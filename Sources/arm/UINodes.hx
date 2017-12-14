@@ -332,6 +332,7 @@ class UINodes extends armory.Trait {
 		
 		frag.write('float dist = distance(bsp.xy, binp.xy);');
 		frag.add_uniform('float brushRadius', '_brushRadius');
+		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
 		frag.write('if (dist > brushRadius) discard;');
@@ -360,9 +361,8 @@ class UINodes extends armory.Trait {
 		frag.write('float occlusion = $occ;');
 		frag.write('vec3 nortan = $nortan;');
 
-		frag.write('    float str = brushStrength;');
-		// Fade
-		// frag.write('    str *= clamp(brushRadius - dist * 2.0, 0.0, 1.0);');
+		frag.write('    float str = brushOpacity * clamp((brushRadius - dist) * brushStrength, 0.0, 1.0);');
+		frag.write('    str = clamp(str, 0.0, 1.0);');
 		
 		frag.write('    fragColor[0] = vec4(basecol, str);');
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);'); // Encode normal, height, opacity, matid,..

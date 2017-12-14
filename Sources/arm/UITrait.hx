@@ -88,19 +88,24 @@ class UITrait extends armory.Trait {
 
 	// TODO: Recompile mat instead of uniforms?
 	public static var brushRadius = 0.5;
-	public static var brushStrength = 1.0;
+	public static var brushOpacity = 1.0;
 	public static var brushScale = 0.5;
+	public static var brushStrength = 1.0;
+	public static var brushBias = 1.0;
 	public static var brushPaint = 0;
 	function linkFloat(link:String):Null<Float> {
 
 		if (link == '_brushRadius') {
 			return brushRadius / 15.0;
 		}
-		else if (link == '_brushStrength') {
-			return brushStrength;
+		else if (link == '_brushOpacity') {
+			return brushOpacity;
 		}
 		else if (link == '_brushScale') {
 			return brushScale * 2.0;
+		}
+		else if (link == '_brushStrength') {
+			return brushStrength * brushStrength * 100;
 		}
 		// else if (link == '_brushPaint') {
 			// return brushPaint;
@@ -111,10 +116,10 @@ class UITrait extends armory.Trait {
 
 	var sub = 0;
 	var vsub = new iron.math.Vec4();
-	static inline var seps = 0.0002;
 	function linkVec2(link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
+			var seps = brushBias * 0.0001;
 			sub = (sub + 1) % 9;
 			if (sub == 0) vsub.set(0.0 + seps, 0.0, 0.0);
 			else if (sub == 1) vsub.set(0.0 - seps, 0.0, 0.0);
@@ -434,6 +439,7 @@ class UITrait extends armory.Trait {
 						importMesh(path);
 					}
 				}
+				else if (ui.isHovered) ui.tooltip("Drop .obj mesh here"); 
 
 				if (ui.button("Export Textures")) {
 
@@ -609,18 +615,21 @@ class UITrait extends armory.Trait {
 						// UINodes.show = false;
 					// }
 					ui.row([1/2, 1/2]);
-					// ui.combo(Id.handle(), ["Draw", "Fill"], "Type");
-					ui.combo(Id.handle(), ["Draw"], "Type");
-					ui.combo(Id.handle(), ["Add"], "Blending");
-					ui.row([1/2, 1/2]);
-					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 1.0, true);
-					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-					ui.row([1/2, 1/2]);
 					var paintHandle = Id.handle();
 					brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
 					if (paintHandle.changed) {
 						UINodes.changed = true;
 					}
+					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 3.0, true);
+					ui.row([1/2, 1/2]);
+					// ui.combo(Id.handle(), ["Draw", "Fill"], "Type");
+					ui.combo(Id.handle(), ["Draw"], "Type");
+					ui.combo(Id.handle(), ["Add"], "Blending");
+					ui.row([1/2, 1/2]);
+					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					ui.row([1/2, 1/2]);
+					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 					brushScale = ui.slider(Id.handle({value: brushScale}), "Scale", 0.0, 1.0, true);
 				}
 				ui.separator();
@@ -785,6 +794,7 @@ class UITrait extends armory.Trait {
 				currentObject.data.delete();
 				iron.App.notifyOnRender(clearTargetsHandler);
 				currentObject.setData(md);
+				currentObject.transform.setRotation(Math.PI / 2, 0, 0);
 				UITrait.dirty = true;
 			});
 		});

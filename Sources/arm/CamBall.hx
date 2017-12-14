@@ -1,10 +1,8 @@
 package arm;
 
-import iron.object.Object;
 import iron.Trait;
 import iron.system.Input;
 import iron.math.Vec4;
-import iron.math.Quat;
 
 @:keep
 class CamBall extends Trait {
@@ -38,7 +36,7 @@ class CamBall extends Trait {
 			// Rotate
 			object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);
 			object.transform.buildMatrix();
-			object.transform.rotate(object.transform.world.right(), mouse.movementY / 100);
+			object.transform.rotate(object.transform.right(), mouse.movementY / 100);
 			object.transform.buildMatrix();
 		}
 	}

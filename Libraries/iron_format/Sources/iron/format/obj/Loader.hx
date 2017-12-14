@@ -108,15 +108,15 @@ class Loader {
 		for (i in 0...Std.int(vertices.length / 3)) {
 
 			// Try to find a similar vertex in out_XXXX
-			var found:Bool = getSimilarVertexIndex(
-				vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2],
-				uvs[i * 2], uvs[i * 2 + 1],
-				normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+			// var found:Bool = getSimilarVertexIndex(
+				// vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2],
+				// uvs[i * 2], uvs[i * 2 + 1],
+				// normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
 
-			if (found) { // A similar vertex is already in the VBO, use it instead !
-				indices.push(index);
-			}
-			else { // If not, it needs to be added in the output data.
+			// if (found) { // A similar vertex is already in the VBO, use it instead !
+				// indices.push(index);
+			// }
+			// else { // If not, it needs to be added in the output data.
 				indexedVertices.push(vertices[i * 3]);
 				indexedVertices.push(vertices[i * 3 + 1]);
 				indexedVertices.push(vertices[i * 3 + 2]);
@@ -126,7 +126,7 @@ class Loader {
 				indexedNormals.push(normals[i * 3 + 1]);
 				indexedNormals.push(normals[i * 3 + 2]);
 				indices.push(Std.int(indexedVertices.length / 3) - 1);
-			}
+			// }
 		}
 	}
 
