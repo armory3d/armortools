@@ -620,7 +620,7 @@ class UITrait extends armory.Trait {
 					if (paintHandle.changed) {
 						UINodes.changed = true;
 					}
-					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 3.0, true);
+					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
 					ui.row([1/2, 1/2]);
 					// ui.combo(Id.handle(), ["Draw", "Fill"], "Type");
 					ui.combo(Id.handle(), ["Draw"], "Type");
@@ -793,8 +793,20 @@ class UITrait extends armory.Trait {
 			new MeshData(raw, function(md:MeshData) {
 				currentObject.data.delete();
 				iron.App.notifyOnRender(clearTargetsHandler);
+				
 				currentObject.setData(md);
+				
+				// Scale to bounds
+				md.geom.calculateAABB();
+				var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
+				if (r > 3) {
+					currentObject.transform.scale.set(3 / r, 3 / r, 3 / r);
+					currentObject.transform.buildMatrix();
+				}
+
+				// Face camera
 				currentObject.transform.setRotation(Math.PI / 2, 0, 0);
+				
 				UITrait.dirty = true;
 			});
 		});

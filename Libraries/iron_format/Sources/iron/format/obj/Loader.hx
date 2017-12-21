@@ -131,35 +131,35 @@ class Loader {
 	}
 
 	// Returns true if v1 can be considered equal to v2
-	function isNear(v1:Float, v2:Float):Bool {
-		return Math.abs(v1 - v2) < 0.001;
-	}
+	// function isNear(v1:Float, v2:Float):Bool {
+	// 	return Math.abs(v1 - v2) < 0.001;
+	// }
 
-	// Searches through all already-exported vertices for a similar one.
-	// Similar = same position + same UVs + same normal
-	function getSimilarVertexIndex( 
-		vertexX:Float, vertexY:Float, vertexZ:Float,
-		uvX:Float, uvY:Float,
-		normalX:Float, normalY:Float, normalZ:Float
-	):Bool {
-		// Lame linear search
-		for (i in 0...Std.int(indexedVertices.length / 3)) {
-			if (
-				isNear(vertexX, indexedVertices[i * 3]) &&
-				isNear(vertexY, indexedVertices[i * 3 + 1]) &&
-				isNear(vertexZ, indexedVertices[i * 3 + 2]) &&
-				isNear(uvX    , indexedUVs     [i * 2]) &&
-				isNear(uvY    , indexedUVs     [i * 2 + 1]) &&
-				isNear(normalX, indexedNormals [i * 3]) &&
-				isNear(normalY, indexedNormals [i * 3 + 1]) &&
-				isNear(normalZ, indexedNormals [i * 3 + 2])
-			) {
-				index = i;
-				return true;
-			}
-		}
-		// No other vertex could be used instead.
-		// Looks like we'll have to add it to the VBO.
-		return false;
-	}
+	// // Searches through all already-exported vertices for a similar one.
+	// // Similar = same position + same UVs + same normal
+	// function getSimilarVertexIndex( 
+	// 	vertexX:Float, vertexY:Float, vertexZ:Float,
+	// 	uvX:Float, uvY:Float,
+	// 	normalX:Float, normalY:Float, normalZ:Float
+	// ):Bool {
+	// 	// Lame linear search
+	// 	for (i in 0...Std.int(indexedVertices.length / 3)) {
+	// 		if (
+	// 			isNear(vertexX, indexedVertices[i * 3]) &&
+	// 			isNear(vertexY, indexedVertices[i * 3 + 1]) &&
+	// 			isNear(vertexZ, indexedVertices[i * 3 + 2]) &&
+	// 			isNear(uvX    , indexedUVs     [i * 2]) &&
+	// 			isNear(uvY    , indexedUVs     [i * 2 + 1]) &&
+	// 			isNear(normalX, indexedNormals [i * 3]) &&
+	// 			isNear(normalY, indexedNormals [i * 3 + 1]) &&
+	// 			isNear(normalZ, indexedNormals [i * 3 + 2])
+	// 		) {
+	// 			index = i;
+	// 			return true;
+	// 		}
+	// 	}
+	// 	// No other vertex could be used instead.
+	// 	// Looks like we'll have to add it to the VBO.
+	// 	return false;
+	// }
 }
