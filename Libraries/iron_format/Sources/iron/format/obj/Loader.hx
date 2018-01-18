@@ -2,9 +2,9 @@ package iron.format.obj;
 
 class Loader {
 
-	public var indexedVertices:Array<Float>;
-	public var indexedUVs:Array<Float>;
-	public var indexedNormals:Array<Float>;
+	public var indexedVertices:Array<Float> = null;
+	public var indexedUVs:Array<Float> = null;
+	public var indexedNormals:Array<Float> = null;
 	public var index:Int;
 
 	// public var data:Array<Float>;
@@ -54,18 +54,48 @@ class Loader {
 				var sec2:Array<String> = words[2].split("/");
 				var sec3:Array<String> = words[3].split("/");
 
-				vertexIndices.push(Std.int(Std.parseFloat(sec1[0])));
-				vertexIndices.push(Std.int(Std.parseFloat(sec2[0])));
-				vertexIndices.push(Std.int(Std.parseFloat(sec3[0])));
+				var vi0 = Std.int(Std.parseFloat(sec1[0]));
+				var vi1 = Std.int(Std.parseFloat(sec2[0]));
+				var vi2 = Std.int(Std.parseFloat(sec3[0]));
+				vertexIndices.push(vi0);
+				vertexIndices.push(vi1);
+				vertexIndices.push(vi2);
 
-				uvIndices.push(Std.int(Std.parseFloat(sec1[1])));
-				uvIndices.push(Std.int(Std.parseFloat(sec2[1])));
-				uvIndices.push(Std.int(Std.parseFloat(sec3[1])));
+				var vuv0 = Std.int(Std.parseFloat(sec1[1]));
+				var vuv1 = Std.int(Std.parseFloat(sec2[1]));
+				var vuv2 = Std.int(Std.parseFloat(sec3[1]));
+				uvIndices.push(vuv0);
+				uvIndices.push(vuv1);
+				uvIndices.push(vuv2);
 				
-				normalIndices.push(Std.int(Std.parseFloat(sec1[2])));
-				normalIndices.push(Std.int(Std.parseFloat(sec2[2])));
-				normalIndices.push(Std.int(Std.parseFloat(sec3[2])));
+				var vn0 = Std.int(Std.parseFloat(sec1[2]));
+				var vn1 = Std.int(Std.parseFloat(sec2[2]));
+				var vn2 = Std.int(Std.parseFloat(sec3[2]));
+				normalIndices.push(vn0);
+				normalIndices.push(vn1);
+				normalIndices.push(vn2);
+
+				if (words.length > 4) {
+					var sec4:Array<String> = words[4].split("/");
+
+					vertexIndices.push(vi2);
+					vertexIndices.push(Std.int(Std.parseFloat(sec4[0])));
+					vertexIndices.push(vi0);
+
+					uvIndices.push(vuv2);
+					uvIndices.push(Std.int(Std.parseFloat(sec4[1])));
+					uvIndices.push(vuv0);
+
+					normalIndices.push(vn2);
+					normalIndices.push(Std.int(Std.parseFloat(sec4[2])));
+					normalIndices.push(vn0);
+				}
 			}
+		}
+
+		// UVs not found
+		if (tempUVs.length == 0) {
+			return;
 		}
 
 		for (i in 0...vertexIndices.length) {

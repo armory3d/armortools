@@ -27,12 +27,18 @@ class UITrait extends armory.Trait {
 	public static var dragAsset:TAsset = null;
 
 	public static var showFiles = false;
+	public static var foldersOnly = false;
 	public static var filesDone:String->Void;
 	public static var showSplash = false;
 	public static var show = true;
 	public static var dirty = true;
 
+	var message = "";
+	var messageTimer = 0.0;
+
 	var dropPath = "";
+	var dropX = 0.0;
+	var dropY = 0.0;
 	var bundled:Map<String, kha.Image> = new Map();
 	var ui:Zui;
 	var uimodal:Zui;
@@ -93,6 +99,15 @@ class UITrait extends armory.Trait {
 	public static var brushStrength = 1.0;
 	public static var brushBias = 1.0;
 	public static var brushPaint = 0;
+	public static var brushType = 0;
+
+	public static var paintBase = true;
+	public static var paintOpac = true;
+	public static var paintOcc = true;
+	public static var paintRough = true;
+	public static var paintMet = true;
+	public static var paintNor = true;
+
 	function linkFloat(link:String):Null<Float> {
 
 		if (link == '_brushRadius') {
@@ -156,13 +171,31 @@ class UITrait extends armory.Trait {
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);
+			var mouse = iron.system.Input.getMouse();
+			dropX = mouse.x;
+			dropY = mouse.y;
 		});
 	}
 
-	function importAsset(path:String) {
+	function showMessage(s:String) {
+		messageTimer = 3.0;
+		message = s;
+		hwnd.redraws = 2;
+	}
+
+	function checkImageFormat(path:String):Bool {
 		if (!StringTools.endsWith(path, ".jpg") &&
 			!StringTools.endsWith(path, ".png") &&
-			!StringTools.endsWith(path, ".hdr")) return;
+			!StringTools.endsWith(path, ".hdr")) {
+			return false;
+		}
+		return true;
+	}
+
+	function importAsset(path:String) {
+		if (!checkImageFormat(path)) {
+			showMessage("Error: Unknown asset format");
+		}
 		
 		iron.data.Data.getImage(path, function(image:kha.Image) {
 			var ar = path.split("/");
@@ -210,6 +243,11 @@ class UITrait extends armory.Trait {
 
 	function resize() {
 		iron.Scene.active.camera.buildProjection();
+
+		if (UINodes.grid != null) {
+			UINodes.grid.unload();
+			UINodes.grid = null;
+		}
 	}
 
 	function update() {
@@ -220,6 +258,9 @@ class UITrait extends armory.Trait {
 	}
 
 	function updateUI() {
+
+		messageTimer -= iron.system.Time.delta;
+
 		paint = false;
 		var mouse = iron.system.Input.getMouse();
 		// if (mouse.started() && mouse.x < 50 && mouse.y < 50) show = !show;
@@ -350,7 +391,15 @@ class UITrait extends armory.Trait {
 
 		if (dropPath != "") {
 			if (StringTools.endsWith(dropPath, ".obj")) importMesh(dropPath);
-			else importAsset(dropPath);
+			else {
+				importAsset(dropPath);
+				// Place image node
+				if (UINodes.show && dropX > UINodes.wx && dropX < UINodes.wx + UINodes.ww) {
+					UINodes.acceptDrag(assets.length - 1);
+					UINodes.nodes.nodeDrag = null;
+					UINodes.inst.hwnd.redraws = 2;
+				}
+			}
 			dropPath = "";
 		}
 
@@ -391,6 +440,7 @@ class UITrait extends armory.Trait {
 	}
 
 	var isBase = true;
+	var isOpac = true;
 	var isOcc = true;
 	var isRough = true;
 	var isMet = true;
@@ -433,8 +483,13 @@ class UITrait extends armory.Trait {
 					// showSplash = true;
 				// }
 
+				if (messageTimer > 0) {
+					ui.text(message);
+				}
+
 				if (ui.button("Import Mesh")) {
 					showFiles = true;
+					foldersOnly = false;
 					filesDone = function(path:String) {
 						importMesh(path);
 					}
@@ -448,6 +503,7 @@ class UITrait extends armory.Trait {
 					var textureSize = getTextureRes();
 
 					showFiles = true;
+					foldersOnly = true;
 					// var path = 'C:\\Users\\lubos\\Documents\\';
 					filesDone = function(path:String) {
 						var bo = new haxe.io.BytesOutput();
@@ -470,7 +526,7 @@ class UITrait extends armory.Trait {
 						// var jpgwriter = new iron.format.jpg.Writer(bo);
 						// jpgwriter.write(jpgdata);
 						#if kha_krom
-						Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
+						if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
 						#end
 
 						pixels = texpaint_nor.getPixels();
@@ -483,7 +539,7 @@ class UITrait extends armory.Trait {
 						var pngwriter = new iron.format.png.Writer(bo);
 						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 						#if kha_krom
-						Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
+						if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
 						#end
 
 						// for (i in 0...textureSize * textureSize) {
@@ -508,7 +564,7 @@ class UITrait extends armory.Trait {
 						var pngwriter = new iron.format.png.Writer(bo);
 						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 						#if kha_krom
-						Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
+						if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
 						#end
 
 						for (i in 0...textureSize * textureSize) {
@@ -520,7 +576,7 @@ class UITrait extends armory.Trait {
 						var pngwriter = new iron.format.png.Writer(bo);
 						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 						#if kha_krom
-						Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
+						if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
 						#end
 
 						for (i in 0...textureSize * textureSize) {
@@ -532,12 +588,12 @@ class UITrait extends armory.Trait {
 						var pngwriter = new iron.format.png.Writer(bo);
 						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 						#if kha_krom
-						Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
+						if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
 						#end
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "Properties")) {
+				if (ui.panel(Id.handle({selected: false}), "Export")) {
 
 					var hres = Id.handle({position: textureRes});
 					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
@@ -546,17 +602,19 @@ class UITrait extends armory.Trait {
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
 					ui.combo(Id.handle(), ["png"], "Format", true);
-					// ui.text("Channels");
+					ui.text("Channels");
 					ui.row([1/2, 1/2]);
 					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
-					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
+					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
 					ui.row([1/2, 1/2]);
+					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
 					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
+					ui.row([1/2, 1/2]);
 					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
 					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Camera")) {
+				if (ui.panel(Id.handle({selected: false}), "Camera")) {
 
 					ui.row([1/2,1/2]);
 					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
@@ -600,7 +658,7 @@ class UITrait extends armory.Trait {
 				// }
 				// ui.separator();
 
-				if (ui.panel(Id.handle({selected: true}), "Environment")) {
+				if (ui.panel(Id.handle({selected: false}), "Environment")) {
 					ui.image(envThumbCay);
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
@@ -618,12 +676,15 @@ class UITrait extends armory.Trait {
 					var paintHandle = Id.handle();
 					brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
 					if (paintHandle.changed) {
-						UINodes.changed = true;
+						UINodes.inst.parseMaterial();
 					}
 					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
 					ui.row([1/2, 1/2]);
-					// ui.combo(Id.handle(), ["Draw", "Fill"], "Type");
-					ui.combo(Id.handle(), ["Draw"], "Type");
+					var typeHandle = Id.handle();
+					brushType = ui.combo(typeHandle, ["Draw", "Fill"], "Type");
+					if (typeHandle.changed) {
+						UINodes.inst.parseMaterial();
+					}
 					ui.combo(Id.handle(), ["Add"], "Blending");
 					ui.row([1/2, 1/2]);
 					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
@@ -641,13 +702,48 @@ class UITrait extends armory.Trait {
 						UINodesBrush.show = false;
 						resize();
 					}
+					// ui.text("Paint");
+					// ui.row([1/2, 1/2]);
+					// paintBase = ui.check(Id.handle({selected: paintBase}), "Base Color");
+					// paintOpac = ui.check(Id.handle({selected: paintOpac}), "Opacity");
+					// ui.row([1/2, 1/2]);
+					// paintOcc = ui.check(Id.handle({selected: paintOcc}), "Occlusion");
+					// paintRough = ui.check(Id.handle({selected: paintRough}), "Roughness");
+					// ui.row([1/2, 1/2]);
+					// paintMet = ui.check(Id.handle({selected: paintMet}), "Metallic");
+					// paintNor = ui.check(Id.handle({selected: paintNor}), "Normal Map");
+
+					var baseHandle = Id.handle({selected: paintBase});
+					paintBase = ui.check(baseHandle, "Base Color");
+					if (baseHandle.changed) {
+						UINodes.inst.parseMaterial();
+					}
+
+					var norHandle = Id.handle({selected: paintNor});
+					paintNor = ui.check(norHandle, "Normal Map");
+					if (norHandle.changed) {
+						UINodes.inst.parseMaterial();
+					}
+
+					var roughHandle = Id.handle({selected: paintRough});
+					paintRough = ui.check(roughHandle, "Rough Met Occ");
+					if (roughHandle.changed) {
+						UINodes.inst.parseMaterial();
+					}
 				}
+
+				ui.text("v0.1", zui.Zui.Align.Right);
 			}
 
 			if (ui.tab(htab, "Assets")) {
 
+				if (messageTimer > 0) {
+					ui.text(message);
+				}
+
 				if (ui.button("Import")) {
 					showFiles = true;
+					foldersOnly = false;
 					filesDone = function(path:String) {
 						importAsset(path);
 					}
@@ -731,7 +827,7 @@ class UITrait extends armory.Trait {
 		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
 			var pathHandle = Id.handle();
 			pathHandle.text = uimodal.textInput(pathHandle);
-			path = zui.Ext.fileBrowser(uimodal, pathHandle);
+			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);
 		g.begin(false);
@@ -753,10 +849,20 @@ class UITrait extends armory.Trait {
 	}
 
 	function importMesh(path:String) {
+		if (!StringTools.endsWith(path, ".obj")) {
+			showMessage("Error: Unknown mesh format");
+			return;
+		}
 
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 
 			var obj = new iron.format.obj.Loader(b.toString());
+
+			if (obj.indexedVertices == null) {
+				showMessage("Error: Invalid mesh - no UVs found");
+				return;
+			}
+
 			var pa = new TFloat32Array(obj.indexedVertices.length);
 			for (i in 0...pa.length) pa[i] = obj.indexedVertices[i];
 			var uva = new TFloat32Array(obj.indexedUVs.length);

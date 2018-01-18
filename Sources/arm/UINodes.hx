@@ -14,6 +14,7 @@ class UINodes extends armory.Trait {
 
 	public static var wx:Int;
 	public static var wy:Int;
+	public static var ww:Int;
 
 	var ui:Zui;
 	var drawMenu = false;
@@ -126,7 +127,7 @@ class UINodes extends armory.Trait {
 			hideMenu = true;
 		}
 
-		if (keyboard.started("x")) {
+		if (keyboard.started("x") || keyboard.started("backspace")) {
 			nodes.removeNode(nodes.nodeSelected, canvas);
 			changed = true;
 		}
@@ -136,7 +137,7 @@ class UINodes extends armory.Trait {
 		}
 	}
 
-	static var nodes = new Nodes();
+	public static var nodes = new Nodes();
 
 	static var canvas:TNodeCanvas = null;
 
@@ -175,6 +176,8 @@ class UINodes extends armory.Trait {
 		grid.g2.end();
 	}
 
+	public var hwnd = Id.handle();
+
 	@:access(zui.Zui)
 	function render2D(g:kha.graphics2.Graphics) {
 
@@ -192,11 +195,10 @@ class UINodes extends armory.Trait {
 		// ui.begin(rt.g2); ////
 		
 		// Make window
-		var ww = Std.int(iron.App.w());
+		ww = Std.int(iron.App.w());
 		wx = Std.int(iron.App.w());
 		wy = 0;
-		var hwin = Id.handle();
-		if (ui.window(hwin, wx, wy, ww, iron.App.h())) {
+		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {
 			
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
@@ -324,18 +326,23 @@ class UINodes extends armory.Trait {
 		frag.write('bsp = bsp * 0.5 + 0.5;');
 
 		frag.add_uniform('sampler2D paintdb');
-		frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
-
-		frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-		frag.write('binp.x *= aspectRatio;');
-		frag.write('binp = binp * 0.5 + 0.5;');
-		
-		frag.write('float dist = distance(bsp.xy, binp.xy);');
 		frag.add_uniform('float brushRadius', '_brushRadius');
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
-		frag.write('if (dist > brushRadius) discard;');
+		if (UITrait.brushType == 0) { // Draw
+			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
+			
+			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
+			frag.write('binp.x *= aspectRatio;');
+			frag.write('binp = binp * 0.5 + 0.5;');
+			
+			frag.write('float dist = distance(bsp.xy, binp.xy);');
+			frag.write('if (dist > brushRadius) discard;');
+		}
+		else {
+			frag.write('float dist = 0.0;');
+		}
 		
 		// Texture projection - texcoords
 		if (UITrait.brushPaint == 0 && con_paint.is_elem('tex')) {
@@ -363,10 +370,14 @@ class UINodes extends armory.Trait {
 
 		frag.write('    float str = brushOpacity * clamp((brushRadius - dist) * brushStrength, 0.0, 1.0);');
 		frag.write('    str = clamp(str, 0.0, 1.0);');
-		
+
 		frag.write('    fragColor[0] = vec4(basecol, str);');
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);'); // Encode normal, height, opacity, matid,..
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
+
+		if (!UITrait.paintBase) frag.write('fragColor[0].a = 0.0;');
+		if (!UITrait.paintNor) frag.write('fragColor[1].a = 0.0;');
+		if (!UITrait.paintRough) frag.write('fragColor[2].a = 0.0;');
 
 		con_paint.data.shader_from_source = true;
 		con_paint.data.vertex_shader = vert.get();
@@ -490,7 +501,7 @@ class UINodes extends armory.Trait {
 	// 	return con_mesh;
 	// }
 
-	function parseMaterial() {
+	public function parseMaterial() {
 		UITrait.dirty = true;
 
 		var mout = false;
