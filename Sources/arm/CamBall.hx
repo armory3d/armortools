@@ -24,13 +24,14 @@ class CamBall extends Trait {
 		if (!object.visible) return;
 
 		var mouse = Input.getMouse();
+		var kb = Input.getKeyboard();
 
 		// Paint bounds
 		if (mouse.x > iron.App.w()) return;
 		// if (UINodes.show && mouse.y > UINodes.wy) return;
 		// if (UINodesBrush.show && mouse.y > UINodesBrush.wy) return;
 
-		if (mouse.down("right")) {
+		if (mouse.down("right") || (mouse.down("left") && kb.down("ctrl"))) {
 			UITrait.dirty = true;
 			
 			// Rotate

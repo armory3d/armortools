@@ -253,7 +253,7 @@ class UITrait extends armory.Trait {
 	function update() {
 		isScrolling = ui.isScrolling;
 		updateUI();
-		updateSplash();
+		// updateSplash();
 		updateFiles();
 	}
 
@@ -263,6 +263,7 @@ class UITrait extends armory.Trait {
 
 		paint = false;
 		var mouse = iron.system.Input.getMouse();
+		var kb = iron.system.Input.getKeyboard();
 		// if (mouse.started() && mouse.x < 50 && mouse.y < 50) show = !show;
 
 		isDragging = dragAsset != null;
@@ -278,7 +279,7 @@ class UITrait extends armory.Trait {
 		if (!show) return;
 		if (!UITrait.uienabled) return;
 
-		if (mouse.down()) {
+		if (mouse.down() && !kb.down("ctrl")) {
 			for (f in _onBrush) f();
 		}
 	}
@@ -288,21 +289,21 @@ class UITrait extends armory.Trait {
 	var modalHeaderH = 66;
 	var modalRectW = 625; // No shadow
 	var modalRectH = 545;
-	function updateSplash() {
-		if (!showSplash) return;
+	// function updateSplash() {
+	// 	if (!showSplash) return;
 
-		var mouse = iron.system.Input.getMouse();
+	// 	var mouse = iron.system.Input.getMouse();
 
-		if (mouse.released()) {
-			var left = iron.App.w() / 2 - modalRectW / 2;
-			var right = iron.App.w() / 2 + modalRectW / 2;
-			var top = iron.App.h() / 2 - modalRectH / 2;
-			var bottom = iron.App.h() / 2 + modalRectH / 2;
-			if (mouse.x < left || mouse.x > right || mouse.y < top + modalHeaderH || mouse.y > bottom) {
-				showSplash = false;
-			}
-		}
-	}
+	// 	if (mouse.released()) {
+	// 		var left = iron.App.w() / 2 - modalRectW / 2;
+	// 		var right = iron.App.w() / 2 + modalRectW / 2;
+	// 		var top = iron.App.h() / 2 - modalRectH / 2;
+	// 		var bottom = iron.App.h() / 2 + modalRectH / 2;
+	// 		if (mouse.x < left || mouse.x > right || mouse.y < top + modalHeaderH || mouse.y > bottom) {
+	// 			showSplash = false;
+	// 		}
+	// 	}
+	// }
 
 	function updateFiles() {
 		if (!showFiles) return;
@@ -310,10 +311,12 @@ class UITrait extends armory.Trait {
 		var mouse = iron.system.Input.getMouse();
 
 		if (mouse.released()) {
-			var left = iron.App.w() / 2 - modalRectW / 2;
-			var right = iron.App.w() / 2 + modalRectW / 2;
-			var top = iron.App.h() / 2 - modalRectH / 2;
-			var bottom = iron.App.h() / 2 + modalRectH / 2;
+			var appw = kha.System.windowWidth();
+			var apph = kha.System.windowHeight();
+			var left = appw / 2 - modalRectW / 2;
+			var right = appw / 2 + modalRectW / 2;
+			var top = apph / 2 - modalRectH / 2;
+			var bottom = apph / 2 + modalRectH / 2;
 			if (mouse.x < left || mouse.x > right || mouse.y < top + modalHeaderH || mouse.y > bottom) {
 				showFiles = false;
 			}
@@ -664,6 +667,11 @@ class UITrait extends armory.Trait {
 					ui.row([1/2, 1/2]);
 					var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Map");
 					p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
+					
+					if (iron.Scene.active.lamps.length > 0) {
+						var lamp = iron.Scene.active.lamps[0];
+						lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
+					}
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Brush")) {
@@ -809,17 +817,19 @@ class UITrait extends armory.Trait {
 
 	var path = '/';
 	function renderFiles(g:kha.graphics2.Graphics) {
-		var left = iron.App.w() / 2 - modalW / 2;
-		var top = iron.App.h() / 2 - modalH / 2;
+		var appw = kha.System.windowWidth();
+		var apph = kha.System.windowHeight();
+		var left = appw / 2 - modalW / 2;
+		var top = apph / 2 - modalH / 2;
 		var filesImg = bundled.get('files');
 		g.color = 0xff202020;
 		// g.drawScaledImage(filesImg, left, top, modalW, modalH);
 		g.fillRect(left, top, modalW, modalH);
 
-		var leftRect = Std.int(iron.App.w() / 2 - modalRectW / 2);
-		var rightRect = Std.int(iron.App.w() / 2 + modalRectW / 2);
-		var topRect = Std.int(iron.App.h() / 2 - modalRectH / 2);
-		var bottomRect = Std.int(iron.App.h() / 2 + modalRectH / 2);
+		var leftRect = Std.int(appw / 2 - modalRectW / 2);
+		var rightRect = Std.int(appw / 2 + modalRectW / 2);
+		var topRect = Std.int(apph / 2 - modalRectH / 2);
+		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
 		topRect += modalHeaderH;
 		
 		g.end();
