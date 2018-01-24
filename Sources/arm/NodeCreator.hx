@@ -358,32 +358,31 @@ class NodeCreator {
 							type: "VECTOR",
 							color: 0xff63c763,
 							default_value: [0.5, 0.5, 1.0]
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Emission",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Height",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Subsurface",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
 						}
-						// ,
-						// {
-						// 	id: nodes.getSocketId(canvas.nodes),
-						// 	node_id: node_id,
-						// 	name: "Emission",
-						// 	type: "VALUE",
-						// 	color: 0xffa1a1a1,
-						// 	default_value: 0.0
-						// },
-						// {
-						// 	id: nodes.getSocketId(canvas.nodes),
-						// 	node_id: node_id,
-						// 	name: "Height",
-						// 	type: "VALUE",
-						// 	color: 0xffa1a1a1,
-						// 	default_value: 0.0
-						// },
-						// {
-						// 	id: nodes.getSocketId(canvas.nodes),
-						// 	node_id: node_id,
-						// 	name: "Subsurface",
-						// 	type: "VALUE",
-						// 	color: 0xffa1a1a1,
-						// 	default_value: 0.0
-						// }
 					],
 					outputs: [],
 					buttons: []
