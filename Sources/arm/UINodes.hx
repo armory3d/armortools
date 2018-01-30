@@ -86,7 +86,6 @@ class UINodes extends armory.Trait {
 		if (frame == 8) parseMaterial(); // Temp cpp fix
 		frame++;
 
-
 		//
 		var mouse = iron.system.Input.getMouse();
 		mreleased = mouse.released();
@@ -94,16 +93,13 @@ class UINodes extends armory.Trait {
 
 		if (ui.changed) {
 			mchanged = true;
-			if (!mdown) {
-				changed = true;
-			}
+			if (!mdown) changed = true;
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
 			parseMaterial();
 		}
 		//
-
 
 		if (!show) return;
 		if (!UITrait.uienabled) return;
@@ -138,10 +134,7 @@ class UINodes extends armory.Trait {
 	}
 
 	public static var nodes = new Nodes();
-
 	static var canvas:TNodeCanvas = null;
-
-	static var bg:kha.Image = null;
 
 	function getNodeX():Int {
 		var mouse = iron.system.Input.getMouse();
@@ -180,7 +173,6 @@ class UINodes extends armory.Trait {
 
 	@:access(zui.Zui)
 	function render2D(g:kha.graphics2.Graphics) {
-
 		if (!show) return;
 		
 		if (!UITrait.uienabled && ui.inputRegistered) ui.unregisterInput();

@@ -195,6 +195,7 @@ class UITrait extends armory.Trait {
 	function importAsset(path:String) {
 		if (!checkImageFormat(path)) {
 			showMessage("Error: Unknown asset format");
+			return;
 		}
 		
 		iron.data.Data.getImage(path, function(image:kha.Image) {
