@@ -35,6 +35,7 @@ class UINodes extends armory.Trait {
 	static var canvasBlob:String;
 
 	static var canvasBrush:TNodeCanvas = null;
+	static var canvasBrushMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
 	static var canvasBrushBlob:String;
 	public static var isBrush = false;
 
@@ -56,7 +57,10 @@ class UINodes extends armory.Trait {
 				kha.Assets.loadImage('color_wheel', function(image:kha.Image) {
 
 					canvas = haxe.Json.parse(canvasBlob);
+					// canvasMap.set(UITrait.selected, canvas);
+
 					canvasBrush = haxe.Json.parse(canvasBrushBlob);
+					// canvasBrushMap.set(UITrait.selectedBrush, canvasBrush);
 					parseBrush();
 
 					font = f;
@@ -100,6 +104,23 @@ class UINodes extends armory.Trait {
 				canvas = c;
 			}
 			else canvas = c;
+
+			if (!isBrush) nodes = UITrait.selected.nodes;
+		}
+	}
+
+	public function updateCanvasBrushMap() {
+		if (UITrait.selectedBrush != null) {
+			if (canvasBrushMap == null) canvasBrushMap = new Map();
+			var c = canvasBrushMap.get(UITrait.selectedBrush);
+			if (c == null) {
+				c = haxe.Json.parse(canvasBrushBlob);
+				canvasBrushMap.set(UITrait.selectedBrush, c);
+				canvasBrush = c;
+			}
+			else canvasBrush = c;
+
+			if (isBrush) nodes = UITrait.selectedBrush.nodes;
 		}
 	}
 
@@ -118,6 +139,7 @@ class UINodes extends armory.Trait {
 		frame++;
 
 		updateCanvasMap();
+		updateCanvasBrushMap();
 
 		//
 		var mouse = iron.system.Input.getMouse();
@@ -127,10 +149,11 @@ class UINodes extends armory.Trait {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
+			if (isBrush) parseBrush();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			isBrush ? parseBrush : parseMaterial();
+			if (!isBrush) parseMaterial();
 		}
 		//
 
@@ -165,10 +188,6 @@ class UINodes extends armory.Trait {
 		if (keyboard.started("p")) {
 			var c = isBrush ? canvasBrush : canvas;
 			trace(haxe.Json.stringify(c));
-		}
-
-		if (keyboard.started("r")) {
-			parseBrush();
 		}
 	}
 
@@ -233,7 +252,7 @@ class UINodes extends armory.Trait {
 
 			ui.g.font = font;
 			ui.g.fontSize = 22;
-			var title = "Material";
+			var title = isBrush ? "Brush" : "Material";
 			var titlew = ui.g.font.width(22, title);
 			var titleh = ui.g.font.height(22);
 			ui.g.drawString(title, ww - titlew - 20, iron.App.h() - titleh - 10);
@@ -250,33 +269,40 @@ class UINodes extends armory.Trait {
 			ui._x = 3;
 			ui._y = 3;
 			ui._w = 105;
-			if (ui.button("Input")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-			ui._x += 105 + 3;
-			ui._y = 3;
-			if (ui.button("Output")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
-			ui._x += 105 + 3;
-			ui._y = 3;
-			if (ui.button("Texture")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
-			ui._x += 105 + 3;
-			ui._y = 3;
-			if (ui.button("Color")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
-			ui._x += 105 + 3;
-			ui._y = 3;
-			if (ui.button("Converter")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+
+			if (isBrush) {
+				if (ui.button("Nodes")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+			}
+			else {
+				if (ui.button("Input")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Output")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Texture")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Color")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Converter")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+			}
 		}
 
 		ui.endWindow();
 
 		if (drawMenu) {
 			
-			var ph = NodeCreator.numNodes[menuCategory] * 20;
+			var numNodes = isBrush ? NodeCreatorBrush.numNodes[menuCategory] : NodeCreator.numNodes[menuCategory];
+			var ph = numNodes * 20;
 			var py = popupY;
 			g.color = 0xff222222;
 			g.fillRect(popupX, py, 105, ph);
 
 			ui.beginLayout(g, Std.int(popupX), Std.int(py), 105);
 			
-			NodeCreator.draw(this, menuCategory);
+			isBrush ? NodeCreatorBrush.draw(this, menuCategory) : NodeCreator.draw(this, menuCategory);
 
 			ui.endLayout();
 		}
@@ -343,7 +369,7 @@ class UINodes extends armory.Trait {
         }
 
 		frag.add_out('vec4 fragColor[3]');
-		frag.add_uniform('vec4 inp', '_input');
+		frag.add_uniform('vec4 inp', '_inputBrush');
 
 		// frag.add_uniform('vec3 v', '_cameraLook');
 		// frag.write('vec3 n = normalize(wnormal);');
@@ -644,7 +670,7 @@ class UINodes extends armory.Trait {
 		nodes.nodeSelected.buttons[0].default_value = assetIndex;
 	}
 
-	function parseBrush() {
+	public function parseBrush() {
 		armory.system.Logic.packageName = "arm.logicnode";
 		var tree = armory.system.Logic.parse(canvasBrush, false);
 	}

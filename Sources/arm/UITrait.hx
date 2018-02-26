@@ -20,10 +20,12 @@ typedef TPreferences = {
 // }
 
 class MaterialSlot {
+	public var nodes = new Nodes();
 	public function new() {}
 }
 
 class BrushSlot {
+	public var nodes = new Nodes();
 	public function new() {}
 }
 
@@ -80,22 +82,22 @@ class UITrait extends armory.Trait {
 
 	public static var firstPaint = true;
 	public static var paint = false;
-	public static var paintX = 0.0;
-	public static var paintY = 0.0;
+	public static var paintVec = new iron.math.Vec4();
 	public static var lastPaintX = 0.0;
 	public static var lastPaintY = 0.0;
 	static var painted = 0;
+	public static var brushTime = 0.0;
 	public static function paintDirty():Bool {
 		// Paint bounds
-		if (paintX > iron.App.w()) return false;
-		// if (UINodes.show && paintY > UINodes.wy) return false;
+		if (paintVec.x > 1) return false;
+		// if (UINodes.show && paintVec.y > UINodes.wy) return false;
 
 		// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
-		if (paintX == lastPaintX && paintY == lastPaintY) painted++;
+		if (paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
 		else painted = 0;
 		if (painted > 8) return false;
-		lastPaintX = paintX;
-		lastPaintY = paintY;
+		lastPaintX = paintVec.x;
+		lastPaintY = paintVec.y;
 
 		if (paint) firstPaint = false;
 		return paint;
@@ -139,24 +141,32 @@ class UITrait extends armory.Trait {
 	}
 
 	var sub = 0;
-	var vsub = new iron.math.Vec4();
+	var vec2 = new iron.math.Vec4();
 	function linkVec2(link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
 			var seps = brushBias * 0.0001;
 			sub = (sub + 1) % 9;
-			if (sub == 0) vsub.set(0.0 + seps, 0.0, 0.0);
-			else if (sub == 1) vsub.set(0.0 - seps, 0.0, 0.0);
-			else if (sub == 2) vsub.set(0.0, 0.0 + seps, 0.0);
-			else if (sub == 3) vsub.set(0.0, 0.0 - seps, 0.0);
-			else if (sub == 4) vsub.set(0.0 + seps, 0.0 + seps, 0.0);
-			else if (sub == 5) vsub.set(0.0 - seps, 0.0 - seps, 0.0);
-			else if (sub == 6) vsub.set(0.0 + seps, 0.0 - seps, 0.0);
-			else if (sub == 7) vsub.set(0.0 - seps, 0.0 + seps, 0.0);
-			else if (sub == 8) vsub.set(0.0, 0.0, 0.0);
-			return vsub;
+			if (sub == 0) vec2.set(0.0 + seps, 0.0, 0.0);
+			else if (sub == 1) vec2.set(0.0 - seps, 0.0, 0.0);
+			else if (sub == 2) vec2.set(0.0, 0.0 + seps, 0.0);
+			else if (sub == 3) vec2.set(0.0, 0.0 - seps, 0.0);
+			else if (sub == 4) vec2.set(0.0 + seps, 0.0 + seps, 0.0);
+			else if (sub == 5) vec2.set(0.0 - seps, 0.0 - seps, 0.0);
+			else if (sub == 6) vec2.set(0.0 + seps, 0.0 - seps, 0.0);
+			else if (sub == 7) vec2.set(0.0 - seps, 0.0 + seps, 0.0);
+			else if (sub == 8) vec2.set(0.0, 0.0, 0.0);
+			return vec2;
 		}
 
+		return null;
+	}
+
+	function linkVec4(link:String):iron.math.Vec4 {
+		if (link == '_inputBrush') {
+			vec2.set(paintVec.x, paintVec.y, iron.system.Input.getMouse().down() ? 1.0 : 0.0, 0.0);
+			return vec2;
+		}
 		return null;
 	}
 
@@ -168,6 +178,7 @@ class UITrait extends armory.Trait {
 
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
+		iron.object.Uniforms.externalVec4Links = [linkVec4];
 
 		iron.data.Data.getFont('droid_sans.ttf', function(f:kha.Font) {
 			font = f;
@@ -257,6 +268,7 @@ class UITrait extends armory.Trait {
 
 	function resize() {
 		iron.Scene.active.camera.buildProjection();
+		dirty = true;
 
 		if (UINodes.grid != null) {
 			UINodes.grid.unload();
@@ -300,8 +312,10 @@ class UITrait extends armory.Trait {
 		if (!UITrait.uienabled) return;
 
 		if (mouse.down() && !kb.down("ctrl")) {
+			brushTime += iron.system.Time.delta;
 			for (f in _onBrush) f();
 		}
+		else brushTime = 0;
 	}
 
 	var modalW = 625;
@@ -673,7 +687,7 @@ class UITrait extends armory.Trait {
 					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Camera")) {
+				if (ui.panel(Id.handle({selected: false}), "Camera")) {
 
 					ui.row([1/2,1/2]);
 					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
@@ -757,6 +771,8 @@ class UITrait extends armory.Trait {
 
 						if (ui.image(im) == State.Started && im == img) {
 							selectedBrush = brushes[i];
+							UINodes.inst.updateCanvasBrushMap();
+							UINodes.inst.parseBrush();
 						}
 					}
 
@@ -774,12 +790,12 @@ class UITrait extends armory.Trait {
 						UINodes.inst.parseMaterial();
 					}
 					ui.combo(Id.handle(), ["Add"], "Blending");
-					ui.row([1/2, 1/2]);
-					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
-					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-					ui.row([1/2, 1/2]);
-					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-					brushScale = ui.slider(Id.handle({value: brushScale}), "Scale", 0.0, 2.0, true);
+					// ui.row([1/2, 1/2]);
+					// brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+					// brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					// ui.row([1/2, 1/2]);
+					// brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+					// brushScale = ui.slider(Id.handle({value: brushScale}), "Scale", 0.0, 2.0, true);
 
 					ui.row([1/3,1/3,1/3]);
 
@@ -1002,14 +1018,14 @@ class UITrait extends armory.Trait {
 	}
 
 	function importBlend(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
-			var obj = new blend.Loader(b);
+		// iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			// var obj = new blend.Loader(b);
 			// if (obj.texa == null) {
 				// showMessage("Error: Invalid mesh - no UVs found");
 				// return;
 			// }
 			// makeMesh(obj);
-		});
+		// });
 	}
 
 	function makeMesh(mesh:Dynamic) {
