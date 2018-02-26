@@ -70,9 +70,7 @@ class NodeCreatorBrush {
 							name: "Radius",
 							type: "VALUE",
 							color: 0xffa1a1a1,
-							default_value: 0.5,
-							min: 0.0,
-							max: 2.0
+							default_value: 1.0
 						},
 						{
 							id: nodes.getSocketId(canvas.nodes),
@@ -93,12 +91,10 @@ class NodeCreatorBrush {
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "Scale",
+							name: "UV Scale",
 							type: "VALUE",
 							color: 0xffa1a1a1,
-							default_value: 0.5,
-							min: 0.0,
-							max: 2.0
+							default_value: 1.0
 						}
 					],
 					outputs: [],

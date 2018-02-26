@@ -103,7 +103,11 @@ class UITrait extends armory.Trait {
 		return paint;
 	}
 
-	// TODO: Recompile mat instead of uniforms?
+	public static var brushNodesRadius = 1.0;
+	public static var brushNodesOpacity = 1.0;
+	public static var brushNodesScale = 1.0;
+	public static var brushNodesStrength = 1.0;
+
 	public static var brushRadius = 0.5;
 	public static var brushOpacity = 1.0;
 	public static var brushScale = 0.5;
@@ -122,20 +126,18 @@ class UITrait extends armory.Trait {
 	function linkFloat(link:String):Null<Float> {
 
 		if (link == '_brushRadius') {
-			return brushRadius / 15.0;
+			return (brushRadius * brushNodesRadius) / 15.0;
 		}
 		else if (link == '_brushOpacity') {
-			return brushOpacity;
+			return brushOpacity * brushNodesOpacity;
 		}
 		else if (link == '_brushScale') {
-			return brushScale * 2.0;
+			return (brushScale * brushNodesScale) * 2.0;
 		}
 		else if (link == '_brushStrength') {
-			return brushStrength * brushStrength * 100;
+			var f = brushStrength * brushNodesStrength;
+			return f * f * 100;
 		}
-		// else if (link == '_brushPaint') {
-			// return brushPaint;
-		// }
 
 		return null;
 	}
@@ -520,7 +522,7 @@ class UITrait extends armory.Trait {
 
 		// Brush
 		if (UITrait.uienabled) {
-			var psize = Std.int(cursorImg.width * brushRadius);
+			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 			// g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
 			g.drawScaledImage(cursorImg, mouse.x - psize / 2, mouse.y - psize / 2, psize, psize);
 		}
@@ -777,6 +779,13 @@ class UITrait extends armory.Trait {
 					}
 
 					ui.row([1/2, 1/2]);
+					var typeHandle = Id.handle();
+					brushType = ui.combo(typeHandle, ["Draw", "Fill"], "Type");
+					if (typeHandle.changed) {
+						UINodes.inst.parseMaterial();
+					}
+					ui.combo(Id.handle(), ["Add"], "Blending");
+					ui.row([1/2, 1/2]);
 					var paintHandle = Id.handle();
 					brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
 					if (paintHandle.changed) {
@@ -784,18 +793,11 @@ class UITrait extends armory.Trait {
 					}
 					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
 					ui.row([1/2, 1/2]);
-					var typeHandle = Id.handle();
-					brushType = ui.combo(typeHandle, ["Draw", "Fill"], "Type");
-					if (typeHandle.changed) {
-						UINodes.inst.parseMaterial();
-					}
-					ui.combo(Id.handle(), ["Add"], "Blending");
-					// ui.row([1/2, 1/2]);
-					// brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
-					// brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-					// ui.row([1/2, 1/2]);
-					// brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-					// brushScale = ui.slider(Id.handle({value: brushScale}), "Scale", 0.0, 2.0, true);
+					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					ui.row([1/2, 1/2]);
+					brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
+					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 
 					ui.row([1/3,1/3,1/3]);
 

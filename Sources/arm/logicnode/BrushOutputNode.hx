@@ -14,10 +14,10 @@ class BrushOutputNode extends LogicNode {
 	override function run() {
 		arm.UITrait.paint = true;
 		arm.UITrait.paintVec = inputs[0].get();
-		arm.UITrait.brushRadius = inputs[1].get();
-		arm.UITrait.brushOpacity = inputs[2].get();
-		arm.UITrait.brushStrength = inputs[3].get();
-		arm.UITrait.brushScale = inputs[4].get();
+		arm.UITrait.brushNodesRadius = inputs[1].get();
+		arm.UITrait.brushNodesOpacity = inputs[2].get();
+		arm.UITrait.brushNodesStrength = inputs[3].get();
+		arm.UITrait.brushNodesScale = inputs[4].get();
 
 		super.run();
 	}
