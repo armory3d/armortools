@@ -890,6 +890,7 @@ class RenderPathCreator {
 		#end
 	}
 
+	static var initVoxels = true;
 	static function commands() {
 
 		// Paint
@@ -900,8 +901,31 @@ class RenderPathCreator {
 		}
 
 		if (arm.UITrait.paintDirty()) {
+			if (UITrait.brushType == 2) { // Bake AO
+				if (initVoxels) {
+					initVoxels = false;
+					var t = new RenderTargetRaw();
+					t.name = "voxels";
+					t.format = "R8";
+					t.width = 256;
+					t.height = 256;
+					t.depth = 256;
+					t.is_image = true;
+					t.mipmaps = true;
+					path.createRenderTarget(t);
+				}
+				path.clearImage("voxels", 0x00000000);
+				path.setTarget("");
+				path.setViewport(256, 256);
+				path.bindTarget("voxels", "voxels");
+				path.drawMeshes("voxel");
+				path.generateMipmaps("voxels");
+			}
 			path.setTarget("texpaint", ["texpaint_nor", "texpaint_pack"]);
 			path.bindTarget("_paintdb", "paintdb");
+			if (UITrait.brushType == 2) { // Bake AO
+				path.bindTarget("voxels", "voxels");
+			}
 			path.drawMeshes("paint");
 		}
 		//

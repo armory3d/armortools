@@ -3,6 +3,11 @@ import arm.material.make_mesh
 
 def register():
 	arm.material.make_mesh.write_material_attribs = write_material_attribs
+	arm.material.mat_utils.add_mesh_contexts.append('voxel') # Defaults to make_ao
+	arm.write_data.add_compiledglsl = """
+		const ivec3 voxelgiResolution = ivec3(256, 256, 256);
+		const vec3 voxelgiHalfExtents = vec3(2.0, 2.0, 2.0);
+	"""
 
 def write_material_attribs(con, frag):
 

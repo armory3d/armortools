@@ -93,8 +93,10 @@ class UITrait extends armory.Trait {
 		// if (UINodes.show && paintVec.y > UINodes.wy) return false;
 
 		// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
-		if (paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
+		var mouse = iron.system.Input.getMouse();
+		if (mouse.down() && paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
 		else painted = 0;
+
 		if (painted > 8) return false;
 		lastPaintX = paintVec.x;
 		lastPaintY = paintVec.y;
@@ -122,6 +124,8 @@ class UITrait extends armory.Trait {
 	public static var paintRough = true;
 	public static var paintMet = true;
 	public static var paintNor = true;
+	
+	public static var paintVisible = true;
 
 	function linkFloat(link:String):Null<Float> {
 
@@ -137,6 +141,9 @@ class UITrait extends armory.Trait {
 		else if (link == '_brushStrength') {
 			var f = brushStrength * brushNodesStrength;
 			return f * f * 100;
+		}
+		else if (link == '_paintDepthBias') {
+			return paintVisible ? 0.0 : 1.0;
 		}
 
 		return null;
@@ -484,6 +491,18 @@ class UITrait extends armory.Trait {
 		return 0;
 	}
 
+	function showMaterialNodes() {
+		if (UINodes.show && !UINodes.isBrush) UINodes.show = false;
+		else { UINodes.show = true; UINodes.isBrush = false; }
+		resize();
+	}
+
+	function showBrushNodes() {
+		if (UINodes.show && UINodes.isBrush) UINodes.show = false;
+		else { UINodes.show = true; UINodes.isBrush = true; }
+		resize();
+	}
+
 	var outputType = 0;
 	var isBase = true;
 	var isOpac = true;
@@ -496,6 +515,7 @@ class UITrait extends armory.Trait {
 	public static var selected:MaterialSlot;
 	var brushes:Array<BrushSlot> = null;
 	public static var selectedBrush:BrushSlot;
+	var selectTime = 0.0;
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
 
@@ -690,16 +710,22 @@ class UITrait extends armory.Trait {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Camera")) {
-
+					var scene = iron.Scene.active;
+					var cam = scene.cameras[0];
 					ui.row([1/2,1/2]);
 					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
+					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+					if (ui.changed) {
+						cam.buildProjection();
+					}
 					if (ui.button("Reset")) {
-						var scene = iron.Scene.active;
-						var cam = scene.cameras[0];
 						for (o in scene.raw.objects) {
 							if (o.type == 'camera_object') {
 								cam.transform.local.setF32(o.transform.values);
 								cam.transform.decompose();
+								fovHandle.value = 0.92;
+								cam.buildProjection();
 								currentObject.transform.reset();
 								break;
 							}
@@ -753,9 +779,7 @@ class UITrait extends armory.Trait {
 						brushes.push(new BrushSlot());
 					}
 					if (ui.button("Nodes")) {
-						if (UINodes.show && UINodes.isBrush) UINodes.show = false;
-						else { UINodes.show = true; UINodes.isBrush = true; }
-						resize();
+						showBrushNodes();
 					}
 
 					var img = bundled.get("brush");
@@ -772,15 +796,21 @@ class UITrait extends armory.Trait {
 						}
 
 						if (ui.image(im) == State.Started && im == img) {
-							selectedBrush = brushes[i];
-							UINodes.inst.updateCanvasBrushMap();
-							UINodes.inst.parseBrush();
+							if (selectedBrush != brushes[i]) {
+								selectedBrush = brushes[i];
+								UINodes.inst.updateCanvasBrushMap();
+								UINodes.inst.parseBrush();
+							}
+							if (iron.system.Time.time() - selectTime < 0.3) {
+								showBrushNodes();
+							}
+							selectTime = iron.system.Time.time();
 						}
 					}
 
 					ui.row([1/2, 1/2]);
 					var typeHandle = Id.handle();
-					brushType = ui.combo(typeHandle, ["Draw", "Fill"], "Type");
+					brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO"], "Type");
 					if (typeHandle.changed) {
 						UINodes.inst.parseMaterial();
 					}
@@ -816,11 +846,14 @@ class UITrait extends armory.Trait {
 					}
 
 					var roughHandle = Id.handle({selected: paintRough});
+					// TODO: Use glColorMaski() to disable specific channel
 					paintRough = ui.check(roughHandle, "ORM");
 					if (roughHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parseMaterial();
 					}
+
+					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Materials")) {
@@ -830,9 +863,7 @@ class UITrait extends armory.Trait {
 						materials.push(new MaterialSlot());
 					}
 					if (ui.button("Nodes")) {
-						if (UINodes.show && !UINodes.isBrush) UINodes.show = false;
-						else { UINodes.show = true; UINodes.isBrush = false; }
-						resize();
+						showMaterialNodes();
 					}
 
 					var img = bundled.get("mat");
@@ -849,9 +880,15 @@ class UITrait extends armory.Trait {
 						}
 
 						if (ui.image(im) == State.Started && im == img) {
-							selected = materials[i];
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parseMaterial();
+							if (selected != materials[i]) {
+								selected = materials[i];
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parseMaterial();
+							}
+							if (iron.system.Time.time() - selectTime < 0.3) {
+								showMaterialNodes();
+							}
+							selectTime = iron.system.Time.time();
 						}
 					}
 				}
@@ -859,7 +896,7 @@ class UITrait extends armory.Trait {
 				// if (ui.panel(Id.handle({selected: true}), "Layers")) {
 				// }
 
-				ui.text("v0.2", zui.Zui.Align.Right);
+				ui.text("v0.2a", zui.Zui.Align.Right);
 			}
 
 			if (ui.tab(htab, "Assets")) {

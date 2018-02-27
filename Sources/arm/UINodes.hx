@@ -337,19 +337,22 @@ class UINodes extends armory.Trait {
 			alpha_blend_operation: 'add',
 			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
+		if (UITrait.brushType == 2) {
+			con_paint.data.color_write_green = false; // R
+			con_paint.data.color_write_blue = false; // M
+		}
+
 		var vert = con_paint.make_vert();
 		var frag = con_paint.make_frag();
 
 		vert.add_out('vec3 sp');
-		// vert.add_out('vec3 wnormal');
 		frag.ins = vert.outs;
-		// vert.add_uniform('mat4 N', '_normalMatrix');
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
-
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, tex.y * 2.0 - 1.0);');
 
 		// TODO: Fix seams at uv borders
 		vert.add_uniform('vec2 sub', '_sub');
+		vert.add_uniform('float paintDepthBias', '_paintDepthBias');
 		vert.write('tpos += sub;');
 		
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
@@ -359,6 +362,7 @@ class UINodes extends armory.Trait {
 		vert.write('sp.xyz = ndc.xyz * 0.5 + 0.5;');
 		vert.write('sp.y = 1.0 - sp.y;');
 		vert.write('sp.z -= 0.0001;'); // Bias
+		vert.write('sp.z -= paintDepthBias;'); // paintVisible
 
 		vert.add_out('vec3 mposition');
 		if (UITrait.brushPaint == 0 && con_paint.is_elem('tex')) {
@@ -368,12 +372,19 @@ class UINodes extends armory.Trait {
         	vert.write('mposition = ndc.xyz;');
         }
 
+        if (UITrait.brushType == 2) {
+        	vert.add_out('vec3 wposition');
+        	vert.add_uniform('mat4 W', '_worldMatrix');
+        	vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
+
+        	vert.add_out('vec3 wnormal');
+			vert.add_uniform('mat3 N', '_normalMatrix');
+			vert.write('wnormal = N * nor;');
+			frag.write('vec3 n = normalize(wnormal);');
+    	}
+
 		frag.add_out('vec4 fragColor[3]');
 		frag.add_uniform('vec4 inp', '_inputBrush');
-
-		// frag.add_uniform('vec3 v', '_cameraLook');
-		// frag.write('vec3 n = normalize(wnormal);');
-		// frag.write('if (dot(n, v) > 0.0) discard;');
 
 		frag.add_uniform('float aspectRatio', '_aspectRatioWindowF');
 		frag.write('vec2 bsp = sp.xy * 2.0 - 1.0;');
@@ -427,12 +438,27 @@ class UINodes extends armory.Trait {
 		frag.write('    str = clamp(str, 0.0, 1.0);');
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
-		frag.write('    fragColor[1] = vec4(nortan, 1.0);'); // Encode normal, height, opacity, matid,..
+		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 
 		if (!UITrait.paintBase) frag.write('fragColor[0].a = 0.0;');
 		if (!UITrait.paintNor) frag.write('fragColor[1].a = 0.0;');
 		if (!UITrait.paintRough) frag.write('fragColor[2].a = 0.0;');
+
+		if (UITrait.brushType == 2) { // Bake AO
+			frag.write('fragColor[0].a = 0.0;');
+			frag.write('fragColor[1].a = 0.0;');
+
+			// frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);')
+			// frag.write('n = nortan * 2.0 - 1.0;')
+			// frag.write('n = normalize(TBN * normalize(n));')
+
+			frag.write('const vec3 voxelgiHalfExtents = vec3(2.0);');
+			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
+       		frag.add_uniform('sampler3D voxels');
+       		frag.add_function(armory.system.CyclesFunctions.str_traceAO);
+			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, wnormal, voxels);');
+		}
 
 		con_paint.data.shader_from_source = true;
 		con_paint.data.vertex_shader = vert.get();

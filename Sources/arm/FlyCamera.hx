@@ -41,8 +41,12 @@ class FlyCamera extends Trait {
 
 	function update() {
 		if (Input.occupied) return;
-
+		if (!UITrait.uienabled) return;
+		if (UITrait.isScrolling) return;
+		if (UITrait.isDragging) return;
 		if (UITrait.cameraType != 1) return;
+		
+		if (mouse.x > iron.App.w()) return;
 
 		var moveForward = keyboard.down("w") || keyboard.down("up");
 		var moveBackward = keyboard.down("s") || keyboard.down("down");
