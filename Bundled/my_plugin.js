@@ -1,0 +1,2 @@
+
+arm.Plugin.test();

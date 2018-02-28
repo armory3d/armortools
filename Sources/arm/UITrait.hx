@@ -33,6 +33,8 @@ class BrushSlot {
 @:access(iron.data.Data)
 class UITrait extends armory.Trait {
 
+	public static var inst:UITrait;
+
 	public static var uienabled = true;
 	public static var isScrolling = false;
 	public static var isDragging = false;
@@ -182,6 +184,7 @@ class UITrait extends armory.Trait {
 	var font:kha.Font;
 	public function new() {
 		super();
+		inst = this;
 
 		windowW = Std.int(windowW * armory.data.Config.raw.window_scale);
 
@@ -272,6 +275,12 @@ class UITrait extends armory.Trait {
 			iron.App.notifyOnUpdate(update);
 			iron.App.notifyOnRender2D(render);
 			iron.App.notifyOnRender(clearTargetsHandler);
+
+			// Init plugins
+			// iron.data.Data.getBlob('my_plugin.js', function(blob:kha.Blob) {
+				// Plugin.keep();
+				// untyped __js__("(1, eval)({0})", blob.toString());
+			// });
 		});
 	}
 
@@ -893,10 +902,15 @@ class UITrait extends armory.Trait {
 					}
 				}
 
-				// if (ui.panel(Id.handle({selected: true}), "Layers")) {
-				// }
+				if (ui.panel(Id.handle({selected: true}), "Layers")) {
+					if (ui.button("View 2D Map")) {
 
-				ui.text("v0.2a", zui.Zui.Align.Right);
+					}
+				}
+
+				// ui.text(customText);
+
+				ui.text("v0.3", zui.Zui.Align.Right);
 			}
 
 			if (ui.tab(htab, "Assets")) {
@@ -954,6 +968,8 @@ class UITrait extends armory.Trait {
 			g.drawScaledImage(getImage(dragAsset), mouse.x, mouse.y, 128, h);
 		}
 	}
+
+	// public var customText = "test";
 
 	function renderSplash(g:kha.graphics2.Graphics) {
 		var left = iron.App.w() / 2 - modalW / 2;
