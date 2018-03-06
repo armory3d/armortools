@@ -10,11 +10,11 @@ import iron.data.MaterialData;
 @:access(arm.UINodes)
 class NodeCreator {
 
-	public static function createImageTexture(uinodes:UINodes) {
-		var getNodeX = uinodes.getNodeX;
-		var getNodeY = uinodes.getNodeY;
-		var nodes = UINodes.nodes;
-		var canvas = UINodes.canvas;
+	public static function createImageTexture() {
+		var getNodeX = UINodes.inst.getNodeX;
+		var getNodeY = UINodes.inst.getNodeY;
+		var nodes = UINodes.inst.nodes;
+		var canvas = UINodes.inst.canvas;
 
 		var node_id = nodes.getNodeId(canvas.nodes);
 		var n:TNode = {
@@ -68,12 +68,12 @@ class NodeCreator {
 
 	public static var numNodes = [2, 1, 5, 5, 8];
 
-	public static function draw(uinodes:UINodes, cat:Int) {
-		var ui = uinodes.ui;
-		var getNodeX = uinodes.getNodeX;
-		var getNodeY = uinodes.getNodeY;
-		var nodes = UINodes.nodes;
-		var canvas = UINodes.canvas;
+	public static function draw(cat:Int) {
+		var ui = UINodes.inst.ui;
+		var getNodeX = UINodes.inst.getNodeX;
+		var getNodeY = UINodes.inst.getNodeY;
+		var nodes = UINodes.inst.nodes;
+		var canvas = UINodes.inst.canvas;
 		
 		if (cat == 0) { // Input
 			if (ui.button("RGB")) {
@@ -394,7 +394,7 @@ class NodeCreator {
 		}
 		if (cat == 2) { // Texture
 			if (ui.button("Image")) {
-				createImageTexture(uinodes);
+				createImageTexture();
 			}
 			if (ui.button("Checker")) {
 				var node_id = nodes.getNodeId(canvas.nodes);

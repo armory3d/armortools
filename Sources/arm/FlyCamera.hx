@@ -8,7 +8,8 @@ import iron.math.Vec4;
 
 class FlyCamera extends Trait {
 
-	public static var enabled = false;
+	public static var inst:FlyCamera;
+	public var enabled = false;
 
 	static inline var speed = 2.0;
 	var dir = new Vec4();
@@ -17,35 +18,26 @@ class FlyCamera extends Trait {
 	var easing = true;
 	var ease = 1.0;
 
-	var camera:CameraObject;
-
-	var keyboard:Keyboard;
-	var gamepad:Gamepad;
-	var mouse:Mouse;
-
 	public function new(easing = true) {
 		super();
+		inst = this;
 
 		this.easing = easing;
-		notifyOnInit(init);
 		notifyOnUpdate(update);
-	}
-
-	function init() {
-		keyboard = Input.getKeyboard();
-		gamepad = Input.getGamepad();
-		mouse = Input.getMouse();
-
-		camera = cast(object, CameraObject);
 	}
 
 	function update() {
 		if (Input.occupied) return;
-		if (!UITrait.uienabled) return;
-		if (UITrait.isScrolling) return;
-		if (UITrait.isDragging) return;
-		if (UITrait.cameraType != 1) return;
+		if (!arm.App.uienabled) return;
+		if (UITrait.inst.isScrolling) return;
+		if (arm.App.isDragging) return;
+		if (UITrait.inst.cameraType != 1) return;
 		
+		var keyboard = Input.getKeyboard();
+		var gamepad = Input.getGamepad();
+		var mouse = Input.getMouse();
+		var camera = iron.Scene.active.camera;
+
 		if (mouse.x > iron.App.w()) return;
 
 		var moveForward = keyboard.down("w") || keyboard.down("up");
@@ -116,12 +108,12 @@ class FlyCamera extends Trait {
 
 		var d = Time.delta * speed * fast * ease;
 		if (d > 0.0) {
-			UITrait.dirty = true;
+			UITrait.inst.dirty = true;
 			camera.move(dir, d);
 		}
 
 		if (mouse.down("right")) {
-			UITrait.dirty = true;
+			UITrait.inst.dirty = true;
 			camera.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 			camera.rotate(camera.right(), -mouse.movementY / 200);
 		}

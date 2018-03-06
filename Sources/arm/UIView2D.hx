@@ -1,6 +1,6 @@
 package arm;
 
-class UIMap {
+class UIView2D {
 	public function new() {
 		
 	}

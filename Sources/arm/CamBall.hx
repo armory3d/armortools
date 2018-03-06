@@ -7,20 +7,22 @@ import iron.math.Vec4;
 @:keep
 class CamBall extends Trait {
 
-	public static var moved = false;
+	public static var inst:CamBall;
+	public var moved = false;
 
 	public function new() {
 		super();
+		inst = this;
 
 		notifyOnUpdate(update);
 	}
 
 	function update() {
 		if (Input.occupied) return;
-		if (!UITrait.uienabled) return;
-		if (UITrait.isScrolling) return;
-		if (UITrait.isDragging) return;
-		if (UITrait.cameraType != 0) return;
+		if (!arm.App.uienabled) return;
+		if (UITrait.inst.isScrolling) return;
+		if (arm.App.isDragging) return;
+		if (UITrait.inst.cameraType != 0) return;
 		if (!object.visible) return;
 
 		var mouse = Input.getMouse();
@@ -28,11 +30,9 @@ class CamBall extends Trait {
 
 		// Paint bounds
 		if (mouse.x > iron.App.w()) return;
-		// if (UINodes.show && mouse.y > UINodes.wy) return;
 
 		if (mouse.down("right") || (mouse.down("left") && kb.down("ctrl"))) {
-			UITrait.dirty = true;
-			
+			UITrait.inst.dirty = true;
 			// Rotate
 			object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);
 			object.transform.buildMatrix();

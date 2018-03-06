@@ -7,17 +7,16 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MaterialData;
 
-@:access(arm.UINodes)
 class NodeCreatorBrush {
 
 	public static var numNodes = [8];
 
-	public static function draw(uinodes:UINodes, cat:Int) {
-		var ui = uinodes.ui;
-		var getNodeX = uinodes.getNodeX;
-		var getNodeY = uinodes.getNodeY;
-		var nodes = UINodes.nodes;
-		var canvas = UINodes.canvasBrush;
+	public static function draw(cat:Int) {
+		var ui = UINodes.inst.ui;
+		var getNodeX = UINodes.inst.getNodeX;
+		var getNodeY = UINodes.inst.getNodeY;
+		var nodes = UINodes.inst.nodes;
+		var canvas = UINodes.inst.canvasBrush;
 		
 		if (cat == 0) { // Input
 			if (ui.button("Input")) {

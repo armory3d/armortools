@@ -1,22 +1,22 @@
 package arm;
 
-import armory.object.Object;
 import armory.system.Cycles;
 import zui.*;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MaterialData;
 
-class UINodes extends armory.Trait {
+@:access(zui.Zui)
+class UINodes extends iron.Trait {
 
 	public static var inst:UINodes;
-	public static var show = false;
 
-	public static var wx:Int;
-	public static var wy:Int;
-	public static var ww:Int;
+	public var show = false;
+	public var wx:Int;
+	public var wy:Int;
+	public var ww:Int;
 
-	var ui:Zui;
+	public var ui:Zui;
 	var drawMenu = false;
 	var showMenu = false;
 	var hideMenu = false;
@@ -29,26 +29,21 @@ class UINodes extends armory.Trait {
 	public var _matcon:TMaterialContext = null;
 	var _materialcontext:MaterialContext = null;
 
-	public static var nodes = new Nodes();
-	static var canvas:TNodeCanvas = null;
-	static var canvasMap:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
-	static var canvasBlob:String;
+	public var nodes = new Nodes();
+	public var canvas:TNodeCanvas = null;
+	var canvasMap:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
+	var canvasBlob:String;
 
-	static var canvasBrush:TNodeCanvas = null;
-	static var canvasBrushMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
-	static var canvasBrushBlob:String;
-	public static var isBrush = false;
-
-	static var font:kha.Font;
+	public var canvasBrush:TNodeCanvas = null;
+	var canvasBrushMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
+	var canvasBrushBlob:String;
+	public var isBrush = false;
 
 	public function new() {
 		super();
 		inst = this;
 
-		// Load font for UI labels
-		iron.data.Data.getFont('droid_sans.ttf', function(f:kha.Font) {
-
-			iron.data.Data.getBlob('default_material.json', function(b1:kha.Blob) {
+		iron.data.Data.getBlob('default_material.json', function(b1:kha.Blob) {
 			iron.data.Data.getBlob('default_brush.json', function(b2:kha.Blob) {
 
 				canvasBlob = b1.toString();
@@ -57,91 +52,68 @@ class UINodes extends armory.Trait {
 				kha.Assets.loadImage('color_wheel', function(image:kha.Image) {
 
 					canvas = haxe.Json.parse(canvasBlob);
-					// canvasMap.set(UITrait.selected, canvas);
-
 					canvasBrush = haxe.Json.parse(canvasBrushBlob);
-					// canvasBrushMap.set(UITrait.selectedBrush, canvasBrush);
 					parseBrush();
 
-					font = f;
 					var t = Reflect.copy(zui.Themes.dark);
 					t.FILL_WINDOW_BG = true;
 					t.ELEMENT_H = 18;
 					t.BUTTON_H = 16;
 					var scale = armory.data.Config.raw.window_scale;
-					ui = new Zui({font: f, theme: t, color_wheel: image, scaleFactor: scale});
+					ui = new Zui({font: arm.App.font, theme: t, color_wheel: image, scaleFactor: scale});
 					ui.scrollEnabled = false;
-					armory.Scene.active.notifyOnInit(sceneInit);
+					
+					notifyOnRender2D(render2D);
+					notifyOnUpdate(update);
 				});
-			});
 			});
 		});
 	}
 
-	// var rt:kha.Image; ////
-	// var uiWidth = 2048;
-	// var uiHeight = 1024;
-
-	function sceneInit() {
-
-		// var pui = iron.Scene.active.getChild("PlaneNodeUI"); ////
-		// rt = kha.Image.createRenderTarget(uiWidth, uiHeight);
-		// var mat:armory.data.MaterialData = cast(pui, armory.object.MeshObject).materials[0];
-		// mat.contexts[0].textures[0] = rt; // Override diffuse texture
-
-		// Store references to cube and plane objects
-		notifyOnRender2D(render2D);
-		notifyOnUpdate(update);
-	}
-
 	public function updateCanvasMap() {
-		if (UITrait.selected != null) {
+		if (UITrait.inst.selected != null) {
 			if (canvasMap == null) canvasMap = new Map();
-			var c = canvasMap.get(UITrait.selected);
+			var c = canvasMap.get(UITrait.inst.selected);
 			if (c == null) {
 				c = haxe.Json.parse(canvasBlob);
-				canvasMap.set(UITrait.selected, c);
+				canvasMap.set(UITrait.inst.selected, c);
 				canvas = c;
 			}
 			else canvas = c;
 
-			if (!isBrush) nodes = UITrait.selected.nodes;
+			if (!isBrush) nodes = UITrait.inst.selected.nodes;
 		}
 	}
 
 	public function updateCanvasBrushMap() {
-		if (UITrait.selectedBrush != null) {
+		if (UITrait.inst.selectedBrush != null) {
 			if (canvasBrushMap == null) canvasBrushMap = new Map();
-			var c = canvasBrushMap.get(UITrait.selectedBrush);
+			var c = canvasBrushMap.get(UITrait.inst.selectedBrush);
 			if (c == null) {
 				c = haxe.Json.parse(canvasBrushBlob);
-				canvasBrushMap.set(UITrait.selectedBrush, c);
+				canvasBrushMap.set(UITrait.inst.selectedBrush, c);
 				canvasBrush = c;
 			}
 			else canvasBrush = c;
 
-			if (isBrush) nodes = UITrait.selectedBrush.nodes;
+			if (isBrush) nodes = UITrait.inst.selectedBrush.nodes;
 		}
 	}
 
 	var mx = 0.0;
 	var my = 0.0;
-	// var wh = 300;
-	static var frame = 0;
+	var frame = 0;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
-	public static var changed = false;
+	public var changed = false;
 	function update() {
-		if (frame == 8) {
-			parseMaterial(); // Temp cpp fix
-		}
+		if (frame == 8) parseMaterial(); // Temp cpp fix
 		frame++;
 
 		updateCanvasMap();
 		updateCanvasBrushMap();
 
-		//
 		var mouse = iron.system.Input.getMouse();
 		mreleased = mouse.released();
 		mdown = mouse.down();
@@ -155,16 +127,14 @@ class UINodes extends armory.Trait {
 			mchanged = changed = false;
 			if (!isBrush) parseMaterial();
 		}
-		//
 
 		if (!show) return;
-		if (!UITrait.uienabled) return;
+		if (!arm.App.uienabled) return;
 		var keyboard = iron.system.Input.getKeyboard();
 
-		wx = Std.int(iron.App.w());//200;
-		wy = 0;//iron.App.h() - wh;
+		wx = Std.int(iron.App.w());
+		wy = 0;
 		if (mouse.x < wx || mouse.y < wy) return;
-
 		if (ui.isTyping) return;
 
 		if (mouse.started("right")) {
@@ -191,17 +161,17 @@ class UINodes extends armory.Trait {
 		}
 	}
 
-	function getNodeX():Int {
+	public function getNodeX():Int {
 		var mouse = iron.system.Input.getMouse();
 		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE);
 	}
 
-	function getNodeY():Int {
+	public function getNodeY():Int {
 		var mouse = iron.system.Input.getMouse();
 		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE);
 	}
 
-	public static var grid:kha.Image = null;
+	public var grid:kha.Image = null;
 	public function drawGrid() {
 		var ww = iron.App.w();
 		var wh = iron.App.h();
@@ -226,12 +196,11 @@ class UINodes extends armory.Trait {
 
 	public var hwnd = Id.handle();
 
-	@:access(zui.Zui)
 	function render2D(g:kha.graphics2.Graphics) {
 		if (!show) return;
 		
-		if (!UITrait.uienabled && ui.inputRegistered) ui.unregisterInput();
-		if (UITrait.uienabled && !ui.inputRegistered) ui.registerInput();
+		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
+		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
 		
 		g.end();
 
@@ -250,7 +219,7 @@ class UINodes extends armory.Trait {
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
 
-			ui.g.font = font;
+			ui.g.font = arm.App.font;
 			ui.g.fontSize = 22;
 			var title = isBrush ? "Brush" : "Material";
 			var titlew = ui.g.font.width(22, title);
@@ -302,7 +271,7 @@ class UINodes extends armory.Trait {
 
 			ui.beginLayout(g, Std.int(popupX), Std.int(py), 105);
 			
-			isBrush ? NodeCreatorBrush.draw(this, menuCategory) : NodeCreator.draw(this, menuCategory);
+			isBrush ? NodeCreatorBrush.draw(menuCategory) : NodeCreator.draw(menuCategory);
 
 			ui.endLayout();
 		}
@@ -337,7 +306,7 @@ class UINodes extends armory.Trait {
 			alpha_blend_operation: 'add',
 			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
-		if (UITrait.brushType == 2) {
+		if (UITrait.inst.brushType == 2) {
 			con_paint.data.color_write_green = false; // R
 			con_paint.data.color_write_blue = false; // M
 		}
@@ -365,14 +334,14 @@ class UINodes extends armory.Trait {
 		vert.write('sp.z -= paintDepthBias;'); // paintVisible
 
 		vert.add_out('vec3 mposition');
-		if (UITrait.brushPaint == 0 && con_paint.is_elem('tex')) {
+		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
         	vert.write('mposition = pos.xyz;');
         }
         else {
         	vert.write('mposition = ndc.xyz;');
         }
 
-        if (UITrait.brushType == 2) {
+        if (UITrait.inst.brushType == 2) {
         	vert.add_out('vec3 wposition');
         	vert.add_uniform('mat4 W', '_worldMatrix');
         	vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
@@ -396,7 +365,7 @@ class UINodes extends armory.Trait {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
-		if (UITrait.brushType == 0) { // Draw
+		if (UITrait.inst.brushType == 0) { // Draw
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
 			
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
@@ -411,7 +380,7 @@ class UINodes extends armory.Trait {
 		}
 		
 		// Texture projection - texcoords
-		if (UITrait.brushPaint == 0 && con_paint.is_elem('tex')) {
+		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = fract(tex * brushScale);'); // TODO: fract(tex) - somehow clamp is set after first paint
@@ -441,11 +410,11 @@ class UINodes extends armory.Trait {
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 
-		if (!UITrait.paintBase) frag.write('fragColor[0].a = 0.0;');
-		if (!UITrait.paintNor) frag.write('fragColor[1].a = 0.0;');
-		if (!UITrait.paintRough) frag.write('fragColor[2].a = 0.0;');
+		if (!UITrait.inst.paintBase) frag.write('fragColor[0].a = 0.0;');
+		if (!UITrait.inst.paintNor) frag.write('fragColor[1].a = 0.0;');
+		if (!UITrait.inst.paintRough) frag.write('fragColor[2].a = 0.0;');
 
-		if (UITrait.brushType == 2) { // Bake AO
+		if (UITrait.inst.brushType == 2) { // Bake AO
 			frag.write('fragColor[0].a = 0.0;');
 			frag.write('fragColor[1].a = 0.0;');
 
@@ -588,7 +557,7 @@ class UINodes extends armory.Trait {
 	}
 
 	public function parseMaterial() {
-		UITrait.dirty = true;
+		UITrait.inst.dirty = true;
 
 		if (getMOut()) {
 
@@ -691,8 +660,8 @@ class UINodes extends armory.Trait {
 		}
 	}
 
-	public static function acceptDrag(assetIndex:Int) {
-		NodeCreator.createImageTexture(inst);
+	public function acceptDrag(assetIndex:Int) {
+		NodeCreator.createImageTexture();
 		nodes.nodeSelected.buttons[0].default_value = assetIndex;
 	}
 
