@@ -18,11 +18,11 @@ class App extends iron.Trait {
 	public static var font:kha.Font = null;
 	static var uimodal:Zui;
 
-	static function getEnumTexts():Array<String> {
+	public static function getEnumTexts():Array<String> {
 		return UILibrary.inst.assetNames.length > 0 ? UILibrary.inst.assetNames : [""];
 	}
 
-	static function mapEnum(s:String):String {
+	public static function mapEnum(s:String):String {
 		for (a in UILibrary.inst.assets) if (a.name == s) return a.file;
 		return "";
 	}

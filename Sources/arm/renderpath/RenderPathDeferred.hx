@@ -406,6 +406,20 @@ class RenderPathDeferred {
 			t.format = 'RGBA32';
 			path.createRenderTarget(t);
 		}
+
+		var w = 1;
+		for (i in 0...8)
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_colorid" + i;
+			t.width = w;
+			t.height = w;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+			w *= 2;
+		}
+
+		path.loadShader("shader_datas/max_luminance_pass/max_luminance_pass");
 		//
 	}
 
@@ -424,32 +438,50 @@ class RenderPathDeferred {
 		}
 
 		if (arm.UITrait.inst.paintDirty()) {
-			if (arm.UITrait.inst.brushType == 2) { // Bake AO
-				if (initVoxels) {
-					initVoxels = false;
-					var t = new RenderTargetRaw();
-					t.name = "voxels";
-					t.format = "R8";
-					t.width = 256;
-					t.height = 256;
-					t.depth = 256;
-					t.is_image = true;
-					t.mipmaps = true;
-					path.createRenderTarget(t);
+			if (arm.UITrait.inst.brushType == 3) { // Pick Color Id
+				path.setTarget("texpaint_colorid7");
+				path.clearTarget(0xff000000);
+				path.bindTarget("_paintdb", "paintdb");
+				path.drawMeshes("paint");
+				// Extract picked color to 1x1 texture
+				for (i in 0...7) {
+					var j = 7 - i;
+					path.setTarget("texpaint_colorid" + (j - 1));
+					path.bindTarget("texpaint_colorid" + j, "tex");
+					path.drawShader("shader_datas/max_luminance_pass/max_luminance_pass");
 				}
-				path.clearImage("voxels", 0x00000000);
-				path.setTarget("");
-				path.setViewport(256, 256);
-				path.bindTarget("voxels", "voxels");
-				path.drawMeshes("voxel");
-				path.generateMipmaps("voxels");
 			}
-			path.setTarget("texpaint", ["texpaint_nor", "texpaint_pack"]);
-			path.bindTarget("_paintdb", "paintdb");
-			if (arm.UITrait.inst.brushType == 2) { // Bake AO
-				path.bindTarget("voxels", "voxels");
+			else {
+				if (arm.UITrait.inst.brushType == 2) { // Bake AO
+					if (initVoxels) {
+						initVoxels = false;
+						var t = new RenderTargetRaw();
+						t.name = "voxels";
+						t.format = "R8";
+						t.width = 256;
+						t.height = 256;
+						t.depth = 256;
+						t.is_image = true;
+						t.mipmaps = true;
+						path.createRenderTarget(t);
+					}
+					path.clearImage("voxels", 0x00000000);
+					path.setTarget("");
+					path.setViewport(256, 256);
+					path.bindTarget("voxels", "voxels");
+					path.drawMeshes("voxel");
+					path.generateMipmaps("voxels");
+				}
+				path.setTarget("texpaint", ["texpaint_nor", "texpaint_pack"]);
+				path.bindTarget("_paintdb", "paintdb");
+				if (arm.UITrait.inst.brushType == 2) { // Bake AO
+					path.bindTarget("voxels", "voxels");
+				}
+				if (arm.UITrait.inst.colorIdPicked) {
+					path.bindTarget("texpaint_colorid0", "texpaint_colorid0");
+				} 
+				path.drawMeshes("paint");
 			}
-			path.drawMeshes("paint");
 		}
 		//
 

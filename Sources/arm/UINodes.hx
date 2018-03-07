@@ -108,7 +108,10 @@ class UINodes extends iron.Trait {
 	var mchanged = false;
 	public var changed = false;
 	function update() {
-		if (frame == 8) parseMaterial(); // Temp cpp fix
+		if (frame == 8) {
+			parseMeshMaterial();
+			parsePaintMaterial(); // Temp cpp fix
+		}
 		frame++;
 
 		updateCanvasMap();
@@ -125,7 +128,7 @@ class UINodes extends iron.Trait {
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			if (!isBrush) parseMaterial();
+			if (!isBrush) parsePaintMaterial();
 		}
 
 		if (!show) return;
@@ -341,7 +344,7 @@ class UINodes extends iron.Trait {
         	vert.write('mposition = ndc.xyz;');
         }
 
-        if (UITrait.inst.brushType == 2) {
+        if (UITrait.inst.brushType == 2) { // Bake ao
         	vert.add_out('vec3 wposition');
         	vert.add_uniform('mat4 W', '_worldMatrix');
         	vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
@@ -352,15 +355,39 @@ class UINodes extends iron.Trait {
 			frag.write('vec3 n = normalize(wnormal);');
     	}
 
-		frag.add_out('vec4 fragColor[3]');
 		frag.add_uniform('vec4 inp', '_inputBrush');
-
 		frag.add_uniform('float aspectRatio', '_aspectRatioWindowF');
 		frag.write('vec2 bsp = sp.xy * 2.0 - 1.0;');
 		frag.write('bsp.x *= aspectRatio;');
 		frag.write('bsp = bsp * 0.5 + 0.5;');
 
 		frag.add_uniform('sampler2D paintdb');
+
+		if (UITrait.inst.brushType == 3) { // Pick color id
+			frag.add_out('vec4 fragColor');
+
+			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
+			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
+			frag.write('binp.x *= aspectRatio;');
+			frag.write('binp = binp * 0.5 + 0.5;');
+			
+			frag.write('float dist = distance(bsp.xy, binp.xy);');
+			frag.write('if (dist > 0.025) discard;'); // Base this on camera zoom - more for zommed in camera, less for zoomed out
+
+			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
+			vert.add_out('vec2 texCoord');
+			vert.write('texCoord = fract(tex);'); // TODO: fract(tex) - somehow clamp is set after first paint
+			frag.write('vec3 idcol = texture(texcolorid, texCoord).rgb;');
+			frag.write('fragColor = vec4(idcol, 1.0);');
+
+			con_paint.data.shader_from_source = true;
+			con_paint.data.vertex_shader = vert.get();
+			con_paint.data.fragment_shader = frag.get();
+			return con_paint;
+		}
+
+		frag.add_out('vec4 fragColor[3]');
+
 		frag.add_uniform('float brushRadius', '_brushRadius');
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
@@ -378,7 +405,16 @@ class UINodes extends iron.Trait {
 		else {
 			frag.write('float dist = 0.0;');
 		}
-		
+
+		if (UITrait.inst.colorIdPicked) {
+			frag.add_uniform('sampler2D texpaint_colorid0'); // 1x1 picker
+			frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
+			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
+			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
+			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoord * texcoloridSize), 0).rgb;');
+			frag.write('if (c1 != c2) discard;');
+		}
+
 		// Texture projection - texcoords
 		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
 			vert.add_uniform('float brushScale', '_brushScale');
@@ -501,62 +537,112 @@ class UINodes extends iron.Trait {
 		return con_depth;
 	}
 
-	// function make_mesh_paint(data:ShaderData):armory.system.ShaderContext {
-	// 	var context_id = 'mesh';
-	// 	var con_mesh:armory.system.ShaderContext = data.add_context({
-	// 		name: context_id,
-	// 		depth_write: true,
-	// 		compare_mode: 'less',
-	// 		cull_mode: 'clockwise' });
+	function make_mesh_paint(data:ShaderData):armory.system.ShaderContext {
+		var context_id = 'mesh';
+		var con_mesh:armory.system.ShaderContext = data.add_context({
+			name: context_id,
+			depth_write: true,
+			compare_mode: 'less',
+			cull_mode: 'clockwise',
+			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
-	// 	var vert = con_mesh.make_vert();
-	// 	var frag = con_mesh.make_frag();
+		var vert = con_mesh.make_vert();
+		var frag = con_mesh.make_frag();
 
-	// 	frag.ins = vert.outs;
+		vert.add_out('vec2 texCoord');
+		vert.add_out('vec3 wnormal');
+		vert.add_out('vec4 wvpposition');
+		vert.add_out('vec4 prevwvpposition');
+		vert.add_out('vec3 eyeDir');
+		vert.add_uniform('mat3 N', '_normalMatrix');
+		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		vert.add_uniform('mat4 prevWVP', '_prevWorldViewProjectionMatrix');
+		vert.add_uniform('vec3 eye', '_cameraPosition');
+		vert.add_uniform('mat4 W', '_worldMatrix');
+		vert.write('vec4 spos = vec4(pos, 1.0);');
+		vert.write('wnormal = normalize(N * nor);');
+		vert.write('vec3 wposition = vec4(W * spos).xyz;');
+		vert.write('gl_Position = WVP * spos;');
+		vert.write('texCoord = tex;');
+		vert.write('wvpposition = gl_Position;');
+		vert.write('prevwvpposition = prevWVP * spos;');
+		vert.write('eyeDir = eye - wposition;');
 
-		
+		frag.ins = vert.outs;
 
+		frag.add_out('vec4[3] fragColor');
+		frag.write('vec3 n = normalize(wnormal);');
+		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
 
+		if (arm.UITrait.inst.brushType == 3) { // Show color map
+			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
+			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0 - gl_FragCoord.z);');
+			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2));');
+			frag.write('fragColor[1] = vec4(idcol.rgb, 1.0);');
+		}
+		else {
+			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+			frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
 
-	// 	frag.write('vec3 basecol;');
-	// 	frag.write('float roughness;');
-	// 	frag.write('float metallic;');
-	// 	frag.write('float occlusion;');
-	// 	frag.write('float opacity;');
+			frag.add_uniform('sampler2D texpaint');
+			frag.add_uniform('sampler2D texpaint_nor');
+			frag.add_uniform('sampler2D texpaint_pack');
 
-	// 	frag.add_uniform('sampler2D texpaint');
-	// 	frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
+			frag.write('vec3 vVec = normalize(eyeDir);');
 
-	// 	frag.add_uniform('sampler2D texpaint_nor');
-	// 	frag.write('vec3 n = texture(texpaint_nor, texCoord).rgb * 2.0 - 1.0;');
-	// 	frag.write('n = normalize(TBN * normalize(n));');
+			frag.write('vec3 basecol;');
+			frag.write('float roughness;');
+			frag.write('float metallic;');
+			frag.write('float occlusion;');
+			frag.write('float opacity;');
 
-	// 	frag.add_uniform('sampler2D texpaint_pack');
-	// 	frag.write('vec4 pack = texture(texpaint_pack, texCoord);');
-	// 	frag.write('occlusion = pack.r;');
-	// 	frag.write('roughness = pack.g;');
-	// 	frag.write('metallic = pack.b;');
+			frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
 
-	// 	// TODO: Sample disp at neightbour points to calc normal
-	// 	// tese.add_uniform('sampler2D texpaint_pack')
-	// 	// tese.write('vec4 pack = texture(texpaint_pack, texCoord);')
-	// 	// tese.write('disp = pack.a * 0.05;')
+			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+			frag.write('n = texture(texpaint_nor, texCoord).rgb * 2.0 - 1.0;');
+			frag.write('n = normalize(TBN * normalize(n));');
 
+			frag.write('vec4 pack = texture(texpaint_pack, texCoord);');
+			frag.write('occlusion = pack.r;');
+			frag.write('roughness = pack.g;');
+			frag.write('metallic = pack.b;');
 
+			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
+			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
+			frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
+			frag.write('fragColor[1] = vec4(basecol.rgb, occlusion);');
+		}
 
-	// 	con_mesh.data.shader_from_source = true;
-	// 	con_mesh.data.vertex_shader = vert.get();
-	// 	con_mesh.data.fragment_shader = frag.get();
+		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
+		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
+		frag.write('fragColor[2].rg = vec2(posa - posb);');
 
-	// 	return con_mesh;
-	// }
+		con_mesh.data.shader_from_source = true;
+		con_mesh.data.vertex_shader = vert.get();
+		con_mesh.data.fragment_shader = frag.get();
+
+		return con_mesh;
+	}
 
 	function getMOut():Bool {
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
-	public function parseMaterial() {
+	public function parseMeshMaterial() {
+		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			var sc:iron.data.ShaderData.ShaderContext = null;
+			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
+			m.shader.raw.contexts.remove(sc.raw);
+			m.shader.contexts.remove(sc);
+			var con = make_mesh_paint(new ShaderData({name: "Material", canvas: null}));
+			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			m.shader.raw.contexts.push(sc.raw);
+			m.shader.contexts.push(sc);
+		});
+	}
+
+	public function parsePaintMaterial() {
 		UITrait.inst.dirty = true;
 
 		if (getMOut()) {
@@ -634,28 +720,6 @@ class UINodes extends iron.Trait {
 				// 	sc.raw.fragment_shader = cdata.fragment_shader;
 				// 	sc.compile();
 				// }
-
-
-				// var sp = iron.Scene.active.getChild("SpherePreview");
-				// var md = cast(sp, iron.object.MeshObject).materials[0];
-				// var mc = md.shader.contexts[0]; // mesh
-
-				// var pmat:TMaterial = {
-				// 	name: "MaterialPreview",
-				// 	canvas: canvas
-				// };
-				// var _psd = new ShaderData(pmat);
-				// _psd.add_elem('pos', 3);
-				// _psd.add_elem('nor', 3);
-				// _psd.add_elem('tex', 2);
-				// _psd.add_elem('tang', 3);
-				// var pcon = make_mesh_preview(_psd, null);
-				// var pcdata = pcon.data;
-
-				// mc.raw.shader_from_source = true;
-				// mc.raw.vertex_shader = pcdata.vertex_shader;
-				// mc.raw.fragment_shader = pcdata.fragment_shader;
-				// mc.compile();
 			});
 		}
 	}
