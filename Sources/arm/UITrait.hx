@@ -89,8 +89,8 @@ class UITrait extends iron.Trait {
 		// if (UINodes.inst.show && paintVec.y > UINodes.inst.wy) return false;
 
 		// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
-		var mouse = iron.system.Input.getMouse();
-		if (mouse.down() && paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
+		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+		if (down && paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
 		else painted = 0;
 
 		if (painted > 8) return false;
@@ -126,7 +126,10 @@ class UITrait extends iron.Trait {
 	function linkFloat(link:String):Null<Float> {
 
 		if (link == '_brushRadius') {
-			return (brushRadius * brushNodesRadius) / 15.0;
+			var r = (brushRadius * brushNodesRadius) / 15.0;
+			var p = iron.system.Input.getPen().pressure;
+			if (p != 0.0) r *= p;
+			return r;
 		}
 		else if (link == '_brushOpacity') {
 			return brushOpacity * brushNodesOpacity;
@@ -136,6 +139,8 @@ class UITrait extends iron.Trait {
 		}
 		else if (link == '_brushStrength') {
 			var f = brushStrength * brushNodesStrength;
+			// var p = iron.system.Input.getPen().pressure;
+			// if (p != 0.0) f *= p;
 			return f * f * 100;
 		}
 		else if (link == '_paintDepthBias') {
@@ -176,7 +181,8 @@ class UITrait extends iron.Trait {
 
 	function linkVec4(link:String):iron.math.Vec4 {
 		if (link == '_inputBrush') {
-			vec2.set(paintVec.x, paintVec.y, iron.system.Input.getMouse().down() ? 1.0 : 0.0, 0.0);
+			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			vec2.set(paintVec.x, paintVec.y, down ? 1.0 : 0.0, 0.0);
 			return vec2;
 		}
 		return null;
@@ -297,7 +303,8 @@ class UITrait extends iron.Trait {
 		if (!show) return;
 		if (!arm.App.uienabled) return;
 
-		if (mouse.down() && !kb.down("ctrl")) {
+		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+		if (down && !kb.down("ctrl")) {
 			brushTime += iron.system.Time.delta;
 			for (f in _onBrush) f();
 		}
@@ -447,7 +454,14 @@ class UITrait extends iron.Trait {
 		if (arm.App.uienabled) {
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 			// g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
-			g.drawScaledImage(cursorImg, mouse.x - psize / 2, mouse.y - psize / 2, psize, psize);
+			var mx = mouse.x;
+			var my = mouse.y;
+			var pen = iron.system.Input.getPen();
+			if (pen.down()) {
+				mx = pen.x;
+				my = pen.y;
+			}
+			g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 		}
 
 		g.end();
@@ -756,7 +770,9 @@ class UITrait extends iron.Trait {
 					UINodes.inst.parsePaintMaterial();
 				}
 
+				ui.row([1/2, 1/2]);
 				paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+				ui.check(Id.handle({selected: true}), "Pen Pressure");
 			}
 
 			if (ui.panel(Id.handle({selected: true}), "Material")) {

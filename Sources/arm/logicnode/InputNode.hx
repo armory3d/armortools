@@ -25,6 +25,12 @@ class InputNode extends LogicNode {
 				startY = mouse.y / iron.App.h();
 			}
 
+			var pen = armory.system.Input.getPen();
+			if (pen.down()) {
+				coords.x = pen.x / iron.App.w();
+				coords.y = pen.y / iron.App.h();
+			}
+
 			var kb = iron.system.Input.getKeyboard();
 
 			lockY = kb.down("shift");
