@@ -49,7 +49,7 @@ class UINodes extends iron.Trait {
 				canvasBlob = b1.toString();
 				canvasBrushBlob = b2.toString();
 
-				kha.Assets.loadImage('color_wheel', function(image:kha.Image) {
+				kha.Assets.loadImageFromPath('color_wheel.png', false, function(image:kha.Image) {
 
 					canvas = haxe.Json.parse(canvasBlob);
 					canvasBrush = haxe.Json.parse(canvasBrushBlob);

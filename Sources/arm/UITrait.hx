@@ -56,7 +56,7 @@ class UITrait extends iron.Trait {
 	function loadBundled(names:Array<String>, done:Void->Void) {
 		var loaded = 0;
 		for (s in names) {
-			kha.Assets.loadImage(s, function(image:kha.Image) {
+			kha.Assets.loadImageFromPath(s, false, function(image:kha.Image) {
 				bundled.set(s, image);
 				loaded++;
 				if (loaded == names.length) done();
@@ -210,7 +210,7 @@ class UITrait extends iron.Trait {
 
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { font: arm.App.font, scaleFactor: scale } );
-		loadBundled(['cursor', 'mat', 'mat_empty', 'brush', 'cay_thumb'], done);
+		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
 	}
 
 	function showMessage(s:String) {
@@ -270,10 +270,13 @@ class UITrait extends iron.Trait {
 			iron.App.notifyOnRender(clearTargetsHandler);
 
 			// Init plugins
-			// iron.data.Data.getBlob('my_plugin.js', function(blob:kha.Blob) {
-				// Plugin.keep();
-				// untyped __js__("(1, eval)({0})", blob.toString());
-			// });
+			Plugin.keep();
+			iron.data.Data.getBlob('my_plugin.js', function(blob:kha.Blob) {
+				untyped __js__("(1, eval)({0})", blob.toString());
+			});
+			iron.data.Data.getBlob('plugin_presentation_mode.js', function(blob:kha.Blob) {
+				untyped __js__("(1, eval)({0})", blob.toString());
+			});
 		});
 	}
 
@@ -290,6 +293,8 @@ class UITrait extends iron.Trait {
 		}
 
 		pickColorId = kb.down("alt");
+
+		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
 
 	function updateUI() {
@@ -444,9 +449,9 @@ class UITrait extends iron.Trait {
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
 
-		var brushImg = bundled.get('brush');
-		var envThumbCay = bundled.get('cay_thumb');
-		var cursorImg = bundled.get('cursor');
+		var brushImg = bundled.get('brush.jpg');
+		var envThumbCay = bundled.get('cay_thumb.jpg');
+		var cursorImg = bundled.get('cursor.png');
 		var mouse = iron.system.Input.getMouse();
 		g.color = 0xffffffff;
 
@@ -696,8 +701,8 @@ class UITrait extends iron.Trait {
 					showBrushNodes();
 				}
 
-				var img = bundled.get("brush");
-				var img2 = bundled.get("mat_empty");
+				var img = bundled.get("brush.jpg");
+				var img2 = bundled.get("mat_empty.jpg");
 				ui.row([1/5,1/5,1/5,1/5,1/5]);
 				for (i in 0...5) {
 					var im = img;
@@ -785,8 +790,8 @@ class UITrait extends iron.Trait {
 					showMaterialNodes();
 				}
 
-				var img = bundled.get("mat");
-				var img2 = bundled.get("mat_empty");
+				var img = bundled.get("mat.jpg");
+				var img2 = bundled.get("mat_empty.jpg");
 				ui.row([1/5,1/5,1/5,1/5,1/5]);
 				for (i in 0...5) {
 					var im = img;
@@ -822,6 +827,9 @@ class UITrait extends iron.Trait {
 				var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
 				if (UILibrary.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UILibrary.inst.assets[cid]));
 			}
+
+			// Draw plugins
+			for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
 		}
 		ui.end();
 		g.begin(false);
