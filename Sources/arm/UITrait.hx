@@ -65,9 +65,17 @@ class UITrait extends iron.Trait {
 	}
 
 	public function depthDirty():Bool {
-		if (!dirty && !firstPaint) return false;
-		dirty = false;
-		return true;
+		return dirty || first < 10;
+	}
+
+	var first = 0;
+	public function redraw():Bool {
+		if (first < 10) {
+			first++;
+			return true;
+		}
+		var m = iron.system.Input.getMouse();
+		return m.down() || m.down("right") || m.released() || m.released("right") || depthDirty();
 	}
 
 	var _onBrush:Array<Void->Void> = [];
@@ -76,7 +84,6 @@ class UITrait extends iron.Trait {
 		_onBrush.push(f);
 	}
 
-	public var firstPaint = true;
 	public var paint = false;
 	public var paintVec = new iron.math.Vec4();
 	public var lastPaintX = 0.0;
@@ -97,7 +104,6 @@ class UITrait extends iron.Trait {
 		lastPaintX = paintVec.x;
 		lastPaintY = paintVec.y;
 
-		if (paint) firstPaint = false;
 		return paint;
 	}
 

@@ -23,6 +23,8 @@ plugin.drawUI = function(ui) {
 
 plugin.update = function(ui) {
 
+	if (h2.value == 0 && h3.value == 0 && h4.value == 0) return;
+
 	x += h2.value / 50;
 	y += h3.value / 50;
 	z += h4.value / 50;

@@ -430,6 +430,8 @@ class RenderPathDeferred {
 	@:access(iron.RenderPath)
 	public static function commands() {
 
+		if (arm.UITrait.inst.redraw()) { //
+
 		// Paint
 		if (arm.UITrait.inst.depthDirty()) {
 			path.setTarget("texpaint");
@@ -864,11 +866,15 @@ class RenderPathDeferred {
 		}
 		#end
 
+		} // redraw
+
 		#if ((rp_supersampling == 4) || (rp_rendercapture))
 		var framebuffer = "buf";
 		#else
 		var framebuffer = "";
 		#end
+
+		if (arm.UITrait.inst.redraw()) { //
 
 		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA"))
 		{
@@ -904,6 +910,8 @@ class RenderPathDeferred {
 			path.drawMeshes("overlay");
 		}
 		#end
+
+		} // redraw
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
@@ -966,6 +974,8 @@ class RenderPathDeferred {
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 		#end
+
+		arm.UITrait.inst.dirty = false; //
 	}
 	#end
 }
