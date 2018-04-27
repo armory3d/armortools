@@ -19,11 +19,11 @@ class App extends iron.Trait {
 	static var uimodal:Zui;
 
 	public static function getEnumTexts():Array<String> {
-		return UILibrary.inst.assetNames.length > 0 ? UILibrary.inst.assetNames : [""];
+		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
 	}
 
 	public static function mapEnum(s:String):String {
-		for (a in UILibrary.inst.assets) if (a.name == s) return a.file;
+		for (a in UITrait.inst.assets) if (a.name == s) return a.file;
 		return "";
 	}
 
@@ -49,7 +49,6 @@ class App extends iron.Trait {
 				notifyOnUpdate(update);
 				notifyOnRender2D(render);
 				object.addTrait(new UITrait());
-				object.addTrait(new UILibrary());
 				object.addTrait(new UINodes());
 				object.addTrait(new FlyCamera());
 				object.addTrait(new OrbitCamera());
@@ -76,13 +75,7 @@ class App extends iron.Trait {
 	public static function h():Int {
 		// TODO: account for Config.raw.window_scale
 		var res = 0;
-		if (UILibrary.inst == null) {
-			res = kha.System.windowHeight() - UILibrary.defaultWindowH;
-		}
-		else {
-			res = kha.System.windowHeight() - UILibrary.inst.windowH;
-		}
-		
+		res = kha.System.windowHeight();
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
@@ -113,7 +106,7 @@ class App extends iron.Trait {
 		if (mouse.released() && isDragging) {
 			if (UINodes.inst.show && mouse.x > UINodes.inst.wx && mouse.y > UINodes.inst.wy) {
 				var index = 0;
-				for (i in 0...UILibrary.inst.assets.length) if (UILibrary.inst.assets[i] == dragAsset) { index = i; break; }
+				for (i in 0...UITrait.inst.assets.length) if (UITrait.inst.assets[i] == dragAsset) { index = i; break; }
 				UINodes.inst.acceptDrag(index);
 			}
 			dragAsset = null;
@@ -131,7 +124,7 @@ class App extends iron.Trait {
 				UITrait.inst.importAsset(dropPath);
 				// Place image node
 				if (UINodes.inst.show && dropX > UINodes.inst.wx && dropX < UINodes.inst.wx + UINodes.inst.ww) {
-					UINodes.inst.acceptDrag(UILibrary.inst.assets.length - 1);
+					UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
 					UINodes.inst.nodes.nodeDrag = null;
 					UINodes.inst.hwnd.redraws = 2;
 				}

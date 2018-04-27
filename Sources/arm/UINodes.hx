@@ -356,6 +356,7 @@ class UINodes extends iron.Trait {
     	}
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
+		frag.add_uniform('vec4 inplast', '_inputBrushLast');
 		frag.add_uniform('float aspectRatio', '_aspectRatioWindowF');
 		frag.write('vec2 bsp = sp.xy * 2.0 - 1.0;');
 		frag.write('bsp.x *= aspectRatio;');
@@ -393,14 +394,28 @@ class UINodes extends iron.Trait {
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
 		if (UITrait.inst.brushType == 0) { // Draw
-			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
+			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) { discard; return; }');
 			
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
 			frag.write('binp.x *= aspectRatio;');
 			frag.write('binp = binp * 0.5 + 0.5;');
+
+			// Continuos paint
+			frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
+			frag.write('binplast.x *= aspectRatio;');
+			frag.write('binplast = binplast * 0.5 + 0.5;');
 			
-			frag.write('float dist = distance(bsp.xy, binp.xy);');
-			frag.write('if (dist > brushRadius) discard;');
+			frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
+		    frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+		    frag.write('float dist = length(pa - ba * h);');
+		    frag.write('if (dist > brushRadius) { discard; return; }');
+		    //
+
+			
+			// frag.write('float dist = distance(bsp.xy, binp.xy);');
+			// frag.write('if (dist > brushRadius) { discard; return; }');
+
+			
 		}
 		else {
 			frag.write('float dist = 0.0;');
@@ -412,7 +427,7 @@ class UINodes extends iron.Trait {
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoord * texcoloridSize), 0).rgb;');
-			frag.write('if (c1 != c2) discard;');
+			frag.write('if (c1 != c2) { discard; return; }');
 		}
 
 		// Texture projection - texcoords

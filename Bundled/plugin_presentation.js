@@ -14,7 +14,7 @@ var y = 0.0;
 var z = 0.0;
 
 plugin.drawUI = function(ui) {
-	if (ui.panel(h1, "Presentation Mode Plugin")) {
+	if (ui.panel(h1, "Presentation Plugin")) {
 		ui.slider(h2, "Rotate X", 0, 1, true);
 		ui.slider(h3, "Rotate Y", 0, 1, true);
 		ui.slider(h4, "Rotate Z", 0, 1, true);

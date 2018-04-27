@@ -7,5 +7,6 @@
     "window_resizable": true,
     "window_scale": 1.0,
     "window_vsync": true,
-    "window_w": "1600"
+    "window_w": "1600",
+    "plugins": ["plugin_hello.js"]
 }

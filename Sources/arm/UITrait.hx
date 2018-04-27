@@ -33,6 +33,10 @@ class BrushSlot {
 @:access(iron.data.Data)
 class UITrait extends iron.Trait {
 
+	public var assets:Array<TAsset> = [];
+	public var assetNames:Array<String> = [];
+	public var assetId = 0;
+
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
 
@@ -176,8 +180,8 @@ class UITrait extends iron.Trait {
 		}
 		else if (link == '_texcoloridSize') {
 			vec2.set(0, 0, 0);
-			if (UILibrary.inst.assets.length == 0) return vec2;
-			var img = UITrait.inst.getImage(UILibrary.inst.assets[colorIdHandle.position]);
+			if (UITrait.inst.assets.length == 0) return vec2;
+			var img = UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
 			vec2.set(img.width, img.height, 0);
 			return vec2;
 		}
@@ -185,10 +189,17 @@ class UITrait extends iron.Trait {
 		return null;
 	}
 
+	public var lastPaintVecX = -1.0;
+	public var lastPaintVecY = -1.0;
 	function linkVec4(link:String):iron.math.Vec4 {
 		if (link == '_inputBrush') {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			vec2.set(paintVec.x, paintVec.y, down ? 1.0 : 0.0, 0.0);
+			return vec2;
+		}
+		else if (link == '_inputBrushLast') {
+			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			vec2.set(lastPaintVecX, lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 			return vec2;
 		}
 		return null;
@@ -196,8 +207,8 @@ class UITrait extends iron.Trait {
 
 	function linkTex(link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UILibrary.inst.assets.length == 0) return null;
-			else return UITrait.inst.getImage(UILibrary.inst.assets[colorIdHandle.position]);
+			if (UITrait.inst.assets.length == 0) return null;
+			else return UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
 		}
 		return null;
 	}
@@ -206,6 +217,9 @@ class UITrait extends iron.Trait {
 		super();
 
 		inst = this;
+
+		haxeTrace = haxe.Log.trace;
+		haxe.Log.trace = consoleTrace;
 
 		windowW = Std.int(windowW * armory.data.Config.raw.window_scale);
 
@@ -218,6 +232,13 @@ class UITrait extends iron.Trait {
 		ui = new Zui( { font: arm.App.font, scaleFactor: scale } );
 		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
 	}
+
+	var haxeTrace:Dynamic->haxe.PosInfos->Void;
+	var lastTrace = '';
+	function consoleTrace(v:Dynamic, ?inf:haxe.PosInfos) {
+		lastTrace = Std.string(v);
+		haxeTrace(v, inf);
+    }
 
 	function showMessage(s:String) {
 		messageTimer = 3.0;
@@ -245,9 +266,9 @@ class UITrait extends iron.Trait {
 		iron.data.Data.getImage(path, function(image:kha.Image) {
 			var ar = path.split("/");
 			var name = ar[ar.length - 1];
-			var asset:TAsset = {name: name, file: path, id: UILibrary.inst.assetId++};
-			UILibrary.inst.assets.push(asset);
-			UILibrary.inst.assetNames.push(name);
+			var asset:TAsset = {name: name, file: path, id: UITrait.inst.assetId++};
+			UITrait.inst.assets.push(asset);
+			UITrait.inst.assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
 			hwnd.redraws = 2;
 		});
@@ -275,14 +296,29 @@ class UITrait extends iron.Trait {
 			iron.App.notifyOnRender2D(render);
 			iron.App.notifyOnRender(clearTargetsHandler);
 
+			// Save last pos for continuos paint
+			iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
+				var m = iron.system.Input.getMouse();
+				if (m.down()) { //
+					arm.UITrait.inst.lastPaintVecX = arm.UITrait.inst.paintVec.x; //
+					arm.UITrait.inst.lastPaintVecY = arm.UITrait.inst.paintVec.y;//
+				}//
+				else {
+					arm.UITrait.inst.lastPaintVecX = m.x / iron.App.w();
+					arm.UITrait.inst.lastPaintVecY = m.y / iron.App.h();
+				}
+			});//
+
 			// Init plugins
 			Plugin.keep();
-			iron.data.Data.getBlob('my_plugin.js', function(blob:kha.Blob) {
-				untyped __js__("(1, eval)({0})", blob.toString());
-			});
-			iron.data.Data.getBlob('plugin_presentation_mode.js', function(blob:kha.Blob) {
-				untyped __js__("(1, eval)({0})", blob.toString());
-			});
+			var apconfig:TAPConfig = cast armory.data.Config.raw;
+			if (apconfig.plugins != null) {
+				for (plugin in apconfig.plugins) {
+					iron.data.Data.getBlob(plugin, function(blob:kha.Blob) {
+						untyped __js__("(1, eval)({0})", blob.toString());
+					});
+				}
+			}
 		});
 	}
 
@@ -481,361 +517,405 @@ class UITrait extends iron.Trait {
 		
 		if (ui.window(hwnd, arm.App.realw() - windowW, 0, windowW, arm.App.realh())) {
 
-			ui._y += 6;
+			var htab = Id.handle({position: 0});
 
-			// ui.row([1/2, 1/2]);
-			// ui.button("Open");
-			// ui.button("Save");
+			if (ui.tab(htab, "Tools")) {
 
-			if (messageTimer > 0) {
-				ui.text(message);
-			}
+				ui._y += 6;
 
-			ui.row([1/2,1/2]);
-			if (ui.button("Import Mesh")) {
-				arm.App.showFiles = true;
-				arm.App.foldersOnly = false;
-				arm.App.filesDone = function(path:String) {
-					importMesh(path);
+				// ui.row([1/2, 1/2]);
+				// ui.button("Open");
+				// ui.button("Save");
+
+				if (messageTimer > 0) {
+					ui.text(message);
 				}
-			}
-			else if (ui.isHovered) ui.tooltip("Drop .obj mesh here"); 
-			if (ui.button("Export Textures")) {
-				var textureSize = getTextureRes();
 
-				arm.App.showFiles = true;
-				arm.App.foldersOnly = true;
-				// var path = 'C:\\Users\\lubos\\Documents\\';
-				arm.App.filesDone = function(path:String) {
-					var bo = new haxe.io.BytesOutput();
-					var pixels = texpaint.getPixels();
-					var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
-					// BGRA to RGB
-					for (i in 0...textureSize * textureSize) {
-						rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-						rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-						rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+				ui.row([1/2,1/2]);
+				if (ui.button("Import Mesh")) {
+					arm.App.showFiles = true;
+					arm.App.foldersOnly = false;
+					arm.App.filesDone = function(path:String) {
+						importMesh(path);
 					}
-					var pngwriter = new iron.format.png.Writer(bo);
-					pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-					// var jpgdata:iron.format.jpg.Data.Data = {
-					// 	width: textureSize,
-					// 	height: textureSize,
-					// 	quality: 80,
-					// 	pixels: rgb
-					// };
-					// var jpgwriter = new iron.format.jpg.Writer(bo);
-					// jpgwriter.write(jpgdata);
-					#if kha_krom
-					if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
-					#end
+				}
+				else if (ui.isHovered) ui.tooltip("Drop .obj mesh here"); 
+				if (ui.button("Export Textures")) {
+					var textureSize = getTextureRes();
 
-					pixels = texpaint_nor.getPixels();
-					for (i in 0...textureSize * textureSize) {
-						rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-						rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-						rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
-					}
-					bo = new haxe.io.BytesOutput();
-					var pngwriter = new iron.format.png.Writer(bo);
-					pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-					#if kha_krom
-					if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
-					#end
-
-					// for (i in 0...textureSize * textureSize) {
-					// 	rgb.set(i * 3 + 0, pixels.get(i * 4 + 3));
-					// 	rgb.set(i * 3 + 1, pixels.get(i * 4 + 3));
-					// 	rgb.set(i * 3 + 2, pixels.get(i * 4 + 3));
-					// }
-					// bo = new haxe.io.BytesOutput();
-					// var pngwriter = new iron.format.png.Writer(bo);
-					// pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-					// #if kha_krom
-					// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
-					// #end
-
-					pixels = texpaint_pack.getPixels(); // occ, rough, met
-
-					if (outputType == 0) {
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4));
-							rgb.set(i * 3 + 1, pixels.get(i * 4));
-							rgb.set(i * 3 + 2, pixels.get(i * 4));
-						}
-						bo = new haxe.io.BytesOutput();
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						#if kha_krom
-						if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
-						#end
-
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
-							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
-						}
-						bo = new haxe.io.BytesOutput();
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						#if kha_krom
-						if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
-						#end
-
+					arm.App.showFiles = true;
+					arm.App.foldersOnly = true;
+					// var path = 'C:\\Users\\lubos\\Documents\\';
+					arm.App.filesDone = function(path:String) {
+						var bo = new haxe.io.BytesOutput();
+						var pixels = texpaint.getPixels();
+						var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
+						// BGRA to RGB
 						for (i in 0...textureSize * textureSize) {
 							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
-						}
-						bo = new haxe.io.BytesOutput();
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						#if kha_krom
-						if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
-						#end
-					}
-					else { // UE4
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4));
 							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+							rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+						}
+						var pngwriter = new iron.format.png.Writer(bo);
+						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+						// var jpgdata:iron.format.jpg.Data.Data = {
+						// 	width: textureSize,
+						// 	height: textureSize,
+						// 	quality: 80,
+						// 	pixels: rgb
+						// };
+						// var jpgwriter = new iron.format.jpg.Writer(bo);
+						// jpgwriter.write(jpgdata);
+						#if kha_krom
+						if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
+						#end
+
+						pixels = texpaint_nor.getPixels();
+						for (i in 0...textureSize * textureSize) {
+							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+							rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
 						}
 						bo = new haxe.io.BytesOutput();
 						var pngwriter = new iron.format.png.Writer(bo);
 						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 						#if kha_krom
-						if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
+						if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
 						#end
-					}
-				}
-			}
 
-			if (ui.panel(Id.handle({selected: false}), "Export")) {
+						// for (i in 0...textureSize * textureSize) {
+						// 	rgb.set(i * 3 + 0, pixels.get(i * 4 + 3));
+						// 	rgb.set(i * 3 + 1, pixels.get(i * 4 + 3));
+						// 	rgb.set(i * 3 + 2, pixels.get(i * 4 + 3));
+						// }
+						// bo = new haxe.io.BytesOutput();
+						// var pngwriter = new iron.format.png.Writer(bo);
+						// pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+						// #if kha_krom
+						// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+						// #end
 
-				var hres = Id.handle({position: textureRes});
-				textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
-				if (hres.changed) {
-					iron.App.notifyOnRender(resizeTargetsHandler);
-				}
-				ui.combo(Id.handle(), ["8bit"], "Color", true);
-				ui.combo(Id.handle(), ["png"], "Format", true);
-				outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
-				ui.text("Channels");
-				ui.row([1/2, 1/2]);
-				isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
-				isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
-				ui.row([1/2, 1/2]);
-				isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
-				isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
-				ui.row([1/2, 1/2]);
-				isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
-				isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
-			}
+						pixels = texpaint_pack.getPixels(); // occ, rough, met
 
-			if (ui.panel(Id.handle({selected: false}), "Camera")) {
-				var scene = iron.Scene.active;
-				var cam = scene.cameras[0];
-				ui.row([1/2,1/2]);
-				cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
-				var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-				cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-				if (ui.changed) {
-					cam.buildProjection();
-				}
-				if (ui.button("Reset")) {
-					for (o in scene.raw.objects) {
-						if (o.type == 'camera_object') {
-							cam.transform.local.setF32(o.transform.values);
-							cam.transform.decompose();
-							fovHandle.value = 0.92;
-							cam.buildProjection();
-							currentObject.transform.reset();
-							break;
+						if (outputType == 0) {
+							for (i in 0...textureSize * textureSize) {
+								rgb.set(i * 3 + 0, pixels.get(i * 4));
+								rgb.set(i * 3 + 1, pixels.get(i * 4));
+								rgb.set(i * 3 + 2, pixels.get(i * 4));
+							}
+							bo = new haxe.io.BytesOutput();
+							var pngwriter = new iron.format.png.Writer(bo);
+							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							#if kha_krom
+							if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
+							#end
+
+							for (i in 0...textureSize * textureSize) {
+								rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
+							}
+							bo = new haxe.io.BytesOutput();
+							var pngwriter = new iron.format.png.Writer(bo);
+							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							#if kha_krom
+							if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
+							#end
+
+							for (i in 0...textureSize * textureSize) {
+								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+							}
+							bo = new haxe.io.BytesOutput();
+							var pngwriter = new iron.format.png.Writer(bo);
+							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							#if kha_krom
+							if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
+							#end
+						}
+						else { // UE4
+							for (i in 0...textureSize * textureSize) {
+								rgb.set(i * 3 + 0, pixels.get(i * 4));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+							}
+							bo = new haxe.io.BytesOutput();
+							var pngwriter = new iron.format.png.Writer(bo);
+							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							#if kha_krom
+							if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
+							#end
 						}
 					}
 				}
-			}
 
+				if (ui.panel(Id.handle({selected: false}), "Export")) {
 
-			// if (ui.panel(Id.handle({selected: true}), "TREE")) {
-			// 	ui.row([1/3, 1/3, 1/3]);
-			// 	if (ui.button("Mesh")) {
-			// 	}
-			// 	if (ui.button("Lamp")) {
-			// 	}
-			// 	if (ui.button("Camera")) {
-			// 	}
-			// 	var h = Id.handle();
-			// 	ui.radio(h, 0, "Mesh");
-			// 	ui.radio(h, 1, "Lamp");
-			// 	ui.radio(h, 2, "Camera");
-			// 	ui.radio(h, 3, "World");
-			// }
-			// ui.separator();
-
-			// if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
-			// 	ui.textInput(Id.handle({text: "Mesh"}), "Name", Right);
-			// 	ui.row([1/3, 1/3, 1/3]);
-			// 	var strx = ui.textInput(Id.handle().nest(0, {text: "0"}), "X", Right);
-			// 	var stry = ui.textInput(Id.handle().nest(1, {text: "0"}), "Y", Right);
-			// 	var strz = ui.textInput(Id.handle().nest(2, {text: "0"}), "X", Right);
-			// }
-			// ui.separator();
-
-			if (ui.panel(Id.handle({selected: true}), "Lighting")) {
-				ui.image(envThumbCay);
-				var p = iron.Scene.active.world.getGlobalProbe();
-				ui.row([1/2, 1/2]);
-				var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Map");
-				p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
-				
-				ui.row([1/2, 1/2]);
-				var showType = ui.combo(Id.handle({position: 0}), ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Show");
-				if (iron.Scene.active.lamps.length > 0) {
-					var lamp = iron.Scene.active.lamps[0];
-					lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
-				}
-			}
-
-			if (ui.panel(Id.handle({selected: true}), "Brush")) {
-
-				ui.row([1/2,1/2]);
-				if (ui.button("New")) {
-					brushes.push(new BrushSlot());
-				}
-				if (ui.button("Nodes")) {
-					showBrushNodes();
-				}
-
-				var img = bundled.get("brush.jpg");
-				var img2 = bundled.get("mat_empty.jpg");
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
-				for (i in 0...5) {
-					var im = img;
-					if (brushes.length <= i) im = img2;
-
-					if (im == img && selectedBrush == brushes[i]) {
-						ui.g.color = 0xff205d9c;
-						ui.g.fillRect(ui._x + 1, ui._y - 2, im.width + 3, im.height + 3);
-						ui.g.color = 0xffffffff;
+					var hres = Id.handle({position: textureRes});
+					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
+					if (hres.changed) {
+						iron.App.notifyOnRender(resizeTargetsHandler);
 					}
+					ui.combo(Id.handle(), ["8bit"], "Color", true);
+					ui.combo(Id.handle(), ["png"], "Format", true);
+					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
+					ui.text("Channels");
+					ui.row([1/2, 1/2]);
+					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
+					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
+					ui.row([1/2, 1/2]);
+					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
+					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
+					ui.row([1/2, 1/2]);
+					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
+					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
+				}
 
-					if (ui.image(im) == State.Started && im == img) {
-						if (selectedBrush != brushes[i]) {
-							selectedBrush = brushes[i];
-							UINodes.inst.updateCanvasBrushMap();
-							UINodes.inst.parseBrush();
+				if (ui.panel(Id.handle({selected: false}), "Camera")) {
+					var scene = iron.Scene.active;
+					var cam = scene.cameras[0];
+					ui.row([1/2,1/2]);
+					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
+					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+					if (ui.changed) {
+						cam.buildProjection();
+					}
+					if (ui.button("Reset")) {
+						for (o in scene.raw.objects) {
+							if (o.type == 'camera_object') {
+								cam.transform.local.setF32(o.transform.values);
+								cam.transform.decompose();
+								fovHandle.value = 0.92;
+								cam.buildProjection();
+								currentObject.transform.reset();
+								break;
+							}
 						}
-						if (iron.system.Time.time() - selectTime < 0.3) {
-							showBrushNodes();
-						}
-						selectTime = iron.system.Time.time();
 					}
 				}
 
-				ui.row([1/2, 1/2]);
-				var typeHandle = Id.handle();
-				brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO", "Pick Color ID"], "Type");
-				if (typeHandle.changed) {
-					UINodes.inst.parsePaintMaterial();
+
+				// if (ui.panel(Id.handle({selected: true}), "TREE")) {
+				// 	ui.row([1/3, 1/3, 1/3]);
+				// 	if (ui.button("Mesh")) {
+				// 	}
+				// 	if (ui.button("Lamp")) {
+				// 	}
+				// 	if (ui.button("Camera")) {
+				// 	}
+				// 	var h = Id.handle();
+				// 	ui.radio(h, 0, "Mesh");
+				// 	ui.radio(h, 1, "Lamp");
+				// 	ui.radio(h, 2, "Camera");
+				// 	ui.radio(h, 3, "World");
+				// }
+				// ui.separator();
+
+				// if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
+				// 	ui.textInput(Id.handle({text: "Mesh"}), "Name", Right);
+				// 	ui.row([1/3, 1/3, 1/3]);
+				// 	var strx = ui.textInput(Id.handle().nest(0, {text: "0"}), "X", Right);
+				// 	var stry = ui.textInput(Id.handle().nest(1, {text: "0"}), "Y", Right);
+				// 	var strz = ui.textInput(Id.handle().nest(2, {text: "0"}), "X", Right);
+				// }
+				// ui.separator();
+
+				if (ui.panel(Id.handle({selected: false}), "Lighting")) {
+					ui.image(envThumbCay);
+					var p = iron.Scene.active.world.getGlobalProbe();
+					ui.row([1/2, 1/2]);
+					var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Map");
+					p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
 					
-					UINodes.inst.parseMeshMaterial(); // Pickcolorid
-					if (brushType == 3) colorIdPicked = true;
-				}
-				ui.combo(Id.handle(), ["Add"], "Blending");
-				ui.row([1/2, 1/2]);
-				var paintHandle = Id.handle();
-				brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
-				if (paintHandle.changed) {
-					UINodes.inst.parsePaintMaterial();
-				}
-				brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
-				ui.row([1/2, 1/2]);
-				brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
-				brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-				ui.row([1/2, 1/2]);
-				brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
-				brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-
-				ui.row([1/3,1/3,1/3]);
-
-				var baseHandle = Id.handle({selected: paintBase});
-				paintBase = ui.check(baseHandle, "Base Color");
-				if (baseHandle.changed) {
-					UINodes.inst.updateCanvasMap();
-					UINodes.inst.parsePaintMaterial();
-				}
-
-				var norHandle = Id.handle({selected: paintNor});
-				paintNor = ui.check(norHandle, "Normal Map");
-				if (norHandle.changed) {
-					UINodes.inst.updateCanvasMap();
-					UINodes.inst.parsePaintMaterial();
-				}
-
-				var roughHandle = Id.handle({selected: paintRough});
-				// TODO: Use glColorMaski() to disable specific channel
-				paintRough = ui.check(roughHandle, "ORM");
-				if (roughHandle.changed) {
-					UINodes.inst.updateCanvasMap();
-					UINodes.inst.parsePaintMaterial();
-				}
-
-				ui.row([1/2, 1/2]);
-				paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-				ui.check(Id.handle({selected: true}), "Pen Pressure");
-			}
-
-			if (ui.panel(Id.handle({selected: true}), "Material")) {
-					
-				ui.row([1/2,1/2]);
-				if (ui.button("New")) {
-					materials.push(new MaterialSlot());
-				}
-				if (ui.button("Nodes")) {
-					showMaterialNodes();
-				}
-
-				var img = bundled.get("mat.jpg");
-				var img2 = bundled.get("mat_empty.jpg");
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
-				for (i in 0...5) {
-					var im = img;
-					if (materials.length <= i) im = img2;
-
-					if (im == img && selected == materials[i]) {
-						ui.g.color = 0xff205d9c;
-						ui.g.fillRect(ui._x + 1, ui._y - 2, im.width + 3, im.height + 3);
-						ui.g.color = 0xffffffff;
-					}
-
-					if (ui.image(im) == State.Started && im == img) {
-						if (selected != materials[i]) {
-							selected = materials[i];
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-						if (iron.system.Time.time() - selectTime < 0.3) {
-							showMaterialNodes();
-						}
-						selectTime = iron.system.Time.time();
+					ui.row([1/2, 1/2]);
+					var showType = ui.combo(Id.handle({position: 0}), ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Show");
+					if (iron.Scene.active.lamps.length > 0) {
+						var lamp = iron.Scene.active.lamps[0];
+						lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
 					}
 				}
-			}
 
-			if (ui.panel(Id.handle({selected: true}), "Layers")) {
-				if (ui.button("2D View")) {
+				if (ui.panel(Id.handle({selected: true}), "Brush")) {
 
+					ui.row([1/2,1/2]);
+					if (ui.button("New")) {
+						brushes.push(new BrushSlot());
+					}
+					if (ui.button("Nodes")) {
+						showBrushNodes();
+					}
+
+					var img = bundled.get("brush.jpg");
+					var img2 = bundled.get("mat_empty.jpg");
+					ui.row([1/5,1/5,1/5,1/5,1/5]);
+					for (i in 0...5) {
+						var im = img;
+						if (brushes.length <= i) im = img2;
+
+						if (im == img && selectedBrush == brushes[i]) {
+							ui.g.color = 0xff205d9c;
+							ui.g.fillRect(ui._x + 1, ui._y - 2, im.width + 3, im.height + 3);
+							ui.g.color = 0xffffffff;
+						}
+
+						if (ui.image(im) == State.Started && im == img) {
+							if (selectedBrush != brushes[i]) {
+								selectedBrush = brushes[i];
+								UINodes.inst.updateCanvasBrushMap();
+								UINodes.inst.parseBrush();
+							}
+							if (iron.system.Time.time() - selectTime < 0.3) {
+								showBrushNodes();
+							}
+							selectTime = iron.system.Time.time();
+						}
+					}
+
+					ui.row([1/2, 1/2]);
+					var typeHandle = Id.handle();
+					brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO", "Pick Color ID", "Line"], "Type");
+					if (typeHandle.changed) {
+						UINodes.inst.parsePaintMaterial();
+						
+						UINodes.inst.parseMeshMaterial(); // Pickcolorid
+						if (brushType == 3) colorIdPicked = true;
+					}
+					ui.combo(Id.handle(), ["Add"], "Blending");
+					ui.row([1/2, 1/2]);
+					var paintHandle = Id.handle();
+					brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
+					if (paintHandle.changed) {
+						UINodes.inst.parsePaintMaterial();
+					}
+					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
+					ui.row([1/2, 1/2]);
+					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					ui.row([1/2, 1/2]);
+					brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
+					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+
+					ui.row([1/3,1/3,1/3]);
+
+					var baseHandle = Id.handle({selected: paintBase});
+					paintBase = ui.check(baseHandle, "Base Color");
+					if (baseHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					var norHandle = Id.handle({selected: paintNor});
+					paintNor = ui.check(norHandle, "Normal Map");
+					if (norHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					var roughHandle = Id.handle({selected: paintRough});
+					// TODO: Use glColorMaski() to disable specific channel
+					paintRough = ui.check(roughHandle, "ORM");
+					if (roughHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					ui.row([1/2, 1/2]);
+					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+					ui.check(Id.handle({selected: true}), "Pen Pressure");
 				}
-				// Picked color
-				ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
-				// Set color map
-				var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
-				if (UILibrary.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UILibrary.inst.assets[cid]));
-			}
 
-			// Draw plugins
-			for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
+				if (ui.panel(Id.handle({selected: true}), "Material")) {
+						
+					ui.row([1/2,1/2]);
+					if (ui.button("New")) {
+						materials.push(new MaterialSlot());
+					}
+					if (ui.button("Nodes")) {
+						showMaterialNodes();
+					}
+
+					var img = bundled.get("mat.jpg");
+					var img2 = bundled.get("mat_empty.jpg");
+					ui.row([1/5,1/5,1/5,1/5,1/5]);
+					for (i in 0...5) {
+						var im = img;
+						if (materials.length <= i) im = img2;
+
+						if (im == img && selected == materials[i]) {
+							ui.g.color = 0xff205d9c;
+							ui.g.fillRect(ui._x + 1, ui._y - 2, im.width + 3, im.height + 3);
+							ui.g.color = 0xffffffff;
+						}
+
+						if (ui.image(im) == State.Started && im == img) {
+							if (selected != materials[i]) {
+								selected = materials[i];
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parsePaintMaterial();
+							}
+							if (iron.system.Time.time() - selectTime < 0.3) {
+								showMaterialNodes();
+							}
+							selectTime = iron.system.Time.time();
+						}
+					}
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Layers")) {
+					if (ui.button("2D View")) {
+
+					}
+					// Picked color
+					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
+					// Set color map
+					var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
+					if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
+				}
+
+				// Draw plugins
+				for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
+			}
+			if (ui.tab(htab, "Assets")) {
+				if (ui.button("Import")) {
+					arm.App.showFiles = true;
+					arm.App.foldersOnly = false;
+					arm.App.filesDone = function(path:String) {
+						UITrait.inst.importAsset(path);
+					}
+				}
+
+				if (assets.length > 0) {
+					var i = assets.length - 1;
+					while (i >= 0) {
+						var asset = assets[i];
+						if (ui.image(UITrait.inst.getImage(asset)) == State.Started) {
+							arm.App.dragAsset = asset;
+						}
+						ui.row([1/8, 7/8]);
+						var b = ui.button("X");
+						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
+						assetNames[i] = asset.name;
+						if (b) {
+							UITrait.inst.getImage(asset).unload();
+							assets.splice(i, 1);
+							assetNames.splice(i, 1);
+						}
+						i--;
+					}
+				}
+				else {
+					ui.text("(Drag & drop assets)");
+				}
+			}
+			if (ui.tab(htab, "Prefs")) {
+				ui.text("v0.3");
+				if (ui.panel(Id.handle({selected: true}), "Console")) {
+					ui.text("Ready");
+					ui.text(lastTrace);
+				}
+			}
 		}
 		ui.end();
 		g.begin(false);
@@ -937,4 +1017,25 @@ class UITrait extends iron.Trait {
 			dirty = true;
 		});
 	}
+}
+
+typedef TAPConfig = {
+	@:optional var debug_console:Null<Bool>;
+	@:optional var window_mode:Null<Int>; // window, borderless, fullscreen
+	@:optional var window_w:Null<Int>;
+	@:optional var window_h:Null<Int>;
+	@:optional var window_resizable:Null<Bool>;
+	@:optional var window_maximizable:Null<Bool>;
+	@:optional var window_minimizable:Null<Bool>;
+	@:optional var window_vsync:Null<Bool>;
+	@:optional var window_msaa:Null<Int>;
+	@:optional var window_scale:Null<Float>;
+	@:optional var rp_supersample:Null<Float>;
+	@:optional var rp_shadowmap:Null<Int>;
+	@:optional var rp_voxelgi:Null<Int>; // off, ao, ao_revox, gi, gi_revox
+	@:optional var rp_ssgi:Null<Bool>;
+	@:optional var rp_ssr:Null<Bool>;
+	@:optional var rp_bloom:Null<Bool>;
+	@:optional var rp_motionblur:Null<Bool>;
+	@:optional var plugins:Array<String>;
 }
