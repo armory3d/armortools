@@ -329,14 +329,36 @@ class UITrait extends iron.Trait {
 		updateUI();
 
 		var kb = iron.system.Input.getKeyboard();
+		var shift = kb.down("shift");
 		if (kb.started("tab")) {
 			UINodes.inst.show = !UINodes.inst.show;
 			arm.App.resize();
 		}
+		else if (kb.started("1")) shift ? selectBrush(0) : selectMaterial(0);
+		else if (kb.started("2")) shift ? selectBrush(1) : selectMaterial(1);
+		else if (kb.started("3")) shift ? selectBrush(2) : selectMaterial(2);
+		else if (kb.started("4")) shift ? selectBrush(3) : selectMaterial(3);
+		else if (kb.started("5")) shift ? selectBrush(4) : selectMaterial(4);
 
 		pickColorId = kb.down("alt");
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
+	}
+
+	function selectMaterial(i:Int) {
+		if (materials.length <= i) return;
+		selected = materials[i];
+		UINodes.inst.updateCanvasMap();
+		UINodes.inst.parsePaintMaterial();
+		hwnd.redraws = 2;
+	}
+
+	function selectBrush(i:Int) {
+		if (brushes.length <= i) return;
+		selectedBrush = brushes[i];
+		UINodes.inst.updateCanvasBrushMap();
+		UINodes.inst.parseBrush();
+		hwnd.redraws = 2;
 	}
 
 	function updateUI() {
