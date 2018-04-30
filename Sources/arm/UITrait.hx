@@ -228,9 +228,13 @@ class UITrait extends iron.Trait {
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
 		iron.object.Uniforms.externalTextureLinks.push(linkTex);
 
-		var scale = armory.data.Config.raw.window_scale;
-		ui = new Zui( { font: arm.App.font, scaleFactor: scale } );
-		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
+		iron.data.Data.getBlob("theme.arm", function(b:kha.Blob) {
+			var theme:zui.Themes.TTheme = haxe.Json.parse(b.toString());
+			var scale = armory.data.Config.raw.window_scale;
+			ui = new Zui( { theme: theme, font: arm.App.font, scaleFactor: scale } );
+
+			loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
+		});
 	}
 
 	var haxeTrace:Dynamic->haxe.PosInfos->Void;
