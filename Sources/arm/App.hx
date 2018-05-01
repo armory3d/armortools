@@ -55,6 +55,7 @@ class App extends iron.Trait {
 						notifyOnRender2D(render);
 						object.addTrait(new UITrait());
 						object.addTrait(new UINodes());
+						object.addTrait(new UIView2D());
 						object.addTrait(new FlyCamera());
 						object.addTrait(new OrbitCamera());
 					});
@@ -69,7 +70,7 @@ class App extends iron.Trait {
 		if (UINodes.inst == null || UITrait.inst == null) {
 			res = kha.System.windowWidth() - UITrait.defaultWindowW;
 		}
-		else if (UINodes.inst.show) {
+		else if (UINodes.inst.show || UIView2D.inst.show) {
 			res = Std.int((kha.System.windowWidth() - UITrait.inst.windowW) / 2);
 		}
 		else {

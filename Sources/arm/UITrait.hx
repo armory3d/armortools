@@ -334,6 +334,7 @@ class UITrait extends iron.Trait {
 		var kb = iron.system.Input.getKeyboard();
 		var shift = kb.down("shift");
 		if (kb.started("tab")) {
+			UIView2D.inst.show = false;
 			UINodes.inst.show = !UINodes.inst.show;
 			arm.App.resize();
 		}
@@ -474,14 +475,22 @@ class UITrait extends iron.Trait {
 	}
 
 	function showMaterialNodes() {
+		UIView2D.inst.show = false;
 		if (UINodes.inst.show && !UINodes.inst.isBrush) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.isBrush = false; }
 		arm.App.resize();
 	}
 
 	function showBrushNodes() {
+		UIView2D.inst.show = false;
 		if (UINodes.inst.show && UINodes.inst.isBrush) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.isBrush = true; }
+		arm.App.resize();
+	}
+
+	function show2DView() {
+		UINodes.inst.show = false;
+		UIView2D.inst.show = !UIView2D.inst.show;
 		arm.App.resize();
 	}
 
@@ -890,7 +899,7 @@ class UITrait extends iron.Trait {
 
 				if (ui.panel(Id.handle({selected: true}), "Layers")) {
 					if (ui.button("2D View")) {
-
+						show2DView();
 					}
 					// Picked color
 					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
