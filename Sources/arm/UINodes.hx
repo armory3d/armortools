@@ -48,24 +48,19 @@ class UINodes extends iron.Trait {
 
 				canvasBlob = b1.toString();
 				canvasBrushBlob = b2.toString();
+				canvas = haxe.Json.parse(canvasBlob);
+				canvasBrush = haxe.Json.parse(canvasBrushBlob);
+				parseBrush();
 
-				kha.Assets.loadImageFromPath('color_wheel.png', false, function(image:kha.Image) {
-
-					canvas = haxe.Json.parse(canvasBlob);
-					canvasBrush = haxe.Json.parse(canvasBrushBlob);
-					parseBrush();
-
-					var t = Reflect.copy(zui.Themes.dark);
-					t.FILL_WINDOW_BG = true;
-					t.ELEMENT_H = 18;
-					t.BUTTON_H = 16;
-					var scale = armory.data.Config.raw.window_scale;
-					ui = new Zui({font: arm.App.font, theme: t, color_wheel: image, scaleFactor: scale});
-					ui.scrollEnabled = false;
-					
-					notifyOnRender2D(render2D);
-					notifyOnUpdate(update);
-				});
+				var t = Reflect.copy(arm.App.theme);
+				t.ELEMENT_H = 18;
+				t.BUTTON_H = 16;
+				var scale = armory.data.Config.raw.window_scale;
+				ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
+				ui.scrollEnabled = false;
+				
+				notifyOnRender2D(render2D);
+				notifyOnUpdate(update);
 			});
 		});
 	}

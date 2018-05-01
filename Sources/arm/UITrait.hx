@@ -40,6 +40,9 @@ class UITrait extends iron.Trait {
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
 
+	public static var drawWorld = true;
+	public static var worldColor = 0xffffffff;
+
 	public var isScrolling = false;
 
 	public var colorIdPicked = false;
@@ -228,13 +231,9 @@ class UITrait extends iron.Trait {
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
 		iron.object.Uniforms.externalTextureLinks.push(linkTex);
 
-		iron.data.Data.getBlob("theme.arm", function(b:kha.Blob) {
-			var theme:zui.Themes.TTheme = haxe.Json.parse(b.toString());
-			var scale = armory.data.Config.raw.window_scale;
-			ui = new Zui( { theme: theme, font: arm.App.font, scaleFactor: scale } );
-
-			loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
-		});
+		var scale = armory.data.Config.raw.window_scale;
+		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
+		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush.jpg', 'cay_thumb.jpg'], done);
 	}
 
 	var haxeTrace:Dynamic->haxe.PosInfos->Void;
@@ -801,7 +800,7 @@ class UITrait extends iron.Trait {
 
 					ui.row([1/2, 1/2]);
 					var typeHandle = Id.handle();
-					brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO", "Pick Color ID", "Line"], "Type");
+					brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO", "Pick Color ID"], "Type");
 					if (typeHandle.changed) {
 						UINodes.inst.parsePaintMaterial();
 						
@@ -936,11 +935,31 @@ class UITrait extends iron.Trait {
 				}
 			}
 			if (ui.tab(htab, "Prefs")) {
-				ui.text("v0.3");
-				if (ui.panel(Id.handle({selected: true}), "Console")) {
-					ui.text("Ready");
-					ui.text(lastTrace);
+				var hscale = Id.handle({value: armory.data.Config.raw.window_scale});
+				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+				if (ui.changed) {
+					armory.data.Config.raw.window_scale = hscale.value;
+					ui.setScale(hscale.value);
 				}
+				drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
+				if (ui.changed) {
+					dirty = true;
+				}
+				if (!drawWorld) {
+					var hwheel = Id.handle();
+					worldColor = Ext.colorWheel(ui, hwheel);
+				}
+				if (ui.button("Save")) {
+					#if kha_krom
+					Krom.fileSaveBytes("config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
+					#end
+				}
+				ui.text("v0.3");
+
+				// if (ui.panel(Id.handle({selected: true}), "Console")) {
+					// ui.text("Ready");
+					// ui.text(lastTrace);
+				// }
 			}
 		}
 		ui.end();

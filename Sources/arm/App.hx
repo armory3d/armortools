@@ -16,6 +16,8 @@ class App extends iron.Trait {
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
 	public static var font:kha.Font = null;
+	public static var theme:zui.Themes.TTheme;
+	public static var color_wheel:kha.Image;
 	static var uimodal:Zui;
 
 	public static function getEnumTexts():Array<String> {
@@ -37,21 +39,26 @@ class App extends iron.Trait {
 			dropY = mouse.y;
 		});
 
-		iron.data.Data.getFont('droid_sans.ttf', function(f:kha.Font) {
-			font = f;
-			var scale = armory.data.Config.raw.window_scale;
-			zui.Themes.dark.FILL_WINDOW_BG = true;
-			zui.Nodes.getEnumTexts = getEnumTexts;
-			zui.Nodes.mapEnum = mapEnum;
-			uimodal = new Zui( { font: f, scaleFactor: scale } );
-			
-			notifyOnInit(function() {
-				notifyOnUpdate(update);
-				notifyOnRender2D(render);
-				object.addTrait(new UITrait());
-				object.addTrait(new UINodes());
-				object.addTrait(new FlyCamera());
-				object.addTrait(new OrbitCamera());
+		iron.data.Data.getFont("droid_sans.ttf", function(f:kha.Font) {
+			iron.data.Data.getBlob("theme.arm", function(b:kha.Blob) {
+				iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
+					theme = haxe.Json.parse(b.toString());
+					font = f;
+					color_wheel = image;
+					var scale = armory.data.Config.raw.window_scale;
+					zui.Nodes.getEnumTexts = getEnumTexts;
+					zui.Nodes.mapEnum = mapEnum;
+					uimodal = new Zui( { font: f, scaleFactor: scale } );
+					
+					notifyOnInit(function() {
+						notifyOnUpdate(update);
+						notifyOnRender2D(render);
+						object.addTrait(new UITrait());
+						object.addTrait(new UINodes());
+						object.addTrait(new FlyCamera());
+						object.addTrait(new OrbitCamera());
+					});
+				});
 			});
 		});
 	}

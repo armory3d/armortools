@@ -13,7 +13,7 @@
 	"LINE_STRENGTH": 1,
 	"FLASH_SPEED": 0.5,
 	"TOOLTIP_DELAY": 1.0,
-	"FILL_WINDOW_BG": false,
+	"FILL_WINDOW_BG": true,
 	"FILL_BUTTON_BG": true,
 	"FILL_ACCENT_BG": false,
 	"WINDOW_BG_COL": "0xff202020",

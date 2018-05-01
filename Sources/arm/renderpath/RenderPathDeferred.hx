@@ -511,7 +511,12 @@ class RenderPathDeferred {
 		}
 		#else
 		{
-			path.clearTarget(null, 1.0);
+			if (!UITrait.drawWorld) { //
+				path.clearTarget(UITrait.worldColor, 1.0);//
+			} //
+			else { //
+				path.clearTarget(null, 1.0);
+			} //
 		}
 		#end
 
@@ -719,10 +724,12 @@ class RenderPathDeferred {
 			#end
 		}
 		path.currentLampIndex = 0;
-
+		
 		#if (rp_background == "World")
 		{
-			path.drawSkydome("shader_datas/world_pass/world_pass");
+			if (UITrait.drawWorld) { //
+				path.drawSkydome("shader_datas/world_pass/world_pass");
+			} //
 		}
 		#end
 
