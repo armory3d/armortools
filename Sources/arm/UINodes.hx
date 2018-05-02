@@ -66,17 +66,17 @@ class UINodes extends iron.Trait {
 	}
 
 	public function updateCanvasMap() {
-		if (UITrait.inst.selected != null) {
+		if (UITrait.inst.selectedMaterial != null) {
 			if (canvasMap == null) canvasMap = new Map();
-			var c = canvasMap.get(UITrait.inst.selected);
+			var c = canvasMap.get(UITrait.inst.selectedMaterial);
 			if (c == null) {
 				c = haxe.Json.parse(canvasBlob);
-				canvasMap.set(UITrait.inst.selected, c);
+				canvasMap.set(UITrait.inst.selectedMaterial, c);
 				canvas = c;
 			}
 			else canvas = c;
 
-			if (!isBrush) nodes = UITrait.inst.selected.nodes;
+			if (!isBrush) nodes = UITrait.inst.selectedMaterial.nodes;
 		}
 	}
 
@@ -328,8 +328,7 @@ class UINodes extends iron.Trait {
 		vert.write('ndc.xyz = ndc.xyz / ndc.w;');
 		vert.write('sp.xyz = ndc.xyz * 0.5 + 0.5;');
 		vert.write('sp.y = 1.0 - sp.y;');
-		vert.write('sp.z -= 0.0001;'); // Bias
-		vert.write('sp.z -= paintDepthBias;'); // paintVisible
+		vert.write('sp.z -= paintDepthBias;'); // small bias or !paintVisible
 
 		vert.add_out('vec3 mposition');
 		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
@@ -388,7 +387,7 @@ class UINodes extends iron.Trait {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
-		if (UITrait.inst.brushType == 0) { // Draw
+		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1) { // Draw / Erase
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) { discard; return; }');
 			
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');

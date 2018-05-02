@@ -31,6 +31,9 @@ class BrushSlot {
 
 class LayerSlot {
 	public function new() {}
+	public function unload() {
+
+	}
 }
 
 @:access(zui.Zui)
@@ -44,6 +47,7 @@ class UITrait extends iron.Trait {
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
 
+	public static var penPressure = true;
 	public static var drawWorld = true;
 	public static var worldColor = 0xffffffff;
 
@@ -104,7 +108,10 @@ class UITrait extends iron.Trait {
 	public function paintDirty():Bool {
 		// Paint bounds
 		if (paintVec.x > 1) return false;
-		// if (UINodes.inst.show && paintVec.y > UINodes.inst.wy) return false;
+
+		if (brushType == 4) {
+			colorIdPicked = true;
+		}
 
 		// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
@@ -145,7 +152,7 @@ class UITrait extends iron.Trait {
 		if (link == '_brushRadius') {
 			var r = (brushRadius * brushNodesRadius) / 15.0;
 			var p = iron.system.Input.getPen().pressure;
-			if (p != 0.0) r *= p;
+			if (p != 0.0 && penPressure) r *= p;
 			return r;
 		}
 		else if (link == '_brushOpacity') {
@@ -156,12 +163,10 @@ class UITrait extends iron.Trait {
 		}
 		else if (link == '_brushStrength') {
 			var f = brushStrength * brushNodesStrength;
-			// var p = iron.system.Input.getPen().pressure;
-			// if (p != 0.0) f *= p;
 			return f * f * 100;
 		}
 		else if (link == '_paintDepthBias') {
-			return paintVisible ? 0.0 : 1.0;
+			return paintVisible ? 0.0001 : 1.0;
 		}
 
 		return null;
@@ -172,7 +177,7 @@ class UITrait extends iron.Trait {
 	function linkVec2(link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
-			var seps = brushBias * 0.0001;
+			var seps = brushBias * 0.0004;
 			sub = (sub + 1) % 9;
 			if (sub == 0) vec2.set(0.0 + seps, 0.0, 0.0);
 			else if (sub == 1) vec2.set(0.0 - seps, 0.0, 0.0);
@@ -214,7 +219,7 @@ class UITrait extends iron.Trait {
 
 	function linkTex(link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UITrait.inst.assets.length == 0) return null;
+			if (UITrait.inst.assets.length == 0) return bundled.get("mat_empty.jpg");
 			else return UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
 		}
 		return null;
@@ -228,7 +233,7 @@ class UITrait extends iron.Trait {
 		haxeTrace = haxe.Log.trace;
 		haxe.Log.trace = consoleTrace;
 
-		windowW = Std.int(windowW * armory.data.Config.raw.window_scale);
+		windowW = Std.int(defaultWindowW * armory.data.Config.raw.window_scale);
 
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
@@ -237,7 +242,7 @@ class UITrait extends iron.Trait {
 
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush_draw.jpg', 'brush_erase.jpg', 'brush_fill.jpg', 'brush_bake.jpg', 'brush_colorid.jpg', 'cay_thumb.jpg'], done);
+		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'cay_thumb.jpg'], done);
 	}
 
 	var haxeTrace:Dynamic->haxe.PosInfos->Void;
@@ -329,7 +334,7 @@ class UITrait extends iron.Trait {
 		});
 	}
 
-	public static var pickColorId = false;
+	// public static var pickColorId = false;
 
 	function update() {
 		isScrolling = ui.isScrolling;
@@ -342,20 +347,20 @@ class UITrait extends iron.Trait {
 			UINodes.inst.show = !UINodes.inst.show;
 			arm.App.resize();
 		}
-		else if (kb.started("1")) shift ? selectBrush(0) : selectMaterial(0);
-		else if (kb.started("2")) shift ? selectBrush(1) : selectMaterial(1);
-		else if (kb.started("3")) shift ? selectBrush(2) : selectMaterial(2);
-		else if (kb.started("4")) shift ? selectBrush(3) : selectMaterial(3);
-		else if (kb.started("5")) shift ? selectBrush(4) : selectMaterial(4);
+		else if (kb.started("1")) shift ? setBrushType(0) : selectMaterial(0);
+		else if (kb.started("2")) shift ? setBrushType(1) : selectMaterial(1);
+		else if (kb.started("3")) shift ? setBrushType(2) : selectMaterial(2);
+		else if (kb.started("4")) shift ? setBrushType(3) : selectMaterial(3);
+		else if (kb.started("5")) shift ? setBrushType(4) : selectMaterial(4);
 
-		pickColorId = kb.down("alt");
+		// pickColorId = kb.down("alt");
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
 
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
-		selected = materials[i];
+		selectedMaterial = materials[i];
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
 		hwnd.redraws = 2;
@@ -399,7 +404,7 @@ class UITrait extends iron.Trait {
 		g.end();
 
 		texpaint.g4.begin();
-		texpaint.g4.clear(kha.Color.fromFloats(0.2, 0.2, 0.2, 0.0)); // Base
+		texpaint.g4.clear(kha.Color.fromFloats(0.3, 0.3, 0.3, 0.0)); // Base
 		texpaint.g4.end();
 
 		texpaint_nor.g4.begin();
@@ -407,7 +412,7 @@ class UITrait extends iron.Trait {
 		texpaint_nor.g4.end();
 
 		texpaint_pack.g4.begin();
-		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 1.0, 0.0, 0.0)); // Occ, rough, met
+		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.3, 0.0, 0.0)); // Occ, rough, met
 		texpaint_pack.g4.end();
 
 		g.begin();
@@ -498,6 +503,13 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
+	function setBrushType(i:Int) {
+		brushType = i;
+		UINodes.inst.parsePaintMaterial();
+		UINodes.inst.parseMeshMaterial();
+		hwnd.redraws = 2;
+	}
+
 	var outputType = 0;
 	var isBase = true;
 	var isOpac = true;
@@ -507,10 +519,10 @@ class UITrait extends iron.Trait {
 	var isNor = true;
 	var hwnd = Id.handle();
 	var materials:Array<MaterialSlot> = null;
-	public var selected:MaterialSlot;
+	public var selectedMaterial:MaterialSlot;
 	var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
-	var layers:Array<LayerSlot> = null;
+	public var layers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
 	var selectTime = 0.0;
 	function renderUI(g:kha.graphics2.Graphics) {
@@ -519,7 +531,7 @@ class UITrait extends iron.Trait {
 		if (materials == null) {
 			materials = [];
 			materials.push(new MaterialSlot());
-			selected = materials[0];
+			selectedMaterial = materials[0];
 		}
 
 		if (brushes == null) {
@@ -571,84 +583,90 @@ class UITrait extends iron.Trait {
 					ui.text(message);
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Brush")) {
+				ui._y += 6;
 
-					var img1 = bundled.get("brush_draw.jpg");
-					var img2 = bundled.get("brush_erase.jpg");
-					var img3 = bundled.get("brush_fill.jpg");
-					var img4 = bundled.get("brush_bake.jpg");
-					var img5 = bundled.get("brush_colorid.jpg");
-					ui.row([1/5,1/5,1/5,1/5,1/5]);
-					if (brushType == 0) { ui.g.color = 0xff205d9c; ui.g.fillRect(ui._x + 1, ui._y - 2, img1.width + 3, img1.height + 3); ui.g.color = 0xffffffff; }
-					if (ui.image(img1) == State.Started) { brushType = 0; UINodes.inst.parsePaintMaterial(); UINodes.inst.parseMeshMaterial(); }
-					if (brushType == 1) { ui.g.color = 0xff205d9c; ui.g.fillRect(ui._x + 1, ui._y - 2, img1.width + 3, img1.height + 3); ui.g.color = 0xffffffff; }
-					if (ui.image(img2) == State.Started) { brushType = 1; UINodes.inst.parsePaintMaterial(); UINodes.inst.parseMeshMaterial(); }
-					if (brushType == 2) { ui.g.color = 0xff205d9c; ui.g.fillRect(ui._x + 1, ui._y - 2, img1.width + 3, img1.height + 3); ui.g.color = 0xffffffff; }
-					if (ui.image(img3) == State.Started) { brushType = 2; UINodes.inst.parsePaintMaterial(); UINodes.inst.parseMeshMaterial(); }
-					if (brushType == 3) { ui.g.color = 0xff205d9c; ui.g.fillRect(ui._x + 1, ui._y - 2, img1.width + 3, img1.height + 3); ui.g.color = 0xffffffff; }
-					if (ui.image(img4) == State.Started) { brushType = 3; UINodes.inst.parsePaintMaterial(); UINodes.inst.parseMeshMaterial(); }
-					if (brushType == 4) { ui.g.color = 0xff205d9c; ui.g.fillRect(ui._x + 1, ui._y - 2, img1.width + 3, img1.height + 3); ui.g.color = 0xffffffff; }
-					if (ui.image(img5) == State.Started) { colorIdPicked = true; brushType = 4; UINodes.inst.parsePaintMaterial(); UINodes.inst.parseMeshMaterial(); }
+				var img1 = bundled.get("brush_draw.png");
+				var img2 = bundled.get("brush_erase.png");
+				var img3 = bundled.get("brush_fill.png");
+				var img4 = bundled.get("brush_bake.png");
+				var img5 = bundled.get("brush_colorid.png");
+				ui.row([1/5,1/5,1/5,1/5,1/5]);
+				var tool = "";
+				if (brushType == 0) { tool = "Draw"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
+				if (ui.image(img1) == State.Started) setBrushType(0);
+				if (brushType == 1) { tool = "Erase"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
+				if (ui.image(img2) == State.Started) setBrushType(1);
+				if (brushType == 2) { tool = "Fill"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
+				if (ui.image(img3) == State.Started) setBrushType(2);
+				if (brushType == 3) { tool = "Bake"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
+				if (ui.image(img4) == State.Started) setBrushType(3);
+				if (brushType == 4) { tool = "Color ID"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
+				if (ui.image(img5) == State.Started) setBrushType(4);
 
-					// UINodes.inst.updateCanvasBrushMap();
-					// UINodes.inst.parseBrush();
+				ui._y += 6;
 
-					// ui.row([1/2,1/2]);
-					// if (ui.button("New")) {
-						// brushes.push(new BrushSlot());
-					// }
-					
-
-					ui.row([1/2, 1/2]);
-					// var typeHandle = Id.handle();
-					// brushType = ui.combo(typeHandle, ["Draw", "Fill", "Bake AO", "Pick Color ID"], "Type");
-					// if (typeHandle.changed) {
-						// UINodes.inst.parsePaintMaterial();
-						// UINodes.inst.parseMeshMaterial(); // Pickcolorid
-						// if (brushType == 3) colorIdPicked = true;
-					// }
-
-					ui.combo(Id.handle(), ["Add"], "Blending");
-					if (ui.button("Nodes")) showBrushNodes();
-					ui.row([1/2, 1/2]);
-					var paintHandle = Id.handle();
-					brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
-					if (paintHandle.changed) {
-						UINodes.inst.parsePaintMaterial();
+				if (ui.panel(Id.handle({selected: true}), tool)) {
+					// Color ID
+					if (brushType == 4) {
+						// Picked color
+						ui.row([1/2, 1/2]);
+						ui.text("Picked Color");
+						if (ui.button("Clear")) colorIdPicked = false;
+						if (colorIdPicked) {
+							ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
+						}
+						// Set color map
+						ui.text("Color ID Map");
+						var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
+						if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
 					}
-					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 4.0, true);
-					ui.row([1/2, 1/2]);
-					brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
-					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-					ui.row([1/2, 1/2]);
-					brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
-					brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-
-					ui.row([1/3,1/3,1/3]);
-
-					var baseHandle = Id.handle({selected: paintBase});
-					paintBase = ui.check(baseHandle, "Base Color");
-					if (baseHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
+					else if (brushType == 3) { // Bake AO
+						ui.radio(Id.handle(), 0, "Ambient Occlusion");
 					}
+					else {
+						ui.row([1/2, 1/2]);
+						ui.combo(Id.handle(), ["Add"], "Blending");
+						if (ui.button("Nodes")) showBrushNodes();
+						ui.row([1/2, 1/2]);
+						var paintHandle = Id.handle();
+						brushPaint = ui.combo(paintHandle, ["UV", "Project"], "Paint");
+						if (paintHandle.changed) {
+							UINodes.inst.parsePaintMaterial();
+						}
+						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
+						ui.row([1/2, 1/2]);
+						brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+						brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+						ui.row([1/2, 1/2]);
+						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
+						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 
-					var norHandle = Id.handle({selected: paintNor});
-					paintNor = ui.check(norHandle, "Normal Map");
-					if (norHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
+						ui.row([1/3,1/3,1/3]);
+
+						var baseHandle = Id.handle({selected: paintBase});
+						paintBase = ui.check(baseHandle, "Base Color");
+						if (baseHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						var norHandle = Id.handle({selected: paintNor});
+						paintNor = ui.check(norHandle, "Normal Map");
+						if (norHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						var roughHandle = Id.handle({selected: paintRough});
+						// TODO: Use glColorMaski() to disable specific channel
+						paintRough = ui.check(roughHandle, "ORM");
+						if (roughHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 					}
-
-					var roughHandle = Id.handle({selected: paintRough});
-					// TODO: Use glColorMaski() to disable specific channel
-					paintRough = ui.check(roughHandle, "ORM");
-					if (roughHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-					}
-
-					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Material")) {
@@ -660,15 +678,13 @@ class UITrait extends iron.Trait {
 						var im = img;
 						if (materials.length <= i) im = img2;
 
-						if (im == img && selected == materials[i]) {
-							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(ui._x + 1, ui._y - 2, im.width + 3, im.height + 3);
-							ui.g.color = 0xffffffff;
+						if (im == img && selectedMaterial == materials[i]) {
+							ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
 						}
 
 						if (ui.image(im) == State.Started && im == img) {
-							if (selected != materials[i]) {
-								selected = materials[i];
+							if (selectedMaterial != materials[i]) {
+								selectedMaterial = materials[i];
 								UINodes.inst.updateCanvasMap();
 								UINodes.inst.parsePaintMaterial();
 							}
@@ -681,7 +697,8 @@ class UITrait extends iron.Trait {
 
 					ui.row([1/2,1/2]);
 					if (ui.button("New")) {
-						materials.push(new MaterialSlot());
+						selectedMaterial = new MaterialSlot();
+						materials.push(selectedMaterial);
 					}
 					if (ui.button("Nodes")) {
 						showMaterialNodes();
@@ -692,9 +709,7 @@ class UITrait extends iron.Trait {
 
 					function drawList(h:zui.Zui.Handle, l:LayerSlot, i:Int) {
 						if (selectedLayer == l) {
-							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
-							ui.g.color = 0xffffffff;
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
 						}
 						ui.text("Layer " + (i + 1));
 						if (ui.isReleased) {
@@ -707,9 +722,19 @@ class UITrait extends iron.Trait {
 						drawList(Id.handle(), l, j);
 					}
 
-					ui.row([1/2, 1/2]);
+					ui.row([1/3, 1/3, 1/3]);
 					if (ui.button("New")) {
-						if (layers.length < 3) layers.push(new LayerSlot());
+						if (layers.length < 2) {
+							selectedLayer = new LayerSlot();
+							layers.push(selectedLayer);
+						}
+					}
+					if (ui.button("Delete")) {
+						if (layers.length > 1) {
+							selectedLayer.unload();
+							layers.remove(selectedLayer);
+							selectedLayer = layers[0];
+						}
 					}
 					if (ui.button("Merge")) {
 					}
@@ -753,14 +778,6 @@ class UITrait extends iron.Trait {
 						var lamp = iron.Scene.active.lamps[0];
 						lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
 					}
-				}
-
-				if (ui.panel(Id.handle({selected: false}), "Color ID")) {
-					// Picked color
-					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
-					// Set color map
-					var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
-					if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
 				}
 
 				// Draw plugins
@@ -942,11 +959,13 @@ class UITrait extends iron.Trait {
 			if (ui.tab(htab, "Preferences")) {
 				var hscale = Id.handle({value: armory.data.Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-				if (ui.changed) {
+				if (ui.changed && !iron.system.Input.getMouse().down()) {
 					armory.data.Config.raw.window_scale = hscale.value;
 					ui.setScale(hscale.value);
+					windowW = Std.int(defaultWindowW * armory.data.Config.raw.window_scale);
+					arm.App.resize();
 				}
-				ui.check(Id.handle({selected: true}), "Pen Pressure");
+				penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
 				drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
 				if (ui.changed) {
 					dirty = true;
@@ -955,6 +974,7 @@ class UITrait extends iron.Trait {
 					var hwheel = Id.handle();
 					worldColor = Ext.colorWheel(ui, hwheel);
 				}
+				armory.data.Config.raw.window_vsync = ui.check(Id.handle({selected: armory.data.Config.raw.window_vsync}), "VSync");
 				if (ui.button("Save")) {
 					#if kha_krom
 					Krom.fileSaveBytes("config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
