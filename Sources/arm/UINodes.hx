@@ -290,17 +290,19 @@ class UINodes extends iron.Trait {
 	}
 
 	function make_paint(data:ShaderData, matcon:TMaterialContext):armory.system.ShaderContext {
+		var layered = UITrait.inst.layers.length > 1 && UITrait.inst.selectedLayer == UITrait.inst.layers[1];
+		var eraser = UITrait.inst.brushType == 1;
 		var context_id = 'paint';
 		var con_paint:armory.system.ShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
 			compare_mode: 'always',
 			cull_mode: 'counter_clockwise',
-			blend_source: 'source_alpha', //blend_one
-			blend_destination: 'inverse_source_alpha', //blend_zero
+			blend_source: layered ? 'blend_one' : 'source_alpha',
+			blend_destination: layered ? 'blend_zero' : 'inverse_source_alpha',
 			blend_operation: 'add',
 			alpha_blend_source: 'blend_one',
-			alpha_blend_destination: 'blend_zero',
+			alpha_blend_destination: eraser ? 'blend_zero' : 'blend_one',
 			alpha_blend_operation: 'add',
 			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
@@ -400,10 +402,10 @@ class UINodes extends iron.Trait {
 			frag.write('binplast = binplast * 0.5 + 0.5;');
 			
 			frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
-		    frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-		    frag.write('float dist = length(pa - ba * h);');
-		    frag.write('if (dist > brushRadius) { discard; return; }');
-		    //
+			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+			frag.write('float dist = length(pa - ba * h);');
+			frag.write('if (dist > brushRadius) { discard; return; }');
+			//
 
 			
 			// frag.write('float dist = distance(bsp.xy, binp.xy);');
@@ -448,11 +450,12 @@ class UINodes extends iron.Trait {
 		frag.write('float occlusion = $occ;');
 		frag.write('vec3 nortan = $nortan;');
 
-		frag.write('    float str = brushOpacity * clamp((brushRadius - dist) * brushStrength, 0.0, 1.0);');
-		frag.write('    str = clamp(str, 0.0, 1.0);');
+		if (eraser) frag.write('    float str = 1.0 - brushOpacity;');
+		else frag.write('    float str = clamp(brushOpacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
+		// frag.write('    fragColor[1] = vec4(nortan, str);');
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 
 		if (!UITrait.inst.paintBase) frag.write('fragColor[0].a = 0.0;');
@@ -605,16 +608,46 @@ class UINodes extends iron.Trait {
 			frag.write('float occlusion;');
 			frag.write('float opacity;');
 
-			frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
+			if (UITrait.inst.layers[0].visible) {
+				frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
 
-			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-			frag.write('n = texture(texpaint_nor, texCoord).rgb * 2.0 - 1.0;');
-			frag.write('n = normalize(TBN * normalize(n));');
+				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+				frag.write('n = texture(texpaint_nor, texCoord).rgb * 2.0 - 1.0;');
+				frag.write('n = normalize(TBN * normalize(n));');
 
-			frag.write('vec4 pack = texture(texpaint_pack, texCoord);');
-			frag.write('occlusion = pack.r;');
-			frag.write('roughness = pack.g;');
-			frag.write('metallic = pack.b;');
+				frag.write('vec4 pack = texture(texpaint_pack, texCoord);');
+				frag.write('occlusion = pack.r;');
+				frag.write('roughness = pack.g;');
+				frag.write('metallic = pack.b;');
+			}
+			else {
+				frag.write('basecol = vec3(0.0);');
+				frag.write('occlusion = 1.0;');
+				frag.write('roughness = 1.0;');
+				frag.write('metallic = 0.0;');
+			}
+
+			if (UITrait.inst.layers.length > 1 && UITrait.inst.layers[1].visible) {
+				frag.add_uniform('sampler2D texpaint1');
+				frag.add_uniform('sampler2D texpaint_nor1');
+				frag.add_uniform('sampler2D texpaint_pack1');
+
+				frag.write('vec4 col_tex1 = texture(texpaint1, texCoord);');
+				// frag.write('vec4 col_nor1 = texture(texpaint_nor1, texCoord);');
+
+				frag.write('float factor = col_tex1.a;');
+				frag.write('float factorinv = 1.0 - factor;');
+
+				frag.write('basecol = basecol * factorinv + pow(col_tex1.rgb, vec3(2.2)) * factor;');
+				
+				// frag.write('vec3 n2 = texture(texpaint_nor1, texCoord).rgb * 2.0 - 1.0;');
+				// frag.write('n2 = normalize(TBN * normalize(n2));');
+				// frag.write('n *= n2;');
+				frag.write('vec4 pack2 = texture(texpaint_pack1, texCoord);');
+				frag.write('occlusion = occlusion * factorinv + pack2.r * factor;');
+				frag.write('roughness = roughness * factorinv + pack2.g * factor;');
+				frag.write('metallic = metallic * factorinv + pack2.b * factor;');
+			}
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');

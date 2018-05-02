@@ -10,5 +10,6 @@ void main() {
 	// Show basecolor
 	vec4 texcolor = texture(tex, texCoord) * color;
 	// texcolor.rgb *= color.a;
-	FragColor = vec4(texcolor.rgb, 1.0);
+	// FragColor = vec4(texcolor.rgb, 1.0);
+	FragColor = texcolor;
 }

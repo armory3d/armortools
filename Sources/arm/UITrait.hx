@@ -6,6 +6,7 @@ import zui.Canvas;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.object.MeshObject;
+import iron.RenderPath;
 
 typedef TPreferences = {
 	public var w:Int;
@@ -30,9 +31,61 @@ class BrushSlot {
 }
 
 class LayerSlot {
-	public function new() {}
-	public function unload() {
+	static var counter = 0;
+	public var id = 0;
+	public var visible = true;
 
+	public var texpaint:kha.Image;
+	public var texpaint_nor:kha.Image;
+	public var texpaint_pack:kha.Image;
+	
+	// public var texpaint_opt:kha.Image;
+
+	public function new() {
+		id = counter++;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint" + id;
+			t.width = 4096;
+			t.height = 4096;
+			t.format = 'RGBA32';
+			t.depth_buffer = "paintdb";
+			texpaint = RenderPath.active.createRenderTarget(t).image;
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_nor" + id;
+			t.width = 4096;
+			t.height = 4096;
+			t.format = 'RGBA32';
+			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_pack" + id;
+			t.width = 4096;
+			t.height = 4096;
+			t.format = 'RGBA32';
+			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
+		}
+
+		// {
+		// 	var t = new RenderTargetRaw();
+		// 	t.name = "texpaint_opt" + id;
+		// 	t.width = 4096;
+		// 	t.height = 4096;
+		// 	t.format = 'RGBA32';
+		// 	texpaint_opt = RenderPath.active.createRenderTarget(t).image;
+		// }
+	}
+
+	public function unload() {
+		texpaint.unload();
+		texpaint_nor.unload();
+		texpaint_pack.unload();
+		
+		// texpaint_opt.unload();
 	}
 }
 
@@ -240,6 +293,24 @@ class UITrait extends iron.Trait {
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
 		iron.object.Uniforms.externalTextureLinks.push(linkTex);
 
+		if (materials == null) {
+			materials = [];
+			materials.push(new MaterialSlot());
+			selectedMaterial = materials[0];
+		}
+
+		if (brushes == null) {
+			brushes = [];
+			brushes.push(new BrushSlot());
+			selectedBrush = brushes[0];
+		}
+
+		if (layers == null) {
+			layers = [];
+			layers.push(new LayerSlot());
+			selectedLayer = layers[0];
+		}
+
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
 		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'cay_thumb.jpg'], done);
@@ -306,7 +377,7 @@ class UITrait extends iron.Trait {
 
 			iron.App.notifyOnUpdate(update);
 			iron.App.notifyOnRender2D(render);
-			iron.App.notifyOnRender(clearTargetsHandler);
+			iron.App.notifyOnRender(initLayers);
 
 			// Save last pos for continuos paint
 			iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
@@ -393,68 +464,159 @@ class UITrait extends iron.Trait {
 		else brushTime = 0;
 	}
 
-	public var texpaint:kha.Image;
-	public var texpaint_nor:kha.Image;
-	public var texpaint_pack:kha.Image;
-	function clearTargetsHandler(g:kha.graphics4.Graphics) {
-		var pd = iron.RenderPath.active;
-		texpaint = pd.renderTargets.get("texpaint").image;
-		texpaint_nor = pd.renderTargets.get("texpaint_nor").image;
-		texpaint_pack = pd.renderTargets.get("texpaint_pack").image;
+	function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
 
-		texpaint.g4.begin();
-		texpaint.g4.clear(kha.Color.fromFloats(0.3, 0.3, 0.3, 0.0)); // Base
-		texpaint.g4.end();
+		layers[0].texpaint.g4.begin();
+		layers[0].texpaint.g4.clear(kha.Color.fromFloats(0.3, 0.3, 0.3, 1.0)); // Base
+		layers[0].texpaint.g4.end();
 
-		texpaint_nor.g4.begin();
-		texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
-		texpaint_nor.g4.end();
+		layers[0].texpaint_nor.g4.begin();
+		layers[0].texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 1.0)); // Nor
+		layers[0].texpaint_nor.g4.end();
 
-		texpaint_pack.g4.begin();
-		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.3, 0.0, 0.0)); // Occ, rough, met
-		texpaint_pack.g4.end();
+		layers[0].texpaint_pack.g4.begin();
+		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.3, 0.0, 1.0)); // Occ, rough, met
+		layers[0].texpaint_pack.g4.end();
+
+		// layers[0].texpaint_opt.g4.begin();
+		// layers[0].texpaint_opt.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Opac, emis, height
+		// layers[0].texpaint_opt.g4.end();
 
 		g.begin();
-		iron.App.removeRender(clearTargetsHandler);
+		iron.App.removeRender(initLayers);
 	}
 
-	function resizeTargetsHandler(g:kha.graphics4.Graphics) {
-		var res = getTextureRes();
-		var pd = iron.RenderPath.active;
-		var texpaint = pd.renderTargets.get("texpaint");
-		var texpaint_nor = pd.renderTargets.get("texpaint_nor");
-		var texpaint_pack = pd.renderTargets.get("texpaint_pack");
-
-		var texpaint_oldimg = texpaint.image;
-		var texpaint_nor_oldimg = texpaint_nor.image;
-		var texpaint_pack_oldimg = texpaint_pack.image;
-
-		texpaint.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.Depth16);
-		texpaint_nor.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-		texpaint_pack.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-
+	function clearLastLayer(g:kha.graphics4.Graphics) {
 		g.end();
-		texpaint.image.g2.begin();
-		texpaint.image.g2.drawScaledImage(texpaint_oldimg, 0, 0, res, res);
-		texpaint.image.g2.end();
 
-		texpaint_nor.image.g2.begin();
-		texpaint_nor.image.g2.drawScaledImage(texpaint_nor_oldimg, 0, 0, res, res);
-		texpaint_nor.image.g2.end();
+		var i = layers.length - 1;
+		layers[i].texpaint.g4.begin();
+		layers[i].texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
+		layers[i].texpaint.g4.end();
 
-		texpaint_pack.image.g2.begin();
-		texpaint_pack.image.g2.drawScaledImage(texpaint_pack_oldimg, 0, 0, res, res);
-		texpaint_pack.image.g2.end();
+		layers[i].texpaint_nor.g4.begin();
+		layers[i].texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		layers[i].texpaint_nor.g4.end();
+
+		layers[i].texpaint_pack.g4.begin();
+		layers[i].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
+		layers[i].texpaint_pack.g4.end();
+
+		// layers[i].texpaint_opt.g4.begin();
+		// layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
+		// layers[i].texpaint_opt.g4.end();
+
 		g.begin();
+		iron.App.removeRender(clearLastLayer);
+	}
 
-		texpaint_oldimg.unload();
-		texpaint_nor_oldimg.unload();
-		texpaint_pack_oldimg.unload();
+	function resizeLayers(g:kha.graphics4.Graphics) {
+		var res = getTextureRes();
+		var rts = RenderPath.active.renderTargets;
+
+		for (l in layers) {
+
+			var rttexpaint = rts.get("texpaint" + l.id);
+			var rttexpaint_nor = rts.get("texpaint_nor" + l.id);
+			var rttexpaint_pack = rts.get("texpaint_pack" + l.id);
+			// var rttexpaint_opt = rts.get("texpaint_opt" + l.id);
+
+			rttexpaint.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.Depth16);
+			rttexpaint_nor.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+			rttexpaint_pack.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+			// rttexpaint_opt.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+
+			g.end();
+			rttexpaint.image.g2.begin();
+			rttexpaint.image.g2.drawScaledImage(l.texpaint, 0, 0, res, res);
+			rttexpaint.image.g2.end();
+
+			rttexpaint_nor.image.g2.begin();
+			rttexpaint_nor.image.g2.drawScaledImage(l.texpaint_nor, 0, 0, res, res);
+			rttexpaint_nor.image.g2.end();
+
+			rttexpaint_pack.image.g2.begin();
+			rttexpaint_pack.image.g2.drawScaledImage(l.texpaint_pack, 0, 0, res, res);
+			rttexpaint_pack.image.g2.end();
+
+			// rttexpaint_opt.image.g2.begin();
+			// rttexpaint_opt.image.g2.drawScaledImage(l.texpaint_opt, 0, 0, res, res);
+			// rttexpaint_opt.image.g2.end();
+			g.begin();
+
+			l.unload();
+
+			l.texpaint = rts.get("texpaint" + l.id).image;
+			l.texpaint_nor = rts.get("texpaint_nor" + l.id).image;
+			l.texpaint_pack = rts.get("texpaint_pack" + l.id).image;
+			// l.texpaint_opt = rts.get("texpaint_opt" + l.id).image;
+		}
 
 		dirty = true;
+		iron.App.removeRender(resizeLayers);
+	}
 
-		iron.App.removeRender(resizeTargetsHandler);
+	function deleteSelectedLayer() {
+		selectedLayer.unload();
+		layers.remove(selectedLayer);
+		selectedLayer = layers[0];
+		UINodes.inst.parseMeshMaterial();
+		UINodes.inst.parsePaintMaterial();
+		dirty = true;
+	}
+
+	var pipe:kha.graphics4.PipelineState = null;
+	function makePipe() {
+		pipe = new kha.graphics4.PipelineState();
+		pipe.fragmentShader = kha.Shaders.view2d_frag;
+		pipe.vertexShader = kha.Shaders.view2d_vert;
+		// pipe.fragmentShader = kha.Shaders.painter_image_frag;
+		// pipe.vertexShader = kha.Shaders.painter_image_vert;
+		var vs = new kha.graphics4.VertexStructure();
+		vs.add("vertexPosition", kha.graphics4.VertexData.Float3);
+		vs.add("texPosition", kha.graphics4.VertexData.Float2);
+		vs.add("vertexColor", kha.graphics4.VertexData.Float4);
+		pipe.inputLayout = [vs];
+		pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
+		pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
+		// pipe.alphaBlendSource = kha.graphics4.BlendingFactor.BlendZero;
+		// pipe.alphaBlendDestination = kha.graphics4.BlendingFactor.BlendOne;
+		pipe.compile();
+	}
+
+	function applySelectedLayer(g:kha.graphics4.Graphics) {
+
+		if (pipe == null) makePipe();
+
+		var l0 = layers[0];
+		var l1 = selectedLayer;
+
+		g.end();
+
+		l0.texpaint.g2.begin(false);
+		l0.texpaint.g2.pipeline = pipe;
+		l0.texpaint.g2.drawImage(l1.texpaint, 0, 0);
+		l0.texpaint.g2.end();
+
+		l0.texpaint_nor.g2.begin(false);
+		l0.texpaint_nor.g2.pipeline = pipe;
+		l0.texpaint_nor.g2.drawImage(l1.texpaint_nor, 0, 0);
+		l0.texpaint_nor.g2.end();
+
+		l0.texpaint_pack.g2.begin(false);
+		l0.texpaint_pack.g2.pipeline = pipe;
+		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
+		l0.texpaint_pack.g2.end();
+
+		// l0.texpaint_opt.g2.begin(false);
+		// l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
+		// l0.texpaint_opt.g2.end();
+		
+		g.begin();
+
+		deleteSelectedLayer();
+		iron.App.removeRender(applySelectedLayer);
 	}
 
 	function render(g:kha.graphics2.Graphics) {
@@ -527,24 +689,6 @@ class UITrait extends iron.Trait {
 	var selectTime = 0.0;
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
-
-		if (materials == null) {
-			materials = [];
-			materials.push(new MaterialSlot());
-			selectedMaterial = materials[0];
-		}
-
-		if (brushes == null) {
-			brushes = [];
-			brushes.push(new BrushSlot());
-			selectedBrush = brushes[0];
-		}
-
-		if (layers == null) {
-			layers = [];
-			layers.push(new LayerSlot());
-			selectedLayer = layers[0];
-		}
 
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
@@ -711,9 +855,30 @@ class UITrait extends iron.Trait {
 						if (selectedLayer == l) {
 							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
 						}
+						if (i > 0) ui.row([1/10, 5/10, 2/10, 2/10]);
+						else ui.row([1/10, 9/10]);
+						l.visible = ui.check(Id.handle().nest(l.id, {selected: l.visible}), "");
+						if (ui.changed) {
+							UINodes.inst.parseMeshMaterial();
+							dirty = true;
+						}
 						ui.text("Layer " + (i + 1));
 						if (ui.isReleased) {
 							selectedLayer = l;
+							UINodes.inst.parsePaintMaterial(); // Different blending for layer on top
+							dirty = true;
+						}
+						if (i > 0) {
+							if (ui.button("Apply")) {
+								if (layers.length > 1 && selectedLayer == layers[1]) {
+									iron.App.notifyOnRender(applySelectedLayer);
+								}
+							}
+							if (ui.button("Delete")) {
+								if (layers.length > 1 && selectedLayer == layers[1]) {
+									deleteSelectedLayer();
+								}
+							}
 						}
 					}
 					for (i in 0...layers.length) {
@@ -722,21 +887,18 @@ class UITrait extends iron.Trait {
 						drawList(Id.handle(), l, j);
 					}
 
-					ui.row([1/3, 1/3, 1/3]);
-					if (ui.button("New")) {
-						if (layers.length < 2) {
-							selectedLayer = new LayerSlot();
-							layers.push(selectedLayer);
+					if (layers.length == 1) {
+						ui.row([1/2, 1/2]);
+						if (ui.button("New")) {
+							if (layers.length < 2) {
+								selectedLayer = new LayerSlot();
+								layers.push(selectedLayer);
+								UINodes.inst.parseMeshMaterial();
+								UINodes.inst.parsePaintMaterial();
+								dirty = true;
+								iron.App.notifyOnRender(clearLastLayer);
+							}
 						}
-					}
-					if (ui.button("Delete")) {
-						if (layers.length > 1) {
-							selectedLayer.unload();
-							layers.remove(selectedLayer);
-							selectedLayer = layers[0];
-						}
-					}
-					if (ui.button("Merge")) {
 					}
 					if (ui.button("2D View")) show2DView();
 				}
@@ -834,7 +996,7 @@ class UITrait extends iron.Trait {
 					// var path = 'C:\\Users\\lubos\\Documents\\';
 					arm.App.filesDone = function(path:String) {
 						var bo = new haxe.io.BytesOutput();
-						var pixels = texpaint.getPixels();
+						var pixels = selectedLayer.texpaint.getPixels();
 						var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
 						// BGRA to RGB
 						for (i in 0...textureSize * textureSize) {
@@ -856,7 +1018,7 @@ class UITrait extends iron.Trait {
 						if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
 						#end
 
-						pixels = texpaint_nor.getPixels();
+						pixels = selectedLayer.texpaint_nor.getPixels();
 						for (i in 0...textureSize * textureSize) {
 							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
 							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
@@ -881,7 +1043,7 @@ class UITrait extends iron.Trait {
 						// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
 						// #end
 
-						pixels = texpaint_pack.getPixels(); // occ, rough, met
+						pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
 
 						if (outputType == 0) {
 							for (i in 0...textureSize * textureSize) {
@@ -939,7 +1101,7 @@ class UITrait extends iron.Trait {
 				var hres = Id.handle({position: textureRes});
 				textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
 				if (hres.changed) {
-					iron.App.notifyOnRender(resizeTargetsHandler);
+					iron.App.notifyOnRender(resizeLayers);
 				}
 				ui.combo(Id.handle(), ["8bit"], "Color", true);
 				ui.combo(Id.handle(), ["png"], "Format", true);
@@ -1071,7 +1233,7 @@ class UITrait extends iron.Trait {
 
 		new MeshData(raw, function(md:MeshData) {
 			currentObject.data.delete();
-			iron.App.notifyOnRender(clearTargetsHandler);
+			iron.App.notifyOnRender(initLayers);
 			
 			currentObject.setData(md);
 			

@@ -48,7 +48,7 @@ class UIView2D extends iron.Trait {
 		var tx = Std.int(iron.App.w() + (iron.App.w() - tw) / 2);
 		var ty = Std.int(iron.App.h() / 2 - tw / 2);
 		g.pipeline = pipe;
-		g.drawScaledImage(UITrait.inst.texpaint, tx, ty, tw, tw);
+ 		g.drawScaledImage(UITrait.inst.selectedLayer.texpaint, tx, ty, tw, tw);
 		g.pipeline = null;
 	}
 }

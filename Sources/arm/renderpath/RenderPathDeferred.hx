@@ -381,30 +381,6 @@ class RenderPathDeferred {
 		// Paint
 		{
 			path.createDepthBuffer("paintdb", "DEPTH16");
-
-			var t = new RenderTargetRaw();
-			t.name = "texpaint";
-			t.width = 4096;
-			t.height = 4096;
-			t.format = 'RGBA32';
-			t.depth_buffer = "paintdb";
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_nor";
-			t.width = 4096;
-			t.height = 4096;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_pack";
-			t.width = 4096;
-			t.height = 4096;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
 		}
 
 		var w = 1;
@@ -433,8 +409,9 @@ class RenderPathDeferred {
 		if (arm.UITrait.inst.redraw()) { //
 
 		// Paint
+		var tid = arm.UITrait.inst.selectedLayer.id;
 		if (arm.UITrait.inst.depthDirty()) {
-			path.setTarget("texpaint");
+			path.setTarget("texpaint" + tid);
 			path.clearTarget(null, 1.0);
 			path.drawMeshes("depth"); // TODO: CHECK DEPTH EXPORT
 		}
@@ -474,7 +451,7 @@ class RenderPathDeferred {
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
 				}
-				path.setTarget("texpaint", ["texpaint_nor", "texpaint_pack"]);
+				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid]);
 				path.bindTarget("_paintdb", "paintdb");
 				if (arm.UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
@@ -521,9 +498,16 @@ class RenderPathDeferred {
 		#end
 
 		// Paint
-		path.bindTarget("texpaint", "texpaint");
-		path.bindTarget("texpaint_nor", "texpaint_nor");
-		path.bindTarget("texpaint_pack", "texpaint_pack");
+		tid = arm.UITrait.inst.layers[0].id;
+		path.bindTarget("texpaint" + tid, "texpaint");
+		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
+		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+		if (arm.UITrait.inst.layers.length > 1) {
+			tid = arm.UITrait.inst.layers[1].id;
+			path.bindTarget("texpaint" + tid, "texpaint1");
+			path.bindTarget("texpaint_nor" + tid, "texpaint_nor1");
+			path.bindTarget("texpaint_pack" + tid, "texpaint_pack1");
+		}
 		//
 
 		path.drawMeshes("mesh");
