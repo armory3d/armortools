@@ -304,7 +304,7 @@ class UINodes extends iron.Trait {
 			alpha_blend_operation: 'add',
 			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
-		if (UITrait.inst.brushType == 2) {
+		if (UITrait.inst.brushType == 3) { // Bake AO
 			con_paint.data.color_write_green = false; // R
 			con_paint.data.color_write_blue = false; // M
 		}
@@ -339,7 +339,7 @@ class UINodes extends iron.Trait {
         	vert.write('mposition = ndc.xyz;');
         }
 
-        if (UITrait.inst.brushType == 2) { // Bake ao
+        if (UITrait.inst.brushType == 3) { // Bake ao
         	vert.add_out('vec3 wposition');
         	vert.add_uniform('mat4 W', '_worldMatrix');
         	vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
@@ -359,7 +359,7 @@ class UINodes extends iron.Trait {
 
 		frag.add_uniform('sampler2D paintdb');
 
-		if (UITrait.inst.brushType == 3) { // Pick color id
+		if (UITrait.inst.brushType == 4) { // Pick color id
 			frag.add_out('vec4 fragColor');
 
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
@@ -460,7 +460,7 @@ class UINodes extends iron.Trait {
 		if (!UITrait.inst.paintNor) frag.write('fragColor[1].a = 0.0;');
 		if (!UITrait.inst.paintRough) frag.write('fragColor[2].a = 0.0;');
 
-		if (UITrait.inst.brushType == 2) { // Bake AO
+		if (UITrait.inst.brushType == 3) { // Bake AO
 			frag.write('fragColor[0].a = 0.0;');
 			frag.write('fragColor[1].a = 0.0;');
 
@@ -584,7 +584,7 @@ class UINodes extends iron.Trait {
 		frag.write('vec3 n = normalize(wnormal);');
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
 
-		if (arm.UITrait.inst.brushType == 3) { // Show color map
+		if (arm.UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0 - gl_FragCoord.z);');
 			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2));');

@@ -5,6 +5,8 @@ class OrbitCamera extends iron.Trait {
 	public static var inst:OrbitCamera;
 	public var enabled = false;
 
+	var redraws = 0;
+
 	public function new() {
 		super();
 		inst = this;
@@ -23,14 +25,19 @@ class OrbitCamera extends iron.Trait {
 			var camera = iron.Scene.active.camera;
 
 			if (mouse.wheelDelta != 0) {
-				UITrait.inst.dirty = true;
+				redraws = 2;
 				camera.move(camera.look(), mouse.wheelDelta * (-0.1));
 			}
 
 			if (mouse.down("middle") || (mouse.down("right") && keyboard.down("space"))) {
-				UITrait.inst.dirty = true;
+				redraws = 2;
 				camera.transform.loc.addf(-mouse.movementX / 150, 0.0, mouse.movementY / 150);
 				camera.buildMatrix();
+			}
+
+			if (redraws > 0) {
+				redraws--;
+				UITrait.inst.dirty = true;
 			}
 		});
 	}

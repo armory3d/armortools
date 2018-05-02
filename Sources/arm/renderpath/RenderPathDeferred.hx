@@ -440,7 +440,7 @@ class RenderPathDeferred {
 		}
 
 		if (arm.UITrait.inst.paintDirty()) {
-			if (arm.UITrait.inst.brushType == 3) { // Pick Color Id
+			if (arm.UITrait.inst.brushType == 4) { // Pick Color Id
 				path.setTarget("texpaint_colorid7");
 				path.clearTarget(0xff000000);
 				path.bindTarget("_paintdb", "paintdb");
@@ -454,7 +454,7 @@ class RenderPathDeferred {
 				}
 			}
 			else {
-				if (arm.UITrait.inst.brushType == 2) { // Bake AO
+				if (arm.UITrait.inst.brushType == 3) { // Bake AO
 					if (initVoxels) {
 						initVoxels = false;
 						var t = new RenderTargetRaw();
@@ -476,7 +476,7 @@ class RenderPathDeferred {
 				}
 				path.setTarget("texpaint", ["texpaint_nor", "texpaint_pack"]);
 				path.bindTarget("_paintdb", "paintdb");
-				if (arm.UITrait.inst.brushType == 2) { // Bake AO
+				if (arm.UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
 				}
 				if (arm.UITrait.inst.colorIdPicked) {

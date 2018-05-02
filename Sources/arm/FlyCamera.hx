@@ -40,49 +40,16 @@ class FlyCamera extends Trait {
 
 		if (mouse.x > iron.App.w()) return;
 
-		var moveForward = keyboard.down("w") || keyboard.down("up");
-		var moveBackward = keyboard.down("s") || keyboard.down("down");
+		var moveForward = keyboard.down("w") || keyboard.down("up") || mouse.wheelDelta < 0;
+		var moveBackward = keyboard.down("s") || keyboard.down("down") || mouse.wheelDelta > 0;
 		var strafeLeft = keyboard.down("a") || keyboard.down("left");
 		var strafeRight = keyboard.down("d") || keyboard.down("right");
 		var strafeUp = keyboard.down("e");
 		var strafeDown = keyboard.down("q");
 		var fast = keyboard.down("shift") ? 2.0 : (keyboard.down("alt") ? 0.5 : 1.0);
-
-		// if (gamepad != null) {
-		// 	var leftStickY = Math.abs(gamepad.leftStick.y) > 0.05;
-		// 	var leftStickX = Math.abs(gamepad.leftStick.x) > 0.05;
-		// 	var r1 = gamepad.down("r1") > 0.0;
-		// 	var l1 = gamepad.down("l1") > 0.0;
-		// 	var rightStickX = Math.abs(gamepad.rightStick.x) > 0.1;
-		// 	var rightStickY = Math.abs(gamepad.rightStick.y) > 0.1;
-
-		// 	if (leftStickY || leftStickX || r1 || l1 || rightStickX || rightStickY) {
-		// 		dir.set(0, 0, 0);
-
-		// 		if (leftStickY) {
-		// 			yvec.setFrom(camera.look());
-		// 			yvec.mult(gamepad.leftStick.y);
-		// 			dir.add(yvec);
-		// 		}
-		// 		if (leftStickX) {
-		// 			xvec.setFrom(camera.right());
-		// 			xvec.mult(gamepad.leftStick.x);
-		// 			dir.add(xvec);
-		// 		}
-		// 		if (r1) dir.addf(0, 0, 1);
-		// 		if (l1) dir.addf(0, 0, -1);
-
-		// 		var d = Time.delta * speed * fast;
-		// 		camera.move(dir, d);
-
-		// 		if (rightStickX) {
-		// 			camera.rotate(Vec4.zAxis(), -gamepad.rightStick.x / 15.0);
-		// 		}
-		// 		if (rightStickY) {
-		// 			camera.rotate(camera.right(), gamepad.rightStick.y / 15.0);
-		// 		}
-		// 	}
-		// }
+		if (mouse.wheelDelta != 0) {
+			fast *= Math.abs(mouse.wheelDelta) * 4.0;
+		}
 		
 		if (moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
 			if (easing) {
