@@ -469,7 +469,7 @@ class UITrait extends iron.Trait {
 		g.end();
 
 		layers[0].texpaint.g4.begin();
-		layers[0].texpaint.g4.clear(kha.Color.fromFloats(0.3, 0.3, 0.3, 1.0)); // Base
+		layers[0].texpaint.g4.clear(kha.Color.fromFloats(0.5, 0.5, 0.5, 1.0)); // Base
 		layers[0].texpaint.g4.end();
 
 		layers[0].texpaint_nor.g4.begin();
@@ -477,7 +477,7 @@ class UITrait extends iron.Trait {
 		layers[0].texpaint_nor.g4.end();
 
 		layers[0].texpaint_pack.g4.begin();
-		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.3, 0.0, 1.0)); // Occ, rough, met
+		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 1.0)); // Occ, rough, met
 		layers[0].texpaint_pack.g4.end();
 
 		// layers[0].texpaint_opt.g4.begin();
