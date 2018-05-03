@@ -414,16 +414,17 @@ class UITrait extends iron.Trait {
 
 		var kb = iron.system.Input.getKeyboard();
 		var shift = kb.down("shift");
+		var alt = kb.down("alt");
 		if (kb.started("tab")) {
 			UIView2D.inst.show = false;
 			UINodes.inst.show = !UINodes.inst.show;
 			arm.App.resize();
 		}
-		else if (kb.started("1")) shift ? setBrushType(0) : selectMaterial(0);
-		else if (kb.started("2")) shift ? setBrushType(1) : selectMaterial(1);
-		else if (kb.started("3")) shift ? setBrushType(2) : selectMaterial(2);
-		else if (kb.started("4")) shift ? setBrushType(3) : selectMaterial(3);
-		else if (kb.started("5")) shift ? setBrushType(4) : selectMaterial(4);
+		else if (kb.started("1") && (shift || alt)) shift ? setBrushType(0) : selectMaterial(0);
+		else if (kb.started("2") && (shift || alt)) shift ? setBrushType(1) : selectMaterial(1);
+		else if (kb.started("3") && (shift || alt)) shift ? setBrushType(2) : selectMaterial(2);
+		else if (kb.started("4") && (shift || alt)) shift ? setBrushType(3) : selectMaterial(3);
+		else if (kb.started("5") && (shift || alt)) shift ? setBrushType(4) : selectMaterial(4);
 
 		// pickColorId = kb.down("alt");
 
