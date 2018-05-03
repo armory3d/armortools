@@ -162,12 +162,13 @@ class UITrait extends iron.Trait {
 		// Paint bounds
 		if (paintVec.x > 1) return false;
 
-		if (brushType == 4) {
+		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+
+		if (brushType == 4 && UITrait.inst.assets.length > 0 && down) {
 			colorIdPicked = true;
 		}
 
 		// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
-		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (down && paintVec.x == lastPaintX && paintVec.y == lastPaintY) painted++;
 		else painted = 0;
 
@@ -817,25 +818,30 @@ class UITrait extends iron.Trait {
 
 					var img = bundled.get("mat.jpg");
 					var img2 = bundled.get("mat_empty.jpg");
-					ui.row([1/5,1/5,1/5,1/5,1/5]);
-					for (i in 0...5) {
-						var im = img;
-						if (materials.length <= i) im = img2;
 
-						if (im == img && selectedMaterial == materials[i]) {
-							ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
-						}
+					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
+						ui.row([1/5,1/5,1/5,1/5,1/5]);
 
-						if (ui.image(im) == State.Started && im == img) {
-							if (selectedMaterial != materials[i]) {
-								selectedMaterial = materials[i];
-								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
+						for (j in 0...5) {
+							var i = j + row * 5;
+							var im = img;
+							if (materials.length <= i) im = img2;
+
+							if (im == img && selectedMaterial == materials[i]) {
+								ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
 							}
-							if (iron.system.Time.time() - selectTime < 0.3) {
-								showMaterialNodes();
+
+							if (ui.image(im) == State.Started && im == img) {
+								if (selectedMaterial != materials[i]) {
+									selectedMaterial = materials[i];
+									UINodes.inst.updateCanvasMap();
+									UINodes.inst.parsePaintMaterial();
+								}
+								if (iron.system.Time.time() - selectTime < 0.3) {
+									showMaterialNodes();
+								}
+								selectTime = iron.system.Time.time();
 							}
-							selectTime = iron.system.Time.time();
 						}
 					}
 

@@ -52,12 +52,12 @@ class App extends iron.Trait {
 					
 					notifyOnInit(function() {
 						notifyOnUpdate(update);
-						notifyOnRender2D(render);
 						object.addTrait(new UITrait());
 						object.addTrait(new UINodes());
 						object.addTrait(new UIView2D());
 						object.addTrait(new FlyCamera());
 						object.addTrait(new OrbitCamera());
+						notifyOnRender2D(render);
 					});
 				});
 			});
