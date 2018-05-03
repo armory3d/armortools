@@ -418,11 +418,13 @@ class UINodes extends iron.Trait {
 		}
 
 		if (UITrait.inst.colorIdPicked) {
+			vert.add_out('vec2 texCoordPick');
+			vert.write('texCoordPick = fract(tex);');
 			frag.add_uniform('sampler2D texpaint_colorid0'); // 1x1 picker
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
-			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoord * texcoloridSize), 0).rgb;');
+			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
 			frag.write('if (c1 != c2) { discard; return; }');
 		}
 
