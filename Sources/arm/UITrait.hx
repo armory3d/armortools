@@ -39,7 +39,7 @@ class LayerSlot {
 	public var texpaint_nor:kha.Image;
 	public var texpaint_pack:kha.Image;
 	
-	// public var texpaint_opt:kha.Image;
+	public var texpaint_opt:kha.Image;
 
 	public function new() {
 		id = counter++;
@@ -70,14 +70,14 @@ class LayerSlot {
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		// {
-		// 	var t = new RenderTargetRaw();
-		// 	t.name = "texpaint_opt" + id;
-		// 	t.width = 4096;
-		// 	t.height = 4096;
-		// 	t.format = 'RGBA32';
-		// 	texpaint_opt = RenderPath.active.createRenderTarget(t).image;
-		// }
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_opt" + id;
+			t.width = 4096;
+			t.height = 4096;
+			t.format = 'RGBA32';
+			texpaint_opt = RenderPath.active.createRenderTarget(t).image;
+		}
 	}
 
 	public function unload() {
@@ -85,7 +85,7 @@ class LayerSlot {
 		texpaint_nor.unload();
 		texpaint_pack.unload();
 		
-		// texpaint_opt.unload();
+		texpaint_opt.unload();
 	}
 }
 
@@ -481,9 +481,9 @@ class UITrait extends iron.Trait {
 		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 1.0)); // Occ, rough, met
 		layers[0].texpaint_pack.g4.end();
 
-		// layers[0].texpaint_opt.g4.begin();
-		// layers[0].texpaint_opt.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Opac, emis, height
-		// layers[0].texpaint_opt.g4.end();
+		layers[0].texpaint_opt.g4.begin();
+		layers[0].texpaint_opt.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Opac, emis, height
+		layers[0].texpaint_opt.g4.end();
 
 		g.begin();
 		iron.App.removeRender(initLayers);
@@ -505,9 +505,9 @@ class UITrait extends iron.Trait {
 		layers[i].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
 		layers[i].texpaint_pack.g4.end();
 
-		// layers[i].texpaint_opt.g4.begin();
-		// layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
-		// layers[i].texpaint_opt.g4.end();
+		layers[i].texpaint_opt.g4.begin();
+		layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
+		layers[i].texpaint_opt.g4.end();
 
 		g.begin();
 		iron.App.removeRender(clearLastLayer);
@@ -522,12 +522,12 @@ class UITrait extends iron.Trait {
 			var rttexpaint = rts.get("texpaint" + l.id);
 			var rttexpaint_nor = rts.get("texpaint_nor" + l.id);
 			var rttexpaint_pack = rts.get("texpaint_pack" + l.id);
-			// var rttexpaint_opt = rts.get("texpaint_opt" + l.id);
+			var rttexpaint_opt = rts.get("texpaint_opt" + l.id);
 
 			rttexpaint.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.Depth16);
 			rttexpaint_nor.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 			rttexpaint_pack.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-			// rttexpaint_opt.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+			rttexpaint_opt.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 
 			g.end();
 			rttexpaint.image.g2.begin();
@@ -542,9 +542,9 @@ class UITrait extends iron.Trait {
 			rttexpaint_pack.image.g2.drawScaledImage(l.texpaint_pack, 0, 0, res, res);
 			rttexpaint_pack.image.g2.end();
 
-			// rttexpaint_opt.image.g2.begin();
-			// rttexpaint_opt.image.g2.drawScaledImage(l.texpaint_opt, 0, 0, res, res);
-			// rttexpaint_opt.image.g2.end();
+			rttexpaint_opt.image.g2.begin();
+			rttexpaint_opt.image.g2.drawScaledImage(l.texpaint_opt, 0, 0, res, res);
+			rttexpaint_opt.image.g2.end();
 			g.begin();
 
 			l.unload();
@@ -552,7 +552,7 @@ class UITrait extends iron.Trait {
 			l.texpaint = rts.get("texpaint" + l.id).image;
 			l.texpaint_nor = rts.get("texpaint_nor" + l.id).image;
 			l.texpaint_pack = rts.get("texpaint_pack" + l.id).image;
-			// l.texpaint_opt = rts.get("texpaint_opt" + l.id).image;
+			l.texpaint_opt = rts.get("texpaint_opt" + l.id).image;
 		}
 
 		dirty = true;
@@ -611,9 +611,9 @@ class UITrait extends iron.Trait {
 		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
 		l0.texpaint_pack.g2.end();
 
-		// l0.texpaint_opt.g2.begin(false);
-		// l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
-		// l0.texpaint_opt.g2.end();
+		l0.texpaint_opt.g2.begin(false);
+		l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
+		l0.texpaint_opt.g2.end();
 		
 		g.begin();
 
@@ -689,6 +689,7 @@ class UITrait extends iron.Trait {
 	public var layers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
 	var selectTime = 0.0;
+	public var displaceStrength = 1.0;
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
 
@@ -947,6 +948,11 @@ class UITrait extends iron.Trait {
 						var lamp = iron.Scene.active.lamps[0];
 						lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
 					}
+
+					displaceStrength = ui.slider(Id.handle({value: displaceStrength}), "Displace", 0.0, 2.0, true);
+					if (ui.changed) {
+						UINodes.inst.parseMeshMaterial();
+					}
 				}
 
 				// Draw plugins
@@ -1102,6 +1108,19 @@ class UITrait extends iron.Trait {
 							if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
 							#end
 						}
+
+						pixels = selectedLayer.texpaint_opt.getPixels();
+						for (i in 0...textureSize * textureSize) {
+							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+							rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
+							rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+						}
+						bo = new haxe.io.BytesOutput();
+						var pngwriter = new iron.format.png.Writer(bo);
+						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+						#if kha_krom
+						if (isMet) Krom.fileSaveBytes(path + "/tex_oeh.png", bo.getBytes().getData());
+						#end
 					}
 				}
 

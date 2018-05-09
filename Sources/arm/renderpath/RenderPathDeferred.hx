@@ -401,6 +401,62 @@ class RenderPathDeferred {
 
 	// Paint
 	static var initVoxels = true;
+
+	public static function drawShadowMapPaint(l:iron.object.LampObject) {
+		#if (rp_shadowmap)
+		var faces = l.data.raw.shadowmap_cube ? 6 : 1;
+		for (j in 0...faces) {
+			if (faces > 1) path.currentFace = j;
+			path.setTarget(Inc.getShadowMap());
+
+			// Paint
+			if (arm.UINodes.inst.materialParsed) {
+				var tid = arm.UITrait.inst.layers[0].id;
+				path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
+			}
+			//
+
+			path.clearTarget(null, 1.0);
+			path.drawMeshes("shadowmap");
+		}
+		path.currentFace = -1;
+
+		// One lamp at a time for now, precompute all lamps for tiled
+		#if rp_soft_shadows
+
+		if (l.raw.type != "point") {
+			path.setTarget("visa"); // Merge using min blend
+			Inc.bindShadowMap();
+			path.drawShader("shader_datas/dilate_pass/dilate_pass_x");
+
+			path.setTarget("visb");
+			path.bindTarget("visa", "shadowMap");
+			path.drawShader("shader_datas/dilate_pass/dilate_pass_y");
+		}
+
+		path.setTarget("visa", ["dist"]);
+		//if (i == 0) path.clearTarget(0x00000000);
+		if (l.raw.type != "point") path.bindTarget("visb", "dilate");
+		Inc.bindShadowMap();
+		//path.bindTarget("_main", "gbufferD");
+		path.bindTarget("gbuffer0", "gbuffer0");
+		path.drawShader("shader_datas/visibility_pass/visibility_pass");
+		
+		path.setTarget("visb");
+		path.bindTarget("visa", "tex");
+		path.bindTarget("gbuffer0", "gbuffer0");
+		path.bindTarget("dist", "dist");
+		path.drawShader("shader_datas/blur_shadow_pass/blur_shadow_pass_x");
+
+		path.setTarget("visa");
+		path.bindTarget("visb", "tex");
+		path.bindTarget("gbuffer0", "gbuffer0");
+		path.bindTarget("dist", "dist");
+		path.drawShader("shader_datas/blur_shadow_pass/blur_shadow_pass_y");
+		#end
+
+		#end
+	}
 	//
 
 	@:access(iron.RenderPath)
@@ -451,7 +507,7 @@ class RenderPathDeferred {
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
 				}
-				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid]);
+				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
 				path.bindTarget("_paintdb", "paintdb");
 				if (arm.UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
@@ -502,11 +558,13 @@ class RenderPathDeferred {
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+		path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
 		if (arm.UITrait.inst.layers.length > 1) {
 			tid = arm.UITrait.inst.layers[1].id;
 			path.bindTarget("texpaint" + tid, "texpaint1");
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor1");
 			path.bindTarget("texpaint_pack" + tid, "texpaint_pack1");
+			path.bindTarget("texpaint_opt" + tid, "texpaint_opt1");
 		}
 		//
 
@@ -650,7 +708,10 @@ class RenderPathDeferred {
 			#if (rp_shadowmap)
 			{
 				if (path.lampCastShadow()) {
-					Inc.drawShadowMap(l);
+					// Inc.drawShadowMap(l);
+					// Paint
+					drawShadowMapPaint(l);
+					//
 				}
 			}
 			#end
