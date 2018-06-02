@@ -618,6 +618,7 @@ class UINodes extends iron.Trait {
 		frag.add_out('vec4[3] fragColor');
 		frag.write('vec3 n = normalize(wnormal);');
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
+		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
 
 		if (arm.UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
@@ -640,6 +641,7 @@ class UINodes extends iron.Trait {
 			frag.write('float metallic;');
 			frag.write('float occlusion;');
 			frag.write('float opacity;');
+			frag.write('float specular;');
 
 			if (UITrait.inst.layers[0].visible) {
 				frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
@@ -673,6 +675,7 @@ class UINodes extends iron.Trait {
 				frag.write('occlusion = 1.0;');
 				frag.write('roughness = 1.0;');
 				frag.write('metallic = 0.0;');
+				frag.write('specular = 1.0;');
 			}
 
 			if (UITrait.inst.layers.length > 1 && UITrait.inst.layers[1].visible) {
@@ -701,7 +704,7 @@ class UINodes extends iron.Trait {
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
-			frag.write('fragColor[1] = vec4(basecol.rgb, occlusion);');
+			frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, specular));');
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
