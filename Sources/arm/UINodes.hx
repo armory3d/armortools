@@ -704,7 +704,7 @@ class UINodes extends iron.Trait {
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
-			frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, specular));');
+			frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
