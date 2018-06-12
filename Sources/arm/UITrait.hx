@@ -5,6 +5,8 @@ import zui.Zui.State;
 import zui.Canvas;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
+import iron.data.MaterialData;
+import iron.object.Object;
 import iron.object.MeshObject;
 import iron.RenderPath;
 
@@ -201,7 +203,7 @@ class UITrait extends iron.Trait {
 	
 	public var paintVisible = true;
 
-	function linkFloat(link:String):Null<Float> {
+	function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 
 		if (link == '_brushRadius') {
 			var r = (brushRadius * brushNodesRadius) / 15.0;
@@ -228,7 +230,7 @@ class UITrait extends iron.Trait {
 
 	var sub = 0;
 	var vec2 = new iron.math.Vec4();
-	function linkVec2(link:String):iron.math.Vec4 {
+	function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
 			var seps = brushBias * 0.0004;
@@ -257,7 +259,7 @@ class UITrait extends iron.Trait {
 
 	public var lastPaintVecX = -1.0;
 	public var lastPaintVecY = -1.0;
-	function linkVec4(link:String):iron.math.Vec4 {
+	function linkVec4(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		if (link == '_inputBrush') {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			vec2.set(paintVec.x, paintVec.y, down ? 1.0 : 0.0, 0.0);
@@ -271,7 +273,7 @@ class UITrait extends iron.Trait {
 		return null;
 	}
 
-	function linkTex(link:String):kha.Image {
+	function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		if (link == "_texcolorid") {
 			if (UITrait.inst.assets.length == 0) return bundled.get("mat_empty.jpg");
 			else return UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
