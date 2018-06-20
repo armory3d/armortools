@@ -4,6 +4,7 @@ import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 import iron.math.Vec4;
 
+@:keep
 class SeparateVectorNode extends LogicNode {
 
 	public function new(tree:LogicTree) {

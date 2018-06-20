@@ -4,6 +4,7 @@ import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 import armory.math.Vec4;
 
+@:keep
 class InputNode extends LogicNode {
 
 	var coords = new Vec4();

@@ -3,6 +3,7 @@ package arm.logicnode;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
+@:keep
 class IntegerNode extends LogicNode {
 
 	public var value:Int;

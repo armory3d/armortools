@@ -3,6 +3,7 @@ package arm.logicnode;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
+@:keep
 class NullNode extends LogicNode {
 
 	public function new(tree:LogicTree) {

@@ -126,7 +126,7 @@ class UITrait extends iron.Trait {
 	function loadBundled(names:Array<String>, done:Void->Void) {
 		var loaded = 0;
 		for (s in names) {
-			kha.Assets.loadImageFromPath(s, false, function(image:kha.Image) {
+			iron.data.Data.getImage(s, function(image:kha.Image) {
 				bundled.set(s, image);
 				loaded++;
 				if (loaded == names.length) done();

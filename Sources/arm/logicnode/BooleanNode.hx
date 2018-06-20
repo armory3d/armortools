@@ -3,6 +3,7 @@ package arm.logicnode;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
+@:keep
 class BooleanNode extends LogicNode {
 
 	public var value:Bool;

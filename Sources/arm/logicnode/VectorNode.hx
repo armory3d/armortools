@@ -4,6 +4,7 @@ import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 import armory.math.Vec4;
 
+@:keep
 class VectorNode extends LogicNode {
 
 	var value = new Vec4();
