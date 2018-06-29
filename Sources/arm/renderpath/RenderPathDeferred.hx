@@ -396,6 +396,16 @@ class RenderPathDeferred {
 		}
 
 		path.loadShader("shader_datas/max_luminance_pass/max_luminance_pass");
+
+		{
+			// Material preview
+			var t = new RenderTargetRaw();
+			t.name = "texpreview";
+			t.width = 50;
+			t.height = 50;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
 		//
 	}
 
@@ -925,6 +935,12 @@ class RenderPathDeferred {
 		#else
 		var framebuffer = "";
 		#end
+
+		// Material preview
+		if (arm.UITrait.inst.preview) { //
+			iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.selectedMaterial.image;
+			framebuffer = "texpreview";
+		}
 
 		if (arm.UITrait.inst.redraw()) { //
 

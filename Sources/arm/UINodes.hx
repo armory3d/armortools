@@ -106,6 +106,7 @@ class UINodes extends iron.Trait {
 		if (frame == 8) {
 			parseMeshMaterial();
 			parsePaintMaterial(); // Temp cpp fix
+			UITrait.inst.makeMaterialPreview();
 		}
 		frame++;
 
@@ -124,6 +125,7 @@ class UINodes extends iron.Trait {
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
 			if (!isBrush) parsePaintMaterial();
+			UITrait.inst.makeMaterialPreview();
 		}
 
 		if (!show) return;
@@ -495,16 +497,23 @@ class UINodes extends iron.Trait {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: 'clockwise' });
+			cull_mode: 'clockwise',
+			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
 
-		
 		frag.ins = vert.outs;
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		vert.add_uniform('mat3 N', '_normalMatrix');
+		vert.add_out('vec3 wnormal');
+		vert.add_out('vec2 texCoord');
 		vert.write('gl_Position = WVP * vec4(pos, 1.0);');
+		vert.write('wnormal = normalize(N * nor);');
 
+		vert.add_out('vec3 mposition');
+		vert.write('mposition = pos.xyz;');
+		vert.write('texCoord = tex;');
 
 		var sout = Cycles.parse(canvas, con_mesh, vert, frag, null, null, null, matcon);
 		var base = sout.out_basecol;
@@ -516,9 +525,19 @@ class UINodes extends iron.Trait {
 		frag.write('float metallic = $met;');
 		frag.write('float occlusion = $occ;');
 
-		frag.add_out('vec4[2] fragColor');
-		frag.write('fragColor[0] = vec4(0.0, 0.0, 0.0, 1.0 - gl_FragCoord.z);');
-		frag.write('fragColor[1] = vec4(basecol.rgb, 0.0);');
+		frag.add_out('vec4[3] fragColor');
+		frag.write('vec3 n = normalize(wnormal);');
+
+		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
+		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
+		frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+		frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+
+		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
+		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
+		frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
+		frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
+		frag.write('fragColor[2] = vec4(0.0);'); // veloc
 
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
@@ -736,8 +755,34 @@ class UINodes extends iron.Trait {
 		});
 	}
 
+	public function parseMeshPreviewMaterial() {
+		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			var sc:iron.data.ShaderData.ShaderContext = null;
+			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
+			m.shader.raw.contexts.remove(sc.raw);
+			m.shader.contexts.remove(sc);
+			
+			var matcon:TMaterialContext = { name: "mesh", bind_textures: [] };
+
+			var con = make_mesh_preview(new ShaderData({name: "Material", canvas: null}), matcon);
+
+			for (i in 0...m.contexts.length) {
+				if (m.contexts[i].raw.name == "mesh") {
+					m.contexts[i] = new MaterialContext(matcon, function(self:MaterialContext) {});
+					break;
+				}
+			}
+			
+			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			m.shader.raw.contexts.push(sc.raw);
+			m.shader.contexts.push(sc);
+		});
+	}
+
 	public var materialParsed = false;
 	public function parsePaintMaterial() {
+
+
 		UITrait.inst.dirty = true;
 
 		if (getMOut()) {

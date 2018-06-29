@@ -65,6 +65,10 @@ class App extends iron.Trait {
 	}
 
 	public static function w():Int {
+		if (UITrait.inst != null && UITrait.inst.preview) {
+			return 50; // Drawing material preview
+		}
+		
 		// TODO: account for Config.raw.window_scale
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
@@ -81,6 +85,10 @@ class App extends iron.Trait {
 	}
 
 	public static function h():Int {
+		if (UITrait.inst != null && UITrait.inst.preview) {
+			return 50; // Drawing material preview
+		}
+
 		// TODO: account for Config.raw.window_scale
 		var res = 0;
 		res = kha.System.windowHeight();

@@ -8,6 +8,7 @@ import iron.data.MeshData;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
+import iron.math.Mat4;
 import iron.RenderPath;
 
 typedef TPreferences = {
@@ -24,7 +25,10 @@ typedef TPreferences = {
 
 class MaterialSlot {
 	public var nodes = new Nodes();
-	public function new() {}
+	public var image:kha.Image = null;
+	public function new() {
+		image = kha.Image.createRenderTarget(50, 50); // TODO: Flickers
+	}
 }
 
 class BrushSlot {
@@ -112,6 +116,8 @@ class UITrait extends iron.Trait {
 
 	public var show = true;
 	public var dirty = true;
+	public var preview = false; // Drawing material previews
+	var savedCamera = Mat4.identity();
 
 	var message = "";
 	var messageTimer = 0.0;
@@ -120,6 +126,7 @@ class UITrait extends iron.Trait {
 	var ui:Zui;
 
 	public var windowW = 280; // Panel width
+	public var toolbarw = 50;
 
 	var colorIdHandle = Id.handle();
 
@@ -433,6 +440,46 @@ class UITrait extends iron.Trait {
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
 
+	public function makeMaterialPreview() {
+		var cube:MeshObject = cast iron.Scene.active.getChild("Cube");
+		cube.visible = false;
+
+		var sphere:MeshObject = cast iron.Scene.active.getChild("Sphere");
+		sphere.visible = true;
+		currentObject = sphere;
+
+		savedCamera.setFrom(iron.Scene.active.camera.transform.local);
+		var m = Mat4.fromArray([0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1]);
+		iron.Scene.active.camera.transform.setMatrix(m);
+		iron.Scene.active.camera.buildMatrix();
+
+		dirty = true;
+		preview = true;
+		arm.App.resize();
+
+		UINodes.inst.parseMeshPreviewMaterial();
+
+		// TAA
+		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
+		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
+
+		var sphere:MeshObject = cast iron.Scene.active.getChild("Sphere");
+		sphere.visible = false;
+
+		var cube:MeshObject = cast iron.Scene.active.getChild("Cube");
+		cube.visible = true;
+		currentObject = cube;
+
+		iron.Scene.active.camera.transform.setMatrix(savedCamera);
+		iron.Scene.active.camera.buildMatrix();
+
+		dirty = true;
+		preview = false;
+		arm.App.resize();
+
+		UINodes.inst.parseMeshMaterial();
+	}
+
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
 		selectedMaterial = materials[i];
@@ -721,6 +768,15 @@ class UITrait extends iron.Trait {
 		g.end();
 		ui.begin(g);
 		// ui.begin(rt.g2); ////
+
+		// if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
+			// if (ui.tab(Id.handle(), "Tools")) {
+			// }
+		// }
+
+		// if (ui.window(Id.handle(), toolbarw, 0, arm.App.realw() - windowW - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+			// ui.tab(Id.handle(), "3D View");
+		// }
 		
 		if (ui.window(hwnd, arm.App.realw() - windowW, 0, windowW, arm.App.realh())) {
 
@@ -820,22 +876,22 @@ class UITrait extends iron.Trait {
 
 				if (ui.panel(Id.handle({selected: true}), "Material")) {
 
-					var img = bundled.get("mat.jpg");
 					var img2 = bundled.get("mat_empty.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);
 
 						for (j in 0...5) {
+							ui.imageInvertY = true; // Material preview
+							
 							var i = j + row * 5;
-							var im = img;
-							if (materials.length <= i) im = img2;
+							var im = i >= materials.length ? img2 : materials[i].image;
 
-							if (im == img && selectedMaterial == materials[i]) {
+							if (im != img2 && selectedMaterial == materials[i]) {
 								ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
 							}
 
-							if (ui.image(im) == State.Started && im == img) {
+							if (ui.image(im) == State.Started && im != img2) {
 								if (selectedMaterial != materials[i]) {
 									selectedMaterial = materials[i];
 									UINodes.inst.updateCanvasMap();
@@ -846,6 +902,8 @@ class UITrait extends iron.Trait {
 								}
 								selectTime = iron.system.Time.time();
 							}
+
+							ui.imageInvertY = false; // Material preview
 						}
 					}
 
@@ -853,6 +911,7 @@ class UITrait extends iron.Trait {
 					if (ui.button("New")) {
 						selectedMaterial = new MaterialSlot();
 						materials.push(selectedMaterial);
+						UITrait.inst.makeMaterialPreview();
 					}
 					if (ui.button("Nodes")) {
 						showMaterialNodes();
