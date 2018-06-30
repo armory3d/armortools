@@ -401,8 +401,8 @@ class RenderPathDeferred {
 			// Material preview
 			var t = new RenderTargetRaw();
 			t.name = "texpreview";
-			t.width = 50;
-			t.height = 50;
+			t.width = 1;
+			t.height = 1;
 			t.format = 'RGBA32';
 			path.createRenderTarget(t);
 		}

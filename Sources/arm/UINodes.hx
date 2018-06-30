@@ -440,7 +440,11 @@ class UINodes extends iron.Trait {
 			frag.add_uniform('float brushScale', '_brushScale');
 			// TODO: use prescaled value from VS
 			Cycles.texCoordName = 'fract(sp * brushScale)'; // Texture projection - project
+
+			// Sticker
+			// frag.write('if (sp.x * brushScale < 0.0 || sp.y * brushScale < 0.0 || sp.x * brushScale > 1.0 || sp.y * brushScale > 1.0) { discard; return; }');
 		}
+
 		var sout = Cycles.parse(canvas, con_paint, vert, frag, null, null, null, matcon);
 		Cycles.texCoordName = 'texCoord';
 		var base = sout.out_basecol;
