@@ -44,24 +44,49 @@ class LayerSlot {
 	public var texpaint:kha.Image;
 	public var texpaint_nor:kha.Image;
 	public var texpaint_pack:kha.Image;
-	
 	public var texpaint_opt:kha.Image;
+	public var rt:iron.RenderPath.RenderTarget;
 
-	public function new() {
+	var ext:String;
+
+	public function set_texpaint(img:kha.Image) {
+		RenderPath.active.renderTargets.get("texpaint" + ext).image = img;
+		texpaint = img;
+	}
+
+	public function set_texpaint_nor(img:kha.Image) {
+		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = img;
+		texpaint_nor = img;
+	}
+
+	public function set_texpaint_pack(img:kha.Image) {
+		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = img;
+		texpaint_pack = img;
+	}
+
+	public function set_texpaint_opt(img:kha.Image) {
+		RenderPath.active.renderTargets.get("texpaint_opt" + ext).image = img;
+		texpaint_opt = img;
+	}
+
+	public function new(ext = "") {
 		id = counter++;
+		if (ext == "") ext = id + "";
+		this.ext = ext;
 
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint" + id;
+			t.name = "texpaint" + ext;
 			t.width = 4096;
 			t.height = 4096;
 			t.format = 'RGBA32';
 			t.depth_buffer = "paintdb";
-			texpaint = RenderPath.active.createRenderTarget(t).image;
+			rt = RenderPath.active.createRenderTarget(t);
+			texpaint = rt.image;
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_nor" + id;
+			t.name = "texpaint_nor" + ext;
 			t.width = 4096;
 			t.height = 4096;
 			t.format = 'RGBA32';
@@ -69,16 +94,15 @@ class LayerSlot {
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_pack" + id;
+			t.name = "texpaint_pack" + ext;
 			t.width = 4096;
 			t.height = 4096;
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
-
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_opt" + id;
+			t.name = "texpaint_opt" + ext;
 			t.width = 4096;
 			t.height = 4096;
 			t.format = 'RGBA32';
@@ -130,6 +154,36 @@ class UITrait extends iron.Trait {
 
 	var colorIdHandle = Id.handle();
 
+	var outputType = 0;
+	var isBase = true;
+	var isOpac = true;
+	var isOcc = true;
+	var isRough = true;
+	var isMet = true;
+	var isNor = true;
+	var hwnd = Id.handle();
+	var materials:Array<MaterialSlot> = null;
+	public var selectedMaterial:MaterialSlot;
+	var brushes:Array<BrushSlot> = null;
+	public var selectedBrush:BrushSlot;
+	public var layers:Array<LayerSlot> = null;
+	public var undoLayers:Array<LayerSlot> = null;
+	public var selectedLayer:LayerSlot;
+	var selectTime = 0.0;
+	public var displaceStrength = 1.0;
+
+	var first = 0;
+	
+	var _onBrush:Array<Void->Void> = [];
+
+	public var paint = false;
+	public var paintVec = new iron.math.Vec4();
+	public var lastPaintX = 0.0;
+	public var lastPaintY = 0.0;
+	var painted = 0;
+	public var brushTime = 0.0;
+	public var pushUndo = false;
+
 	function loadBundled(names:Array<String>, done:Void->Void) {
 		var loaded = 0;
 		for (s in names) {
@@ -145,7 +199,6 @@ class UITrait extends iron.Trait {
 		return dirty || first < 10;
 	}
 
-	var first = 0;
 	public function redraw():Bool {
 		if (first < 10) {
 			first++;
@@ -155,18 +208,10 @@ class UITrait extends iron.Trait {
 		return m.down() || m.down("right") || m.released() || m.released("right") || depthDirty();
 	}
 
-	var _onBrush:Array<Void->Void> = [];
-
 	public function notifyOnBrush(f:Void->Void) {
 		_onBrush.push(f);
 	}
 
-	public var paint = false;
-	public var paintVec = new iron.math.Vec4();
-	public var lastPaintX = 0.0;
-	public var lastPaintY = 0.0;
-	var painted = 0;
-	public var brushTime = 0.0;
 	public function paintDirty():Bool {
 		// Paint bounds
 		if (paintVec.x > 1) return false;
@@ -320,6 +365,10 @@ class UITrait extends iron.Trait {
 			layers.push(new LayerSlot());
 			selectedLayer = layers[0];
 		}
+		if (undoLayers == null) {
+			undoLayers = [];
+			undoLayers.push(new LayerSlot("_undo"));
+		}
 
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
@@ -408,7 +457,9 @@ class UITrait extends iron.Trait {
 			if (apconfig.plugins != null) {
 				for (plugin in apconfig.plugins) {
 					iron.data.Data.getBlob(plugin, function(blob:kha.Blob) {
+						#if js
 						untyped __js__("(1, eval)({0})", blob.toString());
+						#end
 					});
 				}
 			}
@@ -496,6 +547,7 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
+	var isUndo = false;
 	function updateUI() {
 
 		messageTimer -= iron.system.Time.delta;
@@ -508,11 +560,38 @@ class UITrait extends iron.Trait {
 		if (!arm.App.uienabled) return;
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
-		if (down && !kb.down("ctrl")) {
+		if (down && !kb.down("control")) {
+			if (brushTime == 0) pushUndo = true;
 			brushTime += iron.system.Time.delta;
 			for (f in _onBrush) f();
 		}
-		else brushTime = 0;
+		else if (brushTime > 0) {
+			brushTime = 0;
+		}
+
+		if (kb.down("control") && kb.started("z")) {
+			// TODO: swap layers instead of images
+			var tp = selectedLayer.texpaint;
+			var tp_nor = selectedLayer.texpaint_nor;
+			var tp_pack = selectedLayer.texpaint_pack;
+			var tp_opt = selectedLayer.texpaint_opt;
+
+			selectedLayer.set_texpaint(undoLayers[0].texpaint);
+			selectedLayer.set_texpaint_nor(undoLayers[0].texpaint_nor);
+			selectedLayer.set_texpaint_pack(undoLayers[0].texpaint_pack);
+			selectedLayer.set_texpaint_opt(undoLayers[0].texpaint_opt);
+
+			undoLayers[0].set_texpaint(tp);
+			undoLayers[0].set_texpaint_nor(tp_nor);
+			undoLayers[0].set_texpaint_pack(tp_pack);
+			undoLayers[0].set_texpaint_opt(tp_opt);
+
+			// Only main layer contains the depth
+			iron.RenderPath.active.depthToRenderTarget.set("paintdb", isUndo ? selectedLayer.rt : undoLayers[0].rt);
+			isUndo = !isUndo;
+
+			dirty = true;
+		}
 	}
 
 	function initLayers(g:kha.graphics4.Graphics) {
@@ -723,22 +802,6 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
-	var outputType = 0;
-	var isBase = true;
-	var isOpac = true;
-	var isOcc = true;
-	var isRough = true;
-	var isMet = true;
-	var isNor = true;
-	var hwnd = Id.handle();
-	var materials:Array<MaterialSlot> = null;
-	public var selectedMaterial:MaterialSlot;
-	var brushes:Array<BrushSlot> = null;
-	public var selectedBrush:BrushSlot;
-	public var layers:Array<LayerSlot> = null;
-	public var selectedLayer:LayerSlot;
-	var selectTime = 0.0;
-	public var displaceStrength = 1.0;
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
 

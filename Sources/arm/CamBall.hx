@@ -31,7 +31,7 @@ class CamBall extends Trait {
 		// Paint bounds
 		if (mouse.x > iron.App.w()) return;
 
-		if (mouse.down("right") || (mouse.down("left") && kb.down("ctrl"))) {
+		if (mouse.down("right") || (mouse.down("left") && kb.down("control"))) {
 			UITrait.inst.dirty = true;
 			// Rotate
 			object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);

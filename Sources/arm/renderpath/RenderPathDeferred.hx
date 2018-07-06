@@ -396,6 +396,7 @@ class RenderPathDeferred {
 		}
 
 		path.loadShader("shader_datas/max_luminance_pass/max_luminance_pass");
+		path.loadShader("shader_datas/copy_mrt_pass/copy_mrt_pass");
 
 		{
 			// Material preview
@@ -476,6 +477,17 @@ class RenderPathDeferred {
 
 		// Paint
 		var tid = arm.UITrait.inst.selectedLayer.id;
+
+		if (arm.UITrait.inst.pushUndo) {
+			path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo", "texpaint_opt_undo"]);
+			path.bindTarget("texpaint" + tid, "tex0");
+			path.bindTarget("texpaint_nor" + tid, "tex1");
+			path.bindTarget("texpaint_pack" + tid, "tex2");
+			path.bindTarget("texpaint_opt" + tid, "tex3");
+			path.drawShader("shader_datas/copy_mrt_pass/copy_mrt_pass");
+			arm.UITrait.inst.pushUndo = false;
+		}
+
 		if (arm.UITrait.inst.depthDirty()) {
 			path.setTarget("texpaint" + tid);
 			path.clearTarget(null, 1.0);

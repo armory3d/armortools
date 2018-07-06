@@ -5,6 +5,7 @@ import arm.make_renderpath
 
 def on_make_renderpath():
 	arm.assets.add_shader_pass('max_luminance_pass')
+	arm.assets.add_shader_pass('copy_mrt_pass')
 
 def register():
 
