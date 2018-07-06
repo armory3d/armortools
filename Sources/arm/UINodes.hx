@@ -445,7 +445,9 @@ class UINodes extends iron.Trait {
 			// frag.write('if (sp.x * brushScale < 0.0 || sp.y * brushScale < 0.0 || sp.x * brushScale > 1.0 || sp.y * brushScale > 1.0) { discard; return; }');
 		}
 
+		Cycles.parse_height_as_channel = true;
 		var sout = Cycles.parse(canvas, con_paint, vert, frag, null, null, null, matcon);
+		Cycles.parse_height_as_channel = false;
 		Cycles.texCoordName = 'texCoord';
 		var base = sout.out_basecol;
 		var rough = sout.out_roughness;
