@@ -949,8 +949,12 @@ class RenderPathDeferred {
 		#end
 
 		// Material preview
-		if (arm.UITrait.inst.preview) { //
+		if (arm.UITrait.inst.materialPreview) { //
 			iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.selectedMaterial.image;
+			framebuffer = "texpreview";
+		}
+		else if (arm.UITrait.inst.stickerPreview) {
+			iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.stickerImage;
 			framebuffer = "texpreview";
 		}
 

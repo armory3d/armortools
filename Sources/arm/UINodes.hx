@@ -97,19 +97,11 @@ class UINodes extends iron.Trait {
 
 	var mx = 0.0;
 	var my = 0.0;
-	var frame = 0;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
 	public var changed = false;
 	function update() {
-		if (frame == 8) {
-			parseMeshMaterial();
-			parsePaintMaterial(); // Temp cpp fix
-			UITrait.inst.makeMaterialPreview();
-		}
-		frame++;
-
 		updateCanvasMap();
 		updateCanvasBrushMap();
 
@@ -126,6 +118,7 @@ class UINodes extends iron.Trait {
 			mchanged = changed = false;
 			if (!isBrush) parsePaintMaterial();
 			UITrait.inst.makeMaterialPreview();
+			if (UITrait.inst.brushPaint == 2) UITrait.inst.makeStickerPreview();
 		}
 
 		if (!show) return;
@@ -155,10 +148,12 @@ class UINodes extends iron.Trait {
 			changed = true;
 		}
 
-		if (keyboard.started("p")) {
-			var c = isBrush ? canvasBrush : canvas;
-			trace(haxe.Json.stringify(c));
-		}
+		// if (keyboard.started("p")) {
+		// 	var c = isBrush ? canvasBrush : canvas;
+		// 	var str = haxe.Json.stringify(c);
+		// 	trace(str.substr(0, 1023));
+		// 	trace(str.substr(1023, 2047));
+		// }
 	}
 
 	public function getNodeX():Int {
@@ -392,28 +387,31 @@ class UINodes extends iron.Trait {
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
 		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1) { // Draw / Erase
+			
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) { discard; return; }');
 			
-			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-			frag.write('binp.x *= aspectRatio;');
-			frag.write('binp = binp * 0.5 + 0.5;');
+			if (UITrait.inst.brushPaint == 2) { // Sticker
+				frag.write('float dist = 0.0;');
+			}
+			else {
+				frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
+				frag.write('binp.x *= aspectRatio;');
+				frag.write('binp = binp * 0.5 + 0.5;');
 
-			// Continuos paint
-			frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
-			frag.write('binplast.x *= aspectRatio;');
-			frag.write('binplast = binplast * 0.5 + 0.5;');
-			
-			frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
-			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-			frag.write('float dist = length(pa - ba * h);');
-			frag.write('if (dist > brushRadius) { discard; return; }');
-			//
+				// Continuos paint
+				frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
+				frag.write('binplast.x *= aspectRatio;');
+				frag.write('binplast = binplast * 0.5 + 0.5;');
+				
+				frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
+				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+				frag.write('float dist = length(pa - ba * h);');
+				frag.write('if (dist > brushRadius) { discard; return; }');
+				//
 
-			
-			// frag.write('float dist = distance(bsp.xy, binp.xy);');
-			// frag.write('if (dist > brushRadius) { discard; return; }');
-
-			
+				// frag.write('float dist = distance(bsp.xy, binp.xy);');
+				// frag.write('if (dist > brushRadius) { discard; return; }');
+			}
 		}
 		else {
 			frag.write('float dist = 0.0;');
@@ -436,13 +434,31 @@ class UINodes extends iron.Trait {
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = fract(tex * brushScale);'); // TODO: fract(tex) - somehow clamp is set after first paint
 		}
+		// Texture projection - project
 		else {
 			frag.add_uniform('float brushScale', '_brushScale');
-			// TODO: use prescaled value from VS
-			Cycles.texCoordName = 'fract(sp * brushScale)'; // Texture projection - project
+			frag.write('vec2 uvsp = sp.xy;');
 
 			// Sticker
-			// frag.write('if (sp.x * brushScale < 0.0 || sp.y * brushScale < 0.0 || sp.x * brushScale > 1.0 || sp.y * brushScale > 1.0) { discard; return; }');
+			if (UITrait.inst.brushPaint == 2) {
+				
+				frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
+				frag.write('binp = binp * 0.5 + 0.5;');
+
+				frag.write('uvsp -= binp;');
+				frag.write('uvsp.x *= aspectRatio;');
+
+				// frag.write('uvsp *= brushScale;');
+				frag.write('uvsp *= vec2(7.2);');
+				frag.write('uvsp += vec2(0.5);');
+
+				frag.write('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; return; }');
+			}
+			else {
+				frag.write('uvsp.x *= aspectRatio;');
+			}
+
+			Cycles.texCoordName = 'fract(vec2(uvsp.x, uvsp.y) * brushScale)'; // TODO: use prescaled value from VS
 		}
 
 		Cycles.parse_height_as_channel = true;
