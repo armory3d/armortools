@@ -758,7 +758,7 @@ class UITrait extends iron.Trait {
 			l.texpaint = rts.get("texpaint" + l.id).image;
 			l.texpaint_nor = rts.get("texpaint_nor" + l.id).image;
 			l.texpaint_pack = rts.get("texpaint_pack" + l.id).image;
-			l.texpaint_opt = rts.get("texpaint_opt" + l.id).image;
+			if (rttexpaint_opt != null) l.texpaint_opt = rts.get("texpaint_opt" + l.id).image;
 		}
 
 		dirty = true;
