@@ -33,13 +33,20 @@ class CamBall extends Trait {
 
 		if (mouse.down("right") || (mouse.down("left") && kb.down("control"))) {
 			UITrait.inst.dirty = true;
-			// Rotate
-			object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);
-			object.transform.buildMatrix();
-			var v = object.transform.right();
-			v.normalize();
-			object.transform.rotate(v, mouse.movementY / 100);
-			object.transform.buildMatrix();
+			
+			// Rotate X
+			if (!kb.down("alt")) {
+				object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);
+				object.transform.buildMatrix();
+			}
+			
+			// Rotate Y
+			if (!kb.down("shift")) {
+				var v = object.transform.right();
+				v.normalize();
+				object.transform.rotate(v, mouse.movementY / 100);
+				object.transform.buildMatrix();
+			}
 		}
 	}
 }
