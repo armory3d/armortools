@@ -65,6 +65,7 @@ class LayerSlot {
 	}
 
 	public function set_texpaint_opt(img:kha.Image) {
+		if (texpaint_opt == null) return;
 		RenderPath.active.renderTargets.get("texpaint_opt" + ext).image = img;
 		texpaint_opt = img;
 	}
@@ -100,6 +101,13 @@ class LayerSlot {
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
+
+		if (UITrait.inst.paintHeight) make_texpaint_opt();
+	}
+
+	public function make_texpaint_opt() {
+		if (texpaint_opt != null) return;
+
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_opt" + ext;
@@ -114,8 +122,7 @@ class LayerSlot {
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();
-		
-		texpaint_opt.unload();
+		if (texpaint_opt != null) texpaint_opt.unload();
 	}
 }
 
@@ -162,6 +169,7 @@ class UITrait extends iron.Trait {
 	var isRough = true;
 	var isMet = true;
 	var isNor = true;
+	var isHeight = true;
 	var hwnd = Id.handle();
 	var materials:Array<MaterialSlot> = null;
 	public var selectedMaterial:MaterialSlot;
@@ -256,6 +264,7 @@ class UITrait extends iron.Trait {
 	public var paintRough = true;
 	public var paintMet = true;
 	public var paintNor = true;
+	public var paintHeight = false;
 	
 	public var paintVisible = true;
 
@@ -667,12 +676,19 @@ class UITrait extends iron.Trait {
 		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 1.0)); // Occ, rough, met
 		layers[0].texpaint_pack.g4.end();
 
+		g.begin();
+		iron.App.removeRender(initLayers);
+	}
+
+	function initHeightLayer(g:kha.graphics4.Graphics) {
+		g.end();
+
 		layers[0].texpaint_opt.g4.begin();
 		layers[0].texpaint_opt.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Opac, emis, height
 		layers[0].texpaint_opt.g4.end();
 
 		g.begin();
-		iron.App.removeRender(initLayers);
+		iron.App.removeRender(initHeightLayer);
 	}
 
 	function clearLastLayer(g:kha.graphics4.Graphics) {
@@ -691,9 +707,11 @@ class UITrait extends iron.Trait {
 		layers[i].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
 		layers[i].texpaint_pack.g4.end();
 
-		layers[i].texpaint_opt.g4.begin();
-		layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
-		layers[i].texpaint_opt.g4.end();
+		if (layers[i].texpaint_opt != null) {
+			layers[i].texpaint_opt.g4.begin();
+			layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
+			layers[i].texpaint_opt.g4.end();
+		}
 
 		g.begin();
 		iron.App.removeRender(clearLastLayer);
@@ -713,7 +731,7 @@ class UITrait extends iron.Trait {
 			rttexpaint.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.Depth16);
 			rttexpaint_nor.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 			rttexpaint_pack.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-			rttexpaint_opt.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+			if (rttexpaint_opt != null) rttexpaint_opt.image = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 
 			g.end();
 			rttexpaint.image.g2.begin();
@@ -728,9 +746,11 @@ class UITrait extends iron.Trait {
 			rttexpaint_pack.image.g2.drawScaledImage(l.texpaint_pack, 0, 0, res, res);
 			rttexpaint_pack.image.g2.end();
 
-			rttexpaint_opt.image.g2.begin();
-			rttexpaint_opt.image.g2.drawScaledImage(l.texpaint_opt, 0, 0, res, res);
-			rttexpaint_opt.image.g2.end();
+			if (rttexpaint_opt != null) {
+				rttexpaint_opt.image.g2.begin();
+				rttexpaint_opt.image.g2.drawScaledImage(l.texpaint_opt, 0, 0, res, res);
+				rttexpaint_opt.image.g2.end();
+			}
 			g.begin();
 
 			l.unload();
@@ -797,10 +817,12 @@ class UITrait extends iron.Trait {
 		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
 		l0.texpaint_pack.g2.end();
 
-		l0.texpaint_opt.g2.begin(false);
-		l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
-		l0.texpaint_opt.g2.end();
-		
+		if (l0.texpaint_opt != null) {
+			l0.texpaint_opt.g2.begin(false);
+			l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
+			l0.texpaint_opt.g2.end();
+		}
+
 		g.begin();
 
 		deleteSelectedLayer();
@@ -978,17 +1000,17 @@ class UITrait extends iron.Trait {
 						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 
-						ui.row([1/3,1/3,1/3]);
+						ui.row([1/4,1/4,1/4,1/4]);
 
 						var baseHandle = Id.handle({selected: paintBase});
-						paintBase = ui.check(baseHandle, "Base Color");
+						paintBase = ui.check(baseHandle, "Base");
 						if (baseHandle.changed) {
 							UINodes.inst.updateCanvasMap();
 							UINodes.inst.parsePaintMaterial();
 						}
 
 						var norHandle = Id.handle({selected: paintNor});
-						paintNor = ui.check(norHandle, "Normal Map");
+						paintNor = ui.check(norHandle, "Normal");
 						if (norHandle.changed) {
 							UINodes.inst.updateCanvasMap();
 							UINodes.inst.parsePaintMaterial();
@@ -998,6 +1020,16 @@ class UITrait extends iron.Trait {
 						// TODO: Use glColorMaski() to disable specific channel
 						paintRough = ui.check(roughHandle, "ORM");
 						if (roughHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						var heightHandle = Id.handle({selected: paintHeight});
+						paintHeight = ui.check(heightHandle, "Height");
+						if (heightHandle.changed) {
+							for (l in layers) l.make_texpaint_opt();
+							for (l in undoLayers) l.make_texpaint_opt();
+							iron.App.notifyOnRender(initHeightLayer);
 							UINodes.inst.updateCanvasMap();
 							UINodes.inst.parsePaintMaterial();
 						}
@@ -1307,18 +1339,24 @@ class UITrait extends iron.Trait {
 							#end
 						}
 
-						pixels = selectedLayer.texpaint_opt.getPixels();
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+						if (isHeight && selectedLayer.texpaint_opt != null) {
+							pixels = selectedLayer.texpaint_opt.getPixels();
+							for (i in 0...textureSize * textureSize) {
+								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+							}
+							bo = new haxe.io.BytesOutput();
+							var pngwriter = new iron.format.png.Writer(bo);
+							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							#if kha_krom
+							Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+							#end
 						}
-						bo = new haxe.io.BytesOutput();
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						#if kha_krom
-						if (isMet) Krom.fileSaveBytes(path + "/tex_oeh.png", bo.getBytes().getData());
-						#end
+
+						// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac.png", bo.getBytes().getData());
+						// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis.png", bo.getBytes().getData());
+						// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs.png", bo.getBytes().getData());
 					}
 				}
 
@@ -1340,6 +1378,7 @@ class UITrait extends iron.Trait {
 				ui.row([1/2, 1/2]);
 				isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
 				isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
+				isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 			}
 
 			if (ui.tab(htab, "Preferences")) {
@@ -1459,6 +1498,7 @@ class UITrait extends iron.Trait {
 		new MeshData(raw, function(md:MeshData) {
 			currentObject.data.delete();
 			iron.App.notifyOnRender(initLayers);
+			if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
 			
 			currentObject.setData(md);
 			

@@ -380,7 +380,8 @@ class UINodes extends iron.Trait {
 			return con_paint;
 		}
 
-		frag.add_out('vec4 fragColor[4]');
+		var numTex = UITrait.inst.paintHeight ? 4 : 3;
+		frag.add_out('vec4 fragColor[$numTex]');
 
 		frag.add_uniform('float brushRadius', '_brushRadius');
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
@@ -485,11 +486,14 @@ class UINodes extends iron.Trait {
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
 		// frag.write('    fragColor[1] = vec4(nortan, str);');
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
-		frag.write('    fragColor[3] = vec4(1.0, 0.0, height, str);');
+		if (UITrait.inst.paintHeight) {
+			frag.write('    fragColor[3] = vec4(1.0, 0.0, height, str);');
+		}
 
 		if (!UITrait.inst.paintBase) frag.write('fragColor[0].a = 0.0;');
 		if (!UITrait.inst.paintNor) frag.write('fragColor[1].a = 0.0;');
 		if (!UITrait.inst.paintRough) frag.write('fragColor[2].a = 0.0;');
+		// if (!UITrait.inst.paintHeight) frag.write('fragColor[3].a = 0.0;');
 
 		if (UITrait.inst.brushType == 3) { // Bake AO
 			frag.write('fragColor[0].a = 0.0;');
@@ -592,13 +596,15 @@ class UINodes extends iron.Trait {
 			vert.add_uniform('mat4 W', '_worldMatrix');
 			vert.add_uniform('mat3 N', '_normalMatrix');
 			vert.add_uniform('mat4 LVP', '_lampViewProjectionMatrix');
-			vert.add_uniform('sampler2D texpaint_opt');
-			vert.write('vec4 opt = texture(texpaint_opt, tex);');
-			vert.write('float height = opt.b;');
-			vert.write('vec3 wnormal = normalize(N * nor);');
 			vert.write('vec4 wposition = W * vec4(pos, 1.0);');
-			var displaceStrength = UITrait.inst.displaceStrength;
-			vert.write('wposition.xyz += wnormal * height * $displaceStrength;');
+			if (UITrait.inst.paintHeight) {
+				vert.add_uniform('sampler2D texpaint_opt');
+				vert.write('vec4 opt = texture(texpaint_opt, tex);');
+				vert.write('float height = opt.b;');
+				vert.write('vec3 wnormal = normalize(N * nor);');
+				var displaceStrength = UITrait.inst.displaceStrength * 0.1;
+				vert.write('wposition.xyz += wnormal * height * $displaceStrength;');
+			}
 			vert.write('gl_Position = LVP * vec4(wposition.xyz, 1.0);');
 		}
 		else {
@@ -641,11 +647,13 @@ class UINodes extends iron.Trait {
 
 		// Height
 		// TODO: can cause TAA issues
-		vert.add_uniform('sampler2D texpaint_opt');
-		vert.write('vec4 opt = texture(texpaint_opt, tex);');
-		vert.write('float height = opt.b;');
-		var displaceStrength = UITrait.inst.displaceStrength;
-		vert.write('wposition.xyz += wnormal * height * $displaceStrength;');
+		if (UITrait.inst.paintHeight) {
+			vert.add_uniform('sampler2D texpaint_opt');
+			vert.write('vec4 opt = texture(texpaint_opt, tex);');
+			vert.write('float height = opt.b;');
+			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
+			vert.write('wposition.xyz += wnormal * height * $displaceStrength;');
+		}
 		//
 
 		vert.write('gl_Position = VP * wposition;');
@@ -692,18 +700,20 @@ class UINodes extends iron.Trait {
 				frag.write('n = normalize(TBN * normalize(n));');
 
 				// Height
-				frag.add_uniform('sampler2D texpaint_opt');
-				frag.write('vec4 vech;');
-				frag.write('vech.x = textureOffset(texpaint_opt, texCoord, ivec2(-1, 0)).b;');
-				frag.write('vech.y = textureOffset(texpaint_opt, texCoord, ivec2(1, 0)).b;');
-				frag.write('vech.z = textureOffset(texpaint_opt, texCoord, ivec2(0, -1)).b;');
-				frag.write('vech.w = textureOffset(texpaint_opt, texCoord, ivec2(0, 1)).b;');
-				// Displace normal strength
-				frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
-				frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
-				frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
-				frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
-				frag.write('n = normalize(mat3(va, vb, vc) * n);');
+				if (UITrait.inst.paintHeight) {
+					frag.add_uniform('sampler2D texpaint_opt');
+					frag.write('vec4 vech;');
+					frag.write('vech.x = textureOffset(texpaint_opt, texCoord, ivec2(-1, 0)).b;');
+					frag.write('vech.y = textureOffset(texpaint_opt, texCoord, ivec2(1, 0)).b;');
+					frag.write('vech.z = textureOffset(texpaint_opt, texCoord, ivec2(0, -1)).b;');
+					frag.write('vech.w = textureOffset(texpaint_opt, texCoord, ivec2(0, 1)).b;');
+					// Displace normal strength
+					frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
+					frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
+					frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
+					frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
+					frag.write('n = normalize(mat3(va, vb, vc) * n);');
+				}
 				//
 
 				frag.write('vec4 pack = texture(texpaint_pack, texCoord);');

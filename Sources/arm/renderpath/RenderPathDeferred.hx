@@ -396,7 +396,8 @@ class RenderPathDeferred {
 		}
 
 		path.loadShader("shader_datas/max_luminance_pass/max_luminance_pass");
-		path.loadShader("shader_datas/copy_mrt_pass/copy_mrt_pass");
+		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		path.loadShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 
 		{
 			// Material preview
@@ -421,7 +422,7 @@ class RenderPathDeferred {
 			path.setTarget(Inc.getShadowMap());
 
 			// Paint
-			if (arm.UINodes.inst.materialParsed) {
+			if (arm.UINodes.inst.materialParsed && arm.UITrait.inst.paintHeight) {
 				var tid = arm.UITrait.inst.layers[0].id;
 				path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
 			}
@@ -479,12 +480,23 @@ class RenderPathDeferred {
 		var tid = arm.UITrait.inst.selectedLayer.id;
 
 		if (arm.UITrait.inst.pushUndo) {
-			path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo", "texpaint_opt_undo"]);
+			if (arm.UITrait.inst.paintHeight) {
+				path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo", "texpaint_opt_undo"]);
+			}
+			else {
+				path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo"]);
+			}
+			
 			path.bindTarget("texpaint" + tid, "tex0");
 			path.bindTarget("texpaint_nor" + tid, "tex1");
 			path.bindTarget("texpaint_pack" + tid, "tex2");
-			path.bindTarget("texpaint_opt" + tid, "tex3");
-			path.drawShader("shader_datas/copy_mrt_pass/copy_mrt_pass");
+			if (arm.UITrait.inst.paintHeight) {
+				path.bindTarget("texpaint_opt" + tid, "tex3");
+				path.drawShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
+			}
+			else {
+				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+			}
 			arm.UITrait.inst.pushUndo = false;
 		}
 
@@ -529,7 +541,12 @@ class RenderPathDeferred {
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
 				}
-				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
+				if (arm.UITrait.inst.paintHeight) {
+					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
+				}
+				else {
+					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid]);
+				}
 				path.bindTarget("_paintdb", "paintdb");
 				if (arm.UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
@@ -580,13 +597,13 @@ class RenderPathDeferred {
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
+		if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
 		if (arm.UITrait.inst.layers.length > 1) {
 			tid = arm.UITrait.inst.layers[1].id;
 			path.bindTarget("texpaint" + tid, "texpaint1");
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor1");
 			path.bindTarget("texpaint_pack" + tid, "texpaint_pack1");
-			path.bindTarget("texpaint_opt" + tid, "texpaint_opt1");
+			if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt1");
 		}
 		//
 
