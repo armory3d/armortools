@@ -673,7 +673,7 @@ class UINodes extends iron.Trait {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0 - gl_FragCoord.z);');
 			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2));');
-			frag.write('fragColor[1] = vec4(idcol.rgb, 1.0);');
+			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
 		else {
 			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
