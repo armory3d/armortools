@@ -1403,7 +1403,7 @@ class UITrait extends iron.Trait {
 				armory.data.Config.raw.window_vsync = ui.check(Id.handle({selected: armory.data.Config.raw.window_vsync}), "VSync");
 				if (ui.button("Save")) {
 					#if kha_krom
-					Krom.fileSaveBytes("config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
+					Krom.fileSaveBytes("data/config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
 					#end
 				}
 				ui.text("v0.4 armorpaint.org");
