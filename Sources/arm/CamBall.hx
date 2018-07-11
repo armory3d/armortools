@@ -35,10 +35,10 @@ class CamBall extends Trait {
 			UITrait.inst.dirty = true;
 			
 			// Rotate X
-			if (!kb.down("alt")) {
+			// if (!kb.down("alt")) {
 				object.transform.rotate(new Vec4(0, 0, 1), mouse.movementX / 100);
 				object.transform.buildMatrix();
-			}
+			// }
 			
 			// Rotate Y
 			if (!kb.down("shift")) {
