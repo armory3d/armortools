@@ -43,6 +43,8 @@ class UINodes extends iron.Trait {
 		super();
 		inst = this;
 
+		// Cycles.arm_export_tangents = false;
+
 		iron.data.Data.getBlob('default_material.json', function(b1:kha.Blob) {
 			iron.data.Data.getBlob('default_brush.json', function(b2:kha.Blob) {
 
@@ -330,7 +332,7 @@ class UINodes extends iron.Trait {
 		vert.write('sp.z -= paintDepthBias;'); // small bias or !paintVisible
 
 		vert.add_out('vec3 mposition');
-		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
+		if (UITrait.inst.brushPaint == 0) {
         	vert.write('mposition = pos.xyz;');
         }
         else {
@@ -430,14 +432,15 @@ class UINodes extends iron.Trait {
 		}
 
 		// Texture projection - texcoords
-		if (UITrait.inst.brushPaint == 0 && con_paint.is_elem('tex')) {
-			vert.add_uniform('float brushScale', '_brushScale');
+		if (UITrait.inst.brushPaint == 0) {
+			vert.add_uniform('float brushScale', '_brushScale'); // TODO: Will throw uniform not found
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = fract(tex * brushScale);'); // TODO: fract(tex) - somehow clamp is set after first paint
 		}
 		// Texture projection - project
 		else {
 			frag.add_uniform('float brushScale', '_brushScale');
+			frag.write_pre = true; // When tc is fetched by normalmap
 			frag.write('vec2 uvsp = sp.xy;');
 
 			// Sticker
@@ -459,7 +462,8 @@ class UINodes extends iron.Trait {
 				frag.write('uvsp.x *= aspectRatio;');
 			}
 
-			Cycles.texCoordName = 'fract(vec2(uvsp.x, uvsp.y) * brushScale)'; // TODO: use prescaled value from VS
+			frag.write_pre = false;
+			Cycles.texCoordName = 'fract(uvsp * brushScale)'; // TODO: use prescaled value from VS
 		}
 
 		Cycles.parse_height_as_channel = true;
@@ -546,10 +550,12 @@ class UINodes extends iron.Trait {
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
 		var occ = sout.out_occlusion;
+		var nortan = Cycles.out_normaltan;
 		frag.write('vec3 basecol = $base;');
 		frag.write('float roughness = $rough;');
 		frag.write('float metallic = $met;');
 		frag.write('float occlusion = $occ;');
+		frag.write('vec3 nortan = $nortan;');
 
 		frag.add_out('vec4[3] fragColor');
 		frag.write('vec3 n = normalize(wnormal);');
@@ -558,6 +564,18 @@ class UINodes extends iron.Trait {
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
 		frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
 		frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+
+		// Apply normal channel
+		vert.add_uniform('vec3 eye', '_cameraPosition');
+		vert.add_uniform('mat4 W', '_worldMatrix');
+		vert.write('vec4 spos = vec4(pos, 1.0);');
+		vert.write('vec4 wposition = W * spos;');
+		vert.add_out('vec3 eyeDir');
+		vert.write('eyeDir = eye - wposition.xyz;');
+		frag.write('vec3 vVec = normalize(eyeDir);');
+		frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+		frag.write('n = nortan * 2.0 - 1.0;');
+		frag.write('n = normalize(TBN * normalize(n));');
 
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
@@ -594,10 +612,10 @@ class UINodes extends iron.Trait {
 
 		if (shadowmap) {
 			vert.add_uniform('mat4 W', '_worldMatrix');
-			vert.add_uniform('mat3 N', '_normalMatrix');
 			vert.add_uniform('mat4 LVP', '_lampViewProjectionMatrix');
 			vert.write('vec4 wposition = W * vec4(pos, 1.0);');
 			if (UITrait.inst.paintHeight) {
+				vert.add_uniform('mat3 N', '_normalMatrix');
 				vert.add_uniform('sampler2D texpaint_opt');
 				vert.write('vec4 opt = texture(texpaint_opt, tex);');
 				vert.write('float height = opt.b;');
