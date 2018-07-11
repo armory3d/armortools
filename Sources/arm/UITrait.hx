@@ -628,9 +628,15 @@ class UITrait extends iron.Trait {
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (down && !kb.down("control")) {
-			if (brushTime == 0 && undoEnabled) pushUndo = true;
-			brushTime += iron.system.Time.delta;
-			for (f in _onBrush) f();
+
+			if (mouse.x <= iron.App.w()) {
+				if (brushTime == 0 && undoEnabled) {
+					pushUndo = true;
+				}
+				brushTime += iron.system.Time.delta;
+				for (f in _onBrush) f();
+			}
+
 		}
 		else if (brushTime > 0) {
 			brushTime = 0;
