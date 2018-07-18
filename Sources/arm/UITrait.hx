@@ -9,6 +9,7 @@ import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
 import iron.math.Mat4;
+import iron.math.Math;
 import iron.RenderPath;
 
 typedef TPreferences = {
@@ -194,6 +195,20 @@ class UITrait extends iron.Trait {
 	var painted = 0;
 	public var brushTime = 0.0;
 	public var pushUndo = false;
+
+
+	public var selectedObject:iron.object.Object;
+	var gizmo:iron.object.Object = null;
+	var gizmoX:iron.object.Object = null;
+	var gizmoY:iron.object.Object = null;
+	var gizmoZ:iron.object.Object = null;
+	var selectedType = "";
+	var axisX = false;
+	var axisY = false;
+	var axisZ = false;
+	var axisStart = 0.0;
+	var row4 = [1/4, 1/4, 1/4, 1/4];
+
 
 	function loadBundled(names:Array<String>, done:Void->Void) {
 		var loaded = 0;
@@ -467,6 +482,14 @@ class UITrait extends iron.Trait {
 			// var mat:armory.data.MaterialData = cast(pui, armory.object.MeshObject).materials[0];
 			// mat.contexts[0].textures[0] = rt; // Override diffuse texture
 
+			gizmo = iron.Scene.active.getChild(".GizmoTranslate");
+			gizmoX = iron.Scene.active.getChild("GizmoX");
+			gizmoY = iron.Scene.active.getChild("GizmoY");
+			gizmoZ = iron.Scene.active.getChild("GizmoZ");
+			selectedObject = iron.Scene.active.getChild("Cube");
+			var lamp = iron.Scene.active.getChild("Lamp");
+			lamp.addTrait(new armory.trait.physics.RigidBody(0.0));
+
 			currentObject = cast(iron.Scene.active.getChild("Cube"), MeshObject);
 
 			iron.App.notifyOnUpdate(update);
@@ -665,6 +688,117 @@ class UITrait extends iron.Trait {
 
 			dirty = true;
 		}
+
+		updateGizmo();
+	}
+
+	function updateGizmo() {
+		if (selectedObject != null) {
+			gizmo.transform.loc.setFrom(selectedObject.transform.loc);
+			gizmo.transform.buildMatrix();
+		}
+
+		var mouse = iron.system.Input.getMouse();
+		var kb = iron.system.Input.getKeyboard();
+
+		if (mouse.x < App.w()) {
+			if (kb.started("x") || kb.started("backspace")) {
+				if (selectedObject != null) {
+					selectedObject.remove();
+					selectObject(iron.Scene.active.getChild("Scene"));
+				}
+			}
+			if (kb.started("f") && selectedObject != null) {
+				if (Std.is(selectedObject, iron.object.MeshObject)) {
+					var mo = cast(selectedObject, iron.object.MeshObject);
+					var object = iron.Scene.active.addMeshObject(mo.data, mo.materials, iron.Scene.active.getChild("Scene"));
+					object.name = mo.name + '.1';
+
+					object.transform.loc.setFrom(mo.transform.loc);
+					object.transform.rot.setFrom(mo.transform.rot);
+					object.transform.scale.setFrom(mo.transform.scale);
+					object.transform.buildMatrix();
+
+					object.addTrait(new armory.trait.physics.RigidBody(0.0));
+
+					selectObject(object);
+				}
+				else if (Std.is(selectedObject, iron.object.LampObject)) {
+					var lo = cast(selectedObject, iron.object.LampObject);
+					var object = iron.Scene.active.addLampObject(lo.data, iron.Scene.active.getChild("Scene"));
+					object.name = lo.name + '.1';
+
+					object.transform.loc.setFrom(lo.transform.loc);
+					object.transform.rot.setFrom(lo.transform.rot);
+					object.transform.scale.setFrom(lo.transform.scale);
+					object.transform.buildMatrix();
+
+					object.addTrait(new armory.trait.physics.RigidBody(0.0));
+
+					selectObject(object);
+				}
+			}
+		}
+
+		if (mouse.started("right")) {
+			var physics = armory.trait.physics.PhysicsWorld.active;
+			var rb = physics.pickClosest(mouse.x, mouse.y);
+			if (rb != null) selectObject(rb.object);
+		}
+
+		if (mouse.started("left") && selectedObject.name != "Scene") {
+			gizmo.transform.buildMatrix();
+			var trs = [gizmoX.transform, gizmoY.transform, gizmoZ.transform];
+			var hit = iron.math.RayCaster.closestBoxIntersect(trs, mouse.x, mouse.y, iron.Scene.active.camera);
+			if (hit != null) {
+				if (hit.object == gizmoX) axisX = true;
+				else if (hit.object == gizmoY) axisY = true;
+				else if (hit.object == gizmoZ) axisZ = true;
+				if (axisX || axisY || axisZ) axisStart = 0.0;
+			}
+		}
+		else if (mouse.released("left")) {
+			axisX = axisY = axisZ = false;
+		}
+
+		if (axisX || axisY || axisZ) {
+			var t = selectedObject.transform;
+			var v = new iron.math.Vec4();
+			v.set(t.worldx(), t.worldy(), t.worldz());
+			
+			if (axisX) {
+				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.yAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				if (hit != null) {
+					if (axisStart == 0) axisStart = hit.x - selectedObject.transform.loc.x;
+					selectedObject.transform.loc.x = hit.x - axisStart;
+					selectedObject.transform.buildMatrix();
+					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
+					if (rb != null) rb.syncTransform();
+				}
+			}
+			else if (axisY) {
+				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.xAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				if (hit != null) {
+					if (axisStart == 0) axisStart = hit.y - selectedObject.transform.loc.y;
+					selectedObject.transform.loc.y = hit.y - axisStart;
+					selectedObject.transform.buildMatrix();
+					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
+					if (rb != null) rb.syncTransform();
+				}
+			}
+			else if (axisZ) {
+				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.xAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				if (hit != null) {
+					if (axisStart == 0) axisStart = hit.z - selectedObject.transform.loc.z;
+					selectedObject.transform.loc.z = hit.z - axisStart;
+					selectedObject.transform.buildMatrix();
+					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
+					if (rb != null) rb.syncTransform();
+				}
+			}
+		}
+
+		arm.FlyCamera.inst.enabled = !(axisX || axisY || axisZ) && mouse.x < App.w();
 	}
 
 	function initLayers(g:kha.graphics4.Graphics) {
@@ -888,6 +1022,22 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
+
+	function selectObject(o:iron.object.Object) {
+		selectedObject = o;
+		// if (Std.is(o, iron.object.MeshObject)) {
+		// 	for (i in 0...materials.length) {
+		// 		if (materials[i].data == cast(o, iron.object.MeshObject).materials[0]) {
+		// 			// selectMaterial(i); // loop
+		// 			selectedMaterial = materials[i];
+		// 			hwnd.redraws = 2;
+		// 			break;
+		// 		}
+		// 	}
+		// }
+	}
+
+
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
 
@@ -937,6 +1087,165 @@ class UITrait extends iron.Trait {
 		if (ui.window(hwnd, arm.App.realw() - windowW, 0, windowW, arm.App.realh())) {
 
 			var htab = Id.handle({position: 0});
+
+
+			#if 1
+			if (ui.tab(htab, "Scene")) {
+				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
+					ui.indent();
+					
+					var i = 0;
+					function drawList(h:zui.Zui.Handle, o:iron.object.Object) {
+						if (o.name.charAt(0) == '.') return; // Hidden
+						var b = false;
+						if (selectedObject == o) {
+							ui.g.color = 0xff205d9c;
+							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
+							ui.g.color = 0xffffffff;
+						}
+						if (o.children.length > 0) {
+							b = ui.panel(h.nest(i, {selected: true}), o.name, 0, true);
+						}
+						else {
+							ui._x += 18; // Sign offset
+							ui.text(o.name);
+							ui._x -= 18;
+						}
+						if (ui.isReleased) {
+							selectObject(o);
+						}
+						i++;
+						if (b) {
+							for (c in o.children) {
+								ui.indent();
+								drawList(h, c);
+								ui.unindent();
+							}
+						}
+					}
+					for (c in iron.Scene.active.root.children) {
+						drawList(Id.handle(), c);
+					}
+
+					ui.unindent();
+				}
+				
+				if (selectedObject == null) selectedType = "";
+
+				if (ui.panel(Id.handle({selected: true}), 'Properties $selectedType')) {
+					ui.indent();
+					
+					if (selectedObject != null) {
+
+						var h = Id.handle();
+						h.selected = selectedObject.visible;
+						selectedObject.visible = ui.check(h, "Visible");
+
+						var loc = selectedObject.transform.loc;
+						var scale = selectedObject.transform.scale;
+						var rot = selectedObject.transform.rot.getEuler();
+						rot.mult(180 / 3.141592);
+						var f = 0.0;
+
+						ui.row(row4);
+						ui.text("Location");
+
+						h = Id.handle();
+						h.text = Math.roundfp(loc.x) + "";
+						f = Std.parseFloat(ui.textInput(h, "X"));
+						if (ui.changed) loc.x = f;
+
+						h = Id.handle();
+						h.text = Math.roundfp(loc.y) + "";
+						f = Std.parseFloat(ui.textInput(h, "Y"));
+						if (ui.changed) loc.y = f;
+
+						h = Id.handle();
+						h.text = Math.roundfp(loc.z) + "";
+						f = Std.parseFloat(ui.textInput(h, "Z"));
+						if (ui.changed) loc.z = f;
+
+						ui.row(row4);
+						ui.text("Rotation");
+						
+						h = Id.handle();
+						h.text = Math.roundfp(rot.x) + "";
+						f = Std.parseFloat(ui.textInput(h, "X"));
+						var changed = false;
+						if (ui.changed) { changed = true; rot.x = f; }
+
+						h = Id.handle();
+						h.text = Math.roundfp(rot.y) + "";
+						f = Std.parseFloat(ui.textInput(h, "Y"));
+						if (ui.changed) { changed = true; rot.y = f; }
+
+						h = Id.handle();
+						h.text = Math.roundfp(rot.z) + "";
+						f = Std.parseFloat(ui.textInput(h, "Z"));
+						if (ui.changed) { changed = true; rot.z = f; }
+
+						if (changed && selectedObject.name != "Scene") {
+							rot.mult(3.141592 / 180);
+							selectedObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
+							selectedObject.transform.buildMatrix();
+							var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
+							if (rb != null) rb.syncTransform();
+						}
+
+						ui.row(row4);
+						ui.text("Scale");
+						
+						h = Id.handle();
+						h.text = Math.roundfp(scale.x) + "";
+						f = Std.parseFloat(ui.textInput(h, "X"));
+						if (ui.changed) scale.x = f;
+
+						h = Id.handle();
+						h.text = Math.roundfp(scale.y) + "";
+						f = Std.parseFloat(ui.textInput(h, "Y"));
+						if (ui.changed) scale.y = f;
+
+						h = Id.handle();
+						h.text = Math.roundfp(scale.z) + "";
+						f = Std.parseFloat(ui.textInput(h, "Z"));
+						if (ui.changed) scale.z = f;
+
+						selectedObject.transform.dirty = true;
+
+						if (selectedObject.name == "Scene") {
+							selectedType = "(Scene)";
+							// ui.image(envThumbCay);
+							var p = iron.Scene.active.world.getGlobalProbe();
+							ui.row([1/2, 1/2]);
+							var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
+							p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
+						}
+						else if (Std.is(selectedObject, iron.object.LampObject)) {
+							selectedType = "(Lamp)";
+							var lamp = cast(selectedObject, iron.object.LampObject);
+							lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Strength", 0.0, 5.0, true) * 10;
+						}
+						else if (Std.is(selectedObject, iron.object.CameraObject)) {
+							selectedType = "(Camera)";
+							var scene = iron.Scene.active;
+							var cam = scene.cameras[0];
+							var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+							cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+							if (ui.changed) {
+								cam.buildProjection();
+							}
+						}
+						else {
+							selectedType = "(Object)";
+							
+						}
+					}
+
+					ui.unindent();
+				}
+			}
+			#end
+
 
 			if (ui.tab(htab, "Tools")) {
 
@@ -1387,7 +1696,7 @@ class UITrait extends iron.Trait {
 				isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 			}
 
-			if (ui.tab(htab, "Preferences")) {
+			if (ui.tab(htab, "Prefs")) {
 				var hscale = Id.handle({value: armory.data.Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				if (ui.changed && !iron.system.Input.getMouse().down()) {
