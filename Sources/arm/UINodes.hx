@@ -37,7 +37,12 @@ class UINodes extends iron.Trait {
 	public var canvasBrush:TNodeCanvas = null;
 	var canvasBrushMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
 	var canvasBrushBlob:String;
-	public var isBrush = false;
+
+	public var canvasLogic:TNodeCanvas = null;
+	var canvasLogicMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
+	var canvasLogicBlob:String;
+
+	public var canvasType = 0; // material, brush, logic
 
 	public function new() {
 		super();
@@ -47,22 +52,30 @@ class UINodes extends iron.Trait {
 
 		iron.data.Data.getBlob('default_material.json', function(b1:kha.Blob) {
 			iron.data.Data.getBlob('default_brush.json', function(b2:kha.Blob) {
+				iron.data.Data.getBlob('default_logic.json', function(b3:kha.Blob) {
+					iron.data.Data.getBlob('logic_nodes.json', function(bnodes:kha.Blob) {
 
-				canvasBlob = b1.toString();
-				canvasBrushBlob = b2.toString();
-				canvas = haxe.Json.parse(canvasBlob);
-				canvasBrush = haxe.Json.parse(canvasBrushBlob);
-				parseBrush();
+						canvasBlob = b1.toString();
+						canvasBrushBlob = b2.toString();
+						canvas = haxe.Json.parse(canvasBlob);
+						canvasBrush = haxe.Json.parse(canvasBrushBlob);
+						parseBrush();
+						canvasLogicBlob = b3.toString();
+						canvasLogic = haxe.Json.parse(canvasLogicBlob);
 
-				var t = Reflect.copy(arm.App.theme);
-				t.ELEMENT_H = 18;
-				t.BUTTON_H = 16;
-				var scale = armory.data.Config.raw.window_scale;
-				ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
-				ui.scrollEnabled = false;
-				
-				notifyOnRender2D(render2D);
-				notifyOnUpdate(update);
+						NodeCreatorLogic.list = haxe.Json.parse(bnodes.toString());
+
+						var t = Reflect.copy(arm.App.theme);
+						t.ELEMENT_H = 18;
+						t.BUTTON_H = 16;
+						var scale = armory.data.Config.raw.window_scale;
+						ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
+						ui.scrollEnabled = false;
+						
+						notifyOnRender2D(render2D);
+						notifyOnUpdate(update);
+					});
+				});
 			});
 		});
 	}
@@ -78,7 +91,7 @@ class UINodes extends iron.Trait {
 			}
 			else canvas = c;
 
-			if (!isBrush) nodes = UITrait.inst.selectedMaterial.nodes;
+			if (canvasType == 0) nodes = UITrait.inst.selectedMaterial.nodes;
 		}
 	}
 
@@ -93,8 +106,29 @@ class UINodes extends iron.Trait {
 			}
 			else canvasBrush = c;
 
-			if (isBrush) nodes = UITrait.inst.selectedBrush.nodes;
+			if (canvasType == 1) nodes = UITrait.inst.selectedBrush.nodes;
 		}
+	}
+
+	public function updateCanvasLogicMap() {
+		if (UITrait.inst.selectedLogic != null) {
+			if (canvasLogicMap == null) canvasLogicMap = new Map();
+			var c = canvasLogicMap.get(UITrait.inst.selectedLogic);
+			if (c == null) {
+				c = haxe.Json.parse(canvasLogicBlob);
+				canvasLogicMap.set(UITrait.inst.selectedLogic, c);
+				canvasLogic = c;
+			}
+			else canvasLogic = c;
+
+			if (canvasType == 2) nodes = UITrait.inst.selectedLogic.nodes;
+		}
+	}
+
+	function getCanvas() {
+		if (canvasType == 0) return canvas;
+		else if (canvasType == 1) return canvasBrush;
+		else return canvasLogic;
 	}
 
 	var mx = 0.0;
@@ -106,6 +140,7 @@ class UINodes extends iron.Trait {
 	function update() {
 		updateCanvasMap();
 		updateCanvasBrushMap();
+		updateCanvasLogicMap();
 
 		var mouse = iron.system.Input.getMouse();
 		mreleased = mouse.released();
@@ -114,11 +149,12 @@ class UINodes extends iron.Trait {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (isBrush) parseBrush();
+			if (canvasType == 1) parseBrush();
+			else if (canvasType == 2) parseLogic();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			if (!isBrush) parsePaintMaterial();
+			if (canvasType == 0) parsePaintMaterial();
 			UITrait.inst.makeMaterialPreview();
 			if (UITrait.inst.brushPaint == 2) UITrait.inst.makeStickerPreview();
 		}
@@ -145,13 +181,13 @@ class UINodes extends iron.Trait {
 		}
 
 		if (keyboard.started("x") || keyboard.started("backspace")) {
-			var c = isBrush ? canvasBrush : canvas;
+			var c = getCanvas();
 			nodes.removeNode(nodes.nodeSelected, c);
 			changed = true;
 		}
 
 		// if (keyboard.started("p")) {
-		// 	var c = isBrush ? canvasBrush : canvas;
+		// 	var c = getCanvas();
 		// 	var str = haxe.Json.stringify(c);
 		// 	trace(str.substr(0, 1023));
 		// 	trace(str.substr(1023, 2047));
@@ -218,14 +254,14 @@ class UINodes extends iron.Trait {
 
 			ui.g.font = arm.App.font;
 			ui.g.fontSize = 22;
-			var title = isBrush ? "Brush" : "Material";
+			var title = canvasType == 1 ? "Brush" : "Material";
 			var titlew = ui.g.font.width(22, title);
 			var titleh = ui.g.font.height(22);
 			ui.g.drawString(title, ww - titlew - 20, iron.App.h() - titleh - 10);
 			
 			// Recompile material on change
 			ui.changed = false;
-			var c = isBrush ? canvasBrush : canvas;
+			var c = getCanvas();
 			nodes.nodeCanvas(ui, c);
 
 			ui.g.color = ui.t.WINDOW_BG_COL;
@@ -236,8 +272,47 @@ class UINodes extends iron.Trait {
 			ui._y = 3;
 			ui._w = 105;
 
-			if (isBrush) {
+			if (canvasType == 1) {
 				if (ui.button("Nodes")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+			}
+			else if (canvasType == 2) {
+				if (ui.button("Action")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Animation")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Array")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Canvas")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Event")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 3;
+				if (ui.button("Input")) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x = 3;
+				ui._y = 30;
+				if (ui.button("Logic")) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x = 105 + 3;
+				ui._y = 30;
+				if (ui.button("Native")) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 30;
+				if (ui.button("Navmesh")) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 30;
+				if (ui.button("Physics")) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 30;
+				if (ui.button("Sound")) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 30;
+				if (ui.button("Value")) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
+				ui._x += 105 + 3;
+				ui._y = 30;
+				if (ui.button("Variable")) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else {
 				if (ui.button("Input")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
@@ -260,7 +335,10 @@ class UINodes extends iron.Trait {
 
 		if (drawMenu) {
 			
-			var numNodes = isBrush ? NodeCreatorBrush.numNodes[menuCategory] : NodeCreator.numNodes[menuCategory];
+			var numNodes = 0;
+			if (canvasType == 0) numNodes = NodeCreator.numNodes[menuCategory];
+			else if (canvasType == 1) numNodes = NodeCreatorBrush.numNodes[menuCategory];
+			else if (canvasType == 2) numNodes = NodeCreatorLogic.list.categories[menuCategory].nodes.length;
 			var ph = numNodes * 20;
 			var py = popupY;
 			g.color = 0xff222222;
@@ -268,7 +346,9 @@ class UINodes extends iron.Trait {
 
 			ui.beginLayout(g, Std.int(popupX), Std.int(py), 105);
 			
-			isBrush ? NodeCreatorBrush.draw(menuCategory) : NodeCreator.draw(menuCategory);
+			if (canvasType == 0) NodeCreator.draw(menuCategory);
+			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
+			else if (canvasType == 2) NodeCreatorLogic.draw(menuCategory);
 
 			ui.endLayout();
 		}
@@ -941,5 +1021,14 @@ class UINodes extends iron.Trait {
 	public function parseBrush() {
 		armory.system.Logic.packageName = "arm.logicnode";
 		var tree = armory.system.Logic.parse(canvasBrush, false);
+	}
+
+	var lastT:iron.Trait = null;
+	public function parseLogic() {
+		if (lastT != null) UITrait.inst.currentObject.removeTrait(lastT);
+		armory.system.Logic.packageName = "armory.logicnode";
+		var t = armory.system.Logic.parse(canvasLogic);
+		lastT = t;
+		UITrait.inst.currentObject.addTrait(t);
 	}
 }

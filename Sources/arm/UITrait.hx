@@ -176,6 +176,7 @@ class UITrait extends iron.Trait {
 	public var selectedMaterial:MaterialSlot;
 	var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
+	public var selectedLogic:BrushSlot;
 	public var layers:Array<LayerSlot> = null;
 	public var undoLayers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
@@ -469,7 +470,7 @@ class UITrait extends iron.Trait {
 	// var uiWidth = 2048;
 	// var uiHeight = 2048;
 
-	var currentObject:MeshObject;
+	public var currentObject:MeshObject;
 	var frame = 0;
 
 	function done() {
@@ -997,15 +998,22 @@ class UITrait extends iron.Trait {
 
 	function showMaterialNodes() {
 		UIView2D.inst.show = false;
-		if (UINodes.inst.show && !UINodes.inst.isBrush) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.isBrush = false; }
+		if (UINodes.inst.show && UINodes.inst.canvasType == 0) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = 0; }
 		arm.App.resize();
 	}
 
 	function showBrushNodes() {
 		UIView2D.inst.show = false;
-		if (UINodes.inst.show && UINodes.inst.isBrush) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.isBrush = true; }
+		if (UINodes.inst.show && UINodes.inst.canvasType == 1) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = 1; }
+		arm.App.resize();
+	}
+
+	function showLogicNodes() {
+		UIView2D.inst.show = false;
+		if (UINodes.inst.show && UINodes.inst.canvasType == 2) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = 2; }
 		arm.App.resize();
 	}
 
@@ -1240,6 +1248,8 @@ class UITrait extends iron.Trait {
 							
 						}
 					}
+
+					if (ui.button("LNodes")) showLogicNodes();
 
 					ui.unindent();
 				}
@@ -1760,7 +1770,7 @@ class UITrait extends iron.Trait {
 				showMessage("Error: Invalid mesh - no UVs found");
 				return;
 			}
-			makeMesh(obj);
+			makeMesh(obj, path);
 		});
 	}
 
@@ -1771,7 +1781,7 @@ class UITrait extends iron.Trait {
 				showMessage("Error: Invalid mesh - no UVs found");
 				return;
 			}
-			makeMesh(obj);
+			makeMesh(obj, path);
 		});
 	}
 
@@ -1782,7 +1792,7 @@ class UITrait extends iron.Trait {
 				showMessage("Error: Invalid mesh - no UVs found");
 				return;
 			}
-			makeMesh(obj);
+			makeMesh(obj, path);
 		});
 	}
 
@@ -1793,11 +1803,11 @@ class UITrait extends iron.Trait {
 				// showMessage("Error: Invalid mesh - no UVs found");
 				// return;
 			// }
-			// makeMesh(obj);
+			// makeMesh(obj, path);
 		// });
 	}
 
-	function makeMesh(mesh:Dynamic) {
+	function makeMesh(mesh:Dynamic, path:String) {
 		var raw:TMeshData = {
 			name: "Mesh",
 			vertex_arrays: [
@@ -1811,21 +1821,46 @@ class UITrait extends iron.Trait {
 		};
 
 		new MeshData(raw, function(md:MeshData) {
-			currentObject.data.delete();
-			iron.App.notifyOnRender(initLayers);
-			if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
 			
-			currentObject.setData(md);
-			
-			// Scale to bounds
-			md.geom.calculateAABB();
-			var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
-			currentObject.transform.scale.set(3 / r, 3 / r, 3 / r);
-			currentObject.transform.buildMatrix();
+			// Replace
+			{
+				currentObject.data.delete();
+				iron.App.notifyOnRender(initLayers);
+				if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
+				
+				currentObject.setData(md);
+				
+				// Scale to bounds
+				md.geom.calculateAABB();
+				var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
+				currentObject.transform.scale.set(3 / r, 3 / r, 3 / r);
+				currentObject.transform.buildMatrix();
 
-			// Face camera
-			// currentObject.transform.setRotation(Math.PI / 2, 0, 0);
-			
+				// Face camera
+				// currentObject.transform.setRotation(Math.PI / 2, 0, 0);
+			}
+
+			// Append
+			{
+				// var mats = new haxe.ds.Vector(1);
+				// mats[0] = currentObject.materials[0]; //selectedMaterial.data;
+				// var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
+				// path = StringTools.replace(path, "\\", "/");
+				// var ar = path.split("/");
+				// var s = ar[ar.length - 1];
+				// object.name = s.substring(0, s.length - 4);
+
+				// // md.geom.calculateAABB();
+				// // var aabb = md.geom.aabb;
+				// // var dim = new TFloat32Array(3);
+				// // dim[0] = aabb.x;
+				// // dim[1] = aabb.y;
+				// // dim[2] = aabb.z;
+				// // object.raw.dimensions = dim;
+				// object.addTrait(new armory.trait.physics.RigidBody(0.0));
+				// selectObject(object);
+			}
+
 			first = 0; // Needs 2 redraws to clear textures after import
 			dirty = true;
 		});
