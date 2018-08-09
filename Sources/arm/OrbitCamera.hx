@@ -37,7 +37,7 @@ class OrbitCamera extends iron.Trait {
 
 			if (redraws > 0) {
 				redraws--;
-				UITrait.inst.dirty = true;
+				UITrait.inst.dirty = 2;
 			}
 		});
 	}

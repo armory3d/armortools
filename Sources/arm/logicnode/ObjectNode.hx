@@ -17,7 +17,7 @@ class ObjectNode extends LogicNode {
 
 	override function get(from:Int):Dynamic { 
 		if (inputs.length > 0) return inputs[0].get();
-		value = objectName != "" ? armory.Scene.active.getChild(objectName) : null;
+		value = objectName != "" ? iron.Scene.active.getChild(objectName) : null;
 		return value;
 	}
 

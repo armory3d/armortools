@@ -17,7 +17,7 @@ class InputNode extends LogicNode {
 	public function new(tree:LogicTree) {
 		super(tree);
 		tree.notifyOnUpdate(function() {
-			var mouse = armory.system.Input.getMouse();
+			var mouse = iron.system.Input.getMouse();
 			coords.x = mouse.x / iron.App.w();
 			coords.y = mouse.y / iron.App.h();
 
@@ -26,7 +26,7 @@ class InputNode extends LogicNode {
 				startY = mouse.y / iron.App.h();
 			}
 
-			var pen = armory.system.Input.getPen();
+			var pen = iron.system.Input.getPen();
 			if (pen.down()) {
 				coords.x = pen.x / iron.App.w();
 				coords.y = pen.y / iron.App.h();

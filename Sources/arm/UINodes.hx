@@ -32,6 +32,9 @@ class UINodes extends iron.Trait {
 	public var nodes = new Nodes();
 	public var canvas:TNodeCanvas = null;
 	var canvasMap:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
+	#if arm_editor
+	var canvasMap2:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
+	#end
 	var canvasBlob:String;
 
 	public var canvasBrush:TNodeCanvas = null;
@@ -81,6 +84,25 @@ class UINodes extends iron.Trait {
 	}
 
 	public function updateCanvasMap() {
+
+		#if arm_editor
+		if (UITrait.inst.htab.position == 0) {
+			if (UITrait.inst.selectedMaterial2 != null) {
+				if (canvasMap2 == null) canvasMap2 = new Map();
+				var c = canvasMap2.get(UITrait.inst.selectedMaterial2);
+				if (c == null) {
+					c = haxe.Json.parse(canvasBlob);
+					canvasMap2.set(UITrait.inst.selectedMaterial2, c);
+					canvas = c;
+				}
+				else canvas = c;
+
+				if (canvasType == 0) nodes = UITrait.inst.selectedMaterial2.nodes;
+			}
+			return;
+		}
+		#end
+
 		if (UITrait.inst.selectedMaterial != null) {
 			if (canvasMap == null) canvasMap = new Map();
 			var c = canvasMap.get(UITrait.inst.selectedMaterial);
@@ -413,22 +435,22 @@ class UINodes extends iron.Trait {
 
 		vert.add_out('vec3 mposition');
 		if (UITrait.inst.brushPaint == 0) {
-        	vert.write('mposition = pos.xyz;');
-        }
-        else {
-        	vert.write('mposition = ndc.xyz;');
-        }
+			vert.write('mposition = pos.xyz;');
+		}
+		else {
+			vert.write('mposition = ndc.xyz;');
+		}
 
-        if (UITrait.inst.brushType == 3) { // Bake ao
-        	vert.add_out('vec3 wposition');
-        	vert.add_uniform('mat4 W', '_worldMatrix');
-        	vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
+		if (UITrait.inst.brushType == 3) { // Bake ao
+			vert.add_out('vec3 wposition');
+			vert.add_uniform('mat4 W', '_worldMatrix');
+			vert.write('wposition = vec4(W * vec4(pos.xyz, 1.0)).xyz;');
 
-        	vert.add_out('vec3 wnormal');
+			vert.add_out('vec3 wnormal');
 			vert.add_uniform('mat3 N', '_normalMatrix');
 			vert.write('wnormal = N * nor;');
 			frag.write('vec3 n = normalize(wnormal);');
-    	}
+		}
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
 		frag.add_uniform('vec4 inplast', '_inputBrushLast');
@@ -589,8 +611,8 @@ class UINodes extends iron.Trait {
 
 			frag.write('const vec3 voxelgiHalfExtents = vec3(2.0);');
 			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
-       		frag.add_uniform('sampler3D voxels');
-       		frag.add_function(armory.system.CyclesFunctions.str_traceAO);
+			frag.add_uniform('sampler3D voxels');
+			frag.add_function(armory.system.CyclesFunctions.str_traceAO);
 			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, wnormal, voxels);');
 		}
 
@@ -607,7 +629,8 @@ class UINodes extends iron.Trait {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: 'clockwise',
+			// cull_mode: 'clockwise',
+			cull_mode: 'none',
 			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
 
 		var vert = con_mesh.make_vert();
@@ -630,12 +653,18 @@ class UINodes extends iron.Trait {
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
 		var occ = sout.out_occlusion;
+		var opac = sout.out_opacity;
 		var nortan = Cycles.out_normaltan;
 		frag.write('vec3 basecol = $base;');
 		frag.write('float roughness = $rough;');
 		frag.write('float metallic = $met;');
 		frag.write('float occlusion = $occ;');
+		frag.write('float opacity = $opac;');
 		frag.write('vec3 nortan = $nortan;');
+
+		//if discard_transparent:
+			var opac = 0.2;//mat_state.material.discard_transparent_opacity
+			frag.write('if (opacity < $opac) discard;');
 
 		frag.add_out('vec4[3] fragColor');
 		frag.write('vec3 n = normalize(wnormal);');
@@ -670,24 +699,24 @@ class UINodes extends iron.Trait {
 		return con_mesh;
 	}
 
-	function make_depth(data:ShaderData, shadowmap = false):armory.system.ShaderContext {
+	function make_depth(data:ShaderData, matcon:TMaterialContext, shadowmap = false):armory.system.ShaderContext {
 		var context_id = shadowmap ? 'shadowmap' : 'depth';
 		var con_depth:armory.system.ShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: 'clockwise',
+			// cull_mode: 'clockwise',
+			cull_mode: 'none',
 			color_write_red: false,
 			color_write_green: false,
 			color_write_blue: false,
 			color_write_alpha: false,
-			vertex_structure: shadowmap ? [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] : [{"name": "pos", "size": 3}]
+			vertex_structure: [{"name": "pos", "size": 3}]
 		});
 
 		var vert = con_depth.make_vert();
 		var frag = con_depth.make_frag();
 
-		
 		frag.ins = vert.outs;
 
 		if (shadowmap) {
@@ -708,6 +737,27 @@ class UINodes extends iron.Trait {
 		else {
 			vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 			vert.write('gl_Position = WVP * vec4(pos, 1.0);');
+		}
+
+		var parse_opacity = shadowmap; // arm_discard
+		if (parse_opacity) {
+			frag.write('vec3 n;'); // Discard at compile time
+			frag.write('float dotNV;');
+			// frag.write('float opacity;');
+
+			Cycles.parse_surface = false;
+			var sout = Cycles.parse(canvas, con_depth, vert, frag, null, null, null, matcon);
+			Cycles.parse_surface = true;
+			// parse_surface=False, parse_opacity=True
+			var opac = sout.out_opacity;
+			frag.write('float opacity = $opac;');
+			if (con_depth.is_elem('tex')) {
+				vert.add_out('vec2 texCoord');
+				vert.write('texCoord = tex;');
+			}
+			
+			var opac = 0.2;//mat_state.material.discard_transparent_opacity_shadows
+			frag.write('if (opacity < $opac) discard;');
 		}
 
 		con_depth.data.shader_from_source = true;
@@ -757,7 +807,13 @@ class UINodes extends iron.Trait {
 		vert.write('gl_Position = VP * wposition;');
 		vert.write('texCoord = tex;');
 		vert.write('wvpposition = gl_Position;');
-		vert.write('prevwvpposition = prevWVP * spos;');
+		if (UITrait.inst.paintHeight) {
+			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
+			vert.write('prevwvpposition = prevWVP * (invW * wposition);');
+		}
+		else {
+			vert.write('prevwvpposition = prevWVP * spos;');
+		}
 		vert.write('eyeDir = eye - wposition.xyz;');
 
 		frag.ins = vert.outs;
@@ -873,7 +929,12 @@ class UINodes extends iron.Trait {
 	}
 
 	public function parseMeshMaterial() {
+		#if arm_editor
+		if (UITrait.inst.htab.position == 0) return;
+		var m = UITrait.inst.materials[0].data;
+		#else
 		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+		#end
 			var sc:iron.data.ShaderData.ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
 			m.shader.raw.contexts.remove(sc.raw);
@@ -882,11 +943,18 @@ class UINodes extends iron.Trait {
 			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
+		#if (!arm_editor)
 		});
+		#end
 	}
 
 	public function parseMeshPreviewMaterial() {
+		#if arm_editor
+		var m = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
+		#else
 		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+		#end
+
 			var sc:iron.data.ShaderData.ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
 			m.shader.raw.contexts.remove(sc.raw);
@@ -894,7 +962,8 @@ class UINodes extends iron.Trait {
 			
 			var matcon:TMaterialContext = { name: "mesh", bind_textures: [] };
 
-			var con = make_mesh_preview(new ShaderData({name: "Material", canvas: null}), matcon);
+			var sd = new ShaderData({name: "Material", canvas: null});
+			var con = make_mesh_preview(sd, matcon);
 
 			for (i in 0...m.contexts.length) {
 				if (m.contexts[i].raw.name == "mesh") {
@@ -906,25 +975,55 @@ class UINodes extends iron.Trait {
 			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
+
+
+			var matcon:TMaterialContext = { name: "shadowmap", bind_textures: [] };
+			var smcon = make_depth(sd, matcon, true);
+			var smcdata = smcon.data;
+			// from_source is synchronous..
+			var smsc = new iron.data.ShaderData.ShaderContext(smcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
+			m.shader.contexts.push(smsc);
+			for (i in 0...m.contexts.length) {
+				if (m.contexts[i].raw.name == "shadowmap") {
+					m.contexts[i] = new MaterialContext(matcon, function(self:MaterialContext) {});
+					break;
+				}
+			}
+
+		#if (!arm_editor)
 		});
+		#end
 	}
 
 	public var materialParsed = false;
 	public function parsePaintMaterial() {
+		
+		#if arm_editor
+		if (UITrait.inst.htab.position == 0) {
+			parseMeshPreviewMaterial();
+			return;
+		}
+		#end
 
-
-		UITrait.inst.dirty = true;
+		UITrait.inst.dirty = 2;
 
 		if (getMOut()) {
 
+			#if arm_editor
+			var m = UITrait.inst.materials[0].data;
+			sc = null;
+			_materialcontext = null;
+			#else
 			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			#end
 			
 				var mat:TMaterial = {
 					name: "Material",
 					canvas: canvas
 				};
 				var _sd = new ShaderData(mat);
-				
+
 				if (sc == null) {
 					for (c in m.shader.contexts) {
 						if (c.raw.name == "paint") {
@@ -946,6 +1045,8 @@ class UINodes extends iron.Trait {
 				if (sc != null) {
 					m.shader.raw.contexts.remove(sc.raw);
 					m.shader.contexts.remove(sc);
+				}
+				if (_materialcontext != null) {
 					m.raw.contexts.remove(_matcon);
 					m.contexts.remove(_materialcontext);
 				}
@@ -972,7 +1073,7 @@ class UINodes extends iron.Trait {
 
 
 
-					var dcon = make_depth(_sd);
+					var dcon = make_depth(_sd, _matcon);
 					var dcdata = dcon.data;
 					// from_source is synchronous..
 					var dsc = new iron.data.ShaderData.ShaderContext(dcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
@@ -987,7 +1088,7 @@ class UINodes extends iron.Trait {
 
 
 
-					var smcon = make_depth(_sd, true);
+					var smcon = make_depth(_sd, _matcon, true);
 					var smcdata = smcon.data;
 					// from_source is synchronous..
 					var smsc = new iron.data.ShaderData.ShaderContext(smcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
@@ -1009,7 +1110,9 @@ class UINodes extends iron.Trait {
 				// 	sc.raw.fragment_shader = cdata.fragment_shader;
 				// 	sc.compile();
 				// }
+			#if (!arm_editor)
 			});
+			#end
 		}
 	}
 

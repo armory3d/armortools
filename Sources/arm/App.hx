@@ -103,7 +103,7 @@ class App extends iron.Trait {
 
 	public static function resize() {
 		iron.Scene.active.camera.buildProjection();
-		UITrait.inst.dirty = true;
+		UITrait.inst.dirty = 2;
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();
@@ -202,14 +202,14 @@ class App extends iron.Trait {
 		if (uimodal.button("OK")) {
 			showFiles = false;
 			filesDone(path);
-			UITrait.inst.dirty = true;
+			UITrait.inst.dirty = 2;
 		}
 		uimodal.endLayout(false);
 
 		uimodal.beginLayout(g, rightRect - 200, bottomRect - 30, 100);
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
-			UITrait.inst.dirty = true;
+			UITrait.inst.dirty = 2;
 		}
 		uimodal.endLayout();
 

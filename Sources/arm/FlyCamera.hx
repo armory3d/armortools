@@ -75,12 +75,12 @@ class FlyCamera extends Trait {
 
 		var d = Time.delta * speed * fast * ease;
 		if (d > 0.0) {
-			UITrait.inst.dirty = true;
+			UITrait.inst.dirty = 2;
 			camera.move(dir, d);
 		}
 
 		if (mouse.down("right")) {
-			UITrait.inst.dirty = true;
+			UITrait.inst.dirty = 2;
 			camera.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 			camera.rotate(camera.right(), -mouse.movementY / 200);
 		}

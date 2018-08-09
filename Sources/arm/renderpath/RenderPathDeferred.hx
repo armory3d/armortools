@@ -967,7 +967,12 @@ class RenderPathDeferred {
 
 		// Material preview
 		if (arm.UITrait.inst.materialPreview) { //
-			iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.selectedMaterial.image;
+			#if arm_editor
+			var selectedMat = arm.UITrait.inst.htab.position == 0 ? arm.UITrait.inst.selectedMaterial2 : arm.UITrait.inst.selectedMaterial;
+			#else
+			var selectedMat = arm.UITrait.inst.selectedMaterial;
+			#end
+			iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 			framebuffer = "texpreview";
 		}
 		else if (arm.UITrait.inst.stickerPreview) {
@@ -1076,7 +1081,7 @@ class RenderPathDeferred {
 		}
 		#end
 
-		arm.UITrait.inst.dirty = false; //
+		arm.UITrait.inst.dirty--; //
 	}
 	#end
 }
