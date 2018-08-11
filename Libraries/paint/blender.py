@@ -1,3 +1,4 @@
+import bpy
 import arm.material.mat_utils
 import arm.write_data
 import arm.assets
@@ -10,11 +11,11 @@ def on_make_renderpath():
 
 def register():
 
-	#if no paint
-	# arm.material.mat_utils.add_mesh_contexts.append('voxel') # Defaults to make_ao
-	# arm.write_data.add_compiledglsl = """
-		# const ivec3 voxelgiResolution = ivec3(256, 256, 256);
-		# const vec3 voxelgiHalfExtents = vec3(2.0, 2.0, 2.0);
-	# """
+	if bpy.data.worlds['Arm'].arm_project_name == 'ArmorPaint':
+		arm.material.mat_utils.add_mesh_contexts.append('voxel') # Defaults to make_ao
+		arm.write_data.add_compiledglsl = """
+			const ivec3 voxelgiResolution = ivec3(256, 256, 256);
+			const vec3 voxelgiHalfExtents = vec3(2.0, 2.0, 2.0);
+		"""
 
 	arm.make_renderpath.callback = on_make_renderpath

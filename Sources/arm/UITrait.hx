@@ -520,17 +520,19 @@ class UITrait extends iron.Trait {
 			// var mat:armory.data.MaterialData = cast(pui, armory.object.MeshObject).materials[0];
 			// mat.contexts[0].textures[0] = rt; // Override diffuse texture
 
+			#if arm_editor
 			grid = iron.Scene.active.getChild(".Grid");
 			gizmo = iron.Scene.active.getChild(".GizmoTranslate");
 			gizmoX = iron.Scene.active.getChild("GizmoX");
 			gizmoY = iron.Scene.active.getChild("GizmoY");
 			gizmoZ = iron.Scene.active.getChild("GizmoZ");
-			selectedObject = iron.Scene.active.getChild("Cube");
-			paintObject = selectedObject;
 			var lamp = iron.Scene.active.getChild("Lamp");
 			lamp.addTrait(new armory.trait.physics.RigidBody(0.0));
+			#end
 
-			currentObject = cast(iron.Scene.active.getChild("Cube"), MeshObject);
+			selectedObject = iron.Scene.active.getChild("Cube");
+			paintObject = selectedObject;
+			currentObject = cast(selectedObject, MeshObject);
 
 			iron.App.notifyOnUpdate(update);
 			iron.App.notifyOnRender2D(render);
@@ -1931,7 +1933,7 @@ class UITrait extends iron.Trait {
 					Krom.fileSaveBytes("data/config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
 					#end
 				}
-				ui.text("v0.4 armorpaint.org");
+				ui.text("v0.5 armorpaint.org");
 
 				if (ui.panel(Id.handle({selected: true}), "Console")) {
 					ui.text(lastTrace);
