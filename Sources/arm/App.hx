@@ -43,6 +43,21 @@ class App extends iron.Trait {
 			iron.data.Data.getBlob("theme.arm", function(b:kha.Blob) {
 				iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
 					theme = haxe.Json.parse(b.toString());
+					theme.WINDOW_BG_COL = Std.parseInt(cast theme.WINDOW_BG_COL);
+					theme.WINDOW_TINT_COL = Std.parseInt(cast theme.WINDOW_TINT_COL);
+					theme.ACCENT_COL = Std.parseInt(cast theme.ACCENT_COL);
+					theme.ACCENT_HOVER_COL = Std.parseInt(cast theme.ACCENT_HOVER_COL);
+					theme.ACCENT_SELECT_COL = Std.parseInt(cast theme.ACCENT_SELECT_COL);
+					theme.PANEL_BG_COL = Std.parseInt(cast theme.PANEL_BG_COL);
+					theme.PANEL_TEXT_COL = Std.parseInt(cast theme.PANEL_TEXT_COL);
+					theme.BUTTON_COL = Std.parseInt(cast theme.BUTTON_COL);
+					theme.BUTTON_TEXT_COL = Std.parseInt(cast theme.BUTTON_TEXT_COL);
+					theme.BUTTON_HOVER_COL = Std.parseInt(cast theme.BUTTON_HOVER_COL);
+					theme.BUTTON_PRESSED_COL = Std.parseInt(cast theme.BUTTON_PRESSED_COL);
+					theme.TEXT_COL = Std.parseInt(cast theme.TEXT_COL);
+					theme.LABEL_COL = Std.parseInt(cast theme.LABEL_COL);
+					theme.ARROW_COL = Std.parseInt(cast theme.ARROW_COL);
+					theme.SEPARATOR_COL = Std.parseInt(cast theme.SEPARATOR_COL);
 					font = f;
 					color_wheel = image;
 					var scale = armory.data.Config.raw.window_scale;
