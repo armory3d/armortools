@@ -414,7 +414,7 @@ class RenderPathDeferred {
 	// Paint
 	static var initVoxels = true;
 
-	public static function drawShadowMapPaint(l:iron.object.LampObject) {
+	public static function drawShadowMapPaint(l:iron.object.LightObject) {
 		#if (rp_shadowmap)
 		var faces = l.data.raw.shadowmap_cube ? 6 : 1;
 		for (j in 0...faces) {
@@ -433,7 +433,7 @@ class RenderPathDeferred {
 		}
 		path.currentFace = -1;
 
-		// One lamp at a time for now, precompute all lamps for tiled
+		// One light at a time for now, precompute all lights for tiled
 		#if rp_soft_shadows
 
 		if (l.raw.type != "point") {
@@ -738,15 +738,15 @@ class RenderPathDeferred {
 		path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
 
 		// Direct
-		var lamps = iron.Scene.active.lamps;
-		for (i in 0...lamps.length) {
-			var l = lamps[i];
+		var lights = iron.Scene.active.lights;
+		for (i in 0...lights.length) {
+			var l = lights[i];
 			if (!l.visible) continue;
-			path.currentLampIndex = i;
+			path.currentLightIndex = i;
 
 			#if (rp_shadowmap)
 			{
-				if (path.lampCastShadow()) {
+				if (path.lightCastShadow()) {
 					// Inc.drawShadowMap(l);
 					// Paint
 					drawShadowMapPaint(l);
@@ -762,7 +762,7 @@ class RenderPathDeferred {
 
 			#if rp_shadowmap
 			{
-				if (path.lampCastShadow()) {
+				if (path.lightCastShadow()) {
 					#if rp_soft_shadows
 					path.bindTarget("visa", "svisibility");
 					#else
@@ -778,11 +778,11 @@ class RenderPathDeferred {
 			}
 			#end
 
-			if (path.lampIsSun()) {
+			if (path.lightIsSun()) {
 				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
 			}
 			else {
-				path.drawLampVolume("shader_datas/deferred_light/deferred_light");
+				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
 			}
 
 			#if rp_volumetriclight
@@ -790,11 +790,11 @@ class RenderPathDeferred {
 				path.setTarget("bufvola");
 				path.bindTarget("_main", "gbufferD");
 				Inc.bindShadowMap();
-				if (path.lampIsSun()) {
+				if (path.lightIsSun()) {
 					path.drawShader("shader_datas/volumetric_light_quad/volumetric_light_quad");
 				}
 				else {
-					path.drawLampVolume("shader_datas/volumetric_light/volumetric_light");
+					path.drawLightVolume("shader_datas/volumetric_light/volumetric_light");
 				}
 
 				path.setTarget("bufvolb");
@@ -807,7 +807,7 @@ class RenderPathDeferred {
 			}
 			#end
 		}
-		path.currentLampIndex = 0;
+		path.currentLightIndex = 0;
 		
 		#if (rp_background == "World")
 		{
@@ -833,8 +833,8 @@ class RenderPathDeferred {
 
 		#if rp_translucency
 		{
-			var hasLamp = iron.Scene.active.lamps.length > 0;
-			if (hasLamp) Inc.drawTranslucency("tex");
+			var hasLight = iron.Scene.active.lights.length > 0;
+			if (hasLight) Inc.drawTranslucency("tex");
 		}
 		#end
 

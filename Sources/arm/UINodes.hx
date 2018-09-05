@@ -940,7 +940,7 @@ class UINodes extends iron.Trait {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
 			var con = make_mesh_paint(new ShaderData({name: "Material", canvas: null}));
-			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			sc = new iron.data.ShaderData.ShaderContext(con.data, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 		#if (!arm_editor)
@@ -972,7 +972,7 @@ class UINodes extends iron.Trait {
 				}
 			}
 			
-			sc = new iron.data.ShaderData.ShaderContext(con.data, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			sc = new iron.data.ShaderData.ShaderContext(con.data, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 
@@ -981,7 +981,7 @@ class UINodes extends iron.Trait {
 			var smcon = make_depth(sd, matcon, true);
 			var smcdata = smcon.data;
 			// from_source is synchronous..
-			var smsc = new iron.data.ShaderData.ShaderContext(smcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
+			var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
 			for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
 			m.shader.contexts.push(smsc);
 			for (i in 0...m.contexts.length) {
@@ -1061,7 +1061,7 @@ class UINodes extends iron.Trait {
 
 				// if (sc == null) {
 					// from_source is synchronous..
-					sc = new iron.data.ShaderData.ShaderContext(cdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
+					sc = new iron.data.ShaderData.ShaderContext(cdata, function(sc:iron.data.ShaderData.ShaderContext){});
 					m.shader.raw.contexts.push(sc.raw);
 					m.shader.contexts.push(sc);
 					m.raw.contexts.push(_matcon);
@@ -1076,7 +1076,7 @@ class UINodes extends iron.Trait {
 					var dcon = make_depth(_sd, _matcon);
 					var dcdata = dcon.data;
 					// from_source is synchronous..
-					var dsc = new iron.data.ShaderData.ShaderContext(dcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
+					var dsc = new iron.data.ShaderData.ShaderContext(dcdata, function(sc:iron.data.ShaderData.ShaderContext){});
 					m.shader.contexts.push(dsc);
 					var dmatcon:TMaterialContext = {
 						name: "depth"
@@ -1091,7 +1091,7 @@ class UINodes extends iron.Trait {
 					var smcon = make_depth(_sd, _matcon, true);
 					var smcdata = smcon.data;
 					// from_source is synchronous..
-					var smsc = new iron.data.ShaderData.ShaderContext(smcdata, null, function(sc:iron.data.ShaderData.ShaderContext){});
+					var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
 					for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
 					m.shader.contexts.push(smsc);
 					// var smmatcon:TMaterialContext = {

@@ -526,8 +526,8 @@ class UITrait extends iron.Trait {
 			gizmoX = iron.Scene.active.getChild("GizmoX");
 			gizmoY = iron.Scene.active.getChild("GizmoY");
 			gizmoZ = iron.Scene.active.getChild("GizmoZ");
-			var lamp = iron.Scene.active.getChild("Lamp");
-			lamp.addTrait(new armory.trait.physics.RigidBody(0.0));
+			var light = iron.Scene.active.getChild("Lamp");
+			light.addTrait(new armory.trait.physics.RigidBody(0.0));
 			#end
 
 			selectedObject = iron.Scene.active.getChild("Cube");
@@ -677,7 +677,7 @@ class UITrait extends iron.Trait {
 		currentObject = sphere;
 
 		savedCamera.setFrom(iron.Scene.active.camera.transform.local);
-		var m = Mat4.fromArray([0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1]);
+		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		iron.Scene.active.camera.transform.setMatrix(m);
 		iron.Scene.active.camera.buildMatrix();
 
@@ -859,9 +859,9 @@ class UITrait extends iron.Trait {
 
 					selectObject(object);
 				}
-				else if (Std.is(selectedObject, iron.object.LampObject)) {
-					var lo = cast(selectedObject, iron.object.LampObject);
-					var object = iron.Scene.active.addLampObject(lo.data, iron.Scene.active.getChild("Scene"));
+				else if (Std.is(selectedObject, iron.object.LightObject)) {
+					var lo = cast(selectedObject, iron.object.LightObject);
+					var object = iron.Scene.active.addLightObject(lo.data, iron.Scene.active.getChild("Scene"));
 					object.name = lo.name + '.1';
 
 					object.transform.loc.setFrom(lo.transform.loc);
@@ -1377,10 +1377,10 @@ class UITrait extends iron.Trait {
 							var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
 							p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
 						}
-						else if (Std.is(selectedObject, iron.object.LampObject)) {
+						else if (Std.is(selectedObject, iron.object.LightObject)) {
 							selectedType = "(Lamp)";
-							var lamp = cast(selectedObject, iron.object.LampObject);
-							lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Strength", 0.0, 5.0, true) * 10;
+							var light = cast(selectedObject, iron.object.LightObject);
+							light.data.raw.strength = ui.slider(Id.handle({value: light.data.raw.strength / 10}), "Strength", 0.0, 5.0, true) * 10;
 						}
 						else if (Std.is(selectedObject, iron.object.CameraObject)) {
 							selectedType = "(Camera)";
@@ -1701,9 +1701,9 @@ class UITrait extends iron.Trait {
 					
 					ui.row([1/2, 1/2]);
 					var showType = ui.combo(Id.handle({position: 0}), ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Show");
-					if (iron.Scene.active.lamps.length > 0) {
-						var lamp = iron.Scene.active.lamps[0];
-						lamp.data.raw.strength = ui.slider(Id.handle({value: lamp.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
+					if (iron.Scene.active.lights.length > 0) {
+						var light = iron.Scene.active.lights[0];
+						light.data.raw.strength = ui.slider(Id.handle({value: light.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
 					}
 
 					displaceStrength = ui.slider(Id.handle({value: displaceStrength}), "Displace", 0.0, 2.0, true);
