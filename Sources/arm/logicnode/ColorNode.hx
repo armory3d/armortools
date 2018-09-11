@@ -1,6 +1,6 @@
 package arm.logicnode;
 
-import armory.math.Vec4;
+import iron.math.Vec4;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 

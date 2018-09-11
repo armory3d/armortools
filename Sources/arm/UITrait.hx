@@ -517,7 +517,7 @@ class UITrait extends iron.Trait {
 
 			// var pui = iron.Scene.active.getChild("PlaneUI"); ////
 			// rt = kha.Image.createRenderTarget(uiWidth, uiHeight);
-			// var mat:armory.data.MaterialData = cast(pui, armory.object.MeshObject).materials[0];
+			// var mat:armory.data.MaterialData = cast(pui, iron.object.MeshObject).materials[0];
 			// mat.contexts[0].textures[0] = rt; // Override diffuse texture
 
 			#if arm_editor

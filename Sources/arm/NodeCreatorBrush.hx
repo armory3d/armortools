@@ -1,6 +1,6 @@
 package arm;
 
-import armory.object.Object;
+import iron.object.Object;
 import armory.system.Cycles;
 import zui.*;
 import zui.Nodes;

@@ -1,6 +1,6 @@
 package arm.logicnode;
 
-import armory.object.Object;
+import iron.object.Object;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
