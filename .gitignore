@@ -1,6 +1,7 @@
 armorpaint.blend1
 grid.blend1
 build_armorpaint/
+build_grid/
 khafile.js
 Sources/Main.hx
 *.pyc
