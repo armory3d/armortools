@@ -377,7 +377,7 @@ class UITrait extends iron.Trait {
 
 	function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UITrait.inst.assets.length == 0) return bundled.get("mat_empty.jpg");
+			if (UITrait.inst.assets.length == 0) return bundled.get("mat_slot.jpg");
 			else return UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
 		}
 		return null;
@@ -459,7 +459,7 @@ class UITrait extends iron.Trait {
 
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'mat.jpg', 'mat_empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'cay_thumb.jpg'], done);
+		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'cay_thumb.jpg'], done);
 	}
 
 	var haxeTrace:Dynamic->haxe.PosInfos->Void;
@@ -1404,7 +1404,7 @@ class UITrait extends iron.Trait {
 				}
 				if (ui.panel(Id.handle({selected: true}), "Material")) {
 
-					var img2 = bundled.get("mat_empty.jpg");
+					var img2 = bundled.get("mat_slot.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);
@@ -1528,8 +1528,10 @@ class UITrait extends iron.Trait {
 						ui.row([1/2, 1/2]);
 						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+					}
 
-						ui.row([1/4,1/4,1/4,1/4]);
+					if (ui.panel(Id.handle({selected: true}), "Paint Channels")) {
+						ui.row([1/3,1/3,1/3]);
 
 						var baseHandle = Id.handle({selected: paintBase});
 						paintBase = ui.check(baseHandle, "Base");
@@ -1545,14 +1547,6 @@ class UITrait extends iron.Trait {
 							UINodes.inst.parsePaintMaterial();
 						}
 
-						var roughHandle = Id.handle({selected: paintRough});
-						// TODO: Use glColorMaski() to disable specific channel
-						paintRough = ui.check(roughHandle, "ORM");
-						if (roughHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
 						var heightHandle = Id.handle({selected: paintHeight});
 						paintHeight = ui.check(heightHandle, "Height");
 						if (heightHandle.changed) {
@@ -1563,13 +1557,36 @@ class UITrait extends iron.Trait {
 							UINodes.inst.parsePaintMaterial();
 						}
 
+						ui.row([1/3,1/3,1/3]);
+
+						var occHandle = Id.handle({selected: paintOcc});
+						paintOcc = ui.check(occHandle, "Occlusion");
+						if (occHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						var roughHandle = Id.handle({selected: paintRough});
+						paintRough = ui.check(roughHandle, "Roughness");
+						if (roughHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
+						var metHandle = Id.handle({selected: paintMet});
+						paintMet = ui.check(metHandle, "Metallic");
+						if (metHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+
 						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 					}
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Material")) {
 
-					var img2 = bundled.get("mat_empty.jpg");
+					var img2 = bundled.get("mat_slot.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);

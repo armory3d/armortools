@@ -405,11 +405,15 @@ class UINodes extends iron.Trait {
 			alpha_blend_source: 'blend_one',
 			alpha_blend_destination: eraser ? 'blend_zero' : 'blend_one',
 			alpha_blend_operation: 'add',
-			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
+			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
+
+		con_paint.data.color_writes_red = [true, true, true, true];
+		con_paint.data.color_writes_green = [true, true, true, true];
+		con_paint.data.color_writes_blue = [true, true, true, true];
 
 		if (UITrait.inst.brushType == 3) { // Bake AO
-			con_paint.data.color_write_green = false; // R
-			con_paint.data.color_write_blue = false; // M
+			con_paint.data.color_writes_green[2] = false; // No rough
+			con_paint.data.color_writes_blue[2] = false; // No met
 		}
 
 		var vert = con_paint.make_vert();
@@ -598,8 +602,9 @@ class UINodes extends iron.Trait {
 
 		if (!UITrait.inst.paintBase) frag.write('fragColor[0].a = 0.0;');
 		if (!UITrait.inst.paintNor) frag.write('fragColor[1].a = 0.0;');
-		if (!UITrait.inst.paintRough) frag.write('fragColor[2].a = 0.0;');
-		// if (!UITrait.inst.paintHeight) frag.write('fragColor[3].a = 0.0;');
+		if (!UITrait.inst.paintOcc) con_paint.data.color_writes_red[2] = false;
+		if (!UITrait.inst.paintRough) con_paint.data.color_writes_green[2] = false;
+		if (!UITrait.inst.paintMet) con_paint.data.color_writes_blue[2] = false;
 
 		if (UITrait.inst.brushType == 3) { // Bake AO
 			frag.write('fragColor[0].a = 0.0;');
@@ -631,7 +636,7 @@ class UINodes extends iron.Trait {
 			compare_mode: 'less',
 			// cull_mode: 'clockwise',
 			cull_mode: 'none',
-			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
+			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
@@ -711,7 +716,7 @@ class UINodes extends iron.Trait {
 			color_write_green: false,
 			color_write_blue: false,
 			color_write_alpha: false,
-			vertex_structure: [{"name": "pos", "size": 3}]
+			vertex_structure: [{name: "pos", size: 3}]
 		});
 
 		var vert = con_depth.make_vert();
@@ -774,7 +779,7 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			vertex_structure: [{"name": "pos", "size": 3},{"name": "nor", "size": 3},{"name": "tex", "size": 2}] });
+			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
