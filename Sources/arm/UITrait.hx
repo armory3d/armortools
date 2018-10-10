@@ -475,7 +475,7 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
-	function checkImageFormat(path:String):Bool {
+	public static function checkImageFormat(path:String):Bool {
 		var p = path.toLowerCase();
 		if (!StringTools.endsWith(p, ".jpg") &&
 			!StringTools.endsWith(p, ".png") &&
@@ -1746,7 +1746,7 @@ class UITrait extends iron.Trait {
 					arm.App.showFiles = true;
 					arm.App.foldersOnly = false;
 					arm.App.filesDone = function(path:String) {
-						UITrait.inst.importAsset(path);
+						importAsset(path);
 					}
 				}
 
@@ -1973,13 +1973,26 @@ class UITrait extends iron.Trait {
 		return Canvas.assetMap.get(asset.id);
 	}
 
+	public static function checkMeshFormat(path:String):Bool {
+		var p = path.toLowerCase();
+		if (!StringTools.endsWith(p, ".obj") &&
+			!StringTools.endsWith(p, ".gltf") &&
+			// !StringTools.endsWith(p, ".blend") &&
+			!StringTools.endsWith(p, ".fbx")) {
+			return false;
+		}
+		return true;
+	}
+
 	public function importMesh(path:String) {
+		if (!checkMeshFormat(path)) {
+			showMessage("Error: Unknown mesh format");
+			return;
+		}
 		var p = path.toLowerCase();
 		if (StringTools.endsWith(p, ".obj")) importObj(path);
 		else if (StringTools.endsWith(p, ".gltf")) importGltf(path);
 		else if (StringTools.endsWith(p, ".fbx")) importFbx(path);
-		// else if (StringTools.endsWith(p, ".blend")) importBlend(path);
-		else showMessage("Error: Unknown mesh format");
 	}
 
 	function importObj(path:String) {

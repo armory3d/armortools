@@ -4,7 +4,7 @@ import zui.*;
 import zui.Zui.State;
 import zui.Canvas;
 
-class App extends iron.Trait {
+class App {
 
 	public static var uienabled = true;
 	public static var isDragging = false;
@@ -19,6 +19,10 @@ class App extends iron.Trait {
 	public static var theme:zui.Themes.TTheme;
 	public static var color_wheel:kha.Image;
 	static var uimodal:Zui;
+	static var modalW = 625;
+	static var modalH = 545;
+	static var lastW = -1;
+	static var lastH = -1;
 
 	public static function getEnumTexts():Array<String> {
 		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
@@ -30,7 +34,6 @@ class App extends iron.Trait {
 	}
 
 	public function new() {
-		super();
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);
@@ -60,19 +63,18 @@ class App extends iron.Trait {
 					theme.SEPARATOR_COL = Std.parseInt(cast theme.SEPARATOR_COL);
 					font = f;
 					color_wheel = image;
-					var scale = armory.data.Config.raw.window_scale;
 					zui.Nodes.getEnumTexts = getEnumTexts;
 					zui.Nodes.mapEnum = mapEnum;
-					uimodal = new Zui( { font: f, scaleFactor: scale } );
+					uimodal = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
-					notifyOnInit(function() {
-						notifyOnUpdate(update);
-						object.addTrait(new UITrait());
-						object.addTrait(new UINodes());
-						object.addTrait(new UIView2D());
-						object.addTrait(new FlyCamera());
-						object.addTrait(new OrbitCamera());
-						notifyOnRender2D(render);
+					iron.App.notifyOnInit(function() {
+						iron.App.notifyOnUpdate(update);
+						iron.Scene.active.root.addTrait(new UITrait());
+						iron.Scene.active.root.addTrait(new UINodes());
+						iron.Scene.active.root.addTrait(new UIView2D());
+						iron.Scene.active.root.addTrait(new FlyCamera());
+						iron.Scene.active.root.addTrait(new OrbitCamera());
+						iron.App.notifyOnRender2D(render);
 					});
 				});
 			});
@@ -83,7 +85,6 @@ class App extends iron.Trait {
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 50;
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 		
-		// TODO: account for Config.raw.window_scale
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
 			res = kha.System.windowWidth() - UITrait.defaultWindowW;
@@ -102,7 +103,6 @@ class App extends iron.Trait {
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 50;
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 
-		// TODO: account for Config.raw.window_scale
 		var res = 0;
 		res = kha.System.windowHeight();
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -129,13 +129,17 @@ class App extends iron.Trait {
 	static function update() {
 		var mouse = iron.system.Input.getMouse();
 		var kb = iron.system.Input.getKeyboard();
-		// if (mouse.started() && mouse.x < 50 && mouse.y < 50) show = !show;
 
 		isDragging = dragAsset != null;
 		if (mouse.released() && isDragging) {
 			if (UINodes.inst.show && mouse.x > UINodes.inst.wx && mouse.y > UINodes.inst.wy) {
 				var index = 0;
-				for (i in 0...UITrait.inst.assets.length) if (UITrait.inst.assets[i] == dragAsset) { index = i; break; }
+				for (i in 0...UITrait.inst.assets.length) {
+					if (UITrait.inst.assets[i] == dragAsset) {
+						index = i;
+						break;
+					}
+				}
 				UINodes.inst.acceptDrag(index);
 			}
 			dragAsset = null;
@@ -161,79 +165,24 @@ class App extends iron.Trait {
 			dropPath = "";
 		}
 
-		updateFiles();
+		if (showFiles) updateFiles();
 	}
 
 	static function updateFiles() {
-		if (!showFiles) return;
-
 		var mouse = iron.system.Input.getMouse();
-
 		if (mouse.released()) {
 			var appw = kha.System.windowWidth();
 			var apph = kha.System.windowHeight();
-			var left = appw / 2 - modalRectW / 2;
-			var right = appw / 2 + modalRectW / 2;
-			var top = apph / 2 - modalRectH / 2;
-			var bottom = apph / 2 + modalRectH / 2;
-			if (mouse.x < left || mouse.x > right || mouse.y < top + modalHeaderH || mouse.y > bottom) {
+			var left = appw / 2 - modalW / 2;
+			var right = appw / 2 + modalW / 2;
+			var top = apph / 2 - modalH / 2;
+			var bottom = apph / 2 + modalH / 2;
+			if (mouse.x < left || mouse.x > right || mouse.y < top || mouse.y > bottom) {
 				showFiles = false;
 			}
 		}
 	}
 
-	static var modalW = 625;
-	static var modalH = 545;
-	static var modalHeaderH = 66;
-	static var modalRectW = 625; // No shadow
-	static var modalRectH = 545;
-
-	static var path = '/';
-	static function renderFiles(g:kha.graphics2.Graphics) {
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
-		var left = appw / 2 - modalW / 2;
-		var top = apph / 2 - modalH / 2;
-		g.color = 0xff202020;
-		g.fillRect(left, top, modalW, modalH);
-
-		var leftRect = Std.int(appw / 2 - modalRectW / 2);
-		var rightRect = Std.int(appw / 2 + modalRectW / 2);
-		var topRect = Std.int(apph / 2 - modalRectH / 2);
-		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
-		topRect += modalHeaderH;
-		
-		g.end();
-		uimodal.begin(g);
-		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
-			var pathHandle = Id.handle();
-			pathHandle.text = uimodal.textInput(pathHandle);
-			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
-		}
-		uimodal.end(false);
-		g.begin(false);
-
-		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
-		if (uimodal.button("OK")) {
-			showFiles = false;
-			filesDone(path);
-			UITrait.inst.dirty = 2;
-		}
-		uimodal.endLayout(false);
-
-		uimodal.beginLayout(g, rightRect - 200, bottomRect - 30, 100);
-		if (uimodal.button("Cancel")) {
-			showFiles = false;
-			UITrait.inst.dirty = 2;
-		}
-		uimodal.endLayout();
-
-		g.begin(false);
-	}
-
-	static var lastW = -1;
-	static var lastH = -1;
-	static var wasResized = false;
 	static function render(g:kha.graphics2.Graphics) {
 		if (lastW >= 0 && arm.App.realw() > 0 && (lastW != arm.App.realw() || lastH != arm.App.realh())) {
 			arm.App.resize();
@@ -245,13 +194,46 @@ class App extends iron.Trait {
 
 		uienabled = !showFiles;
 		if (showFiles) renderFiles(g);
+	}
 
-		// var ready = showFiles || dirty;
-		// TODO: Texture params get overwritten
-		// if (ready) for (t in UINodes.inst._matcon.bind_textures) t.params_set = null;
-		// if (UINodes.inst._matcon != null) for (t in UINodes.inst._matcon.bind_textures) t.params_set = null;
+	static function renderFiles(g:kha.graphics2.Graphics) {
+		var appw = kha.System.windowWidth();
+		var apph = kha.System.windowHeight();
+		var left = Std.int(appw / 2 - modalW / 2);
+		var right = Std.int(appw / 2 + modalW / 2);
+		var top = Std.int(apph / 2 - modalH / 2);
+		var bottom = Std.int(apph / 2 + modalH / 2);
+		g.color = 0xff202020;
+		g.fillRect(left, top, modalW, modalH);
+		
+		g.end();
+		uimodal.begin(g);
+		var path = '/';
+		var pathHandle = Id.handle();
+		var whandle = Id.handle();
+		if (uimodal.window(whandle, left, top, modalW, modalH - 50, true)) {
+			pathHandle.text = uimodal.textInput(pathHandle);
+			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
+		}
+		uimodal.end(false);
+		g.begin(false);
 
-		// iron.Scene.active.camera.renderPath.ready = ready;
-		// dirty = false;
+		if (UITrait.checkImageFormat(path) || UITrait.checkMeshFormat(path)) {
+			showFiles = false;
+			filesDone(path);
+			var sep = kha.System.systemId == "Windows" ? "\\" : "/";
+			pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
+			whandle.redraws = 2;
+			UITrait.inst.dirty = 2;
+		}
+
+		uimodal.beginLayout(g, right - 100, bottom - 30, 100);
+		if (uimodal.button("Cancel")) {
+			showFiles = false;
+			UITrait.inst.dirty = 2;
+		}
+		uimodal.endLayout();
+
+		g.begin(false);
 	}
 }

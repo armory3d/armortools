@@ -2,7 +2,6 @@ package arm.logicnode;
 
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
-import iron.math.Vec4;
 
 @:keep
 class BrushOutputNode extends LogicNode {
