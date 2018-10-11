@@ -21,7 +21,7 @@
 	"ACCENT_COL": "0xff404040",
 	"ACCENT_HOVER_COL": "0xff505050",
 	"ACCENT_SELECT_COL": "0xff666666",
-	"PANEL_BG_COL": "0xff000000",
+	"PANEL_BG_COL": "0xff191919",
 	"PANEL_TEXT_COL": "0xffeeeeee",
 	"BUTTON_COL": "0xff2b2b2b",
 	"BUTTON_TEXT_COL": "0xffcac9c7",

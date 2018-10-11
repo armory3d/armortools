@@ -1,18 +1,16 @@
-package arm.logicnode;
+package arm.brushnode;
 
-import iron.math.Vec4;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
 @:keep
-class ColorNode extends LogicNode {
+class StringNode extends LogicNode {
 
-	var value = new Vec4();
+	public var value:String;
 
-	public function new(tree:LogicTree, r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
+	public function new(tree:LogicTree, value = "") {
 		super(tree);
-
-		value.set(r, g, b, a);
+		this.value = value;
 	}
 
 	override function get(from:Int):Dynamic {

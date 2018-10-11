@@ -75,8 +75,8 @@ class App {
 						iron.Scene.active.root.addTrait(new UITrait());
 						iron.Scene.active.root.addTrait(new UINodes());
 						iron.Scene.active.root.addTrait(new UIView2D());
-						iron.Scene.active.root.addTrait(new FlyCamera());
-						iron.Scene.active.root.addTrait(new OrbitCamera());
+						iron.Scene.active.root.addTrait(new arm.trait.FlyCamera());
+						iron.Scene.active.root.addTrait(new arm.trait.OrbitCamera());
 						iron.App.notifyOnRender2D(render);
 					});
 				});
@@ -111,6 +111,15 @@ class App {
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
+	static var appx = 0;
+	public static function x():Int {
+		return appx;
+	}
+
+	public static function y():Int {
+		return 0;
+	}
+
 	public static function realw():Int {
 		return kha.System.windowWidth();
 	}
@@ -122,6 +131,10 @@ class App {
 	public static function resize() {
 		iron.Scene.active.camera.buildProjection();
 		UITrait.inst.dirty = 2;
+
+		var lay = UITrait.inst.apconfig.ui_layout;
+		appx = lay == 0 ? 0 : UITrait.inst.windowW;
+		if (UINodes.inst.show) appx += UINodes.inst.ww;
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();

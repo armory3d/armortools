@@ -263,7 +263,7 @@ class UITrait extends iron.Trait {
 		#end
 
 		// Paint bounds
-		if (paintVec.x > 1) return false;
+		if (paintVec.x > 1 || paintVec.x < 0) return false;
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 
@@ -389,7 +389,11 @@ class UITrait extends iron.Trait {
 
 		inst = this;
 
-		windowW = Std.int(defaultWindowW * armory.data.Config.raw.window_scale);
+		// Init config
+		apconfig = cast armory.data.Config.raw;
+		if (apconfig.ui_layout == null) apconfig.ui_layout = 0;
+
+		windowW = Std.int(defaultWindowW * apconfig.window_scale);
 
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
@@ -455,7 +459,7 @@ class UITrait extends iron.Trait {
 			}
 		});//
 
-		var scale = armory.data.Config.raw.window_scale;
+		var scale = apconfig.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
 		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'env_thumb.jpg'], done);
 	}
@@ -596,6 +600,8 @@ class UITrait extends iron.Trait {
 	public var currentObject:MeshObject;
 	var frame = 0;
 
+	public var apconfig:TAPConfig;
+
 	function done() {
 
 		notifyOnInit(function() {
@@ -626,7 +632,6 @@ class UITrait extends iron.Trait {
 
 			// Init plugins
 			Plugin.keep();
-			var apconfig:TAPConfig = cast armory.data.Config.raw;
 			if (apconfig.plugins != null) {
 				for (plugin in apconfig.plugins) {
 					iron.data.Data.getBlob(plugin, function(blob:kha.Blob) {
@@ -1259,7 +1264,6 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
-
 	function selectObject(o:iron.object.Object) {
 		selectedObject = o;
 
@@ -1289,13 +1293,13 @@ class UITrait extends iron.Trait {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (arm.App.uienabled && mouse.x <= iron.App.w()) {
-			var mx = mouse.x;
-			var my = mouse.y;
+		if (arm.App.uienabled) {
+			var mx = mouse.x + iron.App.x();
+			var my = mouse.y + iron.App.y();
 			var pen = iron.system.Input.getPen();
 			if (pen.down()) {
-				mx = pen.x;
-				my = pen.y;
+				mx = pen.x + iron.App.x();
+				my = pen.y + iron.App.y();
 			}
 
 			if (brushPaint == 2) { // Sticker
@@ -1308,7 +1312,7 @@ class UITrait extends iron.Trait {
 				g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 
 				if (mirrorX) {
-					var cx = iron.App.w() / 2;
+					var cx = iron.App.x() + iron.App.w() / 2;
 					var nx = cx + (cx - mx);
 					// Separator line
 					g.color = 0x66ffffff;
@@ -1333,7 +1337,8 @@ class UITrait extends iron.Trait {
 			// ui.tab(Id.handle(), "3D View");
 		// }
 		
-		if (ui.window(hwnd, arm.App.realw() - windowW, 0, windowW, arm.App.realh())) {
+		var wx = apconfig.ui_layout == 0 ? arm.App.realw() - windowW : 0;
+		if (ui.window(hwnd, wx, 0, windowW, arm.App.realh())) {
 
 			#if arm_editor
 
@@ -1343,7 +1348,7 @@ class UITrait extends iron.Trait {
 			if (ui.tab(htab, "Scene")) {
 				gizmo.visible = true;
 				grid.visible = true;
-				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
+				if (ui.panel(Id.handle({selected: true}), "Outliner", 1)) {
 					ui.indent();
 					
 					var i = 0;
@@ -1384,7 +1389,7 @@ class UITrait extends iron.Trait {
 				
 				if (selectedObject == null) selectedType = "";
 
-				if (ui.panel(Id.handle({selected: true}), 'Properties $selectedType')) {
+				if (ui.panel(Id.handle({selected: true}), 'Properties $selectedType', 1)) {
 					ui.indent();
 					
 					if (selectedObject != null) {
@@ -1497,7 +1502,7 @@ class UITrait extends iron.Trait {
 
 					ui.unindent();
 				}
-				if (ui.panel(Id.handle({selected: true}), "Material")) {
+				if (ui.panel(Id.handle({selected: true}), "Material", 1)) {
 
 					var img2 = bundled.get("mat_slot.jpg");
 
@@ -1584,7 +1589,7 @@ class UITrait extends iron.Trait {
 
 				ui._y += 6;
 
-				if (ui.panel(Id.handle({selected: true}), tool)) {
+				if (ui.panel(Id.handle({selected: true}), tool, 1)) {
 					// Color ID
 					if (brushType == 4) {
 						// Picked color
@@ -1626,7 +1631,7 @@ class UITrait extends iron.Trait {
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Paint Channels")) {
+				if (ui.panel(Id.handle({selected: true}), "Paint Channels", 1)) {
 					ui.row([1/3,1/3,1/3]);
 
 					var baseHandle = Id.handle({selected: paintBase});
@@ -1685,7 +1690,7 @@ class UITrait extends iron.Trait {
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Material")) {
+				if (ui.panel(Id.handle({selected: true}), "Material", 1)) {
 
 					var img2 = bundled.get("mat_slot.jpg");
 
@@ -1731,7 +1736,7 @@ class UITrait extends iron.Trait {
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Layers")) {
+				if (ui.panel(Id.handle({selected: true}), "Layers", 1)) {
 
 					function drawList(h:zui.Zui.Handle, l:LayerSlot, i:Int) {
 						if (selectedLayer == l) {
@@ -1786,7 +1791,7 @@ class UITrait extends iron.Trait {
 					if (ui.button("2D View")) show2DView();
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "Camera")) {
+				if (ui.panel(Id.handle({selected: false}), "Camera", 1)) {
 					var scene = iron.Scene.active;
 					var cam = scene.cameras[0];
 					ui.row([1/2,1/2]);
@@ -1811,7 +1816,7 @@ class UITrait extends iron.Trait {
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "Lighting")) {
+				if (ui.panel(Id.handle({selected: false}), "Lighting", 1)) {
 					ui.image(envThumb);
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
@@ -1836,243 +1841,264 @@ class UITrait extends iron.Trait {
 			}
 			if (ui.tab(htab, "Library")) {
 
-				ui.row([1/2, 1/2]);
-				if (ui.button("Import Mesh")) {
-					arm.App.showFiles = true;
-					arm.App.foldersOnly = false;
-					arm.App.filesDone = function(path:String) {
-						importMesh(path);
+				if (ui.panel(Id.handle({selected: true}), "Import", 1)) {
+					ui.row([1/2, 1/2]);
+					if (ui.button("Import Mesh")) {
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = false;
+						arm.App.filesDone = function(path:String) {
+							importMesh(path);
+						}
 					}
-				}
-				if (ui.button("Import Texture")) {
-					arm.App.showFiles = true;
-					arm.App.foldersOnly = false;
-					arm.App.filesDone = function(path:String) {
-						importAsset(path);
+					if (ui.button("Import Texture")) {
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = false;
+						arm.App.filesDone = function(path:String) {
+							importAsset(path);
+						}
 					}
 				}
 
-				if (assets.length > 0) {
-					var i = assets.length - 1;
-					while (i >= 0) {
-						var asset = assets[i];
-						if (ui.image(UITrait.inst.getImage(asset)) == State.Started) {
-							arm.App.dragAsset = asset;
+				if (ui.panel(Id.handle({selected: true}), "Assets", 1)) {
+					if (assets.length > 0) {
+						var i = assets.length - 1;
+						while (i >= 0) {
+							var asset = assets[i];
+							if (ui.image(UITrait.inst.getImage(asset)) == State.Started) {
+								arm.App.dragAsset = asset;
+							}
+							ui.row([1/8, 7/8]);
+							var b = ui.button("X");
+							asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
+							assetNames[i] = asset.name;
+							if (b) {
+								UITrait.inst.getImage(asset).unload();
+								assets.splice(i, 1);
+								assetNames.splice(i, 1);
+							}
+							i--;
 						}
-						ui.row([1/8, 7/8]);
-						var b = ui.button("X");
-						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-						assetNames[i] = asset.name;
-						if (b) {
-							UITrait.inst.getImage(asset).unload();
-							assets.splice(i, 1);
-							assetNames.splice(i, 1);
-						}
-						i--;
 					}
-				}
-				else {
-					ui.text("(Drag & drop assets here)");
+					else {
+						ui.text("(Drag & drop assets here)");
+					}
 				}
 			}
 
-			if (ui.tab(htab, "Export")) {
-				if (ui.button("Export Textures")) {
-					var textureSize = getTextureRes();
+			if (ui.tab(htab, "File")) {
 
-					arm.App.showFiles = true;
-					arm.App.foldersOnly = true;
-					// var path = 'C:\\Users\\lubos\\Documents\\';
-					arm.App.filesDone = function(path:String) {
-						var bo = new haxe.io.BytesOutput();
-						var pixels = selectedLayer.texpaint.getPixels();
-						var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
-						// BGRA to RGB
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
-						}
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						// var jpgdata:iron.format.jpg.Data.Data = {
-						// 	width: textureSize,
-						// 	height: textureSize,
-						// 	quality: 80,
-						// 	pixels: rgb
-						// };
-						// var jpgwriter = new iron.format.jpg.Writer(bo);
-						// jpgwriter.write(jpgdata);
-						#if kha_krom
-						if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
-						#end
+				if (ui.panel(Id.handle({selected: true}), "Project", 1)) {
+					ui.row([1/3,1/3,1/3]);
+					ui.button("Open..");
+					ui.button("Save..");
+					ui.button("Save As..");
+				}
 
-						pixels = selectedLayer.texpaint_nor.getPixels();
-						for (i in 0...textureSize * textureSize) {
-							rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-							rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-							rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
-						}
-						bo = new haxe.io.BytesOutput();
-						var pngwriter = new iron.format.png.Writer(bo);
-						pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						#if kha_krom
-						if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
-						#end
+				if (ui.panel(Id.handle({selected: true}), "Export", 1)) {
 
-						// for (i in 0...textureSize * textureSize) {
-						// 	rgb.set(i * 3 + 0, pixels.get(i * 4 + 3));
-						// 	rgb.set(i * 3 + 1, pixels.get(i * 4 + 3));
-						// 	rgb.set(i * 3 + 2, pixels.get(i * 4 + 3));
-						// }
-						// bo = new haxe.io.BytesOutput();
-						// var pngwriter = new iron.format.png.Writer(bo);
-						// pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-						// #if kha_krom
-						// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
-						// #end
+					if (ui.button("Export Textures")) {
+						var textureSize = getTextureRes();
 
-						pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
-
-						if (outputType == 0) {
-							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4));
-								rgb.set(i * 3 + 1, pixels.get(i * 4));
-								rgb.set(i * 3 + 2, pixels.get(i * 4));
-							}
-							bo = new haxe.io.BytesOutput();
-							var pngwriter = new iron.format.png.Writer(bo);
-							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-							#if kha_krom
-							if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
-							#end
-
-							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
-							}
-							bo = new haxe.io.BytesOutput();
-							var pngwriter = new iron.format.png.Writer(bo);
-							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-							#if kha_krom
-							if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
-							#end
-
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = true;
+						// var path = 'C:\\Users\\lubos\\Documents\\';
+						arm.App.filesDone = function(path:String) {
+							var bo = new haxe.io.BytesOutput();
+							var pixels = selectedLayer.texpaint.getPixels();
+							var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
+							// BGRA to RGB
 							for (i in 0...textureSize * textureSize) {
 								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
-							}
-							bo = new haxe.io.BytesOutput();
-							var pngwriter = new iron.format.png.Writer(bo);
-							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-							#if kha_krom
-							if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
-							#end
-						}
-						else { // UE4
-							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4));
 								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
 							}
-							bo = new haxe.io.BytesOutput();
 							var pngwriter = new iron.format.png.Writer(bo);
 							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							// var jpgdata:iron.format.jpg.Data.Data = {
+							// 	width: textureSize,
+							// 	height: textureSize,
+							// 	quality: 80,
+							// 	pixels: rgb
+							// };
+							// var jpgwriter = new iron.format.jpg.Writer(bo);
+							// jpgwriter.write(jpgdata);
 							#if kha_krom
-							if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
+							if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
 							#end
-						}
 
-						if (isHeight && selectedLayer.texpaint_opt != null) {
-							pixels = selectedLayer.texpaint_opt.getPixels();
+							pixels = selectedLayer.texpaint_nor.getPixels();
 							for (i in 0...textureSize * textureSize) {
 								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
 							}
 							bo = new haxe.io.BytesOutput();
 							var pngwriter = new iron.format.png.Writer(bo);
 							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
 							#if kha_krom
-							Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+							if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
 							#end
-						}
 
-						// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac.png", bo.getBytes().getData());
-						// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis.png", bo.getBytes().getData());
-						// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs.png", bo.getBytes().getData());
+							// for (i in 0...textureSize * textureSize) {
+							// 	rgb.set(i * 3 + 0, pixels.get(i * 4 + 3));
+							// 	rgb.set(i * 3 + 1, pixels.get(i * 4 + 3));
+							// 	rgb.set(i * 3 + 2, pixels.get(i * 4 + 3));
+							// }
+							// bo = new haxe.io.BytesOutput();
+							// var pngwriter = new iron.format.png.Writer(bo);
+							// pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							// #if kha_krom
+							// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+							// #end
+
+							pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
+
+							if (outputType == 0) {
+								for (i in 0...textureSize * textureSize) {
+									rgb.set(i * 3 + 0, pixels.get(i * 4));
+									rgb.set(i * 3 + 1, pixels.get(i * 4));
+									rgb.set(i * 3 + 2, pixels.get(i * 4));
+								}
+								bo = new haxe.io.BytesOutput();
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								#if kha_krom
+								if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
+								#end
+
+								for (i in 0...textureSize * textureSize) {
+									rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
+									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+									rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
+								}
+								bo = new haxe.io.BytesOutput();
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								#if kha_krom
+								if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
+								#end
+
+								for (i in 0...textureSize * textureSize) {
+									rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
+									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								}
+								bo = new haxe.io.BytesOutput();
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								#if kha_krom
+								if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
+								#end
+							}
+							else { // UE4
+								for (i in 0...textureSize * textureSize) {
+									rgb.set(i * 3 + 0, pixels.get(i * 4));
+									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								}
+								bo = new haxe.io.BytesOutput();
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								#if kha_krom
+								if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
+								#end
+							}
+
+							if (isHeight && selectedLayer.texpaint_opt != null) {
+								pixels = selectedLayer.texpaint_opt.getPixels();
+								for (i in 0...textureSize * textureSize) {
+									rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
+									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								}
+								bo = new haxe.io.BytesOutput();
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								#if kha_krom
+								Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+								#end
+							}
+
+							// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac.png", bo.getBytes().getData());
+							// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis.png", bo.getBytes().getData());
+							// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs.png", bo.getBytes().getData());
+						}
 					}
-				}
 
-				var hres = Id.handle({position: textureRes});
-				textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
-				if (hres.changed) {
-					iron.App.notifyOnRender(resizeLayers);
+					var hres = Id.handle({position: textureRes});
+					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
+					if (hres.changed) {
+						iron.App.notifyOnRender(resizeLayers);
+					}
+					ui.combo(Id.handle(), ["8bit"], "Color", true);
+					ui.combo(Id.handle(), ["png"], "Format", true);
+					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
+					ui.text("Channels");
+					ui.row([1/2, 1/2]);
+					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
+					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
+					ui.row([1/2, 1/2]);
+					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
+					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
+					ui.row([1/2, 1/2]);
+					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
+					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
+					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 				}
-				ui.combo(Id.handle(), ["8bit"], "Color", true);
-				ui.combo(Id.handle(), ["png"], "Format", true);
-				outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
-				ui.text("Channels");
-				ui.row([1/2, 1/2]);
-				isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
-				isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
-				ui.row([1/2, 1/2]);
-				isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
-				isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
-				ui.row([1/2, 1/2]);
-				isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
-				isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
-				isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 			}
 
 			if (ui.tab(htab, "Preferences")) {
-				var hscale = Id.handle({value: armory.data.Config.raw.window_scale});
-				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-				if (ui.changed && !iron.system.Input.getMouse().down()) {
-					armory.data.Config.raw.window_scale = hscale.value;
-					ui.setScale(hscale.value);
-					windowW = Std.int(defaultWindowW * armory.data.Config.raw.window_scale);
-					arm.App.resize();
+				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
+					var hscale = Id.handle({value: apconfig.window_scale});
+					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+					if (ui.changed && !iron.system.Input.getMouse().down()) {
+						apconfig.window_scale = hscale.value;
+						ui.setScale(hscale.value);
+						windowW = Std.int(defaultWindowW * apconfig.window_scale);
+						arm.App.resize();
+					}
+					apconfig.ui_layout = ui.combo(Id.handle({position: apconfig.ui_layout}), ["Right", "Left"], "UI Layout", true);
 				}
-				penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-				drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
-				if (ui.changed) {
-					dirty = 2;
+
+				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
+					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
+					undoEnabled = ui.check(Id.handle({selected: true}), "Undo");
 				}
-				if (!drawWorld) {
-					var hwheel = Id.handle();
-					worldColor = Ext.colorWheel(ui, hwheel);
-				}
-				undoEnabled = ui.check(Id.handle({selected: true}), "Undo");
-				
+
 				#if arm_debug
 				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
 				#end
 
-				var hssgi = Id.handle({selected: armory.data.Config.raw.rp_ssgi});
-				var hssr = Id.handle({selected: armory.data.Config.raw.rp_ssr});
-				var hbloom = Id.handle({selected: armory.data.Config.raw.rp_bloom});
-				var hshadowmap = Id.handle({position: getShadowQuality(armory.data.Config.raw.rp_shadowmap)});
-				if (ui.panel(Id.handle({selected: false}), "Viewport")) {
-					armory.data.Config.raw.window_vsync = ui.check(Id.handle({selected: armory.data.Config.raw.window_vsync}), "VSync");
+				var hssgi = Id.handle({selected: apconfig.rp_ssgi});
+				var hssr = Id.handle({selected: apconfig.rp_ssr});
+				var hbloom = Id.handle({selected: apconfig.rp_bloom});
+				var hshadowmap = Id.handle({position: getShadowQuality(apconfig.rp_shadowmap)});
+				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
+					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
+					drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
+					if (ui.changed) {
+						dirty = 2;
+					}
+					if (!drawWorld) {
+						var hwheel = Id.handle();
+						worldColor = Ext.colorWheel(ui, hwheel);
+					}
 					ui.check(hssgi, "SSAO");
 					ui.check(hssr, "SSR");
 					ui.check(hbloom, "Bloom");
 					ui.combo(hshadowmap, ["High", "Medium", "Low"], "Shadows", true);
 				}
 
-				if (ui.button("Save")) {
-					armory.data.Config.raw.rp_ssgi = hssgi.selected;
-					armory.data.Config.raw.rp_ssr = hssr.selected;
-					armory.data.Config.raw.rp_bloom = hbloom.selected;
-					armory.data.Config.raw.rp_shadowmap = getShadowMapSize(hshadowmap.position);
+				if (ui.button("Apply and Save")) {
+					apconfig.rp_ssgi = hssgi.selected;
+					apconfig.rp_ssr = hssr.selected;
+					apconfig.rp_bloom = hbloom.selected;
+					apconfig.rp_shadowmap = getShadowMapSize(hshadowmap.position);
 					armory.data.Config.save();
 					armory.renderpath.RenderPathCreator.applyConfig();
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "About")) {
+				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
 					ui.text("v0.5");
 					// ui.text(Macro.buildSha());
 					// ui.text(Macro.buildDate());
@@ -2263,5 +2289,8 @@ typedef TAPConfig = {
 	@:optional var rp_motionblur:Null<Bool>;
 	@:optional var rp_gi:Null<Bool>;
 	// Ext
+	// @:optional var version:Null<Float>;
 	@:optional var plugins:Array<String>;
+	@:optional var ui_layout:Null<Int>;
+	
 }

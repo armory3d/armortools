@@ -1,14 +1,14 @@
-package arm.logicnode;
+package arm.brushnode;
 
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 
 @:keep
-class BooleanNode extends LogicNode {
+class FloatNode extends LogicNode {
 
-	public var value:Bool;
+	public var value:Float;
 
-	public function new(tree:LogicTree, value = false) {
+	public function new(tree:LogicTree, value = 0.0) {
 		super(tree);
 		this.value = value;
 	}

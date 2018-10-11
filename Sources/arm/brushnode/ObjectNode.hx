@@ -1,4 +1,4 @@
-package arm.logicnode;
+package arm.brushnode;
 
 import iron.object.Object;
 import armory.logicnode.LogicNode;

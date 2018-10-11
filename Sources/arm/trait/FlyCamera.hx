@@ -1,10 +1,11 @@
-package arm;
+package arm.trait;
 
 import iron.Trait;
 import iron.system.Input;
 import iron.system.Time;
 import iron.object.CameraObject;
 import iron.math.Vec4;
+import arm.UITrait;
 
 class FlyCamera extends Trait {
 

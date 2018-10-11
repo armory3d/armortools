@@ -1,4 +1,4 @@
-package arm.logicnode;
+package arm.brushnode;
 
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
@@ -20,7 +20,6 @@ class InputNode extends LogicNode {
 			var mouse = iron.system.Input.getMouse();
 			coords.x = mouse.x / iron.App.w();
 			coords.y = mouse.y / iron.App.h();
-
 			if (mouse.started()) {
 				startX = mouse.x / iron.App.w();
 				startY = mouse.y / iron.App.h();
@@ -31,9 +30,12 @@ class InputNode extends LogicNode {
 				coords.x = pen.x / iron.App.w();
 				coords.y = pen.y / iron.App.h();
 			}
+			if (pen.started()) {
+				startX = pen.x / iron.App.w();
+				startY = pen.y / iron.App.h();
+			}
 
 			var kb = iron.system.Input.getKeyboard();
-
 			lockY = kb.down("shift");
 			if (lockY) coords.y = startY;
 		});

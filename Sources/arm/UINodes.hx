@@ -185,7 +185,8 @@ class UINodes extends iron.Trait {
 		if (!arm.App.uienabled) return;
 		var keyboard = iron.system.Input.getKeyboard();
 
-		wx = Std.int(iron.App.w());
+		var lay = UITrait.inst.apconfig.ui_layout;
+		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 		if (mouse.x < wx || mouse.y < wy) return;
 		if (ui.isTyping) return;
@@ -267,7 +268,8 @@ class UINodes extends iron.Trait {
 		
 		// Make window
 		ww = Std.int(iron.App.w());
-		wx = Std.int(iron.App.w());
+		var lay = UITrait.inst.apconfig.ui_layout;
+		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {
 			
@@ -1141,7 +1143,7 @@ class UINodes extends iron.Trait {
 	}
 
 	public function parseBrush() {
-		armory.system.Logic.packageName = "arm.logicnode";
+		armory.system.Logic.packageName = "arm.brushnode";
 		var tree = armory.system.Logic.parse(canvasBrush, false);
 	}
 

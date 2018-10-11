@@ -1,4 +1,6 @@
-package arm;
+package arm.trait;
+
+import arm.UITrait;
 
 class OrbitCamera extends iron.Trait {
 

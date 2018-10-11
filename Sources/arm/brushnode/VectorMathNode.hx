@@ -1,4 +1,4 @@
-package arm.logicnode;
+package arm.brushnode;
 
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
