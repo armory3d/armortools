@@ -388,9 +388,6 @@ class UITrait extends iron.Trait {
 
 		inst = this;
 
-		haxeTrace = haxe.Log.trace;
-		haxe.Log.trace = consoleTrace;
-
 		windowW = Std.int(defaultWindowW * armory.data.Config.raw.window_scale);
 
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
@@ -460,13 +457,6 @@ class UITrait extends iron.Trait {
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
 		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'env_thumb.jpg'], done);
-	}
-
-	var haxeTrace:Dynamic->haxe.PosInfos->Void;
-	var lastTrace = '';
-	function consoleTrace(v:Dynamic, ?inf:haxe.PosInfos) {
-		lastTrace = Std.string(v);
-		haxeTrace(v, inf);
 	}
 
 	function showMessage(s:String) {
@@ -2040,22 +2030,37 @@ class UITrait extends iron.Trait {
 					worldColor = Ext.colorWheel(ui, hwheel);
 				}
 				undoEnabled = ui.check(Id.handle({selected: true}), "Undo");
-				armory.data.Config.raw.window_vsync = ui.check(Id.handle({selected: armory.data.Config.raw.window_vsync}), "VSync");
+				
+				#if arm_debug
+				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
+				#end
+
+				var hssgi = Id.handle({selected: armory.data.Config.raw.rp_ssgi});
+				var hssr = Id.handle({selected: armory.data.Config.raw.rp_ssr});
+				var hbloom = Id.handle({selected: armory.data.Config.raw.rp_bloom});
+				var hshadowmap = Id.handle({position: getShadowQuality(armory.data.Config.raw.rp_shadowmap)});
+				if (ui.panel(Id.handle({selected: false}), "Viewport")) {
+					armory.data.Config.raw.window_vsync = ui.check(Id.handle({selected: armory.data.Config.raw.window_vsync}), "VSync");
+					ui.check(hssgi, "SSAO");
+					ui.check(hssr, "SSR");
+					ui.check(hbloom, "Bloom");
+					ui.combo(hshadowmap, ["High", "Medium", "Low"], "Shadows", true);
+				}
+
 				if (ui.button("Save")) {
-					#if kha_krom
-					Krom.fileSaveBytes("data/config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
-					#end
+					armory.data.Config.raw.rp_ssgi = hssgi.selected;
+					armory.data.Config.raw.rp_ssr = hssr.selected;
+					armory.data.Config.raw.rp_bloom = hbloom.selected;
+					armory.data.Config.raw.rp_shadowmap = getShadowMapSize(hshadowmap.position);
+					armory.data.Config.save();
+					armory.renderpath.RenderPathCreator.applyConfig();
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "About")) {
 					ui.text("v0.5");
-					ui.text(Macro.buildSha());
-					ui.text(Macro.buildDate());
+					// ui.text(Macro.buildSha());
+					// ui.text(Macro.buildDate());
 					ui.text("armorpaint.org");
-				}
-
-				if (ui.panel(Id.handle({selected: true}), "Console")) {
-					ui.text(lastTrace);
 				}
 			}
 		}
@@ -2069,6 +2074,15 @@ class UITrait extends iron.Trait {
 			var h = getImage(arm.App.dragAsset).height * ratio;
 			g.drawScaledImage(getImage(arm.App.dragAsset), mouse.x, mouse.y, 128, h);
 		}
+	}
+
+	inline function getShadowQuality(i:Int):Int {
+		// 0 - High, 1 - Medium, 2 - Low
+		return i == 4096 ? 0 : i == 2048 ? 1 : 2;
+	}
+
+	inline function getShadowMapSize(i:Int):Int {
+		return i == 0 ? 4096 : i == 1 ? 2048 : 1024;
 	}
 
 	public function getImage(asset:TAsset):kha.Image {
@@ -2216,7 +2230,7 @@ class UITrait extends iron.Trait {
 
 typedef TAPConfig = {
 	@:optional var debug_console:Null<Bool>;
-	@:optional var window_mode:Null<Int>; // window, borderless, fullscreen
+	@:optional var window_mode:Null<Int>; // window, fullscreen
 	@:optional var window_w:Null<Int>;
 	@:optional var window_h:Null<Int>;
 	@:optional var window_resizable:Null<Bool>;
@@ -2225,12 +2239,13 @@ typedef TAPConfig = {
 	@:optional var window_vsync:Null<Bool>;
 	@:optional var window_msaa:Null<Int>;
 	@:optional var window_scale:Null<Float>;
-	@:optional var rp_supersample:Null<Float>;
-	@:optional var rp_shadowmap:Null<Int>;
-	@:optional var rp_voxelgi:Null<Int>; // off, ao, ao_revox, gi, gi_revox
+	// @:optional var rp_supersample:Null<Float>;
+	@:optional var rp_shadowmap:Null<Int>; // size
 	@:optional var rp_ssgi:Null<Bool>;
 	@:optional var rp_ssr:Null<Bool>;
 	@:optional var rp_bloom:Null<Bool>;
 	@:optional var rp_motionblur:Null<Bool>;
+	@:optional var rp_gi:Null<Bool>;
+	// Ext
 	@:optional var plugins:Array<String>;
 }

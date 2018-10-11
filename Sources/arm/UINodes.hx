@@ -954,6 +954,8 @@ class UINodes extends iron.Trait {
 	}
 
 	public function parseMeshPreviewMaterial() {
+		if (!getMOut()) return;
+
 		#if arm_editor
 		var m = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
 		#else
@@ -1003,6 +1005,7 @@ class UINodes extends iron.Trait {
 
 	public var materialParsed = false;
 	public function parsePaintMaterial() {
+		if (!getMOut()) return;
 		
 		#if arm_editor
 		if (UITrait.inst.htab.position == 0) {
@@ -1013,112 +1016,109 @@ class UINodes extends iron.Trait {
 
 		UITrait.inst.dirty = 2;
 
-		if (getMOut()) {
+		#if arm_editor
+		var m = UITrait.inst.materials[0].data;
+		sc = null;
+		_materialcontext = null;
+		#else
+		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+		#end
+		
+			var mat:TMaterial = {
+				name: "Material",
+				canvas: canvas
+			};
+			var _sd = new ShaderData(mat);
 
-			#if arm_editor
-			var m = UITrait.inst.materials[0].data;
-			sc = null;
-			_materialcontext = null;
-			#else
-			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-			#end
-			
-				var mat:TMaterial = {
-					name: "Material",
-					canvas: canvas
-				};
-				var _sd = new ShaderData(mat);
-
-				if (sc == null) {
-					for (c in m.shader.contexts) {
-						if (c.raw.name == "paint") {
-							sc = c;
-							break;
-						}
+			if (sc == null) {
+				for (c in m.shader.contexts) {
+					if (c.raw.name == "paint") {
+						sc = c;
+						break;
 					}
 				}
-				if (_materialcontext == null) {
-					for (c in m.contexts) {
-						if (c.raw.name == "paint") {
-							_materialcontext = c;
-							_matcon = c.raw;
-							break;
-						}
+			}
+			if (_materialcontext == null) {
+				for (c in m.contexts) {
+					if (c.raw.name == "paint") {
+						_materialcontext = c;
+						_matcon = c.raw;
+						break;
 					}
 				}
+			}
 
-				if (sc != null) {
-					m.shader.raw.contexts.remove(sc.raw);
-					m.shader.contexts.remove(sc);
+			if (sc != null) {
+				m.shader.raw.contexts.remove(sc.raw);
+				m.shader.contexts.remove(sc);
+			}
+			if (_materialcontext != null) {
+				m.raw.contexts.remove(_matcon);
+				m.contexts.remove(_materialcontext);
+			}
+
+			_matcon = {
+				name: "paint",
+				bind_textures: []
+			}
+
+			var con = make_paint(_sd, _matcon);
+			var cdata = con.data;
+
+			// if (sc == null) {
+				// from_source is synchronous..
+				sc = new iron.data.ShaderData.ShaderContext(cdata, function(sc:iron.data.ShaderData.ShaderContext){});
+				m.shader.raw.contexts.push(sc.raw);
+				m.shader.contexts.push(sc);
+				m.raw.contexts.push(_matcon);
+
+				new MaterialContext(_matcon, function(self:MaterialContext) {
+					_materialcontext = self;
+					m.contexts.push(self);
+				});
+
+
+
+				var dcon = make_depth(_sd, _matcon);
+				var dcdata = dcon.data;
+				// from_source is synchronous..
+				var dsc = new iron.data.ShaderData.ShaderContext(dcdata, function(sc:iron.data.ShaderData.ShaderContext){});
+				m.shader.contexts.push(dsc);
+				var dmatcon:TMaterialContext = {
+					name: "depth"
 				}
-				if (_materialcontext != null) {
-					m.raw.contexts.remove(_matcon);
-					m.contexts.remove(_materialcontext);
-				}
-
-				_matcon = {
-					name: "paint",
-					bind_textures: []
-				}
-
-				var con = make_paint(_sd, _matcon);
-				var cdata = con.data;
-
-				// if (sc == null) {
-					// from_source is synchronous..
-					sc = new iron.data.ShaderData.ShaderContext(cdata, function(sc:iron.data.ShaderData.ShaderContext){});
-					m.shader.raw.contexts.push(sc.raw);
-					m.shader.contexts.push(sc);
-					m.raw.contexts.push(_matcon);
-
-					new MaterialContext(_matcon, function(self:MaterialContext) {
-						_materialcontext = self;
-						m.contexts.push(self);
-					});
+				m.raw.contexts.push(dmatcon);
+				new MaterialContext(dmatcon, function(self:MaterialContext) {
+					m.contexts.push(self);
+				});
 
 
 
-					var dcon = make_depth(_sd, _matcon);
-					var dcdata = dcon.data;
-					// from_source is synchronous..
-					var dsc = new iron.data.ShaderData.ShaderContext(dcdata, function(sc:iron.data.ShaderData.ShaderContext){});
-					m.shader.contexts.push(dsc);
-					var dmatcon:TMaterialContext = {
-						name: "depth"
-					}
-					m.raw.contexts.push(dmatcon);
-					new MaterialContext(dmatcon, function(self:MaterialContext) {
-						m.contexts.push(self);
-					});
-
-
-
-					var smcon = make_depth(_sd, _matcon, true);
-					var smcdata = smcon.data;
-					// from_source is synchronous..
-					var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
-					for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
-					m.shader.contexts.push(smsc);
-					// var smmatcon:TMaterialContext = {
-						// name: "shadowmap"
-					// }
-					// m.raw.contexts.push(smmatcon);
-					// for (c in m.contexts) if (c.raw.name == 'shadowmap') { m.contexts.remove(c); break; }
-					// new MaterialContext(smmatcon, function(self:MaterialContext) {
-						// m.contexts.push(self);
-					// });
-
-					materialParsed = true;
+				var smcon = make_depth(_sd, _matcon, true);
+				var smcdata = smcon.data;
+				// from_source is synchronous..
+				var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
+				for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
+				m.shader.contexts.push(smsc);
+				// var smmatcon:TMaterialContext = {
+					// name: "shadowmap"
 				// }
-				// else {
-				// 	sc.raw.vertex_shader = cdata.vertex_shader;
-				// 	sc.raw.fragment_shader = cdata.fragment_shader;
-				// 	sc.compile();
-				// }
-			#if (!arm_editor)
-			});
-			#end
-		}
+				// m.raw.contexts.push(smmatcon);
+				// for (c in m.contexts) if (c.raw.name == 'shadowmap') { m.contexts.remove(c); break; }
+				// new MaterialContext(smmatcon, function(self:MaterialContext) {
+					// m.contexts.push(self);
+				// });
+
+				materialParsed = true;
+			// }
+			// else {
+			// 	sc.raw.vertex_shader = cdata.vertex_shader;
+			// 	sc.raw.fragment_shader = cdata.fragment_shader;
+			// 	sc.compile();
+			// }
+		#if (!arm_editor)
+		});
+		#end
 	}
 
 	public function acceptDrag(assetIndex:Int) {

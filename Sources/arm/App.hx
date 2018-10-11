@@ -68,9 +68,9 @@ class App {
 					uimodal = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
-						// #if arm_debug
-						// iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
-						// #end
+						#if arm_debug
+						iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
+						#end
 						iron.App.notifyOnUpdate(update);
 						iron.Scene.active.root.addTrait(new UITrait());
 						iron.Scene.active.root.addTrait(new UINodes());
