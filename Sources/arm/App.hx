@@ -68,6 +68,9 @@ class App {
 					uimodal = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
+						// #if arm_debug
+						// iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
+						// #end
 						iron.App.notifyOnUpdate(update);
 						iron.Scene.active.root.addTrait(new UITrait());
 						iron.Scene.active.root.addTrait(new UINodes());
@@ -228,6 +231,14 @@ class App {
 		}
 
 		uimodal.beginLayout(g, right - 100, bottom - 30, 100);
+		if (uimodal.button("OK")) {
+			showFiles = false;
+			filesDone(path);
+			UITrait.inst.dirty = 2;
+		}
+		uimodal.endLayout(false);
+
+		uimodal.beginLayout(g, right - 200, bottom - 30, 100);
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
 			UITrait.inst.dirty = 2;

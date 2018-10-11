@@ -459,7 +459,7 @@ class UITrait extends iron.Trait {
 
 		var scale = armory.data.Config.raw.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'cay_thumb.jpg'], done);
+		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'env_thumb.jpg'], done);
 	}
 
 	var haxeTrace:Dynamic->haxe.PosInfos->Void;
@@ -467,7 +467,7 @@ class UITrait extends iron.Trait {
 	function consoleTrace(v:Dynamic, ?inf:haxe.PosInfos) {
 		lastTrace = Std.string(v);
 		haxeTrace(v, inf);
-    }
+	}
 
 	function showMessage(s:String) {
 		messageTimer = 3.0;
@@ -500,6 +500,101 @@ class UITrait extends iron.Trait {
 			UITrait.inst.assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
 			hwnd.redraws = 2;
+
+			// Set envmap, has to be 2K res for now
+			if (StringTools.endsWith(path.toLowerCase(), ".hdr") && image.width == 2048) {
+				#if kha_krom
+				var sys = kha.System.systemId;
+				var p = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath;
+				var cmft = p + "/cmft" + (sys == "Windows" ? ".exe" : sys == "Linux" ? "-linux64" : "-osx");
+
+				var cmd = '';
+				var tmp = Krom.getFilesLocation() + '/';
+
+				// Irr
+				cmd = cmft;
+				cmd += ' --input "' + path + '"';
+				cmd += ' --filter shcoeffs';
+				cmd += ' --outputNum 1';
+				cmd += ' --output0 "' + tmp + 'tmp_irr"';
+				Krom.sysCommand(cmd);
+
+				// Rad
+				cmd = cmft;
+				cmd += ' --input "' + path + '"';
+				cmd += ' --filter radiance';
+				cmd += ' --dstFaceSize 256';
+				cmd += ' --srcFaceSize 256';
+				cmd += ' --excludeBase false';
+				cmd += ' --glossScale 8';
+				cmd += ' --glossBias 3';
+				cmd += ' --lightingModel blinnbrdf';
+				cmd += ' --edgeFixup none';
+				cmd += ' --numCpuProcessingThreads 4';
+				cmd += ' --useOpenCL true';
+				cmd += ' --clVendor anyGpuVendor';
+				cmd += ' --deviceType gpu';
+				cmd += ' --deviceIndex 0';
+				cmd += ' --generateMipChain true';
+				cmd += ' --inputGammaNumerator 1.0';
+				cmd += ' --inputGammaDenominator 1.0';
+				cmd += ' --outputGammaNumerator 1.0';
+				cmd += ' --outputGammaDenominator 1.0';
+				cmd += ' --outputNum 1';
+				cmd += ' --output0 "' + tmp + 'tmp_rad"';
+				cmd += ' --output0params hdr,rgbe,latlong';
+				Krom.sysCommand(cmd);
+				#end
+
+				// Load irr
+				iron.data.Data.getBlob(tmp + "tmp_irr.c", function(blob:kha.Blob) {
+					var lines = blob.toString().split("\n");
+					var band0 = lines[5];
+					var band1 = lines[6];
+					var band2 = lines[7];
+					band0 = band0.substring(band0.indexOf("{"), band0.length);
+					band1 = band1.substring(band1.indexOf("{"), band1.length);
+					band2 = band2.substring(band2.indexOf("{"), band2.length);
+					var band = band0 + band1 + band2;
+					band = StringTools.replace(band, "{", "");
+					band = StringTools.replace(band, "}", "");
+					var ar = band.split(",");
+					var buf = new kha.arrays.Float32Array(27);
+					for (i in 0...ar.length) buf[i] = Std.parseFloat(ar[i]);
+					iron.Scene.active.world.probe.irradiance = buf;
+					dirty = 2;
+				});
+
+				// World envmap
+				iron.Scene.active.world.envmap = image;
+
+				// Load mips
+				var mipsCount = 9;
+				var mipsLoaded = 0;
+				var mips:Array<kha.Image> = [];
+				while (mips.length < mipsCount + 2) mips.push(null);
+				var mw = 1024;
+				var mh = 512;
+				for (i in 0...mipsCount) {
+					iron.data.Data.getImage(tmp + "tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip:kha.Image) {
+						mips[i] = mip;
+						mipsLoaded++;
+						if (mipsLoaded == mipsCount) {
+							// 2x1 and 1x1 mips
+							mips[mipsCount] = kha.Image.create(2, 1, kha.graphics4.TextureFormat.RGBA128);
+							mips[mipsCount + 1] = kha.Image.create(1, 1, kha.graphics4.TextureFormat.RGBA128);
+							// Set radiance
+							image.setMipmaps(mips);
+							iron.Scene.active.world.probe.radiance = image;
+							dirty = 2;
+							// Update thumb
+							bundled.set("env_thumb.jpg", mips[0]);
+						}
+					}, true); // Readable
+					mw = Std.int(mw / 2);
+					mh = Std.int(mh / 2);
+				}
+			}
 		});
 	}
 
@@ -1199,7 +1294,7 @@ class UITrait extends iron.Trait {
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
 
 		// var brushImg = bundled.get('brush.jpg');
-		var envThumbCay = bundled.get('cay_thumb.jpg');
+		var envThumb = bundled.get('env_thumb.jpg');
 		var cursorImg = bundled.get('cursor.png');
 		var mouse = iron.system.Input.getMouse();
 		g.color = 0xffffffff;
@@ -1371,7 +1466,7 @@ class UITrait extends iron.Trait {
 
 						if (selectedObject.name == "Scene") {
 							selectedType = "(Scene)";
-							// ui.image(envThumbCay);
+							// ui.image(envThumb);
 							var p = iron.Scene.active.world.getGlobalProbe();
 							ui.row([1/2, 1/2]);
 							var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
@@ -1529,59 +1624,59 @@ class UITrait extends iron.Trait {
 						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 					}
+				}
 
-					if (ui.panel(Id.handle({selected: true}), "Paint Channels")) {
-						ui.row([1/3,1/3,1/3]);
+				if (ui.panel(Id.handle({selected: true}), "Paint Channels")) {
+					ui.row([1/3,1/3,1/3]);
 
-						var baseHandle = Id.handle({selected: paintBase});
-						paintBase = ui.check(baseHandle, "Base");
-						if (baseHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						var norHandle = Id.handle({selected: paintNor});
-						paintNor = ui.check(norHandle, "Normal");
-						if (norHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						var heightHandle = Id.handle({selected: paintHeight});
-						paintHeight = ui.check(heightHandle, "Height");
-						if (heightHandle.changed) {
-							for (l in layers) l.make_texpaint_opt();
-							for (l in undoLayers) l.make_texpaint_opt();
-							iron.App.notifyOnRender(initHeightLayer);
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						ui.row([1/3,1/3,1/3]);
-
-						var occHandle = Id.handle({selected: paintOcc});
-						paintOcc = ui.check(occHandle, "Occlusion");
-						if (occHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						var roughHandle = Id.handle({selected: paintRough});
-						paintRough = ui.check(roughHandle, "Roughness");
-						if (roughHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						var metHandle = Id.handle({selected: paintMet});
-						paintMet = ui.check(metHandle, "Metallic");
-						if (metHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-
-						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+					var baseHandle = Id.handle({selected: paintBase});
+					paintBase = ui.check(baseHandle, "Base");
+					if (baseHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
 					}
+
+					var norHandle = Id.handle({selected: paintNor});
+					paintNor = ui.check(norHandle, "Normal");
+					if (norHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					var heightHandle = Id.handle({selected: paintHeight});
+					paintHeight = ui.check(heightHandle, "Height");
+					if (heightHandle.changed) {
+						for (l in layers) l.make_texpaint_opt();
+						for (l in undoLayers) l.make_texpaint_opt();
+						iron.App.notifyOnRender(initHeightLayer);
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					ui.row([1/3,1/3,1/3]);
+
+					var occHandle = Id.handle({selected: paintOcc});
+					paintOcc = ui.check(occHandle, "Occlusion");
+					if (occHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					var roughHandle = Id.handle({selected: paintRough});
+					paintRough = ui.check(roughHandle, "Roughness");
+					if (roughHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					var metHandle = Id.handle({selected: paintMet});
+					paintMet = ui.check(metHandle, "Metallic");
+					if (metHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Material")) {
@@ -1685,7 +1780,7 @@ class UITrait extends iron.Trait {
 					if (ui.button("2D View")) show2DView();
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "Viewport")) {
+				if (ui.panel(Id.handle({selected: false}), "Camera")) {
 					var scene = iron.Scene.active;
 					var cam = scene.cameras[0];
 					ui.row([1/2,1/2]);
@@ -1708,12 +1803,13 @@ class UITrait extends iron.Trait {
 							}
 						}
 					}
+				}
 
-					ui.text("Lighting");
-					ui.image(envThumbCay);
+				if (ui.panel(Id.handle({selected: false}), "Lighting")) {
+					ui.image(envThumb);
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
-					var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Map");
+					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Map");
 					p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					
 					ui.row([1/2, 1/2]);
@@ -1925,7 +2021,7 @@ class UITrait extends iron.Trait {
 				isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 			}
 
-			if (ui.tab(htab, "Prefs")) {
+			if (ui.tab(htab, "Preferences")) {
 				var hscale = Id.handle({value: armory.data.Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				if (ui.changed && !iron.system.Input.getMouse().down()) {
@@ -1950,7 +2046,13 @@ class UITrait extends iron.Trait {
 					Krom.fileSaveBytes("data/config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
 					#end
 				}
-				ui.text("v0.5 armorpaint.org");
+
+				if (ui.panel(Id.handle({selected: false}), "About")) {
+					ui.text("v0.5");
+					ui.text(Macro.buildSha());
+					ui.text(Macro.buildDate());
+					ui.text("armorpaint.org");
+				}
 
 				if (ui.panel(Id.handle({selected: true}), "Console")) {
 					ui.text(lastTrace);

@@ -1,2 +1,4 @@
-ArmorPaint - 3D PBR Texture Painting
+Thank you for supporting ArmorPaint!
+
+Quick start:
 https://armorpaint.org/manual/
