@@ -304,6 +304,7 @@ class UITrait extends iron.Trait {
 	public var paintHeight = false;
 	
 	public var paintVisible = true;
+	public var mirrorX = false;
 
 	function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 
@@ -1276,14 +1277,12 @@ class UITrait extends iron.Trait {
 		#end
 	}
 
-
 	function renderUI(g:kha.graphics2.Graphics) {
 		if (!show) return;
 
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
 
-		// var brushImg = bundled.get('brush.jpg');
 		var envThumb = bundled.get('env_thumb.jpg');
 		var cursorImg = bundled.get('cursor.png');
 		var mouse = iron.system.Input.getMouse();
@@ -1307,6 +1306,17 @@ class UITrait extends iron.Trait {
 			else {
 				var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 				g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+
+				if (mirrorX) {
+					var cx = iron.App.w() / 2;
+					var nx = cx + (cx - mx);
+					// Separator line
+					g.color = 0x66ffffff;
+					g.fillRect(cx - 1, 0, 2, iron.App.h());
+					// Cursor
+					g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+					g.color = 0xffffffff;
+				}
 			}
 		}
 
@@ -1666,7 +1676,13 @@ class UITrait extends iron.Trait {
 						UINodes.inst.parsePaintMaterial();
 					}
 
+					ui.row([1/2,1/2]);
 					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+					mirrorX = ui.check(Id.handle({selected: mirrorX}), "Mirror");
+					if (ui.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Material")) {

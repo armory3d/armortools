@@ -515,7 +515,16 @@ class UINodes extends iron.Trait {
 				frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
 				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 				frag.write('float dist = length(pa - ba * h);');
-				frag.write('if (dist > brushRadius) { discard; return; }');
+				if (!UITrait.inst.mirrorX) {
+					frag.write('if (dist > brushRadius) { discard; return; }');
+				}
+				else {
+					frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
+					frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
+					frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
+					frag.write('float dist2 = length(pa2 - ba2 * h2);');
+					frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; return; }');
+				}
 				//
 
 				// frag.write('float dist = distance(bsp.xy, binp.xy);');
@@ -591,6 +600,11 @@ class UINodes extends iron.Trait {
 
 		if (eraser) frag.write('    float str = 1.0 - brushOpacity;');
 		else frag.write('    float str = clamp(brushOpacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
+
+		if (UITrait.inst.mirrorX && !eraser) {
+			frag.write('str += clamp(brushOpacity * (brushRadius - dist2) * brushStrength, 0.0, 1.0);');
+			frag.write('str = clamp(str, 0.0, 1.0);');
+		}
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
 		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
