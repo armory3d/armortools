@@ -2044,6 +2044,47 @@ class UITrait extends iron.Trait {
 					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
 					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
 					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
+
+					ui.separator();
+					if (ui.button("Export Mesh")) {
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = true;
+						arm.App.filesDone = function(path:String) {
+							var mesh = currentObject.data.raw;
+							var posa = mesh.vertex_arrays[0].values;
+							var nora = mesh.vertex_arrays[1].values;
+							var texa = mesh.vertex_arrays[2].values;
+							var len = Std.int(posa.length / 3);
+							var s = "";
+							for (i in 0...len) {
+								s += "v " + posa[i * 3 + 0] + " " +
+											posa[i * 3 + 2] + " " +
+											(-posa[i * 3 + 1]) + "\n";
+							}
+							for (i in 0...len) {
+								s += "vn " + nora[i * 3 + 0] + " " +
+											 nora[i * 3 + 2] + " " +
+											 (-nora[i * 3 + 1]) + "\n";
+							}
+							for (i in 0...len) {
+								s += "vt " + texa[i * 2 + 0] + " " +
+											 (1.0 - texa[i * 2 + 1]) + "\n";
+							}
+							var inda = mesh.index_arrays[0].values;
+							for (i in 0...Std.int(inda.length / 3)) {
+
+								var i1 = inda[i * 3 + 0] + 1;
+								var i2 = inda[i * 3 + 1] + 1;
+								var i3 = inda[i * 3 + 2] + 1;
+								s += "f " + i1 + "/" + i1 + "/" + i1 + " " +
+											i2 + "/" + i2 + "/" + i2 + " " +
+											i3 + "/" + i3 + "/" + i3 + "\n";
+							}
+							#if kha_krom
+							Krom.fileSaveBytes(path + "/mesh.obj", haxe.io.Bytes.ofString(s).getData());
+							#end
+						};
+					}
 				}
 			}
 
@@ -2201,8 +2242,19 @@ class UITrait extends iron.Trait {
 		if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		#else
 		if (mesh.texa == null) {
-			showMessage("Error: Invalid mesh - no UVs found");
-			return;
+			showMessage("Error: Mesh has no UVs, generating defaults");
+			var verts = Std.int(mesh.posa.length / 3);
+			mesh.texa = new kha.arrays.Float32Array(verts * 2);
+			var n = new iron.math.Vec4();
+			for (i in 0...verts) {
+				n.set(mesh.posa[i * 3 + 0], mesh.posa[i * 3 + 1], mesh.posa[i * 3 + 2]).normalize();
+				// Sphere projection
+				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+				// Equirect
+				mesh.texa[i * 2 + 0] = (Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2);
+				mesh.texa[i * 2 + 1] = Math.acos(n.y) / Math.PI;
+			}
 		}
 		var raw:TMeshData = {
 			name: "Mesh",

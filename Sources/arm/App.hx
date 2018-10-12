@@ -134,7 +134,7 @@ class App {
 
 		var lay = UITrait.inst.apconfig.ui_layout;
 		appx = lay == 0 ? 0 : UITrait.inst.windowW;
-		if (UINodes.inst.show) appx += UINodes.inst.ww;
+		if (lay == 1 && UINodes.inst.show) appx += UINodes.inst.ww;
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();
@@ -212,6 +212,7 @@ class App {
 		if (showFiles) renderFiles(g);
 	}
 
+	static var path = '/';
 	static function renderFiles(g:kha.graphics2.Graphics) {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
@@ -224,7 +225,6 @@ class App {
 		
 		g.end();
 		uimodal.begin(g);
-		var path = '/';
 		var pathHandle = Id.handle();
 		var whandle = Id.handle();
 		if (uimodal.window(whandle, left, top, modalW, modalH - 50, true)) {
