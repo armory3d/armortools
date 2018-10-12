@@ -95,8 +95,11 @@ class App {
 		else if (UINodes.inst.show || UIView2D.inst.show) {
 			res = Std.int((kha.System.windowWidth() - UITrait.inst.windowW) / 2);
 		}
-		else {
+		else if (UITrait.inst.show) {
 			res = kha.System.windowWidth() - UITrait.inst.windowW;
+		}
+		else {
+			res = kha.System.windowWidth();
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize

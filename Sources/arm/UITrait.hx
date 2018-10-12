@@ -664,6 +664,11 @@ class UITrait extends iron.Trait {
 		else if (kb.started("4") && (shift || alt)) shift ? setBrushType(3) : selectMaterial(3);
 		else if (kb.started("5") && (shift || alt)) shift ? setBrushType(4) : selectMaterial(4);
 
+		if (kb.started("f12")) {
+			show = !show;
+			arm.App.resize();
+		}
+
 		// pickColorId = kb.down("alt");
 
 		camBall();
@@ -860,7 +865,7 @@ class UITrait extends iron.Trait {
 		var mouse = iron.system.Input.getMouse();
 		var kb = iron.system.Input.getKeyboard();
 
-		if (!show) return;
+		// if (!show) return;
 		if (!arm.App.uienabled) return;
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
@@ -1282,18 +1287,16 @@ class UITrait extends iron.Trait {
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {
-		if (!show) return;
-
+		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
-
-		var envThumb = bundled.get('env_thumb.jpg');
-		var cursorImg = bundled.get('cursor.png');
-		var mouse = iron.system.Input.getMouse();
+		
 		g.color = 0xffffffff;
 
 		// Brush
 		if (arm.App.uienabled) {
+			var cursorImg = bundled.get('cursor.png');
+			var mouse = iron.system.Input.getMouse();
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
 			var pen = iron.system.Input.getPen();
@@ -1323,6 +1326,8 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
+
+		if (!show) return;
 
 		g.end();
 		ui.begin(g);
@@ -1817,7 +1822,7 @@ class UITrait extends iron.Trait {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Lighting", 1)) {
-					ui.image(envThumb);
+					ui.image(bundled.get('env_thumb.jpg'));
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
 					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Map");
