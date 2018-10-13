@@ -742,7 +742,7 @@ class UINodes extends iron.Trait {
 
 		if (shadowmap) {
 			vert.add_uniform('mat4 W', '_worldMatrix');
-			vert.add_uniform('mat4 LVP', '_lampViewProjectionMatrix');
+			vert.add_uniform('mat4 LVP', '_lightViewProjectionMatrix');
 			vert.write('vec4 wposition = W * vec4(pos, 1.0);');
 			if (UITrait.inst.paintHeight) {
 				vert.add_uniform('mat3 N', '_normalMatrix');
