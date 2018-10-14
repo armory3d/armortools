@@ -248,9 +248,7 @@ class UITrait extends iron.Trait {
 			first++;
 			return true;
 		}
-		var m = iron.system.Input.getMouse();
-		var b = m.x < iron.App.w() && (m.down() || m.down("right") || m.released() || m.released("right"));
-		return b || depthDirty();
+		return depthDirty();
 	}
 
 	public function notifyOnBrush(f:Void->Void) {
@@ -1215,10 +1213,25 @@ class UITrait extends iron.Trait {
 		iron.App.removeRender(applySelectedLayer);
 	}
 
+	var firstRender = true;
+
 	function render(g:kha.graphics2.Graphics) {
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
+		if (firstRender) {
+			firstRender = false;
+			dirty = 2;
+		}
+
 		renderUI(g);
+
+		// Tag redraw
+		var m = iron.system.Input.getMouse();
+		var b = (m.x > 0 && m.x < iron.App.w()) && (m.down() || m.down("right") || m.released() || m.released("right"));
+		if (b) dirty = 2;
+
+		// TAA fix when no redraw
+		if (!redraw()) @:privateAccess iron.Scene.active.camera.frame--;
 
 		// var ready = showFiles || dirty;
 		// TODO: Texture params get overwritten
@@ -1844,7 +1857,9 @@ class UITrait extends iron.Trait {
 					var showType = ui.combo(Id.handle({position: 0}), ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Show");
 					if (iron.Scene.active.lights.length > 0) {
 						var light = iron.Scene.active.lights[0];
-						light.data.raw.strength = ui.slider(Id.handle({value: light.data.raw.strength / 10}), "Light", 0.0, 5.0, true) * 10;
+						var lhandle = Id.handle();
+						lhandle.value = light.data.raw.strength / 10;
+						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 5.0, true) * 10;
 					}
 
 					displaceStrength = ui.slider(Id.handle({value: displaceStrength}), "Displace", 0.0, 2.0, true);
@@ -2132,6 +2147,7 @@ class UITrait extends iron.Trait {
 				var hssr = Id.handle({selected: apconfig.rp_ssr});
 				var hbloom = Id.handle({selected: apconfig.rp_bloom});
 				var hshadowmap = Id.handle({position: getShadowQuality(apconfig.rp_shadowmap)});
+				var hsupersample = Id.handle({position: getSuperSampleQuality(apconfig.rp_supersample)});
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
 					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
 					drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
@@ -2145,7 +2161,8 @@ class UITrait extends iron.Trait {
 					ui.check(hssgi, "SSAO");
 					ui.check(hssr, "SSR");
 					ui.check(hbloom, "Bloom");
-					ui.combo(hshadowmap, ["High", "Medium", "Low"], "Shadows", true);
+					ui.combo(hshadowmap, ["High", "Medium", "Low", "Off"], "Shadows", true);
+					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x"], "Super Sample", true);
 				}
 
 				if (ui.button("Apply and Save")) {
@@ -2153,6 +2170,9 @@ class UITrait extends iron.Trait {
 					apconfig.rp_ssr = hssr.selected;
 					apconfig.rp_bloom = hbloom.selected;
 					apconfig.rp_shadowmap = getShadowMapSize(hshadowmap.position);
+					var light = iron.Scene.active.lights[0];
+					apconfig.rp_shadowmap == 1 ? light.data.raw.strength = 0 : light.data.raw.strength = 6.5;
+					apconfig.rp_supersample = getSuperSampleSize(hsupersample.position);
 					armory.data.Config.save();
 					armory.renderpath.RenderPathCreator.applyConfig();
 				}
@@ -2178,12 +2198,20 @@ class UITrait extends iron.Trait {
 	}
 
 	inline function getShadowQuality(i:Int):Int {
-		// 0 - High, 1 - Medium, 2 - Low
-		return i == 4096 ? 0 : i == 2048 ? 1 : 2;
+		// 0 - High, 1 - Medium, 2 - Low, 3 - Off
+		return i == 4096 ? 0 : i == 2048 ? 1 : i == 1024 ? 2 : 3;
 	}
 
 	inline function getShadowMapSize(i:Int):Int {
-		return i == 0 ? 4096 : i == 1 ? 2048 : 1024;
+		return i == 0 ? 4096 : i == 1 ? 2048 : i == 2 ? 1024 : 1;
+	}
+
+	inline function getSuperSampleQuality(f:Float):Int {
+		return f == 1.0 ? 0 : f == 1.5 ? 1 : 2;
+	}
+
+	inline function getSuperSampleSize(i:Int):Float {
+		return i == 0 ? 1.0 : i == 1 ? 1.5 : 2.0;
 	}
 
 	public function getImage(asset:TAsset):kha.Image {
@@ -2351,7 +2379,7 @@ typedef TAPConfig = {
 	@:optional var window_vsync:Null<Bool>;
 	@:optional var window_msaa:Null<Int>;
 	@:optional var window_scale:Null<Float>;
-	// @:optional var rp_supersample:Null<Float>;
+	@:optional var rp_supersample:Null<Float>;
 	@:optional var rp_shadowmap:Null<Int>; // size
 	@:optional var rp_ssgi:Null<Bool>;
 	@:optional var rp_ssr:Null<Bool>;
