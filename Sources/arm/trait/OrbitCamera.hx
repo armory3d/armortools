@@ -21,7 +21,7 @@ class OrbitCamera extends iron.Trait {
 			if (UITrait.inst.cameraType != 0) return;
 
 			var mouse = iron.system.Input.getMouse();
-			if (mouse.x > iron.App.w()) return;
+			if (mouse.x < 0 || mouse.x > iron.App.w()) return;
 			
 			var keyboard = iron.system.Input.getKeyboard();
 			var camera = iron.Scene.active.camera;
@@ -39,7 +39,7 @@ class OrbitCamera extends iron.Trait {
 
 			if (redraws > 0) {
 				redraws--;
-				UITrait.inst.dirty = 2;
+				UITrait.inst.ddirty = 2;
 			}
 		});
 	}

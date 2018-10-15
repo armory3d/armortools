@@ -650,8 +650,8 @@ class UINodes extends iron.Trait {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			// cull_mode: 'clockwise',
-			cull_mode: 'none',
+			cull_mode: 'clockwise',
+			// cull_mode: 'none',
 			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
 
 		var vert = con_mesh.make_vert();
@@ -726,8 +726,8 @@ class UINodes extends iron.Trait {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			// cull_mode: 'clockwise',
-			cull_mode: 'none',
+			cull_mode: 'clockwise',
+			// cull_mode: 'none',
 			color_write_red: false,
 			color_write_green: false,
 			color_write_blue: false,
@@ -1030,7 +1030,7 @@ class UINodes extends iron.Trait {
 		}
 		#end
 
-		UITrait.inst.dirty = 2;
+		UITrait.inst.ddirty = 2;
 
 		#if arm_editor
 		var m = UITrait.inst.materials[0].data;

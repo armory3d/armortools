@@ -39,7 +39,7 @@ class FlyCamera extends Trait {
 		var mouse = Input.getMouse();
 		var camera = iron.Scene.active.camera;
 
-		if (mouse.x > iron.App.w()) return;
+		if (mouse.x < 0 || mouse.x > iron.App.w()) return;
 
 		var moveForward = keyboard.down("w") || keyboard.down("up") || mouse.wheelDelta < 0;
 		var moveBackward = keyboard.down("s") || keyboard.down("down") || mouse.wheelDelta > 0;
@@ -76,12 +76,12 @@ class FlyCamera extends Trait {
 
 		var d = Time.delta * speed * fast * ease;
 		if (d > 0.0) {
-			UITrait.inst.dirty = 2;
+			UITrait.inst.ddirty = 2;
 			camera.move(dir, d);
 		}
 
 		if (mouse.down("right")) {
-			UITrait.inst.dirty = 2;
+			UITrait.inst.ddirty = 2;
 			camera.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 			camera.rotate(camera.right(), -mouse.movementY / 200);
 		}

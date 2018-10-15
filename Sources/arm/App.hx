@@ -68,9 +68,9 @@ class App {
 					uimodal = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
-						#if arm_debug
-						iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
-						#end
+						// #if arm_debug
+						// iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
+						// #end
 						iron.App.notifyOnUpdate(update);
 						iron.Scene.active.root.addTrait(new UITrait());
 						iron.Scene.active.root.addTrait(new UINodes());
@@ -133,11 +133,11 @@ class App {
 
 	public static function resize() {
 		iron.Scene.active.camera.buildProjection();
-		UITrait.inst.dirty = 2;
+		UITrait.inst.ddirty = 2;
 
 		var lay = UITrait.inst.apconfig.ui_layout;
 		appx = lay == 0 ? 0 : UITrait.inst.windowW;
-		if (lay == 1 && UINodes.inst.show) appx += UINodes.inst.ww;
+		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) appx += iron.App.w();
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();
@@ -243,21 +243,21 @@ class App {
 			var sep = kha.System.systemId == "Windows" ? "\\" : "/";
 			pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
 			whandle.redraws = 2;
-			UITrait.inst.dirty = 2;
+			UITrait.inst.ddirty = 2;
 		}
 
 		uimodal.beginLayout(g, right - 100, bottom - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
 			filesDone(path);
-			UITrait.inst.dirty = 2;
+			UITrait.inst.ddirty = 2;
 		}
 		uimodal.endLayout(false);
 
 		uimodal.beginLayout(g, right - 200, bottom - 30, 100);
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
-			UITrait.inst.dirty = 2;
+			UITrait.inst.ddirty = 2;
 		}
 		uimodal.endLayout();
 

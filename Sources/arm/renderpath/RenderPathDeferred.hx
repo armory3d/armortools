@@ -494,7 +494,7 @@ class RenderPathDeferred {
 	public static function commands() {
 
 		// Paint
-		if (arm.UITrait.inst.redraw()) {
+		if (arm.UITrait.inst.dirty()) {
 
 		var tid = arm.UITrait.inst.selectedLayer.id;
 
@@ -1044,7 +1044,7 @@ class RenderPathDeferred {
 		#end
 
 		// Paint
-		} // redraw
+		} // dirty()
 		//
 
 		#if ((rp_supersampling == 4) || (rp_rendercapture))
@@ -1068,7 +1068,7 @@ class RenderPathDeferred {
 			framebuffer = "texpreview";
 		}
 
-		if (arm.UITrait.inst.redraw()) {
+		if (arm.UITrait.inst.dirty()) {
 		//
 
 		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
@@ -1110,7 +1110,7 @@ class RenderPathDeferred {
 		#end
 
 		// paint
-		} // redraw
+		} // dirty()
 		//
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
@@ -1149,12 +1149,16 @@ class RenderPathDeferred {
 					path.drawShader("shader_datas/taa_pass/taa_pass");
 
 					// Paint
-					if (arm.UITrait.inst.dirty > 1) {
+					if (arm.UITrait.inst.ddirty > 1 || arm.UITrait.inst.pdirty > 1) {
 					//
 						path.setTarget("taa");
 						path.bindTarget("bufa", "tex");
 						path.drawShader("shader_datas/copy_pass/copy_pass");
 					// Paint
+					}
+					else {
+						// TAA fix when no redraw
+						@:privateAccess iron.Scene.active.camera.frame--;
 					}
 					//
 				}
@@ -1183,8 +1187,9 @@ class RenderPathDeferred {
 		// }
 		#end
 
-		// Paint
-		arm.UITrait.inst.dirty--;
+		// paint
+		arm.UITrait.inst.ddirty--;
+		arm.UITrait.inst.pdirty--;
 		//
 	}
 	#end
