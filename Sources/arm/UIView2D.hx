@@ -162,6 +162,7 @@ void main() {
 	}
 
 	function update() {
+		if (!arm.App.uienabled) return;
 		var m = iron.system.Input.getMouse();
 		if (!show) return;
 		if (m.x + App.x() < wx || m.x + App.x() > wx + ww) return;

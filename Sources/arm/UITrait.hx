@@ -202,7 +202,6 @@ class UITrait extends iron.Trait {
 	public var brushTime = 0.0;
 	public var pushUndo = false;
 
-
 	public var selectedObject:iron.object.Object;
 	public var paintObject:iron.object.Object;
 	var gizmo:iron.object.Object = null;
@@ -277,6 +276,7 @@ class UITrait extends iron.Trait {
 	public var paintVisible = true;
 	public var mirrorX = false;
 	public var showGrid = false;
+	public var autoFillHandle = new Zui.Handle({selected: false});
 
 	function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 
@@ -1276,6 +1276,8 @@ void main() {
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
+		// Auto-disable on brush change
+		autoFillHandle.selected = false;
 	}
 
 	function selectObject(o:iron.object.Object) {
@@ -1439,17 +1441,17 @@ void main() {
 						h = Id.handle();
 						h.text = Math.roundfp(loc.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
-						if (ui.changed) loc.x = f;
+						if (h.changed) loc.x = f;
 
 						h = Id.handle();
 						h.text = Math.roundfp(loc.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (ui.changed) loc.y = f;
+						if (h.changed) loc.y = f;
 
 						h = Id.handle();
 						h.text = Math.roundfp(loc.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (ui.changed) loc.z = f;
+						if (h.changed) loc.z = f;
 
 						ui.row(row4);
 						ui.text("Rotation");
@@ -1458,17 +1460,17 @@ void main() {
 						h.text = Math.roundfp(rot.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
 						var changed = false;
-						if (ui.changed) { changed = true; rot.x = f; }
+						if (h.changed) { changed = true; rot.x = f; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(rot.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (ui.changed) { changed = true; rot.y = f; }
+						if (h.changed) { changed = true; rot.y = f; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(rot.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (ui.changed) { changed = true; rot.z = f; }
+						if (h.changed) { changed = true; rot.z = f; }
 
 						if (changed && selectedObject.name != "Scene") {
 							rot.mult(3.141592 / 180);
@@ -1484,17 +1486,17 @@ void main() {
 						h = Id.handle();
 						h.text = Math.roundfp(scale.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
-						if (ui.changed) scale.x = f;
+						if (h.changed) scale.x = f;
 
 						h = Id.handle();
 						h.text = Math.roundfp(scale.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (ui.changed) scale.y = f;
+						if (h.changed) scale.y = f;
 
 						h = Id.handle();
 						h.text = Math.roundfp(scale.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (ui.changed) scale.z = f;
+						if (h.changed) scale.z = f;
 
 						selectedObject.transform.dirty = true;
 
@@ -1517,7 +1519,7 @@ void main() {
 							var cam = scene.cameras[0];
 							var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 							cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-							if (ui.changed) {
+							if (fovHandle.changed) {
 								cam.buildProjection();
 							}
 						}
@@ -1712,12 +1714,21 @@ void main() {
 
 					ui.row([1/3,1/3,1/3]);
 					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-					mirrorX = ui.check(Id.handle({selected: mirrorX}), "Mirror");
-					if (ui.changed) {
+					var mirrorHandle = Id.handle({selected: mirrorX});
+					mirrorX = ui.check(mirrorHandle, "Mirror");
+					if (mirrorHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+
+					if (brushType == 2) { // Fill
+						ui.check(autoFillHandle, "Auto-Fill");
+						if (autoFillHandle.selected) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+					}
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Material", 1)) {
@@ -1774,8 +1785,9 @@ void main() {
 						}
 						if (i > 0) ui.row([1/10, 5/10, 2/10, 2/10]);
 						else ui.row([1/10, 9/10]);
-						l.visible = ui.check(Id.handle().nest(l.id, {selected: l.visible}), "");
-						if (ui.changed) {
+						var h = Id.handle().nest(l.id, {selected: l.visible});
+						l.visible = ui.check(h, "");
+						if (h.changed) {
 							UINodes.inst.parseMeshMaterial();
 							ddirty = 2;
 						}
@@ -1828,7 +1840,7 @@ void main() {
 					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
 					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-					if (ui.changed) {
+					if (fovHandle.changed) {
 						cam.buildProjection();
 					}
 					if (ui.button("Reset")) {
@@ -1862,8 +1874,9 @@ void main() {
 						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 5.0, true) * 10;
 					}
 
-					displaceStrength = ui.slider(Id.handle({value: displaceStrength}), "Displace", 0.0, 2.0, true);
-					if (ui.changed) {
+					var dispHandle = Id.handle({value: displaceStrength});
+					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+					if (dispHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 					}
 				}
@@ -2129,7 +2142,7 @@ void main() {
 				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
 					var hscale = Id.handle({value: apconfig.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-					if (ui.changed && !iron.system.Input.getMouse().down()) {
+					if (hscale.changed && !iron.system.Input.getMouse().down()) {
 						apconfig.window_scale = hscale.value;
 						ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * apconfig.window_scale);
@@ -2154,8 +2167,9 @@ void main() {
 				var hsupersample = Id.handle({position: getSuperSampleQuality(apconfig.rp_supersample)});
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
 					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
-					drawWorld = ui.check(Id.handle({selected: drawWorld}), "Envmap");
-					if (ui.changed) {
+					var drawWorldHandle = Id.handle({selected: drawWorld});
+					drawWorld = ui.check(drawWorldHandle, "Envmap");
+					if (drawWorldHandle.changed) {
 						ddirty = 2;
 					}
 					if (!drawWorld) {

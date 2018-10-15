@@ -168,6 +168,7 @@ class UINodes extends iron.Trait {
 		mreleased = mouse.released();
 		mdown = mouse.down();
 
+		// Recompile material on change
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
@@ -283,8 +284,6 @@ class UINodes extends iron.Trait {
 			var titleh = ui.g.font.height(22);
 			ui.g.drawString(title, ww - titlew - 20, iron.App.h() - titleh - 10);
 			
-			// Recompile material on change
-			ui.changed = false;
 			var c = getCanvas();
 			nodes.nodeCanvas(ui, c);
 
@@ -1126,6 +1125,10 @@ class UINodes extends iron.Trait {
 				// });
 
 				materialParsed = true;
+
+				if (UITrait.inst.brushType == 2 && UITrait.inst.autoFillHandle.selected) { // Fill
+					UITrait.inst.pdirty = 8;
+				}
 			// }
 			// else {
 			// 	sc.raw.vertex_shader = cdata.vertex_shader;
