@@ -192,6 +192,7 @@ class UITrait extends iron.Trait {
 	public var displaceStrength = 1.0;
 	public var stickerImage:kha.Image = null;
 	public var stickerPreview = false;
+	public var viewportMode = 0;
 	
 	var _onBrush:Array<Void->Void> = [];
 
@@ -1863,21 +1864,29 @@ void main() {
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
 					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Map");
-					p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Environment", 0.0, 5.0, true);
-					
+					var envHandle = Id.handle({value: p.raw.strength});
+					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 5.0, true);
+					if (envHandle.changed) ddirty = 2;
 					ui.row([1/2, 1/2]);
-					var showType = ui.combo(Id.handle({position: 0}), ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Show");
+					var modeHandle = Id.handle({position: 0});
+					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Mode");
+					if (modeHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
 					if (iron.Scene.active.lights.length > 0) {
 						var light = iron.Scene.active.lights[0];
 						var lhandle = Id.handle();
 						lhandle.value = light.data.raw.strength / 10;
 						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 5.0, true) * 10;
+						if (lhandle.changed) ddirty = 2;
 					}
 
 					var dispHandle = Id.handle({value: displaceStrength});
 					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 					if (dispHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
 					}
 				}
 
@@ -2199,6 +2208,7 @@ void main() {
 					apconfig.rp_supersample = getSuperSampleSize(hsupersample.position);
 					armory.data.Config.save();
 					armory.renderpath.RenderPathCreator.applyConfig();
+					ddirty = 2;
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {

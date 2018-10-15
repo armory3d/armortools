@@ -870,7 +870,8 @@ class UINodes extends iron.Trait {
 				frag.write('basecol = pow(texture(texpaint, texCoord).rgb, vec3(2.2));');
 
 				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-				frag.write('n = texture(texpaint_nor, texCoord).rgb * 2.0 - 1.0;');
+				frag.write('vec3 ntex = texture(texpaint_nor, texCoord).rgb;');
+				frag.write('n = ntex * 2.0 - 1.0;');
 				frag.write('n = normalize(TBN * normalize(n));');
 
 				// Height
@@ -928,8 +929,30 @@ class UINodes extends iron.Trait {
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
-			frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
-			frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
+			if (UITrait.inst.viewportMode == 0) { // Render
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 1) { // Basecol
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 2) { // Normal
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(ntex.rgb, packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 3) { // Occ
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(vec3(occlusion), packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 4) { // Rough
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(vec3(roughness), packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 5) { // Met
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0 - gl_FragCoord.z);');
+				frag.write('fragColor[1] = vec4(vec3(metallic), packFloat2(1.0, 1.0));'); // occ/spec
+			}
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
