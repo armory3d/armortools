@@ -26,8 +26,12 @@ class BrushOutputNode extends LogicNode {
 				arm.UITrait.inst.colorIdPicked = true;
 			}
 			// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
-			if (down && arm.UITrait.inst.paintVec.x == arm.UITrait.inst.lastPaintX && arm.UITrait.inst.paintVec.y == arm.UITrait.inst.lastPaintY) arm.UITrait.inst.painted++;
-			else arm.UITrait.inst.painted = 0;
+			if (down && arm.UITrait.inst.paintVec.x == arm.UITrait.inst.lastPaintX && arm.UITrait.inst.paintVec.y == arm.UITrait.inst.lastPaintY) {
+				arm.UITrait.inst.painted++;
+			}
+			else {
+				arm.UITrait.inst.painted = 0;
+			}
 			arm.UITrait.inst.lastPaintX = arm.UITrait.inst.paintVec.x;
 			arm.UITrait.inst.lastPaintY = arm.UITrait.inst.paintVec.y;
 			if (arm.UITrait.inst.painted <= 8) arm.UITrait.inst.pdirty = 2;

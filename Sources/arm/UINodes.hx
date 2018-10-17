@@ -158,7 +158,10 @@ class UINodes extends iron.Trait {
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
+	var mstartedlast = false;
 	public var changed = false;
+	var recompileMat = false; // Mat preview
+
 	function update() {
 		updateCanvasMap();
 		updateCanvasBrushMap();
@@ -177,10 +180,16 @@ class UINodes extends iron.Trait {
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			if (canvasType == 0) parsePaintMaterial();
-			UITrait.inst.makeMaterialPreview();
-			if (UITrait.inst.brushPaint == 2) UITrait.inst.makeStickerPreview();
+			if (canvasType == 0) {
+				parsePaintMaterial();
+				UITrait.inst.makeMaterialPreview();
+				if (UITrait.inst.brushPaint == 2) UITrait.inst.makeStickerPreview();
+			}
 		}
+		else if (ui.changed && (mstartedlast || mouse.moved) && UITrait.inst.instantMat) {
+			recompileMat = true; // Instant preview
+		}
+		mstartedlast = mouse.started();
 
 		if (!show) return;
 		if (!arm.App.uienabled) return;
@@ -254,6 +263,17 @@ class UINodes extends iron.Trait {
 	public var hwnd = Id.handle();
 
 	function render2D(g:kha.graphics2.Graphics) {
+		if (recompileMat) {
+			recompileMat = false;
+			if (UITrait.inst.autoFillHandle.selected) {
+				parsePaintMaterial();
+			}
+			else {
+				UITrait.inst.makeMaterialPreview();
+				UITrait.inst.hwnd.redraws = 2;
+			}
+		}
+
 		if (!show) return;
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
@@ -602,7 +622,7 @@ class UINodes extends iron.Trait {
 		if (eraser) frag.write('    float str = 1.0 - brushOpacity;');
 		else frag.write('    float str = clamp(brushOpacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
 
-		if (UITrait.inst.mirrorX && !eraser) {
+		if (UITrait.inst.mirrorX && UITrait.inst.brushType == 0) { // Draw
 			frag.write('str += clamp(brushOpacity * (brushRadius - dist2) * brushStrength, 0.0, 1.0);');
 			frag.write('str = clamp(str, 0.0, 1.0);');
 		}
@@ -983,6 +1003,7 @@ class UINodes extends iron.Trait {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
 			var con = make_mesh_paint(new ShaderData({name: "Material", canvas: null}));
+			if (sc != null) sc.delete();
 			sc = new iron.data.ShaderData.ShaderContext(con.data, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
@@ -1017,31 +1038,31 @@ class UINodes extends iron.Trait {
 				}
 			}
 			
+			if (sc != null) sc.delete();
 			sc = new iron.data.ShaderData.ShaderContext(con.data, function(sc:iron.data.ShaderData.ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 
 
-			var matcon:TMaterialContext = { name: "shadowmap", bind_textures: [] };
-			var smcon = make_depth(sd, matcon, true);
-			var smcdata = smcon.data;
-			// from_source is synchronous..
-			var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
-			for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
-			m.shader.contexts.push(smsc);
-			for (i in 0...m.contexts.length) {
-				if (m.contexts[i].raw.name == "shadowmap") {
-					m.contexts[i] = new MaterialContext(matcon, function(self:MaterialContext) {});
-					break;
-				}
-			}
+			// var matcon:TMaterialContext = { name: "shadowmap", bind_textures: [] };
+			// var smcon = make_depth(sd, matcon, true);
+			// var smcdata = smcon.data;
+			// // from_source is synchronous..
+			// var smsc = new iron.data.ShaderData.ShaderContext(smcdata, function(sc:iron.data.ShaderData.ShaderContext){});
+			// for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
+			// m.shader.contexts.push(smsc);
+			// for (i in 0...m.contexts.length) {
+			// 	if (m.contexts[i].raw.name == "shadowmap") {
+			// 		m.contexts[i] = new MaterialContext(matcon, function(self:MaterialContext) {});
+			// 		break;
+			// 	}
+			// }
 
 		#if (!arm_editor)
 		});
 		#end
 	}
 
-	public var materialParsed = false;
 	public function parsePaintMaterial() {
 		if (!getMOut()) return;
 		
@@ -1051,8 +1072,6 @@ class UINodes extends iron.Trait {
 			return;
 		}
 		#end
-
-		UITrait.inst.ddirty = 2;
 
 		#if arm_editor
 		var m = UITrait.inst.materials[0].data;
@@ -1105,6 +1124,7 @@ class UINodes extends iron.Trait {
 
 			// if (sc == null) {
 				// from_source is synchronous..
+				if (sc != null) sc.delete();
 				sc = new iron.data.ShaderData.ShaderContext(cdata, function(sc:iron.data.ShaderData.ShaderContext){});
 				m.shader.raw.contexts.push(sc.raw);
 				m.shader.contexts.push(sc);
@@ -1146,8 +1166,6 @@ class UINodes extends iron.Trait {
 				// new MaterialContext(smmatcon, function(self:MaterialContext) {
 					// m.contexts.push(self);
 				// });
-
-				materialParsed = true;
 
 				if (UITrait.inst.brushType == 2 && UITrait.inst.autoFillHandle.selected) { // Fill
 					UITrait.inst.pdirty = 8;

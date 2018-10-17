@@ -98,8 +98,6 @@ class RenderPathDeferred {
 		}
 
 		{
-			path.createDepthBuffer("main", "DEPTH24");
-
 			var t = new RenderTargetRaw();
 			t.name = "gbuffer0";
 			t.width = 0;
@@ -422,14 +420,92 @@ class RenderPathDeferred {
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		path.loadShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 
-		{
-			// Material preview
-			var t = new RenderTargetRaw();
-			t.name = "texpreview";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
+		{ // Material preview
+			{
+				var t = new RenderTargetRaw();
+				t.name = "texpreview";
+				t.width = 1;
+				t.height = 1;
+				t.format = 'RGBA32';
+				path.createRenderTarget(t);
+			}
+
+			{
+				path.createDepthBuffer("mmain", "DEPTH24");
+
+				var t = new RenderTargetRaw();
+				t.name = "mtex";
+				t.width = 50;
+				t.height = 50;
+				t.format = Inc.getHdrFormat();
+				t.scale = Inc.getSuperSampling();
+				t.depth_buffer = "mmain";
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbuf";
+				t.width = 50;
+				t.height = 50;
+				t.format = Inc.getHdrFormat();
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer0";
+				t.width = 50;
+				t.height = 50;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				t.depth_buffer = "mmain";
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer1";
+				t.width = 50;
+				t.height = 50;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+
+			#if rp_gbuffer2
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer2";
+				t.width = 50;
+				t.height = 50;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			#end
+
+			#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbufa";
+				t.width = 50;
+				t.height = 50;
+				t.format = "RGBA32";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbufb";
+				t.width = 50;
+				t.height = 50;
+				t.format = "RGBA32";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			#end
 		}
 		//
 	}
@@ -443,7 +519,7 @@ class RenderPathDeferred {
 			if (faces > 1) path.currentFace = i;
 			path.setTarget(Inc.getShadowMap());
 			// Paint
-			if (arm.UINodes.inst.materialParsed && arm.UITrait.inst.paintHeight) {
+			if (arm.UITrait.inst.paintHeight) {
 				var tid = arm.UITrait.inst.layers[0].id;
 				path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
 			}
@@ -494,7 +570,12 @@ class RenderPathDeferred {
 	public static function commands() {
 
 		// Paint
-		if (arm.UITrait.inst.dirty()) {
+		if (!arm.UITrait.inst.dirty()) {
+			path.setTarget("");
+			path.bindTarget("bufb", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+			return;
+		}
 
 		var tid = arm.UITrait.inst.selectedLayer.id;
 
@@ -779,7 +860,6 @@ class RenderPathDeferred {
 		else {
 			path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
 		}
-
 		
 		#if rp_probes
 		if (!path.isProbe) {
@@ -1043,33 +1123,11 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// Paint
-		} // dirty()
-		//
-
 		#if ((rp_supersampling == 4) || (rp_rendercapture))
 		var framebuffer = "buf";
 		#else
 		var framebuffer = "";
 		#end
-
-		// Paint
-		if (arm.UITrait.inst.materialPreview) { //
-			#if arm_editor
-			var selectedMat = arm.UITrait.inst.htab.position == 0 ? arm.UITrait.inst.selectedMaterial2 : arm.UITrait.inst.selectedMaterial;
-			#else
-			var selectedMat = arm.UITrait.inst.selectedMaterial;
-			#end
-			iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
-			framebuffer = "texpreview";
-		}
-		else if (arm.UITrait.inst.stickerPreview) {
-			iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.stickerImage;
-			framebuffer = "texpreview";
-		}
-
-		if (arm.UITrait.inst.dirty()) {
-		//
 
 		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
 		{
@@ -1109,10 +1167,6 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// paint
-		} // dirty()
-		//
-
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
 			path.setTarget("bufa");
@@ -1130,6 +1184,7 @@ class RenderPathDeferred {
 			#else
 			path.setTarget(framebuffer);
 			#end
+
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");
 			#if (rp_antialiasing == "TAA")
@@ -1142,24 +1197,33 @@ class RenderPathDeferred {
 			#if (rp_antialiasing == "TAA")
 			{
 				if (!path.isProbe) { // No last frame for probe
-					path.setTarget(framebuffer);
+
+					// Paint
+					var isLast = arm.UITrait.inst.ddirty == 1 || arm.UITrait.inst.pdirty == 1;
+					path.setTarget(isLast ? "bufb" : framebuffer);
 					path.bindTarget("bufa", "tex");
 					path.bindTarget("taa", "tex2");
 					path.bindTarget("gbuffer2", "sveloc");
 					path.drawShader("shader_datas/taa_pass/taa_pass");
-
-					// Paint
-					if (arm.UITrait.inst.ddirty > 1 || arm.UITrait.inst.pdirty > 1) {
-					//
+					if (isLast) {
+						path.setTarget(framebuffer);
+						path.bindTarget("bufb", "tex");
+						path.drawShader("shader_datas/copy_pass/copy_pass");
+					}
+					else {
 						path.setTarget("taa");
 						path.bindTarget("bufa", "tex");
 						path.drawShader("shader_datas/copy_pass/copy_pass");
-					// Paint
 					}
-					else {
-						// TAA fix when no redraw
-						@:privateAccess iron.Scene.active.camera.frame--;
-					}
+					//
+					// path.setTarget(framebuffer);
+					// path.bindTarget("bufa", "tex");
+					// path.bindTarget("taa", "tex2");
+					// path.bindTarget("gbuffer2", "sveloc");
+					// path.drawShader("shader_datas/taa_pass/taa_pass");
+					// path.setTarget("taa");
+					// path.bindTarget("bufa", "tex");
+					// path.drawShader("shader_datas/copy_pass/copy_pass");
 					//
 				}
 			}
@@ -1192,5 +1256,267 @@ class RenderPathDeferred {
 		arm.UITrait.inst.pdirty--;
 		//
 	}
+
+	@:access(iron.RenderPath)
+	public static function commandsPreview() {
+
+		#if rp_gbuffer2
+		{
+			path.setTarget("mgbuffer2");
+			path.clearTarget(0xff000000);
+			path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
+		}
+		#else
+		{
+			path.setTarget("mgbuffer0", ["mgbuffer1"]);
+		}
+		#end
+
+		#if (rp_background == "Clear")
+		{
+			path.clearTarget(-1, 1.0);
+		}
+		#else
+		{
+			if (!UITrait.drawWorld) path.clearTarget(UITrait.worldColor, 1.0);
+			else path.clearTarget(null, 1.0);
+		}
+		#end
+
+		RenderPathCreator.drawMeshes();
+
+		// Indirect
+		path.setTarget("mtex");
+		// path.bindTarget("_mmain", "gbufferD");
+		path.bindTarget("mgbuffer0", "gbuffer0");
+		path.bindTarget("mgbuffer1", "gbuffer1");
+		#if (rp_ssgi != "Off")
+		{
+			path.bindTarget("empty_white", "ssaotex");
+		}
+		#end
+		path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
+
+		// Direct
+		var lights = iron.Scene.active.lights;
+		for (i in 0...lights.length) {
+			var l = lights[i];
+			if (!l.visible) continue;
+			path.currentLightIndex = i;
+
+			path.setTarget("mtex");
+			// path.bindTarget("_mmain", "gbufferD");
+			path.bindTarget("mgbuffer0", "gbuffer0");
+			path.bindTarget("mgbuffer1", "gbuffer1");
+			#if rp_gbuffer2_direct
+			path.bindTarget("mgbuffer2", "gbuffer2");
+			#end
+
+			if (path.lightIsSun()) {
+				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
+			}
+			else {
+				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
+			}
+		}
+		path.currentLightIndex = 0;
+
+		#if (rp_background == "World")
+		{
+			if (UITrait.drawWorld) path.drawSkydome("shader_datas/world_pass/world_pass");
+		}
+		#end
+		
+		var framebuffer = "texpreview";
+
+		#if arm_editor
+		var selectedMat = arm.UITrait.inst.htab.position == 0 ? arm.UITrait.inst.selectedMaterial2 : arm.UITrait.inst.selectedMaterial;
+		#else
+		var selectedMat = arm.UITrait.inst.selectedMaterial;
+		#end
+		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
+
+		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
+		{
+			path.setTarget(framebuffer);
+		}
+		#else
+		{
+			path.setTarget("mbuf");
+		}
+		#end
+		
+		path.bindTarget("mtex", "tex");
+		#if rp_compositordepth
+		{
+			path.bindTarget("_mmain", "gbufferD");
+		}
+		#end
+
+		#if rp_compositornodes
+		{
+			path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		}
+		#else
+		{
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
+		#end
+
+		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		{
+			path.setTarget("mbufa");
+			path.clearTarget(0x00000000);
+			path.bindTarget("mbuf", "colorTex");
+			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+
+			path.setTarget("mbufb");
+			path.clearTarget(0x00000000);
+			path.bindTarget("mbufa", "edgesTex");
+			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+
+			path.setTarget(framebuffer);
+			path.clearTarget(0x00000000, 0.0);
+
+			path.bindTarget("mbuf", "colorTex");
+			path.bindTarget("mbufb", "blendTex");
+			#if (rp_antialiasing == "TAA")
+			{
+				path.bindTarget("mgbuffer2", "sveloc");
+			}
+			#end
+			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		}
+		#end
+	}
+
+	@:access(iron.RenderPath)
+	public static function commandsSticker() {
+
+		#if rp_gbuffer2
+		{
+			path.setTarget("gbuffer2");
+			path.clearTarget(0xff000000);
+			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		}
+		#else
+		{
+			path.setTarget("gbuffer0", ["gbuffer1"]);
+		}
+		#end
+
+		#if (rp_background == "Clear")
+		{
+			path.clearTarget(-1, 1.0);
+		}
+		#else
+		{
+			if (!UITrait.drawWorld) path.clearTarget(UITrait.worldColor, 1.0);
+			else path.clearTarget(null, 1.0);
+		}
+		#end
+
+		RenderPathCreator.drawMeshes();
+
+		// Indirect
+		path.setTarget("tex");
+		// path.bindTarget("_main", "gbufferD");
+		path.bindTarget("gbuffer0", "gbuffer0");
+		path.bindTarget("gbuffer1", "gbuffer1");
+		#if (rp_ssgi != "Off")
+		{
+			path.bindTarget("empty_white", "ssaotex");
+		}
+		#end
+		path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
+
+		// Direct
+		var lights = iron.Scene.active.lights;
+		for (i in 0...lights.length) {
+			var l = lights[i];
+			if (!l.visible) continue;
+			path.currentLightIndex = i;
+
+			path.setTarget("tex");
+			// path.bindTarget("_main", "gbufferD");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.bindTarget("gbuffer1", "gbuffer1");
+			#if rp_gbuffer2_direct
+			path.bindTarget("gbuffer2", "gbuffer2");
+			#end
+
+			if (path.lightIsSun()) {
+				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
+			}
+			else {
+				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
+			}
+		}
+		path.currentLightIndex = 0;
+
+		#if (rp_background == "World")
+		{
+			if (UITrait.drawWorld) path.drawSkydome("shader_datas/world_pass/world_pass");
+		}
+		#end
+		
+		var framebuffer = "texpreview";
+
+		iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.stickerImage;
+
+		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
+		{
+			path.setTarget(framebuffer);
+		}
+		#else
+		{
+			path.setTarget("buf");
+		}
+		#end
+		
+		path.bindTarget("tex", "tex");
+		#if rp_compositordepth
+		{
+			path.bindTarget("_main", "gbufferD");
+		}
+		#end
+
+		#if rp_compositornodes
+		{
+			path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		}
+		#else
+		{
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
+		#end
+
+		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		{
+			path.setTarget("bufa");
+			path.clearTarget(0x00000000);
+			path.bindTarget("buf", "colorTex");
+			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+
+			path.setTarget("bufb");
+			path.clearTarget(0x00000000);
+			path.bindTarget("bufa", "edgesTex");
+			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+
+			path.setTarget(framebuffer);
+			path.clearTarget(0x00000000, 0.0);
+
+			path.bindTarget("buf", "colorTex");
+			path.bindTarget("bufb", "blendTex");
+			#if (rp_antialiasing == "TAA")
+			{
+				path.bindTarget("gbuffer2", "sveloc");
+			}
+			#end
+			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		}
+		#end
+	}
+
 	#end
 }

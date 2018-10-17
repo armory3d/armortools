@@ -31,7 +31,7 @@ class MaterialSlot {
 	public var data:iron.data.MaterialData;
 	#end
 	public function new(m:iron.data.MaterialData = null) {
-		image = kha.Image.createRenderTarget(50, 50); // TODO: Flickers
+		image = kha.Image.createRenderTarget(50, 50);
 		#if arm_editor
 		data = m;
 		#end
@@ -157,7 +157,7 @@ class UITrait extends iron.Trait {
 	var message = "";
 	var messageTimer = 0.0;
 
-	public var ddirty = 2;
+	public var ddirty = 0;
 	public var pdirty = 0;
 
 	public var bundled:Map<String, kha.Image> = new Map();
@@ -175,7 +175,7 @@ class UITrait extends iron.Trait {
 	var isMet = true;
 	var isNor = true;
 	var isHeight = true;
-	var hwnd = Id.handle();
+	public var hwnd = Id.handle();
 	public var materials:Array<MaterialSlot> = null;
 	public var selectedMaterial:MaterialSlot;
 	#if arm_editor
@@ -193,6 +193,8 @@ class UITrait extends iron.Trait {
 	public var stickerImage:kha.Image = null;
 	public var stickerPreview = false;
 	public var viewportMode = 0;
+	public var instantMat = true;
+	var hscaleWasChanged = false;
 	
 	var _onBrush:Array<Void->Void> = [];
 
@@ -351,7 +353,7 @@ class UITrait extends iron.Trait {
 
 	function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UITrait.inst.assets.length == 0) return bundled.get("mat_slot.jpg");
+			if (UITrait.inst.assets.length == 0) return bundled.get("empty.jpg");
 			else return UITrait.inst.getImage(UITrait.inst.assets[colorIdHandle.position]);
 		}
 		return null;
@@ -434,7 +436,7 @@ class UITrait extends iron.Trait {
 
 		var scale = apconfig.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'mat_slot.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'env_thumb.jpg'], done);
+		loadBundled(['cursor.png', 'empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png'], done);
 	}
 
 	function showMessage(s:String) {
@@ -462,6 +464,7 @@ class UITrait extends iron.Trait {
 		
 		iron.data.Data.getImage(path, function(image:kha.Image) {
 			var ar = path.split("/");
+			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
 			var asset:TAsset = {name: name, file: path, id: UITrait.inst.assetId++};
 			UITrait.inst.assets.push(asset);
@@ -554,9 +557,8 @@ class UITrait extends iron.Trait {
 							// Set radiance
 							image.setMipmaps(mips);
 							iron.Scene.active.world.probe.radiance = image;
+							iron.Scene.active.world.probe.radianceMipmaps = mips;
 							ddirty = 2;
-							// Update thumb
-							bundled.set("env_thumb.jpg", mips[0]);
 						}
 					}, true); // Readable
 					mw = Std.int(mw / 2);
@@ -617,32 +619,40 @@ class UITrait extends iron.Trait {
 		});
 	}
 
-	// public static var pickColorId = false;
-
+	var lastBrushType = -1;
 	function update() {
 		isScrolling = ui.isScrolling;
 		updateUI();
 
 		var kb = iron.system.Input.getKeyboard();
 		var shift = kb.down("shift");
-		var alt = kb.down("alt");
+		var ctrl = kb.down("control");
 		if (kb.started("tab")) {
 			UIView2D.inst.show = false;
 			UINodes.inst.show = !UINodes.inst.show;
 			arm.App.resize();
 		}
-		else if (kb.started("1") && (shift || alt)) shift ? setBrushType(0) : selectMaterial(0);
-		else if (kb.started("2") && (shift || alt)) shift ? setBrushType(1) : selectMaterial(1);
-		else if (kb.started("3") && (shift || alt)) shift ? setBrushType(2) : selectMaterial(2);
-		else if (kb.started("4") && (shift || alt)) shift ? setBrushType(3) : selectMaterial(3);
-		else if (kb.started("5") && (shift || alt)) shift ? setBrushType(4) : selectMaterial(4);
+		else if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
+		else if (kb.started("2") && (shift || ctrl)) shift ? setBrushType(1) : selectMaterial(1);
+		else if (kb.started("3") && (shift || ctrl)) shift ? setBrushType(2) : selectMaterial(2);
+		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
+		else if (kb.started("5") && (shift || ctrl)) shift ? setBrushType(4) : selectMaterial(4);
 
 		if (kb.started("f12")) {
 			show = !show;
 			arm.App.resize();
 		}
 
-		// pickColorId = kb.down("alt");
+		// Color pick shortcut
+		var mouse = iron.system.Input.getMouse();
+		if (mouse.x > 0 && mouse.x < iron.App.w() && kb.started("alt")) {
+			lastBrushType = brushType;
+			setBrushType(4);
+		}
+		if (kb.released("alt") && lastBrushType != -1) {
+			setBrushType(lastBrushType);
+			lastBrushType = -1;
+		}
 
 		camBall();
 
@@ -684,90 +694,98 @@ class UITrait extends iron.Trait {
 
 	public function makeStickerPreview() {
 		if (stickerImage == null) stickerImage = kha.Image.createRenderTarget(512, 512);
+		stickerPreview = true;
 
 		var cube:MeshObject = cast iron.Scene.active.getChild("Cube");
-		cube.visible = false;
-
 		var plane:MeshObject = cast iron.Scene.active.getChild("Plane");
+		cube.visible = false;
 		plane.visible = true;
 		currentObject = plane;
-
+		
 		savedCamera.setFrom(iron.Scene.active.camera.transform.local);
 		var m = Mat4.identity();
 		m.translate(0, 0, 1);
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
+		var light = iron.Scene.active.lights[0];
+		light.data.raw.cast_shadow = false;
+
+		// No jitter
+		// @:privateAccess iron.Scene.active.camera.frame = 0;
+		// No resize
+		@:privateAccess iron.RenderPath.active.lastW = 512;
+		@:privateAccess iron.RenderPath.active.lastH = 512;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
-		ddirty = 2;
-		stickerPreview = true;
-		arm.App.resize();
-
 		UINodes.inst.parseMeshPreviewMaterial();
-
-		// TAA
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsSticker;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
 
+		stickerPreview = false;
+		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
+		@:privateAccess iron.RenderPath.active.lastH = iron.App.h();
+
+		// Restore
 		plane.visible = false;
 		cube.visible = true;
 		currentObject = cube;
 
-		ddirty = 2;
-		stickerPreview = false;
-
 		iron.Scene.active.camera.transform.setMatrix(savedCamera);
-		iron.Scene.active.camera.buildMatrix();
-		arm.App.resize();
 		iron.Scene.active.camera.data.raw.fov = savedFov;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
-
+		var light = iron.Scene.active.lights[0];
+		light.data.raw.cast_shadow = true;
 		UINodes.inst.parseMeshMaterial();
-
-		// Prevent flicker
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
+		ddirty = 2;
 	}
 
 	public function makeMaterialPreview() {
+		materialPreview = true;
+
+		var cube:MeshObject = cast iron.Scene.active.getChild("Cube");
+		var sphere:MeshObject = cast iron.Scene.active.getChild("Sphere");
+		cube.visible = false;
+		sphere.visible = true;
+		currentObject = sphere;
 
 		#if arm_editor
+		sphere.materials[0] = htab.position == 0 ? selectedMaterial2.data : materials[0].data;
 		var gizmo_vis = gizmo.visible;
 		var grid_vis = grid.visible;
 		gizmo.visible = false;
 		grid.visible = false;
 		#end
-
-		var cube:MeshObject = cast iron.Scene.active.getChild("Cube");
-		cube.visible = false;
-
-		var sphere:MeshObject = cast iron.Scene.active.getChild("Sphere");
-		sphere.visible = true;
-		#if arm_editor
-		sphere.materials[0] = htab.position == 0 ? selectedMaterial2.data : materials[0].data;
-		#end
-		currentObject = sphere;
-
+		
 		savedCamera.setFrom(iron.Scene.active.camera.transform.local);
 		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
+		var light = iron.Scene.active.lights[0];
+		light.data.raw.cast_shadow = false;
+
+		// No jitter
+		// @:privateAccess iron.Scene.active.camera.frame = 0;
+		// No resize
+		@:privateAccess iron.RenderPath.active.lastW = 50;
+		@:privateAccess iron.RenderPath.active.lastH = 50;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
-		ddirty = 2;
-		materialPreview = true;
-		arm.App.resize();
-
 		UINodes.inst.parseMeshPreviewMaterial();
-
-		// TAA
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsPreview;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
 
+		materialPreview = false;
+		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
+		@:privateAccess iron.RenderPath.active.lastH = iron.App.h();
+
+		// Restore
 		sphere.visible = false;
 		cube.visible = true;
 		currentObject = cube;
@@ -777,20 +795,13 @@ class UITrait extends iron.Trait {
 		grid.visible = grid_vis;
 		#end
 
-		ddirty = 2;
-		materialPreview = false;
-
 		iron.Scene.active.camera.transform.setMatrix(savedCamera);
-		iron.Scene.active.camera.buildMatrix();
-		arm.App.resize();
 		iron.Scene.active.camera.data.raw.fov = savedFov;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
-
+		var light = iron.Scene.active.lights[0];
+		light.data.raw.cast_shadow = true;
 		UINodes.inst.parseMeshMaterial();
-
-		// Prevent flicker
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 	}
 
 	function selectMaterial(i:Int) {
@@ -864,6 +875,7 @@ class UITrait extends iron.Trait {
 		}
 		else if (brushTime > 0) {
 			brushTime = 0;
+			ddirty = 3;
 		}
 
 		if (kb.down("control") && kb.started("z") && undoEnabled) {
@@ -1037,7 +1049,7 @@ class UITrait extends iron.Trait {
 		g.begin();
 		iron.App.removeRender(initLayers);
 
-		ddirty = 2;
+		ddirty = 3;
 	}
 
 	function initHeightLayer(g:kha.graphics4.Graphics) {
@@ -1277,6 +1289,7 @@ void main() {
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
+		ddirty = 2;
 		// Auto-disable on brush change
 		autoFillHandle.selected = false;
 	}
@@ -1534,9 +1547,9 @@ void main() {
 
 					ui.unindent();
 				}
-				if (ui.panel(Id.handle({selected: true}), "Material", 1)) {
+				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
 
-					var img2 = bundled.get("mat_slot.jpg");
+					var img2 = bundled.get("empty.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);
@@ -1576,10 +1589,12 @@ void main() {
 						iron.data.Data.cachedBlobs.remove("Material2_data.arm");
 						iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
 							md.name = "Material2." + materials2.length;
+							ui.g.end();
 							var m = new MaterialSlot(md);
 							materials2.push(m);
 							selectMaterial2(materials2.length - 1);
 							UITrait.inst.makeMaterialPreview();
+							ui.g.begin(false);
 						});
 					}
 					if (ui.button("Nodes")) {
@@ -1639,7 +1654,7 @@ void main() {
 					else if (brushType == 3) { // Bake AO
 						ui.radio(Id.handle(), 0, "Ambient Occlusion");
 					}
-					else {
+					else { // Draw, Erase, Fil;
 						ui.row([1/2, 1/2]);
 						ui.combo(Id.handle(), ["Add"], "Blending");
 						if (ui.button("Nodes")) showBrushNodes();
@@ -1648,9 +1663,10 @@ void main() {
 						brushPaint = ui.combo(paintHandle, ["UV", "Project", "Sticker"], "Paint");
 						if (paintHandle.changed) {
 							UINodes.inst.parsePaintMaterial();
-
 							if (brushPaint == 2) { // Sticker
+								ui.g.end();
 								UITrait.inst.makeStickerPreview();
+								ui.g.begin(false);
 							}
 						}
 						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
@@ -1660,19 +1676,35 @@ void main() {
 						ui.row([1/2, 1/2]);
 						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+
+						if (brushType == 2) { // Fill
+							ui.check(autoFillHandle, "Auto-Fill");
+							if (autoFillHandle.selected) {
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parsePaintMaterial();
+							}
+						}
+						else { // Draw, Erase
+							ui.row([1/2,1/2]);
+							paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+							var mirrorHandle = Id.handle({selected: mirrorX});
+							mirrorX = ui.check(mirrorHandle, "Mirror");
+							if (mirrorHandle.changed) {
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parsePaintMaterial();
+							}
+						}
 					}
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Paint Channels", 1)) {
-					ui.row([1/3,1/3,1/3]);
-
+				if (ui.panel(Id.handle({selected: true}), "Paint Maps", 1)) {
+					ui.row([1/2,1/2]);
 					var baseHandle = Id.handle({selected: paintBase});
-					paintBase = ui.check(baseHandle, "Base");
+					paintBase = ui.check(baseHandle, "Base Color");
 					if (baseHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}
-
 					var norHandle = Id.handle({selected: paintNor});
 					paintNor = ui.check(norHandle, "Normal");
 					if (norHandle.changed) {
@@ -1680,6 +1712,27 @@ void main() {
 						UINodes.inst.parsePaintMaterial();
 					}
 
+					ui.row([1/2,1/2]);
+					var occHandle = Id.handle({selected: paintOcc});
+					paintOcc = ui.check(occHandle, "Occlusion");
+					if (occHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+					var roughHandle = Id.handle({selected: paintRough});
+					paintRough = ui.check(roughHandle, "Roughness");
+					if (roughHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+
+					ui.row([1/2,1/2]);
+					var metHandle = Id.handle({selected: paintMet});
+					paintMet = ui.check(metHandle, "Metallic");
+					if (metHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
 					var heightHandle = Id.handle({selected: paintHeight});
 					paintHeight = ui.check(heightHandle, "Height");
 					if (heightHandle.changed) {
@@ -1689,89 +1742,49 @@ void main() {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}
-
-					ui.row([1/3,1/3,1/3]);
-
-					var occHandle = Id.handle({selected: paintOcc});
-					paintOcc = ui.check(occHandle, "Occlusion");
-					if (occHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-					}
-
-					var roughHandle = Id.handle({selected: paintRough});
-					paintRough = ui.check(roughHandle, "Roughness");
-					if (roughHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-					}
-
-					var metHandle = Id.handle({selected: paintMet});
-					paintMet = ui.check(metHandle, "Metallic");
-					if (metHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-					}
-
-					ui.row([1/3,1/3,1/3]);
-					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-					var mirrorHandle = Id.handle({selected: mirrorX});
-					mirrorX = ui.check(mirrorHandle, "Mirror");
-					if (mirrorHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-					}
-					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
-
-					if (brushType == 2) { // Fill
-						ui.check(autoFillHandle, "Auto-Fill");
-						if (autoFillHandle.selected) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-					}
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Material", 1)) {
+				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
 
-					var img2 = bundled.get("mat_slot.jpg");
+					var empty = bundled.get("empty.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);
 
 						if (row > 0) ui._y += 6;
 
+						ui.imageInvertY = true; // Material preview
 						for (j in 0...5) {
-							ui.imageInvertY = true; // Material preview
-							
 							var i = j + row * 5;
-							var im = i >= materials.length ? img2 : materials[i].image;
+							var img = i >= materials.length ? empty : materials[i].image;
 
-							if (im != img2 && selectedMaterial == materials[i]) {
-								ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
+							if (selectedMaterial == materials[i]) {
+								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
+								var off = row % 2 == 1 ? 1 : 0;
+								ui.fill(1, -2, img.width + 3, 2, 0xff205d9c);
+								ui.fill(1, img.height - 1 - off, img.width + 3, 2 + off, 0xff205d9c);
+								ui.fill(1, -2, 2, img.height + 3, 0xff205d9c);
+								ui.fill(img.width + 2, -2, 2, img.height + 3, 0xff205d9c);
 							}
 
-							if (ui.image(im) == State.Started && im != img2) {
-								if (selectedMaterial != materials[i]) {
-									selectMaterial(i);
-								}
-								if (iron.system.Time.time() - selectTime < 0.3) {
-									showMaterialNodes();
-								}
+							if (ui.image(img) == State.Started && img != empty) {
+								if (selectedMaterial != materials[i]) selectMaterial(i);
+								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
 								selectTime = iron.system.Time.time();
 							}
-
-							ui.imageInvertY = false; // Material preview
 						}
+						ui.imageInvertY = false; // Material preview
 					}
 
 					ui.row([1/2,1/2]);
 					if (ui.button("New")) {
+						ui.g.end();
 						selectedMaterial = new MaterialSlot();
 						materials.push(selectedMaterial);
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 						UITrait.inst.makeMaterialPreview();
+						ui.g.begin(false);
 					}
 					if (ui.button("Nodes")) {
 						showMaterialNodes();
@@ -1860,10 +1873,12 @@ void main() {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Viewport", 1)) {
-					ui.image(bundled.get('env_thumb.jpg'));
+					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
+						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
+					}
 					var p = iron.Scene.active.world.getGlobalProbe();
 					ui.row([1/2, 1/2]);
-					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Map");
+					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Envmap");
 					var envHandle = Id.handle({value: p.raw.strength});
 					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 5.0, true);
 					if (envHandle.changed) ddirty = 2;
@@ -1882,12 +1897,14 @@ void main() {
 						if (lhandle.changed) ddirty = 2;
 					}
 
+					ui.row([1/2, 1/2]);
 					var dispHandle = Id.handle({value: displaceStrength});
 					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 					if (dispHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}
+					showGrid = ui.check(Id.handle({selected: showGrid}), "Show Grid");
 				}
 
 				// Draw plugins
@@ -1948,9 +1965,9 @@ void main() {
 					ui.button("Save As..");
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Export", 1)) {
+				if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
 
-					if (ui.button("Export Textures")) {
+					if (ui.button("Export..")) {
 						var textureSize = getTextureRes();
 
 						arm.App.showFiles = true;
@@ -1962,9 +1979,14 @@ void main() {
 							var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
 							// BGRA to RGB
 							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+								// srgb
+								rgb.set(i * 3 + 0, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0/2.2) * 255));
+								rgb.set(i * 3 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0/2.2) * 255));
+								rgb.set(i * 3 + 2, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0/2.2) * 255));
+								// linear
+								// rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+								// rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+								// rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
 							}
 							var pngwriter = new iron.format.png.Writer(bo);
 							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
@@ -2087,7 +2109,7 @@ void main() {
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
 					ui.combo(Id.handle(), ["png"], "Format", true);
 					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
-					ui.text("Channels");
+					ui.text("Export Maps");
 					ui.row([1/2, 1/2]);
 					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
 					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
@@ -2096,11 +2118,12 @@ void main() {
 					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
 					ui.row([1/2, 1/2]);
 					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
-					isNor = ui.check(Id.handle({selected: isNor}), "Normal Map");
+					isNor = ui.check(Id.handle({selected: isNor}), "Normal");
 					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
+				}
 
-					ui.separator();
-					if (ui.button("Export Mesh")) {
+				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
+					if (ui.button("Export..")) {
 						arm.App.showFiles = true;
 						arm.App.foldersOnly = true;
 						arm.App.filesDone = function(path:String) {
@@ -2151,18 +2174,22 @@ void main() {
 				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
 					var hscale = Id.handle({value: apconfig.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-					if (hscale.changed && !iron.system.Input.getMouse().down()) {
+					if (!hscale.changed && hscaleWasChanged) {
 						apconfig.window_scale = hscale.value;
 						ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * apconfig.window_scale);
 						arm.App.resize();
 					}
-					apconfig.ui_layout = ui.combo(Id.handle({position: apconfig.ui_layout}), ["Right", "Left"], "UI Layout", true);
+					hscaleWasChanged = hscale.changed;
+					var layHandle = Id.handle({position: apconfig.ui_layout});
+					apconfig.ui_layout = ui.combo(layHandle, ["Right", "Left"], "UI Layout", true);
+					if (layHandle.changed) arm.App.resize();
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
 					undoEnabled = ui.check(Id.handle({selected: true}), "Undo");
+					instantMat = ui.check(Id.handle({selected: instantMat}), "Instant Material Preview");
 				}
 
 				#if arm_debug
@@ -2215,7 +2242,8 @@ void main() {
 					ui.text("Distract Free - F12");
 					ui.text("Node Editor - TAB");
 					ui.text("Select Tool - SHIFT+1-9");
-					ui.text("Select Material - ALT+1-9");
+					ui.text("Select Material - CTRL+1-9");
+					ui.text("Pick Color ID - ALT");
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
