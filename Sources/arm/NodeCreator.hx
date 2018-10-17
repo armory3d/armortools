@@ -10,7 +10,7 @@ import iron.data.MaterialData;
 @:access(arm.UINodes)
 class NodeCreator {
 
-	public static function createImageTexture() {
+	public static function createImageTexture():TNode {
 		var getNodeX = UINodes.inst.getNodeX;
 		var getNodeY = UINodes.inst.getNodeY;
 		var nodes = UINodes.inst.nodes;
@@ -62,8 +62,7 @@ class NodeCreator {
 			]
 		};
 		canvas.nodes.push(n);
-		nodes.nodeDrag = n;
-		nodes.nodeSelected = n;
+		return n;
 	}
 
 	public static var numNodes = [2, 1, 5, 5, 8];
@@ -238,7 +237,9 @@ class NodeCreator {
 		}
 		if (cat == 2) { // Texture
 			if (ui.button("Image")) {
-				createImageTexture();
+				var n = createImageTexture();
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
 			}
 			if (ui.button("Checker")) {
 				var node_id = nodes.getNodeId(canvas.nodes);

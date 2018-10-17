@@ -1182,8 +1182,9 @@ class UINodes extends iron.Trait {
 	}
 
 	public function acceptDrag(assetIndex:Int) {
-		NodeCreator.createImageTexture();
-		nodes.nodeSelected.buttons[0].default_value = assetIndex;
+		var n = NodeCreator.createImageTexture();
+		n.buttons[0].default_value = assetIndex;
+		nodes.nodeSelected = n;
 	}
 
 	public function parseBrush() {

@@ -169,12 +169,19 @@ class UITrait extends iron.Trait {
 
 	var outputType = 0;
 	var isBase = true;
+	var isBaseSpace = 1;
 	var isOpac = true;
+	var isOpacSpace = 0;
 	var isOcc = true;
+	var isOccSpace = 0;
 	var isRough = true;
+	var isRoughSpace = 0;
 	var isMet = true;
+	var isMetSpace = 0;
 	var isNor = true;
+	var isNorSpace = 0;
 	var isHeight = true;
+	var isHeightSpace = 0;
 	public var hwnd = Id.handle();
 	public var materials:Array<MaterialSlot> = null;
 	public var selectedMaterial:MaterialSlot;
@@ -1535,6 +1542,7 @@ void main() {
 							cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 							if (fovHandle.changed) {
 								cam.buildProjection();
+								ddirty = 2;
 							}
 						}
 						else {
@@ -1979,14 +1987,14 @@ void main() {
 							var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
 							// BGRA to RGB
 							for (i in 0...textureSize * textureSize) {
-								// srgb
-								rgb.set(i * 3 + 0, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0/2.2) * 255));
-								rgb.set(i * 3 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0/2.2) * 255));
-								rgb.set(i * 3 + 2, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0/2.2) * 255));
-								// linear
-								// rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								// rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								// rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
+								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
+								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+							}
+							if (isBaseSpace == 1) {
+								for (i in 0...rgb.length) {
+									rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+								}
 							}
 							var pngwriter = new iron.format.png.Writer(bo);
 							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
@@ -2007,6 +2015,11 @@ void main() {
 								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
 								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
 								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
+							}
+							if (isNorSpace == 1) {
+								for (i in 0...rgb.length) {
+									rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+								}
 							}
 							bo = new haxe.io.BytesOutput();
 							var pngwriter = new iron.format.png.Writer(bo);
@@ -2035,6 +2048,11 @@ void main() {
 									rgb.set(i * 3 + 1, pixels.get(i * 4));
 									rgb.set(i * 3 + 2, pixels.get(i * 4));
 								}
+								if (isOccSpace == 1) {
+									for (i in 0...rgb.length) {
+										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									}
+								}
 								bo = new haxe.io.BytesOutput();
 								var pngwriter = new iron.format.png.Writer(bo);
 								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
@@ -2046,6 +2064,11 @@ void main() {
 									rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
 									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
 									rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
+								}
+								if (isRoughSpace == 1) {
+									for (i in 0...rgb.length) {
+										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									}
 								}
 								bo = new haxe.io.BytesOutput();
 								var pngwriter = new iron.format.png.Writer(bo);
@@ -2059,6 +2082,11 @@ void main() {
 									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
 									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
 								}
+								if (isMetSpace == 1) {
+									for (i in 0...rgb.length) {
+										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									}
+								}
 								bo = new haxe.io.BytesOutput();
 								var pngwriter = new iron.format.png.Writer(bo);
 								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
@@ -2071,6 +2099,11 @@ void main() {
 									rgb.set(i * 3 + 0, pixels.get(i * 4));
 									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
 									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								}
+								if (isOccSpace == 1) {
+									for (i in 0...rgb.length) {
+										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									}
 								}
 								bo = new haxe.io.BytesOutput();
 								var pngwriter = new iron.format.png.Writer(bo);
@@ -2086,6 +2119,11 @@ void main() {
 									rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
 									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
 									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
+								}
+								if (isHeightSpace == 1) {
+									for (i in 0...rgb.length) {
+										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									}
 								}
 								bo = new haxe.io.BytesOutput();
 								var pngwriter = new iron.format.png.Writer(bo);
@@ -2112,14 +2150,25 @@ void main() {
 					ui.text("Export Maps");
 					ui.row([1/2, 1/2]);
 					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
+					isBaseSpace = ui.combo(Id.handle({position: isBaseSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
 					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
+					isOpacSpace = ui.combo(Id.handle({position: isOpacSpace}), ["linear", "srgb"], "Space");
 					ui.row([1/2, 1/2]);
 					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
+					isOccSpace = ui.combo(Id.handle({position: isOccSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
 					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
+					isRoughSpace = ui.combo(Id.handle({position: isRoughSpace}), ["linear", "srgb"], "Space");
 					ui.row([1/2, 1/2]);
 					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
+					isMetSpace = ui.combo(Id.handle({position: isMetSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
 					isNor = ui.check(Id.handle({selected: isNor}), "Normal");
+					isNorSpace = ui.combo(Id.handle({position: isNorSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
 					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
+					isHeightSpace = ui.combo(Id.handle({position: isHeightSpace}), ["linear", "srgb"], "Space");
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
