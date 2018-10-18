@@ -695,7 +695,7 @@ class UINodes extends iron.Trait {
 		var occ = sout.out_occlusion;
 		var opac = sout.out_opacity;
 		var nortan = Cycles.out_normaltan;
-		frag.write('vec3 basecol = $base;');
+		frag.write('vec3 basecol = pow($base, vec3(2.2));');
 		frag.write('float roughness = $rough;');
 		frag.write('float metallic = $met;');
 		frag.write('float occlusion = $occ;');

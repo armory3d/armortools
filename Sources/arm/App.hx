@@ -271,51 +271,58 @@ class App {
 				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 				for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 				
+				var pos = 0;
 				if (mapbase != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapbase);
-					n.x = 0;
-					n.y = 0;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
 					canvas.links.push(l);
 				}
 				if (mapocc != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapocc);
-					n.x = 0;
-					n.y = 50;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
 					canvas.links.push(l);
 				}
 				if (maprough != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(maprough);
-					n.x = 0;
-					n.y = 100;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
 					canvas.links.push(l);
 				}
 				if (mapmet != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapmet);
-					n.x = 0;
-					n.y = 150;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
 					canvas.links.push(l);
 				}
 				if (mapnor != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapnor);
-					n.x = 0;
-					n.y = 200;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
 					canvas.links.push(l);
 				}
 				if (mapheight != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapheight);
-					n.x = 0;
-					n.y = 250;
+					n.x = 72;
+					n.y = 192 + 130 * pos;
+					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 					canvas.links.push(l);
 				}
