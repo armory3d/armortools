@@ -47,6 +47,17 @@ class UINodes extends iron.Trait {
 
 	public var canvasType = 0; // material, brush, logic
 
+	var mx = 0.0;
+	var my = 0.0;
+	var mdown = false;
+	var mreleased = false;
+	var mchanged = false;
+	var mstartedlast = false;
+	public var changed = false;
+	var recompileMat = false; // Mat preview
+
+	public var grid:kha.Image = null;
+
 	public function new() {
 		super();
 		inst = this;
@@ -153,15 +164,6 @@ class UINodes extends iron.Trait {
 		else return canvasLogic;
 	}
 
-	var mx = 0.0;
-	var my = 0.0;
-	var mdown = false;
-	var mreleased = false;
-	var mchanged = false;
-	var mstartedlast = false;
-	public var changed = false;
-	var recompileMat = false; // Mat preview
-
 	function update() {
 		updateCanvasMap();
 		updateCanvasBrushMap();
@@ -237,7 +239,6 @@ class UINodes extends iron.Trait {
 		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE);
 	}
 
-	public var grid:kha.Image = null;
 	public function drawGrid() {
 		var ww = iron.App.w();
 		var wh = iron.App.h();

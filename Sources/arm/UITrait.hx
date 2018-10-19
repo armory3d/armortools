@@ -226,6 +226,52 @@ class UITrait extends iron.Trait {
 	var axisStart = 0.0;
 	var row4 = [1/4, 1/4, 1/4, 1/4];
 
+	public var brushNodesRadius = 1.0;
+	public var brushNodesOpacity = 1.0;
+	public var brushNodesScale = 1.0;
+	public var brushNodesStrength = 1.0;
+
+	public var brushRadius = 0.5;
+	public var brushOpacity = 1.0;
+	public var brushScale = 0.5;
+	public var brushStrength = 1.0;
+	public var brushBias = 1.0;
+	public var brushPaint = 0;
+	public var brushType = 0;
+
+	public var paintBase = true;
+	public var paintOpac = true;
+	public var paintOcc = true;
+	public var paintRough = true;
+	public var paintMet = true;
+	public var paintNor = true;
+	public var paintHeight = false;
+	
+	public var paintVisible = true;
+	public var mirrorX = false;
+	public var showGrid = false;
+	public var autoFillHandle = new Zui.Handle({selected: false});
+
+	var sub = 0;
+	var vec2 = new iron.math.Vec4();
+
+	public var lastPaintVecX = -1.0;
+	public var lastPaintVecY = -1.0;
+
+	public var currentObject:MeshObject;
+	var frame = 0;
+
+	public var apconfig:TAPConfig;
+
+	var lastBrushType = -1;
+
+	#if arm_editor
+	public var cameraType = 1;
+	#else
+	public var cameraType = 0;
+	#end
+	var textureRes = 2;
+
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
 	#else
@@ -262,32 +308,6 @@ class UITrait extends iron.Trait {
 		return pdirty > 0;
 	}
 
-	public var brushNodesRadius = 1.0;
-	public var brushNodesOpacity = 1.0;
-	public var brushNodesScale = 1.0;
-	public var brushNodesStrength = 1.0;
-
-	public var brushRadius = 0.5;
-	public var brushOpacity = 1.0;
-	public var brushScale = 0.5;
-	public var brushStrength = 1.0;
-	public var brushBias = 1.0;
-	public var brushPaint = 0;
-	public var brushType = 0;
-
-	public var paintBase = true;
-	public var paintOpac = true;
-	public var paintOcc = true;
-	public var paintRough = true;
-	public var paintMet = true;
-	public var paintNor = true;
-	public var paintHeight = false;
-	
-	public var paintVisible = true;
-	public var mirrorX = false;
-	public var showGrid = false;
-	public var autoFillHandle = new Zui.Handle({selected: false});
-
 	function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 
 		if (link == '_brushRadius') {
@@ -313,8 +333,6 @@ class UITrait extends iron.Trait {
 		return null;
 	}
 
-	var sub = 0;
-	var vec2 = new iron.math.Vec4();
 	function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
@@ -342,8 +360,6 @@ class UITrait extends iron.Trait {
 		return null;
 	}
 
-	public var lastPaintVecX = -1.0;
-	public var lastPaintVecY = -1.0;
 	function linkVec4(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		if (link == '_inputBrush') {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
@@ -575,15 +591,6 @@ class UITrait extends iron.Trait {
 		});
 	}
 
-	// var rt:kha.Image; ////
-	// var uiWidth = 2048;
-	// var uiHeight = 2048;
-
-	public var currentObject:MeshObject;
-	var frame = 0;
-
-	public var apconfig:TAPConfig;
-
 	function done() {
 
 		notifyOnInit(function() {
@@ -626,7 +633,6 @@ class UITrait extends iron.Trait {
 		});
 	}
 
-	var lastBrushType = -1;
 	function update() {
 		isScrolling = ui.isScrolling;
 		updateUI();
@@ -1248,12 +1254,6 @@ void main() {
 		// dirty = false;
 	}
 
-	#if arm_editor
-	public var cameraType = 1;
-	#else
-	public var cameraType = 0;
-	#end
-	var textureRes = 2;
 	function getTextureRes():Int {
 		if (textureRes == 0) return 1024;
 		if (textureRes == 1) return 2048;
