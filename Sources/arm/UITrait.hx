@@ -85,8 +85,8 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint" + ext;
-			t.width = 4096;
-			t.height = 4096;
+			t.width = UITrait.inst.getTextureRes();
+			t.height = UITrait.inst.getTextureRes();
 			t.format = 'RGBA32';
 			t.depth_buffer = "paintdb";
 			rt = RenderPath.active.createRenderTarget(t);
@@ -95,16 +95,16 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_nor" + ext;
-			t.width = 4096;
-			t.height = 4096;
+			t.width = UITrait.inst.getTextureRes();
+			t.height = UITrait.inst.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_pack" + ext;
-			t.width = 4096;
-			t.height = 4096;
+			t.width = UITrait.inst.getTextureRes();
+			t.height = UITrait.inst.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
@@ -159,6 +159,7 @@ class UITrait extends iron.Trait {
 
 	public var ddirty = 0;
 	public var pdirty = 0;
+	public var rdirty = 0;
 
 	public var bundled:Map<String, kha.Image> = new Map();
 	var ui:Zui;
@@ -167,6 +168,8 @@ class UITrait extends iron.Trait {
 
 	var colorIdHandle = Id.handle();
 
+	var formatType = 0;
+	var formatQuality = 80.0;
 	var outputType = 0;
 	var isBase = true;
 	var isBaseSpace = 1;
@@ -203,7 +206,7 @@ class UITrait extends iron.Trait {
 	public var instantMat = true;
 	var hscaleWasChanged = false;
 	
-	var _onBrush:Array<Void->Void> = [];
+	var _onBrush:Array<Int->Void> = [];
 
 	public var paintVec = new iron.math.Vec4();
 	public var lastPaintX = 0.0;
@@ -270,7 +273,7 @@ class UITrait extends iron.Trait {
 	#else
 	public var cameraType = 0;
 	#end
-	var textureRes = 2;
+	var textureRes = 1;
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -289,12 +292,12 @@ class UITrait extends iron.Trait {
 		}
 	}
 
-	public function notifyOnBrush(f:Void->Void) {
+	public function notifyOnBrush(f:Int->Void) {
 		_onBrush.push(f);
 	}
 
 	public function dirty():Bool {
-		return paintDirty() || depthDirty();
+		return paintDirty() || depthDirty() || rdirty > 0;
 	}
 
 	public function depthDirty():Bool {
@@ -658,13 +661,23 @@ class UITrait extends iron.Trait {
 
 		// Color pick shortcut
 		var mouse = iron.system.Input.getMouse();
-		if (mouse.x > 0 && mouse.x < iron.App.w() && kb.started("alt")) {
-			lastBrushType = brushType;
-			setBrushType(4);
-		}
-		if (kb.released("alt") && lastBrushType != -1) {
-			setBrushType(lastBrushType);
-			lastBrushType = -1;
+		// if (mouse.x > 0 && mouse.x < iron.App.w() && kb.started("alt")) {
+		// 	lastBrushType = brushType;
+		// 	setBrushType(4);
+		// }
+		// if (kb.released("alt") && lastBrushType != -1) {
+		// 	setBrushType(lastBrushType);
+		// 	lastBrushType = -1;
+		// }
+		if (mouse.x > 0 && mouse.x < iron.App.w() && kb.released("alt")) {
+			if (lastBrushType == -1) {
+				lastBrushType = brushType;
+				setBrushType(4);
+			}
+			else {
+				setBrushType(lastBrushType);
+				lastBrushType = -1;
+			}
 		}
 
 		camBall();
@@ -882,7 +895,7 @@ class UITrait extends iron.Trait {
 					pushUndo = true;
 				}
 				brushTime += iron.system.Time.delta;
-				for (f in _onBrush) f();
+				for (f in _onBrush) f(0);
 			}
 
 		}
@@ -1254,7 +1267,7 @@ void main() {
 		// dirty = false;
 	}
 
-	function getTextureRes():Int {
+	public function getTextureRes():Int {
 		if (textureRes == 0) return 1024;
 		if (textureRes == 1) return 2048;
 		if (textureRes == 2) return 4096;
@@ -1971,6 +1984,27 @@ void main() {
 					ui.button("Open..");
 					ui.button("Save..");
 					ui.button("Save As..");
+					ui.row([1/2,1/2]);
+					if (ui.button("New")) {
+						// currentObject.data.delete();
+						// iron.data.Data.cachedMeshes.remove("mesh_Cube");
+						iron.data.Data.getMesh("mesh_Cube", "Cube", function(md:MeshData) {
+							iron.App.notifyOnRender(initLayers);
+							if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
+							// currentObject.setData(md);
+							paintObject = currentObject;
+						});
+					}
+					ui.combo(Id.handle(), ["Cube", "Plane", "Sphere", "Cylinder"], "Default Object");
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Quality", 1)) {
+					var hres = Id.handle({position: textureRes});
+					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
+					if (hres.changed) {
+						iron.App.notifyOnRender(resizeLayers);
+					}
+					ui.combo(Id.handle(), ["8bit"], "Color", true);
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
@@ -1982,170 +2016,201 @@ void main() {
 						arm.App.foldersOnly = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
 						arm.App.filesDone = function(path:String) {
+							var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
 							var bo = new haxe.io.BytesOutput();
-							var pixels = selectedLayer.texpaint.getPixels();
-							var rgb = haxe.io.Bytes.alloc(textureSize * textureSize * 3);
-							// BGRA to RGB
-							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
-							}
+							
+							var pixels = selectedLayer.texpaint.getPixels(); // bgra
 							if (isBaseSpace == 1) {
-								for (i in 0...rgb.length) {
-									rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+								for (i in 0...Std.int(pixels.length / 4)) {
+									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+									// pixels.set(i * 4 + 3, 255);
 								}
 							}
-							var pngwriter = new iron.format.png.Writer(bo);
-							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-							// var jpgdata:iron.format.jpg.Data.Data = {
-							// 	width: textureSize,
-							// 	height: textureSize,
-							// 	quality: 80,
-							// 	pixels: rgb
-							// };
-							// var jpgwriter = new iron.format.jpg.Writer(bo);
-							// jpgwriter.write(jpgdata);
+							if (formatType == 0) {
+								var jpgdata:iron.format.jpg.Data.Data = {
+									width: textureSize,
+									height: textureSize,
+									quality: formatQuality,
+									pixels: pixels
+								};
+								var jpgwriter = new iron.format.jpg.Writer(bo);
+								jpgwriter.write(jpgdata, 1);
+							}
+							else {
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+							}
 							#if kha_krom
-							if (isBase) Krom.fileSaveBytes(path + "/tex_basecol.png", bo.getBytes().getData());
+							if (isBase) Krom.fileSaveBytes(path + "/tex_basecol" + ext, bo.getBytes().getData());
 							#end
 
 							pixels = selectedLayer.texpaint_nor.getPixels();
-							for (i in 0...textureSize * textureSize) {
-								rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-								rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-								rgb.set(i * 3 + 2, pixels.get(i * 4 + 0));
-							}
 							if (isNorSpace == 1) {
-								for (i in 0...rgb.length) {
-									rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+								for (i in 0...Std.int(pixels.length / 4)) {
+									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+									// pixels.set(i * 4 + 3, 255);
 								}
 							}
 							bo = new haxe.io.BytesOutput();
-							var pngwriter = new iron.format.png.Writer(bo);
-							pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+							if (formatType == 0) {
+								var jpgdata:iron.format.jpg.Data.Data = {
+									width: textureSize,
+									height: textureSize,
+									quality: formatQuality,
+									pixels: pixels
+								};
+								var jpgwriter = new iron.format.jpg.Writer(bo);
+								jpgwriter.write(jpgdata, 1);
+							}
+							else {
+								var pngwriter = new iron.format.png.Writer(bo);
+								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+							}
 							#if kha_krom
-							if (isNor) Krom.fileSaveBytes(path + "/tex_nor.png", bo.getBytes().getData());
+							if (isNor) Krom.fileSaveBytes(path + "/tex_nor" + ext, bo.getBytes().getData());
 							#end
-
-							// for (i in 0...textureSize * textureSize) {
-							// 	rgb.set(i * 3 + 0, pixels.get(i * 4 + 3));
-							// 	rgb.set(i * 3 + 1, pixels.get(i * 4 + 3));
-							// 	rgb.set(i * 3 + 2, pixels.get(i * 4 + 3));
-							// }
-							// bo = new haxe.io.BytesOutput();
-							// var pngwriter = new iron.format.png.Writer(bo);
-							// pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
-							// #if kha_krom
-							// Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
-							// #end
 
 							pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
 
+							if (isOccSpace == 1) {
+								for (i in 0...Std.int(pixels.length / 4)) {
+									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+								}
+							}
+							if (isRoughSpace == 1) {
+								for (i in 0...Std.int(pixels.length / 4)) {
+									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+								}
+							}
+							if (isMetSpace == 1) {
+								for (i in 0...Std.int(pixels.length / 4)) {
+									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+								}
+							}
+
 							if (outputType == 0) {
-								for (i in 0...textureSize * textureSize) {
-									rgb.set(i * 3 + 0, pixels.get(i * 4));
-									rgb.set(i * 3 + 1, pixels.get(i * 4));
-									rgb.set(i * 3 + 2, pixels.get(i * 4));
-								}
-								if (isOccSpace == 1) {
-									for (i in 0...rgb.length) {
-										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
-									}
-								}
 								bo = new haxe.io.BytesOutput();
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								if (formatType == 0) {
+									var jpgdata:iron.format.jpg.Data.Data = {
+										width: textureSize,
+										height: textureSize,
+										quality: formatQuality,
+										pixels: pixels
+									};
+									var jpgwriter = new iron.format.jpg.Writer(bo);
+									jpgwriter.write(jpgdata, 2, 0);
+								}
+								else {
+									var pngwriter = new iron.format.png.Writer(bo);
+									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 0));
+								}
 								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/tex_occ.png", bo.getBytes().getData());
+								if (isOcc) Krom.fileSaveBytes(path + "/tex_occ" + ext, bo.getBytes().getData());
 								#end
 
-								for (i in 0...textureSize * textureSize) {
-									rgb.set(i * 3 + 0, pixels.get(i * 4 + 1));
-									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-									rgb.set(i * 3 + 2, pixels.get(i * 4 + 1));
-								}
-								if (isRoughSpace == 1) {
-									for (i in 0...rgb.length) {
-										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
-									}
-								}
 								bo = new haxe.io.BytesOutput();
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								if (formatType == 0) {
+									var jpgdata:iron.format.jpg.Data.Data = {
+										width: textureSize,
+										height: textureSize,
+										quality: formatQuality,
+										pixels: pixels
+									};
+									var jpgwriter = new iron.format.jpg.Writer(bo);
+									jpgwriter.write(jpgdata, 2, 1);
+								}
+								else {
+									var pngwriter = new iron.format.png.Writer(bo);
+									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 1));
+								}
 								#if kha_krom
-								if (isRough) Krom.fileSaveBytes(path + "/tex_rough.png", bo.getBytes().getData());
+								if (isRough) Krom.fileSaveBytes(path + "/tex_rough" + ext, bo.getBytes().getData());
 								#end
-
-								for (i in 0...textureSize * textureSize) {
-									rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
-								}
-								if (isMetSpace == 1) {
-									for (i in 0...rgb.length) {
-										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
-									}
-								}
+								
 								bo = new haxe.io.BytesOutput();
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								if (formatType == 0) {
+									var jpgdata:iron.format.jpg.Data.Data = {
+										width: textureSize,
+										height: textureSize,
+										quality: formatQuality,
+										pixels: pixels
+									};
+									var jpgwriter = new iron.format.jpg.Writer(bo);
+									jpgwriter.write(jpgdata, 2, 2);
+								}
+								else {
+									var pngwriter = new iron.format.png.Writer(bo);
+									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 2));
+								}
 								#if kha_krom
-								if (isMet) Krom.fileSaveBytes(path + "/tex_met.png", bo.getBytes().getData());
+								if (isMet) Krom.fileSaveBytes(path + "/tex_met" + ext, bo.getBytes().getData());
 								#end
 							}
 							else { // UE4
-								for (i in 0...textureSize * textureSize) {
-									rgb.set(i * 3 + 0, pixels.get(i * 4));
-									rgb.set(i * 3 + 1, pixels.get(i * 4 + 1));
-									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
-								}
-								if (isOccSpace == 1) {
-									for (i in 0...rgb.length) {
-										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
-									}
-								}
 								bo = new haxe.io.BytesOutput();
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								if (formatType == 0) {
+									var jpgdata:iron.format.jpg.Data.Data = {
+										width: textureSize,
+										height: textureSize,
+										quality: formatQuality,
+										pixels: pixels
+									};
+									var jpgwriter = new iron.format.jpg.Writer(bo);
+									jpgwriter.write(jpgdata, 1);
+								}
+								else {
+									var pngwriter = new iron.format.png.Writer(bo);
+									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+								}
 								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/tex_orm.png", bo.getBytes().getData());
+								if (isOcc) Krom.fileSaveBytes(path + "/tex_orm" + ext, bo.getBytes().getData());
 								#end
 							}
 
 							if (isHeight && selectedLayer.texpaint_opt != null) {
 								pixels = selectedLayer.texpaint_opt.getPixels();
-								for (i in 0...textureSize * textureSize) {
-									rgb.set(i * 3 + 0, pixels.get(i * 4 + 2));
-									rgb.set(i * 3 + 1, pixels.get(i * 4 + 2));
-									rgb.set(i * 3 + 2, pixels.get(i * 4 + 2));
-								}
 								if (isHeightSpace == 1) {
-									for (i in 0...rgb.length) {
-										rgb.set(i, Std.int(Math.pow(rgb.get(i) / 255, 1.0/2.2) * 255));
+									for (i in 0...Std.int(pixels.length / 4)) {
+										pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+										pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+										pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+										// pixels.set(i * 4 + 3, 255);
 									}
 								}
 								bo = new haxe.io.BytesOutput();
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.buildRGB(textureSize, textureSize, rgb));
+								if (formatType == 0) {
+									var jpgdata:iron.format.jpg.Data.Data = {
+										width: textureSize,
+										height: textureSize,
+										quality: formatQuality,
+										pixels: pixels
+									};
+									var jpgwriter = new iron.format.jpg.Writer(bo);
+									jpgwriter.write(jpgdata, 1);
+								}
+								else {
+									var pngwriter = new iron.format.png.Writer(bo);
+									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+								}
 								#if kha_krom
-								Krom.fileSaveBytes(path + "/tex_height.png", bo.getBytes().getData());
+								Krom.fileSaveBytes(path + "/tex_height" + ext, bo.getBytes().getData());
 								#end
 							}
 
-							// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac.png", bo.getBytes().getData());
-							// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis.png", bo.getBytes().getData());
-							// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs.png", bo.getBytes().getData());
+							// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac" + ext, bo.getBytes().getData());
+							// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis" + ext, bo.getBytes().getData());
+							// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs" + ext, bo.getBytes().getData());
 						}
 					}
 
-					var hres = Id.handle({position: textureRes});
-					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
-					if (hres.changed) {
-						iron.App.notifyOnRender(resizeLayers);
+					formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
+					if (formatType == 0) {
+						formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
 					}
-					ui.combo(Id.handle(), ["8bit"], "Color", true);
-					ui.combo(Id.handle(), ["png"], "Format", true);
 					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
 					ui.text("Export Maps");
 					ui.row([1/2, 1/2]);
@@ -2340,7 +2405,7 @@ void main() {
 		var p = path.toLowerCase();
 		if (!StringTools.endsWith(p, ".obj") &&
 			!StringTools.endsWith(p, ".gltf") &&
-			// !StringTools.endsWith(p, ".blend") &&
+			!StringTools.endsWith(p, ".blend") &&
 			!StringTools.endsWith(p, ".fbx")) {
 			return false;
 		}
@@ -2356,6 +2421,7 @@ void main() {
 		if (StringTools.endsWith(p, ".obj")) importObj(path);
 		else if (StringTools.endsWith(p, ".gltf")) importGltf(path);
 		else if (StringTools.endsWith(p, ".fbx")) importFbx(path);
+		else if (StringTools.endsWith(p, ".blend")) importBlend(path);
 	}
 
 	function importObj(path:String) {
@@ -2380,14 +2446,14 @@ void main() {
 	}
 
 	function importBlend(path:String) {
-		// iron.data.Data.getBlob(path, function(b:kha.Blob) {
-			// var obj = new blend.Loader(b);
-			// if (obj.texa == null) {
-				// showMessage("Error: Invalid mesh - no UVs found");
-				// return;
-			// }
+		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			var bl = new iron.format.blend.Blend(b);
+
+			trace(bl.version);
+
+			// var obj = ;
 			// makeMesh(obj, path);
-		// });
+		});
 	}
 
 	function makeMesh(mesh:Dynamic, path:String) {

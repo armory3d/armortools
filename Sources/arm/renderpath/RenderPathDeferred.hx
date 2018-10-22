@@ -1199,7 +1199,7 @@ class RenderPathDeferred {
 				if (!path.isProbe) { // No last frame for probe
 
 					// Paint
-					var isLast = arm.UITrait.inst.ddirty == 1 || arm.UITrait.inst.pdirty == 1;
+					var isLast = arm.UITrait.inst.ddirty == 1 || arm.UITrait.inst.rdirty == 1;
 					path.setTarget(isLast ? "bufb" : framebuffer);
 					path.bindTarget("bufa", "tex");
 					path.bindTarget("taa", "tex2");
@@ -1254,6 +1254,7 @@ class RenderPathDeferred {
 		// paint
 		arm.UITrait.inst.ddirty--;
 		arm.UITrait.inst.pdirty--;
+		arm.UITrait.inst.rdirty--;
 		//
 	}
 

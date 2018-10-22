@@ -572,7 +572,7 @@ class UINodes extends iron.Trait {
 		if (UITrait.inst.brushPaint == 0) {
 			vert.add_uniform('float brushScale', '_brushScale'); // TODO: Will throw uniform not found
 			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = fract(tex * brushScale);'); // TODO: fract(tex) - somehow clamp is set after first paint
+			vert.write('texCoord = tex * brushScale;');
 		}
 		// Texture projection - project
 		else {

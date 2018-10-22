@@ -178,7 +178,7 @@ class App {
 			// Mesh
 			if (StringTools.endsWith(p, ".obj") ||
 				StringTools.endsWith(p, ".fbx") ||
-				// StringTools.endsWith(p, ".blend") ||
+				StringTools.endsWith(p, ".blend") ||
 				StringTools.endsWith(p, ".gltf")) {
 				UITrait.inst.importMesh(dropPath);
 			}
@@ -225,35 +225,38 @@ class App {
 					
 					f = dropPath + sep + f;
 					if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
-					var base = f.substr(0, f.lastIndexOf("."));
-
+					
+					var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 					var valid = false;
-					if (mapbase == "" && (StringTools.endsWith(base, "_Albedo") ||
+					if (mapbase == "" && (StringTools.endsWith(base, "_albedo") ||
+										  StringTools.endsWith(base, "_basecol") ||
 										  StringTools.endsWith(base, "_col"))) {
 						mapbase = f;
 						valid = true;
 					}
-					if (mapnor == "" && (StringTools.endsWith(base, "_Normal") ||
+					if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
+										 StringTools.endsWith(base, "_nor") ||
 										 StringTools.endsWith(base, "_nrm"))) {
 						mapnor = f;
 						valid = true;
 					}
-					if (mapocc == "" && (StringTools.endsWith(base, "_AO") ||
+					if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
 										 StringTools.endsWith(base, "_occ"))) {
 						mapocc = f;
 						valid = true;
 					}
-					if (maprough == "" && (StringTools.endsWith(base, "_Roughness") ||
+					if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
+										   StringTools.endsWith(base, "_roug") ||
 										   StringTools.endsWith(base, "_rgh"))) {
 						maprough = f;
 						valid = true;
 					}
-					if (mapmet == "" && (StringTools.endsWith(base, "_Metallic") ||
-										 StringTools.endsWith(base, "_mtl"))) {
+					if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
+										 StringTools.endsWith(base, "_met"))) {
 						mapmet = f;
 						valid = true;
 					}
-					if (mapheight == "" && (StringTools.endsWith(base, "_Displacement") ||
+					if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
 											StringTools.endsWith(base, "_disp"))) {
 						mapheight = f;
 						valid = true;
@@ -326,9 +329,10 @@ class App {
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 					canvas.links.push(l);
 				}
-				
-				UINodes.inst.parsePaintMaterial();
-				UITrait.inst.makeMaterialPreview();
+				iron.system.Tween.timer(0.01, function() {
+					UINodes.inst.parsePaintMaterial();
+					UITrait.inst.makeMaterialPreview();
+				});
 				#end
 			}
 			dropPath = "";

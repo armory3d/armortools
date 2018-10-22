@@ -11,7 +11,7 @@ class BrushOutputNode extends LogicNode {
 		arm.UITrait.inst.notifyOnBrush(run);
 	}
 
-	override function run() {
+	override function run(from:Int) {
 		arm.UITrait.inst.paintVec = inputs[0].get();
 		arm.UITrait.inst.brushNodesRadius = inputs[1].get();
 		arm.UITrait.inst.brushNodesOpacity = inputs[2].get();
@@ -34,9 +34,12 @@ class BrushOutputNode extends LogicNode {
 			}
 			arm.UITrait.inst.lastPaintX = arm.UITrait.inst.paintVec.x;
 			arm.UITrait.inst.lastPaintY = arm.UITrait.inst.paintVec.y;
-			if (arm.UITrait.inst.painted <= 8) arm.UITrait.inst.pdirty = 2;
+			if (arm.UITrait.inst.painted <= 8) {
+				arm.UITrait.inst.pdirty = 1;
+				arm.UITrait.inst.rdirty = 2;
+			}
 		}
 
-		super.run();
+		runOutput(0);
 	}
 }
