@@ -18,7 +18,7 @@ class App {
 	public static var font:kha.Font = null;
 	public static var theme:zui.Themes.TTheme;
 	public static var color_wheel:kha.Image;
-	static var uimodal:Zui;
+	public static var uimodal:Zui;
 	static var modalW = 625;
 	static var modalH = 545;
 	static var lastW = -1;
@@ -77,7 +77,10 @@ class App {
 						iron.Scene.active.root.addTrait(new UIView2D());
 						iron.Scene.active.root.addTrait(new arm.trait.FlyCamera());
 						iron.Scene.active.root.addTrait(new arm.trait.OrbitCamera());
-						iron.App.notifyOnRender2D(render);
+						iron.App.notifyOnInit(function() {
+							iron.App.notifyOnRender2D(render); // Draw on top
+						});
+						
 					});
 				});
 			});
@@ -400,7 +403,7 @@ class App {
 			UITrait.inst.ddirty = 2;
 		}
 
-		uimodal.beginLayout(g, right - 100, bottom - 30, 100);
+		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
 		if (uimodal.button("OK")) {
 			showFiles = false;
 			filesDone(path);
@@ -408,7 +411,7 @@ class App {
 		}
 		uimodal.endLayout(false);
 
-		uimodal.beginLayout(g, right - 200, bottom - 30, 100);
+		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W() * 2), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
 			UITrait.inst.ddirty = 2;

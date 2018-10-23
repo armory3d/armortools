@@ -2291,6 +2291,8 @@ void main() {
 					if (!hscale.changed && hscaleWasChanged) {
 						apconfig.window_scale = hscale.value;
 						ui.setScale(hscale.value);
+						arm.App.uimodal.setScale(hscale.value);
+						UINodes.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * apconfig.window_scale);
 						arm.App.resize();
 					}
