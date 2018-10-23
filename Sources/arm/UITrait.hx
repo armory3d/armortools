@@ -145,9 +145,7 @@ class UITrait extends iron.Trait {
 	public static var defaultWindowW = 280;
 
 	public static var penPressure = true;
-	public static var drawWorld = true;
 	public static var undoEnabled = true;
-	public static var worldColor = 0xffffffff;
 
 	public var isScrolling = false;
 	public var colorIdPicked = false;
@@ -156,6 +154,9 @@ class UITrait extends iron.Trait {
 	var savedCamera = Mat4.identity();
 	var message = "";
 	var messageTimer = 0.0;
+
+	var savedEnvmap:kha.Image = null;
+	var emptyEnvmap:kha.Image = null;
 
 	public var ddirty = 0;
 	public var pdirty = 0;
@@ -255,6 +256,9 @@ class UITrait extends iron.Trait {
 	public var mirrorX = false;
 	public var showGrid = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
+	var newConfirm = false;
+	var newObject = 0;
+	var newObjectNames = ["Cube", "Plane", "Sphere", "Cylinder"];
 
 	var sub = 0;
 	var vec2 = new iron.math.Vec4();
@@ -1317,8 +1321,7 @@ void main() {
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
 		ddirty = 2;
-		// Auto-disable on brush change
-		autoFillHandle.selected = false;
+		autoFillHandle.selected = false; // Auto-disable
 	}
 
 	function selectObject(o:iron.object.Object) {
@@ -1865,8 +1868,10 @@ void main() {
 							if (layers.length < 2) {
 								selectedLayer = new LayerSlot();
 								layers.push(selectedLayer);
+								ui.g.end();
 								UINodes.inst.parseMeshMaterial();
 								UINodes.inst.parsePaintMaterial();
+								ui.g.begin(false);
 								ddirty = 2;
 								iron.App.notifyOnRender(clearLastLayer);
 							}
@@ -1992,17 +1997,34 @@ void main() {
 					ui.button("Save..");
 					ui.button("Save As..");
 					ui.row([1/2,1/2]);
-					if (ui.button("New")) {
-						// currentObject.data.delete();
-						// iron.data.Data.cachedMeshes.remove("mesh_Cube");
-						iron.data.Data.getMesh("mesh_Cube", "Cube", function(md:MeshData) {
-							iron.App.notifyOnRender(initLayers);
-							if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
-							// currentObject.setData(md);
-							paintObject = currentObject;
-						});
+					if (newConfirm) {
+						if (ui.button("Confirm")) {
+							newConfirm = false;
+							var n = newObjectNames[newObject];
+							iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
+								currentObject.setData(md);
+								paintObject = currentObject;
+								ui.g.end();
+								materials = [new MaterialSlot()];
+								selectedMaterial = materials[0];
+								layers = [new LayerSlot()];
+								selectedLayer = layers[0];
+								iron.App.notifyOnRender(initLayers);
+								if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parsePaintMaterial();
+								makeMaterialPreview();
+								ui.g.begin(false);
+								assets = [];
+								assetNames = [];
+								assetId = 0;
+							});
+						}
 					}
-					ui.combo(Id.handle(), ["Cube", "Plane", "Sphere", "Cylinder"], "Default Object");
+					else if (ui.button("New")) {
+						newConfirm = true;
+					}
+					newObject = ui.combo(Id.handle(), newObjectNames, "Default Object");
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Quality", 1)) {
@@ -2326,15 +2348,35 @@ void main() {
 				var hsupersample = Id.handle({position: getSuperSampleQuality(apconfig.rp_supersample)});
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
 					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
-					var drawWorldHandle = Id.handle({selected: drawWorld});
-					drawWorld = ui.check(drawWorldHandle, "Envmap");
+					var drawWorldHandle = Id.handle({selected: true});
+					var drawWorld = ui.check(drawWorldHandle, "Envmap");
 					if (drawWorldHandle.changed) {
 						ddirty = 2;
 					}
+					if (savedEnvmap == null) savedEnvmap = iron.Scene.active.world.envmap;
 					if (!drawWorld) {
-						var hwheel = Id.handle();
-						worldColor = Ext.colorWheel(ui, hwheel);
+						var hwheel = Id.handle({color: 0xff030303});
+						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
+						if (emptyEnvmap == null) {
+							var b = haxe.io.Bytes.alloc(4);
+							b.set(0, worldColor.Rb);
+							b.set(1, worldColor.Gb);
+							b.set(2, worldColor.Bb);
+							b.set(3, 255);
+							emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+						}
+						if (hwheel.changed) {
+							var b = emptyEnvmap.lock();
+							b.set(0, worldColor.Rb);
+							b.set(1, worldColor.Gb);
+							b.set(2, worldColor.Bb);
+							emptyEnvmap.unlock();
+							ddirty = 2;
+						}
+						
+						iron.Scene.active.world.envmap = emptyEnvmap;
 					}
+					else iron.Scene.active.world.envmap = savedEnvmap;
 					ui.check(hssgi, "SSAO");
 					ui.check(hssr, "SSR");
 					ui.check(hbloom, "Bloom");

@@ -685,11 +685,7 @@ class RenderPathDeferred {
 		}
 		#else
 		{
-			// Paint
-			// path.clearTarget(null, 1.0);
-			if (!UITrait.drawWorld) path.clearTarget(UITrait.worldColor, 1.0);
-			else path.clearTarget(null, 1.0);
-			//
+			path.clearTarget(null, 1.0);
 		}
 		#end
 
@@ -971,10 +967,7 @@ class RenderPathDeferred {
 
 		#if (rp_background == "World")
 		{
-			// Paint
-			// path.drawSkydome("shader_datas/world_pass/world_pass");
-			if (UITrait.drawWorld) path.drawSkydome("shader_datas/world_pass/world_pass");
-			//
+			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end
 
@@ -1281,8 +1274,7 @@ class RenderPathDeferred {
 		}
 		#else
 		{
-			if (!UITrait.drawWorld) path.clearTarget(UITrait.worldColor, 1.0);
-			else path.clearTarget(null, 1.0);
+			path.clearTarget(null, 1.0);
 		}
 		#end
 
@@ -1326,7 +1318,7 @@ class RenderPathDeferred {
 
 		#if (rp_background == "World")
 		{
-			if (UITrait.drawWorld) path.drawSkydome("shader_datas/world_pass/world_pass");
+			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end
 		
@@ -1414,8 +1406,7 @@ class RenderPathDeferred {
 		}
 		#else
 		{
-			if (!UITrait.drawWorld) path.clearTarget(UITrait.worldColor, 1.0);
-			else path.clearTarget(null, 1.0);
+			path.clearTarget(null, 1.0);
 		}
 		#end
 
@@ -1459,7 +1450,7 @@ class RenderPathDeferred {
 
 		#if (rp_background == "World")
 		{
-			if (UITrait.drawWorld) path.drawSkydome("shader_datas/world_pass/world_pass");
+			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end
 		

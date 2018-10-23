@@ -714,8 +714,8 @@ class UINodes extends iron.Trait {
 		frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
 
 		// Apply normal channel
-		vert.add_uniform('vec3 eye', '_cameraPosition');
-		vert.add_uniform('mat4 W', '_worldMatrix');
+		vert.add_uniform('vec3 eye', '_cameraPosition'); // eyeDir discard
+		vert.add_uniform('mat4 W', '_worldMatrix'); //eyeDir discard
 		vert.write('vec4 spos = vec4(pos, 1.0);');
 		vert.write('vec4 wposition = W * spos;');
 		vert.add_out('vec3 eyeDir');
@@ -1168,6 +1168,7 @@ class UINodes extends iron.Trait {
 
 				if (UITrait.inst.brushType == 2 && UITrait.inst.autoFillHandle.selected) { // Fill
 					UITrait.inst.pdirty = 8;
+					UITrait.inst.ddirty = 8;
 				}
 			// }
 			// else {

@@ -85,7 +85,7 @@ void main() {
 		if (!show) return;
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
-		if (UITrait.inst.paintDirty()) hwnd.redraws = 2;
+		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
 		var tw = iron.App.w() * 0.95;
 		var tx = iron.App.w() / 2 - tw / 2;
