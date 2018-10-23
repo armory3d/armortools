@@ -83,6 +83,7 @@ void main() {
 		wy = 0;
 
 		if (!show) return;
+		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
 		if (UITrait.inst.paintDirty()) hwnd.redraws = 2;
 

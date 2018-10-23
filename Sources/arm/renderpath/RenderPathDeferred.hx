@@ -569,6 +569,8 @@ class RenderPathDeferred {
 	@:access(iron.RenderPath)
 	public static function commands() {
 
+		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+
 		// Paint
 		if (!arm.UITrait.inst.dirty()) {
 			path.setTarget("");

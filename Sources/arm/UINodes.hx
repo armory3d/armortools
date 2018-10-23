@@ -272,6 +272,7 @@ class UINodes extends iron.Trait {
 		}
 
 		if (!show) return;
+		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();

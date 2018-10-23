@@ -4,7 +4,7 @@ import zui.*;
 import zui.Zui.State;
 import zui.Canvas;
 
-class App {
+class App extends iron.Trait {
 
 	public static var uienabled = true;
 	public static var isDragging = false;
@@ -34,6 +34,7 @@ class App {
 	}
 
 	public function new() {
+		super();
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);

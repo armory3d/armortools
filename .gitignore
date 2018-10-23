@@ -4,6 +4,7 @@ build_armorpaint/
 build_grid/
 build/
 khafile.js
+korefile.js
 Sources/Main.hx
 *.pyc
 .vscode

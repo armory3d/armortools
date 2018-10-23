@@ -541,6 +541,8 @@ class UITrait extends iron.Trait {
 				cmd += ' --output0 "' + tmp + 'tmp_rad"';
 				cmd += ' --output0params hdr,rgbe,latlong';
 				Krom.sysCommand(cmd);
+				#else
+				var tmp = "";
 				#end
 
 				// Load irr
@@ -1709,7 +1711,7 @@ void main() {
 							ui.row([1/2,1/2]);
 							paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 							var mirrorHandle = Id.handle({selected: mirrorX});
-							mirrorX = ui.check(mirrorHandle, "Mirror");
+							mirrorX = ui.check(mirrorHandle, "Mirror Screen");
 							if (mirrorHandle.changed) {
 								UINodes.inst.updateCanvasMap();
 								UINodes.inst.parsePaintMaterial();
