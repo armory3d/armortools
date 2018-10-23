@@ -47,8 +47,6 @@ class UINodes extends iron.Trait {
 
 	public var canvasType = 0; // material, brush, logic
 
-	var mx = 0.0;
-	var my = 0.0;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
@@ -200,14 +198,12 @@ class UINodes extends iron.Trait {
 		var lay = UITrait.inst.apconfig.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
-		if (mouse.x < wx || mouse.y < wy) return;
+		var mx = mouse.x + App.x();
+		var my = mouse.y + App.y();
+		if (mx < wx || my < wy) return;
 		if (ui.isTyping) return;
 
-		if (mouse.started("right")) {
-			mx = mouse.x;
-			my = mouse.y;
-		}
-		else if (addNodeButton) {
+		if (addNodeButton) {
 			showMenu = true;
 			addNodeButton = false;
 		}
@@ -231,12 +227,12 @@ class UINodes extends iron.Trait {
 
 	public function getNodeX():Int {
 		var mouse = iron.system.Input.getMouse();
-		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE);
+		return Std.int((mouse.x + App.x() - wx - nodes.PAN_X()) / nodes.SCALE);
 	}
 
 	public function getNodeY():Int {
 		var mouse = iron.system.Input.getMouse();
-		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE);
+		return Std.int((mouse.y + App.y() - wy - nodes.PAN_Y()) / nodes.SCALE);
 	}
 
 	public function drawGrid() {
@@ -293,6 +289,7 @@ class UINodes extends iron.Trait {
 		var lay = UITrait.inst.apconfig.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
+		var ew = Std.int(ui.ELEMENT_W());
 		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {
 			
 			ui.g.color = 0xffffffff;
@@ -314,62 +311,62 @@ class UINodes extends iron.Trait {
 
 			ui._x = 3;
 			ui._y = 3;
-			ui._w = 105;
+			ui._w = ew;
 
 			if (canvasType == 1) {
 				if (ui.button("Nodes")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else if (canvasType == 2) {
 				if (ui.button("Action")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Animation")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Array")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Canvas")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Event")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Input")) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x = 3;
 				ui._y = 30;
 				if (ui.button("Logic")) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x = 105 + 3;
+				ui._x = ew + 3;
 				ui._y = 30;
 				if (ui.button("Native")) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 30;
 				if (ui.button("Navmesh")) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 30;
 				if (ui.button("Physics")) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 30;
 				if (ui.button("Sound")) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 30;
 				if (ui.button("Value")) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 30;
 				if (ui.button("Variable")) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else {
 				if (ui.button("Input")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Output")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Texture")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Color")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += 105 + 3;
+				ui._x += ew + 3;
 				ui._y = 3;
 				if (ui.button("Converter")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
@@ -386,9 +383,9 @@ class UINodes extends iron.Trait {
 			var ph = numNodes * 20;
 			var py = popupY;
 			g.color = 0xff222222;
-			g.fillRect(popupX, py, 105, ph);
+			g.fillRect(popupX, py, ew, ph);
 
-			ui.beginLayout(g, Std.int(popupX), Std.int(py), 105);
+			ui.beginLayout(g, Std.int(popupX), Std.int(py), ew);
 			
 			if (canvasType == 0) NodeCreator.draw(menuCategory);
 			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
