@@ -165,6 +165,7 @@ class UITrait extends iron.Trait {
 	var ui:Zui;
 	public var windowW = 280; // Panel width
 	public var toolbarw = 50;
+	var systemId = "";
 
 	var colorIdHandle = Id.handle();
 
@@ -389,6 +390,7 @@ class UITrait extends iron.Trait {
 		super();
 
 		inst = this;
+		systemId = kha.System.systemId;
 
 		// Init config
 		apconfig = cast armory.data.Config.raw;
@@ -906,7 +908,10 @@ class UITrait extends iron.Trait {
 			ddirty = 3;
 		}
 
-		if (kb.down("control") && kb.started("z") && undoEnabled) {
+		var undoPressed = kb.down("control") && kb.started("z");
+		if (systemId == 'OSX') undoPressed = kb.started("z"); // cmd+z on macos
+
+		if (undoPressed && undoEnabled) {
 			// TODO: swap layers instead of images
 			var tp = selectedLayer.texpaint;
 			var tp_nor = selectedLayer.texpaint_nor;
