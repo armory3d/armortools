@@ -89,7 +89,7 @@ class App extends iron.Trait {
 	}
 
 	public static function w():Int {
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return 50;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 		
 		var res = 0;
@@ -110,7 +110,7 @@ class App extends iron.Trait {
 	}
 
 	public static function h():Int {
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return 50;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 
 		var res = 0;

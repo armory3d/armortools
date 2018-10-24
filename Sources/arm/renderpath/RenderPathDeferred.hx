@@ -435,8 +435,8 @@ class RenderPathDeferred {
 
 				var t = new RenderTargetRaw();
 				t.name = "mtex";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = Inc.getHdrFormat();
 				t.scale = Inc.getSuperSampling();
 				t.depth_buffer = "mmain";
@@ -446,8 +446,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbuf";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = Inc.getHdrFormat();
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -456,8 +456,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer0";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				t.depth_buffer = "mmain";
@@ -467,8 +467,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer1";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -478,8 +478,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer2";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -490,8 +490,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbufa";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = "RGBA32";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -499,8 +499,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbufb";
-				t.width = 50;
-				t.height = 50;
+				t.width = 100;
+				t.height = 100;
 				t.format = "RGBA32";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);

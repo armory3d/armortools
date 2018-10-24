@@ -31,7 +31,7 @@ class MaterialSlot {
 	public var data:iron.data.MaterialData;
 	#end
 	public function new(m:iron.data.MaterialData = null) {
-		image = kha.Image.createRenderTarget(50, 50);
+		image = kha.Image.createRenderTarget(100, 100);
 		#if arm_editor
 		data = m;
 		#end
@@ -157,6 +157,8 @@ class UITrait extends iron.Trait {
 
 	var savedEnvmap:kha.Image = null;
 	var emptyEnvmap:kha.Image = null;
+	var previewEnvmap:kha.Image = null;
+	var drawWorld = true;
 
 	public var ddirty = 0;
 	public var pdirty = 0;
@@ -443,6 +445,26 @@ class UITrait extends iron.Trait {
 		if (undoLayers == null) {
 			undoLayers = [];
 			undoLayers.push(new LayerSlot("_undo"));
+		}
+
+		if (savedEnvmap == null) {
+			savedEnvmap = iron.Scene.active.world.envmap;
+		}
+		if (emptyEnvmap == null) {
+			var b = haxe.io.Bytes.alloc(4);
+			b.set(0, 5);
+			b.set(1, 5);
+			b.set(2, 5);
+			b.set(3, 255);
+			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+		}
+		if (previewEnvmap == null) {
+			var b = haxe.io.Bytes.alloc(4);
+			b.set(0, 0);
+			b.set(1, 0);
+			b.set(2, 0);
+			b.set(3, 255);
+			previewEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
 
 		// Save last pos for continuos paint
@@ -801,12 +823,13 @@ class UITrait extends iron.Trait {
 		iron.Scene.active.camera.data.raw.fov = 0.92;
 		var light = iron.Scene.active.lights[0];
 		light.data.raw.cast_shadow = false;
+		// iron.Scene.active.world.envmap = previewEnvmap;
 
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = 50;
-		@:privateAccess iron.RenderPath.active.lastH = 50;
+		@:privateAccess iron.RenderPath.active.lastW = 100;
+		@:privateAccess iron.RenderPath.active.lastH = 100;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
@@ -835,6 +858,7 @@ class UITrait extends iron.Trait {
 		iron.Scene.active.camera.buildMatrix();
 		var light = iron.Scene.active.lights[0];
 		light.data.raw.cast_shadow = true;
+		iron.Scene.active.world.envmap = drawWorld ? savedEnvmap : emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
 	}
 
@@ -1792,10 +1816,10 @@ void main() {
 							if (selectedMaterial == materials[i]) {
 								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
 								var off = row % 2 == 1 ? 1 : 0;
-								ui.fill(1, -2, img.width + 3, 2, 0xff205d9c);
-								ui.fill(1, img.height - 1 - off, img.width + 3, 2 + off, 0xff205d9c);
-								ui.fill(1, -2, 2, img.height + 3, 0xff205d9c);
-								ui.fill(img.width + 2, -2, 2, img.height + 3, 0xff205d9c);
+								ui.fill(1, -2, 50 + 3, 2, 0xff205d9c);
+								ui.fill(1, 50 - 1 - off, 50 + 3, 2 + off, 0xff205d9c);
+								ui.fill(1, -2, 2, 50 + 3, 0xff205d9c);
+								ui.fill(50 + 2, -2, 2, 50 + 3, 0xff205d9c);
 							}
 
 							if (ui.image(img) == State.Started && img != empty) {
@@ -1803,6 +1827,7 @@ void main() {
 								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
 								selectTime = iron.system.Time.time();
 							}
+							if (img != empty && ui.isHovered) ui.tooltipImage(img);
 						}
 						ui.imageInvertY = false; // Material preview
 					}
@@ -2348,23 +2373,14 @@ void main() {
 				var hsupersample = Id.handle({position: getSuperSampleQuality(apconfig.rp_supersample)});
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
 					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
-					var drawWorldHandle = Id.handle({selected: true});
-					var drawWorld = ui.check(drawWorldHandle, "Envmap");
+					var drawWorldHandle = Id.handle({selected: drawWorld});
+					drawWorld = ui.check(drawWorldHandle, "Envmap");
 					if (drawWorldHandle.changed) {
 						ddirty = 2;
 					}
-					if (savedEnvmap == null) savedEnvmap = iron.Scene.active.world.envmap;
 					if (!drawWorld) {
 						var hwheel = Id.handle({color: 0xff030303});
 						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
-						if (emptyEnvmap == null) {
-							var b = haxe.io.Bytes.alloc(4);
-							b.set(0, worldColor.Rb);
-							b.set(1, worldColor.Gb);
-							b.set(2, worldColor.Bb);
-							b.set(3, 255);
-							emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
-						}
 						if (hwheel.changed) {
 							var b = emptyEnvmap.lock();
 							b.set(0, worldColor.Rb);
@@ -2373,10 +2389,8 @@ void main() {
 							emptyEnvmap.unlock();
 							ddirty = 2;
 						}
-						
-						iron.Scene.active.world.envmap = emptyEnvmap;
 					}
-					else iron.Scene.active.world.envmap = savedEnvmap;
+					iron.Scene.active.world.envmap = drawWorld ? savedEnvmap : emptyEnvmap;
 					ui.check(hssgi, "SSAO");
 					ui.check(hssr, "SSR");
 					ui.check(hbloom, "Bloom");
