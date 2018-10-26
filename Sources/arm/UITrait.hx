@@ -675,8 +675,10 @@ class UITrait extends iron.Trait {
 		var ctrl = kb.down("control");
 		if (kb.started("tab")) {
 			UIView2D.inst.show = false;
-			UINodes.inst.show = !UINodes.inst.show;
-			arm.App.resize();
+			if (!UINodes.inst.ui.isTyping) {
+				UINodes.inst.show = !UINodes.inst.show;
+				arm.App.resize();
+			}
 		}
 		else if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
 		else if (kb.started("2") && (shift || ctrl)) shift ? setBrushType(1) : selectMaterial(1);
@@ -865,6 +867,8 @@ class UITrait extends iron.Trait {
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
 		selectedMaterial = materials[i];
+
+		autoFillHandle.selected = false; // Auto-disable
 
 		// #if arm_editor
 		// if (Std.is(selectedObject, iron.object.MeshObject)) {
@@ -1341,11 +1345,11 @@ void main() {
 
 	function setBrushType(i:Int) {
 		brushType = i;
+		autoFillHandle.selected = false; // Auto-disable
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
 		ddirty = 2;
-		autoFillHandle.selected = false; // Auto-disable
 	}
 
 	function selectObject(o:iron.object.Object) {
@@ -1734,7 +1738,7 @@ void main() {
 
 						if (brushType == 2) { // Fill
 							ui.check(autoFillHandle, "Auto-Fill");
-							if (autoFillHandle.selected) {
+							if (autoFillHandle.changed) {
 								UINodes.inst.updateCanvasMap();
 								UINodes.inst.parsePaintMaterial();
 							}
@@ -1816,10 +1820,11 @@ void main() {
 							if (selectedMaterial == materials[i]) {
 								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
 								var off = row % 2 == 1 ? 1 : 0;
-								ui.fill(1, -2, 50 + 3, 2, 0xff205d9c);
-								ui.fill(1, 50 - 1 - off, 50 + 3, 2 + off, 0xff205d9c);
-								ui.fill(1, -2, 2, 50 + 3, 0xff205d9c);
-								ui.fill(50 + 2, -2, 2, 50 + 3, 0xff205d9c);
+								var w = 51 - apconfig.window_scale;
+								ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
+								ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
+								ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
+								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
 							}
 
 							if (ui.image(img) == State.Started && img != empty) {
@@ -1835,6 +1840,7 @@ void main() {
 					ui.row([1/2,1/2]);
 					if (ui.button("New")) {
 						ui.g.end();
+						autoFillHandle.selected = false; // Auto-disable
 						selectedMaterial = new MaterialSlot();
 						materials.push(selectedMaterial);
 						UINodes.inst.updateCanvasMap();
@@ -2027,7 +2033,10 @@ void main() {
 							newConfirm = false;
 							var n = newObjectNames[newObject];
 							iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
+								autoFillHandle.selected = false;
 								currentObject.setData(md);
+								currentObject.transform.scale.set(1, 1, 1);
+								currentObject.transform.buildMatrix();
 								paintObject = currentObject;
 								ui.g.end();
 								materials = [new MaterialSlot()];
@@ -2347,6 +2356,7 @@ void main() {
 						ui.setScale(hscale.value);
 						arm.App.uimodal.setScale(hscale.value);
 						UINodes.inst.ui.setScale(hscale.value);
+						UIView2D.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * apconfig.window_scale);
 						arm.App.resize();
 					}
@@ -2412,8 +2422,10 @@ void main() {
 						light.data.raw.strength = 6.5;
 					}
 					apconfig.rp_supersample = getSuperSampleSize(hsupersample.position);
+					ui.g.end();
 					armory.data.Config.save();
 					armory.renderpath.RenderPathCreator.applyConfig();
+					ui.g.begin(false);
 					ddirty = 2;
 				}
 
@@ -2695,7 +2707,9 @@ void main() {
 			else {
 			#end
 			{ // Replace
-				currentObject.data.delete();
+				// currentObject.data.delete();
+				iron.data.Data.deleteMesh("mesh_Cube");
+
 				iron.App.notifyOnRender(initLayers);
 				if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
 				

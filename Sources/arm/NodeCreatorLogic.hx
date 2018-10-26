@@ -1,6 +1,6 @@
 package arm;
 
-import armory.system.Cycles;
+import armory.system.CyclesFormat;
 
 typedef TNodeList = {
 	var categories: Array<TCat>;

@@ -145,17 +145,18 @@ void main() {
 			}
 
 			// Controls
+			var ew = Std.int(ui.ELEMENT_W());
 			ui.g.color = ui.t.WINDOW_BG_COL;
 			ui.g.fillRect(0, 0, ww, 24);
 			ui.g.color = 0xffffffff;
 			ui._x = 3;
 			ui._y = 3;
-			ui._w = 105;
+			ui._w = ew;
 			texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal", "ORM"], "Texture");
-			ui._x += 105 + 3;
+			ui._x += ew + 3;
 			ui._y = 3;
 			uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
-			ui._x += 105 + 3;
+			ui._x += ew + 3;
 			ui._y = 3;
 		}
 		ui.end();
