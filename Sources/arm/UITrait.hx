@@ -253,6 +253,10 @@ class UITrait extends iron.Trait {
 	public var paintMet = true;
 	public var paintNor = true;
 	public var paintHeight = false;
+
+	public var bakeStrength = 1.0;
+	public var bakeRadius = 1.0;
+	public var bakeOffset = 1.0;
 	
 	public var paintVisible = true;
 	public var mirrorX = false;
@@ -1712,6 +1716,21 @@ void main() {
 					}
 					else if (brushType == 3) { // Bake AO
 						ui.radio(Id.handle(), 0, "Ambient Occlusion");
+						ui.row([1/3, 1/3, 1/3]);
+						var h = Id.handle({value: bakeStrength});
+						bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
+						if (h.changed) UINodes.inst.parsePaintMaterial();
+						var h = Id.handle({value: bakeRadius});
+						bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
+						if (h.changed) UINodes.inst.parsePaintMaterial();
+						var h = Id.handle({value: bakeOffset});
+						bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
+						if (h.changed) UINodes.inst.parsePaintMaterial();
+						ui.check(autoFillHandle, "Auto-Fill");
+						if (autoFillHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
 					}
 					else { // Draw, Erase, Fil;
 						ui.row([1/2, 1/2]);
@@ -1736,7 +1755,7 @@ void main() {
 						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 
-						if (brushType == 2) { // Fill
+						if (brushType == 2) { // Fill, Bake
 							ui.check(autoFillHandle, "Auto-Fill");
 							if (autoFillHandle.changed) {
 								UINodes.inst.updateCanvasMap();
@@ -1976,24 +1995,6 @@ void main() {
 			}
 			if (ui.tab(htab, "Library")) {
 
-				if (ui.panel(Id.handle({selected: true}), "Import", 1)) {
-					ui.row([1/2, 1/2]);
-					if (ui.button("Import Mesh")) {
-						arm.App.showFiles = true;
-						arm.App.foldersOnly = false;
-						arm.App.filesDone = function(path:String) {
-							importMesh(path);
-						}
-					}
-					if (ui.button("Import Texture")) {
-						arm.App.showFiles = true;
-						arm.App.foldersOnly = false;
-						arm.App.filesDone = function(path:String) {
-							importAsset(path);
-						}
-					}
-				}
-
 				if (ui.panel(Id.handle({selected: true}), "Assets", 1)) {
 					if (assets.length > 0) {
 						var i = assets.length - 1;
@@ -2023,10 +2024,6 @@ void main() {
 			if (ui.tab(htab, "File")) {
 
 				if (ui.panel(Id.handle({selected: true}), "Project", 1)) {
-					ui.row([1/3,1/3,1/3]);
-					ui.button("Open..");
-					ui.button("Save..");
-					ui.button("Save As..");
 					ui.row([1/2,1/2]);
 					if (newConfirm) {
 						if (ui.button("Confirm")) {
@@ -2059,6 +2056,10 @@ void main() {
 						newConfirm = true;
 					}
 					newObject = ui.combo(Id.handle(), newObjectNames, "Default Object");
+					ui.row([1/3,1/3,1/3]);
+					ui.button("Open..");
+					ui.button("Save..");
+					ui.button("Save As..");
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Quality", 1)) {
@@ -2068,6 +2069,24 @@ void main() {
 						iron.App.notifyOnRender(resizeLayers);
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Import", 1)) {
+					ui.row([1/2, 1/2]);
+					if (ui.button("Import Mesh")) {
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = false;
+						arm.App.filesDone = function(path:String) {
+							importMesh(path);
+						}
+					}
+					if (ui.button("Import Texture")) {
+						arm.App.showFiles = true;
+						arm.App.foldersOnly = false;
+						arm.App.filesDone = function(path:String) {
+							importAsset(path);
+						}
+					}
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
@@ -2438,10 +2457,10 @@ void main() {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
-					ui.text("v0.5");
-					ui.text(Macro.buildSha());
+					ui.text("v0.5 - " +  Macro.buildSha() + " - armorpaint.org");
 					// ui.text(Macro.buildDate());
-					ui.text("armorpaint.org");
+					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
+					ui.text("System: " + kha.System.systemId + " - Renderer: " + renderer);
 				}
 			}
 		}

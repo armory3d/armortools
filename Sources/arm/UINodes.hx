@@ -655,7 +655,10 @@ class UINodes extends iron.Trait {
 			frag.add_uniform('sampler3D voxels');
 			frag.add_function(armory.system.CyclesFunctions.str_traceAO);
 			frag.n = true;
-			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, voxels);');
+			var strength = UITrait.inst.bakeStrength;
+			var radius = UITrait.inst.bakeRadius;
+			var offset = UITrait.inst.bakeOffset;
+			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, voxels, $radius, $offset) * $strength;');
 		}
 
 		Cycles.finalize(con_paint);
@@ -990,8 +993,10 @@ class UINodes extends iron.Trait {
 		#end
 			var sc:ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
-			m.shader.raw.contexts.remove(sc.raw);
-			m.shader.contexts.remove(sc);
+			if (sc != null) {
+				m.shader.raw.contexts.remove(sc.raw);
+				m.shader.contexts.remove(sc);
+			}
 			var con = make_mesh_paint(new CyclesShaderData({name: "Material", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
@@ -1157,7 +1162,7 @@ class UINodes extends iron.Trait {
 					// m.contexts.push(self);
 				// });
 
-				if (UITrait.inst.brushType == 2 && UITrait.inst.autoFillHandle.selected) { // Fill
+				if ((UITrait.inst.brushType == 2 || UITrait.inst.brushType == 3) && UITrait.inst.autoFillHandle.selected) { // Fill
 					UITrait.inst.pdirty = 8;
 					UITrait.inst.ddirty = 8;
 				}
