@@ -118,8 +118,8 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_opt" + ext;
-			t.width = 4096;
-			t.height = 4096;
+			t.width = UITrait.inst.getTextureRes();
+			t.height = UITrait.inst.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_opt = RenderPath.active.createRenderTarget(t).image;
 		}
@@ -145,7 +145,8 @@ class UITrait extends iron.Trait {
 	public static var defaultWindowW = 280;
 
 	public static var penPressure = true;
-	public static var undoEnabled = true;
+	public var undoSteps = 4;
+	public var undoLayer = 0;
 
 	public var isScrolling = false;
 	public var colorIdPicked = false;
@@ -448,7 +449,7 @@ class UITrait extends iron.Trait {
 		}
 		if (undoLayers == null) {
 			undoLayers = [];
-			undoLayers.push(new LayerSlot("_undo"));
+			for (i in 0...undoSteps) undoLayers.push(new LayerSlot("_undo"));
 		}
 
 		if (savedEnvmap == null) {
@@ -931,7 +932,7 @@ class UITrait extends iron.Trait {
 		if (down && !kb.down("control")) {
 
 			if (mouse.x <= iron.App.w()) {
-				if (brushTime == 0 && undoEnabled) {
+				if (brushTime == 0 && undoSteps > 0) {
 					pushUndo = true;
 				}
 				brushTime += iron.system.Time.delta;
@@ -947,7 +948,11 @@ class UITrait extends iron.Trait {
 		var undoPressed = kb.down("control") && kb.started("z");
 		if (systemId == 'OSX') undoPressed = kb.started("z"); // cmd+z on macos
 
-		if (undoPressed && undoEnabled) {
+		var redoPressed = (kb.down("control") && kb.down("shift") && kb.started("z")) ||
+						   kb.down("control") && kb.started("y");
+		if (systemId == 'OSX') redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
+
+		if (undoPressed && undoSteps > 0) {
 			// TODO: swap layers instead of images
 			var tp = selectedLayer.texpaint;
 			var tp_nor = selectedLayer.texpaint_nor;
@@ -2387,7 +2392,15 @@ void main() {
 
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-					undoEnabled = ui.check(Id.handle({selected: true}), "Undo");
+					var undoHandle = Id.handle({value: 4});
+					undoSteps = Std.int(ui.slider(undoHandle, "Undo Steps", 0, 8, false, 1));
+					if (undoHandle.changed) {
+						ui.g.end();
+						while (undoLayers.length < undoSteps) undoLayers.push(new LayerSlot("_undo"));
+						while (undoLayers.length > undoSteps) { var l = undoLayers.pop(); l.unload(); }
+						ui.g.begin(false);
+					}
+
 					instantMat = ui.check(Id.handle({selected: instantMat}), "Instant Material Preview");
 				}
 
