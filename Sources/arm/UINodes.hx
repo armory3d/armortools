@@ -36,18 +36,18 @@ class UINodes extends iron.Trait {
 
 	public var nodes = new Nodes();
 	public var canvas:TNodeCanvas = null;
-	var canvasMap:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
+	var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
 	#if arm_editor
-	var canvasMap2:Map<UITrait.MaterialSlot, TNodeCanvas> = null;
+	var canvasMap2:Map<MaterialSlot, TNodeCanvas> = null;
 	#end
 	var canvasBlob:String;
 
 	public var canvasBrush:TNodeCanvas = null;
-	var canvasBrushMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
+	var canvasBrushMap:Map<BrushSlot, TNodeCanvas> = null;
 	var canvasBrushBlob:String;
 
 	public var canvasLogic:TNodeCanvas = null;
-	var canvasLogicMap:Map<UITrait.BrushSlot, TNodeCanvas> = null;
+	var canvasLogicMap:Map<BrushSlot, TNodeCanvas> = null;
 	var canvasLogicBlob:String;
 
 	public var canvasType = 0; // material, brush, logic
@@ -200,7 +200,7 @@ class UINodes extends iron.Trait {
 		if (!arm.App.uienabled) return;
 		var keyboard = iron.system.Input.getKeyboard();
 
-		var lay = UITrait.inst.apconfig.ui_layout;
+		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 		var mx = mouse.x + App.x();
@@ -294,7 +294,7 @@ class UINodes extends iron.Trait {
 		
 		// Make window
 		ww = Std.int(iron.App.w());
-		var lay = UITrait.inst.apconfig.ui_layout;
+		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 		var ew = Std.int(ui.ELEMENT_W());

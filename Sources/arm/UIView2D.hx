@@ -78,7 +78,7 @@ void main() {
 
 	function render2D(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w());
-		var lay = UITrait.inst.apconfig.ui_layout;
+		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 

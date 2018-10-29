@@ -139,7 +139,7 @@ class App extends iron.Trait {
 		iron.Scene.active.camera.buildProjection();
 		UITrait.inst.ddirty = 2;
 
-		var lay = UITrait.inst.apconfig.ui_layout;
+		var lay = UITrait.inst.C.ui_layout;
 		appx = lay == 0 ? 0 : UITrait.inst.windowW;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) appx += iron.App.w();
 
@@ -269,7 +269,7 @@ class App extends iron.Trait {
 					if (valid) UITrait.inst.importAsset(f);
 				}
 				// Create material
-				UITrait.inst.selectedMaterial = new UITrait.MaterialSlot();
+				UITrait.inst.selectedMaterial = new MaterialSlot();
 				UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
 				UINodes.inst.updateCanvasMap();
 				var nodes = UINodes.inst.nodes;

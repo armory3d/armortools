@@ -582,11 +582,12 @@ class RenderPathDeferred {
 		var tid = arm.UITrait.inst.selectedLayer.id;
 
 		if (arm.UITrait.inst.pushUndo) {
+			var i = arm.UITrait.inst.undoI;
 			if (arm.UITrait.inst.paintHeight) {
-				path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo", "texpaint_opt_undo"]);
+				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i, "texpaint_opt_undo" + i]);
 			}
 			else {
-				path.setTarget("texpaint_undo", ["texpaint_nor_undo", "texpaint_pack_undo"]);
+				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);
 			}
 			
 			path.bindTarget("texpaint" + tid, "tex0");
@@ -599,6 +600,9 @@ class RenderPathDeferred {
 			else {
 				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 			}
+			arm.UITrait.inst.undoI = (arm.UITrait.inst.undoI + 1) % arm.UITrait.inst.C.undo_steps;
+			if (arm.UITrait.inst.undos < arm.UITrait.inst.C.undo_steps) arm.UITrait.inst.undos++;
+			arm.UITrait.inst.redos = 0;
 			arm.UITrait.inst.pushUndo = false;
 		}
 

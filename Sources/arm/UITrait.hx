@@ -11,127 +11,7 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Math;
 import iron.RenderPath;
-
-typedef TPreferences = {
-	public var w:Int;
-	public var h:Int;
-	public var save_location:String;
-	public var load_location:String;
-}
-
-// typedef TProject = {
-	// public var brushes:Array<>;
-	// public var materials:Array<>;
-// }
-
-class MaterialSlot {
-	public var nodes = new Nodes();
-	public var image:kha.Image = null;
-	#if arm_editor
-	public var data:iron.data.MaterialData;
-	#end
-	public function new(m:iron.data.MaterialData = null) {
-		image = kha.Image.createRenderTarget(100, 100);
-		#if arm_editor
-		data = m;
-		#end
-	}
-}
-
-class BrushSlot {
-	public var nodes = new Nodes();
-	public function new() {}
-}
-
-class LayerSlot {
-	static var counter = 0;
-	public var id = 0;
-	public var visible = true;
-
-	public var texpaint:kha.Image;
-	public var texpaint_nor:kha.Image;
-	public var texpaint_pack:kha.Image;
-	public var texpaint_opt:kha.Image;
-	public var rt:iron.RenderPath.RenderTarget;
-
-	var ext:String;
-
-	public function set_texpaint(img:kha.Image) {
-		RenderPath.active.renderTargets.get("texpaint" + ext).image = img;
-		texpaint = img;
-	}
-
-	public function set_texpaint_nor(img:kha.Image) {
-		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = img;
-		texpaint_nor = img;
-	}
-
-	public function set_texpaint_pack(img:kha.Image) {
-		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = img;
-		texpaint_pack = img;
-	}
-
-	public function set_texpaint_opt(img:kha.Image) {
-		if (texpaint_opt == null) return;
-		RenderPath.active.renderTargets.get("texpaint_opt" + ext).image = img;
-		texpaint_opt = img;
-	}
-
-	public function new(ext = "") {
-		id = counter++;
-		if (ext == "") ext = id + "";
-		this.ext = ext;
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
-			t.format = 'RGBA32';
-			t.depth_buffer = "paintdb";
-			rt = RenderPath.active.createRenderTarget(t);
-			texpaint = rt.image;
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_nor" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
-			t.format = 'RGBA32';
-			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_pack" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
-			t.format = 'RGBA32';
-			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
-		}
-
-		if (UITrait.inst.paintHeight) make_texpaint_opt();
-	}
-
-	public function make_texpaint_opt() {
-		if (texpaint_opt != null) return;
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_opt" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
-			t.format = 'RGBA32';
-			texpaint_opt = RenderPath.active.createRenderTarget(t).image;
-		}
-	}
-
-	public function unload() {
-		texpaint.unload();
-		texpaint_nor.unload();
-		texpaint_pack.unload();
-		if (texpaint_opt != null) texpaint_opt.unload();
-	}
-}
+import arm.ProjectFormat.TAPConfig;
 
 @:access(zui.Zui)
 @:access(iron.data.Data)
@@ -145,8 +25,10 @@ class UITrait extends iron.Trait {
 	public static var defaultWindowW = 280;
 
 	public static var penPressure = true;
-	public var undoSteps = 4;
-	public var undoLayer = 0;
+	public var undoI = 0; // Undo layer
+	public var undos = 0; // Undos available
+	public var redos = 0; // Redos available
+	public var pushUndo = false; // Store undo on next paint
 
 	public var isScrolling = false;
 	public var colorIdPicked = false;
@@ -218,7 +100,6 @@ class UITrait extends iron.Trait {
 	public var lastPaintY = 0.0;
 	public var painted = 0;
 	public var brushTime = 0.0;
-	public var pushUndo = false;
 
 	public var selectedObject:iron.object.Object;
 	public var paintObject:iron.object.Object;
@@ -276,7 +157,7 @@ class UITrait extends iron.Trait {
 	public var currentObject:MeshObject;
 	var frame = 0;
 
-	public var apconfig:TAPConfig;
+	public var C:TAPConfig;
 
 	var lastBrushType = -1;
 
@@ -327,8 +208,8 @@ class UITrait extends iron.Trait {
 
 		if (link == '_brushRadius') {
 			var r = (brushRadius * brushNodesRadius) / 15.0;
-			var p = iron.system.Input.getPen().pressure;
-			if (p != 0.0 && penPressure) r *= p;
+			var pen = iron.system.Input.getPen();
+			if (penPressure && pen.down()) r *= pen.pressure;
 			return r;
 		}
 		else if (link == '_brushOpacity') {
@@ -404,10 +285,11 @@ class UITrait extends iron.Trait {
 		systemId = kha.System.systemId;
 
 		// Init config
-		apconfig = cast armory.data.Config.raw;
-		if (apconfig.ui_layout == null) apconfig.ui_layout = 0;
+		C = cast armory.data.Config.raw;
+		if (C.ui_layout == null) C.ui_layout = 0;
+		if (C.undo_steps == null) C.undo_steps = 8; // Max steps to keep
 
-		windowW = Std.int(defaultWindowW * apconfig.window_scale);
+		windowW = Std.int(defaultWindowW * C.window_scale);
 
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
@@ -449,7 +331,7 @@ class UITrait extends iron.Trait {
 		}
 		if (undoLayers == null) {
 			undoLayers = [];
-			for (i in 0...undoSteps) undoLayers.push(new LayerSlot("_undo"));
+			for (i in 0...C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
 		}
 
 		if (savedEnvmap == null) {
@@ -493,7 +375,7 @@ class UITrait extends iron.Trait {
 			}
 		});//
 
-		var scale = apconfig.window_scale;
+		var scale = C.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
 		loadBundled(['cursor.png', 'empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png'], done);
 	}
@@ -659,8 +541,8 @@ class UITrait extends iron.Trait {
 
 			// Init plugins
 			Plugin.keep();
-			if (apconfig.plugins != null) {
-				for (plugin in apconfig.plugins) {
+			if (C.plugins != null) {
+				for (plugin in C.plugins) {
 					iron.data.Data.getBlob(plugin, function(blob:kha.Blob) {
 						#if js
 						untyped __js__("(1, eval)({0})", blob.toString());
@@ -917,7 +799,6 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
-	var isUndo = false;
 	function updateUI() {
 
 		messageTimer -= iron.system.Time.delta;
@@ -932,7 +813,7 @@ class UITrait extends iron.Trait {
 		if (down && !kb.down("control")) {
 
 			if (mouse.x <= iron.App.w()) {
-				if (brushTime == 0 && undoSteps > 0) {
+				if (brushTime == 0 && C.undo_steps > 0) { // Paint started
 					pushUndo = true;
 				}
 				brushTime += iron.system.Time.delta;
@@ -945,35 +826,28 @@ class UITrait extends iron.Trait {
 			ddirty = 3;
 		}
 
-		var undoPressed = kb.down("control") && kb.started("z");
-		if (systemId == 'OSX') undoPressed = kb.started("z"); // cmd+z on macos
+		var undoPressed = kb.down("control") && !kb.down("shift") && kb.started("z");
+		if (systemId == 'OSX') undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
 
 		var redoPressed = (kb.down("control") && kb.down("shift") && kb.started("z")) ||
 						   kb.down("control") && kb.started("y");
 		if (systemId == 'OSX') redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
 
-		if (undoPressed && undoSteps > 0) {
-			// TODO: swap layers instead of images
-			var tp = selectedLayer.texpaint;
-			var tp_nor = selectedLayer.texpaint_nor;
-			var tp_pack = selectedLayer.texpaint_pack;
-			var tp_opt = selectedLayer.texpaint_opt;
-
-			selectedLayer.set_texpaint(undoLayers[0].texpaint);
-			selectedLayer.set_texpaint_nor(undoLayers[0].texpaint_nor);
-			selectedLayer.set_texpaint_pack(undoLayers[0].texpaint_pack);
-			selectedLayer.set_texpaint_opt(undoLayers[0].texpaint_opt);
-
-			undoLayers[0].set_texpaint(tp);
-			undoLayers[0].set_texpaint_nor(tp_nor);
-			undoLayers[0].set_texpaint_pack(tp_pack);
-			undoLayers[0].set_texpaint_opt(tp_opt);
-
-			// Only main layer contains the depth
-			iron.RenderPath.active.depthToRenderTarget.set("paintdb", isUndo ? selectedLayer.rt : undoLayers[0].rt);
-			isUndo = !isUndo;
-
-			ddirty = 2;
+		if (C.undo_steps > 0) {
+			if (undoPressed && undos > 0) {
+				undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
+				selectedLayer.swap(undoLayers[undoI]);
+				ddirty = 2;
+				undos--;
+				redos++;
+			}
+			else if (redoPressed && redos > 0) {
+				selectedLayer.swap(undoLayers[undoI]);
+				undoI = (undoI + 1) % C.undo_steps;
+				ddirty = 2;
+				undos++;
+				redos--;
+			}
 		}
 
 		#if arm_editor
@@ -1449,7 +1323,7 @@ void main() {
 			// ui.tab(Id.handle(), "3D View");
 		// }
 		
-		var wx = apconfig.ui_layout == 0 ? arm.App.realw() - windowW : 0;
+		var wx = C.ui_layout == 0 ? arm.App.realw() - windowW : 0;
 		if (ui.window(hwnd, wx, 0, windowW, arm.App.realh())) {
 
 			#if arm_editor
@@ -1844,7 +1718,7 @@ void main() {
 							if (selectedMaterial == materials[i]) {
 								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
 								var off = row % 2 == 1 ? 1 : 0;
-								var w = 51 - apconfig.window_scale;
+								var w = 51 - C.window_scale;
 								ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
 								ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
 								ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
@@ -2067,7 +1941,7 @@ void main() {
 					ui.button("Save As..");
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Quality", 1)) {
+				if (ui.panel(Id.handle({selected: true}), "Project Quality", 1)) {
 					var hres = Id.handle({position: textureRes});
 					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
 					if (hres.changed) {
@@ -2373,31 +2247,34 @@ void main() {
 
 			if (ui.tab(htab, "Preferences")) {
 				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
-					var hscale = Id.handle({value: apconfig.window_scale});
+					var hscale = Id.handle({value: C.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 					if (!hscale.changed && hscaleWasChanged) {
-						apconfig.window_scale = hscale.value;
+						C.window_scale = hscale.value;
 						ui.setScale(hscale.value);
 						arm.App.uimodal.setScale(hscale.value);
 						UINodes.inst.ui.setScale(hscale.value);
 						UIView2D.inst.ui.setScale(hscale.value);
-						windowW = Std.int(defaultWindowW * apconfig.window_scale);
+						windowW = Std.int(defaultWindowW * C.window_scale);
 						arm.App.resize();
 					}
 					hscaleWasChanged = hscale.changed;
-					var layHandle = Id.handle({position: apconfig.ui_layout});
-					apconfig.ui_layout = ui.combo(layHandle, ["Right", "Left"], "UI Layout", true);
+					var layHandle = Id.handle({position: C.ui_layout});
+					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "UI Layout", true);
 					if (layHandle.changed) arm.App.resize();
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-					var undoHandle = Id.handle({value: 4});
-					undoSteps = Std.int(ui.slider(undoHandle, "Undo Steps", 0, 8, false, 1));
+					var undoHandle = Id.handle({value: C.undo_steps});
+					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 0, 64, false, 1));
 					if (undoHandle.changed) {
 						ui.g.end();
-						while (undoLayers.length < undoSteps) undoLayers.push(new LayerSlot("_undo"));
-						while (undoLayers.length > undoSteps) { var l = undoLayers.pop(); l.unload(); }
+						while (undoLayers.length < C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
+						while (undoLayers.length > C.undo_steps) { var l = undoLayers.pop(); l.unload(); }
+						undos = 0;
+						redos = 0;
+						undoI = 0;
 						ui.g.begin(false);
 					}
 
@@ -2408,13 +2285,13 @@ void main() {
 				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
 				#end
 
-				var hssgi = Id.handle({selected: apconfig.rp_ssgi});
-				var hssr = Id.handle({selected: apconfig.rp_ssr});
-				var hbloom = Id.handle({selected: apconfig.rp_bloom});
-				var hshadowmap = Id.handle({position: getShadowQuality(apconfig.rp_shadowmap)});
-				var hsupersample = Id.handle({position: getSuperSampleQuality(apconfig.rp_supersample)});
+				var hssgi = Id.handle({selected: C.rp_ssgi});
+				var hssr = Id.handle({selected: C.rp_ssr});
+				var hbloom = Id.handle({selected: C.rp_bloom});
+				var hshadowmap = Id.handle({position: getShadowQuality(C.rp_shadowmap)});
+				var hsupersample = Id.handle({position: getSuperSampleQuality(C.rp_supersample)});
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
-					apconfig.window_vsync = ui.check(Id.handle({selected: apconfig.window_vsync}), "VSync");
+					C.window_vsync = ui.check(Id.handle({selected: C.window_vsync}), "VSync");
 					var drawWorldHandle = Id.handle({selected: drawWorld});
 					drawWorld = ui.check(drawWorldHandle, "Envmap");
 					if (drawWorldHandle.changed) {
@@ -2441,19 +2318,19 @@ void main() {
 				}
 
 				if (ui.button("Apply and Save")) {
-					apconfig.rp_ssgi = hssgi.selected;
-					apconfig.rp_ssr = hssr.selected;
-					apconfig.rp_bloom = hbloom.selected;
-					var wasOff = apconfig.rp_shadowmap == 1;
-					apconfig.rp_shadowmap = getShadowMapSize(hshadowmap.position);
+					C.rp_ssgi = hssgi.selected;
+					C.rp_ssr = hssr.selected;
+					C.rp_bloom = hbloom.selected;
+					var wasOff = C.rp_shadowmap == 1;
+					C.rp_shadowmap = getShadowMapSize(hshadowmap.position);
 					var light = iron.Scene.active.lights[0];
-					if (apconfig.rp_shadowmap == 1) {
+					if (C.rp_shadowmap == 1) {
 						light.data.raw.strength = 0;
 					}
 					else if (wasOff) {
 						light.data.raw.strength = 6.5;
 					}
-					apconfig.rp_supersample = getSuperSampleSize(hsupersample.position);
+					C.rp_supersample = getSuperSampleSize(hsupersample.position);
 					ui.g.end();
 					armory.data.Config.save();
 					armory.renderpath.RenderPathCreator.applyConfig();
@@ -2767,28 +2644,4 @@ void main() {
 			arm.UIView2D.inst.uvmapCached = false;
 		});
 	}
-}
-
-typedef TAPConfig = {
-	@:optional var debug_console:Null<Bool>;
-	@:optional var window_mode:Null<Int>; // window, fullscreen
-	@:optional var window_w:Null<Int>;
-	@:optional var window_h:Null<Int>;
-	@:optional var window_resizable:Null<Bool>;
-	@:optional var window_maximizable:Null<Bool>;
-	@:optional var window_minimizable:Null<Bool>;
-	@:optional var window_vsync:Null<Bool>;
-	@:optional var window_msaa:Null<Int>;
-	@:optional var window_scale:Null<Float>;
-	@:optional var rp_supersample:Null<Float>;
-	@:optional var rp_shadowmap:Null<Int>; // size
-	@:optional var rp_ssgi:Null<Bool>;
-	@:optional var rp_ssr:Null<Bool>;
-	@:optional var rp_bloom:Null<Bool>;
-	@:optional var rp_motionblur:Null<Bool>;
-	@:optional var rp_gi:Null<Bool>;
-	// Ext
-	// @:optional var version:Null<Float>;
-	@:optional var plugins:Array<String>;
-	@:optional var ui_layout:Null<Int>;
 }
