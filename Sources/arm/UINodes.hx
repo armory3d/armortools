@@ -421,7 +421,7 @@ class UINodes extends iron.Trait {
 	}
 
 	function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
-		var layered = UITrait.inst.layers.length > 1 && UITrait.inst.selectedLayer == UITrait.inst.layers[1];
+		var layered = UITrait.inst.selectedLayer.id > 0;
 		var eraser = UITrait.inst.brushType == 1;
 		var context_id = 'paint';
 		var con_paint:CyclesShaderContext = data.add_context({
@@ -916,27 +916,37 @@ class UINodes extends iron.Trait {
 				frag.write('specular = 1.0;');
 			}
 
-			if (UITrait.inst.layers.length > 1 && UITrait.inst.layers[1].visible) {
-				frag.add_uniform('sampler2D texpaint1');
-				frag.add_uniform('sampler2D texpaint_nor1');
-				frag.add_uniform('sampler2D texpaint_pack1');
-				// frag.add_uniform('sampler2D texpaint_opt1');
+			if (UITrait.inst.layers.length > 1) {
+				frag.write('float factor0;');
+				frag.write('float factorinv0;');
+				frag.write('vec4 col_tex0;');
+				// frag.write('vec4 col_nor0;');
+				// frag.write('vec3 n0;');
+				frag.write('vec4 pack0;');
+				for (i in 1...UITrait.inst.layers.length) {
+					if (!UITrait.inst.layers[i].visible) continue;
+					var id = UITrait.inst.layers[i].id;
+					frag.add_uniform('sampler2D texpaint' + id);
+					frag.add_uniform('sampler2D texpaint_nor' + id);
+					frag.add_uniform('sampler2D texpaint_pack' + id);
+					// frag.add_uniform('sampler2D texpaint_opt' + id);
 
-				frag.write('vec4 col_tex1 = texture(texpaint1, texCoord);');
-				// frag.write('vec4 col_nor1 = texture(texpaint_nor1, texCoord);');
+					frag.write('col_tex0 = texture(texpaint' + id + ', texCoord);');
+					// frag.write('col_nor0 = texture(texpaint_nor' + id + ', texCoord);');
 
-				frag.write('float factor = col_tex1.a;');
-				frag.write('float factorinv = 1.0 - factor;');
+					frag.write('factor0 = col_tex0.a;');
+					frag.write('factorinv0 = 1.0 - factor0;');
 
-				frag.write('basecol = basecol * factorinv + pow(col_tex1.rgb, vec3(2.2)) * factor;');
-				
-				// frag.write('vec3 n2 = texture(texpaint_nor1, texCoord).rgb * 2.0 - 1.0;');
-				// frag.write('n2 = normalize(TBN * normalize(n2));');
-				// frag.write('n *= n2;');
-				frag.write('vec4 pack2 = texture(texpaint_pack1, texCoord);');
-				frag.write('occlusion = occlusion * factorinv + pack2.r * factor;');
-				frag.write('roughness = roughness * factorinv + pack2.g * factor;');
-				frag.write('metallic = metallic * factorinv + pack2.b * factor;');
+					frag.write('basecol = basecol * factorinv0 + pow(col_tex0.rgb, vec3(2.2)) * factor0;');
+					
+					// frag.write('n0 = texture(texpaint_nor' + id + ', texCoord).rgb * 2.0 - 1.0;');
+					// frag.write('n0 = normalize(TBN * normalize(n0));');
+					// frag.write('n *= n0;');
+					frag.write('pack0 = texture(texpaint_pack' + id + ', texCoord);');
+					frag.write('occlusion = occlusion * factorinv0 + pack0.r * factor0;');
+					frag.write('roughness = roughness * factorinv0 + pack0.g * factor0;');
+					frag.write('metallic = metallic * factorinv0 + pack0.b * factor0;');
+				}
 			}
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');

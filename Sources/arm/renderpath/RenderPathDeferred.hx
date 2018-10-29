@@ -699,12 +699,12 @@ class RenderPathDeferred {
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 		if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
-		if (arm.UITrait.inst.layers.length > 1) {
-			tid = arm.UITrait.inst.layers[1].id;
-			path.bindTarget("texpaint" + tid, "texpaint1");
-			path.bindTarget("texpaint_nor" + tid, "texpaint_nor1");
-			path.bindTarget("texpaint_pack" + tid, "texpaint_pack1");
-			if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt1");
+		for (i in 1...arm.UITrait.inst.layers.length) {
+			tid = arm.UITrait.inst.layers[i].id;
+			path.bindTarget("texpaint" + tid, "texpaint" + tid);
+			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
+			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
+			if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt" + tid);
 		}
 		//
 

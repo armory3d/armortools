@@ -67,7 +67,15 @@ class LayerSlot {
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();
-		if (texpaint_opt != null) texpaint_opt.unload();
+
+		RenderPath.active.renderTargets.remove("texpaint" + ext);
+		RenderPath.active.renderTargets.remove("texpaint_nor" + ext);
+		RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
+
+		if (texpaint_opt != null) {
+			texpaint_opt.unload();
+			RenderPath.active.renderTargets.remove("texpaint_opt" + ext);
+		}
 	}
 
 	public function swap(other:LayerSlot) {

@@ -1773,14 +1773,12 @@ void main() {
 						}
 						if (i > 0) {
 							if (ui.button("Apply")) {
-								if (layers.length > 1 && selectedLayer == layers[1]) {
-									iron.App.notifyOnRender(applySelectedLayer);
-								}
+								selectedLayer = layers[i];
+								iron.App.notifyOnRender(applySelectedLayer);
 							}
 							if (ui.button("Delete")) {
-								if (layers.length > 1 && selectedLayer == layers[1]) {
-									deleteSelectedLayer();
-								}
+								selectedLayer = layers[i];
+								deleteSelectedLayer();
 							}
 						}
 					}
@@ -1791,19 +1789,17 @@ void main() {
 						drawList(Id.handle(), l, j);
 					}
 
-					if (layers.length == 1) {
+					if (layers.length < 4) { // TODO: Samplers limit in Kore, use arrays
 						ui.row([1/2, 1/2]);
 						if (ui.button("New")) {
-							if (layers.length < 2) {
-								selectedLayer = new LayerSlot();
-								layers.push(selectedLayer);
-								ui.g.end();
-								UINodes.inst.parseMeshMaterial();
-								UINodes.inst.parsePaintMaterial();
-								ui.g.begin(false);
-								ddirty = 2;
-								iron.App.notifyOnRender(clearLastLayer);
-							}
+							selectedLayer = new LayerSlot();
+							layers.push(selectedLayer);
+							ui.g.end();
+							UINodes.inst.parseMeshMaterial();
+							UINodes.inst.parsePaintMaterial();
+							ui.g.begin(false);
+							ddirty = 2;
+							iron.App.notifyOnRender(clearLastLayer);
 						}
 					}
 					if (ui.button("2D View")) show2DView();
