@@ -676,7 +676,6 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			// cull_mode: 'none',
 			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
 
 		var vert = con_mesh.make_vert();
@@ -742,7 +741,6 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			// cull_mode: 'none',
 			color_write_red: false,
 			color_write_green: false,
 			color_write_blue: false,
@@ -807,13 +805,13 @@ class UINodes extends iron.Trait {
 		return con_depth;
 	}
 
-	function make_mesh_paint(data:CyclesShaderData):CyclesShaderContext {
+	function make_mesh(data:CyclesShaderData):CyclesShaderContext {
 		var context_id = 'mesh';
 		var con_mesh:CyclesShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: 'clockwise',
+			cull_mode: UITrait.inst.culling ? 'clockwise' : 'none',
 			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
 
 		var vert = con_mesh.make_vert();
@@ -1007,7 +1005,7 @@ class UINodes extends iron.Trait {
 				m.shader.raw.contexts.remove(sc.raw);
 				m.shader.contexts.remove(sc);
 			}
-			var con = make_mesh_paint(new CyclesShaderData({name: "Material", canvas: null}));
+			var con = make_mesh(new CyclesShaderData({name: "Material", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
@@ -1200,10 +1198,10 @@ class UINodes extends iron.Trait {
 
 	var lastT:iron.Trait = null;
 	public function parseLogic() {
-		if (lastT != null) UITrait.inst.currentObject.removeTrait(lastT);
+		if (lastT != null) UITrait.inst.selectedObject.removeTrait(lastT);
 		armory.system.Logic.packageName = "armory.logicnode";
 		var t = armory.system.Logic.parse(canvasLogic);
 		lastT = t;
-		UITrait.inst.currentObject.addTrait(t);
+		UITrait.inst.selectedObject.addTrait(t);
 	}
 }

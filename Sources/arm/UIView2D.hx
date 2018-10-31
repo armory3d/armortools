@@ -106,7 +106,7 @@ void main() {
 		}
 		if (!uvmapCached && uvmapShow) {
 			uvmapCached = true;
-			var mesh = UITrait.inst.currentObject.data.raw;
+			var mesh = UITrait.inst.paintObject.data.raw;
 			var texa = mesh.vertex_arrays[2].values;
 			var inda = mesh.index_arrays[0].values;
 			uvmap.g2.begin(true, 0x00000000);

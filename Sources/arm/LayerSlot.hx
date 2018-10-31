@@ -12,7 +12,7 @@ class LayerSlot {
 	public var texpaint_pack:kha.Image;
 	public var texpaint_opt:kha.Image;
 
-	var ext = "";
+	public var ext = "";
 
 	public function new(ext = "") {
 		if (ext == "") {
