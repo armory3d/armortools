@@ -600,6 +600,8 @@ class RenderPathDeferred {
 			else {
 				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 			}
+			arm.UITrait.inst.undoLayers[arm.UITrait.inst.undoI].targetObject = arm.UITrait.inst.paintObject;
+			arm.UITrait.inst.undoLayers[arm.UITrait.inst.undoI].targetLayer = arm.UITrait.inst.selectedLayer;
 			arm.UITrait.inst.undoI = (arm.UITrait.inst.undoI + 1) % arm.UITrait.inst.C.undo_steps;
 			if (arm.UITrait.inst.undos < arm.UITrait.inst.C.undo_steps) arm.UITrait.inst.undos++;
 			arm.UITrait.inst.redos = 0;

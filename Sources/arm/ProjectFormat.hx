@@ -1,16 +1,24 @@
 package arm;
 
-typedef TPreferences = {
-	public var w:Int;
-	public var h:Int;
-	public var save_location:String;
-	public var load_location:String;
+import zui.Nodes;
+import iron.data.SceneFormat;
+
+typedef TProjectFormat = {
+	public var version:Float;
+	public var brush_nodes:Array<TNodeCanvas>;
+	public var material_nodes:Array<TNodeCanvas>;
+	public var assets:Array<String>;
+	public var layer_datas:Array<TLayerData>;
+	public var mesh_datas:Array<TMeshData>;
 }
 
-// typedef TProject = {
-	// public var brushes:Array<>;
-	// public var materials:Array<>;
-// }
+typedef TLayerData = {
+	public var res:Int;
+	public var texpaint:haxe.io.Bytes;
+	public var texpaint_nor:haxe.io.Bytes;
+	public var texpaint_pack:haxe.io.Bytes;
+	public var texpaint_opt:haxe.io.Bytes;
+}
 
 typedef TAPConfig = {
 	@:optional var debug_console:Null<Bool>;

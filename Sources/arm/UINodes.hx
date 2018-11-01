@@ -36,18 +36,18 @@ class UINodes extends iron.Trait {
 
 	public var nodes = new Nodes();
 	public var canvas:TNodeCanvas = null;
-	var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
+	public var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
 	#if arm_editor
-	var canvasMap2:Map<MaterialSlot, TNodeCanvas> = null;
+	public var canvasMap2:Map<MaterialSlot, TNodeCanvas> = null;
 	#end
 	var canvasBlob:String;
 
 	public var canvasBrush:TNodeCanvas = null;
-	var canvasBrushMap:Map<BrushSlot, TNodeCanvas> = null;
+	public var canvasBrushMap:Map<BrushSlot, TNodeCanvas> = null;
 	var canvasBrushBlob:String;
 
 	public var canvasLogic:TNodeCanvas = null;
-	var canvasLogicMap:Map<BrushSlot, TNodeCanvas> = null;
+	public var canvasLogicMap:Map<BrushSlot, TNodeCanvas> = null;
 	var canvasLogicBlob:String;
 
 	public var canvasType = 0; // material, brush, logic
@@ -188,6 +188,7 @@ class UINodes extends iron.Trait {
 			if (canvasType == 0) {
 				parsePaintMaterial();
 				UITrait.inst.makeMaterialPreview();
+				UITrait.inst.hwnd.redraws = 2;
 				if (UITrait.inst.brushPaint == 2) UITrait.inst.makeStickerPreview();
 			}
 		}
@@ -573,29 +574,27 @@ class UINodes extends iron.Trait {
 		// Texture projection - project
 		else {
 			frag.add_uniform('float brushScale', '_brushScale');
-			frag.write_pre = true; // When tc is fetched by normalmap
-			frag.write('vec2 uvsp = sp.xy;');
+			frag.write_attrib('vec2 uvsp = sp.xy;');
 
 			// Sticker
 			if (UITrait.inst.brushPaint == 2) {
 				
-				frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-				frag.write('binp = binp * 0.5 + 0.5;');
+				frag.write_attrib('vec2 binp = inp.xy * 2.0 - 1.0;');
+				frag.write_attrib('binp = binp * 0.5 + 0.5;');
 
-				frag.write('uvsp -= binp;');
-				frag.write('uvsp.x *= aspectRatio;');
+				frag.write_attrib('uvsp -= binp;');
+				frag.write_attrib('uvsp.x *= aspectRatio;');
 
-				// frag.write('uvsp *= brushScale;');
-				frag.write('uvsp *= vec2(7.2);');
-				frag.write('uvsp += vec2(0.5);');
+				// frag.write_attrib('uvsp *= brushScale;');
+				frag.write_attrib('uvsp *= vec2(7.2);');
+				frag.write_attrib('uvsp += vec2(0.5);');
 
-				frag.write('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; return; }');
+				frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; return; }');
 			}
 			else {
-				frag.write('uvsp.x *= aspectRatio;');
+				frag.write_attrib('uvsp.x *= aspectRatio;');
 			}
-
-			frag.write_pre = false;
+			
 			Cycles.texCoordName = 'fract(uvsp * brushScale)'; // TODO: use prescaled value from VS
 		}
 

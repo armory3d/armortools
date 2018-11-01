@@ -199,6 +199,10 @@ class App extends iron.Trait {
 					UINodes.inst.hwnd.redraws = 2;
 				}
 			}
+			// Project
+			else if (StringTools.endsWith(p, ".arm")) {
+				UITrait.inst.importProject(dropPath);
+			}
 			// Folder
 			else if (p.indexOf(".") == -1) {
 				#if kha_krom
@@ -282,8 +286,9 @@ class App extends iron.Trait {
 				if (mapbase != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapbase);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
 					canvas.links.push(l);
@@ -291,8 +296,9 @@ class App extends iron.Trait {
 				if (mapocc != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapocc);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
 					canvas.links.push(l);
@@ -300,8 +306,9 @@ class App extends iron.Trait {
 				if (maprough != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(maprough);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
 					canvas.links.push(l);
@@ -309,8 +316,9 @@ class App extends iron.Trait {
 				if (mapmet != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapmet);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
 					canvas.links.push(l);
@@ -318,8 +326,9 @@ class App extends iron.Trait {
 				if (mapnor != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapnor);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
 					canvas.links.push(l);
@@ -327,8 +336,9 @@ class App extends iron.Trait {
 				if (mapheight != "") {
 					var n = NodeCreator.createImageTexture();
 					n.buttons[0].default_value = getAssetIndex(mapheight);
+					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
 					n.x = 72;
-					n.y = 192 + 130 * pos;
+					n.y = 192 + 160 * pos;
 					pos++;
 					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 					canvas.links.push(l);
@@ -395,7 +405,7 @@ class App extends iron.Trait {
 		uimodal.end(false);
 		g.begin(false);
 
-		if (UITrait.checkImageFormat(path) || UITrait.checkMeshFormat(path)) {
+		if (UITrait.checkImageFormat(path) || UITrait.checkMeshFormat(path) || UITrait.checkProjectFormat(path)) {
 			showFiles = false;
 			filesDone(path);
 			var sep = kha.System.systemId == "Windows" ? "\\" : "/";

@@ -6,13 +6,16 @@ class LayerSlot {
 	static var counter = 0;
 	public var id = 0;
 	public var visible = true;
+	public var ext = "";
 
 	public var texpaint:kha.Image;
 	public var texpaint_nor:kha.Image;
 	public var texpaint_pack:kha.Image;
 	public var texpaint_opt:kha.Image;
 
-	public var ext = "";
+	// For undo layer
+	public var targetLayer:LayerSlot = null;
+	public var targetObject:iron.object.MeshObject = null;
 
 	public function new(ext = "") {
 		if (ext == "") {

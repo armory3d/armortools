@@ -54,10 +54,16 @@ class NodeCreator {
 			],
 			buttons: [
 				{
-					name: "default_value",
+					name: "File",
 					type: "ENUM",
 					default_value: 0,
-					output: 0
+					data: ""
+				},
+				{
+					name: "Color Space",
+					type: "ENUM",
+					default_value: 0,
+					data: ["linear", "srgb"]
 				}
 			]
 		};

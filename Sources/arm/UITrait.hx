@@ -11,11 +11,15 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Math;
 import iron.RenderPath;
+import arm.ProjectFormat;
 import arm.ProjectFormat.TAPConfig;
 
 @:access(zui.Zui)
 @:access(iron.data.Data)
 class UITrait extends iron.Trait {
+
+	// public var project:TProjectFormat;
+	var projectPath = "";
 
 	public var assets:Array<TAsset> = [];
 	public var assetNames:Array<String> = [];
@@ -146,6 +150,7 @@ class UITrait extends iron.Trait {
 	public var mirrorX = false;
 	public var showGrid = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
+	public var resHandle = new Zui.Handle({position: 1}); // 2048
 	var newConfirm = false;
 	var newObject = 0;
 	var newObjectNames = ["Cube", "Plane", "Sphere", "Cylinder"];
@@ -166,7 +171,6 @@ class UITrait extends iron.Trait {
 	#else
 	public var cameraType = 0;
 	#end
-	var textureRes = 1;
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -408,8 +412,8 @@ class UITrait extends iron.Trait {
 			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
 			var asset:TAsset = {name: name, file: path, id: UITrait.inst.assetId++};
-			UITrait.inst.assets.push(asset);
-			UITrait.inst.assetNames.push(name);
+			assets.push(asset);
+			assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
 			hwnd.redraws = 2;
 
@@ -561,10 +565,17 @@ class UITrait extends iron.Trait {
 		var shift = kb.down("shift");
 		var ctrl = kb.down("control");
 		if (kb.started("tab")) {
-			UIView2D.inst.show = false;
-			if (!UINodes.inst.ui.isTyping) {
-				UINodes.inst.show = !UINodes.inst.show;
-				arm.App.resize();
+			if (ctrl) { // Cycle objects
+				var i = (paintObjects.indexOf(paintObject) + 1) % paintObjects.length;
+				selectPaintObject(paintObjects[i]);
+				hwnd.redraws = 2;
+			}
+			else { // Toggle node editor
+				UIView2D.inst.show = false;
+				if (!UINodes.inst.ui.isTyping) {
+					UINodes.inst.show = !UINodes.inst.show;
+					arm.App.resize();
+				}
 			}
 		}
 		else if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
@@ -572,6 +583,12 @@ class UITrait extends iron.Trait {
 		else if (kb.started("3") && (shift || ctrl)) shift ? setBrushType(2) : selectMaterial(2);
 		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
 		else if (kb.started("5") && (shift || ctrl)) shift ? setBrushType(4) : selectMaterial(4);
+
+		if (ctrl && kb.started("s")) projectSave();
+		else if (ctrl && shift && kb.started("s")) projectSaveAs();
+		else if (ctrl && kb.started("o")) projectOpen();
+
+		if (kb.started("escape")) arm.App.showFiles = false;
 
 		if (kb.started("f12")) {
 			show = !show;
@@ -838,15 +855,31 @@ class UITrait extends iron.Trait {
 		if (C.undo_steps > 0) {
 			if (undoPressed && undos > 0) {
 				undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
-				selectedLayer.swap(undoLayers[undoI]);
-				ddirty = 2;
+				var lay = undoLayers[undoI];
+				var opos = paintObjects.indexOf(lay.targetObject);
+				var lpos = layers.indexOf(lay.targetLayer);
+				if (opos >= 0 && lpos >= 0) {
+					hwnd.redraws = 2;
+					selectPaintObject(paintObjects[opos]);
+					selectedLayer = layers[lpos];
+					selectedLayer.swap(lay);
+					ddirty = 2;
+				}
 				undos--;
 				redos++;
 			}
 			else if (redoPressed && redos > 0) {
-				selectedLayer.swap(undoLayers[undoI]);
+				var lay = undoLayers[undoI];
+				var opos = paintObjects.indexOf(lay.targetObject);
+				var lpos = layers.indexOf(lay.targetLayer);
+				if (opos >= 0 && lpos >= 0) {
+					hwnd.redraws = 2;
+					selectPaintObject(paintObjects[opos]);
+					selectedLayer = layers[lpos];
+					selectedLayer.swap(lay);
+					ddirty = 2;
+				}
 				undoI = (undoI + 1) % C.undo_steps;
-				ddirty = 2;
 				undos++;
 				redos--;
 			}
@@ -1197,12 +1230,22 @@ void main() {
 	}
 
 	public function getTextureRes():Int {
-		if (textureRes == 0) return 1024;
-		if (textureRes == 1) return 2048;
-		if (textureRes == 2) return 4096;
-		if (textureRes == 3) return 8192;
-		if (textureRes == 4) return 16384;
-		if (textureRes == 5) return 20480;
+		if (resHandle.position == 0) return 1024;
+		if (resHandle.position == 1) return 2048;
+		if (resHandle.position == 2) return 4096;
+		if (resHandle.position == 3) return 8192;
+		if (resHandle.position == 4) return 16384;
+		if (resHandle.position == 5) return 20480;
+		return 0;
+	}
+
+	function getTextureResPos(i:Int):Int {
+		if (i == 1024) return 0;
+		if (i == 2048) return 1;
+		if (i == 4096) return 2;
+		if (i == 8192) return 3;
+		if (i == 16384) return 4;
+		if (i == 20480) return 5;
 		return 0;
 	}
 
@@ -1263,6 +1306,7 @@ void main() {
 		paintObject.skip_context = "paint";
 		o.skip_context = "";
 		paintObject = o;
+		autoFillHandle.selected = false; // Auto-disable
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {
@@ -1946,35 +1990,7 @@ void main() {
 					if (newConfirm) {
 						if (ui.button("Confirm")) {
 							newConfirm = false;
-							var n = newObjectNames[newObject];
-							paintObject = paintObjects[0];
-							for (i in 1...paintObjects.length) {
-								var p = paintObjects[i];
-								iron.data.Data.deleteMesh(p.data.handle);
-								p.remove();
-							}
-							iron.data.Data.deleteMesh(paintObject.data.handle);
-							iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
-								autoFillHandle.selected = false;
-								paintObject.setData(md);
-								paintObject.transform.scale.set(1, 1, 1);
-								paintObject.transform.buildMatrix();
-								paintObjects = [paintObject];
-								ui.g.end();
-								materials = [new MaterialSlot()];
-								selectedMaterial = materials[0];
-								layers = [new LayerSlot()];
-								selectedLayer = layers[0];
-								iron.App.notifyOnRender(initLayers);
-								if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
-								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
-								makeMaterialPreview();
-								ui.g.begin(false);
-								assets = [];
-								assetNames = [];
-								assetId = 0;
-							});
+							projectNew();
 						}
 					}
 					else if (ui.button("New")) {
@@ -1982,15 +1998,14 @@ void main() {
 					}
 					newObject = ui.combo(Id.handle(), newObjectNames, "Default Object");
 					ui.row([1/3,1/3,1/3]);
-					ui.button("Open..");
-					ui.button("Save..");
-					ui.button("Save As..");
+					if (ui.button("Open..")) projectOpen();
+					if (ui.button("Save..")) projectSave();
+					if (ui.button("Save As..")) projectSaveAs();
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Project Quality", 1)) {
-					var hres = Id.handle({position: textureRes});
-					textureRes = ui.combo(hres, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
-					if (hres.changed) {
+					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
+					if (resHandle.changed) {
 						iron.App.notifyOnRender(resizeLayers);
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
@@ -2306,8 +2321,9 @@ void main() {
 					}
 					hscaleWasChanged = hscale.changed;
 					var layHandle = Id.handle({position: C.ui_layout});
-					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "UI Layout", true);
+					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
 					if (layHandle.changed) arm.App.resize();
+					ui.combo(Id.handle({position: 0}), ["Dark"], "Theme", true);
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
@@ -2390,6 +2406,9 @@ void main() {
 					ddirty = 2;
 				}
 
+				if (ui.panel(Id.handle({selected: false}), "Plugins", 1)) {
+				}
+
 				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
 					ui.text("Distract Free - F12");
 					ui.text("Node Editor - Tab");
@@ -2398,6 +2417,10 @@ void main() {
 					ui.text("Pick Color ID - Alt");
 					ui.text("Undo - Ctrl+Z");
 					ui.text("Redo - Ctrl+Shift+Z");
+					ui.text("Next Object - Ctrl+Tab");
+					ui.text("Save - Ctrl+S");
+					ui.text("Save As - Ctrl+Shift+S");
+					ui.text("Open - Ctrl+O");
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
@@ -2441,6 +2464,14 @@ void main() {
 		return Canvas.assetMap.get(asset.id);
 	}
 
+	public static function checkProjectFormat(path:String):Bool {
+		var p = path.toLowerCase();
+		if (!StringTools.endsWith(p, ".arm")) {
+			return false;
+		}
+		return true;
+	}
+
 	public static function checkMeshFormat(path:String):Bool {
 		var p = path.toLowerCase();
 		if (!StringTools.endsWith(p, ".obj") &&
@@ -2472,29 +2503,7 @@ void main() {
 				obj = new iron.format.obj.ObjParser(b, obj.pos);
 				addMesh(obj);
 			}
-			// Scale to bounds
-			if (paintObjects.length > 1) {
-				var aabbMin = new iron.math.Vec4(-0.01, -0.01, -0.01);
-				var aabbMax = new iron.math.Vec4(0.01, 0.01, 0.01);
-				for (i in 1...paintObjects.length) {
-					var mo = cast(paintObjects[i], MeshObject);
-					mo.data.geom.calculateAABB();
-					var geom = mo.data.geom;
-					if (aabbMin.x > geom.aabbMin.x) aabbMin.x = geom.aabbMin.x;
-					if (aabbMin.y > geom.aabbMin.y) aabbMin.y = geom.aabbMin.y;
-					if (aabbMin.z > geom.aabbMin.z) aabbMin.z = geom.aabbMin.z;
-					if (aabbMax.x < geom.aabbMax.x) aabbMax.x = geom.aabbMax.x;
-					if (aabbMax.y < geom.aabbMax.y) aabbMax.y = geom.aabbMax.y;
-					if (aabbMax.z < geom.aabbMax.z) aabbMax.z = geom.aabbMax.z;
-				}
-				var aabb = new iron.math.Vec4();
-				aabb.x = Math.abs(aabbMin.x) + Math.abs(aabbMax.x);
-				aabb.y = Math.abs(aabbMin.y) + Math.abs(aabbMax.y);
-				aabb.z = Math.abs(aabbMin.z) + Math.abs(aabbMax.z);
-				var r = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
-				paintObjects[0].transform.scale.set(3 / r, 3 / r, 3 / r);
-				paintObjects[0].transform.buildMatrix();
-			}
+			scaleToBounds();
 		});
 	}
 
@@ -2509,7 +2518,44 @@ void main() {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var obj = new iron.format.fbx.FbxParser(b);
 			makeMesh(obj, path);
+			while (obj.next()) {
+				addMesh(obj);
+			}
+			scaleToBounds();
 		});
+	}
+
+	function scaleToBounds() {
+		if (paintObjects.length > 1) {
+			var aabbMin = new iron.math.Vec4(-0.01, -0.01, -0.01);
+			var aabbMax = new iron.math.Vec4(0.01, 0.01, 0.01);
+			for (i in 1...paintObjects.length) {
+				var mo = cast(paintObjects[i], MeshObject);
+				mo.data.geom.calculateAABB();
+				var geom = mo.data.geom;
+				if (aabbMin.x > geom.aabbMin.x) aabbMin.x = geom.aabbMin.x;
+				if (aabbMin.y > geom.aabbMin.y) aabbMin.y = geom.aabbMin.y;
+				if (aabbMin.z > geom.aabbMin.z) aabbMin.z = geom.aabbMin.z;
+				if (aabbMax.x < geom.aabbMax.x) aabbMax.x = geom.aabbMax.x;
+				if (aabbMax.y < geom.aabbMax.y) aabbMax.y = geom.aabbMax.y;
+				if (aabbMax.z < geom.aabbMax.z) aabbMax.z = geom.aabbMax.z;
+			}
+			var aabb = new iron.math.Vec4();
+			aabb.x = Math.abs(aabbMin.x) + Math.abs(aabbMax.x);
+			aabb.y = Math.abs(aabbMin.y) + Math.abs(aabbMax.y);
+			aabb.z = Math.abs(aabbMin.z) + Math.abs(aabbMax.z);
+			var r = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
+			paintObjects[0].transform.scale.set(3 / r, 3 / r, 3 / r);
+			paintObjects[0].transform.buildMatrix();
+		}
+		else {
+			// Scale to bounds
+			var md = paintObject.data;
+			md.geom.calculateAABB();
+			var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
+			paintObject.transform.scale.set(3 / r, 3 / r, 3 / r);
+			paintObject.transform.buildMatrix();
+		}
 	}
 
 	function importBlend(path:String) {
@@ -2630,10 +2676,9 @@ void main() {
 	}
 
 	function makeMesh(mesh:Dynamic, path:String) {
-		
 		#if arm_editor
 		var raw:TMeshData = {
-			name: "Mesh",
+			name: mesh.name,
 			vertex_arrays: [
 				{ values: mesh.posa, attrib: "pos" },
 				{ values: mesh.nora, attrib: "nor" }
@@ -2660,7 +2705,7 @@ void main() {
 			}
 		}
 		var raw:TMeshData = {
-			name: "Mesh",
+			name: mesh.name,
 			vertex_arrays: [
 				{ values: mesh.posa, attrib: "pos" },
 				{ values: mesh.nora, attrib: "nor" },
@@ -2697,8 +2742,15 @@ void main() {
 			else {
 			#end
 			{ // Replace
-				// paintObject.data.delete();
-				iron.data.Data.deleteMesh("mesh_Cube");
+
+				paintObject = paintObjects[0];
+				for (i in 1...paintObjects.length) {
+					var p = paintObjects[i];
+					iron.data.Data.deleteMesh(p.data.handle);
+					p.remove();
+				}
+				iron.data.Data.deleteMesh(paintObject.data.handle);
+				autoFillHandle.selected = false;
 
 				iron.App.notifyOnRender(initLayers);
 				if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
@@ -2706,11 +2758,7 @@ void main() {
 				paintObject.setData(md);
 				paintObject.name = mesh.name;
 				
-				// Scale to bounds
-				md.geom.calculateAABB();
-				var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
-				paintObject.transform.scale.set(3 / r, 3 / r, 3 / r);
-				paintObject.transform.buildMatrix();
+				scaleToBounds();
 
 				// Face camera
 				// paintObject.transform.setRotation(Math.PI / 2, 0, 0);
@@ -2723,6 +2771,7 @@ void main() {
 			#end
 
 			ddirty = 4;
+			hwnd.redraws = 2;
 			arm.UIView2D.inst.uvmapCached = false;
 		});
 	}
@@ -2748,7 +2797,7 @@ void main() {
 			}
 		}
 		var raw:TMeshData = {
-			name: "Mesh",
+			name: mesh.name,
 			vertex_arrays: [
 				{ values: mesh.posa, attrib: "pos" },
 				{ values: mesh.nora, attrib: "nor" },
@@ -2776,6 +2825,205 @@ void main() {
 			ddirty = 4;
 			hwnd.redraws = 2;
 			arm.UIView2D.inst.uvmapCached = false;
+		});
+	}
+
+	function projectOpen() {
+		arm.App.showFiles = true;
+		arm.App.foldersOnly = false;
+		arm.App.filesDone = function(path:String) {
+			importProject(path);
+		};
+	}
+
+	function projectSave() {
+		if (projectPath == "") {
+			projectSaveAs();
+			return;
+		}
+
+		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
+		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
+
+		for (m in materials) mnodes.push(UINodes.inst.canvasMap.get(m));
+		for (b in brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
+
+		var md:Array<TMeshData> = [];
+		for (p in paintObjects) md.push(p.data.raw);
+
+		var asset_files:Array<String> = [];
+		for (a in assets) asset_files.push(a.file);
+
+		var ld:Array<TLayerData> = [];
+		for (l in layers) {
+			ld.push({
+				res: l.texpaint.width,
+				texpaint: l.texpaint.getPixels(),
+				texpaint_nor: l.texpaint_nor.getPixels(),
+				texpaint_pack: l.texpaint_pack.getPixels(),
+				texpaint_opt: l.texpaint_opt != null ? l.texpaint_opt.getPixels() : null,
+			});
+		}
+
+		var project:TProjectFormat = {
+			version: 0.5,
+			material_nodes: mnodes,
+			brush_nodes: bnodes,
+			mesh_datas: md,
+			layer_datas: ld,
+			assets: asset_files
+		};
+		
+		var bytes = iron.system.ArmPack.encode(project);
+
+		#if kha_krom
+		Krom.fileSaveBytes(projectPath, bytes.getData());
+		#elseif kha_kore
+		sys.io.File.saveBytes(projectPath, bytes);
+		#end
+	}
+
+	function projectSaveAs() {
+		arm.App.showFiles = true;
+		arm.App.foldersOnly = true;
+		arm.App.filesDone = function(path:String) {
+			projectPath = path + "/" + paintObject.name + ".arm";
+			projectSave();
+		};
+	}
+
+	function projectNew(resetLayers = true) {
+		var n = newObjectNames[newObject];
+		paintObject = paintObjects[0];
+		for (i in 1...paintObjects.length) {
+			var p = paintObjects[i];
+			iron.data.Data.deleteMesh(p.data.handle);
+			p.remove();
+		}
+		iron.data.Data.deleteMesh(paintObject.data.handle);
+		iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
+			autoFillHandle.selected = false;
+			paintObject.setData(md);
+			paintObject.transform.scale.set(1, 1, 1);
+			paintObject.transform.buildMatrix();
+			paintObject.name = n;
+			paintObjects = [paintObject];
+			ui.g.end();
+			materials = [new MaterialSlot()];
+			selectedMaterial = materials[0];
+			UINodes.inst.canvasMap = new Map();
+			UINodes.inst.canvasBrushMap = new Map();
+			brushes = [new BrushSlot()];
+			selectedBrush = brushes[0];
+			
+			if (resetLayers) {
+				layers = [new LayerSlot()];
+				selectedLayer = layers[0];
+				iron.App.notifyOnRender(initLayers);
+				if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
+			}
+			
+			UINodes.inst.updateCanvasMap();
+			UINodes.inst.parsePaintMaterial();
+			makeMaterialPreview();
+			ui.g.begin(false);
+			assets = [];
+			assetNames = [];
+			assetId = 0;
+		});
+	}
+
+	public function importProject(path:String) {
+		projectPath = path;
+		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			var resetLayers = false;
+			projectNew(resetLayers);
+
+			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
+
+			for (file in project.assets) importAsset(file);
+
+			materials = [];
+			for (n in project.material_nodes) {
+				var mat = new MaterialSlot();
+				UINodes.inst.canvasMap.set(mat, n);
+				materials.push(mat);
+
+				selectedMaterial = mat;
+				UINodes.inst.updateCanvasMap();
+				UINodes.inst.parsePaintMaterial();
+				makeMaterialPreview();
+			}
+
+			brushes = [];
+			for (n in project.brush_nodes) {
+				var brush = new BrushSlot();
+				UINodes.inst.canvasBrushMap.set(brush, n);
+				brushes.push(brush);
+			}
+
+			// Synchronous for now
+			new MeshData(project.mesh_datas[0], function(md:MeshData) {
+				paintObject.setData(md);
+				paintObject.transform.scale.set(1, 1, 1);
+				paintObject.transform.buildMatrix();
+				paintObject.name = md.name;
+				paintObjects = [paintObject];
+			});
+
+			for (i in 1...project.mesh_datas.length) {
+				var raw = project.mesh_datas[i];  
+				new MeshData(raw, function(md:MeshData) {
+					var object = iron.Scene.active.addMeshObject(md, paintObject.materials, paintObject);
+					object.name = md.name;
+					object.skip_context = "paint";
+					paintObjects.push(object);					
+				});
+			}
+			paintObject = paintObjects[0];
+			scaleToBounds();
+
+			resHandle.position = getTextureResPos(project.layer_datas[0].res);
+
+			layers = [];
+			for (i in 0...project.layer_datas.length) {
+				var ld = project.layer_datas[i];
+				var l = new LayerSlot();
+				layers.push(l);
+
+				// TODO: create render target from bytes
+				var texpaint = kha.Image.fromBytes(ld.texpaint, ld.res, ld.res);
+				l.texpaint.g2.begin(false);
+				l.texpaint.g2.drawImage(texpaint, 0, 0);
+				l.texpaint.g2.end();
+				// texpaint.unload();
+
+				var texpaint_nor = kha.Image.fromBytes(ld.texpaint_nor, ld.res, ld.res);
+				l.texpaint_nor.g2.begin(false);
+				l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+				l.texpaint_nor.g2.end();
+				// texpaint_nor.unload();
+
+				var texpaint_pack = kha.Image.fromBytes(ld.texpaint_pack, ld.res, ld.res);
+				l.texpaint_pack.g2.begin(false);
+				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+				l.texpaint_pack.g2.end();
+				// texpaint_pack.unload();
+
+				if (ld.texpaint_opt != null) {
+					var texpaint_opt = kha.Image.fromBytes(ld.texpaint_opt, ld.res, ld.res);
+					l.texpaint_opt.g2.begin(false);
+					l.texpaint_opt.g2.drawImage(texpaint_opt, 0, 0);
+					l.texpaint_opt.g2.end();
+					// texpaint_opt.unload();
+				}
+			}
+			selectedLayer = layers[0];
+
+			if (layers.length > 0) UINodes.inst.parseMeshMaterial();
+
+			ddirty = 2;
+			hwnd.redraws = 2;
 		});
 	}
 }
