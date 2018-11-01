@@ -167,7 +167,7 @@ class UITrait extends iron.Trait {
 	var lastBrushType = -1;
 
 	#if arm_editor
-	public var cameraType = 1;
+	public var cameraType = 2;
 	#else
 	public var cameraType = 0;
 	#end
@@ -616,42 +616,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		camBall();
-
 		for (p in Plugin.plugins) if (p.update != null) p.update();
-	}
-
-	function camBall() {
-		if (iron.system.Input.occupied) return;
-		if (!arm.App.uienabled) return;
-		if (UITrait.inst.isScrolling) return;
-		if (arm.App.isDragging) return;
-		if (UITrait.inst.cameraType != 0) return;
-		//if (!selectedObject.visible) return;
-
-		var mouse = iron.system.Input.getMouse();
-		var kb = iron.system.Input.getKeyboard();
-
-		// Paint bounds
-		if (mouse.x < 0 || mouse.x > iron.App.w()) return;
-
-		if (mouse.down("right") || (mouse.down("left") && kb.down("control"))) {
-			UITrait.inst.ddirty = 2;
-			
-			// Rotate X
-			// if (!kb.down("alt")) {
-				selectedObject.transform.rotate(new iron.math.Vec4(0, 0, 1), mouse.movementX / 100);
-				selectedObject.transform.buildMatrix();
-			// }
-			
-			// Rotate Y
-			if (!kb.down("shift")) {
-				var v = selectedObject.transform.right();
-				v.normalize();
-				selectedObject.transform.rotate(v, mouse.movementY / 100);
-				selectedObject.transform.buildMatrix();
-			}
-		}
 	}
 
 	public function makeStickerPreview() {
@@ -1896,7 +1861,7 @@ void main() {
 					var scene = iron.Scene.active;
 					var cam = scene.cameras[0];
 					ui.row([1/2,1/2]);
-					cameraType = ui.combo(Id.handle({position: cameraType}), ["Orbit", "Fly"], "Camera");
+					cameraType = ui.combo(Id.handle({position: cameraType}), ["ArcBall", "Orbit", "Fly"], "Camera");
 					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 					if (fovHandle.changed) {

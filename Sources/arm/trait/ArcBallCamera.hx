@@ -2,9 +2,9 @@ package arm.trait;
 
 import arm.UITrait;
 
-class OrbitCamera extends iron.Trait {
+class ArcBallCamera extends iron.Trait {
 
-	public static var inst:OrbitCamera;
+	public static var inst:ArcBallCamera;
 
 	var redraws = 0;
 
@@ -17,7 +17,7 @@ class OrbitCamera extends iron.Trait {
 			if (!arm.App.uienabled) return;
 			if (UITrait.inst.isScrolling) return;
 			if (arm.App.isDragging) return;
-			if (UITrait.inst.cameraType != 1) return;
+			if (UITrait.inst.cameraType != 0) return;
 
 			var mouse = iron.system.Input.getMouse();
 			if (mouse.x < 0 || mouse.x > iron.App.w()) return;
@@ -41,24 +41,24 @@ class OrbitCamera extends iron.Trait {
 				
 				// Rotate X
 				if (!kb.down("alt")) {
-					var d = camera.transform.loc.length();
-					camera.transform.loc.set(0, 0, 0);
-					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
-					camera.transform.move(camera.lookWorld(), -d);
+					var v = UITrait.inst.selectedObject.transform.up();
+					v.normalize();
+					UITrait.inst.selectedObject.transform.rotate(v, mouse.movementX / 100);
 				}
 				
 				// Rotate Y
 				if (!kb.down("shift")) {
-					var d = camera.transform.loc.length();
-					camera.transform.loc.set(0, 0, 0);
-					camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100);
+					var v = camera.rightWorld();
+					v.normalize();
+					UITrait.inst.selectedObject.transform.rotate(v, mouse.movementY / 100);
+					UITrait.inst.selectedObject.transform.buildMatrix();
 
-					if (camera.upWorld().z < 0) {
-						camera.transform.rotate(camera.rightWorld(), mouse.movementY / 100);
+					if (UITrait.inst.selectedObject.transform.up().z < 0) {
+						UITrait.inst.selectedObject.transform.rotate(v, -mouse.movementY / 100);
 					}
-					
-					camera.transform.move(camera.lookWorld(), -d);
 				}
+
+
 			}
 
 			if (redraws > 0) {

@@ -78,6 +78,7 @@ class App extends iron.Trait {
 						iron.Scene.active.root.addTrait(new UIView2D());
 						iron.Scene.active.root.addTrait(new arm.trait.FlyCamera());
 						iron.Scene.active.root.addTrait(new arm.trait.OrbitCamera());
+						iron.Scene.active.root.addTrait(new arm.trait.ArcBallCamera());
 						iron.App.notifyOnInit(function() {
 							iron.App.notifyOnRender2D(render); // Draw on top
 						});

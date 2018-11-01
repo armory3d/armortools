@@ -10,7 +10,6 @@ import arm.UITrait;
 class FlyCamera extends Trait {
 
 	public static var inst:FlyCamera;
-	public var enabled = false;
 
 	static inline var speed = 2.0;
 	var dir = new Vec4();
@@ -32,7 +31,7 @@ class FlyCamera extends Trait {
 		if (!arm.App.uienabled) return;
 		if (UITrait.inst.isScrolling) return;
 		if (arm.App.isDragging) return;
-		if (UITrait.inst.cameraType != 1) return;
+		if (UITrait.inst.cameraType != 2) return;
 		
 		var keyboard = Input.getKeyboard();
 		var gamepad = Input.getGamepad();
@@ -77,13 +76,13 @@ class FlyCamera extends Trait {
 		var d = Time.delta * speed * fast * ease;
 		if (d > 0.0) {
 			UITrait.inst.ddirty = 2;
-			camera.move(dir, d);
+			camera.transform.move(dir, d);
 		}
 
 		if (mouse.down("right")) {
 			UITrait.inst.ddirty = 2;
-			camera.rotate(Vec4.zAxis(), -mouse.movementX / 200);
-			camera.rotate(camera.right(), -mouse.movementY / 200);
+			camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
+			camera.transform.rotate(camera.right(), -mouse.movementY / 200);
 		}
 	}
 }
