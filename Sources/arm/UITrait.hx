@@ -20,6 +20,7 @@ class UITrait extends iron.Trait {
 
 	// public var project:TProjectFormat;
 	var projectPath = "";
+	var version = "0.5";
 
 	public var assets:Array<TAsset> = [];
 	public var assetNames:Array<String> = [];
@@ -151,6 +152,9 @@ class UITrait extends iron.Trait {
 	public var showGrid = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
+	var objectsHandle = new Zui.Handle({selected: false});
+	var maskHandle = new Zui.Handle({position: 1});
+	var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	var newObject = 0;
 	var newObjectNames = ["Cube", "Plane", "Sphere", "Cylinder"];
@@ -167,10 +171,12 @@ class UITrait extends iron.Trait {
 	var lastBrushType = -1;
 
 	#if arm_editor
-	public var cameraType = 2;
+	public var cameraControls = 2;
 	#else
-	public var cameraType = 0;
+	public var cameraControls = 0;
 	#end
+	public var cameraType = 0;
+	var originalBias = 0.0;
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -572,7 +578,7 @@ class UITrait extends iron.Trait {
 			}
 			else { // Toggle node editor
 				UIView2D.inst.show = false;
-				if (!UINodes.inst.ui.isTyping) {
+				if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
 					UINodes.inst.show = !UINodes.inst.show;
 					arm.App.resize();
 				}
@@ -584,11 +590,18 @@ class UITrait extends iron.Trait {
 		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
 		else if (kb.started("5") && (shift || ctrl)) shift ? setBrushType(4) : selectMaterial(4);
 
-		if (ctrl && kb.started("s")) projectSave();
+		if (ctrl && !shift && kb.started("s")) projectSave();
 		else if (ctrl && shift && kb.started("s")) projectSaveAs();
 		else if (ctrl && kb.started("o")) projectOpen();
 
-		if (kb.started("escape")) arm.App.showFiles = false;
+		if (!arm.App.uimodal.isTyping) {
+			if (kb.started("escape")) arm.App.showFiles = false;
+			if (kb.started("enter")) {
+				arm.App.showFiles = false;
+				arm.App.filesDone(arm.App.path);
+				UITrait.inst.ddirty = 2;
+			}
+		}
 
 		if (kb.started("f12")) {
 			show = !show;
@@ -605,16 +618,24 @@ class UITrait extends iron.Trait {
 		// 	setBrushType(lastBrushType);
 		// 	lastBrushType = -1;
 		// }
-		if (mouse.x > 0 && mouse.x < iron.App.w() && kb.released("alt")) {
-			if (lastBrushType == -1) {
-				lastBrushType = brushType;
-				setBrushType(4);
-			}
-			else {
-				setBrushType(lastBrushType);
-				lastBrushType = -1;
+		if (mouse.x > 0 && mouse.x < iron.App.w()) {
+
+			// kha.input.Mouse.get().hideSystemCursor();
+
+			if (kb.released("alt")) {
+				if (lastBrushType == -1) {
+					lastBrushType = brushType;
+					setBrushType(4);
+				}
+				else {
+					setBrushType(lastBrushType);
+					lastBrushType = -1;
+				}
 			}
 		}
+		// else {
+			// kha.input.Mouse.get().showSystemCursor();
+		// }
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
@@ -1268,10 +1289,12 @@ void main() {
 	}
 
 	function selectPaintObject(o:iron.object.MeshObject) {
-		paintObject.skip_context = "paint";
-		o.skip_context = "";
-		paintObject = o;
 		autoFillHandle.selected = false; // Auto-disable
+		for (p in paintObjects) p.skip_context = "paint";
+		paintObject = o;
+		if (mergedObject == null || maskHandle.position == 1) { // Single object or object mask set to none
+			paintObject.skip_context = "";
+		}
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {
@@ -1827,41 +1850,151 @@ void main() {
 					if (ui.button("2D View")) show2DView();
 				}
 
-				if (paintObjects.length > 1) {
-					if (ui.panel(Id.handle({selected: true}), "Objects", 1)) {
-						
-						ui.combo(Id.handle({position: 0}), ["Combined"], "UV Map", true);
+				if (ui.panel(objectsHandle, "Objects", 1)) {
 
-						var i = 0;
-						function drawList(h:zui.Zui.Handle, o:iron.object.MeshObject) {
-							if (o.name.charAt(0) == '.') return; // Hidden
-							var b = false;
-							if (paintObject == o) {
-								ui.g.color = 0xff205d9c;
-								ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
-								ui.g.color = 0xffffffff;
-							}
-							ui.row([1/10, 9/10]);
-							var h = Id.handle().nest(i, {selected: o.visible});
-							o.visible = ui.check(h, "");
-							if (h.changed) ddirty = 2;
-							ui.text(o.name);
-							if (ui.isReleased) {
-								selectPaintObject(o);
-							}
-							i++;
+					var i = 0;
+					function drawList(h:zui.Zui.Handle, o:iron.object.MeshObject) {
+						if (o.name.charAt(0) == '.') return; // Hidden
+						var b = false;
+						if (paintObject == o) {
+							ui.g.color = 0xff205d9c;
+							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
+							ui.g.color = 0xffffffff;
 						}
-						for (c in paintObjects) {
-							drawList(Id.handle(), c);
+						ui.row([1/10, 9/10]);
+						var h = Id.handle().nest(i, {selected: o.visible});
+						o.visible = ui.check(h, "");
+						if (h.changed) ddirty = 2;
+						ui.text(o.name);
+						if (ui.isReleased) {
+							selectPaintObject(o);
 						}
+						i++;
 					}
+					for (c in paintObjects) {
+						drawList(Id.handle(), c);
+					}
+
+					var loc = paintObject.transform.loc;
+					var scale = paintObject.transform.scale;
+					var rot = paintObject.transform.rot.getEuler();
+					rot.mult(180 / 3.141592);
+					var f = 0.0;
+
+					if (paintObjects.length > 1) {
+						ui.row([1/2, 1/2]);
+						var maskType = ui.combo(maskHandle, ["None", "Object"], "Mask", true);
+						if (maskHandle.changed) {
+							if (maskType == 1) {
+								// if (mergedObject != null) mergedObject.remove();
+								if (mergedObject != null) mergedObject.visible = false;
+								selectPaintObject(paintObject);
+							}
+							else {
+								if (mergedObject == null) {
+									ui.g.end();
+									mergeMesh();
+									ui.g.begin(false);
+								}
+								selectPaintObject(paintObjects[0]);
+								paintObject.skip_context = "paint";
+								// if (mergedObject.parent == null) paintObject.addChild(mergedObject);
+								mergedObject.visible = true;
+							}
+						}
+						ui.combo(Id.handle({position: 0}), ["Combined"], "UV Map", true);
+					}
+
+					// ui.text("Transform");
+
+					// ui.row(row4);
+					// ui.text("Location");
+
+					// var h = Id.handle();
+					// h.text = Math.roundfp(loc.x) + "";
+					// f = Std.parseFloat(ui.textInput(h, "X"));
+					// var changed = false;
+					// if (h.changed) { loc.x = f; changed = true; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(loc.y) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Y"));
+					// if (h.changed) { loc.y = f; changed = true; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(loc.z) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Z"));
+					// if (h.changed) { loc.z = f; changed = true; }
+
+					// if (changed) {
+					// 	paintObject.transform.dirty = true;
+					// 	ddirty = 2;
+					// }
+
+					// ui.row(row4);
+					// ui.text("Rotation");
+					
+					// h = Id.handle();
+					// h.text = Math.roundfp(rot.x) + "";
+					// f = Std.parseFloat(ui.textInput(h, "X"));
+					// var changed = false;
+					// if (h.changed) { changed = true; rot.x = f; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(rot.y) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Y"));
+					// if (h.changed) { changed = true; rot.y = f; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(rot.z) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Z"));
+					// if (h.changed) { changed = true; rot.z = f; }
+
+					// if (changed) {
+					// 	rot.mult(3.141592 / 180);
+					// 	paintObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
+					// 	paintObject.transform.buildMatrix();
+					// 	ddirty = 2;
+					// }
+
+					// ui.row(row4);
+					// ui.text("Scale");
+					
+					// h = Id.handle();
+					// h.text = Math.roundfp(scale.x) + "";
+					// f = Std.parseFloat(ui.textInput(h, "X"));
+					// if (h.changed) { scale.x = f; ddirty = 2; paintObject.transform.dirty = true; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(scale.y) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Y"));
+					// if (h.changed) { scale.y = f; ddirty = 2; paintObject.transform.dirty = true; }
+
+					// h = Id.handle();
+					// h.text = Math.roundfp(scale.z) + "";
+					// f = Std.parseFloat(ui.textInput(h, "Z"));
+					// if (h.changed) { scale.z = f; ddirty = 2; paintObject.transform.dirty = true; }
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Camera", 1)) {
 					var scene = iron.Scene.active;
 					var cam = scene.cameras[0];
 					ui.row([1/2,1/2]);
-					cameraType = ui.combo(Id.handle({position: cameraType}), ["ArcBall", "Orbit", "Fly"], "Camera");
+					cameraControls = ui.combo(Id.handle({position: cameraControls}), ["ArcBall", "Orbit", "Fly"], "Controls");
+					var camHandle = Id.handle({position: cameraType});
+					cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
+					if (camHandle.changed) {
+						if (cameraType == 0) cam.data.raw.ortho_scale = null;
+						else cam.data.raw.ortho_scale = 1.0;
+						
+						if (originalBias <= 0) originalBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
+						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalBias : originalBias * 15;
+						cam.buildProjection();
+						
+						ddirty = 2;
+					}
+
+					ui.row([1/2,1/2]);
 					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 					if (fovHandle.changed) {
@@ -1873,6 +2006,11 @@ void main() {
 								cam.transform.local.setF32(o.transform.values);
 								cam.transform.decompose();
 								fovHandle.value = 0.92;
+								camHandle.position = 0;
+								cam.data.raw.ortho_scale = null;
+								if (originalBias > 0) {
+									iron.Scene.active.lights[0].data.raw.shadows_bias = originalBias;
+								}
 								cam.buildProjection();
 								paintObject.transform.reset();
 								ddirty = 2;
@@ -1915,6 +2053,8 @@ void main() {
 						ddirty = 2;
 					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Show Grid");
+
+
 				}
 
 				// Draw plugins
@@ -1980,14 +2120,18 @@ void main() {
 					ui.row([1/2, 1/2]);
 					if (ui.button("Import Mesh")) {
 						arm.App.showFiles = true;
+						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = false;
+						arm.App.showFilename = false;
 						arm.App.filesDone = function(path:String) {
 							importMesh(path);
 						}
 					}
 					if (ui.button("Import Texture")) {
 						arm.App.showFiles = true;
+						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = false;
+						arm.App.showFilename = false;
 						arm.App.filesDone = function(path:String) {
 							importAsset(path);
 						}
@@ -2000,9 +2144,15 @@ void main() {
 						var textureSize = getTextureRes();
 
 						arm.App.showFiles = true;
+						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
+						arm.App.showFilename = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
 						arm.App.filesDone = function(path:String) {
+
+							var f = arm.App.filenameHandle.text;
+							if (f == "") f = "untitled";
+
 							var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
 							var bo = new haxe.io.BytesOutput();
 							
@@ -2030,7 +2180,7 @@ void main() {
 								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
 							}
 							#if kha_krom
-							if (isBase) Krom.fileSaveBytes(path + "/tex_basecol" + ext, bo.getBytes().getData());
+							if (isBase) Krom.fileSaveBytes(path + "/" + f + "_basecol" + ext, bo.getBytes().getData());
 							#end
 
 							pixels = selectedLayer.texpaint_nor.getPixels();
@@ -2058,7 +2208,7 @@ void main() {
 								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
 							}
 							#if kha_krom
-							if (isNor) Krom.fileSaveBytes(path + "/tex_nor" + ext, bo.getBytes().getData());
+							if (isNor) Krom.fileSaveBytes(path + "/" + f + "_nor" + ext, bo.getBytes().getData());
 							#end
 
 							pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
@@ -2096,7 +2246,7 @@ void main() {
 									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 0));
 								}
 								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/tex_occ" + ext, bo.getBytes().getData());
+								if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_occ" + ext, bo.getBytes().getData());
 								#end
 
 								bo = new haxe.io.BytesOutput();
@@ -2115,7 +2265,7 @@ void main() {
 									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 1));
 								}
 								#if kha_krom
-								if (isRough) Krom.fileSaveBytes(path + "/tex_rough" + ext, bo.getBytes().getData());
+								if (isRough) Krom.fileSaveBytes(path + "/" + f + "_rough" + ext, bo.getBytes().getData());
 								#end
 								
 								bo = new haxe.io.BytesOutput();
@@ -2134,7 +2284,7 @@ void main() {
 									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 2));
 								}
 								#if kha_krom
-								if (isMet) Krom.fileSaveBytes(path + "/tex_met" + ext, bo.getBytes().getData());
+								if (isMet) Krom.fileSaveBytes(path + "/" + f + "_met" + ext, bo.getBytes().getData());
 								#end
 							}
 							else { // UE4
@@ -2154,7 +2304,7 @@ void main() {
 									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
 								}
 								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/tex_orm" + ext, bo.getBytes().getData());
+								if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_orm" + ext, bo.getBytes().getData());
 								#end
 							}
 
@@ -2184,7 +2334,7 @@ void main() {
 									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
 								}
 								#if kha_krom
-								Krom.fileSaveBytes(path + "/tex_height" + ext, bo.getBytes().getData());
+								Krom.fileSaveBytes(path + "/" + f + "_height" + ext, bo.getBytes().getData());
 								#end
 							}
 
@@ -2226,8 +2376,14 @@ void main() {
 				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
 					if (ui.button("Export..")) {
 						arm.App.showFiles = true;
+						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
+						arm.App.showFilename = true;
 						arm.App.filesDone = function(path:String) {
+							
+							var f = arm.App.filenameHandle.text;
+							if (f == "") f = "untitled";
+
 							var mesh = paintObject.data.raw;
 							var posa = mesh.vertex_arrays[0].values;
 							var nora = mesh.vertex_arrays[1].values;
@@ -2259,7 +2415,9 @@ void main() {
 											i3 + "/" + i3 + "/" + i3 + "\n";
 							}
 							#if kha_krom
-							Krom.fileSaveBytes(path + "/mesh.obj", haxe.io.Bytes.ofString(s).getData());
+							var objpath = path + "/" + f;
+							if (!StringTools.endsWith(objpath, ".obj")) objpath += ".obj";
+							Krom.fileSaveBytes(objpath, haxe.io.Bytes.ofString(s).getData());
 							#end
 						};
 					}
@@ -2389,7 +2547,7 @@ void main() {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
-					ui.text("v0.5 - " +  Macro.buildSha() + " - armorpaint.org");
+					ui.text("v" + version + " - " +  Macro.buildSha() + " - armorpaint.org");
 					// ui.text(Macro.buildDate());
 					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
 					ui.text("System: " + kha.System.systemId + " - Renderer: " + renderer);
@@ -2458,6 +2616,13 @@ void main() {
 		else if (StringTools.endsWith(p, ".gltf")) importGltf(path);
 		else if (StringTools.endsWith(p, ".fbx")) importFbx(path);
 		else if (StringTools.endsWith(p, ".blend")) importBlend(path);
+
+		// Import is synchronous for now
+		scaleToBounds();
+
+		if (paintObjects.length > 1) objectsHandle.selected = true;
+
+		if (paintObject.name == "") paintObject.name = "Object";
 	}
 
 	function importObj(path:String) {
@@ -2468,7 +2633,6 @@ void main() {
 				obj = new iron.format.obj.ObjParser(b, obj.pos);
 				addMesh(obj);
 			}
-			scaleToBounds();
 		});
 	}
 
@@ -2486,7 +2650,6 @@ void main() {
 			while (obj.next()) {
 				addMesh(obj);
 			}
-			scaleToBounds();
 		});
 	}
 
@@ -2498,6 +2661,11 @@ void main() {
 				var mo = cast(paintObjects[i], MeshObject);
 				mo.data.geom.calculateAABB();
 				var geom = mo.data.geom;
+
+				mo.transform.dim.x = geom.aabb.x;
+				mo.transform.dim.y = geom.aabb.y;
+				mo.transform.dim.z = geom.aabb.z;
+
 				if (aabbMin.x > geom.aabbMin.x) aabbMin.x = geom.aabbMin.x;
 				if (aabbMin.y > geom.aabbMin.y) aabbMin.y = geom.aabbMin.y;
 				if (aabbMin.z > geom.aabbMin.z) aabbMin.z = geom.aabbMin.z;
@@ -2510,7 +2678,11 @@ void main() {
 			aabb.y = Math.abs(aabbMin.y) + Math.abs(aabbMax.y);
 			aabb.z = Math.abs(aabbMin.z) + Math.abs(aabbMax.z);
 			var r = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
-			paintObjects[0].transform.scale.set(3 / r, 3 / r, 3 / r);
+			if (paintObjects[0].raw.dimensions == null) paintObjects[0].raw.dimensions = new kha.arrays.Float32Array(3);
+			paintObjects[0].raw.dimensions[0] = aabb.x;
+			paintObjects[0].raw.dimensions[1] = aabb.y;
+			paintObjects[0].raw.dimensions[2] = aabb.z;
+			paintObjects[0].transform.scale.set(2 / r, 2 / r, 2 / r);
 			paintObjects[0].transform.buildMatrix();
 		}
 		else {
@@ -2518,7 +2690,11 @@ void main() {
 			var md = paintObject.data;
 			md.geom.calculateAABB();
 			var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
-			paintObject.transform.scale.set(3 / r, 3 / r, 3 / r);
+			if (paintObjects[0].raw.dimensions == null) paintObjects[0].raw.dimensions = new kha.arrays.Float32Array(3);
+			paintObjects[0].raw.dimensions[0] = md.geom.aabb.x;
+			paintObjects[0].raw.dimensions[1] = md.geom.aabb.y;
+			paintObjects[0].raw.dimensions[2] = md.geom.aabb.z;
+			paintObject.transform.scale.set(2 / r, 2 / r, 2 / r);
 			paintObject.transform.buildMatrix();
 		}
 	}
@@ -2526,6 +2702,13 @@ void main() {
 	function importBlend(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var bl = new iron.format.blend.Blend(b);
+
+			// var obs = bl.get("Object");
+			// var ob = obs[0];
+			// var name:String = ob.get("id").get("name");
+			// name = name.substring(2, name.length);
+			// trace(ob.get("type")); // 1
+
 			var m = bl.get("Mesh")[0];
 
 			var totpoly = m.get("totpoly");
@@ -2641,6 +2824,11 @@ void main() {
 	}
 
 	function makeMesh(mesh:Dynamic, path:String) {
+		if (mesh.posa == null || mesh.nora == null || mesh.inda == null) {
+			showMessage("Error: Failed to read mesh data");
+			return;
+		}
+
 		#if arm_editor
 		var raw:TMeshData = {
 			name: mesh.name,
@@ -2708,7 +2896,7 @@ void main() {
 			#end
 			{ // Replace
 
-				paintObject = paintObjects[0];
+				selectPaintObject(paintObjects[0]);
 				for (i in 1...paintObjects.length) {
 					var p = paintObjects[i];
 					iron.data.Data.deleteMesh(p.data.handle);
@@ -2722,8 +2910,6 @@ void main() {
 				
 				paintObject.setData(md);
 				paintObject.name = mesh.name;
-				
-				scaleToBounds();
 
 				// Face camera
 				// paintObject.transform.setRotation(Math.PI / 2, 0, 0);
@@ -2795,7 +2981,9 @@ void main() {
 
 	function projectOpen() {
 		arm.App.showFiles = true;
+		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = false;
+		arm.App.showFilename = false;
 		arm.App.filesDone = function(path:String) {
 			importProject(path);
 		};
@@ -2831,7 +3019,7 @@ void main() {
 		}
 
 		var project:TProjectFormat = {
-			version: 0.5,
+			version: version,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
 			mesh_datas: md,
@@ -2850,16 +3038,21 @@ void main() {
 
 	function projectSaveAs() {
 		arm.App.showFiles = true;
+		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = true;
+		arm.App.showFilename = true;
 		arm.App.filesDone = function(path:String) {
-			projectPath = path + "/" + paintObject.name + ".arm";
+			var f = arm.App.filenameHandle.text;
+			if (f == "") f = "untitled";
+			projectPath = path + "/" + f;
+			if (!StringTools.endsWith(projectPath, ".arm")) projectPath += ".arm";
 			projectSave();
 		};
 	}
 
 	function projectNew(resetLayers = true) {
 		var n = newObjectNames[newObject];
-		paintObject = paintObjects[0];
+		selectPaintObject(paintObjects[0]);
 		for (i in 1...paintObjects.length) {
 			var p = paintObjects[i];
 			iron.data.Data.deleteMesh(p.data.handle);
@@ -2873,6 +3066,11 @@ void main() {
 			paintObject.transform.buildMatrix();
 			paintObject.name = n;
 			paintObjects = [paintObject];
+			if (mergedObject != null) {
+				iron.data.Data.deleteMesh(mergedObject.data.handle);
+				mergedObject = null;
+			}
+			maskHandle.position = 1;
 			ui.g.end();
 			materials = [new MaterialSlot()];
 			selectedMaterial = materials[0];
@@ -2882,6 +3080,7 @@ void main() {
 			selectedBrush = brushes[0];
 			
 			if (resetLayers) {
+				// for (l in layers) l.unload();
 				layers = [new LayerSlot()];
 				selectedLayer = layers[0];
 				iron.App.notifyOnRender(initLayers);
@@ -2900,6 +3099,7 @@ void main() {
 
 	public function importProject(path:String) {
 		projectPath = path;
+		arm.App.filenameHandle.text = new haxe.io.Path(projectPath).file;
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var resetLayers = false;
 			projectNew(resetLayers);
@@ -2945,11 +3145,17 @@ void main() {
 					paintObjects.push(object);					
 				});
 			}
-			paintObject = paintObjects[0];
+			selectPaintObject(paintObjects[0]);
 			scaleToBounds();
 
 			resHandle.position = getTextureResPos(project.layer_datas[0].res);
 
+			if (undoLayers[0].texpaint.width != getTextureRes()) {
+				for (l in undoLayers) resizeLayer(l); // TODO
+				for (l in layers) resizeLayer(l);
+			}
+
+			// for (l in layers) l.unload();
 			layers = [];
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
@@ -2989,6 +3195,54 @@ void main() {
 
 			ddirty = 2;
 			hwnd.redraws = 2;
+		});
+	}
+
+	function mergeMesh() {
+		var vlen = 0;
+		var ilen = 0;
+		for (i in 0...paintObjects.length) {
+			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
+			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
+		}
+		vlen = Std.int(vlen / 3);
+		var va0 = new kha.arrays.Float32Array(vlen * 3);
+		var va1 = new kha.arrays.Float32Array(vlen * 3);
+		var va2 = new kha.arrays.Float32Array(vlen * 2);
+		var ia = new kha.arrays.Uint32Array(ilen);
+
+		var voff = 0;
+		var ioff = 0;
+		for (i in 0...paintObjects.length) {
+			var vas = paintObjects[i].data.raw.vertex_arrays;
+			var ias = paintObjects[i].data.raw.index_arrays;
+
+			for (j in 0...vas[0].values.length) va0[j + voff * 3] = vas[0].values[j];
+			for (j in 0...vas[1].values.length) va1[j + voff * 3] = vas[1].values[j];
+			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
+			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
+
+			voff += Std.int(vas[0].values.length / 3);
+			ioff += Std.int(ias[0].values.length);
+		}
+
+		var raw:TMeshData = {
+			name: paintObject.name,
+			vertex_arrays: [
+				{ values: va0, attrib: "pos" },
+				{ values: va1, attrib: "nor" },
+				{ values: va2, attrib: "tex" }
+			],
+			index_arrays: [
+				{ values: ia, material: 0 }
+			]
+		};
+
+		new MeshData(raw, function(md:MeshData) {
+			mergedObject = new MeshObject(md, paintObject.materials);
+			mergedObject.name = paintObject.name;
+			mergedObject.force_context = "paint";
+			paintObjects[0].addChild(mergedObject);
 		});
 	}
 }

@@ -11,6 +11,9 @@ class App extends iron.Trait {
 	public static var dragAsset:TAsset = null;
 	public static var showFiles = false;
 	public static var foldersOnly = false;
+	public static var showFilename = false;
+	public static var whandle = new Zui.Handle();
+	public static var filenameHandle = new Zui.Handle({text: "untitled"});
 	public static var filesDone:String->Void;
 	public static var dropPath = "";
 	public static var dropX = 0.0;
@@ -238,7 +241,11 @@ class App extends iron.Trait {
 					var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 					var valid = false;
 					if (mapbase == "" && (StringTools.endsWith(base, "_albedo") ||
+										  StringTools.endsWith(base, "_alb") ||
 										  StringTools.endsWith(base, "_basecol") ||
+										  StringTools.endsWith(base, "_basecolor") ||
+										  StringTools.endsWith(base, "_base") ||
+										  StringTools.endsWith(base, "_bc") ||
 										  StringTools.endsWith(base, "_col"))) {
 						mapbase = f;
 						valid = true;
@@ -250,22 +257,27 @@ class App extends iron.Trait {
 						valid = true;
 					}
 					if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
+										 StringTools.endsWith(base, "_occlusion") ||
 										 StringTools.endsWith(base, "_occ"))) {
 						mapocc = f;
 						valid = true;
 					}
 					if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
 										   StringTools.endsWith(base, "_roug") ||
+										   StringTools.endsWith(base, "_rough") ||
 										   StringTools.endsWith(base, "_rgh"))) {
 						maprough = f;
 						valid = true;
 					}
 					if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
+										 StringTools.endsWith(base, "_metal") ||
+										 StringTools.endsWith(base, "_metalness") ||
 										 StringTools.endsWith(base, "_met"))) {
 						mapmet = f;
 						valid = true;
 					}
 					if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
+										    StringTools.endsWith(base, "_height") ||
 											StringTools.endsWith(base, "_disp"))) {
 						mapheight = f;
 						valid = true;
@@ -384,7 +396,7 @@ class App extends iron.Trait {
 		if (showFiles) renderFiles(g);
 	}
 
-	static var path = '/';
+	public static var path = '/';
 	static function renderFiles(g:kha.graphics2.Graphics) {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
@@ -398,9 +410,9 @@ class App extends iron.Trait {
 		g.end();
 		uimodal.begin(g);
 		var pathHandle = Id.handle();
-		var whandle = Id.handle();
 		if (uimodal.window(whandle, left, top, modalW, modalH - 50, true)) {
-			pathHandle.text = uimodal.textInput(pathHandle);
+			pathHandle.text = uimodal.textInput(pathHandle, "Path");
+			if (showFilename) filenameHandle.text = uimodal.textInput(filenameHandle, "File");
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);

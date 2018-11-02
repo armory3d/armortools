@@ -3,7 +3,7 @@ package arm;
 import iron.RenderPath;
 
 class LayerSlot {
-	static var counter = 0;
+	public static var counter = 0;
 	public var id = 0;
 	public var visible = true;
 	public var ext = "";

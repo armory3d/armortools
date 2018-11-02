@@ -31,7 +31,7 @@ class FlyCamera extends Trait {
 		if (!arm.App.uienabled) return;
 		if (UITrait.inst.isScrolling) return;
 		if (arm.App.isDragging) return;
-		if (UITrait.inst.cameraType != 2) return;
+		if (UITrait.inst.cameraControls != 2) return;
 		
 		var keyboard = Input.getKeyboard();
 		var gamepad = Input.getGamepad();

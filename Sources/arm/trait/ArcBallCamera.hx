@@ -17,7 +17,7 @@ class ArcBallCamera extends iron.Trait {
 			if (!arm.App.uienabled) return;
 			if (UITrait.inst.isScrolling) return;
 			if (arm.App.isDragging) return;
-			if (UITrait.inst.cameraType != 0) return;
+			if (UITrait.inst.cameraControls != 0) return;
 
 			var mouse = iron.system.Input.getMouse();
 			if (mouse.x < 0 || mouse.x > iron.App.w()) return;

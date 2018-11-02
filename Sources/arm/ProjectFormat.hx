@@ -4,7 +4,7 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 
 typedef TProjectFormat = {
-	public var version:Float;
+	public var version:String;
 	public var brush_nodes:Array<TNodeCanvas>;
 	public var material_nodes:Array<TNodeCanvas>;
 	public var assets:Array<String>;

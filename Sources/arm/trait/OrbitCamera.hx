@@ -17,7 +17,7 @@ class OrbitCamera extends iron.Trait {
 			if (!arm.App.uienabled) return;
 			if (UITrait.inst.isScrolling) return;
 			if (arm.App.isDragging) return;
-			if (UITrait.inst.cameraType != 1) return;
+			if (UITrait.inst.cameraControls != 1) return;
 
 			var mouse = iron.system.Input.getMouse();
 			if (mouse.x < 0 || mouse.x > iron.App.w()) return;
