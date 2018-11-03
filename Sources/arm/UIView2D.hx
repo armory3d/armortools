@@ -134,7 +134,8 @@ void main() {
 
 			// Texture
 			ui.g.pipeline = pipe;
-			var l = UITrait.inst.selectedLayer;
+			// var l = UITrait.inst.selectedLayer;
+			var l = UITrait.inst.layers[0];
 			var tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
 	 		ui.g.drawScaledImage(tex, tx, ty, tw, tw);
 			ui.g.pipeline = null;

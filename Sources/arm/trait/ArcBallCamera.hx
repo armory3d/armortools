@@ -40,11 +40,11 @@ class ArcBallCamera extends iron.Trait {
 				redraws = 2;
 				
 				// Rotate X
-				if (!kb.down("alt")) {
+				// if (!kb.down("alt")) {
 					var v = UITrait.inst.selectedObject.transform.up();
 					v.normalize();
 					UITrait.inst.selectedObject.transform.rotate(v, mouse.movementX / 100);
-				}
+				// }
 				
 				// Rotate Y
 				if (!kb.down("shift")) {

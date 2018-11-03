@@ -2,7 +2,7 @@
 	"FONT_SIZE": 13,
 	"ELEMENT_W": 100,
 	"ELEMENT_H": 22,
-	"ELEMENT_OFFSET": 2,
+	"ELEMENT_OFFSET": 4,
 	"ARROW_SIZE": 5,
 	"BUTTON_H": 17,
 	"CHECK_SIZE": 15,
@@ -20,8 +20,8 @@
 	"WINDOW_TINT_COL": "0xffffffff",
 	"ACCENT_COL": "0xff404040",
 	"ACCENT_HOVER_COL": "0xff505050",
-	"ACCENT_SELECT_COL": "0xff666666",
-	"PANEL_BG_COL": "0xff191919",
+	"ACCENT_SELECT_COL": "0xff606060",
+	"PANEL_BG_COL": "0xff202020",
 	"PANEL_TEXT_COL": "0xffeeeeee",
 	"BUTTON_COL": "0xff2b2b2b",
 	"BUTTON_TEXT_COL": "0xffcac9c7",
@@ -30,5 +30,5 @@
 	"TEXT_COL": "0xffcac9c7",
 	"LABEL_COL": "0xffaaaaaa",
 	"ARROW_COL": "0xffcac9c7",
-	"SEPARATOR_COL": "0xff262626"
+	"SEPARATOR_COL": "0xff101010"
 }

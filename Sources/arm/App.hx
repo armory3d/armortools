@@ -46,7 +46,7 @@ class App extends iron.Trait {
 			dropY = mouse.y;
 		});
 
-		iron.data.Data.getFont("droid_sans.ttf", function(f:kha.Font) {
+		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
 			iron.data.Data.getBlob("theme.arm", function(b:kha.Blob) {
 				iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
 					theme = haxe.Json.parse(b.toString());
@@ -244,26 +244,31 @@ class App extends iron.Trait {
 										  StringTools.endsWith(base, "_alb") ||
 										  StringTools.endsWith(base, "_basecol") ||
 										  StringTools.endsWith(base, "_basecolor") ||
+										  StringTools.endsWith(base, "_diffuse") ||
 										  StringTools.endsWith(base, "_base") ||
 										  StringTools.endsWith(base, "_bc") ||
+										  StringTools.endsWith(base, "_d") ||
 										  StringTools.endsWith(base, "_col"))) {
 						mapbase = f;
 						valid = true;
 					}
 					if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
 										 StringTools.endsWith(base, "_nor") ||
+										 StringTools.endsWith(base, "_n") ||
 										 StringTools.endsWith(base, "_nrm"))) {
 						mapnor = f;
 						valid = true;
 					}
 					if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
 										 StringTools.endsWith(base, "_occlusion") ||
+										 StringTools.endsWith(base, "_o") ||
 										 StringTools.endsWith(base, "_occ"))) {
 						mapocc = f;
 						valid = true;
 					}
 					if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
 										   StringTools.endsWith(base, "_roug") ||
+										   StringTools.endsWith(base, "_r") ||
 										   StringTools.endsWith(base, "_rough") ||
 										   StringTools.endsWith(base, "_rgh"))) {
 						maprough = f;
@@ -272,12 +277,14 @@ class App extends iron.Trait {
 					if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
 										 StringTools.endsWith(base, "_metal") ||
 										 StringTools.endsWith(base, "_metalness") ||
+										 StringTools.endsWith(base, "_m") ||
 										 StringTools.endsWith(base, "_met"))) {
 						mapmet = f;
 						valid = true;
 					}
 					if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
 										    StringTools.endsWith(base, "_height") ||
+										    StringTools.endsWith(base, "_h") ||
 											StringTools.endsWith(base, "_disp"))) {
 						mapheight = f;
 						valid = true;

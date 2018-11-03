@@ -40,12 +40,12 @@ class OrbitCamera extends iron.Trait {
 				redraws = 2;
 				
 				// Rotate X
-				if (!kb.down("alt")) {
+				// if (!kb.down("alt")) {
 					var d = camera.transform.loc.length();
 					camera.transform.loc.set(0, 0, 0);
 					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
 					camera.transform.move(camera.lookWorld(), -d);
-				}
+				// }
 				
 				// Rotate Y
 				if (!kb.down("shift")) {
