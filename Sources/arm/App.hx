@@ -419,7 +419,7 @@ class App extends iron.Trait {
 		var pathHandle = Id.handle();
 		if (uimodal.window(whandle, left, top, modalW, modalH - 50, true)) {
 			pathHandle.text = uimodal.textInput(pathHandle, "Path");
-			if (showFilename) filenameHandle.text = uimodal.textInput(filenameHandle, "File");
+			if (showFilename) uimodal.textInput(filenameHandle, "File");
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);

@@ -14,7 +14,7 @@ def on_make_renderpath():
     arm.assets.add_embedded_data('noise256.png')
 
     if bpy.data.worlds['Arm'].arm_project_name == 'ArmorPaint':
-        if arm.make_state.target == 'krom':
+        if arm.make_state.target.startswith('krom'): # krom, krom-windows,..
             arm.material.mat_utils.add_mesh_contexts = ['voxel'] # Defaults to make_ao
             arm.write_data.add_compiledglsl = """
                 const ivec3 voxelgiResolution = ivec3(256, 256, 256);

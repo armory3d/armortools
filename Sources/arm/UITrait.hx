@@ -1327,43 +1327,45 @@ void main() {
 				my = pen.y + iron.App.y();
 			}
 
+			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
+
 			if (brushPaint == 2) { // Sticker
 				if (mouse.x > 0 && mx < iron.App.w()) {
 					// var psize = Std.int(stickerImage.width * (brushRadius * brushNodesRadius));
-					var psize = Std.int(256 * (brushRadius * brushNodesRadius));
+					psize = Std.int(256 * (brushRadius * brushNodesRadius));
 					g.drawScaledImage(stickerImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
 				}
 			}
 			else {
-				var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
-
 				// if (mouse.x > 0 && mx < iron.App.w()) {
+				// if (brushType == 0 || brushType == 1 || brushType == 4) {
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				// }
+				// }
+			}
 
-				if (mirrorX) {
-					var cx = iron.App.x() + iron.App.w() / 2;
-					var nx = cx + (cx - mx);
-					// Separator line
-					g.color = 0x66ffffff;
-					g.fillRect(cx - 1, 0, 2, iron.App.h());
-					// Cursor
-					g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
-					g.color = 0xffffffff;
-				}
-				if (showGrid) {
-					// Separator line
-					var x1 = iron.App.x() + iron.App.w() / 3;
-					var x2 = iron.App.x() + iron.App.w() / 3 * 2;
-					var y1 = iron.App.y() + iron.App.h() / 3;
-					var y2 = iron.App.y() + iron.App.h() / 3 * 2;
-					g.color = 0x66ffffff;
-					g.fillRect(x1 - 1, 0, 2, iron.App.h());
-					g.fillRect(x2 - 1, 0, 2, iron.App.h());
-					g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
-					g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
-					g.color = 0xffffffff;
-				}
+			if (mirrorX) {
+				var cx = iron.App.x() + iron.App.w() / 2;
+				var nx = cx + (cx - mx);
+				// Separator line
+				g.color = 0x66ffffff;
+				g.fillRect(cx - 1, 0, 2, iron.App.h());
+				// Cursor
+				g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+				g.color = 0xffffffff;
+			}
+			if (showGrid) {
+				// Separator line
+				var x1 = iron.App.x() + iron.App.w() / 3;
+				var x2 = iron.App.x() + iron.App.w() / 3 * 2;
+				var y1 = iron.App.y() + iron.App.h() / 3;
+				var y2 = iron.App.y() + iron.App.h() / 3 * 2;
+				g.color = 0x66ffffff;
+				g.fillRect(x1 - 1, 0, 2, iron.App.h());
+				g.fillRect(x2 - 1, 0, 2, iron.App.h());
+				g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
+				g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
+				g.color = 0xffffffff;
 			}
 		}
 
@@ -3238,7 +3240,7 @@ void main() {
 
 			if (layers.length > 0) UINodes.inst.parseMeshMaterial();
 
-			ddirty = 2;
+			ddirty = 4;
 			hwnd.redraws = 2;
 		});
 	}
