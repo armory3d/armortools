@@ -81,72 +81,6 @@ class NodeCreator {
 		var canvas = UINodes.inst.canvas;
 		
 		if (cat == 0) { // Input
-			if (ui.button("RGB")) {
-				var node_id = nodes.getNodeId(canvas.nodes);
-				var n:TNode = {
-					id: node_id,
-					name: "RGB",
-					type: "RGB",
-					x: getNodeX(),
-					y: getNodeY(),
-					color: 0xffb34f5a,
-					inputs: [],
-					outputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Color",
-							type: "RGBA",
-							color: 0xffc7c729,
-							default_value: [0.5, 0.5, 0.5, 1.0]
-						}
-					],
-					buttons: [
-						{
-							name: "default_value",
-							type: "RGBA",
-							output: 0
-						}
-					]
-				};
-				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
-			if (ui.button("Value")) {
-				var node_id = nodes.getNodeId(canvas.nodes);
-				var n:TNode = {
-					id: node_id,
-					name: "Value",
-					type: "VALUE",
-					x: getNodeX(),
-					y: getNodeY(),
-					color: 0xffb34f5a,
-					inputs: [],
-					outputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Value",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.5
-						}
-					],
-					buttons: [
-						{
-							name: "default_value",
-							type: "VALUE",
-							output: 0,
-							min: 0.0,
-							max: 10.0
-						}
-					]
-				};
-				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
 			if (ui.button("Attribute")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
@@ -464,6 +398,38 @@ class NodeCreator {
 				nodes.nodeDrag = n;
 				nodes.nodeSelected = n;
 			}
+			if (ui.button("RGB")) {
+				var node_id = nodes.getNodeId(canvas.nodes);
+				var n:TNode = {
+					id: node_id,
+					name: "RGB",
+					type: "RGB",
+					x: getNodeX(),
+					y: getNodeY(),
+					color: 0xffb34f5a,
+					inputs: [],
+					outputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Color",
+							type: "RGBA",
+							color: 0xffc7c729,
+							default_value: [0.5, 0.5, 0.5, 1.0]
+						}
+					],
+					buttons: [
+						{
+							name: "default_value",
+							type: "RGBA",
+							output: 0
+						}
+					]
+				};
+				canvas.nodes.push(n);
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
 			if (ui.button("Tangent")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
@@ -590,6 +556,40 @@ class NodeCreator {
 				nodes.nodeDrag = n;
 				nodes.nodeSelected = n;
 			}
+			if (ui.button("Value")) {
+				var node_id = nodes.getNodeId(canvas.nodes);
+				var n:TNode = {
+					id: node_id,
+					name: "Value",
+					type: "VALUE",
+					x: getNodeX(),
+					y: getNodeY(),
+					color: 0xffb34f5a,
+					inputs: [],
+					outputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Value",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.5
+						}
+					],
+					buttons: [
+						{
+							name: "default_value",
+							type: "VALUE",
+							output: 0,
+							min: 0.0,
+							max: 10.0
+						}
+					]
+				};
+				canvas.nodes.push(n);
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
 		}
 		if (cat == 1) { // Output
 			if (ui.button("Material Output")) {
@@ -685,11 +685,6 @@ class NodeCreator {
 			}
 		}
 		if (cat == 2) { // Texture
-			if (ui.button("Image")) {
-				var n = createImageTexture();
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
 			if (ui.button("Brick")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
@@ -888,6 +883,11 @@ class NodeCreator {
 				nodes.nodeDrag = n;
 				nodes.nodeSelected = n;
 			}
+			if (ui.button("Image")) {
+				var n = createImageTexture();
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
 			if (ui.button("Magic")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
@@ -947,59 +947,6 @@ class NodeCreator {
 					id: node_id,
 					name: "Musgrave Texture",
 					type: "TEX_MUSGRAVE",
-					x: getNodeX(),
-					y: getNodeY(),
-					color: 0xff4982a0,
-					inputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Vector",
-							type: "VECTOR",
-							color: 0xff6363c7,
-							default_value: [0.0, 0.0, 0.0]
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Scale",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 5.0,
-							min: 0.0,
-							max: 10.0
-						}
-					],
-					outputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Color",
-							type: "RGBA",
-							color: 0xffc7c729,
-							default_value: [0.8, 0.8, 0.8, 1.0]
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Fac",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 1.0
-						}
-					],
-					buttons: []
-				};
-				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
-			if (ui.button("Wave")) {
-				var node_id = nodes.getNodeId(canvas.nodes);
-				var n:TNode = {
-					id: node_id,
-					name: "Wave Texture",
-					type: "TEX_WAVE",
 					x: getNodeX(),
 					y: getNodeY(),
 					color: 0xff4982a0,
@@ -1156,6 +1103,59 @@ class NodeCreator {
 							output: 0
 						}
 					]
+				};
+				canvas.nodes.push(n);
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
+			if (ui.button("Wave")) {
+				var node_id = nodes.getNodeId(canvas.nodes);
+				var n:TNode = {
+					id: node_id,
+					name: "Wave Texture",
+					type: "TEX_WAVE",
+					x: getNodeX(),
+					y: getNodeY(),
+					color: 0xff4982a0,
+					inputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Vector",
+							type: "VECTOR",
+							color: 0xff6363c7,
+							default_value: [0.0, 0.0, 0.0]
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Scale",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 5.0,
+							min: 0.0,
+							max: 10.0
+						}
+					],
+					outputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Color",
+							type: "RGBA",
+							color: 0xffc7c729,
+							default_value: [0.8, 0.8, 0.8, 1.0]
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Fac",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 1.0
+						}
+					],
+					buttons: []
 				};
 				canvas.nodes.push(n);
 				nodes.nodeDrag = n;
@@ -1652,12 +1652,12 @@ class NodeCreator {
 			// VECT_TRANSFORM
 		}
 		if (cat == 5) { // Converter
-			if (ui.button("Combine RGB")) {
+			if (ui.button("Color Ramp")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
-					name: "Combine RGB",
-					type: "COMBRGB",
+					name: "Color Ramp",
+					type: "VALTORGB",
 					x: getNodeX(),
 					y: getNodeY(),
 					color: 0xff62676d,
@@ -1665,26 +1665,10 @@ class NodeCreator {
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "R",
+							name: "Fac",
 							type: "VALUE",
 							color: 0xffa1a1a1,
-							default_value: 0.0
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "G",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "B",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
+							default_value: 0.5
 						}
 					],
 					outputs: [
@@ -1694,10 +1678,26 @@ class NodeCreator {
 							name: "Color",
 							type: "RGBA",
 							color: 0xffc7c729,
-							default_value: [0.8, 0.8, 0.8, 1.0]
+							default_value: [0.0, 0.0, 0.0, 1.0]
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Alpha",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
 						}
 					],
-					buttons: []
+					buttons: [
+						{
+							name: "Ramp",
+							type: "RAMP",
+							default_value: [[1.0, 1.0, 1.0, 1.0, 0.0]],
+							data: 0,
+							output: 0
+						}
+					]
 				};
 				canvas.nodes.push(n);
 				nodes.nodeDrag = n;
@@ -1733,6 +1733,57 @@ class NodeCreator {
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
 							name: "V",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						}
+					],
+					outputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Color",
+							type: "RGBA",
+							color: 0xffc7c729,
+							default_value: [0.8, 0.8, 0.8, 1.0]
+						}
+					],
+					buttons: []
+				};
+				canvas.nodes.push(n);
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
+			if (ui.button("Combine RGB")) {
+				var node_id = nodes.getNodeId(canvas.nodes);
+				var n:TNode = {
+					id: node_id,
+					name: "Combine RGB",
+					type: "COMBRGB",
+					x: getNodeX(),
+					y: getNodeY(),
+					color: 0xff62676d,
+					inputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "R",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "G",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "B",
 							type: "VALUE",
 							color: 0xffa1a1a1,
 							default_value: 0.0
@@ -1800,116 +1851,6 @@ class NodeCreator {
 						}
 					],
 					buttons: []
-				};
-				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
-			if (ui.button("Color Ramp")) {
-				var node_id = nodes.getNodeId(canvas.nodes);
-				var n:TNode = {
-					id: node_id,
-					name: "Color Ramp",
-					type: "VALTORGB",
-					x: getNodeX(),
-					y: getNodeY(),
-					color: 0xff62676d,
-					inputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Fac",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.5
-						}
-					],
-					outputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Color",
-							type: "RGBA",
-							color: 0xffc7c729,
-							default_value: [0.0, 0.0, 0.0, 1.0]
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Alpha",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
-						}
-					],
-					buttons: [
-						{
-							name: "Ramp",
-							type: "RAMP",
-							default_value: [[1.0, 1.0, 1.0, 1.0, 0.0]],
-							data: 0,
-							output: 0
-						}
-					]
-				};
-				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
-			}
-			if (ui.button("Vector Math")) {
-				var node_id = nodes.getNodeId(canvas.nodes);
-				var n:TNode = {
-					id: node_id,
-					name: "Vector Math",
-					type: "VECT_MATH",
-					x: getNodeX(),
-					y: getNodeY(),
-					color: 0xff62676d,
-					inputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Vector",
-							type: "VECTOR",	
-							color: 0xff6363c7,
-							default_value: [0.0, 0.0, 0.0]
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Vector",
-							type: "VECTOR",
-							color: 0xff6363c7,
-							default_value: [0.0, 0.0, 0.0]
-						}
-					],
-					outputs: [
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Vector",
-							type: "VECTOR",
-							color: 0xff6363c7,
-							default_value: [0.0, 0.0, 0.0]
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "Value",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
-						}
-					],
-					buttons: [
-						{
-							name: "operation",
-							type: "ENUM",
-							data: ["Add", "Subtract", "Average", "Dot Product", "Cross Product", "Normalize"],
-							default_value: 0,
-							output: 0
-						}
-					]
 				};
 				canvas.nodes.push(n);
 				nodes.nodeDrag = n;
@@ -1996,6 +1937,57 @@ class NodeCreator {
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
 							name: "Val",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						}
+					],
+					buttons: []
+				};
+				canvas.nodes.push(n);
+				nodes.nodeDrag = n;
+				nodes.nodeSelected = n;
+			}
+			if (ui.button("Separate HSV")) {
+				var node_id = nodes.getNodeId(canvas.nodes);
+				var n:TNode = {
+					id: node_id,
+					name: "Separate HSV",
+					type: "SEPHSV",
+					x: getNodeX(),
+					y: getNodeY(),
+					color: 0xff62676d,
+					inputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Color",
+							type: "RGBA",
+							color: 0xffc7c729,
+							default_value: [0.5, 0.5, 0.5, 1.0]
+						}
+					],
+					outputs: [
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "H",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "S",
+							type: "VALUE",
+							color: 0xffa1a1a1,
+							default_value: 0.0
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "V",
 							type: "VALUE",
 							color: 0xffa1a1a1,
 							default_value: 0.0
@@ -2109,12 +2101,12 @@ class NodeCreator {
 				nodes.nodeDrag = n;
 				nodes.nodeSelected = n;
 			}
-			if (ui.button("Separate HSV")) {
+			if (ui.button("Vector Math")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
-					name: "Separate HSV",
-					type: "SEPHSV",
+					name: "Vector Math",
+					type: "VECT_MATH",
 					x: getNodeX(),
 					y: getNodeY(),
 					color: 0xff62676d,
@@ -2122,39 +2114,47 @@ class NodeCreator {
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "Color",
-							type: "RGBA",
-							color: 0xffc7c729,
-							default_value: [0.5, 0.5, 0.5, 1.0]
+							name: "Vector",
+							type: "VECTOR",	
+							color: 0xff6363c7,
+							default_value: [0.0, 0.0, 0.0]
+						},
+						{
+							id: nodes.getSocketId(canvas.nodes),
+							node_id: node_id,
+							name: "Vector",
+							type: "VECTOR",
+							color: 0xff6363c7,
+							default_value: [0.0, 0.0, 0.0]
 						}
 					],
 					outputs: [
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "H",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
+							name: "Vector",
+							type: "VECTOR",
+							color: 0xff6363c7,
+							default_value: [0.0, 0.0, 0.0]
 						},
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "S",
-							type: "VALUE",
-							color: 0xffa1a1a1,
-							default_value: 0.0
-						},
-						{
-							id: nodes.getSocketId(canvas.nodes),
-							node_id: node_id,
-							name: "V",
+							name: "Value",
 							type: "VALUE",
 							color: 0xffa1a1a1,
 							default_value: 0.0
 						}
 					],
-					buttons: []
+					buttons: [
+						{
+							name: "operation",
+							type: "ENUM",
+							data: ["Add", "Subtract", "Average", "Dot Product", "Cross Product", "Normalize"],
+							default_value: 0,
+							output: 0
+						}
+					]
 				};
 				canvas.nodes.push(n);
 				nodes.nodeDrag = n;

@@ -180,6 +180,11 @@ class UITrait extends iron.Trait {
 	var originalBias = 0.0;
 	var camHandle = new Zui.Handle({position: 0});
 	var fovHandle:Zui.Handle = null;
+	var hssgi:Zui.Handle = null;
+	var hssr:Zui.Handle = null;
+	var hbloom:Zui.Handle = null;
+	var hshadowmap:Zui.Handle = null;
+	var hsupersample:Zui.Handle = null;
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -526,7 +531,7 @@ class UITrait extends iron.Trait {
 
 	function done() {
 
-		notifyOnInit(function() {
+		// notifyOnInit(function() {
 		// iron.Scene.active.notifyOnInit(function() { ////
 
 			// var pui = iron.Scene.active.getChild("PlaneUI"); ////
@@ -563,7 +568,7 @@ class UITrait extends iron.Trait {
 					});
 				}
 			}
-		});
+		// });
 	}
 
 	function update() {
@@ -599,7 +604,7 @@ class UITrait extends iron.Trait {
 
 		if (!arm.App.uimodal.isTyping) {
 			if (kb.started("escape")) arm.App.showFiles = false;
-			if (kb.started("enter")) {
+			if (arm.App.showFiles && kb.started("enter")) {
 				arm.App.showFiles = false;
 				arm.App.filesDone(arm.App.path);
 				UITrait.inst.ddirty = 2;
@@ -1331,7 +1336,10 @@ void main() {
 			}
 			else {
 				var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
-				g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+
+				// if (mouse.x > 0 && mx < iron.App.w()) {
+					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				// }
 
 				if (mirrorX) {
 					var cx = iron.App.x() + iron.App.w() / 2;
@@ -2121,7 +2129,7 @@ void main() {
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Project Quality", 1)) {
+				if (ui.panel(Id.handle({selected: false}), "Project Quality", 1)) {
 					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
 					if (resHandle.changed) {
 						iron.App.notifyOnRender(resizeLayers);
@@ -2492,18 +2500,22 @@ void main() {
 				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
 				#end
 
-				var hssgi = Id.handle({selected: C.rp_ssgi});
-				var hssr = Id.handle({selected: C.rp_ssr});
-				var hbloom = Id.handle({selected: C.rp_bloom});
-				var hshadowmap = Id.handle({position: getShadowQuality(C.rp_shadowmap)});
-				var hsupersample = Id.handle({position: getSuperSampleQuality(C.rp_supersample)});
+				hssgi = Id.handle({selected: C.rp_ssgi});
+				hssr = Id.handle({selected: C.rp_ssr});
+				hbloom = Id.handle({selected: C.rp_bloom});
+				hshadowmap = Id.handle({position: getShadowQuality(C.rp_shadowmap)});
+				hsupersample = Id.handle({position: getSuperSampleQuality(C.rp_supersample)});
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
 					ui.row([1/2, 1/2]);
 					ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
+					if (hshadowmap.changed) applyConfig();
 					ui.combo(hsupersample, ["0.5x", "1.0x", "1.5x", "2.0x"], "Super Sample", true);
+					if (hsupersample.changed) applyConfig();
 					ui.row([1/2, 1/2]);
-					C.window_vsync = ui.check(Id.handle({selected: C.window_vsync}), "VSync");
+					var vsyncHandle = Id.handle({selected: C.window_vsync});
+					C.window_vsync = ui.check(vsyncHandle, "VSync");
+					if (vsyncHandle.changed) applyConfig();
 					var cullHandle = Id.handle({selected: culling});
 					culling = ui.check(cullHandle, "Culling");
 					if (cullHandle.changed) {
@@ -2530,30 +2542,12 @@ void main() {
 					}
 					iron.Scene.active.world.envmap = drawWorld ? savedEnvmap : emptyEnvmap;
 					ui.check(hssgi, "SSAO");
+					if (hssgi.changed) applyConfig();
 					ui.row([1/2, 1/2]);
 					ui.check(hssr, "SSR");
+					if (hssr.changed) applyConfig();
 					ui.check(hbloom, "Bloom");
-				}
-
-				if (ui.button("Apply")) {
-					C.rp_ssgi = hssgi.selected;
-					C.rp_ssr = hssr.selected;
-					C.rp_bloom = hbloom.selected;
-					var wasOff = C.rp_shadowmap == 1;
-					C.rp_shadowmap = getShadowMapSize(hshadowmap.position);
-					var light = iron.Scene.active.lights[0];
-					if (C.rp_shadowmap == 1) {
-						light.data.raw.strength = 0;
-					}
-					else if (wasOff) {
-						light.data.raw.strength = 6.5;
-					}
-					C.rp_supersample = getSuperSampleSize(hsupersample.position);
-					ui.g.end();
-					armory.data.Config.save();
-					armory.renderpath.RenderPathCreator.applyConfig();
-					ui.g.begin(false);
-					ddirty = 2;
+					if (hbloom.changed) applyConfig();
 				}
 
 				ui.separator();
@@ -3024,6 +3018,10 @@ void main() {
 		arm.App.foldersOnly = false;
 		arm.App.showFilename = false;
 		arm.App.filesDone = function(path:String) {
+			if (!StringTools.endsWith(path, ".arm")) {
+				showMessage(".arm file expected");
+				return;
+			}
 			importProject(path);
 		};
 	}
@@ -3350,5 +3348,26 @@ void main() {
 			g.vertexBuffer.unlock();
 			g.vertexBufferMap.get("pos").unlock();
 		}
+	}
+
+	function applyConfig() {
+		C.rp_ssgi = hssgi.selected;
+		C.rp_ssr = hssr.selected;
+		C.rp_bloom = hbloom.selected;
+		var wasOff = C.rp_shadowmap == 1;
+		C.rp_shadowmap = getShadowMapSize(hshadowmap.position);
+		var light = iron.Scene.active.lights[0];
+		if (C.rp_shadowmap == 1) {
+			light.data.raw.strength = 0;
+		}
+		else if (wasOff) {
+			light.data.raw.strength = 6.5;
+		}
+		C.rp_supersample = getSuperSampleSize(hsupersample.position);
+		ui.g.end();
+		armory.data.Config.save();
+		armory.renderpath.RenderPathCreator.applyConfig();
+		ui.g.begin(false);
+		ddirty = 2;
 	}
 }

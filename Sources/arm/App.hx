@@ -144,7 +144,7 @@ class App extends iron.Trait {
 		UITrait.inst.ddirty = 2;
 
 		var lay = UITrait.inst.C.ui_layout;
-		appx = lay == 0 ? 0 : UITrait.inst.windowW;
+		appx = (lay == 0 || !UITrait.inst.show) ? 0 : UITrait.inst.windowW;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) appx += iron.App.w();
 
 		if (UINodes.inst.grid != null) {

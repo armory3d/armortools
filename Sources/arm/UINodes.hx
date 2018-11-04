@@ -422,7 +422,7 @@ class UINodes extends iron.Trait {
 	}
 
 	function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
-		var layered = UITrait.inst.selectedLayer.id > 0;
+		var layered = UITrait.inst.selectedLayer != UITrait.inst.layers[0];
 		var eraser = UITrait.inst.brushType == 1;
 		var context_id = 'paint';
 		var con_paint:CyclesShaderContext = data.add_context({
