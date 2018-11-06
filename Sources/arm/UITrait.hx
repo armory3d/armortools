@@ -726,7 +726,7 @@ class UITrait extends iron.Trait {
 		iron.Scene.active.camera.data.raw.fov = 0.92;
 		var light = iron.Scene.active.lights[0];
 		light.data.raw.cast_shadow = false;
-		// iron.Scene.active.world.envmap = previewEnvmap;
+		iron.Scene.active.world.envmap = previewEnvmap;
 
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
@@ -2058,7 +2058,7 @@ void main() {
 					ui.row([1/2, 1/2]);
 					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Envmap");
 					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 5.0, true);
+					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 					if (envHandle.changed) ddirty = 2;
 					ui.row([1/2, 1/2]);
 					var modeHandle = Id.handle({position: 0});
@@ -2071,7 +2071,7 @@ void main() {
 						var light = iron.Scene.active.lights[0];
 						var lhandle = Id.handle();
 						lhandle.value = light.data.raw.strength / 10;
-						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 5.0, true) * 10;
+						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 10;
 						if (lhandle.changed) ddirty = 2;
 					}
 
