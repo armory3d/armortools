@@ -47,7 +47,7 @@ class UITrait extends iron.Trait {
 	var savedEnvmap:kha.Image = null;
 	var emptyEnvmap:kha.Image = null;
 	var previewEnvmap:kha.Image = null;
-	var drawWorld = true;
+	var showEnvmap = false;
 	public var culling = true;
 
 	public var ddirty = 0;
@@ -66,7 +66,7 @@ class UITrait extends iron.Trait {
 	var formatQuality = 80.0;
 	var outputType = 0;
 	var isBase = true;
-	var isBaseSpace = 1;
+	var isBaseSpace = 0;
 	var isOpac = true;
 	var isOpacSpace = 0;
 	var isOcc = true;
@@ -177,9 +177,10 @@ class UITrait extends iron.Trait {
 	public var cameraControls = 0;
 	#end
 	public var cameraType = 0;
-	var originalBias = 0.0;
+	var originalShadowBias = 0.0;
 	var camHandle = new Zui.Handle({position: 0});
 	var fovHandle:Zui.Handle = null;
+	var undoHandle:Zui.Handle = null;
 	var hssgi:Zui.Handle = null;
 	var hssr:Zui.Handle = null;
 	var hbloom:Zui.Handle = null;
@@ -250,7 +251,7 @@ class UITrait extends iron.Trait {
 	function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 
 		if (link == '_sub') {
-			var seps = brushBias * 0.0004;
+			var seps = brushBias * 0.0004 * getTextureResBias();
 			sub = (sub + 1) % 9;
 			if (sub == 0) vec2.set(0.0 + seps, 0.0, 0.0);
 			else if (sub == 1) vec2.set(0.0 - seps, 0.0, 0.0);
@@ -760,7 +761,7 @@ class UITrait extends iron.Trait {
 		iron.Scene.active.camera.buildMatrix();
 		var light = iron.Scene.active.lights[0];
 		light.data.raw.cast_shadow = true;
-		iron.Scene.active.world.envmap = drawWorld ? savedEnvmap : emptyEnvmap;
+		iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
 	}
 
@@ -1114,6 +1115,11 @@ class UITrait extends iron.Trait {
 	}
 
 	function resizeLayers(g:kha.graphics4.Graphics) {
+		if (resHandle.position >= 4) { // Save memory for >=16k
+			C.undo_steps = resHandle.position == 4 ? 1 : 0; // 1 undo for 16k, 0 for 20k
+			if (undoHandle != null) undoHandle.value = C.undo_steps;
+			while (undoLayers.length > C.undo_steps) { var l = undoLayers.pop(); l.unload(); }
+		}
 		g.end();
 		for (l in layers) resizeLayer(l);
 		for (l in undoLayers) resizeLayer(l);
@@ -1236,6 +1242,16 @@ void main() {
 		return 0;
 	}
 
+	function getTextureResBias():Float {
+		if (resHandle.position == 0) return 2.0;
+		if (resHandle.position == 1) return 1.5;
+		if (resHandle.position == 2) return 1.0;
+		if (resHandle.position == 3) return 0.5;
+		if (resHandle.position == 4) return 0.25;
+		if (resHandle.position == 5) return 0.125;
+		return 1.0;
+	}
+
 	function getTextureResPos(i:Int):Int {
 		if (i == 1024) return 0;
 		if (i == 2048) return 1;
@@ -1306,6 +1322,7 @@ void main() {
 		if (mergedObject == null || maskHandle.position == 1) { // Single object or object mask set to none
 			paintObject.skip_context = "";
 		}
+		UIView2D.inst.uvmapCached = false;
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {
@@ -2012,8 +2029,8 @@ void main() {
 						if (cameraType == 0) cam.data.raw.ortho_scale = null;
 						else cam.data.raw.ortho_scale = 1.0;
 						
-						if (originalBias <= 0) originalBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
-						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalBias : originalBias * 15;
+						if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
+						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
 						cam.buildProjection();
 						
 						ddirty = 2;
@@ -2024,6 +2041,7 @@ void main() {
 					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 					if (fovHandle.changed) {
 						cam.buildProjection();
+						ddirty = 2;
 					}
 					if (ui.button("Reset")) {
 						resetViewport();
@@ -2073,7 +2091,29 @@ void main() {
 						ddirty = 2;
 					}
 
+					ui.row([1/2, 1/2]);
+					var showEnvmapHandle = Id.handle({selected: showEnvmap});
+					showEnvmap = ui.check(showEnvmapHandle, "Show Envmap");
+					if (showEnvmapHandle.changed) {
+						ddirty = 2;
+					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Show Grid");
+
+					if (!showEnvmap) {
+						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
+							var hwheel = Id.handle({color: 0xff030303});
+							var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
+							if (hwheel.changed) {
+								var b = emptyEnvmap.lock();
+								b.set(0, worldColor.Rb);
+								b.set(1, worldColor.Gb);
+								b.set(2, worldColor.Bb);
+								emptyEnvmap.unlock();
+								ddirty = 2;
+							}
+						}
+					}
+					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
 				}
 
 				// Draw plugins
@@ -2482,7 +2522,7 @@ void main() {
 
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
-					var undoHandle = Id.handle({value: C.undo_steps});
+					undoHandle = Id.handle({value: C.undo_steps});
 					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 0, 64, false, 1));
 					if (undoHandle.changed) {
 						ui.g.end();
@@ -2519,33 +2559,14 @@ void main() {
 					C.window_vsync = ui.check(vsyncHandle, "VSync");
 					if (vsyncHandle.changed) applyConfig();
 					var cullHandle = Id.handle({selected: culling});
-					culling = ui.check(cullHandle, "Culling");
+					culling = ui.check(cullHandle, "Cull Backfaces");
 					if (cullHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}
 					ui.row([1/2, 1/2]);
-					var drawWorldHandle = Id.handle({selected: drawWorld});
-					drawWorld = ui.check(drawWorldHandle, "Envmap");
-					if (drawWorldHandle.changed) {
-						ddirty = 2;
-					}
-					if (!drawWorld) {
-						var hwheel = Id.handle({color: 0xff030303});
-						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
-						if (hwheel.changed) {
-							var b = emptyEnvmap.lock();
-							b.set(0, worldColor.Rb);
-							b.set(1, worldColor.Gb);
-							b.set(2, worldColor.Bb);
-							emptyEnvmap.unlock();
-							ddirty = 2;
-						}
-					}
-					iron.Scene.active.world.envmap = drawWorld ? savedEnvmap : emptyEnvmap;
 					ui.check(hssgi, "SSAO");
 					if (hssgi.changed) applyConfig();
-					ui.row([1/2, 1/2]);
 					ui.check(hssr, "SSR");
 					if (hssr.changed) applyConfig();
 					ui.check(hbloom, "Bloom");
@@ -2582,14 +2603,6 @@ void main() {
 		}
 		ui.end();
 		g.begin(false);
-
-		if (arm.App.dragAsset != null) {
-			ddirty = 2;
-			var mouse = iron.system.Input.getMouse();
-			var ratio = 128 / getImage(arm.App.dragAsset).width;
-			var h = getImage(arm.App.dragAsset).height * ratio;
-			g.drawScaledImage(getImage(arm.App.dragAsset), mouse.x, mouse.y, 128, h);
-		}
 	}
 
 	inline function getShadowQuality(i:Int):Int {
@@ -2940,6 +2953,10 @@ void main() {
 				iron.data.Data.deleteMesh(paintObject.data.handle);
 				autoFillHandle.selected = false;
 
+				while (layers.length > 1) { var l = layers.pop(); l.unload(); }
+				selectedLayer = layers[0];
+				UINodes.inst.parseMeshMaterial();
+				UINodes.inst.parsePaintMaterial();
 				iron.App.notifyOnRender(initLayers);
 				if (paintHeight) iron.App.notifyOnRender(initHeightLayer);
 				
@@ -3303,8 +3320,8 @@ void main() {
 				if (fovHandle != null) fovHandle.value = 0.92;
 				camHandle.position = 0;
 				cam.data.raw.ortho_scale = null;
-				if (originalBias > 0) {
-					iron.Scene.active.lights[0].data.raw.shadows_bias = originalBias;
+				if (originalShadowBias > 0) {
+					iron.Scene.active.lights[0].data.raw.shadows_bias = originalShadowBias;
 				}
 				cam.buildProjection();
 				selectedObject.transform.reset();
@@ -3317,8 +3334,9 @@ void main() {
 	function switchUpAxis(axisUp:Int) {
 		for (p in paintObjects) {
 			var g = p.data.geom;
-			var vertices = g.vertexBuffer.lock();
+			var vertices = g.vertexBuffer.lock(); // posnortex
 			var verticesDepth = g.vertexBufferMap.get("pos").lock();
+			var verticesVox = g.vertexBufferMap.get("posnor").lock();
 			if (axisUp == 1) { // Y
 				for (i in 0...Std.int(vertices.length / g.structLength)) {
 					var f = vertices[i * g.structLength + 1];
@@ -3331,6 +3349,10 @@ void main() {
 					f = verticesDepth[i * 3 + 1];
 					verticesDepth[i * 3 + 1] = verticesDepth[i * 3 + 2];
 					verticesDepth[i * 3 + 2] = -f;
+
+					f = verticesVox[i * 6 + 1];
+					verticesVox[i * 6 + 1] = verticesVox[i * 6 + 2];
+					verticesVox[i * 6 + 2] = -f;
 				}
 			}
 			else { // Z
@@ -3345,10 +3367,15 @@ void main() {
 					f = verticesDepth[i * 3 + 1];
 					verticesDepth[i * 3 + 1] = -verticesDepth[i * 3 + 2];
 					verticesDepth[i * 3 + 2] = f;
+
+					f = verticesVox[i * 6 + 1];
+					verticesVox[i * 6 + 1] = -verticesVox[i * 6 + 2];
+					verticesVox[i * 6 + 2] = f;
 				}
 			}
 			g.vertexBuffer.unlock();
 			g.vertexBufferMap.get("pos").unlock();
+			g.vertexBufferMap.get("posnor").unlock();
 		}
 	}
 

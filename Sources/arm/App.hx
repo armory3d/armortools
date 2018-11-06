@@ -399,6 +399,14 @@ class App extends iron.Trait {
 
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
+		if (arm.App.dragAsset != null) {
+			var mouse = iron.system.Input.getMouse();
+			var img = UITrait.inst.getImage(arm.App.dragAsset);
+			var ratio = 128 / img.width;
+			var h = img.height * ratio;
+			g.drawScaledImage(img, mouse.x, mouse.y, 128, h);
+		}
+
 		uienabled = !showFiles;
 		if (showFiles) renderFiles(g);
 	}
