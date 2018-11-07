@@ -169,7 +169,7 @@ class App extends iron.Trait {
 
 		isDragging = dragAsset != null;
 		if (mouse.released() && isDragging) {
-			if (UINodes.inst.show && mouse.x > UINodes.inst.wx && mouse.y > UINodes.inst.wy) {
+			if (UINodes.inst.show && mouse.x + iron.App.x() > UINodes.inst.wx && mouse.y + iron.App.y() > UINodes.inst.wy) {
 				var index = 0;
 				for (i in 0...UITrait.inst.assets.length) {
 					if (UITrait.inst.assets[i] == dragAsset) {
@@ -219,7 +219,7 @@ class App extends iron.Trait {
 			var img = UITrait.inst.getImage(arm.App.dragAsset);
 			var ratio = 128 / img.width;
 			var h = img.height * ratio;
-			g.drawScaledImage(img, mouse.x, mouse.y, 128, h);
+			g.drawScaledImage(img, mouse.x + iron.App.x(), mouse.y + iron.App.y(), 128, h);
 		}
 
 		uienabled = !showFiles;

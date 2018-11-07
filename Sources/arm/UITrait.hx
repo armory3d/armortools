@@ -188,6 +188,7 @@ class UITrait extends iron.Trait {
 	var hsupersample:Zui.Handle = null;
 	var textureExport = false;
 	var textureExportPath = "";
+	var projectExport = false;
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -771,6 +772,10 @@ class UITrait extends iron.Trait {
 		if (textureExport) {
 			textureExport = false;
 			exportTextures(textureExportPath);
+		}
+		if (projectExport) {
+			projectExport = false;
+			exportProject();
 		}
 
 		isScrolling = ui.isScrolling;
@@ -2678,6 +2683,8 @@ void main() {
 
 		if (paintObject.name == "") paintObject.name = "Object";
 
+		UIView2D.inst.hwnd.redraws = 2;
+
 		#if arm_debug
 		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));
 		#end
@@ -3058,14 +3065,7 @@ void main() {
 		};
 	}
 
-	function projectSave() {
-		if (projectPath == "") {
-			projectSaveAs();
-			return;
-		}
-
-		kha.Window.get(0).title = arm.App.filenameHandle.text + " - ArmorPaint";
-
+	function exportProject() {
 		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
 		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
 
@@ -3107,6 +3107,15 @@ void main() {
 		#end
 	}
 
+	function projectSave() {
+		if (projectPath == "") {
+			projectSaveAs();
+			return;
+		}
+		kha.Window.get(0).title = arm.App.filenameHandle.text + " - ArmorPaint";
+		projectExport = true;
+	}
+
 	function projectSaveAs() {
 		arm.App.showFiles = true;
 		@:privateAccess zui.Ext.lastPath = ""; // Refresh
@@ -3125,13 +3134,18 @@ void main() {
 	function projectNew(resetLayers = true) {
 		kha.Window.get(0).title = "ArmorPaint";
 		projectPath = "";
-		var n = newObjectNames[newObject];
+		if (mergedObject != null) {
+			mergedObject.remove();
+			iron.data.Data.deleteMesh(mergedObject.data.handle);
+			mergedObject = null;
+		}
 		selectPaintObject(paintObjects[0]);
 		for (i in 1...paintObjects.length) {
 			var p = paintObjects[i];
 			iron.data.Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
+		var n = newObjectNames[newObject];
 		iron.data.Data.deleteMesh(paintObject.data.handle);
 		iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
 			autoFillHandle.selected = false;
@@ -3140,10 +3154,6 @@ void main() {
 			paintObject.transform.buildMatrix();
 			paintObject.name = n;
 			paintObjects = [paintObject];
-			if (mergedObject != null) {
-				iron.data.Data.deleteMesh(mergedObject.data.handle);
-				mergedObject = null;
-			}
 			maskHandle.position = 0;
 			ui.g.end();
 			materials = [new MaterialSlot()];
@@ -3458,7 +3468,7 @@ void main() {
 			pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
 		}
 		#if kha_krom
-		if (isBase) Krom.fileSaveBytes(path + "/" + f + "_basecol" + ext, bo.getBytes().getData());
+		if (isBase) Krom.fileSaveBytes(path + "/" + f + "_base" + ext, bo.getBytes().getData());
 		#end
 
 		pixels = selectedLayer.texpaint_nor.getPixels();
