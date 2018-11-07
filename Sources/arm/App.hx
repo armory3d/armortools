@@ -86,6 +86,7 @@ class App extends iron.Trait {
 							iron.App.notifyOnRender2D(render); // Draw on top
 						});
 						
+						appx = UITrait.inst.C.ui_layout == 0 ? 0 : UITrait.inst.windowW;
 					});
 				});
 			});
@@ -153,7 +154,7 @@ class App extends iron.Trait {
 		}
 	}
 
-	static function getAssetIndex(f:String):Int {
+	public static function getAssetIndex(f:String):Int {
 		for (i in 0...UITrait.inst.assets.length) {
 			if (UITrait.inst.assets[i].file == f) {
 				return i;
@@ -182,193 +183,7 @@ class App extends iron.Trait {
 		}
 
 		if (dropPath != "") {
-			var p = dropPath.toLowerCase();
-			// Mesh
-			if (StringTools.endsWith(p, ".obj") ||
-				StringTools.endsWith(p, ".fbx") ||
-				StringTools.endsWith(p, ".blend") ||
-				StringTools.endsWith(p, ".gltf")) {
-				UITrait.inst.importMesh(dropPath);
-			}
-			// Image
-			else if (StringTools.endsWith(p, ".jpg") ||
-					 StringTools.endsWith(p, ".png") ||
-					 StringTools.endsWith(p, ".tga") ||
-					 StringTools.endsWith(p, ".hdr")) {
-				UITrait.inst.importAsset(dropPath);
-				// Place image node
-				if (UINodes.inst.show && dropX > UINodes.inst.wx && dropX < UINodes.inst.wx + UINodes.inst.ww) {
-					UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
-					UINodes.inst.nodes.nodeDrag = null;
-					UINodes.inst.hwnd.redraws = 2;
-				}
-			}
-			// Project
-			else if (StringTools.endsWith(p, ".arm")) {
-				UITrait.inst.importProject(dropPath);
-			}
-			// Folder
-			else if (p.indexOf(".") == -1) {
-				#if kha_krom
-				var systemId = kha.System.systemId;
-				var cmd = systemId == "Windows" ? "dir /b " : "ls ";
-				var sep = systemId == "Windows" ? "\\" : "/";
-				var save = systemId == "Linux" ? "/tmp" : Krom.savePath();
-				save += sep + "dir.txt";
-				Krom.sysCommand(cmd + '"' + dropPath + '"' + ' > ' + '"' + save + '"');
-				var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
-				var files = str.split("\n");
-				var mapbase = "";
-				var mapnor = "";
-				var mapocc = "";
-				var maprough = "";
-				var mapmet = "";
-				var mapheight = "";
-				// Import maps
-				for (f in files) {
-					if (f.length == 0) continue;
-					f = StringTools.rtrim(f);
-					var known = 
-						StringTools.endsWith(f, ".jpg") ||
-						StringTools.endsWith(f, ".png") ||
-						StringTools.endsWith(f, ".tga") ||
-						StringTools.endsWith(f, ".hdr");
-					if (!known) continue;
-					
-					f = dropPath + sep + f;
-					if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
-					
-					var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
-					var valid = false;
-					if (mapbase == "" && (StringTools.endsWith(base, "_albedo") ||
-										  StringTools.endsWith(base, "_alb") ||
-										  StringTools.endsWith(base, "_basecol") ||
-										  StringTools.endsWith(base, "_basecolor") ||
-										  StringTools.endsWith(base, "_diffuse") ||
-										  StringTools.endsWith(base, "_base") ||
-										  StringTools.endsWith(base, "_bc") ||
-										  StringTools.endsWith(base, "_d") ||
-										  StringTools.endsWith(base, "_col"))) {
-						mapbase = f;
-						valid = true;
-					}
-					if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
-										 StringTools.endsWith(base, "_nor") ||
-										 StringTools.endsWith(base, "_n") ||
-										 StringTools.endsWith(base, "_nrm"))) {
-						mapnor = f;
-						valid = true;
-					}
-					if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
-										 StringTools.endsWith(base, "_occlusion") ||
-										 StringTools.endsWith(base, "_o") ||
-										 StringTools.endsWith(base, "_occ"))) {
-						mapocc = f;
-						valid = true;
-					}
-					if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
-										   StringTools.endsWith(base, "_roug") ||
-										   StringTools.endsWith(base, "_r") ||
-										   StringTools.endsWith(base, "_rough") ||
-										   StringTools.endsWith(base, "_rgh"))) {
-						maprough = f;
-						valid = true;
-					}
-					if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
-										 StringTools.endsWith(base, "_metal") ||
-										 StringTools.endsWith(base, "_metalness") ||
-										 StringTools.endsWith(base, "_m") ||
-										 StringTools.endsWith(base, "_met"))) {
-						mapmet = f;
-						valid = true;
-					}
-					if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
-										    StringTools.endsWith(base, "_height") ||
-										    StringTools.endsWith(base, "_h") ||
-											StringTools.endsWith(base, "_disp"))) {
-						mapheight = f;
-						valid = true;
-					}
-
-					if (valid) UITrait.inst.importAsset(f);
-				}
-				// Create material
-				UITrait.inst.selectedMaterial = new MaterialSlot();
-				UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
-				UINodes.inst.updateCanvasMap();
-				var nodes = UINodes.inst.nodes;
-				var canvas = UINodes.inst.canvas;
-				var nout:Nodes.TNode = null;
-				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
-				for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
-				
-				var pos = 0;
-				if (mapbase != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(mapbase);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
-					canvas.links.push(l);
-				}
-				if (mapocc != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(mapocc);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
-					canvas.links.push(l);
-				}
-				if (maprough != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(maprough);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
-					canvas.links.push(l);
-				}
-				if (mapmet != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(mapmet);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
-					canvas.links.push(l);
-				}
-				if (mapnor != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(mapnor);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
-					canvas.links.push(l);
-				}
-				if (mapheight != "") {
-					var n = NodeCreator.createImageTexture();
-					n.buttons[0].default_value = getAssetIndex(mapheight);
-					n.buttons[0].data = mapEnum(getEnumTexts()[n.buttons[0].default_value]);
-					n.x = 72;
-					n.y = 192 + 160 * pos;
-					pos++;
-					var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
-					canvas.links.push(l);
-				}
-				iron.system.Tween.timer(0.01, function() {
-					UINodes.inst.parsePaintMaterial();
-					UITrait.inst.makeMaterialPreview();
-				});
-				#end
-			}
+			UITrait.inst.importFile(dropPath, dropX, dropY);
 			dropPath = "";
 		}
 

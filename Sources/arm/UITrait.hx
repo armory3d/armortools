@@ -154,7 +154,7 @@ class UITrait extends iron.Trait {
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
 	var objectsHandle = new Zui.Handle({selected: false});
-	var maskHandle = new Zui.Handle({position: 1});
+	var maskHandle = new Zui.Handle({position: 0});
 	var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	var newObject = 0;
@@ -186,6 +186,8 @@ class UITrait extends iron.Trait {
 	var hbloom:Zui.Handle = null;
 	var hshadowmap:Zui.Handle = null;
 	var hsupersample:Zui.Handle = null;
+	var textureExport = false;
+	var textureExportPath = "";
 
 	#if arm_editor
 	public var htab = Id.handle({position: 1});
@@ -416,11 +418,203 @@ class UITrait extends iron.Trait {
 		return true;
 	}
 
+	public function importFile(path:String, dropX = -1.0, dropY = -1.0) {
+		var p = path.toLowerCase();
+		// Mesh
+		if (StringTools.endsWith(p, ".obj") ||
+			StringTools.endsWith(p, ".fbx") ||
+			StringTools.endsWith(p, ".blend") ||
+			StringTools.endsWith(p, ".gltf")) {
+			UITrait.inst.importMesh(path);
+		}
+		// Image
+		else if (StringTools.endsWith(p, ".jpg") ||
+				 StringTools.endsWith(p, ".png") ||
+				 StringTools.endsWith(p, ".tga") ||
+				 StringTools.endsWith(p, ".hdr")) {
+			UITrait.inst.importAsset(path);
+			// Place image node
+			if (UINodes.inst.show && dropX > UINodes.inst.wx && dropX < UINodes.inst.wx + UINodes.inst.ww) {
+				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
+				UINodes.inst.nodes.nodeDrag = null;
+				UINodes.inst.hwnd.redraws = 2;
+			}
+		}
+		// Project
+		else if (StringTools.endsWith(p, ".arm")) {
+			UITrait.inst.importProject(path);
+		}
+		// Folder
+		else if (p.indexOf(".") == -1) {
+			#if kha_krom
+			var systemId = kha.System.systemId;
+			var cmd = systemId == "Windows" ? "dir /b " : "ls ";
+			var sep = systemId == "Windows" ? "\\" : "/";
+			var save = systemId == "Linux" ? "/tmp" : Krom.savePath();
+			save += sep + "dir.txt";
+			Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
+			var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
+			var files = str.split("\n");
+			var mapbase = "";
+			var mapnor = "";
+			var mapocc = "";
+			var maprough = "";
+			var mapmet = "";
+			var mapheight = "";
+			// Import maps
+			for (f in files) {
+				if (f.length == 0) continue;
+				f = StringTools.rtrim(f);
+				var known = 
+					StringTools.endsWith(f, ".jpg") ||
+					StringTools.endsWith(f, ".png") ||
+					StringTools.endsWith(f, ".tga") ||
+					StringTools.endsWith(f, ".hdr");
+				if (!known) continue;
+				
+				f = path + sep + f;
+				if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
+				
+				var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
+				var valid = false;
+				if (mapbase == "" && (StringTools.endsWith(base, "_albedo") ||
+									  StringTools.endsWith(base, "_alb") ||
+									  StringTools.endsWith(base, "_basecol") ||
+									  StringTools.endsWith(base, "_basecolor") ||
+									  StringTools.endsWith(base, "_diffuse") ||
+									  StringTools.endsWith(base, "_base") ||
+									  StringTools.endsWith(base, "_bc") ||
+									  StringTools.endsWith(base, "_d") ||
+									  StringTools.endsWith(base, "_col"))) {
+					mapbase = f;
+					valid = true;
+				}
+				if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
+									 StringTools.endsWith(base, "_nor") ||
+									 StringTools.endsWith(base, "_n") ||
+									 StringTools.endsWith(base, "_nrm"))) {
+					mapnor = f;
+					valid = true;
+				}
+				if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
+									 StringTools.endsWith(base, "_occlusion") ||
+									 StringTools.endsWith(base, "_o") ||
+									 StringTools.endsWith(base, "_occ"))) {
+					mapocc = f;
+					valid = true;
+				}
+				if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
+									   StringTools.endsWith(base, "_roug") ||
+									   StringTools.endsWith(base, "_r") ||
+									   StringTools.endsWith(base, "_rough") ||
+									   StringTools.endsWith(base, "_rgh"))) {
+					maprough = f;
+					valid = true;
+				}
+				if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
+									 StringTools.endsWith(base, "_metal") ||
+									 StringTools.endsWith(base, "_metalness") ||
+									 StringTools.endsWith(base, "_m") ||
+									 StringTools.endsWith(base, "_met"))) {
+					mapmet = f;
+					valid = true;
+				}
+				if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
+									    StringTools.endsWith(base, "_height") ||
+									    StringTools.endsWith(base, "_h") ||
+										StringTools.endsWith(base, "_disp"))) {
+					mapheight = f;
+					valid = true;
+				}
+
+				if (valid) UITrait.inst.importAsset(f);
+			}
+			// Create material
+			UITrait.inst.selectedMaterial = new MaterialSlot();
+			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+			UINodes.inst.updateCanvasMap();
+			var nodes = UINodes.inst.nodes;
+			var canvas = UINodes.inst.canvas;
+			var nout:Nodes.TNode = null;
+			for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
+			for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
+			
+			var pos = 0;
+			if (mapbase != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapbase);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
+				canvas.links.push(l);
+			}
+			if (mapocc != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapocc);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
+				canvas.links.push(l);
+			}
+			if (maprough != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(maprough);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
+				canvas.links.push(l);
+			}
+			if (mapmet != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapmet);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
+				canvas.links.push(l);
+			}
+			if (mapnor != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapnor);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
+				canvas.links.push(l);
+			}
+			if (mapheight != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapheight);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
+				canvas.links.push(l);
+			}
+			iron.system.Tween.timer(0.01, function() {
+				UINodes.inst.parsePaintMaterial();
+				UITrait.inst.makeMaterialPreview();
+			});
+			#end
+		}
+	}
+
 	public function importAsset(path:String) {
 		if (!checkImageFormat(path)) {
 			showMessage("Error: Unknown asset format");
 			return;
 		}
+
+		for (a in assets) if (a.file == path) { showMessage("Info: Asset already imported"); return; }
 		
 		iron.data.Data.getImage(path, function(image:kha.Image) {
 			var ar = path.split("/");
@@ -500,6 +694,7 @@ class UITrait extends iron.Trait {
 
 				// World envmap
 				iron.Scene.active.world.envmap = image;
+				savedEnvmap = image;
 
 				// Load mips
 				var mipsCount = 9;
@@ -573,6 +768,11 @@ class UITrait extends iron.Trait {
 	}
 
 	function update() {
+		if (textureExport) {
+			textureExport = false;
+			exportTextures(textureExportPath);
+		}
+
 		isScrolling = ui.isScrolling;
 		updateUI();
 
@@ -1896,7 +2096,7 @@ void main() {
 
 					var i = 0;
 					function drawList(h:zui.Zui.Handle, o:iron.object.MeshObject) {
-						if (o.name.charAt(0) == '.') return; // Hidden
+						// if (o.name.charAt(0) == '.') return; // Hidden
 						var b = false;
 						if (paintObject == o) {
 							ui.g.color = 0xff205d9c;
@@ -2122,6 +2322,18 @@ void main() {
 			if (ui.tab(htab, "Library")) {
 
 				ui.separator();
+				if (ui.button("Import")) {
+					arm.App.showFiles = true;
+					@:privateAccess zui.Ext.lastPath = ""; // Refresh
+					arm.App.whandle.redraws = 2;
+					arm.App.foldersOnly = false;
+					arm.App.showFilename = false;
+					arm.App.filesDone = function(path:String) {
+						importFile(path);
+					}
+				}
+
+				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Assets", 1)) {
 					if (assets.length > 0) {
 						var i = assets.length - 1;
@@ -2135,7 +2347,8 @@ void main() {
 							asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
 							assetNames[i] = asset.name;
 							if (b) {
-								UITrait.inst.getImage(asset).unload();
+								iron.data.Data.deleteImage(asset.file);
+								Canvas.assetMap.remove(asset.id);
 								assets.splice(i, 1);
 								assetNames.splice(i, 1);
 							}
@@ -2143,7 +2356,7 @@ void main() {
 						}
 					}
 					else {
-						ui.text("(Drag & drop assets here)");
+						ui.text("(Drag & drop files onto window)");
 					}
 				}
 			}
@@ -2180,35 +2393,10 @@ void main() {
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Import Mesh", 1)) {
-					if (ui.button("Import")) {
-						arm.App.showFiles = true;
-						arm.App.whandle.redraws = 2;
-						arm.App.foldersOnly = false;
-						arm.App.showFilename = false;
-						arm.App.filesDone = function(path:String) {
-							importMesh(path);
-						}
-					}
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Import Texture", 1)) {
-					if (ui.button("Import")) {
-						arm.App.showFiles = true;
-						arm.App.whandle.redraws = 2;
-						arm.App.foldersOnly = false;
-						arm.App.showFilename = false;
-						arm.App.filesDone = function(path:String) {
-							importAsset(path);
-						}
-					}
-				}
-
-				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
 					if (ui.button("Export")) {
 						arm.App.showFiles = true;
+						@:privateAccess zui.Ext.lastPath = ""; // Refresh
 						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
@@ -2265,206 +2453,15 @@ void main() {
 				if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
 
 					if (ui.button("Export")) {
-						var textureSize = getTextureRes();
-
 						arm.App.showFiles = true;
+						@:privateAccess zui.Ext.lastPath = ""; // Refresh
 						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
 						arm.App.filesDone = function(path:String) {
-
-							var f = arm.App.filenameHandle.text;
-							if (f == "") f = "untitled";
-
-							var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
-							var bo = new haxe.io.BytesOutput();
-							
-							var pixels = selectedLayer.texpaint.getPixels(); // bgra
-							if (isBaseSpace == 1) {
-								for (i in 0...Std.int(pixels.length / 4)) {
-									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
-									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
-									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
-									// pixels.set(i * 4 + 3, 255);
-								}
-							}
-							if (formatType == 0) {
-								var jpgdata:iron.format.jpg.Data.Data = {
-									width: textureSize,
-									height: textureSize,
-									quality: formatQuality,
-									pixels: pixels
-								};
-								var jpgwriter = new iron.format.jpg.Writer(bo);
-								jpgwriter.write(jpgdata, 1);
-							}
-							else {
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
-							}
-							#if kha_krom
-							if (isBase) Krom.fileSaveBytes(path + "/" + f + "_basecol" + ext, bo.getBytes().getData());
-							#end
-
-							pixels = selectedLayer.texpaint_nor.getPixels();
-							if (isNorSpace == 1) {
-								for (i in 0...Std.int(pixels.length / 4)) {
-									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
-									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
-									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
-									// pixels.set(i * 4 + 3, 255);
-								}
-							}
-							bo = new haxe.io.BytesOutput();
-							if (formatType == 0) {
-								var jpgdata:iron.format.jpg.Data.Data = {
-									width: textureSize,
-									height: textureSize,
-									quality: formatQuality,
-									pixels: pixels
-								};
-								var jpgwriter = new iron.format.jpg.Writer(bo);
-								jpgwriter.write(jpgdata, 1);
-							}
-							else {
-								var pngwriter = new iron.format.png.Writer(bo);
-								pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
-							}
-							#if kha_krom
-							if (isNor) Krom.fileSaveBytes(path + "/" + f + "_nor" + ext, bo.getBytes().getData());
-							#end
-
-							pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
-
-							if (isOccSpace == 1) {
-								for (i in 0...Std.int(pixels.length / 4)) {
-									pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
-								}
-							}
-							if (isRoughSpace == 1) {
-								for (i in 0...Std.int(pixels.length / 4)) {
-									pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
-								}
-							}
-							if (isMetSpace == 1) {
-								for (i in 0...Std.int(pixels.length / 4)) {
-									pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
-								}
-							}
-
-							if (outputType == 0) {
-								bo = new haxe.io.BytesOutput();
-								if (formatType == 0) {
-									var jpgdata:iron.format.jpg.Data.Data = {
-										width: textureSize,
-										height: textureSize,
-										quality: formatQuality,
-										pixels: pixels
-									};
-									var jpgwriter = new iron.format.jpg.Writer(bo);
-									jpgwriter.write(jpgdata, 2, 0);
-								}
-								else {
-									var pngwriter = new iron.format.png.Writer(bo);
-									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 0));
-								}
-								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_occ" + ext, bo.getBytes().getData());
-								#end
-
-								bo = new haxe.io.BytesOutput();
-								if (formatType == 0) {
-									var jpgdata:iron.format.jpg.Data.Data = {
-										width: textureSize,
-										height: textureSize,
-										quality: formatQuality,
-										pixels: pixels
-									};
-									var jpgwriter = new iron.format.jpg.Writer(bo);
-									jpgwriter.write(jpgdata, 2, 1);
-								}
-								else {
-									var pngwriter = new iron.format.png.Writer(bo);
-									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 1));
-								}
-								#if kha_krom
-								if (isRough) Krom.fileSaveBytes(path + "/" + f + "_rough" + ext, bo.getBytes().getData());
-								#end
-								
-								bo = new haxe.io.BytesOutput();
-								if (formatType == 0) {
-									var jpgdata:iron.format.jpg.Data.Data = {
-										width: textureSize,
-										height: textureSize,
-										quality: formatQuality,
-										pixels: pixels
-									};
-									var jpgwriter = new iron.format.jpg.Writer(bo);
-									jpgwriter.write(jpgdata, 2, 2);
-								}
-								else {
-									var pngwriter = new iron.format.png.Writer(bo);
-									pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 2));
-								}
-								#if kha_krom
-								if (isMet) Krom.fileSaveBytes(path + "/" + f + "_met" + ext, bo.getBytes().getData());
-								#end
-							}
-							else { // UE4
-								bo = new haxe.io.BytesOutput();
-								if (formatType == 0) {
-									var jpgdata:iron.format.jpg.Data.Data = {
-										width: textureSize,
-										height: textureSize,
-										quality: formatQuality,
-										pixels: pixels
-									};
-									var jpgwriter = new iron.format.jpg.Writer(bo);
-									jpgwriter.write(jpgdata, 1);
-								}
-								else {
-									var pngwriter = new iron.format.png.Writer(bo);
-									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
-								}
-								#if kha_krom
-								if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_orm" + ext, bo.getBytes().getData());
-								#end
-							}
-
-							if (isHeight && selectedLayer.texpaint_opt != null) {
-								pixels = selectedLayer.texpaint_opt.getPixels();
-								if (isHeightSpace == 1) {
-									for (i in 0...Std.int(pixels.length / 4)) {
-										pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
-										pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
-										pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
-										// pixels.set(i * 4 + 3, 255);
-									}
-								}
-								bo = new haxe.io.BytesOutput();
-								if (formatType == 0) {
-									var jpgdata:iron.format.jpg.Data.Data = {
-										width: textureSize,
-										height: textureSize,
-										quality: formatQuality,
-										pixels: pixels
-									};
-									var jpgwriter = new iron.format.jpg.Writer(bo);
-									jpgwriter.write(jpgdata, 1);
-								}
-								else {
-									var pngwriter = new iron.format.png.Writer(bo);
-									pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
-								}
-								#if kha_krom
-								Krom.fileSaveBytes(path + "/" + f + "_height" + ext, bo.getBytes().getData());
-								#end
-							}
-
-							// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac" + ext, bo.getBytes().getData());
-							// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis" + ext, bo.getBytes().getData());
-							// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs" + ext, bo.getBytes().getData());
+							textureExport = true;
+							textureExportPath = path;
 						}
 					}
 
@@ -2511,12 +2508,16 @@ void main() {
 						UIView2D.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * C.window_scale);
 						arm.App.resize();
+						armory.data.Config.save();
 					}
 					hscaleWasChanged = hscale.changed;
 					ui.row([1/2, 1/2]);
 					var layHandle = Id.handle({position: C.ui_layout});
 					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
-					if (layHandle.changed) arm.App.resize();
+					if (layHandle.changed) {
+						arm.App.resize();
+						armory.data.Config.save();
+					}
 					ui.combo(Id.handle({position: 0}), ["Dark"], "Theme", true);
 				}
 
@@ -2532,6 +2533,7 @@ void main() {
 						redos = 0;
 						undoI = 0;
 						ui.g.begin(false);
+						armory.data.Config.save();
 					}
 					ui.row([1/2, 1/2]);
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
@@ -2557,7 +2559,7 @@ void main() {
 					ui.row([1/2, 1/2]);
 					var vsyncHandle = Id.handle({selected: C.window_vsync});
 					C.window_vsync = ui.check(vsyncHandle, "VSync");
-					if (vsyncHandle.changed) applyConfig();
+					if (vsyncHandle.changed) armory.data.Config.save();
 					var cullHandle = Id.handle({selected: culling});
 					culling = ui.check(cullHandle, "Cull Backfaces");
 					if (cullHandle.changed) {
@@ -2664,7 +2666,15 @@ void main() {
 		// Import is synchronous for now
 		scaleToBounds();
 
-		if (paintObjects.length > 1) objectsHandle.selected = true;
+		if (paintObjects.length > 1) {
+			objectsHandle.selected = true;
+
+			// No mask by default
+			if (mergedObject == null) mergeMesh();
+			selectPaintObject(paintObjects[0]);
+			paintObject.skip_context = "paint";
+			mergedObject.visible = true;
+		}
 
 		if (paintObject.name == "") paintObject.name = "Object";
 
@@ -2866,7 +2876,9 @@ void main() {
 				}
 			}
 
-			var obj = {posa: posa, nora: nora, texa: texa, inda: inda};
+			var name:String = m.get("id").get("name");
+			name = name.substring(2, name.length);
+			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name};
 			makeMesh(obj, path);
 		});
 	}
@@ -3033,6 +3045,7 @@ void main() {
 
 	function projectOpen() {
 		arm.App.showFiles = true;
+		@:privateAccess zui.Ext.lastPath = ""; // Refresh
 		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = false;
 		arm.App.showFilename = false;
@@ -3096,6 +3109,7 @@ void main() {
 
 	function projectSaveAs() {
 		arm.App.showFiles = true;
+		@:privateAccess zui.Ext.lastPath = ""; // Refresh
 		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = true;
 		arm.App.showFilename = true;
@@ -3130,7 +3144,7 @@ void main() {
 				iron.data.Data.deleteMesh(mergedObject.data.handle);
 				mergedObject = null;
 			}
-			maskHandle.position = 1;
+			maskHandle.position = 0;
 			ui.g.end();
 			materials = [new MaterialSlot()];
 			selectedMaterial = materials[0];
@@ -3211,6 +3225,12 @@ void main() {
 			}
 			selectPaintObject(paintObjects[0]);
 			scaleToBounds();
+
+			// No mask by default
+			if (mergedObject == null) mergeMesh();
+			selectPaintObject(paintObjects[0]);
+			paintObject.skip_context = "paint";
+			mergedObject.visible = true;
 
 			resHandle.position = getTextureResPos(project.layer_datas[0].res);
 
@@ -3334,8 +3354,12 @@ void main() {
 	function switchUpAxis(axisUp:Int) {
 		for (p in paintObjects) {
 			var g = p.data.geom;
+
+			// position, normals
+
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			var verticesDepth = g.vertexBufferMap.get("pos").lock();
+			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", size: 3}, {name: "nor", size: 3}]);
 			var verticesVox = g.vertexBufferMap.get("posnor").lock();
 			if (axisUp == 1) { // Y
 				for (i in 0...Std.int(vertices.length / g.structLength)) {
@@ -3398,5 +3422,202 @@ void main() {
 		armory.renderpath.RenderPathCreator.applyConfig();
 		ui.g.begin(false);
 		ddirty = 2;
+	}
+
+	function exportTextures(path:String) {
+		
+		var textureSize = getTextureRes();
+
+		var f = arm.App.filenameHandle.text;
+		if (f == "") f = "untitled";
+
+		var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
+		var bo = new haxe.io.BytesOutput();
+		
+		var pixels = selectedLayer.texpaint.getPixels(); // bgra
+		if (isBaseSpace == 1) {
+			for (i in 0...Std.int(pixels.length / 4)) {
+				pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+				pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+				pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+				// pixels.set(i * 4 + 3, 255);
+			}
+		}
+		if (formatType == 0) {
+			var jpgdata:iron.format.jpg.Data.Data = {
+				width: textureSize,
+				height: textureSize,
+				quality: formatQuality,
+				pixels: pixels
+			};
+			var jpgwriter = new iron.format.jpg.Writer(bo);
+			jpgwriter.write(jpgdata, 1);
+		}
+		else {
+			var pngwriter = new iron.format.png.Writer(bo);
+			pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+		}
+		#if kha_krom
+		if (isBase) Krom.fileSaveBytes(path + "/" + f + "_basecol" + ext, bo.getBytes().getData());
+		#end
+
+		pixels = selectedLayer.texpaint_nor.getPixels();
+		if (isNorSpace == 1) {
+			for (i in 0...Std.int(pixels.length / 4)) {
+				pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+				pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+				pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+				// pixels.set(i * 4 + 3, 255);
+			}
+		}
+		bo = new haxe.io.BytesOutput();
+		if (formatType == 0) {
+			var jpgdata:iron.format.jpg.Data.Data = {
+				width: textureSize,
+				height: textureSize,
+				quality: formatQuality,
+				pixels: pixels
+			};
+			var jpgwriter = new iron.format.jpg.Writer(bo);
+			jpgwriter.write(jpgdata, 1);
+		}
+		else {
+			var pngwriter = new iron.format.png.Writer(bo);
+			pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+		}
+		#if kha_krom
+		if (isNor) Krom.fileSaveBytes(path + "/" + f + "_nor" + ext, bo.getBytes().getData());
+		#end
+
+		pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met
+
+		if (isOccSpace == 1) {
+			for (i in 0...Std.int(pixels.length / 4)) {
+				pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+			}
+		}
+		if (isRoughSpace == 1) {
+			for (i in 0...Std.int(pixels.length / 4)) {
+				pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+			}
+		}
+		if (isMetSpace == 1) {
+			for (i in 0...Std.int(pixels.length / 4)) {
+				pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+			}
+		}
+
+		if (outputType == 0) {
+			bo = new haxe.io.BytesOutput();
+			if (formatType == 0) {
+				var jpgdata:iron.format.jpg.Data.Data = {
+					width: textureSize,
+					height: textureSize,
+					quality: formatQuality,
+					pixels: pixels
+				};
+				var jpgwriter = new iron.format.jpg.Writer(bo);
+				jpgwriter.write(jpgdata, 2, 0);
+			}
+			else {
+				var pngwriter = new iron.format.png.Writer(bo);
+				pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 0));
+			}
+			#if kha_krom
+			if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_occ" + ext, bo.getBytes().getData());
+			#end
+
+			bo = new haxe.io.BytesOutput();
+			if (formatType == 0) {
+				var jpgdata:iron.format.jpg.Data.Data = {
+					width: textureSize,
+					height: textureSize,
+					quality: formatQuality,
+					pixels: pixels
+				};
+				var jpgwriter = new iron.format.jpg.Writer(bo);
+				jpgwriter.write(jpgdata, 2, 1);
+			}
+			else {
+				var pngwriter = new iron.format.png.Writer(bo);
+				pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 1));
+			}
+			#if kha_krom
+			if (isRough) Krom.fileSaveBytes(path + "/" + f + "_rough" + ext, bo.getBytes().getData());
+			#end
+			
+			bo = new haxe.io.BytesOutput();
+			if (formatType == 0) {
+				var jpgdata:iron.format.jpg.Data.Data = {
+					width: textureSize,
+					height: textureSize,
+					quality: formatQuality,
+					pixels: pixels
+				};
+				var jpgwriter = new iron.format.jpg.Writer(bo);
+				jpgwriter.write(jpgdata, 2, 2);
+			}
+			else {
+				var pngwriter = new iron.format.png.Writer(bo);
+				pngwriter.write(iron.format.png.Tools.build32RGBA_(textureSize, textureSize, pixels, 2));
+			}
+			#if kha_krom
+			if (isMet) Krom.fileSaveBytes(path + "/" + f + "_met" + ext, bo.getBytes().getData());
+			#end
+		}
+		else { // UE4
+			bo = new haxe.io.BytesOutput();
+			if (formatType == 0) {
+				var jpgdata:iron.format.jpg.Data.Data = {
+					width: textureSize,
+					height: textureSize,
+					quality: formatQuality,
+					pixels: pixels
+				};
+				var jpgwriter = new iron.format.jpg.Writer(bo);
+				jpgwriter.write(jpgdata, 1);
+			}
+			else {
+				var pngwriter = new iron.format.png.Writer(bo);
+				pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+			}
+			#if kha_krom
+			if (isOcc) Krom.fileSaveBytes(path + "/" + f + "_orm" + ext, bo.getBytes().getData());
+			#end
+		}
+
+		if (isHeight && selectedLayer.texpaint_opt != null) {
+			pixels = selectedLayer.texpaint_opt.getPixels();
+			if (isHeightSpace == 1) {
+				for (i in 0...Std.int(pixels.length / 4)) {
+					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+					pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+					pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+					// pixels.set(i * 4 + 3, 255);
+				}
+			}
+			bo = new haxe.io.BytesOutput();
+			if (formatType == 0) {
+				var jpgdata:iron.format.jpg.Data.Data = {
+					width: textureSize,
+					height: textureSize,
+					quality: formatQuality,
+					pixels: pixels
+				};
+				var jpgwriter = new iron.format.jpg.Writer(bo);
+				jpgwriter.write(jpgdata, 1);
+			}
+			else {
+				var pngwriter = new iron.format.png.Writer(bo);
+				pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+			}
+			#if kha_krom
+			Krom.fileSaveBytes(path + "/" + f + "_height" + ext, bo.getBytes().getData());
+			#end
+		}
+
+		// if (isOpac) Krom.fileSaveBytes(path + "/tex_opac" + ext, bo.getBytes().getData());
+		// if (isEmis) Krom.fileSaveBytes(path + "/tex_emis" + ext, bo.getBytes().getData());
+		// if (isSubs) Krom.fileSaveBytes(path + "/tex_subs" + ext, bo.getBytes().getData());
 	}
 }
