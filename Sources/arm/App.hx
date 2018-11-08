@@ -199,7 +199,9 @@ class App extends iron.Trait {
 			var right = appw / 2 + modalW / 2;
 			var top = apph / 2 - modalH / 2;
 			var bottom = apph / 2 + modalH / 2;
-			if (mouse.x < left || mouse.x > right || mouse.y < top || mouse.y > bottom) {
+			var mx = mouse.x + iron.App.x();
+			var my = mouse.y + iron.App.y();
+			if (mx < left || mx > right || my < top || my > bottom) {
 				showFiles = false;
 			}
 		}

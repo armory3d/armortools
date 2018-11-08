@@ -2671,6 +2671,13 @@ void main() {
 		// Import is synchronous for now
 		scaleToBounds();
 
+		if (mergedObject != null) {
+			mergedObject.remove();
+			iron.data.Data.deleteMesh(mergedObject.data.handle);
+			mergedObject = null;
+		}
+		selectPaintObject(paintObjects[0]);
+
 		if (paintObjects.length > 1) {
 			objectsHandle.selected = true;
 
