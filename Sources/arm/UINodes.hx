@@ -428,8 +428,9 @@ class UINodes extends iron.Trait {
 		var con_paint:CyclesShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
-			compare_mode: 'always',
-			cull_mode: 'counter_clockwise',
+			compare_mode: 'always', // TODO: align texcoords winding order
+			// cull_mode: 'counter_clockwise',
+			cull_mode: 'none',
 			blend_source: layered ? 'blend_one' : 'source_alpha',
 			blend_destination: layered ? 'blend_zero' : 'inverse_source_alpha',
 			blend_operation: 'add',

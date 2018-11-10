@@ -2410,35 +2410,40 @@ void main() {
 							var f = arm.App.filenameHandle.text;
 							if (f == "") f = "untitled";
 
-							var mesh = paintObject.data.raw;
-							var posa = mesh.vertex_arrays[0].values;
-							var nora = mesh.vertex_arrays[1].values;
-							var texa = mesh.vertex_arrays[2].values;
-							var len = Std.int(posa.length / 3);
 							var s = "";
-							for (i in 0...len) {
-								s += "v " + posa[i * 3 + 0] + " " +
-											posa[i * 3 + 2] + " " +
-											(-posa[i * 3 + 1]) + "\n";
-							}
-							for (i in 0...len) {
-								s += "vn " + nora[i * 3 + 0] + " " +
-											 nora[i * 3 + 2] + " " +
-											 (-nora[i * 3 + 1]) + "\n";
-							}
-							for (i in 0...len) {
-								s += "vt " + texa[i * 2 + 0] + " " +
-											 (1.0 - texa[i * 2 + 1]) + "\n";
-							}
-							var inda = mesh.index_arrays[0].values;
-							for (i in 0...Std.int(inda.length / 3)) {
+							var off = 0;
+							for (p in paintObjects) {
+								var mesh = p.data.raw;
+								var posa = mesh.vertex_arrays[0].values;
+								var nora = mesh.vertex_arrays[1].values;
+								var texa = mesh.vertex_arrays[2].values;
+								var len = Std.int(posa.length / 3);
+								s += "o " + p.name + "\n";
+								for (i in 0...len) {
+									s += "v " + posa[i * 3 + 0] + " " +
+												posa[i * 3 + 2] + " " +
+												(-posa[i * 3 + 1]) + "\n";
+								}
+								for (i in 0...len) {
+									s += "vn " + nora[i * 3 + 0] + " " +
+												 nora[i * 3 + 2] + " " +
+												 (-nora[i * 3 + 1]) + "\n";
+								}
+								for (i in 0...len) {
+									s += "vt " + texa[i * 2 + 0] + " " +
+												 (1.0 - texa[i * 2 + 1]) + "\n";
+								}
+								var inda = mesh.index_arrays[0].values;
+								for (i in 0...Std.int(inda.length / 3)) {
 
-								var i1 = inda[i * 3 + 0] + 1;
-								var i2 = inda[i * 3 + 1] + 1;
-								var i3 = inda[i * 3 + 2] + 1;
-								s += "f " + i1 + "/" + i1 + "/" + i1 + " " +
-											i2 + "/" + i2 + "/" + i2 + " " +
-											i3 + "/" + i3 + "/" + i3 + "\n";
+									var i1 = inda[i * 3 + 0] + 1 + off;
+									var i2 = inda[i * 3 + 1] + 1 + off;
+									var i3 = inda[i * 3 + 2] + 1 + off;
+									s += "f " + i1 + "/" + i1 + "/" + i1 + " " +
+												i2 + "/" + i2 + "/" + i2 + " " +
+												i3 + "/" + i3 + "/" + i3 + "\n";
+								}
+								off += inda.length;
 							}
 							#if kha_krom
 							var objpath = path + "/" + f;
