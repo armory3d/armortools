@@ -531,6 +531,7 @@ class UITrait extends iron.Trait {
 				if (valid) UITrait.inst.importAsset(f);
 			}
 			// Create material
+			autoFillHandle.selected = false;
 			UITrait.inst.selectedMaterial = new MaterialSlot();
 			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
 			UINodes.inst.updateCanvasMap();
@@ -820,6 +821,13 @@ class UITrait extends iron.Trait {
 		if (kb.started("f12")) {
 			show = !show;
 			arm.App.resize();
+		}
+
+		if (kb.started("g") && (brushType == 2 || brushType == 3)) {
+			autoFillHandle.selected = !autoFillHandle.selected;
+			hwnd.redraws = 2;
+			UINodes.inst.updateCanvasMap();
+			UINodes.inst.parsePaintMaterial();
 		}
 
 		// Color pick shortcut
@@ -1919,7 +1927,9 @@ void main() {
 						brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
 						brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
 						ui.row([1/2, 1/2]);
-						brushScale = ui.slider(Id.handle({value: brushScale}), "UV Scale", 0.0, 2.0, true);
+						var brushScaleHandle = Id.handle({value: brushScale});
+						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
+						if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
 						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 
 						if (brushType == 2) { // Fill, Bake
@@ -2083,6 +2093,7 @@ void main() {
 					if (layers.length < 4) { // TODO: Samplers limit in Kore, use arrays
 						ui.row([1/2, 1/2]);
 						if (ui.button("New")) {
+							autoFillHandle.selected = false; // Auto-disable
 							selectedLayer = new LayerSlot();
 							layers.push(selectedLayer);
 							ui.g.end();
@@ -2602,6 +2613,7 @@ void main() {
 					ui.text("Save - Ctrl+S");
 					ui.text("Save As - Ctrl+Shift+S");
 					ui.text("Open - Ctrl+O");
+					ui.text("Auto-Fill - G");
 				}
 
 				ui.separator();
@@ -2685,6 +2697,13 @@ void main() {
 
 		if (paintObjects.length > 1) {
 			objectsHandle.selected = true;
+
+			// Sort by name
+			paintObjects.sort(function(a, b):Int {
+				if (a.name < b.name) return -1;
+				else if (a.name > b.name) return 1;
+				return 0;
+			});
 
 			// No mask by default
 			if (mergedObject == null) mergeMesh();
