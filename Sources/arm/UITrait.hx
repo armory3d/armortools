@@ -1221,7 +1221,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		arm.trait.FlyCamera.inst.enabled = !(axisX || axisY || axisZ) && mouse.x < App.w();
+		iron.system.Input.occupied = (axisX || axisY || axisZ) && mouse.x < App.w();
 	}
 	#end
 
@@ -1786,35 +1786,36 @@ void main() {
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
 
-					var img2 = bundled.get("empty.jpg");
+					var empty = bundled.get("empty.jpg");
 
 					for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
 						ui.row([1/5,1/5,1/5,1/5,1/5]);
 
 						if (row > 0) ui._y += 6;
 
+						ui.imageInvertY = true; // Material preview
 						for (j in 0...5) {
-							ui.imageInvertY = true; // Material preview
-							
 							var i = j + row * 5;
-							var im = i >= materials2.length ? img2 : materials2[i].image;
+							var img = i >= materials2.length ? empty : materials2[i].image;
 
-							if (im != img2 && selectedMaterial2 == materials2[i]) {
-								ui.fill(1, -2, im.width + 3, im.height + 3, 0xff205d9c);
+							if (selectedMaterial2 == materials2[i]) {
+								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
+								var off = row % 2 == 1 ? 1 : 0;
+								var w = 51 - C.window_scale;
+								ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
+								ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
+								ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
+								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
 							}
 
-							if (ui.image(im) == State.Started && im != img2) {
-								if (selectedMaterial2 != materials2[i]) {
-									selectMaterial2(i);
-								}
-								if (iron.system.Time.time() - selectTime < 0.3) {
-									showMaterialNodes();
-								}
+							if (ui.image(img) == State.Started && img != empty) {
+								if (selectedMaterial2 != materials2[i]) selectMaterial2(i);
+								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
 								selectTime = iron.system.Time.time();
 							}
-
-							ui.imageInvertY = false; // Material preview
+							if (img != empty && ui.isHovered) ui.tooltipImage(img);
 						}
+						ui.imageInvertY = false; // Material preview
 					}
 
 					ui.row([1/2,1/2]);
@@ -1823,7 +1824,7 @@ void main() {
 						iron.data.Data.cachedMaterials.remove("SceneMaterial2");
 						iron.data.Data.cachedShaders.remove("Material2_data");
 						iron.data.Data.cachedSceneRaws.remove("Material2_data");
-						iron.data.Data.cachedBlobs.remove("Material2_data.arm");
+						// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
 						iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
 							md.name = "Material2." + materials2.length;
 							ui.g.end();
@@ -2242,8 +2243,8 @@ void main() {
 					cameraControls = ui.combo(Id.handle({position: cameraControls}), ["ArcBall", "Orbit", "Fly"], "Controls");
 					cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
 					if (camHandle.changed) {
-						if (cameraType == 0) cam.data.raw.ortho_scale = null;
-						else cam.data.raw.ortho_scale = 1.0;
+						if (cameraType == 0) cam.data.raw.ortho = null;
+						else cam.data.raw.ortho = [-2, 2, -2 * (iron.App.h() / iron.App.w()), 2 * (iron.App.h() / iron.App.w())];
 						
 						if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
 						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
@@ -3380,7 +3381,7 @@ void main() {
 				cam.transform.decompose();
 				if (fovHandle != null) fovHandle.value = 0.92;
 				camHandle.position = 0;
-				cam.data.raw.ortho_scale = null;
+				cam.data.raw.ortho = null;
 				if (originalShadowBias > 0) {
 					iron.Scene.active.lights[0].data.raw.shadows_bias = originalShadowBias;
 				}
