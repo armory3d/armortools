@@ -60,7 +60,7 @@ class RenderPathDeferred {
 			}
 			#end
 			#if (rp_gi == "Voxel AO")
-			path.loadShader("shader_datas/deferred_indirect/deferred_indirect_VoxelAOvar");
+			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
 			#end
 		}
 		#end
@@ -68,6 +68,18 @@ class RenderPathDeferred {
 		{
 			path.createDepthBuffer("main", "DEPTH24");
 
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer0";
+			t.width = 0;
+			t.height = 0;
+			t.displayp = Inc.getDisplayp();
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			t.depth_buffer = "main";
+			path.createRenderTarget(t);
+		}
+
+		{
 			var t = new RenderTargetRaw();
 			t.name = "tex";
 			t.width = 0;
@@ -94,18 +106,6 @@ class RenderPathDeferred {
 			t.displayp = Inc.getDisplayp();
 			t.format = Inc.getHdrFormat();
 			t.scale = Inc.getSuperSampling();
-			path.createRenderTarget(t);
-		}
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "gbuffer0";
-			t.width = 0;
-			t.height = 0;
-			t.displayp = Inc.getDisplayp();
-			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
-			t.depth_buffer = "main";
 			path.createRenderTarget(t);
 		}
 
@@ -144,9 +144,7 @@ class RenderPathDeferred {
 		}
 		#end
 
-		path.loadShader("shader_datas/deferred_indirect/deferred_indirect");
 		path.loadShader("shader_datas/deferred_light/deferred_light");
-		path.loadShader("shader_datas/deferred_light_quad/deferred_light_quad");
 
 		#if rp_probes
 		path.loadShader("shader_datas/probe_planar/probe_planar");
@@ -514,54 +512,26 @@ class RenderPathDeferred {
 	static var initVoxels = true;
 	public static function drawShadowMap(l:iron.object.LightObject) {
 		#if (rp_shadowmap)
-		var faces = l.data.raw.shadowmap_cube ? 6 : 1;
-		for (i in 0...faces) {
-			if (faces > 1) path.currentFace = i;
-			path.setTarget(Inc.getShadowMap());
-			// Paint
-			if (arm.UITrait.inst.paintHeight) {
-				var tid = arm.UITrait.inst.layers[0].id;
-				path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
-			}
-			//
-			path.clearTarget(null, 1.0);
-			path.drawMeshes("shadowmap");
-		}
-		path.currentFace = -1;
-
-		// One light at a time for now, precompute all lights for tiled
-		#if rp_soft_shadows
-
-		if (l.raw.type != "point") {
-			path.setTarget("visa"); // Merge using min blend
-			Inc.bindShadowMap();
-			path.drawShader("shader_datas/dilate_pass/dilate_pass_x");
-
-			path.setTarget("visb");
-			path.bindTarget("visa", "shadowMap");
-			path.drawShader("shader_datas/dilate_pass/dilate_pass_y");
-		}
-
-		path.setTarget("visa", ["dist"]);
-		//if (i == 0) path.clearTarget(0x00000000);
-		if (l.raw.type != "point") path.bindTarget("visb", "dilate");
-		Inc.bindShadowMap();
-		//path.bindTarget("_main", "gbufferD");
-		path.bindTarget("gbuffer0", "gbuffer0");
-		path.drawShader("shader_datas/visibility_pass/visibility_pass");
 		
-		path.setTarget("visb");
-		path.bindTarget("visa", "tex");
-		path.bindTarget("gbuffer0", "gbuffer0");
-		path.bindTarget("dist", "dist");
-		path.drawShader("shader_datas/blur_shadow_pass/blur_shadow_pass_x");
+		for (l in iron.Scene.active.lights) {
+			if (!l.visible || !l.data.raw.cast_shadow) continue;
+			path.light = l;
 
-		path.setTarget("visa");
-		path.bindTarget("visb", "tex");
-		path.bindTarget("gbuffer0", "gbuffer0");
-		path.bindTarget("dist", "dist");
-		path.drawShader("shader_datas/blur_shadow_pass/blur_shadow_pass_y");
-		#end
+			var faces = l.data.raw.shadowmap_cube ? 6 : 1;
+			for (i in 0...faces) {
+				if (faces > 1) path.currentFace = i;
+				path.setTarget(@:privateAccess Inc.getShadowMap(l));
+				// Paint
+				if (arm.UITrait.inst.paintHeight) {
+					var tid = arm.UITrait.inst.layers[0].id;
+					path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
+				}
+				//
+				path.clearTarget(null, 1.0);
+				path.drawMeshes("shadowmap");
+			}
+			path.currentFace = -1;
+		}
 
 		#end
 	}
@@ -827,11 +797,32 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// Indirect
+		// ---
+		// Deferred light
+		// ---
+		var lights = iron.Scene.active.lights;
+		
+		// #if (rp_gi == "Voxel GI")
+		// if (relight) Inc.computeVoxelsBegin();
+		// #end
+		// #if (rp_gi == "Voxel GI")
+		// if (relight) Inc.computeVoxels(i);
+		// #end
+		// #if (rp_gi == "Voxel GI")
+		// if (relight) Inc.computeVoxelsEnd();
+		// #end
+
+		#if (rp_shadowmap)
+		Inc.drawShadowMap();
+		#end
+
 		path.setTarget("tex");
-		// path.bindTarget("_main", "gbufferD");
+		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
+		// 	#if rp_gbuffer2_direct
+		// 	path.bindTarget("gbuffer2", "gbuffer2");
+		// 	#end
 		#if (rp_ssgi != "Off")
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
@@ -858,12 +849,9 @@ class RenderPathDeferred {
 		}
 		#end
 		
-		if (voxelao_pass) {
-			path.drawShader("shader_datas/deferred_indirect/deferred_indirect_VoxelAOvar");
-		}
-		else {
-			path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
-		}
+		voxelao_pass ?
+			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
+			path.drawShader("shader_datas/deferred_light/deferred_light");
 		
 		#if rp_probes
 		if (!path.isProbe) {
@@ -886,90 +874,27 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// Direct
-		var lights = iron.Scene.active.lights;
-		#if (rp_gi == "Voxel GI")
-		if (relight) Inc.computeVoxelsBegin();
-		#end
-		for (i in 0...lights.length) {
-			var l = lights[i];
-			if (!l.visible) continue;
-			path.currentLightIndex = i;
+		// #if rp_volumetriclight
+		// {
+		// 	path.setTarget("bufvola");
+		// 	path.bindTarget("_main", "gbufferD");
+		// 	Inc.bindShadowMap();
+		// 	if (path.lightIsSun()) {
+		// 		path.drawShader("shader_datas/volumetric_light_quad/volumetric_light_quad");
+		// 	}
+		// 	else {
+		// 		path.drawLightVolume("shader_datas/volumetric_light/volumetric_light");
+		// 	}
 
-			#if (rp_shadowmap)
-			{
-				if (path.lightCastShadow()) {
-					// Paint
-					// Inc.drawShadowMap(l);
-					drawShadowMap(l);
-					//
-				}
-			}
-			#end
+		// 	path.setTarget("bufvolb");
+		// 	path.bindTarget("bufvola", "tex");
+		// 	path.drawShader("shader_datas/blur_bilat_pass/blur_bilat_pass_x");
 
-			#if (rp_gi == "Voxel GI")
-			if (relight) Inc.computeVoxels(i);
-			#end
-
-			path.setTarget("tex");
-			// path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.bindTarget("gbuffer1", "gbuffer1");
-			#if rp_gbuffer2_direct
-			path.bindTarget("gbuffer2", "gbuffer2");
-			#end
-
-			#if rp_shadowmap
-			{
-				if (path.lightCastShadow()) {
-					#if rp_soft_shadows
-					path.bindTarget("visa", "svisibility");
-					#else
-					Inc.bindShadowMap();
-					#end
-				}
-			}
-			#end
-
-			#if ((rp_voxelgi_shadows) || (rp_voxelgi_refraction))
-			{
-				path.bindTarget(voxels, "voxels");
-			}
-			#end
-
-			if (path.lightIsSun()) {
-				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
-			}
-			else {
-				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
-			}
-
-			#if rp_volumetriclight
-			{
-				path.setTarget("bufvola");
-				path.bindTarget("_main", "gbufferD");
-				Inc.bindShadowMap();
-				if (path.lightIsSun()) {
-					path.drawShader("shader_datas/volumetric_light_quad/volumetric_light_quad");
-				}
-				else {
-					path.drawLightVolume("shader_datas/volumetric_light/volumetric_light");
-				}
-
-				path.setTarget("bufvolb");
-				path.bindTarget("bufvola", "tex");
-				path.drawShader("shader_datas/blur_bilat_pass/blur_bilat_pass_x");
-
-				path.setTarget("tex");
-				path.bindTarget("bufvolb", "tex");
-				path.drawShader("shader_datas/blur_bilat_blend_pass/blur_bilat_blend_pass_y");
-			}
-			#end
-		}
-		path.currentLightIndex = 0;
-		#if (rp_gi == "Voxel GI")
-		if (relight) Inc.computeVoxelsEnd();
-		#end
+		// 	path.setTarget("tex");
+		// 	path.bindTarget("bufvolb", "tex");
+		// 	path.drawShader("shader_datas/blur_bilat_blend_pass/blur_bilat_blend_pass_y");
+		// }
+		// #end
 
 		#if (rp_background == "World")
 		{
@@ -1286,9 +1211,9 @@ class RenderPathDeferred {
 
 		RenderPathCreator.drawMeshes();
 
-		// Indirect
+		// Light
 		path.setTarget("mtex");
-		// path.bindTarget("_mmain", "gbufferD");
+		path.bindTarget("_mmain", "gbufferD");
 		path.bindTarget("mgbuffer0", "gbuffer0");
 		path.bindTarget("mgbuffer1", "gbuffer1");
 		#if (rp_ssgi != "Off")
@@ -1296,31 +1221,7 @@ class RenderPathDeferred {
 			path.bindTarget("empty_white", "ssaotex");
 		}
 		#end
-		path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
-
-		// Direct
-		var lights = iron.Scene.active.lights;
-		for (i in 0...lights.length) {
-			var l = lights[i];
-			if (!l.visible) continue;
-			path.currentLightIndex = i;
-
-			path.setTarget("mtex");
-			// path.bindTarget("_mmain", "gbufferD");
-			path.bindTarget("mgbuffer0", "gbuffer0");
-			path.bindTarget("mgbuffer1", "gbuffer1");
-			#if rp_gbuffer2_direct
-			path.bindTarget("mgbuffer2", "gbuffer2");
-			#end
-
-			if (path.lightIsSun()) {
-				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
-			}
-			else {
-				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
-			}
-		}
-		path.currentLightIndex = 0;
+		path.drawShader("shader_datas/deferred_light/deferred_light");
 
 		#if (rp_background == "World")
 		{
@@ -1418,9 +1319,9 @@ class RenderPathDeferred {
 
 		RenderPathCreator.drawMeshes();
 
-		// Indirect
+		// Light
 		path.setTarget("tex");
-		// path.bindTarget("_main", "gbufferD");
+		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
 		#if (rp_ssgi != "Off")
@@ -1428,31 +1329,7 @@ class RenderPathDeferred {
 			path.bindTarget("empty_white", "ssaotex");
 		}
 		#end
-		path.drawShader("shader_datas/deferred_indirect/deferred_indirect");
-
-		// Direct
-		var lights = iron.Scene.active.lights;
-		for (i in 0...lights.length) {
-			var l = lights[i];
-			if (!l.visible) continue;
-			path.currentLightIndex = i;
-
-			path.setTarget("tex");
-			// path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.bindTarget("gbuffer1", "gbuffer1");
-			#if rp_gbuffer2_direct
-			path.bindTarget("gbuffer2", "gbuffer2");
-			#end
-
-			if (path.lightIsSun()) {
-				path.drawShader("shader_datas/deferred_light_quad/deferred_light_quad");
-			}
-			else {
-				path.drawLightVolume("shader_datas/deferred_light/deferred_light");
-			}
-		}
-		path.currentLightIndex = 0;
+		path.drawShader("shader_datas/deferred_light/deferred_light");
 
 		#if (rp_background == "World")
 		{
