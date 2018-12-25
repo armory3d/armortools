@@ -14,14 +14,6 @@ class RenderPathDeferred {
 	static var voxelsLast = "voxels";
 	#end
 
-	public static function drawMeshes() {
-		path.drawMeshes("mesh");
-	}
-
-	public static function applyConfig() {
-		Inc.applyConfig();
-	}
-
 	public static function init(_path:RenderPath) {
 
 		path = _path;
@@ -143,15 +135,16 @@ class RenderPathDeferred {
 	static var initVoxels = true;
 	public static function drawShadowMap(l:iron.object.LightObject) {
 		#if (rp_shadowmap)
-		
+		@:privateAccess Inc.pointIndex = 0;
+		@:privateAccess Inc.spotIndex = 0;
 		for (l in iron.Scene.active.lights) {
 			if (!l.visible || !l.data.raw.cast_shadow) continue;
 			path.light = l;
-
+			var shadowmap = @:privateAccess Inc.getShadowMap(l);
 			var faces = l.data.raw.shadowmap_cube ? 6 : 1;
 			for (i in 0...faces) {
 				if (faces > 1) path.currentFace = i;
-				path.setTarget(@:privateAccess Inc.getShadowMap(l));
+				path.setTarget(shadowmap);
 				// Paint
 				if (arm.UITrait.inst.paintHeight) {
 					var tid = arm.UITrait.inst.layers[0].id;
@@ -162,17 +155,19 @@ class RenderPathDeferred {
 				path.drawMeshes("shadowmap");
 			}
 			path.currentFace = -1;
-		}
 
+			if (l.data.raw.type == "point") @:privateAccess Inc.pointIndex++;
+			else if (l.data.raw.type == "spot") @:privateAccess Inc.spotIndex++;
+		}
 		#end
 	}
 
 	@:access(iron.RenderPath)
 	public static function commands() {
 
+		// Paint
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
-		// Paint
 		if (!arm.UITrait.inst.dirty()) {
 			path.setTarget("");
 			path.bindTarget("bufb", "tex");
@@ -274,6 +269,17 @@ class RenderPathDeferred {
 		}
 		#end
 
+		path.setTarget("gbuffer0"); // Only clear gbuffer0
+		#if (rp_background == "Clear")
+		{
+			path.clearTarget(-1, 1.0);
+		}
+		#else
+		{
+			path.clearTarget(null, 1.0);
+		}
+		#end
+
 		#if rp_gbuffer2
 		{
 			path.setTarget("gbuffer2");
@@ -283,16 +289,6 @@ class RenderPathDeferred {
 		#else
 		{
 			path.setTarget("gbuffer0", ["gbuffer1"]);
-		}
-		#end
-
-		#if (rp_background == "Clear")
-		{
-			path.clearTarget(-1, 1.0);
-		}
-		#else
-		{
-			path.clearTarget(null, 1.0);
 		}
 		#end
 
@@ -323,49 +319,65 @@ class RenderPathDeferred {
 
 		#if rp_decals
 		{
-			// path.setTarget("gbuffer0", ["gbuffer1"]);
+			path.setDepthFrom("gbuffer0", "gbuffer1"); // Unbind depth so we can read it
+			path.depthToRenderTarget.set("main", path.renderTargets.get("tex"));
+			path.setTarget("gbuffer0", ["gbuffer1"]);
+			
 			path.bindTarget("_main", "gbufferD");
 			path.drawDecals("decal");
+			
+			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
+			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
 		}
+		#end
+
+		#if (rp_ssr_half || rp_ssgi_half)
+		path.setTarget("half");
+		path.bindTarget("_main", "texdepth");
+		path.drawShader("shader_datas/downsample_depth/downsample_depth");
 		#end
 
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
-				path.setTarget("bufa");
+				path.setTarget("singlea");
+				#if rp_ssgi_half
+				path.bindTarget("half", "gbufferD");
+				#else
 				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				#if (rp_ssgi == "RTGI")
-				path.bindTarget("gbuffer1", "gbuffer1");
 				#end
+				path.bindTarget("gbuffer0", "gbuffer0");
+				// #if (rp_ssgi == "RTGI")
+				// path.bindTarget("gbuffer1", "gbuffer1");
+				// #end
 				path.drawShader("shader_datas/ssgi_pass/ssgi_pass");
 
-				path.setTarget("bufb");
+				path.setTarget("singleb");
+				path.bindTarget("singlea", "tex");
 				path.bindTarget("gbuffer0", "gbuffer0");
-				path.bindTarget("bufa", "tex");
-				path.drawShader("shader_datas/ssgi_blur_pass/ssgi_blur_pass_x");
+				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
 
-				path.setTarget("bufa");
+				path.setTarget("singlea");
+				path.bindTarget("singleb", "tex");
 				path.bindTarget("gbuffer0", "gbuffer0");
-				path.bindTarget("bufb", "tex");
-				path.drawShader("shader_datas/ssgi_blur_pass/ssgi_blur_pass_y");
+				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
 			}
 		}	
 		#elseif (rp_ssgi == "SSAO")
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
-				path.setTarget("bufa");
+				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.drawShader("shader_datas/ssao_pass/ssao_pass");
 
-				path.setTarget("bufb");
-				path.bindTarget("bufa", "tex");
+				path.setTarget("singleb");
+				path.bindTarget("singlea", "tex");
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
 
-				path.setTarget("bufa");
-				path.bindTarget("bufb", "tex");
+				path.setTarget("singlea");
+				path.bindTarget("singleb", "tex");
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
 			}
@@ -447,6 +459,7 @@ class RenderPathDeferred {
 		Inc.drawShadowMap();
 		#end
 
+		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
@@ -457,7 +470,7 @@ class RenderPathDeferred {
 		#if (rp_ssgi != "Off")
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
-				path.bindTarget("bufa", "ssaotex");
+				path.bindTarget("singlea", "ssaotex");
 			}
 			else {
 				path.bindTarget("empty_white", "ssaotex");
@@ -479,10 +492,28 @@ class RenderPathDeferred {
 			#end
 		}
 		#end
+
+		#if rp_shadowmap
+		{
+			// if (path.lightCastShadow()) {
+				#if rp_soft_shadows
+				path.bindTarget("visa", "svisibility");
+				#else
+				Inc.bindShadowMap();
+				#end
+			// }
+		}
+		#end
 		
+		#if rp_material_solid
+		path.drawShader("shader_datas/deferred_light_solid/deferred_light");
+		#elseif rp_material_mobile
+		path.drawShader("shader_datas/deferred_light_mobile/deferred_light");
+		#else
 		voxelao_pass ?
 			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
 			path.drawShader("shader_datas/deferred_light/deferred_light");
+		#end
 		
 		#if rp_probes
 		if (!path.isProbe) {
@@ -492,6 +523,7 @@ class RenderPathDeferred {
 				if (!p.visible || p.culled) continue;
 				path.currentProbeIndex = i;
 				path.setTarget("tex");
+				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.bindTarget("gbuffer1", "gbuffer1");
 				path.bindTarget(p.raw.name, "probeTex");
@@ -529,6 +561,7 @@ class RenderPathDeferred {
 
 		#if (rp_background == "World")
 		{
+			path.setTarget("tex"); // Re-binds depth
 			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end
@@ -623,9 +656,14 @@ class RenderPathDeferred {
 				var targeta = "buf";
 				var targetb = "gbuffer1";
 				#end
+
 				path.setTarget(targeta);
 				path.bindTarget("tex", "tex");
+				#if rp_ssr_half
+				path.bindTarget("half", "gbufferD");
+				#else
 				path.bindTarget("_main", "gbufferD");
+				#end
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.bindTarget("gbuffer1", "gbuffer1");
 				path.drawShader("shader_datas/ssr_pass/ssr_pass");
@@ -741,7 +779,6 @@ class RenderPathDeferred {
 			#else
 			path.setTarget(framebuffer);
 			#end
-
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");
 			#if (rp_antialiasing == "TAA")
@@ -790,22 +827,11 @@ class RenderPathDeferred {
 
 		#if (rp_supersampling == 4)
 		{
-			// #if rp_rendercapture
-			// TODO: ss4 + capture broken
-			// var finalTarget = "capture";
-			// #else
 			var finalTarget = "";
-			// #end
 			path.setTarget(finalTarget);
 			path.bindTarget(framebuffer, "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 		}
-		// #elseif (rp_rendercapture)
-		// {
-			// path.setTarget("capture");
-			// path.bindTarget(framebuffer, "tex");
-			// path.drawShader("shader_datas/copy_pass/copy_pass");
-		// }
 		#end
 
 		// paint
@@ -925,7 +951,7 @@ class RenderPathDeferred {
 
 	@:access(iron.RenderPath)
 	public static function commandsSticker() {
-
+		
 		#if rp_gbuffer2
 		{
 			path.setTarget("gbuffer2");

@@ -5,8 +5,8 @@ import armory.renderpath.Inc;
 
 class RenderPathCreator {
 
-	public static var drawMeshes:Void->Void = RenderPathDeferred.drawMeshes;
-	public static var applyConfig:Void->Void = RenderPathDeferred.applyConfig;
+	public static var drawMeshes:Void->Void = armory.renderpath.RenderPathDeferred.drawMeshes;
+	public static var applyConfig:Void->Void = armory.renderpath.RenderPathDeferred.applyConfig;
 
 	public static function get():RenderPath {
 		var path = new RenderPath();

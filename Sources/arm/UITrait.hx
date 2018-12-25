@@ -18,7 +18,7 @@ import arm.ProjectFormat.TAPConfig;
 @:access(iron.data.Data)
 class UITrait extends iron.Trait {
 
-	var version = "0.5";
+	var version = "0.6";
 
 	public var project:TProjectFormat;
 	var projectPath = "";
