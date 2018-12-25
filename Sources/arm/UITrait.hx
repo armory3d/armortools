@@ -2271,7 +2271,7 @@ void main() {
 					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
 						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
 					}
-					var p = iron.Scene.active.world.getGlobalProbe();
+					var p = iron.Scene.active.world.probe;
 					ui.row([1/2, 1/2]);
 					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Envmap");
 					var envHandle = Id.handle({value: p.raw.strength});
@@ -3325,51 +3325,51 @@ void main() {
 	}
 
 	function mergeMesh() {
-		var vlen = 0;
-		var ilen = 0;
-		for (i in 0...paintObjects.length) {
-			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
-			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
-		}
-		vlen = Std.int(vlen / 3);
-		var va0 = new kha.arrays.Float32Array(vlen * 3);
-		var va1 = new kha.arrays.Float32Array(vlen * 3);
-		var va2 = new kha.arrays.Float32Array(vlen * 2);
-		var ia = new kha.arrays.Uint32Array(ilen);
+		// var vlen = 0;
+		// var ilen = 0;
+		// for (i in 0...paintObjects.length) {
+		// 	vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
+		// 	ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
+		// }
+		// vlen = Std.int(vlen / 3);
+		// var va0 = new kha.arrays.Float32Array(vlen * 3);
+		// var va1 = new kha.arrays.Float32Array(vlen * 3);
+		// var va2 = new kha.arrays.Float32Array(vlen * 2);
+		// var ia = new kha.arrays.Uint32Array(ilen);
 
-		var voff = 0;
-		var ioff = 0;
-		for (i in 0...paintObjects.length) {
-			var vas = paintObjects[i].data.raw.vertex_arrays;
-			var ias = paintObjects[i].data.raw.index_arrays;
+		// var voff = 0;
+		// var ioff = 0;
+		// for (i in 0...paintObjects.length) {
+		// 	var vas = paintObjects[i].data.raw.vertex_arrays;
+		// 	var ias = paintObjects[i].data.raw.index_arrays;
 
-			for (j in 0...vas[0].values.length) va0[j + voff * 3] = vas[0].values[j];
-			for (j in 0...vas[1].values.length) va1[j + voff * 3] = vas[1].values[j];
-			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
-			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
+		// 	for (j in 0...vas[0].values.length) va0[j + voff * 3] = vas[0].values[j];
+		// 	for (j in 0...vas[1].values.length) va1[j + voff * 3] = vas[1].values[j];
+		// 	for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
+		// 	for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
 
-			voff += Std.int(vas[0].values.length / 3);
-			ioff += Std.int(ias[0].values.length);
-		}
+		// 	voff += Std.int(vas[0].values.length / 3);
+		// 	ioff += Std.int(ias[0].values.length);
+		// }
 
-		var raw:TMeshData = {
-			name: paintObject.name,
-			vertex_arrays: [
-				{ values: va0, attrib: "pos" },
-				{ values: va1, attrib: "nor" },
-				{ values: va2, attrib: "tex" }
-			],
-			index_arrays: [
-				{ values: ia, material: 0 }
-			]
-		};
+		// var raw:TMeshData = {
+		// 	name: paintObject.name,
+		// 	vertex_arrays: [
+		// 		{ values: va0, attrib: "pos" },
+		// 		{ values: va1, attrib: "nor" },
+		// 		{ values: va2, attrib: "tex" }
+		// 	],
+		// 	index_arrays: [
+		// 		{ values: ia, material: 0 }
+		// 	]
+		// };
 
-		new MeshData(raw, function(md:MeshData) {
-			mergedObject = new MeshObject(md, paintObject.materials);
-			mergedObject.name = paintObject.name;
-			mergedObject.force_context = "paint";
-			paintObjects[0].addChild(mergedObject);
-		});
+		// new MeshData(raw, function(md:MeshData) {
+		// 	mergedObject = new MeshObject(md, paintObject.materials);
+		// 	mergedObject.name = paintObject.name;
+		// 	mergedObject.force_context = "paint";
+		// 	paintObjects[0].addChild(mergedObject);
+		// });
 	}
 
 	function resetViewport() {
@@ -3401,7 +3401,7 @@ void main() {
 
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			var verticesDepth = g.vertexBufferMap.get("pos").lock();
-			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", size: 3}, {name: "nor", size: 3}]);
+			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
 			var verticesVox = g.vertexBufferMap.get("posnor").lock();
 			if (axisUp == 1) { // Y
 				for (i in 0...Std.int(vertices.length / g.structLength)) {

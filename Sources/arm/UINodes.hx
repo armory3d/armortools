@@ -437,7 +437,7 @@ class UINodes extends iron.Trait {
 			alpha_blend_source: 'blend_one',
 			alpha_blend_destination: eraser ? 'blend_zero' : 'blend_one',
 			alpha_blend_operation: 'add',
-			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
+			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		con_paint.data.color_writes_red = [true, true, true, true];
 		con_paint.data.color_writes_green = [true, true, true, true];
@@ -676,7 +676,7 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
+			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
@@ -745,7 +745,7 @@ class UINodes extends iron.Trait {
 			color_write_green: false,
 			color_write_blue: false,
 			color_write_alpha: false,
-			vertex_structure: [{name: "pos", size: 3}]
+			vertex_structure: [{name: "pos", data: 'short4norm'}]
 		});
 
 		var vert = con_depth.make_vert();
@@ -755,7 +755,7 @@ class UINodes extends iron.Trait {
 
 		if (shadowmap) {
 			if (UITrait.inst.paintHeight) {
-				con_depth.add_elem('nor', 3);
+				con_depth.add_elem('nor', 'short2norm');
 				vert.wposition = true;
 				vert.n = true;
 				vert.add_uniform('sampler2D texpaint_opt');
@@ -812,7 +812,7 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: UITrait.inst.culling ? 'clockwise' : 'none',
-			vertex_structure: [{name: "pos", size: 3},{name: "nor", size: 3},{name: "tex", size: 2}] });
+			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
