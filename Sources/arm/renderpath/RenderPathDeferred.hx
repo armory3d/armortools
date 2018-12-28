@@ -133,7 +133,7 @@ class RenderPathDeferred {
 
 	// Paint
 	static var initVoxels = true;
-	public static function drawShadowMap(l:iron.object.LightObject) {
+	public static function drawShadowMap() {
 		#if (rp_shadowmap)
 		@:privateAccess Inc.pointIndex = 0;
 		@:privateAccess Inc.spotIndex = 0;
@@ -456,7 +456,8 @@ class RenderPathDeferred {
 		// #end
 
 		#if (rp_shadowmap)
-		Inc.drawShadowMap();
+		// Inc.drawShadowMap();
+		drawShadowMap(); // Paint
 		#end
 
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it

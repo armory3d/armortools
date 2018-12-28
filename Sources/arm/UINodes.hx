@@ -437,7 +437,7 @@ class UINodes extends iron.Trait {
 			alpha_blend_source: 'blend_one',
 			alpha_blend_destination: eraser ? 'blend_zero' : 'blend_one',
 			alpha_blend_operation: 'add',
-			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
+			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		con_paint.data.color_writes_red = [true, true, true, true];
 		con_paint.data.color_writes_green = [true, true, true, true];
@@ -463,7 +463,7 @@ class UINodes extends iron.Trait {
 		
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 		
-		vert.write_attrib('vec4 ndc = WVP * vec4(pos, 1.0);');
+		vert.write_attrib('vec4 ndc = WVP * vec4(pos.xyz, 1.0);');
 		vert.write_attrib('ndc.xyz = ndc.xyz / ndc.w;');
 		vert.write('sp.xyz = ndc.xyz * 0.5 + 0.5;');
 		vert.write('sp.y = 1.0 - sp.y;');
@@ -676,7 +676,7 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
+			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
@@ -684,7 +684,7 @@ class UINodes extends iron.Trait {
 		frag.ins = vert.outs;
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.add_out('vec2 texCoord');
-		vert.write('gl_Position = WVP * vec4(pos, 1.0);');
+		vert.write('gl_Position = WVP * vec4(pos.xyz, 1.0);');
 		vert.write('texCoord = tex;');
 
 		var sout = Cycles.parse(canvas, con_mesh, vert, frag, null, null, null, matcon);
@@ -722,7 +722,7 @@ class UINodes extends iron.Trait {
 
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
-		frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0 - gl_FragCoord.z);');
+		frag.write('fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), 1.0);');
 		frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
 		frag.write('fragColor[2] = vec4(0.0);'); // veloc
 
@@ -745,7 +745,7 @@ class UINodes extends iron.Trait {
 			color_write_green: false,
 			color_write_blue: false,
 			color_write_alpha: false,
-			vertex_structure: [{name: "pos", data: 'short4norm'}]
+			vertex_elements: [{name: "pos", data: 'short4norm'}]
 		});
 
 		var vert = con_depth.make_vert();
@@ -769,12 +769,12 @@ class UINodes extends iron.Trait {
 			}
 			else {
 				vert.add_uniform('mat4 LWVP', '_lightWorldViewProjectionMatrix');
-				vert.write('gl_Position = LWVP * vec4(pos, 1.0);');
+				vert.write('gl_Position = LWVP * vec4(pos.xyz, 1.0);');
 			}
 		}
 		else {
 			vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
-			vert.write('gl_Position = WVP * vec4(pos, 1.0);');
+			vert.write('gl_Position = WVP * vec4(pos.xyz, 1.0);');
 		}
 
 		var parse_opacity = shadowmap; // arm_discard
@@ -802,6 +802,7 @@ class UINodes extends iron.Trait {
 		con_depth.data.shader_from_source = true;
 		con_depth.data.vertex_shader = vert.get();
 		con_depth.data.fragment_shader = frag.get();
+
 		return con_depth;
 	}
 
@@ -812,7 +813,7 @@ class UINodes extends iron.Trait {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: UITrait.inst.culling ? 'clockwise' : 'none',
-			vertex_structure: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
+			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
@@ -843,7 +844,7 @@ class UINodes extends iron.Trait {
 			vert.write('prevwvpposition = prevWVP * (invW * vec4(wposition, 1.0));');
 		}
 		else {
-			vert.write('prevwvpposition = prevWVP * vec4(pos, 1.0);');
+			vert.write('prevwvpposition = prevWVP * vec4(pos.xyz, 1.0);');
 		}
 
 		frag.ins = vert.outs;
@@ -855,7 +856,7 @@ class UINodes extends iron.Trait {
 
 		if (arm.UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
-			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0 - gl_FragCoord.z);');
+			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0);');
 			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2));');
 			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
