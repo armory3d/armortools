@@ -2818,13 +2818,15 @@ void main() {
 			var inda = new kha.arrays.Uint32Array(numtri * 3);
 			for (i in 0...inda.length) inda[i] = i;
 
-			var posa = new kha.arrays.Float32Array(numtri * 3 * 3);
-			var nora = new kha.arrays.Float32Array(numtri * 3 * 3);
+			var posa = new kha.arrays.Int16Array(numtri * 3 * 4);
+			var nora = new kha.arrays.Int16Array(numtri * 3 * 2);
 			var hasuv = m.get("mloopuv") != null;
-			var texa = hasuv ? new kha.arrays.Float32Array(numtri * 3 * 2) : null;
+			var texa = hasuv ? new kha.arrays.Int16Array(numtri * 3 * 2) : null;
 			
 			var tri = 0;
-			var vec = new iron.math.Vec4();
+			var vec0 = new iron.math.Vec4();
+			var vec1 = new iron.math.Vec4();
+			var vec2 = new iron.math.Vec4();
 			for (i in 0...totpoly) {
 				var poly = m.get("mpoly", i);
 				var loopstart = poly.get("loopstart");
@@ -2839,27 +2841,28 @@ void main() {
 					var no0 = v0.get("no");
 					var no1 = v1.get("no");
 					var no2 = v2.get("no");
-					posa[tri * 9 + 0] = co0[0];
-					posa[tri * 9 + 1] = co0[1];
-					posa[tri * 9 + 2] = co0[2];
-					posa[tri * 9 + 3] = co1[0];
-					posa[tri * 9 + 4] = co1[1];
-					posa[tri * 9 + 5] = co1[2];
-					posa[tri * 9 + 6] = co2[0];
-					posa[tri * 9 + 7] = co2[1];
-					posa[tri * 9 + 8] = co2[2];
-					vec.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
-					nora[tri * 9 + 0] = vec.x;
-					nora[tri * 9 + 1] = vec.y;
-					nora[tri * 9 + 2] = vec.z;
-					vec.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
-					nora[tri * 9 + 3] = vec.x;
-					nora[tri * 9 + 4] = vec.y;
-					nora[tri * 9 + 5] = vec.z;
-					vec.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
-					nora[tri * 9 + 6] = vec.x;
-					nora[tri * 9 + 7] = vec.y;
-					nora[tri * 9 + 8] = vec.z;
+					vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
+					vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
+					vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+					posa[tri * 12    ] = Std.int(co0[0] * 32767);
+					posa[tri * 12 + 1] = Std.int(co0[1] * 32767);
+					posa[tri * 12 + 2] = Std.int(co0[2] * 32767);
+					posa[tri * 12 + 3] = Std.int(vec0.z * 32767);
+					posa[tri * 12 + 4] = Std.int(co1[0] * 32767);
+					posa[tri * 12 + 5] = Std.int(co1[1] * 32767);
+					posa[tri * 12 + 6] = Std.int(co1[2] * 32767);
+					posa[tri * 12 + 7] = Std.int(vec1.z * 32767);
+					posa[tri * 12 + 8] = Std.int(co2[0] * 32767);
+					posa[tri * 12 + 9] = Std.int(co2[1] * 32767);
+					posa[tri * 12 + 10] = Std.int(co2[2] * 32767);
+					posa[tri * 12 + 11] = Std.int(vec2.z * 32767);
+					nora[tri * 6    ] = Std.int(vec0.x * 32767);
+					nora[tri * 6 + 1] = Std.int(vec0.y * 32767);
+					nora[tri * 6 + 2] = Std.int(vec1.x * 32767);
+					nora[tri * 6 + 3] = Std.int(vec1.y * 32767);
+					nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
+					nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
+					
 					var uv0:kha.arrays.Float32Array = null;
 					var uv1:kha.arrays.Float32Array = null;
 					var uv2:kha.arrays.Float32Array = null;
@@ -2867,51 +2870,51 @@ void main() {
 						uv0 = m.get("mloopuv", loopstart + 0).get("uv");
 						uv1 = m.get("mloopuv", loopstart + 1).get("uv");
 						uv2 = m.get("mloopuv", loopstart + 2).get("uv");
-						texa[tri * 6 + 0] = uv0[0];
-						texa[tri * 6 + 1] = 1.0 - uv0[1];
-						texa[tri * 6 + 2] = uv1[0];
-						texa[tri * 6 + 3] = 1.0 - uv1[1];
-						texa[tri * 6 + 4] = uv2[0];
-						texa[tri * 6 + 5] = 1.0 - uv2[1];
+						texa[tri * 6    ] = Std.int(uv0[0] * 32767);
+						texa[tri * 6 + 1] = Std.int((1.0 - uv0[1]) * 32767);
+						texa[tri * 6 + 2] = Std.int(uv1[0] * 32767);
+						texa[tri * 6 + 3] = Std.int((1.0 - uv1[1]) * 32767);
+						texa[tri * 6 + 4] = Std.int(uv2[0] * 32767);
+						texa[tri * 6 + 5] = Std.int((1.0 - uv2[1]) * 32767);
 					}
 					tri++;
 
-					if (totloop >= 4) {
-						var v3 = m.get("mvert", m.get("mloop", loopstart + 3).get("v"));
-						var co3 = v3.get("co");
-						var no3 = v3.get("no");
-						posa[tri * 9 + 0] = co2[0];
-						posa[tri * 9 + 1] = co2[1];
-						posa[tri * 9 + 2] = co2[2];
-						posa[tri * 9 + 3] = co3[0];
-						posa[tri * 9 + 4] = co3[1];
-						posa[tri * 9 + 5] = co3[2];
-						posa[tri * 9 + 6] = co0[0];
-						posa[tri * 9 + 7] = co0[1];
-						posa[tri * 9 + 8] = co0[2];
-						vec.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize(); // shortmax
-						nora[tri * 9 + 0] = vec.x;
-						nora[tri * 9 + 1] = vec.y;
-						nora[tri * 9 + 2] = vec.z;
-						vec.set(no3[0] / 32767, no3[1] / 32767, no3[2] / 32767).normalize();
-						nora[tri * 9 + 3] = vec.x;
-						nora[tri * 9 + 4] = vec.y;
-						nora[tri * 9 + 5] = vec.z;
-						vec.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize();
-						nora[tri * 9 + 6] = vec.x;
-						nora[tri * 9 + 7] = vec.y;
-						nora[tri * 9 + 8] = vec.z;
-						if (hasuv) {
-							var uv3 = m.get("mloopuv", loopstart + 3).get("uv");
-							texa[tri * 6 + 0] = uv2[0];
-							texa[tri * 6 + 1] = 1.0 - uv2[1];
-							texa[tri * 6 + 2] = uv3[0];
-							texa[tri * 6 + 3] = 1.0 - uv3[1];
-							texa[tri * 6 + 4] = uv0[0];
-							texa[tri * 6 + 5] = 1.0 - uv0[1];
-						}
-						tri++;
-					}
+					// if (totloop >= 4) {
+					// 	var v3 = m.get("mvert", m.get("mloop", loopstart + 3).get("v"));
+					// 	var co3 = v3.get("co");
+					// 	var no3 = v3.get("no");
+					// 	posa[tri * 9 + 0] = co2[0];
+					// 	posa[tri * 9 + 1] = co2[1];
+					// 	posa[tri * 9 + 2] = co2[2];
+					// 	posa[tri * 9 + 3] = co3[0];
+					// 	posa[tri * 9 + 4] = co3[1];
+					// 	posa[tri * 9 + 5] = co3[2];
+					// 	posa[tri * 9 + 6] = co0[0];
+					// 	posa[tri * 9 + 7] = co0[1];
+					// 	posa[tri * 9 + 8] = co0[2];
+					// 	vec.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize(); // shortmax
+					// 	nora[tri * 9 + 0] = vec.x;
+					// 	nora[tri * 9 + 1] = vec.y;
+					// 	nora[tri * 9 + 2] = vec.z;
+					// 	vec.set(no3[0] / 32767, no3[1] / 32767, no3[2] / 32767).normalize();
+					// 	nora[tri * 9 + 3] = vec.x;
+					// 	nora[tri * 9 + 4] = vec.y;
+					// 	nora[tri * 9 + 5] = vec.z;
+					// 	vec.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize();
+					// 	nora[tri * 9 + 6] = vec.x;
+					// 	nora[tri * 9 + 7] = vec.y;
+					// 	nora[tri * 9 + 8] = vec.z;
+					// 	if (hasuv) {
+					// 		var uv3 = m.get("mloopuv", loopstart + 3).get("uv");
+					// 		texa[tri * 6 + 0] = uv2[0];
+					// 		texa[tri * 6 + 1] = 1.0 - uv2[1];
+					// 		texa[tri * 6 + 2] = uv3[0];
+					// 		texa[tri * 6 + 3] = 1.0 - uv3[1];
+					// 		texa[tri * 6 + 4] = uv0[0];
+					// 		texa[tri * 6 + 5] = 1.0 - uv0[1];
+					// 	}
+					// 	tri++;
+					// }
 				}
 			}
 
@@ -2943,17 +2946,17 @@ void main() {
 		#else
 		if (mesh.texa == null) {
 			showMessage("Error: Mesh has no UVs, generating defaults");
-			var verts = Std.int(mesh.posa.length / 3);
-			mesh.texa = new kha.arrays.Float32Array(verts * 2);
+			var verts = Std.int(mesh.posa.length / 4);
+			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();
 			for (i in 0...verts) {
-				n.set(mesh.posa[i * 3 + 0], mesh.posa[i * 3 + 1], mesh.posa[i * 3 + 2]).normalize();
+				n.set(mesh.posa[i * 4 + 0] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 				// Sphere projection
 				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
 				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
 				// Equirect
-				mesh.texa[i * 2 + 0] = (Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2);
-				mesh.texa[i * 2 + 1] = Math.acos(n.y) / Math.PI;
+				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+				mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
 			}
 		}
 		var raw:TMeshData = {
@@ -3037,17 +3040,17 @@ void main() {
 
 		if (mesh.texa == null) {
 			showMessage("Error: Mesh has no UVs, generating defaults");
-			var verts = Std.int(mesh.posa.length / 3);
-			mesh.texa = new kha.arrays.Float32Array(verts * 2);
+			var verts = Std.int(mesh.posa.length / 4);
+			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();
 			for (i in 0...verts) {
-				n.set(mesh.posa[i * 3 + 0], mesh.posa[i * 3 + 1], mesh.posa[i * 3 + 2]).normalize();
+				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 				// Sphere projection
 				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
 				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
 				// Equirect
-				mesh.texa[i * 2 + 0] = (Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2);
-				mesh.texa[i * 2 + 1] = Math.acos(n.y) / Math.PI;
+				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+				mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
 			}
 		}
 		var raw:TMeshData = {

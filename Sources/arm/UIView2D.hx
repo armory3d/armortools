@@ -112,12 +112,12 @@ void main() {
 			uvmap.g2.begin(true, 0x00000000);
 			uvmap.g2.color = 0xffffffff;
 			for (i in 0...Std.int(inda.length / 3)) {
-				var x1 = texa[inda[i * 3 + 0] * 2 + 0] * uvmap.width;
-				var x2 = texa[inda[i * 3 + 1] * 2 + 0] * uvmap.width;
-				var x3 = texa[inda[i * 3 + 2] * 2 + 0] * uvmap.width;
-				var y1 = texa[inda[i * 3 + 0] * 2 + 1] * uvmap.width;
-				var y2 = texa[inda[i * 3 + 1] * 2 + 1] * uvmap.width;
-				var y3 = texa[inda[i * 3 + 2] * 2 + 1] * uvmap.width;
+				var x1 = (texa[inda[i * 3 + 0] * 2 + 0]) / 32767 * uvmap.width;
+				var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) / 32767 * uvmap.width;
+				var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) / 32767 * uvmap.width;
+				var y1 = (texa[inda[i * 3 + 0] * 2 + 1]) / 32767 * uvmap.width;
+				var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) / 32767 * uvmap.width;
+				var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) / 32767 * uvmap.width;
 				uvmap.g2.drawLine(x1, y1, x2, y2);
 				uvmap.g2.drawLine(x2, y2, x3, y3);
 				uvmap.g2.drawLine(x3, y3, x1, y1);

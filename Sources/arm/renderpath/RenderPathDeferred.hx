@@ -170,7 +170,7 @@ class RenderPathDeferred {
 
 		if (!arm.UITrait.inst.dirty()) {
 			path.setTarget("");
-			path.bindTarget("bufb", "tex");
+			path.bindTarget("taa", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 			return;
 		}
@@ -538,6 +538,8 @@ class RenderPathDeferred {
 		}
 		#end
 
+		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
+
 		// #if rp_volumetriclight
 		// {
 		// 	path.setTarget("bufvola");
@@ -792,34 +794,14 @@ class RenderPathDeferred {
 			#if (rp_antialiasing == "TAA")
 			{
 				if (!path.isProbe) { // No last frame for probe
-
-					// Paint
-					var isLast = arm.UITrait.inst.ddirty == 1 || arm.UITrait.inst.rdirty == 1;
-					path.setTarget(isLast ? "bufb" : framebuffer);
+					path.setTarget(framebuffer);
 					path.bindTarget("bufa", "tex");
 					path.bindTarget("taa", "tex2");
 					path.bindTarget("gbuffer2", "sveloc");
 					path.drawShader("shader_datas/taa_pass/taa_pass");
-					if (isLast) {
-						path.setTarget(framebuffer);
-						path.bindTarget("bufb", "tex");
-						path.drawShader("shader_datas/copy_pass/copy_pass");
-					}
-					else {
-						path.setTarget("taa");
-						path.bindTarget("bufa", "tex");
-						path.drawShader("shader_datas/copy_pass/copy_pass");
-					}
-					//
-					// path.setTarget(framebuffer);
-					// path.bindTarget("bufa", "tex");
-					// path.bindTarget("taa", "tex2");
-					// path.bindTarget("gbuffer2", "sveloc");
-					// path.drawShader("shader_datas/taa_pass/taa_pass");
-					// path.setTarget("taa");
-					// path.bindTarget("bufa", "tex");
-					// path.drawShader("shader_datas/copy_pass/copy_pass");
-					//
+					path.setTarget("taa");
+					path.bindTarget("bufa", "tex");
+					path.drawShader("shader_datas/copy_pass/copy_pass");
 				}
 			}
 			#end
