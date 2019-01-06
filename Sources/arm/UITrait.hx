@@ -2818,6 +2818,7 @@ void main() {
 			var inda = new kha.arrays.Uint32Array(numtri * 3);
 			for (i in 0...inda.length) inda[i] = i;
 
+			var posa32 = new kha.arrays.Float32Array(numtri * 3 * 4);
 			var posa = new kha.arrays.Int16Array(numtri * 3 * 4);
 			var nora = new kha.arrays.Int16Array(numtri * 3 * 2);
 			var hasuv = m.get("mloopuv") != null;
@@ -2827,6 +2828,7 @@ void main() {
 			var vec0 = new iron.math.Vec4();
 			var vec1 = new iron.math.Vec4();
 			var vec2 = new iron.math.Vec4();
+			var vec3 = new iron.math.Vec4();
 			for (i in 0...totpoly) {
 				var poly = m.get("mpoly", i);
 				var loopstart = poly.get("loopstart");
@@ -2844,17 +2846,17 @@ void main() {
 					vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
 					vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
 					vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
-					posa[tri * 12    ] = Std.int(co0[0] * 32767);
-					posa[tri * 12 + 1] = Std.int(co0[1] * 32767);
-					posa[tri * 12 + 2] = Std.int(co0[2] * 32767);
+					posa32[tri * 9    ] = co0[0];
+					posa32[tri * 9 + 1] = co0[1];
+					posa32[tri * 9 + 2] = co0[2];
+					posa32[tri * 9 + 3] = co1[0];
+					posa32[tri * 9 + 4] = co1[1];
+					posa32[tri * 9 + 5] = co1[2];
+					posa32[tri * 9 + 6] = co2[0];
+					posa32[tri * 9 + 7] = co2[1];
+					posa32[tri * 9 + 8] = co2[2];
 					posa[tri * 12 + 3] = Std.int(vec0.z * 32767);
-					posa[tri * 12 + 4] = Std.int(co1[0] * 32767);
-					posa[tri * 12 + 5] = Std.int(co1[1] * 32767);
-					posa[tri * 12 + 6] = Std.int(co1[2] * 32767);
 					posa[tri * 12 + 7] = Std.int(vec1.z * 32767);
-					posa[tri * 12 + 8] = Std.int(co2[0] * 32767);
-					posa[tri * 12 + 9] = Std.int(co2[1] * 32767);
-					posa[tri * 12 + 10] = Std.int(co2[2] * 32767);
 					posa[tri * 12 + 11] = Std.int(vec2.z * 32767);
 					nora[tri * 6    ] = Std.int(vec0.x * 32767);
 					nora[tri * 6 + 1] = Std.int(vec0.y * 32767);
@@ -2879,48 +2881,67 @@ void main() {
 					}
 					tri++;
 
-					// if (totloop >= 4) {
-					// 	var v3 = m.get("mvert", m.get("mloop", loopstart + 3).get("v"));
-					// 	var co3 = v3.get("co");
-					// 	var no3 = v3.get("no");
-					// 	posa[tri * 9 + 0] = co2[0];
-					// 	posa[tri * 9 + 1] = co2[1];
-					// 	posa[tri * 9 + 2] = co2[2];
-					// 	posa[tri * 9 + 3] = co3[0];
-					// 	posa[tri * 9 + 4] = co3[1];
-					// 	posa[tri * 9 + 5] = co3[2];
-					// 	posa[tri * 9 + 6] = co0[0];
-					// 	posa[tri * 9 + 7] = co0[1];
-					// 	posa[tri * 9 + 8] = co0[2];
-					// 	vec.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize(); // shortmax
-					// 	nora[tri * 9 + 0] = vec.x;
-					// 	nora[tri * 9 + 1] = vec.y;
-					// 	nora[tri * 9 + 2] = vec.z;
-					// 	vec.set(no3[0] / 32767, no3[1] / 32767, no3[2] / 32767).normalize();
-					// 	nora[tri * 9 + 3] = vec.x;
-					// 	nora[tri * 9 + 4] = vec.y;
-					// 	nora[tri * 9 + 5] = vec.z;
-					// 	vec.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize();
-					// 	nora[tri * 9 + 6] = vec.x;
-					// 	nora[tri * 9 + 7] = vec.y;
-					// 	nora[tri * 9 + 8] = vec.z;
-					// 	if (hasuv) {
-					// 		var uv3 = m.get("mloopuv", loopstart + 3).get("uv");
-					// 		texa[tri * 6 + 0] = uv2[0];
-					// 		texa[tri * 6 + 1] = 1.0 - uv2[1];
-					// 		texa[tri * 6 + 2] = uv3[0];
-					// 		texa[tri * 6 + 3] = 1.0 - uv3[1];
-					// 		texa[tri * 6 + 4] = uv0[0];
-					// 		texa[tri * 6 + 5] = 1.0 - uv0[1];
-					// 	}
-					// 	tri++;
-					// }
+					if (totloop >= 4) {
+						var v3 = m.get("mvert", m.get("mloop", loopstart + 3).get("v"));
+						var co3 = v3.get("co");
+						var no3 = v3.get("no");
+						vec3.set(no3[0] / 32767, no3[1] / 32767, no3[2] / 32767).normalize();
+						posa32[tri * 9    ] = co2[0];
+						posa32[tri * 9 + 1] = co2[1];
+						posa32[tri * 9 + 2] = co2[2];
+						posa32[tri * 9 + 3] = co3[0];
+						posa32[tri * 9 + 4] = co3[1];
+						posa32[tri * 9 + 5] = co3[2];
+						posa32[tri * 9 + 6] = co0[0];
+						posa32[tri * 9 + 7] = co0[1];
+						posa32[tri * 9 + 8] = co0[2];
+						posa[tri * 12 + 3] = Std.int(vec2.z * 32767);
+						posa[tri * 12 + 7] = Std.int(vec3.z * 32767);
+						posa[tri * 12 + 11] = Std.int(vec0.z * 32767);
+						nora[tri * 6    ] = Std.int(vec2.x * 32767);
+						nora[tri * 6 + 1] = Std.int(vec2.y * 32767);
+						nora[tri * 6 + 2] = Std.int(vec3.x * 32767);
+						nora[tri * 6 + 3] = Std.int(vec3.y * 32767);
+						nora[tri * 6 + 4] = Std.int(vec0.x * 32767);
+						nora[tri * 6 + 5] = Std.int(vec0.y * 32767);
+						
+						if (hasuv) {
+							var uv3 = m.get("mloopuv", loopstart + 3).get("uv");
+							texa[tri * 6    ] = Std.int(uv2[0] * 32767);
+							texa[tri * 6 + 1] = Std.int((1.0 - uv2[1]) * 32767);
+							texa[tri * 6 + 2] = Std.int(uv3[0] * 32767);
+							texa[tri * 6 + 3] = Std.int((1.0 - uv3[1]) * 32767);
+							texa[tri * 6 + 4] = Std.int(uv0[0] * 32767);
+							texa[tri * 6 + 5] = Std.int((1.0 - uv0[1]) * 32767);
+						}
+						tri++;
+					}
 				}
+			}
+
+			// Pack positions to (-1, 1) range
+			var hx = 0.0;
+			var hy = 0.0;
+			var hz = 0.0;
+			for (i in 0...Std.int(posa32.length / 3)) {
+				var f = Math.abs(posa32[i * 3]);
+				if (hx < f) hx = f;
+				f = Math.abs(posa32[i * 3 + 1]);
+				if (hy < f) hy = f;
+				f = Math.abs(posa32[i * 3 + 2]);
+				if (hz < f) hz = f;
+			}
+			var scalePos = Math.max(hx, Math.max(hy, hz));
+			var inv = 1 / scalePos;
+			for (i in 0...Std.int(posa32.length / 3)) {
+				posa[i * 4    ] = Std.int(posa32[i * 3    ] * 32767 * inv);
+				posa[i * 4 + 1] = Std.int(posa32[i * 3 + 1] * 32767 * inv);
+				posa[i * 4 + 2] = Std.int(posa32[i * 3 + 2] * 32767 * inv);
 			}
 
 			var name:String = m.get("id").get("name");
 			name = name.substring(2, name.length);
-			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name};
+			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
 			makeMesh(obj, path);
 		});
 	}
@@ -2968,7 +2989,9 @@ void main() {
 			],
 			index_arrays: [
 				{ values: mesh.inda, material: 0 }
-			]
+			],
+			scale_pos: mesh.scalePos,
+			scale_tex: mesh.scaleTex
 		};
 		#end
 
@@ -3062,7 +3085,9 @@ void main() {
 			],
 			index_arrays: [
 				{ values: mesh.inda, material: 0 }
-			]
+			],
+			scale_pos: mesh.scalePos,
+			scale_tex: mesh.scaleTex
 		};
 
 		new MeshData(raw, function(md:MeshData) {
