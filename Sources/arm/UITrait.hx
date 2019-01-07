@@ -1751,7 +1751,7 @@ void main() {
 						if (selectedObject.name == "Scene") {
 							selectedType = "(Scene)";
 							// ui.image(envThumb);
-							var p = iron.Scene.active.world.getGlobalProbe();
+							var p = iron.Scene.active.world.probe;
 							ui.row([1/2, 1/2]);
 							var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
 							p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
@@ -2155,7 +2155,7 @@ void main() {
 									mergeMesh();
 									ui.g.begin(false);
 								}
-								selectPaintObject(paintObjects[0]);
+								selectPaintObject(mainObject());
 								paintObject.skip_context = "paint";
 								// if (mergedObject.parent == null) paintObject.addChild(mergedObject);
 								mergedObject.visible = true;
@@ -2686,15 +2686,13 @@ void main() {
 		else if (StringTools.endsWith(p, ".fbx")) importFbx(path);
 		else if (StringTools.endsWith(p, ".blend")) importBlend(path);
 
-		// Import is synchronous for now
-		scaleToBounds();
-
 		if (mergedObject != null) {
 			mergedObject.remove();
 			iron.data.Data.deleteMesh(mergedObject.data.handle);
 			mergedObject = null;
 		}
-		selectPaintObject(paintObjects[0]);
+
+		selectPaintObject(mainObject());
 
 		if (paintObjects.length > 1) {
 			objectsHandle.selected = true;
@@ -2708,10 +2706,12 @@ void main() {
 
 			// No mask by default
 			if (mergedObject == null) mergeMesh();
-			selectPaintObject(paintObjects[0]);
 			paintObject.skip_context = "paint";
 			mergedObject.visible = true;
 		}
+
+		// Import is synchronous for now
+		scaleToBounds();
 
 		if (paintObject.name == "") paintObject.name = "Object";
 
@@ -2750,50 +2750,22 @@ void main() {
 		});
 	}
 
+	function mainObject():MeshObject {
+		for (po in paintObjects) if (po.children.length > 0) return po;
+		return paintObjects[0];
+	}
+
 	function scaleToBounds() {
-		if (paintObjects.length > 1) {
-			var aabbMin = new iron.math.Vec4(-0.01, -0.01, -0.01);
-			var aabbMax = new iron.math.Vec4(0.01, 0.01, 0.01);
-			for (i in 1...paintObjects.length) {
-				var mo = cast(paintObjects[i], MeshObject);
-				mo.data.geom.calculateAABB();
-				var geom = mo.data.geom;
-
-				mo.transform.dim.x = geom.aabb.x;
-				mo.transform.dim.y = geom.aabb.y;
-				mo.transform.dim.z = geom.aabb.z;
-
-				if (aabbMin.x > geom.aabbMin.x) aabbMin.x = geom.aabbMin.x;
-				if (aabbMin.y > geom.aabbMin.y) aabbMin.y = geom.aabbMin.y;
-				if (aabbMin.z > geom.aabbMin.z) aabbMin.z = geom.aabbMin.z;
-				if (aabbMax.x < geom.aabbMax.x) aabbMax.x = geom.aabbMax.x;
-				if (aabbMax.y < geom.aabbMax.y) aabbMax.y = geom.aabbMax.y;
-				if (aabbMax.z < geom.aabbMax.z) aabbMax.z = geom.aabbMax.z;
-			}
-			var aabb = new iron.math.Vec4();
-			aabb.x = Math.abs(aabbMin.x) + Math.abs(aabbMax.x);
-			aabb.y = Math.abs(aabbMin.y) + Math.abs(aabbMax.y);
-			aabb.z = Math.abs(aabbMin.z) + Math.abs(aabbMax.z);
-			var r = Math.sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
-			if (paintObjects[0].raw.dimensions == null) paintObjects[0].raw.dimensions = new kha.arrays.Float32Array(3);
-			paintObjects[0].raw.dimensions[0] = aabb.x;
-			paintObjects[0].raw.dimensions[1] = aabb.y;
-			paintObjects[0].raw.dimensions[2] = aabb.z;
-			paintObjects[0].transform.scale.set(2 / r, 2 / r, 2 / r);
-			paintObjects[0].transform.buildMatrix();
-		}
-		else {
-			// Scale to bounds
-			var md = paintObject.data;
-			md.geom.calculateAABB();
-			var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
-			if (paintObjects[0].raw.dimensions == null) paintObjects[0].raw.dimensions = new kha.arrays.Float32Array(3);
-			paintObjects[0].raw.dimensions[0] = md.geom.aabb.x;
-			paintObjects[0].raw.dimensions[1] = md.geom.aabb.y;
-			paintObjects[0].raw.dimensions[2] = md.geom.aabb.z;
-			paintObject.transform.scale.set(2 / r, 2 / r, 2 / r);
-			paintObject.transform.buildMatrix();
-		}
+		var po = mergedObject == null ? mainObject() : mergedObject;
+		var md = po.data;
+		md.geom.calculateAABB();
+		var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
+		po = mainObject();
+		po.transform.dim.x = md.geom.aabb.x;
+		po.transform.dim.y = md.geom.aabb.y;
+		po.transform.dim.z = md.geom.aabb.z;
+		po.transform.scale.set(2 / r, 2 / r, 2 / r);
+		po.transform.buildMatrix();
 	}
 
 	function importBlend(path:String) {
@@ -3021,7 +2993,7 @@ void main() {
 			#end
 			{ // Replace
 
-				selectPaintObject(paintObjects[0]);
+				selectPaintObject(mainObject());
 				for (i in 1...paintObjects.length) {
 					var p = paintObjects[i];
 					iron.data.Data.deleteMesh(p.data.handle);
@@ -3199,7 +3171,7 @@ void main() {
 			iron.data.Data.deleteMesh(mergedObject.data.handle);
 			mergedObject = null;
 		}
-		selectPaintObject(paintObjects[0]);
+		selectPaintObject(mainObject());
 		for (i in 1...paintObjects.length) {
 			var p = paintObjects[i];
 			iron.data.Data.deleteMesh(p.data.handle);
@@ -3293,12 +3265,11 @@ void main() {
 					paintObjects.push(object);					
 				});
 			}
-			selectPaintObject(paintObjects[0]);
-			scaleToBounds();
 
 			// No mask by default
 			if (mergedObject == null) mergeMesh();
-			selectPaintObject(paintObjects[0]);
+			selectPaintObject(mainObject());
+			scaleToBounds();
 			paintObject.skip_context = "paint";
 			mergedObject.visible = true;
 
@@ -3353,51 +3324,61 @@ void main() {
 	}
 
 	function mergeMesh() {
-		// var vlen = 0;
-		// var ilen = 0;
-		// for (i in 0...paintObjects.length) {
-		// 	vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
-		// 	ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
-		// }
-		// vlen = Std.int(vlen / 3);
-		// var va0 = new kha.arrays.Float32Array(vlen * 3);
-		// var va1 = new kha.arrays.Float32Array(vlen * 3);
-		// var va2 = new kha.arrays.Float32Array(vlen * 2);
-		// var ia = new kha.arrays.Uint32Array(ilen);
+		var vlen = 0;
+		var ilen = 0;
+		var maxScale = 0.0;
+		for (i in 0...paintObjects.length) {
+			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
+			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
+			if (paintObjects[i].data.scalePos > maxScale) maxScale = paintObjects[i].data.scalePos;
+		}
+		vlen = Std.int(vlen / 4);
+		var va0 = new kha.arrays.Int16Array(vlen * 4);
+		var va1 = new kha.arrays.Int16Array(vlen * 2);
+		var va2 = new kha.arrays.Int16Array(vlen * 2);
+		var ia = new kha.arrays.Uint32Array(ilen);
 
-		// var voff = 0;
-		// var ioff = 0;
-		// for (i in 0...paintObjects.length) {
-		// 	var vas = paintObjects[i].data.raw.vertex_arrays;
-		// 	var ias = paintObjects[i].data.raw.index_arrays;
+		var voff = 0;
+		var ioff = 0;
+		for (i in 0...paintObjects.length) {
+			var vas = paintObjects[i].data.raw.vertex_arrays;
+			var ias = paintObjects[i].data.raw.index_arrays;
+			var scale = paintObjects[i].data.scalePos;	
 
-		// 	for (j in 0...vas[0].values.length) va0[j + voff * 3] = vas[0].values[j];
-		// 	for (j in 0...vas[1].values.length) va1[j + voff * 3] = vas[1].values[j];
-		// 	for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
-		// 	for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
+			for (j in 0...vas[0].values.length) va0[j + voff * 4] = vas[0].values[j];
+			for (j in 0...Std.int(va0.length / 4)) {
+				va0[j * 4     + voff * 4] = Std.int((va0[j * 4     + voff * 4] * scale) / maxScale);
+				va0[j * 4 + 1 + voff * 4] = Std.int((va0[j * 4 + 1 + voff * 4] * scale) / maxScale);
+				va0[j * 4 + 2 + voff * 4] = Std.int((va0[j * 4 + 2 + voff * 4] * scale) / maxScale);
+			}
+			for (j in 0...vas[1].values.length) va1[j + voff * 2] = vas[1].values[j];
+			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
+			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
 
-		// 	voff += Std.int(vas[0].values.length / 3);
-		// 	ioff += Std.int(ias[0].values.length);
-		// }
+			voff += Std.int(vas[0].values.length / 4);
+			ioff += Std.int(ias[0].values.length);
+		}
 
-		// var raw:TMeshData = {
-		// 	name: paintObject.name,
-		// 	vertex_arrays: [
-		// 		{ values: va0, attrib: "pos" },
-		// 		{ values: va1, attrib: "nor" },
-		// 		{ values: va2, attrib: "tex" }
-		// 	],
-		// 	index_arrays: [
-		// 		{ values: ia, material: 0 }
-		// 	]
-		// };
+		var raw:TMeshData = {
+			name: paintObject.name,
+			vertex_arrays: [
+				{ values: va0, attrib: "pos" },
+				{ values: va1, attrib: "nor" },
+				{ values: va2, attrib: "tex" }
+			],
+			index_arrays: [
+				{ values: ia, material: 0 }
+			],
+			scale_pos: maxScale,
+			scale_tex: 1.0
+		};
 
-		// new MeshData(raw, function(md:MeshData) {
-		// 	mergedObject = new MeshObject(md, paintObject.materials);
-		// 	mergedObject.name = paintObject.name;
-		// 	mergedObject.force_context = "paint";
-		// 	paintObjects[0].addChild(mergedObject);
-		// });
+		new MeshData(raw, function(md:MeshData) {
+			mergedObject = new MeshObject(md, paintObject.materials);
+			mergedObject.name = paintObject.name;
+			mergedObject.force_context = "paint";
+			mainObject().addChild(mergedObject);
+		});
 	}
 
 	function resetViewport() {
