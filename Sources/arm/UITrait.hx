@@ -2244,7 +2244,14 @@ void main() {
 					cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
 					if (camHandle.changed) {
 						if (cameraType == 0) cam.data.raw.ortho = null;
-						else cam.data.raw.ortho = [-2, 2, -2 * (iron.App.h() / iron.App.w()), 2 * (iron.App.h() / iron.App.w())];
+						else {
+							var f32 = new kha.arrays.Float32Array(4);
+							f32[0] = -2;
+							f32[1] =  2;
+							f32[2] = -2 * (iron.App.h() / iron.App.w());
+							f32[2] =  2 * (iron.App.h() / iron.App.w());
+							cam.data.raw.ortho = cast f32; // TODO: skip cast in 0.6
+						}
 						
 						if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
 						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
