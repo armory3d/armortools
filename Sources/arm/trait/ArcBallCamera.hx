@@ -31,12 +31,17 @@ class ArcBallCamera extends iron.Trait {
 			}
 
 			if (mouse.down("middle") || (mouse.down("right") && kb.down("space"))) {
-				redraws = 2;
-				camera.transform.loc.addf(-mouse.movementX / 150, 0.0, mouse.movementY / 150);
-				camera.buildMatrix();
+				if (kb.down("control")) {
+					redraws = 2;
+					camera.transform.move(camera.look(), mouse.movementX / 75);
+				} else {
+					redraws = 2;
+					camera.transform.loc.addf(-mouse.movementX / 150, 0.0, mouse.movementY / 150);
+					camera.buildMatrix();
+				}
 			}
 
-			if (mouse.down("right") || (mouse.down("left") && kb.down("control"))) {
+			if ((mouse.down("right") && !kb.down("space")) || (mouse.down("left") && kb.down("control"))) {
 				redraws = 2;
 				
 				// Rotate X
@@ -57,6 +62,8 @@ class ArcBallCamera extends iron.Trait {
 						UITrait.inst.selectedObject.transform.rotate(v, -mouse.movementY / 100);
 					}
 				}
+
+				
 
 
 			}
