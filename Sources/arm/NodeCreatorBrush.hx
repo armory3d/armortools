@@ -1,11 +1,7 @@
 package arm;
 
-import iron.object.Object;
-import armory.system.Cycles;
 import zui.*;
 import zui.Nodes;
-import iron.data.SceneFormat;
-import iron.data.MaterialData;
 
 class NodeCreatorBrush {
 

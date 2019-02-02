@@ -6,56 +6,29 @@ import zui.*;
 class UIView2D extends iron.Trait {
 
 	public static var inst:UIView2D;
-
 	public var show = false;
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
-
+	public var uvmapCached = false;
+	public var ui:Zui;
+	public var hwnd = Id.handle();
+	
 	var panX = 0.0;
 	var panY = 0.0;
 	var panScale = 1.0;
-
 	var pipe:kha.graphics4.PipelineState;
 	var texType = 0;
 	var uvmap:kha.Image = null;
 	var uvmapShow = false;
-	public var uvmapCached = false;
-	public var ui:Zui;
 
 	public function new() {
 		super();
 		inst = this;
 
-		var frag = "
-#version 330
-uniform sampler2D tex;
-in vec2 texCoord;
-in vec4 color;
-out vec4 FragColor;
-void main() {
-	vec4 texcolor = texture(tex, texCoord) * color;
-	FragColor = texcolor;
-}
-		";
-		var vert = "
-#version 330
-in vec3 vertexPosition;
-in vec2 texPosition;
-in vec4 vertexColor;
-uniform mat4 projectionMatrix;
-out vec2 texCoord;
-out vec4 color;
-void main() {
-	gl_Position = projectionMatrix * vec4(vertexPosition, 1.0);
-	texCoord = texPosition;
-	color = vertexColor;
-}
-		";
-
 		pipe = new kha.graphics4.PipelineState();
-		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(frag);
-		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(vert);
+		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.painterVert);
+		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.painterFrag);
 		var vs = new kha.graphics4.VertexStructure();
 		vs.add("vertexPosition", kha.graphics4.VertexData.Float3);
 		vs.add("texPosition", kha.graphics4.VertexData.Float2);
@@ -74,16 +47,15 @@ void main() {
 		notifyOnUpdate(update);
 	}
 
-	public var hwnd = Id.handle();
-
 	function render2D(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w());
 		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 
-		if (!show) return;
-		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+		if (!show ||
+			arm.App.realw() == 0 ||
+			arm.App.realh() == 0) return;
 
 		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
@@ -165,10 +137,12 @@ void main() {
 	}
 
 	function update() {
-		if (!arm.App.uienabled) return;
 		var m = iron.system.Input.getMouse();
-		if (!show) return;
-		if (m.x + App.x() < wx || m.x + App.x() > wx + ww) return;
+
+		if (!arm.App.uienabled ||
+			!show ||
+			m.x + App.x() < wx ||
+			m.x + App.x() > wx + ww) return;
 		
 		if (m.down("right")) {
 			panX += m.movementX;

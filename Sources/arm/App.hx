@@ -22,10 +22,12 @@ class App extends iron.Trait {
 	public static var theme:zui.Themes.TTheme;
 	public static var color_wheel:kha.Image;
 	public static var uimodal:Zui;
+	public static var path = '/';
 	static var modalW = 625;
 	static var modalH = 545;
 	static var lastW = -1;
 	static var lastH = -1;
+	static var appx = 0;
 
 	public static function getEnumTexts():Array<String> {
 		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
@@ -76,16 +78,16 @@ class App extends iron.Trait {
 						// iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
 						// #end
 						iron.App.notifyOnUpdate(update);
-						iron.Scene.active.root.addTrait(new UITrait());
-						iron.Scene.active.root.addTrait(new UINodes());
-						iron.Scene.active.root.addTrait(new UIView2D());
-						iron.Scene.active.root.addTrait(new arm.trait.FlyCamera());
-						iron.Scene.active.root.addTrait(new arm.trait.OrbitCamera());
-						iron.Scene.active.root.addTrait(new arm.trait.ArcBallCamera());
+						var root = iron.Scene.active.root;
+						root.addTrait(new UITrait());
+						root.addTrait(new UINodes());
+						root.addTrait(new UIView2D());
+						root.addTrait(new arm.trait.FlyCamera());
+						root.addTrait(new arm.trait.OrbitCamera());
+						root.addTrait(new arm.trait.ArcBallCamera());
 						iron.App.notifyOnInit(function() {
 							iron.App.notifyOnRender2D(render); // Draw on top
 						});
-						
 						appx = UITrait.inst.C.ui_layout == 0 ? 0 : UITrait.inst.windowW;
 					});
 				});
@@ -94,7 +96,10 @@ class App extends iron.Trait {
 	}
 
 	public static function w():Int {
+		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
+
+		// Drawing sticker preview
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 		
 		var res = 0;
@@ -110,12 +115,14 @@ class App extends iron.Trait {
 		else {
 			res = kha.System.windowWidth();
 		}
-
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
 	public static function h():Int {
+		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
+
+		// Drawing sticker preview
 		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
 
 		var res = 0;
@@ -123,30 +130,16 @@ class App extends iron.Trait {
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
-	static var appx = 0;
-	public static function x():Int {
-		return appx;
-	}
-
-	public static function y():Int {
-		return 0;
-	}
-
-	public static function realw():Int {
-		return kha.System.windowWidth();
-	}
-
-	public static function realh():Int {
-		return kha.System.windowHeight();
-	}
-
 	public static function resize() {
 		iron.Scene.active.camera.buildProjection();
 		UITrait.inst.ddirty = 2;
 
 		var lay = UITrait.inst.C.ui_layout;
+		
 		appx = (lay == 0 || !UITrait.inst.show) ? 0 : UITrait.inst.windowW;
-		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) appx += iron.App.w();
+		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {
+			appx += iron.App.w();
+		}
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();
@@ -169,7 +162,9 @@ class App extends iron.Trait {
 
 		isDragging = dragAsset != null;
 		if (mouse.released() && isDragging) {
-			if (UINodes.inst.show && mouse.x + iron.App.x() > UINodes.inst.wx && mouse.y + iron.App.y() > UINodes.inst.wy) {
+			var x = mouse.x + iron.App.x();
+			var y = mouse.y + iron.App.y();
+			if (UINodes.inst.show && x > UINodes.inst.wx && y > UINodes.inst.wy) {
 				var index = 0;
 				for (i in 0...UITrait.inst.assets.length) {
 					if (UITrait.inst.assets[i] == dragAsset) {
@@ -183,7 +178,7 @@ class App extends iron.Trait {
 		}
 
 		if (dropPath != "") {
-			UITrait.inst.importFile(dropPath, dropX, dropY);
+			Importer.importFile(dropPath, dropX, dropY);
 			dropPath = "";
 		}
 
@@ -228,7 +223,6 @@ class App extends iron.Trait {
 		if (showFiles) renderFiles(g);
 	}
 
-	public static var path = '/';
 	static function renderFiles(g:kha.graphics2.Graphics) {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
@@ -250,7 +244,7 @@ class App extends iron.Trait {
 		uimodal.end(false);
 		g.begin(false);
 
-		if (UITrait.checkImageFormat(path) || UITrait.checkMeshFormat(path) || UITrait.checkProjectFormat(path)) {
+		if (Format.checkTextureFormat(path) || Format.checkMeshFormat(path) || Format.checkProjectFormat(path)) {
 			showFiles = false;
 			filesDone(path);
 			var sep = kha.System.systemId == "Windows" ? "\\" : "/";
@@ -276,4 +270,9 @@ class App extends iron.Trait {
 
 		g.begin(false);
 	}
+
+	public static function x():Int { return appx; }
+	public static function y():Int { return 0; }
+	public static function realw():Int { return kha.System.windowWidth(); }
+	public static function realh():Int { return kha.System.windowHeight(); }
 }

@@ -27,8 +27,8 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
 			t.format = 'RGBA32';
 			t.depth_buffer = "paintdb";
 			texpaint = RenderPath.active.createRenderTarget(t).image;
@@ -36,16 +36,16 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_nor" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_pack" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
@@ -59,8 +59,8 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_opt" + ext;
-			t.width = UITrait.inst.getTextureRes();
-			t.height = UITrait.inst.getTextureRes();
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
 			t.format = 'RGBA32';
 			texpaint_opt = RenderPath.active.createRenderTarget(t).image;
 		}

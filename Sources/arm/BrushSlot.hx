@@ -1,8 +1,6 @@
 package arm;
 
-import zui.*;
-
 class BrushSlot {
-	public var nodes = new Nodes();
+	public var nodes = new zui.Nodes();
 	public function new() {}
 }

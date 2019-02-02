@@ -32,7 +32,8 @@ typedef TAPConfig = {
 	@:optional var window_msaa:Null<Int>;
 	@:optional var window_scale:Null<Float>;
 	@:optional var rp_supersample:Null<Float>;
-	@:optional var rp_shadowmap:Null<Int>; // size
+	@:optional var rp_shadowmap_cube:Null<Int>; // size
+	@:optional var rp_shadowmap_cascade:Null<Int>; // size for single cascade
 	@:optional var rp_ssgi:Null<Bool>;
 	@:optional var rp_ssr:Null<Bool>;
 	@:optional var rp_bloom:Null<Bool>;

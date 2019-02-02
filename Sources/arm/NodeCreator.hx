@@ -1,14 +1,12 @@
 package arm;
 
-import iron.object.Object;
-import armory.system.Cycles;
 import zui.*;
 import zui.Nodes;
-import iron.data.SceneFormat;
-import iron.data.MaterialData;
 
 @:access(arm.UINodes)
 class NodeCreator {
+
+	public static var numNodes = [11, 1, 9, 5, 4, 10];
 
 	public static function createImageTexture():TNode {
 		var getNodeX = UINodes.inst.getNodeX;
@@ -70,8 +68,6 @@ class NodeCreator {
 		canvas.nodes.push(n);
 		return n;
 	}
-
-	public static var numNodes = [11, 1, 9, 5, 4, 10];
 
 	public static function draw(cat:Int) {
 		var ui = UINodes.inst.ui;
