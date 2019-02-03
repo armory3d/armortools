@@ -200,18 +200,20 @@ class MaterialBuilder {
 		var occ = sout.out_occlusion;
 		var nortan = Cycles.out_normaltan;
 		var height = sout.out_height;
+		var opac = sout.out_opacity;
 		frag.write('vec3 basecol = $base;');
 		frag.write('float roughness = $rough;');
 		frag.write('float metallic = $met;');
 		frag.write('float occlusion = $occ;');
 		frag.write('vec3 nortan = $nortan;');
 		frag.write('float height = $height;');
+		frag.write('float opacity = $opac * brushOpacity;');
 
-		if (eraser) frag.write('    float str = 1.0 - brushOpacity;');
-		else frag.write('    float str = clamp(brushOpacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
+		if (eraser) frag.write('    float str = 1.0 - opacity;');
+		else frag.write('    float str = clamp(opacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
 
 		if (UITrait.inst.mirrorX && UITrait.inst.brushType == 0) { // Draw
-			frag.write('str += clamp(brushOpacity * (brushRadius - dist2) * brushStrength, 0.0, 1.0);');
+			frag.write('str += clamp(opacity * (brushRadius - dist2) * brushStrength, 0.0, 1.0);');
 			frag.write('str = clamp(str, 0.0, 1.0);');
 		}
 
