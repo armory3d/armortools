@@ -41,6 +41,7 @@ class Importer {
 			var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
 			var files = str.split("\n");
 			var mapbase = "";
+			var mapopac = "";
 			var mapnor = "";
 			var mapocc = "";
 			var maprough = "";
@@ -67,6 +68,13 @@ class Importer {
 									  StringTools.endsWith(base, "_d") ||
 									  StringTools.endsWith(base, "_col"))) {
 					mapbase = f;
+					valid = true;
+				}
+				if (mapopac == "" && (StringTools.endsWith(base, "_opac") ||
+									  StringTools.endsWith(base, "_alpha") ||
+									  StringTools.endsWith(base, "_opacity") ||
+									  StringTools.endsWith(base, "_mask"))) {
+					mapopac = f;
 					valid = true;
 				}
 				if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
@@ -129,6 +137,16 @@ class Importer {
 				n.y = 192 + 160 * pos;
 				pos++;
 				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
+				canvas.links.push(l);
+			}
+			if (mapopac != "") {
+				var n = NodeCreator.createImageTexture();
+				n.buttons[0].default_value = arm.App.getAssetIndex(mapopac);
+				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+				n.x = 72;
+				n.y = 192 + 160 * pos;
+				pos++;
+				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 1 };
 				canvas.links.push(l);
 			}
 			if (mapocc != "") {
