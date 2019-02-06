@@ -15,9 +15,9 @@ static float2 texPosition;
 static float4 color;
 static float4 vertexColor;
 struct SPIRV_Cross_Input {
-    float2 texPosition : TEXCOORD0;
-    float4 vertexColor : TEXCOORD1;
-    float3 vertexPosition : TEXCOORD2;
+    float3 vertexPosition : TEXCOORD0;
+    float2 texPosition : TEXCOORD1;
+    float4 vertexColor : TEXCOORD2;
 };
 struct SPIRV_Cross_Output {
     float4 color : TEXCOORD0;

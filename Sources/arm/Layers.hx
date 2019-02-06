@@ -138,9 +138,9 @@ class Layers {
 		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.painterVert);
 		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.painterFrag);
 		var vs = new kha.graphics4.VertexStructure();
-		vs.add("vertexPosition", kha.graphics4.VertexData.Float3);
-		vs.add("texPosition", kha.graphics4.VertexData.Float2);
-		vs.add("vertexColor", kha.graphics4.VertexData.Float4);
+		vs.add("pos", kha.graphics4.VertexData.Float3);
+		vs.add("tex", kha.graphics4.VertexData.Float2);
+		vs.add("col", kha.graphics4.VertexData.Float4);
 		pipe.inputLayout = [vs];
 		pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
 		pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;

@@ -45,19 +45,29 @@ class MaterialBuilder {
 		vert.add_out('vec3 sp');
 		frag.ins = vert.outs;
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		#if kha_direct3d11
+		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
+		#else
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, tex.y * 2.0 - 1.0);');
+		#end
 
 		// TODO: Fix seams at uv borders
 		vert.add_uniform('vec2 sub', '_sub');
-		vert.add_uniform('float paintDepthBias', '_paintDepthBias');
 		vert.write('tpos += sub;');
 		
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 		
 		vert.write_attrib('vec4 ndc = mul(vec4(pos.xyz, 1.0), WVP);');
 		vert.write_attrib('ndc.xyz = ndc.xyz / ndc.w;');
+		#if kha_direct3d11
+		vert.write('sp.xy = ndc.xy * 0.5 + 0.5;');
+		vert.write('sp.z = ndc.z;');
+		#else
 		vert.write('sp.xyz = ndc.xyz * 0.5 + 0.5;');
+		#end
 		vert.write('sp.y = 1.0 - sp.y;');
+
+		vert.add_uniform('float paintDepthBias', '_paintDepthBias');
 		vert.write('sp.z -= paintDepthBias;'); // small bias or !paintVisible
 
 		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;

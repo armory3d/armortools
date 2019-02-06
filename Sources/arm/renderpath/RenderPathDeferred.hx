@@ -245,6 +245,13 @@ class RenderPathDeferred {
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
 				}
+
+				//
+				path.setDepthFrom("bufa", "texpaint" + tid); // Unbind depth so we can read it
+				path.setDepthFrom("texpaint" + tid, "bufb");
+				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("bufa"));
+				//
+
 				if (arm.UITrait.inst.paintHeight) {
 					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
 				}
@@ -259,6 +266,11 @@ class RenderPathDeferred {
 					path.bindTarget("texpaint_colorid0", "texpaint_colorid0");
 				} 
 				path.drawMeshes("paint");
+
+				//
+				path.setDepthFrom("texpaint" + tid, "bufa"); // Re-bind depth
+				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("texpaint" + tid));
+				//
 			}
 		}
 		//
