@@ -18,6 +18,10 @@ class RenderPathDeferred {
 
 		path = _path;
 
+		#if arm_editor
+		armory.data.Config.raw.rp_gi = true;
+		#end
+
 		armory.renderpath.RenderPathDeferred.init(path);
 
 		// Paint
@@ -157,7 +161,7 @@ class RenderPathDeferred {
 			path.currentFace = -1;
 
 			if (l.data.raw.type == "point") @:privateAccess Inc.pointIndex++;
-			else if (l.data.raw.type == "spot") @:privateAccess Inc.spotIndex++;
+			else if (l.data.raw.type == "spot" || l.data.raw.type == "area") @:privateAccess Inc.spotIndex++;
 		}
 		#end
 	}
@@ -396,12 +400,23 @@ class RenderPathDeferred {
 		}
 		#end
 
+		#if (rp_shadowmap)
+		// Inc.drawShadowMap();
+		drawShadowMap(); // Paint
+		#end
+
 		// Voxels
 		#if (rp_gi != "Off")
-		var relight = false;
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var voxelize = path.voxelize();
+
+			#if ((rp_gi == "Voxel GI") && (rp_voxelgi_relight))
+			// Relight if light was moved
+			for (light in iron.Scene.active.lights) {
+				if (light.transform.diff()) { voxelize = true; break; }
+			}
+			#end
 
 			#if arm_voxelgi_temporal
 			voxelize = ++RenderPathCreator.voxelFrame % RenderPathCreator.voxelFreq == 0;
@@ -415,63 +430,41 @@ class RenderPathDeferred {
 			if (voxelize) {
 				var res = Inc.getVoxelRes();
 
-				#if (rp_gi == "Voxel GI")
-				var voxtex = "voxelsOpac";
-				#else
+				// #if (rp_gi == "Voxel GI")
+				// var voxtex = "voxelsOpac";
+				// #else
 				var voxtex = voxels;
-				#end
+				// #end
 
 				path.clearImage(voxtex, 0x00000000);
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
-				path.drawMeshes("voxel");
-
-				relight = true;
-			}
-
-			#if ((rp_gi == "Voxel GI") && (rp_voxelgi_relight))
-			// Relight if light was moved
-			for (light in iron.Scene.active.lights) {
-				if (light.transform.diff()) { relight = true; break; }
-			}
-			#end
-
-			if (relight) {
 				#if (rp_gi == "Voxel GI")
-					// Inc.computeVoxelsBegin();
-					// for (i in 0...lights.length) Inc.computeVoxels(i); // Redraws SM
-					// Inc.computeVoxelsEnd();
-					#if (rp_gi_bounces)
-					voxels = "voxelsBounce";
-					#end
-				#else
-				path.generateMipmaps(voxels); // AO
+				// path.bindTarget("voxelsNor", "voxelsNor");
+				for (l in iron.Scene.active.lights) {
+					if (!l.visible || !l.data.raw.cast_shadow || l.data.raw.type != "sun") continue;
+					var n = "shadowMap";
+					path.bindTarget(n, n);
+					break;
+				}
 				#end
+				path.drawMeshes("voxel");
+				path.generateMipmaps(voxels);
 			}
+
+			// if (relight) {
+			// 	Inc.computeVoxelsBegin();
+			// 	Inc.computeVoxels();
+			// 	Inc.computeVoxelsEnd();
+			// 	path.generateMipmaps(voxels);
+			// }
 		}
 		#end
 
 		// ---
 		// Deferred light
 		// ---
-		var lights = iron.Scene.active.lights;
-		
-		// #if (rp_gi == "Voxel GI")
-		// if (relight) Inc.computeVoxelsBegin();
-		// #end
-		// #if (rp_gi == "Voxel GI")
-		// if (relight) Inc.computeVoxels(i);
-		// #end
-		// #if (rp_gi == "Voxel GI")
-		// if (relight) Inc.computeVoxelsEnd();
-		// #end
-
-		#if (rp_shadowmap)
-		// Inc.drawShadowMap();
-		drawShadowMap(); // Paint
-		#end
-
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");

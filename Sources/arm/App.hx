@@ -25,8 +25,6 @@ class App extends iron.Trait {
 	public static var path = '/';
 	static var modalW = 625;
 	static var modalH = 545;
-	static var lastW = -1;
-	static var lastH = -1;
 	static var appx = 0;
 
 	public static function getEnumTexts():Array<String> {
@@ -40,6 +38,10 @@ class App extends iron.Trait {
 
 	public function new() {
 		super();
+
+		#if arm_resizable
+		iron.App.onResize = resize;
+		#end
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);
@@ -203,12 +205,6 @@ class App extends iron.Trait {
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
-		if (lastW >= 0 && arm.App.realw() > 0 && (lastW != arm.App.realw() || lastH != arm.App.realh())) {
-			arm.App.resize();
-		}
-		lastW = arm.App.realw();
-		lastH = arm.App.realh();
-
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
 		if (arm.App.dragAsset != null) {
@@ -253,6 +249,7 @@ class App extends iron.Trait {
 			UITrait.inst.ddirty = 2;
 		}
 
+		g.end();
 		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
 		if (uimodal.button("OK")) {
 			showFiles = false;

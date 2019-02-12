@@ -334,8 +334,8 @@ class UITrait extends iron.Trait {
 		gizmoX = iron.Scene.active.getChild("GizmoX");
 		gizmoY = iron.Scene.active.getChild("GizmoY");
 		gizmoZ = iron.Scene.active.getChild("GizmoZ");
-		var light = iron.Scene.active.getChild("Lamp");
-		light.addTrait(new armory.trait.physics.RigidBody(0.0));
+		var light = iron.Scene.active.getChild("Light");
+		// light.addTrait(new armory.trait.physics.RigidBody(0, 0));
 		#end
 
 		selectedObject = iron.Scene.active.getChild("Cube");
@@ -612,7 +612,7 @@ class UITrait extends iron.Trait {
 
 					object.transform.buildMatrix();
 
-					object.addTrait(new armory.trait.physics.RigidBody(0.0));
+					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
 
 					selectObject(object);
 				}
@@ -626,7 +626,7 @@ class UITrait extends iron.Trait {
 					object.transform.scale.setFrom(lo.transform.scale);
 					object.transform.buildMatrix();
 
-					object.addTrait(new armory.trait.physics.RigidBody(0.0));
+					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
 
 					selectObject(object);
 				}
@@ -745,7 +745,7 @@ class UITrait extends iron.Trait {
 		ddirty = 2;
 	}
 
-	function selectObject(o:iron.object.Object) {
+	public function selectObject(o:iron.object.Object) {
 		selectedObject = o;
 
 		#if arm_editor
@@ -1000,7 +1000,7 @@ class UITrait extends iron.Trait {
 							p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
 						}
 						else if (Std.is(selectedObject, iron.object.LightObject)) {
-							selectedType = "(Lamp)";
+							selectedType = "(Light)";
 							var light = cast(selectedObject, iron.object.LightObject);
 							light.data.raw.strength = ui.slider(Id.handle({value: light.data.raw.strength / 10}), "Strength", 0.0, 5.0, true) * 10;
 						}

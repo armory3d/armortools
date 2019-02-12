@@ -103,6 +103,10 @@ class Project {
 		var n = UITrait.inst.newObjectNames[UITrait.inst.newObject];
 		iron.data.Data.deleteMesh(UITrait.inst.paintObject.data.handle);
 		iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
+			
+			var hasCurrent = @:privateAccess kha.graphics4.Graphics2.current != null;
+			if (hasCurrent) UITrait.inst.ui.g.end();
+
 			UITrait.inst.autoFillHandle.selected = false;
 			UITrait.inst.paintObject.setData(md);
 			UITrait.inst.paintObject.transform.scale.set(1, 1, 1);
@@ -110,7 +114,6 @@ class Project {
 			UITrait.inst.paintObject.name = n;
 			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
 			UITrait.inst.maskHandle.position = 0;
-			UITrait.inst.ui.g.end();
 			UITrait.inst.materials = [new MaterialSlot()];
 			UITrait.inst.selectedMaterial = UITrait.inst.materials[0];
 			UINodes.inst.canvasMap = new Map();
@@ -129,12 +132,12 @@ class Project {
 			UINodes.inst.updateCanvasMap();
 			UINodes.inst.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
-			UITrait.inst.ui.g.begin(false);
 			UITrait.inst.assets = [];
 			UITrait.inst.assetNames = [];
 			UITrait.inst.assetId = 0;
-
 			ViewportUtil.resetViewport();
+
+			if (hasCurrent) UITrait.inst.ui.g.begin(false);
 		});
 	}
 

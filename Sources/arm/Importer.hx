@@ -569,7 +569,9 @@ class Importer {
 			],
 			index_arrays: [
 				{ values: mesh.inda, material: 0 }
-			]
+			],
+			scale_pos: mesh.scalePos,
+			scale_tex: mesh.scaleTex
 		};
 		if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		#else
@@ -579,7 +581,7 @@ class Importer {
 			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();
 			for (i in 0...verts) {
-				n.set(mesh.posa[i * 4 + 0] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 				// Sphere projection
 				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
 				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
@@ -606,9 +608,9 @@ class Importer {
 		new MeshData(raw, function(md:MeshData) {
 			
 			#if arm_editor // Append
-			if (htab.position == 0) {
+			if (UITrait.inst.htab.position == 0) {
 				var mats = new haxe.ds.Vector(1);
-				mats[0] = selectedMaterial2.data;
+				mats[0] = UITrait.inst.selectedMaterial2.data;
 				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
 				path = StringTools.replace(path, "\\", "/");
 				var ar = path.split("/");

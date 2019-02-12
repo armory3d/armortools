@@ -58,11 +58,10 @@ class MeshUtil {
 		};
 
 		new MeshData(raw, function(md:MeshData) {
-			var mergedObject = UITrait.inst.mergedObject;
-			mergedObject = new MeshObject(md, UITrait.inst.paintObject.materials);
-			mergedObject.name = UITrait.inst.paintObject.name;
-			mergedObject.force_context = "paint";
-			UITrait.inst.mainObject().addChild(mergedObject);
+			UITrait.inst.mergedObject = new MeshObject(md, UITrait.inst.paintObject.materials);
+			UITrait.inst.mergedObject.name = UITrait.inst.paintObject.name;
+			UITrait.inst.mergedObject.force_context = "paint";
+			UITrait.inst.mainObject().addChild(UITrait.inst.mergedObject);
 		});
 	}
 	
