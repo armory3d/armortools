@@ -34,7 +34,7 @@ class UINodes extends iron.Trait {
 	public var _matcon:TMaterialContext = null;
 	var _materialcontext:MaterialContext = null;
 
-	public var nodes = new Nodes();
+	public var nodes:Nodes;
 	public var canvas:TNodeCanvas = null;
 	public var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
 	#if arm_editor
@@ -64,6 +64,8 @@ class UINodes extends iron.Trait {
 	public function new() {
 		super();
 		inst = this;
+
+		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
 
 		// Cycles.arm_export_tangents = false;
 
@@ -215,16 +217,6 @@ class UINodes extends iron.Trait {
 		}
 		else if (mouse.released()) {
 			hideMenu = true;
-		}
-
-		if (keyboard.started("x") || keyboard.started("backspace")) {
-			for (n in nodes.nodesSelected) {
-				if (n.type != "OUTPUT_MATERIAL_PBR") {
-					var c = getCanvas();
-					nodes.removeNode(n, c);
-					changed = true;
-				}
-			}
 		}
 
 		// if (keyboard.started("p")) {
