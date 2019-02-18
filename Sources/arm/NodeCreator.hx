@@ -121,8 +121,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Camera Data")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -163,8 +163,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Fresnel")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -208,8 +208,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Geometry")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -290,8 +290,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Layer Weight")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -341,8 +341,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Object Info")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -391,8 +391,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("RGB")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -423,8 +423,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Tangent")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -449,8 +449,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Texture Coord")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -523,8 +523,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("UV Map")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -549,8 +549,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Value")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -583,8 +583,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 		if (cat == 1) { // Output
@@ -676,8 +676,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 		if (cat == 2) { // Texture
@@ -755,8 +755,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Checker")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -824,8 +824,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Gradient")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -876,13 +876,13 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Image")) {
 				var n = createImageTexture();
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Magic")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -934,8 +934,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Musgrave")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -987,8 +987,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Noise")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1040,8 +1040,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Voronoi")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1101,8 +1101,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Wave")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1154,8 +1154,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 		if (cat == 3) { // Color
@@ -1207,8 +1207,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Gamma")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1250,8 +1250,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("HueSatVal")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1317,8 +1317,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Invert")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1360,8 +1360,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("MixRGB")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1425,8 +1425,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			// CURVE_RGB
 		}
@@ -1488,8 +1488,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Mapping")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1542,8 +1542,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Normal")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1592,8 +1592,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Vector Curves")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1642,8 +1642,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			// VECT_TRANSFORM
 		}
@@ -1696,8 +1696,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Combine HSV")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1747,8 +1747,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Combine RGB")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1798,8 +1798,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Combine XYZ")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1849,8 +1849,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Math")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1906,8 +1906,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("RGB to BW")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1941,8 +1941,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Separate HSV")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -1992,8 +1992,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Separate RGB")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -2043,8 +2043,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Separate XYZ")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -2094,8 +2094,8 @@ class NodeCreator {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Vector Math")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -2153,8 +2153,8 @@ class NodeCreator {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 	}

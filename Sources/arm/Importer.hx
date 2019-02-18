@@ -21,7 +21,7 @@ class Importer {
 			var y = UINodes.inst.wx + UINodes.inst.ww;
 			if (UINodes.inst.show && dropX > x && dropX < y) {
 				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
-				UINodes.inst.nodes.nodeDrag = null;
+				UINodes.inst.nodes.nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}
 		}

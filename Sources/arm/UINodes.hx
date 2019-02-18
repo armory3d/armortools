@@ -218,10 +218,12 @@ class UINodes extends iron.Trait {
 		}
 
 		if (keyboard.started("x") || keyboard.started("backspace")) {
-			if (nodes.nodeSelected != null && nodes.nodeSelected.type != "OUTPUT_MATERIAL_PBR") {
-				var c = getCanvas();
-				nodes.removeNode(nodes.nodeSelected, c);
-				changed = true;
+			for (n in nodes.nodesSelected) {
+				if (n.type != "OUTPUT_MATERIAL_PBR") {
+					var c = getCanvas();
+					nodes.removeNode(n, c);
+					changed = true;
+				}
 			}
 		}
 
@@ -251,15 +253,15 @@ class UINodes extends iron.Trait {
 		grid = kha.Image.createRenderTarget(w, h);
 		grid.g2.begin(true, 0xff242424);
 		for (i in 0...Std.int(h / 40) + 1) {
-			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(0, i * 40, w, i * 40);
-			grid.g2.color = 0xff323232;
+			// grid.g2.color = 0xff282828;
+			// grid.g2.drawLine(0, i * 40, w, i * 40);
+			grid.g2.color = 0xff303030;
 			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
 		}
 		for (i in 0...Std.int(w / 40) + 1) {
-			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(i * 40, 0, i * 40, h);
-			grid.g2.color = 0xff323232;
+			// grid.g2.color = 0xff282828;
+			// grid.g2.drawLine(i * 40, 0, i * 40, h);
+			grid.g2.color = 0xff303030;
 			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
 		}
 		grid.g2.end();
@@ -622,7 +624,7 @@ class UINodes extends iron.Trait {
 	public function acceptDrag(assetIndex:Int) {
 		var n = NodeCreator.createImageTexture();
 		n.buttons[0].default_value = assetIndex;
-		nodes.nodeSelected = n;
+		nodes.nodesSelected = [n];
 	}
 
 	public function parseBrush() {

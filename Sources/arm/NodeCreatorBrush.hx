@@ -38,8 +38,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Brush Output")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -96,8 +96,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Value")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -133,8 +133,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Vector")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -184,8 +184,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Separate Vector")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -235,8 +235,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Vector Math")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -294,8 +294,8 @@ class NodeCreatorBrush {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Math")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -351,8 +351,8 @@ class NodeCreatorBrush {
 					]
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 			if (ui.button("Time")) {
 				var node_id = nodes.getNodeId(canvas.nodes);
@@ -393,8 +393,8 @@ class NodeCreatorBrush {
 					buttons: []
 				};
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 	}

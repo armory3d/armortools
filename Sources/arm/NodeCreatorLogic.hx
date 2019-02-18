@@ -171,8 +171,8 @@ class NodeCreatorLogic {
 					n.buttons.push(but);
 				}
 				canvas.nodes.push(n);
-				nodes.nodeDrag = n;
-				nodes.nodeSelected = n;
+				nodes.nodesDrag = true;
+				nodes.nodesSelected = [n];
 			}
 		}
 	}
