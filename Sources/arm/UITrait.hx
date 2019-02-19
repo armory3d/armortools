@@ -280,9 +280,9 @@ class UITrait extends iron.Trait {
 		}
 		if (emptyEnvmap == null) {
 			var b = haxe.io.Bytes.alloc(4);
-			b.set(0, 5);
-			b.set(1, 5);
-			b.set(2, 5);
+			b.set(0, 4);
+			b.set(1, 4);
+			b.set(2, 4);
 			b.set(3, 255);
 			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
@@ -781,12 +781,24 @@ class UITrait extends iron.Trait {
 		return paintObjects[0];
 	}
 
+	// var cursorImg:kha.Image = null;
+
 	function renderUI(g:kha.graphics2.Graphics) {
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
 		
 		g.color = 0xffffffff;
+
+		// if (cursorImg == null) {
+		// 	g.end();
+		// 	cursorImg = kha.Image.createRenderTarget(256, 256);
+		// 	cursorImg.g2.begin(true, 0x00000000);
+		// 	cursorImg.g2.color = 0xffcccccc;
+		// 	kha.graphics2.GraphicsExtension.drawCircle(cursorImg.g2, 128, 128, 124, 8);
+		// 	cursorImg.g2.end();
+		// 	g.begin(false);
+		// }
 
 		// Brush
 		if (arm.App.uienabled) {
@@ -1605,21 +1617,37 @@ class UITrait extends iron.Trait {
 					if (assets.length > 0) {
 						var i = assets.length - 1;
 						while (i >= 0) {
+							
+							// Align into 2 items per row
+							if ((assets.length - 1 - i) % 2 == 0) {
+								ui.separator();
+								ui.separator();
+								ui.row([1/2, 1/2]);
+							}
+							
 							var asset = assets[i];
 							if (ui.image(UITrait.inst.getImage(asset)) == State.Started) {
 								arm.App.dragAsset = asset;
 							}
-							ui.row([1/8, 7/8]);
-							var b = ui.button("X");
-							asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-							assetNames[i] = asset.name;
-							if (b) {
-								iron.data.Data.deleteImage(asset.file);
-								Canvas.assetMap.remove(asset.id);
-								assets.splice(i, 1);
-								assetNames.splice(i, 1);
-							}
+
+							// ui.row([1/8, 7/8]);
+							// var b = ui.button("X");
+							// asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
+							// assetNames[i] = asset.name;
+							// if (b) {
+							// 	iron.data.Data.deleteImage(asset.file);
+							// 	Canvas.assetMap.remove(asset.id);
+							// 	assets.splice(i, 1);
+							// 	assetNames.splice(i, 1);
+							// }
+
 							i--;
+						}
+
+						// Fill in last odd spot
+						if (assets.length % 2 == 1) {
+							var empty = bundled.get("empty.jpg");
+							ui.image(empty);
 						}
 					}
 					else {

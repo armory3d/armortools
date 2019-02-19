@@ -243,17 +243,17 @@ class UINodes extends iron.Trait {
 		var w = ww + 40 * 2;
 		var h = wh + 40 * 2;
 		grid = kha.Image.createRenderTarget(w, h);
-		grid.g2.begin(true, 0xff242424);
+		grid.g2.begin(true, 0xff212121);
 		for (i in 0...Std.int(h / 40) + 1) {
 			// grid.g2.color = 0xff282828;
 			// grid.g2.drawLine(0, i * 40, w, i * 40);
-			grid.g2.color = 0xff303030;
+			grid.g2.color = 0xff292929;
 			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
 		}
 		for (i in 0...Std.int(w / 40) + 1) {
 			// grid.g2.color = 0xff282828;
 			// grid.g2.drawLine(i * 40, 0, i * 40, h);
-			grid.g2.color = 0xff303030;
+			grid.g2.color = 0xff292929;
 			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
 		}
 		grid.g2.end();
@@ -293,10 +293,20 @@ class UINodes extends iron.Trait {
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wy = 0;
 		var ew = Std.int(ui.ELEMENT_W());
-		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {
+		var wh = iron.App.h();
+		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
+
+			// Image node preview
+			if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0].type == 'TEX_IMAGE') {
+				var id = nodes.nodesSelected[0].buttons[0].default_value;
+				if (id < UITrait.inst.assets.length) {
+					var img = UITrait.inst.getImage(UITrait.inst.assets[id]);
+					ui.g.drawScaledImage(img, ww - 64 - 20, wh - 64 - 40, 64, 64);
+				}
+			}
 
 			ui.g.font = arm.App.font;
 			ui.g.fontSize = 22;
