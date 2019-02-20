@@ -81,6 +81,10 @@ class Uniforms {
 			if (UITrait.inst.assets.length == 0) return UITrait.inst.bundled.get("empty.jpg");
 			else return UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
 		}
+		else if (link == "_texuvmap") {
+			UIView2D.inst.cacheUVMap(); // TODO: Check overlapping g4 calls here
+			return UIView2D.inst.uvmap;
+		}
 		return null;
 	}
 }

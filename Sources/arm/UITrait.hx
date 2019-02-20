@@ -49,6 +49,7 @@ class UITrait extends iron.Trait {
 	public var emptyEnvmap:kha.Image = null;
 	public var previewEnvmap:kha.Image = null;
 	public var showEnvmap = false;
+	public var drawWireframe = false;
 	public var culling = true;
 
 	public var ddirty = 0;
@@ -280,9 +281,9 @@ class UITrait extends iron.Trait {
 		}
 		if (emptyEnvmap == null) {
 			var b = haxe.io.Bytes.alloc(4);
-			b.set(0, 4);
-			b.set(1, 4);
-			b.set(2, 4);
+			b.set(0, 5);
+			b.set(1, 5);
+			b.set(2, 5);
 			b.set(3, 255);
 			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
@@ -1593,6 +1594,13 @@ class UITrait extends iron.Trait {
 						}
 					}
 					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
+
+					var wireframeHandle = Id.handle({selected: drawWireframe});
+					drawWireframe = ui.check(wireframeHandle, "Wireframe");
+					if (wireframeHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
 				}
 
 				// Draw plugins
@@ -1683,6 +1691,8 @@ class UITrait extends iron.Trait {
 					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
 					if (resHandle.changed) {
 						iron.App.notifyOnRender(Layers.resizeLayers);
+						UIView2D.inst.uvmap = null;
+						UIView2D.inst.uvmapCached = false;
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
 				}

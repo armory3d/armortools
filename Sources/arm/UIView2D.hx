@@ -10,6 +10,7 @@ class UIView2D extends iron.Trait {
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
+	public var uvmap:kha.Image = null;
 	public var uvmapCached = false;
 	public var ui:Zui;
 	public var hwnd = Id.handle();
@@ -19,7 +20,6 @@ class UIView2D extends iron.Trait {
 	var panScale = 1.0;
 	var pipe:kha.graphics4.PipelineState;
 	var texType = 0;
-	var uvmap:kha.Image = null;
 	var uvmapShow = false;
 
 	public function new() {
@@ -47,6 +47,35 @@ class UIView2D extends iron.Trait {
 		notifyOnUpdate(update);
 	}
 
+	public function cacheUVMap() {
+		if (uvmapCached) return;
+		
+		var res = Config.getTextureRes();
+		if (uvmap == null) {
+			uvmap = kha.Image.createRenderTarget(res, res);
+		}
+
+		uvmapCached = true;
+		var mesh = UITrait.inst.paintObject.data.raw;
+		var texa = mesh.vertex_arrays[2].values;
+		var inda = mesh.index_arrays[0].values;
+		uvmap.g2.begin(true, 0x00000000);
+		uvmap.g2.color = 0xffffffff;
+		var strength = (res / 1024) * 0.5;
+		for (i in 0...Std.int(inda.length / 3)) {
+			var x1 = (texa[inda[i * 3 + 0] * 2 + 0]) / 32767 * uvmap.width;
+			var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) / 32767 * uvmap.width;
+			var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) / 32767 * uvmap.width;
+			var y1 = (texa[inda[i * 3 + 0] * 2 + 1]) / 32767 * uvmap.width;
+			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) / 32767 * uvmap.width;
+			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) / 32767 * uvmap.width;
+			uvmap.g2.drawLine(x1, y1, x2, y2, strength);
+			uvmap.g2.drawLine(x2, y2, x3, y3, strength);
+			uvmap.g2.drawLine(x3, y3, x1, y1, strength);
+		}
+		uvmap.g2.end();
+	}
+
 	function render2D(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w());
 		var lay = UITrait.inst.C.ui_layout;
@@ -72,30 +101,8 @@ class UIView2D extends iron.Trait {
 		// Cache grid
 		if (UINodes.inst.grid == null) UINodes.inst.drawGrid();
 
-		// Cache UV map
-		if (uvmap == null && uvmapShow) {
-			uvmap = kha.Image.createRenderTarget(2048, 2048);
-		}
-		if (!uvmapCached && uvmapShow) {
-			uvmapCached = true;
-			var mesh = UITrait.inst.paintObject.data.raw;
-			var texa = mesh.vertex_arrays[2].values;
-			var inda = mesh.index_arrays[0].values;
-			uvmap.g2.begin(true, 0x00000000);
-			uvmap.g2.color = 0xffffffff;
-			for (i in 0...Std.int(inda.length / 3)) {
-				var x1 = (texa[inda[i * 3 + 0] * 2 + 0]) / 32767 * uvmap.width;
-				var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) / 32767 * uvmap.width;
-				var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) / 32767 * uvmap.width;
-				var y1 = (texa[inda[i * 3 + 0] * 2 + 1]) / 32767 * uvmap.width;
-				var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) / 32767 * uvmap.width;
-				var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) / 32767 * uvmap.width;
-				uvmap.g2.drawLine(x1, y1, x2, y2);
-				uvmap.g2.drawLine(x2, y2, x3, y3);
-				uvmap.g2.drawLine(x3, y3, x1, y1);
-			}
-			uvmap.g2.end();
-		}
+		// Ensure UV map is drawn
+		if (uvmapShow) cacheUVMap();
 		
 		ui.begin(g);
 		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {

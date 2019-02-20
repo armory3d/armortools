@@ -550,6 +550,14 @@ class MaterialBuilder {
 				}
 			}
 
+			if (UITrait.inst.drawWireframe) {
+				// GL_NV_fragment_shader_barycentric
+				// VK_AMD_shader_explicit_vertex_parameter
+				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
+				frag.write('basecol += texture(texuvmap, texCoord).rgb;');
+				// frag.write('if (basecol == vec3(0,0,0)) discard;');
+			}
+
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			if (UITrait.inst.viewportMode == 0) { // Render
