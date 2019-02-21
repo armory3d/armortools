@@ -6,7 +6,7 @@ import zui.Nodes;
 @:access(arm.UINodes)
 class NodeCreator {
 
-	public static var numNodes = [11, 1, 9, 5, 4, 10];
+	public static var numNodes = [12, 1, 9, 5, 4, 10];
 
 	public static function createImageTexture():TNode {
 		var getNodeX = UINodes.inst.getNodeX;
@@ -77,7 +77,7 @@ class NodeCreator {
 		var canvas = UINodes.inst.canvas;
 		
 		if (cat == 0) { // Input
-			if (ui.button("Attribute")) {
+			if (ui.button("Attribute", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -124,7 +124,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Camera Data")) {
+			if (ui.button("Camera Data", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -166,7 +166,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Fresnel")) {
+			if (ui.button("Fresnel", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -211,7 +211,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Geometry")) {
+			if (ui.button("Geometry", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -293,7 +293,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Layer Weight")) {
+			if (ui.button("Layer Weight", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -344,7 +344,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Object Info")) {
+			if (ui.button("Object Info", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -394,7 +394,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("RGB")) {
+			if (ui.button("RGB", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -426,7 +426,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Tangent")) {
+			if (ui.button("Tangent", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -452,7 +452,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Texture Coord")) {
+			if (ui.button("Texture Coord", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -526,7 +526,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("UV Map")) {
+			if (ui.button("UV Map", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -552,7 +552,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Value")) {
+			if (ui.button("Value", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -588,7 +588,7 @@ class NodeCreator {
 			}
 		}
 		if (cat == 1) { // Output
-			if (ui.button("Material Output")) {
+			if (ui.button("Material Output", Left)) {
 
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
@@ -681,7 +681,7 @@ class NodeCreator {
 			}
 		}
 		if (cat == 2) { // Texture
-			if (ui.button("Brick")) {
+			if (ui.button("Brick", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -758,7 +758,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Checker")) {
+			if (ui.button("Checker", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -827,7 +827,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Gradient")) {
+			if (ui.button("Gradient", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -879,12 +879,12 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Image")) {
+			if (ui.button("Image", Left)) {
 				var n = createImageTexture();
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Magic")) {
+			if (ui.button("Magic", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -937,7 +937,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Musgrave")) {
+			if (ui.button("Musgrave", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -990,7 +990,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Noise")) {
+			if (ui.button("Noise", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1043,7 +1043,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Voronoi")) {
+			if (ui.button("Voronoi", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1104,7 +1104,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Wave")) {
+			if (ui.button("Wave", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1159,7 +1159,7 @@ class NodeCreator {
 			}
 		}
 		if (cat == 3) { // Color
-			if (ui.button("BrightContrast")) {
+			if (ui.button("BrightContrast", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1210,7 +1210,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Gamma")) {
+			if (ui.button("Gamma", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1253,7 +1253,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("HueSatVal")) {
+			if (ui.button("HueSatVal", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1320,7 +1320,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Invert")) {
+			if (ui.button("Invert", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1363,7 +1363,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("MixRGB")) {
+			if (ui.button("MixRGB", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1431,7 +1431,7 @@ class NodeCreator {
 			// CURVE_RGB
 		}
 		if (cat == 4) { // Vector
-			if (ui.button("Bump")) {
+			if (ui.button("Bump", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1491,7 +1491,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Mapping")) {
+			if (ui.button("Mapping", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1545,7 +1545,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Normal")) {
+			if (ui.button("Normal", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1595,7 +1595,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Vector Curves")) {
+			if (ui.button("Vector Curves", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1648,7 +1648,7 @@ class NodeCreator {
 			// VECT_TRANSFORM
 		}
 		if (cat == 5) { // Converter
-			if (ui.button("Color Ramp")) {
+			if (ui.button("Color Ramp", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1699,7 +1699,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Combine HSV")) {
+			if (ui.button("Combine HSV", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1750,7 +1750,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Combine RGB")) {
+			if (ui.button("Combine RGB", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1801,7 +1801,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Combine XYZ")) {
+			if (ui.button("Combine XYZ", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1852,7 +1852,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Math")) {
+			if (ui.button("Math", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1909,7 +1909,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("RGB to BW")) {
+			if (ui.button("RGB to BW", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1944,7 +1944,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Separate HSV")) {
+			if (ui.button("Separate HSV", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -1995,7 +1995,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Separate RGB")) {
+			if (ui.button("Separate RGB", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -2046,7 +2046,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Separate XYZ")) {
+			if (ui.button("Separate XYZ", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -2097,7 +2097,7 @@ class NodeCreator {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Vector Math")) {
+			if (ui.button("Vector Math", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,

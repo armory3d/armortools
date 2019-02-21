@@ -125,7 +125,7 @@ class NodeCreatorLogic {
 		
 		var c:TCat = list.categories[cat];
 		for (cnode in c.nodes) {
-			if (ui.button(cnode.name)) {
+			if (ui.button(cnode.name, Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,

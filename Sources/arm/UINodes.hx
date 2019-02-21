@@ -205,7 +205,8 @@ class UINodes extends iron.Trait {
 
 		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
-		wy = 0;
+		wx += UITrait.inst.toolbarw;
+		wy = UITrait.inst.headerh * 2;
 		var mx = mouse.x + App.x();
 		var my = mouse.y + App.y();
 		if (mx < wx || my < wy) return;
@@ -238,22 +239,18 @@ class UINodes extends iron.Trait {
 	}
 
 	public function drawGrid() {
-		var ww = iron.App.w();
+		var ww = iron.App.w() + UITrait.inst.toolbarw;
 		var wh = iron.App.h();
 		var w = ww + 40 * 2;
 		var h = wh + 40 * 2;
 		grid = kha.Image.createRenderTarget(w, h);
-		grid.g2.begin(true, 0xff212121);
+		grid.g2.begin(true, ui.t.SEPARATOR_COL);
 		for (i in 0...Std.int(h / 40) + 1) {
-			// grid.g2.color = 0xff282828;
-			// grid.g2.drawLine(0, i * 40, w, i * 40);
-			grid.g2.color = 0xff292929;
+			grid.g2.color = ui.t.WINDOW_BG_COL;
 			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
 		}
 		for (i in 0...Std.int(w / 40) + 1) {
-			// grid.g2.color = 0xff282828;
-			// grid.g2.drawLine(i * 40, 0, i * 40, h);
-			grid.g2.color = 0xff292929;
+			grid.g2.color = ui.t.WINDOW_BG_COL;
 			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
 		}
 		grid.g2.end();
@@ -288,11 +285,12 @@ class UINodes extends iron.Trait {
 		// ui.begin(rt.g2); ////
 		
 		// Make window
-		ww = Std.int(iron.App.w());
+		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
-		wy = 0;
-		var ew = Std.int(ui.ELEMENT_W());
+		wx += UITrait.inst.toolbarw;
+		wy = UITrait.inst.headerh * 2;
+		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		var wh = iron.App.h();
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			
@@ -319,73 +317,78 @@ class UINodes extends iron.Trait {
 			nodes.nodeCanvas(ui, c);
 
 			ui.g.color = ui.t.WINDOW_BG_COL;
-			ui.g.fillRect(0, 0, ww, 24);
+			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
 			ui.g.color = 0xffffffff;
 
 			ui._x = 3;
 			ui._y = 3;
 			ui._w = ew;
 
+			var BUTTON_COL = ui.t.BUTTON_COL;
+			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+
 			if (canvasType == 1) {
-				if (ui.button("Nodes")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Nodes", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else if (canvasType == 2) {
-				if (ui.button("Action")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Action", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Animation")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Animation", Left)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Array")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Array", Left)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Canvas")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Canvas", Left)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Event")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Event", Left)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Input")) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Input", Left)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x = 3;
 				ui._y = 30;
-				if (ui.button("Logic")) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Logic", Left)) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x = ew + 3;
 				ui._y = 30;
-				if (ui.button("Native")) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Native", Left)) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Navmesh")) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Navmesh", Left)) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Physics")) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Physics", Left)) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Sound")) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Sound", Left)) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Value")) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Value", Left)) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Variable")) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Variable", Left)) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else {
-				if (ui.button("Input")) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Input", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				// if (ui.button("Output")) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
+				// if (ui.button("Output", Left)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
 				// ui._x += ew + 3;
 				// ui._y = 3;
-				if (ui.button("Texture")) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Texture", Left)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Color")) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Color", Left)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Vector")) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Vector", Left)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Converter")) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Converter", Left)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
+
+			ui.t.BUTTON_COL = BUTTON_COL;
 		}
 
 		ui.endWindow();
@@ -396,17 +399,21 @@ class UINodes extends iron.Trait {
 			if (canvasType == 0) numNodes = NodeCreator.numNodes[menuCategory];
 			else if (canvasType == 1) numNodes = NodeCreatorBrush.numNodes[menuCategory];
 			else if (canvasType == 2) numNodes = NodeCreatorLogic.list.categories[menuCategory].nodes.length;
-			var ph = numNodes * 20;
+			var ph = numNodes * 20 * ui.SCALE;
 			var py = popupY;
-			g.color = 0xff222222;
-			g.fillRect(popupX, py, ew, ph);
+			g.color = ui.t.WINDOW_BG_COL;
+			var menuw = Std.int(ew * 1.6);
+			g.fillRect(popupX, py, menuw, ph);
 
-			ui.beginLayout(g, Std.int(popupX), Std.int(py), ew);
-			
+			ui.beginLayout(g, Std.int(popupX), Std.int(py), menuw);
+			var BUTTON_COL = ui.t.BUTTON_COL;
+			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+
 			if (canvasType == 0) NodeCreator.draw(menuCategory);
 			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
 			else if (canvasType == 2) NodeCreatorLogic.draw(menuCategory);
 
+			ui.t.BUTTON_COL = BUTTON_COL;
 			ui.endLayout();
 		}
 

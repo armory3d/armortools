@@ -16,19 +16,20 @@
 	"FILL_WINDOW_BG": true,
 	"FILL_BUTTON_BG": true,
 	"FILL_ACCENT_BG": false,
-	"WINDOW_BG_COL": "0xff202020",
+
+	"WINDOW_BG_COL": "0xff333333",
 	"WINDOW_TINT_COL": "0xffffffff",
-	"ACCENT_COL": "0xff404040",
-	"ACCENT_HOVER_COL": "0xff505050",
+	"ACCENT_COL": "0xff444444",
+	"ACCENT_HOVER_COL": "0xff484848",
 	"ACCENT_SELECT_COL": "0xff606060",
-	"PANEL_BG_COL": "0xff202020",
-	"PANEL_TEXT_COL": "0xffeeeeee",
-	"BUTTON_COL": "0xff2b2b2b",
+	"PANEL_BG_COL": "0xff333333",
+	"PANEL_TEXT_COL": "0xffcac9c7",
+	"BUTTON_COL": "0xff484848",
 	"BUTTON_TEXT_COL": "0xffcac9c7",
 	"BUTTON_HOVER_COL": "0xff3b3b3b",
 	"BUTTON_PRESSED_COL": "0xff1b1b1b",
 	"TEXT_COL": "0xffcac9c7",
 	"LABEL_COL": "0xffaaaaaa",
 	"ARROW_COL": "0xffcac9c7",
-	"SEPARATOR_COL": "0xff101010"
+	"SEPARATOR_COL": "0xff272727"
 }

@@ -77,10 +77,11 @@ class UIView2D extends iron.Trait {
 	}
 
 	function render2D(g:kha.graphics2.Graphics) {
-		ww = Std.int(iron.App.w());
+		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
-		wy = 0;
+		wx += UITrait.inst.toolbarw;
+		wy = UITrait.inst.headerh * 2;
 
 		if (!show ||
 			arm.App.realw() == 0 ||

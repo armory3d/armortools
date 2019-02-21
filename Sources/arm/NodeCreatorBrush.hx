@@ -15,7 +15,7 @@ class NodeCreatorBrush {
 		var canvas = UINodes.inst.canvasBrush;
 		
 		if (cat == 0) { // Input
-			if (ui.button("Input")) {
+			if (ui.button("Input", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -41,7 +41,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Brush Output")) {
+			if (ui.button("Brush Output", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -99,7 +99,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Value")) {
+			if (ui.button("Value", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -136,7 +136,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Vector")) {
+			if (ui.button("Vector", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -187,7 +187,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Separate Vector")) {
+			if (ui.button("Separate Vector", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -238,7 +238,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Vector Math")) {
+			if (ui.button("Vector Math", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -297,7 +297,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Math")) {
+			if (ui.button("Math", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,
@@ -354,7 +354,7 @@ class NodeCreatorBrush {
 				nodes.nodesDrag = true;
 				nodes.nodesSelected = [n];
 			}
-			if (ui.button("Time")) {
+			if (ui.button("Time", Left)) {
 				var node_id = nodes.getNodeId(canvas.nodes);
 				var n:TNode = {
 					id: node_id,

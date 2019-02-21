@@ -57,7 +57,9 @@ class UITrait extends iron.Trait {
 	public var rdirty = 0;
 
 	public var windowW = 280; // Panel width
-	public var toolbarw = 50;
+	public var toolbarw = 54;
+	public var headerh = 24;
+	public var menubarw = 215;
 
 	public var ui:Zui;
 	public var systemId = "";
@@ -155,7 +157,7 @@ class UITrait extends iron.Trait {
 	public var showGrid = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
-	public var objectsHandle = new Zui.Handle({selected: false});
+	public var objectsHandle = new Zui.Handle({selected: true});
 	public var maskHandle = new Zui.Handle({position: 0});
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
@@ -184,6 +186,7 @@ class UITrait extends iron.Trait {
 	var textureExport = false;
 	var textureExportPath = "";
 	public var projectExport = false;
+	var headerHandle = Id.handle({layout:Horizontal});
 
 	#if arm_editor
 	public var cameraControls = 2;
@@ -235,6 +238,9 @@ class UITrait extends iron.Trait {
 		if (C.undo_steps == null) C.undo_steps = 4; // Max steps to keep
 
 		windowW = Std.int(defaultWindowW * C.window_scale);
+		toolbarw = Std.int(54 * C.window_scale);
+		headerh = Std.int(24 * C.window_scale);
+		menubarw = Std.int(215 * C.window_scale);
 
 		Uniforms.init();
 
@@ -281,9 +287,9 @@ class UITrait extends iron.Trait {
 		}
 		if (emptyEnvmap == null) {
 			var b = haxe.io.Bytes.alloc(4);
-			b.set(0, 5);
-			b.set(1, 5);
-			b.set(2, 5);
+			b.set(0, 3);
+			b.set(1, 3);
+			b.set(2, 3);
 			b.set(3, 255);
 			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
@@ -743,6 +749,7 @@ class UITrait extends iron.Trait {
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
+		headerHandle.redraws = 2;
 		ddirty = 2;
 	}
 
@@ -859,16 +866,204 @@ class UITrait extends iron.Trait {
 
 		g.end();
 		ui.begin(g);
-		// ui.begin(rt.g2); ////
 
-		// if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
-			// if (ui.tab(Id.handle(), "Tools")) {
-			// }
-		// }
+		// ui.t.FILL_WINDOW_BG = false;
+		var panelx = (iron.App.x() - toolbarw);
+		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (ui.window(Id.handle(), panelx, headerh, toolbarw, kha.System.windowHeight())) {
+			ui._y += 2;
 
-		// if (ui.window(Id.handle(), toolbarw, 0, arm.App.realw() - windowW - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
-			// ui.tab(Id.handle(), "3D View");
-		// }
+			ui.imageScrollAlign = false;
+			var img1 = bundled.get("brush_draw.png");
+			var img2 = bundled.get("brush_erase.png");
+			var img3 = bundled.get("brush_fill.png");
+			var img4 = bundled.get("brush_bake.png");
+			var img5 = bundled.get("brush_colorid.png");
+			var tool = "";
+			
+			ui._x += 2;
+			if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img1) == State.Started) setBrushType(0);
+			if (ui.isHovered) ui.tooltip("Draw");
+			ui._x -= 2;
+			ui._y += 2;
+			
+			ui._x += 2;
+			if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img2) == State.Started) setBrushType(1);
+			if (ui.isHovered) ui.tooltip("Erase");
+			ui._x -= 2;
+			ui._y += 2;
+
+			ui._x += 2;
+			if (brushType == 2) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img3) == State.Started) setBrushType(2);
+			if (ui.isHovered) ui.tooltip("Fill");
+			ui._x -= 2;
+			ui._y += 2;
+
+			ui._x += 2;
+			if (brushType == 3) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img4) == State.Started) setBrushType(3);
+			if (ui.isHovered) ui.tooltip("Bake");
+			ui._x -= 2;
+			ui._y += 2;
+
+			ui._x += 2;
+			if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img5) == State.Started) setBrushType(4);
+			if (ui.isHovered) ui.tooltip("Color ID");
+			ui.imageScrollAlign = true;
+			ui._x -= 2;
+			ui._y += 2;
+		}
+		// ui.t.FILL_WINDOW_BG = true;
+
+		var panelx = iron.App.x() - toolbarw;
+		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+			var _w = ui._w;
+			ui._w = Std.int(ui._w * 0.5);
+			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+			ui.t.ELEMENT_OFFSET = 0;
+			var buttonOffsetY = ui.buttonOffsetY;
+			var BUTTON_COL = ui.t.BUTTON_COL;
+			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+			ui.buttonOffsetY = 0;
+			ui.button("File", Left);
+			ui.button("Edit", Left);
+			ui.button("View", Left);
+			ui.button("Help", Left);
+			ui._w = _w;
+			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+			ui.t.BUTTON_COL = BUTTON_COL;
+			ui.buttonOffsetY = buttonOffsetY;
+		}
+
+		var panelx = (iron.App.x() - toolbarw) + menubarw;
+		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, arm.App.realw() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+			ui.tab(Id.handle(), "Paint");
+			// ui.tab(Id.handle(), "Sculpt");
+			// ui.tab(Id.handle(), "Material");
+			// ui.tab(Id.handle(), "Scene");
+			// ui.tab(Id.handle(), "Render");
+		}
+
+		var panelx = iron.App.x();
+		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (ui.window(headerHandle, panelx, headerh, arm.App.realw() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+
+			// Color ID
+			if (brushType == 4) {
+				// Picked color
+				ui.text("Picked Color");
+				if (colorIdPicked) {
+					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
+				}
+				if (ui.button("Clear")) colorIdPicked = false;
+				// Set color map
+				ui.text("Color ID Map");
+				var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
+				if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
+			}
+			else if (brushType == 3) { // Bake AO
+				ui.combo(Id.handle(), ["AO"], "Bake");
+				var h = Id.handle({value: bakeStrength});
+				bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
+				if (h.changed) UINodes.inst.parsePaintMaterial();
+				var h = Id.handle({value: bakeRadius});
+				bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
+				if (h.changed) UINodes.inst.parsePaintMaterial();
+				var h = Id.handle({value: bakeOffset});
+				bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
+				if (h.changed) UINodes.inst.parsePaintMaterial();
+				ui.check(autoFillHandle, "Auto-Fill");
+				if (autoFillHandle.changed) {
+					UINodes.inst.updateCanvasMap();
+					UINodes.inst.parsePaintMaterial();
+				}
+			}
+			else { // Draw, Erase, Fill
+				brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+				var brushScaleHandle = Id.handle({value: brushScale});
+				brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
+				if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
+
+				brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+				brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+				brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
+
+				ui.combo(Id.handle(), ["Add"], "Blending");
+
+				var paintHandle = Id.handle();
+				brushPaint = ui.combo(paintHandle, ["UV", "Project", "Sticker"], "Paint");
+				if (paintHandle.changed) {
+					UINodes.inst.parsePaintMaterial();
+					if (brushPaint == 2) { // Sticker
+						ui.g.end();
+						RenderUtil.makeStickerPreview();
+						ui.g.begin(false);
+					}
+				}
+
+				if (brushType == 2) { // Fill, Bake
+					ui.check(autoFillHandle, "Auto-Fill");
+					if (autoFillHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+				}
+				else { // Draw, Erase
+					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+					var mirrorHandle = Id.handle({selected: mirrorX});
+					mirrorX = ui.check(mirrorHandle, "Mirror Screen");
+					if (mirrorHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
+				}
+			}
+		}
+
+		if (ui.window(Id.handle({layout:Horizontal}), iron.App.x(), arm.App.realh() - headerh, arm.App.realw() - toolbarw - windowW, headerh)) {
+
+			var scene = iron.Scene.active;
+			var cam = scene.cameras[0];
+			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Rotate", "Orbit", "Fly"], "Controls");
+			cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
+			if (camHandle.changed) {
+				if (cameraType == 0) cam.data.raw.ortho = null;
+				else {
+					var f32 = new kha.arrays.Float32Array(4);
+					f32[0] = -2;
+					f32[1] =  2;
+					f32[2] = -2 * (iron.App.h() / iron.App.w());
+					f32[2] =  2 * (iron.App.h() / iron.App.w());
+					cam.data.raw.ortho = f32;
+				}
+				
+				if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
+				iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
+				cam.buildProjection();
+				
+				ddirty = 2;
+			}
+
+			fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+			cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+			if (fovHandle.changed) {
+				cam.buildProjection();
+				ddirty = 2;
+			}
+
+			ui.t.FILL_BUTTON_BG = false;
+			if (ui.button("Default")) {
+				ViewportUtil.resetViewport();
+				ViewportUtil.scaleToBounds();
+			}
+			ui.t.FILL_BUTTON_BG = true;
+		}
 		
 		var wx = C.ui_layout == 0 ? arm.App.realw() - windowW : 0;
 		if (ui.window(hwnd, wx, 0, windowW, arm.App.realh())) {
@@ -1053,6 +1248,7 @@ class UITrait extends iron.Trait {
 						for (j in 0...5) {
 							var i = j + row * 5;
 							var img = i >= materials2.length ? empty : materials2[i].image;
+							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
 
 							if (selectedMaterial2 == materials2[i]) {
 								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
@@ -1064,7 +1260,7 @@ class UITrait extends iron.Trait {
 								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
 							}
 
-							if (ui.image(img) == State.Started && img != empty) {
+							if (ui.image(img, tint) == State.Started && img != empty) {
 								if (selectedMaterial2 != materials2[i]) selectMaterial2(i);
 								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
 								selectTime = iron.system.Time.time();
@@ -1108,105 +1304,10 @@ class UITrait extends iron.Trait {
 					ui.text(message);
 				}
 
-				ui._y += 6;
-
-				var img1 = bundled.get("brush_draw.png");
-				var img2 = bundled.get("brush_erase.png");
-				var img3 = bundled.get("brush_fill.png");
-				var img4 = bundled.get("brush_bake.png");
-				var img5 = bundled.get("brush_colorid.png");
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
-				var tool = "";
-				if (brushType == 0) { tool = "Draw"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
-				if (ui.image(img1) == State.Started) setBrushType(0);
-				if (brushType == 1) { tool = "Erase"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
-				if (ui.image(img2) == State.Started) setBrushType(1);
-				if (brushType == 2) { tool = "Fill"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
-				if (ui.image(img3) == State.Started) setBrushType(2);
-				if (brushType == 3) { tool = "Bake"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
-				if (ui.image(img4) == State.Started) setBrushType(3);
-				if (brushType == 4) { tool = "Color ID"; ui.fill(1, -2, img1.width + 3, img1.height + 3, 0xff205d9c); }
-				if (ui.image(img5) == State.Started) setBrushType(4);
-
-				ui._y += 6;
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), tool, 1)) {
-					// Color ID
-					if (brushType == 4) {
-						// Picked color
-						ui.row([1/2, 1/2]);
-						ui.text("Picked Color");
-						if (ui.button("Clear")) colorIdPicked = false;
-						if (colorIdPicked) {
-							ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
-						}
-						// Set color map
-						ui.text("Color ID Map");
-						var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
-						if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
-					}
-					else if (brushType == 3) { // Bake AO
-						ui.radio(Id.handle(), 0, "Ambient Occlusion");
-						ui.row([1/3, 1/3, 1/3]);
-						var h = Id.handle({value: bakeStrength});
-						bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
-						if (h.changed) UINodes.inst.parsePaintMaterial();
-						var h = Id.handle({value: bakeRadius});
-						bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
-						if (h.changed) UINodes.inst.parsePaintMaterial();
-						var h = Id.handle({value: bakeOffset});
-						bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
-						if (h.changed) UINodes.inst.parsePaintMaterial();
-						ui.check(autoFillHandle, "Auto-Fill");
-						if (autoFillHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-						}
-					}
-					else { // Draw, Erase, Fil;
-						ui.row([1/2, 1/2]);
-						ui.combo(Id.handle(), ["Add"], "Blending");
-						if (ui.button("Nodes")) showBrushNodes();
-						ui.row([1/2, 1/2]);
-						var paintHandle = Id.handle();
-						brushPaint = ui.combo(paintHandle, ["UV", "Project", "Sticker"], "Paint");
-						if (paintHandle.changed) {
-							UINodes.inst.parsePaintMaterial();
-							if (brushPaint == 2) { // Sticker
-								ui.g.end();
-								RenderUtil.makeStickerPreview();
-								ui.g.begin(false);
-							}
-						}
-						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
-						ui.row([1/2, 1/2]);
-						brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
-						brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-						ui.row([1/2, 1/2]);
-						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
-						if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
-						brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
-
-						if (brushType == 2) { // Fill, Bake
-							ui.check(autoFillHandle, "Auto-Fill");
-							if (autoFillHandle.changed) {
-								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
-							}
-						}
-						else { // Draw, Erase
-							ui.row([1/2,1/2]);
-							paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-							var mirrorHandle = Id.handle({selected: mirrorX});
-							mirrorX = ui.check(mirrorHandle, "Mirror Screen");
-							if (mirrorHandle.changed) {
-								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
-							}
-						}
-					}
+				if (ui.panel(Id.handle({selected: true}), "Brushes", 1)) {
+					ui.row([1/2,1/2]);
+					if (ui.button("New")) {}
+					if (ui.button("Nodes")) showBrushNodes();
 				}
 
 				ui.separator();
@@ -1271,6 +1372,7 @@ class UITrait extends iron.Trait {
 						for (j in 0...5) {
 							var i = j + row * 5;
 							var img = i >= materials.length ? empty : materials[i].image;
+							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
 
 							if (selectedMaterial == materials[i]) {
 								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
@@ -1282,7 +1384,7 @@ class UITrait extends iron.Trait {
 								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
 							}
 
-							if (ui.image(img) == State.Started && img != empty) {
+							if (ui.image(img, tint) == State.Started && img != empty) {
 								if (selectedMaterial != materials[i]) selectMaterial(i);
 								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
 								selectTime = iron.system.Time.time();
@@ -1372,9 +1474,7 @@ class UITrait extends iron.Trait {
 						// if (o.name.charAt(0) == '.') return; // Hidden
 						var b = false;
 						if (paintObject == o) {
-							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
-							ui.g.color = 0xffffffff;
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
 						}
 						ui.row([1/10, 9/10]);
 						var h = Id.handle().nest(i, {selected: o.visible});
@@ -1489,44 +1589,6 @@ class UITrait extends iron.Trait {
 					// h.text = Math.roundfp(scale.z) + "";
 					// f = Std.parseFloat(ui.textInput(h, "Z"));
 					// if (h.changed) { scale.z = f; ddirty = 2; paintObject.transform.dirty = true; }
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Camera", 1)) {
-					var scene = iron.Scene.active;
-					var cam = scene.cameras[0];
-					ui.row([1/2,1/2]);
-					cameraControls = ui.combo(Id.handle({position: cameraControls}), ["ArcBall", "Orbit", "Fly"], "Controls");
-					cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
-					if (camHandle.changed) {
-						if (cameraType == 0) cam.data.raw.ortho = null;
-						else {
-							var f32 = new kha.arrays.Float32Array(4);
-							f32[0] = -2;
-							f32[1] =  2;
-							f32[2] = -2 * (iron.App.h() / iron.App.w());
-							f32[2] =  2 * (iron.App.h() / iron.App.w());
-							cam.data.raw.ortho = cast f32; // TODO: skip cast in 0.6
-						}
-						
-						if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
-						iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
-						cam.buildProjection();
-						
-						ddirty = 2;
-					}
-
-					ui.row([1/2,1/2]);
-					fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-					if (fovHandle.changed) {
-						cam.buildProjection();
-						ddirty = 2;
-					}
-					if (ui.button("Reset")) {
-						ViewportUtil.resetViewport();
-						ViewportUtil.scaleToBounds();
-					}
 				}
 
 				ui.separator();
@@ -1817,6 +1879,9 @@ class UITrait extends iron.Trait {
 						UINodes.inst.ui.setScale(hscale.value);
 						UIView2D.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * C.window_scale);
+						toolbarw = Std.int(54 * C.window_scale);
+						headerh = Std.int(24 * C.window_scale);
+						menubarw = Std.int(215 * C.window_scale);
 						arm.App.resize();
 						armory.data.Config.save();
 					}
