@@ -151,7 +151,7 @@ class MaterialBuilder {
 				// frag.write('if (dist > brushRadius) { discard; }');
 			}
 		}
-		else {
+		else { // Fill, Bake
 			frag.write('float dist = 0.0;');
 		}
 
@@ -163,6 +163,19 @@ class MaterialBuilder {
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
+			frag.write('if (c1 != c2) { discard; }');
+		}
+		// Face fill
+		else if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) {
+			vert.add_out('vec2 texCoordPick');
+			vert.write('texCoordPick = fract(tex);');
+			frag.add_uniform('sampler2D gbuffer2');
+			frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
+			frag.add_uniform('vec2 textrianglemapSize', '_textrianglemapSize');
+			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
+			frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
+			frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
 			frag.write('if (c1 != c2) { discard; }');
 		}
 
@@ -227,8 +240,7 @@ class MaterialBuilder {
 		}
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
-		frag.write('    fragColor[1] = vec4(nortan, 1.0);');
-		// frag.write('    fragColor[1] = vec4(nortan, str);');
+		frag.write('    fragColor[1] = vec4(nortan, 1.0);'); // nortan.xy *= str
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 		if (UITrait.inst.paintHeight) {
 			frag.write('    fragColor[3] = vec4(1.0, 0.0, height, str);');
@@ -584,11 +596,22 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(vec3(metallic), packFloat2(1.0, 1.0));'); // occ/spec
 			}
+			else if (UITrait.inst.viewportMode == 6) { // Texcoord
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
+				frag.write('fragColor[1] = vec4(texCoord, 0.0, packFloat2(1.0, 1.0));'); // occ/spec
+			}
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
 		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
-		frag.write('fragColor[2] = vec4(posa - posb, 0.0, 0.0);');
+
+		if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) {
+			// Face fill - write texcoords into gbuffer
+			frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');
+		}
+		else {
+			frag.write('fragColor[2] = vec4(posa - posb, 0.0, 0.0);');
+		}
 
 		Cycles.finalize(con_mesh);
 		con_mesh.data.shader_from_source = true;

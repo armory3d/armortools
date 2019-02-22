@@ -156,6 +156,7 @@ class UITrait extends iron.Trait {
 	public var mirrorX = false;
 	public var showGrid = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
+	public var fillTypeHandle = new Zui.Handle();
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
 	public var objectsHandle = new Zui.Handle({selected: true});
 	public var maskHandle = new Zui.Handle({position: 0});
@@ -187,6 +188,8 @@ class UITrait extends iron.Trait {
 	var textureExportPath = "";
 	public var projectExport = false;
 	var headerHandle = Id.handle({layout:Horizontal});
+	var drawMenu = false;
+	var menuCategory = 0;
 
 	#if arm_editor
 	public var cameraControls = 2;
@@ -709,6 +712,7 @@ class UITrait extends iron.Trait {
 		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
 
 		renderUI(g);
+		renderMenu(g);
 
 		// var ready = showFiles || dirty;
 		// TODO: Texture params get overwritten
@@ -930,10 +934,10 @@ class UITrait extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 			ui.buttonOffsetY = 0;
-			ui.button("File", Left);
-			ui.button("Edit", Left);
-			ui.button("View", Left);
-			ui.button("Help", Left);
+			if (ui.button("File", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 0; };
+			if (ui.button("Edit", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 1; };
+			if (ui.button("View", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 2; };
+			if (ui.button("Help", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 3; };
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
 			ui.t.BUTTON_COL = BUTTON_COL;
@@ -944,10 +948,10 @@ class UITrait extends iron.Trait {
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, arm.App.realw() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(Id.handle(), "Paint");
-			// ui.tab(Id.handle(), "Sculpt");
-			// ui.tab(Id.handle(), "Material");
-			// ui.tab(Id.handle(), "Scene");
-			// ui.tab(Id.handle(), "Render");
+			ui.tab(Id.handle(), "Sculpt");
+			ui.tab(Id.handle(), "Material");
+			ui.tab(Id.handle(), "Scene");
+			ui.tab(Id.handle(), "Render");
 		}
 
 		var panelx = iron.App.x();
@@ -1008,6 +1012,16 @@ class UITrait extends iron.Trait {
 				}
 
 				if (brushType == 2) { // Fill, Bake
+					ui.combo(fillTypeHandle, ["Object", "Face"], "Fill");
+					if (fillTypeHandle.changed) {
+						if (fillTypeHandle.position == 1) {
+							ui.g.end();
+							UIView2D.inst.cacheTriangleMap();
+							ui.g.begin(false);
+						}
+						UINodes.inst.parsePaintMaterial();
+						UINodes.inst.parseMeshMaterial();
+					}
 					ui.check(autoFillHandle, "Auto-Fill");
 					if (autoFillHandle.changed) {
 						UINodes.inst.updateCanvasMap();
@@ -1604,7 +1618,7 @@ class UITrait extends iron.Trait {
 					if (envHandle.changed) ddirty = 2;
 					ui.row([1/2, 1/2]);
 					var modeHandle = Id.handle({position: 0});
-					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic"], "Mode");
+					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord"], "Mode");
 					if (modeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
@@ -1755,6 +1769,8 @@ class UITrait extends iron.Trait {
 						iron.App.notifyOnRender(Layers.resizeLayers);
 						UIView2D.inst.uvmap = null;
 						UIView2D.inst.uvmapCached = false;
+						UIView2D.inst.trianglemap = null;
+						UIView2D.inst.trianglemapCached = false;
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
 				}
@@ -1982,5 +1998,65 @@ class UITrait extends iron.Trait {
 		}
 		ui.end();
 		g.begin(false);
+	}
+
+	function renderMenu(g:kha.graphics2.Graphics) {
+		
+		// Draw menu
+		if (drawMenu) {
+
+			var panelx = iron.App.x() - toolbarw;
+			if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+
+			var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
+			var px = panelx + menuButtonW * menuCategory;
+			var py = headerh;
+			var ph = 200 * ui.SCALE;
+			
+			g.color = ui.t.SEPARATOR_COL;
+			var menuw = Std.int(ui.ELEMENT_W() * 1.5);
+			g.fillRect(px, py, menuw, ph);
+
+			ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
+			var BUTTON_COL = ui.t.BUTTON_COL;
+			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
+
+			if (menuCategory == 0) {
+				ui.button("New", Left);
+				ui.button("Open...", Left);
+				ui.button("Save", Left);
+				ui.button("Save As...", Left);
+				ui.button("Import Asset...", Left);
+				ui.button("Export Textures...", Left);
+				ui.button("Export Mesh...", Left);
+				ui.button("Exit", Left);
+			}
+			else if (menuCategory == 1) {
+				ui.button("Undo", Left);
+				ui.button("Redo", Left);
+				ui.button("Preferences...", Left);
+			}
+			else if (menuCategory == 2) {
+				ui.button("Show Envmap", Left);
+				ui.button("Show Grid", Left);
+				ui.button("Wireframe", Left);
+			}
+			else if (menuCategory == 3) {
+				ui.button("Manual...", Left);
+				ui.button("About...", Left);
+			}
+
+			ui.t.BUTTON_COL = BUTTON_COL;
+			ui.endLayout();
+
+
+
+			var mouse = iron.system.Input.getMouse();
+			var kb = iron.system.Input.getKeyboard();
+
+			if (mouse.released()) {
+				drawMenu = false;
+			}
+		}
 	}
 }

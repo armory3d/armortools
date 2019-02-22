@@ -226,6 +226,7 @@ class App extends iron.Trait {
 		if (showFiles) renderFiles(g);
 	}
 
+	@:access(zui.Zui)
 	static function renderFiles(g:kha.graphics2.Graphics) {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
@@ -233,7 +234,7 @@ class App extends iron.Trait {
 		var right = Std.int(appw / 2 + modalW / 2);
 		var top = Std.int(apph / 2 - modalH / 2);
 		var bottom = Std.int(apph / 2 + modalH / 2);
-		g.color = 0xff202020;
+		g.color = uimodal.t.SEPARATOR_COL;
 		g.fillRect(left, top, modalW, modalH);
 		
 		g.end();

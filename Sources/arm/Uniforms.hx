@@ -58,6 +58,18 @@ class Uniforms {
 			vec2.set(img.width, img.height, 0);
 			return vec2;
 		}
+		else if (link == '_textrianglemapSize') {
+			vec2.set(0, 0, 0);
+			var res = Config.getTextureRes();
+			vec2.set(res, res, 0);
+			return vec2;
+		}
+		else if (link == '_gbufferSize') {
+			vec2.set(0, 0, 0);
+			var f = armory.renderpath.Inc.getSuperSampling();
+			vec2.set(iron.App.w() * f, iron.App.h() * f, 0);
+			return vec2;
+		}
 		return null;
 	}
 
@@ -84,6 +96,10 @@ class Uniforms {
 		else if (link == "_texuvmap") {
 			UIView2D.inst.cacheUVMap(); // TODO: Check overlapping g4 calls here
 			return UIView2D.inst.uvmap;
+		}
+		else if (link == "_textrianglemap") {
+			UIView2D.inst.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
+			return UIView2D.inst.trianglemap;
 		}
 		return null;
 	}

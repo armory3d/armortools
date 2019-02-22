@@ -282,7 +282,6 @@ class UINodes extends iron.Trait {
 
 		// Start with UI
 		ui.begin(g);
-		// ui.begin(rt.g2); ////
 		
 		// Make window
 		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
@@ -328,64 +327,64 @@ class UINodes extends iron.Trait {
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
 			if (canvasType == 1) {
-				if (ui.button("Nodes", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Nodes", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else if (canvasType == 2) {
-				if (ui.button("Action", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Action", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Animation", Left)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Animation", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Array", Left)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Array", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Canvas", Left)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Canvas", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Event", Left)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Event", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Input", Left)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Input", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x = 3;
 				ui._y = 30;
-				if (ui.button("Logic", Left)) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Logic", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x = ew + 3;
 				ui._y = 30;
-				if (ui.button("Native", Left)) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Native", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Navmesh", Left)) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Navmesh", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Physics", Left)) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Physics", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Sound", Left)) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Sound", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Value", Left)) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Value", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 30;
-				if (ui.button("Variable", Left)) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Variable", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 			else {
-				if (ui.button("Input", Left)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Input", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
 				// if (ui.button("Output", Left)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
 				// ui._x += ew + 3;
 				// ui._y = 3;
-				if (ui.button("Texture", Left)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Texture", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Color", Left)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Color", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Vector", Left)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Vector", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
 				ui._x += ew + 3;
 				ui._y = 3;
-				if (ui.button("Converter", Left)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+				if (ui.button("Converter", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
 			}
 
 			ui.t.BUTTON_COL = BUTTON_COL;
@@ -394,7 +393,6 @@ class UINodes extends iron.Trait {
 		ui.endWindow();
 
 		if (drawMenu) {
-			
 			var numNodes = 0;
 			if (canvasType == 0) numNodes = NodeCreator.numNodes[menuCategory];
 			else if (canvasType == 1) numNodes = NodeCreatorBrush.numNodes[menuCategory];
