@@ -38,8 +38,8 @@ class Uniforms {
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_sub') {
 			var seps = UITrait.inst.brushBias * 0.0004 * Config.getTextureResBias();
+			UITrait.inst.sub = (UITrait.inst.sub + 1) % 9;
 			var sub = UITrait.inst.sub;
-			sub = (sub + 1) % 9;
 			if (sub == 0) vec2.set(0.0 + seps, 0.0, 0.0);
 			else if (sub == 1) vec2.set(0.0 - seps, 0.0, 0.0);
 			else if (sub == 2) vec2.set(0.0, 0.0 + seps, 0.0);
@@ -66,9 +66,13 @@ class Uniforms {
 		}
 		else if (link == '_gbufferSize') {
 			vec2.set(0, 0, 0);
-			var f = armory.renderpath.Inc.getSuperSampling();
-			vec2.set(iron.App.w() * f, iron.App.h() * f, 0);
+			var gbuffer2 = iron.RenderPath.active.renderTargets.get("gbuffer2");
+			vec2.set(gbuffer2.image.width, gbuffer2.image.height, 0);
 			return vec2;
+			// Check equality at init
+			// trace(iron.RenderPath.active.renderTargets.get("gbuffer2").image.width);
+			// trace(iron.App.w());
+			// var f = armory.renderpath.Inc.getSuperSampling();
 		}
 		return null;
 	}

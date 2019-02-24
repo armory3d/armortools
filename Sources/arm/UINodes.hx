@@ -321,6 +321,7 @@ class UINodes extends iron.Trait {
 			ui.fontSize = Std.int(22 * ui.SCALE);
 			ui._x = ww - ui.ELEMENT_W() * 1.4;
 			ui._y = wh - ui.ELEMENT_H() * 1.2;
+			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
 			h.text = c.name;
 			c.name = ui.textInput(h, "", Right);

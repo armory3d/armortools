@@ -18,6 +18,12 @@ class BrushOutputNode extends LogicNode {
 		arm.UITrait.inst.brushNodesStrength = inputs[3].get();
 		arm.UITrait.inst.brushNodesScale = inputs[4].get();
 
+		// First time init
+		if (arm.UITrait.inst.lastPaintX < 0 || arm.UITrait.inst.lastPaintY < 0) {
+			arm.UITrait.inst.lastPaintVecX = arm.UITrait.inst.paintVec.x;
+			arm.UITrait.inst.lastPaintVecY = arm.UITrait.inst.paintVec.y;
+		}
+
 		// Paint bounds
 		if (arm.UITrait.inst.paintVec.x < 1 && arm.UITrait.inst.paintVec.x > 0 &&
 			arm.UITrait.inst.paintVec.y < 1 && arm.UITrait.inst.paintVec.y > 0 &&

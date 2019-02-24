@@ -663,6 +663,7 @@ class Importer {
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			arm.UIView2D.inst.uvmapCached = false;
+			arm.UIView2D.inst.trianglemapCached = false;
 		});
 	}
 
@@ -717,6 +718,7 @@ class Importer {
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UIView2D.inst.uvmapCached = false;
+			UIView2D.inst.trianglemapCached = false;
 		});
 	}
 }

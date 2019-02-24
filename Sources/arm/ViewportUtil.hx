@@ -24,9 +24,9 @@ class ViewportUtil {
 				if (UITrait.inst.fovHandle != null) UITrait.inst.fovHandle.value = 0.92;
 				UITrait.inst.camHandle.position = 0;
 				cam.data.raw.ortho = null;
-				if (UITrait.inst.originalShadowBias > 0) {
-					iron.Scene.active.lights[0].data.raw.shadows_bias = UITrait.inst.originalShadowBias;
-				}
+				// if (UITrait.inst.originalShadowBias > 0) {
+					// iron.Scene.active.lights[0].data.raw.shadows_bias = UITrait.inst.originalShadowBias;
+				// }
 				cam.buildProjection();
 				UITrait.inst.selectedObject.transform.reset();
 				UITrait.inst.ddirty = 2;

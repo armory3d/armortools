@@ -49,9 +49,13 @@ class MaterialBuilder {
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, tex.y * 2.0 - 1.0);');
 		#end
 
-		// TODO: Fix seams at uv borders
-		vert.add_uniform('vec2 sub', '_sub');
-		vert.write('tpos += sub;');
+		var faceFill = UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1;
+		if (!faceFill) {
+			// Fix seams at uv borders
+			vert.add_uniform('vec2 sub', '_sub');
+			vert.write('tpos += sub;');
+		}
+
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
@@ -87,7 +91,11 @@ class MaterialBuilder {
 		if (UITrait.inst.brushType == 4) { // Pick color id
 			frag.add_out('vec4 fragColor');
 
+			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
+			#else
+			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, bsp.y)).r) discard;');
+			#end
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
 			frag.write('binp.x *= aspectRatio;');
 			frag.write('binp = binp * 0.5 + 0.5;');
@@ -116,8 +124,12 @@ class MaterialBuilder {
 
 		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1) { // Draw / Erase
 			
+			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) { discard; }');
-			
+			#else
+			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, bsp.y)).r) { discard; }');
+			#end
+
 			if (UITrait.inst.brushPaint == 2) { // Sticker
 				frag.write('float dist = 0.0;');
 			}
@@ -163,20 +175,24 @@ class MaterialBuilder {
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
-			frag.write('if (c1 != c2) { discard; }');
+			frag.write('if (any(c1 != c2)) { discard; }');
 		}
-		// Face fill
-		else if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) {
+		else if (faceFill) {
 			vert.add_out('vec2 texCoordPick');
 			vert.write('texCoordPick = fract(tex);');
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
 			frag.add_uniform('vec2 textrianglemapSize', '_textrianglemapSize');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
+			#if (kha_opengl || kha_webgl)
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
+			// frag.write('vec2 texCoordInp = textureLod(gbuffer2, vec2(inp.x, (1.0 - inp.y)), 0).ba;');
+			#else
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
+			#end
 			frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
 			frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
-			frag.write('if (c1 != c2) { discard; }');
+			frag.write('if (any(c1 != c2)) { discard; }');
 		}
 
 		// Texture projection - texcoords

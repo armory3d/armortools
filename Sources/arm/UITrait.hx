@@ -106,8 +106,8 @@ class UITrait extends iron.Trait {
 	var _onBrush:Array<Int->Void> = [];
 
 	public var paintVec = new iron.math.Vec4();
-	public var lastPaintX = 0.0;
-	public var lastPaintY = 0.0;
+	public var lastPaintX = -1.0;
+	public var lastPaintY = -1.0;
 	public var painted = 0;
 	public var brushTime = 0.0;
 
@@ -178,7 +178,7 @@ class UITrait extends iron.Trait {
 	var altStartedX = -1.0;
 	var altStartedY = -1.0;
 	public var cameraType = 0;
-	public var originalShadowBias = 0.0;
+	// public var originalShadowBias = 0.0;
 	public var camHandle = new Zui.Handle({position: 0});
 	public var fovHandle:Zui.Handle = null;
 	public var undoHandle:Zui.Handle = null;
@@ -792,6 +792,7 @@ class UITrait extends iron.Trait {
 			paintObject.skip_context = "";
 		}
 		UIView2D.inst.uvmapCached = false;
+		UIView2D.inst.trianglemapCached = false;
 	}
 
 	public function getImage(asset:TAsset):kha.Image {
@@ -1068,8 +1069,8 @@ class UITrait extends iron.Trait {
 					cam.data.raw.ortho = f32;
 				}
 				
-				if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
-				iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
+				// if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
+				// iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
 				cam.buildProjection();
 				
 				ddirty = 2;
@@ -1269,7 +1270,10 @@ class UITrait extends iron.Trait {
 
 						if (row > 0) ui._y += 6;
 
+						#if (kha_opengl || kha_webgl)
 						ui.imageInvertY = true; // Material preview
+						#end
+
 						for (j in 0...5) {
 							var i = j + row * 5;
 							var img = i >= materials2.length ? empty : materials2[i].image;
@@ -1292,7 +1296,10 @@ class UITrait extends iron.Trait {
 							}
 							if (img != empty && ui.isHovered) ui.tooltipImage(img);
 						}
+
+						#if (kha_opengl || kha_webgl)
 						ui.imageInvertY = false; // Material preview
+						#end
 					}
 
 					ui.row([1/2,1/2]);
@@ -1393,7 +1400,10 @@ class UITrait extends iron.Trait {
 
 						if (row > 0) ui._y += 6;
 
+						#if (kha_opengl || kha_webgl)
 						ui.imageInvertY = true; // Material preview
+						#end
+
 						for (j in 0...5) {
 							var i = j + row * 5;
 							var img = i >= materials.length ? empty : materials[i].image;
@@ -1416,7 +1426,10 @@ class UITrait extends iron.Trait {
 							}
 							if (img != empty && ui.isHovered) ui.tooltipImage(img);
 						}
+
+						#if (kha_opengl || kha_webgl)
 						ui.imageInvertY = false; // Material preview
+						#end
 					}
 
 					ui.row([1/2,1/2]);
@@ -1949,13 +1962,13 @@ class UITrait extends iron.Trait {
 				hssgi = Id.handle({selected: C.rp_ssgi});
 				hssr = Id.handle({selected: C.rp_ssr});
 				hbloom = Id.handle({selected: C.rp_bloom});
-				hshadowmap = Id.handle({position: Config.getShadowQuality(C.rp_shadowmap_cascade)});
+				// hshadowmap = Id.handle({position: Config.getShadowQuality(C.rp_shadowmap_cascade)});
 				hsupersample = Id.handle({position: Config.getSuperSampleQuality(C.rp_supersample)});
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
-					ui.row([1/2, 1/2]);
-					ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
-					if (hshadowmap.changed) Config.applyConfig();
+					// ui.row([1/2, 1/2]);
+					// ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
+					// if (hshadowmap.changed) Config.applyConfig();
 					ui.combo(hsupersample, ["0.5x", "1.0x", "1.5x", "2.0x"], "Super Sample", true);
 					if (hsupersample.changed) Config.applyConfig();
 					ui.row([1/2, 1/2]);
