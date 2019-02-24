@@ -59,7 +59,8 @@ class UIView2D extends iron.Trait {
 		}
 
 		uvmapCached = true;
-		var mesh = UITrait.inst.paintObject.data.raw;
+		var merged = UITrait.inst.mergedObject != null ? UITrait.inst.mergedObject.data.raw : UITrait.inst.paintObject.data.raw;
+		var mesh = UITrait.inst.maskHandle.position == 0 ? merged : UITrait.inst.paintObject.data.raw;
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
 		uvmap.g2.begin(true, 0x00000000);
@@ -89,7 +90,8 @@ class UIView2D extends iron.Trait {
 		}
 
 		trianglemapCached = true;
-		var mesh = UITrait.inst.paintObject.data.raw;
+		var merged = UITrait.inst.mergedObject != null ? UITrait.inst.mergedObject.data.raw : UITrait.inst.paintObject.data.raw;
+		var mesh = UITrait.inst.maskHandle.position == 0 ? merged : UITrait.inst.paintObject.data.raw;
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
 		trianglemap.g2.begin(true, 0xff000000);
