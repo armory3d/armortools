@@ -44,6 +44,9 @@ class App extends iron.Trait {
 		iron.App.onResize = resize;
 		#end
 
+		// Set base dir for file browser
+		zui.Ext.dataPath = iron.data.Data.dataPath;
+
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);
 			var mouse = iron.system.Input.getMouse();
