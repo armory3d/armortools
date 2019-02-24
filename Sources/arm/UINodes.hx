@@ -293,8 +293,13 @@ class UINodes extends iron.Trait {
 		var wh = iron.App.h();
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			
+			// Grid
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
+
+			// Nodes
+			var c = getCanvas();
+			nodes.nodeCanvas(ui, c);
 
 			// Image node preview
 			if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0].type == 'TEX_IMAGE') {
@@ -305,16 +310,26 @@ class UINodes extends iron.Trait {
 				}
 			}
 
-			ui.g.font = arm.App.font;
-			ui.g.fontSize = 22;
-			var title = canvasType == 1 ? "Brush" : "Material";
-			var titlew = ui.g.font.width(22, title);
-			var titleh = ui.g.font.height(22);
-			ui.g.drawString(title, ww - titlew - 20, iron.App.h() - titleh - 10);
-			
-			var c = getCanvas();
-			nodes.nodeCanvas(ui, c);
+			// Editable canvas name
+			var ACCENT_COL = ui.t.ACCENT_COL;
+			var BUTTON_H = ui.t.BUTTON_H;
+			var ELEMENT_H = ui.t.ELEMENT_H;
+			var FONT_SIZE = ui.fontSize;
+			ui.t.ACCENT_COL = 0x00000000;
+			ui.t.BUTTON_H = 30;
+			ui.t.ELEMENT_H = 30;
+			ui.fontSize = Std.int(22 * ui.SCALE);
+			ui._x = ww - ui.ELEMENT_W() * 1.4;
+			ui._y = wh - ui.ELEMENT_H() * 1.2;
+			var h = Id.handle();
+			h.text = c.name;
+			c.name = ui.textInput(h, "", Right);
+			ui.t.ACCENT_COL = ACCENT_COL;
+			ui.t.BUTTON_H = BUTTON_H;
+			ui.t.ELEMENT_H = ELEMENT_H;
+			ui.fontSize = FONT_SIZE;
 
+			// Menu
 			ui.g.color = ui.t.WINDOW_BG_COL;
 			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
 			ui.g.color = 0xffffffff;
@@ -406,12 +421,18 @@ class UINodes extends iron.Trait {
 			ui.beginLayout(g, Std.int(popupX), Std.int(py), menuw);
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+			ui.t.ELEMENT_OFFSET = 0;
+			var ELEMENT_H = ui.t.ELEMENT_H;
+			ui.t.ELEMENT_H = Std.int(22 * ui.SCALE);
 
 			if (canvasType == 0) NodeCreator.draw(menuCategory);
 			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
 			else if (canvasType == 2) NodeCreatorLogic.draw(menuCategory);
 
 			ui.t.BUTTON_COL = BUTTON_COL;
+			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+			ui.t.ELEMENT_H = ELEMENT_H;
 			ui.endLayout();
 		}
 
