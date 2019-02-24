@@ -133,6 +133,7 @@ class UITrait extends iron.Trait {
 	public var brushNodesStrength = 1.0;
 
 	public var brushRadius = 0.5;
+	public var brushRadiusHandle = new Zui.Handle({value: 0.5});
 	public var brushOpacity = 1.0;
 	public var brushScale = 0.5;
 	public var brushStrength = 1.0;
@@ -174,6 +175,8 @@ class UITrait extends iron.Trait {
 
 	public var C:TAPConfig;
 	var lastBrushType = -1;
+	var altStartedX = -1.0;
+	var altStartedY = -1.0;
 	public var cameraType = 0;
 	public var originalShadowBias = 0.0;
 	public var camHandle = new Zui.Handle({position: 0});
@@ -432,19 +435,14 @@ class UITrait extends iron.Trait {
 
 		// Color pick shortcut
 		var mouse = iron.system.Input.getMouse();
-		// if (mouse.x > 0 && mouse.x < iron.App.w() && kb.started("alt")) {
-		// 	lastBrushType = brushType;
-		// 	setBrushType(4);
-		// }
-		// if (kb.released("alt") && lastBrushType != -1) {
-		// 	setBrushType(lastBrushType);
-		// 	lastBrushType = -1;
-		// }
-		if (mouse.x > 0 && mouse.x < iron.App.w()) {
+		if (mouse.x > 0 && mouse.x < iron.App.w() &&
+			mouse.y > 0 && mouse.y < iron.App.h()) {
 
-			// kha.input.Mouse.get().hideSystemCursor();
-
-			if (kb.released("alt")) {
+			if (kb.started("alt")) {
+				altStartedX = mouse.x;
+				altStartedY = mouse.y;
+			}
+			else if (kb.released("alt") && altStartedX == mouse.x && altStartedY == mouse.y) {
 				if (lastBrushType == -1) {
 					lastBrushType = brushType;
 					setBrushType(4);
@@ -453,11 +451,23 @@ class UITrait extends iron.Trait {
 					setBrushType(lastBrushType);
 					lastBrushType = -1;
 				}
+				altStartedX = -1.0;
+				altStartedY = -1.0;
+			}
+
+			if (kb.released("-")) {
+				if (brushRadius > 0.1) {
+					brushRadius -= 0.1;
+					brushRadiusHandle.value = brushRadius;
+				}
+			}
+			if (kb.released("+")) {
+				if (brushRadius < 2.0) {
+					brushRadius += 0.1;
+					brushRadiusHandle.value = brushRadius;
+				}
 			}
 		}
-		// else {
-			// kha.input.Mouse.get().showSystemCursor();
-		// }
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
@@ -928,20 +938,21 @@ class UITrait extends iron.Trait {
 		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			var _w = ui._w;
 			ui._w = Std.int(ui._w * 0.5);
+			ui._x += 1; // Prevent "File" button highlight on startup
+			
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
-			var buttonOffsetY = ui.buttonOffsetY;
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-			ui.buttonOffsetY = 0;
+
 			if (ui.button("File", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 0; };
 			if (ui.button("Edit", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 1; };
 			if (ui.button("View", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 2; };
 			if (ui.button("Help", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 3; };
+			
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
 			ui.t.BUTTON_COL = BUTTON_COL;
-			ui.buttonOffsetY = buttonOffsetY;
 		}
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
@@ -989,7 +1000,7 @@ class UITrait extends iron.Trait {
 				}
 			}
 			else { // Draw, Erase, Fill
-				brushRadius = ui.slider(Id.handle({value: brushRadius}), "Radius", 0.0, 2.0, true);
+				brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
 				var brushScaleHandle = Id.handle({value: brushScale});
 				brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
 				if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
@@ -1626,8 +1637,8 @@ class UITrait extends iron.Trait {
 					if (iron.Scene.active.lights.length > 0) {
 						var light = iron.Scene.active.lights[0];
 						var lhandle = Id.handle();
-						lhandle.value = light.data.raw.strength / 10;
-						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 10;
+						lhandle.value = light.data.raw.strength / 100;
+						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 100;
 						if (lhandle.changed) ddirty = 2;
 					}
 
@@ -1977,13 +1988,9 @@ class UITrait extends iron.Trait {
 					ui.text("Select Tool - Shift+1-9");
 					ui.text("Select Material - Ctrl+1-9");
 					ui.text("Pick Color ID - Alt");
-					ui.text("Undo - Ctrl+Z");
-					ui.text("Redo - Ctrl+Shift+Z");
 					ui.text("Next Object - Ctrl+Tab");
-					ui.text("Save - Ctrl+S");
-					ui.text("Save As - Ctrl+Shift+S");
-					ui.text("Open - Ctrl+O");
 					ui.text("Auto-Fill - G");
+					ui.text("Brush Radius - +/-");
 				}
 
 				ui.separator();
@@ -2021,6 +2028,11 @@ class UITrait extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
+			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+			ui.t.ELEMENT_OFFSET = 0;
+			var ELEMENT_H = ui.t.ELEMENT_H;
+			ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
+
 			if (menuCategory == 0) {
 				ui.button("New", Left);
 				ui.button("Open...", Left);
@@ -2047,9 +2059,9 @@ class UITrait extends iron.Trait {
 			}
 
 			ui.t.BUTTON_COL = BUTTON_COL;
+			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+			ui.t.ELEMENT_H = ELEMENT_H;
 			ui.endLayout();
-
-
 
 			var mouse = iron.system.Input.getMouse();
 			var kb = iron.system.Input.getKeyboard();

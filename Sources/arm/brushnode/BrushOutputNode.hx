@@ -20,7 +20,8 @@ class BrushOutputNode extends LogicNode {
 
 		// Paint bounds
 		if (arm.UITrait.inst.paintVec.x < 1 && arm.UITrait.inst.paintVec.x > 0 &&
-			arm.UITrait.inst.paintVec.y < 1 && arm.UITrait.inst.paintVec.y > 0) {
+			arm.UITrait.inst.paintVec.y < 1 && arm.UITrait.inst.paintVec.y > 0 &&
+			!arm.UITrait.inst.ui.isHovered) { // Header combos are hovered
 			// Set color pick
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			if (arm.UITrait.inst.brushType == 4 && arm.UITrait.inst.assets.length > 0 && down) {
