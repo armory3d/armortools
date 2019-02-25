@@ -226,14 +226,17 @@ class Importer {
 			UITrait.inst.hwnd.redraws = 2;
 
 			// Set envmap, has to be 2K res for now
-			if (StringTools.endsWith(path.toLowerCase(), ".hdr") && image.width == 2048) {
+			if (StringTools.endsWith(path.toLowerCase(), ".hdr") &&
+				(image.width == 1024 || image.width == 2048 || image.width == 4096)) {
+				
 				#if kha_krom
 				var sys = kha.System.systemId;
-				var p = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath;
+				var dataPath = iron.data.Data.dataPath;
+				var p = Krom.getFilesLocation() + '/' + dataPath;
 				var cmft = p + "/cmft" + (sys == "Windows" ? ".exe" : sys == "Linux" ? "-linux64" : "-osx");
 
 				var cmd = '';
-				var tmp = Krom.getFilesLocation() + '/';
+				var tmp = Krom.getFilesLocation() + '/' + dataPath;
 
 				// Irr
 				cmd = cmft;
@@ -244,11 +247,12 @@ class Importer {
 				Krom.sysCommand(cmd);
 
 				// Rad
+				var faceSize = Std.int(image.width / 8);
 				cmd = cmft;
 				cmd += ' --input "' + path + '"';
 				cmd += ' --filter radiance';
-				cmd += ' --dstFaceSize 256';
-				cmd += ' --srcFaceSize 256';
+				cmd += ' --dstFaceSize ' + faceSize;
+				cmd += ' --srcFaceSize ' + faceSize;
 				cmd += ' --excludeBase false';
 				cmd += ' --glossScale 8';
 				cmd += ' --glossBias 3';
@@ -261,7 +265,7 @@ class Importer {
 				cmd += ' --deviceIndex 0';
 				cmd += ' --generateMipChain true';
 				cmd += ' --inputGammaNumerator 1.0';
-				cmd += ' --inputGammaDenominator 1.0';
+				cmd += ' --inputGammaDenominator 2.2';
 				cmd += ' --outputGammaNumerator 1.0';
 				cmd += ' --outputGammaDenominator 1.0';
 				cmd += ' --outputNum 1';
@@ -294,14 +298,16 @@ class Importer {
 				// World envmap
 				iron.Scene.active.world.envmap = image;
 				UITrait.inst.savedEnvmap = image;
+				UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = true;
 
 				// Load mips
-				var mipsCount = 9;
+				var mips = Std.int(image.width / 1024);
+				var mipsCount = 6 + mips;
 				var mipsLoaded = 0;
 				var mips:Array<kha.Image> = [];
 				while (mips.length < mipsCount + 2) mips.push(null);
-				var mw = 1024;
-				var mh = 512;
+				var mw = Std.int(image.width / 2);
+				var mh = Std.int(image.width / 4);
 				for (i in 0...mipsCount) {
 					iron.data.Data.getImage(tmp + "tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip:kha.Image) {
 						mips[i] = mip;

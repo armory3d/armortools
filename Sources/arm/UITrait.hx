@@ -49,6 +49,7 @@ class UITrait extends iron.Trait {
 	public var emptyEnvmap:kha.Image = null;
 	public var previewEnvmap:kha.Image = null;
 	public var showEnvmap = false;
+	public var showEnvmapHandle = new Zui.Handle({selected: false});
 	public var drawWireframe = false;
 	public var culling = true;
 
@@ -1706,7 +1707,6 @@ class UITrait extends iron.Trait {
 					}
 
 					ui.row([1/2, 1/2]);
-					var showEnvmapHandle = Id.handle({selected: showEnvmap});
 					showEnvmap = ui.check(showEnvmapHandle, "Show Envmap");
 					if (showEnvmapHandle.changed) {
 						ddirty = 2;
