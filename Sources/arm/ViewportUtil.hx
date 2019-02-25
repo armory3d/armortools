@@ -1,5 +1,9 @@
 package arm;
 
+import iron.math.Mat4;
+import iron.math.Vec4;
+import iron.math.Quat;
+
 class ViewportUtil {
 	public static function scaleToBounds() {
 		var po = UITrait.inst.mergedObject == null ? UITrait.inst.mainObject() : UITrait.inst.mergedObject;
@@ -16,7 +20,7 @@ class ViewportUtil {
 
 	public static function resetViewport() {
 		var scene = iron.Scene.active;
-		var cam = scene.cameras[0];
+		var cam = scene.camera;
 		for (o in scene.raw.objects) {
 			if (o.type == 'camera_object') {
 				cam.transform.local.setF32(o.transform.values);
@@ -33,5 +37,42 @@ class ViewportUtil {
 				break;
 			}
 		}
+	}
+
+	public static function setView(x:Float, y:Float, z:Float, rx:Float, ry:Float, rz:Float) {
+		UITrait.inst.selectedObject.transform.reset();
+		var scene = iron.Scene.active;
+		var cam = scene.camera;
+		cam.transform.loc.set(x, y, z);
+		cam.transform.rot.fromEuler(rx, ry, rz);
+		cam.transform.buildMatrix();
+		cam.buildProjection();
+		UITrait.inst.ddirty = 2;
+	}
+
+	public static inline function ortho(left:kha.FastFloat, right:kha.FastFloat, bottom:kha.FastFloat, top:kha.FastFloat, near:kha.FastFloat, far:kha.FastFloat):Mat4 {
+		// For runtime shader, D3D NDC is not matched to OGL yet
+		// Build proper ortho matrix
+		var rl = right - left;
+		var tb = top - bottom;
+		var tx = -(right + left) / (rl);
+		var ty = -(top + bottom) / (tb);
+
+		#if (kha_opengl || kha_webgl)
+		var fn = far - near;
+		var tz = -(far + near) / (fn);
+		var w = -2 / fn;
+		#else
+		var nf = near - far;
+		var tz = -(near) / (nf);
+		var w = 1 / nf;
+		#end
+
+		return new Mat4(
+			2 / rl,	0,		0, tx,
+			0,		2 / tb,	0, ty,
+			0,		0,		w, tz,
+			0,		0,		0, 1
+		);
 	}
 }

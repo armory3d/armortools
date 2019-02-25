@@ -190,7 +190,8 @@ class UITrait extends iron.Trait {
 	var textureExport = false;
 	var textureExportPath = "";
 	public var projectExport = false;
-	var headerHandle = Id.handle({layout:Horizontal});
+	var headerHandle = new Zui.Handle({layout:Horizontal});
+	var toolbarHandle = new Zui.Handle();
 	var drawMenu = false;
 	var menuCategory = 0;
 
@@ -402,7 +403,7 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
-		else if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
+		if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
 		else if (kb.started("2") && (shift || ctrl)) shift ? setBrushType(1) : selectMaterial(1);
 		else if (kb.started("3") && (shift || ctrl)) shift ? setBrushType(2) : selectMaterial(2);
 		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
@@ -433,11 +434,12 @@ class UITrait extends iron.Trait {
 			UINodes.inst.parsePaintMaterial();
 		}
 
-		// Color pick shortcut
+		// Viewport shortcuts
 		var mouse = iron.system.Input.getMouse();
 		if (mouse.x > 0 && mouse.x < iron.App.w() &&
 			mouse.y > 0 && mouse.y < iron.App.h()) {
 
+			// Color pick shortcut
 			if (kb.started("alt")) {
 				altStartedX = mouse.x;
 				altStartedY = mouse.y;
@@ -455,17 +457,35 @@ class UITrait extends iron.Trait {
 				altStartedY = -1.0;
 			}
 
-			if (kb.released("-")) {
+			// Radius
+			if (kb.started("-")) {
 				if (brushRadius > 0.1) {
-					brushRadius -= 0.1;
+					brushRadius = Math.round((brushRadius - 0.1) * 100) / 100;
 					brushRadiusHandle.value = brushRadius;
+					headerHandle.redraws = 2;
 				}
 			}
-			if (kb.released("+")) {
+			else if (kb.started("+")) {
 				if (brushRadius < 2.0) {
-					brushRadius += 0.1;
+					brushRadius = Math.round((brushRadius + 0.1) * 100) / 100;
 					brushRadiusHandle.value = brushRadius;
+					headerHandle.redraws = 2;
 				}
+			}
+
+			// Viewpoint
+			if (kb.started("0")) {
+				ViewportUtil.resetViewport();
+				ViewportUtil.scaleToBounds();
+			}
+			else if (kb.started("1")) {
+				ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0);
+			}
+			else if (kb.started("3")) {
+				ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+			}
+			else if (kb.started("7")) {
+				ViewportUtil.setView(0, 0, 3, 0, 0, 0);
 			}
 		}
 
@@ -764,6 +784,7 @@ class UITrait extends iron.Trait {
 		UINodes.inst.parseMeshMaterial();
 		hwnd.redraws = 2;
 		headerHandle.redraws = 2;
+		toolbarHandle.redraws = 2;
 		ddirty = 2;
 	}
 
@@ -885,7 +906,7 @@ class UITrait extends iron.Trait {
 		// ui.t.FILL_WINDOW_BG = false;
 		var panelx = (iron.App.x() - toolbarw);
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		if (ui.window(Id.handle(), panelx, headerh, toolbarw, kha.System.windowHeight())) {
+		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, kha.System.windowHeight())) {
 			ui._y += 2;
 
 			ui.imageScrollAlign = false;
@@ -1059,19 +1080,24 @@ class UITrait extends iron.Trait {
 			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Rotate", "Orbit", "Fly"], "Controls");
 			cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
 			if (camHandle.changed) {
-				if (cameraType == 0) cam.data.raw.ortho = null;
+				if (cameraType == 0) {
+					cam.data.raw.ortho = null;
+					cam.buildProjection();
+				}
 				else {
 					var f32 = new kha.arrays.Float32Array(4);
 					f32[0] = -2;
 					f32[1] =  2;
 					f32[2] = -2 * (iron.App.h() / iron.App.w());
-					f32[2] =  2 * (iron.App.h() / iron.App.w());
-					cam.data.raw.ortho = f32;
+					f32[3] =  2 * (iron.App.h() / iron.App.w());
+					// cam.data.raw.ortho = f32; // See ViewportUtil.ortho
+					// cam.buildProjection();
+
+					cam.P = ViewportUtil.ortho(f32[0], f32[1], f32[2], f32[3], cam.data.raw.near_plane, cam.data.raw.far_plane);
+					#if arm_taa
+					cam.noJitterP.setFrom(cam.P);
+					#end
 				}
-				
-				// if (originalShadowBias <= 0) originalShadowBias = iron.Scene.active.lights[0].data.raw.shadows_bias;
-				// iron.Scene.active.lights[0].data.raw.shadows_bias = cameraType == 0 ? originalShadowBias : originalShadowBias * 15;
-				cam.buildProjection();
 				
 				ddirty = 2;
 			}
@@ -2004,6 +2030,11 @@ class UITrait extends iron.Trait {
 					ui.text("Next Object - Ctrl+Tab");
 					ui.text("Auto-Fill - G");
 					ui.text("Brush Radius - +/-");
+					ui.text("Brush Ruler - Hold Shift");
+					ui.text("View Default - 0");
+					ui.text("View Front - 1");
+					ui.text("View Right - 3");
+					ui.text("View Top - 7");
 				}
 
 				ui.separator();
