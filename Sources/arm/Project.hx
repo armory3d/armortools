@@ -13,7 +13,7 @@ class Project {
 		arm.App.showFilename = false;
 		arm.App.filesDone = function(path:String) {
 			if (!StringTools.endsWith(path, ".arm")) {
-				UITrait.inst.showMessage(".arm file expected");
+				UITrait.inst.showMessage("Error: .arm file expected");
 				return;
 			}
 			importProject(path);

@@ -192,6 +192,7 @@ class UITrait extends iron.Trait {
 	public var projectExport = false;
 	var headerHandle = new Zui.Handle({layout:Horizontal});
 	var toolbarHandle = new Zui.Handle();
+	var statusHandle = new Zui.Handle({layout:Horizontal});
 	var drawMenu = false;
 	var menuCategory = 0;
 
@@ -336,9 +337,9 @@ class UITrait extends iron.Trait {
 	}
 
 	public function showMessage(s:String) {
-		messageTimer = 3.0;
+		messageTimer = 8.0;
 		message = s;
-		hwnd.redraws = 2;
+		statusHandle.redraws = 2;
 	}
 
 	function done() {
@@ -542,7 +543,10 @@ class UITrait extends iron.Trait {
 
 	function updateUI() {
 
-		messageTimer -= iron.system.Time.delta;
+		if (messageTimer > 0) {
+			messageTimer -= iron.system.Time.delta;
+			if (messageTimer <= 0) statusHandle.redraws = 2;
+		}
 
 		var mouse = iron.system.Input.getMouse();
 		var kb = iron.system.Input.getKeyboard();
@@ -1073,7 +1077,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		if (ui.window(Id.handle({layout:Horizontal}), iron.App.x(), arm.App.realh() - headerh, arm.App.realw() - toolbarw - windowW, headerh)) {
+		if (ui.window(statusHandle, iron.App.x(), arm.App.realh() - headerh, arm.App.realw() - toolbarw - windowW, headerh)) {
 
 			var scene = iron.Scene.active;
 			var cam = scene.cameras[0];
@@ -1115,6 +1119,14 @@ class UITrait extends iron.Trait {
 				ViewportUtil.scaleToBounds();
 			}
 			ui.t.FILL_BUTTON_BG = true;
+
+			if (messageTimer > 0) {
+				var _w = ui._w;
+				ui._w = Std.int(ui.ops.font.width(ui.fontSize, message) + 50 * ui.SCALE);
+				ui.fill(0, 0, ui._w, ui._h, 0xffff0000);
+				ui.text(message);
+				ui._w = _w;
+			}
 		}
 		
 		var wx = C.ui_layout == 0 ? arm.App.realw() - windowW : 0;
@@ -1357,10 +1369,6 @@ class UITrait extends iron.Trait {
 
 
 			if (ui.tab(htab, "Tools")) {
-
-				if (messageTimer > 0) {
-					ui.text(message);
-				}
 
 				if (ui.panel(Id.handle({selected: true}), "Brushes", 1)) {
 					ui.row([1/2,1/2]);
