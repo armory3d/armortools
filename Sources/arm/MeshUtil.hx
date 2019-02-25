@@ -71,22 +71,24 @@ class MeshUtil {
 
 			// position, normals
 
-			var vertices = g.vertexBuffer.lock(); // posnortex
-			var verticesDepth = g.vertexBufferMap.get("pos").lock();
+			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
 			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
-			var verticesVox = g.vertexBufferMap.get("posnor").lock();
+			var verticesVox = g.vertexBufferMap.get("posnor").lockInt16();
 			if (axisUp == 1) { // Y
-				for (i in 0...Std.int(vertices.length / g.structLength)) {
-					var f = vertices[i * g.structLength + 1];
-					vertices[i * g.structLength + 1] = vertices[i * g.structLength + 2];
-					vertices[i * g.structLength + 2] = -f;
-					f = vertices[i * g.structLength + 4];
-					vertices[i * g.structLength + 4] = vertices[i * g.structLength + 5];
-					vertices[i * g.structLength + 5] = -f;
+				for (i in 0...Std.int(vertices.length / 8)) {
+					// Swap Y/Z
+					var f = vertices[i * 8 + 1];
+					vertices[i * 8 + 1] = vertices[i * 8 + 2];
+					vertices[i * 8 + 2] = -f;
 
-					f = verticesDepth[i * 3 + 1];
-					verticesDepth[i * 3 + 1] = verticesDepth[i * 3 + 2];
-					verticesDepth[i * 3 + 2] = -f;
+					f = vertices[i * 8 + 5];
+					vertices[i * 8 + 5] = vertices[i * 8 + 3];
+					vertices[i * 8 + 3] = -f;
+
+					f = verticesDepth[i * 4 + 1];
+					verticesDepth[i * 4 + 1] = verticesDepth[i * 4 + 2];
+					verticesDepth[i * 4 + 2] = -f;
 
 					f = verticesVox[i * 6 + 1];
 					verticesVox[i * 6 + 1] = verticesVox[i * 6 + 2];
@@ -94,17 +96,18 @@ class MeshUtil {
 				}
 			}
 			else { // Z
-				for (i in 0...Std.int(vertices.length / g.structLength)) {
-					var f = vertices[i * g.structLength + 1];
-					vertices[i * g.structLength + 1] = -vertices[i * g.structLength + 2];
-					vertices[i * g.structLength + 2] = f;
-					f = vertices[i * g.structLength + 4];
-					vertices[i * g.structLength + 4] = -vertices[i * g.structLength + 5];
-					vertices[i * g.structLength + 5] = f;
+				for (i in 0...Std.int(vertices.length / 8)) {
+					var f = vertices[i * 8 + 1];
+					vertices[i * 8 + 1] = -vertices[i * 8 + 2];
+					vertices[i * 8 + 2] = f;
 
-					f = verticesDepth[i * 3 + 1];
-					verticesDepth[i * 3 + 1] = -verticesDepth[i * 3 + 2];
-					verticesDepth[i * 3 + 2] = f;
+					f = vertices[i * 8 + 5];
+					vertices[i * 8 + 5] = -vertices[i * 8 + 3];
+					vertices[i * 8 + 3] = f;
+
+					f = verticesDepth[i * 4 + 1];
+					verticesDepth[i * 4 + 1] = -verticesDepth[i * 4 + 2];
+					verticesDepth[i * 4 + 2] = f;
 
 					f = verticesVox[i * 6 + 1];
 					verticesVox[i * 6 + 1] = -verticesVox[i * 6 + 2];
