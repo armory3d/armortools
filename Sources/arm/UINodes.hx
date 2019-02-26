@@ -507,7 +507,13 @@ class UINodes extends iron.Trait {
 			}
 			
 			if (sc != null) sc.delete();
-			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
+			
+			var compileError = false;
+			sc = new ShaderContext(con.data, function(sc:ShaderContext) {
+				if (sc == null) compileError = true;
+			});
+			if (compileError) return;
+
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 
@@ -593,7 +599,13 @@ class UINodes extends iron.Trait {
 			// if (sc == null) {
 				// from_source is synchronous..
 				if (sc != null) sc.delete();
-				sc = new ShaderContext(cdata, function(sc:ShaderContext){});
+				
+				var compileError = false;
+				sc = new ShaderContext(cdata, function(sc:ShaderContext) {
+					if (sc == null) compileError = true;
+				});
+				if (compileError) return;
+				
 				m.shader.raw.contexts.push(sc.raw);
 				m.shader.contexts.push(sc);
 				m.raw.contexts.push(_matcon);
