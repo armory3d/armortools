@@ -134,7 +134,7 @@ class MaterialBuilder {
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) { discard; }');
 			#end
 
-			if (UITrait.inst.brushPaint == 2) { // Sticker
+			if (UITrait.inst.brushPaint == 2) { // Decal
 				frag.write('float dist = 0.0;');
 			}
 			else {
@@ -210,7 +210,7 @@ class MaterialBuilder {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
-			// Sticker
+			// Decal
 			if (UITrait.inst.brushPaint == 2) {
 				
 				frag.write_attrib('vec2 binp = inp.xy * 2.0 - 1.0;');

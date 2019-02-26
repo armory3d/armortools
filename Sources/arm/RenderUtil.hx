@@ -4,11 +4,11 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 
 class RenderUtil {
-	public static function makeStickerPreview() {
-		if (UITrait.inst.stickerImage == null) {
-			UITrait.inst.stickerImage = kha.Image.createRenderTarget(512, 512);
+	public static function makeDecalPreview() {
+		if (UITrait.inst.decalImage == null) {
+			UITrait.inst.decalImage = kha.Image.createRenderTarget(512, 512);
 		}
-		UITrait.inst.stickerPreview = true;
+		UITrait.inst.decalPreview = true;
 
 		var painto = UITrait.inst.paintObject;
 		for (p in UITrait.inst.paintObjects) p.visible = false;
@@ -35,11 +35,11 @@ class RenderUtil {
 		iron.Scene.active.camera.buildMatrix();
 
 		UINodes.inst.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsSticker;
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsDecal;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
 
-		UITrait.inst.stickerPreview = false;
+		UITrait.inst.decalPreview = false;
 		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
 		@:privateAccess iron.RenderPath.active.lastH = iron.App.h();
 

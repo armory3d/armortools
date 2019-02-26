@@ -106,8 +106,8 @@ class App extends iron.Trait {
 		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
 
-		// Drawing sticker preview
-		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
+		// Drawing decal preview
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return 512;
 		
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
@@ -132,8 +132,8 @@ class App extends iron.Trait {
 		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return 100;
 
-		// Drawing sticker preview
-		if (UITrait.inst != null && UITrait.inst.stickerPreview) return 512;
+		// Drawing decal preview
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return 512;
 
 		var res = 0;
 		res = kha.System.windowHeight();

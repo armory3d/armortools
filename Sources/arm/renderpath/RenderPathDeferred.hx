@@ -946,7 +946,7 @@ class RenderPathDeferred {
 	}
 
 	@:access(iron.RenderPath)
-	public static function commandsSticker() {
+	public static function commandsDecal() {
 		
 		#if rp_gbuffer2
 		{
@@ -992,7 +992,7 @@ class RenderPathDeferred {
 		
 		var framebuffer = "texpreview";
 
-		iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.stickerImage;
+		iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.decalImage;
 
 		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
 		{

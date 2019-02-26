@@ -98,8 +98,8 @@ class UITrait extends iron.Trait {
 	public var selectedLayer:LayerSlot;
 	var selectTime = 0.0;
 	public var displaceStrength = 1.0;
-	public var stickerImage:kha.Image = null;
-	public var stickerPreview = false;
+	public var decalImage:kha.Image = null;
+	public var decalPreview = false;
 	public var viewportMode = 0;
 	public var instantMat = true;
 	var hscaleWasChanged = false;
@@ -863,11 +863,11 @@ class UITrait extends iron.Trait {
 
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			if (brushPaint == 2) { // Sticker
+			if (brushPaint == 2) { // Decal
 				if (mouse.x > 0 && mx < iron.App.w()) {
-					// var psize = Std.int(stickerImage.width * (brushRadius * brushNodesRadius));
+					// var psize = Std.int(decalImage.width * (brushRadius * brushNodesRadius));
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
-					g.drawScaledImage(stickerImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
+					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
 				}
 			}
 			else {
@@ -1035,12 +1035,12 @@ class UITrait extends iron.Trait {
 				ui.combo(Id.handle(), ["Add"], "Blending");
 
 				var paintHandle = Id.handle();
-				brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Sticker"], "TexCoord");
+				brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Decal"], "TexCoord");
 				if (paintHandle.changed) {
 					UINodes.inst.parsePaintMaterial();
-					if (brushPaint == 2) { // Sticker
+					if (brushPaint == 2) { // Decal
 						ui.g.end();
-						RenderUtil.makeStickerPreview();
+						RenderUtil.makeDecalPreview();
 						ui.g.begin(false);
 					}
 				}
