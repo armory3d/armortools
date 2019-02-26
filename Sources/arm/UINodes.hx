@@ -425,7 +425,7 @@ class UINodes extends iron.Trait {
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 			var ELEMENT_H = ui.t.ELEMENT_H;
-			ui.t.ELEMENT_H = Std.int(22 * ui.SCALE);
+			ui.t.ELEMENT_H = 22;
 
 			if (canvasType == 0) NodeCreator.draw(menuCategory);
 			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
