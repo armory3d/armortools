@@ -94,9 +94,13 @@ class Project {
 			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
 			UITrait.inst.mergedObject = null;
 		}
+
+		UITrait.inst.paintObject = UITrait.inst.mainObject();
+
 		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
 		for (i in 1...UITrait.inst.paintObjects.length) {
 			var p = UITrait.inst.paintObjects[i];
+			if (p == UITrait.inst.paintObject) continue;
 			iron.data.Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
