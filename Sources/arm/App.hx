@@ -124,6 +124,7 @@ class App extends iron.Trait {
 		else {
 			res = kha.System.windowWidth();
 		}
+		
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
@@ -136,7 +137,8 @@ class App extends iron.Trait {
 
 		var res = 0;
 		res = kha.System.windowHeight();
-		if (UITrait.inst != null && res > 0) res -= UITrait.inst.headerh * 3;
+		if (UITrait.inst != null && UITrait.inst.show && res > 0) res -= UITrait.inst.headerh * 3;
+		
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
@@ -146,12 +148,17 @@ class App extends iron.Trait {
 
 		var lay = UITrait.inst.C.ui_layout;
 		
-		appx = (lay == 0 || !UITrait.inst.show) ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+		appx = lay == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {
 			appx += iron.App.w() + UITrait.inst.toolbarw;
 		}
 
 		appy = UITrait.inst.headerh * 2;
+
+		if (!UITrait.inst.show) {
+			appx = 0;
+			appy = 0;
+		}
 
 		if (UINodes.inst.grid != null) {
 			UINodes.inst.grid.unload();
