@@ -67,6 +67,11 @@ class LayerSlot {
 	}
 
 	public function unload() {
+		// Set null depth so paintdb stays alive
+		if (UITrait.inst.layers.length > 0 && UITrait.inst.layers[0] != this) {
+			texpaint.setDepthStencilFrom(texpaint_nor);
+		}
+
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();

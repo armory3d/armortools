@@ -253,7 +253,7 @@ class RenderPathDeferred {
 				//
 				#if (!kha_opengl)
 				path.setDepthFrom("bufa", "texpaint" + tid); // Unbind depth so we can read it
-				path.setDepthFrom("texpaint" + tid, "bufb");
+				path.setDepthFrom("texpaint" + tid, "texpaint_nor" + tid);
 				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("bufa"));
 				#end
 				//
@@ -282,8 +282,9 @@ class RenderPathDeferred {
 				//
 				#if (!kha_opengl)
 				path.setDepthFrom("texpaint" + tid, "bufa"); // Re-bind depth
-				path.setDepthFrom("bufa", "bufb");
-				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("texpaint" + tid));
+				path.setDepthFrom("bufa", "texpaint_nor" + tid);
+				var tid0 = UITrait.inst.layers[0].id;
+				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("texpaint" + tid0));
 				#end
 				//
 			}
@@ -346,15 +347,19 @@ class RenderPathDeferred {
 
 		#if rp_decals
 		{
+			#if (!kha_opengl)
 			path.setDepthFrom("gbuffer0", "gbuffer1"); // Unbind depth so we can read it
 			path.depthToRenderTarget.set("main", path.renderTargets.get("tex"));
+			#end
+
 			path.setTarget("gbuffer0", ["gbuffer1"]);
-			
 			path.bindTarget("_main", "gbufferD");
 			path.drawDecals("decal");
 			
+			#if (!kha_opengl)
 			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
 			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
+			#end
 		}
 		#end
 
@@ -476,7 +481,9 @@ class RenderPathDeferred {
 		// ---
 		// Deferred light
 		// ---
+		#if (!kha_opengl)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
+		#end
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
@@ -551,7 +558,9 @@ class RenderPathDeferred {
 		}
 		#end
 
+		#if (!kha_opengl)
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
+		#end
 
 		// #if rp_volumetriclight
 		// {
@@ -864,7 +873,12 @@ class RenderPathDeferred {
 
 		RenderPathCreator.drawMeshes();
 
-		// Light
+		// ---
+		// Deferred light
+		// ---
+		#if (!kha_opengl)
+		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth so we can read it
+		#end
 		path.setTarget("mtex");
 		path.bindTarget("_mmain", "gbufferD");
 		path.bindTarget("mgbuffer0", "gbuffer0");
@@ -876,8 +890,13 @@ class RenderPathDeferred {
 		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
+		#if (!kha_opengl)
+		path.setDepthFrom("mtex", "mgbuffer0"); // Re-bind depth
+		#end
+
 		#if (rp_background == "World")
 		{
+			path.setTarget("mtex"); // Re-binds depth
 			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end
@@ -972,7 +991,12 @@ class RenderPathDeferred {
 
 		RenderPathCreator.drawMeshes();
 
-		// Light
+		// ---
+		// Deferred light
+		// ---
+		#if (!kha_opengl)
+		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
+		#end
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
@@ -984,8 +1008,13 @@ class RenderPathDeferred {
 		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
+		#if (!kha_opengl)
+		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
+		#end
+
 		#if (rp_background == "World")
 		{
+			path.setTarget("tex"); // Re-binds depth
 			path.drawSkydome("shader_datas/world_pass/world_pass");
 		}
 		#end

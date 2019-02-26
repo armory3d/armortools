@@ -564,9 +564,11 @@ class MaterialBuilder {
 			if (UITrait.inst.layers.length > 1) {
 				frag.write('float factor0;');
 				frag.write('float factorinv0;');
+				frag.write('float nfactor0;');
+				frag.write('float nfactorinv0;');
 				frag.write('vec4 col_tex0;');
-				// frag.write('vec4 col_nor0;');
-				// frag.write('vec3 n0;');
+				frag.write('vec4 col_nor0;');
+				frag.write('vec3 n0;');
 				frag.write('vec4 pack0;');
 				for (i in 1...UITrait.inst.layers.length) {
 					if (!UITrait.inst.layers[i].visible) continue;
@@ -577,16 +579,19 @@ class MaterialBuilder {
 					// frag.add_uniform('sampler2D texpaint_opt' + id);
 
 					frag.write('col_tex0 = texture(texpaint' + id + ', texCoord);');
-					// frag.write('col_nor0 = texture(texpaint_nor' + id + ', texCoord);');
+					frag.write('col_nor0 = texture(texpaint_nor' + id + ', texCoord);');
 
 					frag.write('factor0 = col_tex0.a;');
 					frag.write('factorinv0 = 1.0 - factor0;');
-
 					frag.write('basecol = basecol * factorinv0 + pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2)) * factor0;');
-					
-					// frag.write('n0 = texture(texpaint_nor' + id + ', texCoord).rgb * 2.0 - 1.0;');
-					// frag.write('n0 = normalize(TBN * normalize(n0));');
-					// frag.write('n *= n0;');
+
+					frag.write('nfactor0 = col_nor0.a;');
+					frag.write('nfactorinv0 = 1.0 - nfactor0;');					
+					frag.write('n0 = texture(texpaint_nor' + id + ', texCoord).rgb * 2.0 - 1.0;');
+					frag.write('n0.y = -n0.y;');
+					frag.write('n0 = normalize(mul(n0, TBN));');
+					frag.write('n = normalize(n * nfactorinv0 + n0 * nfactor0);');
+
 					frag.write('pack0 = texture(texpaint_pack' + id + ', texCoord);');
 					frag.write('occlusion = occlusion * factorinv0 + pack0.r * factor0;');
 					frag.write('roughness = roughness * factorinv0 + pack0.g * factor0;');

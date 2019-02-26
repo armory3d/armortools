@@ -133,23 +133,22 @@ class Layers {
 	}
 
 	static function makePipe() {
-		var pipe = UITrait.inst.pipe;
-		pipe = new kha.graphics4.PipelineState();
-		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.painterVert);
-		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.painterFrag);
+		UITrait.inst.pipe = new kha.graphics4.PipelineState();
+		UITrait.inst.pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.painterVert);
+		UITrait.inst.pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.painterFrag);
 		var vs = new kha.graphics4.VertexStructure();
 		vs.add("pos", kha.graphics4.VertexData.Float3);
 		vs.add("tex", kha.graphics4.VertexData.Float2);
 		vs.add("col", kha.graphics4.VertexData.Float4);
-		pipe.inputLayout = [vs];
-		pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
-		pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
-		pipe.compile();
+		UITrait.inst.pipe.inputLayout = [vs];
+		UITrait.inst.pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
+		UITrait.inst.pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
+		UITrait.inst.pipe.colorWriteMaskAlpha = false;
+		UITrait.inst.pipe.compile();
 	}
 
 	public static function applySelectedLayer(g:kha.graphics4.Graphics) {
-		var pipe = UITrait.inst.pipe;
-		if (pipe == null) makePipe();
+		if (UITrait.inst.pipe == null) makePipe();
 
 		var l0 = UITrait.inst.layers[0];
 		var l1 = UITrait.inst.selectedLayer;
@@ -157,17 +156,17 @@ class Layers {
 		g.end();
 
 		l0.texpaint.g2.begin(false);
-		l0.texpaint.g2.pipeline = pipe;
+		l0.texpaint.g2.pipeline = UITrait.inst.pipe;
 		l0.texpaint.g2.drawImage(l1.texpaint, 0, 0);
 		l0.texpaint.g2.end();
 
 		l0.texpaint_nor.g2.begin(false);
-		l0.texpaint_nor.g2.pipeline = pipe;
+		l0.texpaint_nor.g2.pipeline = UITrait.inst.pipe;
 		l0.texpaint_nor.g2.drawImage(l1.texpaint_nor, 0, 0);
 		l0.texpaint_nor.g2.end();
 
 		l0.texpaint_pack.g2.begin(false);
-		l0.texpaint_pack.g2.pipeline = pipe;
+		l0.texpaint_pack.g2.pipeline = UITrait.inst.pipe;
 		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
 		l0.texpaint_pack.g2.end();
 
