@@ -63,14 +63,18 @@ class MaterialBuilder {
 		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
 
 		#if kha_direct3d11
-		frag.write('vec3 sp = vec3((ndc.xy / ndc.w) * 0.5 + 0.5, (ndc.z / ndc.w));');
+		frag.write_attrib('vec3 sp = vec3((ndc.xy / ndc.w) * 0.5 + 0.5, (ndc.z / ndc.w));');
 		#else
-		frag.write('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
+		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
 		#end
-		frag.write('sp.y = 1.0 - sp.y;');
+		frag.write_attrib('sp.y = 1.0 - sp.y;');
 
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
-		frag.write('sp.z -= paintDepthBias;'); // small bias or !paintVisible
+		#if kha_direct3d11
+		frag.write_attrib('sp.z -= paintDepthBias * 4;'); // small bias or !paintVisible
+		#else
+		frag.write_attrib('sp.z -= paintDepthBias;');
+		#end
 
 		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;
 
@@ -92,9 +96,9 @@ class MaterialBuilder {
 			frag.add_out('vec4 fragColor');
 
 			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) discard;');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) discard;');
 			#else
-			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, bsp.y)).r) discard;');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) discard;');
 			#end
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
 			frag.write('binp.x *= aspectRatio;');
@@ -106,7 +110,7 @@ class MaterialBuilder {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = fract(tex);'); // TODO: fract(tex) - somehow clamp is set after first paint
-			frag.write('vec3 idcol = texture(texcolorid, texCoord).rgb;');
+			frag.write('vec3 idcol = textureLod(texcolorid, texCoord, 0).rgb;');
 			frag.write('fragColor = vec4(idcol, 1.0);');
 
 			con_paint.data.shader_from_source = true;
@@ -125,9 +129,9 @@ class MaterialBuilder {
 		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, 1.0 - bsp.y)).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
 			#else
-			frag.write('if (sp.z > texture(paintdb, vec2(sp.x, bsp.y)).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) { discard; }');
 			#end
 
 			if (UITrait.inst.brushPaint == 2) { // Sticker
@@ -216,8 +220,8 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 
 				// frag.write_attrib('uvsp *= brushScale;');
-				frag.write_attrib('uvsp *= vec2(7.2);');
-				frag.write_attrib('uvsp += vec2(0.5);');
+				frag.write_attrib('uvsp *= vec2(7.2, 7.2);');
+				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
 				frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; }');
 			}
@@ -275,12 +279,16 @@ class MaterialBuilder {
 			// Apply normal channel
 			frag.vVec = true;
 			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+			#if kha_direct3d11
+			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+			#end
 			frag.write('n = nortan * 2.0 - 1.0;');
 			frag.write('n.y = -n.y;');
 			frag.write('n = normalize(mul(n, TBN));');
 
-			frag.write('const vec3 voxelgiHalfExtents = vec3(2.0);');
+			frag.write('const vec3 voxelgiHalfExtents = vec3(2.0, 2.0, 2.0);');
 			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 			frag.add_uniform('sampler3D voxels');
 			frag.add_function(armory.system.CyclesFunctions.str_traceAO);
@@ -345,7 +353,11 @@ class MaterialBuilder {
 
 		// Apply normal channel
 		frag.vVec = true;
+		#if kha_direct3d11
+		frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+		#else
 		frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+		#end
 		frag.write('n = nortan * 2.0 - 1.0;');
 		frag.write('n.y = -n.y;');
 		frag.write('n = normalize(mul(n, TBN));');
@@ -383,29 +395,29 @@ class MaterialBuilder {
 
 		frag.ins = vert.outs;
 
-		if (shadowmap) {
-			if (UITrait.inst.paintHeight) {
-				con_depth.add_elem('nor', 'short2norm');
-				vert.wposition = true;
-				vert.n = true;
-				vert.add_uniform('sampler2D texpaint_opt');
-				vert.write('vec4 opt = texture(texpaint_opt, tex);');
-				vert.write('float height = opt.b;');
-				var displaceStrength = UITrait.inst.displaceStrength * 0.1;
-				vert.write('wposition += wnormal * height * $displaceStrength;');
+		// if (shadowmap) {
+		// 	if (UITrait.inst.paintHeight) {
+		// 		con_depth.add_elem('nor', 'short2norm');
+		// 		vert.wposition = true;
+		// 		vert.n = true;
+		// 		vert.add_uniform('sampler2D texpaint_opt');
+		// 		vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0);');
+		// 		vert.write('float height = opt.b;');
+		// 		var displaceStrength = UITrait.inst.displaceStrength * 0.1;
+		// 		vert.write('wposition += wnormal * height * $displaceStrength;');
 				
-				vert.add_uniform('mat4 LVP', '_lightViewProjectionMatrix');
-				vert.write('gl_Position = LVP * vec4(wposition, 1.0);');
-			}
-			else {
-				vert.add_uniform('mat4 LWVP', '_lightWorldViewProjectionMatrix');
-				vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), LWVP);');
-			}
-		}
-		else {
+		// 		vert.add_uniform('mat4 LVP', '_lightViewProjectionMatrix');
+		// 		vert.write('gl_Position = LVP * vec4(wposition, 1.0);');
+		// 	}
+		// 	else {
+		// 		vert.add_uniform('mat4 LWVP', '_lightWorldViewProjectionMatrix');
+		// 		vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), LWVP);');
+		// 	}
+		// }
+		// else {
 			vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 			vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
-		}
+		// }
 
 		var parse_opacity = shadowmap; // arm_discard
 		if (parse_opacity) {
@@ -459,7 +471,7 @@ class MaterialBuilder {
 		// TODO: can cause TAA issues
 		if (UITrait.inst.paintHeight) {
 			vert.add_uniform('sampler2D texpaint_opt');
-			vert.write('vec4 opt = texture(texpaint_opt, tex);');
+			vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0);');
 			vert.write('float height = opt.b;');
 			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
 			vert.n = true;
@@ -509,7 +521,11 @@ class MaterialBuilder {
 
 				frag.vVec = true;
 				frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+				#if kha_direct3d11
+				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+				#else
 				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+				#end
 				frag.write('vec3 ntex = texture(texpaint_nor, texCoord).rgb;');
 				frag.write('n = ntex * 2.0 - 1.0;');
 				frag.write('n.y = -n.y;');
@@ -538,7 +554,7 @@ class MaterialBuilder {
 				frag.write('metallic = pack.b;');
 			}
 			else {
-				frag.write('basecol = vec3(0.0);');
+				frag.write('basecol = vec3(0.0, 0.0, 0.0);');
 				frag.write('occlusion = 1.0;');
 				frag.write('roughness = 1.0;');
 				frag.write('metallic = 0.0;');
@@ -602,15 +618,15 @@ class MaterialBuilder {
 			}
 			else if (UITrait.inst.viewportMode == 3) { // Occ
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
-				frag.write('fragColor[1] = vec4(vec3(occlusion), packFloat2(1.0, 1.0));'); // occ/spec
+				frag.write('fragColor[1] = vec4(vec3(occlusion, occlusion, occlusion), packFloat2(1.0, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 4) { // Rough
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
-				frag.write('fragColor[1] = vec4(vec3(roughness), packFloat2(1.0, 1.0));'); // occ/spec
+				frag.write('fragColor[1] = vec4(vec3(roughness, roughness, roughness), packFloat2(1.0, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 5) { // Met
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
-				frag.write('fragColor[1] = vec4(vec3(metallic), packFloat2(1.0, 1.0));'); // occ/spec
+				frag.write('fragColor[1] = vec4(vec3(metallic, metallic, metallic), packFloat2(1.0, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 6) { // Texcoord
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
