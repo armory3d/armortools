@@ -895,8 +895,8 @@ class UITrait extends iron.Trait {
 				var y1 = iron.App.y() + iron.App.h() / 3;
 				var y2 = iron.App.y() + iron.App.h() / 3 * 2;
 				g.color = 0x66ffffff;
-				g.fillRect(x1 - 1, 0, 2, iron.App.h());
-				g.fillRect(x2 - 1, 0, 2, iron.App.h());
+				g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
+				g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
 				g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
 				g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
 				g.color = 0xffffffff;
@@ -986,10 +986,6 @@ class UITrait extends iron.Trait {
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, arm.App.realw() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(Id.handle(), "Paint");
-			ui.tab(Id.handle(), "Sculpt");
-			ui.tab(Id.handle(), "Material");
-			ui.tab(Id.handle(), "Scene");
-			ui.tab(Id.handle(), "Render");
 		}
 
 		var panelx = iron.App.x();
@@ -1039,7 +1035,7 @@ class UITrait extends iron.Trait {
 				ui.combo(Id.handle(), ["Add"], "Blending");
 
 				var paintHandle = Id.handle();
-				brushPaint = ui.combo(paintHandle, ["UV", "Project", "Sticker"], "Paint");
+				brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Sticker"], "TexCoord");
 				if (paintHandle.changed) {
 					UINodes.inst.parsePaintMaterial();
 					if (brushPaint == 2) { // Sticker
@@ -1069,7 +1065,7 @@ class UITrait extends iron.Trait {
 				else { // Draw, Erase
 					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 					var mirrorHandle = Id.handle({selected: mirrorX});
-					mirrorX = ui.check(mirrorHandle, "Mirror Screen");
+					mirrorX = ui.check(mirrorHandle, "Mirror");
 					if (mirrorHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
@@ -1669,21 +1665,33 @@ class UITrait extends iron.Trait {
 					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
 						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
 					}
-					var p = iron.Scene.active.world.probe;
-					ui.row([1/2, 1/2]);
-					var envType = ui.combo(Id.handle({position: 0}), ["Default"], "Envmap");
-					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
-					if (envHandle.changed) ddirty = 2;
-					ui.row([1/2, 1/2]);
 					var modeHandle = Id.handle({position: 0});
 					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord"], "Mode");
 					if (modeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}
+
+					ui.row([1/2, 1/2]);
+					var p = iron.Scene.active.world.probe;
+					var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
+					var envHandle = Id.handle({value: p.raw.strength});
+					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
+					if (envHandle.changed) ddirty = 2;
+					
+					ui.row([1/2, 1/2]);
 					if (iron.Scene.active.lights.length > 0) {
 						var light = iron.Scene.active.lights[0];
+
+						var sxhandle = Id.handle();
+						sxhandle.value = light.data.raw.size;
+						light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
+						if (sxhandle.changed) ddirty = 2;
+						// var syhandle = Id.handle();
+						// syhandle.value = light.data.raw.size_y;
+						// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
+						// if (syhandle.changed) ddirty = 2;
+						
 						var lhandle = Id.handle();
 						lhandle.value = light.data.raw.strength / 100;
 						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 100;
@@ -1707,12 +1715,18 @@ class UITrait extends iron.Trait {
 					}
 
 					ui.row([1/2, 1/2]);
-					showEnvmap = ui.check(showEnvmapHandle, "Show Envmap");
+					var wireframeHandle = Id.handle({selected: drawWireframe});
+					drawWireframe = ui.check(wireframeHandle, "Wireframe");
+					if (wireframeHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
+					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+
+					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 					if (showEnvmapHandle.changed) {
 						ddirty = 2;
 					}
-					showGrid = ui.check(Id.handle({selected: showGrid}), "Show Grid");
-
 					if (!showEnvmap) {
 						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
 							var hwheel = Id.handle({color: 0xff030303});
@@ -1728,13 +1742,6 @@ class UITrait extends iron.Trait {
 						}
 					}
 					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
-
-					var wireframeHandle = Id.handle({selected: drawWireframe});
-					drawWireframe = ui.check(wireframeHandle, "Wireframe");
-					if (wireframeHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
 				}
 
 				// Draw plugins
@@ -2000,7 +2007,8 @@ class UITrait extends iron.Trait {
 				hsupersample = Id.handle({position: Config.getSuperSampleQuality(C.rp_supersample)});
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
-					// ui.row([1/2, 1/2]);
+					ui.row([1/2, 1/2]);
+					ui.combo(Id.handle(), ["Off"], "Shadows", true);
 					// ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
 					// if (hshadowmap.changed) Config.applyConfig();
 					ui.combo(hsupersample, ["0.5x", "1.0x", "1.5x", "2.0x"], "Super Sample", true);
@@ -2062,7 +2070,8 @@ class UITrait extends iron.Trait {
 	function renderMenu(g:kha.graphics2.Graphics) {
 		
 		// Draw menu
-		if (drawMenu) {
+		// if (drawMenu) {
+		if (false) {
 
 			var panelx = iron.App.x() - toolbarw;
 			if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
@@ -2091,9 +2100,9 @@ class UITrait extends iron.Trait {
 				ui.button("Save", Left);
 				ui.button("Save As...", Left);
 				ui.button("Import Asset...", Left);
-				ui.button("Export Textures...", Left);
-				ui.button("Export Mesh...", Left);
-				ui.button("Exit", Left);
+				// ui.button("Export Textures...", Left);
+				// ui.button("Export Mesh...", Left);
+				if (ui.button("Exit", Left)) { kha.System.stop(); }
 			}
 			else if (menuCategory == 1) {
 				ui.button("Undo", Left);
