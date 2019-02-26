@@ -637,9 +637,12 @@ class Importer {
 			#end
 			{ // Replace
 
+				UITrait.inst.paintObject = UITrait.inst.mainObject();
+
 				UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
-				for (i in 1...UITrait.inst.paintObjects.length) {
+				for (i in 0...UITrait.inst.paintObjects.length) {
 					var p = UITrait.inst.paintObjects[i];
+					if (p == UITrait.inst.paintObject) continue;
 					iron.data.Data.deleteMesh(p.data.handle);
 					p.remove();
 				}
@@ -674,9 +677,6 @@ class Importer {
 	}
 
 	static function addMesh(mesh:Dynamic) {
-		// #if arm_editor
-		// #else
-		// #end
 
 		if (mesh.texa == null) {
 			UITrait.inst.showMessage("Error: Mesh has no UVs, generating defaults");
