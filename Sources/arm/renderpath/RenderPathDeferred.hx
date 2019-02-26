@@ -251,9 +251,11 @@ class RenderPathDeferred {
 				}
 
 				//
+				#if (!kha_opengl)
 				path.setDepthFrom("bufa", "texpaint" + tid); // Unbind depth so we can read it
 				path.setDepthFrom("texpaint" + tid, "bufb");
 				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("bufa"));
+				#end
 				//
 
 				if (arm.UITrait.inst.paintHeight) {
@@ -278,8 +280,11 @@ class RenderPathDeferred {
 				path.drawMeshes("paint");
 
 				//
+				#if (!kha_opengl)
 				path.setDepthFrom("texpaint" + tid, "bufa"); // Re-bind depth
+				path.setDepthFrom("bufa", "bufb");
 				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("texpaint" + tid));
+				#end
 				//
 			}
 		}

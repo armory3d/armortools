@@ -19,7 +19,8 @@ class Uniforms {
 			return r;
 		}
 		else if (link == '_brushOpacity') {
-			return UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
+			return UITrait.inst.brushOpacity * UITrait.inst.brushOpacity *
+				   UITrait.inst.brushNodesOpacity * UITrait.inst.brushNodesOpacity;
 		}
 		else if (link == '_brushScale') {
 			return (UITrait.inst.brushScale * UITrait.inst.brushNodesScale) * 2.0;
