@@ -181,7 +181,7 @@ class RenderPathDeferred {
 
 		var tid = arm.UITrait.inst.selectedLayer.id;
 
-		if (arm.UITrait.inst.pushUndo) {
+		if (arm.UITrait.inst.pushUndo && arm.UITrait.inst.C.undo_steps > 0) {
 			var i = arm.UITrait.inst.undoI;
 			if (arm.UITrait.inst.paintHeight) {
 				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i, "texpaint_opt_undo" + i]);

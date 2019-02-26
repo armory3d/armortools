@@ -557,7 +557,8 @@ class UITrait extends iron.Trait {
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (down && !kb.down("control")) {
 
-			if (mouse.x <= iron.App.w()) {
+			if (mouse.x < iron.App.w() && mouse.x > iron.App.x() &&
+				mouse.y < iron.App.h() && mouse.y > iron.App.y()) {
 				if (brushTime == 0 && C.undo_steps > 0) { // Paint started
 					pushUndo = true;
 					if (projectPath != "") {
@@ -1829,7 +1830,7 @@ class UITrait extends iron.Trait {
 
 				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Project Quality", 1)) {
-					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K", "20K"], "Res", true);
+					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K"], "Res", true);
 					if (resHandle.changed) {
 						iron.App.notifyOnRender(Layers.resizeLayers);
 						UIView2D.inst.uvmap = null;
