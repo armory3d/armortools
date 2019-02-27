@@ -16,7 +16,13 @@ class Project {
 				UITrait.inst.showMessage("Error: .arm file expected");
 				return;
 			}
+
+			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+
 			importProject(path);
+
+			if (current != null) current.begin(false);
 		};
 	}
 
@@ -108,8 +114,8 @@ class Project {
 		iron.data.Data.deleteMesh(UITrait.inst.paintObject.data.handle);
 		iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
 			
-			var hasCurrent = @:privateAccess kha.graphics4.Graphics2.current != null;
-			if (hasCurrent) UITrait.inst.ui.g.end();
+			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
 
 			UITrait.inst.autoFillHandle.selected = false;
 			UITrait.inst.paintObject.setData(md);
@@ -141,7 +147,7 @@ class Project {
 			UITrait.inst.assetId = 0;
 			ViewportUtil.resetViewport();
 
-			if (hasCurrent) UITrait.inst.ui.g.begin(false);
+			if (current != null) current.begin(false);
 		});
 	}
 

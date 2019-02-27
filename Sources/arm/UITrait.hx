@@ -1793,7 +1793,7 @@ class UITrait extends iron.Trait {
 						// Fill in last odd spot
 						if (assets.length % 2 == 1) {
 							var empty = bundled.get("empty.jpg");
-							ui.image(empty);
+							ui.image(empty, 0x00000000);
 						}
 					}
 					else {
