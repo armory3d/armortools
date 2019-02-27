@@ -191,9 +191,9 @@ class UITrait extends iron.Trait {
 	var textureExport = false;
 	var textureExportPath = "";
 	public var projectExport = false;
-	var headerHandle = new Zui.Handle({layout:Horizontal});
-	var toolbarHandle = new Zui.Handle();
-	var statusHandle = new Zui.Handle({layout:Horizontal});
+	public var headerHandle = new Zui.Handle({layout:Horizontal});
+	public var toolbarHandle = new Zui.Handle();
+	public var statusHandle = new Zui.Handle({layout:Horizontal});
 	var drawMenu = false;
 	var menuCategory = 0;
 
@@ -1092,13 +1092,8 @@ class UITrait extends iron.Trait {
 					f32[1] =  2;
 					f32[2] = -2 * (iron.App.h() / iron.App.w());
 					f32[3] =  2 * (iron.App.h() / iron.App.w());
-					// cam.data.raw.ortho = f32; // See ViewportUtil.ortho
-					// cam.buildProjection();
-
-					cam.P = ViewportUtil.ortho(f32[0], f32[1], f32[2], f32[3], cam.data.raw.near_plane, cam.data.raw.far_plane);
-					#if arm_taa
-					cam.noJitterP.setFrom(cam.P);
-					#end
+					cam.data.raw.ortho = f32;
+					cam.buildProjection();
 				}
 				
 				ddirty = 2;
@@ -1694,8 +1689,9 @@ class UITrait extends iron.Trait {
 						// if (syhandle.changed) ddirty = 2;
 						
 						var lhandle = Id.handle();
-						lhandle.value = light.data.raw.strength / 100;
-						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 100;
+						lhandle.value = light.data.raw.strength / 1333;
+						lhandle.value = Std.int(lhandle.value * 100) / 100;
+						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
 						if (lhandle.changed) ddirty = 2;
 					}
 

@@ -49,30 +49,4 @@ class ViewportUtil {
 		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
 	}
-
-	public static inline function ortho(left:kha.FastFloat, right:kha.FastFloat, bottom:kha.FastFloat, top:kha.FastFloat, near:kha.FastFloat, far:kha.FastFloat):Mat4 {
-		// For runtime shader, D3D NDC is not matched to OGL yet
-		// Build proper ortho matrix
-		var rl = right - left;
-		var tb = top - bottom;
-		var tx = -(right + left) / (rl);
-		var ty = -(top + bottom) / (tb);
-
-		#if (kha_opengl || kha_webgl)
-		var fn = far - near;
-		var tz = -(far + near) / (fn);
-		var w = -2 / fn;
-		#else
-		var nf = near - far;
-		var tz = -(near) / (nf);
-		var w = 1 / nf;
-		#end
-
-		return new Mat4(
-			2 / rl,	0,		0, tx,
-			0,		2 / tb,	0, ty,
-			0,		0,		w, tz,
-			0,		0,		0, 1
-		);
-	}
 }

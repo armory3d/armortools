@@ -227,6 +227,7 @@ class RenderPathDeferred {
 					path.bindTarget("texpaint_colorid" + j, "tex");
 					path.drawShader("shader_datas/max_luminance_pass/max_luminance_pass");
 				}
+				arm.UITrait.inst.headerHandle.redraws = 2;
 			}
 			else {
 				if (arm.UITrait.inst.brushType == 3) { // Bake AO

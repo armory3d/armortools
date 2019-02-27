@@ -61,20 +61,11 @@ class MaterialBuilder {
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.add_out('vec4 ndc');
 		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
-
-		#if kha_direct3d11
-		frag.write_attrib('vec3 sp = vec3((ndc.xy / ndc.w) * 0.5 + 0.5, (ndc.z / ndc.w));');
-		#else
 		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
-		#end
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
 
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
-		#if kha_direct3d11
-		frag.write_attrib('sp.z -= paintDepthBias * 4;'); // small bias or !paintVisible
-		#else
-		frag.write_attrib('sp.z -= paintDepthBias;');
-		#end
+		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or !paintVisible
 
 		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;
 
@@ -288,7 +279,7 @@ class MaterialBuilder {
 			frag.write('n.y = -n.y;');
 			frag.write('n = normalize(mul(n, TBN));');
 
-			frag.write('const vec3 voxelgiHalfExtents = vec3(2.0, 2.0, 2.0);');
+			frag.write('const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);');
 			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 			frag.add_uniform('sampler3D voxels');
 			frag.add_function(armory.system.CyclesFunctions.str_traceAO);
@@ -296,7 +287,7 @@ class MaterialBuilder {
 			var strength = UITrait.inst.bakeStrength;
 			var radius = UITrait.inst.bakeRadius;
 			var offset = UITrait.inst.bakeOffset;
-			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, voxels, $radius, $offset) * $strength;');
+			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
 		}
 
 		Cycles.finalize(con_paint);
@@ -498,7 +489,7 @@ class MaterialBuilder {
 
 		if (arm.UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
-			frag.write('fragColor[0] = vec4(n.xy, packFloat(1.0, 1.0), 1.0);');
+			frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0);'); // met/rough
 			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2, 2.2, 2.2));');
 			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
