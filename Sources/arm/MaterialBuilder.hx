@@ -43,6 +43,32 @@ class MaterialBuilder {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
+		if (UITrait.inst.brushType == 4) { // Pick color id
+			// Mangle vertices to form full screen triangle
+			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
+
+			frag.add_out('vec4 fragColor');
+			
+			frag.add_uniform('sampler2D gbuffer2');
+			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
+			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
+			frag.add_uniform('vec4 inp', '_inputBrush');
+
+			#if (kha_opengl || kha_webgl)
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
+			#else
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
+			#end
+
+			frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0).rgb;');
+			frag.write('fragColor = vec4(idcol, 1.0);');
+
+			con_paint.data.shader_from_source = true;
+			con_paint.data.vertex_shader = vert.get();
+			con_paint.data.fragment_shader = frag.get();
+			return con_paint;
+		}
+
 		#if kha_direct3d11
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		#else
@@ -82,33 +108,6 @@ class MaterialBuilder {
 		frag.write('bsp = bsp * 0.5 + 0.5;');
 
 		frag.add_uniform('sampler2D paintdb');
-
-		if (UITrait.inst.brushType == 4) { // Pick color id
-			frag.add_out('vec4 fragColor');
-
-			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) discard;');
-			#else
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) discard;');
-			#end
-			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-			frag.write('binp.x *= aspectRatio;');
-			frag.write('binp = binp * 0.5 + 0.5;');
-			
-			frag.write('float dist = distance(bsp.xy, binp.xy);');
-			frag.write('if (dist > 0.025) discard;'); // Base this on camera zoom - more for zommed in camera, less for zoomed out
-
-			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
-			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = fract(tex);'); // TODO: fract(tex) - somehow clamp is set after first paint
-			frag.write('vec3 idcol = textureLod(texcolorid, texCoord, 0).rgb;');
-			frag.write('fragColor = vec4(idcol, 1.0);');
-
-			con_paint.data.shader_from_source = true;
-			con_paint.data.vertex_shader = vert.get();
-			con_paint.data.fragment_shader = frag.get();
-			return con_paint;
-		}
 
 		var numTex = UITrait.inst.paintHeight ? 4 : 3;
 		frag.add_out('vec4 fragColor[$numTex]');
@@ -165,10 +164,10 @@ class MaterialBuilder {
 		if (UITrait.inst.colorIdPicked) {
 			vert.add_out('vec2 texCoordPick');
 			vert.write('texCoordPick = fract(tex);');
-			frag.add_uniform('sampler2D texpaint_colorid0'); // 1x1 picker
+			frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
-			frag.write('vec3 c1 = texelFetch(texpaint_colorid0, ivec2(0, 0), 0).rgb;');
+			frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
 			frag.write('if (any(c1 != c2)) { discard; }');
 		}
@@ -181,7 +180,6 @@ class MaterialBuilder {
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			#if (kha_opengl || kha_webgl)
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
-			// frag.write('vec2 texCoordInp = textureLod(gbuffer2, vec2(inp.x, (1.0 - inp.y)), 0).ba;');
 			#else
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
 			#end
@@ -633,8 +631,10 @@ class MaterialBuilder {
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
 		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
 
-		if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) {
-			// Face fill - write texcoords into gbuffer
+		var writeTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
+					   UITrait.inst.brushType == 4; // Colorid pick
+
+		if (writeTC) {
 			frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');
 		}
 		else {
