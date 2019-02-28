@@ -243,6 +243,8 @@ class UINodes extends iron.Trait {
 		var wh = iron.App.h();
 		var w = ww + 40 * 2;
 		var h = wh + 40 * 2;
+		if (w < 1) w = 1;
+		if (h < 1) h = 1;
 		grid = kha.Image.createRenderTarget(w, h);
 		grid.g2.begin(true, ui.t.SEPARATOR_COL);
 		for (i in 0...Std.int(h / 40) + 1) {
@@ -271,7 +273,7 @@ class UINodes extends iron.Trait {
 		}
 
 		if (!show) return;
-		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();

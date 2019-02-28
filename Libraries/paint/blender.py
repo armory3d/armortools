@@ -7,12 +7,10 @@ import arm.make_state
 import arm.utils
 
 def on_make_renderpath():
-    arm.assets.add_shader_pass('max_luminance_pass')
     arm.assets.add_shader_pass('copy_mrt3_pass')
     arm.assets.add_shader_pass('copy_mrt4_pass')
     arm.assets.add(arm.utils.get_sdk_path() + '/armory/Assets/noise256.png')
     arm.assets.add_embedded_data('noise256.png')
-    # bpy.data.worlds['Arm'].world_defs += '_SMSizeUniform'
     bpy.data.worlds['Arm'].world_defs += '_CGrainStatic'
 
     if bpy.data.worlds['Arm'].arm_project_name == 'ArmorPaint':

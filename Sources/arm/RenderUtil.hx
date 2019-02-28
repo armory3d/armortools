@@ -35,7 +35,7 @@ class RenderUtil {
 		iron.Scene.active.camera.buildMatrix();
 
 		UINodes.inst.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsDecal;
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsDecal;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
 
@@ -94,7 +94,7 @@ class RenderUtil {
 		iron.Scene.active.camera.buildMatrix();
 
 		UINodes.inst.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commandsPreview;
+		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsPreview;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
 

@@ -295,12 +295,14 @@ class UITrait extends iron.Trait {
 			savedEnvmap = iron.Scene.active.world.envmap;
 		}
 		if (emptyEnvmap == null) {
-			var b = haxe.io.Bytes.alloc(4);
+			// emptyEnvmap = kha.Image.fromBytes(1, 1); // No lock for d3d11
+			emptyEnvmap = kha.Image.create(1, 1);
+			var b = emptyEnvmap.lock();
 			b.set(0, 3);
 			b.set(1, 3);
 			b.set(2, 3);
 			b.set(3, 255);
-			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+			emptyEnvmap.unlock();
 		}
 		if (previewEnvmap == null) {
 			var b = haxe.io.Bytes.alloc(4);
@@ -745,7 +747,7 @@ class UITrait extends iron.Trait {
 	#end
 
 	function render(g:kha.graphics2.Graphics) {
-		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		renderUI(g);
 		renderMenu(g);
@@ -985,20 +987,20 @@ class UITrait extends iron.Trait {
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, arm.App.realw() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(Id.handle(), "Paint");
 		}
 
 		var panelx = iron.App.x();
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		if (ui.window(headerHandle, panelx, headerh, arm.App.realw() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(headerHandle, panelx, headerh, kha.System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
 			// Color ID
 			if (brushType == 4) {
 				// Picked color
 				ui.text("Picked Color");
 				if (colorIdPicked) {
-					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid0").image, 0xffffffff, 64);
+					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
 				if (ui.button("Clear")) colorIdPicked = false;
 				// Set color map
@@ -1075,7 +1077,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		if (ui.window(statusHandle, iron.App.x(), arm.App.realh() - headerh, arm.App.realw() - toolbarw - windowW, headerh)) {
+		if (ui.window(statusHandle, iron.App.x(), kha.System.windowHeight() - headerh, kha.System.windowWidth() - toolbarw - windowW, headerh)) {
 
 			var scene = iron.Scene.active;
 			var cam = scene.cameras[0];
@@ -1122,8 +1124,8 @@ class UITrait extends iron.Trait {
 			}
 		}
 		
-		var wx = C.ui_layout == 0 ? arm.App.realw() - windowW : 0;
-		if (ui.window(hwnd, wx, 0, windowW, arm.App.realh())) {
+		var wx = C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
+		if (ui.window(hwnd, wx, 0, windowW, kha.System.windowHeight())) {
 
 			#if arm_editor
 
@@ -1746,7 +1748,6 @@ class UITrait extends iron.Trait {
 			}
 			if (ui.tab(htab, "Library")) {
 
-				ui.separator();
 				if (ui.button("Import")) {
 					arm.App.showFiles = true;
 					@:privateAccess zui.Ext.lastPath = ""; // Refresh
@@ -1803,8 +1804,7 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab, "File")) {
-
-				ui.separator();
+				
 				if (ui.panel(Id.handle({selected: true}), "Project", 1)) {
 					ui.row([1/2,1/2]);
 					if (newConfirm) {
@@ -1905,7 +1905,7 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab, "Preferences")) {
-				ui.separator();
+				
 				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
 					var hscale = Id.handle({value: C.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
@@ -1967,7 +1967,7 @@ class UITrait extends iron.Trait {
 					ui.combo(Id.handle(), ["Off"], "Shadows", true);
 					// ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
 					// if (hshadowmap.changed) Config.applyConfig();
-					ui.combo(hsupersample, ["0.5x", "1.0x", "1.5x", "2.0x"], "Super Sample", true);
+					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 					if (hsupersample.changed) Config.applyConfig();
 					ui.row([1/2, 1/2]);
 					var vsyncHandle = Id.handle({selected: C.window_vsync});

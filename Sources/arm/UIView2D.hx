@@ -118,9 +118,8 @@ class UIView2D extends iron.Trait {
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 
-		if (!show ||
-			arm.App.realw() == 0 ||
-			arm.App.realh() == 0) return;
+		if (!show) return;
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 

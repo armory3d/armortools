@@ -6,6 +6,9 @@ import zui.Canvas;
 
 class App extends iron.Trait {
 
+	public static function x():Int { return appx; }
+	public static function y():Int { return appy; }
+
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var dragAsset:TAsset = null;
@@ -41,7 +44,7 @@ class App extends iron.Trait {
 		super();
 
 		#if arm_resizable
-		iron.App.onResize = resize;
+		iron.App.onResize = onResize;
 		#end
 
 		// Set base dir for file browser
@@ -142,7 +145,25 @@ class App extends iron.Trait {
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
+	#if arm_resizable
+	static function onResize() {
+		resize();
+		
+		// Save window size
+		// UITrait.inst.C.window_w = kha.System.windowWidth();
+		// UITrait.inst.C.window_h = kha.System.windowHeight();
+		// Cap height, window is not centered properly
+		// var disp =  kha.Display.primary;
+		// if (disp.height > 0 && UITrait.inst.C.window_h > disp.height - 140) {
+		// 	UITrait.inst.C.window_h = disp.height - 140;
+		// }
+		// armory.data.Config.save();
+	}
+	#end
+
 	public static function resize() {
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+
 		iron.Scene.active.camera.buildProjection();
 		UITrait.inst.ddirty = 2;
 
@@ -222,7 +243,7 @@ class App extends iron.Trait {
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
-		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		if (arm.App.dragAsset != null) {
 			var mouse = iron.system.Input.getMouse();
@@ -285,9 +306,4 @@ class App extends iron.Trait {
 
 		g.begin(false);
 	}
-
-	public static function x():Int { return appx; }
-	public static function y():Int { return appy; }
-	public static function realw():Int { return kha.System.windowWidth(); }
-	public static function realh():Int { return kha.System.windowHeight(); }
 }
