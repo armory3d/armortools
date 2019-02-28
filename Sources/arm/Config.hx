@@ -34,11 +34,11 @@ class Config {
 	// }
 
 	public static inline function getSuperSampleQuality(f:Float):Int {
-		return f == 0.5 ? 0 : f == 1.0 ? 1 : f == 1.5 ? 2 : f == 2.0 ? 3 : 4;
+		return f == 1.0 ? 0 : f == 1.5 ? 1 : f == 2.0 ? 2 : 3;
 	}
 
 	public static inline function getSuperSampleSize(i:Int):Float {
-		return i == 0 ? 0.5 : i == 1 ? 1.0 : i == 2 ? 1.5 : i == 3 ? 2.0 : 4.0;
+		return i == 0 ? 1.0 : i == 1 ? 1.5 : i == 2 ? 2.0 : 4.0;
 	}
 
 	public static function getTextureRes():Int {
@@ -48,7 +48,6 @@ class Config {
 		if (resHandle.position == 2) return 4096;
 		if (resHandle.position == 3) return 8192;
 		if (resHandle.position == 4) return 16384;
-		if (resHandle.position == 5) return 20480;
 		return 0;
 	}
 
