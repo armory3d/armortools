@@ -7,12 +7,14 @@ class RenderPathDeferred {
 
 	#if (rp_renderer == "Deferred")
 
-	static var path:RenderPath;
+	public static var path:RenderPath;
 
 	#if (rp_gi != "Off")
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
 	#end
+	static var initVoxels = true; // Bake AO
+	static var taaFrame = 0;
 
 	public static function init(_path:RenderPath) {
 
@@ -24,24 +26,30 @@ class RenderPathDeferred {
 
 		armory.renderpath.RenderPathDeferred.init(path);
 
-		// Paint
+		{
+			var t = new RenderTargetRaw();
+			t.name = "taa2";
+			t.width = 0;
+			t.height = 0;
+			t.displayp = Inc.getDisplayp();
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
 		{
 			path.createDepthBuffer("paintdb", "DEPTH16");
 		}
 
-		var w = 1;
-		for (i in 0...8)
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_colorid" + i;
-			t.width = w;
-			t.height = w;
+			t.name = "texpaint_colorid";
+			t.width = 1;
+			t.height = 1;
 			t.format = 'RGBA32';
 			path.createRenderTarget(t);
-			w *= 2;
 		}
 
-		path.loadShader("shader_datas/max_luminance_pass/max_luminance_pass");
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		path.loadShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 
@@ -135,47 +143,19 @@ class RenderPathDeferred {
 		//
 	}
 
-	// Paint
-	static var initVoxels = true;
-	public static function drawShadowMap() {
-		#if (rp_shadowmap)
-		@:privateAccess Inc.pointIndex = 0;
-		@:privateAccess Inc.spotIndex = 0;
-		for (l in iron.Scene.active.lights) {
-			if (!l.visible || !l.data.raw.cast_shadow) continue;
-			path.light = l;
-			var shadowmap = @:privateAccess Inc.getShadowMap(l);
-			var faces = l.data.raw.shadowmap_cube ? 6 : 1;
-			for (i in 0...faces) {
-				if (faces > 1) path.currentFace = i;
-				path.setTarget(shadowmap);
-				// Paint
-				if (arm.UITrait.inst.paintHeight) {
-					var tid = arm.UITrait.inst.layers[0].id;
-					path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
-				}
-				//
-				path.clearTarget(null, 1.0);
-				path.drawMeshes("shadowmap");
-			}
-			path.currentFace = -1;
-
-			if (l.data.raw.type == "point") @:privateAccess Inc.pointIndex++;
-			else if (l.data.raw.type == "spot" || l.data.raw.type == "area") @:privateAccess Inc.spotIndex++;
-		}
-		#end
-	}
-
 	@:access(iron.RenderPath)
 	public static function commands() {
 
-		// Paint
-		if (arm.App.realw() == 0 || arm.App.realh() == 0) return;
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+
+		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 
 		if (!arm.UITrait.inst.dirty()) {
 			path.setTarget("");
-			path.bindTarget("taa", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
+			path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
+			ssaa4 ?
+				path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
+				path.drawShader("shader_datas/copy_pass/copy_pass");
 			return;
 		}
 
@@ -211,22 +191,15 @@ class RenderPathDeferred {
 		if (arm.UITrait.inst.depthDirty()) {
 			path.setTarget("texpaint" + tid);
 			path.clearTarget(null, 1.0);
-			path.drawMeshes("depth"); // TODO: CHECK DEPTH EXPORT
+			path.drawMeshes("depth");
 		}
 
 		if (arm.UITrait.inst.paintDirty()) {
 			if (arm.UITrait.inst.brushType == 4) { // Pick Color Id
-				path.setTarget("texpaint_colorid7");
+				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
-				path.bindTarget("_paintdb", "paintdb");
+				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
-				// Extract picked color to 1x1 texture
-				for (i in 0...7) {
-					var j = 7 - i;
-					path.setTarget("texpaint_colorid" + (j - 1));
-					path.bindTarget("texpaint_colorid" + j, "tex");
-					path.drawShader("shader_datas/max_luminance_pass/max_luminance_pass");
-				}
 				arm.UITrait.inst.headerHandle.redraws = 2;
 			}
 			else {
@@ -270,11 +243,11 @@ class RenderPathDeferred {
 					path.bindTarget("voxels", "voxels");
 				}
 				if (arm.UITrait.inst.colorIdPicked) {
-					path.bindTarget("texpaint_colorid0", "texpaint_colorid0");
+					path.bindTarget("texpaint_colorid", "texpaint_colorid");
 				} 
 
-				if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) {
-					// Face fill
+				// Read texcoords from gbuffer
+				if (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) { // Face fill
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
 
@@ -292,23 +265,8 @@ class RenderPathDeferred {
 		}
 		//
 
-		#if rp_dynres
-		{
-			DynamicResolutionScale.run(path);
-		}
-		#end
-
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
-		#if (rp_background == "Clear")
-		{
-			path.clearTarget(-1, 1.0);
-		}
-		#else
-		{
-			path.clearTarget(null, 1.0);
-		}
-		#end
-
+		path.clearTarget(null, 1.0);
 		#if rp_gbuffer2
 		{
 			path.setTarget("gbuffer2");
@@ -336,15 +294,7 @@ class RenderPathDeferred {
 		}
 		//
 
-		#if rp_stereo
-		{
-			path.drawStereo(drawMeshes);
-		}
-		#else
-		{
-			RenderPathCreator.drawMeshes();
-		}
-		#end
+		RenderPathCreator.drawMeshes();
 
 		#if rp_decals
 		{
@@ -364,21 +314,11 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if (rp_ssr_half || rp_ssgi_half)
-		path.setTarget("half");
-		path.bindTarget("_main", "texdepth");
-		path.drawShader("shader_datas/downsample_depth/downsample_depth");
-		#end
-
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			if (armory.data.Config.raw.rp_ssgi != false) {
 				path.setTarget("singlea");
-				#if rp_ssgi_half
-				path.bindTarget("half", "gbufferD");
-				#else
 				path.bindTarget("_main", "gbufferD");
-				#end
 				path.bindTarget("gbuffer0", "gbuffer0");
 				// #if (rp_ssgi == "RTGI")
 				// path.bindTarget("gbuffer1", "gbuffer1");
@@ -396,30 +336,6 @@ class RenderPathDeferred {
 				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
 			}
 		}	
-		#elseif (rp_ssgi == "SSAO")
-		{
-			if (armory.data.Config.raw.rp_ssgi != false) {
-				path.setTarget("singlea");
-				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/ssao_pass/ssao_pass");
-
-				path.setTarget("singleb");
-				path.bindTarget("singlea", "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
-
-				path.setTarget("singlea");
-				path.bindTarget("singleb", "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
-			}
-		}
-		#end
-
-		#if (rp_shadowmap)
-		// Inc.drawShadowMap();
-		drawShadowMap(); // Paint
 		#end
 
 		// Voxels
@@ -427,13 +343,6 @@ class RenderPathDeferred {
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var voxelize = path.voxelize();
-
-			#if ((rp_gi == "Voxel GI") && (rp_voxelgi_relight))
-			// Relight if light was moved
-			for (light in iron.Scene.active.lights) {
-				if (light.transform.diff()) { voxelize = true; break; }
-			}
-			#end
 
 			#if arm_voxelgi_temporal
 			voxelize = ++RenderPathCreator.voxelFrame % RenderPathCreator.voxelFreq == 0;
@@ -446,36 +355,15 @@ class RenderPathDeferred {
 
 			if (voxelize) {
 				var res = Inc.getVoxelRes();
-
-				// #if (rp_gi == "Voxel GI")
-				// var voxtex = "voxelsOpac";
-				// #else
 				var voxtex = voxels;
-				// #end
 
 				path.clearImage(voxtex, 0x00000000);
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
-				#if (rp_gi == "Voxel GI")
-				// path.bindTarget("voxelsNor", "voxelsNor");
-				for (l in iron.Scene.active.lights) {
-					if (!l.visible || !l.data.raw.cast_shadow || l.data.raw.type != "sun") continue;
-					var n = "shadowMap";
-					path.bindTarget(n, n);
-					break;
-				}
-				#end
 				path.drawMeshes("voxel");
 				path.generateMipmaps(voxels);
 			}
-
-			// if (relight) {
-			// 	Inc.computeVoxelsBegin();
-			// 	Inc.computeVoxels();
-			// 	Inc.computeVoxelsEnd();
-			// 	path.generateMipmaps(voxels);
-			// }
 		}
 		#end
 
@@ -503,9 +391,7 @@ class RenderPathDeferred {
 		#if (rp_gi != "Off")
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			#if (rp_gi == "Voxel AO")
 			voxelao_pass = true;
-			#end
 			path.bindTarget(voxels, "voxels");
 			#if arm_voxelgi_temporal
 			{
@@ -514,83 +400,17 @@ class RenderPathDeferred {
 			#end
 		}
 		#end
-
-		#if rp_shadowmap
-		{
-			// if (path.lightCastShadow()) {
-				#if rp_soft_shadows
-				path.bindTarget("visa", "svisibility");
-				#else
-				Inc.bindShadowMap();
-				#end
-			// }
-		}
-		#end
 		
-		#if rp_material_solid
-		path.drawShader("shader_datas/deferred_light_solid/deferred_light");
-		#elseif rp_material_mobile
-		path.drawShader("shader_datas/deferred_light_mobile/deferred_light");
-		#else
 		voxelao_pass ?
 			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
 			path.drawShader("shader_datas/deferred_light/deferred_light");
-		#end
-		
-		#if rp_probes
-		if (!path.isProbe) {
-			var probes = iron.Scene.active.probes;
-			for (i in 0...probes.length) {
-				var p = probes[i];
-				if (!p.visible || p.culled) continue;
-				path.currentProbeIndex = i;
-				path.setTarget("tex");
-				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.bindTarget("gbuffer1", "gbuffer1");
-				path.bindTarget(p.raw.name, "probeTex");
-				if (p.data.raw.type == "planar") {
-					path.drawVolume(p, "shader_datas/probe_planar/probe_planar");
-				}
-				else if (p.data.raw.type == "cubemap") {
-					path.drawVolume(p, "shader_datas/probe_cubemap/probe_cubemap");
-				}
-			}
-		}
-		#end
 
 		#if (!kha_opengl)
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 		#end
 
-		// #if rp_volumetriclight
-		// {
-		// 	path.setTarget("bufvola");
-		// 	path.bindTarget("_main", "gbufferD");
-		// 	Inc.bindShadowMap();
-		// 	if (path.lightIsSun()) {
-		// 		path.drawShader("shader_datas/volumetric_light_quad/volumetric_light_quad");
-		// 	}
-		// 	else {
-		// 		path.drawLightVolume("shader_datas/volumetric_light/volumetric_light");
-		// 	}
-
-		// 	path.setTarget("bufvolb");
-		// 	path.bindTarget("bufvola", "tex");
-		// 	path.drawShader("shader_datas/blur_bilat_pass/blur_bilat_pass_x");
-
-		// 	path.setTarget("tex");
-		// 	path.bindTarget("bufvolb", "tex");
-		// 	path.drawShader("shader_datas/blur_bilat_blend_pass/blur_bilat_blend_pass_y");
-		// }
-		// #end
-
-		#if (rp_background == "World")
-		{
-			path.setTarget("tex"); // Re-binds depth
-			path.drawSkydome("shader_datas/world_pass/world_pass");
-		}
-		#end
+		path.setTarget("tex"); // Re-binds depth
+		path.drawSkydome("shader_datas/world_pass/world_pass");
 
 		#if rp_ocean
 		{
@@ -675,21 +495,12 @@ class RenderPathDeferred {
 		#if rp_ssr
 		{
 			if (armory.data.Config.raw.rp_ssr != false) {
-				#if rp_ssr_half
-				var targeta = "ssra";
-				var targetb = "ssrb";
-				#else
 				var targeta = "buf";
 				var targetb = "gbuffer1";
-				#end
 
 				path.setTarget(targeta);
 				path.bindTarget("tex", "tex");
-				#if rp_ssr_half
-				path.bindTarget("half", "gbufferD");
-				#else
 				path.bindTarget("_main", "gbufferD");
-				#end
 				path.bindTarget("gbuffer0", "gbuffer0");
 				path.bindTarget("gbuffer1", "gbuffer1");
 				path.drawShader("shader_datas/ssr_pass/ssr_pass");
@@ -731,12 +542,6 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// We are just about to enter compositing, add more custom passes here
-		// #if rp_custom_pass
-		// {
-		// }
-		// #end
-
 		// Begin compositor
 		#if rp_autoexposure
 		{
@@ -744,23 +549,8 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if ((rp_supersampling == 4) || (rp_rendercapture))
-		var framebuffer = "buf";
-		#else
-		var framebuffer = "";
-		#end
-
-		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
-		{
-			RenderPathCreator.finalTarget = path.currentTarget;
-			path.setTarget(framebuffer);
-		}
-		#else
-		{
-			RenderPathCreator.finalTarget = path.currentTarget;
-			path.setTarget("buf");
-		}
-		#end
+		RenderPathCreator.finalTarget = path.currentTarget;
+		path.setTarget("buf");
 		
 		path.bindTarget("tex", "tex");
 		#if rp_compositordepth
@@ -768,17 +558,7 @@ class RenderPathDeferred {
 			path.bindTarget("_main", "gbufferD");
 		}
 		#end
-
-		#if rp_compositornodes
-		{
-			if (!path.isProbe) path.drawShader("shader_datas/compositor_pass/compositor_pass");
-			else path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-		#else
-		{
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-		#end
+		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 		// End compositor
 
 		#if rp_overlays
@@ -800,282 +580,52 @@ class RenderPathDeferred {
 			path.bindTarget("bufa", "edgesTex");
 			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-			#if (rp_antialiasing == "TAA")
-			path.isProbe ? path.setTarget(framebuffer) : path.setTarget("bufa");
-			#else
-			path.setTarget(framebuffer);
-			#end
+			// #if (rp_antialiasing == "TAA")
+			path.setTarget("bufa");
+			// #else
+			// path.setTarget("");
+			// #end
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");
-			#if (rp_antialiasing == "TAA")
-			{
+			// #if (rp_antialiasing == "TAA")
+			// {
 				path.bindTarget("gbuffer2", "sveloc");
-			}
-			#end
+			// }
+			// #end
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-			#if (rp_antialiasing == "TAA")
-			{
-				if (!path.isProbe) { // No last frame for probe
-					path.setTarget(framebuffer);
-					path.bindTarget("bufa", "tex");
-					path.bindTarget("taa", "tex2");
-					path.bindTarget("gbuffer2", "sveloc");
-					path.drawShader("shader_datas/taa_pass/taa_pass");
-					path.setTarget("taa");
-					path.bindTarget("bufa", "tex");
+			// #if (rp_antialiasing == "TAA")
+			// {
+				path.setTarget(taaFrame % 2 == 0 ? "taa2" : "taa");
+				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex2");
+				path.bindTarget("bufa", "tex");
+				path.bindTarget("gbuffer2", "sveloc");
+				path.drawShader("shader_datas/taa_pass/taa_pass");
+				if (!ssaa4) {
+					path.setTarget("");
+					path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				}
-			}
-			#end
+				
+			// }
+			// #end
 		}
 		#end
 
 		#if (rp_supersampling == 4)
 		{
-			var finalTarget = "";
-			path.setTarget(finalTarget);
-			path.bindTarget(framebuffer, "tex");
-			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+			if (ssaa4) {
+				path.setTarget("");
+				path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+				path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+			}
 		}
 		#end
 
-		// paint
+		taaFrame++;
 		arm.UITrait.inst.ddirty--;
 		arm.UITrait.inst.pdirty--;
 		arm.UITrait.inst.rdirty--;
-		//
-	}
-
-	@:access(iron.RenderPath)
-	public static function commandsPreview() {
-
-		#if rp_gbuffer2
-		{
-			path.setTarget("mgbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
-		}
-		#else
-		{
-			path.setTarget("mgbuffer0", ["mgbuffer1"]);
-		}
-		#end
-
-		#if (rp_background == "Clear")
-		{
-			path.clearTarget(-1, 1.0);
-		}
-		#else
-		{
-			path.clearTarget(null, 1.0);
-		}
-		#end
-
-		RenderPathCreator.drawMeshes();
-
-		// ---
-		// Deferred light
-		// ---
-		#if (!kha_opengl)
-		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth so we can read it
-		#end
-		path.setTarget("mtex");
-		path.bindTarget("_mmain", "gbufferD");
-		path.bindTarget("mgbuffer0", "gbuffer0");
-		path.bindTarget("mgbuffer1", "gbuffer1");
-		#if (rp_ssgi != "Off")
-		{
-			path.bindTarget("empty_white", "ssaotex");
-		}
-		#end
-		path.drawShader("shader_datas/deferred_light/deferred_light");
-
-		#if (!kha_opengl)
-		path.setDepthFrom("mtex", "mgbuffer0"); // Re-bind depth
-		#end
-
-		#if (rp_background == "World")
-		{
-			path.setTarget("mtex"); // Re-binds depth
-			path.drawSkydome("shader_datas/world_pass/world_pass");
-		}
-		#end
-		
-		var framebuffer = "texpreview";
-
-		#if arm_editor
-		var selectedMat = arm.UITrait.inst.htab.position == 0 ? arm.UITrait.inst.selectedMaterial2 : arm.UITrait.inst.selectedMaterial;
-		#else
-		var selectedMat = arm.UITrait.inst.selectedMaterial;
-		#end
-		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
-
-		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
-		{
-			path.setTarget(framebuffer);
-		}
-		#else
-		{
-			path.setTarget("mbuf");
-		}
-		#end
-		
-		path.bindTarget("mtex", "tex");
-		#if rp_compositordepth
-		{
-			path.bindTarget("_mmain", "gbufferD");
-		}
-		#end
-
-		#if rp_compositornodes
-		{
-			path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		}
-		#else
-		{
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-		#end
-
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
-		{
-			path.setTarget("mbufa");
-			path.clearTarget(0x00000000);
-			path.bindTarget("mbuf", "colorTex");
-			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-
-			path.setTarget("mbufb");
-			path.clearTarget(0x00000000);
-			path.bindTarget("mbufa", "edgesTex");
-			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-
-			path.setTarget(framebuffer);
-			path.clearTarget(0x00000000, 0.0);
-
-			path.bindTarget("mbuf", "colorTex");
-			path.bindTarget("mbufb", "blendTex");
-			#if (rp_antialiasing == "TAA")
-			{
-				path.bindTarget("mgbuffer2", "sveloc");
-			}
-			#end
-			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-		}
-		#end
-	}
-
-	@:access(iron.RenderPath)
-	public static function commandsDecal() {
-		
-		#if rp_gbuffer2
-		{
-			path.setTarget("gbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		}
-		#else
-		{
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-		}
-		#end
-
-		#if (rp_background == "Clear")
-		{
-			path.clearTarget(-1, 1.0);
-		}
-		#else
-		{
-			path.clearTarget(null, 1.0);
-		}
-		#end
-
-		RenderPathCreator.drawMeshes();
-
-		// ---
-		// Deferred light
-		// ---
-		#if (!kha_opengl)
-		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
-		#end
-		path.setTarget("tex");
-		path.bindTarget("_main", "gbufferD");
-		path.bindTarget("gbuffer0", "gbuffer0");
-		path.bindTarget("gbuffer1", "gbuffer1");
-		#if (rp_ssgi != "Off")
-		{
-			path.bindTarget("empty_white", "ssaotex");
-		}
-		#end
-		path.drawShader("shader_datas/deferred_light/deferred_light");
-
-		#if (!kha_opengl)
-		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
-		#end
-
-		#if (rp_background == "World")
-		{
-			path.setTarget("tex"); // Re-binds depth
-			path.drawSkydome("shader_datas/world_pass/world_pass");
-		}
-		#end
-		
-		var framebuffer = "texpreview";
-
-		iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.decalImage;
-
-		#if ((rp_antialiasing == "Off") || (rp_antialiasing == "FXAA") || (!rp_render_to_texture))
-		{
-			path.setTarget(framebuffer);
-		}
-		#else
-		{
-			path.setTarget("buf");
-		}
-		#end
-		
-		path.bindTarget("tex", "tex");
-		#if rp_compositordepth
-		{
-			path.bindTarget("_main", "gbufferD");
-		}
-		#end
-
-		#if rp_compositornodes
-		{
-			path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		}
-		#else
-		{
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-		#end
-
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
-		{
-			path.setTarget("bufa");
-			path.clearTarget(0x00000000);
-			path.bindTarget("buf", "colorTex");
-			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-
-			path.setTarget("bufb");
-			path.clearTarget(0x00000000);
-			path.bindTarget("bufa", "edgesTex");
-			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-
-			path.setTarget(framebuffer);
-			path.clearTarget(0x00000000, 0.0);
-
-			path.bindTarget("buf", "colorTex");
-			path.bindTarget("bufb", "blendTex");
-			#if (rp_antialiasing == "TAA")
-			{
-				path.bindTarget("gbuffer2", "sveloc");
-			}
-			#end
-			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-		}
-		#end
 	}
 
 	#end
