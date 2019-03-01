@@ -197,6 +197,7 @@ class UITrait extends iron.Trait {
 	public var statusHandle = new Zui.Handle({layout:Horizontal});
 	var drawMenu = false;
 	var menuCategory = 0;
+	var updateAvailable = false;
 
 	#if arm_editor
 	public var cameraControls = 2;
@@ -641,7 +642,7 @@ class UITrait extends iron.Trait {
 		var kb = iron.system.Input.getKeyboard();
 
 		if (mouse.x < App.w()) {
-			if (kb.started("x") || kb.started("backspace")) {
+			if (kb.started("delete") || kb.started("backspace")) {
 				if (selectedObject != null) {
 					selectedObject.remove();
 					selectObject(iron.Scene.active.getChild("Scene"));
@@ -2023,6 +2024,27 @@ class UITrait extends iron.Trait {
 					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
 					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
 					ui.text(kha.System.systemId + " - " + gapi + " - " + renderer);
+
+					if (ui.button("Check for Updates")) {
+						// Retrieve latest version number
+						var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
+						var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
+						#if kha_krom
+						if (kha.System.systemId == "Windows") {
+							Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+						}
+						// Compare versions
+						iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
+							var update = haxe.Json.parse(blob.toString());
+							if (Std.int(update.version) > 190201) {
+								updateAvailable = true;
+							}
+						});
+						#end
+					}
+					if (updateAvailable) {
+						ui.text("Update is available!");
+					}
 				}
 			}
 		}
