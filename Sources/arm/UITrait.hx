@@ -51,6 +51,7 @@ class UITrait extends iron.Trait {
 	public var showEnvmap = false;
 	public var showEnvmapHandle = new Zui.Handle({selected: false});
 	public var drawWireframe = false;
+	public var wireframeHandle = new Zui.Handle({selected: false});
 	public var culling = true;
 
 	public var ddirty = 0;
@@ -400,6 +401,11 @@ class UITrait extends iron.Trait {
 				hwnd.redraws = 2;
 			}
 			else { // Toggle node editor
+
+				// Clear input state as ui receives input events even when not drawn
+				@:privateAccess UIView2D.inst.ui.endInput();
+				@:privateAccess UINodes.inst.ui.endInput();
+
 				UIView2D.inst.show = false;
 				if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
 					UINodes.inst.show = !UINodes.inst.show;
@@ -1053,8 +1059,10 @@ class UITrait extends iron.Trait {
 					if (fillTypeHandle.changed) {
 						if (fillTypeHandle.position == 1) {
 							ui.g.end();
+							// UIView2D.inst.cacheUVMap();
 							UIView2D.inst.cacheTriangleMap();
 							ui.g.begin(false);
+							// wireframeHandle.selected = drawWireframe = true;
 						}
 						UINodes.inst.parsePaintMaterial();
 						UINodes.inst.parseMeshMaterial();
@@ -1714,7 +1722,6 @@ class UITrait extends iron.Trait {
 					}
 
 					ui.row([1/2, 1/2]);
-					var wireframeHandle = Id.handle({selected: drawWireframe});
 					drawWireframe = ui.check(wireframeHandle, "Wireframe");
 					if (wireframeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
