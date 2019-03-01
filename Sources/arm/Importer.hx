@@ -66,6 +66,7 @@ class Importer {
 									  StringTools.endsWith(base, "_base") ||
 									  StringTools.endsWith(base, "_bc") ||
 									  StringTools.endsWith(base, "_d") ||
+									  StringTools.endsWith(base, "_color") ||
 									  StringTools.endsWith(base, "_col"))) {
 					mapbase = f;
 					valid = true;
