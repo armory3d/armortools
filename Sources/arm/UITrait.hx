@@ -197,7 +197,7 @@ class UITrait extends iron.Trait {
 	public var statusHandle = new Zui.Handle({layout:Horizontal});
 	var drawMenu = false;
 	var menuCategory = 0;
-	var updateAvailable = false;
+	var updateVersion = 0;
 
 	#if arm_editor
 	public var cameraControls = 2;
@@ -2019,12 +2019,15 @@ class UITrait extends iron.Trait {
 
 				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
-					ui.text("v" + version + " - " +  Macro.buildSha() + " - armorpaint.org");
-					// ui.text(Macro.buildDate());
+					var sha = Macro.buildSha();
+					var date = Macro.buildDate().split(" ")[0];
+					ui.text("v" + version + " (" + date + ") - " + sha);
 					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
 					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
 					ui.text(kha.System.systemId + " - " + gapi + " - " + renderer);
+					ui.text("armorpaint.org");
 
+					var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
 					if (ui.button("Check for Updates")) {
 						// Retrieve latest version number
 						var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
@@ -2036,14 +2039,17 @@ class UITrait extends iron.Trait {
 						// Compare versions
 						iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
 							var update = haxe.Json.parse(blob.toString());
-							if (Std.int(update.version) > 190201) {
-								updateAvailable = true;
-							}
+							updateVersion = Std.int(update.version);
 						});
 						#end
 					}
-					if (updateAvailable) {
-						ui.text("Update is available!");
+					if (updateVersion > 0) {
+						if (updateVersion > dateInt) {
+							ui.text("Update is available!");
+						}
+						else {
+							ui.text("No update available");
+						}
 					}
 				}
 			}
