@@ -78,7 +78,6 @@ class RenderPathPreview {
 			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
 			path.setTarget(framebuffer);
-			path.clearTarget(0x00000000, 0.0);
 
 			path.bindTarget("mbuf", "colorTex");
 			path.bindTarget("mbufb", "blendTex");
@@ -163,7 +162,6 @@ class RenderPathPreview {
 			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
 			path.setTarget(framebuffer);
-			path.clearTarget(0x00000000, 0.0);
 
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");

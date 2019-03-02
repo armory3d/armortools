@@ -14,6 +14,8 @@ class RenderUtil {
 		for (p in UITrait.inst.paintObjects) p.visible = false;
 
 		var plane:MeshObject = cast iron.Scene.active.getChild("Plane");
+		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+		plane.transform.buildMatrix();
 		plane.visible = true;
 		UITrait.inst.paintObject = plane;
 		
@@ -24,7 +26,8 @@ class RenderUtil {
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
 		var light = iron.Scene.active.lights[0];
-		light.data.raw.cast_shadow = false;
+		light.visible = false;
+		// light.data.raw.cast_shadow = false;
 
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
@@ -53,7 +56,8 @@ class RenderUtil {
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 		var light = iron.Scene.active.lights[0];
-		light.data.raw.cast_shadow = true;
+		light.visible = true;
+		// light.data.raw.cast_shadow = true;
 		UINodes.inst.parseMeshMaterial();
 		UITrait.inst.ddirty = 2;
 	}
@@ -81,8 +85,8 @@ class RenderUtil {
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
-		var light = iron.Scene.active.lights[0];
-		light.data.raw.cast_shadow = false;
+		// var light = iron.Scene.active.lights[0];
+		// light.data.raw.cast_shadow = false;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 
 		// No jitter
@@ -116,8 +120,8 @@ class RenderUtil {
 		iron.Scene.active.camera.data.raw.fov = savedFov;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
-		var light = iron.Scene.active.lights[0];
-		light.data.raw.cast_shadow = true;
+		// var light = iron.Scene.active.lights[0];
+		// light.data.raw.cast_shadow = true;
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
 	}

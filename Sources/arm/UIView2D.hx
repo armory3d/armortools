@@ -64,7 +64,7 @@ class UIView2D extends iron.Trait {
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
 		uvmap.g2.begin(true, 0x00000000);
-		uvmap.g2.color = 0xffffffff;
+		uvmap.g2.color = 0xffcccccc;
 		var strength = res > 2048 ? 2.0 : 1.0;
 		var f = (1 / 32767) * uvmap.width;
 		for (i in 0...Std.int(inda.length / 3)) {

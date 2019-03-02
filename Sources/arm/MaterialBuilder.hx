@@ -208,24 +208,21 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp -= binp;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 
-				// frag.write_attrib('uvsp *= brushScale;');
-				frag.write_attrib('uvsp *= vec2(7.2, 7.2);');
+				frag.write_attrib('uvsp *= 0.21 / brushRadius;');
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
-				frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; }');
+				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) { discard; }');
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 			}
 			
 			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
-			// Cycles.texCoordName = 'fract(uvsp * brushScale)'; // TODO: use prescaled value from VS
 		}
 
 		Cycles.parse_height_as_channel = true;
 		var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
 		Cycles.parse_height_as_channel = false;
-		Cycles.texCoordName = 'texCoord';
 		var base = sout.out_basecol;
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
@@ -595,7 +592,7 @@ class MaterialBuilder {
 				// GL_NV_fragment_shader_barycentric
 				// VK_AMD_shader_explicit_vertex_parameter
 				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
-				frag.write('basecol += texture(texuvmap, texCoord).rgb;');
+				frag.write('basecol *= 1.0 - texture(texuvmap, texCoord).r;');
 				// frag.write('if (basecol == vec3(0,0,0)) discard;');
 			}
 

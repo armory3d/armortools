@@ -856,8 +856,6 @@ class UITrait extends iron.Trait {
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
-		
-		g.color = 0xffffffff;
 
 		// if (cursorImg == null) {
 		// 	g.end();
@@ -868,6 +866,8 @@ class UITrait extends iron.Trait {
 		// 	cursorImg.g2.end();
 		// 	g.begin(false);
 		// }
+
+		g.color = 0xffffffff;
 
 		// Brush
 		if (arm.App.uienabled) {
@@ -884,17 +884,12 @@ class UITrait extends iron.Trait {
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			if (brushType == 5) { // Decal
-				if (mouse.x > 0 && mx < iron.App.w()) {
-					// var psize = Std.int(decalImage.width * (brushRadius * brushNodesRadius));
-					psize = Std.int(256 * (brushRadius * brushNodesRadius));
-					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
-				}
+				psize = Std.int(256 * (brushRadius * brushNodesRadius));
+				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
 			}
 			else {
-				// if (mouse.x > 0 && mx < iron.App.w()) {
 				// if (brushType == 0 || brushType == 1 || brushType == 4) {
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				// }
 				// }
 			}
 
