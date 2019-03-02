@@ -340,7 +340,7 @@ class UITrait extends iron.Trait {
 
 		var scale = C.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png'], done);
+		loadBundled(['cursor.png', 'empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'brush_decal.png'], done);
 	}
 
 	public function showMessage(s:String) {
@@ -419,6 +419,7 @@ class UITrait extends iron.Trait {
 		else if (kb.started("3") && (shift || ctrl)) shift ? setBrushType(2) : selectMaterial(2);
 		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
 		else if (kb.started("5") && (shift || ctrl)) shift ? setBrushType(4) : selectMaterial(4);
+		else if (kb.started("6") && (shift || ctrl)) shift ? setBrushType(5) : selectMaterial(5);
 
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
@@ -801,6 +802,15 @@ class UITrait extends iron.Trait {
 		headerHandle.redraws = 2;
 		toolbarHandle.redraws = 2;
 		ddirty = 2;
+
+		if (brushType == 5) { // Decal
+			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+
+			RenderUtil.makeDecalPreview();
+			
+			if (current != null) current.begin(false);
+		}
 	}
 
 	public function selectObject(o:iron.object.Object) {
@@ -873,7 +883,7 @@ class UITrait extends iron.Trait {
 
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			if (brushPaint == 2) { // Decal
+			if (brushType == 5) { // Decal
 				if (mouse.x > 0 && mx < iron.App.w()) {
 					// var psize = Std.int(decalImage.width * (brushRadius * brushNodesRadius));
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
@@ -930,6 +940,7 @@ class UITrait extends iron.Trait {
 			var img3 = bundled.get("brush_fill.png");
 			var img4 = bundled.get("brush_bake.png");
 			var img5 = bundled.get("brush_colorid.png");
+			var img6 = bundled.get("brush_decal.png");
 			var tool = "";
 			
 			ui._x += 2;
@@ -964,9 +975,17 @@ class UITrait extends iron.Trait {
 			if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img5) == State.Started) setBrushType(4);
 			if (ui.isHovered) ui.tooltip("Color ID");
-			ui.imageScrollAlign = true;
 			ui._x -= 2;
 			ui._y += 2;
+
+			ui._x += 2;
+			if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+			if (ui.image(img6) == State.Started) setBrushType(5);
+			if (ui.isHovered) ui.tooltip("Decal");
+			ui._x -= 2;
+			ui._y += 2;
+
+			ui.imageScrollAlign = true;
 		}
 		// ui.t.FILL_WINDOW_BG = true;
 
@@ -1045,14 +1064,9 @@ class UITrait extends iron.Trait {
 				ui.combo(Id.handle(), ["Add"], "Blending");
 
 				var paintHandle = Id.handle();
-				brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Decal"], "TexCoord");
+				brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
 				if (paintHandle.changed) {
 					UINodes.inst.parsePaintMaterial();
-					if (brushPaint == 2) { // Decal
-						ui.g.end();
-						RenderUtil.makeDecalPreview();
-						ui.g.begin(false);
-					}
 				}
 
 				if (brushType == 2) { // Fill, Bake

@@ -42,7 +42,11 @@ class BrushOutputNode extends LogicNode {
 			}
 			arm.UITrait.inst.lastPaintX = arm.UITrait.inst.paintVec.x;
 			arm.UITrait.inst.lastPaintY = arm.UITrait.inst.paintVec.y;
-			if (arm.UITrait.inst.painted <= 8) {
+
+			var decal = UITrait.inst.brushType == 5;
+			var paintFrames = decal ? 1 : 8;
+
+			if (arm.UITrait.inst.painted <= paintFrames) {
 				arm.UITrait.inst.pdirty = 1;
 				arm.UITrait.inst.rdirty = 2;
 			}

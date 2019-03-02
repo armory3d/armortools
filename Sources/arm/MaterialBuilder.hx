@@ -76,7 +76,9 @@ class MaterialBuilder {
 		#end
 
 		var faceFill = UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1;
-		if (!faceFill) {
+		var decal = UITrait.inst.brushType == 5;
+
+		if (!faceFill && !decal) {
 			// Fix seams at uv borders
 			vert.add_uniform('vec2 sub', '_sub');
 			vert.write('tpos += sub;');
@@ -116,7 +118,7 @@ class MaterialBuilder {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushStrength', '_brushStrength');
 
-		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1) { // Draw / Erase
+		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
@@ -124,7 +126,7 @@ class MaterialBuilder {
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) { discard; }');
 			#end
 
-			if (UITrait.inst.brushPaint == 2) { // Decal
+			if (decal) {
 				frag.write('float dist = 0.0;');
 			}
 			else {
@@ -189,7 +191,7 @@ class MaterialBuilder {
 		}
 
 		// Texture projection - texcoords
-		if (UITrait.inst.brushPaint == 0) {
+		if (UITrait.inst.brushPaint == 0 && !decal) {
 			vert.add_uniform('float brushScale', '_brushScale'); // TODO: Will throw uniform not found
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = tex * brushScale;');
@@ -199,9 +201,7 @@ class MaterialBuilder {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
-			// Decal
-			if (UITrait.inst.brushPaint == 2) {
-				
+			if (decal) {
 				frag.write_attrib('vec2 binp = inp.xy * 2.0 - 1.0;');
 				frag.write_attrib('binp = binp * 0.5 + 0.5;');
 
@@ -218,7 +218,8 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 			}
 			
-			Cycles.texCoordName = 'fract(uvsp * brushScale)'; // TODO: use prescaled value from VS
+			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
+			// Cycles.texCoordName = 'fract(uvsp * brushScale)'; // TODO: use prescaled value from VS
 		}
 
 		Cycles.parse_height_as_channel = true;
@@ -459,12 +460,14 @@ class MaterialBuilder {
 		// Height
 		// TODO: can cause TAA issues
 		if (UITrait.inst.paintHeight) {
+			#if (!kha_direct3d11) // TODO: unable to bind texpaint_opt to both vs and fs in d3d11
 			vert.add_uniform('sampler2D texpaint_opt');
 			vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0);');
 			vert.write('float height = opt.b;');
 			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
 			vert.n = true;
 			vert.write('wposition += wnormal * height * $displaceStrength;');
+			#end
 		}
 		//
 
@@ -472,7 +475,7 @@ class MaterialBuilder {
 		vert.write('texCoord = tex;');
 		if (UITrait.inst.paintHeight) {
 			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
-			vert.write('prevwvpposition = prevWVP * (invW * vec4(wposition, 1.0));');
+			vert.write('prevwvpposition = mul(mul(vec4(wposition, 1.0), invW), prevWVP);');
 		}
 		else {
 			vert.write('prevwvpposition = mul(vec4(pos.xyz, 1.0), prevWVP);');
@@ -533,7 +536,7 @@ class MaterialBuilder {
 					frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
 					frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
 					frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
-					frag.write('n = normalize(mat3(va, vb, vc) * n);');
+					frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
 				}
 				//
 
