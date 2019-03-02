@@ -90,9 +90,6 @@ class UINodes extends iron.Trait {
 						var scale = armory.data.Config.raw.window_scale;
 						ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
 						ui.scrollEnabled = false;
-						
-						notifyOnRender2D(render2D);
-						notifyOnUpdate(update);
 					});
 				});
 			});

@@ -94,9 +94,15 @@ class App extends iron.Trait {
 						root.addTrait(new arm.trait.FlyCamera());
 						root.addTrait(new arm.trait.OrbitCamera());
 						root.addTrait(new arm.trait.ArcBallCamera());
-						iron.App.notifyOnInit(function() {
-							iron.App.notifyOnRender2D(render); // Draw on top
-						});
+
+						iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
+						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render2D);
+
+						iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
+						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
+
+						iron.App.notifyOnRender2D(render);
+						
 						appx = UITrait.inst.C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 						appy = UITrait.inst.headerh * 2;
 					});

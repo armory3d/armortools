@@ -50,6 +50,8 @@ class UITrait extends iron.Trait {
 	public var previewEnvmap:kha.Image = null;
 	public var showEnvmap = false;
 	public var showEnvmapHandle = new Zui.Handle({selected: false});
+	public var showEnvmapBlur = false;
+	public var showEnvmapBlurHandle = new Zui.Handle({selected: false});
 	public var drawWireframe = false;
 	public var wireframeHandle = new Zui.Handle({selected: false});
 	public var culling = true;
@@ -362,8 +364,6 @@ class UITrait extends iron.Trait {
 		paintObject = cast (selectedObject, MeshObject);
 		paintObjects = [paintObject];
 
-		iron.App.notifyOnUpdate(update);
-		iron.App.notifyOnRender2D(render);
 		iron.App.notifyOnRender(Layers.initLayers);
 
 		// Init plugins
@@ -1734,7 +1734,15 @@ class UITrait extends iron.Trait {
 					if (showEnvmapHandle.changed) {
 						ddirty = 2;
 					}
-					if (!showEnvmap) {
+					if (showEnvmap) {
+						showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
+						if (showEnvmapBlurHandle.changed) {
+							var probe = iron.Scene.active.world.probe;
+							savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+							ddirty = 2;
+						}
+					}
+					else {
 						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
 							var hwheel = Id.handle({color: 0xff030303});
 							var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
