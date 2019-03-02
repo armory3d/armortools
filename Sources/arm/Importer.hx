@@ -206,11 +206,14 @@ class Importer {
 			});
 			#end
 		}
+		else {
+			UITrait.inst.showError("Error: Unknown asset format");
+		}
 	}
 
 	public static function importTexture(path:String) {
 		if (!Format.checkTextureFormat(path)) {
-			UITrait.inst.showMessage("Error: Unknown asset format");
+			UITrait.inst.showError("Error: Unknown asset format");
 			return;
 		}
 
@@ -333,7 +336,7 @@ class Importer {
 
 	public static function importMesh(path:String) {
 		if (!Format.checkMeshFormat(path)) {
-			UITrait.inst.showMessage("Error: Unknown mesh format");
+			UITrait.inst.showError("Error: Unknown mesh format");
 			return;
 		}
 
@@ -563,7 +566,7 @@ class Importer {
 
 	static function makeMesh(mesh:Dynamic, path:String) {
 		if (mesh.posa == null || mesh.nora == null || mesh.inda == null) {
-			UITrait.inst.showMessage("Error: Failed to read mesh data");
+			UITrait.inst.showError("Error: Failed to read mesh data");
 			return;
 		}
 
@@ -583,7 +586,7 @@ class Importer {
 		if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		#else
 		if (mesh.texa == null) {
-			UITrait.inst.showMessage("Error: Mesh has no UVs, generating defaults");
+			UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
 			var verts = Std.int(mesh.posa.length / 4);
 			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();
@@ -680,7 +683,7 @@ class Importer {
 	static function addMesh(mesh:Dynamic) {
 
 		if (mesh.texa == null) {
-			UITrait.inst.showMessage("Error: Mesh has no UVs, generating defaults");
+			UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
 			var verts = Std.int(mesh.posa.length / 4);
 			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();

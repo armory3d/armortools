@@ -44,6 +44,7 @@ class UITrait extends iron.Trait {
 	public var savedCamera = Mat4.identity();
 	var message = "";
 	var messageTimer = 0.0;
+	var messageColor = 0x00000000;
 
 	public var savedEnvmap:kha.Image = null;
 	public var emptyEnvmap:kha.Image = null;
@@ -346,6 +347,14 @@ class UITrait extends iron.Trait {
 	public function showMessage(s:String) {
 		messageTimer = 8.0;
 		message = s;
+		messageColor = 0x00000000;
+		statusHandle.redraws = 2;
+	}
+
+	public function showError(s:String) {
+		messageTimer = 8.0;
+		message = s;
+		messageColor = 0xffff0000;
 		statusHandle.redraws = 2;
 	}
 
@@ -766,6 +775,69 @@ class UITrait extends iron.Trait {
 		// if (UINodes.inst._matcon != null) for (t in UINodes.inst._matcon.bind_textures) t.params_set = null;
 	}
 
+	function renderCursor(g:kha.graphics2.Graphics) {
+		// if (cursorImg == null) {
+		// 	g.end();
+		// 	cursorImg = kha.Image.createRenderTarget(256, 256);
+		// 	cursorImg.g2.begin(true, 0x00000000);
+		// 	cursorImg.g2.color = 0xffcccccc;
+		// 	kha.graphics2.GraphicsExtension.drawCircle(cursorImg.g2, 128, 128, 124, 8);
+		// 	cursorImg.g2.end();
+		// 	g.begin(false);
+		// }
+
+		g.color = 0xffffffff;
+
+		// Brush
+		if (arm.App.uienabled) {
+			var cursorImg = bundled.get('cursor.png');
+			var mouse = iron.system.Input.getMouse();
+			var mx = mouse.x + iron.App.x();
+			var my = mouse.y + iron.App.y();
+			var pen = iron.system.Input.getPen();
+			if (pen.down()) {
+				mx = pen.x + iron.App.x();
+				my = pen.y + iron.App.y();
+			}
+
+			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
+
+			if (brushType == 5) { // Decal
+				psize = Std.int(256 * (brushRadius * brushNodesRadius));
+				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
+			}
+			else {
+				// if (brushType == 0 || brushType == 1 || brushType == 4) {
+					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				// }
+			}
+
+			if (mirrorX) {
+				var cx = iron.App.x() + iron.App.w() / 2;
+				var nx = cx + (cx - mx);
+				// Separator line
+				g.color = 0x66ffffff;
+				g.fillRect(cx - 1, 0, 2, iron.App.h());
+				// Cursor
+				g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+				g.color = 0xffffffff;
+			}
+			if (showGrid) {
+				// Separator line
+				var x1 = iron.App.x() + iron.App.w() / 3;
+				var x2 = iron.App.x() + iron.App.w() / 3 * 2;
+				var y1 = iron.App.y() + iron.App.h() / 3;
+				var y2 = iron.App.y() + iron.App.h() / 3 * 2;
+				g.color = 0x66ffffff;
+				g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
+				g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
+				g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
+				g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
+				g.color = 0xffffffff;
+			}
+		}
+	}
+
 	function showMaterialNodes() {
 		UIView2D.inst.show = false;
 		if (UINodes.inst.show && UINodes.inst.canvasType == 0) UINodes.inst.show = false;
@@ -856,67 +928,6 @@ class UITrait extends iron.Trait {
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
-
-		// if (cursorImg == null) {
-		// 	g.end();
-		// 	cursorImg = kha.Image.createRenderTarget(256, 256);
-		// 	cursorImg.g2.begin(true, 0x00000000);
-		// 	cursorImg.g2.color = 0xffcccccc;
-		// 	kha.graphics2.GraphicsExtension.drawCircle(cursorImg.g2, 128, 128, 124, 8);
-		// 	cursorImg.g2.end();
-		// 	g.begin(false);
-		// }
-
-		g.color = 0xffffffff;
-
-		// Brush
-		if (arm.App.uienabled) {
-			var cursorImg = bundled.get('cursor.png');
-			var mouse = iron.system.Input.getMouse();
-			var mx = mouse.x + iron.App.x();
-			var my = mouse.y + iron.App.y();
-			var pen = iron.system.Input.getPen();
-			if (pen.down()) {
-				mx = pen.x + iron.App.x();
-				my = pen.y + iron.App.y();
-			}
-
-			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
-
-			if (brushType == 5) { // Decal
-				psize = Std.int(256 * (brushRadius * brushNodesRadius));
-				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
-			}
-			else {
-				// if (brushType == 0 || brushType == 1 || brushType == 4) {
-					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				// }
-			}
-
-			if (mirrorX) {
-				var cx = iron.App.x() + iron.App.w() / 2;
-				var nx = cx + (cx - mx);
-				// Separator line
-				g.color = 0x66ffffff;
-				g.fillRect(cx - 1, 0, 2, iron.App.h());
-				// Cursor
-				g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
-				g.color = 0xffffffff;
-			}
-			if (showGrid) {
-				// Separator line
-				var x1 = iron.App.x() + iron.App.w() / 3;
-				var x2 = iron.App.x() + iron.App.w() / 3 * 2;
-				var y1 = iron.App.y() + iron.App.h() / 3;
-				var y2 = iron.App.y() + iron.App.h() / 3 * 2;
-				g.color = 0x66ffffff;
-				g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
-				g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
-				g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
-				g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
-				g.color = 0xffffffff;
-			}
-		}
 
 		if (!show) return;
 
@@ -1136,7 +1147,7 @@ class UITrait extends iron.Trait {
 			if (messageTimer > 0) {
 				var _w = ui._w;
 				ui._w = Std.int(ui.ops.font.width(ui.fontSize, message) + 50 * ui.SCALE);
-				ui.fill(0, 0, ui._w, ui._h, 0xffff0000);
+				ui.fill(0, 0, ui._w, ui._h, messageColor);
 				ui.text(message);
 				ui._w = _w;
 			}

@@ -95,6 +95,8 @@ class App extends iron.Trait {
 						root.addTrait(new arm.trait.OrbitCamera());
 						root.addTrait(new arm.trait.ArcBallCamera());
 
+						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
+
 						iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
 						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render2D);
 
