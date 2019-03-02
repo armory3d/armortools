@@ -1,4 +1,4 @@
-package arm;
+package arm.ui;
 
 import zui.*;
 import zui.Zui.State;
@@ -13,6 +13,7 @@ import iron.math.Math;
 import iron.RenderPath;
 import arm.ProjectFormat;
 import arm.ProjectFormat.TAPConfig;
+import arm.util.*;
 
 @:access(zui.Zui)
 @:access(iron.data.Data)
@@ -166,6 +167,7 @@ class UITrait extends iron.Trait {
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
 	public var objectsHandle = new Zui.Handle({selected: true});
 	public var maskHandle = new Zui.Handle({position: 0});
+	public var uvmapHandle = new Zui.Handle({position: 0});
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	public var newObject = 0;
@@ -330,12 +332,12 @@ class UITrait extends iron.Trait {
 
 			var m = iron.system.Input.getMouse();
 			if (m.down()) { //
-				arm.UITrait.inst.lastPaintVecX = arm.UITrait.inst.paintVec.x; //
-				arm.UITrait.inst.lastPaintVecY = arm.UITrait.inst.paintVec.y;//
+				UITrait.inst.lastPaintVecX = UITrait.inst.paintVec.x; //
+				UITrait.inst.lastPaintVecY = UITrait.inst.paintVec.y;//
 			}//
 			else {
-				arm.UITrait.inst.lastPaintVecX = m.x / iron.App.w();
-				arm.UITrait.inst.lastPaintVecY = m.y / iron.App.h();
+				UITrait.inst.lastPaintVecX = m.x / iron.App.w();
+				UITrait.inst.lastPaintVecY = m.y / iron.App.h();
 			}
 		});//
 
@@ -1613,7 +1615,10 @@ class UITrait extends iron.Trait {
 								mergedObject.visible = true;
 							}
 						}
-						ui.combo(Id.handle({position: 0}), ["Combined"], "UV Map", true);
+						var uvMapType = ui.combo(uvmapHandle, ["Combined", "Object"], "UV Map", true);
+						if (uvmapHandle.changed) {
+							
+						}
 					}
 
 					// ui.text("Transform");

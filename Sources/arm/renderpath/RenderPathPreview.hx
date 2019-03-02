@@ -1,5 +1,7 @@
 package arm.renderpath;
 
+import arm.ui.*;
+
 class RenderPathPreview {
 
 	@:access(iron.RenderPath)
@@ -50,9 +52,9 @@ class RenderPathPreview {
 		var framebuffer = "texpreview";
 
 		#if arm_editor
-		var selectedMat = arm.UITrait.inst.htab.position == 0 ? arm.UITrait.inst.selectedMaterial2 : arm.UITrait.inst.selectedMaterial;
+		var selectedMat = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2 : UITrait.inst.selectedMaterial;
 		#else
-		var selectedMat = arm.UITrait.inst.selectedMaterial;
+		var selectedMat = UITrait.inst.selectedMaterial;
 		#end
 		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 
@@ -138,7 +140,7 @@ class RenderPathPreview {
 		
 		var framebuffer = "texpreview";
 
-		iron.RenderPath.active.renderTargets.get("texpreview").image = arm.UITrait.inst.decalImage;
+		iron.RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
 
 		path.setTarget("buf");
 		path.bindTarget("tex", "tex");

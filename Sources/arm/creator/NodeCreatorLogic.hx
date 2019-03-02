@@ -1,6 +1,7 @@
-package arm;
+package arm.creator;
 
 import armory.system.CyclesFormat;
+import arm.ui.*;
 
 typedef TNodeList = {
 	var categories: Array<TCat>;
@@ -31,7 +32,7 @@ typedef TCatButton = {
 	var data: Array<String>;
 }
 
-@:access(arm.UINodes)
+@:access(arm.ui.UINodes)
 class NodeCreatorLogic {
 	
 	public static var list:TNodeList;

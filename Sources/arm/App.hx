@@ -3,6 +3,7 @@ package arm;
 import zui.*;
 import zui.Zui.State;
 import zui.Canvas;
+import arm.ui.*;
 
 class App extends iron.Trait {
 
@@ -93,7 +94,7 @@ class App extends iron.Trait {
 						root.addTrait(new UIView2D());
 						root.addTrait(new arm.trait.FlyCamera());
 						root.addTrait(new arm.trait.OrbitCamera());
-						root.addTrait(new arm.trait.ArcBallCamera());
+						root.addTrait(new arm.trait.RotateCamera());
 
 						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
 

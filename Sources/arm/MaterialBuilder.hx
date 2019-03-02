@@ -9,6 +9,7 @@ import iron.data.ShaderData;
 import iron.data.ShaderData.ShaderContext;
 import iron.data.MaterialData;
 import iron.data.SceneFormat;
+import arm.ui.*;
 
 class MaterialBuilder {
 
@@ -485,7 +486,7 @@ class MaterialBuilder {
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
 
-		if (arm.UITrait.inst.brushType == 4) { // Show color map
+		if (UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0);'); // met/rough
 			frag.write('vec3 idcol = pow(texture(texcolorid, texCoord).rgb, vec3(2.2, 2.2, 2.2));');

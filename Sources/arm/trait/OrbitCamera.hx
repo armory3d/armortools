@@ -1,7 +1,7 @@
 package arm.trait;
 
 import iron.system.Input;
-import arm.UITrait;
+import arm.ui.*;
 
 class OrbitCamera extends iron.Trait {
 

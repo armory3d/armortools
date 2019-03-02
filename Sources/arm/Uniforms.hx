@@ -2,6 +2,7 @@ package arm;
 
 import iron.data.MaterialData;
 import iron.object.Object;
+import arm.ui.*;
 
 class Uniforms {
 	public static function init() {

@@ -3,7 +3,7 @@ package arm.trait;
 import iron.system.Input;
 import iron.system.Time;
 import iron.math.Vec4;
-import arm.UITrait;
+import arm.ui.*;
 
 class FlyCamera extends iron.Trait {
 

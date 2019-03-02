@@ -1,6 +1,7 @@
 package arm;
 
 import iron.RenderPath;
+import arm.ui.*;
 
 class LayerSlot {
 	public static var counter = 0;

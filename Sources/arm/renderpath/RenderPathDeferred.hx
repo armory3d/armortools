@@ -2,6 +2,7 @@ package arm.renderpath;
 
 import iron.RenderPath;
 import armory.renderpath.Inc;
+import arm.ui.*;
 
 class RenderPathDeferred {
 
@@ -150,7 +151,7 @@ class RenderPathDeferred {
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 
-		if (!arm.UITrait.inst.dirty()) {
+		if (!UITrait.inst.dirty()) {
 			path.setTarget("");
 			path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
 			ssaa4 ?
@@ -159,11 +160,11 @@ class RenderPathDeferred {
 			return;
 		}
 
-		var tid = arm.UITrait.inst.selectedLayer.id;
+		var tid = UITrait.inst.selectedLayer.id;
 
-		if (arm.UITrait.inst.pushUndo && arm.UITrait.inst.C.undo_steps > 0) {
-			var i = arm.UITrait.inst.undoI;
-			if (arm.UITrait.inst.paintHeight) {
+		if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0) {
+			var i = UITrait.inst.undoI;
+			if (UITrait.inst.paintHeight) {
 				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i, "texpaint_opt_undo" + i]);
 			}
 			else {
@@ -173,37 +174,37 @@ class RenderPathDeferred {
 			path.bindTarget("texpaint" + tid, "tex0");
 			path.bindTarget("texpaint_nor" + tid, "tex1");
 			path.bindTarget("texpaint_pack" + tid, "tex2");
-			if (arm.UITrait.inst.paintHeight) {
+			if (UITrait.inst.paintHeight) {
 				path.bindTarget("texpaint_opt" + tid, "tex3");
 				path.drawShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 			}
 			else {
 				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 			}
-			arm.UITrait.inst.undoLayers[arm.UITrait.inst.undoI].targetObject = arm.UITrait.inst.paintObject;
-			arm.UITrait.inst.undoLayers[arm.UITrait.inst.undoI].targetLayer = arm.UITrait.inst.selectedLayer;
-			arm.UITrait.inst.undoI = (arm.UITrait.inst.undoI + 1) % arm.UITrait.inst.C.undo_steps;
-			if (arm.UITrait.inst.undos < arm.UITrait.inst.C.undo_steps) arm.UITrait.inst.undos++;
-			arm.UITrait.inst.redos = 0;
-			arm.UITrait.inst.pushUndo = false;
+			UITrait.inst.undoLayers[UITrait.inst.undoI].targetObject = UITrait.inst.paintObject;
+			UITrait.inst.undoLayers[UITrait.inst.undoI].targetLayer = UITrait.inst.selectedLayer;
+			UITrait.inst.undoI = (UITrait.inst.undoI + 1) % UITrait.inst.C.undo_steps;
+			if (UITrait.inst.undos < UITrait.inst.C.undo_steps) UITrait.inst.undos++;
+			UITrait.inst.redos = 0;
+			UITrait.inst.pushUndo = false;
 		}
 
-		if (arm.UITrait.inst.depthDirty()) {
+		if (UITrait.inst.depthDirty()) {
 			path.setTarget("texpaint" + tid);
 			path.clearTarget(null, 1.0);
 			path.drawMeshes("depth");
 		}
 
-		if (arm.UITrait.inst.paintDirty()) {
-			if (arm.UITrait.inst.brushType == 4) { // Pick Color Id
+		if (UITrait.inst.paintDirty()) {
+			if (UITrait.inst.brushType == 4) { // Pick Color Id
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
-				arm.UITrait.inst.headerHandle.redraws = 2;
+				UITrait.inst.headerHandle.redraws = 2;
 			}
 			else {
-				if (arm.UITrait.inst.brushType == 3) { // Bake AO
+				if (UITrait.inst.brushType == 3) { // Bake AO
 					if (initVoxels) {
 						initVoxels = false;
 						var t = new RenderTargetRaw();
@@ -232,17 +233,17 @@ class RenderPathDeferred {
 				#end
 				//
 
-				if (arm.UITrait.inst.paintHeight) {
+				if (UITrait.inst.paintHeight) {
 					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
 				}
 				else {
 					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid]);
 				}
 				path.bindTarget("_paintdb", "paintdb");
-				if (arm.UITrait.inst.brushType == 3) { // Bake AO
+				if (UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
 				}
-				if (arm.UITrait.inst.colorIdPicked) {
+				if (UITrait.inst.colorIdPicked) {
 					path.bindTarget("texpaint_colorid", "texpaint_colorid");
 				} 
 
@@ -280,19 +281,19 @@ class RenderPathDeferred {
 		#end
 
 		// Paint
-		tid = arm.UITrait.inst.layers[0].id;
+		tid = UITrait.inst.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		if (arm.UITrait.inst.paintHeight) {
+		if (UITrait.inst.paintHeight) {
 			path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
 		}
-		for (i in 1...arm.UITrait.inst.layers.length) {
-			tid = arm.UITrait.inst.layers[i].id;
+		for (i in 1...UITrait.inst.layers.length) {
+			tid = UITrait.inst.layers[i].id;
 			path.bindTarget("texpaint" + tid, "texpaint" + tid);
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
 			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
-			if (arm.UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt" + tid);
+			if (UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt" + tid);
 		}
 		//
 
@@ -625,9 +626,9 @@ class RenderPathDeferred {
 		#end
 
 		taaFrame++;
-		arm.UITrait.inst.ddirty--;
-		arm.UITrait.inst.pdirty--;
-		arm.UITrait.inst.rdirty--;
+		UITrait.inst.ddirty--;
+		UITrait.inst.pdirty--;
+		UITrait.inst.rdirty--;
 	}
 
 	#end

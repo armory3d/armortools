@@ -1,11 +1,11 @@
 package arm.trait;
 
 import iron.system.Input;
-import arm.UITrait;
+import arm.ui.*;
 
-class ArcBallCamera extends iron.Trait {
+class RotateCamera extends iron.Trait {
 
-	public static var inst:ArcBallCamera;
+	public static var inst:RotateCamera;
 	var redraws = 0;
 
 	public function new() {

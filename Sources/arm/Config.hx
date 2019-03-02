@@ -1,5 +1,7 @@
 package arm;
 
+import arm.ui.*;
+
 class Config {
 
 	public static function applyConfig() {

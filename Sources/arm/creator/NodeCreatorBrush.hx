@@ -1,7 +1,8 @@
-package arm;
+package arm.creator;
 
 import zui.*;
 import zui.Nodes;
+import arm.ui.*;
 
 class NodeCreatorBrush {
 

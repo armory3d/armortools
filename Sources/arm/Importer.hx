@@ -5,6 +5,9 @@ import zui.Nodes;
 import zui.*;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
+import arm.creator.*;
+import arm.util.*;
+import arm.ui.*;
 
 class Importer {
 
@@ -675,8 +678,8 @@ class Importer {
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
-			arm.UIView2D.inst.uvmapCached = false;
-			arm.UIView2D.inst.trianglemapCached = false;
+			UIView2D.inst.uvmapCached = false;
+			UIView2D.inst.trianglemapCached = false;
 		});
 	}
 

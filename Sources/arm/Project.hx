@@ -3,6 +3,8 @@ package arm;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import arm.ProjectFormat;
+import arm.util.*;
+import arm.ui.*;
 
 class Project {
 	public static function projectOpen() {

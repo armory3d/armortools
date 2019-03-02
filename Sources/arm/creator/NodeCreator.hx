@@ -1,9 +1,10 @@
-package arm;
+package arm.creator;
 
 import zui.*;
 import zui.Nodes;
+import arm.ui.*;
 
-@:access(arm.UINodes)
+@:access(arm.ui.UINodes)
 class NodeCreator {
 
 	public static var numNodes = [12, 1, 9, 5, 4, 10];
