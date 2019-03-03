@@ -39,9 +39,7 @@ class UINodes extends iron.Trait {
 	public var nodes:Nodes;
 	public var canvas:TNodeCanvas = null;
 	public var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
-	#if arm_editor
 	public var canvasMap2:Map<MaterialSlot, TNodeCanvas> = null;
-	#end
 	var canvasBlob:String;
 
 	public var canvasBrush:TNodeCanvas = null;
@@ -100,8 +98,7 @@ class UINodes extends iron.Trait {
 
 	public function updateCanvasMap() {
 
-		#if arm_editor
-		if (UITrait.inst.htab.position == 0) {
+		if (UITrait.inst.worktab.position == 1) {
 			if (UITrait.inst.selectedMaterial2 != null) {
 				if (canvasMap2 == null) canvasMap2 = new Map();
 				var c = canvasMap2.get(UITrait.inst.selectedMaterial2);
@@ -116,7 +113,6 @@ class UINodes extends iron.Trait {
 			}
 			return;
 		}
-		#end
 
 		if (UITrait.inst.selectedMaterial != null) {
 			if (canvasMap == null) canvasMap = new Map();
@@ -459,12 +455,9 @@ class UINodes extends iron.Trait {
 	}
 
 	public function parseMeshMaterial() {
-		#if arm_editor
-		if (UITrait.inst.htab.position == 0) return;
+		if (UITrait.inst.worktab.position == 1) return;
 		var m = UITrait.inst.materials[0].data;
-		#else
-		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-		#end
+		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 			var sc:ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
 			if (sc != null) {
@@ -476,19 +469,14 @@ class UINodes extends iron.Trait {
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
-		#if (!arm_editor)
-		});
-		#end
+		// });
 	}
 
 	public function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		#if arm_editor
-		var m = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
-		#else
-		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-		#end
+		var m = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
+		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 
 			var sc:ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
@@ -533,28 +521,23 @@ class UINodes extends iron.Trait {
 			// 	}
 			// }
 
-		#if (!arm_editor)
-		});
-		#end
+		// });
 	}
 
 	public function parsePaintMaterial() {
 		if (!getMOut()) return;
 		
-		#if arm_editor
-		if (UITrait.inst.htab.position == 0) {
+		if (UITrait.inst.worktab.position == 1) {
 			parseMeshPreviewMaterial();
 			return;
 		}
-		#end
 
-		#if arm_editor
+		//
 		var m = UITrait.inst.materials[0].data;
 		sc = null;
 		_materialcontext = null;
-		#else
-		iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-		#end
+		//
+		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 		
 			var mat:TMaterial = {
 				name: "Material",
@@ -658,9 +641,7 @@ class UINodes extends iron.Trait {
 			// 	sc.raw.fragment_shader = cdata.fragment_shader;
 			// 	sc.compile();
 			// }
-		#if (!arm_editor)
-		});
-		#end
+		// });
 	}
 
 	public function acceptDrag(assetIndex:Int) {

@@ -573,55 +573,58 @@ class Importer {
 			return;
 		}
 
-		#if arm_editor
-		var raw:TMeshData = {
-			name: mesh.name,
-			vertex_arrays: [
-				{ values: mesh.posa, attrib: "pos" },
-				{ values: mesh.nora, attrib: "nor" }
-			],
-			index_arrays: [
-				{ values: mesh.inda, material: 0 }
-			],
-			scale_pos: mesh.scalePos,
-			scale_tex: mesh.scaleTex
-		};
-		if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
-		#else
-		if (mesh.texa == null) {
-			UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
-			var verts = Std.int(mesh.posa.length / 4);
-			mesh.texa = new kha.arrays.Int16Array(verts * 2);
-			var n = new iron.math.Vec4();
-			for (i in 0...verts) {
-				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
-				// Sphere projection
-				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
-				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
-				// Equirect
-				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
-				mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
-			}
+		var raw:TMeshData = null;
+		if (UITrait.inst.worktab.position == 1) {
+			raw = {
+				name: mesh.name,
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos" },
+					{ values: mesh.nora, attrib: "nor" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		}
-		var raw:TMeshData = {
-			name: mesh.name,
-			vertex_arrays: [
-				{ values: mesh.posa, attrib: "pos" },
-				{ values: mesh.nora, attrib: "nor" },
-				{ values: mesh.texa, attrib: "tex" }
-			],
-			index_arrays: [
-				{ values: mesh.inda, material: 0 }
-			],
-			scale_pos: mesh.scalePos,
-			scale_tex: mesh.scaleTex
-		};
-		#end
+		else {
+
+			if (mesh.texa == null) {
+				UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
+				var verts = Std.int(mesh.posa.length / 4);
+				mesh.texa = new kha.arrays.Int16Array(verts * 2);
+				var n = new iron.math.Vec4();
+				for (i in 0...verts) {
+					n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+					// Sphere projection
+					// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+					// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+					// Equirect
+					mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+					mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
+				}
+			}
+			raw = {
+				name: mesh.name,
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos" },
+					{ values: mesh.nora, attrib: "nor" },
+					{ values: mesh.texa, attrib: "tex" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+		}
 
 		new MeshData(raw, function(md:MeshData) {
 			
-			#if arm_editor // Append
-			if (UITrait.inst.htab.position == 0) {
+			// Append
+			if (UITrait.inst.worktab.position == 1) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = UITrait.inst.selectedMaterial2.data;
 				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
@@ -637,13 +640,14 @@ class Importer {
 				// dim[1] = aabb.y;
 				// dim[2] = aabb.z;
 				// object.raw.dimensions = dim;
+				#if arm_physics
 				object.addTrait(new armory.trait.physics.RigidBody(0.0));
+				#end
+				
 				UITrait.inst.selectObject(object);
 			}
+			// Replace
 			else {
-			#end
-			{ // Replace
-
 				UITrait.inst.paintObject = UITrait.inst.mainObject();
 
 				UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
@@ -671,10 +675,6 @@ class Importer {
 
 				UITrait.inst.paintObjects = [UITrait.inst.paintObject];
 			}
-
-			#if arm_editor
-			}
-			#end
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;

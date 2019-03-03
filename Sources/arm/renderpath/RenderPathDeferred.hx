@@ -21,10 +21,6 @@ class RenderPathDeferred {
 
 		path = _path;
 
-		#if arm_editor
-		armory.data.Config.raw.rp_gi = true;
-		#end
-
 		armory.renderpath.RenderPathDeferred.init(path);
 
 		{
@@ -148,6 +144,8 @@ class RenderPathDeferred {
 	public static function commands() {
 
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+
+		armory.data.Config.raw.rp_gi = UITrait.inst.worktab.position == 1;
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 

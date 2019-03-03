@@ -51,11 +51,8 @@ class RenderPathPreview {
 		
 		var framebuffer = "texpreview";
 
-		#if arm_editor
-		var selectedMat = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2 : UITrait.inst.selectedMaterial;
-		#else
-		var selectedMat = UITrait.inst.selectedMaterial;
-		#end
+		var selectedMat = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2 : UITrait.inst.selectedMaterial;
+
 		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 
 		path.setTarget("mbuf");

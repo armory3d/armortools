@@ -91,10 +91,8 @@ class UITrait extends iron.Trait {
 	public var hwnd = Id.handle();
 	public var materials:Array<MaterialSlot> = null;
 	public var selectedMaterial:MaterialSlot;
-	#if arm_editor
 	public var materials2:Array<MaterialSlot> = null;
 	public var selectedMaterial2:MaterialSlot;
-	#end
 	public var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
 	public var selectedLogic:BrushSlot;
@@ -204,13 +202,9 @@ class UITrait extends iron.Trait {
 	var menuCategory = 0;
 	var updateVersion = 0;
 
-	#if arm_editor
-	public var cameraControls = 2;
-	public var htab = Id.handle({position: 1});
-	#else
 	public var cameraControls = 0;
 	public var htab = Id.handle({position: 0});
-	#end
+	public var worktab = Id.handle({position: 0});
 
 	function loadBundled(names:Array<String>, done:Void->Void) {
 		var loaded = 0;
@@ -236,9 +230,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function paintDirty():Bool {
-		#if arm_editor
-		if (htab.position == 0) return false;
-		#end
+		if (UITrait.inst.worktab.position == 1) return false;
 		return pdirty > 0;
 	}
 
@@ -262,17 +254,15 @@ class UITrait extends iron.Trait {
 
 		if (materials == null) {
 			materials = [];
-			#if arm_editor
+			//
 			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 				materials.push(new MaterialSlot(m));
 				selectedMaterial = materials[0];
 			});
-			#else
-			materials.push(new MaterialSlot());
-			selectedMaterial = materials[0];
-			#end
+			//
+			// materials.push(new MaterialSlot());
+			// selectedMaterial = materials[0];
 		}
-		#if arm_editor
 		if (materials2 == null) {
 			materials2 = [];
 			iron.data.Data.getMaterial("Scene", "Material2", function(m:iron.data.MaterialData) {
@@ -280,7 +270,6 @@ class UITrait extends iron.Trait {
 				selectedMaterial2 = materials2[0];
 			});
 		}
-		#end
 
 		if (brushes == null) {
 			brushes = [];
@@ -361,15 +350,13 @@ class UITrait extends iron.Trait {
 	}
 
 	function done() {
-		#if arm_editor
-		grid = iron.Scene.active.getChild(".Grid");
+		//
+		// grid = iron.Scene.active.getChild(".Grid");
 		gizmo = iron.Scene.active.getChild(".GizmoTranslate");
 		gizmoX = iron.Scene.active.getChild("GizmoX");
 		gizmoY = iron.Scene.active.getChild("GizmoY");
 		gizmoZ = iron.Scene.active.getChild("GizmoZ");
-		var light = iron.Scene.active.getChild("Light");
-		// light.addTrait(new armory.trait.physics.RigidBody(0, 0));
-		#end
+		//
 
 		selectedObject = iron.Scene.active.getChild("Cube");
 		paintObject = cast (selectedObject, MeshObject);
@@ -521,39 +508,25 @@ class UITrait extends iron.Trait {
 
 		autoFillHandle.selected = false; // Auto-disable
 
-		// #if arm_editor
-		// if (Std.is(selectedObject, iron.object.MeshObject)) {
-		// 	cast(selectedObject, iron.object.MeshObject).materials[0] = selectedMaterial.data;
-		// }
-		// #end
-
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
-
-		// #if arm_editor
-		// UINodes.inst.parseBrush();
-		// #end
 
 		hwnd.redraws = 2;
 	}
 
-	#if arm_editor
 	function selectMaterial2(i:Int) {
 		if (materials2.length <= i) return;
 		selectedMaterial2 = materials2[i];
 
-		#if arm_editor
 		if (Std.is(selectedObject, iron.object.MeshObject)) {
 			cast(selectedObject, iron.object.MeshObject).materials[0] = selectedMaterial2.data;
 		}
-		#end
 
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
 
 		hwnd.redraws = 2;
 	}
-	#end
 
 	function selectBrush(i:Int) {
 		if (brushes.length <= i) return;
@@ -636,12 +609,11 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		#if arm_editor
-		updateGizmo();
-		#end
+		if (UITrait.inst.worktab.position == 1) {
+			updateGizmo();
+		}
 	}
 
-	#if arm_editor
 	function updateGizmo() {
 		if (!gizmo.visible) return;
 
@@ -679,7 +651,9 @@ class UITrait extends iron.Trait {
 
 					object.transform.buildMatrix();
 
+					#if arm_physics
 					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
+					#end
 
 					selectObject(object);
 				}
@@ -693,7 +667,9 @@ class UITrait extends iron.Trait {
 					object.transform.scale.setFrom(lo.transform.scale);
 					object.transform.buildMatrix();
 
+					#if arm_physics
 					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
+					#end
 
 					selectObject(object);
 				}
@@ -704,9 +680,11 @@ class UITrait extends iron.Trait {
 		}
 
 		if (mouse.started("middle")) {
+			#if arm_physics
 			var physics = armory.trait.physics.PhysicsWorld.active;
 			var rb = physics.pickClosest(mouse.x, mouse.y);
 			if (rb != null) selectObject(rb.object);
+			#end
 		}
 
 		if (mouse.started("left") && selectedObject.name != "Scene") {
@@ -735,8 +713,10 @@ class UITrait extends iron.Trait {
 					if (axisStart == 0) axisStart = hit.x - selectedObject.transform.loc.x;
 					selectedObject.transform.loc.x = hit.x - axisStart;
 					selectedObject.transform.buildMatrix();
+					#if arm_physics
 					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
 					if (rb != null) rb.syncTransform();
+					#end
 				}
 			}
 			else if (axisY) {
@@ -745,8 +725,10 @@ class UITrait extends iron.Trait {
 					if (axisStart == 0) axisStart = hit.y - selectedObject.transform.loc.y;
 					selectedObject.transform.loc.y = hit.y - axisStart;
 					selectedObject.transform.buildMatrix();
+					#if arm_physics
 					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
 					if (rb != null) rb.syncTransform();
+					#end
 				}
 			}
 			else if (axisZ) {
@@ -755,15 +737,16 @@ class UITrait extends iron.Trait {
 					if (axisStart == 0) axisStart = hit.z - selectedObject.transform.loc.z;
 					selectedObject.transform.loc.z = hit.z - axisStart;
 					selectedObject.transform.buildMatrix();
+					#if arm_physics
 					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
 					if (rb != null) rb.syncTransform();
+					#end
 				}
 			}
 		}
 
 		iron.system.Input.occupied = (axisX || axisY || axisZ) && mouse.x < App.w();
 	}
-	#end
 
 	function render(g:kha.graphics2.Graphics) {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
@@ -854,12 +837,12 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
-	function showLogicNodes() {
-		UIView2D.inst.show = false;
-		if (UINodes.inst.show && UINodes.inst.canvasType == 2) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = 2; }
-		arm.App.resize();
-	}
+	// function showLogicNodes() {
+	// 	UIView2D.inst.show = false;
+	// 	if (UINodes.inst.show && UINodes.inst.canvasType == 2) UINodes.inst.show = false;
+	// 	else { UINodes.inst.show = true; UINodes.inst.canvasType = 2; }
+	// 	arm.App.resize();
+	// }
 
 	function show2DView() {
 		UINodes.inst.show = false;
@@ -890,18 +873,18 @@ class UITrait extends iron.Trait {
 	public function selectObject(o:iron.object.Object) {
 		selectedObject = o;
 
-		#if arm_editor
-		if (Std.is(o, iron.object.MeshObject)) {
-			for (i in 0...materials2.length) {
-				if (materials2[i].data == cast(o, iron.object.MeshObject).materials[0]) {
-					// selectMaterial(i); // loop
-					selectedMaterial2 = materials2[i];
-					hwnd.redraws = 2;
-					break;
+		if (UITrait.inst.worktab.position == 1) {
+			if (Std.is(o, iron.object.MeshObject)) {
+				for (i in 0...materials2.length) {
+					if (materials2[i].data == cast(o, iron.object.MeshObject).materials[0]) {
+						// selectMaterial(i); // loop
+						selectedMaterial2 = materials2[i];
+						hwnd.redraws = 2;
+						break;
+					}
 				}
 			}
 		}
-		#end
 	}
 
 	public function selectPaintObject(o:iron.object.MeshObject) {
@@ -1022,7 +1005,8 @@ class UITrait extends iron.Trait {
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
-			ui.tab(Id.handle(), "Paint");
+			ui.tab(worktab, "Paint");
+			ui.tab(worktab, "Scene");
 		}
 
 		var panelx = iron.App.x();
@@ -1158,15 +1142,14 @@ class UITrait extends iron.Trait {
 		var wx = C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
 		if (ui.window(hwnd, wx, 0, windowW, kha.System.windowHeight())) {
 
-			#if arm_editor
-
 			gizmo.visible = false;
-			grid.visible = false;
+			// grid.visible = false;
 
-			if (ui.tab(htab, "Scene")) {
-				gizmo.visible = true;
-				grid.visible = true;
-				ui.separator();
+			if (UITrait.inst.worktab.position == 1) { //
+
+			gizmo.visible = true;
+			// grid.visible = true;
+			if (ui.tab(htab, "Tools")) {
 				if (ui.panel(Id.handle({selected: true}), "Outliner", 1)) {
 					ui.indent();
 					
@@ -1265,8 +1248,10 @@ class UITrait extends iron.Trait {
 							rot.mult(3.141592 / 180);
 							selectedObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
 							selectedObject.transform.buildMatrix();
+							#if arm_physics
 							var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
 							if (rb != null) rb.syncTransform();
+							#end
 						}
 
 						ui.row(row4);
@@ -1319,80 +1304,79 @@ class UITrait extends iron.Trait {
 						}
 					}
 
-					if (ui.button("LNodes")) showLogicNodes();
+					// if (ui.button("LNodes")) showLogicNodes();
 
 					ui.unindent();
 				}
 
-				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
+				// ui.separator();
+				// if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
 
-					var empty = bundled.get("empty.jpg");
+				// 	var empty = bundled.get("empty.jpg");
 
-					for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
-						ui.row([1/5,1/5,1/5,1/5,1/5]);
+				// 	for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
+				// 		ui.row([1/5,1/5,1/5,1/5,1/5]);
 
-						if (row > 0) ui._y += 6;
+				// 		if (row > 0) ui._y += 6;
 
-						#if (kha_opengl || kha_webgl)
-						ui.imageInvertY = true; // Material preview
-						#end
+				// 		#if (kha_opengl || kha_webgl)
+				// 		ui.imageInvertY = true; // Material preview
+				// 		#end
 
-						for (j in 0...5) {
-							var i = j + row * 5;
-							var img = i >= materials2.length ? empty : materials2[i].image;
-							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
+				// 		for (j in 0...5) {
+				// 			var i = j + row * 5;
+				// 			var img = i >= materials2.length ? empty : materials2[i].image;
+				// 			var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
 
-							if (selectedMaterial2 == materials2[i]) {
-								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
-								var off = row % 2 == 1 ? 1 : 0;
-								var w = 51 - C.window_scale;
-								ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
-								ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
-								ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
-								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
-							}
+				// 			if (selectedMaterial2 == materials2[i]) {
+				// 				// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
+				// 				var off = row % 2 == 1 ? 1 : 0;
+				// 				var w = 51 - C.window_scale;
+				// 				ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
+				// 				ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
+				// 				ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
+				// 				ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
+				// 			}
 
-							if (ui.image(img, tint) == State.Started && img != empty) {
-								if (selectedMaterial2 != materials2[i]) selectMaterial2(i);
-								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
-								selectTime = iron.system.Time.time();
-							}
-							if (img != empty && ui.isHovered) ui.tooltipImage(img);
-						}
+				// 			if (ui.image(img, tint) == State.Started && img != empty) {
+				// 				if (selectedMaterial2 != materials2[i]) selectMaterial2(i);
+				// 				if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
+				// 				selectTime = iron.system.Time.time();
+				// 			}
+				// 			if (img != empty && ui.isHovered) ui.tooltipImage(img);
+				// 		}
 
-						#if (kha_opengl || kha_webgl)
-						ui.imageInvertY = false; // Material preview
-						#end
-					}
+				// 		#if (kha_opengl || kha_webgl)
+				// 		ui.imageInvertY = false; // Material preview
+				// 		#end
+				// 	}
 
-					ui.row([1/2,1/2]);
-					if (ui.button("New")) {
+				// 	ui.row([1/2,1/2]);
+				// 	if (ui.button("New")) {
 
-						iron.data.Data.cachedMaterials.remove("SceneMaterial2");
-						iron.data.Data.cachedShaders.remove("Material2_data");
-						iron.data.Data.cachedSceneRaws.remove("Material2_data");
-						// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
-						iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
-							md.name = "Material2." + materials2.length;
-							ui.g.end();
-							var m = new MaterialSlot(md);
-							materials2.push(m);
-							selectMaterial2(materials2.length - 1);
-							RenderUtil.makeMaterialPreview();
-							ui.g.begin(false);
-						});
-					}
-					if (ui.button("Nodes")) {
-						showMaterialNodes();
-					}
-				}
+				// 		iron.data.Data.cachedMaterials.remove("SceneMaterial2");
+				// 		iron.data.Data.cachedShaders.remove("Material2_data");
+				// 		iron.data.Data.cachedSceneRaws.remove("Material2_data");
+				// 		// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
+				// 		iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+				// 			md.name = "Material2." + materials2.length;
+				// 			ui.g.end();
+				// 			var m = new MaterialSlot(md);
+				// 			materials2.push(m);
+				// 			selectMaterial2(materials2.length - 1);
+				// 			RenderUtil.makeMaterialPreview();
+				// 			ui.g.begin(false);
+				// 		});
+				// 	}
+				// 	if (ui.button("Nodes")) {
+				// 		showMaterialNodes();
+				// 	}
+				// }
 			}
-			else {
-				selectedObject = paintObject;
+			
 			}
-			#end // arm_editor
-
+			else { // worktab
+			selectedObject = paintObject;
 
 			if (ui.tab(htab, "Tools")) {
 
@@ -1787,6 +1771,9 @@ class UITrait extends iron.Trait {
 				// Draw plugins
 				for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
 			}
+
+			} // worktab
+
 			if (ui.tab(htab, "Library")) {
 
 				if (ui.button("Import")) {

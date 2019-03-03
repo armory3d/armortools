@@ -73,13 +73,13 @@ class RenderUtil {
 		sphere.visible = true;
 		UITrait.inst.paintObject = sphere;
 
-		#if arm_editor
-		sphere.materials[0] = UITrait.inst.htab.position == 0 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
+		//
+		sphere.materials[0] = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
 		var gizmo_vis = UITrait.inst.gizmo.visible;
-		var grid_vis = UITrait.inst.grid.visible;
+		// var grid_vis = UITrait.inst.grid.visible;
 		UITrait.inst.gizmo.visible = false;
-		UITrait.inst.grid.visible = false;
-		#end
+		// UITrait.inst.grid.visible = false;
+		//
 		
 		UITrait.inst.savedCamera.setFrom(iron.Scene.active.camera.transform.local);
 		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
@@ -112,10 +112,8 @@ class RenderUtil {
 		for (p in UITrait.inst.paintObjects) p.visible = true;
 		UITrait.inst.paintObject = painto;
 
-		#if arm_editor
 		UITrait.inst.gizmo.visible = gizmo_vis;
-		UITrait.inst.grid.visible = grid_vis;
-		#end
+		// UITrait.inst.grid.visible = grid_vis;
 
 		iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 		iron.Scene.active.camera.data.raw.fov = savedFov;
