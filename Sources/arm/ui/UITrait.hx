@@ -789,7 +789,11 @@ class UITrait extends iron.Trait {
 
 			if (brushType == 5) { // Decal
 				psize = Std.int(256 * (brushRadius * brushNodesRadius));
+				#if kha_direct3d11
+				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
+				#else
 				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
+				#end
 			}
 			else {
 				// if (brushType == 0 || brushType == 1 || brushType == 4) {
@@ -803,10 +807,19 @@ class UITrait extends iron.Trait {
 				// Separator line
 				g.color = 0x66ffffff;
 				g.fillRect(cx - 1, 0, 2, iron.App.h());
-				// Cursor
-				g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+				if (brushType == 5) { // Decal
+					#if kha_direct3d11
+					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
+					#else
+					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2 + psize, psize, -psize);
+					#end
+				}
+				else { // Cursor
+					g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+				}
 				g.color = 0xffffffff;
 			}
+
 			if (showGrid) {
 				// Separator line
 				var x1 = iron.App.x() + iron.App.w() / 3;

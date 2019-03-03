@@ -203,16 +203,22 @@ class MaterialBuilder {
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
 			if (decal) {
-				frag.write_attrib('vec2 binp = inp.xy * 2.0 - 1.0;');
-				frag.write_attrib('binp = binp * 0.5 + 0.5;');
-
-				frag.write_attrib('uvsp -= binp;');
+				frag.write_attrib('uvsp -= inp.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 
 				frag.write_attrib('uvsp *= 0.21 / brushRadius;');
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
-				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) { discard; }');
+				if (UITrait.inst.mirrorX) {
+					frag.write_attrib('vec2 uvsp2 = sp.xy - vec2(1.0 - inp.x, inp.y);');
+					frag.write_attrib('uvsp2.x *= aspectRatio;');
+					frag.write_attrib('uvsp2 *= 0.21 / brushRadius;');
+					frag.write_attrib('uvsp2 += vec2(0.5, 0.5);');
+					frag.write_attrib('if ((uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) && (uvsp2.x < 0.01 || uvsp2.y < 0.01 || uvsp2.x > 0.99 || uvsp2.y > 0.99)) { discard; }');
+				}
+				else {
+					frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) { discard; }');
+				}
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
