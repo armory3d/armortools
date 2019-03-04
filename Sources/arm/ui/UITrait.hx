@@ -395,6 +395,7 @@ class UITrait extends iron.Trait {
 		var kb = iron.system.Input.getKeyboard();
 		var shift = kb.down("shift");
 		var ctrl = kb.down("control");
+		var alt = kb.down("alt");
 		if (kb.started("tab")) {
 			if (ctrl) { // Cycle objects
 				var i = (paintObjects.indexOf(paintObject) + 1) % paintObjects.length;
@@ -414,12 +415,12 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
-		if (kb.started("1") && (shift || ctrl)) shift ? setBrushType(0) : selectMaterial(0);
-		else if (kb.started("2") && (shift || ctrl)) shift ? setBrushType(1) : selectMaterial(1);
-		else if (kb.started("3") && (shift || ctrl)) shift ? setBrushType(2) : selectMaterial(2);
-		else if (kb.started("4") && (shift || ctrl)) shift ? setBrushType(3) : selectMaterial(3);
-		else if (kb.started("5") && (shift || ctrl)) shift ? setBrushType(4) : selectMaterial(4);
-		else if (kb.started("6") && (shift || ctrl)) shift ? setBrushType(5) : selectMaterial(5);
+		if (kb.started("1") && (shift || alt)) shift ? setBrushType(0) : selectMaterial(0);
+		else if (kb.started("2") && (shift || alt)) shift ? setBrushType(1) : selectMaterial(1);
+		else if (kb.started("3") && (shift || alt)) shift ? setBrushType(2) : selectMaterial(2);
+		else if (kb.started("4") && (shift || alt)) shift ? setBrushType(3) : selectMaterial(3);
+		else if (kb.started("5") && (shift || alt)) shift ? setBrushType(4) : selectMaterial(4);
+		else if (kb.started("6") && (shift || alt)) shift ? setBrushType(5) : selectMaterial(5);
 
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
@@ -452,22 +453,22 @@ class UITrait extends iron.Trait {
 			mouse.y > 0 && mouse.y < iron.App.h() && !ui.isTyping) {
 
 			// Color pick shortcut
-			if (kb.started("alt")) {
-				altStartedX = mouse.x;
-				altStartedY = mouse.y;
-			}
-			else if (kb.released("alt") && altStartedX == mouse.x && altStartedY == mouse.y) {
-				if (lastBrushType == -1) {
-					lastBrushType = brushType;
-					setBrushType(4);
-				}
-				else {
-					setBrushType(lastBrushType);
-					lastBrushType = -1;
-				}
-				altStartedX = -1.0;
-				altStartedY = -1.0;
-			}
+			// if (kb.started("alt")) {
+			// 	altStartedX = mouse.x;
+			// 	altStartedY = mouse.y;
+			// }
+			// else if (kb.released("alt") && altStartedX == mouse.x && altStartedY == mouse.y) {
+			// 	if (lastBrushType == -1) {
+			// 		lastBrushType = brushType;
+			// 		setBrushType(4);
+			// 	}
+			// 	else {
+			// 		setBrushType(lastBrushType);
+			// 		lastBrushType = -1;
+			// 	}
+			// 	altStartedX = -1.0;
+			// 	altStartedY = -1.0;
+			// }
 
 			// Radius
 			if (kb.started("-")) {
@@ -486,18 +487,26 @@ class UITrait extends iron.Trait {
 			}
 
 			// Viewpoint
-			if (kb.started("0")) {
-				ViewportUtil.resetViewport();
-				ViewportUtil.scaleToBounds();
-			}
-			else if (kb.started("1")) {
-				ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0);
-			}
-			else if (kb.started("3")) {
-				ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-			}
-			else if (kb.started("7")) {
-				ViewportUtil.setView(0, 0, 3, 0, 0, 0);
+			if (!shift && !alt) {
+				if (kb.started("0")) {
+					ViewportUtil.resetViewport();
+					ViewportUtil.scaleToBounds();
+				}
+				else if (kb.started("1")) {
+					ctrl ?
+						ViewportUtil.setView(0, 3, 0, Math.PI / 2, 0, Math.PI) :
+						ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0);
+				}
+				else if (kb.started("3")) {
+					ctrl ?
+						ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2) :
+						ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				}
+				else if (kb.started("7")) {
+					ctrl ?
+						ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI) :
+						ViewportUtil.setView(0, 0, 3, 0, 0, 0);
+				}
 			}
 		}
 
@@ -2049,16 +2058,18 @@ class UITrait extends iron.Trait {
 					ui.text("Distract Free - F12");
 					ui.text("Node Editor - Tab");
 					ui.text("Select Tool - Shift+1-9");
-					ui.text("Select Material - Ctrl+1-9");
-					ui.text("Pick Color ID - Alt");
+					ui.text("Select Material - Alt+1-9");
 					ui.text("Next Object - Ctrl+Tab");
 					ui.text("Auto-Fill - G");
 					ui.text("Brush Radius - +/-");
 					ui.text("Brush Ruler - Hold Shift");
 					ui.text("View Default - 0");
 					ui.text("View Front - 1");
+					ui.text("View Back - Ctrl+1");
 					ui.text("View Right - 3");
+					ui.text("View Left - Ctrl+3");
 					ui.text("View Top - 7");
+					ui.text("View Bottom - Ctrl+7");
 				}
 
 				ui.separator();
