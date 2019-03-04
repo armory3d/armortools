@@ -353,6 +353,8 @@ class UITrait extends iron.Trait {
 		//
 		// grid = iron.Scene.active.getChild(".Grid");
 		gizmo = iron.Scene.active.getChild(".GizmoTranslate");
+		gizmo.transform.scale.set(0.5, 0.5, 0.5);
+		gizmo.transform.buildMatrix();
 		gizmoX = iron.Scene.active.getChild("GizmoX");
 		gizmoY = iron.Scene.active.getChild("GizmoY");
 		gizmoZ = iron.Scene.active.getChild("GizmoZ");
@@ -447,7 +449,7 @@ class UITrait extends iron.Trait {
 		// Viewport shortcuts
 		var mouse = iron.system.Input.getMouse();
 		if (mouse.x > 0 && mouse.x < iron.App.w() &&
-			mouse.y > 0 && mouse.y < iron.App.h()) {
+			mouse.y > 0 && mouse.y < iron.App.h() && !ui.isTyping) {
 
 			// Color pick shortcut
 			if (kb.started("alt")) {
@@ -1020,6 +1022,7 @@ class UITrait extends iron.Trait {
 		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			ui.tab(worktab, "Scene");
+			if (worktab.changed) ddirty = 2;
 		}
 
 		var panelx = iron.App.x();
@@ -1751,6 +1754,11 @@ class UITrait extends iron.Trait {
 						ddirty = 2;
 					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+
+					if (ui.button("Flip Normals")) {
+						MeshUtil.flipNormals();
+						ddirty = 2;
+					}
 
 					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 					if (showEnvmapHandle.changed) {
