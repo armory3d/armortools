@@ -254,7 +254,7 @@ class MaterialBuilder {
 		}
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
-		frag.write('    fragColor[1] = vec4(nortan, 1.0);'); // nortan.xy *= str
+		frag.write('    fragColor[1] = vec4(nortan, str);'); // nortan.xy *= str
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 		if (UITrait.inst.paintHeight) {
 			frag.write('    fragColor[3] = vec4(1.0, 0.0, height, str);');
@@ -334,8 +334,8 @@ class MaterialBuilder {
 		frag.write('vec3 nortan = $nortan;');
 
 		//if discard_transparent:
-			var opac = 0.2;//mat_state.material.discard_transparent_opacity
-			frag.write('if (opacity < $opac) discard;');
+			// var opac = 0.2;//mat_state.material.discard_transparent_opacity
+			// frag.write('if (opacity < $opac) discard;');
 
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
