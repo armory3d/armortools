@@ -120,4 +120,26 @@ class MeshUtil {
 			g.vertexBufferMap.get("posnor").unlock();
 		}
 	}
+
+	public static function flipNormals() {
+		for (p in UITrait.inst.paintObjects) {
+			var g = p.data.geom;
+			// position, normals
+			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
+			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
+			var verticesVox = g.vertexBufferMap.get("posnor").lockInt16();
+			for (i in 0...Std.int(vertices.length / 8)) {
+				vertices[i * 8 + 3] = -vertices[i * 8 + 3];
+				vertices[i * 8 + 4] = -vertices[i * 8 + 4];
+				vertices[i * 8 + 5] = -vertices[i * 8 + 5];
+				verticesVox[i * 6 + 3] = -verticesVox[i * 6 + 3];
+				verticesVox[i * 6 + 4] = -verticesVox[i * 6 + 4];
+				verticesVox[i * 6 + 5] = -verticesVox[i * 6 + 5];
+			}
+			g.vertexBuffer.unlock();
+			g.vertexBufferMap.get("pos").unlock();
+			g.vertexBufferMap.get("posnor").unlock();
+		}
+	}
 }
