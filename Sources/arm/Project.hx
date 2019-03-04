@@ -259,6 +259,8 @@ class Project {
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
+
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 }

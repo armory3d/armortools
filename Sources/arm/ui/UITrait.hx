@@ -1750,6 +1750,9 @@ class UITrait extends iron.Trait {
 					ui.row([1/2, 1/2]);
 					drawWireframe = ui.check(wireframeHandle, "Wireframe");
 					if (wireframeHandle.changed) {
+						ui.g.end();
+						UIView2D.inst.cacheUVMap();
+						ui.g.begin(false);
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}

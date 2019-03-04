@@ -397,6 +397,7 @@ class Importer {
 				obj = new iron.format.obj.ObjParser(b, obj.pos);
 				addMesh(obj);
 			}
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 
@@ -404,6 +405,7 @@ class Importer {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var obj = new iron.format.gltf.GltfParser(b);
 			makeMesh(obj, path);
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 
@@ -414,6 +416,7 @@ class Importer {
 			while (obj.next()) {
 				addMesh(obj);
 			}
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 
@@ -564,6 +567,7 @@ class Importer {
 			name = name.substring(2, name.length);
 			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
 			makeMesh(obj, path);
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 
