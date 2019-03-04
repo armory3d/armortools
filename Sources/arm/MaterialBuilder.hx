@@ -191,13 +191,18 @@ class MaterialBuilder {
 			frag.write('if (any(c1 != c2)) { discard; }');
 		}
 
-		// Texture projection - texcoords
+		// TexCoords - uvmap
 		if (UITrait.inst.brushPaint == 0 && !decal) {
-			vert.add_uniform('float brushScale', '_brushScale'); // TODO: Will throw uniform not found
+			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = tex * brushScale;');
+
+			if (UITrait.inst.brushRot > 0.0) {
+				var a = UITrait.inst.brushRot * (Math.PI / 180);
+				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
+			}
 		}
-		// Texture projection - project
+		// TexCoords - project
 		else {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
@@ -225,6 +230,11 @@ class MaterialBuilder {
 			}
 			
 			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
+
+			if (UITrait.inst.brushRot > 0.0) {
+				var a = UITrait.inst.brushRot * (Math.PI / 180);
+				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
+			}
 		}
 
 		Cycles.parse_height_as_channel = true;

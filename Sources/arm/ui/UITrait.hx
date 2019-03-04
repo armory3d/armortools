@@ -140,6 +140,7 @@ class UITrait extends iron.Trait {
 	public var brushRadiusHandle = new Zui.Handle({value: 0.5});
 	public var brushOpacity = 1.0;
 	public var brushScale = 0.5;
+	public var brushRot = 0.0;
 	public var brushStrength = 1.0;
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
@@ -1038,15 +1039,12 @@ class UITrait extends iron.Trait {
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(headerHandle, panelx, headerh, kha.System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
-			// Color ID
-			if (brushType == 4) {
-				// Picked color
+			if (brushType == 4) { // Color ID
 				ui.text("Picked Color");
 				if (colorIdPicked) {
 					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
 				if (ui.button("Clear")) colorIdPicked = false;
-				// Set color map
 				ui.text("Color ID Map");
 				var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
 				if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
@@ -1068,12 +1066,18 @@ class UITrait extends iron.Trait {
 					UINodes.inst.parsePaintMaterial();
 				}
 			}
-			else { // Draw, Erase, Fill
+			else { // Draw, Erase, Fill, Decal
 				brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
+				
 				var brushScaleHandle = Id.handle({value: brushScale});
 				brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
 				if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
-
+				
+				var brushRotHandle = Id.handle({value: brushRot});
+				brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
+				// if (brushRotHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
+				if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
+				
 				brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
 				brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
 				brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
@@ -1105,7 +1109,7 @@ class UITrait extends iron.Trait {
 						UINodes.inst.parsePaintMaterial();
 					}
 				}
-				else { // Draw, Erase
+				else { // Draw, Erase, Decal
 					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 					var mirrorHandle = Id.handle({selected: mirrorX});
 					mirrorX = ui.check(mirrorHandle, "Mirror");
