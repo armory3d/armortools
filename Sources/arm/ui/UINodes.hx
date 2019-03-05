@@ -580,7 +580,6 @@ class UINodes extends iron.Trait {
 			var con = MaterialBuilder.make_paint(_sd, _matcon);
 			var cdata = con.data;
 
-			// if (sc == null) {
 				// from_source is synchronous..
 				if (sc != null) sc.delete();
 				
@@ -599,8 +598,6 @@ class UINodes extends iron.Trait {
 					m.contexts.push(self);
 				});
 
-
-
 				var dcon = MaterialBuilder.make_depth(_sd, _matcon);
 				var dcdata = dcon.data;
 				// from_source is synchronous..
@@ -614,14 +611,12 @@ class UINodes extends iron.Trait {
 					m.contexts.push(self);
 				});
 
-
-
-				var smcon = MaterialBuilder.make_depth(_sd, _matcon, true);
-				var smcdata = smcon.data;
+				// var smcon = MaterialBuilder.make_depth(_sd, _matcon, true);
+				// var smcdata = smcon.data;
 				// from_source is synchronous..
-				var smsc = new ShaderContext(smcdata, function(sc:ShaderContext){});
-				for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
-				m.shader.contexts.push(smsc);
+				// var smsc = new ShaderContext(smcdata, function(sc:ShaderContext){});
+				// for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
+				// m.shader.contexts.push(smsc);
 				// var smmatcon:TMaterialContext = {
 					// name: "shadowmap"
 				// }
@@ -635,12 +630,6 @@ class UINodes extends iron.Trait {
 					UITrait.inst.pdirty = 8;
 					UITrait.inst.ddirty = 8;
 				}
-			// }
-			// else {
-			// 	sc.raw.vertex_shader = cdata.vertex_shader;
-			// 	sc.raw.fragment_shader = cdata.fragment_shader;
-			// 	sc.compile();
-			// }
 		// });
 	}
 

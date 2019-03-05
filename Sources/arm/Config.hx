@@ -19,10 +19,14 @@ class Config {
 			// light.data.raw.strength = 6.5;
 		// }
 		C.rp_supersample = getSuperSampleSize(UITrait.inst.hsupersample.position);
-		UITrait.inst.ui.g.end();
+		
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+		
 		armory.data.Config.save();
 		armory.renderpath.RenderPathCreator.applyConfig();
-		UITrait.inst.ui.g.begin(false);
+		
+		if (current != null) current.begin(false);
 		UITrait.inst.ddirty = 2;
 	}
 

@@ -623,7 +623,7 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 			}
-			else if (UITrait.inst.viewportMode == 2) { // Normal
+			else if (UITrait.inst.viewportMode == 2) { // Normal Map
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(ntex.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 			}
@@ -642,6 +642,11 @@ class MaterialBuilder {
 			else if (UITrait.inst.viewportMode == 6) { // Texcoord
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(texCoord, 0.0, packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 7) { // Normal
+				frag.nAttr = true;
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
+				frag.write('fragColor[1] = vec4(nAttr, packFloat2(1.0, 1.0));'); // occ/spec
 			}
 		}
 

@@ -126,7 +126,10 @@ class Project {
 			UITrait.inst.paintObject.name = n;
 			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
 			UITrait.inst.maskHandle.position = 0;
-			UITrait.inst.materials = [new MaterialSlot()];
+			// UITrait.inst.materials = [new MaterialSlot()];
+			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+				UITrait.inst.materials = [new MaterialSlot(m)];
+			});
 			UITrait.inst.selectedMaterial = UITrait.inst.materials[0];
 			UINodes.inst.canvasMap = new Map();
 			UINodes.inst.canvasBrushMap = new Map();
@@ -167,9 +170,14 @@ class Project {
 
 			for (file in project.assets) Importer.importTexture(file);
 
+			var m0:iron.data.MaterialData = null;
+			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+				m0 = m;
+			});
+
 			UITrait.inst.materials = [];
 			for (n in project.material_nodes) {
-				var mat = new MaterialSlot();
+				var mat = new MaterialSlot(m0);
 				UINodes.inst.canvasMap.set(mat, n);
 				UITrait.inst.materials.push(mat);
 

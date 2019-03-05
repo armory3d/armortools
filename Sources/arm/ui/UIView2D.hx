@@ -167,7 +167,7 @@ class UIView2D extends iron.Trait {
 			ui._x = 3;
 			ui._y = 3;
 			ui._w = ew;
-			texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal", "ORM"], "Texture");
+			texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal Map", "ORM"], "Texture");
 			ui._x += ew + 3;
 			ui._y = 3;
 			uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");

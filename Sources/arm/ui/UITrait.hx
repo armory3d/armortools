@@ -397,7 +397,9 @@ class UITrait extends iron.Trait {
 		var shift = kb.down("shift");
 		var ctrl = kb.down("control");
 		var alt = kb.down("alt");
+		alt = false; // TODO: gets stuck after alt+tab
 		if (kb.started("tab")) {
+			trace("TAB");
 			if (ctrl) { // Cycle objects
 				var i = (paintObjects.indexOf(paintObject) + 1) % paintObjects.length;
 				selectPaintObject(paintObjects[i]);
@@ -1711,7 +1713,7 @@ class UITrait extends iron.Trait {
 						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
 					}
 					var modeHandle = Id.handle({position: 0});
-					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord"], "Mode");
+					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal"], "Mode");
 					if (modeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
@@ -1868,7 +1870,7 @@ class UITrait extends iron.Trait {
 				}
 			}
 
-			if (ui.tab(htab, "File")) {
+			if (ui.tab(htab, "Export")) {
 				
 				if (ui.panel(Id.handle({selected: true}), "Project", 1)) {
 					ui.row([1/2,1/2]);
@@ -2062,7 +2064,7 @@ class UITrait extends iron.Trait {
 					ui.text("Distract Free - F12");
 					ui.text("Node Editor - Tab");
 					ui.text("Select Tool - Shift+1-9");
-					ui.text("Select Material - Alt+1-9");
+					// ui.text("Select Material - Alt+1-9");
 					ui.text("Next Object - Ctrl+Tab");
 					ui.text("Auto-Fill - G");
 					ui.text("Brush Radius - +/-");
@@ -2120,8 +2122,7 @@ class UITrait extends iron.Trait {
 	function renderMenu(g:kha.graphics2.Graphics) {
 		
 		// Draw menu
-		// if (drawMenu) {
-		if (false) {
+		if (drawMenu) {
 
 			var panelx = iron.App.x() - toolbarw;
 			if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
@@ -2145,11 +2146,11 @@ class UITrait extends iron.Trait {
 			ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
 
 			if (menuCategory == 0) {
-				ui.button("New", Left);
-				ui.button("Open...", Left);
-				ui.button("Save", Left);
-				ui.button("Save As...", Left);
-				ui.button("Import Asset...", Left);
+				if (ui.button("New", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
+				if (ui.button("Open...", Left)) {}
+				if (ui.button("Save", Left)) {}
+				if (ui.button("Save As...", Left)) {}
+				// ui.button("Import Asset...", Left);
 				// ui.button("Export Textures...", Left);
 				// ui.button("Export Mesh...", Left);
 				if (ui.button("Exit", Left)) { kha.System.stop(); }
