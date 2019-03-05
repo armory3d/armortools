@@ -199,7 +199,8 @@ class UITrait extends iron.Trait {
 	public var headerHandle = new Zui.Handle({layout:Horizontal});
 	public var toolbarHandle = new Zui.Handle();
 	public var statusHandle = new Zui.Handle({layout:Horizontal});
-	var drawMenu = false;
+	public var drawMenu = false;
+	var drawMenuFirst = true;
 	var menuCategory = 0;
 	var updateVersion = 0;
 
@@ -550,6 +551,42 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
+	function doUndo() {
+		if (undos > 0 && C.undo_steps > 0) {
+			undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
+			var lay = undoLayers[undoI];
+			var opos = paintObjects.indexOf(lay.targetObject);
+			var lpos = layers.indexOf(lay.targetLayer);
+			if (opos >= 0 && lpos >= 0) {
+				hwnd.redraws = 2;
+				selectPaintObject(paintObjects[opos]);
+				selectedLayer = layers[lpos];
+				selectedLayer.swap(lay);
+				ddirty = 2;
+			}
+			undos--;
+			redos++;
+		}
+	}
+
+	function doRedo() {
+		if (redos > 0 && C.undo_steps > 0) {
+			var lay = undoLayers[undoI];
+			var opos = paintObjects.indexOf(lay.targetObject);
+			var lpos = layers.indexOf(lay.targetLayer);
+			if (opos >= 0 && lpos >= 0) {
+				hwnd.redraws = 2;
+				selectPaintObject(paintObjects[opos]);
+				selectedLayer = layers[lpos];
+				selectedLayer.swap(lay);
+				ddirty = 2;
+			}
+			undoI = (undoI + 1) % C.undo_steps;
+			undos++;
+			redos--;
+		}
+	}
+
 	function updateUI() {
 
 		if (messageTimer > 0) {
@@ -564,7 +601,6 @@ class UITrait extends iron.Trait {
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (down && !kb.down("control")) {
-
 			if (mouse.x < iron.App.w() && mouse.x > iron.App.x() &&
 				mouse.y < iron.App.h() && mouse.y > iron.App.y()) {
 				if (brushTime == 0 && C.undo_steps > 0) { // Paint started
@@ -590,38 +626,8 @@ class UITrait extends iron.Trait {
 						   kb.down("control") && kb.started("y");
 		if (systemId == 'OSX') redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
 
-		if (C.undo_steps > 0) {
-			if (undoPressed && undos > 0) {
-				undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				var opos = paintObjects.indexOf(lay.targetObject);
-				var lpos = layers.indexOf(lay.targetLayer);
-				if (opos >= 0 && lpos >= 0) {
-					hwnd.redraws = 2;
-					selectPaintObject(paintObjects[opos]);
-					selectedLayer = layers[lpos];
-					selectedLayer.swap(lay);
-					ddirty = 2;
-				}
-				undos--;
-				redos++;
-			}
-			else if (redoPressed && redos > 0) {
-				var lay = undoLayers[undoI];
-				var opos = paintObjects.indexOf(lay.targetObject);
-				var lpos = layers.indexOf(lay.targetLayer);
-				if (opos >= 0 && lpos >= 0) {
-					hwnd.redraws = 2;
-					selectPaintObject(paintObjects[opos]);
-					selectedLayer = layers[lpos];
-					selectedLayer.swap(lay);
-					ddirty = 2;
-				}
-				undoI = (undoI + 1) % C.undo_steps;
-				undos++;
-				redos--;
-			}
-		}
+		if (undoPressed) doUndo();
+		else if (redoPressed) doRedo();
 
 		if (UITrait.inst.worktab.position == 1) {
 			updateGizmo();
@@ -766,7 +772,6 @@ class UITrait extends iron.Trait {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		renderUI(g);
-		renderMenu(g);
 
 		// var ready = showFiles || dirty;
 		// TODO: Texture params get overwritten
@@ -2115,6 +2120,9 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
+
+		renderMenu(g);
+
 		ui.end();
 		g.begin(false);
 	}
@@ -2130,8 +2138,11 @@ class UITrait extends iron.Trait {
 			var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 			var px = panelx + menuButtonW * menuCategory;
 			var py = headerh;
-			var ph = 200 * ui.SCALE;
+			var menuItems = [5, 2, 0, 0];
+			var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 			
+			ui.end(false);
+
 			g.color = ui.t.SEPARATOR_COL;
 			var menuw = Std.int(ui.ELEMENT_W() * 1.5);
 			g.fillRect(px, py, menuw, ph);
@@ -2145,42 +2156,51 @@ class UITrait extends iron.Trait {
 			var ELEMENT_H = ui.t.ELEMENT_H;
 			ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
 
+			ui.changed = false;
+
 			if (menuCategory == 0) {
-				if (ui.button("New", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
-				if (ui.button("Open...", Left)) {}
-				if (ui.button("Save", Left)) {}
-				if (ui.button("Save As...", Left)) {}
+				if (ui.button("New Project", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
+				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
+				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
+				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
 				// ui.button("Import Asset...", Left);
 				// ui.button("Export Textures...", Left);
 				// ui.button("Export Mesh...", Left);
 				if (ui.button("Exit", Left)) { kha.System.stop(); }
 			}
 			else if (menuCategory == 1) {
-				ui.button("Undo", Left);
-				ui.button("Redo", Left);
-				ui.button("Preferences...", Left);
+				if (ui.button("Undo", Left)) doUndo();
+				if (ui.button("Redo", Left)) doRedo();
+				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {
-				ui.button("Show Envmap", Left);
-				ui.button("Show Grid", Left);
-				ui.button("Wireframe", Left);
+				// ui.button("Show Envmap", Left);
+				// ui.button("Show Grid", Left);
+				// ui.button("Wireframe", Left);
 			}
 			else if (menuCategory == 3) {
-				ui.button("Manual...", Left);
-				ui.button("About...", Left);
+				// ui.button("Manual...", Left);
+				// ui.button("About...", Left);
+			}
+
+			// Hide menu
+			var first = drawMenuFirst;
+			drawMenuFirst = false;
+			if (first) {
+				// arm.App.uienabled = false;
+			}
+			else {
+				if (ui.changed || ui.inputReleased || ui.isEscapeDown) {
+					drawMenu = false;
+					drawMenuFirst = true;
+					// arm.App.uienabled = true;
+				}
 			}
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
 			ui.t.ELEMENT_H = ELEMENT_H;
 			ui.endLayout();
-
-			var mouse = iron.system.Input.getMouse();
-			var kb = iron.system.Input.getKeyboard();
-
-			if (mouse.released()) {
-				drawMenu = false;
-			}
 		}
 	}
 }
