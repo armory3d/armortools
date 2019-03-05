@@ -400,7 +400,6 @@ class UITrait extends iron.Trait {
 		var alt = kb.down("alt");
 		alt = false; // TODO: gets stuck after alt+tab
 		if (kb.started("tab")) {
-			trace("TAB");
 			if (ctrl) { // Cycle objects
 				var i = (paintObjects.indexOf(paintObject) + 1) % paintObjects.length;
 				selectPaintObject(paintObjects[i]);
@@ -419,12 +418,24 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
-		if (kb.started("1") && (shift || alt)) shift ? setBrushType(0) : selectMaterial(0);
-		else if (kb.started("2") && (shift || alt)) shift ? setBrushType(1) : selectMaterial(1);
-		else if (kb.started("3") && (shift || alt)) shift ? setBrushType(2) : selectMaterial(2);
-		else if (kb.started("4") && (shift || alt)) shift ? setBrushType(3) : selectMaterial(3);
-		else if (kb.started("5") && (shift || alt)) shift ? setBrushType(4) : selectMaterial(4);
-		else if (kb.started("6") && (shift || alt)) shift ? setBrushType(5) : selectMaterial(5);
+
+		if (!ui.isTyping) {
+			if (shift) {
+				if (kb.started("1")) selectMaterial(0);
+				else if (kb.started("2")) selectMaterial(1);
+				else if (kb.started("3")) selectMaterial(2);
+				else if (kb.started("4")) selectMaterial(3);
+				else if (kb.started("5")) selectMaterial(4);
+				else if (kb.started("6")) selectMaterial(5);
+			}
+
+			if (kb.started("b")) selectTool(0); // Brush
+			else if (kb.started("r")) selectTool(1); // Erase
+			else if (kb.started("g")) selectTool(2); // Fill
+			else if (kb.started("k")) selectTool(3); // Bake
+			else if (kb.started("f")) selectTool(4); // Color id
+			else if (kb.started("l")) selectTool(5); // Decal
+		}
 
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
@@ -444,12 +455,12 @@ class UITrait extends iron.Trait {
 			arm.App.resize();
 		}
 
-		if (kb.started("g") && (brushType == 2 || brushType == 3)) {
-			autoFillHandle.selected = !autoFillHandle.selected;
-			hwnd.redraws = 2;
-			UINodes.inst.updateCanvasMap();
-			UINodes.inst.parsePaintMaterial();
-		}
+		// if (kb.started("g") && (brushType == 2 || brushType == 3)) {
+		// 	autoFillHandle.selected = !autoFillHandle.selected;
+		// 	hwnd.redraws = 2;
+		// 	UINodes.inst.updateCanvasMap();
+		// 	UINodes.inst.parsePaintMaterial();
+		// }
 
 		// Viewport shortcuts
 		var mouse = iron.system.Input.getMouse();
@@ -464,10 +475,10 @@ class UITrait extends iron.Trait {
 			// else if (kb.released("alt") && altStartedX == mouse.x && altStartedY == mouse.y) {
 			// 	if (lastBrushType == -1) {
 			// 		lastBrushType = brushType;
-			// 		setBrushType(4);
+			// 		selectTool(4);
 			// 	}
 			// 	else {
-			// 		setBrushType(lastBrushType);
+			// 		selectTool(lastBrushType);
 			// 		lastBrushType = -1;
 			// 	}
 			// 	altStartedX = -1.0;
@@ -882,7 +893,7 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
-	function setBrushType(i:Int) {
+	function selectTool(i:Int) {
 		brushType = i;
 		autoFillHandle.selected = false; // Auto-disable
 		UINodes.inst.parsePaintMaterial();
@@ -968,42 +979,42 @@ class UITrait extends iron.Trait {
 			
 			ui._x += 2;
 			if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img1) == State.Started) setBrushType(0);
+			if (ui.image(img1) == State.Started) selectTool(0);
 			if (ui.isHovered) ui.tooltip("Draw");
 			ui._x -= 2;
 			ui._y += 2;
 			
 			ui._x += 2;
 			if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img2) == State.Started) setBrushType(1);
+			if (ui.image(img2) == State.Started) selectTool(1);
 			if (ui.isHovered) ui.tooltip("Erase");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 2) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img3) == State.Started) setBrushType(2);
+			if (ui.image(img3) == State.Started) selectTool(2);
 			if (ui.isHovered) ui.tooltip("Fill");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 3) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img4) == State.Started) setBrushType(3);
+			if (ui.image(img4) == State.Started) selectTool(3);
 			if (ui.isHovered) ui.tooltip("Bake");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img5) == State.Started) setBrushType(4);
+			if (ui.image(img5) == State.Started) selectTool(4);
 			if (ui.isHovered) ui.tooltip("Color ID");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-			if (ui.image(img6) == State.Started) setBrushType(5);
+			if (ui.image(img6) == State.Started) selectTool(5);
 			if (ui.isHovered) ui.tooltip("Decal");
 			ui._x -= 2;
 			ui._y += 2;
@@ -2068,10 +2079,14 @@ class UITrait extends iron.Trait {
 				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
 					ui.text("Distract Free - F12");
 					ui.text("Node Editor - Tab");
-					ui.text("Select Tool - Shift+1-9");
-					// ui.text("Select Material - Alt+1-9");
+					ui.text("Select Material - Shift+1-9");
 					ui.text("Next Object - Ctrl+Tab");
-					ui.text("Auto-Fill - G");
+					ui.text("Brush Tool - B");
+					ui.text("Erase Tool - R");
+					ui.text("Fill Tool - G");
+					ui.text("Bake Tool - K");
+					ui.text("Color ID Tool - F");
+					ui.text("Decal Tool - L");
 					ui.text("Brush Radius - +/-");
 					ui.text("Brush Ruler - Hold Shift");
 					ui.text("View Default - 0");
