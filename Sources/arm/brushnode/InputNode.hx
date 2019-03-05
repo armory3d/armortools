@@ -11,8 +11,13 @@ class InputNode extends LogicNode {
 
 	var startX = 0.0;
 	var startY = 0.0;
+
+	// Brush ruler
+	var lockBegin = false;
 	var lockX = false;
 	var lockY = false;
+	var lockStartX = 0.0;
+	var lockStartY = 0.0;
 
 	public function new(tree:LogicTree) {
 		super(tree);
@@ -36,7 +41,19 @@ class InputNode extends LogicNode {
 			}
 
 			var kb = iron.system.Input.getKeyboard();
-			lockY = kb.down("shift");
+			if (lockBegin) {
+				var dx = Math.abs(lockStartX - mouse.x);
+				var dy = Math.abs(lockStartY - mouse.y);
+				if (dx > 1 || dy > 1) {
+					lockBegin = false;
+					if (dx > dy) lockY = true;
+					else lockX = true;
+				}
+			}
+			if (kb.started("shift")) { lockStartX = mouse.x; lockStartY = mouse.y; lockBegin = true; }
+			else if (kb.released("shift")) { lockX = lockY = lockBegin = false; }
+
+			if (lockX) coords.x = startX;
 			if (lockY) coords.y = startY;
 		});
 	}
