@@ -17,6 +17,11 @@ class Format {
 			   StringTools.endsWith(p, ".hdr");
 	}
 
+	public static function checkFontFormat(path:String):Bool {
+		var p = path.toLowerCase();
+		return StringTools.endsWith(p, ".ttf");
+	}
+
 	public static function checkProjectFormat(path:String):Bool {
 		var p = path.toLowerCase();
 		return StringTools.endsWith(p, ".arm");

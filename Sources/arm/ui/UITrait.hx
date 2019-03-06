@@ -106,6 +106,9 @@ class UITrait extends iron.Trait {
 	public var viewportMode = 0;
 	public var instantMat = true;
 	var hscaleWasChanged = false;
+
+	public var textToolImage:kha.Image = null;
+	public var textToolText = "Text";
 	
 	var _onBrush:Array<Int->Void> = [];
 
@@ -145,8 +148,6 @@ class UITrait extends iron.Trait {
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
 	public var brushType = 0;
-
-	public var brushText = "Text";
 
 	public var paintBase = true;
 	public var paintOpac = true;
@@ -941,9 +942,13 @@ class UITrait extends iron.Trait {
 		toolbarHandle.redraws = 2;
 		ddirty = 2;
 
-		if (brushType == 5) { // Decal
+		if (brushType == 5 || brushType == 6) { // Decal, Text
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
+
+			if (brushType == 6) { // Text
+				RenderUtil.makeTextPreview();
+			}
 
 			RenderUtil.makeDecalPreview();
 			
@@ -1075,12 +1080,12 @@ class UITrait extends iron.Trait {
 				ui._x -= 2;
 				ui._y += 2;
 
-				ui._x += 2;
-				if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
-				if (ui.image(img9) == State.Started) selectTool(8);
-				if (ui.isHovered) ui.tooltip("Particle (P)");
-				ui._x -= 2;
-				ui._y += 2;
+				// ui._x += 2;
+				// if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				// if (ui.image(img9) == State.Started) selectTool(8);
+				// if (ui.isHovered) ui.tooltip("Particle (P)");
+				// ui._x -= 2;
+				// ui._y += 2;
 			}
 			else if (UITrait.inst.worktab.position == 1) {
 				
@@ -1220,10 +1225,19 @@ class UITrait extends iron.Trait {
 						UINodes.inst.parsePaintMaterial();
 					}
 				}
-				if (brushType == 6) {
+				if (brushType == 6) { // Text
 					var font = ui.combo(Id.handle({position: 0}), ["default.ttf"], "Font");
-					var h = Id.handle({text: brushText});
-					brushText = ui.textInput(h, "");
+					var h = Id.handle();
+					h.text = textToolText;
+					textToolText = ui.textInput(h, "");
+					if (h.changed) {
+						ui.g.end();
+						RenderUtil.makeTextPreview();
+						ui.g.begin(false);
+					}
+				}
+				if (brushType == 7) { // Shape
+					var shape = ui.combo(Id.handle({position: 0}), ["Rect"], "Shape");
 				}
 			}
 		}
@@ -2075,6 +2089,7 @@ class UITrait extends iron.Trait {
 					var hscale = Id.handle({value: C.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 					if (!hscale.changed && hscaleWasChanged) {
+						if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 						C.window_scale = hscale.value;
 						ui.setScale(hscale.value);
 						arm.App.uimodal.setScale(hscale.value);
@@ -2260,8 +2275,8 @@ class UITrait extends iron.Trait {
 				if (ui.button("Exit", Left)) { kha.System.stop(); }
 			}
 			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left)) doUndo();
-				if (ui.button("Redo", Left)) doRedo();
+				if (ui.button("Undo", Left, "Ctrl+Z")) doUndo();
+				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) doRedo();
 				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {

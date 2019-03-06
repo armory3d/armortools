@@ -28,6 +28,10 @@ class Importer {
 				UINodes.inst.hwnd.redraws = 2;
 			}
 		}
+		// Font
+		else if (Format.checkFontFormat(path)) {
+			importFont(path);
+		}
 		// Project
 		else if (StringTools.endsWith(path.toLowerCase(), ".arm")) {
 			Project.importProject(path);
@@ -212,6 +216,11 @@ class Importer {
 		else {
 			UITrait.inst.showError("Error: Unknown asset format");
 		}
+	}
+
+	public static function importFont(path:String) {
+		iron.data.Data.getFont(path, function(font:kha.Font) {
+		});
 	}
 
 	public static function importTexture(path:String) {

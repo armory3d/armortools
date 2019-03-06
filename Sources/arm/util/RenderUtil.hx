@@ -124,4 +124,17 @@ class RenderUtil {
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
 	}
+
+	@:access(zui.Zui)
+	public static function makeTextPreview() {
+		if (UITrait.inst.textToolImage == null) {
+			UITrait.inst.textToolImage = kha.Image.createRenderTarget(512, 512);
+		}
+		var g2 = UITrait.inst.textToolImage.g2;
+		g2.begin(true, 0xff000000);
+		g2.font = UITrait.inst.ui.ops.font;
+		g2.fontSize = 32;
+		g2.drawString(UITrait.inst.textToolText, 0, 0);
+		g2.end();
+	}
 }
