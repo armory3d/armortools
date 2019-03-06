@@ -117,7 +117,7 @@ class MaterialBuilder {
 
 		frag.add_uniform('float brushRadius', '_brushRadius');
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
-		frag.add_uniform('float brushStrength', '_brushStrength');
+		frag.add_uniform('float brushHardness', '_brushHardness');
 
 		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal) { // Draw / Erase
 			
@@ -256,10 +256,10 @@ class MaterialBuilder {
 		frag.write('float opacity = $opac * brushOpacity;');
 
 		if (eraser) frag.write('    float str = 1.0 - opacity;');
-		else frag.write('    float str = clamp(opacity * (brushRadius - dist) * brushStrength, 0.0, 1.0);');
+		else frag.write('    float str = clamp(opacity * (brushRadius - dist) * brushHardness, 0.0, 1.0);');
 
 		if (UITrait.inst.mirrorX && UITrait.inst.brushType == 0) { // Draw
-			frag.write('str += clamp(opacity * (brushRadius - dist2) * brushStrength, 0.0, 1.0);');
+			frag.write('str += clamp(opacity * (brushRadius - dist2) * brushHardness, 0.0, 1.0);');
 			frag.write('str = clamp(str, 0.0, 1.0);');
 		}
 

@@ -16,7 +16,7 @@ class BrushOutputNode extends LogicNode {
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
 		UITrait.inst.brushNodesOpacity = inputs[2].get();
-		UITrait.inst.brushNodesStrength = inputs[3].get();
+		UITrait.inst.brushNodesHardness = inputs[3].get();
 		UITrait.inst.brushNodesScale = inputs[4].get();
 
 		// First time init

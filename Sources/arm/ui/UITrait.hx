@@ -134,14 +134,14 @@ class UITrait extends iron.Trait {
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
 	public var brushNodesScale = 1.0;
-	public var brushNodesStrength = 1.0;
+	public var brushNodesHardness = 1.0;
 
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Zui.Handle({value: 0.5});
 	public var brushOpacity = 1.0;
 	public var brushScale = 0.5;
 	public var brushRot = 0.0;
-	public var brushStrength = 1.0;
+	public var brushHardness = 1.0;
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
 	public var brushType = 0;
@@ -183,6 +183,11 @@ class UITrait extends iron.Trait {
 	var lastBrushType = -1;
 	var altStartedX = -1.0;
 	var altStartedY = -1.0;
+	var lockStartedX = -1.0;
+	var lockStartedY = -1.0;
+	var brushLocked = false;
+	var brushCanLock = false;
+	var brushCanUnlock = false;
 	public var cameraType = 0;
 	// public var originalShadowBias = 0.0;
 	public var camHandle = new Zui.Handle({position: 0});
@@ -429,12 +434,14 @@ class UITrait extends iron.Trait {
 				else if (kb.started("6")) selectMaterial(5);
 			}
 
-			if (kb.started("b")) selectTool(0); // Brush
-			else if (kb.started("r")) selectTool(1); // Erase
-			else if (kb.started("g")) selectTool(2); // Fill
-			else if (kb.started("k")) selectTool(3); // Bake
-			else if (kb.started("f")) selectTool(4); // Color id
-			else if (kb.started("l")) selectTool(5); // Decal
+			if (!ctrl) {
+				if (kb.started("b")) selectTool(0); // Brush
+				else if (kb.started("r")) selectTool(1); // Erase
+				else if (kb.started("g")) selectTool(2); // Fill
+				else if (kb.started("k")) selectTool(3); // Bake
+				else if (kb.started("c")) selectTool(4); // Color id
+				else if (kb.started("l")) selectTool(5); // Decal
+			}
 		}
 
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
@@ -486,20 +493,51 @@ class UITrait extends iron.Trait {
 			// }
 
 			// Radius
-			if (kb.started("-")) {
-				if (brushRadius > 0.1) {
-					brushRadius = Math.round((brushRadius - 0.1) * 100) / 100;
-					brushRadiusHandle.value = brushRadius;
-					headerHandle.redraws = 2;
+			if (!ctrl && !shift) {
+				if (brushType == 0 || brushType == 1 || brushType == 5) { // Draw, erase, decal
+					if (kb.down("f") && mouse.moved) {
+						if (brushLocked) {
+							brushRadius += mouse.movementX / 100;
+							brushRadius = Math.max(0.05, Math.min(2.0, brushRadius));
+							brushRadius = Math.round(brushRadius * 100) / 100;
+							brushRadiusHandle.value = brushRadius;
+							headerHandle.redraws = 2;
+						}
+						else if (brushCanLock) {
+							brushCanLock = false;
+							brushLocked = true;
+						}
+					}
+					if (kb.started("f")) {
+						brushCanLock = true;
+						mouse.lock();
+						lockStartedX = mouse.x + iron.App.x();
+						lockStartedY = mouse.y + iron.App.y();
+					}
+					if (mouse.moved && brushCanUnlock) {
+						brushLocked = false;
+						brushCanUnlock = false;
+					}
+					if (kb.released("f")) {
+						mouse.unlock();
+						brushCanUnlock = true;
+					}
 				}
 			}
-			else if (kb.started("+")) {
-				if (brushRadius < 2.0) {
-					brushRadius = Math.round((brushRadius + 0.1) * 100) / 100;
-					brushRadiusHandle.value = brushRadius;
-					headerHandle.redraws = 2;
-				}
-			}
+			// if (kb.started("-")) {
+			// 	if (brushRadius > 0.1) {
+			// 		brushRadius = Math.round((brushRadius - 0.1) * 100) / 100;
+			// 		brushRadiusHandle.value = brushRadius;
+			// 		headerHandle.redraws = 2;
+			// 	}
+			// }
+			// else if (kb.started("+")) {
+			// 	if (brushRadius < 2.0) {
+			// 		brushRadius = Math.round((brushRadius + 0.1) * 100) / 100;
+			// 		brushRadiusHandle.value = brushRadius;
+			// 		headerHandle.redraws = 2;
+			// 	}
+			// }
 
 			// Viewpoint
 			if (!shift && !alt) {
@@ -815,6 +853,12 @@ class UITrait extends iron.Trait {
 				my = pen.y + iron.App.y();
 			}
 
+			// Radius being scaled
+			if (brushLocked) {
+				mx += lockStartedX - kha.System.windowWidth() / 2;
+				my += lockStartedY - kha.System.windowHeight() / 2;
+			}
+
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			if (brushType == 5) { // Decal
@@ -980,42 +1024,42 @@ class UITrait extends iron.Trait {
 			ui._x += 2;
 			if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img1) == State.Started) selectTool(0);
-			if (ui.isHovered) ui.tooltip("Draw");
+			if (ui.isHovered) ui.tooltip("Brush (B)");
 			ui._x -= 2;
 			ui._y += 2;
 			
 			ui._x += 2;
 			if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img2) == State.Started) selectTool(1);
-			if (ui.isHovered) ui.tooltip("Erase");
+			if (ui.isHovered) ui.tooltip("Eraser (R)");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 2) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img3) == State.Started) selectTool(2);
-			if (ui.isHovered) ui.tooltip("Fill");
+			if (ui.isHovered) ui.tooltip("Fill (G)");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 3) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img4) == State.Started) selectTool(3);
-			if (ui.isHovered) ui.tooltip("Bake");
+			if (ui.isHovered) ui.tooltip("Bake (K)");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img5) == State.Started) selectTool(4);
-			if (ui.isHovered) ui.tooltip("Color ID");
+			if (ui.isHovered) ui.tooltip("Color ID (F)");
 			ui._x -= 2;
 			ui._y += 2;
 
 			ui._x += 2;
 			if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
 			if (ui.image(img6) == State.Started) selectTool(5);
-			if (ui.isHovered) ui.tooltip("Decal");
+			if (ui.isHovered) ui.tooltip("Decal (L)");
 			ui._x -= 2;
 			ui._y += 2;
 
@@ -1097,7 +1141,7 @@ class UITrait extends iron.Trait {
 				if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
 				
 				brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-				brushStrength = ui.slider(Id.handle({value: brushStrength}), "Strength", 0.0, 1.0, true);
+				brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 				brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
 
 				ui.combo(Id.handle(), ["Add"], "Blending");
@@ -2082,13 +2126,13 @@ class UITrait extends iron.Trait {
 					ui.text("Select Material - Shift+1-9");
 					ui.text("Next Object - Ctrl+Tab");
 					ui.text("Brush Tool - B");
-					ui.text("Erase Tool - R");
+					ui.text("Eraser Tool - R");
 					ui.text("Fill Tool - G");
 					ui.text("Bake Tool - K");
-					ui.text("Color ID Tool - F");
+					ui.text("Color ID Tool - C");
 					ui.text("Decal Tool - L");
-					ui.text("Brush Radius - +/-");
-					ui.text("Brush Ruler - Hold Shift");
+					ui.text("Brush Radius - Hold F+Drag");
+					ui.text("Brush Ruler - Hold Shift+Paint");
 					ui.text("View Default - 0");
 					ui.text("View Front - 1");
 					ui.text("View Back - Ctrl+1");

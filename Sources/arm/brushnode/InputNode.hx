@@ -40,7 +40,6 @@ class InputNode extends LogicNode {
 				startY = pen.y / iron.App.h();
 			}
 
-			var kb = iron.system.Input.getKeyboard();
 			if (lockBegin) {
 				var dx = Math.abs(lockStartX - mouse.x);
 				var dy = Math.abs(lockStartY - mouse.y);
@@ -50,6 +49,8 @@ class InputNode extends LogicNode {
 					else lockX = true;
 				}
 			}
+
+			var kb = iron.system.Input.getKeyboard();
 			if (kb.started("shift")) { lockStartX = mouse.x; lockStartY = mouse.y; lockBegin = true; }
 			else if (kb.released("shift")) { lockX = lockY = lockBegin = false; }
 

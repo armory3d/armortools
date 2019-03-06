@@ -26,8 +26,8 @@ class Uniforms {
 		else if (link == '_brushScale') {
 			return (UITrait.inst.brushScale * UITrait.inst.brushNodesScale) * 2.0;
 		}
-		else if (link == '_brushStrength') {
-			var f = UITrait.inst.brushStrength * UITrait.inst.brushNodesStrength;
+		else if (link == '_brushHardness') {
+			var f = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 			return f * f * 100;
 		}
 		else if (link == '_paintDepthBias') {

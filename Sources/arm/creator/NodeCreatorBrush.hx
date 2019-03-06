@@ -79,7 +79,7 @@ class NodeCreatorBrush {
 						{
 							id: nodes.getSocketId(canvas.nodes),
 							node_id: node_id,
-							name: "Strength",
+							name: "Hardness",
 							type: "VALUE",
 							color: 0xffa1a1a1,
 							default_value: 1.0
