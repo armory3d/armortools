@@ -77,7 +77,7 @@ class MaterialBuilder {
 		#end
 
 		var faceFill = UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1;
-		var decal = UITrait.inst.brushType == 5;
+		var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6;
 
 		if (!faceFill && !decal) {
 			// Fix seams at uv borders
@@ -254,6 +254,11 @@ class MaterialBuilder {
 		frag.write('vec3 nortan = $nortan;');
 		frag.write('float height = $height;');
 		frag.write('float opacity = $opac * brushOpacity;');
+
+		if (UITrait.inst.brushType == 6) { // Text tool
+			frag.add_uniform('sampler2D textexttool', '_textexttool');
+			frag.write('opacity *= texture(textexttool, texCoord).r;');
+		}
 
 		if (eraser) frag.write('    float str = 1.0 - opacity;');
 		else frag.write('    float str = clamp(opacity * (brushRadius - dist) * brushHardness, 0.0, 1.0);');

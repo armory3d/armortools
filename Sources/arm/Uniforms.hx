@@ -107,6 +107,9 @@ class Uniforms {
 			UIView2D.inst.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
 			return UIView2D.inst.trianglemap;
 		}
+		else if (link == "_textexttool") { // Opacity map for text
+			return UITrait.inst.textToolImage;
+		}
 		return null;
 	}
 }

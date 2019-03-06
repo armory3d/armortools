@@ -513,7 +513,7 @@ class UITrait extends iron.Trait {
 
 			// Radius
 			if (!ctrl && !shift) {
-				if (brushType == 0 || brushType == 1 || brushType == 5) { // Draw, erase, decal
+				if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6) { // Draw, erase, decal, text
 					if (kb.started("f")) {
 						brushCanLock = true;
 						mouse.lock();
@@ -856,7 +856,8 @@ class UITrait extends iron.Trait {
 
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			if (brushType == 5) { // Decal
+			var decal = brushType == 5 || brushType == 6;
+			if (decal) {
 				psize = Std.int(256 * (brushRadius * brushNodesRadius));
 				#if kha_direct3d11
 				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
@@ -876,7 +877,7 @@ class UITrait extends iron.Trait {
 				// Separator line
 				g.color = 0x66ffffff;
 				g.fillRect(cx - 1, 0, 2, iron.App.h());
-				if (brushType == 5) { // Decal
+				if (decal) {
 					#if kha_direct3d11
 					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
 					#else
@@ -942,7 +943,8 @@ class UITrait extends iron.Trait {
 		toolbarHandle.redraws = 2;
 		ddirty = 2;
 
-		if (brushType == 5 || brushType == 6) { // Decal, Text
+		var decal = brushType == 5 || brushType == 6;
+		if (decal) { // Decal, Text
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
@@ -1170,7 +1172,7 @@ class UITrait extends iron.Trait {
 					UINodes.inst.parsePaintMaterial();
 				}
 			}
-			else { // Draw, Erase, Fill, Decal, Text
+			else { // Draw, Erase, Fill, Decal, Text, Shape
 				brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
 				
 				var brushScaleHandle = Id.handle({value: brushScale});
@@ -1216,7 +1218,7 @@ class UITrait extends iron.Trait {
 						UINodes.inst.parsePaintMaterial();
 					}
 				}
-				else { // Draw, Erase, Decal
+				else { // Draw, Erase, Decal, Text, Shape
 					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 					var mirrorHandle = Id.handle({selected: mirrorX});
 					mirrorX = ui.check(mirrorHandle, "Mirror");
