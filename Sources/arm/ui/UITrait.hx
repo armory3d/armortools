@@ -341,7 +341,7 @@ class UITrait extends iron.Trait {
 
 		var scale = C.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'empty.jpg', 'brush_draw.png', 'brush_erase.png', 'brush_fill.png', 'brush_bake.png', 'brush_colorid.png', 'brush_decal.png', 'brush_text.png','brush_shape.png', 'brush_particle.png'], done);
+		loadBundled(['cursor.png', 'empty.jpg', 'tool_draw.png', 'tool_eraser.png', 'tool_fill.png', 'tool_bake.png', 'tool_colorid.png', 'tool_decal.png', 'tool_text.png','tool_shape.png', 'tool_particle.png'], done);
 	}
 
 	public function showMessage(s:String) {
@@ -1007,15 +1007,15 @@ class UITrait extends iron.Trait {
 			ui._y += 2;
 
 			ui.imageScrollAlign = false;
-			var img1 = bundled.get("brush_draw.png");
-			var img2 = bundled.get("brush_erase.png");
-			var img3 = bundled.get("brush_fill.png");
-			var img4 = bundled.get("brush_bake.png");
-			var img5 = bundled.get("brush_colorid.png");
-			var img6 = bundled.get("brush_decal.png");
-			var img7 = bundled.get("brush_text.png");
-			var img8 = bundled.get("brush_shape.png");
-			var img9 = bundled.get("brush_particle.png");
+			var img1 = bundled.get("tool_draw.png");
+			var img2 = bundled.get("tool_eraser.png");
+			var img3 = bundled.get("tool_fill.png");
+			var img4 = bundled.get("tool_bake.png");
+			var img5 = bundled.get("tool_colorid.png");
+			var img6 = bundled.get("tool_decal.png");
+			var img7 = bundled.get("tool_text.png");
+			var img8 = bundled.get("tool_shape.png");
+			var img9 = bundled.get("tool_particle.png");
 			var tool = "";
 			
 			ui._x += 2;
