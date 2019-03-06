@@ -1235,6 +1235,7 @@ class UITrait extends iron.Trait {
 					if (h.changed) {
 						ui.g.end();
 						RenderUtil.makeTextPreview();
+						RenderUtil.makeDecalPreview();
 						ui.g.begin(false);
 					}
 				}

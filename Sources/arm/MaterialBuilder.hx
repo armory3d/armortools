@@ -348,9 +348,15 @@ class MaterialBuilder {
 		frag.write('float opacity = $opac;');
 		frag.write('vec3 nortan = $nortan;');
 
-		//if discard_transparent:
-			// var opac = 0.2;//mat_state.material.discard_transparent_opacity
-			// frag.write('if (opacity < $opac) discard;');
+		var decal = UITrait.inst.decalPreview;
+		if (decal) {
+			if (UITrait.inst.brushType == 6) { // Text tool
+				frag.add_uniform('sampler2D textexttool', '_textexttool');
+				frag.write('opacity *= texture(textexttool, texCoord).r;');
+			}
+			var opac = 0.05;
+			frag.write('if (opacity < $opac) discard;');
+		}
 
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;

@@ -133,7 +133,7 @@ class RenderUtil {
 		var g2 = UITrait.inst.textToolImage.g2;
 		g2.begin(true, 0xff000000);
 		g2.font = UITrait.inst.ui.ops.font;
-		g2.fontSize = 32;
+		g2.fontSize = 200;
 		g2.color = 0xffffffff;
 		g2.drawString(UITrait.inst.textToolText, 0, 0);
 		g2.end();
