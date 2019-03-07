@@ -86,8 +86,12 @@ class RenderUtil {
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
-		// var light = iron.Scene.active.lights[0];
-		// light.data.raw.cast_shadow = false;
+		var light = iron.Scene.active.lights[0];
+		var savedLight = light.data.raw.strength;
+		light.data.raw.strength = 1000;
+		var probe = iron.Scene.active.world.probe;
+		var savedProbe = probe.raw.strength;
+		probe.raw.strength = 2;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 
 		// No jitter
@@ -119,8 +123,8 @@ class RenderUtil {
 		iron.Scene.active.camera.data.raw.fov = savedFov;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
-		// var light = iron.Scene.active.lights[0];
-		// light.data.raw.cast_shadow = true;
+		light.data.raw.strength = savedLight;
+		probe.raw.strength = savedProbe;
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
 	}
@@ -132,7 +136,7 @@ class RenderUtil {
 		}
 		var g2 = UITrait.inst.textToolImage.g2;
 		g2.begin(true, 0xff000000);
-		g2.font = UITrait.inst.ui.ops.font;
+		g2.font = UITrait.inst.getTextToolFont();
 		g2.fontSize = 200;
 		g2.color = 0xffffffff;
 		g2.drawString(UITrait.inst.textToolText, 0, 0);

@@ -218,8 +218,16 @@ class Importer {
 		}
 	}
 
+	public static var fontList = ["default.ttf"];
+	public static var fontMap = new Map<String, kha.Font>();
+
 	public static function importFont(path:String) {
 		iron.data.Data.getFont(path, function(font:kha.Font) {
+			var ar = path.split("/");
+			ar = ar[ar.length - 1].split("\\");
+			var name = ar[ar.length - 1];
+			fontList.push(name);
+			fontMap.set(name, font);
 		});
 	}
 

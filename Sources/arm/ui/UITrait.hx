@@ -107,6 +107,7 @@ class UITrait extends iron.Trait {
 
 	public var textToolImage:kha.Image = null;
 	public var textToolText = "Text";
+	public var textToolHandle = new Zui.Handle({position: 0});
 	
 	var _onBrush:Array<Int->Void> = [];
 
@@ -546,7 +547,7 @@ class UITrait extends iron.Trait {
 				brushLocked = false;
 				brushCanUnlock = false;
 			}
-			if (kb.released("f") && brushLocked) {
+			if (kb.released("f")) {
 				mouse.unlock();
 				brushCanUnlock = true;
 			}
@@ -1222,11 +1223,11 @@ class UITrait extends iron.Trait {
 					}
 				}
 				if (brushType == 6) { // Text
-					var font = ui.combo(Id.handle({position: 0}), ["default.ttf"], "Font");
+					ui.combo(textToolHandle, Importer.fontList, "Font");
 					var h = Id.handle();
 					h.text = textToolText;
 					textToolText = ui.textInput(h, "");
-					if (h.changed) {
+					if (h.changed || textToolHandle.changed) {
 						ui.g.end();
 						RenderUtil.makeTextPreview();
 						RenderUtil.makeDecalPreview();
@@ -2185,5 +2186,11 @@ class UITrait extends iron.Trait {
 
 		ui.end();
 		g.begin(false);
+	}
+
+	public function getTextToolFont():kha.Font {
+		var fontName = Importer.fontList[textToolHandle.position];
+		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
+		return Importer.fontMap.get(fontName);
 	}
 }
