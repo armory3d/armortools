@@ -14,6 +14,8 @@ class App extends iron.Trait {
 	public static var isDragging = false;
 	public static var dragAsset:TAsset = null;
 	public static var showFiles = false;
+	public static var showBox = false;
+	public static var boxText = "";
 	public static var foldersOnly = false;
 	public static var showFilename = false;
 	public static var whandle = new Zui.Handle();
@@ -245,10 +247,10 @@ class App extends iron.Trait {
 			dropPath = "";
 		}
 
-		if (showFiles) updateFiles();
+		if (showFiles || showBox) updateModal();
 	}
 
-	static function updateFiles() {
+	static function updateModal() {
 		var mouse = iron.system.Input.getMouse();
 		if (mouse.released()) {
 			var appw = kha.System.windowWidth();
@@ -260,7 +262,7 @@ class App extends iron.Trait {
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
 			if (mx < left || mx > right || my < top || my > bottom) {
-				showFiles = false;
+				showFiles = showBox = false;
 			}
 		}
 	}
@@ -276,8 +278,9 @@ class App extends iron.Trait {
 			g.drawScaledImage(img, mouse.x + iron.App.x(), mouse.y + iron.App.y(), 128, h);
 		}
 
-		uienabled = !showFiles;
+		uienabled = !showFiles && !showBox;
 		if (showFiles) renderFiles(g);
+		else if (showBox) renderBox(g);
 	}
 
 	@:access(zui.Zui)
@@ -288,13 +291,17 @@ class App extends iron.Trait {
 		var right = Std.int(appw / 2 + modalW / 2);
 		var top = Std.int(apph / 2 - modalH / 2);
 		var bottom = Std.int(apph / 2 + modalH / 2);
+		
+		// g.color = 0x44000000;
+		// g.fillRect(0, 0, appw, apph);
+
 		g.color = uimodal.t.SEPARATOR_COL;
 		g.fillRect(left, top, modalW, modalH);
 		
 		g.end();
 		uimodal.begin(g);
 		var pathHandle = Id.handle();
-		if (uimodal.window(whandle, left, top, modalW, modalH - 50, true)) {
+		if (uimodal.window(whandle, left, top, modalW, modalH - 50)) {
 			pathHandle.text = uimodal.textInput(pathHandle, "Path");
 			if (showFilename) uimodal.textInput(filenameHandle, "File");
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
@@ -328,5 +335,52 @@ class App extends iron.Trait {
 		uimodal.endLayout();
 
 		g.begin(false);
+	}
+
+	@:access(zui.Zui)
+	static function renderBox(g:kha.graphics2.Graphics) {
+		var appw = kha.System.windowWidth();
+		var apph = kha.System.windowHeight();
+		var modalW = 300;
+		var modalH = 100;
+		var left = Std.int(appw / 2 - modalW / 2);
+		var right = Std.int(appw / 2 + modalW / 2);
+		var top = Std.int(apph / 2 - modalH / 2);
+		var bottom = Std.int(apph / 2 + modalH / 2);
+		
+		g.color = uimodal.t.SEPARATOR_COL;
+		g.fillRect(left, top, modalW, modalH);
+		
+		g.end();
+		uimodal.begin(g);
+		if (uimodal.window(whandle, left, top, modalW, modalH)) {
+			uimodal._y += 20;
+			uimodal.text(boxText);
+		}
+		uimodal.end(false);
+
+		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
+		if (uimodal.button("OK")) {
+			showBox = false;
+		}
+		uimodal.endLayout(false);
+
+		g.begin(false);
+
+
+		// g.end();
+		// uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
+		// if (uimodal.button("OK")) {
+		// 	showFiles = false;
+		// 	filesDone(path);
+		// 	UITrait.inst.ddirty = 2;
+		// }
+		// uimodal.endLayout(false);
+		// g.begin(false);
+	}
+
+	public static function showMessageBox(text:String) {
+		showBox = true;
+		boxText = text;
 	}
 }

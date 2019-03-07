@@ -2201,31 +2201,6 @@ class UITrait extends iron.Trait {
 					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
 					ui.text(kha.System.systemId + " - " + gapi + " - " + renderer);
 					ui.text("armorpaint.org");
-
-					var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
-					if (ui.button("Check for Updates")) {
-						// Retrieve latest version number
-						var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
-						var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-						#if kha_krom
-						if (kha.System.systemId == "Windows") {
-							Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
-						}
-						// Compare versions
-						iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
-							var update = haxe.Json.parse(blob.toString());
-							updateVersion = Std.int(update.version);
-						});
-						#end
-					}
-					if (updateVersion > 0) {
-						if (updateVersion > dateInt) {
-							ui.text("Update is available!");
-						}
-						else {
-							ui.text("No update available");
-						}
-					}
 				}
 			}
 		}
@@ -2247,7 +2222,7 @@ class UITrait extends iron.Trait {
 			var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 			var px = panelx + menuButtonW * menuCategory;
 			var py = headerh;
-			var menuItems = [5, 2, 7, 0];
+			var menuItems = [5, 2, 7, 1];
 			var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 			
 			ui.end(false);
@@ -2296,6 +2271,31 @@ class UITrait extends iron.Trait {
 				// ui.button("Wireframe", Left);
 			}
 			else if (menuCategory == 3) {
+				if (ui.button("Check for Updates")) {
+					// Retrieve latest version number
+					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
+					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
+					#if kha_krom
+					if (kha.System.systemId == "Windows") {
+						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+					}
+					// Compare versions
+					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
+						var update = haxe.Json.parse(blob.toString());
+						updateVersion = Std.int(update.version);
+						if (updateVersion > 0) {
+							var date = Macro.buildDate().split(" ")[0];
+							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
+							if (updateVersion > dateInt) {
+								arm.App.showMessageBox("Update is available!");
+							}
+							else {
+								arm.App.showMessageBox("No update available");
+							}
+						}
+					});
+					#end
+				}
 				// ui.button("Manual...", Left);
 				// ui.button("About...", Left);
 			}
