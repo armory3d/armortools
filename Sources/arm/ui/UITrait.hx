@@ -19,8 +19,6 @@ import arm.util.*;
 @:access(iron.data.Data)
 class UITrait extends iron.Trait {
 
-	public var version = "0.6";
-
 	public var project:TProjectFormat;
 	public var projectPath = "";
 
@@ -207,10 +205,6 @@ class UITrait extends iron.Trait {
 	public var headerHandle = new Zui.Handle({layout:Horizontal});
 	public var toolbarHandle = new Zui.Handle();
 	public var statusHandle = new Zui.Handle({layout:Horizontal});
-	public var drawMenu = false;
-	var drawMenuFirst = true;
-	var menuCategory = 0;
-	var updateVersion = 0;
 
 	public var cameraControls = 0;
 	public var htab = Id.handle({position: 0});
@@ -440,7 +434,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		if (kb.started("f12")) {
+		if (kb.started("f11")) {
 			show = !show;
 			arm.App.resize();
 		}
@@ -595,7 +589,7 @@ class UITrait extends iron.Trait {
 		hwnd.redraws = 2;
 	}
 
-	function doUndo() {
+	public function doUndo() {
 		if (undos > 0 && C.undo_steps > 0) {
 			undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
@@ -613,7 +607,7 @@ class UITrait extends iron.Trait {
 		}
 	}
 
-	function doRedo() {
+	public function doRedo() {
 		if (redos > 0 && C.undo_steps > 0) {
 			var lay = undoLayers[undoI];
 			var opos = paintObjects.indexOf(lay.targetObject);
@@ -1120,10 +1114,10 @@ class UITrait extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
-			if (ui.button("File", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 0; };
-			if (ui.button("Edit", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 1; };
-			if (ui.button("View", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 2; };
-			if (ui.button("Help", Left) || (drawMenu && ui.isHovered)) { drawMenu = true; menuCategory = 3; };
+			if (ui.button("File", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 0; };
+			if (ui.button("Edit", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 1; };
+			if (ui.button("View", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 2; };
+			if (ui.button("Help", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 3; };
 			
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -1346,6 +1340,7 @@ class UITrait extends iron.Trait {
 						var h = Id.handle();
 						h.selected = selectedObject.visible;
 						selectedObject.visible = ui.check(h, "Visible");
+						if (h.changed) ddirty = 2;
 
 						var loc = selectedObject.transform.loc;
 						var scale = selectedObject.transform.scale;
@@ -1359,17 +1354,17 @@ class UITrait extends iron.Trait {
 						h = Id.handle();
 						h.text = Math.roundfp(loc.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
-						if (h.changed) loc.x = f;
+						if (h.changed) { loc.x = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(loc.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (h.changed) loc.y = f;
+						if (h.changed) { loc.y = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(loc.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (h.changed) loc.z = f;
+						if (h.changed) { loc.z = f; ddirty = 2; }
 
 						ui.row(row4);
 						ui.text("Rotation");
@@ -1378,17 +1373,17 @@ class UITrait extends iron.Trait {
 						h.text = Math.roundfp(rot.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
 						var changed = false;
-						if (h.changed) { changed = true; rot.x = f; }
+						if (h.changed) { changed = true; rot.x = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(rot.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (h.changed) { changed = true; rot.y = f; }
+						if (h.changed) { changed = true; rot.y = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(rot.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (h.changed) { changed = true; rot.z = f; }
+						if (h.changed) { changed = true; rot.z = f; ddirty = 2; }
 
 						if (changed && selectedObject.name != "Scene") {
 							rot.mult(3.141592 / 180);
@@ -1406,17 +1401,17 @@ class UITrait extends iron.Trait {
 						h = Id.handle();
 						h.text = Math.roundfp(scale.x) + "";
 						f = Std.parseFloat(ui.textInput(h, "X"));
-						if (h.changed) scale.x = f;
+						if (h.changed) { scale.x = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(scale.y) + "";
 						f = Std.parseFloat(ui.textInput(h, "Y"));
-						if (h.changed) scale.y = f;
+						if (h.changed) { scale.y = f; ddirty = 2; }
 
 						h = Id.handle();
 						h.text = Math.roundfp(scale.z) + "";
 						f = Std.parseFloat(ui.textInput(h, "Z"));
-						if (h.changed) scale.z = f;
+						if (h.changed) { scale.z = f; ddirty = 2; }
 
 						selectedObject.transform.dirty = true;
 
@@ -1633,9 +1628,12 @@ class UITrait extends iron.Trait {
 						RenderUtil.makeMaterialPreview();
 						ui.g.begin(false);
 					}
+					// else if (ui.isHovered) ui.tooltip("New Material (Ctrl+N)");
+
 					if (ui.button("Nodes")) {
 						showMaterialNodes();
 					}
+					else if (ui.isHovered) ui.tooltip("Show Editor (TAB)");
 				}
 
 				ui.separator();
@@ -2177,147 +2175,15 @@ class UITrait extends iron.Trait {
 
 				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
-					ui.text("Distract Free - F12");
-					ui.text("Node Editor - Tab");
 					ui.text("Select Material - Shift+1-9");
 					ui.text("Next Object - Ctrl+Tab");
 					ui.text("Brush Radius - Hold F+Drag");
 					ui.text("Brush Ruler - Hold Shift+Paint");
-					ui.text("View Default - 0");
-					ui.text("View Front - 1");
-					ui.text("View Back - Ctrl+1");
-					ui.text("View Right - 3");
-					ui.text("View Left - Ctrl+3");
-					ui.text("View Top - 7");
-					ui.text("View Bottom - Ctrl+7");
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "About", 1)) {
-					var sha = Macro.buildSha();
-					var date = Macro.buildDate().split(" ")[0];
-					ui.text("v" + version + " (" + date + ") - " + sha);
-					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
-					var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
-					ui.text(kha.System.systemId + " - " + gapi + " - " + renderer);
-					ui.text("armorpaint.org");
 				}
 			}
 		}
-
-		renderMenu(g);
 
 		ui.end();
 		g.begin(false);
-	}
-
-	function renderMenu(g:kha.graphics2.Graphics) {
-		
-		// Draw menu
-		if (drawMenu) {
-
-			var panelx = iron.App.x() - toolbarw;
-			if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-
-			var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
-			var px = panelx + menuButtonW * menuCategory;
-			var py = headerh;
-			var menuItems = [5, 2, 7, 1];
-			var ph = 24 * menuItems[menuCategory] * ui.SCALE;
-			
-			ui.end(false);
-
-			g.color = ui.t.SEPARATOR_COL;
-			var menuw = Std.int(ui.ELEMENT_W() * 1.5);
-			g.fillRect(px, py, menuw, ph);
-
-			ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
-			var BUTTON_COL = ui.t.BUTTON_COL;
-			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-
-			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
-			ui.t.ELEMENT_OFFSET = 0;
-			var ELEMENT_H = ui.t.ELEMENT_H;
-			ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
-
-			ui.changed = false;
-
-			if (menuCategory == 0) {
-				if (ui.button("New Project", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
-				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
-				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
-				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
-				// ui.button("Import Asset...", Left);
-				// ui.button("Export Textures...", Left);
-				// ui.button("Export Mesh...", Left);
-				if (ui.button("Exit", Left)) { kha.System.stop(); }
-			}
-			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, "Ctrl+Z")) doUndo();
-				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) doRedo();
-				// ui.button("Preferences...", Left);
-			}
-			else if (menuCategory == 2) {
-
-				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
-				if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0); }
-				if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 3, 0, Math.PI / 2, 0, Math.PI); }
-				if (ui.button("Right", Left, "3")) { ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
-				if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
-				if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 3, 0, 0, 0); }
-				if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI); }
-				// ui.button("Show Envmap", Left);
-				// ui.button("Show Grid", Left);
-				// ui.button("Wireframe", Left);
-			}
-			else if (menuCategory == 3) {
-				if (ui.button("Check for Updates")) {
-					// Retrieve latest version number
-					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
-					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					#if kha_krom
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
-					}
-					// Compare versions
-					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
-						var update = haxe.Json.parse(blob.toString());
-						updateVersion = Std.int(update.version);
-						if (updateVersion > 0) {
-							var date = Macro.buildDate().split(" ")[0];
-							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
-							if (updateVersion > dateInt) {
-								arm.App.showMessageBox("Update is available!");
-							}
-							else {
-								arm.App.showMessageBox("No update available");
-							}
-						}
-					});
-					#end
-				}
-				// ui.button("Manual...", Left);
-				// ui.button("About...", Left);
-			}
-
-			// Hide menu
-			var first = drawMenuFirst;
-			drawMenuFirst = false;
-			if (first) {
-				// arm.App.uienabled = false;
-			}
-			else {
-				if (ui.changed || ui.inputReleased || ui.isEscapeDown) {
-					drawMenu = false;
-					drawMenuFirst = true;
-					// arm.App.uienabled = true;
-				}
-			}
-
-			ui.t.BUTTON_COL = BUTTON_COL;
-			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-			ui.t.ELEMENT_H = ELEMENT_H;
-			ui.endLayout();
-		}
 	}
 }

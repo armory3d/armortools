@@ -4,8 +4,12 @@ import zui.*;
 import zui.Zui.State;
 import zui.Canvas;
 import arm.ui.*;
+import arm.util.*;
+import arm.ProjectFormat.TAPConfig;
 
 class App extends iron.Trait {
+
+	public static var version = "0.6";
 
 	public static function x():Int { return appx; }
 	public static function y():Int { return appy; }
@@ -33,6 +37,10 @@ class App extends iron.Trait {
 	static var modalH = 545;
 	static var appx = 0;
 	static var appy = 0;
+
+	public static var showMenu = false;
+	public static var menuCategory = 0;
+	static var showMenuFirst = true;
 
 	public static function getEnumTexts():Array<String> {
 		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
@@ -270,17 +278,21 @@ class App extends iron.Trait {
 	static function render(g:kha.graphics2.Graphics) {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
+		var mouse = iron.system.Input.getMouse();
 		if (arm.App.dragAsset != null) {
-			var mouse = iron.system.Input.getMouse();
 			var img = UITrait.inst.getImage(arm.App.dragAsset);
 			var ratio = 128 / img.width;
 			var h = img.height * ratio;
 			g.drawScaledImage(img, mouse.x + iron.App.x(), mouse.y + iron.App.y(), 128, h);
 		}
 
-		uienabled = !showFiles && !showBox;
+		var usingMenu = false;
+		if (showMenu) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
+
+		uienabled = !showFiles && !showBox && !usingMenu;
 		if (showFiles) renderFiles(g);
 		else if (showBox) renderBox(g);
+		else if (showMenu) renderMenu(g);
 	}
 
 	@:access(zui.Zui)
@@ -355,7 +367,9 @@ class App extends iron.Trait {
 		uimodal.begin(g);
 		if (uimodal.window(whandle, left, top, modalW, modalH)) {
 			uimodal._y += 20;
-			uimodal.text(boxText);
+			for (line in boxText.split("\n")) {
+				uimodal.text(line);
+			}
 		}
 		uimodal.end(false);
 
@@ -366,21 +380,138 @@ class App extends iron.Trait {
 		uimodal.endLayout(false);
 
 		g.begin(false);
-
-
-		// g.end();
-		// uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
-		// if (uimodal.button("OK")) {
-		// 	showFiles = false;
-		// 	filesDone(path);
-		// 	UITrait.inst.ddirty = 2;
-		// }
-		// uimodal.endLayout(false);
-		// g.begin(false);
 	}
 
 	public static function showMessageBox(text:String) {
 		showBox = true;
 		boxText = text;
+	}
+
+	@:access(zui.Zui)
+	static function renderMenu(g:kha.graphics2.Graphics) {
+		
+		var ui = uimodal;
+
+		var panelx = iron.App.x() - UITrait.inst.toolbarw;
+		var C:TAPConfig = cast armory.data.Config.raw;
+		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - UITrait.inst.toolbarw;
+
+		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
+		var px = panelx + menuButtonW * menuCategory;
+		var py = UITrait.inst.headerh;
+		var menuItems = [5, 2, 8, 2];
+		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
+		
+		g.color = ui.t.SEPARATOR_COL;
+		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
+		g.fillRect(px, py, menuw, ph);
+
+		g.end();
+
+		ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
+		var BUTTON_COL = ui.t.BUTTON_COL;
+		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
+
+		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+		ui.t.ELEMENT_OFFSET = 0;
+		var ELEMENT_H = ui.t.ELEMENT_H;
+		ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
+
+		ui.changed = false;
+
+		if (menuCategory == 0) {
+			if (ui.button("New Project", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
+			if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
+			if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
+			if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
+			// ui.button("Import Asset...", Left);
+			// ui.button("Export Textures...", Left);
+			// ui.button("Export Mesh...", Left);
+			ui.fill(0, 0, menuw, 1, ui.t.ACCENT_SELECT_COL);
+			if (ui.button("Exit", Left)) { kha.System.stop(); }
+		}
+		else if (menuCategory == 1) {
+			if (ui.button("Undo", Left, "Ctrl+Z")) UITrait.inst.doUndo();
+			if (ui.button("Redo", Left, "Ctrl+Shift+Z")) UITrait.inst.doRedo();
+			// ui.button("Preferences...", Left);
+		}
+		else if (menuCategory == 2) {
+
+			if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
+			if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0); }
+			if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 3, 0, Math.PI / 2, 0, Math.PI); }
+			if (ui.button("Right", Left, "3")) { ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
+			if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
+			if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 3, 0, 0, 0); }
+			if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI); }
+			ui.fill(0, 0, menuw, 1, ui.t.ACCENT_SELECT_COL);
+			if (ui.button("Distract Free", Left, "F11")) {
+				UITrait.inst.show = !UITrait.inst.show;
+				arm.App.resize();
+				UITrait.inst.ui.isHovered = false;
+			}
+
+			// ui.button("Show Envmap", Left);
+			// ui.button("Show Grid", Left);
+			// ui.button("Wireframe", Left);
+		}
+		else if (menuCategory == 3) {
+			// ui.button("Manual...", Left);
+			if (ui.button("Check for Updates...", Left)) {
+				// Retrieve latest version number
+				var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
+				var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
+				#if kha_krom
+				if (kha.System.systemId == "Windows") {
+					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+				}
+				// Compare versions
+				iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
+					var update = haxe.Json.parse(blob.toString());
+					var updateVersion = Std.int(update.version);
+					if (updateVersion > 0) {
+						var date = Macro.buildDate().split(" ")[0];
+						var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
+						if (updateVersion > dateInt) {
+							arm.App.showMessageBox("Update is available!");
+						}
+						else {
+							arm.App.showMessageBox("You are up to date!");
+						}
+					}
+				});
+				#end
+			}
+			if (ui.button("About...", Left)) {
+				var sha = Macro.buildSha();
+				var date = Macro.buildDate().split(" ")[0];
+				var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
+				var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
+				var msg = "ArmorPaint.org - v" + version + " (" + date + ") - " + sha + "\n";
+				msg += kha.System.systemId + " - " + gapi + " - " + renderer;
+				arm.App.showMessageBox(msg);
+			}
+		}
+
+		// Hide menu
+		var first = showMenuFirst;
+		showMenuFirst = false;
+		if (first) {
+			// arm.App.uienabled = false;
+		}
+		else {
+			if (ui.changed || ui.inputReleased || ui.isEscapeDown) {
+				showMenu = false;
+				showMenuFirst = true;
+				// arm.App.uienabled = true;
+			}
+		}
+
+		ui.t.BUTTON_COL = BUTTON_COL;
+		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+		ui.t.ELEMENT_H = ELEMENT_H;
+		ui.endLayout();
+
+		g.begin(false);
 	}
 }

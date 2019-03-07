@@ -53,7 +53,7 @@ class Project {
 		}
 
 		UITrait.inst.project = {
-			version: UITrait.inst.version,
+			version: arm.App.version,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
 			mesh_datas: md,
