@@ -297,6 +297,10 @@ class App extends iron.Trait {
 
 	@:access(zui.Zui)
 	static function renderFiles(g:kha.graphics2.Graphics) {
+
+		// modalW = Std.int(625 * uimodal.SCALE);
+		// modalH = Std.int(545 * uimodal.SCALE);
+
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
 		var left = Std.int(appw / 2 - modalW / 2);
@@ -353,8 +357,8 @@ class App extends iron.Trait {
 	static function renderBox(g:kha.graphics2.Graphics) {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
-		var modalW = 300;
-		var modalH = 100;
+		var modalW = Std.int(300 * uimodal.SCALE);
+		var modalH = Std.int(100 * uimodal.SCALE);
 		var left = Std.int(appw / 2 - modalW / 2);
 		var right = Std.int(appw / 2 + modalW / 2);
 		var top = Std.int(apph / 2 - modalH / 2);
@@ -404,6 +408,7 @@ class App extends iron.Trait {
 		
 		g.color = ui.t.SEPARATOR_COL;
 		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
+		var sepw = menuw / ui.SCALE;
 		g.fillRect(px, py, menuw, ph);
 
 		g.end();
@@ -415,7 +420,7 @@ class App extends iron.Trait {
 		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
 		var ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Std.int(24 * ui.SCALE);
+		ui.t.ELEMENT_H = Std.int(24);
 
 		ui.changed = false;
 
@@ -427,7 +432,7 @@ class App extends iron.Trait {
 			// ui.button("Import Asset...", Left);
 			// ui.button("Export Textures...", Left);
 			// ui.button("Export Mesh...", Left);
-			ui.fill(0, 0, menuw, 1, ui.t.ACCENT_SELECT_COL);
+			ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 			if (ui.button("Exit", Left)) { kha.System.stop(); }
 		}
 		else if (menuCategory == 1) {
@@ -444,7 +449,7 @@ class App extends iron.Trait {
 			if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
 			if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 3, 0, 0, 0); }
 			if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI); }
-			ui.fill(0, 0, menuw, 1, ui.t.ACCENT_SELECT_COL);
+			ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 			if (ui.button("Distract Free", Left, "F11")) {
 				UITrait.inst.show = !UITrait.inst.show;
 				arm.App.resize();
