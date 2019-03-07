@@ -206,6 +206,8 @@ class UITrait extends iron.Trait {
 	public var headerHandle = new Zui.Handle({layout:Horizontal});
 	public var toolbarHandle = new Zui.Handle();
 	public var statusHandle = new Zui.Handle({layout:Horizontal});
+	public var menuHandle = new Zui.Handle({layout:Horizontal});
+	public var workspaceHandle = new Zui.Handle({layout:Horizontal});
 
 	public var cameraControls = 0;
 	public var htab = Id.handle({position: 0});
@@ -1022,63 +1024,63 @@ class UITrait extends iron.Trait {
 				var img9 = bundled.get("tool_particle.png");
 				
 				ui._x += 2;
-				if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img1) == State.Started) selectTool(0);
 				if (ui.isHovered) ui.tooltip("Brush (B)");
 				ui._x -= 2;
 				ui._y += 2;
 				
 				ui._x += 2;
-				if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img2) == State.Started) selectTool(1);
 				if (ui.isHovered) ui.tooltip("Eraser (R)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 2) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 2) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img3) == State.Started) selectTool(2);
 				if (ui.isHovered) ui.tooltip("Fill (G)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 3) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 3) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img4) == State.Started) selectTool(3);
 				if (ui.isHovered) ui.tooltip("Bake (K)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img5) == State.Started) selectTool(4);
 				if (ui.isHovered) ui.tooltip("Color ID (F)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img6) == State.Started) selectTool(5);
 				if (ui.isHovered) ui.tooltip("Decal (L)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 6) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 6) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img7) == State.Started) selectTool(6);
 				if (ui.isHovered) ui.tooltip("Text (T)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == 7) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				if (brushType == 7) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img8) == State.Started) selectTool(7);
 				if (ui.isHovered) ui.tooltip("Shape (H)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				// ui._x += 2;
-				// if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+				// if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				// if (ui.image(img9) == State.Started) selectTool(8);
 				// if (ui.isHovered) ui.tooltip("Particle (P)");
 				// ui._x -= 2;
@@ -1091,7 +1093,7 @@ class UITrait extends iron.Trait {
 					var img1 = bundled.get("tool_gizmo.png");
 					
 					ui._x += 2;
-					if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, 0xff205d9c, 2);
+					if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 					if (ui.image(img1) == State.Started) selectTool(0);
 					if (ui.isHovered) ui.tooltip("Gizmo (G)");
 					ui._x -= 2;
@@ -1105,7 +1107,7 @@ class UITrait extends iron.Trait {
 
 		var panelx = iron.App.x() - toolbarw;
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			var _w = ui._w;
 			ui._w = Std.int(ui._w * 0.5);
 			ui._x += 1; // Prevent "File" button highlight on startup
@@ -1127,7 +1129,7 @@ class UITrait extends iron.Trait {
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		if (ui.window(Id.handle({layout:Horizontal}), panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(workspaceHandle, panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			ui.tab(worktab, "Scene");
 			if (worktab.changed) {
@@ -1299,7 +1301,7 @@ class UITrait extends iron.Trait {
 						if (o.name.charAt(0) == '.') return; // Hidden
 						var b = false;
 						if (selectedObject == o) {
-							ui.g.color = 0xff205d9c;
+							ui.g.color = ui.t.HIGHLIGHT_COL;
 							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
 							ui.g.color = 0xffffffff;
 						}
@@ -1471,13 +1473,13 @@ class UITrait extends iron.Trait {
 				// 			var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
 
 				// 			if (selectedMaterial2 == materials2[i]) {
-				// 				// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
+				// 				// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 				// 				var off = row % 2 == 1 ? 1 : 0;
 				// 				var w = 51 - C.window_scale;
-				// 				ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
-				// 				ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
-				// 				ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
-				// 				ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
+				// 				ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+				// 				ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+				// 				ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+				// 				ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 				// 			}
 
 				// 			if (ui.image(img, tint) == State.Started && img != empty) {
@@ -1596,13 +1598,13 @@ class UITrait extends iron.Trait {
 							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
 
 							if (selectedMaterial == materials[i]) {
-								// ui.fill(1, -2, img.width + 3, img.height + 3, 0xff205d9c); // TODO
+								// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 								var off = row % 2 == 1 ? 1 : 0;
 								var w = 51 - C.window_scale;
-								ui.fill(1,          -2, w + 3,       2, 0xff205d9c);
-								ui.fill(1,     w - off, w + 3, 2 + off, 0xff205d9c);
-								ui.fill(1,          -2,     2,   w + 3, 0xff205d9c);
-								ui.fill(w + 3,      -2,     2,   w + 4, 0xff205d9c);
+								ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+								ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+								ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+								ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 							}
 
 							if (ui.image(img, tint) == State.Started && img != empty) {
@@ -1642,7 +1644,7 @@ class UITrait extends iron.Trait {
 
 					function drawList(h:zui.Zui.Handle, l:LayerSlot, i:Int) {
 						if (selectedLayer == l) {
-							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 						}
 						if (i > 0) ui.row([1/10, 5/10, 2/10, 2/10]);
 						else ui.row([1/10, 9/10]);
@@ -1701,7 +1703,7 @@ class UITrait extends iron.Trait {
 						// if (o.name.charAt(0) == '.') return; // Hidden
 						var b = false;
 						if (paintObject == o) {
-							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 						}
 						ui.row([1/10, 9/10]);
 						var h = Id.handle().nest(i, {selected: o.visible});
@@ -2112,7 +2114,21 @@ class UITrait extends iron.Trait {
 						arm.App.resize();
 						armory.data.Config.save();
 					}
-					ui.combo(Id.handle({position: 0}), ["Dark"], "Theme", true);
+					var themeHandle = Id.handle({position: 0});
+					var themes = ["Dark", "Light"];
+					ui.combo(themeHandle, themes, "Theme", true);
+					if (themeHandle.changed) {
+						iron.data.Data.getBlob("theme_" + themes[themeHandle.position] + ".arm", function(b:kha.Blob) {
+							arm.App.parseTheme(b);
+							ui.t = arm.App.theme;
+							// UINodes.inst.applyTheme();
+							headerHandle.redraws = 2;
+							toolbarHandle.redraws = 2;
+							statusHandle.redraws = 2;
+							workspaceHandle.redraws = 2;
+							menuHandle.redraws = 2;
+						});
+					}
 				}
 
 				ui.separator();
