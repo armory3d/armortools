@@ -1125,6 +1125,7 @@ class UITrait extends iron.Trait {
 			if (worktab.changed) {
 				ddirty = 2;
 				toolbarHandle.redraws = 2;
+				headerHandle.redraws = 2;
 				if (worktab.position == 1) {
 					selectTool(0);
 				}
