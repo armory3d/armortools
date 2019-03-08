@@ -482,7 +482,7 @@ class App extends iron.Trait {
 						var date = Macro.buildDate().split(" ")[0];
 						var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
 						if (updateVersion > dateInt) {
-							arm.App.showMessageBox("Update is available!");
+							arm.App.showMessageBox("Update is available!\nPlease visit armorpaint.org to download.");
 						}
 						else {
 							arm.App.showMessageBox("You are up to date!");
@@ -493,11 +493,11 @@ class App extends iron.Trait {
 			}
 			if (ui.button("About...", Left)) {
 				var sha = Macro.buildSha();
+				sha = sha.substr(1, sha.length - 2);
 				var date = Macro.buildDate().split(" ")[0];
 				var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
-				var renderer = #if (rp_renderer == "Deferred") "Deferred" #else "Forward" #end;
-				var msg = "ArmorPaint.org - v" + version + " (" + date + ") - " + sha + "\n";
-				msg += kha.System.systemId + " - " + gapi + " - " + renderer;
+				var msg = "ArmorPaint.org - v" + version + " (" + date + ") - git " + sha + "\n";
+				msg += kha.System.systemId + " - " + gapi;
 				arm.App.showMessageBox(msg);
 			}
 		}

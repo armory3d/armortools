@@ -131,15 +131,26 @@ class RenderUtil {
 
 	@:access(zui.Zui)
 	public static function makeTextPreview() {
+		var text = UITrait.inst.textToolText;
+		var font = UITrait.inst.getTextToolFont();
+		var fontSize = 200;
+		var textW = Std.int(font.width(fontSize, text));
+		var textH = Std.int(font.height(fontSize));
+		var texW = textW + 32;
+		if (texW < 512) texW = 512;
+		if (UITrait.inst.textToolImage != null && UITrait.inst.textToolImage.width < texW) {
+			UITrait.inst.textToolImage.unload();
+			UITrait.inst.textToolImage = null;
+		}
 		if (UITrait.inst.textToolImage == null) {
-			UITrait.inst.textToolImage = kha.Image.createRenderTarget(512, 512, kha.graphics4.TextureFormat.L8);
+			UITrait.inst.textToolImage = kha.Image.createRenderTarget(texW, texW, kha.graphics4.TextureFormat.L8);
 		}
 		var g2 = UITrait.inst.textToolImage.g2;
 		g2.begin(true, 0xff000000);
-		g2.font = UITrait.inst.getTextToolFont();
-		g2.fontSize = 200;
+		g2.font = font;
+		g2.fontSize = fontSize;
 		g2.color = 0xffffffff;
-		g2.drawString(UITrait.inst.textToolText, 0, 0);
+		g2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
 		g2.end();
 	}
 }
