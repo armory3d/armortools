@@ -837,7 +837,7 @@ class UITrait extends iron.Trait {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (arm.App.uienabled) {
+		if (arm.App.uienabled && worktab.position == 0) {
 			var cursorImg = bundled.get('cursor.png');
 			var mouse = iron.system.Input.getMouse();
 			var mx = mouse.x + iron.App.x();
@@ -1141,6 +1141,9 @@ class UITrait extends iron.Trait {
 			if (worktab.changed) {
 				ddirty = 2;
 				toolbarHandle.redraws = 2;
+				if (worktab.position == 1) {
+					selectTool(0);
+				}
 			}
 		}
 
@@ -1327,6 +1330,7 @@ class UITrait extends iron.Trait {
 						}
 						if (ui.isReleased) {
 							selectObject(o);
+							ddirty = 2;
 						}
 						i++;
 						if (b) {
@@ -1434,14 +1438,24 @@ class UITrait extends iron.Trait {
 							selectedType = "(Scene)";
 							// ui.image(envThumb);
 							var p = iron.Scene.active.world.probe;
-							ui.row([1/2, 1/2]);
-							var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
-							p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Strength", 0.0, 5.0, true);
+							// ui.row([1/2, 1/2]);
+							// var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
+							var envHandle = Id.handle({value: p.raw.strength});
+							p.raw.strength = ui.slider(envHandle, "Strength", 0.0, 5.0, true);
+							if (envHandle.changed) {
+								ddirty = 2;
+							}
 						}
 						else if (Std.is(selectedObject, iron.object.LightObject)) {
 							selectedType = "(Light)";
 							var light = cast(selectedObject, iron.object.LightObject);
-							light.data.raw.strength = ui.slider(Id.handle({value: light.data.raw.strength / 10}), "Strength", 0.0, 5.0, true) * 10;
+							var lhandle = Id.handle();
+							lhandle.value = light.data.raw.strength / 1333;
+							lhandle.value = Std.int(lhandle.value * 100) / 100;
+							light.data.raw.strength = ui.slider(lhandle, "Strength", 0.0, 4.0, true) * 1333;
+							if (lhandle.changed) {
+								ddirty = 2;
+							}
 						}
 						else if (Std.is(selectedObject, iron.object.CameraObject)) {
 							selectedType = "(Camera)";
@@ -1837,19 +1851,40 @@ class UITrait extends iron.Trait {
 
 				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Viewport", 1)) {
+
+					ui.row([1/2,1/2]);
+					if (ui.button("Flip Normals")) {
+						MeshUtil.flipNormals();
+						ddirty = 2;
+					}
+					if (ui.button("Import Envmap")) {
+						arm.App.showFiles = true;
+						@:privateAccess zui.Ext.lastPath = ""; // Refresh
+						arm.App.whandle.redraws = 2;
+						arm.App.foldersOnly = false;
+						arm.App.showFilename = false;
+						arm.App.filesDone = function(path:String) {
+							if (!StringTools.endsWith(path, ".hdr")) {
+								UITrait.inst.showError("Error: .hdr file expected");
+								return;
+							}
+							Importer.importFile(path);
+						}
+					}
+
 					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
 						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
 					}
+
+					ui.row([1/2, 1/2]);
 					var modeHandle = Id.handle({position: 0});
 					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal"], "Mode");
 					if (modeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}
-
-					ui.row([1/2, 1/2]);
 					var p = iron.Scene.active.world.probe;
-					var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
+					// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
 					var envHandle = Id.handle({value: p.raw.strength});
 					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 					if (envHandle.changed) ddirty = 2;
@@ -1900,11 +1935,6 @@ class UITrait extends iron.Trait {
 						ddirty = 2;
 					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
-
-					if (ui.button("Flip Normals")) {
-						MeshUtil.flipNormals();
-						ddirty = 2;
-					}
 
 					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 					if (showEnvmapHandle.changed) {

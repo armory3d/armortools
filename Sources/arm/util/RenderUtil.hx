@@ -14,7 +14,7 @@ class RenderUtil {
 		var painto = UITrait.inst.paintObject;
 		for (p in UITrait.inst.paintObjects) p.visible = false;
 
-		var plane:MeshObject = cast iron.Scene.active.getChild("Plane");
+		var plane:MeshObject = cast iron.Scene.active.getChild(".Plane");
 		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 		plane.transform.buildMatrix();
 		plane.visible = true;
@@ -69,7 +69,7 @@ class RenderUtil {
 		var painto = UITrait.inst.paintObject;
 		for (p in UITrait.inst.paintObjects) p.visible = false;
 
-		var sphere:MeshObject = cast iron.Scene.active.getChild("Sphere");
+		var sphere:MeshObject = cast iron.Scene.active.getChild(".Sphere");
 		sphere.visible = true;
 		UITrait.inst.paintObject = sphere;
 
