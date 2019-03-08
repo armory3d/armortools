@@ -473,52 +473,36 @@ class UITrait extends iron.Trait {
 		if (mouse.x > 0 && mouse.x < iron.App.w() &&
 			mouse.y > 0 && mouse.y < iron.App.h() && !ui.isTyping) {
 
-			if (shift) {
-				if (kb.started("1")) selectMaterial(0);
-				else if (kb.started("2")) selectMaterial(1);
-				else if (kb.started("3")) selectMaterial(2);
-				else if (kb.started("4")) selectMaterial(3);
-				else if (kb.started("5")) selectMaterial(4);
-				else if (kb.started("6")) selectMaterial(5);
-			}
+			if (UITrait.inst.worktab.position == 0) { // Paint
+				if (shift) {
+					if (kb.started("1")) selectMaterial(0);
+					else if (kb.started("2")) selectMaterial(1);
+					else if (kb.started("3")) selectMaterial(2);
+					else if (kb.started("4")) selectMaterial(3);
+					else if (kb.started("5")) selectMaterial(4);
+					else if (kb.started("6")) selectMaterial(5);
+				}
 
-			if (!ctrl) {
-				if (kb.started("b")) selectTool(0); // Brush
-				else if (kb.started("r")) selectTool(1); // Erase
-				else if (kb.started("g")) selectTool(2); // Fill
-				else if (kb.started("k")) selectTool(3); // Bake
-				else if (kb.started("c")) selectTool(4); // Color id
-				else if (kb.started("l")) selectTool(5); // Decal
-				else if (kb.started("t")) selectTool(6); // Text
-				else if (kb.started("h")) selectTool(7); // Shape
-			}
+				if (!ctrl) {
+					if (kb.started("b")) selectTool(0); // Brush
+					else if (kb.started("r")) selectTool(1); // Erase
+					else if (kb.started("g")) selectTool(2); // Fill
+					else if (kb.started("k")) selectTool(3); // Bake
+					else if (kb.started("c")) selectTool(4); // Color id
+					else if (kb.started("l")) selectTool(5); // Decal
+					else if (kb.started("t")) selectTool(6); // Text
+					else if (kb.started("h")) selectTool(7); // Shape
+				}
 
-			// Color pick shortcut
-			// if (kb.started("alt")) {
-			// 	altStartedX = mouse.x;
-			// 	altStartedY = mouse.y;
-			// }
-			// else if (kb.released("alt") && altStartedX == mouse.x && altStartedY == mouse.y) {
-			// 	if (lastBrushType == -1) {
-			// 		lastBrushType = brushType;
-			// 		selectTool(4);
-			// 	}
-			// 	else {
-			// 		selectTool(lastBrushType);
-			// 		lastBrushType = -1;
-			// 	}
-			// 	altStartedX = -1.0;
-			// 	altStartedY = -1.0;
-			// }
-
-			// Radius
-			if (!ctrl && !shift) {
-				if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6 || brushType == 7) { // Draw, erase, decal, text
-					if (kb.started("f")) {
-						brushCanLock = true;
-						mouse.lock();
-						lockStartedX = mouse.x + iron.App.x();
-						lockStartedY = mouse.y + iron.App.y();
+				// Radius
+				if (!ctrl && !shift) {
+					if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6 || brushType == 7) { // Draw, erase, decal, text
+						if (kb.started("f")) {
+							brushCanLock = true;
+							mouse.lock();
+							lockStartedX = mouse.x + iron.App.x();
+							lockStartedY = mouse.y + iron.App.y();
+						}
 					}
 				}
 			}
@@ -1151,109 +1135,115 @@ class UITrait extends iron.Trait {
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(headerHandle, panelx, headerh, kha.System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
-			if (brushType == 4) { // Color ID
-				ui.text("Picked Color");
-				if (colorIdPicked) {
-					ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
-				}
-				if (ui.button("Clear")) colorIdPicked = false;
-				ui.text("Color ID Map");
-				var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
-				if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
-			}
-			else if (brushType == 3) { // Bake AO
-				ui.combo(Id.handle(), ["AO"], "Bake");
-				var h = Id.handle({value: bakeStrength});
-				bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
-				if (h.changed) UINodes.inst.parsePaintMaterial();
-				var h = Id.handle({value: bakeRadius});
-				bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
-				if (h.changed) UINodes.inst.parsePaintMaterial();
-				var h = Id.handle({value: bakeOffset});
-				bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
-				if (h.changed) UINodes.inst.parsePaintMaterial();
-				ui.check(autoFillHandle, "Auto-Fill");
-				if (autoFillHandle.changed) {
-					UINodes.inst.updateCanvasMap();
-					UINodes.inst.parsePaintMaterial();
-				}
-			}
-			else { // Draw, Erase, Fill, Decal, Text, Shape
-				brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
-				
-				var brushScaleHandle = Id.handle({value: brushScale});
-				brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
-				if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
-				
-				var brushRotHandle = Id.handle({value: brushRot});
-				brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
-				// if (brushRotHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
-				if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
-				
-				brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
-				
-				if (brushType == 0 || brushType == 1 || brushType == 2) {
-					brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
-					brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
-				}
+			if (UITrait.inst.worktab.position == 0) {
 
-				ui.combo(Id.handle(), ["Add"], "Blending");
-
-				var paintHandle = Id.handle();
-				brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
-				if (paintHandle.changed) {
-					UINodes.inst.parsePaintMaterial();
-				}
-
-				if (brushType == 2) { // Fill
-					ui.combo(fillTypeHandle, ["Object", "Face"], "Fill");
-					if (fillTypeHandle.changed) {
-						if (fillTypeHandle.position == 1) {
-							ui.g.end();
-							// UIView2D.inst.cacheUVMap();
-							UIView2D.inst.cacheTriangleMap();
-							ui.g.begin(false);
-							// wireframeHandle.selected = drawWireframe = true;
-						}
-						UINodes.inst.parsePaintMaterial();
-						UINodes.inst.parseMeshMaterial();
+				if (brushType == 4) { // Color ID
+					ui.text("Picked Color");
+					if (colorIdPicked) {
+						ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 					}
+					if (ui.button("Clear")) colorIdPicked = false;
+					ui.text("Color ID Map");
+					var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
+					if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
+				}
+				else if (brushType == 3) { // Bake AO
+					ui.combo(Id.handle(), ["AO"], "Bake");
+					var h = Id.handle({value: bakeStrength});
+					bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
+					if (h.changed) UINodes.inst.parsePaintMaterial();
+					var h = Id.handle({value: bakeRadius});
+					bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
+					if (h.changed) UINodes.inst.parsePaintMaterial();
+					var h = Id.handle({value: bakeOffset});
+					bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
+					if (h.changed) UINodes.inst.parsePaintMaterial();
 					ui.check(autoFillHandle, "Auto-Fill");
 					if (autoFillHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}
 				}
-				else { // Draw, Erase, Decal, Text, Shape
-					paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-					var mirrorHandle = Id.handle({selected: mirrorX});
-					mirrorX = ui.check(mirrorHandle, "Mirror");
-					if (mirrorHandle.changed) {
-						UINodes.inst.updateCanvasMap();
+				else { // Draw, Erase, Fill, Decal, Text, Shape
+					brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
+					
+					var brushScaleHandle = Id.handle({value: brushScale});
+					brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
+					if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
+					
+					var brushRotHandle = Id.handle({value: brushRot});
+					brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
+					// if (brushRotHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
+					if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
+					
+					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					
+					if (brushType == 0 || brushType == 1 || brushType == 2) {
+						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
+						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
+					}
+
+					ui.combo(Id.handle(), ["Add"], "Blending");
+
+					var paintHandle = Id.handle();
+					brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
+					if (paintHandle.changed) {
 						UINodes.inst.parsePaintMaterial();
 					}
-				}
-				if (brushType == 6) { // Text
-					ui.combo(textToolHandle, Importer.fontList, "Font");
-					var h = Id.handle();
-					h.text = textToolText;
-					textToolText = ui.textInput(h, "");
-					if (h.changed || textToolHandle.changed) {
-						ui.g.end();
-						RenderUtil.makeTextPreview();
-						RenderUtil.makeDecalPreview();
-						ui.g.begin(false);
+
+					if (brushType == 2) { // Fill
+						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill");
+						if (fillTypeHandle.changed) {
+							if (fillTypeHandle.position == 1) {
+								ui.g.end();
+								// UIView2D.inst.cacheUVMap();
+								UIView2D.inst.cacheTriangleMap();
+								ui.g.begin(false);
+								// wireframeHandle.selected = drawWireframe = true;
+							}
+							UINodes.inst.parsePaintMaterial();
+							UINodes.inst.parseMeshMaterial();
+						}
+						ui.check(autoFillHandle, "Auto-Fill");
+						if (autoFillHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+					}
+					else { // Draw, Erase, Decal, Text, Shape
+						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+						var mirrorHandle = Id.handle({selected: mirrorX});
+						mirrorX = ui.check(mirrorHandle, "Mirror");
+						if (mirrorHandle.changed) {
+							UINodes.inst.updateCanvasMap();
+							UINodes.inst.parsePaintMaterial();
+						}
+					}
+					if (brushType == 6) { // Text
+						ui.combo(textToolHandle, Importer.fontList, "Font");
+						var h = Id.handle();
+						h.text = textToolText;
+						textToolText = ui.textInput(h, "");
+						if (h.changed || textToolHandle.changed) {
+							ui.g.end();
+							RenderUtil.makeTextPreview();
+							RenderUtil.makeDecalPreview();
+							ui.g.begin(false);
+						}
+					}
+					if (brushType == 7) { // Shape
+						var shape = ui.combo(shapeToolHandle, ["Rectangle", "Circle", "Triangle"], "Shape");
+						if (shapeToolHandle.changed) {
+							ui.g.end();
+							RenderUtil.makeShapePreview();
+							RenderUtil.makeDecalPreview();
+							ui.g.begin(false);
+						}
 					}
 				}
-				if (brushType == 7) { // Shape
-					var shape = ui.combo(shapeToolHandle, ["Rectangle", "Circle", "Triangle"], "Shape");
-					if (shapeToolHandle.changed) {
-						ui.g.end();
-						RenderUtil.makeShapePreview();
-						RenderUtil.makeDecalPreview();
-						ui.g.begin(false);
-					}
-				}
+			}
+			else if (UITrait.inst.worktab.position == 1) {
+				// ui.button("Clone");
 			}
 		}
 
