@@ -474,6 +474,9 @@ class App extends iron.Trait {
 				if (kha.System.systemId == "Windows") {
 					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
 				}
+				else {
+					Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
+				}
 				// Compare versions
 				iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
 					var update = haxe.Json.parse(blob.toString());
