@@ -110,6 +110,9 @@ class Uniforms {
 		else if (link == "_textexttool") { // Opacity map for text
 			return UITrait.inst.textToolImage;
 		}
+		else if (link == "_texshapetool") { // Opacity map for shape
+			return UITrait.inst.shapeToolImage;
+		}
 		return null;
 	}
 }

@@ -193,7 +193,7 @@ class UINodes extends iron.Trait {
 				parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd.redraws = 2;
-				var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6;
+				var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6 || UITrait.inst.brushType == 7;
 				if (decal) RenderUtil.makeDecalPreview();
 			}
 		}

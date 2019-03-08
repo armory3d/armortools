@@ -108,6 +108,8 @@ class UITrait extends iron.Trait {
 	public var textToolImage:kha.Image = null;
 	public var textToolText = "Text";
 	public var textToolHandle = new Zui.Handle({position: 0});
+	public var shapeToolImage:kha.Image = null;
+	public var shapeToolHandle = new Zui.Handle({position: 0});
 	
 	var _onBrush:Array<Int->Void> = [];
 
@@ -488,6 +490,7 @@ class UITrait extends iron.Trait {
 				else if (kb.started("c")) selectTool(4); // Color id
 				else if (kb.started("l")) selectTool(5); // Decal
 				else if (kb.started("t")) selectTool(6); // Text
+				else if (kb.started("h")) selectTool(7); // Shape
 			}
 
 			// Color pick shortcut
@@ -510,7 +513,7 @@ class UITrait extends iron.Trait {
 
 			// Radius
 			if (!ctrl && !shift) {
-				if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6) { // Draw, erase, decal, text
+				if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6 || brushType == 7) { // Draw, erase, decal, text
 					if (kb.started("f")) {
 						brushCanLock = true;
 						mouse.lock();
@@ -853,7 +856,7 @@ class UITrait extends iron.Trait {
 
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			var decal = brushType == 5 || brushType == 6;
+			var decal = brushType == 5 || brushType == 6 || brushType == 7;
 			if (decal) {
 				psize = Std.int(256 * (brushRadius * brushNodesRadius));
 				#if kha_direct3d11
@@ -940,13 +943,16 @@ class UITrait extends iron.Trait {
 		toolbarHandle.redraws = 2;
 		ddirty = 2;
 
-		var decal = brushType == 5 || brushType == 6;
+		var decal = brushType == 5 || brushType == 6 || brushType == 7;
 		if (decal) { // Decal, Text
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
 			if (brushType == 6) { // Text
 				RenderUtil.makeTextPreview();
+			}
+			else if (brushType == 7) { // Shape
+				RenderUtil.makeShapePreview();
 			}
 
 			RenderUtil.makeDecalPreview();
@@ -1237,7 +1243,13 @@ class UITrait extends iron.Trait {
 					}
 				}
 				if (brushType == 7) { // Shape
-					var shape = ui.combo(Id.handle({position: 0}), ["Rect"], "Shape");
+					var shape = ui.combo(shapeToolHandle, ["Rectangle", "Circle", "Triangle"], "Shape");
+					if (shapeToolHandle.changed) {
+						ui.g.end();
+						RenderUtil.makeShapePreview();
+						RenderUtil.makeDecalPreview();
+						ui.g.begin(false);
+					}
 				}
 			}
 		}
