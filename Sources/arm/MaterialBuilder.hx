@@ -119,7 +119,7 @@ class MaterialBuilder {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushHardness', '_brushHardness');
 
-		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal) { // Draw / Erase
+		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 8) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
@@ -237,23 +237,55 @@ class MaterialBuilder {
 			}
 		}
 
-		Cycles.parse_height_as_channel = true;
-		var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
-		Cycles.parse_height_as_channel = false;
-		var base = sout.out_basecol;
-		var rough = sout.out_roughness;
-		var met = sout.out_metallic;
-		var occ = sout.out_occlusion;
-		var nortan = Cycles.out_normaltan;
-		var height = sout.out_height;
-		var opac = sout.out_opacity;
-		frag.write('vec3 basecol = $base;');
-		frag.write('float roughness = $rough;');
-		frag.write('float metallic = $met;');
-		frag.write('float occlusion = $occ;');
-		frag.write('vec3 nortan = $nortan;');
-		frag.write('float height = $height;');
-		frag.write('float opacity = $opac * brushOpacity;');
+		var clone = UITrait.inst.brushType == 8;
+		if (clone) {
+			frag.add_uniform('sampler2D gbuffer2');
+			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
+			frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
+			#if (kha_opengl || kha_webgl)
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
+			#else
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (sp.y + cloneDelta.y) * gbufferSize.y), 0).ba;');
+			#end
+			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
+			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
+			frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0).rgb;');
+			
+			var base = 'textureLod(texpaint_undo, texCoordInp, 0).rgb;';
+			var rough = 'texpaint_pack_sample.g;';
+			var met = 'texpaint_pack_sample.b;';
+			var occ = 'texpaint_pack_sample.r;';
+			var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0).rgb;';
+			var height = '0.0';
+			var opac = '1.0';
+			frag.write('vec3 basecol = $base;');
+			frag.write('float roughness = $rough;');
+			frag.write('float metallic = $met;');
+			frag.write('float occlusion = $occ;');
+			frag.write('vec3 nortan = $nortan;');
+			frag.write('float height = $height;');
+			frag.write('float opacity = $opac * brushOpacity;');
+		}
+		else {
+			Cycles.parse_height_as_channel = true;
+			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
+			Cycles.parse_height_as_channel = false;
+			var base = sout.out_basecol;
+			var rough = sout.out_roughness;
+			var met = sout.out_metallic;
+			var occ = sout.out_occlusion;
+			var nortan = Cycles.out_normaltan;
+			var height = sout.out_height;
+			var opac = sout.out_opacity;
+			frag.write('vec3 basecol = $base;');
+			frag.write('float roughness = $rough;');
+			frag.write('float metallic = $met;');
+			frag.write('float occlusion = $occ;');
+			frag.write('vec3 nortan = $nortan;');
+			frag.write('float height = $height;');
+			frag.write('float opacity = $opac * brushOpacity;');
+		}
 
 		if (UITrait.inst.brushType == 6) { // Text tool
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
@@ -673,7 +705,8 @@ class MaterialBuilder {
 		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
 
 		var writeTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
-					   UITrait.inst.brushType == 4; // Colorid pick
+					   UITrait.inst.brushType == 4 || // Colorid pick
+					   UITrait.inst.brushType == 8; // Clone
 
 		if (writeTC) {
 			frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');

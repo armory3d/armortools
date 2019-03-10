@@ -54,14 +54,12 @@ class Uniforms {
 			return vec2;
 		}
 		else if (link == '_texcoloridSize') {
-			vec2.set(0, 0, 0);
 			if (UITrait.inst.assets.length == 0) return vec2;
 			var img = UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
 			vec2.set(img.width, img.height, 0);
 			return vec2;
 		}
 		else if (link == '_textrianglemapSize') {
-			vec2.set(0, 0, 0);
 			var res = Config.getTextureRes();
 			vec2.set(res, res, 0);
 			return vec2;
@@ -75,6 +73,10 @@ class Uniforms {
 			// trace(iron.RenderPath.active.renderTargets.get("gbuffer2").image.width);
 			// trace(iron.App.w());
 			// var f = armory.renderpath.Inc.getSuperSampling();
+		}
+		else if (link == '_cloneDelta') {
+			vec2.set(UITrait.inst.cloneDeltaX, UITrait.inst.cloneDeltaY, 0);
+			return vec2;
 		}
 		return null;
 	}
@@ -112,6 +114,23 @@ class Uniforms {
 		}
 		else if (link == "_texshapetool") { // Opacity map for shape
 			return UITrait.inst.shapeToolImage;
+		}
+		else if (link == "_texpaint_undo") {
+			// if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0)
+			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			return iron.RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
+		}
+		else if (link == "_texpaint_nor_undo") {
+			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			return iron.RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
+		}
+		else if (link == "_texpaint_pack_undo") {
+			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			return iron.RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
+		}
+		else if (link == "_texpaint_opt_undo") {
+			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			return iron.RenderPath.active.renderTargets.get("texpaint_opt_undo" + i).image;
 		}
 		return null;
 	}

@@ -118,6 +118,10 @@ class UITrait extends iron.Trait {
 	public var lastPaintY = -1.0;
 	public var painted = 0;
 	public var brushTime = 0.0;
+	public var cloneStartX = -1.0;
+	public var cloneStartY = -1.0;
+	public var cloneDeltaX = 0.0;
+	public var cloneDeltaY = 0.0;
 
 	public var selectedObject:iron.object.Object;
 	public var paintObject:iron.object.MeshObject;
@@ -341,7 +345,20 @@ class UITrait extends iron.Trait {
 
 		var scale = C.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
-		loadBundled(['cursor.png', 'empty.jpg', 'tool_draw.png', 'tool_eraser.png', 'tool_fill.png', 'tool_bake.png', 'tool_colorid.png', 'tool_decal.png', 'tool_text.png','tool_shape.png', 'tool_particle.png'], done);
+		loadBundled([
+			'cursor.png',
+			'empty.jpg',
+			'tool_draw.png',
+			'tool_eraser.png',
+			'tool_fill.png',
+			'tool_bake.png',
+			'tool_colorid.png',
+			'tool_decal.png',
+			'tool_text.png',
+			'tool_shape.png',
+			'tool_clone.png',
+			'tool_particle.png'
+		], done);
 	}
 
 	public function showMessage(s:String) {
@@ -483,15 +500,17 @@ class UITrait extends iron.Trait {
 					else if (kb.started("6")) selectMaterial(5);
 				}
 
-				if (!ctrl) {
+				if (!ctrl && !mouse.down("right")) {
 					if (kb.started("b")) selectTool(0); // Brush
-					else if (kb.started("r")) selectTool(1); // Erase
+					else if (kb.started("e")) selectTool(1); // Erase
 					else if (kb.started("g")) selectTool(2); // Fill
 					else if (kb.started("k")) selectTool(3); // Bake
 					else if (kb.started("c")) selectTool(4); // Color id
-					else if (kb.started("l")) selectTool(5); // Decal
+					else if (kb.started("d")) selectTool(5); // Decal
 					else if (kb.started("t")) selectTool(6); // Text
-					else if (kb.started("h")) selectTool(7); // Shape
+					else if (kb.started("s")) selectTool(7); // Shape
+					else if (kb.started("l")) selectTool(8); // Clone
+					// else if (kb.started("p")) selectTool(8); // Particle
 				}
 
 				// Radius
@@ -631,14 +650,26 @@ class UITrait extends iron.Trait {
 		if (down && !kb.down("control")) {
 			if (mouse.x < iron.App.w() && mouse.x > iron.App.x() &&
 				mouse.y < iron.App.h() && mouse.y > iron.App.y()) {
-				if (brushTime == 0 && C.undo_steps > 0) { // Paint started
-					pushUndo = true;
-					if (projectPath != "") {
-						kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
-					}
+				
+				if (brushType == 8 && kb.down("alt")) { // Clone source
+					cloneStartX = mouse.x;
+					cloneStartY = mouse.y;
 				}
-				brushTime += iron.system.Time.delta;
-				for (f in _onBrush) f(0);
+				else {
+					if (brushTime == 0 && C.undo_steps > 0) { // Paint started
+						pushUndo = true;
+						if (projectPath != "") {
+							kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
+						}
+						if (brushType == 8 && cloneStartX >= 0.0) { // Clone delta
+							cloneDeltaX = (cloneStartX - mouse.x) / iron.App.w();
+							cloneDeltaY = (cloneStartY - mouse.y) / iron.App.h();
+							cloneStartX = -1;
+						}
+					}
+					brushTime += iron.system.Time.delta;
+					for (f in _onBrush) f(0);
+				}
 			}
 
 		}
@@ -1011,7 +1042,8 @@ class UITrait extends iron.Trait {
 				var img6 = bundled.get("tool_decal.png");
 				var img7 = bundled.get("tool_text.png");
 				var img8 = bundled.get("tool_shape.png");
-				var img9 = bundled.get("tool_particle.png");
+				var img9 = bundled.get("tool_clone.png");
+				// var img10 = bundled.get("tool_particle.png");
 				
 				ui._x += 2;
 				if (brushType == 0) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -1023,7 +1055,7 @@ class UITrait extends iron.Trait {
 				ui._x += 2;
 				if (brushType == 1) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img2) == State.Started) selectTool(1);
-				if (ui.isHovered) ui.tooltip("Eraser (R)");
+				if (ui.isHovered) ui.tooltip("Eraser (E)");
 				ui._x -= 2;
 				ui._y += 2;
 
@@ -1044,14 +1076,14 @@ class UITrait extends iron.Trait {
 				ui._x += 2;
 				if (brushType == 4) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img5) == State.Started) selectTool(4);
-				if (ui.isHovered) ui.tooltip("Color ID (F)");
+				if (ui.isHovered) ui.tooltip("Color ID (C)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
 				if (brushType == 5) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img6) == State.Started) selectTool(5);
-				if (ui.isHovered) ui.tooltip("Decal (L)");
+				if (ui.isHovered) ui.tooltip("Decal (D)");
 				ui._x -= 2;
 				ui._y += 2;
 
@@ -1065,7 +1097,14 @@ class UITrait extends iron.Trait {
 				ui._x += 2;
 				if (brushType == 7) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img8) == State.Started) selectTool(7);
-				if (ui.isHovered) ui.tooltip("Shape (H)");
+				if (ui.isHovered) ui.tooltip("Shape (S)");
+				ui._x -= 2;
+				ui._y += 2;
+
+				ui._x += 2;
+				if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img9) == State.Started) selectTool(8);
+				if (ui.isHovered) ui.tooltip("Clone (L) - Hold ALT to set source");
 				ui._x -= 2;
 				ui._y += 2;
 

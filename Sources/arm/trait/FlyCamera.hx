@@ -30,7 +30,8 @@ class FlyCamera extends iron.Trait {
 				UITrait.inst.isScrolling ||
 				UITrait.inst.cameraControls != 2 ||
 				mouse.x < 0 ||
-				mouse.x > iron.App.w()) return;
+				mouse.x > iron.App.w() ||
+				!mouse.down("right")) return;
 
 			var camera = iron.Scene.active.camera;
 
