@@ -283,27 +283,24 @@ class MaterialBuilder {
 				frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 				frag.write('float height = 1.0;');
 				frag.write('float opacity = 1.0 * brushOpacity;');
+				frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
+				frag.write('float blur_step = 1.0 / gbufferSize;');
 				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('  basecol += textureOffset(texpaint_undo, texCoordInp, ivec2(i, 0)).rgb;');
-				frag.write('  vec3 texpaint_pack_sample = textureOffset(texpaint_pack_undo, texCoordInp, ivec2(i, 0)).rgb;');
+				frag.write('  basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+				frag.write('  vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
 				frag.write('  roughness += texpaint_pack_sample.g;');
 				frag.write('  metallic += texpaint_pack_sample.b;');
 				frag.write('  occlusion += texpaint_pack_sample.r;');
-				frag.write('  nortan += textureOffset(texpaint_nor_undo, texCoordInp, ivec2(i, 0)).rgb;');
+				frag.write('  nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
 				frag.write('}');
 				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('  basecol += textureOffset(texpaint_undo, texCoordInp, ivec2(0, i)).rgb;');
-				frag.write('  vec3 texpaint_pack_sample = textureOffset(texpaint_pack_undo, texCoordInp, ivec2(0, i)).rgb;');
+				frag.write('  basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+				frag.write('  vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
 				frag.write('  roughness += texpaint_pack_sample.g;');
 				frag.write('  metallic += texpaint_pack_sample.b;');
 				frag.write('  occlusion += texpaint_pack_sample.r;');
-				frag.write('  nortan += textureOffset(texpaint_nor_undo, texCoordInp, ivec2(0, i)).rgb;');
+				frag.write('  nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
 				frag.write('}');
-				frag.write('basecol /= 30.0;');
-				frag.write('roughness /= 30.0;');
-				frag.write('metallic /= 30.0;');
-				frag.write('occlusion /= 30.0;');
-				frag.write('nortan /= 30.0;');
 			}
 		}
 		else {
