@@ -510,12 +510,13 @@ class UITrait extends iron.Trait {
 					else if (kb.started("t")) selectTool(6); // Text
 					else if (kb.started("s")) selectTool(7); // Shape
 					else if (kb.started("l")) selectTool(8); // Clone
-					// else if (kb.started("p")) selectTool(8); // Particle
+					else if (kb.started("u")) selectTool(9); // Blur
+					// else if (kb.started("p")) selectTool(10); // Particle
 				}
 
 				// Radius
 				if (!ctrl && !shift) {
-					if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6 || brushType == 7) { // Draw, erase, decal, text
+					if (brushType == 0 || brushType == 1 || brushType == 5 || brushType == 6 || brushType == 7 || brushType == 8 || brushType == 9) { // Draw, erase, decal, text, shape, clone, blur
 						if (kb.started("f")) {
 							brushCanLock = true;
 							mouse.lock();
@@ -905,6 +906,13 @@ class UITrait extends iron.Trait {
 				g.color = 0xffffffff;
 			}
 
+			var kb = iron.system.Input.getKeyboard();
+			if (brushType == 8 && !kb.down("alt") && (mouse.down() || pen.down())) { // Clone source cursor
+				g.color = 0x66ffffff;
+				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+				g.color = 0xffffffff;
+			}
+
 			if (showGrid) {
 				// Separator line
 				var x1 = iron.App.x() + iron.App.w() / 3;
@@ -1108,9 +1116,16 @@ class UITrait extends iron.Trait {
 				ui._x -= 2;
 				ui._y += 2;
 
+				ui._x += 2;
+				if (brushType == 9) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img9) == State.Started) selectTool(9);
+				if (ui.isHovered) ui.tooltip("Blur (U)");
+				ui._x -= 2;
+				ui._y += 2;
+
 				// ui._x += 2;
-				// if (brushType == 8) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
-				// if (ui.image(img9) == State.Started) selectTool(8);
+				// if (brushType == 10) ui.rect(-1, -1, img1.width + 2, img1.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				// if (ui.image(img11) == State.Started) selectTool(10);
 				// if (ui.isHovered) ui.tooltip("Particle (P)");
 				// ui._x -= 2;
 				// ui._y += 2;

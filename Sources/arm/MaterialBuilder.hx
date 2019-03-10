@@ -119,7 +119,7 @@ class MaterialBuilder {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushHardness', '_brushHardness');
 
-		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 8) { // Draw / Erase
+		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 8 || UITrait.inst.brushType == 9) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
@@ -237,35 +237,74 @@ class MaterialBuilder {
 			}
 		}
 
-		var clone = UITrait.inst.brushType == 8;
-		if (clone) {
+		if (UITrait.inst.brushType == 8 || UITrait.inst.brushType == 9) { // Clone, Blur
+			
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
-			frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
-			#if (kha_opengl || kha_webgl)
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
-			#else
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (sp.y + cloneDelta.y) * gbufferSize.y), 0).ba;');
-			#end
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
-			frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0).rgb;');
-			
-			var base = 'textureLod(texpaint_undo, texCoordInp, 0).rgb;';
-			var rough = 'texpaint_pack_sample.g;';
-			var met = 'texpaint_pack_sample.b;';
-			var occ = 'texpaint_pack_sample.r;';
-			var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0).rgb;';
-			var height = '0.0';
-			var opac = '1.0';
-			frag.write('vec3 basecol = $base;');
-			frag.write('float roughness = $rough;');
-			frag.write('float metallic = $met;');
-			frag.write('float occlusion = $occ;');
-			frag.write('vec3 nortan = $nortan;');
-			frag.write('float height = $height;');
-			frag.write('float opacity = $opac * brushOpacity;');
+
+			if (UITrait.inst.brushType == 8) { // Clone
+				frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
+				#if (kha_opengl || kha_webgl)
+				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
+				#else
+				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (sp.y + cloneDelta.y) * gbufferSize.y), 0).ba;');
+				#end
+
+				frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0).rgb;');
+				var base = 'textureLod(texpaint_undo, texCoordInp, 0).rgb';
+				var rough = 'texpaint_pack_sample.g';
+				var met = 'texpaint_pack_sample.b';
+				var occ = 'texpaint_pack_sample.r';
+				var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0).rgb';
+				var height = '0.0';
+				var opac = '1.0';
+				frag.write('vec3 basecol = $base;');
+				frag.write('float roughness = $rough;');
+				frag.write('float metallic = $met;');
+				frag.write('float occlusion = $occ;');
+				frag.write('vec3 nortan = $nortan;');
+				frag.write('float height = $height;');
+				frag.write('float opacity = $opac * brushOpacity;');
+			}
+			else { // Blur
+				#if (kha_opengl || kha_webgl)
+				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
+				#else
+				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
+				#end
+
+				frag.write('vec3 basecol = vec3(0.0, 0.0, 0.0);');
+				frag.write('float roughness = 0.0;');
+				frag.write('float metallic = 0.0;');
+				frag.write('float occlusion = 0.0;');
+				frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
+				frag.write('float height = 1.0;');
+				frag.write('float opacity = 1.0 * brushOpacity;');
+				frag.write('for (int i = -7; i <= 7; i++) {');
+				frag.write('  basecol += textureOffset(texpaint_undo, texCoordInp, ivec2(i, 0)).rgb;');
+				frag.write('  vec3 texpaint_pack_sample = textureOffset(texpaint_pack_undo, texCoordInp, ivec2(i, 0)).rgb;');
+				frag.write('  roughness += texpaint_pack_sample.g;');
+				frag.write('  metallic += texpaint_pack_sample.b;');
+				frag.write('  occlusion += texpaint_pack_sample.r;');
+				frag.write('  nortan += textureOffset(texpaint_nor_undo, texCoordInp, ivec2(i, 0)).rgb;');
+				frag.write('}');
+				frag.write('for (int i = -7; i <= 7; i++) {');
+				frag.write('  basecol += textureOffset(texpaint_undo, texCoordInp, ivec2(0, i)).rgb;');
+				frag.write('  vec3 texpaint_pack_sample = textureOffset(texpaint_pack_undo, texCoordInp, ivec2(0, i)).rgb;');
+				frag.write('  roughness += texpaint_pack_sample.g;');
+				frag.write('  metallic += texpaint_pack_sample.b;');
+				frag.write('  occlusion += texpaint_pack_sample.r;');
+				frag.write('  nortan += textureOffset(texpaint_nor_undo, texCoordInp, ivec2(0, i)).rgb;');
+				frag.write('}');
+				frag.write('basecol /= 30.0;');
+				frag.write('roughness /= 30.0;');
+				frag.write('metallic /= 30.0;');
+				frag.write('occlusion /= 30.0;');
+				frag.write('nortan /= 30.0;');
+			}
 		}
 		else {
 			Cycles.parse_height_as_channel = true;
@@ -706,7 +745,8 @@ class MaterialBuilder {
 
 		var writeTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
 					   UITrait.inst.brushType == 4 || // Colorid pick
-					   UITrait.inst.brushType == 8; // Clone
+					   UITrait.inst.brushType == 8 || // Clone
+					   UITrait.inst.brushType == 9;   // Blur
 
 		if (writeTC) {
 			frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');

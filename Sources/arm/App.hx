@@ -490,6 +490,9 @@ class App extends iron.Trait {
 						else {
 							arm.App.showMessageBox("You are up to date!");
 						}
+						// explorer "https://armorpaint.org/download"
+						// open "https://armorpaint.org/download"
+						// xdg-open "https://armorpaint.org/download"
 					}
 				});
 				#end

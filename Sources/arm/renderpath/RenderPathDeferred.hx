@@ -247,7 +247,8 @@ class RenderPathDeferred {
 
 				// Read texcoords from gbuffer
 				var readTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
-							  UITrait.inst.brushType == 8; // Clone
+							  UITrait.inst.brushType == 8 || // Clone
+							  UITrait.inst.brushType == 9;   // Blur
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
