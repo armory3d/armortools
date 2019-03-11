@@ -448,7 +448,6 @@ class UITrait extends iron.Trait {
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
-				arm.App.showFiles = false;
 
 		if (!arm.App.uimodal.isTyping) {
 			if (kb.started("escape")) {
