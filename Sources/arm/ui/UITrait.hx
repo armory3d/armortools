@@ -448,13 +448,19 @@ class UITrait extends iron.Trait {
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
+				arm.App.showFiles = false;
 
 		if (!arm.App.uimodal.isTyping) {
-			if (kb.started("escape")) arm.App.showFiles = false;
-			if (arm.App.showFiles && kb.started("enter")) {
+			if (kb.started("escape")) {
 				arm.App.showFiles = false;
-				arm.App.filesDone(arm.App.path);
-				UITrait.inst.ddirty = 2;
+				arm.App.showBox = false;
+			}
+			if (arm.App.showFiles) {
+				if (kb.started("enter")) {
+					arm.App.showFiles = false;
+					arm.App.filesDone(arm.App.path);
+					UITrait.inst.ddirty = 2;
+				}
 			}
 		}
 
@@ -2091,27 +2097,7 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab, "Export")) {
-				
-				if (ui.panel(Id.handle({selected: true}), "Project", 1)) {
-					ui.row([1/2,1/2]);
-					if (newConfirm) {
-						if (ui.button("Confirm")) {
-							newConfirm = false;
-							Project.projectNew();
-							ViewportUtil.scaleToBounds();
-						}
-					}
-					else if (ui.button("New")) {
-						newConfirm = true;
-					}
-					newObject = ui.combo(Id.handle(), newObjectNames, "Default Object");
-					ui.row([1/3,1/3,1/3]);
-					if (ui.button("Open")) Project.projectOpen();
-					if (ui.button("Save")) Project.projectSave();
-					if (ui.button("Save As")) Project.projectSaveAs();
-				}
 
-				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Project Quality", 1)) {
 					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K"], "Res", true);
 					if (resHandle.changed) {

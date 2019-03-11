@@ -20,6 +20,7 @@ class App extends iron.Trait {
 	public static var showFiles = false;
 	public static var showBox = false;
 	public static var boxText = "";
+	public static var boxCommands:Zui->Void = null;
 	public static var foldersOnly = false;
 	public static var showFilename = false;
 	public static var whandle = new Zui.Handle();
@@ -370,29 +371,44 @@ class App extends iron.Trait {
 		
 		g.color = uimodal.t.SEPARATOR_COL;
 		g.fillRect(left, top, modalW, modalH);
-		
 		g.end();
-		uimodal.begin(g);
-		if (uimodal.window(whandle, left, top, modalW, modalH)) {
-			uimodal._y += 20;
-			for (line in boxText.split("\n")) {
-				uimodal.text(line);
+
+		if (boxCommands == null) {
+			uimodal.begin(g);
+			if (uimodal.window(whandle, left, top, modalW, modalH)) {
+				uimodal._y += 20;
+				for (line in boxText.split("\n")) {
+					uimodal.text(line);
+				}
 			}
+			uimodal.end(false);
+			uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
+			if (uimodal.button("OK")) {
+				showBox = false;
+			}
+			uimodal.endLayout(false);
 		}
-		uimodal.end(false);
-
-		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
-		if (uimodal.button("OK")) {
-			showBox = false;
+		else {
+			uimodal.begin(g);
+			if (uimodal.window(whandle, left, top, modalW, modalH)) {
+				uimodal._y += 20;
+				boxCommands(uimodal);
+			}
+			uimodal.end();
 		}
-		uimodal.endLayout(false);
-
+		
 		g.begin(false);
 	}
 
 	public static function showMessageBox(text:String) {
 		showBox = true;
 		boxText = text;
+		boxCommands = null;
+	}
+
+	public static function showCustomBox(commands:Zui->Void = null) {
+		showBox = true;
+		boxCommands = commands;
 	}
 
 	@:access(zui.Zui)
@@ -429,7 +445,18 @@ class App extends iron.Trait {
 		ui.changed = false;
 
 		if (menuCategory == 0) {
-			if (ui.button("New Project", Left)) { Project.projectNew(); ViewportUtil.scaleToBounds(); }
+			if (ui.button("New Project", Left)) {
+				showCustomBox(function(ui:Zui) {
+					ui.text("New Project");
+					ui.row([1/2, 1/2]);
+					UITrait.inst.newObject = ui.combo(Id.handle(), UITrait.inst.newObjectNames, "Default Object");
+					if (ui.button("OK")) {
+						Project.projectNew();
+						ViewportUtil.scaleToBounds();
+						showBox = false;
+					}
+				});
+			}
 			if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
 			if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
 			if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
