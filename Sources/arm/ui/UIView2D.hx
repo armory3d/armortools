@@ -162,7 +162,7 @@ class UIView2D extends iron.Trait {
 			// Controls
 			var ew = Std.int(ui.ELEMENT_W());
 			ui.g.color = ui.t.WINDOW_BG_COL;
-			ui.g.fillRect(0, 0, ww, 24);
+			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
 			ui.g.color = 0xffffffff;
 			ui._x = 3;
 			ui._y = 3;

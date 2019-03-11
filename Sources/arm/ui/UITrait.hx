@@ -169,6 +169,7 @@ class UITrait extends iron.Trait {
 	public var paintVisible = true;
 	public var mirrorX = false;
 	public var showGrid = false;
+	public var showCompass = false;
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var fillTypeHandle = new Zui.Handle();
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
@@ -512,7 +513,7 @@ class UITrait extends iron.Trait {
 					else if (kb.started("s")) selectTool(7); // Shape
 					else if (kb.started("l")) selectTool(8); // Clone
 					else if (kb.started("u")) selectTool(9); // Blur
-					// else if (kb.started("p")) selectTool(10); // Particle
+					else if (kb.started("p")) selectTool(10); // Particle
 				}
 
 				// Radius
@@ -1053,7 +1054,7 @@ class UITrait extends iron.Trait {
 				var img7 = bundled.get("tool_shape.png");
 				var img8 = bundled.get("tool_clone.png");
 				var img9 = bundled.get("tool_blur.png");
-				// var img10 = bundled.get("tool_particle.png");
+				var img10 = bundled.get("tool_particle.png");
 				
 				ui._x += 2;
 				if (brushType == 0) ui.rect(-1, -1, img0.width + 2, img0.height + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -1125,12 +1126,12 @@ class UITrait extends iron.Trait {
 				ui._x -= 2;
 				ui._y += 2;
 
-				// ui._x += 2;
-				// if (brushType == 10) ui.rect(-1, -1, img0.width + 2, img0.height + 2, ui.t.HIGHLIGHT_COL, 2);
-				// if (ui.image(img10) == State.Started) selectTool(10);
-				// if (ui.isHovered) ui.tooltip("Particle (P)");
-				// ui._x -= 2;
-				// ui._y += 2;
+				ui._x += 2;
+				if (brushType == 10) ui.rect(-1, -1, img0.width + 2, img0.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img10) == State.Started) selectTool(10);
+				if (ui.isHovered) ui.tooltip("Particle (P)");
+				ui._x -= 2;
+				ui._y += 2;
 			}
 			else if (UITrait.inst.worktab.position == 1) {
 				
@@ -1239,6 +1240,8 @@ class UITrait extends iron.Trait {
 					
 					if (brushType == 0 || brushType == 1 || brushType == 2) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
+					}
+					if (brushType == 0 || brushType == 1 || brushType == 2 || brushType == 8 || brushType == 9) {
 						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
 					}
 
@@ -1990,10 +1993,15 @@ class UITrait extends iron.Trait {
 					}
 					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
 
+					ui.row([1/2, 1/2]);
 					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 					if (showEnvmapHandle.changed) {
 						ddirty = 2;
 					}
+					var compassHandle = Id.handle({selected: showCompass});
+					showCompass = ui.check(compassHandle, "Compass");
+					if (compassHandle.changed) ddirty = 2;
+
 					if (showEnvmap) {
 						showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
 						if (showEnvmapBlurHandle.changed) {
@@ -2293,6 +2301,10 @@ class UITrait extends iron.Trait {
 					ui.text("Brush Radius - Hold F+Drag");
 					ui.text("Brush Ruler - Hold Shift+Paint");
 				}
+
+				// ui.separator();
+				// ui.button("Restore Defaults");
+				// ui.button("Confirm");
 			}
 		}
 

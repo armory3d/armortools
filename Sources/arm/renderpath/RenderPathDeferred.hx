@@ -569,6 +569,35 @@ class RenderPathDeferred {
 		{
 			path.clearTarget(null, 1.0);
 			path.drawMeshes("overlay");
+
+			if (UITrait.inst.showCompass) {
+				var scene = iron.Scene.active;
+				var cam = iron.Scene.active.camera;
+				var gizmo:iron.object.MeshObject = cast scene.getChild(".GizmoTranslate");
+				
+				var visible = gizmo.visible;
+				var parent = gizmo.parent;
+				var loc = gizmo.transform.loc;
+				var rot = gizmo.transform.rot;
+				var crot = cam.transform.rot;
+				var ratio = iron.App.w() / iron.App.h();
+				var P = cam.P;
+				cam.P = iron.math.Mat4.ortho(-6 * ratio, 6 * ratio, -6, 6, -2, 2);
+				gizmo.visible = true;
+				gizmo.parent = cam;
+				gizmo.transform.loc = new iron.math.Vec4(5.2 * ratio, -5.6, -1);
+				gizmo.transform.rot = new iron.math.Quat(-crot.x, -crot.y, -crot.z, crot.w);
+				gizmo.transform.buildMatrix();
+				
+				gizmo.render(path.currentG, "overlay", []);
+				
+				cam.P = P;
+				gizmo.visible = visible;
+				gizmo.parent = parent;
+				gizmo.transform.loc = loc;
+				gizmo.transform.rot = rot;
+				gizmo.transform.buildMatrix();
+			}
 		}
 		#end
 

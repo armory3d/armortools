@@ -28,7 +28,7 @@ class RenderUtil {
 		iron.Scene.active.camera.data.raw.fov = 0.92;
 		var light = iron.Scene.active.lights[0];
 		light.visible = false;
-		// light.data.raw.cast_shadow = false;
+		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
@@ -59,6 +59,8 @@ class RenderUtil {
 		var light = iron.Scene.active.lights[0];
 		light.visible = true;
 		// light.data.raw.cast_shadow = true;
+		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
+		
 		UINodes.inst.parseMeshMaterial();
 		UITrait.inst.ddirty = 2;
 	}
