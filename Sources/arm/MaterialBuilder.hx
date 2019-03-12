@@ -77,7 +77,7 @@ class MaterialBuilder {
 		#end
 
 		var faceFill = UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1;
-		var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6 || UITrait.inst.brushType == 7;
+		var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6;
 
 		if (!faceFill && !decal) {
 			// Fix seams at uv borders
@@ -119,7 +119,7 @@ class MaterialBuilder {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushHardness', '_brushHardness');
 
-		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 8 || UITrait.inst.brushType == 9) { // Draw / Erase
+		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 7 || UITrait.inst.brushType == 8) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
@@ -237,7 +237,7 @@ class MaterialBuilder {
 			}
 		}
 
-		if (UITrait.inst.brushType == 8 || UITrait.inst.brushType == 9) { // Clone, Blur
+		if (UITrait.inst.brushType == 7 || UITrait.inst.brushType == 8) { // Clone, Blur
 			
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
@@ -245,7 +245,7 @@ class MaterialBuilder {
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
-			if (UITrait.inst.brushType == 8) { // Clone
+			if (UITrait.inst.brushType == 7) { // Clone
 				frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
 				#if (kha_opengl || kha_webgl)
 				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
@@ -323,13 +323,13 @@ class MaterialBuilder {
 			frag.write('float opacity = $opac * brushOpacity;');
 		}
 
-		if (UITrait.inst.brushType == 6) { // Text tool
+		if (UITrait.inst.brushType == 5) { // Decal tool
+			frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
+			frag.write('opacity *= texture(texdecalmask, texCoord).r;');
+		}
+		else if (UITrait.inst.brushType == 6) { // Text tool
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
 			frag.write('opacity *= texture(textexttool, texCoord).r;');
-		}
-		else if (UITrait.inst.brushType == 7) { // Shape tool
-			frag.add_uniform('sampler2D texshapetool', '_texshapetool');
-			frag.write('opacity *= texture(texshapetool, texCoord).r;');
 		}
 
 		if (eraser) frag.write('    float str = 1.0 - opacity;');
@@ -341,7 +341,7 @@ class MaterialBuilder {
 		}
 
 		frag.write('    fragColor[0] = vec4(basecol, str);');
-		frag.write('    fragColor[1] = vec4(nortan, str);'); // nortan.xy *= str
+		frag.write('    fragColor[1] = vec4(nortan, str);');
 		frag.write('    fragColor[2] = vec4(occlusion, roughness, metallic, str);');
 		if (UITrait.inst.paintHeight) {
 			frag.write('    fragColor[3] = vec4(1.0, 0.0, height, str);');
@@ -422,13 +422,13 @@ class MaterialBuilder {
 
 		var decal = UITrait.inst.decalPreview;
 		if (decal) {
-			if (UITrait.inst.brushType == 6) { // Text tool
+			if (UITrait.inst.brushType == 5) { // Decal tool
+				frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
+				frag.write('opacity *= texture(texdecalmask, texCoord).r;');
+			}
+			else if (UITrait.inst.brushType == 6) { // Text tool
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
 				frag.write('opacity *= texture(textexttool, texCoord).r;');
-			}
-			else if (UITrait.inst.brushType == 7) { // Shape tool
-				frag.add_uniform('sampler2D texshapetool', '_texshapetool');
-				frag.write('opacity *= texture(texshapetool, texCoord).r;');
 			}
 			var opac = 0.05;
 			frag.write('if (opacity < $opac) discard;');
@@ -742,8 +742,8 @@ class MaterialBuilder {
 
 		var writeTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
 					   UITrait.inst.brushType == 4 || // Colorid pick
-					   UITrait.inst.brushType == 8 || // Clone
-					   UITrait.inst.brushType == 9;   // Blur
+					   UITrait.inst.brushType == 7 || // Clone
+					   UITrait.inst.brushType == 8;   // Blur
 
 		if (writeTC) {
 			frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');

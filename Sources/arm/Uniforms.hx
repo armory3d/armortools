@@ -112,8 +112,8 @@ class Uniforms {
 		else if (link == "_textexttool") { // Opacity map for text
 			return UITrait.inst.textToolImage;
 		}
-		else if (link == "_texshapetool") { // Opacity map for shape
-			return UITrait.inst.shapeToolImage;
+		else if (link == "_texdecalmask") { // Opacity map for decal
+			return UITrait.inst.decalMaskImage;
 		}
 		else if (link == "_texpaint_undo") {
 			// if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0)

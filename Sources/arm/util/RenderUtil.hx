@@ -155,23 +155,23 @@ class RenderUtil {
 		g2.end();
 	}
 
-	public static function makeShapePreview() {
+	public static function makeDecalMaskPreview() {
 		var texw = 1024;
 		var off = 12;
-		if (UITrait.inst.shapeToolImage == null) {
-			UITrait.inst.shapeToolImage = kha.Image.createRenderTarget(texw, texw, kha.graphics4.TextureFormat.L8);
+		if (UITrait.inst.decalMaskImage == null) {
+			UITrait.inst.decalMaskImage = kha.Image.createRenderTarget(texw, texw, kha.graphics4.TextureFormat.L8);
 		}
-		var g2 = UITrait.inst.shapeToolImage.g2;
+		var g2 = UITrait.inst.decalMaskImage.g2;
 		g2.begin(true, 0xff000000);
 		g2.color = 0xffffffff;
-		var shape = UITrait.inst.shapeToolHandle.position;
-		if (shape == 0) {
+		var mask = UITrait.inst.decalMaskHandle.position;
+		if (mask == 0) {
 			g2.fillRect(off, off, texw - off, texw - off);
 		}
-		else if (shape == 1) {
+		else if (mask == 1) {
 			kha.graphics2.GraphicsExtension.fillCircle(g2, texw / 2, texw / 2, texw / 2 - off);
 		}
-		else if (shape == 2) {
+		else if (mask == 2) {
 			g2.fillTriangle(texw / 2, off, off, texw - off, texw - off, texw - off);
 		}
 		g2.end();
