@@ -116,7 +116,6 @@ class Uniforms {
 			return UITrait.inst.decalMaskImage;
 		}
 		else if (link == "_texpaint_undo") {
-			// if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0)
 			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
 			return iron.RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
 		}

@@ -84,13 +84,23 @@ class Layers {
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
 		var C = UITrait.inst.C;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
-			C.undo_steps = 0;// No undo for 16k+
+			C.undo_steps = 1;
 			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;
 			while (UITrait.inst.undoLayers.length > C.undo_steps) { var l = UITrait.inst.undoLayers.pop(); l.unload(); }
 		}
 		g.end();
 		for (l in UITrait.inst.layers) resizeLayer(l);
 		for (l in UITrait.inst.undoLayers) resizeLayer(l);
+		var rts = RenderPath.active.renderTargets;
+		rts.get("texpaint_mask0").image.unload();
+		rts.get("texpaint_mask0").raw.width = Config.getTextureRes();
+		rts.get("texpaint_mask0").raw.height = Config.getTextureRes();
+		rts.get("texpaint_mask0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		rts.get("texpaint_mask1").image.unload();
+		rts.get("texpaint_mask1").raw.width = Config.getTextureRes();
+		rts.get("texpaint_mask1").raw.height = Config.getTextureRes();
+		rts.get("texpaint_mask1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		UITrait.inst.maskDirty = true;
 		g.begin();
 		UITrait.inst.ddirty = 2;
 		iron.App.removeRender(resizeLayers);

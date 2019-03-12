@@ -161,7 +161,7 @@ class RenderPathDeferred {
 
 		var tid = UITrait.inst.selectedLayer.id;
 
-		if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0) {
+		if (UITrait.inst.pushUndo) {
 			var i = UITrait.inst.undoI;
 			path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);			
 			path.bindTarget("texpaint" + tid, "tex0");

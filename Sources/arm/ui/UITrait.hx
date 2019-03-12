@@ -608,7 +608,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function doUndo() {
-		if (undos > 0 && C.undo_steps > 0) {
+		if (undos > 0) {
 			undoI = undoI - 1 < 0 ? C.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
 			var opos = paintObjects.indexOf(lay.targetObject);
@@ -626,7 +626,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function doRedo() {
-		if (redos > 0 && C.undo_steps > 0) {
+		if (redos > 0) {
 			var lay = undoLayers[undoI];
 			var opos = paintObjects.indexOf(lay.targetObject);
 			var lpos = layers.indexOf(lay.targetLayer);
@@ -665,7 +665,7 @@ class UITrait extends iron.Trait {
 					cloneStartY = mouse.y;
 				}
 				else {
-					if (brushTime == 0 && C.undo_steps > 0) { // Paint started
+					if (brushTime == 0) { // Paint started
 						pushUndo = true;
 						if (projectPath != "") {
 							kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
@@ -2224,7 +2224,7 @@ class UITrait extends iron.Trait {
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
 					undoHandle = Id.handle({value: C.undo_steps});
-					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 0, 64, false, 1));
+					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
 					if (undoHandle.changed) {
 						ui.g.end();
 						while (undoLayers.length < C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
