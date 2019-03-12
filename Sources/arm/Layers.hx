@@ -27,18 +27,6 @@ class Layers {
 		UITrait.inst.ddirty = 3;
 	}
 
-	public static function initHeightLayer(g:kha.graphics4.Graphics) {
-		g.end();
-
-		var layers = UITrait.inst.layers;
-		layers[0].texpaint_opt.g4.begin();
-		layers[0].texpaint_opt.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Opac, emis, height
-		layers[0].texpaint_opt.g4.end();
-
-		g.begin();
-		iron.App.removeRender(initHeightLayer);
-	}
-
 	public static function clearLastLayer(g:kha.graphics4.Graphics) {
 		g.end();
 
@@ -56,12 +44,6 @@ class Layers {
 		layers[i].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
 		layers[i].texpaint_pack.g4.end();
 
-		if (layers[i].texpaint_opt != null) {
-			layers[i].texpaint_opt.g4.begin();
-			layers[i].texpaint_opt.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Opac, emis, height
-			layers[i].texpaint_opt.g4.end();
-		}
-
 		g.begin();
 		iron.App.removeRender(clearLastLayer);
 	}
@@ -73,12 +55,10 @@ class Layers {
 		var texpaint = l.texpaint;
 		var texpaint_nor = l.texpaint_nor;
 		var texpaint_pack = l.texpaint_pack;
-		var texpaint_opt = l.texpaint_opt;
 
 		l.texpaint = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.Depth16);
 		l.texpaint_nor = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 		l.texpaint_pack = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-		if (l.texpaint_opt != null) l.texpaint_opt = kha.Image.createRenderTarget(res, res, kha.graphics4.TextureFormat.RGBA32, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 
 		l.texpaint.g2.begin(false);
 		l.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
@@ -92,17 +72,9 @@ class Layers {
 		l.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
 		l.texpaint_pack.g2.end();
 
-		if (texpaint_opt != null) {
-			l.texpaint_opt.g2.begin(false);
-			l.texpaint_opt.g2.drawScaledImage(texpaint_opt, 0, 0, res, res);
-			l.texpaint_opt.g2.end();
-			rts.get("texpaint_opt" + l.ext).image = l.texpaint_opt;
-		}
-
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();
-		if (texpaint_opt != null) texpaint_opt.unload();
 
 		rts.get("texpaint" + l.ext).image = l.texpaint;
 		rts.get("texpaint_nor" + l.ext).image = l.texpaint_nor;
@@ -170,12 +142,6 @@ class Layers {
 		l0.texpaint_pack.g2.pipeline = UITrait.inst.pipe;
 		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
 		l0.texpaint_pack.g2.end();
-
-		if (l0.texpaint_opt != null) {
-			l0.texpaint_opt.g2.begin(false);
-			l0.texpaint_opt.g2.drawImage(l1.texpaint_opt, 0, 0);
-			l0.texpaint_opt.g2.end();
-		}
 
 		g.begin();
 

@@ -169,34 +169,34 @@ class Exporter {
 			#end
 		}
 
-		if (UITrait.inst.isHeight && selectedLayer.texpaint_opt != null) {
-			pixels = selectedLayer.texpaint_opt.getPixels();
-			if (UITrait.inst.isHeightSpace == 1) {
-				for (i in 0...Std.int(pixels.length / 4)) {
-					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
-					pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
-					pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
-					// pixels.set(i * 4 + 3, 255);
-				}
-			}
-			bo = new haxe.io.BytesOutput();
-			if (formatType == 0) {
-				var jpgdata:iron.format.jpg.Data.Data = {
-					width: textureSize,
-					height: textureSize,
-					quality: formatQuality,
-					pixels: pixels
-				};
-				var jpgwriter = new iron.format.jpg.Writer(bo);
-				jpgwriter.write(jpgdata, 1);
-			}
-			else {
-				var pngwriter = new iron.format.png.Writer(bo);
-				pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
-			}
-			#if kha_krom
-			Krom.fileSaveBytes(path + "/" + f + "_height" + ext, bo.getBytes().getData());
-			#end
+		if (UITrait.inst.isHeight) {
+			// pixels = selectedLayer.texpaint_opt.getPixels();
+			// if (UITrait.inst.isHeightSpace == 1) {
+			// 	for (i in 0...Std.int(pixels.length / 4)) {
+			// 		pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+			// 		pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
+			// 		pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
+			// 		// pixels.set(i * 4 + 3, 255);
+			// 	}
+			// }
+			// bo = new haxe.io.BytesOutput();
+			// if (formatType == 0) {
+			// 	var jpgdata:iron.format.jpg.Data.Data = {
+			// 		width: textureSize,
+			// 		height: textureSize,
+			// 		quality: formatQuality,
+			// 		pixels: pixels
+			// 	};
+			// 	var jpgwriter = new iron.format.jpg.Writer(bo);
+			// 	jpgwriter.write(jpgdata, 1);
+			// }
+			// else {
+			// 	var pngwriter = new iron.format.png.Writer(bo);
+			// 	pngwriter.write(iron.format.png.Tools.build32RGBA(textureSize, textureSize, pixels));
+			// }
+			// #if kha_krom
+			// Krom.fileSaveBytes(path + "/" + f + "_height" + ext, bo.getBytes().getData());
+			// #end
 		}
 
 		// if (UITrait.inst.isOpac) Krom.fileSaveBytes(path + "/tex_opac" + ext, bo.getBytes().getData());

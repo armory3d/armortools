@@ -12,13 +12,35 @@ class LayerSlot {
 	public var texpaint:kha.Image;
 	public var texpaint_nor:kha.Image;
 	public var texpaint_pack:kha.Image;
-	public var texpaint_opt:kha.Image;
 
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
 	public var targetObject:iron.object.MeshObject = null;
 
+	static var first = true;
+
 	public function new(ext = "") {
+
+		if (first) {
+			first = false;
+			{
+				var t = new RenderTargetRaw();
+				t.name = "texpaint_mask0";
+				t.width = Config.getTextureRes();
+				t.height = Config.getTextureRes();
+				t.format = 'R8';
+				RenderPath.active.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "texpaint_mask1";
+				t.width = Config.getTextureRes();
+				t.height = Config.getTextureRes();
+				t.format = 'R8';
+				RenderPath.active.createRenderTarget(t);
+			}
+		}
+
 		if (ext == "") {
 			id = counter++;
 			ext = id + "";
@@ -50,21 +72,6 @@ class LayerSlot {
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
-
-		if (UITrait.inst.paintHeight) make_texpaint_opt();
-	}
-
-	public function make_texpaint_opt() {
-		if (texpaint_opt != null) return;
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_opt" + ext;
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
-			t.format = 'RGBA32';
-			texpaint_opt = RenderPath.active.createRenderTarget(t).image;
-		}
 	}
 
 	public function unload() {
@@ -80,11 +87,6 @@ class LayerSlot {
 		RenderPath.active.renderTargets.remove("texpaint" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_nor" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
-
-		if (texpaint_opt != null) {
-			texpaint_opt.unload();
-			RenderPath.active.renderTargets.remove("texpaint_opt" + ext);
-		}
 	}
 
 	public function swap(other:LayerSlot) {
@@ -107,14 +109,6 @@ class LayerSlot {
 		other.texpaint = tp;
 		other.texpaint_nor = tp_nor;
 		other.texpaint_pack = tp_pack;
-
-		if (texpaint_opt != null) {
-			var tp_opt = texpaint_opt;
-			RenderPath.active.renderTargets.get("texpaint_opt" + ext).image = other.texpaint_opt;
-			RenderPath.active.renderTargets.get("texpaint_opt" + other.ext).image = texpaint_opt;
-			texpaint_opt = other.texpaint_opt;
-			other.texpaint_opt = tp_opt;
-		}
 		
 		// var tp_rt = rt;
 		// rt = other.rt;

@@ -59,6 +59,7 @@ class UITrait extends iron.Trait {
 	public var ddirty = 0;
 	public var pdirty = 0;
 	public var rdirty = 0;
+	public var maskDirty = true;
 
 	public var windowW = 280; // Panel width
 	public var toolbarw = 54;
@@ -684,6 +685,7 @@ class UITrait extends iron.Trait {
 		else if (brushTime > 0) {
 			brushTime = 0;
 			ddirty = 3;
+			maskDirty = true;
 		}
 
 		var undoPressed = kb.down("control") && !kb.down("shift") && kb.started("z");
@@ -1658,9 +1660,6 @@ class UITrait extends iron.Trait {
 					var heightHandle = Id.handle({selected: paintHeight});
 					paintHeight = ui.check(heightHandle, "Height");
 					if (heightHandle.changed) {
-						for (l in layers) l.make_texpaint_opt();
-						for (l in undoLayers) l.make_texpaint_opt();
-						iron.App.notifyOnRender(Layers.initHeightLayer);
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}

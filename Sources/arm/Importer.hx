@@ -686,7 +686,6 @@ class Importer {
 				UINodes.inst.parseMeshMaterial();
 				UINodes.inst.parsePaintMaterial();
 				iron.App.notifyOnRender(Layers.initLayers);
-				if (UITrait.inst.paintHeight) iron.App.notifyOnRender(Layers.initHeightLayer);
 				
 				UITrait.inst.paintObject.setData(md);
 				UITrait.inst.paintObject.name = mesh.name;
@@ -742,7 +741,6 @@ class Importer {
 			object.skip_context = "paint";
 
 			// iron.App.notifyOnRender(Layers.initLayers);
-			// if (UITrait.inst.paintHeight) iron.App.notifyOnRender(Layers.initHeightLayer);
 			
 			// object.transform.scale.setFrom(UITrait.inst.paintObject.transform.scale);
 			// object.transform.buildMatrix();

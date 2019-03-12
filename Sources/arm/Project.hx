@@ -47,8 +47,7 @@ class Project {
 				res: l.texpaint.width,
 				texpaint: l.texpaint.getPixels(),
 				texpaint_nor: l.texpaint_nor.getPixels(),
-				texpaint_pack: l.texpaint_pack.getPixels(),
-				texpaint_opt: l.texpaint_opt != null ? l.texpaint_opt.getPixels() : null,
+				texpaint_pack: l.texpaint_pack.getPixels()
 			});
 		}
 
@@ -141,7 +140,6 @@ class Project {
 				UITrait.inst.layers = [new LayerSlot()];
 				UITrait.inst.selectedLayer = UITrait.inst.layers[0];
 				iron.App.notifyOnRender(Layers.initLayers);
-				if (UITrait.inst.paintHeight) iron.App.notifyOnRender(Layers.initHeightLayer);
 			}
 			
 			UINodes.inst.updateCanvasMap();
@@ -252,14 +250,6 @@ class Project {
 				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 				l.texpaint_pack.g2.end();
 				// texpaint_pack.unload();
-
-				if (ld.texpaint_opt != null) {
-					var texpaint_opt = kha.Image.fromBytes(ld.texpaint_opt, ld.res, ld.res);
-					l.texpaint_opt.g2.begin(false);
-					l.texpaint_opt.g2.drawImage(texpaint_opt, 0, 0);
-					l.texpaint_opt.g2.end();
-					// texpaint_opt.unload();
-				}
 			}
 			UITrait.inst.selectedLayer = UITrait.inst.layers[0];
 

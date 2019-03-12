@@ -16,6 +16,7 @@ class RenderPathDeferred {
 	#end
 	static var initVoxels = true; // Bake AO
 	static var taaFrame = 0;
+	static var maskFrame = 0;
 
 	public static function init(_path:RenderPath) {
 
@@ -162,23 +163,11 @@ class RenderPathDeferred {
 
 		if (UITrait.inst.pushUndo && UITrait.inst.C.undo_steps > 0) {
 			var i = UITrait.inst.undoI;
-			if (UITrait.inst.paintHeight) {
-				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i, "texpaint_opt_undo" + i]);
-			}
-			else {
-				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);
-			}
-			
+			path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);			
 			path.bindTarget("texpaint" + tid, "tex0");
 			path.bindTarget("texpaint_nor" + tid, "tex1");
 			path.bindTarget("texpaint_pack" + tid, "tex2");
-			if (UITrait.inst.paintHeight) {
-				path.bindTarget("texpaint_opt" + tid, "tex3");
-				path.drawShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
-			}
-			else {
-				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-			}
+			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 			UITrait.inst.undoLayers[UITrait.inst.undoI].targetObject = UITrait.inst.paintObject;
 			UITrait.inst.undoLayers[UITrait.inst.undoI].targetLayer = UITrait.inst.selectedLayer;
 			UITrait.inst.undoI = (UITrait.inst.undoI + 1) % UITrait.inst.C.undo_steps;
@@ -231,13 +220,12 @@ class RenderPathDeferred {
 				#end
 				//
 
-				if (UITrait.inst.paintHeight) {
-					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_opt" + tid]);
-				}
-				else {
-					path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid]);
-				}
+				var maskA = maskFrame % 2 == 0 ? "texpaint_mask0" : "texpaint_mask1";
+				var maskB = maskFrame % 2 == 0 ? "texpaint_mask1" : "texpaint_mask0";
+				maskFrame++;
+				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, maskA]);
 				path.bindTarget("_paintdb", "paintdb");
+				path.bindTarget(maskB, "paintmask");
 				if (UITrait.inst.brushType == 3) { // Bake AO
 					path.bindTarget("voxels", "voxels");
 				}
@@ -267,6 +255,12 @@ class RenderPathDeferred {
 		}
 		//
 
+		if (UITrait.inst.maskDirty) {
+			UITrait.inst.maskDirty = false;
+			path.setTarget("texpaint_mask0", ["texpaint_mask1"]);
+			path.clearTarget(0x00000000);
+		}
+
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		path.clearTarget(null, 1.0);
 		#if rp_gbuffer2
@@ -286,15 +280,11 @@ class RenderPathDeferred {
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		if (UITrait.inst.paintHeight) {
-			path.bindTarget("texpaint_opt" + tid, "texpaint_opt");
-		}
 		for (i in 1...UITrait.inst.layers.length) {
 			tid = UITrait.inst.layers[i].id;
 			path.bindTarget("texpaint" + tid, "texpaint" + tid);
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
 			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
-			if (UITrait.inst.paintHeight) path.bindTarget("texpaint_opt" + tid, "texpaint_opt" + tid);
 		}
 		//
 

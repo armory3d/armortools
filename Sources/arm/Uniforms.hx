@@ -128,10 +128,6 @@ class Uniforms {
 			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
 			return iron.RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
-		else if (link == "_texpaint_opt_undo") {
-			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
-			return iron.RenderPath.active.renderTargets.get("texpaint_opt_undo" + i).image;
-		}
 		return null;
 	}
 }
