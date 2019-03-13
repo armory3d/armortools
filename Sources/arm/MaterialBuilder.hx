@@ -322,9 +322,11 @@ class MaterialBuilder {
 			}
 		}
 		else {
+			Cycles.parse_height = UITrait.inst.paintHeight;
 			Cycles.parse_height_as_channel = true;
 			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
 			Cycles.parse_height_as_channel = false;
+			Cycles.parse_height = false;
 			var base = sout.out_basecol;
 			var rough = sout.out_roughness;
 			var met = sout.out_metallic;
@@ -380,7 +382,12 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
 			}
 			frag.write('fragColor[1] = vec4(nortan, $matid);');
-			frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, 1.0);');
+			if (!UITrait.inst.paintHeight) {
+				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, 0.0);');
+			}
+			else {
+				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, height);');
+			}
 		}
 		else {
 			if (eraser) {
@@ -397,7 +404,12 @@ class MaterialBuilder {
 				frag.write('float invstr = 1.0 - str;');
 				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, 0.0);');
 				frag.write('fragColor[1] = vec4(nortan * str + sample_nor_undo.rgb * invstr, $matid);');
-				frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, 1.0);');
+				if (!UITrait.inst.paintHeight) {
+					frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, 0.0);');
+				}
+				else {
+					frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, height * str + sample_pack_undo.a * invstr);');
+				}
 			}
 		}
 		frag.write('fragColor[3] = vec4(str, 0.0, 0.0, 1.0);');
@@ -420,6 +432,9 @@ class MaterialBuilder {
 		}
 		if (!UITrait.inst.paintMet) {
 			con_paint.data.color_writes_blue[2] = false;
+		}
+		if (!UITrait.inst.paintHeight) {
+			con_paint.data.color_writes_alpha[2] = false;
 		}
 
 		if (UITrait.inst.brushType == 3) { // Bake AO
@@ -472,7 +487,13 @@ class MaterialBuilder {
 		vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
 		vert.write('texCoord = tex;');
 
+		if (UITrait.inst.paintHeight) {
+			frag.bposition = true;
+		}
+
+		Cycles.parse_height = UITrait.inst.paintHeight;
 		var sout = Cycles.parse(UINodes.inst.canvas, con_mesh, vert, frag, null, null, null, matcon);
+		Cycles.parse_height = false;
 		var base = sout.out_basecol;
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
@@ -533,8 +554,8 @@ class MaterialBuilder {
 		return con_mesh;
 	}
 
-	public static function make_depth(data:CyclesShaderData, matcon:TMaterialContext, shadowmap = false):CyclesShaderContext {
-		var context_id = shadowmap ? 'shadowmap' : 'depth';
+	public static function make_depth(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
+		var context_id = 'depth';
 		var con_depth:CyclesShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
@@ -555,28 +576,7 @@ class MaterialBuilder {
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
 
-		var parse_opacity = shadowmap; // arm_discard
-		if (parse_opacity) {
-			frag.write_attrib('vec3 n;'); // discard at compile time
-			frag.write_attrib('float dotNV;'); // discard at compile time
-			// frag.write('float opacity;');
-
-			Cycles.parse_surface = false;
-			var sout = Cycles.parse(UINodes.inst.canvas, con_depth, vert, frag, null, null, null, matcon);
-			Cycles.parse_surface = true;
-			// parse_surface=False, parse_opacity=True
-			var opac = sout.out_opacity;
-			frag.write('float opacity = $opac;');
-			if (con_depth.is_elem('tex')) {
-				vert.add_out('vec2 texCoord');
-				vert.write('texCoord = tex;');
-			}
-			
-			var opac = 0.2;//mat_state.material.discard_transparent_opacity_shadows
-			frag.write('if (opacity < $opac) discard;');
-		}
-
-		Cycles.finalize(con_depth);
+		// Cycles.finalize(con_depth);
 		con_depth.data.shader_from_source = true;
 		con_depth.data.vertex_shader = vert.get();
 		con_depth.data.fragment_shader = frag.get();
@@ -607,12 +607,10 @@ class MaterialBuilder {
 		// TODO: can cause TAA issues
 		if (UITrait.inst.paintHeight) {
 			#if (!kha_direct3d11) // TODO: unable to bind texpaint_opt to both vs and fs in d3d11
-			// vert.add_uniform('sampler2D texpaint_opt');
-			// vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0.0);');
-			// vert.write('float height = opt.b;');
-			// var displaceStrength = UITrait.inst.displaceStrength * 0.1;
-			// vert.n = true;
-			// vert.write('wposition += wnormal * height * $displaceStrength;');
+			vert.write('float height = textureLod(texpaint_pack, tex, 0.0).a;');
+			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
+			vert.n = true;
+			vert.write('wposition += wnormal * height * $displaceStrength;');
 			#end
 		}
 		//
@@ -672,18 +670,17 @@ class MaterialBuilder {
 
 				// Height
 				if (UITrait.inst.paintHeight) {
-					// frag.add_uniform('sampler2D texpaint_opt');
-					// frag.write('vec4 vech;');
-					// frag.write('vech.x = textureOffset(texpaint_opt, texCoord, ivec2(-1, 0)).b;');
-					// frag.write('vech.y = textureOffset(texpaint_opt, texCoord, ivec2(1, 0)).b;');
-					// frag.write('vech.z = textureOffset(texpaint_opt, texCoord, ivec2(0, -1)).b;');
-					// frag.write('vech.w = textureOffset(texpaint_opt, texCoord, ivec2(0, 1)).b;');
-					// // Displace normal strength
-					// frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
-					// frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
-					// frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
-					// frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
-					// frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
+					frag.write('vec4 vech;');
+					frag.write('vech.x = textureOffset(texpaint_pack, texCoord, ivec2(-1, 0)).a;');
+					frag.write('vech.y = textureOffset(texpaint_pack, texCoord, ivec2(1, 0)).a;');
+					frag.write('vech.z = textureOffset(texpaint_pack, texCoord, ivec2(0, -1)).a;');
+					frag.write('vech.w = textureOffset(texpaint_pack, texCoord, ivec2(0, 1)).a;');
+					// Displace normal strength
+					frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
+					frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
+					frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
+					frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
+					frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
 				}
 				//
 
