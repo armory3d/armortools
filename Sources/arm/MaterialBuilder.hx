@@ -48,14 +48,11 @@ class MaterialBuilder {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		if (UITrait.inst.brushType == 4) { // Pick color id
+		if (UITrait.inst.brushType == 4 || UITrait.inst.brushType == 10) { // Color id, material picker
 			// Mangle vertices to form full screen triangle
 			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
-
-			frag.add_out('vec4 fragColor');
 			
 			frag.add_uniform('sampler2D gbuffer2');
-			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('vec4 inp', '_inputBrush');
 
@@ -65,8 +62,21 @@ class MaterialBuilder {
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
 			#end
 
-			frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0).rgb;');
-			frag.write('fragColor = vec4(idcol, 1.0);');
+			if (UITrait.inst.brushType == 4) { // Color id
+				frag.add_out('vec4 fragColor');
+				frag.add_uniform('sampler2D texcolorid', '_texcolorid');
+				frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
+				frag.write('fragColor = vec4(idcol, 1.0);');
+			}
+			else if (UITrait.inst.brushType == 10) { // Picker
+				frag.add_out('vec4 fragColor[3]');
+				frag.add_uniform('sampler2D texpaint');
+				frag.add_uniform('sampler2D texpaint_nor');
+				frag.add_uniform('sampler2D texpaint_pack');
+				frag.write('fragColor[0] = textureLod(texpaint, texCoordInp, 0.0);');
+				frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
+				frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
+			}
 
 			con_paint.data.shader_from_source = true;
 			con_paint.data.vertex_shader = vert.get();
@@ -125,9 +135,9 @@ class MaterialBuilder {
 		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 7 || UITrait.inst.brushType == 8) { // Draw / Erase
 			
 			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0.0).r) { discard; }');
 			#else
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0.0).r) { discard; }');
 			#end
 
 			if (decal) {
@@ -182,7 +192,7 @@ class MaterialBuilder {
 			vert.write('texCoordPick = fract(tex);');
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
-			frag.add_uniform('vec2 textrianglemapSize', '_textrianglemapSize');
+			frag.add_uniform('float textrianglemapSize', '_texpaintSize');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			#if (kha_opengl || kha_webgl)
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
@@ -256,12 +266,12 @@ class MaterialBuilder {
 				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (sp.y + cloneDelta.y) * gbufferSize.y), 0).ba;');
 				#end
 
-				frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0).rgb;');
-				var base = 'textureLod(texpaint_undo, texCoordInp, 0).rgb';
+				frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
+				var base = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
 				var rough = 'texpaint_pack_sample.g';
 				var met = 'texpaint_pack_sample.b';
 				var occ = 'texpaint_pack_sample.r';
-				var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0).rgb';
+				var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
 				var height = '0.0';
 				var opac = '1.0';
 				frag.write('vec3 basecol = $base;');
@@ -286,23 +296,28 @@ class MaterialBuilder {
 				frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 				frag.write('float height = 1.0;');
 				frag.write('float opacity = 1.0 * brushOpacity;');
+				#if kha_direct3d11
 				frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
-				frag.write('float blur_step = 1.0 / gbufferSize;');
+				#else
+				frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
+				#end
+				frag.add_uniform('float texpaintSize', '_texpaintSize');
+				frag.write('float blur_step = 1.0 / texpaintSize;');
 				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('  basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-				frag.write('  vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-				frag.write('  roughness += texpaint_pack_sample.g;');
-				frag.write('  metallic += texpaint_pack_sample.b;');
-				frag.write('  occlusion += texpaint_pack_sample.r;');
-				frag.write('  nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+				frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+				frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+				frag.write('roughness += texpaint_pack_sample.g;');
+				frag.write('metallic += texpaint_pack_sample.b;');
+				frag.write('occlusion += texpaint_pack_sample.r;');
+				frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
 				frag.write('}');
 				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('  basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-				frag.write('  vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-				frag.write('  roughness += texpaint_pack_sample.g;');
-				frag.write('  metallic += texpaint_pack_sample.b;');
-				frag.write('  occlusion += texpaint_pack_sample.r;');
-				frag.write('  nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+				frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+				frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+				frag.write('roughness += texpaint_pack_sample.g;');
+				frag.write('metallic += texpaint_pack_sample.b;');
+				frag.write('occlusion += texpaint_pack_sample.r;');
+				frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
 				frag.write('}');
 			}
 		}
@@ -349,11 +364,13 @@ class MaterialBuilder {
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');
-		frag.write('float sample_mask = textureLod(paintmask, sample_tc, 0).r;');
+		frag.write('float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;');
 		frag.write('str = max(str, sample_mask);');
 
 		frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
-		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0);');
+		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
+
+		var matid = UITrait.inst.selectedMaterial.id / 255;
 
 		if (layered) {
 			if (eraser) {
@@ -362,7 +379,7 @@ class MaterialBuilder {
 			else {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
 			}
-			frag.write('fragColor[1] = vec4(nortan, 1.0);');
+			frag.write('fragColor[1] = vec4(nortan, $matid);');
 			frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, 1.0);');
 		}
 		else {
@@ -374,12 +391,12 @@ class MaterialBuilder {
 			else {
 				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
-				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0);');
-				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0);');
+				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
+				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
 
 				frag.write('float invstr = 1.0 - str;');
 				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, 0.0);');
-				frag.write('fragColor[1] = vec4(nortan * str + sample_nor_undo.rgb * invstr, 1.0);');
+				frag.write('fragColor[1] = vec4(nortan * str + sample_nor_undo.rgb * invstr, $matid);');
 				frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, 1.0);');
 			}
 		}
@@ -591,7 +608,7 @@ class MaterialBuilder {
 		if (UITrait.inst.paintHeight) {
 			#if (!kha_direct3d11) // TODO: unable to bind texpaint_opt to both vs and fs in d3d11
 			// vert.add_uniform('sampler2D texpaint_opt');
-			// vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0);');
+			// vert.write('vec4 opt = textureLod(texpaint_opt, tex, 0.0);');
 			// vert.write('float height = opt.b;');
 			// var displaceStrength = UITrait.inst.displaceStrength * 0.1;
 			// vert.n = true;
@@ -620,7 +637,7 @@ class MaterialBuilder {
 		if (UITrait.inst.brushType == 4) { // Show color map
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0);'); // met/rough
-			frag.write('vec3 idcol = pow(textureLod(texcolorid, texCoord).rgb, vec3(2.2, 2.2, 2.2), 0.0);');
+			frag.write('vec3 idcol = pow(textureLod(texcolorid, texCoord, 0.0).rgb, vec3(2.2, 2.2, 2.2));');
 			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
 		else {

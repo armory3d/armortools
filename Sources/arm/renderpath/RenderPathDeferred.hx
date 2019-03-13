@@ -47,6 +47,31 @@ class RenderPathDeferred {
 			path.createRenderTarget(t);
 		}
 
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_nor_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_pack_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		path.loadShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 
@@ -188,6 +213,44 @@ class RenderPathDeferred {
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
 				UITrait.inst.headerHandle.redraws = 2;
+			}
+			else if (UITrait.inst.brushType == 10) { // Picker
+				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+				path.clearTarget(0xff000000);
+				path.bindTarget("gbuffer2", "gbuffer2");
+				tid = UITrait.inst.layers[0].id;
+				path.bindTarget("texpaint" + tid, "texpaint");
+				path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
+				path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+				path.drawMeshes("paint");
+				UITrait.inst.headerHandle.redraws = 2;
+
+				var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
+				var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
+				var texpaint_pack_picker = path.renderTargets.get("texpaint_pack_picker").image;
+				var a = texpaint_picker.getPixels();
+				var b = texpaint_nor_picker.getPixels();
+				var c = texpaint_pack_picker.getPixels();
+				// Picked surface values
+				UITrait.inst.baseRPicked = a.get(0) / 255;
+				UITrait.inst.baseGPicked = a.get(1) / 255;
+				UITrait.inst.baseBPicked = a.get(2) / 255;
+				UITrait.inst.normalRPicked = b.get(0) / 255;
+				UITrait.inst.normalGPicked = b.get(1) / 255;
+				UITrait.inst.normalBPicked = b.get(2) / 255;
+				UITrait.inst.occlusionPicked = c.get(0) / 255;
+				UITrait.inst.roughnessPicked = c.get(1) / 255;
+				UITrait.inst.metallicPicked = c.get(2) / 255;
+				// Pick material
+				if (UITrait.inst.pickMaterial) {
+					var matid = b.get(3);
+					for (m in UITrait.inst.materials) {
+						if (m.id == matid) {
+							UITrait.inst.setMaterial(m);
+							break;
+						}
+					}
+				}
 			}
 			else {
 				if (UITrait.inst.brushType == 3) { // Bake AO

@@ -41,6 +41,16 @@ class UITrait extends iron.Trait {
 	public var show = true;
 	public var materialPreview = false; // Drawing material previews
 	public var savedCamera = Mat4.identity();
+	public var baseRPicked = 0.0;
+	public var baseGPicked = 0.0;
+	public var baseBPicked = 0.0;
+	public var normalRPicked = 0.0;
+	public var normalGPicked = 0.0;
+	public var normalBPicked = 0.0;
+	public var roughnessPicked = 0.0;
+	public var metallicPicked = 0.0;
+	public var occlusionPicked = 0.0;
+	public var pickMaterial = true;
 	var message = "";
 	var messageTimer = 0.0;
 	var messageColor = 0x00000000;
@@ -519,7 +529,7 @@ class UITrait extends iron.Trait {
 					else if (kb.started("l")) selectTool(7); // Clone
 					else if (kb.started("u")) selectTool(8); // Blur
 					else if (kb.started("p")) selectTool(9); // Particle
-					else if (kb.started("v")) selectTool(9); // Picker
+					else if (kb.started("v")) selectTool(10); // Picker
 				}
 
 				// Radius
@@ -575,13 +585,14 @@ class UITrait extends iron.Trait {
 
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
-		selectedMaterial = materials[i];
+		setMaterial(materials[i]);
+	}
 
+	public function setMaterial(m:MaterialSlot) {
+		selectedMaterial = m;
 		autoFillHandle.selected = false; // Auto-disable
-
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
-
 		hwnd.redraws = 2;
 	}
 
@@ -891,9 +902,9 @@ class UITrait extends iron.Trait {
 				#end
 			}
 			else {
-				// if (brushType == 0 || brushType == 1 || brushType == 4) {
+				if (brushType == 0 || brushType == 1 || brushType == 7 || brushType == 8 || brushType == 9) {
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				// }
+				}
 			}
 
 			if (mirrorX) {
@@ -1211,6 +1222,23 @@ class UITrait extends iron.Trait {
 					ui.text("Color ID Map");
 					var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
 					if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
+				}
+				else if (brushType == 10) { // Picker
+					baseRPicked = Math.round(baseRPicked * 10) / 10;
+					baseGPicked = Math.round(baseGPicked * 10) / 10;
+					baseBPicked = Math.round(baseBPicked * 10) / 10;
+					normalRPicked = Math.round(normalRPicked * 10) / 10;
+					normalGPicked = Math.round(normalGPicked * 10) / 10;
+					normalBPicked = Math.round(normalBPicked * 10) / 10;
+					occlusionPicked = Math.round(occlusionPicked * 100) / 100;
+					roughnessPicked = Math.round(roughnessPicked * 100) / 100;
+					metallicPicked = Math.round(metallicPicked * 100) / 100;
+					ui.text('Base $baseRPicked,$baseGPicked,$baseBPicked');
+					ui.text('Nor $normalRPicked,$normalGPicked,$normalBPicked');
+					ui.text('Occlusion $occlusionPicked');
+					ui.text('Roughness $roughnessPicked');
+					ui.text('Metallic $metallicPicked');
+					pickMaterial = ui.check(Id.handle({selected: pickMaterial}), "Pick Material");
 				}
 				else if (brushType == 3) { // Bake AO
 					ui.combo(Id.handle(), ["AO"], "Bake");

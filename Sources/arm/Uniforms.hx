@@ -33,6 +33,9 @@ class Uniforms {
 		else if (link == '_paintDepthBias') {
 			return UITrait.inst.paintVisible ? 0.0001 : 1.0;
 		}
+		else if (link == '_texpaintSize') {
+			return Config.getTextureRes();
+		}
 		return null;
 	}
 
@@ -57,11 +60,6 @@ class Uniforms {
 			if (UITrait.inst.assets.length == 0) return vec2;
 			var img = UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
 			vec2.set(img.width, img.height, 0);
-			return vec2;
-		}
-		else if (link == '_textrianglemapSize') {
-			var res = Config.getTextureRes();
-			vec2.set(res, res, 0);
 			return vec2;
 		}
 		else if (link == '_gbufferSize') {
