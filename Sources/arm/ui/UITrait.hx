@@ -519,7 +519,7 @@ class UITrait extends iron.Trait {
 					else if (kb.started("l")) selectTool(7); // Clone
 					else if (kb.started("u")) selectTool(8); // Blur
 					else if (kb.started("p")) selectTool(9); // Particle
-					else if (kb.started("x")) selectTool(9); // Picker
+					else if (kb.started("v")) selectTool(9); // Picker
 				}
 
 				// Radius
@@ -1136,7 +1136,7 @@ class UITrait extends iron.Trait {
 				ui._x += 2;
 				if (brushType == 10) ui.rect(-1, -1, img0.width + 2, img0.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img10) == State.Started) selectTool(10);
-				if (ui.isHovered) ui.tooltip("Picker (X)");
+				if (ui.isHovered) ui.tooltip("Picker (V)");
 				ui._x -= 2;
 				ui._y += 2;
 			}

@@ -94,6 +94,8 @@ class LayerSlot {
 		var tp_nor = texpaint_nor;
 		var tp_pack = texpaint_pack;
 
+		RenderPath.active.renderTargets.get("texpaint" + ext).image.setDepthStencilFrom(other.texpaint);
+
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
 		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = other.texpaint_pack;

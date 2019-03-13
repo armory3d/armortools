@@ -16,7 +16,6 @@ class RenderPathDeferred {
 	#end
 	static var initVoxels = true; // Bake AO
 	static var taaFrame = 0;
-	static var maskFrame = 0;
 
 	public static function init(_path:RenderPath) {
 
@@ -220,9 +219,11 @@ class RenderPathDeferred {
 				#end
 				//
 
-				var maskA = maskFrame % 2 == 0 ? "texpaint_mask0" : "texpaint_mask1";
-				var maskB = maskFrame % 2 == 0 ? "texpaint_mask1" : "texpaint_mask0";
-				maskFrame++;
+				var maskA = "texpaint_mask0";
+				var maskB = "texpaint_mask1";
+				path.setTarget(maskB);
+				path.bindTarget(maskA, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
 				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, maskA]);
 				path.bindTarget("_paintdb", "paintdb");
 				path.bindTarget(maskB, "paintmask");

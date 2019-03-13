@@ -220,9 +220,27 @@ class Project {
 
 			UITrait.inst.resHandle.position = Config.getTextureResPos(project.layer_datas[0].res);
 
-			if (UITrait.inst.undoLayers[0].texpaint.width != Config.getTextureRes()) {
-				for (l in UITrait.inst.undoLayers) Layers.resizeLayer(l); // TODO
-				for (l in UITrait.inst.layers) Layers.resizeLayer(l);
+			if (UITrait.inst.layers[0].texpaint.width != Config.getTextureRes()) {
+				var i = 0;
+				for (l in UITrait.inst.layers) {
+					Layers.resizeLayer(l, i == 0);
+					if (i > 0) l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
+					i++;
+				}
+				for (l in UITrait.inst.undoLayers) {
+					Layers.resizeLayer(l, false);
+					l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
+				}
+				var rts = iron.RenderPath.active.renderTargets;
+				rts.get("texpaint_mask0").image.unload();
+				rts.get("texpaint_mask0").raw.width = Config.getTextureRes();
+				rts.get("texpaint_mask0").raw.height = Config.getTextureRes();
+				rts.get("texpaint_mask0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_mask1").image.unload();
+				rts.get("texpaint_mask1").raw.width = Config.getTextureRes();
+				rts.get("texpaint_mask1").raw.height = Config.getTextureRes();
+				rts.get("texpaint_mask1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				UITrait.inst.maskDirty = true;
 			}
 
 			// for (l in UITrait.inst.layers) l.unload();
