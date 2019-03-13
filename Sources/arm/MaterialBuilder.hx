@@ -346,7 +346,9 @@ class MaterialBuilder {
 		frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 		frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 		frag.write('vec2 sample_tc = vec2(wvpposition.x, wvpposition.y) * 0.5 + 0.5;');
+		#if kha_direct3d11
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
+		#end
 		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0);');
 		frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0);');
 		frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0);');
