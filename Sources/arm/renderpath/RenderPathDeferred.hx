@@ -73,7 +73,6 @@ class RenderPathDeferred {
 		}
 
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-		path.loadShader("shader_datas/copy_mrt4_pass/copy_mrt4_pass");
 
 		{ // Material preview
 			{
@@ -170,7 +169,12 @@ class RenderPathDeferred {
 
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
-		armory.data.Config.raw.rp_gi = UITrait.inst.worktab.position == 1;
+		// Only enable vxao in scene mode
+		var restoreGI = false;
+		if (armory.data.Config.raw.rp_gi && UITrait.inst.worktab.position == 0) { // paint
+			armory.data.Config.raw.rp_gi = false;
+			restoreGI = true;
+		}
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 
@@ -636,10 +640,10 @@ class RenderPathDeferred {
 				var crot = cam.transform.rot;
 				var ratio = iron.App.w() / iron.App.h();
 				var P = cam.P;
-				cam.P = iron.math.Mat4.ortho(-6 * ratio, 6 * ratio, -6, 6, -2, 2);
+				cam.P = iron.math.Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 				gizmo.visible = true;
 				gizmo.parent = cam;
-				gizmo.transform.loc = new iron.math.Vec4(5.2 * ratio, -5.6, -1);
+				gizmo.transform.loc = new iron.math.Vec4(7.2 * ratio, -7.6, -1);
 				gizmo.transform.rot = new iron.math.Quat(-crot.x, -crot.y, -crot.z, crot.w);
 				gizmo.transform.buildMatrix();
 				
@@ -713,6 +717,8 @@ class RenderPathDeferred {
 		UITrait.inst.ddirty--;
 		UITrait.inst.pdirty--;
 		UITrait.inst.rdirty--;
+
+		if (restoreGI) armory.data.Config.raw.rp_gi = true;
 	}
 
 	#end

@@ -180,7 +180,7 @@ class UITrait extends iron.Trait {
 	public var paintVisible = true;
 	public var mirrorX = false;
 	public var showGrid = false;
-	public var showCompass = false;
+	public var showCompass = true;
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var fillTypeHandle = new Zui.Handle();
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
@@ -216,8 +216,8 @@ class UITrait extends iron.Trait {
 	public var hssgi:Zui.Handle = null;
 	public var hssr:Zui.Handle = null;
 	public var hbloom:Zui.Handle = null;
-	public var hshadowmap:Zui.Handle = null;
 	public var hsupersample:Zui.Handle = null;
+	public var hvxao:Zui.Handle = null;
 	var textureExport = false;
 	var textureExportPath = "";
 	public var projectExport = false;
@@ -227,7 +227,7 @@ class UITrait extends iron.Trait {
 	public var menuHandle = new Zui.Handle({layout:Horizontal});
 	public var workspaceHandle = new Zui.Handle({layout:Horizontal});
 
-	public var cameraControls = 0;
+	public var cameraControls = 1;
 	public var htab = Id.handle({position: 0});
 	public var worktab = Id.handle({position: 0});
 
@@ -2061,6 +2061,10 @@ class UITrait extends iron.Trait {
 					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
 				}
 
+				// ui.separator();
+				// if (ui.panel(Id.handle({selected: false}), "History", 1)) {
+				// }
+
 				// Draw plugins
 				for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
 			}
@@ -2275,33 +2279,33 @@ class UITrait extends iron.Trait {
 				hssgi = Id.handle({selected: C.rp_ssgi});
 				hssr = Id.handle({selected: C.rp_ssr});
 				hbloom = Id.handle({selected: C.rp_bloom});
-				// hshadowmap = Id.handle({position: Config.getShadowQuality(C.rp_shadowmap_cascade)});
 				hsupersample = Id.handle({position: Config.getSuperSampleQuality(C.rp_supersample)});
+				hvxao = Id.handle({selected: C.rp_gi});
 				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Viewport", 1)) {
-					ui.row([1/2, 1/2]);
-					ui.combo(Id.handle(), ["Off"], "Shadows", true);
-					// ui.combo(hshadowmap, ["Ultra", "High", "Medium", "Low", "Off"], "Shadows", true);
-					// if (hshadowmap.changed) Config.applyConfig();
-					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
-					if (hsupersample.changed) Config.applyConfig();
 					ui.row([1/2, 1/2]);
 					var vsyncHandle = Id.handle({selected: C.window_vsync});
 					C.window_vsync = ui.check(vsyncHandle, "VSync");
 					if (vsyncHandle.changed) armory.data.Config.save();
+					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
+					if (hsupersample.changed) Config.applyConfig();
+					ui.row([1/2, 1/2]);
+					ui.check(hvxao, "Voxel AO");
+					if (ui.isHovered) ui.tooltip("Scene mode only");
+					if (hvxao.changed) Config.applyConfig();
+					ui.check(hssgi, "SSAO");
+					if (hssgi.changed) Config.applyConfig();
+					ui.row([1/2, 1/2]);
+					ui.check(hbloom, "Bloom");
+					if (hbloom.changed) Config.applyConfig();
+					ui.check(hssr, "SSR");
+					if (hssr.changed) Config.applyConfig();
 					var cullHandle = Id.handle({selected: culling});
 					culling = ui.check(cullHandle, "Cull Backfaces");
 					if (cullHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;
 					}
-					ui.row([1/2, 1/2]);
-					ui.check(hssgi, "SSAO");
-					if (hssgi.changed) Config.applyConfig();
-					ui.check(hssr, "SSR");
-					if (hssr.changed) Config.applyConfig();
-					ui.check(hbloom, "Bloom");
-					if (hbloom.changed) Config.applyConfig();
 				}
 
 				ui.separator();
