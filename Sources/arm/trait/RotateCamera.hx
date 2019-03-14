@@ -38,7 +38,10 @@ class RotateCamera extends iron.Trait {
 					camera.transform.move(camera.look(), mouse.movementX / 75);
 				}
 				else {
-					camera.transform.loc.addf(-mouse.movementX / 150, 0.0, mouse.movementY / 150);
+					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
+					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
+					camera.transform.loc.add(look);
+					camera.transform.loc.add(right);
 					camera.buildMatrix();
 				}
 			}
