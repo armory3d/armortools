@@ -260,15 +260,11 @@ class RenderPathDeferred {
 				if (UITrait.inst.brushType == 3) { // Bake AO
 					if (initVoxels) {
 						initVoxels = false;
-						var t = new RenderTargetRaw();
-						t.name = "voxels";
-						t.format = "R8";
-						t.width = 256;
-						t.height = 256;
-						t.depth = 256;
-						t.is_image = true;
-						t.mipmaps = true;
-						path.createRenderTarget(t);
+						// Init voxel texture
+						var rp_gi = UITrait.inst.C.rp_gi;
+						UITrait.inst.C.rp_gi = true;
+						Inc.initGI();
+						UITrait.inst.C.rp_gi = rp_gi;
 					}
 					path.clearImage("voxels", 0x00000000);
 					path.setTarget("");
