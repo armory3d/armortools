@@ -472,12 +472,12 @@ class App extends iron.Trait {
 			// ui.button("Preferences...", Left);
 		}
 		else if (menuCategory == 2) {
-			if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0); }
-			if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 3, 0, Math.PI / 2, 0, Math.PI); }
-			if (ui.button("Right", Left, "3")) { ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
-			if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
-			if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 3, 0, 0, 0); }
-			if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI); }
+			if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
+			if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
+			if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
+			if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
+			if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
+			if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
 			if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
 			ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 			if (ui.button("Distract Free", Left, "F11")) {

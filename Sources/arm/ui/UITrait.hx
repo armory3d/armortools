@@ -553,18 +553,18 @@ class UITrait extends iron.Trait {
 				}
 				else if (kb.started("1")) {
 					ctrl ?
-						ViewportUtil.setView(0, 3, 0, Math.PI / 2, 0, Math.PI) :
-						ViewportUtil.setView(0, -3, 0, Math.PI / 2, 0, 0);
+						ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI) :
+						ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
 				}
 				else if (kb.started("3")) {
 					ctrl ?
-						ViewportUtil.setView(-3, 0, 0, Math.PI / 2, 0, -Math.PI / 2) :
-						ViewportUtil.setView(3, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+						ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2) :
+						ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
 				}
 				else if (kb.started("7")) {
 					ctrl ?
-						ViewportUtil.setView(0, 0, -3, Math.PI, 0, Math.PI) :
-						ViewportUtil.setView(0, 0, 3, 0, 0, 0);
+						ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI) :
+						ViewportUtil.setView(0, 0, 1, 0, 0, 0);
 				}
 			}
 		}

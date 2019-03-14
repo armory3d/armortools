@@ -35,6 +35,7 @@ class ViewportUtil {
 				cam.buildProjection();
 				UITrait.inst.selectedObject.transform.reset();
 				UITrait.inst.ddirty = 2;
+				arm.trait.OrbitCamera.inst.reset();
 				break;
 			}
 		}
@@ -44,10 +45,12 @@ class ViewportUtil {
 		UITrait.inst.selectedObject.transform.reset();
 		var scene = iron.Scene.active;
 		var cam = scene.camera;
-		cam.transform.loc.set(x, y, z);
+		var dist = cam.transform.loc.length();
+		cam.transform.loc.set(x * dist, y * dist, z * dist);
 		cam.transform.rot.fromEuler(rx, ry, rz);
 		cam.transform.buildMatrix();
 		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
+		arm.trait.OrbitCamera.inst.reset();
 	}
 }
