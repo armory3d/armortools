@@ -246,11 +246,12 @@ class RenderPathDeferred {
 				UITrait.inst.roughnessPicked = c.get(1) / 255;
 				UITrait.inst.metallicPicked = c.get(2) / 255;
 				// Pick material
-				if (UITrait.inst.pickMaterial) {
+				if (UITrait.inst.pickerSelectMaterial) {
 					var matid = b.get(3);
 					for (m in UITrait.inst.materials) {
 						if (m.id == matid) {
 							UITrait.inst.setMaterial(m);
+							UITrait.inst.materialIdPicked = matid;
 							break;
 						}
 					}

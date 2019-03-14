@@ -20,15 +20,13 @@ class Uniforms {
 			return r;
 		}
 		else if (link == '_brushOpacity') {
-			return UITrait.inst.brushOpacity * UITrait.inst.brushOpacity *
-				   UITrait.inst.brushNodesOpacity * UITrait.inst.brushNodesOpacity;
+			return UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
 		}
 		else if (link == '_brushScale') {
 			return (UITrait.inst.brushScale * UITrait.inst.brushNodesScale) * 2.0;
 		}
 		else if (link == '_brushHardness') {
-			var f = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
-			return f * f * 100;
+			return UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 		}
 		else if (link == '_paintDepthBias') {
 			return UITrait.inst.paintVisible ? 0.0001 : 1.0;

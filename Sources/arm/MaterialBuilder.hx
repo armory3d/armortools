@@ -187,7 +187,7 @@ class MaterialBuilder {
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
 			frag.write('if (any(c1 != c2)) { discard; }');
 		}
-		else if (faceFill) {
+		else if (faceFill) { // TODO: allow to combine with colorid mask
 			vert.add_out('vec2 texCoordPick');
 			vert.write('texCoordPick = fract(tex);');
 			frag.add_uniform('sampler2D gbuffer2');
@@ -202,6 +202,17 @@ class MaterialBuilder {
 			frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
 			frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
 			frag.write('if (any(c1 != c2)) { discard; }');
+		}
+
+		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
+			frag.wvpposition = true;
+			frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
+			#if kha_direct3d11
+			frag.write('picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
+			#end
+			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+			var matid = UITrait.inst.materialIdPicked / 255;
+			frag.write('if ($matid != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;');
 		}
 
 		// TexCoords - uvmap
@@ -352,10 +363,10 @@ class MaterialBuilder {
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 		}
 
-		frag.write('float str = clamp(opacity * (brushRadius - dist) * brushHardness * 2.0, 0.0, 1.0);');
+		frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 
 		if (UITrait.inst.mirrorX && UITrait.inst.brushType == 0) { // Draw
-			frag.write('str += opacity * (brushRadius - dist2) * brushHardness * 2.0;');
+			frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 			frag.write('str = clamp(str, 0.0, 1.0);');
 		}
 
@@ -373,6 +384,10 @@ class MaterialBuilder {
 		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
 		var matid = UITrait.inst.selectedMaterial.id / 255;
+
+		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
+			matid = UITrait.inst.materialIdPicked / 255; // Keep existing material id in place when mask is set
+		}
 
 		if (layered) {
 			if (eraser) {
@@ -773,6 +788,14 @@ class MaterialBuilder {
 				frag.nAttr = true;
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(nAttr, packFloat2(1.0, 1.0));'); // occ/spec
+			}
+			else if (UITrait.inst.viewportMode == 8) { // MaterialID
+				frag.write('float sample_matid = textureLod(texpaint_nor, texCoord, 0.0).a;');
+				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 2.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 2.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 4.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
+				frag.write('fragColor[1] = vec4(matid_r, matid_g, matid_b, packFloat2(1.0, 1.0));'); // occ/spec
 			}
 		}
 

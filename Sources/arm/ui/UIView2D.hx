@@ -37,6 +37,9 @@ class UIView2D extends iron.Trait {
 		vs.add("tex", kha.graphics4.VertexData.Float2);
 		vs.add("col", kha.graphics4.VertexData.Float4);
 		pipe.inputLayout = [vs];
+		pipe.blendSource = kha.graphics4.BlendingFactor.BlendOne;
+		pipe.blendDestination = kha.graphics4.BlendingFactor.BlendZero;
+		pipe.colorWriteMaskAlpha = false;
 		pipe.compile();
 
 		var t = Reflect.copy(arm.App.theme);
@@ -148,8 +151,7 @@ class UIView2D extends iron.Trait {
 
 			// Texture
 			ui.g.pipeline = pipe;
-			// var l = UITrait.inst.selectedLayer;
-			var l = UITrait.inst.layers[0];
+			var l = UITrait.inst.selectedLayer;
 			var tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
 	 		ui.g.drawScaledImage(tex, tx, ty, tw, tw);
 			ui.g.pipeline = null;

@@ -56,7 +56,7 @@ struct SPIRV_Cross_Output {
     float4 FragColor : SV_Target0;
 };
 void frag_main() {
-    float4 texcolor = float4(tex.Sample(_tex_sampler, texCoord).rgb, 1.0) * color;
+    float4 texcolor = tex.Sample(_tex_sampler, texCoord) * color;
     FragColor = texcolor;
 }
 SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {
@@ -92,7 +92,7 @@ in vec2 texCoord;
 in vec4 color;
 out vec4 FragColor;
 void main() {
-	vec4 texcolor = vec4(texture(tex, texCoord).rgb, 1.0) * color;
+	vec4 texcolor = texture(tex, texCoord) * color;
 	FragColor = texcolor;
 }
 ";

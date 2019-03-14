@@ -50,7 +50,9 @@ class UITrait extends iron.Trait {
 	public var roughnessPicked = 0.0;
 	public var metallicPicked = 0.0;
 	public var occlusionPicked = 0.0;
-	public var pickMaterial = true;
+	public var materialIdPicked = 0.0;
+	public var pickerSelectMaterial = true;
+	public var pickerMaskHandle = new Zui.Handle({position: 0});
 	var message = "";
 	var messageTimer = 0.0;
 	var messageColor = 0x00000000;
@@ -160,7 +162,7 @@ class UITrait extends iron.Trait {
 	public var brushOpacity = 1.0;
 	public var brushScale = 0.5;
 	public var brushRot = 0.0;
-	public var brushHardness = 1.0;
+	public var brushHardness = 0.8;
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
 	public var brushType = 0;
@@ -1238,7 +1240,12 @@ class UITrait extends iron.Trait {
 					ui.text('Occlusion $occlusionPicked');
 					ui.text('Roughness $roughnessPicked');
 					ui.text('Metallic $metallicPicked');
-					pickMaterial = ui.check(Id.handle({selected: pickMaterial}), "Pick Material");
+					pickerSelectMaterial = ui.check(Id.handle({selected: pickerSelectMaterial}), "Select Material");
+					ui.combo(pickerMaskHandle, ["None", "Material"], "Mask", true);
+					if (pickerMaskHandle.changed) {
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+					}
 				}
 				else if (brushType == 3) { // Bake AO
 					ui.combo(Id.handle(), ["AO"], "Bake");
@@ -1863,7 +1870,8 @@ class UITrait extends iron.Trait {
 								mergedObject.visible = true;
 							}
 						}
-						var uvMapType = ui.combo(uvmapHandle, ["Combined", "Object"], "UV Map", true);
+						// var uvMapType = ui.combo(uvmapHandle, ["Combined", "Object"], "UV Map", true);
+						var uvMapType = ui.combo(uvmapHandle, ["Combined"], "UV Map", true);
 						if (uvmapHandle.changed) {
 							
 						}
@@ -1969,7 +1977,7 @@ class UITrait extends iron.Trait {
 
 					ui.row([1/2, 1/2]);
 					var modeHandle = Id.handle({position: 0});
-					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal"], "Mode");
+					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID"], "Mode");
 					if (modeHandle.changed) {
 						UINodes.inst.parseMeshMaterial();
 						ddirty = 2;

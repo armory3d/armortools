@@ -491,7 +491,17 @@ class App extends iron.Trait {
 			// ui.button("Wireframe", Left);
 		}
 		else if (menuCategory == 3) {
-			// ui.button("Manual...", Left);
+			if (ui.button("Manual...", Left)) {
+				if (kha.System.systemId == "Windows") {
+					Krom.sysCommand('explorer "https://armorpaint.org/manual"');
+				}
+				else if (kha.System.systemId == "Linux") {
+					Krom.sysCommand('xdg-explorer "https://armorpaint.org/manual"');
+				}
+				else {
+					Krom.sysCommand('open "https://armorpaint.org/manual"');
+				}
+			}
 			if (ui.button("Check for Updates...", Left)) {
 				// Retrieve latest version number
 				var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
@@ -516,9 +526,6 @@ class App extends iron.Trait {
 						else {
 							arm.App.showMessageBox("You are up to date!");
 						}
-						// explorer "https://armorpaint.org/download"
-						// open "https://armorpaint.org/download"
-						// xdg-open "https://armorpaint.org/download"
 					}
 				});
 				#end
