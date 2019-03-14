@@ -1,5 +1,5 @@
 {
-    "rp_bloom": true,
+    "rp_bloom": false,
     "rp_gi": false,
     "rp_motionblur": false,
     "rp_shadowmap_cube": 0,
