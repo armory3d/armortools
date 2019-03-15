@@ -2248,7 +2248,7 @@ class UITrait extends iron.Trait {
 					var themes = ["Dark", "Light"];
 					ui.combo(themeHandle, themes, "Theme", true);
 					if (themeHandle.changed) {
-						iron.data.Data.getBlob("theme_" + themes[themeHandle.position] + ".arm", function(b:kha.Blob) {
+						iron.data.Data.getBlob("theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
 							arm.App.parseTheme(b);
 							ui.t = arm.App.theme;
 							// UINodes.inst.applyTheme();
