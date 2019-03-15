@@ -264,7 +264,9 @@ class RenderPathDeferred {
 						// Init voxel texture
 						var rp_gi = UITrait.inst.C.rp_gi;
 						UITrait.inst.C.rp_gi = true;
+						#if (rp_gi != "Off")
 						Inc.initGI();
+						#end
 						UITrait.inst.C.rp_gi = rp_gi;
 					}
 					path.clearImage("voxels", 0x00000000);
