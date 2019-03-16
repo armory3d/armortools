@@ -2,6 +2,7 @@ package arm.renderpath;
 
 import iron.RenderPath;
 import armory.renderpath.Inc;
+import arm.ui.UITrait;
 import arm.ui.*;
 
 class RenderPathDeferred {
@@ -211,14 +212,14 @@ class RenderPathDeferred {
 		}
 
 		if (UITrait.inst.paintDirty()) {
-			if (UITrait.inst.brushType == 4) { // Pick Color Id
+			if (UITrait.inst.brushType == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
 				UITrait.inst.headerHandle.redraws = 2;
 			}
-			else if (UITrait.inst.brushType == 10) { // Picker
+			else if (UITrait.inst.brushType == ToolPicker) {
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
@@ -258,7 +259,7 @@ class RenderPathDeferred {
 				}
 			}
 			else {
-				if (UITrait.inst.brushType == 3) { // Bake AO
+				if (UITrait.inst.brushType == ToolBake) {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -293,7 +294,7 @@ class RenderPathDeferred {
 				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, maskA]);
 				path.bindTarget("_paintdb", "paintdb");
 				path.bindTarget(maskB, "paintmask");
-				if (UITrait.inst.brushType == 3) { // Bake AO
+				if (UITrait.inst.brushType == ToolBake) {
 					path.bindTarget("voxels", "voxels");
 				}
 				if (UITrait.inst.colorIdPicked) {
@@ -301,9 +302,9 @@ class RenderPathDeferred {
 				} 
 
 				// Read texcoords from gbuffer
-				var readTC = (UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
-							  UITrait.inst.brushType == 7 || // Clone
-							  UITrait.inst.brushType == 8;   // Blur
+				var readTC = (UITrait.inst.brushType == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
+							  UITrait.inst.brushType == ToolClone ||
+							  UITrait.inst.brushType == ToolBlur;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}

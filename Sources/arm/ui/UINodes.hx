@@ -12,6 +12,7 @@ import armory.system.CyclesShader;
 import armory.system.CyclesShader.CyclesShaderContext;
 import arm.creator.*;
 import arm.util.*;
+import arm.ui.UITrait;
 
 @:access(zui.Zui)
 class UINodes extends iron.Trait {
@@ -193,7 +194,7 @@ class UINodes extends iron.Trait {
 				parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd.redraws = 2;
-				var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6;
+				var decal = UITrait.inst.brushType == ToolDecal || UITrait.inst.brushType == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
 			}
 		}
@@ -634,7 +635,7 @@ class UINodes extends iron.Trait {
 					// m.contexts.push(self);
 				// });
 
-				if ((UITrait.inst.brushType == 2 || UITrait.inst.brushType == 3) && UITrait.inst.autoFillHandle.selected) { // Fill
+				if ((UITrait.inst.brushType == ToolFill || UITrait.inst.brushType == ToolBake) && UITrait.inst.autoFillHandle.selected) {
 					UITrait.inst.pdirty = 8;
 					UITrait.inst.ddirty = 8;
 				}

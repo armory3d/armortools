@@ -9,13 +9,14 @@ import iron.data.ShaderData;
 import iron.data.ShaderData.ShaderContext;
 import iron.data.MaterialData;
 import iron.data.SceneFormat;
+import arm.ui.UITrait;
 import arm.ui.*;
 
 class MaterialBuilder {
 
 	public static function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
 		var layered = UITrait.inst.selectedLayer != UITrait.inst.layers[0];
-		var eraser = UITrait.inst.brushType == 1;
+		var eraser = UITrait.inst.brushType == ToolEraser;
 		var context_id = 'paint';
 		var con_paint:CyclesShaderContext = data.add_context({
 			name: context_id,
@@ -30,7 +31,7 @@ class MaterialBuilder {
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 
-		if (UITrait.inst.brushType == 3) { // Bake AO
+		if (UITrait.inst.brushType == ToolBake) {
 			con_paint.data.color_writes_red[0] = false;
 			con_paint.data.color_writes_green[0] = false;
 			con_paint.data.color_writes_blue[0] = false;
@@ -48,7 +49,7 @@ class MaterialBuilder {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		if (UITrait.inst.brushType == 4 || UITrait.inst.brushType == 10) { // Color id, material picker
+		if (UITrait.inst.brushType == ToolColorId || UITrait.inst.brushType == ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 			
@@ -62,13 +63,13 @@ class MaterialBuilder {
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
 			#end
 
-			if (UITrait.inst.brushType == 4) { // Color id
+			if (UITrait.inst.brushType == ToolColorId) {
 				frag.add_out('vec4 fragColor');
 				frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 				frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
 				frag.write('fragColor = vec4(idcol, 1.0);');
 			}
-			else if (UITrait.inst.brushType == 10) { // Picker
+			else if (UITrait.inst.brushType == ToolPicker) {
 				frag.add_out('vec4 fragColor[3]');
 				frag.add_uniform('sampler2D texpaint');
 				frag.add_uniform('sampler2D texpaint_nor');
@@ -90,8 +91,8 @@ class MaterialBuilder {
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, tex.y * 2.0 - 1.0);');
 		#end
 
-		var faceFill = UITrait.inst.brushType == 2 && UITrait.inst.fillTypeHandle.position == 1;
-		var decal = UITrait.inst.brushType == 5 || UITrait.inst.brushType == 6;
+		var faceFill = UITrait.inst.brushType == ToolFill && UITrait.inst.fillTypeHandle.position == 1;
+		var decal = UITrait.inst.brushType == ToolDecal || UITrait.inst.brushType == ToolText;
 
 		if (!faceFill && !decal) {
 			// Fix seams at uv borders
@@ -112,7 +113,7 @@ class MaterialBuilder {
 
 		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;
 
-		if (UITrait.inst.brushType == 3) { // Bake ao
+		if (UITrait.inst.brushType == ToolBake) {
 			frag.wposition = true;
 			frag.n = true;
 		}
@@ -132,7 +133,11 @@ class MaterialBuilder {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushHardness', '_brushHardness');
 
-		if (UITrait.inst.brushType == 0 || UITrait.inst.brushType == 1 || decal || UITrait.inst.brushType == 7 || UITrait.inst.brushType == 8) { // Draw / Erase
+		if (UITrait.inst.brushType == ToolBrush  ||
+			UITrait.inst.brushType == ToolEraser ||
+			UITrait.inst.brushType == ToolClone  ||
+			UITrait.inst.brushType == ToolBlur   ||
+			decal) {
 			
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0.0).r) { discard; }');
@@ -261,7 +266,7 @@ class MaterialBuilder {
 			}
 		}
 
-		if (UITrait.inst.brushType == 7 || UITrait.inst.brushType == 8) { // Clone, Blur
+		if (UITrait.inst.brushType == ToolClone || UITrait.inst.brushType == ToolBlur) {
 			
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
@@ -269,7 +274,7 @@ class MaterialBuilder {
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
-			if (UITrait.inst.brushType == 7) { // Clone
+			if (UITrait.inst.brushType == ToolClone) {
 				frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
 				#if (kha_opengl || kha_webgl)
 				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
@@ -354,18 +359,18 @@ class MaterialBuilder {
 			frag.write('float opacity = $opac * brushOpacity;');
 		}
 
-		if (UITrait.inst.brushType == 5) { // Decal tool
+		if (UITrait.inst.brushType == ToolDecal) {
 			frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
 			frag.write('opacity *= textureLod(texdecalmask, texCoord, 0.0).r;');
 		}
-		else if (UITrait.inst.brushType == 6) { // Text tool
+		else if (UITrait.inst.brushType == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 		}
 
 		frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 
-		if (UITrait.inst.mirrorX && UITrait.inst.brushType == 0) { // Draw
+		if (UITrait.inst.mirrorX && UITrait.inst.brushType == ToolBrush) {
 			frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
 			frag.write('str = clamp(str, 0.0, 1.0);');
 		}
@@ -452,7 +457,7 @@ class MaterialBuilder {
 			con_paint.data.color_writes_alpha[2] = false;
 		}
 
-		if (UITrait.inst.brushType == 3) { // Bake AO
+		if (UITrait.inst.brushType == ToolBake) {
 			// Apply normal channel
 			frag.vVec = true;
 			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
@@ -524,11 +529,11 @@ class MaterialBuilder {
 
 		var decal = UITrait.inst.decalPreview;
 		if (decal) {
-			if (UITrait.inst.brushType == 5) { // Decal tool
+			if (UITrait.inst.brushType == ToolDecal) {
 				frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
 				frag.write('opacity *= textureLod(texdecalmask, texCoord, 0.0).r;');
 			}
-			else if (UITrait.inst.brushType == 6) { // Text tool
+			else if (UITrait.inst.brushType == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
 				frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 			}
@@ -647,7 +652,7 @@ class MaterialBuilder {
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
 		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
 
-		if (UITrait.inst.brushType == 4) { // Show color map
+		if (UITrait.inst.brushType == ToolColorId) {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 1.0);'); // met/rough
 			frag.write('vec3 idcol = pow(textureLod(texcolorid, texCoord, 0.0).rgb, vec3(2.2, 2.2, 2.2));');
