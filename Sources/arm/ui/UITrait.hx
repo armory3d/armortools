@@ -1100,20 +1100,6 @@ class UITrait extends iron.Trait {
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolBake) ui.rect(-1, -1, imgBake.width + 2, imgBake.height + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(imgBake) == State.Started) selectTool(ToolBake);
-				if (ui.isHovered) ui.tooltip("Bake (K)");
-				ui._x -= 2;
-				ui._y += 2;
-
-				ui._x += 2;
-				if (brushType == ToolColorId) ui.rect(-1, -1, imgColorId.width + 2, imgColorId.height + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(imgColorId) == State.Started) selectTool(ToolColorId);
-				if (ui.isHovered) ui.tooltip("Color ID (C)");
-				ui._x -= 2;
-				ui._y += 2;
-
-				ui._x += 2;
 				if (brushType == ToolDecal) ui.rect(-1, -1, imgDecal.width + 2, imgDecal.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgDecal) == State.Started) selectTool(ToolDecal);
 				if (ui.isHovered) ui.tooltip("Decal (D)");
@@ -1145,6 +1131,20 @@ class UITrait extends iron.Trait {
 				if (brushType == ToolParticle) ui.rect(-1, -1, imgParticle.width + 2, imgParticle.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgParticle) == State.Started) selectTool(ToolParticle);
 				if (ui.isHovered) ui.tooltip("Particle (P)");
+				ui._x -= 2;
+				ui._y += 2;
+
+				ui._x += 2;
+				if (brushType == ToolBake) ui.rect(-1, -1, imgBake.width + 2, imgBake.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(imgBake) == State.Started) selectTool(ToolBake);
+				if (ui.isHovered) ui.tooltip("Bake (K)");
+				ui._x -= 2;
+				ui._y += 2;
+
+				ui._x += 2;
+				if (brushType == ToolColorId) ui.rect(-1, -1, imgColorId.width + 2, imgColorId.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(imgColorId) == State.Started) selectTool(ToolColorId);
+				if (ui.isHovered) ui.tooltip("Color ID (C)");
 				ui._x -= 2;
 				ui._y += 2;
 
