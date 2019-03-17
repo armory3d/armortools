@@ -212,14 +212,14 @@ class RenderPathDeferred {
 		}
 
 		if (UITrait.inst.paintDirty()) {
-			if (UITrait.inst.brushType == ToolColorId) {
+			if (UITrait.inst.selectedTool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
 				UITrait.inst.headerHandle.redraws = 2;
 			}
-			else if (UITrait.inst.brushType == ToolPicker) {
+			else if (UITrait.inst.selectedTool == ToolPicker) {
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
@@ -259,7 +259,7 @@ class RenderPathDeferred {
 				}
 			}
 			else {
-				if (UITrait.inst.brushType == ToolBake) {
+				if (UITrait.inst.selectedTool == ToolBake) {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -294,7 +294,7 @@ class RenderPathDeferred {
 				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, maskA]);
 				path.bindTarget("_paintdb", "paintdb");
 				path.bindTarget(maskB, "paintmask");
-				if (UITrait.inst.brushType == ToolBake) {
+				if (UITrait.inst.selectedTool == ToolBake) {
 					path.bindTarget("voxels", "voxels");
 				}
 				if (UITrait.inst.colorIdPicked) {
@@ -302,9 +302,9 @@ class RenderPathDeferred {
 				} 
 
 				// Read texcoords from gbuffer
-				var readTC = (UITrait.inst.brushType == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
-							  UITrait.inst.brushType == ToolClone ||
-							  UITrait.inst.brushType == ToolBlur;
+				var readTC = (UITrait.inst.selectedTool == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
+							  UITrait.inst.selectedTool == ToolClone ||
+							  UITrait.inst.selectedTool == ToolBlur;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}

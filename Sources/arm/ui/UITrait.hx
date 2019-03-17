@@ -165,7 +165,7 @@ class UITrait extends iron.Trait {
 	public var brushHardness = 0.8;
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
-	public var brushType = 0;
+	public var selectedTool = 0;
 
 	public var paintBase = true;
 	public var paintOpac = true;
@@ -202,7 +202,6 @@ class UITrait extends iron.Trait {
 	var frame = 0;
 
 	public var C:TAPConfig;
-	var lastBrushType = -1;
 	var altStartedX = -1.0;
 	var altStartedY = -1.0;
 	var lockStartedX = -1.0;
@@ -529,12 +528,12 @@ class UITrait extends iron.Trait {
 
 				// Radius
 				if (!ctrl && !shift) {
-					if (brushType == ToolBrush  ||
-						brushType == ToolEraser ||
-						brushType == ToolDecal  ||
-						brushType == ToolText   ||
-						brushType == ToolClone  ||
-						brushType == ToolBlur) {
+					if (selectedTool == ToolBrush  ||
+						selectedTool == ToolEraser ||
+						selectedTool == ToolDecal  ||
+						selectedTool == ToolText   ||
+						selectedTool == ToolClone  ||
+						selectedTool == ToolBlur) {
 						if (kb.started("f")) {
 							brushCanLock = true;
 							mouse.lock();
@@ -671,7 +670,7 @@ class UITrait extends iron.Trait {
 			if (mouse.x < iron.App.w() && mouse.x > iron.App.x() &&
 				mouse.y < iron.App.h() && mouse.y > iron.App.y()) {
 				
-				if (brushType == ToolClone && kb.down("alt")) { // Clone source
+				if (selectedTool == ToolClone && kb.down("alt")) { // Clone source
 					cloneStartX = mouse.x;
 					cloneStartY = mouse.y;
 				}
@@ -681,7 +680,7 @@ class UITrait extends iron.Trait {
 						if (projectPath != "") {
 							kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
 						}
-						if (brushType == ToolClone && cloneStartX >= 0.0) { // Clone delta
+						if (selectedTool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mouse.x) / iron.App.w();
 							cloneDeltaY = (cloneStartY - mouse.y) / iron.App.h();
 							cloneStartX = -1;
@@ -892,7 +891,7 @@ class UITrait extends iron.Trait {
 
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			var decal = brushType == ToolDecal || brushType == ToolText;
+			var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 			if (decal) {
 				psize = Std.int(256 * (brushRadius * brushNodesRadius));
 				#if kha_direct3d11
@@ -902,11 +901,11 @@ class UITrait extends iron.Trait {
 				#end
 			}
 			else {
-				if (brushType == ToolBrush  ||
-					brushType == ToolEraser ||
-					brushType == ToolClone  ||
-					brushType == ToolBlur   ||
-					brushType == ToolParticle) {
+				if (selectedTool == ToolBrush  ||
+					selectedTool == ToolEraser ||
+					selectedTool == ToolClone  ||
+					selectedTool == ToolBlur   ||
+					selectedTool == ToolParticle) {
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
 			}
@@ -931,7 +930,7 @@ class UITrait extends iron.Trait {
 			}
 
 			var kb = iron.system.Input.getKeyboard();
-			if (brushType == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) { // Clone source cursor
+			if (selectedTool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) { // Clone source cursor
 				g.color = 0x66ffffff;
 				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
 				g.color = 0xffffffff;
@@ -981,7 +980,7 @@ class UITrait extends iron.Trait {
 	}
 
 	function selectTool(i:Int) {
-		brushType = i;
+		selectedTool = i;
 		autoFillHandle.selected = false; // Auto-disable
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
@@ -990,15 +989,15 @@ class UITrait extends iron.Trait {
 		toolbarHandle.redraws = 2;
 		ddirty = 2;
 
-		var decal = brushType == ToolDecal || brushType == ToolText;
+		var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 		if (decal) {
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			if (brushType == ToolDecal) {
+			if (selectedTool == ToolDecal) {
 				RenderUtil.makeDecalMaskPreview();
 			}
-			else if (brushType == ToolText) {
+			else if (selectedTool == ToolText) {
 				RenderUtil.makeTextPreview();
 			}
 
@@ -1079,77 +1078,77 @@ class UITrait extends iron.Trait {
 				var imgPicker = bundled.get("tool_picker.png");
 				
 				ui._x += 2;
-				if (brushType == ToolBrush) ui.rect(-1, -1, imgBrush.width + 2, imgBrush.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolBrush) ui.rect(-1, -1, imgBrush.width + 2, imgBrush.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgBrush) == State.Started) selectTool(ToolBrush);
 				if (ui.isHovered) ui.tooltip("Brush (B)");
 				ui._x -= 2;
 				ui._y += 2;
 				
 				ui._x += 2;
-				if (brushType == ToolEraser) ui.rect(-1, -1, imgEraser.width + 2, imgEraser.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolEraser) ui.rect(-1, -1, imgEraser.width + 2, imgEraser.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgEraser) == State.Started) selectTool(ToolEraser);
 				if (ui.isHovered) ui.tooltip("Eraser (E)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolFill) ui.rect(-1, -1, imgFill.width + 2, imgFill.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolFill) ui.rect(-1, -1, imgFill.width + 2, imgFill.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgFill) == State.Started) selectTool(ToolFill);
 				if (ui.isHovered) ui.tooltip("Fill (G)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolDecal) ui.rect(-1, -1, imgDecal.width + 2, imgDecal.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolDecal) ui.rect(-1, -1, imgDecal.width + 2, imgDecal.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgDecal) == State.Started) selectTool(ToolDecal);
 				if (ui.isHovered) ui.tooltip("Decal (D)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolText) ui.rect(-1, -1, imgText.width + 2, imgText.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolText) ui.rect(-1, -1, imgText.width + 2, imgText.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgText) == State.Started) selectTool(ToolText);
 				if (ui.isHovered) ui.tooltip("Text (T)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolClone) ui.rect(-1, -1, imgClone.width + 2, imgClone.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolClone) ui.rect(-1, -1, imgClone.width + 2, imgClone.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgClone) == State.Started) selectTool(ToolClone);
 				if (ui.isHovered) ui.tooltip("Clone (L) - Hold ALT to set source");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolBlur) ui.rect(-1, -1, imgBlur.width + 2, imgBlur.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolBlur) ui.rect(-1, -1, imgBlur.width + 2, imgBlur.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgBlur) == State.Started) selectTool(ToolBlur);
 				if (ui.isHovered) ui.tooltip("Blur (U)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolParticle) ui.rect(-1, -1, imgParticle.width + 2, imgParticle.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolParticle) ui.rect(-1, -1, imgParticle.width + 2, imgParticle.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgParticle) == State.Started) selectTool(ToolParticle);
 				if (ui.isHovered) ui.tooltip("Particle (P)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolBake) ui.rect(-1, -1, imgBake.width + 2, imgBake.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolBake) ui.rect(-1, -1, imgBake.width + 2, imgBake.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgBake) == State.Started) selectTool(ToolBake);
 				if (ui.isHovered) ui.tooltip("Bake (K)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolColorId) ui.rect(-1, -1, imgColorId.width + 2, imgColorId.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolColorId) ui.rect(-1, -1, imgColorId.width + 2, imgColorId.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgColorId) == State.Started) selectTool(ToolColorId);
 				if (ui.isHovered) ui.tooltip("Color ID (C)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
-				if (brushType == ToolPicker) ui.rect(-1, -1, imgPicker.width + 2, imgPicker.height + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (selectedTool == ToolPicker) ui.rect(-1, -1, imgPicker.width + 2, imgPicker.height + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(imgPicker) == State.Started) selectTool(ToolPicker);
 				if (ui.isHovered) ui.tooltip("Picker (V)");
 				ui._x -= 2;
@@ -1162,7 +1161,7 @@ class UITrait extends iron.Trait {
 					var imgGizmo = bundled.get("tool_gizmo.png");
 					
 					ui._x += 2;
-					if (brushType == ToolGizmo) ui.rect(-1, -1, imgGizmo.width + 2, imgGizmo.height + 2, ui.t.HIGHLIGHT_COL, 2);
+					if (selectedTool == ToolGizmo) ui.rect(-1, -1, imgGizmo.width + 2, imgGizmo.height + 2, ui.t.HIGHLIGHT_COL, 2);
 					if (ui.image(imgGizmo) == State.Started) selectTool(ToolGizmo);
 					if (ui.isHovered) ui.tooltip("Gizmo (G)");
 					ui._x -= 2;
@@ -1217,7 +1216,7 @@ class UITrait extends iron.Trait {
 
 			if (UITrait.inst.worktab.position == 0) {
 
-				if (brushType == ToolColorId) {
+				if (selectedTool == ToolColorId) {
 					ui.text("Picked Color");
 					if (colorIdPicked) {
 						ui.image(iron.RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
@@ -1227,7 +1226,7 @@ class UITrait extends iron.Trait {
 					var cid = ui.combo(colorIdHandle, App.getEnumTexts(), "Color ID");
 					if (UITrait.inst.assets.length > 0) ui.image(UITrait.inst.getImage(UITrait.inst.assets[cid]));
 				}
-				else if (brushType == ToolPicker) {
+				else if (selectedTool == ToolPicker) {
 					baseRPicked = Math.round(baseRPicked * 10) / 10;
 					baseGPicked = Math.round(baseGPicked * 10) / 10;
 					baseBPicked = Math.round(baseBPicked * 10) / 10;
@@ -1249,7 +1248,7 @@ class UITrait extends iron.Trait {
 						UINodes.inst.parsePaintMaterial();
 					}
 				}
-				else if (brushType == ToolBake) {
+				else if (selectedTool == ToolBake) {
 					ui.combo(Id.handle(), ["AO"], "Bake");
 					var h = Id.handle({value: bakeStrength});
 					bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
@@ -1269,11 +1268,11 @@ class UITrait extends iron.Trait {
 				else {
 					brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
 					
-					if (brushType == ToolBrush  ||
-						brushType == ToolEraser ||
-						brushType == ToolFill   ||
-						brushType == ToolDecal  ||
-						brushType == ToolText) {
+					if (selectedTool == ToolBrush  ||
+						selectedTool == ToolEraser ||
+						selectedTool == ToolFill   ||
+						selectedTool == ToolDecal  ||
+						selectedTool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
 						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
 						if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
@@ -1286,16 +1285,16 @@ class UITrait extends iron.Trait {
 					
 					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
 					
-					if (brushType == ToolBrush || brushType == ToolEraser || brushType == ToolFill) {
+					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 					}
-					if (brushType == ToolBrush || brushType == ToolEraser || brushType == ToolFill || brushType == ToolClone || brushType == ToolBlur) {
+					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolClone || selectedTool == ToolBlur) {
 						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
 					}
 
 					ui.combo(Id.handle(), ["Add"], "Blending");
 
-					if (brushType == ToolBrush || brushType == ToolEraser || brushType == ToolFill || brushType == ToolDecal || brushType == ToolText) {
+					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
 						var paintHandle = Id.handle();
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
 						if (paintHandle.changed) {
@@ -1303,7 +1302,7 @@ class UITrait extends iron.Trait {
 						}
 					}
 
-					if (brushType == ToolFill) {
+					if (selectedTool == ToolFill) {
 						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill");
 						if (fillTypeHandle.changed) {
 							if (fillTypeHandle.position == 1) {
@@ -1325,7 +1324,7 @@ class UITrait extends iron.Trait {
 					else {
 						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
 
-						if (brushType == ToolBrush || brushType == ToolEraser || brushType == ToolFill || brushType == ToolDecal || brushType == ToolText) {
+						if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
 							var mirrorHandle = Id.handle({selected: mirrorX});
 							mirrorX = ui.check(mirrorHandle, "Mirror");
 							if (mirrorHandle.changed) {
@@ -1334,7 +1333,7 @@ class UITrait extends iron.Trait {
 							}
 						}
 					}
-					if (brushType == ToolDecal) {
+					if (selectedTool == ToolDecal) {
 						ui.combo(decalMaskHandle, ["Rectangle", "Circle", "Triangle"], "Mask");
 						if (decalMaskHandle.changed) {
 							ui.g.end();
@@ -1343,7 +1342,7 @@ class UITrait extends iron.Trait {
 							ui.g.begin(false);
 						}
 					}
-					if (brushType == ToolText) {
+					if (selectedTool == ToolText) {
 						ui.combo(textToolHandle, Importer.fontList, "Font");
 						var h = Id.handle();
 						h.text = textToolText;

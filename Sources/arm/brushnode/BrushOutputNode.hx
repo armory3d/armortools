@@ -32,7 +32,7 @@ class BrushOutputNode extends LogicNode {
 			!UITrait.inst.ui.isHovered && !UITrait.inst.ui.isScrolling) { // Header combos are in use
 			// Set color pick
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
-			if (UITrait.inst.brushType == ToolColorId && UITrait.inst.assets.length > 0 && down) {
+			if (UITrait.inst.selectedTool == ToolColorId && UITrait.inst.assets.length > 0 && down) {
 				UITrait.inst.colorIdPicked = true;
 			}
 			// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
@@ -45,7 +45,7 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.lastPaintX = UITrait.inst.paintVec.x;
 			UITrait.inst.lastPaintY = UITrait.inst.paintVec.y;
 
-			var decal = UITrait.inst.brushType == ToolDecal || UITrait.inst.brushType == ToolText;
+			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 			var paintFrames = decal ? 1 : 8;
 
 			if (UITrait.inst.painted <= paintFrames) {
