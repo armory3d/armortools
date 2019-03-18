@@ -28,18 +28,55 @@ class Project {
 		};
 	}
 
+	static function toRelative(from:String, to:String) {
+		from = haxe.io.Path.normalize(from);
+		to = haxe.io.Path.normalize(to);
+		var a = from.split("/");
+		var b = to.split("/");
+		while (a[0] == b[0]) {
+			a.shift();
+			b.shift();
+			if (a.length == 0 || b.length == 0) break;
+		}
+		var base = "";
+		for (i in 0...a.length - 1) base += "../";
+		base += b.join("/");
+		return haxe.io.Path.normalize(base);
+	}
+
+	static function baseDir(path:String) {
+		path = haxe.io.Path.normalize(path);
+		var base = path.substr(0, path.lastIndexOf("/") + 1);
+		if (kha.System.systemId == "Windows") {
+			// base = StringTools.replace(base, "/", "\\");
+			base = base.substr(0, 2) + "\\" + base.substr(3);
+		}
+		return base;
+	}
+
 	public static function exportProject() {
 		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
 		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
 
-		for (m in UITrait.inst.materials) mnodes.push(UINodes.inst.canvasMap.get(m));
+		for (m in UITrait.inst.materials) {
+			var c = Reflect.copy(UINodes.inst.canvasMap.get(m));
+			for (n in c.nodes) {
+				if (n.type == "TEX_IMAGE") {
+					n.buttons[0].data = toRelative(UITrait.inst.projectPath, n.buttons[0].data);
+				}
+			}
+			mnodes.push(c);
+		}
 		for (b in UITrait.inst.brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
 
 		var md:Array<TMeshData> = [];
 		for (p in UITrait.inst.paintObjects) md.push(p.data.raw);
 
 		var asset_files:Array<String> = [];
-		for (a in UITrait.inst.assets) asset_files.push(a.file);
+		for (a in UITrait.inst.assets) {
+			var rel = toRelative(UITrait.inst.projectPath, a.file);
+			asset_files.push(rel);
+		}
 
 		var ld:Array<TLayerData> = [];
 		for (l in UITrait.inst.layers) {
@@ -166,7 +203,27 @@ class Project {
 			UITrait.inst.project = iron.system.ArmPack.decode(b.toBytes());
 			var project = UITrait.inst.project;
 
-			for (file in project.assets) Importer.importTexture(file);
+			var base = baseDir(path);
+
+			for (file in project.assets) {
+				var abs = base + file;
+				var exists = 1;
+				if (kha.System.systemId == "Windows") {
+					exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+				}
+				//else { test -e file && echo 1 || echo 0 }
+				if (exists == 0) {
+					trace("Could not locate texture " + abs);
+					var b = haxe.io.Bytes.alloc(4);
+					b.set(0, 255);
+					b.set(1, 0);
+					b.set(2, 255);
+					b.set(3, 255);
+					var pink = kha.Image.fromBytes(b, 1, 1);
+					iron.data.Data.cachedImages.set(abs, pink);
+				}
+				Importer.importTexture(abs);
+			}
 
 			var m0:iron.data.MaterialData = null;
 			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
@@ -175,6 +232,12 @@ class Project {
 
 			UITrait.inst.materials = [];
 			for (n in project.material_nodes) {
+				for (node in n.nodes) {
+					if (node.type == "TEX_IMAGE") {
+						var abs = base + node.buttons[0].data;
+						node.buttons[0].data = abs;
+					}
+				}
 				var mat = new MaterialSlot(m0);
 				UINodes.inst.canvasMap.set(mat, n);
 				UITrait.inst.materials.push(mat);
