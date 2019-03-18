@@ -95,7 +95,6 @@ class RenderUtil {
 		var savedProbe = probe.raw.strength;
 		probe.raw.strength = 2;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
-
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize

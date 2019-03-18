@@ -188,6 +188,10 @@ class RenderPathDeferred {
 			return;
 		}
 
+		// Match projection matrix jitter
+		@:privateAccess iron.Scene.active.camera.frame = taaFrame;
+		@:privateAccess iron.Scene.active.camera.projectionJitter();
+
 		var tid = UITrait.inst.selectedLayer.id;
 
 		if (UITrait.inst.pushUndo) {

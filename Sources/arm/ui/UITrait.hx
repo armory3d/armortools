@@ -1200,12 +1200,21 @@ class UITrait extends iron.Trait {
 		if (ui.window(workspaceHandle, panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			ui.tab(worktab, "Scene");
+			ui.tab(worktab, "Material");
 			if (worktab.changed) {
 				ddirty = 2;
 				toolbarHandle.redraws = 2;
 				headerHandle.redraws = 2;
 				if (worktab.position == 1) {
 					selectTool(ToolGizmo);
+				}
+				else if (worktab.position == 2) {
+					UINodes.inst.parseMeshPreviewMaterial();
+					mainObject().skip_context = "paint";
+				}
+				else if (worktab.position == 0) {
+					UINodes.inst.parseMeshMaterial();
+					mainObject().skip_context = null;
 				}
 			}
 		}
@@ -2366,4 +2375,10 @@ class UITrait extends iron.Trait {
 
 @:enum abstract SceneTool(Int) from Int to Int {
 	var ToolGizmo = 0;
+}
+
+@:enum abstract WorkMode(Int) from Int to Int {
+	var ModePaint = 0;
+	var ModeScene = 1;
+	var ModeMaterial = 2;
 }

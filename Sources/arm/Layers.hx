@@ -137,7 +137,7 @@ class Layers {
 		UITrait.inst.pipe.inputLayout = [vs];
 		UITrait.inst.pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
 		UITrait.inst.pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
-		UITrait.inst.pipe.colorWriteMaskAlpha = false;
+		UITrait.inst.pipe.colorWriteMaskAlpha = false; // TODO: use texpaint.a to merge all layer channels instead
 		UITrait.inst.pipe.compile();
 	}
 

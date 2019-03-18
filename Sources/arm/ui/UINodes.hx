@@ -464,7 +464,7 @@ class UINodes extends iron.Trait {
 	}
 
 	public function parseMeshMaterial() {
-		if (UITrait.inst.worktab.position == 1) return;
+		if (UITrait.inst.worktab.position == 1 || UITrait.inst.worktab.position == 2) return;
 		var m = UITrait.inst.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 			var sc:ShaderContext = null;
@@ -483,6 +483,10 @@ class UINodes extends iron.Trait {
 
 	public function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
+
+		if (UITrait.inst.worktab.position == 2) { // Material
+			UITrait.inst.rdirty = 1;
+		}
 
 		var m = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
