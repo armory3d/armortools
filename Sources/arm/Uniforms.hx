@@ -17,6 +17,7 @@ class Uniforms {
 			var r = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
 			var pen = iron.system.Input.getPen();
 			if (UITrait.penPressure && pen.down()) r *= pen.pressure;
+			r *= 900 / App.h(); // Projection ratio
 			return r;
 		}
 		else if (link == '_brushOpacity') {
