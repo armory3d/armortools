@@ -481,6 +481,23 @@ class UINodes extends iron.Trait {
 		// });
 	}
 
+	public function parseParticleMaterial() {
+		var m = UITrait.inst.particleMaterial;
+		// iron.data.Data.getMaterial("Scene", "MaterialParticle", function(m:iron.data.MaterialData) {
+			var sc:ShaderContext = null;
+			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
+			if (sc != null) {
+				m.shader.raw.contexts.remove(sc.raw);
+				m.shader.contexts.remove(sc);
+			}
+			var con = MaterialBuilder.make_particle(new CyclesShaderData({name: "MaterialParticle", canvas: null}));
+			if (sc != null) sc.delete();
+			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
+			m.shader.raw.contexts.push(sc.raw);
+			m.shader.contexts.push(sc);
+		// });
+	}
+
 	public function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 

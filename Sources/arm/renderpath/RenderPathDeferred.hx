@@ -262,6 +262,12 @@ class RenderPathDeferred {
 					}
 				}
 			}
+			else if (UITrait.inst.selectedTool == ToolParticle) {
+				path.setTarget("texparticle");
+				path.clearTarget(0xff000000);
+				path.bindTarget("_paintdb", "paintdb");
+				path.drawMeshes("particle");
+			}
 			else {
 				if (UITrait.inst.selectedTool == ToolBake) {
 					if (initVoxels) {

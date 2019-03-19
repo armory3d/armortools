@@ -105,9 +105,14 @@ class MaterialBuilder {
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.add_out('vec4 ndc');
 		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
+
+		if (UITrait.inst.selectedTool == ToolParticle) {
+			frag.add_uniform('sampler2D texparticle', '_texparticle');
+			
+		}
+
 		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
-
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
 		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or !paintVisible
 
@@ -604,6 +609,65 @@ class MaterialBuilder {
 		return con_depth;
 	}
 
+	public static function make_particle(data:CyclesShaderData):CyclesShaderContext {
+		var context_id = 'particle';
+		var con_part:CyclesShaderContext = data.add_context({
+			name: context_id,
+			depth_write: false,
+			compare_mode: 'less',
+			cull_mode: 'clockwise',
+			vertex_elements: [{name: "pos", data: 'short4norm'}]
+		});
+
+		var vert = con_part.make_vert();
+		var frag = con_part.make_frag();
+		frag.ins = vert.outs;
+
+		vert.write_attrib('vec4 spos = vec4(pos.xyz, 1.0);');
+
+		vert.add_uniform('mat4 pd', '_particleData');
+			
+		var str_tex_hash = "float fhash(float n) { return fract(sin(n) * 43758.5453); }\n";
+		vert.add_function(str_tex_hash);
+		vert.add_out('float p_age');
+		vert.write('p_age = pd[3][3] - gl_InstanceID * pd[0][1];');
+		vert.write('p_age -= p_age * fhash(gl_InstanceID) * pd[2][3];');
+		
+		vert.write('if (pd[0][0] > 0 && p_age < 0) p_age += (int(-p_age / pd[0][0]) + 1) * pd[0][0];');
+
+		vert.add_out('float p_lifetime');
+		vert.write('p_lifetime = pd[0][2];');
+		vert.write('if (p_age < 0 || p_age > p_lifetime) {');
+		// vert.write('    SPIRV_Cross_Output stage_output;');
+		// vert.write('    stage_output.svpos /= 0.0;');
+		// vert.write('    return stage_output;');
+		vert.write('    spos /= 0.0;');
+		vert.write('}');
+
+		vert.add_out('vec3 p_velocity');
+		vert.write('p_velocity = vec3(pd[1][0], pd[1][1], pd[1][2]);');
+		vert.write('p_velocity.x += fhash(gl_InstanceID)                * pd[1][3] - pd[1][3] / 2;');
+		vert.write('p_velocity.y += fhash(gl_InstanceID +     pd[0][3]) * pd[1][3] - pd[1][3] / 2;');
+		vert.write('p_velocity.z += fhash(gl_InstanceID + 2 * pd[0][3]) * pd[1][3] - pd[1][3] / 2;');
+		vert.write('p_velocity.x += (pd[2][0] * p_age) / 5;');
+		vert.write('p_velocity.y += (pd[2][1] * p_age) / 5;');
+		vert.write('p_velocity.z += (pd[2][2] * p_age) / 5;');
+
+		vert.add_out('vec3 p_location');
+		vert.write('p_location = p_velocity * p_age;');
+		vert.write('spos.xyz += p_location;');
+
+		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		vert.write('gl_Position = mul(spos, WVP);');
+
+		// Cycles.finalize(con_part);
+		con_part.data.shader_from_source = true;
+		con_part.data.vertex_shader = vert.get();
+		con_part.data.fragment_shader = frag.get();
+
+		return con_part;
+	}
+
 	public static function make_mesh(data:CyclesShaderData):CyclesShaderContext {
 		var context_id = 'mesh';
 		var con_mesh:CyclesShaderContext = data.add_context({
@@ -626,7 +690,7 @@ class MaterialBuilder {
 		// Height
 		// TODO: can cause TAA issues
 		if (UITrait.inst.paintHeight) {
-			#if (!kha_direct3d11) // TODO: unable to bind texpaint_opt to both vs and fs in d3d11
+			#if (!kha_direct3d11) // TODO: unable to bind texpaint_pack to both vs and fs in d3d11
 			vert.write('float height = textureLod(texpaint_pack, tex, 0.0).a;');
 			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
 			vert.n = true;

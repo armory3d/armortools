@@ -123,7 +123,8 @@ class UITrait extends iron.Trait {
 	public var textToolHandle = new Zui.Handle({position: 0});
 	public var decalMaskImage:kha.Image = null;
 	public var decalMaskHandle = new Zui.Handle({position: 0});
-	
+	public var particleMaterial:MaterialData;
+
 	var _onBrush:Array<Int->Void> = [];
 
 	public var paintVec = new iron.math.Vec4();
@@ -979,6 +980,12 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
+	function f32(ar:Array<kha.FastFloat>):kha.arrays.Float32Array {
+		var res = new kha.arrays.Float32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
+	}
+
 	function selectTool(i:Int) {
 		selectedTool = i;
 		autoFillHandle.selected = false; // Auto-disable
@@ -1004,6 +1011,61 @@ class UITrait extends iron.Trait {
 			RenderUtil.makeDecalPreview();
 			
 			if (current != null) current.begin(false);
+		}
+
+		if (selectedTool == ToolParticle) {
+			var raw:TParticleData = {
+				name: "Particles",
+				type: 0,
+				loop: true,
+				render_emitter: false,
+				count: 100,
+				frame_start: 0,
+				frame_end: 100,
+				lifetime: 5,
+				lifetime_random: 0,
+				emit_from: 1,
+				object_align_factor: f32([0, 0, -1]),
+				factor_random: 0,
+				physics_type: 0,
+				particle_size: 1,
+				size_random: 0,
+				mass: 1,
+				instance_object: "Particle",
+				weight_gravity: 1
+			};
+			// iron.Scene.active.gravity = f32([0, 0, -9.8]);
+			var pd = new iron.data.ParticleData(raw, function(pd:iron.data.ParticleData) {});
+			var particle_refs:Array<TParticleReference> = [
+				{
+					name: "Particles",
+					particle: "Particles",
+					seed: 0
+				}
+			];
+			// obj.setupParticleSystem("Scene", particle_refs[0]);
+			// obj.is_particle = true;
+			// obj.particle_refs = particle_refs;
+
+			{
+				var t = new iron.RenderPath.RenderTargetRaw();
+				t.name = "texparticle";
+				t.width = 0;
+				t.height = 0;
+				t.format = 'R8';
+				t.scale = armory.renderpath.Inc.getSuperSampling();
+				iron.RenderPath.active.createRenderTarget(t);
+			}
+
+			iron.data.Data.cachedMaterials.remove("SceneMaterial2");
+			iron.data.Data.cachedShaders.remove("Material2_data");
+			iron.data.Data.cachedSceneRaws.remove("Material2_data");
+			// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
+			iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+				md.name = "MaterialParticle";
+				particleMaterial = md;
+				UINodes.inst.parseParticleMaterial();
+			});
 		}
 	}
 
