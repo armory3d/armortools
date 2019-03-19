@@ -78,6 +78,8 @@ class App extends iron.Trait {
 		kha.System.notifyOnDropFiles(function(filePath:String) {
 			dropPath = StringTools.rtrim(filePath);
 			dropPath = StringTools.replace(dropPath, "%20", " "); // Linux can pass %20 on drop
+			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
+
 			var mouse = iron.system.Input.getMouse();
 			dropX = mouse.x;
 			dropY = mouse.y;
