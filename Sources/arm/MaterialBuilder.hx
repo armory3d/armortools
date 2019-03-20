@@ -106,11 +106,6 @@ class MaterialBuilder {
 		vert.add_out('vec4 ndc');
 		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
 
-		if (UITrait.inst.selectedTool == ToolParticle) {
-			frag.add_uniform('sampler2D texparticle', '_texparticle');
-			
-		}
-
 		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
@@ -142,15 +137,16 @@ class MaterialBuilder {
 			UITrait.inst.selectedTool == ToolEraser ||
 			UITrait.inst.selectedTool == ToolClone  ||
 			UITrait.inst.selectedTool == ToolBlur   ||
+			UITrait.inst.selectedTool == ToolParticle ||
 			decal) {
 			
 			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - bsp.y), 0.0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
 			#else
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, bsp.y), 0.0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, sp.y), 0.0).r) { discard; }');
 			#end
 
-			if (decal) {
+			if (decal || UITrait.inst.selectedTool == ToolParticle) {
 				frag.write('float dist = 0.0;');
 			}
 			else {
@@ -373,11 +369,20 @@ class MaterialBuilder {
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 		}
 
-		frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-
-		if (UITrait.inst.mirrorX && UITrait.inst.selectedTool == ToolBrush) {
-			frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-			frag.write('str = clamp(str, 0.0, 1.0);');
+		if (UITrait.inst.selectedTool == ToolParticle) { // particle mask
+			frag.add_uniform('sampler2D texparticle', '_texparticle');
+			#if (kha_opengl || kha_webgl)
+			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0).r;');
+			#else
+			frag.write('float str = textureLod(texparticle, sp.xy, 0).r;');
+			#end
+		}
+		else { // brush cursor mask
+			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
+			if (UITrait.inst.mirrorX && UITrait.inst.selectedTool == ToolBrush) {
+				frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
+				frag.write('str = clamp(str, 0.0, 1.0);');
+			}
 		}
 
 		// Manual blending to preserve memory
@@ -610,11 +615,11 @@ class MaterialBuilder {
 	}
 
 	public static function make_particle(data:CyclesShaderData):CyclesShaderContext {
-		var context_id = 'particle';
+		var context_id = 'mesh';
 		var con_part:CyclesShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
-			compare_mode: 'less',
+			compare_mode: 'always',
 			cull_mode: 'clockwise',
 			vertex_elements: [{name: "pos", data: 'short4norm'}]
 		});
@@ -624,6 +629,11 @@ class MaterialBuilder {
 		frag.ins = vert.outs;
 
 		vert.write_attrib('vec4 spos = vec4(pos.xyz, 1.0);');
+
+		vert.add_uniform('float brushRadius', '_brushRadius');
+		vert.write_attrib('vec3 emitFrom = vec3(fhash(gl_InstanceID), fhash(gl_InstanceID * 2), fhash(gl_InstanceID * 3));');
+		vert.write_attrib('emitFrom = emitFrom * brushRadius - brushRadius / 2;');
+		vert.write_attrib('spos.xyz += emitFrom * 256;');
 
 		vert.add_uniform('mat4 pd', '_particleData');
 			
@@ -659,6 +669,24 @@ class MaterialBuilder {
 
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write('gl_Position = mul(spos, WVP);');
+
+		vert.add_uniform('vec4 inp', '_inputBrush');
+		vert.write('vec2 binp = vec2(inp.x, 1.0 - inp.y);');
+		vert.write('binp = binp * 2.0 - 1.0;');
+		vert.write('binp *= gl_Position.w;');
+		vert.write('gl_Position.xy += binp;');
+
+		vert.add_out('float p_fade');
+		vert.write('p_fade = sin(min((p_age / 8) * 3.141592, 3.141592));');
+		
+		frag.add_out('float fragColor');
+		frag.write('fragColor = p_fade;');
+
+		// vert.add_out('vec4 wvpposition');
+		// vert.write('wvpposition = gl_Position;');
+		// frag.write('vec2 texCoord = wvpposition.xy / wvpposition.w;');
+		// frag.add_uniform('sampler2D paintdb');
+		// frag.write('fragColor *= 1.0 - clamp(distance(textureLod(paintdb, texCoord, 0).r, wvpposition.z), 0.0, 1.0);');
 
 		// Cycles.finalize(con_part);
 		con_part.data.shader_from_source = true;

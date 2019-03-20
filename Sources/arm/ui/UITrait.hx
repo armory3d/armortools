@@ -123,7 +123,7 @@ class UITrait extends iron.Trait {
 	public var textToolHandle = new Zui.Handle({position: 0});
 	public var decalMaskImage:kha.Image = null;
 	public var decalMaskHandle = new Zui.Handle({position: 0});
-	public var particleMaterial:MaterialData;
+	public var particleMaterial:MaterialData = null;
 
 	var _onBrush:Array<Int->Void> = [];
 
@@ -534,7 +534,8 @@ class UITrait extends iron.Trait {
 						selectedTool == ToolDecal  ||
 						selectedTool == ToolText   ||
 						selectedTool == ToolClone  ||
-						selectedTool == ToolBlur) {
+						selectedTool == ToolBlur   ||
+						selectedTool == ToolParticle) {
 						if (kb.started("f")) {
 							brushCanLock = true;
 							mouse.lock();
@@ -685,6 +686,14 @@ class UITrait extends iron.Trait {
 							cloneDeltaX = (cloneStartX - mouse.x) / iron.App.w();
 							cloneDeltaY = (cloneStartY - mouse.y) / iron.App.h();
 							cloneStartX = -1;
+						}
+						else if (selectedTool == ToolParticle) {
+							// Reset particles
+							var emitter:iron.object.MeshObject = cast iron.Scene.active.getChild("ParticleEmitter");
+							var psys = emitter.particleSystems[0];
+							@:privateAccess psys.time = 0;
+							// @:privateAccess psys.time = @:privateAccess psys.seed * @:privateAccess psys.animtime;
+							// @:privateAccess psys.seed++;
 						}
 					}
 					brushTime += iron.system.Time.delta;
@@ -980,12 +989,6 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
-	function f32(ar:Array<kha.FastFloat>):kha.arrays.Float32Array {
-		var res = new kha.arrays.Float32Array(ar.length);
-		for (i in 0...ar.length) res[i] = ar[i];
-		return res;
-	}
-
 	function selectTool(i:Int) {
 		selectedTool = i;
 		autoFillHandle.selected = false; // Auto-disable
@@ -1014,58 +1017,8 @@ class UITrait extends iron.Trait {
 		}
 
 		if (selectedTool == ToolParticle) {
-			var raw:TParticleData = {
-				name: "Particles",
-				type: 0,
-				loop: true,
-				render_emitter: false,
-				count: 100,
-				frame_start: 0,
-				frame_end: 100,
-				lifetime: 5,
-				lifetime_random: 0,
-				emit_from: 1,
-				object_align_factor: f32([0, 0, -1]),
-				factor_random: 0,
-				physics_type: 0,
-				particle_size: 1,
-				size_random: 0,
-				mass: 1,
-				instance_object: "Particle",
-				weight_gravity: 1
-			};
-			// iron.Scene.active.gravity = f32([0, 0, -9.8]);
-			var pd = new iron.data.ParticleData(raw, function(pd:iron.data.ParticleData) {});
-			var particle_refs:Array<TParticleReference> = [
-				{
-					name: "Particles",
-					particle: "Particles",
-					seed: 0
-				}
-			];
-			// obj.setupParticleSystem("Scene", particle_refs[0]);
-			// obj.is_particle = true;
-			// obj.particle_refs = particle_refs;
-
-			{
-				var t = new iron.RenderPath.RenderTargetRaw();
-				t.name = "texparticle";
-				t.width = 0;
-				t.height = 0;
-				t.format = 'R8';
-				t.scale = armory.renderpath.Inc.getSuperSampling();
-				iron.RenderPath.active.createRenderTarget(t);
-			}
-
-			iron.data.Data.cachedMaterials.remove("SceneMaterial2");
-			iron.data.Data.cachedShaders.remove("Material2_data");
-			iron.data.Data.cachedSceneRaws.remove("Material2_data");
-			// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
-			iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
-				md.name = "MaterialParticle";
-				particleMaterial = md;
-				UINodes.inst.parseParticleMaterial();
-			});
+			initParticle();
+			UINodes.inst.parseParticleMaterial();
 		}
 	}
 
@@ -2418,6 +2371,88 @@ class UITrait extends iron.Trait {
 		var fontName = Importer.fontList[textToolHandle.position];
 		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
 		return Importer.fontMap.get(fontName);
+	}
+
+	function f32(ar:Array<kha.FastFloat>):kha.arrays.Float32Array {
+		var res = new kha.arrays.Float32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
+	}
+
+	function initParticle() {
+		if (particleMaterial != null) return;
+
+		var raw:TParticleData = {
+			name: "Particles",
+			type: 0,
+			loop: false,
+			render_emitter: false,
+			count: 1000,
+			frame_start: 0,
+			frame_end: 1000,
+			lifetime: 400,
+			lifetime_random: 0.5,
+			emit_from: 1,
+			object_align_factor: f32([0, 0, -40]),
+			factor_random: 2.0,
+			physics_type: 0,
+			particle_size: 1.0,
+			size_random: 0,
+			mass: 1,
+			instance_object: "Particle",
+			weight_gravity: 1
+		};
+		// iron.Scene.active.raw.gravity = f32([0, 0, -9.8]);
+		iron.Scene.active.raw.particle_datas = [raw];
+		var particle_refs:Array<TParticleReference> = [
+			{
+				name: "Particles",
+				particle: "Particles",
+				seed: 0
+			}
+		];
+
+		{
+			var t = new iron.RenderPath.RenderTargetRaw();
+			t.name = "texparticle";
+			t.width = 0;
+			t.height = 0;
+			t.format = 'R8';
+			t.scale = armory.renderpath.Inc.getSuperSampling();
+			iron.RenderPath.active.createRenderTarget(t);
+		}
+
+		for (mat in iron.Scene.active.raw.material_datas) {
+			if (mat.name == 'Material2') {
+				var m = Reflect.copy(mat);
+				m.name = 'MaterialParticle';
+				iron.Scene.active.raw.material_datas.push(m);
+				break;
+			}
+		}
+
+		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md:iron.data.MaterialData) {
+			particleMaterial = md;
+
+			for (obj in iron.Scene.active.raw.objects) {
+				if (obj.name == '.Sphere') {
+					var particle = Reflect.copy(obj);
+					particle.name = 'Particle';
+					particle.is_particle = true;
+					particle.material_refs = ['MaterialParticle'];
+					iron.Scene.active.raw.objects.push(particle);
+					for (i in 0...16) particle.transform.values[i] *= 0.01;
+					break;
+				}
+			}
+
+			iron.Scene.active.spawnObject(".Sphere", null, function(o:Object) {
+				var mo:MeshObject = cast o;
+				mo.name = "ParticleEmitter";
+				mo.raw.particle_refs = particle_refs;
+				mo.setupParticleSystem("Scene", particle_refs[0]);
+			});
+		});
 	}
 }
 

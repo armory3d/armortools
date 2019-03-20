@@ -45,6 +45,10 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.lastPaintX = UITrait.inst.paintVec.x;
 			UITrait.inst.lastPaintY = UITrait.inst.paintVec.y;
 
+			if (UITrait.inst.selectedTool == ToolParticle) {
+				UITrait.inst.painted = 0; // Always paint particles
+			}
+
 			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 			var paintFrames = decal ? 1 : 8;
 

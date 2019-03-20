@@ -172,10 +172,10 @@ class RenderPathDeferred {
 
 		// Only enable vxao in scene mode
 		var restoreGI = false;
-		if (armory.data.Config.raw.rp_gi && UITrait.inst.worktab.position == 0) { // paint
-			armory.data.Config.raw.rp_gi = false;
-			restoreGI = true;
-		}
+		// if (armory.data.Config.raw.rp_gi && UITrait.inst.worktab.position == 0) { // paint
+		// 	armory.data.Config.raw.rp_gi = false;
+		// 	restoreGI = true;
+		// }
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 
@@ -216,6 +216,23 @@ class RenderPathDeferred {
 		}
 
 		if (UITrait.inst.paintDirty()) {
+			if (UITrait.inst.selectedTool == ToolParticle) {
+				path.setTarget("texparticle");
+				path.clearTarget(0x00000000);
+				path.bindTarget("_paintdb", "paintdb");
+				
+				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild("ParticleEmitter");
+				mo.visible = true;
+				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
+				mo.visible = false;
+
+				mo = cast iron.Scene.active.getChild("Particle");
+				mo.visible = true;
+				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
+				mo.visible = false;
+				@:privateAccess path.end(path.currentG);
+			}
+			
 			if (UITrait.inst.selectedTool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
@@ -261,12 +278,6 @@ class RenderPathDeferred {
 						}
 					}
 				}
-			}
-			else if (UITrait.inst.selectedTool == ToolParticle) {
-				path.setTarget("texparticle");
-				path.clearTarget(0xff000000);
-				path.bindTarget("_paintdb", "paintdb");
-				path.drawMeshes("particle");
 			}
 			else {
 				if (UITrait.inst.selectedTool == ToolBake) {

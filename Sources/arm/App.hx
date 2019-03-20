@@ -425,7 +425,7 @@ class App extends iron.Trait {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [5, 2, 8, 2];
+		var menuItems = [5, 2, 8, 4];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 		
 		g.color = ui.t.SEPARATOR_COL;
@@ -493,7 +493,7 @@ class App extends iron.Trait {
 			// ui.button("Wireframe", Left);
 		}
 		else if (menuCategory == 3) {
-			if (ui.button("Manual...", Left)) {
+			if (ui.button("Manual", Left)) {
 				if (kha.System.systemId == "Windows") {
 					Krom.sysCommand('explorer "https://armorpaint.org/manual"');
 				}
@@ -502,6 +502,17 @@ class App extends iron.Trait {
 				}
 				else {
 					Krom.sysCommand('open "https://armorpaint.org/manual"');
+				}
+			}
+			if (ui.button("Report Bug", Left)) {
+				if (kha.System.systemId == "Windows") {
+					Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
+				}
+				else if (kha.System.systemId == "Linux") {
+					Krom.sysCommand('xdg-explorer "https://github.com/armory3d/armorpaint/issues"');
+				}
+				else {
+					Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
 				}
 			}
 			if (ui.button("Check for Updates...", Left)) {
