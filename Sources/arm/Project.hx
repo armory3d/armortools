@@ -156,6 +156,7 @@ class Project {
 			if (current != null) current.end();
 
 			UITrait.inst.autoFillHandle.selected = false;
+			UITrait.inst.pickerMaskHandle.position = 0;
 			UITrait.inst.paintObject.setData(md);
 			UITrait.inst.paintObject.transform.scale.set(1, 1, 1);
 			UITrait.inst.paintObject.transform.buildMatrix();
@@ -186,6 +187,8 @@ class Project {
 			UITrait.inst.assetNames = [];
 			UITrait.inst.assetId = 0;
 			ViewportUtil.resetViewport();
+			UITrait.inst.ddirty = 4;
+			UITrait.inst.hwnd.redraws = 2;
 
 			if (current != null) current.begin(false);
 		});

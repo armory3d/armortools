@@ -221,12 +221,12 @@ class RenderPathDeferred {
 				path.clearTarget(0x00000000);
 				path.bindTarget("_paintdb", "paintdb");
 				
-				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild("ParticleEmitter");
+				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;
 
-				mo = cast iron.Scene.active.getChild("Particle");
+				mo = cast iron.Scene.active.getChild(".Particle");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;

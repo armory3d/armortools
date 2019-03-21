@@ -695,7 +695,7 @@ class UITrait extends iron.Trait {
 						}
 						else if (selectedTool == ToolParticle) {
 							// Reset particles
-							var emitter:iron.object.MeshObject = cast iron.Scene.active.getChild("ParticleEmitter");
+							var emitter:iron.object.MeshObject = cast iron.Scene.active.getChild(".ParticleEmitter");
 							var psys = emitter.particleSystems[0];
 							@:privateAccess psys.time = 0;
 							// @:privateAccess psys.time = @:privateAccess psys.seed * @:privateAccess psys.animtime;
@@ -2325,7 +2325,7 @@ class UITrait extends iron.Trait {
 					if (hsupersample.changed) Config.applyConfig();
 					ui.row([1/2, 1/2]);
 					ui.check(hvxao, "Voxel AO");
-					if (ui.isHovered) ui.tooltip("Scene mode only");
+					if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
 					if (hvxao.changed) Config.applyConfig();
 					ui.check(hssgi, "SSAO");
 					if (hssgi.changed) Config.applyConfig();
@@ -2349,7 +2349,7 @@ class UITrait extends iron.Trait {
 				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
 					ui.text("Select Material - Shift+1-9");
-					ui.text("Next Object - Ctrl+Tab");
+					ui.text("Cycle Objects - Ctrl+Tab");
 					ui.text("Brush Radius - Hold F+Drag");
 					ui.text("Brush Ruler - Hold Shift+Paint");
 				}
@@ -2414,7 +2414,7 @@ class UITrait extends iron.Trait {
 			particle_size: 1.0,
 			size_random: 0,
 			mass: 1,
-			instance_object: "Particle",
+			instance_object: ".Particle",
 			weight_gravity: 1
 		};
 		// iron.Scene.active.raw.gravity = f32([0, 0, -9.8]);
@@ -2452,7 +2452,7 @@ class UITrait extends iron.Trait {
 			for (obj in iron.Scene.active.raw.objects) {
 				if (obj.name == '.Sphere') {
 					var particle = Reflect.copy(obj);
-					particle.name = 'Particle';
+					particle.name = '.Particle';
 					particle.is_particle = true;
 					particle.material_refs = ['MaterialParticle'];
 					iron.Scene.active.raw.objects.push(particle);
@@ -2463,7 +2463,7 @@ class UITrait extends iron.Trait {
 
 			iron.Scene.active.spawnObject(".Sphere", null, function(o:Object) {
 				var mo:MeshObject = cast o;
-				mo.name = "ParticleEmitter";
+				mo.name = ".ParticleEmitter";
 				mo.raw.particle_refs = particle_refs;
 				mo.setupParticleSystem("Scene", particle_refs[0]);
 			});
