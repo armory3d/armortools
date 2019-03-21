@@ -433,11 +433,30 @@ class UITrait extends iron.Trait {
 		isScrolling = ui.isScrolling;
 		updateUI();
 
+		for (p in Plugin.plugins) if (p.update != null) p.update();
+
 		var kb = iron.system.Input.getKeyboard();
 		var shift = kb.down("shift");
 		var ctrl = kb.down("control");
 		var alt = kb.down("alt");
 		alt = false; // TODO: gets stuck after alt+tab
+
+		if (!arm.App.uimodal.isTyping) {
+			if (kb.started("escape")) {
+				arm.App.showFiles = false;
+				arm.App.showBox = false;
+			}
+			if (arm.App.showFiles) {
+				if (kb.started("enter")) {
+					arm.App.showFiles = false;
+					arm.App.filesDone(arm.App.path);
+					UITrait.inst.ddirty = 2;
+				}
+			}
+		}
+
+		if (!arm.App.uienabled) return;
+
 		if (kb.started("tab")) {
 			if (ctrl) { // Cycle objects
 				var i = (paintObjects.indexOf(paintObject) + 1) % paintObjects.length;
@@ -460,20 +479,6 @@ class UITrait extends iron.Trait {
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
-
-		if (!arm.App.uimodal.isTyping) {
-			if (kb.started("escape")) {
-				arm.App.showFiles = false;
-				arm.App.showBox = false;
-			}
-			if (arm.App.showFiles) {
-				if (kb.started("enter")) {
-					arm.App.showFiles = false;
-					arm.App.filesDone(arm.App.path);
-					UITrait.inst.ddirty = 2;
-				}
-			}
-		}
 
 		if (kb.started("f11")) {
 			show = !show;
@@ -585,8 +590,6 @@ class UITrait extends iron.Trait {
 				brushCanUnlock = true;
 			}
 		}
-
-		for (p in Plugin.plugins) if (p.update != null) p.update();
 	}
 
 	function selectMaterial(i:Int) {
@@ -2037,7 +2040,8 @@ class UITrait extends iron.Trait {
 					ui.row([1/2, 1/2]);
 					var upHandle = Id.handle();
 					var lastUp = upHandle.position;
-					var axisUp = ui.combo(upHandle, ["Z", "Y"], "Up Axis", true);
+					// TODO: Turn into axis rotation instead
+					var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
 					if (upHandle.changed && axisUp != lastUp) {
 						MeshUtil.switchUpAxis(axisUp);
 						ddirty = 2;

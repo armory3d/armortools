@@ -76,42 +76,44 @@ class MeshUtil {
 			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
 			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
 			var verticesVox = g.vertexBufferMap.get("posnor").lockInt16();
-			if (axisUp == 1) { // Y
+			if (axisUp == 2 || axisUp == 3) { // Y / -Y
+				var sign = axisUp == 2 ? 1 : -1;
 				for (i in 0...Std.int(vertices.length / 8)) {
 					// Swap Y/Z
-					var f = vertices[i * 8 + 1];
-					vertices[i * 8 + 1] = vertices[i * 8 + 2];
+					var f = vertices[i * 8 + 1] * sign;
+					vertices[i * 8 + 1] = vertices[i * 8 + 2] * sign;
 					vertices[i * 8 + 2] = -f;
 
-					f = vertices[i * 8 + 5];
-					vertices[i * 8 + 5] = vertices[i * 8 + 3];
+					f = vertices[i * 8 + 5] * sign;
+					vertices[i * 8 + 5] = vertices[i * 8 + 3] * sign;
 					vertices[i * 8 + 3] = -f;
 
-					f = verticesDepth[i * 4 + 1];
-					verticesDepth[i * 4 + 1] = verticesDepth[i * 4 + 2];
+					f = verticesDepth[i * 4 + 1] * sign;
+					verticesDepth[i * 4 + 1] = verticesDepth[i * 4 + 2] * sign;
 					verticesDepth[i * 4 + 2] = -f;
 
-					f = verticesVox[i * 6 + 1];
-					verticesVox[i * 6 + 1] = verticesVox[i * 6 + 2];
+					f = verticesVox[i * 6 + 1] * sign;
+					verticesVox[i * 6 + 1] = verticesVox[i * 6 + 2] * sign;
 					verticesVox[i * 6 + 2] = -f;
 				}
 			}
-			else { // Z
+			else if (axisUp == 0 || axisUp == 1) { // Z / -Z
+				var sign = axisUp == 0 ? 1 : -1;
 				for (i in 0...Std.int(vertices.length / 8)) {
-					var f = vertices[i * 8 + 1];
-					vertices[i * 8 + 1] = -vertices[i * 8 + 2];
+					var f = vertices[i * 8 + 1] * sign;
+					vertices[i * 8 + 1] = -vertices[i * 8 + 2] * sign;
 					vertices[i * 8 + 2] = f;
 
-					f = vertices[i * 8 + 5];
-					vertices[i * 8 + 5] = -vertices[i * 8 + 3];
+					f = vertices[i * 8 + 5] * sign;
+					vertices[i * 8 + 5] = -vertices[i * 8 + 3] * sign;
 					vertices[i * 8 + 3] = f;
 
-					f = verticesDepth[i * 4 + 1];
-					verticesDepth[i * 4 + 1] = -verticesDepth[i * 4 + 2];
+					f = verticesDepth[i * 4 + 1] * sign;
+					verticesDepth[i * 4 + 1] = -verticesDepth[i * 4 + 2] * sign;
 					verticesDepth[i * 4 + 2] = f;
 
-					f = verticesVox[i * 6 + 1];
-					verticesVox[i * 6 + 1] = -verticesVox[i * 6 + 2];
+					f = verticesVox[i * 6 + 1] * sign;
+					verticesVox[i * 6 + 1] = -verticesVox[i * 6 + 2] * sign;
 					verticesVox[i * 6 + 2] = f;
 				}
 			}

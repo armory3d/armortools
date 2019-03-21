@@ -307,8 +307,8 @@ class App extends iron.Trait {
 	@:access(zui.Zui)
 	static function renderFiles(g:kha.graphics2.Graphics) {
 
-		// modalW = Std.int(625 * uimodal.SCALE);
-		// modalH = Std.int(545 * uimodal.SCALE);
+		modalW = Std.int(625 * uimodal.SCALE);
+		modalH = Std.int(545 * uimodal.SCALE);
 
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
