@@ -1301,7 +1301,6 @@ class UITrait extends iron.Trait {
 					brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
 					
 					if (selectedTool == ToolBrush  ||
-						selectedTool == ToolEraser ||
 						selectedTool == ToolFill   ||
 						selectedTool == ToolDecal  ||
 						selectedTool == ToolText) {
@@ -1326,7 +1325,7 @@ class UITrait extends iron.Trait {
 
 					ui.combo(Id.handle(), ["Add"], "Blending");
 
-					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
+					if (selectedTool == ToolBrush || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
 						var paintHandle = Id.handle();
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
 						if (paintHandle.changed) {
