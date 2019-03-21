@@ -20,9 +20,10 @@ class Importer {
 		else if (Format.checkTextureFormat(path)) {
 			importTexture(path);
 			// Place image node
-			var x = UINodes.inst.wx;
-			var y = UINodes.inst.wx + UINodes.inst.ww;
-			if (UINodes.inst.show && dropX > x && dropX < y) {
+			var x0 = UINodes.inst.wx;
+			var x1 = UINodes.inst.wx + UINodes.inst.ww;
+			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
+
 				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
 				UINodes.inst.nodes.nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;

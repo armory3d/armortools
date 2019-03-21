@@ -76,13 +76,10 @@ class App extends iron.Trait {
 		zui.Ext.dataPath = iron.data.Data.dataPath;
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
-			dropPath = StringTools.rtrim(filePath);
+			dropPath = filePath;
 			dropPath = StringTools.replace(dropPath, "%20", " "); // Linux can pass %20 on drop
 			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
-
-			var mouse = iron.system.Input.getMouse();
-			dropX = mouse.x;
-			dropY = mouse.y;
+			dropPath = StringTools.rtrim(dropPath);
 		});
 
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
@@ -258,8 +255,13 @@ class App extends iron.Trait {
 		}
 
 		if (dropPath != "") {
-			Importer.importFile(dropPath, dropX, dropY);
-			dropPath = "";
+			var wait = kha.System.systemId == "Linux" && !mouse.moved; // Mouse coords not updated on Linux during drag
+			if (!wait) {
+				dropX = mouse.x + App.x();
+				dropY = mouse.y + App.y();
+				Importer.importFile(dropPath, dropX, dropY);
+				dropPath = "";
+			}
 		}
 
 		if (showFiles || showBox) updateModal();
