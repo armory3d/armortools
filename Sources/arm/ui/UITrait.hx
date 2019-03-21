@@ -450,7 +450,6 @@ class UITrait extends iron.Trait {
 				@:privateAccess UIView2D.inst.ui.endInput();
 				@:privateAccess UINodes.inst.ui.endInput();
 
-				UIView2D.inst.show = false;
 				if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
 					UINodes.inst.show = !UINodes.inst.show;
 					arm.App.resize();
@@ -567,6 +566,12 @@ class UITrait extends iron.Trait {
 						ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI) :
 						ViewportUtil.setView(0, 0, 1, 0, 0, 0);
 				}
+				else if (kb.started("5")) {
+					cameraType = cameraType == 0 ? 1 : 0;
+					camHandle.position = cameraType;
+					updateCameraType();
+					statusHandle.redraws = 2;
+				}
 			}
 		}
 
@@ -595,6 +600,7 @@ class UITrait extends iron.Trait {
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
 		hwnd.redraws = 2;
+		headerHandle.redraws = 2;
 	}
 
 	function selectMaterial2(i:Int) {
@@ -963,14 +969,12 @@ class UITrait extends iron.Trait {
 	}
 
 	function showMaterialNodes() {
-		UIView2D.inst.show = false;
 		if (UINodes.inst.show && UINodes.inst.canvasType == 0) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.canvasType = 0; }
 		arm.App.resize();
 	}
 
 	function showBrushNodes() {
-		UIView2D.inst.show = false;
 		if (UINodes.inst.show && UINodes.inst.canvasType == 1) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.canvasType = 1; }
 		arm.App.resize();
@@ -983,8 +987,9 @@ class UITrait extends iron.Trait {
 	// 	arm.App.resize();
 	// }
 
+	// function showParticleNodes() {}
+
 	function show2DView() {
-		UINodes.inst.show = false;
 		UIView2D.inst.show = !UIView2D.inst.show;
 		arm.App.resize();
 	}
@@ -1041,6 +1046,7 @@ class UITrait extends iron.Trait {
 
 	public function selectPaintObject(o:iron.object.MeshObject) {
 		autoFillHandle.selected = false; // Auto-disable
+		headerHandle.redraws = 2;
 		for (p in paintObjects) p.skip_context = "paint";
 		paintObject = o;
 		if (mergedObject == null || maskHandle.position == 1) { // Single object or object mask set to none
@@ -1223,11 +1229,12 @@ class UITrait extends iron.Trait {
 				if (worktab.position == 1) {
 					selectTool(ToolGizmo);
 				}
-				else if (worktab.position == 2) {
+				
+				if (worktab.position == 2) {
 					UINodes.inst.parseMeshPreviewMaterial();
 					mainObject().skip_context = "paint";
 				}
-				else if (worktab.position == 0) {
+				else {
 					UINodes.inst.parseMeshMaterial();
 					mainObject().skip_context = null;
 				}
@@ -1287,6 +1294,7 @@ class UITrait extends iron.Trait {
 					if (autoFillHandle.changed) {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
+						pushUndo = true;
 					}
 				}
 				else {
@@ -1343,6 +1351,7 @@ class UITrait extends iron.Trait {
 						if (autoFillHandle.changed) {
 							UINodes.inst.updateCanvasMap();
 							UINodes.inst.parsePaintMaterial();
+							pushUndo = true;
 						}
 					}
 					else {
@@ -1391,22 +1400,9 @@ class UITrait extends iron.Trait {
 			var cam = scene.cameras[0];
 			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Rotate", "Orbit", "Fly"], "Controls");
 			cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
+			if (ui.isHovered) ui.tooltip("Camera Type (5)");
 			if (camHandle.changed) {
-				if (cameraType == 0) {
-					cam.data.raw.ortho = null;
-					cam.buildProjection();
-				}
-				else {
-					var f32 = new kha.arrays.Float32Array(4);
-					f32[0] = -2;
-					f32[1] =  2;
-					f32[2] = -2 * (iron.App.h() / iron.App.w());
-					f32[3] =  2 * (iron.App.h() / iron.App.w());
-					cam.data.raw.ortho = f32;
-					cam.buildProjection();
-				}
-				
-				ddirty = 2;
+				updateCameraType();
 			}
 
 			fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
@@ -1777,6 +1773,7 @@ class UITrait extends iron.Trait {
 					if (ui.button("New")) {
 						ui.g.end();
 						autoFillHandle.selected = false; // Auto-disable
+						headerHandle.redraws = 2;
 						selectedMaterial = new MaterialSlot();
 						materials.push(selectedMaterial);
 						UINodes.inst.updateCanvasMap();
@@ -1835,6 +1832,7 @@ class UITrait extends iron.Trait {
 						ui.row([1/2, 1/2]);
 						if (ui.button("New")) {
 							autoFillHandle.selected = false; // Auto-disable
+							headerHandle.redraws = 2;
 							selectedLayer = new LayerSlot();
 							layers.push(selectedLayer);
 							ui.g.end();
@@ -2365,6 +2363,24 @@ class UITrait extends iron.Trait {
 
 		ui.end();
 		g.begin(false);
+	}
+
+	function updateCameraType() {
+		var cam = iron.Scene.active.cameras[0];
+		if (cameraType == 0) {
+			cam.data.raw.ortho = null;
+			cam.buildProjection();
+		}
+		else {
+			var f32 = new kha.arrays.Float32Array(4);
+			f32[0] = -2;
+			f32[1] =  2;
+			f32[2] = -2 * (iron.App.h() / iron.App.w());
+			f32[3] =  2 * (iron.App.h() / iron.App.w());
+			cam.data.raw.ortho = f32;
+			cam.buildProjection();
+		}
+		ddirty = 2;
 	}
 
 	public function getTextToolFont():kha.Font {

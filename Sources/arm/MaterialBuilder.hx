@@ -241,7 +241,7 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp -= inp.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 
-				frag.write_attrib('uvsp *= 0.21 / brushRadius;');
+				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
 				if (UITrait.inst.mirrorX) {

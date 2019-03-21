@@ -296,7 +296,7 @@ class UINodes extends iron.Trait {
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		var wh = iron.App.h();
+		var wh = UIView2D.inst.show ? Std.int(iron.App.h() / 2) : iron.App.h();
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			
 			// Grid

@@ -10,6 +10,7 @@ class UIView2D extends iron.Trait {
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
+	public var wh:Int;
 	public var uvmap:kha.Image = null;
 	public var uvmapCached = false;
 	public var ui:Zui;
@@ -143,7 +144,12 @@ class UIView2D extends iron.Trait {
 		if (uvmapShow) cacheUVMap();
 		
 		ui.begin(g);
-		if (ui.window(hwnd, wx, wy, ww, iron.App.h())) {
+		wh = iron.App.h();
+		if (UINodes.inst.show) {
+			wh = Std.int(iron.App.h() / 2);
+			wy += Std.int(iron.App.h() / 2);
+		}
+		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -186,7 +192,9 @@ class UIView2D extends iron.Trait {
 		if (!arm.App.uienabled ||
 			!show ||
 			m.x + App.x() < wx ||
-			m.x + App.x() > wx + ww) return;
+			m.x + App.x() > wx + ww ||
+			m.y + App.y() < wy ||
+			m.y + App.y() > wy + wh) return;
 		
 		if (m.down("right")) {
 			panX += m.movementX;
