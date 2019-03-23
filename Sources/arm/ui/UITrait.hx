@@ -1301,7 +1301,9 @@ class UITrait extends iron.Trait {
 					}
 				}
 				else {
-					brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
+					if (selectedTool != ToolFill) {
+						brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
+					}
 					
 					if (selectedTool == ToolBrush  ||
 						selectedTool == ToolFill   ||
@@ -1319,7 +1321,7 @@ class UITrait extends iron.Trait {
 					
 					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
 					
-					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill) {
+					if (selectedTool == ToolBrush || selectedTool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 					}
 					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolClone || selectedTool == ToolBlur) {
@@ -1337,7 +1339,7 @@ class UITrait extends iron.Trait {
 					}
 
 					if (selectedTool == ToolFill) {
-						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill");
+						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill Mode");
 						if (fillTypeHandle.changed) {
 							if (fillTypeHandle.position == 1) {
 								ui.g.end();
@@ -2305,9 +2307,9 @@ class UITrait extends iron.Trait {
 						ui.g.begin(false);
 						armory.data.Config.save();
 					}
-					ui.row([1/2, 1/2]);
+					// ui.row([1/2, 1/2]);
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-					instantMat = ui.check(Id.handle({selected: instantMat}), "Material Preview");
+					// instantMat = ui.check(Id.handle({selected: instantMat}), "Material Preview");
 				}
 
 				#if arm_debug

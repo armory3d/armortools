@@ -61,7 +61,7 @@ class Project {
 		for (m in UITrait.inst.materials) {
 			var c = Reflect.copy(UINodes.inst.canvasMap.get(m));
 			for (n in c.nodes) {
-				if (n.type == "TEX_IMAGE") {
+				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
 					n.buttons[0].data = toRelative(UITrait.inst.projectPath, n.buttons[0].data);
 				}
 			}
@@ -236,9 +236,12 @@ class Project {
 			UITrait.inst.materials = [];
 			for (n in project.material_nodes) {
 				for (node in n.nodes) {
-					if (node.type == "TEX_IMAGE") {
+					if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
 						var abs = base + node.buttons[0].data;
 						node.buttons[0].data = abs;
+					}
+					for (inp in node.inputs) { // Round input socket values
+						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
 					}
 				}
 				var mat = new MaterialSlot(m0);
