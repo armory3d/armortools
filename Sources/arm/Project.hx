@@ -149,7 +149,10 @@ class Project {
 			p.remove();
 		}
 		var n = UITrait.inst.newObjectNames[UITrait.inst.newObject];
-		iron.data.Data.deleteMesh(UITrait.inst.paintObject.data.handle);
+		var handle = UITrait.inst.paintObject.data.handle;
+		if (handle != "mesh_SphereSphere" && handle != "mesh_PlanePlane") {
+			iron.data.Data.deleteMesh(handle);
+		}
 		iron.data.Data.getMesh("mesh_" + n, n, function(md:MeshData) {
 			
 			var current = @:privateAccess kha.graphics4.Graphics2.current;

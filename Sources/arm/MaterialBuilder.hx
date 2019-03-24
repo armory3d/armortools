@@ -512,10 +512,13 @@ class MaterialBuilder {
 		var frag = con_mesh.make_frag();
 
 		frag.ins = vert.outs;
+		
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		vert.write_attrib('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
+
 		vert.add_out('vec2 texCoord');
-		vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
-		vert.write('texCoord = tex;');
+		vert.add_uniform('float brushScale', '_brushScale');
+		vert.write_attrib('texCoord = tex * brushScale;');
 
 		if (UITrait.inst.paintHeight) {
 			frag.bposition = true;

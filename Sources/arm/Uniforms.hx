@@ -24,7 +24,7 @@ class Uniforms {
 			return UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
 		}
 		else if (link == '_brushScale') {
-			return (UITrait.inst.brushScale * UITrait.inst.brushNodesScale) * 2.0;
+			return UITrait.inst.brushScale * UITrait.inst.brushNodesScale;
 		}
 		else if (link == '_brushHardness') {
 			return UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;

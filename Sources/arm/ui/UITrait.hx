@@ -161,7 +161,7 @@ class UITrait extends iron.Trait {
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Zui.Handle({value: 0.5});
 	public var brushOpacity = 1.0;
-	public var brushScale = 0.5;
+	public var brushScale = 1.0;
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
 	public var brushBias = 1.0;
@@ -479,6 +479,7 @@ class UITrait extends iron.Trait {
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
+		else if (ctrl && kb.started("n")) App.projectNew();
 
 		if (kb.started("f11")) {
 			show = !show;
@@ -1311,8 +1312,18 @@ class UITrait extends iron.Trait {
 						selectedTool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
 						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
-						if (brushScaleHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
-						
+						if (brushScaleHandle.changed) {
+							if (selectedTool == ToolDecal || selectedTool == ToolText) {
+								ui.g.end();
+								RenderUtil.makeDecalMaskPreview();
+								RenderUtil.makeDecalPreview();
+								ui.g.begin(false);
+							}
+							if (autoFillHandle.selected) {
+								UINodes.inst.parsePaintMaterial();
+							}
+						}
+
 						var brushRotHandle = Id.handle({value: brushRot});
 						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
 						// if (brushRotHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
@@ -1330,7 +1341,7 @@ class UITrait extends iron.Trait {
 
 					ui.combo(Id.handle(), ["Add"], "Blending");
 
-					if (selectedTool == ToolBrush || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
+					if (selectedTool == ToolBrush || selectedTool == ToolFill) {
 						var paintHandle = Id.handle();
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
 						if (paintHandle.changed) {

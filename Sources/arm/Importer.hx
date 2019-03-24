@@ -679,7 +679,10 @@ class Importer {
 					iron.data.Data.deleteMesh(p.data.handle);
 					p.remove();
 				}
-				iron.data.Data.deleteMesh(UITrait.inst.paintObject.data.handle);
+				var handle = UITrait.inst.paintObject.data.handle;
+				if (handle != "mesh_SphereSphere" && handle != "mesh_PlanePlane") {
+					iron.data.Data.deleteMesh(handle);
+				}
 				UITrait.inst.autoFillHandle.selected = false;
 
 				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }

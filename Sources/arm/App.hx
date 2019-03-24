@@ -415,6 +415,19 @@ class App extends iron.Trait {
 		boxCommands = commands;
 	}
 
+	public static function projectNew() {
+		showCustomBox(function(ui:Zui) {
+			ui.text("New Project");
+			ui.row([1/2, 1/2]);
+			UITrait.inst.newObject = ui.combo(Id.handle(), UITrait.inst.newObjectNames, "Default Object");
+			if (ui.button("OK")) {
+				Project.projectNew();
+				ViewportUtil.scaleToBounds();
+				showBox = false;
+			}
+		});
+	}
+
 	@:access(zui.Zui)
 	static function renderMenu(g:kha.graphics2.Graphics) {
 		
@@ -449,18 +462,7 @@ class App extends iron.Trait {
 		ui.changed = false;
 
 		if (menuCategory == 0) {
-			if (ui.button("New Project", Left)) {
-				showCustomBox(function(ui:Zui) {
-					ui.text("New Project");
-					ui.row([1/2, 1/2]);
-					UITrait.inst.newObject = ui.combo(Id.handle(), UITrait.inst.newObjectNames, "Default Object");
-					if (ui.button("OK")) {
-						Project.projectNew();
-						ViewportUtil.scaleToBounds();
-						showBox = false;
-					}
-				});
-			}
+			if (ui.button("New Project...", Left, 'Ctrl+N')) projectNew();
 			if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
 			if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
 			if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
