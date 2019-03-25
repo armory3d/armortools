@@ -380,7 +380,7 @@ class Importer {
 		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
 
 		if (UITrait.inst.paintObjects.length > 1) {
-			UITrait.inst.objectsHandle.selected = true;
+			// UITrait.inst.layersHandle.selected = true;
 
 			// Sort by name
 			UITrait.inst.paintObjects.sort(function(a, b):Int {

@@ -19,6 +19,8 @@ class LayerSlot {
 
 	static var first = true;
 
+	public var objectMask = 0;
+
 	public function new(ext = "") {
 
 		if (first) {

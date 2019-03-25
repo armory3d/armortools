@@ -125,6 +125,8 @@ class UITrait extends iron.Trait {
 	public var decalMaskHandle = new Zui.Handle({position: 0});
 	public var particleMaterial:MaterialData = null;
 
+	var layerFilter = 0;
+
 	var _onBrush:Array<Int->Void> = [];
 
 	public var paintVec = new iron.math.Vec4();
@@ -187,9 +189,6 @@ class UITrait extends iron.Trait {
 	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var fillTypeHandle = new Zui.Handle();
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
-	public var objectsHandle = new Zui.Handle({selected: true});
-	public var maskHandle = new Zui.Handle({position: 0});
-	public var uvmapHandle = new Zui.Handle({position: 0});
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	public var newObject = 0;
@@ -402,7 +401,7 @@ class UITrait extends iron.Trait {
 		//
 
 		selectedObject = iron.Scene.active.getChild("Cube");
-		paintObject = cast (selectedObject, MeshObject);
+		paintObject = cast(selectedObject, MeshObject);
 		paintObjects = [paintObject];
 
 		iron.App.notifyOnRender(Layers.initLayers);
@@ -1053,7 +1052,11 @@ class UITrait extends iron.Trait {
 		headerHandle.redraws = 2;
 		for (p in paintObjects) p.skip_context = "paint";
 		paintObject = o;
-		if (mergedObject == null || maskHandle.position == 1) { // Single object or object mask set to none
+
+		var mask = selectedLayer.objectMask;
+		if (layerFilter > 0) mask = layerFilter;
+		
+		if (mergedObject == null || mask > 0) {
 			paintObject.skip_context = "";
 		}
 		UIView2D.inst.uvmapCached = false;
@@ -1455,9 +1458,7 @@ class UITrait extends iron.Trait {
 						if (o.name.charAt(0) == '.') return; // Hidden
 						var b = false;
 						if (selectedObject == o) {
-							ui.g.color = ui.t.HIGHLIGHT_COL;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
-							ui.g.color = 0xffffffff;
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 						}
 						if (o.children.length > 0) {
 							b = ui.panel(h.nest(i, {selected: true}), o.name, 0, true);
@@ -1690,13 +1691,172 @@ class UITrait extends iron.Trait {
 			if (ui.tab(htab, "Tools")) {
 
 				if (ui.panel(Id.handle({selected: true}), "Brushes", 1)) {
+					// var imgBrush = bundled.get("tool_draw.png");
+					// ui.imageScrollAlign = false;
+					// ui.image(imgBrush);
+					// ui.imageScrollAlign = false;
 					ui.row([1/2,1/2]);
 					if (ui.button("New")) {}
 					if (ui.button("Nodes")) showBrushNodes();
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Paint Maps", 1)) {
+				ui.separator();
+				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
+
+					var empty = bundled.get("empty.jpg");
+
+					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
+						ui.row([1/5,1/5,1/5,1/5,1/5]);
+
+						if (row > 0) ui._y += 6;
+
+						#if (kha_opengl || kha_webgl)
+						ui.imageInvertY = true; // Material preview
+						#end
+
+						for (j in 0...5) {
+							var i = j + row * 5;
+							var img = i >= materials.length ? empty : materials[i].image;
+							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
+
+							if (selectedMaterial == materials[i]) {
+								// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
+								var off = row % 2 == 1 ? 1 : 0;
+								var w = 51 - C.window_scale;
+								ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+								ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+								ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+								ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+							}
+
+							if (ui.image(img, tint) == State.Started && img != empty) {
+								if (selectedMaterial != materials[i]) selectMaterial(i);
+								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
+								selectTime = iron.system.Time.time();
+							}
+							if (img != empty && ui.isHovered) ui.tooltipImage(img);
+						}
+
+						ui._y += 6;
+
+						#if (kha_opengl || kha_webgl)
+						ui.imageInvertY = false; // Material preview
+						#end
+					}
+
+					ui.row([1/2,1/2]);
+					if (ui.button("New")) {
+						ui.g.end();
+						autoFillHandle.selected = false; // Auto-disable
+						headerHandle.redraws = 2;
+						selectedMaterial = new MaterialSlot();
+						materials.push(selectedMaterial);
+						UINodes.inst.updateCanvasMap();
+						UINodes.inst.parsePaintMaterial();
+						RenderUtil.makeMaterialPreview();
+						ui.g.begin(false);
+					}
+
+					if (ui.button("Nodes")) {
+						showMaterialNodes();
+					}
+					else if (ui.isHovered) ui.tooltip("Show Editor (TAB)");
+				}
+
+				ui.separator();
+				ui.separator();
+				if (ui.panel(Id.handle({selected: true}), "Layers", 1)) {
+					
+					var ar = ["All"];
+					for (p in paintObjects) ar.push(p.name);
+					var filterHandle = Id.handle();
+					layerFilter = ui.combo(filterHandle, ar, "Filter", true);
+					if (filterHandle.changed) {
+						for (p in paintObjects) {
+							p.visible = layerFilter == 0 || p.name == ar[layerFilter];
+							ddirty = 2;
+							setObjectMask();
+						}
+					}
+
+					function drawList(h:zui.Zui.Handle, l:LayerSlot, i:Int) {
+						if (layerFilter > 0 &&
+							l.objectMask > 0 &&
+							l.objectMask != layerFilter) return;
+
+						if (selectedLayer == l) {
+							// ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
+							ui.rect(1, 0, ui._windowW - 2, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL, 2);
+						}
+
+						ui.row([8/100, 42/100, 50/100]);
+						var h = Id.handle().nest(l.id, {selected: l.visible});
+						l.visible = ui.check(h, "");
+						if (h.changed) {
+							UINodes.inst.parseMeshMaterial();
+							ddirty = 2;
+						}
+
+						ui.text("Layer " + (i + 1));
+						if (ui.isReleased) {
+							selectedLayer = l;
+							UINodes.inst.parsePaintMaterial(); // Different blending for layer on top
+							ddirty = 2;
+						}
+
+						var ar = [""];
+						for (p in paintObjects) ar.push(p.name);
+						var h = Id.handle().nest(l.id);
+						l.objectMask = ui.combo(h, ar, "Mask");
+						if (h.changed) {
+							selectedLayer = l;
+							setObjectMask();
+						}
+					}
+
+					for (i in 0...layers.length) {
+						if (i >= layers.length) break; // Layer was deleted
+						var j = layers.length - 1 - i;
+						var l = layers[j];
+						drawList(Id.handle(), l, j);
+					}
+
+					ui.row([1/4,1/4,1/4,1/4]);
+					if (ui.button("New")) {
+						autoFillHandle.selected = false; // Auto-disable
+						headerHandle.redraws = 2;
+						selectedLayer = new LayerSlot();
+						layers.push(selectedLayer);
+						ui.g.end();
+						UINodes.inst.parseMeshMaterial();
+						UINodes.inst.parsePaintMaterial();
+						ui.g.begin(false);
+						ddirty = 2;
+						iron.App.notifyOnRender(Layers.clearLastLayer);
+					}
+
+					if (ui.button("Delete") && selectedLayer != layers[0]) {
+						Layers.deleteSelectedLayer();
+					}
+
+					if (ui.button("Merge") && selectedLayer != layers[0]) {
+						iron.App.notifyOnRender(Layers.applySelectedLayer);
+					}
+
+					if (ui.button("2D View")) show2DView();
+				}
+
+				ui.separator();
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Layer Mask", 1)) {
+
+					
+
+					ui.row([1/2, 1/2]);
+					var opac = ui.slider(Id.handle({value: 1.0}), "Opacity", 0.0, 1.0, true);
+					var blend = ui.combo(Id.handle(), ["Add"], "Blending");
+
 					ui.row([1/2,1/2]);
 					var baseHandle = Id.handle({selected: paintBase});
 					paintBase = ui.check(baseHandle, "Base Color");
@@ -1738,378 +1898,9 @@ class UITrait extends iron.Trait {
 						UINodes.inst.updateCanvasMap();
 						UINodes.inst.parsePaintMaterial();
 					}
-					// ui.check(heightHandle, "Emission");
-					// ui.check(heightHandle, "Subsurface");
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
-
-					var empty = bundled.get("empty.jpg");
-
-					for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
-						ui.row([1/5,1/5,1/5,1/5,1/5]);
-
-						if (row > 0) ui._y += 6;
-
-						#if (kha_opengl || kha_webgl)
-						ui.imageInvertY = true; // Material preview
-						#end
-
-						for (j in 0...5) {
-							var i = j + row * 5;
-							var img = i >= materials.length ? empty : materials[i].image;
-							var tint = img == empty ? ui.t.WINDOW_BG_COL : 0xffffffff;
-
-							if (selectedMaterial == materials[i]) {
-								// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
-								var off = row % 2 == 1 ? 1 : 0;
-								var w = 51 - C.window_scale;
-								ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-								ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-								ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-								ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
-							}
-
-							if (ui.image(img, tint) == State.Started && img != empty) {
-								if (selectedMaterial != materials[i]) selectMaterial(i);
-								if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
-								selectTime = iron.system.Time.time();
-							}
-							if (img != empty && ui.isHovered) ui.tooltipImage(img);
-						}
-
-						#if (kha_opengl || kha_webgl)
-						ui.imageInvertY = false; // Material preview
-						#end
-					}
-
 					ui.row([1/2,1/2]);
-					if (ui.button("New")) {
-						ui.g.end();
-						autoFillHandle.selected = false; // Auto-disable
-						headerHandle.redraws = 2;
-						selectedMaterial = new MaterialSlot();
-						materials.push(selectedMaterial);
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-						RenderUtil.makeMaterialPreview();
-						ui.g.begin(false);
-					}
-					// else if (ui.isHovered) ui.tooltip("New Material (Ctrl+N)");
-
-					if (ui.button("Nodes")) {
-						showMaterialNodes();
-					}
-					else if (ui.isHovered) ui.tooltip("Show Editor (TAB)");
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Layers", 1)) {
-
-					function drawList(h:zui.Zui.Handle, l:LayerSlot, i:Int) {
-						if (selectedLayer == l) {
-							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
-						}
-						if (i > 0) ui.row([1/10, 5/10, 2/10, 2/10]);
-						else ui.row([1/10, 9/10]);
-						var h = Id.handle().nest(l.id, {selected: l.visible});
-						l.visible = ui.check(h, "");
-						if (h.changed) {
-							UINodes.inst.parseMeshMaterial();
-							ddirty = 2;
-						}
-						ui.text("Layer " + (i + 1));
-						if (ui.isReleased) {
-							selectedLayer = l;
-							UINodes.inst.parsePaintMaterial(); // Different blending for layer on top
-							ddirty = 2;
-						}
-						if (i > 0) {
-							if (ui.button("Apply")) {
-								selectedLayer = layers[i];
-								iron.App.notifyOnRender(Layers.applySelectedLayer);
-							}
-							if (ui.button("Delete")) {
-								selectedLayer = layers[i];
-								Layers.deleteSelectedLayer();
-							}
-						}
-					}
-					for (i in 0...layers.length) {
-						if (i >= layers.length) break; // Layer was deleted
-						var j = layers.length - 1 - i;
-						var l = layers[j];
-						drawList(Id.handle(), l, j);
-					}
-
-					if (layers.length < 4) { // TODO: Samplers limit in Kore, use arrays
-						ui.row([1/2, 1/2]);
-						if (ui.button("New")) {
-							autoFillHandle.selected = false; // Auto-disable
-							headerHandle.redraws = 2;
-							selectedLayer = new LayerSlot();
-							layers.push(selectedLayer);
-							ui.g.end();
-							UINodes.inst.parseMeshMaterial();
-							UINodes.inst.parsePaintMaterial();
-							ui.g.begin(false);
-							ddirty = 2;
-							iron.App.notifyOnRender(Layers.clearLastLayer);
-						}
-					}
-					if (ui.button("2D View")) show2DView();
-				}
-
-				ui.separator();
-				if (ui.panel(objectsHandle, "Objects", 1)) {
-
-					var i = 0;
-					function drawList(h:zui.Zui.Handle, o:iron.object.MeshObject) {
-						// if (o.name.charAt(0) == '.') return; // Hidden
-						var b = false;
-						if (paintObject == o) {
-							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
-						}
-						ui.row([1/10, 9/10]);
-						var h = Id.handle().nest(i, {selected: o.visible});
-						o.visible = ui.check(h, "");
-						if (h.changed) ddirty = 2;
-						ui.text(o.name);
-						if (ui.isReleased) {
-							selectPaintObject(o);
-						}
-						i++;
-					}
-					for (c in paintObjects) {
-						drawList(Id.handle(), c);
-					}
-
-					var loc = paintObject.transform.loc;
-					var scale = paintObject.transform.scale;
-					var rot = paintObject.transform.rot.getEuler();
-					rot.mult(180 / 3.141592);
-					var f = 0.0;
-
-					if (paintObjects.length > 1) {
-						ui.row([1/2, 1/2]);
-						var maskType = ui.combo(maskHandle, ["None", "Object"], "Mask", true);
-						if (maskHandle.changed) {
-							if (maskType == 1) {
-								// if (mergedObject != null) mergedObject.remove();
-								if (mergedObject != null) mergedObject.visible = false;
-								selectPaintObject(paintObject);
-							}
-							else {
-								if (mergedObject == null) {
-									ui.g.end();
-									MeshUtil.mergeMesh();
-									ui.g.begin(false);
-								}
-								selectPaintObject(mainObject());
-								paintObject.skip_context = "paint";
-								// if (mergedObject.parent == null) paintObject.addChild(mergedObject);
-								mergedObject.visible = true;
-							}
-						}
-						// var uvMapType = ui.combo(uvmapHandle, ["Combined", "Object"], "UV Map", true);
-						var uvMapType = ui.combo(uvmapHandle, ["Combined"], "UV Map", true);
-						if (uvmapHandle.changed) {
-							
-						}
-					}
-
-					// ui.text("Transform");
-
-					// ui.row(row4);
-					// ui.text("Location");
-
-					// var h = Id.handle();
-					// h.text = Math.roundfp(loc.x) + "";
-					// f = Std.parseFloat(ui.textInput(h, "X"));
-					// var changed = false;
-					// if (h.changed) { loc.x = f; changed = true; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(loc.y) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Y"));
-					// if (h.changed) { loc.y = f; changed = true; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(loc.z) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Z"));
-					// if (h.changed) { loc.z = f; changed = true; }
-
-					// if (changed) {
-					// 	paintObject.transform.dirty = true;
-					// 	ddirty = 2;
-					// }
-
-					// ui.row(row4);
-					// ui.text("Rotation");
-					
-					// h = Id.handle();
-					// h.text = Math.roundfp(rot.x) + "";
-					// f = Std.parseFloat(ui.textInput(h, "X"));
-					// var changed = false;
-					// if (h.changed) { changed = true; rot.x = f; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(rot.y) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Y"));
-					// if (h.changed) { changed = true; rot.y = f; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(rot.z) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Z"));
-					// if (h.changed) { changed = true; rot.z = f; }
-
-					// if (changed) {
-					// 	rot.mult(3.141592 / 180);
-					// 	paintObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
-					// 	paintObject.transform.buildMatrix();
-					// 	ddirty = 2;
-					// }
-
-					// ui.row(row4);
-					// ui.text("Scale");
-					
-					// h = Id.handle();
-					// h.text = Math.roundfp(scale.x) + "";
-					// f = Std.parseFloat(ui.textInput(h, "X"));
-					// if (h.changed) { scale.x = f; ddirty = 2; paintObject.transform.dirty = true; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(scale.y) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Y"));
-					// if (h.changed) { scale.y = f; ddirty = 2; paintObject.transform.dirty = true; }
-
-					// h = Id.handle();
-					// h.text = Math.roundfp(scale.z) + "";
-					// f = Std.parseFloat(ui.textInput(h, "Z"));
-					// if (h.changed) { scale.z = f; ddirty = 2; paintObject.transform.dirty = true; }
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Viewport", 1)) {
-
-					ui.row([1/2,1/2]);
-					if (ui.button("Flip Normals")) {
-						MeshUtil.flipNormals();
-						ddirty = 2;
-					}
-					if (ui.button("Import Envmap")) {
-						arm.App.showFiles = true;
-						@:privateAccess zui.Ext.lastPath = ""; // Refresh
-						arm.App.whandle.redraws = 2;
-						arm.App.foldersOnly = false;
-						arm.App.showFilename = false;
-						arm.App.filesDone = function(path:String) {
-							if (!StringTools.endsWith(path, ".hdr")) {
-								UITrait.inst.showError("Error: .hdr file expected");
-								return;
-							}
-							Importer.importFile(path);
-						}
-					}
-
-					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
-						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
-					}
-
-					ui.row([1/2, 1/2]);
-					var modeHandle = Id.handle({position: 0});
-					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID"], "Mode");
-					if (modeHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-					var p = iron.Scene.active.world.probe;
-					// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
-					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
-					if (envHandle.changed) ddirty = 2;
-					
-					ui.row([1/2, 1/2]);
-					if (iron.Scene.active.lights.length > 0) {
-						var light = iron.Scene.active.lights[0];
-
-						var sxhandle = Id.handle();
-						sxhandle.value = light.data.raw.size;
-						light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
-						if (sxhandle.changed) ddirty = 2;
-						// var syhandle = Id.handle();
-						// syhandle.value = light.data.raw.size_y;
-						// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
-						// if (syhandle.changed) ddirty = 2;
-						
-						var lhandle = Id.handle();
-						lhandle.value = light.data.raw.strength / 1333;
-						lhandle.value = Std.int(lhandle.value * 100) / 100;
-						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
-						if (lhandle.changed) ddirty = 2;
-					}
-
-					ui.row([1/2, 1/2]);
-					var upHandle = Id.handle();
-					var lastUp = upHandle.position;
-					// TODO: Turn into axis rotation instead
-					var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
-					if (upHandle.changed && axisUp != lastUp) {
-						MeshUtil.switchUpAxis(axisUp);
-						ddirty = 2;
-					}
-					
-					var dispHandle = Id.handle({value: displaceStrength});
-					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-					if (dispHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-
-					ui.row([1/2, 1/2]);
-					drawWireframe = ui.check(wireframeHandle, "Wireframe");
-					if (wireframeHandle.changed) {
-						ui.g.end();
-						UIView2D.inst.cacheUVMap();
-						ui.g.begin(false);
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
-
-					ui.row([1/2, 1/2]);
-					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
-					if (showEnvmapHandle.changed) {
-						ddirty = 2;
-					}
-					var compassHandle = Id.handle({selected: showCompass});
-					showCompass = ui.check(compassHandle, "Compass");
-					if (compassHandle.changed) ddirty = 2;
-
-					if (showEnvmap) {
-						showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
-						if (showEnvmapBlurHandle.changed) {
-							var probe = iron.Scene.active.world.probe;
-							savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-							ddirty = 2;
-						}
-					}
-					else {
-						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
-							var hwheel = Id.handle({color: 0xff030303});
-							var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
-							if (hwheel.changed) {
-								var b = emptyEnvmap.lock();
-								b.set(0, worldColor.Rb);
-								b.set(1, worldColor.Gb);
-								b.set(2, worldColor.Bb);
-								emptyEnvmap.unlock();
-								ddirty = 2;
-							}
-						}
-					}
-					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
+					ui.check(heightHandle, "Emission");
+					ui.check(heightHandle, "Subsurface");
 				}
 
 				// ui.separator();
@@ -2374,11 +2165,158 @@ class UITrait extends iron.Trait {
 				// ui.separator();
 				// ui.button("Restore Defaults");
 				// ui.button("Confirm");
+
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Viewport", 1)) {
+
+					ui.row([1/2,1/2]);
+					if (ui.button("Flip Normals")) {
+						MeshUtil.flipNormals();
+						ddirty = 2;
+					}
+					if (ui.button("Import Envmap")) {
+						arm.App.showFiles = true;
+						@:privateAccess zui.Ext.lastPath = ""; // Refresh
+						arm.App.whandle.redraws = 2;
+						arm.App.foldersOnly = false;
+						arm.App.showFilename = false;
+						arm.App.filesDone = function(path:String) {
+							if (!StringTools.endsWith(path, ".hdr")) {
+								UITrait.inst.showError("Error: .hdr file expected");
+								return;
+							}
+							Importer.importFile(path);
+						}
+					}
+
+					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
+						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
+					}
+
+					ui.row([1/2, 1/2]);
+					var modeHandle = Id.handle({position: 0});
+					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID"], "Mode");
+					if (modeHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
+					var p = iron.Scene.active.world.probe;
+					// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
+					var envHandle = Id.handle({value: p.raw.strength});
+					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
+					if (envHandle.changed) ddirty = 2;
+					
+					ui.row([1/2, 1/2]);
+					if (iron.Scene.active.lights.length > 0) {
+						var light = iron.Scene.active.lights[0];
+
+						var sxhandle = Id.handle();
+						sxhandle.value = light.data.raw.size;
+						light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
+						if (sxhandle.changed) ddirty = 2;
+						// var syhandle = Id.handle();
+						// syhandle.value = light.data.raw.size_y;
+						// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
+						// if (syhandle.changed) ddirty = 2;
+						
+						var lhandle = Id.handle();
+						lhandle.value = light.data.raw.strength / 1333;
+						lhandle.value = Std.int(lhandle.value * 100) / 100;
+						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
+						if (lhandle.changed) ddirty = 2;
+					}
+
+					ui.row([1/2, 1/2]);
+					var upHandle = Id.handle();
+					var lastUp = upHandle.position;
+					// TODO: Turn into axis rotation instead
+					var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
+					if (upHandle.changed && axisUp != lastUp) {
+						MeshUtil.switchUpAxis(axisUp);
+						ddirty = 2;
+					}
+					
+					var dispHandle = Id.handle({value: displaceStrength});
+					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+					if (dispHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
+
+					ui.row([1/2, 1/2]);
+					drawWireframe = ui.check(wireframeHandle, "Wireframe");
+					if (wireframeHandle.changed) {
+						ui.g.end();
+						UIView2D.inst.cacheUVMap();
+						ui.g.begin(false);
+						UINodes.inst.parseMeshMaterial();
+						ddirty = 2;
+					}
+					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+
+					ui.row([1/2, 1/2]);
+					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
+					if (showEnvmapHandle.changed) {
+						ddirty = 2;
+					}
+					var compassHandle = Id.handle({selected: showCompass});
+					showCompass = ui.check(compassHandle, "Compass");
+					if (compassHandle.changed) ddirty = 2;
+
+					if (showEnvmap) {
+						showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
+						if (showEnvmapBlurHandle.changed) {
+							var probe = iron.Scene.active.world.probe;
+							savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+							ddirty = 2;
+						}
+					}
+					else {
+						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
+							var hwheel = Id.handle({color: 0xff030303});
+							var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
+							if (hwheel.changed) {
+								var b = emptyEnvmap.lock();
+								b.set(0, worldColor.Rb);
+								b.set(1, worldColor.Gb);
+								b.set(2, worldColor.Bb);
+								emptyEnvmap.unlock();
+								ddirty = 2;
+							}
+						}
+					}
+					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
+				}
 			}
 		}
 
 		ui.end();
 		g.begin(false);
+	}
+
+	function setObjectMask() {
+		var ar = ["None"];
+		for (p in paintObjects) ar.push(p.name);
+
+		var mask = selectedLayer.objectMask;
+		if (layerFilter > 0) mask = layerFilter;
+		if (mask > 0) {
+			if (mergedObject != null) mergedObject.visible = false;
+			var o = paintObjects[0];
+			for (p in paintObjects) if (p.name == ar[mask]) { o = p; break; }
+			selectPaintObject(o);
+		}
+		else {
+			if (mergedObject == null) {
+				ui.g.end();
+				MeshUtil.mergeMesh();
+				ui.g.begin(false);
+			}
+			selectPaintObject(mainObject());
+			paintObject.skip_context = "paint";
+			mergedObject.visible = true;
+		}
+		UINodes.inst.parseMeshMaterial();
 	}
 
 	function updateCameraType() {

@@ -819,12 +819,22 @@ class MaterialBuilder {
 				frag.write('vec4 col_nor0;');
 				frag.write('vec4 col_pack0;');
 				frag.write('vec3 n0;');
+				var numLayers = 1;
 				for (i in 1...UITrait.inst.layers.length) {
-					if (!UITrait.inst.layers[i].visible) continue;
-					var id = UITrait.inst.layers[i].id;
+					var l = UITrait.inst.layers[i];
+					if (!l.visible) continue;
+					if (numLayers > 4) break; // 16 samplers limit
+					numLayers++;
+					var id = l.id;
 					frag.add_uniform('sampler2D texpaint' + id);
 					frag.add_uniform('sampler2D texpaint_nor' + id);
 					frag.add_uniform('sampler2D texpaint_pack' + id);
+
+					if (l.objectMask > 0) {
+						var uid = UITrait.inst.paintObjects[l.objectMask - 1].uid;
+						frag.add_uniform('int objectId', '_uid');
+						frag.write('if ($uid == objectId) {');
+					}
 
 					frag.write('col_tex0 = textureLod(texpaint' + id + ', texCoord, 0.0);');
 					frag.write('col_nor0 = textureLod(texpaint_nor' + id + ', texCoord, 0.0);');
@@ -843,6 +853,10 @@ class MaterialBuilder {
 					frag.write('occlusion = occlusion * factorinv0 + col_pack0.r * factor0;');
 					frag.write('roughness = roughness * factorinv0 + col_pack0.g * factor0;');
 					frag.write('metallic = metallic * factorinv0 + col_pack0.b * factor0;');
+
+					if (l.objectMask > 0) {
+						frag.write('}');
+					}
 				}
 			}
 

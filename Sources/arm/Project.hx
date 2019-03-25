@@ -165,7 +165,7 @@ class Project {
 			UITrait.inst.paintObject.transform.buildMatrix();
 			UITrait.inst.paintObject.name = n;
 			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
-			UITrait.inst.maskHandle.position = 0;
+			// UITrait.inst.maskHandle.position = 0;
 			// UITrait.inst.materials = [new MaterialSlot()];
 			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 				UITrait.inst.materials = [new MaterialSlot(m)];
