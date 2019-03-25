@@ -1701,7 +1701,6 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
 
 					var empty = bundled.get("empty.jpg");
@@ -1765,7 +1764,6 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Layers", 1)) {
 					
 					var ar = ["All"];
@@ -1785,12 +1783,7 @@ class UITrait extends iron.Trait {
 							l.objectMask > 0 &&
 							l.objectMask != layerFilter) return;
 
-						if (selectedLayer == l) {
-							// ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
-							ui.rect(1, 0, ui._windowW - 2, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL, 2);
-						}
-
-						ui.row([8/100, 42/100, 50/100]);
+						ui.row([8/100, 92/100]);
 						var h = Id.handle().nest(l.id, {selected: l.visible});
 						l.visible = ui.check(h, "");
 						if (h.changed) {
@@ -1798,20 +1791,16 @@ class UITrait extends iron.Trait {
 							ddirty = 2;
 						}
 
+						if (selectedLayer == l) {
+							ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
+							// ui.rect(1, 0, ui._windowW - 2, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL, 2);
+						}
+
 						ui.text("Layer " + (i + 1));
 						if (ui.isReleased) {
 							selectedLayer = l;
 							UINodes.inst.parsePaintMaterial(); // Different blending for layer on top
 							ddirty = 2;
-						}
-
-						var ar = [""];
-						for (p in paintObjects) ar.push(p.name);
-						var h = Id.handle().nest(l.id);
-						l.objectMask = ui.combo(h, ar, "Mask");
-						if (h.changed) {
-							selectedLayer = l;
-							setObjectMask();
 						}
 					}
 
@@ -1848,10 +1837,17 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				ui.separator();
 				if (ui.panel(Id.handle({selected: false}), "Layer Mask", 1)) {
 
-					
+					var l = selectedLayer;
+					var ar = [""];
+					for (p in paintObjects) ar.push(p.name);
+					var h = Id.handle().nest(l.id);
+					l.objectMask = ui.combo(h, ar, "Object");
+					if (h.changed) {
+						selectedLayer = l;
+						setObjectMask();
+					}
 
 					ui.row([1/2, 1/2]);
 					var opac = ui.slider(Id.handle({value: 1.0}), "Opacity", 0.0, 1.0, true);
