@@ -29,6 +29,7 @@ class LayerSlot {
 	public var paintHeight = false;
 	public var paintEmis = false;
 	public var paintSubs = false;
+	public var opacity = 1.0;
 
 	public function new(ext = "") {
 

@@ -1443,6 +1443,11 @@ class UITrait extends iron.Trait {
 		var wx = C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
 		var wh = Std.int(kha.System.windowHeight() / 3);
 
+		if (hwnd.redraws > 0) {
+			hwnd1.redraws = hwnd.redraws;
+			hwnd2.redraws = hwnd.redraws;
+		}
+
 		gizmo.visible = false;
 		// grid.visible = false;
 		if (UITrait.inst.worktab.position == 1) { //
@@ -1761,12 +1766,16 @@ class UITrait extends iron.Trait {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						App.showContextMenu(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-							ui.separator();
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.text("Layer " + (i + 1));
 							if (ui.button("Delete") && l != layers[0]) {
+								hwnd.redraws = 2;
+								selectedLayer = l;
 								Layers.deleteSelectedLayer();
 							}
 							if (ui.button("Merge") && l != layers[0]) {
+								hwnd.redraws = 2;
+								selectedLayer = l;
 								iron.App.notifyOnRender(Layers.applySelectedLayer);
 							}
 						});
@@ -1776,7 +1785,12 @@ class UITrait extends iron.Trait {
 
 						if (i > 0) {
 							ui.row([1/2,1/2]);
-							var opac = ui.slider(Id.handle({value: 1.0}), "Opacity", 0.0, 1.0, false);
+							var opacHandle = Id.handle().nest(l.id, {value: l.opacity});
+							l.opacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, false);
+							if (opacHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+								ddirty = 2;
+							}
 							var blend = ui.combo(Id.handle(), ["Add"], "Blending");
 
 							var ar = ["Shared"];
@@ -1911,10 +1925,11 @@ class UITrait extends iron.Trait {
 							}
 							if (ui.isHovered && ui.inputReleasedR) {
 								App.showContextMenu(function(ui:Zui) {
-									ui.fill(0, 0, ui._w, ui.t.ELEMENT_H, ui.t.SEPARATOR_COL);
-									ui.separator();
+									ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+									ui.text(UINodes.inst.canvasMap.get(materials[i]).name);
 									if (ui.button("Delete") && materials.length > 1) {
 										materials.splice(i, 1);
+										hwnd.redraws = 2;
 									}
 								});
 							}
@@ -1984,16 +1999,19 @@ class UITrait extends iron.Trait {
 
 						if (ui.isHovered) ui.tooltipImage(img, 256);
 
-						// ui.row([1/8, 7/8]);
-						// var b = ui.button("X");
-						// asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-						// assetNames[i] = asset.name;
-						// if (b) {
-						// 	iron.data.Data.deleteImage(asset.file);
-						// 	Canvas.assetMap.remove(asset.id);
-						// 	assets.splice(i, 1);
-						// 	assetNames.splice(i, 1);
-						// }
+						if (ui.isHovered && ui.inputReleasedR) {
+							App.showContextMenu(function(ui:Zui) {
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+								ui.text(asset.name);
+								if (ui.button("Delete")) {
+									hwnd.redraws = 2;
+									iron.data.Data.deleteImage(asset.file);
+									Canvas.assetMap.remove(asset.id);
+									assets.splice(i, 1);
+									assetNames.splice(i, 1);
+								}
+							});
+						}
 
 						i--;
 					}

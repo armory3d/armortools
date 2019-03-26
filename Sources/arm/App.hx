@@ -423,6 +423,10 @@ class App extends iron.Trait {
 		menuCommands = commands;
 		menuX = Std.int(iron.App.x() + iron.system.Input.getMouse().x);
 		menuY = Std.int(iron.App.y() + iron.system.Input.getMouse().y);
+		var menuw = uimodal.ELEMENT_W() * 1.5;
+		if (menuX + menuw > kha.System.windowWidth()) {
+			menuX = Std.int(kha.System.windowWidth() - menuw);
+		}
 	}
 
 	public static function projectNew() {
@@ -588,9 +592,10 @@ class App extends iron.Trait {
 			// arm.App.uienabled = false;
 		}
 		else {
-			if (ui.changed || ui.inputReleased || ui.isEscapeDown) {
+			if (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown) {
 				showMenu = false;
 				showMenuFirst = true;
+				menuCommands = null;
 				// arm.App.uienabled = true;
 			}
 		}
