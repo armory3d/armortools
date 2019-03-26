@@ -42,6 +42,9 @@ class App extends iron.Trait {
 	public static var showMenu = false;
 	public static var menuCategory = 0;
 	static var showMenuFirst = true;
+	static var menuCommands:Zui->Void = null;
+	static var menuX = 0;
+	static var menuY = 0;
 
 	public static function getEnumTexts():Array<String> {
 		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
@@ -415,6 +418,13 @@ class App extends iron.Trait {
 		boxCommands = commands;
 	}
 
+	public static function showContextMenu(commands:Zui->Void = null) {
+		showMenu = true;
+		menuCommands = commands;
+		menuX = Std.int(iron.App.x() + iron.system.Input.getMouse().x);
+		menuY = Std.int(iron.App.y() + iron.system.Input.getMouse().y);
+	}
+
 	public static function projectNew() {
 		showCustomBox(function(ui:Zui) {
 			ui.text("New Project");
@@ -446,8 +456,15 @@ class App extends iron.Trait {
 		g.color = ui.t.SEPARATOR_COL;
 		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
 		var sepw = menuw / ui.SCALE;
-		g.fillRect(px, py, menuw, ph);
 
+		if (menuCommands != null) {
+			px = menuX;
+			py = menuY;
+		}
+		else {
+			g.fillRect(px, py, menuw, ph);
+		}
+		
 		g.end();
 
 		ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
@@ -461,100 +478,106 @@ class App extends iron.Trait {
 
 		ui.changed = false;
 
-		if (menuCategory == 0) {
-			if (ui.button("New Project...", Left, 'Ctrl+N')) projectNew();
-			if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
-			if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
-			if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
-			// ui.button("Import Asset...", Left);
-			// ui.button("Export Textures...", Left);
-			// ui.button("Export Mesh...", Left);
-			ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-			if (ui.button("Exit", Left)) { kha.System.stop(); }
+		if (menuCommands != null) {
+			menuCommands(ui);
 		}
-		else if (menuCategory == 1) {
-			if (ui.button("Undo", Left, "Ctrl+Z")) UITrait.inst.doUndo();
-			if (ui.button("Redo", Left, "Ctrl+Shift+Z")) UITrait.inst.doRedo();
-			// ui.button("Preferences...", Left);
-		}
-		else if (menuCategory == 2) {
-			if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
-			if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
-			if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
-			if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
-			if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
-			if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
-			if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
-			ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-			if (ui.button("Distract Free", Left, "F11")) {
-				UITrait.inst.show = !UITrait.inst.show;
-				arm.App.resize();
-				UITrait.inst.ui.isHovered = false;
-			}
+		else {
 
-			// ui.button("Show Envmap", Left);
-			// ui.button("Show Grid", Left);
-			// ui.button("Wireframe", Left);
-		}
-		else if (menuCategory == 3) {
-			if (ui.button("Manual", Left)) {
-				if (kha.System.systemId == "Windows") {
-					Krom.sysCommand('explorer "https://armorpaint.org/manual"');
-				}
-				else if (kha.System.systemId == "Linux") {
-					Krom.sysCommand('xdg-explorer "https://armorpaint.org/manual"');
-				}
-				else {
-					Krom.sysCommand('open "https://armorpaint.org/manual"');
-				}
+			if (menuCategory == 0) {
+				if (ui.button("New Project...", Left, 'Ctrl+N')) projectNew();
+				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
+				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
+				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
+				// ui.button("Import Asset...", Left);
+				// ui.button("Export Textures...", Left);
+				// ui.button("Export Mesh...", Left);
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("Exit", Left)) { kha.System.stop(); }
 			}
-			if (ui.button("Report Bug", Left)) {
-				if (kha.System.systemId == "Windows") {
-					Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
-				}
-				else if (kha.System.systemId == "Linux") {
-					Krom.sysCommand('xdg-explorer "https://github.com/armory3d/armorpaint/issues"');
-				}
-				else {
-					Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
-				}
+			else if (menuCategory == 1) {
+				if (ui.button("Undo", Left, "Ctrl+Z")) UITrait.inst.doUndo();
+				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) UITrait.inst.doRedo();
+				// ui.button("Preferences...", Left);
 			}
-			if (ui.button("Check for Updates...", Left)) {
-				// Retrieve latest version number
-				var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
-				var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-				#if kha_krom
-				if (kha.System.systemId == "Windows") {
-					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+			else if (menuCategory == 2) {
+				if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
+				if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
+				if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
+				if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
+				if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
+				if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
+				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("Distract Free", Left, "F11")) {
+					UITrait.inst.show = !UITrait.inst.show;
+					arm.App.resize();
+					UITrait.inst.ui.isHovered = false;
 				}
-				else {
-					Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
-				}
-				// Compare versions
-				iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
-					var update = haxe.Json.parse(blob.toString());
-					var updateVersion = Std.int(update.version);
-					if (updateVersion > 0) {
-						var date = Macro.buildDate().split(" ")[0];
-						var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
-						if (updateVersion > dateInt) {
-							arm.App.showMessageBox("Update is available!\nPlease visit armorpaint.org to download.");
-						}
-						else {
-							arm.App.showMessageBox("You are up to date!");
-						}
+
+				// ui.button("Show Envmap", Left);
+				// ui.button("Show Grid", Left);
+				// ui.button("Wireframe", Left);
+			}
+			else if (menuCategory == 3) {
+				if (ui.button("Manual", Left)) {
+					if (kha.System.systemId == "Windows") {
+						Krom.sysCommand('explorer "https://armorpaint.org/manual"');
 					}
-				});
-				#end
-			}
-			if (ui.button("About...", Left)) {
-				var sha = Macro.buildSha();
-				sha = sha.substr(1, sha.length - 2);
-				var date = Macro.buildDate().split(" ")[0];
-				var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
-				var msg = "ArmorPaint.org - v" + version + " (" + date + ") - git " + sha + "\n";
-				msg += kha.System.systemId + " - " + gapi;
-				arm.App.showMessageBox(msg);
+					else if (kha.System.systemId == "Linux") {
+						Krom.sysCommand('xdg-explorer "https://armorpaint.org/manual"');
+					}
+					else {
+						Krom.sysCommand('open "https://armorpaint.org/manual"');
+					}
+				}
+				if (ui.button("Report Bug", Left)) {
+					if (kha.System.systemId == "Windows") {
+						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
+					}
+					else if (kha.System.systemId == "Linux") {
+						Krom.sysCommand('xdg-explorer "https://github.com/armory3d/armorpaint/issues"');
+					}
+					else {
+						Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
+					}
+				}
+				if (ui.button("Check for Updates...", Left)) {
+					// Retrieve latest version number
+					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
+					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
+					#if kha_krom
+					if (kha.System.systemId == "Windows") {
+						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+					}
+					else {
+						Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
+					}
+					// Compare versions
+					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
+						var update = haxe.Json.parse(blob.toString());
+						var updateVersion = Std.int(update.version);
+						if (updateVersion > 0) {
+							var date = Macro.buildDate().split(" ")[0];
+							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
+							if (updateVersion > dateInt) {
+								arm.App.showMessageBox("Update is available!\nPlease visit armorpaint.org to download.");
+							}
+							else {
+								arm.App.showMessageBox("You are up to date!");
+							}
+						}
+					});
+					#end
+				}
+				if (ui.button("About...", Left)) {
+					var sha = Macro.buildSha();
+					sha = sha.substr(1, sha.length - 2);
+					var date = Macro.buildDate().split(" ")[0];
+					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
+					var msg = "ArmorPaint.org - v" + version + " (" + date + ") - git " + sha + "\n";
+					msg += kha.System.systemId + " - " + gapi;
+					arm.App.showMessageBox(msg);
+				}
 			}
 		}
 

@@ -20,6 +20,15 @@ class LayerSlot {
 	static var first = true;
 
 	public var objectMask = 0;
+	public var paintBase = true;
+	public var paintOpac = true;
+	public var paintOcc = true;
+	public var paintRough = true;
+	public var paintMet = true;
+	public var paintNor = true;
+	public var paintHeight = false;
+	public var paintEmis = false;
+	public var paintSubs = false;
 
 	public function new(ext = "") {
 

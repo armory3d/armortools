@@ -339,7 +339,7 @@ class MaterialBuilder {
 			}
 		}
 		else {
-			Cycles.parse_height = UITrait.inst.paintHeight;
+			Cycles.parse_height = UITrait.inst.selectedLayer.paintHeight;
 			Cycles.parse_height_as_channel = true;
 			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
 			Cycles.parse_height_as_channel = false;
@@ -412,7 +412,7 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
 			}
 			frag.write('fragColor[1] = vec4(nortan, $matid);');
-			if (!UITrait.inst.paintHeight) {
+			if (!UITrait.inst.selectedLayer.paintHeight) {
 				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, 0.0);');
 			}
 			else {
@@ -434,7 +434,7 @@ class MaterialBuilder {
 				frag.write('float invstr = 1.0 - str;');
 				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, 0.0);');
 				frag.write('fragColor[1] = vec4(nortan * str + sample_nor_undo.rgb * invstr, $matid);');
-				if (!UITrait.inst.paintHeight) {
+				if (!UITrait.inst.selectedLayer.paintHeight) {
 					frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, 0.0);');
 				}
 				else {
@@ -444,26 +444,26 @@ class MaterialBuilder {
 		}
 		frag.write('fragColor[3] = vec4(str, 0.0, 0.0, 1.0);');
 
-		if (!UITrait.inst.paintBase) {
+		if (!UITrait.inst.selectedLayer.paintBase) {
 			con_paint.data.color_writes_red[0] = false;
 			con_paint.data.color_writes_green[0] = false;
 			con_paint.data.color_writes_blue[0] = false;
 		}
-		if (!UITrait.inst.paintNor) {
+		if (!UITrait.inst.selectedLayer.paintNor) {
 			con_paint.data.color_writes_red[1] = false;
 			con_paint.data.color_writes_green[1] = false;
 			con_paint.data.color_writes_blue[1] = false;
 		}
-		if (!UITrait.inst.paintOcc) {
+		if (!UITrait.inst.selectedLayer.paintOcc) {
 			con_paint.data.color_writes_red[2] = false;
 		}
-		if (!UITrait.inst.paintRough) {
+		if (!UITrait.inst.selectedLayer.paintRough) {
 			con_paint.data.color_writes_green[2] = false;
 		}
-		if (!UITrait.inst.paintMet) {
+		if (!UITrait.inst.selectedLayer.paintMet) {
 			con_paint.data.color_writes_blue[2] = false;
 		}
-		if (!UITrait.inst.paintHeight) {
+		if (!UITrait.inst.selectedLayer.paintHeight) {
 			con_paint.data.color_writes_alpha[2] = false;
 		}
 
@@ -520,11 +520,11 @@ class MaterialBuilder {
 		vert.add_uniform('float brushScale', '_brushScale');
 		vert.write_attrib('texCoord = tex * brushScale;');
 
-		if (UITrait.inst.paintHeight) {
+		if (UITrait.inst.selectedLayer.paintHeight) {
 			frag.bposition = true;
 		}
 
-		Cycles.parse_height = UITrait.inst.paintHeight;
+		Cycles.parse_height = UITrait.inst.selectedLayer.paintHeight;
 		var sout = Cycles.parse(UINodes.inst.canvas, con_mesh, vert, frag, null, null, null, matcon);
 		Cycles.parse_height = false;
 		var base = sout.out_basecol;
@@ -720,7 +720,7 @@ class MaterialBuilder {
 
 		// Height
 		// TODO: can cause TAA issues
-		if (UITrait.inst.paintHeight) {
+		if (UITrait.inst.selectedLayer.paintHeight) {
 			#if (!kha_direct3d11) // TODO: unable to bind texpaint_pack to both vs and fs in d3d11
 			vert.write('float height = textureLod(texpaint_pack, tex, 0.0).a;');
 			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
@@ -732,7 +732,7 @@ class MaterialBuilder {
 
 		vert.write('gl_Position = mul(vec4(wposition.xyz, 1.0), VP);');
 		vert.write('texCoord = tex;');
-		if (UITrait.inst.paintHeight) {
+		if (UITrait.inst.selectedLayer.paintHeight) {
 			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
 			vert.write('prevwvpposition = mul(mul(vec4(wposition, 1.0), invW), prevWVP);');
 		}
@@ -784,7 +784,7 @@ class MaterialBuilder {
 				frag.write('n = normalize(mul(n, TBN));');
 
 				// Height
-				if (UITrait.inst.paintHeight) {
+				if (UITrait.inst.selectedLayer.paintHeight) {
 					frag.write('vec4 vech;');
 					frag.write('vech.x = textureOffset(texpaint_pack, texCoord, ivec2(-1, 0)).a;');
 					frag.write('vech.y = textureOffset(texpaint_pack, texCoord, ivec2(1, 0)).a;');
