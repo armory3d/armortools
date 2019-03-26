@@ -840,7 +840,7 @@ class MaterialBuilder {
 					frag.write('col_nor0 = textureLod(texpaint_nor' + id + ', texCoord, 0.0);');
 					frag.write('col_pack0 = textureLod(texpaint_pack' + id + ', texCoord, 0.0);');
 
-					frag.write('factor0 = col_tex0.a;');
+					frag.write('factor0 = col_tex0.a * ${l.opacity};');
 					frag.write('factorinv0 = 1.0 - factor0;');
 
 					frag.write('basecol = basecol * factorinv0 + pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2)) * factor0;');
