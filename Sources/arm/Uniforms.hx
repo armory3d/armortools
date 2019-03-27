@@ -124,6 +124,9 @@ class Uniforms {
 			var i = UITrait.inst.undoI - 1 < 0 ? UITrait.inst.C.undo_steps - 1 : UITrait.inst.undoI - 1;
 			return iron.RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
+		else if (link == "_texpaint_mask") {
+			return UITrait.inst.selectedLayer.texpaint_mask;
+		}
 		else if (link == "_texparticle") {
 			return iron.RenderPath.active.renderTargets.get("texparticle").image;
 		}

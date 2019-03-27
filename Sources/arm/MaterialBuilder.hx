@@ -922,6 +922,15 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
 				frag.write('fragColor[1] = vec4(matid_r, matid_g, matid_b, packFloat2(1.0, 1.0));'); // occ/spec
 			}
+			else if (UITrait.inst.viewportMode == 9) { // Mask
+				frag.write('fragColor[0] = vec4(n.xy, packFloat(0.0, 1.0), 0.0);');
+				frag.write('float sample_mask = 1.0;');
+				if (UITrait.inst.selectedLayer.texpaint_mask != null) {
+					frag.add_uniform('sampler2D texpaint_mask', '_texpaint_mask');
+					frag.write('sample_mask = textureLod(texpaint_mask, texCoord, 0.0).r;');
+				}
+				frag.write('fragColor[1] = vec4(sample_mask, sample_mask, sample_mask, packFloat2(1.0, 1.0));'); // occ/spec
+			}
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');

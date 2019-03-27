@@ -460,6 +460,7 @@ class UITrait extends iron.Trait {
 				selectedLayer = layers[i];
 				selectedLayerIsMask = false;
 				autoFillHandle.selected = false; // Auto-disable
+				UINodes.inst.parseMeshMaterial();
 				UINodes.inst.parsePaintMaterial();
 				ddirty = 2;
 				hwnd.redraws = 2;
@@ -640,9 +641,12 @@ class UITrait extends iron.Trait {
 				hwnd.redraws = 2;
 				selectPaintObject(paintObjects[opos]);
 				selectedLayer = layers[lpos];
+				selectedLayerIsMask = false; //
 				selectedLayer.swap(lay);
 				ddirty = 2;
 				layerPreviewDirty = true;
+				UINodes.inst.parseMeshMaterial();
+				UINodes.inst.parsePaintMaterial();
 			}
 			undos--;
 			redos++;
@@ -660,6 +664,8 @@ class UITrait extends iron.Trait {
 				selectedLayer = layers[lpos];
 				selectedLayer.swap(lay);
 				ddirty = 2;
+				UINodes.inst.parseMeshMaterial();
+				UINodes.inst.parsePaintMaterial();
 			}
 			undoI = (undoI + 1) % C.undo_steps;
 			undos++;
@@ -1718,6 +1724,24 @@ class UITrait extends iron.Trait {
 
 				ui.row([1/4,1/4,1/2]);
 				if (ui.button("New")) {
+
+					// App.showContextMenu(function(ui:Zui) {
+					// 	ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
+					// 	ui.text("Type", Right);
+					// 	if (ui.button("Paint Layer", Left)) {
+							
+					// 	}
+					// 	if (ui.button("Fill Layer", Left)) {
+							
+					// 	}
+					// 	if (ui.button("Black Mask", Left)) {
+							
+					// 	}
+					// 	if (ui.button("White Mask", Left)) {
+							
+					// 	}
+					// });
+
 					autoFillHandle.selected = false; // Auto-disable
 					headerHandle.redraws = 2;
 					selectedLayerIsMask = false;
@@ -1826,10 +1850,15 @@ class UITrait extends iron.Trait {
 									selectedLayer = l;
 									l.deleteMask();
 									selectedLayerIsMask = false;
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
+									ddirty = 2;
 								}
 								if (ui.button("Apply", Left)) {
 									hwnd.redraws = 2;
 									selectedLayer = l;
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
 								}
 							});
 						}
@@ -1851,6 +1880,7 @@ class UITrait extends iron.Trait {
 					if (selectLayer) {
 						selectedLayer = l;
 						autoFillHandle.selected = false; // Auto-disable
+						UINodes.inst.parseMeshMaterial();
 						UINodes.inst.parsePaintMaterial();
 						ddirty = 2;
 					}
@@ -1872,15 +1902,21 @@ class UITrait extends iron.Trait {
 									hwnd.redraws = 2;
 									selectedLayer = l;
 									Layers.deleteSelectedLayer();
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
 								}
 								if (ui.button("Merge Down", Left) && l != layers[0]) {
 									hwnd.redraws = 2;
 									selectedLayer = l;
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
 									iron.App.notifyOnRender(Layers.applySelectedLayer);
 								}
 								if (ui.button("Duplicate", Left) && l != layers[0]) {
 									hwnd.redraws = 2;
 									selectedLayer = l;
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
 									
 								}
 								if (ui.button("Create Mask", Left) && l != layers[0]) {
@@ -1889,6 +1925,9 @@ class UITrait extends iron.Trait {
 									selectedLayer.createMask();
 									selectedLayerIsMask = true;
 									layerPreviewDirty = true;
+									UINodes.inst.parseMeshMaterial();
+									UINodes.inst.parsePaintMaterial();
+									ddirty = 2;
 								}
 							}
 						});
@@ -1923,6 +1962,8 @@ class UITrait extends iron.Trait {
 						if (h.changed) {
 							selectedLayer = l;
 							setObjectMask();
+							UINodes.inst.parseMeshMaterial();
+							UINodes.inst.parsePaintMaterial();
 						}
 						@:privateAccess ui.endElement();
 					}
@@ -2230,6 +2271,126 @@ class UITrait extends iron.Trait {
 				}
 			}
 
+			if (ui.tab(htab2, "Viewport")) {
+				ui.row([1/2,1/2]);
+				if (ui.button("Flip Normals")) {
+					MeshUtil.flipNormals();
+					ddirty = 2;
+				}
+				if (ui.button("Import Envmap")) {
+					arm.App.showFiles = true;
+					@:privateAccess zui.Ext.lastPath = ""; // Refresh
+					arm.App.whandle.redraws = 2;
+					arm.App.foldersOnly = false;
+					arm.App.showFilename = false;
+					arm.App.filesDone = function(path:String) {
+						if (!StringTools.endsWith(path, ".hdr")) {
+							UITrait.inst.showError("Error: .hdr file expected");
+							return;
+						}
+						Importer.importFile(path);
+					}
+				}
+
+				if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
+					ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
+				}
+
+				ui.row([1/2, 1/2]);
+				var modeHandle = Id.handle({position: 0});
+				viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"], "Mode");
+				if (modeHandle.changed) {
+					UINodes.inst.parseMeshMaterial();
+					ddirty = 2;
+				}
+				var p = iron.Scene.active.world.probe;
+				// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
+				var envHandle = Id.handle({value: p.raw.strength});
+				p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
+				if (envHandle.changed) ddirty = 2;
+				
+				ui.row([1/2, 1/2]);
+				if (iron.Scene.active.lights.length > 0) {
+					var light = iron.Scene.active.lights[0];
+
+					var sxhandle = Id.handle();
+					sxhandle.value = light.data.raw.size;
+					light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
+					if (sxhandle.changed) ddirty = 2;
+					// var syhandle = Id.handle();
+					// syhandle.value = light.data.raw.size_y;
+					// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
+					// if (syhandle.changed) ddirty = 2;
+					
+					var lhandle = Id.handle();
+					lhandle.value = light.data.raw.strength / 1333;
+					lhandle.value = Std.int(lhandle.value * 100) / 100;
+					light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
+					if (lhandle.changed) ddirty = 2;
+				}
+
+				ui.row([1/2, 1/2]);
+				var upHandle = Id.handle();
+				var lastUp = upHandle.position;
+				// TODO: Turn into axis rotation instead
+				var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
+				if (upHandle.changed && axisUp != lastUp) {
+					MeshUtil.switchUpAxis(axisUp);
+					ddirty = 2;
+				}
+				
+				var dispHandle = Id.handle({value: displaceStrength});
+				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+				if (dispHandle.changed) {
+					UINodes.inst.parseMeshMaterial();
+					ddirty = 2;
+				}
+
+				ui.row([1/2, 1/2]);
+				drawWireframe = ui.check(wireframeHandle, "Wireframe");
+				if (wireframeHandle.changed) {
+					ui.g.end();
+					UIView2D.inst.cacheUVMap();
+					ui.g.begin(false);
+					UINodes.inst.parseMeshMaterial();
+					ddirty = 2;
+				}
+				showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+
+				ui.row([1/2, 1/2]);
+				showEnvmap = ui.check(showEnvmapHandle, "Envmap");
+				if (showEnvmapHandle.changed) {
+					ddirty = 2;
+				}
+				var compassHandle = Id.handle({selected: showCompass});
+				showCompass = ui.check(compassHandle, "Compass");
+				if (compassHandle.changed) ddirty = 2;
+
+				if (showEnvmap) {
+					showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
+					if (showEnvmapBlurHandle.changed) {
+						var probe = iron.Scene.active.world.probe;
+						savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+						ddirty = 2;
+					}
+				}
+				else {
+					if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
+						var hwheel = Id.handle({color: 0xff030303});
+						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
+						if (hwheel.changed) {
+							var b = emptyEnvmap.lock();
+							b.set(0, worldColor.Rb);
+							b.set(1, worldColor.Gb);
+							b.set(2, worldColor.Bb);
+							emptyEnvmap.unlock();
+							ddirty = 2;
+						}
+					}
+				}
+				iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
+			}
+
 			if (ui.tab(htab2, "Preferences")) {
 				
 				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
@@ -2340,128 +2501,6 @@ class UITrait extends iron.Trait {
 				// ui.separator();
 				// ui.button("Restore Defaults");
 				// ui.button("Confirm");
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Viewport", 1)) {
-
-					ui.row([1/2,1/2]);
-					if (ui.button("Flip Normals")) {
-						MeshUtil.flipNormals();
-						ddirty = 2;
-					}
-					if (ui.button("Import Envmap")) {
-						arm.App.showFiles = true;
-						@:privateAccess zui.Ext.lastPath = ""; // Refresh
-						arm.App.whandle.redraws = 2;
-						arm.App.foldersOnly = false;
-						arm.App.showFilename = false;
-						arm.App.filesDone = function(path:String) {
-							if (!StringTools.endsWith(path, ".hdr")) {
-								UITrait.inst.showError("Error: .hdr file expected");
-								return;
-							}
-							Importer.importFile(path);
-						}
-					}
-
-					if (iron.Scene.active.world.probe.radianceMipmaps.length > 0) {
-						ui.image(iron.Scene.active.world.probe.radianceMipmaps[0]);
-					}
-
-					ui.row([1/2, 1/2]);
-					var modeHandle = Id.handle({position: 0});
-					viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID"], "Mode");
-					if (modeHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-					var p = iron.Scene.active.world.probe;
-					// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
-					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
-					if (envHandle.changed) ddirty = 2;
-					
-					ui.row([1/2, 1/2]);
-					if (iron.Scene.active.lights.length > 0) {
-						var light = iron.Scene.active.lights[0];
-
-						var sxhandle = Id.handle();
-						sxhandle.value = light.data.raw.size;
-						light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
-						if (sxhandle.changed) ddirty = 2;
-						// var syhandle = Id.handle();
-						// syhandle.value = light.data.raw.size_y;
-						// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
-						// if (syhandle.changed) ddirty = 2;
-						
-						var lhandle = Id.handle();
-						lhandle.value = light.data.raw.strength / 1333;
-						lhandle.value = Std.int(lhandle.value * 100) / 100;
-						light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
-						if (lhandle.changed) ddirty = 2;
-					}
-
-					ui.row([1/2, 1/2]);
-					var upHandle = Id.handle();
-					var lastUp = upHandle.position;
-					// TODO: Turn into axis rotation instead
-					var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
-					if (upHandle.changed && axisUp != lastUp) {
-						MeshUtil.switchUpAxis(axisUp);
-						ddirty = 2;
-					}
-					
-					var dispHandle = Id.handle({value: displaceStrength});
-					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-					if (dispHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-
-					ui.row([1/2, 1/2]);
-					drawWireframe = ui.check(wireframeHandle, "Wireframe");
-					if (wireframeHandle.changed) {
-						ui.g.end();
-						UIView2D.inst.cacheUVMap();
-						ui.g.begin(false);
-						UINodes.inst.parseMeshMaterial();
-						ddirty = 2;
-					}
-					showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
-
-					ui.row([1/2, 1/2]);
-					showEnvmap = ui.check(showEnvmapHandle, "Envmap");
-					if (showEnvmapHandle.changed) {
-						ddirty = 2;
-					}
-					var compassHandle = Id.handle({selected: showCompass});
-					showCompass = ui.check(compassHandle, "Compass");
-					if (compassHandle.changed) ddirty = 2;
-
-					if (showEnvmap) {
-						showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
-						if (showEnvmapBlurHandle.changed) {
-							var probe = iron.Scene.active.world.probe;
-							savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-							ddirty = 2;
-						}
-					}
-					else {
-						if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
-							var hwheel = Id.handle({color: 0xff030303});
-							var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
-							if (hwheel.changed) {
-								var b = emptyEnvmap.lock();
-								b.set(0, worldColor.Rb);
-								b.set(1, worldColor.Gb);
-								b.set(2, worldColor.Bb);
-								emptyEnvmap.unlock();
-								ddirty = 2;
-							}
-						}
-					}
-					iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
-				}
 			}
 		}
 

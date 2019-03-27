@@ -172,7 +172,8 @@ class LayerSlot {
 
 		texpaint_mask.unload();
 		RenderPath.active.renderTargets.remove("texpaint_mask" + ext);
+		texpaint_mask = null;
 
-		texpaint_mask.unload();
+		texpaint_mask_preview.unload();
 	}
 }
