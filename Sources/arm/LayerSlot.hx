@@ -17,6 +17,9 @@ class LayerSlot {
 
 	public var texpaint_preview:kha.Image; // Layer preview
 
+	public var texpaint_mask:kha.Image = null;
+	public var texpaint_mask_preview:kha.Image;
+
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
 	public var targetObject:iron.object.MeshObject = null;
@@ -40,7 +43,7 @@ class LayerSlot {
 			first = false;
 			{
 				var t = new RenderTargetRaw();
-				t.name = "texpaint_mask0";
+				t.name = "texpaint_blend0";
 				t.width = Config.getTextureRes();
 				t.height = Config.getTextureRes();
 				t.format = 'R8';
@@ -48,7 +51,7 @@ class LayerSlot {
 			}
 			{
 				var t = new RenderTargetRaw();
-				t.name = "texpaint_mask1";
+				t.name = "texpaint_blend1";
 				t.width = Config.getTextureRes();
 				t.height = Config.getTextureRes();
 				t.format = 'R8';
@@ -107,6 +110,8 @@ class LayerSlot {
 		RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
 
 		texpaint_preview.unload();
+
+		deleteMask();
 	}
 
 	public function swap(other:LayerSlot) {
@@ -131,5 +136,43 @@ class LayerSlot {
 		other.texpaint = tp;
 		other.texpaint_nor = tp_nor;
 		other.texpaint_pack = tp_pack;
+	}
+
+	public function createMask() {
+		if (texpaint_mask != null) return;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_mask" + ext;
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
+			t.format = 'R8';
+			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
+		}
+
+		texpaint_mask_preview = kha.Image.createRenderTarget(200, 200, kha.graphics4.TextureFormat.L8);
+
+		iron.App.notifyOnRender(clearMask);
+	}
+
+	function clearMask(g:kha.graphics4.Graphics) {
+		g.end();
+
+		texpaint_mask.g4.begin();
+		// texpaint_mask.g4.clear(0xffffffff);
+		texpaint_mask.g4.clear(0x00000000);
+		texpaint_mask.g4.end();
+
+		g.begin();
+		iron.App.removeRender(clearMask);
+	}
+
+	public function deleteMask() {
+		if (texpaint_mask == null) return;
+
+		texpaint_mask.unload();
+		RenderPath.active.renderTargets.remove("texpaint_mask" + ext);
+
+		texpaint_mask.unload();
 	}
 }

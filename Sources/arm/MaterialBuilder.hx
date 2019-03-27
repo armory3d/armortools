@@ -444,26 +444,28 @@ class MaterialBuilder {
 		}
 		frag.write('fragColor[3] = vec4(str, 0.0, 0.0, 1.0);');
 
+		var isMask = UITrait.inst.selectedLayerIsMask;
+
 		if (!UITrait.inst.selectedLayer.paintBase) {
 			con_paint.data.color_writes_red[0] = false;
 			con_paint.data.color_writes_green[0] = false;
 			con_paint.data.color_writes_blue[0] = false;
 		}
-		if (!UITrait.inst.selectedLayer.paintNor) {
+		if (!UITrait.inst.selectedLayer.paintNor || isMask) {
 			con_paint.data.color_writes_red[1] = false;
 			con_paint.data.color_writes_green[1] = false;
 			con_paint.data.color_writes_blue[1] = false;
 		}
-		if (!UITrait.inst.selectedLayer.paintOcc) {
+		if (!UITrait.inst.selectedLayer.paintOcc || isMask) {
 			con_paint.data.color_writes_red[2] = false;
 		}
-		if (!UITrait.inst.selectedLayer.paintRough) {
+		if (!UITrait.inst.selectedLayer.paintRough || isMask) {
 			con_paint.data.color_writes_green[2] = false;
 		}
-		if (!UITrait.inst.selectedLayer.paintMet) {
+		if (!UITrait.inst.selectedLayer.paintMet || isMask) {
 			con_paint.data.color_writes_blue[2] = false;
 		}
-		if (!UITrait.inst.selectedLayer.paintHeight) {
+		if (!UITrait.inst.selectedLayer.paintHeight || isMask) {
 			con_paint.data.color_writes_alpha[2] = false;
 		}
 
@@ -830,6 +832,10 @@ class MaterialBuilder {
 					frag.add_uniform('sampler2D texpaint_nor' + id);
 					frag.add_uniform('sampler2D texpaint_pack' + id);
 
+					if (l.texpaint_mask != null) {
+						frag.add_uniform('sampler2D texpaint_mask' + id);
+					}
+
 					if (l.objectMask > 0) {
 						var uid = UITrait.inst.paintObjects[l.objectMask - 1].uid;
 						frag.add_uniform('int objectId', '_uid');
@@ -841,6 +847,11 @@ class MaterialBuilder {
 					frag.write('col_pack0 = textureLod(texpaint_pack' + id + ', texCoord, 0.0);');
 
 					frag.write('factor0 = col_tex0.a;');
+
+					if (l.texpaint_mask != null) {
+						frag.write('factor0 *= textureLod(texpaint_mask' + id + ', texCoord, 0.0).r;');
+					}
+
 					frag.write('factorinv0 = 1.0 - factor0;');
 
 					frag.write('basecol = basecol * factorinv0 + pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2)) * factor0;');

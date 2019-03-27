@@ -71,7 +71,7 @@ class UITrait extends iron.Trait {
 	public var ddirty = 0;
 	public var pdirty = 0;
 	public var rdirty = 0;
-	public var maskDirty = true;
+	public var brushBlendDirty = true;
 	public var layerPreviewDirty = true;
 
 	public var windowW = 280; // Panel width
@@ -113,6 +113,7 @@ class UITrait extends iron.Trait {
 	public var layers:Array<LayerSlot> = null;
 	public var undoLayers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
+	public var selectedLayerIsMask = false; // Mask selected for active layer
 	var selectTime = 0.0;
 	public var displaceStrength = 1.0;
 	public var decalImage:kha.Image = null;
@@ -457,6 +458,7 @@ class UITrait extends iron.Trait {
 			if (ctrl) { // Cycle layers
 				var i = (layers.indexOf(selectedLayer) + 1) % layers.length;
 				selectedLayer = layers[i];
+				selectedLayerIsMask = false;
 				autoFillHandle.selected = false; // Auto-disable
 				UINodes.inst.parsePaintMaterial();
 				ddirty = 2;
@@ -715,7 +717,7 @@ class UITrait extends iron.Trait {
 		else if (brushTime > 0) { // Brush released
 			brushTime = 0;
 			ddirty = 3;
-			maskDirty = true; // Update brush mask
+			brushBlendDirty = true; // Update brush mask
 			layerPreviewDirty = true; // Update layer preview
 		}
 
@@ -723,10 +725,11 @@ class UITrait extends iron.Trait {
 			layerPreviewDirty = false;
 			// Update layer preview
 			var l = selectedLayer;
-			var tp = l.texpaint_preview;
-			var g2 = tp.g2;
+			var target = selectedLayerIsMask ? l.texpaint_mask_preview : l.texpaint_preview;
+			var source = selectedLayerIsMask ? l.texpaint_mask : l.texpaint;
+			var g2 = target.g2;
 			g2.begin(true, 0xff000000);
-			g2.drawScaledImage(l.texpaint, 0, 0, tp.width, tp.height);
+			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.end();
 			hwnd.redraws = 2;
 		}
@@ -1717,6 +1720,7 @@ class UITrait extends iron.Trait {
 				if (ui.button("New")) {
 					autoFillHandle.selected = false; // Auto-disable
 					headerHandle.redraws = 2;
+					selectedLayerIsMask = false;
 					selectedLayer = new LayerSlot();
 					layers.push(selectedLayer);
 					ui.g.end();
@@ -1759,11 +1763,22 @@ class UITrait extends iron.Trait {
 					}
 
 					if (selectedLayer == l) {
-						var h = layerPanel.selected ? step * 4 + off : step * 2;
-						ui.rect(1, 0, ui._windowW / ui.SCALE - 2, h, ui.t.HIGHLIGHT_COL, 2);
+						if (selectedLayerIsMask) {
+							var h = step * 2;
+							ui.rect(ui._windowW / 100 * 24 - 2, 0, ui._windowW / 100 * 16, h, ui.t.HIGHLIGHT_COL, 2);
+						}
+						else {
+							var h = layerPanel.selected ? step * 4 + off : step * 2;
+							ui.rect(1, 0, ui._windowW / ui.SCALE - 2, h, ui.t.HIGHLIGHT_COL, 2);
+						}
 					}
 
-					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
+					if (l.texpaint_mask != null) {
+						ui.row([8/100, 16/100, 16/100, 20/100, 30/100, 10/100]);
+					}
+					else {
+						ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
+					}
 					
 					var center = (step / 2) * ui.SCALE;
 					ui._y += center;
@@ -1788,10 +1803,40 @@ class UITrait extends iron.Trait {
 					}
 					if (ui.isReleased) {
 						selectLayer = true;
+						selectedLayerIsMask = false;
 					}
 					if (state == State.Started) {
 						if (iron.system.Time.time() - selectTime < 0.25) show2DView();
 						selectTime = iron.system.Time.time();
+					}
+
+					if (l.texpaint_mask != null) {
+						ui._y += 3;
+						var state = ui.image(l.texpaint_mask_preview);
+						ui._y -= 3;
+						if (ui.isHovered) {
+							ui.tooltipImage(l.texpaint_mask_preview);
+						}
+						if (ui.isHovered && ui.inputReleasedR) {
+							App.showContextMenu(function(ui:Zui) {
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+								ui.text(l.name + " Mask", Right);
+								if (ui.button("Delete", Left)) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+									l.deleteMask();
+									selectedLayerIsMask = false;
+								}
+								if (ui.button("Apply", Left)) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+								}
+							});
+						}
+						if (ui.isReleased) {
+							selectLayer = true;
+							selectedLayerIsMask = true;
+						}
 					}
 
 					ui._y += center;
@@ -1800,6 +1845,7 @@ class UITrait extends iron.Trait {
 
 					if (ui.isReleased) {
 						selectLayer = true;
+						selectedLayerIsMask = false;
 					}
 
 					if (selectLayer) {
@@ -1815,22 +1861,35 @@ class UITrait extends iron.Trait {
 
 					if (contextMenu) {
 						App.showContextMenu(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
-							ui.text(l.name, Right);
-							if (ui.button("Delete", Left) && l != layers[0]) {
-								hwnd.redraws = 2;
-								selectedLayer = l;
-								Layers.deleteSelectedLayer();
+							if (l == layers[0]) {
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H, ui.t.SEPARATOR_COL);
+								ui.text(l.name, Right);
 							}
-							if (ui.button("Merge", Left) && l != layers[0]) {
-								hwnd.redraws = 2;
-								selectedLayer = l;
-								iron.App.notifyOnRender(Layers.applySelectedLayer);
-							}
-							if (ui.button("Duplicate", Left) && l != layers[0]) {
-								hwnd.redraws = 2;
-								selectedLayer = l;
-								
+							else {
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
+								ui.text(l.name, Right);
+								if (ui.button("Delete", Left) && l != layers[0]) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+									Layers.deleteSelectedLayer();
+								}
+								if (ui.button("Merge Down", Left) && l != layers[0]) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+									iron.App.notifyOnRender(Layers.applySelectedLayer);
+								}
+								if (ui.button("Duplicate", Left) && l != layers[0]) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+									
+								}
+								if (ui.button("Create Mask", Left) && l != layers[0]) {
+									hwnd.redraws = 2;
+									selectedLayer = l;
+									selectedLayer.createMask();
+									selectedLayerIsMask = true;
+									layerPreviewDirty = true;
+								}
 							}
 						});
 					}

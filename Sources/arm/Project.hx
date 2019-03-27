@@ -201,6 +201,10 @@ class Project {
 
 	public static function importProject(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+
+			UITrait.inst.layerPreviewDirty = true;
+			LayerSlot.counter = 0;
+
 			var resetLayers = false;
 			projectNew(resetLayers);
 			UITrait.inst.projectPath = path;
@@ -306,15 +310,15 @@ class Project {
 					l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 				}
 				var rts = iron.RenderPath.active.renderTargets;
-				rts.get("texpaint_mask0").image.unload();
-				rts.get("texpaint_mask0").raw.width = Config.getTextureRes();
-				rts.get("texpaint_mask0").raw.height = Config.getTextureRes();
-				rts.get("texpaint_mask0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-				rts.get("texpaint_mask1").image.unload();
-				rts.get("texpaint_mask1").raw.width = Config.getTextureRes();
-				rts.get("texpaint_mask1").raw.height = Config.getTextureRes();
-				rts.get("texpaint_mask1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-				UITrait.inst.maskDirty = true;
+				rts.get("texpaint_blend0").image.unload();
+				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
+				rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
+				rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image.unload();
+				rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
+				rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
+				rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				UITrait.inst.brushBlendDirty = true;
 			}
 
 			// for (l in UITrait.inst.layers) l.unload();

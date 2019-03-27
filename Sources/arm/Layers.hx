@@ -82,6 +82,19 @@ class Layers {
 		rts.get("texpaint" + l.ext).image = l.texpaint;
 		rts.get("texpaint_nor" + l.ext).image = l.texpaint_nor;
 		rts.get("texpaint_pack" + l.ext).image = l.texpaint_pack;
+
+		if (l.texpaint_mask != null) {
+			var texpaint_mask = l.texpaint_mask;
+			l.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+
+			l.texpaint_mask.g2.begin(false);
+			l.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
+			l.texpaint_mask.g2.end();
+
+			texpaint_mask.unload();
+
+			rts.get("texpaint_mask" + l.ext).image = l.texpaint_mask;
+		}
 	}
 
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
@@ -103,15 +116,15 @@ class Layers {
 			l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 		}
 		var rts = RenderPath.active.renderTargets;
-		rts.get("texpaint_mask0").image.unload();
-		rts.get("texpaint_mask0").raw.width = Config.getTextureRes();
-		rts.get("texpaint_mask0").raw.height = Config.getTextureRes();
-		rts.get("texpaint_mask0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-		rts.get("texpaint_mask1").image.unload();
-		rts.get("texpaint_mask1").raw.width = Config.getTextureRes();
-		rts.get("texpaint_mask1").raw.height = Config.getTextureRes();
-		rts.get("texpaint_mask1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
-		UITrait.inst.maskDirty = true;
+		rts.get("texpaint_blend0").image.unload();
+		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
+		rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
+		rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		rts.get("texpaint_blend1").image.unload();
+		rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
+		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
+		rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		UITrait.inst.brushBlendDirty = true;
 		g.begin();
 		UITrait.inst.ddirty = 2;
 		iron.App.removeRender(resizeLayers);

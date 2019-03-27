@@ -307,14 +307,16 @@ class RenderPathDeferred {
 				#end
 				//
 
-				var maskA = "texpaint_mask0";
-				var maskB = "texpaint_mask1";
-				path.setTarget(maskB);
-				path.bindTarget(maskA, "tex");
+				var blendA = "texpaint_blend0";
+				var blendB = "texpaint_blend1";
+				path.setTarget(blendB);
+				path.bindTarget(blendA, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
-				path.setTarget("texpaint" + tid, ["texpaint_nor" + tid, "texpaint_pack" + tid, maskA]);
+				var isMask = UITrait.inst.selectedLayerIsMask;
+				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
+				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
 				path.bindTarget("_paintdb", "paintdb");
-				path.bindTarget(maskB, "paintmask");
+				path.bindTarget(blendB, "paintmask");
 				if (UITrait.inst.selectedTool == ToolBake) {
 					path.bindTarget("voxels", "voxels");
 				}
@@ -344,9 +346,9 @@ class RenderPathDeferred {
 		}
 		//
 
-		if (UITrait.inst.maskDirty) {
-			UITrait.inst.maskDirty = false;
-			path.setTarget("texpaint_mask0", ["texpaint_mask1"]);
+		if (UITrait.inst.brushBlendDirty) {
+			UITrait.inst.brushBlendDirty = false;
+			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
 			path.clearTarget(0x00000000);
 		}
 
@@ -370,10 +372,14 @@ class RenderPathDeferred {
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 		for (i in 1...UITrait.inst.layers.length) {
-			tid = UITrait.inst.layers[i].id;
+			var l = UITrait.inst.layers[i];
+			tid = l.id;
 			path.bindTarget("texpaint" + tid, "texpaint" + tid);
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
 			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
+			if (l.texpaint_mask != null) {
+				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
+			}
 		}
 		//
 
