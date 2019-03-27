@@ -23,7 +23,6 @@ class Importer {
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;
 			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
-
 				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
 				UINodes.inst.nodes.nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
@@ -63,6 +62,8 @@ class Importer {
 				
 				f = path + sep + f;
 				if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
+
+				// TODO: handle -albedo
 				
 				var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 				var valid = false;
@@ -71,6 +72,7 @@ class Importer {
 									  StringTools.endsWith(base, "_basecol") ||
 									  StringTools.endsWith(base, "_basecolor") ||
 									  StringTools.endsWith(base, "_diffuse") ||
+									  StringTools.endsWith(base, "_diff") ||
 									  StringTools.endsWith(base, "_base") ||
 									  StringTools.endsWith(base, "_bc") ||
 									  StringTools.endsWith(base, "_d") ||
@@ -211,6 +213,7 @@ class Importer {
 			iron.system.Tween.timer(0.01, function() {
 				UINodes.inst.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
+				UITrait.inst.hwnd1.redraws = 2;
 			});
 			#end
 		}
@@ -248,7 +251,7 @@ class Importer {
 			UITrait.inst.assets.push(asset);
 			UITrait.inst.assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
-			UITrait.inst.hwnd.redraws = 2;
+			UITrait.inst.hwnd2.redraws = 2;
 
 			// Set envmap, has to be 2K res for now
 			if (StringTools.endsWith(path.toLowerCase(), ".hdr") &&
@@ -702,6 +705,8 @@ class Importer {
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
+			UITrait.inst.hwnd1.redraws = 2;
+			UITrait.inst.hwnd2.redraws = 2;
 			UIView2D.inst.uvmapCached = false;
 			UIView2D.inst.trianglemapCached = false;
 		});

@@ -192,6 +192,8 @@ class Project {
 			ViewportUtil.resetViewport();
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
+			UITrait.inst.hwnd1.redraws = 2;
+			UITrait.inst.hwnd2.redraws = 2;
 
 			if (current != null) current.begin(false);
 		});
@@ -347,6 +349,8 @@ class Project {
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
+			UITrait.inst.hwnd1.redraws = 2;
+			UITrait.inst.hwnd2.redraws = 2;
 
 			iron.data.Data.deleteBlob(path);
 		});

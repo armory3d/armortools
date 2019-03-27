@@ -18,6 +18,7 @@ import arm.ui.UITrait;
 class UINodes extends iron.Trait {
 
 	public static var inst:UINodes;
+	static var materialCounter = 0;
 
 	public var show = false;
 	public var wx:Int;
@@ -129,6 +130,7 @@ class UINodes extends iron.Trait {
 				c = haxe.Json.parse(canvasBlob);
 				canvasMap.set(UITrait.inst.selectedMaterial, c);
 				canvas = c;
+				c.name = "Material " + (++materialCounter);
 			}
 			else canvas = c;
 
@@ -193,7 +195,7 @@ class UINodes extends iron.Trait {
 			if (canvasType == 0) {
 				parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd.redraws = 2;
+				UITrait.inst.hwnd1.redraws = 2;
 				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
 			}
@@ -272,7 +274,7 @@ class UINodes extends iron.Trait {
 			}
 			else {
 				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd.redraws = 2;
+				UITrait.inst.hwnd1.redraws = 2;
 			}
 		}
 
@@ -296,7 +298,11 @@ class UINodes extends iron.Trait {
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		var wh = UIView2D.inst.show ? Std.int(iron.App.h() / 2) : iron.App.h();
+		var wh = iron.App.h();
+		if (UIView2D.inst.show) {
+			wh = Std.int(iron.App.h() / 2);
+			wy += Std.int(iron.App.h() / 2);
+		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			
 			// Grid

@@ -98,8 +98,8 @@ class RenderUtil {
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = 100;
-		@:privateAccess iron.RenderPath.active.lastH = 100;
+		@:privateAccess iron.RenderPath.active.lastW = 200;
+		@:privateAccess iron.RenderPath.active.lastH = 200;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 

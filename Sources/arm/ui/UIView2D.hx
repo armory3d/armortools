@@ -149,7 +149,6 @@ class UIView2D extends iron.Trait {
 		wh = iron.App.h();
 		if (UINodes.inst.show) {
 			wh = Std.int(iron.App.h() / 2);
-			wy += Std.int(iron.App.h() / 2);
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
@@ -168,6 +167,27 @@ class UIView2D extends iron.Trait {
 			if (uvmapShow) {
 				ui.g.drawScaledImage(uvmap, tx, ty, tw, tw);
 			}
+
+			// Editable layer name
+			var ACCENT_COL = ui.t.ACCENT_COL;
+			var BUTTON_H = ui.t.BUTTON_H;
+			var ELEMENT_H = ui.t.ELEMENT_H;
+			var FONT_SIZE = ui.fontSize;
+			ui.t.ACCENT_COL = 0x00000000;
+			ui.t.BUTTON_H = 30;
+			ui.t.ELEMENT_H = 30;
+			ui.fontSize = Std.int(22 * ui.SCALE);
+			ui._x = ww - ui.ELEMENT_W() * 1.4;
+			ui._y = wh - ui.ELEMENT_H() * 1.2;
+			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
+			var h = Id.handle();
+			h.text = l.name;
+			l.name = ui.textInput(h, "", Right);
+			if (h.changed) UITrait.inst.hwnd.redraws = 2;
+			ui.t.ACCENT_COL = ACCENT_COL;
+			ui.t.BUTTON_H = BUTTON_H;
+			ui.t.ELEMENT_H = ELEMENT_H;
+			ui.fontSize = FONT_SIZE;
 
 			// Controls
 			var ew = Std.int(ui.ELEMENT_W());

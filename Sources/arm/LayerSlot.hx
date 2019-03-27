@@ -9,9 +9,13 @@ class LayerSlot {
 	public var visible = true;
 	public var ext = "";
 
+	public var name:String;
+
 	public var texpaint:kha.Image;
 	public var texpaint_nor:kha.Image;
 	public var texpaint_pack:kha.Image;
+
+	public var texpaint_preview:kha.Image; // Layer preview
 
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
@@ -29,7 +33,6 @@ class LayerSlot {
 	public var paintHeight = false;
 	public var paintEmis = false;
 	public var paintSubs = false;
-	public var opacity = 1.0;
 
 	public function new(ext = "") {
 
@@ -58,6 +61,7 @@ class LayerSlot {
 			ext = id + "";
 		}
 		this.ext = ext;
+		name = "Layer " + (id + 1);
 
 		{
 			var t = new RenderTargetRaw();
@@ -84,6 +88,8 @@ class LayerSlot {
 			t.format = 'RGBA32';
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
+
+		texpaint_preview = kha.Image.createRenderTarget(200, 200, kha.graphics4.TextureFormat.RGBA32);
 	}
 
 	public function unload() {
@@ -99,6 +105,8 @@ class LayerSlot {
 		RenderPath.active.renderTargets.remove("texpaint" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_nor" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
+
+		texpaint_preview.unload();
 	}
 
 	public function swap(other:LayerSlot) {
@@ -123,9 +131,5 @@ class LayerSlot {
 		other.texpaint = tp;
 		other.texpaint_nor = tp_nor;
 		other.texpaint_pack = tp_pack;
-		
-		// var tp_rt = rt;
-		// rt = other.rt;
-		// other.rt = tp_rt;
 	}
 }
