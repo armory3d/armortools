@@ -12,7 +12,11 @@ class RenderUtil {
 		UITrait.inst.decalPreview = true;
 
 		var painto = UITrait.inst.paintObject;
-		for (p in UITrait.inst.paintObjects) p.visible = false;
+		var visibles:Array<Bool> = [];
+		for (p in UITrait.inst.paintObjects) {
+			visibles.push(p.visible);
+			p.visible = false;
+		}
 
 		var plane:MeshObject = cast iron.Scene.active.getChild(".Plane");
 		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
@@ -49,7 +53,9 @@ class RenderUtil {
 
 		// Restore
 		plane.visible = false;
-		for (p in UITrait.inst.paintObjects) p.visible = true;
+		for (i in 0...UITrait.inst.paintObjects.length) {
+			UITrait.inst.paintObjects[i].visible = visibles[i];
+		}
 		UITrait.inst.paintObject = painto;
 
 		iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
@@ -62,14 +68,18 @@ class RenderUtil {
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		
 		UINodes.inst.parseMeshMaterial();
-		UITrait.inst.ddirty = 2;
+		UITrait.inst.ddirty = 0;
 	}
 
 	public static function makeMaterialPreview() {
 		UITrait.inst.materialPreview = true;
 
 		var painto = UITrait.inst.paintObject;
-		for (p in UITrait.inst.paintObjects) p.visible = false;
+		var visibles:Array<Bool> = [];
+		for (p in UITrait.inst.paintObjects) {
+			visibles.push(p.visible);
+			p.visible = false;
+		}
 
 		var sphere:MeshObject = cast iron.Scene.active.getChild(".Sphere");
 		sphere.visible = true;
@@ -114,7 +124,9 @@ class RenderUtil {
 
 		// Restore
 		sphere.visible = false;
-		for (p in UITrait.inst.paintObjects) p.visible = true;
+		for (i in 0...UITrait.inst.paintObjects.length) {
+			UITrait.inst.paintObjects[i].visible = visibles[i];
+		}
 		UITrait.inst.paintObject = painto;
 
 		UITrait.inst.gizmo.visible = gizmo_vis;
@@ -128,6 +140,7 @@ class RenderUtil {
 		probe.raw.strength = savedProbe;
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		UINodes.inst.parseMeshMaterial();
+		UITrait.inst.ddirty = 0;
 	}
 
 	public static function makeTextPreview() {

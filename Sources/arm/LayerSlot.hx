@@ -19,6 +19,7 @@ class LayerSlot {
 
 	public var texpaint_mask:kha.Image = null;
 	public var texpaint_mask_preview:kha.Image;
+	public var maskOpacity = 1.0;
 
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
@@ -138,8 +139,12 @@ class LayerSlot {
 		other.texpaint_pack = tp_pack;
 	}
 
-	public function createMask() {
+	var createMaskColor:Int;
+
+	public function createMask(color:Int) {
 		if (texpaint_mask != null) return;
+
+		createMaskColor = color;
 
 		{
 			var t = new RenderTargetRaw();
@@ -159,8 +164,7 @@ class LayerSlot {
 		g.end();
 
 		texpaint_mask.g4.begin();
-		// texpaint_mask.g4.clear(0xffffffff);
-		texpaint_mask.g4.clear(0x00000000);
+		texpaint_mask.g4.clear(createMaskColor);
 		texpaint_mask.g4.end();
 
 		g.begin();

@@ -133,10 +133,7 @@ class Layers {
 	public static function deleteSelectedLayer() {
 		UITrait.inst.selectedLayer.unload();
 		UITrait.inst.layers.remove(UITrait.inst.selectedLayer);
-		UITrait.inst.selectedLayer = UITrait.inst.layers[0];
-		UINodes.inst.parseMeshMaterial();
-		UINodes.inst.parsePaintMaterial();
-		UITrait.inst.ddirty = 2;
+		UITrait.inst.setLayer(UITrait.inst.layers[0]);
 	}
 
 	static function makePipe() {
@@ -159,6 +156,13 @@ class Layers {
 
 		var l0 = UITrait.inst.layers[0];
 		var l1 = UITrait.inst.selectedLayer;
+		
+		// for (i in 1...UITrait.inst.layers.length) { // Merge down
+		// 	if (UITrait.inst.layers[i] == l1) {
+		// 		l0 = UITrait.inst.layers[i - 1];
+		// 		break;
+		// 	}
+		// }
 
 		g.end();
 

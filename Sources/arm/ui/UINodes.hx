@@ -484,6 +484,7 @@ class UINodes extends iron.Trait {
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
+			UITrait.inst.ddirty = 2;
 		// });
 	}
 

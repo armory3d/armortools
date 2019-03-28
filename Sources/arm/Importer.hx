@@ -689,9 +689,7 @@ class Importer {
 				UITrait.inst.autoFillHandle.selected = false;
 
 				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
-				UITrait.inst.selectedLayer = UITrait.inst.layers[0];
-				UINodes.inst.parseMeshMaterial();
-				UINodes.inst.parsePaintMaterial();
+				UITrait.inst.setLayer(UITrait.inst.layers[0]);
 				iron.App.notifyOnRender(Layers.initLayers);
 				
 				UITrait.inst.paintObject.setData(md);

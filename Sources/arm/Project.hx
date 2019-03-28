@@ -139,6 +139,9 @@ class Project {
 			UITrait.inst.mergedObject = null;
 		}
 
+		UITrait.inst.layerPreviewDirty = true;
+		LayerSlot.counter = 0;
+
 		UITrait.inst.paintObject = UITrait.inst.mainObject();
 
 		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
@@ -179,7 +182,7 @@ class Project {
 			if (resetLayers) {
 				// for (l in layers) l.unload();
 				UITrait.inst.layers = [new LayerSlot()];
-				UITrait.inst.selectedLayer = UITrait.inst.layers[0];
+				UITrait.inst.setLayer(UITrait.inst.layers[0]);
 				iron.App.notifyOnRender(Layers.initLayers);
 			}
 			
@@ -347,9 +350,7 @@ class Project {
 				l.texpaint_pack.g2.end();
 				// texpaint_pack.unload();
 			}
-			UITrait.inst.selectedLayer = UITrait.inst.layers[0];
-
-			if (UITrait.inst.layers.length > 0) UINodes.inst.parseMeshMaterial();
+			UITrait.inst.setLayer(UITrait.inst.layers[0]);
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
