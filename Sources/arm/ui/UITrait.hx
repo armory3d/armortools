@@ -601,6 +601,12 @@ class UITrait extends iron.Trait {
 		UINodes.inst.parsePaintMaterial();
 		hwnd1.redraws = 2;
 		headerHandle.redraws = 2;
+
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+		var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+		if (decal) RenderUtil.makeDecalPreview();
+		if (current != null) current.begin(false);
 	}
 
 	function selectMaterial2(i:Int) {

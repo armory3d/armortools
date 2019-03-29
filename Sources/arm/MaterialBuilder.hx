@@ -428,6 +428,11 @@ class MaterialBuilder {
 		if (layered) {
 			if (eraser) {
 				frag.write('fragColor[0] = vec4(basecol, sample_undo.a - str);');
+				frag.write('matid = 0;');
+			}
+			else if (decal) {
+				frag.write('float invstr = 1.0 - str;');
+				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, max(str, sample_undo.a));');
 			}
 			else {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
@@ -610,7 +615,8 @@ class MaterialBuilder {
 
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
-		frag.write('fragColor[0] = vec4(n.x, n.y, packFloat(metallic, roughness), 1.0);');
+		// float matid = 0.0;
+		frag.write('fragColor[0] = vec4(n.x, n.y, packFloat(metallic, roughness), 0.0);');
 		frag.write('fragColor[1] = vec4(basecol.r, basecol.g, basecol.b, packFloat2(occlusion, 1.0));'); // occ/spec
 		frag.write('fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);'); // veloc
 

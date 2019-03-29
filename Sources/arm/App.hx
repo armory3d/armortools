@@ -147,10 +147,10 @@ class App extends iron.Trait {
 
 	public static function w():Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return 200;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return arm.util.RenderUtil.matPreviewSize;
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return 512;
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return arm.util.RenderUtil.decalPreviewSize;
 		
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
@@ -173,10 +173,10 @@ class App extends iron.Trait {
 
 	public static function h():Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return 200;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return arm.util.RenderUtil.matPreviewSize;
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return 512;
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return arm.util.RenderUtil.decalPreviewSize;
 
 		var res = 0;
 		res = kha.System.windowHeight();

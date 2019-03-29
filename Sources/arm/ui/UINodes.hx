@@ -198,6 +198,9 @@ class UINodes extends iron.Trait {
 				UITrait.inst.hwnd1.redraws = 2;
 				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
+				if (UITrait.inst.autoFillHandle.selected) {
+					UITrait.inst.layerPreviewDirty = true;
+				}
 			}
 		}
 		else if (ui.changed && (mstartedlast || mouse.moved) && UITrait.inst.instantMat) {

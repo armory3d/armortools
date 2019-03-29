@@ -5,9 +5,13 @@ import iron.math.Mat4;
 import arm.ui.*;
 
 class RenderUtil {
+
+	public static inline var matPreviewSize = 100; // 200
+	public static inline var decalPreviewSize = 512;
+
 	public static function makeDecalPreview() {
 		if (UITrait.inst.decalImage == null) {
-			UITrait.inst.decalImage = kha.Image.createRenderTarget(512, 512);
+			UITrait.inst.decalImage = kha.Image.createRenderTarget(arm.util.RenderUtil.decalPreviewSize, arm.util.RenderUtil.decalPreviewSize);
 		}
 		UITrait.inst.decalPreview = true;
 
@@ -37,8 +41,8 @@ class RenderUtil {
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = 512;
-		@:privateAccess iron.RenderPath.active.lastH = 512;
+		@:privateAccess iron.RenderPath.active.lastW = arm.util.RenderUtil.decalPreviewSize;
+		@:privateAccess iron.RenderPath.active.lastH = arm.util.RenderUtil.decalPreviewSize;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
@@ -108,8 +112,8 @@ class RenderUtil {
 		// No jitter
 		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = 200;
-		@:privateAccess iron.RenderPath.active.lastH = 200;
+		@:privateAccess iron.RenderPath.active.lastW = matPreviewSize;
+		@:privateAccess iron.RenderPath.active.lastH = matPreviewSize;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 

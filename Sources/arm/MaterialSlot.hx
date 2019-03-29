@@ -20,7 +20,7 @@ class MaterialSlot {
 	
 	public function new(m:iron.data.MaterialData = null) {
 		id = ++counter;
-		image = kha.Image.createRenderTarget(200, 200);
+		image = kha.Image.createRenderTarget(arm.util.RenderUtil.matPreviewSize, arm.util.RenderUtil.matPreviewSize);
 		data = m;
 	}
 }
