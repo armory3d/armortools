@@ -476,6 +476,20 @@ class UITrait extends iron.Trait {
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
 		else if (ctrl && kb.started("n")) App.projectNew();
+		else if (ctrl && shift && kb.started("e")) { // Export textures
+			if (textureExportPath == "") { // First export, ask for path
+				arm.App.showFiles = true;
+				@:privateAccess zui.Ext.lastPath = "";
+				arm.App.whandle.redraws = 2;
+				arm.App.foldersOnly = true;
+				arm.App.showFilename = true;
+				arm.App.filesDone = function(path:String) {
+					textureExport = true;
+					textureExportPath = path;
+				}
+			}
+			else textureExport = true;
+		}
 
 		if (kb.started("f11")) {
 			show = !show;
@@ -2272,6 +2286,7 @@ class UITrait extends iron.Trait {
 							textureExportPath = path;
 						}
 					}
+					if (ui.isHovered) ui.tooltip("Export texture files (Ctrl + Shift + E)");
 
 					formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
 					if (formatType == 0) {
