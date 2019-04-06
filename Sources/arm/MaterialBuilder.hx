@@ -635,10 +635,10 @@ class MaterialBuilder {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: 'clockwise',
-			color_write_red: false,
-			color_write_green: false,
-			color_write_blue: false,
-			color_write_alpha: false,
+			color_writes_red: [false],
+			color_writes_green: [false],
+			color_writes_blue: [false],
+			color_writes_alpha: [false],
 			vertex_elements: [{name: "pos", data: 'short4norm'}]
 		});
 
