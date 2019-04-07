@@ -11,6 +11,9 @@ import arm.ui.*;
 
 class Importer {
 
+	public static var fontList = ["default.ttf"];
+	public static var fontMap = new Map<String, kha.Font>();
+
 	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
 		if (Format.checkMeshFormat(path)) {
@@ -221,9 +224,6 @@ class Importer {
 			UITrait.inst.showError("Error: Unknown asset format");
 		}
 	}
-
-	public static var fontList = ["default.ttf"];
-	public static var fontMap = new Map<String, kha.Font>();
 
 	public static function importFont(path:String) {
 		iron.data.Data.getFont(path, function(font:kha.Font) {

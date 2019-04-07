@@ -38,6 +38,8 @@ class LayerSlot {
 	public var paintEmis = false;
 	public var paintSubs = false;
 
+	var createMaskColor:Int;
+
 	public function new(ext = "") {
 
 		if (first) {
@@ -138,8 +140,6 @@ class LayerSlot {
 		other.texpaint_nor = tp_nor;
 		other.texpaint_pack = tp_pack;
 	}
-
-	var createMaskColor:Int;
 
 	public function createMask(color:Int) {
 		if (texpaint_mask != null) return;

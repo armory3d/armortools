@@ -63,6 +63,9 @@ class UINodes extends iron.Trait {
 
 	public var grid:kha.Image = null;
 
+	public var hwnd = Id.handle();
+	var lastT:iron.Trait = null;
+
 	public function new() {
 		super();
 		inst = this;
@@ -266,8 +269,6 @@ class UINodes extends iron.Trait {
 		}
 		grid.g2.end();
 	}
-
-	public var hwnd = Id.handle();
 
 	function render2D(g:kha.graphics2.Graphics) {
 		if (recompileMat) {
@@ -684,7 +685,6 @@ class UINodes extends iron.Trait {
 		var tree = armory.system.Logic.parse(canvasBrush, false);
 	}
 
-	var lastT:iron.Trait = null;
 	public function parseLogic() {
 		if (lastT != null) UITrait.inst.selectedObject.removeTrait(lastT);
 		armory.system.Logic.packageName = "armory.logicnode";
