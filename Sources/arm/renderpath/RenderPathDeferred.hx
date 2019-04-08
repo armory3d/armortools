@@ -11,7 +11,7 @@ class RenderPathDeferred {
 
 	public static var path:RenderPath;
 
-	#if (rp_gi != "Off")
+	#if rp_voxelao
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
 	#end
@@ -286,7 +286,7 @@ class RenderPathDeferred {
 						// Init voxel texture
 						var rp_gi = UITrait.inst.C.rp_gi;
 						UITrait.inst.C.rp_gi = true;
-						#if (rp_gi != "Off")
+						#if rp_voxelao
 						Inc.initGI();
 						#end
 						UITrait.inst.C.rp_gi = rp_gi;
@@ -428,7 +428,7 @@ class RenderPathDeferred {
 		#end
 
 		// Voxels
-		#if (rp_gi != "Off")
+		#if rp_voxelao
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			var voxelize = path.voxelize();
@@ -477,7 +477,7 @@ class RenderPathDeferred {
 		}
 		#end
 		var voxelao_pass = false;
-		#if (rp_gi != "Off")
+		#if rp_voxelao
 		if (armory.data.Config.raw.rp_gi != false)
 		{
 			voxelao_pass = true;
