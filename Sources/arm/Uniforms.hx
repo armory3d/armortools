@@ -83,11 +83,13 @@ class Uniforms {
 		if (link == '_inputBrush') {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			vec2.set(UITrait.inst.paintVec.x, UITrait.inst.paintVec.y, down ? 1.0 : 0.0, 0.0);
+			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
 		else if (link == '_inputBrushLast') {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			vec2.set(UITrait.inst.lastPaintVecX, UITrait.inst.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
+			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
 		return null;

@@ -20,6 +20,13 @@ class BrushOutputNode extends LogicNode {
 		UITrait.inst.brushNodesHardness = inputs[3].get();
 		UITrait.inst.brushNodesScale = inputs[4].get();
 
+		var left = 0;
+		var right = 1;
+		if (UITrait.inst.paint2d) {
+			left = 1;
+			right = 2;
+		}
+
 		// First time init
 		if (UITrait.inst.lastPaintX < 0 || UITrait.inst.lastPaintY < 0) {
 			UITrait.inst.lastPaintVecX = UITrait.inst.paintVec.x;
@@ -27,7 +34,7 @@ class BrushOutputNode extends LogicNode {
 		}
 
 		// Paint bounds
-		if (UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
+		if (UITrait.inst.paintVec.x < right && UITrait.inst.paintVec.x > left &&
 			UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0 &&
 			!UITrait.inst.ui.isHovered && !UITrait.inst.ui.isScrolling) { // Header combos are in use
 			// Set color pick

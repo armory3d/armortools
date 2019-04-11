@@ -603,15 +603,20 @@ class MaterialBuilder {
 		frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
 
 		// Apply normal channel
-		frag.vVec = true;
-		#if kha_direct3d11
-		frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
-		#else
-		frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-		#end
-		frag.write('n = nortan * 2.0 - 1.0;');
-		frag.write('n.y = -n.y;');
-		frag.write('n = normalize(mul(n, TBN));');
+		if (decal) {
+			// TODO
+		}
+		else {
+			frag.vVec = true;
+			#if kha_direct3d11
+			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+			#else
+			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+			#end
+			frag.write('n = nortan * 2.0 - 1.0;');
+			frag.write('n.y = -n.y;');
+			frag.write('n = normalize(mul(n, TBN));');
+		}
 
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');

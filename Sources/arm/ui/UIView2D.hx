@@ -18,10 +18,11 @@ class UIView2D extends iron.Trait {
 
 	public var trianglemap:kha.Image = null;
 	public var trianglemapCached = false;
+
+	public var panX = 0.0;
+	public var panY = 0.0;
+	public var panScale = 1.0;
 	
-	var panX = 0.0;
-	var panY = 0.0;
-	var panScale = 1.0;
 	var pipe:kha.graphics4.PipelineState;
 	var texType = 0;
 	var uvmapShow = false;
@@ -129,13 +130,9 @@ class UIView2D extends iron.Trait {
 
 		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
-		var tw = iron.App.w() * 0.95;
-		var tx = iron.App.w() / 2 - tw / 2;
-		var ty = iron.App.h() / 2 - tw / 2;
-
-		tx += panX;
-		ty += panY;
-		tw *= panScale;
+		var tw = iron.App.w() * 0.95 * panScale;
+		var tx = iron.App.w() / 2 - tw / 2 + panX;
+		var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 		g.end();
 		
@@ -210,12 +207,14 @@ class UIView2D extends iron.Trait {
 
 	function update() {
 		var m = iron.system.Input.getMouse();
+		var headerh = ui.ELEMENT_H() * 1.4;
+		UITrait.inst.paint2d = false;
 
 		if (!arm.App.uienabled ||
 			!show ||
 			m.x + App.x() < wx ||
 			m.x + App.x() > wx + ww ||
-			m.y + App.y() < wy ||
+			m.y + App.y() < wy + headerh ||
 			m.y + App.y() > wy + wh) return;
 		
 		if (m.down("right")) {
@@ -226,6 +225,10 @@ class UIView2D extends iron.Trait {
 			panScale -= m.wheelDelta / 10;
 			if (panScale < 0.1) panScale = 0.1;
 			if (panScale > 3.0) panScale = 3.0;
+		}
+
+		if (m.down("left")) {
+			UITrait.inst.paint2d = true;
 		}
 	}
 }

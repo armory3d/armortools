@@ -196,6 +196,7 @@ class UITrait extends iron.Trait {
 	public var lastPaintVecX = -1.0;
 	public var lastPaintVecY = -1.0;
 	var frame = 0;
+	public var paint2d = false;
 
 	public var C:TAPConfig;
 	var altStartedX = -1.0;
@@ -346,7 +347,7 @@ class UITrait extends iron.Trait {
 			var m = iron.system.Input.getMouse();
 			if (m.down()) { //
 				UITrait.inst.lastPaintVecX = UITrait.inst.paintVec.x; //
-				UITrait.inst.lastPaintVecY = UITrait.inst.paintVec.y;//
+				UITrait.inst.lastPaintVecY = UITrait.inst.paintVec.y; //
 			}//
 			else {
 				UITrait.inst.lastPaintVecX = m.x / iron.App.w();
@@ -514,9 +515,13 @@ class UITrait extends iron.Trait {
 			}
 		}
 
+		var right = iron.App.w();
+		if (UIView2D.inst.show) right = iron.App.w() * 2;
+
 		// Viewport shortcuts
-		if (mouse.x > 0 && mouse.x < iron.App.w() &&
-			mouse.y > 0 && mouse.y < iron.App.h() && !ui.isTyping) {
+		if (mouse.x > 0 && mouse.x < right &&
+			mouse.y > 0 && mouse.y < iron.App.h() &&
+			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
 
 			if (UITrait.inst.worktab.position == 0) { // Paint
 				if (shift) {
@@ -677,6 +682,7 @@ class UITrait extends iron.Trait {
 			}
 			undos--;
 			redos++;
+			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
 
@@ -693,6 +699,7 @@ class UITrait extends iron.Trait {
 			undoI = (undoI + 1) % C.undo_steps;
 			undos++;
 			redos--;
+			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
 
@@ -710,12 +717,16 @@ class UITrait extends iron.Trait {
 
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (down && !kb.down("control")) {
-			if (mouse.x < iron.App.w() && mouse.x > iron.App.x() &&
-				mouse.y < iron.App.h() && mouse.y > iron.App.y()) {
+			var mx = mouse.x;
+			var my = mouse.y;
+			if (paint2d) mx -= iron.App.w();
+
+			if (mx < iron.App.w() && mx > iron.App.x() &&
+				my < iron.App.h() && my > iron.App.y()) {
 				
 				if (selectedTool == ToolClone && kb.down("alt")) { // Clone source
-					cloneStartX = mouse.x;
-					cloneStartY = mouse.y;
+					cloneStartX = mx;
+					cloneStartY = my;
 				}
 				else {
 					if (brushTime == 0) { // Paint started
@@ -724,8 +735,8 @@ class UITrait extends iron.Trait {
 							kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
 						}
 						if (selectedTool == ToolClone && cloneStartX >= 0.0) { // Clone delta
-							cloneDeltaX = (cloneStartX - mouse.x) / iron.App.w();
-							cloneDeltaY = (cloneStartY - mouse.y) / iron.App.h();
+							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
+							cloneDeltaY = (cloneStartY - my) / iron.App.h();
 							cloneStartX = -1;
 						}
 						else if (selectedTool == ToolParticle) {
@@ -2043,6 +2054,8 @@ class UITrait extends iron.Trait {
 					UINodes.inst.updateCanvasMap();
 					UINodes.inst.parsePaintMaterial();
 					RenderUtil.makeMaterialPreview();
+					var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+					if (decal) RenderUtil.makeDecalPreview();
 					ui.g.begin(false);
 				}
 

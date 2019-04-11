@@ -171,7 +171,7 @@ class RenderPathDeferred {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		// Only enable vxao in scene mode
-		var restoreGI = false;
+		// var restoreGI = false;
 		// if (armory.data.Config.raw.rp_gi && UITrait.inst.worktab.position == 0) { // paint
 		// 	armory.data.Config.raw.rp_gi = false;
 		// 	restoreGI = true;
@@ -207,6 +207,58 @@ class RenderPathDeferred {
 			if (UITrait.inst.undos < UITrait.inst.C.undo_steps) UITrait.inst.undos++;
 			UITrait.inst.redos = 0;
 			UITrait.inst.pushUndo = false;
+		}
+
+		// 2D paint
+		var painto:iron.object.MeshObject = null;
+		var planeo:iron.object.MeshObject = null;
+		var visibles:Array<Bool> = null;
+		var mergedObjectVisible = false;
+		var savedFov = 0.0;
+		if (UITrait.inst.paint2d) {
+			// Set plane mesh
+			painto = UITrait.inst.paintObject;
+			visibles = [];
+			for (p in UITrait.inst.paintObjects) {
+				visibles.push(p.visible);
+				p.visible = false;
+			}
+			if (UITrait.inst.mergedObject != null) {
+				mergedObjectVisible = UITrait.inst.mergedObject.visible;
+				UITrait.inst.mergedObject.visible = false;
+			}
+
+			var cam = iron.Scene.active.camera;
+			UITrait.inst.savedCamera.setFrom(cam.transform.local);
+			savedFov = cam.data.raw.fov;
+			var m = iron.math.Mat4.identity();
+			m.translate(0, 0, 0.5);
+			cam.transform.setMatrix(m);
+			cam.data.raw.fov = 0.92;
+			cam.buildProjection();
+			cam.buildMatrix();
+
+			var tw = 0.95 * UIView2D.inst.panScale;
+			var tx = UIView2D.inst.panX / iron.App.w();
+			var ty = UIView2D.inst.panY / iron.App.h();
+			
+			m.setIdentity();
+			m.scale(new iron.math.Vec4(tw, tw, 1));
+			m.setLoc(new iron.math.Vec4(tx, ty, 0));
+			var m2 = iron.math.Mat4.identity();
+			m2.getInverse(iron.Scene.active.camera.VP);
+			m.multmat(m2);
+
+			planeo = cast iron.Scene.active.getChild(".Plane");
+			planeo.visible = true;
+			UITrait.inst.paintObject = planeo;
+
+			var v = new iron.math.Vec4();
+			var sx = v.set(m._00, m._01, m._02).length();
+			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+			planeo.transform.scale.set(sx, 1.0, sx);
+			planeo.transform.loc.set(m._30, -m._31, 0.0);
+			planeo.transform.buildMatrix();
 		}
 
 		if (UITrait.inst.depthDirty()) {
@@ -350,6 +402,22 @@ class RenderPathDeferred {
 			UITrait.inst.brushBlendDirty = false;
 			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
 			path.clearTarget(0x00000000);
+		}
+
+		if (UITrait.inst.paint2d) {
+			// Restore paint mesh
+			planeo.visible = false;
+			for (i in 0...UITrait.inst.paintObjects.length) {
+				UITrait.inst.paintObjects[i].visible = visibles[i];
+			}
+			if (UITrait.inst.mergedObject != null) {
+				UITrait.inst.mergedObject.visible = mergedObjectVisible;
+			}
+			UITrait.inst.paintObject = painto;
+			iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
+			iron.Scene.active.camera.data.raw.fov = savedFov;
+			iron.Scene.active.camera.buildProjection();
+			iron.Scene.active.camera.buildMatrix();
 		}
 
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
@@ -745,7 +813,7 @@ class RenderPathDeferred {
 		UITrait.inst.pdirty--;
 		UITrait.inst.rdirty--;
 
-		if (restoreGI) armory.data.Config.raw.rp_gi = true;
+		// if (restoreGI) armory.data.Config.raw.rp_gi = true;
 	}
 
 	#end
