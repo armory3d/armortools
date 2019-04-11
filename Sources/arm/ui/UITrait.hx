@@ -100,6 +100,7 @@ class UITrait extends iron.Trait {
 	public var isNorSpace = 0;
 	public var isHeight = true;
 	public var isHeightSpace = 0;
+	public var isUdim = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();
@@ -490,6 +491,16 @@ class UITrait extends iron.Trait {
 				}
 			}
 			else textureExport = true;
+		}
+		else if (ctrl && shift && kb.started("i")) { // Import asset
+			arm.App.showFiles = true;
+			@:privateAccess zui.Ext.lastPath = ""; // Refresh
+			arm.App.whandle.redraws = 2;
+			arm.App.foldersOnly = false;
+			arm.App.showFilename = false;
+			arm.App.filesDone = function(path:String) {
+				Importer.importFile(path);
+			}
 		}
 
 		if (kb.started("f11")) {
@@ -2036,6 +2047,117 @@ class UITrait extends iron.Trait {
 				// Draw plugins
 				for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
 			}
+
+			if (ui.tab(htab, "Preferences")) {
+				
+				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
+					var hscale = Id.handle({value: C.window_scale});
+					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+					if (!hscale.changed && hscaleWasChanged) {
+						if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
+						C.window_scale = hscale.value;
+						ui.setScale(hscale.value);
+						arm.App.uimodal.setScale(hscale.value);
+						UINodes.inst.ui.setScale(hscale.value);
+						UIView2D.inst.ui.setScale(hscale.value);
+						windowW = Std.int(defaultWindowW * C.window_scale);
+						toolbarw = Std.int(54 * C.window_scale);
+						headerh = Std.int(24 * C.window_scale);
+						menubarw = Std.int(215 * C.window_scale);
+						arm.App.resize();
+						armory.data.Config.save();
+					}
+					hscaleWasChanged = hscale.changed;
+					ui.row([1/2, 1/2]);
+					var layHandle = Id.handle({position: C.ui_layout});
+					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
+					if (layHandle.changed) {
+						arm.App.resize();
+						armory.data.Config.save();
+					}
+					var themeHandle = Id.handle({position: 0});
+					var themes = ["Dark", "Light"];
+					ui.combo(themeHandle, themes, "Theme", true);
+					if (themeHandle.changed) {
+						iron.data.Data.getBlob("theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
+							arm.App.parseTheme(b);
+							ui.t = arm.App.theme;
+							// UINodes.inst.applyTheme();
+							headerHandle.redraws = 2;
+							toolbarHandle.redraws = 2;
+							statusHandle.redraws = 2;
+							workspaceHandle.redraws = 2;
+							menuHandle.redraws = 2;
+						});
+					}
+				}
+
+				ui.separator();
+				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
+					undoHandle = Id.handle({value: C.undo_steps});
+					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
+					if (undoHandle.changed) {
+						ui.g.end();
+						while (undoLayers.length < C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
+						while (undoLayers.length > C.undo_steps) { var l = undoLayers.pop(); l.unload(); }
+						undos = 0;
+						redos = 0;
+						undoI = 0;
+						ui.g.begin(false);
+						armory.data.Config.save();
+					}
+					// ui.row([1/2, 1/2]);
+					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
+					// instantMat = ui.check(Id.handle({selected: instantMat}), "Material Preview");
+				}
+
+				#if arm_debug
+				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
+				#end
+
+				hssgi = Id.handle({selected: C.rp_ssgi});
+				hssr = Id.handle({selected: C.rp_ssr});
+				hbloom = Id.handle({selected: C.rp_bloom});
+				hsupersample = Id.handle({position: Config.getSuperSampleQuality(C.rp_supersample)});
+				hvxao = Id.handle({selected: C.rp_gi});
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Viewport Quality", 1)) {
+					ui.row([1/2, 1/2]);
+					var vsyncHandle = Id.handle({selected: C.window_vsync});
+					C.window_vsync = ui.check(vsyncHandle, "VSync");
+					if (vsyncHandle.changed) armory.data.Config.save();
+					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
+					if (hsupersample.changed) Config.applyConfig();
+					ui.row([1/2, 1/2]);
+					ui.check(hvxao, "Voxel AO");
+					if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
+					if (hvxao.changed) Config.applyConfig();
+					ui.check(hssgi, "SSAO");
+					if (hssgi.changed) Config.applyConfig();
+					ui.row([1/2, 1/2]);
+					ui.check(hbloom, "Bloom");
+					if (hbloom.changed) Config.applyConfig();
+					ui.check(hssr, "SSR");
+					if (hssr.changed) Config.applyConfig();
+					var cullHandle = Id.handle({selected: culling});
+					culling = ui.check(cullHandle, "Cull Backfaces");
+					if (cullHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+					}
+				}
+
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
+					ui.text("Select Material - Shift+1-9");
+					ui.text("Cycle Layers - Ctrl+Tab");
+					ui.text("Brush Radius - Hold F+Drag");
+					ui.text("Brush Ruler - Hold Shift+Paint");
+				}
+
+				// ui.separator();
+				// ui.button("Restore Defaults");
+				// ui.button("Confirm");
+			}
 		}
 
 		if (ui.window(hwnd1, wx, wh, windowW, wh)) {
@@ -2249,6 +2371,47 @@ class UITrait extends iron.Trait {
 				}
 			}
 
+			if (ui.tab(htab2, "Meshes")) {
+				ui.row([1/4]);
+
+				if (ui.button("Import")) {
+					arm.App.showFiles = true;
+					@:privateAccess zui.Ext.lastPath = ""; // Refresh
+					arm.App.whandle.redraws = 2;
+					arm.App.foldersOnly = false;
+					arm.App.showFilename = false;
+					arm.App.filesDone = function(path:String) {
+						Importer.importFile(path);
+					}
+				}
+
+				isUdim = ui.check(Id.handle({selected: isUdim}), "Import UDIM tiles");
+				if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
+
+				if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
+					var i = 0;
+					function drawList(h:zui.Zui.Handle, o:iron.object.MeshObject) {
+						// if (paintObject == o) {
+							// ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
+						// }
+						// ui.row([1/10, 9/10]);
+						// var h = Id.handle().nest(i, {selected: o.visible});
+						// o.visible = ui.check(h, "");
+						// if (h.changed) ddirty = 2;
+						ui.text(o.name);
+						// if (ui.isReleased) {
+						// 	selectPaintObject(o);
+						// }
+						i++;
+					}
+					ui.indent();
+					for (c in paintObjects) {
+						drawList(Id.handle(), c);
+					}
+					ui.unindent();
+				}
+			}
+
 			if (ui.tab(htab2, "Export")) {
 
 				if (ui.panel(Id.handle({selected: false}), "Project Quality", 1)) {
@@ -2446,117 +2609,6 @@ class UITrait extends iron.Trait {
 					}
 				}
 				iron.Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
-			}
-
-			if (ui.tab(htab2, "Preferences")) {
-				
-				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
-					var hscale = Id.handle({value: C.window_scale});
-					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-					if (!hscale.changed && hscaleWasChanged) {
-						if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
-						C.window_scale = hscale.value;
-						ui.setScale(hscale.value);
-						arm.App.uimodal.setScale(hscale.value);
-						UINodes.inst.ui.setScale(hscale.value);
-						UIView2D.inst.ui.setScale(hscale.value);
-						windowW = Std.int(defaultWindowW * C.window_scale);
-						toolbarw = Std.int(54 * C.window_scale);
-						headerh = Std.int(24 * C.window_scale);
-						menubarw = Std.int(215 * C.window_scale);
-						arm.App.resize();
-						armory.data.Config.save();
-					}
-					hscaleWasChanged = hscale.changed;
-					ui.row([1/2, 1/2]);
-					var layHandle = Id.handle({position: C.ui_layout});
-					C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
-					if (layHandle.changed) {
-						arm.App.resize();
-						armory.data.Config.save();
-					}
-					var themeHandle = Id.handle({position: 0});
-					var themes = ["Dark", "Light"];
-					ui.combo(themeHandle, themes, "Theme", true);
-					if (themeHandle.changed) {
-						iron.data.Data.getBlob("theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
-							arm.App.parseTheme(b);
-							ui.t = arm.App.theme;
-							// UINodes.inst.applyTheme();
-							headerHandle.redraws = 2;
-							toolbarHandle.redraws = 2;
-							statusHandle.redraws = 2;
-							workspaceHandle.redraws = 2;
-							menuHandle.redraws = 2;
-						});
-					}
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
-					undoHandle = Id.handle({value: C.undo_steps});
-					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
-					if (undoHandle.changed) {
-						ui.g.end();
-						while (undoLayers.length < C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
-						while (undoLayers.length > C.undo_steps) { var l = undoLayers.pop(); l.unload(); }
-						undos = 0;
-						redos = 0;
-						undoI = 0;
-						ui.g.begin(false);
-						armory.data.Config.save();
-					}
-					// ui.row([1/2, 1/2]);
-					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-					// instantMat = ui.check(Id.handle({selected: instantMat}), "Material Preview");
-				}
-
-				#if arm_debug
-				iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
-				#end
-
-				hssgi = Id.handle({selected: C.rp_ssgi});
-				hssr = Id.handle({selected: C.rp_ssr});
-				hbloom = Id.handle({selected: C.rp_bloom});
-				hsupersample = Id.handle({position: Config.getSuperSampleQuality(C.rp_supersample)});
-				hvxao = Id.handle({selected: C.rp_gi});
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Viewport Quality", 1)) {
-					ui.row([1/2, 1/2]);
-					var vsyncHandle = Id.handle({selected: C.window_vsync});
-					C.window_vsync = ui.check(vsyncHandle, "VSync");
-					if (vsyncHandle.changed) armory.data.Config.save();
-					ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
-					if (hsupersample.changed) Config.applyConfig();
-					ui.row([1/2, 1/2]);
-					ui.check(hvxao, "Voxel AO");
-					if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
-					if (hvxao.changed) Config.applyConfig();
-					ui.check(hssgi, "SSAO");
-					if (hssgi.changed) Config.applyConfig();
-					ui.row([1/2, 1/2]);
-					ui.check(hbloom, "Bloom");
-					if (hbloom.changed) Config.applyConfig();
-					ui.check(hssr, "SSR");
-					if (hssr.changed) Config.applyConfig();
-					var cullHandle = Id.handle({selected: culling});
-					culling = ui.check(cullHandle, "Cull Backfaces");
-					if (cullHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
-					}
-				}
-
-				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
-					ui.text("Select Material - Shift+1-9");
-					ui.text("Cycle Layers - Ctrl+Tab");
-					ui.text("Brush Radius - Hold F+Drag");
-					ui.text("Brush Ruler - Hold Shift+Paint");
-				}
-
-				// ui.separator();
-				// ui.button("Restore Defaults");
-				// ui.button("Confirm");
 			}
 		}
 
