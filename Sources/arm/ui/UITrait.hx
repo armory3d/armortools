@@ -590,7 +590,7 @@ class UITrait extends iron.Trait {
 				else if (kb.started("5")) {
 					cameraType = cameraType == 0 ? 1 : 0;
 					camHandle.position = cameraType;
-					updateCameraType();
+					updateCameraType(cameraType);
 					statusHandle.redraws = 2;
 				}
 			}
@@ -1476,10 +1476,10 @@ class UITrait extends iron.Trait {
 			var scene = iron.Scene.active;
 			var cam = scene.cameras[0];
 			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Rotate", "Orbit", "Fly"], "Controls");
-			cameraType = ui.combo(camHandle, ["Perspective", "Orhographic"], "Type");
+			cameraType = ui.combo(camHandle, ["Perspective", "Orthographic"], "Type");
 			if (ui.isHovered) ui.tooltip("Camera Type (5)");
 			if (camHandle.changed) {
-				updateCameraType();
+				updateCameraType(cameraType);
 			}
 
 			fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
@@ -2586,7 +2586,7 @@ class UITrait extends iron.Trait {
 		}
 	}
 
-	function updateCameraType() {
+	public function updateCameraType(cameraType:Int) {
 		var cam = iron.Scene.active.cameras[0];
 		if (cameraType == 0) {
 			cam.data.raw.ortho = null;

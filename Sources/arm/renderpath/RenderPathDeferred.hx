@@ -231,6 +231,7 @@ class RenderPathDeferred {
 			var cam = iron.Scene.active.camera;
 			UITrait.inst.savedCamera.setFrom(cam.transform.local);
 			savedFov = cam.data.raw.fov;
+			UITrait.inst.updateCameraType(0);
 			var m = iron.math.Mat4.identity();
 			m.translate(0, 0, 0.5);
 			cam.transform.setMatrix(m);
@@ -416,6 +417,7 @@ class RenderPathDeferred {
 			UITrait.inst.paintObject = painto;
 			iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 			iron.Scene.active.camera.data.raw.fov = savedFov;
+			UITrait.inst.updateCameraType(UITrait.inst.cameraType);
 			iron.Scene.active.camera.buildProjection();
 			iron.Scene.active.camera.buildMatrix();
 		}

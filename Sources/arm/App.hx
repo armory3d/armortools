@@ -204,7 +204,12 @@ class App extends iron.Trait {
 	public static function resize() {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
-		iron.Scene.active.camera.buildProjection();
+		var cam = iron.Scene.active.camera;
+		if (cam.data.raw.ortho != null) {
+			cam.data.raw.ortho[2] = -2 * (iron.App.h() / iron.App.w());
+			cam.data.raw.ortho[3] =  2 * (iron.App.h() / iron.App.w());
+		}
+		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
 
 		var lay = UITrait.inst.C.ui_layout;
