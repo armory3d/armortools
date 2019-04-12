@@ -69,13 +69,8 @@ class MeshUtil {
 	public static function switchUpAxis(axisUp:Int) {
 		for (p in UITrait.inst.paintObjects) {
 			var g = p.data.geom;
-
-			// position, normals
-
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
-			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
-			var verticesVox = g.vertexBufferMap.get("posnor").lockInt16();
 			if (axisUp == 2 || axisUp == 3) { // Y / -Y
 				var sign = axisUp == 2 ? 1 : -1;
 				for (i in 0...Std.int(vertices.length / 8)) {
@@ -91,10 +86,6 @@ class MeshUtil {
 					f = verticesDepth[i * 4 + 1] * sign;
 					verticesDepth[i * 4 + 1] = verticesDepth[i * 4 + 2] * sign;
 					verticesDepth[i * 4 + 2] = -f;
-
-					f = verticesVox[i * 6 + 1] * sign;
-					verticesVox[i * 6 + 1] = verticesVox[i * 6 + 2] * sign;
-					verticesVox[i * 6 + 2] = -f;
 				}
 			}
 			else if (axisUp == 0 || axisUp == 1) { // Z / -Z
@@ -111,37 +102,58 @@ class MeshUtil {
 					f = verticesDepth[i * 4 + 1] * sign;
 					verticesDepth[i * 4 + 1] = -verticesDepth[i * 4 + 2] * sign;
 					verticesDepth[i * 4 + 2] = f;
-
-					f = verticesVox[i * 6 + 1] * sign;
-					verticesVox[i * 6 + 1] = -verticesVox[i * 6 + 2] * sign;
-					verticesVox[i * 6 + 2] = f;
 				}
 			}
 			g.vertexBuffer.unlock();
 			g.vertexBufferMap.get("pos").unlock();
-			g.vertexBufferMap.get("posnor").unlock();
 		}
 	}
 
 	public static function flipNormals() {
 		for (p in UITrait.inst.paintObjects) {
 			var g = p.data.geom;
-			// position, normals
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
-			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
-			if (!g.vertexBufferMap.exists("posnor")) g.get([{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]);
-			var verticesVox = g.vertexBufferMap.get("posnor").lockInt16();
 			for (i in 0...Std.int(vertices.length / 8)) {
 				vertices[i * 8 + 3] = -vertices[i * 8 + 3];
 				vertices[i * 8 + 4] = -vertices[i * 8 + 4];
 				vertices[i * 8 + 5] = -vertices[i * 8 + 5];
-				verticesVox[i * 6 + 3] = -verticesVox[i * 6 + 3];
-				verticesVox[i * 6 + 4] = -verticesVox[i * 6 + 4];
-				verticesVox[i * 6 + 5] = -verticesVox[i * 6 + 5];
 			}
 			g.vertexBuffer.unlock();
-			g.vertexBufferMap.get("pos").unlock();
-			g.vertexBufferMap.get("posnor").unlock();
+		}
+	}
+
+	public static function calcNormals() {
+		var va = new iron.math.Vec4();
+		var vb = new iron.math.Vec4();
+		var vc = new iron.math.Vec4();
+		var cb = new iron.math.Vec4();
+		var ab = new iron.math.Vec4();
+		for (p in UITrait.inst.paintObjects) {
+			var g = p.data.geom;
+			var inda = g.indices[0];
+			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			for (i in 0...Std.int(inda.length / 3)) {
+				var i1 = inda[i * 3    ];
+				var i2 = inda[i * 3 + 1];
+				var i3 = inda[i * 3 + 2];
+				va.set(vertices[i1 * 8], vertices[i1 * 8 + 1], vertices[i1 * 8 + 2]);
+				vb.set(vertices[i2 * 8], vertices[i2 * 8 + 1], vertices[i2 * 8 + 2]);
+				vc.set(vertices[i3 * 8], vertices[i3 * 8 + 1], vertices[i3 * 8 + 2]);
+				cb.subvecs(vc, vb);
+				ab.subvecs(va, vb);
+				cb.cross(ab);
+				cb.normalize();
+				vertices[i1 * 8 + 4] = Std.int(cb.x * 32767);
+				vertices[i1 * 8 + 5] = Std.int(cb.y * 32767);
+				vertices[i1 * 8 + 3] = Std.int(cb.z * 32767);
+				vertices[i2 * 8 + 4] = Std.int(cb.x * 32767);
+				vertices[i2 * 8 + 5] = Std.int(cb.y * 32767);
+				vertices[i2 * 8 + 3] = Std.int(cb.z * 32767);
+				vertices[i3 * 8 + 4] = Std.int(cb.x * 32767);
+				vertices[i3 * 8 + 5] = Std.int(cb.y * 32767);
+				vertices[i3 * 8 + 3] = Std.int(cb.z * 32767);
+			}
+			g.vertexBuffer.unlock();
 		}
 	}
 }

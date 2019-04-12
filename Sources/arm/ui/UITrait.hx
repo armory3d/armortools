@@ -2508,6 +2508,10 @@ class UITrait extends iron.Trait {
 					MeshUtil.flipNormals();
 					ddirty = 2;
 				}
+				if (ui.button("Calculate Normals")) {
+					MeshUtil.calcNormals();
+					ddirty = 2;
+				}
 				if (ui.button("Import Envmap")) {
 					arm.App.showFiles = true;
 					@:privateAccess zui.Ext.lastPath = ""; // Refresh
