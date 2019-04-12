@@ -383,8 +383,6 @@ class Importer {
 		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
 
 		if (UITrait.inst.paintObjects.length > 1) {
-			// UITrait.inst.layersHandle.selected = true;
-
 			// Sort by name
 			UITrait.inst.paintObjects.sort(function(a, b):Int {
 				if (a.name < b.name) return -1;
@@ -398,7 +396,6 @@ class Importer {
 			UITrait.inst.mergedObject.visible = true;
 		}
 
-		// Import is synchronous for now
 		ViewportUtil.scaleToBounds();
 
 		if (UITrait.inst.paintObject.name == "") UITrait.inst.paintObject.name = "Object";
@@ -746,11 +743,6 @@ class Importer {
 			var object = iron.Scene.active.addMeshObject(md, UITrait.inst.paintObject.materials, UITrait.inst.paintObject);
 			object.name = mesh.name;
 			object.skip_context = "paint";
-
-			// iron.App.notifyOnRender(Layers.initLayers);
-			
-			// object.transform.scale.setFrom(UITrait.inst.paintObject.transform.scale);
-			// object.transform.buildMatrix();
 
 			UITrait.inst.paintObjects.push(object);
 

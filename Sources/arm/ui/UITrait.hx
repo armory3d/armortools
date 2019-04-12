@@ -462,14 +462,8 @@ class UITrait extends iron.Trait {
 				setLayer(layers[i]);
 			}
 			else { // Toggle node editor
-
-				// Clear input state as ui receives input events even when not drawn
-				@:privateAccess UIView2D.inst.ui.endInput();
-				@:privateAccess UINodes.inst.ui.endInput();
-
 				if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
-					UINodes.inst.show = !UINodes.inst.show;
-					arm.App.resize();
+					showMaterialNodes();
 				}
 			}
 		}
@@ -503,7 +497,8 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		if (kb.started("f11")) {
+		if (kb.started("f11") ||
+		   (kb.started("escape") && !show && !arm.App.showFiles && !arm.App.showBox)) {
 			show = !show;
 			arm.App.resize();
 		}
@@ -1040,19 +1035,27 @@ class UITrait extends iron.Trait {
 	}
 
 	function showMaterialNodes() {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UINodes.inst.ui.endInput();
+
 		if (UINodes.inst.show && UINodes.inst.canvasType == 0) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.canvasType = 0; }
 		arm.App.resize();
 	}
 
 	function showBrushNodes() {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UINodes.inst.ui.endInput();
+
 		if (UINodes.inst.show && UINodes.inst.canvasType == 1) UINodes.inst.show = false;
 		else { UINodes.inst.show = true; UINodes.inst.canvasType = 1; }
 		arm.App.resize();
 	}
 
 	// function showLogicNodes() {
-	// 	UIView2D.inst.show = false;
+	//	// Clear input state as ui receives input events even when not drawn
+	//	@:privateAccess UINodes.inst.ui.endInput();
+
 	// 	if (UINodes.inst.show && UINodes.inst.canvasType == 2) UINodes.inst.show = false;
 	// 	else { UINodes.inst.show = true; UINodes.inst.canvasType = 2; }
 	// 	arm.App.resize();
@@ -1061,6 +1064,9 @@ class UITrait extends iron.Trait {
 	// function showParticleNodes() {}
 
 	function show2DView() {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UIView2D.inst.ui.endInput();
+
 		UIView2D.inst.show = !UIView2D.inst.show;
 		arm.App.resize();
 	}
@@ -2324,6 +2330,7 @@ class UITrait extends iron.Trait {
 						Importer.importFile(path);
 					}
 				}
+				if (ui.isHovered) ui.tooltip("Import texture file (Ctrl + Shift + I)");
 
 				if (assets.length > 0) {
 					for (i in 0...assets.length) {
@@ -2384,6 +2391,7 @@ class UITrait extends iron.Trait {
 						Importer.importFile(path);
 					}
 				}
+				if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
 
 				isUdim = ui.check(Id.handle({selected: isUdim}), "Import UDIM tiles");
 				if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
