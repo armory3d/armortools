@@ -1804,13 +1804,13 @@ class UITrait extends iron.Trait {
 				var ar = ["All"];
 				for (p in paintObjects) ar.push(p.name);
 				var filterHandle = Id.handle();
-				layerFilter = ui.combo(filterHandle, ar, "Show");
+				layerFilter = ui.combo(filterHandle, ar, "Filter");
 				if (filterHandle.changed) {
 					for (p in paintObjects) {
 						p.visible = layerFilter == 0 || p.name == ar[layerFilter];
-						ddirty = 2;
 						setObjectMask();
 					}
+					ddirty = 2;
 				}
 
 				function drawList(l:LayerSlot, i:Int) {
@@ -2393,7 +2393,7 @@ class UITrait extends iron.Trait {
 				}
 				if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
 
-				isUdim = ui.check(Id.handle({selected: isUdim}), "Import UDIM tiles");
+				isUdim = ui.check(Id.handle({selected: isUdim}), "UDIM import");
 				if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
 
 				if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {

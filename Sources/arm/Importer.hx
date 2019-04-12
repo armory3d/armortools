@@ -409,11 +409,25 @@ class Importer {
 
 	static function importObj(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
-			var obj = new iron.format.obj.ObjParser(b);
-			makeMesh(obj, path);
-			while (obj.hasNext) {
-				obj = new iron.format.obj.ObjParser(b, obj.pos);
-				addMesh(obj);
+			if (UITrait.inst.isUdim) {
+				var obj = new iron.format.obj.ObjParser(b, 0, UITrait.inst.isUdim);
+				var name = obj.name;
+				obj.name = name + "_1001";
+				obj.inda = obj.udims[0];
+				makeMesh(obj, path);
+				for (i in 1...obj.udims.length) {
+					obj.name = name + "_100" + (i + 1);
+					obj.inda = obj.udims[i];
+					addMesh(obj);
+				}
+			}
+			else {
+				var obj = new iron.format.obj.ObjParser(b);
+				makeMesh(obj, path);
+				while (obj.hasNext) {
+					obj = new iron.format.obj.ObjParser(b, obj.pos);
+					addMesh(obj);
+				}
 			}
 			iron.data.Data.deleteBlob(path);
 		});
