@@ -923,7 +923,10 @@ class MaterialBuilder {
 
 					if (l.texpaint_mask != null) {
 						frag.add_uniform('sampler2D texpaint_mask' + id);
-						frag.write('factor0 *= textureLod(texpaint_mask' + id + ', texCoord, 0.0).r * ${l.maskOpacity};');
+						frag.write('factor0 *= textureLod(texpaint_mask' + id + ', texCoord, 0.0).r;');
+					}
+					if (l.maskOpacity < 1) {
+						frag.write('factor0 *= ${l.maskOpacity};');
 					}
 
 					frag.write('factorinv0 = 1.0 - factor0;');

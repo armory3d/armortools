@@ -1826,7 +1826,7 @@ class UITrait extends iron.Trait {
 					var checkw = (ui._windowW / 100 * 8) / ui.SCALE;
 
 					if (layerPanel.selected) {
-						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, step * 2 + off, ui.t.SEPARATOR_COL);
+						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, step + off, ui.t.SEPARATOR_COL);
 					}
 
 					if (selectedLayer == l) {
@@ -1912,11 +1912,11 @@ class UITrait extends iron.Trait {
 					if (contextMenu) {
 						App.showContextMenu(function(ui:Zui) {
 							if (l == layers[0]) {
-								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H, ui.t.SEPARATOR_COL);
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
 							}
 							else {
-								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 14, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
 								if (ui.button("Delete", Left) && l != layers[0]) {
 									selectedLayer = l;
@@ -1940,6 +1940,47 @@ class UITrait extends iron.Trait {
 									setLayer(l, true);
 									layerPreviewDirty = true;
 								}
+							}
+
+							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
+							l.paintBase = ui.check(baseHandle, "Base Color");
+							if (baseHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
+							l.paintNor = ui.check(norHandle, "Normal");
+							if (norHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
+							l.paintOcc = ui.check(occHandle, "Occlusion");
+							if (occHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
+							l.paintRough = ui.check(roughHandle, "Roughness");
+							if (roughHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
+							l.paintMet = ui.check(metHandle, "Metallic");
+							if (metHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
+							l.paintHeight = ui.check(heightHandle, "Height");
+							if (heightHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
+							l.paintEmis = ui.check(emisHandle, "Emission");
+							if (emisHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
+							}
+							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
+							l.paintSubs = ui.check(subsHandle, "Subsurface");
+							if (subsHandle.changed) {
+								UINodes.inst.parseMeshMaterial();
 							}
 						});
 					}
@@ -1978,62 +2019,12 @@ class UITrait extends iron.Trait {
 					ui._y -= ui.t.ELEMENT_OFFSET;
 
 					if (showPanel) {
-						if (l == selectedLayer && selectedLayerIsMask) {
-							ui.row([8/100,92/100]);
-							@:privateAccess ui.endElement();
-							var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
-							l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
-							if (opacHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							@:privateAccess ui.endElement();
-						}
-						else {
-							ui.row([8/100,23/100,23/100,23/100,23/100]);
-							@:privateAccess ui.endElement();
-							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
-							l.paintBase = ui.check(baseHandle, "Base");
-							if (baseHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
-							l.paintNor = ui.check(norHandle, "Nor");
-							if (norHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
-							l.paintOcc = ui.check(occHandle, "Occ");
-							if (occHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
-							l.paintRough = ui.check(roughHandle, "Rgh");
-							if (roughHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-
-							ui.row([8/100,23/100,23/100,23/100,23/100]);
-							@:privateAccess ui.endElement();
-							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
-							l.paintMet = ui.check(metHandle, "Met");
-							if (metHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
-							l.paintHeight = ui.check(heightHandle, "Hgh");
-							if (heightHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
-							l.paintEmis = ui.check(emisHandle, "Emi");
-							if (emisHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
-							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
-							l.paintSubs = ui.check(subsHandle, "Sub");
-							if (subsHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
-							}
+						ui.row([8/100,92/100]);
+						@:privateAccess ui.endElement();
+						var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
+						l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
+						if (opacHandle.changed) {
+							UINodes.inst.parseMeshMaterial();
 						}
 					}
 				}
