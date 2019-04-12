@@ -88,7 +88,7 @@ class UITrait extends iron.Trait {
 	public var outputType = 0;
 	public var isBase = true;
 	public var isBaseSpace = 0;
-	public var isOpac = true;
+	public var isOpac = false;
 	public var isOpacSpace = 0;
 	public var isOcc = true;
 	public var isOccSpace = 0;
@@ -98,8 +98,12 @@ class UITrait extends iron.Trait {
 	public var isMetSpace = 0;
 	public var isNor = true;
 	public var isNorSpace = 0;
-	public var isHeight = true;
+	public var isEmis = false;
+	public var isEmisSpace = 0;
+	public var isHeight = false;
 	public var isHeightSpace = 0;
+	public var isSubs = false;
+	public var isSubsSpace = 0;
 	public var isUdim = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
@@ -2488,8 +2492,14 @@ class UITrait extends iron.Trait {
 					isNor = ui.check(Id.handle({selected: isNor}), "Normal");
 					isNorSpace = ui.combo(Id.handle({position: isNorSpace}), ["linear", "srgb"], "Space");
 					ui.row([1/2, 1/2]);
+					isEmis = ui.check(Id.handle({selected: isEmis}), "Emission");
+					isEmisSpace = ui.combo(Id.handle({position: isEmisSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
 					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
 					isHeightSpace = ui.combo(Id.handle({position: isHeightSpace}), ["linear", "srgb"], "Space");
+					ui.row([1/2, 1/2]);
+					isSubs = ui.check(Id.handle({selected: isSubs}), "Subsurface");
+					isSubsSpace = ui.combo(Id.handle({position: isSubsSpace}), ["linear", "srgb"], "Space");
 				}
 			}
 
