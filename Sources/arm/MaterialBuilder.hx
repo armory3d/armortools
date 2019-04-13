@@ -445,11 +445,23 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
+			
+			var height = '0.0';
 			if (UITrait.inst.selectedMaterial.paintHeight && heightUsed) {
-				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, height);');
+				height = 'height';
+			}
+
+			if (decal) {
+				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
+				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
+				frag.write('fragColor[2] = vec4(
+					occlusion * str + sample_pack_undo.r * invstr,
+					roughness * str + sample_pack_undo.g * invstr,
+					metallic * str + sample_pack_undo.b * invstr,
+					$height * str + sample_pack_undo.a * invstr);');
 			}
 			else {
-				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, 0.0);');
+				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, $height);');
 			}
 		}
 		else {
