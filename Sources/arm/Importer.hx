@@ -412,13 +412,12 @@ class Importer {
 			if (UITrait.inst.isUdim) {
 				var obj = new iron.format.obj.ObjParser(b, 0, UITrait.inst.isUdim);
 				var name = obj.name;
-				obj.name = name + "_1001";
-				obj.inda = obj.udims[0];
-				makeMesh(obj, path);
-				for (i in 1...obj.udims.length) {
-					obj.name = name + "_100" + (i + 1);
+				for (i in 0...obj.udims.length) {
+					var u = i % obj.udimsU;
+					var v = Std.int(i / obj.udimsU);
+					obj.name = name + "." + (1000 + v * 10 + u + 1);
 					obj.inda = obj.udims[i];
-					addMesh(obj);
+					i == 0 ? makeMesh(obj, path) : addMesh(obj);
 				}
 			}
 			else {
