@@ -34,9 +34,9 @@ class LayerSlot {
 	public var paintRough = true;
 	public var paintMet = true;
 	public var paintNor = true;
-	public var paintHeight = false;
-	public var paintEmis = false;
-	public var paintSubs = false;
+	public var paintHeight = true;
+	public var paintEmis = true;
+	public var paintSubs = true;
 
 	var createMaskColor:Int;
 
