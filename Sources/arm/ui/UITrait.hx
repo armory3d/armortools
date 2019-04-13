@@ -2413,6 +2413,32 @@ class UITrait extends iron.Trait {
 					}
 					ui.unindent();
 				}
+
+				ui.row([1/2,1/2]);
+				if (ui.button("Flip Normals")) {
+					MeshUtil.flipNormals();
+					ddirty = 2;
+				}
+				if (ui.button("Calculate Normals")) {
+					MeshUtil.calcNormals();
+					ddirty = 2;
+				}
+
+				ui.row([1/2, 1/2]);
+				var upHandle = Id.handle();
+				var lastUp = upHandle.position;
+				// TODO: Turn into axis rotation instead
+				var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
+				if (upHandle.changed && axisUp != lastUp) {
+					MeshUtil.switchUpAxis(axisUp);
+					ddirty = 2;
+				}
+				
+				var dispHandle = Id.handle({value: displaceStrength});
+				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+				if (dispHandle.changed) {
+					UINodes.inst.parseMeshMaterial();
+				}
 			}
 
 			if (ui.tab(htab2, "Export")) {
@@ -2504,15 +2530,6 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab2, "Viewport")) {
-				ui.row([1/2,1/2]);
-				if (ui.button("Flip Normals")) {
-					MeshUtil.flipNormals();
-					ddirty = 2;
-				}
-				if (ui.button("Calculate Normals")) {
-					MeshUtil.calcNormals();
-					ddirty = 2;
-				}
 				if (ui.button("Import Envmap")) {
 					arm.App.showFiles = true;
 					@:privateAccess zui.Ext.lastPath = ""; // Refresh
@@ -2562,22 +2579,6 @@ class UITrait extends iron.Trait {
 					lhandle.value = Std.int(lhandle.value * 100) / 100;
 					light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
 					if (lhandle.changed) ddirty = 2;
-				}
-
-				ui.row([1/2, 1/2]);
-				var upHandle = Id.handle();
-				var lastUp = upHandle.position;
-				// TODO: Turn into axis rotation instead
-				var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
-				if (upHandle.changed && axisUp != lastUp) {
-					MeshUtil.switchUpAxis(axisUp);
-					ddirty = 2;
-				}
-				
-				var dispHandle = Id.handle({value: displaceStrength});
-				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-				if (dispHandle.changed) {
-					UINodes.inst.parseMeshMaterial();
 				}
 
 				ui.row([1/2, 1/2]);
