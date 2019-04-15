@@ -1926,6 +1926,24 @@ class UITrait extends iron.Trait {
 									selectedLayer = l;
 									Layers.deleteSelectedLayer();
 								}
+								if (ui.button("Move Up", Left) && l != layers[0]) {
+									if (i < layers.length - 1) {
+										setLayer(l);
+										var t = layers[i + 1];
+										layers[i + 1] = layers[i];
+										layers[i] = t;
+										hwnd.redraws = 2;
+									}
+								}
+								if (ui.button("Move Down", Left) && l != layers[0]) {
+									if (i > 1) {
+										setLayer(l);
+										var t = layers[i - 1];
+										layers[i - 1] = layers[i];
+										layers[i] = t;
+										hwnd.redraws = 2;
+									}
+								}
 								if (ui.button("Merge Down", Left) && l != layers[0]) {
 									setLayer(l);
 									iron.App.notifyOnRender(Layers.applySelectedLayer);
