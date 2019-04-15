@@ -6,6 +6,22 @@ import iron.RenderPath;
 import arm.ui.*;
 
 class Layers {
+
+	public static var pipe:kha.graphics4.PipelineState = null;
+	public static var pipeCopy:kha.graphics4.PipelineState;
+	public static var pipeMask:kha.graphics4.PipelineState;
+	static var tex0:kha.graphics4.TextureUnit;
+	static var tex1:kha.graphics4.TextureUnit;
+	static var tex2:kha.graphics4.TextureUnit;
+	static var texa:kha.graphics4.TextureUnit;
+	static var texb:kha.graphics4.TextureUnit;
+	static var texc:kha.graphics4.TextureUnit;
+	static var opac:kha.graphics4.ConstantLocation;
+	public static var tex0Mask:kha.graphics4.TextureUnit;
+	public static var texaMask:kha.graphics4.TextureUnit;
+	public static var imga:kha.Image = null;
+	public static var imgb:kha.Image = null;
+	public static var imgc:kha.Image = null;
 	
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
@@ -136,54 +152,116 @@ class Layers {
 		UITrait.inst.setLayer(UITrait.inst.layers[0]);
 	}
 
-	static function makePipe() {
-		UITrait.inst.pipe = new kha.graphics4.PipelineState();
-		UITrait.inst.pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.painterVert);
-		UITrait.inst.pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.painterFrag);
+	public static function makePipe() {
+		pipe = new kha.graphics4.PipelineState();
+		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerMergeVert);
+		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.layerMergeFrag);
+		var vs = new kha.graphics4.VertexStructure();
+		vs.add("pos", kha.graphics4.VertexData.Float2);
+		pipe.inputLayout = [vs];
+		pipe.compile();
+		tex0 = pipe.getTextureUnit("tex0");
+		tex1 = pipe.getTextureUnit("tex1");
+		tex2 = pipe.getTextureUnit("tex2");
+		texa = pipe.getTextureUnit("texa");
+		texb = pipe.getTextureUnit("texb");
+		texc = pipe.getTextureUnit("texc");
+		opac = pipe.getConstantLocation("opac");
+
+		pipeCopy = new kha.graphics4.PipelineState();
+		pipeCopy.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerViewVert);
+		pipeCopy.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.layerViewFrag);
 		var vs = new kha.graphics4.VertexStructure();
 		vs.add("pos", kha.graphics4.VertexData.Float3);
 		vs.add("tex", kha.graphics4.VertexData.Float2);
 		vs.add("col", kha.graphics4.VertexData.Float4);
-		UITrait.inst.pipe.inputLayout = [vs];
-		UITrait.inst.pipe.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
-		UITrait.inst.pipe.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
-		UITrait.inst.pipe.colorWriteMaskAlpha = false; // TODO: use texpaint.a to merge all layer channels instead
-		UITrait.inst.pipe.compile();
+		pipeCopy.inputLayout = [vs];
+		pipeCopy.compile();
+
+		pipeMask = new kha.graphics4.PipelineState();
+		pipeMask.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerMergeVert);
+		pipeMask.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.maskMergeFrag);
+		var vs = new kha.graphics4.VertexStructure();
+		vs.add("pos", kha.graphics4.VertexData.Float2);
+		pipeMask.inputLayout = [vs];
+		pipeMask.compile();
+		tex0Mask = pipeMask.getTextureUnit("tex0");
+		texaMask = pipeMask.getTextureUnit("texa");
 	}
 
-	public static function applySelectedLayer(g:kha.graphics4.Graphics) {
-		if (UITrait.inst.pipe == null) makePipe();
+	public static function makeTempImg() {
+		var l = UITrait.inst.layers[0];
+		if (imga != null && imga.width != l.texpaint.width) {
+			imga.unload();
+			imgb.unload();
+			imgc.unload();
+			imga = null;
+			imgb = null;
+			imgc = null;
+		}
+		if (imga == null) {
+			imga = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			imgb = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			imgc = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+		}
+	}
+
+	public static function mergeSelectedLayer(g:kha.graphics4.Graphics) {
+		if (pipe == null) makePipe();
 
 		var l0 = UITrait.inst.layers[0];
 		var l1 = UITrait.inst.selectedLayer;
 		
-		// for (i in 1...UITrait.inst.layers.length) { // Merge down
-		// 	if (UITrait.inst.layers[i] == l1) {
-		// 		l0 = UITrait.inst.layers[i - 1];
-		// 		break;
-		// 	}
-		// }
+		for (i in 1...UITrait.inst.layers.length) { // Merge down
+			if (UITrait.inst.layers[i] == l1) {
+				l0 = UITrait.inst.layers[i - 1];
+				break;
+			}
+		}
 
 		g.end();
 
-		l0.texpaint.g2.begin(false);
-		l0.texpaint.g2.pipeline = UITrait.inst.pipe;
-		l0.texpaint.g2.drawImage(l1.texpaint, 0, 0);
-		l0.texpaint.g2.end();
+		makeTempImg();
 
-		l0.texpaint_nor.g2.begin(false);
-		l0.texpaint_nor.g2.pipeline = UITrait.inst.pipe;
-		l0.texpaint_nor.g2.drawImage(l1.texpaint_nor, 0, 0);
-		l0.texpaint_nor.g2.end();
+		if (l1.texpaint_mask != null) {
+			l1.applyMask();
+		}
 
-		l0.texpaint_pack.g2.begin(false);
-		l0.texpaint_pack.g2.pipeline = UITrait.inst.pipe;
-		l0.texpaint_pack.g2.drawImage(l1.texpaint_pack, 0, 0);
-		l0.texpaint_pack.g2.end();
+		// Copy layer0 to temp
+		imga.g2.begin(false);
+		imga.g2.pipeline = pipeCopy;
+		imga.g2.drawImage(l0.texpaint, 0, 0);
+		imga.g2.end();
+		imgb.g2.begin(false);
+		imgb.g2.pipeline = pipeCopy;
+		imgb.g2.drawImage(l0.texpaint_nor, 0, 0);
+		imgb.g2.end();
+		imgc.g2.begin(false);
+		imgc.g2.pipeline = pipeCopy;
+		imgc.g2.drawImage(l0.texpaint_pack, 0, 0);
+		imgc.g2.end();
+
+		// Merge into layer0
+		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+		l0.texpaint.g4.begin([l0.texpaint_nor, l0.texpaint_pack]);
+		l0.texpaint.g4.setPipeline(pipe);
+		l0.texpaint.g4.setTexture(tex0, l1.texpaint);
+		l0.texpaint.g4.setTexture(tex1, l1.texpaint_nor);
+		l0.texpaint.g4.setTexture(tex2, l1.texpaint_pack);
+		l0.texpaint.g4.setTexture(texa, imga);
+		l0.texpaint.g4.setTexture(texb, imgb);
+		l0.texpaint.g4.setTexture(texc, imgc);
+		l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
+		l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+		l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+		l0.texpaint.g4.drawIndexedVertices();
+		l0.texpaint.g4.end();
 
 		g.begin();
 
 		deleteSelectedLayer();
-		iron.App.removeRender(applySelectedLayer);
+		iron.App.removeRender(mergeSelectedLayer);
+		UITrait.inst.setLayer(l0);
+		UITrait.inst.layerPreviewDirty = true;
 	}
 }

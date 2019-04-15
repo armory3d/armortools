@@ -180,4 +180,30 @@ class LayerSlot {
 
 		texpaint_mask_preview.unload();
 	}
+
+	public function applyMask() {
+		if (texpaint_mask == null) return;
+
+		if (Layers.pipe == null) Layers.makePipe();
+		Layers.makeTempImg();
+
+		// Copy layer to temp
+		Layers.imga.g2.begin(false);
+		Layers.imga.g2.pipeline = Layers.pipeCopy;
+		Layers.imga.g2.drawImage(texpaint, 0, 0);
+		Layers.imga.g2.end();
+
+		// Merge mask
+		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+		texpaint.g4.begin();
+		texpaint.g4.setPipeline(Layers.pipeMask);
+		texpaint.g4.setTexture(Layers.tex0Mask, Layers.imga);
+		texpaint.g4.setTexture(Layers.texaMask, texpaint_mask);
+		texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+		texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+		texpaint.g4.drawIndexedVertices();
+		texpaint.g4.end();
+
+		deleteMask();
+	}
 }

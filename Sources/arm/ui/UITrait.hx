@@ -162,7 +162,6 @@ class UITrait extends iron.Trait {
 	var axisZ = false;
 	var axisStart = 0.0;
 	var row4 = [1/4, 1/4, 1/4, 1/4];
-	public var pipe:kha.graphics4.PipelineState = null;
 
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
@@ -705,6 +704,7 @@ class UITrait extends iron.Trait {
 				selectPaintObject(paintObjects[opos]);
 				setLayer(layers[lpos]);
 				selectedLayer.swap(lay);
+				layerPreviewDirty = true;
 			}
 			undoI = (undoI + 1) % C.undo_steps;
 			undos++;
@@ -1893,6 +1893,8 @@ class UITrait extends iron.Trait {
 								}
 								if (ui.button("Apply", Left)) {
 									setLayer(l);
+									l.applyMask();
+									setLayer(l); // Parse mesh material
 								}
 							});
 						}
@@ -1920,7 +1922,7 @@ class UITrait extends iron.Trait {
 								ui.text(l.name, Right);
 							}
 							else {
-								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 14, ui.t.SEPARATOR_COL);
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 16, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
 								if (ui.button("Delete", Left) && l != layers[0]) {
 									selectedLayer = l;
@@ -1946,7 +1948,7 @@ class UITrait extends iron.Trait {
 								}
 								if (ui.button("Merge Down", Left) && l != layers[0]) {
 									setLayer(l);
-									iron.App.notifyOnRender(Layers.applySelectedLayer);
+									iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 								}
 								if (ui.button("Duplicate", Left) && l != layers[0]) {
 									setLayer(l);
