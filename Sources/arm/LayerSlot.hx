@@ -17,9 +17,10 @@ class LayerSlot {
 
 	public var texpaint_preview:kha.Image; // Layer preview
 
-	public var texpaint_mask:kha.Image = null;
+	public var texpaint_mask:kha.Image = null; // Texture mask
 	public var texpaint_mask_preview:kha.Image;
-	public var maskOpacity = 1.0;
+	public var maskOpacity = 1.0; // Opacity mask
+	public var material_mask:MaterialSlot = null; // Fill layer
 
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
@@ -205,5 +206,31 @@ class LayerSlot {
 		texpaint.g4.end();
 
 		deleteMask();
+	}
+
+	public function duplicate() {
+		var layers = UITrait.inst.layers;
+		var i = 0;
+		while (i++ < layers.length) if (layers[i] == this) break;
+		i++;
+
+		var l = new LayerSlot();
+		layers.insert(i, l);
+
+		if (Layers.pipe == null) Layers.makePipe();
+		l.texpaint.g2.begin(false);
+		l.texpaint.g2.pipeline = Layers.pipeCopy;
+		l.texpaint.g2.drawImage(texpaint, 0, 0);
+		l.texpaint.g2.end();
+		l.texpaint_nor.g2.begin(false);
+		l.texpaint_nor.g2.pipeline = Layers.pipeCopy;
+		l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+		l.texpaint_nor.g2.end();
+		l.texpaint_pack.g2.begin(false);
+		l.texpaint_pack.g2.pipeline = Layers.pipeCopy;
+		l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+		l.texpaint_pack.g2.end();
+		
+		return l;
 	}
 }

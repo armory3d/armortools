@@ -3,6 +3,7 @@ package arm;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.DepthStencilFormat;
 import iron.RenderPath;
+import arm.ui.UITrait;
 import arm.ui.*;
 
 class Layers {
@@ -263,5 +264,56 @@ class Layers {
 		iron.App.removeRender(mergeSelectedLayer);
 		UITrait.inst.setLayer(l0);
 		UITrait.inst.layerPreviewDirty = true;
+	}
+
+	public static function isFillMaterial():Bool {
+		var m = UITrait.inst.selectedMaterial;
+		for (l in UITrait.inst.layers) if (l.material_mask == m) return true;
+		return false;
+	}
+
+	public static function updateFillLayers(fills = 1) {
+		var m = UITrait.inst.selectedMaterial;
+		var layers = UITrait.inst.layers;
+		var selectedLayer = UITrait.inst.selectedLayer;
+		var isMask = UITrait.inst.selectedLayerIsMask;
+		var selectedTool = UITrait.inst.selectedTool;
+		var current:kha.graphics4.Graphics2 = null;
+
+		var first = true;
+		for (l in layers) {
+			if (l.material_mask == m) {
+				if (first) {
+					current = @:privateAccess kha.graphics4.Graphics2.current;
+					if (current != null) current.end();
+					UITrait.inst.pdirty = fills;
+					UITrait.inst.selectedLayerIsMask = false;
+					UITrait.inst.selectedTool = ToolFill;
+				}
+
+				UITrait.inst.selectedLayer = l;
+				UITrait.inst.setObjectMask();
+
+				if (first) {
+					first = false;
+					UINodes.inst.parsePaintMaterial();
+				}
+				
+				for (i in 0...fills) {
+					arm.renderpath.RenderPathDeferred.commandsPaint();
+				}
+			}
+		}
+
+		if (!first) {
+			UITrait.inst.pdirty = 0;
+			UITrait.inst.ddirty = 2;
+			UITrait.inst.rdirty = 2;
+			if (current != null) current.begin(false);
+			UITrait.inst.selectedLayer = selectedLayer;
+			UITrait.inst.selectedLayerIsMask = isMask;
+			UITrait.inst.setObjectMask();
+			UITrait.inst.selectedTool = selectedTool;
+		}
 	}
 }

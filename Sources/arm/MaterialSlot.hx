@@ -2,7 +2,8 @@ package arm;
 
 class MaterialSlot {
 	public var nodes = new zui.Nodes();
-	public var image:kha.Image = null;
+	public var image:kha.Image = null; // 200
+	public var imageIcon:kha.Image = null; // 50
 	public var data:iron.data.MaterialData;
 
 	static var counter = 0;
@@ -20,7 +21,12 @@ class MaterialSlot {
 	
 	public function new(m:iron.data.MaterialData = null) {
 		id = ++counter;
-		image = kha.Image.createRenderTarget(arm.util.RenderUtil.matPreviewSize, arm.util.RenderUtil.matPreviewSize);
+
+		var w = arm.util.RenderUtil.matPreviewSize;
+		var wIcon = Std.int(w / 4);
+		image = kha.Image.createRenderTarget(w, w);
+		imageIcon = kha.Image.createRenderTarget(wIcon, wIcon);
+		
 		data = m;
 	}
 }

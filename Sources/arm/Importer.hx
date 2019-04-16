@@ -132,7 +132,6 @@ class Importer {
 				if (valid) importTexture(f);
 			}
 			// Create material
-			UITrait.inst.autoFillHandle.selected = false;
 			UITrait.inst.selectedMaterial = new MaterialSlot();
 			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
 			UINodes.inst.updateCanvasMap();
@@ -696,7 +695,6 @@ class Importer {
 				if (handle != "mesh_SphereSphere" && handle != "mesh_PlanePlane") {
 					iron.data.Data.deleteMesh(handle);
 				}
-				UITrait.inst.autoFillHandle.selected = false;
 
 				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
 				UITrait.inst.setLayer(UITrait.inst.layers[0]);

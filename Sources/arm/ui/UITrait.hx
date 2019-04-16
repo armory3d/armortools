@@ -124,7 +124,6 @@ class UITrait extends iron.Trait {
 	public var decalImage:kha.Image = null;
 	public var decalPreview = false;
 	public var viewportMode = 0;
-	public var instantMat = true;
 	var hscaleWasChanged = false;
 
 	public var textToolImage:kha.Image = null;
@@ -186,7 +185,6 @@ class UITrait extends iron.Trait {
 	public var mirrorX = false;
 	public var showGrid = false;
 	public var showCompass = true;
-	public var autoFillHandle = new Zui.Handle({selected: false});
 	public var fillTypeHandle = new Zui.Handle();
 	public var resHandle = new Zui.Handle({position: 1}); // 2048
 	public var mergedObject:MeshObject = null; // For object mask
@@ -211,7 +209,6 @@ class UITrait extends iron.Trait {
 	var brushCanLock = false;
 	var brushCanUnlock = false;
 	public var cameraType = 0;
-	// public var originalShadowBias = 0.0;
 	public var camHandle = new Zui.Handle({position: 0});
 	public var fovHandle:Zui.Handle = null;
 	public var undoHandle:Zui.Handle = null;
@@ -624,7 +621,6 @@ class UITrait extends iron.Trait {
 
 	public function setMaterial(m:MaterialSlot) {
 		selectedMaterial = m;
-		autoFillHandle.selected = false; // Auto-disable
 		UINodes.inst.updateCanvasMap();
 		UINodes.inst.parsePaintMaterial();
 		hwnd1.redraws = 2;
@@ -662,7 +658,6 @@ class UITrait extends iron.Trait {
 	public function setLayer(l:LayerSlot, isMask = false) {
 		selectedLayer = l;
 		selectedLayerIsMask = isMask;
-		autoFillHandle.selected = false; // Auto-disable
 		headerHandle.redraws = 2;
 
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
@@ -1077,7 +1072,6 @@ class UITrait extends iron.Trait {
 
 	function selectTool(i:Int) {
 		selectedTool = i;
-		autoFillHandle.selected = false; // Auto-disable
 		UINodes.inst.parsePaintMaterial();
 		UINodes.inst.parseMeshMaterial();
 		headerHandle.redraws = 2;
@@ -1124,7 +1118,6 @@ class UITrait extends iron.Trait {
 	}
 
 	public function selectPaintObject(o:iron.object.MeshObject) {
-		autoFillHandle.selected = false; // Auto-disable
 		headerHandle.redraws = 2;
 		for (p in paintObjects) p.skip_context = "paint";
 		paintObject = o;
@@ -1377,12 +1370,6 @@ class UITrait extends iron.Trait {
 					var h = Id.handle({value: bakeOffset});
 					bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
 					if (h.changed) UINodes.inst.parsePaintMaterial();
-					ui.check(autoFillHandle, "Auto-Fill");
-					if (autoFillHandle.changed) {
-						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
-						pushUndo = true;
-					}
 				}
 				else {
 					if (selectedTool != ToolFill) {
@@ -1402,14 +1389,10 @@ class UITrait extends iron.Trait {
 								RenderUtil.makeDecalPreview();
 								ui.g.begin(false);
 							}
-							if (autoFillHandle.selected) {
-								UINodes.inst.parsePaintMaterial();
-							}
 						}
 
 						var brushRotHandle = Id.handle({value: brushRot});
 						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
-						// if (brushRotHandle.changed && autoFillHandle.selected) UINodes.inst.parsePaintMaterial();
 						if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
 					}
 					
@@ -1444,12 +1427,6 @@ class UITrait extends iron.Trait {
 							}
 							UINodes.inst.parsePaintMaterial();
 							UINodes.inst.parseMeshMaterial();
-						}
-						ui.check(autoFillHandle, "Auto-Fill");
-						if (autoFillHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							UINodes.inst.parsePaintMaterial();
-							pushUndo = true;
 						}
 					}
 					else {
@@ -1718,7 +1695,7 @@ class UITrait extends iron.Trait {
 					// 				@:privateAccess ui.endElement();
 					//				continue;
 					//			}
-					// 			var img = materials2[i].image;
+					// 			var img = materials2[i].imageIcon;
 
 					// 			if (selectedMaterial2 == materials2[i]) {
 					// 				// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
@@ -1860,8 +1837,10 @@ class UITrait extends iron.Trait {
 					var contextMenu = false;
 
 					ui._y += 3;
-					var state = ui.image(l.texpaint_preview);
+					// var state = ui.image(l.texpaint_preview);
+					var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon);
 					ui._y -= 3;
+
 					if (ui.isHovered) {
 						ui.tooltipImage(l.texpaint_preview);
 					}
@@ -1875,6 +1854,21 @@ class UITrait extends iron.Trait {
 						if (iron.system.Time.time() - selectTime < 0.25) show2DView();
 						selectTime = iron.system.Time.time();
 					}
+
+					// if (l.material_mask != null) {
+					// 	var img = l.material_mask.imageIcon;
+					// 	var w = img.width / 2;
+					// 	var x = ui._x - w * 1.13;
+					// 	var y = ui._y + w * 0.63;
+					// 	ui.g.color = 0xff000000;
+					// 	ui.g.fillRect(x, y, w, w);
+					// 	ui.g.color = 0xffffffff;
+					// 	#if kha_direct3d11
+					// 	ui.g.drawScaledImage(img, x, y, w, w);
+					// 	#else
+					// 	ui.g.drawScaledImage(img, x, y + w, w, -w);
+					// 	#end
+					// }
 
 					if (l.texpaint_mask != null) {
 						ui._y += 3;
@@ -1922,13 +1916,13 @@ class UITrait extends iron.Trait {
 								ui.text(l.name, Right);
 							}
 							else {
-								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 16, ui.t.SEPARATOR_COL);
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 17, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
-								if (ui.button("Delete", Left) && l != layers[0]) {
+								if (ui.button("Delete", Left)) {
 									selectedLayer = l;
 									Layers.deleteSelectedLayer();
 								}
-								if (ui.button("Move Up", Left) && l != layers[0]) {
+								if (ui.button("Move Up", Left)) {
 									if (i < layers.length - 1) {
 										setLayer(l);
 										var t = layers[i + 1];
@@ -1937,7 +1931,7 @@ class UITrait extends iron.Trait {
 										hwnd.redraws = 2;
 									}
 								}
-								if (ui.button("Move Down", Left) && l != layers[0]) {
+								if (ui.button("Move Down", Left)) {
 									if (i > 1) {
 										setLayer(l);
 										var t = layers[i - 1];
@@ -1946,23 +1940,47 @@ class UITrait extends iron.Trait {
 										hwnd.redraws = 2;
 									}
 								}
-								if (ui.button("Merge Down", Left) && l != layers[0]) {
+								if (ui.button("Merge Down", Left)) {
 									setLayer(l);
 									iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 								}
-								if (ui.button("Duplicate", Left) && l != layers[0]) {
+								if (ui.button("Duplicate", Left)) {
 									setLayer(l);
-									
+									l = l.duplicate();
+									setLayer(l);
+									layerPreviewDirty = true;
 								}
-								if (ui.button("Black Mask", Left) && l != layers[0]) {
+								if (ui.button("Black Mask", Left)) {
 									l.createMask(0x00000000);
 									setLayer(l, true);
 									layerPreviewDirty = true;
 								}
-								if (ui.button("White Mask", Left) && l != layers[0]) {
+								if (ui.button("White Mask", Left)) {
 									l.createMask(0xffffffff);
 									setLayer(l, true);
 									layerPreviewDirty = true;
+								}
+								
+								if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
+									setLayer(l);
+									l.material_mask = UITrait.inst.selectedMaterial;
+									function makeFill(g:kha.graphics4.Graphics) {
+										g.end();
+										Layers.updateFillLayers(8);
+										UINodes.inst.parsePaintMaterial();
+										UITrait.inst.layerPreviewDirty = true;
+										hwnd.redraws = 2;
+										g.begin();
+										iron.App.removeRender(makeFill);
+									}
+									iron.App.notifyOnRender(makeFill);
+								}
+								if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
+									setLayer(l);
+									l.material_mask = null;
+									UINodes.inst.parsePaintMaterial();
+									UITrait.inst.layerPreviewDirty = true;
+									hwnd.redraws = 2;
 								}
 							}
 
@@ -2109,6 +2127,9 @@ class UITrait extends iron.Trait {
 							statusHandle.redraws = 2;
 							workspaceHandle.redraws = 2;
 							menuHandle.redraws = 2;
+							hwnd.redraws = 2;
+							hwnd1.redraws = 2;
+							hwnd2.redraws = 2;
 						});
 					}
 				}
@@ -2127,9 +2148,7 @@ class UITrait extends iron.Trait {
 						ui.g.begin(false);
 						armory.data.Config.save();
 					}
-					// ui.row([1/2, 1/2]);
 					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
-					// instantMat = ui.check(Id.handle({selected: instantMat}), "Material Preview");
 				}
 
 				#if arm_debug
@@ -2190,7 +2209,6 @@ class UITrait extends iron.Trait {
 				ui.row([1/4,1/4]);
 				if (ui.button("New")) {
 					ui.g.end();
-					autoFillHandle.selected = false; // Auto-disable
 					headerHandle.redraws = 2;
 					selectedMaterial = new MaterialSlot();
 					materials.push(selectedMaterial);
@@ -2222,7 +2240,8 @@ class UITrait extends iron.Trait {
 							@:privateAccess ui.endElement();
 							continue;
 						}
-						var img = materials[i].image;
+						var img = materials[i].imageIcon;
+						var imgFull = materials[i].image;
 
 						if (selectedMaterial == materials[i]) {
 							// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
@@ -2242,14 +2261,15 @@ class UITrait extends iron.Trait {
 						}
 						if (ui.isHovered && ui.inputReleasedR) {
 							App.showContextMenu(function(ui:Zui) {
+								var m = materials[i];
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 								ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
+								
 								if (ui.button("Delete", Left) && materials.length > 1) {
 									materials.splice(i, 1);
 									hwnd1.redraws = 2;
 								}
 								
-								var m = materials[i];
 								var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
 								m.paintBase = ui.check(baseHandle, "Base Color");
 								if (baseHandle.changed) {
@@ -2300,7 +2320,7 @@ class UITrait extends iron.Trait {
 								}
 							});
 						}
-						if (ui.isHovered) ui.tooltipImage(img);
+						if (ui.isHovered) ui.tooltipImage(imgFull);
 					}
 
 					ui._y += 6;
@@ -2664,7 +2684,7 @@ class UITrait extends iron.Trait {
 		g.begin(false);
 	}
 
-	function setObjectMask() {
+	public function setObjectMask() {
 		var ar = ["None"];
 		for (p in paintObjects) ar.push(p.name);
 

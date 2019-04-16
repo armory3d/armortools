@@ -196,17 +196,18 @@ class UINodes extends iron.Trait {
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
 			if (canvasType == 0) {
+				if (Layers.isFillMaterial()) {
+					Layers.updateFillLayers(1); // TODO: jitter
+					UITrait.inst.hwnd.redraws = 2;
+				}
 				parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd1.redraws = 2;
 				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
-				if (UITrait.inst.autoFillHandle.selected) {
-					UITrait.inst.layerPreviewDirty = true;
-				}
 			}
 		}
-		else if (ui.changed && (mstartedlast || mouse.moved) && UITrait.inst.instantMat) {
+		else if (ui.changed && (mstartedlast || mouse.moved)) {
 			recompileMat = true; // Instant preview
 		}
 		mstartedlast = mouse.started();
@@ -273,13 +274,13 @@ class UINodes extends iron.Trait {
 	function render2D(g:kha.graphics2.Graphics) {
 		if (recompileMat) {
 			recompileMat = false;
-			if (UITrait.inst.autoFillHandle.selected) {
-				parsePaintMaterial();
+			if (Layers.isFillMaterial()) {
+				Layers.updateFillLayers();
 			}
 			else {
 				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd1.redraws = 2;
 			}
+			UITrait.inst.hwnd1.redraws = 2;
 		}
 
 		if (!show) return;
@@ -547,21 +548,6 @@ class UINodes extends iron.Trait {
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 
-
-			// var matcon:TMaterialContext = { name: "shadowmap", bind_textures: [] };
-			// var smcon = MaterialBuilder.make_depth(sd, matcon, true);
-			// var smcdata = smcon.data;
-			// // from_source is synchronous..
-			// var smsc = new ShaderContext(smcdata, function(sc:ShaderContext){});
-			// for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
-			// m.shader.contexts.push(smsc);
-			// for (i in 0...m.contexts.length) {
-			// 	if (m.contexts[i].raw.name == "shadowmap") {
-			// 		m.contexts[i] = new MaterialContext(matcon, function(self:MaterialContext) {});
-			// 		break;
-			// 	}
-			// }
-
 		// });
 	}
 
@@ -651,26 +637,6 @@ class UINodes extends iron.Trait {
 				new MaterialContext(dmatcon, function(self:MaterialContext) {
 					m.contexts.push(self);
 				});
-
-				// var smcon = MaterialBuilder.make_depth(_sd, _matcon, true);
-				// var smcdata = smcon.data;
-				// from_source is synchronous..
-				// var smsc = new ShaderContext(smcdata, function(sc:ShaderContext){});
-				// for (c in m.shader.contexts) if (c.raw.name == 'shadowmap') { m.shader.contexts.remove(c); break; }
-				// m.shader.contexts.push(smsc);
-				// var smmatcon:TMaterialContext = {
-					// name: "shadowmap"
-				// }
-				// m.raw.contexts.push(smmatcon);
-				// for (c in m.contexts) if (c.raw.name == 'shadowmap') { m.contexts.remove(c); break; }
-				// new MaterialContext(smmatcon, function(self:MaterialContext) {
-					// m.contexts.push(self);
-				// });
-
-				if ((UITrait.inst.selectedTool == ToolFill || UITrait.inst.selectedTool == ToolBake) && UITrait.inst.autoFillHandle.selected) {
-					UITrait.inst.pdirty = 8;
-					UITrait.inst.ddirty = 8;
-				}
 		// });
 	}
 

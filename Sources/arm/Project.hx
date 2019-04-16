@@ -161,7 +161,6 @@ class Project {
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			UITrait.inst.autoFillHandle.selected = false;
 			UITrait.inst.pickerMaskHandle.position = 0;
 			UITrait.inst.paintObject.setData(md);
 			UITrait.inst.paintObject.transform.scale.set(1, 1, 1);

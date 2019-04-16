@@ -50,12 +50,13 @@ class RenderPathPreview {
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
-
 		var selectedMat = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2 : UITrait.inst.selectedMaterial;
-
 		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
+		iron.RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 
-		path.setTarget("mbuf");
+		// path.setTarget("mbuf");
+		path.setTarget(framebuffer); //
+
 		path.bindTarget("mtex", "tex");
 		#if rp_compositordepth
 		{
@@ -64,30 +65,34 @@ class RenderPathPreview {
 		#end
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
-		{
-			path.setTarget("mbufa");
-			path.clearTarget(0x00000000);
-			path.bindTarget("mbuf", "colorTex");
-			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+		path.setTarget("texpreview_icon");
+		path.bindTarget("texpreview", "tex");
+		path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 
-			path.setTarget("mbufb");
-			path.clearTarget(0x00000000);
-			path.bindTarget("mbufa", "edgesTex");
-			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+		// #if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		// {
+		// 	path.setTarget("mbufa");
+		// 	path.clearTarget(0x00000000);
+		// 	path.bindTarget("mbuf", "colorTex");
+		// 	path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
-			path.setTarget(framebuffer);
+		// 	path.setTarget("mbufb");
+		// 	path.clearTarget(0x00000000);
+		// 	path.bindTarget("mbufa", "edgesTex");
+		// 	path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-			path.bindTarget("mbuf", "colorTex");
-			path.bindTarget("mbufb", "blendTex");
-			#if (rp_antialiasing == "TAA")
-			{
-				path.bindTarget("mgbuffer2", "sveloc");
-			}
-			#end
-			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-		}
-		#end
+		// 	path.setTarget(framebuffer);
+
+		// 	path.bindTarget("mbuf", "colorTex");
+		// 	path.bindTarget("mbufb", "blendTex");
+		// 	#if (rp_antialiasing == "TAA")
+		// 	{
+		// 		path.bindTarget("mgbuffer2", "sveloc");
+		// 	}
+		// 	#end
+		// 	path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		// }
+		// #end
 	}
 
 	@:access(iron.RenderPath)
@@ -132,14 +137,15 @@ class RenderPathPreview {
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 		#end
 
-		path.setTarget("tex"); // Re-binds depth
-		path.drawSkydome("shader_datas/world_pass/world_pass");
+		// path.setTarget("tex"); // Re-binds depth
+		// path.drawSkydome("shader_datas/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
-
 		iron.RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
 
-		path.setTarget("buf");
+		// path.setTarget("buf");
+		path.setTarget(framebuffer); //
+
 		path.bindTarget("tex", "tex");
 		#if rp_compositordepth
 		{
@@ -148,29 +154,29 @@ class RenderPathPreview {
 		#end
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
-		{
-			path.setTarget("bufa");
-			path.clearTarget(0x00000000);
-			path.bindTarget("buf", "colorTex");
-			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+		// #if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		// {
+		// 	path.setTarget("bufa");
+		// 	path.clearTarget(0x00000000);
+		// 	path.bindTarget("buf", "colorTex");
+		// 	path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
-			path.setTarget("bufb");
-			path.clearTarget(0x00000000);
-			path.bindTarget("bufa", "edgesTex");
-			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+		// 	path.setTarget("bufb");
+		// 	path.clearTarget(0x00000000);
+		// 	path.bindTarget("bufa", "edgesTex");
+		// 	path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-			path.setTarget(framebuffer);
+		// 	path.setTarget(framebuffer);
 
-			path.bindTarget("buf", "colorTex");
-			path.bindTarget("bufb", "blendTex");
-			#if (rp_antialiasing == "TAA")
-			{
-				path.bindTarget("gbuffer2", "sveloc");
-			}
-			#end
-			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-		}
-		#end
+		// 	path.bindTarget("buf", "colorTex");
+		// 	path.bindTarget("bufb", "blendTex");
+		// 	#if (rp_antialiasing == "TAA")
+		// 	{
+		// 		path.bindTarget("gbuffer2", "sveloc");
+		// 	}
+		// 	#end
+		// 	path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+		// }
+		// #end
 	}
 }
