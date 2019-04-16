@@ -19,6 +19,11 @@ class Exporter {
 		var selectedLayer = UITrait.inst.selectedLayer;
 		var pixels:haxe.io.Bytes = null;
 
+		// Append object mask name
+		if (selectedLayer.objectMask > 0) {
+			f += "_" + UITrait.inst.paintObjects[selectedLayer.objectMask].name;
+		}
+
 		if (UITrait.inst.isBase || UITrait.inst.isOpac) {
 			pixels = selectedLayer.texpaint.getPixels(); // bgra
 			if (UITrait.inst.isBase && UITrait.inst.isBaseSpace == 1) {

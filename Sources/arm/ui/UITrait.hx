@@ -2434,30 +2434,33 @@ class UITrait extends iron.Trait {
 					ui.unindent();
 				}
 
-				ui.row([1/2,1/2]);
-				if (ui.button("Flip Normals")) {
-					MeshUtil.flipNormals();
-					ddirty = 2;
-				}
-				if (ui.button("Calculate Normals")) {
-					MeshUtil.calcNormals();
-					ddirty = 2;
-				}
+				if (ui.panel(Id.handle({selected: false}), "Geometry")) {
 
-				ui.row([1/2, 1/2]);
-				var upHandle = Id.handle();
-				var lastUp = upHandle.position;
-				// TODO: Turn into axis rotation instead
-				var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
-				if (upHandle.changed && axisUp != lastUp) {
-					MeshUtil.switchUpAxis(axisUp);
-					ddirty = 2;
-				}
-				
-				var dispHandle = Id.handle({value: displaceStrength});
-				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-				if (dispHandle.changed) {
-					UINodes.inst.parseMeshMaterial();
+					ui.row([1/2,1/2]);
+					if (ui.button("Flip Normals")) {
+						MeshUtil.flipNormals();
+						ddirty = 2;
+					}
+					if (ui.button("Calculate Normals")) {
+						MeshUtil.calcNormals();
+						ddirty = 2;
+					}
+
+					ui.row([1/2, 1/2]);
+					var upHandle = Id.handle();
+					var lastUp = upHandle.position;
+					// TODO: Turn into axis rotation instead
+					var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
+					if (upHandle.changed && axisUp != lastUp) {
+						MeshUtil.switchUpAxis(axisUp);
+						ddirty = 2;
+					}
+					
+					var dispHandle = Id.handle({value: displaceStrength});
+					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+					if (dispHandle.changed) {
+						UINodes.inst.parseMeshMaterial();
+					}
 				}
 			}
 
@@ -2513,39 +2516,50 @@ class UITrait extends iron.Trait {
 					}
 					if (ui.isHovered) ui.tooltip("Export texture files (Ctrl + Shift + E)");
 
+					if (formatType == 0) {
+						ui.row([1/2, 1/2]);
+					}
+					else {
+						ui.row([1/2]);
+					}
 					formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
 					if (formatType == 0) {
 						formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
 					}
+					
+					ui.row([1/2, 1/2]);
+					ui.combo(Id.handle(), ["Selected", "All"], "Layer", true);
 					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
-					ui.text("Export Maps");
-					ui.row([1/2, 1/2]);
-					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
-					isBaseSpace = ui.combo(Id.handle({position: isBaseSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
-					isOpacSpace = ui.combo(Id.handle({position: isOpacSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
-					isOccSpace = ui.combo(Id.handle({position: isOccSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
-					isRoughSpace = ui.combo(Id.handle({position: isRoughSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
-					isMetSpace = ui.combo(Id.handle({position: isMetSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isNor = ui.check(Id.handle({selected: isNor}), "Normal");
-					isNorSpace = ui.combo(Id.handle({position: isNorSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isEmis = ui.check(Id.handle({selected: isEmis}), "Emission");
-					isEmisSpace = ui.combo(Id.handle({position: isEmisSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
-					isHeightSpace = ui.combo(Id.handle({position: isHeightSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isSubs = ui.check(Id.handle({selected: isSubs}), "Subsurface");
-					isSubsSpace = ui.combo(Id.handle({position: isSubsSpace}), ["linear", "srgb"], "Space");
+					
+					if (ui.panel(Id.handle({selected: false}), "Channels")) {
+						ui.row([1/2, 1/2]);
+						isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
+						isBaseSpace = ui.combo(Id.handle({position: isBaseSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
+						isOpacSpace = ui.combo(Id.handle({position: isOpacSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
+						isOccSpace = ui.combo(Id.handle({position: isOccSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
+						isRoughSpace = ui.combo(Id.handle({position: isRoughSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
+						isMetSpace = ui.combo(Id.handle({position: isMetSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isNor = ui.check(Id.handle({selected: isNor}), "Normal");
+						isNorSpace = ui.combo(Id.handle({position: isNorSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isEmis = ui.check(Id.handle({selected: isEmis}), "Emission");
+						isEmisSpace = ui.combo(Id.handle({position: isEmisSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
+						isHeightSpace = ui.combo(Id.handle({position: isHeightSpace}), ["linear", "srgb"], "Space");
+						ui.row([1/2, 1/2]);
+						isSubs = ui.check(Id.handle({selected: isSubs}), "Subsurface");
+						isSubsSpace = ui.combo(Id.handle({position: isSubsSpace}), ["linear", "srgb"], "Space");
+					}
 				}
 			}
 
