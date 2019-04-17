@@ -595,7 +595,9 @@ class RenderPathDeferred {
 
 		#if rp_overlays
 		{
+			path.setTarget("buf");
 			path.clearTarget(null, 1.0);
+			var currentG = path.currentG;
 			path.drawMeshes("overlay");
 
 			if (UITrait.inst.showCompass) {
@@ -617,7 +619,7 @@ class RenderPathDeferred {
 				gizmo.transform.rot = new iron.math.Quat(-crot.x, -crot.y, -crot.z, crot.w);
 				gizmo.transform.buildMatrix();
 				
-				gizmo.render(path.currentG, "overlay", []);
+				gizmo.render(currentG, "overlay", []);
 				
 				cam.P = P;
 				gizmo.visible = visible;
@@ -710,7 +712,7 @@ class RenderPathDeferred {
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;
-				@:privateAccess path.end(path.currentG);
+				@:privateAccess path.end();
 			}
 			
 			if (UITrait.inst.selectedTool == ToolColorId) {
