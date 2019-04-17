@@ -157,6 +157,7 @@ class UIView2D extends iron.Trait {
 			ui.g.pipeline = pipe;
 			var l = UITrait.inst.selectedLayer;
 			var tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
+			if (UITrait.inst.selectedLayerIsMask) tex = l.texpaint_mask;
 	 		ui.g.drawScaledImage(tex, tx, ty, tw, tw);
 			ui.g.pipeline = null;
 

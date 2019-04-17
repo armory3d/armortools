@@ -17,6 +17,10 @@ typedef TLayerData = {
 	public var texpaint:haxe.io.Bytes;
 	public var texpaint_nor:haxe.io.Bytes;
 	public var texpaint_pack:haxe.io.Bytes;
+	public var texpaint_mask:haxe.io.Bytes;
+	public var opacity_mask:Float;
+	public var material_mask:Int;
+	public var object_mask:Int;
 }
 
 typedef TAPConfig = {

@@ -54,6 +54,19 @@ class Project {
 		return base;
 	}
 
+	static function materialToIndex(m:MaterialSlot):Int {
+		var index = -1;
+		if (m != null) {
+			for (i in 0...UITrait.inst.materials.length) {
+				if (UITrait.inst.materials[i] == m) {
+					index = i;
+					break;
+				}
+			}
+		}
+		return index;
+	}
+
 	public static function exportProject() {
 		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
 		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
@@ -84,7 +97,11 @@ class Project {
 				res: l.texpaint.width,
 				texpaint: l.texpaint.getPixels(),
 				texpaint_nor: l.texpaint_nor.getPixels(),
-				texpaint_pack: l.texpaint_pack.getPixels()
+				texpaint_pack: l.texpaint_pack.getPixels(),
+				texpaint_mask: l.texpaint_mask != null ? l.texpaint_mask.getPixels() : null,
+				opacity_mask: l.maskOpacity,
+				material_mask: materialToIndex(l.material_mask),
+				object_mask: l.objectMask
 			});
 		}
 
@@ -348,6 +365,19 @@ class Project {
 				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 				l.texpaint_pack.g2.end();
 				// texpaint_pack.unload();
+
+				if (ld.texpaint_mask != null) {
+					l.createMask(0, false);
+					var texpaint_mask = kha.Image.fromBytes(ld.texpaint_mask, ld.res, ld.res, kha.graphics4.TextureFormat.L8);
+					l.texpaint_mask.g2.begin(false);
+					l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+					l.texpaint_mask.g2.end();
+					// texpaint_mask.unload();
+				}
+
+				l.maskOpacity = ld.opacity_mask;
+				l.material_mask = UITrait.inst.materials[ld.material_mask];
+				l.objectMask = ld.object_mask;
 			}
 			UITrait.inst.setLayer(UITrait.inst.layers[0]);
 

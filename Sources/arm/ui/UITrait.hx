@@ -2052,9 +2052,11 @@ class UITrait extends iron.Trait {
 						var ar = ["Shared"];
 						for (p in paintObjects) ar.push(p.name);
 						var h = Id.handle().nest(l.id);
+						h.position = l.objectMask;
 						l.objectMask = ui.combo(h, ar, "Object");
 						if (h.changed) {
 							setLayer(l);
+							Layers.updateFillLayers(8);
 						}
 						@:privateAccess ui.endElement();
 					}

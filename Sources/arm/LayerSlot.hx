@@ -142,10 +142,8 @@ class LayerSlot {
 		other.texpaint_pack = tp_pack;
 	}
 
-	public function createMask(color:Int) {
+	public function createMask(color:Int, clear = true) {
 		if (texpaint_mask != null) return;
-
-		createMaskColor = color;
 
 		{
 			var t = new RenderTargetRaw();
@@ -158,7 +156,10 @@ class LayerSlot {
 
 		texpaint_mask_preview = kha.Image.createRenderTarget(200, 200, kha.graphics4.TextureFormat.L8);
 
-		iron.App.notifyOnRender(clearMask);
+		if (clear) {
+			createMaskColor = color;
+			iron.App.notifyOnRender(clearMask);
+		}
 	}
 
 	function clearMask(g:kha.graphics4.Graphics) {
