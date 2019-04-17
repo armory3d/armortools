@@ -1834,10 +1834,17 @@ class UITrait extends iron.Trait {
 
 					var contextMenu = false;
 
+					#if (kha_opengl || kha_webgl)
+					ui.imageInvertY = l.material_mask != null;
+					#end
+
 					ui._y += 3;
-					// var state = ui.image(l.texpaint_preview);
 					var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon);
 					ui._y -= 3;
+
+					#if (kha_opengl || kha_webgl)
+					ui.imageInvertY = false;
+					#end
 
 					if (ui.isHovered) {
 						ui.tooltipImage(l.texpaint_preview);
