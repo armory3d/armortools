@@ -918,6 +918,14 @@ class MaterialBuilder {
 				else {
 					frag.write('metallic = 0.0;');
 				}
+
+				var l = UITrait.inst.layers[0];
+				if (l.maskOpacity < 1) {
+					frag.write('basecol *= ${l.maskOpacity};');
+					frag.write('occlusion *= ${l.maskOpacity};');
+					frag.write('roughness *= ${l.maskOpacity};');
+					frag.write('metallic *= ${l.maskOpacity};');
+				}
 			}
 			else {
 				frag.write('basecol = vec3(0.0, 0.0, 0.0);');
