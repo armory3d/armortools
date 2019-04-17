@@ -302,6 +302,12 @@ class MaterialBuilder {
 				frag.write('vec3 nortan = $nortan;');
 				frag.write('float height = $height;');
 				frag.write('float opacity = $opac * brushOpacity;');
+				if (UITrait.inst.selectedMaterial.paintEmis) {
+					frag.write('float emis = 0.0;');
+				}
+				if (UITrait.inst.selectedMaterial.paintSubs) {
+					frag.write('float subs = 0.0;');
+				}
 			}
 			else { // Blur
 				#if (kha_opengl || kha_webgl)
@@ -317,6 +323,12 @@ class MaterialBuilder {
 				frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 				frag.write('float height = 0.0;');
 				frag.write('float opacity = 1.0 * brushOpacity;');
+				if (UITrait.inst.selectedMaterial.paintEmis) {
+					frag.write('float emis = 0.0;');
+				}
+				if (UITrait.inst.selectedMaterial.paintSubs) {
+					frag.write('float subs = 0.0;');
+				}
 				#if kha_direct3d11
 				frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
 				#else

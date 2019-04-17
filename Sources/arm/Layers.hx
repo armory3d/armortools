@@ -300,7 +300,7 @@ class Layers {
 				}
 				
 				for (i in 0...fills) {
-					arm.renderpath.RenderPathDeferred.commandsPaint();
+					arm.renderpath.RenderPathPaint.commandsPaint();
 				}
 			}
 		}

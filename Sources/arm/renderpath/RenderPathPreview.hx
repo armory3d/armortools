@@ -137,8 +137,8 @@ class RenderPathPreview {
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 		#end
 
-		// path.setTarget("tex"); // Re-binds depth
-		// path.drawSkydome("shader_datas/world_pass/world_pass");
+		path.setTarget("tex"); // Re-binds depth
+		path.drawSkydome("shader_datas/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
 		iron.RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;

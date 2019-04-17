@@ -456,16 +456,13 @@ class UITrait extends iron.Trait {
 
 		if (!arm.App.uienabled) return;
 
-		if (kb.started("tab")) {
+		if (kb.started("tab") && !UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
 			if (ctrl) { // Cycle layers
 				var i = (layers.indexOf(selectedLayer) + 1) % layers.length;
 				setLayer(layers[i]);
 			}
-			else { // Toggle node editor
-				if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
-					showMaterialNodes();
-				}
-			}
+			else if (shift) show2DView();
+			else showMaterialNodes();
 		}
 
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
@@ -1781,6 +1778,7 @@ class UITrait extends iron.Trait {
 				}
 
 				if (ui.button("2D View")) show2DView();
+				else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
 				
 				var ar = ["All"];
 				for (p in paintObjects) ar.push(p.name);
@@ -1912,12 +1910,39 @@ class UITrait extends iron.Trait {
 					if (contextMenu) {
 						App.showContextMenu(function(ui:Zui) {
 							if (l == layers[0]) {
-								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
+								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
 							}
 							else {
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 17, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
+							}
+
+							if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
+								setLayer(l);
+								l.material_mask = UITrait.inst.selectedMaterial;
+								function makeFill(g:kha.graphics4.Graphics) {
+									g.end();
+									Layers.updateFillLayers(8);
+									UINodes.inst.parsePaintMaterial();
+									UITrait.inst.layerPreviewDirty = true;
+									hwnd.redraws = 2;
+									g.begin();
+									iron.App.removeRender(makeFill);
+								}
+								iron.App.notifyOnRender(makeFill);
+							}
+							if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
+								setLayer(l);
+								l.material_mask = null;
+								UINodes.inst.parsePaintMaterial();
+								UITrait.inst.layerPreviewDirty = true;
+								hwnd.redraws = 2;
+							}
+
+							if (l == layers[0]) {
+							}
+							else {
 								if (ui.button("Delete", Left)) {
 									selectedLayer = l;
 									Layers.deleteSelectedLayer();
@@ -1959,28 +1984,6 @@ class UITrait extends iron.Trait {
 									l.createMask(0xffffffff);
 									setLayer(l, true);
 									layerPreviewDirty = true;
-								}
-								
-								if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-									setLayer(l);
-									l.material_mask = UITrait.inst.selectedMaterial;
-									function makeFill(g:kha.graphics4.Graphics) {
-										g.end();
-										Layers.updateFillLayers(8);
-										UINodes.inst.parsePaintMaterial();
-										UITrait.inst.layerPreviewDirty = true;
-										hwnd.redraws = 2;
-										g.begin();
-										iron.App.removeRender(makeFill);
-									}
-									iron.App.notifyOnRender(makeFill);
-								}
-								if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-									setLayer(l);
-									l.material_mask = null;
-									UINodes.inst.parsePaintMaterial();
-									UITrait.inst.layerPreviewDirty = true;
-									hwnd.redraws = 2;
 								}
 							}
 
@@ -2212,7 +2215,7 @@ class UITrait extends iron.Trait {
 				if (ui.button("New")) {
 					ui.g.end();
 					headerHandle.redraws = 2;
-					selectedMaterial = new MaterialSlot();
+					selectedMaterial = new MaterialSlot(materials[0].data);
 					materials.push(selectedMaterial);
 					UINodes.inst.updateCanvasMap();
 					UINodes.inst.parsePaintMaterial();
@@ -2225,7 +2228,7 @@ class UITrait extends iron.Trait {
 				if (ui.button("Nodes")) {
 					showMaterialNodes();
 				}
-				else if (ui.isHovered) ui.tooltip("Show Editor (TAB)");
+				else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
 
 				for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 					ui.row([1/5,1/5,1/5,1/5,1/5]);
@@ -2268,6 +2271,7 @@ class UITrait extends iron.Trait {
 								ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 								
 								if (ui.button("Delete", Left) && materials.length > 1) {
+									selectMaterial(i == 0 ? 1 : 0);
 									materials.splice(i, 1);
 									hwnd1.redraws = 2;
 								}
@@ -2550,7 +2554,8 @@ class UITrait extends iron.Trait {
 					}
 					
 					ui.row([1/2, 1/2]);
-					ui.combo(Id.handle(), ["Selected", "All"], "Layer", true);
+					// ui.combo(Id.handle(), ["Selected", "All"], "Layer", true);
+					ui.combo(Id.handle(), ["Selected"], "Layer", true);
 					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
 					
 					if (ui.panel(Id.handle({selected: false}), "Channels")) {
