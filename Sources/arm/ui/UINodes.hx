@@ -101,13 +101,6 @@ class UINodes extends iron.Trait {
 		});
 	}
 
-	// public function applyTheme() {
-	// 	var t = Reflect.copy(arm.App.theme);
-	// 	t.ELEMENT_H = 18;
-	// 	t.BUTTON_H = 16;
-	// 	ui.t = t;
-	// }
-
 	public function updateCanvasMap() {
 
 		if (UITrait.inst.worktab.position == 1) {

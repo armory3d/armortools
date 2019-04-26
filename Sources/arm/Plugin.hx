@@ -5,13 +5,13 @@ package arm;
 @:expose
 class Plugin {
 
-	public static function keep() {}
-
 	public static var plugins:Array<Plugin> = [];
 
 	public var drawUI:zui.Zui->Void = null;
 	public var draw:Void->Void = null;
 	public var update:Void->Void = null;
+
+	public static function keep() {}
 
 	public function handle(ops: zui.Zui.HandleOptions = null) {
 		return new zui.Zui.Handle(ops);

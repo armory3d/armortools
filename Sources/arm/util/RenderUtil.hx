@@ -26,9 +26,7 @@ class RenderUtil {
 		//
 		sphere.materials[0] = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
 		var gizmo_vis = UITrait.inst.gizmo.visible;
-		// var grid_vis = UITrait.inst.grid.visible;
 		UITrait.inst.gizmo.visible = false;
-		// UITrait.inst.grid.visible = false;
 		//
 		
 		UITrait.inst.savedCamera.setFrom(iron.Scene.active.camera.transform.local);
@@ -44,8 +42,6 @@ class RenderUtil {
 		var savedProbe = probe.raw.strength;
 		probe.raw.strength = 4;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
-		// No jitter
-		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
 		@:privateAccess iron.RenderPath.active.lastW = matPreviewSize;
 		@:privateAccess iron.RenderPath.active.lastH = matPreviewSize;
@@ -69,7 +65,6 @@ class RenderUtil {
 		UITrait.inst.paintObject = painto;
 
 		UITrait.inst.gizmo.visible = gizmo_vis;
-		// UITrait.inst.grid.visible = grid_vis;
 
 		iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 		UITrait.inst.updateCameraType(UITrait.inst.cameraType);
@@ -113,8 +108,6 @@ class RenderUtil {
 		light.visible = false;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 
-		// No jitter
-		// @:privateAccess iron.Scene.active.camera.frame = 0;
 		// No resize
 		@:privateAccess iron.RenderPath.active.lastW = arm.util.RenderUtil.decalPreviewSize;
 		@:privateAccess iron.RenderPath.active.lastH = arm.util.RenderUtil.decalPreviewSize;
