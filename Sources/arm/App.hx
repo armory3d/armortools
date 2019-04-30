@@ -566,7 +566,7 @@ class App extends iron.Trait {
 						var update = haxe.Json.parse(blob.toString());
 						var updateVersion = Std.int(update.version);
 						if (updateVersion > 0) {
-							var date = Macro.buildDate().split(" ")[0];
+							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
 							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
 							if (updateVersion > dateInt) {
 								arm.App.showMessageBox("Update is available!\nPlease visit armorpaint.org to download.");
