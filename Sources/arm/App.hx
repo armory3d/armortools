@@ -316,9 +316,9 @@ class App extends iron.Trait {
 	static function renderFiles(g:kha.graphics2.Graphics) {
 
 		// Krom with native file dialogs
-		if (untyped Krom.openFileDialog != null) {
+		if (untyped Krom.openDialog != null) {
 			showFiles = false;
-			path = untyped foldersOnly ? Krom.saveFileDialog() : Krom.openFileDialog();
+			path = untyped foldersOnly ? Krom.saveDialog() : Krom.openDialog();
 			if (path != null) {
 				path = StringTools.replace(path, "\\\\", "\\");
 				path = StringTools.replace(path, "\r", "");
