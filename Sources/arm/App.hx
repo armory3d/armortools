@@ -315,6 +315,21 @@ class App extends iron.Trait {
 	@:access(zui.Zui)
 	static function renderFiles(g:kha.graphics2.Graphics) {
 
+		// Krom with native file dialogs
+		if (untyped Krom.openFileDialog != null) {
+			showFiles = false;
+			path = untyped foldersOnly ? Krom.saveFileDialog() : Krom.openFileDialog();
+			if (path != null) {
+				path = StringTools.replace(path, "\\\\", "\\");
+				path = StringTools.replace(path, "\r", "");
+				var sep = kha.System.systemId == "Windows" ? "\\" : "/";
+				filenameHandle.text = path.substr(path.lastIndexOf(sep) + 1);
+				if (foldersOnly) path = path.substr(0, path.lastIndexOf(sep));
+				filesDone(path);
+			}
+			return;
+		}
+
 		modalW = Std.int(625 * uimodal.SCALE);
 		modalH = Std.int(545 * uimodal.SCALE);
 
