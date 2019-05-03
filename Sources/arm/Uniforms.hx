@@ -32,7 +32,7 @@ class Uniforms {
 		else if (link == '_paintDepthBias') {
 			var f = 0.0001;
 			var t = UITrait.inst.paintObject.transform;
-			if (!UITrait.inst.paintVisible) f = 1.0;
+			if (UITrait.inst.xray) f = 1.0;
 			else if (t.scale.x < 0 && t.scale.y < 0 && t.scale.z < 0) f = -f;
 			else if (t.scale.x < 0 && t.scale.y > 0 && t.scale.z > 0) f = -f;
 			else if (t.scale.y < 0 && t.scale.x > 0 && t.scale.z > 0) f = -f;

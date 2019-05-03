@@ -113,7 +113,7 @@ class MaterialBuilder {
 		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
-		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or !paintVisible
+		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or xray
 
 		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;
 

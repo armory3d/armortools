@@ -181,7 +181,7 @@ class UITrait extends iron.Trait {
 	public var bakeRadius = 1.0;
 	public var bakeOffset = 1.0;
 	
-	public var paintVisible = true;
+	public var xray = false;
 	public var mirrorX = false;
 	public var symX = false;
 	public var symY = false;
@@ -1450,11 +1450,13 @@ class UITrait extends iron.Trait {
 						}
 					}
 					else {
-						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+						var _w = ui._w;
+						ui._w = 60;
+
+						xray = ui.check(Id.handle({selected: xray}), "X-Ray");
 
 						if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolDecal || selectedTool == ToolText) {
 							var mirrorHandle = Id.handle({selected: mirrorX});
-							var _w = ui._w;
 							ui._w = 60;
 							mirrorX = ui.check(mirrorHandle, "Mirror");
 							if (mirrorHandle.changed) {
@@ -1475,8 +1477,8 @@ class UITrait extends iron.Trait {
 							if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
 								UINodes.inst.parsePaintMaterial();
 							}
-							ui._w = _w;
 						}
+						ui._w = _w;
 					}
 				}
 			}
