@@ -125,6 +125,7 @@ class UITrait extends iron.Trait {
 	public var decalPreview = false;
 	public var viewportMode = 0;
 	var hscaleWasChanged = false;
+	public var exportMeshFormat = 0;
 
 	public var textToolImage:kha.Image = null;
 	public var textToolText = "Text";
@@ -2547,7 +2548,7 @@ class UITrait extends iron.Trait {
 							Exporter.exportMesh(path + "/" + f);
 						};
 					}
-					ui.combo(Id.handle(), ["obj"], "Format", true);
+					exportMeshFormat = ui.combo(Id.handle({position: exportMeshFormat}), ["obj", "arm"], "Format", true);
 					var mesh = paintObject.data.raw;
 					var inda = mesh.index_arrays[0].values;
 					var tris = Std.int(inda.length / 3);
