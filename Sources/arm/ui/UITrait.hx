@@ -1451,13 +1451,14 @@ class UITrait extends iron.Trait {
 					}
 					else {
 						var _w = ui._w;
-						ui._w = 60;
+						var sc = ui.SCALE;
+						ui._w = Std.int(60 * sc);
 
 						xray = ui.check(Id.handle({selected: xray}), "X-Ray");
 
 						if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolDecal || selectedTool == ToolText) {
 							var mirrorHandle = Id.handle({selected: mirrorX});
-							ui._w = 60;
+							ui._w = Std.int(60 * sc);
 							mirrorX = ui.check(mirrorHandle, "Mirror");
 							if (mirrorHandle.changed) {
 								UINodes.inst.updateCanvasMap();
@@ -1468,9 +1469,9 @@ class UITrait extends iron.Trait {
 							var symXHandle = Id.handle({selected: false});
 							var symYHandle = Id.handle({selected: false});
 							var symZHandle = Id.handle({selected: false});
-							ui._w = 55;
+							ui._w = Std.int(55 * sc);
 							ui.text("Symmetry");
-							ui._w = 25;
+							ui._w = Std.int(25 * sc);
 							symX = ui.check(symXHandle, "X");
 							symY = ui.check(symYHandle, "Y");
 							symZ = ui.check(symZHandle, "Z");
