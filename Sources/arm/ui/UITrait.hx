@@ -183,6 +183,9 @@ class UITrait extends iron.Trait {
 	
 	public var paintVisible = true;
 	public var mirrorX = false;
+	public var symX = false;
+	public var symY = false;
+	public var symZ = false;
 	public var showGrid = false;
 	public var showCompass = true;
 	public var fillTypeHandle = new Zui.Handle();
@@ -993,7 +996,7 @@ class UITrait extends iron.Trait {
 				var nx = cx + (cx - mx);
 				// Separator line
 				g.color = 0x66ffffff;
-				g.fillRect(cx - 1, 0, 2, iron.App.h());
+				g.fillRect(cx - 1, iron.App.y(), 2, iron.App.h());
 				if (decal) {
 					#if kha_direct3d11
 					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
@@ -1411,33 +1414,6 @@ class UITrait extends iron.Trait {
 							UINodes.inst.parsePaintMaterial();
 						}
 					}
-
-					if (selectedTool == ToolFill) {
-						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill Mode");
-						if (fillTypeHandle.changed) {
-							if (fillTypeHandle.position == 1) {
-								ui.g.end();
-								// UIView2D.inst.cacheUVMap();
-								UIView2D.inst.cacheTriangleMap();
-								ui.g.begin(false);
-								// wireframeHandle.selected = drawWireframe = true;
-							}
-							UINodes.inst.parsePaintMaterial();
-							UINodes.inst.parseMeshMaterial();
-						}
-					}
-					else {
-						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
-
-						if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolDecal || selectedTool == ToolText) {
-							var mirrorHandle = Id.handle({selected: mirrorX});
-							mirrorX = ui.check(mirrorHandle, "Mirror");
-							if (mirrorHandle.changed) {
-								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
-							}
-						}
-					}
 					if (selectedTool == ToolDecal) {
 						ui.combo(decalMaskHandle, ["Rectangle", "Circle", "Triangle"], "Mask");
 						if (decalMaskHandle.changed) {
@@ -1457,6 +1433,49 @@ class UITrait extends iron.Trait {
 							RenderUtil.makeTextPreview();
 							RenderUtil.makeDecalPreview();
 							ui.g.begin(false);
+						}
+					}
+					if (selectedTool == ToolFill) {
+						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill Mode");
+						if (fillTypeHandle.changed) {
+							if (fillTypeHandle.position == 1) {
+								ui.g.end();
+								// UIView2D.inst.cacheUVMap();
+								UIView2D.inst.cacheTriangleMap();
+								ui.g.begin(false);
+								// wireframeHandle.selected = drawWireframe = true;
+							}
+							UINodes.inst.parsePaintMaterial();
+							UINodes.inst.parseMeshMaterial();
+						}
+					}
+					else {
+						paintVisible = ui.check(Id.handle({selected: paintVisible}), "Visible Only");
+
+						if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolDecal || selectedTool == ToolText) {
+							var mirrorHandle = Id.handle({selected: mirrorX});
+							var _w = ui._w;
+							ui._w = 60;
+							mirrorX = ui.check(mirrorHandle, "Mirror");
+							if (mirrorHandle.changed) {
+								UINodes.inst.updateCanvasMap();
+								UINodes.inst.parsePaintMaterial();
+							}
+
+							
+							var symXHandle = Id.handle({selected: false});
+							var symYHandle = Id.handle({selected: false});
+							var symZHandle = Id.handle({selected: false});
+							ui._w = 55;
+							ui.text("Symmetry");
+							ui._w = 25;
+							symX = ui.check(symXHandle, "X");
+							symY = ui.check(symYHandle, "Y");
+							symZ = ui.check(symZHandle, "Z");
+							if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
+								UINodes.inst.parsePaintMaterial();
+							}
+							ui._w = _w;
 						}
 					}
 				}

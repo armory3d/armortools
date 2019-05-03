@@ -262,13 +262,54 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
-		if (UITrait.inst.depthDirty()) {
-			path.setTarget("texpaint" + tid);
-			path.clearTarget(null, 1.0);
-			path.drawMeshes("depth");
+		// Symmetry
+		if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
+			UITrait.inst.ddirty = 2;
+			var t = UITrait.inst.paintObject.transform;
+			var sx = t.scale.x;
+			var sy = t.scale.y;
+			var sz = t.scale.z;
+			if (UITrait.inst.symX) {
+				t.scale.set(-sx, sy, sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symY) {
+				t.scale.set(sx, -sy, sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symZ) {
+				t.scale.set(sx, sy, -sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symY) {
+				t.scale.set(-sx, -sy, sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symZ) {
+				t.scale.set(-sx, sy, -sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symY && UITrait.inst.symZ) {
+				t.scale.set(sx, -sy, -sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
+				t.scale.set(-sx, -sy, -sz);
+				t.buildMatrix();
+				RenderPathPaint.commandsPaint();
+			}
+			t.scale.set(sx, sy, sz);
+			t.buildMatrix();
 		}
 
 		RenderPathPaint.commandsPaint();
+
 		//
 
 		if (UITrait.inst.brushBlendDirty) {

@@ -30,7 +30,14 @@ class Uniforms {
 			return UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 		}
 		else if (link == '_paintDepthBias') {
-			return UITrait.inst.paintVisible ? 0.0001 : 1.0;
+			var f = 0.0001;
+			var t = UITrait.inst.paintObject.transform;
+			if (!UITrait.inst.paintVisible) f = 1.0;
+			else if (t.scale.x < 0 && t.scale.y < 0 && t.scale.z < 0) f = -f;
+			else if (t.scale.x < 0 && t.scale.y > 0 && t.scale.z > 0) f = -f;
+			else if (t.scale.y < 0 && t.scale.x > 0 && t.scale.z > 0) f = -f;
+			else if (t.scale.z < 0 && t.scale.x > 0 && t.scale.y > 0) f = -f;
+			return f;
 		}
 		else if (link == '_texpaintSize') {
 			return Config.getTextureRes();

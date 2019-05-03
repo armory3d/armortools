@@ -13,11 +13,15 @@ class RenderPathPaint {
 	public static function commandsPaint() {
 
 		var path = RenderPathDeferred.path;
+		var tid = UITrait.inst.selectedLayer.id;
+
+		if (UITrait.inst.depthDirty()) {
+			path.setTarget("texpaint" + tid);
+			path.clearTarget(null, 1.0);
+			path.drawMeshes("depth");
+		}
 		
 		if (UITrait.inst.paintDirty()) {
-
-			var tid = UITrait.inst.selectedLayer.id;
-
 			if (UITrait.inst.selectedTool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
