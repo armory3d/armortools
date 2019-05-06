@@ -2128,7 +2128,9 @@ class UITrait extends iron.Trait {
 					var hscale = Id.handle({value: C.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 					if (!hscale.changed && hscaleWasChanged) {
+						#if kha_krom
 						if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
+						#end
 						C.window_scale = hscale.value;
 						ui.setScale(hscale.value);
 						arm.App.uimodal.setScale(hscale.value);
@@ -2657,7 +2659,8 @@ class UITrait extends iron.Trait {
 					var light = iron.Scene.active.lights[0];
 
 					var sxhandle = Id.handle();
-					sxhandle.value = light.data.raw.size;
+					var f32:kha.FastFloat = light.data.raw.size; // hl fix
+					sxhandle.value = f32;
 					light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
 					if (sxhandle.changed) ddirty = 2;
 					// var syhandle = Id.handle();

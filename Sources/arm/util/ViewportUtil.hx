@@ -30,7 +30,6 @@ class ViewportUtil {
 				UITrait.inst.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
-				UITrait.inst.selectedObject.transform.reset();
 				UITrait.inst.ddirty = 2;
 				arm.trait.OrbitCamera.inst.reset();
 				break;

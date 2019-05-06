@@ -316,6 +316,7 @@ class App extends iron.Trait {
 	static function renderFiles(g:kha.graphics2.Graphics) {
 
 		// Krom with native file dialogs
+		#if kha_krom
 		if (untyped Krom.openDialog != null) {
 			showFiles = false;
 			path = untyped foldersOnly ? Krom.saveDialog() : Krom.openDialog();
@@ -329,6 +330,7 @@ class App extends iron.Trait {
 			}
 			return;
 		}
+		#end
 
 		modalW = Std.int(625 * uimodal.SCALE);
 		modalH = Std.int(545 * uimodal.SCALE);
@@ -544,6 +546,7 @@ class App extends iron.Trait {
 			}
 			else if (menuCategory == 3) {
 				if (ui.button("Manual", Left)) {
+					#if kha_krom
 					if (kha.System.systemId == "Windows") {
 						Krom.sysCommand('explorer "https://armorpaint.org/manual"');
 					}
@@ -553,8 +556,10 @@ class App extends iron.Trait {
 					else {
 						Krom.sysCommand('open "https://armorpaint.org/manual"');
 					}
+					#end
 				}
 				if (ui.button("Report Bug", Left)) {
+					#if kha_krom
 					if (kha.System.systemId == "Windows") {
 						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
 					}
@@ -564,12 +569,13 @@ class App extends iron.Trait {
 					else {
 						Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
 					}
+					#end
 				}
 				if (ui.button("Check for Updates...", Left)) {
 					// Retrieve latest version number
+					#if kha_krom
 					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
 					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					#if kha_krom
 					if (kha.System.systemId == "Windows") {
 						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
 					}

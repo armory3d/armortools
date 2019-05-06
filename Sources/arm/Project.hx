@@ -253,7 +253,9 @@ class Project {
 				var abs = base + file;
 				var exists = 1;
 				if (kha.System.systemId == "Windows") {
+					#if kha_krom
 					exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+					#end
 				}
 				//else { test -e file && echo 1 || echo 0 }
 				if (exists == 0) {
