@@ -95,10 +95,10 @@ class Project {
 		for (l in UITrait.inst.layers) {
 			ld.push({
 				res: l.texpaint.width,
-				texpaint: l.texpaint.getPixels(),
-				texpaint_nor: l.texpaint_nor.getPixels(),
-				texpaint_pack: l.texpaint_pack.getPixels(),
-				texpaint_mask: l.texpaint_mask != null ? l.texpaint_mask.getPixels() : null,
+				texpaint: Lz4.encode(l.texpaint.getPixels()),
+				texpaint_nor: Lz4.encode(l.texpaint_nor.getPixels()),
+				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),
+				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				opacity_mask: l.maskOpacity,
 				material_mask: materialToIndex(l.material_mask),
 				object_mask: l.objectMask
@@ -363,19 +363,19 @@ class Project {
 				UITrait.inst.layers.push(l);
 
 				// TODO: create render target from bytes
-				var texpaint = kha.Image.fromBytes(ld.texpaint, ld.res, ld.res);
+				var texpaint = kha.Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint.g2.begin(false);
 				l.texpaint.g2.drawImage(texpaint, 0, 0);
 				l.texpaint.g2.end();
 				// texpaint.unload();
 
-				var texpaint_nor = kha.Image.fromBytes(ld.texpaint_nor, ld.res, ld.res);
+				var texpaint_nor = kha.Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint_nor.g2.begin(false);
 				l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
 				l.texpaint_nor.g2.end();
 				// texpaint_nor.unload();
 
-				var texpaint_pack = kha.Image.fromBytes(ld.texpaint_pack, ld.res, ld.res);
+				var texpaint_pack = kha.Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint_pack.g2.begin(false);
 				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 				l.texpaint_pack.g2.end();
@@ -383,7 +383,7 @@ class Project {
 
 				if (ld.texpaint_mask != null) {
 					l.createMask(0, false);
-					var texpaint_mask = kha.Image.fromBytes(ld.texpaint_mask, ld.res, ld.res, kha.graphics4.TextureFormat.L8);
+					var texpaint_mask = kha.Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, kha.graphics4.TextureFormat.L8);
 					l.texpaint_mask.g2.begin(false);
 					l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
 					l.texpaint_mask.g2.end();
