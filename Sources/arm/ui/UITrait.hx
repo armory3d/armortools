@@ -1503,8 +1503,7 @@ class UITrait extends iron.Trait {
 			fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 			cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 			if (fovHandle.changed) {
-				cam.buildProjection();
-				ddirty = 2;
+				updateCameraType(cameraType);
 			}
 
 			if (messageTimer > 0) {
@@ -2748,19 +2747,22 @@ class UITrait extends iron.Trait {
 
 	public function updateCameraType(cameraType:Int) {
 		var cam = iron.Scene.active.cameras[0];
+		var light = iron.Scene.active.lights[0];
 		if (cameraType == 0) {
 			cam.data.raw.ortho = null;
-			cam.buildProjection();
+			light.visible = true;
 		}
 		else {
 			var f32 = new kha.arrays.Float32Array(4);
-			f32[0] = -2;
-			f32[1] =  2;
-			f32[2] = -2 * (iron.App.h() / iron.App.w());
-			f32[3] =  2 * (iron.App.h() / iron.App.w());
+			var f = cam.data.raw.fov * cam.transform.world.getLoc().length() / 2.5;
+			f32[0] = -2 * f;
+			f32[1] =  2 * f;
+			f32[2] = -2 * f * (iron.App.h() / iron.App.w());
+			f32[3] =  2 * f * (iron.App.h() / iron.App.w());
 			cam.data.raw.ortho = f32;
-			cam.buildProjection();
+			light.visible = false;
 		}
+		cam.buildProjection();
 		ddirty = 2;
 	}
 

@@ -76,6 +76,10 @@ class OrbitCamera extends iron.Trait {
 			if (redraws > 0) {
 				redraws--;
 				UITrait.inst.ddirty = 2;
+
+				if (UITrait.inst.cameraType == 1) {
+					UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+				}
 			}
 		});
 	}

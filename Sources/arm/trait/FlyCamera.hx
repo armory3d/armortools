@@ -66,6 +66,10 @@ class FlyCamera extends iron.Trait {
 			if (d > 0.0) {
 				UITrait.inst.ddirty = 2;
 				camera.transform.move(dir, d);
+
+				if (UITrait.inst.cameraType == 1) {
+					UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+				}
 			}
 
 			if (mouse.down("right")) {

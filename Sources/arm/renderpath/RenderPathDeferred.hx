@@ -388,7 +388,8 @@ class RenderPathDeferred {
 
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
-			if (armory.data.Config.raw.rp_ssgi != false) {
+			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
+			if (ssgi) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -451,7 +452,8 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer1", "gbuffer1");
 		#if (rp_ssgi != "Off")
 		{
-			if (armory.data.Config.raw.rp_ssgi != false) {
+			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
+			if (ssgi) {
 				path.bindTarget("singlea", "ssaotex");
 			}
 			else {
