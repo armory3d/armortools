@@ -49,4 +49,14 @@ class ViewportUtil {
 		UITrait.inst.ddirty = 2;
 		arm.trait.OrbitCamera.inst.reset();
 	}
+
+	public static function orbit(x:Float, y:Float) {
+		var camera = iron.Scene.active.camera;
+		var dist = arm.trait.OrbitCamera.dist;
+		camera.transform.move(camera.lookWorld(), dist);
+		camera.transform.rotate(new iron.math.Vec4(0, 0, 1), x);
+		camera.transform.rotate(camera.rightWorld(), y);
+		camera.transform.move(camera.lookWorld(), -dist);
+		UITrait.inst.ddirty = 2;
+	}
 }

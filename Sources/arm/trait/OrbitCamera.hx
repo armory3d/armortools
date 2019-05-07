@@ -6,9 +6,9 @@ import arm.ui.*;
 class OrbitCamera extends iron.Trait {
 
 	public static var inst:OrbitCamera;
+	public static var dist = 0.0;
 	var redraws = 0;
 	var first = true;
-	var dist = 0.0;
 
 	public function new() {
 		super();

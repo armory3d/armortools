@@ -600,6 +600,11 @@ class UITrait extends iron.Trait {
 					updateCameraType(cameraType);
 					statusHandle.redraws = 2;
 				}
+				else if (kb.started("4")) { ViewportUtil.orbit(-Math.PI / 12, 0); }
+				else if (kb.started("6")) { ViewportUtil.orbit(Math.PI / 12, 0); }
+				else if (kb.started("8")) { ViewportUtil.orbit(0, -Math.PI / 12); }
+				else if (kb.started("2")) { ViewportUtil.orbit(0, Math.PI / 12); }
+				else if (kb.started("9")) { ViewportUtil.orbit(Math.PI, 0); }
 			}
 		}
 

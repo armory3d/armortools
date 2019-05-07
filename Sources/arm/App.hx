@@ -476,7 +476,7 @@ class App extends iron.Trait {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [5, 2, 8, 4];
+		var menuItems = [5, 2, 13, 4];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 		
 		g.color = ui.t.SEPARATOR_COL;
@@ -526,13 +526,20 @@ class App extends iron.Trait {
 				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {
+				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
 				if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
 				if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
 				if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
 				if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
 				if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
-				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("Orbit Left", Left, "4")) { ViewportUtil.orbit(-Math.PI / 12, 0); }
+				if (ui.button("Orbit Right", Left, "6")) { ViewportUtil.orbit(Math.PI / 12, 0); }
+				if (ui.button("Orbit Up", Left, "8")) { ViewportUtil.orbit(0, -Math.PI / 12); }
+				if (ui.button("Orbit Down", Left, "2")) { ViewportUtil.orbit(0, Math.PI / 12); }
+				if (ui.button("Orbit Opposite", Left, "9")) { ViewportUtil.orbit(Math.PI, 0); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Distract Free", Left, "F11")) {
 					UITrait.inst.show = !UITrait.inst.show;
