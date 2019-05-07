@@ -221,7 +221,7 @@ class Project {
 	public static function importProject(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 
-			UITrait.inst.layerPreviewDirty = true;
+			UITrait.inst.layersPreviewDirty = true;
 			LayerSlot.counter = 0;
 
 			var resetLayers = false;

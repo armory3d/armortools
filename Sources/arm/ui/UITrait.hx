@@ -73,6 +73,7 @@ class UITrait extends iron.Trait {
 	public var rdirty = 0;
 	public var brushBlendDirty = true;
 	public var layerPreviewDirty = true;
+	public var layersPreviewDirty = false;
 
 	public var windowW = 280; // Panel width
 	public var toolbarw = 54;
@@ -772,6 +773,28 @@ class UITrait extends iron.Trait {
 			layerPreviewDirty = true; // Update layer preview
 		}
 
+		if (layersPreviewDirty) {
+			layersPreviewDirty = false;
+			layerPreviewDirty = false;
+			// Update all layer previews
+			for (l in layers) {
+				var target = l.texpaint_preview;
+				var source = l.texpaint;
+				var g2 = target.g2;
+				g2.begin(true, 0xff000000);
+				g2.drawScaledImage(source, 0, 0, target.width, target.height);
+				g2.end();
+				if (l.texpaint_mask != null) {
+					var target = l.texpaint_mask_preview;
+					var source = l.texpaint_mask;
+					var g2 = target.g2;
+					g2.begin(true, 0xff000000);
+					g2.drawScaledImage(source, 0, 0, target.width, target.height);
+					g2.end();
+				}
+			}
+			hwnd.redraws = 2;
+		}
 		if (layerPreviewDirty) {
 			layerPreviewDirty = false;
 			// Update layer preview
