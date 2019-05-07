@@ -75,7 +75,10 @@ class Project {
 			var c = Reflect.copy(UINodes.inst.canvasMap.get(m));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
-					n.buttons[0].data = toRelative(UITrait.inst.projectPath, n.buttons[0].data);
+					var sameDrive = UITrait.inst.projectPath.charAt(0) == n.buttons[0].data.charAt(0);
+					if (sameDrive) {
+						n.buttons[0].data = toRelative(UITrait.inst.projectPath, n.buttons[0].data);
+					}
 				}
 			}
 			mnodes.push(c);
@@ -87,8 +90,14 @@ class Project {
 
 		var asset_files:Array<String> = [];
 		for (a in UITrait.inst.assets) {
-			var rel = toRelative(UITrait.inst.projectPath, a.file);
-			asset_files.push(rel);
+			// Convert image path from absolute to relative
+			var sameDrive = UITrait.inst.projectPath.charAt(0) == a.file.charAt(0);
+			if (sameDrive) {
+				asset_files.push(toRelative(UITrait.inst.projectPath, a.file));
+			}
+			else {
+				asset_files.push(a.file);
+			}
 		}
 
 		var ld:Array<TLayerData> = [];
@@ -250,7 +259,9 @@ class Project {
 			var base = baseDir(path);
 
 			for (file in project.assets) {
-				var abs = base + file;
+				// Convert image path from relative to absolute
+				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
+				var abs = isAbsolute ? file : base + file;
 				var exists = 1;
 				if (kha.System.systemId == "Windows") {
 					#if kha_krom
@@ -280,8 +291,12 @@ class Project {
 			for (n in project.material_nodes) {
 				for (node in n.nodes) {
 					if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
-						var abs = base + node.buttons[0].data;
-						node.buttons[0].data = abs;
+						var filepath = node.buttons[0].data;
+						var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
+						if (!isAbsolute) {
+							var abs = base + filepath;
+							node.buttons[0].data = abs;
+						}
 					}
 					for (inp in node.inputs) { // Round input socket values
 						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
