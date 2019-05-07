@@ -25,6 +25,7 @@ class LayerSlot {
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
 	public var targetObject:iron.object.MeshObject = null;
+	public var targetIsMask = false;
 
 	static var first = true;
 
@@ -119,10 +120,6 @@ class LayerSlot {
 	}
 
 	public function swap(other:LayerSlot) {
-		var tp = texpaint;
-		var tp_nor = texpaint_nor;
-		var tp_pack = texpaint_pack;
-
 		RenderPath.active.renderTargets.get("texpaint" + ext).image.setDepthStencilFrom(other.texpaint);
 
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
@@ -133,13 +130,23 @@ class LayerSlot {
 		RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = texpaint_pack;
 
+		var tp = texpaint;
+		var tp_nor = texpaint_nor;
+		var tp_pack = texpaint_pack;
 		texpaint = other.texpaint;
 		texpaint_nor = other.texpaint_nor;
 		texpaint_pack = other.texpaint_pack;
-
 		other.texpaint = tp;
 		other.texpaint_nor = tp_nor;
 		other.texpaint_pack = tp_pack;
+	}
+
+	public function swapMask(other:LayerSlot) {
+		RenderPath.active.renderTargets.get("texpaint_mask" + ext).image = other.texpaint_mask;
+		RenderPath.active.renderTargets.get("texpaint_mask" + other.ext).image = texpaint_mask;
+		var tp_mask = texpaint_mask;
+		texpaint_mask = other.texpaint_mask;
+		other.texpaint_mask = tp_mask;
 	}
 
 	public function createMask(color:Int, clear = true) {

@@ -315,7 +315,11 @@ class UITrait extends iron.Trait {
 		}
 		if (undoLayers == null) {
 			undoLayers = [];
-			for (i in 0...C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
+			for (i in 0...C.undo_steps) {
+				var l = new LayerSlot("_undo" + undoLayers.length);
+				l.createMask(0, false);
+				undoLayers.push(l);
+			}
 		}
 
 		if (savedEnvmap == null) {
@@ -687,8 +691,8 @@ class UITrait extends iron.Trait {
 			var lpos = layers.indexOf(lay.targetLayer);
 			if (opos >= 0 && lpos >= 0) {
 				selectPaintObject(paintObjects[opos]);
-				setLayer(layers[lpos]);
-				selectedLayer.swap(lay);
+				setLayer(layers[lpos], lay.targetIsMask);
+				lay.targetIsMask ? selectedLayer.swapMask(lay) : selectedLayer.swap(lay);
 				layerPreviewDirty = true;
 			}
 			undos--;
@@ -704,8 +708,8 @@ class UITrait extends iron.Trait {
 			var lpos = layers.indexOf(lay.targetLayer);
 			if (opos >= 0 && lpos >= 0) {
 				selectPaintObject(paintObjects[opos]);
-				setLayer(layers[lpos]);
-				selectedLayer.swap(lay);
+				setLayer(layers[lpos], lay.targetIsMask);
+				lay.targetIsMask ? selectedLayer.swapMask(lay) : selectedLayer.swap(lay);
 				layerPreviewDirty = true;
 			}
 			undoI = (undoI + 1) % C.undo_steps;
@@ -1955,6 +1959,10 @@ class UITrait extends iron.Trait {
 						if (ui.isReleased) {
 							setLayer(l, true);
 						}
+						if (state == State.Started) {
+							if (iron.system.Time.time() - selectTime < 0.25) show2DView();
+							selectTime = iron.system.Time.time();
+						}
 					}
 
 					ui._y += center;
@@ -2209,8 +2217,15 @@ class UITrait extends iron.Trait {
 					C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
 					if (undoHandle.changed) {
 						ui.g.end();
-						while (undoLayers.length < C.undo_steps) undoLayers.push(new LayerSlot("_undo" + undoLayers.length));
-						while (undoLayers.length > C.undo_steps) { var l = undoLayers.pop(); l.unload(); }
+						while (undoLayers.length < C.undo_steps) {
+							var l = new LayerSlot("_undo" + undoLayers.length);
+							l.createMask(0, false);
+							undoLayers.push(l);
+						}
+						while (undoLayers.length > C.undo_steps) {
+							var l = undoLayers.pop();
+							l.unload();
+						}
 						undos = 0;
 						redos = 0;
 						undoI = 0;

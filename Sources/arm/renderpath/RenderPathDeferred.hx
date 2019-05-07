@@ -195,14 +195,24 @@ class RenderPathDeferred {
 		var tid = UITrait.inst.selectedLayer.id;
 
 		if (UITrait.inst.pushUndo) {
+			var isMask = UITrait.inst.selectedLayerIsMask;
 			var i = UITrait.inst.undoI;
-			path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);			
-			path.bindTarget("texpaint" + tid, "tex0");
-			path.bindTarget("texpaint_nor" + tid, "tex1");
-			path.bindTarget("texpaint_pack" + tid, "tex2");
-			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-			UITrait.inst.undoLayers[UITrait.inst.undoI].targetObject = UITrait.inst.paintObject;
-			UITrait.inst.undoLayers[UITrait.inst.undoI].targetLayer = UITrait.inst.selectedLayer;
+			if (isMask) {
+				path.setTarget("texpaint_mask_undo" + i);
+				path.bindTarget("texpaint_mask" + tid, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+			}
+			else {
+				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);
+				path.bindTarget((isMask ? "texpaint_mask" : "texpaint") + tid, "tex0");
+				path.bindTarget("texpaint_nor" + tid, "tex1");
+				path.bindTarget("texpaint_pack" + tid, "tex2");
+				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+			}
+			var undoLayer = UITrait.inst.undoLayers[UITrait.inst.undoI];
+			undoLayer.targetObject = UITrait.inst.paintObject;
+			undoLayer.targetLayer = UITrait.inst.selectedLayer;
+			undoLayer.targetIsMask = isMask;
 			UITrait.inst.undoI = (UITrait.inst.undoI + 1) % UITrait.inst.C.undo_steps;
 			if (UITrait.inst.undos < UITrait.inst.C.undo_steps) UITrait.inst.undos++;
 			UITrait.inst.redos = 0;

@@ -102,7 +102,7 @@ class Layers {
 
 		if (l.texpaint_mask != null) {
 			var texpaint_mask = l.texpaint_mask;
-			l.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+			l.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
 
 			l.texpaint_mask.g2.begin(false);
 			l.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
