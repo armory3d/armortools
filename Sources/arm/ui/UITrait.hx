@@ -1018,6 +1018,11 @@ class UITrait extends iron.Trait {
 					selectedTool == ToolParticle) {
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
+				else if (selectedTool == ToolPicker && UITrait.inst.pickerSelectMaterial) {
+					// Show picked material next to cursor
+					var img = selectedMaterial.imageIcon;
+					g.drawImage(img, mx + 10, my + 10);
+				}
 			}
 
 			if (mirrorX) {
