@@ -453,6 +453,7 @@ class Importer {
 	static function importBlend(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var bl = new iron.format.blend.Blend(b);
+			if (bl.dna == null) { makeMesh(null, path); return; }
 
 			// var obs = bl.get("Object");
 			// var ob = obs[0];
@@ -461,6 +462,7 @@ class Importer {
 			// trace(ob.get("type")); // 1
 
 			var m = bl.get("Mesh")[0];
+			if (m == null) { makeMesh(null, path); return; }
 
 			var totpoly = m.get("totpoly");
 			var numtri = 0;
@@ -602,7 +604,7 @@ class Importer {
 	}
 
 	static function makeMesh(mesh:Dynamic, path:String) {
-		if (mesh.posa == null || mesh.nora == null || mesh.inda == null) {
+		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
 			UITrait.inst.showError("Error: Failed to read mesh data");
 			return;
 		}
