@@ -43,8 +43,9 @@ typedef TAPConfig = {
 	@:optional var rp_motionblur:Null<Bool>;
 	@:optional var rp_gi:Null<Bool>;
 	// Ext
-	// @:optional var version:Null<Float>;
+	@:optional var version:Null<Int>;
 	@:optional var plugins:Array<String>;
 	@:optional var ui_layout:Null<Int>;
 	@:optional var undo_steps:Null<Int>;
+	@:optional var keymap:Dynamic; // Map<String, String>
 }

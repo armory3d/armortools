@@ -205,7 +205,8 @@ class UITrait extends iron.Trait {
 	var frame = 0;
 	public var paint2d = false;
 
-	public var C:TAPConfig;
+	public var C:TAPConfig; // Config
+	public var K:Dynamic; // Config.Keymap
 	var altStartedX = -1.0;
 	var altStartedY = -1.0;
 	var lockStartedX = -1.0;
@@ -273,8 +274,55 @@ class UITrait extends iron.Trait {
 
 		// Init config
 		C = cast armory.data.Config.raw;
+		// if (C.version == null) C.version = 1;
 		if (C.ui_layout == null) C.ui_layout = 0;
 		if (C.undo_steps == null) C.undo_steps = 4; // Max steps to keep
+		if (C.keymap == null) {
+			C.keymap = {};
+			C.keymap.action_paint = "left";
+			C.keymap.action_rotate = "right";
+			C.keymap.action_pan = "middle";
+			C.keymap.select_material = "shift+num";
+			C.keymap.cycle_layers = "ctrl+tab";
+			C.keymap.brush_radius = "f+drag";
+			C.keymap.brush_ruler = "shift+paint";
+			C.keymap.file_new = "ctrl+n";
+			C.keymap.file_open = "ctrl+o";
+			C.keymap.file_save = "ctrl+s";
+			C.keymap.file_save_as = "ctrl+shift+s";
+			C.keymap.edit_undo = "ctrl+z";
+			C.keymap.edit_redo = "ctrl+shift+z";
+			C.keymap.view_reset = "0";
+			C.keymap.view_front = "1";
+			C.keymap.view_back = "ctrl+1";
+			C.keymap.view_right = "3";
+			C.keymap.view_left = "ctrl+3";
+			C.keymap.view_top = "7";
+			C.keymap.view_bottom = "ctrl+7";
+			C.keymap.view_camera_type = "5";
+			C.keymap.view_orbit_left = "4";
+			C.keymap.view_orbit_right = "6";
+			C.keymap.view_orbit_top = "8";
+			C.keymap.view_orbit_bottom = "2";
+			C.keymap.view_orbit_opposite = "9";
+			C.keymap.view_distract_free = "f11";
+			C.keymap.tool_brush = "b";
+			C.keymap.tool_eraser = "e";
+			C.keymap.tool_fill = "g";
+			C.keymap.tool_decal = "d";
+			C.keymap.tool_text = "t";
+			C.keymap.tool_clone = "l";
+			C.keymap.tool_blur = "u";
+			C.keymap.tool_particle = "p";
+			C.keymap.tool_bake = "k";
+			C.keymap.tool_colorid = "c";
+			C.keymap.tool_picker = "v";
+			C.keymap.toggle_2d_view = "shift+tab";
+			C.keymap.toggle_node_editor = "tab";
+			C.keymap.import_assets = "ctrl+shift+i";
+			C.keymap.export_textures = "ctrl+shift+e";
+		}
+		K = C.keymap;
 
 		windowW = Std.int(defaultWindowW * C.window_scale);
 		toolbarw = Std.int(54 * C.window_scale);
@@ -2271,11 +2319,10 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Controls", 1)) {
-					ui.text("Select Material - Shift+1-9");
-					ui.text("Cycle Layers - Ctrl+Tab");
-					ui.text("Brush Radius - Hold F+Drag");
-					ui.text("Brush Ruler - Hold Shift+Paint");
+				if (ui.panel(Id.handle({selected: false}), "Keymap", 1)) {
+					for (k in Reflect.fields(C.keymap)) {
+						ui.button(k, Left, Reflect.field(C.keymap, k));
+					}
 				}
 
 				// ui.separator();
