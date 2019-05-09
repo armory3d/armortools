@@ -28,45 +28,6 @@ class Project {
 		};
 	}
 
-	static function toRelative(from:String, to:String) {
-		from = haxe.io.Path.normalize(from);
-		to = haxe.io.Path.normalize(to);
-		var a = from.split("/");
-		var b = to.split("/");
-		while (a[0] == b[0]) {
-			a.shift();
-			b.shift();
-			if (a.length == 0 || b.length == 0) break;
-		}
-		var base = "";
-		for (i in 0...a.length - 1) base += "../";
-		base += b.join("/");
-		return haxe.io.Path.normalize(base);
-	}
-
-	static function baseDir(path:String) {
-		path = haxe.io.Path.normalize(path);
-		var base = path.substr(0, path.lastIndexOf("/") + 1);
-		if (kha.System.systemId == "Windows") {
-			// base = StringTools.replace(base, "/", "\\");
-			base = base.substr(0, 2) + "\\" + base.substr(3);
-		}
-		return base;
-	}
-
-	static function materialToIndex(m:MaterialSlot):Int {
-		var index = -1;
-		if (m != null) {
-			for (i in 0...UITrait.inst.materials.length) {
-				if (UITrait.inst.materials[i] == m) {
-					index = i;
-					break;
-				}
-			}
-		}
-		return index;
-	}
-
 	public static function exportProject() {
 		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
 		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
@@ -77,7 +38,7 @@ class Project {
 				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
 					var sameDrive = UITrait.inst.projectPath.charAt(0) == n.buttons[0].data.charAt(0);
 					if (sameDrive) {
-						n.buttons[0].data = toRelative(UITrait.inst.projectPath, n.buttons[0].data);
+						n.buttons[0].data = Path.toRelative(UITrait.inst.projectPath, n.buttons[0].data);
 					}
 				}
 			}
@@ -93,7 +54,7 @@ class Project {
 			// Convert image path from absolute to relative
 			var sameDrive = UITrait.inst.projectPath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
-				asset_files.push(toRelative(UITrait.inst.projectPath, a.file));
+				asset_files.push(Path.toRelative(UITrait.inst.projectPath, a.file));
 			}
 			else {
 				asset_files.push(a.file);
@@ -109,7 +70,7 @@ class Project {
 				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),
 				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				opacity_mask: l.maskOpacity,
-				material_mask: materialToIndex(l.material_mask),
+				material_mask: l.material_mask != null ? UITrait.inst.materials.indexOf(l.material_mask) : -1,
 				object_mask: l.objectMask
 			});
 		}
@@ -212,7 +173,7 @@ class Project {
 			}
 			
 			UINodes.inst.updateCanvasMap();
-			UINodes.inst.parsePaintMaterial();
+			arm.MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
 			UITrait.inst.assets = [];
 			UITrait.inst.assetNames = [];
@@ -256,7 +217,7 @@ class Project {
 
 			UITrait.inst.project = project;
 
-			var base = baseDir(path);
+			var base = Path.baseDir(path);
 
 			for (file in project.assets) {
 				// Convert image path from relative to absolute
@@ -308,7 +269,7 @@ class Project {
 
 				UITrait.inst.selectedMaterial = mat;
 				UINodes.inst.updateCanvasMap();
-				UINodes.inst.parsePaintMaterial();
+				arm.MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
@@ -350,12 +311,12 @@ class Project {
 			if (UITrait.inst.layers[0].texpaint.width != Config.getTextureRes()) {
 				var i = 0;
 				for (l in UITrait.inst.layers) {
-					Layers.resizeLayer(l, i == 0);
+					l.resize(i == 0);
 					if (i > 0) l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 					i++;
 				}
 				for (l in UITrait.inst.undoLayers) {
-					Layers.resizeLayer(l, false);
+					l.resize(false);
 					l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 				}
 				var rts = iron.RenderPath.active.renderTargets;
@@ -406,7 +367,7 @@ class Project {
 				}
 
 				l.maskOpacity = ld.opacity_mask;
-				l.material_mask = UITrait.inst.materials[ld.material_mask];
+				l.material_mask = ld.material_mask > -1 ? UITrait.inst.materials[ld.material_mask] : null;
 				l.objectMask = ld.object_mask;
 			}
 			UITrait.inst.setLayer(UITrait.inst.layers[0]);

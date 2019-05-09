@@ -2,7 +2,8 @@ package arm;
 
 import iron.data.MaterialData;
 import iron.object.Object;
-import arm.ui.*;
+import arm.ui.UITrait;
+import arm.util.UVUtil;
 
 class Uniforms {
 	public static function init() {
@@ -108,12 +109,12 @@ class Uniforms {
 			else return UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
 		}
 		else if (link == "_texuvmap") {
-			UIView2D.inst.cacheUVMap(); // TODO: Check overlapping g4 calls here
-			return UIView2D.inst.uvmap;
+			UVUtil.cacheUVMap(); // TODO: Check overlapping g4 calls here
+			return UVUtil.uvmap;
 		}
 		else if (link == "_textrianglemap") {
-			UIView2D.inst.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
-			return UIView2D.inst.trianglemap;
+			UVUtil.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
+			return UVUtil.trianglemap;
 		}
 		else if (link == "_textexttool") { // Opacity map for text
 			return UITrait.inst.textToolImage;

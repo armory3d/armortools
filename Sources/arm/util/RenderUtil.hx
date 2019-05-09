@@ -48,7 +48,7 @@ class RenderUtil {
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
-		UINodes.inst.parseMeshPreviewMaterial();
+		arm.MaterialParser.parseMeshPreviewMaterial();
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsPreview;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
@@ -74,7 +74,7 @@ class RenderUtil {
 		light.data.raw.strength = savedLight;
 		probe.raw.strength = savedProbe;
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
-		UINodes.inst.parseMeshMaterial();
+		arm.MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 
@@ -114,7 +114,7 @@ class RenderUtil {
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 
-		UINodes.inst.parseMeshPreviewMaterial();
+		arm.MaterialParser.parseMeshPreviewMaterial();
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsDecal;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
 		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
@@ -139,7 +139,7 @@ class RenderUtil {
 		light.visible = true;
 		iron.Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		
-		UINodes.inst.parseMeshMaterial();
+		arm.MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 

@@ -5,22 +5,19 @@ import zui.Zui.State;
 import zui.Canvas;
 import arm.ui.*;
 import arm.util.*;
-import arm.ProjectFormat.TAPConfig;
 
 class App extends iron.Trait {
 
 	public static var version = "0.6";
-
 	public static function x():Int { return appx; }
 	public static function y():Int { return appy; }
-
+	static var appx = 0;
+	static var appy = 0;
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var dragAsset:TAsset = null;
 	public static var showFiles = false;
 	public static var showBox = false;
-	public static var boxText = "";
-	public static var boxCommands:Zui->Void = null;
 	public static var foldersOnly = false;
 	public static var showFilename = false;
 	public static var whandle = new Zui.Handle();
@@ -32,28 +29,9 @@ class App extends iron.Trait {
 	public static var font:kha.Font = null;
 	public static var theme:zui.Themes.TTheme;
 	public static var color_wheel:kha.Image;
-	public static var uimodal:Zui;
+	public static var uibox:Zui;
 	public static var path = '/';
-	static var modalW = 625;
-	static var modalH = 545;
-	static var appx = 0;
-	static var appy = 0;
-
 	public static var showMenu = false;
-	public static var menuCategory = 0;
-	static var showMenuFirst = true;
-	static var menuCommands:Zui->Void = null;
-	static var menuX = 0;
-	static var menuY = 0;
-
-	public static function getEnumTexts():Array<String> {
-		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
-	}
-
-	public static function mapEnum(s:String):String {
-		for (a in UITrait.inst.assets) if (a.name == s) return a.file;
-		return "";
-	}
 
 	public function new() {
 		super();
@@ -93,7 +71,7 @@ class App extends iron.Trait {
 					color_wheel = image;
 					zui.Nodes.getEnumTexts = getEnumTexts;
 					zui.Nodes.mapEnum = mapEnum;
-					uimodal = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
+					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
 						// #if arm_debug
@@ -111,7 +89,7 @@ class App extends iron.Trait {
 						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
 
 						iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
-						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render2D);
+						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
 
 						iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
 						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
@@ -232,15 +210,6 @@ class App extends iron.Trait {
 		}
 	}
 
-	public static function getAssetIndex(f:String):Int {
-		for (i in 0...UITrait.inst.assets.length) {
-			if (UITrait.inst.assets[i].file == f) {
-				return i;
-			}
-		}
-		return 0;
-	}
-
 	static function update() {
 		var mouse = iron.system.Input.getMouse();
 		var kb = iron.system.Input.getKeyboard();
@@ -272,24 +241,7 @@ class App extends iron.Trait {
 			}
 		}
 
-		if (showFiles || showBox) updateModal();
-	}
-
-	static function updateModal() {
-		var mouse = iron.system.Input.getMouse();
-		if (mouse.released()) {
-			var appw = kha.System.windowWidth();
-			var apph = kha.System.windowHeight();
-			var left = appw / 2 - modalW / 2;
-			var right = appw / 2 + modalW / 2;
-			var top = apph / 2 - modalH / 2;
-			var bottom = apph / 2 + modalH / 2;
-			var mx = mouse.x + iron.App.x();
-			var my = mouse.y + iron.App.y();
-			if (mx < left || mx > right || my < top || my > bottom) {
-				showFiles = showBox = false;
-			}
-		}
+		if (showFiles || showBox) UIBox.update();
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
@@ -307,337 +259,26 @@ class App extends iron.Trait {
 		if (showMenu) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
 
 		uienabled = !showFiles && !showBox && !usingMenu;
-		if (showFiles) renderFiles(g);
-		else if (showBox) renderBox(g);
-		else if (showMenu) renderMenu(g);
+		if (showFiles) UIFiles.render(g);
+		else if (showBox) UIBox.render(g);
+		else if (showMenu) UIMenu.render(g);
 	}
 
-	@:access(zui.Zui)
-	static function renderFiles(g:kha.graphics2.Graphics) {
-
-		// Krom with native file dialogs
-		#if kha_krom
-		if (untyped Krom.openDialog != null) {
-			showFiles = false;
-			path = untyped foldersOnly ? Krom.saveDialog() : Krom.openDialog();
-			if (path != null) {
-				path = StringTools.replace(path, "\\\\", "\\");
-				path = StringTools.replace(path, "\r", "");
-				var sep = kha.System.systemId == "Windows" ? "\\" : "/";
-				filenameHandle.text = path.substr(path.lastIndexOf(sep) + 1);
-				if (foldersOnly) path = path.substr(0, path.lastIndexOf(sep));
-				filesDone(path);
-			}
-			return;
-		}
-		#end
-
-		modalW = Std.int(625 * uimodal.SCALE);
-		modalH = Std.int(545 * uimodal.SCALE);
-
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
-		var left = Std.int(appw / 2 - modalW / 2);
-		var right = Std.int(appw / 2 + modalW / 2);
-		var top = Std.int(apph / 2 - modalH / 2);
-		var bottom = Std.int(apph / 2 + modalH / 2);
-		
-		// g.color = 0x44000000;
-		// g.fillRect(0, 0, appw, apph);
-
-		g.color = uimodal.t.SEPARATOR_COL;
-		g.fillRect(left, top, modalW, modalH);
-		
-		g.end();
-		uimodal.begin(g);
-		var pathHandle = Id.handle();
-		if (uimodal.window(whandle, left, top, modalW, modalH - 50)) {
-			pathHandle.text = uimodal.textInput(pathHandle, "Path");
-			if (showFilename) uimodal.textInput(filenameHandle, "File");
-			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
-		}
-		uimodal.end(false);
-		g.begin(false);
-
-		if (Format.checkTextureFormat(path) || Format.checkMeshFormat(path) || Format.checkProjectFormat(path)) {
-			showFiles = false;
-			filesDone(path);
-			var sep = kha.System.systemId == "Windows" ? "\\" : "/";
-			pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
-			whandle.redraws = 2;
-			UITrait.inst.ddirty = 2;
-		}
-
-		g.end();
-		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
-		if (uimodal.button("OK")) {
-			showFiles = false;
-			filesDone(path);
-			UITrait.inst.ddirty = 2;
-		}
-		uimodal.endLayout(false);
-
-		uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W() * 2), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
-		if (uimodal.button("Cancel")) {
-			showFiles = false;
-			UITrait.inst.ddirty = 2;
-		}
-		uimodal.endLayout();
-
-		g.begin(false);
+	public static function getEnumTexts():Array<String> {
+		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
 	}
 
-	@:access(zui.Zui)
-	static function renderBox(g:kha.graphics2.Graphics) {
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
-		var modalW = Std.int(300 * uimodal.SCALE);
-		var modalH = Std.int(100 * uimodal.SCALE);
-		var left = Std.int(appw / 2 - modalW / 2);
-		var right = Std.int(appw / 2 + modalW / 2);
-		var top = Std.int(apph / 2 - modalH / 2);
-		var bottom = Std.int(apph / 2 + modalH / 2);
-		
-		g.color = uimodal.t.SEPARATOR_COL;
-		g.fillRect(left, top, modalW, modalH);
-		g.end();
-
-		if (boxCommands == null) {
-			uimodal.begin(g);
-			if (uimodal.window(whandle, left, top, modalW, modalH)) {
-				uimodal._y += 20;
-				for (line in boxText.split("\n")) {
-					uimodal.text(line);
-				}
-			}
-			uimodal.end(false);
-			uimodal.beginLayout(g, right - Std.int(uimodal.ELEMENT_W()), bottom - Std.int(uimodal.ELEMENT_H() * 1.2), Std.int(uimodal.ELEMENT_W()));
-			if (uimodal.button("OK")) {
-				showBox = false;
-			}
-			uimodal.endLayout(false);
-		}
-		else {
-			uimodal.begin(g);
-			if (uimodal.window(whandle, left, top, modalW, modalH)) {
-				uimodal._y += 20;
-				boxCommands(uimodal);
-			}
-			uimodal.end();
-		}
-		
-		g.begin(false);
+	public static function mapEnum(s:String):String {
+		for (a in UITrait.inst.assets) if (a.name == s) return a.file;
+		return "";
 	}
 
-	public static function showMessageBox(text:String) {
-		showBox = true;
-		boxText = text;
-		boxCommands = null;
-	}
-
-	public static function showCustomBox(commands:Zui->Void = null) {
-		showBox = true;
-		boxCommands = commands;
-	}
-
-	public static function showContextMenu(commands:Zui->Void = null) {
-		showMenu = true;
-		menuCommands = commands;
-		menuX = Std.int(iron.App.x() + iron.system.Input.getMouse().x);
-		menuY = Std.int(iron.App.y() + iron.system.Input.getMouse().y);
-		var menuw = uimodal.ELEMENT_W() * 1.5;
-		if (menuX + menuw > kha.System.windowWidth()) {
-			menuX = Std.int(kha.System.windowWidth() - menuw);
-		}
-	}
-
-	public static function projectNew() {
-		showCustomBox(function(ui:Zui) {
-			ui.text("New Project");
-			ui.row([1/2, 1/2]);
-			UITrait.inst.newObject = ui.combo(Id.handle(), UITrait.inst.newObjectNames, "Default Object");
-			if (ui.button("OK")) {
-				Project.projectNew();
-				ViewportUtil.scaleToBounds();
-				showBox = false;
-			}
-		});
-	}
-
-	@:access(zui.Zui)
-	static function renderMenu(g:kha.graphics2.Graphics) {
-		
-		var ui = uimodal;
-
-		var panelx = iron.App.x() - UITrait.inst.toolbarw;
-		var C:TAPConfig = cast armory.data.Config.raw;
-		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - UITrait.inst.toolbarw;
-
-		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
-		var px = panelx + menuButtonW * menuCategory;
-		var py = UITrait.inst.headerh;
-		var menuItems = [5, 2, 13, 4];
-		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
-		
-		g.color = ui.t.SEPARATOR_COL;
-		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
-		var sepw = menuw / ui.SCALE;
-
-		if (menuCommands != null) {
-			px = menuX;
-			py = menuY;
-		}
-		else {
-			g.fillRect(px, py, menuw, ph);
-		}
-		
-		g.end();
-
-		ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
-		var BUTTON_COL = ui.t.BUTTON_COL;
-		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-
-		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
-		ui.t.ELEMENT_OFFSET = 0;
-		var ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Std.int(24);
-
-		ui.changed = false;
-
-		if (menuCommands != null) {
-			menuCommands(ui);
-		}
-		else {
-
-			if (menuCategory == 0) {
-				if (ui.button("New Project...", Left, 'Ctrl+N')) projectNew();
-				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
-				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
-				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
-				// ui.button("Import Asset...", Left);
-				// ui.button("Export Textures...", Left);
-				// ui.button("Export Mesh...", Left);
-				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Exit", Left)) { kha.System.stop(); }
-			}
-			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, "Ctrl+Z")) UITrait.inst.doUndo();
-				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) UITrait.inst.doRedo();
-				// ui.button("Preferences...", Left);
-			}
-			else if (menuCategory == 2) {
-				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
-				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
-				if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
-				if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
-				if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
-				if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
-				if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
-				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Orbit Left", Left, "4")) { ViewportUtil.orbit(-Math.PI / 12, 0); }
-				if (ui.button("Orbit Right", Left, "6")) { ViewportUtil.orbit(Math.PI / 12, 0); }
-				if (ui.button("Orbit Up", Left, "8")) { ViewportUtil.orbit(0, -Math.PI / 12); }
-				if (ui.button("Orbit Down", Left, "2")) { ViewportUtil.orbit(0, Math.PI / 12); }
-				if (ui.button("Orbit Opposite", Left, "9")) { ViewportUtil.orbit(Math.PI, 0); }
-				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Distract Free", Left, "F11")) {
-					UITrait.inst.show = !UITrait.inst.show;
-					arm.App.resize();
-					UITrait.inst.ui.isHovered = false;
-				}
-
-				// ui.button("Show Envmap", Left);
-				// ui.button("Show Grid", Left);
-				// ui.button("Wireframe", Left);
-			}
-			else if (menuCategory == 3) {
-				if (ui.button("Manual", Left)) {
-					#if kha_krom
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('explorer "https://armorpaint.org/manual"');
-					}
-					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-explorer "https://armorpaint.org/manual"');
-					}
-					else {
-						Krom.sysCommand('open "https://armorpaint.org/manual"');
-					}
-					#end
-				}
-				if (ui.button("Report Bug", Left)) {
-					#if kha_krom
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
-					}
-					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-explorer "https://github.com/armory3d/armorpaint/issues"');
-					}
-					else {
-						Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
-					}
-					#end
-				}
-				if (ui.button("Check for Updates...", Left)) {
-					// Retrieve latest version number
-					#if kha_krom
-					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
-					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
-					}
-					else {
-						Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
-					}
-					// Compare versions
-					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
-						var update = haxe.Json.parse(blob.toString());
-						var updateVersion = Std.int(update.version);
-						if (updateVersion > 0) {
-							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
-							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
-							if (updateVersion > dateInt) {
-								arm.App.showMessageBox("Update is available!\nPlease visit armorpaint.org to download.");
-							}
-							else {
-								arm.App.showMessageBox("You are up to date!");
-							}
-						}
-					});
-					#end
-				}
-				if (ui.button("About...", Left)) {
-					var sha = Macro.buildSha();
-					sha = sha.substr(1, sha.length - 2);
-					var date = Macro.buildDate().split(" ")[0];
-					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
-					var msg = "ArmorPaint.org - v" + version + " (" + date + ") - git " + sha + "\n";
-					msg += kha.System.systemId + " - " + gapi;
-					arm.App.showMessageBox(msg);
-				}
+	public static function getAssetIndex(f:String):Int {
+		for (i in 0...UITrait.inst.assets.length) {
+			if (UITrait.inst.assets[i].file == f) {
+				return i;
 			}
 		}
-
-		// Hide menu
-		var first = showMenuFirst;
-		showMenuFirst = false;
-		if (first) {
-			// arm.App.uienabled = false;
-		}
-		else {
-			if (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown) {
-				showMenu = false;
-				showMenuFirst = true;
-				menuCommands = null;
-				// arm.App.uienabled = true;
-			}
-		}
-
-		ui.t.BUTTON_COL = BUTTON_COL;
-		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-		ui.t.ELEMENT_H = ELEMENT_H;
-		ui.endLayout();
-
-		g.begin(false);
+		return 0;
 	}
 }

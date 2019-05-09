@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.*;
+import arm.util.UVUtil;
 
 @:access(zui.Zui)
 class UIView2D extends iron.Trait {
@@ -11,18 +12,11 @@ class UIView2D extends iron.Trait {
 	public var wy:Int;
 	public var ww:Int;
 	public var wh:Int;
-	public var uvmap:kha.Image = null;
-	public var uvmapCached = false;
 	public var ui:Zui;
 	public var hwnd = Id.handle();
-
-	public var trianglemap:kha.Image = null;
-	public var trianglemapCached = false;
-
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	
 	var pipe:kha.graphics4.PipelineState;
 	var texType = 0;
 	var uvmapShow = false;
@@ -51,74 +45,11 @@ class UIView2D extends iron.Trait {
 		ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 
-		notifyOnRender2D(render2D);
+		notifyOnRender2D(render);
 		notifyOnUpdate(update);
 	}
 
-	public function cacheUVMap() {
-		if (uvmapCached) return;
-		
-		var res = Config.getTextureRes();
-		if (uvmap == null) {
-			uvmap = kha.Image.createRenderTarget(res, res);
-		}
-
-		uvmapCached = true;
-		var merged = UITrait.inst.mergedObject != null ? UITrait.inst.mergedObject.data.raw : UITrait.inst.paintObject.data.raw;
-		// var mesh = UITrait.inst.maskHandle.position == 0 ? merged : UITrait.inst.paintObject.data.raw;
-		var mesh = merged;
-		var texa = mesh.vertex_arrays[2].values;
-		var inda = mesh.index_arrays[0].values;
-		uvmap.g2.begin(true, 0x00000000);
-		uvmap.g2.color = 0xffcccccc;
-		var strength = res > 2048 ? 2.0 : 1.0;
-		var f = (1 / 32767) * uvmap.width;
-		for (i in 0...Std.int(inda.length / 3)) {
-			var x1 = (texa[inda[i * 3    ] * 2 + 0]) * f;
-			var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) * f;
-			var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) * f;
-			var y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
-			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
-			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-			uvmap.g2.drawLine(x1, y1, x2, y2, strength);
-			uvmap.g2.drawLine(x2, y2, x3, y3, strength);
-			uvmap.g2.drawLine(x3, y3, x1, y1, strength);
-		}
-		uvmap.g2.end();
-	}
-
-	public function cacheTriangleMap() {
-		if (trianglemapCached) return;
-
-		var res = Config.getTextureRes();
-		if (trianglemap == null) {
-			trianglemap = kha.Image.createRenderTarget(res, res);
-		}
-
-		trianglemapCached = true;
-		var merged = UITrait.inst.mergedObject != null ? UITrait.inst.mergedObject.data.raw : UITrait.inst.paintObject.data.raw;
-		// var mesh = UITrait.inst.maskHandle.position == 0 ? merged : UITrait.inst.paintObject.data.raw;
-		var mesh = merged;
-		var texa = mesh.vertex_arrays[2].values;
-		var inda = mesh.index_arrays[0].values;
-		trianglemap.g2.begin(true, 0xff000000);
-		var f = (1 / 32767) * trianglemap.width;
-		var color = 0xff000000;
-		for (i in 0...Std.int(inda.length / 3)) {
-			trianglemap.g2.color = color;
-			var x1 = (texa[inda[i * 3    ] * 2 + 0]) * f;
-			var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) * f;
-			var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) * f;
-			var y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
-			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
-			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
-			trianglemap.g2.fillTriangle(x1, y1, x2, y2, x3, y3);
-			color++;
-		}
-		trianglemap.g2.end();
-	}
-
-	function render2D(g:kha.graphics2.Graphics) {
+	function render(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		var lay = UITrait.inst.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
@@ -140,7 +71,7 @@ class UIView2D extends iron.Trait {
 		if (UINodes.inst.grid == null) UINodes.inst.drawGrid();
 
 		// Ensure UV map is drawn
-		if (uvmapShow) cacheUVMap();
+		if (uvmapShow) UVUtil.cacheUVMap();
 		
 		ui.begin(g);
 		wh = iron.App.h();
@@ -163,7 +94,7 @@ class UIView2D extends iron.Trait {
 
 			// UV map
 			if (uvmapShow) {
-				ui.g.drawScaledImage(uvmap, tx, ty, tw, tw);
+				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, tw);
 			}
 
 			// Editable layer name

@@ -11,6 +11,7 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Math;
 import iron.RenderPath;
+import arm.MaterialParser;
 import arm.ProjectFormat;
 import arm.ProjectFormat.TAPConfig;
 import arm.util.*;
@@ -396,8 +397,8 @@ class UITrait extends iron.Trait {
 		iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
 
 			if (frame == 0) {
-				UINodes.inst.parseMeshMaterial();
-				UINodes.inst.parsePaintMaterial();
+				MaterialParser.parseMeshMaterial();
+				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 			frame++;
@@ -497,7 +498,7 @@ class UITrait extends iron.Trait {
 		var alt = kb.down("alt");
 		alt = false; // TODO: gets stuck after alt+tab
 
-		if (!arm.App.uimodal.isTyping) {
+		if (!arm.App.uibox.isTyping) {
 			if (kb.started("escape")) {
 				arm.App.showFiles = false;
 				arm.App.showBox = false;
@@ -525,7 +526,7 @@ class UITrait extends iron.Trait {
 		if (ctrl && !shift && kb.started("s")) Project.projectSave();
 		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
 		else if (ctrl && kb.started("o")) Project.projectOpen();
-		else if (ctrl && kb.started("n")) App.projectNew();
+		else if (ctrl && kb.started("n")) UIBox.newProject();
 		else if (ctrl && shift && kb.started("e")) { // Export textures
 			if (textureExportPath == "") { // First export, ask for path
 				arm.App.showFiles = true;
@@ -681,7 +682,7 @@ class UITrait extends iron.Trait {
 	public function setMaterial(m:MaterialSlot) {
 		selectedMaterial = m;
 		UINodes.inst.updateCanvasMap();
-		UINodes.inst.parsePaintMaterial();
+		MaterialParser.parsePaintMaterial();
 		hwnd1.redraws = 2;
 		headerHandle.redraws = 2;
 
@@ -701,7 +702,7 @@ class UITrait extends iron.Trait {
 		}
 
 		UINodes.inst.updateCanvasMap();
-		UINodes.inst.parsePaintMaterial();
+		MaterialParser.parsePaintMaterial();
 
 		hwnd.redraws = 2;
 	}
@@ -710,7 +711,7 @@ class UITrait extends iron.Trait {
 		if (brushes.length <= i) return;
 		selectedBrush = brushes[i];
 		UINodes.inst.updateCanvasBrushMap();
-		UINodes.inst.parseBrush();
+		MaterialParser.parseBrush();
 		hwnd1.redraws = 2;
 	}
 
@@ -723,8 +724,8 @@ class UITrait extends iron.Trait {
 		if (current != null) current.end();
 
 		setObjectMask();
-		UINodes.inst.parseMeshMaterial();
-		UINodes.inst.parsePaintMaterial();
+		MaterialParser.parseMeshMaterial();
+		MaterialParser.parsePaintMaterial();
 
 		if (current != null) current.begin(false);
 
@@ -1158,8 +1159,8 @@ class UITrait extends iron.Trait {
 
 	function selectTool(i:Int) {
 		selectedTool = i;
-		UINodes.inst.parsePaintMaterial();
-		UINodes.inst.parseMeshMaterial();
+		MaterialParser.parsePaintMaterial();
+		MaterialParser.parseMeshMaterial();
 		headerHandle.redraws = 2;
 		toolbarHandle.redraws = 2;
 
@@ -1182,7 +1183,7 @@ class UITrait extends iron.Trait {
 
 		if (selectedTool == ToolParticle) {
 			initParticle();
-			UINodes.inst.parseParticleMaterial();
+			MaterialParser.parseParticleMaterial();
 		}
 	}
 
@@ -1214,8 +1215,8 @@ class UITrait extends iron.Trait {
 		if (mergedObject == null || mask > 0) {
 			paintObject.skip_context = "";
 		}
-		UIView2D.inst.uvmapCached = false;
-		UIView2D.inst.trianglemapCached = false;
+		UVUtil.uvmapCached = false;
+		UVUtil.trianglemapCached = false;
 	}
 
 	public function getImage(asset:TAsset):kha.Image {
@@ -1371,10 +1372,10 @@ class UITrait extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			if (ui.button("File", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 0; };
-			if (ui.button("Edit", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 1; };
-			if (ui.button("View", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 2; };
-			if (ui.button("Help", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; arm.App.menuCategory = 3; };
+			if (ui.button("File", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; UIMenu.menuCategory = 0; };
+			if (ui.button("Edit", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; UIMenu.menuCategory = 1; };
+			if (ui.button("View", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; UIMenu.menuCategory = 2; };
+			if (ui.button("Help", Left) || (arm.App.showMenu && ui.isHovered)) { arm.App.showMenu = true; UIMenu.menuCategory = 3; };
 			
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -1397,11 +1398,11 @@ class UITrait extends iron.Trait {
 				}
 				
 				if (worktab.position == 2) {
-					UINodes.inst.parseMeshPreviewMaterial();
+					MaterialParser.parseMeshPreviewMaterial();
 					mainObject().skip_context = "paint";
 				}
 				else {
-					UINodes.inst.parseMeshMaterial();
+					MaterialParser.parseMeshMaterial();
 					mainObject().skip_context = null;
 				}
 			}
@@ -1442,20 +1443,20 @@ class UITrait extends iron.Trait {
 					ui.combo(pickerMaskHandle, ["None", "Material"], "Mask", true);
 					if (pickerMaskHandle.changed) {
 						UINodes.inst.updateCanvasMap();
-						UINodes.inst.parsePaintMaterial();
+						MaterialParser.parsePaintMaterial();
 					}
 				}
 				else if (selectedTool == ToolBake) {
 					ui.combo(Id.handle(), ["AO"], "Bake");
 					var h = Id.handle({value: bakeStrength});
 					bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
-					if (h.changed) UINodes.inst.parsePaintMaterial();
+					if (h.changed) MaterialParser.parsePaintMaterial();
 					var h = Id.handle({value: bakeRadius});
 					bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
-					if (h.changed) UINodes.inst.parsePaintMaterial();
+					if (h.changed) MaterialParser.parsePaintMaterial();
 					var h = Id.handle({value: bakeOffset});
 					bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
-					if (h.changed) UINodes.inst.parsePaintMaterial();
+					if (h.changed) MaterialParser.parsePaintMaterial();
 				}
 				else {
 					if (selectedTool != ToolFill) {
@@ -1479,7 +1480,7 @@ class UITrait extends iron.Trait {
 
 						var brushRotHandle = Id.handle({value: brushRot});
 						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
-						if (brushRotHandle.changed) UINodes.inst.parsePaintMaterial();
+						if (brushRotHandle.changed) MaterialParser.parsePaintMaterial();
 					}
 					
 					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
@@ -1497,7 +1498,7 @@ class UITrait extends iron.Trait {
 						var paintHandle = Id.handle();
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
 						if (paintHandle.changed) {
-							UINodes.inst.parsePaintMaterial();
+							MaterialParser.parsePaintMaterial();
 						}
 					}
 					if (selectedTool == ToolDecal) {
@@ -1526,13 +1527,13 @@ class UITrait extends iron.Trait {
 						if (fillTypeHandle.changed) {
 							if (fillTypeHandle.position == 1) {
 								ui.g.end();
-								// UIView2D.inst.cacheUVMap();
-								UIView2D.inst.cacheTriangleMap();
+								// UVUtil.cacheUVMap();
+								UVUtil.cacheTriangleMap();
 								ui.g.begin(false);
 								// wireframeHandle.selected = drawWireframe = true;
 							}
-							UINodes.inst.parsePaintMaterial();
-							UINodes.inst.parseMeshMaterial();
+							MaterialParser.parsePaintMaterial();
+							MaterialParser.parseMeshMaterial();
 						}
 					}
 					else {
@@ -1548,7 +1549,7 @@ class UITrait extends iron.Trait {
 							mirrorX = ui.check(mirrorHandle, "Mirror");
 							if (mirrorHandle.changed) {
 								UINodes.inst.updateCanvasMap();
-								UINodes.inst.parsePaintMaterial();
+								MaterialParser.parsePaintMaterial();
 							}
 
 							
@@ -1562,7 +1563,7 @@ class UITrait extends iron.Trait {
 							symY = ui.check(symYHandle, "Y");
 							symZ = ui.check(symZHandle, "Z");
 							if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
-								UINodes.inst.parsePaintMaterial();
+								MaterialParser.parsePaintMaterial();
 							}
 						}
 						ui._w = _w;
@@ -1860,7 +1861,7 @@ class UITrait extends iron.Trait {
 				ui.row([1/4,1/4,1/2]);
 				if (ui.button("New")) {
 
-					// App.showContextMenu(function(ui:Zui) {
+					// UIMenu.show(function(ui:Zui) {
 					// 	ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
 					// 	ui.text("Type", Right);
 					// 	if (ui.button("Paint Layer", Left)) {
@@ -1935,7 +1936,7 @@ class UITrait extends iron.Trait {
 					ui._y += center;
 					l.visible = ui.check(h, "");
 					if (h.changed) {
-						UINodes.inst.parseMeshMaterial();
+						MaterialParser.parseMeshMaterial();
 					}
 					ui._y -= center;
 
@@ -1990,7 +1991,7 @@ class UITrait extends iron.Trait {
 							ui.tooltipImage(l.texpaint_mask_preview);
 						}
 						if (ui.isHovered && ui.inputReleasedR) {
-							App.showContextMenu(function(ui:Zui) {
+							UIMenu.show(function(ui:Zui) {
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 								ui.text(l.name + " Mask", Right);
 								if (ui.button("Delete", Left)) {
@@ -2026,7 +2027,7 @@ class UITrait extends iron.Trait {
 					}
 
 					if (contextMenu) {
-						App.showContextMenu(function(ui:Zui) {
+						UIMenu.show(function(ui:Zui) {
 							if (l == layers[0]) {
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 								ui.text(l.name, Right);
@@ -2042,7 +2043,7 @@ class UITrait extends iron.Trait {
 								function makeFill(g:kha.graphics4.Graphics) {
 									g.end();
 									Layers.updateFillLayers(8);
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 									UITrait.inst.layerPreviewDirty = true;
 									hwnd.redraws = 2;
 									g.begin();
@@ -2053,7 +2054,7 @@ class UITrait extends iron.Trait {
 							if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
 								setLayer(l);
 								l.material_mask = null;
-								UINodes.inst.parsePaintMaterial();
+								MaterialParser.parsePaintMaterial();
 								UITrait.inst.layerPreviewDirty = true;
 								hwnd.redraws = 2;
 							}
@@ -2108,42 +2109,42 @@ class UITrait extends iron.Trait {
 							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
 							l.paintBase = ui.check(baseHandle, "Base Color");
 							if (baseHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
 							l.paintNor = ui.check(norHandle, "Normal");
 							if (norHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
 							l.paintOcc = ui.check(occHandle, "Occlusion");
 							if (occHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
 							l.paintRough = ui.check(roughHandle, "Roughness");
 							if (roughHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
 							l.paintMet = ui.check(metHandle, "Metallic");
 							if (metHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
 							l.paintHeight = ui.check(heightHandle, "Height");
 							if (heightHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
 							l.paintEmis = ui.check(emisHandle, "Emission");
 							if (emisHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
 							l.paintSubs = ui.check(subsHandle, "Subsurface");
 							if (subsHandle.changed) {
-								UINodes.inst.parseMeshMaterial();
+								MaterialParser.parseMeshMaterial();
 							}
 						});
 					}
@@ -2189,7 +2190,7 @@ class UITrait extends iron.Trait {
 						var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
 						l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
 						if (opacHandle.changed) {
-							UINodes.inst.parseMeshMaterial();
+							MaterialParser.parseMeshMaterial();
 						}
 					}
 				}
@@ -2221,7 +2222,7 @@ class UITrait extends iron.Trait {
 						#end
 						C.window_scale = hscale.value;
 						ui.setScale(hscale.value);
-						arm.App.uimodal.setScale(hscale.value);
+						arm.App.uibox.setScale(hscale.value);
 						UINodes.inst.ui.setScale(hscale.value);
 						UIView2D.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * C.window_scale);
@@ -2314,7 +2315,7 @@ class UITrait extends iron.Trait {
 					var cullHandle = Id.handle({selected: culling});
 					culling = ui.check(cullHandle, "Cull Backfaces");
 					if (cullHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
+						MaterialParser.parseMeshMaterial();
 					}
 				}
 
@@ -2344,7 +2345,7 @@ class UITrait extends iron.Trait {
 					selectedMaterial = new MaterialSlot(materials[0].data);
 					materials.push(selectedMaterial);
 					UINodes.inst.updateCanvasMap();
-					UINodes.inst.parsePaintMaterial();
+					MaterialParser.parsePaintMaterial();
 					RenderUtil.makeMaterialPreview();
 					var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 					if (decal) RenderUtil.makeDecalPreview();
@@ -2391,7 +2392,7 @@ class UITrait extends iron.Trait {
 							selectTime = iron.system.Time.time();
 						}
 						if (ui.isHovered && ui.inputReleasedR) {
-							App.showContextMenu(function(ui:Zui) {
+							UIMenu.show(function(ui:Zui) {
 								var m = materials[i];
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 								ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
@@ -2406,49 +2407,49 @@ class UITrait extends iron.Trait {
 								m.paintBase = ui.check(baseHandle, "Base Color");
 								if (baseHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
 								m.paintNor = ui.check(norHandle, "Normal");
 								if (norHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
 								m.paintOcc = ui.check(occHandle, "Occlusion");
 								if (occHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
 								m.paintRough = ui.check(roughHandle, "Roughness");
 								if (roughHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
 								m.paintMet = ui.check(metHandle, "Metallic");
 								if (metHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
 								m.paintHeight = ui.check(heightHandle, "Height");
 								if (heightHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
 								m.paintEmis = ui.check(emisHandle, "Emission");
 								if (emisHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 								var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
 								m.paintSubs = ui.check(subsHandle, "Subsurface");
 								if (subsHandle.changed) {
 									UINodes.inst.updateCanvasMap();
-									UINodes.inst.parsePaintMaterial();
+									MaterialParser.parsePaintMaterial();
 								}
 							});
 						}
@@ -2517,7 +2518,7 @@ class UITrait extends iron.Trait {
 						if (ui.isHovered) ui.tooltipImage(img, 256);
 
 						if (ui.isHovered && ui.inputReleasedR) {
-							App.showContextMenu(function(ui:Zui) {
+							UIMenu.show(function(ui:Zui) {
 								ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 								ui.text(asset.name, Right);
 								if (ui.button("Delete", Left)) {
@@ -2611,7 +2612,7 @@ class UITrait extends iron.Trait {
 					var dispHandle = Id.handle({value: displaceStrength});
 					displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 					if (dispHandle.changed) {
-						UINodes.inst.parseMeshMaterial();
+						MaterialParser.parseMeshMaterial();
 					}
 				}
 			}
@@ -2622,10 +2623,10 @@ class UITrait extends iron.Trait {
 					ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K"], "Res", true);
 					if (resHandle.changed) {
 						iron.App.notifyOnRender(Layers.resizeLayers);
-						UIView2D.inst.uvmap = null;
-						UIView2D.inst.uvmapCached = false;
-						UIView2D.inst.trianglemap = null;
-						UIView2D.inst.trianglemapCached = false;
+						UVUtil.uvmap = null;
+						UVUtil.uvmapCached = false;
+						UVUtil.trianglemap = null;
+						UVUtil.trianglemapCached = false;
 					}
 					ui.combo(Id.handle(), ["8bit"], "Color", true);
 				}
@@ -2740,7 +2741,7 @@ class UITrait extends iron.Trait {
 				var modeHandle = Id.handle({position: 0});
 				viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"], "Mode");
 				if (modeHandle.changed) {
-					UINodes.inst.parseMeshMaterial();
+					MaterialParser.parseMeshMaterial();
 				}
 				var p = iron.Scene.active.world.probe;
 				// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
@@ -2773,9 +2774,9 @@ class UITrait extends iron.Trait {
 				drawWireframe = ui.check(wireframeHandle, "Wireframe");
 				if (wireframeHandle.changed) {
 					ui.g.end();
-					UIView2D.inst.cacheUVMap();
+					UVUtil.cacheUVMap();
 					ui.g.begin(false);
-					UINodes.inst.parseMeshMaterial();
+					MaterialParser.parseMeshMaterial();
 				}
 				showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
 

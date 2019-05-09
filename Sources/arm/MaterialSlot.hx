@@ -21,12 +21,11 @@ class MaterialSlot {
 	
 	public function new(m:iron.data.MaterialData = null) {
 		id = ++counter;
+		data = m;
 
 		var w = arm.util.RenderUtil.matPreviewSize;
 		var wIcon = Std.int(w / 4);
 		image = kha.Image.createRenderTarget(w, w);
 		imageIcon = kha.Image.createRenderTarget(wIcon, wIcon);
-		
-		data = m;
 	}
 }

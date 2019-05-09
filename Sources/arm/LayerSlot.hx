@@ -1,5 +1,7 @@
 package arm;
 
+import kha.graphics4.DepthStencilFormat;
+import kha.graphics4.TextureFormat;
 import iron.RenderPath;
 import arm.ui.*;
 
@@ -240,5 +242,52 @@ class LayerSlot {
 		l.texpaint_pack.g2.end();
 		
 		return l;
+	}
+
+	public function resize(hasDepth:Bool) {
+		var res = Config.getTextureRes();
+		var rts = RenderPath.active.renderTargets;
+
+		var texpaint = this.texpaint;
+		var texpaint_nor = this.texpaint_nor;
+		var texpaint_pack = this.texpaint_pack;
+
+		var depthFormat = hasDepth ? DepthStencilFormat.Depth16 : DepthStencilFormat.NoDepthAndStencil;
+		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, depthFormat);
+		this.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
+		this.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
+
+		this.texpaint.g2.begin(false);
+		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
+		this.texpaint.g2.end();
+
+		this.texpaint_nor.g2.begin(false);
+		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, res, res);
+		this.texpaint_nor.g2.end();
+
+		this.texpaint_pack.g2.begin(false);
+		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
+		this.texpaint_pack.g2.end();
+
+		texpaint.unload();
+		texpaint_nor.unload();
+		texpaint_pack.unload();
+
+		rts.get("texpaint" + this.ext).image = this.texpaint;
+		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
+		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
+
+		if (this.texpaint_mask != null) {
+			var texpaint_mask = this.texpaint_mask;
+			this.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
+
+			this.texpaint_mask.g2.begin(false);
+			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
+			this.texpaint_mask.g2.end();
+
+			texpaint_mask.unload();
+
+			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package arm;
 
 import kha.graphics4.TextureFormat;
-import kha.graphics4.DepthStencilFormat;
 import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.ui.*;
@@ -67,53 +66,6 @@ class Layers {
 		iron.App.removeRender(clearLastLayer);
 	}
 
-	public static function resizeLayer(l:LayerSlot, hasDepth:Bool) {
-		var res = Config.getTextureRes();
-		var rts = RenderPath.active.renderTargets;
-
-		var texpaint = l.texpaint;
-		var texpaint_nor = l.texpaint_nor;
-		var texpaint_pack = l.texpaint_pack;
-
-		var depthFormat = hasDepth ? DepthStencilFormat.Depth16 : DepthStencilFormat.NoDepthAndStencil;
-		l.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, depthFormat);
-		l.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
-		l.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
-
-		l.texpaint.g2.begin(false);
-		l.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
-		l.texpaint.g2.end();
-
-		l.texpaint_nor.g2.begin(false);
-		l.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, res, res);
-		l.texpaint_nor.g2.end();
-
-		l.texpaint_pack.g2.begin(false);
-		l.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
-		l.texpaint_pack.g2.end();
-
-		texpaint.unload();
-		texpaint_nor.unload();
-		texpaint_pack.unload();
-
-		rts.get("texpaint" + l.ext).image = l.texpaint;
-		rts.get("texpaint_nor" + l.ext).image = l.texpaint_nor;
-		rts.get("texpaint_pack" + l.ext).image = l.texpaint_pack;
-
-		if (l.texpaint_mask != null) {
-			var texpaint_mask = l.texpaint_mask;
-			l.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
-
-			l.texpaint_mask.g2.begin(false);
-			l.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
-			l.texpaint_mask.g2.end();
-
-			texpaint_mask.unload();
-
-			rts.get("texpaint_mask" + l.ext).image = l.texpaint_mask;
-		}
-	}
-
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
 		var C = UITrait.inst.C;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
@@ -124,23 +76,23 @@ class Layers {
 		g.end();
 		var i = 0;
 		for (l in UITrait.inst.layers) {
-			resizeLayer(l, i == 0);
+			l.resize(i == 0);
 			if (i > 0) l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 			i++;
 		}
 		for (l in UITrait.inst.undoLayers) {
-			resizeLayer(l, false);
+			l.resize(false);
 			l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 		}
 		var rts = RenderPath.active.renderTargets;
 		rts.get("texpaint_blend0").image.unload();
 		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
 		rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
 		rts.get("texpaint_blend1").image.unload();
 		rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+		rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
 		UITrait.inst.brushBlendDirty = true;
 		g.begin();
 		UITrait.inst.ddirty = 2;
@@ -296,7 +248,7 @@ class Layers {
 
 				if (first) {
 					first = false;
-					UINodes.inst.parsePaintMaterial();
+					arm.MaterialParser.parsePaintMaterial();
 				}
 				
 				for (i in 0...fills) {

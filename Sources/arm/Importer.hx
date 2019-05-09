@@ -36,192 +36,166 @@ class Importer {
 			importFont(path);
 		}
 		// Project
-		else if (StringTools.endsWith(path.toLowerCase(), ".arm")) {
+		else if (Format.checkProjectFormat(path)) {
 			Project.importProject(path);
 		}
 		// Folder
 		else if (path.indexOf(".") == -1) {
-			#if kha_krom
-			var systemId = kha.System.systemId;
-			var cmd = systemId == "Windows" ? "dir /b " : "ls ";
-			var sep = systemId == "Windows" ? "\\" : "/";
-			var save = systemId == "Linux" ? "/tmp" : Krom.savePath();
-			save += sep + "dir.txt";
-			Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
-			var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
-			var files = str.split("\n");
-			var mapbase = "";
-			var mapopac = "";
-			var mapnor = "";
-			var mapocc = "";
-			var maprough = "";
-			var mapmet = "";
-			var mapheight = "";
-			// Import maps
-			for (f in files) {
-				if (f.length == 0) continue;
-				f = StringTools.rtrim(f);
-				if (!Format.checkTextureFormat(f)) continue;
-				
-				f = path + sep + f;
-				if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
-
-				// TODO: handle -albedo
-				
-				var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
-				var valid = false;
-				if (mapbase == "" && (StringTools.endsWith(base, "_albedo") ||
-									  StringTools.endsWith(base, "_alb") ||
-									  StringTools.endsWith(base, "_basecol") ||
-									  StringTools.endsWith(base, "_basecolor") ||
-									  StringTools.endsWith(base, "_diffuse") ||
-									  StringTools.endsWith(base, "_diff") ||
-									  StringTools.endsWith(base, "_base") ||
-									  StringTools.endsWith(base, "_bc") ||
-									  StringTools.endsWith(base, "_d") ||
-									  StringTools.endsWith(base, "_color") ||
-									  StringTools.endsWith(base, "_col"))) {
-					mapbase = f;
-					valid = true;
-				}
-				if (mapopac == "" && (StringTools.endsWith(base, "_opac") ||
-									  StringTools.endsWith(base, "_alpha") ||
-									  StringTools.endsWith(base, "_opacity") ||
-									  StringTools.endsWith(base, "_mask"))) {
-					mapopac = f;
-					valid = true;
-				}
-				if (mapnor == "" && (StringTools.endsWith(base, "_normal") ||
-									 StringTools.endsWith(base, "_nor") ||
-									 StringTools.endsWith(base, "_n") ||
-									 StringTools.endsWith(base, "_nrm"))) {
-					mapnor = f;
-					valid = true;
-				}
-				if (mapocc == "" && (StringTools.endsWith(base, "_ao") ||
-									 StringTools.endsWith(base, "_occlusion") ||
-									 StringTools.endsWith(base, "_o") ||
-									 StringTools.endsWith(base, "_occ"))) {
-					mapocc = f;
-					valid = true;
-				}
-				if (maprough == "" && (StringTools.endsWith(base, "_roughness") ||
-									   StringTools.endsWith(base, "_roug") ||
-									   StringTools.endsWith(base, "_r") ||
-									   StringTools.endsWith(base, "_rough") ||
-									   StringTools.endsWith(base, "_rgh"))) {
-					maprough = f;
-					valid = true;
-				}
-				if (mapmet == "" && (StringTools.endsWith(base, "_metallic") ||
-									 StringTools.endsWith(base, "_metal") ||
-									 StringTools.endsWith(base, "_metalness") ||
-									 StringTools.endsWith(base, "_m") ||
-									 StringTools.endsWith(base, "_met"))) {
-					mapmet = f;
-					valid = true;
-				}
-				if (mapheight == "" && (StringTools.endsWith(base, "_displacement") ||
-									    StringTools.endsWith(base, "_height") ||
-									    StringTools.endsWith(base, "_h") ||
-										StringTools.endsWith(base, "_disp"))) {
-					mapheight = f;
-					valid = true;
-				}
-
-				if (valid) importTexture(f);
-			}
-			// Create material
-			UITrait.inst.selectedMaterial = new MaterialSlot();
-			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
-			UINodes.inst.updateCanvasMap();
-			var nodes = UINodes.inst.nodes;
-			var canvas = UINodes.inst.canvas;
-			var nout:Nodes.TNode = null;
-			for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
-			for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
-			
-			var pos = 0;
-			if (mapbase != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapbase);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
-				canvas.links.push(l);
-			}
-			if (mapopac != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapopac);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 1 };
-				canvas.links.push(l);
-			}
-			if (mapocc != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapocc);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
-				canvas.links.push(l);
-			}
-			if (maprough != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(maprough);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
-				canvas.links.push(l);
-			}
-			if (mapmet != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapmet);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
-				canvas.links.push(l);
-			}
-			if (mapnor != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapnor);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
-				canvas.links.push(l);
-			}
-			if (mapheight != "") {
-				var n = NodeCreator.createImageTexture();
-				n.buttons[0].default_value = arm.App.getAssetIndex(mapheight);
-				n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
-				n.x = 72;
-				n.y = 192 + 160 * pos;
-				pos++;
-				var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
-				canvas.links.push(l);
-			}
-			iron.system.Tween.timer(0.01, function() {
-				UINodes.inst.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd1.redraws = 2;
-			});
-			#end
+			importFolder(path);
 		}
 		else {
 			UITrait.inst.showError("Error: Unknown asset format");
 		}
+	}
+
+	static function importFolder(path:String) {
+		#if kha_krom
+		var systemId = kha.System.systemId;
+		var cmd = systemId == "Windows" ? "dir /b " : "ls ";
+		var sep = systemId == "Windows" ? "\\" : "/";
+		var save = systemId == "Linux" ? "/tmp" : Krom.savePath();
+		save += sep + "dir.txt";
+		Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
+		var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
+		var files = str.split("\n");
+		var mapbase = "";
+		var mapopac = "";
+		var mapnor = "";
+		var mapocc = "";
+		var maprough = "";
+		var mapmet = "";
+		var mapheight = "";
+		// Import maps
+		for (f in files) {
+			if (f.length == 0) continue;
+			f = StringTools.rtrim(f);
+			if (!Format.checkTextureFormat(f)) continue;
+			
+			f = path + sep + f;
+			if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
+
+			// TODO: handle -albedo
+			
+			var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
+			var valid = false;
+			if (mapbase == "" && Format.checkBaseTex(base)) {
+				mapbase = f;
+				valid = true;
+			}
+			if (mapopac == "" && Format.checkOpacTex(base)) {
+				mapopac = f;
+				valid = true;
+			}
+			if (mapnor == "" && Format.checkNorTex(base)) {
+				mapnor = f;
+				valid = true;
+			}
+			if (mapocc == "" && Format.checkOccTex(base)) {
+				mapocc = f;
+				valid = true;
+			}
+			if (maprough == "" && Format.checkRoughTex(base)) {
+				maprough = f;
+				valid = true;
+			}
+			if (mapmet == "" && Format.checkMetTex(base)) {
+				mapmet = f;
+				valid = true;
+			}
+			if (mapheight == "" && Format.checkDispTex(base)) {
+				mapheight = f;
+				valid = true;
+			}
+
+			if (valid) importTexture(f);
+		}
+		// Create material
+		UITrait.inst.selectedMaterial = new MaterialSlot();
+		UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+		UINodes.inst.updateCanvasMap();
+		var nodes = UINodes.inst.nodes;
+		var canvas = UINodes.inst.canvas;
+		var nout:Nodes.TNode = null;
+		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
+		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
+		
+		var pos = 0;
+		if (mapbase != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapbase);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
+			canvas.links.push(l);
+		}
+		if (mapopac != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapopac);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 1 };
+			canvas.links.push(l);
+		}
+		if (mapocc != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapocc);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
+			canvas.links.push(l);
+		}
+		if (maprough != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(maprough);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
+			canvas.links.push(l);
+		}
+		if (mapmet != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapmet);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
+			canvas.links.push(l);
+		}
+		if (mapnor != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapnor);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
+			canvas.links.push(l);
+		}
+		if (mapheight != "") {
+			var n = NodeCreator.createImageTexture();
+			n.buttons[0].default_value = arm.App.getAssetIndex(mapheight);
+			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.x = 72;
+			n.y = 192 + 160 * pos;
+			pos++;
+			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
+			canvas.links.push(l);
+		}
+		iron.system.Tween.timer(0.01, function() {
+			arm.MaterialParser.parsePaintMaterial();
+			RenderUtil.makeMaterialPreview();
+			UITrait.inst.hwnd1.redraws = 2;
+		});
+		#end
 	}
 
 	public static function importFont(path:String) {
@@ -715,8 +689,8 @@ class Importer {
 			UITrait.inst.hwnd.redraws = 2;
 			UITrait.inst.hwnd1.redraws = 2;
 			UITrait.inst.hwnd2.redraws = 2;
-			UIView2D.inst.uvmapCached = false;
-			UIView2D.inst.trianglemapCached = false;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
 		});
 	}
 
@@ -761,8 +735,8 @@ class Importer {
 
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
-			UIView2D.inst.uvmapCached = false;
-			UIView2D.inst.trianglemapCached = false;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
 		});
 	}
 }
