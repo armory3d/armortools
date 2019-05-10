@@ -1,7 +1,8 @@
 package arm;
 
 import iron.data.SceneFormat;
-import arm.ui.*;
+import arm.ui.UITrait;
+import arm.ui.UIBox;
 
 class Exporter {
 

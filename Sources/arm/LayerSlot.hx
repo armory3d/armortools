@@ -3,7 +3,7 @@ package arm;
 import kha.graphics4.DepthStencilFormat;
 import kha.graphics4.TextureFormat;
 import iron.RenderPath;
-import arm.ui.*;
+import arm.ui.UITrait;
 
 class LayerSlot {
 	public static var counter = 0;
@@ -99,7 +99,7 @@ class LayerSlot {
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_preview = kha.Image.createRenderTarget(200, 200, kha.graphics4.TextureFormat.RGBA32);
+		texpaint_preview = kha.Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
 	}
 
 	public function unload() {
@@ -163,7 +163,7 @@ class LayerSlot {
 			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_mask_preview = kha.Image.createRenderTarget(200, 200, kha.graphics4.TextureFormat.L8);
+		texpaint_mask_preview = kha.Image.createRenderTarget(200, 200, TextureFormat.L8);
 
 		if (clear) {
 			createMaskColor = color;

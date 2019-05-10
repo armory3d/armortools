@@ -22,30 +22,3 @@ typedef TLayerData = {
 	public var material_mask:Int;
 	public var object_mask:Int;
 }
-
-typedef TAPConfig = {
-	@:optional var debug_console:Null<Bool>;
-	@:optional var window_mode:Null<Int>; // window, fullscreen
-	@:optional var window_w:Null<Int>;
-	@:optional var window_h:Null<Int>;
-	@:optional var window_resizable:Null<Bool>;
-	@:optional var window_maximizable:Null<Bool>;
-	@:optional var window_minimizable:Null<Bool>;
-	@:optional var window_vsync:Null<Bool>;
-	@:optional var window_msaa:Null<Int>;
-	@:optional var window_scale:Null<Float>;
-	@:optional var rp_supersample:Null<Float>;
-	@:optional var rp_shadowmap_cube:Null<Int>; // size
-	@:optional var rp_shadowmap_cascade:Null<Int>; // size for single cascade
-	@:optional var rp_ssgi:Null<Bool>;
-	@:optional var rp_ssr:Null<Bool>;
-	@:optional var rp_bloom:Null<Bool>;
-	@:optional var rp_motionblur:Null<Bool>;
-	@:optional var rp_gi:Null<Bool>;
-	// Ext
-	@:optional var version:Null<Int>;
-	@:optional var plugins:Array<String>;
-	@:optional var ui_layout:Null<Int>;
-	@:optional var undo_steps:Null<Int>;
-	@:optional var keymap:Dynamic; // Map<String, String>
-}

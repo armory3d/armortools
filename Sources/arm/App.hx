@@ -1,10 +1,15 @@
 package arm;
 
-import zui.*;
-import zui.Zui.State;
+import zui.Zui;
+import zui.Zui.Handle;
 import zui.Canvas;
-import arm.ui.*;
-import arm.util.*;
+import arm.ui.UITrait;
+import arm.ui.UINodes;
+import arm.ui.UIView2D;
+import arm.ui.UIMenu;
+import arm.ui.UIBox;
+import arm.ui.UIFiles;
+import arm.Config;
 
 class App extends iron.Trait {
 
@@ -20,8 +25,8 @@ class App extends iron.Trait {
 	public static var showBox = false;
 	public static var foldersOnly = false;
 	public static var showFilename = false;
-	public static var whandle = new Zui.Handle();
-	public static var filenameHandle = new Zui.Handle({text: "untitled"});
+	public static var whandle = new Handle();
+	public static var filenameHandle = new Handle({text: "untitled"});
 	public static var filesDone:String->Void;
 	public static var dropPath = "";
 	public static var dropX = 0.0;
@@ -32,6 +37,9 @@ class App extends iron.Trait {
 	public static var uibox:Zui;
 	public static var path = '/';
 	public static var showMenu = false;
+
+	public static var C:TConfig; // Config
+	public static var K:Dynamic; // Config.Keymap
 
 	public function new() {
 		super();
@@ -48,6 +56,10 @@ class App extends iron.Trait {
 			C.rp_ssr = false;
 			C.rp_supersample = 1.0;
 		}
+
+		// Init config
+		C = Config.init();
+		K = C.keymap;
 
 		#if arm_resizable
 		iron.App.onResize = onResize;
@@ -74,9 +86,6 @@ class App extends iron.Trait {
 					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
-						// #if arm_debug
-						// iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = false;
-						// #end
 						iron.App.notifyOnUpdate(update);
 						var root = iron.Scene.active.root;
 						root.addTrait(new UITrait());
@@ -85,18 +94,13 @@ class App extends iron.Trait {
 						root.addTrait(new arm.trait.FlyCamera());
 						root.addTrait(new arm.trait.OrbitCamera());
 						root.addTrait(new arm.trait.RotateCamera());
-
 						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
-
 						iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
 						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
-
 						iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
 						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
-
 						iron.App.notifyOnRender2D(render);
-						
-						appx = UITrait.inst.C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+						appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 						appy = UITrait.inst.headerh * 2;
 					});
 				});
@@ -168,12 +172,12 @@ class App extends iron.Trait {
 		resize();
 		
 		// Save window size
-		// UITrait.inst.C.window_w = kha.System.windowWidth();
-		// UITrait.inst.C.window_h = kha.System.windowHeight();
+		// C.window_w = kha.System.windowWidth();
+		// C.window_h = kha.System.windowHeight();
 		// Cap height, window is not centered properly
 		// var disp =  kha.Display.primary;
-		// if (disp.height > 0 && UITrait.inst.C.window_h > disp.height - 140) {
-		// 	UITrait.inst.C.window_h = disp.height - 140;
+		// if (disp.height > 0 && C.window_h > disp.height - 140) {
+		// 	C.window_h = disp.height - 140;
 		// }
 		// armory.data.Config.save();
 	}
@@ -190,7 +194,7 @@ class App extends iron.Trait {
 		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
 
-		var lay = UITrait.inst.C.ui_layout;
+		var lay = C.ui_layout;
 		
 		appx = lay == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {

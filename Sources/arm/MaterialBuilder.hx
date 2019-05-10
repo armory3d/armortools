@@ -1,16 +1,12 @@
 package arm;
 
 import armory.system.Cycles;
-import armory.system.CyclesFormat;
 import armory.system.CyclesShader;
 import armory.system.CyclesShader.CyclesShaderContext;
 import iron.data.SceneFormat;
-import iron.data.ShaderData;
-import iron.data.ShaderData.ShaderContext;
-import iron.data.MaterialData;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.*;
+import arm.ui.UINodes;
+import arm.Tool;
 
 class MaterialBuilder {
 

@@ -1,6 +1,6 @@
 package arm.ui;
 
-import zui.*;
+import zui.Id;
 import arm.App;
 
 class UIFiles {

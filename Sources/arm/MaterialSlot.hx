@@ -1,10 +1,15 @@
 package arm;
 
+import kha.Image;
+import zui.Nodes;
+import iron.data.MaterialData;
+import arm.util.RenderUtil;
+
 class MaterialSlot {
-	public var nodes = new zui.Nodes();
-	public var image:kha.Image = null; // 200
-	public var imageIcon:kha.Image = null; // 50
-	public var data:iron.data.MaterialData;
+	public var nodes = new Nodes();
+	public var image:Image = null; // 200
+	public var imageIcon:Image = null; // 50
+	public var data:MaterialData;
 
 	static var counter = 0;
 	public var id = 0;
@@ -19,13 +24,13 @@ class MaterialSlot {
 	public var paintEmis = true;
 	public var paintSubs = true;
 	
-	public function new(m:iron.data.MaterialData = null) {
+	public function new(m:MaterialData = null) {
 		id = ++counter;
 		data = m;
 
-		var w = arm.util.RenderUtil.matPreviewSize;
+		var w = RenderUtil.matPreviewSize;
 		var wIcon = Std.int(w / 4);
-		image = kha.Image.createRenderTarget(w, w);
-		imageIcon = kha.Image.createRenderTarget(wIcon, wIcon);
+		image = Image.createRenderTarget(w, w);
+		imageIcon = Image.createRenderTarget(wIcon, wIcon);
 	}
 }

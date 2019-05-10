@@ -2,7 +2,7 @@ package arm.util;
 
 import iron.object.MeshObject;
 import iron.math.Mat4;
-import arm.ui.*;
+import arm.ui.UITrait;
 
 class RenderUtil {
 
@@ -34,7 +34,7 @@ class RenderUtil {
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
-		UITrait.inst.updateCameraType(0);
+		ViewportUtil.updateCameraType(0);
 		var light = iron.Scene.active.lights[0];
 		var savedLight = light.data.raw.strength;
 		light.data.raw.strength = 1500;
@@ -67,7 +67,7 @@ class RenderUtil {
 		UITrait.inst.gizmo.visible = gizmo_vis;
 
 		iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
-		UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+		ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 		iron.Scene.active.camera.data.raw.fov = savedFov;
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
@@ -103,7 +103,7 @@ class RenderUtil {
 		iron.Scene.active.camera.transform.setMatrix(m);
 		var savedFov = iron.Scene.active.camera.data.raw.fov;
 		iron.Scene.active.camera.data.raw.fov = 0.92;
-		UITrait.inst.updateCameraType(0);
+		ViewportUtil.updateCameraType(0);
 		var light = iron.Scene.active.lights[0];
 		light.visible = false;
 		iron.Scene.active.world.envmap = UITrait.inst.previewEnvmap;
@@ -132,7 +132,7 @@ class RenderUtil {
 
 		iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 		iron.Scene.active.camera.data.raw.fov = savedFov;
-		UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+		ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 		iron.Scene.active.camera.buildProjection();
 		iron.Scene.active.camera.buildMatrix();
 		var light = iron.Scene.active.lights[0];
@@ -145,7 +145,7 @@ class RenderUtil {
 
 	public static function makeTextPreview() {
 		var text = UITrait.inst.textToolText;
-		var font = UITrait.inst.getTextToolFont();
+		var font = Tool.getTextToolFont();
 		var fontSize = 200;
 		var textW = Std.int(font.width(fontSize, text));
 		var textH = Std.int(font.height(fontSize));

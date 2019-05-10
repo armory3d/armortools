@@ -1,9 +1,8 @@
 package arm.renderpath;
 
-import iron.RenderPath;
 import armory.renderpath.Inc;
 import arm.ui.UITrait;
-import arm.ui.*;
+import arm.Tool;
 
 class RenderPathPaint {
 	
@@ -90,12 +89,12 @@ class RenderPathPaint {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
-						var rp_gi = UITrait.inst.C.rp_gi;
-						UITrait.inst.C.rp_gi = true;
+						var rp_gi = App.C.rp_gi;
+						App.C.rp_gi = true;
 						#if rp_voxelao
 						Inc.initGI();
 						#end
-						UITrait.inst.C.rp_gi = rp_gi;
+						App.C.rp_gi = rp_gi;
 					}
 					path.clearImage("voxels", 0x00000000);
 					path.setTarget("");

@@ -1,6 +1,6 @@
 package arm.renderpath;
 
-import arm.ui.*;
+import arm.ui.UITrait;
 
 class RenderPathPreview {
 

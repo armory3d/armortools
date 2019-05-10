@@ -1,8 +1,7 @@
 package arm.ui;
 
-import zui.*;
+import zui.Zui;
 import arm.App;
-import arm.ProjectFormat.TAPConfig;
 import arm.util.ViewportUtil;
 
 class UIMenu {
@@ -18,7 +17,7 @@ class UIMenu {
 		var ui = App.uibox;
 
 		var panelx = iron.App.x() - UITrait.inst.toolbarw;
-		var C:TAPConfig = cast armory.data.Config.raw;
+		var C = App.C;
 		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - UITrait.inst.toolbarw;
 
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);

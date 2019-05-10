@@ -3,7 +3,8 @@ package arm.brushnode;
 import armory.logicnode.LogicNode;
 import armory.logicnode.LogicTree;
 import arm.ui.UITrait;
-import arm.ui.*;
+import arm.ui.UIView2D;
+import arm.Tool;
 
 @:keep
 class BrushOutputNode extends LogicNode {

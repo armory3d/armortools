@@ -1,13 +1,10 @@
 package arm;
 
 import iron.data.SceneFormat;
-import iron.data.ShaderData;
 import iron.data.ShaderData.ShaderContext;
 import iron.data.MaterialData;
-import armory.system.Cycles;
 import armory.system.CyclesFormat;
 import armory.system.CyclesShader;
-import armory.system.CyclesShader.CyclesShaderContext;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 
@@ -194,11 +191,11 @@ class MaterialParser {
 		var tree = armory.system.Logic.parse(UINodes.inst.canvasBrush, false);
 	}
 
-	public static function parseLogic() {
-		if (lastT != null) UITrait.inst.selectedObject.removeTrait(lastT);
-		armory.system.Logic.packageName = "armory.logicnode";
-		var t = armory.system.Logic.parse(UINodes.inst.canvasLogic);
-		lastT = t;
-		UITrait.inst.selectedObject.addTrait(t);
-	}
+	// public static function parseLogic() {
+	// 	if (lastT != null) UITrait.inst.selectedObject.removeTrait(lastT);
+	// 	armory.system.Logic.packageName = "armory.logicnode";
+	// 	var t = armory.system.Logic.parse(UINodes.inst.canvasLogic);
+	// 	lastT = t;
+	// 	UITrait.inst.selectedObject.addTrait(t);
+	// }
 }

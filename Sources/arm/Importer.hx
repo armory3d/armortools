@@ -2,12 +2,17 @@ package arm;
 
 import zui.Canvas;
 import zui.Nodes;
-import zui.*;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
-import arm.creator.*;
-import arm.util.*;
-import arm.ui.*;
+import arm.creator.NodeCreator;
+import arm.util.RenderUtil;
+import arm.util.MeshUtil;
+import arm.util.UVUtil;
+import arm.util.ViewportUtil;
+import arm.ui.UITrait;
+import arm.ui.UIBox;
+import arm.ui.UIView2D;
+import arm.ui.UINodes;
 
 class Importer {
 
@@ -115,7 +120,7 @@ class Importer {
 		UINodes.inst.updateCanvasMap();
 		var nodes = UINodes.inst.nodes;
 		var canvas = UINodes.inst.canvas;
-		var nout:Nodes.TNode = null;
+		var nout:TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 		

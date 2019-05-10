@@ -3,7 +3,7 @@ package arm.util;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.object.MeshObject;
-import arm.ui.*;
+import arm.ui.UITrait;
 
 class MeshUtil {
 

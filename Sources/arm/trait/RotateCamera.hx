@@ -1,7 +1,8 @@
 package arm.trait;
 
 import iron.system.Input;
-import arm.ui.*;
+import arm.ui.UITrait;
+import arm.util.ViewportUtil;
 
 class RotateCamera extends iron.Trait {
 
@@ -71,7 +72,7 @@ class RotateCamera extends iron.Trait {
 				UITrait.inst.ddirty = 2;
 
 				if (UITrait.inst.cameraType == 1) {
-					UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 				}
 			}
 		});

@@ -1,6 +1,7 @@
 package arm.ui;
 
-import zui.*;
+import zui.Zui;
+import zui.Id;
 import arm.App;
 import arm.util.ViewportUtil;
 

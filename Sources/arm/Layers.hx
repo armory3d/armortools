@@ -1,24 +1,26 @@
 package arm;
 
 import kha.graphics4.TextureFormat;
+import kha.graphics4.TextureUnit;
+import kha.graphics4.ConstantLocation;
 import iron.RenderPath;
 import arm.ui.UITrait;
-import arm.ui.*;
+import arm.Tool;
 
 class Layers {
 
 	public static var pipe:kha.graphics4.PipelineState = null;
 	public static var pipeCopy:kha.graphics4.PipelineState;
 	public static var pipeMask:kha.graphics4.PipelineState;
-	static var tex0:kha.graphics4.TextureUnit;
-	static var tex1:kha.graphics4.TextureUnit;
-	static var tex2:kha.graphics4.TextureUnit;
-	static var texa:kha.graphics4.TextureUnit;
-	static var texb:kha.graphics4.TextureUnit;
-	static var texc:kha.graphics4.TextureUnit;
-	static var opac:kha.graphics4.ConstantLocation;
-	public static var tex0Mask:kha.graphics4.TextureUnit;
-	public static var texaMask:kha.graphics4.TextureUnit;
+	static var tex0:TextureUnit;
+	static var tex1:TextureUnit;
+	static var tex2:TextureUnit;
+	static var texa:TextureUnit;
+	static var texb:TextureUnit;
+	static var texc:TextureUnit;
+	static var opac:ConstantLocation;
+	public static var tex0Mask:TextureUnit;
+	public static var texaMask:TextureUnit;
 	public static var imga:kha.Image = null;
 	public static var imgb:kha.Image = null;
 	public static var imgc:kha.Image = null;
@@ -67,7 +69,7 @@ class Layers {
 	}
 
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
-		var C = UITrait.inst.C;
+		var C = App.C;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
 			C.undo_steps = 1;
 			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;

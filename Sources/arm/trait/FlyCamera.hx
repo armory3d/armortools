@@ -3,7 +3,8 @@ package arm.trait;
 import iron.system.Input;
 import iron.system.Time;
 import iron.math.Vec4;
-import arm.ui.*;
+import arm.ui.UITrait;
+import arm.util.ViewportUtil;
 
 class FlyCamera extends iron.Trait {
 
@@ -68,7 +69,7 @@ class FlyCamera extends iron.Trait {
 				camera.transform.move(dir, d);
 
 				if (UITrait.inst.cameraType == 1) {
-					UITrait.inst.updateCameraType(UITrait.inst.cameraType);
+					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 				}
 			}
 

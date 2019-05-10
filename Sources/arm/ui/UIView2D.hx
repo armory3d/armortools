@@ -1,6 +1,7 @@
 package arm.ui;
 
-import zui.*;
+import zui.Zui;
+import zui.Id;
 import arm.util.UVUtil;
 
 @:access(zui.Zui)
@@ -51,7 +52,7 @@ class UIView2D extends iron.Trait {
 
 	function render(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		var lay = UITrait.inst.C.ui_layout;
+		var lay = App.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;

@@ -1,11 +1,10 @@
 package arm.util;
 
-import iron.math.Mat4;
 import iron.math.Vec4;
-import iron.math.Quat;
-import arm.ui.*;
+import arm.ui.UITrait;
 
 class ViewportUtil {
+	
 	public static function scaleToBounds() {
 		var po = UITrait.inst.mergedObject == null ? UITrait.inst.mainObject() : UITrait.inst.mergedObject;
 		var md = po.data;
@@ -57,6 +56,27 @@ class ViewportUtil {
 		camera.transform.rotate(new iron.math.Vec4(0, 0, 1), x);
 		camera.transform.rotate(camera.rightWorld(), y);
 		camera.transform.move(camera.lookWorld(), -dist);
+		UITrait.inst.ddirty = 2;
+	}
+
+	public static function updateCameraType(cameraType:Int) {
+		var cam = iron.Scene.active.cameras[0];
+		var light = iron.Scene.active.lights[0];
+		if (cameraType == 0) {
+			cam.data.raw.ortho = null;
+			light.visible = true;
+		}
+		else {
+			var f32 = new kha.arrays.Float32Array(4);
+			var f = cam.data.raw.fov * cam.transform.world.getLoc().length() / 2.5;
+			f32[0] = -2 * f;
+			f32[1] =  2 * f;
+			f32[2] = -2 * f * (iron.App.h() / iron.App.w());
+			f32[3] =  2 * f * (iron.App.h() / iron.App.w());
+			cam.data.raw.ortho = f32;
+			light.visible = false;
+		}
+		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
 	}
 }
