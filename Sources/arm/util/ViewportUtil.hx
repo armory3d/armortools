@@ -37,7 +37,8 @@ class ViewportUtil {
 	}
 
 	public static function setView(x:Float, y:Float, z:Float, rx:Float, ry:Float, rz:Float) {
-		UITrait.inst.selectedObject.transform.reset();
+		UITrait.inst.selectedObject.transform.rot.set(0, 0, 0, 1);
+		UITrait.inst.selectedObject.transform.dirty = true;
 		var scene = iron.Scene.active;
 		var cam = scene.camera;
 		var dist = cam.transform.loc.length();
