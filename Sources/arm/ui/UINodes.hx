@@ -341,65 +341,18 @@ class UINodes extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
-			if (canvasType == 1) {
-				if (ui.button("Nodes", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-			}
-			else if (canvasType == 2) {
-				if (ui.button("Action", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Animation", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Array", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Canvas", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Event", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Input", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x = 3;
-				ui._y = 30;
-				if (ui.button("Logic", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 6; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x = ew + 3;
-				ui._y = 30;
-				if (ui.button("Native", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 7; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 30;
-				if (ui.button("Navmesh", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 8; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 30;
-				if (ui.button("Physics", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 9; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 30;
-				if (ui.button("Sound", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 10; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 30;
-				if (ui.button("Value", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 11; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 30;
-				if (ui.button("Variable", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 12; popupX = wx + ui._x; popupY = wy + ui._y; }
-			}
-			else {
-				if (ui.button("Input", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 0; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				// if (ui.button("Output", Left)) { addNodeButton = true; menuCategory = 1; popupX = wx + ui._x; popupY = wy + ui._y; }
-				// ui._x += ew + 3;
-				// ui._y = 3;
-				if (ui.button("Texture", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 2; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Color", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 3; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Vector", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 4; popupX = wx + ui._x; popupY = wy + ui._y; }
-				ui._x += ew + 3;
-				ui._y = 3;
-				if (ui.button("Converter", Left) || (ui.isHovered && drawMenu)) { addNodeButton = true; menuCategory = 5; popupX = wx + ui._x; popupY = wy + ui._y; }
+			var cats = canvasType == 0 ? NodeCreator.categories : NodeCreatorBrush.categories;
+			for (i in 0...cats.length) {
+				if (ui.button(cats[i], Left) || (ui.isHovered && drawMenu)) {
+					addNodeButton = true;
+					menuCategory = i;
+					popupX = wx + ui._x;
+					popupY = wy + ui._y;
+				}
+				if (i < cats.length - 1) {
+					ui._x += ew + 3;
+					ui._y = 3;
+				}
 			}
 
 			ui.t.BUTTON_COL = BUTTON_COL;
@@ -408,10 +361,11 @@ class UINodes extends iron.Trait {
 		ui.endWindow();
 
 		if (drawMenu) {
-			var numNodes = 0;
-			if (canvasType == 0) numNodes = NodeCreator.numNodes[menuCategory];
-			else if (canvasType == 1) numNodes = NodeCreatorBrush.numNodes[menuCategory];
-			// else if (canvasType == 2) numNodes = NodeCreatorLogic.list.categories[menuCategory].nodes.length;
+			var list = canvasType == 0 ? NodeCreator.list : NodeCreatorBrush.list;
+			var canvas = canvasType == 0 ? canvas : canvasBrush;
+			var numNodes = list[menuCategory].length;
+			// if (canvasType == 2) numNodes = NodeCreatorLogic.list.categories[menuCategory].nodes.length;
+			
 			var ph = numNodes * 20 * ui.SCALE;
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
@@ -426,9 +380,14 @@ class UINodes extends iron.Trait {
 			var ELEMENT_H = ui.t.ELEMENT_H;
 			ui.t.ELEMENT_H = 22;
 
-			if (canvasType == 0) NodeCreator.draw(menuCategory);
-			else if (canvasType == 1) NodeCreatorBrush.draw(menuCategory);
-			// else if (canvasType == 2) NodeCreatorLogic.draw(menuCategory);
+			for (n in list[menuCategory]) {
+				if (ui.button(n.name, Left)) {
+					var node = makeNode(n, nodes, canvas);
+					canvas.nodes.push(node);
+					nodes.nodesSelected = [node];
+					nodes.nodesDrag = true;
+				}
+			}
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -455,5 +414,21 @@ class UINodes extends iron.Trait {
 		var n = NodeCreator.createImageTexture();
 		n.buttons[0].default_value = assetIndex;
 		nodes.nodesSelected = [n];
+	}
+
+	public static function makeNode(n:TNode, nodes:Nodes, canvas:TNodeCanvas):TNode {
+		var node:TNode = haxe.Json.parse(haxe.Json.stringify(n));
+		node.id = nodes.getNodeId(canvas.nodes);
+		node.x = UINodes.inst.getNodeX();
+		node.y = UINodes.inst.getNodeY();
+		for (soc in node.inputs) {
+			soc.id = nodes.getSocketId(canvas.nodes);
+			soc.node_id = node.id;
+		}
+		for (soc in node.outputs) {
+			soc.id = nodes.getSocketId(canvas.nodes);
+			soc.node_id = node.id;
+		}
+		return node;
 	}
 }

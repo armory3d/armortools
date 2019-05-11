@@ -59,7 +59,7 @@ class Tool {
 
 		for (mat in iron.Scene.active.raw.material_datas) {
 			if (mat.name == 'Material2') {
-				var m = Reflect.copy(mat);
+				var m:TMaterialData = haxe.Json.parse(haxe.Json.stringify(mat));
 				m.name = 'MaterialParticle';
 				iron.Scene.active.raw.material_datas.push(m);
 				break;
@@ -71,7 +71,7 @@ class Tool {
 
 			for (obj in iron.Scene.active.raw.objects) {
 				if (obj.name == '.Sphere') {
-					var particle = Reflect.copy(obj);
+					var particle:TObj = haxe.Json.parse(haxe.Json.stringify(obj));
 					particle.name = '.Particle';
 					particle.is_particle = true;
 					particle.material_refs = ['MaterialParticle'];

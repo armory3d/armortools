@@ -33,6 +33,8 @@ typedef TCatButton = {
 }
 
 class NodeCreatorLogic {
+
+	public static var categories = ["Action", "Animation", "Array", "Canvas", "Event", "Input", "Logic", "Native", "Navmesh", "Physics", "Sound", "Value", "Variable"];
 	
 	public static var list:TNodeList;
 

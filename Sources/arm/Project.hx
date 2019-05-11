@@ -38,7 +38,7 @@ class Project {
 		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
 
 		for (m in UITrait.inst.materials) {
-			var c = Reflect.copy(UINodes.inst.canvasMap.get(m));
+			var c:zui.Nodes.TNodeCanvas = haxe.Json.parse(haxe.Json.stringify(UINodes.inst.canvasMap.get(m)));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
 					var sameDrive = UITrait.inst.projectPath.charAt(0) == n.buttons[0].data.charAt(0);
