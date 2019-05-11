@@ -92,6 +92,7 @@ class RenderUtil {
 		}
 
 		var plane:MeshObject = cast iron.Scene.active.getChild(".Plane");
+		plane.transform.scale.set(1, 1, 1);
 		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 		plane.transform.buildMatrix();
 		plane.visible = true;
