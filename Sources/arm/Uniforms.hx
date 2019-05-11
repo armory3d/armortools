@@ -16,20 +16,27 @@ class Uniforms {
 
 	public static function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 		if (link == '_brushRadius') {
-			var r = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
+			var val = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
 			var pen = iron.system.Input.getPen();
-			if (UITrait.penPressure && pen.down()) r *= pen.pressure;
-			r *= 900 / App.h(); // Projection ratio
-			return r;
+			if (UITrait.penPressureRadius && pen.down()) val *= pen.pressure;
+			val *= 900 / App.h(); // Projection ratio
+			return val;
 		}
 		else if (link == '_brushOpacity') {
-			return UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
-		}
-		else if (link == '_brushScale') {
-			return UITrait.inst.brushScale * UITrait.inst.brushNodesScale;
+			var val = UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
+			var pen = iron.system.Input.getPen();
+			if (UITrait.penPressureOpacity && pen.down()) val *= pen.pressure;
+			return val;
 		}
 		else if (link == '_brushHardness') {
-			return UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
+			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
+			var pen = iron.system.Input.getPen();
+			if (UITrait.penPressureHardness && pen.down()) val *= pen.pressure;
+			return val;
+		}
+		else if (link == '_brushScale') {
+			var val = UITrait.inst.brushScale * UITrait.inst.brushNodesScale;
+			return val;
 		}
 		else if (link == '_paintDepthBias') {
 			var f = 0.0001;

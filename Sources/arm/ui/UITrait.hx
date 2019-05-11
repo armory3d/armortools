@@ -31,7 +31,9 @@ class UITrait extends iron.Trait {
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
 
-	public static var penPressure = true;
+	public static var penPressureRadius = true;
+	public static var penPressureOpacity = false;
+	public static var penPressureHardness = false;
 	public var undoI = 0; // Undo layer
 	public var undos = 0; // Undos available
 	public var redos = 0; // Redos available
@@ -1890,7 +1892,7 @@ class UITrait extends iron.Trait {
 
 			if (ui.tab(htab, "Preferences")) {
 				
-				if (ui.panel(Id.handle({selected: true}), "Interface", 1)) {
+				if (ui.panel(Id.handle({selected: false}), "Interface", 1)) {
 					var hscale = Id.handle({value: App.C.window_scale});
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 					if (!hscale.changed && hscaleWasChanged) {
@@ -1938,7 +1940,7 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: true}), "Usage", 1)) {
+				if (ui.panel(Id.handle({selected: false}), "Usage", 1)) {
 					undoHandle = Id.handle({value: App.C.undo_steps});
 					App.C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
 					if (undoHandle.changed) {
@@ -1958,7 +1960,13 @@ class UITrait extends iron.Trait {
 						ui.g.begin(false);
 						armory.data.Config.save();
 					}
-					penPressure = ui.check(Id.handle({selected: penPressure}), "Pen Pressure");
+				}
+
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Pen Pressure", 1)) {
+					penPressureRadius = ui.check(Id.handle({selected: penPressureRadius}), "Brush Radius");
+					penPressureOpacity = ui.check(Id.handle({selected: penPressureOpacity}), "Brush Opacity");
+					penPressureHardness = ui.check(Id.handle({selected: penPressureHardness}), "Brush Hardness");
 				}
 
 				#if arm_debug
