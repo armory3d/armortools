@@ -216,8 +216,14 @@ class RenderPathDeferred {
 			undoLayer.targetIsMask = isMask;
 			UITrait.inst.undoI = (UITrait.inst.undoI + 1) % App.C.undo_steps;
 			if (UITrait.inst.undos < App.C.undo_steps) UITrait.inst.undos++;
-			UITrait.inst.redos = 0;
+			if (UITrait.inst.redos > 0) {
+				for (i in 0...UITrait.inst.redos) History.stack.pop();
+				UITrait.inst.redos = 0;
+			}
 			UITrait.inst.pushUndo = false;
+
+			History.stack.push(UITrait.inst.toolNames[UITrait.inst.selectedTool]);
+			while (History.stack.length > App.C.undo_steps + 1) History.stack.shift();
 		}
 
 		// 2D paint

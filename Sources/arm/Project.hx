@@ -176,6 +176,8 @@ class Project {
 				UITrait.inst.setLayer(UITrait.inst.layers[0]);
 				iron.App.notifyOnRender(Layers.initLayers);
 			}
+
+			History.reset();
 			
 			UINodes.inst.updateCanvasMap();
 			arm.MaterialParser.parsePaintMaterial();

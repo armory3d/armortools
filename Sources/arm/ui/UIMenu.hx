@@ -67,8 +67,8 @@ class UIMenu {
 				if (ui.button("Exit", Left)) { kha.System.stop(); }
 			}
 			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, "Ctrl+Z")) UITrait.inst.doUndo();
-				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) UITrait.inst.doRedo();
+				if (ui.button("Undo", Left, "Ctrl+Z")) History.doUndo();
+				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) History.doRedo();
 				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {
