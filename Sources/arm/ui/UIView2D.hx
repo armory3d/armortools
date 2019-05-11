@@ -150,7 +150,7 @@ class UIView2D extends iron.Trait {
 			m.y + App.y() < wy + headerh ||
 			m.y + App.y() > wy + wh) return;
 		
-		if (m.down("right")) {
+		if (m.down("right") || m.down("middle")) {
 			panX += m.movementX;
 			panY += m.movementY;
 		}
