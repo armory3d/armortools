@@ -978,6 +978,7 @@ class UITrait extends iron.Trait {
 			}
 
 			RenderUtil.makeDecalPreview();
+			ddirty = 2;
 			
 			if (current != null) current.begin(false);
 		}
