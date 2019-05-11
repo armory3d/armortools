@@ -1179,7 +1179,7 @@ class UITrait extends iron.Trait {
 
 					if (selectedTool == ToolBrush || selectedTool == ToolFill) {
 						var paintHandle = Id.handle();
-						brushPaint = ui.combo(paintHandle, ["UV Map", "Project"], "TexCoord");
+						brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Triplanar"], "TexCoord");
 						if (paintHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}

@@ -233,7 +233,7 @@ class MaterialBuilder {
 			}
 		}
 		// TexCoords - project
-		else {
+		else if (UITrait.inst.brushPaint == 1) {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
@@ -265,6 +265,18 @@ class MaterialBuilder {
 				var a = UITrait.inst.brushRot * (Math.PI / 180);
 				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
+		}
+		else { // Triplanar
+			frag.wposition = true;
+			frag.n = true;
+			frag.add_uniform('float brushScale', '_brushScale');
+			frag.write_attrib('vec3 triWeight = wnormal * wnormal;'); // n * n
+			frag.write_attrib('float triMax = max(triWeight.x, max(triWeight.y, triWeight.z));');
+			frag.write_attrib('triWeight = max(triWeight - triMax * 0.75, 0.0);');
+			frag.write_attrib('vec3 texCoordBlend = triWeight * (1.0 / (triWeight.x + triWeight.y + triWeight.z));');
+			frag.write_attrib('vec2 texCoord0 = fract(wposition.yz * brushScale);');
+			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale);');
+			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale);');
 		}
 
 		if (UITrait.inst.selectedTool == ToolClone || UITrait.inst.selectedTool == ToolBlur) {
@@ -355,7 +367,9 @@ class MaterialBuilder {
 			Cycles.parse_subsurface = UITrait.inst.selectedMaterial.paintSubs;
 			Cycles.parse_height = UITrait.inst.selectedMaterial.paintHeight;
 			Cycles.parse_height_as_channel = true;
+			Cycles.triplanar = UITrait.inst.brushPaint == 2;
 			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
+			Cycles.triplanar = false;
 			Cycles.parse_emission = false;
 			Cycles.parse_subsurface = false;
 			Cycles.parse_height_as_channel = false;
