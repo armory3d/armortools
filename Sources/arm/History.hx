@@ -5,7 +5,7 @@ import arm.ui.UIView2D;
 
 class History {
 
-	public static var stack:Array<String> = [];
+	public static var stack:Array<String> = ["New"];
 
 	public static function doUndo() {
 		if (UITrait.inst.undos > 0) {
@@ -44,6 +44,6 @@ class History {
 	}
 
 	public static function reset() {
-		stack = [];
+		stack = ["New"];
 	}
 }

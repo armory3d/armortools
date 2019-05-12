@@ -10,6 +10,7 @@ import arm.util.Path;
 import arm.util.Lz4;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
+import arm.ui.UIFiles;
 
 class Project {
 	public static function projectOpen() {
@@ -18,6 +19,7 @@ class Project {
 		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = false;
 		arm.App.showFilename = false;
+		UIFiles.filters = "arm";
 		arm.App.filesDone = function(path:String) {
 			if (!StringTools.endsWith(path, ".arm")) {
 				UITrait.inst.showError("Error: .arm file expected");
@@ -113,6 +115,7 @@ class Project {
 		arm.App.whandle.redraws = 2;
 		arm.App.foldersOnly = true;
 		arm.App.showFilename = true;
+		UIFiles.filters = "arm";
 		arm.App.filesDone = function(path:String) {
 			var f = arm.App.filenameHandle.text;
 			if (f == "") f = "untitled";

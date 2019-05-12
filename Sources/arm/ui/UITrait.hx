@@ -393,7 +393,9 @@ class UITrait extends iron.Trait {
 		paintObject = cast(selectedObject, MeshObject);
 		paintObjects = [paintObject];
 
-		iron.App.notifyOnRender(Layers.initLayers);
+		if (App.fileArg == "") {
+			iron.App.notifyOnRender(Layers.initLayers);
+		}
 
 		// Init plugins
 		Plugin.keep();
@@ -407,6 +409,8 @@ class UITrait extends iron.Trait {
 			}
 		}
 	}
+
+	var checkArg = true;
 
 	function update() {
 		if (textureExport) {
@@ -465,6 +469,7 @@ class UITrait extends iron.Trait {
 				arm.App.whandle.redraws = 2;
 				arm.App.foldersOnly = true;
 				arm.App.showFilename = true;
+				UIFiles.filters = "";
 				arm.App.filesDone = function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
@@ -478,6 +483,7 @@ class UITrait extends iron.Trait {
 			arm.App.whandle.redraws = 2;
 			arm.App.foldersOnly = false;
 			arm.App.showFilename = false;
+			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,gltf,arm";
 			arm.App.filesDone = function(path:String) {
 				Importer.importFile(path);
 			}
@@ -1886,6 +1892,12 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab, "Plugins")) {
+
+				if (ui.panel(Id.handle({selected: false}), "Console", 1)) {
+					Console.render(ui);
+				}
+				ui.separator();
+
 				// Draw plugins
 				for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
 			}
@@ -2179,6 +2191,7 @@ class UITrait extends iron.Trait {
 					arm.App.whandle.redraws = 2;
 					arm.App.foldersOnly = false;
 					arm.App.showFilename = false;
+					UIFiles.filters = "jpg,png,tga,hdr";
 					arm.App.filesDone = function(path:String) {
 						Importer.importFile(path);
 					}
@@ -2240,6 +2253,7 @@ class UITrait extends iron.Trait {
 					arm.App.whandle.redraws = 2;
 					arm.App.foldersOnly = false;
 					arm.App.showFilename = false;
+					UIFiles.filters = "obj,fbx,blend,gltf,arm";
 					arm.App.filesDone = function(path:String) {
 						Importer.importFile(path);
 					}
@@ -2317,27 +2331,6 @@ class UITrait extends iron.Trait {
 				}
 
 				ui.separator();
-				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
-					if (ui.button("Export")) {
-						arm.App.showFiles = true;
-						@:privateAccess Ext.lastPath = ""; // Refresh
-						arm.App.whandle.redraws = 2;
-						arm.App.foldersOnly = true;
-						arm.App.showFilename = true;
-						arm.App.filesDone = function(path:String) {
-							var f = arm.App.filenameHandle.text;
-							if (f == "") f = "untitled";
-							Exporter.exportMesh(path + "/" + f);
-						};
-					}
-					exportMeshFormat = ui.combo(Id.handle({position: exportMeshFormat}), ["obj", "arm"], "Format", true);
-					var mesh = paintObject.data.raw;
-					var inda = mesh.index_arrays[0].values;
-					var tris = Std.int(inda.length / 3);
-					ui.text(tris + " triangles");
-				}
-
-				ui.separator();
 				if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
 
 					if (ui.button("Export")) {
@@ -2347,6 +2340,7 @@ class UITrait extends iron.Trait {
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
+						UIFiles.filters = "";
 						arm.App.filesDone = function(path:String) {
 							textureExport = true;
 							textureExportPath = path;
@@ -2400,6 +2394,28 @@ class UITrait extends iron.Trait {
 						isSubsSpace = ui.combo(Id.handle({position: isSubsSpace}), ["linear", "srgb"], "Space");
 					}
 				}
+
+				ui.separator();
+				if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
+					if (ui.button("Export")) {
+						arm.App.showFiles = true;
+						@:privateAccess Ext.lastPath = ""; // Refresh
+						arm.App.whandle.redraws = 2;
+						arm.App.foldersOnly = true;
+						arm.App.showFilename = true;
+						UIFiles.filters = "";
+						arm.App.filesDone = function(path:String) {
+							var f = arm.App.filenameHandle.text;
+							if (f == "") f = "untitled";
+							Exporter.exportMesh(path + "/" + f);
+						};
+					}
+					exportMeshFormat = ui.combo(Id.handle({position: exportMeshFormat}), ["obj", "arm"], "Format", true);
+					var mesh = paintObject.data.raw;
+					var inda = mesh.index_arrays[0].values;
+					var tris = Std.int(inda.length / 3);
+					ui.text(tris + " triangles");
+				}
 			}
 
 			if (ui.tab(htab2, "Viewport")) {
@@ -2409,6 +2425,7 @@ class UITrait extends iron.Trait {
 					arm.App.whandle.redraws = 2;
 					arm.App.foldersOnly = false;
 					arm.App.showFilename = false;
+					UIFiles.filters = "hdr";
 					arm.App.filesDone = function(path:String) {
 						if (!StringTools.endsWith(path, ".hdr")) {
 							UITrait.inst.showError("Error: .hdr file expected");

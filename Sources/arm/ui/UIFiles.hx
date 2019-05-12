@@ -5,6 +5,8 @@ import arm.App;
 
 class UIFiles {
 
+	public static var filters = "";
+
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
 
@@ -14,7 +16,7 @@ class UIFiles {
 		#if kha_krom
 		if (untyped Krom.openDialog != null) {
 			App.showFiles = false;
-			App.path = untyped App.foldersOnly ? Krom.saveDialog() : Krom.openDialog();
+			App.path = untyped App.foldersOnly ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 			if (App.path != null) {
 				App.path = StringTools.replace(App.path, "\\\\", "\\");
 				App.path = StringTools.replace(App.path, "\r", "");
