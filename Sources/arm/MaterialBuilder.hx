@@ -221,19 +221,8 @@ class MaterialBuilder {
 			frag.write('if ($matid != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;');
 		}
 
-		// TexCoords - uvmap
-		if (UITrait.inst.brushPaint == 0 && !decal) {
-			vert.add_uniform('float brushScale', '_brushScale');
-			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = tex * brushScale;');
-
-			if (UITrait.inst.brushRot > 0.0) {
-				var a = UITrait.inst.brushRot * (Math.PI / 180);
-				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
-			}
-		}
 		// TexCoords - project
-		else if (UITrait.inst.brushPaint == 1) {
+		if (UITrait.inst.brushPaint == 1 || decal) {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
@@ -264,6 +253,17 @@ class MaterialBuilder {
 			if (UITrait.inst.brushRot > 0.0) {
 				var a = UITrait.inst.brushRot * (Math.PI / 180);
 				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
+			}
+		}
+		// TexCoords - uvmap
+		else if (UITrait.inst.brushPaint == 0) {
+			vert.add_uniform('float brushScale', '_brushScale');
+			vert.add_out('vec2 texCoord');
+			vert.write('texCoord = tex * brushScale;');
+
+			if (UITrait.inst.brushRot > 0.0) {
+				var a = UITrait.inst.brushRot * (Math.PI / 180);
+				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
 		else { // Triplanar
