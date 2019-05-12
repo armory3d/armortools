@@ -2340,7 +2340,8 @@ class UITrait extends iron.Trait {
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
-						UIFiles.filters = "";
+						var fmt = formatType == 0 ? "jpg" : "png";
+						UIFiles.filters = systemId == "Linux" ? fmt : "";
 						arm.App.filesDone = function(path:String) {
 							textureExport = true;
 							textureExportPath = path;
@@ -2403,7 +2404,8 @@ class UITrait extends iron.Trait {
 						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
-						UIFiles.filters = "";
+						var fmt = formatType == 0 ? "obj" : "arm";
+						UIFiles.filters = systemId == "Linux" ? fmt : "";
 						arm.App.filesDone = function(path:String) {
 							var f = arm.App.filenameHandle.text;
 							if (f == "") f = "untitled";
