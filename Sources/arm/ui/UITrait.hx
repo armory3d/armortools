@@ -238,7 +238,7 @@ class UITrait extends iron.Trait {
 	public var htab1 = Id.handle({position: 0});
 	public var htab2 = Id.handle({position: 0});
 	public var worktab = Id.handle({position: 0});
-	public var toolNames = ["Brush", "Eraser", "Fill", "Bake", "ColorID", "Decal", "Text", "Clone", "Blur", "Particle", "Picker"];
+	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
 	public var toolImages:Array<kha.Image>;
 
 	public function notifyOnBrush(f:Int->Void) {
