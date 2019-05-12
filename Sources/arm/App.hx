@@ -37,6 +37,7 @@ class App extends iron.Trait {
 	public static var uibox:Zui;
 	public static var path = '/';
 	public static var showMenu = false;
+	public static var fileArg = "";
 
 	public static var C:TConfig; // Config
 	public static var K:Dynamic; // Config.Keymap
@@ -86,6 +87,18 @@ class App extends iron.Trait {
 					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
+						// File to open passed as argument
+						#if kha_krom
+						if (Krom.getArgCount() > 1) {
+							var path = Krom.getArg(1);
+							if (Format.checkProjectFormat(path) ||
+								Format.checkMeshFormat(path) ||
+								Format.checkTextureFormat(path) ||
+								Format.checkFontFormat(path)) {
+								fileArg = path;
+							}
+						}
+						#end
 						iron.App.notifyOnUpdate(update);
 						var root = iron.Scene.active.root;
 						root.addTrait(new UITrait());
@@ -102,6 +115,9 @@ class App extends iron.Trait {
 						iron.App.notifyOnRender2D(render);
 						appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 						appy = UITrait.inst.headerh * 2;
+						if (fileArg != "") {
+							Importer.importFile(fileArg);
+						}
 					});
 				});
 			});
