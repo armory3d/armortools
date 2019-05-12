@@ -111,7 +111,7 @@ class MaterialBuilder {
 		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
 		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or xray
 
-		if (UITrait.inst.brushPaint != 0) frag.ndcpos = true;
+		if (UITrait.inst.brushPaint == 1) frag.ndcpos = true; // Project
 
 		if (UITrait.inst.selectedTool == ToolBake) {
 			frag.wposition = true;
@@ -274,7 +274,7 @@ class MaterialBuilder {
 			frag.write_attrib('float triMax = max(triWeight.x, max(triWeight.y, triWeight.z));');
 			frag.write_attrib('triWeight = max(triWeight - triMax * 0.75, 0.0);');
 			frag.write_attrib('vec3 texCoordBlend = triWeight * (1.0 / (triWeight.x + triWeight.y + triWeight.z));');
-			frag.write_attrib('vec2 texCoord0 = fract(wposition.yz * brushScale);');
+			frag.write_attrib('vec2 texCoord = fract(wposition.yz * brushScale);');
 			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale);');
 			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale);');
 		}
@@ -369,7 +369,6 @@ class MaterialBuilder {
 			Cycles.parse_height_as_channel = true;
 			Cycles.triplanar = UITrait.inst.brushPaint == 2;
 			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
-			Cycles.triplanar = false;
 			Cycles.parse_emission = false;
 			Cycles.parse_subsurface = false;
 			Cycles.parse_height_as_channel = false;
@@ -573,6 +572,7 @@ class MaterialBuilder {
 		}
 
 		Cycles.finalize(con_paint);
+		Cycles.triplanar = false;
 		con_paint.data.shader_from_source = true;
 		con_paint.data.vertex_shader = vert.get();
 		con_paint.data.fragment_shader = frag.get();
