@@ -10,6 +10,11 @@ class Macro {
 
 	macro public static function buildSha():ExprOf<String> {
 		var proc = new sys.io.Process('git', ['log', "--pretty=format:'%h'", '-n', '1']);
-		return Context.makeExpr(proc.stdout.readLine(), Context.currentPos());
+		try {
+			return Context.makeExpr(proc.stdout.readLine(), Context.currentPos());
+		}
+		catch (e:Dynamic) {
+			throw "- use 'git clone https://github.com/armory3d/armorpaint' to compile armorpaint";
+		}
 	}
 }
