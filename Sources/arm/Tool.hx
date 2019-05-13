@@ -102,13 +102,13 @@ class Tool {
 	var ToolBrush = 0;
 	var ToolEraser = 1;
 	var ToolFill = 2;
-	var ToolBake = 3;
-	var ToolColorId = 4;
-	var ToolDecal = 5;
-	var ToolText = 6;
-	var ToolClone = 7;
-	var ToolBlur = 8;
-	var ToolParticle = 9;
+	var ToolDecal = 3;
+	var ToolText = 4;
+	var ToolClone = 5;
+	var ToolBlur = 6;
+	var ToolParticle = 7;
+	var ToolBake = 8;
+	var ToolColorId = 9;
 	var ToolPicker = 10;
 }
 
