@@ -113,7 +113,7 @@ class Uniforms {
 
 	public static function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UITrait.inst.assets.length == 0) return Res.get("empty.jpg");
+			if (UITrait.inst.assets.length == 0) return null;
 			else return UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
 		}
 		else if (link == "_texuvmap") {

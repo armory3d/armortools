@@ -239,7 +239,6 @@ class UITrait extends iron.Trait {
 	public var htab2 = Id.handle({position: 0});
 	public var worktab = Id.handle({position: 0});
 	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
-	public var toolImages:Array<kha.Image>;
 
 	public function notifyOnBrush(f:Int->Void) {
 		_onBrush.push(f);
@@ -356,8 +355,7 @@ class UITrait extends iron.Trait {
 		var scale = App.C.window_scale;
 		ui = new Zui( { theme: arm.App.theme, font: arm.App.font, scaleFactor: scale, color_wheel: arm.App.color_wheel } );
 		
-		var resources = ['cursor.png', 'drag.png'];
-		for (s in toolNames) resources.push('tool_' + s.toLowerCase() + '.png');
+		var resources = ['cursor.png', 'icons.png'];
 		Res.load(resources, done);
 	}
 
@@ -376,9 +374,6 @@ class UITrait extends iron.Trait {
 	}
 
 	function done() {
-		toolImages = [];
-		for (s in toolNames) toolImages.push(Res.get('tool_' + s.toLowerCase() + '.png'));
-
 		//
 		// grid = iron.Scene.active.getChild(".Grid");
 		gizmo = iron.Scene.active.getChild(".GizmoTranslate");
@@ -1018,30 +1013,26 @@ class UITrait extends iron.Trait {
 
 			if (UITrait.inst.worktab.position == 0) {
 				var keys = ['(B)', '(E)', '(G)', '(D)', '(T)', '(L) - Hold ALT to set source', '(U)', '(P)', '(K)', '(C)', '(V)'];
-
+				var img = Res.get("icons.png");
+				var imgw = 50;
 				for (i in 0...toolNames.length) {
 					ui._x += 2;
-					var img = toolImages[i];
-					if (selectedTool == i) ui.rect(-1, -1, img.width + 2, img.height + 2, ui.t.HIGHLIGHT_COL, 2);
-					if (ui.image(img) == State.Started) selectTool(i);
+					if (selectedTool == i) ui.rect(-1, -1, imgw + 2, imgw + 2, ui.t.HIGHLIGHT_COL, 2);
+					if (ui.image(img, -1, null, i * imgw, 0, imgw, imgw) == State.Started) selectTool(i);
 					if (ui.isHovered) ui.tooltip(toolNames[i] + " " + keys[i]);
 					ui._x -= 2;
 					ui._y += 2;
 				}
 			}
 			else if (UITrait.inst.worktab.position == 1) {
-				
-				Res.load(["tool_gizmo.png"], function() {
-
-					var imgGizmo = Res.get("tool_gizmo.png");
-					
-					ui._x += 2;
-					if (selectedTool == ToolGizmo) ui.rect(-1, -1, imgGizmo.width + 2, imgGizmo.height + 2, ui.t.HIGHLIGHT_COL, 2);
-					if (ui.image(imgGizmo) == State.Started) selectTool(ToolGizmo);
-					if (ui.isHovered) ui.tooltip("Gizmo (G)");
-					ui._x -= 2;
-					ui._y += 2;
-				});
+				var img = Res.get("icons.png");
+				var imgw = 50;
+				ui._x += 2;
+				if (selectedTool == ToolGizmo) ui.rect(-1, -1, imgw + 2, imgw + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) selectTool(ToolGizmo);
+				if (ui.isHovered) ui.tooltip("Gizmo (G)");
+				ui._x -= 2;
+				ui._y += 2;
 			}
 
 			ui.imageScrollAlign = true;
@@ -2164,10 +2155,6 @@ class UITrait extends iron.Trait {
 			}
 
 			if (ui.tab(htab1, "Brushes")) {
-				// var imgBrush = Res.get("tool_draw.png");
-				// ui.imageScrollAlign = false;
-				// ui.image(imgBrush);
-				// ui.imageScrollAlign = false;
 				ui.row([1/4,1/4]);
 				if (ui.button("New")) {}
 				if (ui.button("Nodes")) showBrushNodes();
@@ -2238,8 +2225,9 @@ class UITrait extends iron.Trait {
 					}
 				}
 				else {
-					var dragImg = Res.get('drag.png');
-					ui.image(dragImg, ui.t.BUTTON_COL);
+					var img = Res.get('icons.png');
+					var imgw = 50;
+					ui.image(img, ui.t.BUTTON_COL, null, 0, imgw, imgw, imgw);
 					if (ui.isHovered) ui.tooltip("Drag and drop files here");
 				}
 			}
