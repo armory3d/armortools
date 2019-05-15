@@ -673,7 +673,7 @@ class Importer {
 					p.remove();
 				}
 				var handle = UITrait.inst.paintObject.data.handle;
-				if (handle != "mesh_SphereSphere" && handle != "mesh_PlanePlane") {
+				if (handle != "SceneSphere" && handle != "ScenePlane") {
 					iron.data.Data.deleteMesh(handle);
 				}
 
