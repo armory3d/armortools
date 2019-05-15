@@ -241,6 +241,36 @@ class LayerSlot {
 		l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 		l.texpaint_pack.g2.end();
 		
+		l.texpaint_preview.g2.begin(true, 0xff000000);
+		l.texpaint_preview.g2.drawScaledImage(texpaint_preview, 0, 0, texpaint_preview.width, texpaint_preview.height);
+		l.texpaint_preview.g2.end();
+
+		if (texpaint_mask != null) {
+			l.createMask(0, false);
+			l.texpaint_mask.g2.begin(false);
+			l.texpaint_mask.g2.pipeline = Layers.pipeCopy;
+			l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+			l.texpaint_mask.g2.end();
+
+			l.texpaint_mask_preview.g2.begin(true, 0xff000000);
+			l.texpaint_mask_preview.g2.drawScaledImage(texpaint_mask_preview, 0, 0, texpaint_mask_preview.width, texpaint_mask_preview.height);
+			l.texpaint_mask_preview.g2.end();
+		}
+
+		l.visible = visible;
+		l.maskOpacity = maskOpacity;
+		l.material_mask = material_mask;
+		l.objectMask = objectMask;
+		l.paintBase = paintBase;
+		l.paintOpac = paintOpac;
+		l.paintOcc = paintOcc;
+		l.paintRough = paintRough;
+		l.paintMet = paintMet;
+		l.paintNor = paintNor;
+		l.paintHeight = paintHeight;
+		l.paintEmis = paintEmis;
+		l.paintSubs = paintSubs;
+		
 		return l;
 	}
 

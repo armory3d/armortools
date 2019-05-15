@@ -1755,9 +1755,14 @@ class UITrait extends iron.Trait {
 								}
 								if (ui.button("Duplicate", Left)) {
 									setLayer(l);
-									l = l.duplicate();
-									setLayer(l);
-									layerPreviewDirty = true;
+									function makeDupli(g:kha.graphics4.Graphics) {
+										g.end();
+										l = l.duplicate();
+										setLayer(l);
+										g.begin();
+										iron.App.removeRender(makeDupli);
+									}
+									iron.App.notifyOnRender(makeDupli);
 								}
 								if (ui.button("Black Mask", Left)) {
 									l.createMask(0x00000000);
