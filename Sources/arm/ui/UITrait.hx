@@ -1772,44 +1772,31 @@ class UITrait extends iron.Trait {
 							}
 
 							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
-							l.paintBase = ui.check(baseHandle, "Base Color");
-							if (baseHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
-							l.paintNor = ui.check(norHandle, "Normal");
-							if (norHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
-							l.paintOcc = ui.check(occHandle, "Occlusion");
-							if (occHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
-							l.paintRough = ui.check(roughHandle, "Roughness");
-							if (roughHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
-							l.paintMet = ui.check(metHandle, "Metallic");
-							if (metHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
-							l.paintHeight = ui.check(heightHandle, "Height");
-							if (heightHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
-							l.paintEmis = ui.check(emisHandle, "Emission");
-							if (emisHandle.changed) {
-								MaterialParser.parseMeshMaterial();
-							}
 							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
+							l.paintBase = ui.check(baseHandle, "Base Color");
+							l.paintNor = ui.check(norHandle, "Normal");
+							l.paintOcc = ui.check(occHandle, "Occlusion");
+							l.paintRough = ui.check(roughHandle, "Roughness");
+							l.paintMet = ui.check(metHandle, "Metallic");
+							l.paintHeight = ui.check(heightHandle, "Height");
+							l.paintEmis = ui.check(emisHandle, "Emission");
 							l.paintSubs = ui.check(subsHandle, "Subsurface");
-							if (subsHandle.changed) {
+							if (baseHandle.changed ||
+								norHandle.changed ||
+								occHandle.changed ||
+								roughHandle.changed ||
+								metHandle.changed ||
+								heightHandle.changed ||
+								emisHandle.changed ||
+								subsHandle.changed) {
 								MaterialParser.parseMeshMaterial();
+								UIMenu.propChanged = true;
 							}
 						});
 					}
@@ -2093,52 +2080,32 @@ class UITrait extends iron.Trait {
 								}
 								
 								var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
-								m.paintBase = ui.check(baseHandle, "Base Color");
-								if (baseHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
-								m.paintNor = ui.check(norHandle, "Normal");
-								if (norHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
-								m.paintOcc = ui.check(occHandle, "Occlusion");
-								if (occHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
-								m.paintRough = ui.check(roughHandle, "Roughness");
-								if (roughHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
-								m.paintMet = ui.check(metHandle, "Metallic");
-								if (metHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
-								m.paintHeight = ui.check(heightHandle, "Height");
-								if (heightHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
-								m.paintEmis = ui.check(emisHandle, "Emission");
-								if (emisHandle.changed) {
-									UINodes.inst.updateCanvasMap();
-									MaterialParser.parsePaintMaterial();
-								}
 								var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
+								m.paintBase = ui.check(baseHandle, "Base Color");
+								m.paintNor = ui.check(norHandle, "Normal");
+								m.paintOcc = ui.check(occHandle, "Occlusion");
+								m.paintRough = ui.check(roughHandle, "Roughness");
+								m.paintMet = ui.check(metHandle, "Metallic");
+								m.paintHeight = ui.check(heightHandle, "Height");
+								m.paintEmis = ui.check(emisHandle, "Emission");
 								m.paintSubs = ui.check(subsHandle, "Subsurface");
-								if (subsHandle.changed) {
+								if (baseHandle.changed ||
+									norHandle.changed ||
+									occHandle.changed ||
+									roughHandle.changed ||
+									metHandle.changed ||
+									heightHandle.changed ||
+									emisHandle.changed ||
+									subsHandle.changed) {
 									UINodes.inst.updateCanvasMap();
 									MaterialParser.parsePaintMaterial();
+									UIMenu.propChanged = true;
 								}
 							});
 						}

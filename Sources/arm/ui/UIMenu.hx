@@ -7,6 +7,7 @@ import arm.util.ViewportUtil;
 class UIMenu {
 
 	public static var menuCategory = 0;
+	public static var propChanged = false;
 	static var showMenuFirst = true;
 	static var menuX = 0;
 	static var menuY = 0;
@@ -172,10 +173,15 @@ class UIMenu {
 		}
 		else {
 			if (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown) {
-				App.showMenu = false;
-				showMenuFirst = true;
-				menuCommands = null;
-				// arm.App.uienabled = true;
+				if (propChanged) {
+					propChanged = false;
+				}
+				else {
+					App.showMenu = false;
+					showMenuFirst = true;
+					menuCommands = null;
+					// arm.App.uienabled = true;
+				}
 			}
 		}
 
