@@ -12,18 +12,22 @@ class Layers {
 	public static var pipe:kha.graphics4.PipelineState = null;
 	public static var pipeCopy:kha.graphics4.PipelineState;
 	public static var pipeMask:kha.graphics4.PipelineState;
-	static var tex0:TextureUnit;
-	static var tex1:TextureUnit;
-	static var tex2:TextureUnit;
-	static var texa:TextureUnit;
-	static var texb:TextureUnit;
-	static var texc:TextureUnit;
-	static var opac:ConstantLocation;
+	public static var tex0:TextureUnit;
+	public static var tex1:TextureUnit;
+	public static var tex2:TextureUnit;
+	public static var texa:TextureUnit;
+	public static var texb:TextureUnit;
+	public static var texc:TextureUnit;
+	public static var opac:ConstantLocation;
 	public static var tex0Mask:TextureUnit;
 	public static var texaMask:TextureUnit;
 	public static var imga:kha.Image = null;
 	public static var imgb:kha.Image = null;
 	public static var imgc:kha.Image = null;
+	public static var expa:kha.Image = null;
+	public static var expb:kha.Image = null;
+	public static var expc:kha.Image = null;
+	public static var expd:kha.Image = null;
 	
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
@@ -158,6 +162,26 @@ class Layers {
 			imga = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
 			imgb = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
 			imgc = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+		}
+	}
+
+	public static function makeExportImg() {
+		var l = UITrait.inst.layers[0];
+		if (expa != null && expa.width != l.texpaint.width) {
+			expa.unload();
+			expb.unload();
+			expc.unload();
+			expd.unload();
+			expa = null;
+			expb = null;
+			expc = null;
+			expd = null;
+		}
+		if (expa == null) {
+			expa = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expb = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expc = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expd = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
 		}
 	}
 

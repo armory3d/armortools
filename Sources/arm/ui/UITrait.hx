@@ -89,6 +89,7 @@ class UITrait extends iron.Trait {
 
 	public var formatType = 0;
 	public var formatQuality = 80.0;
+	public var layersExport = 0;
 	public var outputType = 0;
 	public var isBase = true;
 	public var isBaseSpace = 0;
@@ -2349,8 +2350,7 @@ class UITrait extends iron.Trait {
 					}
 					
 					ui.row([1/2, 1/2]);
-					// ui.combo(Id.handle(), ["Selected", "All"], "Layer", true);
-					ui.combo(Id.handle(), ["Selected"], "Layer", true);
+					layersExport = ui.combo(Id.handle({position: layersExport}), ["Visible", "Selected"], "Layers", true);
 					outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
 					
 					if (ui.panel(Id.handle({selected: false}), "Channels")) {

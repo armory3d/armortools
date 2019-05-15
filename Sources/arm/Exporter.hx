@@ -7,27 +7,118 @@ import arm.ui.UIBox;
 class Exporter {
 
 	public static function exportTextures(path:String) {
-		
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
-
 		var f = arm.App.filenameHandle.text;
 		if (f == "") f = "untitled";
-
 		var formatType = UITrait.inst.formatType;
 		var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
-		var bo = new haxe.io.BytesOutput();
-		
-		var selectedLayer = UITrait.inst.selectedLayer;
-		var pixels:haxe.io.Bytes = null;
+		var texpaint:kha.Image = null;
+		var texpaint_nor:kha.Image = null;
+		var texpaint_pack:kha.Image = null;
+		var layers = UITrait.inst.layers;
 
-		// Append object mask name
-		if (selectedLayer.objectMask > 0) {
-			f += "_" + UITrait.inst.paintObjects[selectedLayer.objectMask].name;
+		// Export visible layers
+		if (UITrait.inst.layersExport == 0 && layers.length > 1) {
+			Layers.makeTempImg();
+			Layers.makeExportImg();
+			if (Layers.pipe == null) Layers.makePipe();
+			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+
+			// Duplicate base layer
+			if (layers[0].visible) {
+				Layers.expa.g2.begin(false);
+				Layers.expa.g2.pipeline = Layers.pipeCopy;
+				Layers.expa.g2.drawImage(layers[0].texpaint, 0, 0);
+				Layers.expa.g2.end();
+				Layers.expb.g2.begin(false);
+				Layers.expb.g2.pipeline = Layers.pipeCopy;
+				Layers.expb.g2.drawImage(layers[0].texpaint_nor, 0, 0);
+				Layers.expb.g2.end();
+				Layers.expc.g2.begin(false);
+				Layers.expc.g2.pipeline = Layers.pipeCopy;
+				Layers.expc.g2.drawImage(layers[0].texpaint_pack, 0, 0);
+				Layers.expc.g2.end();
+			}
+			else {
+				Layers.expa.g4.begin();
+				Layers.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+				Layers.expa.g4.end();
+				Layers.expb.g4.begin();
+				Layers.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+				Layers.expb.g4.end();
+				Layers.expc.g4.begin();
+				Layers.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+				Layers.expc.g4.end();
+			}
+
+			for (i in 1...layers.length) {
+				var l1 = layers[i];
+				if (!l1.visible) continue;
+
+				// Apply mask
+				var hasMask = l1.texpaint_mask != null;
+				if (hasMask) {
+					Layers.expd.g4.begin();
+					Layers.expd.g4.setPipeline(Layers.pipeMask);
+					Layers.expd.g4.setTexture(Layers.tex0Mask, l1.texpaint);
+					Layers.expd.g4.setTexture(Layers.texaMask, l1.texpaint_mask);
+					Layers.expd.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+					Layers.expd.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+					Layers.expd.g4.drawIndexedVertices();
+					Layers.expd.g4.end();
+				}
+				
+				// Copy layer0 to temp
+				Layers.imga.g2.begin(false);
+				Layers.imga.g2.pipeline = Layers.pipeCopy;
+				Layers.imga.g2.drawImage(Layers.expa, 0, 0);
+				Layers.imga.g2.end();
+				Layers.imgb.g2.begin(false);
+				Layers.imgb.g2.pipeline = Layers.pipeCopy;
+				Layers.imgb.g2.drawImage(Layers.expb, 0, 0);
+				Layers.imgb.g2.end();
+				Layers.imgc.g2.begin(false);
+				Layers.imgc.g2.pipeline = Layers.pipeCopy;
+				Layers.imgc.g2.drawImage(Layers.expc, 0, 0);
+				Layers.imgc.g2.end();
+				
+				// Merge into layer0
+				Layers.expa.g4.begin([Layers.expb, Layers.expc]);
+				Layers.expa.g4.setPipeline(Layers.pipe);
+				Layers.expa.g4.setTexture(Layers.tex0, hasMask ? Layers.expd : l1.texpaint);
+				Layers.expa.g4.setTexture(Layers.tex1, l1.texpaint_nor);
+				Layers.expa.g4.setTexture(Layers.tex2, l1.texpaint_pack);
+				Layers.expa.g4.setTexture(Layers.texa, Layers.imga);
+				Layers.expa.g4.setTexture(Layers.texb, Layers.imgb);
+				Layers.expa.g4.setTexture(Layers.texc, Layers.imgc);
+				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				Layers.expa.g4.drawIndexedVertices();
+				Layers.expa.g4.end();
+			}
+
+			texpaint = Layers.expa;
+			texpaint_nor = Layers.expb;
+			texpaint_pack = Layers.expc;
+		}
+		// Export selected layer
+		else {
+			var selectedLayer = UITrait.inst.selectedLayer;
+			texpaint = selectedLayer.texpaint;
+			texpaint_nor = selectedLayer.texpaint_nor;
+			texpaint_pack = selectedLayer.texpaint_pack;
+			if (selectedLayer.objectMask > 0) { // Append object mask name
+				f += "_" + UITrait.inst.paintObjects[selectedLayer.objectMask].name;
+			}
 		}
 
+		var bo = new haxe.io.BytesOutput();
+		var pixels:haxe.io.Bytes = null;
+
 		if (UITrait.inst.isBase || UITrait.inst.isOpac) {
-			pixels = selectedLayer.texpaint.getPixels(); // bgra
+			pixels = texpaint.getPixels(); // bgra
 			if (UITrait.inst.isBase && UITrait.inst.isBaseSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
 					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
@@ -83,7 +174,7 @@ class Exporter {
 		}
 
 		if (UITrait.inst.isNor) {
-			pixels = selectedLayer.texpaint_nor.getPixels();
+			pixels = texpaint_nor.getPixels();
 			if (UITrait.inst.isNorSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
 					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
@@ -113,7 +204,7 @@ class Exporter {
 
 		if (UITrait.inst.isOcc || UITrait.inst.isRough || UITrait.inst.isMet || UITrait.inst.isHeight) {
 
-			pixels = selectedLayer.texpaint_pack.getPixels(); // occ, rough, met, height
+			pixels = texpaint_pack.getPixels(); // occ, rough, met, height
 
 			if (UITrait.inst.isOcc && UITrait.inst.isOccSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
