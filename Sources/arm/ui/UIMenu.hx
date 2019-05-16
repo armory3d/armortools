@@ -113,6 +113,7 @@ class UIMenu {
 					#end
 				}
 				if (ui.button("Report Bug", Left)) {
+					// var url = "https://github.com/armory3d/armorpaint/issues/new?body=body";
 					#if kha_krom
 					if (kha.System.systemId == "Windows") {
 						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
@@ -125,6 +126,7 @@ class UIMenu {
 					}
 					#end
 				}
+				// if (ui.button("Request Feature", Left)) {}
 				if (ui.button("Check for Updates...", Left)) {
 					// Retrieve latest version number
 					#if kha_krom
@@ -158,8 +160,21 @@ class UIMenu {
 					sha = sha.substr(1, sha.length - 2);
 					var date = Macro.buildDate().split(" ")[0];
 					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
-					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - git " + sha + "\n";
+					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
 					msg += kha.System.systemId + " - " + gapi;
+
+					if (kha.System.systemId == "Windows") {
+						var save = Krom.getFilesLocation() + "\\" + iron.data.Data.dataPath + "gpu.txt";
+						Krom.sysCommand('wmic path win32_VideoController get name' + ' > "' + save + '"');
+						var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
+						var gpu = "";
+						for (i in 32...Std.int(bytes.length / 2)) {
+							gpu += String.fromCharCode(bytes.get(i * 2));
+						}
+						msg += '\n$gpu';
+					}
+					// else { lshw -C display }
+
 					UIBox.showMessage(msg);
 				}
 			}

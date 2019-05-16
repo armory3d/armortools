@@ -19,7 +19,7 @@ class UIBox {
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
 		var modalW = Std.int(300 * uibox.SCALE);
-		var modalH = Std.int(100 * uibox.SCALE);
+		var modalH = Std.int(115 * uibox.SCALE);
 		var left = Std.int(appw / 2 - modalW / 2);
 		var right = Std.int(appw / 2 + modalW / 2);
 		var top = Std.int(apph / 2 - modalH / 2);
@@ -32,7 +32,7 @@ class UIBox {
 		if (boxCommands == null) {
 			uibox.begin(g);
 			if (uibox.window(App.whandle, left, top, modalW, modalH)) {
-				uibox._y += 20;
+				uibox._y += 10;
 				for (line in boxText.split("\n")) {
 					uibox.text(line);
 				}
