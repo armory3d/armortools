@@ -2019,7 +2019,7 @@ class UITrait extends iron.Trait {
 
 			if (ui.tab(htab1, "Materials")) {
 
-				ui.row([1/4,1/4]);
+				ui.row([1/4,1/4,1/4]);
 				if (ui.button("New")) {
 					ui.g.end();
 					headerHandle.redraws = 2;
@@ -2037,6 +2037,18 @@ class UITrait extends iron.Trait {
 					showMaterialNodes();
 				}
 				else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
+
+				if (ui.button("Import")) {
+					arm.App.showFiles = true;
+					@:privateAccess Ext.lastPath = ""; // Refresh
+					arm.App.whandle.redraws = 2;
+					arm.App.foldersOnly = false;
+					arm.App.showFilename = false;
+					UIFiles.filters = "arm,blend";
+					arm.App.filesDone = function(path:String) {
+						Importer.importBlendMaterials(path);
+					}
+				}
 
 				for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 					ui.row([1/5,1/5,1/5,1/5,1/5]);

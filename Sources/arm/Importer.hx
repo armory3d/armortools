@@ -429,6 +429,177 @@ class Importer {
 		});
 	}
 
+	public static function importBlendMaterials(path:String) {
+		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			var bl = new iron.format.blend.Blend(b);
+			if (bl.dna == null) {
+				UITrait.inst.showError("Error: Compressed blend");
+				return;
+			}
+
+			var mats = bl.get("Material");
+			if (mats.length == 0) {
+				UITrait.inst.showError("Error: No materials found");
+				return;
+			}
+
+			for (mat in mats) {
+				// Material slot
+				UITrait.inst.selectedMaterial = new MaterialSlot();
+				UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+				UINodes.inst.updateCanvasMap();
+				var nodes = UINodes.inst.nodes;
+				var canvas = UINodes.inst.canvas;
+				var nout:TNode = null;
+				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
+				for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
+
+				// Parse nodetree
+				var nodetree = mat.get("nodetree"); // bNodeTree
+				var blnodes = nodetree.get("nodes"); // ListBase
+				var bllinks = nodetree.get("links"); // bNodeLink
+
+				// Look for Principled BSDF node
+				var node:Dynamic = blnodes.get("first", 0, "bNode");
+				var last = blnodes.get("last", 0, "bNode");
+				while (true) {
+					if (node.get("idname") == "ShaderNodeBsdfPrincipled") break;
+					if (node.get("name") == last.get("name")) break;
+					node = node.get("next");
+				}
+				if (node.get("idname") != "ShaderNodeBsdfPrincipled") {
+					UITrait.inst.showError("Error: No Principled BSDF node found");
+					continue;
+				}
+
+				// Use Principled BSDF as material output
+				nout.name = node.get("name");
+				nout.x = node.get("locx") + 400;
+				nout.y = -node.get("locy") + 400;
+
+				// Place nodes
+				var node:Dynamic = blnodes.get("first", 0, "bNode");
+				while (true) {
+					// Search for node in creator
+					var search = node.get("idname").substr(10).toLowerCase();
+					var base:TNode = null;
+					for (list in NodeCreator.list) {
+						var found = false;
+						for (n in list) {
+							var s = StringTools.replace(n.type, "_", "").toLowerCase();
+							if (search == s) {
+								base = n;
+								found = true;
+								break;
+							}
+						}
+						if (found) break;
+					}
+
+					if (base != null) {
+						var n = UINodes.makeNode(base, nodes, canvas);
+						n.x = node.get("locx") + 400;
+						n.y = -node.get("locy") + 400;
+
+						// Fill input socket values
+						// var inputs = node.get("inputs");
+						// var sock:Dynamic = inputs.get("first", 0, "bNodeSocket");
+						// var pos = 0;
+						// while (true) {
+						// 	if (pos >= n.inputs.length) break;
+
+						// 	var val:Dynamic = null;
+						// 	if (sock.get("idname") == "NodeSocketVector") {
+						// 		val = sock.get("default_value", 0, "float[3]");
+						// 	}
+						// 	else if (sock.get("idname") == "NodeSocketFloat") {
+						// 		val = sock.get("default_value", 0, "float");
+						// 	}
+						// 	n.inputs[pos].default_value = val;
+
+						// 	var last = sock;
+						// 	sock = sock.get("next");
+						// 	if (last.block == sock.block) break;
+						// 	pos++;
+						// }
+						
+						canvas.nodes.push(n);
+					}
+
+					if (node.get("name") == last.get("name")) break;
+					node = node.get("next");
+				}
+
+				// Place links
+				var link:Dynamic = bllinks.get("first", 0, "bNodeLink");
+				while (true) {
+					var fromnode = link.get("fromnode").get("name");
+					var tonode = link.get("tonode").get("name");
+					var fromsock = link.get("fromsock");
+					var tosock = link.get("tosock");
+
+					var from_id = -1;
+					var to_id = -1;
+					for (n in canvas.nodes) if (n.name == fromnode) { from_id = n.id; break; }
+					for (n in canvas.nodes) if (n.name == tonode) { to_id = n.id; break; }
+
+					if (from_id >= 0 && to_id >= 0) {
+						var from_socket = 0;
+						var sock:Dynamic = fromsock;
+						while (true) {
+							var last = sock;
+							sock = sock.get("prev");
+							if (last.block == sock.block) break;
+							from_socket++;
+						}
+
+						var to_socket = 0;
+						var sock:Dynamic = tosock;
+						while (true) {
+							var last = sock;
+							sock = sock.get("prev");
+							if (last.block == sock.block) break;
+							to_socket++;
+						}
+
+						var valid = true;
+
+						// Remap principled
+						if (tonode == nout.name) {
+							if (to_socket == 0) to_socket = 0; // Base
+							else if (to_socket == 18) to_socket = 1; // Opac
+							else if (to_socket == 7) to_socket = 3; // Rough
+							else if (to_socket == 4) to_socket = 4; // Met
+							else if (to_socket == 19) to_socket = 5; // TODO: auto-remove normal_map node
+							else if (to_socket == 17) to_socket = 6; // Emis
+							else if (to_socket == 1) to_socket = 8; // Subs
+							else valid = false;
+						}
+
+						if (valid) {
+							var raw:TNodeLink = {
+								id: nodes.getLinkId(canvas.links),
+								from_id: from_id,
+								from_socket: from_socket,
+								to_id: to_id,
+								to_socket: to_socket
+							};
+							canvas.links.push(raw);
+						}
+					}
+
+					var last = link;
+					link = link.get("next");
+					if (last.block == link.block) break;
+				}
+
+				MaterialParser.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
+				UITrait.inst.hwnd1.redraws = 2;
+			}
+		});
+	}
+
 	static function importBlend(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var bl = new iron.format.blend.Blend(b);
