@@ -13,6 +13,7 @@ class Exporter {
 		if (f == "") f = "untitled";
 		var formatType = UITrait.inst.formatType;
 		var ext = formatType == 0 ? ".jpg" : formatType == 1 ? ".png" : ".tga";
+		if (StringTools.endsWith(f, ext)) f = f.substr(0, f.length - 4);
 		var texpaint:kha.Image = null;
 		var texpaint_nor:kha.Image = null;
 		var texpaint_pack:kha.Image = null;

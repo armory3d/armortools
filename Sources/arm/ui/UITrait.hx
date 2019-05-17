@@ -467,7 +467,7 @@ class UITrait extends iron.Trait {
 				arm.App.whandle.redraws = 2;
 				arm.App.foldersOnly = true;
 				arm.App.showFilename = true;
-				UIFiles.filters = "";
+				UIFiles.filters = formatType == 0 ? "jpg" : "png";
 				arm.App.filesDone = function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
@@ -2315,8 +2315,7 @@ class UITrait extends iron.Trait {
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
 						// var path = 'C:\\Users\\lubos\\Documents\\';
-						var fmt = formatType == 0 ? "jpg" : "png";
-						UIFiles.filters = systemId == "Linux" ? fmt : "";
+						UIFiles.filters = formatType == 0 ? "jpg" : "png";
 						arm.App.filesDone = function(path:String) {
 							textureExport = true;
 							textureExportPath = path;
@@ -2378,8 +2377,7 @@ class UITrait extends iron.Trait {
 						arm.App.whandle.redraws = 2;
 						arm.App.foldersOnly = true;
 						arm.App.showFilename = true;
-						var fmt = formatType == 0 ? "obj" : "arm";
-						UIFiles.filters = systemId == "Linux" ? fmt : "";
+						UIFiles.filters = exportMeshFormat == 0 ? "obj" : "arm";
 						arm.App.filesDone = function(path:String) {
 							var f = arm.App.filenameHandle.text;
 							if (f == "") f = "untitled";
