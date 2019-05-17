@@ -168,8 +168,10 @@ class UIMenu {
 						Krom.sysCommand('wmic path win32_VideoController get name' + ' > "' + save + '"');
 						var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
 						var gpu = "";
-						for (i in 32...Std.int(bytes.length / 2)) {
-							gpu += String.fromCharCode(bytes.get(i * 2));
+						for (i in 30...Std.int(bytes.length / 2)) {
+							var c = String.fromCharCode(bytes.get(i * 2));
+							if (c == '\n') continue;
+							gpu += c;
 						}
 						msg += '\n$gpu';
 					}
