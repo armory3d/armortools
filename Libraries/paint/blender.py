@@ -14,6 +14,7 @@ def on_make_renderpath():
 
     arm.assets.add_khafile_param('--macro include("arm.brushnode")')
     arm.assets.add_khafile_def('arm_appwh')
+    arm.assets.add_khafile_def('arm_skip_envmap')
     # arm.assets.add_khafile_param('--macro include("armory.logicnode")')
 
 def register():

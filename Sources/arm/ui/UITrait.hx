@@ -301,14 +301,6 @@ class UITrait extends iron.Trait {
 			layers.push(new LayerSlot());
 			selectedLayer = layers[0];
 		}
-		if (undoLayers == null) {
-			undoLayers = [];
-			for (i in 0...App.C.undo_steps) {
-				var l = new LayerSlot("_undo" + undoLayers.length);
-				l.createMask(0, false);
-				undoLayers.push(l);
-			}
-		}
 
 		if (savedEnvmap == null) {
 			savedEnvmap = iron.Scene.active.world.envmap;
@@ -339,6 +331,16 @@ class UITrait extends iron.Trait {
 				MaterialParser.parseMeshMaterial();
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
+			}
+			else if (frame == 1) {
+				if (undoLayers == null) {
+					undoLayers = [];
+					for (i in 0...App.C.undo_steps) {
+						var l = new LayerSlot("_undo" + undoLayers.length);
+						l.createMask(0, false);
+						undoLayers.push(l);
+					}
+				}
 			}
 			frame++;
 
@@ -2420,7 +2422,6 @@ class UITrait extends iron.Trait {
 					MaterialParser.parseMeshMaterial();
 				}
 				var p = iron.Scene.active.world.probe;
-				// var envType = ui.combo(Id.handle({position: 0}), ["Indoor"], "Envmap");
 				var envHandle = Id.handle({value: p.raw.strength});
 				p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 				if (envHandle.changed) ddirty = 2;
@@ -2459,6 +2460,9 @@ class UITrait extends iron.Trait {
 				ui.row([1/2, 1/2]);
 				showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 				if (showEnvmapHandle.changed) {
+					var world = iron.Scene.active.world;
+					world.loadEnvmap(function(_) {});
+					savedEnvmap = world.envmap;
 					ddirty = 2;
 				}
 				var compassHandle = Id.handle({selected: showCompass});
