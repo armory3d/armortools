@@ -9,10 +9,12 @@ import arm.util.RenderUtil;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;
 import arm.util.ViewportUtil;
+import arm.util.Path;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
 import arm.ui.UIView2D;
 import arm.ui.UINodes;
+import arm.ProjectFormat;
 
 class Importer {
 
@@ -426,6 +428,69 @@ class Importer {
 			while (obj.next()) {
 				addMesh(obj);
 			}
+			iron.data.Data.deleteBlob(path);
+		});
+	}
+
+	public static function importArmMaterials(path:String) {
+		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
+			var base = Path.baseDir(path);
+
+			for (file in project.assets) {
+				// Convert image path from relative to absolute
+				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
+				var abs = isAbsolute ? file : base + file;
+				var exists = 1;
+				if (kha.System.systemId == "Windows") {
+					#if kha_krom
+					exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+					#end
+				}
+				//else { test -e file && echo 1 || echo 0 }
+				if (exists == 0) {
+					trace("Could not locate texture " + abs);
+					var b = haxe.io.Bytes.alloc(4);
+					b.set(0, 255);
+					b.set(1, 0);
+					b.set(2, 255);
+					b.set(3, 255);
+					var pink = kha.Image.fromBytes(b, 1, 1);
+					iron.data.Data.cachedImages.set(abs, pink);
+				}
+				Importer.importTexture(abs);
+			}
+
+			var m0:iron.data.MaterialData = null;
+			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+				m0 = m;
+			});
+
+			for (n in project.material_nodes) {
+				for (node in n.nodes) {
+					if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
+						var filepath = node.buttons[0].data;
+						var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
+						if (!isAbsolute) {
+							var abs = base + filepath;
+							node.buttons[0].data = abs;
+						}
+					}
+					for (inp in node.inputs) { // Round input socket values
+						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
+					}
+				}
+				var mat = new MaterialSlot(m0);
+				UINodes.inst.canvasMap.set(mat, n);
+				UITrait.inst.materials.push(mat);
+
+				UITrait.inst.selectedMaterial = mat;
+				UINodes.inst.updateCanvasMap();
+				arm.MaterialParser.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
+			}
+
+			UITrait.inst.hwnd1.redraws = 2;
 			iron.data.Data.deleteBlob(path);
 		});
 	}

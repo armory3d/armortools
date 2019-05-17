@@ -2050,7 +2050,9 @@ class UITrait extends iron.Trait {
 					arm.App.showFilename = false;
 					UIFiles.filters = "arm,blend";
 					arm.App.filesDone = function(path:String) {
-						Importer.importBlendMaterials(path);
+						StringTools.endsWith(path, ".blend") ?
+							Importer.importBlendMaterials(path) :
+							Importer.importArmMaterials(path);
 					}
 				}
 
