@@ -227,6 +227,7 @@ class Importer {
 			var name = ar[ar.length - 1];
 			var asset:TAsset = {name: name, file: path, id: UITrait.inst.assetId++};
 			UITrait.inst.assets.push(asset);
+			if (UITrait.inst.selectedTexture == null) UITrait.inst.selectedTexture = asset;
 			UITrait.inst.assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
 			UITrait.inst.hwnd2.redraws = 2;

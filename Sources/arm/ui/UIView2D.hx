@@ -9,6 +9,7 @@ class UIView2D extends iron.Trait {
 
 	public static var inst:UIView2D;
 	public var show = false;
+	public var type = 0; // Layer, texture
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
@@ -88,13 +89,21 @@ class UIView2D extends iron.Trait {
 			// Texture
 			ui.g.pipeline = pipe;
 			var l = UITrait.inst.selectedLayer;
-			var tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
-			if (UITrait.inst.selectedLayerIsMask) tex = l.texpaint_mask;
-	 		ui.g.drawScaledImage(tex, tx, ty, tw, tw);
+			var tex:kha.Image = null;
+
+			if (type == 0) { // Layer
+				tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
+				if (UITrait.inst.selectedLayerIsMask) tex = l.texpaint_mask;
+			}
+			else { // Texture
+				tex = UITrait.inst.getImage(UITrait.inst.selectedTexture);
+			}
+	 		
+	 		if (tex != null) ui.g.drawScaledImage(tex, tx, ty, tw, tw);
 			ui.g.pipeline = null;
 
 			// UV map
-			if (uvmapShow) {
+			if (type == 0 && uvmapShow) {
 				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, tw);
 			}
 
@@ -111,8 +120,22 @@ class UIView2D extends iron.Trait {
 			ui._y = wh - ui.ELEMENT_H() * 1.2;
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
-			h.text = l.name;
-			l.name = ui.textInput(h, "", Right);
+			
+			if (type == 0) {
+				h.text = l.name;
+				l.name = ui.textInput(h, "", Right);
+			}
+			else {
+				var asset = UITrait.inst.selectedTexture;
+				if (asset != null) {
+					var assetNames = UITrait.inst.assetNames;
+					var i = assetNames.indexOf(asset.name);
+					h.text = asset.name;
+					asset.name = ui.textInput(h, "", Right);
+					assetNames[i] = asset.name;
+				}
+			}
+
 			if (h.changed) UITrait.inst.hwnd.redraws = 2;
 			ui.t.ACCENT_COL = ACCENT_COL;
 			ui.t.BUTTON_H = BUTTON_H;
@@ -120,19 +143,21 @@ class UIView2D extends iron.Trait {
 			ui.fontSize = FONT_SIZE;
 
 			// Controls
-			var ew = Std.int(ui.ELEMENT_W());
-			ui.g.color = ui.t.WINDOW_BG_COL;
-			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
-			ui.g.color = 0xffffffff;
-			ui._x = 3;
-			ui._y = 3;
-			ui._w = ew;
-			texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal Map", "ORM"], "Texture");
-			ui._x += ew + 3;
-			ui._y = 3;
-			uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
-			ui._x += ew + 3;
-			ui._y = 3;
+			if (type == 0) {
+				var ew = Std.int(ui.ELEMENT_W());
+				ui.g.color = ui.t.WINDOW_BG_COL;
+				ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
+				ui.g.color = 0xffffffff;
+				ui._x = 3;
+				ui._y = 3;
+				ui._w = ew;
+				texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal Map", "ORM"], "Texture");
+				ui._x += ew + 3;
+				ui._y = 3;
+				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
+				ui._x += ew + 3;
+				ui._y = 3;
+			}
 		}
 		ui.end();
 		g.begin(false);
@@ -160,7 +185,7 @@ class UIView2D extends iron.Trait {
 			if (panScale > 3.0) panScale = 3.0;
 		}
 
-		if (m.down("left")) {
+		if (type == 0 && m.down("left")) {
 			UITrait.inst.paint2d = true;
 		}
 	}

@@ -117,6 +117,7 @@ class UITrait extends iron.Trait {
 	public var selectedMaterial:MaterialSlot;
 	public var materials2:Array<MaterialSlot> = null;
 	public var selectedMaterial2:MaterialSlot;
+	public var selectedTexture:TAsset = null;
 	public var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
 	public var selectedLogic:BrushSlot;
@@ -914,11 +915,12 @@ class UITrait extends iron.Trait {
 
 	// function showParticleNodes() {}
 
-	function show2DView() {
+	function show2DView(type = 0) {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UIView2D.inst.ui.endInput();
-
-		UIView2D.inst.show = !UIView2D.inst.show;
+		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
+		else UIView2D.inst.show = !UIView2D.inst.show;
+		UIView2D.inst.type = type;
 		arm.App.resize();
 	}
 
@@ -986,7 +988,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function getImage(asset:TAsset):kha.Image {
-		return Canvas.assetMap.get(asset.id);
+		return asset != null ? Canvas.assetMap.get(asset.id) : null;
 	}
 
 	public function mainObject():MeshObject {
@@ -2157,7 +2159,7 @@ class UITrait extends iron.Trait {
 		if (ui.window(hwnd2, wx, wh * 2, windowW, wh)) {
 			if (ui.tab(htab2, "Textures")) {
 
-				ui.row([1/4]);
+				ui.row([1/4, 1/4]);
 
 				if (ui.button("Import")) {
 					arm.App.showFiles = true;
@@ -2172,6 +2174,8 @@ class UITrait extends iron.Trait {
 				}
 				if (ui.isHovered) ui.tooltip("Import texture file (Ctrl + Shift + I)");
 
+				if (ui.button("2D View")) show2DView(1);
+
 				if (assets.length > 0) {
 					for (i in 0...assets.length) {
 						
@@ -2182,9 +2186,22 @@ class UITrait extends iron.Trait {
 						}
 						
 						var asset = assets[i];
+						if (asset == selectedTexture) {
+							var off = i % 2 == 1 ? 1 : 0;
+							var w = 51 - App.C.window_scale;
+							ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+							ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+							ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+							ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						}
+
 						var img = UITrait.inst.getImage(asset);
 						if (ui.image(img) == State.Started) {
 							arm.App.dragAsset = asset;
+							selectedTexture = asset;
+
+							if (iron.system.Time.time() - selectTime < 0.25) show2DView(1);
+							selectTime = iron.system.Time.time();
 						}
 
 						if (ui.isHovered) ui.tooltipImage(img, 256);
