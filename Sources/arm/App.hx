@@ -143,8 +143,17 @@ class App extends iron.Trait {
 						iron.App.notifyOnRender2D(render);
 						appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 						appy = UITrait.inst.headerh * 2;
+						var cam = iron.Scene.active.camera;
+						cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
+						cam.buildProjection();
 						if (fileArg != "") {
 							Importer.importFile(fileArg);
+							if (Format.checkMeshFormat(fileArg)) {
+								UITrait.inst.toggleDistractFree();
+							}
+							else if (Format.checkTextureFormat(fileArg)) {
+								UITrait.inst.show2DView(1);
+							}
 						}
 					});
 				});
@@ -181,6 +190,7 @@ class App extends iron.Trait {
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
 			res = kha.System.windowWidth() - UITrait.defaultWindowW;
+			res -= UITrait.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
 			res = Std.int((kha.System.windowWidth() - UITrait.inst.windowW) / 2);
@@ -193,7 +203,7 @@ class App extends iron.Trait {
 		else {
 			res = kha.System.windowWidth();
 		}
-		
+
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
@@ -206,8 +216,9 @@ class App extends iron.Trait {
 
 		var res = 0;
 		res = kha.System.windowHeight();
+		if (UITrait.inst == null) res -= UITrait.defaultHeaderH * 3;
 		if (UITrait.inst != null && UITrait.inst.show && res > 0) res -= UITrait.inst.headerh * 3;
-		
+
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 

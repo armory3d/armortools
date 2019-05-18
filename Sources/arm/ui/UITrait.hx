@@ -30,6 +30,8 @@ class UITrait extends iron.Trait {
 
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
+	public static var defaultToolbarW = 54;
+	public static var defaultHeaderH = 24;
 
 	public static var penPressureRadius = true;
 	public static var penPressureOpacity = false;
@@ -267,8 +269,8 @@ class UITrait extends iron.Trait {
 		systemId = kha.System.systemId;
 
 		windowW = Std.int(defaultWindowW * App.C.window_scale);
-		toolbarw = Std.int(54 * App.C.window_scale);
-		headerh = Std.int(24 * App.C.window_scale);
+		toolbarw = Std.int(defaultToolbarW * App.C.window_scale);
+		headerh = Std.int(defaultHeaderH * App.C.window_scale);
 		menubarw = Std.int(215 * App.C.window_scale);
 
 		Uniforms.init();
@@ -496,8 +498,7 @@ class UITrait extends iron.Trait {
 
 		if (kb.started("f11") ||
 		   (kb.started("escape") && !show && !arm.App.showFiles && !arm.App.showBox)) {
-			show = !show;
-			arm.App.resize();
+			toggleDistractFree();
 		}
 
 		var mouse = iron.system.Input.getMouse();
@@ -616,6 +617,11 @@ class UITrait extends iron.Trait {
 		}
 	}
 
+	public function toggleDistractFree() {
+		show = !show;
+		arm.App.resize();
+	}
+
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
 		setMaterial(materials[i]);
@@ -632,6 +638,7 @@ class UITrait extends iron.Trait {
 		if (current != null) current.end();
 		var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 		if (decal) RenderUtil.makeDecalPreview();
+		if (worktab.position == 2) MaterialParser.parseMeshPreviewMaterial();
 		if (current != null) current.begin(false);
 	}
 
@@ -921,7 +928,7 @@ class UITrait extends iron.Trait {
 
 	// function showParticleNodes() {}
 
-	function show2DView(type = 0) {
+	public function show2DView(type = 0) {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UIView2D.inst.ui.endInput();
 		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
@@ -1911,8 +1918,8 @@ class UITrait extends iron.Trait {
 						UINodes.inst.ui.setScale(hscale.value);
 						UIView2D.inst.ui.setScale(hscale.value);
 						windowW = Std.int(defaultWindowW * App.C.window_scale);
-						toolbarw = Std.int(54 * App.C.window_scale);
-						headerh = Std.int(24 * App.C.window_scale);
+						toolbarw = Std.int(defaultToolbarW * App.C.window_scale);
+						headerh = Std.int(defaultHeaderH * App.C.window_scale);
 						menubarw = Std.int(215 * App.C.window_scale);
 						arm.App.resize();
 						armory.data.Config.save();
@@ -2043,11 +2050,6 @@ class UITrait extends iron.Trait {
 					ui.g.begin(false);
 				}
 
-				if (ui.button("Nodes")) {
-					showMaterialNodes();
-				}
-				else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
-
 				if (ui.button("Import")) {
 					arm.App.showFiles = true;
 					@:privateAccess Ext.lastPath = ""; // Refresh
@@ -2061,6 +2063,11 @@ class UITrait extends iron.Trait {
 							Importer.importArmMaterials(path);
 					}
 				}
+
+				if (ui.button("Nodes")) {
+					showMaterialNodes();
+				}
+				else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
 
 				for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
 					ui.row([1/5,1/5,1/5,1/5,1/5]);

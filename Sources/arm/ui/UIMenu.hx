@@ -89,8 +89,7 @@ class UIMenu {
 				if (ui.button("Orbit Opposite", Left, "9")) { ViewportUtil.orbit(Math.PI, 0); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Distract Free", Left, "F11")) {
-					UITrait.inst.show = !UITrait.inst.show;
-					arm.App.resize();
+					UITrait.inst.toggleDistractFree();
 					UITrait.inst.ui.isHovered = false;
 				}
 
