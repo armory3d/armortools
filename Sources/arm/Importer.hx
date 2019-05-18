@@ -496,6 +496,29 @@ class Importer {
 		});
 	}
 
+	static function readBlendSocket(sock:Dynamic):Dynamic {
+		var idname = sock.get("idname");
+		if (StringTools.startsWith(idname, "NodeSocketVector")) {
+			return sock.get("default_value", 0, "bNodeSocketValueVector").get("value");
+		}
+		else if (StringTools.startsWith(idname, "NodeSocketColor")) {
+			return sock.get("default_value", 0, "bNodeSocketValueRGBA").get("value");
+		}
+		else if (StringTools.startsWith(idname, "NodeSocketFloat")) {
+			return sock.get("default_value", 0, "bNodeSocketValueFloat").get("value");
+		}
+		else if (StringTools.startsWith(idname, "NodeSocketInt")) {
+			return sock.get("default_value", 0, "bNodeSocketValueInt").get("value");
+		}
+		else if (StringTools.startsWith(idname, "NodeSocketBoolean")) {
+			return sock.get("default_value", 0, "bNodeSocketValueBoolean").get("value");
+		}
+		else if (StringTools.startsWith(idname, "NodeSocketString")) {
+			return sock.get("default_value", 0, "bNodeSocketValueString").get("value");
+		}
+		return null;
+	}
+
 	public static function importBlendMaterials(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var bl = new iron.format.blend.Blend(b);
@@ -567,28 +590,44 @@ class Importer {
 						var n = UINodes.makeNode(base, nodes, canvas);
 						n.x = node.get("locx") + 400;
 						n.y = -node.get("locy") + 400;
+						n.name = node.get("name");
 
 						// Fill input socket values
-						// var inputs = node.get("inputs");
-						// var sock:Dynamic = inputs.get("first", 0, "bNodeSocket");
-						// var pos = 0;
-						// while (true) {
-						// 	if (pos >= n.inputs.length) break;
+						var inputs = node.get("inputs");
+						var sock:Dynamic = inputs.get("first", 0, "bNodeSocket");
+						var pos = 0;
+						while (true) {
+							if (pos >= n.inputs.length) break;
+							n.inputs[pos].default_value = readBlendSocket(sock);
 
-						// 	var val:Dynamic = null;
-						// 	if (sock.get("idname") == "NodeSocketVector") {
-						// 		val = sock.get("default_value", 0, "float[3]");
-						// 	}
-						// 	else if (sock.get("idname") == "NodeSocketFloat") {
-						// 		val = sock.get("default_value", 0, "float");
-						// 	}
-						// 	n.inputs[pos].default_value = val;
+							var last = sock;
+							sock = sock.get("next");
+							if (last.block == sock.block) break;
+							pos++;
+						}
 
-						// 	var last = sock;
-						// 	sock = sock.get("next");
-						// 	if (last.block == sock.block) break;
-						// 	pos++;
-						// }
+						// Fill output socket values
+						if (search == "teximage") {
+							var img = node.get("id", 0, "Image");
+							var file = img.get("name").substr(2); // '//desktop\logo.png'
+							file = StringTools.replace(file, "\\", "/");
+							file = Path.baseDir(path) + file;
+							importTexture(file);
+							n.buttons[0].default_value = arm.App.getAssetIndex(file);
+							n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+						}
+						var outputs = node.get("outputs");
+						var sock:Dynamic = outputs.get("first", 0, "bNodeSocket");
+						var pos = 0;
+						while (true) {
+							if (pos >= n.outputs.length) break;
+							n.outputs[pos].default_value = readBlendSocket(sock);
+
+							var last = sock;
+							sock = sock.get("next");
+							if (last.block == sock.block) break;
+							pos++;
+						}
 						
 						canvas.nodes.push(n);
 					}
