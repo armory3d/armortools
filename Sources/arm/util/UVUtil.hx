@@ -28,9 +28,9 @@ class UVUtil {
 		var strength = res > 2048 ? 2.0 : 1.0;
 		var f = (1 / 32767) * uvmap.width;
 		for (i in 0...Std.int(inda.length / 3)) {
-			var x1 = (texa[inda[i * 3    ] * 2 + 0]) * f;
-			var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) * f;
-			var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) * f;
+			var x1 = (texa[inda[i * 3    ] * 2    ]) * f;
+			var x2 = (texa[inda[i * 3 + 1] * 2    ]) * f;
+			var x3 = (texa[inda[i * 3 + 2] * 2    ]) * f;
 			var y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
@@ -60,9 +60,9 @@ class UVUtil {
 		var color = 0xff000000;
 		for (i in 0...Std.int(inda.length / 3)) {
 			trianglemap.g2.color = color;
-			var x1 = (texa[inda[i * 3    ] * 2 + 0]) * f;
-			var x2 = (texa[inda[i * 3 + 1] * 2 + 0]) * f;
-			var x3 = (texa[inda[i * 3 + 2] * 2 + 0]) * f;
+			var x1 = (texa[inda[i * 3    ] * 2    ]) * f;
+			var x2 = (texa[inda[i * 3 + 1] * 2    ]) * f;
+			var x3 = (texa[inda[i * 3 + 2] * 2    ]) * f;
 			var y1 = (texa[inda[i * 3    ] * 2 + 1]) * f;
 			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;

@@ -122,7 +122,7 @@ class Exporter {
 			pixels = texpaint.getPixels(); // bgra
 			if (UITrait.inst.isBase && UITrait.inst.isBaseSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
-					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+					pixels.set(i * 4    , Std.int(Math.pow(pixels.get(i * 4    ) / 255, 1.0 / 2.2) * 255));
 					pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
 					pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
 				}
@@ -178,7 +178,7 @@ class Exporter {
 			pixels = texpaint_nor.getPixels();
 			if (UITrait.inst.isNorSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
-					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+					pixels.set(i * 4    , Std.int(Math.pow(pixels.get(i * 4    ) / 255, 1.0 / 2.2) * 255));
 					pixels.set(i * 4 + 1, Std.int(Math.pow(pixels.get(i * 4 + 1) / 255, 1.0 / 2.2) * 255));
 					pixels.set(i * 4 + 2, Std.int(Math.pow(pixels.get(i * 4 + 2) / 255, 1.0 / 2.2) * 255));
 				}
@@ -219,7 +219,7 @@ class Exporter {
 			}
 			if (UITrait.inst.isMet && UITrait.inst.isMetSpace == 1) {
 				for (i in 0...Std.int(pixels.length / 4)) {
-					pixels.set(i * 4 + 0, Std.int(Math.pow(pixels.get(i * 4 + 0) / 255, 1.0 / 2.2) * 255));
+					pixels.set(i * 4    , Std.int(Math.pow(pixels.get(i * 4    ) / 255, 1.0 / 2.2) * 255));
 				}
 			}
 			if (UITrait.inst.isHeight && UITrait.inst.isHeightSpace == 1) {
@@ -365,7 +365,7 @@ class Exporter {
 							   (-nora[i * 2 + 1]) + "\n";
 				}
 				for (i in 0...len) {
-					s += "vt " + texa[i * 2 + 0] + " " +
+					s += "vt " + texa[i * 2    ] + " " +
 								 (1.0 - texa[i * 2 + 1]) + "\n";
 				}
 				var inda = mesh.index_arrays[0].values;

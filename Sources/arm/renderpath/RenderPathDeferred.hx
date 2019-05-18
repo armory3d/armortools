@@ -195,7 +195,7 @@ class RenderPathDeferred {
 
 		var tid = UITrait.inst.selectedLayer.id;
 
-		if (UITrait.inst.pushUndo) {
+		if (UITrait.inst.pushUndo && UITrait.inst.undoLayers != null) {
 			var isMask = UITrait.inst.selectedLayerIsMask;
 			var i = UITrait.inst.undoI;
 			if (isMask) {
@@ -279,53 +279,56 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
-		// Symmetry
-		if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
-			UITrait.inst.ddirty = 2;
-			var t = UITrait.inst.paintObject.transform;
-			var sx = t.scale.x;
-			var sy = t.scale.y;
-			var sz = t.scale.z;
-			if (UITrait.inst.symX) {
-				t.scale.set(-sx, sy, sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symY) {
-				t.scale.set(sx, -sy, sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symZ) {
-				t.scale.set(sx, sy, -sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symX && UITrait.inst.symY) {
-				t.scale.set(-sx, -sy, sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symX && UITrait.inst.symZ) {
-				t.scale.set(-sx, sy, -sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symY && UITrait.inst.symZ) {
-				t.scale.set(sx, -sy, -sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
-				t.scale.set(-sx, -sy, -sz);
-				t.buildMatrix();
-				RenderPathPaint.commandsPaint();
-			}
-			t.scale.set(sx, sy, sz);
-			t.buildMatrix();
-		}
+		if (UITrait.inst.undoLayers != null) {
 
-		RenderPathPaint.commandsPaint();
+			// Symmetry
+			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
+				UITrait.inst.ddirty = 2;
+				var t = UITrait.inst.paintObject.transform;
+				var sx = t.scale.x;
+				var sy = t.scale.y;
+				var sz = t.scale.z;
+				if (UITrait.inst.symX) {
+					t.scale.set(-sx, sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symY) {
+					t.scale.set(sx, -sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symZ) {
+					t.scale.set(sx, sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symY) {
+					t.scale.set(-sx, -sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symZ) {
+					t.scale.set(-sx, sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symY && UITrait.inst.symZ) {
+					t.scale.set(sx, -sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
+					t.scale.set(-sx, -sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				t.scale.set(sx, sy, sz);
+				t.buildMatrix();
+			}
+
+			RenderPathPaint.commandsPaint();
+		}
 
 		//
 
@@ -725,7 +728,8 @@ class RenderPathDeferred {
 				path.drawShader("shader_datas/taa_pass/taa_pass");
 				if (!ssaa4) {
 					path.setTarget("");
-					path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+					if (taaFrame == 0) path.bindTarget("bufa", "tex");
+					else path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				}
 				

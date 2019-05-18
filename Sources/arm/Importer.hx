@@ -302,6 +302,7 @@ class Importer {
 					for (i in 0...ar.length) buf[i] = Std.parseFloat(ar[i]);
 					iron.Scene.active.world.probe.irradiance = buf;
 					UITrait.inst.ddirty = 2;
+					iron.data.Data.deleteBlob(tmp + "tmp_irr.c");
 				});
 
 				// World envmap
@@ -661,8 +662,10 @@ class Importer {
 
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd1.redraws = 2;
 			}
+
+			UITrait.inst.hwnd1.redraws = 2;
+			iron.data.Data.deleteBlob(path);
 		});
 	}
 
@@ -706,7 +709,7 @@ class Importer {
 				var loopstart = poly.get("loopstart");
 				var totloop = poly.get("totloop");
 				if (totloop >= 3) {
-					var v0 = m.get("mvert", m.get("mloop", loopstart + 0).get("v"));
+					var v0 = m.get("mvert", m.get("mloop", loopstart    ).get("v"));
 					var v1 = m.get("mvert", m.get("mloop", loopstart + 1).get("v"));
 					var v2 = m.get("mvert", m.get("mloop", loopstart + 2).get("v"));
 					var co0 = v0.get("co");
@@ -741,7 +744,7 @@ class Importer {
 					var uv1:kha.arrays.Float32Array = null;
 					var uv2:kha.arrays.Float32Array = null;
 					if (hasuv) {
-						uv0 = m.get("mloopuv", loopstart + 0).get("uv");
+						uv0 = m.get("mloopuv", loopstart    ).get("uv");
 						uv1 = m.get("mloopuv", loopstart + 1).get("uv");
 						uv2 = m.get("mloopuv", loopstart + 2).get("uv");
 						texa[tri * 6    ] = Std.int(uv0[0] * 32767);
@@ -851,7 +854,7 @@ class Importer {
 				for (i in 0...verts) {
 					n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 					// Sphere projection
-					// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+					// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
 					// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
 					// Equirect
 					mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
@@ -946,7 +949,7 @@ class Importer {
 			for (i in 0...verts) {
 				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 				// Sphere projection
-				// mesh.texa[i * 2 + 0] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+				// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
 				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
 				// Equirect
 				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);

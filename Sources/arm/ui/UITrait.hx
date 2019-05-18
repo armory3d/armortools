@@ -77,6 +77,7 @@ class UITrait extends iron.Trait {
 	public var brushBlendDirty = true;
 	public var layerPreviewDirty = true;
 	public var layersPreviewDirty = false;
+	var materialPreviewReady = false;
 
 	public var windowW = 280; // Panel width
 	public var toolbarw = 54;
@@ -303,18 +304,13 @@ class UITrait extends iron.Trait {
 			selectedLayer = layers[0];
 		}
 
-		if (savedEnvmap == null) {
-			savedEnvmap = iron.Scene.active.world.envmap;
-		}
 		if (emptyEnvmap == null) {
-			// emptyEnvmap = kha.Image.fromBytes(1, 1); // No lock for d3d11
-			emptyEnvmap = kha.Image.create(1, 1);
-			var b = emptyEnvmap.lock();
+			var b = haxe.io.Bytes.alloc(4);
 			b.set(0, 3);
 			b.set(1, 3);
 			b.set(2, 3);
 			b.set(3, 255);
-			emptyEnvmap.unlock();
+			emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
 		if (previewEnvmap == null) {
 			var b = haxe.io.Bytes.alloc(4);
@@ -325,15 +321,22 @@ class UITrait extends iron.Trait {
 			previewEnvmap = kha.Image.fromBytes(b, 1, 1);
 		}
 
+		var world = iron.Scene.active.world;
+		if (savedEnvmap == null) {
+			savedEnvmap = world.envmap;
+		}
+		world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
+		ddirty = 1;
+
 		// Save last pos for continuos paint
 		iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
-
-			if (frame == 0) {
+			if (frame == 2) {
+				RenderUtil.makeMaterialPreview();
+				materialPreviewReady = true;
+				hwnd1.redraws = 2;
 				MaterialParser.parseMeshMaterial();
 				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-			}
-			else if (frame == 1) {
+				ddirty = 0;
 				if (undoLayers == null) {
 					undoLayers = [];
 					for (i in 0...App.C.undo_steps) {
@@ -342,6 +345,9 @@ class UITrait extends iron.Trait {
 						undoLayers.push(l);
 					}
 				}
+			}
+			else if (frame == 3) {
+				ddirty = 1;
 			}
 			frame++;
 
@@ -2084,7 +2090,7 @@ class UITrait extends iron.Trait {
 							ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 						}
 
-						var state = ui.image(img);
+						var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, 50, 50, 50, 50);
 						if (state == State.Started) {
 							if (selectedMaterial != materials[i]) selectMaterial(i);
 							if (iron.system.Time.time() - selectTime < 0.25) showMaterialNodes();
@@ -2499,11 +2505,18 @@ class UITrait extends iron.Trait {
 						var hwheel = Id.handle({color: 0xff030303});
 						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
 						if (hwheel.changed) {
-							var b = emptyEnvmap.lock();
+							// var b = emptyEnvmap.lock(); // No lock for d3d11
+							// b.set(0, worldColor.Rb);
+							// b.set(1, worldColor.Gb);
+							// b.set(2, worldColor.Bb);
+							// emptyEnvmap.unlock();
+							// emptyEnvmap.unload(); //
+							var b = haxe.io.Bytes.alloc(4);
 							b.set(0, worldColor.Rb);
 							b.set(1, worldColor.Gb);
 							b.set(2, worldColor.Bb);
-							emptyEnvmap.unlock();
+							b.set(3, 255);
+							emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
 							ddirty = 2;
 						}
 					}

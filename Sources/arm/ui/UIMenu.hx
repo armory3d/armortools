@@ -152,6 +152,7 @@ class UIMenu {
 								UIBox.showMessage("You are up to date!");
 							}
 						}
+						iron.data.Data.deleteBlob(outFile);
 					});
 					#end
 				}
