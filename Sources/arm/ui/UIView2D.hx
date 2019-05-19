@@ -165,6 +165,8 @@ class UIView2D extends iron.Trait {
 
 	function update() {
 		var m = iron.system.Input.getMouse();
+		var kb = iron.system.Input.getKeyboard();
+
 		var headerh = ui.ELEMENT_H() * 1.4;
 		UITrait.inst.paint2d = false;
 
@@ -188,5 +190,10 @@ class UIView2D extends iron.Trait {
 		if (type == 0 && m.down("left")) {
 			UITrait.inst.paint2d = true;
 		}
+
+		if (kb.started("left")) panX -= 5;
+		else if (kb.started("right")) panX += 5;
+		if (kb.started("up")) panY -= 5;
+		else if (kb.started("down")) panY += 5;
 	}
 }

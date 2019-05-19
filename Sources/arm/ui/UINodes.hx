@@ -221,6 +221,13 @@ class UINodes extends iron.Trait {
 		// 	trace(str.substr(0, 1023));
 		// 	trace(str.substr(1023, 2047));
 		// }
+
+		if (nodes.nodesSelected.length > 0) {
+			if (keyboard.started("left")) for (n in nodes.nodesSelected) n.x -= 1;
+			else if (keyboard.started("right")) for (n in nodes.nodesSelected) n.x += 1;
+			if (keyboard.started("up")) for (n in nodes.nodesSelected) n.y -= 1;
+			else if (keyboard.started("down")) for (n in nodes.nodesSelected) n.y += 1;
+		}
 	}
 
 	public function getNodeX():Int {
