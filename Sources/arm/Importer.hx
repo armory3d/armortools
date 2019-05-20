@@ -436,8 +436,9 @@ class Importer {
 	public static function importArmMaterials(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
 			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
+			if (project.version == null) { iron.data.Data.deleteBlob(path); return; }
+			
 			var base = Path.baseDir(path);
-
 			for (file in project.assets) {
 				// Convert image path from relative to absolute
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";

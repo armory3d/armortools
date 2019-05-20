@@ -28,6 +28,13 @@ class Layers {
 	public static var expb:kha.Image = null;
 	public static var expc:kha.Image = null;
 	public static var expd:kha.Image = null;
+	public static var pipeCursor:kha.graphics4.PipelineState;
+	public static var cursorVP:ConstantLocation;
+	public static var cursorInvVP:ConstantLocation;
+	public static var cursorMouse:ConstantLocation;
+	public static var cursorTex:TextureUnit;
+	public static var cursorGbufferD:TextureUnit;
+	public static var cursorGbuffer0:TextureUnit;
 	
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
@@ -146,6 +153,28 @@ class Layers {
 		pipeMask.compile();
 		tex0Mask = pipeMask.getTextureUnit("tex0");
 		texaMask = pipeMask.getTextureUnit("texa");
+	}
+
+	public static function makeCursorPipe() {
+		pipeCursor = new kha.graphics4.PipelineState();
+		pipeCursor.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.cursorVert);
+		pipeCursor.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.cursorFrag);
+		var vs = new kha.graphics4.VertexStructure();
+		vs.add("pos", kha.graphics4.VertexData.Short4Norm);
+		vs.add("nor", kha.graphics4.VertexData.Short2Norm);
+		vs.add("tex", kha.graphics4.VertexData.Short2Norm);
+		pipeCursor.inputLayout = [vs];
+		pipeCursor.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
+		pipeCursor.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
+		pipeCursor.depthWrite = false;
+		pipeCursor.depthMode = kha.graphics4.CompareMode.Always;
+		pipeCursor.compile();
+		cursorVP = pipeCursor.getConstantLocation("VP");
+		cursorInvVP = pipeCursor.getConstantLocation("invVP");
+		cursorMouse = pipeCursor.getConstantLocation("mouse");
+		cursorTex = pipeCursor.getTextureUnit("tex");
+		cursorGbufferD = pipeCursor.getTextureUnit("gbufferD");
+		cursorGbuffer0 = pipeCursor.getTextureUnit("gbuffer0");
 	}
 
 	public static function makeTempImg() {

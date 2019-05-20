@@ -213,7 +213,7 @@ class Project {
 
 			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
 
-			// Read as .arm mesh instead
+			// Import as mesh instead
 			if (project.version == null) {
 				new MeshData(project.mesh_datas[0], function(md:MeshData) {
 					UITrait.inst.paintObject.setData(md);
@@ -221,6 +221,7 @@ class Project {
 					UITrait.inst.paintObject.transform.buildMatrix();
 					UITrait.inst.paintObject.name = md.name;
 					UITrait.inst.paintObjects = [UITrait.inst.paintObject];
+					iron.App.notifyOnRender(Layers.initLayers);
 				});
 				return;
 			}

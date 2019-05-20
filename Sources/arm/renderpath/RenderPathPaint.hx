@@ -150,4 +150,36 @@ class RenderPathPaint {
 			}
 		}
 	}
+
+	@:access(iron.RenderPath)
+	public static function commandsCursor() {
+		var path = RenderPathDeferred.path;
+
+		var plane = cast(iron.Scene.active.getChild(".Plane"), iron.object.MeshObject);
+		var geom = plane.data.geom;
+
+		var g = path.frameG;
+		if (Layers.pipeCursor == null) Layers.makeCursorPipe();
+
+		path.setTarget("");
+		g.setPipeline(Layers.pipeCursor);
+		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+		var img = decal ? UITrait.inst.decalImage : Res.get("cursor.png");
+		g.setTexture(Layers.cursorTex, img);
+		g.setTextureDepth(Layers.cursorGbufferD, path.renderTargets.get("gbuffer0").image);
+		g.setTexture(Layers.cursorGbuffer0, path.renderTargets.get("gbuffer0").image);
+		var mx = iron.system.Input.getMouse().x / iron.App.w();
+		var my = 1.0 - (iron.system.Input.getMouse().y / iron.App.h());
+		g.setFloat2(Layers.cursorMouse, mx, my);
+		g.setMatrix(Layers.cursorVP, iron.Scene.active.camera.VP.self);
+		var helpMat = iron.math.Mat4.identity();
+		helpMat.getInverse(iron.Scene.active.camera.VP);
+		g.setMatrix(Layers.cursorInvVP, helpMat.self);
+		g.setVertexBuffer(geom.vertexBuffer);
+		g.setIndexBuffer(geom.indexBuffers[0]);
+		g.drawIndexedVertices();
+		
+		g.disableScissor();
+		path.end();
+	}
 }
