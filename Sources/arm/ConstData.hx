@@ -8,12 +8,12 @@ class ConstData {
 	public static var layerViewVert = "
 uniform float4x4 projectionMatrix;
 struct SPIRV_Cross_Output { float4 color : TEXCOORD0; float2 texCoord : TEXCOORD1; float4 gl_Position : SV_Position; };
-SPIRV_Cross_Output main(float3 vertexPosition : TEXCOORD0, float2 texPosition : TEXCOORD1, float4 vertexColor : TEXCOORD2) {
+SPIRV_Cross_Output main(float3 pos : TEXCOORD0, float2 tex : TEXCOORD1, float4 col : TEXCOORD2) {
 	SPIRV_Cross_Output stage_output;
-	stage_output.gl_Position = mul(float4(vertexPosition, 1.0f), projectionMatrix);
+	stage_output.gl_Position = mul(float4(pos, 1.0f), projectionMatrix);
 	stage_output.gl_Position.z = (stage_output.gl_Position.z + stage_output.gl_Position.w) * 0.5;
-	stage_output.texCoord = texPosition;
-	stage_output.color = vertexColor;
+	stage_output.texCoord = tex;
+	stage_output.color = col;
 	return stage_output;
 }
 ";
@@ -28,16 +28,16 @@ float4 main(float4 color : TEXCOORD0, float2 texCoord : TEXCOORD1) : SV_Target0 
 	#else // kha_opengl
 
 	public static var layerViewVert = "#version 330
-in vec3 vertexPosition;
-in vec2 texPosition;
-in vec4 vertexColor;
+in vec3 pos;
+in vec2 tex;
+in vec4 col;
 uniform mat4 projectionMatrix;
 out vec2 texCoord;
 out vec4 color;
 void main() {
-	gl_Position = projectionMatrix * vec4(vertexPosition, 1.0);
-	texCoord = texPosition;
-	color = vertexColor;
+	gl_Position = projectionMatrix * vec4(pos, 1.0);
+	texCoord = tex;
+	color = col;
 }
 ";
 	public static var layerViewFrag = "#version 330
