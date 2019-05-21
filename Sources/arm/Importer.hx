@@ -122,6 +122,8 @@ class Importer {
 		UINodes.inst.updateCanvasMap();
 		var nodes = UINodes.inst.nodes;
 		var canvas = UINodes.inst.canvas;
+		var dirs = StringTools.replace(path, "\\", "/").split("/");
+		canvas.name = dirs[dirs.length - 1];
 		var nout:TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }

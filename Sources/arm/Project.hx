@@ -151,6 +151,7 @@ class Project {
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			iron.data.Data.deleteMesh(handle);
 		}
+
 		iron.data.Data.getMesh("Scene", n, function(md:MeshData) {
 			
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
@@ -185,6 +186,7 @@ class Project {
 			UINodes.inst.updateCanvasMap();
 			arm.MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
+			for (a in UITrait.inst.assets) iron.data.Data.deleteImage(a.file);
 			UITrait.inst.assets = [];
 			UITrait.inst.assetNames = [];
 			UITrait.inst.assetId = 0;
