@@ -85,7 +85,7 @@ class RenderPathPaint {
 				}
 			}
 			else {
-				if (UITrait.inst.selectedTool == ToolBake) {
+				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -122,7 +122,7 @@ class RenderPathPaint {
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
 				path.bindTarget("_paintdb", "paintdb");
 				path.bindTarget(blendB, "paintmask");
-				if (UITrait.inst.selectedTool == ToolBake) {
+				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");
 				}
 				if (UITrait.inst.colorIdPicked) {

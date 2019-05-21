@@ -187,7 +187,7 @@ class UITrait extends iron.Trait {
 	public var brushPaint = 0;
 	public var selectedTool = 0;
 	public var brushWarp = false;
-
+	public var bakeType = 0;
 	public var bakeStrength = 1.0;
 	public var bakeRadius = 1.0;
 	public var bakeOffset = 1.0;
@@ -1148,16 +1148,22 @@ class UITrait extends iron.Trait {
 					}
 				}
 				else if (selectedTool == ToolBake) {
-					ui.combo(Id.handle(), ["AO"], "Bake");
-					var h = Id.handle({value: bakeStrength});
-					bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
-					if (h.changed) MaterialParser.parsePaintMaterial();
-					var h = Id.handle({value: bakeRadius});
-					bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
-					if (h.changed) MaterialParser.parsePaintMaterial();
-					var h = Id.handle({value: bakeOffset});
-					bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
-					if (h.changed) MaterialParser.parsePaintMaterial();
+					var bakeHandle = Id.handle({position: bakeType});
+					bakeType = ui.combo(bakeHandle, ["AO", "Position", "TexCoord", "Material ID", "Normal (World)"], "Bake");
+					if (bakeHandle.changed) {
+						MaterialParser.parsePaintMaterial();
+					}
+					if (bakeType == 0) {
+						var h = Id.handle({value: bakeStrength});
+						bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
+						if (h.changed) MaterialParser.parsePaintMaterial();
+						var h = Id.handle({value: bakeRadius});
+						bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
+						if (h.changed) MaterialParser.parsePaintMaterial();
+						var h = Id.handle({value: bakeOffset});
+						bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
+						if (h.changed) MaterialParser.parsePaintMaterial();
+					}
 				}
 				else {
 					if (selectedTool != ToolFill) {

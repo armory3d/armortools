@@ -32,17 +32,34 @@ class MaterialBuilder {
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 
 		if (UITrait.inst.selectedTool == ToolBake) {
-			con_paint.data.color_writes_red[0] = false;
-			con_paint.data.color_writes_green[0] = false;
-			con_paint.data.color_writes_blue[0] = false;
-			con_paint.data.color_writes_alpha[0] = false;
-			con_paint.data.color_writes_red[1] = false;
-			con_paint.data.color_writes_green[1] = false;
-			con_paint.data.color_writes_blue[1] = false;
-			con_paint.data.color_writes_alpha[1] = false;
-			con_paint.data.color_writes_green[2] = false; // No rough
-			con_paint.data.color_writes_blue[2] = false; // No met
-			con_paint.data.color_writes_alpha[2] = false;
+			if (UITrait.inst.bakeType == 0) { // AO
+				con_paint.data.color_writes_red[0] = false;
+				con_paint.data.color_writes_green[0] = false;
+				con_paint.data.color_writes_blue[0] = false;
+				con_paint.data.color_writes_alpha[0] = false;
+				con_paint.data.color_writes_red[1] = false;
+				con_paint.data.color_writes_green[1] = false;
+				con_paint.data.color_writes_blue[1] = false;
+				con_paint.data.color_writes_alpha[1] = false;
+				// con_paint.data.color_writes_red[2] = true;
+				con_paint.data.color_writes_green[2] = false; // No rough
+				con_paint.data.color_writes_blue[2] = false; // No met
+				con_paint.data.color_writes_alpha[2] = false;
+			}
+			else {
+				// con_paint.data.color_writes_red[0] = true;
+				// con_paint.data.color_writes_green[0] = true;
+				// con_paint.data.color_writes_blue[0] = true;
+				// con_paint.data.color_writes_alpha[0] = true;
+				con_paint.data.color_writes_red[1] = false;
+				con_paint.data.color_writes_green[1] = false;
+				con_paint.data.color_writes_blue[1] = false;
+				con_paint.data.color_writes_alpha[1] = false;
+				con_paint.data.color_writes_red[2] = false;
+				con_paint.data.color_writes_green[2] = false;
+				con_paint.data.color_writes_blue[2] = false;
+				con_paint.data.color_writes_alpha[2] = false;
+			}
 		}
 
 		var vert = con_paint.make_vert();
@@ -114,8 +131,16 @@ class MaterialBuilder {
 		if (UITrait.inst.brushPaint == 1) frag.ndcpos = true; // Project
 
 		if (UITrait.inst.selectedTool == ToolBake) {
-			frag.wposition = true;
-			frag.n = true;
+			if (UITrait.inst.bakeType == 0) { // AO
+				frag.wposition = true;
+				frag.n = true;
+			}
+			else if (UITrait.inst.bakeType == 1) { // Position
+				frag.wposition = true;
+			}
+			else if (UITrait.inst.bakeType == 4) { // Normal (world)
+				frag.n = true;
+			}
 		}
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
@@ -548,27 +573,46 @@ class MaterialBuilder {
 		}
 
 		if (UITrait.inst.selectedTool == ToolBake) {
-			// Apply normal channel
-			frag.vVec = true;
-			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
-			#if kha_direct3d11
-			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
-			#else
-			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-			#end
-			frag.write('n = nortan * 2.0 - 1.0;');
-			frag.write('n.y = -n.y;');
-			frag.write('n = normalize(mul(n, TBN));');
+			if (UITrait.inst.bakeType == 0) { // AO
+				// Apply normal channel
+				frag.vVec = true;
+				frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+				#if kha_direct3d11
+				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+				#else
+				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+				#end
+				frag.write('n = nortan * 2.0 - 1.0;');
+				frag.write('n.y = -n.y;');
+				frag.write('n = normalize(mul(n, TBN));');
 
-			frag.write('const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);');
-			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
-			frag.add_uniform('sampler3D voxels');
-			frag.add_function(armory.system.CyclesFunctions.str_traceAO);
-			frag.n = true;
-			var strength = UITrait.inst.bakeStrength;
-			var radius = UITrait.inst.bakeRadius;
-			var offset = UITrait.inst.bakeOffset;
-			frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
+				frag.write('const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);');
+				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
+				frag.add_uniform('sampler3D voxels');
+				frag.add_function(armory.system.CyclesFunctions.str_traceAO);
+				frag.n = true;
+				var strength = UITrait.inst.bakeStrength;
+				var radius = UITrait.inst.bakeRadius;
+				var offset = UITrait.inst.bakeOffset;
+				frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
+			}
+			else if (UITrait.inst.bakeType == 1) { // Position
+				frag.write('fragColor[0] = vec4(wposition, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 2) { // TexCoord
+				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 3) { // Material ID
+				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+				frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
+				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 2.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 2.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 4.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 4) { // Normal (World)
+				frag.write('fragColor[0] = vec4(n, 1.0);');
+			}
 		}
 
 		Cycles.finalize(con_paint);
