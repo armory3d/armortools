@@ -328,9 +328,11 @@ class Project {
 					if (i > 0) l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
 					i++;
 				}
-				for (l in UITrait.inst.undoLayers) {
-					l.resize(false);
-					l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
+				if (UITrait.inst.undoLayers != null) {
+					for (l in UITrait.inst.undoLayers) {
+						l.resize(false);
+						l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
+					}
 				}
 				var rts = iron.RenderPath.active.renderTargets;
 				rts.get("texpaint_blend0").image.unload();
