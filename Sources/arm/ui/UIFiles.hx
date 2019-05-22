@@ -25,6 +25,7 @@ class UIFiles {
 				if (App.foldersOnly) App.path = App.path.substr(0, App.path.lastIndexOf(sep));
 				App.filesDone(App.path);
 			}
+			releaseKeys();
 			return;
 		}
 		#end
@@ -82,5 +83,12 @@ class UIFiles {
 		uibox.endLayout();
 
 		g.begin(false);
+	}
+
+	static function releaseKeys() {
+		// File dialog may prevent firing key up events
+		var kb = iron.system.Input.getKeyboard();
+		@:privateAccess kb.upListener(kha.input.KeyCode.Shift);
+		@:privateAccess kb.upListener(kha.input.KeyCode.Control);
 	}
 }
