@@ -161,6 +161,8 @@ class MaterialParser {
 					if (sc == null) compileError = true;
 				});
 				if (compileError) return;
+				sc.overrideContext = {}
+				sc.overrideContext.addressing = "repeat";
 				
 				m.shader.raw.contexts.push(sc.raw);
 				m.shader.contexts.push(sc);
