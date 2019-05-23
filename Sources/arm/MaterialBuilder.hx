@@ -480,12 +480,15 @@ class MaterialBuilder {
 
 		if (layered) {
 			if (eraser) {
-				frag.write('fragColor[0] = vec4(basecol, sample_undo.a - str);');
+				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
+				frag.write('nortan = vec3(0.5, 0.5, 1.0);');
+				frag.write('occlusion = 1.0;');
+				frag.write('roughness = 0.0;');
+				frag.write('metallic = 0.0;');
 				frag.write('matid = 0;');
 			}
 			else if (decal) {
-				frag.write('float invstr = 1.0 - str;');
-				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, max(str, sample_undo.a));');
+				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, basecol, str), max(str, sample_undo.a));');
 			}
 			else {
 				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
@@ -500,11 +503,7 @@ class MaterialBuilder {
 			if (decal) {
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				frag.write('fragColor[2] = vec4(
-					occlusion * str + sample_pack_undo.r * invstr,
-					roughness * str + sample_pack_undo.g * invstr,
-					metallic * str + sample_pack_undo.b * invstr,
-					$height * str + sample_pack_undo.a * invstr);');
+				frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, $height), str);');
 			}
 			else {
 				frag.write('fragColor[2] = vec4(occlusion, roughness, metallic, $height);');
@@ -522,14 +521,13 @@ class MaterialBuilder {
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
 
-				frag.write('float invstr = 1.0 - str;');
-				frag.write('fragColor[0] = vec4(basecol * str + sample_undo.rgb * invstr, 0.0);');
-				frag.write('fragColor[1] = vec4(nortan * str + sample_nor_undo.rgb * invstr, matid);');
+				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, basecol, str), 0.0);');
+				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (UITrait.inst.selectedMaterial.paintHeight && heightUsed) {
-					frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, height * str + sample_pack_undo.a * invstr);');
+					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
 				}
 				else {
-					frag.write('fragColor[2] = vec4(occlusion * str + sample_pack_undo.r * invstr, roughness * str + sample_pack_undo.g * invstr, metallic * str + sample_pack_undo.b * invstr, 0.0);');
+					frag.write('fragColor[2] = vec4(mix(sample_pack_undo.rgb, vec3(occlusion, roughness, metallic), str), 0.0);');
 				}
 			}
 		}
@@ -991,7 +989,6 @@ class MaterialBuilder {
 
 			if (UITrait.inst.layers.length > 1) {
 				frag.write('float factor0;');
-				frag.write('float factorinv0;');
 				frag.write('vec4 col_tex0;');
 				frag.write('vec4 col_nor0;');
 				frag.write('vec4 col_pack0;');
@@ -1022,10 +1019,8 @@ class MaterialBuilder {
 						frag.write('factor0 *= ${l.maskOpacity};');
 					}
 
-					frag.write('factorinv0 = 1.0 - factor0;');
-
 					if (UITrait.inst.selectedLayer.paintBase) {
-						frag.write('basecol = basecol * factorinv0 + pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2)) * factor0;');
+						frag.write('basecol = mix(basecol, pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2)), factor0);');
 					}
 
 					if (emisUsed ||
@@ -1042,7 +1037,7 @@ class MaterialBuilder {
 							frag.write('n0 = col_nor0.rgb * 2.0 - 1.0;');
 							frag.write('n0.y = -n0.y;');
 							frag.write('n0 = normalize(mul(n0, TBN));');
-							frag.write('n = normalize(n * factorinv0 + n0 * factor0);');
+							frag.write('n = normalize(mix(n, n0, factor0));');
 						}
 					}
 
@@ -1053,13 +1048,13 @@ class MaterialBuilder {
 						frag.write('col_pack0 = textureLod(texpaint_pack' + id + ', texCoord, 0.0);');
 					
 						if (UITrait.inst.selectedLayer.paintOcc) {
-							frag.write('occlusion = occlusion * factorinv0 + col_pack0.r * factor0;');
+							frag.write('occlusion = mix(occlusion, col_pack0.r, factor0);');
 						}
 						if (UITrait.inst.selectedLayer.paintRough) {
-							frag.write('roughness = roughness * factorinv0 + col_pack0.g * factor0;');
+							frag.write('roughness = mix(roughness, col_pack0.g, factor0);');
 						}
 						if (UITrait.inst.selectedLayer.paintMet) {
-							frag.write('metallic = metallic * factorinv0 + col_pack0.b * factor0;');
+							frag.write('metallic = mix(metallic, col_pack0.b, factor0);');
 						}
 					}
 

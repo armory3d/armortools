@@ -90,11 +90,10 @@ SPIRV_Cross_Output main(float2 texCoord : TEXCOORD0) {
 	float4 colb = texb.SampleLevel(_texb_sampler, texCoord, 0);
 	float4 colc = texc.SampleLevel(_texc_sampler, texCoord, 0);
 	float str = col0.a * opac;
-	float invstr = 1.0 - str;
 	SPIRV_Cross_Output stage_output;
-	stage_output.color0 = float4(cola.rgb * invstr + col0.rgb * str, max(col0.a, cola.a));
-	stage_output.color1 = float4(colb * invstr + col1 * str);
-	stage_output.color2 = float4(colc * invstr + col2 * str);
+	stage_output.color0 = float4(lerp(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	stage_output.color1 = float4(lerp(colb, col1, str));
+	stage_output.color2 = float4(lerp(colc, col2, str));
 	return stage_output;
 }
 ";
@@ -142,10 +141,9 @@ void main() {
 	vec4 colb = textureLod(texb, texCoord, 0);
 	vec4 colc = textureLod(texc, texCoord, 0);
 	float str = col0.a * opac;
-	float invstr = 1.0 - str;
-	FragColor[0] = vec4(cola.rgb * invstr + col0.rgb * str, max(col0.a, cola.a));
-	FragColor[1] = vec4(colb * invstr + col1 * str);
-	FragColor[2] = vec4(colc * invstr + col2 * str);
+	FragColor[0] = vec4(mix(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	FragColor[1] = vec4(mix(colb, col1, str));
+	FragColor[2] = vec4(mix(colc, col2, str));
 }
 ";
 	public static var maskMergeFrag = "#version 330
