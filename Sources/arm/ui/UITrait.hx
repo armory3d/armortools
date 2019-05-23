@@ -2092,7 +2092,7 @@ class UITrait extends iron.Trait {
 							@:privateAccess ui.endElement();
 							continue;
 						}
-						var img = materials[i].imageIcon;
+						var img = ui.SCALE >= 2.0 ? materials[i].image : materials[i].imageIcon;
 						var imgFull = materials[i].image;
 
 						if (selectedMaterial == materials[i]) {
@@ -2219,7 +2219,12 @@ class UITrait extends iron.Trait {
 						}
 
 						var img = UITrait.inst.getImage(asset);
+						var uix = ui._x;
+						var uiy = ui._y;
 						if (ui.image(img) == State.Started) {
+							var mouse = iron.system.Input.getMouse();
+							arm.App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
+							arm.App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
 							arm.App.dragAsset = asset;
 							selectedTexture = asset;
 

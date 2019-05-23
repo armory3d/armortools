@@ -22,6 +22,8 @@ class App extends iron.Trait {
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var dragAsset:TAsset = null;
+	public static var dragOffX = 0.0;
+	public static var dragOffY = 0.0;
 	public static var showFiles = false;
 	public static var showBox = false;
 	public static var foldersOnly = false;
@@ -310,9 +312,10 @@ class App extends iron.Trait {
 		var mouse = iron.system.Input.getMouse();
 		if (arm.App.dragAsset != null) {
 			var img = UITrait.inst.getImage(arm.App.dragAsset);
-			var ratio = 128 / img.width;
+			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
+			var ratio = size / img.width;
 			var h = img.height * ratio;
-			g.drawScaledImage(img, mouse.x + iron.App.x(), mouse.y + iron.App.y(), 128, h);
+			g.drawScaledImage(img, mouse.x + iron.App.x() + arm.App.dragOffX, mouse.y + iron.App.y() + arm.App.dragOffY, size, h);
 		}
 
 		var usingMenu = false;

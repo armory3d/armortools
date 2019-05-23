@@ -312,7 +312,8 @@ class UINodes extends iron.Trait {
 				var id = nodes.nodesSelected[0].buttons[0].default_value;
 				if (id < UITrait.inst.assets.length) {
 					var img = UITrait.inst.getImage(UITrait.inst.assets[id]);
-					ui.g.drawScaledImage(img, ww - 64 - 20, wh - 64 - 40, 64, 64);
+					var size = 64 * ui.SCALE;
+					ui.g.drawScaledImage(img, ww - size - 20 * ui.SCALE, wh - size - 40 * ui.SCALE, size, size);
 				}
 			}
 
