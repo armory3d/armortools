@@ -1,0 +1,7 @@
+#?RADIANCE
+# Output from cmft.
+FORMAT=32-bit_rle_rgbe
+EXPOSURE=1
+
+-Y 2 +X 4
+美纞美纞美纞美纞美纞美纞美纞美纞
