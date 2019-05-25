@@ -1,7 +1,6 @@
-armorpaint.blend1
-build_armorpaint/
 build/
-khafile.js
-Sources/Main.hx
-*.pyc
 .vscode
+Assets/blend/scene.blend1
+Assets/blend/khafile.js
+Assets/blend/build_scene
+Assets/blend/Sources

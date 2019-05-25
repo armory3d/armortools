@@ -1,0 +1,15 @@
+[submodule "Libraries/armory"]
+	path = Libraries/armory
+	url = https://github.com/armory3d/armory
+[submodule "Libraries/iron"]
+	path = Libraries/iron
+	url = https://github.com/armory3d/iron
+[submodule "Libraries/iron_format"]
+	path = Libraries/iron_format
+	url = https://github.com/armory3d/iron_format
+[submodule "Libraries/zui"]
+	path = Libraries/zui
+	url = https://github.com/armory3d/zui
+[submodule "Kha"]
+	path = Kha
+	url = https://github.com/armory3d/Kha
