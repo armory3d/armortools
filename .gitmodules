@@ -13,3 +13,6 @@
 [submodule "Kha"]
 	path = Kha
 	url = https://github.com/armory3d/Kha
+[submodule "Krom"]
+	path = Krom
+	url = https://github.com/armory3d/Krom_armorpaint
