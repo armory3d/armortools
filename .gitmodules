@@ -13,6 +13,8 @@
 [submodule "Kha"]
 	path = Kha
 	url = https://github.com/armory3d/Kha
+	shallow = true
 [submodule "Krom"]
 	path = Krom
 	url = https://github.com/armory3d/Krom_armorpaint
+	shallow = true
