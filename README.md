@@ -3,6 +3,8 @@
 armorpaint
 ==============
 
+[![Build Status](https://travis-ci.org/armory3d/armorpaint.svg?branch=master)](https://travis-ci.org/armory3d/armorpaint)
+
 [ArmorPaint](https://armorpaint.org) is a software for 3D PBR texture painting - check out the [manual](https://armorpaint.org/manual/).
 
 *Note 1: This repository is aimed at developers and may not be stable. Distributed binaries are currently [paid](https://armorpaint.org/download) to help with the project funding. All of the development is happening here in order to make it accessible to everyone. Thank you for support!*
