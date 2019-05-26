@@ -408,7 +408,7 @@ class UITrait extends iron.Trait {
 		Plugin.keep();
 		if (App.C.plugins != null) {
 			for (plugin in App.C.plugins) {
-				iron.data.Data.getBlob(plugin, function(blob:kha.Blob) {
+				iron.data.Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
 					#if js
 					untyped __js__("(1, eval)({0})", blob.toString());
 					#end
@@ -1784,7 +1784,7 @@ class UITrait extends iron.Trait {
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, "Theme", true);
 				if (themeHandle.changed) {
-					iron.data.Data.getBlob("theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
+					iron.data.Data.getBlob("themes/theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
 						arm.App.parseTheme(b);
 						ui.t = arm.App.theme;
 						// UINodes.inst.applyTheme();

@@ -64,9 +64,9 @@ class UINodes extends iron.Trait {
 
 		// Cycles.arm_export_tangents = false;
 
-		iron.data.Data.getBlob('default_material.json', function(b1:kha.Blob) {
-			iron.data.Data.getBlob('default_brush.json', function(b2:kha.Blob) {
-				// iron.data.Data.getBlob('default_logic.json', function(b3:kha.Blob) {
+		iron.data.Data.getBlob('defaults/default_material.json', function(b1:kha.Blob) {
+			iron.data.Data.getBlob('defaults/default_brush.json', function(b2:kha.Blob) {
+				// iron.data.Data.getBlob('defaults/default_logic.json', function(b3:kha.Blob) {
 					// iron.data.Data.getBlob('logic_nodes.json', function(bnodes:kha.Blob) {
 
 						canvasBlob = b1.toString();

@@ -9,7 +9,12 @@ project.addShaders("compiled/Shaders/*.glsl", { noembed: false});
 project.addShaders("compiled/Hlsl/*.glsl", { noprocessing: true, noembed: false });
 project.addAssets("compiled/Assets/**", { notinlist: true , destination: "data/{name}" });
 project.addAssets("compiled/Shaders/*.arm", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Bundled/**", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/data/**", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/defaults/**", { notinlist: true , destination: "data/defaults/{name}" });
+project.addAssets("Bundled/licenses/**", { notinlist: true , destination: "data/licenses/{name}" });
+project.addAssets("Bundled/plugins/**", { notinlist: true , destination: "data/plugins/{name}" });
+project.addAssets("Bundled/themes/**", { notinlist: true , destination: "data/themes/{name}" });
+project.addAssets("Bundled/readme.txt", { notinlist: true , destination: "{name}" });
 project.addAssets("Libraries/armory/Assets/brdf.png", { notinlist: true , destination: "data/{name}" });
 project.addAssets("Libraries/armory/Assets/noise256.png", { notinlist: true , destination: "data/{name}" });
 project.addAssets("Libraries/armory/Assets/smaa_area.png", { notinlist: true , destination: "data/{name}" });
@@ -48,5 +53,15 @@ project.addDefine('arm_resizable');
 project.addDefine('arm_data_dir');
 project.addParameter('--macro include("arm.brushnode")');
 project.addParameter('-dce full');
+
+if (platform === Platform.Windows) {
+	project.addAssets("Bundled/cmft/cmft.exe", { notinlist: true , destination: "data/{name}" });
+}
+else if (platform === Platform.Linux) {
+	project.addAssets("Bundled/cmft/cmft-linux64", { notinlist: true , destination: "data/{name}" });
+}
+else if (platform === Platform.OSX) {
+	project.addAssets("Bundled/cmft/cmft-osx", { notinlist: true , destination: "data/{name}" });
+}
 
 resolve(project);

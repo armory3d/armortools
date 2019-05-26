@@ -80,7 +80,7 @@ class App extends iron.Trait {
 		});
 
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
-			iron.data.Data.getBlob("theme_dark.arm", function(b:kha.Blob) {
+			iron.data.Data.getBlob("themes/theme_dark.arm", function(b:kha.Blob) {
 				iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
 					font = f;
 
