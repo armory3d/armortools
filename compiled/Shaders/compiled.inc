@@ -2,6 +2,11 @@
 #define _COMPILED_GLSL_
 #define _EnvTex
 #define _EnvStr
+#define _CGrainStatic
+#define _Emission
+#define _Brdf
+#define _Irr
+#define _Rad
 #define _Irr
 #define _EnvStr
 #define _MicroShadowing
@@ -14,11 +19,6 @@
 #define _Veloc
 #define _SSAO
 #define _gbuffer2
-#define _CGrainStatic
-#define _Emission
-#define _Brdf
-#define _Irr
-#define _Rad
 #define _CToneFilmic
 #define _CVignette
 const float PI = 3.1415926535;
