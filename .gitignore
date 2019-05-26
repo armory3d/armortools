@@ -4,3 +4,5 @@ Assets/blend/scene.blend1
 Assets/blend/khafile.js
 Assets/blend/build_scene
 Assets/blend/Sources
+*.pyc
+*.DS_Store
