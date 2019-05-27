@@ -44,7 +44,14 @@ class OrbitCamera extends iron.Trait {
 
 			if (mouse.down("middle") || (mouse.down("right") && kb.down("space"))) {
 				redraws = 2;
-				if (kb.down("control")) {
+				if (kb.down("shift")) {
+					var light = iron.Scene.active.lights[0];
+					var m = iron.math.Mat4.identity();
+					m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
+					light.transform.local.multmat(m);
+					light.transform.decompose();
+				}
+				else if (kb.down("control")) {
 					var f = mouse.movementX / 75;
 					camera.transform.move(camera.look(), f);
 					dist -= f;

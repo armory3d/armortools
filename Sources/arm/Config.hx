@@ -14,6 +14,7 @@ class Config {
 			C.keymap = {};
 			C.keymap.action_paint = "left";
 			C.keymap.action_rotate = "right";
+			C.keymap.action_rotate_light = "shift+middle";
 			C.keymap.action_pan = "middle";
 			C.keymap.select_material = "shift+num";
 			C.keymap.cycle_layers = "ctrl+tab";
