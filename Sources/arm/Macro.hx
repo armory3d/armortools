@@ -14,7 +14,7 @@ class Macro {
 			return Context.makeExpr(proc.stdout.readLine(), Context.currentPos());
 		}
 		catch (e:Dynamic) {
-			throw "- use 'git clone https://github.com/armory3d/armorpaint' to compile armorpaint";
+			throw "- use 'git clone --recursive https://github.com/armory3d/armorpaint' to compile armorpaint";
 		}
 	}
 }
