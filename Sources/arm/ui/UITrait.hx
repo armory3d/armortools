@@ -85,6 +85,8 @@ class UITrait extends iron.Trait {
 	public var toolbarw = 54;
 	public var headerh = 24;
 	public var menubarw = 215;
+	public var tabx = 0;
+	public var tabh = 0;
 
 	public var ui:Zui;
 	public var systemId = "";
@@ -1309,26 +1311,26 @@ class UITrait extends iron.Trait {
 			}
 		}
 		
-		var wx = App.C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
-		var wh = Std.int(kha.System.windowHeight() / 3);
+		tabx = App.C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
+		tabh = Std.int(kha.System.windowHeight() / 3);
 		gizmo.visible = false;
 		// grid.visible = false;
 		var work = worktab.position;
 
 		if (work == 0) { // Paint
-			if (ui.window(hwnd, wx, 0, windowW, wh)) {
+			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabLayers();
 				tabHistory();
 				tabPlugins();
 				tabPreferences();
 			}
-			if (ui.window(hwnd1, wx, wh, windowW, wh)) {
+			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
 				selectedObject = paintObject;
 				tabMaterials();
 				tabBrushes();
 				tabParticles();
 			}
-			if (ui.window(hwnd2, wx, wh * 2, windowW, wh)) {
+			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
 				tabTextures();
 				tabMeshes();
 				tabExport();
@@ -1338,27 +1340,27 @@ class UITrait extends iron.Trait {
 		else if (work == 1) { // Scene
 			gizmo.visible = true;
 			// grid.visible = true;
-			if (ui.window(hwnd, wx, 0, windowW, wh)) {
+			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabOutliner();
 			}
-			if (ui.window(hwnd1, wx, wh, windowW, wh)) {
+			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
 				tabProperties();
 			}
-			if (ui.window(hwnd2, wx, wh * 2, windowW, wh)) {
+			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
 			}
 		}
 		else if (work == 2) { // Material
-			if (ui.window(hwnd, wx, 0, windowW, wh)) {
+			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabHistory();
 				tabPlugins();
 				tabPreferences();
 				
 			}
-			if (ui.window(hwnd1, wx, wh, windowW, wh)) {
+			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
 				selectedObject = paintObject;
 				tabMaterials();
 			}
-			if (ui.window(hwnd2, wx, wh * 2, windowW, wh)) {
+			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
 				tabTextures();
 				tabMeshes();
 				tabExport();
@@ -1392,17 +1394,42 @@ class UITrait extends iron.Trait {
 		}
 	}
 
+	public function newLayer():LayerSlot {
+		var l = new LayerSlot();
+		layers.push(l);
+		setLayer(l);
+		iron.App.notifyOnRender(Layers.clearLastLayer);
+		layerPreviewDirty = true;
+		return l;
+	}
+
+	public function toFillLayer(l:LayerSlot) {
+		setLayer(l);
+		l.material_mask = UITrait.inst.selectedMaterial;
+		function makeFill(g:kha.graphics4.Graphics) {
+			g.end();
+			Layers.updateFillLayers(8);
+			MaterialParser.parsePaintMaterial();
+			UITrait.inst.layerPreviewDirty = true;
+			hwnd.redraws = 2;
+			g.begin();
+			iron.App.removeRender(makeFill);
+		}
+		iron.App.notifyOnRender(makeFill);
+	}
+
+	public function toPaintLayer(l:LayerSlot) {
+		setLayer(l);
+		l.material_mask = null;
+		MaterialParser.parsePaintMaterial();
+		UITrait.inst.layerPreviewDirty = true;
+		hwnd.redraws = 2;
+	}
+
 	function tabLayers() {
 		if (ui.tab(htab, "Layers")) {
 			ui.row([1/4,1/4,1/2]);
-			if (ui.button("New")) {
-				var l = new LayerSlot();
-				layers.push(l);
-				setLayer(l);
-				iron.App.notifyOnRender(Layers.clearLastLayer);
-				layerPreviewDirty = true;
-			}
-
+			if (ui.button("New")) newLayer();
 			if (ui.button("2D View")) show2DView();
 			else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
 			
@@ -1556,25 +1583,10 @@ class UITrait extends iron.Trait {
 						}
 
 						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-							setLayer(l);
-							l.material_mask = UITrait.inst.selectedMaterial;
-							function makeFill(g:kha.graphics4.Graphics) {
-								g.end();
-								Layers.updateFillLayers(8);
-								MaterialParser.parsePaintMaterial();
-								UITrait.inst.layerPreviewDirty = true;
-								hwnd.redraws = 2;
-								g.begin();
-								iron.App.removeRender(makeFill);
-							}
-							iron.App.notifyOnRender(makeFill);
+							toFillLayer(l);
 						}
 						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-							setLayer(l);
-							l.material_mask = null;
-							MaterialParser.parsePaintMaterial();
-							UITrait.inst.layerPreviewDirty = true;
-							hwnd.redraws = 2;
+							toPaintLayer(l);
 						}
 
 						if (l == layers[0]) {
@@ -1944,11 +1956,17 @@ class UITrait extends iron.Trait {
 					}
 
 					var imgw = ui.SCALE >= 2 ? 100 : 50;
+					var uix = ui._x;
+					var uiy = ui._y;
 					var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
 					if (state == State.Started) {
 						if (selectedMaterial != materials[i]) selectMaterial(i);
 						if (iron.system.Time.time() - selectTime < 0.25) showMaterialNodes();
 						selectTime = iron.system.Time.time();
+						var mouse = iron.system.Input.getMouse();
+						arm.App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
+						arm.App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
+						arm.App.dragMaterial = selectedMaterial;
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.show(function(ui:Zui) {

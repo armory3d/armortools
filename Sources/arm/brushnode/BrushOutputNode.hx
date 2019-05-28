@@ -37,7 +37,9 @@ class BrushOutputNode extends LogicNode {
 		// Paint bounds
 		if (UITrait.inst.paintVec.x < right && UITrait.inst.paintVec.x > left &&
 			UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0 &&
-			!UITrait.inst.ui.isHovered && !UITrait.inst.ui.isScrolling &&
+			!UITrait.inst.ui.isHovered &&
+			!UITrait.inst.ui.isScrolling &&
+			!arm.App.isDragging &&
 			@:privateAccess UITrait.inst.ui.comboSelectedHandle == null &&
 			@:privateAccess UIView2D.inst.ui.comboSelectedHandle == null) { // Header combos are in use
 			// Set color pick

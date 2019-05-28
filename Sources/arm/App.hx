@@ -21,6 +21,7 @@ class App extends iron.Trait {
 	static var appy = 0;
 	public static var uienabled = true;
 	public static var isDragging = false;
+	public static var dragMaterial:MaterialSlot = null;
 	public static var dragAsset:TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
@@ -276,21 +277,42 @@ class App extends iron.Trait {
 		var mouse = iron.system.Input.getMouse();
 		var kb = iron.system.Input.getKeyboard();
 
-		isDragging = dragAsset != null;
-		if (mouse.released() && isDragging) {
+		if ((dragAsset != null || dragMaterial != null) &&
+			(mouse.movementX != 0 || mouse.movementY != 0)) {
+			isDragging = true;
+		}
+		if (mouse.released()) {
 			var x = mouse.x + iron.App.x();
 			var y = mouse.y + iron.App.y();
-			if (UINodes.inst.show && x > UINodes.inst.wx && y > UINodes.inst.wy) {
-				var index = 0;
-				for (i in 0...UITrait.inst.assets.length) {
-					if (UITrait.inst.assets[i] == dragAsset) {
-						index = i;
-						break;
+			if (dragAsset != null) {
+				// Texture dragged onto node canvas
+				if (UINodes.inst.show && x > UINodes.inst.wx && y > UINodes.inst.wy) {
+					var index = 0;
+					for (i in 0...UITrait.inst.assets.length) {
+						if (UITrait.inst.assets[i] == dragAsset) {
+							index = i;
+							break;
+						}
 					}
+					// Create image texture
+					UINodes.inst.acceptDrag(index);
 				}
-				UINodes.inst.acceptDrag(index);
+				dragAsset = null;
 			}
-			dragAsset = null;
+			if (dragMaterial != null) {
+				// Material dragged onto viewport or layers tab
+				var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
+								 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
+				var inLayers = UITrait.inst.htab.position == 0 &&
+							   mouse.x > UITrait.inst.tabx && mouse.y < UITrait.inst.tabh;
+				if (inViewport || inLayers) {
+					// Create fill layer
+					var l = UITrait.inst.newLayer();
+					UITrait.inst.toFillLayer(l);
+				}
+				dragMaterial = null;
+			}
+			isDragging = false;
 		}
 
 		if (dropPath != "") {
@@ -310,12 +332,12 @@ class App extends iron.Trait {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		var mouse = iron.system.Input.getMouse();
-		if (arm.App.dragAsset != null) {
-			var img = UITrait.inst.getImage(arm.App.dragAsset);
+		if (isDragging) {
+			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
 			var ratio = size / img.width;
 			var h = img.height * ratio;
-			g.drawScaledImage(img, mouse.x + iron.App.x() + arm.App.dragOffX, mouse.y + iron.App.y() + arm.App.dragOffY, size, h);
+			g.drawScaledImage(img, mouse.x + iron.App.x() + dragOffX, mouse.y + iron.App.y() + dragOffY, size, h);
 		}
 
 		var usingMenu = false;
