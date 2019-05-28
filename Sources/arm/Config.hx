@@ -55,6 +55,7 @@ class Config {
 			C.keymap.toggle_node_editor = "tab";
 			C.keymap.import_assets = "ctrl+shift+i";
 			C.keymap.export_textures = "ctrl+shift+e";
+			C.keymap.node_search = "space";
 		}
 		
 		return C;

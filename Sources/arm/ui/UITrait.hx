@@ -1798,6 +1798,7 @@ class UITrait extends iron.Trait {
 						hwnd2.redraws = 2;
 					});
 				}
+				// var gridSnap = ui.check(Id.handle({selected: false}), "Node Grid Snap");
 			}
 
 			ui.separator();

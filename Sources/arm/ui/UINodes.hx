@@ -52,6 +52,9 @@ class UINodes extends iron.Trait {
 	var mstartedlast = false;
 	public var changed = false;
 	var recompileMat = false; // Mat preview
+	var nodeSearchSpawn:TNode = null;
+	var nodeSearchOffset = 0;
+	var nodeSearchLast = "";
 
 	public var grid:kha.Image = null;
 	public var hwnd = Id.handle();
@@ -227,6 +230,64 @@ class UINodes extends iron.Trait {
 			else if (keyboard.started("right")) for (n in nodes.nodesSelected) n.x += 1;
 			if (keyboard.started("up")) for (n in nodes.nodesSelected) n.y -= 1;
 			else if (keyboard.started("down")) for (n in nodes.nodesSelected) n.y += 1;
+		}
+
+		// Node search popup
+		if (keyboard.started("space")) {
+			var searchHandle = Id.handle();
+			var first = true;
+			UIMenu.show(function(ui:Zui) {
+				ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
+				ui.textInput(searchHandle, "");
+				ui.changed = false;
+				if (first) {
+					first = false;
+					ui.startTextEdit(searchHandle); // Focus search bar
+					ui.textSelectedCurrentText = searchHandle.text;
+					searchHandle.text = "";
+					nodeSearchLast = "";
+
+				}
+				var search = ui.textSelectedCurrentText.toLowerCase();
+				if (searchHandle.text != "") search = searchHandle.text;
+				if (search != nodeSearchLast) {
+					nodeSearchOffset = 0;
+					nodeSearchLast = search;
+				}
+				if (ui.isKeyDown) { // Move selection
+					if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
+					if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
+				}
+				var enter = keyboard.down("enter");
+				var count = 0;
+				var BUTTON_COL = ui.t.BUTTON_COL;
+				for (list in NodeCreator.list) {
+					for (n in list) {
+						if (n.name.toLowerCase().indexOf(search) >= 0) {
+							ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
+							if (ui.button(n.name, Left) || (enter && count == nodeSearchOffset)) {
+								nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
+								canvas.nodes.push(nodeSearchSpawn);
+								nodes.nodesSelected = [nodeSearchSpawn];
+								nodes.nodesDrag = true;
+								hwnd.redraws = 2;
+								if (enter) {
+									ui.changed = true;
+									count = 6; // Trigger break
+								}
+							}
+							if (++count > 6) break;
+						}
+					}
+					if (count > 6) break;
+				}
+				ui.t.BUTTON_COL = BUTTON_COL;
+			});
+		}
+		if (nodeSearchSpawn != null) {
+			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
+			ui.inputY = mouse.y + App.y();
+			nodeSearchSpawn = null;
 		}
 	}
 
