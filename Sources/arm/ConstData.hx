@@ -169,16 +169,33 @@ Texture2D<float4> gbufferD;
 SamplerState _gbufferD_sampler;
 Texture2D<float4> gbuffer0;
 SamplerState _gbuffer0_sampler;
+float2 octahedronWrap(float2 v) { return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); }
+float3x3 rotAxis(float3 axis, float a) {
+	float c = cos(a);
+	float3 as = axis * sin(a).xxx;
+	float3x3 p = float3x3(axis.xxx * axis, axis.yyy * axis, axis.zzz * axis);
+	float3x3 q = float3x3(c, -as.z, as.y, as.z, c, -as.x, -as.y, as.x, c);
+	return p * (1.0 - c) + q;
+}
 struct SPIRV_Cross_Output { float2 texCoord : TEXCOORD0; float4 gl_Position : SV_Position; };
 SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 tex : TEXCOORD2) {
 	SPIRV_Cross_Output stage_output;
 	stage_output.texCoord = tex;
-	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouse, 0);
-	float4 mpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
-	mpos = mul(mpos, invVP);
-	mpos.xyz /= mpos.w;
-	mpos.xyz += pos.xyz;
-	stage_output.gl_Position = mul(float4(mpos.xyz, 1.0f), VP);
+	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouse, 0).r;
+	float4 wpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	wpos = mul(wpos, invVP);
+	wpos.xyz /= wpos.w;
+	float2 g0 = gbuffer0.SampleLevel(_gbuffer0_sampler, mouse, 0.0).rg;
+	float3 n;
+	n.z = 1.0 - abs(g0.x) - abs(g0.y);
+	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
+	n = normalize(n);
+	float ax = acos(dot(float3(1,0,0), float3(n.x,0,0)));
+	float az = acos(dot(float3(0,0,1), float3(0,0,n.z)));
+	float sy = -sign(n.y);
+	wpos.xyz += mul(mul(pos.xyz / float3(8,8,8), rotAxis(float3(0,0,1), ax + 3.14/2)),
+					rotAxis(float3(1,0,0), -az * sy + 3.14/2));
+	stage_output.gl_Position = mul(float4(wpos.xyz, 1.0), VP);
 	stage_output.gl_Position.z = (stage_output.gl_Position.z + stage_output.gl_Position.w) * 0.5;
 	return stage_output;
 }

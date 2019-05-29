@@ -172,9 +172,9 @@ class Layers {
 		cursorVP = pipeCursor.getConstantLocation("VP");
 		cursorInvVP = pipeCursor.getConstantLocation("invVP");
 		cursorMouse = pipeCursor.getConstantLocation("mouse");
-		cursorTex = pipeCursor.getTextureUnit("tex");
 		cursorGbufferD = pipeCursor.getTextureUnit("gbufferD");
 		cursorGbuffer0 = pipeCursor.getTextureUnit("gbuffer0");
+		cursorTex = pipeCursor.getTextureUnit("tex");
 	}
 
 	public static function makeTempImg() {

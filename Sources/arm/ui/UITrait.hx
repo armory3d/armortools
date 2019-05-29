@@ -1834,7 +1834,7 @@ class UITrait extends iron.Trait {
 					ui.g.begin(false);
 					armory.data.Config.save();
 				}
-				// brushWarp = ui.check(Id.handle({selected: brushWarp}), "Brush Warp");
+				brushWarp = ui.check(Id.handle({selected: brushWarp}), "Brush Warp");
 			}
 
 			ui.separator();
