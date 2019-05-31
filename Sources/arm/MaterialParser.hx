@@ -36,6 +36,10 @@ class MaterialParser {
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 			UITrait.inst.ddirty = 2;
+
+			var sc:ShaderContext = null;
+			for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
+			MaterialBuilder.make_voxel(sc);
 		// });
 	}
 

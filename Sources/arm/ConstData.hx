@@ -181,11 +181,12 @@ struct SPIRV_Cross_Output { float2 texCoord : TEXCOORD0; float4 gl_Position : SV
 SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 tex : TEXCOORD2) {
 	SPIRV_Cross_Output stage_output;
 	stage_output.texCoord = tex;
-	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouse, 0).r;
+	float2 mouseinv = float2(mouse.x, 1.0 - mouse.y);
+	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouseinv, 0).r;
 	float4 wpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = mul(wpos, invVP);
 	wpos.xyz /= wpos.w;
-	float2 g0 = gbuffer0.SampleLevel(_gbuffer0_sampler, mouse, 0.0).rg;
+	float2 g0 = gbuffer0.SampleLevel(_gbuffer0_sampler, mouseinv, 0.0).rg;
 	float3 n;
 	n.z = 1.0 - abs(g0.x) - abs(g0.y);
 	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);

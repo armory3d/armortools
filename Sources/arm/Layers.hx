@@ -55,6 +55,7 @@ class Layers {
 		g.begin();
 		iron.App.removeRender(initLayers);
 
+		UITrait.inst.layerPreviewDirty = true;
 		UITrait.inst.ddirty = 3;
 	}
 

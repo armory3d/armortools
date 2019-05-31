@@ -850,12 +850,18 @@ class MaterialBuilder {
 		// Height
 		// TODO: can cause TAA issues
 		if (heightUsed) {
-			#if (!kha_direct3d11) // TODO: unable to bind texpaint_pack to both vs and fs in d3d11
-			vert.write('float height = textureLod(texpaint_pack, tex, 0.0).a;');
-			var displaceStrength = UITrait.inst.displaceStrength * 0.1;
+			var displaceStrength = UITrait.inst.displaceStrength * 0.02;
 			vert.n = true;
-			vert.write('wposition += wnormal * height * $displaceStrength;');
-			#end
+			vert.write('float height = 0.0;');
+			var numLayers = 0;
+			for (l in UITrait.inst.layers) {
+				if (!l.visible) continue;
+				if (numLayers > 4) break;
+				numLayers++;
+				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
+				vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
+			}
+			vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
 		}
 		//
 
@@ -1139,5 +1145,17 @@ class MaterialBuilder {
 		con_mesh.data.fragment_shader = frag.get();
 
 		return con_mesh;
+	}
+
+	public static function make_voxel(data:iron.data.ShaderData.ShaderContext) {
+		// uniform float4x4 W;
+		// struct SPIRV_Cross_Input { float4 pos : TEXCOORD0; };
+		// struct SPIRV_Cross_Output { float4 svpos : SV_POSITION; };
+		// SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {
+		//   SPIRV_Cross_Output stage_output;
+		//   stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / float3(1, 1, 1);
+		//   stage_output.svpos.w = 1.0;
+		//   return stage_output;
+		// }
 	}
 }
