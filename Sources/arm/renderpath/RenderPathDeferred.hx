@@ -186,14 +186,14 @@ class RenderPathDeferred {
 		lastY = mouse.y;
 
 		if (!UITrait.inst.dirty()) {
-			if (mx != lastX || my != lastY || UITrait.inst.ddirty == 0 || mouse.locked) {
-				UITrait.inst.ddirty--;
+			if (mx != lastX || my != lastY || UITrait.inst.ddirty > -1 || mouse.locked) {
 				path.setTarget("");
 				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
 				ssaa4 ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+				if (UITrait.inst.ddirty == 0) UITrait.inst.ddirty--;
 			}
 			return;
 		}

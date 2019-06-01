@@ -239,6 +239,7 @@ class UITrait extends iron.Trait {
 	public var statusHandle = new Handle({layout:Horizontal});
 	public var menuHandle = new Handle({layout:Horizontal});
 	public var workspaceHandle = new Handle({layout:Horizontal});
+	var lastCombo:Handle = null;
 
 	public var cameraControls = 1;
 	public var htab = Id.handle({position: 0});
@@ -789,6 +790,9 @@ class UITrait extends iron.Trait {
 		if (UITrait.inst.worktab.position == 1) {
 			Gizmo.update();
 		}
+
+		if (lastCombo != null) ddirty = 0;
+		lastCombo = ui.comboSelectedHandle;
 	}
 
 	function render(g:kha.graphics2.Graphics) {

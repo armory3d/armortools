@@ -115,7 +115,6 @@ class App extends iron.Trait {
 					color_wheel = image;
 					zui.Nodes.getEnumTexts = getEnumTexts;
 					zui.Nodes.mapEnum = mapEnum;
-					Zui.alwaysRedrawWindow = false;
 					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
@@ -273,14 +272,19 @@ class App extends iron.Trait {
 			UINodes.inst.grid = null;
 		}
 
-		UITrait.inst.hwnd.redraws = 2;
-		UITrait.inst.hwnd1.redraws = 2;
-		UITrait.inst.hwnd2.redraws = 2;
-		UITrait.inst.headerHandle.redraws = 2;
-		UITrait.inst.toolbarHandle.redraws = 2;
-		UITrait.inst.statusHandle.redraws = 2;
-		UITrait.inst.menuHandle.redraws = 2;
-		UITrait.inst.workspaceHandle.redraws = 2;
+		redrawUI();
+	}
+
+	public static function redrawUI(draws = 2) {
+		UITrait.inst.hwnd.redraws = draws;
+		UITrait.inst.hwnd1.redraws = draws;
+		UITrait.inst.hwnd2.redraws = draws;
+		UITrait.inst.headerHandle.redraws = draws;
+		UITrait.inst.toolbarHandle.redraws = draws;
+		UITrait.inst.statusHandle.redraws = draws;
+		UITrait.inst.menuHandle.redraws = draws;
+		UITrait.inst.workspaceHandle.redraws = draws;
+		UINodes.inst.hwnd.redraws = 2; // Full redraw
 	}
 
 	static function update() {
@@ -336,6 +340,8 @@ class App extends iron.Trait {
 		}
 
 		if (showFiles || showBox) UIBox.update();
+
+		Zui.alwaysRedrawWindow = showMenu;
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
