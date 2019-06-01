@@ -13,18 +13,12 @@ class RenderPathPaint {
 
 		var path = RenderPathDeferred.path;
 		var tid = UITrait.inst.selectedLayer.id;
-
-		if (UITrait.inst.depthDirty()) {
-			path.setTarget("texpaint" + tid);
-			path.clearTarget(null, 1.0);
-			path.drawMeshes("depth");
-		}
 		
 		if (UITrait.inst.paintDirty()) {
 			if (UITrait.inst.selectedTool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
-				path.bindTarget("_paintdb", "paintdb");
+				path.bindTarget("_main", "gbufferD");
 				
 				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
@@ -104,14 +98,6 @@ class RenderPathPaint {
 					path.generateMipmaps("voxels");
 				}
 
-				//
-				#if (!kha_opengl)
-				path.setDepthFrom("bufa", "texpaint" + tid); // Unbind depth so we can read it
-				path.setDepthFrom("texpaint" + tid, "texpaint_nor" + tid);
-				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("bufa"));
-				#end
-				//
-
 				var blendA = "texpaint_blend0";
 				var blendB = "texpaint_blend1";
 				path.setTarget(blendB);
@@ -120,7 +106,7 @@ class RenderPathPaint {
 				var isMask = UITrait.inst.selectedLayerIsMask;
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
-				path.bindTarget("_paintdb", "paintdb");
+				path.bindTarget("_main", "gbufferD");
 				path.bindTarget(blendB, "paintmask");
 				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");
@@ -138,15 +124,6 @@ class RenderPathPaint {
 				}
 
 				path.drawMeshes("paint");
-
-				//
-				#if (!kha_opengl)
-				path.setDepthFrom("texpaint" + tid, "bufa"); // Re-bind depth
-				path.setDepthFrom("bufa", "texpaint_nor" + tid);
-				var tid0 = UITrait.inst.layers[0].id;
-				path.depthToRenderTarget.set("paintdb", path.renderTargets.get("texpaint" + tid0));
-				#end
-				//
 			}
 		}
 	}

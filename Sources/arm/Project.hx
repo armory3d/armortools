@@ -322,18 +322,8 @@ class Project {
 			UITrait.inst.resHandle.position = Config.getTextureResPos(project.layer_datas[0].res);
 
 			if (UITrait.inst.layers[0].texpaint.width != Config.getTextureRes()) {
-				var i = 0;
-				for (l in UITrait.inst.layers) {
-					l.resize(i == 0);
-					if (i > 0) l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
-					i++;
-				}
-				if (UITrait.inst.undoLayers != null) {
-					for (l in UITrait.inst.undoLayers) {
-						l.resize(false);
-						l.texpaint.setDepthStencilFrom(UITrait.inst.layers[0].texpaint);
-					}
-				}
+				for (l in UITrait.inst.layers) l.resize();
+				if (UITrait.inst.undoLayers != null) for (l in UITrait.inst.undoLayers) l.resize();
 				var rts = iron.RenderPath.active.renderTargets;
 				rts.get("texpaint_blend0").image.unload();
 				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();

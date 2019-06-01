@@ -150,7 +150,7 @@ class MaterialBuilder {
 		frag.write('bsp.x *= aspectRatio;');
 		frag.write('bsp = bsp * 0.5 + 0.5;');
 
-		frag.add_uniform('sampler2D paintdb');
+		frag.add_uniform('sampler2D gbufferD');
 
 		frag.add_out('vec4 fragColor[4]');
 
@@ -166,9 +166,9 @@ class MaterialBuilder {
 			decal) {
 			
 			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
 			#else
-			frag.write('if (sp.z > textureLod(paintdb, vec2(sp.x, sp.y), 0.0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, sp.y), 0.0).r) { discard; }');
 			#end
 
 			if (decal || UITrait.inst.selectedTool == ToolParticle) {
@@ -177,9 +177,9 @@ class MaterialBuilder {
 			else {
 				if (UITrait.inst.brush3d) {
 					#if (kha_opengl || kha_webgl)
-					frag.write('float depth = textureLod(paintdb, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
+					frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 					#else
-					frag.write('float depth = textureLod(paintdb, inp.xy, 0.0).r;');
+					frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 					#end
 					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
 					#if (kha_opengl || kha_webgl)
@@ -197,9 +197,9 @@ class MaterialBuilder {
 
 					// Continuos paint
 					#if (kha_opengl || kha_webgl)
-					frag.write('float depthlast = textureLod(paintdb, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
+					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 					#else
-					frag.write('float depthlast = textureLod(paintdb, inplast.xy, 0.0).r;');
+					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 					#end
 					#if (kha_opengl || kha_webgl)
 					frag.write('vec2 inplast2 = inplast;');
@@ -863,8 +863,8 @@ class MaterialBuilder {
 		// vert.add_out('vec4 wvpposition');
 		// vert.write('wvpposition = gl_Position;');
 		// frag.write('vec2 texCoord = wvpposition.xy / wvpposition.w;');
-		// frag.add_uniform('sampler2D paintdb');
-		// frag.write('fragColor *= 1.0 - clamp(distance(textureLod(paintdb, texCoord, 0).r, wvpposition.z), 0.0, 1.0);');
+		// frag.add_uniform('sampler2D gbufferD');
+		// frag.write('fragColor *= 1.0 - clamp(distance(textureLod(gbufferD, texCoord, 0).r, wvpposition.z), 0.0, 1.0);');
 
 		// Cycles.finalize(con_part);
 		con_part.data.shader_from_source = true;

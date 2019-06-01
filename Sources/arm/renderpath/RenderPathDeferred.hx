@@ -36,10 +36,6 @@ class RenderPathDeferred {
 		}
 
 		{
-			path.createDepthBuffer("paintdb", "DEPTH16");
-		}
-
-		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_colorid";
 			t.width = 1;
@@ -190,7 +186,7 @@ class RenderPathDeferred {
 		lastY = mouse.y;
 
 		if (!UITrait.inst.dirty()) {
-			if (mx != lastX || my != lastY || UITrait.inst.ddirty == 0) {
+			if (mx != lastX || my != lastY || UITrait.inst.ddirty == 0 || mouse.locked) {
 				UITrait.inst.ddirty--;
 				path.setTarget("");
 				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
@@ -422,7 +418,7 @@ class RenderPathDeferred {
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
-			if (ssgi) {
+			if (ssgi && UITrait.inst.ddirty > 0) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -448,7 +444,7 @@ class RenderPathDeferred {
 		#if rp_voxelao
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			var voxelize = path.voxelize();
+			var voxelize = path.voxelize() && UITrait.inst.ddirty > 0;
 
 			#if arm_voxelgi_temporal
 			voxelize = ++RenderPathCreator.voxelFrame % RenderPathCreator.voxelFreq == 0;

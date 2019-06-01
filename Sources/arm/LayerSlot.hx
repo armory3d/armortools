@@ -79,7 +79,6 @@ class LayerSlot {
 			t.width = Config.getTextureRes();
 			t.height = Config.getTextureRes();
 			t.format = 'RGBA32';
-			t.depth_buffer = "paintdb";
 			texpaint = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
@@ -103,11 +102,6 @@ class LayerSlot {
 	}
 
 	public function unload() {
-		// Set null depth so paintdb stays alive
-		if (UITrait.inst.layers.length > 0 && UITrait.inst.layers[0] != this) {
-			texpaint.setDepthStencilFrom(texpaint_nor);
-		}
-
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();
@@ -122,8 +116,6 @@ class LayerSlot {
 	}
 
 	public function swap(other:LayerSlot) {
-		RenderPath.active.renderTargets.get("texpaint" + ext).image.setDepthStencilFrom(other.texpaint);
-
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
 		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = other.texpaint_pack;
@@ -274,7 +266,7 @@ class LayerSlot {
 		return l;
 	}
 
-	public function resize(hasDepth:Bool) {
+	public function resize() {
 		var res = Config.getTextureRes();
 		var rts = RenderPath.active.renderTargets;
 
@@ -282,8 +274,7 @@ class LayerSlot {
 		var texpaint_nor = this.texpaint_nor;
 		var texpaint_pack = this.texpaint_pack;
 
-		var depthFormat = hasDepth ? DepthStencilFormat.Depth16 : DepthStencilFormat.NoDepthAndStencil;
-		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, depthFormat);
+		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
 		this.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
 		this.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
 
