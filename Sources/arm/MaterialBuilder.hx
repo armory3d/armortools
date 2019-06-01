@@ -175,33 +175,79 @@ class MaterialBuilder {
 				frag.write('float dist = 0.0;');
 			}
 			else {
-				frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-				frag.write('binp.x *= aspectRatio;');
-				frag.write('binp = binp * 0.5 + 0.5;');
+				if (UITrait.inst.brush3d) {
+					#if (kha_opengl || kha_webgl)
+					frag.write('float depth = textureLod(paintdb, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
+					#else
+					frag.write('float depth = textureLod(paintdb, inp.xy, 0.0).r;');
+					#end
+					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
+					#if (kha_opengl || kha_webgl)
+					frag.write('vec2 inp2 = inp;');
+					#else
+					frag.write('vec2 inp2 = vec2(inp.x, 1.0 - inp.y);');
+					#end
+					frag.write('float4 winp = float4(inp2.xy * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
+					frag.write('winp = mul(winp, invVP);');
+					frag.write('winp.xyz /= winp.w;');
+					frag.wposition = true;
 
-				// Continuos paint
-				frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
-				frag.write('binplast.x *= aspectRatio;');
-				frag.write('binplast = binplast * 0.5 + 0.5;');
-				
-				frag.write('vec2 pa = bsp.xy - binp.xy, ba = binplast.xy - binp.xy;');
-				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-				frag.write('float dist = length(pa - ba * h);');
-				
-				if (!UITrait.inst.mirrorX) {
+					// frag.write('float dist = distance(wposition, winp);');
+					// frag.write('if (dist > brushRadius) { discard; }');
+
+					// Continuos paint
+					#if (kha_opengl || kha_webgl)
+					frag.write('float depthlast = textureLod(paintdb, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
+					#else
+					frag.write('float depthlast = textureLod(paintdb, inplast.xy, 0.0).r;');
+					#end
+					#if (kha_opengl || kha_webgl)
+					frag.write('vec2 inplast2 = inplast;');
+					#else
+					frag.write('vec2 inplast2 = vec2(inplast.x, 1.0 - inplast.y);');
+					#end
+					frag.write('float4 winplast = float4(inplast2.xy * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
+					frag.write('winplast = mul(winplast, invVP);');
+					frag.write('winplast.xyz /= winplast.w;');
+
+					frag.write('vec3 pa = wposition - winp;');
+					frag.write('vec3 ba = winplast - winp;');
+					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+					frag.write('float dist = length(pa - ba * h);');
 					frag.write('if (dist > brushRadius) { discard; }');
+
+					// if (UITrait.inst.mirrorX) {}
 				}
 				else {
-					frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
-					frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
-					frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
-					frag.write('float dist2 = length(pa2 - ba2 * h2);');
-					frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; }');
-				}
-				//
+					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
+					frag.write('binp.x *= aspectRatio;');
+					frag.write('binp = binp * 0.5 + 0.5;');
 
-				// frag.write('float dist = distance(bsp.xy, binp.xy);');
-				// frag.write('if (dist > brushRadius) { discard; }');
+					// Continuos paint
+					frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
+					frag.write('binplast.x *= aspectRatio;');
+					frag.write('binplast = binplast * 0.5 + 0.5;');
+					
+					frag.write('vec2 pa = bsp.xy - binp.xy;');
+					frag.write('vec2 ba = binplast.xy - binp.xy;');
+					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+					frag.write('float dist = length(pa - ba * h);');
+					
+					if (!UITrait.inst.mirrorX) {
+						frag.write('if (dist > brushRadius) { discard; }');
+					}
+					else {
+						frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
+						frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
+						frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
+						frag.write('float dist2 = length(pa2 - ba2 * h2);');
+						frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; }');
+					}
+					//
+
+					// frag.write('float dist = distance(bsp.xy, binp.xy);');
+					// frag.write('if (dist > brushRadius) { discard; }');
+				}
 			}
 		}
 		else { // Fill, Bake

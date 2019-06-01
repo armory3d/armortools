@@ -187,7 +187,7 @@ class UITrait extends iron.Trait {
 	public var brushBias = 1.0;
 	public var brushPaint = 0;
 	public var selectedTool = 0;
-	public var brushWarp = false;
+	public var brush3d = true;
 	public var bakeType = 0;
 	public var bakeStrength = 1.0;
 	public var bakeRadius = 1.0;
@@ -816,7 +816,7 @@ class UITrait extends iron.Trait {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (arm.App.uienabled && worktab.position == 0 && !brushWarp) {
+		if (arm.App.uienabled && worktab.position == 0 && !brush3d) {
 			var cursorImg = Res.get('cursor.png');
 			var mouse = iron.system.Input.getMouse();
 			var mx = mouse.x + iron.App.x();
@@ -1834,7 +1834,9 @@ class UITrait extends iron.Trait {
 					ui.g.begin(false);
 					armory.data.Config.save();
 				}
-				brushWarp = ui.check(Id.handle({selected: brushWarp}), "Brush Warp");
+				var brush3dHandle = Id.handle({selected: brush3d});
+				brush3d = ui.check(brush3dHandle, "3D Brush Cursor");
+				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 			}
 
 			ui.separator();

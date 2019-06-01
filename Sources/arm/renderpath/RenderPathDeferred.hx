@@ -186,10 +186,7 @@ class RenderPathDeferred {
 			ssaa4 ?
 				path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 				path.drawShader("shader_datas/copy_pass/copy_pass");
-
-			if (UITrait.inst.brushWarp) {
-				RenderPathPaint.commandsCursor();
-			}
+			if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
 			return;
 		}
 
@@ -751,6 +748,8 @@ class RenderPathDeferred {
 			}
 		}
 		#end
+
+		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
 
 		taaFrame++;
 		UITrait.inst.ddirty--;

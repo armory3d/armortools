@@ -171,6 +171,7 @@ class RenderPathPaint {
 		var mx = iron.system.Input.getMouse().x / iron.App.w();
 		var my = 1.0 - (iron.system.Input.getMouse().y / iron.App.h());
 		g.setFloat2(Layers.cursorMouse, mx, my);
+		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
 		g.setMatrix(Layers.cursorVP, iron.Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(iron.Scene.active.camera.VP);

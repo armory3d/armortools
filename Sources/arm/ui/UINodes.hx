@@ -205,6 +205,9 @@ class UINodes extends iron.Trait {
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
+		if (UIView2D.inst.show) {
+			wy += Std.int(iron.App.h() / 2);
+		}
 		var mx = mouse.x + App.x();
 		var my = mouse.y + App.y();
 		if (mx < wx || my < wy) return;

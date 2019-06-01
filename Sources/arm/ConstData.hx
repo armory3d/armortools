@@ -165,6 +165,7 @@ void main() {
 uniform float4x4 VP;
 uniform float4x4 invVP;
 uniform float2 mouse;
+uniform float radius;
 Texture2D<float4> gbufferD;
 SamplerState _gbufferD_sampler;
 Texture2D<float4> gbuffer0;
@@ -194,7 +195,7 @@ SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 t
 	float ax = acos(dot(float3(1,0,0), float3(n.x,0,0)));
 	float az = acos(dot(float3(0,0,1), float3(0,0,n.z)));
 	float sy = -sign(n.y);
-	wpos.xyz += mul(mul(pos.xyz / float3(8,8,8), rotAxis(float3(0,0,1), ax + 3.14/2)),
+	wpos.xyz += mul(mul(pos.xyz * radius.xxx, rotAxis(float3(0,0,1), ax + 3.14/2)),
 					rotAxis(float3(1,0,0), -az * sy + 3.14/2));
 	stage_output.gl_Position = mul(float4(wpos.xyz, 1.0), VP);
 	stage_output.gl_Position.z = (stage_output.gl_Position.z + stage_output.gl_Position.w) * 0.5;
@@ -205,7 +206,7 @@ SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 t
 Texture2D<float4> tex;
 SamplerState _tex_sampler;
 float4 main(float2 texCoord : TEXCOORD0) : SV_Target0 {
-	return tex.SampleLevel(_tex_sampler, texCoord, 0);
+	return float4(1.0, 1.0, 1.0, tex.SampleLevel(_tex_sampler, texCoord, 0).a);
 }
 ";
 
@@ -215,6 +216,7 @@ float4 main(float2 texCoord : TEXCOORD0) : SV_Target0 {
 uniform mat4 VP;
 uniform mat4 invVP;
 uniform vec2 mouse;
+uniform float radius;
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0;
 in vec4 pos;
@@ -246,7 +248,7 @@ void main() {
 	wpos.xyz +=
 		rotAxis(vec3(1,0,0), -az * sy + 3.14/2) *
 		rotAxis(vec3(0,0,1), ax + 3.14/2) *
-		(pos.xyz / 8);
+		(pos.xyz * radius);
 	gl_Position = VP * vec4(wpos.xyz, 1.0);
 }
 ";
@@ -255,8 +257,7 @@ uniform sampler2D tex;
 in vec2 texCoord;
 out vec4 FragColor;
 void main() {
-	FragColor = textureLod(tex, texCoord, 0.0);
-	FragColor.rgb = vec3(1.0);
+	FragColor = vec4(1.0, 1.0, 1.0, textureLod(tex, texCoord, 0.0).a);
 }
 ";
 
