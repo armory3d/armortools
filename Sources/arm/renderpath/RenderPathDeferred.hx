@@ -173,20 +173,32 @@ class RenderPathDeferred {
 		//
 	}
 
+	static var lastX = -1.0;
+	static var lastY = -1.0;
+
 	@:access(iron.RenderPath)
 	public static function commands() {
 
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
+		
+		var mouse = iron.system.Input.getMouse();
+		var mx = lastX;
+		var my = lastY;
+		lastX = mouse.x;
+		lastY = mouse.y;
 
 		if (!UITrait.inst.dirty()) {
-			path.setTarget("");
-			path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
-			ssaa4 ?
-				path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-			if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+			if (mx != lastX || my != lastY || UITrait.inst.ddirty == 0) {
+				UITrait.inst.ddirty--;
+				path.setTarget("");
+				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
+				ssaa4 ?
+					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
+					path.drawShader("shader_datas/copy_pass/copy_pass");
+				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+			}
 			return;
 		}
 

@@ -165,6 +165,7 @@ void main() {
 uniform float4x4 VP;
 uniform float4x4 invVP;
 uniform float2 mouse;
+uniform float2 step;
 uniform float radius;
 Texture2D<float4> gbufferD;
 SamplerState _gbufferD_sampler;
@@ -178,6 +179,13 @@ float3x3 rotAxis(float3 axis, float a) {
 	float3x3 q = float3x3(c, -as.z, as.y, as.z, c, -as.x, -as.y, as.x, c);
 	return p * (1.0 - c) + q;
 }
+float3 getNormal(float2 uv) {
+	float2 g0 = gbuffer0.SampleLevel(_gbuffer0_sampler, uv, 0.0).rg;
+	float3 n;
+	n.z = 1.0 - abs(g0.x) - abs(g0.y);
+	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
+	return n;
+}
 struct SPIRV_Cross_Output { float2 texCoord : TEXCOORD0; float4 gl_Position : SV_Position; };
 SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 tex : TEXCOORD2) {
 	SPIRV_Cross_Output stage_output;
@@ -187,11 +195,13 @@ SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 t
 	float4 wpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = mul(wpos, invVP);
 	wpos.xyz /= wpos.w;
-	float2 g0 = gbuffer0.SampleLevel(_gbuffer0_sampler, mouseinv, 0.0).rg;
-	float3 n;
-	n.z = 1.0 - abs(g0.x) - abs(g0.y);
-	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
-	n = normalize(n);
+	float3 n = normalize(
+		getNormal(mouseinv + float2(step.x, step.y)) +
+		getNormal(mouseinv + float2(-step.x, step.y)) +
+		getNormal(mouseinv + float2(-step.x, -step.y)) +
+		getNormal(mouseinv + float2(step.x, -step.y)) +
+		getNormal(mouseinv)
+	);
 	float ax = acos(dot(float3(1,0,0), float3(n.x,0,0)));
 	float az = acos(dot(float3(0,0,1), float3(0,0,n.z)));
 	float sy = -sign(n.y);
@@ -216,6 +226,7 @@ float4 main(float2 texCoord : TEXCOORD0) : SV_Target0 {
 uniform mat4 VP;
 uniform mat4 invVP;
 uniform vec2 mouse;
+uniform vec2 step;
 uniform float radius;
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0;
@@ -231,17 +242,26 @@ mat3 rotAxis(vec3 axis, float a) {
 	mat3 q = mat3(c, -as.z, as.y, as.z, c, -as.x, -as.y, as.x, c);
 	return p * (1.0 - c) + q;
 }
+vec3 getNormal(vec2 uv) {
+	vec2 g0 = textureLod(gbuffer0, mouse, 0.0).rg;
+	vec3 n;
+	n.z = 1.0 - abs(g0.x) - abs(g0.y);
+	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
+	return n;
+}
 void main() {
 	texCoord = tex;
 	float depth = textureLod(gbufferD, mouse, 0.0).r;
 	vec4 wpos = vec4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = invVP * wpos;
 	wpos.xyz /= wpos.w;
-	vec2 g0 = textureLod(gbuffer0, mouse, 0.0).rg;
-	vec3 n;
-	n.z = 1.0 - abs(g0.x) - abs(g0.y);
-	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
-	n = normalize(n);
+	vec3 n = normalize(
+		getNormal(mouseinv + vec2(step.x, step.y)) +
+		getNormal(mouseinv + vec2(-step.x, step.y)) +
+		getNormal(mouseinv + vec2(-step.x, -step.y)) +
+		getNormal(mouseinv + vec2(step.x, -step.y)) +
+		getNormal(mouseinv)
+	);
 	float ax = acos(dot(vec3(1,0,0), vec3(n.x,0,0)));
 	float az = acos(dot(vec3(0,0,1), vec3(0,0,n.z)));
 	float sy = -sign(n.y);

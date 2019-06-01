@@ -166,11 +166,17 @@ class RenderPathPaint {
 		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 		var img = decal ? UITrait.inst.decalImage : Res.get("cursor.png");
 		g.setTexture(Layers.cursorTex, img);
-		g.setTextureDepth(Layers.cursorGbufferD, path.renderTargets.get("gbuffer0").image);
-		g.setTexture(Layers.cursorGbuffer0, path.renderTargets.get("gbuffer0").image);
+		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
+		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
+		g.setTexture(Layers.cursorGbuffer0, gbuffer0);
 		var mx = iron.system.Input.getMouse().x / iron.App.w();
 		var my = 1.0 - (iron.system.Input.getMouse().y / iron.App.h());
+		if (UITrait.inst.brushLocked) {
+			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		}
 		g.setFloat2(Layers.cursorMouse, mx, my);
+		g.setFloat2(Layers.cursorStep, 2 / gbuffer0.width, 2 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
 		g.setMatrix(Layers.cursorVP, iron.Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();

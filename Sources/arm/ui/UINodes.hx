@@ -284,6 +284,10 @@ class UINodes extends iron.Trait {
 					}
 					if (count > 6) break;
 				}
+				if (enter && count == 0) { // Hide popup on enter when node is not found
+					ui.changed = true;
+					searchHandle.text = "";
+				}
 				ui.t.BUTTON_COL = BUTTON_COL;
 			});
 		}

@@ -33,6 +33,7 @@ class Uniforms {
 			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 			var pen = iron.system.Input.getPen();
 			if (UITrait.penPressureHardness && pen.down()) val *= pen.pressure;
+			if (UITrait.inst.brush3d) val *= val;
 			return val;
 		}
 		else if (link == '_brushScale') {

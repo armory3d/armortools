@@ -217,9 +217,9 @@ class UITrait extends iron.Trait {
 
 	var altStartedX = -1.0;
 	var altStartedY = -1.0;
-	var lockStartedX = -1.0;
-	var lockStartedY = -1.0;
-	var brushLocked = false;
+	public var lockStartedX = -1.0;
+	public var lockStartedY = -1.0;
+	public var brushLocked = false;
 	var brushCanLock = false;
 	var brushCanUnlock = false;
 	public var cameraType = 0;

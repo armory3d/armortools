@@ -115,6 +115,7 @@ class App extends iron.Trait {
 					color_wheel = image;
 					zui.Nodes.getEnumTexts = getEnumTexts;
 					zui.Nodes.mapEnum = mapEnum;
+					Zui.alwaysRedrawWindow = false;
 					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 					
 					iron.App.notifyOnInit(function() {
@@ -271,6 +272,15 @@ class App extends iron.Trait {
 			UINodes.inst.grid.unload();
 			UINodes.inst.grid = null;
 		}
+
+		UITrait.inst.hwnd.redraws = 2;
+		UITrait.inst.hwnd1.redraws = 2;
+		UITrait.inst.hwnd2.redraws = 2;
+		UITrait.inst.headerHandle.redraws = 2;
+		UITrait.inst.toolbarHandle.redraws = 2;
+		UITrait.inst.statusHandle.redraws = 2;
+		UITrait.inst.menuHandle.redraws = 2;
+		UITrait.inst.workspaceHandle.redraws = 2;
 	}
 
 	static function update() {
