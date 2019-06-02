@@ -74,6 +74,7 @@ class App extends iron.Trait {
 		zui.Ext.dataPath = iron.data.Data.dataPath;
 
 		kha.System.notifyOnDropFiles(function(filePath:String) {
+			if (!checkAscii(filePath)) return;
 			dropPath = filePath;
 			dropPath = StringTools.replace(dropPath, "%20", " "); // Linux can pass %20 on drop
 			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
@@ -275,16 +276,17 @@ class App extends iron.Trait {
 		redrawUI();
 	}
 
-	public static function redrawUI(draws = 2) {
-		UITrait.inst.hwnd.redraws = draws;
-		UITrait.inst.hwnd1.redraws = draws;
-		UITrait.inst.hwnd2.redraws = draws;
-		UITrait.inst.headerHandle.redraws = draws;
-		UITrait.inst.toolbarHandle.redraws = draws;
-		UITrait.inst.statusHandle.redraws = draws;
-		UITrait.inst.menuHandle.redraws = draws;
-		UITrait.inst.workspaceHandle.redraws = draws;
-		UINodes.inst.hwnd.redraws = 2; // Full redraw
+	public static function redrawUI() {
+		UITrait.inst.hwnd.redraws = 2;
+		UITrait.inst.hwnd1.redraws = 2;
+		UITrait.inst.hwnd2.redraws = 2;
+		UITrait.inst.headerHandle.redraws = 2;
+		UITrait.inst.toolbarHandle.redraws = 2;
+		UITrait.inst.statusHandle.redraws = 2;
+		UITrait.inst.menuHandle.redraws = 2;
+		UITrait.inst.workspaceHandle.redraws = 2;
+		UINodes.inst.hwnd.redraws = 2;
+		if (UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0; // Tag cached viewport texture redraw
 	}
 
 	static function update() {
@@ -322,6 +324,7 @@ class App extends iron.Trait {
 				if (inViewport || inLayers) {
 					// Create fill layer
 					var l = UITrait.inst.newLayer();
+					l.objectMask = UITrait.inst.layerFilter;
 					UITrait.inst.toFillLayer(l);
 				}
 				dragMaterial = null;
@@ -341,7 +344,7 @@ class App extends iron.Trait {
 
 		if (showFiles || showBox) UIBox.update();
 
-		Zui.alwaysRedrawWindow = showMenu;
+		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d);
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
@@ -381,5 +384,16 @@ class App extends iron.Trait {
 			}
 		}
 		return 0;
+	}
+
+	public static function checkAscii(s:String):Bool {
+		for (i in 0...s.length) {
+			if (s.charCodeAt(i) > 255) {
+				// Bail out for now :(
+				UITrait.inst.showError("Error: non-ascii file path detected");
+				return false;
+			}
+		}
+		return true;
 	}
 }

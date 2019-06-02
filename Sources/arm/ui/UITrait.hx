@@ -145,7 +145,7 @@ class UITrait extends iron.Trait {
 	public var decalMaskHandle = new Handle({position: 0});
 	public var particleMaterial:MaterialData = null;
 
-	var layerFilter = 0;
+	public var layerFilter = 0;
 
 	var _onBrush:Array<Int->Void> = [];
 
@@ -791,7 +791,7 @@ class UITrait extends iron.Trait {
 			Gizmo.update();
 		}
 
-		if (lastCombo != null) ddirty = 0;
+		if (lastCombo != null) App.redrawUI();
 		lastCombo = ui.comboSelectedHandle;
 	}
 
@@ -2108,6 +2108,7 @@ class UITrait extends iron.Trait {
 								Canvas.assetMap.remove(asset.id);
 								assets.splice(i, 1);
 								assetNames.splice(i, 1);
+								// TODO: rebuild affected materials
 							}
 						});
 					}

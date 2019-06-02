@@ -18,6 +18,7 @@ class UIFiles {
 			App.showFiles = false;
 			App.path = untyped App.foldersOnly ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 			if (App.path != null) {
+				if (!App.checkAscii(App.path)) return;
 				App.path = StringTools.replace(App.path, "\\\\", "\\");
 				App.path = StringTools.replace(App.path, "\r", "");
 				var sep = kha.System.systemId == "Windows" ? "\\" : "/";

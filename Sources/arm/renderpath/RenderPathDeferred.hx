@@ -418,7 +418,7 @@ class RenderPathDeferred {
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
-			if (ssgi && UITrait.inst.ddirty > 0) {
+			if (ssgi && UITrait.inst.ddirty > 0 && taaFrame > 0) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -444,7 +444,7 @@ class RenderPathDeferred {
 		#if rp_voxelao
 		if (armory.data.Config.raw.rp_gi != false)
 		{
-			var voxelize = path.voxelize() && UITrait.inst.ddirty > 0;
+			var voxelize = path.voxelize() && UITrait.inst.ddirty > 0 && taaFrame > 0;
 
 			#if arm_voxelgi_temporal
 			voxelize = ++RenderPathCreator.voxelFrame % RenderPathCreator.voxelFreq == 0;
@@ -482,7 +482,7 @@ class RenderPathDeferred {
 		#if (rp_ssgi != "Off")
 		{
 			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
-			if (ssgi) {
+			if (ssgi && taaFrame > 0) {
 				path.bindTarget("singlea", "ssaotex");
 			}
 			else {

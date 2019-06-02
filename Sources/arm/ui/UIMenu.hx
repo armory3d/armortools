@@ -195,8 +195,7 @@ class UIMenu {
 				}
 				else {
 					App.showMenu = false;
-					App.redrawUI(0);
-					UITrait.inst.ddirty = 0; // Tag cached viewport texture redraw
+					App.redrawUI();
 					showMenuFirst = true;
 					menuCommands = null;
 					// arm.App.uienabled = true;
