@@ -194,7 +194,7 @@ class UITrait extends iron.Trait {
 	public var bakeOffset = 1.0;
 	
 	public var xray = false;
-	public var mirrorX = false;
+	// public var mirrorX = false;
 	public var symX = false;
 	public var symY = false;
 	public var symZ = false;
@@ -389,6 +389,7 @@ class UITrait extends iron.Trait {
 	}
 
 	function done() {
+		if (ui.SCALE > 1) setIconScale();
 		//
 		// grid = iron.Scene.active.getChild(".Grid");
 		gizmo = iron.Scene.active.getChild(".GizmoTranslate");
@@ -820,8 +821,7 @@ class UITrait extends iron.Trait {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (arm.App.uienabled && worktab.position == 0 && !brush3d) {
-			var cursorImg = Res.get('cursor.png');
+		if (arm.App.uienabled && worktab.position == 0) {
 			var mouse = iron.system.Input.getMouse();
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
@@ -837,71 +837,74 @@ class UITrait extends iron.Trait {
 				my += lockStartedY - kha.System.windowHeight() / 2;
 			}
 
+			// Show picked material next to cursor
+			if (selectedTool == ToolPicker && UITrait.inst.pickerSelectMaterial) {
+				var img = selectedMaterial.imageIcon;
+				g.drawImage(img, mx + 10, my + 10);
+			}
+
+			var cursorImg = Res.get('cursor.png');
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
-			var decal = selectedTool == ToolDecal || selectedTool == ToolText;
-			if (decal) {
-				psize = Std.int(256 * (brushRadius * brushNodesRadius));
-				#if kha_direct3d11
-				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
-				#else
-				g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
-				#end
-			}
-			else {
-				if (selectedTool == ToolBrush  ||
-					selectedTool == ToolEraser ||
-					selectedTool == ToolClone  ||
-					selectedTool == ToolBlur   ||
-					selectedTool == ToolParticle) {
-					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				}
-				else if (selectedTool == ToolPicker && UITrait.inst.pickerSelectMaterial) {
-					// Show picked material next to cursor
-					var img = selectedMaterial.imageIcon;
-					g.drawImage(img, mx + 10, my + 10);
-				}
-			}
-
-			if (mirrorX) {
-				var cx = iron.App.x() + iron.App.w() / 2;
-				var nx = cx + (cx - mx);
-				// Separator line
-				g.color = 0x66ffffff;
-				g.fillRect(cx - 1, iron.App.y(), 2, iron.App.h());
-				if (decal) {
-					#if kha_direct3d11
-					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
-					#else
-					g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2 + psize, psize, -psize);
-					#end
-				}
-				else { // Cursor
-					g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
-				}
-				g.color = 0xffffffff;
-			}
-
+			// Clone source cursor
 			var kb = iron.system.Input.getKeyboard();
-			if (selectedTool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) { // Clone source cursor
+			if (selectedTool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 				g.color = 0x66ffffff;
 				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
 				g.color = 0xffffffff;
 			}
 
-			if (showGrid) {
-				// Separator line
-				var x1 = iron.App.x() + iron.App.w() / 3;
-				var x2 = iron.App.x() + iron.App.w() / 3 * 2;
-				var y1 = iron.App.y() + iron.App.h() / 3;
-				var y2 = iron.App.y() + iron.App.h() / 3 * 2;
-				g.color = 0x66ffffff;
-				g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
-				g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
-				g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
-				g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
-				g.color = 0xffffffff;
+			if (!brush3d) {
+				var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+				if (decal) {
+					psize = Std.int(256 * (brushRadius * brushNodesRadius));
+					#if kha_direct3d11
+					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
+					#else
+					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
+					#end
+				}
+				else if (selectedTool == ToolBrush  ||
+						 selectedTool == ToolEraser ||
+						 selectedTool == ToolClone  ||
+						 selectedTool == ToolBlur   ||
+						 selectedTool == ToolParticle) {
+						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				}
+
+				// if (mirrorX) {
+				// 	var cx = iron.App.x() + iron.App.w() / 2;
+				// 	var nx = cx + (cx - mx);
+				// 	// Separator line
+				// 	g.color = 0x66ffffff;
+				// 	g.fillRect(cx - 1, iron.App.y(), 2, iron.App.h());
+				// 	if (decal) {
+				// 		#if kha_direct3d11
+				// 		g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
+				// 		#else
+				// 		g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2 + psize, psize, -psize);
+				// 		#end
+				// 	}
+				// 	else { // Cursor
+				// 		g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
+				// 	}
+				// 	g.color = 0xffffffff;
+				// }
 			}
+		}
+
+		if (showGrid) {
+			// Separator line
+			var x1 = iron.App.x() + iron.App.w() / 3;
+			var x2 = iron.App.x() + iron.App.w() / 3 * 2;
+			var y1 = iron.App.y() + iron.App.h() / 3;
+			var y2 = iron.App.y() + iron.App.h() / 3 * 2;
+			g.color = 0x66ffffff;
+			g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
+			g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
+			g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
+			g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
+			g.color = 0xffffffff;
 		}
 	}
 
@@ -1038,7 +1041,7 @@ class UITrait extends iron.Trait {
 			if (UITrait.inst.worktab.position == 0) {
 				var keys = ['(B)', '(E)', '(G)', '(D)', '(T)', '(L) - Hold ALT to set source', '(U)', '(P)', '(K)', '(C)', '(V)'];
 				var img = Res.get("icons.png");
-				var imgw = ui.SCALE >= 2 ? 100 : 50;
+				var imgw = ui.SCALE > 1 ? 100 : 50;
 				for (i in 0...toolNames.length) {
 					ui._x += 2;
 					if (selectedTool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -1050,7 +1053,7 @@ class UITrait extends iron.Trait {
 			}
 			else if (UITrait.inst.worktab.position == 1) {
 				var img = Res.get("icons.png");
-				var imgw = ui.SCALE >= 2 ? 100 : 50;
+				var imgw = ui.SCALE > 1 ? 100 : 50;
 				ui._x += 2;
 				if (selectedTool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) selectTool(ToolGizmo);
@@ -1259,13 +1262,13 @@ class UITrait extends iron.Trait {
 
 						xray = ui.check(Id.handle({selected: xray}), "X-Ray");
 
-						var mirrorHandle = Id.handle({selected: mirrorX});
-						ui._w = Std.int(60 * sc);
-						mirrorX = ui.check(mirrorHandle, "Mirror");
-						if (mirrorHandle.changed) {
-							UINodes.inst.updateCanvasMap();
-							MaterialParser.parsePaintMaterial();
-						}
+						// var mirrorHandle = Id.handle({selected: mirrorX});
+						// ui._w = Std.int(60 * sc);
+						// mirrorX = ui.check(mirrorHandle, "Mirror");
+						// if (mirrorHandle.changed) {
+						// 	UINodes.inst.updateCanvasMap();
+						// 	MaterialParser.parsePaintMaterial();
+						// }
 						
 						var symXHandle = Id.handle({selected: false});
 						var symYHandle = Id.handle({selected: false});
@@ -1779,14 +1782,7 @@ class UITrait extends iron.Trait {
 					menubarw = Std.int(215 * App.C.window_scale);
 					arm.App.resize();
 					armory.data.Config.save();
-					if (ui.SCALE >= 2) {
-						Res.load(["icons2x.png"], function() {
-							@:privateAccess Res.bundled.set("icons.png", Res.get("icons2x.png"));
-						});
-					}
-					else {
-						Res.load(["icons.png"], function() {});
-					}
+					setIconScale();
 				}
 				hscaleWasChanged = hscale.changed;
 				ui.row([1/2, 1/2]);
@@ -1898,6 +1894,17 @@ class UITrait extends iron.Trait {
 		}
 	}
 
+	function setIconScale() {
+		if (ui.SCALE > 1) {
+			Res.load(["icons2x.png"], function() {
+				@:privateAccess Res.bundled.set("icons.png", Res.get("icons2x.png"));
+			});
+		}
+		else {
+			Res.load(["icons.png"], function() {});
+		}
+	}
+
 	function tabMaterials() {
 		if (ui.tab(htab1, "Materials")) {
 			ui.row([1/4,1/4,1/4]);
@@ -1948,7 +1955,7 @@ class UITrait extends iron.Trait {
 						@:privateAccess ui.endElement();
 						continue;
 					}
-					var img = ui.SCALE >= 2.0 ? materials[i].image : materials[i].imageIcon;
+					var img = ui.SCALE > 1 ? materials[i].image : materials[i].imageIcon;
 					var imgFull = materials[i].image;
 
 					if (selectedMaterial == materials[i]) {
@@ -1961,7 +1968,7 @@ class UITrait extends iron.Trait {
 						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
-					var imgw = ui.SCALE >= 2 ? 100 : 50;
+					var imgw = ui.SCALE > 1 ? 100 : 50;
 					var uix = ui._x;
 					var uiy = ui._y;
 					var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
@@ -1977,9 +1984,14 @@ class UITrait extends iron.Trait {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.show(function(ui:Zui) {
 							var m = materials[i];
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 							
+							if (ui.button("Add as Fill Layer", Left)) {
+								selectMaterial(i);
+								createFillLayer();
+							}
+
 							if (ui.button("Delete", Left) && materials.length > 1) {
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
@@ -2026,6 +2038,12 @@ class UITrait extends iron.Trait {
 				#end
 			}
 		}
+	}
+
+	public function createFillLayer() {
+		var l = UITrait.inst.newLayer();
+		l.objectMask = UITrait.inst.layerFilter;
+		UITrait.inst.toFillLayer(l);
 	}
 
 	function tabBrushes() {
@@ -2100,8 +2118,11 @@ class UITrait extends iron.Trait {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.show(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
+							if (ui.button("Add as Mask", Left)) {
+								createImageMask(asset);
+							}
 							if (ui.button("Delete", Left)) {
 								hwnd2.redraws = 2;
 								iron.data.Data.deleteImage(asset.file);
@@ -2123,10 +2144,19 @@ class UITrait extends iron.Trait {
 			}
 			else {
 				var img = Res.get('icons.png');
-				var imgw = ui.SCALE >= 2 ? 100 : 50;
+				var imgw = ui.SCALE > 1 ? 100 : 50;
 				ui.image(img, ui.t.BUTTON_COL, imgw, 0, imgw, imgw, imgw);
 				if (ui.isHovered) ui.tooltip("Drag and drop files here");
 			}
+		}
+	}
+
+	public function createImageMask(asset:TAsset) {
+		var l = UITrait.inst.selectedLayer;
+		if (l != UITrait.inst.layers[0]) {
+			l.createMask(0x00000000, true, UITrait.inst.getImage(asset));
+			UITrait.inst.setLayer(l, true);
+			UITrait.inst.layerPreviewDirty = true;
 		}
 	}
 

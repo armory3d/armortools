@@ -20,6 +20,7 @@ class UINodes extends iron.Trait {
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
+	public var wh:Int;
 
 	public var ui:Zui;
 	var drawMenu = false;
@@ -241,7 +242,7 @@ class UINodes extends iron.Trait {
 			var searchHandle = Id.handle();
 			var first = true;
 			UIMenu.show(function(ui:Zui) {
-				ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
+				ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
 				ui.textInput(searchHandle, "");
 				ui.changed = false;
 				if (first) {
@@ -361,7 +362,7 @@ class UINodes extends iron.Trait {
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		var wh = iron.App.h();
+		wh = iron.App.h();
 		if (UIView2D.inst.show) {
 			wh = Std.int(iron.App.h() / 2);
 			wy += Std.int(iron.App.h() / 2);

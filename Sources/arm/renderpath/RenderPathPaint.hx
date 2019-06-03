@@ -130,6 +130,17 @@ class RenderPathPaint {
 
 	@:access(iron.RenderPath)
 	public static function commandsCursor() {
+		var tool = UITrait.inst.selectedTool;
+		if (tool != ToolBrush &&
+			tool != ToolEraser &&
+			tool != ToolClone &&
+			tool != ToolBlur &&
+			tool != ToolParticle &&
+			tool != ToolDecal &&
+			tool != ToolText) {
+				return;
+		}
+
 		var path = RenderPathDeferred.path;
 
 		var plane = cast(iron.Scene.active.getChild(".Plane"), iron.object.MeshObject);

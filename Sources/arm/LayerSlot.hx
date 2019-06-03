@@ -43,6 +43,7 @@ class LayerSlot {
 	public var paintSubs = true;
 
 	var createMaskColor:Int;
+	var createMaskImage:kha.Image;
 
 	public function new(ext = "") {
 
@@ -143,7 +144,7 @@ class LayerSlot {
 		other.texpaint_mask = tp_mask;
 	}
 
-	public function createMask(color:Int, clear = true) {
+	public function createMask(color:Int, clear = true, image:kha.Image = null) {
 		if (texpaint_mask != null) return;
 
 		{
@@ -159,6 +160,7 @@ class LayerSlot {
 
 		if (clear) {
 			createMaskColor = color;
+			createMaskImage = image;
 			iron.App.notifyOnRender(clearMask);
 		}
 	}
@@ -166,12 +168,18 @@ class LayerSlot {
 	function clearMask(g:kha.graphics4.Graphics) {
 		g.end();
 
-		texpaint_mask.g4.begin();
-		texpaint_mask.g4.clear(createMaskColor);
-		texpaint_mask.g4.end();
+		texpaint_mask.g2.begin();
+		
+		if (createMaskImage != null) texpaint_mask.g2.drawScaledImage(createMaskImage, 0, 0, texpaint_mask.width, texpaint_mask.height);
+		else texpaint_mask.g2.clear(createMaskColor);
+		texpaint_mask.g2.end();
 
 		g.begin();
 		iron.App.removeRender(clearMask);
+
+		UITrait.inst.layerPreviewDirty = true;
+		createMaskColor = 0;
+		createMaskImage = null;
 	}
 
 	public function deleteMask() {

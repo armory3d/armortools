@@ -168,7 +168,7 @@ class MaterialBuilder {
 			#if (kha_opengl || kha_webgl)
 			frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
 			#else
-			frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, sp.y), 0.0).r) { discard; }');
+			frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) { discard; }');
 			#end
 
 			if (decal || UITrait.inst.selectedTool == ToolParticle) {
@@ -192,9 +192,6 @@ class MaterialBuilder {
 					frag.write('winp.xyz /= winp.w;');
 					frag.wposition = true;
 
-					// frag.write('float dist = distance(wposition, winp);');
-					// frag.write('if (dist > brushRadius) { discard; }');
-
 					// Continuos paint
 					#if (kha_opengl || kha_webgl)
 					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
@@ -216,7 +213,10 @@ class MaterialBuilder {
 					frag.write('float dist = length(pa - ba * h);');
 					frag.write('if (dist > brushRadius) { discard; }');
 
-					// if (UITrait.inst.mirrorX) {}
+					//
+
+					// frag.write('float dist = distance(wposition, winp);');
+					// frag.write('if (dist > brushRadius) { discard; }');
 				}
 				else {
 					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
@@ -233,16 +233,16 @@ class MaterialBuilder {
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');
 					
-					if (!UITrait.inst.mirrorX) {
+					// if (!UITrait.inst.mirrorX) {
 						frag.write('if (dist > brushRadius) { discard; }');
-					}
-					else {
-						frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
-						frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
-						frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
-						frag.write('float dist2 = length(pa2 - ba2 * h2);');
-						frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; }');
-					}
+					// }
+					// else {
+					// 	frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
+					// 	frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
+					// 	frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
+					// 	frag.write('float dist2 = length(pa2 - ba2 * h2);');
+					// 	frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; }');
+					// }
 					//
 
 					// frag.write('float dist = distance(bsp.xy, binp.xy);');
@@ -304,16 +304,16 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
-				if (UITrait.inst.mirrorX) {
-					frag.write_attrib('vec2 uvsp2 = sp.xy - vec2(1.0 - inp.x, inp.y);');
-					frag.write_attrib('uvsp2.x *= aspectRatio;');
-					frag.write_attrib('uvsp2 *= 0.21 / brushRadius;');
-					frag.write_attrib('uvsp2 += vec2(0.5, 0.5);');
-					frag.write_attrib('if ((uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) && (uvsp2.x < 0.01 || uvsp2.y < 0.01 || uvsp2.x > 0.99 || uvsp2.y > 0.99)) { discard; }');
-				}
-				else {
+				// if (UITrait.inst.mirrorX) {
+				// 	frag.write_attrib('vec2 uvsp2 = sp.xy - vec2(1.0 - inp.x, inp.y);');
+				// 	frag.write_attrib('uvsp2.x *= aspectRatio;');
+				// 	frag.write_attrib('uvsp2 *= 0.21 / brushRadius;');
+				// 	frag.write_attrib('uvsp2 += vec2(0.5, 0.5);');
+				// 	frag.write_attrib('if ((uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) && (uvsp2.x < 0.01 || uvsp2.y < 0.01 || uvsp2.x > 0.99 || uvsp2.y > 0.99)) { discard; }');
+				// }
+				// else {
 					frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) { discard; }');
-				}
+				// }
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
@@ -490,10 +490,10 @@ class MaterialBuilder {
 		}
 		else { // brush cursor mask
 			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-			if (UITrait.inst.mirrorX && UITrait.inst.selectedTool == ToolBrush) {
-				frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-				frag.write('str = clamp(str, 0.0, 1.0);');
-			}
+			// if (UITrait.inst.mirrorX && UITrait.inst.selectedTool == ToolBrush) {
+			// 	frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
+			// 	frag.write('str = clamp(str, 0.0, 1.0);');
+			// }
 		}
 
 		// Manual blending to preserve memory

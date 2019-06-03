@@ -10,6 +10,7 @@ import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
 import arm.Config;
+import arm.Tool;
 import kha.graphics2.truetype.StbTruetype;
 
 class App extends iron.Trait {
@@ -297,12 +298,22 @@ class App extends iron.Trait {
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
 			isDragging = true;
 		}
-		if (mouse.released()) {
-			var x = mouse.x + iron.App.x();
-			var y = mouse.y + iron.App.y();
+		if (mouse.released() && (dragAsset != null || dragMaterial != null)) {
+			var mx = mouse.x + iron.App.x();
+			var my = mouse.y + iron.App.y();
+			var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
+							 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
+			var inLayers = UITrait.inst.htab.position == 0 &&
+						   mx > UITrait.inst.tabx && my < UITrait.inst.tabh;
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == 0 &&
+						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+			var inNodes = UINodes.inst.show &&
+						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
+						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			if (dragAsset != null) {
-				// Texture dragged onto node canvas
-				if (UINodes.inst.show && x > UINodes.inst.wx && y > UINodes.inst.wy) {
+				// Create image texture
+				if (inNodes) {
 					var index = 0;
 					for (i in 0...UITrait.inst.assets.length) {
 						if (UITrait.inst.assets[i] == dragAsset) {
@@ -310,22 +321,18 @@ class App extends iron.Trait {
 							break;
 						}
 					}
-					// Create image texture
 					UINodes.inst.acceptDrag(index);
+				}
+				// Create mask
+				else if (inViewport || inLayers || in2dView) {
+					UITrait.inst.createImageMask(dragAsset);
 				}
 				dragAsset = null;
 			}
 			if (dragMaterial != null) {
 				// Material dragged onto viewport or layers tab
-				var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
-								 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
-				var inLayers = UITrait.inst.htab.position == 0 &&
-							   mouse.x > UITrait.inst.tabx && mouse.y < UITrait.inst.tabh;
-				if (inViewport || inLayers) {
-					// Create fill layer
-					var l = UITrait.inst.newLayer();
-					l.objectMask = UITrait.inst.layerFilter;
-					UITrait.inst.toFillLayer(l);
+				if (inViewport || inLayers || in2dView) {
+					UITrait.inst.createFillLayer();
 				}
 				dragMaterial = null;
 			}
@@ -344,7 +351,9 @@ class App extends iron.Trait {
 
 		if (showFiles || showBox) UIBox.update();
 
-		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d);
+		var isPicker = UITrait.inst.selectedTool == ToolPicker;
+		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d) || showBox || isPicker;
+		if (Zui.alwaysRedrawWindow) UITrait.inst.ddirty = 0;
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
@@ -388,7 +397,7 @@ class App extends iron.Trait {
 
 	public static function checkAscii(s:String):Bool {
 		for (i in 0...s.length) {
-			if (s.charCodeAt(i) > 255) {
+			if (s.charCodeAt(i) > 127) {
 				// Bail out for now :(
 				UITrait.inst.showError("Error: non-ascii file path detected");
 				return false;

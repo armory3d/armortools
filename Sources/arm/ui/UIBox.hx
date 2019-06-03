@@ -41,6 +41,7 @@ class UIBox {
 			uibox.beginLayout(g, right - Std.int(uibox.ELEMENT_W()), bottom - Std.int(uibox.ELEMENT_H() * 1.2), Std.int(uibox.ELEMENT_W()));
 			if (uibox.button("OK")) {
 				App.showBox = false;
+				App.redrawUI();
 			}
 			uibox.endLayout(false);
 		}
@@ -69,6 +70,7 @@ class UIBox {
 			var my = mouse.y + iron.App.y();
 			if (mx < left || mx > right || my < top || my > bottom) {
 				App.showFiles = App.showBox = false;
+				App.redrawUI();
 			}
 		}
 	}
@@ -82,6 +84,7 @@ class UIBox {
 				Project.projectNew();
 				ViewportUtil.scaleToBounds();
 				App.showBox = false;
+				App.redrawUI();
 			}
 		});
 	}
