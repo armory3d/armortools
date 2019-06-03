@@ -54,13 +54,13 @@ project.addDefine('arm_data_dir');
 project.addParameter('--macro include("arm.brushnode")');
 project.addParameter('-dce full');
 
-if (platform === Platform.Windows) {
+if (process.platform === 'win32') {
 	project.addAssets("Bundled/cmft/cmft.exe", { notinlist: true , destination: "data/{name}" });
 }
-else if (platform === Platform.Linux) {
+else if (process.platform === 'linux') {
 	project.addAssets("Bundled/cmft/cmft-linux64", { notinlist: true , destination: "data/{name}" });
 }
-else if (platform === Platform.OSX) {
+else if (process.platform === 'darwin') {
 	project.addAssets("Bundled/cmft/cmft-osx", { notinlist: true , destination: "data/{name}" });
 }
 
