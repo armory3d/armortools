@@ -180,10 +180,8 @@ class MaterialBuilder {
 
 					#if (kha_opengl || kha_webgl)
 					frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
-					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 					#else
 					frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
-					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 					#end
 
 					// Continuous paint
@@ -198,6 +196,29 @@ class MaterialBuilder {
 					frag.write('winp.xyz /= winp.w;');
 					frag.wposition = true;
 
+					if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
+						frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+						frag.add_uniform('sampler2D gbuffer0');
+						frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
+						frag.write('vec3 wn;');
+						frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
+						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
+						frag.write('wn = normalize(wn);');
+						frag.write('float planeDist = dot(wn, winp.xyz - wposition.xyz);');
+						
+						if (UITrait.inst.brushAngleReject) {
+							frag.write('if (planeDist < -0.01) discard;');
+							frag.n = true;
+							frag.write('if (dot(wn, n) < 0.5) discard;');
+						}
+					}
+
+					#if (kha_opengl || kha_webgl)
+					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
+					#else
+					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
+					#end
+
 					#if (kha_opengl || kha_webgl)
 					frag.write('vec2 inplast2 = inplast;');
 					#else
@@ -208,14 +229,6 @@ class MaterialBuilder {
 					frag.write('winplast.xyz /= winplast.w;');
 
 					if (UITrait.inst.xray) {
-						frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
-						frag.add_uniform('sampler2D gbuffer0');
-						frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
-						frag.write('vec3 wn;');
-						frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
-						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
-						frag.write('wn = normalize(wn);');
-						frag.write('float planeDist = dot(wn, winp.xyz - wposition.xyz);');
 						frag.write('wposition += wn * vec3(planeDist, planeDist, planeDist);');
 					}
 
@@ -223,7 +236,7 @@ class MaterialBuilder {
 					frag.write('vec3 ba = winplast - winp;');
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');
-					frag.write('if (dist > brushRadius) { discard; }');
+					frag.write('if (dist > brushRadius) discard;');
 
 					//
 

@@ -189,6 +189,7 @@ class UITrait extends iron.Trait {
 	public var selectedTool = 0;
 	public var brush3d = true;
 	public var brushVolum = false;
+	public var brushAngleReject = true;
 	public var bakeType = 0;
 	public var bakeStrength = 1.0;
 	public var bakeRadius = 1.0;
@@ -241,6 +242,7 @@ class UITrait extends iron.Trait {
 	public var menuHandle = new Handle({layout:Horizontal});
 	public var workspaceHandle = new Handle({layout:Horizontal});
 	var lastCombo:Handle = null;
+	var lastTooltip:kha.Image = null;
 
 	public var cameraControls = 1;
 	public var htab = Id.handle({position: 0});
@@ -795,8 +797,9 @@ class UITrait extends iron.Trait {
 			Gizmo.update();
 		}
 
-		if (lastCombo != null) App.redrawUI();
+		if (lastCombo != null || (ui.tooltipImg == null && lastTooltip != null)) App.redrawUI();
 		lastCombo = ui.comboSelectedHandle;
+		lastTooltip = ui.tooltipImg;
 	}
 
 	function render(g:kha.graphics2.Graphics) {
@@ -1839,18 +1842,20 @@ class UITrait extends iron.Trait {
 						var l = undoLayers.pop();
 						l.unload();
 					}
-					undos = 0;
-					redos = 0;
-					undoI = 0;
+					History.reset();
 					ui.g.begin(false);
 					armory.data.Config.save();
 				}
 				var brush3dHandle = Id.handle({selected: brush3d});
-				brush3d = ui.check(brush3dHandle, "3D Brush Cursor");
+				brush3d = ui.check(brush3dHandle, "3D Cursor");
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
+				var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
+				brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
+				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
+
 				var brushVolumHandle = Id.handle({selected: brushVolum});
-				brushVolum = ui.check(brushVolumHandle, "Volumetric Brush");
+				brushVolum = ui.check(brushVolumHandle, "Volumetric Paint");
 				if (brushVolumHandle.changed) MaterialParser.parsePaintMaterial();
 			}
 

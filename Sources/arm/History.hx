@@ -45,5 +45,8 @@ class History {
 
 	public static function reset() {
 		stack = ["New"];
+		UITrait.inst.undos = 0;
+		UITrait.inst.redos = 0;
+		UITrait.inst.undoI = 0;
 	}
 }

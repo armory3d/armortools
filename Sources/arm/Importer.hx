@@ -962,6 +962,7 @@ class Importer {
 				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
 				UITrait.inst.setLayer(UITrait.inst.layers[0]);
 				iron.App.notifyOnRender(Layers.initLayers);
+				History.reset();
 				
 				UITrait.inst.paintObject.setData(md);
 				UITrait.inst.paintObject.name = mesh.name;

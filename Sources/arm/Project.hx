@@ -224,6 +224,7 @@ class Project {
 					UITrait.inst.paintObject.name = md.name;
 					UITrait.inst.paintObjects = [UITrait.inst.paintObject];
 					iron.App.notifyOnRender(Layers.initLayers);
+					History.reset();
 				});
 				return;
 			}
