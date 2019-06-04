@@ -288,6 +288,9 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
+		// Geometry
+		drawGbuffer();
+
 		if (UITrait.inst.undoLayers != null) {
 
 			// Symmetry
@@ -362,58 +365,9 @@ class RenderPathDeferred {
 			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 			iron.Scene.active.camera.buildProjection();
 			iron.Scene.active.camera.buildMatrix();
-		}
 
-		path.setTarget("gbuffer0"); // Only clear gbuffer0
-		path.clearTarget(null, 1.0);
-		#if rp_gbuffer2
-		{
-			path.setTarget("gbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+			drawGbuffer();
 		}
-		#else
-		{
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-		}
-		#end
-
-		// Paint
-		tid = UITrait.inst.layers[0].id;
-		path.bindTarget("texpaint" + tid, "texpaint");
-		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
-		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		for (i in 1...UITrait.inst.layers.length) {
-			var l = UITrait.inst.layers[i];
-			tid = l.id;
-			path.bindTarget("texpaint" + tid, "texpaint" + tid);
-			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
-			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
-			if (l.texpaint_mask != null) {
-				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
-			}
-		}
-		//
-
-		RenderPathCreator.drawMeshes();
-
-		#if rp_decals
-		{
-			#if (!kha_opengl)
-			path.setDepthFrom("gbuffer0", "gbuffer1"); // Unbind depth so we can read it
-			path.depthToRenderTarget.set("main", path.renderTargets.get("tex"));
-			#end
-
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-			path.bindTarget("_main", "gbufferD");
-			path.drawDecals("decal");
-			
-			#if (!kha_opengl)
-			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
-			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
-			#end
-		}
-		#end
 
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
@@ -763,6 +717,59 @@ class RenderPathDeferred {
 		UITrait.inst.ddirty--;
 		UITrait.inst.pdirty--;
 		UITrait.inst.rdirty--;
+	}
+
+	static function drawGbuffer() {
+		path.setTarget("gbuffer0"); // Only clear gbuffer0
+		path.clearTarget(null, 1.0);
+		#if rp_gbuffer2
+		{
+			path.setTarget("gbuffer2");
+			path.clearTarget(0xff000000);
+			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		}
+		#else
+		{
+			path.setTarget("gbuffer0", ["gbuffer1"]);
+		}
+		#end
+
+		// Paint
+		var tid = UITrait.inst.layers[0].id;
+		path.bindTarget("texpaint" + tid, "texpaint");
+		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
+		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+		for (i in 1...UITrait.inst.layers.length) {
+			var l = UITrait.inst.layers[i];
+			tid = l.id;
+			path.bindTarget("texpaint" + tid, "texpaint" + tid);
+			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
+			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
+			if (l.texpaint_mask != null) {
+				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
+			}
+		}
+		//
+
+		RenderPathCreator.drawMeshes();
+
+		#if rp_decals
+		{
+			#if (!kha_opengl)
+			path.setDepthFrom("gbuffer0", "gbuffer1"); // Unbind depth so we can read it
+			path.depthToRenderTarget.set("main", path.renderTargets.get("tex"));
+			#end
+
+			path.setTarget("gbuffer0", ["gbuffer1"]);
+			path.bindTarget("_main", "gbufferD");
+			path.drawDecals("decal");
+			
+			#if (!kha_opengl)
+			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
+			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
+			#end
+		}
+		#end
 	}
 
 	#end

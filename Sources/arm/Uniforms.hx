@@ -5,6 +5,7 @@ import iron.object.Object;
 import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.util.UVUtil;
+import arm.Tool;
 
 class Uniforms {
 	public static function init() {
@@ -19,7 +20,10 @@ class Uniforms {
 			var val = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
 			var pen = iron.system.Input.getPen();
 			if (UITrait.penPressureRadius && pen.down()) val *= pen.pressure;
-			if (UITrait.inst.brush3d) val *= 2;
+			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+			if (UITrait.inst.brush3d && !decal) {
+				val *= UITrait.inst.paint2d ? 0.6 : 2;
+			}
 			else val *= 900 / App.h(); // Projection ratio
 			return val;
 		}
@@ -33,22 +37,12 @@ class Uniforms {
 			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 			var pen = iron.system.Input.getPen();
 			if (UITrait.penPressureHardness && pen.down()) val *= pen.pressure;
-			if (UITrait.inst.brush3d) val *= val;
+			if (UITrait.inst.brush3d && !UITrait.inst.paint2d) val *= val;
 			return val;
 		}
 		else if (link == '_brushScale') {
 			var val = UITrait.inst.brushScale * UITrait.inst.brushNodesScale;
 			return val;
-		}
-		else if (link == '_paintDepthBias') {
-			var f = 0.0001;
-			var t = UITrait.inst.paintObject.transform;
-			if (UITrait.inst.xray) f = 1.0;
-			else if (t.scale.x < 0 && t.scale.y < 0 && t.scale.z < 0) f = -f;
-			else if (t.scale.x < 0 && t.scale.y > 0 && t.scale.z > 0) f = -f;
-			else if (t.scale.y < 0 && t.scale.x > 0 && t.scale.z > 0) f = -f;
-			else if (t.scale.z < 0 && t.scale.x > 0 && t.scale.y > 0) f = -f;
-			return f;
 		}
 		else if (link == '_texpaintSize') {
 			return Config.getTextureRes();

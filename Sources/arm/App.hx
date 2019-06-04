@@ -352,8 +352,8 @@ class App extends iron.Trait {
 		if (showFiles || showBox) UIBox.update();
 
 		var isPicker = UITrait.inst.selectedTool == ToolPicker;
-		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d) || showBox || isPicker;
-		if (Zui.alwaysRedrawWindow) UITrait.inst.ddirty = 0;
+		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d) || showBox || isPicker || UIView2D.inst.show;
+		if (Zui.alwaysRedrawWindow && UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0;
 	}
 
 	static function render(g:kha.graphics2.Graphics) {

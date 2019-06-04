@@ -19,6 +19,7 @@ class RenderPathPaint {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
+				if (UITrait.inst.xray && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
 				
 				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
@@ -107,6 +108,7 @@ class RenderPathPaint {
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
 				path.bindTarget("_main", "gbufferD");
+				if (UITrait.inst.xray && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
 				path.bindTarget(blendB, "paintmask");
 				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");

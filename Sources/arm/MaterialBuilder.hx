@@ -125,8 +125,7 @@ class MaterialBuilder {
 
 		frag.write_attrib('vec3 sp = vec3((ndc.xyz / ndc.w) * 0.5 + 0.5);');
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
-		frag.add_uniform('float paintDepthBias', '_paintDepthBias');
-		frag.write_attrib('sp.z -= paintDepthBias;'); // small bias or xray
+		frag.write_attrib('sp.z -= 0.0001;'); // small bias
 
 		if (UITrait.inst.brushPaint == 1) frag.ndcpos = true; // Project
 
@@ -165,22 +164,29 @@ class MaterialBuilder {
 			UITrait.inst.selectedTool == ToolParticle ||
 			decal) {
 			
-			#if (kha_opengl || kha_webgl)
-			frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
-			#else
-			frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) { discard; }');
-			#end
+			if (!UITrait.inst.xray && !UITrait.inst.brushVolum) {
+				#if (kha_opengl || kha_webgl)
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
+				#else
+				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) { discard; }');
+				#end
+			}
 
 			if (decal || UITrait.inst.selectedTool == ToolParticle) {
 				frag.write('float dist = 0.0;');
 			}
 			else {
 				if (UITrait.inst.brush3d) {
+
 					#if (kha_opengl || kha_webgl)
 					frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
+					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 					#else
 					frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
+					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 					#end
+
+					// Continuous paint
 					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
 					#if (kha_opengl || kha_webgl)
 					frag.write('vec2 inp2 = inp;');
@@ -192,12 +198,6 @@ class MaterialBuilder {
 					frag.write('winp.xyz /= winp.w;');
 					frag.wposition = true;
 
-					// Continuos paint
-					#if (kha_opengl || kha_webgl)
-					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
-					#else
-					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
-					#end
 					#if (kha_opengl || kha_webgl)
 					frag.write('vec2 inplast2 = inplast;');
 					#else
@@ -206,6 +206,18 @@ class MaterialBuilder {
 					frag.write('float4 winplast = float4(inplast2.xy * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
 					frag.write('winplast = mul(winplast, invVP);');
 					frag.write('winplast.xyz /= winplast.w;');
+
+					if (UITrait.inst.xray) {
+						frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+						frag.add_uniform('sampler2D gbuffer0');
+						frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
+						frag.write('vec3 wn;');
+						frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
+						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
+						frag.write('wn = normalize(wn);');
+						frag.write('float planeDist = dot(wn, winp.xyz - wposition.xyz);');
+						frag.write('wposition += wn * vec3(planeDist, planeDist, planeDist);');
+					}
 
 					frag.write('vec3 pa = wposition - winp;');
 					frag.write('vec3 ba = winplast - winp;');

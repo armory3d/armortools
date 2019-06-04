@@ -98,13 +98,14 @@ class UIView2D extends iron.Trait {
 			else { // Texture
 				tex = UITrait.inst.getImage(UITrait.inst.selectedTexture);
 			}
-	 		
-	 		if (tex != null) ui.g.drawScaledImage(tex, tx, ty, tw, tw);
+			
+			var th = tw * (tex.height / tex.width);
+			if (tex != null) ui.g.drawScaledImage(tex, tx, ty, tw, th);
 			ui.g.pipeline = null;
 
 			// UV map
 			if (type == 0 && uvmapShow) {
-				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, tw);
+				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, th);
 			}
 
 			// Editable layer name

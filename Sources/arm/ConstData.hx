@@ -216,7 +216,8 @@ SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 t
 Texture2D<float4> tex;
 SamplerState _tex_sampler;
 float4 main(float2 texCoord : TEXCOORD0) : SV_Target0 {
-	return float4(1.0, 1.0, 1.0, tex.SampleLevel(_tex_sampler, texCoord, 0).a);
+	float4 col = tex.Sample(_tex_sampler, texCoord);
+	return float4(col.rgb / col.a, col.a);
 }
 ";
 
@@ -277,7 +278,8 @@ uniform sampler2D tex;
 in vec2 texCoord;
 out vec4 FragColor;
 void main() {
-	FragColor = vec4(1.0, 1.0, 1.0, textureLod(tex, texCoord, 0.0).a);
+	float4 col = texture(tex, texCoord);
+	FragColor = float4(col.rgb / col.a, col.a);
 }
 ";
 

@@ -188,6 +188,7 @@ class UITrait extends iron.Trait {
 	public var brushPaint = 0;
 	public var selectedTool = 0;
 	public var brush3d = true;
+	public var brushVolum = false;
 	public var bakeType = 0;
 	public var bakeStrength = 1.0;
 	public var bakeRadius = 1.0;
@@ -617,6 +618,8 @@ class UITrait extends iron.Trait {
 			if (kb.released("f")) {
 				mouse.unlock();
 				brushCanUnlock = true;
+				lastPaintX = -1;
+				lastPaintY = -1;
 			}
 		}
 	}
@@ -854,7 +857,11 @@ class UITrait extends iron.Trait {
 				g.color = 0xffffffff;
 			}
 
-			if (!brush3d) {
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == 0 &&
+						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+
+			if (!brush3d || in2dView) {
 				var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 				if (decal) {
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
@@ -1260,7 +1267,11 @@ class UITrait extends iron.Trait {
 						var sc = ui.SCALE;
 						ui._w = Std.int(60 * sc);
 
-						xray = ui.check(Id.handle({selected: xray}), "X-Ray");
+						var xrayHandle = Id.handle({selected: xray});
+						xray = ui.check(xrayHandle, "X-Ray");
+						if (xrayHandle.changed) {
+							MaterialParser.parsePaintMaterial();
+						}
 
 						// var mirrorHandle = Id.handle({selected: mirrorX});
 						// ui._w = Std.int(60 * sc);
@@ -1837,6 +1848,10 @@ class UITrait extends iron.Trait {
 				var brush3dHandle = Id.handle({selected: brush3d});
 				brush3d = ui.check(brush3dHandle, "3D Brush Cursor");
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
+
+				var brushVolumHandle = Id.handle({selected: brushVolum});
+				brushVolum = ui.check(brushVolumHandle, "Volumetric Brush");
+				if (brushVolumHandle.changed) MaterialParser.parsePaintMaterial();
 			}
 
 			ui.separator();
@@ -1987,7 +2002,7 @@ class UITrait extends iron.Trait {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 							
-							if (ui.button("Add as Fill Layer", Left)) {
+							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);
 								createFillLayer();
 							}
@@ -2120,7 +2135,7 @@ class UITrait extends iron.Trait {
 						UIMenu.show(function(ui:Zui) {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
-							if (ui.button("Add as Mask", Left)) {
+							if (ui.button("To Mask", Left)) {
 								createImageMask(asset);
 							}
 							if (ui.button("Delete", Left)) {
