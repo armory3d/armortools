@@ -183,7 +183,7 @@ class UINodes extends iron.Trait {
 			mchanged = changed = false;
 			if (canvasType == 0) {
 				if (Layers.isFillMaterial()) {
-					Layers.updateFillLayers(1); // TODO: jitter
+					Layers.updateFillLayers(); // TODO: jitter
 					UITrait.inst.hwnd.redraws = 2;
 				}
 				arm.MaterialParser.parsePaintMaterial();
@@ -382,8 +382,9 @@ class UINodes extends iron.Trait {
 				var id = nodes.nodesSelected[0].buttons[0].default_value;
 				if (id < UITrait.inst.assets.length) {
 					var img = UITrait.inst.getImage(UITrait.inst.assets[id]);
-					var size = 64 * ui.SCALE;
-					ui.g.drawScaledImage(img, ww - size - 20 * ui.SCALE, wh - size - 40 * ui.SCALE, size, size);
+					var tw = 64 * ui.SCALE;
+					var th = tw * (img.height / img.width);
+					ui.g.drawScaledImage(img, ww - tw - 20 * ui.SCALE, wh - th - 40 * ui.SCALE, tw, th);
 				}
 			}
 

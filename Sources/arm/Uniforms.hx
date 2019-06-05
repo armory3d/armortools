@@ -53,19 +53,11 @@ class Uniforms {
 	public static function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_sub') {
-			var eps = 0.0004;
-			var seps = UITrait.inst.brushBias * eps * Config.getTextureResBias();
-			UITrait.inst.sub = (UITrait.inst.sub + 1) % 9;
-			var sub = UITrait.inst.sub;
-			if (sub == 0) vec2.set(0.0 + seps, 0.0, 0.0);
-			else if (sub == 1) vec2.set(0.0 - seps, 0.0, 0.0);
-			else if (sub == 2) vec2.set(0.0, 0.0 + seps, 0.0);
-			else if (sub == 3) vec2.set(0.0, 0.0 - seps, 0.0);
-			else if (sub == 4) vec2.set(0.0 + seps, 0.0 + seps, 0.0);
-			else if (sub == 5) vec2.set(0.0 - seps, 0.0 - seps, 0.0);
-			else if (sub == 6) vec2.set(0.0 + seps, 0.0 - seps, 0.0);
-			else if (sub == 7) vec2.set(0.0 - seps, 0.0 + seps, 0.0);
-			else if (sub == 8) vec2.set(0.0, 0.0, 0.0);
+			var eps = UITrait.inst.brushBias * 0.0004 * Config.getTextureResBias();
+			UITrait.inst.sub == 0 ? vec2.set(eps, eps, 0.0) :
+			UITrait.inst.sub == 1 ? vec2.set(eps, -eps, 0.0) :
+			UITrait.inst.sub == 2 ? vec2.set(-eps, -eps, 0.0) :
+									vec2.set(-eps, eps, 0.0);
 			return vec2;
 		}
 		else if (link == '_texcoloridSize') {

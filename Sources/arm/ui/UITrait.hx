@@ -188,15 +188,15 @@ class UITrait extends iron.Trait {
 	public var brushPaint = 0;
 	public var selectedTool = 0;
 	public var brush3d = true;
-	public var brushVolum = false;
+	public var brushDepthReject = true;
 	public var brushAngleReject = true;
+	public var brushAngleRejectDot = 0.5;
 	public var bakeType = 0;
 	public var bakeStrength = 1.0;
 	public var bakeRadius = 1.0;
 	public var bakeOffset = 1.0;
 	
 	public var xray = false;
-	// public var mirrorX = false;
 	public var symX = false;
 	public var symY = false;
 	public var symZ = false;
@@ -863,9 +863,9 @@ class UITrait extends iron.Trait {
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == 0 &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-
-			if (!brush3d || in2dView) {
-				var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+			var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+			
+			if (!brush3d || in2dView || decal) {
 				if (decal) {
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
 					#if kha_direct3d11
@@ -881,25 +881,6 @@ class UITrait extends iron.Trait {
 						 selectedTool == ToolParticle) {
 						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
-
-				// if (mirrorX) {
-				// 	var cx = iron.App.x() + iron.App.w() / 2;
-				// 	var nx = cx + (cx - mx);
-				// 	// Separator line
-				// 	g.color = 0x66ffffff;
-				// 	g.fillRect(cx - 1, iron.App.y(), 2, iron.App.h());
-				// 	if (decal) {
-				// 		#if kha_direct3d11
-				// 		g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2, psize, psize);
-				// 		#else
-				// 		g.drawScaledImage(decalImage, nx - psize / 2, my - psize / 2 + psize, psize, -psize);
-				// 		#end
-				// 	}
-				// 	else { // Cursor
-				// 		g.drawScaledImage(cursorImg, nx - psize / 2, my - psize / 2, psize, psize);
-				// 	}
-				// 	g.color = 0xffffffff;
-				// }
 			}
 		}
 
@@ -1217,9 +1198,6 @@ class UITrait extends iron.Trait {
 					if (selectedTool == ToolBrush || selectedTool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 					}
-					if (selectedTool == ToolBrush || selectedTool == ToolEraser || selectedTool == ToolFill || selectedTool == ToolClone || selectedTool == ToolBlur) {
-						brushBias = ui.slider(Id.handle({value: brushBias}), "Bias", 0.0, 1.0, true);
-					}
 
 					ui.combo(Id.handle(), ["Add"], "Blending");
 
@@ -1251,8 +1229,9 @@ class UITrait extends iron.Trait {
 							ui.g.begin(false);
 						}
 					}
+
 					if (selectedTool == ToolFill) {
-						ui.combo(fillTypeHandle, ["Object", "Face"], "Fill Mode");
+						ui.combo(fillTypeHandle, ["Object", "Face", "Angle"], "Fill Mode");
 						if (fillTypeHandle.changed) {
 							if (fillTypeHandle.position == 1) {
 								ui.g.end();
@@ -1275,14 +1254,6 @@ class UITrait extends iron.Trait {
 						if (xrayHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
-
-						// var mirrorHandle = Id.handle({selected: mirrorX});
-						// ui._w = Std.int(60 * sc);
-						// mirrorX = ui.check(mirrorHandle, "Mirror");
-						// if (mirrorHandle.changed) {
-						// 	UINodes.inst.updateCanvasMap();
-						// 	MaterialParser.parsePaintMaterial();
-						// }
 						
 						var symXHandle = Id.handle({selected: false});
 						var symYHandle = Id.handle({selected: false});
@@ -1372,6 +1343,7 @@ class UITrait extends iron.Trait {
 		}
 		else if (work == 2) { // Material
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
+				tabLayers();
 				tabHistory();
 				tabPlugins();
 				tabPreferences();
@@ -1429,7 +1401,7 @@ class UITrait extends iron.Trait {
 		l.material_mask = UITrait.inst.selectedMaterial;
 		function makeFill(g:kha.graphics4.Graphics) {
 			g.end();
-			Layers.updateFillLayers(8);
+			Layers.updateFillLayers(4);
 			MaterialParser.parsePaintMaterial();
 			UITrait.inst.layerPreviewDirty = true;
 			hwnd.redraws = 2;
@@ -1721,7 +1693,7 @@ class UITrait extends iron.Trait {
 					l.objectMask = ui.combo(h, ar, "Object");
 					if (h.changed) {
 						setLayer(l);
-						Layers.updateFillLayers(8);
+						Layers.updateFillLayers(4);
 					}
 					@:privateAccess ui.endElement();
 				}
@@ -1846,17 +1818,31 @@ class UITrait extends iron.Trait {
 					ui.g.begin(false);
 					armory.data.Config.save();
 				}
+
+				brushBias = ui.slider(Id.handle({value: brushBias}), "Paint Bias", 0.0, 1.0, true);
+
 				var brush3dHandle = Id.handle({selected: brush3d});
 				brush3d = ui.check(brush3dHandle, "3D Cursor");
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
-				var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
-				brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
-				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
+				if (brush3d) {
 
-				var brushVolumHandle = Id.handle({selected: brushVolum});
-				brushVolum = ui.check(brushVolumHandle, "Volumetric Paint");
-				if (brushVolumHandle.changed) MaterialParser.parsePaintMaterial();
+					var brushDepthRejectHandle = Id.handle({selected: brushDepthReject});
+					brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
+					if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
+
+					ui.row([1/2,1/2]);
+
+					var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
+					brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
+					if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
+
+					var angleDotHandle = Id.handle({value: brushAngleRejectDot});
+					brushAngleRejectDot = ui.slider(angleDotHandle, "Angle", 0.0, 1.0, true);
+					if (angleDotHandle.changed) {
+						MaterialParser.parsePaintMaterial();
+					}
+				}
 			}
 
 			ui.separator();

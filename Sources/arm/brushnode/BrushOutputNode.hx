@@ -47,7 +47,7 @@ class BrushOutputNode extends LogicNode {
 			if (UITrait.inst.selectedTool == ToolColorId && UITrait.inst.assets.length > 0 && down) {
 				UITrait.inst.colorIdPicked = true;
 			}
-			// Prevent painting the same spot - save perf & reduce projection paint jittering caused by _sub offset
+			// Prevent painting the same spot
 			if (down && UITrait.inst.paintVec.x == UITrait.inst.lastPaintX && UITrait.inst.paintVec.y == UITrait.inst.lastPaintY) {
 				UITrait.inst.painted++;
 			}
@@ -62,11 +62,12 @@ class BrushOutputNode extends LogicNode {
 			}
 
 			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
-			var paintFrames = decal ? 1 : 8;
+			var paintFrames = decal ? 1 : 4;
 
 			if (UITrait.inst.painted <= paintFrames) {
 				UITrait.inst.pdirty = 1;
 				UITrait.inst.rdirty = 2;
+				UITrait.inst.sub = (UITrait.inst.sub + 1) % 4;
 			}
 		}
 

@@ -102,20 +102,21 @@ class MaterialBuilder {
 			return con_paint;
 		}
 
-		#if kha_direct3d11
-		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
-		#else
-		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, tex.y * 2.0 - 1.0);');
-		#end
-
 		var faceFill = UITrait.inst.selectedTool == ToolFill && UITrait.inst.fillTypeHandle.position == 1;
 		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
-
-		if (!faceFill && !decal) {
-			// Fix seams at uv borders
+		if (!faceFill && !decal) { // Fix seams at uv borders
 			vert.add_uniform('vec2 sub', '_sub');
-			vert.write('tpos += sub;');
+			vert.write('vec2 subtex = tex + sub;');
 		}
+		else {
+			vert.write('vec2 subtex = tex;');
+		}
+
+		#if kha_direct3d11
+		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
+		#else
+		vert.write('vec2 tpos = vec2(subtex.xy);');
+		#end
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
@@ -164,11 +165,14 @@ class MaterialBuilder {
 			UITrait.inst.selectedTool == ToolParticle ||
 			decal) {
 			
-			if (!UITrait.inst.xray && !UITrait.inst.brushVolum) {
+			var depthReject = !UITrait.inst.xray;
+			if (UITrait.inst.brush3d && !UITrait.inst.brushDepthReject) depthReject = false;
+
+			if (depthReject) {
 				#if (kha_opengl || kha_webgl)
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) { discard; }');
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
 				#else
-				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) { discard; }');
+				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) discard;');
 				#end
 			}
 
@@ -184,7 +188,6 @@ class MaterialBuilder {
 					frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 					#end
 
-					// Continuous paint
 					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
 					#if (kha_opengl || kha_webgl)
 					frag.write('vec2 inp2 = inp;');
@@ -206,10 +209,11 @@ class MaterialBuilder {
 						frag.write('wn = normalize(wn);');
 						frag.write('float planeDist = dot(wn, winp.xyz - wposition.xyz);');
 						
-						if (UITrait.inst.brushAngleReject) {
+						if (UITrait.inst.brushAngleReject && !UITrait.inst.xray) {
 							frag.write('if (planeDist < -0.01) discard;');
 							frag.n = true;
-							frag.write('if (dot(wn, n) < 0.5) discard;');
+							var angle = UITrait.inst.brushAngleRejectDot;
+							frag.write('if (dot(wn, n) < $angle) discard;');
 						}
 					}
 
@@ -238,17 +242,14 @@ class MaterialBuilder {
 					frag.write('float dist = length(pa - ba * h);');
 					frag.write('if (dist > brushRadius) discard;');
 
-					//
-
+					// Non-continuous
 					// frag.write('float dist = distance(wposition, winp);');
-					// frag.write('if (dist > brushRadius) { discard; }');
 				}
-				else {
+				else { // !paint3d
 					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
 					frag.write('binp.x *= aspectRatio;');
 					frag.write('binp = binp * 0.5 + 0.5;');
 
-					// Continuos paint
 					frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
 					frag.write('binplast.x *= aspectRatio;');
 					frag.write('binplast = binplast * 0.5 + 0.5;');
@@ -258,40 +259,44 @@ class MaterialBuilder {
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');
 					
-					// if (!UITrait.inst.mirrorX) {
-						frag.write('if (dist > brushRadius) { discard; }');
-					// }
-					// else {
-					// 	frag.write('vec2 binp2 = vec2(0.5 - (binp.x - 0.5), binp.y), binplast2 = vec2(0.5 - (binplast.x - 0.5), binplast.y);');
-					// 	frag.write('vec2 pa2 = bsp.xy - binp2.xy, ba2 = binplast2.xy - binp2.xy;');
-					// 	frag.write('float h2 = clamp(dot(pa2, ba2) / dot(ba2, ba2), 0.0, 1.0);');
-					// 	frag.write('float dist2 = length(pa2 - ba2 * h2);');
-					// 	frag.write('if (dist > brushRadius && dist2 > brushRadius) { discard; }');
-					// }
-					//
+					frag.write('if (dist > brushRadius) discard;');
 
+					// Non-continuous
 					// frag.write('float dist = distance(bsp.xy, binp.xy);');
-					// frag.write('if (dist > brushRadius) { discard; }');
 				}
 			}
 		}
 		else { // Fill, Bake
 			frag.write('float dist = 0.0;');
+
+			var angleFill = UITrait.inst.selectedTool == ToolFill && UITrait.inst.fillTypeHandle.position == 2;
+			if (angleFill) {
+				frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+				frag.add_uniform('sampler2D gbuffer0');
+				frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
+				frag.write('vec3 wn;');
+				frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
+				frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
+				frag.write('wn = normalize(wn);');
+				frag.n = true;
+				var angle = UITrait.inst.brushAngleRejectDot;
+				frag.write('if (dot(wn, n) < $angle) discard;');
+			}
 		}
 
 		if (UITrait.inst.colorIdPicked) {
 			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = fract(tex);');
+			vert.write('texCoordPick = fract(subtex);');
 			frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
 			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 			frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
 			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
-			frag.write('if (any(c1 != c2)) { discard; }');
+			frag.write('if (any(c1 != c2)) discard;');
 		}
 		else if (faceFill) { // TODO: allow to combine with colorid mask
 			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = fract(tex);');
+			vert.write('texCoordPick = fract(subtex);');
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
 			frag.add_uniform('float textrianglemapSize', '_texpaintSize');
@@ -303,7 +308,7 @@ class MaterialBuilder {
 			#end
 			frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
 			frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
-			frag.write('if (any(c1 != c2)) { discard; }');
+			frag.write('if (any(c1 != c2)) discard;');
 		}
 
 		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
@@ -329,16 +334,7 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
-				// if (UITrait.inst.mirrorX) {
-				// 	frag.write_attrib('vec2 uvsp2 = sp.xy - vec2(1.0 - inp.x, inp.y);');
-				// 	frag.write_attrib('uvsp2.x *= aspectRatio;');
-				// 	frag.write_attrib('uvsp2 *= 0.21 / brushRadius;');
-				// 	frag.write_attrib('uvsp2 += vec2(0.5, 0.5);');
-				// 	frag.write_attrib('if ((uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) && (uvsp2.x < 0.01 || uvsp2.y < 0.01 || uvsp2.x > 0.99 || uvsp2.y > 0.99)) { discard; }');
-				// }
-				// else {
-					frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) { discard; }');
-				// }
+				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) discard;');
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
@@ -355,7 +351,7 @@ class MaterialBuilder {
 		else if (UITrait.inst.brushPaint == 0) {
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = tex * brushScale;');
+			vert.write('texCoord = subtex * brushScale;');
 
 			if (UITrait.inst.brushRot > 0.0) {
 				var a = UITrait.inst.brushRot * (Math.PI / 180);
@@ -515,10 +511,6 @@ class MaterialBuilder {
 		}
 		else { // brush cursor mask
 			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-			// if (UITrait.inst.mirrorX && UITrait.inst.selectedTool == ToolBrush) {
-			// 	frag.write('str += clamp((brushRadius - dist2) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
-			// 	frag.write('str = clamp(str, 0.0, 1.0);');
-			// }
 		}
 
 		// Manual blending to preserve memory

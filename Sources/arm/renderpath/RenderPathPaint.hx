@@ -108,7 +108,9 @@ class RenderPathPaint {
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
 				path.bindTarget("_main", "gbufferD");
-				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
+				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) {
+					path.bindTarget("gbuffer0", "gbuffer0");
+				}
 				path.bindTarget(blendB, "paintmask");
 				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");
@@ -137,9 +139,9 @@ class RenderPathPaint {
 			tool != ToolEraser &&
 			tool != ToolClone &&
 			tool != ToolBlur &&
-			tool != ToolParticle &&
-			tool != ToolDecal &&
-			tool != ToolText) {
+			tool != ToolParticle) {
+			// tool != ToolDecal &&
+			// tool != ToolText) {
 				return;
 		}
 
