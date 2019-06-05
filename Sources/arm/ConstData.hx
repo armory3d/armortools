@@ -257,11 +257,11 @@ void main() {
 	wpos = invVP * wpos;
 	wpos.xyz /= wpos.w;
 	vec3 n = normalize(
-		getNormal(mouseinv + vec2(step.x, step.y)) +
-		getNormal(mouseinv + vec2(-step.x, step.y)) +
-		getNormal(mouseinv + vec2(-step.x, -step.y)) +
-		getNormal(mouseinv + vec2(step.x, -step.y)) +
-		getNormal(mouseinv)
+		getNormal(mouse + vec2(step.x, step.y)) +
+		getNormal(mouse + vec2(-step.x, step.y)) +
+		getNormal(mouse + vec2(-step.x, -step.y)) +
+		getNormal(mouse + vec2(step.x, -step.y)) +
+		getNormal(mouse)
 	);
 	float ax = acos(dot(vec3(1,0,0), vec3(n.x,0,0)));
 	float az = acos(dot(vec3(0,0,1), vec3(0,0,n.z)));
@@ -278,8 +278,8 @@ uniform sampler2D tex;
 in vec2 texCoord;
 out vec4 FragColor;
 void main() {
-	float4 col = texture(tex, texCoord);
-	FragColor = float4(col.rgb / col.a, col.a);
+	vec4 col = texture(tex, texCoord);
+	FragColor = vec4(col.rgb / col.a, col.a);
 }
 ";
 

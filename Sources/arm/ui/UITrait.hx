@@ -214,7 +214,7 @@ class UITrait extends iron.Trait {
 
 	public var lastPaintVecX = -1.0;
 	public var lastPaintVecY = -1.0;
-	var frame = 0;
+	public var frame = 0;
 	public var paint2d = false;
 
 	var altStartedX = -1.0;

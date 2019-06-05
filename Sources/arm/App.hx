@@ -351,8 +351,17 @@ class App extends iron.Trait {
 
 		if (showFiles || showBox) UIBox.update();
 
+		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 		var isPicker = UITrait.inst.selectedTool == ToolPicker;
-		Zui.alwaysRedrawWindow = showMenu || isDragging || (!UITrait.inst.brush3d) || showBox || isPicker || UIView2D.inst.show;
+		Zui.alwaysRedrawWindow = 
+			showMenu ||
+			isDragging ||
+			(!UITrait.inst.brush3d) ||
+			showBox ||
+			isPicker ||
+			UIView2D.inst.show ||
+			decal ||
+			UITrait.inst.frame < 3;
 		if (Zui.alwaysRedrawWindow && UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0;
 	}
 
@@ -365,7 +374,12 @@ class App extends iron.Trait {
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
 			var ratio = size / img.width;
 			var h = img.height * ratio;
-			g.drawScaledImage(img, mouse.x + iron.App.x() + dragOffX, mouse.y + iron.App.y() + dragOffY, size, h);
+			#if (kha_opengl || kha_webgl)
+			var inv = dragMaterial != null ? h : 0;
+			#else
+			var inv = 0;
+			#end
+			g.drawScaledImage(img, mouse.x + iron.App.x() + dragOffX, mouse.y + iron.App.y() + dragOffY + inv, size, h - inv * 2);
 		}
 
 		var usingMenu = false;

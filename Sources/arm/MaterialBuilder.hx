@@ -115,7 +115,7 @@ class MaterialBuilder {
 		#if kha_direct3d11
 		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
 		#else
-		vert.write('vec2 tpos = vec2(subtex.xy);');
+		vert.write('vec2 tpos = vec2(subtex.xy * 2.0 - 1.0);');
 		#end
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
@@ -189,12 +189,7 @@ class MaterialBuilder {
 					#end
 
 					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
-					#if (kha_opengl || kha_webgl)
-					frag.write('vec2 inp2 = inp;');
-					#else
-					frag.write('vec2 inp2 = vec2(inp.x, 1.0 - inp.y);');
-					#end
-					frag.write('float4 winp = float4(inp2.xy * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
+					frag.write('vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
 					frag.write('winp = mul(winp, invVP);');
 					frag.write('winp.xyz /= winp.w;');
 					frag.wposition = true;
@@ -202,12 +197,16 @@ class MaterialBuilder {
 					if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
 						frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
 						frag.add_uniform('sampler2D gbuffer0');
-						frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
+						#if (kha_opengl || kha_webgl)
+						frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
+						#else
+						frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
+						#end
 						frag.write('vec3 wn;');
 						frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
 						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
 						frag.write('wn = normalize(wn);');
-						frag.write('float planeDist = dot(wn, winp.xyz - wposition.xyz);');
+						frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
 						
 						if (UITrait.inst.brushAngleReject && !UITrait.inst.xray) {
 							frag.write('if (planeDist < -0.01) discard;');
@@ -223,12 +222,7 @@ class MaterialBuilder {
 					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 					#end
 
-					#if (kha_opengl || kha_webgl)
-					frag.write('vec2 inplast2 = inplast;');
-					#else
-					frag.write('vec2 inplast2 = vec2(inplast.x, 1.0 - inplast.y);');
-					#end
-					frag.write('float4 winplast = float4(inplast2.xy * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
+					frag.write('vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
 					frag.write('winplast = mul(winplast, invVP);');
 					frag.write('winplast.xyz /= winplast.w;');
 
@@ -236,14 +230,14 @@ class MaterialBuilder {
 						frag.write('wposition += wn * vec3(planeDist, planeDist, planeDist);');
 					}
 
-					frag.write('vec3 pa = wposition - winp;');
-					frag.write('vec3 ba = winplast - winp;');
+					frag.write('vec3 pa = wposition - winp.xyz;');
+					frag.write('vec3 ba = winplast.xyz - winp.xyz;');
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');
 					frag.write('if (dist > brushRadius) discard;');
 
 					// Non-continuous
-					// frag.write('float dist = distance(wposition, winp);');
+					// frag.write('float dist = distance(wposition, winp.xyz);');
 				}
 				else { // !paint3d
 					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
@@ -273,7 +267,7 @@ class MaterialBuilder {
 			if (angleFill) {
 				frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
-				frag.write('vec2 g0 = textureLod(gbuffer0, inp, 0.0).rg;');
+				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				frag.write('vec3 wn;');
 				frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
 				frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');

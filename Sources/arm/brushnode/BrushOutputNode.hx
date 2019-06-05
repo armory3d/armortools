@@ -67,7 +67,6 @@ class BrushOutputNode extends LogicNode {
 			if (UITrait.inst.painted <= paintFrames) {
 				UITrait.inst.pdirty = 1;
 				UITrait.inst.rdirty = 2;
-				UITrait.inst.sub = (UITrait.inst.sub + 1) % 4;
 			}
 		}
 

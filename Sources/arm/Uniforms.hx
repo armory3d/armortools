@@ -53,7 +53,8 @@ class Uniforms {
 	public static function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_sub') {
-			var eps = UITrait.inst.brushBias * 0.0004 * Config.getTextureResBias();
+			UITrait.inst.sub = (UITrait.inst.sub + 1) % 4;
+			var eps = UITrait.inst.brushBias * 0.00022 * Config.getTextureResBias();
 			UITrait.inst.sub == 0 ? vec2.set(eps, eps, 0.0) :
 			UITrait.inst.sub == 1 ? vec2.set(eps, -eps, 0.0) :
 			UITrait.inst.sub == 2 ? vec2.set(-eps, -eps, 0.0) :
