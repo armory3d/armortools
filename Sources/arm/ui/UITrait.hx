@@ -2485,7 +2485,7 @@ class UITrait extends iron.Trait {
 	}
 
 	function tabProperties() {
-		if (ui.tab(htab, 'Properties')) {
+		if (ui.tab(htab1, 'Properties')) {
 			if (selectedObject != null) {
 
 				var h = Id.handle();

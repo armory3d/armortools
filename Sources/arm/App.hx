@@ -355,12 +355,12 @@ class App extends iron.Trait {
 		var isPicker = UITrait.inst.selectedTool == ToolPicker;
 		Zui.alwaysRedrawWindow = 
 			showMenu ||
-			isDragging ||
-			(!UITrait.inst.brush3d) ||
 			showBox ||
+			isDragging ||
 			isPicker ||
-			UIView2D.inst.show ||
 			decal ||
+			UIView2D.inst.show ||
+			!UITrait.inst.brush3d ||
 			UITrait.inst.frame < 3;
 		if (Zui.alwaysRedrawWindow && UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0;
 	}

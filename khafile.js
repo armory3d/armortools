@@ -6,7 +6,6 @@ project.addLibrary("iron");
 project.addLibrary("zui");
 project.addLibrary("iron_format");
 project.addShaders("compiled/Shaders/*.glsl", { noembed: false});
-project.addShaders("compiled/Hlsl/*.glsl", { noprocessing: true, noembed: false });
 project.addAssets("compiled/Assets/**", { notinlist: true , destination: "data/{name}" });
 project.addAssets("compiled/Shaders/*.arm", { notinlist: true , destination: "data/{name}" });
 project.addAssets("Bundled/data/**", { notinlist: true , destination: "data/{name}" });
@@ -53,6 +52,13 @@ project.addDefine('arm_resizable');
 project.addDefine('arm_data_dir');
 project.addParameter('--macro include("arm.brushnode")');
 project.addParameter('-dce full');
+
+if (process.platform === 'win32') {
+	project.addShaders("compiled/Hlsl/*.glsl", { noprocessing: true, noembed: false });
+}
+else {
+	project.addShaders("compiled/Glsl/*.glsl", { noembed: false });
+}
 
 if (process.platform === 'win32') {
 	project.addAssets("Bundled/cmft/cmft.exe", { notinlist: true , destination: "data/{name}" });

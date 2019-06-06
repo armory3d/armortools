@@ -238,66 +238,70 @@ class UINodes extends iron.Trait {
 		}
 
 		// Node search popup
-		if (keyboard.started("space")) {
-			var searchHandle = Id.handle();
-			var first = true;
-			UIMenu.show(function(ui:Zui) {
-				ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
-				ui.textInput(searchHandle, "");
-				ui.changed = false;
-				if (first) {
-					first = false;
-					ui.startTextEdit(searchHandle); // Focus search bar
-					ui.textSelectedCurrentText = searchHandle.text;
-					searchHandle.text = "";
-					nodeSearchLast = "";
-
-				}
-				var search = ui.textSelectedCurrentText.toLowerCase();
-				if (searchHandle.text != "") search = searchHandle.text;
-				if (search != nodeSearchLast) {
-					nodeSearchOffset = 0;
-					nodeSearchLast = search;
-				}
-				if (ui.isKeyDown) { // Move selection
-					if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
-					if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
-				}
-				var enter = keyboard.down("enter");
-				var count = 0;
-				var BUTTON_COL = ui.t.BUTTON_COL;
-				for (list in NodeCreator.list) {
-					for (n in list) {
-						if (n.name.toLowerCase().indexOf(search) >= 0) {
-							ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
-							if (ui.button(n.name, Left) || (enter && count == nodeSearchOffset)) {
-								nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
-								canvas.nodes.push(nodeSearchSpawn);
-								nodes.nodesSelected = [nodeSearchSpawn];
-								nodes.nodesDrag = true;
-								hwnd.redraws = 2;
-								if (enter) {
-									ui.changed = true;
-									count = 6; // Trigger break
-								}
-							}
-							if (++count > 6) break;
-						}
-					}
-					if (count > 6) break;
-				}
-				if (enter && count == 0) { // Hide popup on enter when node is not found
-					ui.changed = true;
-					searchHandle.text = "";
-				}
-				ui.t.BUTTON_COL = BUTTON_COL;
-			});
-		}
+		if (keyboard.started("space")) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
 			ui.inputY = mouse.y + App.y();
 			nodeSearchSpawn = null;
 		}
+	}
+
+	function nodeSearch(x = -1, y = -1) {
+		var keyboard = iron.system.Input.getKeyboard();
+		var searchHandle = Id.handle();
+		var first = true;
+		UIMenu.show(function(ui:Zui) {
+			ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
+			ui.textInput(searchHandle, "");
+			ui.changed = false;
+			if (first) {
+				first = false;
+				ui.startTextEdit(searchHandle); // Focus search bar
+				ui.textSelectedCurrentText = searchHandle.text;
+				searchHandle.text = "";
+				nodeSearchLast = "";
+			}
+			var search = ui.textSelectedCurrentText.toLowerCase();
+			if (searchHandle.text != "") search = searchHandle.text;
+			if (search != nodeSearchLast) {
+				nodeSearchOffset = 0;
+				nodeSearchLast = search;
+			}
+			if (ui.isKeyDown) { // Move selection
+				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
+				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
+			}
+			var enter = keyboard.down("enter");
+			var count = 0;
+			var BUTTON_COL = ui.t.BUTTON_COL;
+			var nodeList = canvasType == 0 ? NodeCreator.list : NodeCreatorBrush.list;
+			for (list in nodeList) {
+				for (n in list) {
+					if (n.name.toLowerCase().indexOf(search) >= 0) {
+						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
+						if (ui.button(n.name, Left) || (enter && count == nodeSearchOffset)) {
+							var canvas = getCanvas();
+							nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
+							canvas.nodes.push(nodeSearchSpawn);
+							nodes.nodesSelected = [nodeSearchSpawn];
+							nodes.nodesDrag = true;
+							hwnd.redraws = 2;
+							if (enter) {
+								ui.changed = true;
+								count = 6; // Trigger break
+							}
+						}
+						if (++count > 6) break;
+					}
+				}
+				if (count > 6) break;
+			}
+			if (enter && count == 0) { // Hide popup on enter when node is not found
+				ui.changed = true;
+				searchHandle.text = "";
+			}
+			ui.t.BUTTON_COL = BUTTON_COL;
+		}, x, y);
 	}
 
 	public function getNodeX():Int {
@@ -433,6 +437,11 @@ class UINodes extends iron.Trait {
 					ui._y = 3;
 				}
 			}
+
+			ui._x += ew + 3;
+			ui._y = 3;
+			if (ui.button("Search")) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+			if (ui.isHovered) ui.tooltip("(Space)");
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 		}

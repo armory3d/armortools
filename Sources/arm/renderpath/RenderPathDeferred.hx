@@ -186,7 +186,8 @@ class RenderPathDeferred {
 		lastY = mouse.y;
 
 		if (!UITrait.inst.dirty()) {
-			if (mx != lastX || my != lastY || UITrait.inst.ddirty > -2 || mouse.locked) {
+			if (mx != lastX || my != lastY || mouse.locked) UITrait.inst.ddirty = 0;
+			if (UITrait.inst.ddirty > -2) {
 				path.setTarget("");
 				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
 				ssaa4 ?

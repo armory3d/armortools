@@ -211,12 +211,12 @@ class UIMenu {
 		g.begin(false);
 	}
 
-	public static function show(commands:Zui->Void = null) {
+	public static function show(commands:Zui->Void = null, x = -1, y = -1) {
 		var uibox = App.uibox;
 		App.showMenu = true;
 		menuCommands = commands;
-		menuX = Std.int(iron.App.x() + iron.system.Input.getMouse().x);
-		menuY = Std.int(iron.App.y() + iron.system.Input.getMouse().y);
+		menuX = x > -1 ? x : Std.int(iron.App.x() + iron.system.Input.getMouse().x);
+		menuY = y > -1 ? y : Std.int(iron.App.y() + iron.system.Input.getMouse().y);
 		var menuw = uibox.ELEMENT_W() * 1.5;
 		if (menuX + menuw > kha.System.windowWidth()) {
 			menuX = Std.int(kha.System.windowWidth() - menuw);
