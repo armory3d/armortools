@@ -144,6 +144,10 @@ class RenderPathPaint {
 			// tool != ToolText) {
 				return;
 		}
+		if (!arm.App.uienabled ||
+			UITrait.inst.worktab.position != 0) {
+			return;
+		}
 
 		var path = RenderPathDeferred.path;
 

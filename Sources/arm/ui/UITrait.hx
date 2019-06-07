@@ -1956,9 +1956,10 @@ class UITrait extends iron.Trait {
 				#end
 
 				for (j in 0...5) {
+					var imgw = ui.SCALE > 1 ? 100 : 50;
 					var i = j + row * 5;
 					if (i >= materials.length) {
-						@:privateAccess ui.endElement();
+						@:privateAccess ui.endElement(imgw);
 						continue;
 					}
 					var img = ui.SCALE > 1 ? materials[i].image : materials[i].imageIcon;
@@ -1974,7 +1975,6 @@ class UITrait extends iron.Trait {
 						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
-					var imgw = ui.SCALE > 1 ? 100 : 50;
 					var uix = ui._x;
 					var uiy = ui._y;
 					var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
