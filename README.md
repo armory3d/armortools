@@ -28,7 +28,6 @@ node Kore/make -g direct3d11
 node Kha/make krom -g opengl --shaderversion 330
 cd Krom
 node Kore/make -g opengl --compiler clang --compile
-cp build/Release/Krom Deployment/Krom
 cd Deployment
 strip Krom
 ./Krom ../../build/krom
