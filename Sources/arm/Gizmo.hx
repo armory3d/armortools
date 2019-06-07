@@ -67,8 +67,8 @@ class Gizmo {
 				}
 			}
 			if (kb.started("m")) { // skip voxel
-				UITrait.inst.selectedMaterial2.data.raw.skip_context =
-					UITrait.inst.selectedMaterial2.data.raw.skip_context == '' ? 'voxel' : '';
+				UITrait.inst.selectedMaterialScene.data.raw.skip_context =
+					UITrait.inst.selectedMaterialScene.data.raw.skip_context == '' ? 'voxel' : '';
 			}
 		}
 

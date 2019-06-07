@@ -120,8 +120,8 @@ class UITrait extends iron.Trait {
 	public var hwnd2 = Id.handle();
 	public var materials:Array<MaterialSlot> = null;
 	public var selectedMaterial:MaterialSlot;
-	public var materials2:Array<MaterialSlot> = null;
-	public var selectedMaterial2:MaterialSlot;
+	public var materialsScene:Array<MaterialSlot> = null;
+	public var selectedMaterialScene:MaterialSlot;
 	public var selectedTexture:TAsset = null;
 	public var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
@@ -292,11 +292,11 @@ class UITrait extends iron.Trait {
 			// materials.push(new MaterialSlot());
 			// selectedMaterial = materials[0];
 		}
-		if (materials2 == null) {
-			materials2 = [];
+		if (materialsScene == null) {
+			materialsScene = [];
 			iron.data.Data.getMaterial("Scene", "Material2", function(m:iron.data.MaterialData) {
-				materials2.push(new MaterialSlot(m));
-				selectedMaterial2 = materials2[0];
+				materialsScene.push(new MaterialSlot(m));
+				selectedMaterialScene = materialsScene[0];
 			});
 		}
 
@@ -631,6 +631,17 @@ class UITrait extends iron.Trait {
 		arm.App.resize();
 	}
 
+	function selectMaterialScene(i:Int) {
+		if (materialsScene.length <= i || selectedObject == paintObject) return;
+		selectedMaterialScene = materialsScene[i];
+		if (Std.is(selectedObject, MeshObject)) {
+			cast(selectedObject, MeshObject).materials[0] = selectedMaterialScene.data;
+		}
+		UINodes.inst.updateCanvasMap();
+		MaterialParser.parsePaintMaterial();
+		hwnd.redraws = 2;
+	}
+
 	function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
 		setMaterial(materials[i]);
@@ -649,20 +660,6 @@ class UITrait extends iron.Trait {
 		if (decal) RenderUtil.makeDecalPreview();
 		if (worktab.position == 2) MaterialParser.parseMeshPreviewMaterial();
 		if (current != null) current.begin(false);
-	}
-
-	function selectMaterial2(i:Int) {
-		if (materials2.length <= i) return;
-		selectedMaterial2 = materials2[i];
-
-		if (Std.is(selectedObject, MeshObject)) {
-			cast(selectedObject, MeshObject).materials[0] = selectedMaterial2.data;
-		}
-
-		UINodes.inst.updateCanvasMap();
-		MaterialParser.parsePaintMaterial();
-
-		hwnd.redraws = 2;
 	}
 
 	function selectBrush(i:Int) {
@@ -973,10 +970,10 @@ class UITrait extends iron.Trait {
 
 		if (UITrait.inst.worktab.position == 1) {
 			if (Std.is(o, MeshObject)) {
-				for (i in 0...materials2.length) {
-					if (materials2[i].data == cast(o, MeshObject).materials[0]) {
+				for (i in 0...materialsScene.length) {
+					if (materialsScene[i].data == cast(o, MeshObject).materials[0]) {
 						// selectMaterial(i); // loop
-						selectedMaterial2 = materials2[i];
+						selectedMaterialScene = materialsScene[i];
 						hwnd.redraws = 2;
 						break;
 					}
@@ -1052,6 +1049,16 @@ class UITrait extends iron.Trait {
 				ui._x -= 2;
 				ui._y += 2;
 			}
+			else if (UITrait.inst.worktab.position == 2) {
+				var img = Res.get("icons.png");
+				var imgw = ui.SCALE > 1 ? 100 : 50;
+				ui._x += 2;
+				if (selectedTool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) selectTool(ToolGizmo);
+				if (ui.isHovered) ui.tooltip("Gizmo (G)");
+				ui._x -= 2;
+				ui._y += 2;
+			}
 
 			ui.imageScrollAlign = true;
 		}
@@ -1099,9 +1106,11 @@ class UITrait extends iron.Trait {
 
 				if (worktab.position == 1) {
 					selectTool(ToolGizmo);
+					// RenderUtil.makeMaterialPreview();
 				}
 
 				if (worktab.position == 2) {
+					selectTool(ToolGizmo);
 					MaterialParser.parseMeshPreviewMaterial();
 					mainObject().skip_context = "paint";
 				}
@@ -1275,6 +1284,9 @@ class UITrait extends iron.Trait {
 			else if (UITrait.inst.worktab.position == 1) {
 				// ui.button("Clone");
 			}
+			else if (UITrait.inst.worktab.position == 2) {
+				ui.combo(Id.handle({position: 0}), ["Mesh", "Cube", "Plane", "Sphere", "Cylinder"], "Preview");
+			}
 		}
 
 		if (ui.window(statusHandle, iron.App.x(), kha.System.windowHeight() - headerh, kha.System.windowWidth() - toolbarw - windowW, headerh)) {
@@ -1334,11 +1346,14 @@ class UITrait extends iron.Trait {
 			// grid.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabOutliner();
+				tabPlugins();
+				tabPreferences();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
 				tabProperties();
 			}
 			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
+				tabMaterials();
 			}
 		}
 		else if (work == 2) { // Material
@@ -1911,20 +1926,50 @@ class UITrait extends iron.Trait {
 		}
 	}
 
+	public function removeMaterialCache() {
+		iron.data.Data.cachedMaterials.remove("SceneMaterial2");
+		iron.data.Data.cachedShaders.remove("Material2_data");
+		iron.data.Data.cachedSceneRaws.remove("Material2_data");
+		// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
+	}
+
+	function getSelectedMaterial() { return worktab.position == 1 ? selectedMaterialScene : selectedMaterial; }
+
 	function tabMaterials() {
+
+		var isScene = worktab.position == 1;
+		var materials = isScene ? materialsScene : this.materials;
+		var selectMaterial = isScene ? selectMaterialScene : this.selectMaterial;
+
 		if (ui.tab(htab1, "Materials")) {
 			ui.row([1/4,1/4,1/4]);
 			if (ui.button("New")) {
-				ui.g.end();
-				headerHandle.redraws = 2;
-				selectedMaterial = new MaterialSlot(materials[0].data);
-				materials.push(selectedMaterial);
-				UINodes.inst.updateCanvasMap();
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-				var decal = selectedTool == ToolDecal || selectedTool == ToolText;
-				if (decal) RenderUtil.makeDecalPreview();
-				ui.g.begin(false);
+				if (isScene) {
+					if (selectedObject != paintObject) {
+						removeMaterialCache();
+						iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+							ui.g.end();
+							md.name = "Material2." + materials.length;
+							selectedMaterialScene = new MaterialSlot(md);
+							materials.push(selectedMaterialScene);
+							selectMaterial(materials.length - 1);
+							RenderUtil.makeMaterialPreview();
+							ui.g.begin(false);
+						});
+					}
+				}
+				else {
+					ui.g.end();
+					headerHandle.redraws = 2;
+					selectedMaterial = new MaterialSlot(materials[0].data);
+					materials.push(selectedMaterial);
+					UINodes.inst.updateCanvasMap();
+					MaterialParser.parsePaintMaterial();
+					RenderUtil.makeMaterialPreview();
+					var decal = selectedTool == ToolDecal || selectedTool == ToolText;
+					if (decal) RenderUtil.makeDecalPreview();
+					ui.g.begin(false);
+				}
 			}
 
 			if (ui.button("Import")) {
@@ -1965,7 +2010,7 @@ class UITrait extends iron.Trait {
 					var img = ui.SCALE > 1 ? materials[i].image : materials[i].imageIcon;
 					var imgFull = materials[i].image;
 
-					if (selectedMaterial == materials[i]) {
+					if (getSelectedMaterial() == materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 51 - App.C.window_scale;
@@ -1979,13 +2024,13 @@ class UITrait extends iron.Trait {
 					var uiy = ui._y;
 					var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
 					if (state == State.Started) {
-						if (selectedMaterial != materials[i]) selectMaterial(i);
+						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
 						if (iron.system.Time.time() - selectTime < 0.25) showMaterialNodes();
 						selectTime = iron.system.Time.time();
 						var mouse = iron.system.Input.getMouse();
 						arm.App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
 						arm.App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
-						arm.App.dragMaterial = selectedMaterial;
+						arm.App.dragMaterial = getSelectedMaterial();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.show(function(ui:Zui) {
@@ -2166,21 +2211,23 @@ class UITrait extends iron.Trait {
 		}
 	}
 
+	function importMesh() {
+		arm.App.showFiles = true;
+		@:privateAccess Ext.lastPath = ""; // Refresh
+		arm.App.whandle.redraws = 2;
+		arm.App.foldersOnly = false;
+		arm.App.showFilename = false;
+		UIFiles.filters = "obj,fbx,blend,gltf,arm";
+		arm.App.filesDone = function(path:String) {
+			Importer.importFile(path);
+		}
+	}
+
 	function tabMeshes() {
 		if (ui.tab(htab2, "Meshes")) {
 			ui.row([1/4]);
 
-			if (ui.button("Import")) {
-				arm.App.showFiles = true;
-				@:privateAccess Ext.lastPath = ""; // Refresh
-				arm.App.whandle.redraws = 2;
-				arm.App.foldersOnly = false;
-				arm.App.showFilename = false;
-				UIFiles.filters = "obj,fbx,blend,gltf,arm";
-				arm.App.filesDone = function(path:String) {
-					Importer.importFile(path);
-				}
-			}
+			if (ui.button("Import")) importMesh();
 			if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
 
 			isUdim = ui.check(Id.handle({selected: isUdim}), "UDIM import");
@@ -2450,6 +2497,9 @@ class UITrait extends iron.Trait {
 
 	function tabOutliner() {
 		if (ui.tab(htab, "Outliner")) {
+			ui.row([1/4]);
+			if (ui.button("Import")) importMesh();
+
 			var i = 0;
 			function drawList(h:Handle, o:Object) {
 				if (o.name.charAt(0) == '.') return; // Hidden
@@ -2601,70 +2651,5 @@ class UITrait extends iron.Trait {
 
 			// if (ui.button("LNodes")) showLogicNodes();
 		}
-
-		// ui.separator();
-		// if (ui.panel(Id.handle({selected: true}), "Materials", 1)) {
-
-		// 	for (row in 0...Std.int(Math.ceil(materials2.length / 5))) { 
-		// 		ui.row([1/5,1/5,1/5,1/5,1/5]);
-
-		// 		if (row > 0) ui._y += 6;
-
-		// 		#if (kha_opengl || kha_webgl)
-		// 		ui.imageInvertY = true; // Material preview
-		// 		#end
-
-		// 		for (j in 0...5) {
-		// 			var i = j + row * 5;
-		//			if (i >= materials2.length) {
-		// 				@:privateAccess ui.endElement();
-		//				continue;
-		//			}
-		// 			var img = materials2[i].imageIcon;
-
-		// 			if (selectedMaterial2 == materials2[i]) {
-		// 				// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
-		// 				var off = row % 2 == 1 ? 1 : 0;
-		// 				var w = 51 - App.C.window_scale;
-		// 				ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-		// 				ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-		// 				ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-		// 				ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
-		// 			}
-
-		// 			if (ui.image(img) == State.Started) {
-		// 				if (selectedMaterial2 != materials2[i]) selectMaterial2(i);
-		// 				if (iron.system.Time.time() - selectTime < 0.3) showMaterialNodes();
-		// 				selectTime = iron.system.Time.time();
-		// 			}
-		// 			if (ui.isHovered) ui.tooltipImage(img);
-		// 		}
-
-		// 		#if (kha_opengl || kha_webgl)
-		// 		ui.imageInvertY = false; // Material preview
-		// 		#end
-		// 	}
-
-		// 	ui.row([1/2,1/2]);
-		// 	if (ui.button("New")) {
-
-		// 		iron.data.Data.cachedMaterials.remove("SceneMaterial2");
-		// 		iron.data.Data.cachedShaders.remove("Material2_data");
-		// 		iron.data.Data.cachedSceneRaws.remove("Material2_data");
-		// 		// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
-		// 		iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
-		// 			md.name = "Material2." + materials2.length;
-		// 			ui.g.end();
-		// 			var m = new MaterialSlot(md);
-		// 			materials2.push(m);
-		// 			selectMaterial2(materials2.length - 1);
-		// 			RenderUtil.makeMaterialPreview();
-		// 			ui.g.begin(false);
-		// 		});
-		// 	}
-		// 	if (ui.button("Nodes")) {
-		// 		showMaterialNodes();
-		// 	}
-		// }
 	}
 }

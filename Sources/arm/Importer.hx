@@ -117,8 +117,18 @@ class Importer {
 			if (valid) importTexture(f);
 		}
 		// Create material
-		UITrait.inst.selectedMaterial = new MaterialSlot();
-		UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+		var isScene = UITrait.inst.worktab.position == 1;
+		if (isScene) {
+			UITrait.inst.removeMaterialCache();
+			iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+				UITrait.inst.selectedMaterialScene = new MaterialSlot(md);
+				UITrait.inst.materialsScene.push(UITrait.inst.selectedMaterialScene);
+			});
+		}
+		else {
+			UITrait.inst.selectedMaterial = new MaterialSlot();
+			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+		}
 		UINodes.inst.updateCanvasMap();
 		var nodes = UINodes.inst.nodes;
 		var canvas = UINodes.inst.canvas;
@@ -199,11 +209,9 @@ class Importer {
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 			canvas.links.push(l);
 		}
-		iron.system.Tween.timer(0.01, function() {
-			arm.MaterialParser.parsePaintMaterial();
-			RenderUtil.makeMaterialPreview();
-			UITrait.inst.hwnd1.redraws = 2;
-		});
+		arm.MaterialParser.parsePaintMaterial();
+		RenderUtil.makeMaterialPreview();
+		UITrait.inst.hwnd1.redraws = 2;
 		#end
 	}
 
@@ -923,7 +931,7 @@ class Importer {
 			// Append
 			if (UITrait.inst.worktab.position == 1) {
 				var mats = new haxe.ds.Vector(1);
-				mats[0] = UITrait.inst.selectedMaterial2.data;
+				mats[0] = UITrait.inst.selectedMaterialScene.data;
 				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
 				path = StringTools.replace(path, "\\", "/");
 				var ar = path.split("/");

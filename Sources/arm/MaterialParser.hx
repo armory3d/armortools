@@ -67,7 +67,7 @@ class MaterialParser {
 			UITrait.inst.rdirty = 1;
 		}
 
-		var m = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterial2.data : UITrait.inst.materials[0].data;
+		var m = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterialScene.data : UITrait.inst.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 
 			var sc:ShaderContext = null;

@@ -97,18 +97,15 @@ class UINodes extends iron.Trait {
 
 	public function updateCanvasMap() {
 		if (UITrait.inst.worktab.position == 1) {
-			if (UITrait.inst.selectedMaterial2 != null) {
-				if (canvasMap2 == null) canvasMap2 = new Map();
-				var c = canvasMap2.get(UITrait.inst.selectedMaterial2);
-				if (c == null) {
-					c = haxe.Json.parse(canvasBlob);
-					canvasMap2.set(UITrait.inst.selectedMaterial2, c);
-					canvas = c;
-				}
-				else canvas = c;
-
-				if (canvasType == 0) nodes = UITrait.inst.selectedMaterial2.nodes;
+			if (canvasMap2 == null) canvasMap2 = new Map();
+			var c = canvasMap2.get(UITrait.inst.selectedMaterialScene);
+			if (c == null) {
+				c = haxe.Json.parse(canvasBlob);
+				canvasMap2.set(UITrait.inst.selectedMaterialScene, c);
+				canvas = c;
 			}
+			else canvas = c;
+			if (canvasType == 0) nodes = UITrait.inst.selectedMaterialScene.nodes;
 			return;
 		}
 
