@@ -146,7 +146,7 @@ class Project {
 			iron.data.Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
-		var n = UITrait.inst.newObjectNames[UITrait.inst.newObject];
+		var n = UITrait.inst.projectType == 0 ? "Cube" : "Plane";
 		var handle = UITrait.inst.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			iron.data.Data.deleteMesh(handle);

@@ -79,7 +79,7 @@ class UIBox {
 		showCustom(function(ui:Zui) {
 			ui.text("New Project");
 			ui.row([1/2, 1/2]);
-			UITrait.inst.newObject = ui.combo(Id.handle(), UITrait.inst.newObjectNames, "Default Object");
+			UITrait.inst.projectType = ui.combo(Id.handle(), ["Texture Paint", "Material Creation"], "Task");
 			if (ui.button("OK")) {
 				Project.projectNew();
 				ViewportUtil.scaleToBounds();

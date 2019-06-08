@@ -206,8 +206,7 @@ class UITrait extends iron.Trait {
 	public var resHandle = new Handle({position: 1}); // 2048
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
-	public var newObject = 0;
-	public var newObjectNames = ["Cube", "Plane", "Sphere", "Cylinder"];
+	public var projectType = 0; // paint, material
 
 	public var sub = 0;
 	public var vec2 = new iron.math.Vec4();
@@ -658,7 +657,6 @@ class UITrait extends iron.Trait {
 		if (current != null) current.end();
 		var decal = selectedTool == ToolDecal || selectedTool == ToolText;
 		if (decal) RenderUtil.makeDecalPreview();
-		if (worktab.position == 2) MaterialParser.parseMeshPreviewMaterial();
 		if (current != null) current.begin(false);
 	}
 
@@ -1049,16 +1047,6 @@ class UITrait extends iron.Trait {
 				ui._x -= 2;
 				ui._y += 2;
 			}
-			else if (UITrait.inst.worktab.position == 2) {
-				var img = Res.get("icons.png");
-				var imgw = ui.SCALE > 1 ? 100 : 50;
-				ui._x += 2;
-				if (selectedTool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) selectTool(ToolGizmo);
-				if (ui.isHovered) ui.tooltip("Gizmo (G)");
-				ui._x -= 2;
-				ui._y += 2;
-			}
 
 			ui.imageScrollAlign = true;
 		}
@@ -1095,7 +1083,6 @@ class UITrait extends iron.Trait {
 		if (ui.window(workspaceHandle, panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			ui.tab(worktab, "Scene");
-			ui.tab(worktab, "Material");
 			if (worktab.changed) {
 				ddirty = 2;
 				toolbarHandle.redraws = 2;
@@ -1109,15 +1096,8 @@ class UITrait extends iron.Trait {
 					// RenderUtil.makeMaterialPreview();
 				}
 
-				if (worktab.position == 2) {
-					selectTool(ToolGizmo);
-					MaterialParser.parseMeshPreviewMaterial();
-					mainObject().skip_context = "paint";
-				}
-				else {
-					MaterialParser.parseMeshMaterial();
-					mainObject().skip_context = null;
-				}
+				MaterialParser.parseMeshMaterial();
+				mainObject().skip_context = null;
 			}
 		}
 
@@ -1283,9 +1263,6 @@ class UITrait extends iron.Trait {
 			}
 			else if (UITrait.inst.worktab.position == 1) {
 				// ui.button("Clone");
-			}
-			else if (UITrait.inst.worktab.position == 2) {
-				ui.combo(Id.handle({position: 0}), ["Mesh", "Cube", "Plane", "Sphere", "Cylinder"], "Preview");
 			}
 		}
 
