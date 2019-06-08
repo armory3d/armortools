@@ -53,6 +53,13 @@ project.addDefine('arm_data_dir');
 project.addParameter('--macro include("arm.brushnode")');
 project.addParameter('-dce full');
 
+let debug = false;
+if (debug) {
+	project.addDefine('arm_debug');
+	project.addShaders("Libraries/armory/Shaders/debug_draw/**");
+	project.addParameter('--times');
+}
+
 if (process.platform === 'win32') {
 	project.addShaders("compiled/Hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
