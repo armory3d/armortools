@@ -1844,10 +1844,6 @@ class UITrait extends iron.Trait {
 				penPressureHardness = ui.check(Id.handle({selected: penPressureHardness}), "Brush Hardness");
 			}
 
-			#if arm_debug
-			iron.Scene.active.sceneParent.getTrait(armory.trait.internal.DebugConsole).visible = ui.check(Id.handle({selected: false}), "Debug Console");
-			#end
-
 			hssgi = Id.handle({selected: App.C.rp_ssgi});
 			hssr = Id.handle({selected: App.C.rp_ssr});
 			hbloom = Id.handle({selected: App.C.rp_bloom});
