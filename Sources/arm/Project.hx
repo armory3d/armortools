@@ -146,6 +146,15 @@ class Project {
 			iron.data.Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
+		var meshes = iron.Scene.active.meshes;
+		var len = meshes.length;
+		for (i in 0...len) {
+			var m = meshes[len - i - 1];
+			if (UITrait.inst.projectObjects.indexOf(m) == -1) {
+				iron.data.Data.deleteMesh(m.data.handle);
+				m.remove();
+			}
+		}
 		var n = UITrait.inst.projectType == 0 ? "Cube" : "Plane";
 		var handle = UITrait.inst.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {

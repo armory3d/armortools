@@ -9,6 +9,7 @@ class MaterialSlot {
 	public var nodes = new Nodes();
 	public var image:Image = null; // 200
 	public var imageIcon:Image = null; // 50
+	public var previewReady = false;
 	public var data:MaterialData;
 
 	static var counter = 0;

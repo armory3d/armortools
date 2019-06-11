@@ -79,7 +79,6 @@ class UITrait extends iron.Trait {
 	public var brushBlendDirty = true;
 	public var layerPreviewDirty = true;
 	public var layersPreviewDirty = false;
-	var materialPreviewReady = false;
 
 	public var windowW = 280; // Panel width
 	public var toolbarw = 54;
@@ -208,6 +207,7 @@ class UITrait extends iron.Trait {
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	public var projectType = 0; // paint, material
+	public var projectObjects:Array<MeshObject>;
 
 	public var sub = 0;
 	public var vec2 = new iron.math.Vec4();
@@ -340,7 +340,6 @@ class UITrait extends iron.Trait {
 		iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
 			if (frame == 2) {
 				RenderUtil.makeMaterialPreview();
-				materialPreviewReady = true;
 				hwnd1.redraws = 2;
 				MaterialParser.parseMeshMaterial();
 				MaterialParser.parsePaintMaterial();
@@ -375,6 +374,9 @@ class UITrait extends iron.Trait {
 		
 		var resources = ['cursor.png', 'icons.png'];
 		Res.load(resources, done);
+
+		projectObjects = [];
+		for (m in iron.Scene.active.meshes) projectObjects.push(m);
 	}
 
 	public function showMessage(s:String) {
@@ -1919,7 +1921,7 @@ class UITrait extends iron.Trait {
 			ui.row([1/4,1/4,1/4]);
 			if (ui.button("New")) {
 				if (isScene) {
-					if (selectedObject != paintObject) {
+					if (selectedObject != paintObject && Std.is(selectedObject, iron.object.MeshObject)) {
 						removeMaterialCache();
 						iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
 							ui.g.end();
@@ -1996,7 +1998,7 @@ class UITrait extends iron.Trait {
 
 					var uix = ui._x;
 					var uiy = ui._y;
-					var state = materialPreviewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
+					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
 					if (state == State.Started) {
 						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
 						if (iron.system.Time.time() - selectTime < 0.25) showMaterialNodes();

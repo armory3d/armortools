@@ -20,8 +20,10 @@ class RenderUtil {
 		var painto = UITrait.inst.paintObject;
 		UITrait.inst.paintObject = sphere;
 
-		sphere.materials[0] = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterialScene.data : UITrait.inst.materials[0].data;
-		
+		var mat = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterialScene : UITrait.inst.materials[0];
+		mat.previewReady = true;
+		sphere.materials[0] = mat.data;
+
 		UITrait.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
 		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
