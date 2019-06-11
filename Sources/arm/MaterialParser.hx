@@ -173,18 +173,18 @@ class MaterialParser {
 					m.contexts.push(self);
 				});
 
-				var dcon = MaterialBuilder.make_depth(_sd, _matcon);
-				var dcdata = dcon.data;
-				// from_source is synchronous..
-				var dsc = new ShaderContext(dcdata, function(sc:ShaderContext){});
-				m.shader.contexts.push(dsc);
-				var dmatcon:TMaterialContext = {
-					name: "depth"
-				}
-				m.raw.contexts.push(dmatcon);
-				new MaterialContext(dmatcon, function(self:MaterialContext) {
-					m.contexts.push(self);
-				});
+				// var dcon = MaterialBuilder.make_depth(_sd, _matcon);
+				// var dcdata = dcon.data;
+				// // from_source is synchronous..
+				// var dsc = new ShaderContext(dcdata, function(sc:ShaderContext){});
+				// m.shader.contexts.push(dsc);
+				// var dmatcon:TMaterialContext = {
+				// 	name: "depth"
+				// }
+				// m.raw.contexts.push(dmatcon);
+				// new MaterialContext(dmatcon, function(self:MaterialContext) {
+				// 	m.contexts.push(self);
+				// });
 		// });
 	}
 

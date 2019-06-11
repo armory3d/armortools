@@ -115,6 +115,7 @@ class UITrait extends iron.Trait {
 	public var isSubs = false;
 	public var isSubsSpace = 0;
 	public var isUdim = false;
+	public var parseTransform = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();
@@ -2203,8 +2204,10 @@ class UITrait extends iron.Trait {
 			if (ui.button("Import")) importMesh();
 			if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
 
-			isUdim = ui.check(Id.handle({selected: isUdim}), "UDIM import");
+			isUdim = ui.check(Id.handle({selected: isUdim}), "UDIM Import");
 			if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
+
+			parseTransform = ui.check(Id.handle({selected: parseTransform}), "Parse Transforms");
 
 			if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
 				var i = 0;
@@ -2241,16 +2244,20 @@ class UITrait extends iron.Trait {
 					ddirty = 2;
 				}
 
-				ui.row([1/2, 1/2]);
-				var upHandle = Id.handle();
-				var lastUp = upHandle.position;
-				// TODO: Turn into axis rotation instead
-				var axisUp = ui.combo(upHandle, ["Z", "-Z", "Y", "-Y"], "Up Axis", true);
-				if (upHandle.changed && axisUp != lastUp) {
-					MeshUtil.switchUpAxis(axisUp);
+				ui.row([1/3, 1/3, 1/3]);
+				if (ui.button("Rotate X")) {
+					MeshUtil.swapAxis(1, 2);
 					ddirty = 2;
 				}
-				
+				if (ui.button("Rotate Y")) {
+					MeshUtil.swapAxis(2, 0);
+					ddirty = 2;
+				}
+				if (ui.button("Rotate Z")) {
+					MeshUtil.swapAxis(0, 1);
+					ddirty = 2;
+				}
+
 				var dispHandle = Id.handle({value: displaceStrength});
 				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 				if (dispHandle.changed) {

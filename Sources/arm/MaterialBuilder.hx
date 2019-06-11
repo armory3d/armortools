@@ -774,35 +774,35 @@ class MaterialBuilder {
 		return con_mesh;
 	}
 
-	public static function make_depth(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
-		var context_id = 'depth';
-		var con_depth:CyclesShaderContext = data.add_context({
-			name: context_id,
-			depth_write: true,
-			compare_mode: 'less',
-			cull_mode: 'clockwise',
-			color_writes_red: [false],
-			color_writes_green: [false],
-			color_writes_blue: [false],
-			color_writes_alpha: [false],
-			vertex_elements: [{name: "pos", data: 'short4norm'}]
-		});
+	// public static function make_depth(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
+	// 	var context_id = 'depth';
+	// 	var con_depth:CyclesShaderContext = data.add_context({
+	// 		name: context_id,
+	// 		depth_write: true,
+	// 		compare_mode: 'less',
+	// 		cull_mode: 'clockwise',
+	// 		color_writes_red: [false],
+	// 		color_writes_green: [false],
+	// 		color_writes_blue: [false],
+	// 		color_writes_alpha: [false],
+	// 		vertex_elements: [{name: "pos", data: 'short4norm'}]
+	// 	});
 
-		var vert = con_depth.make_vert();
-		var frag = con_depth.make_frag();
+	// 	var vert = con_depth.make_vert();
+	// 	var frag = con_depth.make_frag();
 
-		frag.ins = vert.outs;
+	// 	frag.ins = vert.outs;
 
-		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
-		vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
+	// 	vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+	// 	vert.write('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
 
-		// Cycles.finalize(con_depth);
-		con_depth.data.shader_from_source = true;
-		con_depth.data.vertex_shader = vert.get();
-		con_depth.data.fragment_shader = frag.get();
+	// 	// Cycles.finalize(con_depth);
+	// 	con_depth.data.shader_from_source = true;
+	// 	con_depth.data.vertex_shader = vert.get();
+	// 	con_depth.data.fragment_shader = frag.get();
 
-		return con_depth;
-	}
+	// 	return con_depth;
+	// }
 
 	public static function make_particle(data:CyclesShaderData):CyclesShaderContext {
 		var context_id = 'mesh';

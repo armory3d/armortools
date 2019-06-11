@@ -434,6 +434,7 @@ class Importer {
 
 	static function importFbx(path:String) {
 		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+			iron.format.fbx.FbxParser.parseTransform = UITrait.inst.parseTransform;
 			var obj = new iron.format.fbx.FbxParser(b);
 			makeMesh(obj, path);
 			while (obj.next()) {

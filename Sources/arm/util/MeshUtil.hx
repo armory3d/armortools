@@ -66,47 +66,47 @@ class MeshUtil {
 		});
 	}
 	
-	public static function switchUpAxis(axisUp:Int) {
+	public static function swapAxis(a:Int, b:Int) {
 		for (p in UITrait.inst.paintObjects) {
+			// Remapping vertices, backle up
+			// 0 - x, 1 - y, 2 - z
+			var vas = p.data.raw.vertex_arrays;
+			var pa  = vas[0].values;
+			var na0 = a == 2 ? vas[0].values : vas[1].values;
+			var na1 = b == 2 ? vas[0].values : vas[1].values;
+			var c   = a == 2 ? 3 : a;
+			var d   = b == 2 ? 3 : b;
+			var e   = a == 2 ? 4 : 2;
+			var f   = b == 2 ? 4 : 2;
+
+			for (i in 0...Std.int(pa.length / 4)) {
+				var t = pa[i * 4 + a];
+				pa[i * 4 + a] = pa[i * 4 + b];
+				pa[i * 4 + b] = -t;
+				t = na0[i * e + c];
+				na0[i * e + c] = na1[i * f + d];
+				na1[i * f + d] = -t;
+			}
+
 			var g = p.data.geom;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
-			var verticesDepth = g.vertexBufferMap.get("pos").lockInt16();
-			if (axisUp == 2 || axisUp == 3) { // Y / -Y
-				var sign = axisUp == 2 ? 1 : -1;
-				for (i in 0...Std.int(vertices.length / 8)) {
-					// Swap Y/Z
-					var f = vertices[i * 8 + 1] * sign;
-					vertices[i * 8 + 1] = vertices[i * 8 + 2] * sign;
-					vertices[i * 8 + 2] = -f;
-
-					f = vertices[i * 8 + 5] * sign;
-					vertices[i * 8 + 5] = vertices[i * 8 + 3] * sign;
-					vertices[i * 8 + 3] = -f;
-
-					f = verticesDepth[i * 4 + 1] * sign;
-					verticesDepth[i * 4 + 1] = verticesDepth[i * 4 + 2] * sign;
-					verticesDepth[i * 4 + 2] = -f;
-				}
-			}
-			else if (axisUp == 0 || axisUp == 1) { // Z / -Z
-				var sign = axisUp == 0 ? 1 : -1;
-				for (i in 0...Std.int(vertices.length / 8)) {
-					var f = vertices[i * 8 + 1] * sign;
-					vertices[i * 8 + 1] = -vertices[i * 8 + 2] * sign;
-					vertices[i * 8 + 2] = f;
-
-					f = vertices[i * 8 + 5] * sign;
-					vertices[i * 8 + 5] = -vertices[i * 8 + 3] * sign;
-					vertices[i * 8 + 3] = f;
-
-					f = verticesDepth[i * 4 + 1] * sign;
-					verticesDepth[i * 4 + 1] = -verticesDepth[i * 4 + 2] * sign;
-					verticesDepth[i * 4 + 2] = f;
-				}
+			for (i in 0...Std.int(vertices.length / 8)) {
+				vertices[i * 8    ] = vas[0].values[i * 4    ];
+				vertices[i * 8 + 1] = vas[0].values[i * 4 + 1];
+				vertices[i * 8 + 2] = vas[0].values[i * 4 + 2];
+				vertices[i * 8 + 3] = vas[0].values[i * 4 + 3];
+				vertices[i * 8 + 4] = vas[1].values[i * 2    ];
+				vertices[i * 8 + 5] = vas[1].values[i * 2 + 1];
 			}
 			g.vertexBuffer.unlock();
-			g.vertexBufferMap.get("pos").unlock();
 		}
+
+		if (UITrait.inst.mergedObject != null) {
+			UITrait.inst.mergedObject.remove();
+			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
+			UITrait.inst.mergedObject = null;
+		}
+		mergeMesh();
 	}
 
 	public static function flipNormals() {
