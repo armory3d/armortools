@@ -168,6 +168,9 @@ class MaterialBuilder {
 			var depthReject = !UITrait.inst.xray;
 			if (UITrait.inst.brush3d && !UITrait.inst.brushDepthReject) depthReject = false;
 
+			// TODO: sp.z needs to take height channel into account
+			if (heightUsed) depthReject = false;
+
 			if (depthReject) {
 				#if (kha_opengl || kha_webgl)
 				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
@@ -481,7 +484,11 @@ class MaterialBuilder {
 			if (UITrait.inst.selectedMaterial.paintSubs) {
 				frag.write('float subs = $subs;');
 			}
-			if (height != '0') heightUsed = true;
+			if (height != '0' && !heightUsed) {
+				heightUsed = true;
+				// Height used for the first time, also rebuild vertex shader
+				return make_paint(data, matcon);
+			}
 			if (emis != '0') emisUsed = true;
 			if (subs != '0') subsUsed = true;
 		}
