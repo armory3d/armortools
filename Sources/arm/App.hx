@@ -366,6 +366,7 @@ class App extends iron.Trait {
 		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 		var isPicker = UITrait.inst.selectedTool == ToolPicker;
 		Zui.alwaysRedrawWindow = 
+			kha.System.systemId != "Windows" ||
 			showMenu ||
 			showBox ||
 			isDragging ||
