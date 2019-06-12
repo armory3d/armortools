@@ -104,7 +104,7 @@ class UIMenu {
 						Krom.sysCommand('explorer "https://armorpaint.org/manual"');
 					}
 					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-explorer "https://armorpaint.org/manual"');
+						Krom.sysCommand('xdg-open "https://armorpaint.org/manual"');
 					}
 					else {
 						Krom.sysCommand('open "https://armorpaint.org/manual"');
@@ -118,7 +118,7 @@ class UIMenu {
 						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
 					}
 					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-explorer "https://github.com/armory3d/armorpaint/issues"');
+						Krom.sysCommand('xdg-open "https://github.com/armory3d/armorpaint/issues"');
 					}
 					else {
 						Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
