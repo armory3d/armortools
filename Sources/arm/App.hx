@@ -43,6 +43,7 @@ class App extends iron.Trait {
 	public static var path = '/';
 	public static var showMenu = false;
 	public static var fileArg = "";
+	public static var saveAndQuit = false;
 
 	public static var C:TConfig; // Config
 	public static var K:Dynamic; // Config.Keymap
@@ -81,6 +82,12 @@ class App extends iron.Trait {
 			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
 			dropPath = StringTools.rtrim(dropPath);
 		});
+
+		#if kha_krom
+		if (kha.System.systemId == "Windows") {
+			untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
+		}
+		#end
 
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
 			iron.data.Data.getBlob("themes/theme_dark.arm", function(b:kha.Blob) {
@@ -165,6 +172,11 @@ class App extends iron.Trait {
 				});
 			});
 		});
+	}
+
+	static function saveAndQuitCallback() {
+		saveAndQuit = true;
+		Project.projectSave();
 	}
 
 	public static function parseTheme(b:kha.Blob) {
@@ -413,7 +425,7 @@ class App extends iron.Trait {
 		for (i in 0...s.length) {
 			if (s.charCodeAt(i) > 127) {
 				// Bail out for now :(
-				UITrait.inst.showError("Error: non-ascii file path detected");
+				UITrait.inst.showError("Error: accented / special characters in file path");
 				return false;
 			}
 		}

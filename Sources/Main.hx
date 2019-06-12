@@ -1,6 +1,6 @@
 package ;
 class Main {
-    public static inline var projectName = 'ArmorPaint';
+    public static inline var projectName = 'untitled - ArmorPaint';
     public static inline var projectPackage = 'arm';
     public static inline var voxelgiVoxelSize = 2.0 / 256;
     public static inline var voxelgiHalfExtents = 1;

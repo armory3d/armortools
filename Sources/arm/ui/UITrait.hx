@@ -436,6 +436,7 @@ class UITrait extends iron.Trait {
 		if (projectExport) {
 			projectExport = false;
 			Project.exportProject();
+			if (App.saveAndQuit) kha.System.stop();
 		}
 
 		isScrolling = ui.isScrolling;
@@ -716,9 +717,7 @@ class UITrait extends iron.Trait {
 				else {
 					if (brushTime == 0) { // Paint started
 						pushUndo = true;
-						if (projectPath != "") {
-							kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
-						}
+						kha.Window.get(0).title = arm.App.filenameHandle.text + "* - ArmorPaint";
 						if (selectedTool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
 							cloneDeltaY = (cloneStartY - my) / iron.App.h();
@@ -1288,7 +1287,7 @@ class UITrait extends iron.Trait {
 
 			if (messageTimer > 0) {
 				var _w = ui._w;
-				ui._w = Std.int(ui.ops.font.width(ui.fontSize, message) + 50 * ui.SCALE);
+				ui._w = Std.int(ui.ops.font.width(ui.fontSize, message) + 65 * ui.SCALE);
 				ui.fill(0, 0, ui._w, ui._h, messageColor);
 				ui.text(message);
 				ui._w = _w;
@@ -1299,9 +1298,8 @@ class UITrait extends iron.Trait {
 		tabh = Std.int(kha.System.windowHeight() / 3);
 		gizmo.visible = false;
 		// grid.visible = false;
-		var work = worktab.position;
 
-		if (work == 0) { // Paint
+		if (worktab.position == 0) { // Paint
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabLayers();
 				tabHistory();
@@ -1321,7 +1319,7 @@ class UITrait extends iron.Trait {
 				tabViewport();
 			}
 		}
-		else if (work == 1) { // Scene
+		else if (worktab.position == 1) { // Scene
 			gizmo.visible = true;
 			// grid.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
@@ -1330,28 +1328,11 @@ class UITrait extends iron.Trait {
 				tabPreferences();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
+				tabMaterials();
 				tabProperties();
 			}
 			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
-				tabMaterials();
-			}
-		}
-		else if (work == 2) { // Material
-			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
-				tabLayers();
-				tabHistory();
-				tabPlugins();
-				tabPreferences();
-				
-			}
-			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
-				selectedObject = paintObject;
-				tabMaterials();
-			}
-			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
 				tabTextures();
-				tabMeshes();
-				tabExport();
 				tabViewport();
 			}
 		}
@@ -1820,24 +1801,24 @@ class UITrait extends iron.Trait {
 				brush3d = ui.check(brush3dHandle, "3D Cursor");
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
-				if (brush3d) {
+				ui.enabled = brush3d;
+				var brushDepthRejectHandle = Id.handle({selected: brushDepthReject});
+				brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
+				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
-					var brushDepthRejectHandle = Id.handle({selected: brushDepthReject});
-					brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
-					if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
+				ui.row([1/2,1/2]);
 
-					ui.row([1/2,1/2]);
+				var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
+				brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
+				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
-					var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
-					brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
-					if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
-
-					var angleDotHandle = Id.handle({value: brushAngleRejectDot});
-					brushAngleRejectDot = ui.slider(angleDotHandle, "Angle", 0.0, 1.0, true);
-					if (angleDotHandle.changed) {
-						MaterialParser.parsePaintMaterial();
-					}
+				if (!brushAngleReject) ui.enabled = false;
+				var angleDotHandle = Id.handle({value: brushAngleRejectDot});
+				brushAngleRejectDot = ui.slider(angleDotHandle, "Angle", 0.0, 1.0, true);
+				if (angleDotHandle.changed) {
+					MaterialParser.parsePaintMaterial();
 				}
+				ui.enabled = true;
 			}
 
 			ui.separator();
@@ -2298,17 +2279,11 @@ class UITrait extends iron.Trait {
 				}
 				ui.combo(Id.handle(), ["8bit"], "Color", true);
 
-				if (formatType == 0) {
-					ui.row([1/2, 1/2]);
-				}
-				else {
-					ui.row([1/2]);
-				}
+				ui.row([1/2, 1/2]);
 				formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
-				if (formatType == 0) {
-					formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
-				}
-				
+				ui.enabled = formatType == 0;
+				formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
+				ui.enabled = true;
 				ui.row([1/2, 1/2]);
 				layersExport = ui.combo(Id.handle({position: layersExport}), ["Visible", "Selected"], "Layers", true);
 				outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
