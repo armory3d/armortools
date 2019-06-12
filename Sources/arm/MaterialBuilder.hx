@@ -229,11 +229,10 @@ class MaterialBuilder {
 					frag.write('winplast = mul(winplast, invVP);');
 					frag.write('winplast.xyz /= winplast.w;');
 
-					if (UITrait.inst.xray) {
-						frag.write('wposition += wn * vec3(planeDist, planeDist, planeDist);');
-					}
-
 					frag.write('vec3 pa = wposition - winp.xyz;');
+					if (UITrait.inst.xray) {
+						frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
+					}
 					frag.write('vec3 ba = winplast.xyz - winp.xyz;');
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');

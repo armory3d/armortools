@@ -1953,10 +1953,6 @@ class UITrait extends iron.Trait {
 
 				if (row > 0) ui._y += 6;
 
-				#if (kha_opengl || kha_webgl)
-				ui.imageInvertY = true; // Material preview
-				#end
-
 				for (j in 0...5) {
 					var imgw = ui.SCALE > 1 ? 100 : 50;
 					var i = j + row * 5;
@@ -1976,6 +1972,10 @@ class UITrait extends iron.Trait {
 						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
 						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
+
+					#if (kha_opengl || kha_webgl)
+					ui.imageInvertY = materials[i].previewReady;
+					#end
 
 					var uix = ui._x;
 					var uiy = ui._y;
