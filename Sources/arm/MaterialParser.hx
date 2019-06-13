@@ -37,9 +37,13 @@ class MaterialParser {
 			m.shader.contexts.push(sc);
 			UITrait.inst.ddirty = 2;
 
-			var sc:ShaderContext = null;
-			for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
-			MaterialBuilder.make_voxel(sc);
+			#if rp_voxelao
+			if (MaterialBuilder.heightUsed && armory.data.Config.raw.rp_gi != false) {
+				var sc:ShaderContext = null;
+				for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
+				if (sc != null )MaterialBuilder.make_voxel(sc);
+			}
+			#end
 		// });
 	}
 

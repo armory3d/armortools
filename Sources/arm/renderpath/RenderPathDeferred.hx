@@ -418,6 +418,10 @@ class RenderPathDeferred {
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
+				if (MaterialBuilder.heightUsed) {
+					var tid = UITrait.inst.layers[0].id;
+					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+				}
 				path.drawMeshes("voxel");
 				path.generateMipmaps(voxels);
 			}

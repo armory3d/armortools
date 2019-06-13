@@ -89,6 +89,12 @@ class MeshUtil {
 			}
 
 			var g = p.data.geom;
+			var posbuf = g.vertexBufferMap.get("pos");
+			if (posbuf != null) { // Remove cache
+				posbuf.delete();
+				g.vertexBufferMap.remove("pos");
+			}
+			
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / 8)) {
 				vertices[i * 8    ] = vas[0].values[i * 4    ];

@@ -976,6 +976,13 @@ class Importer {
 				UITrait.inst.paintObject.setData(md);
 				UITrait.inst.paintObject.name = mesh.name;
 
+				var g = UITrait.inst.paintObject.data.geom;
+				var posbuf = g.vertexBufferMap.get("pos");
+				if (posbuf != null) { // Remove cache
+					posbuf.delete();
+					g.vertexBufferMap.remove("pos");
+				}
+
 				// Face camera
 				// UITrait.inst.paintObject.transform.setRotation(Math.PI / 2, 0, 0);
 
