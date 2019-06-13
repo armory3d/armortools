@@ -134,6 +134,7 @@ class Project {
 			UITrait.inst.mergedObject = null;
 		}
 
+		ViewportUtil.resetViewport();
 		UITrait.inst.layerPreviewDirty = true;
 		LayerSlot.counter = 0;
 
@@ -155,12 +156,33 @@ class Project {
 				m.remove();
 			}
 		}
-		var n = UITrait.inst.projectType == 0 ? "Cube" : "Plane";
 		var handle = UITrait.inst.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			iron.data.Data.deleteMesh(handle);
 		}
 
+		if (UITrait.inst.projectType == 1) {
+			var mesh = new iron.format.proc.Plane(1, 1, 512, 512);
+			var raw = {
+				name: "PlaneTess",
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos" },
+					{ values: mesh.nora, attrib: "nor" },
+					{ values: mesh.texa, attrib: "tex" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+			var md = new MeshData(raw, function(md:MeshData) {});
+			iron.data.Data.cachedMeshes.set("ScenePlaneTess", md);
+
+			ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
+		}
+
+		var n = UITrait.inst.projectType == 0 ? "Cube" : "PlaneTess";
 		iron.data.Data.getMesh("Scene", n, function(md:MeshData) {
 			
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
@@ -182,13 +204,6 @@ class Project {
 			UINodes.inst.canvasBrushMap = new Map();
 			UITrait.inst.brushes = [new BrushSlot()];
 			UITrait.inst.selectedBrush = UITrait.inst.brushes[0];
-			
-			if (resetLayers) {
-				// for (l in layers) l.unload();
-				UITrait.inst.layers = [new LayerSlot()];
-				UITrait.inst.setLayer(UITrait.inst.layers[0]);
-				iron.App.notifyOnRender(Layers.initLayers);
-			}
 
 			History.reset();
 			
@@ -199,11 +214,24 @@ class Project {
 			UITrait.inst.assets = [];
 			UITrait.inst.assetNames = [];
 			UITrait.inst.assetId = 0;
-			ViewportUtil.resetViewport();
 			UITrait.inst.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UITrait.inst.hwnd1.redraws = 2;
 			UITrait.inst.hwnd2.redraws = 2;
+
+			if (resetLayers) {
+				// for (l in layers) l.unload();
+				var layer = new LayerSlot();
+				UITrait.inst.layers = [layer];
+				UITrait.inst.setLayer(layer);
+				if (UITrait.inst.projectType == 1) {
+					layer.material_mask = UITrait.inst.materials[0];
+					Layers.updateFillLayers(4);
+				}
+				else {
+					iron.App.notifyOnRender(Layers.initLayers);
+				}
+			}
 
 			if (current != null) current.begin(false);
 		});

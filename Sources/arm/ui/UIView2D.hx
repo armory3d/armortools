@@ -99,8 +99,11 @@ class UIView2D extends iron.Trait {
 				tex = UITrait.inst.getImage(UITrait.inst.selectedTexture);
 			}
 			
-			var th = tw * (tex.height / tex.width);
-			if (tex != null) ui.g.drawScaledImage(tex, tx, ty, tw, th);
+			var th = tw;
+			if (tex != null) {
+				th = tw * (tex.height / tex.width);
+				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+			}
 			ui.g.pipeline = null;
 
 			// UV map
