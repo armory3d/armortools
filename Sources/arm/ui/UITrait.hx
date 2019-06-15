@@ -2146,7 +2146,7 @@ class UITrait extends iron.Trait {
 				// Fill in unused row space
 				if (assets.length % 5 > 0) {
 					for (i in 0...5 - (assets.length % 5)) {
-						@:privateAccess ui.endElement();
+						@:privateAccess ui.endElement(ui._w);
 					}
 				}
 			}
