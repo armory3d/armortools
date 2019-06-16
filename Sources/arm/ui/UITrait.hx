@@ -1758,19 +1758,25 @@ class UITrait extends iron.Trait {
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, "Theme", true);
 				if (themeHandle.changed) {
-					iron.data.Data.getBlob("themes/theme_" + themes[themeHandle.position].toLowerCase() + ".arm", function(b:kha.Blob) {
-						arm.App.parseTheme(b);
-						ui.t = arm.App.theme;
-						// UINodes.inst.applyTheme();
-						headerHandle.redraws = 2;
-						toolbarHandle.redraws = 2;
-						statusHandle.redraws = 2;
-						workspaceHandle.redraws = 2;
-						menuHandle.redraws = 2;
-						hwnd.redraws = 2;
-						hwnd1.redraws = 2;
-						hwnd2.redraws = 2;
-					});
+					var theme = themes[themeHandle.position].toLowerCase();
+					if (theme == "dark") { // Built-in default
+						arm.App.theme = zui.Themes.dark;
+					}
+					else {
+						iron.data.Data.getBlob("themes/theme_" + theme + ".arm", function(b:kha.Blob) {
+							arm.App.theme = haxe.Json.parse(b.toString());
+						});
+					}
+					ui.t = arm.App.theme;
+					// UINodes.inst.applyTheme();
+					headerHandle.redraws = 2;
+					toolbarHandle.redraws = 2;
+					statusHandle.redraws = 2;
+					workspaceHandle.redraws = 2;
+					menuHandle.redraws = 2;
+					hwnd.redraws = 2;
+					hwnd1.redraws = 2;
+					hwnd2.redraws = 2;
 				}
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Node Grid Snap");
 			}

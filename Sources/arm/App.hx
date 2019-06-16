@@ -88,85 +88,84 @@ class App extends iron.Trait {
 		#end
 
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
-			iron.data.Data.getBlob("themes/theme_dark.arm", function(b:kha.Blob) {
-				iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
-					font = f;
+			iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
+				font = f;
+				theme = zui.Themes.dark;
+				theme.FILL_WINDOW_BG = true;
 
-					#if kha_krom // Pre-baked font texture
-					var kimg:kha.Kravur.KravurImage = js.Object.create(untyped kha.Kravur.KravurImage.prototype);
-					@:privateAccess kimg.mySize = 13;
-					@:privateAccess kimg.width = 128;
-					@:privateAccess kimg.height = 128;
-					@:privateAccess kimg.baseline = 10;
-					var chars = new haxe.ds.Vector(ConstData.font_x0.length);
-					// kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
-					kha.graphics2.Graphics.fontGlyphs = [for (i in 32...206) i]; // Fix tiny font
-					// for (i in 0...ConstData.font_x0.length) chars[i] = new Stbtt_bakedchar();
-					for (i in 0...174) chars[i] = new Stbtt_bakedchar();
-					for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
-					for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
-					for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
-					for (i in 0...ConstData.font_y1.length) chars[i].y1 = ConstData.font_y1[i];
-					for (i in 0...ConstData.font_xoff.length) chars[i].xoff = ConstData.font_xoff[i];
-					for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
-					for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
-					@:privateAccess kimg.chars = chars;
-					iron.data.Data.getBlob("font13.bin", function(fontbin:kha.Blob) {
-						@:privateAccess kimg.texture = kha.Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
-						// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
-						@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
-					});
+				#if kha_krom // Pre-baked font texture
+				var kimg:kha.Kravur.KravurImage = js.Object.create(untyped kha.Kravur.KravurImage.prototype);
+				@:privateAccess kimg.mySize = 13;
+				@:privateAccess kimg.width = 128;
+				@:privateAccess kimg.height = 128;
+				@:privateAccess kimg.baseline = 10;
+				var chars = new haxe.ds.Vector(ConstData.font_x0.length);
+				// kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
+				kha.graphics2.Graphics.fontGlyphs = [for (i in 32...206) i]; // Fix tiny font
+				// for (i in 0...ConstData.font_x0.length) chars[i] = new Stbtt_bakedchar();
+				for (i in 0...174) chars[i] = new Stbtt_bakedchar();
+				for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
+				for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
+				for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
+				for (i in 0...ConstData.font_y1.length) chars[i].y1 = ConstData.font_y1[i];
+				for (i in 0...ConstData.font_xoff.length) chars[i].xoff = ConstData.font_xoff[i];
+				for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
+				for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
+				@:privateAccess kimg.chars = chars;
+				iron.data.Data.getBlob("font13.bin", function(fontbin:kha.Blob) {
+					@:privateAccess kimg.texture = kha.Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
+					// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
+					@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
+				});
+				#end
+
+				color_wheel = image;
+				zui.Nodes.getEnumTexts = getEnumTexts;
+				zui.Nodes.mapEnum = mapEnum;
+				uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
+				
+				iron.App.notifyOnInit(function() {
+					// File to open passed as argument
+					#if kha_krom
+					if (Krom.getArgCount() > 1) {
+						var path = Krom.getArg(1);
+						if (Format.checkProjectFormat(path) ||
+							Format.checkMeshFormat(path) ||
+							Format.checkTextureFormat(path) ||
+							Format.checkFontFormat(path)) {
+							fileArg = path;
+						}
+					}
 					#end
-
-					parseTheme(b);
-					color_wheel = image;
-					zui.Nodes.getEnumTexts = getEnumTexts;
-					zui.Nodes.mapEnum = mapEnum;
-					uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
-					
-					iron.App.notifyOnInit(function() {
-						// File to open passed as argument
-						#if kha_krom
-						if (Krom.getArgCount() > 1) {
-							var path = Krom.getArg(1);
-							if (Format.checkProjectFormat(path) ||
-								Format.checkMeshFormat(path) ||
-								Format.checkTextureFormat(path) ||
-								Format.checkFontFormat(path)) {
-								fileArg = path;
-							}
+					iron.App.notifyOnUpdate(update);
+					var root = iron.Scene.active.root;
+					root.addTrait(new UITrait());
+					root.addTrait(new UINodes());
+					root.addTrait(new UIView2D());
+					root.addTrait(new arm.trait.FlyCamera());
+					root.addTrait(new arm.trait.OrbitCamera());
+					root.addTrait(new arm.trait.RotateCamera());
+					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
+					iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
+					iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
+					iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
+					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
+					iron.App.notifyOnRender2D(render);
+					appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+					appy = UITrait.inst.headerh * 2;
+					var cam = iron.Scene.active.camera;
+					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
+					cam.buildProjection();
+					if (fileArg != "") {
+						Importer.importFile(fileArg);
+						if (Format.checkMeshFormat(fileArg)) {
+							UITrait.inst.toggleDistractFree();
 						}
-						#end
-						iron.App.notifyOnUpdate(update);
-						var root = iron.Scene.active.root;
-						root.addTrait(new UITrait());
-						root.addTrait(new UINodes());
-						root.addTrait(new UIView2D());
-						root.addTrait(new arm.trait.FlyCamera());
-						root.addTrait(new arm.trait.OrbitCamera());
-						root.addTrait(new arm.trait.RotateCamera());
-						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
-						iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
-						iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
-						iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
-						iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
-						iron.App.notifyOnRender2D(render);
-						appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
-						appy = UITrait.inst.headerh * 2;
-						var cam = iron.Scene.active.camera;
-						cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
-						cam.buildProjection();
-						if (fileArg != "") {
-							Importer.importFile(fileArg);
-							if (Format.checkMeshFormat(fileArg)) {
-								UITrait.inst.toggleDistractFree();
-							}
-							else if (Format.checkTextureFormat(fileArg)) {
-								UITrait.inst.show2DView(1);
-							}
-							// fileArg = "";
+						else if (Format.checkTextureFormat(fileArg)) {
+							UITrait.inst.show2DView(1);
 						}
-					});
+						// fileArg = "";
+					}
 				});
 			});
 		});
@@ -175,25 +174,6 @@ class App extends iron.Trait {
 	static function saveAndQuitCallback() {
 		saveAndQuit = true;
 		Project.projectSave();
-	}
-
-	public static function parseTheme(b:kha.Blob) {
-		theme = haxe.Json.parse(b.toString());
-		theme.WINDOW_BG_COL = Std.parseInt(cast theme.WINDOW_BG_COL);
-		theme.WINDOW_TINT_COL = Std.parseInt(cast theme.WINDOW_TINT_COL);
-		theme.ACCENT_COL = Std.parseInt(cast theme.ACCENT_COL);
-		theme.ACCENT_HOVER_COL = Std.parseInt(cast theme.ACCENT_HOVER_COL);
-		theme.ACCENT_SELECT_COL = Std.parseInt(cast theme.ACCENT_SELECT_COL);
-		theme.PANEL_BG_COL = Std.parseInt(cast theme.PANEL_BG_COL);
-		theme.PANEL_TEXT_COL = Std.parseInt(cast theme.PANEL_TEXT_COL);
-		theme.BUTTON_COL = Std.parseInt(cast theme.BUTTON_COL);
-		theme.BUTTON_TEXT_COL = Std.parseInt(cast theme.BUTTON_TEXT_COL);
-		theme.BUTTON_HOVER_COL = Std.parseInt(cast theme.BUTTON_HOVER_COL);
-		theme.BUTTON_PRESSED_COL = Std.parseInt(cast theme.BUTTON_PRESSED_COL);
-		theme.TEXT_COL = Std.parseInt(cast theme.TEXT_COL);
-		theme.LABEL_COL = Std.parseInt(cast theme.LABEL_COL);
-		theme.ARROW_COL = Std.parseInt(cast theme.ARROW_COL);
-		theme.SEPARATOR_COL = Std.parseInt(cast theme.SEPARATOR_COL);
 	}
 
 	public static function w():Int {
