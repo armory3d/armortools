@@ -57,10 +57,18 @@ class Importer {
 
 	static function importFolder(path:String) {
 		#if kha_krom
-		var systemId = kha.System.systemId;
-		var cmd = systemId == "Windows" ? "dir /b " : "ls ";
-		var sep = systemId == "Windows" ? "\\" : "/";
-		var save = systemId == "Linux" ? "/tmp" : Krom.savePath();
+		#if krom_windows
+		var cmd = "dir /b ";
+		var sep = "\\";
+		#else
+		var cmd = "ls ";
+		var sep = "/";
+		#end
+		#if krom_linux
+		var save = "/tmp";
+		#else
+		var save = Krom.savePath();
+		#end
 		save += sep + "dir.txt";
 		Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
 		var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
@@ -79,7 +87,9 @@ class Importer {
 			if (!Format.checkTextureFormat(f)) continue;
 			
 			f = path + sep + f;
-			if (systemId == "Windows") f = StringTools.replace(f, "/", "\\");
+			#if krom_windows
+			f = StringTools.replace(f, "/", "\\");
+			#end
 
 			// TODO: handle -albedo
 			
@@ -249,10 +259,15 @@ class Importer {
 				(image.width == 1024 || image.width == 2048 || image.width == 4096)) {
 				
 				#if kha_krom
-				var sys = kha.System.systemId;
 				var dataPath = iron.data.Data.dataPath;
 				var p = Krom.getFilesLocation() + '/' + dataPath;
-				var cmft = p + "/cmft" + (sys == "Windows" ? ".exe" : sys == "Linux" ? "-linux64" : "-osx");
+				#if krom_windows
+				var cmft = p + "/cmft.exe";
+				#elseif krom_linux
+				var cmft = p + "/cmft-linux64";
+				#else
+				var cmft = p + "/cmft-osx";
+				#end
 
 				var cmd = '';
 				var tmp = Krom.getFilesLocation() + '/' + dataPath;
@@ -454,13 +469,12 @@ class Importer {
 				// Convert image path from relative to absolute
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;
+				#if krom_windows
+				var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+				#else
 				var exists = 1;
-				if (kha.System.systemId == "Windows") {
-					#if kha_krom
-					exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
-					#end
-				}
-				//else { test -e file && echo 1 || echo 0 }
+				// { test -e file && echo 1 || echo 0 }
+				#end
 				if (exists == 0) {
 					trace("Could not locate texture " + abs);
 					var b = haxe.io.Bytes.alloc(4);

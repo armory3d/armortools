@@ -163,6 +163,7 @@ class Project {
 
 		if (UITrait.inst.projectType == 1) {
 			var mesh = new iron.format.proc.Plane(1, 1, 512, 512);
+			// var mesh = new iron.format.proc.Sphere(1, 512, 256);
 			var raw = {
 				name: "PlaneTess",
 				vertex_arrays: [
@@ -179,7 +180,7 @@ class Project {
 			var md = new MeshData(raw, function(md:MeshData) {});
 			iron.data.Data.cachedMeshes.set("ScenePlaneTess", md);
 
-			ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
+			// ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
 		}
 
 		var n = UITrait.inst.projectType == 0 ? "Cube" : "PlaneTess";
@@ -274,13 +275,12 @@ class Project {
 				// Convert image path from relative to absolute
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;
+				#if krom_windows
+				var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+				#else
 				var exists = 1;
-				if (kha.System.systemId == "Windows") {
-					#if kha_krom
-					exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
-					#end
-				}
-				//else { test -e file && echo 1 || echo 0 }
+				// { test -e file && echo 1 || echo 0 }
+				#end
 				if (exists == 0) {
 					trace("Could not locate texture " + abs);
 					var b = haxe.io.Bytes.alloc(4);

@@ -88,7 +88,6 @@ class UITrait extends iron.Trait {
 	public var tabh = 0;
 
 	public var ui:Zui;
-	public var systemId = "";
 	public var colorIdHandle = Id.handle();
 
 	public var formatType = 0;
@@ -272,7 +271,6 @@ class UITrait extends iron.Trait {
 		super();
 
 		inst = this;
-		systemId = kha.System.systemId;
 
 		windowW = Std.int(defaultWindowW * App.C.window_scale);
 		toolbarw = Std.int(defaultToolbarW * App.C.window_scale);
@@ -780,12 +778,14 @@ class UITrait extends iron.Trait {
 			hwnd.redraws = 2;
 		}
 
+		#if krom_darwin
+		var undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
+		var redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
+		#else
 		var undoPressed = kb.down("control") && !kb.down("shift") && kb.started("z");
-		if (systemId == 'OSX') undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
-
 		var redoPressed = (kb.down("control") && kb.down("shift") && kb.started("z")) ||
 						   kb.down("control") && kb.started("y");
-		if (systemId == 'OSX') redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
+		#end
 
 		if (undoPressed) History.doUndo();
 		else if (redoPressed) History.doRedo();

@@ -83,10 +83,8 @@ class App extends iron.Trait {
 			dropPath = StringTools.rtrim(dropPath);
 		});
 
-		#if kha_krom
-		if (kha.System.systemId == "Windows") {
-			untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
-		}
+		#if krom_windows
+		untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
@@ -352,7 +350,11 @@ class App extends iron.Trait {
 		}
 
 		if (dropPath != "") {
-			var wait = kha.System.systemId == "Linux" && !mouse.moved; // Mouse coords not updated on Linux during drag
+			#if krom_linux
+			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
+			#else
+			var wait = false;
+			#end
 			if (!wait) {
 				dropX = mouse.x + App.x();
 				dropY = mouse.y + App.y();
@@ -365,8 +367,8 @@ class App extends iron.Trait {
 
 		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 		var isPicker = UITrait.inst.selectedTool == ToolPicker;
-		Zui.alwaysRedrawWindow = 
-			kha.System.systemId != "Windows" ||
+		#if krom_windows
+		Zui.alwaysRedrawWindow =
 			showMenu ||
 			showBox ||
 			isDragging ||
@@ -375,6 +377,7 @@ class App extends iron.Trait {
 			UIView2D.inst.show ||
 			!UITrait.inst.brush3d ||
 			UITrait.inst.frame < 3;
+		#end
 		if (Zui.alwaysRedrawWindow && UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0;
 	}
 

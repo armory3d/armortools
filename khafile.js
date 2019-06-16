@@ -68,12 +68,15 @@ else {
 }
 
 if (process.platform === 'win32') {
+	project.addDefine('krom_windows');
 	project.addAssets("Bundled/cmft/cmft.exe", { notinlist: true , destination: "data/{name}" });
 }
 else if (process.platform === 'linux') {
+	project.addDefine('krom_linux');
 	project.addAssets("Bundled/cmft/cmft-linux64", { notinlist: true , destination: "data/{name}" });
 }
 else if (process.platform === 'darwin') {
+	project.addDefine('krom_darwin');
 	project.addAssets("Bundled/cmft/cmft-osx", { notinlist: true , destination: "data/{name}" });
 }
 

@@ -99,30 +99,22 @@ class UIMenu {
 			}
 			else if (menuCategory == 3) {
 				if (ui.button("Manual", Left)) {
-					#if kha_krom
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('explorer "https://armorpaint.org/manual"');
-					}
-					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-open "https://armorpaint.org/manual"');
-					}
-					else {
-						Krom.sysCommand('open "https://armorpaint.org/manual"');
-					}
+					#if krom_windows
+					Krom.sysCommand('explorer "https://armorpaint.org/manual"');
+					#elseif krom_linux
+					Krom.sysCommand('xdg-open "https://armorpaint.org/manual"');
+					#else
+					Krom.sysCommand('open "https://armorpaint.org/manual"');
 					#end
 				}
 				if (ui.button("Report Bug", Left)) {
 					// var url = "https://github.com/armory3d/armorpaint/issues/new?body=body";
-					#if kha_krom
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
-					}
-					else if (kha.System.systemId == "Linux") {
-						Krom.sysCommand('xdg-open "https://github.com/armory3d/armorpaint/issues"');
-					}
-					else {
-						Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
-					}
+					#if krom_windows
+					Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
+					#elseif krom_linux
+					Krom.sysCommand('xdg-open "https://github.com/armory3d/armorpaint/issues"');
+					#else
+					Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
 					#end
 				}
 				// if (ui.button("Request Feature", Left)) {}
@@ -131,12 +123,11 @@ class UIMenu {
 					#if kha_krom
 					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
 					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					if (kha.System.systemId == "Windows") {
-						Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
-					}
-					else {
-						Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
-					}
+					#if krom_windows
+					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
+					#else
+					Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
+					#end
 					// Compare versions
 					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
 						var update = haxe.Json.parse(blob.toString());
@@ -163,19 +154,20 @@ class UIMenu {
 					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
 					msg += kha.System.systemId + " - " + gapi;
 
-					if (kha.System.systemId == "Windows") {
-						var save = Krom.getFilesLocation() + "\\" + iron.data.Data.dataPath + "gpu.txt";
-						Krom.sysCommand('wmic path win32_VideoController get name' + ' > "' + save + '"');
-						var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
-						var gpu = "";
-						for (i in 30...Std.int(bytes.length / 2)) {
-							var c = String.fromCharCode(bytes.get(i * 2));
-							if (c == '\n') continue;
-							gpu += c;
-						}
-						msg += '\n$gpu';
+					#if krom_windows
+					var save = Krom.getFilesLocation() + "\\" + iron.data.Data.dataPath + "gpu.txt";
+					Krom.sysCommand('wmic path win32_VideoController get name' + ' > "' + save + '"');
+					var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
+					var gpu = "";
+					for (i in 30...Std.int(bytes.length / 2)) {
+						var c = String.fromCharCode(bytes.get(i * 2));
+						if (c == '\n') continue;
+						gpu += c;
 					}
-					// else { lshw -C display }
+					msg += '\n$gpu';
+					#else
+					// { lshw -C display }
+					#end
 
 					UIBox.showMessage(msg);
 				}

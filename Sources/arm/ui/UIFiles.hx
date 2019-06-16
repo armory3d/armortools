@@ -21,7 +21,11 @@ class UIFiles {
 				if (!App.checkAscii(App.path)) return;
 				App.path = StringTools.replace(App.path, "\\\\", "\\");
 				App.path = StringTools.replace(App.path, "\r", "");
-				var sep = kha.System.systemId == "Windows" ? "\\" : "/";
+				#if krom_windows
+				var sep = "\\";
+				#else
+				var sep = "/";
+				#end
 				App.filenameHandle.text = App.path.substr(App.path.lastIndexOf(sep) + 1);
 				if (App.foldersOnly) App.path = App.path.substr(0, App.path.lastIndexOf(sep));
 				App.filesDone(App.path);
@@ -61,7 +65,11 @@ class UIFiles {
 		if (Format.checkTextureFormat(App.path) || Format.checkMeshFormat(App.path) || Format.checkProjectFormat(App.path)) {
 			App.showFiles = false;
 			App.filesDone(App.path);
-			var sep = kha.System.systemId == "Windows" ? "\\" : "/";
+			#if krom_windows
+			var sep = "\\";
+			#else
+			var sep = "/";
+			#end
 			pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
 			App.whandle.redraws = 2;
 			UITrait.inst.ddirty = 2;
