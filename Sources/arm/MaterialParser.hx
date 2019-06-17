@@ -33,6 +33,8 @@ class MaterialParser {
 			var con = MaterialBuilder.make_mesh(new CyclesShaderData({name: "Material", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
+			sc.overrideContext = {}
+			sc.overrideContext.shared_sampler = true;
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 			UITrait.inst.ddirty = 2;

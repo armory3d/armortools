@@ -1364,6 +1364,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function newLayer():LayerSlot {
+		if (layers.length > 255) return null;
 		var l = new LayerSlot();
 		layers.push(l);
 		setLayer(l);
