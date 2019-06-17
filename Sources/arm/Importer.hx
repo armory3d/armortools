@@ -51,7 +51,7 @@ class Importer {
 			importFolder(path);
 		}
 		else {
-			UITrait.inst.showError("Error: Unknown asset format");
+			UITrait.inst.showError(Strings.error1);
 		}
 	}
 
@@ -237,11 +237,11 @@ class Importer {
 
 	public static function importTexture(path:String) {
 		if (!Format.checkTextureFormat(path)) {
-			UITrait.inst.showError("Error: Unknown asset format");
+			UITrait.inst.showError(Strings.error1);
 			return;
 		}
 
-		for (a in UITrait.inst.assets) if (a.file == path) { UITrait.inst.showMessage("Info: Asset already imported"); return; }
+		for (a in UITrait.inst.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
 		
 		iron.data.Data.getImage(path, function(image:kha.Image) {
 			var ar = path.split("/");
@@ -367,7 +367,7 @@ class Importer {
 
 	public static function importMesh(path:String) {
 		if (!Format.checkMeshFormat(path)) {
-			UITrait.inst.showError("Error: Unknown mesh format");
+			UITrait.inst.showError(Strings.error1);
 			return;
 		}
 
@@ -476,7 +476,7 @@ class Importer {
 				// { test -e file && echo 1 || echo 0 }
 				#end
 				if (exists == 0) {
-					trace("Could not locate texture " + abs);
+					UITrait.inst.showError(Strings.error2 + abs);
 					var b = haxe.io.Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
@@ -889,7 +889,7 @@ class Importer {
 
 	static function makeMesh(mesh:Dynamic, path:String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
-			UITrait.inst.showError("Error: Failed to read mesh data");
+			UITrait.inst.showError(Strings.error3);
 			return;
 		}
 
@@ -912,7 +912,7 @@ class Importer {
 		else {
 
 			if (mesh.texa == null) {
-				UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
+				UITrait.inst.showError(Strings.error4);
 				var verts = Std.int(mesh.posa.length / 4);
 				mesh.texa = new kha.arrays.Int16Array(verts * 2);
 				var n = new iron.math.Vec4();
@@ -1015,7 +1015,7 @@ class Importer {
 	static function addMesh(mesh:Dynamic) {
 
 		if (mesh.texa == null) {
-			UITrait.inst.showError("Error: Mesh has no UVs, generating defaults");
+			UITrait.inst.showError(Strings.error4);
 			var verts = Std.int(mesh.posa.length / 4);
 			mesh.texa = new kha.arrays.Int16Array(verts * 2);
 			var n = new iron.math.Vec4();

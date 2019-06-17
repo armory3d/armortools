@@ -22,7 +22,7 @@ class Project {
 		UIFiles.filters = "arm";
 		arm.App.filesDone = function(path:String) {
 			if (!StringTools.endsWith(path, ".arm")) {
-				UITrait.inst.showError("Error: .arm file expected");
+				UITrait.inst.showError(Strings.error5);
 				return;
 			}
 
@@ -282,7 +282,7 @@ class Project {
 				// { test -e file && echo 1 || echo 0 }
 				#end
 				if (exists == 0) {
-					trace("Could not locate texture " + abs);
+					UITrait.inst.showError(Strings.error2 + abs);
 					var b = haxe.io.Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
