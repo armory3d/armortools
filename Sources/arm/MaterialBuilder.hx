@@ -1010,10 +1010,10 @@ class MaterialBuilder {
 				// Height
 				if (heightUsed) {
 					frag.write('vec4 vech;');
-					frag.write('vech.x = textureOffset(texpaint_pack, texCoord, ivec2(-1, 0)).a;');
-					frag.write('vech.y = textureOffset(texpaint_pack, texCoord, ivec2(1, 0)).a;');
-					frag.write('vech.z = textureOffset(texpaint_pack, texCoord, ivec2(0, -1)).a;');
-					frag.write('vech.w = textureOffset(texpaint_pack, texCoord, ivec2(0, 1)).a;');
+					frag.write('vech.x = textureOffsetShared(texpaint_pack, texCoord, ivec2(-1, 0)).a;');
+					frag.write('vech.y = textureOffsetShared(texpaint_pack, texCoord, ivec2(1, 0)).a;');
+					frag.write('vech.z = textureOffsetShared(texpaint_pack, texCoord, ivec2(0, -1)).a;');
+					frag.write('vech.w = textureOffsetShared(texpaint_pack, texCoord, ivec2(0, 1)).a;');
 					// Displace normal strength
 					frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
 					frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');

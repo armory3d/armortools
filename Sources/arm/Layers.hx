@@ -107,6 +107,15 @@ class Layers {
 		iron.App.removeRender(resizeLayers);
 	}
 
+	public static function setLayerBits(g:kha.graphics4.Graphics) {
+		g.end();
+		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' : 'RGBA64';
+		for (l in UITrait.inst.layers) l.setBits(format);
+		for (l in UITrait.inst.undoLayers) l.setBits(format);
+		g.begin();
+		iron.App.removeRender(setLayerBits);
+	}
+
 	public static function deleteSelectedLayer() {
 		UITrait.inst.selectedLayer.unload();
 		UITrait.inst.layers.remove(UITrait.inst.selectedLayer);

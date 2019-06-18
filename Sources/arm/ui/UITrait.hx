@@ -203,6 +203,7 @@ class UITrait extends iron.Trait {
 	public var showCompass = true;
 	public var fillTypeHandle = new Handle();
 	public var resHandle = new Handle({position: 1}); // 2048
+	public var bitsHandle = new Handle({position: 0}); // 8bit
 	public var mergedObject:MeshObject = null; // For object mask
 	var newConfirm = false;
 	public var projectType = 0; // paint, material
@@ -2284,7 +2285,10 @@ class UITrait extends iron.Trait {
 					UVUtil.trianglemap = null;
 					UVUtil.trianglemapCached = false;
 				}
-				ui.combo(Id.handle(), ["8bit"], "Color", true);
+				ui.combo(bitsHandle, ["8bit", "16bit"], "Color", true);
+				if (bitsHandle.changed) {
+					iron.App.notifyOnRender(Layers.setLayerBits);
+				}
 
 				ui.row([1/2, 1/2]);
 				formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);

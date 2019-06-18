@@ -1,6 +1,5 @@
 package arm;
 
-import kha.graphics4.DepthStencilFormat;
 import kha.graphics4.TextureFormat;
 import iron.RenderPath;
 import arm.ui.UITrait;
@@ -73,13 +72,14 @@ class LayerSlot {
 		}
 		this.ext = ext;
 		name = "Layer " + (id + 1);
+		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' : 'RGBA64';
 
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint" + ext;
 			t.width = Config.getTextureRes();
 			t.height = Config.getTextureRes();
-			t.format = 'RGBA32';
+			t.format = format;
 			texpaint = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
@@ -87,7 +87,7 @@ class LayerSlot {
 			t.name = "texpaint_nor" + ext;
 			t.width = Config.getTextureRes();
 			t.height = Config.getTextureRes();
-			t.format = 'RGBA32';
+			t.format = format;
 			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
@@ -95,7 +95,7 @@ class LayerSlot {
 			t.name = "texpaint_pack" + ext;
 			t.width = Config.getTextureRes();
 			t.height = Config.getTextureRes();
-			t.format = 'RGBA32';
+			t.format = format;
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
 
@@ -282,9 +282,9 @@ class LayerSlot {
 		var texpaint_nor = this.texpaint_nor;
 		var texpaint_pack = this.texpaint_pack;
 
-		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
-		this.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
-		this.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32, DepthStencilFormat.NoDepthAndStencil);
+		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
+		this.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
+		this.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
 
 		this.texpaint.g2.begin(false);
 		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
@@ -318,5 +318,39 @@ class LayerSlot {
 
 			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
 		}
+	}
+
+	public function setBits(formatName:String) {
+		var format = formatName == "RGBA32" ? TextureFormat.RGBA32 : TextureFormat.RGBA64;
+		var res = this.texpaint.width;
+		var rts = RenderPath.active.renderTargets;
+
+		var texpaint = this.texpaint;
+		var texpaint_nor = this.texpaint_nor;
+		var texpaint_pack = this.texpaint_pack;
+
+		this.texpaint = kha.Image.createRenderTarget(res, res, format);
+		this.texpaint_nor = kha.Image.createRenderTarget(res, res, format);
+		this.texpaint_pack = kha.Image.createRenderTarget(res, res, format);
+
+		this.texpaint.g2.begin(false);
+		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
+		this.texpaint.g2.end();
+
+		this.texpaint_nor.g2.begin(false);
+		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, res, res);
+		this.texpaint_nor.g2.end();
+
+		this.texpaint_pack.g2.begin(false);
+		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
+		this.texpaint_pack.g2.end();
+
+		texpaint.unload();
+		texpaint_nor.unload();
+		texpaint_pack.unload();
+
+		rts.get("texpaint" + this.ext).image = this.texpaint;
+		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
+		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
 	}
 }
