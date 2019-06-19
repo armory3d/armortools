@@ -235,7 +235,7 @@ class UINodes extends iron.Trait {
 		}
 
 		// Node search popup
-		if (keyboard.started("space")) nodeSearch();
+		if (keyboard.started(App.K.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
 			ui.inputY = mouse.y + App.y();

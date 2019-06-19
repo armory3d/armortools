@@ -51,19 +51,6 @@ class App extends iron.Trait {
 	public function new() {
 		super();
 
-		// Restore default config
-		if (!armory.data.Config.configLoaded) {
-			var C = armory.data.Config.raw;
-			C.rp_bloom = true;
-			C.rp_gi = false;
-			C.rp_motionblur = false;
-			C.rp_shadowmap_cube = 0;
-			C.rp_shadowmap_cascade = 0;
-			C.rp_ssgi = true;
-			C.rp_ssr = false;
-			C.rp_supersample = 1.0;
-		}
-
 		// Init config
 		C = Config.init();
 		K = C.keymap;

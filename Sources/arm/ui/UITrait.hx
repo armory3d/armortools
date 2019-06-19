@@ -465,20 +465,24 @@ class UITrait extends iron.Trait {
 
 		if (!arm.App.uienabled) return;
 
-		if (kb.started("tab") && !UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
-			if (ctrl) { // Cycle layers
+		if (!UINodes.inst.ui.isTyping && !UITrait.inst.ui.isTyping) {
+			if (shortcut(App.K.cycle_layers)) {
 				var i = (layers.indexOf(selectedLayer) + 1) % layers.length;
 				setLayer(layers[i]);
 			}
-			else if (shift) show2DView();
-			else showMaterialNodes();
+			else if (shortcut(App.K.toggle_2d_view)) {
+				show2DView();
+			}
+			else if (shortcut(App.K.toggle_node_editor)) {
+				showMaterialNodes();
+			}
 		}
 
-		if (ctrl && !shift && kb.started("s")) Project.projectSave();
-		else if (ctrl && shift && kb.started("s")) Project.projectSaveAs();
-		else if (ctrl && kb.started("o")) Project.projectOpen();
-		else if (ctrl && kb.started("n")) UIBox.newProject();
-		else if (ctrl && shift && kb.started("e")) { // Export textures
+		if (shortcut(App.K.file_save_as)) Project.projectSaveAs();
+		else if (shortcut(App.K.file_save)) Project.projectSave();
+		else if (shortcut(App.K.file_open)) Project.projectOpen();
+		else if (shortcut(App.K.file_new)) UIBox.newProject();
+		else if (shortcut(App.K.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
 				arm.App.showFiles = true;
 				@:privateAccess Ext.lastPath = "";
@@ -493,7 +497,7 @@ class UITrait extends iron.Trait {
 			}
 			else textureExport = true;
 		}
-		else if (ctrl && shift && kb.started("i")) { // Import asset
+		else if (shortcut(App.K.import_assets)) {
 			arm.App.showFiles = true;
 			@:privateAccess Ext.lastPath = ""; // Refresh
 			arm.App.whandle.redraws = 2;
@@ -505,7 +509,7 @@ class UITrait extends iron.Trait {
 			}
 		}
 
-		if (kb.started("f11") ||
+		if (kb.started(App.K.view_distract_free) ||
 		   (kb.started("escape") && !show && !arm.App.showFiles && !arm.App.showBox)) {
 			toggleDistractFree();
 		}
@@ -513,7 +517,7 @@ class UITrait extends iron.Trait {
 		var mouse = iron.system.Input.getMouse();
 
 		if (brushCanLock || brushLocked) {
-			if (kb.down("f") && mouse.moved) {
+			if (kb.down(App.K.brush_radius) && mouse.moved) {
 				if (brushLocked) {
 					brushRadius += mouse.movementX / 100;
 					brushRadius = Math.max(0.05, Math.min(4.0, brushRadius));
@@ -547,17 +551,17 @@ class UITrait extends iron.Trait {
 				}
 
 				if (!ctrl && !mouse.down("right")) {
-					if (kb.started("b")) selectTool(ToolBrush);
-					else if (kb.started("e")) selectTool(ToolEraser);
-					else if (kb.started("g")) selectTool(ToolFill);
-					else if (kb.started("k")) selectTool(ToolBake);
-					else if (kb.started("c")) selectTool(ToolColorId);
-					else if (kb.started("d")) selectTool(ToolDecal);
-					else if (kb.started("t")) selectTool(ToolText);
-					else if (kb.started("l")) selectTool(ToolClone);
-					else if (kb.started("u")) selectTool(ToolBlur);
-					else if (kb.started("p")) selectTool(ToolParticle);
-					else if (kb.started("v")) selectTool(ToolPicker);
+					if (shortcut(App.K.tool_brush)) selectTool(ToolBrush);
+					else if (shortcut(App.K.tool_eraser)) selectTool(ToolEraser);
+					else if (shortcut(App.K.tool_fill)) selectTool(ToolFill);
+					else if (shortcut(App.K.tool_bake)) selectTool(ToolBake);
+					else if (shortcut(App.K.tool_colorid)) selectTool(ToolColorId);
+					else if (shortcut(App.K.tool_decal)) selectTool(ToolDecal);
+					else if (shortcut(App.K.tool_text)) selectTool(ToolText);
+					else if (shortcut(App.K.tool_clone)) selectTool(ToolClone);
+					else if (shortcut(App.K.tool_blur)) selectTool(ToolBlur);
+					else if (shortcut(App.K.tool_particle)) selectTool(ToolParticle);
+					else if (shortcut(App.K.tool_picker)) selectTool(ToolPicker);
 				}
 
 				// Radius
@@ -569,7 +573,7 @@ class UITrait extends iron.Trait {
 						selectedTool == ToolClone  ||
 						selectedTool == ToolBlur   ||
 						selectedTool == ToolParticle) {
-						if (kb.started("f")) {
+						if (shortcut(App.K.brush_radius)) {
 							brushCanLock = true;
 							mouse.lock();
 							lockStartedX = mouse.x + iron.App.x();
@@ -581,36 +585,27 @@ class UITrait extends iron.Trait {
 
 			// Viewpoint
 			if (!shift && !alt) {
-				if (kb.started("0")) {
+				if (shortcut(App.K.view_reset)) {
 					ViewportUtil.resetViewport();
 					ViewportUtil.scaleToBounds();
 				}
-				else if (kb.started("1")) {
-					ctrl ?
-						ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI) :
-						ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
-				}
-				else if (kb.started("3")) {
-					ctrl ?
-						ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2) :
-						ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				}
-				else if (kb.started("7")) {
-					ctrl ?
-						ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI) :
-						ViewportUtil.setView(0, 0, 1, 0, 0, 0);
-				}
-				else if (kb.started("5")) {
+				else if (shortcut(App.K.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				else if (shortcut(App.K.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
+				else if (shortcut(App.K.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				else if (shortcut(App.K.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				else if (shortcut(App.K.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
+				else if (shortcut(App.K.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+				else if (shortcut(App.K.view_camera_type)) {
 					cameraType = cameraType == 0 ? 1 : 0;
 					camHandle.position = cameraType;
 					ViewportUtil.updateCameraType(cameraType);
 					statusHandle.redraws = 2;
 				}
-				else if (kb.started("4")) { ViewportUtil.orbit(-Math.PI / 12, 0); }
-				else if (kb.started("6")) { ViewportUtil.orbit(Math.PI / 12, 0); }
-				else if (kb.started("8")) { ViewportUtil.orbit(0, -Math.PI / 12); }
-				else if (kb.started("2")) { ViewportUtil.orbit(0, Math.PI / 12); }
-				else if (kb.started("9")) { ViewportUtil.orbit(Math.PI, 0); }
+				else if (shortcut(App.K.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
+				else if (shortcut(App.K.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
+				else if (shortcut(App.K.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
+				else if (shortcut(App.K.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
+				else if (shortcut(App.K.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
 			}
 		}
 
@@ -619,7 +614,7 @@ class UITrait extends iron.Trait {
 				brushLocked = false;
 				brushCanUnlock = false;
 			}
-			if (kb.released("f")) {
+			if (kb.released(App.K.brush_radius)) {
 				mouse.unlock();
 				brushCanUnlock = true;
 				lastPaintX = -1;
@@ -783,9 +778,9 @@ class UITrait extends iron.Trait {
 		var undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
 		var redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
 		#else
-		var undoPressed = kb.down("control") && !kb.down("shift") && kb.started("z");
-		var redoPressed = (kb.down("control") && kb.down("shift") && kb.started("z")) ||
-						   kb.down("control") && kb.started("y");
+		var undoPressed = shortcut(App.K.edit_undo);
+		var redoPressed = shortcut(App.K.edit_redo) ||
+						  (kb.down("control") && kb.started("y"));
 		#end
 
 		if (undoPressed) History.doUndo();
@@ -1867,14 +1862,21 @@ class UITrait extends iron.Trait {
 
 			ui.separator();
 			if (ui.panel(Id.handle({selected: false}), "Keymap", 1)) {
-				for (k in Reflect.fields(App.C.keymap)) {
-					ui.button(k, Left, Reflect.field(App.C.keymap, k));
+				var i = 0;
+				ui.changed = false;
+				for (k in Reflect.fields(App.K)) {
+					var h = Id.handle().nest(i++, {text: Reflect.field(App.K, k)});
+					var t = ui.textInput(h, k, Left);
+					Reflect.setField(App.K, k, t);
 				}
+				if (ui.changed) Config.applyConfig();
 			}
 
-			// ui.separator();
-			// ui.button("Restore Defaults");
-			// ui.button("Confirm");
+			// if (ui.button("Restore Defaults")) {
+			// 	App.C = Config.init();
+			// 	App.K = App.C.keymap;
+			// 	Config.applyConfig();
+			// }
 		}
 	}
 
@@ -2622,5 +2624,18 @@ class UITrait extends iron.Trait {
 
 			// if (ui.button("LNodes")) showLogicNodes();
 		}
+	}
+
+	function shortcut(s:String):Bool {
+		var kb = iron.system.Input.getKeyboard();
+		var flag = true;
+		var plus = s.indexOf("+");
+		if (plus > 0) {
+			var shift = s.indexOf("shift") >= 0;
+			var ctrl = s.indexOf("ctrl") >= 0;
+			flag = shift == kb.down("shift") && ctrl == kb.down("control");
+			s = s.substr(s.lastIndexOf("+") + 1);
+		}
+		return flag && kb.started(s);
 	}
 }

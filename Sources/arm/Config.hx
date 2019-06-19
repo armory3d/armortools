@@ -7,6 +7,17 @@ class Config {
 	public static function init():TConfig {
 		var C:TConfig = cast armory.data.Config.raw;
 
+		if (!armory.data.Config.configLoaded) {
+			C.rp_bloom = true;
+			C.rp_gi = false;
+			C.rp_motionblur = false;
+			C.rp_shadowmap_cube = 0;
+			C.rp_shadowmap_cascade = 0;
+			C.rp_ssgi = true;
+			C.rp_ssr = false;
+			C.rp_supersample = 1.0;
+		}
+
 		// if (C.version == null) C.version = 1;
 		if (C.ui_layout == null) C.ui_layout = 0;
 		if (C.undo_steps == null) C.undo_steps = 4; // Max steps to keep
@@ -14,12 +25,12 @@ class Config {
 			C.keymap = {};
 			C.keymap.action_paint = "left";
 			C.keymap.action_rotate = "right";
-			C.keymap.action_rotate_light = "shift+middle";
+			C.keymap.action_rotate_light = "middle+shift";
 			C.keymap.action_pan = "middle";
-			C.keymap.select_material = "shift+num";
+			C.keymap.select_material = "shift+number";
 			C.keymap.cycle_layers = "ctrl+tab";
-			C.keymap.brush_radius = "f+drag";
-			C.keymap.brush_ruler = "shift+paint";
+			C.keymap.brush_radius = "f";
+			C.keymap.brush_ruler = "shift";
 			C.keymap.file_new = "ctrl+n";
 			C.keymap.file_open = "ctrl+o";
 			C.keymap.file_save = "ctrl+s";
