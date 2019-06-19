@@ -17,6 +17,16 @@ class Exporter {
 			var writer = new iron.format.exr.Writer(out, res, res, pixels, bits, type, off);
 		}
 		else if (UITrait.inst.formatType == 0) {
+			var writer = new iron.format.png.Writer(out);
+			var data =
+				type == 1 ?
+					iron.format.png.Tools.build32RGB1(res, res, pixels) :
+				type == 2 ?
+					iron.format.png.Tools.build32RRR1(res, res, pixels, off) :
+					iron.format.png.Tools.build32RGBA(res, res, pixels);
+			writer.write(data);
+		}
+		else {
 			var writer = new iron.format.jpg.Writer(out);
 			writer.write({
 				width: res,
@@ -24,13 +34,6 @@ class Exporter {
 				quality: UITrait.inst.formatQuality,
 				pixels: pixels
 			}, type, off);
-		}
-		else {
-			var writer = new iron.format.png.Writer(out);
-			var data = type == 1 ?
-				iron.format.png.Tools.build32RGBA(res, res, pixels) :
-				iron.format.png.Tools.build32RGBA_(res, res, pixels, off);
-			writer.write(data);
 		}
 		#if kha_krom
 		Krom.fileSaveBytes(file, out.getBytes().getData());
@@ -44,7 +47,7 @@ class Exporter {
 		if (f == "") f = "untitled";
 		var formatType = UITrait.inst.formatType;
 		var bits = UITrait.inst.bitsHandle.position == 0 ? 8 : 16;
-		var ext = bits == 16 ? ".exr" : formatType == 0 ? ".jpg" : ".png";
+		var ext = bits == 16 ? ".exr" : formatType == 0 ? ".png" : ".jpg";
 		if (StringTools.endsWith(f, ext)) f = f.substr(0, f.length - 4);
 		var texpaint:kha.Image = null;
 		var texpaint_nor:kha.Image = null;
@@ -210,9 +213,22 @@ class Exporter {
 				if (UITrait.inst.isRough) writeTexture(path + "/" + f + "_rough" + ext, pixels, 2, 1);
 				if (UITrait.inst.isMet) writeTexture(path + "/" + f + "_met" + ext, pixels, 2, 2);
 			}
-			else { // UE4
+			else {
 				if (UITrait.inst.isOcc || UITrait.inst.isRough || UITrait.inst.isMet) {
-					writeTexture(path + "/" + f + "_orm" + ext, pixels);
+					if (UITrait.inst.outputType == 1) { // Unreal 4
+						writeTexture(path + "/" + f + "_orm" + ext, pixels);
+					}
+					else { // Unity 5
+						var pixels2 = haxe.io.Bytes.alloc(pixels.length);
+						// 8bit only
+						for (i in 0...Std.int(pixels.length / 4)) {
+							pixels2.set(i * 4    , pixels.get(i * 4 + 2));
+							pixels2.set(i * 4 + 1, pixels.get(i * 4    ));
+							// pixels2.set(i * 4 + 2, 0);
+							pixels2.set(i * 4 + 3, 255 - pixels.get(i * 4 + 1));
+						}
+						writeTexture(path + "/" + f + "_mos" + ext, pixels2, 3);
+					}
 				}
 			}
 

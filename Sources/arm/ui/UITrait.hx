@@ -91,7 +91,7 @@ class UITrait extends iron.Trait {
 	public var colorIdHandle = Id.handle();
 
 	public var formatType = 0;
-	public var formatQuality = 80.0;
+	public var formatQuality = 100.0;
 	public var layersExport = 0;
 	public var outputType = 0;
 	public var isBase = true;
@@ -485,7 +485,7 @@ class UITrait extends iron.Trait {
 				arm.App.whandle.redraws = 2;
 				arm.App.foldersOnly = true;
 				arm.App.showFilename = true;
-				UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "jpg" : "png";
+				UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
 				arm.App.filesDone = function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
@@ -2268,7 +2268,7 @@ class UITrait extends iron.Trait {
 					arm.App.foldersOnly = true;
 					arm.App.showFilename = true;
 					// var path = 'C:\\Users\\lubos\\Documents\\';
-					UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "jpg" : "png";
+					UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
 					arm.App.filesDone = function(path:String) {
 						textureExport = true;
 						textureExportPath = path;
@@ -2292,17 +2292,17 @@ class UITrait extends iron.Trait {
 
 				ui.row([1/2, 1/2]);
 				if (bitsHandle.position == 0) {
-					formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
+					formatType = ui.combo(Id.handle({position: formatType}), ["png", "jpg"], "Format", true);
 				}
 				else {
 					ui.combo(Id.handle({position: formatType}), ["exr"], "Format", true);
 				}
-				ui.enabled = formatType == 0 && bitsHandle.position == 0;
+				ui.enabled = formatType == 1 && bitsHandle.position == 0;
 				formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);
 				layersExport = ui.combo(Id.handle({position: layersExport}), ["Visible", "Selected"], "Layers", true);
-				outputType = ui.combo(Id.handle(), ["Generic", "UE4 (ORM)"], "Output", true);
+				outputType = ui.combo(Id.handle(), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
 				
 				if (ui.panel(Id.handle({selected: false}), "Channels")) {
 					ui.row([1/2, 1/2]);
