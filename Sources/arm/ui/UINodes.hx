@@ -5,7 +5,6 @@ import zui.Id;
 import zui.Nodes;
 import arm.creator.NodeCreator;
 import arm.creator.NodeCreatorBrush;
-// import arm.creator.NodeCreatorLogic;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.Tool;
@@ -41,11 +40,7 @@ class UINodes extends iron.Trait {
 	public var canvasBrushMap:Map<BrushSlot, TNodeCanvas> = null;
 	var canvasBrushBlob:String;
 
-	// public var canvasLogic:TNodeCanvas = null;
-	// public var canvasLogicMap:Map<BrushSlot, TNodeCanvas> = null;
-	// var canvasLogicBlob:String;
-
-	public var canvasType = 0; // material, brush, logic
+	public var canvasType = 0; // material, brush
 
 	var mdown = false;
 	var mreleased = false;
@@ -65,32 +60,22 @@ class UINodes extends iron.Trait {
 		inst = this;
 
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
-
 		// Cycles.arm_export_tangents = false;
 
 		iron.data.Data.getBlob('defaults/default_material.json', function(b1:kha.Blob) {
 			iron.data.Data.getBlob('defaults/default_brush.json', function(b2:kha.Blob) {
-				// iron.data.Data.getBlob('defaults/default_logic.json', function(b3:kha.Blob) {
-					// iron.data.Data.getBlob('logic_nodes.json', function(bnodes:kha.Blob) {
+				canvasBlob = b1.toString();
+				canvasBrushBlob = b2.toString();
+				canvas = haxe.Json.parse(canvasBlob);
+				canvasBrush = haxe.Json.parse(canvasBrushBlob);
+				MaterialParser.parseBrush();
 
-						canvasBlob = b1.toString();
-						canvasBrushBlob = b2.toString();
-						canvas = haxe.Json.parse(canvasBlob);
-						canvasBrush = haxe.Json.parse(canvasBrushBlob);
-						MaterialParser.parseBrush();
-						// canvasLogicBlob = b3.toString();
-						// canvasLogic = haxe.Json.parse(canvasLogicBlob);
-
-						// NodeCreatorLogic.list = haxe.Json.parse(bnodes.toString());
-
-						var t = Reflect.copy(arm.App.theme);
-						t.ELEMENT_H = 18;
-						t.BUTTON_H = 16;
-						var scale = armory.data.Config.raw.window_scale;
-						ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
-						ui.scrollEnabled = false;
-					// });
-				// });
+				var t = Reflect.copy(arm.App.theme);
+				t.ELEMENT_H = 18;
+				t.BUTTON_H = 16;
+				var scale = armory.data.Config.raw.window_scale;
+				ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
+				ui.scrollEnabled = false;
 			});
 		});
 	}
@@ -139,31 +124,14 @@ class UINodes extends iron.Trait {
 		}
 	}
 
-	// public function updateCanvasLogicMap() {
-	// 	if (UITrait.inst.selectedLogic != null) {
-	// 		if (canvasLogicMap == null) canvasLogicMap = new Map();
-	// 		var c = canvasLogicMap.get(UITrait.inst.selectedLogic);
-	// 		if (c == null) {
-	// 			c = haxe.Json.parse(canvasLogicBlob);
-	// 			canvasLogicMap.set(UITrait.inst.selectedLogic, c);
-	// 			canvasLogic = c;
-	// 		}
-	// 		else canvasLogic = c;
-
-	// 		if (canvasType == 2) nodes = UITrait.inst.selectedLogic.nodes;
-	// 	}
-	// }
-
 	function getCanvas() {
 		if (canvasType == 0) return canvas;
 		else return canvasBrush;
-		// else if (canvasType == 2) return canvasLogic;
 	}
 
 	function update() {
 		updateCanvasMap();
 		updateCanvasBrushMap();
-		// updateCanvasLogicMap();
 
 		var mouse = iron.system.Input.getMouse();
 		mreleased = mouse.released();
@@ -174,7 +142,6 @@ class UINodes extends iron.Trait {
 			mchanged = true;
 			if (!mdown) changed = true;
 			if (canvasType == 1) MaterialParser.parseBrush();
-			// else if (canvasType == 2) MaterialParser.parseLogic();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
@@ -219,13 +186,6 @@ class UINodes extends iron.Trait {
 		else if (mouse.released()) {
 			hideMenu = true;
 		}
-
-		// if (keyboard.started("p")) {
-		// 	var c = getCanvas();
-		// 	var str = haxe.Json.stringify(c);
-		// 	trace(str.substr(0, 1023));
-		// 	trace(str.substr(1023, 2047));
-		// }
 
 		if (nodes.nodesSelected.length > 0) {
 			if (keyboard.started("left")) for (n in nodes.nodesSelected) n.x -= 1;
@@ -449,7 +409,6 @@ class UINodes extends iron.Trait {
 			var list = canvasType == 0 ? NodeCreator.list : NodeCreatorBrush.list;
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
-			// if (canvasType == 2) numNodes = NodeCreatorLogic.list.categories[menuCategory].nodes.length;
 			
 			var ph = numNodes * 20 * ui.SCALE;
 			var py = popupY;

@@ -22,7 +22,6 @@ class Path {
 		path = haxe.io.Path.normalize(path);
 		var base = path.substr(0, path.lastIndexOf("/") + 1);
 		#if krom_windows
-		// base = StringTools.replace(base, "/", "\\");
 		base = base.substr(0, 2) + "\\" + base.substr(3);
 		#end
 		return base;

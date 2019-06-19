@@ -18,7 +18,6 @@ class Config {
 			C.rp_supersample = 1.0;
 		}
 
-		// if (C.version == null) C.version = 1;
 		if (C.ui_layout == null) C.ui_layout = 0;
 		if (C.undo_steps == null) C.undo_steps = 4; // Max steps to keep
 		if (C.keymap == null) {

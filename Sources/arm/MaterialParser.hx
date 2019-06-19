@@ -179,19 +179,6 @@ class MaterialParser {
 					_materialcontext = self;
 					m.contexts.push(self);
 				});
-
-				// var dcon = MaterialBuilder.make_depth(_sd, _matcon);
-				// var dcdata = dcon.data;
-				// // from_source is synchronous..
-				// var dsc = new ShaderContext(dcdata, function(sc:ShaderContext){});
-				// m.shader.contexts.push(dsc);
-				// var dmatcon:TMaterialContext = {
-				// 	name: "depth"
-				// }
-				// m.raw.contexts.push(dmatcon);
-				// new MaterialContext(dmatcon, function(self:MaterialContext) {
-				// 	m.contexts.push(self);
-				// });
 		// });
 	}
 
@@ -199,12 +186,4 @@ class MaterialParser {
 		armory.system.Logic.packageName = "arm.brushnode";
 		var tree = armory.system.Logic.parse(UINodes.inst.canvasBrush, false);
 	}
-
-	// public static function parseLogic() {
-	// 	if (lastT != null) UITrait.inst.selectedObject.removeTrait(lastT);
-	// 	armory.system.Logic.packageName = "armory.logicnode";
-	// 	var t = armory.system.Logic.parse(UINodes.inst.canvasLogic);
-	// 	lastT = t;
-	// 	UITrait.inst.selectedObject.addTrait(t);
-	// }
 }

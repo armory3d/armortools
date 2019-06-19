@@ -124,7 +124,6 @@ class UITrait extends iron.Trait {
 	public var selectedTexture:TAsset = null;
 	public var brushes:Array<BrushSlot> = null;
 	public var selectedBrush:BrushSlot;
-	public var selectedLogic:BrushSlot;
 	public var layers:Array<LayerSlot> = null;
 	public var undoLayers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
@@ -165,7 +164,6 @@ class UITrait extends iron.Trait {
 	public var gizmoX:Object = null;
 	public var gizmoY:Object = null;
 	public var gizmoZ:Object = null;
-	public var grid:Object = null;
 	public var axisX = false;
 	public var axisY = false;
 	public var axisZ = false;
@@ -199,7 +197,6 @@ class UITrait extends iron.Trait {
 	public var symX = false;
 	public var symY = false;
 	public var symZ = false;
-	public var showGrid = false;
 	public var showCompass = true;
 	public var fillTypeHandle = new Handle();
 	public var resHandle = new Handle({position: 1}); // 2048
@@ -395,7 +392,6 @@ class UITrait extends iron.Trait {
 	function done() {
 		if (ui.SCALE > 1) setIconScale();
 		//
-		// grid = iron.Scene.active.getChild(".Grid");
 		gizmo = iron.Scene.active.getChild(".GizmoTranslate");
 		gizmo.transform.scale.set(0.5, 0.5, 0.5);
 		gizmo.transform.buildMatrix();
@@ -799,11 +795,6 @@ class UITrait extends iron.Trait {
 		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
 
 		renderUI(g);
-
-		// var ready = showFiles || dirty;
-		// TODO: Texture params get overwritten
-		// if (ready) for (t in UINodes.inst._matcon.bind_textures) t.params_set = null;
-		// if (UINodes.inst._matcon != null) for (t in UINodes.inst._matcon.bind_textures) t.params_set = null;
 	}
 
 	function renderCursor(g:kha.graphics2.Graphics) {
@@ -876,20 +867,6 @@ class UITrait extends iron.Trait {
 				}
 			}
 		}
-
-		if (showGrid) {
-			// Separator line
-			var x1 = iron.App.x() + iron.App.w() / 3;
-			var x2 = iron.App.x() + iron.App.w() / 3 * 2;
-			var y1 = iron.App.y() + iron.App.h() / 3;
-			var y2 = iron.App.y() + iron.App.h() / 3 * 2;
-			g.color = 0x66ffffff;
-			g.fillRect(x1 - 1, iron.App.y(), 2, iron.App.h());
-			g.fillRect(x2 - 1, iron.App.y(), 2, iron.App.h());
-			g.fillRect(iron.App.x(), y1 - 1, iron.App.x() + iron.App.w(), 2);
-			g.fillRect(iron.App.x(), y2 - 1, iron.App.x() + iron.App.w(), 2);
-			g.color = 0xffffffff;
-		}
 	}
 
 	function showMaterialNodes() {
@@ -909,15 +886,6 @@ class UITrait extends iron.Trait {
 		else { UINodes.inst.show = true; UINodes.inst.canvasType = 1; }
 		arm.App.resize();
 	}
-
-	// function showLogicNodes() {
-	//	// Clear input state as ui receives input events even when not drawn
-	//	@:privateAccess UINodes.inst.ui.endInput();
-
-	// 	if (UINodes.inst.show && UINodes.inst.canvasType == 2) UINodes.inst.show = false;
-	// 	else { UINodes.inst.show = true; UINodes.inst.canvasType = 2; }
-	// 	arm.App.resize();
-	// }
 
 	// function showParticleNodes() {}
 
@@ -1002,8 +970,6 @@ class UITrait extends iron.Trait {
 		return paintObjects[0];
 	}
 
-	// var cursorImg:kha.Image = null;
-
 	function renderUI(g:kha.graphics2.Graphics) {
 		
 		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
@@ -1014,7 +980,6 @@ class UITrait extends iron.Trait {
 		g.end();
 		ui.begin(g);
 
-		// ui.t.FILL_WINDOW_BG = false;
 		var panelx = (iron.App.x() - toolbarw);
 		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, kha.System.windowHeight())) {
@@ -1048,7 +1013,6 @@ class UITrait extends iron.Trait {
 
 			ui.imageScrollAlign = true;
 		}
-		// ui.t.FILL_WINDOW_BG = true;
 
 		var panelx = iron.App.x() - toolbarw;
 		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
@@ -1092,7 +1056,6 @@ class UITrait extends iron.Trait {
 
 				if (worktab.position == SpaceScene) {
 					selectTool(ToolGizmo);
-					// RenderUtil.makeMaterialPreview();
 				}
 
 				MaterialParser.parseMeshMaterial();
@@ -1291,7 +1254,6 @@ class UITrait extends iron.Trait {
 		tabx = App.C.ui_layout == 0 ? kha.System.windowWidth() - windowW : 0;
 		tabh = Std.int(kha.System.windowHeight() / 3);
 		gizmo.visible = false;
-		// grid.visible = false;
 
 		if (worktab.position == SpacePaint) {
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
@@ -1315,7 +1277,6 @@ class UITrait extends iron.Trait {
 		}
 		else if (worktab.position == SpaceScene) {
 			gizmo.visible = true;
-			// grid.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabOutliner();
 				tabPlugins();
@@ -1476,21 +1437,6 @@ class UITrait extends iron.Trait {
 					if (iron.system.Time.time() - selectTime < 0.25) show2DView();
 					selectTime = iron.system.Time.time();
 				}
-
-				// if (l.material_mask != null) {
-				// 	var img = l.material_mask.imageIcon;
-				// 	var w = img.width / 2;
-				// 	var x = ui._x - w * 1.13;
-				// 	var y = ui._y + w * 0.63;
-				// 	ui.g.color = 0xff000000;
-				// 	ui.g.fillRect(x, y, w, w);
-				// 	ui.g.color = 0xffffffff;
-				// 	#if kha_direct3d11
-				// 	ui.g.drawScaledImage(img, x, y, w, w);
-				// 	#else
-				// 	ui.g.drawScaledImage(img, x, y + w, w, -w);
-				// 	#end
-				// }
 
 				if (l.texpaint_mask != null) {
 					ui._y += 3;
@@ -2201,24 +2147,9 @@ class UITrait extends iron.Trait {
 			parseTransform = ui.check(Id.handle({selected: parseTransform}), "Parse Transforms");
 
 			if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
-				var i = 0;
-				function drawList(h:Handle, o:MeshObject) {
-					// if (paintObject == o) {
-						// ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, 0xff205d9c);
-					// }
-					// ui.row([1/10, 9/10]);
-					// var h = Id.handle().nest(i, {selected: o.visible});
-					// o.visible = ui.check(h, "");
-					// if (h.changed) ddirty = 2;
-					ui.text(o.name);
-					// if (ui.isReleased) {
-					// 	selectPaintObject(o);
-					// }
-					i++;
-				}
 				ui.indent();
-				for (c in paintObjects) {
-					drawList(Id.handle(), c);
+				for (o in paintObjects) {
+					ui.text(o.name);
 				}
 				ui.unindent();
 			}
@@ -2421,9 +2352,10 @@ class UITrait extends iron.Trait {
 				ui.g.begin(false);
 				MaterialParser.parseMeshMaterial();
 			}
-			showGrid = ui.check(Id.handle({selected: showGrid}), "Grid");
+			var compassHandle = Id.handle({selected: showCompass});
+			showCompass = ui.check(compassHandle, "Compass");
+			if (compassHandle.changed) ddirty = 2;
 
-			ui.row([1/2, 1/2]);
 			showEnvmap = ui.check(showEnvmapHandle, "Envmap");
 			if (showEnvmapHandle.changed) {
 				var world = iron.Scene.active.world;
@@ -2431,9 +2363,6 @@ class UITrait extends iron.Trait {
 				savedEnvmap = world.envmap;
 				ddirty = 2;
 			}
-			var compassHandle = Id.handle({selected: showCompass});
-			showCompass = ui.check(compassHandle, "Compass");
-			if (compassHandle.changed) ddirty = 2;
 
 			if (showEnvmap) {
 				showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
@@ -2590,10 +2519,7 @@ class UITrait extends iron.Trait {
 				selectedObject.transform.dirty = true;
 
 				if (selectedObject.name == "Scene") {
-					// ui.image(envThumb);
 					var p = iron.Scene.active.world.probe;
-					// ui.row([1/2, 1/2]);
-					// var envType = ui.combo(Id.handle({position: 0}), ["Outdoor"], "Map");
 					var envHandle = Id.handle({value: p.raw.strength});
 					p.raw.strength = ui.slider(envHandle, "Strength", 0.0, 5.0, true);
 					if (envHandle.changed) {
@@ -2621,8 +2547,6 @@ class UITrait extends iron.Trait {
 					}
 				}
 			}
-
-			// if (ui.button("LNodes")) showLogicNodes();
 		}
 	}
 

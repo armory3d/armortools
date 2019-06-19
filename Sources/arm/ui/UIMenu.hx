@@ -94,7 +94,6 @@ class UIMenu {
 				}
 
 				// ui.button("Show Envmap", Left);
-				// ui.button("Show Grid", Left);
 				// ui.button("Wireframe", Left);
 			}
 			else if (menuCategory == 3) {

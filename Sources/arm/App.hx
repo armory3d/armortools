@@ -151,7 +151,6 @@ class App extends iron.Trait {
 						else if (Format.checkTextureFormat(fileArg)) {
 							UITrait.inst.show2DView(1);
 						}
-						// fileArg = "";
 					}
 				});
 			});

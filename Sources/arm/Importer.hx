@@ -998,9 +998,6 @@ class Importer {
 					g.vertexBufferMap.remove("pos");
 				}
 
-				// Face camera
-				// UITrait.inst.paintObject.transform.setRotation(Math.PI / 2, 0, 0);
-
 				UITrait.inst.paintObjects = [UITrait.inst.paintObject];
 			}
 

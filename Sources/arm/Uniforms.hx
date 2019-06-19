@@ -72,10 +72,6 @@ class Uniforms {
 			var gbuffer2 = RenderPath.active.renderTargets.get("gbuffer2");
 			vec2.set(gbuffer2.image.width, gbuffer2.image.height, 0);
 			return vec2;
-			// Check equality at init
-			// trace(RenderPath.active.renderTargets.get("gbuffer2").image.width);
-			// trace(iron.App.w());
-			// var f = armory.renderpath.Inc.getSuperSampling();
 		}
 		else if (link == '_cloneDelta') {
 			vec2.set(UITrait.inst.cloneDeltaX, UITrait.inst.cloneDeltaY, 0);
