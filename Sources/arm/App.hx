@@ -144,7 +144,7 @@ class App extends iron.Trait {
 					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
 					cam.buildProjection();
 					if (fileArg != "") {
-						Importer.importFile(fileArg);
+						arm.io.Importer.importFile(fileArg);
 						if (Format.checkMeshFormat(fileArg)) {
 							UITrait.inst.toggleDistractFree();
 						}
@@ -324,7 +324,7 @@ class App extends iron.Trait {
 			if (!wait) {
 				dropX = mouse.x + App.x();
 				dropY = mouse.y + App.y();
-				Importer.importFile(dropPath, dropX, dropY);
+				arm.io.Importer.importFile(dropPath, dropX, dropY);
 				dropPath = "";
 			}
 		}

@@ -426,11 +426,11 @@ class UITrait extends iron.Trait {
 	function update() {
 		if (textureExport) {
 			textureExport = false;
-			Exporter.exportTextures(textureExportPath);
+			arm.io.Exporter.exportTextures(textureExportPath);
 		}
 		if (projectExport) {
 			projectExport = false;
-			Project.exportProject();
+			arm.io.ExportArm.runProject();
 			if (App.saveAndQuit) kha.System.stop();
 		}
 
@@ -501,7 +501,7 @@ class UITrait extends iron.Trait {
 			arm.App.showFilename = false;
 			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,gltf,arm";
 			arm.App.filesDone = function(path:String) {
-				Importer.importFile(path);
+				arm.io.Importer.importFile(path);
 			}
 		}
 
@@ -1169,7 +1169,7 @@ class UITrait extends iron.Trait {
 						}
 					}
 					if (selectedTool == ToolText) {
-						ui.combo(textToolHandle, Importer.fontList, "Font");
+						ui.combo(textToolHandle, arm.io.Importer.fontList, "Font");
 						var h = Id.handle();
 						h.text = textToolText;
 						textToolText = ui.textInput(h, "");
@@ -1892,8 +1892,8 @@ class UITrait extends iron.Trait {
 				UIFiles.filters = "arm,blend";
 				arm.App.filesDone = function(path:String) {
 					StringTools.endsWith(path, ".blend") ?
-						Importer.importBlendMaterials(path) :
-						Importer.importArmMaterials(path);
+						arm.io.ImportBlend.runMaterial(path) :
+						arm.io.ImportArm.runMaterial(path);
 				}
 			}
 
@@ -2036,7 +2036,7 @@ class UITrait extends iron.Trait {
 				arm.App.showFilename = false;
 				UIFiles.filters = "jpg,png,tga,hdr";
 				arm.App.filesDone = function(path:String) {
-					Importer.importFile(path);
+					arm.io.Importer.importFile(path);
 				}
 			}
 			if (ui.isHovered) ui.tooltip("Import texture file (Ctrl + Shift + I)");
@@ -2130,7 +2130,7 @@ class UITrait extends iron.Trait {
 		arm.App.showFilename = false;
 		UIFiles.filters = "obj,fbx,blend,gltf,arm";
 		arm.App.filesDone = function(path:String) {
-			Importer.importFile(path);
+			arm.io.Importer.importFile(path);
 		}
 	}
 
@@ -2278,7 +2278,7 @@ class UITrait extends iron.Trait {
 					arm.App.filesDone = function(path:String) {
 						var f = arm.App.filenameHandle.text;
 						if (f == "") f = "untitled";
-						Exporter.exportMesh(path + "/" + f);
+						arm.io.Exporter.exportMesh(path + "/" + f);
 					};
 				}
 				exportMeshFormat = ui.combo(Id.handle({position: exportMeshFormat}), ["obj", "arm"], "Format", true);
@@ -2304,7 +2304,7 @@ class UITrait extends iron.Trait {
 						UITrait.inst.showError("Error: .hdr file expected");
 						return;
 					}
-					Importer.importFile(path);
+					arm.io.Importer.importFile(path);
 				}
 			}
 

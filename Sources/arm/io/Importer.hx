@@ -1,0 +1,275 @@
+package arm.io;
+
+import zui.Canvas;
+import zui.Nodes;
+import iron.data.SceneFormat;
+import iron.data.MeshData;
+import arm.creator.NodeCreator;
+import arm.util.RenderUtil;
+import arm.util.MeshUtil;
+import arm.util.UVUtil;
+import arm.util.ViewportUtil;
+import arm.util.Path;
+import arm.ui.UITrait;
+import arm.ui.UIBox;
+import arm.ui.UIView2D;
+import arm.ui.UINodes;
+import arm.ProjectFormat;
+import arm.Tool;
+
+class Importer {
+
+	public static var fontList = ["default.ttf"];
+	public static var fontMap = new Map<String, kha.Font>();
+
+	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
+		// Mesh
+		if (Format.checkMeshFormat(path)) {
+			importMesh(path);
+		}
+		// Image
+		else if (Format.checkTextureFormat(path)) {
+			arm.io.ImportTexture.run(path);
+			// Place image node
+			var x0 = UINodes.inst.wx;
+			var x1 = UINodes.inst.wx + UINodes.inst.ww;
+			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
+				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
+				UINodes.inst.nodes.nodesDrag = false;
+				UINodes.inst.hwnd.redraws = 2;
+			}
+		}
+		// Font
+		else if (Format.checkFontFormat(path)) {
+			arm.io.ImportFont.run(path);
+		}
+		// Project
+		else if (Format.checkProjectFormat(path)) {
+			arm.io.ImportArm.runProject(path);
+		}
+		// Folder
+		else if (path.indexOf(".") == -1) {
+			arm.io.ImportFolder.run(path);
+		}
+		else {
+			UITrait.inst.showError(Strings.error1);
+		}
+	}
+
+	public static function importMesh(path:String) {
+		if (!Format.checkMeshFormat(path)) {
+			UITrait.inst.showError(Strings.error1);
+			return;
+		}
+
+		#if arm_debug
+		var timer = iron.system.Time.realTime();
+		#end
+
+		var p = path.toLowerCase();
+		if (StringTools.endsWith(p, ".obj")) arm.io.ImportObj.run(path);
+		else if (StringTools.endsWith(p, ".gltf")) arm.io.ImportGltf.run(path);
+		else if (StringTools.endsWith(p, ".fbx")) arm.io.ImportFbx.run(path);
+		else if (StringTools.endsWith(p, ".blend")) arm.io.ImportBlend.run(path);
+
+		if (UITrait.inst.mergedObject != null) {
+			UITrait.inst.mergedObject.remove();
+			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
+			UITrait.inst.mergedObject = null;
+		}
+
+		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
+
+		if (UITrait.inst.paintObjects.length > 1) {
+			// Sort by name
+			UITrait.inst.paintObjects.sort(function(a, b):Int {
+				if (a.name < b.name) return -1;
+				else if (a.name > b.name) return 1;
+				return 0;
+			});
+
+			// No mask by default
+			if (UITrait.inst.mergedObject == null) MeshUtil.mergeMesh();
+			UITrait.inst.paintObject.skip_context = "paint";
+			UITrait.inst.mergedObject.visible = true;
+		}
+
+		ViewportUtil.scaleToBounds();
+
+		if (UITrait.inst.paintObject.name == "") UITrait.inst.paintObject.name = "Object";
+
+		UIView2D.inst.hwnd.redraws = 2;
+
+		#if arm_debug
+		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));
+		#end
+	}
+
+	public static function makeMesh(mesh:Dynamic, path:String) {
+		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
+			UITrait.inst.showError(Strings.error3);
+			return;
+		}
+
+		var raw:TMeshData = null;
+		if (UITrait.inst.worktab.position == SpaceScene) {
+			raw = {
+				name: mesh.name,
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos" },
+					{ values: mesh.nora, attrib: "nor" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
+		}
+		else {
+
+			if (mesh.texa == null) {
+				UITrait.inst.showError(Strings.error4);
+				var verts = Std.int(mesh.posa.length / 4);
+				mesh.texa = new kha.arrays.Int16Array(verts * 2);
+				var n = new iron.math.Vec4();
+				for (i in 0...verts) {
+					n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+					// Sphere projection
+					// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+					// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+					// Equirect
+					mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+					mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
+				}
+			}
+			raw = {
+				name: mesh.name,
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos" },
+					{ values: mesh.nora, attrib: "nor" },
+					{ values: mesh.texa, attrib: "tex" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+		}
+
+		new MeshData(raw, function(md:MeshData) {
+			
+			// Append
+			if (UITrait.inst.worktab.position == SpaceScene) {
+				var mats = new haxe.ds.Vector(1);
+				mats[0] = UITrait.inst.selectedMaterialScene.data;
+				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
+				path = StringTools.replace(path, "\\", "/");
+				var ar = path.split("/");
+				var s = ar[ar.length - 1];
+				object.name = s.substring(0, s.length - 4);
+
+				// md.geom.calculateAABB();
+				// var aabb = md.geom.aabb;
+				// var dim = new TFloat32Array(3);
+				// dim[0] = aabb.x;
+				// dim[1] = aabb.y;
+				// dim[2] = aabb.z;
+				// object.raw.dimensions = dim;
+				#if arm_physics
+				object.addTrait(new armory.trait.physics.RigidBody(0.0));
+				#end
+				
+				UITrait.inst.selectObject(object);
+			}
+			// Replace
+			else {
+				UITrait.inst.paintObject = UITrait.inst.mainObject();
+
+				UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
+				for (i in 0...UITrait.inst.paintObjects.length) {
+					var p = UITrait.inst.paintObjects[i];
+					if (p == UITrait.inst.paintObject) continue;
+					iron.data.Data.deleteMesh(p.data.handle);
+					p.remove();
+				}
+				var handle = UITrait.inst.paintObject.data.handle;
+				if (handle != "SceneSphere" && handle != "ScenePlane") {
+					iron.data.Data.deleteMesh(handle);
+				}
+
+				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
+				UITrait.inst.setLayer(UITrait.inst.layers[0]);
+				iron.App.notifyOnRender(Layers.initLayers);
+				History.reset();
+				
+				UITrait.inst.paintObject.setData(md);
+				UITrait.inst.paintObject.name = mesh.name;
+
+				var g = UITrait.inst.paintObject.data.geom;
+				var posbuf = g.vertexBufferMap.get("pos");
+				if (posbuf != null) { // Remove cache
+					posbuf.delete();
+					g.vertexBufferMap.remove("pos");
+				}
+
+				UITrait.inst.paintObjects = [UITrait.inst.paintObject];
+			}
+
+			UITrait.inst.ddirty = 4;
+			UITrait.inst.hwnd.redraws = 2;
+			UITrait.inst.hwnd1.redraws = 2;
+			UITrait.inst.hwnd2.redraws = 2;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
+		});
+	}
+
+	public static function addMesh(mesh:Dynamic) {
+
+		if (mesh.texa == null) {
+			UITrait.inst.showError(Strings.error4);
+			var verts = Std.int(mesh.posa.length / 4);
+			mesh.texa = new kha.arrays.Int16Array(verts * 2);
+			var n = new iron.math.Vec4();
+			for (i in 0...verts) {
+				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+				// Sphere projection
+				// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+				// Equirect
+				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+				mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
+			}
+		}
+		var raw:TMeshData = {
+			name: mesh.name,
+			vertex_arrays: [
+				{ values: mesh.posa, attrib: "pos" },
+				{ values: mesh.nora, attrib: "nor" },
+				{ values: mesh.texa, attrib: "tex" }
+			],
+			index_arrays: [
+				{ values: mesh.inda, material: 0 }
+			],
+			scale_pos: mesh.scalePos,
+			scale_tex: mesh.scaleTex
+		};
+
+		new MeshData(raw, function(md:MeshData) {
+			
+			var object = iron.Scene.active.addMeshObject(md, UITrait.inst.paintObject.materials, UITrait.inst.paintObject);
+			object.name = mesh.name;
+			object.skip_context = "paint";
+
+			UITrait.inst.paintObjects.push(object);
+
+			UITrait.inst.ddirty = 4;
+			UITrait.inst.hwnd.redraws = 2;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
+		});
+	}
+}

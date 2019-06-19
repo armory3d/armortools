@@ -37,7 +37,6 @@ class Tool {
 			instance_object: ".Particle",
 			weight_gravity: 1
 		};
-		// iron.Scene.active.raw.gravity = f32([0, 0, -9.8]);
 		iron.Scene.active.raw.particle_datas = [raw];
 		var particle_refs:Array<TParticleReference> = [
 			{
@@ -92,9 +91,9 @@ class Tool {
 
 	@:access(zui.Zui)
 	public static function getTextToolFont():kha.Font {
-		var fontName = Importer.fontList[UITrait.inst.textToolHandle.position];
+		var fontName = arm.io.Importer.fontList[UITrait.inst.textToolHandle.position];
 		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
-		return Importer.fontMap.get(fontName);
+		return arm.io.Importer.fontMap.get(fontName);
 	}
 }
 
