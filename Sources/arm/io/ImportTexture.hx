@@ -2,11 +2,12 @@ package arm.io;
 
 import zui.Canvas;
 import arm.ui.UITrait;
+import arm.util.Path;
 
 class ImportTexture {
 
 	public static function run(path:String) {
-		if (!Format.checkTextureFormat(path)) {
+		if (!Path.checkTextureFormat(path)) {
 			UITrait.inst.showError(Strings.error1);
 			return;
 		}

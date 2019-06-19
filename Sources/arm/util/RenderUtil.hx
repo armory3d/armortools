@@ -49,10 +49,10 @@ class RenderUtil {
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		arm.MaterialParser.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsPreview;
+		arm.nodes.MaterialParser.parseMeshPreviewMaterial();
+		iron.RenderPath.active.commands = arm.render.RenderPathPreview.commandsPreview;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
+		iron.RenderPath.active.commands = arm.render.RenderPathDeferred.commands;
 
 		UITrait.inst.materialPreview = false;
 		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
@@ -71,7 +71,7 @@ class RenderUtil {
 		light.data.raw.strength = savedLight;
 		probe.raw.strength = savedProbe;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
-		arm.MaterialParser.parseMeshMaterial();
+		arm.nodes.MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 
@@ -108,10 +108,10 @@ class RenderUtil {
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		arm.MaterialParser.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathPreview.commandsDecal;
+		arm.nodes.MaterialParser.parseMeshPreviewMaterial();
+		iron.RenderPath.active.commands = arm.render.RenderPathPreview.commandsDecal;
 		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.commands = arm.renderpath.RenderPathDeferred.commands;
+		iron.RenderPath.active.commands = arm.render.RenderPathDeferred.commands;
 
 		UITrait.inst.decalPreview = false;
 		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
@@ -131,7 +131,7 @@ class RenderUtil {
 		light.visible = true;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		
-		arm.MaterialParser.parseMeshMaterial();
+		arm.nodes.MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 

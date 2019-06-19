@@ -3,11 +3,13 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
-import arm.creator.NodeCreator;
-import arm.creator.NodeCreatorBrush;
+import arm.nodes.NodesMaterial;
+import arm.nodes.NodesBrush;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.Tool;
+import arm.data.BrushSlot;
+import arm.data.MaterialSlot;
 
 @:access(zui.Zui)
 class UINodes extends iron.Trait {
@@ -68,7 +70,7 @@ class UINodes extends iron.Trait {
 				canvasBrushBlob = b2.toString();
 				canvas = haxe.Json.parse(canvasBlob);
 				canvasBrush = haxe.Json.parse(canvasBrushBlob);
-				MaterialParser.parseBrush();
+				arm.nodes.MaterialParser.parseBrush();
 
 				var t = Reflect.copy(arm.App.theme);
 				t.ELEMENT_H = 18;
@@ -141,7 +143,7 @@ class UINodes extends iron.Trait {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (canvasType == 1) MaterialParser.parseBrush();
+			if (canvasType == 1) arm.nodes.MaterialParser.parseBrush();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
@@ -150,7 +152,7 @@ class UINodes extends iron.Trait {
 					Layers.updateFillLayers(); // TODO: jitter
 					UITrait.inst.hwnd.redraws = 2;
 				}
-				arm.MaterialParser.parsePaintMaterial();
+				arm.nodes.MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd1.redraws = 2;
 				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
@@ -231,7 +233,7 @@ class UINodes extends iron.Trait {
 			var enter = keyboard.down("enter");
 			var count = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
-			var nodeList = canvasType == 0 ? NodeCreator.list : NodeCreatorBrush.list;
+			var nodeList = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
 			for (list in nodeList) {
 				for (n in list) {
 					if (n.name.toLowerCase().indexOf(search) >= 0) {
@@ -381,7 +383,7 @@ class UINodes extends iron.Trait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
-			var cats = canvasType == 0 ? NodeCreator.categories : NodeCreatorBrush.categories;
+			var cats = canvasType == 0 ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
 				if (ui.button(cats[i], Left) || (ui.isHovered && drawMenu)) {
 					addNodeButton = true;
@@ -406,7 +408,7 @@ class UINodes extends iron.Trait {
 		ui.endWindow();
 
 		if (drawMenu) {
-			var list = canvasType == 0 ? NodeCreator.list : NodeCreatorBrush.list;
+			var list = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
 			
@@ -455,7 +457,7 @@ class UINodes extends iron.Trait {
 	}
 
 	public function acceptDrag(assetIndex:Int) {
-		var n = NodeCreator.createImageTexture();
+		var n = NodesMaterial.createImageTexture();
 		n.buttons[0].default_value = assetIndex;
 		nodes.nodesSelected = [n];
 	}

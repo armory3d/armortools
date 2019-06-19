@@ -28,8 +28,8 @@ class UIView2D extends iron.Trait {
 		inst = this;
 
 		pipe = new kha.graphics4.PipelineState();
-		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerViewVert);
-		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.layerViewFrag);
+		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(arm.data.ConstData.layerViewVert);
+		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(arm.data.ConstData.layerViewFrag);
 		var vs = new kha.graphics4.VertexStructure();
 		vs.add("pos", kha.graphics4.VertexData.Float3);
 		vs.add("tex", kha.graphics4.VertexData.Float2);

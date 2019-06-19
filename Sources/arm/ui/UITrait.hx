@@ -10,12 +10,15 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Math;
 import iron.RenderPath;
-import arm.MaterialParser;
-import arm.ProjectFormat;
+import arm.nodes.MaterialParser;
+import arm.Project;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.UVUtil;
+import arm.data.LayerSlot;
+import arm.data.BrushSlot;
+import arm.data.MaterialSlot;
 import arm.Tool;
 
 @:access(zui.Zui)
@@ -275,7 +278,7 @@ class UITrait extends iron.Trait {
 		headerh = Std.int(defaultHeaderH * App.C.window_scale);
 		menubarw = Std.int(215 * App.C.window_scale);
 
-		Uniforms.init();
+		arm.render.Uniforms.init();
 
 		if (materials == null) {
 			materials = [];
@@ -783,7 +786,7 @@ class UITrait extends iron.Trait {
 		else if (redoPressed) History.doRedo();
 
 		if (UITrait.inst.worktab.position == SpaceScene) {
-			Gizmo.update();
+			arm.plugin.Gizmo.update();
 		}
 
 		if (lastCombo != null || (ui.tooltipImg == null && lastTooltip != null)) App.redrawUI();
@@ -1656,7 +1659,7 @@ class UITrait extends iron.Trait {
 	function tabPlugins() {
 		if (ui.tab(htab, "Plugins")) {
 			if (ui.panel(Id.handle({selected: false}), "Console", 1)) {
-				Console.render(ui);
+				arm.plugin.Console.render(ui);
 			}
 			ui.separator();
 

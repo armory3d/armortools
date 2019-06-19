@@ -3,9 +3,10 @@ package arm.io;
 import zui.Nodes;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.creator.NodeCreator;
+import arm.nodes.NodesMaterial;
 import arm.util.Path;
 import arm.util.RenderUtil;
+import arm.data.MaterialSlot;
 
 class ImportBlend {
 
@@ -213,10 +214,10 @@ class ImportBlend {
 				// Place nodes
 				var node:Dynamic = blnodes.get("first", 0, "bNode");
 				while (true) {
-					// Search for node in creator
+					// Search for node in list
 					var search = node.get("idname").substr(10).toLowerCase();
 					var base:TNode = null;
-					for (list in NodeCreator.list) {
+					for (list in NodesMaterial.list) {
 						var found = false;
 						for (n in list) {
 							var s = StringTools.replace(n.type, "_", "").toLowerCase();
@@ -342,7 +343,7 @@ class ImportBlend {
 					if (last.block == link.block) break;
 				}
 
-				MaterialParser.parsePaintMaterial();
+				arm.nodes.MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 

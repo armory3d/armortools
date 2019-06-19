@@ -5,6 +5,7 @@ import kha.graphics4.TextureUnit;
 import kha.graphics4.ConstantLocation;
 import iron.RenderPath;
 import arm.ui.UITrait;
+import arm.data.ConstData;
 import arm.Tool;
 
 class Layers {
@@ -308,11 +309,11 @@ class Layers {
 
 				if (first) {
 					first = false;
-					arm.MaterialParser.parsePaintMaterial();
+					arm.nodes.MaterialParser.parsePaintMaterial();
 				}
 				
 				for (i in 0...fills) {
-					arm.renderpath.RenderPathPaint.commandsPaint();
+					arm.render.RenderPathPaint.commandsPaint();
 				}
 			}
 		}

@@ -9,6 +9,9 @@ import arm.ui.UIView2D;
 import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
+import arm.util.Path;
+import arm.data.MaterialSlot;
+import arm.data.ConstData;
 import arm.Config;
 import arm.Tool;
 import kha.graphics2.truetype.StbTruetype;
@@ -116,10 +119,10 @@ class App extends iron.Trait {
 					#if kha_krom
 					if (Krom.getArgCount() > 1) {
 						var path = Krom.getArg(1);
-						if (Format.checkProjectFormat(path) ||
-							Format.checkMeshFormat(path) ||
-							Format.checkTextureFormat(path) ||
-							Format.checkFontFormat(path)) {
+						if (Path.checkProjectFormat(path) ||
+							Path.checkMeshFormat(path) ||
+							Path.checkTextureFormat(path) ||
+							Path.checkFontFormat(path)) {
 							fileArg = path;
 						}
 					}
@@ -129,9 +132,9 @@ class App extends iron.Trait {
 					root.addTrait(new UITrait());
 					root.addTrait(new UINodes());
 					root.addTrait(new UIView2D());
-					root.addTrait(new arm.trait.FlyCamera());
-					root.addTrait(new arm.trait.OrbitCamera());
-					root.addTrait(new arm.trait.RotateCamera());
+					root.addTrait(new arm.plugin.FlyCamera());
+					root.addTrait(new arm.plugin.OrbitCamera());
+					root.addTrait(new arm.plugin.RotateCamera());
 					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
 					iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
 					iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
@@ -145,10 +148,10 @@ class App extends iron.Trait {
 					cam.buildProjection();
 					if (fileArg != "") {
 						arm.io.Importer.importFile(fileArg);
-						if (Format.checkMeshFormat(fileArg)) {
+						if (Path.checkMeshFormat(fileArg)) {
 							UITrait.inst.toggleDistractFree();
 						}
-						else if (Format.checkTextureFormat(fileArg)) {
+						else if (Path.checkTextureFormat(fileArg)) {
 							UITrait.inst.show2DView(1);
 						}
 					}

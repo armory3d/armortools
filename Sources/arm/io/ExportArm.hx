@@ -5,7 +5,7 @@ import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.Lz4;
 import arm.util.Path;
-import arm.ProjectFormat;
+import arm.Project;
 
 class ExportArm {
 

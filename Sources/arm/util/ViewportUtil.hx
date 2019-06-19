@@ -30,7 +30,7 @@ class ViewportUtil {
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
 				UITrait.inst.ddirty = 2;
-				arm.trait.OrbitCamera.inst.reset();
+				arm.plugin.OrbitCamera.inst.reset();
 				break;
 			}
 		}
@@ -47,12 +47,12 @@ class ViewportUtil {
 		cam.transform.buildMatrix();
 		cam.buildProjection();
 		UITrait.inst.ddirty = 2;
-		arm.trait.OrbitCamera.inst.reset();
+		arm.plugin.OrbitCamera.inst.reset();
 	}
 
 	public static function orbit(x:Float, y:Float) {
 		var camera = iron.Scene.active.camera;
-		var dist = arm.trait.OrbitCamera.dist;
+		var dist = arm.plugin.OrbitCamera.dist;
 		camera.transform.move(camera.lookWorld(), dist);
 		camera.transform.rotate(new iron.math.Vec4(0, 0, 1), x);
 		camera.transform.rotate(camera.rightWorld(), y);

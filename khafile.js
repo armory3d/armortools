@@ -50,7 +50,7 @@ project.addDefine('arm_particles');
 project.addDefine('arm_config');
 project.addDefine('arm_resizable');
 project.addDefine('arm_data_dir');
-project.addParameter('--macro include("arm.brushnode")');
+project.addParameter('--macro include("arm.nodes.brush")');
 project.addParameter('-dce full');
 
 let debug = false;

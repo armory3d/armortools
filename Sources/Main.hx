@@ -16,7 +16,7 @@ class Main {
             900,
             1,
             true,
-            arm.renderpath.RenderPathCreator.get
+            arm.render.RenderPathCreator.get
         );
         new arm.App();
     }

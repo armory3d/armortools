@@ -1,7 +1,7 @@
 package arm.io;
 
 import iron.data.MeshData;
-import arm.ProjectFormat;
+import arm.Project;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.Path;
@@ -9,6 +9,9 @@ import arm.util.Lz4;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.MeshUtil;
+import arm.data.LayerSlot;
+import arm.data.BrushSlot;
+import arm.data.MaterialSlot;
 
 class ImportArm {
 
@@ -94,7 +97,7 @@ class ImportArm {
 
 				UITrait.inst.selectedMaterial = mat;
 				UINodes.inst.updateCanvasMap();
-				arm.MaterialParser.parsePaintMaterial();
+				arm.nodes.MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
@@ -252,7 +255,7 @@ class ImportArm {
 
 				UITrait.inst.selectedMaterial = mat;
 				UINodes.inst.updateCanvasMap();
-				arm.MaterialParser.parsePaintMaterial();
+				arm.nodes.MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 

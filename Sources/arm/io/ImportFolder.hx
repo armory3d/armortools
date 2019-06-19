@@ -4,8 +4,10 @@ import zui.Nodes;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.RenderUtil;
-import arm.creator.NodeCreator;
+import arm.util.Path;
+import arm.nodes.NodesMaterial;
 import arm.Tool;
+import arm.data.MaterialSlot;
 
 class ImportFolder {
 
@@ -38,7 +40,7 @@ class ImportFolder {
 		for (f in files) {
 			if (f.length == 0) continue;
 			f = StringTools.rtrim(f);
-			if (!Format.checkTextureFormat(f)) continue;
+			if (!Path.checkTextureFormat(f)) continue;
 			
 			f = path + sep + f;
 			#if krom_windows
@@ -49,31 +51,31 @@ class ImportFolder {
 			
 			var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			var valid = false;
-			if (mapbase == "" && Format.checkBaseTex(base)) {
+			if (mapbase == "" && Path.checkBaseTex(base)) {
 				mapbase = f;
 				valid = true;
 			}
-			if (mapopac == "" && Format.checkOpacTex(base)) {
+			if (mapopac == "" && Path.checkOpacTex(base)) {
 				mapopac = f;
 				valid = true;
 			}
-			if (mapnor == "" && Format.checkNorTex(base)) {
+			if (mapnor == "" && Path.checkNorTex(base)) {
 				mapnor = f;
 				valid = true;
 			}
-			if (mapocc == "" && Format.checkOccTex(base)) {
+			if (mapocc == "" && Path.checkOccTex(base)) {
 				mapocc = f;
 				valid = true;
 			}
-			if (maprough == "" && Format.checkRoughTex(base)) {
+			if (maprough == "" && Path.checkRoughTex(base)) {
 				maprough = f;
 				valid = true;
 			}
-			if (mapmet == "" && Format.checkMetTex(base)) {
+			if (mapmet == "" && Path.checkMetTex(base)) {
 				mapmet = f;
 				valid = true;
 			}
-			if (mapheight == "" && Format.checkDispTex(base)) {
+			if (mapheight == "" && Path.checkDispTex(base)) {
 				mapheight = f;
 				valid = true;
 			}
@@ -104,7 +106,7 @@ class ImportFolder {
 		
 		var pos = 0;
 		if (mapbase != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapbase);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -114,7 +116,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (mapopac != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapopac);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -124,7 +126,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (mapocc != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapocc);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -134,7 +136,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (maprough != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(maprough);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -144,7 +146,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (mapmet != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapmet);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -154,7 +156,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (mapnor != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapnor);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -164,7 +166,7 @@ class ImportFolder {
 			canvas.links.push(l);
 		}
 		if (mapheight != "") {
-			var n = NodeCreator.createImageTexture();
+			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = arm.App.getAssetIndex(mapheight);
 			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
@@ -173,7 +175,7 @@ class ImportFolder {
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 			canvas.links.push(l);
 		}
-		arm.MaterialParser.parsePaintMaterial();
+		arm.nodes.MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UITrait.inst.hwnd1.redraws = 2;
 		#end

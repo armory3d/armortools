@@ -1,8 +1,8 @@
 package arm;
 
+import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
-import arm.ProjectFormat;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
@@ -11,6 +11,9 @@ import arm.util.Lz4;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
+import arm.data.LayerSlot;
+import arm.data.BrushSlot;
+import arm.data.MaterialSlot;
 
 class Project {
 	public static function projectOpen() {
@@ -146,7 +149,7 @@ class Project {
 			History.reset();
 			
 			UINodes.inst.updateCanvasMap();
-			arm.MaterialParser.parsePaintMaterial();
+			arm.nodes.MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
 			for (a in UITrait.inst.assets) iron.data.Data.deleteImage(a.file);
 			UITrait.inst.assets = [];
@@ -174,4 +177,24 @@ class Project {
 			if (current != null) current.begin(false);
 		});
 	}
+}
+
+typedef TProjectFormat = {
+	public var version:String;
+	public var brush_nodes:Array<TNodeCanvas>;
+	public var material_nodes:Array<TNodeCanvas>;
+	public var assets:Array<String>;
+	public var layer_datas:Array<TLayerData>;
+	public var mesh_datas:Array<TMeshData>;
+}
+
+typedef TLayerData = {
+	public var res:Int;
+	public var texpaint:haxe.io.Bytes;
+	public var texpaint_nor:haxe.io.Bytes;
+	public var texpaint_pack:haxe.io.Bytes;
+	public var texpaint_mask:haxe.io.Bytes;
+	public var opacity_mask:Float;
+	public var material_mask:Int;
+	public var object_mask:Int;
 }

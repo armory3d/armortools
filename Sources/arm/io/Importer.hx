@@ -4,7 +4,6 @@ import zui.Canvas;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
-import arm.creator.NodeCreator;
 import arm.util.RenderUtil;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;
@@ -14,7 +13,7 @@ import arm.ui.UITrait;
 import arm.ui.UIBox;
 import arm.ui.UIView2D;
 import arm.ui.UINodes;
-import arm.ProjectFormat;
+import arm.Project;
 import arm.Tool;
 
 class Importer {
@@ -24,11 +23,11 @@ class Importer {
 
 	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
-		if (Format.checkMeshFormat(path)) {
+		if (Path.checkMeshFormat(path)) {
 			importMesh(path);
 		}
 		// Image
-		else if (Format.checkTextureFormat(path)) {
+		else if (Path.checkTextureFormat(path)) {
 			arm.io.ImportTexture.run(path);
 			// Place image node
 			var x0 = UINodes.inst.wx;
@@ -40,11 +39,11 @@ class Importer {
 			}
 		}
 		// Font
-		else if (Format.checkFontFormat(path)) {
+		else if (Path.checkFontFormat(path)) {
 			arm.io.ImportFont.run(path);
 		}
 		// Project
-		else if (Format.checkProjectFormat(path)) {
+		else if (Path.checkProjectFormat(path)) {
 			arm.io.ImportArm.runProject(path);
 		}
 		// Folder
@@ -57,7 +56,7 @@ class Importer {
 	}
 
 	public static function importMesh(path:String) {
-		if (!Format.checkMeshFormat(path)) {
+		if (!Path.checkMeshFormat(path)) {
 			UITrait.inst.showError(Strings.error1);
 			return;
 		}
