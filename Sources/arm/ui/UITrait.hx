@@ -485,7 +485,7 @@ class UITrait extends iron.Trait {
 				arm.App.whandle.redraws = 2;
 				arm.App.foldersOnly = true;
 				arm.App.showFilename = true;
-				UIFiles.filters = formatType == 0 ? "jpg" : "png";
+				UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "jpg" : "png";
 				arm.App.filesDone = function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
@@ -2268,7 +2268,7 @@ class UITrait extends iron.Trait {
 					arm.App.foldersOnly = true;
 					arm.App.showFilename = true;
 					// var path = 'C:\\Users\\lubos\\Documents\\';
-					UIFiles.filters = formatType == 0 ? "jpg" : "png";
+					UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "jpg" : "png";
 					arm.App.filesDone = function(path:String) {
 						textureExport = true;
 						textureExportPath = path;
@@ -2285,14 +2285,19 @@ class UITrait extends iron.Trait {
 					UVUtil.trianglemap = null;
 					UVUtil.trianglemapCached = false;
 				}
-				ui.combo(bitsHandle, ["8bit", "16bit"], "Color", true);
+				ui.combo(bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
 				if (bitsHandle.changed) {
 					iron.App.notifyOnRender(Layers.setLayerBits);
 				}
 
 				ui.row([1/2, 1/2]);
-				formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
-				ui.enabled = formatType == 0;
+				if (bitsHandle.position == 0) {
+					formatType = ui.combo(Id.handle({position: formatType}), ["jpg", "png"], "Format", true);
+				}
+				else {
+					ui.combo(Id.handle({position: formatType}), ["exr"], "Format", true);
+				}
+				ui.enabled = formatType == 0 && bitsHandle.position == 0;
 				formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);

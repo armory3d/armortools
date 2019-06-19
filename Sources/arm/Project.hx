@@ -360,8 +360,8 @@ class Project {
 			UITrait.inst.resHandle.position = Config.getTextureResPos(project.layer_datas[0].res);
 
 			if (UITrait.inst.layers[0].texpaint.width != Config.getTextureRes()) {
-				for (l in UITrait.inst.layers) l.resize();
-				if (UITrait.inst.undoLayers != null) for (l in UITrait.inst.undoLayers) l.resize();
+				for (l in UITrait.inst.layers) l.resizeAndSetBits();
+				if (UITrait.inst.undoLayers != null) for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
 				var rts = iron.RenderPath.active.renderTargets;
 				rts.get("texpaint_blend0").image.unload();
 				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();

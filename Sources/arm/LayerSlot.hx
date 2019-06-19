@@ -72,7 +72,8 @@ class LayerSlot {
 		}
 		this.ext = ext;
 		name = "Layer " + (id + 1);
-		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' : 'RGBA64';
+		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' :
+					 UITrait.inst.bitsHandle.position == 1 ? 'RGBA64' : 'RGBA128';
 
 		{
 			var t = new RenderTargetRaw();
@@ -274,55 +275,11 @@ class LayerSlot {
 		return l;
 	}
 
-	public function resize() {
+	public function resizeAndSetBits() {
+		var format = UITrait.inst.bitsHandle.position == 0 ? TextureFormat.RGBA32 :
+					 UITrait.inst.bitsHandle.position == 1 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
+		
 		var res = Config.getTextureRes();
-		var rts = RenderPath.active.renderTargets;
-
-		var texpaint = this.texpaint;
-		var texpaint_nor = this.texpaint_nor;
-		var texpaint_pack = this.texpaint_pack;
-
-		this.texpaint = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
-		this.texpaint_nor = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
-		this.texpaint_pack = kha.Image.createRenderTarget(res, res, TextureFormat.RGBA32);
-
-		this.texpaint.g2.begin(false);
-		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
-		this.texpaint.g2.end();
-
-		this.texpaint_nor.g2.begin(false);
-		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, res, res);
-		this.texpaint_nor.g2.end();
-
-		this.texpaint_pack.g2.begin(false);
-		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
-		this.texpaint_pack.g2.end();
-
-		texpaint.unload();
-		texpaint_nor.unload();
-		texpaint_pack.unload();
-
-		rts.get("texpaint" + this.ext).image = this.texpaint;
-		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
-		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
-
-		if (this.texpaint_mask != null) {
-			var texpaint_mask = this.texpaint_mask;
-			this.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
-
-			this.texpaint_mask.g2.begin(false);
-			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
-			this.texpaint_mask.g2.end();
-
-			texpaint_mask.unload();
-
-			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
-		}
-	}
-
-	public function setBits(formatName:String) {
-		var format = formatName == "RGBA32" ? TextureFormat.RGBA32 : TextureFormat.RGBA64;
-		var res = this.texpaint.width;
 		var rts = RenderPath.active.renderTargets;
 
 		var texpaint = this.texpaint;
@@ -352,5 +309,18 @@ class LayerSlot {
 		rts.get("texpaint" + this.ext).image = this.texpaint;
 		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
 		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
+
+		if (this.texpaint_mask != null && this.texpaint_mask.width != res) {
+			var texpaint_mask = this.texpaint_mask;
+			this.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
+
+			this.texpaint_mask.g2.begin(false);
+			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
+			this.texpaint_mask.g2.end();
+
+			texpaint_mask.unload();
+
+			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
+		}
 	}
 }

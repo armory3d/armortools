@@ -90,8 +90,8 @@ class Layers {
 			while (UITrait.inst.undoLayers.length > C.undo_steps) { var l = UITrait.inst.undoLayers.pop(); l.unload(); }
 		}
 		g.end();
-		for (l in UITrait.inst.layers) l.resize();
-		for (l in UITrait.inst.undoLayers) l.resize();
+		for (l in UITrait.inst.layers) l.resizeAndSetBits();
+		for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
 		var rts = RenderPath.active.renderTargets;
 		rts.get("texpaint_blend0").image.unload();
 		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
@@ -109,9 +109,8 @@ class Layers {
 
 	public static function setLayerBits(g:kha.graphics4.Graphics) {
 		g.end();
-		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' : 'RGBA64';
-		for (l in UITrait.inst.layers) l.setBits(format);
-		for (l in UITrait.inst.undoLayers) l.setBits(format);
+		for (l in UITrait.inst.layers) l.resizeAndSetBits();
+		for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
 		g.begin();
 		iron.App.removeRender(setLayerBits);
 	}
