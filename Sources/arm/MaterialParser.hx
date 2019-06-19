@@ -7,6 +7,7 @@ import armory.system.CyclesFormat;
 import armory.system.CyclesShader;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
+import arm.Tool;
 
 class MaterialParser {
 
@@ -21,7 +22,7 @@ class MaterialParser {
 	}
 
 	public static function parseMeshMaterial() {
-		if (UITrait.inst.worktab.position == 1) return;
+		if (UITrait.inst.worktab.position == SpaceScene) return;
 		var m = UITrait.inst.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 			var sc:ShaderContext = null;
@@ -69,7 +70,7 @@ class MaterialParser {
 	public static function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		var m = UITrait.inst.worktab.position == 1 ? UITrait.inst.selectedMaterialScene.data : UITrait.inst.materials[0].data;
+		var m = UITrait.inst.worktab.position == SpaceScene ? UITrait.inst.selectedMaterialScene.data : UITrait.inst.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 
 			var sc:ShaderContext = null;
@@ -106,7 +107,7 @@ class MaterialParser {
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
 		
-		if (UITrait.inst.worktab.position == 1) {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			parseMeshPreviewMaterial();
 			return;
 		}

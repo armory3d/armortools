@@ -264,7 +264,7 @@ class UITrait extends iron.Trait {
 	}
 
 	public function paintDirty():Bool {
-		if (UITrait.inst.worktab.position == 1) return false;
+		if (UITrait.inst.worktab.position == SpaceScene) return false;
 		return pdirty > 0;
 	}
 
@@ -536,7 +536,7 @@ class UITrait extends iron.Trait {
 			mouse.y > 0 && mouse.y < iron.App.h() &&
 			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
 
-			if (UITrait.inst.worktab.position == 0) { // Paint
+			if (UITrait.inst.worktab.position == SpacePaint) {
 				if (shift) {
 					if (kb.started("1")) selectMaterial(0);
 					else if (kb.started("2")) selectMaterial(1);
@@ -791,7 +791,7 @@ class UITrait extends iron.Trait {
 		if (undoPressed) History.doUndo();
 		else if (redoPressed) History.doRedo();
 
-		if (UITrait.inst.worktab.position == 1) {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			Gizmo.update();
 		}
 
@@ -825,7 +825,7 @@ class UITrait extends iron.Trait {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (arm.App.uienabled && worktab.position == 0) {
+		if (arm.App.uienabled && worktab.position == SpacePaint) {
 			var mouse = iron.system.Input.getMouse();
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
@@ -969,7 +969,7 @@ class UITrait extends iron.Trait {
 	public function selectObject(o:Object) {
 		selectedObject = o;
 
-		if (UITrait.inst.worktab.position == 1) {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			if (Std.is(o, MeshObject)) {
 				for (i in 0...materialsScene.length) {
 					if (materialsScene[i].data == cast(o, MeshObject).materials[0]) {
@@ -1027,7 +1027,7 @@ class UITrait extends iron.Trait {
 
 			ui.imageScrollAlign = false;
 
-			if (UITrait.inst.worktab.position == 0) {
+			if (UITrait.inst.worktab.position == SpacePaint) {
 				var keys = ['(B)', '(E)', '(G)', '(D)', '(T)', '(L) - Hold ALT to set source', '(U)', '(P)', '(K)', '(C)', '(V)'];
 				var img = Res.get("icons.png");
 				var imgw = ui.SCALE > 1 ? 100 : 50;
@@ -1040,7 +1040,7 @@ class UITrait extends iron.Trait {
 					ui._y += 2;
 				}
 			}
-			else if (UITrait.inst.worktab.position == 1) {
+			else if (UITrait.inst.worktab.position == SpaceScene) {
 				var img = Res.get("icons.png");
 				var imgw = ui.SCALE > 1 ? 100 : 50;
 				ui._x += 2;
@@ -1085,6 +1085,7 @@ class UITrait extends iron.Trait {
 		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(workspaceHandle, panelx, 0, kha.System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
+			// ui.tab(worktab, "Sculpt");
 			ui.tab(worktab, "Scene");
 			if (worktab.changed) {
 				ddirty = 2;
@@ -1094,7 +1095,7 @@ class UITrait extends iron.Trait {
 				hwnd1.redraws = 2;
 				hwnd2.redraws = 2;
 
-				if (worktab.position == 1) {
+				if (worktab.position == SpaceScene) {
 					selectTool(ToolGizmo);
 					// RenderUtil.makeMaterialPreview();
 				}
@@ -1108,7 +1109,7 @@ class UITrait extends iron.Trait {
 		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(headerHandle, panelx, headerh, kha.System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
-			if (UITrait.inst.worktab.position == 0) {
+			if (UITrait.inst.worktab.position == SpacePaint) {
 
 				if (selectedTool == ToolColorId) {
 					ui.text("Picked Color");
@@ -1264,9 +1265,6 @@ class UITrait extends iron.Trait {
 					}
 				}
 			}
-			else if (UITrait.inst.worktab.position == 1) {
-				// ui.button("Clone");
-			}
 		}
 
 		if (ui.window(statusHandle, iron.App.x(), kha.System.windowHeight() - headerh, kha.System.windowWidth() - toolbarw - windowW, headerh)) {
@@ -1300,7 +1298,7 @@ class UITrait extends iron.Trait {
 		gizmo.visible = false;
 		// grid.visible = false;
 
-		if (worktab.position == 0) { // Paint
+		if (worktab.position == SpacePaint) {
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				tabLayers();
 				tabHistory();
@@ -1320,7 +1318,7 @@ class UITrait extends iron.Trait {
 				tabViewport();
 			}
 		}
-		else if (worktab.position == 1) { // Scene
+		else if (worktab.position == SpaceScene) {
 			gizmo.visible = true;
 			// grid.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
@@ -1898,11 +1896,11 @@ class UITrait extends iron.Trait {
 		// iron.data.Data.cachedBlobs.remove("Material2_data.arm");
 	}
 
-	function getSelectedMaterial() { return worktab.position == 1 ? selectedMaterialScene : selectedMaterial; }
+	function getSelectedMaterial() { return worktab.position == SpaceScene ? selectedMaterialScene : selectedMaterial; }
 
 	function tabMaterials() {
 
-		var isScene = worktab.position == 1;
+		var isScene = worktab.position == SpaceScene;
 		var materials = isScene ? materialsScene : this.materials;
 		var selectMaterial = isScene ? selectMaterialScene : this.selectMaterial;
 

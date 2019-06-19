@@ -15,6 +15,7 @@ import arm.ui.UIBox;
 import arm.ui.UIView2D;
 import arm.ui.UINodes;
 import arm.ProjectFormat;
+import arm.Tool;
 
 class Importer {
 
@@ -127,7 +128,7 @@ class Importer {
 			if (valid) importTexture(f);
 		}
 		// Create material
-		var isScene = UITrait.inst.worktab.position == 1;
+		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
 			UITrait.inst.removeMaterialCache();
 			iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
@@ -894,7 +895,7 @@ class Importer {
 		}
 
 		var raw:TMeshData = null;
-		if (UITrait.inst.worktab.position == 1) {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			raw = {
 				name: mesh.name,
 				vertex_arrays: [
@@ -944,7 +945,7 @@ class Importer {
 		new MeshData(raw, function(md:MeshData) {
 			
 			// Append
-			if (UITrait.inst.worktab.position == 1) {
+			if (UITrait.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = UITrait.inst.selectedMaterialScene.data;
 				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));

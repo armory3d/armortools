@@ -161,11 +161,12 @@ class Project {
 			iron.data.Data.deleteMesh(handle);
 		}
 
-		if (UITrait.inst.projectType == 1) {
-			var mesh = new iron.format.proc.Plane(1, 1, 512, 512);
-			// var mesh = new iron.format.proc.Sphere(1, 512, 256);
+		if (UITrait.inst.projectType > 0) {
+			var mesh:Dynamic = UITrait.inst.projectType == 1 ?
+				new iron.format.proc.Sphere(1, 512, 256) :
+				new iron.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
-				name: "PlaneTess",
+				name: "Tesselated",
 				vertex_arrays: [
 					{ values: mesh.posa, attrib: "pos" },
 					{ values: mesh.nora, attrib: "nor" },
@@ -178,12 +179,15 @@ class Project {
 				scale_tex: mesh.scaleTex
 			};
 			var md = new MeshData(raw, function(md:MeshData) {});
-			iron.data.Data.cachedMeshes.set("ScenePlaneTess", md);
+			iron.data.Data.cachedMeshes.set("SceneTesselated", md);
 
-			// ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
+			if (UITrait.inst.projectType == 2) {
+				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
+				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
+			}
 		}
 
-		var n = UITrait.inst.projectType == 0 ? "Cube" : "PlaneTess";
+		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tesselated";
 		iron.data.Data.getMesh("Scene", n, function(md:MeshData) {
 			
 			var current = @:privateAccess kha.graphics4.Graphics2.current;

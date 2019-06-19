@@ -4,6 +4,7 @@ import iron.Scene;
 import iron.object.MeshObject;
 import iron.math.Mat4;
 import arm.ui.UITrait;
+import arm.Tool;
 
 class RenderUtil {
 
@@ -20,13 +21,13 @@ class RenderUtil {
 		var painto = UITrait.inst.paintObject;
 		UITrait.inst.paintObject = sphere;
 
-		if (UITrait.inst.worktab.position == 0) {
-			sphere.materials[0] = UITrait.inst.materials[0].data;
-			UITrait.inst.selectedMaterial.previewReady = true;
-		}
-		else {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			sphere.materials[0] = UITrait.inst.selectedMaterialScene.data;
 			UITrait.inst.selectedMaterialScene.previewReady = true;
+		}
+		else {
+			sphere.materials[0] = UITrait.inst.materials[0].data;
+			UITrait.inst.selectedMaterial.previewReady = true;
 		}
 
 		UITrait.inst.savedCamera.setFrom(Scene.active.camera.transform.local);

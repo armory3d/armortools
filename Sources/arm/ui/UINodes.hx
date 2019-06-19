@@ -96,7 +96,7 @@ class UINodes extends iron.Trait {
 	}
 
 	public function updateCanvasMap() {
-		if (UITrait.inst.worktab.position == 1) {
+		if (UITrait.inst.worktab.position == SpaceScene) {
 			if (canvasMap2 == null) canvasMap2 = new Map();
 			var c = canvasMap2.get(UITrait.inst.selectedMaterialScene);
 			if (c == null) {

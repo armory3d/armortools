@@ -145,7 +145,7 @@ class RenderPathPaint {
 				return;
 		}
 		if (!arm.App.uienabled ||
-			UITrait.inst.worktab.position != 0) {
+			UITrait.inst.worktab.position == SpaceScene) {
 			return;
 		}
 

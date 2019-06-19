@@ -116,8 +116,8 @@ class Tool {
 	var ToolGizmo = 0;
 }
 
-@:enum abstract WorkMode(Int) from Int to Int {
-	var ModePaint = 0;
-	var ModeScene = 1;
-	var ModeMaterial = 2;
+@:enum abstract Workspace(Int) from Int to Int {
+	var SpacePaint = 0;
+	// var SpaceSculpt = 1;
+	var SpaceScene = 1;
 }
