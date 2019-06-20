@@ -1,15 +1,19 @@
 package arm.io;
 
+import haxe.io.Bytes;
+import haxe.io.BytesOutput;
+import kha.Image;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
+import arm.App;
 
 class Exporter {
 
 	static inline var gamma = 1.0 / 2.2;
 
-	static function writeTexture(file:String, pixels:haxe.io.Bytes, type = 1, off = 0) {
-		var out = new haxe.io.BytesOutput();
+	static function writeTexture(file:String, pixels:Bytes, type = 1, off = 0) {
+		var out = new BytesOutput();
 		var res = Config.getTextureRes();
 		var bitsHandle = UITrait.inst.bitsHandle.position;
 		var bits = bitsHandle == 0 ? 8 : bitsHandle == 1 ? 16 : 32;
@@ -43,15 +47,15 @@ class Exporter {
 	public static function exportTextures(path:String) {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
-		var f = arm.App.filenameHandle.text;
+		var f = App.filenameHandle.text;
 		if (f == "") f = "untitled";
 		var formatType = UITrait.inst.formatType;
 		var bits = UITrait.inst.bitsHandle.position == 0 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == 0 ? ".png" : ".jpg";
 		if (StringTools.endsWith(f, ext)) f = f.substr(0, f.length - 4);
-		var texpaint:kha.Image = null;
-		var texpaint_nor:kha.Image = null;
-		var texpaint_pack:kha.Image = null;
+		var texpaint:Image = null;
+		var texpaint_nor:Image = null;
+		var texpaint_pack:Image = null;
 		var layers = UITrait.inst.layers;
 
 		// Export visible layers
@@ -150,7 +154,7 @@ class Exporter {
 			}
 		}
 
-		var pixels:haxe.io.Bytes = null;
+		var pixels:Bytes = null;
 
 		if (UITrait.inst.isBase || UITrait.inst.isOpac) {
 			pixels = texpaint.getPixels(); // bgra
@@ -170,8 +174,6 @@ class Exporter {
 			if (UITrait.inst.isBase) writeTexture(path + "/" + f + "_base" + ext, pixels);
 			if (UITrait.inst.isOpac) writeTexture(path + "/" + f + "_opac" + ext, pixels, 2, 3);
 		}
-
-
 
 		if (UITrait.inst.isNor) {
 			pixels = texpaint_nor.getPixels();
@@ -219,7 +221,7 @@ class Exporter {
 						writeTexture(path + "/" + f + "_orm" + ext, pixels);
 					}
 					else { // Unity 5
-						var pixels2 = haxe.io.Bytes.alloc(pixels.length);
+						var pixels2 = Bytes.alloc(pixels.length);
 						// 8bit only
 						for (i in 0...Std.int(pixels.length / 4)) {
 							pixels2.set(i * 4    , pixels.get(i * 4 + 2));
@@ -240,7 +242,7 @@ class Exporter {
 	}
 
 	public static function exportMesh(path:String) {
-		if (UITrait.inst.exportMeshFormat == 0) arm.io.ExportObj.run(path);
-		else arm.io.ExportArm.run(path);
+		if (UITrait.inst.exportMeshFormat == 0) ExportObj.run(path);
+		else ExportArm.run(path);
 	}
 }

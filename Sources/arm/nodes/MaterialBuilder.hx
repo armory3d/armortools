@@ -2,7 +2,7 @@ package arm.nodes;
 
 import armory.system.Cycles;
 import armory.system.CyclesShader;
-import armory.system.CyclesShader.CyclesShaderContext;
+import armory.system.CyclesFunctions;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
@@ -199,7 +199,7 @@ class MaterialBuilder {
 					frag.wposition = true;
 
 					if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
-						frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+						frag.add_function(CyclesFunctions.str_octahedronWrap);
 						frag.add_uniform('sampler2D gbuffer0');
 						#if (kha_opengl || kha_webgl)
 						frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
@@ -268,7 +268,7 @@ class MaterialBuilder {
 
 			var angleFill = UITrait.inst.selectedTool == ToolFill && UITrait.inst.fillTypeHandle.position == 2;
 			if (angleFill) {
-				frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+				frag.add_function(CyclesFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				frag.write('vec3 wn;');
@@ -639,7 +639,7 @@ class MaterialBuilder {
 			if (UITrait.inst.bakeType == 0) { // AO
 				// Apply normal channel
 				frag.vVec = true;
-				frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+				frag.add_function(CyclesFunctions.str_cotangentFrame);
 				#if kha_direct3d11
 				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 				#else
@@ -652,7 +652,7 @@ class MaterialBuilder {
 				frag.write('const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);');
 				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 				frag.add_uniform('sampler3D voxels');
-				frag.add_function(armory.system.CyclesFunctions.str_traceAO);
+				frag.add_function(CyclesFunctions.str_traceAO);
 				frag.n = true;
 				var strength = UITrait.inst.bakeStrength;
 				var radius = UITrait.inst.bakeRadius;
@@ -745,10 +745,10 @@ class MaterialBuilder {
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
 
-		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
-		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
-		frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
-		frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+		frag.add_function(CyclesFunctions.str_packFloat);
+		frag.add_function(CyclesFunctions.str_packFloat2);
+		frag.add_function(CyclesFunctions.str_cotangentFrame);
+		frag.add_function(CyclesFunctions.str_octahedronWrap);
 
 		// Apply normal channel
 		if (decal) {
@@ -914,8 +914,8 @@ class MaterialBuilder {
 
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
-		frag.add_function(armory.system.CyclesFunctions.str_packFloat);
-		frag.add_function(armory.system.CyclesFunctions.str_packFloat2);
+		frag.add_function(CyclesFunctions.str_packFloat);
+		frag.add_function(CyclesFunctions.str_packFloat2);
 
 		if (UITrait.inst.selectedTool == ToolColorId) {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
@@ -924,7 +924,7 @@ class MaterialBuilder {
 			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
 		else {
-			frag.add_function(armory.system.CyclesFunctions.str_octahedronWrap);
+			frag.add_function(CyclesFunctions.str_octahedronWrap);
 
 			frag.write('vec3 basecol;');
 			frag.write('float roughness;');
@@ -935,7 +935,7 @@ class MaterialBuilder {
 			frag.write('float matid = 0.0;');
 
 			frag.vVec = true;
-			frag.add_function(armory.system.CyclesFunctions.str_cotangentFrame);
+			frag.add_function(CyclesFunctions.str_cotangentFrame);
 			#if kha_direct3d11
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
@@ -1187,7 +1187,6 @@ class MaterialBuilder {
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();
-
 		return con_mesh;
 	}
 

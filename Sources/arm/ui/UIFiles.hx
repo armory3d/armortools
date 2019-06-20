@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Id;
+import iron.system.Input;
 import arm.App;
 
 class UIFiles {
@@ -35,7 +36,7 @@ class UIFiles {
 
 	static function releaseKeys() {
 		// File dialog may prevent firing key up events
-		var kb = iron.system.Input.getKeyboard();
+		var kb = Input.getKeyboard();
 		@:privateAccess kb.upListener(kha.input.KeyCode.Shift);
 		@:privateAccess kb.upListener(kha.input.KeyCode.Control);
 	}

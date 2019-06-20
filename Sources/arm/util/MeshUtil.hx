@@ -1,8 +1,12 @@
 package arm.util;
 
+import kha.arrays.Int16Array;
+import kha.arrays.Uint32Array;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
+import iron.data.Data;
 import iron.object.MeshObject;
+import iron.math.Vec4;
 import arm.ui.UITrait;
 
 class MeshUtil {
@@ -18,10 +22,10 @@ class MeshUtil {
 			if (paintObjects[i].data.scalePos > maxScale) maxScale = paintObjects[i].data.scalePos;
 		}
 		vlen = Std.int(vlen / 4);
-		var va0 = new kha.arrays.Int16Array(vlen * 4);
-		var va1 = new kha.arrays.Int16Array(vlen * 2);
-		var va2 = new kha.arrays.Int16Array(vlen * 2);
-		var ia = new kha.arrays.Uint32Array(ilen);
+		var va0 = new Int16Array(vlen * 4);
+		var va1 = new Int16Array(vlen * 2);
+		var va2 = new Int16Array(vlen * 2);
+		var ia = new Uint32Array(ilen);
 
 		var voff = 0;
 		var ioff = 0;
@@ -109,7 +113,7 @@ class MeshUtil {
 
 		if (UITrait.inst.mergedObject != null) {
 			UITrait.inst.mergedObject.remove();
-			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
+			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
 			UITrait.inst.mergedObject = null;
 		}
 		mergeMesh();
@@ -129,11 +133,11 @@ class MeshUtil {
 	}
 
 	public static function calcNormals() {
-		var va = new iron.math.Vec4();
-		var vb = new iron.math.Vec4();
-		var vc = new iron.math.Vec4();
-		var cb = new iron.math.Vec4();
-		var ab = new iron.math.Vec4();
+		var va = new Vec4();
+		var vb = new Vec4();
+		var vc = new Vec4();
+		var cb = new Vec4();
+		var ab = new Vec4();
 		for (p in UITrait.inst.paintObjects) {
 			var g = p.data.geom;
 			var inda = g.indices[0];

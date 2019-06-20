@@ -1,22 +1,31 @@
 package arm;
 
+import kha.graphics2.truetype.StbTruetype;
+import kha.Image;
+import kha.Font;
+import kha.System;
 import zui.Zui;
 import zui.Zui.Handle;
-import zui.Canvas;
+import zui.Themes;
+import zui.Nodes;
+import iron.Scene;
+import iron.data.Data;
+import iron.system.Input;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
+import arm.io.Importer;
 import arm.util.Path;
+import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
 import arm.data.ConstData;
 import arm.Config;
 import arm.Tool;
-import kha.graphics2.truetype.StbTruetype;
 
-class App extends iron.Trait {
+class App {
 
 	public static var version = "0.6";
 	public static function x():Int { return appx; }
@@ -26,7 +35,7 @@ class App extends iron.Trait {
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var dragMaterial:MaterialSlot = null;
-	public static var dragAsset:TAsset = null;
+	public static var dragAsset:zui.Canvas.TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
 	public static var showFiles = false;
@@ -39,9 +48,9 @@ class App extends iron.Trait {
 	public static var dropPath = "";
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
-	public static var font:kha.Font = null;
-	public static var theme:zui.Themes.TTheme;
-	public static var color_wheel:kha.Image;
+	public static var font:Font = null;
+	public static var theme:TTheme;
+	public static var color_wheel:Image;
 	public static var uibox:Zui;
 	public static var path = '/';
 	public static var showMenu = false;
@@ -52,8 +61,6 @@ class App extends iron.Trait {
 	public static var K:Dynamic; // Config.Keymap
 
 	public function new() {
-		super();
-
 		// Init config
 		C = Config.init();
 		K = C.keymap;
@@ -63,9 +70,9 @@ class App extends iron.Trait {
 		#end
 
 		// Set base dir for file browser
-		zui.Ext.dataPath = iron.data.Data.dataPath;
+		zui.Ext.dataPath = Data.dataPath;
 
-		kha.System.notifyOnDropFiles(function(filePath:String) {
+		System.notifyOnDropFiles(function(filePath:String) {
 			if (!checkAscii(filePath)) return;
 			dropPath = filePath;
 			dropPath = StringTools.replace(dropPath, "%20", " "); // Linux can pass %20 on drop
@@ -77,8 +84,8 @@ class App extends iron.Trait {
 		untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
-		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
-			iron.data.Data.getImage('color_wheel.png', function(image:kha.Image) {
+		Data.getFont("font_default.ttf", function(f:Font) {
+			Data.getImage('color_wheel.png', function(image:Image) {
 				font = f;
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;
@@ -102,16 +109,16 @@ class App extends iron.Trait {
 				for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
 				for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
 				@:privateAccess kimg.chars = chars;
-				iron.data.Data.getBlob("font13.bin", function(fontbin:kha.Blob) {
-					@:privateAccess kimg.texture = kha.Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
+				Data.getBlob("font13.bin", function(fontbin:kha.Blob) {
+					@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
 					// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
 					@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
 				});
 				#end
 
 				color_wheel = image;
-				zui.Nodes.getEnumTexts = getEnumTexts;
-				zui.Nodes.mapEnum = mapEnum;
+				Nodes.getEnumTexts = getEnumTexts;
+				Nodes.mapEnum = mapEnum;
 				uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
 				
 				iron.App.notifyOnInit(function() {
@@ -128,10 +135,10 @@ class App extends iron.Trait {
 					}
 					#end
 					iron.App.notifyOnUpdate(update);
-					var root = iron.Scene.active.root;
-					root.addTrait(new UITrait());
-					root.addTrait(new UINodes());
-					root.addTrait(new UIView2D());
+					var root = Scene.active.root;
+					new UITrait();
+					new UINodes();
+					new UIView2D();
 					root.addTrait(new arm.plugin.FlyCamera());
 					root.addTrait(new arm.plugin.OrbitCamera());
 					root.addTrait(new arm.plugin.RotateCamera());
@@ -143,11 +150,11 @@ class App extends iron.Trait {
 					iron.App.notifyOnRender2D(render);
 					appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 					appy = UITrait.inst.headerh * 2;
-					var cam = iron.Scene.active.camera;
+					var cam = Scene.active.camera;
 					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
 					cam.buildProjection();
 					if (fileArg != "") {
-						arm.io.Importer.importFile(fileArg);
+						Importer.importFile(fileArg);
 						if (Path.checkMeshFormat(fileArg)) {
 							UITrait.inst.toggleDistractFree();
 						}
@@ -167,26 +174,26 @@ class App extends iron.Trait {
 
 	public static function w():Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return arm.util.RenderUtil.matPreviewSize;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return arm.util.RenderUtil.decalPreviewSize;
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return RenderUtil.decalPreviewSize;
 		
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
-			res = kha.System.windowWidth() - UITrait.defaultWindowW;
+			res = System.windowWidth() - UITrait.defaultWindowW;
 			res -= UITrait.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = Std.int((kha.System.windowWidth() - UITrait.inst.windowW) / 2);
+			res = Std.int((System.windowWidth() - UITrait.inst.windowW) / 2);
 			res -= UITrait.inst.toolbarw;
 		}
 		else if (UITrait.inst.show) {
-			res = kha.System.windowWidth() - UITrait.inst.windowW;
+			res = System.windowWidth() - UITrait.inst.windowW;
 			res -= UITrait.inst.toolbarw;
 		}
 		else {
-			res = kha.System.windowWidth();
+			res = System.windowWidth();
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -194,13 +201,13 @@ class App extends iron.Trait {
 
 	public static function h():Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return arm.util.RenderUtil.matPreviewSize;
+		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return arm.util.RenderUtil.decalPreviewSize;
+		if (UITrait.inst != null && UITrait.inst.decalPreview) return RenderUtil.decalPreviewSize;
 
 		var res = 0;
-		res = kha.System.windowHeight();
+		res = System.windowHeight();
 		if (UITrait.inst == null) res -= UITrait.defaultHeaderH * 3;
 		if (UITrait.inst != null && UITrait.inst.show && res > 0) res -= UITrait.inst.headerh * 3;
 
@@ -212,8 +219,8 @@ class App extends iron.Trait {
 		resize();
 		
 		// Save window size
-		// C.window_w = kha.System.windowWidth();
-		// C.window_h = kha.System.windowHeight();
+		// C.window_w = System.windowWidth();
+		// C.window_h = System.windowHeight();
 		// Cap height, window is not centered properly
 		// var disp =  kha.Display.primary;
 		// if (disp.height > 0 && C.window_h > disp.height - 140) {
@@ -224,9 +231,9 @@ class App extends iron.Trait {
 	#end
 
 	public static function resize() {
-		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		var cam = iron.Scene.active.camera;
+		var cam = Scene.active.camera;
 		if (cam.data.raw.ortho != null) {
 			cam.data.raw.ortho[2] = -2 * (iron.App.h() / iron.App.w());
 			cam.data.raw.ortho[3] =  2 * (iron.App.h() / iron.App.w());
@@ -270,8 +277,8 @@ class App extends iron.Trait {
 	}
 
 	static function update() {
-		var mouse = iron.system.Input.getMouse();
-		var kb = iron.system.Input.getKeyboard();
+		var mouse = Input.getMouse();
+		var kb = Input.getKeyboard();
 
 		if ((dragAsset != null || dragMaterial != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
@@ -327,7 +334,7 @@ class App extends iron.Trait {
 			if (!wait) {
 				dropX = mouse.x + App.x();
 				dropY = mouse.y + App.y();
-				arm.io.Importer.importFile(dropPath, dropX, dropY);
+				Importer.importFile(dropPath, dropX, dropY);
 				dropPath = "";
 			}
 		}
@@ -351,9 +358,9 @@ class App extends iron.Trait {
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
-		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		if (isDragging) {
 			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;

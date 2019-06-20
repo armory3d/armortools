@@ -1,15 +1,21 @@
 package arm;
 
+import haxe.Json;
+import kha.Font;
+import kha.arrays.Float32Array;
 import iron.RenderPath;
+import iron.Scene;
 import iron.data.SceneFormat;
+import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
 import arm.ui.UITrait;
+import arm.io.Importer;
 
 class Tool {
 
-	static function f32(ar:Array<kha.FastFloat>):kha.arrays.Float32Array {
-		var res = new kha.arrays.Float32Array(ar.length);
+	static function f32(ar:Array<kha.FastFloat>):Float32Array {
+		var res = new Float32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;
 	}
@@ -37,7 +43,7 @@ class Tool {
 			instance_object: ".Particle",
 			weight_gravity: 1
 		};
-		iron.Scene.active.raw.particle_datas = [raw];
+		Scene.active.raw.particle_datas = [raw];
 		var particle_refs:Array<TParticleReference> = [
 			{
 				name: "Particles",
@@ -56,31 +62,31 @@ class Tool {
 			RenderPath.active.createRenderTarget(t);
 		}
 
-		for (mat in iron.Scene.active.raw.material_datas) {
+		for (mat in Scene.active.raw.material_datas) {
 			if (mat.name == 'Material2') {
-				var m:TMaterialData = haxe.Json.parse(haxe.Json.stringify(mat));
+				var m:TMaterialData = Json.parse(Json.stringify(mat));
 				m.name = 'MaterialParticle';
-				iron.Scene.active.raw.material_datas.push(m);
+				Scene.active.raw.material_datas.push(m);
 				break;
 			}
 		}
 
-		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md:iron.data.MaterialData) {
+		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md:MaterialData) {
 			UITrait.inst.particleMaterial = md;
 
-			for (obj in iron.Scene.active.raw.objects) {
+			for (obj in Scene.active.raw.objects) {
 				if (obj.name == '.Sphere') {
-					var particle:TObj = haxe.Json.parse(haxe.Json.stringify(obj));
+					var particle:TObj = Json.parse(Json.stringify(obj));
 					particle.name = '.Particle';
 					particle.is_particle = true;
 					particle.material_refs = ['MaterialParticle'];
-					iron.Scene.active.raw.objects.push(particle);
+					Scene.active.raw.objects.push(particle);
 					for (i in 0...16) particle.transform.values[i] *= 0.01;
 					break;
 				}
 			}
 
-			iron.Scene.active.spawnObject(".Sphere", null, function(o:Object) {
+			Scene.active.spawnObject(".Sphere", null, function(o:Object) {
 				var mo:MeshObject = cast o;
 				mo.name = ".ParticleEmitter";
 				mo.raw.particle_refs = particle_refs;
@@ -90,10 +96,10 @@ class Tool {
 	}
 
 	@:access(zui.Zui)
-	public static function getTextToolFont():kha.Font {
-		var fontName = arm.io.Importer.fontList[UITrait.inst.textToolHandle.position];
+	public static function getTextToolFont():Font {
+		var fontName = Importer.fontList[UITrait.inst.textToolHandle.position];
 		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
-		return arm.io.Importer.fontMap.get(fontName);
+		return Importer.fontMap.get(fontName);
 	}
 }
 

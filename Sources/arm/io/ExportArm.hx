@@ -1,17 +1,21 @@
 package arm.io;
 
+import haxe.Json;
+import zui.Nodes;
 import iron.data.SceneFormat;
+import iron.system.ArmPack;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.Lz4;
 import arm.util.Path;
 import arm.Project;
+import arm.App;
 
 class ExportArm {
 
 	public static function run(path:String) {
 		var raw:TSceneFormat = { mesh_datas: [ UITrait.inst.paintObject.data.raw ] };
-		var b = iron.system.ArmPack.encode(raw);
+		var b = ArmPack.encode(raw);
 		if (!StringTools.endsWith(path, ".arm")) path += ".arm";
 		#if kha_krom
 		Krom.fileSaveBytes(path, b.getData());
@@ -19,11 +23,11 @@ class ExportArm {
 	}
 
 	public static function runProject() {
-		var mnodes:Array<zui.Nodes.TNodeCanvas> = [];
-		var bnodes:Array<zui.Nodes.TNodeCanvas> = [];
+		var mnodes:Array<TNodeCanvas> = [];
+		var bnodes:Array<TNodeCanvas> = [];
 
 		for (m in UITrait.inst.materials) {
-			var c:zui.Nodes.TNodeCanvas = haxe.Json.parse(haxe.Json.stringify(UINodes.inst.canvasMap.get(m)));
+			var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
 					var sameDrive = UITrait.inst.projectPath.charAt(0) == n.buttons[0].data.charAt(0);
@@ -66,7 +70,7 @@ class ExportArm {
 		}
 
 		UITrait.inst.project = {
-			version: arm.App.version,
+			version: App.version,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
 			mesh_datas: md,
@@ -74,12 +78,10 @@ class ExportArm {
 			assets: asset_files
 		};
 		
-		var bytes = iron.system.ArmPack.encode(UITrait.inst.project);
+		var bytes = ArmPack.encode(UITrait.inst.project);
 
 		#if kha_krom
 		Krom.fileSaveBytes(UITrait.inst.projectPath, bytes.getData());
-		#elseif kha_kore
-		sys.io.File.saveBytes(UITrait.inst.projectPath, bytes);
 		#end
 	}
 }

@@ -1,5 +1,6 @@
 package arm.plugin;
 
+import kha.Image;
 import kha.Scheduler;
 import zui.Zui;
 import zui.Id;
@@ -12,9 +13,9 @@ class Console {
 	static var totalTime = 0.0;
 	static var frames = 0;
 	static var frameTimeAvg = 0.0;
-	static var graph:kha.Image = null;
-	static var graphA:kha.Image = null;
-	static var graphB:kha.Image = null;
+	static var graph:Image = null;
+	static var graphA:Image = null;
+	static var graphB:Image = null;
 	static var lrow = [1/2, 1/2];
 	static var haxeTrace:Dynamic->haxe.PosInfos->Void = null;
 	static var lastTraces:Array<String> = [''];
@@ -27,8 +28,8 @@ class Console {
 
 	static function updateGraph() {
 		if (graph == null) {
-			graphA = kha.Image.createRenderTarget(280, 33);
-			graphB = kha.Image.createRenderTarget(280, 33);
+			graphA = Image.createRenderTarget(280, 33);
+			graphB = Image.createRenderTarget(280, 33);
 			graph = graphA;
 		}
 		else graph = graph == graphA ? graphB : graphA;

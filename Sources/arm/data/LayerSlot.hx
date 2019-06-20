@@ -1,7 +1,9 @@
 package arm.data;
 
 import kha.graphics4.TextureFormat;
+import kha.Image;
 import iron.RenderPath;
+import iron.object.MeshObject;
 import arm.ui.UITrait;
 
 class LayerSlot {
@@ -12,20 +14,20 @@ class LayerSlot {
 
 	public var name:String;
 
-	public var texpaint:kha.Image;
-	public var texpaint_nor:kha.Image;
-	public var texpaint_pack:kha.Image;
+	public var texpaint:Image;
+	public var texpaint_nor:Image;
+	public var texpaint_pack:Image;
 
-	public var texpaint_preview:kha.Image; // Layer preview
+	public var texpaint_preview:Image; // Layer preview
 
-	public var texpaint_mask:kha.Image = null; // Texture mask
-	public var texpaint_mask_preview:kha.Image;
+	public var texpaint_mask:Image = null; // Texture mask
+	public var texpaint_mask_preview:Image;
 	public var maskOpacity = 1.0; // Opacity mask
 	public var material_mask:MaterialSlot = null; // Fill layer
 
 	// For undo layer
 	public var targetLayer:LayerSlot = null;
-	public var targetObject:iron.object.MeshObject = null;
+	public var targetObject:MeshObject = null;
 	public var targetIsMask = false;
 
 	static var first = true;
@@ -42,7 +44,7 @@ class LayerSlot {
 	public var paintSubs = true;
 
 	var createMaskColor:Int;
-	var createMaskImage:kha.Image;
+	var createMaskImage:Image;
 
 	public function new(ext = "") {
 
@@ -100,7 +102,7 @@ class LayerSlot {
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_preview = kha.Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
+		texpaint_preview = Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
 	}
 
 	public function unload() {
@@ -145,7 +147,7 @@ class LayerSlot {
 		other.texpaint_mask = tp_mask;
 	}
 
-	public function createMask(color:Int, clear = true, image:kha.Image = null) {
+	public function createMask(color:Int, clear = true, image:Image = null) {
 		if (texpaint_mask != null) return;
 
 		{
@@ -157,7 +159,7 @@ class LayerSlot {
 			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_mask_preview = kha.Image.createRenderTarget(200, 200, TextureFormat.L8);
+		texpaint_mask_preview = Image.createRenderTarget(200, 200, TextureFormat.L8);
 
 		if (clear) {
 			createMaskColor = color;
@@ -286,9 +288,9 @@ class LayerSlot {
 		var texpaint_nor = this.texpaint_nor;
 		var texpaint_pack = this.texpaint_pack;
 
-		this.texpaint = kha.Image.createRenderTarget(res, res, format);
-		this.texpaint_nor = kha.Image.createRenderTarget(res, res, format);
-		this.texpaint_pack = kha.Image.createRenderTarget(res, res, format);
+		this.texpaint = Image.createRenderTarget(res, res, format);
+		this.texpaint_nor = Image.createRenderTarget(res, res, format);
+		this.texpaint_pack = Image.createRenderTarget(res, res, format);
 
 		this.texpaint.g2.begin(false);
 		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
@@ -312,7 +314,7 @@ class LayerSlot {
 
 		if (this.texpaint_mask != null && this.texpaint_mask.width != res) {
 			var texpaint_mask = this.texpaint_mask;
-			this.texpaint_mask = kha.Image.createRenderTarget(res, res, TextureFormat.L8);
+			this.texpaint_mask = Image.createRenderTarget(res, res, TextureFormat.L8);
 
 			this.texpaint_mask.g2.begin(false);
 			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);

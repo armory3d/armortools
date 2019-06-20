@@ -1,6 +1,8 @@
 package arm.io;
 
+import kha.Image;
 import zui.Canvas;
+import iron.data.Data;
 import arm.ui.UITrait;
 import arm.util.Path;
 
@@ -14,7 +16,7 @@ class ImportTexture {
 
 		for (a in UITrait.inst.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
 		
-		iron.data.Data.getImage(path, function(image:kha.Image) {
+		Data.getImage(path, function(image:Image) {
 			var ar = path.split("/");
 			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
@@ -28,7 +30,7 @@ class ImportTexture {
 			// Set envmap
 			if (StringTools.endsWith(path.toLowerCase(), ".hdr") &&
 				(image.width == 1024 || image.width == 2048 || image.width == 4096)) {
-				arm.io.ImportEnvmap.run(path, image);
+				ImportEnvmap.run(path, image);
 			}
 		});
 	}

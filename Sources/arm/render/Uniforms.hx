@@ -2,6 +2,7 @@ package arm.render;
 
 import iron.data.MaterialData;
 import iron.object.Object;
+import iron.system.Input;
 import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.util.UVUtil;
@@ -18,7 +19,7 @@ class Uniforms {
 	public static function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
 		if (link == '_brushRadius') {
 			var val = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
-			var pen = iron.system.Input.getPen();
+			var pen = Input.getPen();
 			if (UITrait.penPressureRadius && pen.down()) val *= pen.pressure;
 			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
 			if (UITrait.inst.brush3d && !decal) {
@@ -29,13 +30,13 @@ class Uniforms {
 		}
 		else if (link == '_brushOpacity') {
 			var val = UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
-			var pen = iron.system.Input.getPen();
+			var pen = Input.getPen();
 			if (UITrait.penPressureOpacity && pen.down()) val *= pen.pressure;
 			return val;
 		}
 		else if (link == '_brushHardness') {
 			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
-			var pen = iron.system.Input.getPen();
+			var pen = Input.getPen();
 			if (UITrait.penPressureHardness && pen.down()) val *= pen.pressure;
 			if (UITrait.inst.brush3d && !UITrait.inst.paint2d) val *= val;
 			return val;
@@ -83,13 +84,13 @@ class Uniforms {
 	public static function linkVec4(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_inputBrush') {
-			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			var down = Input.getMouse().down() || Input.getPen().down();
 			vec2.set(UITrait.inst.paintVec.x, UITrait.inst.paintVec.y, down ? 1.0 : 0.0, 0.0);
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
 		else if (link == '_inputBrushLast') {
-			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			var down = Input.getMouse().down() || Input.getPen().down();
 			vec2.set(UITrait.inst.lastPaintVecX, UITrait.inst.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;

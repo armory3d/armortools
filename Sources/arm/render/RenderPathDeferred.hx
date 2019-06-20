@@ -1,8 +1,16 @@
 package arm.render;
 
+import kha.System;
 import iron.RenderPath;
+import iron.Scene;
+import iron.math.Mat4;
+import iron.math.Vec4;
+import iron.math.Quat;
+import iron.system.Input;
+import iron.object.MeshObject;
 import armory.renderpath.Inc;
 import arm.util.ViewportUtil;
+import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 
@@ -17,6 +25,8 @@ class RenderPathDeferred {
 	static var voxelsLast = "voxels";
 	#end
 	static var taaFrame = 0;
+	static var lastX = -1.0;
+	static var lastY = -1.0;
 
 	public static function init(_path:RenderPath) {
 
@@ -94,8 +104,8 @@ class RenderPathDeferred {
 
 				var t = new RenderTargetRaw();
 				t.name = "mtex";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = Inc.getHdrFormat();
 				t.scale = Inc.getSuperSampling();
 				t.depth_buffer = "mmain";
@@ -105,8 +115,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbuf";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = Inc.getHdrFormat();
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -115,8 +125,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer0";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				t.depth_buffer = "mmain";
@@ -126,8 +136,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer1";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -137,8 +147,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer2";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -149,8 +159,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbufa";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = "RGBA32";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -158,8 +168,8 @@ class RenderPathDeferred {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbufb";
-				t.width = arm.util.RenderUtil.matPreviewSize;
-				t.height = arm.util.RenderUtil.matPreviewSize;
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
 				t.format = "RGBA32";
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
@@ -169,17 +179,14 @@ class RenderPathDeferred {
 		//
 	}
 
-	static var lastX = -1.0;
-	static var lastY = -1.0;
-
 	@:access(iron.RenderPath)
 	public static function commands() {
 
-		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
 		
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		var mx = lastX;
 		var my = lastY;
 		lastX = mouse.x;
@@ -200,8 +207,8 @@ class RenderPathDeferred {
 		}
 
 		// Match projection matrix jitter
-		@:privateAccess iron.Scene.active.camera.frame = taaFrame;
-		@:privateAccess iron.Scene.active.camera.projectionJitter();
+		@:privateAccess Scene.active.camera.frame = taaFrame;
+		@:privateAccess Scene.active.camera.projectionJitter();
 
 		var tid = UITrait.inst.selectedLayer.id;
 
@@ -237,8 +244,8 @@ class RenderPathDeferred {
 		}
 
 		// 2D paint
-		var painto:iron.object.MeshObject = null;
-		var planeo:iron.object.MeshObject = null;
+		var painto:MeshObject = null;
+		var planeo:MeshObject = null;
 		var visibles:Array<Bool> = null;
 		var mergedObjectVisible = false;
 		var savedFov = 0.0;
@@ -255,11 +262,11 @@ class RenderPathDeferred {
 				UITrait.inst.mergedObject.visible = false;
 			}
 
-			var cam = iron.Scene.active.camera;
+			var cam = Scene.active.camera;
 			UITrait.inst.savedCamera.setFrom(cam.transform.local);
 			savedFov = cam.data.raw.fov;
 			ViewportUtil.updateCameraType(0);
-			var m = iron.math.Mat4.identity();
+			var m = Mat4.identity();
 			m.translate(0, 0, 0.5);
 			cam.transform.setMatrix(m);
 			cam.data.raw.fov = 0.92;
@@ -271,17 +278,17 @@ class RenderPathDeferred {
 			var ty = UIView2D.inst.panY / iron.App.h();
 			
 			m.setIdentity();
-			m.scale(new iron.math.Vec4(tw, tw, 1));
-			m.setLoc(new iron.math.Vec4(tx, ty, 0));
-			var m2 = iron.math.Mat4.identity();
-			m2.getInverse(iron.Scene.active.camera.VP);
+			m.scale(new Vec4(tw, tw, 1));
+			m.setLoc(new Vec4(tx, ty, 0));
+			var m2 = Mat4.identity();
+			m2.getInverse(Scene.active.camera.VP);
 			m.multmat(m2);
 
-			planeo = cast iron.Scene.active.getChild(".Plane");
+			planeo = cast Scene.active.getChild(".Plane");
 			planeo.visible = true;
 			UITrait.inst.paintObject = planeo;
 
-			var v = new iron.math.Vec4();
+			var v = new Vec4();
 			var sx = v.set(m._00, m._01, m._02).length();
 			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 			planeo.transform.scale.set(sx, 1.0, sx);
@@ -361,11 +368,11 @@ class RenderPathDeferred {
 				UITrait.inst.mergedObject.visible = mergedObjectVisible;
 			}
 			UITrait.inst.paintObject = painto;
-			iron.Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
-			iron.Scene.active.camera.data.raw.fov = savedFov;
+			Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
+			Scene.active.camera.data.raw.fov = savedFov;
 			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
-			iron.Scene.active.camera.buildProjection();
-			iron.Scene.active.camera.buildMatrix();
+			Scene.active.camera.buildProjection();
+			Scene.active.camera.buildMatrix();
 
 			drawGbuffer();
 		}
@@ -490,7 +497,7 @@ class RenderPathDeferred {
 
 		#if rp_translucency
 		{
-			var hasLight = iron.Scene.active.lights.length > 0;
+			var hasLight = Scene.active.lights.length > 0;
 			if (hasLight) Inc.drawTranslucency("tex");
 		}
 		#end
@@ -631,9 +638,9 @@ class RenderPathDeferred {
 			path.drawMeshes("overlay");
 
 			if (UITrait.inst.showCompass) {
-				var scene = iron.Scene.active;
-				var cam = iron.Scene.active.camera;
-				var gizmo:iron.object.MeshObject = cast scene.getChild(".GizmoTranslate");
+				var scene = Scene.active;
+				var cam = Scene.active.camera;
+				var gizmo:MeshObject = cast scene.getChild(".GizmoTranslate");
 				
 				var visible = gizmo.visible;
 				var parent = gizmo.parent;
@@ -642,11 +649,11 @@ class RenderPathDeferred {
 				var crot = cam.transform.rot;
 				var ratio = iron.App.w() / iron.App.h();
 				var P = cam.P;
-				cam.P = iron.math.Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
+				cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 				gizmo.visible = true;
 				gizmo.parent = cam;
-				gizmo.transform.loc = new iron.math.Vec4(7.2 * ratio, -7.6, -1);
-				gizmo.transform.rot = new iron.math.Quat(-crot.x, -crot.y, -crot.z, crot.w);
+				gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
+				gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
 				gizmo.transform.buildMatrix();
 				
 				gizmo.render(currentG, "overlay", []);
@@ -673,36 +680,23 @@ class RenderPathDeferred {
 			path.bindTarget("bufa", "edgesTex");
 			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-			// #if (rp_antialiasing == "TAA")
 			path.setTarget("bufa");
-			// #else
-			// path.setTarget("");
-			// #end
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");
-			// #if (rp_antialiasing == "TAA")
-			// {
-				path.bindTarget("gbuffer2", "sveloc");
-			// }
-			// #end
+			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-			// #if (rp_antialiasing == "TAA")
-			// {
-				path.setTarget(taaFrame % 2 == 0 ? "taa2" : "taa");
-				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex2");
-				path.bindTarget("bufa", "tex");
-				path.bindTarget("gbuffer2", "sveloc");
-				path.drawShader("shader_datas/taa_pass/taa_pass");
-				if (!ssaa4) {
-					path.setTarget("");
-					if (taaFrame == 0) path.bindTarget("bufa", "tex");
-					else path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
-					path.drawShader("shader_datas/copy_pass/copy_pass");
-				}
-				
-			// }
-			// #end
+			path.setTarget(taaFrame % 2 == 0 ? "taa2" : "taa");
+			path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex2");
+			path.bindTarget("bufa", "tex");
+			path.bindTarget("gbuffer2", "sveloc");
+			path.drawShader("shader_datas/taa_pass/taa_pass");
+			if (!ssaa4) {
+				path.setTarget("");
+				if (taaFrame == 0) path.bindTarget("bufa", "tex");
+				else path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+			}
 		}
 		#end
 

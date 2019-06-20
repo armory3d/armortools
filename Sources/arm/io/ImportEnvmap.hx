@@ -1,12 +1,18 @@
 package arm.io;
 
+import kha.Image;
+import kha.Blob;
+import kha.graphics4.TextureFormat;
+import kha.arrays.Float32Array;
+import iron.data.Data;
+import iron.Scene;
 import arm.ui.UITrait;
 
 class ImportEnvmap {
 
-	public static function run(path:String, image:kha.Image) {
+	public static function run(path:String, image:Image) {
 		#if kha_krom
-		var dataPath = iron.data.Data.dataPath;
+		var dataPath = Data.dataPath;
 		var p = Krom.getFilesLocation() + '/' + dataPath;
 		#if krom_windows
 		var cmft = p + "/cmft.exe";
@@ -53,12 +59,10 @@ class ImportEnvmap {
 		cmd += ' --output0 "' + tmp + 'tmp_rad"';
 		cmd += ' --output0params hdr,rgbe,latlong';
 		Krom.sysCommand(cmd);
-		#else
-		var tmp = "";
 		#end
 
 		// Load irr
-		iron.data.Data.getBlob(tmp + "tmp_irr.c", function(blob:kha.Blob) {
+		Data.getBlob(tmp + "tmp_irr.c", function(blob:Blob) {
 			var lines = blob.toString().split("\n");
 			var band0 = lines[5];
 			var band1 = lines[6];
@@ -70,15 +74,15 @@ class ImportEnvmap {
 			band = StringTools.replace(band, "{", "");
 			band = StringTools.replace(band, "}", "");
 			var ar = band.split(",");
-			var buf = new kha.arrays.Float32Array(27);
+			var buf = new Float32Array(27);
 			for (i in 0...ar.length) buf[i] = Std.parseFloat(ar[i]);
-			iron.Scene.active.world.probe.irradiance = buf;
+			Scene.active.world.probe.irradiance = buf;
 			UITrait.inst.ddirty = 2;
-			iron.data.Data.deleteBlob(tmp + "tmp_irr.c");
+			Data.deleteBlob(tmp + "tmp_irr.c");
 		});
 
 		// World envmap
-		iron.Scene.active.world.envmap = image;
+		Scene.active.world.envmap = image;
 		UITrait.inst.savedEnvmap = image;
 		UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = true;
 
@@ -86,22 +90,22 @@ class ImportEnvmap {
 		var mips = Std.int(image.width / 1024);
 		var mipsCount = 6 + mips;
 		var mipsLoaded = 0;
-		var mips:Array<kha.Image> = [];
+		var mips:Array<Image> = [];
 		while (mips.length < mipsCount + 2) mips.push(null);
 		var mw = Std.int(image.width / 2);
 		var mh = Std.int(image.width / 4);
 		for (i in 0...mipsCount) {
-			iron.data.Data.getImage(tmp + "tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip:kha.Image) {
+			Data.getImage(tmp + "tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip:Image) {
 				mips[i] = mip;
 				mipsLoaded++;
 				if (mipsLoaded == mipsCount) {
 					// 2x1 and 1x1 mips
-					mips[mipsCount] = kha.Image.create(2, 1, kha.graphics4.TextureFormat.RGBA128);
-					mips[mipsCount + 1] = kha.Image.create(1, 1, kha.graphics4.TextureFormat.RGBA128);
+					mips[mipsCount] = Image.create(2, 1, TextureFormat.RGBA128);
+					mips[mipsCount + 1] = Image.create(1, 1, TextureFormat.RGBA128);
 					// Set radiance
 					image.setMipmaps(mips);
-					iron.Scene.active.world.probe.radiance = image;
-					iron.Scene.active.world.probe.radianceMipmaps = mips;
+					Scene.active.world.probe.radiance = image;
+					Scene.active.world.probe.radianceMipmaps = mips;
 					UITrait.inst.ddirty = 2;
 				}
 			}, true); // Readable

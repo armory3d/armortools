@@ -1,11 +1,22 @@
 package arm.ui;
 
+import kha.System;
+import kha.Image;
+import kha.graphics4.PipelineState;
+import kha.graphics4.VertexShader;
+import kha.graphics4.FragmentShader;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.VertexData;
+import kha.graphics4.BlendingFactor;
 import zui.Zui;
 import zui.Id;
+import iron.system.Input;
 import arm.util.UVUtil;
+import arm.data.ConstData;
+import arm.App;
 
 @:access(zui.Zui)
-class UIView2D extends iron.Trait {
+class UIView2D {
 
 	public static var inst:UIView2D;
 	public var show = false;
@@ -19,36 +30,35 @@ class UIView2D extends iron.Trait {
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	var pipe:kha.graphics4.PipelineState;
+	var pipe:PipelineState;
 	var texType = 0;
 	var uvmapShow = false;
 
 	public function new() {
-		super();
 		inst = this;
 
-		pipe = new kha.graphics4.PipelineState();
-		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(arm.data.ConstData.layerViewVert);
-		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(arm.data.ConstData.layerViewFrag);
-		var vs = new kha.graphics4.VertexStructure();
-		vs.add("pos", kha.graphics4.VertexData.Float3);
-		vs.add("tex", kha.graphics4.VertexData.Float2);
-		vs.add("col", kha.graphics4.VertexData.Float4);
+		pipe = new PipelineState();
+		pipe.vertexShader = VertexShader.fromSource(ConstData.layerViewVert);
+		pipe.fragmentShader = FragmentShader.fromSource(ConstData.layerViewFrag);
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
 		pipe.inputLayout = [vs];
-		pipe.blendSource = kha.graphics4.BlendingFactor.BlendOne;
-		pipe.blendDestination = kha.graphics4.BlendingFactor.BlendZero;
+		pipe.blendSource = BlendingFactor.BlendOne;
+		pipe.blendDestination = BlendingFactor.BlendZero;
 		pipe.colorWriteMaskAlpha = false;
 		pipe.compile();
 
-		var t = Reflect.copy(arm.App.theme);
+		var t = Reflect.copy(App.theme);
 		t.ELEMENT_H = 18;
 		t.BUTTON_H = 16;
 		var scale = armory.data.Config.raw.window_scale;
-		ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
+		ui = new Zui({font: App.font, theme: t, color_wheel: App.color_wheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 
-		notifyOnRender2D(render);
-		notifyOnUpdate(update);
+		iron.App.notifyOnRender2D(render);
+		iron.App.notifyOnUpdate(update);
 	}
 
 	function render(g:kha.graphics2.Graphics) {
@@ -59,7 +69,7 @@ class UIView2D extends iron.Trait {
 		wy = UITrait.inst.headerh * 2;
 
 		if (!show) return;
-		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
@@ -89,7 +99,7 @@ class UIView2D extends iron.Trait {
 			// Texture
 			ui.g.pipeline = pipe;
 			var l = UITrait.inst.selectedLayer;
-			var tex:kha.Image = null;
+			var tex:Image = null;
 
 			if (type == 0) { // Layer
 				tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
@@ -168,13 +178,13 @@ class UIView2D extends iron.Trait {
 	}
 
 	function update() {
-		var m = iron.system.Input.getMouse();
-		var kb = iron.system.Input.getKeyboard();
+		var m = Input.getMouse();
+		var kb = Input.getKeyboard();
 
 		var headerh = ui.ELEMENT_H() * 1.4;
 		UITrait.inst.paint2d = false;
 
-		if (!arm.App.uienabled ||
+		if (!App.uienabled ||
 			!show ||
 			m.x + App.x() < wx ||
 			m.x + App.x() > wx + ww ||

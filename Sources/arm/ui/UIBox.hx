@@ -1,7 +1,9 @@
 package arm.ui;
 
+import kha.System;
 import zui.Zui;
 import zui.Id;
+import iron.system.Input;
 import arm.App;
 import arm.util.ViewportUtil;
 
@@ -16,8 +18,8 @@ class UIBox {
 	public static function render(g:kha.graphics2.Graphics) {
 
 		var uibox = App.uibox;
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
+		var appw = System.windowWidth();
+		var apph = System.windowHeight();
 		var modalW = Std.int(300 * uibox.SCALE);
 		var modalH = Std.int(115 * uibox.SCALE);
 		var left = Std.int(appw / 2 - modalW / 2);
@@ -58,10 +60,10 @@ class UIBox {
 	}
 
 	public static function update() {
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		if (mouse.released()) {
-			var appw = kha.System.windowWidth();
-			var apph = kha.System.windowHeight();
+			var appw = System.windowWidth();
+			var apph = System.windowHeight();
 			var left = appw / 2 - modalW / 2;
 			var right = appw / 2 + modalW / 2;
 			var top = apph / 2 - modalH / 2;

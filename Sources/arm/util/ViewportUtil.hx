@@ -1,5 +1,7 @@
 package arm.util;
 
+import kha.arrays.Float32Array;
+import iron.Scene;
 import iron.math.Vec4;
 import arm.ui.UITrait;
 
@@ -19,9 +21,8 @@ class ViewportUtil {
 	}
 
 	public static function resetViewport() {
-		var scene = iron.Scene.active;
-		var cam = scene.camera;
-		for (o in scene.raw.objects) {
+		var cam = Scene.active.camera;
+		for (o in Scene.active.raw.objects) {
 			if (o.type == 'camera_object') {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
@@ -39,8 +40,7 @@ class ViewportUtil {
 	public static function setView(x:Float, y:Float, z:Float, rx:Float, ry:Float, rz:Float) {
 		UITrait.inst.selectedObject.transform.rot.set(0, 0, 0, 1);
 		UITrait.inst.selectedObject.transform.dirty = true;
-		var scene = iron.Scene.active;
-		var cam = scene.camera;
+		var cam = Scene.active.camera;
 		var dist = cam.transform.loc.length();
 		cam.transform.loc.set(x * dist, y * dist, z * dist);
 		cam.transform.rot.fromEuler(rx, ry, rz);
@@ -51,24 +51,24 @@ class ViewportUtil {
 	}
 
 	public static function orbit(x:Float, y:Float) {
-		var camera = iron.Scene.active.camera;
+		var cam = Scene.active.camera;
 		var dist = arm.plugin.OrbitCamera.dist;
-		camera.transform.move(camera.lookWorld(), dist);
-		camera.transform.rotate(new iron.math.Vec4(0, 0, 1), x);
-		camera.transform.rotate(camera.rightWorld(), y);
-		camera.transform.move(camera.lookWorld(), -dist);
+		cam.transform.move(cam.lookWorld(), dist);
+		cam.transform.rotate(new Vec4(0, 0, 1), x);
+		cam.transform.rotate(cam.rightWorld(), y);
+		cam.transform.move(cam.lookWorld(), -dist);
 		UITrait.inst.ddirty = 2;
 	}
 
 	public static function updateCameraType(cameraType:Int) {
-		var cam = iron.Scene.active.cameras[0];
-		var light = iron.Scene.active.lights[0];
+		var cam = Scene.active.cameras[0];
+		var light = Scene.active.lights[0];
 		if (cameraType == 0) {
 			cam.data.raw.ortho = null;
 			light.visible = true;
 		}
 		else {
-			var f32 = new kha.arrays.Float32Array(4);
+			var f32 = new Float32Array(4);
 			var f = cam.data.raw.fov * cam.transform.world.getLoc().length() / 2.5;
 			f32[0] = -2 * f;
 			f32[1] =  2 * f;

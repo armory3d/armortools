@@ -1,13 +1,18 @@
 package arm.io;
 
+import haxe.io.Bytes;
 import zui.Nodes;
+import iron.data.Data;
+import iron.data.MaterialData;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.RenderUtil;
 import arm.util.Path;
 import arm.nodes.NodesMaterial;
-import arm.Tool;
+import arm.nodes.MaterialParser;
 import arm.data.MaterialSlot;
+import arm.Tool;
+import arm.App;
 
 class ImportFolder {
 
@@ -27,7 +32,7 @@ class ImportFolder {
 		#end
 		save += sep + "dir.txt";
 		Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
-		var str = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString();
+		var str = Bytes.ofData(Krom.loadBlob(save)).toString();
 		var files = str.split("\n");
 		var mapbase = "";
 		var mapopac = "";
@@ -80,13 +85,13 @@ class ImportFolder {
 				valid = true;
 			}
 
-			if (valid) arm.io.ImportTexture.run(f);
+			if (valid) ImportTexture.run(f);
 		}
 		// Create material
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
 			UITrait.inst.removeMaterialCache();
-			iron.data.Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+			Data.getMaterial("Scene", "Material2", function(md:MaterialData) {
 				UITrait.inst.selectedMaterialScene = new MaterialSlot(md);
 				UITrait.inst.materialsScene.push(UITrait.inst.selectedMaterialScene);
 			});
@@ -107,8 +112,8 @@ class ImportFolder {
 		var pos = 0;
 		if (mapbase != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapbase);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapbase);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -117,8 +122,8 @@ class ImportFolder {
 		}
 		if (mapopac != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapopac);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapopac);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -127,8 +132,8 @@ class ImportFolder {
 		}
 		if (mapocc != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapocc);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapocc);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -137,8 +142,8 @@ class ImportFolder {
 		}
 		if (maprough != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(maprough);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(maprough);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -147,8 +152,8 @@ class ImportFolder {
 		}
 		if (mapmet != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapmet);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapmet);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -157,8 +162,8 @@ class ImportFolder {
 		}
 		if (mapnor != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapnor);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapnor);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
@@ -167,15 +172,15 @@ class ImportFolder {
 		}
 		if (mapheight != "") {
 			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = arm.App.getAssetIndex(mapheight);
-			n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+			n.buttons[0].default_value = App.getAssetIndex(mapheight);
+			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
 			n.y = 192 + 160 * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 			canvas.links.push(l);
 		}
-		arm.nodes.MaterialParser.parsePaintMaterial();
+		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UITrait.inst.hwnd1.redraws = 2;
 		#end

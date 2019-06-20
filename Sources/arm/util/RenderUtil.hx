@@ -1,9 +1,15 @@
 package arm.util;
 
+import kha.Image;
+import kha.graphics4.TextureFormat;
 import iron.Scene;
+import iron.RenderPath;
 import iron.object.MeshObject;
 import iron.math.Mat4;
 import arm.ui.UITrait;
+import arm.render.RenderPathPreview;
+import arm.render.RenderPathDeferred;
+import arm.nodes.MaterialParser;
 import arm.Tool;
 
 class RenderUtil {
@@ -44,19 +50,19 @@ class RenderUtil {
 		probe.raw.strength = 4;
 		Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = matPreviewSize;
-		@:privateAccess iron.RenderPath.active.lastH = matPreviewSize;
+		@:privateAccess RenderPath.active.lastW = matPreviewSize;
+		@:privateAccess RenderPath.active.lastH = matPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		arm.nodes.MaterialParser.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.render.RenderPathPreview.commandsPreview;
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.commands = arm.render.RenderPathDeferred.commands;
+		MaterialParser.parseMeshPreviewMaterial();
+		RenderPath.active.commands = RenderPathPreview.commandsPreview;
+		RenderPath.active.renderFrame(RenderPath.active.frameG);
+		RenderPath.active.commands = RenderPathDeferred.commands;
 
 		UITrait.inst.materialPreview = false;
-		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
-		@:privateAccess iron.RenderPath.active.lastH = iron.App.h();
+		@:privateAccess RenderPath.active.lastW = iron.App.w();
+		@:privateAccess RenderPath.active.lastH = iron.App.h();
 
 		// Restore
 		sphere.visible = false;
@@ -71,13 +77,13 @@ class RenderUtil {
 		light.data.raw.strength = savedLight;
 		probe.raw.strength = savedProbe;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
-		arm.nodes.MaterialParser.parseMeshMaterial();
+		MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 
 	public static function makeDecalPreview() {
 		if (UITrait.inst.decalImage == null) {
-			UITrait.inst.decalImage = kha.Image.createRenderTarget(arm.util.RenderUtil.decalPreviewSize, arm.util.RenderUtil.decalPreviewSize);
+			UITrait.inst.decalImage = Image.createRenderTarget(RenderUtil.decalPreviewSize, RenderUtil.decalPreviewSize);
 		}
 		UITrait.inst.decalPreview = true;
 
@@ -103,19 +109,19 @@ class RenderUtil {
 		Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 
 		// No resize
-		@:privateAccess iron.RenderPath.active.lastW = arm.util.RenderUtil.decalPreviewSize;
-		@:privateAccess iron.RenderPath.active.lastH = arm.util.RenderUtil.decalPreviewSize;
+		@:privateAccess RenderPath.active.lastW = RenderUtil.decalPreviewSize;
+		@:privateAccess RenderPath.active.lastH = RenderUtil.decalPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		arm.nodes.MaterialParser.parseMeshPreviewMaterial();
-		iron.RenderPath.active.commands = arm.render.RenderPathPreview.commandsDecal;
-		iron.RenderPath.active.renderFrame(iron.RenderPath.active.frameG);
-		iron.RenderPath.active.commands = arm.render.RenderPathDeferred.commands;
+		MaterialParser.parseMeshPreviewMaterial();
+		RenderPath.active.commands = RenderPathPreview.commandsDecal;
+		RenderPath.active.renderFrame(RenderPath.active.frameG);
+		RenderPath.active.commands = RenderPathDeferred.commands;
 
 		UITrait.inst.decalPreview = false;
-		@:privateAccess iron.RenderPath.active.lastW = iron.App.w();
-		@:privateAccess iron.RenderPath.active.lastH = iron.App.h();
+		@:privateAccess RenderPath.active.lastW = iron.App.w();
+		@:privateAccess RenderPath.active.lastH = iron.App.h();
 
 		// Restore
 		plane.visible = false;
@@ -131,7 +137,7 @@ class RenderUtil {
 		light.visible = true;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		
-		arm.nodes.MaterialParser.parseMeshMaterial();
+		MaterialParser.parseMeshMaterial();
 		UITrait.inst.ddirty = 0;
 	}
 
@@ -148,7 +154,7 @@ class RenderUtil {
 			UITrait.inst.textToolImage = null;
 		}
 		if (UITrait.inst.textToolImage == null) {
-			UITrait.inst.textToolImage = kha.Image.createRenderTarget(texW, texW, kha.graphics4.TextureFormat.L8);
+			UITrait.inst.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
 		}
 		var g2 = UITrait.inst.textToolImage.g2;
 		g2.begin(true, 0xff000000);
@@ -163,7 +169,7 @@ class RenderUtil {
 		var texw = 1024;
 		var off = 12;
 		if (UITrait.inst.decalMaskImage == null) {
-			UITrait.inst.decalMaskImage = kha.Image.createRenderTarget(texw, texw, kha.graphics4.TextureFormat.L8);
+			UITrait.inst.decalMaskImage = Image.createRenderTarget(texw, texw, TextureFormat.L8);
 		}
 		var g2 = UITrait.inst.decalMaskImage.g2;
 		g2.begin(true, 0xff000000);

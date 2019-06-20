@@ -1,13 +1,16 @@
 package arm.io;
 
+import kha.Blob;
+import iron.data.Data;
+import iron.format.obj.ObjParser;
 import arm.ui.UITrait;
 
 class ImportObj {
 
 	public static function run(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+		Data.getBlob(path, function(b:Blob) {
 			if (UITrait.inst.isUdim) {
-				var obj = new iron.format.obj.ObjParser(b, 0, UITrait.inst.isUdim);
+				var obj = new ObjParser(b, 0, UITrait.inst.isUdim);
 				var name = obj.name;
 				for (i in 0...obj.udims.length) {
 					var u = i % obj.udimsU;
@@ -18,14 +21,14 @@ class ImportObj {
 				}
 			}
 			else {
-				var obj = new iron.format.obj.ObjParser(b);
+				var obj = new ObjParser(b);
 				Importer.makeMesh(obj, path);
 				while (obj.hasNext) {
-					obj = new iron.format.obj.ObjParser(b, obj.pos);
+					obj = new ObjParser(b, obj.pos);
 					Importer.addMesh(obj);
 				}
 			}
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 }

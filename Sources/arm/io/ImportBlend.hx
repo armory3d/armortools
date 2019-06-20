@@ -1,9 +1,17 @@
 package arm.io;
 
+import kha.Blob;
+import kha.arrays.Uint32Array;
+import kha.arrays.Float32Array;
+import kha.arrays.Int16Array;
+import iron.data.Data;
+import iron.math.Vec4;
 import zui.Nodes;
+import arm.App;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.nodes.NodesMaterial;
+import arm.nodes.MaterialParser;
 import arm.util.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
@@ -11,9 +19,12 @@ import arm.data.MaterialSlot;
 class ImportBlend {
 
 	public static function run(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+		Data.getBlob(path, function(b:Blob) {
 			var bl = new iron.format.blend.Blend(b);
-			if (bl.dna == null) { Importer.makeMesh(null, path); return; }
+			if (bl.dna == null) {
+				UITrait.inst.showError("Error: Compressed blend");
+				return;
+			}
 
 			// var obs = bl.get("Object");
 			// var ob = obs[0];
@@ -31,20 +42,20 @@ class ImportBlend {
 				var totloop = poly.get("totloop");
 				numtri += totloop == 3 ? 1 : 2;
 			}
-			var inda = new kha.arrays.Uint32Array(numtri * 3);
+			var inda = new Uint32Array(numtri * 3);
 			for (i in 0...inda.length) inda[i] = i;
 
-			var posa32 = new kha.arrays.Float32Array(numtri * 3 * 4);
-			var posa = new kha.arrays.Int16Array(numtri * 3 * 4);
-			var nora = new kha.arrays.Int16Array(numtri * 3 * 2);
+			var posa32 = new Float32Array(numtri * 3 * 4);
+			var posa = new Int16Array(numtri * 3 * 4);
+			var nora = new Int16Array(numtri * 3 * 2);
 			var hasuv = m.get("mloopuv") != null;
-			var texa = hasuv ? new kha.arrays.Int16Array(numtri * 3 * 2) : null;
+			var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
 			
 			var tri = 0;
-			var vec0 = new iron.math.Vec4();
-			var vec1 = new iron.math.Vec4();
-			var vec2 = new iron.math.Vec4();
-			var vec3 = new iron.math.Vec4();
+			var vec0 = new Vec4();
+			var vec1 = new Vec4();
+			var vec2 = new Vec4();
+			var vec3 = new Vec4();
 			for (i in 0...totpoly) {
 				var poly = m.get("mpoly", i);
 				var loopstart = poly.get("loopstart");
@@ -81,9 +92,9 @@ class ImportBlend {
 					nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
 					nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
 					
-					var uv0:kha.arrays.Float32Array = null;
-					var uv1:kha.arrays.Float32Array = null;
-					var uv2:kha.arrays.Float32Array = null;
+					var uv0:Float32Array = null;
+					var uv1:Float32Array = null;
+					var uv2:Float32Array = null;
 					if (hasuv) {
 						uv0 = m.get("mloopuv", loopstart    ).get("uv");
 						uv1 = m.get("mloopuv", loopstart + 1).get("uv");
@@ -159,12 +170,12 @@ class ImportBlend {
 			name = name.substring(2, name.length);
 			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
 			Importer.makeMesh(obj, path);
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 
 	public static function runMaterial(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+		Data.getBlob(path, function(b:Blob) {
 			var bl = new iron.format.blend.Blend(b);
 			if (bl.dna == null) {
 				UITrait.inst.showError("Error: Compressed blend");
@@ -256,9 +267,9 @@ class ImportBlend {
 							var file = img.get("name").substr(2); // '//desktop\logo.png'
 							file = StringTools.replace(file, "\\", "/");
 							file = Path.baseDir(path) + file;
-							arm.io.ImportTexture.run(file);
-							n.buttons[0].default_value = arm.App.getAssetIndex(file);
-							n.buttons[0].data = arm.App.mapEnum(arm.App.getEnumTexts()[n.buttons[0].default_value]);
+							ImportTexture.run(file);
+							n.buttons[0].default_value = App.getAssetIndex(file);
+							n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 						}
 						var outputs = node.get("outputs");
 						var sock:Dynamic = outputs.get("first", 0, "bNodeSocket");
@@ -343,12 +354,12 @@ class ImportBlend {
 					if (last.block == link.block) break;
 				}
 
-				arm.nodes.MaterialParser.parsePaintMaterial();
+				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
 			UITrait.inst.hwnd1.redraws = 2;
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 

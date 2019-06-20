@@ -1,7 +1,7 @@
 package arm.nodes;
 
 import iron.data.SceneFormat;
-import iron.data.ShaderData.ShaderContext;
+import iron.data.ShaderData;
 import iron.data.MaterialData;
 import armory.system.CyclesFormat;
 import armory.system.CyclesShader;
@@ -14,7 +14,6 @@ class MaterialParser {
 	static var sc:ShaderContext = null;
 	static var _matcon:TMaterialContext = null;
 	static var _materialcontext:MaterialContext = null;
-	static var lastT:iron.Trait = null;
 
 	static function getMOut():Bool {
 		for (n in UINodes.inst.canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
@@ -44,7 +43,7 @@ class MaterialParser {
 			if (MaterialBuilder.heightUsed && armory.data.Config.raw.rp_gi != false) {
 				var sc:ShaderContext = null;
 				for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
-				if (sc != null )MaterialBuilder.make_voxel(sc);
+				if (sc != null) MaterialBuilder.make_voxel(sc);
 			}
 			#end
 		// });

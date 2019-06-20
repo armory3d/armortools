@@ -1,8 +1,11 @@
 package arm;
 
+import kha.Window;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
+import iron.data.Data;
+import iron.Scene;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
@@ -14,16 +17,18 @@ import arm.ui.UIFiles;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
+import arm.nodes.MaterialParser;
+import arm.io.ImportArm;
+import arm.App;
 
 class Project {
 	public static function projectOpen() {
-		arm.App.showFiles = true;
-		@:privateAccess zui.Ext.lastPath = ""; // Refresh
-		arm.App.whandle.redraws = 2;
-		arm.App.foldersOnly = false;
-		arm.App.showFilename = false;
+		App.showFiles = true;
+		App.whandle.redraws = 2;
+		App.foldersOnly = false;
+		App.showFilename = false;
 		UIFiles.filters = "arm";
-		arm.App.filesDone = function(path:String) {
+		App.filesDone = function(path:String) {
 			if (!StringTools.endsWith(path, ".arm")) {
 				UITrait.inst.showError(Strings.error5);
 				return;
@@ -32,7 +37,7 @@ class Project {
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			arm.io.ImportArm.runProject(path);
+			ImportArm.runProject(path);
 
 			if (current != null) current.begin(false);
 		};
@@ -43,19 +48,18 @@ class Project {
 			projectSaveAs();
 			return;
 		}
-		kha.Window.get(0).title = arm.App.filenameHandle.text + " - ArmorPaint";
+		Window.get(0).title = App.filenameHandle.text + " - ArmorPaint";
 		UITrait.inst.projectExport = true;
 	}
 
 	public static function projectSaveAs() {
-		arm.App.showFiles = true;
-		@:privateAccess zui.Ext.lastPath = ""; // Refresh
-		arm.App.whandle.redraws = 2;
-		arm.App.foldersOnly = true;
-		arm.App.showFilename = true;
+		App.showFiles = true;
+		App.whandle.redraws = 2;
+		App.foldersOnly = true;
+		App.showFilename = true;
 		UIFiles.filters = "arm";
-		arm.App.filesDone = function(path:String) {
-			var f = arm.App.filenameHandle.text;
+		App.filesDone = function(path:String) {
+			var f = App.filenameHandle.text;
 			if (f == "") f = "untitled";
 			UITrait.inst.projectPath = path + "/" + f;
 			if (!StringTools.endsWith(UITrait.inst.projectPath, ".arm")) UITrait.inst.projectPath += ".arm";
@@ -64,11 +68,11 @@ class Project {
 	}
 
 	public static function projectNew(resetLayers = true) {
-		kha.Window.get(0).title = "ArmorPaint";
+		Window.get(0).title = "ArmorPaint";
 		UITrait.inst.projectPath = "";
 		if (UITrait.inst.mergedObject != null) {
 			UITrait.inst.mergedObject.remove();
-			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
+			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
 			UITrait.inst.mergedObject = null;
 		}
 
@@ -82,21 +86,21 @@ class Project {
 		for (i in 1...UITrait.inst.paintObjects.length) {
 			var p = UITrait.inst.paintObjects[i];
 			if (p == UITrait.inst.paintObject) continue;
-			iron.data.Data.deleteMesh(p.data.handle);
+			Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
-		var meshes = iron.Scene.active.meshes;
+		var meshes = Scene.active.meshes;
 		var len = meshes.length;
 		for (i in 0...len) {
 			var m = meshes[len - i - 1];
 			if (UITrait.inst.projectObjects.indexOf(m) == -1) {
-				iron.data.Data.deleteMesh(m.data.handle);
+				Data.deleteMesh(m.data.handle);
 				m.remove();
 			}
 		}
 		var handle = UITrait.inst.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
-			iron.data.Data.deleteMesh(handle);
+			Data.deleteMesh(handle);
 		}
 
 		if (UITrait.inst.projectType > 0) {
@@ -117,7 +121,7 @@ class Project {
 				scale_tex: mesh.scaleTex
 			};
 			var md = new MeshData(raw, function(md:MeshData) {});
-			iron.data.Data.cachedMeshes.set("SceneTesselated", md);
+			Data.cachedMeshes.set("SceneTesselated", md);
 
 			if (UITrait.inst.projectType == 2) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
@@ -126,7 +130,7 @@ class Project {
 		}
 
 		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tesselated";
-		iron.data.Data.getMesh("Scene", n, function(md:MeshData) {
+		Data.getMesh("Scene", n, function(md:MeshData) {
 			
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
@@ -137,7 +141,7 @@ class Project {
 			UITrait.inst.paintObject.transform.buildMatrix();
 			UITrait.inst.paintObject.name = n;
 			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
-			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 				UITrait.inst.materials = [new MaterialSlot(m)];
 			});
 			UITrait.inst.selectedMaterial = UITrait.inst.materials[0];
@@ -149,9 +153,9 @@ class Project {
 			History.reset();
 			
 			UINodes.inst.updateCanvasMap();
-			arm.nodes.MaterialParser.parsePaintMaterial();
+			MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
-			for (a in UITrait.inst.assets) iron.data.Data.deleteImage(a.file);
+			for (a in UITrait.inst.assets) Data.deleteImage(a.file);
 			UITrait.inst.assets = [];
 			UITrait.inst.assetNames = [];
 			UITrait.inst.assetId = 0;

@@ -1,6 +1,15 @@
 package arm.io;
 
+import haxe.io.Bytes;
+import kha.Window;
+import kha.Blob;
+import kha.Image;
+import iron.data.MaterialData;
 import iron.data.MeshData;
+import iron.data.Data;
+import iron.system.ArmPack;
+import iron.RenderPath;
+import arm.App;
 import arm.Project;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
@@ -12,40 +21,41 @@ import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
+import arm.nodes.MaterialParser;
 
 class ImportArm {
 
+	public static function run(project:TProjectFormat) {
+		new MeshData(project.mesh_datas[0], function(md:MeshData) {
+			UITrait.inst.paintObject.setData(md);
+			UITrait.inst.paintObject.transform.scale.set(1, 1, 1);
+			UITrait.inst.paintObject.transform.buildMatrix();
+			UITrait.inst.paintObject.name = md.name;
+			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
+			iron.App.notifyOnRender(Layers.initLayers);
+			History.reset();
+		});
+	}
+
 	public static function runProject(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
+		Data.getBlob(path, function(b:Blob) {
 
 			UITrait.inst.layersPreviewDirty = true;
 			LayerSlot.counter = 0;
-
 			var resetLayers = false;
 			Project.projectNew(resetLayers);
 			UITrait.inst.projectPath = path;
-			arm.App.filenameHandle.text = new haxe.io.Path(UITrait.inst.projectPath).file;
-
-			kha.Window.get(0).title = arm.App.filenameHandle.text + " - ArmorPaint";
-
-			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
+			App.filenameHandle.text = new haxe.io.Path(UITrait.inst.projectPath).file;
+			Window.get(0).title = App.filenameHandle.text + " - ArmorPaint";
+			var project:TProjectFormat = ArmPack.decode(b.toBytes());
 
 			// Import as mesh instead
 			if (project.version == null) {
-				new MeshData(project.mesh_datas[0], function(md:MeshData) {
-					UITrait.inst.paintObject.setData(md);
-					UITrait.inst.paintObject.transform.scale.set(1, 1, 1);
-					UITrait.inst.paintObject.transform.buildMatrix();
-					UITrait.inst.paintObject.name = md.name;
-					UITrait.inst.paintObjects = [UITrait.inst.paintObject];
-					iron.App.notifyOnRender(Layers.initLayers);
-					History.reset();
-				});
+				run(project);
 				return;
 			}
 
 			UITrait.inst.project = project;
-
 			var base = Path.baseDir(path);
 
 			for (file in project.assets) {
@@ -60,19 +70,19 @@ class ImportArm {
 				#end
 				if (exists == 0) {
 					UITrait.inst.showError(Strings.error2 + abs);
-					var b = haxe.io.Bytes.alloc(4);
+					var b = Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
 					b.set(2, 255);
 					b.set(3, 255);
-					var pink = kha.Image.fromBytes(b, 1, 1);
-					iron.data.Data.cachedImages.set(abs, pink);
+					var pink = Image.fromBytes(b, 1, 1);
+					Data.cachedImages.set(abs, pink);
 				}
-				arm.io.ImportTexture.run(abs);
+				ImportTexture.run(abs);
 			}
 
-			var m0:iron.data.MaterialData = null;
-			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			var m0:MaterialData = null;
+			Data.getMaterial("Scene", "Material", function(m:MaterialData) {
 				m0 = m;
 			});
 
@@ -97,7 +107,7 @@ class ImportArm {
 
 				UITrait.inst.selectedMaterial = mat;
 				UINodes.inst.updateCanvasMap();
-				arm.nodes.MaterialParser.parsePaintMaterial();
+				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
@@ -139,15 +149,15 @@ class ImportArm {
 			if (UITrait.inst.layers[0].texpaint.width != Config.getTextureRes()) {
 				for (l in UITrait.inst.layers) l.resizeAndSetBits();
 				if (UITrait.inst.undoLayers != null) for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
-				var rts = iron.RenderPath.active.renderTargets;
+				var rts = RenderPath.active.renderTargets;
 				rts.get("texpaint_blend0").image.unload();
 				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
 				rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 				rts.get("texpaint_blend1").image.unload();
 				rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
 				rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
 				UITrait.inst.brushBlendDirty = true;
 			}
 
@@ -159,19 +169,19 @@ class ImportArm {
 				UITrait.inst.layers.push(l);
 
 				// TODO: create render target from bytes
-				var texpaint = kha.Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint.g2.begin(false);
 				l.texpaint.g2.drawImage(texpaint, 0, 0);
 				l.texpaint.g2.end();
 				// texpaint.unload();
 
-				var texpaint_nor = kha.Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint_nor.g2.begin(false);
 				l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
 				l.texpaint_nor.g2.end();
 				// texpaint_nor.unload();
 
-				var texpaint_pack = kha.Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4), ld.res, ld.res);
 				l.texpaint_pack.g2.begin(false);
 				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 				l.texpaint_pack.g2.end();
@@ -179,7 +189,7 @@ class ImportArm {
 
 				if (ld.texpaint_mask != null) {
 					l.createMask(0, false);
-					var texpaint_mask = kha.Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, kha.graphics4.TextureFormat.L8);
+					var texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, kha.graphics4.TextureFormat.L8);
 					l.texpaint_mask.g2.begin(false);
 					l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
 					l.texpaint_mask.g2.end();
@@ -197,14 +207,14 @@ class ImportArm {
 			UITrait.inst.hwnd1.redraws = 2;
 			UITrait.inst.hwnd2.redraws = 2;
 
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 
 	public static function runMaterial(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
-			var project:TProjectFormat = iron.system.ArmPack.decode(b.toBytes());
-			if (project.version == null) { iron.data.Data.deleteBlob(path); return; }
+		Data.getBlob(path, function(b:Blob) {
+			var project:TProjectFormat = ArmPack.decode(b.toBytes());
+			if (project.version == null) { Data.deleteBlob(path); return; }
 			
 			var base = Path.baseDir(path);
 			for (file in project.assets) {
@@ -219,19 +229,19 @@ class ImportArm {
 				#end
 				if (exists == 0) {
 					UITrait.inst.showError(Strings.error2 + abs);
-					var b = haxe.io.Bytes.alloc(4);
+					var b = Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
 					b.set(2, 255);
 					b.set(3, 255);
-					var pink = kha.Image.fromBytes(b, 1, 1);
-					iron.data.Data.cachedImages.set(abs, pink);
+					var pink = Image.fromBytes(b, 1, 1);
+					Data.cachedImages.set(abs, pink);
 				}
 				arm.io.ImportTexture.run(abs);
 			}
 
-			var m0:iron.data.MaterialData = null;
-			iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			var m0:MaterialData = null;
+			Data.getMaterial("Scene", "Material", function(m:MaterialData) {
 				m0 = m;
 			});
 
@@ -255,12 +265,12 @@ class ImportArm {
 
 				UITrait.inst.selectedMaterial = mat;
 				UINodes.inst.updateCanvasMap();
-				arm.nodes.MaterialParser.parsePaintMaterial();
+				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
 			UITrait.inst.hwnd1.redraws = 2;
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 }

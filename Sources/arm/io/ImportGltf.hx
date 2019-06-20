@@ -1,12 +1,16 @@
 package arm.io;
 
+import kha.Blob;
+import iron.data.Data;
+import iron.format.gltf.GltfParser;
+
 class ImportGltf {
 
 	public static function run(path:String) {
-		iron.data.Data.getBlob(path, function(b:kha.Blob) {
-			var obj = new iron.format.gltf.GltfParser(b);
+		Data.getBlob(path, function(b:Blob) {
+			var obj = new GltfParser(b);
 			Importer.makeMesh(obj, path);
-			iron.data.Data.deleteBlob(path);
+			Data.deleteBlob(path);
 		});
 	}
 }

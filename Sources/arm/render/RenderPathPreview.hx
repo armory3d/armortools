@@ -1,11 +1,12 @@
 package arm.render;
 
+import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.Tool;
 
+@:access(iron.RenderPath)
 class RenderPathPreview {
 
-	@:access(iron.RenderPath)
 	public static function commandsPreview() {
 
 		var path = RenderPathDeferred.path;
@@ -52,11 +53,10 @@ class RenderPathPreview {
 		
 		var framebuffer = "texpreview";
 		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? UITrait.inst.selectedMaterialScene : UITrait.inst.selectedMaterial;
-		iron.RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
-		iron.RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
+		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
+		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 
-		// path.setTarget("mbuf");
-		path.setTarget(framebuffer); //
+		path.setTarget(framebuffer);
 
 		path.bindTarget("mtex", "tex");
 		#if rp_compositordepth
@@ -71,7 +71,6 @@ class RenderPathPreview {
 		path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 	}
 
-	@:access(iron.RenderPath)
 	public static function commandsDecal() {
 
 		var path = RenderPathDeferred.path;
@@ -117,10 +116,9 @@ class RenderPathPreview {
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
-		iron.RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
+		RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
 
-		// path.setTarget("buf");
-		path.setTarget(framebuffer); //
+		path.setTarget(framebuffer);
 
 		path.bindTarget("tex", "tex");
 		#if rp_compositordepth

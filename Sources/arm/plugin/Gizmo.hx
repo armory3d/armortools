@@ -1,6 +1,11 @@
 package arm.plugin;
 
 import iron.object.MeshObject;
+import iron.object.LightObject;
+import iron.system.Input;
+import iron.math.RayCaster;
+import iron.math.Vec4;
+import iron.Scene;
 import arm.ui.UITrait;
 
 class Gizmo {
@@ -14,27 +19,27 @@ class Gizmo {
 			gizmo.transform.buildMatrix();
 		}
 
-		var mouse = iron.system.Input.getMouse();
-		var kb = iron.system.Input.getKeyboard();
+		var mouse = Input.getMouse();
+		var kb = Input.getKeyboard();
 
 		if (mouse.x < App.w()) {
 			if (kb.started("delete") || kb.started("backspace")) {
 				if (UITrait.inst.selectedObject != null) {
 					UITrait.inst.selectedObject.remove();
-					UITrait.inst.selectObject(iron.Scene.active.getChild("Scene"));
+					UITrait.inst.selectObject(Scene.active.getChild("Scene"));
 				}
 			}
 			if (kb.started("c") && UITrait.inst.selectedObject != null) {
 				if (Std.is(UITrait.inst.selectedObject, MeshObject)) {
 					var mo = cast(UITrait.inst.selectedObject, MeshObject);
-					var object = iron.Scene.active.addMeshObject(mo.data, mo.materials, iron.Scene.active.getChild("Scene"));
+					var object = Scene.active.addMeshObject(mo.data, mo.materials, Scene.active.getChild("Scene"));
 					object.name = mo.name + '.1';
 
 					object.transform.loc.setFrom(mo.transform.loc);
 					object.transform.rot.setFrom(mo.transform.rot);
 					object.transform.scale.setFrom(mo.transform.scale);
 
-					var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.zAxis(), new iron.math.Vec4(), mouse.x, mouse.y, iron.Scene.active.camera);
+					var hit = RayCaster.planeIntersect(Vec4.zAxis(), new Vec4(), mouse.x, mouse.y, Scene.active.camera);
 					if (hit != null) {
 						object.transform.loc.x = hit.x;
 						object.transform.loc.y = hit.y;
@@ -49,9 +54,9 @@ class Gizmo {
 
 					UITrait.inst.selectObject(object);
 				}
-				else if (Std.is(UITrait.inst.selectedObject, iron.object.LightObject)) {
-					var lo = cast(UITrait.inst.selectedObject, iron.object.LightObject);
-					var object = iron.Scene.active.addLightObject(lo.data, iron.Scene.active.getChild("Scene"));
+				else if (Std.is(UITrait.inst.selectedObject, LightObject)) {
+					var lo = cast(UITrait.inst.selectedObject, LightObject);
+					var object = Scene.active.addLightObject(lo.data, Scene.active.getChild("Scene"));
 					object.name = lo.name + '.1';
 
 					object.transform.loc.setFrom(lo.transform.loc);
@@ -83,7 +88,7 @@ class Gizmo {
 		if (mouse.started("left") && UITrait.inst.selectedObject.name != "Scene") {
 			gizmo.transform.buildMatrix();
 			var trs = [UITrait.inst.gizmoX.transform, UITrait.inst.gizmoY.transform, UITrait.inst.gizmoZ.transform];
-			var hit = iron.math.RayCaster.closestBoxIntersect(trs, mouse.x, mouse.y, iron.Scene.active.camera);
+			var hit = RayCaster.closestBoxIntersect(trs, mouse.x, mouse.y, Scene.active.camera);
 			if (hit != null) {
 				if (hit.object == UITrait.inst.gizmoX) UITrait.inst.axisX = true;
 				else if (hit.object == UITrait.inst.gizmoY) UITrait.inst.axisY = true;
@@ -97,11 +102,11 @@ class Gizmo {
 
 		if (UITrait.inst.axisX || UITrait.inst.axisY || UITrait.inst.axisZ) {
 			var t = UITrait.inst.selectedObject.transform;
-			var v = new iron.math.Vec4();
+			var v = new Vec4();
 			v.set(t.worldx(), t.worldy(), t.worldz());
 			
 			if (UITrait.inst.axisX) {
-				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.yAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.x, mouse.y, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.x - UITrait.inst.selectedObject.transform.loc.x;
 					UITrait.inst.selectedObject.transform.loc.x = hit.x - UITrait.inst.axisStart;
@@ -113,7 +118,7 @@ class Gizmo {
 				}
 			}
 			else if (UITrait.inst.axisY) {
-				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.xAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.x, mouse.y, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.y - UITrait.inst.selectedObject.transform.loc.y;
 					UITrait.inst.selectedObject.transform.loc.y = hit.y - UITrait.inst.axisStart;
@@ -125,7 +130,7 @@ class Gizmo {
 				}
 			}
 			else if (UITrait.inst.axisZ) {
-				var hit = iron.math.RayCaster.planeIntersect(iron.math.Vec4.xAxis(), v, mouse.x, mouse.y, iron.Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.x, mouse.y, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.z - UITrait.inst.selectedObject.transform.loc.z;
 					UITrait.inst.selectedObject.transform.loc.z = hit.z - UITrait.inst.axisStart;
@@ -138,6 +143,6 @@ class Gizmo {
 			}
 		}
 
-		iron.system.Input.occupied = (UITrait.inst.axisX || UITrait.inst.axisY || UITrait.inst.axisZ) && mouse.x < App.w();
+		Input.occupied = (UITrait.inst.axisX || UITrait.inst.axisY || UITrait.inst.axisZ) && mouse.x < App.w();
 	}
 }

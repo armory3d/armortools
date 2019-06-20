@@ -1,5 +1,7 @@
 package arm.render;
 
+import iron.object.MeshObject;
+import iron.Scene;
 import armory.renderpath.Inc;
 import arm.ui.UITrait;
 import arm.Tool;
@@ -21,12 +23,12 @@ class RenderPathPaint {
 				path.bindTarget("_main", "gbufferD");
 				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
 				
-				var mo:iron.object.MeshObject = cast iron.Scene.active.getChild(".ParticleEmitter");
+				var mo:MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;
 
-				mo = cast iron.Scene.active.getChild(".Particle");
+				mo = cast Scene.active.getChild(".Particle");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;
@@ -151,7 +153,7 @@ class RenderPathPaint {
 
 		var path = RenderPathDeferred.path;
 
-		var plane = cast(iron.Scene.active.getChild(".Plane"), iron.object.MeshObject);
+		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
 		var g = path.frameG;
@@ -174,9 +176,9 @@ class RenderPathPaint {
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorStep, 2 / gbuffer0.width, 2 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
-		g.setMatrix(Layers.cursorVP, iron.Scene.active.camera.VP.self);
+		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();
-		helpMat.getInverse(iron.Scene.active.camera.VP);
+		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(Layers.cursorInvVP, helpMat.self);
 		g.setVertexBuffer(geom.vertexBuffer);
 		g.setIndexBuffer(geom.indexBuffers[0]);

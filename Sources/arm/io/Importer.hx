@@ -1,16 +1,17 @@
 package arm.io;
 
-import zui.Canvas;
-import zui.Nodes;
+import kha.Font;
+import kha.arrays.Int16Array;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
-import arm.util.RenderUtil;
+import iron.data.Data;
+import iron.math.Vec4;
+import iron.Scene;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;
 import arm.util.ViewportUtil;
 import arm.util.Path;
 import arm.ui.UITrait;
-import arm.ui.UIBox;
 import arm.ui.UIView2D;
 import arm.ui.UINodes;
 import arm.Project;
@@ -19,7 +20,7 @@ import arm.Tool;
 class Importer {
 
 	public static var fontList = ["default.ttf"];
-	public static var fontMap = new Map<String, kha.Font>();
+	public static var fontMap = new Map<String, Font>();
 
 	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
@@ -28,7 +29,7 @@ class Importer {
 		}
 		// Image
 		else if (Path.checkTextureFormat(path)) {
-			arm.io.ImportTexture.run(path);
+			ImportTexture.run(path);
 			// Place image node
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;
@@ -40,15 +41,15 @@ class Importer {
 		}
 		// Font
 		else if (Path.checkFontFormat(path)) {
-			arm.io.ImportFont.run(path);
+			ImportFont.run(path);
 		}
 		// Project
 		else if (Path.checkProjectFormat(path)) {
-			arm.io.ImportArm.runProject(path);
+			ImportArm.runProject(path);
 		}
 		// Folder
 		else if (path.indexOf(".") == -1) {
-			arm.io.ImportFolder.run(path);
+			ImportFolder.run(path);
 		}
 		else {
 			UITrait.inst.showError(Strings.error1);
@@ -66,14 +67,14 @@ class Importer {
 		#end
 
 		var p = path.toLowerCase();
-		if (StringTools.endsWith(p, ".obj")) arm.io.ImportObj.run(path);
-		else if (StringTools.endsWith(p, ".gltf")) arm.io.ImportGltf.run(path);
-		else if (StringTools.endsWith(p, ".fbx")) arm.io.ImportFbx.run(path);
-		else if (StringTools.endsWith(p, ".blend")) arm.io.ImportBlend.run(path);
+		if (StringTools.endsWith(p, ".obj")) ImportObj.run(path);
+		else if (StringTools.endsWith(p, ".gltf")) ImportGltf.run(path);
+		else if (StringTools.endsWith(p, ".fbx")) ImportFbx.run(path);
+		else if (StringTools.endsWith(p, ".blend")) ImportBlend.run(path);
 
 		if (UITrait.inst.mergedObject != null) {
 			UITrait.inst.mergedObject.remove();
-			iron.data.Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
+			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
 			UITrait.inst.mergedObject = null;
 		}
 
@@ -131,8 +132,8 @@ class Importer {
 			if (mesh.texa == null) {
 				UITrait.inst.showError(Strings.error4);
 				var verts = Std.int(mesh.posa.length / 4);
-				mesh.texa = new kha.arrays.Int16Array(verts * 2);
-				var n = new iron.math.Vec4();
+				mesh.texa = new Int16Array(verts * 2);
+				var n = new Vec4();
 				for (i in 0...verts) {
 					n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 					// Sphere projection
@@ -164,7 +165,7 @@ class Importer {
 			if (UITrait.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = UITrait.inst.selectedMaterialScene.data;
-				var object = iron.Scene.active.addMeshObject(md, mats, iron.Scene.active.getChild("Scene"));
+				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
 				path = StringTools.replace(path, "\\", "/");
 				var ar = path.split("/");
 				var s = ar[ar.length - 1];
@@ -191,12 +192,12 @@ class Importer {
 				for (i in 0...UITrait.inst.paintObjects.length) {
 					var p = UITrait.inst.paintObjects[i];
 					if (p == UITrait.inst.paintObject) continue;
-					iron.data.Data.deleteMesh(p.data.handle);
+					Data.deleteMesh(p.data.handle);
 					p.remove();
 				}
 				var handle = UITrait.inst.paintObject.data.handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
-					iron.data.Data.deleteMesh(handle);
+					Data.deleteMesh(handle);
 				}
 
 				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
@@ -231,8 +232,8 @@ class Importer {
 		if (mesh.texa == null) {
 			UITrait.inst.showError(Strings.error4);
 			var verts = Std.int(mesh.posa.length / 4);
-			mesh.texa = new kha.arrays.Int16Array(verts * 2);
-			var n = new iron.math.Vec4();
+			mesh.texa = new Int16Array(verts * 2);
+			var n = new Vec4();
 			for (i in 0...verts) {
 				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
 				// Sphere projection
@@ -259,7 +260,7 @@ class Importer {
 
 		new MeshData(raw, function(md:MeshData) {
 			
-			var object = iron.Scene.active.addMeshObject(md, UITrait.inst.paintObject.materials, UITrait.inst.paintObject);
+			var object = Scene.active.addMeshObject(md, UITrait.inst.paintObject.materials, UITrait.inst.paintObject);
 			object.name = mesh.name;
 			object.skip_context = "paint";
 

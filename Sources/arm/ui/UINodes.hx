@@ -1,18 +1,26 @@
 package arm.ui;
 
+import haxe.Json;
+import kha.Blob;
+import kha.Image;
+import kha.System;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
+import iron.data.Data;
+import iron.system.Input;
 import arm.nodes.NodesMaterial;
 import arm.nodes.NodesBrush;
+import arm.nodes.MaterialParser;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
-import arm.Tool;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
+import arm.Tool;
+import arm.App;
 
 @:access(zui.Zui)
-class UINodes extends iron.Trait {
+class UINodes {
 
 	public static var inst:UINodes;
 	static var materialCounter = 0;
@@ -54,29 +62,28 @@ class UINodes extends iron.Trait {
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
 
-	public var grid:kha.Image = null;
+	public var grid:Image = null;
 	public var hwnd = Id.handle();
 
 	public function new() {
-		super();
 		inst = this;
 
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
 		// Cycles.arm_export_tangents = false;
 
-		iron.data.Data.getBlob('defaults/default_material.json', function(b1:kha.Blob) {
-			iron.data.Data.getBlob('defaults/default_brush.json', function(b2:kha.Blob) {
+		Data.getBlob('defaults/default_material.json', function(b1:Blob) {
+			Data.getBlob('defaults/default_brush.json', function(b2:Blob) {
 				canvasBlob = b1.toString();
 				canvasBrushBlob = b2.toString();
-				canvas = haxe.Json.parse(canvasBlob);
-				canvasBrush = haxe.Json.parse(canvasBrushBlob);
-				arm.nodes.MaterialParser.parseBrush();
+				canvas = Json.parse(canvasBlob);
+				canvasBrush = Json.parse(canvasBrushBlob);
+				MaterialParser.parseBrush();
 
-				var t = Reflect.copy(arm.App.theme);
+				var t = Reflect.copy(App.theme);
 				t.ELEMENT_H = 18;
 				t.BUTTON_H = 16;
 				var scale = armory.data.Config.raw.window_scale;
-				ui = new Zui({font: arm.App.font, theme: t, color_wheel: arm.App.color_wheel, scaleFactor: scale});
+				ui = new Zui({font: App.font, theme: t, color_wheel: App.color_wheel, scaleFactor: scale});
 				ui.scrollEnabled = false;
 			});
 		});
@@ -87,7 +94,7 @@ class UINodes extends iron.Trait {
 			if (canvasMap2 == null) canvasMap2 = new Map();
 			var c = canvasMap2.get(UITrait.inst.selectedMaterialScene);
 			if (c == null) {
-				c = haxe.Json.parse(canvasBlob);
+				c = Json.parse(canvasBlob);
 				canvasMap2.set(UITrait.inst.selectedMaterialScene, c);
 				canvas = c;
 			}
@@ -100,7 +107,7 @@ class UINodes extends iron.Trait {
 			if (canvasMap == null) canvasMap = new Map();
 			var c = canvasMap.get(UITrait.inst.selectedMaterial);
 			if (c == null) {
-				c = haxe.Json.parse(canvasBlob);
+				c = Json.parse(canvasBlob);
 				canvasMap.set(UITrait.inst.selectedMaterial, c);
 				canvas = c;
 				c.name = "Material " + (++materialCounter);
@@ -116,7 +123,7 @@ class UINodes extends iron.Trait {
 			if (canvasBrushMap == null) canvasBrushMap = new Map();
 			var c = canvasBrushMap.get(UITrait.inst.selectedBrush);
 			if (c == null) {
-				c = haxe.Json.parse(canvasBrushBlob);
+				c = Json.parse(canvasBrushBlob);
 				canvasBrushMap.set(UITrait.inst.selectedBrush, c);
 				canvasBrush = c;
 			}
@@ -135,7 +142,7 @@ class UINodes extends iron.Trait {
 		updateCanvasMap();
 		updateCanvasBrushMap();
 
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		mreleased = mouse.released();
 		mdown = mouse.down();
 
@@ -143,7 +150,7 @@ class UINodes extends iron.Trait {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (canvasType == 1) arm.nodes.MaterialParser.parseBrush();
+			if (canvasType == 1) MaterialParser.parseBrush();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
@@ -152,7 +159,7 @@ class UINodes extends iron.Trait {
 					Layers.updateFillLayers(); // TODO: jitter
 					UITrait.inst.hwnd.redraws = 2;
 				}
-				arm.nodes.MaterialParser.parsePaintMaterial();
+				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd1.redraws = 2;
 				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
@@ -165,8 +172,8 @@ class UINodes extends iron.Trait {
 		mstartedlast = mouse.started();
 
 		if (!show) return;
-		if (!arm.App.uienabled) return;
-		var keyboard = iron.system.Input.getKeyboard();
+		if (!App.uienabled) return;
+		var keyboard = Input.getKeyboard();
 
 		var lay = App.C.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
@@ -206,7 +213,7 @@ class UINodes extends iron.Trait {
 	}
 
 	function nodeSearch(x = -1, y = -1) {
-		var keyboard = iron.system.Input.getKeyboard();
+		var keyboard = Input.getKeyboard();
 		var searchHandle = Id.handle();
 		var first = true;
 		UIMenu.show(function(ui:Zui) {
@@ -264,12 +271,12 @@ class UINodes extends iron.Trait {
 	}
 
 	public function getNodeX():Int {
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		return Std.int((mouse.x + App.x() - wx - nodes.PAN_X()) / nodes.SCALE);
 	}
 
 	public function getNodeY():Int {
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		return Std.int((mouse.y + App.y() - wy - nodes.PAN_Y()) / nodes.SCALE);
 	}
 
@@ -280,7 +287,7 @@ class UINodes extends iron.Trait {
 		var h = wh + 40 * 2;
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
-		grid = kha.Image.createRenderTarget(w, h);
+		grid = Image.createRenderTarget(w, h);
 		grid.g2.begin(true, ui.t.SEPARATOR_COL);
 		for (i in 0...Std.int(h / 40) + 1) {
 			grid.g2.color = ui.t.WINDOW_BG_COL;
@@ -306,10 +313,10 @@ class UINodes extends iron.Trait {
 		}
 
 		if (!show) return;
-		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 		
-		if (!arm.App.uienabled && ui.inputRegistered) ui.unregisterInput();
-		if (arm.App.uienabled && !ui.inputRegistered) ui.registerInput();
+		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
+		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
 		
 		g.end();
 
@@ -463,7 +470,7 @@ class UINodes extends iron.Trait {
 	}
 
 	public static function makeNode(n:TNode, nodes:Nodes, canvas:TNodeCanvas):TNode {
-		var node:TNode = haxe.Json.parse(haxe.Json.stringify(n));
+		var node:TNode = Json.parse(Json.stringify(n));
 		node.id = nodes.getNodeId(canvas.nodes);
 		node.x = UINodes.inst.getNodeX();
 		node.y = UINodes.inst.getNodeY();

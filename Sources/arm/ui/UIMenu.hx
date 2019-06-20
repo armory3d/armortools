@@ -1,6 +1,11 @@
 package arm.ui;
 
+import haxe.Json;
+import kha.System;
+import kha.Blob;
 import zui.Zui;
+import iron.system.Input;
+import iron.data.Data;
 import arm.App;
 import arm.util.ViewportUtil;
 
@@ -65,7 +70,7 @@ class UIMenu {
 				// ui.button("Export Textures...", Left);
 				// ui.button("Export Mesh...", Left);
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Exit", Left)) { kha.System.stop(); }
+				if (ui.button("Exit", Left)) { System.stop(); }
 			}
 			else if (menuCategory == 1) {
 				if (ui.button("Undo", Left, "Ctrl+Z")) History.doUndo();
@@ -120,7 +125,7 @@ class UIMenu {
 				if (ui.button("Check for Updates...", Left)) {
 					// Retrieve latest version number
 					#if kha_krom
-					var outFile = Krom.getFilesLocation() + '/' + iron.data.Data.dataPath + "update.txt";
+					var outFile = Krom.getFilesLocation() + '/' + Data.dataPath + "update.txt";
 					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
 					#if krom_windows
 					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
@@ -128,8 +133,8 @@ class UIMenu {
 					Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
 					#end
 					// Compare versions
-					iron.data.Data.getBlob(outFile, function(blob:kha.Blob) {
-						var update = haxe.Json.parse(blob.toString());
+					Data.getBlob(outFile, function(blob:Blob) {
+						var update = Json.parse(blob.toString());
 						var updateVersion = Std.int(update.version);
 						if (updateVersion > 0) {
 							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
@@ -141,7 +146,7 @@ class UIMenu {
 								UIBox.showMessage("You are up to date!");
 							}
 						}
-						iron.data.Data.deleteBlob(outFile);
+						Data.deleteBlob(outFile);
 					});
 					#end
 				}
@@ -151,10 +156,10 @@ class UIMenu {
 					var date = Macro.buildDate().split(" ")[0];
 					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
 					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
-					msg += kha.System.systemId + " - " + gapi;
+					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows
-					var save = Krom.getFilesLocation() + "\\" + iron.data.Data.dataPath + "gpu.txt";
+					var save = Krom.getFilesLocation() + "\\" + Data.dataPath + "gpu.txt";
 					Krom.sysCommand('wmic path win32_VideoController get name' + ' > "' + save + '"');
 					var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
 					var gpu = "";
@@ -206,11 +211,11 @@ class UIMenu {
 		var uibox = App.uibox;
 		App.showMenu = true;
 		menuCommands = commands;
-		menuX = x > -1 ? x : Std.int(iron.App.x() + iron.system.Input.getMouse().x);
-		menuY = y > -1 ? y : Std.int(iron.App.y() + iron.system.Input.getMouse().y);
+		menuX = x > -1 ? x : Std.int(iron.App.x() + Input.getMouse().x);
+		menuY = y > -1 ? y : Std.int(iron.App.y() + Input.getMouse().y);
 		var menuw = uibox.ELEMENT_W() * 1.5;
-		if (menuX + menuw > kha.System.windowWidth()) {
-			menuX = Std.int(kha.System.windowWidth() - menuw);
+		if (menuX + menuw > System.windowWidth()) {
+			menuX = Std.int(System.windowWidth() - menuw);
 		}
 	}
 }

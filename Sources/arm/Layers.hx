@@ -1,18 +1,28 @@
 package arm;
 
+import kha.Image;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.TextureUnit;
 import kha.graphics4.ConstantLocation;
+import kha.graphics4.PipelineState;
+import kha.graphics4.VertexShader;
+import kha.graphics4.FragmentShader;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.VertexData;
+import kha.graphics4.BlendingFactor;
+import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.data.ConstData;
+import arm.nodes.MaterialParser;
+import arm.render.RenderPathPaint;
 import arm.Tool;
 
 class Layers {
 
-	public static var pipe:kha.graphics4.PipelineState = null;
-	public static var pipeCopy:kha.graphics4.PipelineState;
-	public static var pipeMask:kha.graphics4.PipelineState;
+	public static var pipe:PipelineState = null;
+	public static var pipeCopy:PipelineState;
+	public static var pipeMask:PipelineState;
 	public static var tex0:TextureUnit;
 	public static var tex1:TextureUnit;
 	public static var tex2:TextureUnit;
@@ -22,14 +32,14 @@ class Layers {
 	public static var opac:ConstantLocation;
 	public static var tex0Mask:TextureUnit;
 	public static var texaMask:TextureUnit;
-	public static var imga:kha.Image = null;
-	public static var imgb:kha.Image = null;
-	public static var imgc:kha.Image = null;
-	public static var expa:kha.Image = null;
-	public static var expb:kha.Image = null;
-	public static var expc:kha.Image = null;
-	public static var expd:kha.Image = null;
-	public static var pipeCursor:kha.graphics4.PipelineState;
+	public static var imga:Image = null;
+	public static var imgb:Image = null;
+	public static var imgc:Image = null;
+	public static var expa:Image = null;
+	public static var expb:Image = null;
+	public static var expc:Image = null;
+	public static var expd:Image = null;
+	public static var pipeCursor:PipelineState;
 	public static var cursorVP:ConstantLocation;
 	public static var cursorInvVP:ConstantLocation;
 	public static var cursorMouse:ConstantLocation;
@@ -97,11 +107,11 @@ class Layers {
 		rts.get("texpaint_blend0").image.unload();
 		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
 		rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend0").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
+		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
 		rts.get("texpaint_blend1").image.unload();
 		rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend1").image = kha.Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
+		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
 		UITrait.inst.brushBlendDirty = true;
 		g.begin();
 		UITrait.inst.ddirty = 2;
@@ -123,11 +133,11 @@ class Layers {
 	}
 
 	public static function makePipe() {
-		pipe = new kha.graphics4.PipelineState();
-		pipe.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerMergeVert);
-		pipe.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.layerMergeFrag);
-		var vs = new kha.graphics4.VertexStructure();
-		vs.add("pos", kha.graphics4.VertexData.Float2);
+		pipe = new PipelineState();
+		pipe.vertexShader = VertexShader.fromSource(ConstData.layerMergeVert);
+		pipe.fragmentShader = FragmentShader.fromSource(ConstData.layerMergeFrag);
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float2);
 		pipe.inputLayout = [vs];
 		pipe.compile();
 		tex0 = pipe.getTextureUnit("tex0");
@@ -138,21 +148,21 @@ class Layers {
 		texc = pipe.getTextureUnit("texc");
 		opac = pipe.getConstantLocation("opac");
 
-		pipeCopy = new kha.graphics4.PipelineState();
-		pipeCopy.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerViewVert);
-		pipeCopy.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.layerViewFrag);
-		var vs = new kha.graphics4.VertexStructure();
-		vs.add("pos", kha.graphics4.VertexData.Float3);
-		vs.add("tex", kha.graphics4.VertexData.Float2);
-		vs.add("col", kha.graphics4.VertexData.Float4);
+		pipeCopy = new PipelineState();
+		pipeCopy.vertexShader = VertexShader.fromSource(ConstData.layerViewVert);
+		pipeCopy.fragmentShader = FragmentShader.fromSource(ConstData.layerViewFrag);
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
 		pipeCopy.inputLayout = [vs];
 		pipeCopy.compile();
 
-		pipeMask = new kha.graphics4.PipelineState();
-		pipeMask.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.layerMergeVert);
-		pipeMask.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.maskMergeFrag);
-		var vs = new kha.graphics4.VertexStructure();
-		vs.add("pos", kha.graphics4.VertexData.Float2);
+		pipeMask = new PipelineState();
+		pipeMask.vertexShader = VertexShader.fromSource(ConstData.layerMergeVert);
+		pipeMask.fragmentShader = FragmentShader.fromSource(ConstData.maskMergeFrag);
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float2);
 		pipeMask.inputLayout = [vs];
 		pipeMask.compile();
 		tex0Mask = pipeMask.getTextureUnit("tex0");
@@ -160,18 +170,18 @@ class Layers {
 	}
 
 	public static function makeCursorPipe() {
-		pipeCursor = new kha.graphics4.PipelineState();
-		pipeCursor.vertexShader = kha.graphics4.VertexShader.fromSource(ConstData.cursorVert);
-		pipeCursor.fragmentShader = kha.graphics4.FragmentShader.fromSource(ConstData.cursorFrag);
-		var vs = new kha.graphics4.VertexStructure();
-		vs.add("pos", kha.graphics4.VertexData.Short4Norm);
-		vs.add("nor", kha.graphics4.VertexData.Short2Norm);
-		vs.add("tex", kha.graphics4.VertexData.Short2Norm);
+		pipeCursor = new PipelineState();
+		pipeCursor.vertexShader = VertexShader.fromSource(ConstData.cursorVert);
+		pipeCursor.fragmentShader = FragmentShader.fromSource(ConstData.cursorFrag);
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Short4Norm);
+		vs.add("nor", VertexData.Short2Norm);
+		vs.add("tex", VertexData.Short2Norm);
 		pipeCursor.inputLayout = [vs];
-		pipeCursor.blendSource = kha.graphics4.BlendingFactor.SourceAlpha;
-		pipeCursor.blendDestination = kha.graphics4.BlendingFactor.InverseSourceAlpha;
+		pipeCursor.blendSource = BlendingFactor.SourceAlpha;
+		pipeCursor.blendDestination = BlendingFactor.InverseSourceAlpha;
 		pipeCursor.depthWrite = false;
-		pipeCursor.depthMode = kha.graphics4.CompareMode.Always;
+		pipeCursor.depthMode = CompareMode.Always;
 		pipeCursor.compile();
 		cursorVP = pipeCursor.getConstantLocation("VP");
 		cursorInvVP = pipeCursor.getConstantLocation("invVP");
@@ -194,9 +204,9 @@ class Layers {
 			imgc = null;
 		}
 		if (imga == null) {
-			imga = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			imgb = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			imgc = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			imga = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			imgb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			imgc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
 		}
 	}
 
@@ -213,10 +223,10 @@ class Layers {
 			expd = null;
 		}
 		if (expa == null) {
-			expa = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			expb = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			expc = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			expd = kha.Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expa = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			expd = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
 		}
 	}
 
@@ -309,11 +319,11 @@ class Layers {
 
 				if (first) {
 					first = false;
-					arm.nodes.MaterialParser.parsePaintMaterial();
+					MaterialParser.parsePaintMaterial();
 				}
 				
 				for (i in 0...fills) {
-					arm.render.RenderPathPaint.commandsPaint();
+					RenderPathPaint.commandsPaint();
 				}
 			}
 		}

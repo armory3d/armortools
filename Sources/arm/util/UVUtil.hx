@@ -1,12 +1,13 @@
 package arm.util;
 
+import kha.Image;
 import arm.ui.UITrait;
 
 class UVUtil {
 
-	public static var uvmap:kha.Image = null;
+	public static var uvmap:Image = null;
 	public static var uvmapCached = false;
-	public static var trianglemap:kha.Image = null;
+	public static var trianglemap:Image = null;
 	public static var trianglemapCached = false;
 
 	public static function cacheUVMap() {
@@ -14,7 +15,7 @@ class UVUtil {
 		
 		var res = Config.getTextureRes();
 		if (uvmap == null) {
-			uvmap = kha.Image.createRenderTarget(res, res);
+			uvmap = Image.createRenderTarget(res, res);
 		}
 
 		uvmapCached = true;
@@ -45,7 +46,7 @@ class UVUtil {
 
 		var res = Config.getTextureRes();
 		if (trianglemap == null) {
-			trianglemap = kha.Image.createRenderTarget(res, res);
+			trianglemap = Image.createRenderTarget(res, res);
 		}
 
 		trianglemapCached = true;
