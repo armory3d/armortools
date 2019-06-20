@@ -6,6 +6,7 @@ import kha.arrays.Float32Array;
 import kha.arrays.Int16Array;
 import iron.data.Data;
 import iron.math.Vec4;
+import iron.format.BlendParser;
 import zui.Nodes;
 import arm.App;
 import arm.ui.UITrait;
@@ -20,7 +21,7 @@ class ImportBlend {
 
 	public static function run(path:String) {
 		Data.getBlob(path, function(b:Blob) {
-			var bl = new iron.format.blend.Blend(b);
+			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				UITrait.inst.showError("Error: Compressed blend");
 				return;
@@ -176,7 +177,7 @@ class ImportBlend {
 
 	public static function runMaterial(path:String) {
 		Data.getBlob(path, function(b:Blob) {
-			var bl = new iron.format.blend.Blend(b);
+			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				UITrait.inst.showError("Error: Compressed blend");
 				return;

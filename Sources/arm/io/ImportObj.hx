@@ -2,7 +2,7 @@ package arm.io;
 
 import kha.Blob;
 import iron.data.Data;
-import iron.format.obj.ObjParser;
+import iron.format.ObjParser;
 import arm.ui.UITrait;
 
 class ImportObj {

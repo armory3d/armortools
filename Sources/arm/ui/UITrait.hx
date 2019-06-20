@@ -2569,7 +2569,7 @@ class UITrait {
 	}
 
 	static function roundfp(f:Float, precision = 2):Float {
-    	f *= std.Math.pow(10, precision);
-    	return std.Math.round(f) / std.Math.pow(10, precision);
+		f *= Math.pow(10, precision);
+		return Math.round(f) / Math.pow(10, precision);
 	}
 }

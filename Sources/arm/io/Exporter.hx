@@ -4,6 +4,10 @@ import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
 import iron.data.SceneFormat;
+import iron.format.ExrWriter;
+import iron.format.JpgWriter;
+import iron.format.PngWriter;
+import iron.format.PngTools;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
 import arm.App;
@@ -18,20 +22,20 @@ class Exporter {
 		var bitsHandle = UITrait.inst.bitsHandle.position;
 		var bits = bitsHandle == 0 ? 8 : bitsHandle == 1 ? 16 : 32;
 		if (bits > 8) { // 16/32bit
-			var writer = new iron.format.exr.Writer(out, res, res, pixels, bits, type, off);
+			var writer = new ExrWriter(out, res, res, pixels, bits, type, off);
 		}
 		else if (UITrait.inst.formatType == 0) {
-			var writer = new iron.format.png.Writer(out);
+			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
-					iron.format.png.Tools.build32RGB1(res, res, pixels) :
+					PngTools.build32RGB1(res, res, pixels) :
 				type == 2 ?
-					iron.format.png.Tools.build32RRR1(res, res, pixels, off) :
-					iron.format.png.Tools.build32RGBA(res, res, pixels);
+					PngTools.build32RRR1(res, res, pixels, off) :
+					PngTools.build32RGBA(res, res, pixels);
 			writer.write(data);
 		}
 		else {
-			var writer = new iron.format.jpg.Writer(out);
+			var writer = new JpgWriter(out);
 			writer.write({
 				width: res,
 				height: res,
