@@ -12,7 +12,6 @@ import arm.nodes.NodesMaterial;
 import arm.nodes.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.Tool;
-import arm.App;
 using StringTools;
 
 class ImportFolder {

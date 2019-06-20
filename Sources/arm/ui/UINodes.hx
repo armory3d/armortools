@@ -17,7 +17,6 @@ import arm.ui.UITrait;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.Tool;
-import arm.App;
 
 @:access(zui.Zui)
 class UINodes {

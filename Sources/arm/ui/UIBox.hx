@@ -4,7 +4,6 @@ import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
-import arm.App;
 import arm.util.ViewportUtil;
 
 class UIBox {

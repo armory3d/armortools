@@ -8,7 +8,6 @@ import iron.data.Data;
 import iron.math.Vec4;
 import iron.format.BlendParser;
 import zui.Nodes;
-import arm.App;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.nodes.NodesMaterial;

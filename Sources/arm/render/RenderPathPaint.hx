@@ -146,7 +146,7 @@ class RenderPathPaint {
 			// tool != ToolText) {
 				return;
 		}
-		if (!arm.App.uienabled ||
+		if (!App.uienabled ||
 			UITrait.inst.worktab.position == SpaceScene) {
 			return;
 		}

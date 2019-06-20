@@ -10,7 +10,6 @@ import iron.format.PngWriter;
 import iron.format.PngTools;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
-import arm.App;
 using StringTools;
 
 class Exporter {

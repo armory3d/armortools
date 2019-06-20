@@ -5,7 +5,6 @@ import kha.Image;
 import kha.System;
 import zui.Zui;
 import zui.Id;
-import zui.Ext;
 import iron.data.Data;
 import iron.data.MaterialData;
 import iron.object.Object;
@@ -25,14 +24,10 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.io.Importer;
-import arm.io.ImportArm;
-import arm.io.ImportBlend;
 import arm.io.Exporter;
 import arm.io.ExportArm;
 import arm.Project;
 import arm.Tool;
-import arm.App;
-using StringTools;
 
 @:access(zui.Zui)
 class UITrait {
@@ -144,12 +139,12 @@ class UITrait {
 	public var undoLayers:Array<LayerSlot> = null;
 	public var selectedLayer:LayerSlot;
 	public var selectedLayerIsMask = false; // Mask selected for active layer
-	var selectTime = 0.0;
+	public var selectTime = 0.0;
 	public var displaceStrength = 1.0;
 	public var decalImage:Image = null;
 	public var decalPreview = false;
 	public var viewportMode = 0;
-	var hscaleWasChanged = false;
+	public var hscaleWasChanged = false;
 	public var exportMeshFormat = 0;
 
 	public var textToolImage:Image = null;
@@ -184,7 +179,7 @@ class UITrait {
 	public var axisY = false;
 	public var axisZ = false;
 	public var axisStart = 0.0;
-	var row4 = [1/4, 1/4, 1/4, 1/4];
+	public var row4 = [1/4, 1/4, 1/4, 1/4];
 
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
@@ -246,8 +241,8 @@ class UITrait {
 	public var hbloom:Handle = null;
 	public var hsupersample:Handle = null;
 	public var hvxao:Handle = null;
-	var textureExport = false;
-	var textureExportPath = "";
+	public var textureExport = false;
+	public var textureExportPath = "";
 	public var projectExport = false;
 	public var headerHandle = new Handle({layout:Horizontal});
 	public var toolbarHandle = new Handle();
@@ -636,7 +631,7 @@ class UITrait {
 		App.resize();
 	}
 
-	function selectMaterialScene(i:Int) {
+	public function selectMaterialScene(i:Int) {
 		if (materialsScene.length <= i || selectedObject == paintObject) return;
 		selectedMaterialScene = materialsScene[i];
 		if (Std.is(selectedObject, MeshObject)) {
@@ -647,7 +642,7 @@ class UITrait {
 		hwnd.redraws = 2;
 	}
 
-	function selectMaterial(i:Int) {
+	public function selectMaterial(i:Int) {
 		if (materials.length <= i) return;
 		setMaterial(materials[i]);
 	}
@@ -666,7 +661,7 @@ class UITrait {
 		if (current != null) current.begin(false);
 	}
 
-	function selectBrush(i:Int) {
+	public function selectBrush(i:Int) {
 		if (brushes.length <= i) return;
 		selectedBrush = brushes[i];
 		UINodes.inst.updateCanvasBrushMap();
@@ -881,7 +876,7 @@ class UITrait {
 		}
 	}
 
-	function showMaterialNodes() {
+	public function showMaterialNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
 
@@ -890,7 +885,7 @@ class UITrait {
 		App.resize();
 	}
 
-	function showBrushNodes() {
+	public function showBrushNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
 
@@ -1269,38 +1264,38 @@ class UITrait {
 
 		if (worktab.position == SpacePaint) {
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
-				tabLayers();
-				tabHistory();
-				tabPlugins();
-				tabPreferences();
+				TabLayers.draw();
+				TabHistory.draw();
+				TabPlugins.draw();
+				TabPreferences.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
 				selectedObject = paintObject;
-				tabMaterials();
-				tabBrushes();
-				tabParticles();
+				TabMaterials.draw();
+				TabBrushes.draw();
+				TabParticles.draw();
 			}
 			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
-				tabTextures();
-				tabMeshes();
-				tabExport();
-				tabViewport();
+				TabTextures.draw();
+				TabMeshes.draw();
+				TabExport.draw();
+				TabViewport.draw();
 			}
 		}
 		else if (worktab.position == SpaceScene) {
 			gizmo.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
-				tabOutliner();
-				tabPlugins();
-				tabPreferences();
+				TabOutliner.draw();
+				TabPlugins.draw();
+				TabPreferences.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
-				tabMaterials();
-				tabProperties();
+				TabMaterials.draw();
+				TabProperties.draw();
 			}
 			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
-				tabTextures();
-				tabViewport();
+				TabTextures.draw();
+				TabViewport.draw();
 			}
 		}
 
@@ -1363,482 +1358,7 @@ class UITrait {
 		hwnd.redraws = 2;
 	}
 
-	function tabLayers() {
-		if (ui.tab(htab, "Layers")) {
-			ui.row([1/4,1/4,1/2]);
-			if (ui.button("New")) newLayer();
-			if (ui.button("2D View")) show2DView();
-			else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
-			
-			var ar = ["All"];
-			for (p in paintObjects) ar.push(p.name);
-			var filterHandle = Id.handle();
-			layerFilter = ui.combo(filterHandle, ar, "Filter");
-			if (filterHandle.changed) {
-				for (p in paintObjects) {
-					p.visible = layerFilter == 0 || p.name == ar[layerFilter];
-					setObjectMask();
-				}
-				ddirty = 2;
-			}
-
-			function drawList(l:LayerSlot, i:Int) {
-
-				if (layerFilter > 0 &&
-					l.objectMask > 0 &&
-					l.objectMask != layerFilter) return;
-
-				var h = Id.handle().nest(l.id, {selected: l.visible});
-				var layerPanel = h.nest(0, {selected: false});
-				var off = ui.t.ELEMENT_OFFSET;
-				var step = ui.t.ELEMENT_H;
-				var checkw = (ui._windowW / 100 * 8) / ui.SCALE;
-
-				if (layerPanel.selected) {
-					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, step + off, ui.t.SEPARATOR_COL);
-				}
-
-				if (selectedLayer == l) {
-					if (selectedLayerIsMask) {
-						ui.rect(ui._windowW / 100 * 24 - 2, 0, ui._windowW / 100 * 16, step * 2, ui.t.HIGHLIGHT_COL, 2);
-					}
-					else {
-						ui.fill(checkw, 0, (ui._windowW / ui.SCALE - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
-					}
-				}
-
-				if (l.texpaint_mask != null) {
-					ui.row([8/100, 16/100, 16/100, 20/100, 30/100, 10/100]);
-				}
-				else {
-					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
-				}
-				
-				var center = (step / 2) * ui.SCALE;
-				ui._y += center;
-				l.visible = ui.check(h, "");
-				if (h.changed) {
-					MaterialParser.parseMeshMaterial();
-				}
-				ui._y -= center;
-
-				var contextMenu = false;
-
-				#if (kha_opengl || kha_webgl)
-				ui.imageInvertY = l.material_mask != null;
-				#end
-
-				ui._y += 3;
-				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon);
-				ui._y -= 3;
-
-				#if (kha_opengl || kha_webgl)
-				ui.imageInvertY = false;
-				#end
-
-				if (ui.isHovered) {
-					ui.tooltipImage(l.texpaint_preview);
-				}
-				if (ui.isHovered && ui.inputReleasedR) {
-					contextMenu = true;
-				}
-				if (ui.isReleased) {
-					setLayer(l);
-				}
-				if (state == State.Started) {
-					if (Time.time() - selectTime < 0.25) show2DView();
-					selectTime = Time.time();
-				}
-
-				if (l.texpaint_mask != null) {
-					ui._y += 3;
-					var state = ui.image(l.texpaint_mask_preview);
-					ui._y -= 3;
-					if (ui.isHovered) {
-						ui.tooltipImage(l.texpaint_mask_preview);
-					}
-					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
-							ui.text(l.name + " Mask", Right);
-							if (ui.button("Delete", Left)) {
-								l.deleteMask();
-								setLayer(l);
-							}
-							if (ui.button("Apply", Left)) {
-								setLayer(l);
-								l.applyMask();
-								setLayer(l); // Parse mesh material
-							}
-						});
-					}
-					if (ui.isReleased) {
-						setLayer(l, true);
-					}
-					if (state == State.Started) {
-						if (Time.time() - selectTime < 0.25) show2DView();
-						selectTime = Time.time();
-					}
-				}
-
-				ui._y += center;
-				ui.text(l.name);
-				ui._y -= center;
-
-				if (ui.isReleased) {
-					setLayer(l);
-				}
-
-				if (ui.isHovered && ui.inputReleasedR) {
-					contextMenu = true;
-				}
-
-				if (contextMenu) {
-					UIMenu.show(function(ui:Zui) {
-						if (l == layers[0]) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
-							ui.text(l.name, Right);
-						}
-						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 17, ui.t.SEPARATOR_COL);
-							ui.text(l.name, Right);
-						}
-
-						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-							toFillLayer(l);
-						}
-						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-							toPaintLayer(l);
-						}
-
-						if (l == layers[0]) {
-						}
-						else {
-							if (ui.button("Delete", Left)) {
-								selectedLayer = l;
-								Layers.deleteSelectedLayer();
-							}
-							if (ui.button("Move Up", Left)) {
-								if (i < layers.length - 1) {
-									setLayer(l);
-									var t = layers[i + 1];
-									layers[i + 1] = layers[i];
-									layers[i] = t;
-									hwnd.redraws = 2;
-								}
-							}
-							if (ui.button("Move Down", Left)) {
-								if (i > 1) {
-									setLayer(l);
-									var t = layers[i - 1];
-									layers[i - 1] = layers[i];
-									layers[i] = t;
-									hwnd.redraws = 2;
-								}
-							}
-							if (ui.button("Merge Down", Left)) {
-								setLayer(l);
-								iron.App.notifyOnRender(Layers.mergeSelectedLayer);
-							}
-							if (ui.button("Duplicate", Left)) {
-								setLayer(l);
-								function makeDupli(g:kha.graphics4.Graphics) {
-									g.end();
-									l = l.duplicate();
-									setLayer(l);
-									g.begin();
-									iron.App.removeRender(makeDupli);
-								}
-								iron.App.notifyOnRender(makeDupli);
-							}
-							if (ui.button("Black Mask", Left)) {
-								l.createMask(0x00000000);
-								setLayer(l, true);
-								layerPreviewDirty = true;
-							}
-							if (ui.button("White Mask", Left)) {
-								l.createMask(0xffffffff);
-								setLayer(l, true);
-								layerPreviewDirty = true;
-							}
-						}
-
-						var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
-						var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
-						var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
-						var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
-						var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
-						var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
-						var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
-						var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
-						l.paintBase = ui.check(baseHandle, "Base Color");
-						l.paintNor = ui.check(norHandle, "Normal");
-						l.paintOcc = ui.check(occHandle, "Occlusion");
-						l.paintRough = ui.check(roughHandle, "Roughness");
-						l.paintMet = ui.check(metHandle, "Metallic");
-						l.paintHeight = ui.check(heightHandle, "Height");
-						l.paintEmis = ui.check(emisHandle, "Emission");
-						l.paintSubs = ui.check(subsHandle, "Subsurface");
-						if (baseHandle.changed ||
-							norHandle.changed ||
-							occHandle.changed ||
-							roughHandle.changed ||
-							metHandle.changed ||
-							heightHandle.changed ||
-							emisHandle.changed ||
-							subsHandle.changed) {
-							MaterialParser.parseMeshMaterial();
-							UIMenu.propChanged = true;
-						}
-					});
-				}
-
-				if (i == 0) {
-					@:privateAccess ui.endElement();
-				}
-				else {
-					var blend = ui.combo(Id.handle(), ["Add"], "Blending");
-				}
-
-				ui._y += center;
-				var showPanel = ui.panel(layerPanel, "", 0, true);
-				ui._y -= center;
-
-				if (i == 0) {
-					ui._y -= ui.t.ELEMENT_OFFSET;
-					@:privateAccess ui.endElement();
-				}
-				else {
-					ui._y -= ui.t.ELEMENT_OFFSET;
-					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
-					@:privateAccess ui.endElement();
-					@:privateAccess ui.endElement();
-					@:privateAccess ui.endElement();
-
-					var ar = ["Shared"];
-					for (p in paintObjects) ar.push(p.name);
-					var h = Id.handle().nest(l.id);
-					h.position = l.objectMask;
-					l.objectMask = ui.combo(h, ar, "Object");
-					if (h.changed) {
-						setLayer(l);
-						Layers.updateFillLayers(4);
-					}
-					@:privateAccess ui.endElement();
-				}
-				ui._y -= ui.t.ELEMENT_OFFSET;
-
-				if (showPanel) {
-					ui.row([8/100,92/100]);
-					@:privateAccess ui.endElement();
-					var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
-					l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
-					if (opacHandle.changed) {
-						MaterialParser.parseMeshMaterial();
-					}
-				}
-			}
-
-			for (i in 0...layers.length) {
-				if (i >= layers.length) break; // Layer was deleted
-				var j = layers.length - 1 - i;
-				var l = layers[j];
-				drawList(l, j);
-			}
-		}
-	}
-
-	function tabHistory() {
-		if (ui.tab(htab, "History")) {
-			for (i in 0...History.stack.length) {
-				var active = History.stack.length - 1 - redos;
-				if (i == active) {
-					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
-				}
-				ui.text(History.stack[i]);
-				if (ui.isReleased) { // Jump to undo step
-					var diff = i - active;
-					while (diff > 0) { diff--; History.doRedo(); }
-					while (diff < 0) { diff++; History.doUndo(); }
-				}
-			}
-		}
-	}
-
-	function tabPlugins() {
-		if (ui.tab(htab, "Plugins")) {
-			if (ui.panel(Id.handle({selected: false}), "Console", 1)) {
-				arm.plugin.Console.render(ui);
-			}
-			ui.separator();
-
-			// Draw plugins
-			for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
-		}
-	}
-
-	function tabPreferences() {
-		if (ui.tab(htab, "Preferences")) {
-			if (ui.panel(Id.handle({selected: false}), "Interface", 1)) {
-				var hscale = Id.handle({value: App.C.window_scale});
-				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-				if (!hscale.changed && hscaleWasChanged) {
-					#if kha_krom
-					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
-					#end
-					App.C.window_scale = hscale.value;
-					ui.setScale(hscale.value);
-					App.uibox.setScale(hscale.value);
-					UINodes.inst.ui.setScale(hscale.value);
-					UIView2D.inst.ui.setScale(hscale.value);
-					windowW = Std.int(defaultWindowW * App.C.window_scale);
-					toolbarw = Std.int(defaultToolbarW * App.C.window_scale);
-					headerh = Std.int(defaultHeaderH * App.C.window_scale);
-					menubarw = Std.int(215 * App.C.window_scale);
-					App.resize();
-					armory.data.Config.save();
-					setIconScale();
-				}
-				hscaleWasChanged = hscale.changed;
-				ui.row([1/2, 1/2]);
-				var layHandle = Id.handle({position: App.C.ui_layout});
-				App.C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
-				if (layHandle.changed) {
-					App.resize();
-					armory.data.Config.save();
-				}
-				var themeHandle = Id.handle({position: 0});
-				var themes = ["Dark", "Light"];
-				ui.combo(themeHandle, themes, "Theme", true);
-				if (themeHandle.changed) {
-					var theme = themes[themeHandle.position].toLowerCase();
-					if (theme == "dark") { // Built-in default
-						App.theme = zui.Themes.dark;
-					}
-					else {
-						Data.getBlob("themes/theme_" + theme + ".arm", function(b:kha.Blob) {
-							App.theme = haxe.Json.parse(b.toString());
-						});
-					}
-					ui.t = App.theme;
-					// UINodes.inst.applyTheme();
-					headerHandle.redraws = 2;
-					toolbarHandle.redraws = 2;
-					statusHandle.redraws = 2;
-					workspaceHandle.redraws = 2;
-					menuHandle.redraws = 2;
-					hwnd.redraws = 2;
-					hwnd1.redraws = 2;
-					hwnd2.redraws = 2;
-				}
-				// var gridSnap = ui.check(Id.handle({selected: false}), "Node Grid Snap");
-			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Usage", 1)) {
-				undoHandle = Id.handle({value: App.C.undo_steps});
-				App.C.undo_steps = Std.int(ui.slider(undoHandle, "Undo Steps", 1, 64, false, 1));
-				if (undoHandle.changed) {
-					ui.g.end();
-					while (undoLayers.length < App.C.undo_steps) {
-						var l = new LayerSlot("_undo" + undoLayers.length);
-						l.createMask(0, false);
-						undoLayers.push(l);
-					}
-					while (undoLayers.length > App.C.undo_steps) {
-						var l = undoLayers.pop();
-						l.unload();
-					}
-					History.reset();
-					ui.g.begin(false);
-					armory.data.Config.save();
-				}
-
-				brushBias = ui.slider(Id.handle({value: brushBias}), "Paint Bias", 0.0, 1.0, true);
-
-				var brush3dHandle = Id.handle({selected: brush3d});
-				brush3d = ui.check(brush3dHandle, "3D Cursor");
-				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
-
-				ui.enabled = brush3d;
-				var brushDepthRejectHandle = Id.handle({selected: brushDepthReject});
-				brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
-				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
-
-				ui.row([1/2,1/2]);
-
-				var brushAngleRejectHandle = Id.handle({selected: brushAngleReject});
-				brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
-				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
-
-				if (!brushAngleReject) ui.enabled = false;
-				var angleDotHandle = Id.handle({value: brushAngleRejectDot});
-				brushAngleRejectDot = ui.slider(angleDotHandle, "Angle", 0.0, 1.0, true);
-				if (angleDotHandle.changed) {
-					MaterialParser.parsePaintMaterial();
-				}
-				ui.enabled = true;
-			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Pen Pressure", 1)) {
-				penPressureRadius = ui.check(Id.handle({selected: penPressureRadius}), "Brush Radius");
-				penPressureOpacity = ui.check(Id.handle({selected: penPressureOpacity}), "Brush Opacity");
-				penPressureHardness = ui.check(Id.handle({selected: penPressureHardness}), "Brush Hardness");
-			}
-
-			hssgi = Id.handle({selected: App.C.rp_ssgi});
-			hssr = Id.handle({selected: App.C.rp_ssr});
-			hbloom = Id.handle({selected: App.C.rp_bloom});
-			hsupersample = Id.handle({position: Config.getSuperSampleQuality(App.C.rp_supersample)});
-			hvxao = Id.handle({selected: App.C.rp_gi});
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Viewport Quality", 1)) {
-				ui.row([1/2, 1/2]);
-				var vsyncHandle = Id.handle({selected: App.C.window_vsync});
-				App.C.window_vsync = ui.check(vsyncHandle, "VSync");
-				if (vsyncHandle.changed) armory.data.Config.save();
-				ui.combo(hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
-				if (hsupersample.changed) Config.applyConfig();
-				ui.row([1/2, 1/2]);
-				ui.check(hvxao, "Voxel AO");
-				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
-				if (hvxao.changed) Config.applyConfig();
-				ui.check(hssgi, "SSAO");
-				if (hssgi.changed) Config.applyConfig();
-				ui.row([1/2, 1/2]);
-				ui.check(hbloom, "Bloom");
-				if (hbloom.changed) Config.applyConfig();
-				ui.check(hssr, "SSR");
-				if (hssr.changed) Config.applyConfig();
-				var cullHandle = Id.handle({selected: culling});
-				culling = ui.check(cullHandle, "Cull Backfaces");
-				if (cullHandle.changed) {
-					MaterialParser.parseMeshMaterial();
-				}
-			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Keymap", 1)) {
-				var i = 0;
-				ui.changed = false;
-				for (k in Reflect.fields(App.K)) {
-					var h = Id.handle().nest(i++, {text: Reflect.field(App.K, k)});
-					var t = ui.textInput(h, k, Left);
-					Reflect.setField(App.K, k, t);
-				}
-				if (ui.changed) Config.applyConfig();
-			}
-
-			// if (ui.button("Restore Defaults")) {
-			// 	App.C = Config.init();
-			// 	App.K = App.C.keymap;
-			// 	Config.applyConfig();
-			// }
-		}
-	}
-
-	function setIconScale() {
+	public function setIconScale() {
 		if (ui.SCALE > 1) {
 			Res.load(["icons2x.png"], function() {
 				@:privateAccess Res.bundled.set("icons.png", Res.get("icons2x.png"));
@@ -1856,271 +1376,10 @@ class UITrait {
 		// Data.cachedBlobs.remove("Material2_data.arm");
 	}
 
-	function getSelectedMaterial() { return worktab.position == SpaceScene ? selectedMaterialScene : selectedMaterial; }
-
-	function tabMaterials() {
-
-		var isScene = worktab.position == SpaceScene;
-		var materials = isScene ? materialsScene : this.materials;
-		var selectMaterial = isScene ? selectMaterialScene : this.selectMaterial;
-
-		if (ui.tab(htab1, "Materials")) {
-			ui.row([1/4,1/4,1/4]);
-			if (ui.button("New")) {
-				if (isScene) {
-					if (selectedObject != paintObject && Std.is(selectedObject, iron.object.MeshObject)) {
-						removeMaterialCache();
-						Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
-							ui.g.end();
-							md.name = "Material2." + materials.length;
-							selectedMaterialScene = new MaterialSlot(md);
-							materials.push(selectedMaterialScene);
-							selectMaterial(materials.length - 1);
-							RenderUtil.makeMaterialPreview();
-							ui.g.begin(false);
-						});
-					}
-				}
-				else {
-					ui.g.end();
-					headerHandle.redraws = 2;
-					selectedMaterial = new MaterialSlot(materials[0].data);
-					materials.push(selectedMaterial);
-					UINodes.inst.updateCanvasMap();
-					MaterialParser.parsePaintMaterial();
-					RenderUtil.makeMaterialPreview();
-					var decal = selectedTool == ToolDecal || selectedTool == ToolText;
-					if (decal) RenderUtil.makeDecalPreview();
-					ui.g.begin(false);
-				}
-			}
-
-			if (ui.button("Import")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
-				UIFiles.filters = "arm,blend";
-				App.filesDone = function(path:String) {
-					path.endsWith(".blend") ?
-						ImportBlend.runMaterial(path) :
-						ImportArm.runMaterial(path);
-				}
-			}
-
-			if (ui.button("Nodes")) {
-				showMaterialNodes();
-			}
-			else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
-
-			for (row in 0...Std.int(Math.ceil(materials.length / 5))) { 
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
-
-				if (row > 0) ui._y += 6;
-
-				for (j in 0...5) {
-					var imgw = ui.SCALE > 1 ? 100 : 50;
-					var i = j + row * 5;
-					if (i >= materials.length) {
-						@:privateAccess ui.endElement(imgw);
-						continue;
-					}
-					var img = ui.SCALE > 1 ? materials[i].image : materials[i].imageIcon;
-					var imgFull = materials[i].image;
-
-					if (getSelectedMaterial() == materials[i]) {
-						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
-						var off = row % 2 == 1 ? 1 : 0;
-						var w = 51 - App.C.window_scale;
-						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
-					}
-
-					#if (kha_opengl || kha_webgl)
-					ui.imageInvertY = materials[i].previewReady;
-					#end
-
-					var uix = ui._x;
-					var uiy = ui._y;
-					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
-					if (state == State.Started) {
-						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
-						if (Time.time() - selectTime < 0.25) showMaterialNodes();
-						selectTime = Time.time();
-						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
-						App.dragMaterial = getSelectedMaterial();
-					}
-					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
-							var m = materials[i];
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
-							
-							if (ui.button("To Fill Layer", Left)) {
-								selectMaterial(i);
-								createFillLayer();
-							}
-
-							if (ui.button("Delete", Left) && materials.length > 1) {
-								selectMaterial(i == 0 ? 1 : 0);
-								materials.splice(i, 1);
-								hwnd1.redraws = 2;
-							}
-							
-							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
-							var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
-							var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
-							var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
-							var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
-							var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
-							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
-							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
-							m.paintBase = ui.check(baseHandle, "Base Color");
-							m.paintNor = ui.check(norHandle, "Normal");
-							m.paintOcc = ui.check(occHandle, "Occlusion");
-							m.paintRough = ui.check(roughHandle, "Roughness");
-							m.paintMet = ui.check(metHandle, "Metallic");
-							m.paintHeight = ui.check(heightHandle, "Height");
-							m.paintEmis = ui.check(emisHandle, "Emission");
-							m.paintSubs = ui.check(subsHandle, "Subsurface");
-							if (baseHandle.changed ||
-								norHandle.changed ||
-								occHandle.changed ||
-								roughHandle.changed ||
-								metHandle.changed ||
-								heightHandle.changed ||
-								emisHandle.changed ||
-								subsHandle.changed) {
-								UINodes.inst.updateCanvasMap();
-								MaterialParser.parsePaintMaterial();
-								UIMenu.propChanged = true;
-							}
-						});
-					}
-					if (ui.isHovered) ui.tooltipImage(imgFull);
-				}
-
-				ui._y += 6;
-
-				#if (kha_opengl || kha_webgl)
-				ui.imageInvertY = false; // Material preview
-				#end
-			}
-		}
-	}
-
 	public function createFillLayer() {
 		var l = UITrait.inst.newLayer();
 		l.objectMask = UITrait.inst.layerFilter;
 		UITrait.inst.toFillLayer(l);
-	}
-
-	function tabBrushes() {
-		if (ui.tab(htab1, "Brushes")) {
-			ui.row([1/4,1/4]);
-			if (ui.button("New")) {}
-			if (ui.button("Nodes")) showBrushNodes();
-		}
-	}
-
-	function tabParticles() {
-		if (ui.tab(htab1, "Particles")) {
-			ui.row([1/4,1/4]);
-			if (ui.button("New")) {}
-			if (ui.button("Nodes")) {}
-		}
-	}
-
-	function tabTextures() {
-		if (ui.tab(htab2, "Textures")) {
-			ui.row([1/4, 1/4]);
-
-			if (ui.button("Import")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
-				UIFiles.filters = "jpg,png,tga,hdr";
-				App.filesDone = function(path:String) {
-					Importer.importFile(path);
-				}
-			}
-			if (ui.isHovered) ui.tooltip("Import texture file (Ctrl + Shift + I)");
-
-			if (ui.button("2D View")) show2DView(1);
-
-			if (assets.length > 0) {
-				for (i in 0...assets.length) {
-					
-					// Align into 5 items per row
-					if (i % 5 == 0) {
-						ui._y += ui.ELEMENT_OFFSET() * 1.5;
-						ui.row([1/5, 1/5, 1/5, 1/5, 1/5]);
-					}
-					
-					var asset = assets[i];
-					if (asset == selectedTexture) {
-						var off = i % 2 == 1 ? 1 : 0;
-						var w = 51 - App.C.window_scale;
-						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
-					}
-
-					var img = UITrait.inst.getImage(asset);
-					var uix = ui._x;
-					var uiy = ui._y;
-					if (ui.image(img) == State.Started) {
-						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
-						App.dragAsset = asset;
-						selectedTexture = asset;
-
-						if (Time.time() - selectTime < 0.25) show2DView(1);
-						selectTime = Time.time();
-					}
-
-					if (ui.isHovered) ui.tooltipImage(img, 256);
-
-					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
-							ui.text(asset.name, Right);
-							if (ui.button("To Mask", Left)) {
-								createImageMask(asset);
-							}
-							if (ui.button("Delete", Left)) {
-								hwnd2.redraws = 2;
-								Data.deleteImage(asset.file);
-								zui.Canvas.assetMap.remove(asset.id);
-								assets.splice(i, 1);
-								assetNames.splice(i, 1);
-								// TODO: rebuild affected materials
-							}
-						});
-					}
-				}
-
-				// Fill in unused row space
-				if (assets.length % 5 > 0) {
-					for (i in 0...5 - (assets.length % 5)) {
-						@:privateAccess ui.endElement(ui._w);
-					}
-				}
-			}
-			else {
-				var img = Res.get('icons.png');
-				var imgw = ui.SCALE > 1 ? 100 : 50;
-				ui.image(img, ui.t.BUTTON_COL, imgw, 0, imgw, imgw, imgw);
-				if (ui.isHovered) ui.tooltip("Drag and drop files here");
-			}
-		}
 	}
 
 	public function createImageMask(asset:zui.Canvas.TAsset) {
@@ -2132,7 +1391,7 @@ class UITrait {
 		}
 	}
 
-	function importMesh() {
+	public function importMesh() {
 		App.showFiles = true;
 		App.whandle.redraws = 2;
 		App.foldersOnly = false;
@@ -2140,419 +1399,6 @@ class UITrait {
 		UIFiles.filters = "obj,fbx,blend,gltf,arm";
 		App.filesDone = function(path:String) {
 			Importer.importFile(path);
-		}
-	}
-
-	function tabMeshes() {
-		if (ui.tab(htab2, "Meshes")) {
-			ui.row([1/4]);
-
-			if (ui.button("Import")) importMesh();
-			if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
-
-			isUdim = ui.check(Id.handle({selected: isUdim}), "UDIM Import");
-			if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
-
-			parseTransform = ui.check(Id.handle({selected: parseTransform}), "Parse Transforms");
-
-			if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
-				ui.indent();
-				for (o in paintObjects) {
-					ui.text(o.name);
-				}
-				ui.unindent();
-			}
-
-			if (ui.panel(Id.handle({selected: false}), "Geometry")) {
-
-				ui.row([1/2,1/2]);
-				if (ui.button("Flip Normals")) {
-					MeshUtil.flipNormals();
-					ddirty = 2;
-				}
-				if (ui.button("Calculate Normals")) {
-					MeshUtil.calcNormals();
-					ddirty = 2;
-				}
-
-				ui.row([1/3, 1/3, 1/3]);
-				if (ui.button("Rotate X")) {
-					MeshUtil.swapAxis(1, 2);
-					ddirty = 2;
-				}
-				if (ui.button("Rotate Y")) {
-					MeshUtil.swapAxis(2, 0);
-					ddirty = 2;
-				}
-				if (ui.button("Rotate Z")) {
-					MeshUtil.swapAxis(0, 1);
-					ddirty = 2;
-				}
-
-				var dispHandle = Id.handle({value: displaceStrength});
-				displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-				if (dispHandle.changed) {
-					MaterialParser.parseMeshMaterial();
-				}
-			}
-		}
-	}
-
-	function tabExport() {
-		if (ui.tab(htab2, "Export")) {
-			if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
-				if (ui.button("Export")) {
-					App.showFiles = true;
-					App.whandle.redraws = 2;
-					App.foldersOnly = true;
-					App.showFilename = true;
-					// var path = 'C:\\Users\\lubos\\Documents\\';
-					UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
-					App.filesDone = function(path:String) {
-						textureExport = true;
-						textureExportPath = path;
-					}
-				}
-				if (ui.isHovered) ui.tooltip("Export texture files (Ctrl + Shift + E)");
-
-				ui.row([1/2, 1/2]);
-				ui.combo(resHandle, ["1K", "2K", "4K", "8K", "16K"], "Res", true);
-				if (resHandle.changed) {
-					iron.App.notifyOnRender(Layers.resizeLayers);
-					UVUtil.uvmap = null;
-					UVUtil.uvmapCached = false;
-					UVUtil.trianglemap = null;
-					UVUtil.trianglemapCached = false;
-				}
-				ui.combo(bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
-				if (bitsHandle.changed) {
-					iron.App.notifyOnRender(Layers.setLayerBits);
-				}
-
-				ui.row([1/2, 1/2]);
-				if (bitsHandle.position == 0) {
-					formatType = ui.combo(Id.handle({position: formatType}), ["png", "jpg"], "Format", true);
-				}
-				else {
-					ui.combo(Id.handle({position: formatType}), ["exr"], "Format", true);
-				}
-				ui.enabled = formatType == 1 && bitsHandle.position == 0;
-				formatQuality = ui.slider(Id.handle({value: formatQuality}), "Quality", 0.0, 100.0, true, 1);
-				ui.enabled = true;
-				ui.row([1/2, 1/2]);
-				layersExport = ui.combo(Id.handle({position: layersExport}), ["Visible", "Selected"], "Layers", true);
-				outputType = ui.combo(Id.handle(), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
-				
-				if (ui.panel(Id.handle({selected: false}), "Channels")) {
-					ui.row([1/2, 1/2]);
-					isBase = ui.check(Id.handle({selected: isBase}), "Base Color");
-					isBaseSpace = ui.combo(Id.handle({position: isBaseSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isOpac = ui.check(Id.handle({selected: isOpac}), "Opacity");
-					isOpacSpace = ui.combo(Id.handle({position: isOpacSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isOcc = ui.check(Id.handle({selected: isOcc}), "Occlusion");
-					isOccSpace = ui.combo(Id.handle({position: isOccSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isRough = ui.check(Id.handle({selected: isRough}), "Roughness");
-					isRoughSpace = ui.combo(Id.handle({position: isRoughSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isMet = ui.check(Id.handle({selected: isMet}), "Metallic");
-					isMetSpace = ui.combo(Id.handle({position: isMetSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isNor = ui.check(Id.handle({selected: isNor}), "Normal");
-					isNorSpace = ui.combo(Id.handle({position: isNorSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isEmis = ui.check(Id.handle({selected: isEmis}), "Emission");
-					isEmisSpace = ui.combo(Id.handle({position: isEmisSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isHeight = ui.check(Id.handle({selected: isHeight}), "Height");
-					isHeightSpace = ui.combo(Id.handle({position: isHeightSpace}), ["linear", "srgb"], "Space");
-					ui.row([1/2, 1/2]);
-					isSubs = ui.check(Id.handle({selected: isSubs}), "Subsurface");
-					isSubsSpace = ui.combo(Id.handle({position: isSubsSpace}), ["linear", "srgb"], "Space");
-				}
-			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
-				if (ui.button("Export")) {
-					App.showFiles = true;
-					App.whandle.redraws = 2;
-					App.foldersOnly = true;
-					App.showFilename = true;
-					UIFiles.filters = exportMeshFormat == 0 ? "obj" : "arm";
-					App.filesDone = function(path:String) {
-						var f = App.filenameHandle.text;
-						if (f == "") f = "untitled";
-						Exporter.exportMesh(path + "/" + f);
-					};
-				}
-				exportMeshFormat = ui.combo(Id.handle({position: exportMeshFormat}), ["obj", "arm"], "Format", true);
-				var mesh = paintObject.data.raw;
-				var inda = mesh.index_arrays[0].values;
-				var tris = Std.int(inda.length / 3);
-				ui.text(tris + " triangles");
-			}
-		}
-	}
-
-	function tabViewport() {
-		if (ui.tab(htab2, "Viewport")) {
-			if (ui.button("Import Envmap")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
-				UIFiles.filters = "hdr";
-				App.filesDone = function(path:String) {
-					if (!path.endsWith(".hdr")) {
-						UITrait.inst.showError("Error: .hdr file expected");
-						return;
-					}
-					Importer.importFile(path);
-				}
-			}
-
-			if (Scene.active.world.probe.radianceMipmaps.length > 0) {
-				ui.image(Scene.active.world.probe.radianceMipmaps[0]);
-			}
-
-			ui.row([1/2, 1/2]);
-			var modeHandle = Id.handle({position: 0});
-			viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"], "Mode");
-			if (modeHandle.changed) {
-				MaterialParser.parseMeshMaterial();
-			}
-			var p = Scene.active.world.probe;
-			var envHandle = Id.handle({value: p.raw.strength});
-			p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
-			if (envHandle.changed) ddirty = 2;
-			
-			ui.row([1/2, 1/2]);
-			if (Scene.active.lights.length > 0) {
-				var light = Scene.active.lights[0];
-
-				var sxhandle = Id.handle();
-				var f32:kha.FastFloat = light.data.raw.size; // hl fix
-				sxhandle.value = f32;
-				light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
-				if (sxhandle.changed) ddirty = 2;
-				// var syhandle = Id.handle();
-				// syhandle.value = light.data.raw.size_y;
-				// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
-				// if (syhandle.changed) ddirty = 2;
-				
-				var lhandle = Id.handle();
-				lhandle.value = light.data.raw.strength / 1333;
-				lhandle.value = Std.int(lhandle.value * 100) / 100;
-				light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
-				if (lhandle.changed) ddirty = 2;
-			}
-
-			ui.row([1/2, 1/2]);
-			drawWireframe = ui.check(wireframeHandle, "Wireframe");
-			if (wireframeHandle.changed) {
-				ui.g.end();
-				UVUtil.cacheUVMap();
-				ui.g.begin(false);
-				MaterialParser.parseMeshMaterial();
-			}
-			var compassHandle = Id.handle({selected: showCompass});
-			showCompass = ui.check(compassHandle, "Compass");
-			if (compassHandle.changed) ddirty = 2;
-
-			showEnvmap = ui.check(showEnvmapHandle, "Envmap");
-			if (showEnvmapHandle.changed) {
-				var world = Scene.active.world;
-				world.loadEnvmap(function(_) {});
-				savedEnvmap = world.envmap;
-				ddirty = 2;
-			}
-
-			if (showEnvmap) {
-				showEnvmapBlur = ui.check(showEnvmapBlurHandle, "Blurred");
-				if (showEnvmapBlurHandle.changed) {
-					var probe = Scene.active.world.probe;
-					savedEnvmap = showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-					ddirty = 2;
-				}
-			}
-			else {
-				if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
-					var hwheel = Id.handle({color: 0xff030303});
-					var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
-					if (hwheel.changed) {
-						// var b = emptyEnvmap.lock(); // No lock for d3d11
-						// b.set(0, worldColor.Rb);
-						// b.set(1, worldColor.Gb);
-						// b.set(2, worldColor.Bb);
-						// emptyEnvmap.unlock();
-						// emptyEnvmap.unload(); //
-						var b = Bytes.alloc(4);
-						b.set(0, worldColor.Rb);
-						b.set(1, worldColor.Gb);
-						b.set(2, worldColor.Bb);
-						b.set(3, 255);
-						emptyEnvmap = Image.fromBytes(b, 1, 1);
-						ddirty = 2;
-					}
-				}
-			}
-			Scene.active.world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
-		}
-	}
-
-	function tabOutliner() {
-		if (ui.tab(htab, "Outliner")) {
-			ui.row([1/4]);
-			if (ui.button("Import")) importMesh();
-
-			var i = 0;
-			function drawList(h:Handle, o:Object) {
-				if (o.name.charAt(0) == '.') return; // Hidden
-				var b = false;
-				if (selectedObject == o) {
-					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
-				}
-				if (o.children.length > 0) {
-					b = ui.panel(h.nest(i, {selected: true}), o.name, 0, true);
-				}
-				else {
-					ui._x += 18; // Sign offset
-					ui.text(o.name);
-					ui._x -= 18;
-				}
-				if (ui.isReleased) {
-					selectObject(o);
-					ddirty = 2;
-				}
-				i++;
-				if (b) {
-					for (c in o.children) {
-						ui.indent();
-						drawList(h, c);
-						ui.unindent();
-					}
-				}
-			}
-			for (c in Scene.active.root.children) {
-				drawList(Id.handle(), c);
-			}
-		}
-	}
-
-	function tabProperties() {
-		if (ui.tab(htab1, 'Properties')) {
-			if (selectedObject != null) {
-
-				var h = Id.handle();
-				h.selected = selectedObject.visible;
-				selectedObject.visible = ui.check(h, "Visible");
-				if (h.changed) ddirty = 2;
-
-				var loc = selectedObject.transform.loc;
-				var scale = selectedObject.transform.scale;
-				var rot = selectedObject.transform.rot.getEuler();
-				rot.mult(180 / 3.141592);
-				var f = 0.0;
-
-				ui.row(row4);
-				ui.text("Location");
-
-				h = Id.handle();
-				h.text = roundfp(loc.x) + "";
-				f = Std.parseFloat(ui.textInput(h, "X"));
-				if (h.changed) { loc.x = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(loc.y) + "";
-				f = Std.parseFloat(ui.textInput(h, "Y"));
-				if (h.changed) { loc.y = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(loc.z) + "";
-				f = Std.parseFloat(ui.textInput(h, "Z"));
-				if (h.changed) { loc.z = f; ddirty = 2; }
-
-				ui.row(row4);
-				ui.text("Rotation");
-				
-				h = Id.handle();
-				h.text = roundfp(rot.x) + "";
-				f = Std.parseFloat(ui.textInput(h, "X"));
-				var changed = false;
-				if (h.changed) { changed = true; rot.x = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(rot.y) + "";
-				f = Std.parseFloat(ui.textInput(h, "Y"));
-				if (h.changed) { changed = true; rot.y = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(rot.z) + "";
-				f = Std.parseFloat(ui.textInput(h, "Z"));
-				if (h.changed) { changed = true; rot.z = f; ddirty = 2; }
-
-				if (changed && selectedObject.name != "Scene") {
-					rot.mult(3.141592 / 180);
-					selectedObject.transform.rot.fromEuler(rot.x, rot.y, rot.z);
-					selectedObject.transform.buildMatrix();
-					#if arm_physics
-					var rb = selectedObject.getTrait(armory.trait.physics.RigidBody);
-					if (rb != null) rb.syncTransform();
-					#end
-				}
-
-				ui.row(row4);
-				ui.text("Scale");
-				
-				h = Id.handle();
-				h.text = roundfp(scale.x) + "";
-				f = Std.parseFloat(ui.textInput(h, "X"));
-				if (h.changed) { scale.x = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(scale.y) + "";
-				f = Std.parseFloat(ui.textInput(h, "Y"));
-				if (h.changed) { scale.y = f; ddirty = 2; }
-
-				h = Id.handle();
-				h.text = roundfp(scale.z) + "";
-				f = Std.parseFloat(ui.textInput(h, "Z"));
-				if (h.changed) { scale.z = f; ddirty = 2; }
-
-				selectedObject.transform.dirty = true;
-
-				if (selectedObject.name == "Scene") {
-					var p = Scene.active.world.probe;
-					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Strength", 0.0, 5.0, true);
-					if (envHandle.changed) {
-						ddirty = 2;
-					}
-				}
-				else if (Std.is(selectedObject, iron.object.LightObject)) {
-					var light = cast(selectedObject, iron.object.LightObject);
-					var lhandle = Id.handle();
-					lhandle.value = light.data.raw.strength / 1333;
-					lhandle.value = Std.int(lhandle.value * 100) / 100;
-					light.data.raw.strength = ui.slider(lhandle, "Strength", 0.0, 4.0, true) * 1333;
-					if (lhandle.changed) {
-						ddirty = 2;
-					}
-				}
-				else if (Std.is(selectedObject, iron.object.CameraObject)) {
-					var scene = Scene.active;
-					var cam = scene.cameras[0];
-					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-					if (fovHandle.changed) {
-						cam.buildProjection();
-						ddirty = 2;
-					}
-				}
-			}
 		}
 	}
 
@@ -2567,10 +1413,5 @@ class UITrait {
 			s = s.substr(s.lastIndexOf("+") + 1);
 		}
 		return flag && kb.started(s);
-	}
-
-	static function roundfp(f:Float, precision = 2):Float {
-		f *= Math.pow(10, precision);
-		return Math.round(f) / Math.pow(10, precision);
 	}
 }

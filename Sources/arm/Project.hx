@@ -19,7 +19,6 @@ import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.nodes.MaterialParser;
 import arm.io.ImportArm;
-import arm.App;
 using StringTools;
 
 class Project {

@@ -52,6 +52,7 @@ project.addDefine('arm_resizable');
 project.addDefine('arm_data_dir');
 project.addParameter('--macro include("arm.nodes.brush")');
 project.addParameter('-dce full');
+// project.addParameter('--no-inline');
 
 let debug = false;
 if (debug) {

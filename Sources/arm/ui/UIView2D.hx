@@ -13,7 +13,6 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
 import arm.data.ConstData;
-import arm.App;
 
 @:access(zui.Zui)
 class UIView2D {

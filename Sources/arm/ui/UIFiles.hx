@@ -2,7 +2,6 @@ package arm.ui;
 
 import zui.Id;
 import iron.system.Input;
-import arm.App;
 using StringTools;
 
 class UIFiles {

@@ -9,7 +9,6 @@ import arm.ui.UINodes;
 import arm.util.Lz4;
 import arm.util.Path;
 import arm.Project;
-import arm.App;
 using StringTools;
 
 class ExportArm {

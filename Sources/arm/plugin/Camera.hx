@@ -25,8 +25,8 @@ class Camera {
 		
 		iron.App.notifyOnUpdate(function() {
 			if (Input.occupied ||
-				!arm.App.uienabled ||
-				arm.App.isDragging  ||
+				!App.uienabled ||
+				App.isDragging  ||
 				UITrait.inst.isScrolling ||
 				mouse.x < 0 ||
 				mouse.x > iron.App.w()) return;

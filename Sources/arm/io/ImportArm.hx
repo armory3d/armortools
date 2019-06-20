@@ -9,7 +9,6 @@ import iron.data.MeshData;
 import iron.data.Data;
 import iron.system.ArmPack;
 import iron.RenderPath;
-import arm.App;
 import arm.Project;
 import arm.ui.UITrait;
 import arm.ui.UINodes;

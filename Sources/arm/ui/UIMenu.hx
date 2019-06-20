@@ -6,7 +6,6 @@ import kha.Blob;
 import zui.Zui;
 import iron.system.Input;
 import iron.data.Data;
-import arm.App;
 import arm.util.ViewportUtil;
 using StringTools;
 
@@ -183,7 +182,7 @@ class UIMenu {
 		var first = showMenuFirst;
 		showMenuFirst = false;
 		if (first) {
-			// arm.App.uienabled = false;
+			// App.uienabled = false;
 		}
 		else {
 			if (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown) {
@@ -195,7 +194,7 @@ class UIMenu {
 					App.redrawUI();
 					showMenuFirst = true;
 					menuCommands = null;
-					// arm.App.uienabled = true;
+					// App.uienabled = true;
 				}
 			}
 		}
