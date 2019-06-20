@@ -22,6 +22,7 @@ import arm.util.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
 import arm.data.ConstData;
+import arm.plugin.Camera;
 import arm.Config;
 import arm.Tool;
 using StringTools;
@@ -140,9 +141,7 @@ class App {
 					new UITrait();
 					new UINodes();
 					new UIView2D();
-					root.addTrait(new arm.plugin.FlyCamera());
-					root.addTrait(new arm.plugin.OrbitCamera());
-					root.addTrait(new arm.plugin.RotateCamera());
+					new Camera();
 					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
 					iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
 					iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
