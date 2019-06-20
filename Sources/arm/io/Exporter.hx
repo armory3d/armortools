@@ -11,6 +11,7 @@ import iron.format.PngTools;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
 import arm.App;
+using StringTools;
 
 class Exporter {
 
@@ -56,7 +57,7 @@ class Exporter {
 		var formatType = UITrait.inst.formatType;
 		var bits = UITrait.inst.bitsHandle.position == 0 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == 0 ? ".png" : ".jpg";
-		if (StringTools.endsWith(f, ext)) f = f.substr(0, f.length - 4);
+		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 		var texpaint:Image = null;
 		var texpaint_nor:Image = null;
 		var texpaint_pack:Image = null;

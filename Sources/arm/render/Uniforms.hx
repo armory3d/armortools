@@ -7,6 +7,7 @@ import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.util.UVUtil;
 import arm.Tool;
+using StringTools;
 
 class Uniforms {
 	public static function init() {
@@ -129,7 +130,7 @@ class Uniforms {
 			var i = UITrait.inst.undoI - 1 < 0 ? App.C.undo_steps - 1 : UITrait.inst.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
-		else if (StringTools.startsWith(link, "_texpaint_pack_vert")) {
+		else if (link.startsWith("_texpaint_pack_vert")) {
 			var tid = link.substr(19);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
 		}

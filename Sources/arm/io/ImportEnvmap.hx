@@ -7,6 +7,7 @@ import kha.arrays.Float32Array;
 import iron.data.Data;
 import iron.Scene;
 import arm.ui.UITrait;
+using StringTools;
 
 class ImportEnvmap {
 
@@ -71,8 +72,8 @@ class ImportEnvmap {
 			band1 = band1.substring(band1.indexOf("{"), band1.length);
 			band2 = band2.substring(band2.indexOf("{"), band2.length);
 			var band = band0 + band1 + band2;
-			band = StringTools.replace(band, "{", "");
-			band = StringTools.replace(band, "}", "");
+			band = band.replace("{", "");
+			band = band.replace("}", "");
 			var ar = band.split(",");
 			var buf = new Float32Array(27);
 			for (i in 0...ar.length) buf[i] = Std.parseFloat(ar[i]);

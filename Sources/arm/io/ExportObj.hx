@@ -2,6 +2,7 @@ package arm.io;
 
 import haxe.io.Bytes;
 import arm.ui.UITrait;
+using StringTools;
 
 class ExportObj {
 
@@ -41,7 +42,7 @@ class ExportObj {
 			}
 			off += inda.length;
 		}
-		if (!StringTools.endsWith(path, ".obj")) path += ".obj";
+		if (!path.endsWith(".obj")) path += ".obj";
 		#if kha_krom
 		Krom.fileSaveBytes(path, Bytes.ofString(s).getData());
 		#end

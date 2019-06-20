@@ -10,13 +10,14 @@ import arm.util.Lz4;
 import arm.util.Path;
 import arm.Project;
 import arm.App;
+using StringTools;
 
 class ExportArm {
 
 	public static function run(path:String) {
 		var raw:TSceneFormat = { mesh_datas: [ UITrait.inst.paintObject.data.raw ] };
 		var b = ArmPack.encode(raw);
-		if (!StringTools.endsWith(path, ".arm")) path += ".arm";
+		if (!path.endsWith(".arm")) path += ".arm";
 		#if kha_krom
 		Krom.fileSaveBytes(path, b.getData());
 		#end

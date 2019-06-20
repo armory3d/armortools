@@ -8,6 +8,7 @@ import iron.system.Input;
 import iron.data.Data;
 import arm.App;
 import arm.util.ViewportUtil;
+using StringTools;
 
 class UIMenu {
 
@@ -138,7 +139,7 @@ class UIMenu {
 						var updateVersion = Std.int(update.version);
 						if (updateVersion > 0) {
 							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
-							var dateInt = Std.parseInt(StringTools.replace(date, "-", ""));
+							var dateInt = Std.parseInt(date.replace("-", ""));
 							if (updateVersion > dateInt) {
 								UIBox.showMessage("Update is available!\nPlease visit armorpaint.org to download.");
 							}

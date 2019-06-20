@@ -20,6 +20,7 @@ import arm.data.MaterialSlot;
 import arm.nodes.MaterialParser;
 import arm.io.ImportArm;
 import arm.App;
+using StringTools;
 
 class Project {
 	public static function projectOpen() {
@@ -29,7 +30,7 @@ class Project {
 		App.showFilename = false;
 		UIFiles.filters = "arm";
 		App.filesDone = function(path:String) {
-			if (!StringTools.endsWith(path, ".arm")) {
+			if (!path.endsWith(".arm")) {
 				UITrait.inst.showError(Strings.error5);
 				return;
 			}
@@ -62,7 +63,7 @@ class Project {
 			var f = App.filenameHandle.text;
 			if (f == "") f = "untitled";
 			UITrait.inst.projectPath = path + "/" + f;
-			if (!StringTools.endsWith(UITrait.inst.projectPath, ".arm")) UITrait.inst.projectPath += ".arm";
+			if (!UITrait.inst.projectPath.endsWith(".arm")) UITrait.inst.projectPath += ".arm";
 			projectSave();
 		};
 	}

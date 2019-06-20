@@ -16,6 +16,7 @@ import arm.nodes.MaterialParser;
 import arm.util.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
+using StringTools;
 
 class ImportBlend {
 
@@ -232,7 +233,7 @@ class ImportBlend {
 					for (list in NodesMaterial.list) {
 						var found = false;
 						for (n in list) {
-							var s = StringTools.replace(n.type, "_", "").toLowerCase();
+							var s = n.type.replace("_", "").toLowerCase();
 							if (search == s) {
 								base = n;
 								found = true;
@@ -265,8 +266,8 @@ class ImportBlend {
 						// Fill output socket values
 						if (search == "teximage") {
 							var img = node.get("id", 0, "Image");
-							var file = img.get("name").substr(2); // '//desktop\logo.png'
-							file = StringTools.replace(file, "\\", "/");
+							var file:String = img.get("name").substr(2); // '//desktop\logo.png'
+							file = file.replace("\\", "/");
 							file = Path.baseDir(path) + file;
 							ImportTexture.run(file);
 							n.buttons[0].default_value = App.getAssetIndex(file);
@@ -366,22 +367,22 @@ class ImportBlend {
 
 	static function readBlendSocket(sock:Dynamic):Dynamic {
 		var idname = sock.get("idname");
-		if (StringTools.startsWith(idname, "NodeSocketVector")) {
+		if (idname.startsWith("NodeSocketVector")) {
 			return sock.get("default_value", 0, "bNodeSocketValueVector").get("value");
 		}
-		else if (StringTools.startsWith(idname, "NodeSocketColor")) {
+		else if (idname.startsWith("NodeSocketColor")) {
 			return sock.get("default_value", 0, "bNodeSocketValueRGBA").get("value");
 		}
-		else if (StringTools.startsWith(idname, "NodeSocketFloat")) {
+		else if (idname.startsWith("NodeSocketFloat")) {
 			return sock.get("default_value", 0, "bNodeSocketValueFloat").get("value");
 		}
-		else if (StringTools.startsWith(idname, "NodeSocketInt")) {
+		else if (idname.startsWith("NodeSocketInt")) {
 			return sock.get("default_value", 0, "bNodeSocketValueInt").get("value");
 		}
-		else if (StringTools.startsWith(idname, "NodeSocketBoolean")) {
+		else if (idname.startsWith("NodeSocketBoolean")) {
 			return sock.get("default_value", 0, "bNodeSocketValueBoolean").get("value");
 		}
-		else if (StringTools.startsWith(idname, "NodeSocketString")) {
+		else if (idname.startsWith("NodeSocketString")) {
 			return sock.get("default_value", 0, "bNodeSocketValueString").get("value");
 		}
 		return null;

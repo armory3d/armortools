@@ -5,6 +5,7 @@ import zui.Canvas;
 import iron.data.Data;
 import arm.ui.UITrait;
 import arm.util.Path;
+using StringTools;
 
 class ImportTexture {
 
@@ -28,7 +29,7 @@ class ImportTexture {
 			UITrait.inst.hwnd2.redraws = 2;
 
 			// Set envmap
-			if (StringTools.endsWith(path.toLowerCase(), ".hdr") &&
+			if (path.toLowerCase().endsWith(".hdr") &&
 				(image.width == 1024 || image.width == 2048 || image.width == 4096)) {
 				ImportEnvmap.run(path, image);
 			}

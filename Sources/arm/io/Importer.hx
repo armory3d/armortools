@@ -16,6 +16,7 @@ import arm.ui.UIView2D;
 import arm.ui.UINodes;
 import arm.Project;
 import arm.Tool;
+using StringTools;
 
 class Importer {
 
@@ -67,10 +68,10 @@ class Importer {
 		#end
 
 		var p = path.toLowerCase();
-		if (StringTools.endsWith(p, ".obj")) ImportObj.run(path);
-		else if (StringTools.endsWith(p, ".gltf")) ImportGltf.run(path);
-		else if (StringTools.endsWith(p, ".fbx")) ImportFbx.run(path);
-		else if (StringTools.endsWith(p, ".blend")) ImportBlend.run(path);
+		if (p.endsWith(".obj")) ImportObj.run(path);
+		else if (p.endsWith(".gltf")) ImportGltf.run(path);
+		else if (p.endsWith(".fbx")) ImportFbx.run(path);
+		else if (p.endsWith(".blend")) ImportBlend.run(path);
 
 		if (UITrait.inst.mergedObject != null) {
 			UITrait.inst.mergedObject.remove();
@@ -166,7 +167,7 @@ class Importer {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = UITrait.inst.selectedMaterialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
-				path = StringTools.replace(path, "\\", "/");
+				path = path.replace("\\", "/");
 				var ar = path.split("/");
 				var s = ar[ar.length - 1];
 				object.name = s.substring(0, s.length - 4);

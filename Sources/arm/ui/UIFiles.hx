@@ -3,6 +3,7 @@ package arm.ui;
 import zui.Id;
 import iron.system.Input;
 import arm.App;
+using StringTools;
 
 class UIFiles {
 
@@ -18,8 +19,8 @@ class UIFiles {
 			App.path = untyped App.foldersOnly ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 			if (App.path != null) {
 				if (!App.checkAscii(App.path)) return;
-				App.path = StringTools.replace(App.path, "\\\\", "\\");
-				App.path = StringTools.replace(App.path, "\r", "");
+				App.path = App.path.replace("\\\\", "\\");
+				App.path = App.path.replace("\r", "");
 				#if krom_windows
 				var sep = "\\";
 				#else

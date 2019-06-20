@@ -24,6 +24,7 @@ import arm.data.MaterialSlot;
 import arm.data.ConstData;
 import arm.Config;
 import arm.Tool;
+using StringTools;
 
 class App {
 
@@ -75,9 +76,9 @@ class App {
 		System.notifyOnDropFiles(function(filePath:String) {
 			if (!checkAscii(filePath)) return;
 			dropPath = filePath;
-			dropPath = StringTools.replace(dropPath, "%20", " "); // Linux can pass %20 on drop
+			dropPath = dropPath.replace("%20", " "); // Linux can pass %20 on drop
 			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
-			dropPath = StringTools.rtrim(dropPath);
+			dropPath = dropPath.rtrim();
 		});
 
 		#if krom_windows

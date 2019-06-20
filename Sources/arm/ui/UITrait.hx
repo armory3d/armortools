@@ -32,6 +32,7 @@ import arm.io.ExportArm;
 import arm.Project;
 import arm.Tool;
 import arm.App;
+using StringTools;
 
 @:access(zui.Zui)
 class UITrait {
@@ -1901,7 +1902,7 @@ class UITrait {
 				App.showFilename = false;
 				UIFiles.filters = "arm,blend";
 				App.filesDone = function(path:String) {
-					StringTools.endsWith(path, ".blend") ?
+					path.endsWith(".blend") ?
 						ImportBlend.runMaterial(path) :
 						ImportArm.runMaterial(path);
 				}
@@ -2305,7 +2306,7 @@ class UITrait {
 				App.showFilename = false;
 				UIFiles.filters = "hdr";
 				App.filesDone = function(path:String) {
-					if (!StringTools.endsWith(path, ".hdr")) {
+					if (!path.endsWith(".hdr")) {
 						UITrait.inst.showError("Error: .hdr file expected");
 						return;
 					}

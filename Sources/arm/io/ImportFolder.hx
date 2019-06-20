@@ -13,6 +13,7 @@ import arm.nodes.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.Tool;
 import arm.App;
+using StringTools;
 
 class ImportFolder {
 
@@ -44,12 +45,12 @@ class ImportFolder {
 		// Import maps
 		for (f in files) {
 			if (f.length == 0) continue;
-			f = StringTools.rtrim(f);
+			f = f.rtrim();
 			if (!Path.checkTextureFormat(f)) continue;
 			
 			f = path + sep + f;
 			#if krom_windows
-			f = StringTools.replace(f, "/", "\\");
+			f = f.replace("/", "\\");
 			#end
 
 			// TODO: handle -albedo
@@ -103,7 +104,7 @@ class ImportFolder {
 		UINodes.inst.updateCanvasMap();
 		var nodes = UINodes.inst.nodes;
 		var canvas = UINodes.inst.canvas;
-		var dirs = StringTools.replace(path, "\\", "/").split("/");
+		var dirs = path.replace("\\", "/").split("/");
 		canvas.name = dirs[dirs.length - 1];
 		var nout:TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
