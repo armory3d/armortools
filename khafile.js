@@ -1,7 +1,6 @@
 let project = new Project('ArmorPaint');
 
 project.addSources('Sources');
-project.addLibrary("armory");
 project.addLibrary("iron");
 project.addLibrary("zui");
 project.addLibrary("iron_format");
@@ -14,11 +13,11 @@ project.addAssets("Bundled/licenses/**", { notinlist: true , destination: "data/
 project.addAssets("Bundled/plugins/**", { notinlist: true , destination: "data/plugins/{name}" });
 project.addAssets("Bundled/themes/**", { notinlist: true , destination: "data/themes/{name}" });
 project.addAssets("Bundled/readme.txt", { notinlist: true , destination: "{name}" });
-project.addAssets("Libraries/armory/Assets/brdf.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Libraries/armory/Assets/noise256.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Libraries/armory/Assets/smaa_area.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Libraries/armory/Assets/smaa_search.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Libraries/armory/Assets/font_default.ttf", { notinlist: false , destination: "data/{name}" });
+project.addAssets("Bundled/Assets/brdf.png", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/Assets/noise256.png", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/Assets/smaa_area.png", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/Assets/smaa_search.png", { notinlist: true , destination: "data/{name}" });
+project.addAssets("Bundled/Assets/font_default.ttf", { notinlist: false , destination: "data/{name}" });
 project.addDefine('arm_deferred');
 project.addDefine('arm_voxelgi_revox');
 project.addDefine('arm_ltc');
@@ -57,7 +56,7 @@ project.addParameter('-dce full');
 let debug = false;
 if (debug) {
 	project.addDefine('arm_debug');
-	project.addShaders("Libraries/armory/Shaders/debug_draw/**");
+	project.addShaders("Bundled/Shaders/debug_draw/**");
 	project.addParameter('--times');
 }
 
