@@ -3,10 +3,9 @@ package arm.nodes;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
-import armory.system.CyclesFormat;
-import armory.system.CyclesShader;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
+import arm.nodes.CyclesShader;
 import arm.Tool;
 
 class MaterialParser {
