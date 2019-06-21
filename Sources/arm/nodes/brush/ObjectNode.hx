@@ -1,8 +1,6 @@
 package arm.nodes.brush;
 
 import iron.object.Object;
-import armory.logicnode.LogicNode;
-import armory.logicnode.LogicTree;
 
 @:keep
 class ObjectNode extends LogicNode {

@@ -1,7 +1,5 @@
 package arm.nodes.brush;
 
-import armory.logicnode.LogicNode;
-import armory.logicnode.LogicTree;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.Tool;

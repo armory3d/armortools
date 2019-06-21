@@ -1,8 +1,5 @@
 package arm.nodes.brush;
 
-import armory.logicnode.LogicNode;
-import armory.logicnode.LogicTree;
-
 @:keep
 class FloatNode extends LogicNode {
 

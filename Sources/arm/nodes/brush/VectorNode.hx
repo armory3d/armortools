@@ -1,7 +1,5 @@
 package arm.nodes.brush;
 
-import armory.logicnode.LogicNode;
-import armory.logicnode.LogicTree;
 import iron.math.Vec4;
 
 @:keep

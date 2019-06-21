@@ -1,8 +1,6 @@
 package arm.nodes.brush;
 
 import iron.math.Vec4;
-import armory.logicnode.LogicNode;
-import armory.logicnode.LogicTree;
 
 @:keep
 class ColorNode extends LogicNode {
