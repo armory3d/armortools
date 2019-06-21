@@ -1,6 +1,3 @@
-[submodule "Libraries/armory"]
-	path = Libraries/armory
-	url = https://github.com/armory3d/armory
 [submodule "Libraries/iron"]
 	path = Libraries/iron
 	url = https://github.com/armory3d/iron
