@@ -24,8 +24,7 @@ class RenderPathPreview {
 		#end
 
 		path.clearTarget(null, 1.0);
-
-		RenderPathCreator.drawMeshes();
+		path.drawMeshes("mesh");
 
 		// ---
 		// Deferred light
@@ -88,8 +87,7 @@ class RenderPathPreview {
 		#end
 
 		path.clearTarget(null, 1.0);
-
-		RenderPathCreator.drawMeshes();
+		path.drawMeshes("mesh");
 
 		// ---
 		// Deferred light

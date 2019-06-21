@@ -28,7 +28,7 @@ class TabPreferences {
 					UITrait.inst.headerh = Std.int(UITrait.defaultHeaderH * App.C.window_scale);
 					UITrait.inst.menubarw = Std.int(215 * App.C.window_scale);
 					App.resize();
-					armory.data.Config.save();
+					Config.save();
 					UITrait.inst.setIconScale();
 				}
 				UITrait.inst.hscaleWasChanged = hscale.changed;
@@ -37,7 +37,7 @@ class TabPreferences {
 				App.C.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
 				if (layHandle.changed) {
 					App.resize();
-					armory.data.Config.save();
+					Config.save();
 				}
 				var themeHandle = Id.handle({position: 0});
 				var themes = ["Dark", "Light"];
@@ -83,7 +83,7 @@ class TabPreferences {
 					}
 					History.reset();
 					ui.g.begin(false);
-					armory.data.Config.save();
+					Config.save();
 				}
 
 				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), "Paint Bias", 0.0, 1.0, true);
@@ -129,7 +129,7 @@ class TabPreferences {
 				ui.row([1/2, 1/2]);
 				var vsyncHandle = Id.handle({selected: App.C.window_vsync});
 				App.C.window_vsync = ui.check(vsyncHandle, "VSync");
-				if (vsyncHandle.changed) armory.data.Config.save();
+				if (vsyncHandle.changed) Config.save();
 				ui.combo(UITrait.inst.hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 				ui.row([1/2, 1/2]);

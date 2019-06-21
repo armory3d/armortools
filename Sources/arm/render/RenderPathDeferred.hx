@@ -8,7 +8,6 @@ import iron.math.Vec4;
 import iron.math.Quat;
 import iron.system.Input;
 import iron.object.MeshObject;
-import armory.renderpath.Inc;
 import arm.util.ViewportUtil;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
@@ -23,6 +22,8 @@ class RenderPathDeferred {
 	#if rp_voxelao
 	static var voxels = "voxels";
 	static var voxelsLast = "voxels";
+	public static var voxelFrame = 0;
+	public static var voxelFreq = 6; // Revoxelizing frequency
 	#end
 	static var taaFrame = 0;
 	static var lastX = -1.0;
@@ -32,14 +33,319 @@ class RenderPathDeferred {
 
 		path = _path;
 
-		armory.renderpath.RenderPathDeferred.init(path);
+		#if (rp_background == "World")
+		{
+			path.loadShader("shader_datas/world_pass/world_pass");
+		}
+		#end
+
+		#if rp_voxelao
+		{
+			Inc.initGI();
+			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+		}
+		#end
+
+		{
+			path.createDepthBuffer("main", "DEPTH24");
+
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer0";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			t.depth_buffer = "main";
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "tex";
+			t.width = 0;
+			t.height = 0;
+			t.format = Inc.getHdrFormat();
+			t.scale = Inc.getSuperSampling();
+			t.depth_buffer = "main";
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "buf";
+			t.width = 0;
+			t.height = 0;
+			t.format = Inc.getHdrFormat();
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer1";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		#if rp_gbuffer2
+		{
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer2";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "taa";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		#end
+
+		path.loadShader("shader_datas/deferred_light/deferred_light");
+
+		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
+		{
+			path.loadShader("shader_datas/ssgi_pass/ssgi_pass");
+			path.loadShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
+			path.loadShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
+		}
+		#end
+
+		#if ((rp_ssgi != "Off") || rp_volumetriclight)
+		{
+			var t = new RenderTargetRaw();
+			t.name = "singlea";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R8";
+			t.scale = Inc.getSuperSampling();
+			#if rp_ssgi_half
+			t.scale *= 0.5;
+			#end
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "singleb";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R8";
+			t.scale = Inc.getSuperSampling();
+			#if rp_ssgi_half
+			t.scale *= 0.5;
+			#end
+			path.createRenderTarget(t);
+		}
+		#end
+
+		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		{
+			var t = new RenderTargetRaw();
+			t.name = "bufa";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "bufb";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		#end
+
+		#if rp_compositornodes
+		{
+			path.loadShader("shader_datas/compositor_pass/compositor_pass");
+		}
+		#end
+
+		#if ((!rp_compositornodes) || (rp_antialiasing == "TAA") || (rp_motionblur == "Camera") || (rp_motionblur == "Object"))
+		{
+			path.loadShader("shader_datas/copy_pass/copy_pass");
+		}
+		#end
+
+		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
+		{
+			path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+			path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+			path.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+
+			#if (rp_antialiasing == "TAA")
+			{
+				path.loadShader("shader_datas/taa_pass/taa_pass");
+			}
+			#end
+		}
+		#end
+
+		#if (rp_supersampling == 4)
+		{
+			path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
+		}
+		#end
+
+		#if rp_volumetriclight
+		{
+			path.loadShader("shader_datas/volumetric_light/volumetric_light");
+			path.loadShader("shader_datas/blur_bilat_pass/blur_bilat_pass_x");
+			path.loadShader("shader_datas/blur_bilat_blend_pass/blur_bilat_blend_pass_y");
+		}
+		#end
+
+		#if rp_water
+		{
+			path.loadShader("shader_datas/water_pass/water_pass");
+			path.loadShader("shader_datas/copy_pass/copy_pass");
+		}
+		#end
+
+		#if rp_bloom
+		{
+			var t = new RenderTargetRaw();
+			t.name = "bloomtex";
+			t.width = 0;
+			t.height = 0;
+			t.scale = 0.25;
+			t.format = Inc.getHdrFormat();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "bloomtex2";
+			t.width = 0;
+			t.height = 0;
+			t.scale = 0.25;
+			t.format = Inc.getHdrFormat();
+			path.createRenderTarget(t);
+		}
+
+		{
+			path.loadShader("shader_datas/bloom_pass/bloom_pass");
+			path.loadShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
+			path.loadShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
+			path.loadShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y_blend");
+		}
+		#end
+
+		#if rp_autoexposure
+		{
+			var t = new RenderTargetRaw();
+			t.name = "histogram";
+			t.width = 1;
+			t.height = 1;
+			t.format = Inc.getHdrFormat();
+			path.createRenderTarget(t);
+		}
+
+		{
+			path.loadShader("shader_datas/histogram_pass/histogram_pass");
+		}
+		#end
+
+		#if rp_sss
+		{
+			path.loadShader("shader_datas/sss_pass/sss_pass_x");
+			path.loadShader("shader_datas/sss_pass/sss_pass_y");
+		}
+		#end
+
+		#if (rp_ssr_half || rp_ssgi_half)
+		{
+			{
+				path.loadShader("shader_datas/downsample_depth/downsample_depth");
+				var t = new RenderTargetRaw();
+				t.name = "half";
+				t.width = 0;
+				t.height = 0;
+				t.scale = Inc.getSuperSampling() * 0.5;
+				t.format = "R32"; // R16
+				path.createRenderTarget(t);
+			}
+		}
+		#end
+
+		#if rp_ssr
+		{
+			path.loadShader("shader_datas/ssr_pass/ssr_pass");
+			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
+			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
+			
+			#if rp_ssr_half
+			{
+				var t = new RenderTargetRaw();
+				t.name = "ssra";
+				t.width = 0;
+				t.height = 0;
+				t.scale = Inc.getSuperSampling() * 0.5;
+				t.format = Inc.getHdrFormat();
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "ssrb";
+				t.width = 0;
+				t.height = 0;
+				t.scale = Inc.getSuperSampling() * 0.5;
+				t.format = Inc.getHdrFormat();
+				path.createRenderTarget(t);
+			}
+			#end
+		}
+		#end
+
+		#if ((rp_motionblur == "Camera") || (rp_motionblur == "Object"))
+		{
+			#if (rp_motionblur == "Camera")
+			{
+				path.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
+			}
+			#else
+			{
+				path.loadShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
+			}
+			#end
+		}
+		#end
+
+		#if arm_config
+		{
+			var t = new RenderTargetRaw();
+			t.name = "empty_white";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'R8';
+			var rt = new RenderTarget(t);
+			var b = haxe.io.Bytes.alloc(1);
+			b.set(0, 255);
+			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.L8);
+			path.renderTargets.set(t.name, rt);
+		}
+		#end
 
 		{
 			var t = new RenderTargetRaw();
 			t.name = "taa2";
 			t.width = 0;
 			t.height = 0;
-			t.displayp = Inc.getDisplayp();
 			t.format = "RGBA32";
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
@@ -184,7 +490,7 @@ class RenderPathDeferred {
 
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		var ssaa4 = armory.data.Config.raw.rp_supersample == 4 ? true : false;
+		var ssaa4 = Config.raw.rp_supersample == 4 ? true : false;
 		
 		var mouse = Input.getMouse();
 		var mx = lastX;
@@ -379,7 +685,7 @@ class RenderPathDeferred {
 
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
-			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
+			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
 			if (ssgi && UITrait.inst.ddirty > 0 && taaFrame > 0) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
@@ -404,12 +710,12 @@ class RenderPathDeferred {
 
 		// Voxels
 		#if rp_voxelao
-		if (armory.data.Config.raw.rp_gi != false)
+		if (Config.raw.rp_gi != false)
 		{
 			var voxelize = path.voxelize() && UITrait.inst.ddirty > 0 && taaFrame > 0;
 
 			#if arm_voxelgi_temporal
-			voxelize = ++RenderPathCreator.voxelFrame % RenderPathCreator.voxelFreq == 0;
+			voxelize = ++voxelFrame % voxelFreq == 0;
 
 			if (voxelize) {
 				voxels = voxels == "voxels" ? "voxelsB" : "voxels";
@@ -447,7 +753,7 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer1", "gbuffer1");
 		#if (rp_ssgi != "Off")
 		{
-			var ssgi = armory.data.Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
+			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
 			if (ssgi && taaFrame > 0) {
 				path.bindTarget("singlea", "ssaotex");
 			}
@@ -458,7 +764,7 @@ class RenderPathDeferred {
 		#end
 		var voxelao_pass = false;
 		#if rp_voxelao
-		if (armory.data.Config.raw.rp_gi != false)
+		if (Config.raw.rp_gi != false)
 		{
 			voxelao_pass = true;
 			path.bindTarget(voxels, "voxels");
@@ -504,7 +810,7 @@ class RenderPathDeferred {
 
 		#if rp_bloom
 		{
-			if (armory.data.Config.raw.rp_bloom != false) {
+			if (Config.raw.rp_bloom != false) {
 				path.setTarget("bloomtex");
 				path.bindTarget("tex", "tex");
 				path.drawShader("shader_datas/bloom_pass/bloom_pass");
@@ -563,7 +869,7 @@ class RenderPathDeferred {
 
 		#if rp_ssr
 		{
-			if (armory.data.Config.raw.rp_ssr != false) {
+			if (Config.raw.rp_ssr != false) {
 				var targeta = "buf";
 				var targetb = "gbuffer1";
 
@@ -589,7 +895,7 @@ class RenderPathDeferred {
 
 		#if ((rp_motionblur == "Camera") || (rp_motionblur == "Object"))
 		{
-			if (armory.data.Config.raw.rp_motionblur != false) {
+			if (Config.raw.rp_motionblur != false) {
 				path.setTarget("buf");
 				path.bindTarget("tex", "tex");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -618,7 +924,6 @@ class RenderPathDeferred {
 		}
 		#end
 
-		RenderPathCreator.finalTarget = path.currentTarget;
 		path.setTarget("buf");
 		
 		path.bindTarget("tex", "tex");
@@ -750,7 +1055,7 @@ class RenderPathDeferred {
 		}
 		//
 
-		RenderPathCreator.drawMeshes();
+		path.drawMeshes("mesh");
 
 		#if rp_decals
 		{

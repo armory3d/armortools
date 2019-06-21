@@ -2,7 +2,6 @@ package arm.render;
 
 import iron.object.MeshObject;
 import iron.Scene;
-import armory.renderpath.Inc;
 import arm.ui.UITrait;
 import arm.Tool;
 

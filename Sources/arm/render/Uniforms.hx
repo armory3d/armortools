@@ -14,7 +14,7 @@ class Uniforms {
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
-		iron.object.Uniforms.externalTextureLinks.push(linkTex);
+		iron.object.Uniforms.externalTextureLinks = [linkTex];
 	}
 
 	public static function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
@@ -140,6 +140,16 @@ class Uniforms {
 		else if (link == "_texparticle") {
 			return RenderPath.active.renderTargets.get("texparticle").image;
 		}
+		#if arm_ltc
+		else if (link == "_ltcMat") {
+			if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
+			return arm.data.ConstData.ltcMatTex;
+		}
+		else if (link == "_ltcMag") {
+			if (arm.data.ConstData.ltcMagTex == null) arm.data.ConstData.initLTC();
+			return arm.data.ConstData.ltcMagTex;
+		}
+		#end
 		return null;
 	}
 }

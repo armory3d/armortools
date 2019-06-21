@@ -121,7 +121,7 @@ class App {
 				color_wheel = image;
 				Nodes.getEnumTexts = getEnumTexts;
 				Nodes.mapEnum = mapEnum;
-				uibox = new Zui({ font: f, scaleFactor: armory.data.Config.raw.window_scale });
+				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
 				
 				iron.App.notifyOnInit(function() {
 					// File to open passed as argument
@@ -226,7 +226,7 @@ class App {
 		// if (disp.height > 0 && C.window_h > disp.height - 140) {
 		// 	C.window_h = disp.height - 140;
 		// }
-		// armory.data.Config.save();
+		// Config.save();
 	}
 	#end
 

@@ -39,7 +39,7 @@ class MaterialParser {
 			UITrait.inst.ddirty = 2;
 
 			#if rp_voxelao
-			if (MaterialBuilder.heightUsed && armory.data.Config.raw.rp_gi != false) {
+			if (MaterialBuilder.heightUsed && Config.raw.rp_gi != false) {
 				var sc:ShaderContext = null;
 				for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
 				if (sc != null) MaterialBuilder.make_voxel(sc);
@@ -181,7 +181,7 @@ class MaterialParser {
 	}
 
 	public static function parseBrush() {
-		armory.system.Logic.packageName = "arm.nodes.brush";
-		var tree = armory.system.Logic.parse(UINodes.inst.canvasBrush, false);
+		Logic.packageName = "arm.nodes.brush";
+		var tree = Logic.parse(UINodes.inst.canvasBrush, false);
 	}
 }

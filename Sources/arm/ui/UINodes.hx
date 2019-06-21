@@ -81,7 +81,7 @@ class UINodes {
 				var t = Reflect.copy(App.theme);
 				t.ELEMENT_H = 18;
 				t.BUTTON_H = 16;
-				var scale = armory.data.Config.raw.window_scale;
+				var scale = Config.raw.window_scale;
 				ui = new Zui({font: App.font, theme: t, color_wheel: App.color_wheel, scaleFactor: scale});
 				ui.scrollEnabled = false;
 			});

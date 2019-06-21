@@ -58,7 +58,7 @@ class Tool {
 			t.width = 0;
 			t.height = 0;
 			t.format = 'R8';
-			t.scale = armory.renderpath.Inc.getSuperSampling();
+			t.scale = arm.render.Inc.getSuperSampling();
 			RenderPath.active.createRenderTarget(t);
 		}
 

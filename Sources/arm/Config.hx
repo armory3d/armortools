@@ -1,74 +1,100 @@
 package arm;
 
+import haxe.Json;
+import haxe.io.Bytes;
+import iron.data.Data;
 import arm.ui.UITrait;
+import arm.render.Inc;
 
 class Config {
 
-	public static function init():TConfig {
-		var C:TConfig = cast armory.data.Config.raw;
+	public static var raw:TConfig = null;
+	public static var configLoaded = false;
 
-		if (!armory.data.Config.configLoaded) {
-			C.rp_bloom = true;
-			C.rp_gi = false;
-			C.rp_motionblur = false;
-			C.rp_shadowmap_cube = 0;
-			C.rp_shadowmap_cascade = 0;
-			C.rp_ssgi = true;
-			C.rp_ssr = false;
-			C.rp_supersample = 1.0;
+	public static function load(done:Void->Void) {
+		try {
+			Data.getBlob('config.arm', function(blob:kha.Blob) {
+				configLoaded = true;
+				raw = Json.parse(blob.toString());
+				done();
+			});
+		}
+		catch(e:Dynamic) { done(); }
+	}
+
+	public static function save() {
+		var path = Data.dataPath + 'config.arm';
+		var bytes = Bytes.ofString(Json.stringify(raw));
+		#if kha_krom
+		Krom.fileSaveBytes(path, bytes.getData());
+		#end
+	}
+
+	// public static function reset() {}
+
+	public static function init():TConfig {
+		if (!configLoaded) {
+			raw.rp_bloom = true;
+			raw.rp_gi = false;
+			raw.rp_motionblur = false;
+			raw.rp_shadowmap_cube = 0;
+			raw.rp_shadowmap_cascade = 0;
+			raw.rp_ssgi = true;
+			raw.rp_ssr = false;
+			raw.rp_supersample = 1.0;
 		}
 
-		if (C.ui_layout == null) C.ui_layout = 0;
-		if (C.undo_steps == null) C.undo_steps = 4; // Max steps to keep
-		if (C.keymap == null) {
-			C.keymap = {};
-			C.keymap.action_paint = "left";
-			C.keymap.action_rotate = "right";
-			C.keymap.action_rotate_light = "middle+shift";
-			C.keymap.action_pan = "middle";
-			C.keymap.select_material = "shift+number";
-			C.keymap.cycle_layers = "ctrl+tab";
-			C.keymap.brush_radius = "f";
-			C.keymap.brush_ruler = "shift";
-			C.keymap.file_new = "ctrl+n";
-			C.keymap.file_open = "ctrl+o";
-			C.keymap.file_save = "ctrl+s";
-			C.keymap.file_save_as = "ctrl+shift+s";
-			C.keymap.edit_undo = "ctrl+z";
-			C.keymap.edit_redo = "ctrl+shift+z";
-			C.keymap.view_reset = "0";
-			C.keymap.view_front = "1";
-			C.keymap.view_back = "ctrl+1";
-			C.keymap.view_right = "3";
-			C.keymap.view_left = "ctrl+3";
-			C.keymap.view_top = "7";
-			C.keymap.view_bottom = "ctrl+7";
-			C.keymap.view_camera_type = "5";
-			C.keymap.view_orbit_left = "4";
-			C.keymap.view_orbit_right = "6";
-			C.keymap.view_orbit_top = "8";
-			C.keymap.view_orbit_bottom = "2";
-			C.keymap.view_orbit_opposite = "9";
-			C.keymap.view_distract_free = "f11";
-			C.keymap.tool_brush = "b";
-			C.keymap.tool_eraser = "e";
-			C.keymap.tool_fill = "g";
-			C.keymap.tool_decal = "d";
-			C.keymap.tool_text = "t";
-			C.keymap.tool_clone = "l";
-			C.keymap.tool_blur = "u";
-			C.keymap.tool_particle = "p";
-			C.keymap.tool_bake = "k";
-			C.keymap.tool_colorid = "c";
-			C.keymap.tool_picker = "v";
-			C.keymap.toggle_2d_view = "shift+tab";
-			C.keymap.toggle_node_editor = "tab";
-			C.keymap.import_assets = "ctrl+shift+i";
-			C.keymap.export_textures = "ctrl+shift+e";
-			C.keymap.node_search = "space";
+		if (raw.ui_layout == null) raw.ui_layout = 0;
+		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
+		if (raw.keymap == null) {
+			raw.keymap = {};
+			raw.keymap.action_paint = "left";
+			raw.keymap.action_rotate = "right";
+			raw.keymap.action_rotate_light = "middle+shift";
+			raw.keymap.action_pan = "middle";
+			raw.keymap.select_material = "shift+number";
+			raw.keymap.cycle_layers = "ctrl+tab";
+			raw.keymap.brush_radius = "f";
+			raw.keymap.brush_ruler = "shift";
+			raw.keymap.file_new = "ctrl+n";
+			raw.keymap.file_open = "ctrl+o";
+			raw.keymap.file_save = "ctrl+s";
+			raw.keymap.file_save_as = "ctrl+shift+s";
+			raw.keymap.edit_undo = "ctrl+z";
+			raw.keymap.edit_redo = "ctrl+shift+z";
+			raw.keymap.view_reset = "0";
+			raw.keymap.view_front = "1";
+			raw.keymap.view_back = "ctrl+1";
+			raw.keymap.view_right = "3";
+			raw.keymap.view_left = "ctrl+3";
+			raw.keymap.view_top = "7";
+			raw.keymap.view_bottom = "ctrl+7";
+			raw.keymap.view_camera_type = "5";
+			raw.keymap.view_orbit_left = "4";
+			raw.keymap.view_orbit_right = "6";
+			raw.keymap.view_orbit_top = "8";
+			raw.keymap.view_orbit_bottom = "2";
+			raw.keymap.view_orbit_opposite = "9";
+			raw.keymap.view_distract_free = "f11";
+			raw.keymap.tool_brush = "b";
+			raw.keymap.tool_eraser = "e";
+			raw.keymap.tool_fill = "g";
+			raw.keymap.tool_decal = "d";
+			raw.keymap.tool_text = "t";
+			raw.keymap.tool_clone = "l";
+			raw.keymap.tool_blur = "u";
+			raw.keymap.tool_particle = "p";
+			raw.keymap.tool_bake = "k";
+			raw.keymap.tool_colorid = "c";
+			raw.keymap.tool_picker = "v";
+			raw.keymap.toggle_2d_view = "shift+tab";
+			raw.keymap.toggle_node_editor = "tab";
+			raw.keymap.import_assets = "ctrl+shift+i";
+			raw.keymap.export_textures = "ctrl+shift+e";
+			raw.keymap.node_search = "space";
 		}
 		
-		return C;
+		return raw;
 	}
 
 	public static function applyConfig() {
@@ -82,8 +108,8 @@ class Config {
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
 		
-		armory.data.Config.save();
-		armory.renderpath.RenderPathCreator.applyConfig();
+		save();
+		Inc.applyConfig();
 		
 		if (current != null) current.begin(false);
 		UITrait.inst.ddirty = 2;
