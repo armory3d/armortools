@@ -69,7 +69,6 @@ class Importer {
 
 		var p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path);
-		else if (p.endsWith(".gltf")) ImportGltf.run(path);
 		else if (p.endsWith(".fbx")) ImportFbx.run(path);
 		else if (p.endsWith(".blend")) ImportBlend.run(path);
 

@@ -506,7 +506,7 @@ class UITrait {
 			App.whandle.redraws = 2;
 			App.foldersOnly = false;
 			App.showFilename = false;
-			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,gltf,arm";
+			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,arm";
 			App.filesDone = function(path:String) {
 				Importer.importFile(path);
 			}
@@ -1396,7 +1396,7 @@ class UITrait {
 		App.whandle.redraws = 2;
 		App.foldersOnly = false;
 		App.showFilename = false;
-		UIFiles.filters = "obj,fbx,blend,gltf,arm";
+		UIFiles.filters = "obj,fbx,blend,arm";
 		App.filesDone = function(path:String) {
 			Importer.importFile(path);
 		}

@@ -33,8 +33,7 @@ class Path {
 		var p = path.toLowerCase();
 		return p.endsWith(".obj") ||
 			   p.endsWith(".fbx") ||
-			   p.endsWith(".blend") ||
-			   p.endsWith(".gltf");
+			   p.endsWith(".blend");
 	}
 
 	public static function checkTextureFormat(path:String):Bool {
