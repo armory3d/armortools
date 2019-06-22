@@ -23,7 +23,7 @@ class ImportBlend {
 		Data.getBlob(path, function(b:Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				UITrait.inst.showError("Error: Compressed blend");
+				UITrait.inst.showError(Strings.error3);
 				return;
 			}
 
@@ -179,7 +179,7 @@ class ImportBlend {
 		Data.getBlob(path, function(b:Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				UITrait.inst.showError("Error: Compressed blend");
+				UITrait.inst.showError(Strings.error3);
 				return;
 			}
 
