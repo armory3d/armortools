@@ -71,9 +71,6 @@ class App {
 		iron.App.onResize = onResize;
 		#end
 
-		// Set base dir for file browser
-		zui.Ext.dataPath = Data.dataPath;
-
 		System.notifyOnDropFiles(function(filePath:String) {
 			if (!checkAscii(filePath)) return;
 			dropPath = filePath;
@@ -123,46 +120,44 @@ class App {
 				Nodes.mapEnum = mapEnum;
 				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
 				
-				iron.App.notifyOnInit(function() {
-					// File to open passed as argument
-					#if kha_krom
-					if (Krom.getArgCount() > 1) {
-						var path = Krom.getArg(1);
-						if (Path.checkProjectFormat(path) ||
-							Path.checkMeshFormat(path) ||
-							Path.checkTextureFormat(path) ||
-							Path.checkFontFormat(path)) {
-							fileArg = path;
-						}
+				// File to open passed as argument
+				#if kha_krom
+				if (Krom.getArgCount() > 1) {
+					var path = Krom.getArg(1);
+					if (Path.checkProjectFormat(path) ||
+						Path.checkMeshFormat(path) ||
+						Path.checkTextureFormat(path) ||
+						Path.checkFontFormat(path)) {
+						fileArg = path;
 					}
-					#end
-					iron.App.notifyOnUpdate(update);
-					var root = Scene.active.root;
-					new UITrait();
-					new UINodes();
-					new UIView2D();
-					new Camera();
-					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
-					iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
-					iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
-					iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
-					iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
-					iron.App.notifyOnRender2D(render);
-					appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
-					appy = UITrait.inst.headerh * 2;
-					var cam = Scene.active.camera;
-					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
-					cam.buildProjection();
-					if (fileArg != "") {
-						Importer.importFile(fileArg);
-						if (Path.checkMeshFormat(fileArg)) {
-							UITrait.inst.toggleDistractFree();
-						}
-						else if (Path.checkTextureFormat(fileArg)) {
-							UITrait.inst.show2DView(1);
-						}
+				}
+				#end
+				iron.App.notifyOnUpdate(update);
+				var root = Scene.active.root;
+				new UITrait();
+				new UINodes();
+				new UIView2D();
+				new Camera();
+				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
+				iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
+				iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
+				iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
+				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
+				iron.App.notifyOnRender2D(render);
+				appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+				appy = UITrait.inst.headerh * 2;
+				var cam = Scene.active.camera;
+				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
+				cam.buildProjection();
+				if (fileArg != "") {
+					Importer.importFile(fileArg);
+					if (Path.checkMeshFormat(fileArg)) {
+						UITrait.inst.toggleDistractFree();
 					}
-				});
+					else if (Path.checkTextureFormat(fileArg)) {
+						UITrait.inst.show2DView(1);
+					}
+				}
 			});
 		});
 	}
