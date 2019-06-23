@@ -49,8 +49,8 @@ class InputNode extends LogicNode {
 			}
 
 			var kb = iron.system.Input.getKeyboard();
-			if (kb.started(App.K.brush_ruler)) { lockStartX = mouse.x; lockStartY = mouse.y; lockBegin = true; }
-			else if (kb.released(App.K.brush_ruler)) { lockX = lockY = lockBegin = false; }
+			if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.x; lockStartY = mouse.y; lockBegin = true; }
+			else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
 
 			if (lockX) coords.x = startX;
 			if (lockY) coords.y = startY;

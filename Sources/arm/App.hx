@@ -50,13 +50,8 @@ class App {
 	public static var fileArg = "";
 	public static var saveAndQuit = false;
 
-	public static var C:TConfig; // Config
-	public static var K:Dynamic; // Config.Keymap
-
 	public function new() {
-		// Init config
-		C = Config.init();
-		K = C.keymap;
+		Config.init();
 
 		#if arm_resizable
 		iron.App.onResize = onResize;
@@ -135,7 +130,7 @@ class App {
 				iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
 				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
 				iron.App.notifyOnRender2D(render);
-				appx = C.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+				appx = Config.raw.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 				appy = UITrait.inst.headerh * 2;
 				var cam = Scene.active.camera;
 				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
@@ -205,12 +200,12 @@ class App {
 		resize();
 		
 		// Save window size
-		// C.window_w = System.windowWidth();
-		// C.window_h = System.windowHeight();
+		// Config.raw.window_w = System.windowWidth();
+		// Config.raw.window_h = System.windowHeight();
 		// Cap height, window is not centered properly
 		// var disp =  kha.Display.primary;
-		// if (disp.height > 0 && C.window_h > disp.height - 140) {
-		// 	C.window_h = disp.height - 140;
+		// if (disp.height > 0 && Config.raw.window_h > disp.height - 140) {
+		// 	Config.raw.window_h = disp.height - 140;
 		// }
 		// Config.save();
 	}
@@ -227,7 +222,7 @@ class App {
 		cam.buildProjection();
 		Context.ddirty = 2;
 
-		var lay = C.ui_layout;
+		var lay = Config.raw.ui_layout;
 		
 		appx = lay == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {

@@ -9,6 +9,7 @@ import arm.render.Inc;
 class Config {
 
 	public static var raw:TConfig = null;
+	public static var keymap:Dynamic; // raw.Keymap
 	public static var configLoaded = false;
 
 	public static function load(done:Void->Void) {
@@ -94,11 +95,12 @@ class Config {
 			raw.keymap.node_search = "space";
 		}
 		
+		keymap = raw.keymap;
 		return raw;
 	}
 
 	public static function applyConfig() {
-		var C = App.C;
+		var C = Config.raw;
 		C.rp_ssgi = UITrait.inst.hssgi.selected;
 		C.rp_ssr = UITrait.inst.hssr.selected;
 		C.rp_bloom = UITrait.inst.hbloom.selected;

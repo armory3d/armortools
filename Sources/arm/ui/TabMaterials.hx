@@ -89,7 +89,7 @@ class TabMaterials {
 					if (getSelectedMaterial() == materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
-						var w = 51 - App.C.window_scale;
+						var w = 51 - Config.raw.window_scale;
 						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);

@@ -119,15 +119,15 @@ class Uniforms {
 			return UITrait.inst.decalMaskImage;
 		}
 		else if (link == "_texpaint_undo") {
-			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
+			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
 		}
 		else if (link == "_texpaint_nor_undo") {
-			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
+			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
 		}
 		else if (link == "_texpaint_pack_undo") {
-			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
+			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
 		else if (link.startsWith("_texpaint_pack_vert")) {

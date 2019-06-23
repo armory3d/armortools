@@ -174,7 +174,7 @@ class UINodes {
 		if (!App.uienabled) return;
 		var keyboard = Input.getKeyboard();
 
-		var lay = App.C.ui_layout;
+		var lay = Config.raw.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
@@ -203,7 +203,7 @@ class UINodes {
 		}
 
 		// Node search popup
-		if (keyboard.started(App.K.node_search)) nodeSearch();
+		if (keyboard.started(Config.keymap.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
 			ui.inputY = mouse.y + App.y();
@@ -326,7 +326,7 @@ class UINodes {
 		
 		// Make window
 		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		var lay = App.C.ui_layout;
+		var lay = Config.raw.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;

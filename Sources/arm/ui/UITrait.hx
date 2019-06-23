@@ -229,10 +229,10 @@ class UITrait {
 	public function new() {
 		inst = this;
 
-		windowW = Std.int(defaultWindowW * App.C.window_scale);
-		toolbarw = Std.int(defaultToolbarW * App.C.window_scale);
-		headerh = Std.int(defaultHeaderH * App.C.window_scale);
-		menubarw = Std.int(215 * App.C.window_scale);
+		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
+		toolbarw = Std.int(defaultToolbarW * Config.raw.window_scale);
+		headerh = Std.int(defaultHeaderH * Config.raw.window_scale);
+		menubarw = Std.int(215 * Config.raw.window_scale);
 
 		arm.render.Uniforms.init();
 
@@ -297,7 +297,7 @@ class UITrait {
 				Context.ddirty = 0;
 				if (History.undoLayers == null) {
 					History.undoLayers = [];
-					for (i in 0...App.C.undo_steps) {
+					for (i in 0...Config.raw.undo_steps) {
 						var l = new LayerSlot("_undo" + History.undoLayers.length);
 						l.createMask(0, false);
 						History.undoLayers.push(l);
@@ -320,7 +320,7 @@ class UITrait {
 			}
 		});//
 
-		var scale = App.C.window_scale;
+		var scale = Config.raw.window_scale;
 		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.color_wheel } );
 		
 		var resources = ['cursor.png', 'icons.png'];
@@ -365,8 +365,8 @@ class UITrait {
 
 		// Init plugins
 		Plugin.keep();
-		if (App.C.plugins != null) {
-			for (plugin in App.C.plugins) {
+		if (Config.raw.plugins != null) {
+			for (plugin in Config.raw.plugins) {
 				Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
 					#if js
 					untyped __js__("(1, eval)({0})", blob.toString());
@@ -409,23 +409,23 @@ class UITrait {
 		if (!App.uienabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
-			if (shortcut(App.K.cycle_layers)) {
+			if (shortcut(Config.keymap.cycle_layers)) {
 				var i = (Project.layers.indexOf(Context.layer) + 1) % Project.layers.length;
 				Context.setLayer(Project.layers[i]);
 			}
-			else if (shortcut(App.K.toggle_2d_view)) {
+			else if (shortcut(Config.keymap.toggle_2d_view)) {
 				show2DView();
 			}
-			else if (shortcut(App.K.toggle_node_editor)) {
+			else if (shortcut(Config.keymap.toggle_node_editor)) {
 				showMaterialNodes();
 			}
 		}
 
-		if (shortcut(App.K.file_save_as)) Project.projectSaveAs();
-		else if (shortcut(App.K.file_save)) Project.projectSave();
-		else if (shortcut(App.K.file_open)) Project.projectOpen();
-		else if (shortcut(App.K.file_new)) UIBox.newProject();
-		else if (shortcut(App.K.export_textures)) {
+		if (shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
+		else if (shortcut(Config.keymap.file_save)) Project.projectSave();
+		else if (shortcut(Config.keymap.file_open)) Project.projectOpen();
+		else if (shortcut(Config.keymap.file_new)) UIBox.newProject();
+		else if (shortcut(Config.keymap.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
 				UIFiles.show = true;
 				UIFiles.isSave = true;
@@ -437,7 +437,7 @@ class UITrait {
 			}
 			else textureExport = true;
 		}
-		else if (shortcut(App.K.import_assets)) {
+		else if (shortcut(Config.keymap.import_assets)) {
 			UIFiles.show = true;
 			UIFiles.isSave = false;
 			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,arm";
@@ -446,7 +446,7 @@ class UITrait {
 			}
 		}
 
-		if (kb.started(App.K.view_distract_free) ||
+		if (kb.started(Config.keymap.view_distract_free) ||
 		   (kb.started("escape") && !show && !UIFiles.show && !UIBox.show)) {
 			toggleDistractFree();
 		}
@@ -454,7 +454,7 @@ class UITrait {
 		var mouse = Input.getMouse();
 
 		if (brushCanLock || brushLocked) {
-			if (kb.down(App.K.brush_radius) && mouse.moved) {
+			if (kb.down(Config.keymap.brush_radius) && mouse.moved) {
 				if (brushLocked) {
 					brushRadius += mouse.movementX / 100;
 					brushRadius = Math.max(0.05, Math.min(4.0, brushRadius));
@@ -488,17 +488,17 @@ class UITrait {
 				}
 
 				if (!ctrl && !mouse.down("right")) {
-					if (shortcut(App.K.tool_brush)) Context.selectTool(ToolBrush);
-					else if (shortcut(App.K.tool_eraser)) Context.selectTool(ToolEraser);
-					else if (shortcut(App.K.tool_fill)) Context.selectTool(ToolFill);
-					else if (shortcut(App.K.tool_bake)) Context.selectTool(ToolBake);
-					else if (shortcut(App.K.tool_colorid)) Context.selectTool(ToolColorId);
-					else if (shortcut(App.K.tool_decal)) Context.selectTool(ToolDecal);
-					else if (shortcut(App.K.tool_text)) Context.selectTool(ToolText);
-					else if (shortcut(App.K.tool_clone)) Context.selectTool(ToolClone);
-					else if (shortcut(App.K.tool_blur)) Context.selectTool(ToolBlur);
-					else if (shortcut(App.K.tool_particle)) Context.selectTool(ToolParticle);
-					else if (shortcut(App.K.tool_picker)) Context.selectTool(ToolPicker);
+					if (shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
+					else if (shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
+					else if (shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
+					else if (shortcut(Config.keymap.tool_bake)) Context.selectTool(ToolBake);
+					else if (shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
+					else if (shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
+					else if (shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
+					else if (shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
+					else if (shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
+					else if (shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
+					else if (shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
 				}
 
 				// Radius
@@ -510,7 +510,7 @@ class UITrait {
 						Context.tool == ToolClone  ||
 						Context.tool == ToolBlur   ||
 						Context.tool == ToolParticle) {
-						if (shortcut(App.K.brush_radius)) {
+						if (shortcut(Config.keymap.brush_radius)) {
 							brushCanLock = true;
 							mouse.lock();
 							lockStartedX = mouse.x + iron.App.x();
@@ -522,27 +522,27 @@ class UITrait {
 
 			// Viewpoint
 			if (!shift && !alt) {
-				if (shortcut(App.K.view_reset)) {
+				if (shortcut(Config.keymap.view_reset)) {
 					ViewportUtil.resetViewport();
 					ViewportUtil.scaleToBounds();
 				}
-				else if (shortcut(App.K.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
-				else if (shortcut(App.K.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
-				else if (shortcut(App.K.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
-				else if (shortcut(App.K.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				else if (shortcut(App.K.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (shortcut(App.K.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
-				else if (shortcut(App.K.view_camera_type)) {
+				else if (shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				else if (shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
+				else if (shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				else if (shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				else if (shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
+				else if (shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+				else if (shortcut(Config.keymap.view_camera_type)) {
 					cameraType = cameraType == 0 ? 1 : 0;
 					camHandle.position = cameraType;
 					ViewportUtil.updateCameraType(cameraType);
 					statusHandle.redraws = 2;
 				}
-				else if (shortcut(App.K.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
-				else if (shortcut(App.K.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
-				else if (shortcut(App.K.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
-				else if (shortcut(App.K.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
-				else if (shortcut(App.K.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
+				else if (shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
+				else if (shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
+				else if (shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
+				else if (shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
+				else if (shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
 			}
 		}
 
@@ -551,7 +551,7 @@ class UITrait {
 				brushLocked = false;
 				brushCanUnlock = false;
 			}
-			if (kb.released(App.K.brush_radius)) {
+			if (kb.released(Config.keymap.brush_radius)) {
 				mouse.unlock();
 				brushCanUnlock = true;
 				lastPaintX = -1;
@@ -660,8 +660,8 @@ class UITrait {
 		var undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
 		var redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
 		#else
-		var undoPressed = shortcut(App.K.edit_undo);
-		var redoPressed = shortcut(App.K.edit_redo) ||
+		var undoPressed = shortcut(Config.keymap.edit_undo);
+		var redoPressed = shortcut(Config.keymap.edit_redo) ||
 						  (kb.down("control") && kb.started("y"));
 		#end
 
@@ -797,7 +797,7 @@ class UITrait {
 		ui.begin(g);
 
 		var panelx = (iron.App.x() - toolbarw);
-		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, System.windowHeight())) {
 			ui._y += 2;
 
@@ -831,7 +831,7 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x() - toolbarw;
-		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		
 		var WINDOW_BG_COL = ui.t.WINDOW_BG_COL;
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
@@ -857,7 +857,7 @@ class UITrait {
 		ui.t.WINDOW_BG_COL = WINDOW_BG_COL;
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
-		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
@@ -880,7 +880,7 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x();
-		if (App.C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
+		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
 			if (worktab.position == SpacePaint) {
@@ -1067,7 +1067,7 @@ class UITrait {
 			}
 		}
 		
-		tabx = App.C.ui_layout == 0 ? System.windowWidth() - windowW : 0;
+		tabx = Config.raw.ui_layout == 0 ? System.windowWidth() - windowW : 0;
 		tabh = Std.int(System.windowHeight() / 3);
 		gizmo.visible = false;
 

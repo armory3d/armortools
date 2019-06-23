@@ -96,7 +96,7 @@ class Layers {
 	}
 
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
-		var C = App.C;
+		var C = Config.raw;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
 			C.undo_steps = 1;
 			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;

@@ -62,7 +62,7 @@ class UIView2D {
 
 	function render(g:kha.graphics2.Graphics) {
 		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		var lay = App.C.ui_layout;
+		var lay = Config.raw.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
 		wx += UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;

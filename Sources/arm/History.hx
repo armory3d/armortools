@@ -15,7 +15,7 @@ class History {
 
 	public static function doUndo() {
 		if (undos > 0) {
-			undoI = undoI - 1 < 0 ? App.C.undo_steps - 1 : undoI - 1;
+			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
 			var opos = Context.paintObjects.indexOf(lay.targetObject);
 			var lpos = Project.layers.indexOf(lay.targetLayer);
@@ -42,7 +42,7 @@ class History {
 				lay.targetIsMask ? Context.layer.swapMask(lay) : Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
-			undoI = (undoI + 1) % App.C.undo_steps;
+			undoI = (undoI + 1) % Config.raw.undo_steps;
 			undos++;
 			redos--;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;

@@ -38,7 +38,7 @@ class TabTextures {
 					var asset = Project.assets[i];
 					if (asset == Context.texture) {
 						var off = i % 2 == 1 ? 1 : 0;
-						var w = 51 - App.C.window_scale;
+						var w = 51 - Config.raw.window_scale;
 						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
 						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);

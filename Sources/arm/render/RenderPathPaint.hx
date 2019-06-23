@@ -85,12 +85,12 @@ class RenderPathPaint {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
-						var rp_gi = App.C.rp_gi;
-						App.C.rp_gi = true;
+						var rp_gi = Config.raw.rp_gi;
+						Config.raw.rp_gi = true;
 						#if rp_voxelao
 						Inc.initGI();
 						#end
-						App.C.rp_gi = rp_gi;
+						Config.raw.rp_gi = rp_gi;
 					}
 					path.clearImage("voxels", 0x00000000);
 					path.setTarget("");
