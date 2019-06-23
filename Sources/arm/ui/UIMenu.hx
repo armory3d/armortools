@@ -11,6 +11,7 @@ using StringTools;
 
 class UIMenu {
 
+	public static var show = false;
 	public static var menuCategory = 0;
 	public static var propChanged = false;
 	static var showMenuFirst = true;
@@ -190,7 +191,7 @@ class UIMenu {
 					propChanged = false;
 				}
 				else {
-					App.showMenu = false;
+					show = false;
 					App.redrawUI();
 					showMenuFirst = true;
 					menuCommands = null;
@@ -207,9 +208,9 @@ class UIMenu {
 		g.begin(false);
 	}
 
-	public static function show(commands:Zui->Void = null, x = -1, y = -1) {
+	public static function draw(commands:Zui->Void = null, x = -1, y = -1) {
 		var uibox = App.uibox;
-		App.showMenu = true;
+		show = true;
 		menuCommands = commands;
 		menuX = x > -1 ? x : Std.int(iron.App.x() + Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(iron.App.y() + Input.getMouse().y);

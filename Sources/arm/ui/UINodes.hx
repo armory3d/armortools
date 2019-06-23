@@ -215,7 +215,7 @@ class UINodes {
 		var keyboard = Input.getKeyboard();
 		var searchHandle = Id.handle();
 		var first = true;
-		UIMenu.show(function(ui:Zui) {
+		UIMenu.draw(function(ui:Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
 			ui.textInput(searchHandle, "");
 			ui.changed = false;

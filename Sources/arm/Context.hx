@@ -167,12 +167,10 @@ class Context {
 	}
 
 	public static function importMesh() {
-		App.showFiles = true;
-		App.whandle.redraws = 2;
-		App.foldersOnly = false;
-		App.showFilename = false;
+		UIFiles.show = true;
+		UIFiles.isSave = false;
 		UIFiles.filters = "obj,fbx,blend,arm";
-		App.filesDone = function(path:String) {
+		UIFiles.filesDone = function(path:String) {
 			Importer.importFile(path);
 		}
 	}

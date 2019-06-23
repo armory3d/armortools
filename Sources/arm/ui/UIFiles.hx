@@ -1,12 +1,18 @@
 package arm.ui;
 
+import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 using StringTools;
 
 class UIFiles {
 
+	public static var show = false;
+	public static var isSave = false;
+	public static var filename = "untitled";
+	public static var filesDone:String->Void;
 	public static var filters = "";
+	public static var path = '/';
 
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
@@ -14,20 +20,20 @@ class UIFiles {
 		// Krom with native file dialogs
 		#if kha_krom
 		if (untyped Krom.openDialog != null) {
-			App.showFiles = false;
-			App.path = untyped App.foldersOnly ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
-			if (App.path != null) {
-				if (!App.checkAscii(App.path)) return;
-				App.path = App.path.replace("\\\\", "\\");
-				App.path = App.path.replace("\r", "");
+			show = false;
+			path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
+			if (path != null) {
+				if (!App.checkAscii(path)) return;
+				path = path.replace("\\\\", "\\");
+				path = path.replace("\r", "");
 				#if krom_windows
 				var sep = "\\";
 				#else
 				var sep = "/";
 				#end
-				App.filenameHandle.text = App.path.substr(App.path.lastIndexOf(sep) + 1);
-				if (App.foldersOnly) App.path = App.path.substr(0, App.path.lastIndexOf(sep));
-				App.filesDone(App.path);
+				filename = path.substr(path.lastIndexOf(sep) + 1);
+				if (isSave) path = path.substr(0, path.lastIndexOf(sep));
+				filesDone(path);
 			}
 			releaseKeys();
 		}

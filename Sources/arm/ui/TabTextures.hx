@@ -15,12 +15,10 @@ class TabTextures {
 			ui.row([1/4, 1/4]);
 
 			if (ui.button("Import")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
+				UIFiles.show = true;
+				UIFiles.isSave = false;
 				UIFiles.filters = "jpg,png,tga,hdr";
-				App.filesDone = function(path:String) {
+				UIFiles.filesDone = function(path:String) {
 					Importer.importFile(path);
 				}
 			}
@@ -64,7 +62,7 @@ class TabTextures {
 					if (ui.isHovered) ui.tooltipImage(img, 256);
 
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
+						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
 							if (ui.button("To Mask", Left)) {

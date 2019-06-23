@@ -56,12 +56,10 @@ class TabMaterials {
 			}
 
 			if (ui.button("Import")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
+				UIFiles.show = true;
+				UIFiles.isSave = false;
 				UIFiles.filters = "arm,blend";
-				App.filesDone = function(path:String) {
+				UIFiles.filesDone = function(path:String) {
 					path.endsWith(".blend") ?
 						ImportBlend.runMaterial(path) :
 						ImportArm.runMaterial(path);
@@ -115,7 +113,7 @@ class TabMaterials {
 						App.dragMaterial = getSelectedMaterial();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
+						UIMenu.draw(function(ui:Zui) {
 							var m = materials[i];
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);

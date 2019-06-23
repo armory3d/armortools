@@ -12,6 +12,7 @@ import iron.RenderPath;
 import arm.Project;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
+import arm.ui.UIFiles;
 import arm.util.Path;
 import arm.util.Lz4;
 import arm.util.RenderUtil;
@@ -44,8 +45,8 @@ class ImportArm {
 			var resetLayers = false;
 			Project.projectNew(resetLayers);
 			Project.filepath = path;
-			App.filenameHandle.text = new haxe.io.Path(Project.filepath).file;
-			Window.get(0).title = App.filenameHandle.text + " - ArmorPaint";
+			UIFiles.filename = new haxe.io.Path(Project.filepath).file;
+			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 			var project:TProjectFormat = ArmPack.decode(b.toBytes());
 
 			// Import as mesh instead

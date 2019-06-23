@@ -34,12 +34,10 @@ class Project {
 	public static var layers:Array<LayerSlot> = null;
 
 	public static function projectOpen() {
-		App.showFiles = true;
-		App.whandle.redraws = 2;
-		App.foldersOnly = false;
-		App.showFilename = false;
+		UIFiles.show = true;
+		UIFiles.isSave = false;
 		UIFiles.filters = "arm";
-		App.filesDone = function(path:String) {
+		UIFiles.filesDone = function(path:String) {
 			if (!path.endsWith(".arm")) {
 				UITrait.inst.showError(Strings.error5);
 				return;
@@ -59,18 +57,16 @@ class Project {
 			projectSaveAs();
 			return;
 		}
-		Window.get(0).title = App.filenameHandle.text + " - ArmorPaint";
+		Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 		UITrait.inst.projectExport = true;
 	}
 
 	public static function projectSaveAs() {
-		App.showFiles = true;
-		App.whandle.redraws = 2;
-		App.foldersOnly = true;
-		App.showFilename = true;
+		UIFiles.show = true;
+		UIFiles.isSave = true;
 		UIFiles.filters = "arm";
-		App.filesDone = function(path:String) {
-			var f = App.filenameHandle.text;
+		UIFiles.filesDone = function(path:String) {
+			var f = UIFiles.filename;
 			if (f == "") f = "untitled";
 			filepath = path + "/" + f;
 			if (!filepath.endsWith(".arm")) filepath += ".arm";

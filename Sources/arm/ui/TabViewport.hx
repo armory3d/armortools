@@ -16,12 +16,10 @@ class TabViewport {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab2, "Viewport")) {
 			if (ui.button("Import Envmap")) {
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = false;
-				App.showFilename = false;
+				UIFiles.show = true;
+				UIFiles.isSave = false;
 				UIFiles.filters = "hdr";
-				App.filesDone = function(path:String) {
+				UIFiles.filesDone = function(path:String) {
 					if (!path.endsWith(".hdr")) {
 						UITrait.inst.showError("Error: .hdr file expected");
 						return;

@@ -105,7 +105,7 @@ class TabLayers {
 						ui.tooltipImage(l.texpaint_mask_preview);
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.show(function(ui:Zui) {
+						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right);
 							if (ui.button("Delete", Left)) {
@@ -141,7 +141,7 @@ class TabLayers {
 				}
 
 				if (contextMenu) {
-					UIMenu.show(function(ui:Zui) {
+					UIMenu.draw(function(ui:Zui) {
 						if (l == Project.layers[0]) {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);

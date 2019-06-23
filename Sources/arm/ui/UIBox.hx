@@ -8,6 +8,8 @@ import arm.util.ViewportUtil;
 
 class UIBox {
 
+	public static var show = false;
+	public static var hwnd = new Handle();
 	public static var modalW = 625;
 	public static var modalH = 545;
 	public static var boxText = "";
@@ -32,7 +34,7 @@ class UIBox {
 
 		if (boxCommands == null) {
 			uibox.begin(g);
-			if (uibox.window(App.whandle, left, top, modalW, modalH)) {
+			if (uibox.window(hwnd, left, top, modalW, modalH)) {
 				uibox._y += 10;
 				for (line in boxText.split("\n")) {
 					uibox.text(line);
@@ -41,14 +43,14 @@ class UIBox {
 			uibox.end(false);
 			uibox.beginLayout(g, right - Std.int(uibox.ELEMENT_W()), bottom - Std.int(uibox.ELEMENT_H() * 1.2), Std.int(uibox.ELEMENT_W()));
 			if (uibox.button("OK")) {
-				App.showBox = false;
+				UIBox.show = false;
 				App.redrawUI();
 			}
 			uibox.endLayout(false);
 		}
 		else {
 			uibox.begin(g);
-			if (uibox.window(App.whandle, left, top, modalW, modalH)) {
+			if (uibox.window(hwnd, left, top, modalW, modalH)) {
 				uibox._y += 20;
 				boxCommands(uibox);
 			}
@@ -70,7 +72,7 @@ class UIBox {
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
 			if (mx < left || mx > right || my < top || my > bottom) {
-				App.showFiles = App.showBox = false;
+				UIFiles.show = UIBox.show = false;
 				App.redrawUI();
 			}
 		}
@@ -84,20 +86,20 @@ class UIBox {
 			if (ui.button("OK")) {
 				Project.projectNew();
 				ViewportUtil.scaleToBounds();
-				App.showBox = false;
+				UIBox.show = false;
 				App.redrawUI();
 			}
 		});
 	}
 
 	public static function showMessage(text:String) {
-		App.showBox = true;
+		UIBox.show = true;
 		boxText = text;
 		boxCommands = null;
 	}
 
 	public static function showCustom(commands:Zui->Void = null) {
-		App.showBox = true;
+		UIBox.show = true;
 		boxCommands = commands;
 	}
 }

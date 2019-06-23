@@ -40,13 +40,6 @@ class App {
 	public static var dragAsset:zui.Canvas.TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
-	public static var showFiles = false;
-	public static var showBox = false;
-	public static var foldersOnly = false;
-	public static var showFilename = false;
-	public static var whandle = new Handle();
-	public static var filenameHandle = new Handle({text: "untitled"});
-	public static var filesDone:String->Void;
 	public static var dropPath = "";
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
@@ -54,8 +47,6 @@ class App {
 	public static var theme:TTheme;
 	public static var color_wheel:Image;
 	public static var uibox:Zui;
-	public static var path = '/';
-	public static var showMenu = false;
 	public static var fileArg = "";
 	public static var saveAndQuit = false;
 
@@ -334,14 +325,14 @@ class App {
 			}
 		}
 
-		if (showFiles || showBox) UIBox.update();
+		if (UIFiles.show || UIBox.show) UIBox.update();
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows
 		Zui.alwaysRedrawWindow =
-			showMenu ||
-			showBox ||
+			UIMenu.show ||
+			UIBox.show ||
 			isDragging ||
 			isPicker ||
 			decal ||
@@ -370,12 +361,12 @@ class App {
 		}
 
 		var usingMenu = false;
-		if (showMenu) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
+		if (UIMenu.show) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
 
-		uienabled = !showFiles && !showBox && !usingMenu;
-		if (showFiles) UIFiles.render(g);
-		else if (showBox) UIBox.render(g);
-		else if (showMenu) UIMenu.render(g);
+		uienabled = !UIFiles.show && !UIBox.show && !usingMenu;
+		if (UIFiles.show) UIFiles.render(g);
+		else if (UIBox.show) UIBox.render(g);
+		else if (UIMenu.show) UIMenu.render(g);
 	}
 
 	public static function getEnumTexts():Array<String> {

@@ -11,13 +11,11 @@ class TabExport {
 		if (ui.tab(UITrait.inst.htab2, "Export")) {
 			if (ui.panel(Id.handle({selected: true}), "Export Textures", 1)) {
 				if (ui.button("Export")) {
-					App.showFiles = true;
-					App.whandle.redraws = 2;
-					App.foldersOnly = true;
-					App.showFilename = true;
+					UIFiles.show = true;
+					UIFiles.isSave = true;
 					// var path = 'C:\\Users\\lubos\\Documents\\';
 					UIFiles.filters = UITrait.inst.bitsHandle.position > 0 ? "exr" : UITrait.inst.formatType == 0 ? "png" : "jpg";
-					App.filesDone = function(path:String) {
+					UIFiles.filesDone = function(path:String) {
 						UITrait.inst.textureExport = true;
 						UITrait.inst.textureExportPath = path;
 					}
@@ -86,13 +84,11 @@ class TabExport {
 			ui.separator();
 			if (ui.panel(Id.handle({selected: false}), "Export Mesh", 1)) {
 				if (ui.button("Export")) {
-					App.showFiles = true;
-					App.whandle.redraws = 2;
-					App.foldersOnly = true;
-					App.showFilename = true;
+					UIFiles.show = true;
+					UIFiles.isSave = true;
 					UIFiles.filters = UITrait.inst.exportMeshFormat == 0 ? "obj" : "arm";
-					App.filesDone = function(path:String) {
-						var f = App.filenameHandle.text;
+					UIFiles.filesDone = function(path:String) {
+						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
 						Exporter.exportMesh(path + "/" + f);
 					};

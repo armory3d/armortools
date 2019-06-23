@@ -402,15 +402,7 @@ class UITrait {
 
 		if (!App.uibox.isTyping) {
 			if (kb.started("escape")) {
-				App.showFiles = false;
-				App.showBox = false;
-			}
-			if (App.showFiles) {
-				if (kb.started("enter")) {
-					App.showFiles = false;
-					App.filesDone(App.path);
-					Context.ddirty = 2;
-				}
+				UIBox.show = false;
 			}
 		}
 
@@ -435,12 +427,10 @@ class UITrait {
 		else if (shortcut(App.K.file_new)) UIBox.newProject();
 		else if (shortcut(App.K.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
-				App.showFiles = true;
-				App.whandle.redraws = 2;
-				App.foldersOnly = true;
-				App.showFilename = true;
+				UIFiles.show = true;
+				UIFiles.isSave = true;
 				UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
-				App.filesDone = function(path:String) {
+				UIFiles.filesDone = function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
 				}
@@ -448,18 +438,16 @@ class UITrait {
 			else textureExport = true;
 		}
 		else if (shortcut(App.K.import_assets)) {
-			App.showFiles = true;
-			App.whandle.redraws = 2;
-			App.foldersOnly = false;
-			App.showFilename = false;
+			UIFiles.show = true;
+			UIFiles.isSave = false;
 			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,arm";
-			App.filesDone = function(path:String) {
+			UIFiles.filesDone = function(path:String) {
 				Importer.importFile(path);
 			}
 		}
 
 		if (kb.started(App.K.view_distract_free) ||
-		   (kb.started("escape") && !show && !App.showFiles && !App.showBox)) {
+		   (kb.started("escape") && !show && !UIFiles.show && !UIBox.show)) {
 			toggleDistractFree();
 		}
 
@@ -605,7 +593,7 @@ class UITrait {
 				else {
 					if (brushTime == 0) { // Paint started
 						History.pushUndo = true;
-						kha.Window.get(0).title = App.filenameHandle.text + "* - ArmorPaint";
+						kha.Window.get(0).title = UIFiles.filename + "* - ArmorPaint";
 						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
 							cloneDeltaY = (cloneStartY - my) / iron.App.h();
@@ -857,10 +845,10 @@ class UITrait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			if (ui.button("File", Left) || (App.showMenu && ui.isHovered)) { App.showMenu = true; UIMenu.menuCategory = 0; };
-			if (ui.button("Edit", Left) || (App.showMenu && ui.isHovered)) { App.showMenu = true; UIMenu.menuCategory = 1; };
-			if (ui.button("View", Left) || (App.showMenu && ui.isHovered)) { App.showMenu = true; UIMenu.menuCategory = 2; };
-			if (ui.button("Help", Left) || (App.showMenu && ui.isHovered)) { App.showMenu = true; UIMenu.menuCategory = 3; };
+			if (ui.button("File", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 0; };
+			if (ui.button("Edit", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 1; };
+			if (ui.button("View", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 2; };
+			if (ui.button("Help", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 3; };
 			
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;

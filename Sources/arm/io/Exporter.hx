@@ -10,6 +10,7 @@ import iron.format.PngWriter;
 import iron.format.PngTools;
 import arm.ui.UITrait;
 import arm.ui.UIBox;
+import arm.ui.UIFiles;
 using StringTools;
 
 class Exporter {
@@ -51,7 +52,7 @@ class Exporter {
 	public static function exportTextures(path:String) {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
-		var f = App.filenameHandle.text;
+		var f = UIFiles.filename;
 		if (f == "") f = "untitled";
 		var formatType = UITrait.inst.formatType;
 		var bits = UITrait.inst.bitsHandle.position == 0 ? 8 : 16;
