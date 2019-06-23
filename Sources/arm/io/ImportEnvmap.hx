@@ -78,7 +78,7 @@ class ImportEnvmap {
 			var buf = new Float32Array(27);
 			for (i in 0...ar.length) buf[i] = Std.parseFloat(ar[i]);
 			Scene.active.world.probe.irradiance = buf;
-			UITrait.inst.ddirty = 2;
+			Context.ddirty = 2;
 			Data.deleteBlob(tmp + "tmp_irr.c");
 		});
 
@@ -107,7 +107,7 @@ class ImportEnvmap {
 					image.setMipmaps(mips);
 					Scene.active.world.probe.radiance = image;
 					Scene.active.world.probe.radianceMipmaps = mips;
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 			}, true); // Readable
 			mw = Std.int(mw / 2);

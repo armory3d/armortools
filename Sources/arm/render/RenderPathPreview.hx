@@ -51,7 +51,7 @@ class RenderPathPreview {
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
-		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? UITrait.inst.selectedMaterialScene : UITrait.inst.selectedMaterial;
+		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
 		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 

@@ -13,10 +13,10 @@ class RenderPathPaint {
 	public static function commandsPaint() {
 
 		var path = RenderPathDeferred.path;
-		var tid = UITrait.inst.selectedLayer.id;
+		var tid = Context.layer.id;
 		
-		if (UITrait.inst.paintDirty()) {
-			if (UITrait.inst.selectedTool == ToolParticle) {
+		if (Context.pdirty > 0 && UITrait.inst.worktab.position != SpaceScene) {
+			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
@@ -34,18 +34,18 @@ class RenderPathPaint {
 				@:privateAccess path.end();
 			}
 			
-			if (UITrait.inst.selectedTool == ToolColorId) {
+			if (Context.tool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
 				UITrait.inst.headerHandle.redraws = 2;
 			}
-			else if (UITrait.inst.selectedTool == ToolPicker) {
+			else if (Context.tool == ToolPicker) {
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
-				tid = UITrait.inst.layers[0].id;
+				tid = Project.layers[0].id;
 				path.bindTarget("texpaint" + tid, "texpaint");
 				path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 				path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
@@ -71,9 +71,9 @@ class RenderPathPaint {
 				// Pick material
 				if (UITrait.inst.pickerSelectMaterial) {
 					var matid = b.get(3);
-					for (m in UITrait.inst.materials) {
+					for (m in Project.materials) {
 						if (m.id == matid) {
-							UITrait.inst.setMaterial(m);
+							Context.setMaterial(m);
 							UITrait.inst.materialIdPicked = matid;
 							break;
 						}
@@ -81,7 +81,7 @@ class RenderPathPaint {
 				}
 			}
 			else {
-				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -105,7 +105,7 @@ class RenderPathPaint {
 				path.setTarget(blendB);
 				path.bindTarget(blendA, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
-				var isMask = UITrait.inst.selectedLayerIsMask;
+				var isMask = Context.layerIsMask;
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
 				path.bindTarget("_main", "gbufferD");
@@ -113,7 +113,7 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget(blendB, "paintmask");
-				if (UITrait.inst.selectedTool == ToolBake && UITrait.inst.bakeType == 0) { // AO
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");
 				}
 				if (UITrait.inst.colorIdPicked) {
@@ -121,9 +121,9 @@ class RenderPathPaint {
 				} 
 
 				// Read texcoords from gbuffer
-				var readTC = (UITrait.inst.selectedTool == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
-							  UITrait.inst.selectedTool == ToolClone ||
-							  UITrait.inst.selectedTool == ToolBlur;
+				var readTC = (Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
+							  Context.tool == ToolClone ||
+							  Context.tool == ToolBlur;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
@@ -135,7 +135,7 @@ class RenderPathPaint {
 
 	@:access(iron.RenderPath)
 	public static function commandsCursor() {
-		var tool = UITrait.inst.selectedTool;
+		var tool = Context.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
 			tool != ToolClone &&
@@ -160,7 +160,7 @@ class RenderPathPaint {
 
 		path.setTarget("");
 		g.setPipeline(Layers.pipeCursor);
-		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var img = decal ? UITrait.inst.decalImage : Res.get("cursor.png");
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;

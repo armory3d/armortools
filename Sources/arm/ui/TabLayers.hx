@@ -13,20 +13,20 @@ class TabLayers {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Layers")) {
 			ui.row([1/4,1/4,1/2]);
-			if (ui.button("New")) UITrait.inst.newLayer();
+			if (ui.button("New")) Layers.newLayer();
 			if (ui.button("2D View")) UITrait.inst.show2DView();
 			else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
 			
 			var ar = ["All"];
-			for (p in UITrait.inst.paintObjects) ar.push(p.name);
+			for (p in Context.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
 			UITrait.inst.layerFilter = ui.combo(filterHandle, ar, "Filter");
 			if (filterHandle.changed) {
-				for (p in UITrait.inst.paintObjects) {
+				for (p in Context.paintObjects) {
 					p.visible = UITrait.inst.layerFilter == 0 || p.name == ar[UITrait.inst.layerFilter];
-					UITrait.inst.setObjectMask();
+					Layers.setObjectMask();
 				}
-				UITrait.inst.ddirty = 2;
+				Context.ddirty = 2;
 			}
 
 			function drawList(l:LayerSlot, i:Int) {
@@ -45,8 +45,8 @@ class TabLayers {
 					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, step + off, ui.t.SEPARATOR_COL);
 				}
 
-				if (UITrait.inst.selectedLayer == l) {
-					if (UITrait.inst.selectedLayerIsMask) {
+				if (Context.layer == l) {
+					if (Context.layerIsMask) {
 						ui.rect(ui._windowW / 100 * 24 - 2, 0, ui._windowW / 100 * 16, step * 2, ui.t.HIGHLIGHT_COL, 2);
 					}
 					else {
@@ -90,7 +90,7 @@ class TabLayers {
 					contextMenu = true;
 				}
 				if (ui.isReleased) {
-					UITrait.inst.setLayer(l);
+					Context.setLayer(l);
 				}
 				if (state == State.Started) {
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
@@ -110,17 +110,17 @@ class TabLayers {
 							ui.text(l.name + " Mask", Right);
 							if (ui.button("Delete", Left)) {
 								l.deleteMask();
-								UITrait.inst.setLayer(l);
+								Context.setLayer(l);
 							}
 							if (ui.button("Apply", Left)) {
-								UITrait.inst.setLayer(l);
+								Context.setLayer(l);
 								l.applyMask();
-								UITrait.inst.setLayer(l); // Parse mesh material
+								Context.setLayer(l); // Parse mesh material
 							}
 						});
 					}
 					if (ui.isReleased) {
-						UITrait.inst.setLayer(l, true);
+						Context.setLayer(l, true);
 					}
 					if (state == State.Started) {
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
@@ -133,7 +133,7 @@ class TabLayers {
 				ui._y -= center;
 
 				if (ui.isReleased) {
-					UITrait.inst.setLayer(l);
+					Context.setLayer(l);
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
@@ -142,7 +142,7 @@ class TabLayers {
 
 				if (contextMenu) {
 					UIMenu.show(function(ui:Zui) {
-						if (l == UITrait.inst.layers[0]) {
+						if (l == Project.layers[0]) {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
@@ -152,47 +152,47 @@ class TabLayers {
 						}
 
 						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-							UITrait.inst.toFillLayer(l);
+							Layers.toFillLayer(l);
 						}
 						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-							UITrait.inst.toPaintLayer(l);
+							Layers.toPaintLayer(l);
 						}
 
-						if (l == UITrait.inst.layers[0]) {
+						if (l == Project.layers[0]) {
 						}
 						else {
 							if (ui.button("Delete", Left)) {
-								UITrait.inst.selectedLayer = l;
+								Context.layer = l;
 								Layers.deleteSelectedLayer();
 							}
 							if (ui.button("Move Up", Left)) {
-								if (i < UITrait.inst.layers.length - 1) {
-									UITrait.inst.setLayer(l);
-									var t = UITrait.inst.layers[i + 1];
-									UITrait.inst.layers[i + 1] = UITrait.inst.layers[i];
-									UITrait.inst.layers[i] = t;
+								if (i < Project.layers.length - 1) {
+									Context.setLayer(l);
+									var t = Project.layers[i + 1];
+									Project.layers[i + 1] = Project.layers[i];
+									Project.layers[i] = t;
 									UITrait.inst.hwnd.redraws = 2;
 								}
 							}
 							if (ui.button("Move Down", Left)) {
 								if (i > 1) {
-									UITrait.inst.setLayer(l);
-									var t = UITrait.inst.layers[i - 1];
-									UITrait.inst.layers[i - 1] = UITrait.inst.layers[i];
-									UITrait.inst.layers[i] = t;
+									Context.setLayer(l);
+									var t = Project.layers[i - 1];
+									Project.layers[i - 1] = Project.layers[i];
+									Project.layers[i] = t;
 									UITrait.inst.hwnd.redraws = 2;
 								}
 							}
 							if (ui.button("Merge Down", Left)) {
-								UITrait.inst.setLayer(l);
+								Context.setLayer(l);
 								iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 							}
 							if (ui.button("Duplicate", Left)) {
-								UITrait.inst.setLayer(l);
+								Context.setLayer(l);
 								function makeDupli(g:kha.graphics4.Graphics) {
 									g.end();
 									l = l.duplicate();
-									UITrait.inst.setLayer(l);
+									Context.setLayer(l);
 									g.begin();
 									iron.App.removeRender(makeDupli);
 								}
@@ -200,13 +200,13 @@ class TabLayers {
 							}
 							if (ui.button("Black Mask", Left)) {
 								l.createMask(0x00000000);
-								UITrait.inst.setLayer(l, true);
-								UITrait.inst.layerPreviewDirty = true;
+								Context.setLayer(l, true);
+								Context.layerPreviewDirty = true;
 							}
 							if (ui.button("White Mask", Left)) {
 								l.createMask(0xffffffff);
-								UITrait.inst.setLayer(l, true);
-								UITrait.inst.layerPreviewDirty = true;
+								Context.setLayer(l, true);
+								Context.layerPreviewDirty = true;
 							}
 						}
 
@@ -263,12 +263,12 @@ class TabLayers {
 					@:privateAccess ui.endElement();
 
 					var ar = ["Shared"];
-					for (p in UITrait.inst.paintObjects) ar.push(p.name);
+					for (p in Context.paintObjects) ar.push(p.name);
 					var h = Id.handle().nest(l.id);
 					h.position = l.objectMask;
 					l.objectMask = ui.combo(h, ar, "Object");
 					if (h.changed) {
-						UITrait.inst.setLayer(l);
+						Context.setLayer(l);
 						Layers.updateFillLayers(4);
 					}
 					@:privateAccess ui.endElement();
@@ -286,10 +286,10 @@ class TabLayers {
 				}
 			}
 
-			for (i in 0...UITrait.inst.layers.length) {
-				if (i >= UITrait.inst.layers.length) break; // Layer was deleted
-				var j = UITrait.inst.layers.length - 1 - i;
-				var l = UITrait.inst.layers[j];
+			for (i in 0...Project.layers.length) {
+				if (i >= Project.layers.length) break; // Layer was deleted
+				var j = Project.layers.length - 1 - i;
+				var l = Project.layers[j];
 				drawList(l, j);
 			}
 		}

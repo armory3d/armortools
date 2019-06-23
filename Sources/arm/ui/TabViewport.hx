@@ -43,7 +43,7 @@ class TabViewport {
 			var p = Scene.active.world.probe;
 			var envHandle = Id.handle({value: p.raw.strength});
 			p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
-			if (envHandle.changed) UITrait.inst.ddirty = 2;
+			if (envHandle.changed) Context.ddirty = 2;
 			
 			ui.row([1/2, 1/2]);
 			if (Scene.active.lights.length > 0) {
@@ -53,17 +53,17 @@ class TabViewport {
 				var f32:kha.FastFloat = light.data.raw.size; // hl fix
 				sxhandle.value = f32;
 				light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
-				if (sxhandle.changed) UITrait.inst.ddirty = 2;
+				if (sxhandle.changed) Context.ddirty = 2;
 				// var syhandle = Id.handle();
 				// syhandle.value = light.data.raw.size_y;
 				// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
-				// if (syhandle.changed) UITrait.inst.ddirty = 2;
+				// if (syhandle.changed) Context.ddirty = 2;
 				
 				var lhandle = Id.handle();
 				lhandle.value = light.data.raw.strength / 1333;
 				lhandle.value = Std.int(lhandle.value * 100) / 100;
 				light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
-				if (lhandle.changed) UITrait.inst.ddirty = 2;
+				if (lhandle.changed) Context.ddirty = 2;
 			}
 
 			ui.row([1/2, 1/2]);
@@ -76,14 +76,14 @@ class TabViewport {
 			}
 			var compassHandle = Id.handle({selected: UITrait.inst.showCompass});
 			UITrait.inst.showCompass = ui.check(compassHandle, "Compass");
-			if (compassHandle.changed) UITrait.inst.ddirty = 2;
+			if (compassHandle.changed) Context.ddirty = 2;
 
 			UITrait.inst.showEnvmap = ui.check(UITrait.inst.showEnvmapHandle, "Envmap");
 			if (UITrait.inst.showEnvmapHandle.changed) {
 				var world = Scene.active.world;
 				world.loadEnvmap(function(_) {});
 				UITrait.inst.savedEnvmap = world.envmap;
-				UITrait.inst.ddirty = 2;
+				Context.ddirty = 2;
 			}
 
 			if (UITrait.inst.showEnvmap) {
@@ -91,7 +91,7 @@ class TabViewport {
 				if (UITrait.inst.showEnvmapBlurHandle.changed) {
 					var probe = Scene.active.world.probe;
 					UITrait.inst.savedEnvmap = UITrait.inst.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 			}
 			else {
@@ -111,7 +111,7 @@ class TabViewport {
 						b.set(2, worldColor.Bb);
 						b.set(3, 255);
 						UITrait.inst.emptyEnvmap = Image.fromBytes(b, 1, 1);
-						UITrait.inst.ddirty = 2;
+						Context.ddirty = 2;
 					}
 				}
 			}

@@ -15,16 +15,16 @@ class ImportTexture {
 			return;
 		}
 
-		for (a in UITrait.inst.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
+		for (a in Project.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
 		
 		Data.getImage(path, function(image:Image) {
 			var ar = path.split("/");
 			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
-			var asset:TAsset = {name: name, file: path, id: UITrait.inst.assetId++};
-			UITrait.inst.assets.push(asset);
-			if (UITrait.inst.selectedTexture == null) UITrait.inst.selectedTexture = asset;
-			UITrait.inst.assetNames.push(name);
+			var asset:TAsset = {name: name, file: path, id: Project.assetId++};
+			Project.assets.push(asset);
+			if (Context.texture == null) Context.texture = asset;
+			Project.assetNames.push(name);
 			Canvas.assetMap.set(asset.id, image);
 			UITrait.inst.hwnd2.redraws = 2;
 

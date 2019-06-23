@@ -14,8 +14,10 @@ import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.data.ConstData;
+import arm.data.LayerSlot;
 import arm.nodes.MaterialParser;
 import arm.render.RenderPathPaint;
+import arm.util.MeshUtil;
 import arm.Tool;
 
 class Layers {
@@ -52,7 +54,7 @@ class Layers {
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
 
-		var layers = UITrait.inst.layers;
+		var layers = Project.layers;
 		layers[0].texpaint.g4.begin();
 		layers[0].texpaint.g4.clear(kha.Color.fromFloats(0.5, 0.5, 0.5, 0.0)); // Base
 		layers[0].texpaint.g4.end();
@@ -68,14 +70,14 @@ class Layers {
 		g.begin();
 		iron.App.removeRender(initLayers);
 
-		UITrait.inst.layerPreviewDirty = true;
-		UITrait.inst.ddirty = 3;
+		Context.layerPreviewDirty = true;
+		Context.ddirty = 3;
 	}
 
 	public static function clearLastLayer(g:kha.graphics4.Graphics) {
 		g.end();
 
-		var layers = UITrait.inst.layers;
+		var layers = Project.layers;
 		var i = layers.length - 1;
 		layers[i].texpaint.g4.begin();
 		layers[i].texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
@@ -98,11 +100,11 @@ class Layers {
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
 			C.undo_steps = 1;
 			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;
-			while (UITrait.inst.undoLayers.length > C.undo_steps) { var l = UITrait.inst.undoLayers.pop(); l.unload(); }
+			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
 		}
 		g.end();
-		for (l in UITrait.inst.layers) l.resizeAndSetBits();
-		for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
+		for (l in Project.layers) l.resizeAndSetBits();
+		for (l in History.undoLayers) l.resizeAndSetBits();
 		var rts = RenderPath.active.renderTargets;
 		rts.get("texpaint_blend0").image.unload();
 		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
@@ -112,24 +114,24 @@ class Layers {
 		rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
 		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
-		UITrait.inst.brushBlendDirty = true;
+		Context.brushBlendDirty = true;
 		g.begin();
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 		iron.App.removeRender(resizeLayers);
 	}
 
 	public static function setLayerBits(g:kha.graphics4.Graphics) {
 		g.end();
-		for (l in UITrait.inst.layers) l.resizeAndSetBits();
-		for (l in UITrait.inst.undoLayers) l.resizeAndSetBits();
+		for (l in Project.layers) l.resizeAndSetBits();
+		for (l in History.undoLayers) l.resizeAndSetBits();
 		g.begin();
 		iron.App.removeRender(setLayerBits);
 	}
 
 	public static function deleteSelectedLayer() {
-		UITrait.inst.selectedLayer.unload();
-		UITrait.inst.layers.remove(UITrait.inst.selectedLayer);
-		UITrait.inst.setLayer(UITrait.inst.layers[0]);
+		Context.layer.unload();
+		Project.layers.remove(Context.layer);
+		Context.setLayer(Project.layers[0]);
 	}
 
 	public static function makePipe() {
@@ -194,7 +196,7 @@ class Layers {
 	}
 
 	public static function makeTempImg() {
-		var l = UITrait.inst.layers[0];
+		var l = Project.layers[0];
 		if (imga != null && imga.width != l.texpaint.width) {
 			imga.unload();
 			imgb.unload();
@@ -211,7 +213,7 @@ class Layers {
 	}
 
 	public static function makeExportImg() {
-		var l = UITrait.inst.layers[0];
+		var l = Project.layers[0];
 		if (expa != null && expa.width != l.texpaint.width) {
 			expa.unload();
 			expb.unload();
@@ -233,12 +235,12 @@ class Layers {
 	public static function mergeSelectedLayer(g:kha.graphics4.Graphics) {
 		if (pipe == null) makePipe();
 
-		var l0 = UITrait.inst.layers[0];
-		var l1 = UITrait.inst.selectedLayer;
+		var l0 = Project.layers[0];
+		var l1 = Context.layer;
 		
-		for (i in 1...UITrait.inst.layers.length) { // Merge down
-			if (UITrait.inst.layers[i] == l1) {
-				l0 = UITrait.inst.layers[i - 1];
+		for (i in 1...Project.layers.length) { // Merge down
+			if (Project.layers[i] == l1) {
+				l0 = Project.layers[i - 1];
 				break;
 			}
 		}
@@ -285,22 +287,22 @@ class Layers {
 
 		deleteSelectedLayer();
 		iron.App.removeRender(mergeSelectedLayer);
-		UITrait.inst.setLayer(l0);
-		UITrait.inst.layerPreviewDirty = true;
+		Context.setLayer(l0);
+		Context.layerPreviewDirty = true;
 	}
 
 	public static function isFillMaterial():Bool {
-		var m = UITrait.inst.selectedMaterial;
-		for (l in UITrait.inst.layers) if (l.material_mask == m) return true;
+		var m = Context.material;
+		for (l in Project.layers) if (l.material_mask == m) return true;
 		return false;
 	}
 
 	public static function updateFillLayers(fills = 1) {
-		var m = UITrait.inst.selectedMaterial;
-		var layers = UITrait.inst.layers;
-		var selectedLayer = UITrait.inst.selectedLayer;
-		var isMask = UITrait.inst.selectedLayerIsMask;
-		var selectedTool = UITrait.inst.selectedTool;
+		var m = Context.material;
+		var layers = Project.layers;
+		var selectedLayer = Context.layer;
+		var isMask = Context.layerIsMask;
+		var selectedTool = Context.tool;
 		var current:kha.graphics4.Graphics2 = null;
 
 		var first = true;
@@ -309,13 +311,13 @@ class Layers {
 				if (first) {
 					current = @:privateAccess kha.graphics4.Graphics2.current;
 					if (current != null) current.end();
-					UITrait.inst.pdirty = fills;
-					UITrait.inst.selectedLayerIsMask = false;
-					UITrait.inst.selectedTool = ToolFill;
+					Context.pdirty = fills;
+					Context.layerIsMask = false;
+					Context.tool = ToolFill;
 				}
 
-				UITrait.inst.selectedLayer = l;
-				UITrait.inst.setObjectMask();
+				Context.layer = l;
+				setObjectMask();
 
 				if (first) {
 					first = false;
@@ -329,14 +331,84 @@ class Layers {
 		}
 
 		if (!first) {
-			UITrait.inst.pdirty = 0;
-			UITrait.inst.ddirty = 2;
-			UITrait.inst.rdirty = 2;
+			Context.pdirty = 0;
+			Context.ddirty = 2;
+			Context.rdirty = 2;
 			if (current != null) current.begin(false);
-			UITrait.inst.selectedLayer = selectedLayer;
-			UITrait.inst.selectedLayerIsMask = isMask;
-			UITrait.inst.setObjectMask();
-			UITrait.inst.selectedTool = selectedTool;
+			Context.layer = selectedLayer;
+			Context.layerIsMask = isMask;
+			setObjectMask();
+			Context.tool = selectedTool;
+		}
+	}
+
+	public static function setObjectMask() {
+		var ar = ["None"];
+		for (p in Context.paintObjects) ar.push(p.name);
+
+		var mask = Context.layer.objectMask;
+		if (UITrait.inst.layerFilter > 0) mask = UITrait.inst.layerFilter;
+		if (mask > 0) {
+			if (Context.mergedObject != null) Context.mergedObject.visible = false;
+			var o = Context.paintObjects[0];
+			for (p in Context.paintObjects) if (p.name == ar[mask]) { o = p; break; }
+			Context.selectPaintObject(o);
+		}
+		else {
+			if (Context.mergedObject == null) {
+				MeshUtil.mergeMesh();
+			}
+			Context.selectPaintObject(Context.mainObject());
+			Context.paintObject.skip_context = "paint";
+			Context.mergedObject.visible = true;
+		}
+	}
+
+	public static function newLayer():LayerSlot {
+		if (Project.layers.length > 255) return null;
+		var l = new LayerSlot();
+		Project.layers.push(l);
+		Context.setLayer(l);
+		iron.App.notifyOnRender(Layers.clearLastLayer);
+		Context.layerPreviewDirty = true;
+		return l;
+	}
+
+	public static function toFillLayer(l:LayerSlot) {
+		Context.setLayer(l);
+		l.material_mask = Context.material;
+		function makeFill(g:kha.graphics4.Graphics) {
+			g.end();
+			Layers.updateFillLayers(4);
+			MaterialParser.parsePaintMaterial();
+			Context.layerPreviewDirty = true;
+			UITrait.inst.hwnd.redraws = 2;
+			g.begin();
+			iron.App.removeRender(makeFill);
+		}
+		iron.App.notifyOnRender(makeFill);
+	}
+
+	public static function toPaintLayer(l:LayerSlot) {
+		Context.setLayer(l);
+		l.material_mask = null;
+		MaterialParser.parsePaintMaterial();
+		Context.layerPreviewDirty = true;
+		UITrait.inst.hwnd.redraws = 2;
+	}
+
+	public static function createFillLayer() {
+		var l = newLayer();
+		l.objectMask = UITrait.inst.layerFilter;
+		toFillLayer(l);
+	}
+
+	public static function createImageMask(asset:zui.Canvas.TAsset) {
+		var l = Context.layer;
+		if (l != Project.layers[0]) {
+			l.createMask(0x00000000, true, UITrait.inst.getImage(asset));
+			Context.setLayer(l, true);
+			Context.layerPreviewDirty = true;
 		}
 	}
 }

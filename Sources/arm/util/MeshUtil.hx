@@ -15,7 +15,7 @@ class MeshUtil {
 		var vlen = 0;
 		var ilen = 0;
 		var maxScale = 0.0;
-		var paintObjects = UITrait.inst.paintObjects;
+		var paintObjects = Context.paintObjects;
 		for (i in 0...paintObjects.length) {
 			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
 			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
@@ -49,7 +49,7 @@ class MeshUtil {
 		}
 
 		var raw:TMeshData = {
-			name: UITrait.inst.paintObject.name,
+			name: Context.paintObject.name,
 			vertex_arrays: [
 				{ values: va0, attrib: "pos" },
 				{ values: va1, attrib: "nor" },
@@ -63,15 +63,15 @@ class MeshUtil {
 		};
 
 		new MeshData(raw, function(md:MeshData) {
-			UITrait.inst.mergedObject = new MeshObject(md, UITrait.inst.paintObject.materials);
-			UITrait.inst.mergedObject.name = UITrait.inst.paintObject.name;
-			UITrait.inst.mergedObject.force_context = "paint";
-			UITrait.inst.mainObject().addChild(UITrait.inst.mergedObject);
+			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
+			Context.mergedObject.name = Context.paintObject.name;
+			Context.mergedObject.force_context = "paint";
+			Context.mainObject().addChild(Context.mergedObject);
 		});
 	}
 	
 	public static function swapAxis(a:Int, b:Int) {
-		for (p in UITrait.inst.paintObjects) {
+		for (p in Context.paintObjects) {
 			// Remapping vertices, backle up
 			// 0 - x, 1 - y, 2 - z
 			var vas = p.data.raw.vertex_arrays;
@@ -111,16 +111,16 @@ class MeshUtil {
 			g.vertexBuffer.unlock();
 		}
 
-		if (UITrait.inst.mergedObject != null) {
-			UITrait.inst.mergedObject.remove();
-			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
-			UITrait.inst.mergedObject = null;
+		if (Context.mergedObject != null) {
+			Context.mergedObject.remove();
+			Data.deleteMesh(Context.mergedObject.data.handle);
+			Context.mergedObject = null;
 		}
 		mergeMesh();
 	}
 
 	public static function flipNormals() {
-		for (p in UITrait.inst.paintObjects) {
+		for (p in Context.paintObjects) {
 			var g = p.data.geom;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / 8)) {
@@ -138,7 +138,7 @@ class MeshUtil {
 		var vc = new Vec4();
 		var cb = new Vec4();
 		var ab = new Vec4();
-		for (p in UITrait.inst.paintObjects) {
+		for (p in Context.paintObjects) {
 			var g = p.data.geom;
 			var inda = g.indices[0];
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex

@@ -70,7 +70,7 @@ class UIView2D {
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (UITrait.inst.pdirty >= 0) hwnd.redraws = 2; // Paint was active
+		if (Context.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
 		var tw = iron.App.w() * 0.95 * panScale;
 		var tx = iron.App.w() / 2 - tw / 2 + panX;
@@ -97,15 +97,15 @@ class UIView2D {
 
 			// Texture
 			ui.g.pipeline = pipe;
-			var l = UITrait.inst.selectedLayer;
+			var l = Context.layer;
 			var tex:Image = null;
 
 			if (type == 0) { // Layer
 				tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
-				if (UITrait.inst.selectedLayerIsMask) tex = l.texpaint_mask;
+				if (Context.layerIsMask) tex = l.texpaint_mask;
 			}
 			else { // Texture
-				tex = UITrait.inst.getImage(UITrait.inst.selectedTexture);
+				tex = UITrait.inst.getImage(Context.texture);
 			}
 			
 			var th = tw;
@@ -139,9 +139,9 @@ class UIView2D {
 				l.name = ui.textInput(h, "", Right);
 			}
 			else {
-				var asset = UITrait.inst.selectedTexture;
+				var asset = Context.texture;
 				if (asset != null) {
-					var assetNames = UITrait.inst.assetNames;
+					var assetNames = Project.assetNames;
 					var i = assetNames.indexOf(asset.name);
 					h.text = asset.name;
 					asset.name = ui.textInput(h, "", Right);

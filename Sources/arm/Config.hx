@@ -112,7 +112,7 @@ class Config {
 		Inc.applyConfig();
 		
 		if (current != null) current.begin(false);
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 	}
 
 	public static inline function getSuperSampleQuality(f:Float):Int {

@@ -8,11 +8,11 @@ import arm.ui.UITrait;
 class ViewportUtil {
 	
 	public static function scaleToBounds() {
-		var po = UITrait.inst.mergedObject == null ? UITrait.inst.mainObject() : UITrait.inst.mergedObject;
+		var po = Context.mergedObject == null ? Context.mainObject() : Context.mergedObject;
 		var md = po.data;
 		md.geom.calculateAABB();
 		var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
-		po = UITrait.inst.mainObject();
+		po = Context.mainObject();
 		po.transform.dim.x = md.geom.aabb.x;
 		po.transform.dim.y = md.geom.aabb.y;
 		po.transform.dim.z = md.geom.aabb.z;
@@ -30,7 +30,7 @@ class ViewportUtil {
 				UITrait.inst.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
-				UITrait.inst.ddirty = 2;
+				Context.ddirty = 2;
 				arm.plugin.Camera.inst.reset();
 				break;
 			}
@@ -38,15 +38,15 @@ class ViewportUtil {
 	}
 
 	public static function setView(x:Float, y:Float, z:Float, rx:Float, ry:Float, rz:Float) {
-		UITrait.inst.selectedObject.transform.rot.set(0, 0, 0, 1);
-		UITrait.inst.selectedObject.transform.dirty = true;
+		Context.object.transform.rot.set(0, 0, 0, 1);
+		Context.object.transform.dirty = true;
 		var cam = Scene.active.camera;
 		var dist = cam.transform.loc.length();
 		cam.transform.loc.set(x * dist, y * dist, z * dist);
 		cam.transform.rot.fromEuler(rx, ry, rz);
 		cam.transform.buildMatrix();
 		cam.buildProjection();
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 		arm.plugin.Camera.inst.reset();
 	}
 
@@ -57,7 +57,7 @@ class ViewportUtil {
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
 		cam.transform.rotate(cam.rightWorld(), y);
 		cam.transform.move(cam.lookWorld(), -dist);
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 	}
 
 	public static function updateCameraType(cameraType:Int) {
@@ -78,6 +78,6 @@ class ViewportUtil {
 			light.visible = false;
 		}
 		cam.buildProjection();
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 	}
 }

@@ -22,7 +22,7 @@ class Uniforms {
 			var val = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
 			var pen = Input.getPen();
 			if (UITrait.penPressureRadius && pen.down()) val *= pen.pressure;
-			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (UITrait.inst.brush3d && !decal) {
 				val *= UITrait.inst.paint2d ? 0.6 : 2;
 			}
@@ -64,8 +64,8 @@ class Uniforms {
 			return vec2;
 		}
 		else if (link == '_texcoloridSize') {
-			if (UITrait.inst.assets.length == 0) return vec2;
-			var img = UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
+			if (Project.assets.length == 0) return vec2;
+			var img = UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
 			vec2.set(img.width, img.height, 0);
 			return vec2;
 		}
@@ -101,8 +101,8 @@ class Uniforms {
 
 	public static function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		if (link == "_texcolorid") {
-			if (UITrait.inst.assets.length == 0) return null;
-			else return UITrait.inst.getImage(UITrait.inst.assets[UITrait.inst.colorIdHandle.position]);
+			if (Project.assets.length == 0) return null;
+			else return UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
 		}
 		else if (link == "_texuvmap") {
 			UVUtil.cacheUVMap(); // TODO: Check overlapping g4 calls here
@@ -119,15 +119,15 @@ class Uniforms {
 			return UITrait.inst.decalMaskImage;
 		}
 		else if (link == "_texpaint_undo") {
-			var i = UITrait.inst.undoI - 1 < 0 ? App.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
 		}
 		else if (link == "_texpaint_nor_undo") {
-			var i = UITrait.inst.undoI - 1 < 0 ? App.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
 		}
 		else if (link == "_texpaint_pack_undo") {
-			var i = UITrait.inst.undoI - 1 < 0 ? App.C.undo_steps - 1 : UITrait.inst.undoI - 1;
+			var i = History.undoI - 1 < 0 ? App.C.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
 		else if (link.startsWith("_texpaint_pack_vert")) {
@@ -135,7 +135,7 @@ class Uniforms {
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
 		}
 		else if (link == "_texpaint_mask") {
-			return UITrait.inst.selectedLayer.texpaint_mask;
+			return Context.layer.texpaint_mask;
 		}
 		else if (link == "_texparticle") {
 			return RenderPath.active.renderTargets.get("texparticle").image;

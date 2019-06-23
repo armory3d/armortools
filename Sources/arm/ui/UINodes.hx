@@ -91,44 +91,44 @@ class UINodes {
 	public function updateCanvasMap() {
 		if (UITrait.inst.worktab.position == SpaceScene) {
 			if (canvasMap2 == null) canvasMap2 = new Map();
-			var c = canvasMap2.get(UITrait.inst.selectedMaterialScene);
+			var c = canvasMap2.get(Context.materialScene);
 			if (c == null) {
 				c = Json.parse(canvasBlob);
-				canvasMap2.set(UITrait.inst.selectedMaterialScene, c);
+				canvasMap2.set(Context.materialScene, c);
 				canvas = c;
 			}
 			else canvas = c;
-			if (canvasType == 0) nodes = UITrait.inst.selectedMaterialScene.nodes;
+			if (canvasType == 0) nodes = Context.materialScene.nodes;
 			return;
 		}
 
-		if (UITrait.inst.selectedMaterial != null) {
+		if (Context.material != null) {
 			if (canvasMap == null) canvasMap = new Map();
-			var c = canvasMap.get(UITrait.inst.selectedMaterial);
+			var c = canvasMap.get(Context.material);
 			if (c == null) {
 				c = Json.parse(canvasBlob);
-				canvasMap.set(UITrait.inst.selectedMaterial, c);
+				canvasMap.set(Context.material, c);
 				canvas = c;
 				c.name = "Material " + (++materialCounter);
 			}
 			else canvas = c;
 
-			if (canvasType == 0) nodes = UITrait.inst.selectedMaterial.nodes;
+			if (canvasType == 0) nodes = Context.material.nodes;
 		}
 	}
 
 	public function updateCanvasBrushMap() {
-		if (UITrait.inst.selectedBrush != null) {
+		if (Context.brush != null) {
 			if (canvasBrushMap == null) canvasBrushMap = new Map();
-			var c = canvasBrushMap.get(UITrait.inst.selectedBrush);
+			var c = canvasBrushMap.get(Context.brush);
 			if (c == null) {
 				c = Json.parse(canvasBrushBlob);
-				canvasBrushMap.set(UITrait.inst.selectedBrush, c);
+				canvasBrushMap.set(Context.brush, c);
 				canvasBrush = c;
 			}
 			else canvasBrush = c;
 
-			if (canvasType == 1) nodes = UITrait.inst.selectedBrush.nodes;
+			if (canvasType == 1) nodes = Context.brush.nodes;
 		}
 	}
 
@@ -161,7 +161,7 @@ class UINodes {
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 				UITrait.inst.hwnd1.redraws = 2;
-				var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
 			}
 		}
@@ -349,8 +349,8 @@ class UINodes {
 			// Image node preview
 			if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0].type == 'TEX_IMAGE') {
 				var id = nodes.nodesSelected[0].buttons[0].default_value;
-				if (id < UITrait.inst.assets.length) {
-					var img = UITrait.inst.getImage(UITrait.inst.assets[id]);
+				if (id < Project.assets.length) {
+					var img = UITrait.inst.getImage(Project.assets[id]);
 					var tw = 64 * ui.SCALE;
 					var th = tw * (img.height / img.width);
 					ui.g.drawScaledImage(img, ww - tw - 20 * ui.SCALE, wh - th - 40 * ui.SCALE, tw, th);

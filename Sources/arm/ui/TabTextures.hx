@@ -28,8 +28,8 @@ class TabTextures {
 
 			if (ui.button("2D View")) UITrait.inst.show2DView(1);
 
-			if (UITrait.inst.assets.length > 0) {
-				for (i in 0...UITrait.inst.assets.length) {
+			if (Project.assets.length > 0) {
+				for (i in 0...Project.assets.length) {
 					
 					// Align into 5 items per row
 					if (i % 5 == 0) {
@@ -37,8 +37,8 @@ class TabTextures {
 						ui.row([1/5, 1/5, 1/5, 1/5, 1/5]);
 					}
 					
-					var asset = UITrait.inst.assets[i];
-					if (asset == UITrait.inst.selectedTexture) {
+					var asset = Project.assets[i];
+					if (asset == Context.texture) {
 						var off = i % 2 == 1 ? 1 : 0;
 						var w = 51 - App.C.window_scale;
 						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
@@ -55,7 +55,7 @@ class TabTextures {
 						App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
 						App.dragAsset = asset;
-						UITrait.inst.selectedTexture = asset;
+						Context.texture = asset;
 
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView(1);
 						UITrait.inst.selectTime = Time.time();
@@ -68,14 +68,14 @@ class TabTextures {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
 							if (ui.button("To Mask", Left)) {
-								UITrait.inst.createImageMask(asset);
+								Layers.createImageMask(asset);
 							}
 							if (ui.button("Delete", Left)) {
 								UITrait.inst.hwnd2.redraws = 2;
 								Data.deleteImage(asset.file);
 								zui.Canvas.assetMap.remove(asset.id);
-								UITrait.inst.assets.splice(i, 1);
-								UITrait.inst.assetNames.splice(i, 1);
+								Project.assets.splice(i, 1);
+								Project.assetNames.splice(i, 1);
 								// TODO: rebuild affected materials
 							}
 						});
@@ -83,8 +83,8 @@ class TabTextures {
 				}
 
 				// Fill in unused row space
-				if (UITrait.inst.assets.length % 5 > 0) {
-					for (i in 0...5 - (UITrait.inst.assets.length % 5)) {
+				if (Project.assets.length % 5 > 0) {
+					for (i in 0...5 - (Project.assets.length % 5)) {
 						@:privateAccess ui.endElement(ui._w);
 					}
 				}

@@ -61,7 +61,7 @@ class Camera {
 
 				if ((mouse.down("right") && !kb.down("space")) || (mouse.down("left") && kb.down("control"))) {
 					redraws = 2;
-					var t = UITrait.inst.selectedObject.transform;
+					var t = Context.object.transform;
 
 					// Rotate X
 					var up = t.up().normalize();
@@ -158,7 +158,7 @@ class Camera {
 
 				var d = Time.delta * speed * fast * ease;
 				if (d > 0.0) {
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 					camera.transform.move(dir, d);
 
 					if (UITrait.inst.cameraType == 1) {
@@ -167,7 +167,7 @@ class Camera {
 				}
 
 				if (mouse.down("right")) {
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 					camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 					camera.transform.rotate(camera.right(), -mouse.movementY / 200);
 				}
@@ -175,7 +175,7 @@ class Camera {
 
 			if (redraws > 0) {
 				redraws--;
-				UITrait.inst.ddirty = 2;
+				Context.ddirty = 2;
 
 				if (UITrait.inst.cameraType == 1) {
 					ViewportUtil.updateCameraType(UITrait.inst.cameraType);

@@ -72,13 +72,13 @@ class TabPreferences {
 				App.C.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, "Undo Steps", 1, 64, false, 1));
 				if (UITrait.inst.undoHandle.changed) {
 					ui.g.end();
-					while (UITrait.inst.undoLayers.length < App.C.undo_steps) {
-						var l = new LayerSlot("_undo" + UITrait.inst.undoLayers.length);
+					while (History.undoLayers.length < App.C.undo_steps) {
+						var l = new LayerSlot("_undo" + History.undoLayers.length);
 						l.createMask(0, false);
-						UITrait.inst.undoLayers.push(l);
+						History.undoLayers.push(l);
 					}
-					while (UITrait.inst.undoLayers.length > App.C.undo_steps) {
-						var l = UITrait.inst.undoLayers.pop();
+					while (History.undoLayers.length > App.C.undo_steps) {
+						var l = History.undoLayers.pop();
 						l.unload();
 					}
 					History.reset();

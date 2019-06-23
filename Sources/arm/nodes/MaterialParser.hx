@@ -21,7 +21,7 @@ class MaterialParser {
 
 	public static function parseMeshMaterial() {
 		if (UITrait.inst.worktab.position == SpaceScene) return;
-		var m = UITrait.inst.materials[0].data;
+		var m = Project.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 			var sc:ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
@@ -36,7 +36,7 @@ class MaterialParser {
 			sc.overrideContext.shared_sampler = true;
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
-			UITrait.inst.ddirty = 2;
+			Context.ddirty = 2;
 
 			#if rp_voxelao
 			if (MaterialBuilder.heightUsed && Config.raw.rp_gi != false) {
@@ -68,7 +68,7 @@ class MaterialParser {
 	public static function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		var m = UITrait.inst.worktab.position == SpaceScene ? UITrait.inst.selectedMaterialScene.data : UITrait.inst.materials[0].data;
+		var m = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene.data : Project.materials[0].data;
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 
 			var sc:ShaderContext = null;
@@ -111,7 +111,7 @@ class MaterialParser {
 		}
 
 		//
-		var m = UITrait.inst.materials[0].data;
+		var m = Project.materials[0].data;
 		sc = null;
 		_materialcontext = null;
 		//

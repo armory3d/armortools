@@ -14,7 +14,7 @@ using StringTools;
 class ExportArm {
 
 	public static function run(path:String) {
-		var raw:TSceneFormat = { mesh_datas: [ UITrait.inst.paintObject.data.raw ] };
+		var raw:TSceneFormat = { mesh_datas: [ Context.paintObject.data.raw ] };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
 		#if kha_krom
@@ -26,29 +26,29 @@ class ExportArm {
 		var mnodes:Array<TNodeCanvas> = [];
 		var bnodes:Array<TNodeCanvas> = [];
 
-		for (m in UITrait.inst.materials) {
+		for (m in Project.materials) {
 			var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
-					var sameDrive = UITrait.inst.projectPath.charAt(0) == n.buttons[0].data.charAt(0);
+					var sameDrive = Project.filepath.charAt(0) == n.buttons[0].data.charAt(0);
 					if (sameDrive) {
-						n.buttons[0].data = Path.toRelative(UITrait.inst.projectPath, n.buttons[0].data);
+						n.buttons[0].data = Path.toRelative(Project.filepath, n.buttons[0].data);
 					}
 				}
 			}
 			mnodes.push(c);
 		}
-		for (b in UITrait.inst.brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
+		for (b in Project.brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
 
 		var md:Array<TMeshData> = [];
-		for (p in UITrait.inst.paintObjects) md.push(p.data.raw);
+		for (p in Context.paintObjects) md.push(p.data.raw);
 
 		var asset_files:Array<String> = [];
-		for (a in UITrait.inst.assets) {
+		for (a in Project.assets) {
 			// Convert image path from absolute to relative
-			var sameDrive = UITrait.inst.projectPath.charAt(0) == a.file.charAt(0);
+			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
-				asset_files.push(Path.toRelative(UITrait.inst.projectPath, a.file));
+				asset_files.push(Path.toRelative(Project.filepath, a.file));
 			}
 			else {
 				asset_files.push(a.file);
@@ -56,7 +56,7 @@ class ExportArm {
 		}
 
 		var ld:Array<TLayerData> = [];
-		for (l in UITrait.inst.layers) {
+		for (l in Project.layers) {
 			ld.push({
 				res: l.texpaint.width,
 				texpaint: Lz4.encode(l.texpaint.getPixels()),
@@ -64,12 +64,12 @@ class ExportArm {
 				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),
 				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				opacity_mask: l.maskOpacity,
-				material_mask: l.material_mask != null ? UITrait.inst.materials.indexOf(l.material_mask) : -1,
+				material_mask: l.material_mask != null ? Project.materials.indexOf(l.material_mask) : -1,
 				object_mask: l.objectMask
 			});
 		}
 
-		UITrait.inst.project = {
+		Project.raw = {
 			version: App.version,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
@@ -78,10 +78,10 @@ class ExportArm {
 			assets: asset_files
 		};
 		
-		var bytes = ArmPack.encode(UITrait.inst.project);
+		var bytes = ArmPack.encode(Project.raw);
 
 		#if kha_krom
-		Krom.fileSaveBytes(UITrait.inst.projectPath, bytes.getData());
+		Krom.fileSaveBytes(Project.filepath, bytes.getData());
 		#end
 	}
 }

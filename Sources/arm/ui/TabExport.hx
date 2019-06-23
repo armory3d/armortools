@@ -98,7 +98,7 @@ class TabExport {
 					};
 				}
 				UITrait.inst.exportMeshFormat = ui.combo(Id.handle({position: UITrait.inst.exportMeshFormat}), ["obj", "arm"], "Format", true);
-				var mesh = UITrait.inst.paintObject.data.raw;
+				var mesh = Context.paintObject.data.raw;
 				var inda = mesh.index_arrays[0].values;
 				var tris = Std.int(inda.length / 3);
 				ui.text(tris + " triangles");

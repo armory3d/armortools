@@ -60,7 +60,7 @@ class Exporter {
 		var texpaint:Image = null;
 		var texpaint_nor:Image = null;
 		var texpaint_pack:Image = null;
-		var layers = UITrait.inst.layers;
+		var layers = Project.layers;
 
 		// Export visible layers
 		if (UITrait.inst.layersExport == 0 && layers.length > 1) {
@@ -149,12 +149,12 @@ class Exporter {
 		}
 		// Export selected layer
 		else {
-			var selectedLayer = UITrait.inst.selectedLayer;
+			var selectedLayer = Context.layer;
 			texpaint = selectedLayer.texpaint;
 			texpaint_nor = selectedLayer.texpaint_nor;
 			texpaint_pack = selectedLayer.texpaint_pack;
 			if (selectedLayer.objectMask > 0) { // Append object mask name
-				f += "_" + UITrait.inst.paintObjects[selectedLayer.objectMask].name;
+				f += "_" + Context.paintObjects[selectedLayer.objectMask].name;
 			}
 		}
 

@@ -11,7 +11,7 @@ class TabMeshes {
 		if (ui.tab(UITrait.inst.htab2, "Meshes")) {
 			ui.row([1/4]);
 
-			if (ui.button("Import")) UITrait.inst.importMesh();
+			if (ui.button("Import")) Context.importMesh();
 			if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
 
 			UITrait.inst.isUdim = ui.check(Id.handle({selected: UITrait.inst.isUdim}), "UDIM Import");
@@ -21,7 +21,7 @@ class TabMeshes {
 
 			if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
 				ui.indent();
-				for (o in UITrait.inst.paintObjects) {
+				for (o in Context.paintObjects) {
 					ui.text(o.name);
 				}
 				ui.unindent();
@@ -32,25 +32,25 @@ class TabMeshes {
 				ui.row([1/2,1/2]);
 				if (ui.button("Flip Normals")) {
 					MeshUtil.flipNormals();
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 				if (ui.button("Calculate Normals")) {
 					MeshUtil.calcNormals();
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 
 				ui.row([1/3, 1/3, 1/3]);
 				if (ui.button("Rotate X")) {
 					MeshUtil.swapAxis(1, 2);
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 				if (ui.button("Rotate Y")) {
 					MeshUtil.swapAxis(2, 0);
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 				if (ui.button("Rotate Z")) {
 					MeshUtil.swapAxis(0, 1);
-					UITrait.inst.ddirty = 2;
+					Context.ddirty = 2;
 				}
 
 				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});

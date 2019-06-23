@@ -90,15 +90,15 @@ class ImportFolder {
 		// Create material
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
-			UITrait.inst.removeMaterialCache();
+			Context.removeMaterialCache();
 			Data.getMaterial("Scene", "Material2", function(md:MaterialData) {
-				UITrait.inst.selectedMaterialScene = new MaterialSlot(md);
-				UITrait.inst.materialsScene.push(UITrait.inst.selectedMaterialScene);
+				Context.materialScene = new MaterialSlot(md);
+				Project.materialsScene.push(Context.materialScene);
 			});
 		}
 		else {
-			UITrait.inst.selectedMaterial = new MaterialSlot();
-			UITrait.inst.materials.push(UITrait.inst.selectedMaterial);
+			Context.material = new MaterialSlot();
+			Project.materials.push(Context.material);
 		}
 		UINodes.inst.updateCanvasMap();
 		var nodes = UINodes.inst.nodes;

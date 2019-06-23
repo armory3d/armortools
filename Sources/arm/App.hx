@@ -234,7 +234,7 @@ class App {
 			cam.data.raw.ortho[3] =  2 * (iron.App.h() / iron.App.w());
 		}
 		cam.buildProjection();
-		UITrait.inst.ddirty = 2;
+		Context.ddirty = 2;
 
 		var lay = C.ui_layout;
 		
@@ -268,7 +268,7 @@ class App {
 		UITrait.inst.menuHandle.redraws = 2;
 		UITrait.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
-		if (UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0; // Tag cached viewport texture redraw
+		if (Context.ddirty < 0) Context.ddirty = 0; // Tag cached viewport texture redraw
 	}
 
 	static function update() {
@@ -296,8 +296,8 @@ class App {
 				// Create image texture
 				if (inNodes) {
 					var index = 0;
-					for (i in 0...UITrait.inst.assets.length) {
-						if (UITrait.inst.assets[i] == dragAsset) {
+					for (i in 0...Project.assets.length) {
+						if (Project.assets[i] == dragAsset) {
 							index = i;
 							break;
 						}
@@ -306,14 +306,14 @@ class App {
 				}
 				// Create mask
 				else if (inViewport || inLayers || in2dView) {
-					UITrait.inst.createImageMask(dragAsset);
+					Layers.createImageMask(dragAsset);
 				}
 				dragAsset = null;
 			}
 			if (dragMaterial != null) {
 				// Material dragged onto viewport or layers tab
 				if (inViewport || inLayers || in2dView) {
-					UITrait.inst.createFillLayer();
+					Layers.createFillLayer();
 				}
 				dragMaterial = null;
 			}
@@ -336,8 +336,8 @@ class App {
 
 		if (showFiles || showBox) UIBox.update();
 
-		var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
-		var isPicker = UITrait.inst.selectedTool == ToolPicker;
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows
 		Zui.alwaysRedrawWindow =
 			showMenu ||
@@ -349,7 +349,7 @@ class App {
 			!UITrait.inst.brush3d ||
 			UITrait.inst.frame < 3;
 		#end
-		if (Zui.alwaysRedrawWindow && UITrait.inst.ddirty < 0) UITrait.inst.ddirty = 0;
+		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
 	static function render(g:kha.graphics2.Graphics) {
@@ -379,17 +379,17 @@ class App {
 	}
 
 	public static function getEnumTexts():Array<String> {
-		return UITrait.inst.assetNames.length > 0 ? UITrait.inst.assetNames : [""];
+		return Project.assetNames.length > 0 ? Project.assetNames : [""];
 	}
 
 	public static function mapEnum(s:String):String {
-		for (a in UITrait.inst.assets) if (a.name == s) return a.file;
+		for (a in Project.assets) if (a.name == s) return a.file;
 		return "";
 	}
 
 	public static function getAssetIndex(f:String):Int {
-		for (i in 0...UITrait.inst.assets.length) {
-			if (UITrait.inst.assets[i].file == f) {
+		for (i in 0...Project.assets.length) {
+			if (Project.assets[i].file == f) {
 				return i;
 			}
 		}

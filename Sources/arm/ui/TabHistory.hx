@@ -7,7 +7,7 @@ class TabHistory {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "History")) {
 			for (i in 0...History.stack.length) {
-				var active = History.stack.length - 1 - UITrait.inst.redos;
+				var active = History.stack.length - 1 - History.redos;
 				if (i == active) {
 					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}

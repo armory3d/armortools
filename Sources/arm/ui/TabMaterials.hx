@@ -21,20 +21,20 @@ class TabMaterials {
 
 		var ui = UITrait.inst.ui;
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
-		var materials = isScene ? UITrait.inst.materialsScene : UITrait.inst.materials;
-		var selectMaterial = isScene ? UITrait.inst.selectMaterialScene : UITrait.inst.selectMaterial;
+		var materials = isScene ? Project.materialsScene : Project.materials;
+		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
 		if (ui.tab(UITrait.inst.htab1, "Materials")) {
 			ui.row([1/4,1/4,1/4]);
 			if (ui.button("New")) {
 				if (isScene) {
-					if (UITrait.inst.selectedObject != UITrait.inst.paintObject && Std.is(UITrait.inst.selectedObject, MeshObject)) {
-						UITrait.inst.removeMaterialCache();
+					if (Context.object != Context.paintObject && Std.is(Context.object, MeshObject)) {
+						Context.removeMaterialCache();
 						Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
 							ui.g.end();
 							md.name = "Material2." + materials.length;
-							UITrait.inst.selectedMaterialScene = new MaterialSlot(md);
-							materials.push(UITrait.inst.selectedMaterialScene);
+							Context.materialScene = new MaterialSlot(md);
+							materials.push(Context.materialScene);
 							selectMaterial(materials.length - 1);
 							RenderUtil.makeMaterialPreview();
 							ui.g.begin(false);
@@ -44,12 +44,12 @@ class TabMaterials {
 				else {
 					ui.g.end();
 					UITrait.inst.headerHandle.redraws = 2;
-					UITrait.inst.selectedMaterial = new MaterialSlot(materials[0].data);
-					materials.push(UITrait.inst.selectedMaterial);
+					Context.material = new MaterialSlot(materials[0].data);
+					materials.push(Context.material);
 					UINodes.inst.updateCanvasMap();
 					MaterialParser.parsePaintMaterial();
 					RenderUtil.makeMaterialPreview();
-					var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 					if (decal) RenderUtil.makeDecalPreview();
 					ui.g.begin(false);
 				}
@@ -122,7 +122,7 @@ class TabMaterials {
 							
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);
-								UITrait.inst.createFillLayer();
+								Layers.createFillLayer();
 							}
 
 							if (ui.button("Delete", Left) && materials.length > 1) {
@@ -173,5 +173,5 @@ class TabMaterials {
 		}
 	}
 
-	static function getSelectedMaterial() { return UITrait.inst.worktab.position == SpaceScene ? UITrait.inst.selectedMaterialScene : UITrait.inst.selectedMaterial; }
+	static function getSelectedMaterial() { return UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material; }
 }

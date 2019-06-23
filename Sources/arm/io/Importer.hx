@@ -35,7 +35,7 @@ class Importer {
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;
 			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
-				UINodes.inst.acceptDrag(UITrait.inst.assets.length - 1);
+				UINodes.inst.acceptDrag(Project.assets.length - 1);
 				UINodes.inst.nodes.nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}
@@ -72,31 +72,31 @@ class Importer {
 		else if (p.endsWith(".fbx")) ImportFbx.run(path);
 		else if (p.endsWith(".blend")) ImportBlend.run(path);
 
-		if (UITrait.inst.mergedObject != null) {
-			UITrait.inst.mergedObject.remove();
-			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
-			UITrait.inst.mergedObject = null;
+		if (Context.mergedObject != null) {
+			Context.mergedObject.remove();
+			Data.deleteMesh(Context.mergedObject.data.handle);
+			Context.mergedObject = null;
 		}
 
-		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
+		Context.selectPaintObject(Context.mainObject());
 
-		if (UITrait.inst.paintObjects.length > 1) {
+		if (Context.paintObjects.length > 1) {
 			// Sort by name
-			UITrait.inst.paintObjects.sort(function(a, b):Int {
+			Context.paintObjects.sort(function(a, b):Int {
 				if (a.name < b.name) return -1;
 				else if (a.name > b.name) return 1;
 				return 0;
 			});
 
 			// No mask by default
-			if (UITrait.inst.mergedObject == null) MeshUtil.mergeMesh();
-			UITrait.inst.paintObject.skip_context = "paint";
-			UITrait.inst.mergedObject.visible = true;
+			if (Context.mergedObject == null) MeshUtil.mergeMesh();
+			Context.paintObject.skip_context = "paint";
+			Context.mergedObject.visible = true;
 		}
 
 		ViewportUtil.scaleToBounds();
 
-		if (UITrait.inst.paintObject.name == "") UITrait.inst.paintObject.name = "Object";
+		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
 
 		UIView2D.inst.hwnd.redraws = 2;
 
@@ -164,7 +164,7 @@ class Importer {
 			// Append
 			if (UITrait.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
-				mats[0] = UITrait.inst.selectedMaterialScene.data;
+				mats[0] = Context.materialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
 				path = path.replace("\\", "/");
 				var ar = path.split("/");
@@ -182,43 +182,43 @@ class Importer {
 				object.addTrait(new armory.trait.physics.RigidBody(0.0));
 				#end
 				
-				UITrait.inst.selectObject(object);
+				Context.selectObject(object);
 			}
 			// Replace
 			else {
-				UITrait.inst.paintObject = UITrait.inst.mainObject();
+				Context.paintObject = Context.mainObject();
 
-				UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
-				for (i in 0...UITrait.inst.paintObjects.length) {
-					var p = UITrait.inst.paintObjects[i];
-					if (p == UITrait.inst.paintObject) continue;
+				Context.selectPaintObject(Context.mainObject());
+				for (i in 0...Context.paintObjects.length) {
+					var p = Context.paintObjects[i];
+					if (p == Context.paintObject) continue;
 					Data.deleteMesh(p.data.handle);
 					p.remove();
 				}
-				var handle = UITrait.inst.paintObject.data.handle;
+				var handle = Context.paintObject.data.handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
 					Data.deleteMesh(handle);
 				}
 
-				while (UITrait.inst.layers.length > 1) { var l = UITrait.inst.layers.pop(); l.unload(); }
-				UITrait.inst.setLayer(UITrait.inst.layers[0]);
+				while (Project.layers.length > 1) { var l = Project.layers.pop(); l.unload(); }
+				Context.setLayer(Project.layers[0]);
 				iron.App.notifyOnRender(Layers.initLayers);
 				History.reset();
 				
-				UITrait.inst.paintObject.setData(md);
-				UITrait.inst.paintObject.name = mesh.name;
+				Context.paintObject.setData(md);
+				Context.paintObject.name = mesh.name;
 
-				var g = UITrait.inst.paintObject.data.geom;
+				var g = Context.paintObject.data.geom;
 				var posbuf = g.vertexBufferMap.get("pos");
 				if (posbuf != null) { // Remove cache
 					posbuf.delete();
 					g.vertexBufferMap.remove("pos");
 				}
 
-				UITrait.inst.paintObjects = [UITrait.inst.paintObject];
+				Context.paintObjects = [Context.paintObject];
 			}
 
-			UITrait.inst.ddirty = 4;
+			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UITrait.inst.hwnd1.redraws = 2;
 			UITrait.inst.hwnd2.redraws = 2;
@@ -260,13 +260,13 @@ class Importer {
 
 		new MeshData(raw, function(md:MeshData) {
 			
-			var object = Scene.active.addMeshObject(md, UITrait.inst.paintObject.materials, UITrait.inst.paintObject);
+			var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 			object.name = mesh.name;
 			object.skip_context = "paint";
 
-			UITrait.inst.paintObjects.push(object);
+			Context.paintObjects.push(object);
 
-			UITrait.inst.ddirty = 4;
+			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;

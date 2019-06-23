@@ -12,6 +12,7 @@ import arm.util.ViewportUtil;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
+import arm.Tool;
 
 class RenderPathDeferred {
 
@@ -498,16 +499,16 @@ class RenderPathDeferred {
 		lastX = mouse.x;
 		lastY = mouse.y;
 
-		if (!UITrait.inst.dirty()) {
-			if (mx != lastX || my != lastY || mouse.locked) UITrait.inst.ddirty = 0;
-			if (UITrait.inst.ddirty > -2) {
+		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
+			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
+			if (Context.ddirty > -2) {
 				path.setTarget("");
 				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
 				ssaa4 ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-				if (UITrait.inst.ddirty <= 0) UITrait.inst.ddirty--;
+				if (Context.ddirty <= 0) Context.ddirty--;
 			}
 			return;
 		}
@@ -516,11 +517,11 @@ class RenderPathDeferred {
 		@:privateAccess Scene.active.camera.frame = taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
 
-		var tid = UITrait.inst.selectedLayer.id;
+		var tid = Context.layer.id;
 
-		if (UITrait.inst.pushUndo && UITrait.inst.undoLayers != null) {
-			var isMask = UITrait.inst.selectedLayerIsMask;
-			var i = UITrait.inst.undoI;
+		if (History.pushUndo && History.undoLayers != null) {
+			var isMask = Context.layerIsMask;
+			var i = History.undoI;
 			if (isMask) {
 				path.setTarget("texpaint_mask_undo" + i);
 				path.bindTarget("texpaint_mask" + tid, "tex");
@@ -533,19 +534,19 @@ class RenderPathDeferred {
 				path.bindTarget("texpaint_pack" + tid, "tex2");
 				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 			}
-			var undoLayer = UITrait.inst.undoLayers[UITrait.inst.undoI];
-			undoLayer.targetObject = UITrait.inst.paintObject;
-			undoLayer.targetLayer = UITrait.inst.selectedLayer;
+			var undoLayer = History.undoLayers[History.undoI];
+			undoLayer.targetObject = Context.paintObject;
+			undoLayer.targetLayer = Context.layer;
 			undoLayer.targetIsMask = isMask;
-			UITrait.inst.undoI = (UITrait.inst.undoI + 1) % App.C.undo_steps;
-			if (UITrait.inst.undos < App.C.undo_steps) UITrait.inst.undos++;
-			if (UITrait.inst.redos > 0) {
-				for (i in 0...UITrait.inst.redos) History.stack.pop();
-				UITrait.inst.redos = 0;
+			History.undoI = (History.undoI + 1) % App.C.undo_steps;
+			if (History.undos < App.C.undo_steps) History.undos++;
+			if (History.redos > 0) {
+				for (i in 0...History.redos) History.stack.pop();
+				History.redos = 0;
 			}
-			UITrait.inst.pushUndo = false;
+			History.pushUndo = false;
 
-			History.stack.push(UITrait.inst.toolNames[UITrait.inst.selectedTool]);
+			History.stack.push(UITrait.inst.toolNames[Context.tool]);
 			while (History.stack.length > App.C.undo_steps + 1) History.stack.shift();
 		}
 
@@ -557,15 +558,15 @@ class RenderPathDeferred {
 		var savedFov = 0.0;
 		if (UITrait.inst.paint2d) {
 			// Set plane mesh
-			painto = UITrait.inst.paintObject;
+			painto = Context.paintObject;
 			visibles = [];
-			for (p in UITrait.inst.paintObjects) {
+			for (p in Context.paintObjects) {
 				visibles.push(p.visible);
 				p.visible = false;
 			}
-			if (UITrait.inst.mergedObject != null) {
-				mergedObjectVisible = UITrait.inst.mergedObject.visible;
-				UITrait.inst.mergedObject.visible = false;
+			if (Context.mergedObject != null) {
+				mergedObjectVisible = Context.mergedObject.visible;
+				Context.mergedObject.visible = false;
 			}
 
 			var cam = Scene.active.camera;
@@ -592,7 +593,7 @@ class RenderPathDeferred {
 
 			planeo = cast Scene.active.getChild(".Plane");
 			planeo.visible = true;
-			UITrait.inst.paintObject = planeo;
+			Context.paintObject = planeo;
 
 			var v = new Vec4();
 			var sx = v.set(m._00, m._01, m._02).length();
@@ -605,12 +606,12 @@ class RenderPathDeferred {
 		// Geometry
 		drawGbuffer();
 
-		if (UITrait.inst.undoLayers != null) {
+		if (History.undoLayers != null) {
 
 			// Symmetry
 			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
-				UITrait.inst.ddirty = 2;
-				var t = UITrait.inst.paintObject.transform;
+				Context.ddirty = 2;
+				var t = Context.paintObject.transform;
 				var sx = t.scale.x;
 				var sy = t.scale.y;
 				var sz = t.scale.z;
@@ -658,8 +659,8 @@ class RenderPathDeferred {
 
 		//
 
-		if (UITrait.inst.brushBlendDirty) {
-			UITrait.inst.brushBlendDirty = false;
+		if (Context.brushBlendDirty) {
+			Context.brushBlendDirty = false;
 			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
 			path.clearTarget(0x00000000);
 		}
@@ -667,13 +668,13 @@ class RenderPathDeferred {
 		if (UITrait.inst.paint2d) {
 			// Restore paint mesh
 			planeo.visible = false;
-			for (i in 0...UITrait.inst.paintObjects.length) {
-				UITrait.inst.paintObjects[i].visible = visibles[i];
+			for (i in 0...Context.paintObjects.length) {
+				Context.paintObjects[i].visible = visibles[i];
 			}
-			if (UITrait.inst.mergedObject != null) {
-				UITrait.inst.mergedObject.visible = mergedObjectVisible;
+			if (Context.mergedObject != null) {
+				Context.mergedObject.visible = mergedObjectVisible;
 			}
-			UITrait.inst.paintObject = painto;
+			Context.paintObject = painto;
 			Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 			Scene.active.camera.data.raw.fov = savedFov;
 			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
@@ -686,7 +687,7 @@ class RenderPathDeferred {
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
-			if (ssgi && UITrait.inst.ddirty > 0 && taaFrame > 0) {
+			if (ssgi && Context.ddirty > 0 && taaFrame > 0) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -712,7 +713,7 @@ class RenderPathDeferred {
 		#if rp_voxelao
 		if (Config.raw.rp_gi != false)
 		{
-			var voxelize = path.voxelize() && UITrait.inst.ddirty > 0 && taaFrame > 0;
+			var voxelize = path.voxelize() && Context.ddirty > 0 && taaFrame > 0;
 
 			#if arm_voxelgi_temporal
 			voxelize = ++voxelFrame % voxelFreq == 0;
@@ -732,7 +733,7 @@ class RenderPathDeferred {
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
 				if (arm.nodes.MaterialBuilder.heightUsed) {
-					var tid = UITrait.inst.layers[0].id;
+					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}
 				path.drawMeshes("voxel");
@@ -1018,9 +1019,9 @@ class RenderPathDeferred {
 		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
 
 		taaFrame++;
-		UITrait.inst.ddirty--;
-		UITrait.inst.pdirty--;
-		UITrait.inst.rdirty--;
+		Context.ddirty--;
+		Context.pdirty--;
+		Context.rdirty--;
 	}
 
 	static function drawGbuffer() {
@@ -1039,12 +1040,12 @@ class RenderPathDeferred {
 		#end
 
 		// Paint
-		var tid = UITrait.inst.layers[0].id;
+		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		for (i in 1...UITrait.inst.layers.length) {
-			var l = UITrait.inst.layers[i];
+		for (i in 1...Project.layers.length) {
+			var l = Project.layers[i];
 			tid = l.id;
 			path.bindTarget("texpaint" + tid, "texpaint" + tid);
 			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);

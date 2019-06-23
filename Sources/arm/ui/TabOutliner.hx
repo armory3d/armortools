@@ -12,13 +12,13 @@ class TabOutliner {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Outliner")) {
 			ui.row([1/4]);
-			if (ui.button("Import")) UITrait.inst.importMesh();
+			if (ui.button("Import")) Context.importMesh();
 
 			var i = 0;
 			function drawList(h:Handle, o:Object) {
 				if (o.name.charAt(0) == '.') return; // Hidden
 				var b = false;
-				if (UITrait.inst.selectedObject == o) {
+				if (Context.object == o) {
 					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}
 				if (o.children.length > 0) {
@@ -30,8 +30,8 @@ class TabOutliner {
 					ui._x -= 18;
 				}
 				if (ui.isReleased) {
-					UITrait.inst.selectObject(o);
-					UITrait.inst.ddirty = 2;
+					Context.selectObject(o);
+					Context.ddirty = 2;
 				}
 				i++;
 				if (b) {

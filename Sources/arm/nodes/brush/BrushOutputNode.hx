@@ -42,7 +42,7 @@ class BrushOutputNode extends LogicNode {
 			@:privateAccess UIView2D.inst.ui.comboSelectedHandle == null) { // Header combos are in use
 			// Set color pick
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
-			if (UITrait.inst.selectedTool == ToolColorId && UITrait.inst.assets.length > 0 && down) {
+			if (Context.tool == ToolColorId && Project.assets.length > 0 && down) {
 				UITrait.inst.colorIdPicked = true;
 			}
 			// Prevent painting the same spot
@@ -55,16 +55,16 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.lastPaintX = UITrait.inst.paintVec.x;
 			UITrait.inst.lastPaintY = UITrait.inst.paintVec.y;
 
-			if (UITrait.inst.selectedTool == ToolParticle) {
+			if (Context.tool == ToolParticle) {
 				UITrait.inst.painted = 0; // Always paint particles
 			}
 
-			var decal = UITrait.inst.selectedTool == ToolDecal || UITrait.inst.selectedTool == ToolText;
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			var paintFrames = decal ? 1 : 4;
 
 			if (UITrait.inst.painted <= paintFrames) {
-				UITrait.inst.pdirty = 1;
-				UITrait.inst.rdirty = 2;
+				Context.pdirty = 1;
+				Context.rdirty = 2;
 			}
 		}
 

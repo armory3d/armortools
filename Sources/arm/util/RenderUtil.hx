@@ -24,16 +24,16 @@ class RenderUtil {
 		sphere.visible = true;
 		var meshes = Scene.active.meshes;
 		Scene.active.meshes = [sphere];
-		var painto = UITrait.inst.paintObject;
-		UITrait.inst.paintObject = sphere;
+		var painto = Context.paintObject;
+		Context.paintObject = sphere;
 
 		if (UITrait.inst.worktab.position == SpaceScene) {
-			sphere.materials[0] = UITrait.inst.selectedMaterialScene.data;
-			UITrait.inst.selectedMaterialScene.previewReady = true;
+			sphere.materials[0] = Context.materialScene.data;
+			Context.materialScene.previewReady = true;
 		}
 		else {
-			sphere.materials[0] = UITrait.inst.materials[0].data;
-			UITrait.inst.selectedMaterial.previewReady = true;
+			sphere.materials[0] = Project.materials[0].data;
+			Context.material.previewReady = true;
 		}
 
 		UITrait.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
@@ -67,7 +67,7 @@ class RenderUtil {
 		// Restore
 		sphere.visible = false;
 		Scene.active.meshes = meshes;
-		UITrait.inst.paintObject = painto;
+		Context.paintObject = painto;
 
 		Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 		ViewportUtil.updateCameraType(UITrait.inst.cameraType);
@@ -78,7 +78,7 @@ class RenderUtil {
 		probe.raw.strength = savedProbe;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		MaterialParser.parseMeshMaterial();
-		UITrait.inst.ddirty = 0;
+		Context.ddirty = 0;
 	}
 
 	public static function makeDecalPreview() {
@@ -94,8 +94,8 @@ class RenderUtil {
 		plane.visible = true;
 		var meshes = Scene.active.meshes;
 		Scene.active.meshes = [plane];
-		var painto = UITrait.inst.paintObject;
-		UITrait.inst.paintObject = plane;
+		var painto = Context.paintObject;
+		Context.paintObject = plane;
 		
 		UITrait.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
 		var m = Mat4.identity();
@@ -126,7 +126,7 @@ class RenderUtil {
 		// Restore
 		plane.visible = false;
 		Scene.active.meshes = meshes;
-		UITrait.inst.paintObject = painto;
+		Context.paintObject = painto;
 
 		Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
@@ -138,7 +138,7 @@ class RenderUtil {
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
 		
 		MaterialParser.parseMeshMaterial();
-		UITrait.inst.ddirty = 0;
+		Context.ddirty = 0;
 	}
 
 	public static function makeTextPreview() {

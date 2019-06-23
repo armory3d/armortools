@@ -180,7 +180,7 @@ class LayerSlot {
 		g.begin();
 		iron.App.removeRender(clearMask);
 
-		UITrait.inst.layerPreviewDirty = true;
+		Context.layerPreviewDirty = true;
 		createMaskColor = 0;
 		createMaskImage = null;
 	}
@@ -222,7 +222,7 @@ class LayerSlot {
 	}
 
 	public function duplicate() {
-		var layers = UITrait.inst.layers;
+		var layers = Project.layers;
 		var i = 0;
 		while (i++ < layers.length) if (layers[i] == this) break;
 		i++;

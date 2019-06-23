@@ -2,6 +2,7 @@ package arm;
 
 import kha.Window;
 import zui.Nodes;
+import zui.Canvas;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -10,7 +11,6 @@ import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.Path;
-import arm.util.Lz4;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
@@ -22,6 +22,17 @@ import arm.io.ImportArm;
 using StringTools;
 
 class Project {
+
+	public static var raw:TProjectFormat;
+	public static var filepath = "";
+	public static var assets:Array<TAsset> = [];
+	public static var assetNames:Array<String> = [];
+	public static var assetId = 0;
+	public static var materials:Array<MaterialSlot> = null;
+	public static var materialsScene:Array<MaterialSlot> = null;
+	public static var brushes:Array<BrushSlot> = null;
+	public static var layers:Array<LayerSlot> = null;
+
 	public static function projectOpen() {
 		App.showFiles = true;
 		App.whandle.redraws = 2;
@@ -44,7 +55,7 @@ class Project {
 	}
 
 	public static function projectSave() {
-		if (UITrait.inst.projectPath == "") {
+		if (filepath == "") {
 			projectSaveAs();
 			return;
 		}
@@ -61,31 +72,31 @@ class Project {
 		App.filesDone = function(path:String) {
 			var f = App.filenameHandle.text;
 			if (f == "") f = "untitled";
-			UITrait.inst.projectPath = path + "/" + f;
-			if (!UITrait.inst.projectPath.endsWith(".arm")) UITrait.inst.projectPath += ".arm";
+			filepath = path + "/" + f;
+			if (!filepath.endsWith(".arm")) filepath += ".arm";
 			projectSave();
 		};
 	}
 
 	public static function projectNew(resetLayers = true) {
 		Window.get(0).title = "ArmorPaint";
-		UITrait.inst.projectPath = "";
-		if (UITrait.inst.mergedObject != null) {
-			UITrait.inst.mergedObject.remove();
-			Data.deleteMesh(UITrait.inst.mergedObject.data.handle);
-			UITrait.inst.mergedObject = null;
+		filepath = "";
+		if (Context.mergedObject != null) {
+			Context.mergedObject.remove();
+			Data.deleteMesh(Context.mergedObject.data.handle);
+			Context.mergedObject = null;
 		}
 
 		ViewportUtil.resetViewport();
-		UITrait.inst.layerPreviewDirty = true;
+		Context.layerPreviewDirty = true;
 		LayerSlot.counter = 0;
 
-		UITrait.inst.paintObject = UITrait.inst.mainObject();
+		Context.paintObject = Context.mainObject();
 
-		UITrait.inst.selectPaintObject(UITrait.inst.mainObject());
-		for (i in 1...UITrait.inst.paintObjects.length) {
-			var p = UITrait.inst.paintObjects[i];
-			if (p == UITrait.inst.paintObject) continue;
+		Context.selectPaintObject(Context.mainObject());
+		for (i in 1...Context.paintObjects.length) {
+			var p = Context.paintObjects[i];
+			if (p == Context.paintObject) continue;
 			Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
@@ -98,7 +109,7 @@ class Project {
 				m.remove();
 			}
 		}
-		var handle = UITrait.inst.paintObject.data.handle;
+		var handle = Context.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			Data.deleteMesh(handle);
 		}
@@ -136,30 +147,30 @@ class Project {
 			if (current != null) current.end();
 
 			UITrait.inst.pickerMaskHandle.position = 0;
-			UITrait.inst.paintObject.setData(md);
-			UITrait.inst.paintObject.transform.scale.set(1, 1, 1);
-			UITrait.inst.paintObject.transform.buildMatrix();
-			UITrait.inst.paintObject.name = n;
-			UITrait.inst.paintObjects = [UITrait.inst.paintObject];
+			Context.paintObject.setData(md);
+			Context.paintObject.transform.scale.set(1, 1, 1);
+			Context.paintObject.transform.buildMatrix();
+			Context.paintObject.name = n;
+			Context.paintObjects = [Context.paintObject];
 			Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-				UITrait.inst.materials = [new MaterialSlot(m)];
+				materials = [new MaterialSlot(m)];
 			});
-			UITrait.inst.selectedMaterial = UITrait.inst.materials[0];
+			Context.material = materials[0];
 			UINodes.inst.canvasMap = new Map();
 			UINodes.inst.canvasBrushMap = new Map();
-			UITrait.inst.brushes = [new BrushSlot()];
-			UITrait.inst.selectedBrush = UITrait.inst.brushes[0];
+			brushes = [new BrushSlot()];
+			Context.brush = brushes[0];
 
 			History.reset();
 			
 			UINodes.inst.updateCanvasMap();
 			MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
-			for (a in UITrait.inst.assets) Data.deleteImage(a.file);
-			UITrait.inst.assets = [];
-			UITrait.inst.assetNames = [];
-			UITrait.inst.assetId = 0;
-			UITrait.inst.ddirty = 4;
+			for (a in assets) Data.deleteImage(a.file);
+			assets = [];
+			assetNames = [];
+			assetId = 0;
+			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UITrait.inst.hwnd1.redraws = 2;
 			UITrait.inst.hwnd2.redraws = 2;
@@ -167,10 +178,10 @@ class Project {
 			if (resetLayers) {
 				// for (l in layers) l.unload();
 				var layer = new LayerSlot();
-				UITrait.inst.layers = [layer];
-				UITrait.inst.setLayer(layer);
+				layers = [layer];
+				Context.setLayer(layer);
 				if (UITrait.inst.projectType == 1) {
-					layer.material_mask = UITrait.inst.materials[0];
+					layer.material_mask = materials[0];
 					Layers.updateFillLayers(4);
 				}
 				else {
