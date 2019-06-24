@@ -1032,21 +1032,22 @@ class MaterialBuilder {
 				frag.write('vec4 col_nor0;');
 				frag.write('vec4 col_pack0;');
 				frag.write('vec3 n0;');
-				var numLayers = 1;
-				for (i in 1...Project.layers.length) {
+				var len = Project.layers.length;
+				var start = len - 1;
+				var maxLayers = getMaxVisibleLayers();
+				var count = 1;
+				for (i in 1...len) {
+					if (start == 1) break;
+					start--;
+					var l = Project.layers[len - i];
+					if (l.visible) {
+						count++;
+						if (count >= maxLayers) break;
+					}
+				}
+				for (i in start...len) {
 					var l = Project.layers[i];
 					if (!l.visible) continue;
-					#if kha_direct3d11
-					// 128 texture slots available
-					// 4 textures per layer (3 + 1 mask)
-					// 32 layers - base + 31 on top
-					var maxLayers = 31; 
-					#else
-					// 32 texture slots available
-					var maxLayers = 7;
-					#end
-					if (numLayers > maxLayers) break;
-					numLayers++;
 					var id = l.id;
 
 					if (l.objectMask > 0) {
@@ -1186,6 +1187,18 @@ class MaterialBuilder {
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();
 		return con_mesh;
+	}
+
+	static function getMaxVisibleLayers():Int {
+		#if kha_direct3d11
+		// 128 texture slots available
+		// 4 textures per layer (3 + 1 mask)
+		// 32 layers - base + 31 on top
+		return 31;
+		#else
+		// 32 texture slots available
+		return 7;
+		#end
 	}
 
 	#if rp_voxelao
