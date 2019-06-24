@@ -6,6 +6,7 @@ import zui.Canvas;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
+import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
@@ -32,6 +33,7 @@ class Project {
 	public static var materialsScene:Array<MaterialSlot> = null;
 	public static var brushes:Array<BrushSlot> = null;
 	public static var layers:Array<LayerSlot> = null;
+	public static var paintObjects:Array<MeshObject> = null;
 
 	public static function projectOpen() {
 		UIFiles.show = true;
@@ -85,13 +87,12 @@ class Project {
 
 		ViewportUtil.resetViewport();
 		Context.layerPreviewDirty = true;
-		LayerSlot.counter = 0;
 
 		Context.paintObject = Context.mainObject();
 
 		Context.selectPaintObject(Context.mainObject());
-		for (i in 1...Context.paintObjects.length) {
-			var p = Context.paintObjects[i];
+		for (i in 1...paintObjects.length) {
+			var p = paintObjects[i];
 			if (p == Context.paintObject) continue;
 			Data.deleteMesh(p.data.handle);
 			p.remove();
@@ -147,7 +148,7 @@ class Project {
 			Context.paintObject.transform.scale.set(1, 1, 1);
 			Context.paintObject.transform.buildMatrix();
 			Context.paintObject.name = n;
-			Context.paintObjects = [Context.paintObject];
+			paintObjects = [Context.paintObject];
 			Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 				materials = [new MaterialSlot(m)];
 			});

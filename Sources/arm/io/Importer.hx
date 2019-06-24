@@ -80,9 +80,9 @@ class Importer {
 
 		Context.selectPaintObject(Context.mainObject());
 
-		if (Context.paintObjects.length > 1) {
+		if (Project.paintObjects.length > 1) {
 			// Sort by name
-			Context.paintObjects.sort(function(a, b):Int {
+			Project.paintObjects.sort(function(a, b):Int {
 				if (a.name < b.name) return -1;
 				else if (a.name > b.name) return 1;
 				return 0;
@@ -189,8 +189,8 @@ class Importer {
 				Context.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
-				for (i in 0...Context.paintObjects.length) {
-					var p = Context.paintObjects[i];
+				for (i in 0...Project.paintObjects.length) {
+					var p = Project.paintObjects[i];
 					if (p == Context.paintObject) continue;
 					Data.deleteMesh(p.data.handle);
 					p.remove();
@@ -215,7 +215,7 @@ class Importer {
 					g.vertexBufferMap.remove("pos");
 				}
 
-				Context.paintObjects = [Context.paintObject];
+				Project.paintObjects = [Context.paintObject];
 			}
 
 			Context.ddirty = 4;
@@ -264,7 +264,7 @@ class Importer {
 			object.name = mesh.name;
 			object.skip_context = "paint";
 
-			Context.paintObjects.push(object);
+			Project.paintObjects.push(object);
 
 			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;

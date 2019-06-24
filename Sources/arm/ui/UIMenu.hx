@@ -74,8 +74,8 @@ class UIMenu {
 				if (ui.button("Exit", Left)) { System.stop(); }
 			}
 			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, "Ctrl+Z")) History.doUndo();
-				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) History.doRedo();
+				if (ui.button("Undo", Left, "Ctrl+Z")) History.undo();
+				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) History.redo();
 				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {

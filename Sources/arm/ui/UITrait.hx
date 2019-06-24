@@ -295,6 +295,7 @@ class UITrait {
 				MaterialParser.parseMeshMaterial();
 				MaterialParser.parsePaintMaterial();
 				Context.ddirty = 0;
+				History.reset();
 				if (History.undoLayers == null) {
 					History.undoLayers = [];
 					for (i in 0...Config.raw.undo_steps) {
@@ -357,7 +358,7 @@ class UITrait {
 
 		Context.object = Scene.active.getChild("Cube");
 		Context.paintObject = cast(Context.object, MeshObject);
-		Context.paintObjects = [Context.paintObject];
+		Project.paintObjects = [Context.paintObject];
 
 		if (App.fileArg == "") {
 			iron.App.notifyOnRender(Layers.initLayers);
@@ -665,8 +666,8 @@ class UITrait {
 						  (kb.down("control") && kb.started("y"));
 		#end
 
-		if (undoPressed) History.doUndo();
-		else if (redoPressed) History.doRedo();
+		if (undoPressed) History.undo();
+		else if (redoPressed) History.redo();
 
 		if (worktab.position == SpaceScene) {
 			arm.plugin.Gizmo.update();

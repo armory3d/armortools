@@ -41,7 +41,7 @@ class ExportArm {
 		for (b in Project.brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
 
 		var md:Array<TMeshData> = [];
-		for (p in Context.paintObjects) md.push(p.data.raw);
+		for (p in Project.paintObjects) md.push(p.data.raw);
 
 		var asset_files:Array<String> = [];
 		for (a in Project.assets) {

@@ -9,7 +9,7 @@ class ExportObj {
 	public static function run(path:String) {
 		var s = "";
 		var off = 0;
-		for (p in Context.paintObjects) {
+		for (p in Project.paintObjects) {
 			var mesh = p.data.raw;
 			var sc = p.data.scalePos;
 			var posa = mesh.vertex_arrays[0].values;

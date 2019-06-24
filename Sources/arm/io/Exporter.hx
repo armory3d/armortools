@@ -155,7 +155,7 @@ class Exporter {
 			texpaint_nor = selectedLayer.texpaint_nor;
 			texpaint_pack = selectedLayer.texpaint_pack;
 			if (selectedLayer.objectMask > 0) { // Append object mask name
-				f += "_" + Context.paintObjects[selectedLayer.objectMask].name;
+				f += "_" + Project.paintObjects[selectedLayer.objectMask].name;
 			}
 		}
 

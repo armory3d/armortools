@@ -25,7 +25,6 @@ class Context {
 	public static var texture:TAsset = null;
 	public static var object:Object;
 	public static var paintObject:MeshObject;
-	public static var paintObjects:Array<MeshObject> = null;
 	public static var mergedObject:MeshObject = null; // For object mask
 	public static var tool = 0;
 
@@ -141,7 +140,7 @@ class Context {
 
 	public static function selectPaintObject(o:MeshObject) {
 		UITrait.inst.headerHandle.redraws = 2;
-		for (p in paintObjects) p.skip_context = "paint";
+		for (p in Project.paintObjects) p.skip_context = "paint";
 		paintObject = o;
 
 		var mask = layer.objectMask;
@@ -155,8 +154,8 @@ class Context {
 	}
 
 	public static function mainObject():MeshObject {
-		for (po in paintObjects) if (po.children.length > 0) return po;
-		return paintObjects[0];
+		for (po in Project.paintObjects) if (po.children.length > 0) return po;
+		return Project.paintObjects[0];
 	}
 
 	public static function removeMaterialCache() {

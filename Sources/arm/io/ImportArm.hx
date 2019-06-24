@@ -31,7 +31,7 @@ class ImportArm {
 			Context.paintObject.transform.scale.set(1, 1, 1);
 			Context.paintObject.transform.buildMatrix();
 			Context.paintObject.name = md.name;
-			Context.paintObjects = [Context.paintObject];
+			Project.paintObjects = [Context.paintObject];
 			iron.App.notifyOnRender(Layers.initLayers);
 			History.reset();
 		});
@@ -41,7 +41,6 @@ class ImportArm {
 		Data.getBlob(path, function(b:Blob) {
 
 			Context.layersPreviewDirty = true;
-			LayerSlot.counter = 0;
 			var resetLayers = false;
 			Project.projectNew(resetLayers);
 			Project.filepath = path;
@@ -124,7 +123,7 @@ class ImportArm {
 				Context.paintObject.transform.scale.set(1, 1, 1);
 				Context.paintObject.transform.buildMatrix();
 				Context.paintObject.name = md.name;
-				Context.paintObjects = [Context.paintObject];
+				Project.paintObjects = [Context.paintObject];
 			});
 
 			for (i in 1...project.mesh_datas.length) {
@@ -133,7 +132,7 @@ class ImportArm {
 					var object = iron.Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
-					Context.paintObjects.push(object);					
+					Project.paintObjects.push(object);
 				});
 			}
 

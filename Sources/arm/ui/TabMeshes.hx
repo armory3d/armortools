@@ -21,7 +21,7 @@ class TabMeshes {
 
 			if (ui.panel(Id.handle({selected: false}), "Scene", 0, true)) {
 				ui.indent();
-				for (o in Context.paintObjects) {
+				for (o in Project.paintObjects) {
 					ui.text(o.name);
 				}
 				ui.unindent();

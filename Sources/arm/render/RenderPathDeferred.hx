@@ -517,37 +517,8 @@ class RenderPathDeferred {
 		@:privateAccess Scene.active.camera.frame = taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
 
-		var tid = Context.layer.id;
-
 		if (History.pushUndo && History.undoLayers != null) {
-			var isMask = Context.layerIsMask;
-			var i = History.undoI;
-			if (isMask) {
-				path.setTarget("texpaint_mask_undo" + i);
-				path.bindTarget("texpaint_mask" + tid, "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-			}
-			else {
-				path.setTarget("texpaint_undo" + i, ["texpaint_nor_undo" + i, "texpaint_pack_undo" + i]);
-				path.bindTarget((isMask ? "texpaint_mask" : "texpaint") + tid, "tex0");
-				path.bindTarget("texpaint_nor" + tid, "tex1");
-				path.bindTarget("texpaint_pack" + tid, "tex2");
-				path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-			}
-			var undoLayer = History.undoLayers[History.undoI];
-			undoLayer.targetObject = Context.paintObject;
-			undoLayer.targetLayer = Context.layer;
-			undoLayer.targetIsMask = isMask;
-			History.undoI = (History.undoI + 1) % Config.raw.undo_steps;
-			if (History.undos < Config.raw.undo_steps) History.undos++;
-			if (History.redos > 0) {
-				for (i in 0...History.redos) History.stack.pop();
-				History.redos = 0;
-			}
-			History.pushUndo = false;
-
-			History.stack.push(UITrait.inst.toolNames[Context.tool]);
-			while (History.stack.length > Config.raw.undo_steps + 1) History.stack.shift();
+			History.paint();
 		}
 
 		// 2D paint
@@ -560,7 +531,7 @@ class RenderPathDeferred {
 			// Set plane mesh
 			painto = Context.paintObject;
 			visibles = [];
-			for (p in Context.paintObjects) {
+			for (p in Project.paintObjects) {
 				visibles.push(p.visible);
 				p.visible = false;
 			}
@@ -668,8 +639,8 @@ class RenderPathDeferred {
 		if (UITrait.inst.paint2d) {
 			// Restore paint mesh
 			planeo.visible = false;
-			for (i in 0...Context.paintObjects.length) {
-				Context.paintObjects[i].visible = visibles[i];
+			for (i in 0...Project.paintObjects.length) {
+				Project.paintObjects[i].visible = visibles[i];
 			}
 			if (Context.mergedObject != null) {
 				Context.mergedObject.visible = mergedObjectVisible;

@@ -15,7 +15,7 @@ class MeshUtil {
 		var vlen = 0;
 		var ilen = 0;
 		var maxScale = 0.0;
-		var paintObjects = Context.paintObjects;
+		var paintObjects = Project.paintObjects;
 		for (i in 0...paintObjects.length) {
 			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
 			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
@@ -71,7 +71,7 @@ class MeshUtil {
 	}
 	
 	public static function swapAxis(a:Int, b:Int) {
-		for (p in Context.paintObjects) {
+		for (p in Project.paintObjects) {
 			// Remapping vertices, backle up
 			// 0 - x, 1 - y, 2 - z
 			var vas = p.data.raw.vertex_arrays;
@@ -120,7 +120,7 @@ class MeshUtil {
 	}
 
 	public static function flipNormals() {
-		for (p in Context.paintObjects) {
+		for (p in Project.paintObjects) {
 			var g = p.data.geom;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / 8)) {
@@ -138,7 +138,7 @@ class MeshUtil {
 		var vc = new Vec4();
 		var cb = new Vec4();
 		var ab = new Vec4();
-		for (p in Context.paintObjects) {
+		for (p in Project.paintObjects) {
 			var g = p.data.geom;
 			var inda = g.indices[0];
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex

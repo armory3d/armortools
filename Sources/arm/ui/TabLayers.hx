@@ -13,16 +13,19 @@ class TabLayers {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Layers")) {
 			ui.row([1/4,1/4,1/2]);
-			if (ui.button("New")) Layers.newLayer();
+			if (ui.button("New")) {
+				Layers.newLayer();
+				History.newLayer();
+			}
 			if (ui.button("2D View")) UITrait.inst.show2DView();
 			else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
 			
 			var ar = ["All"];
-			for (p in Context.paintObjects) ar.push(p.name);
+			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
 			UITrait.inst.layerFilter = ui.combo(filterHandle, ar, "Filter");
 			if (filterHandle.changed) {
-				for (p in Context.paintObjects) {
+				for (p in Project.paintObjects) {
 					p.visible = UITrait.inst.layerFilter == 0 || p.name == ar[UITrait.inst.layerFilter];
 					Layers.setObjectMask();
 				}
@@ -111,11 +114,13 @@ class TabLayers {
 							if (ui.button("Delete", Left)) {
 								l.deleteMask();
 								Context.setLayer(l);
+								History.deleteMask();
 							}
 							if (ui.button("Apply", Left)) {
 								Context.setLayer(l);
 								l.applyMask();
 								Context.setLayer(l); // Parse mesh material
+								History.applyMask();
 							}
 						});
 					}
@@ -163,32 +168,37 @@ class TabLayers {
 						else {
 							if (ui.button("Delete", Left)) {
 								Context.layer = l;
+								History.deleteLayer();
 								Layers.deleteSelectedLayer();
 							}
 							if (ui.button("Move Up", Left)) {
 								if (i < Project.layers.length - 1) {
 									Context.setLayer(l);
-									var t = Project.layers[i + 1];
+									var target = Project.layers[i + 1];
 									Project.layers[i + 1] = Project.layers[i];
-									Project.layers[i] = t;
+									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
+									History.orderLayers(i);
 								}
 							}
 							if (ui.button("Move Down", Left)) {
 								if (i > 1) {
 									Context.setLayer(l);
-									var t = Project.layers[i - 1];
+									var target = Project.layers[i - 1];
 									Project.layers[i - 1] = Project.layers[i];
-									Project.layers[i] = t;
+									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
+									History.orderLayers(i);
 								}
 							}
 							if (ui.button("Merge Down", Left)) {
 								Context.setLayer(l);
+								iron.App.notifyOnRender(History.mergeLayers);
 								iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 							}
 							if (ui.button("Duplicate", Left)) {
 								Context.setLayer(l);
+								History.duplicateLayer();
 								function makeDupli(g:kha.graphics4.Graphics) {
 									g.end();
 									l = l.duplicate();
@@ -202,11 +212,13 @@ class TabLayers {
 								l.createMask(0x00000000);
 								Context.setLayer(l, true);
 								Context.layerPreviewDirty = true;
+								History.newMask();
 							}
 							if (ui.button("White Mask", Left)) {
 								l.createMask(0xffffffff);
 								Context.setLayer(l, true);
 								Context.layerPreviewDirty = true;
+								History.newMask();
 							}
 						}
 
@@ -263,7 +275,7 @@ class TabLayers {
 					@:privateAccess ui.endElement();
 
 					var ar = ["Shared"];
-					for (p in Context.paintObjects) ar.push(p.name);
+					for (p in Project.paintObjects) ar.push(p.name);
 					var h = Id.handle().nest(l.id);
 					h.position = l.objectMask;
 					l.objectMask = ui.combo(h, ar, "Object");

@@ -1051,7 +1051,7 @@ class MaterialBuilder {
 					var id = l.id;
 
 					if (l.objectMask > 0) {
-						var uid = Context.paintObjects[l.objectMask - 1].uid;
+						var uid = Project.paintObjects[l.objectMask - 1].uid;
 						frag.add_uniform('int objectId', '_uid');
 						frag.write('if ($uid == objectId) {');
 					}

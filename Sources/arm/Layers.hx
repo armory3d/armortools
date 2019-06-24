@@ -98,7 +98,7 @@ class Layers {
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
 		var C = Config.raw;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
-			C.undo_steps = 1;
+			C.undo_steps = 2;
 			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;
 			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
 		}
@@ -130,8 +130,9 @@ class Layers {
 
 	public static function deleteSelectedLayer() {
 		Context.layer.unload();
+		var lpos = Project.layers.indexOf(Context.layer);
 		Project.layers.remove(Context.layer);
-		Context.setLayer(Project.layers[0]);
+		Context.setLayer(Project.layers[lpos - 1]);
 	}
 
 	public static function makePipe() {
@@ -344,14 +345,14 @@ class Layers {
 
 	public static function setObjectMask() {
 		var ar = ["None"];
-		for (p in Context.paintObjects) ar.push(p.name);
+		for (p in Project.paintObjects) ar.push(p.name);
 
 		var mask = Context.layer.objectMask;
 		if (UITrait.inst.layerFilter > 0) mask = UITrait.inst.layerFilter;
 		if (mask > 0) {
 			if (Context.mergedObject != null) Context.mergedObject.visible = false;
-			var o = Context.paintObjects[0];
-			for (p in Context.paintObjects) if (p.name == ar[mask]) { o = p; break; }
+			var o = Project.paintObjects[0];
+			for (p in Project.paintObjects) if (p.name == ar[mask]) { o = p; break; }
 			Context.selectPaintObject(o);
 		}
 		else {
@@ -364,12 +365,12 @@ class Layers {
 		}
 	}
 
-	public static function newLayer():LayerSlot {
+	public static function newLayer(clear = true):LayerSlot {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
 		Project.layers.push(l);
 		Context.setLayer(l);
-		iron.App.notifyOnRender(Layers.clearLastLayer);
+		if (clear) iron.App.notifyOnRender(Layers.clearLastLayer);
 		Context.layerPreviewDirty = true;
 		return l;
 	}

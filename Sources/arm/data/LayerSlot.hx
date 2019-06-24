@@ -7,7 +7,6 @@ import iron.object.MeshObject;
 import arm.ui.UITrait;
 
 class LayerSlot {
-	public static var counter = 0;
 	public var id = 0;
 	public var visible = true;
 	public var ext = "";
@@ -26,8 +25,8 @@ class LayerSlot {
 	public var material_mask:MaterialSlot = null; // Fill layer
 
 	// For undo layer
-	public var targetLayer:LayerSlot = null;
-	public var targetObject:MeshObject = null;
+	public var targetLayer:Int;
+	public var targetObject:Int;
 	public var targetIsMask = false;
 
 	static var first = true;
@@ -69,7 +68,8 @@ class LayerSlot {
 		}
 
 		if (ext == "") {
-			id = counter++;
+			id = 0;
+			for (l in Project.layers) if (l.id >= id) id = l.id + 1;
 			ext = id + "";
 		}
 		this.ext = ext;
