@@ -112,14 +112,27 @@ class UIMenu {
 					Krom.sysCommand('open "https://armorpaint.org/manual"');
 					#end
 				}
-				if (ui.button("Report Bug", Left)) {
-					// var url = "https://github.com/armory3d/armorpaint/issues/new?body=body";
+				if (ui.button("Issue Tracker", Left)) {
 					#if krom_windows
 					Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
 					#elseif krom_linux
 					Krom.sysCommand('xdg-open "https://github.com/armory3d/armorpaint/issues"');
 					#else
 					Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
+					#end
+				}
+				if (ui.button("Report Bug", Left)) {
+					var ver = App.version;
+					var sha = Macro.buildSha();
+					sha = sha.substr(1, sha.length - 2);
+					var os = System.systemId;
+					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + ver + "-" + sha + ",%20" + os + "*";
+					#if krom_windows
+					Krom.sysCommand('explorer "$url"');
+					#elseif krom_linux
+					Krom.sysCommand('xdg-open $url');
+					#else
+					Krom.sysCommand('open $url');
 					#end
 				}
 				// if (ui.button("Request Feature", Left)) {}
