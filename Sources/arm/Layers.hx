@@ -132,7 +132,8 @@ class Layers {
 		Context.layer.unload();
 		var lpos = Project.layers.indexOf(Context.layer);
 		Project.layers.remove(Context.layer);
-		Context.setLayer(Project.layers[lpos - 1]);
+		// Undo can remove base layer and then restore it from undo layers
+		if (lpos > 0) Context.setLayer(Project.layers[lpos - 1]);
 	}
 
 	public static function makePipe() {
@@ -378,16 +379,10 @@ class Layers {
 	public static function toFillLayer(l:LayerSlot) {
 		Context.setLayer(l);
 		l.material_mask = Context.material;
-		function makeFill(g:kha.graphics4.Graphics) {
-			g.end();
-			Layers.updateFillLayers(4);
-			MaterialParser.parsePaintMaterial();
-			Context.layerPreviewDirty = true;
-			UITrait.inst.hwnd.redraws = 2;
-			g.begin();
-			iron.App.removeRender(makeFill);
-		}
-		iron.App.notifyOnRender(makeFill);
+		Layers.updateFillLayers(4);
+		MaterialParser.parsePaintMaterial();
+		Context.layerPreviewDirty = true;
+		UITrait.inst.hwnd.redraws = 2;
 	}
 
 	public static function toPaintLayer(l:LayerSlot) {
@@ -399,14 +394,23 @@ class Layers {
 	}
 
 	public static function createFillLayer() {
-		var l = newLayer();
-		l.objectMask = UITrait.inst.layerFilter;
-		toFillLayer(l);
+		function makeFill(g:kha.graphics4.Graphics) {
+			g.end();
+			var l = newLayer();
+			History.newLayer();
+			l.objectMask = UITrait.inst.layerFilter;
+			History.toFillLayer();
+			toFillLayer(l);
+			g.begin();
+			iron.App.removeRender(makeFill);
+		}
+		iron.App.notifyOnRender(makeFill);
 	}
 
 	public static function createImageMask(asset:zui.Canvas.TAsset) {
 		var l = Context.layer;
 		if (l != Project.layers[0]) {
+			History.newMask();
 			l.createMask(0x00000000, true, UITrait.inst.getImage(asset));
 			Context.setLayer(l, true);
 			Context.layerPreviewDirty = true;

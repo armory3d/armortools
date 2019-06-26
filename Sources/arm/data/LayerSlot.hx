@@ -24,11 +24,6 @@ class LayerSlot {
 	public var maskOpacity = 1.0; // Opacity mask
 	public var material_mask:MaterialSlot = null; // Fill layer
 
-	// For undo layer
-	public var targetLayer:Int;
-	public var targetObject:Int;
-	public var targetIsMask = false;
-
 	static var first = true;
 
 	public var objectMask = 0;

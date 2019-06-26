@@ -112,15 +112,22 @@ class TabLayers {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right);
 							if (ui.button("Delete", Left)) {
-								l.deleteMask();
 								Context.setLayer(l);
 								History.deleteMask();
+								l.deleteMask();
+								Context.setLayer(l);
 							}
 							if (ui.button("Apply", Left)) {
-								Context.setLayer(l);
-								l.applyMask();
-								Context.setLayer(l); // Parse mesh material
-								History.applyMask();
+								function makeApply(g:kha.graphics4.Graphics) {
+									g.end();
+									Context.setLayer(l);
+									History.applyMask();
+									l.applyMask();
+									Context.setLayer(l); // Parse mesh material
+									g.begin();
+									iron.App.removeRender(makeApply);
+								}
+								iron.App.notifyOnRender(makeApply);
 							}
 						});
 					}
@@ -157,10 +164,24 @@ class TabLayers {
 						}
 
 						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-							Layers.toFillLayer(l);
+							function makeFill(g:kha.graphics4.Graphics) {
+								g.end();
+								History.toFillLayer();
+								Layers.toFillLayer(l);
+								g.begin();
+								iron.App.removeRender(makeFill);
+							}
+							iron.App.notifyOnRender(makeFill);
 						}
 						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-							Layers.toPaintLayer(l);
+							function makePaint(g:kha.graphics4.Graphics) {
+								g.end();
+								History.toPaintLayer();
+								Layers.toPaintLayer(l);
+								g.begin();
+								iron.App.removeRender(makePaint);
+							}
+							iron.App.notifyOnRender(makePaint);
 						}
 
 						if (l == Project.layers[0]) {
@@ -174,21 +195,21 @@ class TabLayers {
 							if (ui.button("Move Up", Left)) {
 								if (i < Project.layers.length - 1) {
 									Context.setLayer(l);
+									History.orderLayers(i + 1);
 									var target = Project.layers[i + 1];
 									Project.layers[i + 1] = Project.layers[i];
 									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
-									History.orderLayers(i);
 								}
 							}
 							if (ui.button("Move Down", Left)) {
 								if (i > 1) {
 									Context.setLayer(l);
+									History.orderLayers(i - 1);
 									var target = Project.layers[i - 1];
 									Project.layers[i - 1] = Project.layers[i];
 									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
-									History.orderLayers(i);
 								}
 							}
 							if (ui.button("Merge Down", Left)) {

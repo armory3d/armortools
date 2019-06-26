@@ -592,9 +592,8 @@ class UITrait {
 					cloneStartY = my;
 				}
 				else {
-					if (brushTime == 0) { // Paint started
+					if (brushTime == 0 && !App.isDragging) { // Paint started
 						History.pushUndo = true;
-						kha.Window.get(0).title = UIFiles.filename + "* - ArmorPaint";
 						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
 							cloneDeltaY = (cloneStartY - my) / iron.App.h();
