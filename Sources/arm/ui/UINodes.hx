@@ -172,7 +172,7 @@ class UINodes {
 
 		if (!show) return;
 		if (!App.uienabled) return;
-		var keyboard = Input.getKeyboard();
+		var kb = Input.getKeyboard();
 
 		var lay = Config.raw.ui_layout;
 		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
@@ -196,14 +196,14 @@ class UINodes {
 		}
 
 		if (nodes.nodesSelected.length > 0) {
-			if (keyboard.started("left")) for (n in nodes.nodesSelected) n.x -= 1;
-			else if (keyboard.started("right")) for (n in nodes.nodesSelected) n.x += 1;
-			if (keyboard.started("up")) for (n in nodes.nodesSelected) n.y -= 1;
-			else if (keyboard.started("down")) for (n in nodes.nodesSelected) n.y += 1;
+			if (kb.started("left")) for (n in nodes.nodesSelected) n.x -= 1;
+			else if (kb.started("right")) for (n in nodes.nodesSelected) n.x += 1;
+			if (kb.started("up")) for (n in nodes.nodesSelected) n.y -= 1;
+			else if (kb.started("down")) for (n in nodes.nodesSelected) n.y += 1;
 		}
 
 		// Node search popup
-		if (keyboard.started(Config.keymap.node_search)) nodeSearch();
+		if (kb.started(Config.keymap.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
 			ui.inputY = mouse.y + App.y();
@@ -212,7 +212,7 @@ class UINodes {
 	}
 
 	function nodeSearch(x = -1, y = -1) {
-		var keyboard = Input.getKeyboard();
+		var kb = Input.getKeyboard();
 		var searchHandle = Id.handle();
 		var first = true;
 		UIMenu.draw(function(ui:Zui) {
@@ -236,7 +236,7 @@ class UINodes {
 				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
 				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
 			}
-			var enter = keyboard.down("enter");
+			var enter = kb.down("enter");
 			var count = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			var nodeList = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;

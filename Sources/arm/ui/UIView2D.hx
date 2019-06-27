@@ -200,7 +200,9 @@ class UIView2D {
 			if (panScale > 3.0) panScale = 3.0;
 		}
 
-		if (type == 0 && m.down("left")) {
+		if (type == 0 &&
+			(Operator.shortcut(Config.keymap.action_paint) ||
+			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint))) {
 			UITrait.inst.paint2d = true;
 		}
 

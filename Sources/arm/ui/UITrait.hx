@@ -396,11 +396,6 @@ class UITrait {
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 
 		var kb = Input.getKeyboard();
-		var shift = kb.down("shift");
-		var ctrl = kb.down("control");
-		var alt = kb.down("alt");
-		alt = false; // TODO: gets stuck after alt+tab
-
 		if (!App.uibox.isTyping) {
 			if (kb.started("escape")) {
 				UIBox.show = false;
@@ -479,7 +474,7 @@ class UITrait {
 			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
 
 			if (worktab.position == SpacePaint) {
-				if (shift) {
+				if (kb.down("shift")) {
 					if (kb.started("1")) Context.selectMaterial(0);
 					else if (kb.started("2")) Context.selectMaterial(1);
 					else if (kb.started("3")) Context.selectMaterial(2);
@@ -488,7 +483,7 @@ class UITrait {
 					else if (kb.started("6")) Context.selectMaterial(5);
 				}
 
-				if (!ctrl && !mouse.down("right")) {
+				if (!mouse.down("right")) { // Fly mode off
 					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
 					else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
 					else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
@@ -503,48 +498,44 @@ class UITrait {
 				}
 
 				// Radius
-				if (!ctrl && !shift) {
-					if (Context.tool == ToolBrush  ||
-						Context.tool == ToolEraser ||
-						Context.tool == ToolDecal  ||
-						Context.tool == ToolText   ||
-						Context.tool == ToolClone  ||
-						Context.tool == ToolBlur   ||
-						Context.tool == ToolParticle) {
-						if (Operator.shortcut(Config.keymap.brush_radius)) {
-							brushCanLock = true;
-							mouse.lock();
-							lockStartedX = mouse.x + iron.App.x();
-							lockStartedY = mouse.y + iron.App.y();
-						}
+				if (Context.tool == ToolBrush  ||
+					Context.tool == ToolEraser ||
+					Context.tool == ToolDecal  ||
+					Context.tool == ToolText   ||
+					Context.tool == ToolClone  ||
+					Context.tool == ToolBlur   ||
+					Context.tool == ToolParticle) {
+					if (Operator.shortcut(Config.keymap.brush_radius)) {
+						brushCanLock = true;
+						mouse.lock();
+						lockStartedX = mouse.x + iron.App.x();
+						lockStartedY = mouse.y + iron.App.y();
 					}
 				}
 			}
 
 			// Viewpoint
-			if (!shift && !alt) {
-				if (Operator.shortcut(Config.keymap.view_reset)) {
-					ViewportUtil.resetViewport();
-					ViewportUtil.scaleToBounds();
-				}
-				else if (Operator.shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
-				else if (Operator.shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
-				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-					cameraType = cameraType == 0 ? 1 : 0;
-					camHandle.position = cameraType;
-					ViewportUtil.updateCameraType(cameraType);
-					statusHandle.redraws = 2;
-				}
-				else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
+			if (Operator.shortcut(Config.keymap.view_reset)) {
+				ViewportUtil.resetViewport();
+				ViewportUtil.scaleToBounds();
 			}
+			else if (Operator.shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+			else if (Operator.shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
+			else if (Operator.shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+			else if (Operator.shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+			else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
+			else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+			else if (Operator.shortcut(Config.keymap.view_camera_type)) {
+				cameraType = cameraType == 0 ? 1 : 0;
+				camHandle.position = cameraType;
+				ViewportUtil.updateCameraType(cameraType);
+				statusHandle.redraws = 2;
+			}
+			else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
 		}
 
 		if (brushCanLock || brushLocked) {
@@ -578,8 +569,11 @@ class UITrait {
 
 		if (!App.uienabled) return;
 
-		var down = Operator.shortcut(Config.keymap.action_paint) || Input.getPen().down();
-		if (down && !kb.down("control")) {
+		var down = Operator.shortcut(Config.keymap.action_paint) ||
+				   (Operator.shortcut("alt+" + Config.keymap.action_paint) && Context.tool == ToolClone) ||
+				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
+				   (Input.getPen().down() && !kb.down("alt"));
+		if (down) {
 			var mx = mouse.x;
 			var my = mouse.y;
 			if (paint2d) mx -= iron.App.w();

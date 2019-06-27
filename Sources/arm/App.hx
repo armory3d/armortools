@@ -65,7 +65,14 @@ class App {
 			dropPath = dropPath.rtrim();
 		});
 
-		// System.notifyOnApplicationState(function(){}, function(){}, function(){}, function(){}, function(){});
+		System.notifyOnApplicationState(
+			// Release alt after alt-tab
+			function(){ @:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt); }, // Foreground
+			function(){}, // Resume
+			function(){}, // Pause
+			function(){}, // Background
+			function(){} // Shutdown
+		);
 
 		#if krom_windows
 		// if (untyped Krom.setSaveAndQuitCallback != null) {

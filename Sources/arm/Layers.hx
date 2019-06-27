@@ -396,7 +396,7 @@ class Layers {
 	public static function createFillLayer() {
 		function makeFill(g:kha.graphics4.Graphics) {
 			g.end();
-			var l = newLayer();
+			var l = newLayer(false);
 			History.newLayer();
 			l.objectMask = UITrait.inst.layerFilter;
 			History.toFillLayer();

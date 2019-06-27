@@ -50,10 +50,10 @@ class Config {
 		if (raw.keymap == null) {
 			raw.keymap = {};
 			raw.keymap.action_paint = "left";
-			raw.keymap.action_rotate = "right";
-			raw.keymap.action_rotate_light = "middle+shift";
-			raw.keymap.action_pan = "middle";
-			raw.keymap.action_zoom = "wheel";
+			raw.keymap.action_rotate = "alt+left";
+			raw.keymap.action_pan = "alt+middle";
+			raw.keymap.action_zoom = "alt+right";
+			raw.keymap.action_rotate_light = "shift+middle";
 			raw.keymap.select_material = "shift+number";
 			raw.keymap.cycle_layers = "ctrl+tab";
 			raw.keymap.brush_radius = "f";

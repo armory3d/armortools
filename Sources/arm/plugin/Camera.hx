@@ -38,48 +38,68 @@ class Camera {
 				reset();
 			}
 
+			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = UITrait.inst.cameraControls;
-			if (controls == 0) {
+			if (controls == 0) { // Rotate
+				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
+					redraws = 2;
+					var t = Context.object.transform;
+					var up = t.up().normalize();
+					t.rotate(up, mouse.movementX / 100);
+					var right = camera.rightWorld().normalize();
+					t.rotate(right, mouse.movementY / 100);
+					t.buildMatrix();
+					if (t.up().z < 0) {
+						t.rotate(right, -mouse.movementY / 100);
+					}
+				}
+
+				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
+					redraws = 2;
+					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
+					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
+					camera.transform.loc.add(look);
+					camera.transform.loc.add(right);
+					camera.buildMatrix();
+				}
+
+				if (Operator.shortcut(Config.keymap.action_zoom)) {
+					redraws = 2;
+					camera.transform.move(camera.look(), -mouse.movementY / 150);
+				}
+
 				if (mouse.wheelDelta != 0) {
 					redraws = 2;
 					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
 				}
-
-				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("right") && kb.down("space"))) {
-					redraws = 2;
-					if (kb.down("control")) {
-						camera.transform.move(camera.look(), mouse.movementX / 75);
-					}
-					else {
-						var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
-						var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
-						camera.transform.loc.add(look);
-						camera.transform.loc.add(right);
-						camera.buildMatrix();
-					}
-				}
-
-				if ((mouse.down("right") && !kb.down("space")) || (mouse.down("left") && kb.down("control"))) {
-					redraws = 2;
-					var t = Context.object.transform;
-
-					// Rotate X
-					var up = t.up().normalize();
-					t.rotate(up, mouse.movementX / 100);
-					
-					// Rotate Y
-					if (!kb.down("shift")) {
-						var right = camera.rightWorld().normalize();
-						t.rotate(right, mouse.movementY / 100);
-						t.buildMatrix();
-
-						if (t.up().z < 0) {
-							t.rotate(right, -mouse.movementY / 100);
-						}
-					}
-				}
 			}
-			else if (controls == 1) {
+			else if (controls == 1) { // Orbit
+				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
+					redraws = 2;
+					camera.transform.move(camera.lookWorld(), dist);
+					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
+					camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100);
+					if (camera.upWorld().z < 0) {
+						camera.transform.rotate(camera.rightWorld(), mouse.movementY / 100);
+					}
+					camera.transform.move(camera.lookWorld(), -dist);
+				}
+
+				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
+					redraws = 2;
+					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
+					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
+					camera.transform.loc.add(look);
+					camera.transform.loc.add(right);
+					camera.buildMatrix();
+				}
+
+				if (Operator.shortcut(Config.keymap.action_zoom)) {
+					redraws = 2;
+					var f = -mouse.movementY / 150;
+					camera.transform.move(camera.look(), f);
+					dist -= f;
+				}
 
 				if (mouse.wheelDelta != 0) {
 					redraws = 2;
@@ -88,47 +108,16 @@ class Camera {
 					dist -= f;
 				}
 
-				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("right") && kb.down("space"))) {
+				if (Operator.shortcut(Config.keymap.action_rotate_light)) {
 					redraws = 2;
-					if (kb.down("shift")) {
-						var light = iron.Scene.active.lights[0];
-						var m = iron.math.Mat4.identity();
-						m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
-						light.transform.local.multmat(m);
-						light.transform.decompose();
-					}
-					else if (kb.down("control")) {
-						var f = mouse.movementX / 75;
-						camera.transform.move(camera.look(), f);
-						dist -= f;
-					}
-					else {
-						var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
-						var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
-						camera.transform.loc.add(look);
-						camera.transform.loc.add(right);
-						camera.buildMatrix();
-					}
-				}
-
-				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("left") && kb.down("control"))) {
-					redraws = 2;
-					camera.transform.move(camera.lookWorld(), dist);
-					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
-					
-					// Rotate Y
-					if (!kb.down("shift")) {
-						camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100);
-						if (camera.upWorld().z < 0) {
-							camera.transform.rotate(camera.rightWorld(), mouse.movementY / 100);
-						}
-					}
-
-					camera.transform.move(camera.lookWorld(), -dist);
+					var light = iron.Scene.active.lights[0];
+					var m = iron.math.Mat4.identity();
+					m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
+					light.transform.local.multmat(m);
+					light.transform.decompose();
 				}
 			}
-			else if (controls == 2 && Operator.shortcut(Config.keymap.action_rotate)) {
-				
+			else if (controls == 2 && mouse.down("right")) {
 				var moveForward = kb.down("w") || kb.down("up") || mouse.wheelDelta < 0;
 				var moveBackward = kb.down("s") || kb.down("down") || mouse.wheelDelta > 0;
 				var strafeLeft = kb.down("a") || kb.down("left");
@@ -166,11 +155,9 @@ class Camera {
 					}
 				}
 
-				if (Operator.shortcut(Config.keymap.action_rotate)) {
-					Context.ddirty = 2;
-					camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
-					camera.transform.rotate(camera.right(), -mouse.movementY / 200);
-				}
+				Context.ddirty = 2;
+				camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
+				camera.transform.rotate(camera.right(), -mouse.movementY / 200);
 			}
 
 			if (redraws > 0) {

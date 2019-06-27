@@ -152,12 +152,32 @@ class TabPreferences {
 
 			ui.separator();
 			if (ui.panel(Id.handle({selected: false}), "Keymap", 1)) {
+
+				var presetHandle = Id.handle();
+				ui.combo(presetHandle, ["Default", "Blender"], "Preset", true);
+				if (presetHandle.changed) {
+					var preset = presetHandle.position;
+					var keymap = Config.keymap;
+					if (preset == 0) {
+						keymap.action_rotate = "alt+left";
+						keymap.action_pan = "alt+middle";
+						keymap.action_zoom = "alt+right";
+					}
+					else if (preset == 1) {
+						keymap.action_rotate = "middle";
+						keymap.action_pan = "shift+middle";
+						keymap.action_zoom = "ctrl+middle";
+					}
+				}
+				ui.separator(8, false);
+
 				var i = 0;
 				ui.changed = false;
-				for (k in Reflect.fields(Config.keymap)) {
-					var h = Id.handle().nest(i++, {text: Reflect.field(Config.keymap, k)});
-					var t = ui.textInput(h, k, Left);
-					Reflect.setField(Config.keymap, k, t);
+				for (key in Reflect.fields(Config.keymap)) {
+					var h = Id.handle().nest(i++);
+					h.text = Reflect.field(Config.keymap, key);
+					var text = ui.textInput(h, key, Left);
+					Reflect.setField(Config.keymap, key, text);
 				}
 				if (ui.changed) Config.applyConfig();
 			}
