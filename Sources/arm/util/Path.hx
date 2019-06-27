@@ -56,6 +56,7 @@ class Path {
 
 	public static function checkBaseTex(p:String):Bool {
 		return p.endsWith("_albedo") ||
+			   p.endsWith("-albedo") ||
 			   p.endsWith("_alb") ||
 			   p.endsWith("_basecol") ||
 			   p.endsWith("_basecolor") ||
@@ -77,6 +78,12 @@ class Path {
 
 	public static function checkNorTex(p:String):Bool {
 		return p.endsWith("_normal") ||
+			   p.endsWith("-normal") ||
+			   p.endsWith("-normal-dx") ||
+			   p.endsWith("_normal-dx") ||
+			   p.endsWith("-normal4-ue") ||
+			   p.endsWith("-normal-ogl") ||
+			   p.endsWith("_normal-ogl") ||
 			   p.endsWith("_nor") ||
 			   p.endsWith("_n") ||
 			   p.endsWith("_nrm");
@@ -84,6 +91,7 @@ class Path {
 
 	public static function checkOccTex(p:String):Bool {
 		return p.endsWith("_ao") ||
+			   p.endsWith("-ao") ||
 			   p.endsWith("_occlusion") ||
 			   p.endsWith("_o") ||
 			   p.endsWith("_occ");
@@ -91,6 +99,7 @@ class Path {
 
 	public static function checkRoughTex(p:String):Bool {
 		return p.endsWith("_roughness") ||
+			   p.endsWith("-roughness") ||
 			   p.endsWith("_roug") ||
 			   p.endsWith("_r") ||
 			   p.endsWith("_rough") ||
@@ -99,14 +108,17 @@ class Path {
 
 	public static function checkMetTex(p:String):Bool {
 		return p.endsWith("_metallic") ||
+			   p.endsWith("-metallic") ||
 			   p.endsWith("_metal") ||
 			   p.endsWith("_metalness") ||
+			   p.endsWith("-metalness") ||
 			   p.endsWith("_m") ||
 			   p.endsWith("_met");
 	}
 
 	public static function checkDispTex(p:String):Bool {
 		return p.endsWith("_displacement") ||
+			   p.endsWith("-height") ||
 			   p.endsWith("_height") ||
 			   p.endsWith("_h") ||
 			   p.endsWith("_disp");
