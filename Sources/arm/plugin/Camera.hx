@@ -45,7 +45,7 @@ class Camera {
 					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
 				}
 
-				if (mouse.down("middle") || (mouse.down("right") && kb.down("space"))) {
+				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("right") && kb.down("space"))) {
 					redraws = 2;
 					if (kb.down("control")) {
 						camera.transform.move(camera.look(), mouse.movementX / 75);
@@ -88,7 +88,7 @@ class Camera {
 					dist -= f;
 				}
 
-				if (mouse.down("middle") || (mouse.down("right") && kb.down("space"))) {
+				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("right") && kb.down("space"))) {
 					redraws = 2;
 					if (kb.down("shift")) {
 						var light = iron.Scene.active.lights[0];
@@ -111,7 +111,7 @@ class Camera {
 					}
 				}
 
-				if (mouse.down("right") || (mouse.down("left") && kb.down("control"))) {
+				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("left") && kb.down("control"))) {
 					redraws = 2;
 					camera.transform.move(camera.lookWorld(), dist);
 					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
@@ -127,7 +127,7 @@ class Camera {
 					camera.transform.move(camera.lookWorld(), -dist);
 				}
 			}
-			else if (controls == 2 && mouse.down("right")) {
+			else if (controls == 2 && Operator.shortcut(Config.keymap.action_rotate)) {
 				
 				var moveForward = kb.down("w") || kb.down("up") || mouse.wheelDelta < 0;
 				var moveBackward = kb.down("s") || kb.down("down") || mouse.wheelDelta > 0;
@@ -166,7 +166,7 @@ class Camera {
 					}
 				}
 
-				if (mouse.down("right")) {
+				if (Operator.shortcut(Config.keymap.action_rotate)) {
 					Context.ddirty = 2;
 					camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 					camera.transform.rotate(camera.right(), -mouse.movementY / 200);

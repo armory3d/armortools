@@ -124,7 +124,7 @@ class UITrait {
 
 	public var layerFilter = 0;
 
-	var _onBrush:Array<Int->Void> = [];
+	var onBrush:Array<Int->Void> = [];
 
 	public var paintVec = new Vec4();
 	public var lastPaintX = -1.0;
@@ -223,7 +223,7 @@ class UITrait {
 	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
 
 	public function notifyOnBrush(f:Int->Void) {
-		_onBrush.push(f);
+		onBrush.push(f);
 	}
 
 	public function new() {
@@ -410,23 +410,23 @@ class UITrait {
 		if (!App.uienabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
-			if (shortcut(Config.keymap.cycle_layers)) {
+			if (Operator.shortcut(Config.keymap.cycle_layers)) {
 				var i = (Project.layers.indexOf(Context.layer) + 1) % Project.layers.length;
 				Context.setLayer(Project.layers[i]);
 			}
-			else if (shortcut(Config.keymap.toggle_2d_view)) {
+			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
 				show2DView();
 			}
-			else if (shortcut(Config.keymap.toggle_node_editor)) {
+			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
 				showMaterialNodes();
 			}
 		}
 
-		if (shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
-		else if (shortcut(Config.keymap.file_save)) Project.projectSave();
-		else if (shortcut(Config.keymap.file_open)) Project.projectOpen();
-		else if (shortcut(Config.keymap.file_new)) UIBox.newProject();
-		else if (shortcut(Config.keymap.export_textures)) {
+		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
+		else if (Operator.shortcut(Config.keymap.file_save)) Project.projectSave();
+		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
+		else if (Operator.shortcut(Config.keymap.file_new)) UIBox.newProject();
+		else if (Operator.shortcut(Config.keymap.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
 				UIFiles.show = true;
 				UIFiles.isSave = true;
@@ -438,7 +438,7 @@ class UITrait {
 			}
 			else textureExport = true;
 		}
-		else if (shortcut(Config.keymap.import_assets)) {
+		else if (Operator.shortcut(Config.keymap.import_assets)) {
 			UIFiles.show = true;
 			UIFiles.isSave = false;
 			UIFiles.filters = "jpg,png,tga,hdr,obj,fbx,blend,arm";
@@ -489,17 +489,17 @@ class UITrait {
 				}
 
 				if (!ctrl && !mouse.down("right")) {
-					if (shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
-					else if (shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
-					else if (shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
-					else if (shortcut(Config.keymap.tool_bake)) Context.selectTool(ToolBake);
-					else if (shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
-					else if (shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
-					else if (shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
-					else if (shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
-					else if (shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
-					else if (shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
-					else if (shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
+					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
+					else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
+					else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
+					else if (Operator.shortcut(Config.keymap.tool_bake)) Context.selectTool(ToolBake);
+					else if (Operator.shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
+					else if (Operator.shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
+					else if (Operator.shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
+					else if (Operator.shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
+					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
+					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
+					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
 				}
 
 				// Radius
@@ -511,7 +511,7 @@ class UITrait {
 						Context.tool == ToolClone  ||
 						Context.tool == ToolBlur   ||
 						Context.tool == ToolParticle) {
-						if (shortcut(Config.keymap.brush_radius)) {
+						if (Operator.shortcut(Config.keymap.brush_radius)) {
 							brushCanLock = true;
 							mouse.lock();
 							lockStartedX = mouse.x + iron.App.x();
@@ -523,27 +523,27 @@ class UITrait {
 
 			// Viewpoint
 			if (!shift && !alt) {
-				if (shortcut(Config.keymap.view_reset)) {
+				if (Operator.shortcut(Config.keymap.view_reset)) {
 					ViewportUtil.resetViewport();
 					ViewportUtil.scaleToBounds();
 				}
-				else if (shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
-				else if (shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
-				else if (shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
-				else if (shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				else if (shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
-				else if (shortcut(Config.keymap.view_camera_type)) {
+				else if (Operator.shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				else if (Operator.shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
+				else if (Operator.shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				else if (Operator.shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
+				else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
 					cameraType = cameraType == 0 ? 1 : 0;
 					camHandle.position = cameraType;
 					ViewportUtil.updateCameraType(cameraType);
 					statusHandle.redraws = 2;
 				}
-				else if (shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
-				else if (shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
-				else if (shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
-				else if (shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
-				else if (shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
+				else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
+				else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
+				else if (Operator.shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
+				else if (Operator.shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
+				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
 			}
 		}
 
@@ -578,7 +578,7 @@ class UITrait {
 
 		if (!App.uienabled) return;
 
-		var down = Input.getMouse().down() || Input.getPen().down();
+		var down = Operator.shortcut(Config.keymap.action_paint) || Input.getPen().down();
 		if (down && !kb.down("control")) {
 			var mx = mouse.x;
 			var my = mouse.y;
@@ -609,7 +609,7 @@ class UITrait {
 						}
 					}
 					brushTime += Time.delta;
-					for (f in _onBrush) f(0);
+					for (f in onBrush) f(0);
 				}
 			}
 
@@ -660,8 +660,8 @@ class UITrait {
 		var undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
 		var redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
 		#else
-		var undoPressed = shortcut(Config.keymap.edit_undo);
-		var redoPressed = shortcut(Config.keymap.edit_redo) ||
+		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
+		var redoPressed = Operator.shortcut(Config.keymap.edit_redo) ||
 						  (kb.down("control") && kb.started("y"));
 		#end
 
@@ -1121,18 +1121,5 @@ class UITrait {
 		else {
 			Res.load(["icons.png"], function() {});
 		}
-	}
-
-	function shortcut(s:String):Bool {
-		var kb = Input.getKeyboard();
-		var flag = true;
-		var plus = s.indexOf("+");
-		if (plus > 0) {
-			var shift = s.indexOf("shift") >= 0;
-			var ctrl = s.indexOf("ctrl") >= 0;
-			flag = shift == kb.down("shift") && ctrl == kb.down("control");
-			s = s.substr(s.lastIndexOf("+") + 1);
-		}
-		return flag && kb.started(s);
 	}
 }

@@ -65,8 +65,12 @@ class App {
 			dropPath = dropPath.rtrim();
 		});
 
+		// System.notifyOnApplicationState(function(){}, function(){}, function(){}, function(){}, function(){});
+
 		#if krom_windows
-		untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
+		// if (untyped Krom.setSaveAndQuitCallback != null) {
+			untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
+		// }
 		#end
 
 		Data.getFont("font_default.ttf", function(f:Font) {

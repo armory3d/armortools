@@ -53,6 +53,7 @@ class Config {
 			raw.keymap.action_rotate = "right";
 			raw.keymap.action_rotate_light = "middle+shift";
 			raw.keymap.action_pan = "middle";
+			raw.keymap.action_zoom = "wheel";
 			raw.keymap.select_material = "shift+number";
 			raw.keymap.cycle_layers = "ctrl+tab";
 			raw.keymap.brush_radius = "f";
