@@ -168,6 +168,7 @@ class TabPreferences {
 						keymap.action_pan = "shift+middle";
 						keymap.action_zoom = "ctrl+middle";
 					}
+					Config.applyConfig();
 				}
 				ui.separator(8, false);
 

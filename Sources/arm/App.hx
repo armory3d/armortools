@@ -75,9 +75,9 @@ class App {
 		);
 
 		#if krom_windows
-		// if (untyped Krom.setSaveAndQuitCallback != null) {
+		if (untyped Krom.setSaveAndQuitCallback != null) {
 			untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
-		// }
+		}
 		#end
 
 		Data.getFont("font_default.ttf", function(f:Font) {
