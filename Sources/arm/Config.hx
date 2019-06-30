@@ -57,6 +57,7 @@ class Config {
 			raw.keymap.select_material = "shift+number";
 			raw.keymap.cycle_layers = "ctrl+tab";
 			raw.keymap.brush_radius = "f";
+			raw.keymap.brush_opacity = "shift+f";
 			raw.keymap.brush_ruler = "shift";
 			raw.keymap.file_new = "ctrl+n";
 			raw.keymap.file_open = "ctrl+o";

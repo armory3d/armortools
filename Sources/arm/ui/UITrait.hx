@@ -154,6 +154,7 @@ class UITrait {
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Handle({value: 0.5});
 	public var brushOpacity = 1.0;
+	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
@@ -452,10 +453,18 @@ class UITrait {
 		if (brushCanLock || brushLocked) {
 			if (kb.down(Config.keymap.brush_radius) && mouse.moved) {
 				if (brushLocked) {
-					brushRadius += mouse.movementX / 100;
-					brushRadius = Math.max(0.05, Math.min(4.0, brushRadius));
-					brushRadius = Math.round(brushRadius * 100) / 100;
-					brushRadiusHandle.value = brushRadius;
+					if (kb.down("shift")) {
+						brushOpacity += mouse.movementX / 500;
+						brushOpacity = Math.max(0.0, Math.min(1.0, brushOpacity));
+						brushOpacity = Math.round(brushOpacity * 100) / 100;
+						brushOpacityHandle.value = brushOpacity;
+					}
+					else {
+						brushRadius += mouse.movementX / 150;
+						brushRadius = Math.max(0.05, Math.min(4.0, brushRadius));
+						brushRadius = Math.round(brushRadius * 100) / 100;
+						brushRadiusHandle.value = brushRadius;
+					}
 					headerHandle.redraws = 2;
 				}
 				else if (brushCanLock) {
@@ -505,7 +514,8 @@ class UITrait {
 					Context.tool == ToolClone  ||
 					Context.tool == ToolBlur   ||
 					Context.tool == ToolParticle) {
-					if (Operator.shortcut(Config.keymap.brush_radius)) {
+					if (Operator.shortcut(Config.keymap.brush_radius) ||
+						Operator.shortcut(Config.keymap.brush_opacity)) {
 						brushCanLock = true;
 						mouse.lock();
 						lockStartedX = mouse.x + iron.App.x();
@@ -954,7 +964,7 @@ class UITrait {
 						if (brushRotHandle.changed) MaterialParser.parsePaintMaterial();
 					}
 					
-					brushOpacity = ui.slider(Id.handle({value: brushOpacity}), "Opacity", 0.0, 1.0, true);
+					brushOpacity = ui.slider(brushOpacityHandle, "Opacity", 0.0, 1.0, true);
 					
 					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
