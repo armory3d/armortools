@@ -191,7 +191,7 @@ class ImportBlend {
 
 			for (mat in mats) {
 				// Material slot
-				Context.material = new MaterialSlot();
+				Context.material = new MaterialSlot(Project.materials[0].data);
 				Project.materials.push(Context.material);
 				UINodes.inst.updateCanvasMap();
 				var nodes = UINodes.inst.nodes;

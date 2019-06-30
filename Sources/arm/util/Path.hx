@@ -71,8 +71,7 @@ class Path {
 	public static function checkOpacTex(p:String):Bool {
 		return p.endsWith("_opac") ||
 			   p.endsWith("_alpha") ||
-			   p.endsWith("_opacity") ||
-			   p.endsWith("_mask");
+			   p.endsWith("_opacity");
 	}
 
 	public static function checkNorTex(p:String):Bool {

@@ -97,7 +97,7 @@ class ImportFolder {
 			});
 		}
 		else {
-			Context.material = new MaterialSlot();
+			Context.material = new MaterialSlot(Project.materials[0].data);
 			Project.materials.push(Context.material);
 		}
 		UINodes.inst.updateCanvasMap();
