@@ -20,6 +20,7 @@ import arm.ui.UIFiles;
 import arm.io.Importer;
 import arm.util.Path;
 import arm.util.RenderUtil;
+import arm.util.ViewportUtil;
 import arm.data.MaterialSlot;
 import arm.data.ConstData;
 import arm.plugin.Camera;
@@ -231,15 +232,18 @@ class App {
 			cam.data.raw.ortho[3] =  2 * (iron.App.h() / iron.App.w());
 		}
 		cam.buildProjection();
+
+		if (UITrait.inst.cameraType == 1) {
+			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+		}
+
 		Context.ddirty = 2;
 
 		var lay = Config.raw.ui_layout;
-		
 		appx = lay == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
 		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {
 			appx += iron.App.w() + UITrait.inst.toolbarw;
 		}
-
 		appy = UITrait.inst.headerh * 2;
 
 		if (!UITrait.inst.show) {
