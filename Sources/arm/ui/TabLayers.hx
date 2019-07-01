@@ -141,11 +141,15 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				ui.text(l.name);
+				var state = ui.text(l.name);
 				ui._y -= center;
 
 				if (ui.isReleased) {
 					Context.setLayer(l);
+				}
+				if (state == State.Started) {
+					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
+					UITrait.inst.selectTime = Time.time();
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
