@@ -1547,6 +1547,45 @@ class Cycles {
 			else if (op == 'DIVIDE') {
 				out_val = '($val1 / $val2)';
 			}
+			else if (op == 'POWER') {
+				out_val = 'pow($val1, $val2)';
+			}
+			else if (op == 'LOGARITHM') {
+				out_val = 'log($val1)';
+			}
+			else if (op == 'SQUARE_ROOT') {
+				out_val = 'sqrt($val1)';
+			}
+			else if (op == 'ABSOLUTE') {
+				out_val = 'abs($val1)';
+			}
+			else if (op == 'MINIMUM') {
+				out_val = 'min($val1, $val2)';
+			}
+			else if (op == 'MAXIMUM') {
+				out_val = 'max($val1, $val2)';
+			}
+			else if (op == 'LESS_THAN') {
+				out_val = 'float($val1 < $val2)';
+			}
+			else if (op == 'GREATER_THAN') {
+				out_val = 'float($val1 > $val2)';
+			}
+			else if (op == 'ROUND') {
+				out_val = 'floor($val1 + 0.5)';
+			}
+			else if (op == 'FLOOR') {
+				out_val = 'floor($val1)';
+			}
+			else if (op == 'CEIL') {
+				out_val = 'ceil($val1)';
+			}
+			else if (op == 'FRACT') {
+				out_val = 'fract($val1)';
+			}
+			else if (op == 'MODULO') {
+				out_val = 'mod($val1, $val2)';
+			}
 			else if (op == 'SINE') {
 				out_val = 'sin($val1)';
 			}
@@ -1565,32 +1604,8 @@ class Cycles {
 			else if (op == 'ARCTANGENT') {
 				out_val = 'atan($val1)';
 			}
-			else if (op == 'POWER') {
-				out_val = 'pow($val1, $val2)';
-			}
-			else if (op == 'LOGARITHM') {
-				out_val = 'log($val1)';
-			}
-			else if (op == 'MINIMUM') {
-				out_val = 'min($val1, $val2)';
-			}
-			else if (op == 'MAXIMUM') {
-				out_val = 'max($val1, $val2)';
-			}
-			else if (op == 'ROUND') {
-				out_val = 'floor($val1 + 0.5)';
-			}
-			else if (op == 'LESS_THAN') {
-				out_val = 'float($val1 < $val2)';
-			}
-			else if (op == 'GREATER_THAN') {
-				out_val = 'float($val1 > $val2)';
-			}
-			else if (op == 'MODULO') {
-				out_val = 'mod($val1, $val2)';
-			}
-			else if (op == 'ABSOLUTE') {
-				out_val = 'abs($val1)';
+			else if (op == 'ARCTAN2') {
+				out_val = 'atan2($val1, $val2)';
 			}
 			if (use_clamp) {
 				return 'clamp($out_val, 0.0, 1.0)';
