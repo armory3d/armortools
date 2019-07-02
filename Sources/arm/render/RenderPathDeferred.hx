@@ -625,7 +625,29 @@ class RenderPathDeferred {
 				t.buildMatrix();
 			}
 
-			RenderPathPaint.commandsPaint();
+			if (Context.tool == ToolBake) {
+				if (UITrait.inst.bakeType == 6) { // Object ID
+					var _layerFilter = UITrait.inst.layerFilter;
+					var _paintObject = Context.paintObject;
+					var isMerged = Context.mergedObject != null;
+					var _visible = isMerged && Context.mergedObject.visible;
+					UITrait.inst.layerFilter = 1;
+					if (isMerged) Context.mergedObject.visible = false;
+
+					for (p in Project.paintObjects) {
+						Context.selectPaintObject(p);
+						RenderPathPaint.commandsPaint();
+					}
+
+					UITrait.inst.layerFilter = _layerFilter;
+					Context.selectPaintObject(_paintObject);
+					if (isMerged) Context.mergedObject.visible = _visible;
+				}
+				else RenderPathPaint.commandsPaint();
+			}
+			else { // Paint
+				RenderPathPaint.commandsPaint();
+			}
 		}
 
 		//

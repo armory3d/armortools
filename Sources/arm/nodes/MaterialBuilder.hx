@@ -625,32 +625,15 @@ class MaterialBuilder {
 				var strength = UITrait.inst.bakeAoStrength;
 				var radius = UITrait.inst.bakeAoRadius;
 				var offset = UITrait.inst.bakeAoOffset;
-				// frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
-				frag.write('fragColor[0].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
-				frag.write('fragColor[0].g = fragColor[0].r;');
-				frag.write('fragColor[0].b = fragColor[0].r;');
-				frag.write('fragColor[0].a = 1.0;');
+				frag.write('float ao = traceAO(voxpos, n, $radius, $offset) * $strength;');
+				if (UITrait.inst.bakeAxis > 0) {
+					var axis = axisString(UITrait.inst.bakeAxis);
+					frag.write('ao *= dot(n, $axis);');
+				}
+				frag.write('ao = 1.0 - ao;');
+				frag.write('fragColor[0] = vec4(ao, ao, ao, 1.0);');
 			}
-			else if (UITrait.inst.bakeType == 1) { // Position
-				frag.wposition = true;
-				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 2) { // TexCoord
-				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 3) { // Material ID
-				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-				frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
-				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 2.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 2.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 4.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 4) { // Normal (World)
-				frag.n = true;
-				frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 5) { // Curvature
+			else if (UITrait.inst.bakeType == 1) { // Curvature
 				var strength = UITrait.inst.bakeCurvStrength * 2.0;
 				var radius = (1.0 / UITrait.inst.bakeCurvRadius) * 0.25;
 				var offset = UITrait.inst.bakeCurvOffset / 10;
@@ -659,7 +642,37 @@ class MaterialBuilder {
 				frag.write('vec3 dy = dFdy(n);');
 				frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
 				frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
+				if (UITrait.inst.bakeAxis > 0) {
+					var axis = axisString(UITrait.inst.bakeAxis);
+					frag.write('curvature *= dot(n, $axis);');
+				}
 				frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 2) { // Position
+				frag.wposition = true;
+				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 3) { // TexCoord
+				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 4) { // Normal (World)
+				frag.n = true;
+				frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 5) { // Material ID
+				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
+				frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
+				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 6) { // Object ID
+				frag.add_uniform('float objectId', '_objectId');
+				frag.write('float id_r = fract(sin(dot(vec2(objectId, objectId * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float id_g = fract(sin(dot(vec2(objectId * 20.0, objectId), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float id_b = fract(sin(dot(vec2(objectId, objectId * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('fragColor[0] = vec4(id_r, id_g, id_b, 1.0);');
 			}
 		}
 
@@ -670,6 +683,15 @@ class MaterialBuilder {
 		con_paint.data.fragment_shader = frag.get();
 
 		return con_paint;
+	}
+
+	static function axisString(i:Int):String {
+		return i == 1 ? "vec3(1,0,0)" :
+			   i == 2 ? "vec3(0,1,0)" :
+			   i == 3 ? "vec3(0,0,1)" :
+			   i == 4 ? "vec3(-1,0,0)" :
+			   i == 5 ? "vec3(0,-1,0)" :
+			   			"vec3(0,0,-1)";
 	}
 
 	public static function make_mesh_preview(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {

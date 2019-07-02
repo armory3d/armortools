@@ -165,6 +165,7 @@ class UITrait {
 	public var brushAngleReject = true;
 	public var brushAngleRejectDot = 0.5;
 	public var bakeType = 0;
+	public var bakeAxis = 0;
 	public var bakeAoStrength = 1.0;
 	public var bakeAoRadius = 1.0;
 	public var bakeAoOffset = 1.0;
@@ -930,7 +931,11 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					bakeType = ui.combo(bakeHandle, ["AO", "Position", "TexCoord", "Material ID", "Normal (World)", "Curvature"], "Bake");
+					bakeType = ui.combo(bakeHandle, ["AO", "Curvature", "Position", "TexCoord", "Normal (World)", "Material ID", "Object ID"], "Bake");
+					if (bakeType == 0 || bakeType == 1) {
+						var bakeAxisHandle = Id.handle({position: bakeAxis});
+						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
+					}
 					if (bakeType == 0) { // AO
 						var strengthHandle = Id.handle({value: bakeAoStrength});
 						bakeAoStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
@@ -939,7 +944,7 @@ class UITrait {
 						var offsetHandle = Id.handle({value: bakeAoOffset});
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
-					if (bakeType == 5) { // Curvature
+					if (bakeType == 1) { // Curvature
 						var strengthHandle = Id.handle({value: bakeCurvStrength});
 						bakeCurvStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
 						var radiusHandle = Id.handle({value: bakeCurvRadius});

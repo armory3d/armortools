@@ -49,6 +49,9 @@ class Uniforms {
 		else if (link == '_texpaintSize') {
 			return Config.getTextureRes();
 		}
+		else if (link == '_objectId') {
+			return Project.paintObjects.indexOf(Context.paintObject);
+		}
 		return null;
 	}
 

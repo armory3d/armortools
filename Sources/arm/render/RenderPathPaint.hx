@@ -131,7 +131,7 @@ class RenderPathPaint {
 
 				path.drawMeshes("paint");
 
-				if (Context.tool == ToolBake && UITrait.inst.bakeType == 5 && UITrait.inst.bakeCurvSmooth > 0) { // Curvature
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == 1 && UITrait.inst.bakeCurvSmooth > 0) { // Curvature
 					if (path.renderTargets.get("texpaint_blur") == null) {
 						var t = new RenderTargetRaw();
 						t.name = "texpaint_blur";
