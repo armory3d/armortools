@@ -173,6 +173,7 @@ class UITrait {
 	public var bakeCurvRadius = 1.0;
 	public var bakeCurvOffset = 0.0;
 	public var bakeCurvSmooth = 1;
+	public var bakeHighPoly = 0;
 	
 	public var xray = false;
 	public var symX = false;
@@ -931,7 +932,7 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					bakeType = ui.combo(bakeHandle, ["AO", "Curvature", "Position", "TexCoord", "Normal (World)", "Material ID", "Object ID"], "Bake");
+					bakeType = ui.combo(bakeHandle, ["AO", "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"], "Bake");
 					if (bakeType == 0 || bakeType == 1) {
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
 						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
@@ -953,6 +954,11 @@ class UITrait {
 						bakeCurvOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 						var smoothHandle = Id.handle({value: bakeCurvSmooth});
 						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, "Smooth", 0, 5, false, 1));
+					}
+					if (bakeType == 2) { // Normal (Tang)
+						var ar = [for (p in Project.paintObjects) p.name];
+						var polyHandle = Id.handle({position: bakeHighPoly});
+						bakeHighPoly = ui.combo(polyHandle, ar, "High Poly");
 					}
 					if (ui.changed) {
 						MaterialParser.parsePaintMaterial();

@@ -221,7 +221,7 @@ class History {
 		copyToUndo(Context.layer.id, undoI, isMask);
 		
 		pushUndo = false;
-		var step = push(UITrait.inst.toolNames[Context.tool]);
+		push(UITrait.inst.toolNames[Context.tool]);
 	}
 
 	public static function newLayer() {

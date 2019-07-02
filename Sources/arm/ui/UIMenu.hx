@@ -30,7 +30,7 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [5, 2, 13, 4];
+		var menuItems = [5, 2, 13, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 		
 		g.color = ui.t.SEPARATOR_COL;

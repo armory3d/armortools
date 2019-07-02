@@ -12,6 +12,7 @@ import arm.util.ViewportUtil;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
+import arm.nodes.MaterialParser;
 import arm.Tool;
 
 class RenderPathDeferred {
@@ -517,6 +518,7 @@ class RenderPathDeferred {
 		@:privateAccess Scene.active.camera.frame = taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
 
+		var pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {
 			History.paint();
 		}
@@ -626,7 +628,25 @@ class RenderPathDeferred {
 			}
 
 			if (Context.tool == ToolBake) {
-				if (UITrait.inst.bakeType == 6) { // Object ID
+				if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
+					UITrait.inst.bakeType = 3; // Bake high poly world normals
+					MaterialParser.parsePaintMaterial();
+					var _paintObject = Context.paintObject;
+					var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
+					var _visible = highPoly.visible;
+					highPoly.visible = true;
+					Context.selectPaintObject(highPoly);
+					RenderPathPaint.commandsPaint();
+					highPoly.visible = _visible;
+					UITrait.inst.sub--;
+					if (pushUndoLast) History.paint();
+
+					UITrait.inst.bakeType = 2;
+					MaterialParser.parsePaintMaterial();
+					Context.selectPaintObject(_paintObject);
+					RenderPathPaint.commandsPaint();
+				}
+				else if (UITrait.inst.bakeType == 7) { // Object ID
 					var _layerFilter = UITrait.inst.layerFilter;
 					var _paintObject = Context.paintObject;
 					var isMerged = Context.mergedObject != null;
@@ -643,7 +663,9 @@ class RenderPathDeferred {
 					Context.selectPaintObject(_paintObject);
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
-				else RenderPathPaint.commandsPaint();
+				else {
+					RenderPathPaint.commandsPaint();
+				}
 			}
 			else { // Paint
 				RenderPathPaint.commandsPaint();

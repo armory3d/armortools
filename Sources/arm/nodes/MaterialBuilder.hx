@@ -648,18 +648,27 @@ class MaterialBuilder {
 				}
 				frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
 			}
-			else if (UITrait.inst.bakeType == 2) { // Position
-				frag.wposition = true;
-				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			else if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
+				frag.n = true;
+				frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
+				frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
+				frag.add_function(CyclesFunctions.str_cotangentFrame);
+				frag.write('mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
+				frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
+				frag.write('fragColor[0] = vec4(res, 1.0);');
 			}
-			else if (UITrait.inst.bakeType == 3) { // TexCoord
-				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 4) { // Normal (World)
+			else if (UITrait.inst.bakeType == 3) { // Normal (World)
 				frag.n = true;
 				frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
 			}
-			else if (UITrait.inst.bakeType == 5) { // Material ID
+			else if (UITrait.inst.bakeType == 4) { // Position
+				frag.wposition = true;
+				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 5) { // TexCoord
+				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 6) { // Material ID
 				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 				frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
 				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -667,7 +676,7 @@ class MaterialBuilder {
 				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
 			}
-			else if (UITrait.inst.bakeType == 6) { // Object ID
+			else if (UITrait.inst.bakeType == 7) { // Object ID
 				frag.add_uniform('float objectId', '_objectId');
 				frag.write('float id_r = fract(sin(dot(vec2(objectId, objectId * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('float id_g = fract(sin(dot(vec2(objectId * 20.0, objectId), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -1169,7 +1178,7 @@ class MaterialBuilder {
 				frag.write('fragColor[1] = vec4(nAttr, packFloat2(1.0, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 8) { // MaterialID
-				frag.write('float sample_matid = textureLod(texpaint_nor, texCoord, 0.0).a;');
+				frag.write('float sample_matid = textureLodShared(texpaint_nor, texCoord, 0.0).a;');
 				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 2.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 2.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 4.0), vec2(12.9898, 78.233))) * 43758.5453);');
