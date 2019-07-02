@@ -31,34 +31,15 @@ class MaterialBuilder {
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 
 		if (Context.tool == ToolBake) {
-			if (UITrait.inst.bakeType == 0) { // AO
-				con_paint.data.color_writes_red[0] = false;
-				con_paint.data.color_writes_green[0] = false;
-				con_paint.data.color_writes_blue[0] = false;
-				con_paint.data.color_writes_alpha[0] = false;
-				con_paint.data.color_writes_red[1] = false;
-				con_paint.data.color_writes_green[1] = false;
-				con_paint.data.color_writes_blue[1] = false;
-				con_paint.data.color_writes_alpha[1] = false;
-				// con_paint.data.color_writes_red[2] = true;
-				con_paint.data.color_writes_green[2] = false; // No rough
-				con_paint.data.color_writes_blue[2] = false; // No met
-				con_paint.data.color_writes_alpha[2] = false;
-			}
-			else {
-				// con_paint.data.color_writes_red[0] = true;
-				// con_paint.data.color_writes_green[0] = true;
-				// con_paint.data.color_writes_blue[0] = true;
-				// con_paint.data.color_writes_alpha[0] = true;
-				con_paint.data.color_writes_red[1] = false;
-				con_paint.data.color_writes_green[1] = false;
-				con_paint.data.color_writes_blue[1] = false;
-				con_paint.data.color_writes_alpha[1] = false;
-				con_paint.data.color_writes_red[2] = false;
-				con_paint.data.color_writes_green[2] = false;
-				con_paint.data.color_writes_blue[2] = false;
-				con_paint.data.color_writes_alpha[2] = false;
-			}
+			// Bake into base color, disable other slots
+			con_paint.data.color_writes_red[1] = false;
+			con_paint.data.color_writes_green[1] = false;
+			con_paint.data.color_writes_blue[1] = false;
+			con_paint.data.color_writes_alpha[1] = false;
+			con_paint.data.color_writes_red[2] = false;
+			con_paint.data.color_writes_green[2] = false;
+			con_paint.data.color_writes_blue[2] = false;
+			con_paint.data.color_writes_alpha[2] = false;
 		}
 
 		var vert = con_paint.make_vert();
@@ -128,19 +109,6 @@ class MaterialBuilder {
 		frag.write_attrib('sp.z -= 0.0001;'); // small bias
 
 		if (UITrait.inst.brushPaint == 1) frag.ndcpos = true; // Project
-
-		if (Context.tool == ToolBake) {
-			if (UITrait.inst.bakeType == 0) { // AO
-				frag.wposition = true;
-				frag.n = true;
-			}
-			else if (UITrait.inst.bakeType == 1) { // Position
-				frag.wposition = true;
-			}
-			else if (UITrait.inst.bakeType == 4) { // Normal (world)
-				frag.n = true;
-			}
-		}
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
 		frag.add_uniform('vec4 inplast', '_inputBrushLast');
@@ -636,6 +604,8 @@ class MaterialBuilder {
 		if (Context.tool == ToolBake) {
 			if (UITrait.inst.bakeType == 0) { // AO
 				// Apply normal channel
+				frag.wposition = true;
+				frag.n = true;
 				frag.vVec = true;
 				frag.add_function(CyclesFunctions.str_cotangentFrame);
 				#if kha_direct3d11
@@ -652,13 +622,18 @@ class MaterialBuilder {
 				frag.add_uniform('sampler3D voxels');
 				frag.add_function(CyclesFunctions.str_traceAO);
 				frag.n = true;
-				var strength = UITrait.inst.bakeStrength;
-				var radius = UITrait.inst.bakeRadius;
-				var offset = UITrait.inst.bakeOffset;
-				frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
+				var strength = UITrait.inst.bakeAoStrength;
+				var radius = UITrait.inst.bakeAoRadius;
+				var offset = UITrait.inst.bakeAoOffset;
+				// frag.write('fragColor[2].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
+				frag.write('fragColor[0].r = 1.0 - traceAO(voxpos, n, $radius, $offset) * $strength;');
+				frag.write('fragColor[0].g = fragColor[0].r;');
+				frag.write('fragColor[0].b = fragColor[0].r;');
+				frag.write('fragColor[0].a = 1.0;');
 			}
 			else if (UITrait.inst.bakeType == 1) { // Position
-				frag.write('fragColor[0] = vec4(wposition, 1.0);');
+				frag.wposition = true;
+				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
 			}
 			else if (UITrait.inst.bakeType == 2) { // TexCoord
 				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
@@ -672,7 +647,19 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
 			}
 			else if (UITrait.inst.bakeType == 4) { // Normal (World)
-				frag.write('fragColor[0] = vec4(n, 1.0);');
+				frag.n = true;
+				frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			}
+			else if (UITrait.inst.bakeType == 5) { // Curvature
+				var strength = UITrait.inst.bakeCurvStrength * 2.0;
+				var radius = (1.0 / UITrait.inst.bakeCurvRadius) * 0.25;
+				var offset = UITrait.inst.bakeCurvOffset / 10;
+				frag.n = true;
+				frag.write('vec3 dx = dFdx(n);');
+				frag.write('vec3 dy = dFdy(n);');
+				frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
+				frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
+				frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
 			}
 		}
 

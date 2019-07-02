@@ -115,6 +115,13 @@ class Layers {
 		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
 		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
 		Context.brushBlendDirty = true;
+		if (rts.get("texpaint_blur") != null) {
+			rts.get("texpaint_blur").image.unload();
+			var size = Std.int(Config.getTextureRes() * 0.95);
+			rts.get("texpaint_blur").raw.width = size;
+			rts.get("texpaint_blur").raw.height = size;
+			rts.get("texpaint_blur").image = Image.createRenderTarget(size, size);
+		}
 		g.begin();
 		Context.ddirty = 2;
 		iron.App.removeRender(resizeLayers);

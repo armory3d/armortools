@@ -1,6 +1,7 @@
 package arm.render;
 
 import iron.object.MeshObject;
+import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
 import arm.Tool;
@@ -129,6 +130,26 @@ class RenderPathPaint {
 				}
 
 				path.drawMeshes("paint");
+
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == 5 && UITrait.inst.bakeCurvSmooth > 0) { // Curvature
+					if (path.renderTargets.get("texpaint_blur") == null) {
+						var t = new RenderTargetRaw();
+						t.name = "texpaint_blur";
+						t.width = Std.int(Config.getTextureRes() * 0.95);
+						t.height = Std.int(Config.getTextureRes() * 0.95);
+						t.format = 'RGBA32';
+						RenderPath.active.createRenderTarget(t);
+					}
+					var blurs = Math.round(UITrait.inst.bakeCurvSmooth);
+					for (i in 0...blurs) {
+						path.setTarget("texpaint_blur");
+						path.bindTarget(texpaint, "tex");
+						path.drawShader("shader_datas/copy_pass/copy_pass");
+						path.setTarget(texpaint);
+						path.bindTarget("texpaint_blur", "tex");
+						path.drawShader("shader_datas/copy_pass/copy_pass");
+					}
+				}
 			}
 		}
 	}

@@ -165,9 +165,13 @@ class UITrait {
 	public var brushAngleReject = true;
 	public var brushAngleRejectDot = 0.5;
 	public var bakeType = 0;
-	public var bakeStrength = 1.0;
-	public var bakeRadius = 1.0;
-	public var bakeOffset = 1.0;
+	public var bakeAoStrength = 1.0;
+	public var bakeAoRadius = 1.0;
+	public var bakeAoOffset = 1.0;
+	public var bakeCurvStrength = 1.0;
+	public var bakeCurvRadius = 1.0;
+	public var bakeCurvOffset = 0.0;
+	public var bakeCurvSmooth = 1;
 	
 	public var xray = false;
 	public var symX = false;
@@ -596,7 +600,9 @@ class UITrait {
 					cloneStartY = my;
 				}
 				else {
-					if (brushTime == 0 && !App.isDragging) { // Paint started
+					if (brushTime == 0 &&
+						!App.isDragging &&
+						@:privateAccess ui.comboSelectedHandle == null) { // Paint started
 						History.pushUndo = true;
 						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
@@ -922,21 +928,31 @@ class UITrait {
 					}
 				}
 				else if (Context.tool == ToolBake) {
+					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					bakeType = ui.combo(bakeHandle, ["AO", "Position", "TexCoord", "Material ID", "Normal (World)"], "Bake");
-					if (bakeHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+					bakeType = ui.combo(bakeHandle, ["AO", "Position", "TexCoord", "Material ID", "Normal (World)", "Curvature"], "Bake");
+					if (bakeType == 0) { // AO
+						var strengthHandle = Id.handle({value: bakeAoStrength});
+						bakeAoStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
+						var radiusHandle = Id.handle({value: bakeAoRadius});
+						bakeAoRadius = ui.slider(radiusHandle, "Radius", 0.0, 2.0, true);
+						var offsetHandle = Id.handle({value: bakeAoOffset});
+						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
-					if (bakeType == 0) {
-						var h = Id.handle({value: bakeStrength});
-						bakeStrength = ui.slider(h, "Strength", 0.0, 2.0, true);
-						if (h.changed) MaterialParser.parsePaintMaterial();
-						var h = Id.handle({value: bakeRadius});
-						bakeRadius = ui.slider(h, "Radius", 0.0, 2.0, true);
-						if (h.changed) MaterialParser.parsePaintMaterial();
-						var h = Id.handle({value: bakeOffset});
-						bakeOffset = ui.slider(h, "Offset", 0.0, 2.0, true);
-						if (h.changed) MaterialParser.parsePaintMaterial();
+					if (bakeType == 5) { // Curvature
+						var strengthHandle = Id.handle({value: bakeCurvStrength});
+						bakeCurvStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
+						var radiusHandle = Id.handle({value: bakeCurvRadius});
+						bakeCurvRadius = ui.slider(radiusHandle, "Radius", 0.0, 2.0, true);
+						var offsetHandle = Id.handle({value: bakeCurvOffset});
+						bakeCurvOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
+						var smoothHandle = Id.handle({value: bakeCurvSmooth});
+						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, "Smooth", 0, 5, false, 1));
+					}
+					if (ui.changed) {
+						MaterialParser.parsePaintMaterial();
+						// Context.pdirty = 4;
+						// pushUndo
 					}
 				}
 				else {
