@@ -504,7 +504,7 @@ class RenderPathDeferred {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");
-				path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex");
+				path.bindTarget("taa", "tex");
 				ssaa4 ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -517,6 +517,7 @@ class RenderPathDeferred {
 		// Match projection matrix jitter
 		@:privateAccess Scene.active.camera.frame = taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
+		Scene.active.camera.buildMatrix();
 
 		var pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {
@@ -991,31 +992,34 @@ class RenderPathDeferred {
 
 		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
-			path.setTarget("bufa");
+
+			var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
+			var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
+
+			path.setTarget(current);
 			path.clearTarget(0x00000000);
 			path.bindTarget("buf", "colorTex");
 			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
 			path.setTarget("bufb");
 			path.clearTarget(0x00000000);
-			path.bindTarget("bufa", "edgesTex");
+			path.bindTarget(current, "edgesTex");
 			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
-			path.setTarget("bufa");
+			path.setTarget(current);
 			path.bindTarget("buf", "colorTex");
 			path.bindTarget("bufb", "blendTex");
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-			path.setTarget(taaFrame % 2 == 0 ? "taa2" : "taa");
-			path.bindTarget(taaFrame % 2 == 0 ? "taa" : "taa2", "tex2");
-			path.bindTarget("bufa", "tex");
+			path.setTarget("taa");
+			path.bindTarget(current, "tex");
+			path.bindTarget(last, "tex2");
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/taa_pass/taa_pass");
 			if (!ssaa4) {
 				path.setTarget("");
-				if (taaFrame == 0) path.bindTarget("bufa", "tex");
-				else path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+				path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 			}
 		}
