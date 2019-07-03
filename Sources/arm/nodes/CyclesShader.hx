@@ -129,8 +129,8 @@ class CyclesShader {
 	var includes:Array<String> = [];
 	public var ins:Array<String> = [];
 	public var outs:Array<String> = [];
+	public var sharedSamplers:Array<String> = [];
 	var uniforms:Array<String> = [];
-	var sharedSamplers:Array<String> = [];
 	var functions = new Map<String, String>();
 	public var main = '';
 	public var main_init = '';

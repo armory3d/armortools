@@ -71,14 +71,6 @@ vec3 getPos2NoEye(const vec3 eye, const mat4 invVP, const float depth, const vec
 	return pos.xyz - eye;
 }
 
-float packFloat(const float f1, const float f2) {
-	return floor(f1 * 100.0) + min(f2, 1.0 - 1.0 / 100.0);
-}
-
-vec2 unpackFloat(const float f) {
-	return vec2(floor(f) / 100.0, fract(f));
-}
-
 float packFloat2(const float f1, const float f2) {
 	// Higher f1 = less precise f2
 	return floor(f1 * 255.0) + min(f2, 1.0 - 1.0 / 100.0);
@@ -125,6 +117,51 @@ vec3 decNor(uint val) {
 	vec3 normal = vec3(nor) / 255.0f;
 	normal *= norSigns;
 	return normal;
+}
+
+// GBuffer helper - Sebastien Lagarde
+// https://seblagarde.wordpress.com/2018/09/02/gbuffer-helper-packing-integer-and-float-together/
+float packFloatInt(float f, uint i, uint numBitI, uint numBitTarget) {
+	// Constant optimize by compiler
+	float prec = float(1 << numBitTarget);
+	float maxi = float(1 << numBitI);
+	float precMinusOne = prec - 1.0;
+	float t1 = ((prec / maxi) - 1.0) / precMinusOne;
+	float t2 = (prec / maxi) / precMinusOne;
+	// Code
+	return t1 * f + t2 * float(i);
+}
+
+void unpackFloatInt(float val, uint numBitI, uint numBitTarget, out float f, out uint i) {
+	// Constant optimize by compiler
+	float prec = float(1 << numBitTarget);
+	float maxi = float(1 << numBitI);
+	float precMinusOne = prec - 1.0;
+	float t1 = ((prec / maxi) - 1.0) / precMinusOne;
+	float t2 = (prec / maxi) / precMinusOne;
+	// Code
+	// extract integer part
+	// + rcp(precMinusOne) to deal with precision issue
+	i = int((val / t2) + (1.0 / precMinusOne));
+	// Now that we have i, solve formula in packFloatInt for f
+	//f = (val - t2 * float(i)) / t1 => convert in mads form
+	f = clamp((-t2 * float(i) + val) / t1, 0.0, 1.0); // Saturate in case of precision issue
+}
+
+float packFloatInt8(float f, uint i, uint numBitI) {
+	return packFloatInt(f, i, numBitI, 8);
+}
+
+void unpackFloatInt8(float val, uint numBitI, out float f, out uint i) {
+	unpackFloatInt(val, numBitI, 8, f, i);
+}
+
+float packFloatInt16(float f, uint i, uint numBitI) {
+	return packFloatInt(f, i, numBitI, 16);
+}
+
+void unpackFloatInt16(float val, uint numBitI, out float f, out uint i) {
+	unpackFloatInt(val, numBitI, 16, f, i);
 }
 
 #endif

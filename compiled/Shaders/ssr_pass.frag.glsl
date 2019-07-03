@@ -63,7 +63,7 @@ vec4 rayCast(vec3 dir) {
 
 void main() {
 	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
-	float roughness = unpackFloat(g0.b).y;
+	float roughness = g0.b;
 	if (roughness == 1.0) { fragColor.rgb = vec3(0.0); return; }
 
 	float spec = fract(textureLod(gbuffer1, texCoord, 0.0).a);

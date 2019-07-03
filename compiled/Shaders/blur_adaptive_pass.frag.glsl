@@ -13,7 +13,7 @@ in vec2 texCoord;
 out vec4 fragColor;
 
 void main() {
-	float roughness = unpackFloat(textureLod(gbuffer0, texCoord, 0.0).b).y;
+	float roughness = textureLod(gbuffer0, texCoord, 0.0).b;
 	// if (roughness == 0.0) { // Always blur for now, non blured output can produce noise
 		// fragColor.rgb = textureLod(tex, texCoord).rgb;
 		// return;

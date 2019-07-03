@@ -28,9 +28,9 @@ vec3 n = normalize(wnormal);
 	emission = 0.0;
 	n /= (abs(n.x) + abs(n.y) + abs(n.z));
 	n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);
-	float matid = 0.0;
-	if (emission > 0) { basecol *= emission; matid = 1.0; }
-	fragColor[0] = vec4(n.xy, packFloat(metallic, roughness), matid);
+	uint matid = 0;
+	if (emission > 0) { basecol *= emission; matid = 1; }
+	fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, matid, 4));
 	fragColor[1] = vec4(basecol, packFloat2(occlusion, specular));
 	vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;
 	vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;

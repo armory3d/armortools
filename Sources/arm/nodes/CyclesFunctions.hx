@@ -263,15 +263,21 @@ vec2 octahedronWrap(const vec2 v) {
 }
 ";
 
-	public static var str_packFloat = "
-float packFloat(const float f1, const float f2) {
-	return floor(f1 * 100.0) + min(f2, 1.0 - 1.0 / 100.0);
-}
-";
-
 	public static var str_packFloat2 = "
 float packFloat2(const float f1, const float f2) {
 	return floor(f1 * 255.0) + min(f2, 1.0 - 1.0 / 100.0);
 }
 ";
+
+	public static var str_packFloatInt16 = "
+float packFloatInt16(const float f, const uint i) {
+	const float prec = float(1 << 16);
+	const float maxi = float(1 << 4);
+	const float precMinusOne = prec - 1.0;
+	const float t1 = ((prec / maxi) - 1.0) / precMinusOne;
+	const float t2 = (prec / maxi) / precMinusOne;
+	return t1 * f + t2 * float(i);
+}
+";
+
 }
