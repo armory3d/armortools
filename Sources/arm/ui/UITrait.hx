@@ -60,7 +60,7 @@ class UITrait {
 	public var roughnessPicked = 0.0;
 	public var metallicPicked = 0.0;
 	public var occlusionPicked = 0.0;
-	public var materialIdPicked = 0.0;
+	public var materialIdPicked = 0;
 	public var pickerSelectMaterial = true;
 	public var pickerMaskHandle = new Handle({position: 0});
 	var message = "";
@@ -222,7 +222,7 @@ class UITrait {
 	var lastCombo:Handle = null;
 	var lastTooltip:Image = null;
 
-	public var cameraControls = 1;
+	public var cameraControls = 0;
 	public var htab = Id.handle({position: 0});
 	public var htab1 = Id.handle({position: 0});
 	public var htab2 = Id.handle({position: 0});
@@ -1076,7 +1076,7 @@ class UITrait {
 
 			var scene = Scene.active;
 			var cam = scene.cameras[0];
-			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Rotate", "Orbit", "Fly"], "Controls");
+			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
 			cameraType = ui.combo(camHandle, ["Perspective", "Orthographic"], "Type");
 			if (ui.isHovered) ui.tooltip("Camera Type (5)");
 			if (camHandle.changed) {

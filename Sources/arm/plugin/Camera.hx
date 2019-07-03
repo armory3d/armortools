@@ -40,40 +40,7 @@ class Camera {
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = UITrait.inst.cameraControls;
-			if (controls == 0) { // Rotate
-				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
-					redraws = 2;
-					var t = Context.object.transform;
-					var up = t.up().normalize();
-					t.rotate(up, mouse.movementX / 100);
-					var right = camera.rightWorld().normalize();
-					t.rotate(right, mouse.movementY / 100);
-					t.buildMatrix();
-					if (t.up().z < 0) {
-						t.rotate(right, -mouse.movementY / 100);
-					}
-				}
-
-				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
-					redraws = 2;
-					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
-					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
-					camera.transform.loc.add(look);
-					camera.transform.loc.add(right);
-					camera.buildMatrix();
-				}
-
-				if (Operator.shortcut(Config.keymap.action_zoom)) {
-					redraws = 2;
-					camera.transform.move(camera.look(), -mouse.movementY / 150);
-				}
-
-				if (mouse.wheelDelta != 0) {
-					redraws = 2;
-					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
-				}
-			}
-			else if (controls == 1) { // Orbit
+			if (controls == 0) { // Orbit
 				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
 					redraws = 2;
 					camera.transform.move(camera.lookWorld(), dist);
@@ -115,6 +82,39 @@ class Camera {
 					m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
 					light.transform.local.multmat(m);
 					light.transform.decompose();
+				}
+			}
+			else if (controls == 1) { // Rotate
+				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
+					redraws = 2;
+					var t = Context.object.transform;
+					var up = t.up().normalize();
+					t.rotate(up, mouse.movementX / 100);
+					var right = camera.rightWorld().normalize();
+					t.rotate(right, mouse.movementY / 100);
+					t.buildMatrix();
+					if (t.up().z < 0) {
+						t.rotate(right, -mouse.movementY / 100);
+					}
+				}
+
+				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
+					redraws = 2;
+					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
+					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
+					camera.transform.loc.add(look);
+					camera.transform.loc.add(right);
+					camera.buildMatrix();
+				}
+
+				if (Operator.shortcut(Config.keymap.action_zoom)) {
+					redraws = 2;
+					camera.transform.move(camera.look(), -mouse.movementY / 150);
+				}
+
+				if (mouse.wheelDelta != 0) {
+					redraws = 2;
+					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
 				}
 			}
 			else if (controls == 2 && mouse.down("right")) {
