@@ -1215,7 +1215,7 @@ class MaterialBuilder {
 		return 31;
 		#else
 		// 32 texture slots available
-		return 7;
+		return 4; // base + 4 on top
 		#end
 	}
 
