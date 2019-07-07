@@ -121,24 +121,24 @@ vec3 decNor(uint val) {
 
 // GBuffer helper - Sebastien Lagarde
 // https://seblagarde.wordpress.com/2018/09/02/gbuffer-helper-packing-integer-and-float-together/
-float packFloatInt(float f, uint i, uint numBitI, uint numBitTarget) {
+float packFloatInt(const float f, const uint i, const uint numBitI, const uint numBitTarget) {
 	// Constant optimize by compiler
-	float prec = float(1 << numBitTarget);
-	float maxi = float(1 << numBitI);
-	float precMinusOne = prec - 1.0;
-	float t1 = ((prec / maxi) - 1.0) / precMinusOne;
-	float t2 = (prec / maxi) / precMinusOne;
+	const float prec = float(1 << numBitTarget);
+	const float maxi = float(1 << numBitI);
+	const float precMinusOne = prec - 1.0;
+	const float t1 = ((prec / maxi) - 1.0) / precMinusOne;
+	const float t2 = (prec / maxi) / precMinusOne;
 	// Code
 	return t1 * f + t2 * float(i);
 }
 
-void unpackFloatInt(float val, uint numBitI, uint numBitTarget, out float f, out uint i) {
+void unpackFloatInt(const float val, const uint numBitI, const uint numBitTarget, out float f, out uint i) {
 	// Constant optimize by compiler
-	float prec = float(1 << numBitTarget);
-	float maxi = float(1 << numBitI);
-	float precMinusOne = prec - 1.0;
-	float t1 = ((prec / maxi) - 1.0) / precMinusOne;
-	float t2 = (prec / maxi) / precMinusOne;
+	const float prec = float(1 << numBitTarget);
+	const float maxi = float(1 << numBitI);
+	const float precMinusOne = prec - 1.0;
+	const float t1 = ((prec / maxi) - 1.0) / precMinusOne;
+	const float t2 = (prec / maxi) / precMinusOne;
 	// Code
 	// extract integer part
 	// + rcp(precMinusOne) to deal with precision issue
@@ -148,19 +148,19 @@ void unpackFloatInt(float val, uint numBitI, uint numBitTarget, out float f, out
 	f = clamp((-t2 * float(i) + val) / t1, 0.0, 1.0); // Saturate in case of precision issue
 }
 
-float packFloatInt8(float f, uint i, uint numBitI) {
+float packFloatInt8(const float f, const uint i, const uint numBitI) {
 	return packFloatInt(f, i, numBitI, 8);
 }
 
-void unpackFloatInt8(float val, uint numBitI, out float f, out uint i) {
+void unpackFloatInt8(const float val, const uint numBitI, out float f, out uint i) {
 	unpackFloatInt(val, numBitI, 8, f, i);
 }
 
-float packFloatInt16(float f, uint i, uint numBitI) {
+float packFloatInt16(const float f, const uint i, const uint numBitI) {
 	return packFloatInt(f, i, numBitI, 16);
 }
 
-void unpackFloatInt16(float val, uint numBitI, out float f, out uint i) {
+void unpackFloatInt16(const float val, const uint numBitI, out float f, out uint i) {
 	unpackFloatInt(val, numBitI, 16, f, i);
 }
 
