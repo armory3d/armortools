@@ -113,7 +113,8 @@ class Project {
 
 		if (UITrait.inst.projectType > 0) {
 			var mesh:Dynamic = UITrait.inst.projectType == 1 ?
-				new iron.format.proc.Sphere(1, 512, 256) :
+				// new iron.format.proc.Sphere(1, 512, 256) :
+				new iron.format.proc.Plane(1, 1, 512, 512) :
 				new iron.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
 				name: "Tesselated",
@@ -131,7 +132,7 @@ class Project {
 			var md = new MeshData(raw, function(md:MeshData) {});
 			Data.cachedMeshes.set("SceneTesselated", md);
 
-			if (UITrait.inst.projectType == 2) {
+			if (UITrait.inst.projectType == 1 || UITrait.inst.projectType == 2) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
@@ -201,7 +202,8 @@ typedef TProjectFormat = {
 }
 
 typedef TLayerData = {
-	public var res:Int;
+	public var res:Int; // Width pixels
+	public var bpp:Int; // Bits per pixel
 	public var texpaint:haxe.io.Bytes;
 	public var texpaint_nor:haxe.io.Bytes;
 	public var texpaint_pack:haxe.io.Bytes;

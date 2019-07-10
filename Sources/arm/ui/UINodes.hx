@@ -463,7 +463,7 @@ class UINodes {
 	}
 
 	public function acceptDrag(assetIndex:Int) {
-		var n = NodesMaterial.createImageTexture();
+		var n = canvasType == 0 ? NodesMaterial.createImageTexture() : NodesBrush.createImageTexture();
 		n.buttons[0].default_value = assetIndex;
 		nodes.nodesSelected = [n];
 	}

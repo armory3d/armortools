@@ -55,10 +55,14 @@ class ExportArm {
 			}
 		}
 
+		var bitsPos = UITrait.inst.bitsHandle.position;
+		var bpp = bitsPos == 0 ? 8 : bitsPos == 1 ? 16 : 32;
+
 		var ld:Array<TLayerData> = [];
 		for (l in Project.layers) {
 			ld.push({
 				res: l.texpaint.width,
+				bpp: bpp,
 				texpaint: Lz4.encode(l.texpaint.getPixels()),
 				texpaint_nor: Lz4.encode(l.texpaint_nor.getPixels()),
 				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),

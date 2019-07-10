@@ -4,6 +4,8 @@ import haxe.io.Bytes;
 import kha.Window;
 import kha.Blob;
 import kha.Image;
+import kha.graphics4.TextureFormat;
+import kha.graphics4.DepthStencilFormat;
 import iron.data.MaterialData;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -143,7 +145,13 @@ class ImportArm {
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 
-			UITrait.inst.resHandle.position = Config.getTextureResPos(project.layer_datas[0].res);
+			var l0 = project.layer_datas[0];
+			UITrait.inst.resHandle.position = Config.getTextureResPos(l0.res);
+			if (l0.bpp == null) l0.bpp = 8; // TODO: deprecated
+			var bitsPos = l0.bpp == 8 ? 0 : l0.bpp == 16 ? 1 : 2;
+			UITrait.inst.bitsHandle.position = bitsPos;
+			var bytesPerPixel = Std.int(l0.bpp / 8);
+			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
 
 			if (Project.layers[0].texpaint.width != Config.getTextureRes()) {
 				for (l in Project.layers) l.resizeAndSetBits();
@@ -152,13 +160,15 @@ class ImportArm {
 				rts.get("texpaint_blend0").image.unload();
 				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
 				rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				rts.get("texpaint_blend1").image.unload();
 				rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
 				rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), kha.graphics4.TextureFormat.L8, kha.graphics4.DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				Context.brushBlendDirty = true;
 			}
+
+
 
 			// for (l in Project.layers) l.unload();
 			Project.layers = [];
@@ -168,19 +178,19 @@ class ImportArm {
 				Project.layers.push(l);
 
 				// TODO: create render target from bytes
-				var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 				l.texpaint.g2.begin(false);
 				l.texpaint.g2.drawImage(texpaint, 0, 0);
 				l.texpaint.g2.end();
 				// texpaint.unload();
 
-				var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 				l.texpaint_nor.g2.begin(false);
 				l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
 				l.texpaint_nor.g2.end();
 				// texpaint_nor.unload();
 
-				var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4), ld.res, ld.res);
+				var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 				l.texpaint_pack.g2.begin(false);
 				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 				l.texpaint_pack.g2.end();
@@ -188,7 +198,7 @@ class ImportArm {
 
 				if (ld.texpaint_mask != null) {
 					l.createMask(0, false);
-					var texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, kha.graphics4.TextureFormat.L8);
+					var texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
 					l.texpaint_mask.g2.begin(false);
 					l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
 					l.texpaint_mask.g2.end();

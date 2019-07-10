@@ -1241,14 +1241,14 @@ class NodesMaterial {
 					{
 						name: "blend_type",
 						type: "ENUM",
-						data: ["Mix", "Add", "Multiply", "Subtract", "Screen", "Divide", "Difference", "Darken", "Lighten", "Soft Light"],
+						data: ["Mix", "Add", "Multiply", "Subtract", "Screen", "Divide", "Difference", "Darken", "Lighten", "Overlay", "Dodge", "Burn", "Hue", "Saturation", "Value", "Color", "Soft Light", "Linear Light"],
 						default_value: 0,
 						output: 0
 					},
 					{
 						name: "use_clamp",
 						type: "BOOL",
-						default_value: "false",
+						default_value: false,
 						output: 0
 					}
 				]
@@ -1673,7 +1673,7 @@ class NodesMaterial {
 					{
 						name: "use_clamp",
 						type: "BOOL",
-						default_value: "false",
+						default_value: false,
 						output: 0
 					}
 				]

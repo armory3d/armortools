@@ -995,16 +995,11 @@ class MaterialBuilder {
 
 				// Height
 				if (heightUsed) {
-					frag.write('vec4 vech;');
-					frag.write('vech.x = textureOffsetShared(texpaint_pack, texCoord, ivec2(-1, 0)).a;');
-					frag.write('vech.y = textureOffsetShared(texpaint_pack, texCoord, ivec2(1, 0)).a;');
-					frag.write('vech.z = textureOffsetShared(texpaint_pack, texCoord, ivec2(0, -1)).a;');
-					frag.write('vech.w = textureOffsetShared(texpaint_pack, texCoord, ivec2(0, 1)).a;');
-					// Displace normal strength
-					frag.write('vech *= 15 * 7; float h1 = vech.x - vech.y; float h2 = vech.z - vech.w;');
-					frag.write('vec3 va = normalize(vec3(2.0, 0.0, h1));');
-					frag.write('vec3 vb = normalize(vec3(0.0, 2.0, h2));');
-					frag.write('vec3 vc = normalize(vec3(h1, h2, 2.0));');
+					frag.write('float bump_res_x = dFdx(pack.a) * 32.0;');
+					frag.write('float bump_res_y = dFdy(pack.a) * 32.0;');
+					frag.write('vec3 va = normalize(vec3(1.0, 0.0, bump_res_x));');
+					frag.write('vec3 vb = normalize(vec3(0.0, 1.0, bump_res_y));');
+					frag.write('vec3 vc = normalize(vec3(bump_res_x, bump_res_y, 1.0));');
 					frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
 				}
 				//
