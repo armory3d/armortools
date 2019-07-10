@@ -297,8 +297,6 @@ class CyclesShader {
 		s += '#define sampler3D Texture3D\n';
 		s += '#define texture(tex, coord) tex.Sample(tex ## _sampler, coord)\n';
 		s += '#define textureShared(tex, coord) tex.Sample($sharedSampler, coord)\n';
-		s += '#define textureOffset(tex, coord, offset) tex.Sample(tex ## _sampler, coord, offset)\n';
-		s += '#define textureOffsetShared(tex, coord, offset) tex.Sample($sharedSampler, coord, offset)\n';
 		s += '#define textureLod(tex, coord, lod) tex.SampleLevel(tex ## _sampler, coord, lod)\n';
 		s += '#define textureLodShared(tex, coord, lod) tex.SampleLevel($sharedSampler, coord, lod)\n';
 		s += '#define texelFetch(tex, coord, lod) tex.Load(float3(coord.xy, lod))\n';
@@ -490,7 +488,6 @@ class CyclesShader {
 
 		s += '#define mul(a, b) b * a\n';
 		s += '#define textureShared texture\n';
-		s += '#define textureOffsetShared textureOffset\n';
 		s += '#define textureLodShared textureLod\n';
 		s += header;
 

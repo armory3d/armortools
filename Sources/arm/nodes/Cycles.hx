@@ -19,6 +19,7 @@ package arm.nodes;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import arm.nodes.CyclesShader;
+using StringTools;
 
 class Cycles {
 	
@@ -534,8 +535,8 @@ class Cycles {
 				curshader.bposition = true;
 			}
 			var but = node.buttons[0]; //gradient_type;
-			var grad = but.data[but.default_value].toUpperCase();
-			grad = StringTools.replace(grad, " ", "_");
+			var grad:String = but.data[but.default_value].toUpperCase();
+			grad = grad.replace(" ", "_");
 			var f = '';
 			if (grad == 'LINEAR') {
 				f = '$co.x';
@@ -663,8 +664,8 @@ class Cycles {
 			}
 			var scale = parse_value_input(node.inputs[1]);
 			var but = node.buttons[0]; //coloring;
-			var coloring = but.data[but.default_value].toUpperCase();
-			coloring = StringTools.replace(coloring, " ", "_");
+			var coloring:String = but.data[but.default_value].toUpperCase();
+			coloring = coloring.replace(" ", "_");
 			var res = '';
 			if (coloring == 'INTENSITY') {
 				res = to_vec3('tex_voronoi($co * $scale).a');
@@ -728,8 +729,8 @@ class Cycles {
 			var col1 = parse_vector_input(node.inputs[1]);
 			var col2 = parse_vector_input(node.inputs[2]);
 			var but = node.buttons[0]; // blend_type
-			var blend = but.data[but.default_value].toUpperCase();
-			blend = StringTools.replace(blend, " ", "_");
+			var blend:String = but.data[but.default_value].toUpperCase();
+			blend = blend.replace(" ", "_");
 			but = node.buttons[1]; // use_clamp
 			var use_clamp = but.default_value == "true";
 			var out_col = '';
@@ -760,34 +761,34 @@ class Cycles {
 			else if (blend == 'LIGHTEN') {
 				out_col = 'max($col1, $col2 * $fac_var)';
 			}
-			// else if (blend == 'OVERLAY') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'DODGE') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'BURN') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'HUE') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'SATURATION') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'VALUE') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
-			// else if (blend == 'COLOR') {
-			// 	out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) // Revert to mix
-			// }
+			else if (blend == 'OVERLAY') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'DODGE') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'BURN') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'HUE') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'SATURATION') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'VALUE') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
+			else if (blend == 'COLOR') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			}
 			else if (blend == 'SOFT_LIGHT') {
 				out_col = '((1.0 - $fac_var) * $col1 + $fac_var * ((vec3(1.0, 1.0, 1.0) - $col1) * $col2 * $col1 + $col1 * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))));';
 			}
-			// else if (blend == 'LINEAR_LIGHT') {
-				// out_col = 'mix($col1, $col2, $fac_var)'.format(col1, col2, fac_var) # Revert to mix
+			else if (blend == 'LINEAR_LIGHT') {
+				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
 				// out_col = '($col1 + $fac_var * (2.0 * ($col2 - vec3(0.5, 0.5, 0.5))))'.format(col1, col2, fac_var)
-			// }
+			}
 			if (use_clamp) return 'clamp($out_col, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0))';
 			else return out_col;
 		}
@@ -989,15 +990,11 @@ class Cycles {
 			var nor = parse_vector_input(node.inputs[3]);
 			if (sample_bump_res != '') {
 				curshader.nAttr = true;
-				// var ext = node.invert ? ['1', '2', '3', '4'] : ['2', '1', '4', '3'];
-				var ext = ['2', '1', '4', '3'];
-				curshader.write('float ${sample_bump_res}_fh1 = ${sample_bump_res}_${ext[0]} - ${sample_bump_res}_${ext[1]};');
-				curshader.write('float ${sample_bump_res}_fh2 = ${sample_bump_res}_${ext[2]} - ${sample_bump_res}_${ext[3]};');
-				curshader.write('${sample_bump_res}_fh1 *= ($strength) * 3.0;');
-				curshader.write('${sample_bump_res}_fh2 *= ($strength) * 3.0;');
-				curshader.write('vec3 ${sample_bump_res}_a = normalize(vec3(1.0, 0.0, ${sample_bump_res}_fh1));');
-				curshader.write('vec3 ${sample_bump_res}_b = normalize(vec3(0.0, 1.0, ${sample_bump_res}_fh2));');
-				res = 'normalize(mul(nAttr, mat3(${sample_bump_res}_a, ${sample_bump_res}_b, normalize(vec3(${sample_bump_res}_fh1, ${sample_bump_res}_fh2, 2.0)))))';
+				curshader.write('${sample_bump_res}_x *= ($strength) * 16.0;');
+				curshader.write('${sample_bump_res}_y *= ($strength) * 16.0;');
+				curshader.write('vec3 ${sample_bump_res}_a = normalize(vec3(1.0, 0.0, ${sample_bump_res}_x));');
+				curshader.write('vec3 ${sample_bump_res}_b = normalize(vec3(0.0, 1.0, ${sample_bump_res}_y));');
+				res = 'normalize(mul(nAttr, mat3(${sample_bump_res}_a, ${sample_bump_res}_b, normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0)))))';
 				sample_bump_res = '';
 			}
 			else {
@@ -1090,8 +1087,8 @@ class Cycles {
 			var vec1 = parse_vector_input(node.inputs[0]);
 			var vec2 = parse_vector_input(node.inputs[1]);
 			var but = node.buttons[0]; //operation;
-			var op = but.data[but.default_value].toUpperCase();
-			op = StringTools.replace(op, " ", "_");
+			var op:String = but.data[but.default_value].toUpperCase();
+			op = op.replace(" ", "_");
 			if (op == 'ADD') {
 				return '($vec1 + $vec2)';
 			}
@@ -1359,8 +1356,8 @@ class Cycles {
 				curshader.bposition = true;
 			}
 			var but = node.buttons[0]; //gradient_type;
-			var grad = but.data[but.default_value].toUpperCase();
-			grad = StringTools.replace(grad, " ", "_");
+			var grad:String = but.data[but.default_value].toUpperCase();
+			grad = grad.replace(" ", "_");
 			var f = '';
 			if (grad == 'LINEAR') {
 				f = '$co.x';
@@ -1483,8 +1480,8 @@ class Cycles {
 			}
 			var scale = parse_value_input(node.inputs[1]);
 			var but = node.buttons[0]; //coloring;
-			var coloring = but.data[but.default_value].toUpperCase();
-			coloring = StringTools.replace(coloring, " ", "_");
+			var coloring:String = but.data[but.default_value].toUpperCase();
+			coloring = coloring.replace(" ", "_");
 			var res = '';
 			if (coloring == 'INTENSITY') {
 				res = 'tex_voronoi($co * $scale).a';
@@ -1530,8 +1527,8 @@ class Cycles {
 			var val1 = parse_value_input(node.inputs[0]);
 			var val2 = parse_value_input(node.inputs[1]);
 			var but = node.buttons[0]; //operation;
-			var op = but.data[but.default_value].toUpperCase();
-			op = StringTools.replace(op, " ", "_");
+			var op:String = but.data[but.default_value].toUpperCase();
+			op = op.replace(" ", "_");
 			but = node.buttons[1]; // use_clamp
 			var use_clamp = but.default_value == "true";
 			var out_val = '';
@@ -1653,8 +1650,8 @@ class Cycles {
 			var vec1 = parse_vector_input(node.inputs[0]);
 			var vec2 = parse_vector_input(node.inputs[1]);
 			var but = node.buttons[0]; //operation;
-			var op = but.data[but.default_value].toUpperCase();
-			op = StringTools.replace(op, " ", "_");
+			var op:String = but.data[but.default_value].toUpperCase();
+			op = op.replace(" ", "_");
 			if (op == 'DOT_PRODUCT') {
 				return 'dot($vec1, $vec2)';
 			}
@@ -1782,10 +1779,8 @@ class Cycles {
 		
 		if (sample_bump) {
 			sample_bump_res = tex_store;
-			curshader.write('float ${tex_store}_1 = textureOffset($tex_name, $uv_name.xy, ivec2(-2, 0)).r;');
-			curshader.write('float ${tex_store}_2 = textureOffset($tex_name, $uv_name.xy, ivec2(2, 0)).r;');
-			curshader.write('float ${tex_store}_3 = textureOffset($tex_name, $uv_name.xy, ivec2(0, -2)).r;');
-			curshader.write('float ${tex_store}_4 = textureOffset($tex_name, $uv_name.xy, ivec2(0, 2)).r;');
+			curshader.write('float ${tex_store}_x = dFdx($tex_store).x;');
+			curshader.write('float ${tex_store}_y = dFdy($tex_store).x;');
 			sample_bump = false;
 		}
 		if (to_linear) {
@@ -1796,26 +1791,8 @@ class Cycles {
 
 	static function write_bump(node:TNode, res:String) {
 		sample_bump_res = store_var_name(node) + '_bump';
-		// Testing.. get function parts..
-		var ar0 = res.substring(0, res.indexOf('('));
-		var ar1 = res.substring(res.indexOf('(') + 1, res.length);
-		var pre = ar0 + '(';
-		var post = '';
-		var co = '';
-		if (ar1.indexOf(',') >= 0) {
-			var ar20 = ar1.substring(0, ar1.indexOf(','));
-			var ar21 = ar1.substring(ar1.indexOf(','), ar1.length);
-			co = ar20;
-			post = ',' + ar21;
-		}
-		else {
-			co = ar1.substring(0, ar1.length - 1);
-			post = ')';
-		}
-		curshader.write('float ${sample_bump_res}_1 = $pre$co + vec3(-0.1, 0.0, 0.0)$post;');
-		curshader.write('float ${sample_bump_res}_2 = $pre$co + vec3(0.1, 0.0,  0.1)$post;');
-		curshader.write('float ${sample_bump_res}_3 = $pre$co + vec3(0.0, -0.1, 0.0)$post;');
-		curshader.write('float ${sample_bump_res}_4 = $pre$co + vec3(0.0, 0.1,  -0.1)$post;');
+		curshader.write('float ${sample_bump_res}_x = dFdx($res);');
+		curshader.write('float ${sample_bump_res}_y = dFdy($res);');
 		sample_bump = false;
 	}
 
@@ -1865,7 +1842,12 @@ class Cycles {
 	}
 
 	static function safesrc(s:String):String {
-		return StringTools.replace(s, ' ', '');
+		for (i in 0...s.length) {
+			var code = s.charCodeAt(i);
+			var letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+			if (!letter) s = s.replace(s.charAt(i), '_');
+		}
+		return s;
 	}
 
 	//
