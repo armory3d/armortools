@@ -19,8 +19,8 @@ class UIFiles {
 
 		// Krom with native file dialogs
 		#if kha_krom
+		show = false;
 		if (untyped Krom.openDialog != null) {
-			show = false;
 			path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 			if (path != null) {
 				if (!App.checkAscii(path)) return;

@@ -335,7 +335,7 @@ class App {
 			}
 		}
 
-		if (UIFiles.show || UIBox.show) UIBox.update();
+		if (UIBox.show) UIBox.update();
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
@@ -373,7 +373,7 @@ class App {
 		var usingMenu = false;
 		if (UIMenu.show) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
 
-		uienabled = !UIFiles.show && !UIBox.show && !usingMenu;
+		uienabled = !UIBox.show && !usingMenu;
 		if (UIFiles.show) UIFiles.render(g);
 		else if (UIBox.show) UIBox.render(g);
 		else if (UIMenu.show) UIMenu.render(g);

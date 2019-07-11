@@ -72,7 +72,7 @@ class UIBox {
 			var mx = mouse.x + iron.App.x();
 			var my = mouse.y + iron.App.y();
 			if (mx < left || mx > right || my < top || my > bottom) {
-				UIFiles.show = UIBox.show = false;
+				UIBox.show = false;
 				App.redrawUI();
 			}
 		}

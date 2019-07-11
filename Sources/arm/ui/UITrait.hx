@@ -450,7 +450,7 @@ class UITrait {
 		}
 
 		if (kb.started(Config.keymap.view_distract_free) ||
-		   (kb.started("escape") && !show && !UIFiles.show && !UIBox.show)) {
+		   (kb.started("escape") && !show && !UIBox.show)) {
 			toggleDistractFree();
 		}
 
