@@ -50,6 +50,10 @@ class Exporter {
 	}
 
 	public static function exportTextures(path:String) {
+		#if arm_debug
+		var timer = iron.system.Time.realTime();
+		#end
+
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
 		var f = UIFiles.filename;
@@ -244,6 +248,10 @@ class Exporter {
 
 		// if (UITrait.inst.isEmis) Krom.fileSaveBytes(path + "/tex_emis" + ext, bo.getBytes().getData());
 		// if (UITrait.inst.isSubs) Krom.fileSaveBytes(path + "/tex_subs" + ext, bo.getBytes().getData());
+
+		#if arm_debug
+		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
+		#end
 	}
 
 	public static function exportMesh(path:String) {
