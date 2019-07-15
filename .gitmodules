@@ -11,3 +11,6 @@
 	path = Kha
 	url = https://github.com/armory3d/Kha
 	shallow = true
+[submodule "Kromx"]
+	path = Kromx
+	url = https://github.com/armory3d/Kromx
