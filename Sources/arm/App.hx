@@ -88,7 +88,7 @@ class App {
 				theme.FILL_WINDOW_BG = true;
 
 				#if kha_krom // Pre-baked font texture
-				var kimg:kha.Kravur.KravurImage = js.Object.create(untyped kha.Kravur.KravurImage.prototype);
+				var kimg:kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
 				@:privateAccess kimg.mySize = 13;
 				@:privateAccess kimg.width = 128;
 				@:privateAccess kimg.height = 128;

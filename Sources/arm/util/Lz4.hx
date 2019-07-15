@@ -22,8 +22,8 @@
 package arm.util;
 
 import haxe.io.Bytes;
-import js.html.Int32Array;
-import js.html.Uint8Array;
+import js.lib.Int32Array;
+import js.lib.Uint8Array;
 
 class Lz4 {
 
