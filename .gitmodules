@@ -14,3 +14,4 @@
 [submodule "Kromx"]
 	path = Kromx
 	url = https://github.com/armory3d/Kromx
+	shallow = true
