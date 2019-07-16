@@ -8,4 +8,4 @@ before_script:
   - armorpaint/nodejs_bin/copysysbin.sh
 script: 
   - cd armorpaint
-  - nodejs_bin/node Kha/make.js krom
+  - nodejs_bin/node Kromx/make.js
