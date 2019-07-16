@@ -16,7 +16,7 @@ cd armorpaint
 ```
 ```bash
 # Windows
-node Kha/make krom -g direct3d11
+node Kromx/make -g direct3d11
 cd Kromx
 # Unpack `V8\Libraries\win32\release\v8_monolith.7z` using 7-Zip (exceeds 100MB)
 node Kinc/make -g direct3d11 --noshaders
@@ -26,7 +26,7 @@ node Kinc/make -g direct3d11 --noshaders
 ```
 ```bash
 # Linux
-node Kha/make krom -g opengl --shaderversion 330
+node Kromx/make -g opengl --shaderversion 330
 cd Kromx
 node Kinc/make -g opengl --noshaders --compiler clang --compile
 cd Deployment
@@ -35,7 +35,7 @@ strip Krom
 ```
 ```bash
 # macOS
-node Kha/make krom -g opengl
+node Kromx/make -g opengl
 cd Kromx
 node Kinc/make -g opengl --noshaders
 # Open generated Xcode project
