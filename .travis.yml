@@ -3,9 +3,6 @@ os:
   - linux
 language: node_js
 before_script:
-  - git clone --recursive https://github.com/armory3d/armorpaint
-  - git clone https://github.com/armory3d/nodejs_bin armorpaint/nodejs_bin
-  - armorpaint/nodejs_bin/copysysbin.sh
-script: 
-  - cd armorpaint
-  - nodejs_bin/node Kromx/make.js
+  - git clone https://github.com/armory3d/nodejs_bin
+script:
+  - nodejs_bin/node-linux64 Kromx/make.js krom
