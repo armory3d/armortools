@@ -113,9 +113,9 @@ class Project {
 
 		if (UITrait.inst.projectType > 0) {
 			var mesh:Dynamic = UITrait.inst.projectType == 1 ?
-				// new iron.format.proc.Sphere(1, 512, 256) :
-				new iron.format.proc.Plane(1, 1, 512, 512) :
-				new iron.format.proc.Plane(1, 1, 512, 512);
+				// new arm.format.proc.Sphere(1, 512, 256) :
+				new arm.format.proc.Plane(1, 1, 512, 512) :
+				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
 				name: "Tesselated",
 				vertex_arrays: [

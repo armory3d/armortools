@@ -2,7 +2,7 @@ package arm.io;
 
 import kha.Blob;
 import iron.data.Data;
-import iron.format.FbxParser;
+import arm.format.FbxParser;
 import arm.ui.UITrait;
 
 class ImportFbx {

@@ -6,7 +6,7 @@ import kha.arrays.Float32Array;
 import kha.arrays.Int16Array;
 import iron.data.Data;
 import iron.math.Vec4;
-import iron.format.BlendParser;
+import arm.format.BlendParser;
 import zui.Nodes;
 import arm.ui.UITrait;
 import arm.ui.UINodes;

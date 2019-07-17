@@ -3,7 +3,6 @@ let project = new Project('ArmorPaint');
 project.addSources('Sources');
 project.addLibrary("iron");
 project.addLibrary("zui");
-project.addLibrary("iron_format");
 project.addShaders("compiled/Shaders/*.glsl", { noembed: false});
 project.addAssets("compiled/Assets/**", { notinlist: true , destination: "data/{name}" });
 project.addAssets("compiled/Shaders/*.arm", { notinlist: true , destination: "data/{name}" });

@@ -2,7 +2,7 @@ package arm.io;
 
 import kha.Blob;
 import iron.data.Data;
-import iron.format.GltfParser;
+import arm.format.GltfParser;
 
 class ImportGltf {
 
