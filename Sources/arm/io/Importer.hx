@@ -218,6 +218,9 @@ class Importer {
 				Project.paintObjects = [Context.paintObject];
 			}
 
+			md.handle = raw.name;
+			Data.cachedMeshes.set(md.handle, md);
+
 			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
 			UITrait.inst.hwnd1.redraws = 2;
@@ -265,6 +268,9 @@ class Importer {
 			object.skip_context = "paint";
 
 			Project.paintObjects.push(object);
+
+			md.handle = raw.name;
+			Data.cachedMeshes.set(md.handle, md);
 
 			Context.ddirty = 4;
 			UITrait.inst.hwnd.redraws = 2;
