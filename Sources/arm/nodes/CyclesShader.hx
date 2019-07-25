@@ -291,7 +291,7 @@ class CyclesShader {
 			sharedSampler = sharedSamplers[0].split(' ')[1] + '_sampler';
 		}
 
-		#if kha_direct3d11
+		#if (kha_direct3d11 || kha_direct3d12)
 		var s = '#define HLSL\n';
 		s += '#define sampler2D Texture2D\n';
 		s += '#define sampler3D Texture3D\n';
@@ -381,7 +381,7 @@ class CyclesShader {
 
 		for (a in uniforms) {
 			s += 'uniform ' + a + ';\n';
-			#if kha_direct3d11
+			#if (kha_direct3d11 || kha_direct3d12)
 			if (StringTools.startsWith(a, 'sampler')) {
 				s += 'SamplerState ' + a.split(' ')[1] + '_sampler;\n';
 			}
@@ -392,7 +392,7 @@ class CyclesShader {
 			for (a in sharedSamplers) {
 				s += 'uniform ' + a + ';\n';
 			}
-			#if kha_direct3d11
+			#if (kha_direct3d11 || kha_direct3d12)
 			s += 'SamplerState $sharedSampler;\n';
 			#end
 		}

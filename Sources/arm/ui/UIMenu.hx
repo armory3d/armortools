@@ -168,7 +168,7 @@ class UIMenu {
 					var sha = Macro.buildSha();
 					sha = sha.substr(1, sha.length - 2);
 					var date = Macro.buildDate().split(" ")[0];
-					var gapi = #if (kha_direct3d11) "Direct3D11" #else "OpenGL" #end;
+					var gapi = #if (kha_direct3d11) "Direct3D11" #elseif (kha_direct3d12) "Direct3D12" #else "OpenGL" #end;
 					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
 					msg += System.systemId + " - " + gapi;
 

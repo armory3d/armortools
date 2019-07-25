@@ -750,7 +750,7 @@ class UITrait {
 			if (!brush3d || in2dView || decal) {
 				if (decal) {
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
-					#if kha_direct3d11
+					#if (kha_direct3d11 || kha_direct3d12)
 					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
 					#else
 					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);

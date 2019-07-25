@@ -29,7 +29,7 @@ class RenderPathPreview {
 		// ---
 		// Deferred light
 		// ---
-		#if (!kha_opengl)
+		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth so we can read it
 		#end
 		path.setTarget("mtex");
@@ -43,7 +43,7 @@ class RenderPathPreview {
 		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if (!kha_opengl)
+		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("mtex", "mgbuffer0"); // Re-bind depth
 		#end
 
@@ -92,7 +92,7 @@ class RenderPathPreview {
 		// ---
 		// Deferred light
 		// ---
-		#if (!kha_opengl)
+		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
 		#end
 		path.setTarget("tex");
@@ -106,7 +106,7 @@ class RenderPathPreview {
 		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if (!kha_opengl)
+		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 		#end
 

@@ -9,7 +9,7 @@ import iron.system.ArmPack;
 class ConstData {
 
 	// 2D layer view
-	#if kha_direct3d11
+	#if (kha_direct3d11 || kha_direct3d12)
 
 	public static var layerViewVert = "
 uniform float4x4 projectionMatrix;
@@ -59,7 +59,7 @@ void main() {
 
 
 	// 2D layer merge
-	#if kha_direct3d11
+	#if (kha_direct3d11 || kha_direct3d12)
 
 	public static var layerMergeVert = "
 struct SPIRV_Cross_Output { float2 texCoord : TEXCOORD0; float4 gl_Position : SV_Position; };
@@ -165,7 +165,7 @@ void main() {
 ";
 	#end
 
-	#if kha_direct3d11
+	#if (kha_direct3d11 || kha_direct3d12)
 
 	public static var cursorVert = "
 uniform float4x4 VP;
@@ -173,6 +173,8 @@ uniform float4x4 invVP;
 uniform float2 mouse;
 uniform float2 step;
 uniform float radius;
+Texture2D<float4> texa; // direct3d12 unit align
+SamplerState _texa_sampler; // direct3d12 unit align
 Texture2D<float4> gbufferD;
 SamplerState _gbufferD_sampler;
 Texture2D<float4> gbuffer0;
@@ -198,6 +200,8 @@ SPIRV_Cross_Output main(float4 pos : TEXCOORD1, float2 nor : TEXCOORD0, float2 t
 	stage_output.texCoord = tex;
 	float2 mouseinv = float2(mouse.x, 1.0 - mouse.y);
 	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouseinv, 0).r;
+	float keep = texa.SampleLevel(_texa_sampler, mouseinv, 0).r; // direct3d12 unit align
+	depth += keep * 0.0; // direct3d12 unit align
 	float4 wpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = mul(wpos, invVP);
 	wpos.xyz /= wpos.w;

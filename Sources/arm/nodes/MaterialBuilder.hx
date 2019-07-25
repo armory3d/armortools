@@ -92,7 +92,7 @@ class MaterialBuilder {
 			vert.write('vec2 subtex = tex;');
 		}
 
-		#if kha_direct3d11
+		#if (kha_direct3d11 || kha_direct3d12)
 		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
 		#else
 		vert.write('vec2 tpos = vec2(subtex.xy * 2.0 - 1.0);');
@@ -277,7 +277,7 @@ class MaterialBuilder {
 		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
 			frag.wvpposition = true;
 			frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-			#if kha_direct3d11
+			#if (kha_direct3d11 || kha_direct3d12)
 			frag.write('picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
 			#end
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
@@ -392,7 +392,7 @@ class MaterialBuilder {
 				if (Context.material.paintSubs) {
 					frag.write('float subs = 0.0;');
 				}
-				#if kha_direct3d11
+				#if (kha_direct3d11 || kha_direct3d12)
 				frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
 				#else
 				frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
@@ -483,7 +483,7 @@ class MaterialBuilder {
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
 		frag.write('vec2 sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-		#if kha_direct3d11
+		#if (kha_direct3d11 || kha_direct3d12)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');
@@ -608,7 +608,7 @@ class MaterialBuilder {
 				frag.n = true;
 				frag.vVec = true;
 				frag.add_function(CyclesFunctions.str_cotangentFrame);
-				#if kha_direct3d11
+				#if (kha_direct3d11 || kha_direct3d12)
 				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 				#else
 				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -772,7 +772,7 @@ class MaterialBuilder {
 		}
 		else {
 			frag.vVec = true;
-			#if kha_direct3d11
+			#if (kha_direct3d11 || kha_direct3d12)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -952,7 +952,7 @@ class MaterialBuilder {
 
 			frag.vVec = true;
 			frag.add_function(CyclesFunctions.str_cotangentFrame);
-			#if kha_direct3d11
+			#if (kha_direct3d11 || kha_direct3d12)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -1203,7 +1203,7 @@ class MaterialBuilder {
 	}
 
 	static function getMaxVisibleLayers():Int {
-		#if kha_direct3d11
+		#if (kha_direct3d11 || kha_direct3d12)
 		// 128 texture slots available
 		// 4 textures per layer (3 + 1 mask)
 		// 32 layers - base + 31 on top
@@ -1227,7 +1227,7 @@ class MaterialBuilder {
 
 		var ds = UITrait.inst.displaceStrength * 0.02;
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
-		#if kha_direct3d11
+		#if (kha_direct3d11 || kha_direct3d12)
 		"uniform float4x4 W;
 		uniform float3x3 N;
 		Texture2D<float4> texpaint_pack;

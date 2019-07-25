@@ -45,7 +45,7 @@ class Main {
 		if (c.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (c.window_minimizable) windowFeatures |= FeatureMinimizable;
 
-		System.start({title: "untitled - ArmorPaint", width: c.window_w, height: c.window_h, window: {mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: c.window_msaa, verticalSync: c.window_vsync}}, function(window:Window) {   
+		System.start({title: "untitled - ArmorPaint", width: c.window_w, height: c.window_h, window: {mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: c.window_msaa, verticalSync: c.window_vsync}}, function(window:Window) {
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(object:Object) {
 					var path = new RenderPath();

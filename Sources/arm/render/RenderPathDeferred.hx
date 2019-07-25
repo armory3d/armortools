@@ -955,7 +955,6 @@ class RenderPathDeferred {
 		#if rp_overlays
 		{
 			path.setTarget("buf");
-			path.clearTarget(null, 1.0);
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
 
