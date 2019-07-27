@@ -59,6 +59,11 @@ if (debug) {
 	project.addParameter('--times');
 }
 
+let raytrace = false;
+if (raytrace) {
+	project.addAssets("Bundled/raytrace/**", { notinlist: true , destination: "data/{name}" });
+}
+
 if (process.platform === 'win32') {
 	project.addShaders("compiled/Hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
