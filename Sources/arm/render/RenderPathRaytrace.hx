@@ -61,13 +61,13 @@ class RenderPathRaytrace {
 		f32[19] = helpMat._33;
 		f32[20] = frame;
 		frame += 1.0;
-		if (iron.system.Input.getMouse().down()) frame = 1.0;
+		if (iron.system.Input.getMouse().started()) frame = 1.0;
 
 		var path = RenderPathDeferred.path;
 		var framebuffer = path.renderTargets.get("taa").image;
 
 		untyped Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-		Context.ddirty = 1;
+		Context.ddirty = 2;
 	}
 }

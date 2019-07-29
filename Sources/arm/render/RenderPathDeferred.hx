@@ -700,6 +700,16 @@ class RenderPathDeferred {
 			drawGbuffer();
 		}
 
+		#if kha_direct3d12
+		if (iron.system.Input.getMouse().down()) {
+			RenderPathRaytrace.commands();
+			path.setTarget("");
+			path.bindTarget("taa", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+			return;
+		}
+		#end
+
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
