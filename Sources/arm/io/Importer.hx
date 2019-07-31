@@ -103,6 +103,10 @@ class Importer {
 		#if arm_debug
 		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));
 		#end
+
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
 	}
 
 	public static function makeMesh(mesh:Dynamic, path:String) {

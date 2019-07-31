@@ -108,7 +108,11 @@ class RenderPathDeferred {
 			t.name = "taa";
 			t.width = 0;
 			t.height = 0;
+			#if kha_direct3d12
+			t.format = "RGBA64";
+			#else
 			t.format = "RGBA32";
+			#end
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
@@ -701,13 +705,20 @@ class RenderPathDeferred {
 		}
 
 		#if kha_direct3d12
-		if (iron.system.Input.getMouse().down()) {
-			RenderPathRaytrace.commands();
-			path.setTarget("");
-			path.bindTarget("taa", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-			return;
+		if (iron.system.Input.getMouse().down("left") ||
+			iron.system.Input.getMouse().down("right")) {
+			RenderPathRaytrace.frame = 1.0;
 		}
+		RenderPathRaytrace.commands();
+		path.setTarget("taa");
+		drawCompass(path.currentG);
+		path.setTarget("");
+		path.bindTarget("taa", "tex");
+		path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		if (UITrait.inst.brush3d) {
+			RenderPathPaint.commandsCursor();
+		}
+		return;
 		#end
 
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
@@ -967,35 +978,7 @@ class RenderPathDeferred {
 			path.setTarget("buf");
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
-
-			if (UITrait.inst.showCompass) {
-				var scene = Scene.active;
-				var cam = Scene.active.camera;
-				var gizmo:MeshObject = cast scene.getChild(".GizmoTranslate");
-				
-				var visible = gizmo.visible;
-				var parent = gizmo.parent;
-				var loc = gizmo.transform.loc;
-				var rot = gizmo.transform.rot;
-				var crot = cam.transform.rot;
-				var ratio = iron.App.w() / iron.App.h();
-				var P = cam.P;
-				cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-				gizmo.visible = true;
-				gizmo.parent = cam;
-				gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
-				gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-				gizmo.transform.buildMatrix();
-				
-				gizmo.render(currentG, "overlay", []);
-				
-				cam.P = P;
-				gizmo.visible = visible;
-				gizmo.parent = parent;
-				gizmo.transform.loc = loc;
-				gizmo.transform.rot = rot;
-				gizmo.transform.buildMatrix();
-			}
+			drawCompass(currentG);
 		}
 		#end
 
@@ -1103,6 +1086,37 @@ class RenderPathDeferred {
 			#end
 		}
 		#end
+	}
+
+	static function drawCompass(currentG:kha.graphics4.Graphics) {
+		if (UITrait.inst.showCompass) {
+			var scene = Scene.active;
+			var cam = Scene.active.camera;
+			var gizmo:MeshObject = cast scene.getChild(".GizmoTranslate");
+
+			var visible = gizmo.visible;
+			var parent = gizmo.parent;
+			var loc = gizmo.transform.loc;
+			var rot = gizmo.transform.rot;
+			var crot = cam.transform.rot;
+			var ratio = iron.App.w() / iron.App.h();
+			var P = cam.P;
+			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
+			gizmo.visible = true;
+			gizmo.parent = cam;
+			gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
+			gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
+			gizmo.transform.buildMatrix();
+
+			gizmo.render(currentG, "overlay", []);
+
+			cam.P = P;
+			gizmo.visible = visible;
+			gizmo.parent = parent;
+			gizmo.transform.loc = loc;
+			gizmo.transform.rot = rot;
+			gizmo.transform.buildMatrix();
+		}
 	}
 
 	#end

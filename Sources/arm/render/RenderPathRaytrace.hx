@@ -3,37 +3,92 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 
+#if kha_direct3d12
+
 class RenderPathRaytrace {
 
-	static var ready = false;
-	static var frame = 0.0;
+	public static var frame = 1.0;
+	public static var ready = false;
 	static var f32 = new kha.arrays.Float32Array(21);
 	static var helpMat = iron.math.Mat4.identity();
 
 	public static function init() {
-		iron.data.Data.getBlob("raytrace.cso", function(shader:kha.Blob) {		
-			var md = Context.paintObject.data;
+		iron.data.Data.getBlob("raytrace.cso", function(shader:kha.Blob) {
+			if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
+			var md = Context.mergedObject.data;
 			var geom = md.geom;
 			var count = Std.int(geom.positions.length / 4);
-			var vb = new kha.arrays.Float32Array(count * 8);
+			var vb = new kha.arrays.Float32Array((count + 4) * 8);
 			for (i in 0...count) {
-				vb[i * 8    ] = (geom.positions[i * 4    ] / 32767) * md.scalePos;
-				vb[i * 8 + 1] = (geom.positions[i * 4 + 1] / 32767) * md.scalePos;
-				vb[i * 8 + 2] = (geom.positions[i * 4 + 2] / 32767) * md.scalePos;
+				vb[i * 8    ] = (geom.positions[i * 4    ] / 32767);
+				vb[i * 8 + 1] = (geom.positions[i * 4 + 1] / 32767);
+				vb[i * 8 + 2] = (geom.positions[i * 4 + 2] / 32767);
 				vb[i * 8 + 3] =  geom.normals  [i * 2    ] / 32767;
 				vb[i * 8 + 4] =  geom.normals  [i * 2 + 1] / 32767;
 				vb[i * 8 + 5] =  geom.positions[i * 4 + 3] / 32767;
-				vb[i * 8 + 6] = (geom.uvs[i * 2    ] / 32767) * md.scaleTex;
-				vb[i * 8 + 7] = (geom.uvs[i * 2 + 1] / 32767) * md.scaleTex;
+				vb[i * 8 + 6] = (geom.uvs[i * 2    ] / 32767);
+				vb[i * 8 + 7] = (geom.uvs[i * 2 + 1] / 32767);
 			}
-			var ib = geom.indices[0];
 
-			untyped Krom.raytraceInit(shader.bytes.getData(), vb.buffer, ib.buffer, iron.App.w(), iron.App.h());
+			vb[count * 8    ] = -1; // Light
+			vb[count * 8 + 1] =  0.25;
+			vb[count * 8 + 2] =  1;
+			vb[count * 8 + 3] =  0;
+			vb[count * 8 + 4] =  0;
+			vb[count * 8 + 5] = -1;
+			vb[count * 8 + 6] =  0;
+			vb[count * 8 + 7] =  0;
+
+			vb[count * 8 + 8] =  1;
+			vb[count * 8 + 9] = -0.25;
+			vb[count * 8 + 10] =  1;
+			vb[count * 8 + 11] =  0;
+			vb[count * 8 + 12] =  0;
+			vb[count * 8 + 13] = -1;
+			vb[count * 8 + 14] =  0;
+			vb[count * 8 + 15] =  0;
+
+			vb[count * 8 + 16] = -1;
+			vb[count * 8 + 17] = -0.25;
+			vb[count * 8 + 18] =  1;
+			vb[count * 8 + 19] =  0;
+			vb[count * 8 + 20] =  0;
+			vb[count * 8 + 21] = -1;
+			vb[count * 8 + 22] =  0;
+			vb[count * 8 + 23] =  0;
+
+			vb[count * 8 + 24] =  1;
+			vb[count * 8 + 25] =  0.25;
+			vb[count * 8 + 26] =  1;
+			vb[count * 8 + 27] =  0;
+			vb[count * 8 + 28] =  0;
+			vb[count * 8 + 29] = -1;
+			vb[count * 8 + 30] =  0;
+			vb[count * 8 + 31] =  0;
+
+			var indices = geom.indices[0];
+			var ib = new kha.arrays.Uint32Array(indices.length + 6);
+			for (i in 0...indices.length) ib[i] = indices[i];
+
+			ib[indices.length    ] = count    ; // Light
+			ib[indices.length + 1] = count + 1;
+			ib[indices.length + 2] = count + 2;
+			ib[indices.length + 3] = count    ;
+			ib[indices.length + 4] = count + 3;
+			ib[indices.length + 5] = count + 1;
+
+			var layer = Context.layer;
+			var savedEnvmap = Scene.active.world.probe.radiance;
+
+			untyped Krom.raytraceInit(
+				shader.bytes.getData(), vb.buffer, ib.buffer, iron.App.w(), iron.App.h(),
+				layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_,
+				savedEnvmap.texture_);
 		});
 	}
 
 	public static function commands() {
-		if (!ready) { ready = true; init(); }
+		if (!ready) { ready = true; init(); return; }
 		var cam = Scene.active.camera;
 		var ct = cam.transform;
 		helpMat.setFrom(cam.V);
@@ -61,7 +116,6 @@ class RenderPathRaytrace {
 		f32[19] = helpMat._33;
 		f32[20] = frame;
 		frame += 1.0;
-		if (iron.system.Input.getMouse().started()) frame = 1.0;
 
 		var path = RenderPathDeferred.path;
 		var framebuffer = path.renderTargets.get("taa").image;
@@ -69,5 +123,10 @@ class RenderPathRaytrace {
 		untyped Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
 		Context.ddirty = 2;
+		// Context.ddirty--;
+		Context.pdirty--;
+		Context.rdirty--;
 	}
 }
+
+#end
