@@ -109,7 +109,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			#if kha_direct3d12
-			t.format = "RGBA64";
+			t.format = "RGBA128";
 			#else
 			t.format = "RGBA32";
 			#end

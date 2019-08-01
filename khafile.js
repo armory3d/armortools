@@ -59,7 +59,7 @@ if (debug) {
 	project.addParameter('--times');
 }
 
-let raytrace = false;
+let raytrace = process.argv.indexOf("direct3d12") >= 0;
 if (raytrace) {
 	project.addAssets("Bundled/raytrace/**", { notinlist: true , destination: "data/{name}" });
 }
