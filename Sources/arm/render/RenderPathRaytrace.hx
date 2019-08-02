@@ -9,13 +9,15 @@ class RenderPathRaytrace {
 
 	public static var frame = 1.0;
 	public static var ready = false;
-	static var f32 = new kha.arrays.Float32Array(21);
+	static var f32 = new kha.arrays.Float32Array(20);
 	static var helpMat = iron.math.Mat4.identity();
 
 	public static function init() {
 		iron.data.Data.getBlob("raytrace.cso", function(shader:kha.Blob) {
 			if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
-			var md = Context.mergedObject.data;
+			var mo = Context.mergedObject;
+			var sc = mo.transform.scale;
+			var md = mo.data;
 			var geom = md.geom;
 			var count = Std.int(geom.positions.length / 4);
 			var vb = new kha.arrays.Float32Array((count + 4) * 8);
@@ -97,7 +99,8 @@ class RenderPathRaytrace {
 		f32[0] = ct.worldx();
 		f32[1] = ct.worldy();
 		f32[2] = ct.worldz();
-		f32[3] = 1;
+		f32[3] = frame;
+		frame += 1.0;
 		f32[4] = helpMat._00;
 		f32[5] = helpMat._01;
 		f32[6] = helpMat._02;
@@ -114,15 +117,13 @@ class RenderPathRaytrace {
 		f32[17] = helpMat._31;
 		f32[18] = helpMat._32;
 		f32[19] = helpMat._33;
-		f32[20] = frame;
-		frame += 1.0;
 
 		var path = RenderPathDeferred.path;
 		var framebuffer = path.renderTargets.get("taa").image;
 
 		untyped Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-		Context.ddirty = 2;
+		Context.ddirty = 1;
 		// Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
