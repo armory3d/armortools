@@ -705,8 +705,7 @@ class RenderPathDeferred {
 		}
 
 		#if kha_direct3d12
-		if (iron.system.Input.getMouse().down("left") ||
-			iron.system.Input.getMouse().down("right")) {
+		if (Context.ddirty > 1 || Context.pdirty > 0) {
 			RenderPathRaytrace.frame = 1.0;
 		}
 		RenderPathRaytrace.commands();
