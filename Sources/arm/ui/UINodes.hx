@@ -68,6 +68,7 @@ class UINodes {
 		inst = this;
 
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
+		Nodes.excludeRemove.push("BrushOutputNode");
 		// Cycles.arm_export_tangents = false;
 
 		Data.getBlob('defaults/default_material.json', function(b1:Blob) {
@@ -418,7 +419,7 @@ class UINodes {
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
 			
-			var ph = numNodes * 20 * ui.SCALE;
+			var ph = numNodes * 22 * ui.SCALE;
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
 			var menuw = Std.int(ew * 1.6);

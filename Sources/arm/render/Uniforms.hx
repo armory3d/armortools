@@ -121,6 +121,9 @@ class Uniforms {
 		else if (link == "_texdecalmask") { // Opacity map for decal
 			return UITrait.inst.decalMaskImage;
 		}
+		else if (link == "_texbrushmask") {
+			return UITrait.inst.brushMaskImage;
+		}
 		else if (link == "_texpaint_undo") {
 			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;

@@ -98,7 +98,9 @@ class Logic {
 		for (i in 0...5) {
 			for (b in node.buttons) {
 				if (b.name == 'property' + i) {
-					Reflect.setProperty(v, b.name, b.data[b.default_value]);
+					var arrayData = Std.is(b.data, Array);
+					var texts = arrayData ? b.data : Nodes.getEnumTexts();
+					Reflect.setProperty(v, b.name, texts[b.default_value]);
 				}
 			}
 		}

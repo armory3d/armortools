@@ -9,13 +9,28 @@ class BrushOutputNode extends LogicNode {
 
 	public function new(tree:LogicTree) {
 		super(tree);
-		UITrait.inst.notifyOnBrush(run);
+		UITrait.inst.onBrush = run;
 	}
 
 	override function run(from:Int) {
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
-		UITrait.inst.brushNodesOpacity = inputs[2].get();
+		var opac:Dynamic = inputs[2].get(); // Float or texture name
+		if (opac == null) opac = 1.0;
+		var lastMask = UITrait.inst.brushMaskImage;
+		if (Std.is(opac, String)) {
+			UITrait.inst.brushNodesOpacity = 1.0;
+			var index = Project.assetNames.indexOf(opac);
+			var asset = Project.assets[index];
+			UITrait.inst.brushMaskImage = UITrait.inst.getImage(asset);
+		}
+		else {
+			UITrait.inst.brushNodesOpacity = opac;
+			UITrait.inst.brushMaskImage = null;
+		}
+		if (lastMask != UITrait.inst.brushMaskImage) {
+			MaterialParser.parsePaintMaterial();
+		}
 		UITrait.inst.brushNodesHardness = inputs[3].get();
 		UITrait.inst.brushNodesScale = inputs[4].get();
 
@@ -67,7 +82,5 @@ class BrushOutputNode extends LogicNode {
 				Context.rdirty = 2;
 			}
 		}
-
-		runOutput(0);
 	}
 }

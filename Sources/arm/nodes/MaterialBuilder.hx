@@ -208,7 +208,7 @@ class MaterialBuilder {
 					// Non-continuous
 					// frag.write('float dist = distance(wposition, winp.xyz);');
 				}
-				else { // !paint3d
+				else { // !brush3d
 					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
 					frag.write('binp.x *= aspectRatio;');
 					frag.write('binp = binp * 0.5 + 0.5;');
@@ -466,6 +466,21 @@ class MaterialBuilder {
 		else if (Context.tool == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
+		}
+
+		if (UITrait.inst.brushMaskImage != null && Context.tool == ToolBrush) {
+			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
+			frag.write('vec2 binp_mask = inp.xy * 2.0 - 1.0;');
+			frag.write('binp_mask.x *= aspectRatio;');
+			frag.write('binp_mask = binp_mask * 0.5 + 0.5;');
+			frag.write('vec2 pa_mask = bsp.xy - binp_mask.xy;');
+			frag.write('pa_mask /= brushRadius;');
+			if (UITrait.inst.brush3d) {
+				frag.add_uniform('vec3 eye', '_cameraPosition');
+				frag.write('pa_mask *= distance(eye, winp) / 1.5;');
+			}
+			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
+			frag.write('opacity *= textureLod(texbrushmask, pa_mask, 0).r;');
 		}
 
 		if (Context.tool == ToolParticle) { // particle mask

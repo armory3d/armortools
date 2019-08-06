@@ -124,8 +124,7 @@ class UITrait {
 
 	public var layerFilter = 0;
 
-	var onBrush:Array<Int->Void> = [];
-
+	public var onBrush:Int->Void = null;
 	public var paintVec = new Vec4();
 	public var lastPaintX = -1.0;
 	public var lastPaintY = -1.0;
@@ -148,6 +147,7 @@ class UITrait {
 
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
+	public var brushMaskImage:Image = null;
 	public var brushNodesScale = 1.0;
 	public var brushNodesHardness = 1.0;
 
@@ -228,10 +228,6 @@ class UITrait {
 	public var htab2 = Id.handle({position: 0});
 	public var worktab = Id.handle({position: 0});
 	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
-
-	public function notifyOnBrush(f:Int->Void) {
-		onBrush.push(f);
-	}
 
 	public function new() {
 		inst = this;
@@ -621,7 +617,7 @@ class UITrait {
 						}
 					}
 					brushTime += Time.delta;
-					for (f in onBrush) f(0);
+					if (onBrush != null) onBrush(0);
 				}
 			}
 

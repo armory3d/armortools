@@ -28,58 +28,58 @@ class NodesBrush {
 				],
 				buttons: []
 			},
-			{
-				id: 0,
-				name: "Brush Output",
-				type: "BrushOutputNode",
-				x: 0,
-				y: 0,
-				color: 0xff4982a0,
-				inputs: [
-					{
-						id: 0,
-						node_id: 0,
-						name: "Position",
-						type: "VECTOR",
-						color: 0xff63c763,
-						default_value: [0.0, 0.0, 0.0]
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: "Radius",
-						type: "VALUE",
-						color: 0xffa1a1a1,
-						default_value: 1.0
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: "Opacity",
-						type: "VALUE",
-						color: 0xffa1a1a1,
-						default_value: 1.0
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: "Hardness",
-						type: "VALUE",
-						color: 0xffa1a1a1,
-						default_value: 1.0
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: "UV Scale",
-						type: "VALUE",
-						color: 0xffa1a1a1,
-						default_value: 1.0
-					}
-				],
-				outputs: [],
-				buttons: []
-			},
+			// {
+			// 	id: 0,
+			// 	name: "Brush Output",
+			// 	type: "BrushOutputNode",
+			// 	x: 0,
+			// 	y: 0,
+			// 	color: 0xff4982a0,
+			// 	inputs: [
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Position",
+			// 			type: "VECTOR",
+			// 			color: 0xff63c763,
+			// 			default_value: [0.0, 0.0, 0.0]
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Radius",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Opacity",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Hardness",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "UV Scale",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
+			// 		}
+			// 	],
+			// 	outputs: [],
+			// 	buttons: []
+			// },
 			{
 				id: 0,
 				name: "Value",
@@ -378,7 +378,8 @@ class NodesBrush {
 				],
 				buttons: [
 					{
-						name: "File",
+						// name: "File",
+						name: "property0",
 						type: "ENUM",
 						default_value: 0,
 						data: ""
