@@ -32,10 +32,13 @@ class MaterialParser {
 			var con = MaterialBuilder.make_mesh(new CyclesShaderData({name: "Material", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
+			sc.overrideContext = {}
 			if (con.frag.sharedSamplers.length > 0) {
-				sc.overrideContext = {}
 				var sampler = con.frag.sharedSamplers[0];
 				sc.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+			}
+			if (!UITrait.inst.textureFilter) {
+				sc.overrideContext.filter = "point";
 			}
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);

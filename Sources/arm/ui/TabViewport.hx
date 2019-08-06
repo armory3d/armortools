@@ -72,10 +72,12 @@ class TabViewport {
 				ui.g.begin(false);
 				MaterialParser.parseMeshMaterial();
 			}
-			var compassHandle = Id.handle({selected: UITrait.inst.showCompass});
-			UITrait.inst.showCompass = ui.check(compassHandle, "Compass");
-			if (compassHandle.changed) Context.ddirty = 2;
+			UITrait.inst.drawTexels = ui.check(UITrait.inst.texelsHandle, "Texels");
+			if (UITrait.inst.texelsHandle.changed) {
+				MaterialParser.parseMeshMaterial();
+			}
 
+			ui.row([1/2, 1/2]);
 			UITrait.inst.showEnvmap = ui.check(UITrait.inst.showEnvmapHandle, "Envmap");
 			if (UITrait.inst.showEnvmapHandle.changed) {
 				var world = Scene.active.world;
@@ -83,6 +85,9 @@ class TabViewport {
 				UITrait.inst.savedEnvmap = world.envmap;
 				Context.ddirty = 2;
 			}
+			var compassHandle = Id.handle({selected: UITrait.inst.showCompass});
+			UITrait.inst.showCompass = ui.check(compassHandle, "Compass");
+			if (compassHandle.changed) Context.ddirty = 2;
 
 			if (UITrait.inst.showEnvmap) {
 				UITrait.inst.showEnvmapBlur = ui.check(UITrait.inst.showEnvmapBlurHandle, "Blurred");

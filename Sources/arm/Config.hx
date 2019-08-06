@@ -129,31 +129,39 @@ class Config {
 
 	public static function getTextureRes():Int {
 		var resHandle = UITrait.inst.resHandle;
-		if (resHandle.position == 0) return 1024;
-		if (resHandle.position == 1) return 2048;
-		if (resHandle.position == 2) return 4096;
-		if (resHandle.position == 3) return 8192;
-		if (resHandle.position == 4) return 16384;
+		if (resHandle.position == 0) return 128;
+		if (resHandle.position == 1) return 256;
+		if (resHandle.position == 2) return 512;
+		if (resHandle.position == 3) return 1024;
+		if (resHandle.position == 4) return 2048;
+		if (resHandle.position == 5) return 4096;
+		if (resHandle.position == 6) return 8192;
+		if (resHandle.position == 7) return 16384;
 		return 0;
 	}
 
 	public static function getTextureResBias():Float {
 		var resHandle = UITrait.inst.resHandle;
-		if (resHandle.position == 0) return 2.0;
-		if (resHandle.position == 1) return 1.5;
-		if (resHandle.position == 2) return 1.0;
-		if (resHandle.position == 3) return 0.5;
-		if (resHandle.position == 4) return 0.25;
-		if (resHandle.position == 5) return 0.125;
+		if (resHandle.position == 0) return 16.0;
+		if (resHandle.position == 1) return 8.0;
+		if (resHandle.position == 2) return 4.0;
+		if (resHandle.position == 3) return 2.0;
+		if (resHandle.position == 4) return 1.5;
+		if (resHandle.position == 5) return 1.0;
+		if (resHandle.position == 6) return 0.5;
+		if (resHandle.position == 7) return 0.25;
 		return 1.0;
 	}
 
 	public static function getTextureResPos(i:Int):Int {
-		if (i == 1024) return 0;
-		if (i == 2048) return 1;
-		if (i == 4096) return 2;
-		if (i == 8192) return 3;
-		if (i == 16384) return 4;
+		if (i == 128) return 0;
+		if (i == 256) return 1;
+		if (i == 512) return 2;
+		if (i == 1024) return 3;
+		if (i == 2048) return 4;
+		if (i == 4096) return 5;
+		if (i == 8192) return 6;
+		if (i == 16384) return 7;
 		return 0;
 	}
 }

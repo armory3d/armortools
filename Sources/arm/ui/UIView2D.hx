@@ -111,7 +111,13 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
+				if (!UITrait.inst.textureFilter) {
+					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
+				}
 				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+				if (!UITrait.inst.textureFilter) {
+					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
+				}
 			}
 			ui.g.pipeline = null;
 

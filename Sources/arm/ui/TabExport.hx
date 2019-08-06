@@ -23,7 +23,7 @@ class TabExport {
 				if (ui.isHovered) ui.tooltip("Export texture files (Ctrl + Shift + E)");
 
 				ui.row([1/2, 1/2]);
-				ui.combo(UITrait.inst.resHandle, ["1K", "2K", "4K", "8K", "16K"], "Res", true);
+				ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
 				if (UITrait.inst.resHandle.changed) {
 					iron.App.notifyOnRender(Layers.resizeLayers);
 					UVUtil.uvmap = null;

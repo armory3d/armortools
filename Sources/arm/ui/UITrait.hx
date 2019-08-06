@@ -76,7 +76,10 @@ class UITrait {
 	public var showEnvmapBlurHandle = new Handle({selected: false});
 	public var drawWireframe = false;
 	public var wireframeHandle = new Handle({selected: false});
+	public var drawTexels = false;
+	public var texelsHandle = new Handle({selected: false});
 	public var culling = true;
+	public var textureFilter = true;
 
 	public var ui:Zui;
 	public var colorIdHandle = Id.handle();
@@ -181,7 +184,7 @@ class UITrait {
 	public var symZ = false;
 	public var showCompass = true;
 	public var fillTypeHandle = new Handle();
-	public var resHandle = new Handle({position: 1}); // 2048
+	public var resHandle = new Handle({position: 4}); // 2048
 	public var bitsHandle = new Handle({position: 0}); // 8bit
 	var newConfirm = false;
 	public var projectType = 0; // paint, material

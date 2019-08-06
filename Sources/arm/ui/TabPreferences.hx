@@ -134,6 +134,17 @@ class TabPreferences {
 				ui.combo(UITrait.inst.hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 				ui.row([1/2, 1/2]);
+				var cullHandle = Id.handle({selected: UITrait.inst.culling});
+				UITrait.inst.culling = ui.check(cullHandle, "Cull Backfaces");
+				if (cullHandle.changed) {
+					MaterialParser.parseMeshMaterial();
+				}
+				var filterHandle = Id.handle({selected: UITrait.inst.textureFilter});
+				UITrait.inst.textureFilter = ui.check(filterHandle, "Filter Textures");
+				if (filterHandle.changed) {
+					MaterialParser.parseMeshMaterial();
+				}
+				ui.row([1/2, 1/2]);
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
 				if (UITrait.inst.hvxao.changed) Config.applyConfig();
@@ -144,11 +155,6 @@ class TabPreferences {
 				if (UITrait.inst.hbloom.changed) Config.applyConfig();
 				ui.check(UITrait.inst.hssr, "SSR");
 				if (UITrait.inst.hssr.changed) Config.applyConfig();
-				var cullHandle = Id.handle({selected: UITrait.inst.culling});
-				UITrait.inst.culling = ui.check(cullHandle, "Cull Backfaces");
-				if (cullHandle.changed) {
-					MaterialParser.parseMeshMaterial();
-				}
 			}
 
 			ui.separator();

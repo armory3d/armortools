@@ -1141,6 +1141,12 @@ class MaterialBuilder {
 				}
 			}
 
+			if (UITrait.inst.drawTexels) {
+				frag.add_uniform('float texpaintSize', '_texpaintSize');
+				frag.write('vec2 texel = texCoord * texpaintSize;');
+				frag.write('basecol *= max(float(mod(int(texel.x), 2.0) == mod(int(texel.y), 2.0)), 0.9);');
+			}
+
 			if (UITrait.inst.drawWireframe) {
 				// GL_NV_fragment_shader_barycentric
 				// VK_AMD_shader_explicit_vertex_parameter
