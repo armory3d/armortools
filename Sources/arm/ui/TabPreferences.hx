@@ -131,7 +131,7 @@ class TabPreferences {
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
 				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
 				if (vsyncHandle.changed) Config.save();
-				ui.combo(UITrait.inst.hsupersample, ["1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
+				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 				ui.row([1/2, 1/2]);
 				var cullHandle = Id.handle({selected: UITrait.inst.culling});

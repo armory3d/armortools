@@ -108,7 +108,8 @@ class Config {
 		C.rp_bloom = UITrait.inst.hbloom.selected;
 		C.rp_gi = UITrait.inst.hvxao.selected;
 		C.rp_supersample = getSuperSampleSize(UITrait.inst.hsupersample.position);
-		
+		iron.object.Uniforms.defaultFilter = C.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
+
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
 		
@@ -120,11 +121,19 @@ class Config {
 	}
 
 	public static inline function getSuperSampleQuality(f:Float):Int {
-		return f == 1.0 ? 0 : f == 1.5 ? 1 : f == 2.0 ? 2 : 3;
+		return f == 0.25 ? 0 :
+			   f == 0.5 ? 1 :
+			   f == 1.0 ? 2 :
+			   f == 1.5 ? 3 :
+			   f == 2.0 ? 4 : 5;
 	}
 
 	public static inline function getSuperSampleSize(i:Int):Float {
-		return i == 0 ? 1.0 : i == 1 ? 1.5 : i == 2 ? 2.0 : 4.0;
+		return i == 0 ? 0.25 :
+			   i == 1 ? 0.5 :
+			   i == 2 ? 1.0 :
+			   i == 3 ? 1.5 :
+			   i == 4 ? 2.0 : 4.0;
 	}
 
 	public static function getTextureRes():Int {
