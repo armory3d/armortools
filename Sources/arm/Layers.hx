@@ -93,6 +93,10 @@ class Layers {
 
 		g.begin();
 		iron.App.removeRender(clearLastLayer);
+
+		#if krom_linux
+		Context.layerPreviewDirty = true;
+		#end
 	}
 
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
