@@ -86,7 +86,7 @@ class TabPreferences {
 					Config.save();
 				}
 
-				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), "Paint Bias", 0.0, 2.0, true);
+				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), "Paint Bleed", 0.0, 2.0, true);
 				if (ui.isHovered) ui.tooltip("Stretch brush strokes on the uv map to prevent seams");
 
 				var brush3dHandle = Id.handle({selected: UITrait.inst.brush3d});
