@@ -983,11 +983,19 @@ class UITrait {
 								RenderUtil.makeDecalPreview();
 								ui.g.begin(false);
 							}
+							if (Context.layer.material_mask != null) {
+								Layers.updateFillLayers();
+							}
 						}
 
 						var brushRotHandle = Id.handle({value: brushRot});
 						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
-						if (brushRotHandle.changed) MaterialParser.parsePaintMaterial();
+						if (brushRotHandle.changed) {
+							MaterialParser.parsePaintMaterial();
+							if (Context.layer.material_mask != null) {
+								Layers.updateFillLayers();
+							}
+						}
 					}
 					
 					brushOpacity = ui.slider(brushOpacityHandle, "Opacity", 0.0, 1.0, true);
@@ -1003,6 +1011,9 @@ class UITrait {
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Triplanar"], "TexCoord");
 						if (paintHandle.changed) {
 							MaterialParser.parsePaintMaterial();
+							if (Context.layer.material_mask != null) {
+								Layers.updateFillLayers();
+							}
 						}
 					}
 					if (Context.tool == ToolDecal) {
