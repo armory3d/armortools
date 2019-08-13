@@ -556,10 +556,9 @@ class MaterialBuilder {
 		}
 		else {
 			if (eraser) {
-				// Clear to default initLayers() values
-				frag.write('fragColor[0] = vec4(0.5, 0.5, 0.5, 0.0);');
+				frag.write('fragColor[0] = vec4(${Layers.defaultBase}, ${Layers.defaultBase}, ${Layers.defaultBase}, 0.0);');
 				frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
-				frag.write('fragColor[2] = vec4(1.0, 0.4, 0.0, 0.0);');
+				frag.write('fragColor[2] = vec4(1.0, ${Layers.defaultRough}, 0.0, 0.0);');
 			}
 			else {
 				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');

@@ -50,13 +50,16 @@ class Layers {
 	public static var cursorTex:TextureUnit;
 	public static var cursorGbufferD:TextureUnit;
 	public static var cursorGbuffer0:TextureUnit;
+
+	public static inline var defaultBase = 0.5;
+	public static inline var defaultRough = 0.4;
 	
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
 
 		var layers = Project.layers;
 		layers[0].texpaint.g4.begin();
-		layers[0].texpaint.g4.clear(kha.Color.fromFloats(0.5, 0.5, 0.5, 0.0)); // Base
+		layers[0].texpaint.g4.clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 0.0)); // Base
 		layers[0].texpaint.g4.end();
 
 		layers[0].texpaint_nor.g4.begin();
@@ -64,7 +67,7 @@ class Layers {
 		layers[0].texpaint_nor.g4.end();
 
 		layers[0].texpaint_pack.g4.begin();
-		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, defaultRough, 0.0, 0.0)); // Occ, rough, met
 		layers[0].texpaint_pack.g4.end();
 
 		g.begin();
