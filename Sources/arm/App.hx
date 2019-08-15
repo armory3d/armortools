@@ -30,7 +30,7 @@ using StringTools;
 
 class App {
 
-	public static var version = "0.6";
+	public static var version = "0.7";
 	public static function x():Int { return appx; }
 	public static function y():Int { return appy; }
 	static var appx = 0;
