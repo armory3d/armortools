@@ -41,6 +41,9 @@ class Path {
 		return p.endsWith(".jpg") ||
 			   p.endsWith(".png") ||
 			   p.endsWith(".tga") ||
+			   p.endsWith(".bmp") ||
+			   p.endsWith(".psd") ||
+			   p.endsWith(".gif") ||
 			   p.endsWith(".hdr");
 	}
 

@@ -17,7 +17,7 @@ class TabTextures {
 			if (ui.button("Import")) {
 				UIFiles.show = true;
 				UIFiles.isSave = false;
-				UIFiles.filters = "jpg,png,tga,hdr";
+				UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr";
 				UIFiles.filesDone = function(path:String) {
 					Importer.importFile(path);
 				}
