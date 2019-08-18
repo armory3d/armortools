@@ -8,6 +8,7 @@ import iron.data.Data;
 import iron.object.MeshObject;
 import iron.math.Vec4;
 import arm.ui.UITrait;
+import arm.Tool;
 
 class MeshUtil {
 
@@ -71,10 +72,11 @@ class MeshUtil {
 	}
 	
 	public static function swapAxis(a:Int, b:Int) {
-		for (p in Project.paintObjects) {
+		var objects = UITrait.inst.worktab.position == SpaceScene ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		for (o in objects) {
 			// Remapping vertices, backle up
 			// 0 - x, 1 - y, 2 - z
-			var vas = p.data.raw.vertex_arrays;
+			var vas = o.data.raw.vertex_arrays;
 			var pa  = vas[0].values;
 			var na0 = a == 2 ? vas[0].values : vas[1].values;
 			var na1 = b == 2 ? vas[0].values : vas[1].values;
@@ -92,7 +94,7 @@ class MeshUtil {
 				na1[i * f + d] = -t;
 			}
 
-			var g = p.data.geom;
+			var g = o.data.geom;
 			var posbuf = g.vertexBufferMap.get("pos");
 			if (posbuf != null) { // Remove cache
 				posbuf.delete();
@@ -120,8 +122,9 @@ class MeshUtil {
 	}
 
 	public static function flipNormals() {
-		for (p in Project.paintObjects) {
-			var g = p.data.geom;
+		var objects = UITrait.inst.worktab.position == SpaceScene ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		for (o in objects) {
+			var g = o.data.geom;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / 8)) {
 				vertices[i * 8 + 3] = -vertices[i * 8 + 3];
@@ -138,8 +141,9 @@ class MeshUtil {
 		var vc = new Vec4();
 		var cb = new Vec4();
 		var ab = new Vec4();
-		for (p in Project.paintObjects) {
-			var g = p.data.geom;
+		var objects = UITrait.inst.worktab.position == SpaceScene ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		for (o in objects) {
+			var g = o.data.geom;
 			var inda = g.indices[0];
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(inda.length / 3)) {
