@@ -12,6 +12,12 @@ class MaterialBuilder {
 	public static var emisUsed = false;
 	public static var subsUsed = false;
 
+	public static var opacityDiscardDecal = 0.05;
+	public static var opacityDiscardScene = 0.5;
+
+	// Merge with compiled.inc
+	public static inline var voxelgiHalfExtents = 'const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);';
+
 	public static function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
 		var layered = Context.layer != Project.layers[0];
 		var eraser = Context.tool == ToolEraser;
@@ -631,7 +637,7 @@ class MaterialBuilder {
 				frag.write('n.y = -n.y;');
 				frag.write('n = normalize(mul(n, TBN));');
 
-				frag.write('const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);');
+				frag.write(voxelgiHalfExtents);
 				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 				frag.add_uniform('sampler3D voxels');
 				frag.add_function(CyclesFunctions.str_traceAO);
@@ -718,12 +724,13 @@ class MaterialBuilder {
 	}
 
 	public static function make_mesh_preview(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
+		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		var context_id = 'mesh';
 		var con_mesh:CyclesShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: 'clockwise',
+			cull_mode: (UITrait.inst.culling || !isScene) ? 'clockwise' : 'none',
 			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
@@ -768,7 +775,9 @@ class MaterialBuilder {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
 				frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 			}
-			var opac = 0.05;
+		}
+		if (decal || isScene) {
+			var opac = isScene ? opacityDiscardScene : opacityDiscardDecal;
 			frag.write('if (opacity < $opac) discard;');
 		}
 
@@ -1015,6 +1024,35 @@ class MaterialBuilder {
 					frag.write('vec3 vb = normalize(vec3(0.0, 1.0, bump_res_y));');
 					frag.write('vec3 vc = normalize(vec3(bump_res_x, bump_res_y, 1.0));');
 					frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
+
+					// var ds = UITrait.inst.displaceStrength * 0.1;// * 0.02;
+					// if (ds < 0.1) ds = 0.1;
+					// else if (ds > 2.0) ds = 2.0;
+					// frag.wposition = true;
+					// frag.write('float3 dpdx = dFdx(wposition);');
+					// frag.write('float3 dpdy = dFdy(wposition);');
+					// frag.write('float dhdx = dFdx(pack.a * $ds);');
+					// frag.write('float dhdy = dFdy(pack.a * $ds);');
+					// frag.write('float3 cross_x = cross(n, dpdx);');
+					// frag.write('float3 cross_y = cross(dpdy, n);');
+					// frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
+					// frag.write('n = normalize(n - ngrad);');
+
+					// frag.add_uniform('float texpaintSize', '_texpaintSize');
+					// frag.write('float tex_step = 1.0 / texpaintSize;');
+					// frag.wposition = true;
+					// frag.write('float pack_a = textureLodShared(texpaint_pack, vec2(texCoord.x + tex_step, texCoord.y), 0.0).a;');
+					// frag.write('float pack_b = textureLodShared(texpaint_pack, vec2(texCoord.x - tex_step, texCoord.y), 0.0).a;');
+					// frag.write('float pack_c = textureLodShared(texpaint_pack, vec2(texCoord.x, texCoord.y + tex_step), 0.0).a;');
+					// frag.write('float pack_d = textureLodShared(texpaint_pack, vec2(texCoord.x, texCoord.y - tex_step), 0.0).a;');
+					// frag.write('float3 dpdx = dFdx(wposition);');
+					// frag.write('float3 dpdy = dFdy(wposition);');
+					// frag.write('float dhdx = pack_a - pack_b;');
+					// frag.write('float dhdy = pack_c - pack_d;');
+					// frag.write('float3 cross_x = cross(n, dpdx);');
+					// frag.write('float3 cross_y = cross(dpdy, n);');
+					// frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
+					// frag.write('n = normalize(n - ngrad);');
 				}
 				//
 
@@ -1273,7 +1311,7 @@ class MaterialBuilder {
 		uniform mat3 N;
 		uniform sampler2D texpaint_pack;
 		void main() {
-			const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);
+			" + voxelgiHalfExtents + "
 			voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents;
 			vec3 wnormal = normalize(N * vec3(nor.xy, pos.w));
 			float height = textureLod(texpaint_pack, tex, 0.0).a;
