@@ -1,0 +1,7 @@
+#?RADIANCE
+# Output from cmft.
+FORMAT=32-bit_rle_rgbe
+EXPOSURE=1
+
+-Y 16 +X 32
+?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€?hµ€Clº€Clº€Bl¹€Bk¹€Aj¸€Aj¸€Aj¸€Aj·€Ai·€@i¶€?hµ€>g´€>f³€>g³€?g´€?g´€?g´€?g´€>g³€>f³€>g´€?hµ€@i¶€@i·€Aj·€Aj¸€Aj¸€Aj¸€Bk¹€Bl¹€Clº€Clº€JuÄ€JuÃ€JtÃ€ItÃ€ItÂ€HrÁ€Gq¿€Fp¾€Eo½€Dn»€Dm»€Dmº€Dmº€Cl¹€Bk·€Bk¸€Bk¸€Bk·€Cl¸€Cmº€Dmº€Dmº€Dn»€Eo½€Fp¾€Fq¿€HrÀ€ItÂ€ItÃ€ItÃ€JuÃ€JuÄ€U‚Ï€TÎ€TÏ€S€Î€SÍ€R~Ë€P|É€O{Ç€NzÆ€MxÄ€MxÄ€LwÃ€LvÂ€LvÂ€KuÀ€KuÀ€KuÀ€KuÀ€KvÁ€LvÂ€LwÃ€MxÄ€MxÄ€NyÅ€OzÇ€P|É€R~Ë€SÍ€S€Î€TÏ€TÎ€U‚Ï€j›á€j›á€išà€`Ù€_ŽØ€^ŒÖ€e”Ù€d“Ø€c“×€b‘Ö€Y†Ï€X…Î€X…Í€W„Ì€`ŽÒ€`ŽÒ€`ŽÒ€`ŽÒ€W„Ì€X…Í€X…Í€Y†Î€b‘Ö€c’×€d“Ø€d”Ù€^ŒÖ€_ŽØ€`Ù€išà€j›á€j›á€t¨æ€t§æ€s¦å€r¥å€p¢â€p¢á€o¡ß€o Þ€n Ý€mŸÝ€lÜ€kœÛ€k›Ú€kœÙ€kœÙ€kœÙ€kœÙ€kœÙ€k›Ù€k›Ú€kœÛ€lÛ€mžÜ€nŸÝ€n Þ€o¡ß€p¡á€p¢â€r¥å€s¦å€t§æ€t¨æ€|±ç€|°ç€|°ç€{¯ç€y­å€x¬ã€x«â€w«á€vªà€v©à€u©ß€u¨ß€t§Þ€t§Þ€t§Þ€t§Ý€t§Ý€t§Ý€t§Þ€t§Þ€u¨ß€u¨ß€v©à€vªà€wªá€w«â€x¬ã€y­å€{¯æ€{°ç€|°ç€|±ç€‚·å€·å€·å€·å€€µä€´ã€~³â€}³á€}²á€|²à€|±à€|±à€{±à€{°ß€{°ß€{°ß€{°ß€{°ß€{°ß€{±à€|±à€|±à€|²à€|²á€}²á€~³â€~´â€€µã€·å€·å€·å€‚·å€…»á€„»á€„»à€„»à€ƒºà€‚¹à€¹ß€¸ß€€¸ß€€¸ß€€¸ß€€¸ß€€·ß€·Þ€·Þ€¶Þ€¶Þ€·Þ€·Þ€€·ß€€¸ß€€·ß€€·ß€€¸ß€¸ß€¹ß€‚¹à€ƒºà€„»à€„»à€„»à€…»á€…½Ü€…½Û€…½Û€…½Û€„½Û€ƒ¼Ü€‚¼Ü€‚¼Ü€»Ü€»Ü€»Ý€¼Ý€¼Ý€€»Ý€€»Ý€€»Ý€€»Ý€€»Ý€€»Ý€¼Ý€¼Ý€»Ý€»Ý€»Ý€‚¼Ü€‚¼Ü€ƒ¼Ü€„½Û€…½Û€…½Û€…½Û€…½Ü€„¾×€„¾×€„¾×€ƒ¾×€ƒ¾Ø€‚¾Ù€¾Ú€¾Ú€¾Û€€¾Û€€¾Û€€¾Û€¾Ü€¾Ü€¾Ý€¾Ý€¾Ý€¾Ý€¾Ý€¾Ü€€¾Ü€€¾Û€€¾Û€¾Û€¾Ú€¾Ú€‚¾Ù€‚¾Ø€ƒ¾×€„¾×€„¾×€„¾×€¿Ö€¿Ö€¿Ö€~¿×€}¿Ø€}¿Ø€¿Ù€~¿Ú€~¿Û€~¿Û€zÀÝ€zÀÞ€zÀÞ€zÀß€|¿Þ€|¿Þ€|¿Þ€|¿Þ€zÀß€zÀÞ€zÀÞ€zÀÝ€}¿Ü€~¿Û€~¿Ú€¿Ù€}¿Ù€}¿Ø€~¿×€¿Ö€¿Ö€¿Ö€z¿Û€z¿Û€z¿Û€y¿Û€y¿Ü€x¿Ý€xÀÞ€xÀß€wÀà€wÀà€vÀá€vÀá€vÀâ€vÀâ€uÁã€uÁã€uÁã€uÁã€vÁã€vÀâ€vÀâ€vÀá€wÀá€wÀà€xÀß€xÀÞ€x¿Ý€y¿Ü€y¿Û€z¿Û€z¿Û€z¿Û€vÀà€vÀà€vÀà€vÀà€uÀá€uÀâ€uÀâ€tÀã€tÁä€tÁä€sÁå€sÁå€sÁå€sÁæ€rÁç€sÁç€sÁç€rÁç€sÁæ€sÁæ€sÁå€sÁå€tÁå€tÁä€tÀã€uÀã€uÀâ€uÀá€vÀá€vÀà€vÀà€vÀà€sÁå€sÁå€sÁå€sÁå€sÁæ€sÁæ€sÁæ€sÁæ€rÁæ€rÁç€rÁç€rÁè€qÁè€rÁè€rÁè€rÁè€rÁè€rÁè€qÁè€qÁè€rÁè€rÁç€rÁç€rÁç€sÁæ€sÁæ€sÁæ€sÁæ€sÁå€sÁå€sÁå€sÁå€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€rÁç€

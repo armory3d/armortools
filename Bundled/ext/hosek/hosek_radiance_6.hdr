@@ -1,0 +1,7 @@
+#?RADIANCE
+# Written by stb_image_write.h
+FORMAT=32-bit_rle_rgbe
+EXPOSURE=          1.0000000000000
+
+-Y 1 +X 2
+i¢Õ€i¢Õ€
