@@ -1145,6 +1145,7 @@ class UITrait {
 			}
 			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
 				TabTextures.draw();
+				TabMeshes.draw();
 				TabViewport.draw();
 			}
 		}
