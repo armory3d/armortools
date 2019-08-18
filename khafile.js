@@ -12,11 +12,6 @@ project.addAssets("Bundled/licenses/**", { notinlist: true , destination: "data/
 project.addAssets("Bundled/plugins/**", { notinlist: true , destination: "data/plugins/{name}" });
 project.addAssets("Bundled/themes/**", { notinlist: true , destination: "data/themes/{name}" });
 project.addAssets("Bundled/readme.txt", { notinlist: true , destination: "{name}" });
-project.addAssets("Bundled/Assets/brdf.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Bundled/Assets/noise256.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Bundled/Assets/smaa_area.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Bundled/Assets/smaa_search.png", { notinlist: true , destination: "data/{name}" });
-project.addAssets("Bundled/Assets/font_default.ttf", { notinlist: false , destination: "data/{name}" });
 project.addDefine('arm_deferred');
 project.addDefine('arm_voxelgi_revox');
 project.addDefine('arm_ltc');
@@ -82,6 +77,13 @@ else if (process.platform === 'linux') {
 else if (process.platform === 'darwin') {
 	project.addDefine('krom_darwin');
 	project.addAssets("Bundled/cmft/cmft-osx", { notinlist: true , destination: "data/{name}" });
+}
+
+let world = false;
+if (world) {
+	project.addAssets("Bundled/ext/**", { notinlist: true , destination: "data/{name}" });
+	project.addShaders("Bundled/ext/*.glsl", { noembed: false });
+	project.addDefine('rp_water');
 }
 
 resolve(project);
