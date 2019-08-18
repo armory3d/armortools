@@ -13,9 +13,6 @@ import arm.Config;
 
 class Main {
 	
-	public static inline var voxelgiVoxelSize = 2.0 / 256;
-	public static inline var voxelgiHalfExtents = 1;
-	
 	static var tasks:Int;
 
 	public static function main() {
