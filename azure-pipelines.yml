@@ -1,0 +1,9 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: git clone https://github.com/armory3d/nodejs_bin
+- script: nodejs_bin/node-linux64 Kromx/make.js
