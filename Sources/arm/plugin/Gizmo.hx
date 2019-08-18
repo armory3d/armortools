@@ -70,6 +70,8 @@ class Gizmo {
 
 					Context.selectObject(object);
 				}
+				Context.rdirty = 3;
+				Context.ddirty = 3;
 			}
 			if (kb.started("m")) { // skip voxel
 				Context.materialScene.data.raw.skip_context =
