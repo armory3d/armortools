@@ -50,4 +50,13 @@ const float voxelgiOffset = 1.5;
 const float voxelgiAperture = 1.2;
 const int skinMaxBones = 50;
 
+const float waterLevel = 0.0;
+const float waterDisplace = 1.0;
+const float waterSpeed = 1.0;
+const float waterFreq = 1.0;
+const vec3 waterColor = vec3(1.0, 1.0, 1.0);
+const float waterDensity = 1.0;
+const float waterRefract = 1.0;
+const float waterReflect = 1.0;
+
 #endif // _COMPILED_GLSL_

@@ -218,7 +218,7 @@ class RenderPathDeferred {
 
 		#if rp_water
 		{
-			path.loadShader("shader_datas/water_pass/water_pass");
+			path.loadShader("water_pass/water_pass/water_pass");
 			path.loadShader("shader_datas/copy_pass/copy_pass");
 		}
 		#end
@@ -816,6 +816,21 @@ class RenderPathDeferred {
 		voxelao_pass ?
 			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
 			path.drawShader("shader_datas/deferred_light/deferred_light");
+
+		#if rp_water
+		{
+			path.setTarget("buf");
+			path.bindTarget("tex", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+			path.setTarget("tex");
+			path.bindTarget("_main", "gbufferD");
+			path.bindTarget("buf", "tex");
+			path.drawShader("water_pass/water_pass/water_pass");
+			Scene.active.embedData("water_base.png", function() {});
+			Scene.active.embedData("water_detail.png", function() {});
+			Scene.active.embedData("water_foam.png", function() {});
+		}
+		#end
 
 		#if (!kha_opengl)
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
