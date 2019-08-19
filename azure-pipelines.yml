@@ -5,5 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: git clone https://github.com/armory3d/nodejs_bin
-- script: nodejs_bin/node-linux64 Kromx/make.js
+- script: |
+    git submodule update --init --recursive --remote
+    git clone https://github.com/armory3d/nodejs_bin
+    nodejs_bin/node-linux64 Kromx/make.js -g opengl --shaderversion 330
