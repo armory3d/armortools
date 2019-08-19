@@ -1,8 +1,0 @@
-sudo: false
-os:
-  - linux
-language: node_js
-before_script:
-  - git clone https://github.com/armory3d/nodejs_bin
-script:
-  - nodejs_bin/node-linux64 Kromx/make.js

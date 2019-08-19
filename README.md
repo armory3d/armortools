@@ -3,7 +3,7 @@
 armorpaint
 ==============
 
-[![Build Status](https://travis-ci.org/armory3d/armorpaint.svg?branch=master)](https://travis-ci.org/armory3d/armorpaint)
+[![Build Status](https://dev.azure.com/luboslenco/armory/_apis/build/status/armory3d.iron?branchName=master)](https://dev.azure.com/luboslenco/armory/_build/latest?definitionId=1&branchName=master)
 
 [ArmorPaint](https://armorpaint.org) is a software for 3D PBR texture painting - check out the [manual](https://armorpaint.org/manual/).
 
