@@ -1,5 +1,5 @@
 #version 450
-#include "../Shaders/compiled.inc"
+#include "../compiled.inc"
 in vec4 pos;
 in vec2 nor;
 out vec3 voxpositionGeom;
