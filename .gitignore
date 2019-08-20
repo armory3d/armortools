@@ -1,9 +1,3 @@
 build/
 .vscode
-Assets/blend/scene.blend1
-Assets/blend/khafile.js
-Assets/blend/build_scene
-Assets/blend/Sources
-Assets/blend/Bundled
-*.pyc
 *.DS_Store
