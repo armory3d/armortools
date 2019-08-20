@@ -3,8 +3,10 @@ package arm;
 import haxe.Json;
 import haxe.io.Bytes;
 import iron.data.Data;
+#if arm_painter
 import arm.ui.UITrait;
 import arm.render.Inc;
+#end
 
 class Config {
 
@@ -35,7 +37,7 @@ class Config {
 
 	public static function init():TConfig {
 		if (!configLoaded) {
-			raw.rp_bloom = true;
+			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_motionblur = false;
 			raw.rp_shadowmap_cube = 0;
@@ -45,6 +47,7 @@ class Config {
 			raw.rp_supersample = 1.0;
 		}
 
+		#if arm_painter
 		if (raw.ui_layout == null) raw.ui_layout = 0;
 		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
 		if (raw.keymap == null) {
@@ -96,11 +99,29 @@ class Config {
 			raw.keymap.export_textures = "ctrl+shift+e";
 			raw.keymap.node_search = "space";
 		}
-		
 		keymap = raw.keymap;
+		#end
+
 		return raw;
 	}
 
+	public static inline function getSuperSampleQuality(f:Float):Int {
+		return f == 0.25 ? 0 :
+			   f == 0.5 ? 1 :
+			   f == 1.0 ? 2 :
+			   f == 1.5 ? 3 :
+			   f == 2.0 ? 4 : 5;
+	}
+
+	public static inline function getSuperSampleSize(i:Int):Float {
+		return i == 0 ? 0.25 :
+			   i == 1 ? 0.5 :
+			   i == 2 ? 1.0 :
+			   i == 3 ? 1.5 :
+			   i == 4 ? 2.0 : 4.0;
+	}
+
+	#if arm_painter
 	public static function applyConfig() {
 		var C = Config.raw;
 		C.rp_ssgi = UITrait.inst.hssgi.selected;
@@ -118,22 +139,6 @@ class Config {
 		
 		if (current != null) current.begin(false);
 		Context.ddirty = 2;
-	}
-
-	public static inline function getSuperSampleQuality(f:Float):Int {
-		return f == 0.25 ? 0 :
-			   f == 0.5 ? 1 :
-			   f == 1.0 ? 2 :
-			   f == 1.5 ? 3 :
-			   f == 2.0 ? 4 : 5;
-	}
-
-	public static inline function getSuperSampleSize(i:Int):Float {
-		return i == 0 ? 0.25 :
-			   i == 1 ? 0.5 :
-			   i == 2 ? 1.0 :
-			   i == 3 ? 1.5 :
-			   i == 4 ? 2.0 : 4.0;
 	}
 
 	public static function getTextureRes():Int {
@@ -173,6 +178,7 @@ class Config {
 		if (i == 16384) return 7;
 		return 0;
 	}
+	#end
 }
 
 typedef TConfig = {

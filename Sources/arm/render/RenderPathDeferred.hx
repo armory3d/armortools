@@ -8,12 +8,14 @@ import iron.math.Vec4;
 import iron.math.Quat;
 import iron.system.Input;
 import iron.object.MeshObject;
+#if arm_painter
 import arm.util.ViewportUtil;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.nodes.MaterialParser;
 import arm.Tool;
+#end
 
 class RenderPathDeferred {
 
@@ -128,7 +130,7 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if ((rp_ssgi != "Off") || rp_volumetriclight)
+		#if (rp_ssgi != "Off")
 		{
 			var t = new RenderTargetRaw();
 			t.name = "singlea";
@@ -205,14 +207,6 @@ class RenderPathDeferred {
 		#if (rp_supersampling == 4)
 		{
 			path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
-		}
-		#end
-
-		#if rp_volumetriclight
-		{
-			path.loadShader("shader_datas/volumetric_light/volumetric_light");
-			path.loadShader("shader_datas/blur_bilat_pass/blur_bilat_pass_x");
-			path.loadShader("shader_datas/blur_bilat_blend_pass/blur_bilat_blend_pass_y");
 		}
 		#end
 
@@ -357,6 +351,7 @@ class RenderPathDeferred {
 			path.createRenderTarget(t);
 		}
 
+		#if arm_painter
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_colorid";
@@ -488,7 +483,8 @@ class RenderPathDeferred {
 			}
 			#end
 		}
-		//
+		
+		#end // arm_painter
 	}
 
 	@:access(iron.RenderPath)
@@ -498,12 +494,15 @@ class RenderPathDeferred {
 
 		var ssaa4 = Config.raw.rp_supersample == 4 ? true : false;
 		
+		#if arm_painter
+
 		var mouse = Input.getMouse();
 		var mx = lastX;
 		var my = lastY;
 		lastX = mouse.x;
 		lastY = mouse.y;
 
+		#if (!arm_creator)
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
@@ -517,6 +516,7 @@ class RenderPathDeferred {
 			}
 			return;
 		}
+		#end
 
 		// Match projection matrix jitter
 		@:privateAccess Scene.active.camera.frame = taaFrame;
@@ -581,8 +581,12 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
+		#end
+
 		// Geometry
 		drawGbuffer();
+
+		#if arm_painter
 
 		if (History.undoLayers != null) {
 
@@ -720,10 +724,20 @@ class RenderPathDeferred {
 		return;
 		#end
 
+		#end // arm_painter
+
+		#if arm_painter
+		var cameraType = UITrait.inst.cameraType;
+		var ddirty = Context.ddirty;
+		#else
+		var cameraType = 0;
+		var ddirty = 2;
+		#end
+
 		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
-			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
-			if (ssgi && Context.ddirty > 0 && taaFrame > 0) {
+			var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
+			if (ssgi && ddirty > 0 && taaFrame > 0) {
 				path.setTarget("singlea");
 				path.bindTarget("_main", "gbufferD");
 				path.bindTarget("gbuffer0", "gbuffer0");
@@ -749,7 +763,7 @@ class RenderPathDeferred {
 		#if rp_voxelao
 		if (Config.raw.rp_gi != false)
 		{
-			var voxelize = path.voxelize() && Context.ddirty > 0 && taaFrame > 0;
+			var voxelize = path.voxelize() && ddirty > 0 && taaFrame > 0;
 
 			#if arm_voxelgi_temporal
 			voxelize = ++voxelFrame % voxelFreq == 0;
@@ -768,10 +782,12 @@ class RenderPathDeferred {
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
+				#if arm_painter
 				if (arm.nodes.MaterialBuilder.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}
+				#end
 				path.drawMeshes("voxel");
 				path.generateMipmaps(voxels);
 			}
@@ -790,7 +806,7 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer1", "gbuffer1");
 		#if (rp_ssgi != "Off")
 		{
-			var ssgi = Config.raw.rp_ssgi != false && UITrait.inst.cameraType == 0;
+			var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
 			if (ssgi && taaFrame > 0) {
 				path.bindTarget("singlea", "ssaotex");
 			}
@@ -838,14 +854,6 @@ class RenderPathDeferred {
 
 		path.setTarget("tex"); // Re-binds depth
 		path.drawSkydome("shader_datas/world_pass/world_pass");
-
-		#if rp_ocean
-		{
-			path.setTarget("tex");
-			path.bindTarget("_main", "gbufferD");
-			path.drawShader("shader_datas/water_pass/water_pass");
-		}
-		#end
 
 		#if rp_blending
 		{
@@ -992,7 +1000,9 @@ class RenderPathDeferred {
 			path.setTarget("buf");
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
+			#if arm_painter
 			drawCompass(currentG);
+			#end
 		}
 		#end
 
@@ -1041,12 +1051,14 @@ class RenderPathDeferred {
 		}
 		#end
 
+		#if arm_painter
 		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-
-		taaFrame++;
 		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
+		#end
+
+		taaFrame++;
 	}
 
 	static function drawGbuffer() {
@@ -1064,7 +1076,7 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// Paint
+		#if arm_painter
 		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
@@ -1079,7 +1091,7 @@ class RenderPathDeferred {
 				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
 			}
 		}
-		//
+		#end
 
 		path.drawMeshes("mesh");
 
@@ -1102,6 +1114,7 @@ class RenderPathDeferred {
 		#end
 	}
 
+	#if arm_painter
 	static function drawCompass(currentG:kha.graphics4.Graphics) {
 		if (UITrait.inst.showCompass) {
 			var scene = Scene.active;
@@ -1132,6 +1145,7 @@ class RenderPathDeferred {
 			gizmo.transform.buildMatrix();
 		}
 	}
+	#end
 
 	#end
 }

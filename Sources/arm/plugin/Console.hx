@@ -64,7 +64,7 @@ class Console {
 		var avg = Math.round(frameTimeAvg * 10000) / 10;
 		var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 
-		if (ui.panel(Id.handle({selected: false}), 'Performance')) {
+		if (ui.panel(Id.handle({selected: false}), 'Profiler')) {
 			if (graph != null) ui.image(graph);
 			ui.indent();
 
@@ -74,6 +74,7 @@ class Console {
 
 			ui.unindent();
 		}
+		ui.separator();
 
 		// if (ui.panel(Id.handle({selected: false}), 'Render Targets')) {
 		// 	ui.indent();
@@ -109,7 +110,7 @@ class Console {
 		// }
 
 		#if js
-		if (ui.panel(Id.handle({selected: false}), 'Script')) {
+		if (ui.panel(Id.handle({selected: false}), 'Console')) {
 			ui.indent();
 			ui.row([8/10, 2/10]);
 			var t = ui.textInput(Id.handle());

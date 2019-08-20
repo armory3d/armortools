@@ -1,8 +1,8 @@
 #version 450
 
-#include "../../compiled/Shaders/compiled.inc"
-#include "../../compiled/Shaders/std/gbuffer.glsl"
-#include "../../compiled/Shaders/std/math.glsl"
+#include "../../Bundled/Shaders/compiled.inc"
+#include "../../Bundled/Shaders/std/gbuffer.glsl"
+#include "../../Bundled/Shaders/std/math.glsl"
 
 uniform sampler2D gbufferD;
 uniform sampler2D tex;

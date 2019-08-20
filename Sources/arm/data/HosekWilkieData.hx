@@ -97,7 +97,7 @@ This file contains the coefficient data for the RGB colour space version of
 the model.
 */
 
-package arm;
+package arm.data;
 
 class HosekWilkieData {
 

@@ -3,7 +3,9 @@ package arm.render;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.system.Input;
+import iron.math.Vec4;
 import iron.RenderPath;
+import iron.Scene;
 import arm.ui.UITrait;
 import arm.util.UVUtil;
 import arm.Tool;
@@ -13,6 +15,7 @@ class Uniforms {
 	public static function init() {
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
+		iron.object.Uniforms.externalVec3Links = [linkVec3];
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
 		iron.object.Uniforms.externalTextureLinks = [linkTex];
 	}
@@ -83,6 +86,124 @@ class Uniforms {
 			return vec2;
 		}
 		return null;
+	}
+
+	public static function linkVec3(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
+		var v:Vec4 = null;
+		#if arm_hosek
+		if (link == "_hosekA") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.A.x;
+				v.y = arm.data.HosekWilkie.data.A.y;
+				v.z = arm.data.HosekWilkie.data.A.z;
+			}
+		}
+		else if (link == "_hosekB") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.B.x;
+				v.y = arm.data.HosekWilkie.data.B.y;
+				v.z = arm.data.HosekWilkie.data.B.z;
+			}
+		}
+		else if (link == "_hosekC") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.C.x;
+				v.y = arm.data.HosekWilkie.data.C.y;
+				v.z = arm.data.HosekWilkie.data.C.z;
+			}
+		}
+		else if (link == "_hosekD") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.D.x;
+				v.y = arm.data.HosekWilkie.data.D.y;
+				v.z = arm.data.HosekWilkie.data.D.z;
+			}
+		}
+		else if (link == "_hosekE") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.E.x;
+				v.y = arm.data.HosekWilkie.data.E.y;
+				v.z = arm.data.HosekWilkie.data.E.z;
+			}
+		}
+		else if (link == "_hosekF") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.F.x;
+				v.y = arm.data.HosekWilkie.data.F.y;
+				v.z = arm.data.HosekWilkie.data.F.z;
+			}
+		}
+		else if (link == "_hosekG") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.G.x;
+				v.y = arm.data.HosekWilkie.data.G.y;
+				v.z = arm.data.HosekWilkie.data.G.z;
+			}
+		}
+		else if (link == "_hosekH") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.H.x;
+				v.y = arm.data.HosekWilkie.data.H.y;
+				v.z = arm.data.HosekWilkie.data.H.z;
+			}
+		}
+		else if (link == "_hosekI") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.I.x;
+				v.y = arm.data.HosekWilkie.data.I.y;
+				v.z = arm.data.HosekWilkie.data.I.z;
+			}
+		}
+		else if (link == "_hosekZ") {
+			if (arm.data.HosekWilkie.data == null) {
+				arm.data.HosekWilkie.recompute(Scene.active.world);
+			}
+			if (arm.data.HosekWilkie.data != null) {
+				v = iron.object.Uniforms.helpVec;
+				v.x = arm.data.HosekWilkie.data.Z.x;
+				v.y = arm.data.HosekWilkie.data.Z.y;
+				v.z = arm.data.HosekWilkie.data.Z.z;
+			}
+		}
+		#end
+		
+		return v;
 	}
 
 	public static function linkVec4(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {

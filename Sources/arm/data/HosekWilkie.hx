@@ -1,7 +1,7 @@
 // An Analytic Model for Full Spectral Sky-Dome Radiance
 // Lukas Hosek and Alexander Wilkie
 // Based on https://github.com/ddiakopoulos/sandbox
-package arm;
+package arm.data;
 
 import kha.math.FastVector3;
 import iron.data.WorldData;
