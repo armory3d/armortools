@@ -44,8 +44,6 @@ class ExportObj {
 			off += inda.length;
 		}
 		if (!path.endsWith(".obj")) path += ".obj";
-		#if kha_krom
 		Krom.fileSaveBytes(path, Bytes.ofString(s).getData());
-		#end
 	}
 }

@@ -4,9 +4,11 @@ import kha.Window;
 import kha.WindowOptions;
 import kha.WindowMode;
 import kha.System;
+import iron.object.Object;
+import iron.data.Data;
+import iron.data.SceneFormat;
 import iron.Scene;
 import iron.RenderPath;
-import iron.object.Object;
 import arm.render.Inc;
 import arm.render.RenderPathDeferred;
 import arm.Config;
@@ -18,7 +20,7 @@ class Main {
 
 	public static function main() {
 		tasks = 1;
-		#if (arm_config) tasks++; Config.load(function() { tasks--; start(); }); #end
+		tasks++; Config.load(function() { tasks--; start(); });
 		tasks--; start();
 	}
 
@@ -55,17 +57,22 @@ class Main {
 
 		System.start({title: title, width: c.window_w, height: c.window_h, window: {mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: c.window_msaa, verticalSync: c.window_vsync}}, function(window:Window) {
 			iron.App.init(function() {
-				Scene.setActive("Scene", function(object:Object) {
-					var path = new RenderPath();
-					Inc.init(path);
-					RenderPathDeferred.init(path);
-					path.commands = RenderPathDeferred.commands;
-					RenderPath.setActive(path);
-					#if arm_player
-					new arm.Player();
-					#else
-					new arm.App();
+				Data.getSceneRaw("Scene", function(format:TSceneFormat) {
+					#if arm_world
+					format.world_ref = "Hosek";
 					#end
+					Scene.create(format, function(o:Object) {
+						var path = new RenderPath();
+						Inc.init(path);
+						RenderPathDeferred.init(path);
+						path.commands = RenderPathDeferred.commands;
+						RenderPath.setActive(path);
+						#if arm_player
+						new arm.Player();
+						#else
+						new arm.App();
+						#end
+					});
 				});
 			});
 		});

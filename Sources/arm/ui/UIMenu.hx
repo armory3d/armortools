@@ -138,7 +138,6 @@ class UIMenu {
 				// if (ui.button("Request Feature", Left)) {}
 				if (ui.button("Check for Updates...", Left)) {
 					// Retrieve latest version number
-					#if kha_krom
 					var outFile = Krom.getFilesLocation() + '/' + Data.dataPath + "update.txt";
 					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
 					#if krom_windows
@@ -162,7 +161,6 @@ class UIMenu {
 						}
 						Data.deleteBlob(outFile);
 					});
-					#end
 				}
 				if (ui.button("About...", Left)) {
 					var sha = Macro.buildSha();

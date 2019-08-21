@@ -12,7 +12,6 @@ using StringTools;
 class ImportEnvmap {
 
 	public static function run(path:String, image:Image) {
-		#if kha_krom
 		var dataPath = Data.dataPath;
 		var p = Krom.getFilesLocation() + '/' + dataPath;
 		#if krom_windows
@@ -60,7 +59,6 @@ class ImportEnvmap {
 		cmd += ' --output0 "' + tmp + 'tmp_rad"';
 		cmd += ' --output0params hdr,rgbe,latlong';
 		Krom.sysCommand(cmd);
-		#end
 
 		// Load irr
 		Data.getBlob(tmp + "tmp_irr.c", function(blob:Blob) {

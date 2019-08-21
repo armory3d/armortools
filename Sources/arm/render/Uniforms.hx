@@ -90,7 +90,7 @@ class Uniforms {
 
 	public static function linkVec3(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
 		var v:Vec4 = null;
-		#if arm_hosek
+		#if arm_world
 		if (link == "_hosekA") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);

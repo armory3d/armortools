@@ -17,9 +17,7 @@ class ExportArm {
 		var raw:TSceneFormat = { mesh_datas: [ Context.paintObject.data.raw ] };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
-		#if kha_krom
 		Krom.fileSaveBytes(path, b.getData());
-		#end
 	}
 
 	public static function runProject() {
@@ -83,9 +81,6 @@ class ExportArm {
 		};
 		
 		var bytes = ArmPack.encode(Project.raw);
-
-		#if kha_krom
 		Krom.fileSaveBytes(Project.filepath, bytes.getData());
-		#end
 	}
 }

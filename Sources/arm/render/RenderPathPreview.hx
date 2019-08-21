@@ -10,19 +10,9 @@ class RenderPathPreview {
 	public static function commandsPreview() {
 
 		var path = RenderPathDeferred.path;
-
-		#if rp_gbuffer2
-		{
-			path.setTarget("mgbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
-		}
-		#else
-		{
-			path.setTarget("mgbuffer0", ["mgbuffer1"]);
-		}
-		#end
-
+		path.setTarget("mgbuffer2");
+		path.clearTarget(0xff000000);
+		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
 		path.clearTarget(null, 1.0);
 		path.drawMeshes("mesh");
 
@@ -36,11 +26,9 @@ class RenderPathPreview {
 		path.bindTarget("_mmain", "gbufferD");
 		path.bindTarget("mgbuffer0", "gbuffer0");
 		path.bindTarget("mgbuffer1", "gbuffer1");
-		#if (rp_ssgi != "Off")
 		{
 			path.bindTarget("empty_white", "ssaotex");
 		}
-		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)
@@ -73,19 +61,9 @@ class RenderPathPreview {
 	public static function commandsDecal() {
 
 		var path = RenderPathDeferred.path;
-		
-		#if rp_gbuffer2
-		{
-			path.setTarget("gbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		}
-		#else
-		{
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-		}
-		#end
-
+		path.setTarget("gbuffer2");
+		path.clearTarget(0xff000000);
+		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		path.clearTarget(null, 1.0);
 		path.drawMeshes("mesh");
 
@@ -99,11 +77,9 @@ class RenderPathPreview {
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
-		#if (rp_ssgi != "Off")
 		{
 			path.bindTarget("empty_white", "ssaotex");
 		}
-		#end
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)

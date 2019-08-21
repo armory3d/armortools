@@ -19,8 +19,6 @@ import arm.Tool;
 
 class RenderPathDeferred {
 
-	#if (rp_renderer == "Deferred")
-
 	public static var path:RenderPath;
 
 	#if rp_voxelao
@@ -37,10 +35,9 @@ class RenderPathDeferred {
 
 		path = _path;
 
-		#if (rp_background == "World")
-		{
-			path.loadShader("shader_datas/world_pass/world_pass");
-		}
+		path.loadShader("shader_datas/world_pass/world_pass");
+		#if arm_world
+		path.loadShader("shader_datas/world_pass/world_pass_Hosekvar");
 		#end
 
 		#if rp_voxelao
@@ -94,7 +91,6 @@ class RenderPathDeferred {
 			path.createRenderTarget(t);
 		}
 
-		#if rp_gbuffer2
 		{
 			var t = new RenderTargetRaw();
 			t.name = "gbuffer2";
@@ -118,19 +114,14 @@ class RenderPathDeferred {
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
-		#end
 
 		path.loadShader("shader_datas/deferred_light/deferred_light");
 
-		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
 		{
 			path.loadShader("shader_datas/ssgi_pass/ssgi_pass");
 			path.loadShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
 			path.loadShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
 		}
-		#end
-
-		#if (rp_ssgi != "Off")
 		{
 			var t = new RenderTargetRaw();
 			t.name = "singlea";
@@ -138,9 +129,6 @@ class RenderPathDeferred {
 			t.height = 0;
 			t.format = "R8";
 			t.scale = Inc.getSuperSampling();
-			#if rp_ssgi_half
-			t.scale *= 0.5;
-			#end
 			path.createRenderTarget(t);
 		}
 		{
@@ -150,14 +138,9 @@ class RenderPathDeferred {
 			t.height = 0;
 			t.format = "R8";
 			t.scale = Inc.getSuperSampling();
-			#if rp_ssgi_half
-			t.scale *= 0.5;
-			#end
 			path.createRenderTarget(t);
 		}
-		#end
 
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
 			var t = new RenderTargetRaw();
 			t.name = "bufa";
@@ -176,48 +159,40 @@ class RenderPathDeferred {
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
-		#end
 
-		#if rp_compositornodes
 		{
 			path.loadShader("shader_datas/compositor_pass/compositor_pass");
 		}
-		#end
 
-		#if ((!rp_compositornodes) || (rp_antialiasing == "TAA") || (rp_motionblur == "Camera") || (rp_motionblur == "Object"))
 		{
 			path.loadShader("shader_datas/copy_pass/copy_pass");
 		}
-		#end
 
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
 			path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 			path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 			path.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-
-			#if (rp_antialiasing == "TAA")
-			{
-				path.loadShader("shader_datas/taa_pass/taa_pass");
-			}
-			#end
+			path.loadShader("shader_datas/taa_pass/taa_pass");
 		}
-		#end
 
-		#if (rp_supersampling == 4)
 		{
 			path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
 		}
-		#end
 
-		#if rp_water
+		#if arm_world
 		{
-			path.loadShader("water_pass/water_pass/water_pass");
+			path.loadShader("shader_datas/water_pass/water_pass");
 			path.loadShader("shader_datas/copy_pass/copy_pass");
+			Scene.active.embedData("water_base.png", function() {});
+			Scene.active.embedData("water_detail.png", function() {});
+			Scene.active.embedData("water_foam.png", function() {});
+			Scene.active.embedData("water_foam.png", function() {});
+			Scene.active.embedData("clouds_base.raw", function() {});
+			Scene.active.embedData("clouds_detail.raw", function() {});
+			Scene.active.embedData("clouds_map.png", function() {});
 		}
 		#end
 
-		#if rp_bloom
 		{
 			var t = new RenderTargetRaw();
 			t.name = "bloomtex";
@@ -244,7 +219,6 @@ class RenderPathDeferred {
 			path.loadShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
 			path.loadShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y_blend");
 		}
-		#end
 
 		#if rp_autoexposure
 		{
@@ -261,56 +235,11 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if rp_sss
-		{
-			path.loadShader("shader_datas/sss_pass/sss_pass_x");
-			path.loadShader("shader_datas/sss_pass/sss_pass_y");
-		}
-		#end
-
-		#if (rp_ssr_half || rp_ssgi_half)
-		{
-			{
-				path.loadShader("shader_datas/downsample_depth/downsample_depth");
-				var t = new RenderTargetRaw();
-				t.name = "half";
-				t.width = 0;
-				t.height = 0;
-				t.scale = Inc.getSuperSampling() * 0.5;
-				t.format = "R32"; // R16
-				path.createRenderTarget(t);
-			}
-		}
-		#end
-
-		#if rp_ssr
 		{
 			path.loadShader("shader_datas/ssr_pass/ssr_pass");
 			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
 			path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
-			
-			#if rp_ssr_half
-			{
-				var t = new RenderTargetRaw();
-				t.name = "ssra";
-				t.width = 0;
-				t.height = 0;
-				t.scale = Inc.getSuperSampling() * 0.5;
-				t.format = Inc.getHdrFormat();
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "ssrb";
-				t.width = 0;
-				t.height = 0;
-				t.scale = Inc.getSuperSampling() * 0.5;
-				t.format = Inc.getHdrFormat();
-				path.createRenderTarget(t);
-			}
-			#end
 		}
-		#end
 
 		#if ((rp_motionblur == "Camera") || (rp_motionblur == "Object"))
 		{
@@ -326,7 +255,6 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if arm_config
 		{
 			var t = new RenderTargetRaw();
 			t.name = "empty_white";
@@ -339,7 +267,6 @@ class RenderPathDeferred {
 			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.L8);
 			path.renderTargets.set(t.name, rt);
 		}
-		#end
 
 		{
 			var t = new RenderTargetRaw();
@@ -450,7 +377,6 @@ class RenderPathDeferred {
 				path.createRenderTarget(t);
 			}
 
-			#if rp_gbuffer2
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mgbuffer2";
@@ -460,9 +386,7 @@ class RenderPathDeferred {
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 			}
-			#end
 
-			#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 			{
 				var t = new RenderTargetRaw();
 				t.name = "mbufa";
@@ -481,7 +405,6 @@ class RenderPathDeferred {
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 			}
-			#end
 		}
 		
 		#end // arm_painter
@@ -734,30 +657,23 @@ class RenderPathDeferred {
 		var ddirty = 2;
 		#end
 
-		#if ((rp_ssgi == "RTGI") || (rp_ssgi == "RTAO"))
-		{
-			var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
-			if (ssgi && ddirty > 0 && taaFrame > 0) {
-				path.setTarget("singlea");
-				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				// #if (rp_ssgi == "RTGI")
-				// path.bindTarget("gbuffer1", "gbuffer1");
-				// #end
-				path.drawShader("shader_datas/ssgi_pass/ssgi_pass");
+		var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
+		if (ssgi && ddirty > 0 && taaFrame > 0) {
+			path.setTarget("singlea");
+			path.bindTarget("_main", "gbufferD");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.drawShader("shader_datas/ssgi_pass/ssgi_pass");
 
-				path.setTarget("singleb");
-				path.bindTarget("singlea", "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
+			path.setTarget("singleb");
+			path.bindTarget("singlea", "tex");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_x");
 
-				path.setTarget("singlea");
-				path.bindTarget("singleb", "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
-			}
-		}	
-		#end
+			path.setTarget("singlea");
+			path.bindTarget("singleb", "tex");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.drawShader("shader_datas/blur_edge_pass/blur_edge_pass_y");
+		}
 
 		// Voxels
 		#if rp_voxelao
@@ -804,17 +720,13 @@ class RenderPathDeferred {
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
-		#if (rp_ssgi != "Off")
-		{
-			var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
-			if (ssgi && taaFrame > 0) {
-				path.bindTarget("singlea", "ssaotex");
-			}
-			else {
-				path.bindTarget("empty_white", "ssaotex");
-			}
+		var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
+		if (ssgi && taaFrame > 0) {
+			path.bindTarget("singlea", "ssaotex");
 		}
-		#end
+		else {
+			path.bindTarget("empty_white", "ssaotex");
+		}
 		var voxelao_pass = false;
 		#if rp_voxelao
 		if (Config.raw.rp_gi != false)
@@ -833,7 +745,7 @@ class RenderPathDeferred {
 			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
 			path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if rp_water
+		#if arm_world
 		{
 			path.setTarget("buf");
 			path.bindTarget("tex", "tex");
@@ -841,10 +753,7 @@ class RenderPathDeferred {
 			path.setTarget("tex");
 			path.bindTarget("_main", "gbufferD");
 			path.bindTarget("buf", "tex");
-			path.drawShader("water_pass/water_pass/water_pass");
-			Scene.active.embedData("water_base.png", function() {});
-			Scene.active.embedData("water_detail.png", function() {});
-			Scene.active.embedData("water_foam.png", function() {});
+			path.drawShader("shader_datas/water_pass/water_pass");
 		}
 		#end
 
@@ -853,7 +762,11 @@ class RenderPathDeferred {
 		#end
 
 		path.setTarget("tex"); // Re-binds depth
+		#if arm_world
+		path.drawSkydome("shader_datas/world_pass/world_pass_Hosekvar");
+		#else
 		path.drawSkydome("shader_datas/world_pass/world_pass");
+		#end
 
 		#if rp_blending
 		{
@@ -868,90 +781,65 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if rp_bloom
-		{
-			if (Config.raw.rp_bloom != false) {
-				path.setTarget("bloomtex");
-				path.bindTarget("tex", "tex");
-				path.drawShader("shader_datas/bloom_pass/bloom_pass");
-
-				path.setTarget("bloomtex2");
-				path.bindTarget("bloomtex", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
-
-				path.setTarget("bloomtex");
-				path.bindTarget("bloomtex2", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
-
-				path.setTarget("bloomtex2");
-				path.bindTarget("bloomtex", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
-
-				path.setTarget("bloomtex");
-				path.bindTarget("bloomtex2", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
-
-				path.setTarget("bloomtex2");
-				path.bindTarget("bloomtex", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
-
-				path.setTarget("bloomtex");
-				path.bindTarget("bloomtex2", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
-
-				path.setTarget("bloomtex2");
-				path.bindTarget("bloomtex", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
-
-				path.setTarget("tex");
-				path.bindTarget("bloomtex2", "tex");
-				path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y_blend");
-			}
-		}
-		#end
-
-		#if rp_sss
-		{
-			path.setTarget("buf");
+		if (Config.raw.rp_bloom != false) {
+			path.setTarget("bloomtex");
 			path.bindTarget("tex", "tex");
-			path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer2", "gbuffer2");
-			path.drawShader("shader_datas/sss_pass/sss_pass_x");
+			path.drawShader("shader_datas/bloom_pass/bloom_pass");
+
+			path.setTarget("bloomtex2");
+			path.bindTarget("bloomtex", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
+
+			path.setTarget("bloomtex");
+			path.bindTarget("bloomtex2", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
+
+			path.setTarget("bloomtex2");
+			path.bindTarget("bloomtex", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
+
+			path.setTarget("bloomtex");
+			path.bindTarget("bloomtex2", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
+
+			path.setTarget("bloomtex2");
+			path.bindTarget("bloomtex", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
+
+			path.setTarget("bloomtex");
+			path.bindTarget("bloomtex2", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y");
+
+			path.setTarget("bloomtex2");
+			path.bindTarget("bloomtex", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_x");
 
 			path.setTarget("tex");
-			// TODO: can not bind tex
+			path.bindTarget("bloomtex2", "tex");
+			path.drawShader("shader_datas/blur_gaus_pass/blur_gaus_pass_y_blend");
+		}
+
+		if (Config.raw.rp_ssr != false) {
+			var targeta = "buf";
+			var targetb = "gbuffer1";
+
+			path.setTarget(targeta);
 			path.bindTarget("tex", "tex");
 			path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer2", "gbuffer2");
-			path.drawShader("shader_datas/sss_pass/sss_pass_y");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.bindTarget("gbuffer1", "gbuffer1");
+			path.drawShader("shader_datas/ssr_pass/ssr_pass");
+
+			path.setTarget(targetb);
+			path.bindTarget(targeta, "tex");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.drawShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
+
+			path.setTarget("tex");
+			path.bindTarget(targetb, "tex");
+			path.bindTarget("gbuffer0", "gbuffer0");
+			path.drawShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
 		}
-		#end
-
-		#if rp_ssr
-		{
-			if (Config.raw.rp_ssr != false) {
-				var targeta = "buf";
-				var targetb = "gbuffer1";
-
-				path.setTarget(targeta);
-				path.bindTarget("tex", "tex");
-				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.bindTarget("gbuffer1", "gbuffer1");
-				path.drawShader("shader_datas/ssr_pass/ssr_pass");
-
-				path.setTarget(targetb);
-				path.bindTarget(targeta, "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
-
-				path.setTarget("tex");
-				path.bindTarget(targetb, "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				path.drawShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
-			}
-		}
-		#end
 
 		#if ((rp_motionblur == "Camera") || (rp_motionblur == "Object"))
 		{
@@ -995,7 +883,6 @@ class RenderPathDeferred {
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 		// End compositor
 
-		#if rp_overlays
 		{
 			path.setTarget("buf");
 			var currentG = path.currentG;
@@ -1004,11 +891,8 @@ class RenderPathDeferred {
 			drawCompass(currentG);
 			#end
 		}
-		#end
 
-		#if ((rp_antialiasing == "SMAA") || (rp_antialiasing == "TAA"))
 		{
-
 			var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 			var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
 
@@ -1039,17 +923,12 @@ class RenderPathDeferred {
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 			}
 		}
-		#end
 
-		#if (rp_supersampling == 4)
-		{
-			if (ssaa4) {
-				path.setTarget("");
-				path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
-				path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
-			}
+		if (ssaa4) {
+			path.setTarget("");
+			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 		}
-		#end
 
 		#if arm_painter
 		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
@@ -1064,17 +943,9 @@ class RenderPathDeferred {
 	static function drawGbuffer() {
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		path.clearTarget(null, 1.0);
-		#if rp_gbuffer2
-		{
-			path.setTarget("gbuffer2");
-			path.clearTarget(0xff000000);
-			path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		}
-		#else
-		{
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-		}
-		#end
+		path.setTarget("gbuffer2");
+		path.clearTarget(0xff000000);
+		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 
 		#if arm_painter
 		var tid = Project.layers[0].id;
@@ -1145,7 +1016,5 @@ class RenderPathDeferred {
 			gizmo.transform.buildMatrix();
 		}
 	}
-	#end
-
 	#end
 }

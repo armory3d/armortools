@@ -44,9 +44,7 @@ class Exporter {
 				pixels: pixels
 			}, type, off);
 		}
-		#if kha_krom
 		Krom.fileSaveBytes(file, out.getBytes().getData());
-		#end
 	}
 
 	public static function exportTextures(path:String) {

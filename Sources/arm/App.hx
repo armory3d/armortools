@@ -87,7 +87,6 @@ class App {
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;
 
-				#if kha_krom // Pre-baked font texture
 				var kimg:kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
 				@:privateAccess kimg.mySize = 13;
 				@:privateAccess kimg.width = 128;
@@ -111,7 +110,6 @@ class App {
 					// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
 					@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
 				});
-				#end
 
 				color_wheel = image;
 				Nodes.getEnumTexts = getEnumTexts;
@@ -119,7 +117,6 @@ class App {
 				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
 				
 				// File to open passed as argument
-				#if kha_krom
 				if (Krom.getArgCount() > 1) {
 					var path = Krom.getArg(1);
 					if (Path.checkProjectFormat(path) ||
@@ -129,7 +126,6 @@ class App {
 						fileArg = path;
 					}
 				}
-				#end
 				iron.App.notifyOnUpdate(update);
 				var root = Scene.active.root;
 				new UITrait();

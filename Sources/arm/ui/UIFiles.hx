@@ -17,8 +17,6 @@ class UIFiles {
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
 
-		// Krom with native file dialogs
-		#if kha_krom
 		show = false;
 		if (untyped Krom.openDialog != null) {
 			path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
@@ -37,7 +35,6 @@ class UIFiles {
 			}
 			releaseKeys();
 		}
-		#end
 	}
 
 	static function releaseKeys() {

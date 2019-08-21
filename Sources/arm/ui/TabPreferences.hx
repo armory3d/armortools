@@ -15,9 +15,7 @@ class TabPreferences {
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
-					#if kha_krom
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
-					#end
 					Config.raw.window_scale = hscale.value;
 					ui.setScale(hscale.value);
 					App.uibox.setScale(hscale.value);

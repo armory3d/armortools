@@ -17,7 +17,6 @@ using StringTools;
 class ImportFolder {
 
 	public static function run(path:String) {
-		#if kha_krom
 		#if krom_windows
 		var cmd = "dir /b ";
 		var sep = "\\";
@@ -183,6 +182,5 @@ class ImportFolder {
 		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UITrait.inst.hwnd1.redraws = 2;
-		#end
 	}
 }

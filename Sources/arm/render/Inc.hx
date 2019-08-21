@@ -11,31 +11,17 @@ class Inc {
 	static var spotIndex = 0;
 	static var lastFrame = -1;
 
-	#if (rp_voxelao && arm_config)
+	#if rp_voxelao
 	static var voxelsCreated = false;
 	#end
 
 	public static function init(_path:RenderPath) {
 		path = _path;
-
-		#if arm_config
 		var config = Config.raw;
 		superSample = config.rp_supersample;
-		#else
-		
-		#if (rp_supersampling == 1.5)
-		superSample = 1.5;
-		#elseif (rp_supersampling == 2)
-		superSample = 2.0;
-		#elseif (rp_supersampling == 4)
-		superSample = 4.0;
-		#end
-		
-		#end
 	}
 	
 	public static function applyConfig() {
-		#if arm_config
 		var config = Config.raw;
 		if (superSample != config.rp_supersample) {
 			superSample = config.rp_supersample;
@@ -50,16 +36,13 @@ class Inc {
 		#if rp_voxelao
 		if (!voxelsCreated) initGI();
 		#end
-		#end // arm_config
 	}
 
 	#if rp_voxelao
 	public static function initGI(tname = "voxels") {
-		#if arm_config
 		var config = Config.raw;
 		if (config.rp_gi != true || voxelsCreated) return;
 		voxelsCreated = true;
-		#end
 
 		var t = new RenderTargetRaw();
 		t.name = tname;
@@ -90,31 +73,11 @@ class Inc {
 	#end
 
 	public static inline function getVoxelRes():Int {
-		#if (rp_voxelgi_resolution == 512)
-		return 512;
-		#elseif (rp_voxelgi_resolution == 256)
 		return 256;
-		#elseif (rp_voxelgi_resolution == 128)
-		return 128;
-		#elseif (rp_voxelgi_resolution == 64)
-		return 64;
-		#elseif (rp_voxelgi_resolution == 32)
-		return 32;
-		#else
-		return 0;
-		#end
 	}
 
 	public static inline function getVoxelResZ():Float {
-		#if (rp_voxelgi_resolution_z == 1.0)
 		return 1.0;
-		#elseif (rp_voxelgi_resolution_z == 0.5)
-		return 0.5;
-		#elseif (rp_voxelgi_resolution_z == 0.25)
-		return 0.25;
-		#else
-		return 0.0;
-		#end
 	}
 
 	public static inline function getSuperSampling():Float {
@@ -122,10 +85,6 @@ class Inc {
 	}
 
 	public static inline function getHdrFormat():String {
-		#if rp_hdr
 		return "RGBA64";
-		#else
-		return "RGBA32";
-		#end
 	}
 }

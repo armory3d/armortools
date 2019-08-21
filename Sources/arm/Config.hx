@@ -28,9 +28,7 @@ class Config {
 	public static function save() {
 		var path = Data.dataPath + 'config.arm';
 		var bytes = Bytes.ofString(Json.stringify(raw));
-		#if kha_krom
 		Krom.fileSaveBytes(path, bytes.getData());
-		#end
 	}
 
 	// public static function reset() {}
