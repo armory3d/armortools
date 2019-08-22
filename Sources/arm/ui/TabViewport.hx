@@ -70,6 +70,19 @@ class TabViewport {
 			}
 
 			ui.row([1/2, 1/2]);
+			var cam = Scene.active.camera.data.raw;
+			var near_handle = Id.handle({value: cam.near_plane});
+			var far_handle = Id.handle({value: cam.far_plane});
+			near_handle.value = Std.int(near_handle.value * 1000) / 1000;
+			far_handle.value = Std.int(far_handle.value * 100) / 100;
+			ui.changed = false;
+			cam.near_plane = ui.slider(near_handle, "Clip Start", 0.001, 1.0, true);
+			cam.far_plane = ui.slider(far_handle, "Clip End", 50.0, 100.0, true);
+			if (ui.changed) {
+				Scene.active.camera.buildProjection();
+			}
+
+			ui.row([1/2, 1/2]);
 			UITrait.inst.drawWireframe = ui.check(UITrait.inst.wireframeHandle, "Wireframe");
 			if (UITrait.inst.wireframeHandle.changed) {
 				ui.g.end();
