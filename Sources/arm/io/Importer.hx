@@ -70,6 +70,7 @@ class Importer {
 		var p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path);
 		else if (p.endsWith(".fbx")) ImportFbx.run(path);
+		else if (p.endsWith(".stl")) ImportStl.run(path);
 		else if (p.endsWith(".blend")) ImportBlend.run(path);
 
 		if (Context.mergedObject != null) {

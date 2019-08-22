@@ -442,7 +442,7 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.import_assets)) {
 			UIFiles.show = true;
 			UIFiles.isSave = false;
-			UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,blend,arm";
+			UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm";
 			UIFiles.filesDone = function(path:String) {
 				Importer.importFile(path);
 			}

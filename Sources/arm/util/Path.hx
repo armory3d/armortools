@@ -33,6 +33,7 @@ class Path {
 		var p = path.toLowerCase();
 		return p.endsWith(".obj") ||
 			   p.endsWith(".fbx") ||
+			   p.endsWith(".stl") ||
 			   p.endsWith(".blend");
 	}
 

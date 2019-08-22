@@ -168,7 +168,7 @@ class Context {
 	public static function importMesh() {
 		UIFiles.show = true;
 		UIFiles.isSave = false;
-		UIFiles.filters = "obj,fbx,blend,arm";
+		UIFiles.filters = "obj,fbx,stl,blend,arm";
 		UIFiles.filesDone = function(path:String) {
 			Importer.importFile(path);
 		}
