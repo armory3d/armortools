@@ -58,9 +58,14 @@ class TabViewport {
 				// if (syhandle.changed) Context.ddirty = 2;
 				
 				var lhandle = Id.handle();
-				lhandle.value = light.data.raw.strength / 1333;
+				#if arm_world
+				var scale = 1;
+				#else
+				var scale = 1333;
+				#end
+				lhandle.value = light.data.raw.strength / scale;
 				lhandle.value = Std.int(lhandle.value * 100) / 100;
-				light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * 1333;
+				light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * scale;
 				if (lhandle.changed) Context.ddirty = 2;
 			}
 

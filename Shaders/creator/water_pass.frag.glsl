@@ -9,8 +9,8 @@ const float waterDensity = 1.0;
 const float waterRefract = 1.0;
 const float waterReflect = 1.0;
 
-#include "std/gbuffer.glsl"
-#include "std/math.glsl"
+#include "../std/gbuffer.glsl"
+#include "../std/math.glsl"
 
 uniform sampler2D gbufferD;
 uniform sampler2D tex;

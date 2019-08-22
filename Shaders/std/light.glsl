@@ -1,30 +1,19 @@
 #ifndef _LIGHT_GLSL_
 #define _LIGHT_GLSL_
 
-#define _LTC
-#define _VoxelShadow
-#define _MicroShadowing
-#define _SinglePoint
-#define _SSAO
-#define _Emission
-#define _Rad
-#define _Irr
-#define _Brdf
-#define _EnvTex
-
-#include "std/brdf.glsl"
-#include "std/math.glsl"
+#include "../std/brdf.glsl"
+#include "../std/math.glsl"
 #ifdef _ShadowMap
-#include "std/shadows.glsl"
+#include "../std/shadows.glsl"
 #endif
 #ifdef _VoxelAOvar
-#include "std/conetrace.glsl"
+#include "../std/conetrace.glsl"
 #endif
 #ifdef _LTC
-#include "std/ltc.glsl"
+#include "../std/ltc.glsl"
 #endif
 #ifdef _LightIES
-#include "std/ies.glsl"
+#include "../std/ies.glsl"
 #endif
 
 #ifdef _ShadowMap

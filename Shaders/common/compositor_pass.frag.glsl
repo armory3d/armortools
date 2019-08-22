@@ -4,10 +4,10 @@
 #define _CVignette
 #define _CGrainStatic
 
-#include "std/tonemap.glsl"
-#include "std/math.glsl"
+#include "../std/tonemap.glsl"
+#include "../std/math.glsl"
 #ifdef _CDOF
-#include "std/dof.glsl"
+#include "../std/dof.glsl"
 #endif
 
 const float compoVignetteStrength = 0.4;

@@ -4,7 +4,7 @@
 #define _EnvTex
 
 #ifdef _EnvTex
-#include "std/math.glsl"
+#include "../std/math.glsl"
 #endif
 
 #ifdef _EnvCol

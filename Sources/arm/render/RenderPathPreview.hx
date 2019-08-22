@@ -13,7 +13,11 @@ class RenderPathPreview {
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
+		#if arm_world
+		path.clearTarget(0xffffffff, 1.0);
+		#else
 		path.clearTarget(null, 1.0);
+		#end
 		path.drawMeshes("mesh");
 
 		// ---
@@ -29,14 +33,16 @@ class RenderPathPreview {
 		{
 			path.bindTarget("empty_white", "ssaotex");
 		}
-		path.drawShader("shader_datas/deferred_light/deferred_light");
+		path.drawShader("deferred_light/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("mtex", "mgbuffer0"); // Re-bind depth
 		#end
 
 		path.setTarget("mtex"); // Re-binds depth
-		path.drawSkydome("shader_datas/world_pass/world_pass");
+		#if (!arm_world)
+		path.drawSkydome("world_pass/world_pass/world_pass");
+		#end
 		
 		var framebuffer = "texpreview";
 		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
@@ -80,14 +86,14 @@ class RenderPathPreview {
 		{
 			path.bindTarget("empty_white", "ssaotex");
 		}
-		path.drawShader("shader_datas/deferred_light/deferred_light");
+		path.drawShader("deferred_light/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)
 		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
 		#end
 
 		path.setTarget("tex"); // Re-binds depth
-		path.drawSkydome("shader_datas/world_pass/world_pass");
+		path.drawSkydome("world_pass/world_pass/world_pass");
 		
 		var framebuffer = "texpreview";
 		RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;

@@ -11,8 +11,8 @@ uniform mat4 WVP;
 uniform float texUnpack;
 uniform mat4 prevWVP;
 void main() {
-vec4 spos = vec4(pos.xyz, 1.0);
-texCoord = tex * texUnpack;
+	vec4 spos = vec4(pos.xyz, 1.0);
+	texCoord = tex * texUnpack;
 	wnormal = normalize(N * vec3(nor.xy, pos.w));
 	gl_Position = WVP * spos;
 	wvpposition = gl_Position;

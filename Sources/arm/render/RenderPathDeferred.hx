@@ -35,15 +35,12 @@ class RenderPathDeferred {
 
 		path = _path;
 
-		path.loadShader("shader_datas/world_pass/world_pass");
-		#if arm_world
-		path.loadShader("shader_datas/world_pass/world_pass_Hosekvar");
-		#end
+		path.loadShader("world_pass/world_pass/world_pass");
 
 		#if rp_voxelao
 		{
 			Inc.initGI();
-			path.loadShader("shader_datas/deferred_light/deferred_light_VoxelAOvar");
+			path.loadShader("deferred_light/deferred_light/deferred_light_voxel");
 		}
 		#end
 
@@ -115,7 +112,7 @@ class RenderPathDeferred {
 			path.createRenderTarget(t);
 		}
 
-		path.loadShader("shader_datas/deferred_light/deferred_light");
+		path.loadShader("deferred_light/deferred_light/deferred_light");
 
 		{
 			path.loadShader("shader_datas/ssgi_pass/ssgi_pass");
@@ -181,7 +178,7 @@ class RenderPathDeferred {
 
 		#if arm_world
 		{
-			path.loadShader("shader_datas/water_pass/water_pass");
+			path.loadShader("water_pass/water_pass/water_pass");
 			path.loadShader("shader_datas/copy_pass/copy_pass");
 			Scene.active.embedData("water_base.png", function() {});
 			Scene.active.embedData("water_detail.png", function() {});
@@ -742,8 +739,8 @@ class RenderPathDeferred {
 		#end
 		
 		voxelao_pass ?
-			path.drawShader("shader_datas/deferred_light/deferred_light_VoxelAOvar") :
-			path.drawShader("shader_datas/deferred_light/deferred_light");
+			path.drawShader("deferred_light/deferred_light/deferred_light_voxel") :
+			path.drawShader("deferred_light/deferred_light/deferred_light");
 
 		#if arm_world
 		{
@@ -753,7 +750,7 @@ class RenderPathDeferred {
 			path.setTarget("tex");
 			path.bindTarget("_main", "gbufferD");
 			path.bindTarget("buf", "tex");
-			path.drawShader("shader_datas/water_pass/water_pass");
+			path.drawShader("water_pass/water_pass/water_pass");
 		}
 		#end
 
@@ -762,11 +759,7 @@ class RenderPathDeferred {
 		#end
 
 		path.setTarget("tex"); // Re-binds depth
-		#if arm_world
-		path.drawSkydome("shader_datas/world_pass/world_pass_Hosekvar");
-		#else
-		path.drawSkydome("shader_datas/world_pass/world_pass");
-		#end
+		path.drawSkydome("world_pass/world_pass/world_pass");
 
 		#if rp_blending
 		{

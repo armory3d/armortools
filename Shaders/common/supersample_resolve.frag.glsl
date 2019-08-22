@@ -1,6 +1,6 @@
 #version 450
 
-#include "std/filters.glsl"
+#include "../std/filters.glsl"
 
 uniform sampler2D tex;
 uniform vec2 screenSizeInv;

@@ -44,10 +44,16 @@ class RenderUtil {
 		ViewportUtil.updateCameraType(0);
 		var light = Scene.active.lights[0];
 		var savedLight = light.data.raw.strength;
-		light.data.raw.strength = 1500;
 		var probe = Scene.active.world.probe;
 		var savedProbe = probe.raw.strength;
+		#if arm_world
+		light.data.raw.strength = 1;
+		probe.raw.strength = 1;
+		#else
+		light.data.raw.strength = 1500;
 		probe.raw.strength = 4;
+		#end
+
 		Scene.active.world.envmap = UITrait.inst.previewEnvmap;
 		// No resize
 		@:privateAccess RenderPath.active.lastW = matPreviewSize;

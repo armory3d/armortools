@@ -1,7 +1,7 @@
 // DoF with bokeh GLSL shader by Martins Upitis (martinsh) (devlog-martinsh.blogspot.com)
 // Creative Commons Attribution 3.0 Unported License
 
-#include "std/math.glsl"
+#include "../std/math.glsl"
 
 // const float compoDOFDistance = 10.0; // Focal distance value in meters
 // const float compoDOFLength = 160.0; // Focal length in mm 18-200

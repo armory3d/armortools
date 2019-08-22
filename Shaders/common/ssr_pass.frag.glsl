@@ -1,7 +1,7 @@
 #version 450
 
-#include "std/math.glsl"
-#include "std/gbuffer.glsl"
+#include "../std/math.glsl"
+#include "../std/gbuffer.glsl"
 
 const float ssrRayStep = 0.04;
 const float ssrMinRayStep = 0.05;

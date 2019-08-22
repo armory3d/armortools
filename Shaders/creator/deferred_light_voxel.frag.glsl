@@ -1,24 +1,32 @@
 #version 450
 #define _VoxelAOvar
 
+#define _Sun
+#define _VoxelShadow
+#define _MicroShadowing
 #define _SSAO
+#define _Emission
+#define _Rad
+#define _Irr
+#define _Brdf
 
-#include "std/gbuffer.glsl"
-#include "std/light.glsl"
+
+#include "../std/gbuffer.glsl"
+#include "../std/light.glsl"
 #ifdef _Clusters
-#include "std/clusters.glsl"
+#include "../std/clusters.glsl"
 #endif
 #ifdef _Irr
-#include "std/shirr.glsl"
+#include "../std/shirr.glsl"
 #endif
 #ifdef _VoxelAOvar
-#include "std/conetrace.glsl"
+#include "../std/conetrace.glsl"
 #endif
 #ifdef _SSS
-#include "std/sss.glsl"
+#include "../std/sss.glsl"
 #endif
 #ifdef _SSRS
-#include "std/ssrs.glsl"
+#include "../std/ssrs.glsl"
 #endif
 
 uniform sampler2D gbufferD;

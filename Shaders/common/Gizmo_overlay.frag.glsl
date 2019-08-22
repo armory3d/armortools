@@ -3,7 +3,7 @@ in vec3 vcolor;
 in vec3 wnormal;
 out vec4 fragColor;
 void main() {
-vec3 n = normalize(wnormal);
+	vec3 n = normalize(wnormal);
 	vec3 basecol;
 	float roughness;
 	float metallic;

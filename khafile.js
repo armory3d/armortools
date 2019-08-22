@@ -3,8 +3,8 @@ let project = new Project('ArmorPaint');
 project.addSources('Sources');
 project.addLibrary("iron");
 project.addLibrary("zui");
-project.addShaders("Shaders/*.glsl", { noembed: false});
-project.addAssets("Bundled/*", { notinlist: true, destination: "data/{name}" });
+project.addShaders("Shaders/common/*.glsl", { noembed: false});
+project.addAssets("Bundled/common/*", { notinlist: true, destination: "data/{name}" });
 project.addAssets("Bundled/defaults/*", { notinlist: true, destination: "data/defaults/{name}" });
 project.addAssets("Bundled/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Bundled/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
@@ -36,7 +36,7 @@ let build = 'painter'; // painter || creator || player
 
 if (debug) {
 	project.addDefine('arm_debug');
-	project.addShaders("Shaders/debug_draw/*.glsl");
+	project.addShaders("Shaders/debug/*.glsl");
 	project.addParameter('--times');
 	// project.addParameter('--no-inline');
 }
@@ -49,10 +49,10 @@ if (raytrace) {
 }
 
 if (process.platform === 'win32') {
-	project.addShaders("Shaders/hlsl/*.glsl", { noprocessing: true, noembed: false });
+	project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
 else {
-	project.addShaders("Shaders/glsl/*.glsl", { noembed: false });
+	project.addShaders("Shaders/voxel_glsl/*.glsl", { noembed: false });
 }
 
 if (build === 'player') {
@@ -81,10 +81,13 @@ else { // painter, creator
 }
 
 if (build === 'painter') {
+	project.addAssets("Bundled/painter/*", { notinlist: true, destination: "data/{name}" });
+	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	project.addDefine('kha_no_ogg');
 }
 else {
 	project.addAssets("Bundled/creator/*", { notinlist: true, destination: "data/{name}" });
+	project.addShaders("Shaders/creator/*.glsl", { noembed: false});
 	project.addDefine('arm_audio');
 	project.addDefine('arm_soundcompress');
 	project.addDefine('arm_skin');

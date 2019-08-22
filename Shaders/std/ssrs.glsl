@@ -1,4 +1,4 @@
-#include "std/gbuffer.glsl"
+#include "../std/gbuffer.glsl"
 
 uniform mat4 VP;
 

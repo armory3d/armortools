@@ -1,5 +1,5 @@
 #version 450
-#include "std/gbuffer.glsl"
+#include "../std/gbuffer.glsl"
 in vec3 wnormal;
 in vec4 wvpposition;
 in vec4 prevwvpposition;

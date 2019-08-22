@@ -1,7 +1,7 @@
 #version 450
 
-#include "std/math.glsl"
-#include "std/gbuffer.glsl"
+#include "../std/math.glsl"
+#include "../std/gbuffer.glsl"
 
 const int ssgiMaxSteps = 8;
 const float ssgiRayStep = 0.005 * 2.0;

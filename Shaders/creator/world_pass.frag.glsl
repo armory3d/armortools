@@ -12,7 +12,7 @@ const float cloudsSecondary = 1.0;
 const int cloudsSteps = 24;
 
 #ifdef _EnvTex
-#include "std/math.glsl"
+#include "../std/math.glsl"
 #else
 const float PI = 3.1415926535;
 #endif
