@@ -52,6 +52,26 @@ class MaterialBuilder {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
+		#if kha_direct3d12
+		if (UITrait.inst.bakeType == -1) {
+			// Init raytraced bake
+			vert.add_out('vec3 position');
+			vert.add_out('vec3 normal');
+			vert.write('position = pos.xyz;');
+			vert.write('normal = vec3(nor.xy, pos.w);');
+			vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
+			vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
+			frag.add_out('vec4 fragColor[2]');
+			frag.write('fragColor[0] = vec4(position, 1.0);');
+			frag.write('fragColor[1] = vec4(normal, 1.0);');
+
+			con_paint.data.shader_from_source = true;
+			con_paint.data.vertex_shader = vert.get();
+			con_paint.data.fragment_shader = frag.get();
+			return con_paint;
+		}
+		#end
+
 		if (Context.tool == ToolColorId || Context.tool == ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');

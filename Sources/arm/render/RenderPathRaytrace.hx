@@ -128,6 +128,60 @@ class RenderPathRaytrace {
 		Context.pdirty--;
 		Context.rdirty--;
 	}
+
+	public static function initBake() {
+		iron.data.Data.getBlob("raytrace_bake.cso", function(shader:kha.Blob) {
+			if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
+			var mo = Context.mergedObject;
+			var sc = mo.transform.scale;
+			var md = mo.data;
+			var geom = md.geom;
+			var count = Std.int(geom.positions.length / 4);
+			var vb = new kha.arrays.Float32Array((count + 4) * 8);
+			for (i in 0...count) {
+				vb[i * 8    ] = (geom.positions[i * 4    ] / 32767);
+				vb[i * 8 + 1] = (geom.positions[i * 4 + 1] / 32767);
+				vb[i * 8 + 2] = (geom.positions[i * 4 + 2] / 32767);
+				vb[i * 8 + 3] =  geom.normals  [i * 2    ] / 32767;
+				vb[i * 8 + 4] =  geom.normals  [i * 2 + 1] / 32767;
+				vb[i * 8 + 5] =  geom.positions[i * 4 + 3] / 32767;
+				vb[i * 8 + 6] = (geom.uvs[i * 2    ] / 32767);
+				vb[i * 8 + 7] = (geom.uvs[i * 2 + 1] / 32767);
+			}
+
+			var indices = geom.indices[0];
+			var ib = new kha.arrays.Uint32Array(indices.length + 6);
+			for (i in 0...indices.length) ib[i] = indices[i];
+
+			var path = RenderPathDeferred.path;
+			var baketex0 = path.renderTargets.get("baketex0").image;
+			var baketex1 = path.renderTargets.get("baketex1").image;
+			var baketex2 = path.renderTargets.get("baketex2").image;
+			var savedEnvmap = Scene.active.world.probe.radiance;
+			var layer = Context.layer;
+
+			untyped Krom.raytraceInit(
+				shader.bytes.getData(), vb.buffer, ib.buffer, layer.texpaint.width, layer.texpaint.height,
+				baketex0.renderTarget_, baketex1.renderTarget_, baketex2.renderTarget_,
+				savedEnvmap.texture_);
+		});
+	}
+
+	public static function commandsBake() {
+		if (!ready) { ready = true; initBake(); return; }
+		f32[0] = frame;
+		frame += 1.0;
+
+		var path = RenderPathDeferred.path;
+		var baketex2 = path.renderTargets.get("baketex2").image;
+
+		untyped Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
+
+		Context.ddirty = 1;
+		// Context.ddirty--;
+		Context.pdirty--;
+		Context.rdirty--;
+	}
 }
 
 #end

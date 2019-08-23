@@ -103,7 +103,7 @@ class RenderPathDeferred {
 			t.name = "taa";
 			t.width = 0;
 			t.height = 0;
-			#if kha_direct3d12
+			#if kha_direct3d12 // Match raytrace_target format
 			t.format = "RGBA128";
 			#else
 			t.format = "RGBA32";
@@ -632,16 +632,62 @@ class RenderPathDeferred {
 		if (Context.ddirty > 1 || Context.pdirty > 0) {
 			RenderPathRaytrace.frame = 1.0;
 		}
-		RenderPathRaytrace.commands();
-		path.setTarget("taa");
-		drawCompass(path.currentG);
-		path.setTarget("");
-		path.bindTarget("taa", "tex");
-		path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		if (UITrait.inst.brush3d) {
-			RenderPathPaint.commandsCursor();
+		var bake = true;
+		if (bake) {
+			if (path.renderTargets.get("baketex0") == null) {
+				{
+					var t = new RenderTargetRaw();
+					t.name = "baketex0";
+					t.width = Config.getTextureRes();
+					t.height = Config.getTextureRes();
+					t.format = "RGBA64";
+					path.createRenderTarget(t);
+				}
+				{
+					var t = new RenderTargetRaw();
+					t.name = "baketex1";
+					t.width = Config.getTextureRes();
+					t.height = Config.getTextureRes();
+					t.format = "RGBA64";
+					path.createRenderTarget(t);
+				}
+				{
+					var t = new RenderTargetRaw();
+					t.name = "baketex2";
+					t.width = Config.getTextureRes();
+					t.height = Config.getTextureRes();
+					t.format = "RGBA128";  // Match raytrace_target format
+					path.createRenderTarget(t);
+				}
+			}
+			if (!RenderPathRaytrace.ready) {
+				var _bakeType = UITrait.inst.bakeType;
+				UITrait.inst.bakeType = -1;
+				MaterialParser.parsePaintMaterial();
+
+				path.setTarget("baketex0", ["baketex1"]);
+				path.drawMeshes("paint");
+
+				UITrait.inst.bakeType = _bakeType;
+				// MaterialParser.parsePaintMaterial();
+			}
+			RenderPathRaytrace.commandsBake();
+			path.setTarget("texpaint" + Context.layer.id);
+			path.bindTarget("baketex2", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
-		return;
+		else {
+			RenderPathRaytrace.commands();
+			path.setTarget("taa");
+			drawCompass(path.currentG);
+			path.setTarget("");
+			path.bindTarget("taa", "tex");
+			path.drawShader("shader_datas/compositor_pass/compositor_pass");
+			if (UITrait.inst.brush3d) {
+				RenderPathPaint.commandsCursor();
+			}
+			return;
+		}
 		#end
 
 		#end // arm_painter
