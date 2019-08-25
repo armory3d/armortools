@@ -241,7 +241,17 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 			// TEMP
 			float fresnel = schlick(dot(n, payload.ray_dir), 1.35) * (1.0 - texpaint2.g);
 			if (rand() > fresnel) {
+				// payload.ray_dir = cos_weighted_random_hemisphere_direction(n);
+
+				float3 wo = -payload.ray_dir;
 				payload.ray_dir = cos_weighted_random_hemisphere_direction(n);
+				float3 tangent = float3(0, 0, 0);
+				float3 binormal = float3(0, 0, 0);
+				create_basis(n, tangent, binormal);
+				float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
+				float dotNL = dot(n, wo);
+				float dotNV = dot(n, wi);
+				if (dotNL < 0.0 || dotNV < 0.0) color = float3(0, 0, 0);
 
 				// float3 wo = -payload.ray_dir;
 				// payload.ray_dir = cos_weighted_random_hemisphere_direction(n);
