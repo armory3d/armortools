@@ -15,9 +15,6 @@ class MaterialBuilder {
 	public static var opacityDiscardDecal = 0.05;
 	public static var opacityDiscardScene = 0.5;
 
-	// Merge with compiled.inc
-	public static inline var voxelgiHalfExtents = 'const vec3 voxelgiHalfExtents = vec3(1.0, 1.0, 1.0);';
-
 	public static function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
 		var layered = Context.layer != Project.layers[0];
 		var eraser = Context.tool == ToolEraser;
@@ -657,7 +654,7 @@ class MaterialBuilder {
 				frag.write('n.y = -n.y;');
 				frag.write('n = normalize(mul(n, TBN));');
 
-				frag.write(voxelgiHalfExtents);
+				frag.write(voxelgiHalfExtents());
 				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 				frag.add_uniform('sampler3D voxels');
 				frag.add_function(CyclesFunctions.str_traceAO);
@@ -1306,7 +1303,8 @@ class MaterialBuilder {
 		var ds = UITrait.inst.displaceStrength * 0.02;
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
 		#if (kha_direct3d11 || kha_direct3d12)
-		"uniform float4x4 W;
+		"#define vec3 float3
+		uniform float4x4 W;
 		uniform float3x3 N;
 		Texture2D<float4> texpaint_pack;
 		SamplerState _texpaint_pack_sampler;
@@ -1314,7 +1312,8 @@ class MaterialBuilder {
 		struct SPIRV_Cross_Output { float4 svpos : SV_POSITION; };
 		SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {
 			SPIRV_Cross_Output stage_output;
-			stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / float3(1, 1, 1);
+			" + voxelgiHalfExtents() + "
+			stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgiHalfExtents.xxx;
 			float3 wnormal = normalize(mul(float3(stage_input.nor.xy, stage_input.pos.w), N));
 			float height = texpaint_pack.SampleLevel(_texpaint_pack_sampler, stage_input.tex, 0.0).a;
 			stage_output.svpos.xyz += wnormal * height.xxx * float3(" + ds + "," + ds + "," + ds + ");
@@ -1331,7 +1330,7 @@ class MaterialBuilder {
 		uniform mat3 N;
 		uniform sampler2D texpaint_pack;
 		void main() {
-			" + voxelgiHalfExtents + "
+			" + voxelgiHalfExtents() + "
 			voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents;
 			vec3 wnormal = normalize(N * vec3(nor.xy, pos.w));
 			float height = textureLod(texpaint_pack, tex, 0.0).a;
@@ -1347,4 +1346,9 @@ class MaterialBuilder {
 		data.textureUnits = [pipeState.getTextureUnit("texpaint_pack"), pipeState.getTextureUnit("voxels")];
 	}
 	#end
+
+	static inline function voxelgiHalfExtents() {
+		var ext = UITrait.inst.vxaoExt;
+		return 'const vec3 voxelgiHalfExtents = vec3($ext, $ext, $ext);';
+	}
 }

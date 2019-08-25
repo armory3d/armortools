@@ -9,6 +9,7 @@ import iron.Scene;
 import iron.RenderPath;
 import arm.render.Inc;
 import arm.render.RenderPathDeferred;
+import arm.render.Uniforms;
 import arm.Config;
 using StringTools;
 
@@ -56,6 +57,7 @@ class Main {
 		System.start({title: title, width: c.window_w, height: c.window_h, window: {mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: c.window_msaa, verticalSync: c.window_vsync}}, function(window:Window) {
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o:Object) {
+					Uniforms.init();
 					var path = new RenderPath();
 					Inc.init(path);
 					RenderPathDeferred.init(path);

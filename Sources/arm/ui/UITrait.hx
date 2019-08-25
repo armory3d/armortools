@@ -214,6 +214,7 @@ class UITrait {
 	public var hbloom:Handle = null;
 	public var hsupersample:Handle = null;
 	public var hvxao:Handle = null;
+	public var vxaoExt = 1.0;
 	public var textureExport = false;
 	public var textureExportPath = "";
 	public var projectExport = false;
@@ -239,8 +240,6 @@ class UITrait {
 		toolbarw = Std.int(defaultToolbarW * Config.raw.window_scale);
 		headerh = Std.int(defaultHeaderH * Config.raw.window_scale);
 		menubarw = Std.int(215 * Config.raw.window_scale);
-
-		arm.render.Uniforms.init();
 
 		if (Project.materials == null) {
 			Project.materials = [];

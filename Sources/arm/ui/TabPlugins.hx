@@ -105,12 +105,26 @@ class TabPlugins{
 						exe = exe.substr(0, exe.length - 1);
 						exe += '\\' + Krom.getArg(0);
 
-						var player = Krom.getFilesLocation() + sep + dataPath + "player.bin";
-
+						var sourceData = Krom.getFilesLocation() + sep + dataPath;
 						var dest = path + sep + UIFiles.filename;
+						var destData = dest + sep + "data";
 						Krom.sysCommand("mkdir " + dest);
-						Krom.sysCommand("mkdir " + dest + sep + "data");
-						Krom.sysCommand(copy + ' ' + player + ' ' + dest + sep + "krom.bin");
+						Krom.sysCommand("mkdir " + destData);
+						Krom.sysCommand(copy + ' ' + sourceData + "player.bin" + ' ' + dest + sep + "krom.bin");
+
+						var fileList = [
+							"ammo.wasm.js", "ammo.wasm.wasm", "brdf.png",
+							"clouds_base.raw", "clouds_detail.raw", "clouds_map.png",
+							"config.arm", "deferred_light.arm", "font_default.ttf", "noise256.png",
+							"Scene.arm", "shader_datas.arm", "smaa_area.png", "smaa_search.png",
+							"water_base.png", "water_detail.png", "water_foam.png", "water_pass.arm",
+							"World_irradiance.arm", "world_pass.arm", "World_radiance.hdr",
+							"World_radiance_0.hdr", "World_radiance_1.hdr", "World_radiance_2.hdr",
+							"World_radiance_3.hdr", "World_radiance_4.hdr", "World_radiance_5.hdr",
+							"World_radiance_6.hdr", "World_radiance_7.hdr"];
+						for (file in fileList) {
+							Krom.sysCommand(copy + ' ' + sourceData + file + ' ' + destData + sep + file);
+						}
 
 						dest += sep + UIFiles.filename;
 						#if krom_windows

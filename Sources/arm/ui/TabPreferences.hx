@@ -145,7 +145,12 @@ class TabPreferences {
 				ui.row([1/2, 1/2]);
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
-				if (UITrait.inst.hvxao.changed) Config.applyConfig();
+				if (UITrait.inst.hvxao.changed) {
+					Config.applyConfig();
+					#if arm_creator
+					MaterialParser.parseMeshMaterial();
+					#end
+				}
 				ui.check(UITrait.inst.hssgi, "SSAO");
 				if (UITrait.inst.hssgi.changed) Config.applyConfig();
 				ui.row([1/2, 1/2]);
@@ -153,6 +158,15 @@ class TabPreferences {
 				if (UITrait.inst.hbloom.changed) Config.applyConfig();
 				ui.check(UITrait.inst.hssr, "SSR");
 				if (UITrait.inst.hssr.changed) Config.applyConfig();
+
+				#if arm_creator
+				var h = Id.handle({value: UITrait.inst.vxaoExt});
+				UITrait.inst.vxaoExt = ui.slider(h, "VXAO Ext", 1.0, 10.0);
+				if (h.changed) {
+					Context.ddirty = 2;
+					MaterialParser.parseMeshMaterial();
+				}
+				#end
 			}
 
 			ui.separator();
@@ -195,4 +209,11 @@ class TabPreferences {
 			// }
 		}
 	}
+
+	#if arm_creator
+	static function roundfp(f:Float, precision = 2):Float {
+		f *= Math.pow(10, precision);
+		return Math.round(f) / Math.pow(10, precision);
+	}
+	#end
 }

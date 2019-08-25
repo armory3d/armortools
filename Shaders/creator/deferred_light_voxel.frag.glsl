@@ -33,6 +33,8 @@ uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0;
 uniform sampler2D gbuffer1;
 
+uniform float voxelgiHalfExtentsUni;
+
 #ifdef _VoxelAOvar
 uniform sampler3D voxels;
 #endif
@@ -241,9 +243,9 @@ void main() {
 #ifdef _VoxelAOvar
 
 	#ifdef _VoxelGICam
-	vec3 voxpos = (p - eyeSnap) / voxelgiHalfExtents;
+	vec3 voxpos = (p - eyeSnap) / voxelgiHalfExtentsUni;
 	#else
-	vec3 voxpos = p / voxelgiHalfExtents;
+	vec3 voxpos = p / voxelgiHalfExtentsUni;
 	#endif
 	
 	#ifndef _VoxelAONoTrace

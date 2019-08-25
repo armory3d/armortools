@@ -6,9 +6,11 @@ import iron.system.Input;
 import iron.math.Vec4;
 import iron.RenderPath;
 import iron.Scene;
+#if arm_painter
 import arm.ui.UITrait;
 import arm.util.UVUtil;
 import arm.Tool;
+#end
 using StringTools;
 
 class Uniforms {
@@ -21,6 +23,7 @@ class Uniforms {
 	}
 
 	public static function linkFloat(object:Object, mat:MaterialData, link:String):Null<kha.FastFloat> {
+		#if arm_painter
 		if (link == '_brushRadius') {
 			var val = (UITrait.inst.brushRadius * UITrait.inst.brushNodesRadius) / 15.0;
 			var pen = Input.getPen();
@@ -55,10 +58,21 @@ class Uniforms {
 		else if (link == '_objectId') {
 			return Project.paintObjects.indexOf(Context.paintObject);
 		}
+		#end
+		#if arm_world
+		if (link == '_voxelgiHalfExtentsUni') {
+			#if arm_painter
+			return UITrait.inst.vxaoExt;
+			#else
+			return 10.0;
+			#end
+		}
+		#end
 		return null;
 	}
 
 	public static function linkVec2(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
+		#if arm_painter
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_sub') {
 			UITrait.inst.sub = (UITrait.inst.sub + 1) % 4;
@@ -85,6 +99,7 @@ class Uniforms {
 			vec2.set(UITrait.inst.cloneDeltaX, UITrait.inst.cloneDeltaY, 0);
 			return vec2;
 		}
+		#end
 		return null;
 	}
 
@@ -207,6 +222,7 @@ class Uniforms {
 	}
 
 	public static function linkVec4(object:Object, mat:MaterialData, link:String):iron.math.Vec4 {
+		#if arm_painter
 		var vec2 = UITrait.inst.vec2;
 		if (link == '_inputBrush') {
 			var down = Input.getMouse().down() || Input.getPen().down();
@@ -220,10 +236,12 @@ class Uniforms {
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
+		#end
 		return null;
 	}
 
 	public static function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
+		#if arm_painter
 		if (link == "_texcolorid") {
 			if (Project.assets.length == 0) return null;
 			else return UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
@@ -267,8 +285,9 @@ class Uniforms {
 		else if (link == "_texparticle") {
 			return RenderPath.active.renderTargets.get("texparticle").image;
 		}
+		#end
 		#if arm_ltc
-		else if (link == "_ltcMat") {
+		if (link == "_ltcMat") {
 			if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
 			return arm.data.ConstData.ltcMatTex;
 		}
