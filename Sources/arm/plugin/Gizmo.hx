@@ -15,7 +15,13 @@ class Gizmo {
 		if (!gizmo.visible) return;
 
 		if (Context.object != null) {
+			var cam = Scene.active.camera;
 			gizmo.transform.loc.setFrom(Context.object.transform.loc);
+			var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 10;
+			gizmo.transform.scale.set(dist, dist, dist);
+			UITrait.inst.gizmoX.transform.scale.set(dist, dist, dist);
+			UITrait.inst.gizmoY.transform.scale.set(dist, dist, dist);
+			UITrait.inst.gizmoZ.transform.scale.set(dist, dist, dist);
 			gizmo.transform.buildMatrix();
 		}
 

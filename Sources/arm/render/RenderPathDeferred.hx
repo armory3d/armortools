@@ -1043,6 +1043,7 @@ class RenderPathDeferred {
 			gizmo.parent = cam;
 			gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
 			gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
+			gizmo.transform.scale.set(0.5, 0.5, 0.5);
 			gizmo.transform.buildMatrix();
 
 			gizmo.render(currentG, "overlay", []);
