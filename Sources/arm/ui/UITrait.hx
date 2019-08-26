@@ -966,7 +966,7 @@ class UITrait {
 				}
 				else {
 					if (Context.tool != ToolFill) {
-						brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.0, 2.0, true);
+						brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.01, 2.0, true);
 					}
 					
 					if (Context.tool == ToolBrush  ||
@@ -974,7 +974,7 @@ class UITrait {
 						Context.tool == ToolDecal  ||
 						Context.tool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.0, 2.0, true);
+						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.01, 10.0, true);
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
