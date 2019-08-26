@@ -500,7 +500,7 @@ class MaterialBuilder {
 			frag.write('pa_mask /= brushRadius;');
 			if (UITrait.inst.brush3d) {
 				frag.add_uniform('vec3 eye', '_cameraPosition');
-				frag.write('pa_mask *= distance(eye, winp) / 1.5;');
+				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
 			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
 			frag.write('opacity *= textureLod(texbrushmask, pa_mask, 0).r;');
