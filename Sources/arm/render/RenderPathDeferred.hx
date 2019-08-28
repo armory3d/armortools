@@ -629,10 +629,10 @@ class RenderPathDeferred {
 		}
 
 		#if kha_direct3d12
-		if (Context.ddirty > 1 || Context.pdirty > 0) {
+		var bake = true;
+		if ((Context.ddirty > 1 && !bake) || Context.pdirty > 0) {
 			RenderPathRaytrace.frame = 1.0;
 		}
-		var bake = true;
 		if (bake) {
 			if (path.renderTargets.get("baketex0") == null) {
 				{
@@ -665,8 +665,10 @@ class RenderPathDeferred {
 				UITrait.inst.bakeType = -1;
 				MaterialParser.parsePaintMaterial();
 
-				path.setTarget("baketex0", ["baketex1"]);
-				path.drawMeshes("paint");
+				for (i in 0...4) { // Jitter
+					path.setTarget("baketex0", ["baketex1"]);
+					path.drawMeshes("paint");
+				}
 
 				UITrait.inst.bakeType = _bakeType;
 				// MaterialParser.parsePaintMaterial();

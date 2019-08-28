@@ -72,58 +72,35 @@ void raygeneration() {
 	compute_seed(id, constant_buffer.v0.x, 0);
 
 	float2 xy = DispatchRaysIndex().xy + 0.5f;
-	xy.x += rand(); // AA
-	xy.y += rand();
-
 	float3 pos = mytexture0.Load(uint3(xy, 0)).rgb;
 	float3 nor = mytexture1.Load(uint3(xy, 0)).rgb;
 
-	float color = 0.0;
+	RayPayload payload;
+	payload.ray_origin = pos;
+	payload.ray_dir = cos_weighted_random_hemisphere_direction(nor);
 
-	for (int i = 0; i < 4; ++i) {
-		RayPayload payload;
-		payload.ray_origin = pos;
-		payload.ray_dir = cos_weighted_random_hemisphere_direction(nor);
+	RayDesc ray;
+	ray.TMin = 0.01;
+	ray.TMax = 10.0;
+	ray.Origin = payload.ray_origin;
+	ray.Direction = payload.ray_dir;
 
-		RayDesc ray;
-		ray.TMin = 0.01;
-		ray.TMax = 10.0;
-		ray.Origin = payload.ray_origin;
-		ray.Direction = payload.ray_dir;
+	TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
 
-		TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
-		color += payload.color.r;
+	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
+	float a = 1.0 / constant_buffer.v0.x;
+	float b = 1.0 - a;
 
-		compute_seed(id, constant_buffer.v0.x, i);
-	}
-
-	color /= 4;
-	color = 1 - color;
-	render_target[DispatchRaysIndex().xy] = float4(color.xxx, 0.0f);
-}
-
-float3 hit_world_position() {
-	return WorldRayOrigin() + RayTCurrent() * WorldRayDirection();
-}
-
-float3 hit_attribute(float3 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr) {
-	return vertexAttribute[0] +
-		attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-}
-
-float2 hit_attribute2d(float2 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr) {
-	return vertexAttribute[0] +
-		attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
+	color = color * b + (1.0 - payload.color.r).xxx * a;
+	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
 }
 
 [shader("closesthit")]
 void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
-	payload.color = float4(1,1,1,0);
+	payload.color = float4(1, 1, 1, 1);
 }
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
-	payload.color = float4(0,0,0,-1);
+	payload.color = float4(0, 0, 0, 0);
 }

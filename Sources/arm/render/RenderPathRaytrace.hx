@@ -180,7 +180,8 @@ class RenderPathRaytrace {
 		Context.ddirty = 1;
 		// Context.ddirty--;
 		Context.pdirty--;
-		Context.rdirty--;
+		// Context.rdirty--;
+		Context.rdirty = 2;
 	}
 }
 

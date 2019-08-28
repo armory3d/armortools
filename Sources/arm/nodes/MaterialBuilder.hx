@@ -56,7 +56,9 @@ class MaterialBuilder {
 			vert.add_out('vec3 normal');
 			vert.write('position = pos.xyz;');
 			vert.write('normal = vec3(nor.xy, pos.w);');
-			vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
+			vert.add_uniform('vec2 sub', '_sub');
+			vert.write('vec2 subtex = tex + sub;');
+			vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
 			vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 			frag.add_out('vec4 fragColor[2]');
 			frag.write('fragColor[0] = vec4(position, 1.0);');
