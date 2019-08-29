@@ -212,6 +212,8 @@ class UIView2D {
 			UITrait.inst.paint2d = true;
 		}
 
+		if (ui.isTyping) return;
+
 		if (kb.started("left")) panX -= 5;
 		else if (kb.started("right")) panX += 5;
 		if (kb.started("up")) panY -= 5;
