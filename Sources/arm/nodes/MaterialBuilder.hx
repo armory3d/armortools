@@ -1037,6 +1037,23 @@ class MaterialBuilder {
 
 				// Height
 				if (heightUsed) {
+					#if arm_creator
+
+					var ds = UITrait.inst.displaceStrength * 0.1;// * 0.02;
+					if (ds < 0.1) ds = 0.1;
+					else if (ds > 2.0) ds = 2.0;
+					frag.wposition = true;
+					frag.write('float3 dpdx = dFdx(wposition);');
+					frag.write('float3 dpdy = dFdy(wposition);');
+					frag.write('float dhdx = dFdx(pack.a * $ds);');
+					frag.write('float dhdy = dFdy(pack.a * $ds);');
+					frag.write('float3 cross_x = cross(n, dpdx);');
+					frag.write('float3 cross_y = cross(dpdy, n);');
+					frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
+					frag.write('n = normalize(n - ngrad);');
+
+					#else
+
 					frag.write('float bump_res_x = dFdx(pack.a) * 32.0;');
 					frag.write('float bump_res_y = dFdy(pack.a) * 32.0;');
 					frag.write('vec3 va = normalize(vec3(1.0, 0.0, bump_res_x));');
@@ -1044,18 +1061,7 @@ class MaterialBuilder {
 					frag.write('vec3 vc = normalize(vec3(bump_res_x, bump_res_y, 1.0));');
 					frag.write('n = normalize(mul(n, mat3(va, vb, vc)));');
 
-					// var ds = UITrait.inst.displaceStrength * 0.1;// * 0.02;
-					// if (ds < 0.1) ds = 0.1;
-					// else if (ds > 2.0) ds = 2.0;
-					// frag.wposition = true;
-					// frag.write('float3 dpdx = dFdx(wposition);');
-					// frag.write('float3 dpdy = dFdy(wposition);');
-					// frag.write('float dhdx = dFdx(pack.a * $ds);');
-					// frag.write('float dhdy = dFdy(pack.a * $ds);');
-					// frag.write('float3 cross_x = cross(n, dpdx);');
-					// frag.write('float3 cross_y = cross(dpdy, n);');
-					// frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
-					// frag.write('n = normalize(n - ngrad);');
+					#end
 
 					// frag.add_uniform('float texpaintSize', '_texpaintSize');
 					// frag.write('float tex_step = 1.0 / texpaintSize;');
