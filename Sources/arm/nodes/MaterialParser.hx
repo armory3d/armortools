@@ -44,17 +44,7 @@ class MaterialParser {
 			m.shader.contexts.push(sc);
 			Context.ddirty = 2;
 
-			#if rp_voxelao
-			var rebuild = MaterialBuilder.heightUsed;
-			#if arm_world
-			rebuild = true; //UITrait.inst.vxaoExt != 1.0;
-			#end
-			if (Config.raw.rp_gi != false && rebuild) {
-				var sc:ShaderContext = null;
-				for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
-				if (sc != null) MaterialBuilder.make_voxel(sc);
-			}
-			#end
+			makeVoxel(m);
 		// });
 	}
 
@@ -109,7 +99,25 @@ class MaterialParser {
 			m.shader.raw.contexts.push(sc.raw);
 			m.shader.contexts.push(sc);
 
+			if (UITrait.inst.worktab.position == SpaceScene) {
+				makeVoxel(m);
+			}
+
 		// });
+	}
+
+	static function makeVoxel(m:MaterialData) {
+		#if rp_voxelao
+		var rebuild = MaterialBuilder.heightUsed;
+		#if arm_world
+		rebuild = true; //UITrait.inst.vxaoExt != 1.0;
+		#end
+		if (Config.raw.rp_gi != false && rebuild) {
+			var sc:ShaderContext = null;
+			for (c in m.shader.contexts) if (c.raw.name == "voxel") { sc = c; break; }
+			if (sc != null) MaterialBuilder.make_voxel(sc);
+		}
+		#end
 	}
 
 	public static function parsePaintMaterial() {
