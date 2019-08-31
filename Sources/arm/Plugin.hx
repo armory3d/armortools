@@ -30,6 +30,17 @@ class Plugin {
 	}
 }
 
+@:expose("iron")
+class Bridge {
+	public static var App = iron.App;
+	public static var Scene = iron.Scene;
+	public static var Time = iron.system.Time;
+	public static var Input = iron.system.Input;
+	public static var Object = iron.object.Object;
+	public static var Data = iron.data.Data;
+	public static function log(s:String) { trace(s); };
+}
+
 // my_plugin.js
 // plugin = new arm.Plugin();
 // h = plugin.handle();
