@@ -111,7 +111,11 @@ class UITrait {
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();
 	public var selectTime = 0.0;
+	#if arm_creator
+	public var displaceStrength = 100.0;
+	#else
 	public var displaceStrength = 1.0;
+	#end
 	public var decalImage:Image = null;
 	public var decalPreview = false;
 	public var viewportMode = 0;
@@ -187,7 +191,11 @@ class UITrait {
 	public var resHandle = new Handle({position: 4}); // 2048
 	public var bitsHandle = new Handle({position: 0}); // 8bit
 	var newConfirm = false;
-	public var projectType = 0; // paint, material
+	#if arm_creator
+	public var projectType = 2; // paint, material, terrain
+	#else
+	public var projectType = 0;
+	#end
 	public var projectObjects:Array<MeshObject>;
 
 	public var sub = 0;
@@ -214,7 +222,11 @@ class UITrait {
 	public var hbloom:Handle = null;
 	public var hsupersample:Handle = null;
 	public var hvxao:Handle = null;
+	#if arm_creator
+	public var vxaoExt = 5.0;
+	#else
 	public var vxaoExt = 1.0;
+	#end
 	public var textureExport = false;
 	public var textureExportPath = "";
 	public var projectExport = false;
@@ -381,8 +393,6 @@ class UITrait {
 			}
 		}
 	}
-
-	var checkArg = true;
 
 	function update() {
 		if (textureExport) {
@@ -1129,6 +1139,9 @@ class UITrait {
 				TabMeshes.draw();
 				TabExport.draw();
 				TabViewport.draw();
+				#if arm_creator
+				TabWorld.draw();
+				#end
 			}
 		}
 		else if (worktab.position == SpaceScene) {
@@ -1146,6 +1159,9 @@ class UITrait {
 				TabTextures.draw();
 				TabMeshes.draw();
 				TabViewport.draw();
+				#if arm_creator
+				TabWorld.draw();
+				#end
 			}
 		}
 

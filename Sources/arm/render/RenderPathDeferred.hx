@@ -792,13 +792,15 @@ class RenderPathDeferred {
 
 		#if arm_world
 		{
-			path.setTarget("buf");
-			path.bindTarget("tex", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-			path.setTarget("tex");
-			path.bindTarget("_main", "gbufferD");
-			path.bindTarget("buf", "tex");
-			path.drawShader("water_pass/water_pass/water_pass");
+			if (Project.waterPass) {
+				path.setTarget("buf");
+				path.bindTarget("tex", "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.setTarget("tex");
+				path.bindTarget("_main", "gbufferD");
+				path.bindTarget("buf", "tex");
+				path.drawShader("water_pass/water_pass/water_pass");
+			}
 		}
 		#end
 

@@ -34,6 +34,9 @@ class Project {
 	public static var brushes:Array<BrushSlot> = null;
 	public static var layers:Array<LayerSlot> = null;
 	public static var paintObjects:Array<MeshObject> = null;
+	#if arm_world
+	public static var waterPass = true;
+	#end
 
 	public static function projectOpen() {
 		UIFiles.show = true;
@@ -113,8 +116,8 @@ class Project {
 
 		if (UITrait.inst.projectType > 0) {
 			var mesh:Dynamic = UITrait.inst.projectType == 1 ?
-				// new arm.format.proc.Sphere(1, 512, 256) :
-				new arm.format.proc.Plane(1, 1, 512, 512) :
+				new arm.format.proc.Sphere(1, 512, 256) :
+				// new arm.format.proc.Plane(1, 1, 512, 512) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
 				name: "Tesselated",
@@ -132,8 +135,12 @@ class Project {
 			var md = new MeshData(raw, function(md:MeshData) {});
 			Data.cachedMeshes.set("SceneTesselated", md);
 
-			if (UITrait.inst.projectType == 1 || UITrait.inst.projectType == 2) {
+			if (UITrait.inst.projectType == 1) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
+				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
+			}
+			else if (UITrait.inst.projectType == 2) {
+				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
 		}
@@ -147,6 +154,12 @@ class Project {
 			UITrait.inst.pickerMaskHandle.position = 0;
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
+			#if arm_creator
+			if (UITrait.inst.projectType == 2) {
+				Context.paintObject.transform.loc.set(0, 0, -0.15);
+				Context.paintObject.transform.scale.set(10, 10, 1);
+			}
+			#end
 			Context.paintObject.transform.buildMatrix();
 			Context.paintObject.name = n;
 			paintObjects = [Context.paintObject];
