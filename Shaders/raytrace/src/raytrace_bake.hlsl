@@ -82,6 +82,8 @@ void raygeneration() {
 	RayDesc ray;
 	ray.TMin = 0.01;
 	ray.TMax = 10.0;
+	// ray.TMin = 0.005; // cavity
+	// ray.TMax = 0.01;
 	ray.Origin = payload.ray_origin;
 	ray.Direction = payload.ray_dir;
 
@@ -92,7 +94,7 @@ void raygeneration() {
 	float b = 1.0 - a;
 
 	color = color * b + (1.0 - payload.color.r).xxx * a;
-	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
+	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 1.0f);
 }
 
 [shader("closesthit")]
