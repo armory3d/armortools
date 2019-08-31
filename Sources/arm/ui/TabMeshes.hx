@@ -52,12 +52,6 @@ class TabMeshes {
 					MeshUtil.swapAxis(0, 1);
 					Context.ddirty = 2;
 				}
-
-				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
-				UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
-				if (dispHandle.changed) {
-					MaterialParser.parseMeshMaterial();
-				}
 			}
 		}
 	}

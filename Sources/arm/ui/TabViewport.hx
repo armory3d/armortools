@@ -82,6 +82,12 @@ class TabViewport {
 				Scene.active.camera.buildProjection();
 			}
 
+			var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
+			UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
+			if (dispHandle.changed) {
+				MaterialParser.parseMeshMaterial();
+			}
+
 			ui.row([1/2, 1/2]);
 			UITrait.inst.drawWireframe = ui.check(UITrait.inst.wireframeHandle, "Wireframe");
 			if (UITrait.inst.wireframeHandle.changed) {
