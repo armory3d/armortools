@@ -83,4 +83,44 @@ class ExportArm {
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData());
 	}
+
+	public static function runMaterial(path:String) {
+		var mnodes:Array<TNodeCanvas> = [];
+		var m = Context.material;
+		var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
+		for (n in c.nodes) {
+			if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
+				var sameDrive = Project.filepath.charAt(0) == n.buttons[0].data.charAt(0);
+				if (sameDrive) {
+					n.buttons[0].data = Path.toRelative(Project.filepath, n.buttons[0].data);
+				}
+			}
+		}
+		mnodes.push(c);
+
+		var asset_files:Array<String> = [];
+		for (a in Project.assets) {
+			// Convert image path from absolute to relative
+			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
+			if (sameDrive) {
+				asset_files.push(Path.toRelative(Project.filepath, a.file));
+			}
+			else {
+				asset_files.push(a.file);
+			}
+		}
+
+		var raw = {
+			version: App.version,
+			material_nodes: mnodes,
+			brush_nodes: null,
+			mesh_datas: null,
+			layer_datas: null,
+			assets: asset_files
+		};
+
+		var bytes = ArmPack.encode(raw);
+		if (!path.endsWith(".arm")) path += ".arm";
+		Krom.fileSaveBytes(path, bytes.getData());
+	}
 }

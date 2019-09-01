@@ -256,4 +256,8 @@ class Exporter {
 		if (UITrait.inst.exportMeshFormat == 0) ExportObj.run(path);
 		else ExportArm.run(path);
 	}
+
+	public static function exportMaterial(path:String) {
+		ExportArm.runMaterial(path);
+	}
 }

@@ -11,6 +11,7 @@ import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.io.ImportBlend;
 import arm.io.ImportArm;
+import arm.io.Exporter;
 import arm.Tool;
 using StringTools;
 
@@ -121,6 +122,18 @@ class TabMaterials {
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);
 								Layers.createFillLayer();
+							}
+
+							if (ui.button("Export", Left)) {
+								selectMaterial(i);
+								UIFiles.show = true;
+								UIFiles.isSave = true;
+								UIFiles.filters = "arm";
+								UIFiles.filesDone = function(path:String) {
+									var f = UIFiles.filename;
+									if (f == "") f = "untitled";
+									Exporter.exportMaterial(path + "/" + f);
+								};
 							}
 
 							if (ui.button("Delete", Left) && materials.length > 1) {

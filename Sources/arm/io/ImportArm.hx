@@ -27,7 +27,7 @@ import arm.nodes.MaterialParser;
 
 class ImportArm {
 
-	public static function run(project:TProjectFormat) {
+	public static function runMesh(project:TProjectFormat) {
 		new MeshData(project.mesh_datas[0], function(md:MeshData) {
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
@@ -52,7 +52,12 @@ class ImportArm {
 
 			// Import as mesh instead
 			if (project.version == null) {
-				run(project);
+				runMesh(project);
+				return;
+			}
+
+			if (project.layer_datas == null) {
+				runMaterialFromProject(project);
 				return;
 			}
 
@@ -224,62 +229,66 @@ class ImportArm {
 		Data.getBlob(path, function(b:Blob) {
 			var project:TProjectFormat = ArmPack.decode(b.toBytes());
 			if (project.version == null) { Data.deleteBlob(path); return; }
-			
-			var base = Path.baseDir(path);
-			for (file in project.assets) {
-				// Convert image path from relative to absolute
-				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
-				var abs = isAbsolute ? file : base + file;
-				#if krom_windows
-				var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
-				#else
-				var exists = 1;
-				// { test -e file && echo 1 || echo 0 }
-				#end
-				if (exists == 0) {
-					UITrait.inst.showError(Strings.error2 + abs);
-					var b = Bytes.alloc(4);
-					b.set(0, 255);
-					b.set(1, 0);
-					b.set(2, 255);
-					b.set(3, 255);
-					var pink = Image.fromBytes(b, 1, 1);
-					Data.cachedImages.set(abs, pink);
-				}
-				arm.io.ImportTexture.run(abs);
-			}
-
-			var m0:MaterialData = null;
-			Data.getMaterial("Scene", "Material", function(m:MaterialData) {
-				m0 = m;
-			});
-
-			for (n in project.material_nodes) {
-				for (node in n.nodes) {
-					if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
-						var filepath = node.buttons[0].data;
-						var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
-						if (!isAbsolute) {
-							var abs = base + filepath;
-							node.buttons[0].data = abs;
-						}
-					}
-					for (inp in node.inputs) { // Round input socket values
-						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
-					}
-				}
-				var mat = new MaterialSlot(m0);
-				UINodes.inst.canvasMap.set(mat, n);
-				Project.materials.push(mat);
-
-				Context.material = mat;
-				UINodes.inst.updateCanvasMap();
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-			}
-
-			UITrait.inst.hwnd1.redraws = 2;
-			Data.deleteBlob(path);
+			runMaterialFromProject(project);
 		});
+	}
+
+	public static function runMaterialFromProject(project:TProjectFormat) {
+		var path = Project.filepath;
+		var base = Path.baseDir(path);
+		for (file in project.assets) {
+			// Convert image path from relative to absolute
+			var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
+			var abs = isAbsolute ? file : base + file;
+			#if krom_windows
+			var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
+			#else
+			var exists = 1;
+			// { test -e file && echo 1 || echo 0 }
+			#end
+			if (exists == 0) {
+				UITrait.inst.showError(Strings.error2 + abs);
+				var b = Bytes.alloc(4);
+				b.set(0, 255);
+				b.set(1, 0);
+				b.set(2, 255);
+				b.set(3, 255);
+				var pink = Image.fromBytes(b, 1, 1);
+				Data.cachedImages.set(abs, pink);
+			}
+			arm.io.ImportTexture.run(abs);
+		}
+
+		var m0:MaterialData = null;
+		Data.getMaterial("Scene", "Material", function(m:MaterialData) {
+			m0 = m;
+		});
+
+		for (n in project.material_nodes) {
+			for (node in n.nodes) {
+				if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
+					var filepath = node.buttons[0].data;
+					var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
+					if (!isAbsolute) {
+						var abs = base + filepath;
+						node.buttons[0].data = abs;
+					}
+				}
+				for (inp in node.inputs) { // Round input socket values
+					if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
+				}
+			}
+			var mat = new MaterialSlot(m0);
+			UINodes.inst.canvasMap.set(mat, n);
+			Project.materials.push(mat);
+
+			Context.material = mat;
+			UINodes.inst.updateCanvasMap();
+			MaterialParser.parsePaintMaterial();
+			RenderUtil.makeMaterialPreview();
+		}
+
+		UITrait.inst.hwnd1.redraws = 2;
+		Data.deleteBlob(path);
 	}
 }
