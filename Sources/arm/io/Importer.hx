@@ -95,7 +95,9 @@ class Importer {
 			Context.mergedObject.visible = true;
 		}
 
-		ViewportUtil.scaleToBounds();
+		if (UITrait.inst.worktab.position == SpacePaint) {
+			ViewportUtil.scaleToBounds();
+		}
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
 
