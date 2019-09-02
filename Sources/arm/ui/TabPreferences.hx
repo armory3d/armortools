@@ -61,7 +61,8 @@ class TabPreferences {
 					UITrait.inst.hwnd1.redraws = 2;
 					UITrait.inst.hwnd2.redraws = 2;
 				}
-				// var gridSnap = ui.check(Id.handle({selected: false}), "Node Grid Snap");
+				// ui.text("Node Editor");
+				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");
 			}
 
 			ui.separator();

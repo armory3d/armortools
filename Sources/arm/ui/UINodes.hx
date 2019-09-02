@@ -69,6 +69,7 @@ class UINodes {
 
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
 		Nodes.excludeRemove.push("BrushOutputNode");
+		Nodes.onLinkDrag = onLinkDrag;
 		// Cycles.arm_export_tangents = false;
 
 		Data.getBlob('defaults/default_material.json', function(b1:Blob) {
@@ -87,6 +88,24 @@ class UINodes {
 				ui.scrollEnabled = false;
 			});
 		});
+	}
+
+	function onLinkDrag(linkDrag:TNodeLink, isNewLink:Bool) {
+		if (isNewLink) {
+			nodeSearch(-1, -1, function() {
+				var n = nodes.nodesSelected[0];
+				if (linkDrag.to_id == -1 && n.inputs.length > 0) {
+					linkDrag.to_id = n.id;
+					linkDrag.to_socket = 0;
+					getCanvas().links.push(linkDrag);
+				}
+				else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
+					linkDrag.from_id = n.id;
+					linkDrag.from_socket = 0;
+					getCanvas().links.push(linkDrag);
+				}
+			});
+		}
 	}
 
 	public function updateCanvasMap() {
@@ -212,7 +231,7 @@ class UINodes {
 		}
 	}
 
-	function nodeSearch(x = -1, y = -1) {
+	function nodeSearch(x = -1, y = -1, done:Void->Void = null) {
 		var kb = Input.getKeyboard();
 		var searchHandle = Id.handle();
 		var first = true;
@@ -256,6 +275,7 @@ class UINodes {
 								ui.changed = true;
 								count = 6; // Trigger break
 							}
+							if (done != null) done();
 						}
 						if (++count > 6) break;
 					}
