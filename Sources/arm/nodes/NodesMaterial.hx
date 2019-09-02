@@ -1171,7 +1171,7 @@ class NodesMaterial {
 						name: "Fac",
 						type: "VALUE",
 						color: 0xffa1a1a1,
-						default_value: 0.5
+						default_value: 1.0
 					},
 					{
 						id: 0,
