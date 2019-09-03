@@ -34,8 +34,9 @@ class Main {
 		if (c.window_maximizable == null) c.window_maximizable = true;
 		if (c.window_w == null) c.window_w = 1600;
 		if (c.window_h == null) c.window_h = 900;
+		if (c.window_x == null) c.window_x = -1;
+		if (c.window_y == null) c.window_y = -1;
 		if (c.window_scale == null) c.window_scale = 1.0;
-		if (c.window_msaa == null) c.window_msaa = 1;
 		if (c.window_vsync == null) c.window_vsync = true;
 		
 		var windowMode = c.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
@@ -54,7 +55,7 @@ class Main {
 		var title = "untitled - ArmorPaint";
 		#end
 
-		System.start({title: title, width: c.window_w, height: c.window_h, window: {mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: c.window_msaa, verticalSync: c.window_vsync}}, function(window:Window) {
+		System.start({title: title, window: {width: c.window_w, height: c.window_h, x: c.window_x, y: c.window_y, mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: 1, verticalSync: c.window_vsync}}, function(window:Window) {
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o:Object) {
 					Uniforms.init();

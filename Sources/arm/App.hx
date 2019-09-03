@@ -217,18 +217,20 @@ class App {
 
 		winw = System.windowWidth();
 		winh = System.windowHeight();
-		
-		// Save window size
-		// Config.raw.window_w = System.windowWidth();
-		// Config.raw.window_h = System.windowHeight();
-		// Cap height, window is not centered properly
-		// var disp =  kha.Display.primary;
-		// if (disp.height > 0 && Config.raw.window_h > disp.height - 140) {
-		// 	Config.raw.window_h = disp.height - 140;
-		// }
-		// Config.save();
+
+		saveWindowRect();
 	}
 	#end
+
+	static function saveWindowRect() {
+		#if krom_windows
+		Config.raw.window_w = System.windowWidth();
+		Config.raw.window_h = System.windowHeight();
+		Config.raw.window_x = kha.Window.get(0).x;
+		Config.raw.window_y = kha.Window.get(0).y;
+		Config.save();
+		#end
+	}
 
 	public static function resize() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
