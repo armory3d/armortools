@@ -53,6 +53,7 @@ class BrushOutputNode extends LogicNode {
 			!UITrait.inst.ui.isHovered &&
 			!UITrait.inst.ui.isScrolling &&
 			!arm.App.isDragging &&
+			!arm.App.isResizing &&
 			@:privateAccess UITrait.inst.ui.comboSelectedHandle == null &&
 			@:privateAccess UIView2D.inst.ui.comboSelectedHandle == null) { // Header combos are in use
 			// Set color pick

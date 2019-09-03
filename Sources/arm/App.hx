@@ -35,8 +35,11 @@ class App {
 	public static function y():Int { return appy; }
 	static var appx = 0;
 	static var appy = 0;
+	static var winw = 0;
+	static var winh = 0;
 	public static var uienabled = true;
 	public static var isDragging = false;
+	public static var isResizing = false;
 	public static var dragMaterial:MaterialSlot = null;
 	public static var dragAsset:zui.Canvas.TAsset = null;
 	public static var dragOffX = 0.0;
@@ -53,6 +56,8 @@ class App {
 
 	public function new() {
 		Config.init();
+		winw = System.windowWidth();
+		winh = System.windowHeight();
 
 		#if arm_resizable
 		iron.App.onResize = onResize;
@@ -76,9 +81,7 @@ class App {
 		);
 
 		#if krom_windows
-		if (untyped Krom.setSaveAndQuitCallback != null) {
-			untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
-		}
+		untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
 		Data.getFont("font_default.ttf", function(f:Font) {
@@ -138,7 +141,7 @@ class App {
 				iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
 				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
 				iron.App.notifyOnRender2D(render);
-				appx = Config.raw.ui_layout == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
+				appx = UITrait.inst.toolbarw;
 				appy = UITrait.inst.headerh * 2;
 				var cam = Scene.active.camera;
 				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
@@ -173,18 +176,15 @@ class App {
 		
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
-			res = System.windowWidth() - UITrait.defaultWindowW;
-			res -= UITrait.defaultToolbarW;
+			res = System.windowWidth() - UITrait.defaultWindowW - UITrait.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = Std.int((System.windowWidth() - UITrait.inst.windowW) / 2);
-			res -= UITrait.inst.toolbarw;
+			res = System.windowWidth() - UITrait.inst.windowW - UINodes.inst.defaultWindowW - UITrait.inst.toolbarw;
 		}
 		else if (UITrait.inst.show) {
-			res = System.windowWidth() - UITrait.inst.windowW;
-			res -= UITrait.inst.toolbarw;
+			res = System.windowWidth() - UITrait.inst.windowW - UITrait.inst.toolbarw;
 		}
-		else {
+		else { // Distract free
 			res = System.windowWidth();
 		}
 
@@ -209,6 +209,14 @@ class App {
 	#if arm_resizable
 	static function onResize() {
 		resize();
+
+		var ratio = System.windowHeight() / winh;
+		UITrait.inst.tabh = Std.int(UITrait.inst.tabh * ratio);
+		UITrait.inst.tabh1 = Std.int(UITrait.inst.tabh1 * ratio);
+		UITrait.inst.tabh2 = System.windowHeight() - UITrait.inst.tabh - UITrait.inst.tabh1;
+
+		winw = System.windowWidth();
+		winh = System.windowHeight();
 		
 		// Save window size
 		// Config.raw.window_w = System.windowWidth();
@@ -238,11 +246,7 @@ class App {
 
 		Context.ddirty = 2;
 
-		var lay = Config.raw.ui_layout;
-		appx = lay == 0 ? UITrait.inst.toolbarw : UITrait.inst.windowW + UITrait.inst.toolbarw;
-		if (lay == 1 && (UINodes.inst.show || UIView2D.inst.show)) {
-			appx += iron.App.w() + UITrait.inst.toolbarw;
-		}
+		appx = UITrait.inst.toolbarw;
 		appy = UITrait.inst.headerh * 2;
 
 		if (!UITrait.inst.show) {
@@ -357,6 +361,7 @@ class App {
 
 		var mouse = Input.getMouse();
 		if (isDragging) {
+			untyped Krom.setMouseCursor(1); // Hand
 			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
 			var ratio = size / img.width;

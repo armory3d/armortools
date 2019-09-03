@@ -25,7 +25,6 @@ class UIMenu {
 
 		var panelx = iron.App.x() - UITrait.inst.toolbarw;
 		var C = Config.raw;
-		if (C.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - UITrait.inst.toolbarw;
 
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;

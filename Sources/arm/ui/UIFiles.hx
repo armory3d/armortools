@@ -16,25 +16,22 @@ class UIFiles {
 
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
-
 		show = false;
-		if (untyped Krom.openDialog != null) {
-			path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
-			if (path != null) {
-				if (!App.checkAscii(path)) return;
-				path = path.replace("\\\\", "\\");
-				path = path.replace("\r", "");
-				#if krom_windows
-				var sep = "\\";
-				#else
-				var sep = "/";
-				#end
-				filename = path.substr(path.lastIndexOf(sep) + 1);
-				if (isSave) path = path.substr(0, path.lastIndexOf(sep));
-				filesDone(path);
-			}
-			releaseKeys();
+		path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
+		if (path != null) {
+			if (!App.checkAscii(path)) return;
+			path = path.replace("\\\\", "\\");
+			path = path.replace("\r", "");
+			#if krom_windows
+			var sep = "\\";
+			#else
+			var sep = "/";
+			#end
+			filename = path.substr(path.lastIndexOf(sep) + 1);
+			if (isSave) path = path.substr(0, path.lastIndexOf(sep));
+			filesDone(path);
 		}
+		releaseKeys();
 	}
 
 	static function releaseKeys() {

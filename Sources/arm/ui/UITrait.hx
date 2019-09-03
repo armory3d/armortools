@@ -45,6 +45,8 @@ class UITrait {
 	public var menubarw = 215;
 	public var tabx = 0;
 	public var tabh = 0;
+	public var tabh1 = 0;
+	public var tabh2 = 0;
 
 	public var isScrolling = false;
 	public var colorIdPicked = false;
@@ -66,6 +68,8 @@ class UITrait {
 	var message = "";
 	var messageTimer = 0.0;
 	var messageColor = 0x00000000;
+	var borderStarted = 0;
+	var borderHandle:Handle = null;
 
 	public var savedEnvmap:Image = null;
 	public var emptyEnvmap:Image = null;
@@ -340,7 +344,9 @@ class UITrait {
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.color_wheel } );
-		
+		Zui.onBorderHover = onBorderHover;
+		Zui.onTextHover = onTextHover;
+
 		var resources = ['cursor.png', 'icons.png'];
 		Res.load(resources, done);
 
@@ -574,6 +580,34 @@ class UITrait {
 				lastPaintY = -1;
 			}
 		}
+
+		if (borderHandle != null) {
+			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
+				UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
+				if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
+			}
+			else {
+				if (borderStarted == 0) {
+					defaultWindowW -= Std.int(mouse.movementX);
+					if (defaultWindowW < 32) defaultWindowW = 32;
+					windowW = Std.int(defaultWindowW * Config.raw.window_scale);
+				}
+				else {
+					if (borderHandle == hwnd1 && borderStarted == 2) {
+						tabh += Std.int(mouse.movementY);
+						tabh1 -= Std.int(mouse.movementY);
+					}
+					else if (borderHandle == hwnd2 && borderStarted == 2) {
+						tabh1 += Std.int(mouse.movementY);
+						tabh2 -= Std.int(mouse.movementY);
+					}
+				}
+			}
+		}
+		if (!mouse.down()) {
+			borderHandle = null;
+			App.isResizing = false;
+		}
 	}
 
 	public function toggleDistractFree() {
@@ -612,6 +646,7 @@ class UITrait {
 				else {
 					if (brushTime == 0 &&
 						!App.isDragging &&
+						!App.isResizing &&
 						@:privateAccess ui.comboSelectedHandle == null) { // Paint started
 						History.pushUndo = true;
 						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
@@ -817,7 +852,6 @@ class UITrait {
 		ui.begin(g);
 
 		var panelx = (iron.App.x() - toolbarw);
-		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, System.windowHeight())) {
 			ui._y += 2;
 
@@ -851,8 +885,7 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x() - toolbarw;
-		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
-		
+
 		var WINDOW_BG_COL = ui.t.WINDOW_BG_COL;
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
 		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
@@ -877,7 +910,6 @@ class UITrait {
 		ui.t.WINDOW_BG_COL = WINDOW_BG_COL;
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
-		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
@@ -900,7 +932,6 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x();
-		if (Config.raw.ui_layout == 1 && (UINodes.inst.show || UIView2D.inst.show)) panelx = panelx - App.w() - toolbarw;
 		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 
 			if (worktab.position == SpacePaint) {
@@ -1117,8 +1148,10 @@ class UITrait {
 			}
 		}
 		
-		tabx = Config.raw.ui_layout == 0 ? System.windowWidth() - windowW : 0;
-		tabh = Std.int(System.windowHeight() / 3);
+		tabx = System.windowWidth() - windowW;
+		if (tabh == 0) {
+			tabh = tabh1 = tabh2 = Std.int(System.windowHeight() / 3);
+		}
 		gizmo.visible = false;
 
 		if (worktab.position == SpacePaint) {
@@ -1128,13 +1161,13 @@ class UITrait {
 				TabPlugins.draw();
 				TabPreferences.draw();
 			}
-			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
+			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				Context.object = Context.paintObject;
 				TabMaterials.draw();
 				TabBrushes.draw();
 				TabParticles.draw();
 			}
-			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
+			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
 				TabExport.draw();
@@ -1151,11 +1184,11 @@ class UITrait {
 				TabPlugins.draw();
 				TabPreferences.draw();
 			}
-			if (ui.window(hwnd1, tabx, tabh, windowW, tabh)) {
+			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				TabMaterials.draw();
 				TabProperties.draw();
 			}
-			if (ui.window(hwnd2, tabx, tabh * 2, windowW, tabh)) {
+			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
 				TabViewport.draw();
@@ -1178,5 +1211,29 @@ class UITrait {
 		else {
 			Res.load(["icons.png"], function() {});
 		}
+	}
+
+	function onBorderHover(handle:Handle, side:Int) {
+		if (!App.uienabled) return;
+		if (handle != hwnd && handle != hwnd1 && handle != hwnd2 && handle != UINodes.inst.hwnd && handle != UIView2D.inst.hwnd) return; // Scalable handles
+		if (handle == UINodes.inst.hwnd && side != 0) return; // Left border of node canvas
+		if (handle == UIView2D.inst.hwnd && side != 0) return; // Left border of 2d view
+		if (handle == hwnd && side == 2) return; // Window top
+		if (handle == hwnd2 && side == 3) return; // Window bottom
+		if (side == 1) return; // UI is snapped to the right side
+
+		side == 0 || side == 1 ?
+			untyped Krom.setMouseCursor(6) : // Horizontal
+			untyped Krom.setMouseCursor(5);  // Vertical
+
+		if (ui.inputStarted) {
+			borderStarted = side;
+			borderHandle = handle;
+			App.isResizing = true;
+		}
+	}
+
+	function onTextHover() {
+		untyped Krom.setMouseCursor(3); // I-cursor
 	}
 }

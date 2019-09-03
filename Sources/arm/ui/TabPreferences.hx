@@ -30,13 +30,6 @@ class TabPreferences {
 					UITrait.inst.setIconScale();
 				}
 				UITrait.inst.hscaleWasChanged = hscale.changed;
-				ui.row([1/2, 1/2]);
-				var layHandle = Id.handle({position: Config.raw.ui_layout});
-				Config.raw.ui_layout = ui.combo(layHandle, ["Right", "Left"], "Layout", true);
-				if (layHandle.changed) {
-					App.resize();
-					Config.save();
-				}
 				var themeHandle = Id.handle({position: 0});
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, "Theme", true);

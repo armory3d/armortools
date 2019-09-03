@@ -25,6 +25,7 @@ class UINodes {
 	static var materialCounter = 0;
 
 	public var show = false;
+	public var defaultWindowW = 0;
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
@@ -194,14 +195,13 @@ class UINodes {
 		if (!App.uienabled) return;
 		var kb = Input.getKeyboard();
 
-		var lay = Config.raw.ui_layout;
-		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
-		wx += UITrait.inst.toolbarw;
+		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		if (UIView2D.inst.show) {
 			wy += Std.int(iron.App.h() / 2);
 		}
-		var ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
+		if (defaultWindowW == 0) defaultWindowW = Std.int(iron.App.w() / 2);
+		var ww = defaultWindowW;
 		var mx = mouse.x + App.x();
 		var my = mouse.y + App.y();
 		if (mx < wx || mx > wx + ww || my < wy) return;
@@ -301,7 +301,7 @@ class UINodes {
 	}
 
 	public function drawGrid() {
-		var ww = iron.App.w() + UITrait.inst.toolbarw;
+		var ww = defaultWindowW;
 		var wh = iron.App.h();
 		var w = ww + 40 * 2;
 		var h = wh + 40 * 2;
@@ -346,10 +346,8 @@ class UINodes {
 		ui.begin(g);
 		
 		// Make window
-		ww = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		var lay = Config.raw.ui_layout;
-		wx = lay == 0 ? Std.int(iron.App.w()) : UITrait.inst.windowW;
-		wx += UITrait.inst.toolbarw;
+		ww = defaultWindowW;
+		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();

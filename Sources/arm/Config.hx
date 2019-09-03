@@ -46,7 +46,6 @@ class Config {
 		}
 
 		#if arm_painter
-		if (raw.ui_layout == null) raw.ui_layout = 0;
 		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
 		if (raw.keymap == null) {
 			raw.keymap = {};
@@ -201,7 +200,6 @@ typedef TConfig = {
 	// Ext
 	@:optional var version:Null<Int>;
 	@:optional var plugins:Array<String>;
-	@:optional var ui_layout:Null<Int>;
 	@:optional var undo_steps:Null<Int>;
 	@:optional var keymap:Dynamic; // Map<String, String>
 }
