@@ -1223,8 +1223,8 @@ class UITrait {
 		if (side == 1) return; // UI is snapped to the right side
 
 		side == 0 || side == 1 ?
-			untyped Krom.setMouseCursor(6) : // Horizontal
-			untyped Krom.setMouseCursor(5);  // Vertical
+			Krom.setMouseCursor(6) : // Horizontal
+			Krom.setMouseCursor(5);  // Vertical
 
 		if (ui.inputStarted) {
 			borderStarted = side;
@@ -1234,6 +1234,6 @@ class UITrait {
 	}
 
 	function onTextHover() {
-		untyped Krom.setMouseCursor(3); // I-cursor
+		Krom.setMouseCursor(3); // I-cursor
 	}
 }

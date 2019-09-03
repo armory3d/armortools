@@ -81,7 +81,7 @@ class App {
 		);
 
 		#if krom_windows
-		untyped Krom.setSaveAndQuitCallback(saveAndQuitCallback);
+		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
 		Data.getFont("font_default.ttf", function(f:Font) {
@@ -361,7 +361,7 @@ class App {
 
 		var mouse = Input.getMouse();
 		if (isDragging) {
-			untyped Krom.setMouseCursor(1); // Hand
+			Krom.setMouseCursor(1); // Hand
 			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
 			var ratio = size / img.width;

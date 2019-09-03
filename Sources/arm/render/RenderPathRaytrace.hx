@@ -82,7 +82,7 @@ class RenderPathRaytrace {
 			var layer = Context.layer;
 			var savedEnvmap = Scene.active.world.probe.radiance;
 
-			untyped Krom.raytraceInit(
+			Krom.raytraceInit(
 				shader.bytes.getData(), vb.buffer, ib.buffer, iron.App.w(), iron.App.h(),
 				layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_,
 				savedEnvmap.texture_);
@@ -121,7 +121,7 @@ class RenderPathRaytrace {
 		var path = RenderPathDeferred.path;
 		var framebuffer = path.renderTargets.get("taa").image;
 
-		untyped Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
+		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
 		Context.ddirty = 1;
 		// Context.ddirty--;
@@ -160,7 +160,7 @@ class RenderPathRaytrace {
 			var savedEnvmap = Scene.active.world.probe.radiance;
 			var layer = Context.layer;
 
-			untyped Krom.raytraceInit(
+			Krom.raytraceInit(
 				shader.bytes.getData(), vb.buffer, ib.buffer, layer.texpaint.width, layer.texpaint.height,
 				baketex0.renderTarget_, baketex1.renderTarget_, baketex2.renderTarget_,
 				savedEnvmap.texture_);
@@ -175,7 +175,7 @@ class RenderPathRaytrace {
 		var path = RenderPathDeferred.path;
 		var baketex2 = path.renderTargets.get("baketex2").image;
 
-		untyped Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
+		Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
 
 		Context.ddirty = 1;
 		// Context.ddirty--;

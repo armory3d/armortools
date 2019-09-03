@@ -17,7 +17,7 @@ class UIFiles {
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
 		show = false;
-		path = untyped isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
+		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 		if (path != null) {
 			if (!App.checkAscii(path)) return;
 			path = path.replace("\\\\", "\\");
