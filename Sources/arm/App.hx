@@ -162,9 +162,13 @@ class App {
 		});
 	}
 
-	static function saveAndQuitCallback() {
-		saveAndQuit = true;
-		Project.projectSave();
+	static function saveAndQuitCallback(save:Bool) {
+		saveWindowRect();
+		if (save) {
+			saveAndQuit = true;
+			Project.projectSave();
+		}
+		else System.stop();
 	}
 
 	public static function w():Int {
@@ -217,8 +221,6 @@ class App {
 
 		winw = System.windowWidth();
 		winh = System.windowHeight();
-
-		saveWindowRect();
 	}
 	#end
 
