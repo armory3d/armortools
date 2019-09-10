@@ -14,5 +14,6 @@
     "window_mode": 0,
     "window_resizable": true,
     "window_scale": 1.0,
-    "window_vsync": true
+    "window_vsync": true,
+    "plugins": []
 }

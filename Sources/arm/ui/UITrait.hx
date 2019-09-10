@@ -585,21 +585,28 @@ class UITrait {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
 				UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
 				if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
+				else if (UINodes.inst.defaultWindowW > kha.System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(kha.System.windowWidth() * 0.7);
 			}
 			else {
 				if (borderStarted == 0) {
 					defaultWindowW -= Std.int(mouse.movementX);
 					if (defaultWindowW < 32) defaultWindowW = 32;
+					else if (defaultWindowW > kha.System.windowWidth() - 32) defaultWindowW = kha.System.windowWidth() - 32;
 					windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 				}
 				else {
+					var my = Std.int(mouse.movementY);
 					if (borderHandle == hwnd1 && borderStarted == 2) {
-						tabh += Std.int(mouse.movementY);
-						tabh1 -= Std.int(mouse.movementY);
+						if (tabh + my > 32 && tabh1 - my > 32) {
+							tabh += my;
+							tabh1 -= my;
+						}
 					}
 					else if (borderHandle == hwnd2 && borderStarted == 2) {
-						tabh1 += Std.int(mouse.movementY);
-						tabh2 -= Std.int(mouse.movementY);
+						if (tabh1 + my > 32 && tabh2 - my > 32) {
+							tabh1 += my;
+							tabh2 -= my;
+						}
 					}
 				}
 			}

@@ -27,12 +27,16 @@ class TabTextures {
 			if (ui.button("2D View")) UITrait.inst.show2DView(1);
 
 			if (Project.assets.length > 0) {
+
+				var slotw = ui.SCALE > 1 ? 102 : 51;
+				var num = Std.int(UITrait.inst.windowW / slotw);
+
 				for (i in 0...Project.assets.length) {
 					
-					// Align into 5 items per row
-					if (i % 5 == 0) {
+					// Align into rows
+					if (i % num == 0) {
 						ui._y += ui.ELEMENT_OFFSET() * 1.5;
-						ui.row([1/5, 1/5, 1/5, 1/5, 1/5]);
+						ui.row([for (i in 0...num) 1/num]);
 					}
 					
 					var asset = Project.assets[i];
@@ -81,8 +85,8 @@ class TabTextures {
 				}
 
 				// Fill in unused row space
-				if (Project.assets.length % 5 > 0) {
-					for (i in 0...5 - (Project.assets.length % 5)) {
+				if (Project.assets.length % num > 0) {
+					for (i in 0...num - (Project.assets.length % num)) {
 						@:privateAccess ui.endElement(ui._w);
 					}
 				}
