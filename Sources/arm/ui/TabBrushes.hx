@@ -22,14 +22,17 @@ class TabBrushes {
 			}
 			if (ui.button("Nodes")) UITrait.inst.showBrushNodes();
 
-			for (row in 0...Std.int(Math.ceil(Project.brushes.length / 5))) { 
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
+			var slotw = ui.SCALE > 1 ? 102 : 51;
+			var num = Std.int(UITrait.inst.windowW / slotw);
+
+			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
+				ui.row([for (i in 0...num) 1/num]);
 
 				if (row > 0) ui._y += 6;
 
-				for (j in 0...5) {
+				for (j in 0...num) {
 					var imgw = ui.SCALE > 1 ? 100 : 50;
-					var i = j + row * 5;
+					var i = j + row * num;
 					if (i >= Project.brushes.length) {
 						@:privateAccess ui.endElement(imgw);
 						continue;
