@@ -27,6 +27,7 @@ import arm.io.Importer;
 import arm.io.Exporter;
 import arm.io.ExportArm;
 import arm.Tool;
+import arm.Project;
 
 @:access(zui.Zui)
 class UITrait {
@@ -844,8 +845,8 @@ class UITrait {
 		App.resize();
 	}
 
-	public function getImage(asset:zui.Canvas.TAsset):Image {
-		return asset != null ? zui.Canvas.assetMap.get(asset.id) : null;
+	public function getImage(asset:TAsset):Image {
+		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {

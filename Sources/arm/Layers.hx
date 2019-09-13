@@ -19,6 +19,7 @@ import arm.nodes.MaterialParser;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
 import arm.Tool;
+import arm.Project;
 
 class Layers {
 
@@ -421,7 +422,7 @@ class Layers {
 		iron.App.notifyOnRender(makeFill);
 	}
 
-	public static function createImageMask(asset:zui.Canvas.TAsset) {
+	public static function createImageMask(asset:TAsset) {
 		var l = Context.layer;
 		if (l != Project.layers[0]) {
 			History.newMask();

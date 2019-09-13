@@ -26,6 +26,7 @@ import arm.data.ConstData;
 import arm.plugin.Camera;
 import arm.Config;
 import arm.Tool;
+import arm.Project;
 using StringTools;
 
 class App {
@@ -41,7 +42,7 @@ class App {
 	public static var isDragging = false;
 	public static var isResizing = false;
 	public static var dragMaterial:MaterialSlot = null;
-	public static var dragAsset:zui.Canvas.TAsset = null;
+	public static var dragAsset:TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
 	public static var dropPath = "";

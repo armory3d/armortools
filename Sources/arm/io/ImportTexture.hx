@@ -1,10 +1,10 @@
 package arm.io;
 
 import kha.Image;
-import zui.Canvas;
 import iron.data.Data;
 import arm.ui.UITrait;
 import arm.util.Path;
+import arm.Project;
 using StringTools;
 
 class ImportTexture {
@@ -25,7 +25,7 @@ class ImportTexture {
 			Project.assets.push(asset);
 			if (Context.texture == null) Context.texture = asset;
 			Project.assetNames.push(name);
-			Canvas.assetMap.set(asset.id, image);
+			Project.assetMap.set(asset.id, image);
 			UITrait.inst.hwnd2.redraws = 2;
 
 			// Set envmap

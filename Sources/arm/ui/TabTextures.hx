@@ -75,7 +75,7 @@ class TabTextures {
 							if (ui.button("Delete", Left)) {
 								UITrait.inst.hwnd2.redraws = 2;
 								Data.deleteImage(asset.file);
-								zui.Canvas.assetMap.remove(asset.id);
+								Project.assetMap.remove(asset.id);
 								Project.assets.splice(i, 1);
 								Project.assetNames.splice(i, 1);
 								// TODO: rebuild affected materials

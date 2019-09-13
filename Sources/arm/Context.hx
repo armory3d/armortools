@@ -1,6 +1,5 @@
 package arm;
 
-import zui.Canvas;
 import iron.object.Object;
 import iron.object.MeshObject;
 import iron.data.Data;
@@ -15,6 +14,7 @@ import arm.ui.UIFiles;
 import arm.io.Importer;
 import arm.nodes.MaterialParser;
 import arm.Tool;
+import arm.Project;
 
 class Context {
 	public static var material:MaterialSlot;

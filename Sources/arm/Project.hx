@@ -2,7 +2,6 @@ package arm;
 
 import kha.Window;
 import zui.Nodes;
-import zui.Canvas;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -34,6 +33,7 @@ class Project {
 	public static var brushes:Array<BrushSlot> = null;
 	public static var layers:Array<LayerSlot> = null;
 	public static var paintObjects:Array<MeshObject> = null;
+	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
 	#if arm_world
 	public static var waterPass = true;
 	#end
@@ -224,4 +224,10 @@ typedef TLayerData = {
 	public var opacity_mask:Float;
 	public var material_mask:Int;
 	public var object_mask:Int;
+}
+
+typedef TAsset = {
+	public var id: Int;
+	public var name:String;
+	public var file:String;
 }
