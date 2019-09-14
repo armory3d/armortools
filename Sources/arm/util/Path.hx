@@ -40,6 +40,7 @@ class Path {
 	public static function checkTextureFormat(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".jpg") ||
+			   p.endsWith(".jpeg") ||
 			   p.endsWith(".png") ||
 			   p.endsWith(".tga") ||
 			   p.endsWith(".bmp") ||
