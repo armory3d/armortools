@@ -28,7 +28,7 @@ class TabTextures {
 
 			if (Project.assets.length > 0) {
 
-				var slotw = ui.SCALE > 1 ? 102 : 51;
+				var slotw = Std.int(51 * ui.SCALE);
 				var num = Std.int(UITrait.inst.windowW / slotw);
 
 				for (i in 0...Project.assets.length) {

@@ -72,6 +72,10 @@ class UITrait {
 	var borderStarted = 0;
 	var borderHandle:Handle = null;
 
+	public var defaultEnvmap:Image = null;
+	public var defaultIrradiance:kha.arrays.Float32Array = null;
+	public var defaultRadiance:Image = null;
+	public var defaultRadianceMipmaps:Array<Image> = null;
 	public var savedEnvmap:Image = null;
 	public var emptyEnvmap:Image = null;
 	public var previewEnvmap:Image = null;
@@ -305,6 +309,10 @@ class UITrait {
 		var world = Scene.active.world;
 		if (savedEnvmap == null) {
 			savedEnvmap = world.envmap;
+			defaultEnvmap = world.envmap;
+			defaultIrradiance = world.probe.irradiance;
+			defaultRadiance = world.probe.radiance;
+			defaultRadianceMipmaps = world.probe.radianceMipmaps;
 		}
 		world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
 		Context.ddirty = 1;
@@ -584,9 +592,16 @@ class UITrait {
 
 		if (borderHandle != null) {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
-				UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
-				if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
-				else if (UINodes.inst.defaultWindowW > kha.System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(kha.System.windowWidth() * 0.7);
+				if (borderStarted == 0) {
+					UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
+					if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
+					else if (UINodes.inst.defaultWindowW > kha.System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(kha.System.windowWidth() * 0.7);
+				}
+				else { // UINodes / UIView2D ratio
+					UINodes.inst.defaultWindowH -= Std.int(mouse.movementY);
+					if (UINodes.inst.defaultWindowH < 32) UINodes.inst.defaultWindowH = 32;
+					else if (UINodes.inst.defaultWindowH > iron.App.h() * 0.95) UINodes.inst.defaultWindowH = Std.int(iron.App.h() * 0.95);
+				}
 			}
 			else {
 				if (borderStarted == 0) {
@@ -1224,7 +1239,8 @@ class UITrait {
 	function onBorderHover(handle:Handle, side:Int) {
 		if (!App.uienabled) return;
 		if (handle != hwnd && handle != hwnd1 && handle != hwnd2 && handle != UINodes.inst.hwnd && handle != UIView2D.inst.hwnd) return; // Scalable handles
-		if (handle == UINodes.inst.hwnd && side != 0) return; // Left border of node canvas
+		if (handle == UINodes.inst.hwnd && side != 0 && side != 2) return; // Left/top border of node canvas
+		if (handle == UINodes.inst.hwnd && side == 2 && !UIView2D.inst.show) return; // Left/top border of node canvas
 		if (handle == UIView2D.inst.hwnd && side != 0) return; // Left border of 2d view
 		if (handle == hwnd && side == 2) return; // Window top
 		if (handle == hwnd2 && side == 3) return; // Window bottom

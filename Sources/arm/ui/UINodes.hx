@@ -26,6 +26,7 @@ class UINodes {
 
 	public var show = false;
 	public var defaultWindowW = 0;
+	public var defaultWindowH = 0;
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
@@ -195,12 +196,14 @@ class UINodes {
 		if (!App.uienabled) return;
 		var kb = Input.getKeyboard();
 
+		if (defaultWindowW == 0) defaultWindowW = Std.int(iron.App.w() / 2);
+		if (defaultWindowH == 0) defaultWindowH = Std.int(iron.App.h() / 2);
+
 		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
 		wy = UITrait.inst.headerh * 2;
 		if (UIView2D.inst.show) {
-			wy += Std.int(iron.App.h() / 2);
+			wy += iron.App.h() - defaultWindowH;
 		}
-		if (defaultWindowW == 0) defaultWindowW = Std.int(iron.App.w() / 2);
 		var ww = defaultWindowW;
 		var mx = mouse.x + App.x();
 		var my = mouse.y + App.y();
@@ -352,8 +355,8 @@ class UINodes {
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
 		if (UIView2D.inst.show) {
-			wh = Std.int(iron.App.h() / 2);
-			wy += Std.int(iron.App.h() / 2);
+			wh = defaultWindowH;
+			wy = iron.App.h() - defaultWindowH + UITrait.inst.headerh * 2;
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 			

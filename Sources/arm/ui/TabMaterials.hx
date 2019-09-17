@@ -72,7 +72,7 @@ class TabMaterials {
 			}
 			else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
 
-			var slotw = ui.SCALE > 1 ? 102 : 51;
+			var slotw = Std.int(51 * ui.SCALE);
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
@@ -81,7 +81,7 @@ class TabMaterials {
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
-					var imgw = ui.SCALE > 1 ? 100 : 50;
+					var imgw = Std.int(50 * ui.SCALE);
 					var i = j + row * num;
 					if (i >= materials.length) {
 						@:privateAccess ui.endElement(imgw);
