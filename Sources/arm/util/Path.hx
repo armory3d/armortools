@@ -89,6 +89,7 @@ class Path {
 	public static function checkOccTex(p:String):Bool {
 		return p.endsWith("_ao") ||
 			   p.endsWith("_occlusion") ||
+			   p.endsWith("_ambientOcclusion") ||
 			   p.endsWith("_o") ||
 			   p.endsWith("_occ");
 	}
