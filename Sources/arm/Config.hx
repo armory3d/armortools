@@ -61,6 +61,7 @@ class Config {
 			raw.keymap.file_open = "ctrl+o";
 			raw.keymap.file_save = "ctrl+s";
 			raw.keymap.file_save_as = "ctrl+shift+s";
+			raw.keymap.file_reload_assets = "ctrl+r";
 			raw.keymap.edit_undo = "ctrl+z";
 			raw.keymap.edit_redo = "ctrl+shift+z";
 			raw.keymap.view_reset = "0";

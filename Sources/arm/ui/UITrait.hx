@@ -450,6 +450,7 @@ class UITrait {
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
 		else if (Operator.shortcut(Config.keymap.file_save)) Project.projectSave();
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
+		else if (Operator.shortcut(Config.keymap.file_reload_assets)) Project.reloadAssets();
 		else if (Operator.shortcut(Config.keymap.file_new)) UIBox.newProject();
 		else if (Operator.shortcut(Config.keymap.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path

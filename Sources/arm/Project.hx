@@ -211,6 +211,10 @@ class Project {
 			Scene.active.world.probe.raw.strength = 4.0;
 		});
 	}
+
+	public static function reloadAssets() {
+
+	}
 }
 
 typedef TProjectFormat = {

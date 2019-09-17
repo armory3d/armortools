@@ -66,6 +66,7 @@ class UIMenu {
 				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
 				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
 				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
+				if (ui.button("Reload Assets", Left, 'Ctrl+R')) Project.reloadAssets();
 				// ui.button("Import Asset...", Left);
 				// ui.button("Export Textures...", Left);
 				// ui.button("Export Mesh...", Left);
