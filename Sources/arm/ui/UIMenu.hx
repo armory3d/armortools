@@ -29,7 +29,7 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [5, 2, 13, 5];
+		var menuItems = [6, 2, 13, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 		
 		g.color = ui.t.SEPARATOR_COL;
@@ -62,39 +62,39 @@ class UIMenu {
 		}
 		else {
 			if (menuCategory == 0) {
-				if (ui.button("New Project...", Left, 'Ctrl+N')) UIBox.newProject();
-				if (ui.button("Open...", Left, 'Ctrl+O')) Project.projectOpen();
-				if (ui.button("Save", Left, 'Ctrl+S')) Project.projectSave();
-				if (ui.button("Save As...", Left, 'Ctrl+Shift+S')) Project.projectSaveAs();
-				if (ui.button("Reload Assets", Left, 'Ctrl+R')) Project.reloadAssets();
+				if (ui.button("New Project...", Left, Config.keymap.file_new)) UIBox.newProject();
+				if (ui.button("Open...", Left, Config.keymap.file_open)) Project.projectOpen();
+				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
+				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
+				if (ui.button("Reload Assets", Left, Config.keymap.file_reload_assets)) Project.reloadAssets();
 				// ui.button("Import Asset...", Left);
 				// ui.button("Export Textures...", Left);
 				// ui.button("Export Mesh...", Left);
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Exit", Left)) { System.stop(); }
+				if (ui.button("Exit", Left)) System.stop();
 			}
 			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, "Ctrl+Z")) History.undo();
-				if (ui.button("Redo", Left, "Ctrl+Shift+Z")) History.redo();
+				if (ui.button("Undo", Left, Config.keymap.edit_undo)) History.undo();
+				if (ui.button("Redo", Left, Config.keymap.edit_redo)) History.redo();
 				// ui.button("Preferences...", Left);
 			}
 			else if (menuCategory == 2) {
-				if (ui.button("Reset", Left, "0")) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
+				if (ui.button("Reset", Left, Config.keymap.view_reset)) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Front", Left, "1")) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
-				if (ui.button("Back", Left, "Ctrl+1")) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
-				if (ui.button("Right", Left, "3")) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
-				if (ui.button("Left", Left, "Ctrl+3")) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
-				if (ui.button("Top", Left, "7")) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
-				if (ui.button("Bottom", Left, "Ctrl+7")) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
+				if (ui.button("Front", Left, Config.keymap.view_front)) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
+				if (ui.button("Back", Left, Config.keymap.view_back)) { ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI); }
+				if (ui.button("Right", Left, Config.keymap.view_right)) { ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2); }
+				if (ui.button("Left", Left, Config.keymap.view_left)) { ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2); }
+				if (ui.button("Top", Left, Config.keymap.view_top)) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
+				if (ui.button("Bottom", Left, Config.keymap.view_bottom)) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Orbit Left", Left, "4")) { ViewportUtil.orbit(-Math.PI / 12, 0); }
-				if (ui.button("Orbit Right", Left, "6")) { ViewportUtil.orbit(Math.PI / 12, 0); }
-				if (ui.button("Orbit Up", Left, "8")) { ViewportUtil.orbit(0, -Math.PI / 12); }
-				if (ui.button("Orbit Down", Left, "2")) { ViewportUtil.orbit(0, Math.PI / 12); }
-				if (ui.button("Orbit Opposite", Left, "9")) { ViewportUtil.orbit(Math.PI, 0); }
+				if (ui.button("Orbit Left", Left, Config.keymap.view_orbit_left)) { ViewportUtil.orbit(-Math.PI / 12, 0); }
+				if (ui.button("Orbit Right", Left, Config.keymap.view_orbit_right)) { ViewportUtil.orbit(Math.PI / 12, 0); }
+				if (ui.button("Orbit Up", Left, Config.keymap.view_orbit_up)) { ViewportUtil.orbit(0, -Math.PI / 12); }
+				if (ui.button("Orbit Down", Left, Config.keymap.view_orbit_down)) { ViewportUtil.orbit(0, Math.PI / 12); }
+				if (ui.button("Orbit Opposite", Left, Config.keymap.view_orbit_opposite)) { ViewportUtil.orbit(Math.PI, 0); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Distract Free", Left, "F11")) {
+				if (ui.button("Distract Free", Left, Config.keymap.view_distract_free)) {
 					UITrait.inst.toggleDistractFree();
 					UITrait.inst.ui.isHovered = false;
 				}
