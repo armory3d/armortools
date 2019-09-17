@@ -201,6 +201,14 @@ class Project {
 			}
 
 			if (current != null) current.begin(false);
+
+			UITrait.inst.savedEnvmap = UITrait.inst.defaultEnvmap;
+			Scene.active.world.envmap = UITrait.inst.emptyEnvmap;
+			UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = false;
+			Scene.active.world.probe.radiance = UITrait.inst.defaultRadiance;
+			Scene.active.world.probe.radianceMipmaps = UITrait.inst.defaultRadianceMipmaps;
+			Scene.active.world.probe.irradiance = UITrait.inst.defaultIrradiance;
+			Scene.active.world.probe.raw.strength = 4.0;
 		});
 	}
 }
