@@ -22,6 +22,7 @@ class Importer {
 
 	public static var fontList = ["default.ttf"];
 	public static var fontMap = new Map<String, Font>();
+	public static var clearLayers = true;
 
 	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
@@ -57,11 +58,13 @@ class Importer {
 		}
 	}
 
-	public static function importMesh(path:String) {
+	public static function importMesh(path:String, _clearLayers = true) {
 		if (!Path.checkMeshFormat(path)) {
 			UITrait.inst.showError(Strings.error1);
 			return;
 		}
+
+		clearLayers = _clearLayers;
 
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
@@ -94,6 +97,7 @@ class Importer {
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 		}
+		Project.meshAssets = [path];
 
 		if (UITrait.inst.worktab.position == SpacePaint) {
 			ViewportUtil.scaleToBounds();
@@ -207,10 +211,12 @@ class Importer {
 					Data.deleteMesh(handle);
 				}
 
-				while (Project.layers.length > 1) { var l = Project.layers.pop(); l.unload(); }
-				Context.setLayer(Project.layers[0]);
-				iron.App.notifyOnRender(Layers.initLayers);
-				History.reset();
+				if (clearLayers) {
+					while (Project.layers.length > 1) { var l = Project.layers.pop(); l.unload(); }
+					Context.setLayer(Project.layers[0]);
+					iron.App.notifyOnRender(Layers.initLayers);
+					History.reset();
+				}
 				
 				Context.paintObject.setData(md);
 				Context.paintObject.name = mesh.name;

@@ -143,6 +143,13 @@ class ImportArm {
 				});
 			}
 
+			if (project.mesh_assets != null) {
+				var file = project.mesh_assets[0];
+				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
+				var abs = isAbsolute ? file : base + file;
+				Project.meshAssets = [abs];
+			}
+
 			// No mask by default
 			if (Context.mergedObject == null) MeshUtil.mergeMesh();
 			Context.selectPaintObject(Context.mainObject());

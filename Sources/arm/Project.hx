@@ -18,6 +18,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.nodes.MaterialParser;
+import arm.io.Importer;
 import arm.io.ImportArm;
 using StringTools;
 
@@ -28,6 +29,7 @@ class Project {
 	public static var assets:Array<TAsset> = [];
 	public static var assetNames:Array<String> = [];
 	public static var assetId = 0;
+	public static var meshAssets:Array<String> = [];
 	public static var materials:Array<MaterialSlot> = null;
 	public static var materialsScene:Array<MaterialSlot> = null;
 	public static var brushes:Array<BrushSlot> = null;
@@ -213,17 +215,21 @@ class Project {
 	}
 
 	public static function reloadAssets() {
-
+		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
+			Importer.importMesh(Project.meshAssets[0], false);
+			UITrait.inst.showMessage("Assets reloaded.");
+		}
 	}
 }
 
 typedef TProjectFormat = {
 	public var version:String;
-	public var brush_nodes:Array<TNodeCanvas>;
-	public var material_nodes:Array<TNodeCanvas>;
-	public var assets:Array<String>;
-	public var layer_datas:Array<TLayerData>;
-	public var mesh_datas:Array<TMeshData>;
+	@:optional public var brush_nodes:Array<TNodeCanvas>;
+	@:optional public var material_nodes:Array<TNodeCanvas>;
+	@:optional public var assets:Array<String>; // texture_assets
+	@:optional public var layer_datas:Array<TLayerData>;
+	@:optional public var mesh_datas:Array<TMeshData>;
+	@:optional public var mesh_assets:Array<String>;
 }
 
 typedef TLayerData = {
@@ -239,7 +245,7 @@ typedef TLayerData = {
 }
 
 typedef TAsset = {
-	public var id: Int;
+	public var id:Int;
 	public var name:String;
 	public var file:String;
 }

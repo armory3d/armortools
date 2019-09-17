@@ -41,15 +41,27 @@ class ExportArm {
 		var md:Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
 
-		var asset_files:Array<String> = [];
+		var texture_files:Array<String> = [];
 		for (a in Project.assets) {
 			// Convert image path from absolute to relative
 			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
-				asset_files.push(Path.toRelative(Project.filepath, a.file));
+				texture_files.push(Path.toRelative(Project.filepath, a.file));
 			}
 			else {
-				asset_files.push(a.file);
+				texture_files.push(a.file);
+			}
+		}
+
+		var mesh_files:Array<String> = [];
+		for (file in Project.meshAssets) {
+			// Convert mesh path from absolute to relative
+			var sameDrive = Project.filepath.charAt(0) == file.charAt(0);
+			if (sameDrive) {
+				mesh_files.push(Path.toRelative(Project.filepath, file));
+			}
+			else {
+				mesh_files.push(file);
 			}
 		}
 
@@ -77,7 +89,8 @@ class ExportArm {
 			brush_nodes: bnodes,
 			mesh_datas: md,
 			layer_datas: ld,
-			assets: asset_files
+			assets: texture_files,
+			mesh_assets: mesh_files
 		};
 		
 		var bytes = ArmPack.encode(Project.raw);
@@ -98,25 +111,22 @@ class ExportArm {
 		}
 		mnodes.push(c);
 
-		var asset_files:Array<String> = [];
+		var texture_files:Array<String> = [];
 		for (a in Project.assets) {
 			// Convert image path from absolute to relative
 			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
-				asset_files.push(Path.toRelative(Project.filepath, a.file));
+				texture_files.push(Path.toRelative(Project.filepath, a.file));
 			}
 			else {
-				asset_files.push(a.file);
+				texture_files.push(a.file);
 			}
 		}
 
 		var raw = {
 			version: App.version,
 			material_nodes: mnodes,
-			brush_nodes: null,
-			mesh_datas: null,
-			layer_datas: null,
-			assets: asset_files
+			assets: texture_files
 		};
 
 		var bytes = ArmPack.encode(raw);
