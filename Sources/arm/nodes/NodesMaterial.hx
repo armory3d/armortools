@@ -1241,7 +1241,7 @@ class NodesMaterial {
 					{
 						name: "blend_type",
 						type: "ENUM",
-						data: ["Mix", "Add", "Multiply", "Subtract", "Screen", "Divide", "Difference", "Darken", "Lighten", "Overlay", "Dodge", "Burn", "Hue", "Saturation", "Value", "Color", "Soft Light", "Linear Light"],
+						data: ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"],
 						default_value: 0,
 						output: 0
 					},

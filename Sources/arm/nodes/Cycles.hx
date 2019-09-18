@@ -737,58 +737,67 @@ class Cycles {
 			if (blend == 'MIX') {
 				out_col = 'mix($col1, $col2, $fac_var)';
 			}
-			else if (blend == 'ADD') {
-				out_col = 'mix($col1, $col1 + $col2, $fac_var)';
+			//
+			else if (blend == 'DARKEN') {
+				out_col = 'min($col1, $col2 * $fac_var)';
 			}
 			else if (blend == 'MULTIPLY') {
 				out_col = 'mix($col1, $col1 * $col2, $fac_var)';
 			}
-			else if (blend == 'SUBTRACT') {
-				out_col = 'mix($col1, $col1 - $col2, $fac_var)';
+			else if (blend == 'BURN') {
+				out_col = 'mix($col1, vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col1) / $col2, $fac_var)';
 			}
-			else if (blend == 'SCREEN') {
-				out_col = '(vec3(1.0, 1.0, 1.0) - (' + to_vec3('1.0 - $fac_var') + ' + $fac_var * (vec3(1.0, 1.0, 1.0) - $col2)) * (vec3(1.0) - $col1))';
-			}
-			else if (blend == 'DIVIDE') {
-				out_col = '(' + to_vec3('(1.0 - $fac_var) * $col1 + $fac_var * $col1 / $col2') + ')';
-			}
-			else if (blend == 'DIFFERENCE') {
-				out_col = 'mix($col1, abs($col1 - $col2), $fac_var)';
-			}
-			else if (blend == 'DARKEN') {
-				out_col = 'min($col1, $col2 * $fac_var)';
-			}
+			//
 			else if (blend == 'LIGHTEN') {
 				out_col = 'max($col1, $col2 * $fac_var)';
 			}
-			else if (blend == 'OVERLAY') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			else if (blend == 'SCREEN') {
+				out_col = '(vec3(1.0, 1.0, 1.0) - (' + to_vec3('1.0 - $fac_var') + ' + $fac_var * (vec3(1.0, 1.0, 1.0) - $col2)) * (vec3(1.0, 1.0, 1.0) - $col1))';
 			}
 			else if (blend == 'DODGE') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+				out_col = 'mix($col1, $col1 / (vec3(1.0, 1.0, 1.0) - $col2), $fac_var)';
 			}
-			else if (blend == 'BURN') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			else if (blend == 'ADD') {
+				out_col = 'mix($col1, $col1 + $col2, $fac_var)';
 			}
-			else if (blend == 'HUE') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
-			}
-			else if (blend == 'SATURATION') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
-			}
-			else if (blend == 'VALUE') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
-			}
-			else if (blend == 'COLOR') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
+			//
+			else if (blend == 'OVERLAY') {
+				out_col = '($col1 < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $col1 * $col2 : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))';
 			}
 			else if (blend == 'SOFT_LIGHT') {
 				out_col = '((1.0 - $fac_var) * $col1 + $fac_var * ((vec3(1.0, 1.0, 1.0) - $col1) * $col2 * $col1 + $col1 * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))));';
 			}
 			else if (blend == 'LINEAR_LIGHT') {
-				out_col = 'mix($col1, $col2, $fac_var)'; // TODO
-				// out_col = '($col1 + $fac_var * (2.0 * ($col2 - vec3(0.5, 0.5, 0.5))))'.format(col1, col2, fac_var)
+				out_col = '($col1 + $fac_var * (vec3(2.0, 2.0, 2.0) * ($col2 - vec3(0.5, 0.5, 0.5))))';
 			}
+			//
+			else if (blend == 'DIFFERENCE') {
+				out_col = 'mix($col1, abs($col1 - $col2), $fac_var)';
+			}
+			else if (blend == 'SUBTRACT') {
+				out_col = 'mix($col1, $col1 - $col2, $fac_var)';
+			}
+			else if (blend == 'DIVIDE') {
+				out_col = '(' + to_vec3('(1.0 - $fac_var) * $col1 + $fac_var * $col1 / $col2') + ')';
+			}
+			//
+			else if (blend == 'HUE') {
+				curshader.add_function(CyclesFunctions.str_hue_sat);
+				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col1).g, rgb_to_hsv($col1).b)), $fac_var)';
+			}
+			else if (blend == 'SATURATION') {
+				curshader.add_function(CyclesFunctions.str_hue_sat);
+				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
+			}
+			else if (blend == 'COLOR') {
+				curshader.add_function(CyclesFunctions.str_hue_sat);
+				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
+			}
+			else if (blend == 'VALUE') {
+				curshader.add_function(CyclesFunctions.str_hue_sat);
+				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col1).g, rgb_to_hsv($col2).b)), $fac_var)';
+			}
+			//
 			if (use_clamp) return 'clamp($out_col, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0))';
 			else return out_col;
 		}
