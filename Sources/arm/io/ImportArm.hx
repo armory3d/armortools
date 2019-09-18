@@ -143,7 +143,7 @@ class ImportArm {
 				});
 			}
 
-			if (project.mesh_assets != null) {
+			if (project.mesh_assets != null && project.mesh_assets.length > 0) {
 				var file = project.mesh_assets[0];
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;

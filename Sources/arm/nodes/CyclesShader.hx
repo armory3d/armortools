@@ -315,6 +315,9 @@ class CyclesShader {
 		s += '#define inversesqrt rsqrt\n';
 		s += '#define fract frac\n';
 		s += '#define mix lerp\n';
+		// s += '#define fma mad\n';
+		// s += '#define atan(x, y) atan2(y, x)\n';
+		// s += '#define clamp(x, 0.0, 1.0) saturate(x)\n';
 
 		s += header;
 

@@ -281,7 +281,11 @@ class TabLayers {
 					@:privateAccess ui.endElement();
 				}
 				else {
-					l.blending = ui.combo(Id.handle({position: l.blending}), ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
+					var blendingHandle = Id.handle({position: l.blending});
+					l.blending = ui.combo(blendingHandle, ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
+					if (blendingHandle.changed) {
+						MaterialParser.parseMeshMaterial();
+					}
 				}
 
 				ui._y += center;

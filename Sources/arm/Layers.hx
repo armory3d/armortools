@@ -33,6 +33,7 @@ class Layers {
 	public static var texb:TextureUnit;
 	public static var texc:TextureUnit;
 	public static var opac:ConstantLocation;
+	public static var blending:ConstantLocation;
 	public static var tex0Mask:TextureUnit;
 	public static var texaMask:TextureUnit;
 	public static var imga:Image = null;
@@ -166,6 +167,7 @@ class Layers {
 		texb = pipe.getTextureUnit("texb");
 		texc = pipe.getTextureUnit("texc");
 		opac = pipe.getConstantLocation("opac");
+		blending = pipe.getConstantLocation("blending");
 
 		pipeCopy = new PipelineState();
 		pipeCopy.vertexShader = VertexShader.fromSource(ConstData.layerViewVert);
@@ -295,6 +297,7 @@ class Layers {
 		l0.texpaint.g4.setTexture(texb, imgb);
 		l0.texpaint.g4.setTexture(texc, imgc);
 		l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
+		l0.texpaint.g4.setInt(blending, l1.blending);
 		l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 		l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 		l0.texpaint.g4.drawIndexedVertices();

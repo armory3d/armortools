@@ -87,6 +87,20 @@ SamplerState _texb_sampler;
 Texture2D<float4> texc;
 SamplerState _texc_sampler;
 uniform float opac;
+uniform int blending;
+float3 hsv_to_rgb(const float3 c) {
+	const float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+	return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+float3 rgb_to_hsv(const float3 c) {
+	const float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
+	float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
+	float d = q.x - min(q.w, q.y);
+	float e = 1.0e-10;
+	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
 struct SPIRV_Cross_Output { float4 color0 : SV_Target0; float4 color1 : SV_Target1; float4 color2 : SV_Target2; };
 SPIRV_Cross_Output main(float2 texCoord : TEXCOORD0) {
 	float4 col0 = tex0.SampleLevel(_tex0_sampler, texCoord, 0);
@@ -97,7 +111,60 @@ SPIRV_Cross_Output main(float2 texCoord : TEXCOORD0) {
 	float4 colc = texc.SampleLevel(_texc_sampler, texCoord, 0);
 	float str = col0.a * opac;
 	SPIRV_Cross_Output stage_output;
-	stage_output.color0 = float4(lerp(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	if (blending == 0) { // Mix
+		stage_output.color0 = float4(lerp(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 1) { // Darken
+		stage_output.color0 = float4(lerp(cola.rgb, min(cola.rgb, col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 2) { // Multiply
+		stage_output.color0 = float4(lerp(cola.rgb, cola.rgb * col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 3) { // Burn
+		stage_output.color0 = float4(lerp(cola.rgb, float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - cola.rgb) / col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 4) { // Lighten
+		stage_output.color0 = float4(max(cola.rgb, col0.rgb * str), max(col0.a, cola.a));
+	}
+	else if (blending == 5) { // Screen
+		stage_output.color0 = float4((float3(1.0, 1.0, 1.0) - (float3(1.0 - str, 1.0 - str, 1.0 - str) + str * (float3(1.0, 1.0, 1.0) - col0.rgb)) * (float3(1.0, 1.0, 1.0) - cola.rgb)), max(col0.a, cola.a));
+	}
+	else if (blending == 6) { // Dodge
+		stage_output.color0 = float4(lerp(cola.rgb, cola.rgb / (float3(1.0, 1.0, 1.0) - col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 7) { // Add
+		stage_output.color0 = float4(lerp(cola.rgb, cola.rgb + col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 8) { // Overlay
+		stage_output.color0 = float4(lerp(cola.rgb, (cola.rgb < float3(0.5, 0.5, 0.5) ? float3(2.0, 2.0, 2.0) * cola.rgb * col0.rgb : float3(1.0, 1.0, 1.0) - float3(2.0, 2.0, 2.0) * (float3(1.0, 1.0, 1.0) - col0.rgb) * (float3(1.0, 1.0, 1.0) - cola.rgb)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 9) { // Soft Light
+		stage_output.color0 = float4(((1.0 - str) * cola.rgb + str * ((float3(1.0, 1.0, 1.0) - cola.rgb) * col0.rgb * cola.rgb + cola.rgb * (float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - col0.rgb) * (float3(1.0, 1.0, 1.0) - cola.rgb)))), max(col0.a, cola.a));
+	}
+	else if (blending == 10) { // Linear Light
+		stage_output.color0 = float4((cola.rgb + str * (float3(2.0, 2.0, 2.0) * (col0.rgb - float3(0.5, 0.5, 0.5)))), max(col0.a, cola.a));
+	}
+	else if (blending == 11) { // Difference
+		stage_output.color0 = float4(lerp(cola.rgb, abs(cola.rgb - col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 12) { // Subtract
+		stage_output.color0 = float4(lerp(cola.rgb, cola.rgb - col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 13) { // Divide
+		stage_output.color0 = float4(float3(1.0 - str, 1.0 - str, 1.0 - str) * cola.rgb + float3(str, str, str) * cola.rgb / col0.rgb, max(col0.a, cola.a));
+	}
+	else if (blending == 14) { // Hue
+		stage_output.color0 = float4(lerp(cola.rgb, hsv_to_rgb(float3(rgb_to_hsv(col0.rgb).r, rgb_to_hsv(cola.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 15) { // Saturation
+		stage_output.color0 = float4(lerp(cola.rgb, hsv_to_rgb(float3(rgb_to_hsv(cola.rgb).r, rgb_to_hsv(col0.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 16) { // Color
+		stage_output.color0 = float4(lerp(cola.rgb, hsv_to_rgb(float3(rgb_to_hsv(col0.rgb).r, rgb_to_hsv(col0.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else { // Value
+		stage_output.color0 = float4(lerp(cola.rgb, hsv_to_rgb(float3(rgb_to_hsv(cola.rgb).r, rgb_to_hsv(cola.rgb).g, rgb_to_hsv(col0.rgb).b)), str), max(col0.a, cola.a));
+	}
 	stage_output.color1 = float4(lerp(colb, col1, str));
 	stage_output.color2 = float4(lerp(colc, col2, str));
 	return stage_output;
@@ -137,8 +204,22 @@ uniform sampler2D texa;
 uniform sampler2D texb;
 uniform sampler2D texc;
 uniform float opac;
+uniform int blending;
 in vec2 texCoord;
 out vec4 FragColor[3];
+vec3 hsv_to_rgb(const vec3 c) {
+	const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+vec3 rgb_to_hsv(const vec3 c) {
+	const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+	vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+	float d = q.x - min(q.w, q.y);
+	float e = 1.0e-10;
+	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
 void main() {
 	vec4 col0 = textureLod(tex0, texCoord, 0);
 	vec4 col1 = textureLod(tex1, texCoord, 0);
@@ -147,7 +228,60 @@ void main() {
 	vec4 colb = textureLod(texb, texCoord, 0);
 	vec4 colc = textureLod(texc, texCoord, 0);
 	float str = col0.a * opac;
-	FragColor[0] = vec4(mix(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	if (blending == 0) { // Mix
+		FragColor[0] = vec4(mix(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 1) { // Darken
+		FragColor[0] = vec4(mix(cola.rgb, min(cola.rgb, col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 2) { // Multiply
+		FragColor[0] = vec4(mix(cola.rgb, cola.rgb * col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 3) { // Burn
+		FragColor[0] = vec4(mix(cola.rgb, vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - cola.rgb) / col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 4) { // Lighten
+		FragColor[0] = vec4(max(cola.rgb, col0.rgb * str), max(col0.a, cola.a));
+	}
+	else if (blending == 5) { // Screen
+		FragColor[0] = vec4((vec3(1.0, 1.0, 1.0) - (vec3(1.0 - str, 1.0 - str, 1.0 - str) + str * (vec3(1.0, 1.0, 1.0) - col0.rgb)) * (vec3(1.0, 1.0, 1.0) - cola.rgb)), max(col0.a, cola.a));
+	}
+	else if (blending == 6) { // Dodge
+		FragColor[0] = vec4(mix(cola.rgb, cola.rgb / (vec3(1.0, 1.0, 1.0) - col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 7) { // Add
+		FragColor[0] = vec4(mix(cola.rgb, cola.rgb + col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 8) { // Overlay
+		FragColor[0] = vec4(mix(cola.rgb, (cola.rgb < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * cola.rgb * col0.rgb : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - col0.rgb) * (vec3(1.0, 1.0, 1.0) - cola.rgb)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 9) { // Soft Light
+		FragColor[0] = vec4(((1.0 - str) * cola.rgb + str * ((vec3(1.0, 1.0, 1.0) - cola.rgb) * col0.rgb * cola.rgb + cola.rgb * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - col0.rgb) * (vec3(1.0, 1.0, 1.0) - cola.rgb)))), max(col0.a, cola.a));
+	}
+	else if (blending == 10) { // Linear Light
+		FragColor[0] = vec4((cola.rgb + str * (vec3(2.0, 2.0, 2.0) * (col0.rgb - vec3(0.5, 0.5, 0.5)))), max(col0.a, cola.a));
+	}
+	else if (blending == 11) { // Difference
+		FragColor[0] = vec4(mix(cola.rgb, abs(cola.rgb - col0.rgb), str), max(col0.a, cola.a));
+	}
+	else if (blending == 12) { // Subtract
+		FragColor[0] = vec4(mix(cola.rgb, cola.rgb - col0.rgb, str), max(col0.a, cola.a));
+	}
+	else if (blending == 13) { // Divide
+		FragColor[0] = vec4(vec3(1.0 - str, 1.0 - str, 1.0 - str) * cola.rgb + vec3(str, str, str) * cola.rgb / col0.rgb, max(col0.a, cola.a));
+	}
+	else if (blending == 14) { // Hue
+		FragColor[0] = vec4(mix(cola.rgb, hsv_to_rgb(vec3(rgb_to_hsv(col0.rgb).r, rgb_to_hsv(cola.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 15) { // Saturation
+		FragColor[0] = vec4(mix(cola.rgb, hsv_to_rgb(vec3(rgb_to_hsv(cola.rgb).r, rgb_to_hsv(col0.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else if (blending == 16) { // Color
+		FragColor[0] = vec4(mix(cola.rgb, hsv_to_rgb(vec3(rgb_to_hsv(col0.rgb).r, rgb_to_hsv(col0.rgb).g, rgb_to_hsv(cola.rgb).b)), str), max(col0.a, cola.a));
+	}
+	else { // Value
+		FragColor[0] = vec4(mix(cola.rgb, hsv_to_rgb(vec3(rgb_to_hsv(cola.rgb).r, rgb_to_hsv(cola.rgb).g, rgb_to_hsv(col0.rgb).b)), str), max(col0.a, cola.a));
+	}
 	FragColor[1] = vec4(mix(colb, col1, str));
 	FragColor[2] = vec4(mix(colc, col2, str));
 }
