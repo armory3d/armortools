@@ -169,6 +169,7 @@ class UITrait {
 
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Handle({value: 0.5});
+	public var brushBlending = 0;
 	public var brushOpacity = 1.0;
 	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
@@ -1068,7 +1069,13 @@ class UITrait {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 					}
 
-					ui.combo(Id.handle(), ["Add"], "Blending");
+					if (Context.tool != ToolEraser) {
+						var brushBlendingHandle = Id.handle({value: brushBlending});
+						brushBlending = ui.combo(brushBlendingHandle, ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
+						if (brushBlendingHandle.changed) {
+							MaterialParser.parsePaintMaterial();
+						}
+					}
 
 					if (Context.tool == ToolBrush || Context.tool == ToolFill) {
 						var paintHandle = Id.handle();

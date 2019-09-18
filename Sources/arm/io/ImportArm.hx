@@ -220,6 +220,8 @@ class ImportArm {
 				l.maskOpacity = ld.opacity_mask;
 				l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 				l.objectMask = ld.object_mask;
+				l.blending = ld.blending;
+				if (l.blending == null) l.blending = 0; // TODO: deprecated
 			}
 			Context.setLayer(Project.layers[0]);
 

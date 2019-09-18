@@ -79,7 +79,8 @@ class ExportArm {
 				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				opacity_mask: l.maskOpacity,
 				material_mask: l.material_mask != null ? Project.materials.indexOf(l.material_mask) : -1,
-				object_mask: l.objectMask
+				object_mask: l.objectMask,
+				blending: l.blending
 			});
 		}
 

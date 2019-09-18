@@ -65,7 +65,7 @@ class CyclesShaderContext {
 		data.vertex_elements.push(elem);
 	}
 
-	public function is_elem(name:String) {
+	public function is_elem(name:String):Bool {
 		for (elem in data.vertex_elements)
 			if (elem.name == name)
 				return true;
@@ -109,13 +109,13 @@ class CyclesShaderContext {
 		tunits.push(c);
 	}
 
-	public function make_vert() {
+	public function make_vert():CyclesShader {
 		data.vertex_shader = material.name + '_' + data.name + '.vert';
 		vert = new CyclesShader(this, 'vert');
 		return vert;
 	}
 
-	public function make_frag() {
+	public function make_frag():CyclesShader {
 		data.fragment_shader = material.name + '_' + data.name + '.frag';
 		frag = new CyclesShader(this, 'frag');
 		return frag;

@@ -26,6 +26,7 @@ class LayerSlot {
 
 	static var first = true;
 
+	public var blending = 0;
 	public var objectMask = 0;
 	public var paintBase = true;
 	public var paintOpac = true;

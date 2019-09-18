@@ -765,7 +765,7 @@ class Cycles {
 				out_col = '($col1 < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $col1 * $col2 : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))';
 			}
 			else if (blend == 'SOFT_LIGHT') {
-				out_col = '((1.0 - $fac_var) * $col1 + $fac_var * ((vec3(1.0, 1.0, 1.0) - $col1) * $col2 * $col1 + $col1 * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))));';
+				out_col = '((1.0 - $fac_var) * $col1 + $fac_var * ((vec3(1.0, 1.0, 1.0) - $col1) * $col2 * $col1 + $col1 * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))))';
 			}
 			else if (blend == 'LINEAR_LIGHT') {
 				out_col = '($col1 + $fac_var * (vec3(2.0, 2.0, 2.0) * ($col2 - vec3(0.5, 0.5, 0.5))))';

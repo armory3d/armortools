@@ -561,7 +561,8 @@ class MaterialBuilder {
 				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, basecol, str), max(str, sample_undo.a));');
 			}
 			else {
-				frag.write('fragColor[0] = vec4(basecol, max(str, sample_undo.a));');
+				frag.write('fragColor[0] = vec4(' + blendMode(frag, 'opacity') + ', max(str, sample_undo.a));');
+
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
 			
@@ -590,8 +591,7 @@ class MaterialBuilder {
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-
-				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, basecol, str), 0.0);');
+				frag.write('fragColor[0] = vec4(' + blendMode(frag, 'str') + ', 0.0);');
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.material.paintHeight && heightUsed) {
 					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
@@ -731,6 +731,67 @@ class MaterialBuilder {
 		con_paint.data.fragment_shader = frag.get();
 
 		return con_paint;
+	}
+
+	static function blendMode(frag:CyclesShader, str:String):String {
+		if (UITrait.inst.brushBlending == 0) { // Mix
+			return 'mix(sample_undo.rgb, basecol, $str)';
+		}
+		else if (UITrait.inst.brushBlending == 1) { // Darken
+			return 'mix(sample_undo.rgb, min(sample_undo.rgb, basecol), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 2) { // Multiply
+			return 'mix(sample_undo.rgb, sample_undo.rgb * basecol, $str)';
+		}
+		else if (UITrait.inst.brushBlending == 3) { // Burn
+			return 'mix(sample_undo.rgb, vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - sample_undo.rgb) / basecol, $str)';
+		}
+		else if (UITrait.inst.brushBlending == 4) { // Lighten
+			return 'max(sample_undo.rgb, basecol * $str)';
+		}
+		else if (UITrait.inst.brushBlending == 5) { // Screen
+			return '(vec3(1.0, 1.0, 1.0) - (vec3(1.0 - $str, 1.0 - $str, 1.0 - $str) + $str * (vec3(1.0, 1.0, 1.0) - basecol)) * (vec3(1.0, 1.0, 1.0) - sample_undo.rgb))';
+		}
+		else if (UITrait.inst.brushBlending == 6) { // Dodge
+			return 'mix(sample_undo.rgb, sample_undo.rgb / (vec3(1.0, 1.0, 1.0) - basecol), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 7) { // Add
+			return 'mix(sample_undo.rgb, sample_undo.rgb + basecol, $str)';
+		}
+		else if (UITrait.inst.brushBlending == 8) { // Overlay
+			return 'mix(sample_undo.rgb, (sample_undo.rgb < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * sample_undo.rgb * basecol : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - basecol) * (vec3(1.0, 1.0, 1.0) - sample_undo.rgb)), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 9) { // Soft Light
+			return '((1.0 - $str) * sample_undo.rgb + $str * ((vec3(1.0, 1.0, 1.0) - sample_undo.rgb) * basecol * sample_undo.rgb + sample_undo.rgb * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - basecol) * (vec3(1.0, 1.0, 1.0) - sample_undo.rgb))))';
+		}
+		else if (UITrait.inst.brushBlending == 10) { // Linear Light
+			return '(sample_undo.rgb + $str * (vec3(2.0, 2.0, 2.0) * (basecol - vec3(0.5, 0.5, 0.5))))';
+		}
+		else if (UITrait.inst.brushBlending == 11) { // Difference
+			return 'mix(sample_undo.rgb, abs(sample_undo.rgb - basecol), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 12) { // Subtract
+			return 'mix(sample_undo.rgb, sample_undo.rgb - basecol, $str)';
+		}
+		else if (UITrait.inst.brushBlending == 13) { // Divide
+			return 'vec3(1.0 - $str, 1.0 - $str, 1.0 - $str) * sample_undo.rgb + vec3($str, $str, $str) * sample_undo.rgb / basecol';
+		}
+		else if (UITrait.inst.brushBlending == 14) { // Hue
+			frag.add_function(CyclesFunctions.str_hue_sat);
+			return 'mix(sample_undo.rgb, hsv_to_rgb(vec3(rgb_to_hsv(basecol).r, rgb_to_hsv(sample_undo.rgb).g, rgb_to_hsv(sample_undo.rgb).b)), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 15) { // Saturation
+			frag.add_function(CyclesFunctions.str_hue_sat);
+			return 'mix(sample_undo.rgb, hsv_to_rgb(vec3(rgb_to_hsv(sample_undo.rgb).r, rgb_to_hsv(basecol).g, rgb_to_hsv(sample_undo.rgb).b)), $str)';
+		}
+		else if (UITrait.inst.brushBlending == 16) { // Color
+			frag.add_function(CyclesFunctions.str_hue_sat);
+			return 'mix(sample_undo.rgb, hsv_to_rgb(vec3(rgb_to_hsv(basecol).r, rgb_to_hsv(basecol).g, rgb_to_hsv(sample_undo.rgb).b)), $str)';
+		}
+		else { // Value
+			frag.add_function(CyclesFunctions.str_hue_sat);
+			return 'mix(sample_undo.rgb, hsv_to_rgb(vec3(rgb_to_hsv(sample_undo.rgb).r, rgb_to_hsv(sample_undo.rgb).g, rgb_to_hsv(basecol).b)), $str)';
+		}
 	}
 
 	static function axisString(i:Int):String {

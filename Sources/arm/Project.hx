@@ -242,6 +242,7 @@ typedef TLayerData = {
 	public var opacity_mask:Float;
 	public var material_mask:Int;
 	public var object_mask:Int;
+	public var blending:Int;
 }
 
 typedef TAsset = {

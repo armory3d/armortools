@@ -281,7 +281,7 @@ class TabLayers {
 					@:privateAccess ui.endElement();
 				}
 				else {
-					var blend = ui.combo(Id.handle(), ["Add"], "Blending");
+					l.blending = ui.combo(Id.handle({position: l.blending}), ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
 				}
 
 				ui._y += center;
