@@ -3,6 +3,7 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import iron.object.Object;
+import iron.object.MeshObject;
 import iron.Scene;
 
 class TabOutliner {
@@ -17,6 +18,7 @@ class TabOutliner {
 			var i = 0;
 			function drawList(h:Handle, o:Object) {
 				if (o.name.charAt(0) == '.') return; // Hidden
+				if (Std.is(o, MeshObject) && cast(o, MeshObject).force_context != null) return; // Show mesh context only
 				var b = false;
 				if (Context.object == o) {
 					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
