@@ -759,7 +759,11 @@ class MaterialBuilder {
 			return 'mix($cola, $cola + $colb, $opac)';
 		}
 		else if (blending == 8) { // Overlay
+			#if (kha_direct3d11 || kha_direct3d12)
 			return 'mix($cola, ($cola < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $cola * $colb : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $colb) * (vec3(1.0, 1.0, 1.0) - $cola)), $opac)';
+			#else
+			return 'mix($cola, $colb, $opac)'; // TODO
+			#end
 		}
 		else if (blending == 9) { // Soft Light
 			return '((1.0 - $opac) * $cola + $opac * ((vec3(1.0, 1.0, 1.0) - $cola) * $colb * $cola + $cola * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $colb) * (vec3(1.0, 1.0, 1.0) - $cola))))';
@@ -1207,7 +1211,7 @@ class MaterialBuilder {
 					}
 
 					if (Context.layer.paintBase) {
-						frag.write('basecol = ' + blendMode(frag, l.blending, 'basecol', 'col_tex0', 'factor0') + ';');
+						frag.write('basecol = ' + blendMode(frag, l.blending, 'basecol', 'col_tex0.rgb', 'factor0') + ';');
 					}
 
 					if (emisUsed ||

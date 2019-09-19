@@ -253,7 +253,8 @@ void main() {
 		FragColor[0] = vec4(mix(cola.rgb, cola.rgb + col0.rgb, str), max(col0.a, cola.a));
 	}
 	else if (blending == 8) { // Overlay
-		FragColor[0] = vec4(mix(cola.rgb, (cola.rgb < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * cola.rgb * col0.rgb : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - col0.rgb) * (vec3(1.0, 1.0, 1.0) - cola.rgb)), str), max(col0.a, cola.a));
+		//FragColor[0] = vec4(mix(cola.rgb, (cola.rgb < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * cola.rgb * col0.rgb : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - col0.rgb) * (vec3(1.0, 1.0, 1.0) - cola.rgb)), str), max(col0.a, cola.a)); // TODO
+		FragColor[0] = vec4(mix(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
 	}
 	else if (blending == 9) { // Soft Light
 		FragColor[0] = vec4(((1.0 - str) * cola.rgb + str * ((vec3(1.0, 1.0, 1.0) - cola.rgb) * col0.rgb * cola.rgb + cola.rgb * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - col0.rgb) * (vec3(1.0, 1.0, 1.0) - cola.rgb)))), max(col0.a, cola.a));
