@@ -1065,7 +1065,7 @@ class MaterialBuilder {
 
 				if (Context.layer.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
-					frag.write('basecol = pow(textureLodShared(texpaint, texCoord, 0.0).rgb, vec3(2.2, 2.2, 2.2));');
+					frag.write('basecol = textureLodShared(texpaint, texCoord, 0.0).rgb;');
 				}
 				else {
 					frag.write('basecol = vec3(0.0, 0.0, 0.0);');
@@ -1207,7 +1207,6 @@ class MaterialBuilder {
 					}
 
 					if (Context.layer.paintBase) {
-						frag.write('col_tex0.rgb = pow(col_tex0.rgb, vec3(2.2, 2.2, 2.2));');
 						frag.write('basecol = ' + blendMode(frag, l.blending, 'basecol', 'col_tex0', 'factor0') + ';');
 					}
 
@@ -1268,16 +1267,17 @@ class MaterialBuilder {
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
+			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 			if (UITrait.inst.viewportMode == 0) { // Render
 				if (emisUsed) {
 					frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
 				}
 				frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
-				frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(occlusion, 1.0));'); // occ/spec
+				frag.write('fragColor[1] = vec4(basecol, packFloat2(occlusion, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 1) { // Basecol
 				frag.write('fragColor[0] = vec4(n.xy, 1.0, packFloatInt16(0.0, uint(0)));');
-				frag.write('fragColor[1] = vec4(basecol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
+				frag.write('fragColor[1] = vec4(basecol, packFloat2(1.0, 1.0));'); // occ/spec
 			}
 			else if (UITrait.inst.viewportMode == 2) { // Normal Map
 				frag.write('fragColor[0] = vec4(n.xy, 1.0, packFloatInt16(0.0, uint(0)));');
