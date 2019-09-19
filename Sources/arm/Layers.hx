@@ -79,25 +79,24 @@ class Layers {
 		Context.ddirty = 3;
 	}
 
-	public static function clearLastLayer(g:kha.graphics4.Graphics) {
+	public static function clearSelectedLayer(g:kha.graphics4.Graphics) {
 		g.end();
 
-		var layers = Project.layers;
-		var i = layers.length - 1;
-		layers[i].texpaint.g4.begin();
-		layers[i].texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
-		layers[i].texpaint.g4.end();
+		var l = Context.layer;
+		l.texpaint.g4.begin();
+		l.texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
+		l.texpaint.g4.end();
 
-		layers[i].texpaint_nor.g4.begin();
-		layers[i].texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
-		layers[i].texpaint_nor.g4.end();
+		l.texpaint_nor.g4.begin();
+		l.texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		l.texpaint_nor.g4.end();
 
-		layers[i].texpaint_pack.g4.begin();
-		layers[i].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
-		layers[i].texpaint_pack.g4.end();
+		l.texpaint_pack.g4.begin();
+		l.texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
+		l.texpaint_pack.g4.end();
 
 		g.begin();
-		iron.App.removeRender(clearLastLayer);
+		iron.App.removeRender(clearSelectedLayer);
 
 		#if krom_linux
 		Context.layerPreviewDirty = true;
@@ -389,7 +388,7 @@ class Layers {
 		var l = new LayerSlot();
 		Project.layers.push(l);
 		Context.setLayer(l);
-		if (clear) iron.App.notifyOnRender(Layers.clearLastLayer);
+		if (clear) iron.App.notifyOnRender(Layers.clearSelectedLayer);
 		Context.layerPreviewDirty = true;
 		return l;
 	}

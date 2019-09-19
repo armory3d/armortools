@@ -310,7 +310,15 @@ class TabLayers {
 					l.objectMask = ui.combo(h, ar, "Object");
 					if (h.changed) {
 						Context.setLayer(l);
-						Layers.updateFillLayers(4);
+						if (l.material_mask != null) { // Fill layer
+							iron.App.notifyOnRender(Layers.clearSelectedLayer);
+							iron.App.notifyOnRender(function(_){
+								Layers.updateFillLayers(4);
+							});
+						}
+						else {
+							Layers.updateFillLayers(4);
+						}
 					}
 					@:privateAccess ui.endElement();
 				}
