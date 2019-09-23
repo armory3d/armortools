@@ -401,11 +401,14 @@ class UITrait {
 		Plugin.keep();
 		if (Config.raw.plugins != null) {
 			for (plugin in Config.raw.plugins) {
-				Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
-					#if js
-					untyped __js__("(1, eval)({0})", blob.toString());
-					#end
-				});
+				try {
+					Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
+						#if js
+						untyped __js__("(1, eval)({0})", blob.toString());
+						#end
+					});
+				}
+				catch(e:Dynamic) { trace("Plugin '" + plugin + "' not found"); }
 			}
 		}
 	}
