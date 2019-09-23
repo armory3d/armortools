@@ -83,7 +83,7 @@ class RenderPathRaytrace {
 			var savedEnvmap = Scene.active.world.probe.radiance;
 
 			Krom.raytraceInit(
-				shader.bytes.getData(), vb.buffer, ib.buffer, iron.App.w(), iron.App.h(),
+				shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, iron.App.w(), iron.App.h(),
 				layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_,
 				savedEnvmap.texture_);
 		});
@@ -161,7 +161,7 @@ class RenderPathRaytrace {
 			var layer = Context.layer;
 
 			Krom.raytraceInit(
-				shader.bytes.getData(), vb.buffer, ib.buffer, layer.texpaint.width, layer.texpaint.height,
+				shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, layer.texpaint.width, layer.texpaint.height,
 				baketex0.renderTarget_, baketex1.renderTarget_, baketex2.renderTarget_,
 				savedEnvmap.texture_);
 		});
