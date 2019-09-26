@@ -9,6 +9,9 @@
 #ifdef _CDOF
 #include "../std/dof.glsl"
 #endif
+#ifdef _CDenoise
+#include "../std/denoise.glsl"
+#endif
 
 const float compoVignetteStrength = 0.4;
 
@@ -232,7 +235,11 @@ void main() {
 	#ifdef _CDOF
 	fragColor = vec4(dof(texCo, depth, tex, gbufferD, texStep, cameraProj), 1.0);
 	#else
-	fragColor = textureLod(tex, texCo, 0.0);
+		#ifdef _CDenoise
+		fragColor = smartDeNoise(tex, texCo, 5.0, 2.0, 0.100);
+		#else
+		fragColor = textureLod(tex, texCo, 0.0);
+		#endif
 	#endif
 
 #endif
