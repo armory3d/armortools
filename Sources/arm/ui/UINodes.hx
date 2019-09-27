@@ -255,7 +255,7 @@ class UINodes {
 				nodeSearchOffset = 0;
 				nodeSearchLast = search;
 			}
-			if (ui.isKeyDown) { // Move selection
+			if (ui.isKeyPressed) { // Move selection
 				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
 				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
 			}
