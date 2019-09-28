@@ -79,7 +79,7 @@ class TabLayers {
 				#end
 
 				ui._y += 3;
-				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon, 0xffffffff, (ui.t.ELEMENT_H - 3) * 2);
+				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
 				ui._y -= 3;
 
 				#if (kha_opengl || kha_webgl)
@@ -102,7 +102,7 @@ class TabLayers {
 
 				if (l.texpaint_mask != null) {
 					ui._y += 3;
-					var state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.t.ELEMENT_H - 3) * 2);
+					var state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
 					ui._y -= 3;
 					if (ui.isHovered) {
 						ui.tooltipImage(l.texpaint_mask_preview);
