@@ -47,6 +47,7 @@ else {
 if (raytrace) {
 	project.addAssets("Bundled/raytrace/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Bundled/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 }
 
 if (process.platform === 'win32') {
