@@ -119,7 +119,7 @@ class TabMaterials {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							var m = materials[i];
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 							
 							if (ui.button("To Fill Layer", Left)) {

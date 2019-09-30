@@ -50,7 +50,7 @@ class TabLayers {
 
 				if (Context.layer == l) {
 					if (Context.layerIsMask) {
-						ui.rect(ui._windowW / 100 * 24 - 2, 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
+						ui.rect((ui._windowW / 100 * 24) / ui.SCALE - 2, 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
 					}
 					else {
 						ui.fill(checkw, 0, (ui._windowW / ui.SCALE - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
@@ -109,7 +109,7 @@ class TabLayers {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right);
 							if (ui.button("Delete", Left)) {
 								Context.setLayer(l);
@@ -159,7 +159,7 @@ class TabLayers {
 				if (contextMenu) {
 					UIMenu.draw(function(ui:Zui) {
 						if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
 						else {

@@ -67,7 +67,7 @@ class TabTextures {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
 							if (ui.button("To Mask", Left)) {
 								Layers.createImageMask(asset);

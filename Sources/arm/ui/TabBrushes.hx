@@ -69,7 +69,7 @@ class TabBrushes {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							var b = Project.brushes[i];
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasBrushMap.get(Project.brushes[i]).name, Right);
 
 							if (ui.button("Delete", Left) && Project.brushes.length > 1) {
