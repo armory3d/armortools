@@ -33,24 +33,12 @@ class MaterialBuilder {
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
 
-		if (Context.tool == ToolBake) {
-			// Bake into base color, disable other slots
-			con_paint.data.color_writes_red[1] = false;
-			con_paint.data.color_writes_green[1] = false;
-			con_paint.data.color_writes_blue[1] = false;
-			con_paint.data.color_writes_alpha[1] = false;
-			con_paint.data.color_writes_red[2] = false;
-			con_paint.data.color_writes_green[2] = false;
-			con_paint.data.color_writes_blue[2] = false;
-			con_paint.data.color_writes_alpha[2] = false;
-		}
-
 		var vert = con_paint.make_vert();
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
 		#if kha_direct3d12
-		if (UITrait.inst.bakeType == -1) {
+		if (Context.tool == ToolBake && UITrait.inst.bakeType == -1) {
 			// Init raytraced bake
 			vert.add_out('vec3 position');
 			vert.add_out('vec3 normal');
@@ -70,6 +58,18 @@ class MaterialBuilder {
 			return con_paint;
 		}
 		#end
+
+		if (Context.tool == ToolBake) {
+			// Bake into base color, disable other slots
+			con_paint.data.color_writes_red[1] = false;
+			con_paint.data.color_writes_green[1] = false;
+			con_paint.data.color_writes_blue[1] = false;
+			con_paint.data.color_writes_alpha[1] = false;
+			con_paint.data.color_writes_red[2] = false;
+			con_paint.data.color_writes_green[2] = false;
+			con_paint.data.color_writes_blue[2] = false;
+			con_paint.data.color_writes_alpha[2] = false;
+		}
 
 		if (Context.tool == ToolColorId || Context.tool == ToolPicker) {
 			// Mangle vertices to form full screen triangle

@@ -1,4 +1,8 @@
 
+#include "rand.hlsl"
+#include "attrib.hlsl"
+#include "math.hlsl"
+
 struct Vertex {
 	float3 position;
 	float3 normal;
@@ -31,74 +35,7 @@ Texture2D<float4> mytexture_scramble : register(t8);
 Texture2D<float4> mytexture_rank : register(t9);
 
 static uint seed;
-static const float PI = 3.1415926535f;
 static const int DIFFUSE_RAYS = 64;
-
-// A Low-Discrepancy Sampler that Distributes Monte Carlo Errors as a Blue Noise in Screen Space
-// Eric Heitz, Laurent Belcour, Victor Ostromoukhov, David Coeurjolly and Jean-Claude Iehl
-// https://eheitzresearch.wordpress.com/762-2/
-float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension) {
-	// wrap arguments
-	pixel_i += constant_buffer.eye.w * 9;
-	pixel_j += constant_buffer.eye.w * 11;
-	pixel_i = pixel_i & 127;
-	pixel_j = pixel_j & 127;
-	sampleIndex = sampleIndex & 255;
-	sampleDimension = sampleDimension & 255;
-
-	// xor index based on optimized ranking
-	int i = sampleDimension + (pixel_i + pixel_j*128)*8;
-	int rankedSampleIndex = sampleIndex ^ int(mytexture_rank.Load(uint3(i % 128, uint(i / 128), 0)).r * 255);
-
-	// fetch value in sequence
-	i = sampleDimension + rankedSampleIndex*256;
-	int value = int(mytexture_sobol.Load(uint3(i % 256, uint(i / 256), 0)).r * 255);
-
-	// If the dimension is optimized, xor sequence value based on optimized scrambling
-	i = (sampleDimension%8) + (pixel_i + pixel_j*128)*8;
-	value = value ^ int(mytexture_scramble.Load(uint3(i % 128, uint(i / 128), 0)).r * 255);
-
-	// convert to float and return
-	float v = (0.5f+value)/256.0f;
-	return v;
-}
-
-void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
-	tangent = abs(normal.x) > abs(normal.y) ?
-		normalize(float3(0., normal.z, -normal.y)) :
-		normalize(float3(-normal.z, 0., normal.x));
-	binormal = cross(normal, tangent);
-}
-
-
-float schlick_weight(float cosTheta) {
-	float m = saturate(1. - cosTheta);
-	float m2 = m * m;
-	return m2 * m2 * m;
-}
-
-void generate_camera_ray(float2 screen_pos, out float3 ray_origin, out float3 ray_dir) {
-	screen_pos.y = -screen_pos.y;
-	float4 world = mul(float4(screen_pos, 0, 1), constant_buffer.inv_vp);
-	world.xyz /= world.w;
-	ray_origin = constant_buffer.eye.xyz;
-	ray_dir = normalize(world.xyz - ray_origin);
-}
-
-float3 cos_weighted_hemisphere_direction(float3 n, uint sample) {
-	float2 r = float2(
-		rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed),
-		rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed + 1)
-	);
-	float3 uu = normalize(cross(n, float3(0.0, 1.0, 1.0)));
-	float3 vv = cross(uu, n);
-	float ra = sqrt(r.y);
-	float rx = ra * cos(6.2831 * r.x);
-	float ry = ra * sin(6.2831 * r.x);
-	float rz = sqrt(1.0 - r.y);
-	float3 rr = float3(rx * uu + ry * vv + rz * n);
-	return normalize(rr);
-}
 
 [shader("raygeneration")]
 void raygeneration() {
@@ -106,16 +43,16 @@ void raygeneration() {
 
 	// AA
 	float2 xy = DispatchRaysIndex().xy + 0.5f;
-	xy.x += rand(DispatchRaysIndex().x, DispatchRaysIndex().y, constant_buffer.eye.w, seed);
+	xy.x += rand(DispatchRaysIndex().x, DispatchRaysIndex().y, constant_buffer.eye.w, seed, 0, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	seed += 1;
-	xy.y += rand(DispatchRaysIndex().x, DispatchRaysIndex().y, constant_buffer.eye.w, seed);
+	xy.y += rand(DispatchRaysIndex().x, DispatchRaysIndex().y, constant_buffer.eye.w, seed, 0, mytexture_sobol, mytexture_scramble, mytexture_rank);
 
 	float2 screen_pos = xy / DispatchRaysDimensions().xy * 2.0 - 1.0;
 
 	RayDesc ray;
 	ray.TMin = 0.01;
 	ray.TMax = 10.0;
-	generate_camera_ray(screen_pos, ray.Origin, ray.Direction);
+	generate_camera_ray(screen_pos, ray.Origin, ray.Direction, constant_buffer.eye.xyz, constant_buffer.inv_vp);
 
 	RayPayload payload;
 	payload.color = float4(1, 1, 1, 0);
@@ -128,10 +65,8 @@ void raygeneration() {
 		// }
 	// }
 
-
 	ray.Origin = payload.ray_origin;
 	// ray.Direction = payload.ray_dir;
-
 
 	accum += payload.color.rgb;
 
@@ -141,7 +76,7 @@ void raygeneration() {
 		float3 accum2 = float3(0, 0, 0);
 		float3 norr = payload.ray_dir;
 		for (int k = 0; k < rays; ++k) {
-			ray.Direction = cos_weighted_hemisphere_direction(norr, k);
+			ray.Direction = cos_weighted_hemisphere_direction(norr, k, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 			payload.color = float4(1, 1, 1, (k + 1));
 			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
 			accum2 += payload.color.rgb;
@@ -160,22 +95,6 @@ void raygeneration() {
 	}
 
 	render_target[DispatchRaysIndex().xy] = float4(lerp(color.xyz, accum.xyz, 1.0 / 4.0), 0.0f);
-}
-
-float3 hit_world_position() {
-	return WorldRayOrigin() + RayTCurrent() * WorldRayDirection();
-}
-
-float3 hit_attribute(float3 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr) {
-	return vertexAttribute[0] +
-		attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-}
-
-float2 hit_attribute2d(float2 vertexAttribute[3], BuiltInTriangleIntersectionAttributes attr) {
-	return vertexAttribute[0] +
-		attr.barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]) +
-		attr.barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
 }
 
 [shader("closesthit")]
@@ -209,14 +128,6 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	// DIFFUSE_RAYS
 	payload.ray_dir = n;
 	payload.color.a = texpaint2.g; // roughness
-}
-
-float2 equirect(float3 normal) {
-	const float PI = 3.1415926535;
-	const float PI2 = PI * 2.0;
-	float phi = acos(normal.z);
-	float theta = atan2(-normal.y, normal.x) + PI;
-	return float2(theta / PI2, phi / PI);
 }
 
 [shader("miss")]

@@ -91,19 +91,27 @@ class RenderPathRaytrace {
 
 	public static function commandsBake() {
 		if (!ready) { ready = true; initBake(); return; }
-		f32[0] = frame;
-		frame += 1.0;
 
-		var path = RenderPathDeferred.path;
-		var baketex2 = path.renderTargets.get("baketex2").image;
+		if (Context.pdirty > 0) {
 
-		Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
+			f32[0] = frame;
+			frame = (Std.int(frame) % 30) + 1;
 
-		Context.ddirty = 1;
-		// Context.ddirty--;
-		Context.pdirty--;
-		// Context.rdirty--;
-		Context.rdirty = 2;
+			var path = RenderPathDeferred.path;
+			var baketex2 = path.renderTargets.get("baketex2").image;
+
+			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
+
+			Context.ddirty = 1;
+			// Context.ddirty--;
+			Context.pdirty--;
+			// Context.rdirty--;
+			Context.rdirty = 2;
+
+			path.setTarget("texpaint" + Context.layer.id);
+			path.bindTarget("baketex2", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
 	}
 
 	static function buildData() {

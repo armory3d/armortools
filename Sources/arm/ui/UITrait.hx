@@ -999,7 +999,8 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					bakeType = ui.combo(bakeHandle, ["AO", "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"], "Bake");
+					var ao = #if kha_direct3d12 "AO (DXR)" #else "AO" #end;
+					bakeType = ui.combo(bakeHandle, [ao, "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"], "Bake");
 					if (bakeType == 0 || bakeType == 1) {
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
 						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");

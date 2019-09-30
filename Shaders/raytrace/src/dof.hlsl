@@ -1,4 +1,7 @@
 
+#ifndef DOF_HLSL
+#define DOF_HLSL
+
 float2 calculate_concentric_sample_disk(float u, float v) {
 	// Maps a (u,v) in [0, 1)^2 to a 2D unit disk centered at (0,0). Based on PBRT.
 	float2 u_offset = 2.0f * float2(u, v) - float2(1, 1);
@@ -26,3 +29,5 @@ void generate_camera_ray(float2 screen_pos, out float3 ray_origin, out float3 ra
 	ray_origin += plens;
 	ray_dir = normalize(pfocus - plens);
 }
+
+#endif

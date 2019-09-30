@@ -46,7 +46,7 @@ class RenderPathPaint {
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
-				tid = Project.layers[0].id;
+				tid = Context.layer.id;
 				path.bindTarget("texpaint" + tid, "texpaint");
 				path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 				path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
@@ -82,6 +82,7 @@ class RenderPathPaint {
 				}
 			}
 			else {
+				#if (!kha_direct3d12)
 				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					if (initVoxels) {
 						initVoxels = false;
@@ -100,6 +101,7 @@ class RenderPathPaint {
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
 				}
+				#end
 
 				var blendA = "texpaint_blend0";
 				var blendB = "texpaint_blend1";
@@ -114,9 +116,11 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget(blendB, "paintmask");
+				#if (!kha_direct3d12)
 				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
 					path.bindTarget("voxels", "voxels");
 				}
+				#end
 				if (UITrait.inst.colorIdPicked) {
 					path.bindTarget("texpaint_colorid", "texpaint_colorid");
 				} 
