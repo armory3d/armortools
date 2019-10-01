@@ -1,6 +1,6 @@
 
-#ifndef DOF_HLSL
-#define DOF_HLSL
+#ifndef _DOF_HLSL_
+#define _DOF_HLSL_
 
 float2 calculate_concentric_sample_disk(float u, float v) {
 	// Maps a (u,v) in [0, 1)^2 to a 2D unit disk centered at (0,0). Based on PBRT.
