@@ -119,7 +119,7 @@ class App {
 				Nodes.getEnumTexts = getEnumTexts;
 				Nodes.mapEnum = mapEnum;
 				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
-				
+
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
 					var path = Krom.getArg(1);
@@ -178,7 +178,7 @@ class App {
 
 		// Drawing decal preview
 		if (UITrait.inst != null && UITrait.inst.decalPreview) return RenderUtil.decalPreviewSize;
-		
+
 		var res = 0;
 		if (UINodes.inst == null || UITrait.inst == null) {
 			res = System.windowWidth() - UITrait.defaultWindowW - UITrait.defaultToolbarW;

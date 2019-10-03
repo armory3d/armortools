@@ -137,8 +137,12 @@ class TabPreferences {
 					MaterialParser.parseMeshMaterial();
 				}
 				ui.row([1/2, 1/2]);
+				#if kha_direct3d12
+				ui.check(Id.handle(), "Empty");
+				#else
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
+				#end
 				if (UITrait.inst.hvxao.changed) {
 					Config.applyConfig();
 					#if arm_creator

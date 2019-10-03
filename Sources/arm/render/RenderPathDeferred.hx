@@ -436,7 +436,7 @@ class RenderPathDeferred {
 				path.createRenderTarget(t);
 			}
 		}
-		
+
 		#end // arm_painter
 	}
 
@@ -446,7 +446,7 @@ class RenderPathDeferred {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		var ssaa4 = Config.raw.rp_supersample == 4 ? true : false;
-		
+
 		#if arm_painter
 
 		var mouse = Input.getMouse();
@@ -514,7 +514,7 @@ class RenderPathDeferred {
 			var tw = 0.95 * UIView2D.inst.panScale;
 			var tx = UIView2D.inst.panX / iron.App.w();
 			var ty = UIView2D.inst.panY / iron.App.h();
-			
+
 			m.setIdentity();
 			m.scale(new Vec4(tw, tw, 1));
 			m.setLoc(new Vec4(tx, ty, 0));
@@ -814,7 +814,7 @@ class RenderPathDeferred {
 			#end
 		}
 		#end
-		
+
 		voxelao_pass ?
 			path.drawShader("deferred_light/deferred_light/deferred_light_voxel") :
 			path.drawShader("deferred_light/deferred_light/deferred_light");
@@ -945,7 +945,7 @@ class RenderPathDeferred {
 		#end
 
 		path.setTarget("buf");
-		
+
 		path.bindTarget("tex", "tex");
 		#if rp_compositordepth
 		{
@@ -1048,7 +1048,7 @@ class RenderPathDeferred {
 			path.setTarget("gbuffer0", ["gbuffer1"]);
 			path.bindTarget("_main", "gbufferD");
 			path.drawDecals("decal");
-			
+
 			#if (!kha_opengl)
 			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
 			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));

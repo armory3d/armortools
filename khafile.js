@@ -9,7 +9,6 @@ project.addAssets("Bundled/defaults/*", { notinlist: true, destination: "data/de
 project.addAssets("Bundled/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Bundled/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Bundled/themes/*", { notinlist: true, destination: "data/themes/{name}" });
-project.addAssets("Bundled/readme/readme.txt", { notinlist: true, destination: "{name}" });
 
 project.addDefine('rp_voxelao');
 project.addDefine('arm_voxelgi_revox');
@@ -48,6 +47,9 @@ if (raytrace) {
 	project.addAssets("Bundled/raytrace/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Bundled/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
+}
+else {
+	project.addAssets("Bundled/readme/readme.txt", { notinlist: true, destination: "{name}" });
 }
 
 if (process.platform === 'win32') {
