@@ -2,6 +2,7 @@ package arm.render;
 
 import iron.RenderPath;
 import iron.Scene;
+import arm.ui.UITrait;
 
 #if kha_direct3d12
 
@@ -92,9 +93,16 @@ class RenderPathRaytrace {
 	public static function commandsBake() {
 		if (!ready) { ready = true; initBake(); return; }
 
-		if (Context.pdirty > 0) {
+		if (UITrait.inst.brushTime > 0) {
+			Context.pdirty = 2;
+			Context.rdirty = 2;
+		}
 
+		if (Context.pdirty > 0) {
 			f32[0] = frame;
+			f32[1] = UITrait.inst.bakeAoStrength;
+			f32[2] = UITrait.inst.bakeAoRadius;
+			f32[3] = UITrait.inst.bakeAoOffset;
 			frame = (Std.int(frame) % 30) + 1;
 
 			var path = RenderPathDeferred.path;
@@ -102,15 +110,12 @@ class RenderPathRaytrace {
 
 			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
 
-			Context.ddirty = 1;
-			// Context.ddirty--;
-			Context.pdirty--;
-			// Context.rdirty--;
-			Context.rdirty = 2;
-
 			path.setTarget("texpaint" + Context.layer.id);
 			path.bindTarget("baketex2", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
+		else {
+			frame = 0;
 		}
 	}
 

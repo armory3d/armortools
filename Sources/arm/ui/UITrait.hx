@@ -191,7 +191,7 @@ class UITrait {
 	public var bakeCurvOffset = 0.0;
 	public var bakeCurvSmooth = 1;
 	public var bakeHighPoly = 0;
-	
+
 	public var xray = false;
 	public var symX = false;
 	public var symY = false;
@@ -666,7 +666,7 @@ class UITrait {
 
 			if (mx < iron.App.w() && mx > iron.App.x() &&
 				my < iron.App.h() && my > iron.App.y()) {
-				
+
 				if (Context.tool == ToolClone && kb.down("alt")) { // Clone source
 					cloneStartX = mx;
 					cloneStartY = my;
@@ -817,7 +817,7 @@ class UITrait {
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-			
+
 			if (!brush3d || in2dView || decal) {
 				if (decal) {
 					psize = Std.int(256 * (brushRadius * brushNodesRadius));
@@ -870,7 +870,7 @@ class UITrait {
 	}
 
 	function renderUI(g:kha.graphics2.Graphics) {
-		
+
 		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
 
@@ -920,7 +920,7 @@ class UITrait {
 			var _w = ui._w;
 			ui._w = Std.int(ui._w * 0.5);
 			ui._x += 1; // Prevent "File" button highlight on startup
-			
+
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
@@ -930,7 +930,7 @@ class UITrait {
 			if (ui.button("Edit", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 1; };
 			if (ui.button("View", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 2; };
 			if (ui.button("Help", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 3; };
-			
+
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
 			ui.t.BUTTON_COL = BUTTON_COL;
@@ -1038,7 +1038,7 @@ class UITrait {
 					if (Context.tool != ToolFill) {
 						brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.01, 2.0, true);
 					}
-					
+
 					if (Context.tool == ToolBrush  ||
 						Context.tool == ToolFill   ||
 						Context.tool == ToolDecal  ||
@@ -1066,9 +1066,9 @@ class UITrait {
 							}
 						}
 					}
-					
+
 					brushOpacity = ui.slider(brushOpacityHandle, "Opacity", 0.0, 1.0, true);
-					
+
 					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
 					}
@@ -1137,7 +1137,7 @@ class UITrait {
 						if (xrayHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
-						
+
 						var symXHandle = Id.handle({selected: false});
 						var symYHandle = Id.handle({selected: false});
 						var symZHandle = Id.handle({selected: false});
@@ -1150,7 +1150,7 @@ class UITrait {
 						if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
-						
+
 						ui._w = _w;
 					}
 				}
@@ -1182,7 +1182,7 @@ class UITrait {
 				ui._w = _w;
 			}
 		}
-		
+
 		tabx = System.windowWidth() - windowW;
 		if (tabh == 0) {
 			tabh = tabh1 = tabh2 = Std.int(System.windowHeight() / 3);

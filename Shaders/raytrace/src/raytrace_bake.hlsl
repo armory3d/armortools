@@ -9,7 +9,7 @@ struct Vertex {
 };
 
 struct RayGenConstantBuffer {
-	float4 v0; // frame
+	float4 v0; // frame, strength, radius, offset
 	float4 v1;
 	float4 v2;
 	float4 v3;
@@ -48,12 +48,10 @@ void raygeneration() {
 	RayPayload payload;
 
 	RayDesc ray;
-	ray.TMin = 0.01;
-	ray.TMax = 10.0;
-	// ray.TMin = 0.005; // cavity
-	// ray.TMax = 0.01;
+	ray.TMin = v0.w * 0.01;
+	ray.TMax = v0.z * 10.0;
 	ray.Origin = pos;
-	
+
 	float3 accum = float3(0, 0, 0);
 
 	for (int i = 0; i < SAMPLES; ++i) {
