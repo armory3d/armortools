@@ -19,7 +19,7 @@ class Console {
 	static var lrow = [1/2, 1/2];
 	static var haxeTrace:Dynamic->haxe.PosInfos->Void = null;
 	static var lastTraces:Array<String> = [''];
-	
+
 	static function consoleTrace(v:Dynamic, ?inf:haxe.PosInfos) {
 		lastTraces.unshift(Std.string(v));
 		if (lastTraces.length > 10) lastTraces.pop();
@@ -46,12 +46,12 @@ class Console {
 
 		graph.g2.color = 0xff000000;
 		graph.g2.fillRect(280 - 3, 33 - 17, 3, 1);
-		
+
 		graph.g2.end();
 	}
 
 	public static function render(ui:Zui) {
-		
+
 		if (first) {
 			iron.App.notifyOnRender2D(tick);
 			first = false;

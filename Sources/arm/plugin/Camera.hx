@@ -3,6 +3,7 @@ package arm.plugin;
 import iron.system.Input;
 import iron.system.Time;
 import iron.math.Vec4;
+import iron.math.Mat4;
 import arm.ui.UITrait;
 import arm.util.ViewportUtil;
 
@@ -11,6 +12,7 @@ class Camera {
 	public static var inst:Camera;
 	public static var dist = 0.0;
 	static inline var speed = 2.0;
+	public var views:Array<Mat4>;
 	var redraws = 0;
 	var first = true;
 	var dir = new Vec4();
@@ -22,7 +24,7 @@ class Camera {
 		inst = this;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
-		
+
 		iron.App.notifyOnUpdate(function() {
 			if (Input.occupied ||
 				!App.uienabled ||
@@ -30,13 +32,15 @@ class Camera {
 				UITrait.inst.isScrolling ||
 				mouse.x < 0 ||
 				mouse.x > iron.App.w()) return;
-			
+
 			var camera = iron.Scene.active.camera;
 
 			if (first) {
 				first = false;
 				reset();
 			}
+
+
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = UITrait.inst.cameraControls;
@@ -128,7 +132,7 @@ class Camera {
 				if (mouse.wheelDelta != 0) {
 					fast *= Math.abs(mouse.wheelDelta) * 4.0;
 				}
-				
+
 				if (moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
 					ease += Time.delta * 15;
 					if (ease > 1.0) ease = 1.0;
@@ -167,12 +171,13 @@ class Camera {
 				if (UITrait.inst.cameraType == 1) {
 					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 				}
-			} 
+			}
 		});
 	}
 
 	public function reset() {
 		var camera = iron.Scene.active.camera;
 		dist = camera.transform.loc.length();
+		views = [camera.transform.local.clone(), camera.transform.local.clone()];
 	}
 }

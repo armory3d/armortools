@@ -31,7 +31,7 @@ class UIMenu {
 		var py = UITrait.inst.headerh;
 		var menuItems = [6, 2, 13, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
-		
+
 		g.color = ui.t.SEPARATOR_COL;
 		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
 		var sepw = menuw / ui.SCALE;
@@ -43,7 +43,7 @@ class UIMenu {
 		else {
 			g.fillRect(px, py, menuw, ph);
 		}
-		
+
 		g.end();
 
 		ui.beginLayout(g, Std.int(px), Std.int(py), menuw);
@@ -98,6 +98,9 @@ class UIMenu {
 					UITrait.inst.toggleDistractFree();
 					UITrait.inst.ui.isHovered = false;
 				}
+				// if (ui.button("Split View", Left)) {
+				// 	UITrait.inst.splitView = !UITrait.inst.splitView;
+				// }
 
 				// ui.button("Show Envmap", Left);
 				// ui.button("Wireframe", Left);

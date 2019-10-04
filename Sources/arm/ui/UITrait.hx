@@ -52,6 +52,8 @@ class UITrait {
 	public var isScrolling = false;
 	public var colorIdPicked = false;
 	public var show = true;
+	public var splitView = false;
+	public var viewIndex = 0;
 	public var materialPreview = false; // Drawing material previews
 	public var savedCamera = Mat4.identity();
 	public var baseRPicked = 0.0;

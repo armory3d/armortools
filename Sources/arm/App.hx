@@ -32,8 +32,6 @@ using StringTools;
 class App {
 
 	public static var version = "0.7";
-	public static function x():Int { return appx; }
-	public static function y():Int { return appy; }
 	static var appx = 0;
 	static var appy = 0;
 	static var winw = 0;
@@ -193,6 +191,8 @@ class App {
 			res = System.windowWidth();
 		}
 
+		if (UITrait.inst != null && UITrait.inst.splitView) res = Std.int(res / 2);
+
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
@@ -209,6 +209,15 @@ class App {
 		if (UITrait.inst != null && UITrait.inst.show && res > 0) res -= UITrait.inst.headerh * 3;
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
+	}
+
+	public static function x():Int {
+		if (UITrait.inst.splitView && UITrait.inst.viewIndex == 1) return appx + w();
+		return appx;
+	}
+
+	public static function y():Int {
+		return appy;
 	}
 
 	#if arm_resizable

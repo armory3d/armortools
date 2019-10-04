@@ -447,6 +447,31 @@ class RenderPathDeferred {
 
 		var ssaa4 = Config.raw.rp_supersample == 4 ? true : false;
 
+		if (UITrait.inst.splitView) {
+			UITrait.inst.viewIndex = Input.getMouse().x > arm.App.w() ? 1 : 0;
+			if (UITrait.inst.viewIndex == 1) {
+				if (path.renderTargets.get("taa_split") == null) {
+					{
+						var t = new RenderTargetRaw();
+						t.name = "taa_split";
+						t.width = 0;
+						t.height = 0;
+						#if kha_direct3d12 // Match raytrace_target format
+						t.format = "RGBA128";
+						#else
+						t.format = "RGBA32";
+						#end
+						t.scale = Inc.getSuperSampling();
+						path.createRenderTarget(t);
+					}
+				}
+			}
+			var cam = Scene.active.camera;
+			arm.plugin.Camera.inst.views[0].setFrom(cam.transform.local);
+			cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+			cam.buildMatrix();
+		}
+
 		#if arm_painter
 
 		var mouse = Input.getMouse();
@@ -460,7 +485,7 @@ class RenderPathDeferred {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");
-				path.bindTarget("taa", "tex");
+				path.bindTarget(UITrait.inst.viewIndex > 0 ? "taa_split" : "taa", "tex");
 				ssaa4 ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -948,14 +973,15 @@ class RenderPathDeferred {
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-			path.setTarget("taa");
+			var taa = UITrait.inst.viewIndex > 0 ? "taa_split" : "taa";
+			path.setTarget(taa);
 			path.bindTarget(current, "tex");
 			path.bindTarget(last, "tex2");
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/taa_pass/taa_pass");
 			if (!ssaa4) {
 				path.setTarget("");
-				path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
+				path.bindTarget(taaFrame == 0 ? current : taa, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 			}
 		}
