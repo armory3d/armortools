@@ -1012,6 +1012,10 @@ class UITrait {
 						bakeAoRadius = ui.slider(radiusHandle, "Radius", 0.0, 2.0, true);
 						var offsetHandle = Id.handle({value: bakeAoOffset});
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
+						#if kha_direct3d12
+						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
+						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
+						#end
 					}
 					if (bakeType == 1) { // Curvature
 						var strengthHandle = Id.handle({value: bakeCurvStrength});

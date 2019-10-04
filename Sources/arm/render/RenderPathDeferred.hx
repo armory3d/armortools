@@ -627,42 +627,6 @@ class RenderPathDeferred {
 				}
 				#if kha_direct3d12
 				else if (UITrait.inst.bakeType == 0) { // AO (DXR)
-					if (path.renderTargets.get("baketex0") == null) {
-						{
-							var t = new RenderTargetRaw();
-							t.name = "baketex0";
-							t.width = Config.getTextureRes();
-							t.height = Config.getTextureRes();
-							t.format = "RGBA64";
-							path.createRenderTarget(t);
-						}
-						{
-							var t = new RenderTargetRaw();
-							t.name = "baketex1";
-							t.width = Config.getTextureRes();
-							t.height = Config.getTextureRes();
-							t.format = "RGBA64";
-							path.createRenderTarget(t);
-						}
-						{
-							var t = new RenderTargetRaw();
-							t.name = "baketex2";
-							t.width = Config.getTextureRes();
-							t.height = Config.getTextureRes();
-							t.format = "RGBA128";  // Match raytrace_target format
-							path.createRenderTarget(t);
-						}
-					}
-					if (!RenderPathRaytrace.ready) {
-						UITrait.inst.bakeType = -1;
-						MaterialParser.parsePaintMaterial();
-						for (i in 0...4) { // Jitter
-							path.setTarget("baketex0", ["baketex1"]);
-							path.drawMeshes("paint");
-						}
-						UITrait.inst.bakeType = 0;
-						// MaterialParser.parsePaintMaterial();
-					}
 					RenderPathRaytrace.commandsBake();
 				}
 				#end
@@ -706,7 +670,7 @@ class RenderPathDeferred {
 		var viewport = false;
 		if (viewport) {
 			if (Context.ddirty > 1) {
-				RenderPathRaytrace.frame = 0.0;
+				RenderPathRaytrace.frame = 0;
 			}
 			RenderPathRaytrace.commands();
 			path.setTarget("taa");

@@ -30,6 +30,9 @@ class TabExport {
 					UVUtil.uvmapCached = false;
 					UVUtil.trianglemap = null;
 					UVUtil.trianglemapCached = false;
+					#if kha_direct3d12
+					arm.render.RenderPathRaytrace.ready = false;
+					#end
 				}
 				ui.combo(UITrait.inst.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
 				if (UITrait.inst.bitsHandle.changed) {
@@ -49,7 +52,7 @@ class TabExport {
 				ui.row([1/2, 1/2]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
 				UITrait.inst.outputType = ui.combo(Id.handle(), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
-				
+
 				if (ui.panel(Id.handle({selected: false}), "Channels")) {
 					ui.row([1/2, 1/2]);
 					UITrait.inst.isBase = ui.check(Id.handle({selected: UITrait.inst.isBase}), "Base Color");

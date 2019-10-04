@@ -48,8 +48,8 @@ void raygeneration() {
 	RayPayload payload;
 
 	RayDesc ray;
-	ray.TMin = v0.w * 0.01;
-	ray.TMax = v0.z * 10.0;
+	ray.TMin = constant_buffer.v0.w * 0.01;
+	ray.TMax = constant_buffer.v0.z * 10.0;
 	ray.Origin = pos;
 
 	float3 accum = float3(0, 0, 0);
@@ -68,7 +68,12 @@ void raygeneration() {
 	if (constant_buffer.v0.x == 0) {
 		color = accum.xyz;
 	}
-	render_target[DispatchRaysIndex().xy] = float4(lerp(color.xyz, accum.xyz, 1.0 / 30.0), 0.0f);
+	else {
+		float a = 1.0 / constant_buffer.v0.x;
+		float b = 1.0 - a;
+		color = color * b + accum.xyz * a;
+	}
+	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
 }
 
 [shader("closesthit")]

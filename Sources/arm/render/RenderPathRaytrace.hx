@@ -3,12 +3,15 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
+import arm.nodes.MaterialParser;
 
 #if kha_direct3d12
 
 class RenderPathRaytrace {
 
-	public static var frame = 0.0;
+	public static var frame = 0;
+	public static var raysPix = 0;
+	public static var raysSec = 0;
 	public static var ready = false;
 	static var f32 = new kha.arrays.Float32Array(20);
 	static var helpMat = iron.math.Mat4.identity();
@@ -17,6 +20,8 @@ class RenderPathRaytrace {
 	static var bsobol:kha.Image;
 	static var bscramble:kha.Image;
 	static var brank:kha.Image;
+	static var raysTimer = 0.0;
+	static var raysCounter = 0;
 
 	static function init() {
 		iron.data.Data.getBlob("raytrace_brute.cso", function(shader:kha.Blob) {
@@ -43,7 +48,7 @@ class RenderPathRaytrace {
 		f32[1] = ct.worldy();
 		f32[2] = ct.worldz();
 		f32[3] = frame;
-		frame = (Std.int(frame) % 4) + 1;
+		frame = (frame % 4) + 1;
 		f32[4] = helpMat._00;
 		f32[5] = helpMat._01;
 		f32[6] = helpMat._02;
@@ -91,7 +96,55 @@ class RenderPathRaytrace {
 	}
 
 	public static function commandsBake() {
-		if (!ready) { ready = true; initBake(); return; }
+
+		var path = RenderPathDeferred.path;
+
+		if (!ready) {
+			ready = true;
+
+			if (path.renderTargets.get("baketex0") != null) {
+				path.renderTargets.get("baketex0").image.unload();
+				path.renderTargets.get("baketex1").image.unload();
+				path.renderTargets.get("baketex2").image.unload();
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "baketex0";
+				t.width = Config.getTextureRes();
+				t.height = Config.getTextureRes();
+				t.format = "RGBA64";
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "baketex1";
+				t.width = Config.getTextureRes();
+				t.height = Config.getTextureRes();
+				t.format = "RGBA64";
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "baketex2";
+				t.width = Config.getTextureRes();
+				t.height = Config.getTextureRes();
+				t.format = "RGBA128";  // Match raytrace_target format
+				path.createRenderTarget(t);
+			}
+
+			UITrait.inst.bakeType = -1;
+			MaterialParser.parsePaintMaterial();
+			for (i in 0...4) { // Jitter
+				path.setTarget("baketex0", ["baketex1"]);
+				path.drawMeshes("paint");
+			}
+			UITrait.inst.bakeType = 0;
+			// MaterialParser.parsePaintMaterial();
+
+			initBake();
+			return;
+		}
 
 		if (UITrait.inst.brushTime > 0) {
 			Context.pdirty = 2;
@@ -99,23 +152,32 @@ class RenderPathRaytrace {
 		}
 
 		if (Context.pdirty > 0) {
-			f32[0] = frame;
+			f32[0] = frame++;
 			f32[1] = UITrait.inst.bakeAoStrength;
 			f32[2] = UITrait.inst.bakeAoRadius;
 			f32[3] = UITrait.inst.bakeAoOffset;
-			frame = (Std.int(frame) % 30) + 1;
 
-			var path = RenderPathDeferred.path;
 			var baketex2 = path.renderTargets.get("baketex2").image;
-
 			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
 
 			path.setTarget("texpaint" + Context.layer.id);
 			path.bindTarget("baketex2", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
+
+			raysPix = frame * 64;
+			raysCounter += 64;
+			raysTimer += iron.system.Time.realDelta;
+			if (raysTimer >= 1) {
+				raysSec = raysCounter;
+				raysTimer = 0;
+				raysCounter = 0;
+			}
+			UITrait.inst.headerHandle.redraws = 2;
 		}
 		else {
 			frame = 0;
+			raysTimer = 0;
+			raysCounter = 0;
 		}
 	}
 
