@@ -20,7 +20,7 @@ class TabExport {
 						UITrait.inst.textureExportPath = path;
 					}
 				}
-				if (ui.isHovered) ui.tooltip("Export texture files (Ctrl + Shift + E)");
+				if (ui.isHovered) ui.tooltip("Export texture files (" + Config.keymap.export_textures + ")");
 
 				ui.row([1/2, 1/2]);
 				ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);

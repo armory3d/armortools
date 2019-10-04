@@ -70,7 +70,7 @@ class TabMaterials {
 			if (ui.button("Nodes")) {
 				UITrait.inst.showMaterialNodes();
 			}
-			else if (ui.isHovered) ui.tooltip("Show Node Editor (TAB)");
+			else if (ui.isHovered) ui.tooltip("Show Node Editor (" + Config.keymap.toggle_2d_view + ")");
 
 			var slotw = Std.int(51 * ui.SCALE);
 			var num = Std.int(UITrait.inst.windowW / slotw);
@@ -121,7 +121,7 @@ class TabMaterials {
 							var m = materials[i];
 							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
-							
+
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);
 								Layers.createFillLayer();
@@ -144,7 +144,7 @@ class TabMaterials {
 								materials.splice(i, 1);
 								UITrait.inst.hwnd1.redraws = 2;
 							}
-							
+
 							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
 							var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
 							var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});

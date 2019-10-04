@@ -18,8 +18,8 @@ class TabLayers {
 				History.newLayer();
 			}
 			if (ui.button("2D View")) UITrait.inst.show2DView();
-			else if (ui.isHovered) ui.tooltip("Show 2D View (SHIFT+TAB)");
-			
+			else if (ui.isHovered) ui.tooltip("Show 2D View (" + Config.keymap.toggle_node_editor + ")");
+
 			var ar = ["All"];
 			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
@@ -63,7 +63,7 @@ class TabLayers {
 				else {
 					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
 				}
-				
+
 				var center = (step / 2) * ui.SCALE;
 				ui._y += center;
 				l.visible = ui.check(h, "");

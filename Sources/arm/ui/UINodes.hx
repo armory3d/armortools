@@ -337,17 +337,17 @@ class UINodes {
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
-		
+
 		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
-		
+
 		g.end();
 
 		if (grid == null) drawGrid();
 
 		// Start with UI
 		ui.begin(g);
-		
+
 		// Make window
 		ww = defaultWindowW;
 		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
@@ -359,7 +359,7 @@ class UINodes {
 			wy = iron.App.h() - defaultWindowH + UITrait.inst.headerh * 2;
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
-			
+
 			// Grid
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
@@ -428,7 +428,7 @@ class UINodes {
 			ui._x += ew + 3;
 			ui._y = 3;
 			if (ui.button("Search")) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
-			if (ui.isHovered) ui.tooltip("(Space)");
+			if (ui.isHovered) ui.tooltip("Search for nodes (" + Config.keymap.node_search + ")");
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 		}
@@ -439,7 +439,7 @@ class UINodes {
 			var list = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
-			
+
 			var ph = numNodes * 22 * ui.SCALE;
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
@@ -476,7 +476,7 @@ class UINodes {
 		if (showMenu) {
 			showMenu = false;
 			drawMenu = true;
-			
+
 		}
 		if (hideMenu) {
 			hideMenu = false;

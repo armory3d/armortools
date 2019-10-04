@@ -12,7 +12,7 @@ class TabMeshes {
 			ui.row([1/4]);
 
 			if (ui.button("Import")) Context.importMesh();
-			if (ui.isHovered) ui.tooltip("Import mesh file (Ctrl + Shift + I)");
+			if (ui.isHovered) ui.tooltip("Import mesh file (" + Config.keymap.import_assets  + ")");
 
 			UITrait.inst.isUdim = ui.check(Id.handle({selected: UITrait.inst.isUdim}), "UDIM Import");
 			if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");

@@ -22,7 +22,7 @@ class TabTextures {
 					Importer.importFile(path);
 				}
 			}
-			if (ui.isHovered) ui.tooltip("Import texture file (Ctrl + Shift + I)");
+			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.import_assets + ")");
 
 			if (ui.button("2D View")) UITrait.inst.show2DView(1);
 
@@ -32,13 +32,13 @@ class TabTextures {
 				var num = Std.int(UITrait.inst.windowW / slotw);
 
 				for (i in 0...Project.assets.length) {
-					
+
 					// Align into rows
 					if (i % num == 0) {
 						ui._y += ui.ELEMENT_OFFSET() * 1.5;
 						ui.row([for (i in 0...num) 1/num]);
 					}
-					
+
 					var asset = Project.assets[i];
 					if (asset == Context.texture) {
 						var off = i % 2 == 1 ? 1 : 0;

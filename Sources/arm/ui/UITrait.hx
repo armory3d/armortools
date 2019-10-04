@@ -1167,7 +1167,7 @@ class UITrait {
 			var cam = scene.cameras[0];
 			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
 			cameraType = ui.combo(camHandle, ["Perspective", "Orthographic"], "Type");
-			if (ui.isHovered) ui.tooltip("Camera Type (5)");
+			if (ui.isHovered) ui.tooltip("Camera Type (" + Config.keymap.view_camera_type + ")");
 			if (camHandle.changed) {
 				ViewportUtil.updateCameraType(cameraType);
 			}
