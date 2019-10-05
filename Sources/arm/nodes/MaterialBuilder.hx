@@ -74,7 +74,7 @@ class MaterialBuilder {
 		if (Context.tool == ToolColorId || Context.tool == ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
-			
+
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('vec4 inp', '_inputBrush');
@@ -156,7 +156,7 @@ class MaterialBuilder {
 			Context.tool == ToolBlur   ||
 			Context.tool == ToolParticle ||
 			decal) {
-			
+
 			var depthReject = !UITrait.inst.xray;
 			if (UITrait.inst.brush3d && !UITrait.inst.brushDepthReject) depthReject = false;
 
@@ -202,7 +202,7 @@ class MaterialBuilder {
 						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
 						frag.write('wn = normalize(wn);');
 						frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
-						
+
 						if (UITrait.inst.brushAngleReject && !UITrait.inst.xray) {
 							frag.write('if (planeDist < -0.01) discard;');
 							frag.n = true;
@@ -241,12 +241,12 @@ class MaterialBuilder {
 					frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
 					frag.write('binplast.x *= aspectRatio;');
 					frag.write('binplast = binplast * 0.5 + 0.5;');
-					
+
 					frag.write('vec2 pa = bsp.xy - binp.xy;');
 					frag.write('vec2 ba = binplast.xy - binp.xy;');
 					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 					frag.write('float dist = length(pa - ba * h);');
-					
+
 					frag.write('if (dist > brushRadius) discard;');
 
 					// Non-continuous
@@ -327,7 +327,7 @@ class MaterialBuilder {
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 			}
-			
+
 			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
 
 			if (UITrait.inst.brushRot > 0.0) {
@@ -360,7 +360,7 @@ class MaterialBuilder {
 		}
 
 		if (Context.tool == ToolClone || Context.tool == ToolBlur) {
-			
+
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
@@ -565,7 +565,7 @@ class MaterialBuilder {
 
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
-			
+
 			var height = '0.0';
 			if (Context.material.paintHeight && heightUsed) {
 				height = 'height';
@@ -814,14 +814,14 @@ class MaterialBuilder {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: (UITrait.inst.culling || !isScene) ? 'clockwise' : 'none',
+			cull_mode: (Config.raw.rp_culling || !isScene) ? 'clockwise' : 'none',
 			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
 
 		frag.ins = vert.outs;
-		
+
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write_attrib('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
 
@@ -926,13 +926,13 @@ class MaterialBuilder {
 		vert.write_attrib('spos.xyz += emitFrom * 256;');
 
 		vert.add_uniform('mat4 pd', '_particleData');
-			
+
 		var str_tex_hash = "float fhash(float n) { return fract(sin(n) * 43758.5453); }\n";
 		vert.add_function(str_tex_hash);
 		vert.add_out('float p_age');
 		vert.write('p_age = pd[3][3] - gl_InstanceID * pd[0][1];');
 		vert.write('p_age -= p_age * fhash(gl_InstanceID) * pd[2][3];');
-		
+
 		vert.write('if (pd[0][0] > 0 && p_age < 0) p_age += (int(-p_age / pd[0][0]) + 1) * pd[0][0];');
 
 		vert.add_out('float p_lifetime');
@@ -968,7 +968,7 @@ class MaterialBuilder {
 
 		vert.add_out('float p_fade');
 		vert.write('p_fade = sin(min((p_age / 8) * 3.141592, 3.141592));');
-		
+
 		frag.add_out('float fragColor');
 		frag.write('fragColor = p_fade;');
 
@@ -992,7 +992,7 @@ class MaterialBuilder {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: UITrait.inst.culling ? 'clockwise' : 'none',
+			cull_mode: Config.raw.rp_culling ? 'clockwise' : 'none',
 			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
@@ -1237,7 +1237,7 @@ class MaterialBuilder {
 						Context.layer.paintMet) {
 						frag.add_shared_sampler('sampler2D texpaint_pack' + id);
 						frag.write('col_pack0 = textureLodShared(texpaint_pack' + id + ', texCoord, 0.0);');
-					
+
 						if (Context.layer.paintOcc) {
 							frag.write('occlusion = mix(occlusion, col_pack0.r, factor0);');
 						}

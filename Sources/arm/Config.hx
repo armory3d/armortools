@@ -45,6 +45,7 @@ class Config {
 
 		#if arm_painter
 		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
+		if (raw.rp_culling == null) raw.rp_culling = true;
 		if (raw.keymap == null) {
 			raw.keymap = {};
 			raw.keymap.action_paint = "left";
@@ -129,10 +130,10 @@ class Config {
 
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
-		
+
 		save();
 		Inc.applyConfig();
-		
+
 		if (current != null) current.begin(false);
 		Context.ddirty = 2;
 	}
@@ -199,4 +200,5 @@ typedef TConfig = {
 	@:optional var plugins:Array<String>;
 	@:optional var undo_steps:Null<Int>;
 	@:optional var keymap:Dynamic; // Map<String, String>
+	@:optional var rp_culling:Null<Bool>;
 }
