@@ -23,7 +23,7 @@ class Sphere {
 		nora = new kha.arrays.Int16Array(widthVerts * heightVerts * 2);
 		texa = new kha.arrays.Int16Array(widthVerts * heightVerts * 2);
 		inda = new kha.arrays.Uint32Array(widthSegments * heightSegments * 6 - widthSegments * 6);
-		
+
 		var nor = new iron.math.Vec4();
 		var pos = 0;
 		for (y in 0...heightVerts) {

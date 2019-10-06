@@ -14,7 +14,7 @@ import arm.Config;
 using StringTools;
 
 class Main {
-	
+
 	static var tasks:Int;
 
 	public static function main() {
@@ -25,7 +25,7 @@ class Main {
 
 	static function start() {
 		if (tasks > 0) return;
-		
+
 		if (Config.raw == null) Config.raw = {};
 		var c = Config.raw;
 		if (c.window_mode == null) c.window_mode = 0;
@@ -38,7 +38,7 @@ class Main {
 		if (c.window_y == null) c.window_y = -1;
 		if (c.window_scale == null) c.window_scale = 1.0;
 		if (c.window_vsync == null) c.window_vsync = true;
-		
+
 		var windowMode = c.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
 		var windowFeatures = None;
 		if (c.window_resizable) windowFeatures |= FeatureResizable;

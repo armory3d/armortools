@@ -112,7 +112,7 @@ class Gizmo {
 			var t = Context.object.transform;
 			var v = new Vec4();
 			v.set(t.worldx(), t.worldy(), t.worldz());
-			
+
 			if (UITrait.inst.axisX) {
 				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.x, mouse.y, Scene.active.camera);
 				if (hit != null) {

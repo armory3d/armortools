@@ -16,7 +16,7 @@ class Pako
 {
   /** Version of ported pako lib (https://github.com/nodeca/pako). */
   inline static public var VERSION:String = "1.0.4";
-  
+
   /**
    * deflate(data[, options]) -> Uint8Array|Array|String
    * - data (Uint8Array|Array|String): input data to compress.

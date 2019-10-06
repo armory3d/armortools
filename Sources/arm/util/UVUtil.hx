@@ -12,7 +12,7 @@ class UVUtil {
 
 	public static function cacheUVMap() {
 		if (uvmapCached) return;
-		
+
 		var res = Config.getTextureRes();
 		if (uvmap == null) {
 			uvmap = Image.createRenderTarget(res, res);

@@ -13,7 +13,7 @@ vec3 L4;
 
 float integrateEdge(vec3 v1, vec3 v2) {
 	float cosTheta = dot(v1, v2);
-	float theta = acos(cosTheta);    
+	float theta = acos(cosTheta);
 	float res = cross(v1, v2).z * ((theta > 0.001) ? theta / sin(theta) : 1.0);
 	return res;
 }
@@ -104,7 +104,7 @@ int clipQuadToHorizon(/*inout vec3 L[5], out int n*/) {
 	else if (config == 15) { // V1 V2 V3 V4
 		n = 4;
 	}
-	
+
 	if (n == 3) L3 = L0;
 	if (n == 4) L4 = L0;
 	return n;
@@ -129,7 +129,7 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 
 	// int n;
 	int n = clipQuadToHorizon(/*L, n*/);
-	
+
 	if (n == 0) return 0.0;
 
 	// Project onto sphere
@@ -145,7 +145,7 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 	sum += integrateEdge(L0, L1);
 	sum += integrateEdge(L1, L2);
 	sum += integrateEdge(L2, L3);
-	
+
 	if (n >= 4) sum += integrateEdge(L3, L4);
 	if (n == 5) sum += integrateEdge(L4, L0);
 

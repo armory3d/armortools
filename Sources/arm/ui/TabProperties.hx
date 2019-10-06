@@ -43,7 +43,7 @@ class TabProperties {
 
 				ui.row(UITrait.inst.row4);
 				ui.text("Rotation");
-				
+
 				h = Id.handle();
 				h.text = roundfp(rot.x) + "";
 				f = Std.parseFloat(ui.textInput(h, "X"));
@@ -72,7 +72,7 @@ class TabProperties {
 
 				ui.row(UITrait.inst.row4);
 				ui.text("Scale");
-				
+
 				h = Id.handle();
 				h.text = roundfp(scale.x) + "";
 				f = Std.parseFloat(ui.textInput(h, "X"));

@@ -110,14 +110,14 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	uint base_index = PrimitiveIndex() * triangleIndexStride;
 	uint3 indices_sample = indices.Load3(base_index);
 
-	float3 vertex_normals[3] = { 
+	float3 vertex_normals[3] = {
 		float3(vertices[indices_sample[0]].normal),
 		float3(vertices[indices_sample[1]].normal),
 		float3(vertices[indices_sample[2]].normal)
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
-	float2 vertex_uvs[3] = { 
+	float2 vertex_uvs[3] = {
 		float2(vertices[indices_sample[0]].tex),
 		float2(vertices[indices_sample[1]].tex),
 		float2(vertices[indices_sample[2]].tex)
@@ -128,7 +128,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * 2048, 0)).rgb;
 	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * 2048, 0)).rgb;
 	float3 color = payload.color.rgb * texpaint0.rgb;
-	
+
 	if (texpaint2.b >= 0.99) {
 		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), texpaint2.g);
 	}

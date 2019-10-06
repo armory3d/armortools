@@ -18,7 +18,7 @@ void main() {
 	gl_Position = vec4(pos.xy, 0.0, 1.0);
 
 	// NDC (at the back of cube)
-	vec4 v = vec4(pos.x, pos.y, 1.0, 1.0);		
+	vec4 v = vec4(pos.x, pos.y, 1.0, 1.0);
 	v = vec4(invP * v);
 	viewRay = vec3(v.xy / v.z, 1.0);
 }

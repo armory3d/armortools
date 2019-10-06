@@ -119,7 +119,7 @@ class LayerSlot {
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
 		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = other.texpaint_pack;
-		
+
 		RenderPath.active.renderTargets.get("texpaint" + other.ext).image = texpaint;
 		RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = texpaint_pack;
@@ -168,7 +168,7 @@ class LayerSlot {
 		g.end();
 
 		texpaint_mask.g2.begin();
-		
+
 		if (createMaskImage != null) texpaint_mask.g2.drawScaledImage(createMaskImage, 0, 0, texpaint_mask.width, texpaint_mask.height);
 		else texpaint_mask.g2.clear(createMaskColor);
 		texpaint_mask.g2.end();
@@ -239,7 +239,7 @@ class LayerSlot {
 		l.texpaint_pack.g2.pipeline = Layers.pipeCopy;
 		l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 		l.texpaint_pack.g2.end();
-		
+
 		l.texpaint_preview.g2.begin(true, 0xff000000);
 		l.texpaint_preview.g2.drawScaledImage(texpaint_preview, 0, 0, texpaint_preview.width, texpaint_preview.height);
 		l.texpaint_preview.g2.end();
@@ -269,14 +269,14 @@ class LayerSlot {
 		l.paintHeight = paintHeight;
 		l.paintEmis = paintEmis;
 		l.paintSubs = paintSubs;
-		
+
 		return l;
 	}
 
 	public function resizeAndSetBits() {
 		var format = UITrait.inst.bitsHandle.position == 0 ? TextureFormat.RGBA32 :
 					 UITrait.inst.bitsHandle.position == 1 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
-		
+
 		var res = Config.getTextureRes();
 		var rts = RenderPath.active.renderTargets;
 

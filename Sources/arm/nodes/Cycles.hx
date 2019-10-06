@@ -1,13 +1,13 @@
 //
 // This module builds upon Cycles nodes work licensed as
 // Copyright 2011-2013 Blender Foundation
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ import arm.nodes.CyclesShader;
 using StringTools;
 
 class Cycles {
-	
+
 	static var con:CyclesShaderContext;
 	static var vert:CyclesShader;
 	static var frag:CyclesShader;
@@ -284,7 +284,7 @@ class Cycles {
 		}
 	}
 
-	static function parse_shader(node:TNode, socket:TNodeSocket):TShaderOut { 
+	static function parse_shader(node:TNode, socket:TNodeSocket):TShaderOut {
 		var sout:TShaderOut = {
 			out_basecol: 'vec3(0.8, 0.8, 0.8)',
 			out_roughness: '0.0',
@@ -320,7 +320,7 @@ class Cycles {
 					sout.out_subsurface = parse_value_input(node.inputs[8]);
 				}
 			}
-			
+
 			if (parse_opacity) {
 				sout.out_opacity = parse_value_input(node.inputs[1]);
 			}
@@ -676,7 +676,7 @@ class Cycles {
 			if (sample_bump) write_bump(node, res);
 			return res;
 		}
-	
+
 		else if (node.type == 'TEX_WAVE') {
 			curshader.add_function(CyclesFunctions.str_tex_wave);
 			var co = '';
@@ -721,7 +721,7 @@ class Cycles {
 			var out_col = parse_vector_input(node.inputs[1]);
 			return 'mix($out_col, vec3(1.0, 1.0, 1.0) - ($out_col), $fac)';
 		}
-		
+
 		else if (node.type == 'MIX_RGB') {
 			var fac = parse_value_input(node.inputs[0]);
 			var fac_var = node_name(node) + '_fac';
@@ -893,7 +893,7 @@ class Cycles {
 			return 'wavelength_to_rgb(($wl - 450.0) / 150.0)';
 		}
 
-		// VECTOR 
+		// VECTOR
 
 		else if (node.type == 'CAMERA') {
 			// View Vector in camera space
@@ -1010,7 +1010,7 @@ class Cycles {
 				curshader.n = true;
 				res = 'n';
 			}
-			
+
 			res = '($res + $nor)';
 
 			if (!curshader.invTBN) {
@@ -1044,7 +1044,7 @@ class Cycles {
 			// if node.rotation[0] != 0.0:
 			//     a = node.rotation[0]
 			//     out = 'vec3({0}.y * {1} - {0}.z * {2}, {0}.y * {2} + {0}.z * {1}, 0.0)'.format(out, math.cos(a), math.sin(a))
-			
+
 			if (node_translation[0] != 0.0 || node_translation[1] != 0.0 || node_translation[2] != 0.0) {
 				out = '($out + ${vec3(node_translation)})';
 			}
@@ -1129,7 +1129,7 @@ class Cycles {
 		return 'vec3(0.0, 0.0, 0.0)';
 	}
 
-	static function parse_normal_map_color_input(inp:TNodeSocket, strength = '1.0') { 
+	static function parse_normal_map_color_input(inp:TNodeSocket, strength = '1.0') {
 		// if isInputLinked(inp) == False:
 		//     return
 		frag.write_normal++;
@@ -1733,7 +1733,7 @@ class Cycles {
 			}
 			else if (st == 'VALUE') {
 				var res = parse_value(from_node, from_socket);
-				if (res == null) 
+				if (res == null)
 					return null;
 				curshader.write('float $res_var = $res;');
 			}
@@ -1760,7 +1760,7 @@ class Cycles {
 		return node_name(node) + '_store';
 	}
 
-	static function texture_store(node:TNode, tex:TBindTexture, tex_name:String, to_linear = false):String {		
+	static function texture_store(node:TNode, tex:TBindTexture, tex_name:String, to_linear = false):String {
 		matcon.bind_textures.push(tex);
 		curshader.context.add_elem('tex', 'short2norm');
 		curshader.add_uniform('sampler2D $tex_name');
@@ -1785,7 +1785,7 @@ class Cycles {
 			// else:
 				curshader.write('vec4 $tex_store = texture($tex_name, $uv_name.xy);');
 		}
-		
+
 		if (sample_bump) {
 			sample_bump_res = tex_store;
 			curshader.write('float ${tex_store}_x = dFdx($tex_store).x;');
@@ -1892,7 +1892,7 @@ class Cycles {
 		tex.file = filepath;
 
 		var s = tex.file.split('.');
-		
+
 		if (s.length == 1) {
 			// log.warn(matname + '/' + image.name + ' - file extension required for image name')
 			return null;
@@ -1910,11 +1910,11 @@ class Cycles {
 		// 	if not os.path.exists(unpack_path):
 		// 		os.makedirs(unpack_path)
 		// 	unpack_filepath = unpack_path + '/' + tex['file']
-			
+
 		// 	if do_convert:
 		// 		if not os.path.isfile(unpack_filepath):
 		// 			arm.utils.write_image(image, unpack_filepath)
-			
+
 		// 	# Write bytes if size is different or file does not exist yet
 		// 	elif os.path.isfile(unpack_filepath) == False or os.path.getsize(unpack_filepath) != image.packed_file.size:
 		// 		with open(unpack_filepath, 'wb') as f:
@@ -1945,7 +1945,7 @@ class Cycles {
 
 		 // if image_format != 'RGBA32':
 			 // tex['format'] = image_format
-		
+
 		var interpolation = 'Smart';//image_node.interpolation;
 		var aniso = 'On';//wrd.anisotropic_filtering_state;
 		if (aniso == 'On') {
@@ -1954,7 +1954,7 @@ class Cycles {
 		// else if (aniso == 'Off' && interpolation == 'Smart') {
 			// interpolation = 'Linear';
 		// }
-		
+
 		// TODO: Blender seems to load full images on size request, cache size instead
 		// var powimage = true;//is_pow(image.size[0]) && is_pow(image.size[1]);
 
@@ -1986,7 +1986,7 @@ class Cycles {
 				// tex.u_addressing = 'clamp';
 				// tex.v_addressing = 'clamp';
 		// }
-		
+
 		// if image.source == 'MOVIE': # Just append movie texture trait for now
 		// 	movie_trait = {}
 		// 	movie_trait['type'] = 'Script'

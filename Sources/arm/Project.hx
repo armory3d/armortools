@@ -149,7 +149,7 @@ class Project {
 
 		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tesselated";
 		Data.getMesh("Scene", n, function(md:MeshData) {
-			
+
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
@@ -175,7 +175,7 @@ class Project {
 			Context.brush = brushes[0];
 
 			History.reset();
-			
+
 			UINodes.inst.updateCanvasMap();
 			MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();

@@ -45,14 +45,14 @@ class ImportFolder {
 			if (f.length == 0) continue;
 			f = f.rtrim();
 			if (!Path.checkTextureFormat(f)) continue;
-			
+
 			f = path + sep + f;
 			#if krom_windows
 			f = f.replace("/", "\\");
 			#end
 
 			// TODO: handle -albedo
-			
+
 			var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			var valid = false;
 			if (mapbase == "" && Path.checkBaseTex(base)) {
@@ -107,7 +107,7 @@ class ImportFolder {
 		var nout:TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
-		
+
 		var pos = 0;
 		if (mapbase != "") {
 			var n = NodesMaterial.createImageTexture();

@@ -75,7 +75,7 @@ class MaterialParser {
 			for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
-			
+
 			var matcon:TMaterialContext = { name: "mesh", bind_textures: [] };
 
 			var sd = new CyclesShaderData({name: "Material", canvas: null});
@@ -87,9 +87,9 @@ class MaterialParser {
 					break;
 				}
 			}
-			
+
 			if (sc != null) sc.delete();
-			
+
 			var compileError = false;
 			sc = new ShaderContext(con.data, function(sc:ShaderContext) {
 				if (sc == null) compileError = true;
@@ -122,7 +122,7 @@ class MaterialParser {
 
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
-		
+
 		if (UITrait.inst.worktab.position == SpaceScene) {
 			parseMeshPreviewMaterial();
 			return;
@@ -134,7 +134,7 @@ class MaterialParser {
 		_materialcontext = null;
 		//
 		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-		
+
 			var mat:TMaterial = {
 				name: "Material",
 				canvas: UINodes.inst.canvas
@@ -178,7 +178,7 @@ class MaterialParser {
 
 				// from_source is synchronous..
 				if (sc != null) sc.delete();
-				
+
 				var compileError = false;
 				sc = new ShaderContext(cdata, function(sc:ShaderContext) {
 					if (sc == null) compileError = true;
@@ -186,7 +186,7 @@ class MaterialParser {
 				if (compileError) return;
 				sc.overrideContext = {}
 				sc.overrideContext.addressing = "repeat";
-				
+
 				m.shader.raw.contexts.push(sc.raw);
 				m.shader.contexts.push(sc);
 				m.raw.contexts.push(_matcon);

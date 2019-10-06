@@ -90,7 +90,7 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {
 	#else
 	const float factor = voxelgiOcc * 0.90;
 	#endif
-	
+
 	#ifdef _VoxelCones1
 	return traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE) * factor;
 	#endif
@@ -110,7 +110,7 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {
 	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE);
 	return (col / 5.0) * factor;
 	#endif
-	
+
 	#ifdef _VoxelCones9
 	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE);
 	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE);

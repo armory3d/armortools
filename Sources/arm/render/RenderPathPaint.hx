@@ -7,7 +7,7 @@ import arm.ui.UITrait;
 import arm.Tool;
 
 class RenderPathPaint {
-	
+
 	static var initVoxels = true; // Bake AO
 
 	@:access(iron.RenderPath)
@@ -15,14 +15,14 @@ class RenderPathPaint {
 
 		var path = RenderPathDeferred.path;
 		var tid = Context.layer.id;
-		
+
 		if (Context.pdirty > 0 && UITrait.inst.worktab.position != SpaceScene) {
 			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
 				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
-				
+
 				var mo:MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
@@ -34,7 +34,7 @@ class RenderPathPaint {
 				mo.visible = false;
 				@:privateAccess path.end();
 			}
-			
+
 			if (Context.tool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
@@ -123,7 +123,7 @@ class RenderPathPaint {
 				#end
 				if (UITrait.inst.colorIdPicked) {
 					path.bindTarget("texpaint_colorid", "texpaint_colorid");
-				} 
+				}
 
 				// Read texcoords from gbuffer
 				var readTC = (Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
@@ -207,7 +207,7 @@ class RenderPathPaint {
 		g.setVertexBuffer(geom.vertexBuffer);
 		g.setIndexBuffer(geom.indexBuffers[0]);
 		g.drawIndexedVertices();
-		
+
 		g.disableScissor();
 		path.end();
 	}

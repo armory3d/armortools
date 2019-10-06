@@ -19,7 +19,7 @@ vec3 getPosView(const vec3 viewRay, const float depth, const vec2 cameraProj) {
 	return viewRay * linearDepth;
 }
 
-vec3 getPos(const vec3 eye, const vec3 eyeLook, const vec3 viewRay, const float depth, const vec2 cameraProj) {	
+vec3 getPos(const vec3 eye, const vec3 eyeLook, const vec3 viewRay, const float depth, const vec2 cameraProj) {
 	// eyeLook, viewRay should be normalized
 	float linearDepth = cameraProj.y / ((depth * 0.5 + 0.5) - cameraProj.x);
 	float viewZDist = dot(eyeLook, viewRay);
@@ -27,7 +27,7 @@ vec3 getPos(const vec3 eye, const vec3 eyeLook, const vec3 viewRay, const float 
 	return wposition;
 }
 
-vec3 getPosNoEye(const vec3 eyeLook, const vec3 viewRay, const float depth, const vec2 cameraProj) {	
+vec3 getPosNoEye(const vec3 eyeLook, const vec3 viewRay, const float depth, const vec2 cameraProj) {
 	// eyeLook, viewRay should be normalized
 	float linearDepth = cameraProj.y / ((depth * 0.5 + 0.5) - cameraProj.x);
 	float viewZDist = dot(eyeLook, viewRay);

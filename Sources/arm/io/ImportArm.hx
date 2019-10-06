@@ -134,7 +134,7 @@ class ImportArm {
 			});
 
 			for (i in 1...project.mesh_datas.length) {
-				var raw = project.mesh_datas[i];  
+				var raw = project.mesh_datas[i];
 				new MeshData(raw, function(md:MeshData) {
 					var object = iron.Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 					object.name = md.name;

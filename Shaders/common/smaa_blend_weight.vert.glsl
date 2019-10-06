@@ -17,7 +17,7 @@ void main() {
 	// Scale vertex attribute to [0-1] range
 	const vec2 madd = vec2(0.5, 0.5);
 	texCoord = pos.xy * madd + madd;
-	
+
 	// Blend Weight Calculation Vertex Shader
 	pixcoord = texCoord * screenSize;
 

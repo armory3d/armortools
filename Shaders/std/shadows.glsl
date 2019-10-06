@@ -107,7 +107,7 @@ float shadowTestCascade(sampler2DShadow shadowMap, const vec3 eye, const vec3 p,
 	int casi;
 	int casIndex;
 	mat4 LWVP = getCascadeMat(d, casi, casIndex);
-	
+
 	vec4 lPos = LWVP * vec4(p, 1.0);
 	lPos.xyz /= lPos.w;
 

@@ -372,7 +372,7 @@ class CyclesShader {
 				var out = outs[0];
 				// Multiple render targets
 				if (out.charAt(out.length - 1) == ']') {
-					num = Std.parseInt(out.charAt(out.length - 2)); 
+					num = Std.parseInt(out.charAt(out.length - 2));
 					s += 'vec4 fragColor[$num] : SV_TARGET0;\n';
 				}
 				else {
@@ -459,7 +459,7 @@ class CyclesShader {
 			}
 
 			s += 'return stage_output;\n';
-			
+
 		}
 		else {
 			if (outs.length > 0) {
@@ -476,7 +476,7 @@ class CyclesShader {
 			}
 		}
 		s += '}\n';
-		
+
 		#else // kha_opengl
 
 		#if kha_webgl

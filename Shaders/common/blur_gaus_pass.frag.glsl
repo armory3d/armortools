@@ -21,7 +21,7 @@ void main() {
 		fragColor.rgb += textureLod(tex, texCoord + s, 0.0).rgb * weight[i];
 		fragColor.rgb += textureLod(tex, texCoord - s, 0.0).rgb * weight[i];
 	}
-	
+
 	fragColor.rgb *= bloomStrength / 5;
 	fragColor.rgb = min(fragColor.rgb, 64.0);
 }

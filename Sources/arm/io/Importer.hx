@@ -171,7 +171,7 @@ class Importer {
 		}
 
 		new MeshData(raw, function(md:MeshData) {
-			
+
 			// Append
 			if (UITrait.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
@@ -192,7 +192,7 @@ class Importer {
 				#if arm_physics
 				object.addTrait(new armory.trait.physics.RigidBody(0.0));
 				#end
-				
+
 				Context.selectObject(object);
 			}
 			// Replace
@@ -217,7 +217,7 @@ class Importer {
 					iron.App.notifyOnRender(Layers.initLayers);
 					History.reset();
 				}
-				
+
 				Context.paintObject.setData(md);
 				Context.paintObject.name = mesh.name;
 
@@ -275,7 +275,7 @@ class Importer {
 		};
 
 		new MeshData(raw, function(md:MeshData) {
-			
+
 			var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 			object.name = mesh.name;
 			object.skip_context = "paint";

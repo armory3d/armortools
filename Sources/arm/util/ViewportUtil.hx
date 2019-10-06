@@ -6,7 +6,7 @@ import iron.math.Vec4;
 import arm.ui.UITrait;
 
 class ViewportUtil {
-	
+
 	public static function scaleToBounds() {
 		var po = Context.mergedObject == null ? Context.mainObject() : Context.mergedObject;
 		var md = po.data;

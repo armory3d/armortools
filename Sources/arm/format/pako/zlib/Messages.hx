@@ -17,7 +17,7 @@ class Messages
     ErrorStatus.Z_BUF_ERROR =>      'buffer error',        /* Z_BUF_ERROR     (-5) */
     ErrorStatus.Z_VERSION_ERROR =>  'incompatible version' /* Z_VERSION_ERROR (-6) */
   ];
-  
+
   static public function get(error:Int) {
     return "ERROR: " + map.get(error);
   }

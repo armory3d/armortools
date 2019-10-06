@@ -77,13 +77,13 @@ class UIView2D {
 		var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 		g.end();
-		
+
 		// Cache grid
 		if (UINodes.inst.grid == null) UINodes.inst.drawGrid();
 
 		// Ensure UV map is drawn
 		if (uvmapShow) UVUtil.cacheUVMap();
-		
+
 		ui.begin(g);
 		wh = iron.App.h();
 		if (UINodes.inst.show) {
@@ -107,7 +107,7 @@ class UIView2D {
 			else { // Texture
 				tex = UITrait.inst.getImage(Context.texture);
 			}
-			
+
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
@@ -139,7 +139,7 @@ class UIView2D {
 			ui._y = wh - ui.ELEMENT_H() * 1.2;
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
-			
+
 			if (type == 0) {
 				h.text = l.name;
 				l.name = ui.textInput(h, "", Right);
@@ -195,7 +195,7 @@ class UIView2D {
 			m.x + App.x() > wx + ww ||
 			m.y + App.y() < wy + headerh ||
 			m.y + App.y() > wy + wh) return;
-		
+
 		if (m.down("right") || m.down("middle")) {
 			panX += m.movementX;
 			panY += m.movementY;

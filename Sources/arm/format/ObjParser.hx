@@ -23,7 +23,7 @@ class ObjParser {
 	var ui = 0;
 	var ni = 0;
 	var buf:haxe.io.UInt8Array = null;
-	
+
 	static var vindOff = 0;
 	static var tindOff = 0;
 	static var nindOff = 0;
@@ -219,7 +219,7 @@ class ObjParser {
 					var tileV = Std.int((v1 + v2 + v3) / 3);
 					return tileU + tileV * tilesU;
 				}
-				
+
 				// Amount of indices pre tile
 				var num = new kha.arrays.Uint32Array(tilesU * tilesV);
 				for (i in 0...Std.int(inda.length / 3)) {

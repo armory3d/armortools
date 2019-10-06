@@ -84,13 +84,13 @@ float wardSpecular(vec3 N, vec3 H, float dotNL, float dotNV, float dotNH, vec3 f
 	// fiberDirection - parse from rotation
 	// shinyParallel - roughness
 	// shinyPerpendicular - anisotropy
-	
+
 	vec3 fiberParallel = normalize(fiberDirection);
 	vec3 fiberPerpendicular = normalize(cross(N, fiberDirection));
 	float dotXH = dot(fiberParallel, H);
 	float dotYH = dot(fiberPerpendicular, H);
 	const float PI = 3.1415926535;
-	float coeff = sqrt(dotNL/dotNV) / (4.0 * PI * shinyParallel * shinyPerpendicular); 
+	float coeff = sqrt(dotNL/dotNV) / (4.0 * PI * shinyParallel * shinyPerpendicular);
 	float theta = (pow(dotXH/shinyParallel, 2.0) + pow(dotYH/shinyPerpendicular, 2.0)) / (1.0 + dotNH);
 	return clamp(coeff * exp(-2.0 * theta), 0.0, 1.0);
 }

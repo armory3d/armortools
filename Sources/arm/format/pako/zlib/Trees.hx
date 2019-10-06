@@ -151,7 +151,7 @@ class Trees
     _length_code = new UInt16Array(MAX_MATCH - MIN_MATCH + 1);
     base_length = new UInt16Array(LENGTH_CODES);
     base_dist = new UInt16Array(D_CODES);
-    
+
     Common.zero(cast static_ltree);
     Common.zero(cast static_dtree);
     Common.zero(cast _dist_code);
@@ -301,7 +301,7 @@ class Trees
     }
     if (overflow == 0) { return; }
     h = HEAP_SIZE; // NOTE(hx): set h to last value
-    
+
     // Trace((stderr,"\nbit length overflow\n"));
     /* This happens for example on obj2 and pic of the Calgary corpus */
 
@@ -420,7 +420,7 @@ class Trees
       }
     }
     code = LENGTH_CODES - 1; // NOTE(hx): set code to last value
-    
+
     //Assert (length == 256, "tr_static_init: length != 256");
     /* Note that the length 255 (match length 258) can be represented
      * in two different ways: code 284 + 5 bits or code 285, so we
@@ -1221,7 +1221,7 @@ class StaticTreeDesc
   var max_length:Int;
 
   var has_stree:Bool;
-  
+
   function new(static_tree:UInt16Array, extra_bits:UInt16Array, extra_base, elems, max_length) {
     this.static_tree  = static_tree;  /* static tree or NULL */
     this.extra_bits   = extra_bits;   /* extra bits for each code or NULL */
@@ -1235,12 +1235,12 @@ class StaticTreeDesc
 }
 
 @:allow(arm.format.pako.zlib.Trees)
-class TreeDesc 
+class TreeDesc
 {
   var dyn_tree:UInt16Array;
   var max_code:Int;
   var stat_desc:StaticTreeDesc;
-  
+
   function new(dyn_tree, stat_desc) {
     this.dyn_tree = dyn_tree;     /* the dynamic tree */
     this.max_code = 0;            /* largest code with non zero frequency */

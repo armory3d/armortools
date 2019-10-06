@@ -17,7 +17,7 @@ class FbxBinaryParser {
 		var valid = readChars(magic.length) == magic;
 		if (!valid) return;
 		var version = read32();
-		root = { 
+		root = {
 			name : "Root",
 			props : [PInt(0), PString("Root"), PString("Root")],
 			childs : parseNodes()

@@ -112,7 +112,7 @@ class Deflate
 
   static inline var OS_CODE = 0x03; // Unix :) . Don't detect, use this default.
 
-  
+
   static inline function err(strm:ZStream, errorCode) {
     strm.msg = Messages.get(errorCode);
     return errorCode;
@@ -1022,9 +1022,9 @@ class Deflate
   }
 
   //NOTE(hx): Config moved to end of file
-  
+
   static var configuration_table:Vector<Config>;
-  
+
   static function __init__() {
     configuration_table = Vector.fromArrayCopy([
       /*      good lazy nice chain */
@@ -1041,7 +1041,7 @@ class Deflate
       new Config(32, 258, 258, 4096, deflate_slow)     /* 9 max compression */
     ]);
   }
-  
+
 
   /* ===========================================================================
    * Initialize the "longest match" routines for a new zlib stream
@@ -1181,11 +1181,11 @@ class Deflate
     //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
     //s->pending_buf = (uchf *) overlay;
     s.pending_buf_size = s.lit_bufsize * 4;
-    
+
     s.pending_buf = new UInt8Array(s.pending_buf_size);
 
     // NOTE(hx): bugfix https://github.com/nodeca/pako/commit/4a07e05823dbb110e522566c2a2fa8cb5ed6d4ff
-    
+
     // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
     //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
     s.d_buf = 1 * s.lit_bufsize;
@@ -1241,7 +1241,7 @@ class Deflate
           put_byte(s, 0);
           put_byte(s, 0);
           put_byte(s, 0);
-          //NOTE(hx): 
+          //NOTE(hx):
           put_byte(s, s.level == 9 ? 2 :
                       (s.strategy >= Strategy.Z_HUFFMAN_ONLY || s.level < 2 ?
                        4 : 0));
@@ -1565,7 +1565,7 @@ class Deflate
 
     return status == BUSY_STATE ? err(strm, ErrorStatus.Z_DATA_ERROR) : ErrorStatus.Z_OK;
   }
-  
+
   /* =========================================================================
    * Initializes the compression dictionary from the given byte
    * sequence without producing any compressed output.
@@ -1744,7 +1744,7 @@ class DeflateState
    * greater than this length. This saves time but degrades compression.
    * max_insert_length is used only for compression levels <= 3.
    */
-  
+
   var level:Int = CompressionLevel.Z_NO_COMPRESSION;     /* compression level (1..9) */
   var strategy:Int = Strategy.Z_DEFAULT_STRATEGY;  /* favor or force Huffman coding*/
 
@@ -1829,7 +1829,7 @@ class DeflateState
    * significant bits).
    */
   var bi_valid:Int = 0;
-  
+
   // Used for window memory init. We safely ignore it for JS. That makes
   // sense only for pointers and memory check tools.
   //this.high_water:Int = 0;
@@ -1839,14 +1839,14 @@ class DeflateState
    * updated to the new high water mark.
    */
 
-  
+
   function new() {
     Common.zero(cast dyn_ltree);
     Common.zero(cast dyn_dtree);
     Common.zero(cast bl_tree);
-    
+
     Common.zero(cast this.heap);
-    
+
     Common.zero(cast this.depth);
   }
 }
@@ -1857,7 +1857,7 @@ class DeflateState
  * found for specific files.
  */
 @:allow(arm.format.pako.zlib.Deflate)
-class Config 
+class Config
 {
   var good_length:Int;
   var max_lazy:Int;

@@ -1854,7 +1854,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Vector",
-						type: "VECTOR",	
+						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: [0.0, 0.0, 0.0]
 					},

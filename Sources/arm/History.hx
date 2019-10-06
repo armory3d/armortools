@@ -219,7 +219,7 @@ class History {
 	public static function paint() {
 		var isMask = Context.layerIsMask;
 		copyToUndo(Context.layer.id, undoI, isMask);
-		
+
 		pushUndo = false;
 		push(UITrait.inst.toolNames[Context.tool]);
 	}
@@ -301,7 +301,7 @@ class History {
 			is_mask: Context.layerIsMask,
 			has_mask: Context.layer.texpaint_mask != null
 		});
-		
+
 		while (steps.length > Config.raw.undo_steps + 1) steps.shift();
 		return steps[steps.length - 1];
 	}

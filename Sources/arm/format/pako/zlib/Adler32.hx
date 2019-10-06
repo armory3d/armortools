@@ -6,7 +6,7 @@ import haxe.io.UInt8Array;
 // It doesn't worth to make additional optimizationa as in original.
 // Small size is preferable.
 
-class Adler32 
+class Adler32
 {
   static public function adler32(adler:Int, buf:UInt8Array, len:Int, pos:Int):Int {
     var s1 = (adler & 0xffff) |0,

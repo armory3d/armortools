@@ -97,7 +97,7 @@ var Z_DEFLATED  = 8;
  * - `memLevel`
  * - `strategy`
  * - `dictionary`
- * 
+ *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
  *
@@ -149,9 +149,9 @@ class Deflate
     dictionary: null,
     //to: ''
   }
-  
+
   public var options:DeflateOptions = null;
-  
+
   public var err:Int    = ErrorStatus.Z_OK;      // error code, if happens (0 = Z_OK)
   public var msg:String    = '';     // error message
   public var ended:Bool  = false;  // used to avoid multiple onEnd() calls
@@ -160,9 +160,9 @@ class Deflate
   public var strm:ZStream = new ZStream();
 
   public var result:UInt8Array = null;
-  
+
   public function new(options:DeflateOptions = null) {
-    
+
     this.options = { };
     this.options.level = (options != null && options.level != null) ? options.level : DEFAULT_OPTIONS.level;
     this.options.method = (options != null && options.method != null) ? options.method : DEFAULT_OPTIONS.method;
@@ -174,7 +174,7 @@ class Deflate
     this.options.gzip = (options != null && options.gzip != null) ? options.gzip : DEFAULT_OPTIONS.gzip;
     this.options.header = (options != null && options.header != null) ? options.header : DEFAULT_OPTIONS.header;
     this.options.dictionary = (options != null && options.dictionary != null) ? options.dictionary : DEFAULT_OPTIONS.dictionary;
-    
+
     //NOTE(hx): both raw and gzip are false by default?
     if (this.options.raw && (this.options.windowBits > 0)) {
       this.options.windowBits = -this.options.windowBits;
@@ -184,7 +184,7 @@ class Deflate
 
     this.onData = _onData;
     this.onEnd = _onEnd;
-    
+
     strm.avail_out = 0;
 
     var status = ZlibDeflate.deflateInit2(
@@ -203,7 +203,7 @@ class Deflate
     if (this.options.header != null) {
       ZlibDeflate.deflateSetHeader(this.strm, this.options.header);
     }
-		
+
     //NOTE(hx): only supporting UInt8Array
     if (this.options.dictionary != null) {
       status = ZlibDeflate.deflateSetDictionary(this.strm, this.options.dictionary);
@@ -323,12 +323,12 @@ class Deflate
    * those in `onEnd`. Override this handler, if you need another behaviour.
    **/
   public var onData:UInt8Array->Void;
-  
+
   function _onData(chunk:UInt8Array) {
     this.chunks.push(chunk);
   }
 
-  
+
   /**
    * Deflate#onEnd(status) -> Void
    * - status (Number): deflate status. 0 (Z_OK) on success,
@@ -340,7 +340,7 @@ class Deflate
    * free memory and fill `results` / `err` properties.
    **/
   public var onEnd:Int->Void;
-  
+
   function _onEnd(status:Int) {
     // On success - join
     if (status == ErrorStatus.Z_OK) {

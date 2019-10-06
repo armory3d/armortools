@@ -24,7 +24,7 @@ class MaterialSlot {
 	public var paintHeight = true;
 	public var paintEmis = true;
 	public var paintSubs = true;
-	
+
 	public function new(m:MaterialData = null) {
 		id = ++counter;
 		data = m;

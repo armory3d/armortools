@@ -115,7 +115,7 @@ class Exporter {
 					Layers.expd.g4.drawIndexedVertices();
 					Layers.expd.g4.end();
 				}
-				
+
 				// Copy layer0 to temp
 				Layers.imga.g2.begin(false);
 				Layers.imga.g2.pipeline = Layers.pipeCopy;
@@ -129,7 +129,7 @@ class Exporter {
 				Layers.imgc.g2.pipeline = Layers.pipeCopy;
 				Layers.imgc.g2.drawImage(Layers.expc, 0, 0);
 				Layers.imgc.g2.end();
-				
+
 				// Merge into layer0
 				Layers.expa.g4.begin([Layers.expb, Layers.expc]);
 				Layers.expa.g4.setPipeline(Layers.pipe);

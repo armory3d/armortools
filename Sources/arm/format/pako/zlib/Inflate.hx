@@ -385,9 +385,9 @@ class Inflate
         }
         //=== NEEDBITS(16);
         while (bits < 16) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
-            break; // out of this while 
+            break; // out of this while
           }
           have--;
           hold += input[next++] << bits;
@@ -450,9 +450,9 @@ class Inflate
       case FLAGS:
         //=== NEEDBITS(16); */
         while (bits < 16) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
-            break; // out of this while 
+            break; // out of this while
           }
           have--;
           hold += input[next++] << bits;
@@ -490,9 +490,9 @@ class Inflate
       case TIME:
         //=== NEEDBITS(32); */
         while (bits < 32) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
-            break; // out of this while 
+            break; // out of this while
           }
           have--;
           hold += input[next++] << bits;
@@ -521,9 +521,9 @@ class Inflate
       case OS:
         //=== NEEDBITS(16); */
         while (bits < 16) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
-            break; // out of this while 
+            break; // out of this while
           }
           have--;
           hold += input[next++] << bits;
@@ -552,9 +552,9 @@ class Inflate
         if (state.flags & 0x0400 != 0) {
           //=== NEEDBITS(16); */
           while (bits < 16) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
-              break; // out of this while 
+              break; // out of this while
             }
             have--;
             hold += input[next++] << bits;
@@ -690,7 +690,7 @@ class Inflate
         if (state.flags & 0x0200 != 0) {
           //=== NEEDBITS(16); */
           while (bits < 16) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -719,7 +719,7 @@ class Inflate
       case DICTID:
         //=== NEEDBITS(32); */
         while (bits < 32) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -766,7 +766,7 @@ class Inflate
         }
         //=== NEEDBITS(3); */
         while (bits < 3) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -819,7 +819,7 @@ class Inflate
         //---//
         //=== NEEDBITS(32); */
         while (bits < 32) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -874,7 +874,7 @@ class Inflate
       case TABLE:
         //=== NEEDBITS(14); */
         while (bits < 14) {
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -914,7 +914,7 @@ class Inflate
         while (state.have < state.ncode) {
           //=== NEEDBITS(3);
           while (bits < 3) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of inner while
             }
@@ -964,7 +964,7 @@ class Inflate
 
             if ((here_bits) <= bits) break; //out of inner while
             //--- PULLBYTE() ---//
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of inner while
             }
@@ -986,7 +986,7 @@ class Inflate
               //=== NEEDBITS(here.bits + 2);
               n = here_bits + 2;
               while (bits < n) {
-                if (have == 0) { 
+                if (have == 0) {
                   inf_leave = true;
                   break; //out of this while
                 }
@@ -1016,7 +1016,7 @@ class Inflate
               //=== NEEDBITS(here.bits + 3);
               n = here_bits + 3;
               while (bits < n) {
-                if (have == 0) { 
+                if (have == 0) {
                   inf_leave = true;
                   break; //out of this while
                 }
@@ -1041,7 +1041,7 @@ class Inflate
               //=== NEEDBITS(here.bits + 7);
               n = here_bits + 7;
               while (bits < n) {
-                if (have == 0) { 
+                if (have == 0) {
                   inf_leave = true;
                   break; //out of this while
                 }
@@ -1163,7 +1163,7 @@ class Inflate
 
           if (here_bits <= bits) { break; }
           //--- PULLBYTE() ---//
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -1186,7 +1186,7 @@ class Inflate
 
             if ((last_bits + here_bits) <= bits) { break; }
             //--- PULLBYTE() ---//
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1234,7 +1234,7 @@ class Inflate
           //=== NEEDBITS(state.extra);
           n = state.extra;
           while (bits < n) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1264,7 +1264,7 @@ class Inflate
 
           if ((here_bits) <= bits) { break; }
           //--- PULLBYTE() ---//
-          if (have == 0) { 
+          if (have == 0) {
             inf_leave = true;
             break; //out of this while
           }
@@ -1287,7 +1287,7 @@ class Inflate
 
             if ((last_bits + here_bits) <= bits) { break; }
             //--- PULLBYTE() ---//
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1322,7 +1322,7 @@ class Inflate
           //=== NEEDBITS(state.extra);
           n = state.extra;
           while (bits < n) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1413,7 +1413,7 @@ class Inflate
         if (state.wrap != 0) {
           //=== NEEDBITS(32);
           while (bits < 32) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1454,7 +1454,7 @@ class Inflate
         if (state.wrap != 0 && state.flags != 0) {
           //=== NEEDBITS(32);
           while (bits < 32) {
-            if (have == 0) { 
+            if (have == 0) {
               inf_leave = true;
               break; //out of this while
             }
@@ -1564,7 +1564,7 @@ class Inflate
     head.done = false;
     return ErrorStatus.Z_OK;
   }
-  
+
   static public function inflateSetDictionary(strm:ZStream, dictionary:UInt8Array) {
     var dictLength = dictionary.length;
 
@@ -1605,7 +1605,7 @@ class Inflate
 
 @:allow(arm.format.pako.zlib.Inflate)
 @:allow(arm.format.pako.zlib.InfFast)
-class InflateState 
+class InflateState
 {
   var mode:Int = 0;             /* current inflate mode */
   var last:Bool = false;          /* true if processing last block */
@@ -1662,7 +1662,7 @@ class InflateState
   var sane:Int = 0;                   /* if false, allow invalid distance too far */
   var back:Int = 0;                   /* bits back of last unprocessed length/lit */
   var was:Int = 0;                    /* initial length of match */
-  
+
   function new() { }
 }
 

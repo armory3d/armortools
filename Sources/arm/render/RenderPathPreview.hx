@@ -43,7 +43,7 @@ class RenderPathPreview {
 		#if (!arm_world)
 		path.drawSkydome("world_pass/world_pass/world_pass");
 		#end
-		
+
 		var framebuffer = "texpreview";
 		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
 		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
@@ -94,7 +94,7 @@ class RenderPathPreview {
 
 		path.setTarget("tex"); // Re-binds depth
 		path.drawSkydome("world_pass/world_pass/world_pass");
-		
+
 		var framebuffer = "texpreview";
 		RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
 

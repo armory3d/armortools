@@ -111,7 +111,7 @@ class InfFast
     do {
       if (exit_top) break;
       exit_top = false;
-      
+
       if (bits < 15) {
         hold += input[_in++] << bits;
         bits += 8;
@@ -302,9 +302,9 @@ class InfFast
             }
 
             break; // need to emulate goto via break and continue
-            
+
           } // end of dodist
-          
+
           if (exit_top) break; //out of dolen
         }
         else if ((op & 64) == 0) {              /* 2nd level length code */
@@ -326,12 +326,12 @@ class InfFast
 
         break; // need to emulate goto via "continue"
       } // end of dolen
-      
+
       if (exit_top) continue; //top
-      
+
     } while (_in < last && _out < end);
     // end of top
-    
+
     /* return unused bytes (on entry, bits < 8, so in won't go too far back) */
     len = bits >> 3;
     _in -= len;

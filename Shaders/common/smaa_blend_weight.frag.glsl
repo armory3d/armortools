@@ -104,7 +104,7 @@ vec2 SMAASearchDiag2(vec2 texcoord, vec2 dir) {
 	return coord.zw;
 }
 
-/** 
+/**
  * Similar to SMAAArea, this calculates the area corresponding to a certain
  * diagonal distance and crossing edges 'e'.
  */
@@ -147,7 +147,7 @@ vec2 SMAACalculateDiagWeights(vec2 texcoord, vec2 e, vec4 subsampleIndices) {
 		// Fetch the crossing edges:
 		vec4 coords = mad(vec4(-d.x + 0.25, d.x, d.y, -d.y - 0.25), screenSizeInv.xyxy, texcoord.xyxy);
 		vec4 c;
-		
+
 		c.xy = SMAASampleLevelZeroOffset(edgesTex, coords.xy, ivec2(-1,  0)).rg;
 		c.zw = SMAASampleLevelZeroOffset(edgesTex, coords.zw, ivec2( 1,  0)).rg;
 		c.yxwz = SMAADecodeDiagBilinearAccess(c.xyzw);
@@ -172,7 +172,7 @@ vec2 SMAACalculateDiagWeights(vec2 texcoord, vec2 e, vec4 subsampleIndices) {
 		d.yw = SMAASearchDiag2(texcoord, vec2(1.0, 1.0)/*, cdw_end*/);
 		float dadd = cdw_end.y > 0.9 ? 1.0 : 0.0;
 		d.y += dadd;
-	} 
+	}
 	else {
 		d.yw = vec2(0.0, 0.0);
 	}
@@ -207,7 +207,7 @@ vec2 SMAACalculateDiagWeights(vec2 texcoord, vec2 e, vec4 subsampleIndices) {
 
 /**
  * This allows to determine how much length should we add in the last step
- * of the searches. It takes the bilinearly interpolated edge (see 
+ * of the searches. It takes the bilinearly interpolated edge (see
  * @PSEUDO_GATHER4), and adds 0, 1 or 2, depending on which edges and
  * crossing edges are active.
  */
@@ -244,7 +244,7 @@ float SMAASearchXLeft(vec2 texcoord, float end) {
 	 * which edges are active from the four fetched ones.
 	 */
 	vec2 e = vec2(0.0, 1.0);
-	while (texcoord.x > end && 
+	while (texcoord.x > end &&
 		   e.g > 0.8281 && // Is there some edge not activated?
 		   e.r == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
@@ -257,20 +257,20 @@ float SMAASearchXLeft(vec2 texcoord, float end) {
 
 float SMAASearchXRight(vec2 texcoord, float end) {
 	vec2 e = vec2(0.0, 1.0);
-	while (texcoord.x < end && 
+	while (texcoord.x < end &&
 		   e.g > 0.8281 && // Is there some edge not activated?
 		   e.r == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
 		texcoord = mad(vec2(2.0, 0.0), screenSizeInv.xy, texcoord);
 	}
-	
+
 	float offset = mad(-(255.0 / 127.0), SMAASearchLength(e, 0.5), 3.25);
 	return mad(-screenSizeInv.x, offset, texcoord.x);
 }
 
 float SMAASearchYUp(vec2 texcoord, float end) {
 	vec2 e = vec2(1.0, 0.0);
-	while (texcoord.y > end && 
+	while (texcoord.y > end &&
 		   e.r > 0.8281 && // Is there some edge not activated?
 		   e.g == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
@@ -282,7 +282,7 @@ float SMAASearchYUp(vec2 texcoord, float end) {
 
 float SMAASearchYDown(vec2 texcoord, float end) {
 	vec2 e = vec2(1.0, 0.0);
-	while (texcoord.y < end && 
+	while (texcoord.y < end &&
 		   e.r > 0.8281 && // Is there some edge not activated?
 		   e.g == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
@@ -292,14 +292,14 @@ float SMAASearchYDown(vec2 texcoord, float end) {
 	return mad(-screenSizeInv.y, offset, texcoord.y);
 }
 
-/** 
+/**
  * Ok, we have the distance and both crossing edges. So, what are the areas
  * at each side of current edge?
  */
 vec2 SMAAArea(vec2 dist, float e1, float e2, float offset) {
 	// Rounding prevents precision errors of bilinear filtering:
 	vec2 texcoord = mad(vec2(SMAA_AREATEX_MAX_DISTANCE, SMAA_AREATEX_MAX_DISTANCE), round(4.0 * vec2(e1, e2)), dist);
-	
+
 	// We do a scale and bias for mapping to texel space:
 	texcoord = mad(SMAA_AREATEX_PIXEL_SIZE, texcoord, 0.5 * SMAA_AREATEX_PIXEL_SIZE);
 
@@ -363,7 +363,7 @@ vec4 SMAABlendingWeightCalculationPS(vec2 texcoord, vec2 pixcoord,
 		// one of the boundaries is enough.
 		weights.rg = SMAACalculateDiagWeights(texcoord, e, subsampleIndices);
 
-		// We give priority to diagonals, so if we find a diagonal we skip 
+		// We give priority to diagonals, so if we find a diagonal we skip
 		// horizontal/vertical processing.
 		//SMAA_BRANCH
 		if (weights.r == -weights.g) { // weights.r + weights.g == 0.0
@@ -433,7 +433,7 @@ vec4 SMAABlendingWeightCalculationPS(vec2 texcoord, vec2 pixcoord,
 		// We want the distances to be in pixel units:
 		d = abs(round(mad(screenSize.yy, d, -pixcoord.yy)));
 
-		// SMAAArea below needs a sqrt, as the areas texture is compressed 
+		// SMAAArea below needs a sqrt, as the areas texture is compressed
 		// quadratically:
 		vec2 sqrt_d = sqrt(d);
 

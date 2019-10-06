@@ -38,7 +38,7 @@ class GZHeader
   public var hcrc:Int        = 0;
   /* true when done reading gzip header (not used when writing a gzip file) */
   public var done:Bool       = false;
-  
+
   //NOTE(hx): change GZHeader to accept a GZOptions typedef?
   public function new() { }
 }

@@ -21,7 +21,7 @@ void main() {
 		fragColor.rgb = textureLod(tex, texCoord, 0.0).rgb;
 		return;
 	}
-	
+
 	fragColor.rgb = textureLod(tex, texCoord + dirInv * 2.5, 0.0).rgb;
 	fragColor.rgb += textureLod(tex, texCoord + dirInv * 1.5, 0.0).rgb;
 	fragColor.rgb += textureLod(tex, texCoord, 0.0).rgb;

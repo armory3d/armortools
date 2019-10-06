@@ -23,7 +23,7 @@ vec3 color(vec2 coords, const float blur, const sampler2D tex, const vec2 texSte
 	col.r = textureLod(tex, coords + vec2(0.0, 1.0) * texStep * fringe * blur, 0.0).r;
 	col.g = textureLod(tex, coords + vec2(-0.866, -0.5) * texStep * fringe * blur, 0.0).g;
 	col.b = textureLod(tex, coords + vec2(0.866, -0.5) * texStep * fringe * blur, 0.0).b;
-	
+
 	const vec3 lumcoeff = vec3(0.299, 0.587, 0.114);
 	float lum = dot(col.rgb, lumcoeff);
 	float thresh = max((lum - threshold) * gain, 0.0);
@@ -34,16 +34,16 @@ vec3 dof(const vec2 texCoord, const float gdepth, const sampler2D tex, const sam
 	float depth = linearize(gdepth, cameraProj);
 	// const float fDepth = compoDOFDistance;
 	float fDepth = linearize(textureLod(gbufferD, focus, 0.0).r * 2.0 - 1.0, cameraProj); // Autofocus
-	
+
 	const float f = compoDOFLength; // Focal length in mm
 	const float d = fDepth * 1000.0; // Focal plane in mm
 	float o = depth * 1000.0; // Depth in mm
-	float a = (o * f) / (o - f); 
-	float b = (d * f) / (d - f); 
-	float c = (d - f) / (d * compoDOFFstop * coc); 
+	float a = (o * f) / (o - f);
+	float b = (d * f) / (d - f);
+	float c = (d - f) / (d * compoDOFFstop * coc);
 	float blur = abs(a - b) * c;
 	blur = clamp(blur, 0.0, 1.0);
-	
+
 	vec2 noise = rand2(texCoord) * namount * blur;
 	float w = (texStep.x) * blur * maxblur + noise.x;
 	float h = (texStep.y) * blur * maxblur + noise.y;
@@ -55,8 +55,8 @@ vec3 dof(const vec2 texCoord, const float gdepth, const sampler2D tex, const sam
 		col = textureLod(tex, texCoord, 0.0).rgb;
 		float s = 1.0;
 		int ringsamples;
-		
-		for (int i = 1; i <= rings; ++i) {   
+
+		for (int i = 1; i <= rings; ++i) {
 			ringsamples = i * samples;
 			for (int j = 0 ; j < ringsamples; ++j) {
 				float step = PI2 / float(ringsamples);
@@ -64,8 +64,8 @@ vec3 dof(const vec2 texCoord, const float gdepth, const sampler2D tex, const sam
 				float ph = (sin(float(j) * step) * float(i));
 				float p = 1.0;
 				// if (pentagon) p = penta(vec2(pw, ph));
-				col += color(texCoord + vec2(pw * w, ph * h), blur, tex, texStep) * mix(1.0, (float(i)) / (float(rings)), bias) * p;  
-				s += 1.0 * mix(1.0, (float(i)) / (float(rings)), bias) * p;  
+				col += color(texCoord + vec2(pw * w, ph * h), blur, tex, texStep) * mix(1.0, (float(i)) / (float(rings)), bias) * p;
+				s += 1.0 * mix(1.0, (float(i)) / (float(rings)), bias) * p;
 			}
 		}
 		col /= s;

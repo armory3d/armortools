@@ -6,7 +6,7 @@ class StlParser {
 	public var nora:kha.arrays.Int16Array = null;
 	public var texa:kha.arrays.Int16Array = null;
 	public var inda:kha.arrays.Uint32Array = null;
-	
+
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";

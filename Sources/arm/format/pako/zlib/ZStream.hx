@@ -29,6 +29,6 @@ class ZStream
   public var data_type:Int = Constants.DataType.Z_UNKNOWN /*Z_UNKNOWN*/;
   /* adler32 value of the uncompressed data */
   public var adler:Int = 0;
-  
+
   public function new():Void { }
 }

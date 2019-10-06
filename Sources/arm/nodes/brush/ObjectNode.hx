@@ -13,7 +13,7 @@ class ObjectNode extends LogicNode {
 		super(tree);
 	}
 
-	override function get(from:Int):Dynamic { 
+	override function get(from:Int):Dynamic {
 		if (inputs.length > 0) return inputs[0].get();
 		value = objectName != "" ? iron.Scene.active.getChild(objectName) : null;
 		return value;

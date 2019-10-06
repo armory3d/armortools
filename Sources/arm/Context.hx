@@ -111,7 +111,7 @@ class Context {
 
 			RenderUtil.makeDecalPreview();
 			ddirty = 2;
-			
+
 			if (current != null) current.begin(false);
 		}
 
@@ -145,7 +145,7 @@ class Context {
 
 		var mask = layer.objectMask;
 		if (UITrait.inst.layerFilter > 0) mask = UITrait.inst.layerFilter;
-		
+
 		if (mergedObject == null || mask > 0) {
 			paintObject.skip_context = "";
 		}

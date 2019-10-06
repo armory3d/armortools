@@ -93,7 +93,7 @@ class ExportArm {
 			assets: texture_files,
 			mesh_assets: mesh_files
 		};
-		
+
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData());
 	}

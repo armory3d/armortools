@@ -55,7 +55,7 @@ class Layers {
 
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
-	
+
 	public static function initLayers(g:kha.graphics4.Graphics) {
 		g.end();
 
@@ -255,7 +255,7 @@ class Layers {
 
 		var l0 = Project.layers[0];
 		var l1 = Context.layer;
-		
+
 		for (i in 1...Project.layers.length) { // Merge down
 			if (Project.layers[i] == l1) {
 				l0 = Project.layers[i - 1];
@@ -342,7 +342,7 @@ class Layers {
 					first = false;
 					MaterialParser.parsePaintMaterial();
 				}
-				
+
 				for (i in 0...fills) {
 					RenderPathPaint.commandsPaint();
 				}

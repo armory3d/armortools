@@ -20,7 +20,7 @@ class Inc {
 		var config = Config.raw;
 		superSample = config.rp_supersample;
 	}
-	
+
 	public static function applyConfig() {
 		var config = Config.raw;
 		if (superSample != config.rp_supersample) {

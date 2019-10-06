@@ -49,7 +49,7 @@ vec4 SMAANeighborhoodBlendingPS(vec2 texcoord, vec4 offset) {
 		// Calculate the blending offsets:
 		vec4 blendingOffset = vec4(0.0, a.y, 0.0, a.w);
 		vec2 blendingWeight = a.yw;
-		
+
 		if (h) {
 			blendingOffset.x = a.x;
 			blendingOffset.y = 0.0;
@@ -58,7 +58,7 @@ vec4 SMAANeighborhoodBlendingPS(vec2 texcoord, vec4 offset) {
 			blendingWeight.x = a.x;
 			blendingWeight.y = a.z;
 		}
-		
+
 		blendingWeight /= dot(blendingWeight, vec2(1.0, 1.0));
 
 		// Calculate the texture coordinates:

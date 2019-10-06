@@ -42,7 +42,7 @@ class TabViewport {
 			var envHandle = Id.handle({value: p.raw.strength});
 			p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 			if (envHandle.changed) Context.ddirty = 2;
-			
+
 			ui.row([1/2, 1/2]);
 			if (Scene.active.lights.length > 0) {
 				var light = Scene.active.lights[0];
@@ -56,7 +56,7 @@ class TabViewport {
 				// syhandle.value = light.data.raw.size_y;
 				// light.data.raw.size_y = ui.slider(syhandle, "Size Y", 0.0, 4.0, true);
 				// if (syhandle.changed) Context.ddirty = 2;
-				
+
 				var lhandle = Id.handle();
 				#if arm_world
 				var scale = 1;

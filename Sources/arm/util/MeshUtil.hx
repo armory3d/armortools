@@ -33,7 +33,7 @@ class MeshUtil {
 		for (i in 0...paintObjects.length) {
 			var vas = paintObjects[i].data.raw.vertex_arrays;
 			var ias = paintObjects[i].data.raw.index_arrays;
-			var scale = paintObjects[i].data.scalePos;	
+			var scale = paintObjects[i].data.scalePos;
 
 			for (j in 0...vas[0].values.length) va0[j + voff * 4] = vas[0].values[j];
 			for (j in 0...Std.int(va0.length / 4)) {
@@ -70,7 +70,7 @@ class MeshUtil {
 			Context.mainObject().addChild(Context.mergedObject);
 		});
 	}
-	
+
 	public static function swapAxis(a:Int, b:Int) {
 		var objects = UITrait.inst.worktab.position == SpaceScene ? [cast(Context.object, MeshObject)] : Project.paintObjects;
 		for (o in objects) {
@@ -100,7 +100,7 @@ class MeshUtil {
 				posbuf.delete();
 				g.vertexBufferMap.remove("pos");
 			}
-			
+
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / 8)) {
 				vertices[i * 8    ] = vas[0].values[i * 4    ];

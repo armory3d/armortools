@@ -17,7 +17,7 @@ const float discardThreshold = 0.95;
 
 void main() {
 	vec3 nor = getNor(textureLod(gbuffer0, texCoord, 0.0).rg);
-	
+
 	fragColor = textureLod(tex, texCoord, 0.0).r * blurWeights[0];
 	float weight = blurWeights[0];
 
@@ -30,7 +30,7 @@ void main() {
 		float w = blurWeights[i] * influenceFactor;
 		fragColor += col * w;
 		weight += w;
-		
+
 		nor2 = getNor(textureLod(gbuffer0, texCoord - i * dirInv, 0.0).rg);
 		influenceFactor = step(discardThreshold, dot(nor2, nor));
 		col = textureLod(tex, texCoord - posadd * dirInv, 0.0).r;

@@ -159,14 +159,14 @@ float tex_magic_f(const vec3 p) {
 	public static var str_tex_brick = "
 vec3 tex_brick(vec3 p, const vec3 c1, const vec3 c2, const vec3 c3) {
 	p /= vec3(0.9, 0.49, 0.49) / 2;
-	if (fract(p.y * 0.5) > 0.5) p.x += 0.5;   
+	if (fract(p.y * 0.5) > 0.5) p.x += 0.5;
 	p = fract(p);
 	vec3 b = step(p, vec3(0.95, 0.9, 0.9));
 	return mix(c3, c1, b.x * b.y * b.z);
 }
 float tex_brick_f(vec3 p) {
 	p /= vec3(0.9, 0.49, 0.49) / 2;
-	if (fract(p.y * 0.5) > 0.5) p.x += 0.5;   
+	if (fract(p.y * 0.5) > 0.5) p.x += 0.5;
 	p = fract(p);
 	vec3 b = step(p, vec3(0.95, 0.9, 0.9));
 	return mix(1.0, 0.0, b.x * b.y * b.z);

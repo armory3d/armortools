@@ -16,7 +16,7 @@ class ImportTexture {
 		}
 
 		for (a in Project.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
-		
+
 		Data.getImage(path, function(image:Image) {
 			var ar = path.split("/");
 			ar = ar[ar.length - 1].split("\\");

@@ -51,7 +51,7 @@ class ImportBlend {
 			var nora = new Int16Array(numtri * 3 * 2);
 			var hasuv = m.get("mloopuv") != null;
 			var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-			
+
 			var tri = 0;
 			var vec0 = new Vec4();
 			var vec1 = new Vec4();
@@ -92,7 +92,7 @@ class ImportBlend {
 					nora[tri * 6 + 3] = Std.int(vec1.y * 32767);
 					nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
 					nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
-					
+
 					var uv0:Float32Array = null;
 					var uv1:Float32Array = null;
 					var uv2:Float32Array = null;
@@ -132,7 +132,7 @@ class ImportBlend {
 						nora[tri * 6 + 3] = Std.int(vec3.y * 32767);
 						nora[tri * 6 + 4] = Std.int(vec0.x * 32767);
 						nora[tri * 6 + 5] = Std.int(vec0.y * 32767);
-						
+
 						if (hasuv) {
 							var uv3 = m.get("mloopuv", loopstart + 3).get("uv");
 							texa[tri * 6    ] = Std.int(uv2[0] * 32767);
@@ -320,7 +320,7 @@ class ImportBlend {
 							if (last.block == sock.block) break;
 							pos++;
 						}
-						
+
 						canvas.nodes.push(n);
 					}
 

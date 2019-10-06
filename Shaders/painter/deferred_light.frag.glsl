@@ -175,7 +175,7 @@ out vec4 fragColor;
 
 void main() {
 	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0); // Normal.xy, roughness, metallic/matid
-	
+
 	vec3 n;
 	n.z = 1.0 - abs(g0.x) - abs(g0.y);
 	n.xy = n.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);
@@ -227,7 +227,7 @@ void main() {
 #endif
 
 	envl.rgb *= albedo;
-	
+
 #ifdef _Rad // Indirect specular
 	envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5 * occspec.y;
 #else
@@ -245,7 +245,7 @@ void main() {
 	#else
 	vec3 voxpos = p / voxelgiHalfExtents;
 	#endif
-	
+
 	#ifndef _VoxelAONoTrace
 	#ifdef _VoxelGITemporal
 	envl.rgb *= 1.0 - (traceAO(voxpos, n, voxels) * voxelBlend +
@@ -254,7 +254,7 @@ void main() {
 	envl.rgb *= 1.0 - traceAO(voxpos, n, voxels);
 	#endif
 	#endif
-	
+
 #endif
 
 	fragColor.rgb = envl;
@@ -281,7 +281,7 @@ void main() {
 	// for(uint step = 0; step < 400 && color.a < 0.99f; ++step) {
 	// 	vec3 point = origin + 0.005 * step * direction;
 	// 	color += (1.0f - color.a) * textureLod(voxels, point * 0.5 + 0.5, 0);
-	// } 
+	// }
 	// fragColor.rgb += color.rgb;
 
 	// Show SSAO
@@ -371,12 +371,12 @@ void main() {
 		, occspec.x
 		#endif
 	);
-	
+
 	#ifdef _Spot
 	#ifdef _SSS
 	if (g0.a == 2.0) fragColor.rgb += fragColor.rgb * SSSSTransmittance(LWVPSpot0, p, n, normalize(pointPos - p), lightPlane.y, shadowMapSpot[0]);
 	#endif
-	#endif	
+	#endif
 
 #endif
 

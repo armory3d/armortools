@@ -56,7 +56,7 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 		out.writeByte(0);
-		
+
 		out.writeByte(0);
 		out.writeByte(0);
 		out.writeByte(0);
@@ -130,7 +130,7 @@ class ExrWriter {
 
 		var ww = width - 1;
 		var hh = height - 1;
-		
+
 		out.writeByte(ww&0xFF);
 		out.writeByte((ww>>8)&0xFF);
 		out.writeByte((ww>>16)&0xFF);
@@ -140,7 +140,7 @@ class ExrWriter {
 		out.writeByte((hh>>8)&0xFF);
 		out.writeByte((hh>>16)&0xFF);
 		out.writeByte((hh>>24)&0xFF);
-		
+
 		out.writeString('displayWindow');
 		out.writeByte(0);
 		out.writeString('box2i');

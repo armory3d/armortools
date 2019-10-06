@@ -104,7 +104,7 @@ class Logic {
 				}
 			}
 		}
-		
+
 		// Create inputs
 		var inp_node:LogicNode = null;
 		var inp_from = 0;
@@ -153,7 +153,7 @@ class Logic {
 
 		return name;
 	}
-		
+
 	static function get_root_nodes(node_group:TNodeCanvas):Array<TNode> {
 		var roots:Array<TNode> = [];
 		for (node in node_group.nodes) {
@@ -177,9 +177,9 @@ class Logic {
 	}
 
 	static function build_default_node(inp:TNodeSocket):LogicNode {
-		
+
 		var v:LogicNode = null;
-		
+
 		if (inp.type == 'OBJECT') {
 			v = createClassInstance('ObjectNode', [tree, inp.default_value]);
 		}
@@ -198,7 +198,7 @@ class Logic {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
 			v = createClassInstance('ColorNode', [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
-		else if (inp.type == 'VALUE') { 
+		else if (inp.type == 'VALUE') {
 			v = createClassInstance('FloatNode', [tree, inp.default_value]);
 		}
 		else if (inp.type == 'INT') {

@@ -24,7 +24,7 @@ void main() {
 
 // #ifdef _CPos
 	// NDC (at the back of cube)
-	// vec4 v = vec4(pos.xy, 1.0, 1.0);	
+	// vec4 v = vec4(pos.xy, 1.0, 1.0);
 	// v = vec4(invVP * v);
 	// v.xyz /= v.w;
 	// viewRay = v.xyz - eye;

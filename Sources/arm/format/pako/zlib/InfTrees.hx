@@ -22,7 +22,7 @@ class InfTrees
   static var CODES:Int = 0;
   static var LENS:Int = 1;
   static var DISTS:Int = 2;
-  
+
   static var lbase:UInt16Array = UInt16Array.fromArray([ /* Length codes 257..285 base */
     3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
     35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0
@@ -75,7 +75,7 @@ class InfTrees
 
     bits = opts.bits;
       //here = opts.here; /* table entry for duplication */
-    
+
     var here_bits, here_op, here_val;
 
     /*

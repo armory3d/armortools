@@ -99,7 +99,7 @@ typedef InflateOptions = {
  * console.log(inflate.result);
  * ```
  **/
-class Inflate 
+class Inflate
 {
   static var DEFAULT_OPTIONS:InflateOptions = {
     chunkSize: 16384,
@@ -108,9 +108,9 @@ class Inflate
     dictionary: null,
     //to: ''
   }
-  
+
   public var options:InflateOptions = null;
-  
+
   public var err:Int    = ErrorStatus.Z_OK;      // error code, if happens (0 = Z_OK)
   public var msg:String    = '';     // error message
   public var ended:Bool  = false;  // used to avoid multiple onEnd() calls
@@ -119,7 +119,7 @@ class Inflate
   public var strm:ZStream   = new ZStream();
 
   public var header:GZHeader = new GZHeader();
-  
+
   public var result:UInt8Array = null;
 
   public function new(options:InflateOptions = null) {
@@ -129,7 +129,7 @@ class Inflate
     this.options.windowBits = (options != null && options.windowBits != null) ? options.windowBits : DEFAULT_OPTIONS.windowBits;
     this.options.raw = (options != null && options.raw != null) ? options.raw : DEFAULT_OPTIONS.raw;
     this.options.dictionary = (options != null && options.dictionary != null) ? options.dictionary : DEFAULT_OPTIONS.dictionary;
-  
+
     // Force window size for `raw` data, if not set directly,
     // because we have no header for autodetect.
     if (this.options.raw && (this.options.windowBits >= 0) && (this.options.windowBits < 16)) {
@@ -155,7 +155,7 @@ class Inflate
 
     this.onData = _onData;
     this.onEnd = _onEnd;
-    
+
     this.strm.avail_out = 0;
 
     var status  = ZlibInflate.inflateInit2(
@@ -166,7 +166,7 @@ class Inflate
     if (status != ErrorStatus.Z_OK) {
       throw Messages.get(status);
     }
-    
+
     ZlibInflate.inflateGetHeader(this.strm, this.header);
   }
 
@@ -210,7 +210,7 @@ class Inflate
     var allowBufError = false;
 
     if (this.ended) { return false; }
-    
+
     //NOTE(hx): search codebase for ~~
     //_mode = (mode == ~~mode) ? mode : ((mode == true) ? Z_FINISH : Z_NO_FLUSH);
     if (Std.is(mode, Int)) _mode = mode;
@@ -249,7 +249,7 @@ class Inflate
         status = ErrorStatus.Z_OK;
         allowBufError = false;
       }
-    
+
       if (status != ErrorStatus.Z_STREAM_END && status != ErrorStatus.Z_OK) {
         this.onEnd(status);
         this.ended = true;
@@ -279,7 +279,7 @@ class Inflate
           }
         }
       }
-      
+
       // When no more input data, we should check that internal inflate buffers
       // are flushed. The only way to do it when avail_out = 0 - run one more
       // inflate pass. But if output data not exists, inflate return Z_BUF_ERROR.
@@ -326,7 +326,7 @@ class Inflate
    * those in `onEnd`. Override this handler, if you need another behaviour.
    **/
   public var onData:UInt8Array->Void;
-  
+
   function _onData(chunk:UInt8Array) {
     this.chunks.push(chunk);
   }
@@ -343,7 +343,7 @@ class Inflate
    * free memory and fill `results` / `err` properties.
    **/
   public var onEnd:Int->Void;
-  
+
   function _onEnd(status:Int) {
     // On success - join
     if (status == ErrorStatus.Z_OK) {

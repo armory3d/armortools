@@ -16,7 +16,7 @@ const float SMAA_REPROJECTION_WEIGHT_SCALE = 30.0;
 
 void main() {
 	vec4 current = textureLod(tex, texCoord, 0.0);
-	
+
 #ifdef _Veloc
 	// Velocity is assumed to be calculated for motion blur, so we need to inverse it for reprojection
 	vec2 velocity = -textureLod(sveloc, texCoord, 0.0).rg;

@@ -102,7 +102,7 @@ class RenderUtil {
 		Scene.active.meshes = [plane];
 		var painto = Context.paintObject;
 		Context.paintObject = plane;
-		
+
 		UITrait.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
 		var m = Mat4.identity();
 		m.translate(0, 0, 1);
@@ -142,7 +142,7 @@ class RenderUtil {
 		var light = Scene.active.lights[0];
 		light.visible = true;
 		Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
-		
+
 		MaterialParser.parseMeshMaterial();
 		Context.ddirty = 0;
 	}

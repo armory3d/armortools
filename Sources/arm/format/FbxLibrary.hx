@@ -611,7 +611,7 @@ class Geometry {
 	public function getPolygons() {
 		return FbxTools.getInts(FbxTools.get(root, "PolygonVertexIndex"));
 	}
-	
+
 	/**
 		Decode polygon informations into triangle indexes and vertices indexes.
 		Returns vidx, which is the list of vertices indexes and iout which is the index buffer for the full vertex model

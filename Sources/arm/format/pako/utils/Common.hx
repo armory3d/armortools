@@ -9,23 +9,23 @@ class Common
   static inline public function arraySet(dest:ArrayBufferView, src:ArrayBufferView, src_offs:Int, len:Int, dest_offs:Int) {
     dest.buffer.blit(dest.byteOffset + dest_offs, src.buffer, src.byteOffset + src_offs, len);
   }
-  
+
   //NOTE(hx): moved here from Trees and Deflate
-  static inline public function zero(buf:ArrayBufferView) { 
+  static inline public function zero(buf:ArrayBufferView) {
     var start = buf.byteOffset;
-    var len = buf.byteLength; 
+    var len = buf.byteLength;
     buf.buffer.fill(start, len, 0);
   }
-  
+
   //NOTE(hx): if ArrayBufferView.EMULATED it will be a copy
   // reduce buffer size, avoiding mem copy
   static inline public function shrinkBuf(buf:UInt8Array, size:Int) {
-    if (buf.length != size) { 
+    if (buf.length != size) {
       buf = cast buf.subarray(0, size);
     }
     return buf;
   }
-  
+
   //NOTE(hx): blit
   // Join array of chunks to single array.
   static public function flattenChunks(chunks:Array<UInt8Array>) {

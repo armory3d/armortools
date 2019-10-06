@@ -27,7 +27,7 @@ class UIBox {
 		var right = Std.int(appw / 2 + modalW / 2);
 		var top = Std.int(apph / 2 - modalH / 2);
 		var bottom = Std.int(apph / 2 + modalH / 2);
-		
+
 		g.color = uibox.t.SEPARATOR_COL;
 		g.fillRect(left, top, modalW, modalH);
 		g.end();
@@ -56,7 +56,7 @@ class UIBox {
 			}
 			uibox.end();
 		}
-		
+
 		g.begin(false);
 	}
 
