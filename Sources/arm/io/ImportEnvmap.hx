@@ -117,9 +117,6 @@ class ImportEnvmap {
 						Scene.active.world.probe.radiance = image;
 						Scene.active.world.probe.radianceMipmaps = mips;
 						Context.ddirty = 2;
-						#if kha_direct3d12
-						arm.render.RenderPathRaytrace.ready = false;
-						#end
 					}
 				}, true); // Readable
 				mw = Std.int(mw / 2);

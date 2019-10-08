@@ -12,6 +12,7 @@ struct Vertex {
 struct RayGenConstantBuffer {
 	float4 eye; // xyz, frame
 	float4x4 inv_vp;
+	float4 params; // envstr, envshow
 };
 
 struct RayPayload {
@@ -76,7 +77,9 @@ void raygeneration() {
 			if (payload.color.a < 0) {
 				if (i == 0) {
 					// return;
-					payload.color.rgb = float3(0.05, 0.05, 0.05);
+					if (constant_buffer.params.y == 0) {
+						payload.color.rgb = float3(0.05, 0.05, 0.05);
+					}
 				}
 				break;
 			}
@@ -157,6 +160,6 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 [shader("miss")]
 void miss(inout RayPayload payload) {
 	float2 tex_coord = equirect(WorldRayDirection());
-	float3 texenv = mytexture_env.Load(uint3(tex_coord.x * 1024, tex_coord.y * 512, 0)).rgb * 3;
+	float3 texenv = mytexture_env.Load(uint3(tex_coord.x * 4096, tex_coord.y * 2048, 0)).rgb * constant_buffer.params.x;
 	payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 }

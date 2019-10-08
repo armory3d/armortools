@@ -43,6 +43,7 @@ class TabViewport {
 			p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 			if (envHandle.changed) Context.ddirty = 2;
 
+			#if (!kha_direct3d12)
 			ui.row([1/2, 1/2]);
 			if (Scene.active.lights.length > 0) {
 				var light = Scene.active.lights[0];
@@ -68,6 +69,7 @@ class TabViewport {
 				light.data.raw.strength = ui.slider(lhandle, "Light", 0.0, 4.0, true) * scale;
 				if (lhandle.changed) Context.ddirty = 2;
 			}
+			#end
 
 			ui.row([1/2, 1/2]);
 			var cam = Scene.active.camera.data.raw;

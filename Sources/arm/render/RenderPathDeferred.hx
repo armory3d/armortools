@@ -190,39 +190,6 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if kha_direct3d12
-		{
-			Scene.active.embedData("bnoise_sobol.png", function() {});
-			Scene.active.embedData("bnoise_scramble.png", function() {});
-			Scene.active.embedData("bnoise_rank.png", function() {});
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "bsobol";
-				t.width = 256;
-				t.height = 256;
-				t.format = "RGBA32";
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "bscramble";
-				t.width = 128;
-				t.height = 1024;
-				t.format = "RGBA32";
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "brank";
-				t.width = 128;
-				t.height = 1024;
-				t.format = "RGBA32";
-				path.createRenderTarget(t);
-			}
-		}
-		#end
-
 		{
 			var t = new RenderTargetRaw();
 			t.name = "bloomtex";
