@@ -127,9 +127,11 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	};
 	float2 tex_coord = hit_attribute2d(vertex_uvs, attr);
 
-	float3 texpaint0 = mytexture0.Load(uint3(tex_coord * 2048, 0)).rgb;
-	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * 2048, 0)).rgb;
-	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * 2048, 0)).rgb;
+	uint2 size;
+	mytexture0.GetDimensions(size.x, size.y);
+	float3 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0)).rgb;
+	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0)).rgb;
+	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 color = payload.color.rgb * texpaint0.rgb;
 
 	if (texpaint2.b >= 0.99) {
@@ -160,6 +162,8 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 [shader("miss")]
 void miss(inout RayPayload payload) {
 	float2 tex_coord = equirect(WorldRayDirection());
-	float3 texenv = mytexture_env.Load(uint3(tex_coord.x * 4096, tex_coord.y * 2048, 0)).rgb * constant_buffer.params.x;
+	uint2 size;
+	mytexture_env.GetDimensions(size.x, size.y);
+	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * constant_buffer.params.x;
 	payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 }
