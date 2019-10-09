@@ -31,13 +31,21 @@ class Plugin {
 }
 
 @:expose("iron")
-class Bridge {
+class IronBridge {
 	public static var App = iron.App;
 	public static var Scene = iron.Scene;
 	public static var Time = iron.system.Time;
 	public static var Input = iron.system.Input;
 	public static var Object = iron.object.Object;
 	public static var Data = iron.data.Data;
+}
+
+@:expose("arm")
+class ArmBridge {
+	public static var Project = arm.Project;
+	public static var Layers = arm.Layers;
+	public static var History = arm.History;
+	public static var Context = arm.Context;
 	public static function log(s:String) { trace(s); };
 }
 
