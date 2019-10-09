@@ -52,19 +52,20 @@ class Console {
 
 	public static function render(ui:Zui) {
 
-		if (first) {
-			iron.App.notifyOnRender2D(tick);
-			first = false;
-			if (haxeTrace == null) {
-				haxeTrace = haxe.Log.trace;
-				haxe.Log.trace = consoleTrace;
-			}
-		}
-
 		var avg = Math.round(frameTimeAvg * 10000) / 10;
 		var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 
 		if (ui.panel(Id.handle({selected: false}), 'Profiler')) {
+
+			if (first) {
+				iron.App.notifyOnRender2D(tick);
+				first = false;
+				if (haxeTrace == null) {
+					haxeTrace = haxe.Log.trace;
+					haxe.Log.trace = consoleTrace;
+				}
+			}
+
 			if (graph != null) ui.image(graph);
 			ui.indent();
 
