@@ -47,6 +47,9 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.lastPaintVecY = UITrait.inst.paintVec.y;
 		}
 
+		// Do not paint over fill layer
+		if (Context.layer.material_mask != null && Context.tool != ToolPicker) return;
+
 		// Paint bounds
 		if (UITrait.inst.paintVec.x < right && UITrait.inst.paintVec.x > left &&
 			UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0 &&
