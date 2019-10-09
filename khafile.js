@@ -52,6 +52,10 @@ else {
 	project.addAssets("Bundled/readme/readme.txt", { notinlist: true, destination: "{name}" });
 }
 
+if (process.platform === 'darwin') {
+	project.addAssets("Bundled/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
+}
+
 if (process.platform === 'win32') {
 	project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
