@@ -659,8 +659,7 @@ class RenderPathDeferred {
 		}
 
 		#if kha_direct3d12
-		var viewport = false;
-		if (viewport) {
+		if (Context.tool != ToolBake) {
 			if (Context.ddirty > 1) {
 				RenderPathRaytrace.frame = 0;
 			}

@@ -25,6 +25,7 @@ class RenderPathRaytrace {
 	static var raysCounter = 0;
 	static var lastLayer:kha.Image = null;
 	static var lastEnvmap:kha.Image = null;
+	static var isBake = false;
 
 	static function init(shaderName:String, targetW:Int, targetH:Int) {
 
@@ -78,8 +79,9 @@ class RenderPathRaytrace {
 	}
 
 	public static function commands() {
-		if (!ready) {
+		if (!ready || isBake) {
 			ready = true;
+			isBake = false;
 			init("raytrace_brute.cso", iron.App.w(), iron.App.h());
 			lastEnvmap = null;
 			lastLayer = null;
@@ -148,8 +150,9 @@ class RenderPathRaytrace {
 
 		var path = RenderPathDeferred.path;
 
-		if (!ready) {
+		if (!ready || !isBake) {
 			ready = true;
+			isBake = true;
 
 			if (path.renderTargets.get("baketex0") != null) {
 				path.renderTargets.get("baketex0").image.unload();
@@ -197,7 +200,13 @@ class RenderPathRaytrace {
 			var baketex1 = path.renderTargets.get("baketex1").image;
 			var baketex2 = path.renderTargets.get("baketex2").image;
 			var savedEnvmap = Scene.active.world.probe.radiance;
-			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, baketex2.renderTarget_, savedEnvmap.texture_);
+
+			var envrt = path.renderTargets.get("envrt").image;
+			envrt.g2.begin(false);
+			envrt.g2.drawScaledImage(savedEnvmap, 0, 0, envrt.width, envrt.height);
+			envrt.g2.end();
+
+			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, baketex2.renderTarget_, envrt.renderTarget_);
 
 			return;
 		}
