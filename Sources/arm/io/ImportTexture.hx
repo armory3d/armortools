@@ -11,11 +11,11 @@ class ImportTexture {
 
 	public static function run(path:String) {
 		if (!Path.checkTextureFormat(path)) {
-			UITrait.inst.showError(Strings.error1);
+			Log.showError(Strings.error1);
 			return;
 		}
 
-		for (a in Project.assets) if (a.file == path) { UITrait.inst.showMessage(Strings.info0); return; }
+		for (a in Project.assets) if (a.file == path) { Log.showMessage(Strings.info0); return; }
 
 		Data.getImage(path, function(image:Image) {
 			var ar = path.split("/");

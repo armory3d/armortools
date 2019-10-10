@@ -419,7 +419,7 @@ class App {
 		for (i in 0...s.length) {
 			if (s.charCodeAt(i) > 127) {
 				// Bail out for now :(
-				UITrait.inst.showError(Strings.error0);
+				Log.showError(Strings.error0);
 				return false;
 			}
 		}

@@ -46,7 +46,7 @@ class Project {
 		UIFiles.filters = "arm";
 		UIFiles.filesDone = function(path:String) {
 			if (!path.endsWith(".arm")) {
-				UITrait.inst.showError(Strings.error5);
+				Log.showError(Strings.error5);
 				return;
 			}
 
@@ -217,7 +217,7 @@ class Project {
 	public static function reloadAssets() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
 			Importer.importMesh(Project.meshAssets[0], false);
-			UITrait.inst.showMessage("Assets reloaded.");
+			Log.showMessage("Assets reloaded.");
 		}
 	}
 }

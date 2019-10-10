@@ -59,6 +59,13 @@ class Path {
 		return p.endsWith(".arm");
 	}
 
+	public static function checkPluginFormat(path:String):Bool {
+		var p = path.toLowerCase();
+		return p.endsWith(".js");
+			   // p.endsWith(".wasm") ||
+			   // p.endsWith(".zip");
+	}
+
 	public static function checkBaseTex(p:String):Bool {
 		return p.endsWith("_albedo") ||
 			   p.endsWith("_alb") ||

@@ -68,9 +68,6 @@ class UITrait {
 	public var materialIdPicked = 0;
 	public var pickerSelectMaterial = true;
 	public var pickerMaskHandle = new Handle({position: 0});
-	var message = "";
-	var messageTimer = 0.0;
-	var messageColor = 0x00000000;
 	var borderStarted = 0;
 	var borderHandle:Handle = null;
 
@@ -365,20 +362,6 @@ class UITrait {
 		for (m in Scene.active.meshes) projectObjects.push(m);
 	}
 
-	public function showMessage(s:String) {
-		messageTimer = 8.0;
-		message = s;
-		messageColor = 0x00000000;
-		statusHandle.redraws = 2;
-	}
-
-	public function showError(s:String) {
-		messageTimer = 8.0;
-		message = s;
-		messageColor = 0xffff0000;
-		statusHandle.redraws = 2;
-	}
-
 	function done() {
 		if (ui.SCALE > 1) setIconScale();
 		//
@@ -399,17 +382,9 @@ class UITrait {
 		}
 
 		// Init plugins
-		Plugin.keep();
 		if (Config.raw.plugins != null) {
 			for (plugin in Config.raw.plugins) {
-				try {
-					Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
-						#if js
-						untyped __js__("(1, eval)({0})", blob.toString());
-						#end
-					});
-				}
-				catch(e:Dynamic) { trace("Plugin '" + plugin + "' not found"); }
+				Plugin.start(plugin);
 			}
 		}
 	}
@@ -646,9 +621,9 @@ class UITrait {
 
 	function updateUI() {
 
-		if (messageTimer > 0) {
-			messageTimer -= Time.delta;
-			if (messageTimer <= 0) statusHandle.redraws = 2;
+		if (Log.messageTimer > 0) {
+			Log.messageTimer -= Time.delta;
+			if (Log.messageTimer <= 0) statusHandle.redraws = 2;
 		}
 
 		var mouse = Input.getMouse();
@@ -1179,11 +1154,11 @@ class UITrait {
 				ViewportUtil.updateCameraType(cameraType);
 			}
 
-			if (messageTimer > 0) {
+			if (Log.messageTimer > 0) {
 				var _w = ui._w;
-				ui._w = Std.int(ui.ops.font.width(ui.fontSize, message) + 65 * ui.SCALE);
-				ui.fill(0, 0, ui._w, ui._h, messageColor);
-				ui.text(message);
+				ui._w = Std.int(ui.ops.font.width(ui.fontSize, Log.message) + 65 * ui.SCALE);
+				ui.fill(0, 0, ui._w, ui._h, Log.messageColor);
+				ui.text(Log.message);
 				ui._w = _w;
 			}
 		}

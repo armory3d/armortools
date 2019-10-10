@@ -49,18 +49,22 @@ class Importer {
 		else if (Path.checkProjectFormat(path)) {
 			ImportArm.runProject(path);
 		}
+		// Plugin
+		else if (Path.checkPluginFormat(path)) {
+			ImportPlugin.run(path);
+		}
 		// Folder
 		else if (path.indexOf(".") == -1) {
 			ImportFolder.run(path);
 		}
 		else {
-			UITrait.inst.showError(Strings.error1);
+			Log.showError(Strings.error1);
 		}
 	}
 
 	public static function importMesh(path:String, _clearLayers = true) {
 		if (!Path.checkMeshFormat(path)) {
-			UITrait.inst.showError(Strings.error1);
+			Log.showError(Strings.error1);
 			return;
 		}
 
@@ -118,7 +122,7 @@ class Importer {
 
 	public static function makeMesh(mesh:Dynamic, path:String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
-			UITrait.inst.showError(Strings.error3);
+			Log.showError(Strings.error3);
 			return;
 		}
 
@@ -141,7 +145,7 @@ class Importer {
 		else {
 
 			if (mesh.texa == null) {
-				UITrait.inst.showError(Strings.error4);
+				Log.showError(Strings.error4);
 				var verts = Std.int(mesh.posa.length / 4);
 				mesh.texa = new Int16Array(verts * 2);
 				var n = new Vec4();
@@ -246,7 +250,7 @@ class Importer {
 	public static function addMesh(mesh:Dynamic) {
 
 		if (mesh.texa == null) {
-			UITrait.inst.showError(Strings.error4);
+			Log.showError(Strings.error4);
 			var verts = Std.int(mesh.posa.length / 4);
 			mesh.texa = new Int16Array(verts * 2);
 			var n = new Vec4();

@@ -1,10 +1,9 @@
 
-var plugin = new arm.Plugin();
+let plugin = new arm.Plugin();
 
-var h1 = plugin.handle();
-var h2 = plugin.handle({value:1});
-
-var timer = 0.0;
+let h1 = new zui.Handle();
+let h2 = new zui.Handle({value:1});
+let timer = 0.0;
 
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "Auto Save")) {

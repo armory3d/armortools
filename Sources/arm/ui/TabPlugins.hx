@@ -2,16 +2,108 @@ package arm.ui;
 
 import haxe.io.Bytes;
 import haxe.Json;
+import zui.Zui;
 import zui.Id;
 import iron.data.Data;
 import iron.system.ArmPack;
+import arm.io.ImportPlugin;
 using StringTools;
 
+@:access(zui.Zui)
 class TabPlugins{
+
+	public static var files:Array<String> = null;
 
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Plugins")) {
+
+			if (ui.panel(Id.handle({selected: false}), "Manager", 1)) {
+
+				#if krom_windows
+				var sep = "\\";
+				var dataPath = Data.dataPath.replace("/", "\\");
+				#else
+				var sep = "/";
+				var dataPath = Data.dataPath;
+				#end
+
+				if (files == null) {
+					#if krom_windows
+					var cmd = "dir /b ";
+					#else
+					var cmd = "ls ";
+					#end
+					#if krom_linux
+					var save = "/tmp";
+					#else
+					var save = Krom.savePath();
+					#end
+					save += sep + "dir.txt";
+					var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins";
+					Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
+					var str = Bytes.ofData(Krom.loadBlob(save)).toString();
+					files = str.split("\n");
+					files.pop();
+					for (i in 0...files.length) {
+						files[i] = files[i].replace("\r", "");
+					}
+				}
+
+				ui.row([1/4]);
+				if (ui.button("Install")) {
+					UIFiles.show = true;
+					UIFiles.isSave = false;
+					UIFiles.filters = "js,wasm,zip";
+					UIFiles.filesDone = function(path:String) {
+						ImportPlugin.run(path);
+					}
+				}
+
+				var h = Id.handle({selected: false});
+				for (f in files) {
+					var enabled = Config.raw.plugins.indexOf(f) >= 0;
+					h.selected = enabled;
+					ui.check(h, f.split(".")[0]);
+					if (h.changed && h.selected != enabled) {
+						if (h.selected) {
+							Config.raw.plugins.push(f);
+							Plugin.start(f);
+						}
+						else {
+							Config.raw.plugins.remove(f);
+							Plugin.stop(f);
+						}
+						Config.save();
+					}
+					if (ui.isHovered && ui.inputReleasedR) {
+						UIMenu.draw(function(ui:Zui) {
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+							ui.text(f, Right);
+							if (ui.button("Delete", Left)) {
+								if (Config.raw.plugins.indexOf(f) >= 0) {
+									Config.raw.plugins.remove(f);
+									Plugin.stop(f);
+								}
+								files.remove(f);
+								#if krom_windows
+								var cmd = "del /f ";
+								#else
+								var cmd = "rm ";
+								#end
+								var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
+								Krom.sysCommand(cmd + '"' + path + '"');
+							}
+							// if (ui.button("Edit", Left)) {
+								// filename
+							// }
+							// if (ui.button("Reload", Left)) {}
+						});
+					}
+				}
+			}
+			ui.separator();
+
 			arm.plugin.Console.render(ui);
 			ui.separator();
 

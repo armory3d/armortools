@@ -75,7 +75,7 @@ class ImportArm {
 				// { test -e file && echo 1 || echo 0 }
 				#end
 				if (exists == 0) {
-					UITrait.inst.showError(Strings.error2 + abs);
+					Log.showError(Strings.error2 + abs);
 					var b = Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
@@ -256,7 +256,7 @@ class ImportArm {
 			// { test -e file && echo 1 || echo 0 }
 			#end
 			if (exists == 0) {
-				UITrait.inst.showError(Strings.error2 + abs);
+				Log.showError(Strings.error2 + abs);
 				var b = Bytes.alloc(4);
 				b.set(0, 255);
 				b.set(1, 0);

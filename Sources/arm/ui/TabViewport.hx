@@ -21,7 +21,7 @@ class TabViewport {
 				UIFiles.filters = "hdr";
 				UIFiles.filesDone = function(path:String) {
 					if (!path.endsWith(".hdr")) {
-						UITrait.inst.showError("Error: .hdr file expected");
+						Log.showError("Error: .hdr file expected");
 						return;
 					}
 					Importer.importFile(path);

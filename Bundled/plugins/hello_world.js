@@ -1,20 +1,20 @@
 
-var plugin = new arm.Plugin();
+let plugin = new arm.Plugin();
 
-var h1 = plugin.handle();
-var h2 = plugin.handle();
-var h3 = plugin.handle();
-var h4 = plugin.handle();
-var h5 = plugin.handle();
-var h6 = plugin.handle();
-var h7 = plugin.handle();
+let h1 = new zui.Handle();
+let h2 = new zui.Handle();
+let h3 = new zui.Handle();
+let h4 = new zui.Handle();
+let h5 = new zui.Handle();
+let h6 = new zui.Handle();
+let h7 = new zui.Handle();
 
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "My Plugin")) {
 		ui.text("Label");
 		ui.textInput(h7, "Text Input");
 		if (ui.button("Button")) {
-			plugin.log("Hello");
+			arm.Log.showError("Hello");
 		}
 		ui.row([1/2, 1/2]);
 		ui.button("Button A");

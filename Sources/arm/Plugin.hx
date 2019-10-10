@@ -2,31 +2,39 @@ package arm;
 
 // ArmorPaint plugin API
 
-@:expose
+@:keep
 class Plugin {
 
-	public static var plugins:Array<Plugin> = [];
+	public static var plugins:Map<String, Plugin> = [];
+	static var pluginName:String;
 
 	public var drawUI:zui.Zui->Void = null;
 	public var draw:Void->Void = null;
 	public var update:Void->Void = null;
-
-	public static function keep() {}
-
-	public function handle(ops: zui.Zui.HandleOptions = null) {
-		return new zui.Zui.Handle(ops);
-	}
+	public var delete:Void->Void = null;
+	var name:String;
 
 	public function new() {
-		plugins.push(this);
+		name = pluginName;
+		plugins.set(name, this);
 	}
 
-	public function log(s) {
-		trace(s);
+	public static function start(plugin:String) {
+		try {
+			iron.data.Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
+				pluginName = plugin;
+				#if js
+				untyped __js__("(1, eval)({0})", blob.toString());
+				#end
+			});
+		}
+		catch(e:Dynamic) { trace("Failed to load plugin '" + plugin + "'"); trace(e); }
 	}
 
-	public function scene() {
-		return iron.Scene.active;
+	public static function stop(plugin:String) {
+		var p = plugins.get(plugin);
+		if (p.delete != null) p.delete();
+		plugins.remove(plugin);
 	}
 }
 
@@ -42,20 +50,15 @@ class IronBridge {
 
 @:expose("arm")
 class ArmBridge {
+	public static var Plugin = arm.Plugin;
 	public static var Project = arm.Project;
 	public static var Layers = arm.Layers;
 	public static var History = arm.History;
 	public static var Context = arm.Context;
-	public static function log(s:String) { trace(s); };
+	public static var Log = arm.Log;
 }
 
-// my_plugin.js
-// plugin = new arm.Plugin();
-// h = plugin.handle();
-// plugin.drawUI = function(ui) {
-// 	if (ui.panel(h, "My Plugin")) {
-// 		if (ui.button("Hello")) {
-// 			plugin.log("World");
-// 		}
-// 	}
-// }
+@:expose("zui")
+class ZuiBridge {
+	public static var Handle = zui.Zui.Handle;
+}
