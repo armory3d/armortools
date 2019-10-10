@@ -43,3 +43,8 @@ node Kinc/make -g opengl
 # Add `path/to/Kromx/V8/Libraries/macos/release` into Library Search Paths
 # Build
 ```
+```bash
+# Updating cloned repository
+git pull origin master
+git submodule update --init --recursive
+```
