@@ -424,10 +424,10 @@ class UINodes {
 					ui._y = 3;
 				}
 			}
-
 			ui._x += ew + 3;
 			ui._y = 3;
-			if (ui.button("Search")) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+
+			if (ui.button("Search", Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
 			if (ui.isHovered) ui.tooltip("Search for nodes (" + Config.keymap.node_search + ")");
 
 			ui.t.BUTTON_COL = BUTTON_COL;
