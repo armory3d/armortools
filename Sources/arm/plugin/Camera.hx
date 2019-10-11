@@ -30,8 +30,8 @@ class Camera {
 				!App.uienabled ||
 				App.isDragging  ||
 				UITrait.inst.isScrolling ||
-				mouse.x < 0 ||
-				mouse.x > iron.App.w()) return;
+				mouse.viewX < 0 ||
+				mouse.viewX > iron.App.w()) return;
 
 			var camera = iron.Scene.active.camera;
 
@@ -39,8 +39,6 @@ class Camera {
 				first = false;
 				reset();
 			}
-
-
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = UITrait.inst.cameraControls;

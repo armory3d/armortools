@@ -54,8 +54,8 @@ class TabTextures {
 					var uiy = ui._y;
 					if (ui.image(img) == State.Started) {
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragAsset = asset;
 						Context.texture = asset;
 

@@ -69,8 +69,8 @@ class UIBox {
 			var right = appw / 2 + modalW / 2;
 			var top = apph / 2 - modalH / 2;
 			var bottom = apph / 2 + modalH / 2;
-			var mx = mouse.x + iron.App.x();
-			var my = mouse.y + iron.App.y();
+			var mx = mouse.x;
+			var my = mouse.y;
 			if (mx < left || mx > right || my < top || my > bottom) {
 				UIBox.show = false;
 				App.redrawUI();

@@ -28,7 +28,7 @@ class Gizmo {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		if (mouse.x < App.w()) {
+		if (mouse.viewX < App.w()) {
 			if (kb.started("delete") || kb.started("backspace")) {
 				if (Context.object != null) {
 					Context.object.remove();
@@ -45,7 +45,7 @@ class Gizmo {
 					object.transform.rot.setFrom(mo.transform.rot);
 					object.transform.scale.setFrom(mo.transform.scale);
 
-					var hit = RayCaster.planeIntersect(Vec4.zAxis(), new Vec4(), mouse.x, mouse.y, Scene.active.camera);
+					var hit = RayCaster.planeIntersect(Vec4.zAxis(), new Vec4(), mouse.viewX, mouse.viewY, Scene.active.camera);
 					if (hit != null) {
 						object.transform.loc.x = hit.x;
 						object.transform.loc.y = hit.y;
@@ -88,7 +88,7 @@ class Gizmo {
 		if (mouse.started("middle")) {
 			#if arm_physics
 			var physics = armory.trait.physics.PhysicsWorld.active;
-			var rb = physics.pickClosest(mouse.x, mouse.y);
+			var rb = physics.pickClosest(mouse.viewX, mouse.viewY);
 			if (rb != null) Context.selectObject(rb.object);
 			#end
 		}
@@ -96,7 +96,7 @@ class Gizmo {
 		if (mouse.started("left") && Context.object.name != "Scene") {
 			gizmo.transform.buildMatrix();
 			var trs = [UITrait.inst.gizmoX.transform, UITrait.inst.gizmoY.transform, UITrait.inst.gizmoZ.transform];
-			var hit = RayCaster.closestBoxIntersect(trs, mouse.x, mouse.y, Scene.active.camera);
+			var hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
 			if (hit != null) {
 				if (hit.object == UITrait.inst.gizmoX) UITrait.inst.axisX = true;
 				else if (hit.object == UITrait.inst.gizmoY) UITrait.inst.axisY = true;
@@ -114,7 +114,7 @@ class Gizmo {
 			v.set(t.worldx(), t.worldy(), t.worldz());
 
 			if (UITrait.inst.axisX) {
-				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.x, mouse.y, Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.x - Context.object.transform.loc.x;
 					Context.object.transform.loc.x = hit.x - UITrait.inst.axisStart;
@@ -126,7 +126,7 @@ class Gizmo {
 				}
 			}
 			else if (UITrait.inst.axisY) {
-				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.x, mouse.y, Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.y - Context.object.transform.loc.y;
 					Context.object.transform.loc.y = hit.y - UITrait.inst.axisStart;
@@ -138,7 +138,7 @@ class Gizmo {
 				}
 			}
 			else if (UITrait.inst.axisZ) {
-				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.x, mouse.y, Scene.active.camera);
+				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
 					if (UITrait.inst.axisStart == 0) UITrait.inst.axisStart = hit.z - Context.object.transform.loc.z;
 					Context.object.transform.loc.z = hit.z - UITrait.inst.axisStart;
@@ -151,6 +151,6 @@ class Gizmo {
 			}
 		}
 
-		Input.occupied = (UITrait.inst.axisX || UITrait.inst.axisY || UITrait.inst.axisZ) && mouse.x < App.w();
+		Input.occupied = (UITrait.inst.axisX || UITrait.inst.axisY || UITrait.inst.axisZ) && mouse.viewX < App.w();
 	}
 }

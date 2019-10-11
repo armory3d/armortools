@@ -191,7 +191,7 @@ class App {
 			res = System.windowWidth();
 		}
 
-		if (UITrait.inst != null && UITrait.inst.splitView) res = Std.int(res / 2);
+		if (UITrait.inst != null && UITrait.inst.viewIndex > -1) res = Std.int(res / 2);
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
@@ -212,7 +212,7 @@ class App {
 	}
 
 	public static function x():Int {
-		if (UITrait.inst.splitView && UITrait.inst.viewIndex == 1) return appx + w();
+		if (UITrait.inst.viewIndex == 1) return appx + w();
 		return appx;
 	}
 
@@ -298,8 +298,8 @@ class App {
 			isDragging = true;
 		}
 		if (mouse.released() && (dragAsset != null || dragMaterial != null)) {
-			var mx = mouse.x + iron.App.x();
-			var my = mouse.y + iron.App.y();
+			var mx = mouse.x;
+			var my = mouse.y;
 			var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
 							 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
 			var inLayers = UITrait.inst.htab.position == 0 &&
@@ -345,8 +345,8 @@ class App {
 			var wait = false;
 			#end
 			if (!wait) {
-				dropX = mouse.x + App.x();
-				dropY = mouse.y + App.y();
+				dropX = mouse.x;
+				dropY = mouse.y;
 				Importer.importFile(dropPath, dropX, dropY);
 				dropPath = "";
 			}
@@ -385,11 +385,11 @@ class App {
 			#else
 			var inv = 0;
 			#end
-			g.drawScaledImage(img, mouse.x + iron.App.x() + dragOffX, mouse.y + iron.App.y() + dragOffY + inv, size, h - inv * 2);
+			g.drawScaledImage(img, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
 		}
 
 		var usingMenu = false;
-		if (UIMenu.show) usingMenu = mouse.y + App.y() > UITrait.inst.headerh;
+		if (UIMenu.show) usingMenu = mouse.y > UITrait.inst.headerh;
 
 		uienabled = !UIBox.show && !usingMenu;
 		if (UIFiles.show) UIFiles.render(g);

@@ -407,36 +407,38 @@ class RenderPathDeferred {
 		#end // arm_painter
 	}
 
+	static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
+
 	@:access(iron.RenderPath)
 	public static function commands() {
 
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		var ssaa4 = Config.raw.rp_supersample == 4 ? true : false;
-
 		if (UITrait.inst.splitView) {
-			UITrait.inst.viewIndex = Input.getMouse().x > arm.App.w() ? 1 : 0;
-			if (UITrait.inst.viewIndex == 1) {
-				if (path.renderTargets.get("taa_split") == null) {
-					{
-						var t = new RenderTargetRaw();
-						t.name = "taa_split";
-						t.width = 0;
-						t.height = 0;
-						#if kha_direct3d12 // Match raytrace_target format
-						t.format = "RGBA128";
-						#else
-						t.format = "RGBA32";
-						#end
-						t.scale = Inc.getSuperSampling();
-						path.createRenderTarget(t);
-					}
-				}
+
+			if (UITrait.inst.viewIndexLast == -1 && UITrait.inst.viewIndex == -1) {
+				// Begin split, draw right viewport first
+				UITrait.inst.viewIndex = 1;
 			}
+			else {
+				// Set current viewport
+				UITrait.inst.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			}
+
 			var cam = Scene.active.camera;
-			arm.plugin.Camera.inst.views[0].setFrom(cam.transform.local);
+			if (UITrait.inst.viewIndexLast > -1) {
+				// Save current viewport camera
+				arm.plugin.Camera.inst.views[UITrait.inst.viewIndexLast].setFrom(cam.transform.local);
+			}
+
+			if (UITrait.inst.viewIndexLast != UITrait.inst.viewIndex) {
+				// Redraw on current viewport change
+				Context.ddirty = 1;
+			}
+
 			cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
 			cam.buildMatrix();
+			cam.buildProjection();
 		}
 
 		#if arm_painter
@@ -444,28 +446,32 @@ class RenderPathDeferred {
 		var mouse = Input.getMouse();
 		var mx = lastX;
 		var my = lastY;
-		lastX = mouse.x;
-		lastY = mouse.y;
+		lastX = mouse.viewX;
+		lastY = mouse.viewY;
 
 		#if (!arm_creator)
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");
-				path.bindTarget(UITrait.inst.viewIndex > 0 ? "taa_split" : "taa", "tex");
-				ssaa4 ?
+				path.bindTarget("taa", "tex");
+				ssaa4() ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
+			endSplit();
 			return;
 		}
 		#end
 
 		// Match projection matrix jitter
-		@:privateAccess Scene.active.camera.frame = taaFrame;
-		@:privateAccess Scene.active.camera.projectionJitter();
+		var skipTaa = UITrait.inst.splitView;
+		if (!skipTaa) {
+			@:privateAccess Scene.active.camera.frame = taaFrame;
+			@:privateAccess Scene.active.camera.projectionJitter();
+		}
 		Scene.active.camera.buildMatrix();
 
 		var pushUndoLast = History.pushUndo;
@@ -526,7 +532,26 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
-		#end
+		#end // arm_painter
+
+		if (UITrait.inst.splitView) {
+			if (Context.pdirty > 0) {
+				var cam = Scene.active.camera;
+
+				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				cam.buildMatrix();
+				cam.buildProjection();
+
+				drawGbuffer();
+				drawDeferred();
+
+				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				cam.buildMatrix();
+				cam.buildProjection();
+			}
+		}
 
 		// Geometry
 		drawGbuffer();
@@ -678,6 +703,20 @@ class RenderPathDeferred {
 
 		#end // arm_painter
 
+		drawDeferred();
+
+		#if arm_painter
+		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+		Context.ddirty--;
+		Context.pdirty--;
+		Context.rdirty--;
+		#end
+
+		taaFrame++;
+		endSplit();
+	}
+
+	static function drawDeferred() {
 		#if arm_painter
 		var cameraType = UITrait.inst.cameraType;
 		var ddirty = Context.ddirty;
@@ -939,33 +978,37 @@ class RenderPathDeferred {
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-			var taa = UITrait.inst.viewIndex > 0 ? "taa_split" : "taa";
-			path.setTarget(taa);
-			path.bindTarget(current, "tex");
-			path.bindTarget(last, "tex2");
-			path.bindTarget("gbuffer2", "sveloc");
-			path.drawShader("shader_datas/taa_pass/taa_pass");
-			if (!ssaa4) {
+			var skipTaa = UITrait.inst.splitView;
+			if (skipTaa) {
+				path.setTarget("taa");
+				path.bindTarget(current, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+			}
+			else {
+				path.setTarget("taa");
+				path.bindTarget(current, "tex");
+				path.bindTarget(last, "tex2");
+				path.bindTarget("gbuffer2", "sveloc");
+				path.drawShader("shader_datas/taa_pass/taa_pass");
+			}
+
+			if (!ssaa4()) {
 				path.setTarget("");
-				path.bindTarget(taaFrame == 0 ? current : taa, "tex");
+				path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 			}
 		}
 
-		if (ssaa4) {
+		if (ssaa4()) {
 			path.setTarget("");
 			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 		}
+	}
 
-		#if arm_painter
-		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-		Context.ddirty--;
-		Context.pdirty--;
-		Context.rdirty--;
-		#end
-
-		taaFrame++;
+	static function endSplit() {
+		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
+		UITrait.inst.viewIndex = -1;
 	}
 
 	static function drawGbuffer() {

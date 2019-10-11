@@ -20,27 +20,36 @@ class InputNode extends LogicNode {
 	public function new(tree:LogicTree) {
 		super(tree);
 		tree.notifyOnUpdate(function() {
+
+			if (arm.ui.UITrait.inst.splitView) {
+				arm.ui.UITrait.inst.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			}
+
 			var mouse = iron.system.Input.getMouse();
-			coords.x = mouse.x / iron.App.w();
-			coords.y = mouse.y / iron.App.h();
+			coords.x = mouse.viewX / iron.App.w();
+			coords.y = mouse.viewY / iron.App.h();
 			if (mouse.started()) {
-				startX = mouse.x / iron.App.w();
-				startY = mouse.y / iron.App.h();
+				startX = mouse.viewX / iron.App.w();
+				startY = mouse.viewY / iron.App.h();
 			}
 
 			var pen = iron.system.Input.getPen();
 			if (pen.down()) {
-				coords.x = pen.x / iron.App.w();
-				coords.y = pen.y / iron.App.h();
+				coords.x = pen.viewX / iron.App.w();
+				coords.y = pen.viewY / iron.App.h();
 			}
 			if (pen.started()) {
-				startX = pen.x / iron.App.w();
-				startY = pen.y / iron.App.h();
+				startX = pen.viewX / iron.App.w();
+				startY = pen.viewY / iron.App.h();
+			}
+
+			if (arm.ui.UITrait.inst.splitView) {
+				arm.ui.UITrait.inst.viewIndex = -1;
 			}
 
 			if (lockBegin) {
-				var dx = Math.abs(lockStartX - mouse.x);
-				var dy = Math.abs(lockStartY - mouse.y);
+				var dx = Math.abs(lockStartX - mouse.viewX);
+				var dy = Math.abs(lockStartY - mouse.viewY);
 				if (dx > 1 || dy > 1) {
 					lockBegin = false;
 					if (dx > dy) lockY = true;
@@ -49,7 +58,7 @@ class InputNode extends LogicNode {
 			}
 
 			var kb = iron.system.Input.getKeyboard();
-			if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.x; lockStartY = mouse.y; lockBegin = true; }
+			if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.viewX; lockStartY = mouse.viewY; lockBegin = true; }
 			else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
 
 			if (lockX) coords.x = startX;

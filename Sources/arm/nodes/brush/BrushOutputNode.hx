@@ -48,13 +48,14 @@ class BrushOutputNode extends LogicNode {
 		}
 
 		// Do not paint over fill layer
-		if (Context.layer.material_mask != null && Context.tool != ToolPicker) return;
+		var fillLayer = Context.layer.material_mask != null && Context.tool != ToolPicker;
 
 		// Paint bounds
 		if (UITrait.inst.paintVec.x < right && UITrait.inst.paintVec.x > left &&
 			UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0 &&
 			!UITrait.inst.ui.isHovered &&
 			!UITrait.inst.ui.isScrolling &&
+			!fillLayer &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			@:privateAccess UITrait.inst.ui.comboSelectedHandle == null &&

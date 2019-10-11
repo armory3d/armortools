@@ -205,8 +205,8 @@ class UINodes {
 			wy += iron.App.h() - defaultWindowH;
 		}
 		var ww = defaultWindowW;
-		var mx = mouse.x + App.x();
-		var my = mouse.y + App.y();
+		var mx = mouse.x;
+		var my = mouse.y;
 		if (mx < wx || mx > wx + ww || my < wy) return;
 		if (ui.isTyping) return;
 
@@ -228,8 +228,8 @@ class UINodes {
 		// Node search popup
 		if (kb.started(Config.keymap.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
-			ui.inputX = mouse.x + App.x(); // Fix inputDX after popup removal
-			ui.inputY = mouse.y + App.y();
+			ui.inputX = mouse.x; // Fix inputDX after popup removal
+			ui.inputY = mouse.y;
 			nodeSearchSpawn = null;
 		}
 	}
@@ -295,12 +295,12 @@ class UINodes {
 
 	public function getNodeX():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.x + App.x() - wx - nodes.PAN_X()) / nodes.SCALE);
+		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE);
 	}
 
 	public function getNodeY():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.y + App.y() - wy - nodes.PAN_Y()) / nodes.SCALE);
+		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE);
 	}
 
 	public function drawGrid() {

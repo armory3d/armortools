@@ -191,8 +191,8 @@ class RenderPathPaint {
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
 		g.setTexture(Layers.cursorGbuffer0, gbuffer0);
-		var mx = iron.system.Input.getMouse().x / iron.App.w();
-		var my = 1.0 - (iron.system.Input.getMouse().y / iron.App.h());
+		var mx = iron.system.Input.getMouse().viewX / iron.App.w();
+		var my = 1.0 - (iron.system.Input.getMouse().viewY / iron.App.h());
 		if (UITrait.inst.brushLocked) {
 			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
 			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();

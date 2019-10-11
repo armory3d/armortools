@@ -53,7 +53,8 @@ class UITrait {
 	public var colorIdPicked = false;
 	public var show = true;
 	public var splitView = false;
-	public var viewIndex = 0;
+	public var viewIndex = -1;
+	public var viewIndexLast = -1;
 	public var materialPreview = false; // Drawing material previews
 	public var savedCamera = Mat4.identity();
 	public var baseRPicked = 0.0;
@@ -339,14 +340,20 @@ class UITrait {
 			}
 			frame++;
 
-			var m = Input.getMouse();
-			if (m.down()) { //
+			var mouse = Input.getMouse();
+			if (mouse.down()) { //
 				lastPaintVecX = paintVec.x; //
 				lastPaintVecY = paintVec.y; //
 			}//
 			else {
-				lastPaintVecX = m.x / iron.App.w();
-				lastPaintVecY = m.y / iron.App.h();
+				if (splitView) {
+					viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				}
+
+				lastPaintVecX = mouse.viewX / iron.App.w();
+				lastPaintVecY = mouse.viewY / iron.App.h();
+
+				viewIndex = -1;
 			}
 		});//
 
@@ -488,8 +495,8 @@ class UITrait {
 		if (UIView2D.inst.show) right = iron.App.w() * 2;
 
 		// Viewport shortcuts
-		if (mouse.x > 0 && mouse.x < right &&
-			mouse.y > 0 && mouse.y < iron.App.h() &&
+		if (mouse.viewX > 0 && mouse.viewX < right &&
+			mouse.viewY > 0 && mouse.viewY < iron.App.h() &&
 			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
 
 			if (worktab.position == SpacePaint) {
@@ -528,8 +535,8 @@ class UITrait {
 						Operator.shortcut(Config.keymap.brush_opacity)) {
 						brushCanLock = true;
 						mouse.lock();
-						lockStartedX = mouse.x + iron.App.x();
-						lockStartedY = mouse.y + iron.App.y();
+						lockStartedX = mouse.x;
+						lockStartedY = mouse.y;
 					}
 				}
 			}
@@ -636,8 +643,8 @@ class UITrait {
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
 				   (Input.getPen().down() && !kb.down("alt"));
 		if (down) {
-			var mx = mouse.x;
-			var my = mouse.y;
+			var mx = mouse.viewX;
+			var my = mouse.viewY;
 			if (paint2d) mx -= iron.App.w();
 
 			if (mx < iron.App.w() && mx > iron.App.x() &&
@@ -758,12 +765,12 @@ class UITrait {
 		// Brush
 		if (App.uienabled && worktab.position == SpacePaint) {
 			var mouse = Input.getMouse();
-			var mx = mouse.x + iron.App.x();
-			var my = mouse.y + iron.App.y();
+			var mx = mouse.x;
+			var my = mouse.y;
 			var pen = Input.getPen();
 			if (pen.down()) {
-				mx = pen.x + iron.App.x();
-				my = pen.y + iron.App.y();
+				mx = pen.x;
+				my = pen.y;
 			}
 
 			// Radius being scaled

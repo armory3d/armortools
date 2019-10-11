@@ -112,8 +112,8 @@ class TabMaterials {
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showMaterialNodes();
 						UITrait.inst.selectTime = Time.time();
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX + iron.App.x() - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + iron.App.y() + 1);
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragMaterial = getSelectedMaterial();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {

@@ -29,7 +29,7 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [6, 2, 13, 5];
+		var menuItems = [6, 2, 14, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 
 		g.color = ui.t.SEPARATOR_COL;
@@ -98,9 +98,10 @@ class UIMenu {
 					UITrait.inst.toggleDistractFree();
 					UITrait.inst.ui.isHovered = false;
 				}
-				// if (ui.button("Split View", Left)) {
-				// 	UITrait.inst.splitView = !UITrait.inst.splitView;
-				// }
+				if (ui.button("Split View", Left)) {
+					UITrait.inst.splitView = !UITrait.inst.splitView;
+					App.resize();
+				}
 
 				// ui.button("Show Envmap", Left);
 				// ui.button("Wireframe", Left);
@@ -226,8 +227,8 @@ class UIMenu {
 		var uibox = App.uibox;
 		show = true;
 		menuCommands = commands;
-		menuX = x > -1 ? x : Std.int(iron.App.x() + Input.getMouse().x);
-		menuY = y > -1 ? y : Std.int(iron.App.y() + Input.getMouse().y);
+		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
+		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
 		var menuw = uibox.ELEMENT_W() * 1.5;
 		if (menuX + menuw > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuw);

@@ -183,7 +183,7 @@ class UIView2D {
 	}
 
 	function update() {
-		var m = Input.getMouse();
+		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
 		var headerh = ui.ELEMENT_H() * 1.4;
@@ -191,17 +191,17 @@ class UIView2D {
 
 		if (!App.uienabled ||
 			!show ||
-			m.x + App.x() < wx ||
-			m.x + App.x() > wx + ww ||
-			m.y + App.y() < wy + headerh ||
-			m.y + App.y() > wy + wh) return;
+			mouse.x < wx ||
+			mouse.x > wx + ww ||
+			mouse.y < wy + headerh ||
+			mouse.y > wy + wh) return;
 
-		if (m.down("right") || m.down("middle")) {
-			panX += m.movementX;
-			panY += m.movementY;
+		if (mouse.down("right") || mouse.down("middle")) {
+			panX += mouse.movementX;
+			panY += mouse.movementY;
 		}
-		if (m.wheelDelta != 0) {
-			panScale -= m.wheelDelta / 10;
+		if (mouse.wheelDelta != 0) {
+			panScale -= mouse.wheelDelta / 10;
 			if (panScale < 0.1) panScale = 0.1;
 			if (panScale > 3.0) panScale = 3.0;
 		}
