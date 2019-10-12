@@ -67,6 +67,8 @@ class UITrait {
 	public var metallicPicked = 0.0;
 	public var occlusionPicked = 0.0;
 	public var materialIdPicked = 0;
+	public var uvxPicked = 0.0;
+	public var uvyPicked = 0.0;
 	public var pickerSelectMaterial = true;
 	public var pickerMaskHandle = new Handle({position: 0});
 	var borderStarted = 0;

@@ -13,6 +13,7 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
 import arm.data.ConstData;
+import arm.Tool;
 
 @:access(zui.Zui)
 class UIView2D {
@@ -176,6 +177,11 @@ class UIView2D {
 				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
 				ui._x += ew + 3;
 				ui._y = 3;
+			}
+
+			if (Context.tool == ToolPicker) {
+				var cursorImg = Res.get('cursor.png');
+				ui.g.drawScaledImage(cursorImg, tx + tw * UITrait.inst.uvxPicked - 16, ty + th * UITrait.inst.uvyPicked - 16, 32, 32);
 			}
 		}
 		ui.end();
