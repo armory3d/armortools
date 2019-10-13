@@ -63,7 +63,9 @@ class App {
 		#end
 
 		System.notifyOnDropFiles(function(filePath:String) {
-			if (!checkAscii(filePath)) return;
+			#if krom_windows
+			if (!checkAscii(filePath)) filePath = shortPath(filePath);
+			#end
 			dropPath = filePath;
 			dropPath = dropPath.replace("%20", " "); // Linux can pass %20 on drop
 			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
@@ -415,14 +417,17 @@ class App {
 		return 0;
 	}
 
+	#if krom_windows
 	public static function checkAscii(s:String):Bool {
-		for (i in 0...s.length) {
-			if (s.charCodeAt(i) > 127) {
-				// Bail out for now :(
-				Log.showError(Strings.error0);
-				return false;
-			}
-		}
+		for (i in 0...s.length) if (s.charCodeAt(i) > 127) return false;
 		return true;
 	}
+
+	public static function shortPath(s:String):String {
+		var cmd = 'for %I in ("' + s + '") do echo %~sI';
+		var save = Krom.getFilesLocation() + "\\data\\tmp.txt";
+		Krom.sysCommand(cmd + ' > "' + save + '"');
+		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
+	}
+	#end
 }

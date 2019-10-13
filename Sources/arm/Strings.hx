@@ -1,7 +1,7 @@
 package arm;
 
 class Strings {
-	public static var error0 = "Error: Accented / special characters in file path";
+	public static var error0 = "";
 	public static var error1 = "Error: Unknown asset format";
 	public static var error2 = "Error: Could not locate texture ";
 	public static var error3 = "Error: Failed to read mesh data";
