@@ -67,8 +67,10 @@ class App {
 			if (!checkAscii(filePath)) filePath = shortPath(filePath);
 			#end
 			dropPath = filePath;
-			dropPath = dropPath.replace("%20", " "); // Linux can pass %20 on drop
-			dropPath = dropPath.split("file://")[0]; // Multiple files dropped on Linux, take first
+			#if krom_linux
+			dropPath = untyped decodeURIComponent(dropPath);
+			dropPath = dropPath.split("file://")[0]; // Multiple files dropped, take first
+			#end
 			dropPath = dropPath.rtrim();
 		});
 
