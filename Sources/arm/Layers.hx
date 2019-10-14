@@ -317,7 +317,6 @@ class Layers {
 	}
 
 	public static function updateFillLayers(fills = 1) {
-		var m = Context.material;
 		var layers = Project.layers;
 		var selectedLayer = Context.layer;
 		var isMask = Context.layerIsMask;
@@ -326,7 +325,7 @@ class Layers {
 
 		var first = true;
 		for (l in layers) {
-			if (l.material_mask == m) {
+			if (l.material_mask != null) {
 				if (first) {
 					current = @:privateAccess kha.graphics4.Graphics2.current;
 					if (current != null) current.end();

@@ -49,7 +49,9 @@ class Uniforms {
 			return val;
 		}
 		else if (link == '_brushScale') {
-			var val = UITrait.inst.brushScale * UITrait.inst.brushNodesScale;
+			var nodesScale = UITrait.inst.brushNodesScale;
+			var fill = Context.layer.material_mask != null;
+			var val = (fill ? Context.layer.uvScale : UITrait.inst.brushScale) * nodesScale;
 			return val;
 		}
 		else if (link == '_texpaintSize') {

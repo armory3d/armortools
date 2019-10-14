@@ -217,6 +217,8 @@ class ImportArm {
 					// texpaint_mask.unload();
 				}
 
+				l.uvScale = ld.uv_scale;
+				if (l.uvScale == null) l.uvScale = 1.0; // TODO: deprecated
 				l.maskOpacity = ld.opacity_mask;
 				l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 				l.objectMask = ld.object_mask;

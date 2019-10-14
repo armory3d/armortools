@@ -1033,16 +1033,13 @@ class UITrait {
 						Context.tool == ToolDecal  ||
 						Context.tool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.01, 10.0, true);
+						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.01, 5.0, true);
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
 								RenderUtil.makeDecalMaskPreview();
 								RenderUtil.makeDecalPreview();
 								ui.g.begin(false);
-							}
-							if (Context.layer.material_mask != null) {
-								Layers.updateFillLayers();
 							}
 						}
 

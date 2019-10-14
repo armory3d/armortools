@@ -325,8 +325,18 @@ class TabLayers {
 				ui._y -= ui.t.ELEMENT_OFFSET;
 
 				if (showPanel) {
-					ui.row([8/100,92/100]);
+					l.material_mask != null ?
+						ui.row([8/100, 46/100, 46/100]) :
+						ui.row([8/100, 92/100]);
 					@:privateAccess ui.endElement();
+
+					if (l.material_mask != null) {
+						var uvHandle = Id.handle().nest(l.id, {value: l.uvScale});
+						l.uvScale = ui.slider(uvHandle, "UV Scale", 0.0, 5.0, true);
+						if (uvHandle.changed) {
+							Layers.updateFillLayers();
+						}
+					}
 					var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
 					l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
 					if (opacHandle.changed) {
