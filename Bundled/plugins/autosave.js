@@ -2,7 +2,7 @@
 let plugin = new arm.Plugin();
 
 let h1 = new zui.Handle();
-let h2 = new zui.Handle({value:1});
+let h2 = new zui.Handle({value: 5});
 let timer = 0.0;
 
 plugin.drawUI = function(ui) {

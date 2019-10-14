@@ -78,9 +78,18 @@ class TabPlugins{
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(f, Right);
 							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
+							if (ui.button("Edit", Left)) {
+								#if krom_windows
+								Krom.sysCommand('"' + path + '"');
+								#elseif krom_linux
+								Krom.sysCommand('xdg-open "' + path + '"');
+								#else
+								Krom.sysCommand('open "' + path + '"');
+								#end
+							}
 							if (ui.button("Delete", Left)) {
 								if (Config.raw.plugins.indexOf(f) >= 0) {
 									Config.raw.plugins.remove(f);
@@ -93,24 +102,6 @@ class TabPlugins{
 								var cmd = "rm ";
 								#end
 								Krom.sysCommand(cmd + '"' + path + '"');
-							}
-							if (ui.button("Edit", Left)) {
-								#if krom_windows
-								Krom.sysCommand('"' + path + '"');
-								#elseif krom_linux
-								Krom.sysCommand('xdg-open "' + path + '"');
-								#else
-								Krom.sysCommand('open "' + path + '"');
-								#end
-							}
-							if (ui.button("Reload", Left)) {
-								if (Config.raw.plugins.indexOf(f) >= 0) {
-									Plugin.stop(f);
-								}
-								iron.data.Data.deleteBlob("plugins/" + f);
-								if (Config.raw.plugins.indexOf(f) >= 0) {
-									Plugin.start(f);
-								}
 							}
 						});
 					}

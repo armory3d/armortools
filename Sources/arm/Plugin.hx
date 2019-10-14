@@ -26,6 +26,7 @@ class Plugin {
 				#if js
 				untyped __js__("(1, eval)({0})", blob.toString());
 				#end
+				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}
 		catch(e:Dynamic) { trace("Failed to load plugin '" + plugin + "'"); trace(e); }
