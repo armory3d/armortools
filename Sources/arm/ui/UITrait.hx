@@ -1047,9 +1047,6 @@ class UITrait {
 						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
 						if (brushRotHandle.changed) {
 							MaterialParser.parsePaintMaterial();
-							if (Context.layer.material_mask != null) {
-								Layers.updateFillLayers();
-							}
 						}
 					}
 
@@ -1069,12 +1066,9 @@ class UITrait {
 
 					if (Context.tool == ToolBrush || Context.tool == ToolFill) {
 						var paintHandle = Id.handle();
-						brushPaint = ui.combo(paintHandle, ["UV Map", "Project", "Triplanar"], "TexCoord");
+						brushPaint = ui.combo(paintHandle, ["UV Map", "Triplanar", "Project"], "TexCoord");
 						if (paintHandle.changed) {
 							MaterialParser.parsePaintMaterial();
-							if (Context.layer.material_mask != null) {
-								Layers.updateFillLayers();
-							}
 						}
 					}
 					if (Context.tool == ToolDecal) {

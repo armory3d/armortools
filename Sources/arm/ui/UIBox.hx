@@ -83,7 +83,7 @@ class UIBox {
 			ui.text("New Project");
 			ui.row([1/2, 1/2]);
 			UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Paint", "Material", "Terrain"], "Template");
-			if (ui.button("OK")) {
+			if (ui.button("OK") || ui.isReturnDown) {
 				Project.projectNew();
 				ViewportUtil.scaleToBounds();
 				UIBox.show = false;

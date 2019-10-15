@@ -29,6 +29,8 @@ class LayerSlot {
 	public var blending = 0;
 	public var objectMask = 0;
 	public var uvScale = 1.0;
+	public var uvRot = 0.0;
+	public var uvType = 0;
 	public var paintBase = true;
 	public var paintOpac = true;
 	public var paintOcc = true;

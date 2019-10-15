@@ -219,6 +219,10 @@ class ImportArm {
 
 				l.uvScale = ld.uv_scale;
 				if (l.uvScale == null) l.uvScale = 1.0; // TODO: deprecated
+				l.uvRot = ld.uv_rot;
+				if (l.uvRot == null) l.uvRot = 0.0; // TODO: deprecated
+				l.uvType = ld.uv_type;
+				if (l.uvType == null) l.uvType = 0; // TODO: deprecated
 				l.maskOpacity = ld.opacity_mask;
 				l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 				l.objectMask = ld.object_mask;

@@ -45,7 +45,9 @@ class TabLayers {
 				var checkw = (ui._windowW / 100 * 8) / ui.SCALE;
 
 				if (layerPanel.selected) {
-					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, step + off, ui.t.SEPARATOR_COL);
+					var ph = step + off;
+					if (l.material_mask != null) ph *= 2;
+					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, ph, ui.t.SEPARATOR_COL);
 				}
 
 				if (Context.layer == l) {
@@ -325,22 +327,38 @@ class TabLayers {
 				ui._y -= ui.t.ELEMENT_OFFSET;
 
 				if (showPanel) {
-					l.material_mask != null ?
-						ui.row([8/100, 46/100, 46/100]) :
-						ui.row([8/100, 92/100]);
+					ui.row([8/100, 92/100]);
 					@:privateAccess ui.endElement();
 
-					if (l.material_mask != null) {
-						var uvHandle = Id.handle().nest(l.id, {value: l.uvScale});
-						l.uvScale = ui.slider(uvHandle, "UV Scale", 0.0, 5.0, true);
-						if (uvHandle.changed) {
-							Layers.updateFillLayers();
-						}
-					}
 					var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
 					l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
 					if (opacHandle.changed) {
 						MaterialParser.parseMeshMaterial();
+					}
+
+					if (l.material_mask != null) {
+						ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
+						@:privateAccess ui.endElement();
+
+						var uvScaleHandle = Id.handle().nest(l.id, {value: l.uvScale});
+						l.uvScale = ui.slider(uvScaleHandle, "UV Scale", 0.0, 5.0, true);
+						if (uvScaleHandle.changed) {
+							Layers.updateFillLayers();
+						}
+
+						var uvRotHandle = Id.handle().nest(l.id, {value: l.uvRot});
+						l.uvRot = ui.slider(uvRotHandle, "UV Rotate", 0.0, 360, true, 1);
+						if (uvRotHandle.changed) {
+							MaterialParser.parsePaintMaterial();
+							Layers.updateFillLayers();
+						}
+
+						var uvTypeHandle = Id.handle().nest(l.id, {position: l.uvType});
+						l.uvType = ui.combo(uvTypeHandle, ["UV Map", "Triplanar"], "TexCoord");
+						if (uvTypeHandle.changed) {
+							MaterialParser.parsePaintMaterial();
+							Layers.updateFillLayers();
+						}
 					}
 				}
 			}

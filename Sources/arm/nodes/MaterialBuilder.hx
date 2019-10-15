@@ -135,7 +135,8 @@ class MaterialBuilder {
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
 		frag.write_attrib('sp.z -= 0.0001;'); // small bias
 
-		if (UITrait.inst.brushPaint == 1) frag.ndcpos = true; // Project
+		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
+		if (uvType == 2) frag.ndcpos = true; // Project
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
 		frag.add_uniform('vec4 inplast', '_inputBrushLast');
@@ -313,7 +314,8 @@ class MaterialBuilder {
 		}
 
 		// TexCoords - project
-		if (UITrait.inst.brushPaint == 1 || decal) {
+		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
+		if (uvType == 2 || decal) {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
@@ -332,19 +334,21 @@ class MaterialBuilder {
 
 			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
 
-			if (UITrait.inst.brushRot > 0.0) {
-				var a = UITrait.inst.brushRot * (Math.PI / 180);
+			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
+			if (uvRot > 0.0) {
+				var a = uvRot * (Math.PI / 180);
 				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
 		// TexCoords - uvmap
-		else if (UITrait.inst.brushPaint == 0) {
+		else if (uvType == 0) {
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');
 
-			if (UITrait.inst.brushRot > 0.0) {
-				var a = UITrait.inst.brushRot * (Math.PI / 180);
+			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
+			if (uvRot > 0.0) {
+				var a = uvRot * (Math.PI / 180);
 				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
@@ -356,9 +360,9 @@ class MaterialBuilder {
 			frag.write_attrib('float triMax = max(triWeight.x, max(triWeight.y, triWeight.z));');
 			frag.write_attrib('triWeight = max(triWeight - triMax * 0.75, 0.0);');
 			frag.write_attrib('vec3 texCoordBlend = triWeight * (1.0 / (triWeight.x + triWeight.y + triWeight.z));');
-			frag.write_attrib('vec2 texCoord = fract(wposition.yz * brushScale);');
-			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale);');
-			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale);');
+			frag.write_attrib('vec2 texCoord = fract(wposition.yz * brushScale * 0.5);');
+			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale * 0.5);');
+			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale * 0.5);');
 		}
 
 		if (Context.tool == ToolClone || Context.tool == ToolBlur) {
@@ -449,7 +453,8 @@ class MaterialBuilder {
 			Cycles.parse_subsurface = Context.material.paintSubs;
 			Cycles.parse_height = Context.material.paintHeight;
 			Cycles.parse_height_as_channel = true;
-			Cycles.triplanar = UITrait.inst.brushPaint == 2;
+			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
+			Cycles.triplanar = uvType == 1;
 			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
 			Cycles.parse_emission = false;
 			Cycles.parse_subsurface = false;

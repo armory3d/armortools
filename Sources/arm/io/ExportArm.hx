@@ -78,6 +78,8 @@ class ExportArm {
 				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),
 				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				uv_scale: l.uvScale,
+				uv_rot: l.uvRot,
+				uv_type: l.uvType,
 				opacity_mask: l.maskOpacity,
 				material_mask: l.material_mask != null ? Project.materials.indexOf(l.material_mask) : -1,
 				object_mask: l.objectMask,

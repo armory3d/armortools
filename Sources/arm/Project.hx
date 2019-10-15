@@ -240,6 +240,8 @@ typedef TLayerData = {
 	public var texpaint_pack:haxe.io.Bytes;
 	public var texpaint_mask:haxe.io.Bytes;
 	public var uv_scale:Float;
+	public var uv_rot:Float;
+	public var uv_type:Int;
 	public var opacity_mask:Float;
 	public var material_mask:Int;
 	public var object_mask:Int;
