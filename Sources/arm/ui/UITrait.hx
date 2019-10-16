@@ -201,7 +201,6 @@ class UITrait {
 	public var fillTypeHandle = new Handle();
 	public var resHandle = new Handle({position: 4}); // 2048
 	public var bitsHandle = new Handle({position: 0}); // 8bit
-	var newConfirm = false;
 	#if arm_creator
 	public var projectType = 2; // paint, material, terrain
 	#else

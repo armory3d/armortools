@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Id;
+import zui.Zui;
 import iron.data.Data;
 import arm.nodes.MaterialParser;
 import arm.data.LayerSlot;
@@ -11,6 +12,18 @@ class TabPreferences {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Preferences")) {
+
+			ui.row([1/4]);
+			if (ui.button("Restore")) {
+				UIMenu.draw(function(ui:Zui) {
+					ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+					ui.text("Restore defaults?", Right);
+					if (ui.button("Confirm", Left)) {
+						Config.restore();
+					}
+				});
+			}
+
 			if (ui.panel(Id.handle({selected: false}), "Interface", 1)) {
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
@@ -200,12 +213,6 @@ class TabPreferences {
 				}
 				if (ui.changed) Config.applyConfig();
 			}
-
-			// if (ui.button("Restore Defaults")) {
-			// 	Config.raw = Config.init();
-			// 	Config.keymap = Config.raw.keymap;
-			// 	Config.applyConfig();
-			// }
 		}
 	}
 

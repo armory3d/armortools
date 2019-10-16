@@ -31,7 +31,29 @@ class Config {
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
-	// public static function reset() {}
+	public static function create() {
+		if (Config.raw == null) Config.raw = {};
+		var c = Config.raw;
+		if (c.window_mode == null) c.window_mode = 0;
+		if (c.window_resizable == null) c.window_resizable = true;
+		if (c.window_minimizable == null) c.window_minimizable = true;
+		if (c.window_maximizable == null) c.window_maximizable = true;
+		if (c.window_w == null) c.window_w = 1600;
+		if (c.window_h == null) c.window_h = 900;
+		if (c.window_x == null) c.window_x = -1;
+		if (c.window_y == null) c.window_y = -1;
+		if (c.window_scale == null) c.window_scale = 1.0;
+		if (c.window_vsync == null) c.window_vsync = true;
+	}
+
+	public static function restore() {
+		zui.Zui.Handle.global = new zui.Zui.Handle();
+		configLoaded = false;
+		raw = null;
+		create();
+		init();
+		applyConfig();
+	}
 
 	public static function init():TConfig {
 		if (!configLoaded) {
