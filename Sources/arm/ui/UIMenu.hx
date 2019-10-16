@@ -29,7 +29,7 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [6, 2, 14, 5];
+		var menuItems = [6, 3, 14, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 
 		g.color = ui.t.SEPARATOR_COL;
@@ -62,7 +62,7 @@ class UIMenu {
 		}
 		else {
 			if (menuCategory == 0) {
-				if (ui.button("New Project...", Left, Config.keymap.file_new)) UIBox.newProject();
+				if (ui.button("New Project...", Left, Config.keymap.file_new)) Project.projectNewBox();
 				if (ui.button("Open...", Left, Config.keymap.file_open)) Project.projectOpen();
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
@@ -76,7 +76,8 @@ class UIMenu {
 			else if (menuCategory == 1) {
 				if (ui.button("Undo", Left, Config.keymap.edit_undo)) History.undo();
 				if (ui.button("Redo", Left, Config.keymap.edit_redo)) History.redo();
-				// ui.button("Preferences...", Left);
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("Preferences...", Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
 			else if (menuCategory == 2) {
 				if (ui.button("Reset", Left, Config.keymap.view_reset)) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
@@ -157,10 +158,10 @@ class UIMenu {
 							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
 							var dateInt = Std.parseInt(date.replace("-", ""));
 							if (updateVersion > dateInt) {
-								UIBox.showMessage("Update is available!\nPlease visit armorpaint.org to download.");
+								UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
 							}
 							else {
-								UIBox.showMessage("You are up to date!");
+								UIBox.showMessage("Update", "You are up to date!");
 							}
 						}
 						Data.deleteBlob(outFile);
@@ -189,7 +190,7 @@ class UIMenu {
 					// { lshw -C display }
 					#end
 
-					UIBox.showMessage(msg);
+					UIBox.showMessage("About", msg);
 				}
 			}
 		}

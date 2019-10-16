@@ -87,6 +87,7 @@ class Config {
 			raw.keymap.file_reload_assets = "ctrl+r";
 			raw.keymap.edit_undo = "ctrl+z";
 			raw.keymap.edit_redo = "ctrl+shift+z";
+			raw.keymap.edit_prefs = "ctrl+k";
 			raw.keymap.view_reset = "0";
 			raw.keymap.view_front = "1";
 			raw.keymap.view_back = "ctrl+1";

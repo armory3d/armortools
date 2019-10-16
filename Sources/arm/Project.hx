@@ -1,6 +1,8 @@
 package arm;
 
 import kha.Window;
+import zui.Zui;
+import zui.Id;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
@@ -14,6 +16,7 @@ import arm.util.Path;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
+import arm.ui.UIBox;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
@@ -79,6 +82,21 @@ class Project {
 			if (!filepath.endsWith(".arm")) filepath += ".arm";
 			projectSave();
 		};
+	}
+
+	public static function projectNewBox() {
+		UIBox.showCustom(function(ui:Zui) {
+			if (ui.tab(Id.handle(), "New Project")) {
+				ui.row([1/2, 1/2]);
+				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Paint", "Material", "Terrain"], "Template");
+				if (ui.button("OK") || ui.isReturnDown) {
+					Project.projectNew();
+					ViewportUtil.scaleToBounds();
+					UIBox.show = false;
+					App.redrawUI();
+				}
+			}
+		});
 	}
 
 	public static function projectNew(resetLayers = true) {

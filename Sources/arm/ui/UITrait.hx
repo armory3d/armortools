@@ -439,7 +439,7 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.file_save)) Project.projectSave();
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
 		else if (Operator.shortcut(Config.keymap.file_reload_assets)) Project.reloadAssets();
-		else if (Operator.shortcut(Config.keymap.file_new)) UIBox.newProject();
+		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
 				UIFiles.show = true;
@@ -460,6 +460,7 @@ class UITrait {
 				Importer.importFile(path);
 			}
 		}
+		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 
 		if (kb.started(Config.keymap.view_distract_free) ||
 		   (kb.started("escape") && !show && !UIBox.show)) {
@@ -1173,7 +1174,6 @@ class UITrait {
 				TabLayers.draw();
 				TabHistory.draw();
 				TabPlugins.draw();
-				TabPreferences.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				Context.object = Context.paintObject;
@@ -1196,7 +1196,6 @@ class UITrait {
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				TabOutliner.draw();
 				TabPlugins.draw();
-				TabPreferences.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				TabMaterials.draw();

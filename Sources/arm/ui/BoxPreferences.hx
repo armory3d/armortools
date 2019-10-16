@@ -6,31 +6,23 @@ import iron.data.Data;
 import arm.nodes.MaterialParser;
 import arm.data.LayerSlot;
 
-class TabPreferences {
+class BoxPreferences {
 
 	@:access(zui.Zui)
-	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab, "Preferences")) {
+	public static function show() {
+		UIBox.showCustom(function(ui:Zui) {
+			var _w = ui._w;
+			ui._w = Std.int(_w / 2);
+			var htab = Id.handle();
 
-			ui.row([1/4]);
-			if (ui.button("Restore")) {
-				UIMenu.draw(function(ui:Zui) {
-					ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-					ui.text("Restore defaults?", Right);
-					if (ui.button("Confirm", Left)) {
-						Config.restore();
-					}
-				});
-			}
+			if (ui.tab(htab, "Interface")) {
 
-			if (ui.panel(Id.handle({selected: false}), "Interface", 1)) {
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
-					ui.setScale(hscale.value);
+					UITrait.inst.ui.setScale(hscale.value);
 					App.uibox.setScale(hscale.value);
 					UINodes.inst.ui.setScale(hscale.value);
 					UIView2D.inst.ui.setScale(hscale.value);
@@ -69,10 +61,20 @@ class TabPreferences {
 				}
 				// ui.text("Node Editor");
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");
-			}
 
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Usage", 1)) {
+				ui.endElement();
+				ui.row([1/2]);
+				if (ui.button("Restore Defaults")) {
+					// UIMenu.draw(function(ui:Zui) {
+					// 	ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+					// 	ui.text("Restore defaults?", Right);
+					// 	if (ui.button("Confirm", Left)) {
+							Config.restore();
+					// 	}
+					// });
+				}
+			}
+			if (ui.tab(htab, "Usage")) {
 				UITrait.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
 				Config.raw.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, "Undo Steps", 2, 64, false, 1));
 				if (UITrait.inst.undoHandle.changed) {
@@ -117,9 +119,7 @@ class TabPreferences {
 				}
 				ui.enabled = true;
 			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Pen Pressure", 1)) {
+			if (ui.tab(htab, "Pen")) {
 				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), "Brush Radius");
 				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), "Brush Opacity");
 				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), "Brush Hardness");
@@ -130,15 +130,12 @@ class TabPreferences {
 			UITrait.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
 			UITrait.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
 			UITrait.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Viewport Quality", 1)) {
-				ui.row([1/2, 1/2]);
+			if (ui.tab(htab, "Viewport")) {
+				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
+				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
 				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
 				if (vsyncHandle.changed) Config.save();
-				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
-				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
-				ui.row([1/2, 1/2]);
 				var cullHandle = Id.handle({selected: Config.raw.rp_culling});
 				Config.raw.rp_culling = ui.check(cullHandle, "Cull Backfaces");
 				if (cullHandle.changed) {
@@ -150,10 +147,7 @@ class TabPreferences {
 				if (filterHandle.changed) {
 					MaterialParser.parseMeshMaterial();
 				}
-				ui.row([1/2, 1/2]);
-				#if kha_direct3d12
-				ui.check(Id.handle(), "Empty");
-				#else
+				#if (!kha_direct3d12)
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
 				#end
@@ -165,7 +159,6 @@ class TabPreferences {
 				}
 				ui.check(UITrait.inst.hssgi, "SSAO");
 				if (UITrait.inst.hssgi.changed) Config.applyConfig();
-				ui.row([1/2, 1/2]);
 				ui.check(UITrait.inst.hbloom, "Bloom");
 				if (UITrait.inst.hbloom.changed) Config.applyConfig();
 				ui.check(UITrait.inst.hssr, "SSR");
@@ -180,10 +173,7 @@ class TabPreferences {
 				}
 				#end
 			}
-
-			ui.separator();
-			if (ui.panel(Id.handle({selected: false}), "Keymap", 1)) {
-
+			if (ui.tab(htab, "Keymap")) {
 				var presetHandle = Id.handle();
 				ui.combo(presetHandle, ["Default", "Blender"], "Preset", true);
 				if (presetHandle.changed) {
@@ -213,13 +203,8 @@ class TabPreferences {
 				}
 				if (ui.changed) Config.applyConfig();
 			}
-		}
-	}
 
-	#if arm_creator
-	static function roundfp(f:Float, precision = 2):Float {
-		f *= Math.pow(10, precision);
-		return Math.round(f) / Math.pow(10, precision);
+			ui._w = _w;
+		});
 	}
-	#end
 }
