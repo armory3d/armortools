@@ -324,6 +324,10 @@ class MaterialBuilder {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
+
+				frag.add_uniform('float brushScaleX', '_brushScaleX');
+				frag.write_attrib('uvsp.x *= brushScaleX;');
+
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
 				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) discard;');

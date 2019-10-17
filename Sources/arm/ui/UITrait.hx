@@ -171,6 +171,8 @@ class UITrait {
 
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Handle({value: 0.5});
+	public var brushScaleX = 1.0;
+	public var brushScaleXHandle = new Handle({value: 1.0});
 	public var brushBlending = 0;
 	public var brushOpacity = 1.0;
 	public var brushOpacityHandle = new Handle({value: 1.0});
@@ -806,12 +808,15 @@ class UITrait {
 
 			if (!brush3d || in2dView || decal) {
 				if (decal) {
-					psize = Std.int(256 * (brushRadius * brushNodesRadius));
+					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
+					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
+					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
 					#if (kha_direct3d11 || kha_direct3d12)
-					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2, psize, psize);
+					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
 					#else
-					g.drawScaledImage(decalImage, mx - psize / 2, my - psize / 2 + psize, psize, -psize);
+					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
 					#end
+					g.color = 0xffffffff;
 				}
 				else if (Context.tool == ToolBrush  ||
 						 Context.tool == ToolEraser ||
@@ -1027,6 +1032,10 @@ class UITrait {
 				else {
 					if (Context.tool != ToolFill) {
 						brushRadius = ui.slider(brushRadiusHandle, "Radius", 0.01, 2.0, true);
+					}
+
+					if (Context.tool == ToolDecal) {
+						brushScaleX = ui.slider(brushScaleXHandle, "Scale X", 0.01, 2.0, true);
 					}
 
 					if (Context.tool == ToolBrush  ||

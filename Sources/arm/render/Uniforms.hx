@@ -35,6 +35,9 @@ class Uniforms {
 			else val *= 900 / App.h(); // Projection ratio
 			return val;
 		}
+		else if (link == '_brushScaleX') {
+			return 1 / UITrait.inst.brushScaleX;
+		}
 		else if (link == '_brushOpacity') {
 			var val = UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
 			var pen = Input.getPen();
