@@ -29,11 +29,11 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [6, 3, 14, 5];
+		var menuItems = [9, 3, 14, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
 
 		g.color = ui.t.SEPARATOR_COL;
-		var menuw = Std.int(ui.ELEMENT_W() * 1.5);
+		var menuw = Std.int(ui.ELEMENT_W() * 1.7);
 		var sepw = menuw / ui.SCALE;
 
 		if (menuCommands != null) {
@@ -66,10 +66,12 @@ class UIMenu {
 				if (ui.button("Open...", Left, Config.keymap.file_open)) Project.projectOpen();
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Reload Assets", Left, Config.keymap.file_reload_assets)) Project.reloadAssets();
-				// ui.button("Import Asset...", Left);
-				// ui.button("Export Textures...", Left);
-				// ui.button("Export Mesh...", Left);
+				if (ui.button("Import Assets...", Left, Config.keymap.file_import_assets)) Project.importAsset();
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("Export Textures...", Left, Config.keymap.file_export_textures)) BoxExport.showTextures();
+				if (ui.button("Export Mesh...", Left)) BoxExport.showMesh();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Exit", Left)) System.stop();
 			}
@@ -230,7 +232,7 @@ class UIMenu {
 		menuCommands = commands;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuw = uibox.ELEMENT_W() * 1.5;
+		var menuw = uibox.ELEMENT_W() * 1.7;
 		if (menuX + menuw > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuw);
 		}

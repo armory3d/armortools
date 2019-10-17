@@ -86,13 +86,13 @@ class UIBox {
 	public static function showMessage(title:String, text:String) {
 		init();
 		modalW = 400;
-		modalH = 150;
+		modalH = 170;
 		boxTitle = title;
 		boxText = text;
 		boxCommands = null;
 	}
 
-	public static function showCustom(commands:Zui->Void = null, mw = 400, mh = 150) {
+	public static function showCustom(commands:Zui->Void = null, mw = 400, mh = 170) {
 		init();
 		modalW = mw;
 		modalH = mh;

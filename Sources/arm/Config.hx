@@ -85,6 +85,8 @@ class Config {
 			raw.keymap.file_save = "ctrl+s";
 			raw.keymap.file_save_as = "ctrl+shift+s";
 			raw.keymap.file_reload_assets = "ctrl+r";
+			raw.keymap.file_import_assets = "ctrl+i";
+			raw.keymap.file_export_textures = "ctrl+e";
 			raw.keymap.edit_undo = "ctrl+z";
 			raw.keymap.edit_redo = "ctrl+shift+z";
 			raw.keymap.edit_prefs = "ctrl+k";
@@ -115,8 +117,6 @@ class Config {
 			raw.keymap.tool_picker = "v";
 			raw.keymap.toggle_2d_view = "shift+tab";
 			raw.keymap.toggle_node_editor = "tab";
-			raw.keymap.import_assets = "ctrl+shift+i";
-			raw.keymap.export_textures = "ctrl+shift+e";
 			raw.keymap.node_search = "space";
 		}
 		keymap = raw.keymap;

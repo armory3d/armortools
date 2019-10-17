@@ -443,7 +443,7 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
 		else if (Operator.shortcut(Config.keymap.file_reload_assets)) Project.reloadAssets();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
-		else if (Operator.shortcut(Config.keymap.export_textures)) {
+		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
 				UIFiles.show = true;
 				UIFiles.isSave = true;
@@ -455,14 +455,7 @@ class UITrait {
 			}
 			else textureExport = true;
 		}
-		else if (Operator.shortcut(Config.keymap.import_assets)) {
-			UIFiles.show = true;
-			UIFiles.isSave = false;
-			UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm";
-			UIFiles.filesDone = function(path:String) {
-				Importer.importFile(path);
-			}
-		}
+		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 
 		if (kb.started(Config.keymap.view_distract_free) ||
@@ -1184,6 +1177,7 @@ class UITrait {
 				TabLayers.draw();
 				TabHistory.draw();
 				TabPlugins.draw();
+				// TabBrowser.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				Context.object = Context.paintObject;
@@ -1194,7 +1188,6 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
-				TabExport.draw();
 				TabViewport.draw();
 				#if arm_creator
 				TabWorld.draw();

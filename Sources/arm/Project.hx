@@ -238,6 +238,15 @@ class Project {
 			Log.showMessage("Assets reloaded.");
 		}
 	}
+
+	public static function importAsset() {
+		UIFiles.show = true;
+		UIFiles.isSave = false;
+		UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm";
+		UIFiles.filesDone = function(path:String) {
+			Importer.importFile(path);
+		}
+	}
 }
 
 typedef TProjectFormat = {

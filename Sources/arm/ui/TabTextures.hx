@@ -22,7 +22,7 @@ class TabTextures {
 					Importer.importFile(path);
 				}
 			}
-			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.import_assets + ")");
+			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.file_import_assets + ")");
 
 			if (ui.button("2D View")) UITrait.inst.show2DView(1);
 
@@ -79,7 +79,11 @@ class TabTextures {
 								Project.assetMap.remove(asset.id);
 								Project.assets.splice(i, 1);
 								Project.assetNames.splice(i, 1);
-								// TODO: rebuild affected materials
+								iron.system.Tween.timer(0.1, function() {
+									arm.nodes.MaterialParser.parsePaintMaterial();
+									arm.util.RenderUtil.makeMaterialPreview();
+									UITrait.inst.hwnd1.redraws = 2;
+								});
 							}
 						});
 					}

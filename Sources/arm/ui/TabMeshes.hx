@@ -12,7 +12,7 @@ class TabMeshes {
 			ui.row([1/4]);
 
 			if (ui.button("Import")) Context.importMesh();
-			if (ui.isHovered) ui.tooltip("Import mesh file (" + Config.keymap.import_assets  + ")");
+			if (ui.isHovered) ui.tooltip("Import mesh file (" + Config.keymap.file_import_assets  + ")");
 
 			UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group"], "Split By", true);
 			if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");

@@ -55,7 +55,7 @@ class BoxPreferences {
 
 				ui.endElement();
 				ui.row([1/2]);
-				if (ui.button("Restore Defaults")) {
+				if (ui.button("Restore")) {
 					// UIMenu.draw(function(ui:Zui) {
 					// 	ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 					// 	ui.text("Restore defaults?", Right);

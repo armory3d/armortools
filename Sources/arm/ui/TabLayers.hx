@@ -5,6 +5,7 @@ import zui.Id;
 import iron.system.Time;
 import arm.data.LayerSlot;
 import arm.nodes.MaterialParser;
+import arm.util.UVUtil;
 
 class TabLayers {
 
@@ -45,8 +46,8 @@ class TabLayers {
 				var checkw = (ui._windowW / 100 * 8) / ui.SCALE;
 
 				if (layerPanel.selected) {
-					var ph = step + off;
-					if (l.material_mask != null) ph *= 2;
+					var mult = l.material_mask != null ? 2 : 1;
+					var ph = (step + off) * mult;
 					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, ph, ui.t.SEPARATOR_COL);
 				}
 
@@ -161,13 +162,15 @@ class TabLayers {
 				if (contextMenu) {
 					UIMenu.draw(function(ui:Zui) {
 						if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 10, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
 						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 17, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 18, ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
+
+						if (ui.button("Export", Left)) BoxExport.showTextures();
 
 						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
 							function makeFill(g:kha.graphics4.Graphics) {
@@ -327,13 +330,29 @@ class TabLayers {
 				ui._y -= ui.t.ELEMENT_OFFSET;
 
 				if (showPanel) {
-					ui.row([8/100, 92/100]);
+					ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
 					@:privateAccess ui.endElement();
 
 					var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
 					l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
 					if (opacHandle.changed) {
 						MaterialParser.parseMeshMaterial();
+					}
+
+					ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
+					if (UITrait.inst.resHandle.changed) {
+						iron.App.notifyOnRender(Layers.resizeLayers);
+						UVUtil.uvmap = null;
+						UVUtil.uvmapCached = false;
+						UVUtil.trianglemap = null;
+						UVUtil.trianglemapCached = false;
+						#if kha_direct3d12
+						arm.render.RenderPathRaytrace.ready = false;
+						#end
+					}
+					ui.combo(UITrait.inst.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
+					if (UITrait.inst.bitsHandle.changed) {
+						iron.App.notifyOnRender(Layers.setLayerBits);
 					}
 
 					if (l.material_mask != null) {
