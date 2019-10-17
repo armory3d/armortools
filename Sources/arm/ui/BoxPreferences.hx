@@ -22,17 +22,8 @@ class BoxPreferences {
 				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
-					UITrait.inst.ui.setScale(hscale.value);
-					App.uibox.setScale(hscale.value);
-					UINodes.inst.ui.setScale(hscale.value);
-					UIView2D.inst.ui.setScale(hscale.value);
-					UITrait.inst.windowW = Std.int(UITrait.defaultWindowW * Config.raw.window_scale);
-					UITrait.inst.toolbarw = Std.int(UITrait.defaultToolbarW * Config.raw.window_scale);
-					UITrait.inst.headerh = Std.int(UITrait.defaultHeaderH * Config.raw.window_scale);
-					UITrait.inst.menubarw = Std.int(215 * Config.raw.window_scale);
-					App.resize();
 					Config.save();
-					UITrait.inst.setIconScale();
+					setScale();
 				}
 				UITrait.inst.hscaleWasChanged = hscale.changed;
 				var themeHandle = Id.handle({position: 0});
@@ -70,6 +61,7 @@ class BoxPreferences {
 					// 	ui.text("Restore defaults?", Right);
 					// 	if (ui.button("Confirm", Left)) {
 							Config.restore();
+							setScale();
 					// 	}
 					// });
 				}
@@ -205,6 +197,20 @@ class BoxPreferences {
 			}
 
 			ui._w = _w;
-		});
+		}, 400, 270);
+	}
+
+	static function setScale() {
+		var scale = Config.raw.window_scale;
+		UITrait.inst.ui.setScale(scale);
+		UITrait.inst.windowW = Std.int(UITrait.defaultWindowW * scale);
+		UITrait.inst.toolbarw = Std.int(UITrait.defaultToolbarW * scale);
+		UITrait.inst.headerh = Std.int(UITrait.defaultHeaderH * scale);
+		UITrait.inst.menubarw = Std.int(215 * scale);
+		UITrait.inst.setIconScale();
+		UINodes.inst.ui.setScale(scale);
+		UIView2D.inst.ui.setScale(scale);
+		App.uibox.setScale(scale);
+		App.resize();
 	}
 }

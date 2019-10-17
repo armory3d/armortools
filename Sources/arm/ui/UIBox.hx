@@ -6,6 +6,7 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.ViewportUtil;
 
+@:access(zui.Zui)
 class UIBox {
 
 	public static var show = false;
@@ -16,47 +17,45 @@ class UIBox {
 	static var modalW = 400;
 	static var modalH = 170;
 
-	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
-
-		var uibox = App.uibox;
-		var appw = System.windowWidth();
-		var apph = System.windowHeight();
-		modalW = Std.int(400 * uibox.SCALE);
-		modalH = Std.int(170 * uibox.SCALE);
-		var left = Std.int(appw / 2 - modalW / 2);
-		var right = Std.int(appw / 2 + modalW / 2);
-		var top = Std.int(apph / 2 - modalH / 2);
-		var bottom = Std.int(apph / 2 + modalH / 2);
-
 		g.end();
 
+		var ui = App.uibox;
+		var appw = System.windowWidth();
+		var apph = System.windowHeight();
+		var mw = Std.int(modalW * ui.SCALE);
+		var mh = Std.int(modalH * ui.SCALE);
+		var left = Std.int(appw / 2 - mw / 2);
+		var right = Std.int(appw / 2 + mw / 2);
+		var top = Std.int(apph / 2 - mh / 2);
+		var bottom = Std.int(apph / 2 + mh / 2);
+
 		if (boxCommands == null) {
-			uibox.begin(g);
-			if (uibox.window(hwnd, left, top, modalW, modalH)) {
-				uibox._y += 10;
-				if (uibox.tab(Id.handle(), boxTitle)) {
+			ui.begin(g);
+			if (ui.window(hwnd, left, top, mw, mh, true)) {
+				ui._y += 10;
+				if (ui.tab(Id.handle(), boxTitle)) {
 					for (line in boxText.split("\n")) {
-						uibox.text(line);
+						ui.text(line);
 					}
 
-					uibox.row([2/3, 1/3]);
-					uibox.endElement();
-					if (uibox.button("OK")) {
-						UIBox.show = false;
+					ui.row([2/3, 1/3]);
+					ui.endElement();
+					if (ui.button("OK")) {
+						show = false;
 						App.redrawUI();
 					}
 				}
 			}
-			uibox.end();
+			ui.end();
 		}
 		else {
-			uibox.begin(g);
-			if (uibox.window(hwnd, left, top, modalW, modalH)) {
-				uibox._y += 10;
-				boxCommands(uibox);
+			ui.begin(g);
+			if (ui.window(hwnd, left, top, mw, mh, true)) {
+				ui._y += 10;
+				boxCommands(ui);
 			}
-			uibox.end();
+			ui.end();
 		}
 
 		g.begin(false);
@@ -64,32 +63,45 @@ class UIBox {
 
 	public static function update() {
 		var mouse = Input.getMouse();
-		var inUse = @:privateAccess App.uibox.comboSelectedHandle != null;
-		if (App.uibox.inputReleased && !inUse) {
+		var ui = App.uibox;
+		var inUse = ui.comboSelectedHandle != null;
+		if (ui.inputReleased && !inUse) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
-			var left = appw / 2 - modalW / 2;
-			var right = appw / 2 + modalW / 2;
-			var top = apph / 2 - modalH / 2;
-			var bottom = apph / 2 + modalH / 2;
+			var mw = Std.int(modalW * ui.SCALE);
+			var mh = Std.int(modalH * ui.SCALE);
+			var left = (appw / 2 - mw / 2) + hwnd.dragX;
+			var right = (appw / 2 + mw / 2) + hwnd.dragX;
+			var top = (apph / 2 - mh / 2) + hwnd.dragY;
+			var bottom = (apph / 2 + mh / 2) + hwnd.dragY;
 			var mx = mouse.x;
 			var my = mouse.y;
 			if (mx < left || mx > right || my < top || my > bottom) {
-				UIBox.show = false;
+				show = false;
 				App.redrawUI();
 			}
 		}
 	}
 
 	public static function showMessage(title:String, text:String) {
-		UIBox.show = true;
+		init();
+		modalW = 400;
+		modalH = 150;
 		boxTitle = title;
 		boxText = text;
 		boxCommands = null;
 	}
 
-	public static function showCustom(commands:Zui->Void = null) {
-		UIBox.show = true;
+	public static function showCustom(commands:Zui->Void = null, mw = 400, mh = 150) {
+		init();
+		modalW = mw;
+		modalH = mh;
 		boxCommands = commands;
+	}
+
+	static function init() {
+		hwnd.dragX = 0;
+		hwnd.dragY = 0;
+		show = true;
 	}
 }
