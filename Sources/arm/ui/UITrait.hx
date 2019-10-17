@@ -115,6 +115,7 @@ class UITrait {
 	public var isHeightSpace = 0;
 	public var isSubs = false;
 	public var isSubsSpace = 0;
+	public var splitBy = 0;
 	public var isUdim = false;
 	public var parseTransform = false;
 	public var hwnd = Id.handle();

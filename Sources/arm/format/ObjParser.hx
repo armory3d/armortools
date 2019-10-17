@@ -2,6 +2,7 @@ package arm.format;
 
 class ObjParser {
 
+	public static var splitCode = "o".code; // Object split, "g" for groups
 	public var posa:kha.arrays.Int16Array = null;
 	public var nora:kha.arrays.Int16Array = null;
 	public var texa:kha.arrays.Int16Array = null;
@@ -51,7 +52,7 @@ class ObjParser {
 			if (pos >= bytes.length) break;
 
 			var c0 = bytes.get(pos++);
-			if (readingObject && readingFaces && (c0 == "v".code || c0 == "o".code)) {
+			if (readingObject && readingFaces && (c0 == "v".code || c0 == splitCode)) {
 				pos--;
 				hasNext = true;
 				break;
@@ -122,7 +123,7 @@ class ObjParser {
 					}
 				}
 			}
-			else if (c0 == "o".code) { // || c0 == "g".code
+			else if (c0 == splitCode) {
 				pos++; // Space
 				if (!udim) readingObject = true;
 				name = readString();

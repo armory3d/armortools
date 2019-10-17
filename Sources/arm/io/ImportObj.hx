@@ -8,6 +8,7 @@ import arm.ui.UITrait;
 class ImportObj {
 
 	public static function run(path:String) {
+		ObjParser.splitCode = UITrait.inst.splitBy == 0 ? "o".code : "g".code;
 		Data.getBlob(path, function(b:Blob) {
 			if (UITrait.inst.isUdim) {
 				var obj = new ObjParser(b, 0, UITrait.inst.isUdim);
