@@ -74,6 +74,7 @@ class Context {
 	}
 
 	public static function setLayer(l:LayerSlot, isMask = false) {
+		if (l == layer && layerIsMask == isMask) return;
 		layer = l;
 		layerIsMask = isMask;
 		UITrait.inst.headerHandle.redraws = 2;
