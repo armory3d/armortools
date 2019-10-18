@@ -5,7 +5,7 @@ import iron.data.ShaderData;
 import iron.data.MaterialData;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.nodes.CyclesShader;
+import arm.nodes.MaterialShader;
 import arm.Tool;
 
 class MaterialParser {
@@ -29,7 +29,7 @@ class MaterialParser {
 				m.shader.raw.contexts.remove(sc.raw);
 				m.shader.contexts.remove(sc);
 			}
-			var con = MaterialBuilder.make_mesh(new CyclesShaderData({name: "Material", canvas: null}));
+			var con = MaterialBuilder.make_mesh(new MaterialShaderData({name: "Material", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
 			sc.overrideContext = {}
@@ -57,7 +57,7 @@ class MaterialParser {
 				m.shader.raw.contexts.remove(sc.raw);
 				m.shader.contexts.remove(sc);
 			}
-			var con = MaterialBuilder.make_particle(new CyclesShaderData({name: "MaterialParticle", canvas: null}));
+			var con = MaterialBuilder.make_particle(new MaterialShaderData({name: "MaterialParticle", canvas: null}));
 			if (sc != null) sc.delete();
 			sc = new ShaderContext(con.data, function(sc:ShaderContext){});
 			m.shader.raw.contexts.push(sc.raw);
@@ -78,7 +78,7 @@ class MaterialParser {
 
 			var matcon:TMaterialContext = { name: "mesh", bind_textures: [] };
 
-			var sd = new CyclesShaderData({name: "Material", canvas: null});
+			var sd = new MaterialShaderData({name: "Material", canvas: null});
 			var con = MaterialBuilder.make_mesh_preview(sd, matcon);
 
 			for (i in 0...m.contexts.length) {
@@ -139,7 +139,7 @@ class MaterialParser {
 				name: "Material",
 				canvas: UINodes.inst.canvas
 			};
-			var _sd = new CyclesShaderData(mat);
+			var _sd = new MaterialShaderData(mat);
 
 			if (sc == null) {
 				for (c in m.shader.contexts) {

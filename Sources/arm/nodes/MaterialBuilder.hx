@@ -3,7 +3,7 @@ package arm.nodes;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.nodes.CyclesShader;
+import arm.nodes.MaterialShader;
 import arm.Tool;
 
 class MaterialBuilder {
@@ -15,11 +15,11 @@ class MaterialBuilder {
 	public static var opacityDiscardDecal = 0.05;
 	public static var opacityDiscardScene = 0.5;
 
-	public static function make_paint(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
+	public static function make_paint(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
 		var layered = Context.layer != Project.layers[0];
 		var eraser = Context.tool == ToolEraser;
 		var context_id = 'paint';
-		var con_paint:CyclesShaderContext = data.add_context({
+		var con_paint:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
 			compare_mode: 'always', // TODO: align texcoords winding order
@@ -193,7 +193,7 @@ class MaterialBuilder {
 					frag.wposition = true;
 
 					if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
-						frag.add_function(CyclesFunctions.str_octahedronWrap);
+						frag.add_function(MaterialFunctions.str_octahedronWrap);
 						frag.add_uniform('sampler2D gbuffer0');
 						#if (kha_opengl || kha_webgl)
 						frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
@@ -262,7 +262,7 @@ class MaterialBuilder {
 
 			var angleFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 2;
 			if (angleFill) {
-				frag.add_function(CyclesFunctions.str_octahedronWrap);
+				frag.add_function(MaterialFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				frag.write('vec3 wn;');
@@ -453,22 +453,22 @@ class MaterialBuilder {
 			}
 		}
 		else {
-			Cycles.parse_emission = Context.material.paintEmis;
-			Cycles.parse_subsurface = Context.material.paintSubs;
-			Cycles.parse_height = Context.material.paintHeight;
-			Cycles.parse_height_as_channel = true;
+			Material.parse_emission = Context.material.paintEmis;
+			Material.parse_subsurface = Context.material.paintSubs;
+			Material.parse_height = Context.material.paintHeight;
+			Material.parse_height_as_channel = true;
 			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
-			Cycles.triplanar = uvType == 1;
-			var sout = Cycles.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
-			Cycles.parse_emission = false;
-			Cycles.parse_subsurface = false;
-			Cycles.parse_height_as_channel = false;
-			Cycles.parse_height = false;
+			Material.triplanar = uvType == 1;
+			var sout = Material.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
+			Material.parse_emission = false;
+			Material.parse_subsurface = false;
+			Material.parse_height_as_channel = false;
+			Material.parse_height = false;
 			var base = sout.out_basecol;
 			var rough = sout.out_roughness;
 			var met = sout.out_metallic;
 			var occ = sout.out_occlusion;
-			var nortan = Cycles.out_normaltan;
+			var nortan = Material.out_normaltan;
 			var height = sout.out_height;
 			var opac = sout.out_opacity;
 			var emis = sout.out_emission;
@@ -660,7 +660,7 @@ class MaterialBuilder {
 				frag.wposition = true;
 				frag.n = true;
 				frag.vVec = true;
-				frag.add_function(CyclesFunctions.str_cotangentFrame);
+				frag.add_function(MaterialFunctions.str_cotangentFrame);
 				#if (kha_direct3d11 || kha_direct3d12)
 				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 				#else
@@ -673,7 +673,7 @@ class MaterialBuilder {
 				frag.write(voxelgiHalfExtents());
 				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 				frag.add_uniform('sampler3D voxels');
-				frag.add_function(CyclesFunctions.str_traceAO);
+				frag.add_function(MaterialFunctions.str_traceAO);
 				frag.n = true;
 				var strength = UITrait.inst.bakeAoStrength;
 				var radius = UITrait.inst.bakeAoRadius;
@@ -705,7 +705,7 @@ class MaterialBuilder {
 				frag.n = true;
 				frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
 				frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
-				frag.add_function(CyclesFunctions.str_cotangentFrame);
+				frag.add_function(MaterialFunctions.str_cotangentFrame);
 				frag.write('mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
 				frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 				frag.write('fragColor[0] = vec4(res, 1.0);');
@@ -738,8 +738,8 @@ class MaterialBuilder {
 			}
 		}
 
-		Cycles.finalize(con_paint);
-		Cycles.triplanar = false;
+		Material.finalize(con_paint);
+		Material.triplanar = false;
 		con_paint.data.shader_from_source = true;
 		con_paint.data.vertex_shader = vert.get();
 		con_paint.data.fragment_shader = frag.get();
@@ -747,7 +747,7 @@ class MaterialBuilder {
 		return con_paint;
 	}
 
-	static function blendMode(frag:CyclesShader, blending:Int, cola:String, colb:String, opac:String):String {
+	static function blendMode(frag:MaterialShader, blending:Int, cola:String, colb:String, opac:String):String {
 		if (blending == 0) { // Mix
 			return 'mix($cola, $colb, $opac)';
 		}
@@ -795,19 +795,19 @@ class MaterialBuilder {
 			return 'vec3(1.0 - $opac, 1.0 - $opac, 1.0 - $opac) * $cola + vec3($opac, $opac, $opac) * $cola / $colb';
 		}
 		else if (blending == 14) { // Hue
-			frag.add_function(CyclesFunctions.str_hue_sat);
+			frag.add_function(MaterialFunctions.str_hue_sat);
 			return 'mix($cola, hsv_to_rgb(vec3(rgb_to_hsv($colb).r, rgb_to_hsv($cola).g, rgb_to_hsv($cola).b)), $opac)';
 		}
 		else if (blending == 15) { // Saturation
-			frag.add_function(CyclesFunctions.str_hue_sat);
+			frag.add_function(MaterialFunctions.str_hue_sat);
 			return 'mix($cola, hsv_to_rgb(vec3(rgb_to_hsv($cola).r, rgb_to_hsv($colb).g, rgb_to_hsv($cola).b)), $opac)';
 		}
 		else if (blending == 16) { // Color
-			frag.add_function(CyclesFunctions.str_hue_sat);
+			frag.add_function(MaterialFunctions.str_hue_sat);
 			return 'mix($cola, hsv_to_rgb(vec3(rgb_to_hsv($colb).r, rgb_to_hsv($colb).g, rgb_to_hsv($cola).b)), $opac)';
 		}
 		else { // Value
-			frag.add_function(CyclesFunctions.str_hue_sat);
+			frag.add_function(MaterialFunctions.str_hue_sat);
 			return 'mix($cola, hsv_to_rgb(vec3(rgb_to_hsv($cola).r, rgb_to_hsv($cola).g, rgb_to_hsv($colb).b)), $opac)';
 		}
 	}
@@ -821,10 +821,10 @@ class MaterialBuilder {
 			   			"vec3(0,0,-1)";
 	}
 
-	public static function make_mesh_preview(data:CyclesShaderData, matcon:TMaterialContext):CyclesShaderContext {
+	public static function make_mesh_preview(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		var context_id = 'mesh';
-		var con_mesh:CyclesShaderContext = data.add_context({
+		var con_mesh:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
@@ -847,15 +847,15 @@ class MaterialBuilder {
 			frag.bposition = true;
 		}
 
-		Cycles.parse_height = heightUsed;
-		var sout = Cycles.parse(UINodes.inst.canvas, con_mesh, vert, frag, null, null, null, matcon);
-		Cycles.parse_height = false;
+		Material.parse_height = heightUsed;
+		var sout = Material.parse(UINodes.inst.canvas, con_mesh, vert, frag, null, null, null, matcon);
+		Material.parse_height = false;
 		var base = sout.out_basecol;
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
 		var occ = sout.out_occlusion;
 		var opac = sout.out_opacity;
-		var nortan = Cycles.out_normaltan;
+		var nortan = Material.out_normaltan;
 		frag.write('vec3 basecol = pow($base, vec3(2.2, 2.2, 2.2));');
 		frag.write('float roughness = $rough;');
 		frag.write('float metallic = $met;');
@@ -882,10 +882,10 @@ class MaterialBuilder {
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
 
-		frag.add_function(CyclesFunctions.str_packFloatInt16);
-		frag.add_function(CyclesFunctions.str_packFloat2);
-		frag.add_function(CyclesFunctions.str_cotangentFrame);
-		frag.add_function(CyclesFunctions.str_octahedronWrap);
+		frag.add_function(MaterialFunctions.str_packFloatInt16);
+		frag.add_function(MaterialFunctions.str_packFloat2);
+		frag.add_function(MaterialFunctions.str_cotangentFrame);
+		frag.add_function(MaterialFunctions.str_octahedronWrap);
 
 		// Apply normal channel
 		if (decal) {
@@ -910,7 +910,7 @@ class MaterialBuilder {
 		frag.write('fragColor[1] = vec4(basecol.r, basecol.g, basecol.b, packFloat2(occlusion, 1.0));'); // occ/spec
 		frag.write('fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);'); // veloc
 
-		Cycles.finalize(con_mesh);
+		Material.finalize(con_mesh);
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();
@@ -918,9 +918,9 @@ class MaterialBuilder {
 		return con_mesh;
 	}
 
-	public static function make_particle(data:CyclesShaderData):CyclesShaderContext {
+	public static function make_particle(data:MaterialShaderData):MaterialShaderContext {
 		var context_id = 'mesh';
-		var con_part:CyclesShaderContext = data.add_context({
+		var con_part:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
 			compare_mode: 'always',
@@ -992,7 +992,7 @@ class MaterialBuilder {
 		// frag.add_uniform('sampler2D gbufferD');
 		// frag.write('fragColor *= 1.0 - clamp(distance(textureLod(gbufferD, texCoord, 0).r, wvpposition.z), 0.0, 1.0);');
 
-		// Cycles.finalize(con_part);
+		// Material.finalize(con_part);
 		con_part.data.shader_from_source = true;
 		con_part.data.vertex_shader = vert.get();
 		con_part.data.fragment_shader = frag.get();
@@ -1000,9 +1000,9 @@ class MaterialBuilder {
 		return con_part;
 	}
 
-	public static function make_mesh(data:CyclesShaderData):CyclesShaderContext {
+	public static function make_mesh(data:MaterialShaderData):MaterialShaderContext {
 		var context_id = 'mesh';
-		var con_mesh:CyclesShaderContext = data.add_context({
+		var con_mesh:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
@@ -1051,8 +1051,8 @@ class MaterialBuilder {
 
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
-		frag.add_function(CyclesFunctions.str_packFloatInt16);
-		frag.add_function(CyclesFunctions.str_packFloat2);
+		frag.add_function(MaterialFunctions.str_packFloatInt16);
+		frag.add_function(MaterialFunctions.str_packFloat2);
 
 		if (Context.tool == ToolColorId) {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
@@ -1061,7 +1061,7 @@ class MaterialBuilder {
 			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
 		}
 		else {
-			frag.add_function(CyclesFunctions.str_octahedronWrap);
+			frag.add_function(MaterialFunctions.str_octahedronWrap);
 
 			frag.write('vec3 basecol;');
 			frag.write('float roughness;');
@@ -1072,7 +1072,7 @@ class MaterialBuilder {
 			frag.write('float matid = 0.0;');
 
 			frag.vVec = true;
-			frag.add_function(CyclesFunctions.str_cotangentFrame);
+			frag.add_function(MaterialFunctions.str_cotangentFrame);
 			#if (kha_direct3d11 || kha_direct3d12)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
@@ -1345,7 +1345,7 @@ class MaterialBuilder {
 		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
 		frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');
 
-		Cycles.finalize(con_mesh);
+		Material.finalize(con_mesh);
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();

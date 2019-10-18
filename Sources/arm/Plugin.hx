@@ -57,6 +57,8 @@ class ArmBridge {
 	public static var History = arm.History;
 	public static var Context = arm.Context;
 	public static var Log = arm.Log;
+	public static var NodesMaterial = arm.nodes.NodesMaterial;
+	public static var Material = arm.nodes.Material;
 }
 
 @:expose("zui")

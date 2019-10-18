@@ -72,7 +72,6 @@ class UINodes {
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
 		Nodes.excludeRemove.push("BrushOutputNode");
 		Nodes.onLinkDrag = onLinkDrag;
-		// Cycles.arm_export_tangents = false;
 
 		Data.getBlob('defaults/default_material.json', function(b1:Blob) {
 			Data.getBlob('defaults/default_brush.json', function(b2:Blob) {

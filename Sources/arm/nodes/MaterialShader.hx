@@ -3,24 +3,24 @@ package arm.nodes;
 import zui.Nodes;
 import iron.data.SceneFormat;
 
-class CyclesShaderData {
+class MaterialShaderData {
 	var material:TMaterial;
 
 	public function new(material:TMaterial) {
 		this.material = material;
 	}
 
-	public function add_context(props:Dynamic):CyclesShaderContext {
-		return new CyclesShaderContext(material, props);
+	public function add_context(props:Dynamic):MaterialShaderContext {
+		return new MaterialShaderContext(material, props);
 	}
 }
 
-class CyclesShaderContext {
-	public var vert:CyclesShader;
-	public var frag:CyclesShader;
-	public var geom:CyclesShader;
-	public var tesc:CyclesShader;
-	public var tese:CyclesShader;
+class MaterialShaderContext {
+	public var vert:MaterialShader;
+	public var frag:MaterialShader;
+	public var geom:MaterialShader;
+	public var tesc:MaterialShader;
+	public var tese:MaterialShader;
 	public var data:TShaderContext;
 	var material:TMaterial;
 	var constants:Array<TShaderConstant>;
@@ -109,22 +109,22 @@ class CyclesShaderContext {
 		tunits.push(c);
 	}
 
-	public function make_vert():CyclesShader {
+	public function make_vert():MaterialShader {
 		data.vertex_shader = material.name + '_' + data.name + '.vert';
-		vert = new CyclesShader(this, 'vert');
+		vert = new MaterialShader(this, 'vert');
 		return vert;
 	}
 
-	public function make_frag():CyclesShader {
+	public function make_frag():MaterialShader {
 		data.fragment_shader = material.name + '_' + data.name + '.frag';
-		frag = new CyclesShader(this, 'frag');
+		frag = new MaterialShader(this, 'frag');
 		return frag;
 	}
 }
 
-class CyclesShader {
+class MaterialShader {
 
-	public var context:CyclesShaderContext;
+	public var context:MaterialShaderContext;
 	var shader_type = '';
 	var includes:Array<String> = [];
 	public var ins:Array<String> = [];
@@ -160,7 +160,7 @@ class CyclesShader {
 	public var dotNV = false;
 	public var invTBN = false;
 
-	public function new(context:CyclesShaderContext, shader_type:String) {
+	public function new(context:MaterialShaderContext, shader_type:String) {
 		this.context = context;
 		this.shader_type = shader_type;
 	}

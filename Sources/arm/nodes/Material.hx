@@ -18,18 +18,18 @@ package arm.nodes;
 
 import zui.Nodes;
 import iron.data.SceneFormat;
-import arm.nodes.CyclesShader;
+import arm.nodes.MaterialShader;
 using StringTools;
 
-class Cycles {
+class Material {
 
-	static var con:CyclesShaderContext;
-	static var vert:CyclesShader;
-	static var frag:CyclesShader;
-	static var geom:CyclesShader;
-	static var tesc:CyclesShader;
-	static var tese:CyclesShader;
-	static var curshader:CyclesShader;
+	static var con:MaterialShaderContext;
+	static var vert:MaterialShader;
+	static var frag:MaterialShader;
+	static var geom:MaterialShader;
+	static var tesc:MaterialShader;
+	static var tese:MaterialShader;
+	static var curshader:MaterialShader;
 	static var matcon:TMaterialContext;
 	static var parsed:Array<String>;
 
@@ -42,6 +42,7 @@ class Cycles {
 	static var sample_bump:Bool;
 	static var sample_bump_res:String;
 
+	public static var customNodes = untyped __js__("new Map()");
 	public static var parse_surface = true;
 	public static var parse_opacity = true;
 	public static var parse_height = false;
@@ -89,7 +90,7 @@ class Cycles {
 		return ls;
 	}
 
-	public static function parse(canvas:TNodeCanvas, _con:CyclesShaderContext, _vert:CyclesShader, _frag:CyclesShader, _geom:CyclesShader, _tesc:CyclesShader, _tese:CyclesShader, _matcon:TMaterialContext, _parse_displacement = false):TShaderOut {
+	public static function parse(canvas:TNodeCanvas, _con:MaterialShaderContext, _vert:MaterialShader, _frag:MaterialShader, _geom:MaterialShader, _tesc:MaterialShader, _tese:MaterialShader, _matcon:TMaterialContext, _parse_displacement = false):TShaderOut {
 		nodes = canvas.nodes;
 		links = canvas.links;
 
@@ -122,7 +123,7 @@ class Cycles {
 		return null;
 	}
 
-	public static function finalize(con:CyclesShaderContext) {
+	public static function finalize(con:MaterialShaderContext) {
 		var vert = con.vert;
 		var frag = con.frag;
 
@@ -296,8 +297,7 @@ class Cycles {
 			out_subsurface: '0.0'
 		}
 
-		// if (node.type == 'GROUP') {
-		if (node.type == 'Armory PBR' || node.type == 'OUTPUT_MATERIAL_PBR') {
+		if (node.type == 'OUTPUT_MATERIAL_PBR') {
 			if (parse_surface) {
 				// Normal - parsed first to retrieve uv coords
 				parse_normal_map_color_input(node.inputs[5]);
@@ -310,10 +310,8 @@ class Cycles {
 				// Metallic
 				sout.out_metallic = parse_value_input(node.inputs[4]);
 				// Emission
-				// if (isInputLinked(node.inputs[6]) || node.inputs[6].default_value != 0.0):
 				if (parse_emission) {
 					sout.out_emission = parse_value_input(node.inputs[6]);
-					// sout.out_basecol = '(${sout.out_basecol} + ${to_vec3(sout.out_emission)})';
 				}
 				// Subsurface
 				if (parse_subsurface) {
@@ -332,94 +330,9 @@ class Cycles {
 				if (!parse_height_as_channel) curshader = frag;
 			}
 		}
-		// else:
-			// return parse_group(node, socket)
-
-		// else if (node.type == 'GROUP_INPUT') {
-			// return parse_group_input(node, socket);
-		// }
-
-		else if (node.type == 'MIX_SHADER') {
-			// var prefix = node.inputs[0].is_linked ? '' : 'const ';
-			var prefix = '';
-			var fac = parse_value_input(node.inputs[0]);
-			var fac_var = node_name(node) + '_fac';
-			var fac_inv_var = node_name(node) + '_fac_inv';
-			curshader.write(prefix + 'float $fac_var = $fac;');
-			curshader.write(prefix + 'float $fac_inv_var = 1.0 - $fac_var;');
-			var sout1 = parse_shader_input(node.inputs[1]);
-			var sout2 = parse_shader_input(node.inputs[2]);
-			var bc1 = sout1.out_basecol;
-			var bc2 = sout2.out_basecol;
-			var rough1 = sout1.out_roughness;
-			var rough2 = sout2.out_roughness;
-			var met1 = sout1.out_metallic;
-			var met2 = sout2.out_metallic;
-			var occ1 = sout1.out_occlusion;
-			var occ2 = sout2.out_occlusion;
-			if (parse_surface) {
-				sout.out_basecol = '($bc1 * $fac_inv_var + $bc2 * $fac_var)';
-				sout.out_roughness = '($rough1 * $fac_inv_var + $rough2 * $fac_var)';
-				sout.out_metallic = '($met1 * $fac_inv_var + $met2 * $fac_var)';
-				sout.out_occlusion = '($occ1 * $fac_inv_var + $occ2 * $fac_var)';
-			}
-			if (parse_opacity) {
-				// out_opacity = '({0} * {3} + {1} * {2})'.format(opac1, opac2, fac_var, fac_inv_var)
-			}
-		}
-
-		else if (node.type == 'ADD_SHADER') {
-		//     bc1, rough1, met1, occ1, opac1 = parse_shader_input(node.inputs[0])
-		//     bc2, rough2, met2, occ2, opac2 = parse_shader_input(node.inputs[1])
-		//     if parse_surface:
-		//         out_basecol = '({0} + {1})'.format(bc1, bc2)
-		//         out_roughness = '({0} * 0.5 + {1} * 0.5)'.format(rough1, rough2)
-		//         out_metallic = '({0} * 0.5 + {1} * 0.5)'.format(met1, met2)
-		//         out_occlusion = '({0} * 0.5 + {1} * 0.5)'.format(occ1, occ2)
-		//     if parse_opacity:
-		//         out_opacity = '({0} * 0.5 + {1} * 0.5)'.format(opac1, opac2)
-		}
-
-		else if (node.type == 'BSDF_PRINCIPLED') {
-			//if parse_surface:
-			write_normal(node.inputs[16]);
-			sout.out_basecol = parse_vector_input(node.inputs[0]);
-			// subsurface = parse_vector_input(node.inputs[1])
-			// subsurface_radius = parse_vector_input(node.inputs[2])
-			// subsurface_color = parse_vector_input(node.inputs[3])
-			sout.out_metallic = parse_value_input(node.inputs[4]);
-			// specular = parse_vector_input(node.inputs[5])
-			// specular_tint = parse_vector_input(node.inputs[6])
-			sout.out_roughness = parse_value_input(node.inputs[7]);
-			// aniso = parse_vector_input(node.inputs[8])
-			// aniso_rot = parse_vector_input(node.inputs[9])
-			// sheen = parse_vector_input(node.inputs[10])
-			// sheen_tint = parse_vector_input(node.inputs[11])
-			// clearcoat = parse_vector_input(node.inputs[12])
-			// clearcoat_rough = parse_vector_input(node.inputs[13])
-			// ior = parse_vector_input(node.inputs[14])
-			// transmission = parse_vector_input(node.inputs[15])
-		}
-
-		else if (node.type == 'BSDF_DIFFUSE') {
-			//if parse_surface:
-			write_normal(node.inputs[2]);
-			sout.out_basecol = parse_vector_input(node.inputs[0]);
-			sout.out_roughness = parse_value_input(node.inputs[1]);
-		}
-
-		else if (node.type == 'BSDF_GLOSSY') {
-			// if parse_surface:
-			write_normal(node.inputs[2]);
-			sout.out_basecol = parse_vector_input(node.inputs[0]);
-			sout.out_roughness = parse_value_input(node.inputs[1]);
-			sout.out_metallic = '1.0';
-		}
 
 		return sout;
 	}
-
-	// static function parse_displacement_input() {}
 
 	static function parse_vector_input(inp:TNodeSocket):String {
 		var l = getInputLink(inp);
@@ -484,7 +397,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_BRICK') {
-			curshader.add_function(CyclesFunctions.str_tex_brick);
+			curshader.add_function(MaterialFunctions.str_tex_brick);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -503,7 +416,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_CHECKER') {
-			curshader.add_function(CyclesFunctions.str_tex_checker);
+			curshader.add_function(MaterialFunctions.str_tex_checker);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -591,7 +504,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_MAGIC') {
-			curshader.add_function(CyclesFunctions.str_tex_magic);
+			curshader.add_function(MaterialFunctions.str_tex_magic);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -607,7 +520,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_MUSGRAVE') {
-			curshader.add_function(CyclesFunctions.str_tex_musgrave);
+			curshader.add_function(MaterialFunctions.str_tex_musgrave);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -625,7 +538,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_NOISE') {
-			curshader.add_function(CyclesFunctions.str_tex_noise);
+			curshader.add_function(MaterialFunctions.str_tex_noise);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
@@ -652,7 +565,7 @@ class Cycles {
 	//         return vec3([0.0, 0.0, 0.0])
 
 		else if (node.type == 'TEX_VORONOI') {
-			curshader.add_function(CyclesFunctions.str_tex_voronoi);
+			curshader.add_function(MaterialFunctions.str_tex_voronoi);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
@@ -678,7 +591,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_WAVE') {
-			curshader.add_function(CyclesFunctions.str_tex_wave);
+			curshader.add_function(MaterialFunctions.str_tex_wave);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -697,7 +610,7 @@ class Cycles {
 			var out_col = parse_vector_input(node.inputs[0]);
 			var bright = parse_value_input(node.inputs[1]);
 			var contr = parse_value_input(node.inputs[2]);
-			curshader.add_function(CyclesFunctions.str_brightcontrast);
+			curshader.add_function(MaterialFunctions.str_brightcontrast);
 			return 'brightcontrast($out_col, $bright, $contr)';
 		}
 		else if (node.type == 'GAMMA') {
@@ -707,7 +620,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'HUE_SAT') {
-			curshader.add_function(CyclesFunctions.str_hue_sat);
+			curshader.add_function(MaterialFunctions.str_hue_sat);
 			var hue = parse_value_input(node.inputs[0]);
 			var sat = parse_value_input(node.inputs[1]);
 			var val = parse_value_input(node.inputs[2]);
@@ -782,19 +695,19 @@ class Cycles {
 			}
 			//
 			else if (blend == 'HUE') {
-				curshader.add_function(CyclesFunctions.str_hue_sat);
+				curshader.add_function(MaterialFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col1).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == 'SATURATION') {
-				curshader.add_function(CyclesFunctions.str_hue_sat);
+				curshader.add_function(MaterialFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == 'COLOR') {
-				curshader.add_function(CyclesFunctions.str_hue_sat);
+				curshader.add_function(MaterialFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == 'VALUE') {
-				curshader.add_function(CyclesFunctions.str_hue_sat);
+				curshader.add_function(MaterialFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col1).g, rgb_to_hsv($col2).b)), $fac_var)';
 			}
 			//
@@ -872,7 +785,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'COMBHSV') {
-			curshader.add_function(CyclesFunctions.str_hue_sat);
+			curshader.add_function(MaterialFunctions.str_hue_sat);
 			var h = parse_value_input(node.inputs[0]);
 			var s = parse_value_input(node.inputs[1]);
 			var v = parse_value_input(node.inputs[2]);
@@ -886,10 +799,10 @@ class Cycles {
 			return 'vec3($r, $g, $b)';
 		}
 		else if (node.type == 'WAVELENGTH') {
-			curshader.add_function(CyclesFunctions.str_wavelength_to_rgb);
+			curshader.add_function(MaterialFunctions.str_wavelength_to_rgb);
 			var wl = parse_value_input(node.inputs[0]);
-			// Roughly map to cycles - 450 to 600 nanometers
-			curshader.add_function(CyclesFunctions.str_wavelength_to_rgb);
+			// Roughly map to Cycles - 450 to 600 nanometers
+			curshader.add_function(MaterialFunctions.str_wavelength_to_rgb);
 			return 'wavelength_to_rgb(($wl - 450.0) / 150.0)';
 		}
 
@@ -1016,7 +929,7 @@ class Cycles {
 			if (!curshader.invTBN) {
 				curshader.invTBN = true;
 				curshader.nAttr = true;
-				curshader.add_function(CyclesFunctions.str_cotangentFrame);
+				curshader.add_function(MaterialFunctions.str_cotangentFrame);
 				curshader.write('mat3 invTBN = transpose(cotangentFrame(nAttr, -nAttr, texCoord));');
 			}
 			res = '(normalize(mul($res, invTBN)) * 0.5 + 0.5)';
@@ -1126,6 +1039,12 @@ class Cycles {
 			return to_vec3('$height');
 		}
 
+		else if (customNodes.get(node.type) != null) {
+			return customNodes.get(node.type)();
+		}
+
+		trace(node.type);
+
 		return 'vec3(0.0, 0.0, 0.0)';
 	}
 
@@ -1139,7 +1058,7 @@ class Cycles {
 			frag.write('texn.y = -texn.y;');
 			if (!cotangentFrameWritten) {
 				cotangentFrameWritten = true;
-				frag.add_function(CyclesFunctions.str_cotangentFrame);
+				frag.add_function(MaterialFunctions.str_cotangentFrame);
 			}
 			frag.n = true;
 			#if (kha_direct3d11 || kha_direct3d12)
@@ -1324,7 +1243,7 @@ class Cycles {
 		//     return '0.0'
 
 		else if (node.type == 'TEX_BRICK') {
-			curshader.add_function(CyclesFunctions.str_tex_brick);
+			curshader.add_function(MaterialFunctions.str_tex_brick);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -1340,7 +1259,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_CHECKER') {
-			curshader.add_function(CyclesFunctions.str_tex_checker);
+			curshader.add_function(MaterialFunctions.str_tex_checker);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -1421,7 +1340,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_MAGIC') {
-			curshader.add_function(CyclesFunctions.str_tex_magic);
+			curshader.add_function(MaterialFunctions.str_tex_magic);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -1437,7 +1356,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_MUSGRAVE') {
-			curshader.add_function(CyclesFunctions.str_tex_musgrave);
+			curshader.add_function(MaterialFunctions.str_tex_musgrave);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -1455,7 +1374,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_NOISE') {
-			curshader.add_function(CyclesFunctions.str_tex_noise);
+			curshader.add_function(MaterialFunctions.str_tex_noise);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
@@ -1477,7 +1396,7 @@ class Cycles {
 		//     return '0.0'
 
 		else if (node.type == 'TEX_VORONOI') {
-			curshader.add_function(CyclesFunctions.str_tex_voronoi);
+			curshader.add_function(MaterialFunctions.str_tex_voronoi);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
@@ -1503,7 +1422,7 @@ class Cycles {
 		}
 
 		else if (node.type == 'TEX_WAVE') {
-			curshader.add_function(CyclesFunctions.str_tex_wave);
+			curshader.add_function(MaterialFunctions.str_tex_wave);
 			var co = '';
 			if (getInputLink(node.inputs[0]) != null) {
 				co = parse_vector_input(node.inputs[0]);
@@ -1667,6 +1586,10 @@ class Cycles {
 			else {
 				return '0.0';
 			}
+		}
+
+		else if (customNodes.get(node.type) != null) {
+			return customNodes.get(node.type)();
 		}
 
 		return '0.0';
