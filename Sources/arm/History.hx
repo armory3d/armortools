@@ -5,6 +5,7 @@ import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.ui.UIFiles;
 import arm.data.LayerSlot;
+import arm.nodes.MaterialParser;
 
 class History {
 
@@ -112,6 +113,20 @@ class History {
 				Context.layer.swap(lay);
 				Context.layer.material_mask = Project.materials[step.material];
 			}
+			else if (step.name == "Layer Opacity") {
+				Context.setLayer(Project.layers[step.layer]);
+				var t = Context.layer.maskOpacity;
+				Context.layer.maskOpacity = step.layer_opacity;
+				step.layer_opacity = t;
+				MaterialParser.parseMeshMaterial();
+			}
+			else if (step.name == "Layer Blending") {
+				Context.setLayer(Project.layers[step.layer]);
+				var t = Context.layer.blending;
+				Context.layer.blending = step.layer_blending;
+				step.layer_blending = t;
+				MaterialParser.parseMeshMaterial();
+			}
 			else { // Paint operation
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
@@ -123,6 +138,7 @@ class History {
 			undos--;
 			redos++;
 			UITrait.inst.hwnd.redraws = 2;
+			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
@@ -183,16 +199,30 @@ class History {
 				iron.App.notifyOnRender(makeApply);
 			}
 			else if (step.name == "To Fill Layer") {
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 				Context.layer.material_mask = Project.materials[step.material];
+				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == "To Paint Layer") {
 				Layers.toPaintLayer(Context.layer);
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
+				undoI = (undoI + 1) % Config.raw.undo_steps;
+			}
+			else if (step.name == "Layer Opacity") {
+				Context.setLayer(Project.layers[step.layer]);
+				var t = Context.layer.maskOpacity;
+				Context.layer.maskOpacity = step.layer_opacity;
+				step.layer_opacity = t;
+				MaterialParser.parseMeshMaterial();
+			}
+			else if (step.name == "Layer Blending") {
+				Context.setLayer(Project.layers[step.layer]);
+				var t = Context.layer.blending;
+				Context.layer.blending = step.layer_blending;
+				step.layer_blending = t;
+				MaterialParser.parseMeshMaterial();
 			}
 			else { // Paint operation
 				var lay = undoLayers[undoI];
@@ -205,6 +235,7 @@ class History {
 			undos++;
 			redos--;
 			UITrait.inst.hwnd.redraws = 2;
+			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
@@ -277,6 +308,18 @@ class History {
 		push("To Paint Layer");
 	}
 
+	public static function layerOpacity() {
+		push("Layer Opacity");
+	}
+
+	// public static function layerObject() {
+	// 	push("Layer Object");
+	// }
+
+	public static function layerBlending() {
+		push("Layer Blending");
+	}
+
 	// public static function newMaterial() {}
 	// public static function deleteMaterial() {}
 
@@ -299,7 +342,10 @@ class History {
 			object: opos,
 			material: mpos,
 			is_mask: Context.layerIsMask,
-			has_mask: Context.layer.texpaint_mask != null
+			has_mask: Context.layer.texpaint_mask != null,
+			layer_opacity: Context.layer.maskOpacity,
+			layer_object: Context.layer.objectMask,
+			layer_blending: Context.layer.blending
 		});
 
 		while (steps.length > Config.raw.undo_steps + 1) steps.shift();
@@ -370,5 +416,8 @@ typedef TStep = {
 	public var material:Int;
 	public var is_mask:Bool; // Mask operation
 	public var has_mask:Bool; // Layer contains mask
+	@:optional public var layer_opacity:Float;
+	@:optional public var layer_object:Int;
+	@:optional public var layer_blending:Int;
 	@:optional public var prev_order:Int; // Previous layer position
 }

@@ -286,9 +286,13 @@ class TabLayers {
 					@:privateAccess ui.endElement();
 				}
 				else {
-					var blendingHandle = Id.handle({position: l.blending});
-					l.blending = ui.combo(blendingHandle, ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
+					var blendingHandle = Id.handle().nest(l.id);
+					blendingHandle.position = l.blending;
+					ui.combo(blendingHandle, ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"], "Blending");
 					if (blendingHandle.changed) {
+						Context.setLayer(l);
+						History.layerBlending();
+						l.blending = blendingHandle.position;
 						MaterialParser.parseMeshMaterial();
 					}
 				}
@@ -333,9 +337,14 @@ class TabLayers {
 					ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
 					@:privateAccess ui.endElement();
 
-					var opacHandle = Id.handle().nest(l.id, {value: l.maskOpacity});
-					l.maskOpacity = ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
+					var opacHandle = Id.handle().nest(l.id);
+
+					opacHandle.value = l.maskOpacity;
+					ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
 					if (opacHandle.changed) {
+						Context.setLayer(l);
+						if (ui.inputStarted) History.layerOpacity();
+						l.maskOpacity = opacHandle.value;
 						MaterialParser.parseMeshMaterial();
 					}
 
