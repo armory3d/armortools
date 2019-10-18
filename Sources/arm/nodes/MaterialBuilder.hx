@@ -479,7 +479,10 @@ class MaterialBuilder {
 			frag.write('float occlusion = $occ;');
 			frag.write('vec3 nortan = $nortan;');
 			frag.write('float height = $height;');
-			frag.write('float opacity = $opac * brushOpacity;');
+			frag.write('float opacity = $opac;');
+			if (Context.layer.material_mask == null) {
+				frag.write('opacity *= brushOpacity;');
+			}
 			if (Context.material.paintEmis) {
 				frag.write('float emis = $emis;');
 			}
