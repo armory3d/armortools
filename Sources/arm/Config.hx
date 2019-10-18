@@ -87,6 +87,7 @@ class Config {
 			raw.keymap.file_reload_assets = "ctrl+r";
 			raw.keymap.file_import_assets = "ctrl+i";
 			raw.keymap.file_export_textures = "ctrl+e";
+			raw.keymap.file_export_textures_as = "ctrl+shift+e";
 			raw.keymap.edit_undo = "ctrl+z";
 			raw.keymap.edit_redo = "ctrl+shift+z";
 			raw.keymap.edit_prefs = "ctrl+k";

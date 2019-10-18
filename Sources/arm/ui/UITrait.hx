@@ -455,6 +455,7 @@ class UITrait {
 			}
 			else textureExport = true;
 		}
+		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 

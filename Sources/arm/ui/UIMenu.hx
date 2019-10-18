@@ -70,7 +70,7 @@ class UIMenu {
 				if (ui.button("Reload Assets", Left, Config.keymap.file_reload_assets)) Project.reloadAssets();
 				if (ui.button("Import Assets...", Left, Config.keymap.file_import_assets)) Project.importAsset();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Export Textures...", Left, Config.keymap.file_export_textures)) BoxExport.showTextures();
+				if (ui.button("Export Textures...", Left, Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 				if (ui.button("Export Mesh...", Left)) BoxExport.showMesh();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Exit", Left)) System.stop();
