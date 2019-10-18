@@ -1,13 +1,13 @@
 
 let plugin = new arm.Plugin();
 
-let categoryName = "Custom";
+let categoryName = "My Nodes";
 let nodeName = "Hello World";
 let nodeType = "HELLO_WORLD";
 
 // Create new node category
 let categories = arm.NodesMaterial.categories;
-categories.push("Custom");
+categories.push(categoryName);
 
 // Create new node
 let nodes = [

@@ -15,6 +15,16 @@ class TabLayers {
 		if (ui.tab(UITrait.inst.htab, "Layers")) {
 			ui.row([1/4,1/4,1/2]);
 			if (ui.button("New")) {
+
+				// UIMenu.draw(function(ui:Zui) {
+				// 	ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
+				// 	ui.text("New", Right);
+				// 	if (ui.button("Paint Layer", Left)) {}
+				// 	if (ui.button("Fill Layer", Left)) {}
+				// 	if (ui.button("Black Mask", Left)) {}
+				// 	if (ui.button("White Mask", Left)) {}
+				// });
+
 				Layers.newLayer();
 				History.newLayer();
 			}
