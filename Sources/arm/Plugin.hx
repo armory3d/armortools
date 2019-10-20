@@ -51,12 +51,16 @@ class IronBridge {
 
 @:expose("arm")
 class ArmBridge {
+	public static var App = arm.App;
+	public static var Config = arm.Config;
+	public static var Context = arm.Context;
+	public static var History = arm.History;
+	public static var Layers = arm.Layers;
+	public static var Log = arm.Log;
+	public static var Operator = arm.Operator;
 	public static var Plugin = arm.Plugin;
 	public static var Project = arm.Project;
-	public static var Layers = arm.Layers;
-	public static var History = arm.History;
-	public static var Context = arm.Context;
-	public static var Log = arm.Log;
+	public static var Res = arm.Res;
 	public static var NodesMaterial = arm.nodes.NodesMaterial;
 	public static var Material = arm.nodes.Material;
 }
