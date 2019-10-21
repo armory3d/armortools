@@ -325,7 +325,7 @@ class Layers {
 
 		var first = true;
 		for (l in layers) {
-			if (l.material_mask != null) {
+			if (l.material_mask == Context.material) {
 				if (first) {
 					current = @:privateAccess kha.graphics4.Graphics2.current;
 					if (current != null) current.end();

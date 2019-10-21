@@ -171,12 +171,13 @@ class TabLayers {
 
 				if (contextMenu) {
 					UIMenu.draw(function(ui:Zui) {
+						var add = l.material_mask != null ? 1 : 0;
 						if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 11, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
 						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * 18, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (18 + add), ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
 
@@ -259,6 +260,11 @@ class TabLayers {
 								Context.setLayer(l, true);
 								Context.layerPreviewDirty = true;
 								History.newMask();
+							}
+						}
+						if (l.material_mask != null) {
+							if (ui.button("Select Material", Left)) {
+								Context.setMaterial(l.material_mask);
 							}
 						}
 
@@ -381,12 +387,16 @@ class TabLayers {
 						var uvScaleHandle = Id.handle().nest(l.id, {value: l.uvScale});
 						l.uvScale = ui.slider(uvScaleHandle, "UV Scale", 0.0, 5.0, true);
 						if (uvScaleHandle.changed) {
+							Context.setMaterial(l.material_mask);
+							Context.setLayer(l);
 							Layers.updateFillLayers();
 						}
 
 						var uvRotHandle = Id.handle().nest(l.id, {value: l.uvRot});
 						l.uvRot = ui.slider(uvRotHandle, "UV Rotate", 0.0, 360, true, 1);
 						if (uvRotHandle.changed) {
+							Context.setMaterial(l.material_mask);
+							Context.setLayer(l);
 							MaterialParser.parsePaintMaterial();
 							Layers.updateFillLayers();
 						}
@@ -394,6 +404,8 @@ class TabLayers {
 						var uvTypeHandle = Id.handle().nest(l.id, {position: l.uvType});
 						l.uvType = ui.combo(uvTypeHandle, ["UV Map", "Triplanar"], "TexCoord");
 						if (uvTypeHandle.changed) {
+							Context.setMaterial(l.material_mask);
+							Context.setLayer(l);
 							MaterialParser.parsePaintMaterial();
 							Layers.updateFillLayers();
 						}

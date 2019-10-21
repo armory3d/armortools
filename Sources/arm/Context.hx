@@ -52,6 +52,7 @@ class Context {
 	}
 
 	public static function setMaterial(m:MaterialSlot) {
+		if (Project.materials.indexOf(m) == -1) return;
 		material = m;
 		UINodes.inst.updateCanvasMap();
 		MaterialParser.parsePaintMaterial();
