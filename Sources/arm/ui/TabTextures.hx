@@ -5,6 +5,7 @@ import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
 import arm.io.Importer;
+using StringTools;
 
 class TabTextures {
 
@@ -68,8 +69,31 @@ class TabTextures {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
+							if (ui.button("Export", Left)) {
+								UIFiles.show = true;
+								UIFiles.isSave = true;
+								UIFiles.filters = "png";
+								UIFiles.filesDone = function(path:String) {
+									var target = kha.Image.createRenderTarget(img.width, img.height);
+									function exportTexture(g:kha.graphics4.Graphics) {
+										target.g2.begin(false);
+										target.g2.drawImage(img, 0, 0);
+										target.g2.end();
+										var f = UIFiles.filename;
+										if (f == "") f = "untitled";
+										if (!f.endsWith(".png")) f += ".png";
+										var out = new haxe.io.BytesOutput();
+										var writer = new arm.format.PngWriter(out);
+										var data = arm.format.PngTools.build32RGB1(target.width, target.height, target.getPixels());
+										writer.write(data);
+										Krom.fileSaveBytes(path + "/" + f, out.getBytes().getData());
+										iron.App.removeRender(exportTexture);
+									};
+									iron.App.notifyOnRender(exportTexture);
+								}
+							}
 							if (ui.button("To Mask", Left)) {
 								Layers.createImageMask(asset);
 							}
