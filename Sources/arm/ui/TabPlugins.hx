@@ -87,7 +87,7 @@ class TabPlugins{
 							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
 							if (ui.button("Edit", Left)) {
 								#if krom_windows
-								Krom.sysCommand('"' + path + '"');
+								Krom.sysCommand('start "" "' + path + '"');
 								#elseif krom_linux
 								Krom.sysCommand('xdg-open "' + path + '"');
 								#else
