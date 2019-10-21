@@ -62,9 +62,13 @@ class TabPlugins{
 
 				var h = Id.handle({selected: false});
 				for (f in files) {
+					var isJs = f.endsWith(".js");
+					var isWasm = f.endsWith(".wasm");
+					if (!isJs && !isWasm) continue;
 					var enabled = Config.raw.plugins.indexOf(f) >= 0;
 					h.selected = enabled;
-					ui.check(h, f.split(".")[0]);
+					var tag = isJs ? f.split(".")[0] : f;
+					ui.check(h, tag);
 					if (h.changed && h.selected != enabled) {
 						if (h.selected) {
 							Config.raw.plugins.push(f);
