@@ -34,7 +34,7 @@ class Plugin {
 
 	public static function stop(plugin:String) {
 		var p = plugins.get(plugin);
-		if (p.delete != null) p.delete();
+		if (p != null && p.delete != null) p.delete();
 		plugins.remove(plugin);
 	}
 }
@@ -51,6 +51,8 @@ class IronBridge {
 
 @:expose("arm")
 class ArmBridge {
+	public static var Bytes = haxe.io.Bytes;
+	public static var Image = kha.Image;
 	public static var App = arm.App;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
@@ -63,6 +65,8 @@ class ArmBridge {
 	public static var Res = arm.Res;
 	public static var NodesMaterial = arm.nodes.NodesMaterial;
 	public static var Material = arm.nodes.Material;
+	public static var Exporter = arm.io.Exporter;
+	public static var Importer = arm.io.Importer;
 }
 
 @:expose("zui")
