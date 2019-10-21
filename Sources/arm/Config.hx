@@ -101,8 +101,8 @@ class Config {
 			raw.keymap.view_camera_type = "5";
 			raw.keymap.view_orbit_left = "4";
 			raw.keymap.view_orbit_right = "6";
-			raw.keymap.view_orbit_top = "8";
-			raw.keymap.view_orbit_bottom = "2";
+			raw.keymap.view_orbit_up = "8";
+			raw.keymap.view_orbit_down = "2";
 			raw.keymap.view_orbit_opposite = "9";
 			raw.keymap.view_distract_free = "f11";
 			raw.keymap.tool_brush = "b";

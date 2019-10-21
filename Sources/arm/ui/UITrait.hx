@@ -559,8 +559,8 @@ class UITrait {
 			}
 			else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
 			else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
-			else if (Operator.shortcut(Config.keymap.view_orbit_top)) ViewportUtil.orbit(0, -Math.PI / 12);
-			else if (Operator.shortcut(Config.keymap.view_orbit_bottom)) ViewportUtil.orbit(0, Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_up)) ViewportUtil.orbit(0, -Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_down)) ViewportUtil.orbit(0, Math.PI / 12);
 			else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
 		}
 
