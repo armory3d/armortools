@@ -36,7 +36,11 @@ arm.NodesMaterial.list.push(nodes);
 
 // Node shader
 arm.Material.customNodes.set(nodeType, function() {
-	return "vec3(1.0, 0.0, 0.0)";
+	let frag = arm.Material.frag;
+	frag.write(`
+		float my_out = cos(sin(texCoord.x * 200) + cos(texCoord.y * 200));
+	`);
+	return `vec3(my_out, my_out, my_out)`;
 });
 
 // Cleanup
