@@ -312,8 +312,8 @@ class UITrait {
 
 		var world = Scene.active.world;
 		if (savedEnvmap == null) {
-			savedEnvmap = world.envmap;
-			defaultEnvmap = world.envmap;
+			// savedEnvmap = world.envmap;
+			// defaultEnvmap = world.envmap;
 			defaultIrradiance = world.probe.irradiance;
 			defaultRadiance = world.probe.radiance;
 			defaultRadianceMipmaps = world.probe.radianceMipmaps;

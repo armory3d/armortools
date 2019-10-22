@@ -39,7 +39,8 @@ class TabViewport {
 				MaterialParser.parseMeshMaterial();
 			}
 			var p = Scene.active.world.probe;
-			var envHandle = Id.handle({value: p.raw.strength});
+			var envHandle = Id.handle();
+			envHandle.value = p.raw.strength;
 			p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 			if (envHandle.changed) Context.ddirty = 2;
 
@@ -49,8 +50,7 @@ class TabViewport {
 				var light = Scene.active.lights[0];
 
 				var sxhandle = Id.handle();
-				var f32:kha.FastFloat = light.data.raw.size; // hl fix
-				sxhandle.value = f32;
+				sxhandle.value = light.data.raw.size;
 				light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
 				if (sxhandle.changed) Context.ddirty = 2;
 				// var syhandle = Id.handle();
@@ -108,7 +108,7 @@ class TabViewport {
 			if (UITrait.inst.showEnvmapHandle.changed) {
 				var world = Scene.active.world;
 				world.loadEnvmap(function(_) {});
-				UITrait.inst.savedEnvmap = world.envmap;
+				if (UITrait.inst.savedEnvmap == null) UITrait.inst.savedEnvmap = world.envmap;
 				Context.ddirty = 2;
 			}
 			var compassHandle = Id.handle({selected: UITrait.inst.showCompass});
@@ -117,11 +117,7 @@ class TabViewport {
 
 			if (UITrait.inst.showEnvmap) {
 				UITrait.inst.showEnvmapBlur = ui.check(UITrait.inst.showEnvmapBlurHandle, "Blurred");
-				if (UITrait.inst.showEnvmapBlurHandle.changed) {
-					var probe = Scene.active.world.probe;
-					UITrait.inst.savedEnvmap = UITrait.inst.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-					Context.ddirty = 2;
-				}
+				if (UITrait.inst.showEnvmapBlurHandle.changed) Context.ddirty = 2;
 			}
 			else {
 				if (ui.panel(Id.handle({selected: false}), "Viewport Color")) {
@@ -144,7 +140,13 @@ class TabViewport {
 					}
 				}
 			}
-			Scene.active.world.envmap = UITrait.inst.showEnvmap ? UITrait.inst.savedEnvmap : UITrait.inst.emptyEnvmap;
+
+			if (UITrait.inst.showEnvmap) {
+				Scene.active.world.envmap = UITrait.inst.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : UITrait.inst.savedEnvmap;
+			}
+			else {
+				Scene.active.world.envmap = UITrait.inst.emptyEnvmap;
+			}
 		}
 	}
 }

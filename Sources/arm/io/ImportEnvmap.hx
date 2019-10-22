@@ -87,6 +87,7 @@ class ImportEnvmap {
 		// World envmap
 		Scene.active.world.probe.raw.strength = 1.0;
 		Scene.active.world.envmap = image;
+		Scene.active.world.raw.envmap = path;
 		UITrait.inst.savedEnvmap = image;
 		UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = true;
 
