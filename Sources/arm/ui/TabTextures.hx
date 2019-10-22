@@ -65,6 +65,9 @@ class TabTextures {
 						UITrait.inst.selectTime = Time.time();
 					}
 
+					// End of row align
+					if (i % num == num - 1) ui._y = uiy + slotw;
+
 					if (ui.isHovered) ui.tooltipImage(img, 256);
 
 					if (ui.isHovered && ui.inputReleasedR) {
