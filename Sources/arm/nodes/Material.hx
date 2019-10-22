@@ -1043,8 +1043,6 @@ class Material {
 			return customNodes.get(node.type)();
 		}
 
-		trace(node.type);
-
 		return 'vec3(0.0, 0.0, 0.0)';
 	}
 
