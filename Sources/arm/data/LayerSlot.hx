@@ -263,6 +263,7 @@ class LayerSlot {
 		l.maskOpacity = maskOpacity;
 		l.material_mask = material_mask;
 		l.objectMask = objectMask;
+		l.blending = blending;
 		l.paintBase = paintBase;
 		l.paintOpac = paintOpac;
 		l.paintOcc = paintOcc;
