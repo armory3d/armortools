@@ -37,6 +37,9 @@ class History {
 					Context.setLayer(l, true);
 					Context.layersPreviewDirty = true;
 				}
+				l.maskOpacity = step.layer_opacity;
+				l.blending = step.layer_blending;
+				l.objectMask = step.layer_object;
 			}
 			else if (step.name == "Duplicate Layer") {
 				Context.layer = Project.layers[step.layer + 1];
@@ -67,6 +70,9 @@ class History {
 					Context.layer.swapMask(lay);
 					Context.setLayer(Context.layer, true);
 				}
+				Context.layer.maskOpacity = step.layer_opacity;
+				Context.layer.blending = step.layer_blending;
+				Context.layer.objectMask = step.layer_object;
 				Context.layersPreviewDirty = true;
 			}
 			else if (step.name == "New Mask") {
