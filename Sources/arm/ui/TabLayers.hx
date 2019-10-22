@@ -342,7 +342,8 @@ class TabLayers {
 							});
 						}
 						else {
-							Layers.updateFillLayers(4);
+							MaterialParser.parseMeshMaterial();
+							Layers.setObjectMask();
 						}
 					}
 					@:privateAccess ui.endElement();
