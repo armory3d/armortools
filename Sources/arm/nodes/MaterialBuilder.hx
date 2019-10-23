@@ -596,7 +596,7 @@ class MaterialBuilder {
 		}
 		else {
 			if (eraser) {
-				frag.write('fragColor[0] = vec4(${Layers.defaultBase}, ${Layers.defaultBase}, ${Layers.defaultBase}, 0.0);');
+				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(${Layers.defaultBase}, ${Layers.defaultBase}, ${Layers.defaultBase}), str), sample_undo.a - str);');
 				frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
 				frag.write('fragColor[2] = vec4(1.0, ${Layers.defaultRough}, 0.0, 0.0);');
 			}
