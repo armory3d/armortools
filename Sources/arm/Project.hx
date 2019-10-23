@@ -183,8 +183,9 @@ class Project {
 			Context.paintObject.transform.buildMatrix();
 			Context.paintObject.name = n;
 			paintObjects = [Context.paintObject];
+			while (materials.length > 0) materials.pop().unload();
 			Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
-				materials = [new MaterialSlot(m)];
+				materials.push(new MaterialSlot(m));
 			});
 			Context.material = materials[0];
 			UINodes.inst.canvasMap = new Map();
@@ -207,9 +208,9 @@ class Project {
 			UITrait.inst.hwnd2.redraws = 2;
 
 			if (resetLayers) {
-				// for (l in layers) l.unload();
+				while (layers.length > 0) layers.pop().unload();
 				var layer = new LayerSlot();
-				layers = [layer];
+				layers.push(layer);
 				Context.setLayer(layer);
 				if (UITrait.inst.projectType == 1) {
 					layer.material_mask = materials[0];

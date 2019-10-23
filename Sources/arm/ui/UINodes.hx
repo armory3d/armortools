@@ -22,7 +22,6 @@ import arm.Tool;
 class UINodes {
 
 	public static var inst:UINodes;
-	static var materialCounter = 0;
 
 	public var show = false;
 	public var defaultWindowW = 0;
@@ -130,7 +129,7 @@ class UINodes {
 				c = Json.parse(canvasBlob);
 				canvasMap.set(Context.material, c);
 				canvas = c;
-				c.name = "Material " + (++materialCounter);
+				c.name = "Material " + (Context.material.id + 1);
 			}
 			else canvas = c;
 

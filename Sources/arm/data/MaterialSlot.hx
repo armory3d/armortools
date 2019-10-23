@@ -11,8 +11,6 @@ class MaterialSlot {
 	public var imageIcon:Image = null; // 50
 	public var previewReady = false;
 	public var data:MaterialData;
-
-	static var counter = 0;
 	public var id = 0;
 
 	public var paintBase = true;
@@ -26,7 +24,7 @@ class MaterialSlot {
 	public var paintSubs = true;
 
 	public function new(m:MaterialData = null) {
-		id = ++counter;
+		for (mat in Project.materials) if (mat.id >= id) id = mat.id + 1;
 		data = m;
 
 		var w = RenderUtil.matPreviewSize;
@@ -34,4 +32,6 @@ class MaterialSlot {
 		image = Image.createRenderTarget(w, w);
 		imageIcon = Image.createRenderTarget(wIcon, wIcon);
 	}
+
+	public function unload() {}
 }
