@@ -1,5 +1,6 @@
 package arm.ui;
 
+import haxe.Json;
 import zui.Zui;
 import zui.Id;
 import iron.system.Time;
@@ -44,14 +45,10 @@ class TabMaterials {
 				}
 				else {
 					ui.g.end();
-					UITrait.inst.headerHandle.redraws = 2;
 					Context.material = new MaterialSlot(materials[0].data);
 					materials.push(Context.material);
 					UINodes.inst.updateCanvasMap();
-					MaterialParser.parsePaintMaterial();
-					RenderUtil.makeMaterialPreview();
-					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-					if (decal) RenderUtil.makeDecalPreview();
+					updateMaterial();
 					ui.g.begin(false);
 				}
 			}
@@ -119,7 +116,8 @@ class TabMaterials {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							var m = materials[i];
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 12, ui.t.SEPARATOR_COL);
+							var add = materials.length > 1 ? 1 : 0;
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 
 							if (ui.button("To Fill Layer", Left)) {
@@ -139,7 +137,21 @@ class TabMaterials {
 								};
 							}
 
-							if (ui.button("Delete", Left) && materials.length > 1) {
+							if (ui.button("Duplicate", Left)) {
+								function dupliMat(_) {
+									iron.App.removeRender(dupliMat);
+									Context.material = new MaterialSlot(materials[0].data);
+									materials.push(Context.material);
+									UINodes.inst.updateCanvasMap();
+									var cloned = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(materials[i])));
+									UINodes.inst.canvasMap.set(Context.material, cloned);
+									UINodes.inst.canvas = cloned;
+									updateMaterial();
+								}
+								iron.App.notifyOnRender(dupliMat);
+							}
+
+							if (materials.length > 1 && ui.button("Delete", Left)) {
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
 								UITrait.inst.hwnd1.redraws = 2;
@@ -185,6 +197,14 @@ class TabMaterials {
 				#end
 			}
 		}
+	}
+
+	static function updateMaterial() {
+		UITrait.inst.headerHandle.redraws = 2;
+		MaterialParser.parsePaintMaterial();
+		RenderUtil.makeMaterialPreview();
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		if (decal) RenderUtil.makeDecalPreview();
 	}
 
 	static function getSelectedMaterial() { return UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material; }
