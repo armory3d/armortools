@@ -7,7 +7,7 @@ class Log {
 	public static var messageColor = 0x00000000;
 
 	public static function showMessage(s:String) {
-		messageTimer = 8.0;
+		messageTimer = 5.0;
 		message = s;
 		messageColor = 0x00000000;
 		arm.ui.UITrait.inst.statusHandle.redraws = 2;

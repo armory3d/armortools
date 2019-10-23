@@ -250,6 +250,8 @@ class Exporter {
 		#if arm_debug
 		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
 		#end
+
+		Log.showMessage("Textures exported.");
 	}
 
 	public static function exportMesh(path:String) {
