@@ -33,5 +33,8 @@ class MaterialSlot {
 		imageIcon = Image.createRenderTarget(wIcon, wIcon);
 	}
 
-	public function unload() {}
+	public function unload() {
+		image.unload();
+		imageIcon.unload();
+	}
 }
