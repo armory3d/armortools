@@ -45,6 +45,7 @@ class Uniforms {
 			return val;
 		}
 		else if (link == '_brushHardness') {
+			if (Context.tool != ToolBrush && Context.tool != ToolEraser) return 1.0;
 			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 			var pen = Input.getPen();
 			if (UITrait.penPressureHardness && pen.down()) val *= pen.pressure;
