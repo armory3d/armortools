@@ -119,6 +119,10 @@ class MeshUtil {
 			Context.mergedObject = null;
 		}
 		mergeMesh();
+
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
 	}
 
 	public static function flipNormals() {
@@ -133,6 +137,10 @@ class MeshUtil {
 			}
 			g.vertexBuffer.unlock();
 		}
+
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
 	}
 
 	public static function calcNormals() {
@@ -169,5 +177,9 @@ class MeshUtil {
 			}
 			g.vertexBuffer.unlock();
 		}
+
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
 	}
 }

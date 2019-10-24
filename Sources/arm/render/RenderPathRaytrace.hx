@@ -249,15 +249,15 @@ class RenderPathRaytrace {
 	static function buildData() {
 		if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
 		var mo = Context.mergedObject;
-		var sc = mo.transform.scale;
+		var sc = mo.parent.transform.scale.x * mo.data.scalePos;
 		var md = mo.data;
 		var geom = md.geom;
 		var count = Std.int(geom.positions.length / 4);
 		vb = new kha.arrays.Float32Array(count * 8);
 		for (i in 0...count) {
-			vb[i * 8    ] = (geom.positions[i * 4    ] / 32767);
-			vb[i * 8 + 1] = (geom.positions[i * 4 + 1] / 32767);
-			vb[i * 8 + 2] = (geom.positions[i * 4 + 2] / 32767);
+			vb[i * 8    ] = (geom.positions[i * 4    ] * sc / 32767);
+			vb[i * 8 + 1] = (geom.positions[i * 4 + 1] * sc / 32767);
+			vb[i * 8 + 2] = (geom.positions[i * 4 + 2] * sc / 32767);
 			vb[i * 8 + 3] =  geom.normals  [i * 2    ] / 32767;
 			vb[i * 8 + 4] =  geom.normals  [i * 2 + 1] / 32767;
 			vb[i * 8 + 5] =  geom.positions[i * 4 + 3] / 32767;
