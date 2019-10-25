@@ -136,7 +136,7 @@ class TabLayers {
 									Context.setLayer(l);
 									History.applyMask();
 									l.applyMask();
-									Context.setLayer(l); // Parse mesh material
+									MaterialParser.parseMeshMaterial();
 									g.begin();
 									iron.App.removeRender(makeApply);
 								}
