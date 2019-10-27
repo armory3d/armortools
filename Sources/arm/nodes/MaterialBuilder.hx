@@ -1022,7 +1022,7 @@ class MaterialBuilder {
 		// Height
 		// TODO: can cause TAA issues
 		if (heightUsed) {
-			var displaceStrength = UITrait.inst.displaceStrength * 0.02;
+			var displaceStrength = getDisplaceStrength();
 			vert.n = true;
 			vert.write('float height = 0.0;');
 			var numLayers = 0;
@@ -1116,7 +1116,7 @@ class MaterialBuilder {
 
 				// Height
 				if (heightUsed) {
-					var ds = UITrait.inst.displaceStrength * 0.1;// * 0.02;
+					var ds = getDisplaceStrength() * 5;
 					if (ds < 0.1) ds = 0.1;
 					else if (ds > 2.0) ds = 2.0;
 					frag.wposition = true;
@@ -1375,7 +1375,7 @@ class MaterialBuilder {
 		pipeState.inputLayout = [structure];
 		data.raw.vertex_elements = [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}];
 
-		var ds = UITrait.inst.displaceStrength * 0.02;
+		var ds = getDisplaceStrength();
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
 		#if (kha_direct3d11 || kha_direct3d12)
 		"#define vec3 float3
@@ -1422,7 +1422,12 @@ class MaterialBuilder {
 	}
 	#end
 
-	static inline function voxelgiHalfExtents() {
+	static inline function getDisplaceStrength():Float {
+		var sc = Context.mainObject().transform.scale.x;
+		return UITrait.inst.displaceStrength * 0.02 * sc;
+	}
+
+	static inline function voxelgiHalfExtents():String {
 		var ext = UITrait.inst.vxaoExt;
 		return 'const vec3 voxelgiHalfExtents = vec3($ext, $ext, $ext);';
 	}
