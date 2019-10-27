@@ -143,13 +143,19 @@ class BoxPreferences {
 				#if (!kha_direct3d12)
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
-				#end
 				if (UITrait.inst.hvxao.changed) {
 					Config.applyConfig();
 					#if arm_creator
 					MaterialParser.parseMeshMaterial();
 					#end
 				}
+
+				ui.enabled = UITrait.inst.hvxao.selected;
+				var h = Id.handle({value: UITrait.inst.vxaoOffset});
+				UITrait.inst.vxaoOffset = ui.slider(h, "Cone Offset", 1.0, 4.0);
+				if (h.changed) Context.ddirty = 2;
+				ui.enabled = true;
+				#end
 				ui.check(UITrait.inst.hssgi, "SSAO");
 				if (UITrait.inst.hssgi.changed) Config.applyConfig();
 				ui.check(UITrait.inst.hbloom, "Bloom");
@@ -198,7 +204,7 @@ class BoxPreferences {
 			}
 
 			ui._w = _w;
-		}, 400, 270);
+		}, 400, 290);
 	}
 
 	static function setScale() {
