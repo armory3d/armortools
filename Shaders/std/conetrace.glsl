@@ -19,13 +19,14 @@ const float voxelgiOcc = 1.0;
 const float voxelgiStep = 1.0;
 const float voxelgiRange = 2.0;
 // const float voxelgiOffset = 1.5;
-const float voxelgiAperture = 1.2;
+// const float voxelgiAperture = 1.2;
 const float MAX_DISTANCE = 1.73205080757 * voxelgiRange;
 const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
 
 // uniform sampler3D voxels;
 // uniform sampler3D voxelsLast;
 uniform float coneOffset;
+uniform float coneAperture;
 
 // vec3 orthogonal(const vec3 u) {
 // 	// Pass normalized u
@@ -59,7 +60,7 @@ float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float ape
 }
 
 float traceShadow(sampler3D voxels, const vec3 origin, const vec3 dir) {
-	return traceConeAO(voxels, origin, dir, 0.14 * voxelgiAperture, 2.5 * voxelgiRange);
+	return traceConeAO(voxels, origin, dir, 0.14 * coneAperture, 2.5 * voxelgiRange);
 }
 
 float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {

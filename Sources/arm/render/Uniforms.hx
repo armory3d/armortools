@@ -35,16 +35,16 @@ class Uniforms {
 			else val *= 900 / App.h(); // Projection ratio
 			return val;
 		}
-		else if (link == '_brushScaleX') {
+		if (link == '_brushScaleX') {
 			return 1 / UITrait.inst.brushScaleX;
 		}
-		else if (link == '_brushOpacity') {
+		if (link == '_brushOpacity') {
 			var val = UITrait.inst.brushOpacity * UITrait.inst.brushNodesOpacity;
 			var pen = Input.getPen();
 			if (UITrait.penPressureOpacity && pen.down()) val *= pen.pressure;
 			return val;
 		}
-		else if (link == '_brushHardness') {
+		if (link == '_brushHardness') {
 			if (Context.tool != ToolBrush && Context.tool != ToolEraser) return 1.0;
 			var val = UITrait.inst.brushHardness * UITrait.inst.brushNodesHardness;
 			var pen = Input.getPen();
@@ -52,16 +52,16 @@ class Uniforms {
 			if (UITrait.inst.brush3d && !UITrait.inst.paint2d) val *= val;
 			return val;
 		}
-		else if (link == '_brushScale') {
+		if (link == '_brushScale') {
 			var nodesScale = UITrait.inst.brushNodesScale;
 			var fill = Context.layer.material_mask != null;
 			var val = (fill ? Context.layer.uvScale : UITrait.inst.brushScale) * nodesScale;
 			return val;
 		}
-		else if (link == '_texpaintSize') {
+		if (link == '_texpaintSize') {
 			return Config.getTextureRes();
 		}
-		else if (link == '_objectId') {
+		if (link == '_objectId') {
 			return Project.paintObjects.indexOf(Context.paintObject);
 		}
 		#end
@@ -76,6 +76,9 @@ class Uniforms {
 		#end
 		if (link == "_coneOffset") {
 			return UITrait.inst.vxaoOffset;
+		}
+		if (link == "_coneAperture") {
+			return UITrait.inst.vxaoAperture;
 		}
 		return null;
 	}
@@ -92,19 +95,19 @@ class Uniforms {
 									vec2.set(-eps, eps, 0.0);
 			return vec2;
 		}
-		else if (link == '_texcoloridSize') {
+		if (link == '_texcoloridSize') {
 			if (Project.assets.length == 0) return vec2;
 			var img = UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
 			vec2.set(img.width, img.height, 0);
 			return vec2;
 		}
-		else if (link == '_gbufferSize') {
+		if (link == '_gbufferSize') {
 			vec2.set(0, 0, 0);
 			var gbuffer2 = RenderPath.active.renderTargets.get("gbuffer2");
 			vec2.set(gbuffer2.image.width, gbuffer2.image.height, 0);
 			return vec2;
 		}
-		else if (link == '_cloneDelta') {
+		if (link == '_cloneDelta') {
 			vec2.set(UITrait.inst.cloneDeltaX, UITrait.inst.cloneDeltaY, 0);
 			return vec2;
 		}
@@ -125,8 +128,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.A.y;
 				v.z = arm.data.HosekWilkie.data.A.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekB") {
+		if (link == "_hosekB") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -136,8 +140,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.B.y;
 				v.z = arm.data.HosekWilkie.data.B.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekC") {
+		if (link == "_hosekC") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -147,8 +152,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.C.y;
 				v.z = arm.data.HosekWilkie.data.C.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekD") {
+		if (link == "_hosekD") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -158,8 +164,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.D.y;
 				v.z = arm.data.HosekWilkie.data.D.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekE") {
+		if (link == "_hosekE") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -169,8 +176,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.E.y;
 				v.z = arm.data.HosekWilkie.data.E.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekF") {
+		if (link == "_hosekF") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -180,8 +188,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.F.y;
 				v.z = arm.data.HosekWilkie.data.F.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekG") {
+		if (link == "_hosekG") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -191,8 +200,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.G.y;
 				v.z = arm.data.HosekWilkie.data.G.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekH") {
+		if (link == "_hosekH") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -202,8 +212,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.H.y;
 				v.z = arm.data.HosekWilkie.data.H.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekI") {
+		if (link == "_hosekI") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -213,8 +224,9 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.I.y;
 				v.z = arm.data.HosekWilkie.data.I.z;
 			}
+			return v;
 		}
-		else if (link == "_hosekZ") {
+		if (link == "_hosekZ") {
 			if (arm.data.HosekWilkie.data == null) {
 				arm.data.HosekWilkie.recompute(Scene.active.world);
 			}
@@ -224,6 +236,7 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.Z.y;
 				v.z = arm.data.HosekWilkie.data.Z.z;
 			}
+			return v;
 		}
 		#end
 
@@ -239,7 +252,7 @@ class Uniforms {
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
-		else if (link == '_inputBrushLast') {
+		if (link == '_inputBrushLast') {
 			var down = Input.getMouse().down() || Input.getPen().down();
 			vec2.set(UITrait.inst.lastPaintVecX, UITrait.inst.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
@@ -255,43 +268,43 @@ class Uniforms {
 			if (Project.assets.length == 0) return null;
 			else return UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
 		}
-		else if (link == "_texuvmap") {
+		if (link == "_texuvmap") {
 			UVUtil.cacheUVMap(); // TODO: Check overlapping g4 calls here
 			return UVUtil.uvmap;
 		}
-		else if (link == "_textrianglemap") {
+		if (link == "_textrianglemap") {
 			UVUtil.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
 			return UVUtil.trianglemap;
 		}
-		else if (link == "_textexttool") { // Opacity map for text
+		if (link == "_textexttool") { // Opacity map for text
 			return UITrait.inst.textToolImage;
 		}
-		else if (link == "_texdecalmask") { // Opacity map for decal
+		if (link == "_texdecalmask") { // Opacity map for decal
 			return UITrait.inst.decalMaskImage;
 		}
-		else if (link == "_texbrushmask") {
+		if (link == "_texbrushmask") {
 			return UITrait.inst.brushMaskImage;
 		}
-		else if (link == "_texpaint_undo") {
+		if (link == "_texpaint_undo") {
 			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
 		}
-		else if (link == "_texpaint_nor_undo") {
+		if (link == "_texpaint_nor_undo") {
 			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
 		}
-		else if (link == "_texpaint_pack_undo") {
+		if (link == "_texpaint_pack_undo") {
 			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 			return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
-		else if (link.startsWith("_texpaint_pack_vert")) {
+		if (link.startsWith("_texpaint_pack_vert")) {
 			var tid = link.substr(19);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
 		}
-		else if (link == "_texpaint_mask") {
+		if (link == "_texpaint_mask") {
 			return Context.layer.texpaint_mask;
 		}
-		else if (link == "_texparticle") {
+		if (link == "_texparticle") {
 			return RenderPath.active.renderTargets.get("texparticle").image;
 		}
 		#end
@@ -300,7 +313,7 @@ class Uniforms {
 			if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
 			return arm.data.ConstData.ltcMatTex;
 		}
-		else if (link == "_ltcMag") {
+		if (link == "_ltcMag") {
 			if (arm.data.ConstData.ltcMagTex == null) arm.data.ConstData.initLTC();
 			return arm.data.ConstData.ltcMagTex;
 		}

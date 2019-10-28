@@ -150,9 +150,13 @@ class BoxPreferences {
 					#end
 				}
 
+				ui.row([1/2, 1/2]);
 				ui.enabled = UITrait.inst.hvxao.selected;
 				var h = Id.handle({value: UITrait.inst.vxaoOffset});
-				UITrait.inst.vxaoOffset = ui.slider(h, "Cone Offset", 1.0, 4.0);
+				UITrait.inst.vxaoOffset = ui.slider(h, "Cone Offset", 1.0, 4.0, true);
+				if (h.changed) Context.ddirty = 2;
+				var h = Id.handle({value: UITrait.inst.vxaoAperture});
+				UITrait.inst.vxaoAperture = ui.slider(h, "Aperture", 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
 				ui.enabled = true;
 				#end

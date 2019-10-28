@@ -241,6 +241,7 @@ class UITrait {
 	public var vxaoExt = 1.0;
 	#end
 	public var vxaoOffset = 1.5;
+	public var vxaoAperture = 1.2;
 	public var textureExport = false;
 	public var textureExportPath = "";
 	public var projectExport = false;
