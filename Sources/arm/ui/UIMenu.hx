@@ -76,8 +76,19 @@ class UIMenu {
 				if (ui.button("Exit", Left)) System.stop();
 			}
 			else if (menuCategory == 1) {
-				if (ui.button("Undo", Left, Config.keymap.edit_undo)) History.undo();
-				if (ui.button("Redo", Left, Config.keymap.edit_redo)) History.redo();
+				var stepUndo = "";
+				var stepRedo = "";
+				if (History.undos > 0) {
+					stepUndo = History.steps[History.steps.length - 1 - History.redos].name;
+				}
+				if (History.redos > 0) {
+					stepRedo = History.steps[History.steps.length - History.redos].name;
+				}
+				ui.enabled = History.undos > 0;
+				if (ui.button("Undo " + stepUndo, Left, Config.keymap.edit_undo)) History.undo();
+				ui.enabled = History.redos > 0;
+				if (ui.button("Redo " + stepRedo, Left, Config.keymap.edit_redo)) History.redo();
+				ui.enabled = true;
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Preferences...", Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}

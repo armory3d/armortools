@@ -18,7 +18,7 @@ class History {
 
 	public static function undo() {
 		if (undos > 0) {
-			var active = History.steps.length - 1 - History.redos;
+			var active = steps.length - 1 - redos;
 			var step = steps[active];
 
 			if (step.name == "New Layer") {
@@ -151,7 +151,7 @@ class History {
 
 	public static function redo() {
 		if (redos > 0) {
-			var active = History.steps.length - History.redos;
+			var active = steps.length - redos;
 			var step = steps[active];
 
 			if (step.name == "New Layer") {
