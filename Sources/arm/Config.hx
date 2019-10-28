@@ -84,7 +84,7 @@ class Config {
 			raw.keymap.file_open = "ctrl+o";
 			raw.keymap.file_save = "ctrl+s";
 			raw.keymap.file_save_as = "ctrl+shift+s";
-			raw.keymap.file_reload_assets = "ctrl+r";
+			raw.keymap.file_reimport_mesh = "ctrl+r";
 			raw.keymap.file_import_assets = "ctrl+i";
 			raw.keymap.file_export_textures = "ctrl+e";
 			raw.keymap.file_export_textures_as = "ctrl+shift+e";

@@ -234,10 +234,10 @@ class Project {
 		});
 	}
 
-	public static function reloadAssets() {
+	public static function reimportMesh() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
 			Importer.importMesh(Project.meshAssets[0], false);
-			Log.showMessage("Assets reloaded.");
+			Log.showMessage("Mesh reimported.");
 		}
 	}
 
