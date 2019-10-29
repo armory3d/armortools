@@ -683,7 +683,9 @@ class UITrait {
 		}
 		else if (brushTime > 0) { // Brush released
 			brushTime = 0;
+			#if (!kha_direct3d12) // Keep accumulated samples for D3D12
 			Context.ddirty = 3;
+			#end
 			Context.brushBlendDirty = true; // Update brush mask
 			Context.layerPreviewDirty = true; // Update layer preview
 		}

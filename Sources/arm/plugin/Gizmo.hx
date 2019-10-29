@@ -80,8 +80,8 @@ class Gizmo {
 				Context.ddirty = 3;
 			}
 			if (kb.started("m")) { // skip voxel
-				Context.materialScene.data.raw.skip_context =
-					Context.materialScene.data.raw.skip_context == '' ? 'voxel' : '';
+				var raw = Context.materialScene.data.raw;
+				raw.skip_context = raw.skip_context == '' ? 'voxel' : '';
 			}
 		}
 
