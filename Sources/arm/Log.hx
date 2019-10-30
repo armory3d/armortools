@@ -1,10 +1,13 @@
 package arm;
 
+@:keep
 class Log {
 
 	public static var message = "";
 	public static var messageTimer = 0.0;
 	public static var messageColor = 0x00000000;
+	public static var lastTraces:Array<String> = [''];
+	static var haxeTrace:Dynamic->haxe.PosInfos->Void = null;
 
 	public static function showMessage(s:String) {
 		messageTimer = 5.0;
@@ -22,5 +25,18 @@ class Log {
 
 	public static function trace(s:String) {
 		trace(s);
+	}
+
+	public static function init() {
+		if (haxeTrace == null) {
+			haxeTrace = haxe.Log.trace;
+			haxe.Log.trace = consoleTrace;
+		}
+	}
+
+	static function consoleTrace(v:Dynamic, ?inf:haxe.PosInfos) {
+		lastTraces.unshift(Std.string(v));
+		if (lastTraces.length > 10) lastTraces.pop();
+		haxeTrace(v, inf);
 	}
 }

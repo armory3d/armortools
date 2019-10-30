@@ -45,14 +45,24 @@ class IronBridge {
 	public static var Scene = iron.Scene;
 	public static var Time = iron.system.Time;
 	public static var Input = iron.system.Input;
+	public static var ArmPack = iron.system.ArmPack;
 	public static var Object = iron.object.Object;
 	public static var Data = iron.data.Data;
 }
 
 @:expose("arm")
 class ArmBridge {
+	public static var TypeOf = Type.typeof;
+	public static var TObject = TObject;
+	public static var Json = haxe.Json;
+	public static var ReflectFields = Reflect.fields;
+	public static var ReflectField = Reflect.field;
+	public static var ReflectSetField = Reflect.setField;
+	public static var StdIs = Std.is;
 	public static var Bytes = haxe.io.Bytes;
+	public static var Blob = kha.Blob;
 	public static var Image = kha.Image;
+	public static var Scheduler = kha.Scheduler;
 	public static var App = arm.App;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
@@ -67,9 +77,21 @@ class ArmBridge {
 	public static var Material = arm.nodes.Material;
 	public static var Exporter = arm.io.Exporter;
 	public static var Importer = arm.io.Importer;
+	public static var UITrait = arm.ui.UITrait;
+	public static var UINodes = arm.ui.UINodes;
+	public static var UIFiles = arm.ui.UIFiles;
+	public static function colorFromFloats(r:Float, g:Float, b:Float, a:Float) { return kha.Color.fromFloats(r, g, b, a); }
 }
 
 @:expose("zui")
 class ZuiBridge {
 	public static var Handle = zui.Zui.Handle;
+}
+
+@:keep
+class Keep {
+	public function keep() {
+		var a = iron.system.ArmPack.decode;
+		var b = iron.system.ArmPack.encode;
+	}
 }

@@ -113,74 +113,7 @@ class TabPlugins{
 			}
 			ui.separator();
 
-			arm.plugin.Console.render(ui);
-			ui.separator();
-
 			#if arm_creator
-			if (ui.panel(Id.handle({selected: false}), "Convert", 1)) {
-				ui.row([1/2, 1/2]);
-				if (ui.button(".arm to .json")) {
-					UIFiles.show = true;
-					UIFiles.isSave = false;
-					UIFiles.filters = "arm";
-					UIFiles.filesDone = function(path:String) {
-						Data.getBlob(path, function(b:kha.Blob) {
-							var parsed = ArmPack.decode(b.bytes);
-							var out = Bytes.ofString(Json.stringify(parsed, function(key:Dynamic, value:Dynamic) {
-								if (Std.is(value, js.lib.Float32Array)) {
-									var ar = untyped Array.from(value);
-									ar.unshift(0); // Annotate array type
-									return ar;
-								}
-								else if (Std.is(value, js.lib.Uint32Array)) {
-									var ar = untyped Array.from(value);
-									ar.unshift(1);
-									return ar;
-								}
-								else if (Std.is(value, js.lib.Int16Array)) {
-									var ar = untyped Array.from(value);
-									ar.unshift(2);
-									return ar;
-								}
-								return value;
-							}, "	")).getData();
-							Krom.fileSaveBytes(path.substr(0, path.length - 3) + "json", out);
-						});
-					}
-				}
-				if (ui.button(".json to .arm")) {
-					UIFiles.show = true;
-					UIFiles.isSave = false;
-					UIFiles.filters = "json";
-					UIFiles.filesDone = function(path:String) {
-						Data.getBlob(path, function(b:kha.Blob) {
-							var parsed = Json.parse(b.toString());
-							function iterate(d:Dynamic) {
-								for (n in Reflect.fields(d)) {
-									var v = Reflect.field(d, n);
-									if (Std.is(v, Array)) {
-										if (Std.is(v[0], Int)) {
-											var ar:Dynamic = null;
-											if (v[0] == 0) ar = new js.lib.Float32Array(v.length - 1);
-											else if (v[0] == 1) ar = new js.lib.Uint32Array(v.length - 1);
-											else if (v[0] == 2) ar = new js.lib.Int16Array(v.length - 1);
-											for (i in 0...v.length - 1) ar[i] = v[i + 1];
-											Reflect.setField(d, n, ar);
-										}
-										else for (e in v) if (Type.typeof(e) == TObject) iterate(e);
-									}
-									else if (Type.typeof(v) == TObject) iterate(v);
-								}
-							}
-							iterate(parsed);
-							var out = ArmPack.encode(parsed).getData();
-							Krom.fileSaveBytes(path.substr(0, path.length - 4) + "arm", out);
-						});
-					}
-				}
-			}
-			ui.separator();
-
 			if (ui.panel(Id.handle({selected: false}), "Package", 1)) {
 				if (ui.button("Make Package")) {
 					UIFiles.show = true;

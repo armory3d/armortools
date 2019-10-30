@@ -55,6 +55,7 @@ class App {
 
 	public function new() {
 		Config.init();
+		Log.init();
 		winw = System.windowWidth();
 		winh = System.windowHeight();
 
@@ -154,12 +155,12 @@ class App {
 				#end
 				if (fileArg != "") {
 					Importer.importFile(fileArg);
-				// 	if (Path.checkMeshFormat(fileArg)) {
-				// 		UITrait.inst.toggleDistractFree();
-				// 	}
-				// 	else if (Path.checkTextureFormat(fileArg)) {
-				// 		UITrait.inst.show2DView(1);
-				// 	}
+					// if (Path.checkMeshFormat(fileArg)) {
+					// 	UITrait.inst.toggleDistractFree();
+					// }
+					// else if (Path.checkTextureFormat(fileArg)) {
+					// 	UITrait.inst.show2DView(1);
+					// }
 				}
 			});
 		});
