@@ -41,7 +41,7 @@ class BoxExport {
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
-				UITrait.inst.outputType = ui.combo(Id.handle(), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
+				UITrait.inst.outputType = ui.combo(Id.handle({position: UITrait.inst.outputType}), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
 
 				@:privateAccess ui.endElement();
 
