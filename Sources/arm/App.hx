@@ -162,6 +162,9 @@ class App {
 					// 	UITrait.inst.show2DView(1);
 					// }
 				}
+				if (Krom.getArgCount() > 2) { // Texture export path argument
+					UITrait.inst.textureExportPath = Krom.getArg(2);
+				}
 			});
 		});
 	}
