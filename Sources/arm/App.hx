@@ -365,7 +365,7 @@ class App {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows
-		Zui.alwaysRedrawWindow =
+		Zui.alwaysRedrawWindow = !UITrait.inst.cacheDraws ||
 			UIMenu.show ||
 			UIBox.show ||
 			isDragging ||

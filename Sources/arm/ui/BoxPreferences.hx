@@ -51,6 +51,10 @@ class BoxPreferences {
 					UITrait.inst.hwnd1.redraws = 2;
 					UITrait.inst.hwnd2.redraws = 2;
 				}
+
+				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache Draws");
+				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
+
 				// ui.text("Node Editor");
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");
 
