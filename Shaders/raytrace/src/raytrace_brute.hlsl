@@ -134,27 +134,18 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 color = payload.color.rgb * texpaint0.rgb;
 
-	if (texpaint2.b >= 0.99) {
-		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), texpaint2.g);
+	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	float3 wo = -WorldRayDirection();
+	if (f > 0.5) {
+		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), pow(texpaint2.g, 1.5));
 	}
 	else {
-		float fresnel = schlick_weight(dot(n, WorldRayDirection())) * (1.0 - texpaint2.g);
-		float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-		if (f > fresnel) {
-			float3 wo = -WorldRayDirection();
-			payload.ray_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-			float3 tangent = float3(0, 0, 0);
-			float3 binormal = float3(0, 0, 0);
-			create_basis(n, tangent, binormal);
-			float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
-			float dotNL = dot(n, wo);
-			float dotNV = dot(n, wi);
-			if (dotNL < 0.0 || dotNV < 0.0) color = float3(0, 0, 0);
-		}
-		else {
-			payload.ray_dir = reflect(WorldRayDirection(), n);
-		}
+		payload.ray_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		color = color * (1.0 - texpaint2.b);
 	}
+	float dotNL = dot(n, wo);
+	if (dotNL < 0.0) color = float3(0, 0, 0);
+
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 	payload.color.xyz = color.xyz;
 }
