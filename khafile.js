@@ -95,6 +95,7 @@ if (build === 'painter') {
 }
 else {
 	project.addAssets("Bundled/creator/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Bundled/creator/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 	project.addShaders("Shaders/creator/*.glsl", { noembed: false});
 	project.addDefine('arm_audio');
 	project.addDefine('arm_soundcompress');

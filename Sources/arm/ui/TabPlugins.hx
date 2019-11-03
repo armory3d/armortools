@@ -28,6 +28,43 @@ class TabPlugins{
 				var dataPath = Data.dataPath;
 				#end
 
+				ui.row([1/4, 1/4]);
+				if (ui.button("New")) {
+					var template =
+"let plugin = new arm.Plugin();
+let h1 = new zui.Handle();
+plugin.drawUI = function(ui) {
+	if (ui.panel(h1, 'New Plugin')) {
+		if (ui.button('Button')) {
+			arm.Log.showError('Hello');
+		}
+	}
+}
+";
+					UIBox.showCustom(function(ui:Zui) {
+						if (ui.tab(Id.handle(), "New Plugin")) {
+							ui.row([1/2, 1/2]);
+							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
+							if (ui.button("OK") || ui.isReturnDown) {
+								if (!pluginName.endsWith(".js")) pluginName += ".js";
+								var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + pluginName;
+								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+								arm.ui.TabPlugins.files = null; // Refresh file list
+								UIBox.show = false;
+								App.redrawUI();
+							}
+						}
+					});
+				}
+				if (ui.button("Install")) {
+					UIFiles.show = true;
+					UIFiles.isSave = false;
+					UIFiles.filters = "js,wasm,zip";
+					UIFiles.filesDone = function(path:String) {
+						ImportPlugin.run(path);
+					}
+				}
+
 				if (files == null) {
 					#if krom_windows
 					var cmd = "dir /b ";
@@ -47,16 +84,6 @@ class TabPlugins{
 					files.pop();
 					for (i in 0...files.length) {
 						files[i] = files[i].replace("\r", "");
-					}
-				}
-
-				ui.row([1/4]);
-				if (ui.button("Install")) {
-					UIFiles.show = true;
-					UIFiles.isSave = false;
-					UIFiles.filters = "js,wasm,zip";
-					UIFiles.filesDone = function(path:String) {
-						ImportPlugin.run(path);
 					}
 				}
 
@@ -82,7 +109,7 @@ class TabPlugins{
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(f, Right);
 							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
 							if (ui.button("Edit", Left)) {
@@ -93,6 +120,20 @@ class TabPlugins{
 								#else
 								Krom.sysCommand('open "' + path + '"');
 								#end
+							}
+							if (ui.button("Export", Left)) {
+								UIFiles.show = true;
+								UIFiles.isSave = true;
+								UIFiles.filters = "js";
+								UIFiles.filesDone = function(dest:String) {
+									#if krom_windows
+									var copy = "copy";
+									#else
+									var copy = "cp";
+									#end
+									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
+									Krom.sysCommand(copy + ' ' + path + ' ' + dest + sep + UIFiles.filename);
+								}
 							}
 							if (ui.button("Delete", Left)) {
 								if (Config.raw.plugins.indexOf(f) >= 0) {
@@ -112,64 +153,6 @@ class TabPlugins{
 				}
 			}
 			ui.separator();
-
-			#if arm_creator
-			if (ui.panel(Id.handle({selected: false}), "Package", 1)) {
-				if (ui.button("Make Package")) {
-					UIFiles.show = true;
-					UIFiles.isSave = true;
-					UIFiles.filters = "";
-					UIFiles.filesDone = function(path:String) {
-						#if krom_windows
-						var sep = "\\";
-						var cd = "cd";
-						var copy = "copy";
-						var dataPath = Data.dataPath.replace("/", "\\");
-						#else
-						var sep = "/";
-						var cd = "echo $PWD";
-						var copy = "cp";
-						var dataPath = Data.dataPath;
-						#end
-						var save = Krom.getFilesLocation() + sep + dataPath + "tmp.txt";
-						Krom.sysCommand(cd + ' > "' + save + '"');
-
-						var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
-						var exe = bytes.toString();
-						exe = exe.substr(0, exe.length - 1);
-						exe += '\\' + Krom.getArg(0);
-
-						var sourceData = Krom.getFilesLocation() + sep + dataPath;
-						var dest = path + sep + UIFiles.filename;
-						var destData = dest + sep + "data";
-						Krom.sysCommand("mkdir " + dest);
-						Krom.sysCommand("mkdir " + destData);
-						Krom.sysCommand(copy + ' ' + sourceData + "player.bin" + ' ' + dest + sep + "krom.bin");
-
-						var fileList = [
-							"ammo.wasm.js", "ammo.wasm.wasm", "brdf.png",
-							"clouds_base.raw", "clouds_detail.raw", "clouds_map.png",
-							"config.arm", "deferred_light.arm", "font_default.ttf", "noise256.png",
-							"Scene.arm", "shader_datas.arm", "smaa_area.png", "smaa_search.png",
-							"water_base.png", "water_detail.png", "water_foam.png", "water_pass.arm",
-							"World_irradiance.arm", "world_pass.arm", "World_radiance.hdr",
-							"World_radiance_0.hdr", "World_radiance_1.hdr", "World_radiance_2.hdr",
-							"World_radiance_3.hdr", "World_radiance_4.hdr", "World_radiance_5.hdr",
-							"World_radiance_6.hdr", "World_radiance_7.hdr"];
-						for (file in fileList) {
-							Krom.sysCommand(copy + ' ' + sourceData + file + ' ' + destData + sep + file);
-						}
-
-						dest += sep + UIFiles.filename;
-						#if krom_windows
-						dest += ".exe";
-						#end
-						Krom.sysCommand(copy + ' ' + exe + ' ' + dest);
-					}
-				}
-			}
-			ui.separator();
-			#end
 
 			// Draw plugins
 			for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);
