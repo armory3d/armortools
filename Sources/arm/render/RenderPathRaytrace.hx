@@ -88,7 +88,8 @@ class RenderPathRaytrace {
 		}
 
 		var path = RenderPathDeferred.path;
-		var savedEnvmap = Scene.active.world.probe.radiance;
+		var probe = Scene.active.world.probe;
+		var savedEnvmap = UITrait.inst.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
 		if (lastEnvmap != savedEnvmap) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = null;
