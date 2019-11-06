@@ -162,8 +162,14 @@ class App {
 					// 	UITrait.inst.show2DView(1);
 					// }
 				}
-				if (Krom.getArgCount() > 2) { // Texture export path argument
+				// Parse arguments
+				// armorpaint import_path export_path export_file_name
+				if (Krom.getArgCount() > 2) {
 					UITrait.inst.textureExportPath = Krom.getArg(2);
+					if (Krom.getArgCount() > 3) {
+						UIFiles.filename = Krom.getArg(3);
+						UITrait.inst.outputType = 1; // occ-rough-met
+					}
 				}
 			});
 		});
