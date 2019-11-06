@@ -52,6 +52,8 @@ class BoxPreferences {
 					UITrait.inst.hwnd2.redraws = 2;
 				}
 
+				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
+
 				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache Draws");
 				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
 

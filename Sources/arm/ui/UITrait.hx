@@ -132,6 +132,7 @@ class UITrait {
 	public var viewportMode = 0;
 	public var hscaleWasChanged = false;
 	public var exportMeshFormat = 0;
+	public var nativeBrowser = true;
 	public var cacheDraws = false;
 
 	public var textToolImage:Image = null;
