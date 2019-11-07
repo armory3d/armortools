@@ -57,7 +57,7 @@ class ImportArm {
 			}
 
 			if (project.layer_datas == null) {
-				runMaterialFromProject(project);
+				runMaterialFromProject(project, Project.filepath);
 				return;
 			}
 
@@ -244,12 +244,11 @@ class ImportArm {
 		Data.getBlob(path, function(b:Blob) {
 			var project:TProjectFormat = ArmPack.decode(b.toBytes());
 			if (project.version == null) { Data.deleteBlob(path); return; }
-			runMaterialFromProject(project);
+			runMaterialFromProject(project, path);
 		});
 	}
 
-	public static function runMaterialFromProject(project:TProjectFormat) {
-		var path = Project.filepath;
+	public static function runMaterialFromProject(project:TProjectFormat, path:String) {
 		var base = Path.baseDir(path);
 		for (file in project.assets) {
 			// Convert image path from relative to absolute
