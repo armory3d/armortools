@@ -239,6 +239,7 @@ class Project {
 			Importer.importMesh(Project.meshAssets[0], false);
 			Log.showMessage("Mesh reimported.");
 		}
+		else importAsset();
 	}
 
 	public static function importAsset() {

@@ -2,7 +2,7 @@ package arm.format;
 
 class ObjParser {
 
-	public static var splitCode = "o".code; // Object split, "g" for groups
+	public static var splitCode = "o".code; // Object split, "g" for groups, "u"semtl for materials
 	public var posa:kha.arrays.Int16Array = null;
 	public var nora:kha.arrays.Int16Array = null;
 	public var texa:kha.arrays.Int16Array = null;
@@ -29,6 +29,9 @@ class ObjParser {
 	static var tindOff = 0;
 	static var nindOff = 0;
 	static var bytes:haxe.io.Bytes = null;
+	static var posFirst:Array<Float>;
+	static var uvFirst:Array<Float>;
+	static var norFirst:Array<Float>;
 
 	public function new(blob:kha.Blob, startPos = 0, udim = false) {
 		pos = startPos;
@@ -47,6 +50,12 @@ class ObjParser {
 		ua = new kha.arrays.Uint32Array(60);
 		na = new kha.arrays.Uint32Array(60);
 		buf = new haxe.io.UInt8Array(64);
+
+		if (splitCode == "u".code && startPos > 0) {
+			posTemp = posFirst;
+			norTemp = norFirst;
+			uvTemp = uvFirst;
+		}
 
 		while (true) {
 			if (pos >= bytes.length) break;
@@ -124,6 +133,7 @@ class ObjParser {
 				}
 			}
 			else if (c0 == splitCode) {
+				if (splitCode == "u".code) pos += 5; // "u"semtl
 				pos++; // Space
 				if (!udim) readingObject = true;
 				name = readString();
@@ -132,12 +142,20 @@ class ObjParser {
 		}
 
 		if (startPos > 0) {
-			for (i in 0...posIndices.length) posIndices[i] -= vindOff;
-			for (i in 0...uvIndices.length) uvIndices[i] -= tindOff;
-			for (i in 0...norIndices.length) norIndices[i] -= nindOff;
+			if (splitCode != "u".code) {
+				for (i in 0...posIndices.length) posIndices[i] -= vindOff;
+				for (i in 0...uvIndices.length) uvIndices[i] -= tindOff;
+				for (i in 0...norIndices.length) norIndices[i] -= nindOff;
+			}
 		}
 		else {
 			vindOff = tindOff = nindOff = 0;
+
+			if (splitCode == "u".code) {
+				posFirst = posTemp;
+				norFirst = norTemp;
+				uvFirst = uvTemp;
+			}
 		}
 		vindOff += Std.int(posTemp.length / 3); // Assumes separate vertex data per object
 		tindOff += Std.int(uvTemp.length / 2);
@@ -269,6 +287,7 @@ class ObjParser {
 			}
 		}
 		bytes = null;
+		if (!hasNext) { posFirst = norFirst = uvFirst = null; }
 	}
 
 	function readFaceFast() {

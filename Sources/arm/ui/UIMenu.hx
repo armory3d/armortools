@@ -67,8 +67,8 @@ class UIMenu {
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Reimport Mesh", Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (ui.button("Import Assets...", Left, Config.keymap.file_import_assets)) Project.importAsset();
+				if (ui.button("Reimport Mesh", Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Export Textures...", Left, Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 				if (ui.button("Export Mesh...", Left)) BoxExport.showMesh();

@@ -15,7 +15,8 @@ class TabViewport {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab2, "Viewport")) {
-			if (ui.button("Import Envmap")) {
+			ui.row([1/4]);
+			if (ui.button("Import")) {
 				UIFiles.show = true;
 				UIFiles.isSave = false;
 				UIFiles.filters = "hdr";
