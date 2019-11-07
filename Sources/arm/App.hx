@@ -407,8 +407,8 @@ class App {
 
 		uienabled = !UIBox.show && !usingMenu;
 		if (UIFiles.show) UIFiles.render(g);
-		else if (UIBox.show) UIBox.render(g);
-		else if (UIMenu.show) UIMenu.render(g);
+		if (UIBox.show) UIBox.render(g);
+		if (UIMenu.show) UIMenu.render(g);
 	}
 
 	public static function getEnumTexts():Array<String> {
