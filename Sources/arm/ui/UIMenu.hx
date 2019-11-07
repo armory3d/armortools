@@ -30,7 +30,7 @@ class UIMenu {
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
 		var menuItems = [12, 3, 14, 5];
-		var ph = 24 * menuItems[menuCategory] * ui.SCALE();
+		var ph = 28 * menuItems[menuCategory] * ui.SCALE();
 
 		g.color = ui.t.SEPARATOR_COL;
 		var menuw = Std.int(ui.ELEMENT_W() * 1.7);
@@ -53,7 +53,7 @@ class UIMenu {
 		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
 		var ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = Std.int(24);
+		ui.t.ELEMENT_H = 28;
 
 		ui.changed = false;
 
