@@ -64,7 +64,7 @@ class BoxPreferences {
 				ui.row([1/2]);
 				if (ui.button("Restore")) {
 					// UIMenu.draw(function(ui:Zui) {
-					// 	ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+					// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 					// 	ui.text("Restore defaults?", Right);
 					// 	if (ui.button("Confirm", Left)) {
 							Config.restore();

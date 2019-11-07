@@ -22,7 +22,7 @@ class TabBrushes {
 			}
 			if (ui.button("Nodes")) UITrait.inst.showBrushNodes();
 
-			var slotw = Std.int(51 * ui.SCALE);
+			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
@@ -31,13 +31,13 @@ class TabBrushes {
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
-					var imgw = Std.int(50 * ui.SCALE);
+					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= Project.brushes.length) {
 						@:privateAccess ui.endElement(imgw);
 						continue;
 					}
-					var img = ui.SCALE > 1 ? Project.brushes[i].image : Project.brushes[i].imageIcon;
+					var img = ui.SCALE() > 1 ? Project.brushes[i].image : Project.brushes[i].imageIcon;
 					var imgFull = Project.brushes[i].image;
 
 					if (Context.brush == Project.brushes[i]) {
@@ -69,7 +69,7 @@ class TabBrushes {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							var b = Project.brushes[i];
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasBrushMap.get(Project.brushes[i]).name, Right);
 
 							if (ui.button("Delete", Left) && Project.brushes.length > 1) {

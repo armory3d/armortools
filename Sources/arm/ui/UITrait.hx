@@ -378,7 +378,7 @@ class UITrait {
 	}
 
 	function done() {
-		if (ui.SCALE > 1) setIconScale();
+		if (ui.SCALE() > 1) setIconScale();
 		//
 		gizmo = Scene.active.getChild(".GizmoTranslate");
 		gizmo.transform.scale.set(0.5, 0.5, 0.5);
@@ -879,7 +879,7 @@ class UITrait {
 			if (worktab.position == SpacePaint) {
 				var keys = ['(B)', '(E)', '(G)', '(D)', '(T)', '(L) - Hold ALT to set source', '(U)', '(P)', '(K)', '(C)', '(V)'];
 				var img = Res.get("icons.png");
-				var imgw = ui.SCALE > 1 ? 100 : 50;
+				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				for (i in 0...toolNames.length) {
 					ui._x += 2;
 					if (Context.tool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -891,7 +891,7 @@ class UITrait {
 			}
 			else if (worktab.position == SpaceScene) {
 				var img = Res.get("icons.png");
-				var imgw = ui.SCALE > 1 ? 100 : 50;
+				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
@@ -907,7 +907,7 @@ class UITrait {
 
 		var WINDOW_BG_COL = ui.t.WINDOW_BG_COL;
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
-		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
 			var _w = ui._w;
 			ui._w = Std.int(ui._w * 0.5);
 			ui._x += 1; // Prevent "File" button highlight on startup
@@ -929,7 +929,7 @@ class UITrait {
 		ui.t.WINDOW_BG_COL = WINDOW_BG_COL;
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
 			ui.tab(worktab, "Scene");
@@ -951,7 +951,7 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x();
-		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
 
 			if (worktab.position == SpacePaint) {
 
@@ -1119,7 +1119,7 @@ class UITrait {
 					}
 					else {
 						var _w = ui._w;
-						var sc = ui.SCALE;
+						var sc = ui.SCALE();
 						ui._w = Std.int(60 * sc);
 
 						var xrayHandle = Id.handle({selected: xray});
@@ -1166,7 +1166,7 @@ class UITrait {
 
 			if (Log.messageTimer > 0) {
 				var _w = ui._w;
-				ui._w = Std.int(ui.ops.font.width(ui.fontSize, Log.message) + 65 * ui.SCALE);
+				ui._w = Std.int(ui.ops.font.width(ui.fontSize, Log.message) + 65 * ui.SCALE());
 				ui.fill(0, 0, ui._w, ui._h, Log.messageColor);
 				ui.text(Log.message);
 				ui._w = _w;
@@ -1226,7 +1226,7 @@ class UITrait {
 	}
 
 	public function setIconScale() {
-		if (ui.SCALE > 1) {
+		if (ui.SCALE() > 1) {
 			Res.load(["icons2x.png"], function() {
 				@:privateAccess Res.bundled.set("icons.png", Res.get("icons2x.png"));
 			});

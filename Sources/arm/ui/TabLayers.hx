@@ -17,7 +17,7 @@ class TabLayers {
 			if (ui.button("New")) {
 
 				// UIMenu.draw(function(ui:Zui) {
-				// 	ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
+				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
 				// 	ui.text("New", Right);
 				// 	if (ui.button("Paint Layer", Left)) {}
 				// 	if (ui.button("Fill Layer", Left)) {}
@@ -53,20 +53,20 @@ class TabLayers {
 				var layerPanel = h.nest(0, {selected: false});
 				var off = ui.t.ELEMENT_OFFSET;
 				var step = ui.t.ELEMENT_H;
-				var checkw = (ui._windowW / 100 * 8) / ui.SCALE;
+				var checkw = (ui._windowW / 100 * 8) / ui.SCALE();
 
 				if (layerPanel.selected) {
 					var mult = l.material_mask != null ? 2 : 1;
 					var ph = (step + off) * mult;
-					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE - 2) - checkw, ph, ui.t.SEPARATOR_COL);
+					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, ph, ui.t.SEPARATOR_COL);
 				}
 
 				if (Context.layer == l) {
 					if (Context.layerIsMask) {
-						ui.rect((ui._windowW / 100 * 24) / ui.SCALE - 2, 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
+						ui.rect((ui._windowW / 100 * 24) / ui.SCALE() - 2, 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
 					}
 					else {
-						ui.fill(checkw, 0, (ui._windowW / ui.SCALE - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
+						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
 					}
 				}
 
@@ -77,7 +77,7 @@ class TabLayers {
 					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
 				}
 
-				var center = (step / 2) * ui.SCALE;
+				var center = (step / 2) * ui.SCALE();
 				ui._y += center;
 				l.visible = ui.check(h, "");
 				if (h.changed) {
@@ -122,7 +122,7 @@ class TabLayers {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right);
 							if (ui.button("Delete", Left)) {
 								Context.setLayer(l);
@@ -173,7 +173,7 @@ class TabLayers {
 					UIMenu.draw(function(ui:Zui) {
 						var add = l.material_mask != null ? 1 : 0;
 						if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
 							ui.text(l.name, Right);
 						}
 						else {

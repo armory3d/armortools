@@ -237,7 +237,7 @@ class UINodes {
 		var searchHandle = Id.handle();
 		var first = true;
 		UIMenu.draw(function(ui:Zui) {
-			ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
+			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
 			ui.textInput(searchHandle, "");
 			ui.changed = false;
 			if (first) {
@@ -293,12 +293,12 @@ class UINodes {
 
 	public function getNodeX():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE);
+		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE());
 	}
 
 	public function getNodeY():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE);
+		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE());
 	}
 
 	public function drawGrid() {
@@ -360,7 +360,7 @@ class UINodes {
 
 			// Grid
 			ui.g.color = 0xffffffff;
-			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE) % 40 - 40, (nodes.panY * nodes.SCALE) % 40 - 40);
+			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 40 - 40, (nodes.panY * nodes.SCALE()) % 40 - 40);
 
 			// Nodes
 			var c = getCanvas();
@@ -371,9 +371,9 @@ class UINodes {
 				var id = nodes.nodesSelected[0].buttons[0].default_value;
 				if (id < Project.assets.length) {
 					var img = UITrait.inst.getImage(Project.assets[id]);
-					var tw = 64 * ui.SCALE;
+					var tw = 64 * ui.SCALE();
 					var th = tw * (img.height / img.width);
-					ui.g.drawScaledImage(img, ww - tw - 20 * ui.SCALE, wh - th - 40 * ui.SCALE, tw, th);
+					ui.g.drawScaledImage(img, ww - tw - 20 * ui.SCALE(), wh - th - 40 * ui.SCALE(), tw, th);
 				}
 			}
 
@@ -385,7 +385,7 @@ class UINodes {
 			ui.t.ACCENT_COL = 0x00000000;
 			ui.t.BUTTON_H = 30;
 			ui.t.ELEMENT_H = 30;
-			ui.fontSize = Std.int(22 * ui.SCALE);
+			ui.fontSize = Std.int(22 * ui.SCALE());
 			ui._x = ww - ui.ELEMENT_W() * 1.4;
 			ui._y = wh - ui.ELEMENT_H() * 1.2;
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
@@ -399,7 +399,7 @@ class UINodes {
 
 			// Menu
 			ui.g.color = ui.t.WINDOW_BG_COL;
-			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
+			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE());
 			ui.g.color = 0xffffffff;
 
 			ui._x = 3;
@@ -438,7 +438,7 @@ class UINodes {
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
 
-			var ph = numNodes * 22 * ui.SCALE;
+			var ph = numNodes * 22 * ui.SCALE();
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
 			var menuw = Std.int(ew * 1.6);

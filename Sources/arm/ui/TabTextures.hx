@@ -29,7 +29,7 @@ class TabTextures {
 
 			if (Project.assets.length > 0) {
 
-				var slotw = Std.int(51 * ui.SCALE);
+				var slotw = Std.int(51 * ui.SCALE());
 				var num = Std.int(UITrait.inst.windowW / slotw);
 
 				for (i in 0...Project.assets.length) {
@@ -72,7 +72,7 @@ class TabTextures {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right);
 							if (ui.button("Export", Left)) {
 								UIFiles.show = true;
@@ -125,7 +125,7 @@ class TabTextures {
 			}
 			else {
 				var img = Res.get('icons.png');
-				var imgw = ui.SCALE > 1 ? 100 : 50;
+				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui.image(img, ui.t.BUTTON_COL, imgw, 0, imgw, imgw, imgw);
 				if (ui.isHovered) ui.tooltip("Drag and drop files here");
 			}

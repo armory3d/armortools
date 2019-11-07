@@ -69,7 +69,7 @@ class TabMaterials {
 			}
 			else if (ui.isHovered) ui.tooltip("Show Node Editor (" + Config.keymap.toggle_2d_view + ")");
 
-			var slotw = Std.int(51 * ui.SCALE);
+			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
@@ -78,13 +78,13 @@ class TabMaterials {
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
-					var imgw = Std.int(50 * ui.SCALE);
+					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= materials.length) {
 						@:privateAccess ui.endElement(imgw);
 						continue;
 					}
-					var img = ui.SCALE > 1 ? materials[i].image : materials[i].imageIcon;
+					var img = ui.SCALE() > 1 ? materials[i].image : materials[i].imageIcon;
 					var imgFull = materials[i].image;
 
 					if (getSelectedMaterial() == materials[i]) {
@@ -117,7 +117,7 @@ class TabMaterials {
 						UIMenu.draw(function(ui:Zui) {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
 							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
 
 							if (ui.button("To Fill Layer", Left)) {

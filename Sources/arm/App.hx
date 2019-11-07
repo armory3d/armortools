@@ -391,7 +391,7 @@ class App {
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
 			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
-			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE;
+			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE();
 			var ratio = size / img.width;
 			var h = img.height * ratio;
 			#if (kha_opengl || kha_webgl)

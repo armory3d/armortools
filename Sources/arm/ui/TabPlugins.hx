@@ -109,7 +109,7 @@ plugin.drawUI = function(ui) {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE, ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(f, Right);
 							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
 							if (ui.button("Edit", Left)) {

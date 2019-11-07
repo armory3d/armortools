@@ -135,7 +135,7 @@ class UIView2D {
 			ui.t.ACCENT_COL = 0x00000000;
 			ui.t.BUTTON_H = 30;
 			ui.t.ELEMENT_H = 30;
-			ui.fontSize = Std.int(22 * ui.SCALE);
+			ui.fontSize = Std.int(22 * ui.SCALE());
 			ui._x = ww - ui.ELEMENT_W() * 1.4;
 			ui._y = wh - ui.ELEMENT_H() * 1.2;
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
@@ -166,7 +166,7 @@ class UIView2D {
 			if (type == 0) {
 				var ew = Std.int(ui.ELEMENT_W());
 				ui.g.color = ui.t.WINDOW_BG_COL;
-				ui.g.fillRect(0, 0, ww, 24 * ui.SCALE);
+				ui.g.fillRect(0, 0, ww, 24 * ui.SCALE());
 				ui.g.color = 0xffffffff;
 				ui._x = 3;
 				ui._y = 3;

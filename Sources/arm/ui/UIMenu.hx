@@ -30,11 +30,11 @@ class UIMenu {
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
 		var menuItems = [9, 3, 14, 5];
-		var ph = 24 * menuItems[menuCategory] * ui.SCALE;
+		var ph = 24 * menuItems[menuCategory] * ui.SCALE();
 
 		g.color = ui.t.SEPARATOR_COL;
 		var menuw = Std.int(ui.ELEMENT_W() * 1.7);
-		var sepw = menuw / ui.SCALE;
+		var sepw = menuw / ui.SCALE();
 
 		if (menuCommands != null) {
 			px = menuX;

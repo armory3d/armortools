@@ -23,8 +23,8 @@ class UIBox {
 		var ui = App.uibox;
 		var appw = System.windowWidth();
 		var apph = System.windowHeight();
-		var mw = Std.int(modalW * ui.SCALE);
-		var mh = Std.int(modalH * ui.SCALE);
+		var mw = Std.int(modalW * ui.SCALE());
+		var mh = Std.int(modalH * ui.SCALE());
 		var left = Std.int(appw / 2 - mw / 2);
 		var right = Std.int(appw / 2 + mw / 2);
 		var top = Std.int(apph / 2 - mh / 2);
@@ -68,8 +68,8 @@ class UIBox {
 		if (ui.inputReleased && !inUse) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
-			var mw = Std.int(modalW * ui.SCALE);
-			var mh = Std.int(modalH * ui.SCALE);
+			var mw = Std.int(modalW * ui.SCALE());
+			var mh = Std.int(modalH * ui.SCALE());
 			var left = (appw / 2 - mw / 2) + hwnd.dragX;
 			var right = (appw / 2 + mw / 2) + hwnd.dragX;
 			var top = (apph / 2 - mh / 2) + hwnd.dragY;
