@@ -11,17 +11,8 @@ class TabMeshes {
 		if (ui.tab(UITrait.inst.htab2, "Meshes")) {
 			ui.row([1/4]);
 
-			if (ui.button("Import")) Context.importMesh();
+			if (ui.button("Import")) Project.importMesh();
 			if (ui.isHovered) ui.tooltip("Import mesh file (" + Config.keymap.file_import_assets  + ")");
-
-			UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group", "Material"], "Split By", true);
-			if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
-
-			UITrait.inst.isUdim = ui.check(Id.handle({selected: UITrait.inst.isUdim}), "UDIM Import");
-			if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
-
-			UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), "Parse Transforms");
-			if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
 
 			if (ui.panel(Id.handle({selected: false}), "Geometry")) {
 

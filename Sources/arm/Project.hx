@@ -234,6 +234,32 @@ class Project {
 		});
 	}
 
+	public static function importMesh() {
+		UIBox.showCustom(function(ui:Zui) {
+			if (ui.tab(Id.handle(), "Import Mesh")) {
+
+				UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group", "Material"], "Split By", true);
+				if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
+
+				UITrait.inst.isUdim = ui.check(Id.handle({selected: UITrait.inst.isUdim}), "UDIM Import");
+				if (ui.isHovered) ui.tooltip("Split mesh per UDIM tile");
+
+				UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), "Parse Transforms");
+				if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
+
+				ui.row([1/2, 1/2]);
+				if (ui.button("Cancel")) {
+					UIBox.show = false;
+				}
+				if (ui.button("Import") || ui.isReturnDown) {
+					UIBox.show = false;
+					App.redrawUI();
+					Context.importMesh();
+				}
+			}
+		});
+	}
+
 	public static function reimportMesh() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
 			Importer.importMesh(Project.meshAssets[0], false);

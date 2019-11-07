@@ -52,7 +52,7 @@ class UIFiles {
 				filename = ui.textInput(fileHandle, "File");
 				ui.text('*.' + filters, Center);
 				var known = Path.checkTextureFormat(path) || Path.checkMeshFormat(path) || Path.checkProjectFormat(path);
-				if (ui.button(isSave ? "Save" : "Open") || known) {
+				if (ui.button(isSave ? "Save" : "Open") || known || ui.isReturnDown) {
 					UIBox.show = false;
 					#if krom_windows
 					var sep = "\\";
