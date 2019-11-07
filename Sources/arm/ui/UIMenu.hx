@@ -29,7 +29,7 @@ class UIMenu {
 		var menuButtonW = Std.int(ui.ELEMENT_W() * 0.5);
 		var px = panelx + menuButtonW * menuCategory;
 		var py = UITrait.inst.headerh;
-		var menuItems = [10, 3, 14, 5];
+		var menuItems = [12, 3, 14, 5];
 		var ph = 24 * menuItems[menuCategory] * ui.SCALE();
 
 		g.color = ui.t.SEPARATOR_COL;
@@ -67,7 +67,9 @@ class UIMenu {
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Import Textures...", Left, Config.keymap.file_import_assets)) Project.importAsset();
+				if (ui.button("Import Texture...", Left, Config.keymap.file_import_assets)) Project.importAsset("jpg,png,tga,bmp,psd,gif,hdr");
+				if (ui.button("Import Font...", Left)) Project.importAsset("ttf");
+				if (ui.button("Import Material...", Left)) Project.importMaterial();
 				if (ui.button("Import Mesh...", Left)) Project.importMesh();
 				if (ui.button("Reimport Mesh", Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);

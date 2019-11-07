@@ -23,6 +23,7 @@ import arm.data.MaterialSlot;
 import arm.nodes.MaterialParser;
 import arm.io.Importer;
 import arm.io.ImportArm;
+import arm.io.ImportBlend;
 using StringTools;
 
 class Project {
@@ -234,6 +235,17 @@ class Project {
 		});
 	}
 
+	public static function importMaterial() {
+		UIFiles.show = true;
+		UIFiles.isSave = false;
+		UIFiles.filters = "arm,blend";
+		UIFiles.filesDone = function(path:String) {
+			path.endsWith(".blend") ?
+				ImportBlend.runMaterial(path) :
+				ImportArm.runMaterial(path);
+		}
+	}
+
 	public static function importMesh() {
 		UIBox.showCustom(function(ui:Zui) {
 			if (ui.tab(Id.handle(), "Import Mesh")) {
@@ -268,10 +280,10 @@ class Project {
 		else importAsset();
 	}
 
-	public static function importAsset() {
+	public static function importAsset(filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm") {
 		UIFiles.show = true;
 		UIFiles.isSave = false;
-		UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm";
+		UIFiles.filters = filters;
 		UIFiles.filesDone = function(path:String) {
 			Importer.importFile(path);
 		}

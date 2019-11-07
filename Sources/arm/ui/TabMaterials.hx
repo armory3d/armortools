@@ -54,14 +54,7 @@ class TabMaterials {
 			}
 
 			if (ui.button("Import")) {
-				UIFiles.show = true;
-				UIFiles.isSave = false;
-				UIFiles.filters = "arm,blend";
-				UIFiles.filesDone = function(path:String) {
-					path.endsWith(".blend") ?
-						ImportBlend.runMaterial(path) :
-						ImportArm.runMaterial(path);
-				}
+				Project.importMaterial();
 			}
 
 			if (ui.button("Nodes")) {
