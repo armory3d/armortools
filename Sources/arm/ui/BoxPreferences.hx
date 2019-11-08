@@ -41,7 +41,8 @@ class BoxPreferences {
 					}
 					ui.t = App.theme;
 					UITrait.inst.ui.t = App.theme;
-					// UINodes.inst.ui.t = App.theme;
+					UINodes.inst.ui.t = App.theme;
+					UIView2D.inst.ui.t = App.theme;
 					UITrait.inst.headerHandle.redraws = 2;
 					UITrait.inst.toolbarHandle.redraws = 2;
 					UITrait.inst.statusHandle.redraws = 2;
