@@ -42,6 +42,14 @@ class TabMeshes {
 					}
 				});
 			}
+
+			if (ui.panel(Id.handle({selected: false}), "Scene", true)) {
+				ui.indent();
+				for (o in Project.paintObjects) {
+					ui.text(o.name);
+				}
+				ui.unindent();
+			}
 		}
 	}
 }
