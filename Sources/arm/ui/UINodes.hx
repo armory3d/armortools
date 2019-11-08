@@ -80,11 +80,8 @@ class UINodes {
 				canvasBrush = Json.parse(canvasBrushBlob);
 				MaterialParser.parseBrush();
 
-				var t = Reflect.copy(App.theme);
-				t.ELEMENT_H = 18;
-				t.BUTTON_H = 16;
 				var scale = Config.raw.window_scale;
-				ui = new Zui({font: App.font, theme: t, color_wheel: App.color_wheel, scaleFactor: scale});
+				ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
 				ui.scrollEnabled = false;
 			});
 		});
@@ -373,7 +370,7 @@ class UINodes {
 					var img = UITrait.inst.getImage(Project.assets[id]);
 					var tw = 64 * ui.SCALE();
 					var th = tw * (img.height / img.width);
-					ui.g.drawScaledImage(img, ww - tw - 20 * ui.SCALE(), wh - th - 40 * ui.SCALE(), tw, th);
+					ui.g.drawScaledImage(img, ww - tw - 8 * ui.SCALE(), wh - th - 40 * ui.SCALE(), tw, th);
 				}
 			}
 
@@ -399,11 +396,11 @@ class UINodes {
 
 			// Menu
 			ui.g.color = ui.t.WINDOW_BG_COL;
-			ui.g.fillRect(0, 0, ww, 24 * ui.SCALE());
+			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 			ui.g.color = 0xffffffff;
 
-			ui._x = 3;
-			ui._y = 3;
+			ui._x = 0;
+			ui._y = 0;
 			ui._w = ew;
 
 			var BUTTON_COL = ui.t.BUTTON_COL;
@@ -419,11 +416,11 @@ class UINodes {
 				}
 				if (i < cats.length - 1) {
 					ui._x += ew + 3;
-					ui._y = 3;
+					ui._y = 0;
 				}
 			}
 			ui._x += ew + 3;
-			ui._y = 3;
+			ui._y = 0;
 
 			if (ui.button("Search", Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
 			if (ui.isHovered) ui.tooltip("Search for nodes (" + Config.keymap.node_search + ")");
@@ -438,7 +435,7 @@ class UINodes {
 			var canvas = canvasType == 0 ? canvas : canvasBrush;
 			var numNodes = list[menuCategory].length;
 
-			var ph = numNodes * 22 * ui.SCALE();
+			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
 			var menuw = Std.int(ew * 1.6);
@@ -449,8 +446,6 @@ class UINodes {
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
-			var ELEMENT_H = ui.t.ELEMENT_H;
-			ui.t.ELEMENT_H = 22;
 
 			for (n in list[menuCategory]) {
 				if (ui.button(n.name, Left)) {
@@ -463,7 +458,6 @@ class UINodes {
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-			ui.t.ELEMENT_H = ELEMENT_H;
 			ui.endLayout();
 		}
 

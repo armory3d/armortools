@@ -31,7 +31,6 @@ class TabTextures {
 
 				var slotw = Std.int(51 * ui.SCALE());
 				var num = Std.int(UITrait.inst.windowW / slotw);
-
 				for (i in 0...Project.assets.length) {
 
 					// Align into rows
@@ -39,17 +38,9 @@ class TabTextures {
 						ui._y += ui.ELEMENT_OFFSET() * 1.5;
 						ui.row([for (i in 0...num) 1/num]);
 					}
+					else ui._x += 1;
 
 					var asset = Project.assets[i];
-					if (asset == Context.texture) {
-						var off = i % 2 == 1 ? 1 : 0;
-						var w = 51 - Config.raw.window_scale;
-						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
-					}
-
 					var img = UITrait.inst.getImage(asset);
 					var uix = ui._x;
 					var uiy = ui._y;
@@ -65,6 +56,21 @@ class TabTextures {
 						UITrait.inst.selectTime = Time.time();
 					}
 
+					var _uix = ui._x;
+					var _uiy = ui._y;
+					ui._x = uix;
+					ui._y = uiy;
+					if (asset == Context.texture) {
+						var off = i % 2 == 1 ? 1 : 0;
+						var w = 50;
+						ui.fill(0,               0, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						ui.fill(0,     w - off + 2, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						ui.fill(0,               0,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						ui.fill(w + 2,           0,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+					}
+					ui._x = _uix;
+					ui._y = _uiy;
+
 					// End of row align
 					if (i % num == num - 1) ui._y = uiy + slotw;
 
@@ -73,7 +79,7 @@ class TabTextures {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
-							ui.text(asset.name, Right);
+							ui.text(asset.name, Right, ui.t.CONTEXT_COL);
 							if (ui.button("Export", Left)) {
 								UIFiles.show = true;
 								UIFiles.isSave = true;

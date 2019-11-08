@@ -34,15 +34,15 @@ class UITrait {
 
 	public static var inst:UITrait;
 	public static var defaultWindowW = 280;
-	public static var defaultToolbarW = 54;
-	public static var defaultHeaderH = 24;
+	public static inline var defaultToolbarW = 54;
+	public static inline var defaultHeaderH = 28;
 	public static var penPressureRadius = true;
 	public static var penPressureOpacity = false;
 	public static var penPressureHardness = false;
 
 	public var windowW = 280; // Panel width
-	public var toolbarw = 54;
-	public var headerh = 24;
+	public var toolbarw = defaultToolbarW;
+	public var headerh = defaultHeaderH;
 	public var menubarw = 215;
 	public var tabx = 0;
 	public var tabh = 0;
@@ -871,7 +871,7 @@ class UITrait {
 		ui.begin(g);
 
 		var panelx = (iron.App.x() - toolbarw);
-		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, System.windowHeight())) {
+		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, System.windowHeight() - headerh)) {
 			ui._y += 2;
 
 			ui.imageScrollAlign = false;
@@ -907,7 +907,7 @@ class UITrait {
 
 		var WINDOW_BG_COL = ui.t.WINDOW_BG_COL;
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
-		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
+		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(defaultHeaderH * ui.SCALE()))) {
 			var _w = ui._w;
 			ui._w = Std.int(ui._w * 0.5);
 			ui._x += 1; // Prevent "File" button highlight on startup
@@ -929,7 +929,7 @@ class UITrait {
 		ui.t.WINDOW_BG_COL = WINDOW_BG_COL;
 
 		var panelx = (iron.App.x() - toolbarw) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
+		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int(defaultHeaderH * ui.SCALE()))) {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
 			ui.tab(worktab, "Scene");
@@ -951,7 +951,8 @@ class UITrait {
 		}
 
 		var panelx = iron.App.x();
-		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
+		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int(defaultHeaderH * ui.SCALE()))) {
+			ui._y += 2;
 
 			if (worktab.position == SpacePaint) {
 
@@ -1148,6 +1149,7 @@ class UITrait {
 		}
 
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - headerh, System.windowWidth() - toolbarw - windowW, headerh)) {
+			ui._y += 2;
 
 			var scene = Scene.active;
 			var cam = scene.cameras[0];

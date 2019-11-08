@@ -109,12 +109,14 @@ class ImportFolder {
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 
 		var pos = 0;
+		var startY = 100;
+		var nodeH = 164;
 		if (mapbase != "") {
 			var n = NodesMaterial.createImageTexture();
 			n.buttons[0].default_value = App.getAssetIndex(mapbase);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
 			canvas.links.push(l);
@@ -124,7 +126,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(mapopac);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 1 };
 			canvas.links.push(l);
@@ -134,7 +136,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(mapocc);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
 			canvas.links.push(l);
@@ -144,7 +146,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(maprough);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
 			canvas.links.push(l);
@@ -154,7 +156,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(mapmet);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
 			canvas.links.push(l);
@@ -164,7 +166,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(mapnor);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
 			canvas.links.push(l);
@@ -174,7 +176,7 @@ class ImportFolder {
 			n.buttons[0].default_value = App.getAssetIndex(mapheight);
 			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 			n.x = 72;
-			n.y = 192 + 160 * pos;
+			n.y = startY + nodeH * pos;
 			pos++;
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 			canvas.links.push(l);

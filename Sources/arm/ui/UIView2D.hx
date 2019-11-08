@@ -50,11 +50,8 @@ class UIView2D {
 		pipe.colorWriteMaskAlpha = false;
 		pipe.compile();
 
-		var t = Reflect.copy(App.theme);
-		t.ELEMENT_H = 18;
-		t.BUTTON_H = 16;
 		var scale = Config.raw.window_scale;
-		ui = new Zui({font: App.font, theme: t, color_wheel: App.color_wheel, scaleFactor: scale});
+		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 
 		iron.App.notifyOnRender2D(render);
@@ -166,17 +163,17 @@ class UIView2D {
 			if (type == 0) {
 				var ew = Std.int(ui.ELEMENT_W());
 				ui.g.color = ui.t.WINDOW_BG_COL;
-				ui.g.fillRect(0, 0, ww, 24 * ui.SCALE());
+				ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 				ui.g.color = 0xffffffff;
-				ui._x = 3;
-				ui._y = 3;
+				ui._x = 2;
+				ui._y = 2;
 				ui._w = ew;
 				texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal Map", "ORM"], "Texture");
 				ui._x += ew + 3;
-				ui._y = 3;
+				ui._y = 2;
 				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
 				ui._x += ew + 3;
-				ui._y = 3;
+				ui._y = 2;
 			}
 
 			if (Context.tool == ToolPicker) {

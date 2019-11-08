@@ -92,7 +92,7 @@ class UIBox {
 		boxCommands = null;
 	}
 
-	public static function showCustom(commands:Zui->Void = null, mw = 400, mh = 170) {
+	public static function showCustom(commands:Zui->Void = null, mw = 400, mh = 200) {
 		init();
 		modalW = mw;
 		modalH = mh;

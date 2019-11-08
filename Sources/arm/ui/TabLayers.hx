@@ -18,7 +18,7 @@ class TabLayers {
 
 				// UIMenu.draw(function(ui:Zui) {
 				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
-				// 	ui.text("New", Right);
+				// 	ui.text("New", Right, ui.t.CONTEXT_COL);
 				// 	if (ui.button("Paint Layer", Left)) {}
 				// 	if (ui.button("Fill Layer", Left)) {}
 				// 	if (ui.button("Black Mask", Left)) {}
@@ -91,8 +91,10 @@ class TabLayers {
 				ui.imageInvertY = l.material_mask != null;
 				#end
 
+				ui._x += 2;
 				ui._y += 3;
 				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
+				ui._x -= 2;
 				ui._y -= 3;
 
 				#if (kha_opengl || kha_webgl)
@@ -123,7 +125,7 @@ class TabLayers {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
-							ui.text(l.name + " Mask", Right);
+							ui.text(l.name + " Mask", Right, ui.t.CONTEXT_COL);
 							if (ui.button("Delete", Left)) {
 								Context.setLayer(l);
 								History.deleteMask();
@@ -174,12 +176,11 @@ class TabLayers {
 						var add = l.material_mask != null ? 1 : 0;
 						if (l == Project.layers[0]) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
-							ui.text(l.name, Right);
 						}
 						else {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (18 + add), ui.t.SEPARATOR_COL);
-							ui.text(l.name, Right);
 						}
+						ui.text(l.name, Right, ui.t.CONTEXT_COL);
 
 						if (ui.button("Export", Left)) BoxExport.showTextures();
 
@@ -314,7 +315,7 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				var showPanel = ui.panel(layerPanel, "", 0, true);
+				var showPanel = ui.panel(layerPanel, "", true);
 				ui._y -= center;
 
 				if (i == 0) {
@@ -353,6 +354,8 @@ class TabLayers {
 				if (showPanel) {
 					ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
 					@:privateAccess ui.endElement();
+					ui._x += 1;
+					ui._y += 2;
 
 					var opacHandle = Id.handle().nest(l.id);
 

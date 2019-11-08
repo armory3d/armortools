@@ -18,7 +18,7 @@ class TabPlugins{
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Plugins")) {
 
-			if (ui.panel(Id.handle({selected: false}), "Manager", 1)) {
+			if (ui.panel(Id.handle({selected: false}), "Manager")) {
 
 				#if krom_windows
 				var sep = "\\";
@@ -110,7 +110,7 @@ plugin.drawUI = function(ui) {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
-							ui.text(f, Right);
+							ui.text(f, Right, ui.t.CONTEXT_COL);
 							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
 							if (ui.button("Edit", Left)) {
 								#if krom_windows
@@ -152,7 +152,6 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-			ui.separator();
 
 			// Draw plugins
 			for (p in Plugin.plugins) if (p.drawUI != null) p.drawUI(ui);

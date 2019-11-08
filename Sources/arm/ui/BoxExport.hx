@@ -91,7 +91,7 @@ class BoxExport {
 				UITrait.inst.isSubs = ui.check(Id.handle({selected: UITrait.inst.isSubs}), "Subsurface");
 				UITrait.inst.isSubsSpace = ui.combo(Id.handle({position: UITrait.inst.isSubsSpace}), ["linear", "srgb"], "Space");
 			}
-		}, 400, 220);
+		}, 500, 310);
 	}
 
 	public static function showMesh() {

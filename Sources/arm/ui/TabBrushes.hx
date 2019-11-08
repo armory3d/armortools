@@ -28,6 +28,7 @@ class TabBrushes {
 			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
 				ui.row([for (i in 0...num) 1/num]);
 
+				ui._x += 2;
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
@@ -43,11 +44,12 @@ class TabBrushes {
 					if (Context.brush == Project.brushes[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
-						var w = 51 - Config.raw.window_scale;
-						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						var w = 50;
+						if (Config.raw.window_scale > 1) w += Std.int(Config.raw.window_scale * 2);
+						ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
 					#if (kha_opengl || kha_webgl)
@@ -70,7 +72,7 @@ class TabBrushes {
 						UIMenu.draw(function(ui:Zui) {
 							var b = Project.brushes[i];
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasBrushMap.get(Project.brushes[i]).name, Right);
+							ui.text(UINodes.inst.canvasBrushMap.get(Project.brushes[i]).name, Right, ui.t.CONTEXT_COL);
 
 							if (ui.button("Delete", Left) && Project.brushes.length > 1) {
 								Context.selectBrush(i == 0 ? 1 : 0);

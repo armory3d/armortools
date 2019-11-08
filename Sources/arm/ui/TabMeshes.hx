@@ -19,7 +19,7 @@ class TabMeshes {
 			if (ui.button("Tools...")) {
 				UIMenu.draw(function(ui:Zui) {
 					ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
-					ui.text("Tools", Right);
+					ui.text("Tools", Right, ui.t.CONTEXT_COL);
 					if (ui.button("Flip Normals", Left)) {
 						MeshUtil.flipNormals();
 						Context.ddirty = 2;

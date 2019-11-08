@@ -68,6 +68,7 @@ class TabMaterials {
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
 				ui.row([for (i in 0...num) 1/num]);
 
+				ui._x += 2;
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
@@ -83,11 +84,12 @@ class TabMaterials {
 					if (getSelectedMaterial() == materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
-						var w = 51 - Config.raw.window_scale;
-						ui.fill(1,          -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,     w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-						ui.fill(1,          -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-						ui.fill(w + 3,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+						var w = 50;
+						if (Config.raw.window_scale > 1) w += Std.int(Config.raw.window_scale * 2);
+						ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
 					#if (kha_opengl || kha_webgl)
@@ -111,7 +113,7 @@ class TabMaterials {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right);
+							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right, ui.t.CONTEXT_COL);
 
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);

@@ -65,7 +65,7 @@ class BoxPreferences {
 				if (ui.button("Restore")) {
 					// UIMenu.draw(function(ui:Zui) {
 					// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-					// 	ui.text("Restore defaults?", Right);
+					// 	ui.text("Restore defaults?", Right, ui.t.CONTEXT_COL);
 					// 	if (ui.button("Confirm", Left)) {
 							Config.restore();
 							setScale();
@@ -214,7 +214,7 @@ class BoxPreferences {
 			}
 
 			ui._w = _w;
-		}, 400, 290);
+		}, 500, 310);
 	}
 
 	static function setScale() {
