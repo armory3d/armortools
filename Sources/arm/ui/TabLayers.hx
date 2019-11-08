@@ -63,7 +63,7 @@ class TabLayers {
 
 				if (Context.layer == l) {
 					if (Context.layerIsMask) {
-						ui.rect((ui._windowW / 100 * 24) / ui.SCALE() - 2, 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
+						ui.rect((ui._windowW / 100 * 24) / ui.SCALE() + Std.int(1 * ui.SCALE()), 0, step * 2, step * 2, ui.t.HIGHLIGHT_COL, 2);
 					}
 					else {
 						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
@@ -116,8 +116,10 @@ class TabLayers {
 				}
 
 				if (l.texpaint_mask != null) {
+					ui._x += Std.int(4 * ui.SCALE());
 					ui._y += 3;
 					var state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
+					ui._x -= Std.int(4 * ui.SCALE());
 					ui._y -= 3;
 					if (ui.isHovered) {
 						ui.tooltipImage(l.texpaint_mask_preview);

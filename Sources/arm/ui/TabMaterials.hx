@@ -98,7 +98,8 @@ class TabMaterials {
 
 					var uix = ui._x;
 					var uiy = ui._y;
-					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
+					var tile = ui.SCALE() > 1 ? 100 : 50;
+					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, tile, tile, tile, tile);
 					if (state == State.Started) {
 						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showMaterialNodes();

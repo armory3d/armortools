@@ -58,7 +58,8 @@ class TabBrushes {
 
 					var uix = ui._x;
 					var uiy = ui._y;
-					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, imgw, imgw, imgw, imgw);
+					var tile = ui.SCALE() > 1 ? 100 : 50;
+					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, tile, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showBrushNodes();
