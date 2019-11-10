@@ -87,6 +87,106 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
+				name: "Layer",
+				type: "LAYER", // extension
+				x: 0,
+				y: 0,
+				color: 0xff4982a0,
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Vector",
+						type: "VECTOR",
+						color: 0xff6363c7,
+						default_value: [0.0, 0.0, 0.0]
+					}
+				],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Base Color",
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: [0.0, 0.0, 0.0, 1.0]
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Opacity",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Occlusion",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Roughness",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Metallic",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Normal Map",
+						type: "VECTOR",
+						color: -10238109,
+						default_value: [0.5, 0.5, 1.0]
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Emission",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Height",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Subsurface",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					},
+				],
+				buttons: [
+					{
+						name: "Layer",
+						type: "ENUM",
+						default_value: 0,
+						data: ""
+					}
+				]
+			},
+			{
+				id: 0,
 				name: "Fresnel",
 				type: "FRESNEL",
 				x: 0,
