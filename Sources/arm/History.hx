@@ -1,6 +1,5 @@
 package arm;
 
-import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.ui.UIFiles;
@@ -23,7 +22,7 @@ class History {
 
 			if (step.name == "New Layer") {
 				Context.layer = Project.layers[step.layer];
-				Layers.deleteSelectedLayer();
+				Context.layer.delete();
 			}
 			else if (step.name == "Delete Layer") {
 				var l = Layers.newLayer(false);
@@ -43,7 +42,7 @@ class History {
 			}
 			else if (step.name == "Duplicate Layer") {
 				Context.layer = Project.layers[step.layer + 1];
-				Layers.deleteSelectedLayer();
+				Context.layer.delete();
 			}
 			else if (step.name == "Order Layers") {
 				var target = Project.layers[step.prev_order];
@@ -52,7 +51,7 @@ class History {
 			}
 			else if (step.name == "Merge Layers") {
 				Context.layer = Project.layers[step.layer];
-				Layers.deleteSelectedLayer();
+				Context.layer.delete();
 
 				Context.layer = Layers.newLayer(false);
 				Project.layers.insert(step.layer, Project.layers.pop());
@@ -94,7 +93,7 @@ class History {
 			}
 			else if (step.name == "Apply Mask") {
 				Context.layer = Project.layers[step.layer];
-				Layers.deleteSelectedLayer();
+				Context.layer.delete();
 
 				Context.layer = Layers.newLayer(false);
 				Project.layers.insert(step.layer, Project.layers.pop());
@@ -108,7 +107,7 @@ class History {
 				Context.setLayer(Context.layer, true);
 			}
 			else if (step.name == "To Fill Layer") {
-				Layers.toPaintLayer(Context.layer);
+				Context.layer.toPaintLayer();
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -161,7 +160,7 @@ class History {
 			else if (step.name == "Delete Layer") {
 				Context.layer = Project.layers[step.layer];
 				swapActive();
-				Layers.deleteSelectedLayer();
+				Context.layer.delete();
 			}
 			else if (step.name == "Duplicate Layer") {
 				Context.layer = Project.layers[step.layer];
@@ -211,7 +210,7 @@ class History {
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == "To Paint Layer") {
-				Layers.toPaintLayer(Context.layer);
+				Context.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 				undoI = (undoI + 1) % Config.raw.undo_steps;

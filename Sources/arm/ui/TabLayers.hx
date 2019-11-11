@@ -190,7 +190,7 @@ class TabLayers {
 							function makeFill(g:kha.graphics4.Graphics) {
 								g.end();
 								History.toFillLayer();
-								Layers.toFillLayer(l);
+								l.toFillLayer();
 								g.begin();
 								iron.App.removeRender(makeFill);
 							}
@@ -200,7 +200,7 @@ class TabLayers {
 							function makePaint(g:kha.graphics4.Graphics) {
 								g.end();
 								History.toPaintLayer();
-								Layers.toPaintLayer(l);
+								l.toPaintLayer();
 								g.begin();
 								iron.App.removeRender(makePaint);
 							}
@@ -213,7 +213,7 @@ class TabLayers {
 							if (ui.button("Delete", Left)) {
 								Context.layer = l;
 								History.deleteLayer();
-								Layers.deleteSelectedLayer();
+								l.delete();
 							}
 							if (ui.button("Move Up", Left)) {
 								if (i < Project.layers.length - 1) {
@@ -339,7 +339,7 @@ class TabLayers {
 					if (h.changed) {
 						Context.setLayer(l);
 						if (l.material_mask != null) { // Fill layer
-							iron.App.notifyOnRender(Layers.clearSelectedLayer);
+							iron.App.notifyOnRender(l.clear);
 							iron.App.notifyOnRender(function(_){
 								Layers.updateFillLayers(4);
 							});

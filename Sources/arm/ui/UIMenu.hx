@@ -7,6 +7,7 @@ import zui.Zui;
 import iron.system.Input;
 import iron.data.Data;
 import arm.util.ViewportUtil;
+import arm.util.BuildMacros;
 using StringTools;
 
 class UIMenu {
@@ -144,7 +145,7 @@ class UIMenu {
 				}
 				if (ui.button("Report Bug", Left)) {
 					var ver = App.version;
-					var sha = Macro.buildSha();
+					var sha = BuildMacros.sha();
 					sha = sha.substr(1, sha.length - 2);
 					var os = System.systemId;
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + ver + "-" + sha + ",%20" + os + "*";
@@ -171,7 +172,7 @@ class UIMenu {
 						var update = Json.parse(blob.toString());
 						var updateVersion = Std.int(update.version);
 						if (updateVersion > 0) {
-							var date = Macro.buildDate().split(" ")[0].substr(2); // 2019 -> 19
+							var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
 							var dateInt = Std.parseInt(date.replace("-", ""));
 							if (updateVersion > dateInt) {
 								UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
@@ -184,9 +185,9 @@ class UIMenu {
 					});
 				}
 				if (ui.button("About...", Left)) {
-					var sha = Macro.buildSha();
+					var sha = BuildMacros.sha();
 					sha = sha.substr(1, sha.length - 2);
-					var date = Macro.buildDate().split(" ")[0];
+					var date = BuildMacros.date().split(" ")[0];
 					var gapi = #if (kha_direct3d11) "Direct3D11" #elseif (kha_direct3d12) "Direct3D12" #else "OpenGL" #end;
 					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
 					msg += System.systemId + " - " + gapi;

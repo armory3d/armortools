@@ -29,7 +29,7 @@ class Path {
 		return base;
 	}
 
-	public static function checkMeshFormat(path:String):Bool {
+	public static function isMesh(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".obj") ||
 			   p.endsWith(".fbx") ||
@@ -37,7 +37,7 @@ class Path {
 			   p.endsWith(".blend");
 	}
 
-	public static function checkTextureFormat(path:String):Bool {
+	public static function isTexture(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".jpg") ||
 			   p.endsWith(".jpeg") ||
@@ -49,24 +49,24 @@ class Path {
 			   p.endsWith(".hdr");
 	}
 
-	public static function checkFontFormat(path:String):Bool {
+	public static function isFont(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".ttf");
 	}
 
-	public static function checkProjectFormat(path:String):Bool {
+	public static function isProject(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".arm");
 	}
 
-	public static function checkPluginFormat(path:String):Bool {
+	public static function isPlugin(path:String):Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".js");
 			   // p.endsWith(".wasm") ||
 			   // p.endsWith(".zip");
 	}
 
-	public static function checkBaseTex(p:String):Bool {
+	public static function isBaseTex(p:String):Bool {
 		return p.endsWith("_albedo") ||
 			   p.endsWith("_alb") ||
 			   p.endsWith("_basecol") ||
@@ -80,20 +80,20 @@ class Path {
 			   p.endsWith("_col");
 	}
 
-	public static function checkOpacTex(p:String):Bool {
+	public static function isOpacTex(p:String):Bool {
 		return p.endsWith("_opac") ||
 			   p.endsWith("_alpha") ||
 			   p.endsWith("_opacity");
 	}
 
-	public static function checkNorTex(p:String):Bool {
+	public static function isNorTex(p:String):Bool {
 		return p.endsWith("_normal") ||
 			   p.endsWith("_nor") ||
 			   p.endsWith("_n") ||
 			   p.endsWith("_nrm");
 	}
 
-	public static function checkOccTex(p:String):Bool {
+	public static function isOccTex(p:String):Bool {
 		return p.endsWith("_ao") ||
 			   p.endsWith("_occlusion") ||
 			   p.endsWith("_ambientOcclusion") ||
@@ -101,7 +101,7 @@ class Path {
 			   p.endsWith("_occ");
 	}
 
-	public static function checkRoughTex(p:String):Bool {
+	public static function isRoughTex(p:String):Bool {
 		return p.endsWith("_roughness") ||
 			   p.endsWith("_roug") ||
 			   p.endsWith("_r") ||
@@ -109,7 +109,7 @@ class Path {
 			   p.endsWith("_rgh");
 	}
 
-	public static function checkMetTex(p:String):Bool {
+	public static function isMetTex(p:String):Bool {
 		return p.endsWith("_metallic") ||
 			   p.endsWith("_metal") ||
 			   p.endsWith("_metalness") ||
@@ -117,10 +117,28 @@ class Path {
 			   p.endsWith("_met");
 	}
 
-	public static function checkDispTex(p:String):Bool {
+	public static function isDispTex(p:String):Bool {
 		return p.endsWith("_displacement") ||
 			   p.endsWith("_height") ||
 			   p.endsWith("_h") ||
 			   p.endsWith("_disp");
 	}
+
+	public static function isFolder(p:String):Bool {
+		return p.indexOf(".") == -1;
+	}
+
+	#if krom_windows
+	public static function isAscii(s:String):Bool {
+		for (i in 0...s.length) if (s.charCodeAt(i) > 127) return false;
+		return true;
+	}
+
+	public static function shortPath(s:String):String {
+		var cmd = 'for %I in ("' + s + '") do echo %~sI';
+		var save = Krom.getFilesLocation() + "\\data\\tmp.txt";
+		Krom.sysCommand(cmd + ' > "' + save + '"');
+		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
+	}
+	#end
 }

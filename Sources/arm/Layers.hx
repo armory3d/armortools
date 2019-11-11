@@ -79,30 +79,6 @@ class Layers {
 		Context.ddirty = 3;
 	}
 
-	public static function clearSelectedLayer(g:kha.graphics4.Graphics) {
-		g.end();
-
-		var l = Context.layer;
-		l.texpaint.g4.begin();
-		l.texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
-		l.texpaint.g4.end();
-
-		l.texpaint_nor.g4.begin();
-		l.texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
-		l.texpaint_nor.g4.end();
-
-		l.texpaint_pack.g4.begin();
-		l.texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
-		l.texpaint_pack.g4.end();
-
-		g.begin();
-		iron.App.removeRender(clearSelectedLayer);
-
-		#if krom_linux
-		Context.layerPreviewDirty = true;
-		#end
-	}
-
 	public static function resizeLayers(g:kha.graphics4.Graphics) {
 		var C = Config.raw;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
@@ -141,14 +117,6 @@ class Layers {
 		for (l in History.undoLayers) l.resizeAndSetBits();
 		g.begin();
 		iron.App.removeRender(setLayerBits);
-	}
-
-	public static function deleteSelectedLayer() {
-		Context.layer.unload();
-		var lpos = Project.layers.indexOf(Context.layer);
-		Project.layers.remove(Context.layer);
-		// Undo can remove base layer and then restore it from undo layers
-		if (lpos > 0) Context.setLayer(Project.layers[lpos - 1]);
 	}
 
 	public static function makePipe() {
@@ -304,7 +272,7 @@ class Layers {
 
 		g.begin();
 
-		deleteSelectedLayer();
+		Context.layer.delete();
 		iron.App.removeRender(mergeSelectedLayer);
 		Context.setLayer(l0);
 		Context.layerPreviewDirty = true;
@@ -387,26 +355,9 @@ class Layers {
 		var l = new LayerSlot();
 		Project.layers.push(l);
 		Context.setLayer(l);
-		if (clear) iron.App.notifyOnRender(Layers.clearSelectedLayer);
+		if (clear) iron.App.notifyOnRender(l.clear);
 		Context.layerPreviewDirty = true;
 		return l;
-	}
-
-	public static function toFillLayer(l:LayerSlot) {
-		Context.setLayer(l);
-		l.material_mask = Context.material;
-		Layers.updateFillLayers(4);
-		MaterialParser.parsePaintMaterial();
-		Context.layerPreviewDirty = true;
-		UITrait.inst.hwnd.redraws = 2;
-	}
-
-	public static function toPaintLayer(l:LayerSlot) {
-		Context.setLayer(l);
-		l.material_mask = null;
-		MaterialParser.parsePaintMaterial();
-		Context.layerPreviewDirty = true;
-		UITrait.inst.hwnd.redraws = 2;
 	}
 
 	public static function createFillLayer() {
@@ -416,7 +367,7 @@ class Layers {
 			History.newLayer();
 			l.objectMask = UITrait.inst.layerFilter;
 			History.toFillLayer();
-			toFillLayer(l);
+			l.toFillLayer();
 			g.begin();
 			iron.App.removeRender(makeFill);
 		}

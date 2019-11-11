@@ -9,10 +9,8 @@ import iron.data.MeshData;
 import iron.data.Data;
 import iron.object.MeshObject;
 import iron.Scene;
-import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
-import arm.util.Path;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
@@ -266,7 +264,12 @@ class Project {
 				if (ui.button("Import") || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					Context.importMesh();
+					UIFiles.show = true;
+					UIFiles.isSave = false;
+					UIFiles.filters = "obj,fbx,stl,blend,arm";
+					UIFiles.filesDone = function(path:String) {
+						Importer.importFile(path);
+					}
 				}
 			}
 		});

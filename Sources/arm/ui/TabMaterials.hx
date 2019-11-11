@@ -10,6 +10,7 @@ import iron.data.Data;
 import arm.nodes.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
+import arm.util.MaterialUtil;
 import arm.io.ImportBlend;
 import arm.io.ImportArm;
 import arm.io.Exporter;
@@ -31,7 +32,7 @@ class TabMaterials {
 			if (ui.button("New")) {
 				if (isScene) {
 					if (Context.object != Context.paintObject && Std.is(Context.object, MeshObject)) {
-						Context.removeMaterialCache();
+						MaterialUtil.removeMaterialCache();
 						Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
 							ui.g.end();
 							md.name = "Material2." + materials.length;

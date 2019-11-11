@@ -7,6 +7,7 @@ import iron.data.MaterialData;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.RenderUtil;
+import arm.util.MaterialUtil;
 import arm.util.Path;
 import arm.nodes.NodesMaterial;
 import arm.nodes.MaterialParser;
@@ -44,7 +45,7 @@ class ImportFolder {
 		for (f in files) {
 			if (f.length == 0) continue;
 			f = f.rtrim();
-			if (!Path.checkTextureFormat(f)) continue;
+			if (!Path.isTexture(f)) continue;
 
 			f = path + sep + f;
 			#if krom_windows
@@ -55,31 +56,31 @@ class ImportFolder {
 
 			var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			var valid = false;
-			if (mapbase == "" && Path.checkBaseTex(base)) {
+			if (mapbase == "" && Path.isBaseTex(base)) {
 				mapbase = f;
 				valid = true;
 			}
-			if (mapopac == "" && Path.checkOpacTex(base)) {
+			if (mapopac == "" && Path.isOpacTex(base)) {
 				mapopac = f;
 				valid = true;
 			}
-			if (mapnor == "" && Path.checkNorTex(base)) {
+			if (mapnor == "" && Path.isNorTex(base)) {
 				mapnor = f;
 				valid = true;
 			}
-			if (mapocc == "" && Path.checkOccTex(base)) {
+			if (mapocc == "" && Path.isOccTex(base)) {
 				mapocc = f;
 				valid = true;
 			}
-			if (maprough == "" && Path.checkRoughTex(base)) {
+			if (maprough == "" && Path.isRoughTex(base)) {
 				maprough = f;
 				valid = true;
 			}
-			if (mapmet == "" && Path.checkMetTex(base)) {
+			if (mapmet == "" && Path.isMetTex(base)) {
 				mapmet = f;
 				valid = true;
 			}
-			if (mapheight == "" && Path.checkDispTex(base)) {
+			if (mapheight == "" && Path.isDispTex(base)) {
 				mapheight = f;
 				valid = true;
 			}
@@ -89,7 +90,7 @@ class ImportFolder {
 		// Create material
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
-			Context.removeMaterialCache();
+			MaterialUtil.removeMaterialCache();
 			Data.getMaterial("Scene", "Material2", function(md:MaterialData) {
 				Context.materialScene = new MaterialSlot(md);
 				Project.materialsScene.push(Context.materialScene);

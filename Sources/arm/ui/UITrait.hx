@@ -404,7 +404,7 @@ class UITrait {
 		}
 	}
 
-	function update() {
+	public function update() {
 		if (textureExport) {
 			textureExport = false;
 			Exporter.exportTextures(textureExportPath);
@@ -748,13 +748,13 @@ class UITrait {
 		lastTooltip = ui.tooltipImg;
 	}
 
-	function render(g:kha.graphics2.Graphics) {
+	public function render(g:kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		renderUI(g);
 	}
 
-	function renderCursor(g:kha.graphics2.Graphics) {
+	public function renderCursor(g:kha.graphics2.Graphics) {
 		// if (cursorImg == null) {
 		// 	g.end();
 		// 	cursorImg = Image.createRenderTarget(256, 256);
@@ -1186,7 +1186,6 @@ class UITrait {
 				TabLayers.draw();
 				TabHistory.draw();
 				TabPlugins.draw();
-				// TabBrowser.draw();
 			}
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				Context.object = Context.paintObject;
@@ -1197,6 +1196,7 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
+				TabBrowser.draw();
 				TabViewport.draw();
 				#if arm_creator
 				TabWorld.draw();

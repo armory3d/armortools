@@ -154,7 +154,7 @@ class UINodes {
 		else return canvasBrush;
 	}
 
-	function update() {
+	public function update() {
 		updateCanvasMap();
 		updateCanvasBrushMap();
 
@@ -318,7 +318,7 @@ class UINodes {
 		grid.g2.end();
 	}
 
-	function render(g:kha.graphics2.Graphics) {
+	public function render(g:kha.graphics2.Graphics) {
 		if (recompileMat) {
 			recompileMat = false;
 			if (Layers.isFillMaterial()) {

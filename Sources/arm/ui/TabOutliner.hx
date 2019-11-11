@@ -13,7 +13,7 @@ class TabOutliner {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Outliner")) {
 			ui.row([1/4]);
-			if (ui.button("Import")) Context.importMesh();
+			if (ui.button("Import")) Project.importMesh();
 
 			var i = 0;
 			function drawList(h:Handle, o:Object) {

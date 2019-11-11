@@ -26,11 +26,11 @@ class Importer {
 
 	public static function importFile(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
-		if (Path.checkMeshFormat(path)) {
+		if (Path.isMesh(path)) {
 			importMesh(path);
 		}
 		// Image
-		else if (Path.checkTextureFormat(path)) {
+		else if (Path.isTexture(path)) {
 			ImportTexture.run(path);
 			// Place image node
 			var x0 = UINodes.inst.wx;
@@ -42,19 +42,19 @@ class Importer {
 			}
 		}
 		// Font
-		else if (Path.checkFontFormat(path)) {
+		else if (Path.isFont(path)) {
 			ImportFont.run(path);
 		}
 		// Project
-		else if (Path.checkProjectFormat(path)) {
+		else if (Path.isProject(path)) {
 			ImportArm.runProject(path);
 		}
 		// Plugin
-		else if (Path.checkPluginFormat(path)) {
+		else if (Path.isPlugin(path)) {
 			ImportPlugin.run(path);
 		}
 		// Folder
-		else if (path.indexOf(".") == -1) {
+		else if (Path.isFolder(path)) {
 			ImportFolder.run(path);
 		}
 		else {
@@ -63,7 +63,7 @@ class Importer {
 	}
 
 	public static function importMesh(path:String, _clearLayers = true) {
-		if (!Path.checkMeshFormat(path)) {
+		if (!Path.isMesh(path)) {
 			Log.showError(Strings.error1);
 			return;
 		}

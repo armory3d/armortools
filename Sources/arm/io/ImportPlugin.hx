@@ -7,7 +7,7 @@ using StringTools;
 class ImportPlugin {
 
 	public static function run(path:String) {
-		if (!Path.checkPluginFormat(path)) {
+		if (!Path.isPlugin(path)) {
 			Log.showError(Strings.error1);
 			return;
 		}

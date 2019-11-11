@@ -10,7 +10,7 @@ using StringTools;
 class ImportTexture {
 
 	public static function run(path:String) {
-		if (!Path.checkTextureFormat(path)) {
+		if (!Path.isTexture(path)) {
 			Log.showError(Strings.error1);
 			return;
 		}

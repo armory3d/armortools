@@ -5,6 +5,7 @@ import kha.Image;
 import iron.RenderPath;
 import iron.object.MeshObject;
 import arm.ui.UITrait;
+import arm.nodes.MaterialParser;
 
 class LayerSlot {
 	public var id = 0;
@@ -102,6 +103,14 @@ class LayerSlot {
 		}
 
 		texpaint_preview = Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
+	}
+
+	public function delete() {
+		unload();
+		var lpos = Project.layers.indexOf(this);
+		Project.layers.remove(this);
+		// Undo can remove base layer and then restore it from undo layers
+		if (lpos > 0) Context.setLayer(Project.layers[lpos - 1]);
 	}
 
 	public function unload() {
@@ -324,5 +333,45 @@ class LayerSlot {
 
 			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
 		}
+	}
+
+	public function clear(g:kha.graphics4.Graphics) {
+		g.end();
+
+		texpaint.g4.begin();
+		texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
+		texpaint.g4.end();
+
+		texpaint_nor.g4.begin();
+		texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		texpaint_nor.g4.end();
+
+		texpaint_pack.g4.begin();
+		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
+		texpaint_pack.g4.end();
+
+		g.begin();
+		iron.App.removeRender(clear);
+
+		#if krom_linux
+		Context.layerPreviewDirty = true;
+		#end
+	}
+
+	public function toFillLayer() {
+		Context.setLayer(this);
+		material_mask = Context.material;
+		Layers.updateFillLayers(4);
+		MaterialParser.parsePaintMaterial();
+		Context.layerPreviewDirty = true;
+		UITrait.inst.hwnd.redraws = 2;
+	}
+
+	public function toPaintLayer() {
+		Context.setLayer(this);
+		material_mask = null;
+		MaterialParser.parsePaintMaterial();
+		Context.layerPreviewDirty = true;
+		UITrait.inst.hwnd.redraws = 2;
 	}
 }

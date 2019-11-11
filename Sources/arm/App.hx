@@ -65,7 +65,7 @@ class App {
 
 		System.notifyOnDropFiles(function(filePath:String) {
 			#if krom_windows
-			if (!checkAscii(filePath)) filePath = shortPath(filePath);
+			if (!Path.isAscii(filePath)) filePath = Path.shortPath(filePath);
 			#end
 			dropPath = filePath;
 			#if krom_linux
@@ -126,10 +126,10 @@ class App {
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
 					var path = Krom.getArg(1);
-					if (Path.checkProjectFormat(path) ||
-						Path.checkMeshFormat(path) ||
-						Path.checkTextureFormat(path) ||
-						Path.checkFontFormat(path)) {
+					if (Path.isProject(path) ||
+						Path.isMesh(path) ||
+						Path.isTexture(path) ||
+						Path.isFont(path)) {
 						fileArg = path;
 					}
 				}
@@ -139,11 +139,11 @@ class App {
 				new UINodes();
 				new UIView2D();
 				new Camera();
-				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.renderCursor);
-				iron.App.notifyOnUpdate(@:privateAccess UINodes.inst.update);
-				iron.App.notifyOnRender2D(@:privateAccess UINodes.inst.render);
-				iron.App.notifyOnUpdate(@:privateAccess UITrait.inst.update);
-				iron.App.notifyOnRender2D(@:privateAccess UITrait.inst.render);
+				iron.App.notifyOnRender2D(UITrait.inst.renderCursor);
+				iron.App.notifyOnUpdate(UINodes.inst.update);
+				iron.App.notifyOnRender2D(UINodes.inst.render);
+				iron.App.notifyOnUpdate(UITrait.inst.update);
+				iron.App.notifyOnRender2D(UITrait.inst.render);
 				iron.App.notifyOnRender2D(render);
 				appx = UITrait.inst.toolbarw;
 				appy = UITrait.inst.headerh * 2;
@@ -155,10 +155,10 @@ class App {
 				#end
 				if (fileArg != "") {
 					Importer.importFile(fileArg);
-					// if (Path.checkMeshFormat(fileArg)) {
+					// if (Path.isMesh(fileArg)) {
 					// 	UITrait.inst.toggleDistractFree();
 					// }
-					// else if (Path.checkTextureFormat(fileArg)) {
+					// else if (Path.isTexture(fileArg)) {
 					// 	UITrait.inst.show2DView(1);
 					// }
 				}
@@ -428,18 +428,4 @@ class App {
 		}
 		return 0;
 	}
-
-	#if krom_windows
-	public static function checkAscii(s:String):Bool {
-		for (i in 0...s.length) if (s.charCodeAt(i) > 127) return false;
-		return true;
-	}
-
-	public static function shortPath(s:String):String {
-		var cmd = 'for %I in ("' + s + '") do echo %~sI';
-		var save = Krom.getFilesLocation() + "\\data\\tmp.txt";
-		Krom.sysCommand(cmd + ' > "' + save + '"');
-		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
-	}
-	#end
 }

@@ -8,6 +8,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
+import arm.util.ParticleUtil;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
@@ -118,7 +119,7 @@ class Context {
 		}
 
 		if (tool == ToolParticle) {
-			Tool.initParticle();
+			ParticleUtil.initParticle();
 			MaterialParser.parseParticleMaterial();
 		}
 	}
@@ -158,21 +159,5 @@ class Context {
 	public static function mainObject():MeshObject {
 		for (po in Project.paintObjects) if (po.children.length > 0) return po;
 		return Project.paintObjects[0];
-	}
-
-	public static function removeMaterialCache() {
-		Data.cachedMaterials.remove("SceneMaterial2");
-		Data.cachedShaders.remove("Material2_data");
-		Data.cachedSceneRaws.remove("Material2_data");
-		// Data.cachedBlobs.remove("Material2_data.arm");
-	}
-
-	public static function importMesh() {
-		UIFiles.show = true;
-		UIFiles.isSave = false;
-		UIFiles.filters = "obj,fbx,stl,blend,arm";
-		UIFiles.filesDone = function(path:String) {
-			Importer.importFile(path);
-		}
 	}
 }

@@ -11,7 +11,9 @@ import arm.render.Inc;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
 import arm.Config;
+#if arm_player
 using StringTools;
+#end
 
 class Main {
 

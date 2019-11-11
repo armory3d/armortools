@@ -1,6 +1,7 @@
 package arm.util;
 
 import kha.Image;
+import kha.Font;
 import kha.graphics4.TextureFormat;
 import iron.Scene;
 import iron.RenderPath;
@@ -10,6 +11,7 @@ import arm.ui.UITrait;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathDeferred;
 import arm.nodes.MaterialParser;
+import arm.io.Importer;
 import arm.Tool;
 
 class RenderUtil {
@@ -149,7 +151,7 @@ class RenderUtil {
 
 	public static function makeTextPreview() {
 		var text = UITrait.inst.textToolText;
-		var font = Tool.getTextToolFont();
+		var font = getTextToolFont();
 		var fontSize = 200;
 		var textW = Std.int(font.width(fontSize, text));
 		var textH = Std.int(font.height(fontSize));
@@ -169,6 +171,12 @@ class RenderUtil {
 		g2.color = 0xffffffff;
 		g2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
 		g2.end();
+	}
+
+	static function getTextToolFont():Font {
+		var fontName = Importer.fontList[UITrait.inst.textToolHandle.position];
+		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
+		return Importer.fontMap.get(fontName);
 	}
 
 	public static function makeDecalMaskPreview() {

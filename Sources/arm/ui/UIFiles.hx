@@ -19,6 +19,7 @@ class UIFiles {
 		show = false;
 
 		if (!UITrait.inst.nativeBrowser) {
+			if (path == null) path = '/';
 			renderCustom(g);
 			return;
 		}
@@ -26,7 +27,7 @@ class UIFiles {
 		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 		if (path != null) {
 			#if krom_windows
-			if (!App.checkAscii(path)) path = App.shortPath(path);
+			if (!Path.isAscii(path)) path = Path.shortPath(path);
 			#end
 			path = path.replace("\\\\", "\\");
 			path = path.replace("\r", "");
@@ -51,7 +52,7 @@ class UIFiles {
 				ui.row([6/10, 2/10, 2/10]);
 				filename = ui.textInput(fileHandle, "File");
 				ui.text('*.' + filters, Center);
-				var known = Path.checkTextureFormat(path) || Path.checkMeshFormat(path) || Path.checkProjectFormat(path);
+				var known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
 				if (ui.button(isSave ? "Save" : "Open") || known || ui.isReturnDown) {
 					UIBox.show = false;
 					#if krom_windows
