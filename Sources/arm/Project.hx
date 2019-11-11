@@ -11,6 +11,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
+import arm.util.Path;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
@@ -22,6 +23,7 @@ import arm.nodes.MaterialParser;
 import arm.io.Importer;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;
+import arm.io.ImportMesh;
 using StringTools;
 
 class Project {
@@ -266,9 +268,9 @@ class Project {
 					App.redrawUI();
 					UIFiles.show = true;
 					UIFiles.isSave = false;
-					UIFiles.filters = "obj,fbx,stl,blend,arm";
+					UIFiles.filters = Path.meshFormats.join(",");
 					UIFiles.filesDone = function(path:String) {
-						Importer.importFile(path);
+						Importer.run(path);
 					}
 				}
 			}
@@ -277,18 +279,19 @@ class Project {
 
 	public static function reimportMesh() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
-			Importer.importMesh(Project.meshAssets[0], false);
+			ImportMesh.run(Project.meshAssets[0], false);
 			Log.showMessage("Mesh reimported.");
 		}
 		else importAsset();
 	}
 
-	public static function importAsset(filters = "jpg,png,tga,bmp,psd,gif,hdr,obj,fbx,stl,blend,arm") {
+	public static function importAsset(filters:String = null) {
+		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
 		UIFiles.show = true;
 		UIFiles.isSave = false;
 		UIFiles.filters = filters;
 		UIFiles.filesDone = function(path:String) {
-			Importer.importFile(path);
+			Importer.run(path);
 		}
 	}
 }

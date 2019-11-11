@@ -25,7 +25,7 @@ class TabViewport {
 						Log.showError("Error: .hdr file expected");
 						return;
 					}
-					Importer.importFile(path);
+					Importer.run(path);
 				}
 			}
 

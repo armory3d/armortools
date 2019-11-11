@@ -17,7 +17,12 @@ class ImportTexture {
 
 		for (a in Project.assets) if (a.file == path) { Log.showMessage(Strings.info0); return; }
 
-		Data.getImage(path, function(image:Image) {
+		var ext = path.substr(path.lastIndexOf(".") + 1);
+		var importer = Path.textureImporters.get(ext);
+		if (importer == null) importer = defaultImporter;
+
+		importer(path, function(image:Image) {
+			Data.cachedImages.set(path, image);
 			var ar = path.split("/");
 			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
@@ -34,5 +39,9 @@ class ImportTexture {
 				ImportEnvmap.run(path, image);
 			}
 		});
+	}
+
+	static function defaultImporter(path:String, done:Image->Void) {
+		Data.getImage(path, done);
 	}
 }

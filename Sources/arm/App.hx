@@ -154,7 +154,7 @@ class App {
 				Project.projectNew(); // Spawn terrain plane
 				#end
 				if (fileArg != "") {
-					Importer.importFile(fileArg);
+					Importer.run(fileArg);
 					// if (Path.isMesh(fileArg)) {
 					// 	UITrait.inst.toggleDistractFree();
 					// }
@@ -361,7 +361,7 @@ class App {
 			if (!wait) {
 				dropX = mouse.x;
 				dropY = mouse.y;
-				Importer.importFile(dropPath, dropX, dropY);
+				Importer.run(dropPath, dropX, dropY);
 				dropPath = "";
 			}
 		}

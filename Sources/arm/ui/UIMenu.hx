@@ -8,6 +8,7 @@ import iron.system.Input;
 import iron.data.Data;
 import arm.util.ViewportUtil;
 import arm.util.BuildMacros;
+import arm.util.Path;
 using StringTools;
 
 class UIMenu {
@@ -68,7 +69,7 @@ class UIMenu {
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("Save As...", Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Import Texture...", Left, Config.keymap.file_import_assets)) Project.importAsset("jpg,png,tga,bmp,psd,gif,hdr");
+				if (ui.button("Import Texture...", Left, Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","));
 				if (ui.button("Import Font...", Left)) Project.importAsset("ttf");
 				if (ui.button("Import Material...", Left)) Project.importMaterial();
 				if (ui.button("Import Mesh...", Left)) Project.importMesh();

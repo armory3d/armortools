@@ -4,6 +4,12 @@ using StringTools;
 
 class Path {
 
+	public static var meshFormats = ["obj", "fbx", "stl", "blend"];
+	public static var textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr"];
+
+	public static var meshImporters = new Map<String, String->(Void->Void)->Void>();
+	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
+
 	public static function toRelative(from:String, to:String):String {
 		from = haxe.io.Path.normalize(from);
 		to = haxe.io.Path.normalize(to);
@@ -31,22 +37,14 @@ class Path {
 
 	public static function isMesh(path:String):Bool {
 		var p = path.toLowerCase();
-		return p.endsWith(".obj") ||
-			   p.endsWith(".fbx") ||
-			   p.endsWith(".stl") ||
-			   p.endsWith(".blend");
+		for (s in meshFormats) if (p.endsWith("." + s)) return true;
+		return false;
 	}
 
 	public static function isTexture(path:String):Bool {
 		var p = path.toLowerCase();
-		return p.endsWith(".jpg") ||
-			   p.endsWith(".jpeg") ||
-			   p.endsWith(".png") ||
-			   p.endsWith(".tga") ||
-			   p.endsWith(".bmp") ||
-			   p.endsWith(".psd") ||
-			   p.endsWith(".gif") ||
-			   p.endsWith(".hdr");
+		for (s in textureFormats) if (p.endsWith("." + s)) return true;
+		return false;
 	}
 
 	public static function isFont(path:String):Bool {

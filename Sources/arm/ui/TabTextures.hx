@@ -5,6 +5,7 @@ import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
 import arm.io.Importer;
+import arm.util.Path;
 using StringTools;
 
 class TabTextures {
@@ -18,9 +19,9 @@ class TabTextures {
 			if (ui.button("Import")) {
 				UIFiles.show = true;
 				UIFiles.isSave = false;
-				UIFiles.filters = "jpg,png,tga,bmp,psd,gif,hdr";
+				UIFiles.filters = Path.textureFormats.join(",");
 				UIFiles.filesDone = function(path:String) {
-					Importer.importFile(path);
+					Importer.run(path);
 				}
 			}
 			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.file_import_assets + ")");

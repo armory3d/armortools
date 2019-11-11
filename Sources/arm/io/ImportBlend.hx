@@ -34,7 +34,7 @@ class ImportBlend {
 			// trace(ob.get("type")); // 1
 
 			var m = bl.get("Mesh")[0];
-			if (m == null) { Importer.makeMesh(null, path); return; }
+			if (m == null) { ImportMesh.makeMesh(null, path); return; }
 
 			var totpoly = m.get("totpoly");
 			var numtri = 0;
@@ -170,7 +170,7 @@ class ImportBlend {
 			var name:String = m.get("id").get("name");
 			name = name.substring(2, name.length);
 			var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
-			Importer.makeMesh(obj, path);
+			ImportMesh.makeMesh(obj, path);
 			Data.deleteBlob(path);
 		});
 	}

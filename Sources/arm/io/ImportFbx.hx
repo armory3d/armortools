@@ -11,9 +11,9 @@ class ImportFbx {
 		Data.getBlob(path, function(b:Blob) {
 			FbxParser.parseTransform = UITrait.inst.parseTransform;
 			var obj = new FbxParser(b);
-			Importer.makeMesh(obj, path);
+			ImportMesh.makeMesh(obj, path);
 			while (obj.next()) {
-				Importer.addMesh(obj);
+				ImportMesh.addMesh(obj);
 			}
 			Data.deleteBlob(path);
 		});

@@ -9,7 +9,7 @@ class ImportGltf {
 	public static function run(path:String) {
 		Data.getBlob(path, function(b:Blob) {
 			var obj = new GltfParser(b);
-			Importer.makeMesh(obj, path);
+			ImportMesh.makeMesh(obj, path);
 			Data.deleteBlob(path);
 		});
 	}

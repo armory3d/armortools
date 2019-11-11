@@ -19,15 +19,15 @@ class ImportObj {
 					var v = Std.int(i / obj.udimsU);
 					obj.name = name + "." + (1000 + v * 10 + u + 1);
 					obj.inda = obj.udims[i];
-					i == 0 ? Importer.makeMesh(obj, path) : Importer.addMesh(obj);
+					i == 0 ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
 				}
 			}
 			else {
 				var obj = new ObjParser(b);
-				Importer.makeMesh(obj, path);
+				ImportMesh.makeMesh(obj, path);
 				while (obj.hasNext) {
 					obj = new ObjParser(b, obj.pos);
-					Importer.addMesh(obj);
+					ImportMesh.addMesh(obj);
 				}
 			}
 			Data.deleteBlob(path);

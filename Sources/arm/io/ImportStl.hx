@@ -14,7 +14,7 @@ class ImportStl {
 			var p = path.replace("\\", "/");
 			var index = p.lastIndexOf("/");
 			obj.name = p.substring(index >= 0 ? index + 1 : 0, p.length - 4);
-			Importer.makeMesh(obj, path);
+			ImportMesh.makeMesh(obj, path);
 			Data.deleteBlob(path);
 		});
 	}
