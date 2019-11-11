@@ -121,8 +121,8 @@ class Layers {
 
 	public static function makePipe() {
 		pipe = new PipelineState();
-		pipe.vertexShader = VertexShader.fromSource(ConstData.layerMergeVert);
-		pipe.fragmentShader = FragmentShader.fromSource(ConstData.layerMergeFrag);
+		pipe.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
+		pipe.fragmentShader = Reflect.field(kha.Shaders, "layer_merge_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
 		pipe.inputLayout = [vs];
@@ -137,8 +137,8 @@ class Layers {
 		blending = pipe.getConstantLocation("blending");
 
 		pipeCopy = new PipelineState();
-		pipeCopy.vertexShader = VertexShader.fromSource(ConstData.layerViewVert);
-		pipeCopy.fragmentShader = FragmentShader.fromSource(ConstData.layerViewFrag);
+		pipeCopy.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipeCopy.fragmentShader = Reflect.field(kha.Shaders, "layer_view_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -147,8 +147,8 @@ class Layers {
 		pipeCopy.compile();
 
 		pipeMask = new PipelineState();
-		pipeMask.vertexShader = VertexShader.fromSource(ConstData.layerMergeVert);
-		pipeMask.fragmentShader = FragmentShader.fromSource(ConstData.maskMergeFrag);
+		pipeMask.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
+		pipeMask.fragmentShader = Reflect.field(kha.Shaders, "mask_merge_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
 		pipeMask.inputLayout = [vs];
@@ -159,8 +159,8 @@ class Layers {
 
 	public static function makeCursorPipe() {
 		pipeCursor = new PipelineState();
-		pipeCursor.vertexShader = VertexShader.fromSource(ConstData.cursorVert);
-		pipeCursor.fragmentShader = FragmentShader.fromSource(ConstData.cursorFrag);
+		pipeCursor.vertexShader = Reflect.field(kha.Shaders, "cursor_vert");
+		pipeCursor.fragmentShader = Reflect.field(kha.Shaders, "cursor_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Short4Norm);
 		vs.add("nor", VertexData.Short2Norm);

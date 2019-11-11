@@ -38,8 +38,8 @@ class UIView2D {
 		inst = this;
 
 		pipe = new PipelineState();
-		pipe.vertexShader = VertexShader.fromSource(ConstData.layerViewVert);
-		pipe.fragmentShader = FragmentShader.fromSource(ConstData.layerViewFrag);
+		pipe.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipe.fragmentShader = Reflect.field(kha.Shaders, "layer_view_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);

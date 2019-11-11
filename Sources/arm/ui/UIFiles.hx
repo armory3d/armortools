@@ -63,6 +63,7 @@ class UIFiles {
 					filesDone((known || isSave) ? path : path + sep + filename);
 					if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
 				}
+				zui.Ext.dataPath = iron.data.Data.dataPath;
 				path = zui.Ext.fileBrowser(ui, pathHandle, false);
 				if (pathHandle.changed) ui.currentWindow.redraws = 3;
 			}

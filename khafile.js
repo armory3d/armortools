@@ -91,6 +91,12 @@ else { // painter, creator
 if (build === 'painter') {
 	project.addAssets("Bundled/painter/*", { notinlist: true, destination: "data/{name}" });
 	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
+	if (process.platform === 'win32') {
+		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
+	}
+	else {
+		project.addShaders("Shaders/painter/glsl/*.glsl", { noembed: false });
+	}
 	project.addDefine('kha_no_ogg');
 }
 else {
