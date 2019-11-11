@@ -12,6 +12,8 @@ class Plugin {
 	public var draw:Void->Void = null;
 	public var update:Void->Void = null;
 	public var delete:Void->Void = null;
+	public var version = "0.1";
+	public var apiversion = "0.1";
 	var name:String;
 
 	public function new() {
