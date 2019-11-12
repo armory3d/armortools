@@ -8,19 +8,13 @@ using StringTools;
 
 class UIFiles {
 
-	public static var show = false;
-	public static var isSave = false;
 	public static var filename = "untitled";
-	public static var filesDone:String->Void;
-	public static var filters = "";
 	public static var path = '/';
 
-	public static function render(g:kha.graphics2.Graphics) {
-		show = false;
-
+	public static function show(filters:String, isSave:Bool, filesDone:String->Void) {
 		if (!UITrait.inst.nativeBrowser) {
 			if (path == null) path = '/';
-			renderCustom(g);
+			showCustom(filters, isSave, filesDone);
 			return;
 		}
 
@@ -43,8 +37,8 @@ class UIFiles {
 		releaseKeys();
 	}
 
-	@:access(zui.Zui)
-	static function renderCustom(g:kha.graphics2.Graphics) {
+	@:access(zui.Zui) //
+	static function showCustom(filters:String, isSave:Bool, filesDone:String->Void) {
 		UIBox.showCustom(function(ui:Zui) {
 			if (ui.tab(Id.handle(), "File Browser")) {
 				var pathHandle = Id.handle();

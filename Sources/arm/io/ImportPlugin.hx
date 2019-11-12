@@ -26,7 +26,7 @@ class ImportPlugin {
 		var dest = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + filename;
 
 		Krom.sysCommand(copy + ' ' + path + ' ' + dest); // Copy to plugin folder
-		arm.ui.TabPlugins.files = null; // Refresh file list
+		arm.ui.BoxPreferences.files = null; // Refresh file list
 
 		Log.showMessage("Plugin '" + filename + "' installed.");
 	}

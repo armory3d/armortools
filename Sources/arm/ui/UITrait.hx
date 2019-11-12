@@ -449,13 +449,11 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
-				UIFiles.show = true;
-				UIFiles.isSave = true;
-				UIFiles.filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
-				UIFiles.filesDone = function(path:String) {
+				var filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
+				UIFiles.show(filters, true, function(path:String) {
 					textureExport = true;
 					textureExportPath = path;
-				}
+				});
 			}
 			else textureExport = true;
 		}

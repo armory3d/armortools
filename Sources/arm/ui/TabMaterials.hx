@@ -124,14 +124,11 @@ class TabMaterials {
 
 							if (ui.button("Export", Left)) {
 								selectMaterial(i);
-								UIFiles.show = true;
-								UIFiles.isSave = true;
-								UIFiles.filters = "arm";
-								UIFiles.filesDone = function(path:String) {
+								UIFiles.show("arm", true, function(path:String) {
 									var f = UIFiles.filename;
 									if (f == "") f = "untitled";
 									Exporter.exportMaterial(path + "/" + f);
-								};
+								});
 							}
 
 							if (ui.button("Duplicate", Left)) {
@@ -180,7 +177,7 @@ class TabMaterials {
 								subsHandle.changed) {
 								UINodes.inst.updateCanvasMap();
 								MaterialParser.parsePaintMaterial();
-								UIMenu.propChanged = true;
+								UIMenu.keepOpen = true;
 							}
 						});
 					}

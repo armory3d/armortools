@@ -17,12 +17,9 @@ class TabTextures {
 			ui.row([1/4, 1/4]);
 
 			if (ui.button("Import")) {
-				UIFiles.show = true;
-				UIFiles.isSave = false;
-				UIFiles.filters = Path.textureFormats.join(",");
-				UIFiles.filesDone = function(path:String) {
+				UIFiles.show(Path.textureFormats.join(","), false, function(path:String) {
 					Importer.run(path);
-				}
+				});
 			}
 			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.file_import_assets + ")");
 
@@ -82,10 +79,7 @@ class TabTextures {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right, ui.t.CONTEXT_COL);
 							if (ui.button("Export", Left)) {
-								UIFiles.show = true;
-								UIFiles.isSave = true;
-								UIFiles.filters = "png";
-								UIFiles.filesDone = function(path:String) {
+								UIFiles.show("png", true, function(path:String) {
 									var target = kha.Image.createRenderTarget(img.width, img.height);
 									function exportTexture(g:kha.graphics4.Graphics) {
 										target.g2.begin(false);
@@ -102,7 +96,7 @@ class TabTextures {
 										iron.App.removeRender(exportTexture);
 									};
 									iron.App.notifyOnRender(exportTexture);
-								}
+								});
 							}
 							if (ui.button("To Mask", Left)) {
 								Layers.createImageMask(asset);

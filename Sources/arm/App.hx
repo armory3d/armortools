@@ -406,7 +406,6 @@ class App {
 		if (UIMenu.show) usingMenu = mouse.y > UITrait.inst.headerh;
 
 		uienabled = !UIBox.show && !usingMenu;
-		if (UIFiles.show) UIFiles.render(g);
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
 	}

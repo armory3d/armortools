@@ -7,10 +7,7 @@ plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "Converter")) {
 		ui.row([1/2, 1/2]);
 		if (ui.button(".arm to .json")) {
-			arm.UIFiles.show = true;
-			arm.UIFiles.isSave = false;
-			arm.UIFiles.filters = "arm";
-			arm.UIFiles.filesDone = function(path) {
+			arm.UIFiles.show("arm", false, function(path) {
 				iron.Data.getBlob(path, function(b) {
 					let parsed = iron.ArmPack.decode(b.bytes);
 					let out = arm.Bytes.ofString(arm.Json.stringify(parsed, function(key, value) {
@@ -33,13 +30,10 @@ plugin.drawUI = function(ui) {
 					}, "	")).b.bufferValue;
 					Krom.fileSaveBytes(path.substr(0, path.length - 3) + "json", out);
 				});
-			}
+			});
 		}
 		if (ui.button(".json to .arm")) {
-			arm.UIFiles.show = true;
-			arm.UIFiles.isSave = false;
-			arm.UIFiles.filters = "json";
-			arm.UIFiles.filesDone = function(path) {
+			arm.UIFiles.show("json", false, function(path) {
 				iron.Data.getBlob(path, function(b) {
 					let parsed = arm.Json.parse(b.toString());
 					function iterate(d) {
@@ -63,7 +57,7 @@ plugin.drawUI = function(ui) {
 					let out = iron.ArmPack.encode(parsed).b.bufferValue;
 					Krom.fileSaveBytes(path.substr(0, path.length - 4) + "arm", out);
 				});
-			}
+			});
 		}
 	}
 }

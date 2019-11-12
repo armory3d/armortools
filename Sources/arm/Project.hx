@@ -45,10 +45,7 @@ class Project {
 	#end
 
 	public static function projectOpen() {
-		UIFiles.show = true;
-		UIFiles.isSave = false;
-		UIFiles.filters = "arm";
-		UIFiles.filesDone = function(path:String) {
+		UIFiles.show("arm", false, function(path:String) {
 			if (!path.endsWith(".arm")) {
 				Log.showError(Strings.error5);
 				return;
@@ -60,7 +57,7 @@ class Project {
 			ImportArm.runProject(path);
 
 			if (current != null) current.begin(false);
-		};
+		});
 	}
 
 	public static function projectSave() {
@@ -73,16 +70,13 @@ class Project {
 	}
 
 	public static function projectSaveAs() {
-		UIFiles.show = true;
-		UIFiles.isSave = true;
-		UIFiles.filters = "arm";
-		UIFiles.filesDone = function(path:String) {
+		UIFiles.show("arm", true, function(path:String) {
 			var f = UIFiles.filename;
 			if (f == "") f = "untitled";
 			filepath = path + "/" + f;
 			if (!filepath.endsWith(".arm")) filepath += ".arm";
 			projectSave();
-		};
+		});
 	}
 
 	public static function projectNewBox() {
@@ -236,14 +230,11 @@ class Project {
 	}
 
 	public static function importMaterial() {
-		UIFiles.show = true;
-		UIFiles.isSave = false;
-		UIFiles.filters = "arm,blend";
-		UIFiles.filesDone = function(path:String) {
+		UIFiles.show("arm,blend", false, function(path:String) {
 			path.endsWith(".blend") ?
 				ImportBlend.runMaterial(path) :
 				ImportArm.runMaterial(path);
-		}
+		});
 	}
 
 	public static function importMesh() {
@@ -266,12 +257,9 @@ class Project {
 				if (ui.button("Import") || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					UIFiles.show = true;
-					UIFiles.isSave = false;
-					UIFiles.filters = Path.meshFormats.join(",");
-					UIFiles.filesDone = function(path:String) {
+					UIFiles.show(Path.meshFormats.join(","), false, function(path:String) {
 						Importer.run(path);
-					}
+					});
 				}
 			}
 		});
@@ -287,12 +275,9 @@ class Project {
 
 	public static function importAsset(filters:String = null) {
 		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
-		UIFiles.show = true;
-		UIFiles.isSave = false;
-		UIFiles.filters = filters;
-		UIFiles.filesDone = function(path:String) {
+		UIFiles.show(filters, false, function(path:String) {
 			Importer.run(path);
-		}
+		});
 	}
 }
 

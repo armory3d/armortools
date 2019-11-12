@@ -15,7 +15,7 @@ class UIMenu {
 
 	public static var show = false;
 	public static var menuCategory = 0;
-	public static var propChanged = false;
+	public static var keepOpen = false;
 	static var showMenuFirst = true;
 	static var menuX = 0;
 	static var menuY = 0;
@@ -216,21 +216,15 @@ class UIMenu {
 		// Hide menu
 		var first = showMenuFirst;
 		showMenuFirst = false;
-		if (first) {
-			// App.uienabled = false;
-		}
-		else {
-			if (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown) {
-				if (propChanged) {
-					propChanged = false;
-				}
-				else {
-					show = false;
-					App.redrawUI();
-					showMenuFirst = true;
-					menuCommands = null;
-					// App.uienabled = true;
-				}
+		if (!first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown)) {
+			if (keepOpen) {
+				keepOpen = false;
+			}
+			else {
+				show = false;
+				App.redrawUI();
+				showMenuFirst = true;
+				menuCommands = null;
 			}
 		}
 

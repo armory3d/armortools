@@ -6,10 +6,7 @@ let h1 = new zui.Handle();
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "Packager")) {
 		if (ui.button("Export")) {
-			arm.UIFiles.show = true;
-			arm.UIFiles.isSave = true;
-			arm.UIFiles.filters = "";
-			arm.UIFiles.filesDone = function(path) {
+			arm.UIFiles.show("", true, function(path) {
 				var sep = "/";
 				var cd = "echo $PWD";
 				var copy = "cp";
@@ -54,7 +51,7 @@ plugin.drawUI = function(ui) {
 					dest += ".exe";
 				}
 				Krom.sysCommand(copy + ' ' + exe + ' ' + dest);
-			}
+			});
 		}
 	}
 }

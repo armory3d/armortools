@@ -296,7 +296,7 @@ class TabLayers {
 							emisHandle.changed ||
 							subsHandle.changed) {
 							MaterialParser.parseMeshMaterial();
-							UIMenu.propChanged = true;
+							UIMenu.keepOpen = true;
 						}
 					});
 				}

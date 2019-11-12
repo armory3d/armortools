@@ -17,16 +17,13 @@ class TabViewport {
 		if (ui.tab(UITrait.inst.htab2, "Viewport")) {
 			ui.row([1/4]);
 			if (ui.button("Import")) {
-				UIFiles.show = true;
-				UIFiles.isSave = false;
-				UIFiles.filters = "hdr";
-				UIFiles.filesDone = function(path:String) {
+				UIFiles.show("hdr", false, function(path:String) {
 					if (!path.endsWith(".hdr")) {
 						Log.showError("Error: .hdr file expected");
 						return;
 					}
 					Importer.run(path);
-				}
+				});
 			}
 
 			if (Scene.active.world.probe.radianceMipmaps.length > 0) {

@@ -51,14 +51,11 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					UIFiles.show = true;
-					UIFiles.isSave = true;
-					// var path = 'C:\\Users\\lubos\\Documents\\';
-					UIFiles.filters = UITrait.inst.bitsHandle.position > 0 ? "exr" : UITrait.inst.formatType == 0 ? "png" : "jpg";
-					UIFiles.filesDone = function(path:String) {
+					var filters = UITrait.inst.bitsHandle.position > 0 ? "exr" : UITrait.inst.formatType == 0 ? "png" : "jpg";
+					UIFiles.show(filters, true, function(path:String) {
 						UITrait.inst.textureExport = true;
 						UITrait.inst.textureExportPath = path;
-					}
+					});
 				}
 				if (ui.isHovered) ui.tooltip("Export texture files (" + Config.keymap.file_export_textures + ")");
 			}
@@ -113,14 +110,11 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					UIFiles.show = true;
-					UIFiles.isSave = true;
-					UIFiles.filters = UITrait.inst.exportMeshFormat == 0 ? "obj" : "arm";
-					UIFiles.filesDone = function(path:String) {
+					UIFiles.show(UITrait.inst.exportMeshFormat == 0 ? "obj" : "arm", true, function(path:String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
 						Exporter.exportMesh(path + "/" + f);
-					};
+					});
 				}
 			}
 		});
