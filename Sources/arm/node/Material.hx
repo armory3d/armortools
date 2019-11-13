@@ -1737,31 +1737,20 @@ class Material {
 	//
 
 	static function make_texture(image_node:TNode, tex_name:String, matname:String = null):TBindTexture {
+		var filepath = image_node.buttons[0].data;
+		if (filepath == '' || filepath.indexOf('.') == -1) {
+			return null;
+		}
 
 		var tex:TBindTexture = {
 			name: tex_name,
-			file: ''
+			file: filepath
 		};
-
-		var filepath = image_node.buttons[0].data;
-		if (filepath == '') {
-			return null;
-		}
-
-		tex.file = filepath;
-
-		var s = tex.file.split('.');
-		if (s.length == 1) {
-			return null;
-		}
-
-		var interpolation = 'Smart';
 		tex.min_filter = 'anisotropic';
 		tex.mipmap_filter = 'linear';
 		tex.generate_mipmaps = true;
 		tex.u_addressing = 'repeat';
 		tex.v_addressing = 'repeat';
-
 		return tex;
 	}
 

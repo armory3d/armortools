@@ -909,10 +909,11 @@ class UITrait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			if (ui.button("File", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 0; };
-			if (ui.button("Edit", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 1; };
-			if (ui.button("View", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 2; };
-			if (ui.button("Help", Left) || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 3; };
+			if (ui.button("File") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 0; };
+			if (ui.button("Edit") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 1; };
+			if (ui.button("Camera") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 2; };
+			if (ui.button("View") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 3; };
+			if (ui.button("Help") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 4; };
 
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
