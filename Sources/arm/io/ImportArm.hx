@@ -16,6 +16,7 @@ import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
 import arm.sys.Path;
+import arm.sys.File;
 import arm.util.Lz4;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
@@ -68,13 +69,7 @@ class ImportArm {
 				// Convert image path from relative to absolute
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;
-				#if krom_windows
-				var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
-				#else
-				var exists = 1;
-				// { test -e file && echo 1 || echo 0 }
-				#end
-				if (exists == 0) {
+				if (!File.exists(abs)) {
 					Log.showError(Strings.error2 + abs);
 					var b = Bytes.alloc(4);
 					b.set(0, 255);
@@ -254,13 +249,7 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 			var abs = isAbsolute ? file : base + file;
-			#if krom_windows
-			var exists = Krom.sysCommand('IF EXIST "' + abs + '" EXIT /b 1');
-			#else
-			var exists = 1;
-			// { test -e file && echo 1 || echo 0 }
-			#end
-			if (exists == 0) {
+			if (!File.exists(abs)) {
 				Log.showError(Strings.error2 + abs);
 				var b = Bytes.alloc(4);
 				b.set(0, 255);

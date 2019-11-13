@@ -9,6 +9,7 @@ import iron.data.Data;
 import arm.util.ViewportUtil;
 import arm.util.BuildMacros;
 import arm.sys.Path;
+import arm.sys.File;
 using StringTools;
 
 class UIMenu {
@@ -127,22 +128,10 @@ class UIMenu {
 			}
 			else if (menuCategory == 3) {
 				if (ui.button("Manual", Left)) {
-					#if krom_windows
-					Krom.sysCommand('explorer "https://armorpaint.org/manual"');
-					#elseif krom_linux
-					Krom.sysCommand('xdg-open "https://armorpaint.org/manual"');
-					#else
-					Krom.sysCommand('open "https://armorpaint.org/manual"');
-					#end
+					File.explorer("https://armorpaint.org/manual");
 				}
 				if (ui.button("Issue Tracker", Left)) {
-					#if krom_windows
-					Krom.sysCommand('explorer "https://github.com/armory3d/armorpaint/issues"');
-					#elseif krom_linux
-					Krom.sysCommand('xdg-open "https://github.com/armory3d/armorpaint/issues"');
-					#else
-					Krom.sysCommand('open "https://github.com/armory3d/armorpaint/issues"');
-					#end
+					File.explorer("https://github.com/armory3d/armorpaint/issues");
 				}
 				if (ui.button("Report Bug", Left)) {
 					var ver = App.version;
@@ -150,40 +139,25 @@ class UIMenu {
 					sha = sha.substr(1, sha.length - 2);
 					var os = System.systemId;
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + ver + "-" + sha + ",%20" + os + "*";
-					#if krom_windows
-					Krom.sysCommand('explorer "$url"');
-					#elseif krom_linux
-					Krom.sysCommand('xdg-open $url');
-					#else
-					Krom.sysCommand('open $url');
-					#end
+					File.explorer(url);
 				}
-				// if (ui.button("Request Feature", Left)) {}
 				if (ui.button("Check for Updates...", Left)) {
 					// Retrieve latest version number
-					var outFile = Krom.getFilesLocation() + '/' + Data.dataPath + "update.txt";
-					var uri = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					#if krom_windows
-					Krom.sysCommand('powershell -c "Invoke-WebRequest -Uri ' + uri + " -OutFile '" + outFile + "'");
-					#else
-					Krom.sysCommand('curl ' + uri + ' -o ' + outFile);
-					#end
+					var url = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
+					var blob = File.downloadBytes(url);
 					// Compare versions
-					Data.getBlob(outFile, function(blob:Blob) {
-						var update = Json.parse(blob.toString());
-						var updateVersion = Std.int(update.version);
-						if (updateVersion > 0) {
-							var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
-							var dateInt = Std.parseInt(date.replace("-", ""));
-							if (updateVersion > dateInt) {
-								UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
-							}
-							else {
-								UIBox.showMessage("Update", "You are up to date!");
-							}
+					var update = Json.parse(blob.toString());
+					var updateVersion = Std.int(update.version);
+					if (updateVersion > 0) {
+						var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
+						var dateInt = Std.parseInt(date.replace("-", ""));
+						if (updateVersion > dateInt) {
+							UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
 						}
-						Data.deleteBlob(outFile);
-					});
+						else {
+							UIBox.showMessage("Update", "You are up to date!");
+						}
+					}
 				}
 				if (ui.button("About...", Left)) {
 					var sha = BuildMacros.sha();

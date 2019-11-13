@@ -25,13 +25,8 @@ class UIFiles {
 			#end
 			path = path.replace("\\\\", "\\");
 			path = path.replace("\r", "");
-			#if krom_windows
-			var sep = "\\";
-			#else
-			var sep = "/";
-			#end
-			filename = path.substr(path.lastIndexOf(sep) + 1);
-			if (isSave) path = path.substr(0, path.lastIndexOf(sep));
+			filename = path.substr(path.lastIndexOf(Path.sep) + 1);
+			if (isSave) path = path.substr(0, path.lastIndexOf(Path.sep));
 			filesDone(path);
 		}
 		releaseKeys();
@@ -49,13 +44,8 @@ class UIFiles {
 				var known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
 				if (ui.button(isSave ? "Save" : "Open") || known || ui.isReturnDown) {
 					UIBox.show = false;
-					#if krom_windows
-					var sep = "\\";
-					#else
-					var sep = "/";
-					#end
-					filesDone((known || isSave) ? path : path + sep + filename);
-					if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(sep));
+					filesDone((known || isSave) ? path : path + Path.sep + filename);
+					if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
 				}
 				zui.Ext.dataPath = iron.data.Data.dataPath;
 				path = zui.Ext.fileBrowser(ui, pathHandle, false);

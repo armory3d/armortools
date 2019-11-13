@@ -8,6 +8,8 @@ import iron.data.Data;
 import arm.nodes.MaterialParser;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
+import arm.sys.Path;
+import arm.sys.File;
 using StringTools;
 
 class BoxPreferences {
@@ -70,14 +72,14 @@ class BoxPreferences {
 				ui.endElement();
 				ui.row([1/2]);
 				if (ui.button("Restore")) {
-					// UIMenu.draw(function(ui:Zui) {
-					// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-					// 	ui.text("Restore defaults?", Right, ui.t.CONTEXT_COL);
-					// 	if (ui.button("Confirm", Left)) {
+					UIMenu.draw(function(ui:Zui) {
+						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+						ui.text("Restore defaults?", Right, ui.t.CONTEXT_COL);
+						if (ui.button("Confirm", Left)) {
 							Config.restore();
 							setScale();
-					// 	}
-					// });
+						}
+					});
 				}
 			}
 			if (ui.tab(htab, "Usage")) {
@@ -220,14 +222,6 @@ class BoxPreferences {
 				if (ui.changed) Config.applyConfig();
 			}
 			if (ui.tab(htab, "Plugins")) {
-				#if krom_windows
-				var sep = "\\";
-				var dataPath = Data.dataPath.replace("/", "\\");
-				#else
-				var sep = "/";
-				var dataPath = Data.dataPath;
-				#end
-
 				ui.row([1/4, 1/4]);
 				if (ui.button("New")) {
 					var template =
@@ -247,7 +241,7 @@ plugin.drawUI = function(ui) {
 							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
 							if (ui.button("OK") || ui.isReturnDown) {
 								if (!pluginName.endsWith(".js")) pluginName += ".js";
-								var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + pluginName;
+								var path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
 								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
 								files = null; // Refresh file list
 								UIBox.show = false;
@@ -263,25 +257,7 @@ plugin.drawUI = function(ui) {
 				}
 
 				if (files == null) {
-					#if krom_windows
-					var cmd = "dir /b ";
-					#else
-					var cmd = "ls ";
-					#end
-					#if krom_linux
-					var save = "/tmp";
-					#else
-					var save = Krom.savePath();
-					#end
-					save += sep + "dir.txt";
-					var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins";
-					Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
-					var str = Bytes.ofData(Krom.loadBlob(save)).toString();
-					files = str.split("\n");
-					files.pop();
-					for (i in 0...files.length) {
-						files[i] = files[i].replace("\r", "");
-					}
+					files = File.readDirectory(Path.data() + Path.sep + "plugins");
 				}
 
 				var h = Id.handle({selected: false});
@@ -309,25 +285,14 @@ plugin.drawUI = function(ui) {
 						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(f, Right, ui.t.CONTEXT_COL);
-							var path = Krom.getFilesLocation() + sep + dataPath + sep + "plugins" + sep + f;
+							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
 							if (ui.button("Edit", Left)) {
-								#if krom_windows
-								Krom.sysCommand('start "" "' + path + '"');
-								#elseif krom_linux
-								Krom.sysCommand('xdg-open "' + path + '"');
-								#else
-								Krom.sysCommand('open "' + path + '"');
-								#end
+								File.start(path);
 							}
 							if (ui.button("Export", Left)) {
 								UIFiles.show("js", true, function(dest:String) {
-									#if krom_windows
-									var copy = "copy";
-									#else
-									var copy = "cp";
-									#end
 									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
-									Krom.sysCommand(copy + ' ' + path + ' ' + dest + sep + UIFiles.filename);
+									File.copy(path, dest + Path.sep + UIFiles.filename);
 								});
 							}
 							if (ui.button("Delete", Left)) {
@@ -336,18 +301,12 @@ plugin.drawUI = function(ui) {
 									Plugin.stop(f);
 								}
 								files.remove(f);
-								#if krom_windows
-								var cmd = "del /f ";
-								#else
-								var cmd = "rm ";
-								#end
-								Krom.sysCommand(cmd + '"' + path + '"');
+								File.delete(path);
 							}
 						});
 					}
 				}
 			}
-
 			ui._w = _w;
 		}, 500, 310);
 	}
