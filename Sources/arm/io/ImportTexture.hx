@@ -3,7 +3,7 @@ package arm.io;
 import kha.Image;
 import iron.data.Data;
 import arm.ui.UITrait;
-import arm.util.Path;
+import arm.sys.Path;
 import arm.Project;
 using StringTools;
 

@@ -3,7 +3,7 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
-import arm.util.Path;
+import arm.sys.Path;
 using StringTools;
 
 class UIFiles {

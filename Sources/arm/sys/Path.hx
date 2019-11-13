@@ -1,14 +1,30 @@
-package arm.util;
+package arm.sys;
 
+import iron.data.Data;
 using StringTools;
 
 class Path {
+
+	#if krom_windows
+	public static inline var sep = "\\";
+	#else
+	public static inline var sep = "/";
+	#end
 
 	public static var meshFormats = ["obj", "fbx", "stl", "blend"];
 	public static var textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr"];
 
 	public static var meshImporters = new Map<String, String->(Void->Void)->Void>();
 	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
+
+	public static function data():String {
+		#if krom_windows
+		var path = Data.dataPath.replace("/", "\\");
+		#else
+		var path = Data.dataPath;
+		#end
+		return Krom.getFilesLocation() + Path.sep + path;
+	}
 
 	public static function toRelative(from:String, to:String):String {
 		from = haxe.io.Path.normalize(from);
@@ -134,7 +150,7 @@ class Path {
 
 	public static function shortPath(s:String):String {
 		var cmd = 'for %I in ("' + s + '") do echo %~sI';
-		var save = Krom.getFilesLocation() + "\\data\\tmp.txt";
+		var save = data() + sep + "tmp.txt";
 		Krom.sysCommand(cmd + ' > "' + save + '"');
 		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
 	}

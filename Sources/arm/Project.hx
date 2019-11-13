@@ -11,7 +11,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
-import arm.util.Path;
+import arm.sys.Path;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;

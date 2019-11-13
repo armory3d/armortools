@@ -18,7 +18,7 @@ import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
 import arm.io.Importer;
-import arm.util.Path;
+import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.data.MaterialSlot;

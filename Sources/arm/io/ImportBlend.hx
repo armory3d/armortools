@@ -12,7 +12,7 @@ import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.nodes.NodesMaterial;
 import arm.nodes.MaterialParser;
-import arm.util.Path;
+import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
 using StringTools;

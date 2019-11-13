@@ -1,6 +1,5 @@
 package arm.io;
 
-import haxe.io.Bytes;
 import zui.Nodes;
 import iron.data.Data;
 import iron.data.MaterialData;
@@ -8,7 +7,8 @@ import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
-import arm.util.Path;
+import arm.sys.Path;
+import arm.sys.File;
 import arm.nodes.NodesMaterial;
 import arm.nodes.MaterialParser;
 import arm.data.MaterialSlot;
@@ -18,22 +18,7 @@ using StringTools;
 class ImportFolder {
 
 	public static function run(path:String) {
-		#if krom_windows
-		var cmd = "dir /b ";
-		var sep = "\\";
-		#else
-		var cmd = "ls ";
-		var sep = "/";
-		#end
-		#if krom_linux
-		var save = "/tmp";
-		#else
-		var save = Krom.savePath();
-		#end
-		save += sep + "dir.txt";
-		Krom.sysCommand(cmd + '"' + path + '"' + ' > ' + '"' + save + '"');
-		var str = Bytes.ofData(Krom.loadBlob(save)).toString();
-		var files = str.split("\n");
+		var files = File.readDirectory(path);
 		var mapbase = "";
 		var mapopac = "";
 		var mapnor = "";
@@ -41,16 +26,11 @@ class ImportFolder {
 		var maprough = "";
 		var mapmet = "";
 		var mapheight = "";
+
 		// Import maps
 		for (f in files) {
-			if (f.length == 0) continue;
-			f = f.rtrim();
 			if (!Path.isTexture(f)) continue;
-
-			f = path + sep + f;
-			#if krom_windows
-			f = f.replace("/", "\\");
-			#end
+			f = path + Path.sep + f;
 
 			// TODO: handle -albedo
 
@@ -87,6 +67,7 @@ class ImportFolder {
 
 			if (valid) ImportTexture.run(f);
 		}
+
 		// Create material
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
@@ -109,6 +90,7 @@ class ImportFolder {
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 
+		// Place nodes
 		var pos = 0;
 		var startY = 100;
 		var nodeH = 164;
@@ -182,6 +164,7 @@ class ImportFolder {
 			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
 			canvas.links.push(l);
 		}
+
 		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UITrait.inst.hwnd1.redraws = 2;

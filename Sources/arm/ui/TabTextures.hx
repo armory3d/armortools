@@ -5,7 +5,7 @@ import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
 import arm.io.Importer;
-import arm.util.Path;
+import arm.sys.Path;
 using StringTools;
 
 class TabTextures {

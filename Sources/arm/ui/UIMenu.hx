@@ -8,7 +8,7 @@ import iron.system.Input;
 import iron.data.Data;
 import arm.util.ViewportUtil;
 import arm.util.BuildMacros;
-import arm.util.Path;
+import arm.sys.Path;
 using StringTools;
 
 class UIMenu {

@@ -15,7 +15,7 @@ import arm.Project;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
-import arm.util.Path;
+import arm.sys.Path;
 import arm.util.Lz4;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
