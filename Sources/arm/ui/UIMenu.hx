@@ -18,13 +18,14 @@ class UIMenu {
 	public static var menuCategory = 0;
 	public static var keepOpen = false;
 	static var showMenuFirst = true;
+	static var hideMenu = false;
 	static var menuX = 0;
 	static var menuY = 0;
 	static var menuCommands:Zui->Void = null;
 
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
-		var ui = App.uibox;
+		var ui = App.uimenu;
 
 		var panelx = iron.App.x() - UITrait.inst.toolbarw;
 		var C = Config.raw;
@@ -187,10 +188,21 @@ class UIMenu {
 			}
 		}
 
-		// Hide menu
 		var first = showMenuFirst;
 		showMenuFirst = false;
-		if (!first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown)) {
+		hideMenu = !first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
+
+		ui.t.BUTTON_COL = BUTTON_COL;
+		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+		ui.t.ELEMENT_H = ELEMENT_H;
+		ui.endLayout();
+
+		g.begin(false);
+	}
+
+	public static function update() {
+		var ui = App.uimenu;
+		if (hideMenu) {
 			if (keepOpen) {
 				keepOpen = false;
 			}
@@ -201,22 +213,14 @@ class UIMenu {
 				menuCommands = null;
 			}
 		}
-
-		ui.t.BUTTON_COL = BUTTON_COL;
-		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-		ui.t.ELEMENT_H = ELEMENT_H;
-		ui.endLayout();
-
-		g.begin(false);
 	}
 
 	public static function draw(commands:Zui->Void = null, x = -1, y = -1) {
-		var uibox = App.uibox;
 		show = true;
 		menuCommands = commands;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuw = uibox.ELEMENT_W() * 1.7;
+		var menuw = App.uimenu.ELEMENT_W() * 1.7;
 		if (menuX + menuw > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuw);
 		}

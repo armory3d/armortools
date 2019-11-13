@@ -50,8 +50,10 @@ class App {
 	public static var theme:TTheme;
 	public static var color_wheel:Image;
 	public static var uibox:Zui;
+	public static var uimenu:Zui;
 	public static var fileArg = "";
 	public static var saveAndQuit = false;
+	public static var ELEMENT_H = 28;
 
 	public function new() {
 		Config.init();
@@ -122,6 +124,8 @@ class App {
 				Nodes.getEnumTexts = getEnumTexts;
 				Nodes.mapEnum = mapEnum;
 				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
+				uimenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
+				ELEMENT_H = uimenu.t.ELEMENT_H;
 
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
@@ -367,6 +371,7 @@ class App {
 		}
 
 		if (UIBox.show) UIBox.update();
+		if (UIMenu.show) UIMenu.update();
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;

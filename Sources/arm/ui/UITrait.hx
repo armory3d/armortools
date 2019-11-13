@@ -37,8 +37,8 @@ class UITrait {
 	public static inline var defaultToolbarW = 54;
 	public static inline var defaultHeaderH = 28;
 	public static var penPressureRadius = true;
+	public static var penPressureHardness = true;
 	public static var penPressureOpacity = false;
-	public static var penPressureHardness = false;
 
 	public var windowW = 280; // Panel width
 	public var toolbarw = defaultToolbarW;
@@ -420,13 +420,6 @@ class UITrait {
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 
-		var kb = Input.getKeyboard();
-		if (!App.uibox.isTyping) {
-			if (kb.started("escape")) {
-				UIBox.show = false;
-			}
-		}
-
 		if (!App.uienabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
@@ -461,6 +454,7 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 
+		var kb = Input.getKeyboard();
 		if (kb.started(Config.keymap.view_distract_free) ||
 		   (kb.started("escape") && !show && !UIBox.show)) {
 			toggleDistractFree();
@@ -634,10 +628,10 @@ class UITrait {
 			if (Log.messageTimer <= 0) statusHandle.redraws = 2;
 		}
 
+		if (!App.uienabled) return;
+
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
-
-		if (!App.uienabled) return;
 
 		var down = Operator.shortcut(Config.keymap.action_paint) ||
 				   (Operator.shortcut("alt+" + Config.keymap.action_paint) && Context.tool == ToolClone) ||

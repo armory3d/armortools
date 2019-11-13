@@ -62,10 +62,12 @@ class UIBox {
 	}
 
 	public static function update() {
+		if (UIMenu.show) return;
 		var mouse = Input.getMouse();
+		var kb = Input.getKeyboard();
 		var ui = App.uibox;
 		var inUse = ui.comboSelectedHandle != null;
-		if (ui.inputReleased && !inUse) {
+		if ((ui.inputReleased || kb.started("escape")) && !inUse && !ui.isTyping) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
 			var mw = Std.int(modalW * ui.SCALE());

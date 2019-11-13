@@ -408,7 +408,7 @@ class UINodes {
 
 			var cats = canvasType == 0 ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
-				if (ui.button(cats[i], Left) || (ui.isHovered && drawMenu)) {
+				if ((ui.button(cats[i], Left) && UITrait.inst.ui.comboSelectedHandle == null) || (ui.isHovered && drawMenu)) {
 					addNodeButton = true;
 					menuCategory = i;
 					popupX = wx + ui._x;

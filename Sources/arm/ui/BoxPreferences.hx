@@ -26,7 +26,7 @@ class BoxPreferences {
 			if (ui.tab(htab, "Interface")) {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
-				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+				ui.slider(hscale, "UI Scale", 1.0, 4.0, false, 10);
 				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
@@ -76,6 +76,7 @@ class BoxPreferences {
 						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 						ui.text("Restore defaults?", Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button("Confirm", Left)) {
+							ui.t.ELEMENT_H = App.ELEMENT_H;
 							Config.restore();
 							setScale();
 						}
@@ -129,8 +130,8 @@ class BoxPreferences {
 			}
 			if (ui.tab(htab, "Pen")) {
 				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), "Brush Radius");
-				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), "Brush Opacity");
 				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), "Brush Hardness");
+				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), "Brush Opacity");
 			}
 
 			UITrait.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
@@ -260,6 +261,7 @@ plugin.drawUI = function(ui) {
 					files = File.readDirectory(Path.data() + Path.sep + "plugins");
 				}
 
+				if (Config.raw.plugins == null) Config.raw.plugins = [];
 				var h = Id.handle({selected: false});
 				for (f in files) {
 					var isJs = f.endsWith(".js");
@@ -322,6 +324,7 @@ plugin.drawUI = function(ui) {
 		UINodes.inst.ui.setScale(scale);
 		UIView2D.inst.ui.setScale(scale);
 		App.uibox.setScale(scale);
+		App.uimenu.setScale(scale);
 		App.resize();
 	}
 }
