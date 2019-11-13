@@ -2,6 +2,7 @@ package arm;
 
 import haxe.Json;
 import haxe.io.Bytes;
+import kha.Display;
 import iron.data.Data;
 #if arm_painter
 import arm.ui.UITrait;
@@ -63,6 +64,10 @@ class Config {
 			raw.rp_ssgi = true;
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
+			var disp = Display.primary;
+			if (disp != null && disp.width >= 3000 && disp.height >= 2000) {
+				raw.window_scale = 2.0;
+			}
 		}
 
 		#if arm_painter
