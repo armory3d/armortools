@@ -1,11 +1,11 @@
-package arm.nodes.brush;
+package arm.node.brush;
 
 @:keep
-class IntegerNode extends LogicNode {
+class StringNode extends LogicNode {
 
-	public var value:Int;
+	public var value:String;
 
-	public function new(tree:LogicTree, value = 0) {
+	public function new(tree:LogicTree, value = "") {
 		super(tree);
 		this.value = value;
 	}

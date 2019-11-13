@@ -15,7 +15,7 @@ import iron.RenderPath;
 import arm.ui.UITrait;
 import arm.data.ConstData;
 import arm.data.LayerSlot;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
 import arm.Tool;

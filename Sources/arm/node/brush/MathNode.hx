@@ -1,4 +1,4 @@
-package arm.nodes.brush;
+package arm.node.brush;
 
 import iron.math.Vec4;
 

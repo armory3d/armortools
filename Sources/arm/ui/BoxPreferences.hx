@@ -5,7 +5,7 @@ import haxe.Json;
 import zui.Id;
 import zui.Zui;
 import iron.data.Data;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
 import arm.sys.Path;

@@ -5,7 +5,7 @@ import kha.Image;
 import iron.RenderPath;
 import iron.object.MeshObject;
 import arm.ui.UITrait;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 
 class LayerSlot {
 	public var id = 0;

@@ -76,8 +76,8 @@ class ArmBridge {
 	public static var Project = arm.Project;
 	public static var Res = arm.Res;
 	public static var Path = arm.sys.Path;
-	public static var NodesMaterial = arm.nodes.NodesMaterial;
-	public static var Material = arm.nodes.Material;
+	public static var NodesMaterial = arm.node.NodesMaterial;
+	public static var Material = arm.node.Material;
 	public static var Exporter = arm.io.Exporter;
 	public static var Importer = arm.io.Importer;
 	public static var UITrait = arm.ui.UITrait;

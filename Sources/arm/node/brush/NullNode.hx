@@ -1,4 +1,4 @@
-package arm.nodes.brush;
+package arm.node.brush;
 
 @:keep
 class NullNode extends LogicNode {

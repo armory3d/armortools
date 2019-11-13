@@ -4,7 +4,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Time;
 import arm.data.LayerSlot;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.util.UVUtil;
 
 class TabLayers {

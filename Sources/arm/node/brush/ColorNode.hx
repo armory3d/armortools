@@ -1,13 +1,16 @@
-package arm.nodes.brush;
+package arm.node.brush;
+
+import iron.math.Vec4;
 
 @:keep
-class StringNode extends LogicNode {
+class ColorNode extends LogicNode {
 
-	public var value:String;
+	var value = new Vec4();
 
-	public function new(tree:LogicTree, value = "") {
+	public function new(tree:LogicTree, r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
 		super(tree);
-		this.value = value;
+
+		value.set(r, g, b, a);
 	}
 
 	override function get(from:Int):Dynamic {

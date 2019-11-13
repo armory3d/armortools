@@ -68,7 +68,7 @@ if (build === 'player') {
 }
 else { // painter, creator
 	project.addDefine('arm_painter');
-	project.addParameter('--macro include("arm.nodes.brush")');
+	project.addParameter('--macro include("arm.node.brush")');
 	project.addDefine('arm_appwh');
 	project.addDefine('arm_skip_envmap');
 	project.addDefine('arm_resizable');

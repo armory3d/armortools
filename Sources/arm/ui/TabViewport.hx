@@ -6,7 +6,7 @@ import zui.Id;
 import zui.Ext;
 import iron.Scene;
 import arm.io.Importer;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.util.UVUtil;
 using StringTools;
 

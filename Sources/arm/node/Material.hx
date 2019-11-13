@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package arm.nodes;
+package arm.node;
 
 import zui.Nodes;
 import iron.data.SceneFormat;
-import arm.nodes.MaterialShader;
+import arm.node.MaterialShader;
 using StringTools;
 
 class Material {

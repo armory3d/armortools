@@ -1,4 +1,4 @@
-package arm.nodes;
+package arm.node;
 
 class MaterialFunctions {
 

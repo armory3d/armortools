@@ -6,7 +6,7 @@ import iron.data.SceneFormat;
 import iron.system.ArmPack;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.util.Lz4;
+import arm.format.Lz4;
 import arm.sys.Path;
 import arm.Project;
 using StringTools;

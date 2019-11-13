@@ -1,11 +1,11 @@
-package arm.nodes;
+package arm.node;
 
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.nodes.MaterialShader;
+import arm.node.MaterialShader;
 import arm.Tool;
 
 class MaterialParser {
@@ -199,7 +199,7 @@ class MaterialParser {
 	}
 
 	public static function parseBrush() {
-		Logic.packageName = "arm.nodes.brush";
+		Logic.packageName = "arm.node.brush";
 		var tree = Logic.parse(UINodes.inst.canvasBrush, false);
 	}
 }

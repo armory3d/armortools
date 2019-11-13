@@ -3,7 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 
 #if kha_direct3d12
 

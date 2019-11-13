@@ -19,7 +19,7 @@ import arm.ui.UIBox;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.io.Importer;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;

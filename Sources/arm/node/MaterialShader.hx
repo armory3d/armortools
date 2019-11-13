@@ -1,4 +1,4 @@
-package arm.nodes;
+package arm.node;
 
 import zui.Nodes;
 import iron.data.SceneFormat;

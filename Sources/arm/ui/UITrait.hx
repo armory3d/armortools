@@ -15,7 +15,7 @@ import iron.system.Input;
 import iron.system.Time;
 import iron.RenderPath;
 import iron.Scene;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;

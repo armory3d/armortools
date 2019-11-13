@@ -1,4 +1,4 @@
-package arm.nodes;
+package arm.node;
 
 import zui.Nodes;
 
@@ -11,7 +11,7 @@ class Logic {
 	static var parsed_labels:Map<String, String> = null;
 	static var nodeMap:Map<String, LogicNode>;
 
-	public static var packageName = "arm.nodes.logic";
+	public static var packageName = "arm.node.logic";
 
 	public static function getNode(id: Int): TNode {
 		for (n in nodes) if (n.id == id) return n;

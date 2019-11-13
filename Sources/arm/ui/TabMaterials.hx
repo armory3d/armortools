@@ -7,7 +7,7 @@ import iron.system.Time;
 import iron.system.Input;
 import iron.object.MeshObject;
 import iron.data.Data;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;

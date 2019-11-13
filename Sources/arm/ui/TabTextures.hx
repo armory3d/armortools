@@ -108,7 +108,7 @@ class TabTextures {
 								Project.assets.splice(i, 1);
 								Project.assetNames.splice(i, 1);
 								iron.system.Tween.timer(0.1, function() {
-									arm.nodes.MaterialParser.parsePaintMaterial();
+									arm.node.MaterialParser.parsePaintMaterial();
 									arm.util.RenderUtil.makeMaterialPreview();
 									UITrait.inst.hwnd1.redraws = 2;
 								});

@@ -9,8 +9,8 @@ import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.nodes.NodesMaterial;
-import arm.nodes.MaterialParser;
+import arm.node.NodesMaterial;
+import arm.node.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.Tool;
 using StringTools;
@@ -95,78 +95,46 @@ class ImportFolder {
 		var startY = 100;
 		var nodeH = 164;
 		if (mapbase != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapbase);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapbase, startY + nodeH * pos, nout.id, 0);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 0 };
-			canvas.links.push(l);
 		}
 		if (mapopac != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapopac);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapopac, startY + nodeH * pos, nout.id, 1);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 1 };
-			canvas.links.push(l);
 		}
 		if (mapocc != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapocc);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapocc, startY + nodeH * pos, nout.id, 2);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 2 };
-			canvas.links.push(l);
 		}
 		if (maprough != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(maprough);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(maprough, startY + nodeH * pos, nout.id, 3);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 3 };
-			canvas.links.push(l);
 		}
 		if (mapmet != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapmet);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapmet, startY + nodeH * pos, nout.id, 4);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 4 };
-			canvas.links.push(l);
 		}
 		if (mapnor != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapnor);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapnor, startY + nodeH * pos, nout.id, 5);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 5 };
-			canvas.links.push(l);
 		}
 		if (mapheight != "") {
-			var n = NodesMaterial.createImageTexture();
-			n.buttons[0].default_value = App.getAssetIndex(mapheight);
-			n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
-			n.x = 72;
-			n.y = startY + nodeH * pos;
+			placeImageNode(mapheight, startY + nodeH * pos, nout.id, 7);
 			pos++;
-			var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: nout.id, to_socket: 7 };
-			canvas.links.push(l);
 		}
 
 		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UITrait.inst.hwnd1.redraws = 2;
+	}
+
+	static function placeImageNode(asset:String, ny:Int, to_id:Int, to_socket:Int) {
+		var n = NodesMaterial.createImageTexture();
+		n.buttons[0].default_value = App.getAssetIndex(asset);
+		n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
+		n.x = 72;
+		n.y = ny;
+		var l = { id: UINodes.inst.nodes.getLinkId(UINodes.inst.canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+		UINodes.inst.canvas.links.push(l);
 	}
 }

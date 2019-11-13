@@ -10,7 +10,7 @@ import iron.math.Mat4;
 import arm.ui.UITrait;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathDeferred;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.io.Importer;
 import arm.Tool;
 

@@ -13,7 +13,7 @@ import arm.util.ViewportUtil;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 import arm.Tool;
 #end
 
@@ -767,7 +767,7 @@ class RenderPathDeferred {
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
 				#if arm_painter
-				if (arm.nodes.MaterialBuilder.heightUsed) {
+				if (arm.node.MaterialBuilder.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}

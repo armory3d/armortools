@@ -1,4 +1,4 @@
-package arm.nodes;
+package arm.node;
 
 class LogicNode {
 
@@ -41,16 +41,16 @@ class LogicNode {
 		}
 	}
 
-	@:allow(arm.nodes.LogicNodeInput)
+	@:allow(arm.node.LogicNodeInput)
 	function get(from:Int):Dynamic { return this; }
 
-	@:allow(arm.nodes.LogicNodeInput)
+	@:allow(arm.node.LogicNodeInput)
 	function set(value:Dynamic) { }
 }
 
 class LogicNodeInput {
 
-	@:allow(arm.nodes.LogicNode)
+	@:allow(arm.node.LogicNode)
 	var node:LogicNode;
 	var from:Int; // Socket index
 
@@ -59,12 +59,12 @@ class LogicNodeInput {
 		this.from = from;
 	}
 
-	@:allow(arm.nodes.LogicNode)
+	@:allow(arm.node.LogicNode)
 	function get():Dynamic {
 		return node.get(from);
 	}
 
-	@:allow(arm.nodes.LogicNode)
+	@:allow(arm.node.LogicNode)
 	function set(value:Dynamic) {
 		node.set(value);
 	}

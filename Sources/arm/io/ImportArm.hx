@@ -17,14 +17,14 @@ import arm.ui.UINodes;
 import arm.ui.UIFiles;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.util.Lz4;
+import arm.format.Lz4;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
-import arm.nodes.MaterialParser;
+import arm.node.MaterialParser;
 
 class ImportArm {
 

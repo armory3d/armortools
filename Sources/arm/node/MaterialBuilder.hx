@@ -1,9 +1,9 @@
-package arm.nodes;
+package arm.node;
 
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
-import arm.nodes.MaterialShader;
+import arm.node.MaterialShader;
 import arm.Tool;
 
 class MaterialBuilder {
