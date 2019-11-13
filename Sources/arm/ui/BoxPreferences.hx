@@ -287,7 +287,7 @@ plugin.drawUI = function(ui) {
 				var h = Id.handle({selected: false});
 				for (f in files) {
 					var isJs = f.endsWith(".js");
-					var isWasm = f.endsWith(".wasm");
+					var isWasm = false; //f.endsWith(".wasm");
 					if (!isJs && !isWasm) continue;
 					var enabled = Config.raw.plugins.indexOf(f) >= 0;
 					h.selected = enabled;

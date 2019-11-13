@@ -24,7 +24,9 @@ class TabOutliner {
 					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}
 				if (o.children.length > 0) {
-					b = ui.panel(h.nest(i, {selected: true}), o.name, true);
+					ui.row([1/13, 12/13]);
+					b = ui.panel(h.nest(i, {selected: true}), "", true);
+					ui.text(o.name);
 				}
 				else {
 					ui._x += 18; // Sign offset
@@ -34,6 +36,7 @@ class TabOutliner {
 				if (ui.isReleased) {
 					Context.selectObject(o);
 					Context.ddirty = 2;
+					UITrait.inst.hwnd1.redraws = 2;
 				}
 				i++;
 				if (b) {
