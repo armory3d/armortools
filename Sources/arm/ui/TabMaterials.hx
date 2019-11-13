@@ -115,7 +115,7 @@ class TabMaterials {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right, ui.t.CONTEXT_COL);
+							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);

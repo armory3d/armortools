@@ -18,7 +18,7 @@ class TabLayers {
 
 				// UIMenu.draw(function(ui:Zui) {
 				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
-				// 	ui.text("New", Right, ui.t.CONTEXT_COL);
+				// 	ui.text("New", Right, ui.t.HIGHLIGHT_COL);
 				// 	if (ui.button("Paint Layer", Left)) {}
 				// 	if (ui.button("Fill Layer", Left)) {}
 				// 	if (ui.button("Black Mask", Left)) {}
@@ -127,7 +127,7 @@ class TabLayers {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui:Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
-							ui.text(l.name + " Mask", Right, ui.t.CONTEXT_COL);
+							ui.text(l.name + " Mask", Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Delete", Left)) {
 								Context.setLayer(l);
 								History.deleteMask();
@@ -182,7 +182,7 @@ class TabLayers {
 						else {
 							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (18 + add), ui.t.SEPARATOR_COL);
 						}
-						ui.text(l.name, Right, ui.t.CONTEXT_COL);
+						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
 						if (ui.button("Export", Left)) BoxExport.showTextures();
 
