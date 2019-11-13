@@ -352,10 +352,7 @@ class Material {
 			if (inp.type == 'VALUE') //# Unlinked reroute
 				return vec3([0.0, 0.0, 0.0]);
 			else {
-				// if mat_batch() && inp.is_uniform:
-					// return to_uniform(inp);
-				// else
-					return vec3(inp.default_value);
+				return vec3(inp.default_value);
 			}
 		}
 	}
@@ -363,10 +360,8 @@ class Material {
 	static function parse_vector(node:TNode, socket:TNodeSocket):String {
 
 		// RGB
-
 		//     if (node.type == 'GROUP')
 		//         return parse_group(node, socket)
-
 		//     else if (node.type == 'GROUP_INPUT')
 		//         return parse_group_input(node, socket)
 
@@ -378,16 +373,6 @@ class Material {
 			}
 			else { // Vector
 				curshader.context.add_elem('tex', 'short2norm'); // UVMaps only for now
-				// mat = mat_get_material()
-				// mat_users = mat_get_material_users()
-				// if mat_users != None and mat in mat_users:
-					// mat_user = mat_users[mat][0]
-					// if hasattr(mat_user.data, 'uv_layers'): # No uvlayers for Curve
-						// lays = mat_user.data.uv_layers
-						// # Second uvmap referenced
-						// if len(lays) > 1 and node.attribute_name == lays[1].name:
-							// con.add_elem('tex1', 'short2norm')
-							// return 'vec3(texCoord1.x, 1.0 - texCoord1.y, 0.0)'
 				return 'vec3(texCoord.x, 1.0 - texCoord.y, 0.0)';
 			}
 		}
@@ -1324,17 +1309,6 @@ class Material {
 				var texstore = texture_store(node, tex, tex_name, to_linear);
 				return '$texstore.a';
 			}
-			// # Already fetched
-			// if res_var_name(node, node.outputs[0]) in parsed:
-			//     return '{0}.a'.format(store_var_name(node))
-			// tex_name = c_state.safesrc(node.name)
-			// tex = c_state.make_texture(node, tex_name)
-			// if tex != None:
-			//     return '{0}.a'.format(texture_store(node, tex, tex_name))
-			// else:
-			//     tex_store = store_var_name(node) # Pink color for missing texture
-			//     curshader.write('vec4 {0} = vec4(1.0, 0.0, 1.0, 1.0);'.format(tex_store))
-			//     return '{0}.a'.format(tex_store)
 		}
 
 		else if (node.type == 'TEX_MAGIC') {
@@ -1659,23 +1633,8 @@ class Material {
 				curshader.write('float $res_var = $res;');
 			}
 		}
-		// # Normal map already parsed, return
-		// else if (from_node.type == 'NORMAL_MAP')
-			// return null
 		return res_var;
 	}
-
-	// static function glsl_type(t:String):String {
-	// 	if (t == 'RGB' || t == 'RGBA' || t == 'VECTOR')
-	// 		return 'vec3';
-	// 	else
-	// 		return 'float';
-	// }
-
-	// def to_uniform(inp):
- //    uname = c_state.safesrc(inp.node.name) + c_state.safesrc(inp.name)
- //    curshader.add_uniform(glsl_type(inp.type) + ' ' + uname)
- //    return uname
 
 	static function store_var_name(node:TNode):String {
 		return node_name(node) + '_store';
@@ -1701,10 +1660,7 @@ class Material {
 			curshader.write('if (texCoordBlend.z > 0) $tex_store += texture($tex_name, ${uv_name}2.xy) * texCoordBlend.z;');
 		}
 		else {
-			// if c_state.mat_texture_grad():
-				// curshader.write('vec4 {0} = textureGrad({1}, {2}.xy, g2.xy, g2.zw);'.format(tex_store, tex_name, uv_name))
-			// else:
-				curshader.write('vec4 $tex_store = texture($tex_name, $uv_name.xy);');
+			curshader.write('vec4 $tex_store = texture($tex_name, $uv_name.xy);');
 		}
 
 		if (sample_bump) {
@@ -1766,8 +1722,6 @@ class Material {
 
 	static function node_name(node:TNode):String {
 		var s = safesrc(node.name) + node.id;
-		// if len(parents) > 0:
-			// s = c_state.safesrc(parents[-1].name) + '_' + s
 		return s;
 	}
 
@@ -1789,134 +1743,24 @@ class Material {
 			file: ''
 		};
 
-		// var image = image_node.image;
-		// if (matname == null) {
-			// matname = material.name;
-		// }
-
-		// if (image == null) {
-			// return null;
-		// }
-
 		var filepath = image_node.buttons[0].data;
-
 		if (filepath == '') {
-			// log.warn(matname + '/' + image.name + ' - file path not found')
 			return null;
 		}
 
-		// Reference image name
-		// tex.file = extract_filename(image.filepath);
-		// tex.file = safestr(tex.file);
-
-		// tex.file = image_node.buttons[0].default_value;
 		tex.file = filepath;
 
 		var s = tex.file.split('.');
-
 		if (s.length == 1) {
-			// log.warn(matname + '/' + image.name + ' - file extension required for image name')
 			return null;
 		}
 
-		// var ext = s[1].lower();
-		// do_convert = ext != 'jpg' and ext != 'png' and ext != 'hdr' and ext != 'mp4' # Convert image
-		// if do_convert:
-			// tex['file'] = tex['file'].rsplit('.', 1)[0] + '.jpg'
-			// # log.warn(matname + '/' + image.name + ' - image format is not (jpg/png/hdr), converting to jpg.')
-
-		// if image.packed_file != None:
-		// 	# Extract packed data
-		// 	unpack_path = arm.utils.get_fp() + '/build/compiled/Assets/unpacked'
-		// 	if not os.path.exists(unpack_path):
-		// 		os.makedirs(unpack_path)
-		// 	unpack_filepath = unpack_path + '/' + tex['file']
-
-		// 	if do_convert:
-		// 		if not os.path.isfile(unpack_filepath):
-		// 			arm.utils.write_image(image, unpack_filepath)
-
-		// 	# Write bytes if size is different or file does not exist yet
-		// 	elif os.path.isfile(unpack_filepath) == False or os.path.getsize(unpack_filepath) != image.packed_file.size:
-		// 		with open(unpack_filepath, 'wb') as f:
-		// 			f.write(image.packed_file.data)
-
-		// 	assets.add(unpack_filepath)
-
-		// else:
-			// if not os.path.isfile(arm.utils.asset_path(image.filepath)):
-				// log.warn('Material ' + matname + '/' + image.name + ' - file not found(' + image.filepath + ')')
-				// return None
-
-			// if do_convert:
-			// 	converted_path = arm.utils.get_fp() + '/build/compiled/Assets/unpacked/' + tex['file']
-			// 	# TODO: delete cache when file changes
-			// 	if not os.path.isfile(converted_path):
-			// 		arm.utils.write_image(image, converted_path)
-			// 	assets.add(converted_path)
-			// else:
-				// Link image path to assets
-				// TODO: Khamake converts .PNG to .jpg? Convert ext to lowercase on windows
-				// if arm.utils.get_os() == 'win':
-					// s = image.filepath.rsplit('.', 1)
-					// assets.add(arm.utils.asset_path(s[0] + '.' + s[1].lower()))
-				// else:
-					// assets.add(asset_path(image.filepath));
-
-
-		 // if image_format != 'RGBA32':
-			 // tex['format'] = image_format
-
-		var interpolation = 'Smart';//image_node.interpolation;
-		var aniso = 'On';//wrd.anisotropic_filtering_state;
-		if (aniso == 'On') {
-			interpolation = 'Smart';
-		}
-		// else if (aniso == 'Off' && interpolation == 'Smart') {
-			// interpolation = 'Linear';
-		// }
-
-		// TODO: Blender seems to load full images on size request, cache size instead
-		// var powimage = true;//is_pow(image.size[0]) && is_pow(image.size[1]);
-
-		// Pow2 required to generate mipmaps
-		// if (powimage) {
-		// 	if (interpolation == 'Cubic') { // Mipmap linear
-		// 		tex.mipmap_filter = 'linear';
-		// 		tex.generate_mipmaps = true;
-		// 	}
-		// 	else if (interpolation == 'Smart') { // Mipmap anisotropic
-				tex.min_filter = 'anisotropic';
-				tex.mipmap_filter = 'linear';
-				tex.generate_mipmaps = true;
-		// 	}
-		// }
-		// else if (image_node.interpolation == 'Cubic' || image_node.interpolation == 'Smart') {
-			// log.warn(matname + '/' + image.name + ' - power of 2 texture required for ' + image_node.interpolation + ' interpolation')
-		// }
-
+		var interpolation = 'Smart';
+		tex.min_filter = 'anisotropic';
+		tex.mipmap_filter = 'linear';
+		tex.generate_mipmaps = true;
 		tex.u_addressing = 'repeat';
 		tex.v_addressing = 'repeat';
-		// if (image_node.extension != 'REPEAT') { // Extend or clip
-			// tex.u_addressing = 'clamp';
-			// tex.v_addressing = 'clamp';
-		// }
-		// else {
-			// if state.target == 'html5' and powimage == False:
-				// log.warn(matname + '/' + image.name + ' - non power of 2 texture can not use repeat mode on HTML5 target')
-				// tex.u_addressing = 'clamp';
-				// tex.v_addressing = 'clamp';
-		// }
-
-		// if image.source == 'MOVIE': # Just append movie texture trait for now
-		// 	movie_trait = {}
-		// 	movie_trait['type'] = 'Script'
-		// 	movie_trait['class_name'] = 'armory.trait.internal.MovieTexture'
-		// 	movie_trait['parameters'] = [tex['file']]
-		// 	for o in mat_state.mat_armusers[mat_state.material]:
-		// 		o['traits'].append(movie_trait)
-		// 	tex['source'] = 'movie'
-		// 	tex['file'] = '' # MovieTexture will load the video
 
 		return tex;
 	}
@@ -1926,19 +1770,15 @@ class Material {
 	}
 
 	static function asset_path(s:String):String {
-		// return s[2:] if s[:2] == '//' else s # Remove leading '//';
 		return s;
 	}
 
 	static function extract_filename(s:String):String {
-		// return os.path.basename(asset_path(s));
 		var ar = s.split(".");
 		return ar[ar.length - 2] + "." + ar[ar.length - 1];
 	}
 
 	static function safestr(s:String):String {
-		// for c in r'[]/\;,><&*:%=+@!#^()|?^':
-			// s = s.replace(c, '-')
 		return s;
 	}
 }
