@@ -428,7 +428,9 @@ class UINodes {
 			ui.t.BUTTON_COL = BUTTON_COL;
 		}
 
-		ui.endWindow();
+		ui.end(!drawMenu);
+
+		g.begin(false);
 
 		if (drawMenu) {
 			var list = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
@@ -441,7 +443,7 @@ class UINodes {
 			var menuw = Std.int(ew * 1.6);
 			g.fillRect(popupX, py, menuw, ph);
 
-			ui.beginLayout(g, Std.int(popupX), Std.int(py), menuw);
+			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -458,12 +460,8 @@ class UINodes {
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-			ui.endLayout();
+			ui.endRegion();
 		}
-
-		ui.end();
-
-		g.begin(false);
 
 		if (showMenu) {
 			showMenu = false;

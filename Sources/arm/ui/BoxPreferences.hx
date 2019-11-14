@@ -319,7 +319,7 @@ plugin.drawUI = function(ui) {
 		UITrait.inst.windowW = Std.int(UITrait.defaultWindowW * scale);
 		UITrait.inst.toolbarw = Std.int(UITrait.defaultToolbarW * scale);
 		UITrait.inst.headerh = Std.int(UITrait.defaultHeaderH * scale);
-		UITrait.inst.menubarw = Std.int(215 * scale);
+		UITrait.inst.menubarw = Std.int(UITrait.defaultMenubarW * scale);
 		UITrait.inst.setIconScale();
 		UINodes.inst.ui.setScale(scale);
 		UIView2D.inst.ui.setScale(scale);

@@ -16,6 +16,7 @@ class UIBox {
 	public static var boxCommands:Zui->Void = null;
 	static var modalW = 400;
 	static var modalH = 170;
+	static var drawn = false;
 
 	public static function render(g:kha.graphics2.Graphics) {
 		g.end();
@@ -59,6 +60,7 @@ class UIBox {
 		}
 
 		g.begin(false);
+		drawn = true;
 	}
 
 	public static function update() {
@@ -67,7 +69,7 @@ class UIBox {
 		var kb = Input.getKeyboard();
 		var ui = App.uibox;
 		var inUse = ui.comboSelectedHandle != null;
-		if ((ui.inputReleased || kb.started("escape")) && !inUse && !ui.isTyping) {
+		if (drawn && (ui.inputReleased || kb.started("escape")) && !inUse && !ui.isTyping) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
 			var mw = Std.int(modalW * ui.SCALE());
@@ -105,5 +107,6 @@ class UIBox {
 		hwnd.dragX = 0;
 		hwnd.dragY = 0;
 		show = true;
+		drawn = false;
 	}
 }

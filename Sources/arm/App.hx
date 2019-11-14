@@ -123,8 +123,8 @@ class App {
 				color_wheel = image;
 				Nodes.getEnumTexts = getEnumTexts;
 				Nodes.mapEnum = mapEnum;
-				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
-				uimenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale });
+				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
+				uimenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
 				ELEMENT_H = uimenu.t.ELEMENT_H;
 
 				// File to open passed as argument

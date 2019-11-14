@@ -36,6 +36,7 @@ class UITrait {
 	public static var defaultWindowW = 280;
 	public static inline var defaultToolbarW = 54;
 	public static inline var defaultHeaderH = 28;
+	public static inline var defaultMenubarW = 280;
 	public static var penPressureRadius = true;
 	public static var penPressureHardness = true;
 	public static var penPressureOpacity = false;
@@ -43,7 +44,7 @@ class UITrait {
 	public var windowW = 280; // Panel width
 	public var toolbarw = defaultToolbarW;
 	public var headerh = defaultHeaderH;
-	public var menubarw = 215;
+	public var menubarw = defaultMenubarW;
 	public var tabx = 0;
 	public var tabh = 0;
 	public var tabh1 = 0;
@@ -268,7 +269,7 @@ class UITrait {
 		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 		toolbarw = Std.int(defaultToolbarW * Config.raw.window_scale);
 		headerh = Std.int(defaultHeaderH * Config.raw.window_scale);
-		menubarw = Std.int(215 * Config.raw.window_scale);
+		menubarw = Std.int(defaultMenubarW * Config.raw.window_scale);
 
 		if (Project.materials == null) {
 			Project.materials = [];
@@ -901,7 +902,6 @@ class UITrait {
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
 		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(defaultHeaderH * ui.SCALE()))) {
 			var _w = ui._w;
-			ui._w = Std.int(ui._w * 0.5);
 			ui._x += 1; // Prevent "File" button highlight on startup
 
 			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -909,11 +909,11 @@ class UITrait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			if (ui.button("File") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 0; };
-			if (ui.button("Edit") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 1; };
-			if (ui.button("Camera") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 2; };
-			if (ui.button("View") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 3; };
-			if (ui.button("Help") || (UIMenu.show && ui.isHovered)) { UIMenu.show = true; UIMenu.menuCategory = 4; };
+			menuButton("File", 0);
+			menuButton("Edit", 1);
+			menuButton("Viewport", 2);
+			menuButton("Camera", 3);
+			menuButton("Help", 4);
 
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -1144,6 +1144,12 @@ class UITrait {
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - headerh, System.windowWidth() - toolbarw - windowW, headerh)) {
 			ui._y += 2;
 
+			var modeHandle = Id.handle({position: 0});
+			UITrait.inst.viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"], "Mode");
+			if (modeHandle.changed) {
+				MaterialParser.parseMeshMaterial();
+			}
+
 			var scene = Scene.active;
 			var cam = scene.cameras[0];
 			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
@@ -1190,10 +1196,6 @@ class UITrait {
 				TabTextures.draw();
 				TabMeshes.draw();
 				TabBrowser.draw();
-				TabViewport.draw();
-				#if arm_creator
-				TabWorld.draw();
-				#end
 			}
 		}
 		else if (worktab.position == SpaceScene) {
@@ -1209,15 +1211,22 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
-				TabViewport.draw();
-				#if arm_creator
-				TabWorld.draw();
-				#end
+				TabBrowser.draw();
 			}
 		}
 
 		ui.end();
 		g.begin(false);
+	}
+
+	function menuButton(name:String, category:Int) {
+		ui._w = Std.int(ui.ops.font.width(ui.fontSize, name) + 25);
+		if (ui.button(name) || (UIMenu.show && ui.isHovered)) {
+			UIMenu.show = true;
+			UIMenu.menuCategory = category;
+			UIMenu.menuX = Std.int(ui._x - ui._w);
+			UIMenu.menuY = headerh;
+		}
 	}
 
 	public function setIconScale() {
