@@ -156,6 +156,7 @@ class BoxPreferences {
 				var filterHandle = Id.handle({selected: UITrait.inst.textureFilter});
 				UITrait.inst.textureFilter = ui.check(filterHandle, "Filter Textures");
 				if (filterHandle.changed) {
+					MaterialParser.parsePaintMaterial();
 					MaterialParser.parseMeshMaterial();
 				}
 				#if (!kha_direct3d12)

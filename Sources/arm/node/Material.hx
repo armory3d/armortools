@@ -1746,8 +1746,18 @@ class Material {
 			name: tex_name,
 			file: filepath
 		};
-		tex.min_filter = 'anisotropic';
-		tex.mipmap_filter = 'linear';
+
+		if (arm.ui.UITrait.inst.textureFilter) {
+			tex.min_filter = 'anisotropic';
+			tex.mag_filter = 'linear';
+			tex.mipmap_filter = 'linear';
+		}
+		else {
+			tex.min_filter = 'point';
+			tex.mag_filter = 'point';
+			tex.mipmap_filter = 'no';
+		}
+
 		tex.generate_mipmaps = true;
 		tex.u_addressing = 'repeat';
 		tex.v_addressing = 'repeat';
