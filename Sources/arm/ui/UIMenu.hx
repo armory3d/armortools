@@ -27,16 +27,16 @@ class UIMenu {
 	public static var menuX = 0;
 	public static var menuY = 0;
 	public static var keepOpen = false;
+	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 	static var menuCommands:Zui->Void = null;
-	static var changedLast = false;
 	static var viewportColorHandle = Id.handle({selected: false});
 
 	@:access(zui.Zui)
 	public static function render(g:kha.graphics2.Graphics) {
 		var ui = App.uimenu;
-		var menuW = Std.int(ui.ELEMENT_W() * 1.7);
+		var menuW = Std.int(ui.ELEMENT_W() * 1.8);
 		var BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -50,7 +50,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 15, 12, 5];
+			var menuItems = [12, 3, 13, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			#if (!kha_direct3d12) menuItems[2] += 2; #end
 			var sepw = menuW / ui.SCALE();
@@ -116,6 +116,8 @@ class UIMenu {
 					App.resize();
 				}
 
+				ui.changed = false;
+
 				var p = Scene.active.world.probe;
 				var envHandle = Id.handle();
 				envHandle.value = p.raw.strength;
@@ -143,18 +145,6 @@ class UIMenu {
 					if (sxhandle.changed) Context.ddirty = 2;
 				}
 				#end
-
-				var cam = Scene.active.camera.data.raw;
-				var near_handle = Id.handle({value: cam.near_plane});
-				var far_handle = Id.handle({value: cam.far_plane});
-				near_handle.value = Std.int(near_handle.value * 1000) / 1000;
-				far_handle.value = Std.int(far_handle.value * 100) / 100;
-				ui.changed = false;
-				cam.near_plane = ui.slider(near_handle, "Clip Start", 0.001, 1.0, true);
-				cam.far_plane = ui.slider(far_handle, "Clip End", 50.0, 100.0, true);
-				if (ui.changed) {
-					Scene.active.camera.buildProjection();
-				}
 
 				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
 				UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
@@ -208,6 +198,7 @@ class UIMenu {
 							b.set(3, 255);
 							UITrait.inst.emptyEnvmap = Image.fromBytes(b, 1, 1);
 							Context.ddirty = 2;
+							if (ui.inputStarted) changeStarted = true;
 						}
 					}
 				}
@@ -244,12 +235,47 @@ class UIMenu {
 				if (ui.button("Top", Left, Config.keymap.view_top)) { ViewportUtil.setView(0, 0, 1, 0, 0, 0); }
 				if (ui.button("Bottom", Left, Config.keymap.view_bottom)) { ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("Orbit Left", Left, Config.keymap.view_orbit_left)) { ViewportUtil.orbit(-Math.PI / 12, 0); keepOpen = true; }
-				if (ui.button("Orbit Right", Left, Config.keymap.view_orbit_right)) { ViewportUtil.orbit(Math.PI / 12, 0); keepOpen = true; }
-				if (ui.button("Orbit Up", Left, Config.keymap.view_orbit_up)) { ViewportUtil.orbit(0, -Math.PI / 12); keepOpen = true; }
-				if (ui.button("Orbit Down", Left, Config.keymap.view_orbit_down)) { ViewportUtil.orbit(0, Math.PI / 12); keepOpen = true; }
-				if (ui.button("Orbit Opposite", Left, Config.keymap.view_orbit_opposite)) { ViewportUtil.orbit(Math.PI, 0); keepOpen = true; }
+
+				ui.changed = false;
+
+				if (ui.button("Orbit Left", Left, Config.keymap.view_orbit_left)) { ViewportUtil.orbit(-Math.PI / 12, 0); }
+				if (ui.button("Orbit Right", Left, Config.keymap.view_orbit_right)) { ViewportUtil.orbit(Math.PI / 12, 0); }
+				if (ui.button("Orbit Up", Left, Config.keymap.view_orbit_up)) { ViewportUtil.orbit(0, -Math.PI / 12); }
+				if (ui.button("Orbit Down", Left, Config.keymap.view_orbit_down)) { ViewportUtil.orbit(0, Math.PI / 12); }
+				if (ui.button("Orbit Opposite", Left, Config.keymap.view_orbit_opposite)) { ViewportUtil.orbit(Math.PI, 0); }
 				// ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+
+				var cam = Scene.active.camera;
+				var camRaw = cam.data.raw;
+				var near_handle = Id.handle({value: camRaw.near_plane});
+				var far_handle = Id.handle({value: camRaw.far_plane});
+				near_handle.value = Std.int(near_handle.value * 1000) / 1000;
+				far_handle.value = Std.int(far_handle.value * 100) / 100;
+				camRaw.near_plane = ui.slider(near_handle, "Clip Start", 0.001, 1.0, true);
+				camRaw.far_plane = ui.slider(far_handle, "Clip End", 50.0, 100.0, true);
+				if (near_handle.changed || far_handle.changed) {
+					Scene.active.camera.buildProjection();
+				}
+
+				UITrait.inst.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+				cam.data.raw.fov = ui.slider(UITrait.inst.fovHandle, "FoV", 0.3, 2.0, true);
+				if (UITrait.inst.fovHandle.changed) {
+					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+				}
+
+				// UITrait.inst.cameraControls = ui.combo(Id.handle({position: UITrait.inst.cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
+				// UITrait.inst.cameraType = ui.combo(UITrait.inst.camHandle, ["Perspective", "Orthographic"], "Type");
+
+				UITrait.inst.cameraControls = Ext.inlineRadio(ui, Id.handle({position: UITrait.inst.cameraControls}), ["Orbit", "Rotate", "Fly"], Left);
+				UITrait.inst.cameraType = Ext.inlineRadio(ui, UITrait.inst.camHandle, ["Perspective", "Orthographic"], Left);
+
+				if (ui.isHovered) ui.tooltip("Camera Type (" + Config.keymap.view_camera_type + ")");
+				if (UITrait.inst.camHandle.changed) {
+					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+				}
+
+				if (ui.changed) keepOpen = true;
+
 			}
 			else if (menuCategory == 4) {
 				if (ui.button("Manual", Left)) {
@@ -313,9 +339,10 @@ class UIMenu {
 		}
 
 		var first = showMenuFirst;
+		hideMenu = ui.comboSelectedHandle == null && !changeStarted && !keepOpen && !first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
 		showMenuFirst = false;
-		hideMenu = !keepOpen && !first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
 		keepOpen = false;
+		if (ui.inputReleased) changeStarted = false;
 
 		ui.t.BUTTON_COL = BUTTON_COL;
 		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;

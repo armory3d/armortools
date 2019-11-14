@@ -1150,21 +1150,6 @@ class UITrait {
 				MaterialParser.parseMeshMaterial();
 			}
 
-			var scene = Scene.active;
-			var cam = scene.cameras[0];
-			cameraControls = ui.combo(Id.handle({position: cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
-			cameraType = ui.combo(camHandle, ["Perspective", "Orthographic"], "Type");
-			if (ui.isHovered) ui.tooltip("Camera Type (" + Config.keymap.view_camera_type + ")");
-			if (camHandle.changed) {
-				ViewportUtil.updateCameraType(cameraType);
-			}
-
-			fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-			cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-			if (fovHandle.changed) {
-				ViewportUtil.updateCameraType(cameraType);
-			}
-
 			if (Log.messageTimer > 0) {
 				var _w = ui._w;
 				ui._w = Std.int(ui.ops.font.width(ui.fontSize, Log.message) + 65 * ui.SCALE());
