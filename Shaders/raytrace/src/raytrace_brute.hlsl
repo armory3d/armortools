@@ -94,17 +94,18 @@ void raygeneration() {
 	}
 
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
-	// float a = 1.0 / constant_buffer.eye.w;
+
+	// #ifdef _RENDER
+	// float a = 1.0 / (constant_buffer.eye.w + 1);
 	// float b = 1.0 - a;
 	// color = color * b + (accum.xyz / SAMPLES) * a;
 	// render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
-
+	// #else // _PAINT
 	if (constant_buffer.eye.w == 0) {
 		color = accum.xyz / SAMPLES;
 	}
-
 	render_target[DispatchRaysIndex().xy] = float4(lerp(color.xyz, accum.xyz / SAMPLES, 1.0 / 4.0), 0.0f);
-	// render_target[DispatchRaysIndex().xy] = float4(accum.xyz / SAMPLES, 0.0f);
+	// #endif
 }
 
 [shader("closesthit")]
@@ -129,15 +130,23 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	uint2 size;
 	mytexture0.GetDimensions(size.x, size.y);
-	float3 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0)).rgb;
+	float3 texpaint0 = pow(mytexture0.Load(uint3(tex_coord * size, 0)).rgb, 2.2);
 	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 color = payload.color.rgb * texpaint0.rgb;
 
+	float3 tangent = float3(0, 0, 0);
+	float3 binormal = float3(0, 0, 0);
+	create_basis(n, tangent, binormal);
+
+	texpaint1 = normalize(texpaint1 * 2.0 - 1.0);
+	texpaint1.g = -texpaint1.g;
+	n = mul(texpaint1, float3x3(tangent, binormal, n));
+
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	float3 wo = -WorldRayDirection();
 	if (f > 0.5) {
-		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), pow(texpaint2.g, 1.5));
+		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), pow(texpaint2.g, 1.2));
 	}
 	else {
 		payload.ray_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
@@ -145,6 +154,10 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	}
 	float dotNL = dot(n, wo);
 	if (dotNL < 0.0) color = float3(0, 0, 0);
+
+	float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
+	float dotNV = dot(n, wi);
+	if (dotNV < 0.0) color = float3(0, 0, 0);
 
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 	payload.color.xyz = color.xyz;
