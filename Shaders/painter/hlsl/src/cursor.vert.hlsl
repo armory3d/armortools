@@ -31,7 +31,7 @@ SPIRV_Cross_Output main(float2 nor : TEXCOORD0, float4 pos : TEXCOORD1, float2 t
 	float2 mouseinv = float2(mouse.x, 1.0 - mouse.y);
 	float depth = gbufferD.SampleLevel(_gbufferD_sampler, mouseinv, 0).r;
 	float keep = texa.SampleLevel(_texa_sampler, mouseinv, 0).r; // direct3d12 unit align
-	depth += keep * 0.0; // direct3d12 unit align
+	depth += keep * 0.0000001; // direct3d12 unit align
 	float4 wpos = float4(mouse * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = mul(wpos, invVP);
 	wpos.xyz /= wpos.w;
