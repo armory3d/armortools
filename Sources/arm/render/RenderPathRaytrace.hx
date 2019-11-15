@@ -116,7 +116,8 @@ class RenderPathRaytrace {
 		f32[1] = ct.worldy();
 		f32[2] = ct.worldz();
 		f32[3] = frame;
-		frame = (frame % 4) + 1;
+		frame = (frame % 4) + 1; // _PAINT
+		// frame = frame + 1; // _RENDER
 		f32[4] = helpMat._00;
 		f32[5] = helpMat._01;
 		f32[6] = helpMat._02;

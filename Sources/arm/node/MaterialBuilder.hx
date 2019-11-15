@@ -1286,7 +1286,7 @@ class MaterialBuilder {
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
-			if (UITrait.inst.viewportMode == 0) { // Render
+			if (UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 10) { // Render, Ray-traced
 				if (emisUsed) {
 					frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
 				}

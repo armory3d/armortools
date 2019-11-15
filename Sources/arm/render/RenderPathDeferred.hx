@@ -684,7 +684,7 @@ class RenderPathDeferred {
 		}
 
 		#if kha_direct3d12
-		if (Context.tool != ToolBake) {
+		if (UITrait.inst.viewportMode == 10) { // Ray-traced
 			if (Context.ddirty > 1) {
 				RenderPathRaytrace.frame = 0;
 			}

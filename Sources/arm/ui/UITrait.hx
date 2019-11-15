@@ -1145,7 +1145,11 @@ class UITrait {
 			ui._y += 2;
 
 			var modeHandle = Id.handle({position: 0});
-			UITrait.inst.viewportMode = ui.combo(modeHandle, ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"], "Mode");
+			var modes = ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"];
+			#if kha_direct3d12
+			modes.push("Ray-traced");
+			#end
+			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
 				MaterialParser.parseMeshMaterial();
 			}
