@@ -13,8 +13,6 @@
 #include "../std/denoise.glsl"
 #endif
 
-const float compoVignetteStrength = 0.4;
-
 uniform sampler2D tex;
 #ifdef _CDepth
 uniform sampler2D gbufferD;
@@ -30,6 +28,10 @@ uniform sampler2D lutTexture;
 
 #ifdef _AutoExposure
 uniform sampler2D histogram;
+#endif
+
+#ifdef _CVignette
+uniform float vignetteStrength;
 #endif
 
 // #ifdef _CPos
@@ -119,7 +121,7 @@ vec4 LUTlookup(in vec4 textureColor, in sampler2D lookupTable) {
 
 #ifdef _CVignette
 float vignette() {
-	return (1.0 - compoVignetteStrength) + compoVignetteStrength * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
+	return (1.0 - vignetteStrength) + vignetteStrength * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
 }
 #endif
 

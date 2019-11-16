@@ -74,6 +74,9 @@ class Uniforms {
 			#end
 		}
 		#end
+		if (link == "_vignetteStrength") {
+			return UITrait.inst.vignetteStrength;
+		}
 		if (link == "_coneOffset") {
 			return UITrait.inst.vxaoOffset;
 		}

@@ -186,6 +186,10 @@ class BoxPreferences {
 				ui.check(UITrait.inst.hssr, "SSR");
 				if (UITrait.inst.hssr.changed) Config.applyConfig();
 
+				var h = Id.handle({value: UITrait.inst.vignetteStrength});
+				UITrait.inst.vignetteStrength = ui.slider(h, "Vignette", 0.0, 1.0, true);
+				if (h.changed) Context.ddirty = 2;
+
 				#if arm_creator
 				var h = Id.handle({value: UITrait.inst.vxaoExt});
 				UITrait.inst.vxaoExt = ui.slider(h, "VXAO Ext", 1.0, 10.0);
