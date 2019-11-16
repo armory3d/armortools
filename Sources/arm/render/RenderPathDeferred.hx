@@ -1000,6 +1000,7 @@ class RenderPathDeferred {
 		}
 	}
 
+	#if kha_direct3d12
 	static function drawRaytraced() {
 		if (Context.ddirty > 1) {
 			RenderPathRaytrace.frame = 0;
@@ -1017,6 +1018,7 @@ class RenderPathDeferred {
 			RenderPathPaint.commandsCursor();
 		}
 	}
+	#end
 
 	static function endSplit() {
 		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
