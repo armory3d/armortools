@@ -149,15 +149,13 @@ class Camera {
 
 				var d = Time.delta * speed * fast * ease;
 				if (d > 0.0) {
-					Context.ddirty = 2;
 					camera.transform.move(dir, d);
-
 					if (UITrait.inst.cameraType == 1) {
 						ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 					}
 				}
 
-				Context.ddirty = 2;
+				redraws = 2;
 				camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 200);
 				camera.transform.rotate(camera.right(), -mouse.movementY / 200);
 			}

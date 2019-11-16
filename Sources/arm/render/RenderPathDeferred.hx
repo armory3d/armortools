@@ -73,7 +73,11 @@ class RenderPathDeferred {
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
+			#if kha_direct3d12 // Match raytrace_target format
+			t.format = "RGBA128";
+			#else
 			t.format = Inc.getHdrFormat();
+			#end
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
@@ -103,11 +107,7 @@ class RenderPathDeferred {
 			t.name = "taa";
 			t.width = 0;
 			t.height = 0;
-			#if kha_direct3d12 // Match raytrace_target format
-			t.format = "RGBA128";
-			#else
 			t.format = "RGBA32";
-			#end
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
@@ -544,7 +544,12 @@ class RenderPathDeferred {
 				cam.buildProjection();
 
 				drawGbuffer();
+
+				#if kha_direct3d12
+				UITrait.inst.viewportMode == 10 ? drawRaytraced() : drawDeferred;
+				#else
 				drawDeferred();
+				#end
 
 				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
 				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
@@ -685,18 +690,7 @@ class RenderPathDeferred {
 
 		#if kha_direct3d12
 		if (UITrait.inst.viewportMode == 10) { // Ray-traced
-			if (Context.ddirty > 1) {
-				RenderPathRaytrace.frame = 0;
-			}
-			RenderPathRaytrace.commands();
-			path.setTarget("taa");
-			drawCompass(path.currentG);
-			path.setTarget("");
-			path.bindTarget("taa", "tex");
-			path.drawShader("shader_datas/compositor_pass/compositor_pass");
-			if (UITrait.inst.brush3d) {
-				RenderPathPaint.commandsCursor();
-			}
+			drawRaytraced();
 			return;
 		}
 		#end
@@ -1003,6 +997,24 @@ class RenderPathDeferred {
 			path.setTarget("");
 			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+		}
+	}
+
+	static function drawRaytraced() {
+		if (Context.ddirty > 1) {
+			RenderPathRaytrace.frame = 0;
+		}
+		RenderPathRaytrace.commands();
+		path.setTarget("buf");
+		drawCompass(path.currentG);
+		path.setTarget("taa");
+		path.bindTarget("buf", "tex");
+		path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		path.setTarget("");
+		path.bindTarget("taa", "tex");
+		path.drawShader("shader_datas/copy_pass/copy_pass");
+		if (UITrait.inst.brush3d) {
+			RenderPathPaint.commandsCursor();
 		}
 	}
 

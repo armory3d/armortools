@@ -138,14 +138,16 @@ class RenderPathRaytrace {
 		f32[21] = UITrait.inst.showEnvmap ? 1.0 : 0.0;
 
 		var path = RenderPathDeferred.path;
-		var framebuffer = path.renderTargets.get("taa").image;
+		var framebuffer = path.renderTargets.get("buf").image;
 
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-		Context.ddirty = 1;
-		// Context.ddirty--;
+		if (Context.ddirty == 1 || Context.pdirty == 1) Context.rdirty = 4;
+		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
+
+		// Context.ddirty = 1; // _RENDER
 	}
 
 	public static function commandsBake() {
