@@ -50,7 +50,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 13, 17, 5];
+			var menuItems = [12, 3, 15, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			#if (!kha_direct3d12) menuItems[2] += 2; #end
 			var sepw = menuW / ui.SCALE();
@@ -149,6 +149,19 @@ class UIMenu {
 				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
 				UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 				if (dispHandle.changed) {
+					MaterialParser.parseMeshMaterial();
+				}
+
+				var cullHandle = Id.handle({selected: UITrait.inst.cullBackfaces});
+				UITrait.inst.cullBackfaces = ui.check(cullHandle, "Cull Backfaces");
+				if (cullHandle.changed) {
+					MaterialParser.parseMeshMaterial();
+				}
+
+				var filterHandle = Id.handle({selected: UITrait.inst.textureFilter});
+				UITrait.inst.textureFilter = ui.check(filterHandle, "Filter Textures");
+				if (filterHandle.changed) {
+					MaterialParser.parsePaintMaterial();
 					MaterialParser.parseMeshMaterial();
 				}
 

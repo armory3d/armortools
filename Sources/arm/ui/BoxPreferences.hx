@@ -147,18 +147,7 @@ class BoxPreferences {
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
 				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
 				if (vsyncHandle.changed) Config.save();
-				var cullHandle = Id.handle({selected: Config.raw.rp_culling});
-				Config.raw.rp_culling = ui.check(cullHandle, "Cull Backfaces");
-				if (cullHandle.changed) {
-					Config.save();
-					MaterialParser.parseMeshMaterial();
-				}
-				var filterHandle = Id.handle({selected: UITrait.inst.textureFilter});
-				UITrait.inst.textureFilter = ui.check(filterHandle, "Filter Textures");
-				if (filterHandle.changed) {
-					MaterialParser.parsePaintMaterial();
-					MaterialParser.parseMeshMaterial();
-				}
+
 				#if (!kha_direct3d12)
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");

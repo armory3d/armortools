@@ -828,7 +828,7 @@ class MaterialBuilder {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: (Config.raw.rp_culling || !isScene) ? 'clockwise' : 'none',
+			cull_mode: (UITrait.inst.cullBackfaces || !isScene) ? 'clockwise' : 'none',
 			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
@@ -1006,7 +1006,7 @@ class MaterialBuilder {
 			name: context_id,
 			depth_write: true,
 			compare_mode: 'less',
-			cull_mode: Config.raw.rp_culling ? 'clockwise' : 'none',
+			cull_mode: UITrait.inst.cullBackfaces ? 'clockwise' : 'none',
 			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();

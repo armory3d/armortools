@@ -90,6 +90,7 @@ class UITrait {
 	public var wireframeHandle = new Handle({selected: false});
 	public var drawTexels = false;
 	public var texelsHandle = new Handle({selected: false});
+	public var cullBackfaces = true;
 	public var textureFilter = true;
 
 	public var ui:Zui;
