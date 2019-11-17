@@ -657,6 +657,13 @@ class UITrait {
 						!App.isDragging &&
 						!App.isResizing &&
 						@:privateAccess ui.comboSelectedHandle == null) { // Paint started
+
+						// Draw line
+						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint)) {
+							lastPaintVecX = lastPaintX;
+							lastPaintVecY = lastPaintY;
+						}
+
 						History.pushUndo = true;
 						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
 							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
