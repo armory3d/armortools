@@ -67,7 +67,7 @@ class RenderPathPaint {
 				UITrait.inst.normalRPicked = b.get(0) / 255;
 				UITrait.inst.normalGPicked = b.get(1) / 255;
 				UITrait.inst.normalBPicked = b.get(2) / 255;
-				UITrait.inst.uvyPicked = b.get(3) / 255;
+				UITrait.inst.uvyPicked = c.get(3) / 255;
 				UITrait.inst.occlusionPicked = c.get(0) / 255;
 				UITrait.inst.roughnessPicked = c.get(1) / 255;
 				UITrait.inst.metallicPicked = c.get(2) / 255;

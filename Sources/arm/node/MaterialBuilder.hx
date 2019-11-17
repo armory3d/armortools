@@ -100,7 +100,7 @@ class MaterialBuilder {
 				frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
 				frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
 				frag.write('fragColor[0].a = texCoordInp.x;');
-				frag.write('fragColor[1].a = texCoordInp.y;');
+				frag.write('fragColor[2].a = texCoordInp.y;');
 			}
 
 			con_paint.data.shader_from_source = true;
