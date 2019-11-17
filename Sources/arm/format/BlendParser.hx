@@ -330,7 +330,7 @@ class Handle {
 		var size = 0;
 		if (n.indexOf('*') >= 0) size = block.blend.pointerSize;
 		else size = dna.typesLength[typeIndex];
-		if (n.indexOf('[') > 0) size *= Std.parseInt(n.substring(n.indexOf('[') + 1, n.indexOf(']')));
+		if (n.indexOf('[') > 0) size *= getArrayLen(n);
 		return size;
 	}
 	function baseName(s:String):String {
@@ -338,7 +338,10 @@ class Handle {
 		if (s.charAt(s.length - 1) == ']') s = s.substring(0, s.indexOf('['));
 		return s;
 	}
-	public function get(name:String, index = 0, asType:String = null):Dynamic {
+	function getArrayLen(s:String):Int {
+		return Std.parseInt(s.substring(s.indexOf('[') + 1, s.indexOf(']')));
+	}
+	public function get(name:String, index = 0, asType:String = null, arrayLen = 0):Dynamic {
 		// Return raw type or structure
 		var dna = ds.dna;
 		for (i in 0...ds.fieldNames.length) {
@@ -360,7 +363,7 @@ class Handle {
 					var blend = block.blend;
 					blend.pos = block.pos + newOffset;
 					var isArray = dnaName.charAt(dnaName.length - 1) == ']';
-					var len = isArray ? Std.parseInt(dnaName.substring(dnaName.indexOf('[') + 1, dnaName.indexOf(']'))) : 1;
+					var len = isArray ? (arrayLen > 0 ? arrayLen : getArrayLen(dnaName)) : 1;
 					switch (type) {
 					case 'int': return isArray ? blend.read32array(len) : blend.read32();
 					case 'char': return isArray ? blend.readString() : blend.read8();
