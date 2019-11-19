@@ -4,11 +4,11 @@ project.addSources('Sources');
 project.addLibrary("iron");
 project.addLibrary("zui");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
-project.addAssets("Bundled/common/*", { notinlist: true, destination: "data/{name}" });
-project.addAssets("Bundled/defaults/*", { notinlist: true, destination: "data/defaults/{name}" });
-project.addAssets("Bundled/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
-project.addAssets("Bundled/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
-project.addAssets("Bundled/themes/*", { notinlist: true, destination: "data/themes/{name}" });
+project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
+project.addAssets("Assets/defaults/*", { notinlist: true, destination: "data/defaults/{name}" });
+project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
+project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
+project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/themes/{name}" });
 
 project.addDefine('rp_voxelao');
 project.addDefine('arm_voxelgi_revox');
@@ -44,16 +44,16 @@ else {
 }
 
 if (raytrace) {
-	project.addAssets("Bundled/raytrace/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Assets/raytrace/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
-	project.addAssets("Bundled/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
+	project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 }
 else {
-	project.addAssets("Bundled/readme/readme.txt", { notinlist: true, destination: "{name}" });
+	project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
 }
 
 if (process.platform === 'darwin') {
-	project.addAssets("Bundled/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
+	project.addAssets("Assets/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
 }
 
 if (process.platform === 'win32') {
@@ -74,13 +74,13 @@ else { // painter, creator
 	project.addDefine('arm_resizable');
 
 	if (process.platform === 'win32') {
-		project.addAssets("Bundled/bin/cmft.exe", { notinlist: true, destination: "data/{name}" });
+		project.addAssets("Assets/bin/cmft.exe", { notinlist: true, destination: "data/{name}" });
 	}
 	else if (process.platform === 'linux') {
-		project.addAssets("Bundled/bin/cmft-linux64", { notinlist: true, destination: "data/{name}" });
+		project.addAssets("Assets/bin/cmft-linux64", { notinlist: true, destination: "data/{name}" });
 	}
 	else if (process.platform === 'darwin') {
-		project.addAssets("Bundled/bin/cmft-osx", { notinlist: true, destination: "data/{name}" });
+		project.addAssets("Assets/bin/cmft-osx", { notinlist: true, destination: "data/{name}" });
 	}
 
 	if (build === 'creator') {
@@ -89,8 +89,8 @@ else { // painter, creator
 }
 
 if (build === 'painter') {
-	project.addAssets("Bundled/painter/*", { notinlist: true, destination: "data/{name}" });
-	project.addAssets("Bundled/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
+	project.addAssets("Assets/painter/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	if (process.platform === 'win32') {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
@@ -101,8 +101,8 @@ if (build === 'painter') {
 	project.addDefine('kha_no_ogg');
 }
 else {
-	project.addAssets("Bundled/creator/*", { notinlist: true, destination: "data/{name}" });
-	project.addAssets("Bundled/creator/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
+	project.addAssets("Assets/creator/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Assets/creator/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 	project.addShaders("Shaders/creator/*.glsl", { noembed: false});
 	project.addDefine('arm_audio');
 	project.addDefine('arm_soundcompress');
