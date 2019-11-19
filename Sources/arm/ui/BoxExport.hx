@@ -41,7 +41,7 @@ class BoxExport {
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
-				UITrait.inst.outputType = ui.combo(Id.handle({position: UITrait.inst.outputType}), ["Generic", "Unreal 4", "Unity 5"], "Output", true);
+				UITrait.inst.outputType = ui.combo(Id.handle({position: UITrait.inst.outputType}), ["Generic", "Unreal 4", "Unity 5"], "Preset", true);
 
 				@:privateAccess ui.endElement();
 
@@ -88,6 +88,7 @@ class BoxExport {
 				UITrait.inst.isSubs = ui.check(Id.handle({selected: UITrait.inst.isSubs}), "Subsurface");
 				UITrait.inst.isSubsSpace = ui.combo(Id.handle({position: UITrait.inst.isSubsSpace}), ["linear", "srgb"], "Space");
 			}
+			if (ui.tab(htab, "Presets")) {}
 		}, 500, 310);
 	}
 

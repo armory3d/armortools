@@ -90,6 +90,7 @@ else { // painter, creator
 
 if (build === 'painter') {
 	project.addAssets("Bundled/painter/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Bundled/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	if (process.platform === 'win32') {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });

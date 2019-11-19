@@ -263,3 +263,13 @@ class Exporter {
 		ExportArm.runMaterial(path);
 	}
 }
+
+typedef TExportPreset = {
+	public var name:String;
+	public var textures:TExportPresetTexture;
+}
+
+typedef TExportPresetTexture = {
+	public var name:String;
+	public var channels:Array<String>;
+}
