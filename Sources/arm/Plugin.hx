@@ -83,6 +83,11 @@ class ArmBridge {
 	public static var UITrait = arm.ui.UITrait;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;
+	public static var MeshUtil = arm.util.MeshUtil;
+	public static var MaterialUtil = arm.util.MaterialUtil;
+	public static var RenderUtil = arm.util.RenderUtil;
+	public static var UVUtil = arm.util.UVUtil;
+	public static var ViewportUtil = arm.util.ViewportUtil;
 	public static function colorFromFloats(r:Float, g:Float, b:Float, a:Float) { return kha.Color.fromFloats(r, g, b, a); }
 }
 

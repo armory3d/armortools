@@ -20,10 +20,10 @@ plugin.drawUI = function(ui) {
 
 			for (const po of arm.Project.paintObjects) {
 
-				let geom = po.data.geom;
-				let positions = geom.positions;
-				let normals = geom.normals;
-				let indices = geom.indices[0];
+				let raw = po.data.raw;
+				let positions = raw.vertex_arrays[0].values;
+				let normals = raw.vertex_arrays[1].values;
+				let indices = raw.index_arrays[0].values;
 				let vertexCount = positions.length / 4;
 				let indexCount = indices.length;
 
@@ -75,16 +75,23 @@ plugin.drawUI = function(ui) {
 					ia32[i] = ia[i];
 				}
 
+				po.data.raw.vertex_arrays[0].values = pa16;
+				po.data.raw.vertex_arrays[1].values = na16;
+				po.data.raw.vertex_arrays[2].values = ua16;
+				po.data.raw.index_arrays[0].values = ia32;
+
+				let geom = po.data.geom;
 				geom.positions = pa16;
 				geom.normals = na16;
 				geom.uvs = ua16;
 				geom.indices[0] = ia32;
 				geom.ready = false;
 				geom.build();
-				arm.Context.mergedObject = null;
 
 				b._destroy();
 			}
+
+			arm.Context.mergedObject = null;
 		}
 	}
 }
