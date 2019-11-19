@@ -21,4 +21,21 @@ class Res {
 	public static inline function get(name:String):Image {
 		return bundled.get(name);
 	}
+
+	public static function tile50(img:kha.Image, x:Int, y:Int):TRect {
+		var size = arm.ui.UITrait.inst.ui.SCALE() > 1 ? 100 : 50;
+		return { x: x * size, y: y * size, w: size, h: size };
+	}
+
+	public static function tile18(img:kha.Image, x:Int, y:Int):TRect {
+		var size = arm.ui.UITrait.inst.ui.SCALE() > 1 ? 36 : 18;
+		return { x: x * size, y: img.height - (y + 1) * size, w: size, h: size };
+	}
+}
+
+typedef TRect = {
+	public var x:Int;
+	public var y:Int;
+	public var w:Int;
+	public var h:Int;
 }

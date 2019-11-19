@@ -79,10 +79,16 @@ class TabLayers {
 
 				var center = (step / 2) * ui.SCALE();
 				ui._y += center;
-				l.visible = ui.check(h, "");
-				if (h.changed) {
+				var icons = Res.get('icons.png');
+				var r = Res.tile18(icons, l.visible ? 0 : 1, 0);
+				ui._x += 2;
+				ui._y += 3;
+				if (ui.image(icons, ui.t.ACCENT_SELECT_COL, null, r.x, r.y, r.w, r.h) == Released) {
+					l.visible = !l.visible;
 					MaterialParser.parseMeshMaterial();
 				}
+				ui._x -= 2;
+				ui._y -= 3;
 				ui._y -= center;
 
 				var contextMenu = false;

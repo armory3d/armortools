@@ -79,7 +79,7 @@ class BoxPreferences {
 							ui.t.ELEMENT_H = App.ELEMENT_H;
 							Config.restore();
 							setScale();
-							for (f in files) Plugin.stop(f);
+							if (files != null) for (f in files) Plugin.stop(f);
 							files = null;
 						}
 					});
