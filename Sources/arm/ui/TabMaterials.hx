@@ -13,7 +13,7 @@ import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.io.ImportBlend;
 import arm.io.ImportArm;
-import arm.io.Exporter;
+import arm.io.ExportArm;
 import arm.Tool;
 using StringTools;
 
@@ -127,7 +127,7 @@ class TabMaterials {
 								UIFiles.show("arm", true, function(path:String) {
 									var f = UIFiles.filename;
 									if (f == "") f = "untitled";
-									Exporter.exportMaterial(path + "/" + f);
+									ExportArm.runMaterial(path + "/" + f);
 								});
 							}
 

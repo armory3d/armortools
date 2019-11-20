@@ -20,13 +20,15 @@ using StringTools;
 
 class ImportMesh {
 
+	public static var clearLayers = true;
+
 	public static function run(path:String, _clearLayers = true) {
 		if (!Path.isMesh(path)) {
 			Log.showError(Strings.error1);
 			return;
 		}
 
-		Importer.clearLayers = _clearLayers;
+		clearLayers = _clearLayers;
 
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
@@ -179,7 +181,7 @@ class ImportMesh {
 					Data.deleteMesh(handle);
 				}
 
-				if (Importer.clearLayers) {
+				if (clearLayers) {
 					while (Project.layers.length > 1) { var l = Project.layers.pop(); l.unload(); }
 					Context.setLayer(Project.layers[0]);
 					iron.App.notifyOnRender(Layers.initLayers);

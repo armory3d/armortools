@@ -4,7 +4,7 @@ import zui.Zui;
 import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
-import arm.io.Importer;
+import arm.io.ImportAsset;
 import arm.sys.Path;
 using StringTools;
 
@@ -18,7 +18,7 @@ class TabTextures {
 
 			if (ui.button("Import")) {
 				UIFiles.show(Path.textureFormats.join(","), false, function(path:String) {
-					Importer.run(path);
+					ImportAsset.run(path);
 				});
 			}
 			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.file_import_assets + ")");

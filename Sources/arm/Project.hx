@@ -20,7 +20,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
-import arm.io.Importer;
+import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
@@ -258,7 +258,7 @@ class Project {
 					UIBox.show = false;
 					App.redrawUI();
 					UIFiles.show(Path.meshFormats.join(","), false, function(path:String) {
-						Importer.run(path);
+						ImportAsset.run(path);
 					});
 				}
 			}
@@ -276,7 +276,7 @@ class Project {
 	public static function importAsset(filters:String = null) {
 		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
 		UIFiles.show(filters, false, function(path:String) {
-			Importer.run(path);
+			ImportAsset.run(path);
 		});
 	}
 }

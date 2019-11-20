@@ -11,7 +11,7 @@ import arm.ui.UITrait;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathDeferred;
 import arm.node.MaterialParser;
-import arm.io.Importer;
+import arm.io.ImportFont;
 import arm.Tool;
 
 class RenderUtil {
@@ -174,9 +174,9 @@ class RenderUtil {
 	}
 
 	static function getTextToolFont():Font {
-		var fontName = Importer.fontList[UITrait.inst.textToolHandle.position];
+		var fontName = ImportFont.fontList[UITrait.inst.textToolHandle.position];
 		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
-		return Importer.fontMap.get(fontName);
+		return ImportFont.fontMap.get(fontName);
 	}
 
 	public static function makeDecalMaskPreview() {

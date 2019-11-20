@@ -12,7 +12,6 @@ import arm.util.ParticleUtil;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
 import arm.ui.UIFiles;
-import arm.io.Importer;
 import arm.node.MaterialParser;
 import arm.Tool;
 import arm.Project;

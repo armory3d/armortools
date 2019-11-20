@@ -17,7 +17,7 @@ import arm.util.BuildMacros;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.node.MaterialParser;
-import arm.io.Importer;
+import arm.io.ImportAsset;
 using StringTools;
 
 class UIMenu {
@@ -27,10 +27,10 @@ class UIMenu {
 	public static var menuX = 0;
 	public static var menuY = 0;
 	public static var keepOpen = false;
+	public static var menuCommands:Zui->Void = null;
 	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
-	static var menuCommands:Zui->Void = null;
 	static var viewportColorHandle = Id.handle({selected: false});
 
 	@:access(zui.Zui)
@@ -102,7 +102,7 @@ class UIMenu {
 							Log.showError("Error: .hdr file expected");
 							return;
 						}
-						Importer.run(path);
+						ImportAsset.run(path);
 					});
 				}
 

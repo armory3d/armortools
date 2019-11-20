@@ -1,16 +1,32 @@
 package arm.ui;
 
+import haxe.io.Bytes;
 import zui.Zui;
 import zui.Id;
-import zui.Id;
 import arm.util.UVUtil;
-import arm.io.Exporter;
+import arm.io.ExportMesh;
+import arm.io.ExportTexture;
+import arm.sys.Path;
+import arm.sys.File;
+using StringTools;
 
 class BoxExport {
 
+	public static var htab = Id.handle();
+	public static var hpreset = Id.handle();
+	public static var files:Array<String> = null;
+	public static var preset:TExportPreset = null;
+	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_b", "occ", "opac", "rough", "smooth", "0.0", "1.0"];
+
 	public static function showTextures() {
 		UIBox.showCustom(function(ui:Zui) {
-			var htab = Id.handle();
+
+			if (files == null) fetchPresets();
+			if (preset == null) {
+				parsePreset();
+				@:privateAccess hpreset.children = null;
+			}
+
 			if (ui.tab(htab, "Export Textures")) {
 				ui.row([1/2, 1/2]);
 				ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
@@ -41,7 +57,7 @@ class BoxExport {
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
-				UITrait.inst.outputType = ui.combo(Id.handle({position: UITrait.inst.outputType}), ["Generic", "Unreal 4", "Unity 5"], "Preset", true);
+				ui.combo(hpreset, files, "Preset", true);
 
 				@:privateAccess ui.endElement();
 
@@ -59,36 +75,104 @@ class BoxExport {
 				}
 				if (ui.isHovered) ui.tooltip("Export texture files (" + Config.keymap.file_export_textures + ")");
 			}
-			if (ui.tab(htab, "Channels")) {
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isBase = ui.check(Id.handle({selected: UITrait.inst.isBase}), "Base Color");
-				UITrait.inst.isBaseSpace = ui.combo(Id.handle({position: UITrait.inst.isBaseSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isOpac = ui.check(Id.handle({selected: UITrait.inst.isOpac}), "Opacity");
-				UITrait.inst.isOpacSpace = ui.combo(Id.handle({position: UITrait.inst.isOpacSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isOcc = ui.check(Id.handle({selected: UITrait.inst.isOcc}), "Occlusion");
-				UITrait.inst.isOccSpace = ui.combo(Id.handle({position: UITrait.inst.isOccSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isRough = ui.check(Id.handle({selected: UITrait.inst.isRough}), "Roughness");
-				UITrait.inst.isRoughSpace = ui.combo(Id.handle({position: UITrait.inst.isRoughSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isMet = ui.check(Id.handle({selected: UITrait.inst.isMet}), "Metallic");
-				UITrait.inst.isMetSpace = ui.combo(Id.handle({position: UITrait.inst.isMetSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isNor = ui.check(Id.handle({selected: UITrait.inst.isNor}), "Normal");
-				UITrait.inst.isNorSpace = ui.combo(Id.handle({position: UITrait.inst.isNorSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isEmis = ui.check(Id.handle({selected: UITrait.inst.isEmis}), "Emission");
-				UITrait.inst.isEmisSpace = ui.combo(Id.handle({position: UITrait.inst.isEmisSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isHeight = ui.check(Id.handle({selected: UITrait.inst.isHeight}), "Height");
-				UITrait.inst.isHeightSpace = ui.combo(Id.handle({position: UITrait.inst.isHeightSpace}), ["linear", "srgb"], "Space");
-				ui.row([1/2, 1/2]);
-				UITrait.inst.isSubs = ui.check(Id.handle({selected: UITrait.inst.isSubs}), "Subsurface");
-				UITrait.inst.isSubsSpace = ui.combo(Id.handle({position: UITrait.inst.isSubsSpace}), ["linear", "srgb"], "Space");
+
+			if (ui.tab(htab, "Presets")) {
+				ui.row([3/5, 1/5, 1/5]);
+
+				ui.combo(hpreset, files, "Preset");
+				if (hpreset.changed) preset = null;
+
+				if (ui.button("New")) {
+					UIBox.showCustom(function(ui:Zui) {
+						if (ui.tab(Id.handle(), "New Preset")) {
+							ui.row([1/2, 1/2]);
+							var presetName = ui.textInput(Id.handle({text: "new_preset"}), "Name");
+							if (ui.button("OK") || ui.isReturnDown) {
+								newPreset(presetName);
+								fetchPresets();
+								preset = null;
+								hpreset.position = files.indexOf(presetName);
+								UIBox.show = false;
+								BoxExport.htab.position = 1; // Presets
+								BoxExport.showTextures();
+							}
+						}
+					});
+				}
+
+				if (ui.button("Import")) {
+					UIFiles.show("json", false, function(path:String) {
+						path = path.toLowerCase();
+						if (path.endsWith(".json")) {
+							var filename = path.substr(path.lastIndexOf(Path.sep) + 1);
+							var dstPath = Path.data() + Path.sep + "export_presets" + Path.sep + filename;
+							File.copy(path, dstPath); // Copy to presets folder
+							fetchPresets();
+							preset = null;
+							hpreset.position = files.indexOf(filename.substr(0, filename.length - 5)); // Strip .json
+							Log.showMessage("Preset '" + filename + "' imported.");
+						}
+						else Log.showError(Strings.error1);
+					});
+				}
+
+				if (preset == null) {
+					parsePreset();
+					@:privateAccess hpreset.children = null;
+				}
+
+				// Texture list
+				ui.separator(10, false);
+				ui.row([1/5,1/5,1/5,1/5,1/5]);
+				ui.text("Texture");
+				ui.text("R");
+				ui.text("G");
+				ui.text("B");
+				ui.text("A");
+				ui.changed = false;
+				for (i in 0...preset.textures.length) {
+					var t = preset.textures[i];
+					ui.row([1/5,1/5,1/5,1/5,1/5]);
+					var htex = hpreset.nest(i, {text: t.name});
+					t.name = ui.textInput(htex);
+
+					if (ui.isHovered && ui.inputReleasedR) {
+						UIMenu.draw(function(ui:Zui) {
+							ui.fill(0, 0, @:privateAccess ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
+							ui.text(t.name, Right, ui.t.HIGHLIGHT_COL);
+							if (ui.button("Delete", Left)) {
+								preset.textures.remove(t);
+								savePreset();
+							}
+						});
+					}
+
+					var hr = htex.nest(0, {position: channels.indexOf(t.channels[0])});
+					var hg = htex.nest(1, {position: channels.indexOf(t.channels[1])});
+					var hb = htex.nest(2, {position: channels.indexOf(t.channels[2])});
+					var ha = htex.nest(3, {position: channels.indexOf(t.channels[3])});
+
+					ui.combo(hr, channels, "R");
+					if (hr.changed) t.channels[0] = channels[hr.position];
+					ui.combo(hg, channels, "G");
+					if (hg.changed) t.channels[1] = channels[hg.position];
+					ui.combo(hb, channels, "B");
+					if (hb.changed) t.channels[2] = channels[hb.position];
+					ui.combo(ha, channels, "A");
+					if (ha.changed) t.channels[3] = channels[ha.position];
+				}
+
+				if (ui.changed) {
+					savePreset();
+				}
+
+				ui.row([1/8]);
+				if (ui.button("Add")) {
+					preset.textures.push({name: "base", channels: ["base_r", "base_g", "base_b", "1.0"]});
+					@:privateAccess hpreset.children = null;
+					savePreset();
+				}
 			}
-			if (ui.tab(htab, "Presets")) {}
 		}, 500, 310);
 	}
 
@@ -114,10 +198,45 @@ class BoxExport {
 					UIFiles.show(UITrait.inst.exportMeshFormat == 0 ? "obj" : "arm", true, function(path:String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
-						Exporter.exportMesh(path + "/" + f);
+						ExportMesh.run(path + "/" + f);
 					});
 				}
 			}
 		});
+	}
+
+	static function fetchPresets() {
+		files = File.readDirectory(Path.data() + Path.sep + "export_presets");
+		for (i in 0...files.length) {
+			files[i] = files[i].substr(0, files[i].length - 5); // Strip .json
+		}
+	}
+
+	static function parsePreset() {
+		var file = "export_presets/" + files[hpreset.position] + ".json";
+		iron.data.Data.getBlob(file, function(blob:kha.Blob) {
+			preset = haxe.Json.parse(blob.toString());
+			iron.data.Data.deleteBlob("export_presets/" + file);
+		});
+	}
+
+	static function newPreset(name:String) {
+		var template =
+'{
+	"textures": [
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"] }
+	]
+}
+';
+		if (!name.endsWith(".json")) name += ".json";
+		var path = Path.data() + Path.sep + "export_presets" + Path.sep + name;
+		Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+	}
+
+	static function savePreset() {
+		var name = files[hpreset.position];
+		if (name == "generic") return; // generic is const
+		var path = Path.data() + Path.sep + "export_presets" + Path.sep + name + ".json";
+		Krom.fileSaveBytes(path, Bytes.ofString(haxe.Json.stringify(preset)).getData());
 	}
 }

@@ -78,8 +78,6 @@ class ArmBridge {
 	public static var Path = arm.sys.Path;
 	public static var NodesMaterial = arm.node.NodesMaterial;
 	public static var Material = arm.node.Material;
-	public static var Exporter = arm.io.Exporter;
-	public static var Importer = arm.io.Importer;
 	public static var UITrait = arm.ui.UITrait;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;

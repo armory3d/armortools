@@ -23,8 +23,8 @@ import arm.util.UVUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
-import arm.io.Importer;
-import arm.io.Exporter;
+import arm.io.ImportFont;
+import arm.io.ExportTexture;
 import arm.io.ExportArm;
 import arm.Tool;
 import arm.Project;
@@ -98,7 +98,6 @@ class UITrait {
 	public var formatType = 0;
 	public var formatQuality = 100.0;
 	public var layersExport = 0;
-	public var outputType = 0;
 	public var isBase = true;
 	public var isBaseSpace = 0;
 	public var isOpac = false;
@@ -410,7 +409,7 @@ class UITrait {
 	public function update() {
 		if (textureExport) {
 			textureExport = false;
-			Exporter.exportTextures(textureExportPath);
+			ExportTexture.run(textureExportPath);
 		}
 		if (projectExport) {
 			projectExport = false;
@@ -1094,7 +1093,7 @@ class UITrait {
 						}
 					}
 					if (Context.tool == ToolText) {
-						ui.combo(textToolHandle, Importer.fontList, "Font");
+						ui.combo(textToolHandle, ImportFont.fontList, "Font");
 						var h = Id.handle();
 						h.text = textToolText;
 						textToolText = ui.textInput(h, "");
@@ -1219,7 +1218,7 @@ class UITrait {
 
 	function menuButton(name:String, category:Int) {
 		ui._w = Std.int(ui.ops.font.width(ui.fontSize, name) + 25);
-		if (ui.button(name) || (UIMenu.show && ui.isHovered)) {
+		if (ui.button(name) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
 			UIMenu.show = true;
 			UIMenu.menuCategory = category;
 			UIMenu.menuX = Std.int(ui._x - ui._w);

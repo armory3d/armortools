@@ -17,7 +17,7 @@ import arm.ui.UIView2D;
 import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
-import arm.io.Importer;
+import arm.io.ImportAsset;
 import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
@@ -158,7 +158,7 @@ class App {
 				Project.projectNew(); // Spawn terrain plane
 				#end
 				if (fileArg != "") {
-					Importer.run(fileArg);
+					ImportAsset.run(fileArg);
 					// if (Path.isMesh(fileArg)) {
 					// 	UITrait.inst.toggleDistractFree();
 					// }
@@ -172,7 +172,7 @@ class App {
 					UITrait.inst.textureExportPath = Krom.getArg(2);
 					if (Krom.getArgCount() > 3) {
 						UIFiles.filename = Krom.getArg(3);
-						UITrait.inst.outputType = 1; // occ-rough-met
+						// hpreset.position = presets.indexOf("unreal")
 					}
 				}
 			});
@@ -365,7 +365,7 @@ class App {
 			if (!wait) {
 				dropX = mouse.x;
 				dropY = mouse.y;
-				Importer.run(dropPath, dropX, dropY);
+				ImportAsset.run(dropPath, dropX, dropY);
 				dropPath = "";
 			}
 		}

@@ -18,11 +18,7 @@ import arm.Project;
 import arm.Tool;
 using StringTools;
 
-class Importer {
-
-	public static var fontList = ["default.ttf"];
-	public static var fontMap = new Map<String, Font>();
-	public static var clearLayers = true;
+class ImportAsset {
 
 	public static function run(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh

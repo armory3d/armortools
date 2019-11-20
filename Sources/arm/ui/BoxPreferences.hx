@@ -221,7 +221,12 @@ class BoxPreferences {
 			if (ui.tab(htab, "Plugins")) {
 				ui.row([1/4, 1/4]);
 				if (ui.button("New")) {
-					var template =
+					UIBox.showCustom(function(ui:Zui) {
+						if (ui.tab(Id.handle(), "New Plugin")) {
+							ui.row([1/2, 1/2]);
+							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
+							if (ui.button("OK") || ui.isReturnDown) {
+								var template =
 "let plugin = new arm.Plugin();
 let h1 = new zui.Handle();
 plugin.drawUI = function(ui) {
@@ -232,22 +237,19 @@ plugin.drawUI = function(ui) {
 	}
 }
 ";
-					UIBox.showCustom(function(ui:Zui) {
-						if (ui.tab(Id.handle(), "New Plugin")) {
-							ui.row([1/2, 1/2]);
-							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
-							if (ui.button("OK") || ui.isReturnDown) {
 								if (!pluginName.endsWith(".js")) pluginName += ".js";
 								var path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
 								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
 								files = null; // Refresh file list
 								UIBox.show = false;
 								App.redrawUI();
+								BoxPreferences.htab.position = 5; // Plugins
+								BoxPreferences.show();
 							}
 						}
 					});
 				}
-				if (ui.button("Install")) {
+				if (ui.button("Import")) {
 					UIFiles.show("js,wasm,zip", false, function(path:String) {
 						ImportPlugin.run(path);
 					});

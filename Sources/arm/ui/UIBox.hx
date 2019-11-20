@@ -69,7 +69,8 @@ class UIBox {
 		var kb = Input.getKeyboard();
 		var ui = App.uibox;
 		var inUse = ui.comboSelectedHandle != null;
-		if (drawn && (ui.inputReleased || kb.started("escape")) && !inUse && !ui.isTyping) {
+		var isEscape = kb.started("escape");
+		if (drawn && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
 			var mw = Std.int(modalW * ui.SCALE());
@@ -80,7 +81,7 @@ class UIBox {
 			var bottom = (apph / 2 + mh / 2) + hwnd.dragY;
 			var mx = mouse.x;
 			var my = mouse.y;
-			if (mx < left || mx > right || my < top || my > bottom) {
+			if (mx < left || mx > right || my < top || my > bottom || isEscape) {
 				show = false;
 				App.redrawUI();
 			}
