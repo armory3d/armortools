@@ -238,6 +238,12 @@ class Project {
 	}
 
 	public static function importMesh() {
+		UIFiles.show(Path.meshFormats.join(","), false, function(path:String) {
+			importMeshBox(path);
+		});
+	}
+
+	public static function importMeshBox(path:String) {
 		UIBox.showCustom(function(ui:Zui) {
 			if (ui.tab(Id.handle(), "Import Mesh")) {
 
@@ -254,9 +260,7 @@ class Project {
 				if (ui.button("Import") || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					UIFiles.show(Path.meshFormats.join(","), false, function(path:String) {
-						ImportAsset.run(path);
-					});
+					ImportMesh.run(path);
 				}
 			}
 		});

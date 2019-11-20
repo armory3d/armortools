@@ -23,7 +23,7 @@ class ImportAsset {
 	public static function run(path:String, dropX = -1.0, dropY = -1.0) {
 		// Mesh
 		if (Path.isMesh(path)) {
-			ImportMesh.run(path);
+			Project.importMeshBox(path);
 		}
 		// Image
 		else if (Path.isTexture(path)) {
