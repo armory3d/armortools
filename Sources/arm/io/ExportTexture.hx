@@ -20,6 +20,31 @@ class ExportTexture {
 		var timer = iron.system.Time.realTime();
 		#end
 
+		var udimTiles:Array<String> = [];
+		for (l in Project.layers) {
+			if (l.objectMask > 0) {
+				var name = Project.paintObjects[l.objectMask - 1].name;
+				if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
+					udimTiles.push(name.substr(name.length - 5));
+				}
+			}
+		}
+
+		if (udimTiles.length > 0 && UITrait.inst.layersExport == 0) {
+			for (udimTile in udimTiles) runLayers(path, udimTile);
+		}
+		else {
+			runLayers(path);
+		}
+
+		#if arm_debug
+		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
+		#end
+
+		Log.showMessage("Textures exported.");
+	}
+
+	static function runLayers(path:String, udimTile = "") {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
 		var f = UIFiles.filename;
@@ -28,6 +53,7 @@ class ExportTexture {
 		var bits = UITrait.inst.bitsHandle.position == 0 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == 0 ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
+		ext = udimTile + ext;
 		var texpaint:Image = null;
 		var texpaint_nor:Image = null;
 		var texpaint_pack:Image = null;
@@ -41,7 +67,7 @@ class ExportTexture {
 			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 
 			// Duplicate base layer
-			if (layers[0].visible) {
+			if (layers[0].visible && udimTile == "") {
 				Layers.expa.g2.begin(false);
 				Layers.expa.g2.pipeline = Layers.pipeCopy;
 				Layers.expa.g2.drawImage(layers[0].texpaint, 0, 0);
@@ -70,6 +96,10 @@ class ExportTexture {
 			for (i in 1...layers.length) {
 				var l1 = layers[i];
 				if (!l1.visible) continue;
+
+				if (udimTile != "" && l1.objectMask > 0) {
+					if (!Project.paintObjects[l1.objectMask - 1].name.endsWith(udimTile)) continue;
+				}
 
 				// Apply mask
 				var hasMask = l1.texpaint_mask != null;
@@ -108,6 +138,7 @@ class ExportTexture {
 				Layers.expa.g4.setTexture(Layers.texb, Layers.imgb);
 				Layers.expa.g4.setTexture(Layers.texc, Layers.imgc);
 				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expa.g4.setInt(Layers.blending, l1.blending);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				Layers.expa.g4.drawIndexedVertices();
@@ -192,12 +223,6 @@ class ExportTexture {
 				writeTexture(path + "/" + f + "_" + t.name + ext, pix);
 			}
 		}
-
-		#if arm_debug
-		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
-		#end
-
-		Log.showMessage("Textures exported.");
 	}
 
 	static function writeTexture(file:String, pixels:Bytes, type = 1, off = 0) {
