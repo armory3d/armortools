@@ -9,10 +9,11 @@ class ImportObj {
 
 	public static function run(path:String) {
 		var i = UITrait.inst.splitBy;
-		ObjParser.splitCode = i == 0 ? "o".code : i == 1 ? "g".code : "u".code; // object, group, usemtl
+		var isUdim = i == 3;
+		ObjParser.splitCode = (i == 0 || isUdim) ? "o".code : i == 1 ? "g".code : "u".code; // object, group, usemtl
 		Data.getBlob(path, function(b:Blob) {
-			if (UITrait.inst.isUdim) {
-				var obj = new ObjParser(b, 0, UITrait.inst.isUdim);
+			if (isUdim) {
+				var obj = new ObjParser(b, 0, isUdim);
 				var name = obj.name;
 				for (i in 0...obj.udims.length) {
 					var u = i % obj.udimsU;
