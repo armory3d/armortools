@@ -267,6 +267,8 @@ class ImportArm {
 			m0 = m;
 		});
 
+		var imported:Array<MaterialSlot> = [];
+
 		for (n in project.material_nodes) {
 			for (node in n.nodes) {
 				if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
@@ -284,12 +286,20 @@ class ImportArm {
 			var mat = new MaterialSlot(m0);
 			UINodes.inst.canvasMap.set(mat, n);
 			Project.materials.push(mat);
-
 			Context.material = mat;
 			UINodes.inst.updateCanvasMap();
-			MaterialParser.parsePaintMaterial();
-			RenderUtil.makeMaterialPreview();
+			imported.push(mat);
 		}
+
+		function makeMaterialPreview(_) {
+			for (m in imported) {
+				Context.setMaterial(m);
+				MaterialParser.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
+			}
+			iron.App.removeRender(makeMaterialPreview);
+		}
+		iron.App.notifyOnRender(makeMaterialPreview);
 
 		UITrait.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);

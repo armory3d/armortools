@@ -227,10 +227,13 @@ class ImportBlend {
 				return;
 			}
 
+			var imported:Array<MaterialSlot> = [];
+
 			for (mat in mats) {
 				// Material slot
 				Context.material = new MaterialSlot(Project.materials[0].data);
 				Project.materials.push(Context.material);
+				imported.push(Context.material);
 				UINodes.inst.updateCanvasMap();
 				var nodes = UINodes.inst.nodes;
 				var canvas = UINodes.inst.canvas;
@@ -428,10 +431,17 @@ class ImportBlend {
 					link = link.get("next");
 					if (last.block == link.block) break;
 				}
-
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
 			}
+
+			function makeMaterialPreview(_) {
+				for (m in imported) {
+					Context.setMaterial(m);
+					MaterialParser.parsePaintMaterial();
+					RenderUtil.makeMaterialPreview();
+				}
+				iron.App.removeRender(makeMaterialPreview);
+			}
+			iron.App.notifyOnRender(makeMaterialPreview);
 
 			UITrait.inst.hwnd1.redraws = 2;
 			Data.deleteBlob(path);
