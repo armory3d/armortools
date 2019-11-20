@@ -245,9 +245,7 @@ class UITrait {
 	public var vxaoOffset = 1.5;
 	public var vxaoAperture = 1.2;
 	public var vignetteStrength = 0.4;
-	public var textureExport = false;
 	public var textureExportPath = "";
-	public var projectExport = false;
 	public var headerHandle = new Handle({layout:Horizontal});
 	public var toolbarHandle = new Handle();
 	public var statusHandle = new Handle({layout:Horizontal});
@@ -406,16 +404,6 @@ class UITrait {
 	}
 
 	public function update() {
-		if (textureExport) {
-			textureExport = false;
-			ExportTexture.run(textureExportPath);
-		}
-		if (projectExport) {
-			projectExport = false;
-			ExportArm.runProject();
-			if (App.saveAndQuit) System.stop();
-		}
-
 		isScrolling = ui.isScrolling;
 		updateUI();
 
@@ -443,13 +431,15 @@ class UITrait {
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (textureExportPath == "") { // First export, ask for path
-				var filters = bitsHandle.position > 0 ? "exr" : formatType == 0 ? "png" : "jpg";
-				UIFiles.show(filters, true, function(path:String) {
-					textureExport = true;
-					textureExportPath = path;
-				});
+				BoxExport.showTextures();
 			}
-			else textureExport = true;
+			else {
+				function export(_) {
+					ExportTexture.run(textureExportPath);
+					iron.App.removeRender(export);
+				}
+				iron.App.notifyOnRender(export);
+			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
@@ -579,7 +569,7 @@ class UITrait {
 				if (borderStarted == 0) {
 					UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
 					if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
-					else if (UINodes.inst.defaultWindowW > kha.System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(kha.System.windowWidth() * 0.7);
+					else if (UINodes.inst.defaultWindowW > System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(System.windowWidth() * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
 					UINodes.inst.defaultWindowH -= Std.int(mouse.movementY);
@@ -591,7 +581,7 @@ class UITrait {
 				if (borderStarted == 0) {
 					defaultWindowW -= Std.int(mouse.movementX);
 					if (defaultWindowW < 32) defaultWindowW = 32;
-					else if (defaultWindowW > kha.System.windowWidth() - 32) defaultWindowW = kha.System.windowWidth() - 32;
+					else if (defaultWindowW > System.windowWidth() - 32) defaultWindowW = System.windowWidth() - 32;
 					windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 				}
 				else {

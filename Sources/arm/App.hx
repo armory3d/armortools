@@ -52,7 +52,6 @@ class App {
 	public static var uibox:Zui;
 	public static var uimenu:Zui;
 	public static var fileArg = "";
-	public static var saveAndQuit = false;
 	public static var ELEMENT_H = 28;
 
 	public function new() {
@@ -181,10 +180,7 @@ class App {
 
 	static function saveAndQuitCallback(save:Bool) {
 		saveWindowRect();
-		if (save) {
-			saveAndQuit = true;
-			Project.projectSave();
-		}
+		if (save) Project.projectSave(true);
 		else System.stop();
 	}
 

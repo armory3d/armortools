@@ -1,5 +1,6 @@
 package arm;
 
+import kha.System;
 import kha.Window;
 import zui.Zui;
 import zui.Id;
@@ -24,6 +25,7 @@ import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
+import arm.io.ExportArm;
 using StringTools;
 
 class Project {
@@ -60,13 +62,19 @@ class Project {
 		});
 	}
 
-	public static function projectSave() {
+	public static function projectSave(saveAndQuit = false) {
 		if (filepath == "") {
 			projectSaveAs();
 			return;
 		}
 		Window.get(0).title = UIFiles.filename + " - ArmorPaint";
-		UITrait.inst.projectExport = true;
+
+		function export(_) {
+			ExportArm.runProject();
+			iron.App.removeRender(export);
+			if (saveAndQuit) System.stop();
+		}
+		iron.App.notifyOnRender(export);
 	}
 
 	public static function projectSaveAs() {

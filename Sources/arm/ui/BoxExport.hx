@@ -69,8 +69,12 @@ class BoxExport {
 					UIBox.show = false;
 					var filters = UITrait.inst.bitsHandle.position > 0 ? "exr" : UITrait.inst.formatType == 0 ? "png" : "jpg";
 					UIFiles.show(filters, true, function(path:String) {
-						UITrait.inst.textureExport = true;
 						UITrait.inst.textureExportPath = path;
+						function export(_) {
+							ExportTexture.run(path);
+							iron.App.removeRender(export);
+						}
+						iron.App.notifyOnRender(export);
 					});
 				}
 				if (ui.isHovered) ui.tooltip("Export texture files (" + Config.keymap.file_export_textures + ")");
