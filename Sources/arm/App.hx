@@ -411,7 +411,15 @@ class App {
 	}
 
 	public static function enumTexts(nodeType:String):Array<String> {
-		return Project.assetNames.length > 0 ? Project.assetNames : [""];
+		if (nodeType == "TEX_IMAGE") {
+			return Project.assetNames.length > 0 ? Project.assetNames : [""];
+		}
+		else if (nodeType == "LAYER") {
+			var layerNames:Array<String> = [];
+			for (l in Project.layers) layerNames.push(l.name);
+			return layerNames;
+		}
+		return null;
 	}
 
 	public static function getAssetIndex(filename:String):Int {

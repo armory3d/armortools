@@ -301,8 +301,20 @@ class Uniforms {
 			return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 		}
 		if (link.startsWith("_texpaint_pack_vert")) {
-			var tid = link.substr(19);
+			var tid = link.substr(link.length - 1);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
+		}
+		if (link.startsWith("_texpaint")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return Project.layers[tid].texpaint;
+		}
+		if (link.startsWith("_texpaint_nor")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return Project.layers[tid].texpaint_nor;
+		}
+		if (link.startsWith("_texpaint_pack")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return Project.layers[tid].texpaint_pack;
 		}
 		if (link == "_texpaint_mask") {
 			return Context.layer.texpaint_mask;

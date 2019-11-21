@@ -799,6 +799,19 @@ class Material {
 			return 'vVecCam';
 		}
 
+		else if (node.type == 'LAYER') {
+			if (socket == node.outputs[0]) { // Base
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
+				return 'texture(texpaint, texCoord).rgb';
+			}
+			else if (socket == node.outputs[5]) { // Normal
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_nor", "_texpaint_nor" + l);
+				return 'texture(texpaint_nor, texCoord).rgb';
+			}
+		}
+
 		else if (node.type == 'NEW_GEOMETRY') {
 			if (socket == node.outputs[0]) { // Position
 				curshader.wposition = true;
@@ -1127,6 +1140,38 @@ class Material {
 				curshader.wposition = true;
 				return 'distance(eye, wposition)';
 			}
+		}
+
+		else if (node.type == 'LAYER') {
+			if (socket == node.outputs[1]) { // Opac
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
+				return 'texture(texpaint, texCoord).a';
+			}
+			else if (socket == node.outputs[2]) { // Occ
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
+				return 'texture(texpaint_pack, texCoord).r';
+			}
+			else if (socket == node.outputs[3]) { // Rough
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
+				return 'texture(texpaint_pack, texCoord).g';
+			}
+			else if (socket == node.outputs[4]) { // Metal
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
+				return 'texture(texpaint_pack, texCoord).b';
+			}
+			// else if (socket == node.outputs[6]) { // Emission
+			// }
+			else if (socket == node.outputs[7]) { // Height
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
+				return 'texture(texpaint_pack, texCoord).a';
+			}
+			// else if (socket == node.outputs[8]) { // Subsurface
+			// }
 		}
 
 		else if (node.type == 'FRESNEL') {
