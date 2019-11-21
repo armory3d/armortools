@@ -90,13 +90,12 @@ class ImportArm {
 			Project.materials = [];
 			for (n in project.material_nodes) {
 				for (node in n.nodes) {
-					if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
-						var filepath = node.buttons[0].data;
-						var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
-						if (!isAbsolute) {
-							var abs = base + filepath;
-							node.buttons[0].data = abs;
-						}
+					if (node.type == "TEX_IMAGE") {
+						// TODO: deprecated, stores filename now
+						var s = node.buttons[0].data + "";
+						node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
+						//
+						node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 					}
 					for (inp in node.inputs) { // Round input socket values
 						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
@@ -271,13 +270,12 @@ class ImportArm {
 
 		for (n in project.material_nodes) {
 			for (node in n.nodes) {
-				if (node.type == "TEX_IMAGE") { // Convert image path from relative to absolute
-					var filepath = node.buttons[0].data;
-					var isAbsolute = filepath.charAt(0) == "/" || filepath.charAt(1) == ":";
-					if (!isAbsolute) {
-						var abs = base + filepath;
-						node.buttons[0].data = abs;
-					}
+				if (node.type == "TEX_IMAGE") {
+					// TODO: deprecated, stores filename now
+					var s = node.buttons[0].data + "";
+					node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
+					//
+					node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 				}
 				for (inp in node.inputs) { // Round input socket values
 					if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;

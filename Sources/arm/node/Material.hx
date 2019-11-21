@@ -1736,8 +1736,14 @@ class Material {
 
 	//
 
+	public static function enumData(s:String):String {
+		for (a in Project.assets) if (a.name == s) return a.file;
+		return "";
+	}
+
 	static function make_texture(image_node:TNode, tex_name:String, matname:String = null):TBindTexture {
-		var filepath = image_node.buttons[0].data;
+
+		var filepath = enumData(App.enumTexts(image_node.type)[image_node.buttons[0].default_value]);
 		if (filepath == '' || filepath.indexOf('.') == -1) {
 			return null;
 		}

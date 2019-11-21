@@ -14,6 +14,7 @@ class UIBox {
 	public static var boxTitle = "";
 	public static var boxText = "";
 	public static var boxCommands:Zui->Void = null;
+	public static var clickToHide = true;
 	static var modalW = 400;
 	static var modalH = 170;
 	static var drawn = false;
@@ -81,7 +82,7 @@ class UIBox {
 			var bottom = (apph / 2 + mh / 2) + hwnd.dragY;
 			var mx = mouse.x;
 			var my = mouse.y;
-			if (mx < left || mx > right || my < top || my > bottom || isEscape) {
+			if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
 				show = false;
 				App.redrawUI();
 			}
@@ -109,5 +110,6 @@ class UIBox {
 		hwnd.dragY = 0;
 		show = true;
 		drawn = false;
+		clickToHide = true;
 	}
 }

@@ -14,6 +14,7 @@ import arm.sys.Path;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.ui.UINodes;
+import arm.ui.UIBox;
 import arm.Project;
 import arm.Tool;
 using StringTools;
@@ -24,6 +25,7 @@ class ImportAsset {
 		// Mesh
 		if (Path.isMesh(path)) {
 			Project.importMeshBox(path);
+			if (dropX > 0) UIBox.clickToHide = false; // Prevent closing when going back to window after drag and drop
 		}
 		// Image
 		else if (Path.isTexture(path)) {

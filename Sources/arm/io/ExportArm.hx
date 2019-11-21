@@ -27,11 +27,8 @@ class ExportArm {
 		for (m in Project.materials) {
 			var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
 			for (n in c.nodes) {
-				if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
-					var sameDrive = Project.filepath.charAt(0) == n.buttons[0].data.charAt(0);
-					if (sameDrive) {
-						n.buttons[0].data = Path.toRelative(Project.filepath, n.buttons[0].data);
-					}
+				if (n.type == "TEX_IMAGE") {
+					n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
 				}
 			}
 			mnodes.push(c);
@@ -108,11 +105,8 @@ class ExportArm {
 		var m = Context.material;
 		var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
 		for (n in c.nodes) {
-			if (n.type == "TEX_IMAGE") {  // Convert image path from absolute to relative
-				var sameDrive = Project.filepath.charAt(0) == n.buttons[0].data.charAt(0);
-				if (sameDrive) {
-					n.buttons[0].data = Path.toRelative(Project.filepath, n.buttons[0].data);
-				}
+			if (n.type == "TEX_IMAGE") {
+				n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
 			}
 		}
 		mnodes.push(c);

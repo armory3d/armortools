@@ -311,8 +311,9 @@ class ImportBlend {
 							file = file.replace("\\", "/");
 							file = Path.baseDir(path) + file;
 							ImportTexture.run(file);
-							n.buttons[0].default_value = App.getAssetIndex(file);
-							n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
+							var ar = file.split("/");
+							var filename = ar[ar.length - 1];
+							n.buttons[0].default_value = App.getAssetIndex(filename);
 						}
 						else if (search == "valtorgb") {
 							var ramp:Dynamic = node.get("storage", 0, "ColorBand");

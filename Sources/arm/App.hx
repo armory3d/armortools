@@ -120,8 +120,7 @@ class App {
 				});
 
 				color_wheel = image;
-				Nodes.getEnumTexts = getEnumTexts;
-				Nodes.mapEnum = mapEnum;
+				Nodes.enumTexts = enumTexts;
 				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
 				uimenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
 				ELEMENT_H = uimenu.t.ELEMENT_H;
@@ -411,21 +410,12 @@ class App {
 		if (UIMenu.show) UIMenu.render(g);
 	}
 
-	public static function getEnumTexts():Array<String> {
+	public static function enumTexts(nodeType:String):Array<String> {
 		return Project.assetNames.length > 0 ? Project.assetNames : [""];
 	}
 
-	public static function mapEnum(s:String):String {
-		for (a in Project.assets) if (a.name == s) return a.file;
-		return "";
-	}
-
-	public static function getAssetIndex(f:String):Int {
-		for (i in 0...Project.assets.length) {
-			if (Project.assets[i].file == f) {
-				return i;
-			}
-		}
-		return 0;
+	public static function getAssetIndex(filename:String):Int {
+		var i = Project.assetNames.indexOf(filename);
+		return i >= 0 ? i : 0;
 	}
 }

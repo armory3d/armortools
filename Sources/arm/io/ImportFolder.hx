@@ -30,7 +30,6 @@ class ImportFolder {
 		// Import maps
 		for (f in files) {
 			if (!Path.isTexture(f)) continue;
-			f = path + Path.sep + f;
 
 			// TODO: handle -albedo
 
@@ -65,7 +64,7 @@ class ImportFolder {
 				valid = true;
 			}
 
-			if (valid) ImportTexture.run(f);
+			if (valid) ImportTexture.run(path + Path.sep + f);
 		}
 
 		// Create material
@@ -131,7 +130,6 @@ class ImportFolder {
 	static function placeImageNode(asset:String, ny:Int, to_id:Int, to_socket:Int) {
 		var n = NodesMaterial.createImageTexture();
 		n.buttons[0].default_value = App.getAssetIndex(asset);
-		n.buttons[0].data = App.mapEnum(App.getEnumTexts()[n.buttons[0].default_value]);
 		n.x = 72;
 		n.y = ny;
 		var l = { id: UINodes.inst.nodes.getLinkId(UINodes.inst.canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
