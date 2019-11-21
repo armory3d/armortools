@@ -25,6 +25,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
+using StringTools;
 
 class ImportArm {
 
@@ -46,8 +47,9 @@ class ImportArm {
 			Context.layersPreviewDirty = true;
 			var resetLayers = false;
 			Project.projectNew(resetLayers);
+			path = path.replace("\\", "/");
 			Project.filepath = path;
-			UIFiles.filename = new haxe.io.Path(Project.filepath).file;
+			UIFiles.filename = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 			var project:TProjectFormat = ArmPack.decode(b.toBytes());
 
