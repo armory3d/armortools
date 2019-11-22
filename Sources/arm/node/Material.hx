@@ -598,10 +598,25 @@ class Material {
 			curshader.add_function(MaterialFunctions.str_brightcontrast);
 			return 'brightcontrast($out_col, $bright, $contr)';
 		}
+
 		else if (node.type == 'GAMMA') {
 			var out_col = parse_vector_input(node.inputs[0]);
 			var gamma = parse_value_input(node.inputs[1]);
 			return 'pow($out_col, ' + to_vec3('$gamma') + ')';
+		}
+
+		else if (node.type == 'BLUR') {
+			var out_col = parse_vector_input(node.inputs[0]);
+			var strength = parse_value_input(node.inputs[1]);
+			curshader.write('vec3 res1 = vec3(0, 0, 0);');
+			curshader.write('for (int i = -6; i <= 6; ++i) {');
+			curshader.write('for (int j = -6; j <= 6; ++j) {');
+			curshader.write('texCoord += vec2(i, j) / 100;');
+			curshader.write('res1 += $out_col;');
+			curshader.write('}');
+			curshader.write('}');
+			curshader.write('res1 /= 13 * 13;');
+			return 'res1';
 		}
 
 		else if (node.type == 'HUE_SAT') {

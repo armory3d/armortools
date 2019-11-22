@@ -1198,6 +1198,43 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
+				name: "Blur",
+				type: "BLUR", // extension
+				x: 0,
+				y: 0,
+				color: 0xff448c6d,
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Color",
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: [0.8, 0.8, 0.8, 1.0]
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Strength",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.5
+					}
+				],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Color",
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: [0.8, 0.8, 0.8, 1.0]
+					}
+				],
+				buttons: []
+			},
+			{
+				id: 0,
 				name: "HueSatVal",
 				type: "HUE_SAT",
 				x: 0,
