@@ -475,9 +475,15 @@ class UINodes {
 		}
 	}
 
-	public function acceptDrag(assetIndex:Int) {
-		var n = canvasType == 0 ? NodesMaterial.createImageTexture() : NodesBrush.createImageTexture();
+	public function acceptAssetDrag(assetIndex:Int) {
+		var n = canvasType == 0 ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = assetIndex;
+		nodes.nodesSelected = [n];
+	}
+
+	public function acceptLayerDrag(layerIndex:Int) {
+		var n = NodesMaterial.createNode("LAYER");
+		n.buttons[0].default_value = layerIndex;
 		nodes.nodesSelected = [n];
 	}
 

@@ -34,7 +34,7 @@ class ImportAsset {
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;
 			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
-				UINodes.inst.acceptDrag(Project.assets.length - 1);
+				UINodes.inst.acceptAssetDrag(Project.assets.length - 1);
 				UINodes.inst.nodes.nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}

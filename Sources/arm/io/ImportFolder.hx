@@ -128,7 +128,7 @@ class ImportFolder {
 	}
 
 	static function placeImageNode(asset:String, ny:Int, to_id:Int, to_socket:Int) {
-		var n = NodesMaterial.createImageTexture();
+		var n = NodesMaterial.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = App.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;

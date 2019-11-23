@@ -395,14 +395,16 @@ class NodesBrush {
 		]
 	];
 
-	public static function createImageTexture():TNode {
-		for (n in list[categories.indexOf("Nodes")]) {
-			if (n.type == "TEX_IMAGE") {
-				var canvas = arm.ui.UINodes.inst.canvasBrush;
-				var nodes = arm.ui.UINodes.inst.nodes;
-				var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
-				canvas.nodes.push(node);
-				return node;
+	public static function createNode(nodeType:String):TNode {
+		for (c in list) {
+			for (n in c) {
+				if (n.type == nodeType) {
+					var canvas = arm.ui.UINodes.inst.canvasBrush;
+					var nodes = arm.ui.UINodes.inst.nodes;
+					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
+					canvas.nodes.push(node);
+					return node;
+				}
 			}
 		}
 		return null;

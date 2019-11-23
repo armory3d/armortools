@@ -3,6 +3,7 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import iron.system.Time;
+import iron.system.Input;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 import arm.util.UVUtil;
@@ -97,6 +98,8 @@ class TabLayers {
 				ui.imageInvertY = l.material_mask != null;
 				#end
 
+				var uix = ui._x;
+				var uiy = ui._y;
 				ui._x += 2;
 				ui._y += 3;
 				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
@@ -119,6 +122,10 @@ class TabLayers {
 				if (state == State.Started) {
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
 					UITrait.inst.selectTime = Time.time();
+					var mouse = Input.getMouse();
+					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					App.dragLayer = Context.layer;
 				}
 
 				if (l.texpaint_mask != null) {

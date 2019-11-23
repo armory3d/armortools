@@ -22,6 +22,7 @@ import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.data.MaterialSlot;
+import arm.data.LayerSlot;
 import arm.data.ConstData;
 import arm.plugin.Camera;
 import arm.Config;
@@ -40,6 +41,7 @@ class App {
 	public static var isDragging = false;
 	public static var isResizing = false;
 	public static var dragMaterial:MaterialSlot = null;
+	public static var dragLayer:LayerSlot = null;
 	public static var dragAsset:TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
@@ -306,11 +308,11 @@ class App {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		if ((dragAsset != null || dragMaterial != null) &&
+		if ((dragAsset != null || dragMaterial != null || dragLayer != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
 			isDragging = true;
 		}
-		if (mouse.released() && (dragAsset != null || dragMaterial != null)) {
+		if (mouse.released() && (dragAsset != null || dragMaterial != null || dragLayer != null)) {
 			var mx = mouse.x;
 			var my = mouse.y;
 			var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
@@ -333,7 +335,7 @@ class App {
 							break;
 						}
 					}
-					UINodes.inst.acceptDrag(index);
+					UINodes.inst.acceptAssetDrag(index);
 				}
 				// Create mask
 				else if (inViewport || inLayers || in2dView) {
@@ -341,12 +343,25 @@ class App {
 				}
 				dragAsset = null;
 			}
-			if (dragMaterial != null) {
+			else if (dragMaterial != null) {
 				// Material dragged onto viewport or layers tab
 				if (inViewport || inLayers || in2dView) {
 					Layers.createFillLayer();
 				}
 				dragMaterial = null;
+			}
+			else if (dragLayer != null) {
+				if (inNodes) {
+					var index = 0;
+					for (i in 0...Project.layers.length) {
+						if (Project.layers[i] == dragLayer) {
+							index = i;
+							break;
+						}
+					}
+					UINodes.inst.acceptLayerDrag(index);
+				}
+				dragLayer = null;
 			}
 			isDragging = false;
 		}
@@ -390,12 +405,12 @@ class App {
 		var mouse = Input.getMouse();
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
-			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial.imageIcon;
+			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial != null ? dragMaterial.imageIcon : dragLayer.texpaint_preview;
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE();
 			var ratio = size / img.width;
 			var h = img.height * ratio;
 			#if (kha_opengl || kha_webgl)
-			var inv = dragMaterial != null ? h : 0;
+			var inv = (dragMaterial != null || dragLayer != null) ? h : 0;
 			#else
 			var inv = 0;
 			#end
