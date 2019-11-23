@@ -213,11 +213,11 @@ class UINodes {
 			hideMenu = true;
 		}
 
-		if (nodes.nodesSelected.length > 0) {
-			if (kb.started("left")) for (n in nodes.nodesSelected) n.x -= 1;
-			else if (kb.started("right")) for (n in nodes.nodesSelected) n.x += 1;
-			if (kb.started("up")) for (n in nodes.nodesSelected) n.y -= 1;
-			else if (kb.started("down")) for (n in nodes.nodesSelected) n.y += 1;
+		if (nodes.nodesSelected.length > 0 && ui.isKeyPressed) {
+			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelected) n.x -= 1;
+			else if (ui.key == kha.input.KeyCode.Right) for (n in nodes.nodesSelected) n.x += 1;
+			if (ui.key == kha.input.KeyCode.Up) for (n in nodes.nodesSelected) n.y -= 1;
+			else if (ui.key == kha.input.KeyCode.Down) for (n in nodes.nodesSelected) n.y += 1;
 		}
 
 		// Node search popup
@@ -244,8 +244,9 @@ class UINodes {
 				searchHandle.text = "";
 				nodeSearchLast = "";
 			}
-			var search = ui.textSelectedCurrentText.toLowerCase();
-			if (searchHandle.text != "") search = searchHandle.text;
+			var search = searchHandle.text;
+			if (ui.textSelectedCurrentText != "") search = ui.textSelectedCurrentText;
+
 			if (search != nodeSearchLast) {
 				nodeSearchOffset = 0;
 				nodeSearchLast = search;
