@@ -24,7 +24,7 @@ class ImportMesh {
 
 	public static function run(path:String, _clearLayers = true) {
 		if (!Path.isMesh(path)) {
-			Log.showError(Strings.error1);
+			Log.error(Strings.error1);
 			return;
 		}
 
@@ -88,7 +88,7 @@ class ImportMesh {
 
 	public static function makeMesh(mesh:Dynamic, path:String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
-			Log.showError(Strings.error3);
+			Log.error(Strings.error3);
 			return;
 		}
 
@@ -111,7 +111,7 @@ class ImportMesh {
 		else {
 
 			if (mesh.texa == null) {
-				Log.showError(Strings.error4);
+				Log.error(Strings.error4);
 				var verts = Std.int(mesh.posa.length / 4);
 				mesh.texa = new Int16Array(verts * 2);
 				var n = new Vec4();
@@ -216,7 +216,7 @@ class ImportMesh {
 	public static function addMesh(mesh:Dynamic) {
 
 		if (mesh.texa == null) {
-			Log.showError(Strings.error4);
+			Log.error(Strings.error4);
 			var verts = Std.int(mesh.posa.length / 4);
 			mesh.texa = new Int16Array(verts * 2);
 			var n = new Vec4();

@@ -606,16 +606,27 @@ class Material {
 		}
 
 		else if (node.type == 'BLUR') {
+			// Image nodes only for now
 			var out_col = parse_vector_input(node.inputs[0]);
+			out_col = parsedMap.get(out_col);
+			if (out_col == null) return 'vec3(0.0, 0.0, 0.0)';
+			out_col = textureMap.get(out_col.split(".")[0]);
+			if (out_col == null) return 'vec3(0.0, 0.0, 0.0)';
+			out_col += '.rgb';
 			var strength = parse_value_input(node.inputs[1]);
-			curshader.write('vec3 res1 = vec3(0, 0, 0);');
-			curshader.write('for (int i = -6; i <= 6; ++i) {');
-			curshader.write('for (int j = -6; j <= 6; ++j) {');
-			curshader.write('texCoord += vec2(i, j) / 100;');
+			if (strength == '0.0') return 'vec3(0.0, 0.0, 0.0)';
+			var steps = 'int($strength * 10 + 1)';
+			var texture = out_col.substring(out_col.indexOf("(") + 1, out_col.indexOf(","));
+			curshader.write('vec2 _texCoord = texCoord;');
+			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
+			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
+			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
+			curshader.write('texCoord = _texCoord + vec2(i, j) / textureSize($texture, 0);');
 			curshader.write('res1 += $out_col;');
 			curshader.write('}');
 			curshader.write('}');
-			curshader.write('res1 /= 13 * 13;');
+			curshader.write('texCoord = _texCoord;');
+			curshader.write('res1 /= ($steps * 2 + 1) * ($steps * 2 + 1);');
 			return 'res1';
 		}
 
@@ -1673,6 +1684,9 @@ class Material {
 		return node_name(node) + '_' + safesrc(socket.name) + '_res';
 	}
 
+	static var parsedMap = new Map<String, String>();
+	static var textureMap = new Map<String, String>();
+
 	static function write_result(l:TNodeLink):String {
 		var from_node = getNode(l.from_id);
 		var from_socket = from_node.outputs[l.from_socket];
@@ -1684,12 +1698,14 @@ class Material {
 				var res = parse_vector(from_node, from_socket);
 				if (res == null)
 					return null;
+				parsedMap.set(res_var, res);
 				curshader.write('vec3 $res_var = $res;');
 			}
 			else if (st == 'VALUE') {
 				var res = parse_value(from_node, from_socket);
 				if (res == null)
 					return null;
+				parsedMap.set(res_var, res);
 				curshader.write('float $res_var = $res;');
 			}
 		}
@@ -1720,6 +1736,7 @@ class Material {
 			curshader.write('if (texCoordBlend.z > 0) $tex_store += texture($tex_name, ${uv_name}2.xy) * texCoordBlend.z;');
 		}
 		else {
+			textureMap.set(tex_store, 'texture($tex_name, $uv_name.xy)');
 			curshader.write('vec4 $tex_store = texture($tex_name, $uv_name.xy);');
 		}
 

@@ -7,7 +7,7 @@ class ImportPlugin {
 
 	public static function run(path:String) {
 		if (!Path.isPlugin(path)) {
-			Log.showError(Strings.error1);
+			Log.error(Strings.error1);
 			return;
 		}
 
@@ -15,6 +15,6 @@ class ImportPlugin {
 		var dstPath = Path.data() + Path.sep + "plugins" + Path.sep + filename;
 		File.copy(path, dstPath); // Copy to plugin folder
 		arm.ui.BoxPreferences.files = null; // Refresh file list
-		Log.showMessage("Plugin '" + filename + "' imported.");
+		Log.info("Plugin '" + filename + "' imported.");
 	}
 }

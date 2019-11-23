@@ -97,7 +97,7 @@ class ExportArm {
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData());
 
-		Log.showMessage("Project saved.");
+		Log.info("Project saved.");
 	}
 
 	public static function runMaterial(path:String) {

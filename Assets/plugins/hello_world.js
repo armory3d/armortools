@@ -14,7 +14,7 @@ plugin.drawUI = function(ui) {
 		ui.text("Label");
 		ui.textInput(h7, "Text Input");
 		if (ui.button("Button")) {
-			arm.Log.showError("Hello");
+			arm.Log.error("Hello");
 		}
 		ui.row([1/2, 1/2]);
 		ui.button("Button A");

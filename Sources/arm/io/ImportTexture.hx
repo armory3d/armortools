@@ -11,11 +11,11 @@ class ImportTexture {
 
 	public static function run(path:String) {
 		if (!Path.isTexture(path)) {
-			Log.showError(Strings.error1);
+			Log.error(Strings.error1);
 			return;
 		}
 
-		for (a in Project.assets) if (a.file == path) { Log.showMessage(Strings.info0); return; }
+		for (a in Project.assets) if (a.file == path) { Log.info(Strings.info0); return; }
 
 		var ext = path.substr(path.lastIndexOf(".") + 1);
 		var importer = Path.textureImporters.get(ext);

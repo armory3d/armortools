@@ -99,7 +99,7 @@ class UIMenu {
 				if (ui.button("Import Envmap...", Left)) {
 					UIFiles.show("hdr", false, function(path:String) {
 						if (!path.endsWith(".hdr")) {
-							Log.showError("Error: .hdr file expected");
+							Log.error("Error: .hdr file expected");
 							return;
 						}
 						ImportAsset.run(path);

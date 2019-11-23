@@ -49,7 +49,7 @@ class Project {
 	public static function projectOpen() {
 		UIFiles.show("arm", false, function(path:String) {
 			if (!path.endsWith(".arm")) {
-				Log.showError(Strings.error5);
+				Log.error(Strings.error5);
 				return;
 			}
 
@@ -277,7 +277,7 @@ class Project {
 	public static function reimportMesh() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
 			ImportMesh.run(Project.meshAssets[0], false);
-			Log.showMessage("Mesh reimported.");
+			Log.info("Mesh reimported.");
 		}
 		else importAsset();
 	}

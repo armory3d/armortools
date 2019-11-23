@@ -232,7 +232,7 @@ let h1 = new zui.Handle();
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, 'New Plugin')) {
 		if (ui.button('Button')) {
-			arm.Log.showError('Hello');
+			arm.Log.error('Hello');
 		}
 	}
 }

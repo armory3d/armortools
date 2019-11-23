@@ -300,6 +300,8 @@ class MaterialShader {
 		s += '#define textureLod(tex, coord, lod) tex.SampleLevel(tex ## _sampler, coord, lod)\n';
 		s += '#define textureLodShared(tex, coord, lod) tex.SampleLevel($sharedSampler, coord, lod)\n';
 		s += '#define texelFetch(tex, coord, lod) tex.Load(float3(coord.xy, lod))\n';
+		s += 'uint2 _GetDimensions(Texture2D tex, uint lod) { uint x, y; tex.GetDimensions(x, y); return uint2(x, y); }\n';
+		s += '#define textureSize _GetDimensions\n';
 		s += '#define mod(a, b) (a % b)\n';
 		s += '#define vec2 float2\n';
 		s += '#define vec3 float3\n';

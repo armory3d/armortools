@@ -41,7 +41,7 @@ class ExportTexture {
 		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
 		#end
 
-		Log.showMessage("Textures exported.");
+		Log.info("Textures exported.");
 	}
 
 	static function runLayers(path:String, udimTile = "") {

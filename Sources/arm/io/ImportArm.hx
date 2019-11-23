@@ -72,7 +72,7 @@ class ImportArm {
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;
 				if (!File.exists(abs)) {
-					Log.showError(Strings.error2 + abs);
+					Log.error(Strings.error2 + abs);
 					var b = Bytes.alloc(4);
 					b.set(0, 255);
 					b.set(1, 0);
@@ -251,7 +251,7 @@ class ImportArm {
 			var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 			var abs = isAbsolute ? file : base + file;
 			if (!File.exists(abs)) {
-				Log.showError(Strings.error2 + abs);
+				Log.error(Strings.error2 + abs);
 				var b = Bytes.alloc(4);
 				b.set(0, 255);
 				b.set(1, 0);

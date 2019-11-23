@@ -56,7 +56,7 @@ class ImportAsset {
 			ImportFolder.run(path);
 		}
 		else {
-			Log.showError(Strings.error1);
+			Log.error(Strings.error1);
 		}
 	}
 }
