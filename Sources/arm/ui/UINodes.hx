@@ -364,11 +364,29 @@ class UINodes {
 			var c = getCanvas();
 			nodes.nodeCanvas(ui, c);
 
-			// Image node preview
-			if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0].type == 'TEX_IMAGE') {
-				var id = nodes.nodesSelected[0].buttons[0].default_value;
-				if (id < Project.assets.length) {
-					var img = UITrait.inst.getImage(Project.assets[id]);
+			// Node previews
+			if (nodes.nodesSelected.length > 0) {
+				var img:kha.Image = null;
+				var sel = nodes.nodesSelected[0];
+				if (sel.type == "TEX_IMAGE") {
+					var id = sel.buttons[0].default_value;
+					if (id < Project.assets.length) {
+						img = UITrait.inst.getImage(Project.assets[id]);
+					}
+				}
+				else if (sel.type == "LAYER") {
+					var id = sel.buttons[0].default_value;
+					if (id < Project.layers.length) {
+						img = Project.layers[id].texpaint_preview;
+					}
+				}
+				else if (sel.type == "LAYER_MASK") {
+					var id = sel.buttons[0].default_value;
+					if (id < Project.layers.length) {
+						img = Project.layers[id].texpaint_mask_preview;
+					}
+				}
+				if (img != null) {
 					var tw = 64 * ui.SCALE();
 					var th = tw * (img.height / img.width);
 					ui.g.drawScaledImage(img, ww - tw - 8 * ui.SCALE(), wh - th - 40 * ui.SCALE(), tw, th);
@@ -482,7 +500,7 @@ class UINodes {
 	}
 
 	public function acceptLayerDrag(layerIndex:Int) {
-		var n = NodesMaterial.createNode("LAYER");
+		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
 		n.buttons[0].default_value = layerIndex;
 		nodes.nodesSelected = [n];
 	}

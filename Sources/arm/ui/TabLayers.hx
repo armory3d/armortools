@@ -116,10 +116,8 @@ class TabLayers {
 				if (ui.isHovered && ui.inputReleasedR) {
 					contextMenu = true;
 				}
-				if (ui.isReleased) {
-					Context.setLayer(l);
-				}
 				if (state == State.Started) {
+					Context.setLayer(l);
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
 					UITrait.inst.selectTime = Time.time();
 					var mouse = Input.getMouse();
@@ -129,6 +127,8 @@ class TabLayers {
 				}
 
 				if (l.texpaint_mask != null) {
+					var uix = ui._x;
+					var uiy = ui._y;
 					ui._x += Std.int(4 * ui.SCALE());
 					ui._y += 3;
 					var state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
@@ -161,12 +161,14 @@ class TabLayers {
 							}
 						});
 					}
-					if (ui.isReleased) {
-						Context.setLayer(l, true);
-					}
 					if (state == State.Started) {
+						Context.setLayer(l, true);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
 						UITrait.inst.selectTime = Time.time();
+						var mouse = Input.getMouse();
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						App.dragLayer = Context.layer;
 					}
 				}
 
@@ -174,10 +176,8 @@ class TabLayers {
 				var state = ui.text(l.name);
 				ui._y -= center;
 
-				if (ui.isReleased) {
-					Context.setLayer(l);
-				}
 				if (state == State.Started) {
+					Context.setLayer(l);
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
 					UITrait.inst.selectTime = Time.time();
 				}

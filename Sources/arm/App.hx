@@ -399,13 +399,20 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
+	static function getDragImage():kha.Image {
+		if (dragAsset != null) return UITrait.inst.getImage(dragAsset);
+		if (dragMaterial != null) return dragMaterial.imageIcon;
+		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
+		else return dragLayer.texpaint_preview;
+	}
+
 	static function render(g:kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		var mouse = Input.getMouse();
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
-			var img = dragAsset != null ? UITrait.inst.getImage(dragAsset) : dragMaterial != null ? dragMaterial.imageIcon : dragLayer.texpaint_preview;
+			var img = getDragImage();
 			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE();
 			var ratio = size / img.width;
 			var h = img.height * ratio;
