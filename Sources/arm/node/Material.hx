@@ -1200,6 +1200,14 @@ class Material {
 			// }
 		}
 
+		else if (node.type == 'LAYER_MASK') {
+			if (socket == node.outputs[0]) {
+				var l = node.buttons[0].default_value;
+				curshader.add_uniform("sampler2D texpaint_mask", "_texpaint_mask" + l);
+				return 'texture(texpaint_mask, texCoord).r';
+			}
+		}
+
 		else if (node.type == 'FRESNEL') {
 			var ior = parse_value_input(node.inputs[0]);
 			// var nor = parse_vector_input(node.inputs[1])

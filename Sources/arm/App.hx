@@ -429,7 +429,7 @@ class App {
 		if (nodeType == "TEX_IMAGE") {
 			return Project.assetNames.length > 0 ? Project.assetNames : [""];
 		}
-		else if (nodeType == "LAYER") {
+		else if (nodeType == "LAYER" || nodeType == "LAYER_MASK") {
 			var layerNames:Array<String> = [];
 			for (l in Project.layers) layerNames.push(l.name);
 			return layerNames;
