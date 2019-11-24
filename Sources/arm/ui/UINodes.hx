@@ -386,6 +386,12 @@ class UINodes {
 						img = Project.layers[id].texpaint_mask_preview;
 					}
 				}
+				else if (sel.type == "MATERIAL") {
+					var id = sel.buttons[0].default_value;
+					if (id < Project.materials.length) {
+						img = Project.materials[id].image;
+					}
+				}
 				if (img != null) {
 					var tw = 64 * ui.SCALE();
 					var th = tw * (img.height / img.width);
@@ -501,6 +507,12 @@ class UINodes {
 
 	public function acceptLayerDrag(layerIndex:Int) {
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
+		n.buttons[0].default_value = layerIndex;
+		nodes.nodesSelected = [n];
+	}
+
+	public function acceptMaterialDrag(layerIndex:Int) {
+		var n = NodesMaterial.createNode("MATERIAL");
 		n.buttons[0].default_value = layerIndex;
 		nodes.nodesSelected = [n];
 	}

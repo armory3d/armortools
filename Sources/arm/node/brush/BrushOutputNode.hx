@@ -56,6 +56,7 @@ class BrushOutputNode extends LogicNode {
 			!UITrait.inst.ui.isHovered &&
 			!UITrait.inst.ui.isScrolling &&
 			!fillLayer &&
+			(Context.layer.visible || UITrait.inst.paint2d) &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			@:privateAccess UITrait.inst.ui.comboSelectedHandle == null &&

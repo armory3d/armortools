@@ -841,8 +841,7 @@ class MaterialBuilder {
 		vert.write_attrib('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
 
 		vert.add_out('vec2 texCoord');
-		vert.add_uniform('float brushScale', '_brushScale');
-		vert.write_attrib('texCoord = tex * brushScale;');
+		vert.write_attrib('texCoord = tex;');
 
 		if (heightUsed) {
 			frag.bposition = true;

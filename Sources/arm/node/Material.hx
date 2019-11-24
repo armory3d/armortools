@@ -838,6 +838,10 @@ class Material {
 			}
 		}
 
+		else if (node.type == 'MATERIAL') {
+			return 'vec3(0.0, 0.0, 0.0)';
+		}
+
 		else if (node.type == 'NEW_GEOMETRY') {
 			if (socket == node.outputs[0]) { // Position
 				curshader.wposition = true;
@@ -1206,6 +1210,10 @@ class Material {
 				curshader.add_uniform("sampler2D texpaint_mask", "_texpaint_mask" + l);
 				return 'texture(texpaint_mask, texCoord).r';
 			}
+		}
+
+		else if (node.type == 'MATERIAL') {
+			return '0.0';
 		}
 
 		else if (node.type == 'FRESNEL') {

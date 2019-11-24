@@ -348,6 +348,16 @@ class App {
 				if (inViewport || inLayers || in2dView) {
 					Layers.createFillLayer();
 				}
+				else if (inNodes) {
+					var index = 0;
+					for (i in 0...Project.materials.length) {
+						if (Project.materials[i] == dragMaterial) {
+							index = i;
+							break;
+						}
+					}
+					UINodes.inst.acceptMaterialDrag(index);
+				}
 				dragMaterial = null;
 			}
 			else if (dragLayer != null) {
@@ -440,6 +450,11 @@ class App {
 			var layerNames:Array<String> = [];
 			for (l in Project.layers) layerNames.push(l.name);
 			return layerNames;
+		}
+		else if (nodeType == "MATERIAL") {
+			var materialNames:Array<String> = [];
+			for (m in Project.materials) materialNames.push(UINodes.inst.canvasMap.get(m).name);
+			return materialNames;
 		}
 		return null;
 	}
