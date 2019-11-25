@@ -45,7 +45,7 @@ class App {
 	public static var dragAsset:TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
-	public static var dropPath = "";
+	static var dropPaths:Array<String> = [];
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
 	public static var font:Font = null;
@@ -70,12 +70,15 @@ class App {
 			#if krom_windows
 			if (!Path.isAscii(filePath)) filePath = Path.shortPath(filePath);
 			#end
-			dropPath = filePath;
+			var dropPath = filePath;
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);
-			dropPath = dropPath.split("file://")[0]; // Multiple files dropped, take first
-			#end
+			dropPaths = dropPath.split("file://");
+			for (i in 0...dropPaths.length) dropPaths[i] = dropPaths[i].rtrim();
+			#else
 			dropPath = dropPath.rtrim();
+			dropPaths.push(dropPath);
+			#end
 		});
 
 		System.notifyOnApplicationState(
@@ -376,7 +379,7 @@ class App {
 			isDragging = false;
 		}
 
-		if (dropPath != "") {
+		if (dropPaths.length > 0) {
 			#if krom_linux
 			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
 			#else
@@ -385,8 +388,8 @@ class App {
 			if (!wait) {
 				dropX = mouse.x;
 				dropY = mouse.y;
+				var dropPath = dropPaths.shift();
 				ImportAsset.run(dropPath, dropX, dropY);
-				dropPath = "";
 			}
 		}
 
