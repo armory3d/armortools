@@ -459,7 +459,7 @@ class MaterialBuilder {
 			Material.parse_height = Context.material.paintHeight;
 			Material.parse_height_as_channel = true;
 			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
-			Material.triplanar = uvType == 1;
+			Material.triplanar = uvType == 1 && !decal;
 			var sout = Material.parse(UINodes.inst.canvas, con_paint, vert, frag, null, null, null, matcon);
 			Material.parse_emission = false;
 			Material.parse_subsurface = false;
