@@ -1144,7 +1144,7 @@ class UITrait {
 			var modeHandle = Id.handle({position: 0});
 			var modes = ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"];
 			#if kha_direct3d12
-			modes.push("Ray-traced");
+			modes.push("Path-traced");
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
