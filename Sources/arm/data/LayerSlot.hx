@@ -313,9 +313,11 @@ class LayerSlot {
 		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
 		this.texpaint_pack.g2.end();
 
-		texpaint.unload();
-		texpaint_nor.unload();
-		texpaint_pack.unload();
+		iron.App.notifyOnInit(function() { // Out of command list execution
+			texpaint.unload();
+			texpaint_nor.unload();
+			texpaint_pack.unload();
+		});
 
 		rts.get("texpaint" + this.ext).image = this.texpaint;
 		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
@@ -329,7 +331,9 @@ class LayerSlot {
 			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
 			this.texpaint_mask.g2.end();
 
-			texpaint_mask.unload();
+			iron.App.notifyOnInit(function() { // Out of command list execution
+				texpaint_mask.unload();
+			});
 
 			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
 		}
