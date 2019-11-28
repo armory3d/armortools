@@ -111,11 +111,6 @@ class UIMenu {
 					UITrait.inst.ui.isHovered = false;
 				}
 
-				if (ui.button("Split View", Left)) {
-					UITrait.inst.splitView = !UITrait.inst.splitView;
-					App.resize();
-				}
-
 				ui.changed = false;
 
 				var p = Scene.active.world.probe;
@@ -150,6 +145,12 @@ class UIMenu {
 				UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);
 				if (dispHandle.changed) {
 					MaterialParser.parseMeshMaterial();
+				}
+
+				var splitViewHandle = Id.handle({selected: UITrait.inst.splitView});
+				UITrait.inst.splitView = ui.check(splitViewHandle, "Split View");
+				if (splitViewHandle.changed) {
+					App.resize();
 				}
 
 				var cullHandle = Id.handle({selected: UITrait.inst.cullBackfaces});
