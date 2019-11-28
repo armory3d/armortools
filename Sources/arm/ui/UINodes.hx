@@ -395,7 +395,18 @@ class UINodes {
 				if (img != null) {
 					var tw = 64 * ui.SCALE();
 					var th = tw * (img.height / img.width);
-					ui.g.drawScaledImage(img, ww - tw - 8 * ui.SCALE(), wh - th - 40 * ui.SCALE(), tw, th);
+					var tx = ww - tw - 8 * ui.SCALE();
+					var ty = wh - th - 40 * ui.SCALE();
+
+					#if (kha_opengl || kha_webgl)
+					var invertY = sel.type == "MATERIAL";
+					#else
+					var invertY = false;
+					#end
+
+					invertY ?
+						ui.g.drawScaledImage(img, tx, ty + th, tw, -th) :
+						ui.g.drawScaledImage(img, tx, ty, tw, th);
 				}
 			}
 
