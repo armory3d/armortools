@@ -414,6 +414,8 @@ class RenderPathDeferred {
 
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
+		#if arm_painter
+
 		if (UITrait.inst.splitView) {
 
 			if (UITrait.inst.viewIndexLast == -1 && UITrait.inst.viewIndex == -1) {
@@ -440,8 +442,6 @@ class RenderPathDeferred {
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
-
-		#if arm_painter
 
 		var mouse = Input.getMouse();
 		var mx = lastX;
@@ -532,8 +532,6 @@ class RenderPathDeferred {
 			planeo.transform.buildMatrix();
 		}
 
-		#end // arm_painter
-
 		if (UITrait.inst.splitView) {
 			if (Context.pdirty > 0) {
 				var cam = Scene.active.camera;
@@ -557,6 +555,8 @@ class RenderPathDeferred {
 				cam.buildProjection();
 			}
 		}
+
+		#end // arm_painter
 
 		// Geometry
 		drawGbuffer();
@@ -704,10 +704,10 @@ class RenderPathDeferred {
 		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
+		endSplit();
 		#end
 
 		taaFrame++;
-		endSplit();
 	}
 
 	static function drawDeferred() {
@@ -809,7 +809,13 @@ class RenderPathDeferred {
 
 		#if arm_world
 		{
-			if (Project.waterPass) {
+			#if arm_creator
+			var waterPass = Project.waterPass;
+			#else
+			var waterPass = true;
+			#end
+
+			if (waterPass) {
 				path.setTarget("buf");
 				path.bindTarget("tex", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -972,7 +978,12 @@ class RenderPathDeferred {
 			path.bindTarget("gbuffer2", "sveloc");
 			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
+			#if arm_painter
 			var skipTaa = UITrait.inst.splitView;
+			#else
+			var skipTaa = false;
+			#end
+
 			if (skipTaa) {
 				path.setTarget("taa");
 				path.bindTarget(current, "tex");
@@ -1002,9 +1013,13 @@ class RenderPathDeferred {
 
 	#if kha_direct3d12
 	static function drawRaytraced() {
+		#if arm_painter
 		if (Context.ddirty > 1) {
 			RenderPathRaytrace.frame = 0;
 		}
+		#else
+		RenderPathRaytrace.frame = 0;
+		#end
 		RenderPathRaytrace.commands();
 		path.setTarget("buf");
 		drawCompass(path.currentG);
@@ -1014,16 +1029,13 @@ class RenderPathDeferred {
 		path.setTarget("");
 		path.bindTarget("taa", "tex");
 		path.drawShader("shader_datas/copy_pass/copy_pass");
+		#if arm_painter
 		if (UITrait.inst.brush3d) {
 			RenderPathPaint.commandsCursor();
 		}
+		#end
 	}
 	#end
-
-	static function endSplit() {
-		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
-		UITrait.inst.viewIndex = -1;
-	}
 
 	static function drawGbuffer() {
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
@@ -1101,6 +1113,11 @@ class RenderPathDeferred {
 			gizmo.transform.rot = rot;
 			gizmo.transform.buildMatrix();
 		}
+	}
+
+	static function endSplit() {
+		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
+		UITrait.inst.viewIndex = -1;
 	}
 	#end
 }

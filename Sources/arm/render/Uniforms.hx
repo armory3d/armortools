@@ -75,13 +75,25 @@ class Uniforms {
 		}
 		#end
 		if (link == "_vignetteStrength") {
+			#if arm_painter
 			return UITrait.inst.vignetteStrength;
+			#else
+			return 0.4;
+			#end
 		}
 		if (link == "_coneOffset") {
+			#if arm_painter
 			return UITrait.inst.vxaoOffset;
+			#else
+			return 1.5;
+			#end
 		}
 		if (link == "_coneAperture") {
+			#if arm_painter
 			return UITrait.inst.vxaoAperture;
+			#else
+			return 1.2;
+			#end
 		}
 		return null;
 	}

@@ -86,21 +86,22 @@ else { // painter, creator
 	if (build === 'creator') {
 		project.addDefine('arm_creator');
 	}
-}
 
-if (build === 'painter') {
-	project.addAssets("Assets/painter/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
-	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	if (process.platform === 'win32') {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
 	}
 	else {
 		project.addShaders("Shaders/painter/glsl/*.glsl", { noembed: false });
 	}
+}
+
+if (build === 'painter') {
+	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
+	project.addAssets("Assets/painter/*", { notinlist: true, destination: "data/{name}" });
 	project.addDefine('kha_no_ogg');
 }
-else {
+else { // player, creator
 	project.addAssets("Assets/creator/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Assets/creator/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 	project.addShaders("Shaders/creator/*.glsl", { noembed: false});

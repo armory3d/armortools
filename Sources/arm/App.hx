@@ -57,7 +57,6 @@ class App {
 	public static var ELEMENT_H = 28;
 
 	public function new() {
-		Config.init();
 		Log.init();
 		winw = System.windowWidth();
 		winh = System.windowHeight();

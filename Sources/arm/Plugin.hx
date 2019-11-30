@@ -76,6 +76,7 @@ class ArmBridge {
 	public static var Project = arm.Project;
 	public static var Res = arm.Res;
 	public static var Path = arm.sys.Path;
+	public static var File = arm.sys.File;
 	public static var NodesMaterial = arm.node.NodesMaterial;
 	public static var Material = arm.node.Material;
 	public static var UITrait = arm.ui.UITrait;
@@ -97,7 +98,11 @@ class ZuiBridge {
 @:keep
 class Keep {
 	public function keep() {
-		var a = iron.system.ArmPack.decode;
-		var b = iron.system.ArmPack.encode;
+		iron.system.ArmPack.decode(null);
+		iron.system.ArmPack.encode(null);
+		#if arm_creator
+		arm.sys.Path.workingDir();
+		arm.sys.File.createDirectory(null);
+		#end
 	}
 }

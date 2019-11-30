@@ -49,6 +49,7 @@ class Main {
 		System.start({title: title, window: {width: c.window_w, height: c.window_h, x: c.window_x, y: c.window_y, mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: 1, verticalSync: c.window_vsync}}, function(window:Window) {
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o:Object) {
+					Config.init();
 					Uniforms.init();
 					var path = new RenderPath();
 					Inc.init(path);

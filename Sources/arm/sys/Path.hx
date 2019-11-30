@@ -5,10 +5,10 @@ using StringTools;
 
 class Path {
 
-	#if krom_windows
-	public static inline var sep = "\\";
+	#if krom_windows // no inline for plugin access
+	public static var sep = "\\";
 	#else
-	public static inline var sep = "/";
+	public static var sep = "/";
 	#end
 
 	public static var meshFormats = ["obj", "fbx", "stl", "blend"];
@@ -49,6 +49,17 @@ class Path {
 		base = base.substr(0, 2) + "\\" + base.substr(3);
 		#end
 		return base;
+	}
+
+	public static function workingDir():String {
+		#if krom_windows
+		var cmd = "cd";
+		#else
+		var cmd = "echo $PWD";
+		#end
+		var save = data() + sep + "tmp.txt";
+		Krom.sysCommand(cmd + ' > "' + save + '"');
+		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
 	}
 
 	public static function isMesh(path:String):Bool {

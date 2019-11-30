@@ -25,6 +25,10 @@ class File {
 		return files;
 	}
 
+	public static function createDirectory(path:String) {
+		Krom.sysCommand("mkdir " + path);
+	}
+
 	public static function copy(srcPath:String, dstPath:String) {
 		Krom.sysCommand(cmd_copy + ' "' + srcPath + '" "' + dstPath + '"');
 	}

@@ -53,7 +53,9 @@ class Config {
 		raw = null;
 		create();
 		init();
+		#if arm_painter
 		applyConfig();
+		#end
 	}
 
 	public static function init():TConfig {
