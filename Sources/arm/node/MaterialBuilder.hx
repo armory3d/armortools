@@ -1,5 +1,6 @@
 package arm.node;
 
+import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
@@ -819,7 +820,7 @@ class MaterialBuilder {
 			   i == 3 ? "vec3(0,0,1)" :
 			   i == 4 ? "vec3(-1,0,0)" :
 			   i == 5 ? "vec3(0,-1,0)" :
-			   			"vec3(0,0,-1)";
+						"vec3(0,0,-1)";
 	}
 
 	public static function make_mesh_preview(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
@@ -830,15 +831,36 @@ class MaterialBuilder {
 			depth_write: true,
 			compare_mode: 'less',
 			cull_mode: (UITrait.inst.cullBackfaces || !isScene) ? 'clockwise' : 'none',
-			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
+			vertex_elements: [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
-
 		frag.ins = vert.outs;
+		var pos = "pos";
+
+		#if arm_skin
+		var isMesh = Std.is(Context.object, MeshObject);
+		var skin = isMesh && cast(Context.object, MeshObject).data.geom.bones != null;
+		if (skin) {
+			pos = "spos";
+			con_mesh.add_elem("bone", 'short4norm');
+			con_mesh.add_elem("weight", 'short4norm');
+			vert.add_function(MaterialFunctions.str_getSkinningDualQuat);
+			vert.add_uniform('vec4 skinBones[128 * 2]', '_skinBones');
+			vert.add_uniform('float posUnpack', '_posUnpack');
+			vert.write_attrib('vec4 skinA;');
+			vert.write_attrib('vec4 skinB;');
+			vert.write_attrib('getSkinningDualQuat(ivec4(bone * 32767), weight, skinA, skinB);');
+			vert.write_attrib('vec3 spos = pos.xyz;');
+			vert.write_attrib('spos.xyz *= posUnpack;');
+			vert.write_attrib('spos.xyz += 2.0 * cross(skinA.xyz, cross(skinA.xyz, spos.xyz) + skinA.w * spos.xyz);');
+			vert.write_attrib('spos.xyz += 2.0 * (skinA.w * skinB.xyz - skinB.w * skinA.xyz + cross(skinA.xyz, skinB.xyz));');
+			vert.write_attrib('spos.xyz /= posUnpack;');
+		}
+		#end
 
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
-		vert.write_attrib('gl_Position = mul(vec4(pos.xyz, 1.0), WVP);');
+		vert.write_attrib('gl_Position = mul(vec4($pos.xyz, 1.0), WVP);');
 
 		vert.add_out('vec2 texCoord');
 		vert.write_attrib('texCoord = tex;');
@@ -911,6 +933,13 @@ class MaterialBuilder {
 		frag.write('fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);'); // veloc
 
 		Material.finalize(con_mesh);
+
+		#if arm_skin
+		if (skin) {
+			vert.write('wnormal = normalize(mul(vec3(nor.xy, pos.w) + 2.0 * cross(skinA.xyz, cross(skinA.xyz, vec3(nor.xy, pos.w)) + skinA.w * vec3(nor.xy, pos.w)), N));');
+		}
+		#end
+
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();
@@ -1374,6 +1403,17 @@ class MaterialBuilder {
 		var pipeState = data.pipeState;
 		pipeState.inputLayout = [structure];
 		data.raw.vertex_elements = [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}];
+
+		// #if arm_skin
+		// var isMesh = Std.is(Context.object, MeshObject);
+		// var skin = isMesh && cast(Context.object, MeshObject).data.geom.bones != null;
+		// if (skin) {
+		// 	structure.add("bone", kha.graphics4.VertexData.Short4Norm);
+		// 	structure.add("weight", kha.graphics4.VertexData.Short4Norm);
+		// 	data.raw.vertex_elements.push({name: "bone", data: 'short4norm'});
+		// 	data.raw.vertex_elements.push({name: "weight", data: 'short4norm'});
+		// }
+		// #end
 
 		var ds = getDisplaceStrength();
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(

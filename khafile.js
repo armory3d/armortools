@@ -108,7 +108,7 @@ else { // player, creator
 	project.addDefine('arm_audio');
 	project.addDefine('arm_soundcompress');
 	project.addDefine('arm_skin');
-	project.addDefine('arm_world'); // creator || player
+	project.addDefine('arm_world');
 }
 
 resolve(project);

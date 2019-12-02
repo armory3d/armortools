@@ -39,7 +39,8 @@ class Context {
 		if (Project.materialsScene.length <= i || object == paintObject) return;
 		materialScene = Project.materialsScene[i];
 		if (Std.is(object, MeshObject)) {
-			cast(object, MeshObject).materials[0] = materialScene.data;
+			var mats = cast(object, MeshObject).materials;
+			for (i in 0...mats.length) mats[i] = materialScene.data;
 		}
 		UINodes.inst.updateCanvasMap();
 		MaterialParser.parsePaintMaterial();

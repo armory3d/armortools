@@ -279,4 +279,28 @@ float packFloatInt16(const float f, const uint i) {
 }
 ";
 
+	#if arm_skin
+	public static var str_getSkinningDualQuat = "
+void getSkinningDualQuat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B) {
+	ivec4 bonei = bone * 2;
+	mat4 matA = mat4(
+		skinBones[bonei.x],
+		skinBones[bonei.y],
+		skinBones[bonei.z],
+		skinBones[bonei.w]);
+	mat4 matB = mat4(
+		skinBones[bonei.x + 1],
+		skinBones[bonei.y + 1],
+		skinBones[bonei.z + 1],
+		skinBones[bonei.w + 1]);
+	weight.xyz *= sign(mul(matA, matA[3])).xyz;
+	A = mul(weight, matA);
+	B = mul(weight, matB);
+	float invNormA = 1.0 / length(A);
+	A *= invNormA;
+	B *= invNormA;
+}
+";
+	#end
+
 }

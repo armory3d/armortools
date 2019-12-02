@@ -9,7 +9,11 @@ import kha.graphics4.DepthStencilFormat;
 import iron.data.MaterialData;
 import iron.data.MeshData;
 import iron.data.Data;
+import iron.data.SceneFormat;
 import iron.system.ArmPack;
+import iron.object.Object;
+import iron.object.MeshObject;
+import iron.Scene;
 import iron.RenderPath;
 import arm.Project;
 import arm.ui.UITrait;
@@ -29,16 +33,62 @@ using StringTools;
 
 class ImportArm {
 
-	public static function runMesh(project:TProjectFormat) {
-		new MeshData(project.mesh_datas[0], function(md:MeshData) {
-			Context.paintObject.setData(md);
-			Context.paintObject.transform.scale.set(1, 1, 1);
-			Context.paintObject.transform.buildMatrix();
-			Context.paintObject.name = md.name;
-			Project.paintObjects = [Context.paintObject];
-			iron.App.notifyOnRender(Layers.initLayers);
-			History.reset();
+	public static function runMesh(raw:TSceneFormat) {
+		Project.paintObjects = [];
+		for (i in 0 ...raw.mesh_datas.length) {
+			new MeshData(raw.mesh_datas[i], function(md:MeshData) {
+				var object:MeshObject = null;
+				if (i == 0) {
+					Context.paintObject.setData(md);
+					object = Context.paintObject;
+				}
+				else {
+					object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
+					object.name = md.name;
+					object.skip_context = "paint";
+					md.handle = md.name;
+					Data.cachedMeshes.set(md.handle, md);
+				}
+				object.transform.scale.set(1, 1, 1);
+				object.transform.buildMatrix();
+				object.name = md.name;
+				Project.paintObjects.push(object);
+			});
+		}
+		iron.App.notifyOnRender(Layers.initLayers);
+		History.reset();
+	}
+
+	public static function runScene(raw:TSceneFormat, path:String) {
+		#if krom_windows
+		path = path.replace("\\", "/");
+		#end
+		var _dataPath = Data.dataPath;
+		Data.dataPath = path.substring(0, path.lastIndexOf("/") + 1);
+		#if krom_windows
+		Data.dataPath = Data.dataPath.replace("/", "\\");
+		#end
+		raw.name += "_imported";
+		Data.cachedSceneRaws.set(raw.name, raw);
+		Scene.active.addScene(raw.name, null, function(sceneObject:Object) {
+			traverseObjects(sceneObject.children);
 		});
+		Data.dataPath = _dataPath;
+	}
+
+	static function traverseObjects(objects:Array<Object>) {
+		if (objects == null) return;
+		for (o in objects) {
+			if (Std.is(o, MeshObject)) {
+				var mo = cast(o, MeshObject);
+				var count = mo.data.geom.indices.length;
+				mo.materials = new haxe.ds.Vector(count);
+				for (i in 0...count) {
+					mo.materials[i] = Context.materialScene.data;
+				}
+			}
+			traverseObjects(o.children);
+		}
 	}
 
 	public static function runProject(path:String) {
@@ -55,7 +105,7 @@ class ImportArm {
 
 			// Import as mesh instead
 			if (project.version == null) {
-				runMesh(project);
+				untyped project.objects == null ? runMesh(untyped project) : runScene(untyped project, path);
 				return;
 			}
 
