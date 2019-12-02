@@ -55,7 +55,7 @@ class Gizmo {
 					object.transform.buildMatrix();
 
 					#if arm_physics
-					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
+					object.addTrait(new arm.plugin.PhysicsBody(0));
 					#end
 
 					Context.selectObject(object);
@@ -71,7 +71,7 @@ class Gizmo {
 					object.transform.buildMatrix();
 
 					#if arm_physics
-					object.addTrait(new armory.trait.physics.RigidBody(0, 0));
+					object.addTrait(new arm.plugin.PhysicsBody(0));
 					#end
 
 					Context.selectObject(object);
@@ -87,9 +87,9 @@ class Gizmo {
 
 		if (mouse.started("middle")) {
 			#if arm_physics
-			var physics = armory.trait.physics.PhysicsWorld.active;
-			var rb = physics.pickClosest(mouse.viewX, mouse.viewY);
-			if (rb != null) Context.selectObject(rb.object);
+			var physics = arm.plugin.PhysicsWorld.active;
+			var pb = physics.pickClosest(mouse.viewX, mouse.viewY);
+			if (pb != null) Context.selectObject(pb.object);
 			#end
 		}
 
@@ -120,8 +120,8 @@ class Gizmo {
 					Context.object.transform.loc.x = hit.x - UITrait.inst.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
-					var rb = Context.object.getTrait(armory.trait.physics.RigidBody);
-					if (rb != null) rb.syncTransform();
+					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
+					if (pb != null) pb.syncTransform();
 					#end
 				}
 			}
@@ -132,8 +132,8 @@ class Gizmo {
 					Context.object.transform.loc.y = hit.y - UITrait.inst.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
-					var rb = Context.object.getTrait(armory.trait.physics.RigidBody);
-					if (rb != null) rb.syncTransform();
+					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
+					if (pb != null) pb.syncTransform();
 					#end
 				}
 			}
@@ -144,8 +144,8 @@ class Gizmo {
 					Context.object.transform.loc.z = hit.z - UITrait.inst.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
-					var rb = Context.object.getTrait(armory.trait.physics.RigidBody);
-					if (rb != null) rb.syncTransform();
+					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
+					if (pb != null) pb.syncTransform();
 					#end
 				}
 			}

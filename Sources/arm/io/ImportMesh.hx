@@ -160,7 +160,7 @@ class ImportMesh {
 				// dim[2] = aabb.z;
 				// object.raw.dimensions = dim;
 				#if arm_physics
-				object.addTrait(new armory.trait.physics.RigidBody(0.0));
+				object.addTrait(new arm.plugin.PhysicsBody(0));
 				#end
 
 				Context.selectObject(object);

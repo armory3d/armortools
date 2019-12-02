@@ -65,8 +65,8 @@ class TabProperties {
 					Context.object.transform.rot.fromEuler(rot.x, rot.y, rot.z);
 					Context.object.transform.buildMatrix();
 					#if arm_physics
-					var rb = Context.object.getTrait(armory.trait.physics.RigidBody);
-					if (rb != null) rb.syncTransform();
+					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
+					if (pb != null) pb.syncTransform();
 					#end
 				}
 
@@ -90,32 +90,39 @@ class TabProperties {
 
 				Context.object.transform.dirty = true;
 
-				if (Context.object.name == "Scene") {
-					var p = Scene.active.world.probe;
-					var envHandle = Id.handle({value: p.raw.strength});
-					p.raw.strength = ui.slider(envHandle, "Strength", 0.0, 5.0, true);
-					if (envHandle.changed) {
-						Context.ddirty = 2;
-					}
-				}
-				else if (Std.is(Context.object, LightObject)) {
-					var light = cast(Context.object, LightObject);
-					var lhandle = Id.handle();
-					lhandle.value = light.data.raw.strength / 1333;
-					lhandle.value = Std.int(lhandle.value * 100) / 100;
-					light.data.raw.strength = ui.slider(lhandle, "Strength", 0.0, 4.0, true) * 1333;
-					if (lhandle.changed) {
-						Context.ddirty = 2;
-					}
-				}
-				else if (Std.is(Context.object, CameraObject)) {
-					var scene = Scene.active;
-					var cam = scene.cameras[0];
-					var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-					cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
-					if (fovHandle.changed) {
-						cam.buildProjection();
-						Context.ddirty = 2;
+				// if (Context.object.name == "Scene") {
+				// 	var p = Scene.active.world.probe;
+				// 	var envHandle = Id.handle({value: p.raw.strength});
+				// 	p.raw.strength = ui.slider(envHandle, "Strength", 0.0, 5.0, true);
+				// 	if (envHandle.changed) {
+				// 		Context.ddirty = 2;
+				// 	}
+				// }
+				// else if (Std.is(Context.object, LightObject)) {
+				// 	var light = cast(Context.object, LightObject);
+				// 	var lhandle = Id.handle();
+				// 	lhandle.value = light.data.raw.strength / 1333;
+				// 	lhandle.value = Std.int(lhandle.value * 100) / 100;
+				// 	light.data.raw.strength = ui.slider(lhandle, "Strength", 0.0, 4.0, true) * 1333;
+				// 	if (lhandle.changed) {
+				// 		Context.ddirty = 2;
+				// 	}
+				// }
+				// else if (Std.is(Context.object, CameraObject)) {
+				// 	var scene = Scene.active;
+				// 	var cam = scene.cameras[0];
+				// 	var fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+				// 	cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
+				// 	if (fovHandle.changed) {
+				// 		cam.buildProjection();
+				// 		Context.ddirty = 2;
+				// 	}
+				// }
+
+				if (Context.object.traits.length > 0) {
+					ui.text("Traits:");
+					for (t in Context.object.traits) {
+						ui.text(Type.getClassName(Type.getClass(t)));
 					}
 				}
 			}

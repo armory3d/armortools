@@ -22,6 +22,9 @@ class Main {
 	public static function main() {
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
+		#if arm_physics
+		tasks++; loadPhysics();
+		#end
 		tasks--; start();
 	}
 
@@ -61,8 +64,28 @@ class Main {
 					#else
 					new arm.App();
 					#end
+					#if arm_physics
+					o.addTrait(new arm.plugin.PhysicsWorld());
+					#end
 				});
 			});
 		});
 	}
+
+	#if arm_physics
+	static function loadPhysics() {
+		var b = haxe.io.Bytes.ofData(Krom.loadBlob("data/ammo.wasm.js"));
+		var print = function(s:String) { trace(s); };
+		var loaded = function() { tasks--; start(); };
+		untyped __js__("(1, eval)({0})", b.toString());
+		var instantiateWasm = function(imports, successCallback) {
+			var wasmbin = Krom.loadBlob("data/ammo.wasm.wasm");
+			var module = new js.lib.webassembly.Module(wasmbin);
+			var inst = new js.lib.webassembly.Instance(module, imports);
+			successCallback(inst);
+			return inst.exports;
+		};
+		untyped __js__("Ammo({print:print, instantiateWasm:instantiateWasm}).then(loaded)");
+	}
+	#end
 }
