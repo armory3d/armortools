@@ -160,22 +160,21 @@ class App {
 				Project.projectNew(); // Spawn terrain plane
 				#end
 				if (fileArg != "") {
-					ImportAsset.run(fileArg);
-					// if (Path.isMesh(fileArg)) {
-					// 	UITrait.inst.toggleDistractFree();
-					// }
-					// else if (Path.isTexture(fileArg)) {
-					// 	UITrait.inst.show2DView(1);
-					// }
-				}
-				// Parse arguments
-				// armorpaint import_path export_path export_file_name
-				if (Krom.getArgCount() > 2) {
-					UITrait.inst.textureExportPath = Krom.getArg(2);
-					if (Krom.getArgCount() > 3) {
-						UIFiles.filename = Krom.getArg(3);
-						// hpreset.position = presets.indexOf("unreal")
-					}
+					iron.App.notifyOnInit(function() {
+						#if krom_windows
+						fileArg = fileArg.replace("/", "\\");
+						#end
+						ImportAsset.run(fileArg, -1, -1, false);
+						// Parse arguments
+						// armorpaint import_path export_path export_file_name
+						if (Krom.getArgCount() > 2) {
+							UITrait.inst.textureExportPath = Krom.getArg(2);
+							if (Krom.getArgCount() > 3) {
+								UIFiles.filename = Krom.getArg(3);
+								// hpreset.position = presets.indexOf("unreal")
+							}
+						}
+					});
 				}
 			});
 		});

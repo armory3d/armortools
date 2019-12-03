@@ -21,10 +21,10 @@ using StringTools;
 
 class ImportAsset {
 
-	public static function run(path:String, dropX = -1.0, dropY = -1.0) {
+	public static function run(path:String, dropX = -1.0, dropY = -1.0, showBox = true) {
 		// Mesh
 		if (Path.isMesh(path)) {
-			Project.importMeshBox(path);
+			showBox ? Project.importMeshBox(path) : ImportMesh.run(path);
 			if (dropX > 0) UIBox.clickToHide = false; // Prevent closing when going back to window after drag and drop
 		}
 		// Image
