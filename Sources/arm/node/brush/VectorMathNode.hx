@@ -5,7 +5,7 @@ import iron.math.Vec4;
 @:keep
 class VectorMathNode extends LogicNode {
 
-	public var property0:String;
+	public var operation:String;
 	var v = new Vec4();
 
 	public function new(tree:LogicTree) {
@@ -17,7 +17,7 @@ class VectorMathNode extends LogicNode {
 		var v2:Vec4 = inputs[1].get();
 		v.setFrom(v1);
 		var f = 0.0;
-		switch (property0) {
+		switch (operation) {
 		case "Add":
 			v.add(v2);
 		case "Subtract":

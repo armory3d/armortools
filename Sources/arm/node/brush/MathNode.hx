@@ -5,8 +5,8 @@ import iron.math.Vec4;
 @:keep
 class MathNode extends LogicNode {
 
-	public var property0:String;
-	public var property1:String; // Clamp
+	public var operation:String;
+	public var use_clamp:Bool;
 
 	public function new(tree:LogicTree) {
 		super(tree);
@@ -17,7 +17,7 @@ class MathNode extends LogicNode {
 		var v1:Float = inputs[0].get();
 		var v2:Float = inputs[1].get();
 		var f = 0.0;
-		switch (property0) {
+		switch (operation) {
 		case "Add":
 			f = v1 + v2;
 		case "Multiply":
@@ -58,7 +58,7 @@ class MathNode extends LogicNode {
 			f = v1 % v2;
 		}
 
-		if (property1 == "true") f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
+		if (use_clamp) f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
 
 		return f;
 	}

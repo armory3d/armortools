@@ -300,7 +300,7 @@ class NodesBrush {
 					{
 						name: "use_clamp",
 						type: "BOOL",
-						default_value: "false",
+						default_value: false,
 						output: 0
 					}
 				]
@@ -378,14 +378,13 @@ class NodesBrush {
 				],
 				buttons: [
 					{
-						// name: "File",
-						name: "property0",
+						name: "file",
 						type: "ENUM",
 						default_value: 0,
 						data: ""
 					},
 					{
-						name: "Color Space",
+						name: "color_space",
 						type: "ENUM",
 						default_value: 0,
 						data: ["linear", "srgb"]
