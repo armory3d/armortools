@@ -58,6 +58,7 @@ class BoxExport {
 				ui.row([1/2, 1/2]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
 				ui.combo(hpreset, files, "Preset", true);
+				if (hpreset.changed) preset = null;
 
 				@:privateAccess ui.endElement();
 
