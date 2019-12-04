@@ -1,8 +1,10 @@
 package arm;
 
+import zui.Nodes;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
 import arm.ui.UIFiles;
+import arm.ui.UINodes;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 
@@ -132,6 +134,9 @@ class History {
 				step.layer_blending = t;
 				MaterialParser.parseMeshMaterial();
 			}
+			else if (step.name == "Edit Nodes") {
+				swapCanvas(step);
+			}
 			else { // Paint operation
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
@@ -229,6 +234,9 @@ class History {
 				step.layer_blending = t;
 				MaterialParser.parseMeshMaterial();
 			}
+			else if (step.name == "Edit Nodes") {
+				swapCanvas(step);
+			}
 			else { // Paint operation
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
@@ -246,7 +254,7 @@ class History {
 	}
 
 	public static function reset() {
-		steps = [{name: "New", layer: 0, object: 0, material: 0, is_mask: false, has_mask: false}];
+		steps = [{name: "New", layer: 0, object: 0, material: 0, brush: 0, is_mask: false, has_mask: false}];
 		undos = 0;
 		redos = 0;
 		undoI = 0;
@@ -328,6 +336,12 @@ class History {
 	// public static function newMaterial() {}
 	// public static function deleteMaterial() {}
 
+	public static function editNodes(canvas:TNodeCanvas, canvas_type:Int) {
+		var step = push("Edit Nodes");
+		step.canvas_type = canvas_type;
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
+	}
+
 	static function push(name:String):TStep {
 		kha.Window.get(0).title = UIFiles.filename + "* - ArmorPaint";
 
@@ -340,12 +354,14 @@ class History {
 		var opos = Project.paintObjects.indexOf(cast Context.object);
 		var lpos = Project.layers.indexOf(Context.layer);
 		var mpos = Project.materials.indexOf(Context.material);
+		var bpos = Project.brushes.indexOf(Context.brush);
 
 		steps.push({
 			name: name,
 			layer: lpos,
 			object: opos,
 			material: mpos,
+			brush: bpos,
 			is_mask: Context.layerIsMask,
 			has_mask: Context.layer.texpaint_mask != null,
 			layer_opacity: Context.layer.maskOpacity,
@@ -412,6 +428,24 @@ class History {
 		}
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
+
+	static function swapCanvas(step:TStep) {
+		if (step.canvas_type == 0) {
+			var _canvas = Project.materials[step.material].canvas;
+			Project.materials[step.material].canvas = step.canvas;
+			step.canvas = _canvas;
+		}
+		else {
+			var _canvas = Project.brushes[step.brush].canvas;
+			Project.brushes[step.brush].canvas = step.canvas;
+			step.canvas = _canvas;
+		}
+		function canvasChanged(_) {
+			UINodes.inst.canvasChanged();
+			iron.App.removeRender(canvasChanged);
+		}
+		iron.App.notifyOnRender(canvasChanged);
+	}
 }
 
 typedef TStep = {
@@ -419,10 +453,13 @@ typedef TStep = {
 	public var layer:Int;
 	public var object:Int;
 	public var material:Int;
+	public var brush:Int;
 	public var is_mask:Bool; // Mask operation
 	public var has_mask:Bool; // Layer contains mask
 	@:optional public var layer_opacity:Float;
 	@:optional public var layer_object:Int;
 	@:optional public var layer_blending:Int;
 	@:optional public var prev_order:Int; // Previous layer position
+	@:optional public var canvas:TNodeCanvas; // Node history
+	@:optional public var canvas_type:Int;
 }

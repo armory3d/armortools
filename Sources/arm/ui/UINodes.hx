@@ -50,6 +50,7 @@ class UINodes {
 	var nodeSearchSpawn:TNode = null;
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
+	var lastCanvas:TNodeCanvas;
 
 	public var grid:Image = null;
 	public var hwnd = Id.handle();
@@ -114,16 +115,9 @@ class UINodes {
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
 			if (canvasType == 0) {
-				if (Layers.isFillMaterial()) {
-					Layers.updateFillLayers(); // TODO: jitter
-					UITrait.inst.hwnd.redraws = 2;
-				}
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd1.redraws = 2;
-				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-				if (decal) RenderUtil.makeDecalPreview();
+				canvasChanged();
 			}
+			if (mreleased) History.editNodes(lastCanvas, canvasType);
 		}
 		else if (ui.changed && (mstartedlast || mouse.moved)) {
 			recompileMat = true; // Instant preview
@@ -171,6 +165,18 @@ class UINodes {
 			ui.inputY = mouse.y;
 			nodeSearchSpawn = null;
 		}
+	}
+
+	public function canvasChanged() {
+		if (Layers.isFillMaterial()) {
+			Layers.updateFillLayers(); // TODO: jitter
+			UITrait.inst.hwnd.redraws = 2;
+		}
+		MaterialParser.parsePaintMaterial();
+		RenderUtil.makeMaterialPreview();
+		UITrait.inst.hwnd1.redraws = 2;
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		if (decal) RenderUtil.makeDecalPreview();
 	}
 
 	function nodeSearch(x = -1, y = -1, done:Void->Void = null) {
@@ -281,6 +287,10 @@ class UINodes {
 
 		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
+
+		if (ui.inputStarted) {
+			lastCanvas = Json.parse(Json.stringify(getCanvas()));
+		}
 
 		g.end();
 
