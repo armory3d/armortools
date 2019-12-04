@@ -329,7 +329,14 @@ class ObjParser {
 		while (true) { // Read into buffer
 			var c = bytes.get(pos);
 			if (c == " ".code || c == "\n".code || c == "\r".code) break;
-			if (c == "E".code) return 0.0; // Assume number close to zero for now
+			if (c == "E".code) {
+				while (true) {
+					pos++;
+					c = bytes.get(pos);
+					if (c == " ".code || c == "\n".code || c == "\r".code) break;
+				}
+				return 0.0; // Assume number close to zero for now
+			}
 			pos++;
 			buf[bi++] = c;
 		}
