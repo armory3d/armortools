@@ -15,7 +15,7 @@ class MaterialParser {
 	static var _materialcontext:MaterialContext = null;
 
 	static function getMOut():Bool {
-		for (n in UINodes.inst.canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
+		for (n in UINodes.inst.getCanvasMaterial().nodes) if (n.type == "OUTPUT_MATERIAL_PBR") return true;
 		return false;
 	}
 
@@ -137,7 +137,7 @@ class MaterialParser {
 
 			var mat:TMaterial = {
 				name: "Material",
-				canvas: UINodes.inst.canvas
+				canvas: UINodes.inst.getCanvasMaterial()
 			};
 			var _sd = new MaterialShaderData(mat);
 
@@ -200,6 +200,6 @@ class MaterialParser {
 
 	public static function parseBrush() {
 		Logic.packageName = "arm.node.brush";
-		var tree = Logic.parse(UINodes.inst.canvasBrush, false);
+		var tree = Logic.parse(Context.brush.canvas, false);
 	}
 }

@@ -25,7 +25,7 @@ class ExportArm {
 		var bnodes:Array<TNodeCanvas> = [];
 
 		for (m in Project.materials) {
-			var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
+			var c:TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {
 					n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
@@ -33,7 +33,7 @@ class ExportArm {
 			}
 			mnodes.push(c);
 		}
-		for (b in Project.brushes) bnodes.push(UINodes.inst.canvasBrushMap.get(b));
+		for (b in Project.brushes) bnodes.push(b.canvas);
 
 		var md:Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
@@ -103,7 +103,7 @@ class ExportArm {
 	public static function runMaterial(path:String) {
 		var mnodes:Array<TNodeCanvas> = [];
 		var m = Context.material;
-		var c:TNodeCanvas = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(m)));
+		var c:TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 		for (n in c.nodes) {
 			if (n.type == "TEX_IMAGE") {
 				n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];

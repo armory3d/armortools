@@ -153,21 +153,15 @@ class ImportArm {
 						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
 					}
 				}
-				var mat = new MaterialSlot(m0);
-				UINodes.inst.canvasMap.set(mat, n);
-				Project.materials.push(mat);
-
-				Context.material = mat;
-				UINodes.inst.updateCanvasMap();
+				Context.material = new MaterialSlot(m0);
+				Project.materials.push(Context.material);
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
 			Project.brushes = [];
 			for (n in project.brush_nodes) {
-				var brush = new BrushSlot();
-				UINodes.inst.canvasBrushMap.set(brush, n);
-				Project.brushes.push(brush);
+				Project.brushes.push(new BrushSlot(n));
 			}
 
 			// Synchronous for now
@@ -333,12 +327,9 @@ class ImportArm {
 					if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
 				}
 			}
-			var mat = new MaterialSlot(m0);
-			UINodes.inst.canvasMap.set(mat, n);
-			Project.materials.push(mat);
-			Context.material = mat;
-			UINodes.inst.updateCanvasMap();
-			imported.push(mat);
+			Context.material = new MaterialSlot(m0);
+			Project.materials.push(Context.material);
+			imported.push(Context.material);
 		}
 
 		function makeMaterialPreview(_) {

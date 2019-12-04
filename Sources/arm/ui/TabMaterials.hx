@@ -48,7 +48,6 @@ class TabMaterials {
 					ui.g.end();
 					Context.material = new MaterialSlot(materials[0].data);
 					materials.push(Context.material);
-					UINodes.inst.updateCanvasMap();
 					updateMaterial();
 					ui.g.begin(false);
 				}
@@ -115,7 +114,7 @@ class TabMaterials {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasMap.get(materials[i]).name, Right, ui.t.HIGHLIGHT_COL);
+							ui.text(materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("To Fill Layer", Left)) {
 								selectMaterial(i);
@@ -136,10 +135,8 @@ class TabMaterials {
 									iron.App.removeRender(dupliMat);
 									Context.material = new MaterialSlot(materials[0].data);
 									materials.push(Context.material);
-									UINodes.inst.updateCanvasMap();
-									var cloned = Json.parse(Json.stringify(UINodes.inst.canvasMap.get(materials[i])));
-									UINodes.inst.canvasMap.set(Context.material, cloned);
-									UINodes.inst.canvas = cloned;
+									var cloned = Json.parse(Json.stringify(materials[i].canvas));
+									Context.material.canvas = cloned;
 									updateMaterial();
 								}
 								iron.App.notifyOnRender(dupliMat);
@@ -175,7 +172,6 @@ class TabMaterials {
 								heightHandle.changed ||
 								emisHandle.changed ||
 								subsHandle.changed) {
-								UINodes.inst.updateCanvasMap();
 								MaterialParser.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}

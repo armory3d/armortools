@@ -80,9 +80,8 @@ class ImportFolder {
 			Context.material = new MaterialSlot(Project.materials[0].data);
 			Project.materials.push(Context.material);
 		}
-		UINodes.inst.updateCanvasMap();
-		var nodes = UINodes.inst.nodes;
-		var canvas = UINodes.inst.canvas;
+		var nodes = isScene ? Context.materialScene.nodes : Context.material.nodes;
+		var canvas = isScene ? Context.materialScene.canvas : Context.material.canvas;
 		var dirs = path.replace("\\", "/").split("/");
 		canvas.name = dirs[dirs.length - 1];
 		var nout:TNode = null;
@@ -94,31 +93,31 @@ class ImportFolder {
 		var startY = 100;
 		var nodeH = 164;
 		if (mapbase != "") {
-			placeImageNode(mapbase, startY + nodeH * pos, nout.id, 0);
+			placeImageNode(nodes, canvas, mapbase, startY + nodeH * pos, nout.id, 0);
 			pos++;
 		}
 		if (mapopac != "") {
-			placeImageNode(mapopac, startY + nodeH * pos, nout.id, 1);
+			placeImageNode(nodes, canvas, mapopac, startY + nodeH * pos, nout.id, 1);
 			pos++;
 		}
 		if (mapocc != "") {
-			placeImageNode(mapocc, startY + nodeH * pos, nout.id, 2);
+			placeImageNode(nodes, canvas, mapocc, startY + nodeH * pos, nout.id, 2);
 			pos++;
 		}
 		if (maprough != "") {
-			placeImageNode(maprough, startY + nodeH * pos, nout.id, 3);
+			placeImageNode(nodes, canvas, maprough, startY + nodeH * pos, nout.id, 3);
 			pos++;
 		}
 		if (mapmet != "") {
-			placeImageNode(mapmet, startY + nodeH * pos, nout.id, 4);
+			placeImageNode(nodes, canvas, mapmet, startY + nodeH * pos, nout.id, 4);
 			pos++;
 		}
 		if (mapnor != "") {
-			placeImageNode(mapnor, startY + nodeH * pos, nout.id, 5);
+			placeImageNode(nodes, canvas, mapnor, startY + nodeH * pos, nout.id, 5);
 			pos++;
 		}
 		if (mapheight != "") {
-			placeImageNode(mapheight, startY + nodeH * pos, nout.id, 7);
+			placeImageNode(nodes, canvas, mapheight, startY + nodeH * pos, nout.id, 7);
 			pos++;
 		}
 
@@ -127,12 +126,12 @@ class ImportFolder {
 		UITrait.inst.hwnd1.redraws = 2;
 	}
 
-	static function placeImageNode(asset:String, ny:Int, to_id:Int, to_socket:Int) {
+	static function placeImageNode(nodes:Nodes, canvas:TNodeCanvas, asset:String, ny:Int, to_id:Int, to_socket:Int) {
 		var n = NodesMaterial.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = App.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;
-		var l = { id: UINodes.inst.nodes.getLinkId(UINodes.inst.canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
-		UINodes.inst.canvas.links.push(l);
+		var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+		canvas.links.push(l);
 	}
 }

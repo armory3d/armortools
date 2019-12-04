@@ -207,7 +207,7 @@ class UITrait {
 	public var resHandle = new Handle({position: 4}); // 2048
 	public var bitsHandle = new Handle({position: 0}); // 8bit
 	#if arm_creator
-	public var projectType = 2; // paint, material, terrain
+	public var projectType = 2; // cube, sphere, tessellated plane
 	#else
 	public var projectType = 0;
 	#end
@@ -288,6 +288,7 @@ class UITrait {
 			Project.brushes = [];
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
+			MaterialParser.parseBrush();
 		}
 
 		if (Project.layers == null) {
@@ -923,6 +924,7 @@ class UITrait {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
 			ui.tab(worktab, "Scene");
+			// ui.tab(worktab, "Render");
 			if (worktab.changed) {
 				Context.ddirty = 2;
 				toolbarHandle.redraws = 2;
@@ -974,7 +976,6 @@ class UITrait {
 					pickerSelectMaterial = ui.check(Id.handle({selected: pickerSelectMaterial}), "Select Material");
 					ui.combo(pickerMaskHandle, ["None", "Material"], "Mask", true);
 					if (pickerMaskHandle.changed) {
-						UINodes.inst.updateCanvasMap();
 						MaterialParser.parsePaintMaterial();
 					}
 				}

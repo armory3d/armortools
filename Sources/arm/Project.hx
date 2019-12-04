@@ -91,7 +91,7 @@ class Project {
 		UIBox.showCustom(function(ui:Zui) {
 			if (ui.tab(Id.handle(), "New Project")) {
 				ui.row([1/2, 1/2]);
-				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Paint", "Material", "Terrain"], "Template");
+				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], "Template");
 				if (ui.button("OK") || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
@@ -143,7 +143,7 @@ class Project {
 				// new arm.format.proc.Plane(1, 1, 512, 512) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
-				name: "Tesselated",
+				name: "Tessellated",
 				vertex_arrays: [
 					{ values: mesh.posa, attrib: "pos" },
 					{ values: mesh.nora, attrib: "nor" },
@@ -156,7 +156,7 @@ class Project {
 				scale_tex: mesh.scaleTex
 			};
 			var md = new MeshData(raw, function(md:MeshData) {});
-			Data.cachedMeshes.set("SceneTesselated", md);
+			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (UITrait.inst.projectType == 1) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
@@ -168,7 +168,7 @@ class Project {
 			}
 		}
 
-		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tesselated";
+		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md:MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
@@ -191,14 +191,11 @@ class Project {
 				materials.push(new MaterialSlot(m));
 			});
 			Context.material = materials[0];
-			UINodes.inst.canvasMap = new Map();
-			UINodes.inst.canvasBrushMap = new Map();
 			brushes = [new BrushSlot()];
 			Context.brush = brushes[0];
 
 			History.reset();
 
-			UINodes.inst.updateCanvasMap();
 			MaterialParser.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
 			for (a in assets) Data.deleteImage(a.file);
@@ -215,13 +212,7 @@ class Project {
 				var layer = new LayerSlot();
 				layers.push(layer);
 				Context.setLayer(layer);
-				if (UITrait.inst.projectType == 1) {
-					layer.material_mask = materials[0];
-					Layers.updateFillLayers(4);
-				}
-				else {
-					iron.App.notifyOnRender(Layers.initLayers);
-				}
+				iron.App.notifyOnRender(Layers.initLayers);
 			}
 
 			if (current != null) current.begin(false);
@@ -255,11 +246,15 @@ class Project {
 		UIBox.showCustom(function(ui:Zui) {
 			if (ui.tab(Id.handle(), "Import Mesh")) {
 
-				UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group", "Material", "UDIM Tile"], "Split By", true);
-				if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
+				if (path.toLowerCase().endsWith(".obj")) {
+					UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group", "Material", "UDIM Tile"], "Split By", true);
+					if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
+				}
 
-				UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), "Parse Transforms");
-				if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
+				if (path.toLowerCase().endsWith(".fbx")) {
+					UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), "Parse Transforms");
+					if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
+				}
 
 				ui.row([1/2, 1/2]);
 				if (ui.button("Cancel")) {

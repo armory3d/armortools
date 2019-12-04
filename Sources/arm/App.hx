@@ -454,7 +454,7 @@ class App {
 		}
 		else if (nodeType == "MATERIAL") {
 			var materialNames:Array<String> = [];
-			for (m in Project.materials) materialNames.push(UINodes.inst.canvasMap.get(m).name);
+			for (m in Project.materials) materialNames.push(m.canvas.name);
 			return materialNames;
 		}
 		return null;

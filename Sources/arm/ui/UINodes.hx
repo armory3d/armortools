@@ -32,6 +32,7 @@ class UINodes {
 	public var wh:Int;
 
 	public var ui:Zui;
+	public var canvasType = 0; // material, brush
 	var drawMenu = false;
 	var showMenu = false;
 	var hideMenu = false;
@@ -40,23 +41,11 @@ class UINodes {
 	var popupX = 0.0;
 	var popupY = 0.0;
 
-	public var nodes:Nodes;
-	public var canvas:TNodeCanvas = null;
-	public var canvasMap:Map<MaterialSlot, TNodeCanvas> = null;
-	public var canvasMap2:Map<MaterialSlot, TNodeCanvas> = null;
-	var canvasBlob:String;
-
-	public var canvasBrush:TNodeCanvas = null;
-	public var canvasBrushMap:Map<BrushSlot, TNodeCanvas> = null;
-	var canvasBrushBlob:String;
-
-	public var canvasType = 0; // material, brush
-
+	public var changed = false;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
 	var mstartedlast = false;
-	public var changed = false;
 	var recompileMat = false; // Mat preview
 	var nodeSearchSpawn:TNode = null;
 	var nodeSearchOffset = 0;
@@ -72,25 +61,15 @@ class UINodes {
 		Nodes.excludeRemove.push("BrushOutputNode");
 		Nodes.onLinkDrag = onLinkDrag;
 
-		Data.getBlob('defaults/default_material.json', function(b1:Blob) {
-			Data.getBlob('defaults/default_brush.json', function(b2:Blob) {
-				canvasBlob = b1.toString();
-				canvasBrushBlob = b2.toString();
-				canvas = Json.parse(canvasBlob);
-				canvasBrush = Json.parse(canvasBrushBlob);
-				MaterialParser.parseBrush();
-
-				var scale = Config.raw.window_scale;
-				ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
-				ui.scrollEnabled = false;
-			});
-		});
+		var scale = Config.raw.window_scale;
+		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
+		ui.scrollEnabled = false;
 	}
 
 	function onLinkDrag(linkDrag:TNodeLink, isNewLink:Bool) {
 		if (isNewLink) {
 			nodeSearch(-1, -1, function() {
-				var n = nodes.nodesSelected[0];
+				var n = getNodes().nodesSelected[0];
 				if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 					linkDrag.to_id = n.id;
 					linkDrag.to_socket = 0;
@@ -105,59 +84,23 @@ class UINodes {
 		}
 	}
 
-	public function updateCanvasMap() {
-		if (UITrait.inst.worktab.position == SpaceScene) {
-			if (canvasMap2 == null) canvasMap2 = new Map();
-			var c = canvasMap2.get(Context.materialScene);
-			if (c == null) {
-				c = Json.parse(canvasBlob);
-				canvasMap2.set(Context.materialScene, c);
-				canvas = c;
-			}
-			else canvas = c;
-			if (canvasType == 0) nodes = Context.materialScene.nodes;
-			return;
-		}
-
-		if (Context.material != null) {
-			if (canvasMap == null) canvasMap = new Map();
-			var c = canvasMap.get(Context.material);
-			if (c == null) {
-				c = Json.parse(canvasBlob);
-				canvasMap.set(Context.material, c);
-				canvas = c;
-				c.name = "Material " + (Context.material.id + 1);
-			}
-			else canvas = c;
-
-			if (canvasType == 0) nodes = Context.material.nodes;
-		}
+	public function getCanvas():TNodeCanvas {
+		if (canvasType == 0) return getCanvasMaterial();
+		else return Context.brush.canvas;
 	}
 
-	public function updateCanvasBrushMap() {
-		if (Context.brush != null) {
-			if (canvasBrushMap == null) canvasBrushMap = new Map();
-			var c = canvasBrushMap.get(Context.brush);
-			if (c == null) {
-				c = Json.parse(canvasBrushBlob);
-				canvasBrushMap.set(Context.brush, c);
-				canvasBrush = c;
-			}
-			else canvasBrush = c;
-
-			if (canvasType == 1) nodes = Context.brush.nodes;
-		}
+	public function getCanvasMaterial():TNodeCanvas {
+		var isScene = UITrait.inst.worktab.position == SpaceScene;
+		return isScene ? Context.materialScene.canvas : Context.material.canvas;
 	}
 
-	function getCanvas() {
-		if (canvasType == 0) return canvas;
-		else return canvasBrush;
+	public function getNodes():Nodes {
+		var isScene = UITrait.inst.worktab.position == SpaceScene;
+		if (canvasType == 0) return isScene ? Context.materialScene.nodes : Context.material.nodes;
+		else return Context.brush.nodes;
 	}
 
 	public function update() {
-		updateCanvasMap();
-		updateCanvasBrushMap();
-
 		var mouse = Input.getMouse();
 		mreleased = mouse.released();
 		mdown = mouse.down();
@@ -213,6 +156,7 @@ class UINodes {
 			hideMenu = true;
 		}
 
+		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && ui.isKeyPressed) {
 			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelected) n.x -= 1;
 			else if (ui.key == kha.input.KeyCode.Right) for (n in nodes.nodesSelected) n.x += 1;
@@ -264,6 +208,7 @@ class UINodes {
 					if (n.name.toLowerCase().indexOf(search) >= 0) {
 						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
 						if (ui.button(n.name, Left) || (enter && count == nodeSearchOffset)) {
+							var nodes = getNodes();
 							var canvas = getCanvas();
 							nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
 							canvas.nodes.push(nodeSearchSpawn);
@@ -291,12 +236,12 @@ class UINodes {
 
 	public function getNodeX():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.x - wx - nodes.PAN_X()) / nodes.SCALE());
+		return Std.int((mouse.x - wx - getNodes().PAN_X()) / getNodes().SCALE());
 	}
 
 	public function getNodeY():Int {
 		var mouse = Input.getMouse();
-		return Std.int((mouse.y - wy - nodes.PAN_Y()) / nodes.SCALE());
+		return Std.int((mouse.y - wy - getNodes().PAN_Y()) / getNodes().SCALE());
 	}
 
 	public function drawGrid() {
@@ -357,6 +302,7 @@ class UINodes {
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
 			// Grid
+			var nodes = getNodes();
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 40 - 40, (nodes.panY * nodes.SCALE()) % 40 - 40);
 
@@ -470,7 +416,7 @@ class UINodes {
 
 		if (drawMenu) {
 			var list = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
-			var canvas = canvasType == 0 ? canvas : canvasBrush;
+			var canvas = canvasType == 0 ? Context.material.canvas : Context.brush.canvas;
 			var numNodes = list[menuCategory].length;
 
 			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
@@ -487,6 +433,7 @@ class UINodes {
 
 			for (n in list[menuCategory]) {
 				if (ui.button(n.name, Left)) {
+					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					nodes.nodesSelected = [node];
@@ -513,19 +460,19 @@ class UINodes {
 	public function acceptAssetDrag(assetIndex:Int) {
 		var n = canvasType == 0 ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = assetIndex;
-		nodes.nodesSelected = [n];
+		getNodes().nodesSelected = [n];
 	}
 
 	public function acceptLayerDrag(layerIndex:Int) {
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
 		n.buttons[0].default_value = layerIndex;
-		nodes.nodesSelected = [n];
+		getNodes().nodesSelected = [n];
 	}
 
 	public function acceptMaterialDrag(layerIndex:Int) {
 		var n = NodesMaterial.createNode("MATERIAL");
 		n.buttons[0].default_value = layerIndex;
-		nodes.nodesSelected = [n];
+		getNodes().nodesSelected = [n];
 	}
 
 	public static function makeNode(n:TNode, nodes:Nodes, canvas:TNodeCanvas):TNode {

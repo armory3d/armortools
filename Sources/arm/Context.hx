@@ -42,7 +42,6 @@ class Context {
 			var mats = cast(object, MeshObject).materials;
 			for (i in 0...mats.length) mats[i] = materialScene.data;
 		}
-		UINodes.inst.updateCanvasMap();
 		MaterialParser.parsePaintMaterial();
 		UITrait.inst.hwnd.redraws = 2;
 	}
@@ -55,7 +54,6 @@ class Context {
 	public static function setMaterial(m:MaterialSlot) {
 		if (Project.materials.indexOf(m) == -1) return;
 		material = m;
-		UINodes.inst.updateCanvasMap();
 		MaterialParser.parsePaintMaterial();
 		UITrait.inst.hwnd1.redraws = 2;
 		UITrait.inst.headerHandle.redraws = 2;
@@ -70,7 +68,6 @@ class Context {
 	public static function selectBrush(i:Int) {
 		if (Project.brushes.length <= i) return;
 		brush = Project.brushes[i];
-		UINodes.inst.updateCanvasBrushMap();
 		MaterialParser.parseBrush();
 		UITrait.inst.hwnd1.redraws = 2;
 	}

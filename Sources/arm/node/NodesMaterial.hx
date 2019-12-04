@@ -2166,8 +2166,8 @@ class NodesMaterial {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var canvas = arm.ui.UINodes.inst.canvas;
-					var nodes = arm.ui.UINodes.inst.nodes;
+					var canvas = Context.material.canvas;
+					var nodes = Context.material.nodes;
 					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

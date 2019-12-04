@@ -16,7 +16,6 @@ class TabBrushes {
 				// UITrait.inst.headerHandle.redraws = 2;
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
-				UINodes.inst.updateCanvasBrushMap();
 				// MaterialParser.parsePaintMaterial();
 				// RenderUtil.makeMaterialPreview();
 			}
@@ -73,7 +72,7 @@ class TabBrushes {
 						UIMenu.draw(function(ui:Zui) {
 							var b = Project.brushes[i];
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
-							ui.text(UINodes.inst.canvasBrushMap.get(Project.brushes[i]).name, Right, ui.t.HIGHLIGHT_COL);
+							ui.text(Project.brushes[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("Delete", Left) && Project.brushes.length > 1) {
 								Context.selectBrush(i == 0 ? 1 : 0);

@@ -234,9 +234,8 @@ class ImportBlend {
 				Context.material = new MaterialSlot(Project.materials[0].data);
 				Project.materials.push(Context.material);
 				imported.push(Context.material);
-				UINodes.inst.updateCanvasMap();
-				var nodes = UINodes.inst.nodes;
-				var canvas = UINodes.inst.canvas;
+				var nodes = Context.material.nodes;
+				var canvas = Context.material.canvas;
 				canvas.name = mat.get("id").get("name").substr(2); // MAWood
 				var nout:TNode = null;
 				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
