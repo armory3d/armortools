@@ -1,14 +1,29 @@
 package arm.render;
 
+import iron.math.Mat4;
+import iron.math.Vec4;
+import iron.system.Input;
 import iron.object.MeshObject;
 import iron.RenderPath;
 import iron.Scene;
+import arm.util.RenderUtil;
+import arm.util.ViewportUtil;
 import arm.ui.UITrait;
+import arm.ui.UIView2D;
+import arm.node.MaterialParser;
 import arm.Tool;
+
+#if arm_painter
 
 class RenderPathPaint {
 
 	static var initVoxels = true; // Bake AO
+	static var pushUndoLast:Bool;
+	static var painto:MeshObject = null;
+	static var planeo:MeshObject = null;
+	static var visibles:Array<Bool> = null;
+	static var mergedObjectVisible = false;
+	static var savedFov = 0.0;
 
 	@:access(iron.RenderPath)
 	public static function commandsPaint() {
@@ -193,8 +208,8 @@ class RenderPathPaint {
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
 		g.setTexture(Layers.cursorGbuffer0, gbuffer0);
-		var mx = iron.system.Input.getMouse().viewX / iron.App.w();
-		var my = 1.0 - (iron.system.Input.getMouse().viewY / iron.App.h());
+		var mx = Input.getMouse().viewX / iron.App.w();
+		var my = 1.0 - (Input.getMouse().viewY / iron.App.h());
 		if (UITrait.inst.brushLocked) {
 			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
 			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
@@ -213,4 +228,333 @@ class RenderPathPaint {
 		g.disableScissor();
 		path.end();
 	}
+
+	public static function init() {
+		var path = RenderPathDeferred.path;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_colorid";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_nor_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_pack_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
+		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+
+		{ // Material preview
+			{
+				var t = new RenderTargetRaw();
+				t.name = "texpreview";
+				t.width = 1;
+				t.height = 1;
+				t.format = 'RGBA32';
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "texpreview_icon";
+				t.width = 1;
+				t.height = 1;
+				t.format = 'RGBA32';
+				path.createRenderTarget(t);
+			}
+
+			{
+				path.createDepthBuffer("mmain", "DEPTH24");
+
+				var t = new RenderTargetRaw();
+				t.name = "mtex";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = Inc.getHdrFormat();
+				t.scale = Inc.getSuperSampling();
+				t.depth_buffer = "mmain";
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbuf";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = Inc.getHdrFormat();
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer0";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				t.depth_buffer = "mmain";
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer1";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mgbuffer2";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbufa";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = "RGBA32";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "mbufb";
+				t.width = RenderUtil.matPreviewSize;
+				t.height = RenderUtil.matPreviewSize;
+				t.format = "RGBA32";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+		}
+	}
+
+	public static function begin() {
+		var path = RenderPathDeferred.path;
+
+		pushUndoLast = History.pushUndo;
+		if (History.pushUndo && History.undoLayers != null) {
+			History.paint();
+		}
+
+		// 2D paint
+		if (UITrait.inst.paint2d) {
+			// Set plane mesh
+			painto = Context.paintObject;
+			visibles = [];
+			for (p in Project.paintObjects) {
+				visibles.push(p.visible);
+				p.visible = false;
+			}
+			if (Context.mergedObject != null) {
+				mergedObjectVisible = Context.mergedObject.visible;
+				Context.mergedObject.visible = false;
+			}
+
+			var cam = Scene.active.camera;
+			UITrait.inst.savedCamera.setFrom(cam.transform.local);
+			savedFov = cam.data.raw.fov;
+			ViewportUtil.updateCameraType(0);
+			var m = Mat4.identity();
+			m.translate(0, 0, 0.5);
+			cam.transform.setMatrix(m);
+			cam.data.raw.fov = 0.92;
+			cam.buildProjection();
+			cam.buildMatrix();
+
+			var tw = 0.95 * UIView2D.inst.panScale;
+			var tx = UIView2D.inst.panX / iron.App.w();
+			var ty = UIView2D.inst.panY / iron.App.h();
+
+			m.setIdentity();
+			m.scale(new Vec4(tw, tw, 1));
+			m.setLoc(new Vec4(tx, ty, 0));
+			var m2 = Mat4.identity();
+			m2.getInverse(Scene.active.camera.VP);
+			m.multmat(m2);
+
+			planeo = cast Scene.active.getChild(".Plane");
+			planeo.visible = true;
+			Context.paintObject = planeo;
+
+			var v = new Vec4();
+			var sx = v.set(m._00, m._01, m._02).length();
+			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+			planeo.transform.scale.set(sx, 1.0, sx);
+			planeo.transform.loc.set(m._30, -m._31, 0.0);
+			planeo.transform.buildMatrix();
+		}
+	}
+
+	public static function end() {
+		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+		Context.ddirty--;
+		Context.pdirty--;
+		Context.rdirty--;
+	}
+
+	public static function draw() {
+
+		var path = RenderPathDeferred.path;
+
+		if (History.undoLayers != null) {
+			// Symmetry
+			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
+				Context.ddirty = 2;
+				var t = Context.paintObject.transform;
+				var sx = t.scale.x;
+				var sy = t.scale.y;
+				var sz = t.scale.z;
+				if (UITrait.inst.symX) {
+					t.scale.set(-sx, sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symY) {
+					t.scale.set(sx, -sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symZ) {
+					t.scale.set(sx, sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symY) {
+					t.scale.set(-sx, -sy, sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symZ) {
+					t.scale.set(-sx, sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symY && UITrait.inst.symZ) {
+					t.scale.set(sx, -sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
+					t.scale.set(-sx, -sy, -sz);
+					t.buildMatrix();
+					RenderPathPaint.commandsPaint();
+				}
+				t.scale.set(sx, sy, sz);
+				t.buildMatrix();
+			}
+
+			if (Context.tool == ToolBake) {
+				if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
+					UITrait.inst.bakeType = 3; // Bake high poly world normals
+					MaterialParser.parsePaintMaterial();
+					var _paintObject = Context.paintObject;
+					var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
+					var _visible = highPoly.visible;
+					highPoly.visible = true;
+					Context.selectPaintObject(highPoly);
+					RenderPathPaint.commandsPaint();
+					highPoly.visible = _visible;
+					UITrait.inst.sub--;
+					if (pushUndoLast) History.paint();
+
+					UITrait.inst.bakeType = 2;
+					MaterialParser.parsePaintMaterial();
+					Context.selectPaintObject(_paintObject);
+					RenderPathPaint.commandsPaint();
+				}
+				else if (UITrait.inst.bakeType == 7) { // Object ID
+					var _layerFilter = UITrait.inst.layerFilter;
+					var _paintObject = Context.paintObject;
+					var isMerged = Context.mergedObject != null;
+					var _visible = isMerged && Context.mergedObject.visible;
+					UITrait.inst.layerFilter = 1;
+					if (isMerged) Context.mergedObject.visible = false;
+
+					for (p in Project.paintObjects) {
+						Context.selectPaintObject(p);
+						RenderPathPaint.commandsPaint();
+					}
+
+					UITrait.inst.layerFilter = _layerFilter;
+					Context.selectPaintObject(_paintObject);
+					if (isMerged) Context.mergedObject.visible = _visible;
+				}
+				#if kha_direct3d12
+				else if (UITrait.inst.bakeType == 0 || // AO (DXR)
+						 UITrait.inst.bakeType == 8 || // Lightmap (DXR)
+						 UITrait.inst.bakeType == 9) { // Bent Normal (DXR)
+					RenderPathRaytrace.commandsBake();
+				}
+				#end
+				else {
+					RenderPathPaint.commandsPaint();
+				}
+			}
+			else { // Paint
+				RenderPathPaint.commandsPaint();
+			}
+		}
+
+		//
+
+		if (Context.brushBlendDirty) {
+			Context.brushBlendDirty = false;
+			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
+			path.clearTarget(0x00000000);
+		}
+
+		if (UITrait.inst.paint2d) {
+			// Restore paint mesh
+			planeo.visible = false;
+			for (i in 0...Project.paintObjects.length) {
+				Project.paintObjects[i].visible = visibles[i];
+			}
+			if (Context.mergedObject != null) {
+				Context.mergedObject.visible = mergedObjectVisible;
+			}
+			Context.paintObject = painto;
+			Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
+			Scene.active.camera.data.raw.fov = savedFov;
+			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+			Scene.active.camera.buildProjection();
+			Scene.active.camera.buildMatrix();
+
+			RenderPathDeferred.drawGbuffer();
+		}
+	}
 }
+
+#end

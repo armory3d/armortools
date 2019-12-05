@@ -320,6 +320,31 @@ class RenderPathRaytrace {
 			UITrait.inst.bakeType == 8 ? "raytrace_bake_light.cso" :
 										 "raytrace_bake_bent.cso";
 	}
+
+	public static function draw() {
+		#if arm_painter
+		if (Context.ddirty > 1) frame = 0;
+		#else
+		frame = 0;
+		#end
+
+		commands();
+
+		var path = RenderPathDeferred.path;
+		path.setTarget("buf");
+		Inc.drawCompass(path.currentG);
+		path.setTarget("taa");
+		path.bindTarget("buf", "tex");
+		path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		path.setTarget("");
+		path.bindTarget("taa", "tex");
+		path.drawShader("shader_datas/copy_pass/copy_pass");
+		#if arm_painter
+		if (UITrait.inst.brush3d) {
+			RenderPathPaint.commandsCursor();
+		}
+		#end
+	}
 }
 
 #end

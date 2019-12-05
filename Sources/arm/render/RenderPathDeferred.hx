@@ -27,7 +27,7 @@ class RenderPathDeferred {
 	public static var voxelFrame = 0;
 	public static var voxelFreq = 6; // Revoxelizing frequency
 	#end
-	static var taaFrame = 0;
+	public static var taaFrame = 0;
 	static var lastX = -1.0;
 	static var lastY = -1.0;
 
@@ -276,138 +276,9 @@ class RenderPathDeferred {
 		}
 
 		#if arm_painter
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_colorid";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_nor_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_pack_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-
-		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-
-		{ // Material preview
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpreview";
-				t.width = 1;
-				t.height = 1;
-				t.format = 'RGBA32';
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpreview_icon";
-				t.width = 1;
-				t.height = 1;
-				t.format = 'RGBA32';
-				path.createRenderTarget(t);
-			}
-
-			{
-				path.createDepthBuffer("mmain", "DEPTH24");
-
-				var t = new RenderTargetRaw();
-				t.name = "mtex";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = Inc.getHdrFormat();
-				t.scale = Inc.getSuperSampling();
-				t.depth_buffer = "mmain";
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbuf";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = Inc.getHdrFormat();
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer0";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				t.depth_buffer = "mmain";
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer1";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer2";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbufa";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA32";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbufb";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA32";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-		}
-
-		#end // arm_painter
+		RenderPathPaint.init();
+		#end
 	}
-
-	static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
 
 	@:access(iron.RenderPath)
 	public static function commands() {
@@ -416,52 +287,26 @@ class RenderPathDeferred {
 
 		#if arm_painter
 
-		if (UITrait.inst.splitView) {
-
-			if (UITrait.inst.viewIndexLast == -1 && UITrait.inst.viewIndex == -1) {
-				// Begin split, draw right viewport first
-				UITrait.inst.viewIndex = 1;
-			}
-			else {
-				// Set current viewport
-				UITrait.inst.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
-			}
-
-			var cam = Scene.active.camera;
-			if (UITrait.inst.viewIndexLast > -1) {
-				// Save current viewport camera
-				arm.plugin.Camera.inst.views[UITrait.inst.viewIndexLast].setFrom(cam.transform.local);
-			}
-
-			if (UITrait.inst.viewIndexLast != UITrait.inst.viewIndex) {
-				// Redraw on current viewport change
-				Context.ddirty = 1;
-			}
-
-			cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
-		}
-
-		var mouse = Input.getMouse();
-		var mx = lastX;
-		var my = lastY;
-		lastX = mouse.viewX;
-		lastY = mouse.viewY;
+		Inc.beginSplit();
 
 		#if (!arm_creator)
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
+			var mouse = Input.getMouse();
+			var mx = lastX;
+			var my = lastY;
+			lastX = mouse.viewX;
+			lastY = mouse.viewY;
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");
 				path.bindTarget("taa", "tex");
-				ssaa4() ?
+				RenderPathDeferred.ssaa4() ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
-			endSplit();
+			Inc.endSplit();
 			return;
 		}
 		#end
@@ -469,250 +314,40 @@ class RenderPathDeferred {
 		// Match projection matrix jitter
 		var skipTaa = UITrait.inst.splitView;
 		if (!skipTaa) {
-			@:privateAccess Scene.active.camera.frame = taaFrame;
+			@:privateAccess Scene.active.camera.frame = RenderPathDeferred.taaFrame;
 			@:privateAccess Scene.active.camera.projectionJitter();
 		}
 		Scene.active.camera.buildMatrix();
 
-		var pushUndoLast = History.pushUndo;
-		if (History.pushUndo && History.undoLayers != null) {
-			History.paint();
-		}
+		RenderPathPaint.begin();
 
-		// 2D paint
-		var painto:MeshObject = null;
-		var planeo:MeshObject = null;
-		var visibles:Array<Bool> = null;
-		var mergedObjectVisible = false;
-		var savedFov = 0.0;
-		if (UITrait.inst.paint2d) {
-			// Set plane mesh
-			painto = Context.paintObject;
-			visibles = [];
-			for (p in Project.paintObjects) {
-				visibles.push(p.visible);
-				p.visible = false;
-			}
-			if (Context.mergedObject != null) {
-				mergedObjectVisible = Context.mergedObject.visible;
-				Context.mergedObject.visible = false;
-			}
+		RenderPathDeferred.drawSplit();
+		#end
 
-			var cam = Scene.active.camera;
-			UITrait.inst.savedCamera.setFrom(cam.transform.local);
-			savedFov = cam.data.raw.fov;
-			ViewportUtil.updateCameraType(0);
-			var m = Mat4.identity();
-			m.translate(0, 0, 0.5);
-			cam.transform.setMatrix(m);
-			cam.data.raw.fov = 0.92;
-			cam.buildProjection();
-			cam.buildMatrix();
-
-			var tw = 0.95 * UIView2D.inst.panScale;
-			var tx = UIView2D.inst.panX / iron.App.w();
-			var ty = UIView2D.inst.panY / iron.App.h();
-
-			m.setIdentity();
-			m.scale(new Vec4(tw, tw, 1));
-			m.setLoc(new Vec4(tx, ty, 0));
-			var m2 = Mat4.identity();
-			m2.getInverse(Scene.active.camera.VP);
-			m.multmat(m2);
-
-			planeo = cast Scene.active.getChild(".Plane");
-			planeo.visible = true;
-			Context.paintObject = planeo;
-
-			var v = new Vec4();
-			var sx = v.set(m._00, m._01, m._02).length();
-			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-			planeo.transform.scale.set(sx, 1.0, sx);
-			planeo.transform.loc.set(m._30, -m._31, 0.0);
-			planeo.transform.buildMatrix();
-		}
-
-		if (UITrait.inst.splitView) {
-			if (Context.pdirty > 0) {
-				var cam = Scene.active.camera;
-
-				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
-				cam.buildMatrix();
-				cam.buildProjection();
-
-				drawGbuffer();
-
-				#if kha_direct3d12
-				UITrait.inst.viewportMode == 10 ? drawRaytraced() : drawDeferred;
-				#else
-				drawDeferred();
-				#end
-
-				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
-				cam.buildMatrix();
-				cam.buildProjection();
-			}
-		}
-
-		#end // arm_painter
-
-		// Geometry
 		drawGbuffer();
 
 		#if arm_painter
-
-		if (History.undoLayers != null) {
-
-			// Symmetry
-			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
-				Context.ddirty = 2;
-				var t = Context.paintObject.transform;
-				var sx = t.scale.x;
-				var sy = t.scale.y;
-				var sz = t.scale.z;
-				if (UITrait.inst.symX) {
-					t.scale.set(-sx, sy, sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symY) {
-					t.scale.set(sx, -sy, sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symZ) {
-					t.scale.set(sx, sy, -sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symY) {
-					t.scale.set(-sx, -sy, sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symZ) {
-					t.scale.set(-sx, sy, -sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symY && UITrait.inst.symZ) {
-					t.scale.set(sx, -sy, -sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
-					t.scale.set(-sx, -sy, -sz);
-					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
-				}
-				t.scale.set(sx, sy, sz);
-				t.buildMatrix();
-			}
-
-			if (Context.tool == ToolBake) {
-				if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
-					UITrait.inst.bakeType = 3; // Bake high poly world normals
-					MaterialParser.parsePaintMaterial();
-					var _paintObject = Context.paintObject;
-					var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
-					var _visible = highPoly.visible;
-					highPoly.visible = true;
-					Context.selectPaintObject(highPoly);
-					RenderPathPaint.commandsPaint();
-					highPoly.visible = _visible;
-					UITrait.inst.sub--;
-					if (pushUndoLast) History.paint();
-
-					UITrait.inst.bakeType = 2;
-					MaterialParser.parsePaintMaterial();
-					Context.selectPaintObject(_paintObject);
-					RenderPathPaint.commandsPaint();
-				}
-				else if (UITrait.inst.bakeType == 7) { // Object ID
-					var _layerFilter = UITrait.inst.layerFilter;
-					var _paintObject = Context.paintObject;
-					var isMerged = Context.mergedObject != null;
-					var _visible = isMerged && Context.mergedObject.visible;
-					UITrait.inst.layerFilter = 1;
-					if (isMerged) Context.mergedObject.visible = false;
-
-					for (p in Project.paintObjects) {
-						Context.selectPaintObject(p);
-						RenderPathPaint.commandsPaint();
-					}
-
-					UITrait.inst.layerFilter = _layerFilter;
-					Context.selectPaintObject(_paintObject);
-					if (isMerged) Context.mergedObject.visible = _visible;
-				}
-				#if kha_direct3d12
-				else if (UITrait.inst.bakeType == 0 || // AO (DXR)
-						 UITrait.inst.bakeType == 8 || // Lightmap (DXR)
-						 UITrait.inst.bakeType == 9) { // Bent Normal (DXR)
-					RenderPathRaytrace.commandsBake();
-				}
-				#end
-				else {
-					RenderPathPaint.commandsPaint();
-				}
-			}
-			else { // Paint
-				RenderPathPaint.commandsPaint();
-			}
-		}
-
-		//
-
-		if (Context.brushBlendDirty) {
-			Context.brushBlendDirty = false;
-			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
-			path.clearTarget(0x00000000);
-		}
-
-		if (UITrait.inst.paint2d) {
-			// Restore paint mesh
-			planeo.visible = false;
-			for (i in 0...Project.paintObjects.length) {
-				Project.paintObjects[i].visible = visibles[i];
-			}
-			if (Context.mergedObject != null) {
-				Context.mergedObject.visible = mergedObjectVisible;
-			}
-			Context.paintObject = painto;
-			Scene.active.camera.transform.setMatrix(UITrait.inst.savedCamera);
-			Scene.active.camera.data.raw.fov = savedFov;
-			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
-			Scene.active.camera.buildProjection();
-			Scene.active.camera.buildMatrix();
-
-			drawGbuffer();
-		}
+		RenderPathPaint.draw();
+		#end
 
 		#if kha_direct3d12
 		if (UITrait.inst.viewportMode == 10) { // Ray-traced
-			drawRaytraced();
+			RenderPathRaytrace.draw();
 			return;
 		}
 		#end
 
-		#end // arm_painter
-
 		drawDeferred();
 
 		#if arm_painter
-		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-		Context.ddirty--;
-		Context.pdirty--;
-		Context.rdirty--;
-		endSplit();
+		RenderPathPaint.end();
+		Inc.endSplit();
 		#end
 
 		taaFrame++;
 	}
 
-	static function drawDeferred() {
+	public static function drawDeferred() {
 		#if arm_painter
 		var cameraType = UITrait.inst.cameraType;
 		var ddirty = Context.ddirty;
@@ -956,7 +591,7 @@ class RenderPathDeferred {
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
 			#if arm_painter
-			drawCompass(currentG);
+			Inc.drawCompass(currentG);
 			#end
 		}
 
@@ -1013,33 +648,7 @@ class RenderPathDeferred {
 		}
 	}
 
-	#if kha_direct3d12
-	static function drawRaytraced() {
-		#if arm_painter
-		if (Context.ddirty > 1) {
-			RenderPathRaytrace.frame = 0;
-		}
-		#else
-		RenderPathRaytrace.frame = 0;
-		#end
-		RenderPathRaytrace.commands();
-		path.setTarget("buf");
-		drawCompass(path.currentG);
-		path.setTarget("taa");
-		path.bindTarget("buf", "tex");
-		path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		path.setTarget("");
-		path.bindTarget("taa", "tex");
-		path.drawShader("shader_datas/copy_pass/copy_pass");
-		#if arm_painter
-		if (UITrait.inst.brush3d) {
-			RenderPathPaint.commandsCursor();
-		}
-		#end
-	}
-	#end
-
-	static function drawGbuffer() {
+	public static function drawGbuffer() {
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		path.clearTarget(null, 1.0);
 		path.setTarget("gbuffer2");
@@ -1084,42 +693,31 @@ class RenderPathDeferred {
 		#end
 	}
 
-	#if arm_painter
-	static function drawCompass(currentG:kha.graphics4.Graphics) {
-		if (UITrait.inst.showCompass) {
-			var scene = Scene.active;
-			var cam = Scene.active.camera;
-			var gizmo:MeshObject = cast scene.getChild(".GizmoTranslate");
+	public static function drawSplit() {
+		if (UITrait.inst.splitView) {
+			if (Context.pdirty > 0) {
+				var cam = Scene.active.camera;
 
-			var visible = gizmo.visible;
-			var parent = gizmo.parent;
-			var loc = gizmo.transform.loc;
-			var rot = gizmo.transform.rot;
-			var crot = cam.transform.rot;
-			var ratio = iron.App.w() / iron.App.h();
-			var P = cam.P;
-			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-			gizmo.visible = true;
-			gizmo.parent = cam;
-			gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
-			gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-			gizmo.transform.scale.set(0.5, 0.5, 0.5);
-			gizmo.transform.buildMatrix();
+				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				cam.buildMatrix();
+				cam.buildProjection();
 
-			gizmo.render(currentG, "overlay", []);
+				drawGbuffer();
 
-			cam.P = P;
-			gizmo.visible = visible;
-			gizmo.parent = parent;
-			gizmo.transform.loc = loc;
-			gizmo.transform.rot = rot;
-			gizmo.transform.buildMatrix();
+				#if kha_direct3d12
+				UITrait.inst.viewportMode == 10 ? RenderPathRaytrace.draw() : drawDeferred();
+				#else
+				drawDeferred();
+				#end
+
+				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				cam.buildMatrix();
+				cam.buildProjection();
+			}
 		}
 	}
 
-	static function endSplit() {
-		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
-		UITrait.inst.viewIndex = -1;
-	}
-	#end
+	public static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
 }
