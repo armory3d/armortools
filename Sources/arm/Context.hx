@@ -58,11 +58,13 @@ class Context {
 		UITrait.inst.hwnd1.redraws = 2;
 		UITrait.inst.headerHandle.redraws = 2;
 
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
-		if (current != null) current.end();
 		var decal = tool == ToolDecal || tool == ToolText;
-		if (decal) RenderUtil.makeDecalPreview();
-		if (current != null) current.begin(false);
+		if (decal) {
+			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+			RenderUtil.makeDecalPreview();
+			if (current != null) current.begin(false);
+		}
 	}
 
 	public static function selectBrush(i:Int) {

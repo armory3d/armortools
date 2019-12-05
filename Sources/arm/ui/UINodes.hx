@@ -117,7 +117,10 @@ class UINodes {
 			if (canvasType == 0) {
 				canvasChanged();
 			}
-			if (mreleased) History.editNodes(lastCanvas, canvasType);
+			if (mreleased) {
+				UITrait.inst.hwnd.redraws = 2;
+				History.editNodes(lastCanvas, canvasType);
+			}
 		}
 		else if (ui.changed && (mstartedlast || mouse.moved)) {
 			recompileMat = true; // Instant preview

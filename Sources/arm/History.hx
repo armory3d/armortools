@@ -434,17 +434,22 @@ class History {
 			var _canvas = Project.materials[step.material].canvas;
 			Project.materials[step.material].canvas = step.canvas;
 			step.canvas = _canvas;
+			Context.material = Project.materials[step.material];
 		}
 		else {
 			var _canvas = Project.brushes[step.brush].canvas;
 			Project.brushes[step.brush].canvas = step.canvas;
 			step.canvas = _canvas;
+			Context.brush = Project.brushes[step.brush];
 		}
+
 		function canvasChanged(_) {
 			UINodes.inst.canvasChanged();
 			iron.App.removeRender(canvasChanged);
 		}
 		iron.App.notifyOnRender(canvasChanged);
+		@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+
 	}
 }
 
