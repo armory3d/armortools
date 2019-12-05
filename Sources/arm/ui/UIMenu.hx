@@ -50,9 +50,8 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 15, 17, 5];
+			var menuItems = [12, 3, 17, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
-			#if (!kha_direct3d12) menuItems[2] += 2; #end
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -119,7 +118,6 @@ class UIMenu {
 				p.raw.strength = ui.slider(envHandle, "Environment", 0.0, 8.0, true);
 				if (envHandle.changed) Context.ddirty = 2;
 
-				#if (!kha_direct3d12)
 				if (Scene.active.lights.length > 0) {
 					var light = Scene.active.lights[0];
 
@@ -139,7 +137,6 @@ class UIMenu {
 					light.data.raw.size = ui.slider(sxhandle, "Light Size", 0.0, 4.0, true);
 					if (sxhandle.changed) Context.ddirty = 2;
 				}
-				#end
 
 				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
 				UITrait.inst.displaceStrength = ui.slider(dispHandle, "Displace", 0.0, 2.0, true);

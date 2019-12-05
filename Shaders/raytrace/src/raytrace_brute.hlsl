@@ -1,7 +1,7 @@
 
-#include "rand.hlsl"
-#include "attrib.hlsl"
-#include "math.hlsl"
+#include "std/rand.hlsl"
+#include "std/attrib.hlsl"
+#include "std/math.hlsl"
 
 struct Vertex {
 	float3 position;
@@ -35,12 +35,11 @@ Texture2D<float4> mytexture_sobol : register(t7);
 Texture2D<float4> mytexture_scramble : register(t8);
 Texture2D<float4> mytexture_rank : register(t9);
 
-static uint seed = 0;
-static const int SAMPLES = 64;
-static const int DEPTH = 3; // 3 - 5
-
 static const int rrStart = 2;
 static const float rrProbability = 0.5; // map to albedo
+static const int SAMPLES = 64;
+static const int DEPTH = 3; // 3 - 5
+static uint seed = 0;
 
 [shader("raygeneration")]
 void raygeneration() {

@@ -983,7 +983,12 @@ class UITrait {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
 					var ao = #if kha_direct3d12 "AO (DXR)" #else "AO" #end;
-					bakeType = ui.combo(bakeHandle, [ao, "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"], "Bake");
+					var bakes = [ao, "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"];
+					#if kha_direct3d12
+					bakes.push("Lightmap (DXR)");
+					bakes.push("Bent Nor (DXR)");
+					#end
+					bakeType = ui.combo(bakeHandle, bakes, "Bake");
 					if (bakeType == 0 || bakeType == 1) {
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
 						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
@@ -995,11 +1000,13 @@ class UITrait {
 						bakeAoRadius = ui.slider(radiusHandle, "Radius", 0.0, 2.0, true);
 						var offsetHandle = Id.handle({value: bakeAoOffset});
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
-						#if kha_direct3d12
+					}
+					#if kha_direct3d12
+					if (bakeType == 0 || bakeType == 8 || bakeType == 9) {
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
-						#end
 					}
+					#end
 					if (bakeType == 1) { // Curvature
 						var strengthHandle = Id.handle({value: bakeCurvStrength});
 						bakeCurvStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
@@ -1145,7 +1152,7 @@ class UITrait {
 			var modeHandle = Id.handle({position: 0});
 			var modes = ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"];
 			#if kha_direct3d12
-			modes.push("Path-Traced (DXR)");
+			modes.push("Path-Trace (DXR)");
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {

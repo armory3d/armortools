@@ -648,7 +648,9 @@ class RenderPathDeferred {
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
 				#if kha_direct3d12
-				else if (UITrait.inst.bakeType == 0) { // AO (DXR)
+				else if (UITrait.inst.bakeType == 0 || // AO (DXR)
+						 UITrait.inst.bakeType == 8 || // Lightmap (DXR)
+						 UITrait.inst.bakeType == 9) { // Bent Normal (DXR)
 					RenderPathRaytrace.commandsBake();
 				}
 				#end
