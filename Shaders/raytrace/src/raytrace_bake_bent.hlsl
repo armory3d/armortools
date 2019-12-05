@@ -1,7 +1,6 @@
 
 #include "std/rand.hlsl"
 #include "std/math.hlsl"
-#include "std/attrib.hlsl"
 
 struct Vertex {
 	float3 position;
@@ -11,7 +10,7 @@ struct Vertex {
 
 struct RayGenConstantBuffer {
 	float4 v0; // frame, strength, radius, offset
-	float4 v1; // envstr
+	float4 v1;
 	float4 v2;
 	float4 v3;
 	float4 v4;
@@ -62,7 +61,7 @@ void raygeneration() {
 		accum += payload.color.rgb;
 	}
 
-	accum /= SAMPLES;
+	accum = normalize(accum / SAMPLES) * 0.5 + 0.5;
 
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
 	if (constant_buffer.v0.x == 0) {
@@ -78,35 +77,10 @@ void raygeneration() {
 
 [shader("closesthit")]
 void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
-	const uint triangleIndexStride = 12; // 3 * 4
-	uint base_index = PrimitiveIndex() * triangleIndexStride;
-	uint3 indices_sample = indices.Load3(base_index);
-
-	float3 vertex_normals[3] = {
-		float3(vertices[indices_sample[0]].normal),
-		float3(vertices[indices_sample[1]].normal),
-		float3(vertices[indices_sample[2]].normal)
-	};
-	float3 n = normalize(hit_attribute(vertex_normals, attr));
-
-	float2 vertex_uvs[3] = {
-		float2(vertices[indices_sample[0]].tex),
-		float2(vertices[indices_sample[1]].tex),
-		float2(vertices[indices_sample[2]].tex)
-	};
-	float2 tex_coord = hit_attribute2d(vertex_uvs, attr);
-
-	uint2 size;
-	mytexture2.GetDimensions(size.x, size.y);
-	float3 texpaint2 = pow(mytexture2.Load(uint3(tex_coord * size, 0)).rgb, 2.2); // layer base
-	payload.color.rgb = texpaint2.rgb;
+	payload.color = float4(0, 0, 0, 0);
 }
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
-	float2 tex_coord = equirect(WorldRayDirection());
-	uint2 size;
-	mytexture_env.GetDimensions(size.x, size.y);
-	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * constant_buffer.v1.x;
-	payload.color = float4(texenv.rgb, -1);
+	payload.color = float4(WorldRayDirection(), 0);
 }

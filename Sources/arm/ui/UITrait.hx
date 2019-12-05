@@ -986,7 +986,7 @@ class UITrait {
 					var bakes = [ao, "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"];
 					#if kha_direct3d12
 					bakes.push("Lightmap (DXR)");
-					bakes.push("Bent Nor (DXR)");
+					bakes.push("BentNormal (DXR)");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
 					if (bakeType == 0 || bakeType == 1) {
