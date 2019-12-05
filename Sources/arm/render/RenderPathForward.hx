@@ -136,11 +136,22 @@ class RenderPathForward {
 		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
+
 		drawSplit();
-
-		RenderPathPaint.draw();
-
 		#end // arm_painter
+
+		drawGbuffer();
+
+		#if arm_painter
+		RenderPathPaint.draw();
+		#end
+
+		#if kha_direct3d12
+		if (UITrait.inst.viewportMode == 10) { // Ray-traced
+			RenderPathRaytrace.draw();
+			return;
+		}
+		#end
 
 		drawForward();
 
@@ -152,7 +163,7 @@ class RenderPathForward {
 		RenderPathDeferred.taaFrame++;
 	}
 
-	static function drawForward() {
+	static function drawGbuffer() {
 		path.setTarget("gbuffer0");
 		path.clearTarget(null, 1.0);
 		path.setTarget("gbuffer2");
@@ -162,7 +173,9 @@ class RenderPathForward {
 		RenderPathPaint.bindLayers();
 		#end
 		path.drawMeshes("mesh");
+	}
 
+	static function drawForward() {
 		path.setDepthFrom("gbuffer1", "gbuffer0");
 		path.setTarget("gbuffer1");
 		path.drawSkydome("world_pass/world_pass/world_pass");
@@ -240,6 +253,8 @@ class RenderPathForward {
 				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
+
+				drawGbuffer();
 
 				#if kha_direct3d12
 				UITrait.inst.viewportMode == 10 ? RenderPathRaytrace.draw() : drawForward();

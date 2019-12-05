@@ -280,7 +280,7 @@ class Uniforms {
 	public static function linkTex(object:Object, mat:MaterialData, link:String):kha.Image {
 		#if arm_painter
 		if (link == "_texcolorid") {
-			if (Project.assets.length == 0) return null;
+			if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
 			else return UITrait.inst.getImage(Project.assets[UITrait.inst.colorIdHandle.position]);
 		}
 		if (link == "_texuvmap") {

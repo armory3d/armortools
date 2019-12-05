@@ -1158,13 +1158,13 @@ class UITrait {
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
-				var forward = UITrait.inst.viewportMode != 0 && UITrait.inst.viewportMode != 10;
-				if (forward) {
-					if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
-					RenderPath.active.commands = RenderPathForward.commands;
+				var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 10;
+				if (deferred) {
+					RenderPath.active.commands = RenderPathDeferred.commands;
 				}
 				else {
-					RenderPath.active.commands = RenderPathDeferred.commands;
+					if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
+					RenderPath.active.commands = RenderPathForward.commands;
 				}
 				MaterialParser.parseMeshMaterial();
 			}
