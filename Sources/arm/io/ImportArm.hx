@@ -153,7 +153,7 @@ class ImportArm {
 						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
 					}
 				}
-				Context.material = new MaterialSlot(m0);
+				Context.material = new MaterialSlot(m0, n);
 				Project.materials.push(Context.material);
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
@@ -327,7 +327,7 @@ class ImportArm {
 					if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
 				}
 			}
-			Context.material = new MaterialSlot(m0);
+			Context.material = new MaterialSlot(m0, n);
 			Project.materials.push(Context.material);
 			imported.push(Context.material);
 		}
