@@ -1,15 +1,117 @@
 package arm.render;
 
 import iron.RenderPath;
+import arm.util.RenderUtil;
 import arm.ui.UITrait;
 import arm.Tool;
 
 @:access(iron.RenderPath)
 class RenderPathPreview {
 
-	public static function commandsPreview() {
+	public static var path:RenderPath;
 
-		var path = RenderPathDeferred.path;
+	public static function init(_path:RenderPath) {
+		path = _path;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpreview";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpreview_icon";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
+		{
+			path.createDepthBuffer("mmain", "DEPTH24");
+
+			var t = new RenderTargetRaw();
+			t.name = "mtex";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			t.depth_buffer = "mmain";
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mbuf";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mgbuffer0";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			t.depth_buffer = "mmain";
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mgbuffer1";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mgbuffer2";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA64";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mbufa";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "mbufb";
+			t.width = RenderUtil.matPreviewSize;
+			t.height = RenderUtil.matPreviewSize;
+			t.format = "RGBA32";
+			t.scale = Inc.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+
+		//
+		// path.loadShader("deferred_light/deferred_light/deferred_light");
+		// path.loadShader("world_pass/world_pass/world_pass");
+		// path.loadShader("shader_datas/compositor_pass/compositor_pass");
+		// path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
+		//
+	}
+
+	public static function commandsPreview() {
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
@@ -65,8 +167,6 @@ class RenderPathPreview {
 	}
 
 	public static function commandsDecal() {
-
-		var path = RenderPathDeferred.path;
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);

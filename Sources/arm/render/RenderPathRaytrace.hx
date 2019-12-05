@@ -13,6 +13,7 @@ class RenderPathRaytrace {
 	public static var raysPix = 0;
 	public static var raysSec = 0;
 	public static var ready = false;
+	static var path:RenderPath;
 	static var first = true;
 	static var f32 = new kha.arrays.Float32Array(24);
 	static var helpMat = iron.math.Mat4.identity();
@@ -28,16 +29,19 @@ class RenderPathRaytrace {
 	static var isBake = false;
 	static var lastBake = 0;
 
+	public static function init(_path:RenderPath) {
+		path = _path;
+	}
+
 	public static function commands() {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
-			init("raytrace_brute.cso", iron.App.w(), iron.App.h());
+			raytraceInit("raytrace_brute.cso", iron.App.w(), iron.App.h());
 			lastEnvmap = null;
 			lastLayer = null;
 		}
 
-		var path = RenderPathDeferred.path;
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = UITrait.inst.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
 		if (lastEnvmap != savedEnvmap) {
@@ -87,7 +91,6 @@ class RenderPathRaytrace {
 		f32[20] = Scene.active.world.probe.raw.strength;
 		f32[21] = UITrait.inst.showEnvmap ? 1.0 : 0.0;
 
-		var path = RenderPathDeferred.path;
 		var framebuffer = path.renderTargets.get("buf").image;
 
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
@@ -107,7 +110,6 @@ class RenderPathRaytrace {
 			lastEnvmap = null;
 			lastLayer = null;
 
-			var path = RenderPathDeferred.path;
 			if (path.renderTargets.get("baketex0") != null) {
 				path.renderTargets.get("baketex0").image.unload();
 				path.renderTargets.get("baketex1").image.unload();
@@ -149,14 +151,14 @@ class RenderPathRaytrace {
 			UITrait.inst.bakeType = _bakeType;
 			// MaterialParser.parsePaintMaterial();
 
-			init(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes());
+			raytraceInit(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes());
 
 			return;
 		}
 
 		if (lastBake != UITrait.inst.bakeType) {
 			lastBake = UITrait.inst.bakeType;
-			init(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes(), false);
+			raytraceInit(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes(), false);
 			lastEnvmap = null;
 		}
 
@@ -166,7 +168,6 @@ class RenderPathRaytrace {
 			lastEnvmap = savedEnvmap;
 			lastLayer = Context.layer.texpaint;
 
-			var path = RenderPathDeferred.path;
 			var baketex0 = path.renderTargets.get("baketex0").image;
 			var baketex1 = path.renderTargets.get("baketex1").image;
 			var baketex2 = path.renderTargets.get("baketex2").image;
@@ -191,7 +192,6 @@ class RenderPathRaytrace {
 			f32[3] = UITrait.inst.bakeAoOffset;
 			f32[4] = Scene.active.world.probe.raw.strength;
 
-			var path = RenderPathDeferred.path;
 			var baketex2 = path.renderTargets.get("baketex2").image;
 			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
 
@@ -216,14 +216,12 @@ class RenderPathRaytrace {
 		}
 	}
 
-	static function init(shaderName:String, targetW:Int, targetH:Int, build = true) {
+	static function raytraceInit(shaderName:String, targetW:Int, targetH:Int, build = true) {
 
 		if (first) {
 			Scene.active.embedData("bnoise_sobol.png", function() {});
 			Scene.active.embedData("bnoise_scramble.png", function() {});
 			Scene.active.embedData("bnoise_rank.png", function() {});
-
-			var path = RenderPathDeferred.path;
 
 			{
 				var t = new RenderTargetRaw();
@@ -298,7 +296,6 @@ class RenderPathRaytrace {
 		var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
 		var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
 
-		var path = RenderPathDeferred.path;
 		bsobol = path.renderTargets.get("bsobol").image;
 		bscramble = path.renderTargets.get("bscramble").image;
 		brank = path.renderTargets.get("brank").image;
@@ -330,7 +327,6 @@ class RenderPathRaytrace {
 
 		commands();
 
-		var path = RenderPathDeferred.path;
 		path.setTarget("buf");
 		Inc.drawCompass(path.currentG);
 		path.setTarget("taa");

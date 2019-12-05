@@ -9,7 +9,6 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import arm.ui.UITrait;
 import arm.render.RenderPathPreview;
-import arm.render.RenderPathDeferred;
 import arm.node.MaterialParser;
 import arm.io.ImportFont;
 import arm.Tool;
@@ -64,9 +63,10 @@ class RenderUtil {
 		Scene.active.camera.buildMatrix();
 
 		MaterialParser.parseMeshPreviewMaterial();
+		var _commands = RenderPath.active.commands;
 		RenderPath.active.commands = RenderPathPreview.commandsPreview;
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
-		RenderPath.active.commands = RenderPathDeferred.commands;
+		RenderPath.active.commands = _commands;
 
 		UITrait.inst.materialPreview = false;
 		@:privateAccess RenderPath.active.lastW = iron.App.w();
@@ -123,9 +123,10 @@ class RenderUtil {
 		Scene.active.camera.buildMatrix();
 
 		MaterialParser.parseMeshPreviewMaterial();
+		var _commands = RenderPath.active.commands;
 		RenderPath.active.commands = RenderPathPreview.commandsDecal;
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
-		RenderPath.active.commands = RenderPathDeferred.commands;
+		RenderPath.active.commands = _commands;
 
 		UITrait.inst.decalPreview = false;
 		@:privateAccess RenderPath.active.lastW = iron.App.w();

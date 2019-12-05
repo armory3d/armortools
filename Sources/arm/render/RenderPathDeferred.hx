@@ -62,7 +62,7 @@ class RenderPathDeferred {
 			t.name = "tex";
 			t.width = 0;
 			t.height = 0;
-			t.format = Inc.getHdrFormat();
+			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
 			t.depth_buffer = "main";
 			path.createRenderTarget(t);
@@ -76,7 +76,7 @@ class RenderPathDeferred {
 			#if kha_direct3d12 // Match raytrace_target format
 			t.format = "RGBA128";
 			#else
-			t.format = Inc.getHdrFormat();
+			t.format = "RGBA64";
 			#end
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
@@ -196,7 +196,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.scale = 0.25;
-			t.format = Inc.getHdrFormat();
+			t.format = "RGBA64";
 			path.createRenderTarget(t);
 		}
 
@@ -206,7 +206,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.scale = 0.25;
-			t.format = Inc.getHdrFormat();
+			t.format = "RGBA64";
 			path.createRenderTarget(t);
 		}
 
@@ -223,7 +223,7 @@ class RenderPathDeferred {
 			t.name = "histogram";
 			t.width = 1;
 			t.height = 1;
-			t.format = Inc.getHdrFormat();
+			t.format = "RGBA64";
 			path.createRenderTarget(t);
 		}
 
@@ -276,7 +276,12 @@ class RenderPathDeferred {
 		}
 
 		#if arm_painter
-		RenderPathPaint.init();
+		RenderPathPaint.init(path);
+		RenderPathPreview.init(path);
+		#end
+
+		#if kha_direct3d12
+		RenderPathRaytrace.init(path);
 		#end
 	}
 
@@ -300,7 +305,7 @@ class RenderPathDeferred {
 			if (Context.ddirty > -2) {
 				path.setTarget("");
 				path.bindTarget("taa", "tex");
-				RenderPathDeferred.ssaa4() ?
+				Inc.ssaa4() ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
@@ -634,14 +639,14 @@ class RenderPathDeferred {
 				path.drawShader("shader_datas/taa_pass/taa_pass");
 			}
 
-			if (!ssaa4()) {
+			if (!Inc.ssaa4()) {
 				path.setTarget("");
 				path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 			}
 		}
 
-		if (ssaa4()) {
+		if (Inc.ssaa4()) {
 			path.setTarget("");
 			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
@@ -718,6 +723,4 @@ class RenderPathDeferred {
 			}
 		}
 	}
-
-	public static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
 }

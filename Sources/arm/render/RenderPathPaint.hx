@@ -17,6 +17,7 @@ import arm.Tool;
 
 class RenderPathPaint {
 
+	static var path:RenderPath;
 	static var initVoxels = true; // Bake AO
 	static var pushUndoLast:Bool;
 	static var painto:MeshObject = null;
@@ -25,10 +26,48 @@ class RenderPathPaint {
 	static var mergedObjectVisible = false;
 	static var savedFov = 0.0;
 
+	public static function init(_path:RenderPath) {
+		path = _path;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_colorid";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_nor_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_pack_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = 'RGBA32';
+			path.createRenderTarget(t);
+		}
+
+		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+	}
+
 	@:access(iron.RenderPath)
 	public static function commandsPaint() {
-
-		var path = RenderPathDeferred.path;
 		var tid = Context.layer.id;
 
 		if (Context.pdirty > 0 && UITrait.inst.worktab.position != SpaceScene) {
@@ -192,8 +231,6 @@ class RenderPathPaint {
 			return;
 		}
 
-		var path = RenderPathDeferred.path;
-
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
@@ -229,141 +266,7 @@ class RenderPathPaint {
 		path.end();
 	}
 
-	public static function init() {
-		var path = RenderPathDeferred.path;
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_colorid";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_nor_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "texpaint_pack_picker";
-			t.width = 1;
-			t.height = 1;
-			t.format = 'RGBA32';
-			path.createRenderTarget(t);
-		}
-
-		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-
-		{ // Material preview
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpreview";
-				t.width = 1;
-				t.height = 1;
-				t.format = 'RGBA32';
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpreview_icon";
-				t.width = 1;
-				t.height = 1;
-				t.format = 'RGBA32';
-				path.createRenderTarget(t);
-			}
-
-			{
-				path.createDepthBuffer("mmain", "DEPTH24");
-
-				var t = new RenderTargetRaw();
-				t.name = "mtex";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = Inc.getHdrFormat();
-				t.scale = Inc.getSuperSampling();
-				t.depth_buffer = "mmain";
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbuf";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = Inc.getHdrFormat();
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer0";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				t.depth_buffer = "mmain";
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer1";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mgbuffer2";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbufa";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA32";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "mbufb";
-				t.width = RenderUtil.matPreviewSize;
-				t.height = RenderUtil.matPreviewSize;
-				t.format = "RGBA32";
-				t.scale = Inc.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-		}
-	}
-
 	public static function begin() {
-		var path = RenderPathDeferred.path;
-
 		pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {
 			History.paint();
@@ -426,9 +329,6 @@ class RenderPathPaint {
 	}
 
 	public static function draw() {
-
-		var path = RenderPathDeferred.path;
-
 		if (History.undoLayers != null) {
 			// Symmetry
 			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {

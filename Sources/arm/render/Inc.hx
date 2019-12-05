@@ -91,10 +91,6 @@ class Inc {
 		return superSample;
 	}
 
-	public static inline function getHdrFormat():String {
-		return "RGBA64";
-	}
-
 	#if arm_painter
 	public static function drawCompass(currentG:kha.graphics4.Graphics) {
 		if (UITrait.inst.showCompass) {
@@ -162,4 +158,6 @@ class Inc {
 		UITrait.inst.viewIndexLast = UITrait.inst.viewIndex;
 		UITrait.inst.viewIndex = -1;
 	}
+
+	public static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
 }
