@@ -45,6 +45,7 @@ class Plugin {
 class IronBridge {
 	public static var App = iron.App;
 	public static var Scene = iron.Scene;
+	public static var RenderPath = iron.RenderPath;
 	public static var Time = iron.system.Time;
 	public static var Input = iron.system.Input;
 	public static var ArmPack = iron.system.ArmPack;

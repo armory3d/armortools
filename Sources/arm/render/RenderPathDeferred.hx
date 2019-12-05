@@ -326,8 +326,8 @@ class RenderPathDeferred {
 
 		RenderPathPaint.begin();
 
-		RenderPathDeferred.drawSplit();
-		#end
+		drawSplit();
+		#end // arm_painter
 
 		drawGbuffer();
 
@@ -659,24 +659,9 @@ class RenderPathDeferred {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-
 		#if arm_painter
-		var tid = Project.layers[0].id;
-		path.bindTarget("texpaint" + tid, "texpaint");
-		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
-		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		for (i in 1...Project.layers.length) {
-			var l = Project.layers[i];
-			tid = l.id;
-			path.bindTarget("texpaint" + tid, "texpaint" + tid);
-			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
-			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
-			if (l.texpaint_mask != null) {
-				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
-			}
-		}
+		RenderPathPaint.bindLayers();
 		#end
-
 		path.drawMeshes("mesh");
 
 		#if rp_decals
@@ -698,7 +683,7 @@ class RenderPathDeferred {
 		#end
 	}
 
-	public static function drawSplit() {
+	static function drawSplit() {
 		if (UITrait.inst.splitView) {
 			if (Context.pdirty > 0) {
 				var cam = Scene.active.camera;

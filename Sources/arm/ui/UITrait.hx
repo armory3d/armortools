@@ -26,6 +26,8 @@ import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
 import arm.io.ExportArm;
+import arm.render.RenderPathDeferred;
+import arm.render.RenderPathForward;
 import arm.Tool;
 import arm.Project;
 
@@ -1156,6 +1158,14 @@ class UITrait {
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
+				var forward = UITrait.inst.viewportMode != 0 && UITrait.inst.viewportMode != 10;
+				if (forward) {
+					if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
+					RenderPath.active.commands = RenderPathForward.commands;
+				}
+				else {
+					RenderPath.active.commands = RenderPathDeferred.commands;
+				}
 				MaterialParser.parseMeshMaterial();
 			}
 

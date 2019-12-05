@@ -75,7 +75,9 @@ class RenderPathPaint {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
-				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) path.bindTarget("gbuffer0", "gbuffer0");
+				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) {
+					path.bindTarget("gbuffer0", "gbuffer0");
+				}
 
 				var mo:MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
@@ -453,6 +455,23 @@ class RenderPathPaint {
 			Scene.active.camera.buildMatrix();
 
 			RenderPathDeferred.drawGbuffer();
+		}
+	}
+
+	public static function bindLayers() {
+		var tid = Project.layers[0].id;
+		path.bindTarget("texpaint" + tid, "texpaint");
+		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
+		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+		for (i in 1...Project.layers.length) {
+			var l = Project.layers[i];
+			tid = l.id;
+			path.bindTarget("texpaint" + tid, "texpaint" + tid);
+			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
+			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
+			if (l.texpaint_mask != null) {
+				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
+			}
 		}
 	}
 }
