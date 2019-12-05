@@ -449,7 +449,7 @@ class History {
 		}
 		iron.App.notifyOnRender(canvasChanged);
 		@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
-
+		UINodes.inst.hwnd.redraws = 2;
 	}
 }
 
