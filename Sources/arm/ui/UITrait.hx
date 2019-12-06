@@ -990,6 +990,7 @@ class UITrait {
 					#if kha_direct3d12
 					bakes.push("Lightmap (DXR)");
 					bakes.push("BentNormal (DXR)");
+					bakes.push("Thickness (DXR)");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
 					if (bakeType == 3 || bakeType == 4 || bakeType == 9) {
@@ -1009,7 +1010,7 @@ class UITrait {
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
 					#if kha_direct3d12
-					if (bakeType == 0 || bakeType == 8 || bakeType == 9) { // ao, bent, lightmap
+					if (bakeType == 0 || bakeType == 8 || bakeType == 9 || bakeType == 10) { // ao, bent, lightmap, thick
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
 					}
