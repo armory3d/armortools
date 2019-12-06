@@ -191,6 +191,7 @@ class UITrait {
 	public var brushAngleRejectDot = 0.5;
 	public var bakeType = 0;
 	public var bakeAxis = 0;
+	public var bakeUpAxis = 0;
 	public var bakeAoStrength = 1.0;
 	public var bakeAoRadius = 1.0;
 	public var bakeAoOffset = 1.0;
@@ -991,11 +992,15 @@ class UITrait {
 					bakes.push("BentNormal (DXR)");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
-					if (bakeType == 0 || bakeType == 1) {
+					if (bakeType == 3 || bakeType == 4 || bakeType == 8) {
+						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
+						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
+					}
+					if (bakeType == 0 || bakeType == 1) { // ao, curvature
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
 						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
 					}
-					if (bakeType == 0) { // AO
+					if (bakeType == 0) { // ao
 						var strengthHandle = Id.handle({value: bakeAoStrength});
 						bakeAoStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
 						var radiusHandle = Id.handle({value: bakeAoRadius});
@@ -1004,7 +1009,7 @@ class UITrait {
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
 					#if kha_direct3d12
-					if (bakeType == 0 || bakeType == 8 || bakeType == 9) {
+					if (bakeType == 0 || bakeType == 8 || bakeType == 9) { // ao, bent, lightmap
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
 					}
