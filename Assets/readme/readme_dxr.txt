@@ -15,7 +15,9 @@ may be sub-par in other areas compared to regular builds.
 
 Currently exposed ray-tracing features:
 - Bake Tool - AO (DXR)
-- Viewport Mode - Path-Traced (DXR)
+- Bake Tool - Bent Normal (DXR)
+- Bake Tool - Lightmap (DXR)
+- Viewport Mode - Path-Trace (DXR)
 
 -----
 
