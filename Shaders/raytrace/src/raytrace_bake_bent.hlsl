@@ -10,7 +10,7 @@ struct Vertex {
 
 struct RayGenConstantBuffer {
 	float4 v0; // frame, strength, radius, offset
-	float4 v1;
+	float4 v1; // envstr, upaxis
 	float4 v2;
 	float4 v3;
 	float4 v4;
@@ -62,6 +62,8 @@ void raygeneration() {
 	}
 
 	accum = normalize(accum / SAMPLES) * 0.5 + 0.5;
+
+	if (constant_buffer.v1.y > 0) accum.xyz = float3(accum.x, accum.z, 1.0 - accum.y);
 
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
 	if (constant_buffer.v0.x == 0) {

@@ -992,7 +992,7 @@ class UITrait {
 					bakes.push("BentNormal (DXR)");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
-					if (bakeType == 3 || bakeType == 4 || bakeType == 8) {
+					if (bakeType == 3 || bakeType == 4 || bakeType == 9) {
 						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
 						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
 					}
@@ -1031,8 +1031,6 @@ class UITrait {
 					}
 					if (ui.changed) {
 						MaterialParser.parsePaintMaterial();
-						// Context.pdirty = 4;
-						// pushUndo
 					}
 				}
 				else {

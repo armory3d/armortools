@@ -68,10 +68,16 @@ class MakeBake {
 		else if (UITrait.inst.bakeType == 3) { // Normal (World)
 			frag.n = true;
 			frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			if (UITrait.inst.bakeUpAxis == 1) { // Y up
+				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
+			}
 		}
 		else if (UITrait.inst.bakeType == 4) { // Position
 			frag.wposition = true;
 			frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
+			if (UITrait.inst.bakeUpAxis == 1) { // Y up
+				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
+			}
 		}
 		else if (UITrait.inst.bakeType == 5) { // TexCoord
 			frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');

@@ -191,6 +191,7 @@ class RenderPathRaytrace {
 			f32[2] = UITrait.inst.bakeAoRadius;
 			f32[3] = UITrait.inst.bakeAoOffset;
 			f32[4] = Scene.active.world.probe.raw.strength;
+			f32[5] = UITrait.inst.bakeUpAxis;
 
 			var baketex2 = path.renderTargets.get("baketex2").image;
 			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
