@@ -34,19 +34,7 @@ class MakePaint {
 		#if kha_direct3d12
 		if (Context.tool == ToolBake && UITrait.inst.bakeType == -1) {
 			// Init raytraced bake
-			vert.add_out('vec3 position');
-			vert.add_out('vec3 normal');
-			vert.add_uniform('mat4 W', '_worldMatrix');
-			vert.write('position = mul(vec4(pos.xyz, 1.0), W);');
-			vert.write('normal = vec3(nor.xy, pos.w);');
-			vert.add_uniform('vec2 sub', '_sub');
-			vert.write('vec2 subtex = tex + sub;');
-			vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
-			vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
-			frag.add_out('vec4 fragColor[2]');
-			frag.write('fragColor[0] = vec4(position, 1.0);');
-			frag.write('fragColor[1] = vec4(normal, 1.0);');
-
+			MakeBake.positionAndNormal(vert, frag);
 			con_paint.data.shader_from_source = true;
 			con_paint.data.vertex_shader = vert.get();
 			con_paint.data.fragment_shader = frag.get();
@@ -55,49 +43,11 @@ class MakePaint {
 		#end
 
 		if (Context.tool == ToolBake) {
-			// Bake into base color, disable other slots
-			con_paint.data.color_writes_red[1] = false;
-			con_paint.data.color_writes_green[1] = false;
-			con_paint.data.color_writes_blue[1] = false;
-			con_paint.data.color_writes_alpha[1] = false;
-			con_paint.data.color_writes_red[2] = false;
-			con_paint.data.color_writes_green[2] = false;
-			con_paint.data.color_writes_blue[2] = false;
-			con_paint.data.color_writes_alpha[2] = false;
+			MakeBake.setColorWrites(con_paint);
 		}
 
 		if (Context.tool == ToolColorId || Context.tool == ToolPicker) {
-			// Mangle vertices to form full screen triangle
-			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
-
-			frag.add_uniform('sampler2D gbuffer2');
-			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
-			frag.add_uniform('vec4 inp', '_inputBrush');
-
-			#if (kha_opengl || kha_webgl)
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
-			#else
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
-			#end
-
-			if (Context.tool == ToolColorId) {
-				frag.add_out('vec4 fragColor');
-				frag.add_uniform('sampler2D texcolorid', '_texcolorid');
-				frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
-				frag.write('fragColor = vec4(idcol, 1.0);');
-			}
-			else if (Context.tool == ToolPicker) {
-				frag.add_out('vec4 fragColor[3]');
-				frag.add_uniform('sampler2D texpaint');
-				frag.add_uniform('sampler2D texpaint_nor');
-				frag.add_uniform('sampler2D texpaint_pack');
-				frag.write('fragColor[0] = textureLod(texpaint, texCoordInp, 0.0);');
-				frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
-				frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
-				frag.write('fragColor[0].a = texCoordInp.x;');
-				frag.write('fragColor[2].a = texCoordInp.y;');
-			}
-
+			MakeColorIdPicker.run(vert, frag);
 			con_paint.data.shader_from_source = true;
 			con_paint.data.vertex_shader = vert.get();
 			con_paint.data.fragment_shader = frag.get();
@@ -173,88 +123,11 @@ class MakePaint {
 				frag.write('float dist = 0.0;');
 			}
 			else {
-				if (UITrait.inst.brush3d) {
-
-					#if (kha_opengl || kha_webgl)
-					frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
-					#else
-					frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
-					#end
-
-					frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
-					frag.write('vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
-					frag.write('winp = mul(winp, invVP);');
-					frag.write('winp.xyz /= winp.w;');
-					frag.wposition = true;
-
-					if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
-						frag.add_function(MaterialFunctions.str_octahedronWrap);
-						frag.add_uniform('sampler2D gbuffer0');
-						#if (kha_opengl || kha_webgl)
-						frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
-						#else
-						frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
-						#end
-						frag.write('vec3 wn;');
-						frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
-						frag.write('wn.xy = wn.z >= 0.0 ? g0.xy : octahedronWrap(g0.xy);');
-						frag.write('wn = normalize(wn);');
-						frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
-
-						if (UITrait.inst.brushAngleReject && !UITrait.inst.xray) {
-							frag.write('if (planeDist < -0.01) discard;');
-							frag.n = true;
-							var angle = UITrait.inst.brushAngleRejectDot;
-							frag.write('if (dot(wn, n) < $angle) discard;');
-						}
-					}
-
-					#if (kha_opengl || kha_webgl)
-					frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
-					#else
-					frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
-					#end
-
-					frag.write('vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
-					frag.write('winplast = mul(winplast, invVP);');
-					frag.write('winplast.xyz /= winplast.w;');
-
-					frag.write('vec3 pa = wposition - winp.xyz;');
-					if (UITrait.inst.xray) {
-						frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
-					}
-					frag.write('vec3 ba = winplast.xyz - winp.xyz;');
-					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-					frag.write('float dist = length(pa - ba * h);');
-					frag.write('if (dist > brushRadius) discard;');
-
-					// Non-continuous
-					// frag.write('float dist = distance(wposition, winp.xyz);');
-				}
-				else { // !brush3d
-					frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
-					frag.write('binp.x *= aspectRatio;');
-					frag.write('binp = binp * 0.5 + 0.5;');
-
-					frag.write('vec2 binplast = inplast.xy * 2.0 - 1.0;');
-					frag.write('binplast.x *= aspectRatio;');
-					frag.write('binplast = binplast * 0.5 + 0.5;');
-
-					frag.write('vec2 pa = bsp.xy - binp.xy;');
-					frag.write('vec2 ba = binplast.xy - binp.xy;');
-					frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-					frag.write('float dist = length(pa - ba * h);');
-
-					frag.write('if (dist > brushRadius) discard;');
-
-					// Non-continuous
-					// frag.write('float dist = distance(bsp.xy, binp.xy);');
-				}
+				MakeBrush.run(vert, frag);
 			}
 		}
 		else { // Fill, Bake
 			frag.write('float dist = 0.0;');
-
 			var angleFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 2;
 			if (angleFill) {
 				frag.add_function(MaterialFunctions.str_octahedronWrap);
@@ -271,98 +144,16 @@ class MakePaint {
 		}
 
 		if (UITrait.inst.colorIdPicked) {
-			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = fract(subtex);');
-			frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
-			frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
-			frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
-			frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
-			frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
-			frag.write('if (any(c1 != c2)) discard;');
+			MakeDiscard.colorId(vert, frag);
 		}
 		else if (faceFill) { // TODO: allow to combine with colorid mask
-			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = fract(subtex);');
-			frag.add_uniform('sampler2D gbuffer2');
-			frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
-			frag.add_uniform('float textrianglemapSize', '_texpaintSize');
-			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
-			#if (kha_opengl || kha_webgl)
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
-			#else
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
-			#end
-			frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
-			frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
-			frag.write('if (any(c1 != c2)) discard;');
+			MakeDiscard.face(vert, frag);
 		}
-
 		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
-			frag.wvpposition = true;
-			frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-			#if (kha_direct3d11 || kha_direct3d12)
-			frag.write('picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
-			#end
-			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-			var matid = UITrait.inst.materialIdPicked / 255;
-			frag.write('if ($matid != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;');
+			MakeDiscard.materialId(vert, frag);
 		}
 
-		// TexCoords - project
-		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
-		if (uvType == 2 || decal) {
-			frag.add_uniform('float brushScale', '_brushScale');
-			frag.write_attrib('vec2 uvsp = sp.xy;');
-
-			if (decal) {
-				frag.write_attrib('uvsp -= inp.xy;');
-				frag.write_attrib('uvsp.x *= aspectRatio;');
-
-				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
-
-				frag.add_uniform('float brushScaleX', '_brushScaleX');
-				frag.write_attrib('uvsp.x *= brushScaleX;');
-
-				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
-
-				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) discard;');
-			}
-			else {
-				frag.write_attrib('uvsp.x *= aspectRatio;');
-			}
-
-			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
-
-			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
-			if (uvRot > 0.0) {
-				var a = uvRot * (Math.PI / 180);
-				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
-			}
-		}
-		// TexCoords - uvmap
-		else if (uvType == 0) {
-			vert.add_uniform('float brushScale', '_brushScale');
-			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = subtex * brushScale;');
-
-			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
-			if (uvRot > 0.0) {
-				var a = uvRot * (Math.PI / 180);
-				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
-			}
-		}
-		else { // Triplanar
-			frag.wposition = true;
-			frag.n = true;
-			frag.add_uniform('float brushScale', '_brushScale');
-			frag.write_attrib('vec3 triWeight = wnormal * wnormal;'); // n * n
-			frag.write_attrib('float triMax = max(triWeight.x, max(triWeight.y, triWeight.z));');
-			frag.write_attrib('triWeight = max(triWeight - triMax * 0.75, 0.0);');
-			frag.write_attrib('vec3 texCoordBlend = triWeight * (1.0 / (triWeight.x + triWeight.y + triWeight.z));');
-			frag.write_attrib('vec2 texCoord = fract(wposition.yz * brushScale * 0.5);');
-			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale * 0.5);');
-			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale * 0.5);');
-		}
+		MakeTexcoord.run(vert, frag);
 
 		if (Context.tool == ToolClone || Context.tool == ToolBlur) {
 
@@ -373,78 +164,10 @@ class MakePaint {
 			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
 			if (Context.tool == ToolClone) {
-				frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
-				#if (kha_opengl || kha_webgl)
-				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
-				#else
-				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (sp.y + cloneDelta.y) * gbufferSize.y), 0).ba;');
-				#end
-
-				frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
-				var base = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
-				var rough = 'texpaint_pack_sample.g';
-				var met = 'texpaint_pack_sample.b';
-				var occ = 'texpaint_pack_sample.r';
-				var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
-				var height = '0.0';
-				var opac = '1.0';
-				frag.write('vec3 basecol = $base;');
-				frag.write('float roughness = $rough;');
-				frag.write('float metallic = $met;');
-				frag.write('float occlusion = $occ;');
-				frag.write('vec3 nortan = $nortan;');
-				frag.write('float height = $height;');
-				frag.write('float opacity = $opac * brushOpacity;');
-				if (Context.material.paintEmis) {
-					frag.write('float emis = 0.0;');
-				}
-				if (Context.material.paintSubs) {
-					frag.write('float subs = 0.0;');
-				}
+				MakeClone.run(vert, frag);
 			}
 			else { // Blur
-				#if (kha_opengl || kha_webgl)
-				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
-				#else
-				frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
-				#end
-
-				frag.write('vec3 basecol = vec3(0.0, 0.0, 0.0);');
-				frag.write('float roughness = 0.0;');
-				frag.write('float metallic = 0.0;');
-				frag.write('float occlusion = 0.0;');
-				frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
-				frag.write('float height = 0.0;');
-				frag.write('float opacity = 1.0 * brushOpacity;');
-				if (Context.material.paintEmis) {
-					frag.write('float emis = 0.0;');
-				}
-				if (Context.material.paintSubs) {
-					frag.write('float subs = 0.0;');
-				}
-				#if (kha_direct3d11 || kha_direct3d12)
-				frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
-				#else
-				frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
-				#end
-				frag.add_uniform('float texpaintSize', '_texpaintSize');
-				frag.write('float blur_step = 1.0 / texpaintSize;');
-				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-				frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-				frag.write('roughness += texpaint_pack_sample.g;');
-				frag.write('metallic += texpaint_pack_sample.b;');
-				frag.write('occlusion += texpaint_pack_sample.r;');
-				frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-				frag.write('}');
-				frag.write('for (int i = -7; i <= 7; i++) {');
-				frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-				frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-				frag.write('roughness += texpaint_pack_sample.g;');
-				frag.write('metallic += texpaint_pack_sample.b;');
-				frag.write('occlusion += texpaint_pack_sample.r;');
-				frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-				frag.write('}');
+				MakeBlur.run(vert, frag);
 			}
 		}
 		else {
@@ -650,87 +373,7 @@ class MakePaint {
 		}
 
 		if (Context.tool == ToolBake) {
-			if (UITrait.inst.bakeType == 0) { // AO
-				// Apply normal channel
-				frag.wposition = true;
-				frag.n = true;
-				frag.vVec = true;
-				frag.add_function(MaterialFunctions.str_cotangentFrame);
-				#if (kha_direct3d11 || kha_direct3d12)
-				frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
-				#else
-				frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-				#end
-				frag.write('n = nortan * 2.0 - 1.0;');
-				frag.write('n.y = -n.y;');
-				frag.write('n = normalize(mul(n, TBN));');
-
-				frag.write(MaterialBuilder.voxelgiHalfExtents());
-				frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
-				frag.add_uniform('sampler3D voxels');
-				frag.add_function(MaterialFunctions.str_traceAO);
-				frag.n = true;
-				var strength = UITrait.inst.bakeAoStrength;
-				var radius = UITrait.inst.bakeAoRadius;
-				var offset = UITrait.inst.bakeAoOffset;
-				frag.write('float ao = traceAO(voxpos, n, $radius, $offset) * $strength;');
-				if (UITrait.inst.bakeAxis > 0) {
-					var axis = axisString(UITrait.inst.bakeAxis);
-					frag.write('ao *= dot(n, $axis);');
-				}
-				frag.write('ao = 1.0 - ao;');
-				frag.write('fragColor[0] = vec4(ao, ao, ao, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 1) { // Curvature
-				var strength = UITrait.inst.bakeCurvStrength * 2.0;
-				var radius = (1.0 / UITrait.inst.bakeCurvRadius) * 0.25;
-				var offset = UITrait.inst.bakeCurvOffset / 10;
-				frag.n = true;
-				frag.write('vec3 dx = dFdx(n);');
-				frag.write('vec3 dy = dFdy(n);');
-				frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
-				frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
-				if (UITrait.inst.bakeAxis > 0) {
-					var axis = axisString(UITrait.inst.bakeAxis);
-					frag.write('curvature *= dot(n, $axis);');
-				}
-				frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
-				frag.n = true;
-				frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
-				frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
-				frag.add_function(MaterialFunctions.str_cotangentFrame);
-				frag.write('mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
-				frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
-				frag.write('fragColor[0] = vec4(res, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 3) { // Normal (World)
-				frag.n = true;
-				frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 4) { // Position
-				frag.wposition = true;
-				frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 5) { // TexCoord
-				frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 6) { // Material ID
-				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-				frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
-				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
-			}
-			else if (UITrait.inst.bakeType == 7) { // Object ID
-				frag.add_uniform('float objectId', '_objectId');
-				frag.write('float id_r = fract(sin(dot(vec2(objectId, objectId * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float id_g = fract(sin(dot(vec2(objectId * 20.0, objectId), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float id_b = fract(sin(dot(vec2(objectId, objectId * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('fragColor[0] = vec4(id_r, id_g, id_b, 1.0);');
-			}
+			MakeBake.run(vert, frag);
 		}
 
 		Material.finalize(con_paint);
@@ -740,14 +383,5 @@ class MakePaint {
 		con_paint.data.fragment_shader = frag.get();
 
 		return con_paint;
-	}
-
-	static function axisString(i:Int):String {
-		return i == 1 ? "vec3(1,0,0)" :
-			   i == 2 ? "vec3(0,1,0)" :
-			   i == 3 ? "vec3(0,0,1)" :
-			   i == 4 ? "vec3(-1,0,0)" :
-			   i == 5 ? "vec3(0,-1,0)" :
-						"vec3(0,0,-1)";
 	}
 }
