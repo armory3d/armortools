@@ -1155,13 +1155,13 @@ class UITrait {
 			ui._y += 2;
 
 			var modeHandle = Id.handle({position: 0});
-			var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Mask"];
+			var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
 			#if kha_direct3d12
 			modes.push("Path-Trace");
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
-				var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 10;
+				var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 11;
 				if (deferred) {
 					RenderPath.active.commands = RenderPathDeferred.commands;
 				}

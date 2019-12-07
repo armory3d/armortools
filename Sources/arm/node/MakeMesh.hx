@@ -296,7 +296,7 @@ class MakeMesh {
 			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
 
-			var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 10;
+			var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 11;
 			if (deferred) { // Render, path-trace
 				if (MaterialBuilder.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
 				frag.write('fragColor[1] = vec4(basecol, packFloat2(occlusion, 1.0));'); // occ/spec
@@ -323,14 +323,22 @@ class MakeMesh {
 				frag.nAttr = true;
 				frag.write('fragColor[1] = vec4(nAttr, 1.0);');
 			}
-			else if (UITrait.inst.viewportMode == 8) { // MaterialID
-				frag.write('float sample_matid = textureLodShared(texpaint_nor, texCoord, 0.0).a;');
-				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 2.0), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 2.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
-				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 4.0), vec2(12.9898, 78.233))) * 43758.5453);');
+			else if (UITrait.inst.viewportMode == 8) { // Material ID
+				frag.write('float sample_matid = textureLodShared(texpaint_nor, texCoord, 0.0).a + 1.0 / 255.0;');
+				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('fragColor[1] = vec4(matid_r, matid_g, matid_b, 1.0);');
 			}
-			else if (UITrait.inst.viewportMode == 9) { // Mask
+			else if (UITrait.inst.viewportMode == 9) { // Object ID
+				frag.add_uniform('float objectId', '_objectId');
+				frag.write('float obid = objectId + 1.0 / 255.0;');
+				frag.write('float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float id_g = fract(sin(dot(vec2(obid * 20.0, obid), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
+				frag.write('fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
+			}
+			else if (UITrait.inst.viewportMode == 10) { // Mask
 				frag.write('float sample_mask = 1.0;');
 				if (Context.layer.texpaint_mask != null) {
 					frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
