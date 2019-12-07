@@ -985,14 +985,14 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					var bakes = ["AO", "Curvature", "Normal", "Normal (Object)", "Height", "Position", "TexCoord", "Material ID", "Object ID"];
+					var bakes = ["AO", "Curvature", "Normal", "Normal (Object)", "Height", "Derivative", "Position", "TexCoord", "Material ID", "Object ID"];
 					#if kha_direct3d12
 					bakes.push("Lightmap");
 					bakes.push("Bent Normal");
 					bakes.push("Thickness");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
-					if (bakeType == 3 || bakeType == 5 || bakeType == 10) {
+					if (bakeType == 3 || bakeType == 6 || bakeType == 11) {
 						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
 						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
 					}
@@ -1009,7 +1009,7 @@ class UITrait {
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
 					#if kha_direct3d12
-					if (bakeType == 0 || bakeType == 9 || bakeType == 10 || bakeType == 11) { // ao, bent, lightmap, thick
+					if (bakeType == 0 || bakeType == 10 || bakeType == 11 || bakeType == 12) { // ao, bent, lightmap, thick
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
 					}
@@ -1024,7 +1024,7 @@ class UITrait {
 						var smoothHandle = Id.handle({value: bakeCurvSmooth});
 						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, "Smooth", 0, 5, false, 1));
 					}
-					if (bakeType == 2 || bakeType == 4) { // Normal (Tang), Height
+					if (bakeType == 2 || bakeType == 4 || bakeType == 5) { // Normal (Tang), Height
 						var ar = [for (p in Project.paintObjects) p.name];
 						var polyHandle = Id.handle({position: bakeHighPoly});
 						bakeHighPoly = ui.combo(polyHandle, ar, "High Poly");

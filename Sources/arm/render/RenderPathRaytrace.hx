@@ -317,8 +317,8 @@ class RenderPathRaytrace {
 	static function getBakeShaderName():String {
 		return
 			UITrait.inst.bakeType == 0  ? "raytrace_bake_ao.cso" :
-			UITrait.inst.bakeType == 9  ? "raytrace_bake_light.cso" :
-			UITrait.inst.bakeType == 10 ? "raytrace_bake_bent.cso" :
+			UITrait.inst.bakeType == 10 ? "raytrace_bake_light.cso" :
+			UITrait.inst.bakeType == 11 ? "raytrace_bake_bent.cso" :
 										  "raytrace_bake_thick.cso";
 	}
 

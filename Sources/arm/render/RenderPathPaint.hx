@@ -389,11 +389,12 @@ class RenderPathPaint {
 
 			if (Context.tool == ToolBake) {
 				if (Context.pdirty > 0) dilated = false;
-				var isNormal = UITrait.inst.bakeType == 2;
+				var isNormal = UITrait.inst.bakeType == 2; // Normal (Tangent)
 				var isHeight = UITrait.inst.bakeType == 4;
-				if (isNormal || isHeight) { // Normal (Tangent), Height
+				var isDeriv = UITrait.inst.bakeType == 5;
+				if (isNormal || isHeight || isDeriv) {
 					var _bakeType = UITrait.inst.bakeType;
-					UITrait.inst.bakeType = isNormal ? 3 : 5; // Bake high poly world normals / position
+					UITrait.inst.bakeType = isNormal ? 3 : 6; // Bake high poly world normals / position
 					MaterialParser.parsePaintMaterial();
 					var _paintObject = Context.paintObject;
 					var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
@@ -404,6 +405,15 @@ class RenderPathPaint {
 					highPoly.visible = _visible;
 					UITrait.inst.sub--;
 					if (pushUndoLast) History.paint();
+
+					if (isDeriv) {
+						UITrait.inst.bakeType = 4; // Bake height
+						MaterialParser.parsePaintMaterial();
+						Context.selectPaintObject(_paintObject);
+						RenderPathPaint.commandsPaint();
+						UITrait.inst.sub--;
+						if (pushUndoLast) History.paint();
+					}
 
 					UITrait.inst.bakeType = _bakeType;
 					MaterialParser.parsePaintMaterial();
@@ -428,10 +438,10 @@ class RenderPathPaint {
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
 				#if kha_direct3d12
-				else if (UITrait.inst.bakeType == 0 ||  // AO (DXR)
-						 UITrait.inst.bakeType == 9 ||  // Lightmap (DXR)
-						 UITrait.inst.bakeType == 10 || // Bent Normal (DXR)
-						 UITrait.inst.bakeType == 11) { // Thickness (DXR)
+				else if (UITrait.inst.bakeType == 0  || // AO (DXR)
+						 UITrait.inst.bakeType == 10 || // Lightmap (DXR)
+						 UITrait.inst.bakeType == 11 || // Bent Normal (DXR)
+						 UITrait.inst.bakeType == 12) { // Thickness (DXR)
 					RenderPathRaytrace.commandsBake();
 				}
 				#end
