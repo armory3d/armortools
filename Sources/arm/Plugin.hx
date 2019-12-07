@@ -98,12 +98,12 @@ class ZuiBridge {
 
 @:keep
 class Keep {
-	public function keep() {
-		iron.system.ArmPack.decode(null);
-		iron.system.ArmPack.encode(null);
+	public static function keep() {
+		var x = iron.system.ArmPack.decode;
+		var x = iron.system.ArmPack.encode;
 		#if arm_creator
-		arm.sys.Path.workingDir();
-		arm.sys.File.createDirectory(null);
+		var x = arm.sys.Path.workingDir;
+		var x = arm.sys.File.createDirectory;
 		#end
 	}
 }
