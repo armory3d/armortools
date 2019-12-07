@@ -42,7 +42,12 @@ static uint seed = 0;
 [shader("raygeneration")]
 void raygeneration() {
 	float2 xy = DispatchRaysIndex().xy + 0.5f;
-	float3 pos = mytexture0.Load(uint3(xy, 0)).rgb;
+	float4 tex0 = mytexture0.Load(uint3(xy, 0));
+	if (tex0.a == 0.0) {
+		render_target[DispatchRaysIndex().xy] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		return;
+	}
+	float3 pos = tex0.rgb;
 	float3 nor = mytexture1.Load(uint3(xy, 0)).rgb;
 
 	RayPayload payload;
@@ -84,5 +89,5 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
-	payload.color = float4(1, 1, 1, 1);
+	payload.color = float4(0, 0, 0, 1);
 }

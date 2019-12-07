@@ -10,7 +10,7 @@ import arm.Tool;
 class MakeBake {
 
 	public static function run(vert:MaterialShader, frag:MaterialShader) {
-		if (UITrait.inst.bakeType == 0) { // AO
+		if (UITrait.inst.bakeType == 0) { // AO (voxel)
 			// Apply normal channel
 			frag.wposition = true;
 			frag.n = true;
@@ -58,7 +58,7 @@ class MakeBake {
 		}
 		else if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
 			frag.n = true;
-			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
+			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly normals
 			frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
 			frag.add_function(MaterialFunctions.str_cotangentFrame);
 			frag.write('mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
@@ -84,7 +84,7 @@ class MakeBake {
 		}
 		else if (UITrait.inst.bakeType == 6) { // Material ID
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-			frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a;');
+			frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a + 1.0 / 255.0;');
 			frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -92,9 +92,10 @@ class MakeBake {
 		}
 		else if (UITrait.inst.bakeType == 7) { // Object ID
 			frag.add_uniform('float objectId', '_objectId');
-			frag.write('float id_r = fract(sin(dot(vec2(objectId, objectId * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
-			frag.write('float id_g = fract(sin(dot(vec2(objectId * 20.0, objectId), vec2(12.9898, 78.233))) * 43758.5453);');
-			frag.write('float id_b = fract(sin(dot(vec2(objectId, objectId * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
+			frag.write('float obid = objectId + 1.0 / 255.0;');
+			frag.write('float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
+			frag.write('float id_g = fract(sin(dot(vec2(obid * 20.0, obid), vec2(12.9898, 78.233))) * 43758.5453);');
+			frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(id_r, id_g, id_b, 1.0);');
 		}
 	}

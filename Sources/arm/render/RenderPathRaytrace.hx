@@ -144,6 +144,8 @@ class RenderPathRaytrace {
 			var _bakeType = UITrait.inst.bakeType;
 			UITrait.inst.bakeType = -1;
 			MaterialParser.parsePaintMaterial();
+			path.setTarget("baketex0");
+			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
 			for (i in 0...4) { // Jitter
 				path.setTarget("baketex0", ["baketex1"]);
 				path.drawMeshes("paint");
