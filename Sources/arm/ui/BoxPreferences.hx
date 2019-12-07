@@ -107,6 +107,9 @@ class BoxPreferences {
 				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), "Paint Bleed", 0.0, 2.0, true);
 				if (ui.isHovered) ui.tooltip("Stretch brush strokes on the uv map to prevent seams");
 
+				UITrait.inst.dilateRadius = ui.slider(Id.handle({value: UITrait.inst.dilateRadius}), "Dilate Radius", 0.0, 64.0, true, 1);
+				if (ui.isHovered) ui.tooltip("Dilate baked textures to prevent seams");
+
 				var brush3dHandle = Id.handle({selected: UITrait.inst.brush3d});
 				UITrait.inst.brush3d = ui.check(brush3dHandle, "3D Cursor");
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();

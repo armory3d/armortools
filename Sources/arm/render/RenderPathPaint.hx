@@ -25,6 +25,7 @@ class RenderPathPaint {
 	static var visibles:Array<Bool> = null;
 	static var mergedObjectVisible = false;
 	static var savedFov = 0.0;
+	static var dilated = true;
 
 	public static function init(_path:RenderPath) {
 		path = _path;
@@ -64,6 +65,7 @@ class RenderPathPaint {
 		}
 
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		path.loadShader("shader_datas/dilate_pass/dilate_pass");
 	}
 
 	@:access(iron.RenderPath)
@@ -161,11 +163,18 @@ class RenderPathPaint {
 				}
 				#end
 
+				if (Context.tool == ToolBake && UITrait.inst.brushTime == iron.system.Time.delta) {
+					// Clear to black on bake start
+					path.setTarget("texpaint" + tid);
+					path.clearTarget(0xff000000);
+				}
+
 				var blendA = "texpaint_blend0";
 				var blendB = "texpaint_blend1";
 				path.setTarget(blendB);
 				path.bindTarget(blendA, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
+
 				var isMask = Context.layerIsMask;
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
@@ -379,6 +388,7 @@ class RenderPathPaint {
 			}
 
 			if (Context.tool == ToolBake) {
+				if (Context.pdirty > 0) dilated = false;
 				if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
 					UITrait.inst.bakeType = 3; // Bake high poly world normals
 					MaterialParser.parsePaintMaterial();
@@ -473,6 +483,19 @@ class RenderPathPaint {
 			if (l.texpaint_mask != null) {
 				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
 			}
+		}
+	}
+
+	public static function finishPaint() {
+		if (Context.tool == ToolBake && !dilated && UITrait.inst.dilateRadius > 0) {
+			if (Layers.imga == null) Layers.makeTempImg();
+			dilated = true;
+			path.setTarget("temptex0");
+			path.bindTarget("texpaint0", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+			path.setTarget("texpaint0");
+			path.bindTarget("temptex0", "tex");
+			path.drawShader("shader_datas/dilate_pass/dilate_pass");
 		}
 	}
 }

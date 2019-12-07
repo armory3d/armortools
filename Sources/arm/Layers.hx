@@ -184,17 +184,44 @@ class Layers {
 	public static function makeTempImg() {
 		var l = Project.layers[0];
 		if (imga != null && imga.width != l.texpaint.width) {
-			imga.unload();
-			imgb.unload();
-			imgc.unload();
+			RenderPath.active.renderTargets.get("temptex0").unload();
+			RenderPath.active.renderTargets.get("temptex1").unload();
+			RenderPath.active.renderTargets.get("temptex2").unload();
+			RenderPath.active.renderTargets.remove("temptex0");
+			RenderPath.active.renderTargets.remove("temptex1");
+			RenderPath.active.renderTargets.remove("temptex2");
 			imga = null;
 			imgb = null;
 			imgc = null;
 		}
 		if (imga == null) {
-			imga = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			imgb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			imgc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			{
+				var t = new RenderTargetRaw();
+				t.name = "temptex0";
+				t.width = l.texpaint.width;
+				t.height = l.texpaint.height;
+				t.format = 'RGBA32';
+				var rt = RenderPath.active.createRenderTarget(t);
+				imga = rt.image;
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "temptex1";
+				t.width = l.texpaint.width;
+				t.height = l.texpaint.height;
+				t.format = 'RGBA32';
+				var rt = RenderPath.active.createRenderTarget(t);
+				imgb = rt.image;
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "temptex2";
+				t.width = l.texpaint.width;
+				t.height = l.texpaint.height;
+				t.format = 'RGBA32';
+				var rt = RenderPath.active.createRenderTarget(t);
+				imgc = rt.image;
+			}
 		}
 	}
 

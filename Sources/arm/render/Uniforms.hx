@@ -95,6 +95,13 @@ class Uniforms {
 			return 1.2;
 			#end
 		}
+		if (link == "_dilateRadius") {
+			#if arm_painter
+			return UITrait.inst.dilateRadius;
+			#else
+			return 8.0;
+			#end
+		}
 		return null;
 	}
 

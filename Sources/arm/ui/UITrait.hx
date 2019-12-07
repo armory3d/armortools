@@ -200,6 +200,7 @@ class UITrait {
 	public var bakeCurvOffset = 0.0;
 	public var bakeCurvSmooth = 1;
 	public var bakeHighPoly = 0;
+	public var dilateRadius = 8.0;
 
 	public var xray = false;
 	public var symX = false;

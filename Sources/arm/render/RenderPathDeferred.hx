@@ -312,6 +312,7 @@ class RenderPathDeferred {
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
 			Inc.endSplit();
+			RenderPathPaint.finishPaint();
 			return;
 		}
 		#end
