@@ -65,24 +65,31 @@ class MakeBake {
 			frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 			frag.write('fragColor[0] = vec4(res, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 3) { // Normal (World)
+		else if (UITrait.inst.bakeType == 3) { // Normal (Object)
 			frag.n = true;
 			frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
 			if (UITrait.inst.bakeUpAxis == 1) { // Y up
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UITrait.inst.bakeType == 4) { // Position
+		else if (UITrait.inst.bakeType == 4) { // Height
+			frag.wposition = true;
+			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly positions
+			frag.write('vec3 wpos0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
+			frag.write('float res = distance(wpos0, wposition) * 10.0;');
+			frag.write('fragColor[0] = vec4(res, res, res, 1.0);');
+		}
+		else if (UITrait.inst.bakeType == 5) { // Position
 			frag.wposition = true;
 			frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
 			if (UITrait.inst.bakeUpAxis == 1) { // Y up
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UITrait.inst.bakeType == 5) { // TexCoord
+		else if (UITrait.inst.bakeType == 6) { // TexCoord
 			frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 6) { // Material ID
+		else if (UITrait.inst.bakeType == 7) { // Material ID
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a + 1.0 / 255.0;');
 			frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -90,7 +97,7 @@ class MakeBake {
 			frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 7) { // Object ID
+		else if (UITrait.inst.bakeType == 8) { // Object ID
 			frag.add_uniform('float objectId', '_objectId');
 			frag.write('float obid = objectId + 1.0 / 255.0;');
 			frag.write('float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');

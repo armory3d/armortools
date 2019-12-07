@@ -676,7 +676,6 @@ class UITrait {
 					if (onBrush != null) onBrush(0);
 				}
 			}
-
 		}
 		else if (brushTime > 0) { // Brush released
 			brushTime = 0;
@@ -986,15 +985,14 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					var ao = #if kha_direct3d12 "AO (DXR)" #else "AO" #end;
-					var bakes = [ao, "Curvature", "Normal (Tang)", "Normal (World)", "Position", "TexCoord", "Material ID", "Object ID"];
+					var bakes = ["AO", "Curvature", "Normal", "Normal (Object)", "Height", "Position", "TexCoord", "Material ID", "Object ID"];
 					#if kha_direct3d12
-					bakes.push("Lightmap (DXR)");
-					bakes.push("BentNormal (DXR)");
-					bakes.push("Thickness (DXR)");
+					bakes.push("Lightmap");
+					bakes.push("Bent Normal");
+					bakes.push("Thickness");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
-					if (bakeType == 3 || bakeType == 4 || bakeType == 9) {
+					if (bakeType == 3 || bakeType == 5 || bakeType == 10) {
 						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
 						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
 					}
@@ -1011,7 +1009,7 @@ class UITrait {
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
 					#if kha_direct3d12
-					if (bakeType == 0 || bakeType == 8 || bakeType == 9 || bakeType == 10) { // ao, bent, lightmap, thick
+					if (bakeType == 0 || bakeType == 9 || bakeType == 10 || bakeType == 11) { // ao, bent, lightmap, thick
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
 					}
@@ -1026,7 +1024,7 @@ class UITrait {
 						var smoothHandle = Id.handle({value: bakeCurvSmooth});
 						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, "Smooth", 0, 5, false, 1));
 					}
-					if (bakeType == 2) { // Normal (Tang)
+					if (bakeType == 2 || bakeType == 4) { // Normal (Tang), Height
 						var ar = [for (p in Project.paintObjects) p.name];
 						var polyHandle = Id.handle({position: bakeHighPoly});
 						bakeHighPoly = ui.combo(polyHandle, ar, "High Poly");
@@ -1157,9 +1155,9 @@ class UITrait {
 			ui._y += 2;
 
 			var modeHandle = Id.handle({position: 0});
-			var modes = ["Render", "Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal", "MaterialID", "Mask"];
+			var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Mask"];
 			#if kha_direct3d12
-			modes.push("Path-Trace (DXR)");
+			modes.push("Path-Trace");
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
