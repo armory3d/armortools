@@ -10,7 +10,7 @@ import arm.Tool;
 class MakeBake {
 
 	public static function run(vert:MaterialShader, frag:MaterialShader) {
-		if (UITrait.inst.bakeType == 0) { // AO (voxel)
+		if (UITrait.inst.bakeType == BakeAO) { // Voxel
 			// Apply normal channel
 			frag.wposition = true;
 			frag.n = true;
@@ -34,14 +34,14 @@ class MakeBake {
 			var radius = UITrait.inst.bakeAoRadius;
 			var offset = UITrait.inst.bakeAoOffset;
 			frag.write('float ao = traceAO(voxpos, n, $radius, $offset) * $strength;');
-			if (UITrait.inst.bakeAxis > 0) {
+			if (UITrait.inst.bakeAxis != BakeXYZ) {
 				var axis = axisString(UITrait.inst.bakeAxis);
 				frag.write('ao *= dot(n, $axis);');
 			}
 			frag.write('ao = 1.0 - ao;');
 			frag.write('fragColor[0] = vec4(ao, ao, ao, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 1) { // Curvature
+		else if (UITrait.inst.bakeType == BakeCurvature) {
 			var strength = UITrait.inst.bakeCurvStrength * 2.0;
 			var radius = (1.0 / UITrait.inst.bakeCurvRadius) * 0.25;
 			var offset = UITrait.inst.bakeCurvOffset / 10;
@@ -50,13 +50,13 @@ class MakeBake {
 			frag.write('vec3 dy = dFdy(n);');
 			frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
 			frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
-			if (UITrait.inst.bakeAxis > 0) {
+			if (UITrait.inst.bakeAxis != BakeXYZ) {
 				var axis = axisString(UITrait.inst.bakeAxis);
 				frag.write('curvature *= dot(n, $axis);');
 			}
 			frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 2) { // Normal (Tangent)
+		else if (UITrait.inst.bakeType == BakeNormal) { // Tangent
 			frag.n = true;
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly normals
 			frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
@@ -65,21 +65,21 @@ class MakeBake {
 			frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 			frag.write('fragColor[0] = vec4(res, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 3) { // Normal (Object)
+		else if (UITrait.inst.bakeType == BakeNormalObject) {
 			frag.n = true;
 			frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			if (UITrait.inst.bakeUpAxis == 1) { // Y up
+			if (UITrait.inst.bakeUpAxis == BakeUpY) {
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UITrait.inst.bakeType == 4) { // Height
+		else if (UITrait.inst.bakeType == BakeHeight) {
 			frag.wposition = true;
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly positions
 			frag.write('vec3 wpos0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
 			frag.write('float res = distance(wpos0, wposition) * 10.0;');
 			frag.write('fragColor[0] = vec4(res, res, res, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 5) { // Derivative
+		else if (UITrait.inst.bakeType == BakeDerivative) {
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked height
 			frag.write('vec2 texDx = dFdx(texCoord);');
 			frag.write('vec2 texDy = dFdy(texCoord);');
@@ -88,17 +88,17 @@ class MakeBake {
 			frag.write('float h2 = textureLod(texpaint_undo, texCoord + texDy, 0.0).r * 100;');
 			frag.write('fragColor[0] = vec4((h1 - h0) * 0.5 + 0.5, (h2 - h0) * 0.5 + 0.5, 0.0, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 6) { // Position
+		else if (UITrait.inst.bakeType == BakePosition) {
 			frag.wposition = true;
 			frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			if (UITrait.inst.bakeUpAxis == 1) { // Y up
+			if (UITrait.inst.bakeUpAxis == BakeUpY) {
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UITrait.inst.bakeType == 7) { // TexCoord
+		else if (UITrait.inst.bakeType == BakeTexCoord) {
 			frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 8) { // Material ID
+		else if (UITrait.inst.bakeType == BakeMaterialID) {
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a + 1.0 / 255.0;');
 			frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -106,7 +106,7 @@ class MakeBake {
 			frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
 		}
-		else if (UITrait.inst.bakeType == 9) { // Object ID
+		else if (UITrait.inst.bakeType == BakeObjectID) {
 			frag.add_uniform('float objectId', '_objectId');
 			frag.write('float obid = objectId + 1.0 / 255.0;');
 			frag.write('float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -144,11 +144,11 @@ class MakeBake {
 	}
 
 	static function axisString(i:Int):String {
-		return i == 1 ? "vec3(1,0,0)" :
-			   i == 2 ? "vec3(0,1,0)" :
-			   i == 3 ? "vec3(0,0,1)" :
-			   i == 4 ? "vec3(-1,0,0)" :
-			   i == 5 ? "vec3(0,-1,0)" :
-						"vec3(0,0,-1)";
+		return i == BakeX  ? "vec3(1,0,0)"  :
+			   i == BakeY  ? "vec3(0,1,0)"  :
+			   i == BakeZ  ? "vec3(0,0,1)"  :
+			   i == BakeMX ? "vec3(-1,0,0)" :
+			   i == BakeMY ? "vec3(0,-1,0)" :
+							 "vec3(0,0,-1)";
 	}
 }

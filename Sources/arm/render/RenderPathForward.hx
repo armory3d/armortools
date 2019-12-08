@@ -148,7 +148,7 @@ class RenderPathForward {
 		#end
 
 		#if kha_direct3d12
-		if (UITrait.inst.viewportMode == 11) { // Ray-traced
+		if (UITrait.inst.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
 		}
@@ -258,7 +258,7 @@ class RenderPathForward {
 				drawGbuffer();
 
 				#if kha_direct3d12
-				UITrait.inst.viewportMode == 11 ? RenderPathRaytrace.draw() : drawForward();
+				UITrait.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
 				#else
 				drawForward();
 				#end

@@ -15,7 +15,7 @@ class MakeTexcoord {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 		// TexCoords - project
-		if (uvType == 2 || decal) {
+		if (uvType == UVProject || decal) {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
@@ -45,7 +45,7 @@ class MakeTexcoord {
 			}
 		}
 		// TexCoords - uvmap
-		else if (uvType == 0) {
+		else if (uvType == UVMap) {
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');

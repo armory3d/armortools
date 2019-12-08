@@ -18,6 +18,7 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.node.MaterialParser;
 import arm.io.ImportAsset;
+import arm.Tool;
 using StringTools;
 
 class UIMenu {
@@ -56,7 +57,7 @@ class UIMenu {
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
 
-			if (menuCategory == 0) {
+			if (menuCategory == MenuFile) {
 				if (ui.button("New Project...", Left, Config.keymap.file_new)) Project.projectNewBox();
 				if (ui.button("Open...", Left, Config.keymap.file_open)) Project.projectOpen();
 				if (ui.button("Save", Left, Config.keymap.file_save)) Project.projectSave();
@@ -73,7 +74,7 @@ class UIMenu {
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Exit", Left)) System.stop();
 			}
-			else if (menuCategory == 1) {
+			else if (menuCategory == MenuEdit) {
 				var stepUndo = "";
 				var stepRedo = "";
 				if (History.undos > 0) {
@@ -90,7 +91,7 @@ class UIMenu {
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Preferences...", Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
-			else if (menuCategory == 2) {
+			else if (menuCategory == MenuViewport) {
 				if (Scene.active.world.probe.radianceMipmaps.length > 0) {
 					ui.image(Scene.active.world.probe.radianceMipmaps[0]);
 				}
@@ -236,7 +237,7 @@ class UIMenu {
 
 				if (ui.changed) keepOpen = true;
 			}
-			else if (menuCategory == 3) {
+			else if (menuCategory == MenuCamera) {
 				if (ui.button("Reset", Left, Config.keymap.view_reset)) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("Front", Left, Config.keymap.view_front)) { ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0); }
@@ -274,9 +275,6 @@ class UIMenu {
 					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 				}
 
-				// UITrait.inst.cameraControls = ui.combo(Id.handle({position: UITrait.inst.cameraControls}), ["Orbit", "Rotate", "Fly"], "Controls");
-				// UITrait.inst.cameraType = ui.combo(UITrait.inst.camHandle, ["Perspective", "Orthographic"], "Type");
-
 				UITrait.inst.cameraControls = Ext.inlineRadio(ui, Id.handle({position: UITrait.inst.cameraControls}), ["Orbit", "Rotate", "Fly"], Left);
 				UITrait.inst.cameraType = Ext.inlineRadio(ui, UITrait.inst.camHandle, ["Perspective", "Orthographic"], Left);
 
@@ -288,7 +286,7 @@ class UIMenu {
 				if (ui.changed) keepOpen = true;
 
 			}
-			else if (menuCategory == 4) {
+			else if (menuCategory == MenuHelp) {
 				if (ui.button("Manual", Left)) {
 					File.explorer("https://armorpaint.org/manual");
 				}

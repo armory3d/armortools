@@ -32,7 +32,7 @@ class MakePaint {
 		frag.ins = vert.outs;
 
 		#if kha_direct3d12
-		if (Context.tool == ToolBake && UITrait.inst.bakeType == -1) {
+		if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeInit) {
 			// Init raytraced bake
 			MakeBake.positionAndNormal(vert, frag);
 			con_paint.data.shader_from_source = true;
@@ -54,7 +54,7 @@ class MakePaint {
 			return con_paint;
 		}
 
-		var faceFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 1;
+		var faceFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == FillFace;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		if (!faceFill && !decal) { // Fix seams at uv borders
 			vert.add_uniform('vec2 sub', '_sub');
@@ -81,7 +81,7 @@ class MakePaint {
 		frag.write_attrib('sp.z -= 0.0001;'); // small bias
 
 		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
-		if (uvType == 2) frag.ndcpos = true; // Project
+		if (uvType == UVProject) frag.ndcpos = true;
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
 		frag.add_uniform('vec4 inplast', '_inputBrushLast');
@@ -128,7 +128,7 @@ class MakePaint {
 		}
 		else { // Fill, Bake
 			frag.write('float dist = 0.0;');
-			var angleFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 2;
+			var angleFill = Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == FillAngle;
 			if (angleFill) {
 				frag.add_function(MaterialFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
@@ -149,7 +149,7 @@ class MakePaint {
 		else if (faceFill) { // TODO: allow to combine with colorid mask
 			MakeDiscard.face(vert, frag);
 		}
-		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
+		if (UITrait.inst.pickerMaskHandle.position == MaskMaterial) {
 			MakeDiscard.materialId(vert, frag);
 		}
 
@@ -176,7 +176,7 @@ class MakePaint {
 			Material.parse_height = Context.material.paintHeight;
 			Material.parse_height_as_channel = true;
 			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
-			Material.triplanar = uvType == 1 && !decal;
+			Material.triplanar = uvType == UVTriplanar && !decal;
 			var sout = Material.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon);
 			Material.parse_emission = false;
 			Material.parse_subsurface = false;
@@ -266,7 +266,7 @@ class MakePaint {
 		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
 		var matid = Context.material.id / 255;
-		if (UITrait.inst.pickerMaskHandle.position == 1) { // material id mask
+		if (UITrait.inst.pickerMaskHandle.position == MaskMaterial) {
 			matid = UITrait.inst.materialIdPicked / 255; // Keep existing material id in place when mask is set
 		}
 		frag.write('float matid = $matid;');

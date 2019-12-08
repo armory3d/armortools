@@ -9,8 +9,8 @@ import iron.data.Data;
 class BrushSlot {
 	public var nodes = new Nodes();
 	public var canvas:TNodeCanvas;
-	public var image:Image = null; // 200
-	public var imageIcon:Image = null; // 50
+	public var image:Image = null; // 200px
+	public var imageIcon:Image = null; // 50px
 	public var previewReady = false;
 	public var id = 0;
 	static var defaultCanvas:String = null;

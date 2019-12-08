@@ -9,6 +9,7 @@ import arm.ui.UINodes;
 import arm.format.Lz4;
 import arm.sys.Path;
 import arm.Project;
+import arm.Tool;
 using StringTools;
 
 class ExportArm {
@@ -63,7 +64,7 @@ class ExportArm {
 		}
 
 		var bitsPos = UITrait.inst.bitsHandle.position;
-		var bpp = bitsPos == 0 ? 8 : bitsPos == 1 ? 16 : 32;
+		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
 
 		var ld:Array<TLayerData> = [];
 		for (l in Project.layers) {

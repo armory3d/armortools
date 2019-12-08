@@ -29,6 +29,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
+import arm.Tool;
 using StringTools;
 
 class ImportArm {
@@ -200,7 +201,7 @@ class ImportArm {
 			var l0 = project.layer_datas[0];
 			UITrait.inst.resHandle.position = Config.getTextureResPos(l0.res);
 			if (l0.bpp == null) l0.bpp = 8; // TODO: deprecated
-			var bitsPos = l0.bpp == 8 ? 0 : l0.bpp == 16 ? 1 : 2;
+			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
 			UITrait.inst.bitsHandle.position = bitsPos;
 			var bytesPerPixel = Std.int(l0.bpp / 8);
 			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;

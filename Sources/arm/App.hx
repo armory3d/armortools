@@ -270,7 +270,7 @@ class App {
 		}
 		cam.buildProjection();
 
-		if (UITrait.inst.cameraType == 1) {
+		if (UITrait.inst.cameraType == CameraOrthographic) {
 			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 		}
 
@@ -320,7 +320,7 @@ class App {
 							 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
 			var inLayers = UITrait.inst.htab.position == 0 &&
 						   mx > UITrait.inst.tabx && my < UITrait.inst.tabh;
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == 0 &&
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
 			var inNodes = UINodes.inst.show &&

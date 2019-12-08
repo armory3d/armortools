@@ -4,6 +4,7 @@ import kha.arrays.Float32Array;
 import iron.Scene;
 import iron.math.Vec4;
 import arm.ui.UITrait;
+import arm.Tool;
 
 class ViewportUtil {
 
@@ -63,7 +64,7 @@ class ViewportUtil {
 	public static function updateCameraType(cameraType:Int) {
 		var cam = Scene.active.cameras[0];
 		var light = Scene.active.lights[0];
-		if (cameraType == 0) {
+		if (cameraType == CameraPerspective) {
 			cam.data.raw.ortho = null;
 			light.visible = true;
 		}

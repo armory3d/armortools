@@ -8,6 +8,7 @@ import arm.io.ExportMesh;
 import arm.io.ExportTexture;
 import arm.sys.Path;
 import arm.sys.File;
+import arm.Tool;
 using StringTools;
 
 class BoxExport {
@@ -46,13 +47,13 @@ class BoxExport {
 				}
 
 				ui.row([1/2, 1/2]);
-				if (UITrait.inst.bitsHandle.position == 0) {
+				if (UITrait.inst.bitsHandle.position == Bits8) {
 					UITrait.inst.formatType = ui.combo(Id.handle({position: UITrait.inst.formatType}), ["png", "jpg"], "Format", true);
 				}
 				else {
-					ui.combo(Id.handle({position: UITrait.inst.formatType}), ["exr"], "Format", true);
+					UITrait.inst.formatType = ui.combo(Id.handle({position: UITrait.inst.formatType}), ["exr"], "Format", true);
 				}
-				ui.enabled = UITrait.inst.formatType == 1 && UITrait.inst.bitsHandle.position == 0;
+				ui.enabled = UITrait.inst.formatType == FormatJpg && UITrait.inst.bitsHandle.position == Bits8;
 				UITrait.inst.formatQuality = ui.slider(Id.handle({value: UITrait.inst.formatQuality}), "Quality", 0.0, 100.0, true, 1);
 				ui.enabled = true;
 				ui.row([1/2, 1/2]);
@@ -68,7 +69,7 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					var filters = UITrait.inst.bitsHandle.position > 0 ? "exr" : UITrait.inst.formatType == 0 ? "png" : "jpg";
+					var filters = UITrait.inst.bitsHandle.position != Bits8 ? "exr" : UITrait.inst.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, function(path:String) {
 						UITrait.inst.textureExportPath = path;
 						function export(_) {
@@ -200,7 +201,7 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					UIFiles.show(UITrait.inst.exportMeshFormat == 0 ? "obj" : "arm", true, function(path:String) {
+					UIFiles.show(UITrait.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path:String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
 						ExportMesh.run(path + "/" + f);

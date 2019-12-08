@@ -20,6 +20,177 @@ package arm;
 
 @:enum abstract Workspace(Int) from Int to Int {
 	var SpacePaint = 0;
-	// var SpaceSculpt = 1;
 	var SpaceScene = 1;
+}
+
+@:enum abstract BakeType(Int) from Int to Int {
+	var BakeInit = -1;
+	var BakeAO = 0;
+	var BakeCurvature = 1;
+	var BakeNormal = 2;
+	var BakeNormalObject = 3;
+	var BakeHeight = 4;
+	var BakeDerivative = 5;
+	var BakePosition = 6;
+	var BakeTexCoord = 7;
+	var BakeMaterialID = 8;
+	var BakeObjectID = 9;
+	var BakeLightmap = 10;
+	var BakeBentNormal = 11;
+	var BakeThickness = 12;
+}
+
+@:enum abstract SplitType(Int) from Int to Int {
+	var SplitObject = 0;
+	var SplitGroup = 1;
+	var SplitMaterial = 2;
+	var SplitUdim = 3;
+}
+
+@:enum abstract BakeAxis(Int) from Int to Int {
+	var BakeXYZ = 0;
+	var BakeX = 1;
+	var BakeY = 2;
+	var BakeZ = 3;
+	var BakeMX = 4;
+	var BakeMY = 5;
+	var BakeMZ = 6;
+}
+
+@:enum abstract BakeUpAxis(Int) from Int to Int {
+	var BakeUpZ = 0;
+	var BakeUpY = 1;
+	var BakeUpX = 2;
+}
+
+@:enum abstract ViewportMode(Int) from Int to Int {
+	var ViewRender = 0;
+	var ViewBaseColor = 1;
+	var ViewNormalMap = 2;
+	var ViewOcclusion = 3;
+	var ViewRoughness = 4;
+	var ViewMetallic = 5;
+	var ViewTexCoord = 6;
+	var ViewObjectNormal = 7;
+	var ViewMaterialID = 8;
+	var ViewObjectID = 9;
+	var ViewMask = 10;
+	var ViewPathTrace = 11;
+}
+
+@:enum abstract FillType(Int) from Int to Int {
+	var FillObject = 0;
+	var FillFace = 1;
+	var FillAngle = 2;
+}
+
+@:enum abstract UVType(Int) from Int to Int {
+	var UVMap = 0;
+	var UVTriplanar = 1;
+	var UVProject = 2;
+}
+
+@:enum abstract PickerMask(Int) from Int to Int {
+	var MaskNone = 0;
+	var MaskMaterial = 1;
+}
+
+@:enum abstract BlendType(Int) from Int to Int {
+	var BlendMix = 0;
+	var BlendDarken = 1;
+	var BlendMultiply = 2;
+	var BlendBurn = 3;
+	var BlendLighten = 4;
+	var BlendScreen = 5;
+	var BlendDodge = 6;
+	var BlendAdd = 7;
+	var BlendOverlay = 8;
+	var BlendSoftLight = 9;
+	var BlendLinearLight = 10;
+	var BlendDifference = 11;
+	var BlendSubtract = 12;
+	var BlendDivide = 13;
+	var BlendHue = 14;
+	var BlendSaturation = 15;
+	var BlendColor = 16;
+	var BlendValue = 17;
+}
+
+@:enum abstract CameraControls(Int) from Int to Int {
+	var ControlsOrbit = 0;
+	var ControlsRotate = 0;
+	var ControlsFly = 0;
+}
+
+@:enum abstract CameraType(Int) from Int to Int {
+	var CameraPerspective = 0;
+	var CameraOrthographic = 1;
+}
+
+@:enum abstract TextureBits(Int) from Int to Int {
+	var Bits8 = 0;
+	var Bits16 = 1;
+	var Bits32 = 2;
+}
+
+@:enum abstract TextureRes(Int) from Int to Int {
+	var Res128 = 0;
+	var Res256 = 1;
+	var Res512 = 2;
+	var Res1024 = 3;
+	var Res2048 = 4;
+	var Res4096 = 5;
+	var Res8192 = 6;
+	var Res16384 = 7;
+}
+
+@:enum abstract TextureLdrFormat(Int) from Int to Int {
+	var FormatPng = 0;
+	var FormatJpg = 1;
+}
+
+@:enum abstract TextureHdrFormat(Int) from Int to Int {
+	var FormatExr = 0;
+}
+
+@:enum abstract MeshFormat(Int) from Int to Int {
+	var FormatObj = 0;
+	var FormatArm = 1;
+}
+
+@:enum abstract MenuCategory(Int) from Int to Int {
+	var MenuFile = 0;
+	var MenuEdit = 1;
+	var MenuViewport = 2;
+	var MenuCamera = 3;
+	var MenuHelp = 4;
+}
+
+@:enum abstract CanvasType(Int) from Int to Int {
+	var CanvasMaterial = 0;
+	var CanvasBrush = 1;
+}
+
+@:enum abstract View2DType(Int) from Int to Int {
+	var View2DLayer = 0;
+	var View2DAsset = 1;
+}
+
+@:enum abstract BorderSide(Int) from Int to Int {
+	var SideLeft = 0;
+	var SideRight = 1;
+	var SideTop = 2;
+	var SideBottom = 3;
+}
+
+@:enum abstract PaintTex(Int) from Int to Int {
+	var TexBase = 0;
+	var TexNormal = 1;
+	var TexPack = 2;
+}
+
+@:enum abstract ProjectModel(Int) from Int to Int {
+	var ModelCube = 0;
+	var ModelSphere = 1;
+	var ModelTessellatedPlane = 2;
 }

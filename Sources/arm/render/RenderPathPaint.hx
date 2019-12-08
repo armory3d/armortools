@@ -144,7 +144,7 @@ class RenderPathPaint {
 			}
 			else {
 				#if (!kha_direct3d12)
-				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -185,7 +185,7 @@ class RenderPathPaint {
 				}
 				path.bindTarget(blendB, "paintmask");
 				#if (!kha_direct3d12)
-				if (Context.tool == ToolBake && UITrait.inst.bakeType == 0) { // AO
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}
 				#end
@@ -194,7 +194,7 @@ class RenderPathPaint {
 				}
 
 				// Read texcoords from gbuffer
-				var readTC = (Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == 1) || // Face fill
+				var readTC = (Context.tool == ToolFill && UITrait.inst.fillTypeHandle.position == FillFace) ||
 							  Context.tool == ToolClone ||
 							  Context.tool == ToolBlur;
 				if (readTC) {
@@ -203,7 +203,7 @@ class RenderPathPaint {
 
 				path.drawMeshes("paint");
 
-				if (Context.tool == ToolBake && UITrait.inst.bakeType == 1 && UITrait.inst.bakeCurvSmooth > 0) { // Curvature
+				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeCurvature && UITrait.inst.bakeCurvSmooth > 0) {
 					if (path.renderTargets.get("texpaint_blur") == null) {
 						var t = new RenderTargetRaw();
 						t.name = "texpaint_blur";
@@ -301,7 +301,7 @@ class RenderPathPaint {
 			var cam = Scene.active.camera;
 			UITrait.inst.savedCamera.setFrom(cam.transform.local);
 			savedFov = cam.data.raw.fov;
-			ViewportUtil.updateCameraType(0);
+			ViewportUtil.updateCameraType(CameraPerspective);
 			var m = Mat4.identity();
 			m.translate(0, 0, 0.5);
 			cam.transform.setMatrix(m);
@@ -390,14 +390,11 @@ class RenderPathPaint {
 
 			if (Context.tool == ToolBake) {
 				if (Context.pdirty > 0) dilated = false;
-				var isNormal = UITrait.inst.bakeType == 2; // Normal (Tangent)
-				var isHeight = UITrait.inst.bakeType == 4;
-				var isDeriv = UITrait.inst.bakeType == 5;
-				if (isNormal || isHeight || isDeriv) {
+				if (UITrait.inst.bakeType == BakeNormal || UITrait.inst.bakeType == BakeHeight || UITrait.inst.bakeType == BakeDerivative) {
 					if (!baking && Context.pdirty > 0) {
 						baking = true;
 						var _bakeType = UITrait.inst.bakeType;
-						UITrait.inst.bakeType = isNormal ? 3 : 6; // Bake high poly object normals / position
+						UITrait.inst.bakeType = UITrait.inst.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
 						MaterialParser.parsePaintMaterial();
 						var _paintObject = Context.paintObject;
 						var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
@@ -420,7 +417,7 @@ class RenderPathPaint {
 							baking = false;
 						}
 						function _renderDeriv(_) {
-							UITrait.inst.bakeType = 4; // Bake height
+							UITrait.inst.bakeType = BakeHeight;
 							MaterialParser.parsePaintMaterial();
 							Context.pdirty = 1;
 							RenderPathPaint.commandsPaint();
@@ -430,10 +427,10 @@ class RenderPathPaint {
 							iron.App.removeRender(_renderDeriv);
 							iron.App.notifyOnRender(_renderFinal);
 						}
-						iron.App.notifyOnRender(isDeriv ? _renderDeriv : _renderFinal);
+						iron.App.notifyOnRender(UITrait.inst.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
-				else if (UITrait.inst.bakeType == 8) { // Object ID
+				else if (UITrait.inst.bakeType == BakeObjectID) {
 					var _layerFilter = UITrait.inst.layerFilter;
 					var _paintObject = Context.paintObject;
 					var isMerged = Context.mergedObject != null;
@@ -451,10 +448,10 @@ class RenderPathPaint {
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
 				#if kha_direct3d12
-				else if (UITrait.inst.bakeType == 0  || // AO (DXR)
-						 UITrait.inst.bakeType == 10 || // Lightmap (DXR)
-						 UITrait.inst.bakeType == 11 || // Bent Normal (DXR)
-						 UITrait.inst.bakeType == 12) { // Thickness (DXR)
+				else if (UITrait.inst.bakeType == BakeAO  ||
+						 UITrait.inst.bakeType == BakeLightmap ||
+						 UITrait.inst.bakeType == BakeBentNormal ||
+						 UITrait.inst.bakeType == BakeThickness) {
 					RenderPathRaytrace.commandsBake();
 				}
 				#end

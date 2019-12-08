@@ -4,6 +4,7 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
 import arm.node.MaterialParser;
+import arm.Tool;
 
 #if kha_direct3d12
 
@@ -142,7 +143,7 @@ class RenderPathRaytrace {
 			}
 
 			var _bakeType = UITrait.inst.bakeType;
-			UITrait.inst.bakeType = -1;
+			UITrait.inst.bakeType = BakeInit;
 			MaterialParser.parsePaintMaterial();
 			path.setTarget("baketex0");
 			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
@@ -316,10 +317,10 @@ class RenderPathRaytrace {
 
 	static function getBakeShaderName():String {
 		return
-			UITrait.inst.bakeType == 0  ? "raytrace_bake_ao.cso" :
-			UITrait.inst.bakeType == 10 ? "raytrace_bake_light.cso" :
-			UITrait.inst.bakeType == 11 ? "raytrace_bake_bent.cso" :
-										  "raytrace_bake_thick.cso";
+			UITrait.inst.bakeType == BakeAO  		? "raytrace_bake_ao.cso" :
+			UITrait.inst.bakeType == BakeLightmap 	? "raytrace_bake_light.cso" :
+			UITrait.inst.bakeType == BakeBentNormal ? "raytrace_bake_bent.cso" :
+													  "raytrace_bake_thick.cso";
 	}
 
 	public static function draw() {

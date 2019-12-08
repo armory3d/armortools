@@ -42,7 +42,7 @@ class RenderUtil {
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
 		Scene.active.camera.data.raw.fov = 0.92;
-		ViewportUtil.updateCameraType(0);
+		ViewportUtil.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		var savedLight = light.data.raw.strength;
 		var probe = Scene.active.world.probe;
@@ -111,7 +111,7 @@ class RenderUtil {
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
 		Scene.active.camera.data.raw.fov = 0.92;
-		ViewportUtil.updateCameraType(0);
+		ViewportUtil.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		light.visible = false;
 		Scene.active.world.envmap = UITrait.inst.previewEnvmap;

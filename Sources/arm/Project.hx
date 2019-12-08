@@ -26,6 +26,7 @@ import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
+import arm.Tool;
 using StringTools;
 
 class Project {
@@ -137,10 +138,9 @@ class Project {
 			Data.deleteMesh(handle);
 		}
 
-		if (UITrait.inst.projectType > 0) {
-			var mesh:Dynamic = UITrait.inst.projectType == 1 ?
+		if (UITrait.inst.projectType != ModelCube) {
+			var mesh:Dynamic = UITrait.inst.projectType == ModelSphere ?
 				new arm.format.proc.Sphere(1, 512, 256) :
-				// new arm.format.proc.Plane(1, 1, 512, 512) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
 				name: "Tessellated",
@@ -158,27 +158,27 @@ class Project {
 			var md = new MeshData(raw, function(md:MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
-			if (UITrait.inst.projectType == 1) {
+			if (UITrait.inst.projectType == ModelSphere) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
-			else if (UITrait.inst.projectType == 2) {
+			else if (UITrait.inst.projectType == ModelTessellatedPlane) {
 				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
 		}
 
-		var n = UITrait.inst.projectType == 0 ? "Cube" : "Tessellated";
+		var n = UITrait.inst.projectType == ModelCube ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md:MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			UITrait.inst.pickerMaskHandle.position = 0;
+			UITrait.inst.pickerMaskHandle.position = MaskNone;
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
 			#if arm_creator
-			if (UITrait.inst.projectType == 2) {
+			if (UITrait.inst.projectType == ModelTessellatedPlane) {
 				Context.paintObject.transform.loc.set(0, 0, -0.15);
 				Context.paintObject.transform.scale.set(10, 10, 1);
 			}
@@ -247,7 +247,7 @@ class Project {
 			if (ui.tab(Id.handle(), "Import Mesh")) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					UITrait.inst.splitBy = ui.combo(Id.handle({position: 0}), ["Object", "Group", "Material", "UDIM Tile"], "Split By", true);
+					UITrait.inst.splitBy = ui.combo(Id.handle(), ["Object", "Group", "Material", "UDIM Tile"], "Split By", true);
 					if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
 				}
 

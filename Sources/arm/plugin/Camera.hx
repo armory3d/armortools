@@ -6,6 +6,7 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import arm.ui.UITrait;
 import arm.util.ViewportUtil;
+import arm.Tool;
 
 class Camera {
 
@@ -42,7 +43,7 @@ class Camera {
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = UITrait.inst.cameraControls;
-			if (controls == 0) { // Orbit
+			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
 					redraws = 2;
 					camera.transform.move(camera.lookWorld(), dist);
@@ -86,7 +87,7 @@ class Camera {
 					light.transform.decompose();
 				}
 			}
-			else if (controls == 1) { // Rotate
+			else if (controls == ControlsRotate) {
 				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
 					redraws = 2;
 					var t = Context.object.transform;
@@ -119,7 +120,7 @@ class Camera {
 					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
 				}
 			}
-			else if (controls == 2 && mouse.down("right")) {
+			else if (controls == ControlsFly && mouse.down("right")) {
 				var moveForward = kb.down("w") || kb.down("up") || mouse.wheelDelta < 0;
 				var moveBackward = kb.down("s") || kb.down("down") || mouse.wheelDelta > 0;
 				var strafeLeft = kb.down("a") || kb.down("left");
@@ -150,7 +151,7 @@ class Camera {
 				var d = Time.delta * speed * fast * ease;
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
-					if (UITrait.inst.cameraType == 1) {
+					if (UITrait.inst.cameraType == CameraOrthographic) {
 						ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 					}
 				}
@@ -164,7 +165,7 @@ class Camera {
 				redraws--;
 				Context.ddirty = 2;
 
-				if (UITrait.inst.cameraType == 1) {
+				if (UITrait.inst.cameraType == CameraOrthographic) {
 					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
 				}
 			}

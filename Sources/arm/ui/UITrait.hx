@@ -73,7 +73,7 @@ class UITrait {
 	public var uvxPicked = 0.0;
 	public var uvyPicked = 0.0;
 	public var pickerSelectMaterial = true;
-	public var pickerMaskHandle = new Handle({position: 0});
+	public var pickerMaskHandle = new Handle();
 	var borderStarted = 0;
 	var borderHandle:Handle = null;
 
@@ -97,7 +97,7 @@ class UITrait {
 
 	public var ui:Zui;
 	public var colorIdHandle = Id.handle();
-	public var formatType = 0;
+	public var formatType = FormatPng;
 	public var formatQuality = 100.0;
 	public var layersExport = 0;
 	public var isBase = true;
@@ -118,7 +118,7 @@ class UITrait {
 	public var isHeightSpace = 0;
 	public var isSubs = false;
 	public var isSubsSpace = 0;
-	public var splitBy = 0;
+	public var splitBy = SplitObject;
 	public var parseTransform = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
@@ -131,17 +131,17 @@ class UITrait {
 	#end
 	public var decalImage:Image = null;
 	public var decalPreview = false;
-	public var viewportMode = 0;
+	public var viewportMode = ViewRender;
 	public var hscaleWasChanged = false;
-	public var exportMeshFormat = 0;
+	public var exportMeshFormat = FormatObj;
 	public var nativeBrowser = true;
 	public var cacheDraws = false;
 
 	public var textToolImage:Image = null;
 	public var textToolText = "Text";
-	public var textToolHandle = new Handle({position: 0});
+	public var textToolHandle = new Handle();
 	public var decalMaskImage:Image = null;
-	public var decalMaskHandle = new Handle({position: 0});
+	public var decalMaskHandle = new Handle();
 	public var particleMaterial:MaterialData = null;
 
 	public var layerFilter = 0;
@@ -177,21 +177,21 @@ class UITrait {
 	public var brushRadiusHandle = new Handle({value: 0.5});
 	public var brushScaleX = 1.0;
 	public var brushScaleXHandle = new Handle({value: 1.0});
-	public var brushBlending = 0;
+	public var brushBlending = BlendMix;
 	public var brushOpacity = 1.0;
 	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
 	public var brushBias = 1.0;
-	public var brushPaint = 0;
+	public var brushPaint = UVMap;
 	public var brush3d = true;
 	public var brushDepthReject = true;
 	public var brushAngleReject = true;
 	public var brushAngleRejectDot = 0.5;
-	public var bakeType = 0;
-	public var bakeAxis = 0;
-	public var bakeUpAxis = 0;
+	public var bakeType = BakeAO;
+	public var bakeAxis = BakeXYZ;
+	public var bakeUpAxis = BakeUpZ;
 	public var bakeAoStrength = 1.0;
 	public var bakeAoRadius = 1.0;
 	public var bakeAoOffset = 1.0;
@@ -208,12 +208,12 @@ class UITrait {
 	public var symZ = false;
 	public var showCompass = true;
 	public var fillTypeHandle = new Handle();
-	public var resHandle = new Handle({position: 4}); // 2048
-	public var bitsHandle = new Handle({position: 0}); // 8bit
+	public var resHandle = new Handle({position: Res2048});
+	public var bitsHandle = new Handle();
 	#if arm_creator
-	public var projectType = 2; // cube, sphere, tessellated plane
+	public var projectType = ModelTessellatedPlane;
 	#else
-	public var projectType = 0;
+	public var projectType = ModelCube;
 	#end
 	public var projectObjects:Array<MeshObject>;
 
@@ -232,8 +232,8 @@ class UITrait {
 	public var brushLocked = false;
 	var brushCanLock = false;
 	var brushCanUnlock = false;
-	public var cameraType = 0;
-	public var camHandle = new Handle({position: 0});
+	public var cameraType = CameraPerspective;
+	public var camHandle = new Handle();
 	public var fovHandle:Handle = null;
 	public var undoHandle:Handle = null;
 	public var hssgi:Handle = null;
@@ -258,11 +258,11 @@ class UITrait {
 	var lastCombo:Handle = null;
 	var lastTooltip:Image = null;
 
-	public var cameraControls = 0;
-	public var htab = Id.handle({position: 0});
-	public var htab1 = Id.handle({position: 0});
-	public var htab2 = Id.handle({position: 0});
-	public var worktab = Id.handle({position: 0});
+	public var cameraControls = ControlsOrbit;
+	public var htab = Id.handle();
+	public var htab1 = Id.handle();
+	public var htab2 = Id.handle();
+	public var worktab = Id.handle();
 	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
 
 	public function new() {
@@ -544,7 +544,7 @@ class UITrait {
 			else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
 			else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
 			else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-				cameraType = cameraType == 0 ? 1 : 0;
+				cameraType = cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
 				camHandle.position = cameraType;
 				ViewportUtil.updateCameraType(cameraType);
 				statusHandle.redraws = 2;
@@ -571,7 +571,7 @@ class UITrait {
 
 		if (borderHandle != null) {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
-				if (borderStarted == 0) {
+				if (borderStarted == SideLeft) {
 					UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
 					if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
 					else if (UINodes.inst.defaultWindowW > System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(System.windowWidth() * 0.7);
@@ -583,7 +583,7 @@ class UITrait {
 				}
 			}
 			else {
-				if (borderStarted == 0) {
+				if (borderStarted == SideLeft) {
 					defaultWindowW -= Std.int(mouse.movementX);
 					if (defaultWindowW < 32) defaultWindowW = 32;
 					else if (defaultWindowW > System.windowWidth() - 32) defaultWindowW = System.windowWidth() - 32;
@@ -591,13 +591,13 @@ class UITrait {
 				}
 				else {
 					var my = Std.int(mouse.movementY);
-					if (borderHandle == hwnd1 && borderStarted == 2) {
+					if (borderHandle == hwnd1 && borderStarted == SideTop) {
 						if (tabh + my > 32 && tabh1 - my > 32) {
 							tabh += my;
 							tabh1 -= my;
 						}
 					}
-					else if (borderHandle == hwnd2 && borderStarted == 2) {
+					else if (borderHandle == hwnd2 && borderStarted == SideTop) {
 						if (tabh1 + my > 32 && tabh2 - my > 32) {
 							tabh1 += my;
 							tabh2 -= my;
@@ -795,7 +795,7 @@ class UITrait {
 				g.color = 0xffffffff;
 			}
 
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == 0 &&
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
@@ -827,8 +827,8 @@ class UITrait {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
 
-		if (UINodes.inst.show && UINodes.inst.canvasType == 0) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = 0; }
+		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasMaterial) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasMaterial; }
 		App.resize();
 	}
 
@@ -836,8 +836,8 @@ class UITrait {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
 
-		if (UINodes.inst.show && UINodes.inst.canvasType == 1) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = 1; }
+		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasBrush) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasBrush; }
 		App.resize();
 	}
 
@@ -910,11 +910,11 @@ class UITrait {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			menuButton("File", 0);
-			menuButton("Edit", 1);
-			menuButton("Viewport", 2);
-			menuButton("Camera", 3);
-			menuButton("Help", 4);
+			menuButton("File", MenuFile);
+			menuButton("Edit", MenuEdit);
+			menuButton("Viewport", MenuViewport);
+			menuButton("Camera", MenuCamera);
+			menuButton("Help", MenuHelp);
 
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -992,15 +992,15 @@ class UITrait {
 					bakes.push("Thickness");
 					#end
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
-					if (bakeType == 3 || bakeType == 6 || bakeType == 11) {
+					if (bakeType == BakeNormalObject || bakeType == BakePosition || bakeType == BakeBentNormal) {
 						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
 						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
 					}
-					if (bakeType == 0 || bakeType == 1) { // ao, curvature
+					if (bakeType == BakeAO || bakeType == BakeCurvature) {
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
 						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
 					}
-					if (bakeType == 0) { // ao
+					if (bakeType == BakeAO) {
 						var strengthHandle = Id.handle({value: bakeAoStrength});
 						bakeAoStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
 						var radiusHandle = Id.handle({value: bakeAoRadius});
@@ -1009,12 +1009,12 @@ class UITrait {
 						bakeAoOffset = ui.slider(offsetHandle, "Offset", 0.0, 2.0, true);
 					}
 					#if kha_direct3d12
-					if (bakeType == 0 || bakeType == 10 || bakeType == 11 || bakeType == 12) { // ao, bent, lightmap, thick
+					if (bakeType == BakeAO || bakeType == BakeLightmap || bakeType == BakeBentNormal || bakeType == BakeThickness) {
 						ui.text("Rays/pix: " + arm.render.RenderPathRaytrace.raysPix);
 						ui.text("Rays/sec: " + arm.render.RenderPathRaytrace.raysSec);
 					}
 					#end
-					if (bakeType == 1) { // Curvature
+					if (bakeType == BakeCurvature) {
 						var strengthHandle = Id.handle({value: bakeCurvStrength});
 						bakeCurvStrength = ui.slider(strengthHandle, "Strength", 0.0, 2.0, true);
 						var radiusHandle = Id.handle({value: bakeCurvRadius});
@@ -1024,7 +1024,7 @@ class UITrait {
 						var smoothHandle = Id.handle({value: bakeCurvSmooth});
 						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, "Smooth", 0, 5, false, 1));
 					}
-					if (bakeType == 2 || bakeType == 4 || bakeType == 5) { // Normal (Tang), Height
+					if (bakeType == BakeNormal || bakeType == BakeHeight || bakeType == BakeDerivative) {
 						var ar = [for (p in Project.paintObjects) p.name];
 						var polyHandle = Id.handle({position: bakeHighPoly});
 						bakeHighPoly = ui.combo(polyHandle, ar, "High Poly");
@@ -1110,7 +1110,7 @@ class UITrait {
 					if (Context.tool == ToolFill) {
 						ui.combo(fillTypeHandle, ["Object", "Face", "Angle"], "Fill Mode");
 						if (fillTypeHandle.changed) {
-							if (fillTypeHandle.position == 1) {
+							if (fillTypeHandle.position == FillFace) {
 								ui.g.end();
 								// UVUtil.cacheUVMap();
 								UVUtil.cacheTriangleMap();
@@ -1154,14 +1154,14 @@ class UITrait {
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - headerh, System.windowWidth() - toolbarw - windowW, headerh)) {
 			ui._y += 2;
 
-			var modeHandle = Id.handle({position: 0});
+			var modeHandle = Id.handle();
 			var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
 			#if kha_direct3d12
 			modes.push("Path-Trace");
 			#end
 			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
 			if (modeHandle.changed) {
-				var deferred = UITrait.inst.viewportMode == 0 || UITrait.inst.viewportMode == 11;
+				var deferred = UITrait.inst.viewportMode == ViewRender || UITrait.inst.viewportMode == ViewPathTrace;
 				if (deferred) {
 					RenderPath.active.commands = RenderPathDeferred.commands;
 				}
@@ -1250,14 +1250,14 @@ class UITrait {
 	function onBorderHover(handle:Handle, side:Int) {
 		if (!App.uienabled) return;
 		if (handle != hwnd && handle != hwnd1 && handle != hwnd2 && handle != UINodes.inst.hwnd && handle != UIView2D.inst.hwnd) return; // Scalable handles
-		if (handle == UINodes.inst.hwnd && side != 0 && side != 2) return; // Left/top border of node canvas
-		if (handle == UINodes.inst.hwnd && side == 2 && !UIView2D.inst.show) return; // Left/top border of node canvas
-		if (handle == UIView2D.inst.hwnd && side != 0) return; // Left border of 2d view
-		if (handle == hwnd && side == 2) return; // Window top
-		if (handle == hwnd2 && side == 3) return; // Window bottom
-		if (side == 1) return; // UI is snapped to the right side
+		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
+		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
+		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
+		if (handle == hwnd && side == SideTop) return;
+		if (handle == hwnd2 && side == SideBottom) return;
+		if (side == SideRight) return; // UI is snapped to the right side
 
-		side == 0 || side == 1 ?
+		side == SideLeft || side == SideRight ?
 			Krom.setMouseCursor(6) : // Horizontal
 			Krom.setMouseCursor(5);  // Vertical
 

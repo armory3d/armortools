@@ -34,7 +34,7 @@ class BoxPreferences {
 					setScale();
 				}
 				UITrait.inst.hscaleWasChanged = hscale.changed;
-				var themeHandle = Id.handle({position: 0});
+				var themeHandle = Id.handle();
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, "Theme", true);
 				if (themeHandle.changed) {

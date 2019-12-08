@@ -20,7 +20,7 @@ class UIView2D {
 
 	public static var inst:UIView2D;
 	public var show = false;
-	public var type = 0; // Layer, texture
+	public var type = View2DLayer;
 	public var wx:Int;
 	public var wy:Int;
 	public var ww:Int;
@@ -31,7 +31,7 @@ class UIView2D {
 	public var panY = 0.0;
 	public var panScale = 1.0;
 	var pipe:PipelineState;
-	var texType = 0;
+	var texType = TexBase;
 	var uvmapShow = false;
 
 	public function new() {
@@ -98,11 +98,11 @@ class UIView2D {
 			var l = Context.layer;
 			var tex:Image = null;
 
-			if (type == 0) { // Layer
-				tex = texType == 0 ? l.texpaint : texType == 1 ? l.texpaint_nor : l.texpaint_pack;
+			if (type == View2DLayer) {
+				tex = texType == TexBase ? l.texpaint : texType == TexNormal ? l.texpaint_nor : l.texpaint_pack;
 				if (Context.layerIsMask) tex = l.texpaint_mask;
 			}
-			else { // Texture
+			else { // View2DAsset
 				tex = UITrait.inst.getImage(Context.texture);
 			}
 
@@ -120,7 +120,7 @@ class UIView2D {
 			ui.g.pipeline = null;
 
 			// UV map
-			if (type == 0 && uvmapShow) {
+			if (type == View2DLayer && uvmapShow) {
 				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, th);
 			}
 
@@ -138,7 +138,7 @@ class UIView2D {
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
 
-			if (type == 0) {
+			if (type == View2DLayer) {
 				h.text = l.name;
 				l.name = ui.textInput(h, "", Right);
 			}
@@ -160,7 +160,7 @@ class UIView2D {
 			ui.fontSize = FONT_SIZE;
 
 			// Controls
-			if (type == 0) {
+			if (type == View2DLayer) {
 				var ew = Std.int(ui.ELEMENT_W());
 				ui.g.color = ui.t.WINDOW_BG_COL;
 				ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
@@ -209,7 +209,7 @@ class UIView2D {
 			if (panScale > 3.0) panScale = 3.0;
 		}
 
-		if (type == 0 &&
+		if (type == View2DLayer &&
 			(Operator.shortcut(Config.keymap.action_paint) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint))) {
 			UITrait.inst.paint2d = true;

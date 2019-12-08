@@ -32,7 +32,7 @@ class UINodes {
 	public var wh:Int;
 
 	public var ui:Zui;
-	public var canvasType = 0; // material, brush
+	public var canvasType = CanvasMaterial;
 	var drawMenu = false;
 	var showMenu = false;
 	var hideMenu = false;
@@ -86,7 +86,7 @@ class UINodes {
 	}
 
 	public function getCanvas():TNodeCanvas {
-		if (canvasType == 0) return getCanvasMaterial();
+		if (canvasType == CanvasMaterial) return getCanvasMaterial();
 		else return Context.brush.canvas;
 	}
 
@@ -97,7 +97,7 @@ class UINodes {
 
 	public function getNodes():Nodes {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
-		if (canvasType == 0) return isScene ? Context.materialScene.nodes : Context.material.nodes;
+		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
 		else return Context.brush.nodes;
 	}
 
@@ -110,11 +110,11 @@ class UINodes {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (canvasType == 1) MaterialParser.parseBrush();
+			if (canvasType == CanvasBrush) MaterialParser.parseBrush();
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			if (canvasType == 0) {
+			if (canvasType == CanvasMaterial) {
 				canvasChanged();
 			}
 			if (mreleased) {
@@ -211,7 +211,7 @@ class UINodes {
 			var enter = kb.down("enter");
 			var count = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
-			var nodeList = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
+			var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			for (list in nodeList) {
 				for (n in list) {
 					if (n.name.toLowerCase().indexOf(search) >= 0) {
@@ -401,7 +401,7 @@ class UINodes {
 			var BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
-			var cats = canvasType == 0 ? NodesMaterial.categories : NodesBrush.categories;
+			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
 				if ((ui.button(cats[i], Left) && UITrait.inst.ui.comboSelectedHandle == null) || (ui.isHovered && drawMenu)) {
 					addNodeButton = true;
@@ -428,8 +428,8 @@ class UINodes {
 		g.begin(false);
 
 		if (drawMenu) {
-			var list = canvasType == 0 ? NodesMaterial.list : NodesBrush.list;
-			var canvas = canvasType == 0 ? Context.material.canvas : Context.brush.canvas;
+			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+			var canvas = canvasType == CanvasMaterial ? Context.material.canvas : Context.brush.canvas;
 			var numNodes = list[menuCategory].length;
 
 			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
@@ -471,7 +471,7 @@ class UINodes {
 	}
 
 	public function acceptAssetDrag(assetIndex:Int) {
-		var n = canvasType == 0 ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
+		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = assetIndex;
 		getNodes().nodesSelected = [n];
 	}

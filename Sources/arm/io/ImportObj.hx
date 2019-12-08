@@ -4,13 +4,17 @@ import kha.Blob;
 import iron.data.Data;
 import arm.format.ObjParser;
 import arm.ui.UITrait;
+import arm.Tool;
 
 class ImportObj {
 
 	public static function run(path:String) {
 		var i = UITrait.inst.splitBy;
-		var isUdim = i == 3;
-		ObjParser.splitCode = (i == 0 || isUdim) ? "o".code : i == 1 ? "g".code : "u".code; // object, group, usemtl
+		var isUdim = i == SplitUdim;
+		ObjParser.splitCode =
+			(i == SplitObject || isUdim) ? "o".code :
+			 i == SplitGroup 			 ? "g".code :
+			 				 			   "u".code; // usemtl
 		Data.getBlob(path, function(b:Blob) {
 			if (isUdim) {
 				var obj = new ObjParser(b, 0, isUdim);

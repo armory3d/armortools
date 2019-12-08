@@ -6,6 +6,7 @@ import iron.RenderPath;
 import iron.object.MeshObject;
 import arm.ui.UITrait;
 import arm.node.MaterialParser;
+import arm.Tool;
 
 class LayerSlot {
 	public var id = 0;
@@ -27,11 +28,11 @@ class LayerSlot {
 
 	static var first = true;
 
-	public var blending = 0;
+	public var blending = BlendMix;
 	public var objectMask = 0;
 	public var uvScale = 1.0;
 	public var uvRot = 0.0;
-	public var uvType = 0;
+	public var uvType = UVMap;
 	public var paintBase = true;
 	public var paintOpac = true;
 	public var paintOcc = true;
@@ -74,8 +75,9 @@ class LayerSlot {
 		}
 		this.ext = ext;
 		name = "Layer " + (id + 1);
-		var format = UITrait.inst.bitsHandle.position == 0 ? 'RGBA32' :
-					 UITrait.inst.bitsHandle.position == 1 ? 'RGBA64' : 'RGBA128';
+		var format = UITrait.inst.bitsHandle.position == Bits8 ?  'RGBA32' :
+					 UITrait.inst.bitsHandle.position == Bits16 ? 'RGBA64' :
+					 											  'RGBA128';
 
 		{
 			var t = new RenderTargetRaw();
@@ -287,8 +289,9 @@ class LayerSlot {
 	}
 
 	public function resizeAndSetBits() {
-		var format = UITrait.inst.bitsHandle.position == 0 ? TextureFormat.RGBA32 :
-					 UITrait.inst.bitsHandle.position == 1 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
+		var format = UITrait.inst.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
+					 UITrait.inst.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
+					 											  TextureFormat.RGBA128;
 
 		var res = Config.getTextureRes();
 		var rts = RenderPath.active.renderTargets;

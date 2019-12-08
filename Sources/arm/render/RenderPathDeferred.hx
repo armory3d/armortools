@@ -337,7 +337,7 @@ class RenderPathDeferred {
 		#end
 
 		#if kha_direct3d12
-		if (UITrait.inst.viewportMode == 11) { // Ray-traced
+		if (UITrait.inst.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
 		}
@@ -358,11 +358,11 @@ class RenderPathDeferred {
 		var cameraType = UITrait.inst.cameraType;
 		var ddirty = Context.ddirty;
 		#else
-		var cameraType = 0;
+		var cameraType = CameraPerspective;
 		var ddirty = 2;
 		#end
 
-		var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
+		var ssgi = Config.raw.rp_ssgi != false && cameraType == CameraPerspective;
 		if (ssgi && ddirty > 0 && taaFrame > 0) {
 			path.setTarget("singlea");
 			path.bindTarget("_main", "gbufferD");
@@ -425,7 +425,7 @@ class RenderPathDeferred {
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
-		var ssgi = Config.raw.rp_ssgi != false && cameraType == 0;
+		var ssgi = Config.raw.rp_ssgi != false && cameraType == CameraPerspective;
 		if (ssgi && taaFrame > 0) {
 			path.bindTarget("singlea", "ssaotex");
 		}
@@ -697,7 +697,7 @@ class RenderPathDeferred {
 				drawGbuffer();
 
 				#if kha_direct3d12
-				UITrait.inst.viewportMode == 11 ? RenderPathRaytrace.draw() : drawDeferred();
+				UITrait.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
 				#else
 				drawDeferred();
 				#end
