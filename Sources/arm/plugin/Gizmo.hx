@@ -39,7 +39,7 @@ class Gizmo {
 				if (Std.is(Context.object, MeshObject)) {
 					var mo = cast(Context.object, MeshObject);
 					var object = Scene.active.addMeshObject(mo.data, mo.materials, Scene.active.getChild("Scene"));
-					object.name = mo.name + '.1';
+					object.name = mo.name + ".1";
 
 					object.transform.loc.setFrom(mo.transform.loc);
 					object.transform.rot.setFrom(mo.transform.rot);
@@ -63,7 +63,7 @@ class Gizmo {
 				else if (Std.is(Context.object, LightObject)) {
 					var lo = cast(Context.object, LightObject);
 					var object = Scene.active.addLightObject(lo.data, Scene.active.getChild("Scene"));
-					object.name = lo.name + '.1';
+					object.name = lo.name + ".1";
 
 					object.transform.loc.setFrom(lo.transform.loc);
 					object.transform.rot.setFrom(lo.transform.rot);
@@ -81,7 +81,7 @@ class Gizmo {
 			}
 			if (kb.started("m")) { // skip voxel
 				var raw = Context.materialScene.data.raw;
-				raw.skip_context = raw.skip_context == '' ? 'voxel' : '';
+				raw.skip_context = raw.skip_context == "" ? "voxel" : "";
 			}
 		}
 

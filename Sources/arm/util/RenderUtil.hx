@@ -21,7 +21,7 @@ class RenderUtil {
 	public static function makeMaterialPreview() {
 		UITrait.inst.materialPreview = true;
 
-		var sphere:MeshObject = cast Scene.active.getChild(".Sphere");
+		var sphere: MeshObject = cast Scene.active.getChild(".Sphere");
 		sphere.visible = true;
 		var meshes = Scene.active.meshes;
 		Scene.active.meshes = [sphere];
@@ -95,7 +95,7 @@ class RenderUtil {
 		}
 		UITrait.inst.decalPreview = true;
 
-		var plane:MeshObject = cast Scene.active.getChild(".Plane");
+		var plane: MeshObject = cast Scene.active.getChild(".Plane");
 		plane.transform.scale.set(1, 1, 1);
 		plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 		plane.transform.buildMatrix();
@@ -174,9 +174,9 @@ class RenderUtil {
 		g2.end();
 	}
 
-	static function getTextToolFont():Font {
+	static function getTextToolFont(): Font {
 		var fontName = ImportFont.fontList[UITrait.inst.textToolHandle.position];
-		if (fontName == 'default.ttf') return UITrait.inst.ui.ops.font;
+		if (fontName == "default.ttf") return UITrait.inst.ui.ops.font;
 		return ImportFont.fontMap.get(fontName);
 	}
 

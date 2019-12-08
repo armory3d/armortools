@@ -17,7 +17,7 @@ class Path {
 	public static var meshImporters = new Map<String, String->(Void->Void)->Void>();
 	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
 
-	public static function data():String {
+	public static function data(): String {
 		#if krom_windows
 		var path = Data.dataPath.replace("/", "\\");
 		#else
@@ -26,7 +26,7 @@ class Path {
 		return Krom.getFilesLocation() + Path.sep + path;
 	}
 
-	public static function toRelative(from:String, to:String):String {
+	public static function toRelative(from: String, to: String): String {
 		from = haxe.io.Path.normalize(from);
 		to = haxe.io.Path.normalize(to);
 		var a = from.split("/");
@@ -42,7 +42,7 @@ class Path {
 		return haxe.io.Path.normalize(base);
 	}
 
-	public static function baseDir(path:String):String {
+	public static function baseDir(path: String): String {
 		path = haxe.io.Path.normalize(path);
 		var base = path.substr(0, path.lastIndexOf("/") + 1);
 		#if krom_windows
@@ -51,7 +51,7 @@ class Path {
 		return base;
 	}
 
-	public static function workingDir():String {
+	public static function workingDir(): String {
 		#if krom_windows
 		var cmd = "cd";
 		#else
@@ -62,36 +62,36 @@ class Path {
 		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
 	}
 
-	public static function isMesh(path:String):Bool {
+	public static function isMesh(path: String): Bool {
 		var p = path.toLowerCase();
 		for (s in meshFormats) if (p.endsWith("." + s)) return true;
 		return false;
 	}
 
-	public static function isTexture(path:String):Bool {
+	public static function isTexture(path: String): Bool {
 		var p = path.toLowerCase();
 		for (s in textureFormats) if (p.endsWith("." + s)) return true;
 		return false;
 	}
 
-	public static function isFont(path:String):Bool {
+	public static function isFont(path: String): Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".ttf");
 	}
 
-	public static function isProject(path:String):Bool {
+	public static function isProject(path: String): Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".arm");
 	}
 
-	public static function isPlugin(path:String):Bool {
+	public static function isPlugin(path: String): Bool {
 		var p = path.toLowerCase();
 		return p.endsWith(".js");
 			   // p.endsWith(".wasm") ||
 			   // p.endsWith(".zip");
 	}
 
-	public static function isBaseTex(p:String):Bool {
+	public static function isBaseTex(p: String): Bool {
 		return p.endsWith("_albedo") ||
 			   p.endsWith("_alb") ||
 			   p.endsWith("_basecol") ||
@@ -105,20 +105,20 @@ class Path {
 			   p.endsWith("_col");
 	}
 
-	public static function isOpacTex(p:String):Bool {
+	public static function isOpacTex(p: String): Bool {
 		return p.endsWith("_opac") ||
 			   p.endsWith("_alpha") ||
 			   p.endsWith("_opacity");
 	}
 
-	public static function isNorTex(p:String):Bool {
+	public static function isNorTex(p: String): Bool {
 		return p.endsWith("_normal") ||
 			   p.endsWith("_nor") ||
 			   p.endsWith("_n") ||
 			   p.endsWith("_nrm");
 	}
 
-	public static function isOccTex(p:String):Bool {
+	public static function isOccTex(p: String): Bool {
 		return p.endsWith("_ao") ||
 			   p.endsWith("_occlusion") ||
 			   p.endsWith("_ambientOcclusion") ||
@@ -126,7 +126,7 @@ class Path {
 			   p.endsWith("_occ");
 	}
 
-	public static function isRoughTex(p:String):Bool {
+	public static function isRoughTex(p: String): Bool {
 		return p.endsWith("_roughness") ||
 			   p.endsWith("_roug") ||
 			   p.endsWith("_r") ||
@@ -134,7 +134,7 @@ class Path {
 			   p.endsWith("_rgh");
 	}
 
-	public static function isMetTex(p:String):Bool {
+	public static function isMetTex(p: String): Bool {
 		return p.endsWith("_metallic") ||
 			   p.endsWith("_metal") ||
 			   p.endsWith("_metalness") ||
@@ -142,24 +142,24 @@ class Path {
 			   p.endsWith("_met");
 	}
 
-	public static function isDispTex(p:String):Bool {
+	public static function isDispTex(p: String): Bool {
 		return p.endsWith("_displacement") ||
 			   p.endsWith("_height") ||
 			   p.endsWith("_h") ||
 			   p.endsWith("_disp");
 	}
 
-	public static function isFolder(p:String):Bool {
+	public static function isFolder(p: String): Bool {
 		return p.indexOf(".") == -1;
 	}
 
 	#if krom_windows
-	public static function isAscii(s:String):Bool {
+	public static function isAscii(s: String): Bool {
 		for (i in 0...s.length) if (s.charCodeAt(i) > 127) return false;
 		return true;
 	}
 
-	public static function shortPath(s:String):String {
+	public static function shortPath(s: String): String {
 		var cmd = 'for %I in ("' + s + '") do echo %~sI';
 		var save = data() + sep + "tmp.txt";
 		Krom.sysCommand(cmd + ' > "' + save + '"');

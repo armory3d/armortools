@@ -1,22 +1,17 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
-import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
-import arm.Tool;
 
 class MakeParticle {
 
-	public static function run(data:MaterialShaderData):MaterialShaderContext {
-		var context_id = 'mesh';
+	public static function run(data: MaterialShaderData): MaterialShaderContext {
+		var context_id = "mesh";
 		var con_part:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
-			compare_mode: 'always',
-			cull_mode: 'clockwise',
-			vertex_elements: [{name: "pos", data: 'short4norm'}]
+			compare_mode: "always",
+			cull_mode: "clockwise",
+			vertex_elements: [{name: "pos", data: "short4norm"}]
 		});
 
 		var vert = con_part.make_vert();
@@ -43,10 +38,10 @@ class MakeParticle {
 		vert.add_out('float p_lifetime');
 		vert.write('p_lifetime = pd[0][2];');
 		vert.write('if (p_age < 0 || p_age > p_lifetime) {');
-		// vert.write('    SPIRV_Cross_Output stage_output;');
-		// vert.write('    stage_output.svpos /= 0.0;');
-		// vert.write('    return stage_output;');
-		vert.write('    spos /= 0.0;');
+		// vert.write('SPIRV_Cross_Output stage_output;');
+		// vert.write('stage_output.svpos /= 0.0;');
+		// vert.write('return stage_output;');
+		vert.write('spos /= 0.0;');
 		vert.write('}');
 
 		vert.add_out('vec3 p_velocity');

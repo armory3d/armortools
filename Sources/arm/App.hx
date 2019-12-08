@@ -5,7 +5,6 @@ import kha.Image;
 import kha.Font;
 import kha.System;
 import zui.Zui;
-import zui.Zui.Handle;
 import zui.Themes;
 import zui.Nodes;
 import iron.Scene;
@@ -40,19 +39,19 @@ class App {
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var isResizing = false;
-	public static var dragMaterial:MaterialSlot = null;
-	public static var dragLayer:LayerSlot = null;
-	public static var dragAsset:TAsset = null;
+	public static var dragMaterial: MaterialSlot = null;
+	public static var dragLayer: LayerSlot = null;
+	public static var dragAsset: TAsset = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
-	static var dropPaths:Array<String> = [];
+	static var dropPaths: Array<String> = [];
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
-	public static var font:Font = null;
-	public static var theme:TTheme;
-	public static var color_wheel:Image;
-	public static var uibox:Zui;
-	public static var uimenu:Zui;
+	public static var font: Font = null;
+	public static var theme: TTheme;
+	public static var color_wheel: Image;
+	public static var uibox: Zui;
+	public static var uimenu: Zui;
 	public static var fileArg = "";
 	public static var ELEMENT_H = 28;
 
@@ -65,7 +64,7 @@ class App {
 		iron.App.onResize = onResize;
 		#end
 
-		System.notifyOnDropFiles(function(filePath:String) {
+		System.notifyOnDropFiles(function(filePath: String) {
 			#if krom_windows
 			if (!Path.isAscii(filePath)) filePath = Path.shortPath(filePath);
 			#end
@@ -93,13 +92,13 @@ class App {
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
-		Data.getFont("font_default.ttf", function(f:Font) {
-			Data.getImage('color_wheel.png', function(image:Image) {
+		Data.getFont("font_default.ttf", function(f: Font) {
+			Data.getImage("color_wheel.png", function(image: Image) {
 				font = f;
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;
 
-				var kimg:kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
+				var kimg: kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
 				@:privateAccess kimg.mySize = 13;
 				@:privateAccess kimg.width = 128;
 				@:privateAccess kimg.height = 128;
@@ -117,7 +116,7 @@ class App {
 				for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
 				for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
 				@:privateAccess kimg.chars = chars;
-				Data.getBlob("font13.bin", function(fontbin:kha.Blob) {
+				Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
 					@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
 					// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
 					@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
@@ -180,13 +179,13 @@ class App {
 		});
 	}
 
-	static function saveAndQuitCallback(save:Bool) {
+	static function saveAndQuitCallback(save: Bool) {
 		saveWindowRect();
 		if (save) Project.projectSave(true);
 		else System.stop();
 	}
 
-	public static function w():Int {
+	public static function w(): Int {
 		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
 
@@ -212,7 +211,7 @@ class App {
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
-	public static function h():Int {
+	public static function h(): Int {
 		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
 
@@ -227,12 +226,12 @@ class App {
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
-	public static function x():Int {
+	public static function x(): Int {
 		if (UITrait.inst.viewIndex == 1) return appx + w();
 		return appx;
 	}
 
-	public static function y():Int {
+	public static function y(): Int {
 		return appy;
 	}
 
@@ -307,7 +306,7 @@ class App {
 
 	static function update() {
 		var mouse = Input.getMouse();
-		var kb = Input.getKeyboard();
+		//var kb = Input.getKeyboard();
 
 		if ((dragAsset != null || dragMaterial != null || dragLayer != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
@@ -327,8 +326,7 @@ class App {
 						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			if (dragAsset != null) {
-				// Create image texture
-				if (inNodes) {
+				if (inNodes) { // Create image texture
 					var index = 0;
 					for (i in 0...Project.assets.length) {
 						if (Project.assets[i] == dragAsset) {
@@ -338,8 +336,7 @@ class App {
 					}
 					UINodes.inst.acceptAssetDrag(index);
 				}
-				// Create mask
-				else if (inViewport || inLayers || in2dView) {
+				else if (inViewport || inLayers || in2dView) { // Create mask
 					Layers.createImageMask(dragAsset);
 				}
 				dragAsset = null;
@@ -410,14 +407,14 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
-	static function getDragImage():kha.Image {
+	static function getDragImage(): kha.Image {
 		if (dragAsset != null) return UITrait.inst.getImage(dragAsset);
 		if (dragMaterial != null) return dragMaterial.imageIcon;
 		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
 		else return dragLayer.texpaint_preview;
 	}
 
-	static function render(g:kha.graphics2.Graphics) {
+	static function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		var mouse = Input.getMouse();
@@ -443,24 +440,24 @@ class App {
 		if (UIMenu.show) UIMenu.render(g);
 	}
 
-	public static function enumTexts(nodeType:String):Array<String> {
+	public static function enumTexts(nodeType: String): Array<String> {
 		if (nodeType == "TEX_IMAGE") {
 			return Project.assetNames.length > 0 ? Project.assetNames : [""];
 		}
 		else if (nodeType == "LAYER" || nodeType == "LAYER_MASK") {
-			var layerNames:Array<String> = [];
+			var layerNames: Array<String> = [];
 			for (l in Project.layers) layerNames.push(l.name);
 			return layerNames;
 		}
 		else if (nodeType == "MATERIAL") {
-			var materialNames:Array<String> = [];
+			var materialNames: Array<String> = [];
 			for (m in Project.materials) materialNames.push(m.canvas.name);
 			return materialNames;
 		}
 		return null;
 	}
 
-	public static function getAssetIndex(filename:String):Int {
+	public static function getAssetIndex(filename: String): Int {
 		var i = Project.assetNames.indexOf(filename);
 		return i >= 0 ? i : 0;
 	}

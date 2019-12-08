@@ -25,39 +25,39 @@ class PhysicsBody extends iron.Trait {
 	public var trigger = false;
 	public var group = 1;
 	public var mask = 1;
-	var shape:Shape;
+	var shape: Shape;
 	var destroyed = false;
-	var bodyScaleX:Float; // Transform scale at creation time
-	var bodyScaleY:Float;
-	var bodyScaleZ:Float;
-	var currentScaleX:Float;
-	var currentScaleY:Float;
-	var currentScaleZ:Float;
+	var bodyScaleX: Float; // Transform scale at creation time
+	var bodyScaleY: Float;
+	var bodyScaleZ: Float;
+	var currentScaleX: Float;
+	var currentScaleY: Float;
+	var currentScaleZ: Float;
 
-	var body:Bt.RigidBody = null;
-	var motionState:Bt.MotionState;
-	var btshape:Bt.CollisionShape;
+	var body: Bt.RigidBody = null;
+	var motionState: Bt.MotionState;
+	var btshape: Bt.CollisionShape;
 	var ready = false;
 	public var id = 0;
-	public var heightData:haxe.io.Bytes = null;
+	public var heightData: haxe.io.Bytes = null;
 
 	static var nextId = 0;
-	static var ammoArray:Int = -1;
+	static var ammoArray: Int = -1;
 	static var gimpactRegistered = false;
 	static var first = true;
-	static var vec1:Bt.Vector3;
-	static var vec2:Bt.Vector3;
-	static var vec3:Bt.Vector3;
-	static var quat1:Bt.Quaternion;
-	static var trans1:Bt.Transform;
-	static var trans2:Bt.Transform;
+	static var vec1: Bt.Vector3;
+	static var vec2: Bt.Vector3;
+	static var vec3: Bt.Vector3;
+	static var quat1: Bt.Quaternion;
+	static var trans1: Bt.Transform;
+	static var trans2: Bt.Transform;
 	static var quat = new Quat();
 
 	static var convexHullCache = new Map<MeshData, Bt.ConvexHullShape>();
 	static var triangleMeshCache = new Map<MeshData, Bt.TriangleMesh>();
 	static var usersCache = new Map<MeshData, Int>();
 
-	public function new(shape:Shape) {
+	public function new(shape: Shape) {
 		super();
 
 		if (first) {
@@ -74,7 +74,7 @@ class PhysicsBody extends iron.Trait {
 		notifyOnAdd(init);
 	}
 
-	inline function withMargin(f:Float) { return f - f * collisionMargin; }
+	inline function withMargin(f: Float) { return f - f * collisionMargin; }
 
 	function init() {
 		if (ready) return;
@@ -101,7 +101,7 @@ class PhysicsBody extends iron.Trait {
 			var coneZ = new Bt.ConeShapeZ(
 				withMargin(transform.dim.x / 2), // Radius
 				withMargin(transform.dim.z));	 // Height
-			var cone:Bt.ConeShape = coneZ;
+			var cone: Bt.ConeShape = coneZ;
 			btshape = cone;
 		}
 		else if (shape == Shape.Cylinder) {
@@ -109,7 +109,7 @@ class PhysicsBody extends iron.Trait {
 			vec1.setY(withMargin(transform.dim.y / 2));
 			vec1.setZ(withMargin(transform.dim.z / 2));
 			var cylZ = new Bt.CylinderShapeZ(vec1);
-			var cyl:Bt.CylinderShape = cylZ;
+			var cyl: Bt.CylinderShape = cylZ;
 			btshape = cyl;
 		}
 		else if (shape == Shape.Capsule) {
@@ -117,7 +117,7 @@ class PhysicsBody extends iron.Trait {
 			var capsZ = new Bt.CapsuleShapeZ(
 				withMargin(r), // Radius
 				withMargin(transform.dim.z - r * 2)); // Distance between 2 sphere centers
-			var caps:Bt.CapsuleShape = capsZ;
+			var caps: Bt.CapsuleShape = capsZ;
 			btshape = caps;
 		}
 		else if (shape == Shape.Mesh) {
@@ -125,7 +125,7 @@ class PhysicsBody extends iron.Trait {
 			if (mass > 0) {
 				var shapeGImpact = new Bt.GImpactMeshShape(meshInterface);
 				shapeGImpact.updateBound();
-				var shapeConcave:Bt.ConcaveShape = shapeGImpact;
+				var shapeConcave: Bt.ConcaveShape = shapeGImpact;
 				btshape = shapeConcave;
 				if (!gimpactRegistered) {
 					gimpactRegistered = true;
@@ -134,8 +134,8 @@ class PhysicsBody extends iron.Trait {
 			}
 			else {
 				var shapeBvh = new Bt.BvhTriangleMeshShape(meshInterface, true, true);
-				var shapeTri:Bt.TriangleMeshShape = shapeBvh;
-				var shapeConcave:Bt.ConcaveShape = shapeTri;
+				var shapeTri: Bt.TriangleMeshShape = shapeBvh;
+				var shapeConcave: Bt.ConcaveShape = shapeTri;
 				btshape = shapeConcave;
 			}
 		}
@@ -211,7 +211,7 @@ class PhysicsBody extends iron.Trait {
 
 		var p = trans.getOrigin();
 		var q = trans.getRotation();
-		var qw:Bt.QuadWord = q;
+		var qw: Bt.QuadWord = q;
 
 		var transform = object.transform;
 		transform.loc.set(p.x(), p.y(), p.z());
@@ -234,12 +234,12 @@ class PhysicsBody extends iron.Trait {
 		body.activate(false);
 	}
 
-	public function setGravity(v:Vec4) {
+	public function setGravity(v: Vec4) {
 		vec1.setValue(v.x, v.y, v.z);
 		body.setGravity(vec1);
 	}
 
-	public function applyForce(force:Vec4, loc:Vec4 = null) {
+	public function applyForce(force: Vec4, loc: Vec4 = null) {
 		activate();
 		vec1.setValue(force.x, force.y, force.z);
 		if (loc == null) {
@@ -251,7 +251,7 @@ class PhysicsBody extends iron.Trait {
 		}
 	}
 
-	public function applyImpulse(impulse:Vec4, loc:Vec4 = null) {
+	public function applyImpulse(impulse: Vec4, loc: Vec4 = null) {
 		activate();
 		vec1.setValue(impulse.x, impulse.y, impulse.z);
 		if (loc == null) {
@@ -263,54 +263,54 @@ class PhysicsBody extends iron.Trait {
 		}
 	}
 
-	public function applyTorque(torque:Vec4) {
+	public function applyTorque(torque: Vec4) {
 		activate();
 		vec1.setValue(torque.x, torque.y, torque.z);
 		body.applyTorque(vec1);
 	}
 
-	public function applyTorqueImpulse(torque:Vec4) {
+	public function applyTorqueImpulse(torque: Vec4) {
 		activate();
 		vec1.setValue(torque.x, torque.y, torque.z);
 		body.applyTorqueImpulse(vec1);
 	}
 
-	public function setLinearFactor(x:Float, y:Float, z:Float) {
+	public function setLinearFactor(x: Float, y: Float, z: Float) {
 		vec1.setValue(x, y, z);
 		body.setLinearFactor(vec1);
 	}
 
-	public function setAngularFactor(x:Float, y:Float, z:Float) {
+	public function setAngularFactor(x: Float, y: Float, z: Float) {
 		vec1.setValue(x, y, z);
 		body.setAngularFactor(vec1);
 	}
 
-	public function getLinearVelocity():Vec4 {
+	public function getLinearVelocity(): Vec4 {
 		var v = body.getLinearVelocity();
 		return new Vec4(v.x(), v.y(), v.z());
 	}
 
-	public function setLinearVelocity(x:Float, y:Float, z:Float) {
+	public function setLinearVelocity(x: Float, y: Float, z: Float) {
 		vec1.setValue(x, y, z);
 		body.setLinearVelocity(vec1);
 	}
 
-	public function getAngularVelocity():Vec4 {
+	public function getAngularVelocity(): Vec4 {
 		var v = body.getAngularVelocity();
 		return new Vec4(v.x(), v.y(), v.z());
 	}
 
-	public function setAngularVelocity(x:Float, y:Float, z:Float) {
+	public function setAngularVelocity(x: Float, y: Float, z: Float) {
 		vec1.setValue(x, y, z);
 		body.setAngularVelocity(vec1);
 	}
 
-	public function setFriction(f:Float) {
+	public function setFriction(f: Float) {
 		body.setFriction(f);
 		this.friction = f;
 	}
 
-	function setScale(v:Vec4) {
+	function setScale(v: Vec4) {
 		currentScaleX = v.x;
 		currentScaleY = v.y;
 		currentScaleZ = v.z;
@@ -318,8 +318,8 @@ class PhysicsBody extends iron.Trait {
 		vec1.setY(v.y / bodyScaleY);
 		vec1.setZ(v.z / bodyScaleZ);
 		btshape.setLocalScaling(vec1);
-		var worldDyn:Bt.DynamicsWorld = PhysicsWorld.active.world;
-		var worldCol:Bt.CollisionWorld = worldDyn;
+		var worldDyn: Bt.DynamicsWorld = PhysicsWorld.active.world;
+		var worldCol: Bt.CollisionWorld = worldDyn;
 		worldCol.updateSingleAabb(body);
 	}
 
@@ -336,12 +336,12 @@ class PhysicsBody extends iron.Trait {
 		activate();
 	}
 
-	function setCcd(sphereRadius:Float, motionThreshold = 1e-7) {
+	function setCcd(sphereRadius: Float, motionThreshold = 1e-7) {
 		body.setCcdSweptSphereRadius(sphereRadius);
 		body.setCcdMotionThreshold(motionThreshold);
 	}
 
-	function fillConvexHull(scale:Vec4, margin:kha.FastFloat):Bt.ConvexHullShape {
+	function fillConvexHull(scale: Vec4, margin: kha.FastFloat): Bt.ConvexHullShape {
 		// Check whether shape already exists
 		var data = cast(object, MeshObject).data;
 		var shape = convexHullCache.get(data);
@@ -356,9 +356,9 @@ class PhysicsBody extends iron.Trait {
 
 		var positions = data.geom.positions;
 
-		var sx:kha.FastFloat = scale.x * (1.0 - margin) * (1 / 32767);
-		var sy:kha.FastFloat = scale.y * (1.0 - margin) * (1 / 32767);
-		var sz:kha.FastFloat = scale.z * (1.0 - margin) * (1 / 32767);
+		var sx: kha.FastFloat = scale.x * (1.0 - margin) * (1 / 32767);
+		var sy: kha.FastFloat = scale.y * (1.0 - margin) * (1 / 32767);
+		var sz: kha.FastFloat = scale.z * (1.0 - margin) * (1 / 32767);
 
 		if (data.raw.scale_pos != null) {
 			sx *= data.raw.scale_pos;
@@ -375,7 +375,7 @@ class PhysicsBody extends iron.Trait {
 		return shape;
 	}
 
-	function fillTriangleMesh(scale:Vec4):Bt.TriangleMesh {
+	function fillTriangleMesh(scale: Vec4): Bt.TriangleMesh {
 		// Check whether shape already exists
 		var data = cast(object, MeshObject).data;
 		var triangleMesh = triangleMeshCache.get(data);
@@ -391,9 +391,9 @@ class PhysicsBody extends iron.Trait {
 		var positions = data.geom.positions;
 		var indices = data.geom.indices;
 
-		var sx:kha.FastFloat = scale.x * (1 / 32767);
-		var sy:kha.FastFloat = scale.y * (1 / 32767);
-		var sz:kha.FastFloat = scale.z * (1 / 32767);
+		var sx: kha.FastFloat = scale.x * (1 / 32767);
+		var sy: kha.FastFloat = scale.y * (1 / 32767);
+		var sz: kha.FastFloat = scale.z * (1 / 32767);
 
 		if (data.raw.scale_pos != null) {
 			sx *= data.raw.scale_pos;

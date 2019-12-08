@@ -1,15 +1,11 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
-import arm.Tool;
 
 class MakeBrush {
 
-	public static function run(vert:MaterialShader, frag:MaterialShader) {
+	public static function run(vert: MaterialShader, frag: MaterialShader) {
 		if (UITrait.inst.brush3d) {
 			#if (kha_opengl || kha_webgl)
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');

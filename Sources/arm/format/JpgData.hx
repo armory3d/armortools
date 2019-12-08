@@ -30,8 +30,8 @@
 package arm.format;
 
 typedef JpgData = {
-	var width : Int;
-	var height : Int;
-	var quality : Float;
-	var pixels : haxe.io.Bytes;
+	var width: Int;
+	var height: Int;
+	var quality: Float;
+	var pixels: haxe.io.Bytes;
 }

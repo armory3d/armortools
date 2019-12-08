@@ -3,8 +3,6 @@ package arm.ui;
 import kha.System;
 import kha.Image;
 import kha.graphics4.PipelineState;
-import kha.graphics4.VertexShader;
-import kha.graphics4.FragmentShader;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
@@ -12,25 +10,24 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
-import arm.data.ConstData;
 import arm.Tool;
 
 @:access(zui.Zui)
 class UIView2D {
 
-	public static var inst:UIView2D;
+	public static var inst: UIView2D;
 	public var show = false;
 	public var type = View2DLayer;
-	public var wx:Int;
-	public var wy:Int;
-	public var ww:Int;
-	public var wh:Int;
-	public var ui:Zui;
+	public var wx: Int;
+	public var wy: Int;
+	public var ww: Int;
+	public var wh: Int;
+	public var ui: Zui;
 	public var hwnd = Id.handle();
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	var pipe:PipelineState;
+	var pipe: PipelineState;
 	var texType = TexBase;
 	var uvmapShow = false;
 
@@ -58,7 +55,7 @@ class UIView2D {
 		iron.App.notifyOnUpdate(update);
 	}
 
-	function render(g:kha.graphics2.Graphics) {
+	function render(g: kha.graphics2.Graphics) {
 		if (UINodes.inst.defaultWindowW == 0) UINodes.inst.defaultWindowW = Std.int(iron.App.w() / 2);
 		if (UINodes.inst.defaultWindowH == 0) UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
 		ww = UINodes.inst.defaultWindowW;
@@ -96,7 +93,7 @@ class UIView2D {
 			// Texture
 			ui.g.pipeline = pipe;
 			var l = Context.layer;
-			var tex:Image = null;
+			var tex: Image = null;
 
 			if (type == View2DLayer) {
 				tex = texType == TexBase ? l.texpaint : texType == TexNormal ? l.texpaint_nor : l.texpaint_pack;
@@ -177,7 +174,7 @@ class UIView2D {
 			}
 
 			if (Context.tool == ToolPicker) {
-				var cursorImg = Res.get('cursor.png');
+				var cursorImg = Res.get("cursor.png");
 				ui.g.drawScaledImage(cursorImg, tx + tw * UITrait.inst.uvxPicked - 16, ty + th * UITrait.inst.uvyPicked - 16, 32, 32);
 			}
 		}
@@ -197,7 +194,9 @@ class UIView2D {
 			mouse.x < wx ||
 			mouse.x > wx + ww ||
 			mouse.y < wy + headerh ||
-			mouse.y > wy + wh) return;
+			mouse.y > wy + wh) {
+			return;
+		}
 
 		if (mouse.down("right") || mouse.down("middle")) {
 			panX += mouse.movementX;

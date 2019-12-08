@@ -5,7 +5,7 @@ package arm.format;
 
 class ExrWriter {
 
-	public function new(out:haxe.io.BytesOutput, width:Int, height:Int, src:haxe.io.Bytes, bits = 16, type = 1, off = 0) {
+	public function new(out: haxe.io.BytesOutput, width: Int, height: Int, src: haxe.io.Bytes, bits = 16, type = 1, off = 0) {
 		out.writeByte(0x76); // magic
 		out.writeByte(0x2f);
 		out.writeByte(0x31);
@@ -14,9 +14,9 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 		out.writeByte(0);
-		out.writeString('channels');
+		out.writeString("channels");
 		out.writeByte(0);
-		out.writeString('chlist');
+		out.writeString("chlist");
 		out.writeByte(0);
 
 		out.writeByte(55);
@@ -26,7 +26,7 @@ class ExrWriter {
 
 		var attrib = bits == 16 ? 1 : 2; // half, float
 
-		out.writeByte('B'.code); // B
+		out.writeByte("B".code); // B
 		out.writeByte(0);
 
 		out.writeByte(attrib);
@@ -49,7 +49,7 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 
-		out.writeByte('G'.code); // G
+		out.writeByte("G".code); // G
 		out.writeByte(0);
 
 		out.writeByte(attrib);
@@ -72,7 +72,7 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 
-		out.writeByte('R'.code); // R
+		out.writeByte("R".code); // R
 		out.writeByte(0);
 
 		out.writeByte(attrib);
@@ -97,9 +97,9 @@ class ExrWriter {
 
 		out.writeByte(0);
 
-		out.writeString('compression');
+		out.writeString("compression");
 		out.writeByte(0);
-		out.writeString('compression');
+		out.writeString("compression");
 		out.writeByte(0);
 
 		out.writeByte(1);
@@ -108,9 +108,9 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0); // no compression
 
-		out.writeString('dataWindow');
+		out.writeString("dataWindow");
 		out.writeByte(0);
-		out.writeString('box2i');
+		out.writeString("box2i");
 		out.writeByte(0);
 
 		out.writeByte(16);
@@ -131,19 +131,19 @@ class ExrWriter {
 		var ww = width - 1;
 		var hh = height - 1;
 
-		out.writeByte(ww&0xFF);
-		out.writeByte((ww>>8)&0xFF);
-		out.writeByte((ww>>16)&0xFF);
-		out.writeByte((ww>>24)&0xFF);
+		out.writeByte(ww & 0xff);
+		out.writeByte((ww >> 8) & 0xff);
+		out.writeByte((ww >> 16) & 0xff);
+		out.writeByte((ww >> 24) & 0xff);
 
-		out.writeByte(hh&0xFF);
-		out.writeByte((hh>>8)&0xFF);
-		out.writeByte((hh>>16)&0xFF);
-		out.writeByte((hh>>24)&0xFF);
+		out.writeByte(hh & 0xff);
+		out.writeByte((hh >> 8) & 0xff);
+		out.writeByte((hh >> 16) & 0xff);
+		out.writeByte((hh >> 24) & 0xff);
 
-		out.writeString('displayWindow');
+		out.writeString("displayWindow");
 		out.writeByte(0);
-		out.writeString('box2i');
+		out.writeString("box2i");
 		out.writeByte(0);
 
 		out.writeByte(16);
@@ -161,19 +161,19 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 
-		out.writeByte(ww&0xFF);
-		out.writeByte((ww>>8)&0xFF);
-		out.writeByte((ww>>16)&0xFF);
-		out.writeByte((ww>>24)&0xFF);
+		out.writeByte(ww & 0xff);
+		out.writeByte((ww >> 8) & 0xff);
+		out.writeByte((ww >> 16) & 0xff);
+		out.writeByte((ww >> 24) & 0xff);
 
-		out.writeByte(hh&0xFF);
-		out.writeByte((hh>>8)&0xFF);
-		out.writeByte((hh>>16)&0xFF);
-		out.writeByte((hh>>24)&0xFF);
+		out.writeByte(hh & 0xff);
+		out.writeByte((hh >> 8) & 0xff);
+		out.writeByte((hh >> 16) & 0xff);
+		out.writeByte((hh >> 24) & 0xff);
 
-		out.writeString('lineOrder');
+		out.writeString("lineOrder");
 		out.writeByte(0);
-		out.writeString('lineOrder');
+		out.writeString("lineOrder");
 		out.writeByte(0);
 
 		out.writeByte(1);
@@ -182,9 +182,9 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0); // increasing Y
 
-		out.writeString('pixelAspectRatio');
+		out.writeString("pixelAspectRatio");
 		out.writeByte(0);
-		out.writeString('float');
+		out.writeString("float");
 		out.writeByte(0);
 
 		out.writeByte(4);
@@ -197,10 +197,10 @@ class ExrWriter {
 		out.writeByte(0x80);
 		out.writeByte(0x3f);
 
-		out.writeString('screenWindowCenter');
+		out.writeString("screenWindowCenter");
 		out.writeByte(0);
 
-		out.writeString('v2f');
+		out.writeString("v2f");
 		out.writeByte(0);
 
 		out.writeByte(8);
@@ -218,10 +218,10 @@ class ExrWriter {
 		out.writeByte(0);
 		out.writeByte(0);
 
-		out.writeString('screenWindowWidth');
+		out.writeString("screenWindowWidth");
 		out.writeByte(0);
 
-		out.writeString('float');
+		out.writeString("float");
 		out.writeByte(0);
 
 		out.writeByte(4);
@@ -246,10 +246,10 @@ class ExrWriter {
 		// line offset table
 		var ofs = kHeaderSize + kScanlineTableSize;
 		for (y in 0...height) {
-			out.writeByte(ofs & 0xFF);
-			out.writeByte((ofs >> 8) & 0xFF);
-			out.writeByte((ofs >> 16) & 0xFF);
-			out.writeByte((ofs >> 24) & 0xFF);
+			out.writeByte(ofs & 0xff);
+			out.writeByte((ofs >> 8) & 0xff);
+			out.writeByte((ofs >> 16) & 0xff);
+			out.writeByte((ofs >> 24) & 0xff);
 			out.writeByte(0);
 			out.writeByte(0);
 			out.writeByte(0);
@@ -261,7 +261,7 @@ class ExrWriter {
 		var stride = channels * byteSize;
 		var pos = 0;
 
-		function writeLine16(bytePos:Int) {
+		function writeLine16(bytePos: Int) {
 			for (x in 0...width) {
 				out.writeByte(src.get(bytePos    ));
 				out.writeByte(src.get(bytePos + 1));
@@ -269,7 +269,7 @@ class ExrWriter {
 			}
 		}
 
-		function writeLine32(bytePos:Int) {
+		function writeLine32(bytePos: Int) {
 			for (x in 0...width) {
 				out.writeByte(src.get(bytePos    ));
 				out.writeByte(src.get(bytePos + 1));
@@ -281,13 +281,13 @@ class ExrWriter {
 
 		var writeLine = bits == 16 ? writeLine16 : writeLine32;
 
-		function writeBGR(off:Int) {
+		function writeBGR(off: Int) {
 			writeLine(pos + byteSize * 2);
 			writeLine(pos + byteSize);
 			writeLine(pos    );
 		}
 
-		function writeSingle(off:Int) {
+		function writeSingle(off: Int) {
 			writeLine(pos + off * byteSize);
 			writeLine(pos + off * byteSize);
 			writeLine(pos + off * byteSize);
@@ -297,15 +297,15 @@ class ExrWriter {
 
 		for (y in 0...height) {
 			// coordinate
-			out.writeByte(y & 0xFF);
-			out.writeByte((y >> 8) & 0xFF);
-			out.writeByte((y >> 16) & 0xFF);
-			out.writeByte((y >> 24) & 0xFF);
+			out.writeByte(y & 0xff);
+			out.writeByte((y >> 8) & 0xff);
+			out.writeByte((y >> 16) & 0xff);
+			out.writeByte((y >> 24) & 0xff);
 			// data size
-			out.writeByte(pixelRowSize & 0xFF);
-			out.writeByte((pixelRowSize >> 8) & 0xFF);
-			out.writeByte((pixelRowSize >> 16) & 0xFF);
-			out.writeByte((pixelRowSize >> 24) & 0xFF);
+			out.writeByte(pixelRowSize & 0xff);
+			out.writeByte((pixelRowSize >> 8) & 0xff);
+			out.writeByte((pixelRowSize >> 16) & 0xff);
+			out.writeByte((pixelRowSize >> 24) & 0xff);
 			// data
 			writeData(off);
 			pos += width * stride;

@@ -1,15 +1,11 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
-import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Tool;
 
 class MakeColorIdPicker {
 
-	public static function run(vert:MaterialShader, frag:MaterialShader) {
+	public static function run(vert: MaterialShader, frag: MaterialShader) {
 		// Mangle vertices to form full screen triangle
 		vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 

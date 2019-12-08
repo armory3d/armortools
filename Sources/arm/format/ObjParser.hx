@@ -3,41 +3,41 @@ package arm.format;
 class ObjParser {
 
 	public static var splitCode = "o".code; // Object split, "g" for groups, "u"semtl for materials
-	public var posa:kha.arrays.Int16Array = null;
-	public var nora:kha.arrays.Int16Array = null;
-	public var texa:kha.arrays.Int16Array = null;
-	public var inda:kha.arrays.Uint32Array = null;
-	public var udims:Array<kha.arrays.Uint32Array> = null; // Indices split per udim tile
+	public var posa: kha.arrays.Int16Array = null;
+	public var nora: kha.arrays.Int16Array = null;
+	public var texa: kha.arrays.Int16Array = null;
+	public var inda: kha.arrays.Uint32Array = null;
+	public var udims: Array<kha.arrays.Uint32Array> = null; // Indices split per udim tile
 	public var udimsU = 1; // Number of horizontal udim tiles
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
 	public var hasNext = false; // File contains multiple objects
 	public var pos = 0;
-	var posTemp:Array<Float>;
-	var uvTemp:Array<Float>;
-	var norTemp:Array<Float>;
-	var va:kha.arrays.Uint32Array;
-	var ua:kha.arrays.Uint32Array;
-	var na:kha.arrays.Uint32Array;
+	var posTemp: Array<Float>;
+	var uvTemp: Array<Float>;
+	var norTemp: Array<Float>;
+	var va: kha.arrays.Uint32Array;
+	var ua: kha.arrays.Uint32Array;
+	var na: kha.arrays.Uint32Array;
 	var vi = 0;
 	var ui = 0;
 	var ni = 0;
-	var buf:haxe.io.UInt8Array = null;
+	var buf: haxe.io.UInt8Array = null;
 
 	static var vindOff = 0;
 	static var tindOff = 0;
 	static var nindOff = 0;
-	static var bytes:haxe.io.Bytes = null;
-	static var posFirst:Array<Float>;
-	static var uvFirst:Array<Float>;
-	static var norFirst:Array<Float>;
+	static var bytes: haxe.io.Bytes = null;
+	static var posFirst: Array<Float>;
+	static var uvFirst: Array<Float>;
+	static var norFirst: Array<Float>;
 
-	public function new(blob:kha.Blob, startPos = 0, udim = false) {
+	public function new(blob: kha.Blob, startPos = 0, udim = false) {
 		pos = startPos;
-		var posIndices:Array<Int> = [];
-		var uvIndices:Array<Int> = [];
-		var norIndices:Array<Int> = [];
+		var posIndices: Array<Int> = [];
+		var uvIndices: Array<Int> = [];
+		var norIndices: Array<Int> = [];
 		var readingFaces = false;
 		var readingObject = false;
 		var fullAttrib = false;
@@ -227,7 +227,7 @@ class ObjParser {
 					while (uvTemp[i * 2 + 1] > tilesV) tilesV++;
 				}
 
-				function getTile(i1:Int, i2:Int, i3:Int):Int {
+				function getTile(i1: Int, i2: Int, i3: Int): Int {
 					var u1 = uvTemp[uvIndices[i1] * 2    ];
 					var v1 = uvTemp[uvIndices[i1] * 2 + 1];
 					var u2 = uvTemp[uvIndices[i2] * 2    ];
@@ -324,7 +324,7 @@ class ObjParser {
 		}
 	}
 
-	function readFloat():Float {
+	function readFloat(): Float {
 		var bi = 0;
 		while (true) { // Read into buffer
 			var c = bytes.get(pos);
@@ -355,7 +355,7 @@ class ObjParser {
 		return res;
 	}
 
-	function readInt():Int {
+	function readInt(): Int {
 		var bi = 0;
 		while (true) { // Read into buffer
 			var c = bytes.get(pos);
@@ -375,7 +375,7 @@ class ObjParser {
 		return res;
 	}
 
-	function readString():String {
+	function readString(): String {
 		var s = "";
 		while (true) {
 			var c = bytes.get(pos);

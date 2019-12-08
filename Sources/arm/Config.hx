@@ -12,23 +12,23 @@ import arm.Tool;
 
 class Config {
 
-	public static var raw:TConfig = null;
-	public static var keymap:Dynamic; // raw.Keymap
+	public static var raw: TConfig = null;
+	public static var keymap: Dynamic; // raw.Keymap
 	public static var configLoaded = false;
 
-	public static function load(done:Void->Void) {
+	public static function load(done: Void->Void) {
 		try {
-			Data.getBlob('config.arm', function(blob:kha.Blob) {
+			Data.getBlob("config.arm", function(blob: kha.Blob) {
 				configLoaded = true;
 				raw = Json.parse(blob.toString());
 				done();
 			});
 		}
-		catch(e:Dynamic) { done(); }
+		catch (e: Dynamic) { done(); }
 	}
 
 	public static function save() {
-		var path = Data.dataPath + 'config.arm';
+		var path = Data.dataPath + "config.arm";
 		var bytes = Bytes.ofString(Json.stringify(raw));
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
@@ -59,7 +59,7 @@ class Config {
 		#end
 	}
 
-	public static function init():TConfig {
+	public static function init(): TConfig {
 		if (!configLoaded) {
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
@@ -133,7 +133,7 @@ class Config {
 		return raw;
 	}
 
-	public static inline function getSuperSampleQuality(f:Float):Int {
+	public static inline function getSuperSampleQuality(f: Float): Int {
 		return f == 0.25 ? 0 :
 			   f == 0.5 ? 1 :
 			   f == 1.0 ? 2 :
@@ -141,7 +141,7 @@ class Config {
 			   f == 2.0 ? 4 : 5;
 	}
 
-	public static inline function getSuperSampleSize(i:Int):Float {
+	public static inline function getSuperSampleSize(i: Int): Float {
 		return i == 0 ? 0.25 :
 			   i == 1 ? 0.5 :
 			   i == 2 ? 1.0 :
@@ -169,7 +169,7 @@ class Config {
 		Context.ddirty = 2;
 	}
 
-	public static function getTextureRes():Int {
+	public static function getTextureRes(): Int {
 		var resHandle = UITrait.inst.resHandle;
 		if (resHandle.position == Res128) return 128;
 		if (resHandle.position == Res256) return 256;
@@ -182,7 +182,7 @@ class Config {
 		return 0;
 	}
 
-	public static function getTextureResBias():Float {
+	public static function getTextureResBias(): Float {
 		var resHandle = UITrait.inst.resHandle;
 		if (resHandle.position == Res128) return 16.0;
 		if (resHandle.position == Res256) return 8.0;
@@ -195,7 +195,7 @@ class Config {
 		return 1.0;
 	}
 
-	public static function getTextureResPos(i:Int):Int {
+	public static function getTextureResPos(i: Int): Int {
 		if (i == 128) return Res128;
 		if (i == 256) return Res256;
 		if (i == 512) return Res512;
@@ -210,25 +210,25 @@ class Config {
 }
 
 typedef TConfig = {
-	@:optional var window_mode:Null<Int>; // window, fullscreen
-	@:optional var window_w:Null<Int>;
-	@:optional var window_h:Null<Int>;
-	@:optional var window_x:Null<Int>;
-	@:optional var window_y:Null<Int>;
-	@:optional var window_resizable:Null<Bool>;
-	@:optional var window_maximizable:Null<Bool>;
-	@:optional var window_minimizable:Null<Bool>;
-	@:optional var window_vsync:Null<Bool>;
-	@:optional var window_scale:Null<Float>;
-	@:optional var rp_supersample:Null<Float>;
-	@:optional var rp_ssgi:Null<Bool>;
-	@:optional var rp_ssr:Null<Bool>;
-	@:optional var rp_bloom:Null<Bool>;
-	@:optional var rp_motionblur:Null<Bool>;
-	@:optional var rp_gi:Null<Bool>;
+	@:optional var window_mode: Null<Int>; // window, fullscreen
+	@:optional var window_w: Null<Int>;
+	@:optional var window_h: Null<Int>;
+	@:optional var window_x: Null<Int>;
+	@:optional var window_y: Null<Int>;
+	@:optional var window_resizable: Null<Bool>;
+	@:optional var window_maximizable: Null<Bool>;
+	@:optional var window_minimizable: Null<Bool>;
+	@:optional var window_vsync: Null<Bool>;
+	@:optional var window_scale: Null<Float>;
+	@:optional var rp_supersample: Null<Float>;
+	@:optional var rp_ssgi: Null<Bool>;
+	@:optional var rp_ssr: Null<Bool>;
+	@:optional var rp_bloom: Null<Bool>;
+	@:optional var rp_motionblur: Null<Bool>;
+	@:optional var rp_gi: Null<Bool>;
 	// Ext
-	@:optional var version:Null<Int>;
-	@:optional var plugins:Array<String>;
-	@:optional var undo_steps:Null<Int>;
-	@:optional var keymap:Dynamic; // Map<String, String>
+	@:optional var version: Null<Int>;
+	@:optional var plugins: Array<String>;
+	@:optional var undo_steps: Null<Int>;
+	@:optional var keymap: Dynamic; // Map<String, String>
 }

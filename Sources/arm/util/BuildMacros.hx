@@ -9,7 +9,7 @@ class BuildMacros {
 	}
 
 	macro public static function sha():ExprOf<String> {
-		var proc = new sys.io.Process('git', ['log', "--pretty=format:'%h'", '-n', '1']);
+		var proc = new sys.io.Process("git", ["log", "--pretty=format:'%h'", "-n", "1"]);
 		try {
 			return Context.makeExpr(proc.stdout.readLine(), Context.currentPos());
 		}

@@ -8,21 +8,24 @@ import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
+import arm.Tool;
 
 class Inc {
 
-	static var path:RenderPath;
+	static var path: RenderPath;
 	public static var superSample = 1.0;
 
 	static var pointIndex = 0;
 	static var spotIndex = 0;
 	static var lastFrame = -1;
+	static var lastX = -1.0;
+	static var lastY = -1.0;
 
 	#if rp_voxelao
 	static var voxelsCreated = false;
 	#end
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 		path = _path;
 		var config = Config.raw;
 		superSample = config.rp_supersample;
@@ -79,24 +82,24 @@ class Inc {
 	}
 	#end
 
-	public static inline function getVoxelRes():Int {
+	public static inline function getVoxelRes(): Int {
 		return 256;
 	}
 
-	public static inline function getVoxelResZ():Float {
+	public static inline function getVoxelResZ(): Float {
 		return 1.0;
 	}
 
-	public static inline function getSuperSampling():Float {
+	public static inline function getSuperSampling(): Float {
 		return superSample;
 	}
 
 	#if arm_painter
-	public static function drawCompass(currentG:kha.graphics4.Graphics) {
+	public static function drawCompass(currentG: kha.graphics4.Graphics) {
 		if (UITrait.inst.showCompass) {
 			var scene = Scene.active;
 			var cam = Scene.active.camera;
-			var gizmo:MeshObject = cast scene.getChild(".GizmoTranslate");
+			var gizmo: MeshObject = cast scene.getChild(".GizmoTranslate");
 
 			var visible = gizmo.visible;
 			var parent = gizmo.parent;
@@ -159,5 +162,31 @@ class Inc {
 		UITrait.inst.viewIndex = -1;
 	}
 
-	public static inline function ssaa4():Bool { return Config.raw.rp_supersample == 4; }
+	public static inline function ssaa4(): Bool { return Config.raw.rp_supersample == 4; }
+
+	public static function isCached(): Bool {
+		#if (!arm_creator)
+		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
+			var mouse = Input.getMouse();
+			var mx = lastX;
+			var my = lastY;
+			lastX = mouse.viewX;
+			lastY = mouse.viewY;
+			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
+			if (Context.ddirty > -2) {
+				path.setTarget("");
+				path.bindTarget("taa", "tex");
+				ssaa4() ?
+					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
+					path.drawShader("shader_datas/copy_pass/copy_pass");
+				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+				if (Context.ddirty <= 0) Context.ddirty--;
+			}
+			endSplit();
+			RenderPathPaint.finishPaint();
+			return true;
+		}
+		#end
+		return false;
+	}
 }

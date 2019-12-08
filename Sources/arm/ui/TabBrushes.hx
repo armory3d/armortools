@@ -1,7 +1,6 @@
 package arm.ui;
 
 import iron.system.Time;
-import iron.system.Input;
 import zui.Zui;
 import arm.data.BrushSlot;
 
@@ -11,7 +10,7 @@ class TabBrushes {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab1, "Brushes")) {
-			ui.row([1/4,1/4]);
+			ui.row([1 / 4, 1 / 4]);
 			if (ui.button("New")) {
 				// UITrait.inst.headerHandle.redraws = 2;
 				Context.brush = new BrushSlot();
@@ -25,7 +24,7 @@ class TabBrushes {
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
-				ui.row([for (i in 0...num) 1/num]);
+				ui.row([for (i in 0...num) 1 / num]);
 
 				ui._x += 2;
 				if (row > 0) ui._y += 6;
@@ -55,10 +54,10 @@ class TabBrushes {
 					ui.imageInvertY = Project.brushes[i].previewReady;
 					#end
 
-					var uix = ui._x;
-					var uiy = ui._y;
+					//var uix = ui._x;
+					//var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
-					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, tile, tile, tile, tile);
+					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.png"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showBrushNodes();
@@ -69,8 +68,8 @@ class TabBrushes {
 						// App.dragBrush = Context.brush;
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
-							var b = Project.brushes[i];
+						UIMenu.draw(function(ui: Zui) {
+							//var b = Project.brushes[i];
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(Project.brushes[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 

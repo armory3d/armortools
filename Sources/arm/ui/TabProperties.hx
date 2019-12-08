@@ -1,15 +1,12 @@
 package arm.ui;
 
 import zui.Id;
-import iron.object.LightObject;
-import iron.object.CameraObject;
-import iron.Scene;
 
 class TabProperties {
 
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab1, 'Properties')) {
+		if (ui.tab(UITrait.inst.htab1, "Properties")) {
 			if (Context.object != null) {
 
 				var h = Id.handle();
@@ -129,7 +126,7 @@ class TabProperties {
 		}
 	}
 
-	static function roundfp(f:Float, precision = 2):Float {
+	static function roundfp(f: Float, precision = 2): Float {
 		f *= Math.pow(10, precision);
 		return Math.round(f) / Math.pow(10, precision);
 	}

@@ -5,7 +5,7 @@ import arm.sys.File;
 
 class ImportPlugin {
 
-	public static function run(path:String) {
+	public static function run(path: String) {
 		if (!Path.isPlugin(path)) {
 			Log.error(Strings.error1);
 			return;

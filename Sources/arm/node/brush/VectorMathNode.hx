@@ -5,16 +5,16 @@ import iron.math.Vec4;
 @:keep
 class VectorMathNode extends LogicNode {
 
-	public var operation:String;
+	public var operation: String;
 	var v = new Vec4();
 
-	public function new(tree:LogicTree) {
+	public function new(tree: LogicTree) {
 		super(tree);
 	}
 
-	override function get(from:Int):Dynamic {
-		var v1:Vec4 = inputs[0].get();
-		var v2:Vec4 = inputs[1].get();
+	override function get(from: Int): Dynamic {
+		var v1: Vec4 = inputs[0].get();
+		var v2: Vec4 = inputs[1].get();
 		v.setFrom(v1);
 		var f = 0.0;
 		switch (operation) {

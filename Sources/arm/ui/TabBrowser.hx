@@ -1,6 +1,5 @@
 package arm.ui;
 
-import zui.Zui;
 import zui.Id;
 import zui.Ext;
 

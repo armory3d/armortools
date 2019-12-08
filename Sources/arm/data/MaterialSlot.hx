@@ -10,13 +10,13 @@ import arm.util.RenderUtil;
 
 class MaterialSlot {
 	public var nodes = new Nodes();
-	public var canvas:TNodeCanvas;
-	public var image:Image = null; // 200px
-	public var imageIcon:Image = null; // 50px
+	public var canvas: TNodeCanvas;
+	public var image: Image = null; // 200px
+	public var imageIcon: Image = null; // 50px
 	public var previewReady = false;
-	public var data:MaterialData;
+	public var data: MaterialData;
 	public var id = 0;
-	static var defaultCanvas:String = null;
+	static var defaultCanvas: String = null;
 
 	public var paintBase = true;
 	public var paintOpac = true;
@@ -28,7 +28,7 @@ class MaterialSlot {
 	public var paintEmis = true;
 	public var paintSubs = true;
 
-	public function new(m:MaterialData = null, c:TNodeCanvas = null) {
+	public function new(m: MaterialData = null, c: TNodeCanvas = null) {
 		for (mat in Project.materials) if (mat.id >= id) id = mat.id + 1;
 		data = m;
 
@@ -39,7 +39,7 @@ class MaterialSlot {
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob('defaults/default_material.json', function(b:Blob) {
+				Data.getBlob("defaults/default_material.json", function(b: Blob) {
 					defaultCanvas = b.toString();
 				});
 			}

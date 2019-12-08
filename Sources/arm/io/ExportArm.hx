@@ -5,7 +5,6 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.system.ArmPack;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.format.Lz4;
 import arm.sys.Path;
 import arm.Project;
@@ -14,19 +13,19 @@ using StringTools;
 
 class ExportArm {
 
-	public static function run(path:String) {
-		var raw:TSceneFormat = { mesh_datas: [ Context.paintObject.data.raw ] };
+	public static function run(path: String) {
+		var raw: TSceneFormat = { mesh_datas: [ Context.paintObject.data.raw ] };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, b.getData());
 	}
 
 	public static function runProject() {
-		var mnodes:Array<TNodeCanvas> = [];
-		var bnodes:Array<TNodeCanvas> = [];
+		var mnodes: Array<TNodeCanvas> = [];
+		var bnodes: Array<TNodeCanvas> = [];
 
 		for (m in Project.materials) {
-			var c:TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+			var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 			for (n in c.nodes) {
 				if (n.type == "TEX_IMAGE") {
 					n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
@@ -36,37 +35,16 @@ class ExportArm {
 		}
 		for (b in Project.brushes) bnodes.push(b.canvas);
 
-		var md:Array<TMeshData> = [];
+		var md: Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
 
-		var texture_files:Array<String> = [];
-		for (a in Project.assets) {
-			// Convert image path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
-			if (sameDrive) {
-				texture_files.push(Path.toRelative(Project.filepath, a.file));
-			}
-			else {
-				texture_files.push(a.file);
-			}
-		}
-
-		var mesh_files:Array<String> = [];
-		for (file in Project.meshAssets) {
-			// Convert mesh path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == file.charAt(0);
-			if (sameDrive) {
-				mesh_files.push(Path.toRelative(Project.filepath, file));
-			}
-			else {
-				mesh_files.push(file);
-			}
-		}
+		var texture_files = assetsToFiles();
+		var mesh_files = meshesToFiles();
 
 		var bitsPos = UITrait.inst.bitsHandle.position;
 		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
 
-		var ld:Array<TLayerData> = [];
+		var ld: Array<TLayerData> = [];
 		for (l in Project.layers) {
 			ld.push({
 				res: l.texpaint.width,
@@ -101,10 +79,10 @@ class ExportArm {
 		Log.info("Project saved.");
 	}
 
-	public static function runMaterial(path:String) {
-		var mnodes:Array<TNodeCanvas> = [];
+	public static function runMaterial(path: String) {
+		var mnodes: Array<TNodeCanvas> = [];
 		var m = Context.material;
-		var c:TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 		for (n in c.nodes) {
 			if (n.type == "TEX_IMAGE") {
 				n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
@@ -112,17 +90,7 @@ class ExportArm {
 		}
 		mnodes.push(c);
 
-		var texture_files:Array<String> = [];
-		for (a in Project.assets) {
-			// Convert image path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
-			if (sameDrive) {
-				texture_files.push(Path.toRelative(Project.filepath, a.file));
-			}
-			else {
-				texture_files.push(a.file);
-			}
-		}
+		var texture_files = assetsToFiles();
 
 		var raw = {
 			version: App.version,
@@ -133,5 +101,35 @@ class ExportArm {
 		var bytes = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, bytes.getData());
+	}
+
+	static function assetsToFiles(): Array<String> {
+		var texture_files: Array<String> = [];
+		for (a in Project.assets) {
+			// Convert image path from absolute to relative
+			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
+			if (sameDrive) {
+				texture_files.push(Path.toRelative(Project.filepath, a.file));
+			}
+			else {
+				texture_files.push(a.file);
+			}
+		}
+		return texture_files;
+	}
+
+	static function meshesToFiles(): Array<String> {
+		var mesh_files: Array<String> = [];
+		for (file in Project.meshAssets) {
+			// Convert mesh path from absolute to relative
+			var sameDrive = Project.filepath.charAt(0) == file.charAt(0);
+			if (sameDrive) {
+				mesh_files.push(Path.toRelative(Project.filepath, file));
+			}
+			else {
+				mesh_files.push(file);
+			}
+		}
+		return mesh_files;
 	}
 }

@@ -700,11 +700,11 @@ class JpgWriter {
 	}
 }
 
-private class BitString {
+class BitString {
 	public var len: Int;
 	public var val: Int;
 
-	public function new( l: Int, v: Int ) {
+	public function new(l: Int, v: Int) {
 		len = l;
 		val = v;
 	}

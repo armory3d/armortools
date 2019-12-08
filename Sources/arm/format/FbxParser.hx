@@ -6,10 +6,10 @@ import arm.format.FbxLibrary;
 @:access(arm.format.Geometry)
 class FbxParser {
 
-	public var posa:kha.arrays.Int16Array = null;
-	public var nora:kha.arrays.Int16Array = null;
-	public var texa:kha.arrays.Int16Array = null;
-	public var inda:kha.arrays.Uint32Array = null;
+	public var posa: kha.arrays.Int16Array = null;
+	public var nora: kha.arrays.Int16Array = null;
+	public var texa: kha.arrays.Int16Array = null;
+	public var inda: kha.arrays.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
@@ -26,26 +26,26 @@ class FbxParser {
 	public var sy = 1.0;
 	public var sz = 1.0;
 
-	var geoms:Array<Geometry>;
+	var geoms: Array<Geometry>;
 	var current = 0;
 	var binary = true;
 
-	public function new(blob:kha.Blob) {
+	public function new(blob: kha.Blob) {
 		var magic = "Kaydara FBX Binary\x20\x20\x00\x1a\x00";
-		var s = '';
+		var s = "";
 		for (i in 0...magic.length) s += String.fromCharCode(blob.readU8(i));
 		binary = s == magic;
 
 		var fbx = binary ? FbxBinaryParser.parse(blob) : Parser.parse(blob.toString());
 		var lib = new FbxLibrary();
 		try { lib.load(fbx); }
-		catch(e:Dynamic) { trace(e); }
+		catch (e: Dynamic) { trace(e); }
 
 		geoms = lib.getAllGeometries();
 		next();
 	}
 
-	public function next():Bool {
+	public function next(): Bool {
 		if (current >= geoms.length) return false;
 		var geom = geoms[current];
 		var lib = geom.lib;
@@ -58,7 +58,7 @@ class FbxParser {
 			for (c in connects) {
 				var node = lib.ids.get(c);
 				for (p in FbxTools.getAll(node, "Properties70.P")) {
-					switch(FbxTools.toString(p.props[0])) {
+					switch (FbxTools.toString(p.props[0])) {
 					case "Lcl Translation":
 						tx = FbxTools.toFloat(p.props[4]) / 100;
 						ty = FbxTools.toFloat(p.props[5]) / 100;

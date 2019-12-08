@@ -9,7 +9,7 @@ using StringTools;
 
 class ImportTexture {
 
-	public static function run(path:String) {
+	public static function run(path: String) {
 		if (!Path.isTexture(path)) {
 			Log.error(Strings.error1);
 			return;
@@ -21,12 +21,12 @@ class ImportTexture {
 		var importer = Path.textureImporters.get(ext);
 		if (importer == null) importer = defaultImporter;
 
-		importer(path, function(image:Image) {
+		importer(path, function(image: Image) {
 			Data.cachedImages.set(path, image);
 			var ar = path.split("/");
 			ar = ar[ar.length - 1].split("\\");
 			var name = ar[ar.length - 1];
-			var asset:TAsset = {name: name, file: path, id: Project.assetId++};
+			var asset: TAsset = {name: name, file: path, id: Project.assetId++};
 			Project.assets.push(asset);
 			if (Context.texture == null) Context.texture = asset;
 			Project.assetNames.push(name);
@@ -41,7 +41,7 @@ class ImportTexture {
 		});
 	}
 
-	static function defaultImporter(path:String, done:Image->Void) {
+	static function defaultImporter(path: String, done: Image->Void) {
 		Data.getImage(path, done);
 	}
 }

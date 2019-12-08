@@ -6,7 +6,7 @@ class NodesBrush {
 
 	public static var categories = ["Nodes"];
 
-	public static var list:Array<Array<TNode>> = [
+	public static var list: Array<Array<TNode>> = [
 		[ // Category 0
 			{
 				id: 0,
@@ -394,7 +394,7 @@ class NodesBrush {
 		]
 	];
 
-	public static function createNode(nodeType:String):TNode {
+	public static function createNode(nodeType: String): TNode {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {

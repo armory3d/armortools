@@ -6,7 +6,6 @@ import iron.system.Input;
 import iron.object.MeshObject;
 import iron.RenderPath;
 import iron.Scene;
-import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
@@ -17,18 +16,18 @@ import arm.Tool;
 
 class RenderPathPaint {
 
-	static var path:RenderPath;
+	static var path: RenderPath;
 	static var initVoxels = true; // Bake AO
-	static var pushUndoLast:Bool;
-	static var painto:MeshObject = null;
-	static var planeo:MeshObject = null;
-	static var visibles:Array<Bool> = null;
+	static var pushUndoLast: Bool;
+	static var painto: MeshObject = null;
+	static var planeo: MeshObject = null;
+	static var visibles: Array<Bool> = null;
 	static var mergedObjectVisible = false;
 	static var savedFov = 0.0;
 	static var dilated = true;
 	static var baking = false;
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 		path = _path;
 
 		{
@@ -36,7 +35,7 @@ class RenderPathPaint {
 			t.name = "texpaint_colorid";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 
@@ -45,7 +44,7 @@ class RenderPathPaint {
 			t.name = "texpaint_picker";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 		{
@@ -53,7 +52,7 @@ class RenderPathPaint {
 			t.name = "texpaint_nor_picker";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 		{
@@ -61,7 +60,7 @@ class RenderPathPaint {
 			t.name = "texpaint_pack_picker";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 
@@ -82,7 +81,7 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 
-				var mo:MeshObject = cast Scene.active.getChild(".ParticleEmitter");
+				var mo: MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
 				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
 				mo.visible = false;
@@ -209,7 +208,7 @@ class RenderPathPaint {
 						t.name = "texpaint_blur";
 						t.width = Std.int(Config.getTextureRes() * 0.95);
 						t.height = Std.int(Config.getTextureRes() * 0.95);
-						t.format = 'RGBA32';
+						t.format = "RGBA32";
 						RenderPath.active.createRenderTarget(t);
 					}
 					var blurs = Math.round(UITrait.inst.bakeCurvSmooth);

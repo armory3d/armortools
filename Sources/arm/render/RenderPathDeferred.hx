@@ -3,23 +3,13 @@ package arm.render;
 import kha.System;
 import iron.RenderPath;
 import iron.Scene;
-import iron.math.Mat4;
-import iron.math.Vec4;
-import iron.math.Quat;
-import iron.system.Input;
-import iron.object.MeshObject;
 #if arm_painter
-import arm.util.ViewportUtil;
-import arm.util.RenderUtil;
 import arm.ui.UITrait;
-import arm.ui.UIView2D;
-import arm.node.MaterialParser;
-import arm.Tool;
 #end
 
 class RenderPathDeferred {
 
-	public static var path:RenderPath;
+	public static var path: RenderPath;
 
 	#if rp_voxelao
 	static var voxels = "voxels";
@@ -28,10 +18,8 @@ class RenderPathDeferred {
 	public static var voxelFreq = 6; // Revoxelizing frequency
 	#end
 	public static var taaFrame = 0;
-	static var lastX = -1.0;
-	static var lastY = -1.0;
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 
 		path = _path;
 
@@ -257,7 +245,7 @@ class RenderPathDeferred {
 			t.name = "empty_white";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'R8';
+			t.format = "R8";
 			var rt = new RenderTarget(t);
 			var b = haxe.io.Bytes.alloc(1);
 			b.set(0, 255);
@@ -294,28 +282,7 @@ class RenderPathDeferred {
 
 		Inc.beginSplit();
 
-		#if (!arm_creator)
-		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
-			var mouse = Input.getMouse();
-			var mx = lastX;
-			var my = lastY;
-			lastX = mouse.viewX;
-			lastY = mouse.viewY;
-			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
-			if (Context.ddirty > -2) {
-				path.setTarget("");
-				path.bindTarget("taa", "tex");
-				Inc.ssaa4() ?
-					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
-					path.drawShader("shader_datas/copy_pass/copy_pass");
-				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-				if (Context.ddirty <= 0) Context.ddirty--;
-			}
-			Inc.endSplit();
-			RenderPathPaint.finishPaint();
-			return;
-		}
-		#end
+		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
 		var skipTaa = UITrait.inst.splitView;

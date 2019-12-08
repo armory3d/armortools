@@ -1,19 +1,15 @@
 package arm.render;
 
 import kha.System;
-import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
-import arm.Tool;
 
 class RenderPathForward {
 
-	public static var path:RenderPath;
-	static var lastX = -1.0;
-	static var lastY = -1.0;
+	public static var path: RenderPath;
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 		path = _path;
 
 		// Already loaded in deferred
@@ -105,28 +101,7 @@ class RenderPathForward {
 		#if arm_painter
 		Inc.beginSplit();
 
-		#if (!arm_creator)
-		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UITrait.inst.worktab.position == SpaceScene)) {
-			var mouse = Input.getMouse();
-			var mx = lastX;
-			var my = lastY;
-			lastX = mouse.viewX;
-			lastY = mouse.viewY;
-			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
-			if (Context.ddirty > -2) {
-				path.setTarget("");
-				path.bindTarget("taa", "tex");
-				Inc.ssaa4() ?
-					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
-					path.drawShader("shader_datas/copy_pass/copy_pass");
-				if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
-				if (Context.ddirty <= 0) Context.ddirty--;
-			}
-			Inc.endSplit();
-			RenderPathPaint.finishPaint();
-			return;
-		}
-		#end
+		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
 		var skipTaa = UITrait.inst.splitView;

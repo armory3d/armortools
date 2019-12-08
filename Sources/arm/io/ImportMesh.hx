@@ -1,6 +1,5 @@
 package arm.io;
 
-import kha.Font;
 import kha.arrays.Int16Array;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
@@ -13,7 +12,6 @@ import arm.util.ViewportUtil;
 import arm.sys.Path;
 import arm.ui.UITrait;
 import arm.ui.UIView2D;
-import arm.ui.UINodes;
 import arm.Project;
 import arm.Tool;
 using StringTools;
@@ -22,7 +20,7 @@ class ImportMesh {
 
 	public static var clearLayers = true;
 
-	public static function run(path:String, _clearLayers = true) {
+	public static function run(path: String, _clearLayers = true) {
 		if (!Path.isMesh(path)) {
 			Log.error(Strings.error1);
 			return;
@@ -55,7 +53,7 @@ class ImportMesh {
 
 		if (Project.paintObjects.length > 1) {
 			// Sort by name
-			Project.paintObjects.sort(function(a, b):Int {
+			Project.paintObjects.sort(function(a, b): Int {
 				if (a.name < b.name) return -1;
 				else if (a.name > b.name) return 1;
 				return 0;
@@ -86,61 +84,26 @@ class ImportMesh {
 		#end
 	}
 
-	public static function makeMesh(mesh:Dynamic, path:String) {
+	public static function makeMesh(mesh: Dynamic, path: String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
 			Log.error(Strings.error3);
 			return;
 		}
 
-		var raw:TMeshData = null;
+		var raw: TMeshData = null;
 		if (UITrait.inst.worktab.position == SpaceScene) {
-			raw = {
-				name: mesh.name,
-				vertex_arrays: [
-					{ values: mesh.posa, attrib: "pos" },
-					{ values: mesh.nora, attrib: "nor" }
-				],
-				index_arrays: [
-					{ values: mesh.inda, material: 0 }
-				],
-				scale_pos: mesh.scalePos,
-				scale_tex: mesh.scaleTex
-			};
+			raw = rawMesh(mesh);
 			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		}
 		else {
-
 			if (mesh.texa == null) {
-				Log.error(Strings.error4);
-				var verts = Std.int(mesh.posa.length / 4);
-				mesh.texa = new Int16Array(verts * 2);
-				var n = new Vec4();
-				for (i in 0...verts) {
-					n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
-					// Sphere projection
-					// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
-					// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
-					// Equirect
-					mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
-					mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
-				}
+				equirectUnwrap(mesh);
 			}
-			raw = {
-				name: mesh.name,
-				vertex_arrays: [
-					{ values: mesh.posa, attrib: "pos" },
-					{ values: mesh.nora, attrib: "nor" },
-					{ values: mesh.texa, attrib: "tex" }
-				],
-				index_arrays: [
-					{ values: mesh.inda, material: 0 }
-				],
-				scale_pos: mesh.scalePos,
-				scale_tex: mesh.scaleTex
-			};
+			raw = rawMesh(mesh);
+			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		}
 
-		new MeshData(raw, function(md:MeshData) {
+		new MeshData(raw, function(md: MeshData) {
 
 			// Append
 			if (UITrait.inst.worktab.position == SpaceScene) {
@@ -165,8 +128,7 @@ class ImportMesh {
 
 				Context.selectObject(object);
 			}
-			// Replace
-			else {
+			else { // Replace
 				Context.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
@@ -213,38 +175,15 @@ class ImportMesh {
 		});
 	}
 
-	public static function addMesh(mesh:Dynamic) {
+	public static function addMesh(mesh: Dynamic) {
 
 		if (mesh.texa == null) {
-			Log.error(Strings.error4);
-			var verts = Std.int(mesh.posa.length / 4);
-			mesh.texa = new Int16Array(verts * 2);
-			var n = new Vec4();
-			for (i in 0...verts) {
-				n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
-				// Sphere projection
-				// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
-				// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
-				// Equirect
-				mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
-				mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
-			}
+			equirectUnwrap(mesh);
 		}
-		var raw:TMeshData = {
-			name: mesh.name,
-			vertex_arrays: [
-				{ values: mesh.posa, attrib: "pos" },
-				{ values: mesh.nora, attrib: "nor" },
-				{ values: mesh.texa, attrib: "tex" }
-			],
-			index_arrays: [
-				{ values: mesh.inda, material: 0 }
-			],
-			scale_pos: mesh.scalePos,
-			scale_tex: mesh.scaleTex
-		};
+		var raw = rawMesh(mesh);
+		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 
-		new MeshData(raw, function(md:MeshData) {
+		new MeshData(raw, function(md: MeshData) {
 
 			var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 			object.name = mesh.name;
@@ -260,5 +199,36 @@ class ImportMesh {
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
 		});
+	}
+
+	static function equirectUnwrap(mesh: Dynamic) {
+		Log.error(Strings.error4);
+		var verts = Std.int(mesh.posa.length / 4);
+		mesh.texa = new Int16Array(verts * 2);
+		var n = new Vec4();
+		for (i in 0...verts) {
+			n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+			// Sphere projection
+			// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+			// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+			// Equirect
+			mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+			mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
+		}
+	}
+
+	static function rawMesh(mesh: Dynamic): TMeshData {
+		return {
+			name: mesh.name,
+			vertex_arrays: [
+				{ values: mesh.posa, attrib: "pos" },
+				{ values: mesh.nora, attrib: "nor" }
+			],
+			index_arrays: [
+				{ values: mesh.inda, material: 0 }
+			],
+			scale_pos: mesh.scalePos,
+			scale_tex: mesh.scaleTex
+		};
 	}
 }

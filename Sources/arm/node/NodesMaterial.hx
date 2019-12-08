@@ -6,7 +6,7 @@ class NodesMaterial {
 
 	public static var categories = ["Input", "Texture", "Color", "Vector", "Converter"];
 
-	public static var list:Array<Array<TNode>> = [
+	public static var list: Array<Array<TNode>> = [
 		[ // Input
 			{
 				id: 0,
@@ -2162,7 +2162,7 @@ class NodesMaterial {
 		]
 	];
 
-	public static function createNode(nodeType:String):TNode {
+	public static function createNode(nodeType: String): TNode {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {

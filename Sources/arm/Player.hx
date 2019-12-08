@@ -10,7 +10,7 @@ class Player {
 		#end
 	}
 
-	static function saveAndQuitCallback(save:Bool) {
+	static function saveAndQuitCallback(save: Bool) {
 		System.stop();
 	}
 }

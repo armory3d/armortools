@@ -14,10 +14,10 @@ class TabTextures {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab2, "Textures")) {
-			ui.row([1/4, 1/4]);
+			ui.row([1 / 4, 1 / 4]);
 
 			if (ui.button("Import")) {
-				UIFiles.show(Path.textureFormats.join(","), false, function(path:String) {
+				UIFiles.show(Path.textureFormats.join(","), false, function(path: String) {
 					ImportAsset.run(path);
 				});
 			}
@@ -34,7 +34,7 @@ class TabTextures {
 					// Align into rows
 					if (i % num == 0) {
 						ui._y += ui.ELEMENT_OFFSET() * 1.5;
-						ui.row([for (i in 0...num) 1/num]);
+						ui.row([for (i in 0...num) 1 / num]);
 					}
 					else ui._x += 1;
 
@@ -75,13 +75,13 @@ class TabTextures {
 					if (ui.isHovered) ui.tooltipImage(img, 256);
 
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
+						UIMenu.draw(function(ui: Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(asset.name, Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Export", Left)) {
-								UIFiles.show("png", true, function(path:String) {
+								UIFiles.show("png", true, function(path: String) {
 									var target = kha.Image.createRenderTarget(img.width, img.height);
-									function exportTexture(g:kha.graphics4.Graphics) {
+									function exportTexture(g: kha.graphics4.Graphics) {
 										target.g2.begin(false);
 										target.g2.drawImage(img, 0, 0);
 										target.g2.end();
@@ -125,7 +125,7 @@ class TabTextures {
 				}
 			}
 			else {
-				var img = Res.get('icons.png');
+				var img = Res.get("icons.png");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui.image(img, ui.t.BUTTON_COL, imgw, 0, imgw, imgw, imgw);
 				if (ui.isHovered) ui.tooltip("Drag and drop files here");

@@ -12,19 +12,19 @@ class TabOutliner {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Outliner")) {
-			ui.row([1/4]);
+			ui.row([1 / 4]);
 			if (ui.button("Import")) Project.importMesh();
 
 			var i = 0;
-			function drawList(h:Handle, o:Object) {
-				if (o.name.charAt(0) == '.') return; // Hidden
+			function drawList(h: Handle, o: Object) {
+				if (o.name.charAt(0) == ".") return; // Hidden
 				if (Std.is(o, MeshObject) && cast(o, MeshObject).force_context != null) return; // Show mesh context only
 				var b = false;
 				if (Context.object == o) {
 					ui.fill(0, 0, ui._windowW, ui.t.ELEMENT_H, ui.t.HIGHLIGHT_COL);
 				}
 				if (o.children.length > 0) {
-					ui.row([1/13, 12/13]);
+					ui.row([1 / 13, 12 / 13]);
 					b = ui.panel(h.nest(i, {selected: true}), "", true);
 					ui.text(o.name);
 				}

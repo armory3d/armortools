@@ -1,37 +1,33 @@
 package arm.ui;
 
 import haxe.Json;
-import kha.Blob;
 import kha.Image;
 import kha.System;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
-import iron.data.Data;
 import iron.system.Input;
 import arm.node.NodesMaterial;
 import arm.node.NodesBrush;
 import arm.node.MaterialParser;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
-import arm.data.BrushSlot;
-import arm.data.MaterialSlot;
 import arm.Tool;
 
 @:access(zui.Zui)
 class UINodes {
 
-	public static var inst:UINodes;
+	public static var inst: UINodes;
 
 	public var show = false;
 	public var defaultWindowW = 0;
 	public var defaultWindowH = 0;
-	public var wx:Int;
-	public var wy:Int;
-	public var ww:Int;
-	public var wh:Int;
+	public var wx: Int;
+	public var wy: Int;
+	public var ww: Int;
+	public var wh: Int;
 
-	public var ui:Zui;
+	public var ui: Zui;
 	public var canvasType = CanvasMaterial;
 	var drawMenu = false;
 	var showMenu = false;
@@ -47,12 +43,12 @@ class UINodes {
 	var mchanged = false;
 	var mstartedlast = false;
 	var recompileMat = false; // Mat preview
-	var nodeSearchSpawn:TNode = null;
+	var nodeSearchSpawn: TNode = null;
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
-	var lastCanvas:TNodeCanvas;
+	var lastCanvas: TNodeCanvas;
 
-	public var grid:Image = null;
+	public var grid: Image = null;
 	public var hwnd = Id.handle();
 
 	public function new() {
@@ -67,7 +63,7 @@ class UINodes {
 		ui.scrollEnabled = false;
 	}
 
-	function onLinkDrag(linkDrag:TNodeLink, isNewLink:Bool) {
+	function onLinkDrag(linkDrag: TNodeLink, isNewLink: Bool) {
 		if (isNewLink) {
 			nodeSearch(-1, -1, function() {
 				var n = getNodes().nodesSelected[0];
@@ -85,17 +81,17 @@ class UINodes {
 		}
 	}
 
-	public function getCanvas():TNodeCanvas {
+	public function getCanvas(): TNodeCanvas {
 		if (canvasType == CanvasMaterial) return getCanvasMaterial();
 		else return Context.brush.canvas;
 	}
 
-	public function getCanvasMaterial():TNodeCanvas {
+	public function getCanvasMaterial(): TNodeCanvas {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		return isScene ? Context.materialScene.canvas : Context.material.canvas;
 	}
 
-	public function getNodes():Nodes {
+	public function getNodes(): Nodes {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
 		else return Context.brush.nodes;
@@ -182,11 +178,11 @@ class UINodes {
 		if (decal) RenderUtil.makeDecalPreview();
 	}
 
-	function nodeSearch(x = -1, y = -1, done:Void->Void = null) {
+	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {
 		var kb = Input.getKeyboard();
 		var searchHandle = Id.handle();
 		var first = true;
-		UIMenu.draw(function(ui:Zui) {
+		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
 			ui.textInput(searchHandle, "");
 			ui.changed = false;
@@ -243,12 +239,12 @@ class UINodes {
 		}, x, y);
 	}
 
-	public function getNodeX():Int {
+	public function getNodeX(): Int {
 		var mouse = Input.getMouse();
 		return Std.int((mouse.x - wx - getNodes().PAN_X()) / getNodes().SCALE());
 	}
 
-	public function getNodeY():Int {
+	public function getNodeY(): Int {
 		var mouse = Input.getMouse();
 		return Std.int((mouse.y - wy - getNodes().PAN_Y()) / getNodes().SCALE());
 	}
@@ -273,7 +269,7 @@ class UINodes {
 		grid.g2.end();
 	}
 
-	public function render(g:kha.graphics2.Graphics) {
+	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
 			recompileMat = false;
 			if (Layers.isFillMaterial()) {
@@ -325,7 +321,7 @@ class UINodes {
 
 			// Node previews
 			if (nodes.nodesSelected.length > 0) {
-				var img:kha.Image = null;
+				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
 				if (sel.type == "TEX_IMAGE") {
 					var id = sel.buttons[0].default_value;
@@ -470,26 +466,26 @@ class UINodes {
 		}
 	}
 
-	public function acceptAssetDrag(assetIndex:Int) {
+	public function acceptAssetDrag(assetIndex: Int) {
 		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = assetIndex;
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptLayerDrag(layerIndex:Int) {
+	public function acceptLayerDrag(layerIndex: Int) {
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
 		n.buttons[0].default_value = layerIndex;
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptMaterialDrag(layerIndex:Int) {
+	public function acceptMaterialDrag(layerIndex: Int) {
 		var n = NodesMaterial.createNode("MATERIAL");
 		n.buttons[0].default_value = layerIndex;
 		getNodes().nodesSelected = [n];
 	}
 
-	public static function makeNode(n:TNode, nodes:Nodes, canvas:TNodeCanvas):TNode {
-		var node:TNode = Json.parse(Json.stringify(n));
+	public static function makeNode(n: TNode, nodes: Nodes, canvas: TNodeCanvas): TNode {
+		var node: TNode = Json.parse(Json.stringify(n));
 		node.id = nodes.getNodeId(canvas.nodes);
 		node.x = UINodes.inst.getNodeX();
 		node.y = UINodes.inst.getNodeY();

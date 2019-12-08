@@ -1,22 +1,19 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Tool;
 
 class MakeMesh {
 
-	public static function run(data:MaterialShaderData):MaterialShaderContext {
-		var context_id = 'mesh';
-		var con_mesh:MaterialShaderContext = data.add_context({
+	public static function run(data: MaterialShaderData): MaterialShaderContext {
+		var context_id = "mesh";
+		var con_mesh: MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
-			compare_mode: 'less',
-			cull_mode: UITrait.inst.cullBackfaces ? 'clockwise' : 'none',
-			vertex_elements: [{name: "pos", data: 'short4norm'},{name: "nor", data: 'short2norm'},{name: "tex", data: 'short2norm'}] });
+			compare_mode: "less",
+			cull_mode: UITrait.inst.cullBackfaces ? "clockwise" : "none",
+			vertex_elements: [{name: "pos", data: "short4norm"},{name: "nor", data: "short2norm"},{name: "tex", data: "short2norm"}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
@@ -236,8 +233,7 @@ class MakeMesh {
 						frag.write('basecol = ' + MaterialBuilder.blendMode(frag, l.blending, 'basecol', 'col_tex0.rgb', 'factor0') + ';');
 					}
 
-					if (MaterialBuilder.emisUsed ||
-						Context.layer.paintNor) {
+					if (MaterialBuilder.emisUsed || Context.layer.paintNor) {
 
 						frag.add_shared_sampler('sampler2D texpaint_nor' + id);
 						frag.write('col_nor0 = textureLodShared(texpaint_nor' + id + ', texCoord, 0.0);');
@@ -254,9 +250,7 @@ class MakeMesh {
 						}
 					}
 
-					if (Context.layer.paintOcc ||
-						Context.layer.paintRough ||
-						Context.layer.paintMet) {
+					if (Context.layer.paintOcc || Context.layer.paintRough || Context.layer.paintMet) {
 						frag.add_shared_sampler('sampler2D texpaint_pack' + id);
 						frag.write('col_pack0 = textureLodShared(texpaint_pack' + id + ', texCoord, 0.0);');
 
@@ -359,7 +353,7 @@ class MakeMesh {
 		return con_mesh;
 	}
 
-	static function getMaxVisibleLayers():Int {
+	static function getMaxVisibleLayers(): Int {
 		#if (kha_direct3d11 || kha_direct3d12)
 		// 128 texture slots available
 		// 4 textures per layer (3 + 1 mask)

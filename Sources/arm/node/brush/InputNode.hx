@@ -17,7 +17,7 @@ class InputNode extends LogicNode {
 	var lockStartX = 0.0;
 	var lockStartY = 0.0;
 
-	public function new(tree:LogicTree) {
+	public function new(tree: LogicTree) {
 		super(tree);
 		tree.notifyOnUpdate(function() {
 
@@ -66,7 +66,7 @@ class InputNode extends LogicNode {
 		});
 	}
 
-	override function get(from:Int):Dynamic {
+	override function get(from: Int): Dynamic {
 		return coords;
 	}
 }

@@ -27,25 +27,25 @@
 package arm.format;
 
 enum Color {
-	ColGrey( alpha : Bool ) ; // 1|2|4|8|16 without alpha , 8|16 with alpha
-	ColTrue( alpha : Bool ); // 8|16
+	ColGrey(alpha: Bool); // 1|2|4|8|16 without alpha , 8|16 with alpha
+	ColTrue(alpha: Bool); // 8|16
 	ColIndexed; // 1|2|4|8
 }
 
 typedef Header = {
-	var width : Int;
-	var height : Int;
-	var colbits : Int;
-	var color : Color;
-	var interlaced : Bool;
+	var width: Int;
+	var height: Int;
+	var colbits: Int;
+	var color: Color;
+	var interlaced: Bool;
 }
 
 enum Chunk {
 	CEnd;
-	CHeader( h : Header );
-	CData( b : haxe.io.Bytes );
-	CPalette( b : haxe.io.Bytes );
-	CUnknown( id : String, data : haxe.io.Bytes );
+	CHeader(h: Header);
+	CData(b: haxe.io.Bytes);
+	CPalette(b: haxe.io.Bytes);
+	CUnknown(id: String, data: haxe.io.Bytes);
 }
 
 typedef PngData = List<Chunk>;

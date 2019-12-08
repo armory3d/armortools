@@ -11,11 +11,8 @@ import arm.node.MaterialParser;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
-import arm.io.ImportBlend;
-import arm.io.ImportArm;
 import arm.io.ExportArm;
 import arm.Tool;
-using StringTools;
 
 class TabMaterials {
 
@@ -28,12 +25,12 @@ class TabMaterials {
 		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
 		if (ui.tab(UITrait.inst.htab1, "Materials")) {
-			ui.row([1/4,1/4,1/4]);
+			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button("New")) {
 				if (isScene) {
 					if (Context.object != Context.paintObject && Std.is(Context.object, MeshObject)) {
 						MaterialUtil.removeMaterialCache();
-						Data.getMaterial("Scene", "Material2", function(md:iron.data.MaterialData) {
+						Data.getMaterial("Scene", "Material2", function(md: iron.data.MaterialData) {
 							ui.g.end();
 							md.name = "Material2." + materials.length;
 							Context.materialScene = new MaterialSlot(md);
@@ -66,7 +63,7 @@ class TabMaterials {
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
-				ui.row([for (i in 0...num) 1/num]);
+				ui.row([for (i in 0...num) 1 / num]);
 
 				ui._x += 2;
 				if (row > 0) ui._y += 6;
@@ -99,7 +96,7 @@ class TabMaterials {
 					var uix = ui._x;
 					var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
-					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get('icons.png'), -1, null, tile, tile, tile, tile);
+					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.png"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
 						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showMaterialNodes();
@@ -110,7 +107,7 @@ class TabMaterials {
 						App.dragMaterial = getSelectedMaterial();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
+						UIMenu.draw(function(ui: Zui) {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
@@ -123,7 +120,7 @@ class TabMaterials {
 
 							if (ui.button("Export", Left)) {
 								selectMaterial(i);
-								UIFiles.show("arm", true, function(path:String) {
+								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
 									if (f == "") f = "untitled";
 									ExportArm.runMaterial(path + "/" + f);
@@ -197,5 +194,7 @@ class TabMaterials {
 		if (decal) RenderUtil.makeDecalPreview();
 	}
 
-	static function getSelectedMaterial() { return UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material; }
+	static function getSelectedMaterial():MaterialSlot {
+		return UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
+	}
 }

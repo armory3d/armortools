@@ -1,15 +1,12 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Tool;
 
 class MakeTexcoord {
 
-	public static function run(vert:MaterialShader, frag:MaterialShader) {
+	public static function run(vert: MaterialShader, frag: MaterialShader) {
 
 		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
@@ -44,8 +41,7 @@ class MakeTexcoord {
 				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
-		// TexCoords - uvmap
-		else if (uvType == UVMap) {
+		else if (uvType == UVMap) { // TexCoords - uvmap
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');

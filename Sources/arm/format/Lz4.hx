@@ -27,16 +27,16 @@ import js.lib.Uint8Array;
 
 class Lz4 {
 
-	static var hashTable:Int32Array = null;
+	static var hashTable: Int32Array = null;
 
-	static inline function encodeBound(size:Int):Int {
-		return untyped size > 0x7E000000 ? 0 : size + (size / 255 | 0) + 16;
+	static inline function encodeBound(size: Int): Int {
+		return untyped size > 0x7e000000 ? 0 : size + (size / 255 | 0) + 16;
 	}
 
-	public static function encode(b:Bytes):Bytes {
+	public static function encode(b: Bytes): Bytes {
 		var iBuf = new Uint8Array(cast b.getData());
 		var iLen = iBuf.byteLength;
-		if (iLen >= 0x7E000000) { trace("LZ4 range error"); return null; }
+		if (iLen >= 0x7e000000) { trace("LZ4 range error"); return null; }
 
 		// "The last match must start at least 12 bytes before end of block"
 		var lastMatchPos = iLen - 12;
@@ -57,20 +57,20 @@ class Lz4 {
 		while (true) {
 			var refPos = 0;
 			var mOffset = 0;
-			var sequence = iBuf[iPos] << 8 | iBuf[iPos+1] << 16 | iBuf[iPos+2] << 24;
+			var sequence = iBuf[iPos] << 8 | iBuf[iPos + 1] << 16 | iBuf[iPos + 2] << 24;
 
 			// Match-finding loop
 			while (iPos <= lastMatchPos) {
-				sequence = sequence >>> 8 | iBuf[iPos+3] << 24;
-				var hash = (sequence * 0x9E37 & 0xFFFF) + (sequence * 0x79B1 >>> 16) & 0xFFFF;
+				sequence = sequence >>> 8 | iBuf[iPos + 3] << 24;
+				var hash = (sequence * 0x9e37 & 0xffff) + (sequence * 0x79b1 >>> 16) & 0xffff;
 				refPos = hashTable[hash];
 				hashTable[hash] = iPos;
 				mOffset = iPos - refPos;
 				if (mOffset < 65536 &&
-					iBuf[refPos+0] == ((sequence       ) & 0xFF) &&
-					iBuf[refPos+1] == ((sequence >>>  8) & 0xFF) &&
-					iBuf[refPos+2] == ((sequence >>> 16) & 0xFF) &&
-					iBuf[refPos+3] == ((sequence >>> 24) & 0xFF)
+					iBuf[refPos + 0] == ((sequence       ) & 0xff) &&
+					iBuf[refPos + 1] == ((sequence >>>  8) & 0xff) &&
+					iBuf[refPos + 2] == ((sequence >>> 16) & 0xff) &&
+					iBuf[refPos + 3] == ((sequence >>> 24) & 0xff)
 				) {
 					break;
 				}
@@ -92,7 +92,7 @@ class Lz4 {
 
 			// Write token, length of literals if needed
 			if (lLen >= 15) {
-				oBuf[oPos++] = 0xF0 | token;
+				oBuf[oPos++] = 0xf0 | token;
 				var l = lLen - 15;
 				while (l >= 255) {
 					oBuf[oPos++] = 255;
@@ -112,8 +112,8 @@ class Lz4 {
 			if (mLen == 0) break;
 
 			// Write offset of match
-			oBuf[oPos+0] = mOffset;
-			oBuf[oPos+1] = mOffset >>> 8;
+			oBuf[oPos + 0] = mOffset;
+			oBuf[oPos + 1] = mOffset >>> 8;
 			oPos += 2;
 
 			// Write length of match if needed
@@ -132,7 +132,7 @@ class Lz4 {
 		// Last sequence is literals only
 		var lLen = iLen - anchorPos;
 		if (lLen >= 15) {
-			oBuf[oPos++] = 0xF0;
+			oBuf[oPos++] = 0xf0;
 			var l = lLen - 15;
 			while (l >= 255) {
 				oBuf[oPos++] = 255;
@@ -150,8 +150,8 @@ class Lz4 {
 		return Bytes.ofData(cast new Uint8Array(oBuf.buffer, 0, oPos));
 	}
 
-	public static function decode(b:Bytes, oLen:Int):Bytes {
-		var iBuf:Uint8Array = new Uint8Array(cast b.getData());
+	public static function decode(b: Bytes, oLen: Int): Bytes {
+		var iBuf: Uint8Array = new Uint8Array(cast b.getData());
 		var iLen = iBuf.byteLength;
 		var oBuf = new Uint8Array(oLen);
 	    var iPos = 0;
@@ -184,12 +184,12 @@ class Lz4 {
 	        }
 
 	        // Match
-	        var mOffset = iBuf[iPos+0] | (iBuf[iPos+1] << 8);
+	        var mOffset = iBuf[iPos + 0] | (iBuf[iPos + 1] << 8);
 	        if (mOffset == 0 || mOffset > oPos) return null;
 	        iPos += 2;
 
 	        // Length of match
-	        clen = (token & 0x0F) + 4;
+	        clen = (token & 0x0f) + 4;
 	        if (clen == 19) {
 	            var l = 0;
 	            while (true) {

@@ -1,15 +1,12 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Tool;
 
 class MakeBake {
 
-	public static function run(vert:MaterialShader, frag:MaterialShader) {
+	public static function run(vert: MaterialShader, frag: MaterialShader) {
 		if (UITrait.inst.bakeType == BakeAO) { // Voxel
 			// Apply normal channel
 			frag.wposition = true;
@@ -116,7 +113,7 @@ class MakeBake {
 		}
 	}
 
-	public static function positionAndNormal(vert:MaterialShader, frag:MaterialShader) {
+	public static function positionAndNormal(vert: MaterialShader, frag: MaterialShader) {
 		vert.add_out('vec3 position');
 		vert.add_out('vec3 normal');
 		vert.add_uniform('mat4 W', '_worldMatrix');
@@ -131,7 +128,7 @@ class MakeBake {
 		frag.write('fragColor[1] = vec4(normal, 1.0);');
 	}
 
-	public static function setColorWrites(con_paint:MaterialShaderContext) {
+	public static function setColorWrites(con_paint: MaterialShaderContext) {
 		// Bake into base color, disable other slots
 		con_paint.data.color_writes_red[1] = false;
 		con_paint.data.color_writes_green[1] = false;

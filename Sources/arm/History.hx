@@ -10,12 +10,12 @@ import arm.node.MaterialParser;
 
 class History {
 
-	public static var steps:Array<TStep>;
+	public static var steps: Array<TStep>;
 	public static var undoI = 0; // Undo layer
 	public static var undos = 0; // Undos available
 	public static var redos = 0; // Redos available
 	public static var pushUndo = false; // Store undo on next paint
-	public static var undoLayers:Array<LayerSlot> = null;
+	public static var undoLayers: Array<LayerSlot> = null;
 
 	public static function undo() {
 		if (undos > 0) {
@@ -197,7 +197,7 @@ class History {
 				Context.setLayer(Context.layer, false);
 			}
 			else if (step.name == "Apply Mask") {
-				function makeApply(g:kha.graphics4.Graphics) {
+				function makeApply(g: kha.graphics4.Graphics) {
 					g.end();
 					Context.layer = Project.layers[step.layer];
 					copyToUndoWithMask();
@@ -281,12 +281,12 @@ class History {
 		push("Delete Layer");
 	}
 
-	public static function orderLayers(prevOrder:Int) {
+	public static function orderLayers(prevOrder: Int) {
 		var step = push("Order Layers");
 		step.prev_order = prevOrder;
 	}
 
-	public static function mergeLayers(g:kha.graphics4.Graphics) {
+	public static function mergeLayers(g: kha.graphics4.Graphics) {
 		copyMergingLayers();
 
 		var step = push("Merge Layers");
@@ -336,13 +336,13 @@ class History {
 	// public static function newMaterial() {}
 	// public static function deleteMaterial() {}
 
-	public static function editNodes(canvas:TNodeCanvas, canvas_type:Int) {
+	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int) {
 		var step = push("Edit Nodes");
 		step.canvas_type = canvas_type;
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
 	}
 
-	static function push(name:String):TStep {
+	static function push(name: String): TStep {
 		kha.Window.get(0).title = UIFiles.filename + "* - ArmorPaint";
 
 		if (undos < Config.raw.undo_steps) undos++;
@@ -373,7 +373,7 @@ class History {
 		return steps[steps.length - 1];
 	}
 
-	static function redoMergeLayers(g:kha.graphics4.Graphics) {
+	static function redoMergeLayers(g: kha.graphics4.Graphics) {
 		copyMergingLayers();
 		iron.App.removeRender(redoMergeLayers);
 	}
@@ -412,7 +412,7 @@ class History {
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
 
-	static function copyToUndo(fromId:Int, toId:Int, isMask:Bool) {
+	static function copyToUndo(fromId: Int, toId: Int, isMask: Bool) {
 		var path = iron.RenderPath.active;
 		if (isMask) {
 			path.setTarget("texpaint_mask_undo" + toId);
@@ -429,7 +429,7 @@ class History {
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
 
-	static function swapCanvas(step:TStep) {
+	static function swapCanvas(step: TStep) {
 		if (step.canvas_type == 0) {
 			var _canvas = Project.materials[step.material].canvas;
 			Project.materials[step.material].canvas = step.canvas;
@@ -454,17 +454,17 @@ class History {
 }
 
 typedef TStep = {
-	public var name:String;
-	public var layer:Int;
-	public var object:Int;
-	public var material:Int;
-	public var brush:Int;
-	public var is_mask:Bool; // Mask operation
-	public var has_mask:Bool; // Layer contains mask
-	@:optional public var layer_opacity:Float;
-	@:optional public var layer_object:Int;
-	@:optional public var layer_blending:Int;
-	@:optional public var prev_order:Int; // Previous layer position
-	@:optional public var canvas:TNodeCanvas; // Node history
-	@:optional public var canvas_type:Int;
+	public var name: String;
+	public var layer: Int;
+	public var object: Int;
+	public var material: Int;
+	public var brush: Int;
+	public var is_mask: Bool; // Mask operation
+	public var has_mask: Bool; // Layer contains mask
+	@:optional public var layer_opacity: Float;
+	@:optional public var layer_object: Int;
+	@:optional public var layer_blending: Int;
+	@:optional public var prev_order: Int; // Previous layer position
+	@:optional public var canvas: TNodeCanvas; // Node history
+	@:optional public var canvas_type: Int;
 }

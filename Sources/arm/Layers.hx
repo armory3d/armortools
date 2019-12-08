@@ -5,15 +5,12 @@ import kha.graphics4.TextureFormat;
 import kha.graphics4.TextureUnit;
 import kha.graphics4.ConstantLocation;
 import kha.graphics4.PipelineState;
-import kha.graphics4.VertexShader;
-import kha.graphics4.FragmentShader;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import arm.ui.UITrait;
-import arm.data.ConstData;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 import arm.render.RenderPathPaint;
@@ -23,40 +20,40 @@ import arm.Project;
 
 class Layers {
 
-	public static var pipe:PipelineState = null;
-	public static var pipeCopy:PipelineState;
-	public static var pipeMask:PipelineState;
-	public static var tex0:TextureUnit;
-	public static var tex1:TextureUnit;
-	public static var tex2:TextureUnit;
-	public static var texa:TextureUnit;
-	public static var texb:TextureUnit;
-	public static var texc:TextureUnit;
-	public static var opac:ConstantLocation;
-	public static var blending:ConstantLocation;
-	public static var tex0Mask:TextureUnit;
-	public static var texaMask:TextureUnit;
-	public static var imga:Image = null;
-	public static var imgb:Image = null;
-	public static var imgc:Image = null;
-	public static var expa:Image = null;
-	public static var expb:Image = null;
-	public static var expc:Image = null;
-	public static var expd:Image = null;
-	public static var pipeCursor:PipelineState;
-	public static var cursorVP:ConstantLocation;
-	public static var cursorInvVP:ConstantLocation;
-	public static var cursorMouse:ConstantLocation;
-	public static var cursorStep:ConstantLocation;
-	public static var cursorRadius:ConstantLocation;
-	public static var cursorTex:TextureUnit;
-	public static var cursorGbufferD:TextureUnit;
-	public static var cursorGbuffer0:TextureUnit;
+	public static var pipe: PipelineState = null;
+	public static var pipeCopy: PipelineState;
+	public static var pipeMask: PipelineState;
+	public static var tex0: TextureUnit;
+	public static var tex1: TextureUnit;
+	public static var tex2: TextureUnit;
+	public static var texa: TextureUnit;
+	public static var texb: TextureUnit;
+	public static var texc: TextureUnit;
+	public static var opac: ConstantLocation;
+	public static var blending: ConstantLocation;
+	public static var tex0Mask: TextureUnit;
+	public static var texaMask: TextureUnit;
+	public static var imga: Image = null;
+	public static var imgb: Image = null;
+	public static var imgc: Image = null;
+	public static var expa: Image = null;
+	public static var expb: Image = null;
+	public static var expc: Image = null;
+	public static var expd: Image = null;
+	public static var pipeCursor: PipelineState;
+	public static var cursorVP: ConstantLocation;
+	public static var cursorInvVP: ConstantLocation;
+	public static var cursorMouse: ConstantLocation;
+	public static var cursorStep: ConstantLocation;
+	public static var cursorRadius: ConstantLocation;
+	public static var cursorTex: TextureUnit;
+	public static var cursorGbufferD: TextureUnit;
+	public static var cursorGbuffer0: TextureUnit;
 
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
 
-	public static function initLayers(g:kha.graphics4.Graphics) {
+	public static function initLayers(g: kha.graphics4.Graphics) {
 		g.end();
 
 		var layers = Project.layers;
@@ -79,7 +76,7 @@ class Layers {
 		Context.ddirty = 3;
 	}
 
-	public static function resizeLayers(g:kha.graphics4.Graphics) {
+	public static function resizeLayers(g: kha.graphics4.Graphics) {
 		var C = Config.raw;
 		if (UITrait.inst.resHandle.position >= 4) { // Save memory for >=16k
 			C.undo_steps = 2;
@@ -111,7 +108,7 @@ class Layers {
 		iron.App.removeRender(resizeLayers);
 	}
 
-	public static function setLayerBits(g:kha.graphics4.Graphics) {
+	public static function setLayerBits(g: kha.graphics4.Graphics) {
 		g.end();
 		for (l in Project.layers) l.resizeAndSetBits();
 		for (l in History.undoLayers) l.resizeAndSetBits();
@@ -200,7 +197,7 @@ class Layers {
 				t.name = "temptex0";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
-				t.format = 'RGBA32';
+				t.format = "RGBA32";
 				var rt = RenderPath.active.createRenderTarget(t);
 				imga = rt.image;
 			}
@@ -209,7 +206,7 @@ class Layers {
 				t.name = "temptex1";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
-				t.format = 'RGBA32';
+				t.format = "RGBA32";
 				var rt = RenderPath.active.createRenderTarget(t);
 				imgb = rt.image;
 			}
@@ -218,7 +215,7 @@ class Layers {
 				t.name = "temptex2";
 				t.width = l.texpaint.width;
 				t.height = l.texpaint.height;
-				t.format = 'RGBA32';
+				t.format = "RGBA32";
 				var rt = RenderPath.active.createRenderTarget(t);
 				imgc = rt.image;
 			}
@@ -245,7 +242,7 @@ class Layers {
 		}
 	}
 
-	public static function mergeSelectedLayer(g:kha.graphics4.Graphics) {
+	public static function mergeSelectedLayer(g: kha.graphics4.Graphics) {
 		if (pipe == null) makePipe();
 
 		var l0 = Project.layers[0];
@@ -305,7 +302,7 @@ class Layers {
 		Context.layerPreviewDirty = true;
 	}
 
-	public static function isFillMaterial():Bool {
+	public static function isFillMaterial(): Bool {
 		var m = Context.material;
 		for (l in Project.layers) if (l.material_mask == m) return true;
 		return false;
@@ -316,7 +313,7 @@ class Layers {
 		var selectedLayer = Context.layer;
 		var isMask = Context.layerIsMask;
 		var selectedTool = Context.tool;
-		var current:kha.graphics4.Graphics2 = null;
+		var current: kha.graphics4.Graphics2 = null;
 
 		var first = true;
 		for (l in layers) {
@@ -377,7 +374,7 @@ class Layers {
 		}
 	}
 
-	public static function newLayer(clear = true):LayerSlot {
+	public static function newLayer(clear = true): LayerSlot {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
 		Project.layers.push(l);
@@ -388,7 +385,7 @@ class Layers {
 	}
 
 	public static function createFillLayer() {
-		function makeFill(g:kha.graphics4.Graphics) {
+		function makeFill(g: kha.graphics4.Graphics) {
 			g.end();
 			var l = newLayer(false);
 			History.newLayer();
@@ -401,7 +398,7 @@ class Layers {
 		iron.App.notifyOnRender(makeFill);
 	}
 
-	public static function createImageMask(asset:TAsset) {
+	public static function createImageMask(asset: TAsset) {
 		var l = Context.layer;
 		if (l != Project.layers[0]) {
 			History.newMask();

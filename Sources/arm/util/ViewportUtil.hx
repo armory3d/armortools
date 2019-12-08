@@ -24,7 +24,7 @@ class ViewportUtil {
 	public static function resetViewport() {
 		var cam = Scene.active.camera;
 		for (o in Scene.active.raw.objects) {
-			if (o.type == 'camera_object') {
+			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
 				if (UITrait.inst.fovHandle != null) UITrait.inst.fovHandle.value = 0.92;
@@ -38,7 +38,7 @@ class ViewportUtil {
 		}
 	}
 
-	public static function setView(x:Float, y:Float, z:Float, rx:Float, ry:Float, rz:Float) {
+	public static function setView(x: Float, y: Float, z: Float, rx: Float, ry: Float, rz: Float) {
 		Context.object.transform.rot.set(0, 0, 0, 1);
 		Context.object.transform.dirty = true;
 		var cam = Scene.active.camera;
@@ -51,7 +51,7 @@ class ViewportUtil {
 		arm.plugin.Camera.inst.reset();
 	}
 
-	public static function orbit(x:Float, y:Float) {
+	public static function orbit(x: Float, y: Float) {
 		var cam = Scene.active.camera;
 		var dist = arm.plugin.Camera.dist;
 		cam.transform.move(cam.lookWorld(), dist);
@@ -61,7 +61,7 @@ class ViewportUtil {
 		Context.ddirty = 2;
 	}
 
-	public static function updateCameraType(cameraType:Int) {
+	public static function updateCameraType(cameraType: Int) {
 		var cam = Scene.active.cameras[0];
 		var light = Scene.active.lights[0];
 		if (cameraType == CameraPerspective) {

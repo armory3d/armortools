@@ -8,9 +8,9 @@ import arm.Tool;
 @:access(iron.RenderPath)
 class RenderPathPreview {
 
-	public static var path:RenderPath;
+	public static var path: RenderPath;
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 		path = _path;
 
 		{
@@ -18,7 +18,7 @@ class RenderPathPreview {
 			t.name = "texpreview";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 		{
@@ -26,7 +26,7 @@ class RenderPathPreview {
 			t.name = "texpreview_icon";
 			t.width = 1;
 			t.height = 1;
-			t.format = 'RGBA32';
+			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
 

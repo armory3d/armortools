@@ -4,13 +4,13 @@ import arm.format.FbxLibrary;
 
 class FbxBinaryParser {
 
-	var pos:Int;
-	var blob:kha.Blob;
+	var pos: Int;
+	var blob: kha.Blob;
 
-	var version:Int;
-	var root:FbxNode;
+	var version: Int;
+	var root: FbxNode;
 
-	function new(blob:kha.Blob) {
+	function new(blob: kha.Blob) {
 		this.blob = blob;
 		pos = 0;
 		var magic = "Kaydara FBX Binary\x20\x20\x00\x1a\x00";
@@ -24,16 +24,16 @@ class FbxBinaryParser {
 		};
 	}
 
-	public static function parse(blob:kha.Blob):FbxNode {
+	public static function parse(blob: kha.Blob): FbxNode {
 		return new FbxBinaryParser(blob).root;
 	}
 
-	function parseArray(readVal:Void->Dynamic, isFloat = false):FbxProp {
+	function parseArray(readVal: Void->Dynamic, isFloat = false): FbxProp {
 		var len = read32();
 		var encoding = read32();
 		var compressedLen = read32();
 		var endPos = pos + compressedLen;
-		var blob_ = blob;
+		var _blob = blob;
 		if (encoding != 0) {
 			pos += 2;
 			var input = haxe.io.UInt8Array.fromBytes(blob.sub(pos, compressedLen).toBytes());
@@ -44,51 +44,51 @@ class FbxBinaryParser {
 		var res = isFloat ? parseArrayf(readVal, len) : parseArrayi(readVal, len);
 		if (encoding != 0) {
 			pos = endPos;
-			blob = blob_;
+			blob = _blob;
 		}
 		return res;
 	}
 
-	function parseArrayf(readVal:Void->Dynamic, len:Int):FbxProp {
-		var res:Array<Float> = [];
+	function parseArrayf(readVal: Void->Dynamic, len: Int): FbxProp {
+		var res: Array<Float> = [];
 		for (i in 0...len) res.push(readVal());
 		return PFloats(res);
 	}
 
-	function parseArrayi(readVal:Void->Dynamic, len:Int):FbxProp {
-		var res:Array<Int> = [];
+	function parseArrayi(readVal: Void->Dynamic, len: Int): FbxProp {
+		var res: Array<Int> = [];
 		for (i in 0...len) res.push(readVal());
 		return PInts(res);
 	}
 
-	function parseProp():FbxProp {
+	function parseProp(): FbxProp {
 		switch (readChar()) {
-		case 'C':
+		case "C":
 			return PString(readChar());
-		case 'Y':
+		case "Y":
 			return PInt(read16());
-		case 'I':
+		case "I":
 			return PInt(read32());
-		case 'L':
+		case "L":
 			return PInt(read64());
-		case 'F':
+		case "F":
 			return PFloat(readf32());
-		case 'D':
+		case "D":
 			return PFloat(readf64());
-		case 'f':
+		case "f":
 			return parseArray(readf32, true);
-		case 'd':
+		case "d":
 			return parseArray(readf64, true);
-		case 'l':
+		case "l":
 			return parseArray(read64);
-		case 'i':
+		case "i":
 			return parseArray(read32);
-		case 'b':
+		case "b":
 			return parseArray(readBool);
-		case 'S':
+		case "S":
 			var len = read32();
 			return PString(readChars(len));
-		case 'R':
+		case "R":
 			var b = readBytes(read32());
 			return null;
 		default:
@@ -96,7 +96,7 @@ class FbxBinaryParser {
 		}
 	}
 
-	function parseNode():FbxNode {
+	function parseNode(): FbxNode {
 		var endPos = read32();
 		var numProps = read32();
 		var propListLen = read32();
@@ -104,11 +104,11 @@ class FbxBinaryParser {
 		var name = nameLen == 0 ? "" : readChars(nameLen);
 		if (endPos == 0) return null; // Null node
 
-		var props:Array<FbxProp> = null;
+		var props: Array<FbxProp> = null;
 		if (numProps > 0) props = [];
 		for (i in 0...numProps) props.push(parseProp());
 
-		var childs:Array<FbxNode> = null;
+		var childs: Array<FbxNode> = null;
 		var listLen = endPos - pos;
 		if (listLen > 0) {
 			childs = [];
@@ -120,7 +120,7 @@ class FbxBinaryParser {
 		return { name: name, props: props, childs: childs };
 	}
 
-	function parseNodes():Array<FbxNode> {
+	function parseNodes(): Array<FbxNode> {
 		var nodes = [];
 		while (true) {
 			var n = parseNode();
@@ -129,46 +129,46 @@ class FbxBinaryParser {
 		return nodes;
 	}
 
-	function read8():Int {
+	function read8(): Int {
 		var i = blob.readU8(pos);
 		pos += 1;
 		return i;
 	}
 
-	function read16():Int {
+	function read16(): Int {
 		var i = blob.readS16LE(pos);
 		pos += 2;
 		return i;
 	}
 
-	function read32():Int {
+	function read32(): Int {
 		var i = blob.bytes.getInt32(pos);
 		// var i = blob.readS32LE(pos); // Result sometimes off by 1?
 		pos += 4;
 		return i;
 	}
 
-	function read64():Int {
+	function read64(): Int {
 		var i1 = read32();
 		var i2 = read32();
 		// return cast haxe.Int64.make(i1, i2);
 		return i1;
 	}
 
-	function readf32():Float {
+	function readf32(): Float {
 		var f = blob.readF32LE(pos);
 		pos += 4;
 		return f;
 	}
 
-	function readf64():Float {
+	function readf64(): Float {
 		var i1 = read32();
 		var i2 = read32();
 		return haxe.io.FPHelper.i64ToDouble(i1, i2); // LE
 	}
 
-	function readString():String {
-		var s = '';
+	function readString(): String {
+		var s = "";
 		while (true) {
 			var ch = read8();
 			if (ch == 0) break;
@@ -177,21 +177,21 @@ class FbxBinaryParser {
 		return s;
 	}
 
-	function readChars(len:Int):String {
-		var s = '';
+	function readChars(len: Int): String {
+		var s = "";
 		for (i in 0...len) s += readChar();
 		return s;
 	}
 
-	function readChar():String {
+	function readChar(): String {
 		return String.fromCharCode(read8());
 	}
 
-	function readBool():Int {
+	function readBool(): Int {
 		return read8(); // return read8() == 1;
 	}
 
-	function readBytes(len:Int):kha.Blob {
+	function readBytes(len: Int): kha.Blob {
 		var b = blob.sub(pos, len);
 		pos += len;
 		return b;

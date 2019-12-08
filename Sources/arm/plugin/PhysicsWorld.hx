@@ -9,15 +9,15 @@ import iron.math.RayCaster;
 @:access(arm.plugin.PhysicsBody)
 class PhysicsWorld extends iron.Trait {
 
-	public static var active:PhysicsWorld = null;
-	static var vec1:Bt.Vector3 = null;
-	static var vec2:Bt.Vector3 = null;
+	public static var active: PhysicsWorld = null;
+	static var vec1: Bt.Vector3 = null;
+	static var vec2: Bt.Vector3 = null;
 	static var v1 = new iron.math.Vec4();
 	static var v2 = new iron.math.Vec4();
 
-	var world:Bt.DiscreteDynamicsWorld;
-	var dispatcher:Bt.CollisionDispatcher;
-	var contacts:Array<TPair> = [];
+	var world: Bt.DiscreteDynamicsWorld;
+	var dispatcher: Bt.CollisionDispatcher;
+	var contacts: Array<TPair> = [];
 	var bodyMap = new Map<Int, PhysicsBody>();
 	var timeScale = 1.0;
 	var timeStep = 1 / 60;
@@ -49,17 +49,17 @@ class PhysicsWorld extends iron.Trait {
 		setGravity(new Vec4(0, 0, -9.81));
 	}
 
-	public function setGravity(v:Vec4) {
+	public function setGravity(v: Vec4) {
 		vec1.setValue(v.x, v.y, v.z);
 		world.setGravity(vec1);
 	}
 
-	public function addBody(pb:PhysicsBody) {
+	public function addBody(pb: PhysicsBody) {
 		world.addRigidBodyToGroup(pb.body, pb.group, pb.mask);
 		bodyMap.set(pb.id, pb);
 	}
 
-	public function removeBody(pb:PhysicsBody) {
+	public function removeBody(pb: PhysicsBody) {
 		if (pb.destroyed) return;
 		pb.destroyed = true;
 		if (world != null) world.removeRigidBody(pb.body);
@@ -67,12 +67,12 @@ class PhysicsWorld extends iron.Trait {
 		pb.delete();
 	}
 
-	public function getContacts(pb:PhysicsBody):Array<PhysicsBody> {
+	public function getContacts(pb: PhysicsBody): Array<PhysicsBody> {
 		if (contacts.length == 0) return null;
-		var res:Array<PhysicsBody> = [];
+		var res: Array<PhysicsBody> = [];
 		for (i in 0...contacts.length) {
 			var c = contacts[i];
-			var pb:PhysicsBody = null;
+			var pb: PhysicsBody = null;
 			if (c.a == untyped pb.body.userIndex) pb = bodyMap.get(c.b);
 			else if (c.b == untyped pb.body.userIndex) pb = bodyMap.get(c.a);
 			if (pb != null && res.indexOf(pb) == -1) res.push(pb);
@@ -80,9 +80,9 @@ class PhysicsWorld extends iron.Trait {
 		return res;
 	}
 
-	public function getContactPairs(pb:PhysicsBody):Array<TPair> {
+	public function getContactPairs(pb: PhysicsBody): Array<TPair> {
 		if (contacts.length == 0) return null;
-		var res:Array<TPair> = [];
+		var res: Array<TPair> = [];
 		for (i in 0...contacts.length) {
 			var c = contacts[i];
 			if (c.a == untyped pb.body.userIndex) res.push(c);
@@ -102,7 +102,7 @@ class PhysicsWorld extends iron.Trait {
 
 	function updateContacts() {
 		contacts = [];
-		var disp:Bt.Dispatcher = dispatcher;
+		var disp: Bt.Dispatcher = dispatcher;
 		var numManifolds = disp.getNumManifolds();
 
 		for (i in 0...numManifolds) {
@@ -111,16 +111,16 @@ class PhysicsWorld extends iron.Trait {
 			var body1 = untyped Bt.Ammo.btRigidBody.prototype.upcast(contactManifold.getBody1());
 
 			var numContacts = contactManifold.getNumContacts();
-			var pt:Bt.ManifoldPoint = null;
-			var posA:Bt.Vector3 = null;
-			var posB:Bt.Vector3 = null;
-			var nor:Bt.Vector3 = null;
+			var pt: Bt.ManifoldPoint = null;
+			var posA: Bt.Vector3 = null;
+			var posB: Bt.Vector3 = null;
+			var nor: Bt.Vector3 = null;
 			for (j in 0...numContacts) {
 				pt = contactManifold.getContactPoint(j);
 				posA = pt.get_m_positionWorldOnA();
 				posB = pt.get_m_positionWorldOnB();
 				nor = pt.get_m_normalWorldOnB();
-				var cp:TPair = {
+				var cp: TPair = {
 					a: untyped body0.userIndex,
 					b: untyped body1.userIndex,
 					posA: new Vec4(posA.x(), posA.y(), posA.z()),
@@ -134,7 +134,7 @@ class PhysicsWorld extends iron.Trait {
 		}
 	}
 
-	public function pickClosest(inputX:Float, inputY:Float):PhysicsBody {
+	public function pickClosest(inputX: Float, inputY: Float): PhysicsBody {
 		var camera = iron.Scene.active.camera;
 		var start = new Vec4();
 		var end = new Vec4();
@@ -144,7 +144,7 @@ class PhysicsWorld extends iron.Trait {
 		return body;
 	}
 
-	public function rayCast(from:Vec4, to:Vec4, group:Int = 0x00000001, mask = 0xffffffff):THit {
+	public function rayCast(from: Vec4, to: Vec4, group: Int = 0x00000001, mask = 0xffffffff): THit {
 		var rayFrom = vec1;
 		var rayTo = vec2;
 		rayFrom.setValue(from.x, from.y, from.z);
@@ -155,13 +155,13 @@ class PhysicsWorld extends iron.Trait {
 		rayCallback.set_m_collisionFilterGroup(group);
 		rayCallback.set_m_collisionFilterMask(mask);
 
-		var worldDyn:Bt.DynamicsWorld = world;
-		var worldCol:Bt.CollisionWorld = worldDyn;
+		var worldDyn: Bt.DynamicsWorld = world;
+		var worldCol: Bt.CollisionWorld = worldDyn;
 		worldCol.rayTest(rayFrom, rayTo, rayCallback);
-		var pb:PhysicsBody = null;
-		var hitInfo:THit = null;
+		var pb: PhysicsBody = null;
+		var hitInfo: THit = null;
 
-		var rc:Bt.RayResultCallback = rayCallback;
+		var rc: Bt.RayResultCallback = rayCallback;
 		if (rc.hasHit()) {
 			var co = rayCallback.get_m_collisionObject();
 			var body = untyped Bt.Ammo.btRigidBody.prototype.upcast(co);
@@ -183,19 +183,19 @@ class PhysicsWorld extends iron.Trait {
 }
 
 typedef THit = {
-	public var body:PhysicsBody;
-	public var pos:Vec4;
-	public var normal:Vec4;
+	public var body: PhysicsBody;
+	public var pos: Vec4;
+	public var normal: Vec4;
 }
 
 typedef TPair = {
-	public var a:Int;
-	public var b:Int;
-	public var posA:Vec4;
-	public var posB:Vec4;
-	public var normOnB:Vec4;
-	public var impulse:Float;
-	public var distance:Float;
+	public var a: Int;
+	public var b: Int;
+	public var posA: Vec4;
+	public var posB: Vec4;
+	public var normOnB: Vec4;
+	public var impulse: Float;
+	public var distance: Float;
 }
 
 #end

@@ -19,8 +19,8 @@ using StringTools;
 
 class ImportBlend {
 
-	public static function run(path:String) {
-		Data.getBlob(path, function(b:Blob) {
+	public static function run(path: String) {
+		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				Log.error(Strings.error3);
@@ -34,10 +34,10 @@ class ImportBlend {
 			for (ob in obs) {
 				if (ob.get("type") != 1) continue;
 
-				var name:String = ob.get("id").get("name");
+				var name: String = ob.get("id").get("name");
 				name = name.substring(2, name.length);
 
-				var m:Dynamic = ob.get("data", 0, "Mesh");
+				var m: Dynamic = ob.get("data", 0, "Mesh");
 				if (m == null) continue;
 
 				var totpoly = m.get("totpoly");
@@ -62,7 +62,6 @@ class ImportBlend {
 				var vec0 = new Vec4();
 				var vec1 = new Vec4();
 				var vec2 = new Vec4();
-				var vec3 = new Vec4();
 				for (i in 0...totpoly) {
 					var poly = m.get("mpoly", i);
 					var loopstart = poly.get("loopstart");
@@ -99,9 +98,9 @@ class ImportBlend {
 						nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
 						nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
 						if (hasuv) {
-							var uv0:Float32Array = m.get("mloopuv", loopstart    ).get("uv");
-							var uv1:Float32Array = m.get("mloopuv", loopstart + 1).get("uv");
-							var uv2:Float32Array = m.get("mloopuv", loopstart + 2).get("uv");
+							var uv0: Float32Array = m.get("mloopuv", loopstart    ).get("uv");
+							var uv1: Float32Array = m.get("mloopuv", loopstart + 1).get("uv");
+							var uv2: Float32Array = m.get("mloopuv", loopstart + 2).get("uv");
 							texa[tri * 6    ] = Std.int(uv0[0] * 32767);
 							texa[tri * 6 + 1] = Std.int((1.0 - uv0[1]) * 32767);
 							texa[tri * 6 + 2] = Std.int(uv1[0] * 32767);
@@ -120,9 +119,9 @@ class ImportBlend {
 						var no1 = v1.get("no");
 						vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
 						vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
-						var uv0:Float32Array = null;
-						var uv1:Float32Array = null;
-						var uv2:Float32Array = null;
+						var uv0: Float32Array = null;
+						var uv1: Float32Array = null;
+						var uv2: Float32Array = null;
 						if (hasuv) {
 							uv0 = m.get("mloopuv", loopstart + totloop - 1).get("uv");
 							uv1 = m.get("mloopuv", loopstart).get("uv");
@@ -213,8 +212,8 @@ class ImportBlend {
 		});
 	}
 
-	public static function runMaterial(path:String) {
-		Data.getBlob(path, function(b:Blob) {
+	public static function runMaterial(path: String) {
+		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				Log.error(Strings.error3);
@@ -227,7 +226,7 @@ class ImportBlend {
 				return;
 			}
 
-			var imported:Array<MaterialSlot> = [];
+			var imported: Array<MaterialSlot> = [];
 
 			for (mat in mats) {
 				// Material slot
@@ -237,7 +236,7 @@ class ImportBlend {
 				var nodes = Context.material.nodes;
 				var canvas = Context.material.canvas;
 				canvas.name = mat.get("id").get("name").substr(2); // MAWood
-				var nout:TNode = null;
+				var nout: TNode = null;
 				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 				for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 
@@ -247,7 +246,7 @@ class ImportBlend {
 				var bllinks = nodetree.get("links"); // bNodeLink
 
 				// Look for Principled BSDF node
-				var node:Dynamic = blnodes.get("first", 0, "bNode");
+				var node: Dynamic = blnodes.get("first", 0, "bNode");
 				var last = blnodes.get("last", 0, "bNode");
 				while (true) {
 					if (node.get("idname") == "ShaderNodeBsdfPrincipled") break;
@@ -265,11 +264,11 @@ class ImportBlend {
 				nout.y = -node.get("locy") + 400;
 
 				// Place nodes
-				var node:Dynamic = blnodes.get("first", 0, "bNode");
+				var node: Dynamic = blnodes.get("first", 0, "bNode");
 				while (true) {
 					// Search for node in list
 					var search = node.get("idname").substr(10).toLowerCase();
-					var base:TNode = null;
+					var base: TNode = null;
 					for (list in NodesMaterial.list) {
 						var found = false;
 						for (n in list) {
@@ -291,7 +290,7 @@ class ImportBlend {
 
 						// Fill input socket values
 						var inputs = node.get("inputs");
-						var sock:Dynamic = inputs.get("first", 0, "bNodeSocket");
+						var sock: Dynamic = inputs.get("first", 0, "bNodeSocket");
 						var pos = 0;
 						while (true) {
 							if (pos >= n.inputs.length) break;
@@ -306,7 +305,7 @@ class ImportBlend {
 						// Fill button values
 						if (search == "teximage") {
 							var img = node.get("id", 0, "Image");
-							var file:String = img.get("name").substr(2); // '//desktop\logo.png'
+							var file: String = img.get("name").substr(2); // '//desktop\logo.png'
 							file = file.replace("\\", "/");
 							file = Path.baseDir(path) + file;
 							ImportTexture.run(file);
@@ -315,12 +314,12 @@ class ImportBlend {
 							n.buttons[0].default_value = App.getAssetIndex(filename);
 						}
 						else if (search == "valtorgb") {
-							var ramp:Dynamic = node.get("storage", 0, "ColorBand");
+							var ramp: Dynamic = node.get("storage", 0, "ColorBand");
 							n.buttons[0].data = ramp.get("ipotype") == 0 ? 0 : 1; // Linear / Constant
-							var elems:Array<Array<Float>> = n.buttons[0].default_value;
+							var elems: Array<Array<Float>> = n.buttons[0].default_value;
 							for (i in 0...ramp.get("tot")) {
 								if (i >= elems.length) elems.push([1.0, 1.0, 1.0, 1.0, 0.0]);
-								var cbdata:Dynamic = ramp.get("data", i, "CBData");
+								var cbdata: Dynamic = ramp.get("data", i, "CBData");
 								elems[i][0] = Std.int(cbdata.get("r") * 100) / 100;
 								elems[i][1] = Std.int(cbdata.get("g") * 100) / 100;
 								elems[i][2] = Std.int(cbdata.get("b") * 100) / 100;
@@ -350,7 +349,7 @@ class ImportBlend {
 
 						// Fill output socket values
 						var outputs = node.get("outputs");
-						var sock:Dynamic = outputs.get("first", 0, "bNodeSocket");
+						var sock: Dynamic = outputs.get("first", 0, "bNodeSocket");
 						var pos = 0;
 						while (true) {
 							if (pos >= n.outputs.length) break;
@@ -370,7 +369,7 @@ class ImportBlend {
 				}
 
 				// Place links
-				var link:Dynamic = bllinks.get("first", 0, "bNodeLink");
+				var link: Dynamic = bllinks.get("first", 0, "bNodeLink");
 				while (true) {
 					var fromnode = link.get("fromnode").get("name");
 					var tonode = link.get("tonode").get("name");
@@ -384,7 +383,7 @@ class ImportBlend {
 
 					if (from_id >= 0 && to_id >= 0) {
 						var from_socket = 0;
-						var sock:Dynamic = fromsock;
+						var sock: Dynamic = fromsock;
 						while (true) {
 							var last = sock;
 							sock = sock.get("prev");
@@ -393,7 +392,7 @@ class ImportBlend {
 						}
 
 						var to_socket = 0;
-						var sock:Dynamic = tosock;
+						var sock: Dynamic = tosock;
 						while (true) {
 							var last = sock;
 							sock = sock.get("prev");
@@ -416,7 +415,7 @@ class ImportBlend {
 						}
 
 						if (valid) {
-							var raw:TNodeLink = {
+							var raw: TNodeLink = {
 								id: nodes.getLinkId(canvas.links),
 								from_id: from_id,
 								from_socket: from_socket,
@@ -448,17 +447,17 @@ class ImportBlend {
 		});
 	}
 
-	static function readBlendSocket(sock:Dynamic):Dynamic {
+	static function readBlendSocket(sock: Dynamic): Dynamic {
 		var idname = sock.get("idname");
 		if (idname.startsWith("NodeSocketVector")) {
-			var v:Dynamic = sock.get("default_value", 0, "bNodeSocketValueVector").get("value");
+			var v: Dynamic = sock.get("default_value", 0, "bNodeSocketValueVector").get("value");
 			v[0] = Std.int(v[0] * 100) / 100;
 			v[1] = Std.int(v[1] * 100) / 100;
 			v[2] = Std.int(v[2] * 100) / 100;
 			return v;
 		}
 		else if (idname.startsWith("NodeSocketColor")) {
-			var v:Dynamic = sock.get("default_value", 0, "bNodeSocketValueRGBA").get("value");
+			var v: Dynamic = sock.get("default_value", 0, "bNodeSocketValueRGBA").get("value");
 			v[0] = Std.int(v[0] * 100) / 100;
 			v[1] = Std.int(v[1] * 100) / 100;
 			v[2] = Std.int(v[2] * 100) / 100;
@@ -466,7 +465,7 @@ class ImportBlend {
 			return v;
 		}
 		else if (idname.startsWith("NodeSocketFloat")) {
-			var v:Dynamic = sock.get("default_value", 0, "bNodeSocketValueFloat").get("value");
+			var v: Dynamic = sock.get("default_value", 0, "bNodeSocketValueFloat").get("value");
 			v = Std.int(v * 100) / 100;
 			return v;
 		}

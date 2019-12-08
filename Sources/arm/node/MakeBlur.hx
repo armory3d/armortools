@@ -1,15 +1,10 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
-import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
-import arm.Tool;
 
 class MakeBlur {
 
-	public static function run(vert:MaterialShader, frag:MaterialShader) {
+	public static function run(vert: MaterialShader, frag: MaterialShader) {
 		#if (kha_opengl || kha_webgl)
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
 		#else

@@ -1,4 +1,4 @@
-package ;
+package;
 
 import kha.Window;
 import kha.WindowOptions;
@@ -17,7 +17,7 @@ using StringTools;
 
 class Main {
 
-	static var tasks:Int;
+	static var tasks: Int;
 
 	public static function main() {
 		tasks = 1;
@@ -49,9 +49,25 @@ class Main {
 		var title = "untitled - ArmorPaint";
 		#end
 
-		System.start({title: title, window: {width: c.window_w, height: c.window_h, x: c.window_x, y: c.window_y, mode: windowMode, windowFeatures: windowFeatures}, framebuffer: {samplesPerPixel: 1, verticalSync: c.window_vsync}}, function(window:Window) {
+		var options: kha.SystemOptions = {
+			title: title,
+			window: {
+				width: c.window_w,
+				height: c.window_h,
+				x: c.window_x,
+				y: c.window_y,
+				mode: windowMode,
+				windowFeatures: windowFeatures
+			},
+			framebuffer: {
+				samplesPerPixel: 1,
+				verticalSync: c.window_vsync
+			}
+		};
+
+		System.start(options, function(window: Window) {
 			iron.App.init(function() {
-				Scene.setActive("Scene", function(o:Object) {
+				Scene.setActive("Scene", function(o: Object) {
 					Config.init();
 					Uniforms.init();
 					var path = new RenderPath();
@@ -75,7 +91,7 @@ class Main {
 	#if arm_physics
 	static function loadPhysics() {
 		var b = haxe.io.Bytes.ofData(Krom.loadBlob("data/ammo.wasm.js"));
-		var print = function(s:String) { trace(s); };
+		var print = function(s: String) { trace(s); };
 		var loaded = function() { tasks--; start(); };
 		untyped __js__("(1, eval)({0})", b.toString());
 		var instantiateWasm = function(imports, successCallback) {

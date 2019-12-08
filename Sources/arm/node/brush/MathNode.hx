@@ -1,21 +1,19 @@
 package arm.node.brush;
 
-import iron.math.Vec4;
-
 @:keep
 class MathNode extends LogicNode {
 
-	public var operation:String;
-	public var use_clamp:Bool;
+	public var operation: String;
+	public var use_clamp: Bool;
 
-	public function new(tree:LogicTree) {
+	public function new(tree: LogicTree) {
 		super(tree);
 	}
 
-	override function get(from:Int):Dynamic {
+	override function get(from: Int): Dynamic {
 
-		var v1:Float = inputs[0].get();
-		var v2:Float = inputs[1].get();
+		var v1: Float = inputs[0].get();
+		var v2: Float = inputs[1].get();
 		var f = 0.0;
 		switch (operation) {
 		case "Add":

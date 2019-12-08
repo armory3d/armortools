@@ -9,11 +9,11 @@ using StringTools;
 class UIFiles {
 
 	public static var filename = "untitled";
-	public static var path = '/';
+	public static var path = "/";
 
-	public static function show(filters:String, isSave:Bool, filesDone:String->Void) {
+	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 		if (!UITrait.inst.nativeBrowser) {
-			if (path == null) path = '/';
+			if (path == null) path = "/";
 			showCustom(filters, isSave, filesDone);
 			return;
 		}
@@ -33,14 +33,14 @@ class UIFiles {
 	}
 
 	@:access(zui.Zui) //
-	static function showCustom(filters:String, isSave:Bool, filesDone:String->Void) {
-		UIBox.showCustom(function(ui:Zui) {
+	static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
+		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), "File Browser")) {
 				var pathHandle = Id.handle();
 				var fileHandle = Id.handle();
-				ui.row([6/10, 2/10, 2/10]);
+				ui.row([6 / 10, 2 / 10, 2 / 10]);
 				filename = ui.textInput(fileHandle, "File");
-				ui.text('*.' + filters, Center);
+				ui.text("*." + filters, Center);
 				var known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
 				if (ui.button(isSave ? "Save" : "Open") || known || ui.isReturnDown) {
 					UIBox.show = false;

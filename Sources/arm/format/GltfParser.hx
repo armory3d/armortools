@@ -2,17 +2,17 @@ package arm.format;
 
 class GltfParser {
 
-	public var posa:kha.arrays.Int16Array = null;
-	public var nora:kha.arrays.Int16Array = null;
-	public var texa:kha.arrays.Int16Array = null;
-	public var inda:kha.arrays.Uint32Array = null;
+	public var posa: kha.arrays.Int16Array = null;
+	public var nora: kha.arrays.Int16Array = null;
+	public var texa: kha.arrays.Int16Array = null;
+	public var inda: kha.arrays.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
 
-	public function new(blob:kha.Blob) {
+	public function new(blob: kha.Blob) {
 		// Prototype only, will collapse on anything more complex
-		var format:TGLTF = haxe.Json.parse(blob.toString());
+		var format: TGLTF = haxe.Json.parse(blob.toString());
 
 		var mesh = format.meshes[0];
 		var prim = mesh.primitives[0];
@@ -20,7 +20,7 @@ class GltfParser {
 		var a = format.accessors[prim.indices];
 		var v = format.bufferViews[a.bufferView];
 		var buf = format.buffers[v.buffer];
-		var bytes:haxe.io.Bytes = null;
+		var bytes: haxe.io.Bytes = null;
 		var tag = "data:application/octet-stream;base64,";
 		if (StringTools.startsWith(buf.uri, tag)) {
 			bytes = haxe.crypto.Base64.decode(buf.uri.substr(tag.length));
@@ -75,7 +75,7 @@ class GltfParser {
 		}
 	}
 
-	function readU8Array(format:TGLTF, b:kha.Blob, a:TAccessor):kha.arrays.Uint32Array {
+	function readU8Array(format: TGLTF, b: kha.Blob, a: TAccessor): kha.arrays.Uint32Array {
 		var v = format.bufferViews[a.bufferView];
 		var ar = new kha.arrays.Uint32Array(v.byteLength);
 		var pos = v.byteOffset;
@@ -88,7 +88,7 @@ class GltfParser {
 		return ar;
 	}
 
-	function readU16Array(format:TGLTF, b:kha.Blob, a:TAccessor):kha.arrays.Uint32Array {
+	function readU16Array(format: TGLTF, b: kha.Blob, a: TAccessor): kha.arrays.Uint32Array {
 		var v = format.bufferViews[a.bufferView];
 		var ar = new kha.arrays.Uint32Array(Std.int(v.byteLength / 2));
 		var pos = v.byteOffset;
@@ -101,7 +101,7 @@ class GltfParser {
 		return ar;
 	}
 
-	function readU32Array(format:TGLTF, b:kha.Blob, a:TAccessor):kha.arrays.Uint32Array {
+	function readU32Array(format: TGLTF, b: kha.Blob, a: TAccessor): kha.arrays.Uint32Array {
 		var v = format.bufferViews[a.bufferView];
 		var ar = new kha.arrays.Uint32Array(Std.int(v.byteLength / 4));
 		var pos = v.byteOffset;
@@ -114,7 +114,7 @@ class GltfParser {
 		return ar;
 	}
 
-	function readF32Array(format:TGLTF, b:kha.Blob, a:TAccessor):kha.arrays.Float32Array {
+	function readF32Array(format: TGLTF, b: kha.Blob, a: TAccessor): kha.arrays.Float32Array {
 		var v = format.bufferViews[a.bufferView];
 		var ar = new kha.arrays.Float32Array(Std.int(v.byteLength / 4));
 		var pos = v.byteOffset;
@@ -129,46 +129,46 @@ class GltfParser {
 }
 
 typedef TGLTF = {
-	var accessors:Array<TAccessor>;
-	var bufferViews:Array<TBufferView>;
-	var buffers:Array<TBuffer>;
-	var meshes:Array<TMesh>;
+	var accessors: Array<TAccessor>;
+	var bufferViews: Array<TBufferView>;
+	var buffers: Array<TBuffer>;
+	var meshes: Array<TMesh>;
 }
 
 typedef TAccessor = {
-	var bufferView:Int;
-	var componentType:Int;
-	var count:Int;
-	var max:Array<Float>;
-	var min:Array<Float>;
-	var type:String;
+	var bufferView: Int;
+	var componentType: Int;
+	var count: Int;
+	var max: Array<Float>;
+	var min: Array<Float>;
+	var type: String;
 }
 
 typedef TBufferView = {
-	var buffer:Int;
-	var byteLength:Int;
-	var byteOffset:Int;
-	var target:Int;
+	var buffer: Int;
+	var byteLength: Int;
+	var byteOffset: Int;
+	var target: Int;
 }
 
 typedef TBuffer = {
-	var byteLength:Int;
-	var uri:String;
+	var byteLength: Int;
+	var uri: String;
 }
 
 typedef TMesh = {
-	var name:String;
-	var primitives:Array<TPrimitive>;
+	var name: String;
+	var primitives: Array<TPrimitive>;
 }
 
 typedef TPrimitive = {
-	var attributes:TAttributes;
-	var indices:Int;
+	var attributes: TAttributes;
+	var indices: Int;
 }
 
 typedef TAttributes = {
-	var POSITION:Null<Int>;
-	var NORMAL:Null<Int>;
-	var TANGENT:Null<Int>;
-	var TEXCOORD_0:Null<Int>;
+	var POSITION: Null<Int>;
+	var NORMAL: Null<Int>;
+	var TANGENT: Null<Int>;
+	var TEXCOORD_0: Null<Int>;
 }

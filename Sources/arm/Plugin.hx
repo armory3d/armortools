@@ -5,25 +5,25 @@ package arm;
 @:keep
 class Plugin {
 
-	public static var plugins:Map<String, Plugin> = [];
-	static var pluginName:String;
+	public static var plugins: Map<String, Plugin> = [];
+	static var pluginName: String;
 
-	public var drawUI:zui.Zui->Void = null;
-	public var draw:Void->Void = null;
-	public var update:Void->Void = null;
-	public var delete:Void->Void = null;
+	public var drawUI: zui.Zui->Void = null;
+	public var draw: Void->Void = null;
+	public var update: Void->Void = null;
+	public var delete: Void->Void = null;
 	public var version = "0.1";
 	public var apiversion = "0.1";
-	var name:String;
+	var name: String;
 
 	public function new() {
 		name = pluginName;
 		plugins.set(name, this);
 	}
 
-	public static function start(plugin:String) {
+	public static function start(plugin: String) {
 		try {
-			iron.data.Data.getBlob("plugins/" + plugin, function(blob:kha.Blob) {
+			iron.data.Data.getBlob("plugins/" + plugin, function(blob: kha.Blob) {
 				pluginName = plugin;
 				#if js
 				untyped __js__("(1, eval)({0})", blob.toString());
@@ -31,10 +31,10 @@ class Plugin {
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}
-		catch(e:Dynamic) { trace("Failed to load plugin '" + plugin + "'"); trace(e); }
+		catch (e: Dynamic) { trace("Failed to load plugin '" + plugin + "'"); trace(e); }
 	}
 
-	public static function stop(plugin:String) {
+	public static function stop(plugin: String) {
 		var p = plugins.get(plugin);
 		if (p != null && p.delete != null) p.delete();
 		plugins.remove(plugin);
@@ -88,7 +88,9 @@ class ArmBridge {
 	public static var RenderUtil = arm.util.RenderUtil;
 	public static var UVUtil = arm.util.UVUtil;
 	public static var ViewportUtil = arm.util.ViewportUtil;
-	public static function colorFromFloats(r:Float, g:Float, b:Float, a:Float) { return kha.Color.fromFloats(r, g, b, a); }
+	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
+		return kha.Color.fromFloats(r, g, b, a);
+	}
 }
 
 @:expose("zui")

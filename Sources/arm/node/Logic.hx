@@ -4,12 +4,12 @@ import zui.Nodes;
 
 class Logic {
 
-	static var nodes:Array<TNode>;
-	static var links:Array<TNodeLink>;
+	static var nodes: Array<TNode>;
+	static var links: Array<TNodeLink>;
 
-	static var parsed_nodes:Array<String> = null;
-	static var parsed_labels:Map<String, String> = null;
-	static var nodeMap:Map<String, LogicNode>;
+	static var parsed_nodes: Array<String> = null;
+	static var parsed_labels: Map<String, String> = null;
+	static var nodeMap: Map<String, LogicNode>;
 
 	public static var packageName = "arm.node.logic";
 
@@ -47,16 +47,16 @@ class Logic {
 	}
 
 	static function safesrc(s:String):String {
-		return StringTools.replace(s, ' ', '');
+		return StringTools.replace(s, " ", "");
 	}
 
-	static function node_name(node:TNode):String {
+	static function node_name(node: TNode): String {
 		var s = safesrc(node.name) + node.id;
 		return s;
 	}
 
-	static var tree:LogicTree;
-	public static function parse(canvas:TNodeCanvas, onAdd = true):LogicTree {
+	static var tree: LogicTree;
+	public static function parse(canvas: TNodeCanvas, onAdd = true): LogicTree {
 
 		nodes = canvas.nodes;
 		links = canvas.links;
@@ -78,7 +78,7 @@ class Logic {
 		return tree;
 	}
 
-	static function build_node(node:TNode):String {
+	static function build_node(node: TNode): String {
 
 		// Get node name
 		var name =  node_name(node);
@@ -107,7 +107,7 @@ class Logic {
 		}
 
 		// Create inputs
-		var inp_node:LogicNode = null;
+		var inp_node: LogicNode = null;
 		var inp_from = 0;
 		for (i in 0...node.inputs.length) {
 			var inp = node.inputs[i];
@@ -155,8 +155,8 @@ class Logic {
 		return name;
 	}
 
-	static function get_root_nodes(node_group:TNodeCanvas):Array<TNode> {
-		var roots:Array<TNode> = [];
+	static function get_root_nodes(node_group: TNodeCanvas): Array<TNode> {
+		var roots: Array<TNode> = [];
 		for (node in node_group.nodes) {
 			// if (node.bl_idname == 'NodeUndefined') {
 				// arm.log.warn('Undefined logic nodes in ' + node_group.name)
@@ -177,48 +177,48 @@ class Logic {
 		return roots;
 	}
 
-	static function build_default_node(inp:TNodeSocket):LogicNode {
+	static function build_default_node(inp: TNodeSocket): LogicNode {
 
-		var v:LogicNode = null;
+		var v: LogicNode = null;
 
-		if (inp.type == 'OBJECT') {
-			v = createClassInstance('ObjectNode', [tree, inp.default_value]);
+		if (inp.type == "OBJECT") {
+			v = createClassInstance("ObjectNode", [tree, inp.default_value]);
 		}
-		else if (inp.type == 'ANIMACTION') {
-			v = createClassInstance('StringNode', [tree, inp.default_value]);
+		else if (inp.type == "ANIMACTION") {
+			v = createClassInstance("StringNode", [tree, inp.default_value]);
 		}
-		else if (inp.type == 'VECTOR') {
+		else if (inp.type == "VECTOR") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
-			v = createClassInstance('VectorNode', [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
+			v = createClassInstance("VectorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
-		else if (inp.type == 'RGBA') {
+		else if (inp.type == "RGBA") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
-			v = createClassInstance('ColorNode', [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
+			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 		}
-		else if (inp.type == 'RGB') {
+		else if (inp.type == "RGB") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
-			v = createClassInstance('ColorNode', [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
+			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
-		else if (inp.type == 'VALUE') {
-			v = createClassInstance('FloatNode', [tree, inp.default_value]);
+		else if (inp.type == "VALUE") {
+			v = createClassInstance("FloatNode", [tree, inp.default_value]);
 		}
-		else if (inp.type == 'INT') {
-			v = createClassInstance('IntegerNode', [tree, inp.default_value]);
+		else if (inp.type == "INT") {
+			v = createClassInstance("IntegerNode", [tree, inp.default_value]);
 		}
-		else if (inp.type == 'BOOLEAN') {
-			v = createClassInstance('BooleanNode', [tree, inp.default_value]);
+		else if (inp.type == "BOOLEAN") {
+			v = createClassInstance("BooleanNode", [tree, inp.default_value]);
 		}
-		else if (inp.type == 'STRING') {
-			v = createClassInstance('StringNode', [tree, inp.default_value]);
+		else if (inp.type == "STRING") {
+			v = createClassInstance("StringNode", [tree, inp.default_value]);
 		}
 		else { // ACTION, ARRAY
-			v = createClassInstance('NullNode', [tree]);
+			v = createClassInstance("NullNode", [tree]);
 		}
 		return v;
 	}
 
-	static function createClassInstance(className:String, args:Array<Dynamic>):Dynamic {
-		var cname = Type.resolveClass(packageName + '.' + className);
+	static function createClassInstance(className: String, args: Array<Dynamic>): Dynamic {
+		var cname = Type.resolveClass(packageName + "." + className);
 		if (cname == null) return null;
 		return Type.createInstance(cname, args);
 	}

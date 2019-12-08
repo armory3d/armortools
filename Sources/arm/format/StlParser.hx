@@ -2,10 +2,10 @@ package arm.format;
 
 class StlParser {
 
-	public var posa:kha.arrays.Int16Array = null;
-	public var nora:kha.arrays.Int16Array = null;
-	public var texa:kha.arrays.Int16Array = null;
-	public var inda:kha.arrays.Uint32Array = null;
+	public var posa: kha.arrays.Int16Array = null;
+	public var nora: kha.arrays.Int16Array = null;
+	public var texa: kha.arrays.Int16Array = null;
+	public var inda: kha.arrays.Uint32Array = null;
 
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
@@ -13,7 +13,7 @@ class StlParser {
 	public var hasNext = false;
 	public var pos = 0;
 
-	public function new(blob:kha.Blob) {
+	public function new(blob: kha.Blob) {
 		var bytes = blob.bytes;
 		var input = new haxe.io.BytesInput(bytes);
 		var header = input.read(80);

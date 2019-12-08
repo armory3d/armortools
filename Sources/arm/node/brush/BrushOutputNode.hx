@@ -7,15 +7,15 @@ import arm.Tool;
 @:keep
 class BrushOutputNode extends LogicNode {
 
-	public function new(tree:LogicTree) {
+	public function new(tree: LogicTree) {
 		super(tree);
 		UITrait.inst.onBrush = run;
 	}
 
-	override function run(from:Int) {
+	override function run(from: Int) {
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
-		var opac:Dynamic = inputs[2].get(); // Float or texture name
+		var opac: Dynamic = inputs[2].get(); // Float or texture name
 		if (opac == null) opac = 1.0;
 		var lastMask = UITrait.inst.brushMaskImage;
 		if (Std.is(opac, String)) {

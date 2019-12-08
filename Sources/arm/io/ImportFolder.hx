@@ -4,7 +4,6 @@ import zui.Nodes;
 import iron.data.Data;
 import iron.data.MaterialData;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.sys.Path;
@@ -17,7 +16,7 @@ using StringTools;
 
 class ImportFolder {
 
-	public static function run(path:String) {
+	public static function run(path: String) {
 		var files = File.readDirectory(path);
 		var mapbase = "";
 		var mapopac = "";
@@ -71,7 +70,7 @@ class ImportFolder {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
 		if (isScene) {
 			MaterialUtil.removeMaterialCache();
-			Data.getMaterial("Scene", "Material2", function(md:MaterialData) {
+			Data.getMaterial("Scene", "Material2", function(md: MaterialData) {
 				Context.materialScene = new MaterialSlot(md);
 				Project.materialsScene.push(Context.materialScene);
 			});
@@ -84,7 +83,7 @@ class ImportFolder {
 		var canvas = isScene ? Context.materialScene.canvas : Context.material.canvas;
 		var dirs = path.replace("\\", "/").split("/");
 		canvas.name = dirs[dirs.length - 1];
-		var nout:TNode = null;
+		var nout: TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
 		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
 
@@ -126,7 +125,7 @@ class ImportFolder {
 		UITrait.inst.hwnd1.redraws = 2;
 	}
 
-	static function placeImageNode(nodes:Nodes, canvas:TNodeCanvas, asset:String, ny:Int, to_id:Int, to_socket:Int) {
+	static function placeImageNode(nodes: Nodes, canvas: TNodeCanvas, asset: String, ny: Int, to_id: Int, to_socket: Int) {
 		var n = NodesMaterial.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = App.getAssetIndex(asset);
 		n.x = 72;

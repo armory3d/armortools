@@ -14,7 +14,6 @@ import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.sys.Path;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.data.LayerSlot;
@@ -31,24 +30,24 @@ using StringTools;
 
 class Project {
 
-	public static var raw:TProjectFormat;
+	public static var raw: TProjectFormat;
 	public static var filepath = "";
-	public static var assets:Array<TAsset> = [];
-	public static var assetNames:Array<String> = [];
+	public static var assets: Array<TAsset> = [];
+	public static var assetNames: Array<String> = [];
 	public static var assetId = 0;
-	public static var meshAssets:Array<String> = [];
-	public static var materials:Array<MaterialSlot> = null;
-	public static var materialsScene:Array<MaterialSlot> = null;
-	public static var brushes:Array<BrushSlot> = null;
-	public static var layers:Array<LayerSlot> = null;
-	public static var paintObjects:Array<MeshObject> = null;
+	public static var meshAssets: Array<String> = [];
+	public static var materials: Array<MaterialSlot> = null;
+	public static var materialsScene: Array<MaterialSlot> = null;
+	public static var brushes: Array<BrushSlot> = null;
+	public static var layers: Array<LayerSlot> = null;
+	public static var paintObjects: Array<MeshObject> = null;
 	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
 	#if arm_world
 	public static var waterPass = true;
 	#end
 
 	public static function projectOpen() {
-		UIFiles.show("arm", false, function(path:String) {
+		UIFiles.show("arm", false, function(path: String) {
 			if (!path.endsWith(".arm")) {
 				Log.error(Strings.error5);
 				return;
@@ -79,7 +78,7 @@ class Project {
 	}
 
 	public static function projectSaveAs() {
-		UIFiles.show("arm", true, function(path:String) {
+		UIFiles.show("arm", true, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = "untitled";
 			filepath = path + "/" + f;
@@ -89,9 +88,9 @@ class Project {
 	}
 
 	public static function projectNewBox() {
-		UIBox.showCustom(function(ui:Zui) {
+		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), "New Project")) {
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], "Template");
 				if (ui.button("OK") || ui.isReturnDown) {
 					Project.projectNew();
@@ -139,7 +138,7 @@ class Project {
 		}
 
 		if (UITrait.inst.projectType != ModelCube) {
-			var mesh:Dynamic = UITrait.inst.projectType == ModelSphere ?
+			var mesh: Dynamic = UITrait.inst.projectType == ModelSphere ?
 				new arm.format.proc.Sphere(1, 512, 256) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
@@ -155,7 +154,7 @@ class Project {
 				scale_pos: mesh.scalePos,
 				scale_tex: mesh.scaleTex
 			};
-			var md = new MeshData(raw, function(md:MeshData) {});
+			var md = new MeshData(raw, function(md: MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (UITrait.inst.projectType == ModelSphere) {
@@ -169,7 +168,7 @@ class Project {
 		}
 
 		var n = UITrait.inst.projectType == ModelCube ? "Cube" : "Tessellated";
-		Data.getMesh("Scene", n, function(md:MeshData) {
+		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
@@ -187,7 +186,7 @@ class Project {
 			Context.paintObject.name = n;
 			paintObjects = [Context.paintObject];
 			while (materials.length > 0) materials.pop().unload();
-			Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
+			Data.getMaterial("Scene", "Material", function(m: iron.data.MaterialData) {
 				materials.push(new MaterialSlot(m));
 			});
 			Context.material = materials[0];
@@ -229,7 +228,7 @@ class Project {
 	}
 
 	public static function importMaterial() {
-		UIFiles.show("arm,blend", false, function(path:String) {
+		UIFiles.show("arm,blend", false, function(path: String) {
 			path.endsWith(".blend") ?
 				ImportBlend.runMaterial(path) :
 				ImportArm.runMaterial(path);
@@ -237,13 +236,13 @@ class Project {
 	}
 
 	public static function importMesh() {
-		UIFiles.show(Path.meshFormats.join(","), false, function(path:String) {
+		UIFiles.show(Path.meshFormats.join(","), false, function(path: String) {
 			importMeshBox(path);
 		});
 	}
 
-	public static function importMeshBox(path:String) {
-		UIBox.showCustom(function(ui:Zui) {
+	public static function importMeshBox(path: String) {
+		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), "Import Mesh")) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
@@ -256,7 +255,7 @@ class Project {
 					if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
 				}
 
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				if (ui.button("Cancel")) {
 					UIBox.show = false;
 				}
@@ -277,42 +276,42 @@ class Project {
 		else importAsset();
 	}
 
-	public static function importAsset(filters:String = null) {
+	public static function importAsset(filters: String = null) {
 		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
-		UIFiles.show(filters, false, function(path:String) {
+		UIFiles.show(filters, false, function(path: String) {
 			ImportAsset.run(path);
 		});
 	}
 }
 
 typedef TProjectFormat = {
-	public var version:String;
-	@:optional public var brush_nodes:Array<TNodeCanvas>;
-	@:optional public var material_nodes:Array<TNodeCanvas>;
-	@:optional public var assets:Array<String>; // texture_assets
-	@:optional public var layer_datas:Array<TLayerData>;
-	@:optional public var mesh_datas:Array<TMeshData>;
-	@:optional public var mesh_assets:Array<String>;
+	public var version: String;
+	@:optional public var brush_nodes: Array<TNodeCanvas>;
+	@:optional public var material_nodes: Array<TNodeCanvas>;
+	@:optional public var assets: Array<String>; // texture_assets
+	@:optional public var layer_datas: Array<TLayerData>;
+	@:optional public var mesh_datas: Array<TMeshData>;
+	@:optional public var mesh_assets: Array<String>;
 }
 
 typedef TLayerData = {
-	public var res:Int; // Width pixels
-	public var bpp:Int; // Bits per pixel
-	public var texpaint:haxe.io.Bytes;
-	public var texpaint_nor:haxe.io.Bytes;
-	public var texpaint_pack:haxe.io.Bytes;
-	public var texpaint_mask:haxe.io.Bytes;
-	public var uv_scale:Float;
-	public var uv_rot:Float;
-	public var uv_type:Int;
-	public var opacity_mask:Float;
-	public var material_mask:Int;
-	public var object_mask:Int;
-	public var blending:Int;
+	public var res: Int; // Width pixels
+	public var bpp: Int; // Bits per pixel
+	public var texpaint: haxe.io.Bytes;
+	public var texpaint_nor: haxe.io.Bytes;
+	public var texpaint_pack: haxe.io.Bytes;
+	public var texpaint_mask: haxe.io.Bytes;
+	public var uv_scale: Float;
+	public var uv_rot: Float;
+	public var uv_type: Int;
+	public var opacity_mask: Float;
+	public var material_mask: Int;
+	public var object_mask: Int;
+	public var blending: Int;
 }
 
 typedef TAsset = {
-	public var id:Int;
-	public var name:String;
-	public var file:String;
+	public var id: Int;
+	public var name: String;
+	public var file: String;
 }

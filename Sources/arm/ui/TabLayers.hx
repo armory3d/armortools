@@ -14,7 +14,7 @@ class TabLayers {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab, "Layers")) {
-			ui.row([1/4,1/4,1/2]);
+			ui.row([1 / 4, 1 / 4, 1 / 2]);
 			if (ui.button("New")) {
 
 				// UIMenu.draw(function(ui:Zui) {
@@ -44,11 +44,13 @@ class TabLayers {
 				Context.ddirty = 2;
 			}
 
-			function drawList(l:LayerSlot, i:Int) {
+			function drawList(l: LayerSlot, i: Int) {
 
 				if (UITrait.inst.layerFilter > 0 &&
 					l.objectMask > 0 &&
-					l.objectMask != UITrait.inst.layerFilter) return;
+					l.objectMask != UITrait.inst.layerFilter) {
+					return;
+				}
 
 				var h = Id.handle().nest(l.id, {selected: l.visible});
 				var layerPanel = h.nest(0, {selected: false});
@@ -72,15 +74,15 @@ class TabLayers {
 				}
 
 				if (l.texpaint_mask != null) {
-					ui.row([8/100, 16/100, 16/100, 20/100, 30/100, 10/100]);
+					ui.row([8 / 100, 16 / 100, 16 / 100, 20 / 100, 30 / 100, 10 / 100]);
 				}
 				else {
-					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
+					ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 				}
 
 				var center = (step / 2) * ui.SCALE();
 				ui._y += center;
-				var icons = Res.get('icons.png');
+				var icons = Res.get("icons.png");
 				var r = Res.tile18(icons, l.visible ? 0 : 1, 0);
 				ui._x += 2;
 				ui._y += 3;
@@ -138,7 +140,7 @@ class TabLayers {
 						ui.tooltipImage(l.texpaint_mask_preview);
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
+						UIMenu.draw(function(ui: Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Delete", Left)) {
@@ -148,7 +150,7 @@ class TabLayers {
 								Context.setLayer(l);
 							}
 							if (ui.button("Apply", Left)) {
-								function makeApply(g:kha.graphics4.Graphics) {
+								function makeApply(g: kha.graphics4.Graphics) {
 									g.end();
 									Context.setLayer(l);
 									History.applyMask();
@@ -187,7 +189,7 @@ class TabLayers {
 				}
 
 				if (contextMenu) {
-					UIMenu.draw(function(ui:Zui) {
+					UIMenu.draw(function(ui: Zui) {
 						var add = l.material_mask != null ? 1 : 0;
 						if (l == Project.layers[0]) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
@@ -200,7 +202,7 @@ class TabLayers {
 						if (ui.button("Export", Left)) BoxExport.showTextures();
 
 						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
-							function makeFill(g:kha.graphics4.Graphics) {
+							function makeFill(g: kha.graphics4.Graphics) {
 								g.end();
 								History.toFillLayer();
 								l.toFillLayer();
@@ -210,7 +212,7 @@ class TabLayers {
 							iron.App.notifyOnRender(makeFill);
 						}
 						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
-							function makePaint(g:kha.graphics4.Graphics) {
+							function makePaint(g: kha.graphics4.Graphics) {
 								g.end();
 								History.toPaintLayer();
 								l.toPaintLayer();
@@ -256,7 +258,7 @@ class TabLayers {
 							if (ui.button("Duplicate", Left)) {
 								Context.setLayer(l);
 								History.duplicateLayer();
-								function makeDupli(g:kha.graphics4.Graphics) {
+								function makeDupli(g: kha.graphics4.Graphics) {
 									g.end();
 									l = l.duplicate();
 									Context.setLayer(l);
@@ -339,7 +341,7 @@ class TabLayers {
 				}
 				else {
 					ui._y -= ui.t.ELEMENT_OFFSET;
-					ui.row([8/100, 16/100, 36/100, 30/100, 10/100]);
+					ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 					@:privateAccess ui.endElement();
 					@:privateAccess ui.endElement();
 					@:privateAccess ui.endElement();
@@ -367,7 +369,7 @@ class TabLayers {
 				ui._y -= ui.t.ELEMENT_OFFSET;
 
 				if (showPanel) {
-					ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
+					ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 					@:privateAccess ui.endElement();
 					ui._x += 1;
 					ui._y += 2;
@@ -400,7 +402,7 @@ class TabLayers {
 					}
 
 					if (l.material_mask != null) {
-						ui.row([8/100, 92/100/3, 92/100/3, 92/100/3]);
+						ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 						@:privateAccess ui.endElement();
 
 						var uvScaleHandle = Id.handle().nest(l.id, {value: l.uvScale});

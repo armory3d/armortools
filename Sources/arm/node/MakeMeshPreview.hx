@@ -1,6 +1,5 @@
 package arm.node;
 
-import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
@@ -12,15 +11,15 @@ class MakeMeshPreview {
 	public static var opacityDiscardDecal = 0.05;
 	public static var opacityDiscardScene = 0.5;
 
-	public static function run(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
+	public static function run(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
 		var isScene = UITrait.inst.worktab.position == SpaceScene;
-		var context_id = 'mesh';
-		var con_mesh:MaterialShaderContext = data.add_context({
+		var context_id = "mesh";
+		var con_mesh: MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
-			compare_mode: 'less',
-			cull_mode: (UITrait.inst.cullBackfaces || !isScene) ? 'clockwise' : 'none',
-			vertex_elements: [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}] });
+			compare_mode: "less",
+			cull_mode: (UITrait.inst.cullBackfaces || !isScene) ? "clockwise" : "none",
+			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}] });
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();

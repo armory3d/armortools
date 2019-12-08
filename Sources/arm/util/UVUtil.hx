@@ -1,13 +1,12 @@
 package arm.util;
 
 import kha.Image;
-import arm.ui.UITrait;
 
 class UVUtil {
 
-	public static var uvmap:Image = null;
+	public static var uvmap: Image = null;
 	public static var uvmapCached = false;
-	public static var trianglemap:Image = null;
+	public static var trianglemap: Image = null;
 	public static var trianglemapCached = false;
 
 	public static function cacheUVMap() {

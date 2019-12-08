@@ -4,7 +4,6 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UITrait;
 import arm.node.MaterialParser;
-import arm.Tool;
 
 #if kha_direct3d12
 
@@ -14,23 +13,23 @@ class RenderPathRaytrace {
 	public static var raysPix = 0;
 	public static var raysSec = 0;
 	public static var ready = false;
-	static var path:RenderPath;
+	static var path: RenderPath;
 	static var first = true;
 	static var f32 = new kha.arrays.Float32Array(24);
 	static var helpMat = iron.math.Mat4.identity();
-	static var vb:kha.arrays.Float32Array;
-	static var ib:kha.arrays.Uint32Array;
-	static var bsobol:kha.Image;
-	static var bscramble:kha.Image;
-	static var brank:kha.Image;
+	static var vb: kha.arrays.Float32Array;
+	static var ib: kha.arrays.Uint32Array;
+	static var bsobol: kha.Image;
+	static var bscramble: kha.Image;
+	static var brank: kha.Image;
 	static var raysTimer = 0.0;
 	static var raysCounter = 0;
-	static var lastLayer:kha.Image = null;
-	static var lastEnvmap:kha.Image = null;
+	static var lastLayer: kha.Image = null;
+	static var lastEnvmap: kha.Image = null;
 	static var isBake = false;
 	static var lastBake = 0;
 
-	public static function init(_path:RenderPath) {
+	public static function init(_path: RenderPath) {
 		path = _path;
 	}
 
@@ -220,7 +219,7 @@ class RenderPathRaytrace {
 		}
 	}
 
-	static function raytraceInit(shaderName:String, targetW:Int, targetH:Int, build = true) {
+	static function raytraceInit(shaderName: String, targetW: Int, targetH: Int, build = true) {
 
 		if (first) {
 			Scene.active.embedData("bnoise_sobol.png", function() {});
@@ -261,7 +260,7 @@ class RenderPathRaytrace {
 			}
 		}
 
-		iron.data.Data.getBlob(shaderName, function(shader:kha.Blob) {
+		iron.data.Data.getBlob(shaderName, function(shader: kha.Blob) {
 			if (build) buildData();
 			Krom.raytraceInit(
 				shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, targetW, targetH,
@@ -315,7 +314,7 @@ class RenderPathRaytrace {
 		brank.g2.end();
 	}
 
-	static function getBakeShaderName():String {
+	static function getBakeShaderName(): String {
 		return
 			UITrait.inst.bakeType == BakeAO  		? "raytrace_bake_ao.cso" :
 			UITrait.inst.bakeType == BakeLightmap 	? "raytrace_bake_light.cso" :

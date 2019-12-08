@@ -1,9 +1,7 @@
 package arm.node;
 
-import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Tool;
 
@@ -13,27 +11,29 @@ class MaterialBuilder {
 	public static var emisUsed = false;
 	public static var subsUsed = false;
 
-	public static inline function make_paint(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
+	public static inline function make_paint(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
 		return MakePaint.run(data, matcon);
 	}
 
-	public static inline function make_mesh(data:MaterialShaderData):MaterialShaderContext {
+	public static inline function make_mesh(data: MaterialShaderData): MaterialShaderContext {
 		return MakeMesh.run(data);
 	}
 
-	public static inline function make_mesh_preview(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
+	public static inline function make_mesh_preview(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
 		return MakeMeshPreview.run(data, matcon);
 	}
 
-	public static inline function make_voxel(data:iron.data.ShaderData.ShaderContext) {
+	public static inline function make_voxel(data: iron.data.ShaderData.ShaderContext) {
+		#if rp_voxelao
 		MakeVoxel.run(data);
+		#end
 	}
 
-	public static inline function make_particle(data:MaterialShaderData):MaterialShaderContext {
+	public static inline function make_particle(data: MaterialShaderData): MaterialShaderContext {
 		return MakeParticle.run(data);
 	}
 
-	public static function blendMode(frag:MaterialShader, blending:Int, cola:String, colb:String, opac:String):String {
+	public static function blendMode(frag: MaterialShader, blending: Int, cola: String, colb: String, opac: String): String {
 		if (blending == BlendMix) {
 			return 'mix($cola, $colb, $opac)';
 		}

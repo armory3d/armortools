@@ -3,14 +3,12 @@ package arm.ui;
 import haxe.io.Bytes;
 import haxe.Json;
 import kha.System;
-import kha.Blob;
 import kha.Image;
 import zui.Zui;
 import zui.Id;
 import zui.Ext;
 import iron.Scene;
 import iron.system.Input;
-import iron.data.Data;
 import arm.util.ViewportUtil;
 import arm.util.UVUtil;
 import arm.util.BuildMacros;
@@ -28,14 +26,14 @@ class UIMenu {
 	public static var menuX = 0;
 	public static var menuY = 0;
 	public static var keepOpen = false;
-	public static var menuCommands:Zui->Void = null;
+	public static var menuCommands: Zui->Void = null;
 	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 	static var viewportColorHandle = Id.handle({selected: false});
 
 	@:access(zui.Zui)
-	public static function render(g:kha.graphics2.Graphics) {
+	public static function render(g: kha.graphics2.Graphics) {
 		var ui = App.uimenu;
 		var menuW = Std.int(ui.ELEMENT_W() * 1.8);
 		var BUTTON_COL = ui.t.BUTTON_COL;
@@ -97,7 +95,7 @@ class UIMenu {
 				}
 
 				if (ui.button("Import Envmap...", Left)) {
-					UIFiles.show("hdr", false, function(path:String) {
+					UIFiles.show("hdr", false, function(path: String) {
 						if (!path.endsWith(".hdr")) {
 							Log.error("Error: .hdr file expected");
 							return;
@@ -195,7 +193,7 @@ class UIMenu {
 				else {
 					if (ui.panel(viewportColorHandle, "Viewport Color")) {
 						var hwheel = Id.handle({color: 0xff030303});
-						var worldColor:kha.Color = Ext.colorWheel(ui, hwheel);
+						var worldColor: kha.Color = Ext.colorWheel(ui, hwheel);
 						if (hwheel.changed) {
 							// var b = UITrait.inst.emptyEnvmap.lock(); // No lock for d3d11
 							// b.set(0, worldColor.Rb);
@@ -334,7 +332,7 @@ class UIMenu {
 					var gpu = "";
 					for (i in 30...Std.int(bytes.length / 2)) {
 						var c = String.fromCharCode(bytes.get(i * 2));
-						if (c == '\n') continue;
+						if (c == "\n") continue;
 						gpu += c;
 					}
 					msg += '\n$gpu';
@@ -360,7 +358,7 @@ class UIMenu {
 	}
 
 	public static function update() {
-		var ui = App.uimenu;
+		//var ui = App.uimenu;
 		if (hideMenu) {
 			show = false;
 			App.redrawUI();
@@ -369,7 +367,7 @@ class UIMenu {
 		}
 	}
 
-	public static function draw(commands:Zui->Void = null, x = -1, y = -1) {
+	public static function draw(commands: Zui->Void = null, x = -1, y = -1) {
 		show = true;
 		menuCommands = commands;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);

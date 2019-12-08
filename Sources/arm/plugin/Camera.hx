@@ -6,14 +6,13 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import arm.ui.UITrait;
 import arm.util.ViewportUtil;
-import arm.Tool;
 
 class Camera {
 
-	public static var inst:Camera;
+	public static var inst: Camera;
 	public static var dist = 0.0;
 	static inline var speed = 2.0;
-	public var views:Array<Mat4>;
+	public var views: Array<Mat4>;
 	var redraws = 0;
 	var first = true;
 	var dir = new Vec4();
@@ -32,7 +31,9 @@ class Camera {
 				App.isDragging  ||
 				UITrait.inst.isScrolling ||
 				mouse.viewX < 0 ||
-				mouse.viewX > iron.App.w()) return;
+				mouse.viewX > iron.App.w()) {
+				return;
+			}
 
 			var camera = iron.Scene.active.camera;
 
@@ -55,14 +56,7 @@ class Camera {
 					camera.transform.move(camera.lookWorld(), -dist);
 				}
 
-				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
-					redraws = 2;
-					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
-					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
-					camera.transform.loc.add(look);
-					camera.transform.loc.add(right);
-					camera.buildMatrix();
-				}
+				panAction(modif);
 
 				if (Operator.shortcut(Config.keymap.action_zoom)) {
 					redraws = 2;
@@ -101,14 +95,7 @@ class Camera {
 					}
 				}
 
-				if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
-					redraws = 2;
-					var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
-					var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
-					camera.transform.loc.add(look);
-					camera.transform.loc.add(right);
-					camera.buildMatrix();
-				}
+				panAction(modif);
 
 				if (Operator.shortcut(Config.keymap.action_zoom)) {
 					redraws = 2;
@@ -176,5 +163,18 @@ class Camera {
 		var camera = iron.Scene.active.camera;
 		dist = camera.transform.loc.length();
 		views = [camera.transform.local.clone(), camera.transform.local.clone()];
+	}
+
+	function panAction(modif: Bool) {
+		var camera = iron.Scene.active.camera;
+		var mouse = Input.getMouse();
+		if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
+			redraws = 2;
+			var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
+			var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
+			camera.transform.loc.add(look);
+			camera.transform.loc.add(right);
+			camera.buildMatrix();
+		}
 	}
 }

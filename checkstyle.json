@@ -1,0 +1,253 @@
+{
+	"defaultSeverity": "INFO",
+	"checks": [
+		{
+			"type": "CodeSimilarity"
+		},
+		{
+			"type": "DefaultComesLast"
+		},
+		{
+			"type": "DocCommentStyle"
+		},
+		{
+			"type": "ERegLiteral"
+		},
+		{
+			"props": {
+				"tokens": [
+					"CLASS_DEF",
+					"ENUM_DEF",
+					"ABSTRACT_DEF",
+					"TYPEDEF_DEF",
+					"INTERFACE_DEF",
+					"OBJECT_DECL",
+					"FUNCTION",
+					"FOR",
+					"IF",
+					"WHILE",
+					"SWITCH",
+					"TRY",
+					"CATCH"
+				],
+				"option": "empty"
+			},
+			"type": "EmptyBlock"
+		},
+		{
+			"props": {
+				"max": 1
+			},
+			"type": "EmptyLines"
+		},
+		{
+			"props": {
+				"option": "lowerCase"
+			},
+			"type": "HexadecimalLiteral"
+		},
+		{
+			"type": "InnerAssignment"
+		},
+		{
+			"props": {
+				"modifiers": [
+					"MACRO",
+					"OVERRIDE",
+					"PUBLIC_PRIVATE",
+					"STATIC",
+					"INLINE",
+					"DYNAMIC"
+				]
+			},
+			"type": "ModifierOrder"
+		},
+		{
+			"type": "MultipleVariableDeclarations"
+		},
+		{
+			"props": {
+				"allowSingleLineStatement": true,
+				"tokens": [
+					"FOR",
+					"IF",
+					"ELSE_IF",
+					"WHILE",
+					"DO_WHILE"
+				]
+			},
+			"type": "NeedBraces"
+		},
+		{
+			"props": {
+				"assignOpPolicy": "around",
+				"unaryOpPolicy": "none",
+				"ternaryOpPolicy": "around",
+				"arithmeticOpPolicy": "around",
+				"compareOpPolicy": "around",
+				"bitwiseOpPolicy": "around",
+				"boolOpPolicy": "around",
+				"intervalOpPolicy": "none",
+				"arrowPolicy": "none",
+				"oldFunctionTypePolicy": "none",
+				"newFunctionTypePolicy": "none",
+				"arrowFunctionPolicy": "around"
+			},
+			"type": "OperatorWhitespace"
+		},
+		{
+			"props": {
+				"tokens": [
+					"=",
+					"*",
+					"/",
+					"%",
+					">",
+					"<",
+					">=",
+					"<=",
+					"==",
+					"!=",
+					"&",
+					"|",
+					"^",
+					"<<",
+					">>",
+					">>>",
+					"+=",
+					"-=",
+					"*=",
+					"/=",
+					"%=",
+					"<<=",
+					">>=",
+					">>>=",
+					"|=",
+					"&=",
+					"^=",
+					"...",
+					"=>",
+					"++",
+					"--",
+					"+",
+					"-",
+					"&&",
+					"||"
+				],
+				"option": "eol"
+			},
+			"type": "OperatorWrap"
+		},
+		{
+			"type": "RedundantModifier"
+		},
+		{
+			"type": "RedundantAllowMeta"
+		},
+		{
+			"type": "RedundantAccessMeta"
+		},
+		{
+			"props": {
+				"allowEmptyReturn": true,
+				"enforceReturnType": false
+			},
+			"type": "Return"
+		},
+		{
+			"props": {
+				"dotPolicy": "none",
+				"commaPolicy": "after",
+				"semicolonPolicy": "after"
+			},
+			"type": "SeparatorWhitespace"
+		},
+		{
+			"props": {
+				"tokens": [
+					","
+				],
+				"option": "eol"
+			},
+			"type": "SeparatorWrap"
+		},
+		{
+			"props": {
+				"spaceIfCondition": "should",
+				"spaceAroundBinop": true,
+				"spaceForLoop": "should",
+				"ignoreRangeOperator": true,
+				"spaceWhileLoop": "should",
+				"spaceCatch": "should",
+				"spaceSwitchCase": "should",
+				"noSpaceAroundUnop": true
+			},
+			"type": "Spacing"
+		},
+		{
+			"props": {
+				"allowException": true,
+				"policy": "doubleAndInterpolation"
+			},
+			"type": "StringLiteral"
+		},
+		{
+			"type": "TrailingWhitespace"
+		},
+		{
+			"type": "UnusedImport"
+		},
+		{
+			"type": "UnusedLocalVar"
+		},
+		{
+			"props": {
+				"tokens": [
+					",",
+					";",
+					":"
+				]
+			},
+			"type": "WhitespaceAfter"
+		},
+		{
+			"props": {
+				"tokens": [
+					"=",
+					"+",
+					"-",
+					"*",
+					"/",
+					"%",
+					">",
+					"<",
+					">=",
+					"<=",
+					"==",
+					"!=",
+					"&",
+					"|",
+					"^",
+					"&&",
+					"||",
+					"<<",
+					">>",
+					">>>",
+					"+=",
+					"-=",
+					"*=",
+					"/=",
+					"%=",
+					"<<=",
+					">>=",
+					">>>=",
+					"|=",
+					"&=",
+					"^=",
+					"=>"
+				]
+			},
+			"type": "WhitespaceAround"
+		}
+	]
+}

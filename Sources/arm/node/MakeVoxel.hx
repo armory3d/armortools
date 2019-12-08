@@ -1,16 +1,9 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
-import arm.ui.UITrait;
-import arm.ui.UINodes;
-import arm.node.MaterialShader;
-import arm.Tool;
-
 class MakeVoxel {
 
 	#if rp_voxelao
-	public static function run(data:iron.data.ShaderData.ShaderContext) {
+	public static function run(data: iron.data.ShaderData.ShaderContext) {
 		var structure = new kha.graphics4.VertexStructure();
 		structure.add("pos", kha.graphics4.VertexData.Short4Norm);
 		structure.add("nor", kha.graphics4.VertexData.Short2Norm);
@@ -18,7 +11,7 @@ class MakeVoxel {
 
 		var pipeState = data.pipeState;
 		pipeState.inputLayout = [structure];
-		data.raw.vertex_elements = [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}];
+		data.raw.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
 		// #if arm_skin
 		// var isMesh = Std.is(Context.object, MeshObject);

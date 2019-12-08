@@ -3,7 +3,6 @@ package arm.io;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
-import iron.data.SceneFormat;
 import arm.format.ExrWriter;
 import arm.format.JpgWriter;
 import arm.format.PngWriter;
@@ -16,12 +15,12 @@ using StringTools;
 
 class ExportTexture {
 
-	public static function run(path:String) {
+	public static function run(path: String) {
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
 		#end
 
-		var udimTiles:Array<String> = [];
+		var udimTiles: Array<String> = [];
 		for (l in Project.layers) {
 			if (l.objectMask > 0) {
 				var name = Project.paintObjects[l.objectMask - 1].name;
@@ -45,7 +44,7 @@ class ExportTexture {
 		Log.info("Textures exported.");
 	}
 
-	static function runLayers(path:String, udimTile = "") {
+	static function runLayers(path: String, udimTile = "") {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
 		var f = UIFiles.filename;
@@ -55,9 +54,9 @@ class ExportTexture {
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 		ext = udimTile + ext;
-		var texpaint:Image = null;
-		var texpaint_nor:Image = null;
-		var texpaint_pack:Image = null;
+		var texpaint: Image = null;
+		var texpaint_nor: Image = null;
+		var texpaint_pack: Image = null;
 		var layers = Project.layers;
 
 		// Export visible layers
@@ -150,8 +149,7 @@ class ExportTexture {
 			texpaint_nor = Layers.expb;
 			texpaint_pack = Layers.expc;
 		}
-		// Export selected layer
-		else {
+		else { // Export selected layer
 			var selectedLayer = Context.layer;
 			texpaint = selectedLayer.texpaint;
 			texpaint_nor = selectedLayer.texpaint_nor;
@@ -161,11 +159,11 @@ class ExportTexture {
 			}
 		}
 
-		var pixpaint:Bytes = null;
-		var pixpaint_nor:Bytes = null;
-		var pixpaint_pack:Bytes = null;
+		var pixpaint: Bytes = null;
+		var pixpaint_nor: Bytes = null;
+		var pixpaint_pack: Bytes = null;
 		var preset = BoxExport.preset;
-		var pix:Bytes = null;
+		var pix: Bytes = null;
 
 		for (t in preset.textures) {
 			for (c in t.channels) {
@@ -226,7 +224,7 @@ class ExportTexture {
 		}
 	}
 
-	static function writeTexture(file:String, pixels:Bytes, type = 1, off = 0) {
+	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
 		var out = new BytesOutput();
 		var res = Config.getTextureRes();
 		var bitsHandle = UITrait.inst.bitsHandle.position;
@@ -256,26 +254,26 @@ class ExportTexture {
 		Krom.fileSaveBytes(file, out.getBytes().getData());
 	}
 
-	static function copyChannel(from:Bytes, fromChannel:Int, to:Bytes, toChannel:Int) {
+	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel));
 		}
 	}
 
 	static inline var gamma = 1.0 / 2.2;
-	static function copyChannelGamma(from:Bytes, fromChannel:Int, to:Bytes, toChannel:Int) {
+	static function copyChannelGamma(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, Std.int(Math.pow(from.get(i * 4 + fromChannel) / 255, gamma) * 255));
 		}
 	}
 
-	static function copyChannelInv(from:Bytes, fromChannel:Int, to:Bytes, toChannel:Int) {
+	static function copyChannelInv(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, 255 - from.get(i * 4 + fromChannel));
 		}
 	}
 
-	static function setChannel(value:Int, to:Bytes, toChannel:Int) {
+	static function setChannel(value: Int, to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, value);
 		}
@@ -283,10 +281,10 @@ class ExportTexture {
 }
 
 typedef TExportPreset = {
-	public var textures:Array<TExportPresetTexture>;
+	public var textures: Array<TExportPresetTexture>;
 }
 
 typedef TExportPresetTexture = {
-	public var name:String;
-	public var channels:Array<String>;
+	public var name: String;
+	public var channels: Array<String>;
 }

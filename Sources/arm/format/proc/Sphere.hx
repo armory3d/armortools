@@ -2,10 +2,10 @@ package arm.format.proc;
 
 class Sphere {
 
-	public var posa:kha.arrays.Int16Array = null;
-	public var nora:kha.arrays.Int16Array = null;
-	public var texa:kha.arrays.Int16Array = null;
-	public var inda:kha.arrays.Uint32Array = null;
+	public var posa: kha.arrays.Int16Array = null;
+	public var nora: kha.arrays.Int16Array = null;
+	public var texa: kha.arrays.Int16Array = null;
+	public var inda: kha.arrays.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
@@ -15,7 +15,7 @@ class Sphere {
 		// Pack positions to (-1, 1) range
 		scalePos = radius;
 		var inv = (1 / scalePos) * 32767;
-		var PI2 = Math.PI * 2;
+		var pi2 = Math.PI * 2;
 
 		var widthVerts = widthSegments + 1;
 		var heightVerts = heightSegments + 1;
@@ -32,7 +32,7 @@ class Sphere {
 			var uOff = y == 0 ? 0.5 / widthSegments : y == heightSegments ? -0.5 / widthSegments : 0.0;
 			for (x in 0...widthVerts) {
 				var u = x / widthSegments;
-				var uPI2 = u * PI2;
+				var uPI2 = u * pi2;
 				var vPI  = v * Math.PI;
 				var vPIsin = Math.sin(vPI);
 				var vx = -radius * Math.cos(uPI2) * vPIsin;

@@ -3,7 +3,6 @@ package arm.data;
 import kha.graphics4.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
-import iron.object.MeshObject;
 import arm.ui.UITrait;
 import arm.node.MaterialParser;
 import arm.Tool;
@@ -13,18 +12,18 @@ class LayerSlot {
 	public var visible = true;
 	public var ext = "";
 
-	public var name:String;
+	public var name: String;
 
-	public var texpaint:Image;
-	public var texpaint_nor:Image;
-	public var texpaint_pack:Image;
+	public var texpaint: Image;
+	public var texpaint_nor: Image;
+	public var texpaint_pack: Image;
 
-	public var texpaint_preview:Image; // Layer preview
+	public var texpaint_preview: Image; // Layer preview
 
-	public var texpaint_mask:Image = null; // Texture mask
-	public var texpaint_mask_preview:Image;
+	public var texpaint_mask: Image = null; // Texture mask
+	public var texpaint_mask_preview: Image;
 	public var maskOpacity = 1.0; // Opacity mask
-	public var material_mask:MaterialSlot = null; // Fill layer
+	public var material_mask: MaterialSlot = null; // Fill layer
 
 	static var first = true;
 
@@ -43,8 +42,8 @@ class LayerSlot {
 	public var paintEmis = true;
 	public var paintSubs = true;
 
-	var createMaskColor:Int;
-	var createMaskImage:Image;
+	var createMaskColor: Int;
+	var createMaskImage: Image;
 
 	public function new(ext = "") {
 
@@ -55,7 +54,7 @@ class LayerSlot {
 				t.name = "texpaint_blend0";
 				t.width = Config.getTextureRes();
 				t.height = Config.getTextureRes();
-				t.format = 'R8';
+				t.format = "R8";
 				RenderPath.active.createRenderTarget(t);
 			}
 			{
@@ -63,7 +62,7 @@ class LayerSlot {
 				t.name = "texpaint_blend1";
 				t.width = Config.getTextureRes();
 				t.height = Config.getTextureRes();
-				t.format = 'R8';
+				t.format = "R8";
 				RenderPath.active.createRenderTarget(t);
 			}
 		}
@@ -75,9 +74,9 @@ class LayerSlot {
 		}
 		this.ext = ext;
 		name = "Layer " + (id + 1);
-		var format = UITrait.inst.bitsHandle.position == Bits8 ?  'RGBA32' :
-					 UITrait.inst.bitsHandle.position == Bits16 ? 'RGBA64' :
-					 											  'RGBA128';
+		var format = UITrait.inst.bitsHandle.position == Bits8 ?  "RGBA32" :
+					 UITrait.inst.bitsHandle.position == Bits16 ? "RGBA64" :
+					 											  "RGBA128";
 
 		{
 			var t = new RenderTargetRaw();
@@ -129,7 +128,7 @@ class LayerSlot {
 		deleteMask();
 	}
 
-	public function swap(other:LayerSlot) {
+	public function swap(other: LayerSlot) {
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
 		RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = other.texpaint_pack;
@@ -138,26 +137,26 @@ class LayerSlot {
 		RenderPath.active.renderTargets.get("texpaint_nor" + other.ext).image = texpaint_nor;
 		RenderPath.active.renderTargets.get("texpaint_pack" + other.ext).image = texpaint_pack;
 
-		var tp = texpaint;
-		var tp_nor = texpaint_nor;
-		var tp_pack = texpaint_pack;
+		var _texpaint = texpaint;
+		var _texpaint_nor = texpaint_nor;
+		var _texpaint_pack = texpaint_pack;
 		texpaint = other.texpaint;
 		texpaint_nor = other.texpaint_nor;
 		texpaint_pack = other.texpaint_pack;
-		other.texpaint = tp;
-		other.texpaint_nor = tp_nor;
-		other.texpaint_pack = tp_pack;
+		other.texpaint = _texpaint;
+		other.texpaint_nor = _texpaint_nor;
+		other.texpaint_pack = _texpaint_pack;
 	}
 
-	public function swapMask(other:LayerSlot) {
+	public function swapMask(other: LayerSlot) {
 		RenderPath.active.renderTargets.get("texpaint_mask" + ext).image = other.texpaint_mask;
 		RenderPath.active.renderTargets.get("texpaint_mask" + other.ext).image = texpaint_mask;
-		var tp_mask = texpaint_mask;
+		var _texpaint_mask = texpaint_mask;
 		texpaint_mask = other.texpaint_mask;
-		other.texpaint_mask = tp_mask;
+		other.texpaint_mask = _texpaint_mask;
 	}
 
-	public function createMask(color:Int, clear = true, image:Image = null) {
+	public function createMask(color: Int, clear = true, image: Image = null) {
 		if (texpaint_mask != null) return;
 
 		{
@@ -165,7 +164,7 @@ class LayerSlot {
 			t.name = "texpaint_mask" + ext;
 			t.width = Config.getTextureRes();
 			t.height = Config.getTextureRes();
-			t.format = 'R8';
+			t.format = "R8";
 			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
 		}
 
@@ -178,7 +177,7 @@ class LayerSlot {
 		}
 	}
 
-	function clearMask(g:kha.graphics4.Graphics) {
+	function clearMask(g: kha.graphics4.Graphics) {
 		g.end();
 
 		texpaint_mask.g2.begin();
@@ -231,7 +230,7 @@ class LayerSlot {
 		deleteMask();
 	}
 
-	public function duplicate() {
+	public function duplicate(): LayerSlot {
 		var layers = Project.layers;
 		var i = 0;
 		while (i++ < layers.length) if (layers[i] == this) break;
@@ -342,7 +341,7 @@ class LayerSlot {
 		}
 	}
 
-	public function clear(g:kha.graphics4.Graphics) {
+	public function clear(g: kha.graphics4.Graphics) {
 		g.end();
 
 		texpaint.g4.begin();

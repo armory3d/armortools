@@ -7,16 +7,14 @@ class Operator {
 	public static var run = new Map<String, Dynamic>();
 	public static var keymap = new Map<String, String>();
 
-	public static function register(name:String, key:String, call:Dynamic) {
+	public static function register(name: String, key: String, call: Dynamic) {
 		run[name] = call;
 		keymap[key] = name;
 	}
 
-	public static function update() {
+	public static function update() {}
 
-	}
-
-	public static function shortcut(s:String):Bool {
+	public static function shortcut(s: String): Bool {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 		var shift = s.indexOf("shift") >= 0;

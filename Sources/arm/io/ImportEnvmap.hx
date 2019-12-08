@@ -11,8 +11,8 @@ using StringTools;
 
 class ImportEnvmap {
 
-	public static function run(path:String, image:Image) {
-		var p = Krom.getFilesLocation() + '/' + Data.dataPath;
+	public static function run(path: String, image: Image) {
+		var p = Krom.getFilesLocation() + "/" + Data.dataPath;
 		#if krom_windows
 		var cmft = p + "/cmft.exe";
 		#elseif krom_linux
@@ -21,16 +21,16 @@ class ImportEnvmap {
 		var cmft = p + "/cmft-osx";
 		#end
 
-		var tmp = Krom.getFilesLocation() + '/' + Data.dataPath;
+		var tmp = Krom.getFilesLocation() + "/" + Data.dataPath;
 
 		// Irr
 		var cmd = cmft;
 		cmd += ' --input "' + path + '"';
-		cmd += ' --filter shcoeffs';
-		cmd += ' --outputNum 1';
+		cmd += " --filter shcoeffs";
+		cmd += " --outputNum 1";
 		cmd += ' --output0 "' + tmp + 'tmp_irr"';
 		#if krom_windows
-		cmd = cmd.replace('/', '\\');
+		cmd = cmd.replace("/", "\\");
 		#end
 		Krom.sysCommand(cmd);
 
@@ -38,34 +38,34 @@ class ImportEnvmap {
 		var faceSize = Std.int(image.width / 8);
 		cmd = cmft;
 		cmd += ' --input "' + path + '"';
-		cmd += ' --filter radiance';
-		cmd += ' --dstFaceSize ' + faceSize;
-		cmd += ' --srcFaceSize ' + faceSize;
-		cmd += ' --excludeBase false';
-		cmd += ' --glossScale 8';
-		cmd += ' --glossBias 3';
-		cmd += ' --lightingModel blinnbrdf';
-		cmd += ' --edgeFixup none';
-		cmd += ' --numCpuProcessingThreads 4';
-		cmd += ' --useOpenCL true';
-		cmd += ' --clVendor anyGpuVendor';
-		cmd += ' --deviceType gpu';
-		cmd += ' --deviceIndex 0';
-		cmd += ' --generateMipChain true';
-		cmd += ' --inputGammaNumerator 1.0';
-		cmd += ' --inputGammaDenominator 2.2';
-		cmd += ' --outputGammaNumerator 1.0';
-		cmd += ' --outputGammaDenominator 1.0';
-		cmd += ' --outputNum 1';
+		cmd += " --filter radiance";
+		cmd += " --dstFaceSize " + faceSize;
+		cmd += " --srcFaceSize " + faceSize;
+		cmd += " --excludeBase false";
+		cmd += " --glossScale 8";
+		cmd += " --glossBias 3";
+		cmd += " --lightingModel blinnbrdf";
+		cmd += " --edgeFixup none";
+		cmd += " --numCpuProcessingThreads 4";
+		cmd += " --useOpenCL true";
+		cmd += " --clVendor anyGpuVendor";
+		cmd += " --deviceType gpu";
+		cmd += " --deviceIndex 0";
+		cmd += " --generateMipChain true";
+		cmd += " --inputGammaNumerator 1.0";
+		cmd += " --inputGammaDenominator 2.2";
+		cmd += " --outputGammaNumerator 1.0";
+		cmd += " --outputGammaDenominator 1.0";
+		cmd += " --outputNum 1";
 		cmd += ' --output0 "' + tmp + 'tmp_rad"';
-		cmd += ' --output0params hdr,rgbe,latlong';
+		cmd += " --output0params hdr,rgbe,latlong";
 		#if krom_windows
-		cmd = cmd.replace('/', '\\');
+		cmd = cmd.replace("/", "\\");
 		#end
 		Krom.sysCommand(cmd);
 
 		// Load irr
-		Data.getBlob("tmp_irr.c", function(blob:Blob) {
+		Data.getBlob("tmp_irr.c", function(blob: Blob) {
 			var lines = blob.toString().split("\n");
 			var band0 = lines[5];
 			var band1 = lines[6];
@@ -94,17 +94,17 @@ class ImportEnvmap {
 		// Load envmap clone and set mipmaps
 		Data.cachedImages.remove(path);
 		@:privateAccess Data.loadingImages.remove(path);
-		Data.getImage(path, function(image:kha.Image) {
+		Data.getImage(path, function(image: kha.Image) {
 
 			// Load mips
 			var mipsCount = 6 + Std.int(image.width / 1024);
 			var mipsLoaded = 0;
-			var mips:Array<Image> = [];
+			var mips: Array<Image> = [];
 			while (mips.length < mipsCount + 2) mips.push(null);
 			var mw = Std.int(image.width / 2);
 			var mh = Std.int(image.width / 4);
 			for (i in 0...mipsCount) {
-				Data.getImage("tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip:Image) {
+				Data.getImage("tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip: Image) {
 					mips[i] = mip;
 					mipsLoaded++;
 					if (mipsLoaded == mipsCount) {

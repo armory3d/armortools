@@ -16,7 +16,6 @@ import iron.system.Time;
 import iron.RenderPath;
 import iron.Scene;
 import arm.node.MaterialParser;
-import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.UVUtil;
@@ -25,7 +24,6 @@ import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
-import arm.io.ExportArm;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
 import arm.Tool;
@@ -34,7 +32,7 @@ import arm.Project;
 @:access(zui.Zui)
 class UITrait {
 
-	public static var inst:UITrait;
+	public static var inst: UITrait;
 	public static var defaultWindowW = 280;
 	public static inline var defaultToolbarW = 54;
 	public static inline var defaultHeaderH = 28;
@@ -75,15 +73,15 @@ class UITrait {
 	public var pickerSelectMaterial = true;
 	public var pickerMaskHandle = new Handle();
 	var borderStarted = 0;
-	var borderHandle:Handle = null;
+	var borderHandle: Handle = null;
 
-	public var defaultEnvmap:Image = null;
-	public var defaultIrradiance:kha.arrays.Float32Array = null;
-	public var defaultRadiance:Image = null;
-	public var defaultRadianceMipmaps:Array<Image> = null;
-	public var savedEnvmap:Image = null;
-	public var emptyEnvmap:Image = null;
-	public var previewEnvmap:Image = null;
+	public var defaultEnvmap: Image = null;
+	public var defaultIrradiance: kha.arrays.Float32Array = null;
+	public var defaultRadiance: Image = null;
+	public var defaultRadianceMipmaps: Array<Image> = null;
+	public var savedEnvmap: Image = null;
+	public var emptyEnvmap: Image = null;
+	public var previewEnvmap: Image = null;
 	public var showEnvmap = false;
 	public var showEnvmapHandle = new Handle({selected: false});
 	public var showEnvmapBlur = false;
@@ -95,7 +93,7 @@ class UITrait {
 	public var cullBackfaces = true;
 	public var textureFilter = true;
 
-	public var ui:Zui;
+	public var ui: Zui;
 	public var colorIdHandle = Id.handle();
 	public var formatType = FormatPng;
 	public var formatQuality = 100.0;
@@ -129,7 +127,7 @@ class UITrait {
 	#else
 	public var displaceStrength = 1.0;
 	#end
-	public var decalImage:Image = null;
+	public var decalImage: Image = null;
 	public var decalPreview = false;
 	public var viewportMode = ViewRender;
 	public var hscaleWasChanged = false;
@@ -137,16 +135,16 @@ class UITrait {
 	public var nativeBrowser = true;
 	public var cacheDraws = false;
 
-	public var textToolImage:Image = null;
+	public var textToolImage: Image = null;
 	public var textToolText = "Text";
 	public var textToolHandle = new Handle();
-	public var decalMaskImage:Image = null;
+	public var decalMaskImage: Image = null;
 	public var decalMaskHandle = new Handle();
-	public var particleMaterial:MaterialData = null;
+	public var particleMaterial: MaterialData = null;
 
 	public var layerFilter = 0;
 
-	public var onBrush:Int->Void = null;
+	public var onBrush: Int->Void = null;
 	public var paintVec = new Vec4();
 	public var lastPaintX = -1.0;
 	public var lastPaintY = -1.0;
@@ -157,19 +155,19 @@ class UITrait {
 	public var cloneDeltaX = 0.0;
 	public var cloneDeltaY = 0.0;
 
-	public var gizmo:Object = null;
-	public var gizmoX:Object = null;
-	public var gizmoY:Object = null;
-	public var gizmoZ:Object = null;
+	public var gizmo: Object = null;
+	public var gizmoX: Object = null;
+	public var gizmoY: Object = null;
+	public var gizmoZ: Object = null;
 	public var axisX = false;
 	public var axisY = false;
 	public var axisZ = false;
 	public var axisStart = 0.0;
-	public var row4 = [1/4, 1/4, 1/4, 1/4];
+	public var row4 = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
 
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
-	public var brushMaskImage:Image = null;
+	public var brushMaskImage: Image = null;
 	public var brushNodesScale = 1.0;
 	public var brushNodesHardness = 1.0;
 
@@ -215,7 +213,7 @@ class UITrait {
 	#else
 	public var projectType = ModelCube;
 	#end
-	public var projectObjects:Array<MeshObject>;
+	public var projectObjects: Array<MeshObject>;
 
 	public var sub = 0;
 	public var vec2 = new Vec4();
@@ -234,13 +232,13 @@ class UITrait {
 	var brushCanUnlock = false;
 	public var cameraType = CameraPerspective;
 	public var camHandle = new Handle();
-	public var fovHandle:Handle = null;
-	public var undoHandle:Handle = null;
-	public var hssgi:Handle = null;
-	public var hssr:Handle = null;
-	public var hbloom:Handle = null;
-	public var hsupersample:Handle = null;
-	public var hvxao:Handle = null;
+	public var fovHandle: Handle = null;
+	public var undoHandle: Handle = null;
+	public var hssgi: Handle = null;
+	public var hssr: Handle = null;
+	public var hbloom: Handle = null;
+	public var hsupersample: Handle = null;
+	public var hvxao: Handle = null;
 	#if arm_creator
 	public var vxaoExt = 5.0;
 	#else
@@ -250,13 +248,13 @@ class UITrait {
 	public var vxaoAperture = 1.2;
 	public var vignetteStrength = 0.4;
 	public var textureExportPath = "";
-	public var headerHandle = new Handle({layout:Horizontal});
+	public var headerHandle = new Handle({layout: Horizontal});
 	public var toolbarHandle = new Handle();
-	public var statusHandle = new Handle({layout:Horizontal});
-	public var menuHandle = new Handle({layout:Horizontal});
-	public var workspaceHandle = new Handle({layout:Horizontal});
-	var lastCombo:Handle = null;
-	var lastTooltip:Image = null;
+	public var statusHandle = new Handle({layout: Horizontal});
+	public var menuHandle = new Handle({layout: Horizontal});
+	public var workspaceHandle = new Handle({layout: Horizontal});
+	var lastCombo: Handle = null;
+	var lastTooltip: Image = null;
 
 	public var cameraControls = ControlsOrbit;
 	public var htab = Id.handle();
@@ -275,14 +273,14 @@ class UITrait {
 
 		if (Project.materials == null) {
 			Project.materials = [];
-			Data.getMaterial("Scene", "Material", function(m:MaterialData) {
+			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 				Project.materials.push(new MaterialSlot(m));
 				Context.material = Project.materials[0];
 			});
 		}
 		if (Project.materialsScene == null) {
 			Project.materialsScene = [];
-			Data.getMaterial("Scene", "Material2", function(m:MaterialData) {
+			Data.getMaterial("Scene", "Material2", function(m: MaterialData) {
 				Project.materialsScene.push(new MaterialSlot(m));
 				Context.materialScene = Project.materialsScene[0];
 			});
@@ -330,7 +328,7 @@ class UITrait {
 		Context.ddirty = 1;
 
 		// Save last pos for continuos paint
-		iron.App.notifyOnRender(function(g:kha.graphics4.Graphics) { //
+		iron.App.notifyOnRender(function(g: kha.graphics4.Graphics) { //
 			if (frame == 2) {
 				RenderUtil.makeMaterialPreview();
 				hwnd1.redraws = 2;
@@ -356,7 +354,7 @@ class UITrait {
 			if (mouse.down()) { //
 				lastPaintVecX = paintVec.x; //
 				lastPaintVecY = paintVec.y; //
-			}//
+			} //
 			else {
 				if (splitView) {
 					viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
@@ -367,14 +365,14 @@ class UITrait {
 
 				viewIndex = -1;
 			}
-		});//
+		}); //
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.color_wheel } );
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 
-		var resources = ['cursor.png', 'icons.png'];
+		var resources = ["cursor.png", "icons.png"];
 		Res.load(resources, done);
 
 		projectObjects = [];
@@ -665,11 +663,13 @@ class UITrait {
 						}
 						else if (Context.tool == ToolParticle) {
 							// Reset particles
-							var emitter:MeshObject = cast Scene.active.getChild(".ParticleEmitter");
+							#if arm_particles
+							var emitter: MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 							var psys = emitter.particleSystems[0];
 							@:privateAccess psys.time = 0;
 							// @:privateAccess psys.time = @:privateAccess psys.seed * @:privateAccess psys.animtime;
 							// @:privateAccess psys.seed++;
+							#end
 						}
 					}
 					brushTime += Time.delta;
@@ -742,13 +742,13 @@ class UITrait {
 		lastTooltip = ui.tooltipImg;
 	}
 
-	public function render(g:kha.graphics2.Graphics) {
+	public function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		renderUI(g);
 	}
 
-	public function renderCursor(g:kha.graphics2.Graphics) {
+	public function renderCursor(g: kha.graphics2.Graphics) {
 		// if (cursorImg == null) {
 		// 	g.end();
 		// 	cursorImg = Image.createRenderTarget(256, 256);
@@ -784,7 +784,7 @@ class UITrait {
 				g.drawImage(img, mx + 10, my + 10);
 			}
 
-			var cursorImg = Res.get('cursor.png');
+			var cursorImg = Res.get("cursor.png");
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			// Clone source cursor
@@ -850,11 +850,11 @@ class UITrait {
 		App.resize();
 	}
 
-	public function getImage(asset:TAsset):Image {
+	public function getImage(asset: TAsset): Image {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 
-	function renderUI(g:kha.graphics2.Graphics) {
+	function renderUI(g: kha.graphics2.Graphics) {
 
 		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
@@ -871,7 +871,7 @@ class UITrait {
 			ui.imageScrollAlign = false;
 
 			if (worktab.position == SpacePaint) {
-				var keys = ['(B)', '(E)', '(G)', '(D)', '(T)', '(L) - Hold ALT to set source', '(U)', '(P)', '(K)', '(C)', '(V)'];
+				var keys = ["(B)", "(E)", "(G)", "(D)", "(T)", "(L) - Hold ALT to set source", "(U)", "(P)", "(K)", "(C)", "(V)"];
 				var img = Res.get("icons.png");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				for (i in 0...toolNames.length) {
@@ -1226,7 +1226,7 @@ class UITrait {
 		g.begin(false);
 	}
 
-	function menuButton(name:String, category:Int) {
+	function menuButton(name: String, category: Int) {
 		ui._w = Std.int(ui.ops.font.width(ui.fontSize, name) + 25);
 		if (ui.button(name) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
 			UIMenu.show = true;
@@ -1247,7 +1247,7 @@ class UITrait {
 		}
 	}
 
-	function onBorderHover(handle:Handle, side:Int) {
+	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uienabled) return;
 		if (handle != hwnd && handle != hwnd1 && handle != hwnd2 && handle != UINodes.inst.hwnd && handle != UIView2D.inst.hwnd) return; // Scalable handles
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;

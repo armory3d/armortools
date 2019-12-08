@@ -15,11 +15,11 @@ using StringTools;
 class BoxPreferences {
 
 	public static var htab = Id.handle();
-	public static var files:Array<String> = null;
+	public static var files: Array<String> = null;
 
 	@:access(zui.Zui)
 	public static function show() {
-		UIBox.showCustom(function(ui:Zui) {
+		UIBox.showCustom(function(ui: Zui) {
 			var _w = ui._w;
 			ui._w = Std.int(_w / 2);
 
@@ -43,7 +43,7 @@ class BoxPreferences {
 						App.theme = zui.Themes.dark;
 					}
 					else {
-						Data.getBlob("themes/theme_" + theme + ".arm", function(b:kha.Blob) {
+						Data.getBlob("themes/theme_" + theme + ".arm", function(b: kha.Blob) {
 							App.theme = Json.parse(b.toString());
 						});
 					}
@@ -70,9 +70,9 @@ class BoxPreferences {
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");
 
 				ui.endElement();
-				ui.row([1/2]);
+				ui.row([0.5]);
 				if (ui.button("Restore")) {
-					UIMenu.draw(function(ui:Zui) {
+					UIMenu.draw(function(ui: Zui) {
 						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 						ui.text("Restore defaults?", Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button("Confirm", Left)) {
@@ -119,7 +119,7 @@ class BoxPreferences {
 				UITrait.inst.brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
 				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
-				ui.row([1/2,1/2]);
+				ui.row([0.5, 0.5]);
 
 				var brushAngleRejectHandle = Id.handle({selected: UITrait.inst.brushAngleReject});
 				UITrait.inst.brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
@@ -161,7 +161,7 @@ class BoxPreferences {
 					#end
 				}
 
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				ui.enabled = UITrait.inst.hvxao.selected;
 				var h = Id.handle({value: UITrait.inst.vxaoOffset});
 				UITrait.inst.vxaoOffset = ui.slider(h, "Cone Offset", 1.0, 4.0, true);
@@ -222,11 +222,11 @@ class BoxPreferences {
 				if (ui.changed) Config.applyConfig();
 			}
 			if (ui.tab(htab, "Plugins")) {
-				ui.row([1/4, 1/4]);
+				ui.row([1 / 4, 1 / 4]);
 				if (ui.button("New")) {
-					UIBox.showCustom(function(ui:Zui) {
+					UIBox.showCustom(function(ui: Zui) {
 						if (ui.tab(Id.handle(), "New Plugin")) {
-							ui.row([1/2, 1/2]);
+							ui.row([0.5, 0.5]);
 							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
 							if (ui.button("OK") || ui.isReturnDown) {
 								var template =
@@ -253,7 +253,7 @@ plugin.drawUI = function(ui) {
 					});
 				}
 				if (ui.button("Import")) {
-					UIFiles.show("js,wasm,zip", false, function(path:String) {
+					UIFiles.show("js,wasm,zip", false, function(path: String) {
 						ImportPlugin.run(path);
 					});
 				}
@@ -285,7 +285,7 @@ plugin.drawUI = function(ui) {
 						App.redrawUI();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
+						UIMenu.draw(function(ui: Zui) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 							ui.text(f, Right, ui.t.HIGHLIGHT_COL);
 							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
@@ -293,7 +293,7 @@ plugin.drawUI = function(ui) {
 								File.start(path);
 							}
 							if (ui.button("Export", Left)) {
-								UIFiles.show("js", true, function(dest:String) {
+								UIFiles.show("js", true, function(dest: String) {
 									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
 									File.copy(path, dest + Path.sep + UIFiles.filename);
 								});

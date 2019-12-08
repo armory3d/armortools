@@ -7,8 +7,8 @@ import arm.ui.UITrait;
 
 class ImportFbx {
 
-	public static function run(path:String) {
-		Data.getBlob(path, function(b:Blob) {
+	public static function run(path: String) {
+		Data.getBlob(path, function(b: Blob) {
 			FbxParser.parseTransform = UITrait.inst.parseTransform;
 			var obj = new FbxParser(b);
 			ImportMesh.makeMesh(obj, path);

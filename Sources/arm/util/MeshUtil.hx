@@ -49,7 +49,7 @@ class MeshUtil {
 			ioff += Std.int(ias[0].values.length);
 		}
 
-		var raw:TMeshData = {
+		var raw: TMeshData = {
 			name: Context.paintObject.name,
 			vertex_arrays: [
 				{ values: va0, attrib: "pos" },
@@ -63,7 +63,7 @@ class MeshUtil {
 			scale_tex: 1.0
 		};
 
-		new MeshData(raw, function(md:MeshData) {
+		new MeshData(raw, function(md: MeshData) {
 			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
 			Context.mergedObject.name = Context.paintObject.name;
 			Context.mergedObject.force_context = "paint";
@@ -71,7 +71,7 @@ class MeshUtil {
 		});
 	}
 
-	public static function swapAxis(a:Int, b:Int) {
+	public static function swapAxis(a: Int, b: Int) {
 		var objects = UITrait.inst.worktab.position == SpaceScene ? [cast(Context.object, MeshObject)] : Project.paintObjects;
 		for (o in objects) {
 			// Remapping vertices, backle up

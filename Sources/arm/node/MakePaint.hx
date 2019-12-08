@@ -1,6 +1,5 @@
 package arm.node;
 
-import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
@@ -9,17 +8,17 @@ import arm.Tool;
 
 class MakePaint {
 
-	public static function run(data:MaterialShaderData, matcon:TMaterialContext):MaterialShaderContext {
+	public static function run(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
 		var layered = Context.layer != Project.layers[0];
 		var eraser = Context.tool == ToolEraser;
-		var context_id = 'paint';
+		var context_id = "paint";
 		var con_paint:MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
-			compare_mode: 'always', // TODO: align texcoords winding order
-			// cull_mode: 'counter_clockwise',
-			cull_mode: 'none',
-			vertex_elements: [{name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}, {name: "tex", data: 'short2norm'}]
+			compare_mode: "always", // TODO: align texcoords winding order
+			// cull_mode: "counter_clockwise",
+			cull_mode: "none",
+			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}]
 		});
 
 		con_paint.data.color_writes_red = [true, true, true, true];
@@ -207,13 +206,13 @@ class MakePaint {
 			if (Context.material.paintSubs) {
 				frag.write('float subs = $subs;');
 			}
-			if (height != '0' && !MaterialBuilder.heightUsed) {
+			if (height != "0" && !MaterialBuilder.heightUsed) {
 				MaterialBuilder.heightUsed = true;
 				// Height used for the first time, also rebuild vertex shader
 				return run(data, matcon);
 			}
-			if (emis != '0') MaterialBuilder.emisUsed = true;
-			if (subs != '0') MaterialBuilder.subsUsed = true;
+			if (emis != "0") MaterialBuilder.emisUsed = true;
+			if (subs != "0") MaterialBuilder.subsUsed = true;
 		}
 
 		if (Context.tool == ToolDecal) {
@@ -298,9 +297,9 @@ class MakePaint {
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
 
-			var height = '0.0';
+			var height = "0.0";
 			if (Context.material.paintHeight && MaterialBuilder.heightUsed) {
-				height = 'height';
+				height = "height";
 			}
 
 			if (decal) {

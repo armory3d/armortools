@@ -15,12 +15,12 @@ class BoxExport {
 
 	public static var htab = Id.handle();
 	public static var hpreset = Id.handle();
-	public static var files:Array<String> = null;
-	public static var preset:TExportPreset = null;
+	public static var files: Array<String> = null;
+	public static var preset: TExportPreset = null;
 	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_b", "occ", "opac", "rough", "smooth", "0.0", "1.0"];
 
 	public static function showTextures() {
-		UIBox.showCustom(function(ui:Zui) {
+		UIBox.showCustom(function(ui: Zui) {
 
 			if (files == null) fetchPresets();
 			if (preset == null) {
@@ -29,7 +29,7 @@ class BoxExport {
 			}
 
 			if (ui.tab(htab, "Export Textures")) {
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
 				if (UITrait.inst.resHandle.changed) {
 					iron.App.notifyOnRender(Layers.resizeLayers);
@@ -46,7 +46,7 @@ class BoxExport {
 					iron.App.notifyOnRender(Layers.setLayerBits);
 				}
 
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				if (UITrait.inst.bitsHandle.position == Bits8) {
 					UITrait.inst.formatType = ui.combo(Id.handle({position: UITrait.inst.formatType}), ["png", "jpg"], "Format", true);
 				}
@@ -56,21 +56,21 @@ class BoxExport {
 				ui.enabled = UITrait.inst.formatType == FormatJpg && UITrait.inst.bitsHandle.position == Bits8;
 				UITrait.inst.formatQuality = ui.slider(Id.handle({value: UITrait.inst.formatQuality}), "Quality", 0.0, 100.0, true, 1);
 				ui.enabled = true;
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				UITrait.inst.layersExport = ui.combo(Id.handle({position: UITrait.inst.layersExport}), ["Visible", "Selected"], "Layers", true);
 				ui.combo(hpreset, files, "Preset", true);
 				if (hpreset.changed) preset = null;
 
 				@:privateAccess ui.endElement();
 
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				if (ui.button("Cancel")) {
 					UIBox.show = false;
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
 					var filters = UITrait.inst.bitsHandle.position != Bits8 ? "exr" : UITrait.inst.formatType == FormatPng ? "png" : "jpg";
-					UIFiles.show(filters, true, function(path:String) {
+					UIFiles.show(filters, true, function(path: String) {
 						UITrait.inst.textureExportPath = path;
 						function export(_) {
 							ExportTexture.run(path);
@@ -83,15 +83,15 @@ class BoxExport {
 			}
 
 			if (ui.tab(htab, "Presets")) {
-				ui.row([3/5, 1/5, 1/5]);
+				ui.row([3 / 5, 1 / 5, 1 / 5]);
 
 				ui.combo(hpreset, files, "Preset");
 				if (hpreset.changed) preset = null;
 
 				if (ui.button("New")) {
-					UIBox.showCustom(function(ui:Zui) {
+					UIBox.showCustom(function(ui: Zui) {
 						if (ui.tab(Id.handle(), "New Preset")) {
-							ui.row([1/2, 1/2]);
+							ui.row([0.5, 0.5]);
 							var presetName = ui.textInput(Id.handle({text: "new_preset"}), "Name");
 							if (ui.button("OK") || ui.isReturnDown) {
 								newPreset(presetName);
@@ -107,7 +107,7 @@ class BoxExport {
 				}
 
 				if (ui.button("Import")) {
-					UIFiles.show("json", false, function(path:String) {
+					UIFiles.show("json", false, function(path: String) {
 						path = path.toLowerCase();
 						if (path.endsWith(".json")) {
 							var filename = path.substr(path.lastIndexOf(Path.sep) + 1);
@@ -129,7 +129,7 @@ class BoxExport {
 
 				// Texture list
 				ui.separator(10, false);
-				ui.row([1/5,1/5,1/5,1/5,1/5]);
+				ui.row([0.2, 0.2, 0.2, 0.2, 0.2]);
 				ui.text("Texture");
 				ui.text("R");
 				ui.text("G");
@@ -138,12 +138,12 @@ class BoxExport {
 				ui.changed = false;
 				for (i in 0...preset.textures.length) {
 					var t = preset.textures[i];
-					ui.row([1/5,1/5,1/5,1/5,1/5]);
+					ui.row([0.2, 0.2, 0.2, 0.2, 0.2]);
 					var htex = hpreset.nest(i, {text: t.name});
 					t.name = ui.textInput(htex);
 
 					if (ui.isHovered && ui.inputReleasedR) {
-						UIMenu.draw(function(ui:Zui) {
+						UIMenu.draw(function(ui: Zui) {
 							ui.fill(0, 0, @:privateAccess ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(t.name, Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Delete", Left)) {
@@ -172,7 +172,7 @@ class BoxExport {
 					savePreset();
 				}
 
-				ui.row([1/8]);
+				ui.row([1 / 8]);
 				if (ui.button("Add")) {
 					preset.textures.push({name: "base", channels: ["base_r", "base_g", "base_b", "1.0"]});
 					@:privateAccess hpreset.children = null;
@@ -183,7 +183,7 @@ class BoxExport {
 	}
 
 	public static function showMesh() {
-		UIBox.showCustom(function(ui:Zui) {
+		UIBox.showCustom(function(ui: Zui) {
 			var htab = Id.handle();
 			if (ui.tab(htab, "Export Mesh")) {
 
@@ -195,13 +195,13 @@ class BoxExport {
 
 				@:privateAccess ui.endElement();
 
-				ui.row([1/2, 1/2]);
+				ui.row([0.5, 0.5]);
 				if (ui.button("Cancel")) {
 					UIBox.show = false;
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					UIFiles.show(UITrait.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path:String) {
+					UIFiles.show(UITrait.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
 						ExportMesh.run(path + "/" + f);
@@ -220,13 +220,13 @@ class BoxExport {
 
 	static function parsePreset() {
 		var file = "export_presets/" + files[hpreset.position] + ".json";
-		iron.data.Data.getBlob(file, function(blob:kha.Blob) {
+		iron.data.Data.getBlob(file, function(blob: kha.Blob) {
 			preset = haxe.Json.parse(blob.toString());
 			iron.data.Data.deleteBlob("export_presets/" + file);
 		});
 	}
 
-	static function newPreset(name:String) {
+	static function newPreset(name: String) {
 		var template =
 '{
 	"textures": [

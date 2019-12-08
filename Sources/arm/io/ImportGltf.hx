@@ -6,8 +6,8 @@ import arm.format.GltfParser;
 
 class ImportGltf {
 
-	public static function run(path:String) {
-		Data.getBlob(path, function(b:Blob) {
+	public static function run(path: String) {
+		Data.getBlob(path, function(b: Blob) {
 			var obj = new GltfParser(b);
 			ImportMesh.makeMesh(obj, path);
 			Data.deleteBlob(path);

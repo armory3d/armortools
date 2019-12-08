@@ -1,0 +1,14 @@
+-cp Sources
+-cp Kromx\Sources
+-cp Libraries\iron\Sources
+-cp Libraries\zui\Sources
+-D krom_windows
+-D arm_painter
+-D arm_appwh
+-D kha_direct3d12
+-D sys_g4
+-D arm_taa
+-D arm_veloc
+-js build\krom\krom.js.temp
+-dce full
+-main Main

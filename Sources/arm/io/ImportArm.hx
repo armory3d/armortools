@@ -6,6 +6,7 @@ import kha.Blob;
 import kha.Image;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.DepthStencilFormat;
+import zui.Nodes;
 import iron.data.MaterialData;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -17,7 +18,6 @@ import iron.Scene;
 import iron.RenderPath;
 import arm.Project;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.ui.UIFiles;
 import arm.sys.Path;
 import arm.sys.File;
@@ -34,11 +34,11 @@ using StringTools;
 
 class ImportArm {
 
-	public static function runMesh(raw:TSceneFormat) {
+	public static function runMesh(raw: TSceneFormat) {
 		Project.paintObjects = [];
-		for (i in 0 ...raw.mesh_datas.length) {
-			new MeshData(raw.mesh_datas[i], function(md:MeshData) {
-				var object:MeshObject = null;
+		for (i in 0...raw.mesh_datas.length) {
+			new MeshData(raw.mesh_datas[i], function(md: MeshData) {
+				var object: MeshObject = null;
 				if (i == 0) {
 					Context.paintObject.setData(md);
 					object = Context.paintObject;
@@ -60,7 +60,7 @@ class ImportArm {
 		History.reset();
 	}
 
-	public static function runScene(raw:TSceneFormat, path:String) {
+	public static function runScene(raw: TSceneFormat, path: String) {
 		#if krom_windows
 		path = path.replace("\\", "/");
 		#end
@@ -71,13 +71,13 @@ class ImportArm {
 		#end
 		raw.name += "_imported";
 		Data.cachedSceneRaws.set(raw.name, raw);
-		Scene.active.addScene(raw.name, null, function(sceneObject:Object) {
+		Scene.active.addScene(raw.name, null, function(sceneObject: Object) {
 			traverseObjects(sceneObject.children);
 		});
 		Data.dataPath = _dataPath;
 	}
 
-	static function traverseObjects(objects:Array<Object>) {
+	static function traverseObjects(objects: Array<Object>) {
 		if (objects == null) return;
 		for (o in objects) {
 			if (Std.is(o, MeshObject)) {
@@ -92,8 +92,8 @@ class ImportArm {
 		}
 	}
 
-	public static function runProject(path:String) {
-		Data.getBlob(path, function(b:Blob) {
+	public static function runProject(path: String) {
+		Data.getBlob(path, function(b: Blob) {
 
 			Context.layersPreviewDirty = true;
 			var resetLayers = false;
@@ -102,7 +102,7 @@ class ImportArm {
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
-			var project:TProjectFormat = ArmPack.decode(b.toBytes());
+			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
 			// Import as mesh instead
 			if (project.version == null) {
@@ -123,37 +123,19 @@ class ImportArm {
 				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 				var abs = isAbsolute ? file : base + file;
 				if (!File.exists(abs)) {
-					Log.error(Strings.error2 + abs);
-					var b = Bytes.alloc(4);
-					b.set(0, 255);
-					b.set(1, 0);
-					b.set(2, 255);
-					b.set(3, 255);
-					var pink = Image.fromBytes(b, 1, 1);
-					Data.cachedImages.set(abs, pink);
+					makePink(abs);
 				}
 				ImportTexture.run(abs);
 			}
 
-			var m0:MaterialData = null;
-			Data.getMaterial("Scene", "Material", function(m:MaterialData) {
+			var m0: MaterialData = null;
+			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 				m0 = m;
 			});
 
 			Project.materials = [];
 			for (n in project.material_nodes) {
-				for (node in n.nodes) {
-					if (node.type == "TEX_IMAGE") {
-						// TODO: deprecated, stores filename now
-						var s = node.buttons[0].data + "";
-						node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
-						//
-						node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
-					}
-					for (inp in node.inputs) { // Round input socket values
-						if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
-					}
-				}
+				initNodes(n.nodes);
 				Context.material = new MaterialSlot(m0, n);
 				Project.materials.push(Context.material);
 				MaterialParser.parsePaintMaterial();
@@ -166,7 +148,7 @@ class ImportArm {
 			}
 
 			// Synchronous for now
-			new MeshData(project.mesh_datas[0], function(md:MeshData) {
+			new MeshData(project.mesh_datas[0], function(md: MeshData) {
 				Context.paintObject.setData(md);
 				Context.paintObject.transform.scale.set(1, 1, 1);
 				Context.paintObject.transform.buildMatrix();
@@ -176,7 +158,7 @@ class ImportArm {
 
 			for (i in 1...project.mesh_datas.length) {
 				var raw = project.mesh_datas[i];
-				new MeshData(raw, function(md:MeshData) {
+				new MeshData(raw, function(md: MeshData) {
 					var object = iron.Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
@@ -220,8 +202,6 @@ class ImportArm {
 				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				Context.brushBlendDirty = true;
 			}
-
-
 
 			// for (l in Project.layers) l.unload();
 			Project.layers = [];
@@ -281,53 +261,35 @@ class ImportArm {
 		});
 	}
 
-	public static function runMaterial(path:String) {
-		Data.getBlob(path, function(b:Blob) {
-			var project:TProjectFormat = ArmPack.decode(b.toBytes());
+	public static function runMaterial(path: String) {
+		Data.getBlob(path, function(b: Blob) {
+			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			runMaterialFromProject(project, path);
 		});
 	}
 
-	public static function runMaterialFromProject(project:TProjectFormat, path:String) {
+	public static function runMaterialFromProject(project: TProjectFormat, path: String) {
 		var base = Path.baseDir(path);
 		for (file in project.assets) {
 			// Convert image path from relative to absolute
 			var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
 			var abs = isAbsolute ? file : base + file;
 			if (!File.exists(abs)) {
-				Log.error(Strings.error2 + abs);
-				var b = Bytes.alloc(4);
-				b.set(0, 255);
-				b.set(1, 0);
-				b.set(2, 255);
-				b.set(3, 255);
-				var pink = Image.fromBytes(b, 1, 1);
-				Data.cachedImages.set(abs, pink);
+				makePink(abs);
 			}
 			arm.io.ImportTexture.run(abs);
 		}
 
-		var m0:MaterialData = null;
-		Data.getMaterial("Scene", "Material", function(m:MaterialData) {
+		var m0: MaterialData = null;
+		Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 			m0 = m;
 		});
 
-		var imported:Array<MaterialSlot> = [];
+		var imported: Array<MaterialSlot> = [];
 
 		for (n in project.material_nodes) {
-			for (node in n.nodes) {
-				if (node.type == "TEX_IMAGE") {
-					// TODO: deprecated, stores filename now
-					var s = node.buttons[0].data + "";
-					node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
-					//
-					node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
-				}
-				for (inp in node.inputs) { // Round input socket values
-					if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
-				}
-			}
+			initNodes(n.nodes);
 			Context.material = new MaterialSlot(m0, n);
 			Project.materials.push(Context.material);
 			imported.push(Context.material);
@@ -345,5 +307,31 @@ class ImportArm {
 
 		UITrait.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
+	}
+
+	static function makePink(abs: String) {
+		Log.error(Strings.error2 + abs);
+		var b = Bytes.alloc(4);
+		b.set(0, 255);
+		b.set(1, 0);
+		b.set(2, 255);
+		b.set(3, 255);
+		var pink = Image.fromBytes(b, 1, 1);
+		Data.cachedImages.set(abs, pink);
+	}
+
+	static function initNodes(nodes: Array<TNode>) {
+		for (node in nodes) {
+			if (node.type == "TEX_IMAGE") {
+				// TODO: deprecated, stores filename now
+				var s = node.buttons[0].data + "";
+				node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
+				//
+				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
+			}
+			for (inp in node.inputs) { // Round input socket values
+				if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
+			}
+		}
 	}
 }

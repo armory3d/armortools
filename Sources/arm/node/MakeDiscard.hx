@@ -1,15 +1,11 @@
 package arm.node;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
 import arm.ui.UITrait;
-import arm.ui.UINodes;
 import arm.node.MaterialShader;
-import arm.Tool;
 
 class MakeDiscard {
 
-	public static function colorId(vert:MaterialShader, frag:MaterialShader) {
+	public static function colorId(vert: MaterialShader, frag: MaterialShader) {
 		vert.add_out('vec2 texCoordPick');
 		vert.write('texCoordPick = fract(subtex);');
 		frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
@@ -20,7 +16,7 @@ class MakeDiscard {
 		frag.write('if (any(c1 != c2)) discard;');
 	}
 
-	public static function face(vert:MaterialShader, frag:MaterialShader) {
+	public static function face(vert: MaterialShader, frag: MaterialShader) {
 		vert.add_out('vec2 texCoordPick');
 		vert.write('texCoordPick = fract(subtex);');
 		frag.add_uniform('sampler2D gbuffer2');
@@ -37,7 +33,7 @@ class MakeDiscard {
 		frag.write('if (any(c1 != c2)) discard;');
 	}
 
-	public static function materialId(vert:MaterialShader, frag:MaterialShader) {
+	public static function materialId(vert: MaterialShader, frag: MaterialShader) {
 		frag.wvpposition = true;
 		frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
 		#if (kha_direct3d11 || kha_direct3d12)
