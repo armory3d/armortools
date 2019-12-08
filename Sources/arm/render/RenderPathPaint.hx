@@ -26,6 +26,7 @@ class RenderPathPaint {
 	static var mergedObjectVisible = false;
 	static var savedFov = 0.0;
 	static var dilated = true;
+	static var baking = false;
 
 	public static function init(_path:RenderPath) {
 		path = _path;
@@ -393,32 +394,44 @@ class RenderPathPaint {
 				var isHeight = UITrait.inst.bakeType == 4;
 				var isDeriv = UITrait.inst.bakeType == 5;
 				if (isNormal || isHeight || isDeriv) {
-					var _bakeType = UITrait.inst.bakeType;
-					UITrait.inst.bakeType = isNormal ? 3 : 6; // Bake high poly world normals / position
-					MaterialParser.parsePaintMaterial();
-					var _paintObject = Context.paintObject;
-					var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
-					var _visible = highPoly.visible;
-					highPoly.visible = true;
-					Context.selectPaintObject(highPoly);
-					RenderPathPaint.commandsPaint();
-					highPoly.visible = _visible;
-					UITrait.inst.sub--;
-					if (pushUndoLast) History.paint();
-
-					if (isDeriv) {
-						UITrait.inst.bakeType = 4; // Bake height
+					if (!baking && Context.pdirty > 0) {
+						baking = true;
+						var _bakeType = UITrait.inst.bakeType;
+						UITrait.inst.bakeType = isNormal ? 3 : 6; // Bake high poly object normals / position
 						MaterialParser.parsePaintMaterial();
-						Context.selectPaintObject(_paintObject);
+						var _paintObject = Context.paintObject;
+						var highPoly = Project.paintObjects[UITrait.inst.bakeHighPoly];
+						var _visible = highPoly.visible;
+						highPoly.visible = true;
+						Context.selectPaintObject(highPoly);
 						RenderPathPaint.commandsPaint();
+						highPoly.visible = _visible;
 						UITrait.inst.sub--;
 						if (pushUndoLast) History.paint();
-					}
+						Context.selectPaintObject(_paintObject);
 
-					UITrait.inst.bakeType = _bakeType;
-					MaterialParser.parsePaintMaterial();
-					Context.selectPaintObject(_paintObject);
-					RenderPathPaint.commandsPaint();
+						function _renderFinal(_) {
+							UITrait.inst.bakeType = _bakeType;
+							MaterialParser.parsePaintMaterial();
+							Context.pdirty = 1;
+							RenderPathPaint.commandsPaint();
+							Context.pdirty = 0;
+							iron.App.removeRender(_renderFinal);
+							baking = false;
+						}
+						function _renderDeriv(_) {
+							UITrait.inst.bakeType = 4; // Bake height
+							MaterialParser.parsePaintMaterial();
+							Context.pdirty = 1;
+							RenderPathPaint.commandsPaint();
+							Context.pdirty = 0;
+							UITrait.inst.sub--;
+							if (pushUndoLast) History.paint();
+							iron.App.removeRender(_renderDeriv);
+							iron.App.notifyOnRender(_renderFinal);
+						}
+						iron.App.notifyOnRender(isDeriv ? _renderDeriv : _renderFinal);
+					}
 				}
 				else if (UITrait.inst.bakeType == 8) { // Object ID
 					var _layerFilter = UITrait.inst.layerFilter;
