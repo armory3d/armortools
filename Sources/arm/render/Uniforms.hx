@@ -5,6 +5,7 @@ import iron.object.Object;
 import iron.system.Input;
 import iron.math.Vec4;
 import iron.RenderPath;
+import iron.Scene;
 #if arm_painter
 import arm.ui.UITrait;
 import arm.util.UVUtil;

@@ -1,5 +1,6 @@
 package arm.node;
 
+import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
