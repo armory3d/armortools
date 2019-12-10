@@ -329,7 +329,7 @@ class ObjParser {
 		while (true) { // Read into buffer
 			var c = bytes.get(pos);
 			if (c == " ".code || c == "\n".code || c == "\r".code) break;
-			if (c == "E".code) {
+			if (c == "E".code || c == "e".code) {
 				while (true) {
 					pos++;
 					c = bytes.get(pos);
