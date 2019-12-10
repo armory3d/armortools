@@ -125,12 +125,12 @@ class MakeMesh {
 					if (ds < 0.1) ds = 0.1;
 					else if (ds > 2.0) ds = 2.0;
 					frag.wposition = true;
-					frag.write('float3 dpdx = dFdx(wposition);');
-					frag.write('float3 dpdy = dFdy(wposition);');
+					frag.write('vec3 dpdx = dFdx(wposition);');
+					frag.write('vec3 dpdy = dFdy(wposition);');
 					frag.write('float dhdx = dFdx(pack.a * $ds);');
 					frag.write('float dhdy = dFdy(pack.a * $ds);');
-					frag.write('float3 cross_x = cross(n, dpdx);');
-					frag.write('float3 cross_y = cross(dpdy, n);');
+					frag.write('vec3 cross_x = cross(n, dpdx);');
+					frag.write('vec3 cross_y = cross(dpdy, n);');
 					frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
 					frag.write('n = normalize(n - ngrad);');
 
@@ -141,12 +141,12 @@ class MakeMesh {
 					// frag.write('float pack_b = textureLodShared(texpaint_pack, vec2(texCoord.x - tex_step, texCoord.y), 0.0).a;');
 					// frag.write('float pack_c = textureLodShared(texpaint_pack, vec2(texCoord.x, texCoord.y + tex_step), 0.0).a;');
 					// frag.write('float pack_d = textureLodShared(texpaint_pack, vec2(texCoord.x, texCoord.y - tex_step), 0.0).a;');
-					// frag.write('float3 dpdx = dFdx(wposition);');
-					// frag.write('float3 dpdy = dFdy(wposition);');
+					// frag.write('vec3 dpdx = dFdx(wposition);');
+					// frag.write('vec3 dpdy = dFdy(wposition);');
 					// frag.write('float dhdx = pack_a - pack_b;');
 					// frag.write('float dhdy = pack_c - pack_d;');
-					// frag.write('float3 cross_x = cross(n, dpdx);');
-					// frag.write('float3 cross_y = cross(dpdy, n);');
+					// frag.write('vec3 cross_x = cross(n, dpdx);');
+					// frag.write('vec3 cross_y = cross(dpdy, n);');
 					// frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
 					// frag.write('n = normalize(n - ngrad);');
 				}
