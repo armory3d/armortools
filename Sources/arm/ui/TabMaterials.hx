@@ -99,12 +99,16 @@ class TabMaterials {
 					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.png"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
 						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
-						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showMaterialNodes();
-						UITrait.inst.selectTime = Time.time();
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragMaterial = getSelectedMaterial();
+						if (Time.time() - UITrait.inst.selectTime < 0.25) {
+							UITrait.inst.showMaterialNodes();
+							App.dragMaterial = null;
+							App.isDragging = false;
+						}
+						UITrait.inst.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
