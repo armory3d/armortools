@@ -103,6 +103,9 @@ class Layers {
 			rts.get("texpaint_blur").raw.height = size;
 			rts.get("texpaint_blur").image = Image.createRenderTarget(size, size);
 		}
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
+		#end
 		g.begin();
 		Context.ddirty = 2;
 		iron.App.removeRender(resizeLayers);

@@ -34,7 +34,7 @@ class RenderPathRaytrace {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
-			raytraceInit("raytrace_brute.cso", iron.App.w(), iron.App.h());
+			raytraceInit("raytrace_brute.cso");
 			lastEnvmap = null;
 			lastLayer = null;
 		}
@@ -45,7 +45,10 @@ class RenderPathRaytrace {
 		if (lastEnvmap != savedEnvmap || lastLayer != layer.texpaint) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = layer.texpaint;
-			Krom.raytraceSetTextures(layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_, savedEnvmap.texture_);
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
+			Krom.raytraceSetTextures(layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		var cam = Scene.active.camera;
@@ -143,14 +146,14 @@ class RenderPathRaytrace {
 			}
 			iron.App.notifyOnRender(_render);
 
-			raytraceInit(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes());
+			raytraceInit(getBakeShaderName());
 
 			return;
 		}
 
 		if (lastBake != UITrait.inst.bakeType) {
 			lastBake = UITrait.inst.bakeType;
-			raytraceInit(getBakeShaderName(), Config.getTextureRes(), Config.getTextureRes(), false);
+			raytraceInit(getBakeShaderName(), false);
 			lastEnvmap = null;
 		}
 
@@ -162,7 +165,10 @@ class RenderPathRaytrace {
 
 			var baketex0 = path.renderTargets.get("baketex0").image;
 			var baketex1 = path.renderTargets.get("baketex1").image;
-			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, Context.layer.texpaint.renderTarget_, savedEnvmap.texture_);
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
+			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, Context.layer.texpaint.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (UITrait.inst.brushTime > 0) {
@@ -178,8 +184,8 @@ class RenderPathRaytrace {
 			f32[4] = Scene.active.world.probe.raw.strength;
 			f32[5] = UITrait.inst.bakeUpAxis;
 
-			var baketex2 = path.renderTargets.get("baketex2").image;
-			Krom.raytraceDispatchRays(baketex2.renderTarget_, f32.buffer);
+			var framebuffer = path.renderTargets.get("baketex2").image;
+			Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
 			path.setTarget("texpaint" + Context.layer.id);
 			path.bindTarget("baketex2", "tex");
@@ -202,7 +208,7 @@ class RenderPathRaytrace {
 		}
 	}
 
-	static function raytraceInit(shaderName: String, targetW: Int, targetH: Int, build = true) {
+	static function raytraceInit(shaderName: String, build = true) {
 		if (first) {
 			first = false;
 			Scene.active.embedData("bnoise_sobol.png", function() {});
@@ -215,9 +221,7 @@ class RenderPathRaytrace {
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
-			Krom.raytraceInit(
-				shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, targetW, targetH,
-				bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			Krom.raytraceInit(shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer);
 		});
 	}
 
