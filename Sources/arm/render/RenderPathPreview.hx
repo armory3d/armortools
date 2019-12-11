@@ -45,16 +45,6 @@ class RenderPathPreview {
 
 		{
 			var t = new RenderTargetRaw();
-			t.name = "mbuf";
-			t.width = RenderUtil.matPreviewSize;
-			t.height = RenderUtil.matPreviewSize;
-			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
-			path.createRenderTarget(t);
-		}
-
-		{
-			var t = new RenderTargetRaw();
 			t.name = "mgbuffer0";
 			t.width = RenderUtil.matPreviewSize;
 			t.height = RenderUtil.matPreviewSize;
@@ -80,25 +70,6 @@ class RenderPathPreview {
 			t.width = RenderUtil.matPreviewSize;
 			t.height = RenderUtil.matPreviewSize;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
-			path.createRenderTarget(t);
-		}
-
-		{
-			var t = new RenderTargetRaw();
-			t.name = "mbufa";
-			t.width = RenderUtil.matPreviewSize;
-			t.height = RenderUtil.matPreviewSize;
-			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
-			path.createRenderTarget(t);
-		}
-		{
-			var t = new RenderTargetRaw();
-			t.name = "mbufb";
-			t.width = RenderUtil.matPreviewSize;
-			t.height = RenderUtil.matPreviewSize;
-			t.format = "RGBA32";
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}

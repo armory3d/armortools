@@ -32,13 +32,28 @@ class RenderPathPaint {
 
 		{
 			var t = new RenderTargetRaw();
+			t.name = "texpaint_blend0";
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
+			t.format = "R8";
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_blend1";
+			t.width = Config.getTextureRes();
+			t.height = Config.getTextureRes();
+			t.format = "R8";
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
 			t.name = "texpaint_colorid";
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
-
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_picker";
@@ -209,7 +224,7 @@ class RenderPathPaint {
 						t.width = Std.int(Config.getTextureRes() * 0.95);
 						t.height = Std.int(Config.getTextureRes() * 0.95);
 						t.format = "RGBA32";
-						RenderPath.active.createRenderTarget(t);
+						path.createRenderTarget(t);
 					}
 					var blurs = Math.round(UITrait.inst.bakeCurvSmooth);
 					for (i in 0...blurs) {

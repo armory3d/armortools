@@ -206,8 +206,6 @@ class UITrait {
 	public var symZ = false;
 	public var showCompass = true;
 	public var fillTypeHandle = new Handle();
-	public var resHandle = new Handle({position: Res2048});
-	public var bitsHandle = new Handle();
 	#if arm_creator
 	public var projectType = ModelTessellatedPlane;
 	#else
@@ -994,11 +992,11 @@ class UITrait {
 					bakeType = ui.combo(bakeHandle, bakes, "Bake");
 					if (bakeType == BakeNormalObject || bakeType == BakePosition || bakeType == BakeBentNormal) {
 						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
-						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis");
+						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], "Up Axis", true);
 					}
 					if (bakeType == BakeAO || bakeType == BakeCurvature) {
 						var bakeAxisHandle = Id.handle({position: bakeAxis});
-						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis");
+						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], "Axis", true);
 					}
 					if (bakeType == BakeAO) {
 						var strengthHandle = Id.handle({value: bakeAoStrength});

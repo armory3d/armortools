@@ -50,7 +50,7 @@ class ExportTexture {
 		var f = UIFiles.filename;
 		if (f == "") f = "untitled";
 		var formatType = UITrait.inst.formatType;
-		var bits = UITrait.inst.bitsHandle.position == Bits8 ? 8 : 16;
+		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 		ext = udimTile + ext;
@@ -227,7 +227,7 @@ class ExportTexture {
 	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
 		var out = new BytesOutput();
 		var res = Config.getTextureRes();
-		var bitsHandle = UITrait.inst.bitsHandle.position;
+		var bitsHandle = App.bitsHandle.position;
 		var bits = bitsHandle == Bits8 ? 8 : bitsHandle == Bits16 ? 16 : 32;
 		if (bits > 8) { // 16/32bit
 			var writer = new ExrWriter(out, res, res, pixels, bits, type, off);

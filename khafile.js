@@ -10,9 +10,6 @@ project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/lic
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/themes/{name}" });
 
-project.addDefine('rp_voxelao');
-project.addDefine('arm_voxelgi_revox');
-project.addDefine('arm_ltc');
 project.addDefine('arm_taa');
 project.addDefine('arm_veloc');
 project.addDefine('arm_particles');
@@ -50,6 +47,8 @@ if (raytrace) {
 }
 else {
 	project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
+	project.addDefine('rp_voxelao');
+	project.addDefine('arm_voxelgi_revox');
 }
 
 if (process.platform === 'darwin') {
@@ -100,6 +99,7 @@ if (build === 'painter') {
 	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	project.addAssets("Assets/painter/*", { notinlist: true, destination: "data/{name}" });
 	project.addDefine('kha_no_ogg');
+	project.addDefine('arm_ltc');
 }
 else { // player, creator
 	project.addAssets("Assets/creator/*", { notinlist: true, destination: "data/{name}" });

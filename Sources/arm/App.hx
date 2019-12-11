@@ -54,6 +54,8 @@ class App {
 	public static var uimenu: Zui;
 	public static var fileArg = "";
 	public static var ELEMENT_H = 28;
+	public static var resHandle = new Handle({position: Res2048});
+	public static var bitsHandle = new Handle();
 
 	public function new() {
 		Log.init();

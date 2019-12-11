@@ -42,7 +42,6 @@ class Inc {
 			}
 			path.resize();
 		}
-		// Init voxels
 		#if rp_voxelao
 		if (!voxelsCreated) initGI();
 		#end
@@ -80,7 +79,6 @@ class Inc {
 		}
 		#end
 	}
-	#end
 
 	public static inline function getVoxelRes(): Int {
 		return 256;
@@ -89,6 +87,7 @@ class Inc {
 	public static inline function getVoxelResZ(): Float {
 		return 1.0;
 	}
+	#end
 
 	public static inline function getSuperSampling(): Float {
 		return superSample;
@@ -162,7 +161,9 @@ class Inc {
 		UITrait.inst.viewIndex = -1;
 	}
 
-	public static inline function ssaa4(): Bool { return Config.raw.rp_supersample == 4; }
+	public static inline function ssaa4(): Bool {
+		return Config.raw.rp_supersample == 4;
+	}
 
 	public static function isCached(): Bool {
 		#if (!arm_creator)

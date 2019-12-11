@@ -30,8 +30,8 @@ class BoxExport {
 
 			if (ui.tab(htab, "Export Textures")) {
 				ui.row([0.5, 0.5]);
-				ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
-				if (UITrait.inst.resHandle.changed) {
+				ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
+				if (App.resHandle.changed) {
 					iron.App.notifyOnRender(Layers.resizeLayers);
 					UVUtil.uvmap = null;
 					UVUtil.uvmapCached = false;
@@ -41,19 +41,19 @@ class BoxExport {
 					arm.render.RenderPathRaytrace.ready = false;
 					#end
 				}
-				ui.combo(UITrait.inst.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
-				if (UITrait.inst.bitsHandle.changed) {
+				ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
+				if (App.bitsHandle.changed) {
 					iron.App.notifyOnRender(Layers.setLayerBits);
 				}
 
 				ui.row([0.5, 0.5]);
-				if (UITrait.inst.bitsHandle.position == Bits8) {
+				if (App.bitsHandle.position == Bits8) {
 					UITrait.inst.formatType = ui.combo(Id.handle({position: UITrait.inst.formatType}), ["png", "jpg"], "Format", true);
 				}
 				else {
 					UITrait.inst.formatType = ui.combo(Id.handle({position: UITrait.inst.formatType}), ["exr"], "Format", true);
 				}
-				ui.enabled = UITrait.inst.formatType == FormatJpg && UITrait.inst.bitsHandle.position == Bits8;
+				ui.enabled = UITrait.inst.formatType == FormatJpg && App.bitsHandle.position == Bits8;
 				UITrait.inst.formatQuality = ui.slider(Id.handle({value: UITrait.inst.formatQuality}), "Quality", 0.0, 100.0, true, 1);
 				ui.enabled = true;
 				ui.row([0.5, 0.5]);
@@ -69,7 +69,7 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					var filters = UITrait.inst.bitsHandle.position != Bits8 ? "exr" : UITrait.inst.formatType == FormatPng ? "png" : "jpg";
+					var filters = App.bitsHandle.position != Bits8 ? "exr" : UITrait.inst.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, function(path: String) {
 						UITrait.inst.textureExportPath = path;
 						function export(_) {

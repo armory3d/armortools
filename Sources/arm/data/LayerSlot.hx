@@ -25,8 +25,6 @@ class LayerSlot {
 	public var maskOpacity = 1.0; // Opacity mask
 	public var material_mask: MaterialSlot = null; // Fill layer
 
-	static var first = true;
-
 	public var blending = BlendMix;
 	public var objectMask = 0;
 	public var uvScale = 1.0;
@@ -46,37 +44,17 @@ class LayerSlot {
 	var createMaskImage: Image;
 
 	public function new(ext = "") {
-
-		if (first) {
-			first = false;
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpaint_blend0";
-				t.width = Config.getTextureRes();
-				t.height = Config.getTextureRes();
-				t.format = "R8";
-				RenderPath.active.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "texpaint_blend1";
-				t.width = Config.getTextureRes();
-				t.height = Config.getTextureRes();
-				t.format = "R8";
-				RenderPath.active.createRenderTarget(t);
-			}
-		}
-
 		if (ext == "") {
 			id = 0;
 			for (l in Project.layers) if (l.id >= id) id = l.id + 1;
 			ext = id + "";
 		}
+
 		this.ext = ext;
 		name = "Layer " + (id + 1);
-		var format = UITrait.inst.bitsHandle.position == Bits8 ?  "RGBA32" :
-					 UITrait.inst.bitsHandle.position == Bits16 ? "RGBA64" :
-					 											  "RGBA128";
+		var format = App.bitsHandle.position == Bits8 ?  "RGBA32" :
+					 App.bitsHandle.position == Bits16 ? "RGBA64" :
+					 									 "RGBA128";
 
 		{
 			var t = new RenderTargetRaw();
@@ -288,9 +266,9 @@ class LayerSlot {
 	}
 
 	public function resizeAndSetBits() {
-		var format = UITrait.inst.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
-					 UITrait.inst.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
-					 											  TextureFormat.RGBA128;
+		var format = App.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
+					 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
+					 									 TextureFormat.RGBA128;
 
 		var res = Config.getTextureRes();
 		var rts = RenderPath.active.renderTargets;

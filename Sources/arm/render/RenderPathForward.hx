@@ -68,15 +68,6 @@ class RenderPathForward {
 		// 	t.scale = Inc.getSuperSampling();
 		// 	path.createRenderTarget(t);
 		// }
-		// {
-		// 	var t = new RenderTargetRaw();
-		// 	t.name = "bufb";
-		// 	t.width = 0;
-		// 	t.height = 0;
-		// 	t.format = "RGBA32";
-		// 	t.scale = Inc.getSuperSampling();
-		// 	path.createRenderTarget(t);
-		// }
 
 		// path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 		// path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
@@ -177,14 +168,14 @@ class RenderPathForward {
 		path.bindTarget("buf", "colorTex");
 		path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
-		path.setTarget("bufb");
+		path.setTarget("taa");
 		path.clearTarget(0x00000000);
 		path.bindTarget(current, "edgesTex");
 		path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
 		path.setTarget(current);
 		path.bindTarget("buf", "colorTex");
-		path.bindTarget("bufb", "blendTex");
+		path.bindTarget("taa", "blendTex");
 		path.bindTarget("gbuffer2", "sveloc");
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 

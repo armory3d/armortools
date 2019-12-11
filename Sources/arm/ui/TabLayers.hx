@@ -385,8 +385,8 @@ class TabLayers {
 						MaterialParser.parseMeshMaterial();
 					}
 
-					ui.combo(UITrait.inst.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
-					if (UITrait.inst.resHandle.changed) {
+					ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
+					if (App.resHandle.changed) {
 						iron.App.notifyOnRender(Layers.resizeLayers);
 						UVUtil.uvmap = null;
 						UVUtil.uvmapCached = false;
@@ -396,8 +396,8 @@ class TabLayers {
 						arm.render.RenderPathRaytrace.ready = false;
 						#end
 					}
-					ui.combo(UITrait.inst.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
-					if (UITrait.inst.bitsHandle.changed) {
+					ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], "Color", true);
+					if (App.bitsHandle.changed) {
 						iron.App.notifyOnRender(Layers.setLayerBits);
 					}
 

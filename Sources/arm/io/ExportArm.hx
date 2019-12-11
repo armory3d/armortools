@@ -41,7 +41,7 @@ class ExportArm {
 		var texture_files = assetsToFiles();
 		var mesh_files = meshesToFiles();
 
-		var bitsPos = UITrait.inst.bitsHandle.position;
+		var bitsPos = App.bitsHandle.position;
 		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
 
 		var ld: Array<TLayerData> = [];

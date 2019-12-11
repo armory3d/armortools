@@ -170,28 +170,26 @@ class Config {
 	}
 
 	public static function getTextureRes(): Int {
-		var resHandle = UITrait.inst.resHandle;
-		if (resHandle.position == Res128) return 128;
-		if (resHandle.position == Res256) return 256;
-		if (resHandle.position == Res512) return 512;
-		if (resHandle.position == Res1024) return 1024;
-		if (resHandle.position == Res2048) return 2048;
-		if (resHandle.position == Res4096) return 4096;
-		if (resHandle.position == Res8192) return 8192;
-		if (resHandle.position == Res16384) return 16384;
+		if (App.resHandle.position == Res128) return 128;
+		if (App.resHandle.position == Res256) return 256;
+		if (App.resHandle.position == Res512) return 512;
+		if (App.resHandle.position == Res1024) return 1024;
+		if (App.resHandle.position == Res2048) return 2048;
+		if (App.resHandle.position == Res4096) return 4096;
+		if (App.resHandle.position == Res8192) return 8192;
+		if (App.resHandle.position == Res16384) return 16384;
 		return 0;
 	}
 
 	public static function getTextureResBias(): Float {
-		var resHandle = UITrait.inst.resHandle;
-		if (resHandle.position == Res128) return 16.0;
-		if (resHandle.position == Res256) return 8.0;
-		if (resHandle.position == Res512) return 4.0;
-		if (resHandle.position == Res1024) return 2.0;
-		if (resHandle.position == Res2048) return 1.5;
-		if (resHandle.position == Res4096) return 1.0;
-		if (resHandle.position == Res8192) return 0.5;
-		if (resHandle.position == Res16384) return 0.25;
+		if (App.resHandle.position == Res128) return 16.0;
+		if (App.resHandle.position == Res256) return 8.0;
+		if (App.resHandle.position == Res512) return 4.0;
+		if (App.resHandle.position == Res1024) return 2.0;
+		if (App.resHandle.position == Res2048) return 1.5;
+		if (App.resHandle.position == Res4096) return 1.0;
+		if (App.resHandle.position == Res8192) return 0.5;
+		if (App.resHandle.position == Res16384) return 0.25;
 		return 1.0;
 	}
 
