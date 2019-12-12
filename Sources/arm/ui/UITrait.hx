@@ -797,10 +797,13 @@ class UITrait {
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+			var inNodes = UINodes.inst.show &&
+						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
+						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 			if (!brush3d || in2dView || decal) {
-				if (decal) {
+				if (decal && !inNodes) {
 					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
 					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
 					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
