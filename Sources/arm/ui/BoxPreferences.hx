@@ -182,6 +182,10 @@ class BoxPreferences {
 				UITrait.inst.vignetteStrength = ui.slider(h, "Vignette", 0.0, 1.0, true);
 				if (h.changed) Context.ddirty = 2;
 
+				// var h = Id.handle({value: UITrait.inst.autoExposureStrength});
+				// UITrait.inst.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
+				// if (h.changed) Context.ddirty = 2;
+
 				#if arm_creator
 				var h = Id.handle({value: UITrait.inst.vxaoExt});
 				UITrait.inst.vxaoExt = ui.slider(h, "VXAO Ext", 1.0, 10.0);

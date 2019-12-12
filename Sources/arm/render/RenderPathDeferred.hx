@@ -471,9 +471,34 @@ class RenderPathDeferred {
 		}
 		#end
 
+		// Begin compositor
+		#if rp_autoexposure
+		{
+			{
+				var t = new RenderTargetRaw();
+				t.name = "histogram";
+				t.width = 1;
+				t.height = 1;
+				t.format = "RGBA64";
+				path.createRenderTarget(t);
+				path.loadShader("shader_datas/histogram_pass/histogram_pass");
+			}
+
+			path.setTarget("histogram");
+			path.bindTarget("taa", "tex");
+			path.drawShader("shader_datas/histogram_pass/histogram_pass");
+		}
+		#end
+
 		path.setTarget("buf");
 		path.bindTarget("tex", "tex");
+		#if rp_autoexposure
+		{
+			path.bindTarget("histogram", "histogram");
+		}
+		#end
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		// End compositor
 
 		path.setTarget("buf");
 		var currentG = path.currentG;

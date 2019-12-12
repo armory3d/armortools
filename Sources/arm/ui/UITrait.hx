@@ -245,6 +245,7 @@ class UITrait {
 	public var vxaoOffset = 1.5;
 	public var vxaoAperture = 1.2;
 	public var vignetteStrength = 0.4;
+	// public var autoExposureStrength = 1.0;
 	public var textureExportPath = "";
 	public var headerHandle = new Handle({layout: Horizontal});
 	public var toolbarHandle = new Handle();
