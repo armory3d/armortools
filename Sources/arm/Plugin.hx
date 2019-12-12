@@ -81,6 +81,7 @@ class ArmBridge {
 	public static var UITrait = arm.ui.UITrait;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;
+	public static var UIMenu = arm.ui.UIMenu;
 	public static var MeshUtil = arm.util.MeshUtil;
 	public static var MaterialUtil = arm.util.MaterialUtil;
 	public static var RenderUtil = arm.util.RenderUtil;
@@ -94,6 +95,7 @@ class ArmBridge {
 @:expose("zui")
 class ZuiBridge {
 	public static var Handle = zui.Zui.Handle;
+	public static var Ext = zui.Ext;
 }
 
 @:keep
