@@ -98,19 +98,6 @@ class RenderPathDeferred {
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}
-		#if rp_autoexposure
-		{
-			var t = new RenderTargetRaw();
-			t.name = "histogram";
-			t.width = 1;
-			t.height = 1;
-			t.format = "RGBA64";
-			path.createRenderTarget(t);
-		}
-		{
-			path.loadShader("shader_datas/histogram_pass/histogram_pass");
-		}
-		#end
 		{
 			var t = new RenderTargetRaw();
 			t.name = "empty_white";
@@ -369,19 +356,6 @@ class RenderPathDeferred {
 		path.setTarget("tex"); // Re-binds depth
 		path.drawSkydome("world_pass/world_pass/world_pass");
 
-		#if rp_blending
-		{
-			path.drawMeshes("blend");
-		}
-		#end
-
-		#if rp_translucency
-		{
-			var hasLight = Scene.active.lights.length > 0;
-			if (hasLight) Inc.drawTranslucency("tex");
-		}
-		#end
-
 		if (Config.raw.rp_bloom != false) {
 
 			if (path.renderTargets.get("bloomtex") == null) {
@@ -497,77 +471,59 @@ class RenderPathDeferred {
 		}
 		#end
 
-		// Begin compositor
-		#if rp_autoexposure
-		{
-			path.generateMipmaps("tex");
-		}
-		#end
+		path.setTarget("buf");
+		path.bindTarget("tex", "tex");
+		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 
 		path.setTarget("buf");
-
-		path.bindTarget("tex", "tex");
-		#if rp_compositordepth
-		{
-			path.bindTarget("_main", "gbufferD");
-		}
+		var currentG = path.currentG;
+		path.drawMeshes("overlay");
+		#if arm_painter
+		Inc.drawCompass(currentG);
 		#end
-		path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		// End compositor
 
-		{
-			path.setTarget("buf");
-			var currentG = path.currentG;
-			path.drawMeshes("overlay");
-			#if arm_painter
-			Inc.drawCompass(currentG);
-			#end
+		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
+		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
+
+		path.setTarget(current);
+		path.clearTarget(0x00000000);
+		path.bindTarget("buf", "colorTex");
+		path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
+
+		path.setTarget("taa");
+		path.clearTarget(0x00000000);
+		path.bindTarget(current, "edgesTex");
+		path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
+
+		path.setTarget(current);
+		path.bindTarget("buf", "colorTex");
+		path.bindTarget("taa", "blendTex");
+		path.bindTarget("gbuffer2", "sveloc");
+		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+
+		#if arm_painter
+		var skipTaa = UITrait.inst.splitView;
+		#else
+		var skipTaa = false;
+		#end
+
+		if (skipTaa) {
+			path.setTarget("taa");
+			path.bindTarget(current, "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
+		else {
+			path.setTarget("taa");
+			path.bindTarget(current, "tex");
+			path.bindTarget(last, "tex2");
+			path.bindTarget("gbuffer2", "sveloc");
+			path.drawShader("shader_datas/taa_pass/taa_pass");
 		}
 
-		{
-			var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
-			var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
-
-			path.setTarget(current);
-			path.clearTarget(0x00000000);
-			path.bindTarget("buf", "colorTex");
-			path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-
-			path.setTarget("taa");
-			path.clearTarget(0x00000000);
-			path.bindTarget(current, "edgesTex");
-			path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-
-			path.setTarget(current);
-			path.bindTarget("buf", "colorTex");
-			path.bindTarget("taa", "blendTex");
-			path.bindTarget("gbuffer2", "sveloc");
-			path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-
-			#if arm_painter
-			var skipTaa = UITrait.inst.splitView;
-			#else
-			var skipTaa = false;
-			#end
-
-			if (skipTaa) {
-				path.setTarget("taa");
-				path.bindTarget(current, "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-			}
-			else {
-				path.setTarget("taa");
-				path.bindTarget(current, "tex");
-				path.bindTarget(last, "tex2");
-				path.bindTarget("gbuffer2", "sveloc");
-				path.drawShader("shader_datas/taa_pass/taa_pass");
-			}
-
-			if (!Inc.ssaa4()) {
-				path.setTarget("");
-				path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-			}
+		if (!Inc.ssaa4()) {
+			path.setTarget("");
+			path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 
 		if (Inc.ssaa4()) {
@@ -587,24 +543,6 @@ class RenderPathDeferred {
 		RenderPathPaint.bindLayers();
 		#end
 		path.drawMeshes("mesh");
-
-		#if rp_decals
-		{
-			#if (!kha_opengl)
-			path.setDepthFrom("gbuffer0", "gbuffer1"); // Unbind depth so we can read it
-			path.depthToRenderTarget.set("main", path.renderTargets.get("tex"));
-			#end
-
-			path.setTarget("gbuffer0", ["gbuffer1"]);
-			path.bindTarget("_main", "gbufferD");
-			path.drawDecals("decal");
-
-			#if (!kha_opengl)
-			path.setDepthFrom("gbuffer0", "tex"); // Re-bind depth
-			path.depthToRenderTarget.set("main", path.renderTargets.get("gbuffer0"));
-			#end
-		}
-		#end
 	}
 
 	static function drawSplit() {
