@@ -2,14 +2,10 @@ Texture2D<float4> tex0;
 SamplerState _tex0_sampler;
 Texture2D<float4> tex1;
 SamplerState _tex1_sampler;
-Texture2D<float4> tex2;
-SamplerState _tex2_sampler;
+Texture2D<float4> texmask;
+SamplerState _texmask_sampler;
 Texture2D<float4> texa;
 SamplerState _texa_sampler;
-Texture2D<float4> texb;
-SamplerState _texb_sampler;
-Texture2D<float4> texc;
-SamplerState _texc_sampler;
 uniform float opac;
 uniform int blending;
 float3 hsv_to_rgb(const float3 c) {
@@ -25,17 +21,18 @@ float3 rgb_to_hsv(const float3 c) {
 	float e = 1.0e-10;
 	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
-struct SPIRV_Cross_Output { float4 color0 : SV_Target0; float4 color1 : SV_Target1; float4 color2 : SV_Target2; };
+struct SPIRV_Cross_Output { float4 color0 : SV_Target0; };
 SPIRV_Cross_Output main(float2 texCoord : TEXCOORD0) {
 	float4 col0 = tex0.SampleLevel(_tex0_sampler, texCoord, 0);
-	float4 col1 = tex1.SampleLevel(_tex1_sampler, texCoord, 0);
-	float4 col2 = tex2.SampleLevel(_tex2_sampler, texCoord, 0);
 	float4 cola = texa.SampleLevel(_texa_sampler, texCoord, 0);
-	float4 colb = texb.SampleLevel(_texb_sampler, texCoord, 0);
-	float4 colc = texc.SampleLevel(_texc_sampler, texCoord, 0);
 	float str = col0.a * opac;
+	str *= texmask.SampleLevel(_texmask_sampler, texCoord, 0).r;
 	SPIRV_Cross_Output stage_output;
-	if (blending == 0) { // Mix
+	if (blending == -1) { // Merging _nor and _pack
+		float4 col1 = tex1.SampleLevel(_tex1_sampler, texCoord, 0);
+		stage_output.color0 = float4(lerp(cola, col1, str));
+	}
+	else if (blending == 0) { // Mix
 		stage_output.color0 = float4(lerp(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
 	}
 	else if (blending == 1) { // Darken
@@ -89,7 +86,5 @@ SPIRV_Cross_Output main(float2 texCoord : TEXCOORD0) {
 	else { // Value
 		stage_output.color0 = float4(lerp(cola.rgb, hsv_to_rgb(float3(rgb_to_hsv(cola.rgb).r, rgb_to_hsv(cola.rgb).g, rgb_to_hsv(col0.rgb).b)), str), max(col0.a, cola.a));
 	}
-	stage_output.color1 = float4(lerp(colb, col1, str));
-	stage_output.color2 = float4(lerp(colc, col2, str));
 	return stage_output;
 }

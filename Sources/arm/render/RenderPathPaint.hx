@@ -525,7 +525,7 @@ class RenderPathPaint {
 
 	public static function finishPaint() {
 		if (Context.tool == ToolBake && !dilated && UITrait.inst.dilateRadius > 0) {
-			if (Layers.imga == null) Layers.makeTempImg();
+			Layers.makeTempImg();
 			dilated = true;
 			path.setTarget("temptex0");
 			path.bindTarget("texpaint0", "tex");

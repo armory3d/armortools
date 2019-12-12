@@ -185,7 +185,7 @@ class LayerSlot {
 	public function applyMask() {
 		if (texpaint_mask == null) return;
 
-		if (Layers.pipe == null) Layers.makePipe();
+		if (Layers.pipeMerge == null) Layers.makePipe();
 		Layers.makeTempImg();
 
 		// Copy layer to temp
@@ -217,7 +217,7 @@ class LayerSlot {
 		var l = new LayerSlot();
 		layers.insert(i, l);
 
-		if (Layers.pipe == null) Layers.makePipe();
+		if (Layers.pipeMerge == null) Layers.makePipe();
 		l.texpaint.g2.begin(false);
 		l.texpaint.g2.pipeline = Layers.pipeCopy;
 		l.texpaint.g2.drawImage(texpaint, 0, 0);

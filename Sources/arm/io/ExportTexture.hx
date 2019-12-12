@@ -63,7 +63,7 @@ class ExportTexture {
 		if (UITrait.inst.layersExport == 0 && layers.length > 1) {
 			Layers.makeTempImg();
 			Layers.makeExportImg();
-			if (Layers.pipe == null) Layers.makePipe();
+			if (Layers.pipeMerge == null) Layers.makePipe();
 			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 
 			// Duplicate base layer
@@ -101,48 +101,59 @@ class ExportTexture {
 					if (!Project.paintObjects[l1.objectMask - 1].name.endsWith(udimTile)) continue;
 				}
 
-				// Apply mask
-				var hasMask = l1.texpaint_mask != null;
-				if (hasMask) {
-					Layers.expd.g4.begin();
-					Layers.expd.g4.setPipeline(Layers.pipeMask);
-					Layers.expd.g4.setTexture(Layers.tex0Mask, l1.texpaint);
-					Layers.expd.g4.setTexture(Layers.texaMask, l1.texpaint_mask);
-					Layers.expd.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-					Layers.expd.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-					Layers.expd.g4.drawIndexedVertices();
-					Layers.expd.g4.end();
-				}
-
-				// Copy layer0 to temp
-				Layers.imga.g2.begin(false);
+				// Merge into layer0
+				Layers.imga.g2.begin(false); // Copy to temp
 				Layers.imga.g2.pipeline = Layers.pipeCopy;
 				Layers.imga.g2.drawImage(Layers.expa, 0, 0);
 				Layers.imga.g2.end();
-				Layers.imgb.g2.begin(false);
-				Layers.imgb.g2.pipeline = Layers.pipeCopy;
-				Layers.imgb.g2.drawImage(Layers.expb, 0, 0);
-				Layers.imgb.g2.end();
-				Layers.imgc.g2.begin(false);
-				Layers.imgc.g2.pipeline = Layers.pipeCopy;
-				Layers.imgc.g2.drawImage(Layers.expc, 0, 0);
-				Layers.imgc.g2.end();
-
-				// Merge into layer0
-				Layers.expa.g4.begin([Layers.expb, Layers.expc]);
-				Layers.expa.g4.setPipeline(Layers.pipe);
-				Layers.expa.g4.setTexture(Layers.tex0, hasMask ? Layers.expd : l1.texpaint);
-				Layers.expa.g4.setTexture(Layers.tex1, l1.texpaint_nor);
-				Layers.expa.g4.setTexture(Layers.tex2, l1.texpaint_pack);
+				Layers.expa.g4.begin();
+				Layers.expa.g4.setPipeline(Layers.pipeMerge);
+				Layers.expa.g4.setTexture(Layers.tex0, l1.texpaint);
+				var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
+				Layers.expa.g4.setTexture(Layers.tex1, empty);
+				var hasMask = l1.texpaint_mask != null;
+				Layers.expa.g4.setTexture(Layers.texmask, hasMask ? l1.texpaint_mask : empty);
 				Layers.expa.g4.setTexture(Layers.texa, Layers.imga);
-				Layers.expa.g4.setTexture(Layers.texb, Layers.imgb);
-				Layers.expa.g4.setTexture(Layers.texc, Layers.imgc);
 				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
 				Layers.expa.g4.setInt(Layers.blending, l1.blending);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				Layers.expa.g4.drawIndexedVertices();
 				Layers.expa.g4.end();
+
+				Layers.imga.g2.begin(false);
+				Layers.imga.g2.pipeline = Layers.pipeCopy;
+				Layers.imga.g2.drawImage(Layers.expb, 0, 0);
+				Layers.imga.g2.end();
+				Layers.expb.g4.begin();
+				Layers.expb.g4.setPipeline(Layers.pipeMerge);
+				Layers.expb.g4.setTexture(Layers.tex0, l1.texpaint);
+				Layers.expb.g4.setTexture(Layers.tex1, l1.texpaint_nor);
+				Layers.expb.g4.setTexture(Layers.texmask, empty);
+				Layers.expb.g4.setTexture(Layers.texa, Layers.imga);
+				Layers.expb.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expa.g4.setInt(Layers.blending, -1);
+				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				Layers.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				Layers.expb.g4.drawIndexedVertices();
+				Layers.expb.g4.end();
+
+				Layers.imga.g2.begin(false);
+				Layers.imga.g2.pipeline = Layers.pipeCopy;
+				Layers.imga.g2.drawImage(Layers.expc, 0, 0);
+				Layers.imga.g2.end();
+				Layers.expc.g4.begin();
+				Layers.expc.g4.setPipeline(Layers.pipeMerge);
+				Layers.expc.g4.setTexture(Layers.tex0, l1.texpaint);
+				Layers.expc.g4.setTexture(Layers.tex1, l1.texpaint_pack);
+				Layers.expc.g4.setTexture(Layers.texmask, empty);
+				Layers.expc.g4.setTexture(Layers.texa, Layers.imga);
+				Layers.expc.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expa.g4.setInt(Layers.blending, -1);
+				Layers.expc.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				Layers.expc.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				Layers.expc.g4.drawIndexedVertices();
+				Layers.expc.g4.end();
 			}
 
 			texpaint = Layers.expa;
