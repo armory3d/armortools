@@ -266,7 +266,7 @@ class RenderPathPaint {
 		path.setTarget("");
 		g.setPipeline(Layers.pipeCursor);
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var img = decal ? UITrait.inst.decalImage : Res.get("cursor.png");
+		var img = decal ? UITrait.inst.decalImage : Res.get("cursor.k");
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);

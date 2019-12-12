@@ -167,15 +167,21 @@ class UINodes {
 	}
 
 	public function canvasChanged() {
+		#if (!kha_direct3d12)
 		if (Layers.isFillMaterial()) {
-			Layers.updateFillLayers(); // TODO: jitter
+			Layers.updateFillLayers(); // TODO: only used as jitter
 			UITrait.inst.hwnd.redraws = 2;
 		}
-		MaterialParser.parsePaintMaterial();
-		RenderUtil.makeMaterialPreview();
-		UITrait.inst.hwnd1.redraws = 2;
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		if (decal) RenderUtil.makeDecalPreview();
+		#end
+		function _parse(_) {
+			MaterialParser.parsePaintMaterial();
+			RenderUtil.makeMaterialPreview();
+			UITrait.inst.hwnd1.redraws = 2;
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+			if (decal) RenderUtil.makeDecalPreview();
+			iron.App.removeRender(_parse);
+		}
+		iron.App.notifyOnRender(_parse);
 	}
 
 	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {

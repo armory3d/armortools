@@ -125,7 +125,7 @@ class TabTextures {
 				}
 			}
 			else {
-				var img = Res.get("icons.png");
+				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui.image(img, ui.t.BUTTON_COL, imgw, 0, imgw, imgw, imgw);
 				if (ui.isHovered) ui.tooltip("Drag and drop files here");

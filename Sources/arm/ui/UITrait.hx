@@ -370,7 +370,7 @@ class UITrait {
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 
-		var resources = ["cursor.png", "icons.png"];
+		var resources = ["cursor.k", "icons.k"];
 		Res.load(resources, done);
 
 		projectObjects = [];
@@ -782,7 +782,7 @@ class UITrait {
 				g.drawImage(img, mx + 10, my + 10);
 			}
 
-			var cursorImg = Res.get("cursor.png");
+			var cursorImg = Res.get("cursor.k");
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			// Clone source cursor
@@ -870,7 +870,7 @@ class UITrait {
 
 			if (worktab.position == SpacePaint) {
 				var keys = ["(B)", "(E)", "(G)", "(D)", "(T)", "(L) - Hold ALT to set source", "(U)", "(P)", "(K)", "(C)", "(V)"];
-				var img = Res.get("icons.png");
+				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				for (i in 0...toolNames.length) {
 					ui._x += 2;
@@ -882,7 +882,7 @@ class UITrait {
 				}
 			}
 			else if (worktab.position == SpaceScene) {
-				var img = Res.get("icons.png");
+				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -1236,12 +1236,12 @@ class UITrait {
 
 	public function setIconScale() {
 		if (ui.SCALE() > 1) {
-			Res.load(["icons2x.png"], function() {
-				@:privateAccess Res.bundled.set("icons.png", Res.get("icons2x.png"));
+			Res.load(["icons2x.k"], function() {
+				@:privateAccess Res.bundled.set("icons.k", Res.get("icons2x.k"));
 			});
 		}
 		else {
-			Res.load(["icons.png"], function() {});
+			Res.load(["icons.k"], function() {});
 		}
 	}
 

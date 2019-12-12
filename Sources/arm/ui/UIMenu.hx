@@ -31,6 +31,7 @@ class UIMenu {
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 	static var viewportColorHandle = Id.handle({selected: false});
+	static var envmapLoaded = false;
 
 	@:access(zui.Zui)
 	public static function render(g: kha.graphics2.Graphics) {
@@ -181,6 +182,11 @@ class UIMenu {
 				UITrait.inst.showEnvmap = ui.check(UITrait.inst.showEnvmapHandle, "Envmap");
 				if (UITrait.inst.showEnvmapHandle.changed) {
 					var world = Scene.active.world;
+					if (!envmapLoaded) {
+						// TODO: Unable to share texture for both radiance and envmap - reload image
+						envmapLoaded = true;
+						iron.data.Data.cachedImages.remove("World_radiance.k");
+					}
 					world.loadEnvmap(function(_) {});
 					if (UITrait.inst.savedEnvmap == null) UITrait.inst.savedEnvmap = world.envmap;
 					Context.ddirty = 2;

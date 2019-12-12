@@ -17,15 +17,15 @@ plugin.drawUI = function(ui) {
 				arm.File.copy(sourceData + sep + "player.bin", dest + sep + "krom.bin");
 
 				var fileList = [
-					"ammo.wasm.js", "ammo.wasm.wasm", "brdf.png",
-					"clouds_base.raw", "clouds_detail.raw", "clouds_map.png",
-					"deferred_light.arm", "font_default.ttf", "noise256.png",
-					"Scene.arm", "shader_datas.arm", "smaa_area.png", "smaa_search.png",
-					"water_base.png", "water_detail.png", "water_foam.png", "water_pass.arm",
-					"World_irradiance.arm", "world_pass.arm", "World_radiance.hdr",
-					"World_radiance_0.hdr", "World_radiance_1.hdr", "World_radiance_2.hdr",
-					"World_radiance_3.hdr", "World_radiance_4.hdr", "World_radiance_5.hdr",
-					"World_radiance_6.hdr", "World_radiance_7.hdr"];
+					"ammo.wasm.js", "ammo.wasm.wasm", "brdf.k",
+					"clouds_base.raw", "clouds_detail.raw", "clouds_map.k",
+					"deferred_light.arm", "font_default.ttf", "noise256.k",
+					"Scene.arm", "shader_datas.arm", "smaa_area.k", "smaa_search.k",
+					"water_base.k", "water_detail.k", "water_foam.k", "water_pass.arm",
+					"World_irradiance.arm", "world_pass.arm", "World_radiance.k",
+					"World_radiance_0.k", "World_radiance_1.k", "World_radiance_2.k",
+					"World_radiance_3.k", "World_radiance_4.k", "World_radiance_5.k",
+					"World_radiance_6.k", "World_radiance_7.k"];
 				for (const file of fileList) {
 					arm.File.copy(sourceData + sep + file, destData + sep + file);
 				}

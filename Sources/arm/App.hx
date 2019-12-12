@@ -95,7 +95,7 @@ class App {
 		#end
 
 		Data.getFont("font_default.ttf", function(f: Font) {
-			Data.getImage("color_wheel.png", function(image: Image) {
+			Data.getImage("color_wheel.k", function(image: Image) {
 				font = f;
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;

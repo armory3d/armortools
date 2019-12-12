@@ -457,7 +457,7 @@ class Material {
 		}
 		else if (node.type == "TEX_NOISE") {
 			curshader.add_function(MaterialFunctions.str_tex_noise);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
+			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'vec3(tex_noise($co * $scale), tex_noise($co * $scale + 0.33), tex_noise($co * $scale + 0.66))';
@@ -466,7 +466,7 @@ class Material {
 		}
 		else if (node.type == "TEX_VORONOI") {
 			curshader.add_function(MaterialFunctions.str_tex_voronoi);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
+			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var but = node.buttons[0]; //coloring;
@@ -1128,7 +1128,7 @@ class Material {
 		}
 		else if (node.type == "TEX_NOISE") {
 			curshader.add_function(MaterialFunctions.str_tex_noise);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
+			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_noise($co * $scale)';
@@ -1137,7 +1137,7 @@ class Material {
 		}
 		else if (node.type == "TEX_VORONOI") {
 			curshader.add_function(MaterialFunctions.str_tex_voronoi);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.png");
+			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var but = node.buttons[0]; // coloring

@@ -45,9 +45,9 @@ class RenderPathRaytrace {
 		if (lastEnvmap != savedEnvmap || lastLayer != layer.texpaint) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = layer.texpaint;
-			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
-			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
-			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
 			Krom.raytraceSetTextures(layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
@@ -165,9 +165,9 @@ class RenderPathRaytrace {
 
 			var baketex0 = path.renderTargets.get("baketex0").image;
 			var baketex1 = path.renderTargets.get("baketex1").image;
-			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
-			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
-			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
 			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, Context.layer.texpaint.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
@@ -211,16 +211,16 @@ class RenderPathRaytrace {
 	static function raytraceInit(shaderName: String, build = true) {
 		if (first) {
 			first = false;
-			Scene.active.embedData("bnoise_sobol.png", function() {});
-			Scene.active.embedData("bnoise_scramble.png", function() {});
-			Scene.active.embedData("bnoise_rank.png", function() {});
+			Scene.active.embedData("bnoise_sobol.k", function() {});
+			Scene.active.embedData("bnoise_scramble.k", function() {});
+			Scene.active.embedData("bnoise_rank.k", function() {});
 		}
 
 		iron.data.Data.getBlob(shaderName, function(shader: kha.Blob) {
 			if (build) buildData();
-			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.png");
-			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.png");
-			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.png");
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
 			Krom.raytraceInit(shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer);
 		});
 	}

@@ -218,7 +218,7 @@ class Project {
 
 			UITrait.inst.savedEnvmap = UITrait.inst.defaultEnvmap;
 			Scene.active.world.envmap = UITrait.inst.emptyEnvmap;
-			Scene.active.world.raw.envmap = "World.hdr";
+			Scene.active.world.raw.envmap = "World_radiance.k";
 			UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = false;
 			Scene.active.world.probe.radiance = UITrait.inst.defaultRadiance;
 			Scene.active.world.probe.radianceMipmaps = UITrait.inst.defaultRadianceMipmaps;

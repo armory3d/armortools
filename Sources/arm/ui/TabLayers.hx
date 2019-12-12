@@ -82,7 +82,7 @@ class TabLayers {
 
 				var center = (step / 2) * ui.SCALE();
 				ui._y += center;
-				var icons = Res.get("icons.png");
+				var icons = Res.get("icons.k");
 				var r = Res.tile18(icons, l.visible ? 0 : 1, 0);
 				ui._x += 2;
 				ui._y += 3;

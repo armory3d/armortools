@@ -346,9 +346,13 @@ class LayerSlot {
 		Context.setLayer(this);
 		material_mask = Context.material;
 		Layers.updateFillLayers(4);
-		MaterialParser.parsePaintMaterial();
-		Context.layerPreviewDirty = true;
-		UITrait.inst.hwnd.redraws = 2;
+		function _parse(_) {
+			MaterialParser.parsePaintMaterial();
+			Context.layerPreviewDirty = true;
+			UITrait.inst.hwnd.redraws = 2;
+			iron.App.removeRender(_parse);
+		}
+		iron.App.notifyOnRender(_parse);
 	}
 
 	public function toPaintLayer() {

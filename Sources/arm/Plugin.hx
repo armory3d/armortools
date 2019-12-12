@@ -55,8 +55,6 @@ class IronBridge {
 
 @:expose("arm")
 class ArmBridge {
-	public static var TypeOf = Type.typeof;
-	public static var TObject = TObject;
 	public static var Json = haxe.Json;
 	public static var ReflectFields = Reflect.fields;
 	public static var ReflectField = Reflect.field;

@@ -96,7 +96,7 @@ class TabMaterials {
 					var uix = ui._x;
 					var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
-					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.png"), -1, null, tile, tile, tile, tile);
+					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
 						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
 						var mouse = Input.getMouse();

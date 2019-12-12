@@ -41,6 +41,7 @@ plugin.drawUI = function(ui) {
 							let v = arm.ReflectField(d, n);
 							if (arm.StdIs(v, Array)) {
 								if (arm.StdIs(v[0], Number)) {
+									arm.Log.trace(n);
 									let ar = null;
 									if (v[0] === 0) ar = new Float32Array(v.length - 1);
 									else if (v[0] === 1) ar = new Uint32Array(v.length - 1);
@@ -48,9 +49,9 @@ plugin.drawUI = function(ui) {
 									for (let i = 0; i < v.length - 1; ++i) ar[i] = v[i + 1];
 									arm.ReflectSetField(d, n, ar);
 								}
-								else for (const e of v) if (arm.TypeOf(e) === arm.TObject) iterate(e);
+								else for (const e of v) if (typeof e === 'object') iterate(e);
 							}
-							else if (arm.TypeOf(v) === arm.TObject) iterate(v);
+							else if (typeof v === 'object') iterate(v);
 						}
 					}
 					iterate(parsed);

@@ -137,13 +137,13 @@ class RenderPathDeferred {
 		#if arm_world
 		{
 			path.loadShader("water_pass/water_pass/water_pass");
-			Scene.active.embedData("water_base.png", function() {});
-			Scene.active.embedData("water_detail.png", function() {});
-			Scene.active.embedData("water_foam.png", function() {});
-			Scene.active.embedData("water_foam.png", function() {});
+			Scene.active.embedData("water_base.k", function() {});
+			Scene.active.embedData("water_detail.k", function() {});
+			Scene.active.embedData("water_foam.k", function() {});
+			Scene.active.embedData("water_foam.k", function() {});
 			Scene.active.embedData("clouds_base.raw", function() {});
 			Scene.active.embedData("clouds_detail.raw", function() {});
-			Scene.active.embedData("clouds_map.png", function() {});
+			Scene.active.embedData("clouds_map.k", function() {});
 		}
 		#end
 
