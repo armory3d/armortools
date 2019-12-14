@@ -57,6 +57,8 @@ class UVUtil {
 		var f = (1 / 32767) * trianglemap.width;
 		var color = 0xff000000;
 		for (i in 0...Std.int(inda.length / 3)) {
+			if (color == 0xffffffff) color = 0xff000000;
+			color++;
 			trianglemap.g2.color = color;
 			var x1 = (texa[inda[i * 3    ] * 2    ]) * f;
 			var x2 = (texa[inda[i * 3 + 1] * 2    ]) * f;
@@ -65,7 +67,6 @@ class UVUtil {
 			var y2 = (texa[inda[i * 3 + 1] * 2 + 1]) * f;
 			var y3 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
 			trianglemap.g2.fillTriangle(x1, y1, x2, y2, x3, y3);
-			color++;
 		}
 		trianglemap.g2.end();
 	}

@@ -534,6 +534,15 @@ class RenderPathPaint {
 			path.bindTarget("temptex0", "tex");
 			path.drawShader("shader_datas/dilate_pass/dilate_pass");
 		}
+		// Brush stroke dilate
+		// arm.util.UVUtil.cacheTriangleMap();
+		// Layers.makeTempImg();
+		// path.setTarget("temptex0");
+		// path.bindTarget("texpaint0", "tex");
+		// path.drawShader("shader_datas/copy_pass/copy_pass");
+		// path.setTarget("texpaint0");
+		// path.bindTarget("temptex0", "tex");
+		// path.drawShader("shader_datas/dilate_pass/dilate_pass");
 	}
 }
 
