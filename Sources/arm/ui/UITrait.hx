@@ -929,7 +929,9 @@ class UITrait {
 			ui.tab(worktab, "Paint");
 			// ui.tab(worktab, "Sculpt");
 			ui.tab(worktab, "Scene");
-			// ui.tab(worktab, "Render");
+			#if arm_creator
+			ui.tab(worktab, "Render");
+			#end
 			if (worktab.changed) {
 				Context.ddirty = 2;
 				toolbarHandle.redraws = 2;
@@ -1216,6 +1218,9 @@ class UITrait {
 			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
 				TabMaterials.draw();
 				TabProperties.draw();
+				#if arm_creator
+				TabTraits.draw();
+				#end
 			}
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();

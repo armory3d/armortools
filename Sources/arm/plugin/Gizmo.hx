@@ -55,7 +55,7 @@ class Gizmo {
 					object.transform.buildMatrix();
 
 					#if arm_physics
-					object.addTrait(new arm.plugin.PhysicsBody(0));
+					object.addTrait(new arm.plugin.PhysicsBody());
 					#end
 
 					Context.selectObject(object);
@@ -71,7 +71,7 @@ class Gizmo {
 					object.transform.buildMatrix();
 
 					#if arm_physics
-					object.addTrait(new arm.plugin.PhysicsBody(0));
+					object.addTrait(new arm.plugin.PhysicsBody());
 					#end
 
 					Context.selectObject(object);

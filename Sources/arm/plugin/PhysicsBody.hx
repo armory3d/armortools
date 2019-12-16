@@ -11,6 +11,9 @@ import iron.data.MeshData;
 @:access(arm.plugin.PhysicsWorld)
 class PhysicsBody extends iron.Trait {
 
+	@:keep
+	public var props = ["mass"];
+
 	public var mass = 1.0;
 	public var friction = 0.5;
 	public var restitution = 0.0;
@@ -25,7 +28,7 @@ class PhysicsBody extends iron.Trait {
 	public var trigger = false;
 	public var group = 1;
 	public var mask = 1;
-	var shape: Shape;
+	var shape = ShapeBox;
 	var destroyed = false;
 	var bodyScaleX: Float; // Transform scale at creation time
 	var bodyScaleY: Float;
@@ -57,7 +60,7 @@ class PhysicsBody extends iron.Trait {
 	static var triangleMeshCache = new Map<MeshData, Bt.TriangleMesh>();
 	static var usersCache = new Map<MeshData, Int>();
 
-	public function new(shape: Shape) {
+	public function new() {
 		super();
 
 		if (first) {
@@ -70,7 +73,6 @@ class PhysicsBody extends iron.Trait {
 			trans2 = new Bt.Transform();
 		}
 
-		this.shape = shape;
 		notifyOnAdd(init);
 	}
 
@@ -84,27 +86,27 @@ class PhysicsBody extends iron.Trait {
 		var transform = object.transform;
 		var physics = PhysicsWorld.active;
 
-		if (shape == Shape.Box) {
+		if (shape == ShapeBox) {
 			vec1.setX(withMargin(transform.dim.x / 2));
 			vec1.setY(withMargin(transform.dim.y / 2));
 			vec1.setZ(withMargin(transform.dim.z / 2));
 			btshape = new Bt.BoxShape(vec1);
 		}
-		else if (shape == Shape.Sphere) {
+		else if (shape == ShapeSphere) {
 			btshape = new Bt.SphereShape(withMargin(transform.dim.x / 2));
 		}
-		else if (shape == Shape.ConvexHull) {
+		else if (shape == ShapeConvexHull) {
 			var shapeConvex = fillConvexHull(transform.scale, collisionMargin);
 			btshape = shapeConvex;
 		}
-		else if (shape == Shape.Cone) {
+		else if (shape == ShapeCone) {
 			var coneZ = new Bt.ConeShapeZ(
 				withMargin(transform.dim.x / 2), // Radius
 				withMargin(transform.dim.z));	 // Height
 			var cone: Bt.ConeShape = coneZ;
 			btshape = cone;
 		}
-		else if (shape == Shape.Cylinder) {
+		else if (shape == ShapeCylinder) {
 			vec1.setX(withMargin(transform.dim.x / 2));
 			vec1.setY(withMargin(transform.dim.y / 2));
 			vec1.setZ(withMargin(transform.dim.z / 2));
@@ -112,7 +114,7 @@ class PhysicsBody extends iron.Trait {
 			var cyl: Bt.CylinderShape = cylZ;
 			btshape = cyl;
 		}
-		else if (shape == Shape.Capsule) {
+		else if (shape == ShapeCapsule) {
 			var r = transform.dim.x / 2;
 			var capsZ = new Bt.CapsuleShapeZ(
 				withMargin(r), // Radius
@@ -120,7 +122,7 @@ class PhysicsBody extends iron.Trait {
 			var caps: Bt.CapsuleShape = capsZ;
 			btshape = caps;
 		}
-		else if (shape == Shape.Mesh) {
+		else if (shape == ShapeMesh) {
 			var meshInterface = fillTriangleMesh(transform.scale);
 			if (mass > 0) {
 				var shapeGImpact = new Bt.GImpactMeshShape(meshInterface);
@@ -139,7 +141,7 @@ class PhysicsBody extends iron.Trait {
 				btshape = shapeConcave;
 			}
 		}
-		else if (shape == Shape.Terrain) {
+		else if (shape == ShapeTerrain) {
 			var length = heightData.length;
 			if (ammoArray == -1) {
 				ammoArray = Bt.Ammo._malloc(length);
@@ -179,7 +181,7 @@ class PhysicsBody extends iron.Trait {
 		body = new Bt.RigidBody(bodyCI);
 
 		body.setFriction(friction);
-		if (shape == Shape.Sphere || shape == Shape.Cylinder || shape == Shape.Cone || shape == Shape.Capsule) {
+		if (shape == ShapeSphere || shape == ShapeCylinder || shape == ShapeCone || shape == ShapeCapsule) {
 			angularDamping += friction;
 		}
 		body.setRestitution(restitution);
@@ -223,7 +225,6 @@ class PhysicsBody extends iron.Trait {
 			transform.loc.z -= ptransform.worldz();
 		}
 		transform.buildMatrix();
-		trace(p.z());
 	}
 
 	public function removeFromWorld() {
@@ -423,13 +424,13 @@ class PhysicsBody extends iron.Trait {
 		Bt.Ammo.destroy(body);
 
 		// Delete shape if no other user is found
-		if (shape == Shape.ConvexHull || shape == Shape.Mesh) {
+		if (shape == ShapeConvexHull || shape == ShapeMesh) {
 			var data = cast(object, MeshObject).data;
 			var i = usersCache.get(data) - 1;
 			usersCache.set(data, i);
 			if (i <= 0) {
 				Bt.Ammo.destroy(btshape);
-				shape == Shape.ConvexHull ?
+				shape == ShapeConvexHull ?
 					convexHullCache.remove(data) :
 					triangleMeshCache.remove(data);
 			}
@@ -438,15 +439,15 @@ class PhysicsBody extends iron.Trait {
 	}
 }
 
-@:enum abstract Shape(Int) from Int to Int {
-	var Box = 0;
-	var Sphere = 1;
-	var ConvexHull = 2;
-	var Mesh = 3;
-	var Cone = 4;
-	var Cylinder = 5;
-	var Capsule = 6;
-	var Terrain = 7;
+@:enum abstract ShapeType(Int) from Int to Int {
+	var ShapeBox = 0;
+	var ShapeSphere = 1;
+	var ShapeConvexHull = 2;
+	var ShapeMesh = 3;
+	var ShapeCone = 4;
+	var ShapeCylinder = 5;
+	var ShapeCapsule = 6;
+	var ShapeTerrain = 7;
 }
 
 #end

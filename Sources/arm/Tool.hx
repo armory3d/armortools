@@ -18,9 +18,14 @@ package arm;
 	var ToolGizmo = 0;
 }
 
-@:enum abstract Workspace(Int) from Int to Int {
+@:enum abstract RenderTool(Int) from Int to Int {
+	var ToolGizmo = 0;
+}
+
+@:enum abstract SpaceType(Int) from Int to Int {
 	var SpacePaint = 0;
 	var SpaceScene = 1;
+	var SpaceRender = 2;
 }
 
 @:enum abstract BakeType(Int) from Int to Int {

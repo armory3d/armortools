@@ -123,7 +123,7 @@ class ImportMesh {
 				// dim[2] = aabb.z;
 				// object.raw.dimensions = dim;
 				#if arm_physics
-				object.addTrait(new arm.plugin.PhysicsBody(0));
+				object.addTrait(new arm.plugin.PhysicsBody());
 				#end
 
 				Context.selectObject(object);
