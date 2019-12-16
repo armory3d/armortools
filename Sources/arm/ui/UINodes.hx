@@ -437,7 +437,7 @@ class UINodes {
 			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
-			var menuw = Std.int(ew * 1.6);
+			var menuw = Std.int(ew * 2.0);
 			g.fillRect(popupX, py, menuw, ph);
 
 			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
@@ -447,7 +447,7 @@ class UINodes {
 			ui.t.ELEMENT_OFFSET = 0;
 
 			for (n in list[menuCategory]) {
-				if (ui.button(n.name, Left)) {
+				if (ui.button("      " + n.name, Left)) {
 					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
