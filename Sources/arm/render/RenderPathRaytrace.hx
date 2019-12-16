@@ -93,7 +93,9 @@ class RenderPathRaytrace {
 	}
 
 	public static function commandsBake() {
-		if (!ready || !isBake) {
+		if (!ready || !isBake || lastBake != UITrait.inst.bakeType) {
+			var rebuild = !(ready && isBake && lastBake != UITrait.inst.bakeType);
+			lastBake = UITrait.inst.bakeType;
 			ready = true;
 			isBake = true;
 			lastEnvmap = null;
@@ -146,15 +148,9 @@ class RenderPathRaytrace {
 			}
 			iron.App.notifyOnRender(_render);
 
-			raytraceInit(getBakeShaderName());
+			raytraceInit(getBakeShaderName(), rebuild);
 
 			return;
-		}
-
-		if (lastBake != UITrait.inst.bakeType) {
-			lastBake = UITrait.inst.bakeType;
-			raytraceInit(getBakeShaderName(), false);
-			lastEnvmap = null;
 		}
 
 		var probe = Scene.active.world.probe;
