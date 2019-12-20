@@ -164,7 +164,8 @@ class RenderPathRaytrace {
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, Context.layer.texpaint.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			var texpaint_undo = RenderPath.active.renderTargets.get("texpaint_undo" + History.undoI).image;
+			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, texpaint_undo.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (UITrait.inst.brushTime > 0) {

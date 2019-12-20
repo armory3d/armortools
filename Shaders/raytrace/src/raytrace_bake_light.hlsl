@@ -69,6 +69,9 @@ void raygeneration() {
 
 	accum /= SAMPLES;
 
+	float3 texpaint2 = mytexture2.Load(uint3(xy, 0)).rgb; // layer base
+	accum *= texpaint2;
+
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
 	if (constant_buffer.v0.x == 0) {
 		color = accum.xyz;
