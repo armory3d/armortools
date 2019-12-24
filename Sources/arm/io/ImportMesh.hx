@@ -40,7 +40,9 @@ class ImportMesh {
 		else {
 			var ext = path.substr(path.lastIndexOf(".") + 1);
 			var importer = Path.meshImporters.get(ext);
-			importer(path, function() {});
+			importer(path, function(mesh: Dynamic) {
+				ImportMesh.makeMesh(mesh, path);
+			});
 		}
 
 		if (Context.mergedObject != null) {

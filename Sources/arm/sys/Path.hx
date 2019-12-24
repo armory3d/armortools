@@ -14,7 +14,7 @@ class Path {
 	public static var meshFormats = ["obj", "fbx", "stl", "blend"];
 	public static var textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr"];
 
-	public static var meshImporters = new Map<String, String->(Void->Void)->Void>();
+	public static var meshImporters = new Map<String, String->(Dynamic->Void)->Void>();
 	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
 
 	public static function data(): String {
