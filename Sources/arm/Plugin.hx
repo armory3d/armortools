@@ -61,6 +61,7 @@ class ArmBridge {
 	public static var ReflectSetField = Reflect.setField;
 	public static var StdIs = Std.is;
 	public static var Bytes = haxe.io.Bytes;
+	public static var BytesInput = haxe.io.BytesInput;
 	public static var Blob = kha.Blob;
 	public static var Image = kha.Image;
 	public static var Scheduler = kha.Scheduler;

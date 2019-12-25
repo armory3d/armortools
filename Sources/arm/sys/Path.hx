@@ -11,7 +11,7 @@ class Path {
 	public static var sep = "/";
 	#end
 
-	public static var meshFormats = ["obj", "fbx", "stl", "blend"];
+	public static var meshFormats = ["obj", "fbx", "blend"];
 	public static var textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr"];
 
 	public static var meshImporters = new Map<String, String->(Dynamic->Void)->Void>();
