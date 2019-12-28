@@ -258,20 +258,29 @@ class UINodes {
 	public function drawGrid() {
 		var ww = defaultWindowW;
 		var wh = iron.App.h();
-		var w = ww + 40 * 2;
-		var h = wh + 40 * 2;
+		var w = ww + 100 * 2;
+		var h = wh + 100 * 2;
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		grid = Image.createRenderTarget(w, h);
 		grid.g2.begin(true, ui.t.SEPARATOR_COL);
-		for (i in 0...Std.int(h / 40) + 1) {
-			grid.g2.color = ui.t.WINDOW_BG_COL;
-			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
+
+		grid.g2.color = ui.t.SEPARATOR_COL - 0x00050505;
+		for (i in 0...Std.int(h / 20) + 1) {
+			grid.g2.drawLine(0, i * 20, w, i * 20);
 		}
-		for (i in 0...Std.int(w / 40) + 1) {
-			grid.g2.color = ui.t.WINDOW_BG_COL;
-			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
+		for (i in 0...Std.int(w / 20) + 1) {
+			grid.g2.drawLine(i * 20, 0, i * 20, h);
 		}
+
+		grid.g2.color = ui.t.SEPARATOR_COL - 0x00090909;
+		for (i in 0...Std.int(h / 100) + 1) {
+			grid.g2.drawLine(0, i * 100, w, i * 100);
+		}
+		for (i in 0...Std.int(w / 100) + 1) {
+			grid.g2.drawLine(i * 100, 0, i * 100, h);
+		}
+
 		grid.g2.end();
 	}
 
@@ -319,7 +328,7 @@ class UINodes {
 			// Grid
 			var nodes = getNodes();
 			ui.g.color = 0xffffffff;
-			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 40 - 40, (nodes.panY * nodes.SCALE()) % 40 - 40);
+			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 100 - 100, (nodes.panY * nodes.SCALE()) % 100 - 100);
 
 			// Nodes
 			var c = getCanvas();

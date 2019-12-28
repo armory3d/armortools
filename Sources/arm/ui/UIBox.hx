@@ -16,7 +16,7 @@ class UIBox {
 	public static var clickToHide = true;
 	static var modalW = 400;
 	static var modalH = 170;
-	static var drawn = false;
+	static var draws = 0;
 
 	public static function render(g: kha.graphics2.Graphics) {
 		g.end();
@@ -60,7 +60,7 @@ class UIBox {
 		}
 
 		g.begin(false);
-		drawn = true;
+		draws++;
 	}
 
 	public static function update() {
@@ -70,7 +70,7 @@ class UIBox {
 		var ui = App.uibox;
 		var inUse = ui.comboSelectedHandle != null;
 		var isEscape = kb.started("escape");
-		if (drawn && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
+		if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
 			var appw = System.windowWidth();
 			var apph = System.windowHeight();
 			var mw = Std.int(modalW * ui.SCALE());
@@ -108,7 +108,7 @@ class UIBox {
 		hwnd.dragX = 0;
 		hwnd.dragY = 0;
 		show = true;
-		drawn = false;
+		draws = 0;
 		clickToHide = true;
 	}
 }
