@@ -31,7 +31,7 @@ using StringTools;
 
 class App {
 
-	public static var version = "0.7";
+	public static var version = "0.8";
 	static var appx = 0;
 	static var appy = 0;
 	static var winw = 0;
