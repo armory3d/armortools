@@ -123,8 +123,8 @@ package arm;
 
 @:enum abstract CameraControls(Int) from Int to Int {
 	var ControlsOrbit = 0;
-	var ControlsRotate = 0;
-	var ControlsFly = 0;
+	var ControlsRotate = 1;
+	var ControlsFly = 2;
 }
 
 @:enum abstract CameraType(Int) from Int to Int {
