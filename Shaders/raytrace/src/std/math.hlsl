@@ -5,10 +5,14 @@
 #include "rand.hlsl"
 
 void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
-	tangent = abs(normal.x) > abs(normal.y) ?
-		normalize(float3(0., normal.z, -normal.y)) :
-		normalize(float3(-normal.z, 0., normal.x));
-	binormal = cross(normal, tangent);
+	// tangent = abs(normal.x) > abs(normal.y) ?
+	// 	normalize(float3(0.0, normal.z, -normal.y)) :
+	// 	normalize(float3(-normal.z, 0.0, normal.x));
+	// binormal = cross(normal, tangent);
+	float3 c1 = cross(normal, float3(0.0, 0.0, 1.0));
+	float3 c2 = cross(normal, float3(0.0, 1.0, 0.0));
+	tangent = length(c1) > length(c2) ? c1 : c2;
+	binormal = cross(tangent, normal);
 }
 
 float schlick_weight(float cosTheta) {
