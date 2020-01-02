@@ -786,7 +786,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Color 1",
-						type: "RGB",
+						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: [0.8, 0.8, 0.8]
 					},
@@ -794,7 +794,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Color 2",
-						type: "RGB",
+						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: [0.2, 0.2, 0.2]
 					},
@@ -802,7 +802,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Color 3",
-						type: "RGB",
+						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: [0.0, 0.0, 0.0]
 					},
@@ -857,7 +857,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Color 1",
-						type: "RGB",
+						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: [0.8, 0.8, 0.8]
 					},
@@ -865,7 +865,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: "Color 2",
-						type: "RGB",
+						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: [0.2, 0.2, 0.2]
 					},
