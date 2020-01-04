@@ -129,7 +129,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	uint2 size;
 	mytexture0.GetDimensions(size.x, size.y);
-	float3 texpaint0 = pow(mytexture0.Load(uint3(tex_coord * size, 0)).rgb, 2.2);
+	float3 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0)).rgb;
 	float3 color = payload.color.rgb * texpaint0.rgb;
