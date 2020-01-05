@@ -13,7 +13,11 @@ class MakeDiscard {
 		frag.add_uniform('vec2 texcoloridSize', '_texcoloridSize'); // color map
 		frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
 		frag.write('vec3 c2 = texelFetch(texcolorid, ivec2(texCoordPick * texcoloridSize), 0).rgb;');
+		#if kha_opengl
+		frag.write('if (c1 != c2) discard;');
+		#else
 		frag.write('if (any(c1 != c2)) discard;');
+		#end
 	}
 
 	public static function face(vert: MaterialShader, frag: MaterialShader) {
@@ -30,7 +34,11 @@ class MakeDiscard {
 		#end
 		frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
 		frag.write('vec4 c2 = texelFetch(textrianglemap, ivec2(texCoordPick * textrianglemapSize), 0);');
+		#if kha_opengl
+		frag.write('if (c1 != c2) discard;');
+		#else
 		frag.write('if (any(c1 != c2)) discard;');
+		#end
 	}
 
 	public static function materialId(vert: MaterialShader, frag: MaterialShader) {
