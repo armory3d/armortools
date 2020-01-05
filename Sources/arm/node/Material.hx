@@ -1424,6 +1424,9 @@ class Material {
 		else {
 			textureMap.set(tex_store, 'texture($tex_name, $uv_name.xy)');
 			curshader.write('vec4 $tex_store = texture($tex_name, $uv_name.xy);');
+			if (!tex.file.endsWith(".jpg")) { // Pre-mult alpha
+				curshader.write('$tex_store.rgb *= $tex_store.a;');
+			}
 		}
 
 		if (sample_bump) {

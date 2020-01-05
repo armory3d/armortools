@@ -89,7 +89,11 @@ class MakeMesh {
 
 				if (Context.layer.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
-					frag.write('basecol = textureLodShared(texpaint, texCoord, 0.0).rgb;');
+					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
+					#if kha_direct3d12
+					frag.write('if (texpaint_sample.a < 0.1) discard;');
+					#end
+					frag.write('basecol = texpaint_sample.rgb;');
 				}
 				else {
 					frag.write('basecol = vec3(0.0, 0.0, 0.0);');

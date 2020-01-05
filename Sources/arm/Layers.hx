@@ -53,7 +53,7 @@ class Layers {
 
 		var layers = Project.layers;
 		layers[0].texpaint.g4.begin();
-		layers[0].texpaint.g4.clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 0.0)); // Base
+		layers[0].texpaint.g4.clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0)); // Base
 		layers[0].texpaint.g4.end();
 
 		layers[0].texpaint_nor.g4.begin();

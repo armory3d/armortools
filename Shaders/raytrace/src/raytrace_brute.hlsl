@@ -38,7 +38,8 @@ Texture2D<float4> mytexture_rank : register(t9);
 static const int rrStart = 2;
 static const float rrProbability = 0.5; // map to albedo
 static const int SAMPLES = 64;
-static const int DEPTH = 3; // 3 - 5
+static const int DEPTH = 3; // Opaque hits
+static const int DEPTH_TRANSPARENT = 16; // Transparent hits
 static uint seed = 0;
 
 [shader("raygeneration")]
@@ -54,12 +55,13 @@ void raygeneration() {
 		float2 screen_pos = xy / DispatchRaysDimensions().xy * 2.0 - 1.0;
 
 		RayDesc ray;
-		ray.TMin = 0.01;
+		ray.TMin = 0.0001;
 		ray.TMax = 10.0;
 		generate_camera_ray(screen_pos, ray.Origin, ray.Direction, constant_buffer.eye.xyz, constant_buffer.inv_vp);
 
 		RayPayload payload;
 		payload.color = float4(1, 1, 1, j);
+		int transparentHits = 0;
 
 		for (int i = 0; i < DEPTH; ++i) {
 
@@ -74,13 +76,19 @@ void raygeneration() {
 
 			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
 			if (payload.color.a < 0) {
-				if (i == 0) {
-					// return;
-					if (constant_buffer.params.y == 0) {
+				// Transparent
+				if (payload.color.a == -2 && transparentHits < DEPTH_TRANSPARENT) {
+					payload.color.a = j;
+					transparentHits++;
+					i--;
+				}
+				else {
+					// Miss
+					if (i == 0 && constant_buffer.params.y == 0) { // No envmap
 						payload.color.rgb = float3(0.05, 0.05, 0.05);
 					}
+					break;
 				}
-				break;
 			}
 
 			payload.color.rgb *= rrFactor;
@@ -113,13 +121,6 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	uint base_index = PrimitiveIndex() * triangleIndexStride;
 	uint3 indices_sample = indices.Load3(base_index);
 
-	float3 vertex_normals[3] = {
-		float3(vertices[indices_sample[0]].normal),
-		float3(vertices[indices_sample[1]].normal),
-		float3(vertices[indices_sample[2]].normal)
-	};
-	float3 n = normalize(hit_attribute(vertex_normals, attr));
-
 	float2 vertex_uvs[3] = {
 		float2(vertices[indices_sample[0]].tex),
 		float2(vertices[indices_sample[1]].tex),
@@ -129,18 +130,33 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	uint2 size;
 	mytexture0.GetDimensions(size.x, size.y);
-	float3 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0)).rgb;
-	float3 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0)).rgb;
-	float3 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0)).rgb;
+	float4 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0));
+
+	if (texpaint0.a <= 0.1) {
+		payload.ray_dir = WorldRayDirection();
+		payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
+		payload.color.a = -2;
+		return;
+	}
+
+	float3 vertex_normals[3] = {
+		float3(vertices[indices_sample[0]].normal),
+		float3(vertices[indices_sample[1]].normal),
+		float3(vertices[indices_sample[2]].normal)
+	};
+	float3 n = normalize(hit_attribute(vertex_normals, attr));
+
+	float4 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0));
+	float4 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0));
 	float3 color = payload.color.rgb * texpaint0.rgb;
 
 	float3 tangent = float3(0, 0, 0);
 	float3 binormal = float3(0, 0, 0);
 	create_basis(n, tangent, binormal);
 
-	texpaint1 = normalize(texpaint1 * 2.0 - 1.0);
+	texpaint1.rgb = normalize(texpaint1.rgb * 2.0 - 1.0);
 	texpaint1.g = -texpaint1.g;
-	n = mul(texpaint1, float3x3(tangent, binormal, n));
+	n = mul(texpaint1.rgb, float3x3(tangent, binormal, n));
 
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	float3 wo = -WorldRayDirection();

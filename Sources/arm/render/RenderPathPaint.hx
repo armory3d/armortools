@@ -184,20 +184,18 @@ class RenderPathPaint {
 					path.clearTarget(0xff000000);
 				}
 
-				var blendA = "texpaint_blend0";
-				var blendB = "texpaint_blend1";
-				path.setTarget(blendB);
-				path.bindTarget(blendA, "tex");
+				path.setTarget("texpaint_blend1");
+				path.bindTarget("texpaint_blend0", "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
 
 				var isMask = Context.layerIsMask;
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
-				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, blendA]);
+				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				path.bindTarget("_main", "gbufferD");
 				if ((UITrait.inst.xray || UITrait.inst.brushAngleReject) && UITrait.inst.brush3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
-				path.bindTarget(blendB, "paintmask");
+				path.bindTarget("texpaint_blend1", "paintmask");
 				#if (!kha_direct3d12)
 				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
