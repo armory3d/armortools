@@ -50,7 +50,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 14, 17, 5];
+			var menuItems = [12, 3, 14, 19, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -263,6 +263,8 @@ class UIMenu {
 				if (ui.button("      Orbit Up", Left, Config.keymap.view_orbit_up)) { ViewportUtil.orbit(0, -Math.PI / 12); }
 				if (ui.button("      Orbit Down", Left, Config.keymap.view_orbit_down)) { ViewportUtil.orbit(0, Math.PI / 12); }
 				if (ui.button("      Orbit Opposite", Left, Config.keymap.view_orbit_opposite)) { ViewportUtil.orbit(Math.PI, 0); }
+				if (ui.button("      Zoom In", Left, Config.keymap.view_zoom_in)) { ViewportUtil.zoom(0.2); }
+				if (ui.button("      Zoom Out", Left, Config.keymap.view_zoom_out)) { ViewportUtil.zoom(-0.2); }
 				// ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 
 				var cam = Scene.active.camera;

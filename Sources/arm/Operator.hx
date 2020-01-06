@@ -15,6 +15,7 @@ class Operator {
 	public static function update() {}
 
 	public static function shortcut(s: String): Bool {
+		if (s == "") return false;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 		var shift = s.indexOf("shift") >= 0;

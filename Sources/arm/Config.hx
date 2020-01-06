@@ -111,6 +111,8 @@ class Config {
 			raw.keymap.view_orbit_up = "8";
 			raw.keymap.view_orbit_down = "2";
 			raw.keymap.view_orbit_opposite = "9";
+			raw.keymap.view_zoom_in = "";
+			raw.keymap.view_zoom_out = "";
 			raw.keymap.view_distract_free = "f11";
 			raw.keymap.tool_brush = "b";
 			raw.keymap.tool_eraser = "e";

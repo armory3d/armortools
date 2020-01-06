@@ -61,6 +61,13 @@ class ViewportUtil {
 		Context.ddirty = 2;
 	}
 
+	public static function zoom(f: Float) {
+		var cam = Scene.active.camera;
+		cam.transform.move(cam.look(), f);
+		arm.plugin.Camera.dist -= f;
+		Context.ddirty = 2;
+	}
+
 	public static function updateCameraType(cameraType: Int) {
 		var cam = Scene.active.cameras[0];
 		var light = Scene.active.lights[0];

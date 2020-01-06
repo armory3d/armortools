@@ -551,6 +551,8 @@ class UITrait {
 			else if (Operator.shortcut(Config.keymap.view_orbit_up)) ViewportUtil.orbit(0, -Math.PI / 12);
 			else if (Operator.shortcut(Config.keymap.view_orbit_down)) ViewportUtil.orbit(0, Math.PI / 12);
 			else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
+			else if (Operator.shortcut(Config.keymap.view_zoom_in)) ViewportUtil.zoom(0.2);
+			else if (Operator.shortcut(Config.keymap.view_zoom_out)) ViewportUtil.zoom(-0.2);
 		}
 
 		if (brushCanLock || brushLocked) {
