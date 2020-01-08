@@ -30,7 +30,7 @@ class BoxExport {
 
 			if (ui.tab(htab, "Export Textures")) {
 				ui.row([0.5, 0.5]);
-				ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Res", true);
+				ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], "Resolution", true);
 				if (App.resHandle.changed) {
 					iron.App.notifyOnRender(Layers.resizeLayers);
 					UVUtil.uvmap = null;
