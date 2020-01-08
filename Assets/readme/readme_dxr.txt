@@ -14,10 +14,11 @@ This build is only intended for testing ray-tracing features and
 may be sub-par in other areas compared to regular builds.
 
 Currently exposed ray-tracing features:
-- Bake Tool - AO (DXR)
-- Bake Tool - Bent Normal (DXR)
-- Bake Tool - Lightmap (DXR)
-- Viewport Mode - Path-Trace (DXR)
+- Bake Tool - AO
+- Bake Tool - Bent Normal
+- Bake Tool - Lightmap
+- Bake Tool - Thickness
+- Viewport Mode - Path-Trace
 
 -----
 
