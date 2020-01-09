@@ -63,7 +63,7 @@ class BoxPreferences {
 
 				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
 
-				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache Draws");
+				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache UI Draws");
 				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
 
 				// ui.text("Node Editor");
