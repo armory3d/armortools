@@ -965,6 +965,7 @@ class UITrait {
 					if (ui.button("Clear")) colorIdPicked = false;
 					ui.text("Color ID Map");
 					var cid = ui.combo(colorIdHandle, App.enumTexts("TEX_IMAGE"), "Color ID");
+					if (colorIdHandle.changed) Context.ddirty = 2;
 					if (Project.assets.length > 0) ui.image(getImage(Project.assets[cid]));
 				}
 				else if (Context.tool == ToolPicker) {
