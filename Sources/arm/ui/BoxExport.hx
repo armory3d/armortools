@@ -139,7 +139,8 @@ class BoxExport {
 				for (i in 0...preset.textures.length) {
 					var t = preset.textures[i];
 					ui.row([0.2, 0.2, 0.2, 0.2, 0.2]);
-					var htex = hpreset.nest(i, {text: t.name});
+					var htex = hpreset.nest(i);
+					htex.text = t.name;
 					t.name = ui.textInput(htex);
 
 					if (ui.isHovered && ui.inputReleasedR) {
@@ -153,10 +154,14 @@ class BoxExport {
 						});
 					}
 
-					var hr = htex.nest(0, {position: channels.indexOf(t.channels[0])});
-					var hg = htex.nest(1, {position: channels.indexOf(t.channels[1])});
-					var hb = htex.nest(2, {position: channels.indexOf(t.channels[2])});
-					var ha = htex.nest(3, {position: channels.indexOf(t.channels[3])});
+					var hr = htex.nest(0);
+					hr.position = channels.indexOf(t.channels[0]);
+					var hg = htex.nest(1);
+					hg.position = channels.indexOf(t.channels[1]);
+					var hb = htex.nest(2);
+					hb.position = channels.indexOf(t.channels[2]);
+					var ha = htex.nest(3);
+					ha.position = channels.indexOf(t.channels[3]);
 
 					ui.combo(hr, channels, "R");
 					if (hr.changed) t.channels[0] = channels[hr.position];
