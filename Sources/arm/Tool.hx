@@ -191,7 +191,9 @@ package arm;
 @:enum abstract PaintTex(Int) from Int to Int {
 	var TexBase = 0;
 	var TexNormal = 1;
-	var TexPack = 2;
+	var TexOcclusion = 2;
+	var TexRoughness = 3;
+	var TexMetallic = 4;
 }
 
 @:enum abstract ProjectModel(Int) from Int to Int {

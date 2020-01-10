@@ -6,6 +6,7 @@ import kha.graphics4.PipelineState;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
+import kha.graphics4.ConstantLocation;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
@@ -28,6 +29,7 @@ class UIView2D {
 	public var panY = 0.0;
 	public var panScale = 1.0;
 	var pipe: PipelineState;
+	var channelLocation: ConstantLocation;
 	var texType = TexBase;
 	var uvmapShow = false;
 
@@ -46,6 +48,7 @@ class UIView2D {
 		pipe.blendDestination = BlendingFactor.BlendZero;
 		pipe.colorWriteMaskAlpha = false;
 		pipe.compile();
+		channelLocation = pipe.getConstantLocation("channel");
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
@@ -94,14 +97,26 @@ class UIView2D {
 			ui.g.pipeline = pipe;
 			var l = Context.layer;
 			var tex: Image = null;
+			var channel = 0;
 
 			if (type == View2DLayer) {
-				tex = texType == TexBase ? l.texpaint : texType == TexNormal ? l.texpaint_nor : l.texpaint_pack;
-				if (Context.layerIsMask) tex = l.texpaint_mask;
+				tex =
+					Context.layerIsMask     ? l.texpaint_mask :
+					texType == TexBase      ? l.texpaint :
+					texType == TexNormal    ? l.texpaint_nor :
+										      l.texpaint_pack;
+
+				channel =
+					texType == TexOcclusion ? 1 :
+					texType == TexRoughness ? 2 :
+					texType == TexMetallic  ? 3 :
+											  0;
 			}
 			else { // View2DAsset
 				tex = UITrait.inst.getImage(Context.texture);
 			}
+
+			ui.currentWindow.texture.g4.setInt(channelLocation, channel);
 
 			var th = tw;
 			if (tex != null) {
@@ -109,7 +124,9 @@ class UIView2D {
 				if (!UITrait.inst.textureFilter) {
 					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
 				}
+
 				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+
 				if (!UITrait.inst.textureFilter) {
 					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
 				}
@@ -165,7 +182,7 @@ class UIView2D {
 				ui._x = 2;
 				ui._y = 2;
 				ui._w = ew;
-				texType = ui.combo(Id.handle({position: texType}), ["Base", "Normal Map", "ORM"], "Texture");
+				texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic"], "Texture");
 				ui._x += ew + 3;
 				ui._y = 2;
 				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");

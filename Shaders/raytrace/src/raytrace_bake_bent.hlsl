@@ -79,7 +79,7 @@ void raygeneration() {
 		float b = 1.0 - a;
 		color = color * b + accum.xyz * a;
 	}
-	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
+	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 1.0f);
 }
 
 [shader("closesthit")]
