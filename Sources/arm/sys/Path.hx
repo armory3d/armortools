@@ -91,6 +91,11 @@ class Path {
 			   // p.endsWith(".zip");
 	}
 
+	public static function isJson(path: String): Bool {
+		var p = path.toLowerCase();
+		return p.endsWith(".json");
+	}
+
 	public static function isBaseTex(p: String): Bool {
 		return p.endsWith("_albedo") ||
 			   p.endsWith("_alb") ||

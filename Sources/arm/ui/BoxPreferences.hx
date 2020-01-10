@@ -8,6 +8,7 @@ import iron.data.Data;
 import arm.node.MaterialParser;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
+import arm.io.ImportKeymap;
 import arm.sys.Path;
 import arm.sys.File;
 using StringTools;
@@ -17,6 +18,7 @@ class BoxPreferences {
 	public static var htab = Id.handle();
 	public static var filesPlugin: Array<String> = null;
 	public static var filesKeymap: Array<String> = null;
+	public static var presetHandle: Handle;
 
 	@:access(zui.Zui)
 	public static function show() {
@@ -200,19 +202,32 @@ class BoxPreferences {
 			if (ui.tab(htab, "Keymap")) {
 
 				if (filesKeymap == null) {
-					filesKeymap = File.readDirectory(Path.data() + Path.sep + "keymap_presets");
-					for (i in 0...filesKeymap.length) {
-						filesKeymap[i] = filesKeymap[i].substr(0, filesKeymap[i].length - 5); // Strip .json
-					}
+					fetchKeymaps();
 				}
 
-				var presetHandle = Id.handle({position: filesKeymap.indexOf(Config.raw.keymap.substr(0, Config.raw.keymap.length - 5))}); // Strip .json
-				ui.combo(presetHandle, filesKeymap, "Preset", true);
+				ui.row([1 / 2, 1 / 4, 1 / 4]);
+
+				presetHandle = Id.handle({position: getPresetIndex()});
+				ui.combo(presetHandle, filesKeymap, "Preset");
 				if (presetHandle.changed) {
 					Config.raw.keymap = filesKeymap[presetHandle.position] + ".json";
 					Config.applyConfig();
 					Config.loadKeymap();
 				}
+
+				if (ui.button("Import")) {
+					UIFiles.show("json", false, function(path: String) {
+						ImportKeymap.run(path);
+					});
+				}
+				if (ui.button("Export")) {
+					UIFiles.show("json", true, function(dest: String) {
+						if (!UIFiles.filename.endsWith(".json")) UIFiles.filename += ".json";
+						var path = Path.data() + Path.sep + "keymap_presets" + Path.sep + Config.raw.keymap;
+						File.copy(path, dest + Path.sep + UIFiles.filename);
+					});
+				}
+
 				ui.separator(8, false);
 
 				var i = 0;
@@ -319,6 +334,17 @@ plugin.drawUI = function(ui) {
 			}
 			ui._w = _w;
 		}, 500, 310);
+	}
+
+	public static function fetchKeymaps() {
+		filesKeymap = File.readDirectory(Path.data() + Path.sep + "keymap_presets");
+		for (i in 0...filesKeymap.length) {
+			filesKeymap[i] = filesKeymap[i].substr(0, filesKeymap[i].length - 5); // Strip .json
+		}
+	}
+
+	public static function getPresetIndex(): Int {
+		return filesKeymap.indexOf(Config.raw.keymap.substr(0, Config.raw.keymap.length - 5)); // Strip .json
 	}
 
 	static function setScale() {
