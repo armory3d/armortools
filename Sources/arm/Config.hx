@@ -7,13 +7,14 @@ import iron.data.Data;
 #if arm_painter
 import arm.ui.UITrait;
 import arm.render.Inc;
+import arm.sys.Path;
 import arm.Tool;
 #end
 
 class Config {
 
 	public static var raw: TConfig = null;
-	public static var keymap: Dynamic; // raw.Keymap
+	public static var keymap: Dynamic;
 	public static var configLoaded = false;
 
 	public static function load(done: Void->Void) {
@@ -75,61 +76,8 @@ class Config {
 
 		#if arm_painter
 		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
-		if (raw.keymap == null) {
-			raw.keymap = {};
-			raw.keymap.action_paint = "left";
-			raw.keymap.action_rotate = "alt+left";
-			raw.keymap.action_pan = "alt+middle";
-			raw.keymap.action_zoom = "alt+right";
-			raw.keymap.action_rotate_light = "shift+middle";
-			raw.keymap.select_material = "shift+number";
-			raw.keymap.cycle_layers = "ctrl+tab";
-			raw.keymap.brush_radius = "f";
-			raw.keymap.brush_opacity = "shift+f";
-			raw.keymap.brush_ruler = "shift";
-			raw.keymap.file_new = "ctrl+n";
-			raw.keymap.file_open = "ctrl+o";
-			raw.keymap.file_save = "ctrl+s";
-			raw.keymap.file_save_as = "ctrl+shift+s";
-			raw.keymap.file_reimport_mesh = "ctrl+r";
-			raw.keymap.file_import_assets = "ctrl+i";
-			raw.keymap.file_export_textures = "ctrl+e";
-			raw.keymap.file_export_textures_as = "ctrl+shift+e";
-			raw.keymap.edit_undo = "ctrl+z";
-			raw.keymap.edit_redo = "ctrl+shift+z";
-			raw.keymap.edit_prefs = "ctrl+k";
-			raw.keymap.view_reset = "0";
-			raw.keymap.view_front = "1";
-			raw.keymap.view_back = "ctrl+1";
-			raw.keymap.view_right = "3";
-			raw.keymap.view_left = "ctrl+3";
-			raw.keymap.view_top = "7";
-			raw.keymap.view_bottom = "ctrl+7";
-			raw.keymap.view_camera_type = "5";
-			raw.keymap.view_orbit_left = "4";
-			raw.keymap.view_orbit_right = "6";
-			raw.keymap.view_orbit_up = "8";
-			raw.keymap.view_orbit_down = "2";
-			raw.keymap.view_orbit_opposite = "9";
-			raw.keymap.view_zoom_in = "";
-			raw.keymap.view_zoom_out = "";
-			raw.keymap.view_distract_free = "f11";
-			raw.keymap.tool_brush = "b";
-			raw.keymap.tool_eraser = "e";
-			raw.keymap.tool_fill = "g";
-			raw.keymap.tool_decal = "d";
-			raw.keymap.tool_text = "t";
-			raw.keymap.tool_clone = "l";
-			raw.keymap.tool_blur = "u";
-			raw.keymap.tool_particle = "p";
-			raw.keymap.tool_bake = "k";
-			raw.keymap.tool_colorid = "c";
-			raw.keymap.tool_picker = "v";
-			raw.keymap.toggle_2d_view = "shift+tab";
-			raw.keymap.toggle_node_editor = "tab";
-			raw.keymap.node_search = "space";
-		}
-		keymap = raw.keymap;
+		if (raw.keymap == null) raw.keymap = "default.json";
+		loadKeymap();
 		#end
 
 		return raw;
@@ -169,6 +117,18 @@ class Config {
 
 		if (current != null) current.begin(false);
 		Context.ddirty = 2;
+	}
+
+	public static function loadKeymap() {
+		Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) { // Sync
+			keymap = Json.parse(blob.toString());
+		});
+	}
+
+	public static function saveKeymap() {
+		var path = Data.dataPath + "keymap_presets/" + raw.keymap;
+		var bytes = Bytes.ofString(Json.stringify(keymap));
+		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
 	public static function getTextureRes(): Int {
@@ -230,5 +190,5 @@ typedef TConfig = {
 	@:optional var version: Null<Int>;
 	@:optional var plugins: Array<String>;
 	@:optional var undo_steps: Null<Int>;
-	@:optional var keymap: Dynamic; // Map<String, String>
+	@:optional var keymap: String;
 }

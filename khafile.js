@@ -87,6 +87,7 @@ else { // painter, creator
 	}
 
 	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
+	project.addAssets("Assets/painter/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
 	if (process.platform === 'win32') {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
 	}

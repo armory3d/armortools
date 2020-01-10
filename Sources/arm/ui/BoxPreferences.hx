@@ -15,7 +15,8 @@ using StringTools;
 class BoxPreferences {
 
 	public static var htab = Id.handle();
-	public static var files: Array<String> = null;
+	public static var filesPlugin: Array<String> = null;
+	public static var filesKeymap: Array<String> = null;
 
 	@:access(zui.Zui)
 	public static function show() {
@@ -79,8 +80,9 @@ class BoxPreferences {
 							ui.t.ELEMENT_H = App.ELEMENT_H;
 							Config.restore();
 							setScale();
-							if (files != null) for (f in files) Plugin.stop(f);
-							files = null;
+							if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
+							filesPlugin = null;
+							filesKeymap = null;
 						}
 					});
 				}
@@ -196,22 +198,20 @@ class BoxPreferences {
 				#end
 			}
 			if (ui.tab(htab, "Keymap")) {
-				var presetHandle = Id.handle();
-				ui.combo(presetHandle, ["Default", "Blender"], "Preset", true);
+
+				if (filesKeymap == null) {
+					filesKeymap = File.readDirectory(Path.data() + Path.sep + "keymap_presets");
+					for (i in 0...filesKeymap.length) {
+						filesKeymap[i] = filesKeymap[i].substr(0, filesKeymap[i].length - 5); // Strip .json
+					}
+				}
+
+				var presetHandle = Id.handle({position: filesKeymap.indexOf(Config.raw.keymap.substr(0, Config.raw.keymap.length - 5))}); // Strip .json
+				ui.combo(presetHandle, filesKeymap, "Preset", true);
 				if (presetHandle.changed) {
-					var preset = presetHandle.position;
-					var keymap = Config.keymap;
-					if (preset == 0) {
-						keymap.action_rotate = "alt+left";
-						keymap.action_pan = "alt+middle";
-						keymap.action_zoom = "alt+right";
-					}
-					else if (preset == 1) {
-						keymap.action_rotate = "middle";
-						keymap.action_pan = "shift+middle";
-						keymap.action_zoom = "ctrl+middle";
-					}
+					Config.raw.keymap = filesKeymap[presetHandle.position] + ".json";
 					Config.applyConfig();
+					Config.loadKeymap();
 				}
 				ui.separator(8, false);
 
@@ -223,7 +223,10 @@ class BoxPreferences {
 					var text = ui.textInput(h, key, Left);
 					Reflect.setField(Config.keymap, key, text);
 				}
-				if (ui.changed) Config.applyConfig();
+				if (ui.changed) {
+					Config.applyConfig();
+					Config.saveKeymap();
+				}
 			}
 			if (ui.tab(htab, "Plugins")) {
 				ui.row([1 / 4, 1 / 4]);
@@ -247,7 +250,7 @@ plugin.drawUI = function(ui) {
 								if (!pluginName.endsWith(".js")) pluginName += ".js";
 								var path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
 								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
-								files = null; // Refresh file list
+								filesPlugin = null; // Refresh file list
 								UIBox.show = false;
 								App.redrawUI();
 								BoxPreferences.htab.position = 5; // Plugins
@@ -262,13 +265,13 @@ plugin.drawUI = function(ui) {
 					});
 				}
 
-				if (files == null) {
-					files = File.readDirectory(Path.data() + Path.sep + "plugins");
+				if (filesPlugin == null) {
+					filesPlugin = File.readDirectory(Path.data() + Path.sep + "plugins");
 				}
 
 				if (Config.raw.plugins == null) Config.raw.plugins = [];
 				var h = Id.handle({selected: false});
-				for (f in files) {
+				for (f in filesPlugin) {
 					var isJs = f.endsWith(".js");
 					var isWasm = false; //f.endsWith(".wasm");
 					if (!isJs && !isWasm) continue;
@@ -307,7 +310,7 @@ plugin.drawUI = function(ui) {
 									Config.raw.plugins.remove(f);
 									Plugin.stop(f);
 								}
-								files.remove(f);
+								filesPlugin.remove(f);
 								File.delete(path);
 							}
 						});
