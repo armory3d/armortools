@@ -7,17 +7,19 @@ class File {
 
 	#if krom_windows
 	static inline var cmd_dir = "dir /b";
+	static inline var cmd_dir_nofile = "dir /b /ad";
 	static inline var cmd_copy = "copy";
 	static inline var cmd_del = "del /f";
 	#else
 	static inline var cmd_dir = "ls";
+	static inline var cmd_dir_nofile = "ls";
 	static inline var cmd_copy = "cp";
 	static inline var cmd_del = "rm";
 	#end
 
-	public static function readDirectory(path: String): Array<String> {
+	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
 		var save = Path.data() + Path.sep + "dir.txt";
-		Krom.sysCommand(cmd_dir + ' "' + path + '" > "' + save + '"');
+		Krom.sysCommand(foldersOnly ? cmd_dir_nofile : cmd_dir + ' "' + path + '" > "' + save + '"');
 		var str = Bytes.ofData(Krom.loadBlob(save)).toString();
 		var ar = str.split("\n");
 		var files: Array<String> = [];

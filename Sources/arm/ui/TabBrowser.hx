@@ -1,7 +1,6 @@
 package arm.ui;
 
 import zui.Id;
-import zui.Ext;
 
 class TabBrowser {
 
@@ -11,8 +10,7 @@ class TabBrowser {
 		if (ui.tab(UITrait.inst.htab2, "Browser")) {
 			var h = Id.handle();
 			h.text = ui.textInput(h, "Path");
-			Ext.dataPath = iron.data.Data.dataPath;
-			Ext.fileBrowser(ui, h);
+			UIFiles.fileBrowser(ui, h);
 		}
 	}
 }
