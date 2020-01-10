@@ -38,7 +38,7 @@ class ExportArm {
 		var md: Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
 
-		var texture_files = assetsToFiles();
+		var texture_files = assetsToFiles(Project.assets);
 		var mesh_files = meshesToFiles();
 
 		var bitsPos = App.bitsHandle.position;
@@ -83,14 +83,21 @@ class ExportArm {
 		var mnodes: Array<TNodeCanvas> = [];
 		var m = Context.material;
 		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+		var assets: Array<TAsset> = [];
 		for (n in c.nodes) {
 			if (n.type == "TEX_IMAGE") {
-				n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
+				var index = n.buttons[0].default_value;
+				n.buttons[0].data = App.enumTexts(n.type)[index];
+
+				var asset = Project.assets[index];
+				if (assets.indexOf(asset) == -1) {
+					assets.push(asset);
+				}
 			}
 		}
 		mnodes.push(c);
 
-		var texture_files = assetsToFiles();
+		var texture_files = assetsToFiles(assets);
 
 		var raw = {
 			version: App.version,
@@ -103,9 +110,9 @@ class ExportArm {
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
-	static function assetsToFiles(): Array<String> {
+	static function assetsToFiles(assets: Array<TAsset>): Array<String> {
 		var texture_files: Array<String> = [];
-		for (a in Project.assets) {
+		for (a in assets) {
 			// Convert image path from absolute to relative
 			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
