@@ -167,8 +167,9 @@ package arm;
 	var MenuFile = 0;
 	var MenuEdit = 1;
 	var MenuViewport = 2;
-	var MenuCamera = 3;
-	var MenuHelp = 4;
+	var MenuMode = 3;
+	var MenuCamera = 4;
+	var MenuHelp = 5;
 }
 
 @:enum abstract CanvasType(Int) from Int to Int {

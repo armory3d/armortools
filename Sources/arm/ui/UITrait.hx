@@ -24,8 +24,6 @@ import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
 import arm.Tool;
 import arm.Project;
 
@@ -36,7 +34,7 @@ class UITrait {
 	public static var defaultWindowW = 280;
 	public static inline var defaultToolbarW = 54;
 	public static inline var defaultHeaderH = 28;
-	public static inline var defaultMenubarW = 280;
+	public static inline var defaultMenubarW = 330;
 	public static var penPressureRadius = true;
 	public static var penPressureHardness = true;
 	public static var penPressureOpacity = false;
@@ -917,6 +915,7 @@ class UITrait {
 			menuButton("File", MenuFile);
 			menuButton("Edit", MenuEdit);
 			menuButton("Viewport", MenuViewport);
+			menuButton("Mode", MenuMode);
 			menuButton("Camera", MenuCamera);
 			menuButton("Help", MenuHelp);
 
@@ -1160,24 +1159,6 @@ class UITrait {
 
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - headerh, System.windowWidth() - toolbarw - windowW, headerh)) {
 			ui._y += 2;
-
-			var modeHandle = Id.handle();
-			var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
-			#if kha_direct3d12
-			modes.push("Path-Trace");
-			#end
-			UITrait.inst.viewportMode = ui.combo(modeHandle, modes, "Mode");
-			if (modeHandle.changed) {
-				var deferred = UITrait.inst.viewportMode == ViewRender || UITrait.inst.viewportMode == ViewPathTrace;
-				if (deferred) {
-					RenderPath.active.commands = RenderPathDeferred.commands;
-				}
-				else {
-					if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
-					RenderPath.active.commands = RenderPathForward.commands;
-				}
-				MaterialParser.parseMeshMaterial();
-			}
 
 			if (Log.messageTimer > 0) {
 				var _w = ui._w;

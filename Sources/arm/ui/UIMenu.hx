@@ -8,6 +8,7 @@ import zui.Zui;
 import zui.Id;
 import zui.Ext;
 import iron.Scene;
+import iron.RenderPath;
 import iron.system.Input;
 import arm.util.ViewportUtil;
 import arm.util.UVUtil;
@@ -16,6 +17,8 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.node.MaterialParser;
 import arm.io.ImportAsset;
+import arm.render.RenderPathDeferred;
+import arm.render.RenderPathForward;
 import arm.Tool;
 using StringTools;
 
@@ -50,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 14, 19, 5];
+			var menuItems = [12, 3, 14, 12, 19, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -244,6 +247,29 @@ class UIMenu {
 				#end
 
 				if (ui.changed) keepOpen = true;
+			}
+			else if (menuCategory == MenuMode) {
+				var modeHandle = Id.handle();
+				var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
+				#if kha_direct3d12
+				modes.push("Path-Trace");
+				#end
+				for (i in 0...modes.length) {
+					ui.radio(modeHandle, i, modes[i]);
+				}
+
+				UITrait.inst.viewportMode = modeHandle.position;
+				if (modeHandle.changed) {
+					var deferred = UITrait.inst.viewportMode == ViewRender || UITrait.inst.viewportMode == ViewPathTrace;
+					if (deferred) {
+						RenderPath.active.commands = RenderPathDeferred.commands;
+					}
+					else {
+						if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
+						RenderPath.active.commands = RenderPathForward.commands;
+					}
+					MaterialParser.parseMeshMaterial();
+				}
 			}
 			else if (menuCategory == MenuCamera) {
 				if (ui.button("      Reset", Left, Config.keymap.view_reset)) { ViewportUtil.resetViewport(); ViewportUtil.scaleToBounds(); }
