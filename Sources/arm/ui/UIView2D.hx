@@ -28,8 +28,8 @@ class UIView2D {
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	var pipe: PipelineState;
-	var channelLocation: ConstantLocation;
+	public var pipe: PipelineState;
+	public var channelLocation: ConstantLocation;
 	var texType = TexBase;
 	var uvmapShow = false;
 
@@ -107,6 +107,7 @@ class UIView2D {
 										      l.texpaint_pack;
 
 				channel =
+					Context.layerIsMask ? 1 :
 					texType == TexOcclusion ? 1 :
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
@@ -182,9 +183,13 @@ class UIView2D {
 				ui._x = 2;
 				ui._y = 2;
 				ui._w = ew;
-				texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic"], "Texture");
-				ui._x += ew + 3;
-				ui._y = 2;
+
+				if (!Context.layerIsMask) {
+					texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic"], "Texture");
+					ui._x += ew + 3;
+					ui._y = 2;
+				}
+
 				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
 				ui._x += ew + 3;
 				ui._y = 2;

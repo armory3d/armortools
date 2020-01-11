@@ -133,7 +133,12 @@ class TabLayers {
 					var uiy = ui._y;
 					ui._x += Std.int(4 * ui.SCALE());
 					ui._y += 3;
+
+					ui.g.pipeline = UIView2D.inst.pipe;
+					ui.currentWindow.texture.g4.setInt(UIView2D.inst.channelLocation, 1);
 					var state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
+					ui.g.pipeline = null;
+
 					ui._x -= Std.int(4 * ui.SCALE());
 					ui._y -= 3;
 					if (ui.isHovered) {
