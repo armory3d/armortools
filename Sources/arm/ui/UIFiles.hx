@@ -95,7 +95,7 @@ class UIFiles {
 			if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += Path.sep;
 		}
 
-		var slotw = Std.int(51 * ui.SCALE());
+		var slotw = Std.int(60 * ui.SCALE());
 		var num = Std.int(UITrait.inst.windowW / slotw);
 
 		// Directory contents
@@ -115,20 +115,28 @@ class UIFiles {
 				var f = files[i];
 				var _x = ui._x;
 
-				if (ui.image(icons, ui.t.LABEL_COL, folder.h, folder.x, folder.y, folder.w, folder.h) == Released) {
+				var rect = f.indexOf(".") > 0 ? file : folder;
+				var col = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
+
+				var off = ui._w / 2 - 25 * ui.SCALE();
+				ui._x += off;
+
+				if (ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h) == Released) {
 					handle.changed = ui.changed = true;
 					if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
 						handle.text += Path.sep;
 					}
 					handle.text += f;
 				}
+				ui._x -= off;
 
 				ui._x = _x;
-				ui._y += slotw * 0.9;
+				ui._y += slotw * 0.75;
 				ui.text(f, Center);
-				ui._y -= slotw * 0.9;
+				ui._y -= slotw * 0.75;
 			}
 		}
+		ui._y += slotw * 0.8;
 
 		return handle.text;
 	}
