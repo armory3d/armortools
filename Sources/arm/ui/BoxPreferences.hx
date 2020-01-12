@@ -54,20 +54,19 @@ class BoxPreferences {
 					UITrait.inst.ui.t = App.theme;
 					UINodes.inst.ui.t = App.theme;
 					UIView2D.inst.ui.t = App.theme;
-					UITrait.inst.headerHandle.redraws = 2;
-					UITrait.inst.toolbarHandle.redraws = 2;
-					UITrait.inst.statusHandle.redraws = 2;
-					UITrait.inst.workspaceHandle.redraws = 2;
-					UITrait.inst.menuHandle.redraws = 2;
-					UITrait.inst.hwnd.redraws = 2;
-					UITrait.inst.hwnd1.redraws = 2;
-					UITrait.inst.hwnd2.redraws = 2;
+					UITrait.inst.tagUIRedraw();
 				}
 
 				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
 
 				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache UI Draws");
 				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
+
+				ui.changed = false;
+				UITrait.inst.showAssetNames = ui.check(Id.handle({selected: UITrait.inst.showAssetNames}), "Show Asset Names");
+				if (ui.changed) {
+					UITrait.inst.tagUIRedraw();
+				}
 
 				// ui.text("Node Editor");
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");

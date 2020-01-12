@@ -63,10 +63,12 @@ class TabMaterials {
 			var num = Std.int(UITrait.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
-				ui.row([for (i in 0...num) 1 / num]);
+				var mult = UITrait.inst.showAssetNames ? 2 : 1;
+				ui.row([for (i in 0...num * mult) 1 / num]);
 
 				ui._x += 2;
-				if (row > 0) ui._y += 6;
+				var off = UITrait.inst.showAssetNames ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+				if (row > 0) ui._y += off;
 
 				for (j in 0...num) {
 					var imgw = Std.int(50 * ui.SCALE());
@@ -179,6 +181,13 @@ class TabMaterials {
 						});
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
+
+					if (UITrait.inst.showAssetNames) {
+						ui._x = uix;
+						ui._y += slotw * 0.9;
+						ui.text(materials[i].canvas.name, Center);
+						ui._y -= slotw * 0.9;
+					}
 				}
 
 				ui._y += 6;

@@ -134,6 +134,7 @@ class UITrait {
 	public var exportMeshFormat = FormatObj;
 	public var nativeBrowser = true;
 	public var cacheDraws = false;
+	public var showAssetNames = false;
 
 	public var textToolImage: Image = null;
 	public var textToolText = "Text";
@@ -1280,5 +1281,16 @@ class UITrait {
 
 	function onTextHover() {
 		Krom.setMouseCursor(3); // I-cursor
+	}
+
+	public function tagUIRedraw() {
+		headerHandle.redraws = 2;
+		toolbarHandle.redraws = 2;
+		statusHandle.redraws = 2;
+		workspaceHandle.redraws = 2;
+		menuHandle.redraws = 2;
+		hwnd.redraws = 2;
+		hwnd1.redraws = 2;
+		hwnd2.redraws = 2;
 	}
 }
