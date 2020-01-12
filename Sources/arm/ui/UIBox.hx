@@ -91,7 +91,7 @@ class UIBox {
 	public static function showMessage(title: String, text: String) {
 		init();
 		modalW = 400;
-		modalH = 170;
+		modalH = 190;
 		boxTitle = title;
 		boxText = text;
 		boxCommands = null;

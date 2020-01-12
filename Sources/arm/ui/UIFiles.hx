@@ -39,6 +39,7 @@ class UIFiles {
 
 	@:access(zui.Zui) //
 	static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
+		var known = false;
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), "File Browser")) {
 				var pathHandle = Id.handle();
@@ -46,12 +47,12 @@ class UIFiles {
 				ui.row([6 / 10, 2 / 10, 2 / 10]);
 				filename = ui.textInput(fileHandle, "File");
 				ui.text("*." + filters, Center);
-				var known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
 				if (ui.button(isSave ? "Save" : "Open") || known || ui.isReturnDown) {
 					UIBox.show = false;
 					filesDone((known || isSave) ? path : path + Path.sep + filename);
 					if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
 				}
+				known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
 				path = fileBrowser(ui, pathHandle, false);
 				if (pathHandle.changed) ui.currentWindow.redraws = 3;
 			}
