@@ -74,28 +74,24 @@ class UIFiles {
 
 		if (handle.text == "") initPath(handle);
 		if (handle.text != lastPath) {
-			var filesAll = File.readDirectory(handle.text, foldersOnly);
 			files = [];
+
+			// Up directory
+			var i1 = handle.text.indexOf("/");
+			var i2 = handle.text.indexOf("\\");
+			var nested =
+				(i1 > -1 && handle.text.length - 1 > i1) ||
+				(i2 > -1 && handle.text.length - 1 > i2);
+			if (nested) files.push("..");
+
+			var filesAll = File.readDirectory(handle.text, foldersOnly);
 			for (f in filesAll) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
 				files.push(f);
 			}
 		}
 		lastPath = handle.text;
-
-		// Up directory
-		var i1 = handle.text.indexOf("/");
-		var i2 = handle.text.indexOf("\\");
-		var nested =
-			(i1 > -1 && handle.text.length - 1 > i1) ||
-			(i2 > -1 && handle.text.length - 1 > i2);
 		handle.changed = false;
-		if (nested && ui.button("..", Align.Left)) {
-			handle.changed = ui.changed = true;
-			handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));
-			// Drive root
-			if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += Path.sep;
-		}
 
 		var slotw = Std.int(70 * ui.SCALE());
 		var num = Std.int(ui._w / slotw);
@@ -130,10 +126,17 @@ class UIFiles {
 					selected = i;
 					if (Time.time() - UITrait.inst.selectTime < 0.25) {
 						handle.changed = ui.changed = true;
-						if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
-							handle.text += Path.sep;
+						if (f == "..") { // Up
+							handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));
+							// Drive root
+							if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += Path.sep;
 						}
-						handle.text += f;
+						else {
+							if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
+								handle.text += Path.sep;
+							}
+							handle.text += f;
+						}
 						selected = -1;
 					}
 					UITrait.inst.selectTime = Time.time();

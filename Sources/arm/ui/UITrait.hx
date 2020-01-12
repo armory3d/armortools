@@ -1172,11 +1172,13 @@ class UITrait {
 			TabBrowser.draw();
 
 			if (Log.messageTimer > 0) {
-				ui.tab(statustab, Log.message + "    ", false, Log.messageColor);
+				ui.tab(statustab, Log.message + "        ", false, Log.messageColor);
 			}
 
-			var headerBottom = (System.windowHeight() - statush) + defaultStatusH * Config.raw.window_scale;
-			if (ui.inputStarted && ui.inputY < headerBottom) {
+			var headerTop = System.windowHeight() - statush;
+			var headerBottom = headerTop + defaultStatusH * Config.raw.window_scale;
+			var mouse = Input.getMouse();
+			if (ui.inputStarted && mouse.y > headerTop && mouse.y < headerBottom) {
 				statush = statush <= defaultStatusH * Config.raw.window_scale ? 240 : defaultStatusH;
 				statush = Std.int(statush * Config.raw.window_scale);
 			}
