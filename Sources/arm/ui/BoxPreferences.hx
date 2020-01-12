@@ -26,7 +26,7 @@ class BoxPreferences {
 			var _w = ui._w;
 			ui._w = Std.int(_w / 2);
 
-			if (ui.tab(htab, "Interface")) {
+			if (ui.tab(htab, "Interface", true)) {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, "UI Scale", 1.0, 4.0, false, 10);
@@ -89,7 +89,7 @@ class BoxPreferences {
 					});
 				}
 			}
-			if (ui.tab(htab, "Usage")) {
+			if (ui.tab(htab, "Usage", true)) {
 				UITrait.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
 				Config.raw.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, "Undo Steps", 1, 64, false, 1));
 				if (UITrait.inst.undoHandle.changed) {
@@ -137,7 +137,7 @@ class BoxPreferences {
 				}
 				ui.enabled = true;
 			}
-			if (ui.tab(htab, "Pen")) {
+			if (ui.tab(htab, "Pen", true)) {
 				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), "Brush Radius");
 				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), "Brush Hardness");
 				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), "Brush Opacity");
@@ -148,7 +148,7 @@ class BoxPreferences {
 			UITrait.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
 			UITrait.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
 			UITrait.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
-			if (ui.tab(htab, "Viewport")) {
+			if (ui.tab(htab, "Viewport", true)) {
 				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
@@ -199,7 +199,7 @@ class BoxPreferences {
 				}
 				#end
 			}
-			if (ui.tab(htab, "Keymap")) {
+			if (ui.tab(htab, "Keymap", true)) {
 
 				if (filesKeymap == null) {
 					fetchKeymaps();
@@ -243,7 +243,7 @@ class BoxPreferences {
 					Config.saveKeymap();
 				}
 			}
-			if (ui.tab(htab, "Plugins")) {
+			if (ui.tab(htab, "Plugins", true)) {
 				ui.row([1 / 4, 1 / 4]);
 				if (ui.button("New")) {
 					UIBox.showCustom(function(ui: Zui) {
@@ -333,7 +333,7 @@ plugin.drawUI = function(ui) {
 				}
 			}
 			ui._w = _w;
-		}, 500, 310);
+		}, 600, 400);
 	}
 
 	public static function fetchKeymaps() {
