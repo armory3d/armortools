@@ -31,7 +31,9 @@ class Camera {
 				App.isDragging  ||
 				UITrait.inst.isScrolling ||
 				mouse.viewX < 0 ||
-				mouse.viewX > iron.App.w()) {
+				mouse.viewX > iron.App.w() ||
+				mouse.viewY < 0 ||
+				mouse.viewY > iron.App.h()) {
 				return;
 			}
 

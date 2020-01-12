@@ -19,7 +19,7 @@ class Log {
 	public static function error(s: String) {
 		messageTimer = 8.0;
 		message = s;
-		messageColor = 0xffff0000;
+		messageColor = 0xffaa0000;
 		arm.ui.UITrait.inst.statusHandle.redraws = 2;
 	}
 

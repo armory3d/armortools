@@ -222,8 +222,12 @@ class App {
 
 		var res = 0;
 		res = System.windowHeight();
-		if (UITrait.inst == null) res -= UITrait.defaultHeaderH * 3;
-		if (UITrait.inst != null && UITrait.inst.show && res > 0) res -= UITrait.inst.headerh * 3;
+		if (UITrait.inst == null) {
+			res -= UITrait.defaultHeaderH * 2 + UITrait.defaultStatusH;
+		}
+		else if (UITrait.inst != null && UITrait.inst.show && res > 0) {
+			res -= Std.int(UITrait.defaultHeaderH * 2 * Config.raw.window_scale) + UITrait.inst.statush;
+		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}

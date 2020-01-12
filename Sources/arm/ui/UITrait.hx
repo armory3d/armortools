@@ -34,6 +34,7 @@ class UITrait {
 	public static var defaultWindowW = 280;
 	public static inline var defaultToolbarW = 54;
 	public static inline var defaultHeaderH = 28;
+	public static inline var defaultStatusH = 32;
 	public static inline var defaultMenubarW = 330;
 	public static var penPressureRadius = true;
 	public static var penPressureHardness = true;
@@ -42,6 +43,7 @@ class UITrait {
 	public var windowW = 280; // Panel width
 	public var toolbarw = defaultToolbarW;
 	public var headerh = defaultHeaderH;
+	public var statush = defaultStatusH;
 	public var menubarw = defaultMenubarW;
 	public var tabx = 0;
 	public var tabh = 0;
@@ -247,7 +249,7 @@ class UITrait {
 	public var textureExportPath = "";
 	public var headerHandle = new Handle({layout: Horizontal});
 	public var toolbarHandle = new Handle();
-	public var statusHandle = new Handle({layout: Horizontal});
+	public var statusHandle = new Handle();
 	public var menuHandle = new Handle({layout: Horizontal});
 	public var workspaceHandle = new Handle({layout: Horizontal});
 	var lastCombo: Handle = null;
@@ -258,6 +260,7 @@ class UITrait {
 	public var htab1 = Id.handle();
 	public var htab2 = Id.handle();
 	public var worktab = Id.handle();
+	public var statustab = Id.handle();
 	public var toolNames = ["Brush", "Eraser", "Fill", "Decal", "Text", "Clone", "Blur", "Particle", "Bake", "ColorID", "Picker"];
 
 	public function new() {
@@ -266,6 +269,7 @@ class UITrait {
 		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 		toolbarw = Std.int(defaultToolbarW * Config.raw.window_scale);
 		headerh = Std.int(defaultHeaderH * Config.raw.window_scale);
+		statush = Std.int(defaultStatusH * Config.raw.window_scale);
 		menubarw = Std.int(defaultMenubarW * Config.raw.window_scale);
 
 		if (Project.materials == null) {
@@ -542,7 +546,6 @@ class UITrait {
 				cameraType = cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
 				camHandle.position = cameraType;
 				ViewportUtil.updateCameraType(cameraType);
-				statusHandle.redraws = 2;
 			}
 			else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
 			else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
@@ -577,6 +580,12 @@ class UITrait {
 					UINodes.inst.defaultWindowH -= Std.int(mouse.movementY);
 					if (UINodes.inst.defaultWindowH < 32) UINodes.inst.defaultWindowH = 32;
 					else if (UINodes.inst.defaultWindowH > iron.App.h() * 0.95) UINodes.inst.defaultWindowH = Std.int(iron.App.h() * 0.95);
+				}
+			}
+			else if (borderHandle == statusHandle) {
+				var my = Std.int(mouse.movementY);
+				if (statush - my >= defaultStatusH * Config.raw.window_scale && statush - my < System.windowHeight() * 0.7) {
+					statush -= my;
 				}
 			}
 			else {
@@ -1157,15 +1166,19 @@ class UITrait {
 			}
 		}
 
-		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - headerh, System.windowWidth() - toolbarw - windowW, headerh)) {
+		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - toolbarw - windowW, statush)) {
 			ui._y += 2;
 
+			TabBrowser.draw();
+
 			if (Log.messageTimer > 0) {
-				var _w = ui._w;
-				ui._w = Std.int(ui.ops.font.width(ui.fontSize, Log.message) + 65 * ui.SCALE());
-				ui.fill(0, 0, ui._w, ui._h, Log.messageColor);
-				ui.text(Log.message);
-				ui._w = _w;
+				ui.tab(statustab, Log.message + "    ", false, Log.messageColor);
+			}
+
+			var headerBottom = (System.windowHeight() - statush) + defaultStatusH * Config.raw.window_scale;
+			if (ui.inputStarted && ui.inputY < headerBottom) {
+				statush = statush <= defaultStatusH * Config.raw.window_scale ? 240 : defaultStatusH;
+				statush = Std.int(statush * Config.raw.window_scale);
 			}
 		}
 
@@ -1190,7 +1203,6 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
-				TabBrowser.draw();
 			}
 		}
 		else if (worktab.position == SpaceScene) {
@@ -1209,7 +1221,6 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
-				TabBrowser.draw();
 			}
 		}
 
@@ -1240,12 +1251,18 @@ class UITrait {
 
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uienabled) return;
-		if (handle != hwnd && handle != hwnd1 && handle != hwnd2 && handle != UINodes.inst.hwnd && handle != UIView2D.inst.hwnd) return; // Scalable handles
+		if (handle != hwnd &&
+			handle != hwnd1 &&
+			handle != hwnd2 &&
+			handle != statusHandle &&
+			handle != UINodes.inst.hwnd &&
+			handle != UIView2D.inst.hwnd) return; // Scalable handles
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
 		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
 		if (handle == hwnd && side == SideTop) return;
 		if (handle == hwnd2 && side == SideBottom) return;
+		if (handle == statusHandle && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?

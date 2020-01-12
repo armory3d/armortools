@@ -3,6 +3,7 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
+import iron.system.Time;
 import arm.sys.Path;
 import arm.sys.File;
 using StringTools;
@@ -13,6 +14,7 @@ class UIFiles {
 	public static var path = "/";
 	static var lastPath = "";
 	static var files: Array<String> = null;
+	static var selected = -1;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 		if (!UITrait.inst.nativeBrowser) {
@@ -95,8 +97,8 @@ class UIFiles {
 			if (handle.text.length == 2 && handle.text.charAt(1) == ":") handle.text += Path.sep;
 		}
 
-		var slotw = Std.int(60 * ui.SCALE());
-		var num = Std.int(UITrait.inst.windowW / slotw);
+		var slotw = Std.int(70 * ui.SCALE());
+		var num = Std.int(ui._w / slotw);
 
 		// Directory contents
 		for (row in 0...Std.int(Math.ceil(files.length / num))) {
@@ -117,18 +119,25 @@ class UIFiles {
 
 				var rect = f.indexOf(".") > 0 ? file : folder;
 				var col = rect == file ? ui.t.LABEL_COL : ui.t.LABEL_COL - 0x00202020;
+				if (selected == i) col = ui.t.HIGHLIGHT_COL;
 
 				var off = ui._w / 2 - 25 * ui.SCALE();
 				ui._x += off;
 
-				if (ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h) == Released) {
-					handle.changed = ui.changed = true;
-					if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
-						handle.text += Path.sep;
+				var state = ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h);
+
+				if (state == Started) {
+					selected = i;
+					if (Time.time() - UITrait.inst.selectTime < 0.25) {
+						handle.changed = ui.changed = true;
+						if (handle.text.charAt(handle.text.length - 1) != Path.sep) {
+							handle.text += Path.sep;
+						}
+						handle.text += f;
+						selected = -1;
 					}
-					handle.text += f;
+					UITrait.inst.selectTime = Time.time();
 				}
-				ui._x -= off;
 
 				ui._x = _x;
 				ui._y += slotw * 0.75;
