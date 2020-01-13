@@ -188,7 +188,8 @@ typedef TConfig = {
 	@:optional var rp_gi: Null<Bool>;
 	// Ext
 	@:optional var version: Null<Int>;
-	@:optional var plugins: Array<String>;
-	@:optional var undo_steps: Null<Int>;
-	@:optional var keymap: String;
+	@:optional var plugins: Array<String>; // List of enabled plugins
+	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
+	@:optional var undo_steps: Null<Int>;	// Number of undo steps to preserve
+	@:optional var keymap: String; // Link to keymap file
 }
