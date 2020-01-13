@@ -121,11 +121,27 @@ class UIFiles {
 				var off = ui._w / 2 - 25 * ui.SCALE();
 				ui._x += off;
 
+				var uix = ui._x;
+				var uiy = ui._y;
 				var state = ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h);
 
 				if (state == Started) {
+
+					if (f != "..") {
+						var mouse = Input.getMouse();
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						App.dragFile = handle.text;
+						if (App.dragFile.charAt(App.dragFile.length - 1) != Path.sep) {
+							App.dragFile += Path.sep;
+						}
+						App.dragFile += f;
+					}
+
 					selected = i;
 					if (Time.time() - UITrait.inst.selectTime < 0.25) {
+						App.dragFile = null;
+						App.isDragging = false;
 						handle.changed = ui.changed = true;
 						if (f == "..") { // Up
 							handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));

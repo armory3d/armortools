@@ -27,6 +27,7 @@ import arm.plugin.Camera;
 import arm.Config;
 import arm.Tool;
 import arm.Project;
+import arm.Res;
 using StringTools;
 
 class App {
@@ -42,6 +43,9 @@ class App {
 	public static var dragMaterial: MaterialSlot = null;
 	public static var dragLayer: LayerSlot = null;
 	public static var dragAsset: TAsset = null;
+	public static var dragFile: String = null;
+	public static var dragTint = 0xffffffff;
+	public static var dragRect: TRect = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
 	static var dropPaths: Array<String> = [];
@@ -314,11 +318,11 @@ class App {
 		var mouse = Input.getMouse();
 		//var kb = Input.getKeyboard();
 
-		if ((dragAsset != null || dragMaterial != null || dragLayer != null) &&
+		if ((dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
 			isDragging = true;
 		}
-		if (mouse.released() && (dragAsset != null || dragMaterial != null || dragLayer != null)) {
+		if (mouse.released() && (dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null)) {
 			var mx = mouse.x;
 			var my = mouse.y;
 			var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
@@ -377,6 +381,17 @@ class App {
 				}
 				dragLayer = null;
 			}
+			else if (dragFile != null) {
+				var inBrowser =
+					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UITrait.inst.toolbarw - UITrait.inst.windowW) &&
+					my > System.windowHeight() - UITrait.inst.statush;
+				if (!inBrowser) {
+					dropX = mouse.x;
+					dropY = mouse.y;
+					ImportAsset.run(dragFile, dropX, dropY);
+				}
+				dragFile = null;
+			}
 			isDragging = false;
 		}
 
@@ -414,9 +429,17 @@ class App {
 	}
 
 	static function getDragImage(): kha.Image {
+		dragTint = 0xffffffff;
+		dragRect = null;
 		if (dragAsset != null) return UITrait.inst.getImage(dragAsset);
 		if (dragMaterial != null) return dragMaterial.imageIcon;
 		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
+		if (dragFile != null) {
+			var icons = Res.get("icons.k");
+			dragRect = dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
+			dragTint = UITrait.inst.ui.t.HIGHLIGHT_COL;
+			return icons;
+		}
 		else return dragLayer.texpaint_preview;
 	}
 
@@ -435,7 +458,11 @@ class App {
 			#else
 			var inv = 0;
 			#end
-			g.drawScaledImage(img, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
+			g.color = dragTint;
+			dragRect == null ?
+				g.drawScaledImage(img, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2) :
+				g.drawScaledSubImage(img, dragRect.x, dragRect.y, dragRect.w, dragRect.h, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
+			g.color = 0xffffffff;
 		}
 
 		var usingMenu = false;
