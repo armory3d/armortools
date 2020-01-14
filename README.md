@@ -19,7 +19,7 @@ cd Kromx
 # Unpack `V8\Libraries\win32\release\v8_monolith.7z` using 7-Zip (exceeds 100MB)
 node Kinc/make -g direct3d11
 # Open generated Visual Studio project
-# Set command-line arguments to `..\..\build\krom`
+# Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build for x64 & release
 ```
 ```bash
