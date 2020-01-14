@@ -14,11 +14,19 @@ class TabBrowser {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.statustab, "Browser") && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
+
+			if (Config.raw.bookmarks == null) {
+				Config.raw.bookmarks = [];
+			}
+
 			var bookmarksW = Std.int(100 * ui.SCALE());
 
 			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
+			if (hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
+				hpath.text = Config.raw.bookmarks[0];
+			}
 			hpath.text = ui.textInput(hpath, "Path");
 			UIFiles.fileBrowser(ui, hpath);
 
@@ -33,10 +41,6 @@ class TabBrowser {
 			ui._x = 0;
 			ui._y = _y;
 			ui._w = bookmarksW;
-
-			if (Config.raw.bookmarks == null) {
-				Config.raw.bookmarks = [];
-			}
 
 			if (ui.button("+")) {
 				Config.raw.bookmarks.push(hpath.text);
