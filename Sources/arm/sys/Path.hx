@@ -165,10 +165,11 @@ class Path {
 	}
 
 	public static function shortPath(s: String): String {
-		var cmd = 'for %I in ("' + s + '") do echo %~sI';
-		var save = data() + sep + "tmp.txt";
-		Krom.sysCommand(cmd + ' > "' + save + '"');
-		return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
+		return Krom.getShortPathName(s);
+		// var cmd = 'for %I in ("' + s + '") do echo %~sI';
+		// var save = data() + sep + "tmp.txt";
+		// Krom.sysCommand(cmd + ' > "' + save + '"');
+		// return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
 	}
 	#end
 }
