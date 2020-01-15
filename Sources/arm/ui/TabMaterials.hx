@@ -116,7 +116,7 @@ class TabMaterials {
 						UIMenu.draw(function(ui: Zui) {
 							var m = materials[i];
 							var add = materials.length > 1 ? 1 : 0;
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (13 + add), ui.t.SEPARATOR_COL);
 							ui.text(materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("To Fill Layer", Left)) {
@@ -152,6 +152,7 @@ class TabMaterials {
 							}
 
 							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
+							var opacHandle = Id.handle().nest(m.id, {selected: m.paintOpac});
 							var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
 							var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
 							var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
@@ -160,6 +161,7 @@ class TabMaterials {
 							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
 							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
 							m.paintBase = ui.check(baseHandle, "Base Color");
+							m.paintOpac = ui.check(opacHandle, "Opacity");
 							m.paintNor = ui.check(norHandle, "Normal");
 							m.paintOcc = ui.check(occHandle, "Occlusion");
 							m.paintRough = ui.check(roughHandle, "Roughness");
@@ -168,6 +170,7 @@ class TabMaterials {
 							m.paintEmis = ui.check(emisHandle, "Emission");
 							m.paintSubs = ui.check(subsHandle, "Subsurface");
 							if (baseHandle.changed ||
+								opacHandle.changed ||
 								norHandle.changed ||
 								occHandle.changed ||
 								roughHandle.changed ||

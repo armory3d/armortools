@@ -344,6 +344,9 @@ class MakePaint {
 			con_paint.data.color_writes_green[0] = false;
 			con_paint.data.color_writes_blue[0] = false;
 		}
+		if (!Context.material.paintOpac) {
+			con_paint.data.color_writes_alpha[0] = false;
+		}
 		if (!Context.material.paintNor) {
 			con_paint.data.color_writes_red[1] = false;
 			con_paint.data.color_writes_green[1] = false;

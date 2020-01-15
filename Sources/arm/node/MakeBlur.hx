@@ -17,6 +17,7 @@ class MakeBlur {
 		frag.write('float occlusion = 0.0;');
 		frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 		frag.write('float height = 0.0;');
+		frag.write('float mat_opacity = 1.0;');
 		frag.write('float opacity = 1.0 * brushOpacity;');
 		if (Context.material.paintEmis) {
 			frag.write('float emis = 0.0;');

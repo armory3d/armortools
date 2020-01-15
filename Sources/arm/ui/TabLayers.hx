@@ -197,10 +197,10 @@ class TabLayers {
 					UIMenu.draw(function(ui: Zui) {
 						var add = l.material_mask != null ? 1 : 0;
 						if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (11 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
 						}
 						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (18 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (19 + add), ui.t.SEPARATOR_COL);
 						}
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
@@ -292,6 +292,7 @@ class TabLayers {
 						}
 
 						var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
+						var opacHandle = Id.handle().nest(l.id, {selected: l.paintOpac});
 						var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
 						var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
 						var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
@@ -300,6 +301,7 @@ class TabLayers {
 						var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
 						var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
 						l.paintBase = ui.check(baseHandle, "Base Color");
+						l.paintOpac = ui.check(opacHandle, "Opacity");
 						l.paintNor = ui.check(norHandle, "Normal");
 						l.paintOcc = ui.check(occHandle, "Occlusion");
 						l.paintRough = ui.check(roughHandle, "Roughness");
@@ -308,6 +310,7 @@ class TabLayers {
 						l.paintEmis = ui.check(emisHandle, "Emission");
 						l.paintSubs = ui.check(subsHandle, "Subsurface");
 						if (baseHandle.changed ||
+							opacHandle.changed ||
 							norHandle.changed ||
 							occHandle.changed ||
 							roughHandle.changed ||
@@ -379,14 +382,14 @@ class TabLayers {
 					ui._x += 1;
 					ui._y += 2;
 
-					var opacHandle = Id.handle().nest(l.id);
+					var layerOpacHandle = Id.handle().nest(l.id);
 
-					opacHandle.value = l.maskOpacity;
-					ui.slider(opacHandle, "Opacity", 0.0, 1.0, true);
-					if (opacHandle.changed) {
+					layerOpacHandle.value = l.maskOpacity;
+					ui.slider(layerOpacHandle, "Opacity", 0.0, 1.0, true);
+					if (layerOpacHandle.changed) {
 						Context.setLayer(l);
 						if (ui.inputStarted) History.layerOpacity();
-						l.maskOpacity = opacHandle.value;
+						l.maskOpacity = layerOpacHandle.value;
 						MaterialParser.parseMeshMaterial();
 					}
 

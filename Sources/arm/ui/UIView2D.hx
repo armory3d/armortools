@@ -101,16 +101,18 @@ class UIView2D {
 
 			if (type == View2DLayer) {
 				tex =
-					Context.layerIsMask     ? l.texpaint_mask :
-					texType == TexBase      ? l.texpaint :
-					texType == TexNormal    ? l.texpaint_nor :
-										      l.texpaint_pack;
+					Context.layerIsMask   ? l.texpaint_mask :
+					texType == TexBase    ? l.texpaint :
+					texType == TexOpacity ? l.texpaint :
+					texType == TexNormal  ? l.texpaint_nor :
+										    l.texpaint_pack;
 
 				channel =
 					Context.layerIsMask ? 1 :
 					texType == TexOcclusion ? 1 :
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
+					texType == TexOpacity   ? 4 :
 											  0;
 			}
 			else { // View2DAsset
@@ -185,7 +187,7 @@ class UIView2D {
 				ui._w = ew;
 
 				if (!Context.layerIsMask) {
-					texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic"], "Texture");
+					texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "Opacity"], "Texture");
 					ui._x += ew + 3;
 					ui._y = 2;
 				}

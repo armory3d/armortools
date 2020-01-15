@@ -26,7 +26,8 @@ class MakeClone {
 		frag.write('float occlusion = $occ;');
 		frag.write('vec3 nortan = $nortan;');
 		frag.write('float height = $height;');
-		frag.write('float opacity = $opac * brushOpacity;');
+		frag.write('float mat_opacity = $opac;');
+		frag.write('float opacity = mat_opacity * brushOpacity;');
 		if (Context.material.paintEmis) {
 			frag.write('float emis = 0.0;');
 		}

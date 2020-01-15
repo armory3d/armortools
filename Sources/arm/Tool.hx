@@ -75,12 +75,13 @@ package arm;
 	var ViewOcclusion = 3;
 	var ViewRoughness = 4;
 	var ViewMetallic = 5;
-	var ViewTexCoord = 6;
-	var ViewObjectNormal = 7;
-	var ViewMaterialID = 8;
-	var ViewObjectID = 9;
-	var ViewMask = 10;
-	var ViewPathTrace = 11;
+	var ViewOpacity = 6;
+	var ViewTexCoord = 7;
+	var ViewObjectNormal = 8;
+	var ViewMaterialID = 9;
+	var ViewObjectID = 10;
+	var ViewMask = 11;
+	var ViewPathTrace = 12;
 }
 
 @:enum abstract FillType(Int) from Int to Int {
@@ -195,6 +196,7 @@ package arm;
 	var TexOcclusion = 2;
 	var TexRoughness = 3;
 	var TexMetallic = 4;
+	var TexOpacity = 5;
 }
 
 @:enum abstract ProjectModel(Int) from Int to Int {

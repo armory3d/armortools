@@ -91,13 +91,15 @@ class MakeMesh {
 					frag.add_shared_sampler('sampler2D texpaint');
 					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
 					#if kha_direct3d12
-					frag.write('if (texpaint_sample.a < 0.1) discard;');
+					if (UITrait.inst.viewportMode == ViewRender) {
+						frag.write('if (texpaint_sample.a < 0.1) discard;');
+					}
 					#end
-					frag.write('basecol = texpaint_sample.rgb;');
 				}
 				else {
-					frag.write('basecol = vec3(0.0, 0.0, 0.0);');
+					frag.write('vec4 texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 				}
+				frag.write('basecol = texpaint_sample.rgb;');
 
 				if (Context.layer.paintNor || MaterialBuilder.emisUsed) {
 					frag.add_shared_sampler('sampler2D texpaint_nor');
@@ -313,6 +315,9 @@ class MakeMesh {
 			}
 			else if (UITrait.inst.viewportMode == ViewMetallic) {
 				frag.write('fragColor[1] = vec4(vec3(metallic, metallic, metallic), 1.0);');
+			}
+			else if (UITrait.inst.viewportMode == ViewOpacity) {
+				frag.write('fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 			}
 			else if (UITrait.inst.viewportMode == ViewTexCoord) {
 				frag.write('fragColor[1] = vec4(texCoord, 0.0, 1.0);');

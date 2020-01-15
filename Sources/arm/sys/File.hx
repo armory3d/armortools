@@ -18,7 +18,7 @@ class File {
 	#end
 
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
-		var save = Path.data() + Path.sep + "dir.txt";
+		var save = Path.data() + Path.sep + "tmp.txt";
 		Krom.sysCommand(foldersOnly ? cmd_dir_nofile : cmd_dir + ' "' + path + '" > "' + save + '"');
 		var str = Bytes.ofData(Krom.loadBlob(save)).toString();
 		var ar = str.split("\n");

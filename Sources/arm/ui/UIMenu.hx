@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 14, 12, 19, 5];
+			var menuItems = [12, 3, 14, #if kha_direct3d12 13 #else 12 #end, 19, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -250,7 +250,7 @@ class UIMenu {
 			}
 			else if (menuCategory == MenuMode) {
 				var modeHandle = Id.handle();
-				var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
+				var modes = ["Render", "Base Color", "Normal", "Occlusion", "Roughness", "Metallic", "Opacity", "TexCoord", "Normal (Object)", "Material ID", "Object ID", "Mask"];
 				#if kha_direct3d12
 				modes.push("Path Trace");
 				#end
@@ -370,7 +370,7 @@ class UIMenu {
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows
-					var save = Path.data() + Path.sep + "gpu.txt";
+					var save = Path.data() + Path.sep + "tmp.txt";
 					Krom.sysCommand('wmic path win32_VideoController get name > "' + save + '"');
 					var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
 					var gpu = "";
