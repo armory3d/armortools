@@ -636,8 +636,10 @@ class UITrait {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut("alt+" + Config.keymap.action_paint);
+
 		var down = Operator.shortcut(Config.keymap.action_paint) ||
-				   (Operator.shortcut("alt+" + Config.keymap.action_paint) && Context.tool == ToolClone) ||
+				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
 				   (Input.getPen().down() && !kb.down("alt"));
 		if (down) {
@@ -648,7 +650,7 @@ class UITrait {
 			if (mx < iron.App.w() && mx > iron.App.x() &&
 				my < iron.App.h() && my > iron.App.y()) {
 
-				if (Context.tool == ToolClone && kb.down("alt")) { // Clone source
+				if (setCloneSource) {
 					cloneStartX = mx;
 					cloneStartY = my;
 				}

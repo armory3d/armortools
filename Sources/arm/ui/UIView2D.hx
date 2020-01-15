@@ -232,9 +232,12 @@ class UIView2D {
 			if (panScale > 3.0) panScale = 3.0;
 		}
 
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut("alt+" + Config.keymap.action_paint);
+
 		if (type == View2DLayer &&
 			(Operator.shortcut(Config.keymap.action_paint) ||
-			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint))) {
+			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
+			 setCloneSource)) {
 			UITrait.inst.paint2d = true;
 		}
 
