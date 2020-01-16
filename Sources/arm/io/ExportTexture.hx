@@ -71,14 +71,17 @@ class ExportTexture {
 				Layers.expa.g2.begin(false);
 				Layers.expa.g2.pipeline = Layers.pipeCopy;
 				Layers.expa.g2.drawImage(layers[0].texpaint, 0, 0);
+				Layers.expa.g2.pipeline = null;
 				Layers.expa.g2.end();
 				Layers.expb.g2.begin(false);
 				Layers.expb.g2.pipeline = Layers.pipeCopy;
 				Layers.expb.g2.drawImage(layers[0].texpaint_nor, 0, 0);
+				Layers.expb.g2.pipeline = null;
 				Layers.expb.g2.end();
 				Layers.expc.g2.begin(false);
 				Layers.expc.g2.pipeline = Layers.pipeCopy;
 				Layers.expc.g2.drawImage(layers[0].texpaint_pack, 0, 0);
+				Layers.expc.g2.pipeline = null;
 				Layers.expc.g2.end();
 			}
 			else {
@@ -105,6 +108,7 @@ class ExportTexture {
 				Layers.imga.g2.begin(false); // Copy to temp
 				Layers.imga.g2.pipeline = Layers.pipeCopy;
 				Layers.imga.g2.drawImage(Layers.expa, 0, 0);
+				Layers.imga.g2.pipeline = null;
 				Layers.imga.g2.end();
 				Layers.expa.g4.begin();
 				Layers.expa.g4.setPipeline(Layers.pipeMerge);
@@ -124,6 +128,7 @@ class ExportTexture {
 				Layers.imga.g2.begin(false);
 				Layers.imga.g2.pipeline = Layers.pipeCopy;
 				Layers.imga.g2.drawImage(Layers.expb, 0, 0);
+				Layers.imga.g2.pipeline = null;
 				Layers.imga.g2.end();
 				Layers.expb.g4.begin();
 				Layers.expb.g4.setPipeline(Layers.pipeMerge);
@@ -141,6 +146,7 @@ class ExportTexture {
 				Layers.imga.g2.begin(false);
 				Layers.imga.g2.pipeline = Layers.pipeCopy;
 				Layers.imga.g2.drawImage(Layers.expc, 0, 0);
+				Layers.imga.g2.pipeline = null;
 				Layers.imga.g2.end();
 				Layers.expc.g4.begin();
 				Layers.expc.g4.setPipeline(Layers.pipeMerge);

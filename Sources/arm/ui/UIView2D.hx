@@ -119,14 +119,17 @@ class UIView2D {
 				tex = UITrait.inst.getImage(Context.texture);
 			}
 
-			ui.currentWindow.texture.g4.setInt(channelLocation, channel);
-
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
 				if (!UITrait.inst.textureFilter) {
 					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
 				}
+
+				#if kha_opengl
+				ui.currentWindow.texture.g4.setPipeline(pipe);
+				#end
+				ui.currentWindow.texture.g4.setInt(channelLocation, channel);
 
 				ui.g.drawScaledImage(tex, tx, ty, tw, th);
 

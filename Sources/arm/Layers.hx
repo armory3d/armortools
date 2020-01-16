@@ -238,6 +238,7 @@ class Layers {
 		imga.g2.begin(false); // Copy to temp
 		imga.g2.pipeline = pipeCopy;
 		imga.g2.drawImage(l0.texpaint, 0, 0);
+		imga.g2.pipeline = null;
 		imga.g2.end();
 
 		l0.texpaint.g4.begin();
@@ -257,6 +258,7 @@ class Layers {
 		imga.g2.begin(false);
 		imga.g2.pipeline = pipeCopy;
 		imga.g2.drawImage(l0.texpaint_nor, 0, 0);
+		imga.g2.pipeline = null;
 		imga.g2.end();
 
 		l0.texpaint_nor.g4.begin();
@@ -275,6 +277,7 @@ class Layers {
 		imga.g2.begin(false);
 		imga.g2.pipeline = pipeCopy;
 		imga.g2.drawImage(l0.texpaint_pack, 0, 0);
+		imga.g2.pipeline = null;
 		imga.g2.end();
 
 		l0.texpaint_pack.g4.begin();

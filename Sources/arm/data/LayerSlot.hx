@@ -192,6 +192,7 @@ class LayerSlot {
 		Layers.imga.g2.begin(false);
 		Layers.imga.g2.pipeline = Layers.pipeCopy;
 		Layers.imga.g2.drawImage(texpaint, 0, 0);
+		Layers.imga.g2.pipeline = null;
 		Layers.imga.g2.end();
 
 		// Merge mask
@@ -221,14 +222,17 @@ class LayerSlot {
 		l.texpaint.g2.begin(false);
 		l.texpaint.g2.pipeline = Layers.pipeCopy;
 		l.texpaint.g2.drawImage(texpaint, 0, 0);
+		l.texpaint.g2.pipeline = null;
 		l.texpaint.g2.end();
 		l.texpaint_nor.g2.begin(false);
 		l.texpaint_nor.g2.pipeline = Layers.pipeCopy;
 		l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+		l.texpaint_nor.g2.pipeline = null;
 		l.texpaint_nor.g2.end();
 		l.texpaint_pack.g2.begin(false);
 		l.texpaint_pack.g2.pipeline = Layers.pipeCopy;
 		l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+		l.texpaint_pack.g2.pipeline = null;
 		l.texpaint_pack.g2.end();
 
 		l.texpaint_preview.g2.begin(true, 0xff000000);
@@ -240,6 +244,7 @@ class LayerSlot {
 			l.texpaint_mask.g2.begin(false);
 			l.texpaint_mask.g2.pipeline = Layers.pipeCopy;
 			l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+			l.texpaint_mask.g2.pipeline = null;
 			l.texpaint_mask.g2.end();
 
 			l.texpaint_mask_preview.g2.begin(true, 0xff000000);
