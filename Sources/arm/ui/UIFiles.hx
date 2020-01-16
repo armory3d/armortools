@@ -25,9 +25,6 @@ class UIFiles {
 
 		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 		if (path != null) {
-			#if krom_windows
-			if (!Path.isAscii(path)) path = Path.shortPath(path);
-			#end
 			path = path.replace("\\\\", "\\");
 			path = path.replace("\r", "");
 			filename = path.substr(path.lastIndexOf(Path.sep) + 1);

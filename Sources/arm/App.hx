@@ -71,9 +71,6 @@ class App {
 		#end
 
 		System.notifyOnDropFiles(function(filePath: String) {
-			#if krom_windows
-			if (!Path.isAscii(filePath)) filePath = Path.shortPath(filePath);
-			#end
 			var dropPath = filePath;
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);

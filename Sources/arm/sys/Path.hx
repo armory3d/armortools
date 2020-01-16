@@ -157,19 +157,4 @@ class Path {
 	public static function isFolder(p: String): Bool {
 		return p.indexOf(".") == -1;
 	}
-
-	#if krom_windows
-	public static function isAscii(s: String): Bool {
-		for (i in 0...s.length) if (s.charCodeAt(i) > 127) return false;
-		return true;
-	}
-
-	public static function shortPath(s: String): String {
-		return Krom.getShortPathName(s);
-		// var cmd = 'for %I in ("' + s + '") do echo %~sI';
-		// var save = data() + sep + "tmp.txt";
-		// Krom.sysCommand(cmd + ' > "' + save + '"');
-		// return haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
-	}
-	#end
 }
