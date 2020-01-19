@@ -35,8 +35,6 @@ plugin.drawUI = function(ui) {
 					destExe += ".exe";
 				}
 				var sourceExe = arm.Path.workingDir() + sep + Krom.getArg(0);
-				arm.Log.trace(sourceExe);
-				arm.Log.trace(destExe);
 				arm.File.copy(sourceExe, destExe);
 			});
 		}
