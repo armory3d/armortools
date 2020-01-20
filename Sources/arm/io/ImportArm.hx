@@ -120,8 +120,7 @@ class ImportArm {
 
 			for (file in project.assets) {
 				// Convert image path from relative to absolute
-				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
-				var abs = isAbsolute ? file : base + file;
+				var abs = Data.isAbsolute(file) ? file : base + file;
 				if (!File.exists(abs)) {
 					makePink(abs);
 				}
@@ -168,8 +167,7 @@ class ImportArm {
 
 			if (project.mesh_assets != null && project.mesh_assets.length > 0) {
 				var file = project.mesh_assets[0];
-				var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
-				var abs = isAbsolute ? file : base + file;
+				var abs = Data.isAbsolute(file) ? file : base + file;
 				Project.meshAssets = [abs];
 			}
 
@@ -273,8 +271,7 @@ class ImportArm {
 		var base = Path.baseDir(path);
 		for (file in project.assets) {
 			// Convert image path from relative to absolute
-			var isAbsolute = file.charAt(0) == "/" || file.charAt(1) == ":";
-			var abs = isAbsolute ? file : base + file;
+			var abs = Data.isAbsolute(file) ? file : base + file;
 			if (!File.exists(abs)) {
 				makePink(abs);
 			}
