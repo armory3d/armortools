@@ -195,12 +195,12 @@ class UINodes {
 			if (first) {
 				first = false;
 				ui.startTextEdit(searchHandle); // Focus search bar
-				ui.textSelectedCurrentText = searchHandle.text;
+				ui.textSelected = searchHandle.text;
 				searchHandle.text = "";
 				nodeSearchLast = "";
 			}
 			var search = searchHandle.text;
-			if (ui.textSelectedCurrentText != "") search = ui.textSelectedCurrentText;
+			if (ui.textSelected != "") search = ui.textSelected;
 
 			if (search != nodeSearchLast) {
 				nodeSearchOffset = 0;

@@ -14,6 +14,7 @@ class Log {
 		message = s;
 		messageColor = 0x00000000;
 		arm.ui.UITrait.inst.statusHandle.redraws = 2;
+		trace(s);
 	}
 
 	public static function error(s: String) {
@@ -21,6 +22,7 @@ class Log {
 		message = s;
 		messageColor = 0xffaa0000;
 		arm.ui.UITrait.inst.statusHandle.redraws = 2;
+		trace(s);
 	}
 
 	public static function trace(s: String) {

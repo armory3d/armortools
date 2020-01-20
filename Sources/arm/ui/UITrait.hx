@@ -255,6 +255,7 @@ class UITrait {
 	public var workspaceHandle = new Handle({layout: Horizontal});
 	var lastCombo: Handle = null;
 	var lastTooltip: Image = null;
+	var lastStatusPosition = 0;
 
 	public var cameraControls = ControlsOrbit;
 	public var htab = Id.handle();
@@ -1173,18 +1174,15 @@ class UITrait {
 			ui._y += 2;
 
 			TabBrowser.draw();
+			TabScript.draw();
+			TabConsole.draw();
 
-			if (Log.messageTimer > 0) {
-				ui.tab(statustab, Log.message + "        ", false, Log.messageColor);
-			}
-
-			var headerTop = System.windowHeight() - statush;
-			var headerBottom = headerTop + defaultStatusH * Config.raw.window_scale;
-			var mouse = Input.getMouse();
-			if (ui.inputStarted && mouse.y > headerTop && mouse.y < headerBottom) {
-				statush = statush <= defaultStatusH * Config.raw.window_scale ? 240 : defaultStatusH;
+			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
+			if (statustab.changed && (statustab.position == lastStatusPosition || minimized)) {
+				statush = minimized ? 240 : defaultStatusH;
 				statush = Std.int(statush * Config.raw.window_scale);
 			}
+			lastStatusPosition = statustab.position;
 		}
 
 		tabx = System.windowWidth() - windowW;

@@ -98,7 +98,7 @@ class UIFiles {
 		for (row in 0...Std.int(Math.ceil(files.length / num))) {
 
 			ui.row([for (i in 0...num * 2) 1 / num]);
-			if (row > 0) ui._y += ui.ELEMENT_OFFSET() * 10.0;
+			if (row > 0) ui._y += ui.ELEMENT_OFFSET() * 14.0;
 
 			for (j in 0...num) {
 				var i = j + row * num;

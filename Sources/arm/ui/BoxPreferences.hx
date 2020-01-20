@@ -307,11 +307,19 @@ plugin.drawUI = function(ui) {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
 							ui.text(f, Right, ui.t.HIGHLIGHT_COL);
 							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
-							if (ui.button("Edit", Left)) {
+							if (ui.button("Edit in Text Editor", Left)) {
 								File.start(path);
+							}
+							if (ui.button("Edit in Script Tab", Left)) {
+								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
+									TabScript.hscript.text = blob.toString();
+									iron.data.Data.deleteBlob("plugins/" + f);
+									Log.info("Script opened");
+								});
+
 							}
 							if (ui.button("Export", Left)) {
 								UIFiles.show("js", true, function(dest: String) {
