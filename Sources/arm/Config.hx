@@ -17,9 +17,9 @@ class Config {
 	public static var keymap: Dynamic;
 	public static var configLoaded = false;
 
-	public static function load(done: Void->Void) {
+	public static function load(done: Void->Void, fromSavePath = false) {
 		try {
-			Data.getBlob("config.arm", function(blob: kha.Blob) {
+			Data.getBlob((fromSavePath ? Krom.savePath() : "") + "config.arm", function(blob: kha.Blob) {
 				configLoaded = true;
 				raw = Json.parse(blob.toString());
 				done();
@@ -29,38 +29,24 @@ class Config {
 	}
 
 	public static function save() {
-		var path = Data.dataPath + "config.arm";
+		var path = (Path.isProtected() ? Krom.savePath() : Data.dataPath) + "config.arm";
 		var bytes = Bytes.ofString(Json.stringify(raw));
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
-	public static function create() {
-		if (Config.raw == null) Config.raw = {};
-		var c = Config.raw;
-		if (c.window_mode == null) c.window_mode = 0;
-		if (c.window_resizable == null) c.window_resizable = true;
-		if (c.window_minimizable == null) c.window_minimizable = true;
-		if (c.window_maximizable == null) c.window_maximizable = true;
-		if (c.window_w == null) c.window_w = 1600;
-		if (c.window_h == null) c.window_h = 900;
-		if (c.window_x == null) c.window_x = -1;
-		if (c.window_y == null) c.window_y = -1;
-		if (c.window_scale == null) c.window_scale = 1.0;
-		if (c.window_vsync == null) c.window_vsync = true;
-	}
+	public static function init() {
+		if (raw == null) raw = {};
+		if (raw.window_mode == null) raw.window_mode = 0;
+		if (raw.window_resizable == null) raw.window_resizable = true;
+		if (raw.window_minimizable == null) raw.window_minimizable = true;
+		if (raw.window_maximizable == null) raw.window_maximizable = true;
+		if (raw.window_w == null) raw.window_w = 1600;
+		if (raw.window_h == null) raw.window_h = 900;
+		if (raw.window_x == null) raw.window_x = -1;
+		if (raw.window_y == null) raw.window_y = -1;
+		if (raw.window_scale == null) raw.window_scale = 1.0;
+		if (raw.window_vsync == null) raw.window_vsync = true;
 
-	public static function restore() {
-		zui.Zui.Handle.global = new zui.Zui.Handle();
-		configLoaded = false;
-		raw = null;
-		create();
-		init();
-		#if arm_painter
-		applyConfig();
-		#end
-	}
-
-	public static function init(): TConfig {
 		if (!configLoaded) {
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
@@ -79,8 +65,16 @@ class Config {
 		if (raw.keymap == null) raw.keymap = "default.json";
 		loadKeymap();
 		#end
+	}
 
-		return raw;
+	public static function restore() {
+		zui.Zui.Handle.global = new zui.Zui.Handle();
+		configLoaded = false;
+		raw = null;
+		init();
+		#if arm_painter
+		applyConfig();
+		#end
 	}
 
 	public static inline function getSuperSampleQuality(f: Float): Int {

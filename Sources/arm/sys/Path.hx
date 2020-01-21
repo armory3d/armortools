@@ -157,4 +157,12 @@ class Path {
 	public static function isFolder(p: String): Bool {
 		return p.indexOf(".") == -1;
 	}
+
+	public static function isProtected(): Bool {
+		#if krom_windows
+		return Krom.getFilesLocation().indexOf("Program Files") >= 0;
+		#else
+		return false;
+		#end
+	}
 }

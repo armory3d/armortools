@@ -370,7 +370,7 @@ class UIMenu {
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows
-					var save = Path.data() + Path.sep + "tmp.txt";
+					var save = (Path.isProtected() ? Krom.savePath() : Path.data()) + Path.sep + "tmp.txt";
 					Krom.sysCommand('wmic path win32_VideoController get name > "' + save + '"');
 					var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
 					var gpu = "";

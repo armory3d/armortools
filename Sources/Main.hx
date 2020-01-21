@@ -10,6 +10,7 @@ import iron.RenderPath;
 import arm.render.Inc;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
+import arm.sys.Path;
 import arm.Config;
 #if arm_player
 using StringTools;
@@ -31,7 +32,7 @@ class Main {
 	static function start() {
 		if (tasks > 0) return;
 
-		Config.create();
+		Config.init();
 		var c = Config.raw;
 		var windowMode = c.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
 		var windowFeatures = None;
@@ -46,7 +47,7 @@ class Main {
 		if (lasti >= 0) title = title.substr(lasti + 1);
 		if (title.endsWith(".exe")) title = title.substr(0, title.length - 4);
 		#else
-		var title = "untitled - ArmorPaint";
+		var title = "ArmorPaint";
 		#end
 
 		var options: kha.SystemOptions = {
@@ -66,8 +67,12 @@ class Main {
 		};
 
 		System.start(options, function(window: Window) {
+			#if (!arm_player)
+			kha.Window.get(0).title = "untitled - ArmorPaint";
+			#end
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
+					if (Path.isProtected()) Config.load(function() {}, true);
 					Config.init();
 					Uniforms.init();
 					var path = new RenderPath();
