@@ -34,31 +34,31 @@ class ImportFolder {
 
 			var base = f.substr(0, f.lastIndexOf(".")).toLowerCase();
 			var valid = false;
-			if (mapbase == "" && Path.isBaseTex(base)) {
+			if (mapbase == "" && Path.isBaseColorTex(base)) {
 				mapbase = f;
 				valid = true;
 			}
-			if (mapopac == "" && Path.isOpacTex(base)) {
+			if (mapopac == "" && Path.isOpacityTex(base)) {
 				mapopac = f;
 				valid = true;
 			}
-			if (mapnor == "" && Path.isNorTex(base)) {
+			if (mapnor == "" && Path.isNormalMapTex(base)) {
 				mapnor = f;
 				valid = true;
 			}
-			if (mapocc == "" && Path.isOccTex(base)) {
+			if (mapocc == "" && Path.isOcclusionTex(base)) {
 				mapocc = f;
 				valid = true;
 			}
-			if (maprough == "" && Path.isRoughTex(base)) {
+			if (maprough == "" && Path.isRoughnessTex(base)) {
 				maprough = f;
 				valid = true;
 			}
-			if (mapmet == "" && Path.isMetTex(base)) {
+			if (mapmet == "" && Path.isMetallicTex(base)) {
 				mapmet = f;
 				valid = true;
 			}
-			if (mapheight == "" && Path.isDispTex(base)) {
+			if (mapheight == "" && Path.isDisplacementTex(base)) {
 				mapheight = f;
 				valid = true;
 			}

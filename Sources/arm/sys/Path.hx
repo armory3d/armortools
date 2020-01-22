@@ -17,6 +17,14 @@ class Path {
 	public static var meshImporters = new Map<String, String->(Dynamic->Void)->Void>();
 	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
 
+	public static var baseColorExt = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
+	public static var opacityExt = ["opac", "opacity", "alpha"];
+	public static var normalMapExt = ["normal", "nor", "n", "nrm"];
+	public static var occlusionExt = ["ao", "occlusion", "ambientOcclusion", "o", "occ"];
+	public static var roughnessExt = ["roughness", "rough", "r", "rgh"];
+	public static var metallicExt = ["metallic", "metal", "metalness", "m", "met"];
+	public static var displacementExt = ["displacement", "height", "h", "disp"];
+
 	public static function data(): String {
 		#if krom_windows
 		var path = Data.dataPath.replace("/", "\\");
@@ -96,63 +104,19 @@ class Path {
 		return p.endsWith(".json");
 	}
 
-	public static function isBaseTex(p: String): Bool {
-		return p.endsWith("_albedo") ||
-			   p.endsWith("_alb") ||
-			   p.endsWith("_basecol") ||
-			   p.endsWith("_basecolor") ||
-			   p.endsWith("_diffuse") ||
-			   p.endsWith("_diff") ||
-			   p.endsWith("_base") ||
-			   p.endsWith("_bc") ||
-			   p.endsWith("_d") ||
-			   p.endsWith("_color") ||
-			   p.endsWith("_col");
+	static function checkExt(p: String, exts: Array<String>): Bool {
+		p = p.replace("-", "_");
+		for (ext in exts) if (p.endsWith("_" + ext)) return true;
+		return false;
 	}
 
-	public static function isOpacTex(p: String): Bool {
-		return p.endsWith("_opac") ||
-			   p.endsWith("_alpha") ||
-			   p.endsWith("_opacity");
-	}
-
-	public static function isNorTex(p: String): Bool {
-		return p.endsWith("_normal") ||
-			   p.endsWith("_nor") ||
-			   p.endsWith("_n") ||
-			   p.endsWith("_nrm");
-	}
-
-	public static function isOccTex(p: String): Bool {
-		return p.endsWith("_ao") ||
-			   p.endsWith("_occlusion") ||
-			   p.endsWith("_ambientOcclusion") ||
-			   p.endsWith("_o") ||
-			   p.endsWith("_occ");
-	}
-
-	public static function isRoughTex(p: String): Bool {
-		return p.endsWith("_roughness") ||
-			   p.endsWith("_roug") ||
-			   p.endsWith("_r") ||
-			   p.endsWith("_rough") ||
-			   p.endsWith("_rgh");
-	}
-
-	public static function isMetTex(p: String): Bool {
-		return p.endsWith("_metallic") ||
-			   p.endsWith("_metal") ||
-			   p.endsWith("_metalness") ||
-			   p.endsWith("_m") ||
-			   p.endsWith("_met");
-	}
-
-	public static function isDispTex(p: String): Bool {
-		return p.endsWith("_displacement") ||
-			   p.endsWith("_height") ||
-			   p.endsWith("_h") ||
-			   p.endsWith("_disp");
-	}
+	public static inline function isBaseColorTex(p: String): Bool { return checkExt(p, baseColorExt); }
+	public static inline function isOpacityTex(p: String): Bool { return checkExt(p, opacityExt); }
+	public static inline function isNormalMapTex(p: String): Bool { return checkExt(p, normalMapExt); }
+	public static inline function isOcclusionTex(p: String): Bool { return checkExt(p, occlusionExt); }
+	public static inline function isRoughnessTex(p: String): Bool { return checkExt(p, roughnessExt); }
+	public static inline function isMetallicTex(p: String): Bool { return checkExt(p, metallicExt); }
+	public static inline function isDisplacementTex(p: String): Bool { return checkExt(p, displacementExt); }
 
 	public static function isFolder(p: String): Bool {
 		return p.indexOf(".") == -1;
