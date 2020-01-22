@@ -84,6 +84,11 @@ class File {
 	public static function downloadBytes(url: String): Bytes {
 		var save = Path.data() + Path.sep + "download.bin";
 		download(url, save);
-		return Bytes.ofData(Krom.loadBlob(save));
+		try {
+			return Bytes.ofData(Krom.loadBlob(save));
+		}
+		catch (e: Dynamic) {
+			return null;
+		}
 	}
 }

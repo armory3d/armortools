@@ -347,18 +347,23 @@ class UIMenu {
 					// Retrieve latest version number
 					var url = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
 					var blob = File.downloadBytes(url);
-					// Compare versions
-					var update = Json.parse(blob.toString());
-					var updateVersion = Std.int(update.version);
-					if (updateVersion > 0) {
-						var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
-						var dateInt = Std.parseInt(date.replace("-", ""));
-						if (updateVersion > dateInt) {
-							UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
+					if (blob != null)  {
+						// Compare versions
+						var update = Json.parse(blob.toString());
+						var updateVersion = Std.int(update.version);
+						if (updateVersion > 0) {
+							var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
+							var dateInt = Std.parseInt(date.replace("-", ""));
+							if (updateVersion > dateInt) {
+								UIBox.showMessage("Update", "Update is available!\nPlease visit armorpaint.org to download.");
+							}
+							else {
+								UIBox.showMessage("Update", "You are up to date!");
+							}
 						}
-						else {
-							UIBox.showMessage("Update", "You are up to date!");
-						}
+					}
+					else {
+						UIBox.showMessage("Update", "Unable to check for updates.\nPlease visit armorpaint.org.");
 					}
 				}
 				if (ui.button("      About...", Left)) {
