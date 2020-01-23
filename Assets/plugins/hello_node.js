@@ -18,7 +18,18 @@ let nodes = [
 		x: 0,
 		y: 0,
 		color: 0xffb34f5a,
-		inputs: [],
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: "Scale",
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 1,
+				min: 0.0,
+				max: 5.0
+			}
+		],
 		outputs: [
 			{
 				id: 0,
@@ -35,10 +46,12 @@ let nodes = [
 arm.NodesMaterial.list.push(nodes);
 
 // Node shader
-arm.Material.customNodes.set(nodeType, function() {
+arm.Material.customNodes.set(nodeType, function(node) {
 	let frag = arm.Material.frag;
+	let scale = arm.Material.parse_value_input(node.inputs[0]);
+
 	frag.write(`
-		float my_out = cos(sin(texCoord.x * 200) + cos(texCoord.y * 200));
+		float my_out = cos(sin(texCoord.x * 200 * ${scale}) + cos(texCoord.y * 200 * ${scale}));
 	`);
 	return `vec3(my_out, my_out, my_out)`;
 });

@@ -915,7 +915,7 @@ class Material {
 			return to_vec3('$height');
 		}
 		else if (customNodes.get(node.type) != null) {
-			return customNodes.get(node.type)();
+			return customNodes.get(node.type)(node);
 		}
 		return "vec3(0.0, 0.0, 0.0)";
 	}
@@ -1296,7 +1296,7 @@ class Material {
 			}
 		}
 		else if (customNodes.get(node.type) != null) {
-			return customNodes.get(node.type)();
+			return customNodes.get(node.type)(node);
 		}
 		return "0.0";
 	}
