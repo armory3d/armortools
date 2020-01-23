@@ -69,6 +69,10 @@ class MeshUtil {
 			Context.mergedObject.force_context = "paint";
 			Context.mainObject().addChild(Context.mergedObject);
 		});
+
+		#if kha_direct3d12
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
 	}
 
 	public static function swapAxis(a: Int, b: Int) {
@@ -119,10 +123,6 @@ class MeshUtil {
 			Context.mergedObject = null;
 		}
 		mergeMesh();
-
-		#if kha_direct3d12
-		arm.render.RenderPathRaytrace.ready = false;
-		#end
 	}
 
 	public static function flipNormals() {
