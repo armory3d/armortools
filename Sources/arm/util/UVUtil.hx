@@ -1,6 +1,7 @@
 package arm.util;
 
 import kha.Image;
+import arm.ui.UITrait;
 
 class UVUtil {
 
@@ -18,8 +19,10 @@ class UVUtil {
 		}
 
 		uvmapCached = true;
-		var merged = Context.mergedObject != null ? Context.mergedObject.data.raw : Context.paintObject.data.raw;
-		var mesh = merged;
+		var merged = Context.mergedObject;
+		var mesh = (UITrait.inst.layerFilter == 0 && merged != null) ?
+					merged.data.raw : Context.paintObject.data.raw;
+
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
 		uvmap.g2.begin(true, 0x00000000);
