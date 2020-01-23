@@ -376,6 +376,7 @@ class Layers {
 	public static function newLayer(clear = true): LayerSlot {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
+		l.objectMask = UITrait.inst.layerFilter;
 		Project.layers.push(l);
 		Context.setLayer(l);
 		if (clear) iron.App.notifyOnRender(l.clear);
