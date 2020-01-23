@@ -41,6 +41,7 @@ class TabLayers {
 					p.visible = UITrait.inst.layerFilter == 0 || p.name == ar[UITrait.inst.layerFilter];
 					Layers.setObjectMask();
 				}
+				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
 			}
 
@@ -364,14 +365,16 @@ class TabLayers {
 					l.objectMask = ui.combo(h, ar, "Object");
 					if (h.changed) {
 						Context.setLayer(l);
+						MaterialParser.parseMeshMaterial();
 						if (l.material_mask != null) { // Fill layer
 							iron.App.notifyOnRender(l.clear);
-							iron.App.notifyOnRender(function(_){
+							function updateFillLayers(_) {
 								Layers.updateFillLayers(4);
-							});
+								iron.App.removeRender(updateFillLayers);
+							}
+							iron.App.notifyOnRender(updateFillLayers);
 						}
 						else {
-							MaterialParser.parseMeshMaterial();
 							Layers.setObjectMask();
 						}
 					}
