@@ -17,9 +17,9 @@ class Config {
 	public static var keymap: Dynamic;
 	public static var configLoaded = false;
 
-	public static function load(done: Void->Void, fromSavePath = false) {
+	public static function load(done: Void->Void) {
 		try {
-			Data.getBlob((fromSavePath ? Krom.savePath() : "") + "config.arm", function(blob: kha.Blob) {
+			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.arm", function(blob: kha.Blob) {
 				configLoaded = true;
 				raw = Json.parse(blob.toString());
 				done();
