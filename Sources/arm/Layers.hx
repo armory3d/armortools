@@ -384,6 +384,14 @@ class Layers {
 		return l;
 	}
 
+	public static function newGroup(): LayerSlot {
+		if (Project.layers.length > 255) return null;
+		var l = new LayerSlot("", true);
+		Project.layers.push(l);
+		Context.setLayer(l);
+		return l;
+	}
+
 	public static function createFillLayer() {
 		function makeFill(g: kha.graphics4.Graphics) {
 			g.end();

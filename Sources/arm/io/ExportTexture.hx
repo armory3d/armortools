@@ -67,7 +67,7 @@ class ExportTexture {
 			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 
 			// Duplicate base layer
-			if (layers[0].visible && udimTile == "") {
+			if (layers[0].isVisible() && udimTile == "") {
 				Layers.expa.g2.begin(false);
 				Layers.expa.g2.pipeline = Layers.pipeCopy;
 				Layers.expa.g2.drawImage(layers[0].texpaint, 0, 0);
@@ -98,7 +98,7 @@ class ExportTexture {
 
 			for (i in 1...layers.length) {
 				var l1 = layers[i];
-				if (!l1.visible) continue;
+				if (!l1.isVisible()) continue;
 
 				if (udimTile != "" && l1.objectMask > 0) {
 					if (!Project.paintObjects[l1.objectMask - 1].name.endsWith(udimTile)) continue;

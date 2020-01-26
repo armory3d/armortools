@@ -50,13 +50,17 @@ class BrushOutputNode extends LogicNode {
 		// Do not paint over fill layer
 		var fillLayer = Context.layer.material_mask != null && Context.tool != ToolPicker && !Context.layerIsMask;
 
+		// Do not paint over groups
+		var groupLayer = Context.layer.getChildren() != null;
+
 		// Paint bounds
 		if (UITrait.inst.paintVec.x < right && UITrait.inst.paintVec.x > left &&
 			UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0 &&
 			!UITrait.inst.ui.isHovered &&
 			!UITrait.inst.ui.isScrolling &&
 			!fillLayer &&
-			(Context.layer.visible || UITrait.inst.paint2d) &&
+			!groupLayer &&
+			(Context.layer.isVisible() || UITrait.inst.paint2d) &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			@:privateAccess UITrait.inst.ui.comboSelectedHandle == null &&

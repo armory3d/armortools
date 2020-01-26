@@ -34,7 +34,7 @@ class MakeMesh {
 			vert.write('float height = 0.0;');
 			var numLayers = 0;
 			for (l in Project.layers) {
-				if (!l.visible) continue;
+				if (!l.isVisible() || l.getChildren() != null) continue;
 				if (numLayers > 16) break;
 				numLayers++;
 				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
@@ -85,7 +85,7 @@ class MakeMesh {
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
 			#end
 
-			if (Project.layers[0].visible) {
+			if (Project.layers[0].isVisible()) {
 
 				if (Context.layer.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
@@ -207,14 +207,14 @@ class MakeMesh {
 					if (start == 1) break;
 					start--;
 					var l = Project.layers[len - i];
-					if (l.visible) {
+					if (l.isVisible() && l.getChildren() == null) {
 						count++;
 						if (count >= maxLayers) break;
 					}
 				}
 				for (i in start...len) {
 					var l = Project.layers[i];
-					if (!l.visible) continue;
+					if (!l.isVisible() || l.getChildren() != null) continue;
 					var id = l.id;
 
 					if (l.objectMask > 0) {

@@ -703,6 +703,7 @@ class UITrait {
 			Context.layerPreviewDirty = false;
 			// Update all layer previews
 			for (l in Project.layers) {
+				if (l.getChildren() != null) continue;
 				var target = l.texpaint_preview;
 				var source = l.texpaint;
 				var g2 = target.g2;
@@ -720,7 +721,7 @@ class UITrait {
 			}
 			hwnd.redraws = 2;
 		}
-		if (Context.layerPreviewDirty) {
+		if (Context.layerPreviewDirty && Context.layer.getChildren() == null) {
 			Context.layerPreviewDirty = false;
 			// Update layer preview
 			var l = Context.layer;

@@ -18,12 +18,13 @@ class TabLayers {
 			if (ui.button("New")) {
 
 				// UIMenu.draw(function(ui:Zui) {
-				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
+				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
 				// 	ui.text("New", Right, ui.t.HIGHLIGHT_COL);
 				// 	if (ui.button("Paint Layer", Left)) {}
-				// 	if (ui.button("Fill Layer", Left)) {}
-				// 	if (ui.button("Black Mask", Left)) {}
-				// 	if (ui.button("White Mask", Left)) {}
+				// 	if (ui.button("Fill Layer", Left, "Material 1")) {}
+				// 	if (ui.button("Black Mask", Left, "Layer 1")) {}
+				// 	if (ui.button("White Mask", Left, "Layer 1")) {}
+				// 	if (ui.button("Folder", Left)) {}
 				// });
 
 				Layers.newLayer();
@@ -53,13 +54,18 @@ class TabLayers {
 					return;
 				}
 
+				if (l.parent != null && !l.parent.show_panel) { // Group closed
+					return;
+				}
+
 				var h = Id.handle().nest(l.id, {selected: l.visible});
-				var layerPanel = h.nest(0, {selected: false});
+				var layerPanel = h.nest(0);
+				layerPanel.selected = l.show_panel;
 				var off = ui.t.ELEMENT_OFFSET;
 				var step = ui.t.ELEMENT_H;
 				var checkw = (ui._windowW / 100 * 8) / ui.SCALE();
 
-				if (layerPanel.selected) {
+				if (l.show_panel && l.getChildren() == null) {
 					var mult = l.material_mask != null ? 2 : 1;
 					var ph = (step + off) * mult;
 					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, ph, ui.t.SEPARATOR_COL);
@@ -87,7 +93,11 @@ class TabLayers {
 				var r = Res.tile18(icons, l.visible ? 0 : 1, 0);
 				ui._x += 2;
 				ui._y += 3;
-				if (ui.image(icons, ui.t.ACCENT_SELECT_COL, null, r.x, r.y, r.w, r.h) == Released) {
+				var col = ui.t.ACCENT_SELECT_COL;
+				var groupVisible = l.parent == null || l.parent.visible;
+				if (!groupVisible) col -= 0x99000000;
+
+				if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
 					l.visible = !l.visible;
 					MaterialParser.parseMeshMaterial();
 				}
@@ -105,7 +115,21 @@ class TabLayers {
 				var uiy = ui._y;
 				ui._x += 2;
 				ui._y += 3;
-				var state = ui.image(l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
+				if (l.parent != null) ui._x += 10 * ui.SCALE();
+
+				var state = State.Idle;
+				var iconH = (ui.ELEMENT_H() - 3) * 2;
+
+				if (l.getChildren() == null) {
+					var icon = l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon;
+					state = ui.image(icon, 0xffffffff, iconH);
+				}
+				else { // Group
+					var icons = Res.get("icons.k");
+					var folder = Res.tile50(icons, 2, 1);
+					state = ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
+				}
+
 				ui._x -= 2;
 				ui._y -= 3;
 
@@ -113,7 +137,7 @@ class TabLayers {
 				ui.imageInvertY = false;
 				#end
 
-				if (ui.isHovered) {
+				if (ui.isHovered && l.texpaint_preview != null) {
 					ui.tooltipImage(l.texpaint_preview);
 				}
 				if (ui.isHovered && ui.inputReleasedR) {
@@ -123,10 +147,12 @@ class TabLayers {
 					Context.setLayer(l);
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
 					UITrait.inst.selectTime = Time.time();
-					var mouse = Input.getMouse();
-					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragLayer = Context.layer;
+					if (l.getChildren() == null) {
+						var mouse = Input.getMouse();
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						App.dragLayer = Context.layer;
+					}
 				}
 
 				if (l.texpaint_mask != null) {
@@ -187,6 +213,8 @@ class TabLayers {
 				var state = ui.text(l.name);
 				ui._y -= center;
 
+				if (l.parent != null) ui._x -= 10 * ui.SCALE();
+
 				if (state == State.Started) {
 					Context.setLayer(l);
 					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
@@ -200,17 +228,20 @@ class TabLayers {
 				if (contextMenu) {
 					UIMenu.draw(function(ui: Zui) {
 						var add = l.material_mask != null ? 1 : 0;
-						if (l == Project.layers[0]) {
+						if (l.getChildren() != null) {
+							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
+						}
+						else if (l == Project.layers[0]) {
 							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
 						}
 						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (19 + add), ui.t.SEPARATOR_COL);
+							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (20 + add), ui.t.SEPARATOR_COL);
 						}
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
 						if (ui.button("Export", Left)) BoxExport.showTextures();
 
-						if (l.material_mask == null && ui.button("To Fill Layer", Left)) {
+						if (l.getChildren() == null && l.material_mask == null && ui.button("To Fill Layer", Left)) {
 							function makeFill(g: kha.graphics4.Graphics) {
 								g.end();
 								History.toFillLayer();
@@ -220,7 +251,7 @@ class TabLayers {
 							}
 							iron.App.notifyOnRender(makeFill);
 						}
-						if (l.material_mask != null && ui.button("To Paint Layer", Left)) {
+						if (l.getChildren() == null && l.material_mask != null && ui.button("To Paint Layer", Left)) {
 							function makePaint(g: kha.graphics4.Graphics) {
 								g.end();
 								History.toPaintLayer();
@@ -234,37 +265,118 @@ class TabLayers {
 						if (l == Project.layers[0]) {
 						}
 						else {
+							if (l.getChildren() == null && ui.button("To Group", Left)) {
+								if (l.parent == null) { // 1-level nesting only
+									Context.setLayer(l);
+									var group = Layers.newGroup();
+									Project.layers.remove(group);
+									Project.layers.insert(Project.layers.indexOf(l) + 1, group);
+									group.show_panel = true;
+									l.parent = group;
+									Context.setLayer(l);
+									// History.newGroup();
+								}
+							}
 							if (ui.button("Delete", Left)) {
 								Context.layer = l;
-								History.deleteLayer();
+								if (l.getChildren() == null) {
+									History.deleteLayer();
+								}
+								else {
+									// History.deleteGroup();
+								}
 								l.delete();
+
+								// Remove empty group
+								if (l.parent != null && l.parent.getChildren() == null) {
+									l.parent.delete();
+								}
 							}
 							if (ui.button("Move Up", Left)) {
 								if (i < Project.layers.length - 1) {
+
+									var isGroup = Project.layers[i].getChildren() != null;
+									if (isGroup) {
+										if (Project.layers[i + 1].parent != null) return; // Move over group
+									}
+
 									Context.setLayer(l);
 									History.orderLayers(i + 1);
 									var target = Project.layers[i + 1];
 									Project.layers[i + 1] = Project.layers[i];
 									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
+
+									// Move layer
+									if (!isGroup) {
+										Project.layers[i + 1].parent = Project.layers[i].parent;
+
+										// Remove empty group
+										if (Project.layers[i].texpaint == null && Project.layers[i].getChildren() == null) {
+											Project.layers[i].delete();
+										}
+									}
+									// Move group
+									else {
+										var children = Project.layers[i + 1].getChildren();
+										var j = i;
+										for (c in children) {
+											var target = Project.layers[j - 1];
+											Project.layers[j - 1] = Project.layers[j];
+											Project.layers[j] = target;
+											j--;
+										}
+									}
 								}
 							}
 							if (ui.button("Move Down", Left)) {
 								if (i > 1) {
+
+									var isGroup = l.getChildren() != null;
+									if (isGroup) {
+										var children = l.getChildren();
+										if (i - children.length <= 1) return;
+										if (Project.layers[i - children.length - 2].parent != null) return; // Move over group
+										for (c in children) {
+											var k = Project.layers.indexOf(c);
+											var target = Project.layers[k - 1];
+											Project.layers[k - 1] = Project.layers[k];
+											Project.layers[k] = target;
+										}
+									}
+
 									Context.setLayer(l);
 									History.orderLayers(i - 1);
 									var target = Project.layers[i - 1];
 									Project.layers[i - 1] = Project.layers[i];
 									Project.layers[i] = target;
 									UITrait.inst.hwnd.redraws = 2;
+
+									// Move layer
+									if (!isGroup) {
+										Project.layers[i - 1].parent = Project.layers[i].parent;
+
+										// Move to group
+										if (Project.layers[i].getChildren() != null) {
+											Project.layers[i - 1].parent = Project.layers[i];
+										}
+
+										// Remove empty group
+										if (Project.layers.length > i + 1 && Project.layers[i + 1].texpaint == null && Project.layers[i + 1].getChildren() == null) {
+											Project.layers[i + 1].delete();
+										}
+									}
 								}
 							}
-							if (ui.button("Merge Down", Left)) {
+							if (l.getChildren() != null && ui.button("Merge Group", Left)) {
+
+							}
+							if (l.getChildren() == null && ui.button("Merge Down", Left)) {
 								Context.setLayer(l);
 								iron.App.notifyOnRender(History.mergeLayers);
 								iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 							}
-							if (ui.button("Duplicate", Left)) {
+							if (l.getChildren() == null && ui.button("Duplicate", Left)) {
 								Context.setLayer(l);
 								History.duplicateLayer();
 								function makeDupli(g: kha.graphics4.Graphics) {
@@ -276,13 +388,13 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(makeDupli);
 							}
-							if (ui.button("Black Mask", Left)) {
+							if (l.getChildren() == null && ui.button("Black Mask", Left)) {
 								l.createMask(0x00000000);
 								Context.setLayer(l, true);
 								Context.layerPreviewDirty = true;
 								History.newMask();
 							}
-							if (ui.button("White Mask", Left)) {
+							if (l.getChildren() == null && ui.button("White Mask", Left)) {
 								l.createMask(0xffffffff);
 								Context.setLayer(l, true);
 								Context.layerPreviewDirty = true;
@@ -295,40 +407,42 @@ class TabLayers {
 							}
 						}
 
-						var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
-						var opacHandle = Id.handle().nest(l.id, {selected: l.paintOpac});
-						var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
-						var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
-						var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
-						var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
-						var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
-						var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
-						var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
-						l.paintBase = ui.check(baseHandle, "Base Color");
-						l.paintOpac = ui.check(opacHandle, "Opacity");
-						l.paintNor = ui.check(norHandle, "Normal");
-						l.paintOcc = ui.check(occHandle, "Occlusion");
-						l.paintRough = ui.check(roughHandle, "Roughness");
-						l.paintMet = ui.check(metHandle, "Metallic");
-						l.paintHeight = ui.check(heightHandle, "Height");
-						l.paintEmis = ui.check(emisHandle, "Emission");
-						l.paintSubs = ui.check(subsHandle, "Subsurface");
-						if (baseHandle.changed ||
-							opacHandle.changed ||
-							norHandle.changed ||
-							occHandle.changed ||
-							roughHandle.changed ||
-							metHandle.changed ||
-							heightHandle.changed ||
-							emisHandle.changed ||
-							subsHandle.changed) {
-							MaterialParser.parseMeshMaterial();
-							UIMenu.keepOpen = true;
+						if (l.getChildren() == null) {
+							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
+							var opacHandle = Id.handle().nest(l.id, {selected: l.paintOpac});
+							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
+							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
+							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
+							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
+							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
+							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
+							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
+							l.paintBase = ui.check(baseHandle, "Base Color");
+							l.paintOpac = ui.check(opacHandle, "Opacity");
+							l.paintNor = ui.check(norHandle, "Normal");
+							l.paintOcc = ui.check(occHandle, "Occlusion");
+							l.paintRough = ui.check(roughHandle, "Roughness");
+							l.paintMet = ui.check(metHandle, "Metallic");
+							l.paintHeight = ui.check(heightHandle, "Height");
+							l.paintEmis = ui.check(emisHandle, "Emission");
+							l.paintSubs = ui.check(subsHandle, "Subsurface");
+							if (baseHandle.changed ||
+								opacHandle.changed ||
+								norHandle.changed ||
+								occHandle.changed ||
+								roughHandle.changed ||
+								metHandle.changed ||
+								heightHandle.changed ||
+								emisHandle.changed ||
+								subsHandle.changed) {
+								MaterialParser.parseMeshMaterial();
+								UIMenu.keepOpen = true;
+							}
 						}
 					});
 				}
 
-				if (i == 0) {
+				if (i == 0 || l.getChildren() != null) {
 					@:privateAccess ui.endElement();
 				}
 				else {
@@ -344,10 +458,11 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				var showPanel = ui.panel(layerPanel, "", true);
+				ui.panel(layerPanel, "", true);
+				l.show_panel = layerPanel.selected;
 				ui._y -= center;
 
-				if (i == 0) {
+				if (i == 0 || l.getChildren() != null) {
 					ui._y -= ui.t.ELEMENT_OFFSET;
 					@:privateAccess ui.endElement();
 				}
@@ -382,7 +497,7 @@ class TabLayers {
 				}
 				ui._y -= ui.t.ELEMENT_OFFSET;
 
-				if (showPanel) {
+				if (l.show_panel && l.getChildren() == null) {
 					ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 					@:privateAccess ui.endElement();
 					ui._x += 1;

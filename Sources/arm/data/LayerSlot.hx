@@ -12,18 +12,21 @@ class LayerSlot {
 	public var visible = true;
 	public var ext = "";
 
+	public var parent: LayerSlot = null; // Layer inside group
+
 	public var name: String;
 
 	public var texpaint: Image;
 	public var texpaint_nor: Image;
 	public var texpaint_pack: Image;
 
-	public var texpaint_preview: Image; // Layer preview
+	public var texpaint_preview: Image = null; // Layer preview
 
 	public var texpaint_mask: Image = null; // Texture mask
 	public var texpaint_mask_preview: Image;
 	public var maskOpacity = 1.0; // Opacity mask
 	public var material_mask: MaterialSlot = null; // Fill layer
+	public var show_panel = false;
 
 	public var blending = BlendMix;
 	public var objectMask = 0;
@@ -43,7 +46,7 @@ class LayerSlot {
 	var createMaskColor: Int;
 	var createMaskImage: Image;
 
-	public function new(ext = "") {
+	public function new(ext = "", isGroup = false) {
 		if (ext == "") {
 			id = 0;
 			for (l in Project.layers) if (l.id >= id) id = l.id + 1;
@@ -51,8 +54,14 @@ class LayerSlot {
 		}
 
 		this.ext = ext;
+
+		if (isGroup) {
+			name = "Group " + (id + 1);
+			return;
+		}
+
 		name = "Layer " + (id + 1);
-		var format = App.bitsHandle.position == Bits8 ?  "RGBA32" :
+		var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
 					 App.bitsHandle.position == Bits16 ? "RGBA64" :
 					 									 "RGBA128";
 
@@ -85,7 +94,9 @@ class LayerSlot {
 	}
 
 	public function delete() {
-		unload();
+		if (texpaint != null) unload();
+		var children = getChildren();
+		if (children != null) for (c in children) c.parent = null;
 		var lpos = Project.layers.indexOf(this);
 		Project.layers.remove(this);
 		// Undo can remove base layer and then restore it from undo layers
@@ -366,5 +377,20 @@ class LayerSlot {
 		MaterialParser.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
 		UITrait.inst.hwnd.redraws = 2;
+	}
+
+	public function isVisible(): Bool {
+		return visible && (parent == null || parent.visible);
+	}
+
+	public function getChildren(): Array<LayerSlot> {
+		var children: Array<LayerSlot> = null; // Layer with children is a group
+		for (l in Project.layers) {
+			if (l.parent == this) {
+				if (children == null) children = [];
+				children.push(l);
+			}
+		}
+		return children;
 	}
 }
