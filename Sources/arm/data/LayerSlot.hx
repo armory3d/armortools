@@ -16,9 +16,9 @@ class LayerSlot {
 
 	public var name: String;
 
-	public var texpaint: Image;
-	public var texpaint_nor: Image;
-	public var texpaint_pack: Image;
+	public var texpaint: Image = null;
+	public var texpaint_nor: Image = null;
+	public var texpaint_pack: Image = null;
 
 	public var texpaint_preview: Image = null; // Layer preview
 

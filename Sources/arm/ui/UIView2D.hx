@@ -100,12 +100,13 @@ class UIView2D {
 			var channel = 0;
 
 			if (type == View2DLayer) {
+				var layer = l.getChildren() == null ? l : l.getChildren()[0];
 				tex =
-					Context.layerIsMask   ? l.texpaint_mask :
-					texType == TexBase    ? l.texpaint :
-					texType == TexOpacity ? l.texpaint :
-					texType == TexNormal  ? l.texpaint_nor :
-										    l.texpaint_pack;
+					Context.layerIsMask   ? layer.texpaint_mask :
+					texType == TexBase    ? layer.texpaint :
+					texType == TexOpacity ? layer.texpaint :
+					texType == TexNormal  ? layer.texpaint_nor :
+										    layer.texpaint_pack;
 
 				channel =
 					Context.layerIsMask ? 1 :
@@ -122,20 +123,7 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
-				if (!UITrait.inst.textureFilter) {
-					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
-				}
-
-				#if kha_opengl
-				ui.currentWindow.texture.g4.setPipeline(pipe);
-				#end
-				ui.currentWindow.texture.g4.setInt(channelLocation, channel);
-
-				ui.g.drawScaledImage(tex, tx, ty, tw, th);
-
-				if (!UITrait.inst.textureFilter) {
-					ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
-				}
+				drawLayer(tex, tx, ty, tw, th, channel);
 			}
 			ui.g.pipeline = null;
 
@@ -207,6 +195,23 @@ class UIView2D {
 		}
 		ui.end();
 		g.begin(false);
+	}
+
+	function drawLayer(tex: kha.Image, tx: Float, ty: Float, tw: Float, th: Float, channel: Int) {
+		if (!UITrait.inst.textureFilter) {
+			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
+		}
+
+		#if kha_opengl
+		ui.currentWindow.texture.g4.setPipeline(pipe);
+		#end
+		ui.currentWindow.texture.g4.setInt(channelLocation, channel);
+
+		ui.g.drawScaledImage(tex, tx, ty, tw, th);
+
+		if (!UITrait.inst.textureFilter) {
+			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
+		}
 	}
 
 	function update() {

@@ -47,11 +47,11 @@ class ExportArm {
 		var ld: Array<TLayerData> = [];
 		for (l in Project.layers) {
 			ld.push({
-				res: l.texpaint.width,
+				res: l.texpaint != null ? l.texpaint.width : Project.layers[0].texpaint.width,
 				bpp: bpp,
-				texpaint: Lz4.encode(l.texpaint.getPixels()),
-				texpaint_nor: Lz4.encode(l.texpaint_nor.getPixels()),
-				texpaint_pack: Lz4.encode(l.texpaint_pack.getPixels()),
+				texpaint: l.texpaint != null ? Lz4.encode(l.texpaint.getPixels()) : null,
+				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(l.texpaint_nor.getPixels()) : null,
+				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(l.texpaint_pack.getPixels()) : null,
 				texpaint_mask: l.texpaint_mask != null ? Lz4.encode(l.texpaint_mask.getPixels()) : null,
 				uv_scale: l.uvScale,
 				uv_rot: l.uvRot,
@@ -59,7 +59,8 @@ class ExportArm {
 				opacity_mask: l.maskOpacity,
 				material_mask: l.material_mask != null ? Project.materials.indexOf(l.material_mask) : -1,
 				object_mask: l.objectMask,
-				blending: l.blending
+				blending: l.blending,
+				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1
 			});
 		}
 

@@ -308,6 +308,7 @@ typedef TLayerData = {
 	public var material_mask: Int;
 	public var object_mask: Int;
 	public var blending: Int;
+	public var parent: Int;
 }
 
 typedef TAsset = {

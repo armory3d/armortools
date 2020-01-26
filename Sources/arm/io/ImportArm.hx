@@ -205,49 +205,61 @@ class ImportArm {
 			Project.layers = [];
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
-				var l = new LayerSlot();
+				var isGroup = ld.texpaint == null;
+				var l = new LayerSlot("", isGroup);
 				Project.layers.push(l);
 
-				// TODO: create render target from bytes
-				var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-				l.texpaint.g2.begin(false);
-				l.texpaint.g2.drawImage(texpaint, 0, 0);
-				l.texpaint.g2.end();
-				// texpaint.unload();
+				if (!isGroup) {
+					// TODO: create render target from bytes
+					var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					l.texpaint.g2.begin(false);
+					l.texpaint.g2.drawImage(texpaint, 0, 0);
+					l.texpaint.g2.end();
 
-				var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-				l.texpaint_nor.g2.begin(false);
-				l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
-				l.texpaint_nor.g2.end();
-				// texpaint_nor.unload();
+					var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					l.texpaint_nor.g2.begin(false);
+					l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+					l.texpaint_nor.g2.end();
 
-				var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-				l.texpaint_pack.g2.begin(false);
-				l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
-				l.texpaint_pack.g2.end();
-				// texpaint_pack.unload();
+					var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					l.texpaint_pack.g2.begin(false);
+					l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+					l.texpaint_pack.g2.end();
 
-				if (ld.texpaint_mask != null) {
-					l.createMask(0, false);
-					var texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
-					l.texpaint_mask.g2.begin(false);
-					l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
-					l.texpaint_mask.g2.end();
-					// texpaint_mask.unload();
+					var texpaint_mask: kha.Image = null;
+					if (ld.texpaint_mask != null) {
+						l.createMask(0, false);
+						texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
+						l.texpaint_mask.g2.begin(false);
+						l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+						l.texpaint_mask.g2.end();
+					}
+
+					l.uvScale = ld.uv_scale;
+					if (l.uvScale == null) l.uvScale = 1.0; // TODO: deprecated
+					l.uvRot = ld.uv_rot;
+					if (l.uvRot == null) l.uvRot = 0.0; // TODO: deprecated
+					l.uvType = ld.uv_type;
+					if (l.uvType == null) l.uvType = 0; // TODO: deprecated
+					l.maskOpacity = ld.opacity_mask;
+					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
+					l.objectMask = ld.object_mask;
+					l.blending = ld.blending;
+					if (l.blending == null) l.blending = 0; // TODO: deprecated
+
+					// texpaint.unload();
+					// texpaint_nor.unload();
+					// texpaint_pack.unload();
+					// if (texpaint_mask != null) texpaint_mask.unload();
 				}
-
-				l.uvScale = ld.uv_scale;
-				if (l.uvScale == null) l.uvScale = 1.0; // TODO: deprecated
-				l.uvRot = ld.uv_rot;
-				if (l.uvRot == null) l.uvRot = 0.0; // TODO: deprecated
-				l.uvType = ld.uv_type;
-				if (l.uvType == null) l.uvType = 0; // TODO: deprecated
-				l.maskOpacity = ld.opacity_mask;
-				l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
-				l.objectMask = ld.object_mask;
-				l.blending = ld.blending;
-				if (l.blending == null) l.blending = 0; // TODO: deprecated
 			}
+
+			// Create groups
+			for (i in 0...project.layer_datas.length) {
+				var ld = project.layer_datas[i];
+				if (ld.parent >= 0) Project.layers[i].parent = Project.layers[ld.parent];
+			}
+
 			Context.setLayer(Project.layers[0]);
 
 			Context.ddirty = 4;
