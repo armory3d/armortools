@@ -7,6 +7,8 @@
 	"select_material": "shift+number",
 	"cycle_layers": "ctrl+tab",
 	"brush_radius": "f",
+	"brush_radius_decrease": "[",
+	"brush_radius_increase": "]",
 	"brush_opacity": "shift+f",
 	"brush_ruler": "shift",
 	"file_new": "ctrl+n",

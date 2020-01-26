@@ -530,6 +530,18 @@ class UITrait {
 						lockStartedX = mouse.x;
 						lockStartedY = mouse.y;
 					}
+					else if (Operator.shortcut(Config.keymap.brush_radius_decrease)) {
+						brushRadius -= 0.1;
+						brushRadius = Math.round(brushRadius * 100) / 100;
+						brushRadiusHandle.value = brushRadius;
+						headerHandle.redraws = 2;
+					}
+					else if (Operator.shortcut(Config.keymap.brush_radius_increase)) {
+						brushRadius += 0.1;
+						brushRadius = Math.round(brushRadius * 100) / 100;
+						brushRadiusHandle.value = brushRadius;
+						headerHandle.redraws = 2;
+					}
 				}
 			}
 
