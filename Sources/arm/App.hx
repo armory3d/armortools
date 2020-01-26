@@ -16,6 +16,7 @@ import arm.ui.UIView2D;
 import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
+import arm.ui.TabLayers;
 import arm.io.ImportAsset;
 import arm.sys.Path;
 import arm.util.RenderUtil;
@@ -24,6 +25,7 @@ import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.ConstData;
 import arm.plugin.Camera;
+import arm.node.MaterialParser;
 import arm.Config;
 import arm.Tool;
 import arm.Project;
@@ -375,6 +377,11 @@ class App {
 						}
 					}
 					UINodes.inst.acceptLayerDrag(index);
+				}
+				else if (inLayers && isDragging) {
+					Project.layers.remove(dragLayer);
+					Project.layers.insert(TabLayers.dragDestination, dragLayer);
+					MaterialParser.parseMeshMaterial();
 				}
 				dragLayer = null;
 			}

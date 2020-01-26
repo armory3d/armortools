@@ -10,6 +10,8 @@ import arm.util.UVUtil;
 
 class TabLayers {
 
+	public static var dragDestination = 1;
+
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
@@ -78,6 +80,16 @@ class TabLayers {
 					else {
 						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
 					}
+				}
+
+				// Highlight drag destination
+				var mouse = Input.getMouse();
+				var mx = mouse.x;
+				var my = mouse.y;
+				var inLayers = mx > UITrait.inst.tabx && my < UITrait.inst.tabh;
+				if (App.isDragging && App.dragLayer != null && my > ui._y - step && my < ui._y + step) {
+					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
 				}
 
 				if (l.texpaint_mask != null) {
