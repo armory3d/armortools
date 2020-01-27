@@ -1223,6 +1223,7 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
+				TabFonts.draw();
 			}
 		}
 		else if (worktab.position == SpaceScene) {
@@ -1241,6 +1242,7 @@ class UITrait {
 			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
 				TabTextures.draw();
 				TabMeshes.draw();
+				TabFonts.draw();
 			}
 		}
 
