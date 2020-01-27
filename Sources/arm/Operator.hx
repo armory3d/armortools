@@ -14,7 +14,7 @@ class Operator {
 
 	public static function update() {}
 
-	public static function shortcut(s: String): Bool {
+	public static function shortcut(s: String, repeat = false): Bool {
 		if (s == "") return false;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
@@ -27,7 +27,7 @@ class Operator {
 		if (s.indexOf("+") > 0) {
 			s = s.substr(s.lastIndexOf("+") + 1);
 		}
-		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) : kb.started(s);
+		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) : repeat ? kb.repeat(s) : kb.started(s);
 		return flag && key;
 	}
 }
