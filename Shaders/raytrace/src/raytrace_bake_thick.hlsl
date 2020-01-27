@@ -3,9 +3,10 @@
 #include "std/math.hlsl"
 
 struct Vertex {
-	float3 position;
-	float3 normal;
-	float2 tex;
+	uint posxy;
+	uint poszw;
+	uint nor;
+	uint tex;
 };
 
 struct RayGenConstantBuffer {

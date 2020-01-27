@@ -17,8 +17,9 @@ class RenderPathRaytrace {
 	static var first = true;
 	static var f32 = new kha.arrays.Float32Array(24);
 	static var helpMat = iron.math.Mat4.identity();
-	static var vb: kha.arrays.Float32Array;
-	static var ib: kha.arrays.Uint32Array;
+	static var vb_scale = 1.0;
+	static var vb: kha.graphics4.VertexBuffer;
+	static var ib: kha.graphics4.IndexBuffer;
 	static var raysTimer = 0.0;
 	static var raysCounter = 0;
 	static var lastLayer: kha.Image = null;
@@ -218,32 +219,18 @@ class RenderPathRaytrace {
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			Krom.raytraceInit(shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer);
+			Krom.raytraceInit(shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, vb_scale);
 		});
 	}
 
 	static function buildData() {
 		if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
 		var mo = Context.mergedObject;
-		var sc = mo.parent.transform.scale.x * mo.data.scalePos;
 		var md = mo.data;
 		var geom = md.geom;
-		var count = Std.int(geom.positions.length / 4);
-		vb = new kha.arrays.Float32Array(count * 8);
-		for (i in 0...count) {
-			vb[i * 8    ] = (geom.positions[i * 4    ] * sc / 32767);
-			vb[i * 8 + 1] = (geom.positions[i * 4 + 1] * sc / 32767);
-			vb[i * 8 + 2] = (geom.positions[i * 4 + 2] * sc / 32767);
-			vb[i * 8 + 3] =  geom.normals  [i * 2    ] / 32767;
-			vb[i * 8 + 4] =  geom.normals  [i * 2 + 1] / 32767;
-			vb[i * 8 + 5] =  geom.positions[i * 4 + 3] / 32767;
-			vb[i * 8 + 6] = (geom.uvs[i * 2    ] / 32767);
-			vb[i * 8 + 7] = (geom.uvs[i * 2 + 1] / 32767);
-		}
-
-		var indices = geom.indices[0];
-		ib = new kha.arrays.Uint32Array(indices.length);
-		for (i in 0...indices.length) ib[i] = indices[i];
+		vb_scale = mo.parent.transform.scale.x * md.scalePos;
+		vb = geom.vertexBuffer;
+		ib = geom.indexBuffers[0];
 	}
 
 	static function getBakeShaderName(): String {

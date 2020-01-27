@@ -2,6 +2,12 @@
 #ifndef _ATTRIB_HLSL_
 #define _ATTRIB_HLSL_
 
+float2 S16toF32(uint val) {
+	int a = (int)(val << 16) >> 16;
+	int b = (int)(val & 0xffff0000) >> 16;
+	return float2(a, b) / 32767.0f;
+}
+
 float3 hit_world_position() {
 	return WorldRayOrigin() + RayTCurrent() * WorldRayDirection();
 }

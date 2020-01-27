@@ -4,9 +4,10 @@
 #include "std/attrib.hlsl"
 
 struct Vertex {
-	float3 position;
-	float3 normal;
-	float2 tex;
+	uint posxy;
+	uint poszw;
+	uint nor;
+	uint tex;
 };
 
 struct RayGenConstantBuffer {
@@ -91,16 +92,16 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	uint3 indices_sample = indices.Load3(base_index);
 
 	float3 vertex_normals[3] = {
-		float3(vertices[indices_sample[0]].normal),
-		float3(vertices[indices_sample[1]].normal),
-		float3(vertices[indices_sample[2]].normal)
+		float3(S16toF32(vertices[indices_sample[0]].nor), S16toF32(vertices[indices_sample[0]].poszw).y),
+		float3(S16toF32(vertices[indices_sample[1]].nor), S16toF32(vertices[indices_sample[1]].poszw).y),
+		float3(S16toF32(vertices[indices_sample[2]].nor), S16toF32(vertices[indices_sample[2]].poszw).y)
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
 	float2 vertex_uvs[3] = {
-		float2(vertices[indices_sample[0]].tex),
-		float2(vertices[indices_sample[1]].tex),
-		float2(vertices[indices_sample[2]].tex)
+		S16toF32(vertices[indices_sample[0]].tex),
+		S16toF32(vertices[indices_sample[1]].tex),
+		S16toF32(vertices[indices_sample[2]].tex)
 	};
 	float2 tex_coord = hit_attribute2d(vertex_uvs, attr);
 
