@@ -288,6 +288,7 @@ typedef TProjectFormat = {
 	public var version: String;
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
+	@:optional public var material_icons: Array<haxe.io.Bytes>;
 	@:optional public var assets: Array<String>; // texture_assets
 	@:optional public var layer_datas: Array<TLayerData>;
 	@:optional public var mesh_datas: Array<TMeshData>;

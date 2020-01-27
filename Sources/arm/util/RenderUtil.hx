@@ -15,7 +15,7 @@ import arm.Tool;
 
 class RenderUtil {
 
-	public static inline var matPreviewSize = 200;
+	public static inline var matPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
 
 	public static function makeMaterialPreview() {

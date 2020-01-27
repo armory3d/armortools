@@ -33,7 +33,7 @@ class MaterialSlot {
 		data = m;
 
 		var w = RenderUtil.matPreviewSize;
-		var wIcon = Std.int(w / 4);
+		var wIcon = 50;
 		image = Image.createRenderTarget(w, w);
 		imageIcon = Image.createRenderTarget(wIcon, wIcon);
 

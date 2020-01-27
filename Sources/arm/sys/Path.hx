@@ -104,6 +104,10 @@ class Path {
 		return p.endsWith(".json");
 	}
 
+	public static function isKnown(path: String): Bool {
+		return isMesh(path) || isTexture(path) || isFont(path) || isProject(path) || isPlugin(path);
+	}
+
 	static function checkExt(p: String, exts: Array<String>): Bool {
 		p = p.replace("-", "_");
 		for (ext in exts) if (p.endsWith("_" + ext)) return true;

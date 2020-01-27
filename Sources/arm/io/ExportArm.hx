@@ -103,6 +103,7 @@ class ExportArm {
 		var raw = {
 			version: App.version,
 			material_nodes: mnodes,
+			material_icons: [Lz4.encode(m.image.getPixels())],
 			assets: texture_files
 		};
 

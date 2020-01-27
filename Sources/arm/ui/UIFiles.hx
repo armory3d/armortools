@@ -1,9 +1,12 @@
 package arm.ui;
 
+import haxe.io.Bytes;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import iron.system.Time;
+import iron.system.ArmPack;
+import arm.format.Lz4;
 import arm.sys.Path;
 import arm.sys.File;
 using StringTools;
@@ -14,6 +17,7 @@ class UIFiles {
 	public static var path = "/";
 	static var lastPath = "";
 	static var files: Array<String> = null;
+	static var iconMap: Map<String, kha.Image> = null;
 	static var selected = -1;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
@@ -85,6 +89,7 @@ class UIFiles {
 			var filesAll = File.readDirectory(handle.text, foldersOnly);
 			for (f in filesAll) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
+				if (f.indexOf(".") > 0 && !Path.isKnown(f)) continue; // Skip unknown extensions
 				files.push(f);
 			}
 		}
@@ -120,7 +125,30 @@ class UIFiles {
 
 				var uix = ui._x;
 				var uiy = ui._y;
-				var state = ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h);
+				var state = Idle;
+				var generic = true;
+
+				if (f.endsWith(".arm")) {
+					if (iconMap == null) iconMap = [];
+					var icon = iconMap.get(handle.text + Path.sep + f);
+					if (icon == null) {
+						var bytes = Bytes.ofData(Krom.loadBlob(handle.text + Path.sep + f));
+						var raw = ArmPack.decode(bytes);
+						if (raw.material_icons != null) {
+							var bytesIcon = raw.material_icons[0];
+							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							iconMap.set(handle.text + Path.sep + f, icon);
+						}
+					}
+					if (icon != null) {
+						state = ui.image(icon, col, rect.h);
+						generic = false;
+					}
+				}
+
+				if (generic) {
+					state = ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h);
+				}
 
 				if (state == Started) {
 

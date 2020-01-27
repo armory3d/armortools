@@ -94,24 +94,24 @@ class ImportArm {
 
 	public static function runProject(path: String) {
 		Data.getBlob(path, function(b: Blob) {
+			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+			path = path.replace("\\", "/");
+
+			// Import as material instead
+			if (project.version != null && project.layer_datas == null) {
+				runMaterialFromProject(project, path);
+				return;
+			}
 
 			Context.layersPreviewDirty = true;
-			var resetLayers = false;
-			Project.projectNew(resetLayers);
-			path = path.replace("\\", "/");
 			Project.filepath = path;
+			Project.projectNew(false);
 			UIFiles.filename = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
-			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
 			// Import as mesh instead
 			if (project.version == null) {
 				untyped project.objects == null ? runMesh(untyped project) : runScene(untyped project, path);
-				return;
-			}
-
-			if (project.layer_datas == null) {
-				runMaterialFromProject(project, Project.filepath);
 				return;
 			}
 
