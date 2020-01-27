@@ -39,6 +39,9 @@ class TabMeshes {
 						MeshUtil.swapAxis(0, 1);
 						Context.ddirty = 2;
 					}
+					// if (ui.button("Apply Displacement", Left)) {
+
+					// }
 				});
 			}
 

@@ -10,7 +10,7 @@ class TabBrushes {
 	public static function draw() {
 		var ui = UITrait.inst.ui;
 		if (ui.tab(UITrait.inst.htab1, "Brushes")) {
-			ui.row([1 / 4, 1 / 4]);
+			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button("New")) {
 				// UITrait.inst.headerHandle.redraws = 2;
 				Context.brush = new BrushSlot();
@@ -18,6 +18,7 @@ class TabBrushes {
 				// MaterialParser.parsePaintMaterial();
 				// RenderUtil.makeMaterialPreview();
 			}
+			if (ui.button("Import")) {}
 			if (ui.button("Nodes")) UITrait.inst.showBrushNodes();
 
 			var slotw = Std.int(51 * ui.SCALE());
