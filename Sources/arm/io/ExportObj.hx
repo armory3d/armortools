@@ -5,7 +5,11 @@ using StringTools;
 
 class ExportObj {
 
-	public static function run(path: String) {
+	public static function run(path: String, applyDisplacement = false) {
+
+		var height = applyDisplacement ? Project.layers[0].texpaint_pack.getPixels() : null;
+		var res = Project.layers[0].texpaint_pack.width;
+
 		var s = "";
 		var off = 0;
 		for (p in Project.paintObjects) {
@@ -16,6 +20,10 @@ class ExportObj {
 			var nora = mesh.vertex_arrays[1].values;
 			var texa = mesh.vertex_arrays[2].values;
 			var len = Std.int(posa.length / 4);
+
+			// if (applyDisplacement) {
+			// }
+
 			s += "o " + p.name + "\n";
 			for (i in 0...len) {
 				s += "v " + posa[i * 4    ] * sc  + " " +
@@ -31,6 +39,7 @@ class ExportObj {
 				s += "vt " +        texa[i * 2    ] * inv  + " " +
 							 (1.0 - texa[i * 2 + 1] * inv) + "\n";
 			}
+
 			var inda = mesh.index_arrays[0].values;
 			for (i in 0...Std.int(inda.length / 3)) {
 				var i1 = inda[i * 3    ] + 1 + off;
@@ -42,7 +51,9 @@ class ExportObj {
 			}
 			off += inda.length;
 		}
+
 		if (!path.endsWith(".obj")) path += ".obj";
+
 		Krom.fileSaveBytes(path, Bytes.ofString(s).getData());
 	}
 }

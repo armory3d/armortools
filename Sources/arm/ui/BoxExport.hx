@@ -193,12 +193,13 @@ class BoxExport {
 			if (ui.tab(htab, "Export Mesh")) {
 
 				UITrait.inst.exportMeshFormat = ui.combo(Id.handle({position: UITrait.inst.exportMeshFormat}), ["obj", "arm"], "Format", true);
+
+				var applyDisplacement = ui.check(Id.handle(), "Apply Displacement");
+
 				var mesh = Context.paintObject.data.raw;
 				var inda = mesh.index_arrays[0].values;
 				var tris = Std.int(inda.length / 3);
 				ui.text(tris + " triangles");
-
-				@:privateAccess ui.endElement();
 
 				ui.row([0.5, 0.5]);
 				if (ui.button("Cancel")) {
@@ -209,7 +210,7 @@ class BoxExport {
 					UIFiles.show(UITrait.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
-						ExportMesh.run(path + "/" + f);
+						ExportMesh.run(path + "/" + f, applyDisplacement);
 					});
 				}
 			}
