@@ -530,14 +530,14 @@ class UITrait {
 						lockStartedX = mouse.x;
 						lockStartedY = mouse.y;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_decrease)) {
-						brushRadius -= 0.1;
+					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, true)) {
+						brushRadius -= getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
 						headerHandle.redraws = 2;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_increase)) {
-						brushRadius += 0.1;
+					else if (Operator.shortcut(Config.keymap.brush_radius_increase, true)) {
+						brushRadius += getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
 						headerHandle.redraws = 2;
@@ -561,13 +561,13 @@ class UITrait {
 				camHandle.position = cameraType;
 				ViewportUtil.updateCameraType(cameraType);
 			}
-			else if (Operator.shortcut(Config.keymap.view_orbit_left)) ViewportUtil.orbit(-Math.PI / 12, 0);
-			else if (Operator.shortcut(Config.keymap.view_orbit_right)) ViewportUtil.orbit(Math.PI / 12, 0);
-			else if (Operator.shortcut(Config.keymap.view_orbit_up)) ViewportUtil.orbit(0, -Math.PI / 12);
-			else if (Operator.shortcut(Config.keymap.view_orbit_down)) ViewportUtil.orbit(0, Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_left, true)) ViewportUtil.orbit(-Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_right, true)) ViewportUtil.orbit(Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_up, true)) ViewportUtil.orbit(0, -Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_down, true)) ViewportUtil.orbit(0, Math.PI / 12);
 			else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
-			else if (Operator.shortcut(Config.keymap.view_zoom_in)) ViewportUtil.zoom(0.2);
-			else if (Operator.shortcut(Config.keymap.view_zoom_out)) ViewportUtil.zoom(-0.2);
+			else if (Operator.shortcut(Config.keymap.view_zoom_in, true)) ViewportUtil.zoom(0.2);
+			else if (Operator.shortcut(Config.keymap.view_zoom_out, true)) ViewportUtil.zoom(-0.2);
 		}
 
 		if (brushCanLock || brushLocked) {
@@ -635,6 +635,10 @@ class UITrait {
 	public function toggleDistractFree() {
 		show = !show;
 		App.resize();
+	}
+
+	inline function getRadiusIncrement(): Float {
+		return 0.1;
 	}
 
 	function updateUI() {
