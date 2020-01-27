@@ -64,13 +64,10 @@ class File {
 	}
 
 	public static function exists(path: String): Bool {
-		#if krom_windows
-		var exists = Krom.sysCommand('IF EXIST "' + path + '" EXIT /b 1');
-		#else
-		var exists = 1;
-		// { test -e file && echo 1 || echo 0 }
-		#end
-		return exists == 1;
+		var slash = path.replace("\\", "/").lastIndexOf("/");
+		var dir = path.substr(0, slash);
+		var file = path.substr(slash + 1);
+		return readDirectory(dir).indexOf(file) >= 0;
 	}
 
 	public static function download(url: String, dstPath: String) {
