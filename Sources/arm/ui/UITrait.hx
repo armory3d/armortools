@@ -896,8 +896,7 @@ class UITrait {
 		g.end();
 		ui.begin(g);
 
-		var panelx = (iron.App.x() - toolbarw);
-		if (ui.window(toolbarHandle, panelx, headerh, toolbarw, System.windowHeight() - headerh)) {
+		if (ui.window(toolbarHandle, 0, headerh, toolbarw, System.windowHeight() - headerh)) {
 			ui._y += 2;
 
 			ui.imageScrollAlign = false;
