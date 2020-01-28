@@ -29,7 +29,7 @@ class Config {
 	}
 
 	public static function save() {
-		var path = (Path.isProtected() ? Krom.savePath() : Data.dataPath) + "config.arm";
+		var path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.arm";
 		var bytes = Bytes.ofString(Json.stringify(raw));
 		Krom.fileSaveBytes(path, bytes.getData());
 	}

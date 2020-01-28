@@ -21,7 +21,9 @@ class Main {
 	static var tasks: Int;
 
 	public static function main() {
+		#if (!krom_darwin)
 		Krom.setApplicationName("ArmorPaint");
+		#end
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
 		#if arm_physics
@@ -68,7 +70,9 @@ class Main {
 		};
 
 		System.start(options, function(window: Window) {
+			#if (!krom_darwin)
 			Krom.setApplicationName("ArmorPaint");
+			#end
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
 					Uniforms.init();
