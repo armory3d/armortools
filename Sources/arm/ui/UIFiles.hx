@@ -19,6 +19,7 @@ class UIFiles {
 	static var files: Array<String> = null;
 	static var iconMap: Map<String, kha.Image> = null;
 	static var selected = -1;
+	static var showExtensions = true;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 		if (!UITrait.inst.nativeBrowser) {
@@ -141,7 +142,7 @@ class UIFiles {
 						}
 					}
 					if (icon != null) {
-						state = ui.image(icon, col, rect.h);
+						state = ui.image(icon, 0xffffffff, rect.h);
 						generic = false;
 					}
 				}
@@ -186,7 +187,8 @@ class UIFiles {
 
 				ui._x = _x;
 				ui._y += slotw * 0.75;
-				ui.text(f, Center);
+				var label = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
+				ui.text(label, Center);
 				ui._y -= slotw * 0.75;
 			}
 		}
