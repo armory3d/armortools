@@ -113,10 +113,9 @@ class TabMaterials {
 						UITrait.inst.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
+						var add = materials.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							var m = materials[i];
-							var add = materials.length > 1 ? 1 : 0;
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (13 + add), ui.t.SEPARATOR_COL);
 							ui.text(materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("To Fill Layer", Left)) {
@@ -181,7 +180,7 @@ class TabMaterials {
 								MaterialParser.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
-						});
+						}, 13 + add);
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
 

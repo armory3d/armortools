@@ -17,7 +17,6 @@ class TabMeshes {
 
 			if (ui.button("Tools...")) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
 					ui.text("Tools", Right, ui.t.HIGHLIGHT_COL);
 					if (ui.button("Flip Normals", Left)) {
 						MeshUtil.flipNormals();
@@ -39,7 +38,7 @@ class TabMeshes {
 						MeshUtil.swapAxis(0, 1);
 						Context.ddirty = 2;
 					}
-				});
+				}, 6);
 			}
 
 			if (ui.panel(Id.handle({selected: false}), "Scene", true)) {

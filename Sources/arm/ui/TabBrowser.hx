@@ -56,13 +56,12 @@ class TabBrowser {
 
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 						ui.text(folder, Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button("Delete", Left)) {
 							Config.raw.bookmarks.remove(b);
 							Config.save();
 						}
-					});
+					}, 2);
 				}
 			}
 

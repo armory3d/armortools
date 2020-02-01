@@ -20,14 +20,14 @@ class TabLayers {
 			if (ui.button("New")) {
 
 				// UIMenu.draw(function(ui:Zui) {
-				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
+				// 	ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.SEPARATOR_COL);
 				// 	ui.text("New", Right, ui.t.HIGHLIGHT_COL);
 				// 	if (ui.button("Paint Layer", Left)) {}
 				// 	if (ui.button("Fill Layer", Left, "Material 1")) {}
 				// 	if (ui.button("Black Mask", Left, "Layer 1")) {}
 				// 	if (ui.button("White Mask", Left, "Layer 1")) {}
 				// 	if (ui.button("Folder", Left)) {}
-				// });
+				// }, 6);
 
 				Layers.newLayer();
 				History.newLayer();
@@ -188,7 +188,6 @@ class TabLayers {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 3, ui.t.SEPARATOR_COL);
 							ui.text(l.name + " Mask", Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Delete", Left)) {
 								Context.setLayer(l);
@@ -208,7 +207,7 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(makeApply);
 							}
-						});
+						}, 3);
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
@@ -238,17 +237,20 @@ class TabLayers {
 				}
 
 				if (contextMenu) {
+
+					var add = l.material_mask != null ? 1 : 0;
+					var menuElements = 0;
+					if (l.getChildren() != null) {
+						menuElements = 6;
+					}
+					else if (l == Project.layers[0]) {
+						menuElements = (12 + add);
+					}
+					else {
+						menuElements = (20 + add);
+					}
+
 					UIMenu.draw(function(ui: Zui) {
-						var add = l.material_mask != null ? 1 : 0;
-						if (l.getChildren() != null) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
-						}
-						else if (l == Project.layers[0]) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * (12 + add), ui.t.SEPARATOR_COL);
-						}
-						else {
-							ui.fill(0, 0, ui._w, ui.t.ELEMENT_H * (20 + add), ui.t.SEPARATOR_COL);
-						}
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
 						if (ui.button("Export", Left)) BoxExport.showTextures();
@@ -451,7 +453,7 @@ class TabLayers {
 								UIMenu.keepOpen = true;
 							}
 						}
-					});
+					}, menuElements);
 				}
 
 				if (i == 0 || l.getChildren() != null) {

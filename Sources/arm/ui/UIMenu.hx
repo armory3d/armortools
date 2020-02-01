@@ -28,6 +28,7 @@ class UIMenu {
 	public static var menuCategory = 0;
 	public static var menuX = 0;
 	public static var menuY = 0;
+	public static var menuElements = 0;
 	public static var keepOpen = false;
 	public static var menuCommands: Zui->Void = null;
 	static var changeStarted = false;
@@ -50,6 +51,7 @@ class UIMenu {
 		ui.beginRegion(g, menuX, menuY, menuW);
 
 		if (menuCommands != null) {
+			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * menuElements, ui.t.SEPARATOR_COL);
 			menuCommands(ui);
 		}
 		else {
@@ -416,14 +418,20 @@ class UIMenu {
 		}
 	}
 
-	public static function draw(commands: Zui->Void = null, x = -1, y = -1) {
+	public static function draw(commands: Zui->Void = null, elements: Int, x = -1, y = -1) {
 		show = true;
 		menuCommands = commands;
+		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuW = App.uimenu.ELEMENT_W() * 1.7;
+		var menuW = App.uimenu.ELEMENT_W() * 2.0;
 		if (menuX + menuW > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuW);
+		}
+		var menuH = menuElements * 28; // ui.t.ELEMENT_H
+		if (menuY + menuH > System.windowHeight()) {
+			menuY = System.windowHeight() - menuH;
+			menuX += 1; // Move out of mouse focus
 		}
 	}
 }

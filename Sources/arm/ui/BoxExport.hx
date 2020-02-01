@@ -145,13 +145,12 @@ class BoxExport {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.fill(0, 0, @:privateAccess ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(t.name, Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button("Delete", Left)) {
 								preset.textures.remove(t);
 								savePreset();
 							}
-						});
+						}, 2);
 					}
 
 					var hr = htex.nest(0);

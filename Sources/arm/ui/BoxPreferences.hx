@@ -75,7 +75,6 @@ class BoxPreferences {
 				ui.row([0.5]);
 				if (ui.button("Restore")) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 						ui.text("Restore defaults?", Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button("Confirm", Left)) {
 							ui.t.ELEMENT_H = App.ELEMENT_H;
@@ -85,7 +84,7 @@ class BoxPreferences {
 							filesPlugin = null;
 							filesKeymap = null;
 						}
-					});
+					}, 2);
 				}
 			}
 			if (ui.tab(htab, "Usage", true)) {
@@ -307,7 +306,6 @@ plugin.drawUI = function(ui) {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 5, ui.t.SEPARATOR_COL);
 							ui.text(f, Right, ui.t.HIGHLIGHT_COL);
 							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
 							if (ui.button("Edit in Text Editor", Left)) {
@@ -335,7 +333,7 @@ plugin.drawUI = function(ui) {
 								filesPlugin.remove(f);
 								File.delete(path);
 							}
-						});
+						}, 5);
 					}
 				}
 			}

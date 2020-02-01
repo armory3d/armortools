@@ -82,7 +82,6 @@ class TabTextures {
 
 						if (ui.isHovered && ui.inputReleasedR) {
 							UIMenu.draw(function(ui: Zui) {
-								ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 4, ui.t.SEPARATOR_COL);
 								ui.text(asset.name, Right, ui.t.HIGHLIGHT_COL);
 								if (ui.button("Export", Left)) {
 									UIFiles.show("png", true, function(path: String) {
@@ -119,7 +118,7 @@ class TabTextures {
 										UITrait.inst.hwnd1.redraws = 2;
 									});
 								}
-							});
+							}, 4);
 						}
 					}
 				}

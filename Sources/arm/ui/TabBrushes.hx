@@ -71,7 +71,6 @@ class TabBrushes {
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
 							//var b = Project.brushes[i];
-							ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 2, ui.t.SEPARATOR_COL);
 							ui.text(Project.brushes[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button("Delete", Left) && Project.brushes.length > 1) {
@@ -79,7 +78,7 @@ class TabBrushes {
 								Project.brushes.splice(i, 1);
 								UITrait.inst.hwnd1.redraws = 2;
 							}
-						});
+						}, 2);
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
 				}
