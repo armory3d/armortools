@@ -94,7 +94,7 @@ class LayerSlot {
 	}
 
 	public function delete() {
-		if (texpaint != null) unload();
+		unload();
 		var children = getChildren();
 		if (children != null) for (c in children) c.parent = null;
 		var lpos = Project.layers.indexOf(this);
@@ -104,6 +104,8 @@ class LayerSlot {
 	}
 
 	public function unload() {
+		if (texpaint == null) return; // Layer is group
+
 		texpaint.unload();
 		texpaint_nor.unload();
 		texpaint_pack.unload();
