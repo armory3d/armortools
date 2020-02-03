@@ -29,6 +29,7 @@ else if (process.platform === 'darwin') {
 let debug = false;
 let raytrace = process.argv.indexOf("direct3d12") >= 0;
 let build = 'painter'; // painter || creator || player
+let win_hlsl = true; // GraphicsApi.Direct3D11 && GraphicsApi.Direct3D12
 
 if (debug) {
 	project.addDefine('arm_debug');
@@ -55,7 +56,7 @@ if (process.platform === 'darwin') {
 	project.addAssets("Assets/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
 }
 
-if (process.platform === 'win32') {
+if (process.platform === 'win32' && win_hlsl) {
 	project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
 else {
@@ -88,7 +89,7 @@ else { // painter, creator
 
 	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 	project.addAssets("Assets/painter/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
-	if (process.platform === 'win32') {
+	if (process.platform === 'win32' && win_hlsl) {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
 	}
 	else {
