@@ -115,7 +115,6 @@ class ImportMesh {
 				var ar = path.split("/");
 				var s = ar[ar.length - 1];
 				object.name = s.substring(0, s.length - 4);
-
 				// md.geom.calculateAABB();
 				// var aabb = md.geom.aabb;
 				// var dim = new TFloat32Array(3);
@@ -123,10 +122,6 @@ class ImportMesh {
 				// dim[1] = aabb.y;
 				// dim[2] = aabb.z;
 				// object.raw.dimensions = dim;
-				#if arm_physics
-				object.addTrait(new arm.plugin.PhysicsBody());
-				#end
-
 				Context.selectObject(object);
 			}
 			else { // Replace

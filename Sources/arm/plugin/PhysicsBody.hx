@@ -14,7 +14,20 @@ class PhysicsBody extends iron.Trait {
 	@:keep
 	public var props = ["mass"];
 
-	public var mass = 1.0;
+	public var mass(default, set) = 0.0;
+
+	@:keep
+	function set_mass(f: Float): Float {
+		if (ready) {
+			remove();
+			var t = new PhysicsBody();
+			t.mass = f;
+			object.addTrait(t);
+		}
+		else mass = f;
+		return f;
+	}
+
 	public var friction = 0.5;
 	public var restitution = 0.0;
 	public var collisionMargin = 0.0;

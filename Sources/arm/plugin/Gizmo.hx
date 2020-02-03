@@ -54,9 +54,10 @@ class Gizmo {
 
 					object.transform.buildMatrix();
 
-					#if arm_physics
-					object.addTrait(new arm.plugin.PhysicsBody());
-					#end
+					for (t in mo.traits) { // Clone traits
+						var trait = Type.createInstance(Type.getClass(t), []);
+						object.addTrait(trait);
+					}
 
 					Context.selectObject(object);
 				}
@@ -69,10 +70,6 @@ class Gizmo {
 					object.transform.rot.setFrom(lo.transform.rot);
 					object.transform.scale.setFrom(lo.transform.scale);
 					object.transform.buildMatrix();
-
-					#if arm_physics
-					object.addTrait(new arm.plugin.PhysicsBody());
-					#end
 
 					Context.selectObject(object);
 				}

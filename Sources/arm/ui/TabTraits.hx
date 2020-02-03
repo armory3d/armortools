@@ -18,7 +18,6 @@ class TabTraits {
 				ui.row([1 / 4]);
 				if (ui.button("New")) {
 					UIMenu.draw(function(ui:Zui) {
-						ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * traits.length, ui.t.SEPARATOR_COL);
 						ui.text("New", Right, ui.t.HIGHLIGHT_COL);
 						for (t in traits) {
 							if (ui.button(t, Left)) {
@@ -28,7 +27,7 @@ class TabTraits {
 								Context.object.addTrait(inst);
 							}
 						}
-					});
+					}, traits.length);
 				}
 
 				if (Context.object.traits.length > 0) {
@@ -38,7 +37,7 @@ class TabTraits {
 							var id = Id.handle();
 							id.value = Reflect.field(t, untyped t.props[i]);
 							ui.slider(id, untyped t.props[i]);
-							Reflect.setField(t, untyped t.props[i], id.value);
+							if (id.changed) Reflect.setProperty(t, untyped t.props[i], id.value);
 						}
 					}
 				}
