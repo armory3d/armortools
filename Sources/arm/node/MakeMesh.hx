@@ -34,7 +34,7 @@ class MakeMesh {
 			vert.write('float height = 0.0;');
 			var numLayers = 0;
 			for (l in Project.layers) {
-				if (!l.isVisible() || l.getChildren() != null) continue;
+				if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
 				if (numLayers > 16) break;
 				numLayers++;
 				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
@@ -86,8 +86,9 @@ class MakeMesh {
 			#end
 
 			if (Project.layers[0].isVisible()) {
+				var l = Project.layers[0];
 
-				if (Context.layer.paintBase) {
+				if (l.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
 					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
 					#if kha_direct3d12
@@ -101,7 +102,7 @@ class MakeMesh {
 				}
 				frag.write('basecol = texpaint_sample.rgb;');
 
-				if (Context.layer.paintNor || MaterialBuilder.emisUsed) {
+				if (l.paintNor || MaterialBuilder.emisUsed) {
 					frag.add_shared_sampler('sampler2D texpaint_nor');
 					frag.write('vec4 texpaint_nor_sample = textureLodShared(texpaint_nor, texCoord, 0.0);');
 
@@ -109,7 +110,7 @@ class MakeMesh {
 						frag.write('matid = texpaint_nor_sample.a;');
 					}
 
-					if (Context.layer.paintNor) {
+					if (l.paintNor) {
 						frag.write('vec3 ntex = texpaint_nor_sample.rgb;');
 						frag.write('n = ntex * 2.0 - 1.0;');
 						frag.write('n.y = -n.y;');
@@ -117,16 +118,16 @@ class MakeMesh {
 					}
 				}
 
-				if (MaterialBuilder.heightUsed ||
-					Context.layer.paintOcc ||
-					Context.layer.paintRough ||
-					Context.layer.paintMet) {
+				if ((l.paintHeight && MaterialBuilder.heightUsed) ||
+					l.paintOcc ||
+					l.paintRough ||
+					l.paintMet) {
 					frag.add_shared_sampler('sampler2D texpaint_pack');
 					frag.write('vec4 pack = textureLodShared(texpaint_pack, texCoord, 0.0);');
 				}
 
 				// Height
-				if (MaterialBuilder.heightUsed) {
+				if (l.paintHeight && MaterialBuilder.heightUsed) {
 					var ds = MaterialBuilder.getDisplaceStrength() * 5;
 					if (ds < 0.1) ds = 0.1;
 					else if (ds > 2.0) ds = 2.0;
@@ -158,26 +159,25 @@ class MakeMesh {
 				}
 				//
 
-				if (Context.layer.paintOcc) {
+				if (l.paintOcc) {
 					frag.write('occlusion = pack.r;');
 				}
 				else {
 					frag.write('occlusion = 1.0;');
 				}
-				if (Context.layer.paintRough) {
+				if (l.paintRough) {
 					frag.write('roughness = pack.g;');
 				}
 				else {
 					frag.write('roughness = 1.0;');
 				}
-				if (Context.layer.paintMet) {
+				if (l.paintMet) {
 					frag.write('metallic = pack.b;');
 				}
 				else {
 					frag.write('metallic = 0.0;');
 				}
 
-				var l = Project.layers[0];
 				if (l.maskOpacity < 1) {
 					frag.write('basecol *= ${l.maskOpacity};');
 					frag.write('occlusion *= ${l.maskOpacity};');
@@ -235,11 +235,11 @@ class MakeMesh {
 						frag.write('factor0 *= ${l.maskOpacity};');
 					}
 
-					if (Context.layer.paintBase) {
+					if (l.paintBase) {
 						frag.write('basecol = ' + MaterialBuilder.blendMode(frag, l.blending, 'basecol', 'col_tex0.rgb', 'factor0') + ';');
 					}
 
-					if (MaterialBuilder.emisUsed || Context.layer.paintNor) {
+					if (MaterialBuilder.emisUsed || l.paintNor) {
 
 						frag.add_shared_sampler('sampler2D texpaint_nor' + id);
 						frag.write('col_nor0 = textureLodShared(texpaint_nor' + id + ', texCoord, 0.0);');
@@ -248,7 +248,7 @@ class MakeMesh {
 							frag.write('matid = col_nor0.a;');
 						}
 
-						if (Context.layer.paintNor) {
+						if (l.paintNor) {
 							frag.write('n0 = col_nor0.rgb * 2.0 - 1.0;');
 							frag.write('n0.y = -n0.y;');
 							frag.write('n0 = normalize(mul(n0, TBN));');
@@ -256,17 +256,17 @@ class MakeMesh {
 						}
 					}
 
-					if (Context.layer.paintOcc || Context.layer.paintRough || Context.layer.paintMet) {
+					if (l.paintOcc || l.paintRough || l.paintMet) {
 						frag.add_shared_sampler('sampler2D texpaint_pack' + id);
 						frag.write('col_pack0 = textureLodShared(texpaint_pack' + id + ', texCoord, 0.0);');
 
-						if (Context.layer.paintOcc) {
+						if (l.paintOcc) {
 							frag.write('occlusion = mix(occlusion, col_pack0.r, factor0);');
 						}
-						if (Context.layer.paintRough) {
+						if (l.paintRough) {
 							frag.write('roughness = mix(roughness, col_pack0.g, factor0);');
 						}
-						if (Context.layer.paintMet) {
+						if (l.paintMet) {
 							frag.write('metallic = mix(metallic, col_pack0.b, factor0);');
 						}
 					}
