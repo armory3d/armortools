@@ -41,6 +41,7 @@ class Material {
 	static var cotangentFrameWritten: Bool;
 	static var sample_bump: Bool;
 	static var sample_bump_res: String;
+	static var tex_coord = "texCoord";
 
 	public static var customNodes = untyped __js__("new Map()");
 	public static var parse_surface = true;
@@ -504,7 +505,10 @@ class Material {
 		}
 		else if (node.type == "BLUR") {
 			// Image nodes only for now
+			tex_coord = "texCoordBlur";
+			curshader.write('vec2 texCoordBlur = texCoord;');
 			var out_col = parse_vector_input(node.inputs[0]);
+			tex_coord = "texCoord";
 			out_col = parsedMap.get(out_col);
 			if (out_col == null) return "vec3(0.0, 0.0, 0.0)";
 			out_col = textureMap.get(out_col.split(".")[0]);
@@ -514,15 +518,13 @@ class Material {
 			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
 			var steps = 'int($strength * 10 + 1)';
 			var texture = out_col.substring(out_col.indexOf("(") + 1, out_col.indexOf(","));
-			curshader.write('vec2 _texCoord = texCoord;');
 			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
 			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
 			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
-			curshader.write('texCoord = _texCoord + vec2(i, j) / textureSize($texture, 0);');
+			curshader.write('texCoordBlur = texCoord + vec2(i, j) / textureSize($texture, 0);');
 			curshader.write('res1 += $out_col;');
 			curshader.write('}');
 			curshader.write('}');
-			curshader.write('texCoord = _texCoord;');
 			curshader.write('res1 /= ($steps * 2 + 1) * ($steps * 2 + 1);');
 			return "res1";
 		}
@@ -1411,7 +1413,7 @@ class Material {
 			uv_name = parse_vector_input(node.inputs[0]);
 		}
 		else {
-			uv_name = "texCoord";
+			uv_name = tex_coord;
 		}
 		var tex_store = store_var_name(node);
 
@@ -1493,6 +1495,9 @@ class Material {
 			var letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 			if (!letter) s = s.replace(s.charAt(i), "_");
 		}
+		#if kha_opengl
+		while (s.indexOf("__") >= 0) s = s.replace("__", "_");
+		#end
 		return s;
 	}
 
