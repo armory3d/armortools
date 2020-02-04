@@ -39,11 +39,10 @@ class Layers {
 	public static var cursorVP: ConstantLocation;
 	public static var cursorInvVP: ConstantLocation;
 	public static var cursorMouse: ConstantLocation;
-	public static var cursorStep: ConstantLocation;
+	public static var cursorTexStep: ConstantLocation;
 	public static var cursorRadius: ConstantLocation;
 	public static var cursorTex: TextureUnit;
 	public static var cursorGbufferD: TextureUnit;
-	public static var cursorGbuffer0: TextureUnit;
 
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
@@ -167,10 +166,9 @@ class Layers {
 		cursorVP = pipeCursor.getConstantLocation("VP");
 		cursorInvVP = pipeCursor.getConstantLocation("invVP");
 		cursorMouse = pipeCursor.getConstantLocation("mouse");
-		cursorStep = pipeCursor.getConstantLocation("step");
+		cursorTexStep = pipeCursor.getConstantLocation("texStep");
 		cursorRadius = pipeCursor.getConstantLocation("radius");
 		cursorGbufferD = pipeCursor.getTextureUnit("gbufferD");
-		cursorGbuffer0 = pipeCursor.getTextureUnit("gbuffer0");
 		cursorTex = pipeCursor.getTextureUnit("tex");
 	}
 

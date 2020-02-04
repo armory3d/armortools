@@ -268,7 +268,6 @@ class RenderPathPaint {
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
-		g.setTexture(Layers.cursorGbuffer0, gbuffer0);
 		var mx = Input.getMouse().viewX / iron.App.w();
 		var my = 1.0 - (Input.getMouse().viewY / iron.App.h());
 		if (UITrait.inst.brushLocked) {
@@ -276,7 +275,7 @@ class RenderPathPaint {
 			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
 		}
 		g.setFloat2(Layers.cursorMouse, mx, my);
-		g.setFloat2(Layers.cursorStep, 2 / gbuffer0.width, 2 / gbuffer0.height);
+		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
 		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();
