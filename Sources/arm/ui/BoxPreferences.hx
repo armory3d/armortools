@@ -23,9 +23,6 @@ class BoxPreferences {
 	@:access(zui.Zui)
 	public static function show() {
 		UIBox.showCustom(function(ui: Zui) {
-			var _w = ui._w;
-			ui._w = Std.int(_w / 2);
-
 			if (ui.tab(htab, "Interface", true)) {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
@@ -337,7 +334,6 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-			ui._w = _w;
 		}, 600, 400);
 	}
 
