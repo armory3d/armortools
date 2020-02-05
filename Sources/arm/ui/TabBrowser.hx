@@ -28,7 +28,7 @@ class TabBrowser {
 				hpath.text = Config.raw.bookmarks[0];
 			}
 			hpath.text = ui.textInput(hpath, "Path");
-			UIFiles.fileBrowser(ui, hpath);
+			UIFiles.fileBrowser(ui, hpath, false, true);
 
 			if (known) {
 				ImportAsset.run(hpath.text);

@@ -266,6 +266,7 @@ class Project {
 				}
 			}
 		});
+		UIBox.clickToHide = false; // Prevent closing when going back to window from file browser
 	}
 
 	public static function reimportMesh() {

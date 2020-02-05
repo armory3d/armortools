@@ -69,7 +69,7 @@ class UIFiles {
 	}
 
 	@:access(zui.Zui)
-	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false): String {
+	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false): String {
 
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
@@ -153,7 +153,7 @@ class UIFiles {
 
 				if (state == Started) {
 
-					if (f != "..") {
+					if (f != ".." && dragFiles) {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
