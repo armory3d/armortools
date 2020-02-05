@@ -314,9 +314,9 @@ class MakePaint {
 		}
 		else {
 			if (eraser) {
-				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(${Layers.defaultBase}, ${Layers.defaultBase}, ${Layers.defaultBase}), str), sample_undo.a - str);');
+				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 				frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
-				frag.write('fragColor[2] = vec4(1.0, ${Layers.defaultRough}, 0.0, 0.0);');
+				frag.write('fragColor[2] = vec4(1.0, 0.0, 0.0, 0.0);');
 			}
 			else {
 				frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
@@ -326,7 +326,7 @@ class MakePaint {
 				#if kha_direct3d12
 				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, UITrait.inst.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
 				#else
-				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, UITrait.inst.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', 0.0);');
+				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, UITrait.inst.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 				#end
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.material.paintHeight && MaterialBuilder.heightUsed) {

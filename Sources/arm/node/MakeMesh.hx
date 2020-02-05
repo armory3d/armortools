@@ -74,7 +74,6 @@ class MakeMesh {
 			frag.write('float metallic;');
 			frag.write('float occlusion;');
 			frag.write('float opacity;');
-			frag.write('float specular;');
 			frag.write('float matid = 0.0;');
 
 			frag.vVec = true;
@@ -88,6 +87,12 @@ class MakeMesh {
 			if (Project.layers[0].isVisible()) {
 				var l = Project.layers[0];
 
+				if (l.objectMask > 0) {
+					var uid = Project.paintObjects[l.objectMask - 1].uid;
+					frag.add_uniform('int objectId', '_uid');
+					frag.write('if ($uid == objectId) {');
+				}
+
 				if (l.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
 					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
@@ -100,7 +105,7 @@ class MakeMesh {
 				else {
 					frag.write('vec4 texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 				}
-				frag.write('basecol = texpaint_sample.rgb;');
+				frag.write('basecol = texpaint_sample.rgb * texpaint_sample.a;');
 
 				if (l.paintNor || MaterialBuilder.emisUsed) {
 					frag.add_shared_sampler('sampler2D texpaint_nor');
@@ -184,13 +189,22 @@ class MakeMesh {
 					frag.write('roughness *= ${l.maskOpacity};');
 					frag.write('metallic *= ${l.maskOpacity};');
 				}
+
+				if (l.objectMask > 0) {
+					frag.write('}');
+					frag.write('else {');
+					frag.write('basecol = vec3(0.0, 0.0, 0.0);');
+					frag.write('occlusion = 1.0;');
+					frag.write('roughness = 0.0;');
+					frag.write('metallic = 0.0;');
+					frag.write('}');
+				}
 			}
 			else {
 				frag.write('basecol = vec3(0.0, 0.0, 0.0);');
 				frag.write('occlusion = 1.0;');
-				frag.write('roughness = 1.0;');
+				frag.write('roughness = 0.0;');
 				frag.write('metallic = 0.0;');
-				frag.write('specular = 1.0;');
 			}
 
 			if (Project.layers.length > 1) {

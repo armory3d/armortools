@@ -239,16 +239,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.material_mask != null ? 1 : 0;
-					var menuElements = 0;
-					if (l.getChildren() != null) {
-						menuElements = 6;
-					}
-					else if (l == Project.layers[0]) {
-						menuElements = (12 + add);
-					}
-					else {
-						menuElements = (20 + add);
-					}
+					var menuElements = l.getChildren() != null ? 6 : (20 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -276,22 +267,20 @@ class TabLayers {
 							iron.App.notifyOnRender(makePaint);
 						}
 
-						if (l == Project.layers[0]) {
-						}
-						else {
-							if (l.getChildren() == null && ui.button("To Group", Left)) {
-								if (l.parent == null) { // 1-level nesting only
-									Context.setLayer(l);
-									var group = Layers.newGroup();
-									Project.layers.remove(group);
-									Project.layers.insert(Project.layers.indexOf(l) + 1, group);
-									group.show_panel = true;
-									l.parent = group;
-									Context.setLayer(l);
-									// History.newGroup();
-								}
+						if (l.getChildren() == null && ui.button("To Group", Left)) {
+							if (l.parent == null) { // 1-level nesting only
+								Context.setLayer(l);
+								var group = Layers.newGroup();
+								Project.layers.remove(group);
+								Project.layers.insert(Project.layers.indexOf(l) + 1, group);
+								group.show_panel = true;
+								l.parent = group;
+								Context.setLayer(l);
+								// History.newGroup();
 							}
-							if (ui.button("Delete", Left)) {
+						}
+						if (ui.button("Delete", Left)) {
+							if (arm.Project.layers.length > 1) {
 								Context.layer = l;
 								if (l.getChildren() == null) {
 									History.deleteLayer();
@@ -306,115 +295,116 @@ class TabLayers {
 									l.parent.delete();
 								}
 							}
-							if (ui.button("Move Up", Left)) {
-								if (i < Project.layers.length - 1) {
+						}
+						if (ui.button("Move Up", Left)) {
+							if (i < Project.layers.length - 1) {
 
-									var isGroup = Project.layers[i].getChildren() != null;
-									if (isGroup) {
-										if (Project.layers[i + 1].parent != null) return; // Move over group
-									}
-
-									Context.setLayer(l);
-									History.orderLayers(i + 1);
-									var target = Project.layers[i + 1];
-									Project.layers[i + 1] = Project.layers[i];
-									Project.layers[i] = target;
-									UITrait.inst.hwnd.redraws = 2;
-
-									// Move layer
-									if (!isGroup) {
-										Project.layers[i + 1].parent = Project.layers[i].parent;
-
-										// Remove empty group
-										if (Project.layers[i].texpaint == null && Project.layers[i].getChildren() == null) {
-											Project.layers[i].delete();
-										}
-									}
-									// Move group
-									else {
-										var children = Project.layers[i + 1].getChildren();
-										var j = i;
-										for (c in children) {
-											var target = Project.layers[j - 1];
-											Project.layers[j - 1] = Project.layers[j];
-											Project.layers[j] = target;
-											j--;
-										}
-									}
+								var isGroup = Project.layers[i].getChildren() != null;
+								if (isGroup) {
+									if (Project.layers[i + 1].parent != null) return; // Move over group
 								}
-							}
-							if (ui.button("Move Down", Left)) {
-								if (i > 1) {
 
-									var isGroup = l.getChildren() != null;
-									if (isGroup) {
-										var children = l.getChildren();
-										if (i - children.length <= 1) return;
-										if (Project.layers[i - children.length - 2].parent != null) return; // Move over group
-										for (c in children) {
-											var k = Project.layers.indexOf(c);
-											var target = Project.layers[k - 1];
-											Project.layers[k - 1] = Project.layers[k];
-											Project.layers[k] = target;
-										}
-									}
-
-									Context.setLayer(l);
-									History.orderLayers(i - 1);
-									var target = Project.layers[i - 1];
-									Project.layers[i - 1] = Project.layers[i];
-									Project.layers[i] = target;
-									UITrait.inst.hwnd.redraws = 2;
-
-									// Move layer
-									if (!isGroup) {
-										Project.layers[i - 1].parent = Project.layers[i].parent;
-
-										// Move to group
-										if (Project.layers[i].getChildren() != null) {
-											Project.layers[i - 1].parent = Project.layers[i];
-										}
-
-										// Remove empty group
-										if (Project.layers.length > i + 1 && Project.layers[i + 1].texpaint == null && Project.layers[i + 1].getChildren() == null) {
-											Project.layers[i + 1].delete();
-										}
-									}
-								}
-							}
-							if (l.getChildren() != null && ui.button("Merge Group", Left)) {
-
-							}
-							if (l.getChildren() == null && ui.button("Merge Down", Left)) {
 								Context.setLayer(l);
-								iron.App.notifyOnRender(History.mergeLayers);
-								iron.App.notifyOnRender(Layers.mergeSelectedLayer);
-							}
-							if (l.getChildren() == null && ui.button("Duplicate", Left)) {
-								Context.setLayer(l);
-								History.duplicateLayer();
-								function makeDupli(g: kha.graphics4.Graphics) {
-									g.end();
-									l = l.duplicate();
-									Context.setLayer(l);
-									g.begin();
-									iron.App.removeRender(makeDupli);
+								History.orderLayers(i + 1);
+								var target = Project.layers[i + 1];
+								Project.layers[i + 1] = Project.layers[i];
+								Project.layers[i] = target;
+								UITrait.inst.hwnd.redraws = 2;
+
+								// Move layer
+								if (!isGroup) {
+									Project.layers[i + 1].parent = Project.layers[i].parent;
+
+									// Remove empty group
+									if (Project.layers[i].texpaint == null && Project.layers[i].getChildren() == null) {
+										Project.layers[i].delete();
+									}
 								}
-								iron.App.notifyOnRender(makeDupli);
-							}
-							if (l.getChildren() == null && ui.button("Black Mask", Left)) {
-								l.createMask(0x00000000);
-								Context.setLayer(l, true);
-								Context.layerPreviewDirty = true;
-								History.newMask();
-							}
-							if (l.getChildren() == null && ui.button("White Mask", Left)) {
-								l.createMask(0xffffffff);
-								Context.setLayer(l, true);
-								Context.layerPreviewDirty = true;
-								History.newMask();
+								// Move group
+								else {
+									var children = Project.layers[i + 1].getChildren();
+									var j = i;
+									for (c in children) {
+										var target = Project.layers[j - 1];
+										Project.layers[j - 1] = Project.layers[j];
+										Project.layers[j] = target;
+										j--;
+									}
+								}
 							}
 						}
+						if (ui.button("Move Down", Left)) {
+							if (i > 0) {
+
+								var isGroup = l.getChildren() != null;
+								if (isGroup) {
+									var children = l.getChildren();
+									if (i - children.length <= 1) return;
+									if (Project.layers[i - children.length - 2].parent != null) return; // Move over group
+									for (c in children) {
+										var k = Project.layers.indexOf(c);
+										var target = Project.layers[k - 1];
+										Project.layers[k - 1] = Project.layers[k];
+										Project.layers[k] = target;
+									}
+								}
+
+								Context.setLayer(l);
+								History.orderLayers(i - 1);
+								var target = Project.layers[i - 1];
+								Project.layers[i - 1] = Project.layers[i];
+								Project.layers[i] = target;
+								UITrait.inst.hwnd.redraws = 2;
+
+								// Move layer
+								if (!isGroup) {
+									Project.layers[i - 1].parent = Project.layers[i].parent;
+
+									// Move to group
+									if (Project.layers[i].getChildren() != null) {
+										Project.layers[i - 1].parent = Project.layers[i];
+									}
+
+									// Remove empty group
+									if (Project.layers.length > i + 1 && Project.layers[i + 1].texpaint == null && Project.layers[i + 1].getChildren() == null) {
+										Project.layers[i + 1].delete();
+									}
+								}
+							}
+						}
+						if (l.getChildren() != null && ui.button("Merge Group", Left)) {
+
+						}
+						if (l.getChildren() == null && ui.button("Merge Down", Left)) {
+							Context.setLayer(l);
+							iron.App.notifyOnRender(History.mergeLayers);
+							iron.App.notifyOnRender(Layers.mergeSelectedLayer);
+						}
+						if (l.getChildren() == null && ui.button("Duplicate", Left)) {
+							Context.setLayer(l);
+							History.duplicateLayer();
+							function makeDupli(g: kha.graphics4.Graphics) {
+								g.end();
+								l = l.duplicate();
+								Context.setLayer(l);
+								g.begin();
+								iron.App.removeRender(makeDupli);
+							}
+							iron.App.notifyOnRender(makeDupli);
+						}
+						if (l.getChildren() == null && ui.button("Black Mask", Left)) {
+							l.createMask(0x00000000);
+							Context.setLayer(l, true);
+							Context.layerPreviewDirty = true;
+							History.newMask();
+						}
+						if (l.getChildren() == null && ui.button("White Mask", Left)) {
+							l.createMask(0xffffffff);
+							Context.setLayer(l, true);
+							Context.layerPreviewDirty = true;
+							History.newMask();
+						}
+
 						if (l.material_mask != null) {
 							if (ui.button("Select Material", Left)) {
 								Context.setMaterial(l.material_mask);
@@ -456,7 +446,7 @@ class TabLayers {
 					}, menuElements);
 				}
 
-				if (i == 0 || l.getChildren() != null) {
+				if (l.getChildren() != null) {
 					@:privateAccess ui.endElement();
 				}
 				else {
@@ -476,7 +466,7 @@ class TabLayers {
 				l.show_panel = layerPanel.selected;
 				ui._y -= center;
 
-				if (i == 0 || l.getChildren() != null) {
+				if (l.getChildren() != null) {
 					ui._y -= ui.t.ELEMENT_OFFSET;
 					@:privateAccess ui.endElement();
 				}
