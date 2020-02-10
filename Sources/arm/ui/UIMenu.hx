@@ -206,7 +206,7 @@ class UIMenu {
 					if (UITrait.inst.showEnvmapBlurHandle.changed) Context.ddirty = 2;
 				}
 				else {
-					if (ui.panel(viewportColorHandle, " Viewport Color")) {
+					if (ui.panel(viewportColorHandle, " Viewport Color", false, false, false)) {
 						var hwheel = Id.handle({color: 0xff030303});
 						var worldColor: kha.Color = Ext.colorWheel(ui, hwheel);
 						if (hwheel.changed) {

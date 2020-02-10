@@ -28,7 +28,7 @@ class TabOutliner {
 				}
 				if (o.children.length > 0) {
 					ui.row([1 / 13, 12 / 13]);
-					b = ui.panel(h.nest(i, {selected: true}), "", true);
+					b = ui.panel(h.nest(i, {selected: true}), "", true, false, false);
 					ui.text(o.name);
 				}
 				else {

@@ -462,7 +462,7 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				ui.panel(layerPanel, "", true);
+				ui.panel(layerPanel, "", true, false, false);
 				l.show_panel = layerPanel.selected;
 				ui._y -= center;
 
