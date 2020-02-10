@@ -1,4 +1,5 @@
 let project = new Project('ArmorPaint');
+let android = false; // Temp
 
 project.addSources('Sources');
 project.addLibrary("iron");
@@ -13,10 +14,15 @@ project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/theme
 project.addDefine('arm_taa');
 project.addDefine('arm_veloc');
 project.addDefine('arm_particles');
-project.addDefine('arm_data_dir');
 // project.addDefine('arm_noembed');
+if (!android) {
+	project.addDefine('arm_data_dir');
+}
 
-if (process.platform === 'win32') {
+if (android) {
+	project.addDefine('krom_android');
+}
+else if (process.platform === 'win32') {
 	project.addDefine('krom_windows');
 }
 else if (process.platform === 'linux') {
@@ -48,15 +54,20 @@ if (raytrace) {
 }
 else {
 	project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
-	project.addDefine('rp_voxelao');
-	project.addDefine('arm_voxelgi_revox');
+	if (!android) {
+		project.addDefine('rp_voxelao');
+		project.addDefine('arm_voxelgi_revox');
+	}
 }
 
 if (process.platform === 'darwin') {
 	project.addAssets("Assets/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
 }
 
-if (process.platform === 'win32' && win_hlsl) {
+if (android) {
+
+}
+else if (process.platform === 'win32' && win_hlsl) {
 	project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
 }
 else {
@@ -73,7 +84,10 @@ else { // painter, creator
 	project.addDefine('arm_skip_envmap');
 	project.addDefine('arm_resizable');
 
-	if (process.platform === 'win32') {
+	if (android) {
+
+	}
+	else if (process.platform === 'win32') {
 		project.addAssets("Assets/bin/cmft.exe", { notinlist: true, destination: "data/{name}" });
 	}
 	else if (process.platform === 'linux') {
@@ -89,7 +103,7 @@ else { // painter, creator
 
 	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 	project.addAssets("Assets/painter/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
-	if (process.platform === 'win32' && win_hlsl) {
+	if (process.platform === 'win32' && win_hlsl && !android) {
 		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
 	}
 	else {

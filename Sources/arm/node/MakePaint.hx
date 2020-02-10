@@ -269,15 +269,16 @@ class MakePaint {
 		if (UITrait.inst.pickerMaskHandle.position == MaskMaterial) {
 			matid = UITrait.inst.materialIdPicked / 255; // Keep existing material id in place when mask is set
 		}
-		frag.write('float matid = $matid;');
+		var matidString = Material.vec1(matid);
+		frag.write('float matid = $matidString;');
 
 		// TODO: Use emission/subsurface matid
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 		if (Context.material.paintSubs) {
-			frag.write('if (subs > 0) { matid = 254 / 255; }');
+			frag.write('if (subs > 0.0) { matid = float(254) / float(255); }');
 		}
 		if (Context.material.paintEmis) {
-			frag.write('if (emis > 0) { matid = 255 / 255; }');
+			frag.write('if (emis > 0.0) { matid = float(255) / float(255); }');
 		}
 
 		if (layered) {

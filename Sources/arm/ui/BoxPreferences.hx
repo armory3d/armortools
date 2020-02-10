@@ -54,7 +54,9 @@ class BoxPreferences {
 					UITrait.inst.tagUIRedraw();
 				}
 
+				#if (!krom_android)
 				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
+				#end
 
 				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache UI Draws");
 				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
@@ -150,7 +152,7 @@ class BoxPreferences {
 				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
 				if (vsyncHandle.changed) Config.save();
 
-				#if (!kha_direct3d12)
+				#if rp_voxelao
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
 				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
 				if (UITrait.inst.hvxao.changed) {

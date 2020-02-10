@@ -18,7 +18,7 @@ class File {
 	#end
 
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
-		#if (krom_windows || krom_linux)
+		#if (krom_windows || krom_linux || krom_android)
 		return Krom.readDirectory(path, foldersOnly).split("\n");
 		#else
 		var save = Path.data() + Path.sep + "tmp.txt";

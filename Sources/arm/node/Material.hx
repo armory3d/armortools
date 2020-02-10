@@ -1450,23 +1450,23 @@ class Material {
 		sample_bump = false;
 	}
 
-	static function vec1(v: Float): String {
-		#if kha_webgl
+	public static inline function vec1(v: Float): String {
+		#if (kha_webgl ||krom_android)
 		return 'float($v)';
 		#else
 		return '$v';
 		#end
 	}
 
-	static function vec3(v: Array<Float>): String {
-		#if kha_webgl
+	public static inline function vec3(v: Array<Float>): String {
+		#if (kha_webgl ||krom_android)
 		return 'vec3(float(${v[0]}), float(${v[1]}), float(${v[2]}))';
 		#else
 		return 'vec3(${v[0]}, ${v[1]}, ${v[2]})';
 		#end
 	}
 
-	static function to_vec3(s: String): String {
+	public static inline function to_vec3(s: String): String {
 		#if (kha_direct3d11 || kha_direct3d12)
 		return '($s).xxx';
 		#else

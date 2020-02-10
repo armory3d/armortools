@@ -201,6 +201,8 @@ class UIFiles {
 		#if krom_windows
 		handle.text = "C:\\Users";
 		// %HOMEDRIVE% + %HomePath%
+		#elseif krom_android
+		handle.text = "/sdcard";
 		#else
 		handle.text = "/";
 		// ~

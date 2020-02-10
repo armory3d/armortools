@@ -217,10 +217,18 @@ class BoxExport {
 	}
 
 	static function fetchPresets() {
+		#if krom_android
+
+		files = ["generic"];
+
+		#else
+
 		files = File.readDirectory(Path.data() + Path.sep + "export_presets");
 		for (i in 0...files.length) {
 			files[i] = files[i].substr(0, files[i].length - 5); // Strip .json
 		}
+
+		#end
 	}
 
 	static function parsePreset() {
