@@ -148,9 +148,12 @@ class BoxPreferences {
 			if (ui.tab(htab, "Viewport", true)) {
 				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
+
+				#if arm_debug
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
 				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
 				if (vsyncHandle.changed) Config.save();
+				#end
 
 				#if rp_voxelao
 				ui.check(UITrait.inst.hvxao, "Voxel AO");
