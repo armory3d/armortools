@@ -56,28 +56,25 @@ if (raytrace) {
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 }
-else {
-	if (android) {
-		project.addAssets("Assets/readme/readme_android.txt", { notinlist: true, destination: "{name}" });
-	}
-	else {
-		project.addDefine('rp_voxelao');
-		project.addDefine('arm_voxelgi_revox');
-	}
+
+if (android) {
+	project.addAssets("Assets/readme/readme_android.txt", { notinlist: true, destination: "{name}" });
 }
 
 if (process.platform === 'darwin') {
 	project.addAssets("Assets/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
 }
 
-if (android) {
+if (process.platform !== 'darwin' && !raytrace && !android) {
+	project.addDefine('rp_voxelao');
+	project.addDefine('arm_voxelgi_revox');
 
-}
-else if (process.platform === 'win32' && win_hlsl) {
-	project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
-}
-else {
-	project.addShaders("Shaders/voxel_glsl/*.glsl", { noembed: false });
+	if (process.platform === 'win32' && win_hlsl) {
+		project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
+	}
+	else {
+		project.addShaders("Shaders/voxel_glsl/*.glsl", { noembed: false });
+	}
 }
 
 if (build === 'player') {

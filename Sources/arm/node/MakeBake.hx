@@ -8,12 +8,13 @@ class MakeBake {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
 		if (UITrait.inst.bakeType == BakeAO) { // Voxel
+			#if rp_voxelao
 			// Apply normal channel
 			frag.wposition = true;
 			frag.n = true;
 			frag.vVec = true;
 			frag.add_function(MaterialFunctions.str_cotangentFrame);
-			#if (kha_direct3d11 || kha_direct3d12)
+			#if kha_direct3d11
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -37,6 +38,7 @@ class MakeBake {
 			}
 			frag.write('ao = 1.0 - ao;');
 			frag.write('fragColor[0] = vec4(ao, ao, ao, 1.0);');
+			#end
 		}
 		else if (UITrait.inst.bakeType == BakeCurvature) {
 			var strength = UITrait.inst.bakeCurvStrength * 2.0;

@@ -157,7 +157,7 @@ class RenderPathPaint {
 				}
 			}
 			else {
-				#if (!kha_direct3d12)
+				#if rp_voxelao
 				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
@@ -196,7 +196,7 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
-				#if (!kha_direct3d12)
+				#if rp_voxelao
 				if (Context.tool == ToolBake && UITrait.inst.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}
