@@ -33,20 +33,20 @@ class MakeBlur {
 		frag.add_uniform('float texpaintSize', '_texpaintSize');
 		frag.write('float blur_step = 1.0 / texpaintSize;');
 		frag.write('for (int i = -7; i <= 7; i++) {');
-		frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
-		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+		frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
+		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
 		frag.write('roughness += texpaint_pack_sample.g;');
 		frag.write('metallic += texpaint_pack_sample.b;');
 		frag.write('occlusion += texpaint_pack_sample.r;');
-		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * i, 0.0)).rgb * blur_weight[i + 7];');
+		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
 		frag.write('}');
 		frag.write('for (int i = -7; i <= 7; i++) {');
-		frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
-		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+		frag.write('basecol += texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * float(i))).rgb * blur_weight[i + 7];');
+		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * float(i))).rgb * blur_weight[i + 7];');
 		frag.write('roughness += texpaint_pack_sample.g;');
 		frag.write('metallic += texpaint_pack_sample.b;');
 		frag.write('occlusion += texpaint_pack_sample.r;');
-		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * i)).rgb * blur_weight[i + 7];');
+		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * float(i))).rgb * blur_weight[i + 7];');
 		frag.write('}');
 	}
 }

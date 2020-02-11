@@ -237,15 +237,15 @@ class MakePaint {
 				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
 			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
-			frag.write('opacity *= textureLod(texbrushmask, pa_mask, 0).r;');
+			frag.write('opacity *= textureLod(texbrushmask, pa_mask, 0.0).r;');
 		}
 
 		if (Context.tool == ToolParticle) { // particle mask
 			frag.add_uniform('sampler2D texparticle', '_texparticle');
 			#if (kha_opengl || kha_webgl)
-			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0).r;');
+			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
 			#else
-			frag.write('float str = textureLod(texparticle, sp.xy, 0).r;');
+			frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
 			#end
 		}
 		else { // brush cursor mask

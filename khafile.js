@@ -21,6 +21,7 @@ if (!android) {
 
 if (android) {
 	project.addDefine('krom_android');
+	project.addDefine('kha_android');
 }
 else if (process.platform === 'win32') {
 	project.addDefine('krom_windows');
@@ -47,14 +48,18 @@ else {
 	project.addParameter('-dce full');
 }
 
+project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
+
 if (raytrace) {
 	project.addAssets("Assets/raytrace/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 }
 else {
-	project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
-	if (!android) {
+	if (android) {
+		project.addAssets("Assets/readme/readme_android.txt", { notinlist: true, destination: "{name}" });
+	}
+	else {
 		project.addDefine('rp_voxelao');
 		project.addDefine('arm_voxelgi_revox');
 	}

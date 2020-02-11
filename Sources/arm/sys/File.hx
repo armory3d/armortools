@@ -54,6 +54,8 @@ class File {
 		Krom.sysCommand('explorer "' + url + '"');
 		#elseif krom_linux
 		Krom.sysCommand('xdg-open "' + url + '"');
+		#elseif krom_android
+		Krom.loadUrl(url);
 		#else
 		Krom.sysCommand('open "' + url + '"');
 		#end
