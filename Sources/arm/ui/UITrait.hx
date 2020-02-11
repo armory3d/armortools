@@ -432,6 +432,9 @@ class UITrait {
 			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
 				showMaterialNodes();
 			}
+			else if (Operator.shortcut(Config.keymap.toggle_browser)) {
+				toggleBrowser();
+			}
 		}
 
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
@@ -886,6 +889,12 @@ class UITrait {
 		App.resize();
 	}
 
+	function toggleBrowser() {
+		var minimized = statush <= defaultStatusH * Config.raw.window_scale;
+		statush = minimized ? 240 : defaultStatusH;
+		statush = Std.int(statush * Config.raw.window_scale);
+	}
+
 	public function getImage(asset: TAsset): Image {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
@@ -1199,8 +1208,7 @@ class UITrait {
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
 			if (statustab.changed && (statustab.position == lastStatusPosition || minimized)) {
-				statush = minimized ? 240 : defaultStatusH;
-				statush = Std.int(statush * Config.raw.window_scale);
+				toggleBrowser();
 			}
 			lastStatusPosition = statustab.position;
 		}

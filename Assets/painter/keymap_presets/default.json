@@ -51,5 +51,6 @@
 	"tool_picker": "v",
 	"toggle_2d_view": "shift+tab",
 	"toggle_node_editor": "tab",
+	"toggle_browser": "`",
 	"node_search": "space"
 }
