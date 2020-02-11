@@ -22,6 +22,7 @@ if (!android) {
 if (android) {
 	project.addDefine('krom_android');
 	project.addDefine('kha_android');
+	project.addDefine('kha_android_rmb');
 }
 else if (process.platform === 'win32') {
 	project.addDefine('krom_windows');
