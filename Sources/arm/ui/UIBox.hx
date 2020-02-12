@@ -2,6 +2,7 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
+import zui.Ext;
 import zui.Id;
 import iron.system.Input;
 
@@ -17,6 +18,7 @@ class UIBox {
 	static var modalW = 400;
 	static var modalH = 170;
 	static var draws = 0;
+	static var copyable = false;
 
 	public static function render(g: kha.graphics2.Graphics) {
 		g.end();
@@ -27,19 +29,17 @@ class UIBox {
 		var mw = Std.int(modalW * ui.SCALE());
 		var mh = Std.int(modalH * ui.SCALE());
 		var left = Std.int(appw / 2 - mw / 2);
-		//var right = Std.int(appw / 2 + mw / 2);
 		var top = Std.int(apph / 2 - mh / 2);
-		//var bottom = Std.int(apph / 2 + mh / 2);
 
 		if (boxCommands == null) {
 			ui.begin(g);
 			if (ui.window(hwnd, left, top, mw, mh, true)) {
 				ui._y += 10;
 				if (ui.tab(Id.handle(), boxTitle)) {
-					for (line in boxText.split("\n")) {
-						ui.text(line);
-					}
-
+					copyable ?
+						Ext.textArea(ui, Id.handle({text: boxText}), false) :
+						ui.text(boxText);
+					ui.endElement();
 					ui.row([2 / 3, 1 / 3]);
 					ui.endElement();
 					if (ui.button("OK")) {
@@ -88,13 +88,14 @@ class UIBox {
 		}
 	}
 
-	public static function showMessage(title: String, text: String) {
+	public static function showMessage(title: String, text: String, copyable = false) {
 		init();
 		modalW = 400;
-		modalH = 190;
+		modalH = 210;
 		boxTitle = title;
 		boxText = text;
 		boxCommands = null;
+		UIBox.copyable = copyable;
 	}
 
 	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200) {

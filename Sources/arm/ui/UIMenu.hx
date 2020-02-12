@@ -391,7 +391,7 @@ class UIMenu {
 					// { lshw -C display }
 					#end
 
-					UIBox.showMessage("About", msg);
+					UIBox.showMessage("About", msg, true);
 				}
 			}
 		}
