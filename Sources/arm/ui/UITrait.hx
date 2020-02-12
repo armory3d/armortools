@@ -533,7 +533,7 @@ class UITrait {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
 						Operator.shortcut(Config.keymap.brush_opacity)) {
 						brushCanLock = true;
-						mouse.lock();
+						if (!Input.getPen().connected) mouse.lock();
 						lockStartedX = mouse.x;
 						lockStartedY = mouse.y;
 					}
