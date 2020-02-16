@@ -165,9 +165,6 @@ class App {
 				#end
 				if (fileArg != "") {
 					iron.App.notifyOnInit(function() {
-						#if krom_windows
-						fileArg = fileArg.replace("/", "\\");
-						#end
 						ImportAsset.run(fileArg, -1, -1, false);
 						// Parse arguments
 						// armorpaint import_path export_path export_file_name

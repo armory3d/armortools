@@ -23,8 +23,7 @@ class ImportTexture {
 
 		importer(path, function(image: Image) {
 			Data.cachedImages.set(path, image);
-			var ar = path.split("/");
-			ar = ar[ar.length - 1].split("\\");
+			var ar = path.split(Path.sep);
 			var name = ar[ar.length - 1];
 			var asset: TAsset = {name: name, file: path, id: Project.assetId++};
 			Project.assets.push(asset);

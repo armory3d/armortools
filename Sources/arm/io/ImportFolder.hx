@@ -81,7 +81,7 @@ class ImportFolder {
 		}
 		var nodes = isScene ? Context.materialScene.nodes : Context.material.nodes;
 		var canvas = isScene ? Context.materialScene.canvas : Context.material.canvas;
-		var dirs = path.replace("\\", "/").split("/");
+		var dirs = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
 		var nout: TNode = null;
 		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }

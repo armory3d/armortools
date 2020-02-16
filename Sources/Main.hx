@@ -43,8 +43,7 @@ class Main {
 
 		#if arm_player
 		var title = Krom.getArg(0);
-		title = title.replace("\\", "/");
-		var lasti = title.lastIndexOf("/");
+		var lasti = title.lastIndexOf(Path.sep);
 		if (lasti >= 0) title = title.substr(lasti + 1);
 		if (title.endsWith(".exe")) title = title.substr(0, title.length - 4);
 		#else

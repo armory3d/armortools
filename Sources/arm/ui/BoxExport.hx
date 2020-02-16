@@ -209,7 +209,7 @@ class BoxExport {
 					UIFiles.show(UITrait.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = "untitled";
-						ExportMesh.run(path + "/" + f, applyDisplacement);
+						ExportMesh.run(path + Path.sep + f, applyDisplacement);
 					});
 				}
 			}

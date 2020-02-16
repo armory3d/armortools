@@ -81,7 +81,7 @@ class Project {
 		UIFiles.show("arm", true, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = "untitled";
-			filepath = path + "/" + f;
+			filepath = path + Path.sep + f;
 			if (!filepath.endsWith(".arm")) filepath += ".arm";
 			projectSave();
 		});

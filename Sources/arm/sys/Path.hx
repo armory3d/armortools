@@ -26,37 +26,25 @@ class Path {
 	public static var displacementExt = ["displacement", "height", "h", "disp"];
 
 	public static function data(): String {
-		#if krom_windows
-		var path = Data.dataPath.replace("/", "\\");
-		#else
-		var path = Data.dataPath;
-		#end
-		return Krom.getFilesLocation() + Path.sep + path;
+		return Krom.getFilesLocation() + Path.sep + Data.dataPath;
 	}
 
 	public static function toRelative(from: String, to: String): String {
-		from = haxe.io.Path.normalize(from);
-		to = haxe.io.Path.normalize(to);
-		var a = from.split("/");
-		var b = to.split("/");
+		var a = from.split(Path.sep);
+		var b = to.split(Path.sep);
 		while (a[0] == b[0]) {
 			a.shift();
 			b.shift();
 			if (a.length == 0 || b.length == 0) break;
 		}
 		var base = "";
-		for (i in 0...a.length - 1) base += "../";
-		base += b.join("/");
-		return haxe.io.Path.normalize(base);
+		for (i in 0...a.length - 1) base += ".." + Path.sep;
+		base += b.join(Path.sep);
+		return base;
 	}
 
 	public static function baseDir(path: String): String {
-		path = haxe.io.Path.normalize(path);
-		var base = path.substr(0, path.lastIndexOf("/") + 1);
-		#if krom_windows
-		base = base.substr(0, 2) + "\\" + base.substr(3);
-		#end
-		return base;
+		return path.substr(0, path.lastIndexOf(Path.sep) + 1);
 	}
 
 	public static function workingDir(): String {

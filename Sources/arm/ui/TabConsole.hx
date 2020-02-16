@@ -28,7 +28,7 @@ class TabConsole {
 				UIFiles.show("txt", true, function(path: String) {
 					var f = UIFiles.filename;
 					if (f == "") f = "untitled";
-					path = path + "/" + f;
+					path = path + Path.sep + f;
 					if (!path.endsWith(".txt")) path += ".txt";
 					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
 				});

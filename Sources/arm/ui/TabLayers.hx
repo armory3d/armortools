@@ -480,7 +480,7 @@ class TabLayers {
 					var ar = ["Shared"];
 					for (p in Project.paintObjects) ar.push(p.name);
 					var h = Id.handle().nest(l.id);
-					h.position = l.objectMask;
+					h.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
 					l.objectMask = ui.combo(h, ar, "Object");
 					if (h.changed) {
 						Context.setLayer(l);

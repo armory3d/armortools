@@ -97,7 +97,7 @@ class TabTextures {
 											var writer = new arm.format.PngWriter(out);
 											var data = arm.format.PngTools.build32RGB1(target.width, target.height, target.getPixels());
 											writer.write(data);
-											Krom.fileSaveBytes(path + "/" + f, out.getBytes().getData());
+											Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
 											iron.App.removeRender(exportTexture);
 										};
 										iron.App.notifyOnRender(exportTexture);

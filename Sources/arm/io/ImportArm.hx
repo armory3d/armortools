@@ -61,14 +61,8 @@ class ImportArm {
 	}
 
 	public static function runScene(raw: TSceneFormat, path: String) {
-		#if krom_windows
-		path = path.replace("\\", "/");
-		#end
 		var _dataPath = Data.dataPath;
-		Data.dataPath = path.substring(0, path.lastIndexOf("/") + 1);
-		#if krom_windows
-		Data.dataPath = Data.dataPath.replace("/", "\\");
-		#end
+		Data.dataPath = path.substring(0, path.lastIndexOf(Path.sep) + 1);
 		raw.name += "_imported";
 		Data.cachedSceneRaws.set(raw.name, raw);
 		Scene.active.addScene(raw.name, null, function(sceneObject: Object) {
@@ -95,7 +89,6 @@ class ImportArm {
 	public static function runProject(path: String) {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
-			path = path.replace("\\", "/");
 
 			// Import as material instead
 			if (project.version != null && project.layer_datas == null) {
@@ -106,7 +99,7 @@ class ImportArm {
 			Context.layersPreviewDirty = true;
 			Project.filepath = path;
 			Project.projectNew(false);
-			UIFiles.filename = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 
 			// Import as mesh instead
@@ -180,7 +173,6 @@ class ImportArm {
 
 			var l0 = project.layer_datas[0];
 			App.resHandle.position = Config.getTextureResPos(l0.res);
-			if (l0.bpp == null) l0.bpp = 8; // TODO: deprecated
 			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
 			App.bitsHandle.position = bitsPos;
 			var bytesPerPixel = Std.int(l0.bpp / 8);
@@ -236,16 +228,12 @@ class ImportArm {
 					}
 
 					l.uvScale = ld.uv_scale;
-					if (l.uvScale == null) l.uvScale = 1.0; // TODO: deprecated
 					l.uvRot = ld.uv_rot;
-					if (l.uvRot == null) l.uvRot = 0.0; // TODO: deprecated
 					l.uvType = ld.uv_type;
-					if (l.uvType == null) l.uvType = 0; // TODO: deprecated
 					l.maskOpacity = ld.opacity_mask;
 					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
-					if (l.blending == null) l.blending = 0; // TODO: deprecated
 
 					// texpaint.unload();
 					// texpaint_nor.unload();
@@ -332,10 +320,6 @@ class ImportArm {
 	static function initNodes(nodes: Array<TNode>) {
 		for (node in nodes) {
 			if (node.type == "TEX_IMAGE") {
-				// TODO: deprecated, stores filename now
-				var s = node.buttons[0].data + "";
-				node.buttons[0].data = s.substr(s.lastIndexOf("/") + 1);
-				//
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 			}
 			for (inp in node.inputs) { // Round input socket values

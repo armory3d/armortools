@@ -12,6 +12,7 @@ import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.io.ExportArm;
+import arm.sys.Path;
 import arm.Tool;
 
 class TabMaterials {
@@ -128,7 +129,7 @@ class TabMaterials {
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
 									if (f == "") f = "untitled";
-									ExportArm.runMaterial(path + "/" + f);
+									ExportArm.runMaterial(path + Path.sep + f);
 								});
 							}
 

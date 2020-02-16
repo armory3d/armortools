@@ -111,8 +111,7 @@ class ImportMesh {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = Context.materialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
-				path = path.replace("\\", "/");
-				var ar = path.split("/");
+				var ar = path.split(Path.sep);
 				var s = ar[ar.length - 1];
 				object.name = s.substring(0, s.length - 4);
 				// md.geom.calculateAABB();

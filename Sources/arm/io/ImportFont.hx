@@ -2,6 +2,7 @@ package arm.io;
 
 import kha.Font;
 import iron.data.Data;
+import arm.sys.Path;
 
 class ImportFont {
 
@@ -10,8 +11,7 @@ class ImportFont {
 
 	public static function run(path: String) {
 		Data.getFont(path, function(font: Font) {
-			var ar = path.split("/");
-			ar = ar[ar.length - 1].split("\\");
+			var ar = path.split(Path.sep);
 			var name = ar[ar.length - 1];
 			fontList.push(name);
 			fontMap.set(name, font);

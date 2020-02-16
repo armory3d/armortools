@@ -7,21 +7,22 @@ import kha.arrays.Float32Array;
 import iron.data.Data;
 import iron.Scene;
 import arm.ui.UITrait;
+import arm.sys.Path;
 using StringTools;
 
 class ImportEnvmap {
 
 	public static function run(path: String, image: Image) {
-		var p = Krom.getFilesLocation() + "/" + Data.dataPath;
+		var p = Path.data();
 		#if krom_windows
-		var cmft = p + "/cmft.exe";
+		var cmft = p + "cmft.exe";
 		#elseif krom_linux
-		var cmft = p + "/cmft-linux64";
+		var cmft = p + "cmft-linux64";
 		#else
-		var cmft = p + "/cmft-osx";
+		var cmft = p + "cmft-osx";
 		#end
 
-		var tmp = Krom.getFilesLocation() + "/" + Data.dataPath;
+		var tmp = Krom.getFilesLocation() + Path.sep + Data.dataPath;
 
 		// Irr
 		var cmd = cmft;
@@ -29,9 +30,6 @@ class ImportEnvmap {
 		cmd += " --filter shcoeffs";
 		cmd += " --outputNum 1";
 		cmd += ' --output0 "' + tmp + 'tmp_irr"';
-		#if krom_windows
-		cmd = cmd.replace("/", "\\");
-		#end
 		Krom.sysCommand(cmd);
 
 		// Rad
@@ -59,9 +57,6 @@ class ImportEnvmap {
 		cmd += " --outputNum 1";
 		cmd += ' --output0 "' + tmp + 'tmp_rad"';
 		cmd += " --output0params hdr,rgbe,latlong";
-		#if krom_windows
-		cmd = cmd.replace("/", "\\");
-		#end
 		Krom.sysCommand(cmd);
 
 		// Load irr

@@ -14,7 +14,7 @@ using StringTools;
 class UIFiles {
 
 	public static var filename = "untitled";
-	public static var path = "/";
+	public static var path = defaultPath;
 	static var lastPath = "";
 	static var files: Array<String> = null;
 	static var iconMap: Map<String, kha.Image> = null;
@@ -23,14 +23,14 @@ class UIFiles {
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 		if (!UITrait.inst.nativeBrowser) {
-			if (path == null) path = "/";
+			if (path == null) path = defaultPath;
 			showCustom(filters, isSave, filesDone);
 			return;
 		}
 
 		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 		if (path != null) {
-			if (path.charAt(1) == ":") path = path.replace("\\\\", "\\");
+			while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
 			path = path.replace("\r", "");
 			filename = path.substr(path.lastIndexOf(Path.sep) + 1);
 			if (isSave) path = path.substr(0, path.lastIndexOf(Path.sep));
@@ -39,7 +39,7 @@ class UIFiles {
 		releaseKeys();
 	}
 
-	@:access(zui.Zui) //
+	@:access(zui.Zui)
 	static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
 		var known = false;
 		UIBox.showCustom(function(ui: Zui) {
@@ -75,16 +75,13 @@ class UIFiles {
 		var folder = Res.tile50(icons, 2, 1);
 		var file = Res.tile50(icons, 3, 1);
 
-		if (handle.text == "") initPath(handle);
+		if (handle.text == "") handle.text = defaultPath;
 		if (handle.text != lastPath) {
 			files = [];
 
 			// Up directory
-			var i1 = handle.text.indexOf("/");
-			var i2 = handle.text.indexOf("\\");
-			var nested =
-				(i1 > -1 && handle.text.length - 1 > i1) ||
-				(i2 > -1 && handle.text.length - 1 > i2);
+			var i1 = handle.text.indexOf(Path.sep);
+			var nested = i1 > -1 && handle.text.length - 1 > i1;
 			if (nested) files.push("..");
 
 			var filesAll = File.readDirectory(handle.text, foldersOnly);
@@ -197,15 +194,13 @@ class UIFiles {
 		return handle.text;
 	}
 
-	static function initPath(handle: Handle) {
+	static inline var defaultPath =
 		#if krom_windows
-		handle.text = "C:\\Users";
-		// %HOMEDRIVE% + %HomePath%
+		"C:\\Users"
 		#elseif krom_android
-		handle.text = "/sdcard";
+		"/sdcard"
 		#else
-		handle.text = "/";
-		// ~
+		"/"
 		#end
-	}
+	;
 }

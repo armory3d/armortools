@@ -306,10 +306,9 @@ class ImportBlend {
 						if (search == "teximage") {
 							var img = node.get("id", 0, "Image");
 							var file: String = img.get("name").substr(2); // '//desktop\logo.png'
-							file = file.replace("\\", "/");
 							file = Path.baseDir(path) + file;
 							ImportTexture.run(file);
-							var ar = file.split("/");
+							var ar = file.split(Path.sep);
 							var filename = ar[ar.length - 1];
 							n.buttons[0].default_value = App.getAssetIndex(filename);
 						}
