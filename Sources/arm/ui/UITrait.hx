@@ -371,6 +371,12 @@ class UITrait {
 				lastPaintVecY = mouse.viewY / iron.App.h();
 
 				viewIndex = -1;
+
+				#if (kha_android || kha_ios)
+				// No mouse move events for touch, re-init last paint position on touch start
+				lastPaintX = -1;
+				lastPaintY = -1;
+				#end
 			}
 		}); //
 
