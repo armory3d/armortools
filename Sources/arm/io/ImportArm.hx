@@ -112,6 +112,11 @@ class ImportArm {
 			var base = Path.baseDir(path);
 
 			for (file in project.assets) {
+				#if krom_windows
+				file = file.replace("/", "\\");
+				#else
+				file = file.replace("\\", "/");
+				#end
 				// Convert image path from relative to absolute
 				var abs = Data.isAbsolute(file) ? file : base + file;
 				if (!File.exists(abs)) {
@@ -270,6 +275,11 @@ class ImportArm {
 	public static function runMaterialFromProject(project: TProjectFormat, path: String) {
 		var base = Path.baseDir(path);
 		for (file in project.assets) {
+			#if krom_windows
+			file = file.replace("/", "\\");
+			#else
+			file = file.replace("\\", "/");
+			#end
 			// Convert image path from relative to absolute
 			var abs = Data.isAbsolute(file) ? file : base + file;
 			if (!File.exists(abs)) {
