@@ -330,7 +330,6 @@ class Uniforms {
 		}
 		if (link.startsWith("_texpaint_mask")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			trace(tid);
 			return Project.layers[tid].texpaint_mask;
 		}
 		if (link.startsWith("_texpaint_nor")) {

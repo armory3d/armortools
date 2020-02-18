@@ -508,6 +508,9 @@ class RenderPathPaint {
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+		if (Project.layers[0].texpaint_mask != null) {
+			path.bindTarget("texpaint_mask" + tid, "texpaint_mask");
+		}
 		for (i in 1...Project.layers.length) {
 			var l = Project.layers[i];
 			tid = l.id;

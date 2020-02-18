@@ -183,6 +183,15 @@ class MakeMesh {
 					frag.write('metallic = 0.0;');
 				}
 
+				if (l.texpaint_mask != null) {
+					frag.add_shared_sampler('sampler2D texpaint_mask');
+					frag.write('float maskTexture = textureLodShared(texpaint_mask, texCoord, 0.0).r;');
+					frag.write('basecol *= maskTexture;');
+					frag.write('occlusion *= maskTexture;');
+					frag.write('roughness *= maskTexture;');
+					frag.write('metallic *= maskTexture;');
+				}
+
 				if (l.maskOpacity < 1) {
 					frag.write('basecol *= ${l.maskOpacity};');
 					frag.write('occlusion *= ${l.maskOpacity};');
