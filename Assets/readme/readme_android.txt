@@ -9,6 +9,11 @@ Installation:
 - Open the .apk with file browser to install it
 - Allow installing from unknown sources
 
+Controls:
+- Paint with one finger, rotate and scroll with two fingers
+- Support for pen with pressure sensitivity is included
+- Support for mouse and keyboard is included
+
 This build is only intended for testing and
 may be sub-par in other areas compared to regular builds.
 
