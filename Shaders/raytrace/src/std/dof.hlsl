@@ -3,6 +3,7 @@
 #define _DOF_HLSL_
 
 float2 calculate_concentric_sample_disk(float u, float v) {
+	const float PI = 3.1415926535;
 	// Maps a (u,v) in [0, 1)^2 to a 2D unit disk centered at (0,0). Based on PBRT.
 	float2 u_offset = 2.0f * float2(u, v) - float2(1, 1);
 	if (u_offset.x == 0 && u_offset.y == 0) {
@@ -20,10 +21,10 @@ float2 calculate_concentric_sample_disk(float u, float v) {
 	return r * float2(cos(theta), sin(theta));
 }
 
-void generate_camera_ray(float2 screen_pos, out float3 ray_origin, out float3 ray_dir) {
+void generate_camera_ray_dof(float2 screen_pos, inout float3 ray_origin, inout float3 ray_dir, float rand0, float rand1) {
 	float lens_rad = 0.005f;
 	float focal_dist = 0.4f;
-	float3 plens = float3(lens_rad * calculate_concentric_sample_disk(rand(), rand()), 0.0f);
+	float3 plens = float3(lens_rad * calculate_concentric_sample_disk(rand0, rand1), 0.0f);
 	float ft = focal_dist / abs(ray_dir.z);
 	float3 pfocus = ray_dir * ft;
 	ray_origin += plens;

@@ -133,12 +133,14 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	mytexture0.GetDimensions(size.x, size.y);
 	float4 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0));
 
+	#ifdef _DISCARD
 	if (texpaint0.a <= 0.1) {
 		payload.ray_dir = WorldRayDirection();
 		payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 		payload.color.a = -2;
 		return;
 	}
+	#endif
 
 	float3 vertex_normals[3] = {
 		float3(S16toF32(vertices[indices_sample[0]].nor), S16toF32(vertices[indices_sample[0]].poszw).y),
