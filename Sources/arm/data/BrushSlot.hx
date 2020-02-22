@@ -20,7 +20,7 @@ class BrushSlot {
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob("defaults/default_brush.json", function(b: Blob) {
+				Data.getBlob("default_brush.json", function(b: Blob) {
 					defaultCanvas = b.toString();
 				});
 			}

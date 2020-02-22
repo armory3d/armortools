@@ -6,7 +6,6 @@ project.addLibrary("iron");
 project.addLibrary("zui");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
 project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
-project.addAssets("Assets/defaults/*", { notinlist: true, destination: "data/defaults/{name}" });
 project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/themes/{name}" });
@@ -14,7 +13,6 @@ project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/theme
 project.addDefine('arm_taa');
 project.addDefine('arm_veloc');
 project.addDefine('arm_particles');
-// project.addDefine('arm_noembed');
 if (!android) {
 	project.addDefine('arm_data_dir');
 }

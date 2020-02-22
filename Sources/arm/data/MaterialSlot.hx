@@ -39,7 +39,7 @@ class MaterialSlot {
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob("defaults/default_material.json", function(b: Blob) {
+				Data.getBlob("default_material.json", function(b: Blob) {
 					defaultCanvas = b.toString();
 				});
 			}
