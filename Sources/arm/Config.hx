@@ -35,19 +35,18 @@ class Config {
 	}
 
 	public static function init() {
-		if (raw == null) raw = {};
-		if (raw.window_mode == null) raw.window_mode = 0;
-		if (raw.window_resizable == null) raw.window_resizable = true;
-		if (raw.window_minimizable == null) raw.window_minimizable = true;
-		if (raw.window_maximizable == null) raw.window_maximizable = true;
-		if (raw.window_w == null) raw.window_w = 1600;
-		if (raw.window_h == null) raw.window_h = 900;
-		if (raw.window_x == null) raw.window_x = -1;
-		if (raw.window_y == null) raw.window_y = -1;
-		if (raw.window_scale == null) raw.window_scale = 1.0;
-		if (raw.window_vsync == null) raw.window_vsync = true;
-
-		if (!configLoaded) {
+		if (!configLoaded || raw == null) {
+			raw = {};
+			raw.window_mode = 0;
+			raw.window_resizable = true;
+			raw.window_minimizable = true;
+			raw.window_maximizable = true;
+			raw.window_w = 1600;
+			raw.window_h = 900;
+			raw.window_x = -1;
+			raw.window_y = -1;
+			raw.window_scale = 1.0;
+			raw.window_vsync = true;
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_motionblur = false;
@@ -65,11 +64,24 @@ class Config {
 			#if krom_android
 			raw.window_scale = 2.0;
 			#end
+			#if arm_painter
+			raw.undo_steps = 4;
+			raw.keymap = "default.json";
+			#end
+		}
+		else {
+			// Upgrade config format
+			if (raw.version != App.version) {
+				{
+					// Upgrade logic here
+					// ...
+				}
+				raw.version = App.version;
+				save();
+			}
 		}
 
 		#if arm_painter
-		if (raw.undo_steps == null) raw.undo_steps = 4; // Max steps to keep
-		if (raw.keymap == null) raw.keymap = "default.json";
 		loadKeymap();
 		#end
 	}
@@ -77,7 +89,6 @@ class Config {
 	public static function restore() {
 		zui.Zui.Handle.global = new zui.Zui.Handle();
 		configLoaded = false;
-		raw = null;
 		init();
 		#if arm_painter
 		applyConfig();
@@ -188,7 +199,7 @@ typedef TConfig = {
 	@:optional var rp_motionblur: Null<Bool>;
 	@:optional var rp_gi: Null<Bool>;
 	// Ext
-	@:optional var version: Null<Int>;
+	@:optional var version: String;
 	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
 	@:optional var undo_steps: Null<Int>;	// Number of undo steps to preserve
