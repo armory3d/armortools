@@ -1451,7 +1451,7 @@ class Material {
 	}
 
 	public static inline function vec1(v: Float): String {
-		#if (kha_webgl ||krom_android)
+		#if (kha_webgl || krom_android || krom_ios)
 		return 'float($v)';
 		#else
 		return '$v';
@@ -1459,7 +1459,7 @@ class Material {
 	}
 
 	public static inline function vec3(v: Array<Float>): String {
-		#if (kha_webgl ||krom_android)
+		#if (kha_webgl || krom_android || krom_ios)
 		return 'vec3(float(${v[0]}), float(${v[1]}), float(${v[2]}))';
 		#else
 		return 'vec3(${v[0]}, ${v[1]}, ${v[2]})';

@@ -18,7 +18,7 @@ class File {
 	#end
 
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
-		#if (krom_windows || krom_linux || krom_android)
+		#if (krom_windows || krom_linux || krom_android || krom_ios)
 		return Krom.readDirectory(path, foldersOnly).split("\n");
 		#else
 		var save = Path.data() + Path.sep + "tmp.txt";
@@ -54,7 +54,7 @@ class File {
 		Krom.sysCommand('explorer "' + url + '"');
 		#elseif krom_linux
 		Krom.sysCommand('xdg-open "' + url + '"');
-		#elseif krom_android
+		#elseif (krom_android || krom_ios)
 		Krom.loadUrl(url);
 		#else
 		Krom.sysCommand('open "' + url + '"');

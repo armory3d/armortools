@@ -217,7 +217,7 @@ class BoxExport {
 	}
 
 	static function fetchPresets() {
-		#if krom_android
+		#if (krom_android || krom_ios)
 
 		files = ["generic"];
 

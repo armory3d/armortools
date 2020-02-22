@@ -132,7 +132,7 @@ class UITrait {
 	public var viewportMode = ViewRender;
 	public var hscaleWasChanged = false;
 	public var exportMeshFormat = FormatObj;
-	#if krom_android
+	#if (krom_android || krom_ios)
 	public var nativeBrowser = false;
 	#else
 	public var nativeBrowser = true;

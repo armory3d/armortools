@@ -50,7 +50,7 @@ class Config {
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_motionblur = false;
-			#if krom_android
+			#if (krom_android || krom_ios)
 			raw.rp_ssgi = false;
 			#else
 			raw.rp_ssgi = true;
@@ -61,7 +61,7 @@ class Config {
 			if (disp != null && disp.width >= 3000 && disp.height >= 2000) {
 				raw.window_scale = 2.0;
 			}
-			#if krom_android
+			#if (krom_android || krom_ios)
 			raw.window_scale = 2.0;
 			#end
 			#if arm_painter

@@ -54,7 +54,7 @@ class BoxPreferences {
 					UITrait.inst.tagUIRedraw();
 				}
 
-				#if (!krom_android)
+				#if (!krom_android && !krom_ios)
 				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
 				#end
 
