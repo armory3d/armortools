@@ -186,7 +186,7 @@ class ExportTexture {
 		for (t in preset.textures) {
 			for (c in t.channels) {
 				if      ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) pixpaint = texpaint.getPixels();
-				else if ((c == "nor_r" || c == "nor_g" || c == "nor_b") && pixpaint_nor == null) pixpaint_nor = texpaint_nor.getPixels();
+				else if ((c == "nor_r" || c == "nor_g" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = texpaint_nor.getPixels();
 				else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) pixpaint_pack = texpaint_pack.getPixels();
 			}
 		}
@@ -234,6 +234,8 @@ class ExportTexture {
 					else if (c == "opac") copyChannel(pixpaint, 3, pix, i);
 					else if (c == "rough") copyChannel(pixpaint_pack, 1, pix, i);
 					else if (c == "smooth") copyChannelInv(pixpaint_pack, 1, pix, i);
+					else if (c == "emis") extractChannel(pixpaint_nor, 3, pix, i, 255);
+					else if (c == "subs") extractChannel(pixpaint_nor, 3, pix, i, 254);
 					else if (c == "0.0") setChannel(0, pix, i);
 					else if (c == "1.0") setChannel(255, pix, i);
 				}
@@ -294,6 +296,12 @@ class ExportTexture {
 	static function setChannel(value: Int, to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, value);
+		}
+	}
+
+	static function extractChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, mask: Int) {
+		for (i in 0...Std.int(to.length / 4)) {
+			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel) == mask ? 255 : 0);
 		}
 	}
 }
