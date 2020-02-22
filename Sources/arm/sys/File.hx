@@ -18,17 +18,7 @@ class File {
 	#end
 
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
-		#if (krom_windows || krom_linux || krom_android || krom_ios)
 		return Krom.readDirectory(path, foldersOnly).split("\n");
-		#else
-		var save = Path.data() + Path.sep + "tmp.txt";
-		Krom.sysCommand(foldersOnly ? cmd_dir_nofile : cmd_dir + ' "' + path + '" > "' + save + '"');
-		var str = Bytes.ofData(Krom.loadBlob(save)).toString();
-		var ar = str.split("\n");
-		var files: Array<String> = [];
-		for (file in ar) if (file.length > 0) files.push(file.rtrim());
-		return files;
-		#end
 	}
 
 	public static function createDirectory(path: String) {

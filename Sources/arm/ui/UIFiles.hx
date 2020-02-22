@@ -199,6 +199,8 @@ class UIFiles {
 		"C:\\Users"
 		#elseif krom_android
 		"/sdcard"
+		#elseif krom_darwin
+		"/Users";
 		#else
 		"/"
 		#end
