@@ -109,10 +109,8 @@ class App {
 				@:privateAccess kimg.height = 128;
 				@:privateAccess kimg.baseline = 10;
 				var chars = new haxe.ds.Vector(ConstData.font_x0.length);
-				// kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
-				kha.graphics2.Graphics.fontGlyphs = [for (i in 32...206) i]; // Fix tiny font
-				// for (i in 0...ConstData.font_x0.length) chars[i] = new Stbtt_bakedchar();
-				for (i in 0...174) chars[i] = new Stbtt_bakedchar();
+				kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
+				for (i in 0...95) chars[i] = new Stbtt_bakedchar();
 				for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
 				for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
 				for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
@@ -123,8 +121,7 @@ class App {
 				@:privateAccess kimg.chars = chars;
 				Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
 					@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
-					// @:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
-					@:privateAccess cast(font, kha.Kravur).images.set(130174, kimg);
+					@:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
 				});
 
 				color_wheel = image;
@@ -172,7 +169,6 @@ class App {
 							UITrait.inst.textureExportPath = Krom.getArg(2);
 							if (Krom.getArgCount() > 3) {
 								UIFiles.filename = Krom.getArg(3);
-								// hpreset.position = presets.indexOf("unreal")
 							}
 						}
 					});
@@ -312,7 +308,6 @@ class App {
 
 	static function update() {
 		var mouse = Input.getMouse();
-		//var kb = Input.getKeyboard();
 
 		if ((dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
