@@ -200,7 +200,7 @@ class UIFiles {
 		#elseif krom_android
 		"/sdcard"
 		#elseif krom_darwin
-		"/Users";
+		"/Users"
 		#else
 		"/"
 		#end
