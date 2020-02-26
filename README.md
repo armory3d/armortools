@@ -37,8 +37,8 @@ node Kromx/make -g opengl
 cd Kromx
 node Kinc/make -g opengl
 # Open generated Xcode project
-# Set command-line arguments to `armorpaint_repo/build/krom`
-# Add `path/to/Kromx/v8/libraries/macos/release` into Library Search Paths
+# Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
+# Add `path/to/armorpaint/build/krom` into `Product - Edit Scheme - Arguments - Arguments Passed on Launch`
 # Build
 ```
 ```bash
