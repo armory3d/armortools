@@ -40,9 +40,10 @@ package arm;
 	var BakeTexCoord = 7;
 	var BakeMaterialID = 8;
 	var BakeObjectID = 9;
-	var BakeLightmap = 10;
-	var BakeBentNormal = 11;
-	var BakeThickness = 12;
+	var BakeVertexColor = 10;
+	var BakeLightmap = 11;
+	var BakeBentNormal = 12;
+	var BakeThickness = 13;
 }
 
 @:enum abstract SplitType(Int) from Int to Int {

@@ -6,7 +6,7 @@ import arm.Tool;
 
 class MakeBake {
 
-	public static function run(vert: MaterialShader, frag: MaterialShader) {
+	public static function run(con: MaterialShaderContext, vert: MaterialShader, frag: MaterialShader) {
 		if (UITrait.inst.bakeType == BakeAO) { // Voxel
 			#if rp_voxelao
 			// Apply normal channel
@@ -112,6 +112,15 @@ class MakeBake {
 			frag.write('float id_g = fract(sin(dot(vec2(obid * 20.0, obid), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(id_r, id_g, id_b, 1.0);');
+		}
+		else if (UITrait.inst.bakeType == BakeVertexColor) {
+			if (con.allow_vcols) {
+				con.add_elem("col", "short4norm");
+				frag.write('fragColor[0] = vec4(vcolor.r, vcolor.g, vcolor.b, 1.0);');
+			}
+			else {
+				frag.write('fragColor[0] = vec4(1.0, 1.0, 1.0, 1.0);');
+			}
 		}
 	}
 

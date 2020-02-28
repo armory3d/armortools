@@ -382,7 +382,7 @@ class MakePaint {
 		}
 
 		if (Context.tool == ToolBake) {
-			MakeBake.run(vert, frag);
+			MakeBake.run(con_paint, vert, frag);
 		}
 
 		Material.finalize(con_paint);
