@@ -118,6 +118,7 @@ class UITrait {
 	public var isSubsSpace = 0;
 	public var splitBy = SplitObject;
 	public var parseTransform = false;
+	public var parseVCols = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();

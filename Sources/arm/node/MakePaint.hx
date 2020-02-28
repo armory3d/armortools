@@ -25,6 +25,7 @@ class MakePaint {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
+		con_paint.allow_vcols = Context.paintObject.data.geom.cols != null;
 
 		var vert = con_paint.make_vert();
 		var frag = con_paint.make_frag();

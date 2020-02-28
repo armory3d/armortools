@@ -255,6 +255,11 @@ class Project {
 					if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
 				}
 
+				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
+					UITrait.inst.parseVCols = ui.check(Id.handle({selected: UITrait.inst.parseVCols}), "Parse Vertex Colors");
+					if (ui.isHovered) ui.tooltip("Import vertex color data");
+				}
+
 				ui.row([0.5, 0.5]);
 				if (ui.button("Cancel")) {
 					UIBox.show = false;

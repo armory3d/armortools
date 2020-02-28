@@ -9,6 +9,7 @@ import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
 import arm.ui.UITrait;
+import arm.ui.UINodes;
 import arm.node.MaterialParser;
 import arm.Tool;
 import arm.Project;
@@ -55,6 +56,7 @@ class Context {
 		MaterialParser.parsePaintMaterial();
 		UITrait.inst.hwnd1.redraws = 2;
 		UITrait.inst.headerHandle.redraws = 2;
+		UINodes.inst.hwnd.redraws = 2;
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {

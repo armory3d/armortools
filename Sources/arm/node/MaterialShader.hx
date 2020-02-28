@@ -22,6 +22,7 @@ class MaterialShaderContext {
 	public var tesc:MaterialShader;
 	public var tese:MaterialShader;
 	public var data:TShaderContext;
+	public var allow_vcols = false;
 	var material:TMaterial;
 	var constants:Array<TShaderConstant>;
 	var tunits:Array<TTextureUnit>;

@@ -211,6 +211,10 @@ class Material {
 			vert.add_out("vec4 wvpposition");
 			vert.write_end('wvpposition = gl_Position;');
 		}
+		if (con.is_elem('col')) {
+			vert.add_out('vec3 vcolor');
+			vert.write_attrib('vcolor = col.rgb;');
+		}
 	}
 
 	static function parse_output(node: TNode): TShaderOut {
@@ -378,9 +382,13 @@ class Material {
 
 		if (node.type == "ATTRIBUTE") {
 			if (socket == node.outputs[0]) { // Color
-				curshader.context.add_elem("col", "short4norm"); // Vcols only for now
-				// return "vcolor";
-				return "vec3(0.0, 0.0, 0.0)";
+				if (curshader.context.allow_vcols) {
+					curshader.context.add_elem("col", "short4norm"); // Vcols only for now
+				}
+				else {
+					curshader.write_attrib("vec3 vcolor = vec3(1.0, 1.0, 1.0);");
+				}
+				return "vcolor";
 			}
 			else { // Vector
 				curshader.context.add_elem("tex", "short2norm"); // UVMaps only for now

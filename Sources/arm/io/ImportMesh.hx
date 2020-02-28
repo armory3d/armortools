@@ -97,11 +97,10 @@ class ImportMesh {
 			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
 		}
 		else {
-			if (mesh.texa == null) {
-				equirectUnwrap(mesh);
-			}
 			raw = rawMesh(mesh);
+			if (mesh.texa == null) equirectUnwrap(mesh);
 			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col" });
 		}
 
 		new MeshData(raw, function(md: MeshData) {

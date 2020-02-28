@@ -204,6 +204,7 @@ class TabMaterials {
 
 	static function updateMaterial() {
 		UITrait.inst.headerHandle.redraws = 2;
+		UINodes.inst.hwnd.redraws = 2;
 		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
