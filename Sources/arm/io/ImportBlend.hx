@@ -57,6 +57,8 @@ class ImportBlend {
 				var nora = new Int16Array(numtri * 3 * 2);
 				var hasuv = m.get("mloopuv") != null;
 				var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
+				var hascol = UITrait.inst.parseVCols && m.get("mloopcol") != null;
+				var cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
 
 				var tri = 0;
 				var vec0 = new Vec4();
@@ -108,6 +110,29 @@ class ImportBlend {
 							texa[tri * 6 + 4] = Std.int(uv2[0] * 32767);
 							texa[tri * 6 + 5] = Std.int((1.0 - uv2[1]) * 32767);
 						}
+						if (hascol) {
+							var loop = m.get("mloopcol", loopstart);
+							var col0r: Int = loop.get("r");
+							var col0g: Int = loop.get("g");
+							var col0b: Int = loop.get("b");
+							loop = m.get("mloopcol", loopstart + 1);
+							var col1r: Int = loop.get("r");
+							var col1g: Int = loop.get("g");
+							var col1b: Int = loop.get("b");
+							loop = m.get("mloopcol", loopstart + 2);
+							var col2r: Int = loop.get("r");
+							var col2g: Int = loop.get("g");
+							var col2b: Int = loop.get("b");
+							cola[tri * 9    ] = col0r * 128;
+							cola[tri * 9 + 1] = col0g * 128;
+							cola[tri * 9 + 2] = col0b * 128;
+							cola[tri * 9 + 3] = col1r * 128;
+							cola[tri * 9 + 4] = col1g * 128;
+							cola[tri * 9 + 5] = col1b * 128;
+							cola[tri * 9 + 6] = col2r * 128;
+							cola[tri * 9 + 7] = col2g * 128;
+							cola[tri * 9 + 8] = col2b * 128;
+						}
 						tri++;
 					}
 					else {
@@ -125,6 +150,25 @@ class ImportBlend {
 						if (hasuv) {
 							uv0 = m.get("mloopuv", loopstart + totloop - 1).get("uv");
 							uv1 = m.get("mloopuv", loopstart).get("uv");
+						}
+						var col0r: Int = 0;
+						var col0g: Int = 0;
+						var col0b: Int = 0;
+						var col1r: Int = 0;
+						var col1g: Int = 0;
+						var col1b: Int = 0;
+						var col2r: Int = 0;
+						var col2g: Int = 0;
+						var col2b: Int = 0;
+						if (hascol) {
+							var loop = m.get("mloopcol", loopstart + totloop - 1);
+							col0r = loop.get("r");
+							col0g = loop.get("g");
+							col0b = loop.get("b");
+							loop = m.get("mloopcol", loopstart);
+							col1r = loop.get("r");
+							col1g = loop.get("g");
+							col1b = loop.get("b");
 						}
 						for (j in 0...totloop - 2) {
 							var v2 = m.get("mvert", m.get("mloop", loopstart + j + 1).get("v"));
@@ -161,6 +205,24 @@ class ImportBlend {
 								texa[tri * 6 + 4] = Std.int(uv2[0] * 32767);
 								texa[tri * 6 + 5] = Std.int((1.0 - uv2[1]) * 32767);
 								uv1 = uv2;
+							}
+							if (hascol) {
+								var loop = m.get("mloopcol", loopstart + j + 1);
+								col2r = loop.get("r");
+								col2g = loop.get("g");
+								col2b = loop.get("b");
+								cola[tri * 9    ] = col0r * 128;
+								cola[tri * 9 + 1] = col0g * 128;
+								cola[tri * 9 + 2] = col0b * 128;
+								cola[tri * 9 + 3] = col1r * 128;
+								cola[tri * 9 + 4] = col1g * 128;
+								cola[tri * 9 + 5] = col1b * 128;
+								cola[tri * 9 + 6] = col2r * 128;
+								cola[tri * 9 + 7] = col2g * 128;
+								cola[tri * 9 + 8] = col2b * 128;
+								col1r = col2r;
+								col1g = col2g;
+								col1b = col2b;
 							}
 							tri++;
 						}
@@ -202,7 +264,7 @@ class ImportBlend {
 					posa[i * 4 + 2] = Std.int(posa32[i * 3 + 2] * 32767 * inv);
 				}
 
-				var obj = {posa: posa, nora: nora, texa: texa, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
+				var obj = {posa: posa, nora: nora, texa: texa, cola: cola, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
 
 				first ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
 				first = false;
