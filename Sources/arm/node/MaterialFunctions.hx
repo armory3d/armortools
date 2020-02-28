@@ -303,4 +303,39 @@ void getSkinningDualQuat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B
 ";
 	#end
 
+	// Created by Inigo Quilez
+	// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	public static var str_udQuad = "
+float dot2(vec3 v) { return dot(v, v); }
+float udQuad(vec3 p, vec3 a, vec3 b, vec3 c, vec3 d) {
+	vec3 ba = b - a; vec3 pa = p - a;
+	vec3 cb = c - b; vec3 pb = p - b;
+	vec3 dc = d - c; vec3 pc = p - c;
+	vec3 ad = a - d; vec3 pd = p - d;
+	vec3 nor = cross(ba, ad);
+	return sqrt(
+		(sign(dot(cross(ba, nor), pa)) +
+		 sign(dot(cross(cb, nor), pb)) +
+		 sign(dot(cross(dc, nor), pc)) +
+		 sign(dot(cross(ad, nor), pd)) < 3.0)
+		 ?
+		 min(min(min(
+		 dot2(ba * clamp(dot(ba, pa) / dot2(ba), 0.0, 1.0) - pa),
+		 dot2(cb * clamp(dot(cb, pb) / dot2(cb), 0.0, 1.0) - pb)),
+		 dot2(dc * clamp(dot(dc, pc) / dot2(dc), 0.0, 1.0) - pc)),
+		 dot2(ad * clamp(dot(ad, pd) / dot2(ad), 0.0, 1.0) - pd))
+		 :
+		 dot(nor, pa) * dot(nor, pa) / dot2(nor));
+}
+";
+
+	public static var str_createBasis = "
+void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
+	vec3 v1 = cross(normal, vec3(1.0, 0.0, 0.0));
+	vec3 v2 = cross(normal, vec3(0.0, 1.0, 0.0));
+	tangent = length(v1) > length(v2) ? v1 : v2;
+	binormal = cross(tangent, normal);
+}
+";
+
 }
