@@ -9,13 +9,16 @@ class FbxParser {
 	public var posa: kha.arrays.Int16Array = null;
 	public var nora: kha.arrays.Int16Array = null;
 	public var texa: kha.arrays.Int16Array = null;
+	public var cola: kha.arrays.Int16Array = null;
 	public var inda: kha.arrays.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
 
-	// Transform
 	public static var parseTransform = false;
+	public static var parseVCols = false;
+
+	// Transform
 	public var tx = 0.0;
 	public var ty = 0.0;
 	public var tz = 0.0;
@@ -82,6 +85,7 @@ class FbxParser {
 		posa = res.posa;
 		nora = res.nora;
 		texa = res.texa;
+		cola = res.cola;
 		inda = res.inda;
 		name = FbxTools.getName(geom.getRoot());
 		if (name.charCodeAt(0) == 0) name = name.substring(1); // null

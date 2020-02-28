@@ -693,6 +693,7 @@ class Geometry {
 		var pbuf = getVertices();
 		var nbuf = getNormals();
 		var tbuf = getUVs()[0];
+		var cbuf = FbxParser.parseVCols ? getColors() : null;
 		var polys = getPolygons();
 
 		if (FbxParser.parseTransform) {
@@ -734,6 +735,7 @@ class Geometry {
 		var posa = new kha.arrays.Int16Array(vlen * 4);
 		var nora = new kha.arrays.Int16Array(vlen * 2);
 		var texa = tbuf != null ? new kha.arrays.Int16Array(vlen * 2) : null;
+		var cola = cbuf != null ? new kha.arrays.Int16Array(vlen * 4) : null;
 		var inda = new kha.arrays.Uint32Array(ilen);
 
 		pos = 0;
@@ -759,6 +761,13 @@ class Geometry {
 						texa[vlen * 2    ] = Std.int(       tbuf.values[iuv * 2    ]  * 32767);
 						texa[vlen * 2 + 1] = Std.int((1.0 - tbuf.values[iuv * 2 + 1]) * 32767);
 					}
+					if (cbuf != null) {
+						var icol = cbuf.index[k];
+						cola[vlen * 3    ] = Std.int(cbuf.values[icol * 4    ] * 32767);
+						cola[vlen * 3 + 1] = Std.int(cbuf.values[icol * 4 + 1] * 32767);
+						cola[vlen * 3 + 2] = Std.int(cbuf.values[icol * 4 + 2] * 32767);
+						// cola[vlen * 4 + 3] = Std.int(cbuf.values[icol * 4 + 3] * 32767);
+					}
 					vlen++;
 				}
 				// polygons are actually triangle fans
@@ -774,6 +783,6 @@ class Geometry {
 			pos++;
 		}
 
-		return { posa: posa, nora: nora, texa: texa, inda: inda, scalePos: scalePos };
+		return { posa: posa, nora: nora, texa: texa, cola: cola, inda: inda, scalePos: scalePos };
 	}
 }
