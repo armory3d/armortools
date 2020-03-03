@@ -1040,7 +1040,7 @@ class UITrait {
 				else if (Context.tool == ToolBake) {
 					ui.changed = false;
 					var bakeHandle = Id.handle({position: bakeType});
-					var bakes = ["AO", "Curvature", "Normal", "Normal (Object)", "Height", "Derivative", "Position", "TexCoord", "Material ID", "Object ID"];
+					var bakes = ["AO", "Curvature", "Normal", "Normal (Object)", "Height", "Derivative", "Position", "TexCoord", "Material ID", "Object ID", "Vertex Color"];
 					#if kha_direct3d12
 					bakes.push("Lightmap");
 					bakes.push("Bent Normal");
