@@ -144,9 +144,9 @@ class Project {
 			var raw = {
 				name: "Tessellated",
 				vertex_arrays: [
-					{ values: mesh.posa, attrib: "pos" },
-					{ values: mesh.nora, attrib: "nor" },
-					{ values: mesh.texa, attrib: "tex" }
+					{ values: mesh.posa, attrib: "pos", data: "short4norm" },
+					{ values: mesh.nora, attrib: "nor", data: "short2norm" },
+					{ values: mesh.texa, attrib: "tex", data: "short2norm" }
 				],
 				index_arrays: [
 					{ values: mesh.inda, material: 0 }

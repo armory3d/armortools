@@ -52,9 +52,9 @@ class MeshUtil {
 		var raw: TMeshData = {
 			name: Context.paintObject.name,
 			vertex_arrays: [
-				{ values: va0, attrib: "pos" },
-				{ values: va1, attrib: "nor" },
-				{ values: va2, attrib: "tex" }
+				{ values: va0, attrib: "pos", data: "short4norm" },
+				{ values: va1, attrib: "nor", data: "short2norm" },
+				{ values: va2, attrib: "tex", data: "short2norm" }
 			],
 			index_arrays: [
 				{ values: ia, material: 0 }

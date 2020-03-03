@@ -94,13 +94,13 @@ class ImportMesh {
 		var raw: TMeshData = null;
 		if (UITrait.inst.worktab.position == SpaceScene) {
 			raw = rawMesh(mesh);
-			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
+			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
 		}
 		else {
 			raw = rawMesh(mesh);
 			if (mesh.texa == null) equirectUnwrap(mesh);
-			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col" });
+			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
 		}
 
 		new MeshData(raw, function(md: MeshData) {
@@ -175,7 +175,7 @@ class ImportMesh {
 			equirectUnwrap(mesh);
 		}
 		var raw = rawMesh(mesh);
-		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex" });
+		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
 
 		new MeshData(raw, function(md: MeshData) {
 
@@ -215,8 +215,8 @@ class ImportMesh {
 		return {
 			name: mesh.name,
 			vertex_arrays: [
-				{ values: mesh.posa, attrib: "pos" },
-				{ values: mesh.nora, attrib: "nor" }
+				{ values: mesh.posa, attrib: "pos", data: "short4norm" },
+				{ values: mesh.nora, attrib: "nor", data: "short2norm" }
 			],
 			index_arrays: [
 				{ values: mesh.inda, material: 0 }
