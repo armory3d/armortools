@@ -225,8 +225,8 @@ class ExportTexture {
 					if      (c == "base_r") copyChannel(pixpaint, 0, pix, i); // copyChannelGamma
 					else if (c == "base_g") copyChannel(pixpaint, 1, pix, i); // copyChannelGamma
 					else if (c == "base_b") copyChannel(pixpaint, 2, pix, i); // copyChannelGamma
-					else if (c == "height") copyChannel(pixpaint_pack, 4, pix, i);
-					else if (c == "metal") copyChannel(pixpaint_pack, 3, pix, i);
+					else if (c == "height") copyChannel(pixpaint_pack, 3, pix, i);
+					else if (c == "metal") copyChannel(pixpaint_pack, 2, pix, i);
 					else if (c == "nor_r") copyChannel(pixpaint_nor, 0, pix, i);
 					else if (c == "nor_g") copyChannel(pixpaint_nor, 1, pix, i);
 					else if (c == "nor_b") copyChannel(pixpaint_nor, 2, pix, i);
@@ -239,7 +239,7 @@ class ExportTexture {
 					else if (c == "0.0") setChannel(0, pix, i);
 					else if (c == "1.0") setChannel(255, pix, i);
 				}
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pix);
+				writeTexture(path + Path.sep + f + "_" + t.name + ext, pix, 3);
 			}
 		}
 	}
