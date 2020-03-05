@@ -1,7 +1,6 @@
 {
 	"textures": [
-		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"] },
-		{ "name": "nor", "channels": ["nor_r", "nor_g", "metal", "smooth"] },
-		{ "name": "occ", "channels": ["occ", "occ", "occ", "1.0"] }
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "rough"] },
+		{ "name": "nor", "channels": ["nor_r", "nor_g", "smooth", "metal"] }
 	]
 }
