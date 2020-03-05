@@ -72,6 +72,7 @@ class ImportMesh {
 		}
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
+		arm.node.MaterialParser.parsePaintMaterial();
 		arm.node.MaterialParser.parseMeshMaterial();
 
 		UIView2D.inst.hwnd.redraws = 2;
@@ -100,7 +101,7 @@ class ImportMesh {
 			raw = rawMesh(mesh);
 			if (mesh.texa == null) equirectUnwrap(mesh);
 			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm" });
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 		}
 
 		new MeshData(raw, function(md: MeshData) {
