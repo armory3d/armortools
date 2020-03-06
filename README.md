@@ -7,7 +7,7 @@ armorpaint
 
 *Note 1: This repository is aimed at developers and may not be stable. Distributed binaries are currently [paid](https://armorpaint.org/download) to help with the project funding. All of the development is happening here in order to make it accessible to everyone. Thank you for support!*
 
-*Note 2: If you are compiling git version of ArmorPaint, then you need to have a compiler ([Visual Studio](https://visualstudio.microsoft.com/downloads/) - Windows, [clang](https://clang.llvm.org/get_started.html) + [deps](https://github.com/Kode/Kha/wiki/Linux) - Linux, [Xcode](https://developer.apple.com/xcode/resources/) - macOS), [nodejs](https://nodejs.org/en/download/) and [git](https://git-scm.com/downloads) installed. Learn more about [Kha](https://github.com/Kode/Kha/wiki), [Kinc](https://github.com/Kode/Kinc/wiki) and [Krom](https://github.com/Kode/Krom/blob/master/readme.md).*
+*Note 2: If you are compiling git version of ArmorPaint, then you need to have a compiler ([Visual Studio](https://visualstudio.microsoft.com/downloads/) - Windows, [clang](https://clang.llvm.org/get_started.html) + [deps](https://github.com/Kode/Kha/wiki/Linux) - Linux, [Xcode](https://developer.apple.com/xcode/resources/) - macOS / iOS, [Android Studio](https://developer.android.com/studio) - Android), [nodejs](https://nodejs.org/en/download/) and [git](https://git-scm.com/downloads) installed. Learn more about [Kha](https://github.com/Kode/Kha/wiki), [Kinc](https://github.com/Kode/Kinc/wiki) and [Krom](https://github.com/Kode/Krom/blob/master/readme.md).*
 ```bash
 git clone --recursive https://github.com/armory3d/armorpaint
 cd armorpaint
@@ -40,6 +40,27 @@ node Kinc/make -g opengl
 # Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Add `path/to/armorpaint/build/krom` into `Product - Edit Scheme - Arguments - Arguments Passed on Launch`
 # Build
+```
+```bash
+# Android - wip
+node Kromx/make android -g opengl --shaderversion 300
+cd Kromx
+node Kinc/make android -g opengl --noshaders
+# Manual tweaking is required for now:
+# https://github.com/armory3d/Kromx/blob/master/kincfile.js#L68
+# Open generated Android Studio project
+# Build for device
+```
+```bash
+# iOS - wip
+node Kromx/make ios -g opengl --shaderversion 300
+cd Kromx
+node Kinc/make ios -g opengl --noshaders
+# Manual tweaking is required for now:
+# https://github.com/armory3d/Kromx/blob/master/kincfile.js#L84
+# Open generated Xcode project
+# Add `path/to/Kromx/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
+# Build for device
 ```
 ```bash
 # Updating cloned repository
