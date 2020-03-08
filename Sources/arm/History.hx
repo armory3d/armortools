@@ -421,7 +421,7 @@ class History {
 		}
 		else {
 			path.setTarget("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
-			path.bindTarget((isMask ? "texpaint_mask" : "texpaint") + fromId, "tex0");
+			path.bindTarget("texpaint" + fromId, "tex0");
 			path.bindTarget("texpaint_nor" + fromId, "tex1");
 			path.bindTarget("texpaint_pack" + fromId, "tex2");
 			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
