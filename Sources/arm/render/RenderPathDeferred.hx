@@ -568,6 +568,9 @@ class RenderPathDeferred {
 		RenderPathPaint.bindLayers();
 		#end
 		path.drawMeshes("mesh");
+		#if arm_painter
+		RenderPathPaint.unbindLayers();
+		#end
 	}
 
 	static function drawSplit() {

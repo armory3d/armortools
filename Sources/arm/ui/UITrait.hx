@@ -190,6 +190,7 @@ class UITrait {
 	public var brushBias = 1.0;
 	public var brushPaint = UVMap;
 	public var brush3d = true;
+	public var brushLive = false;
 	public var brushDepthReject = true;
 	public var brushAngleReject = true;
 	public var brushAngleRejectDot = 0.5;
@@ -846,7 +847,7 @@ class UITrait {
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
-			if (!brush3d || in2dView || decal) {
+			if (!brush3d || in2dView || (decal && !brushLive)) {
 				if (decal && !inNodes) {
 					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
 					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));

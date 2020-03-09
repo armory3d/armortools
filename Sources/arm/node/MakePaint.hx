@@ -119,12 +119,7 @@ class MakePaint {
 				#end
 			}
 
-			if (decal || Context.tool == ToolParticle) {
-				frag.write('float dist = 0.0;');
-			}
-			else {
-				MakeBrush.run(vert, frag);
-			}
+			MakeBrush.run(vert, frag);
 		}
 		else { // Fill, Bake
 			frag.write('float dist = 0.0;');

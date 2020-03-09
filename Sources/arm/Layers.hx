@@ -41,6 +41,7 @@ class Layers {
 	public static var cursorMouse: ConstantLocation;
 	public static var cursorTexStep: ConstantLocation;
 	public static var cursorRadius: ConstantLocation;
+	public static var cursorCameraRight: ConstantLocation;
 	public static var cursorTex: TextureUnit;
 	public static var cursorGbufferD: TextureUnit;
 
@@ -168,6 +169,7 @@ class Layers {
 		cursorMouse = pipeCursor.getConstantLocation("mouse");
 		cursorTexStep = pipeCursor.getConstantLocation("texStep");
 		cursorRadius = pipeCursor.getConstantLocation("radius");
+		cursorCameraRight = pipeCursor.getConstantLocation("cameraRight");
 		cursorGbufferD = pipeCursor.getTextureUnit("gbufferD");
 		cursorTex = pipeCursor.getTextureUnit("tex");
 	}

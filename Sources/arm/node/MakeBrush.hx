@@ -2,11 +2,16 @@ package arm.node;
 
 import arm.ui.UITrait;
 import arm.node.MaterialShader;
+import arm.Tool;
 
 class MakeBrush {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
-		if (UITrait.inst.brush3d) {
+
+		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
+			frag.write('float dist = 0.0;');
+		}
+		else if (UITrait.inst.brush3d) {
 			#if (kha_opengl || kha_webgl)
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#else

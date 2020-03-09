@@ -27,7 +27,7 @@ class MakeTexcoord {
 
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
 
-				frag.write_attrib('if (uvsp.x < 0.01 || uvsp.y < 0.01 || uvsp.x > 0.99 || uvsp.y > 0.99) discard;');
+				frag.write_attrib('if (uvsp.x < 0.0001 || uvsp.y < 0.0001 || uvsp.x > 0.9999 || uvsp.y > 0.9999) discard;');
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');

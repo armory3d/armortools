@@ -26,6 +26,11 @@ class RenderPathPaint {
 	static var savedFov = 0.0;
 	static var dilated = true;
 	static var baking = false;
+	static var liveLayer: arm.data.LayerSlot = null;
+	static var liveLayerDrawn = 0;
+	static var _texpaint: RenderTarget;
+	static var _texpaint_nor: RenderTarget;
+	static var _texpaint_pack: RenderTarget;
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -238,6 +243,70 @@ class RenderPathPaint {
 		}
 	}
 
+	static function useLiveLayer(use: Bool) {
+		var tid = Context.layer.id;
+		if (use) {
+			_texpaint = path.renderTargets.get("texpaint" + tid);
+			_texpaint_nor = path.renderTargets.get("texpaint_nor" + tid);
+			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
+			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
+			path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
+			path.renderTargets.set("texpaint_pack" + tid, path.renderTargets.get("texpaint_pack_live"));
+		}
+		else {
+			path.renderTargets.set("texpaint" + tid, _texpaint);
+			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
+			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
+		}
+	}
+
+	public static function commandsLiveBrush() {
+
+		if (liveLayer == null) {
+			liveLayer = new arm.data.LayerSlot("_live");
+		}
+
+		var tid = Context.layer.id;
+		path.setTarget("texpaint_live", ["texpaint_nor_live", "texpaint_pack_live"]);
+		path.bindTarget("texpaint" + tid, "tex0");
+		path.bindTarget("texpaint_nor" + tid, "tex1");
+		path.bindTarget("texpaint_pack" + tid, "tex2");
+		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+
+		useLiveLayer(true);
+		liveLayerDrawn = 2;
+
+		var mx = Input.getMouse().viewX / iron.App.w();
+		var my = 1.0 - (Input.getMouse().viewY / iron.App.h());
+		if (UITrait.inst.brushLocked) {
+			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		}
+
+		var _x = UITrait.inst.paintVec.x;
+		var _y = UITrait.inst.paintVec.y;
+		var _lastX = UITrait.inst.lastPaintVecX;
+		var _lastY = UITrait.inst.lastPaintVecY;
+		var _pdirty = Context.pdirty;
+		UITrait.inst.paintVec.x = mx;
+		UITrait.inst.paintVec.y = 1.0 - my;
+		UITrait.inst.lastPaintVecX = mx;
+		UITrait.inst.lastPaintVecY = 1.0 - my;
+		Context.pdirty = 2;
+		Context.rdirty = 2;
+		UITrait.inst.sub = 0;
+
+		commandsPaint();
+
+		useLiveLayer(false);
+
+		UITrait.inst.paintVec.x = _x;
+		UITrait.inst.paintVec.y = _y;
+		UITrait.inst.lastPaintVecX = _lastX;
+		UITrait.inst.lastPaintVecY = _lastY;
+		Context.pdirty = _pdirty;
+	}
+
 	@:access(iron.RenderPath)
 	public static function commandsCursor() {
 		var tool = Context.tool;
@@ -246,8 +315,6 @@ class RenderPathPaint {
 			tool != ToolClone &&
 			tool != ToolBlur &&
 			tool != ToolParticle) {
-			// tool != ToolDecal &&
-			// tool != ToolText) {
 				return;
 		}
 		if (!App.uienabled ||
@@ -277,6 +344,8 @@ class RenderPathPaint {
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
+		var right = Scene.active.camera.rightWorld().normalize();
+		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
 		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
@@ -293,6 +362,13 @@ class RenderPathPaint {
 		pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {
 			History.paint();
+		}
+
+		if (liveLayerDrawn > 0) liveLayerDrawn--;
+
+		if (UITrait.inst.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && UITrait.inst.brushTime == 0) {
+			// Depth is unchnaged, draw before gbuffer gets updated
+			commandsLiveBrush();
 		}
 
 		// 2D paint
@@ -345,13 +421,18 @@ class RenderPathPaint {
 	}
 
 	public static function end() {
-		if (UITrait.inst.brush3d) RenderPathPaint.commandsCursor();
+		if (UITrait.inst.brush3d) commandsCursor();
 		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
 	}
 
 	public static function draw() {
+		if (UITrait.inst.brushLive && Context.pdirty <= 0 && Context.ddirty > 0 && UITrait.inst.brushTime == 0) {
+			// gbuffer has been updated now but brush will lag 1 frame
+			commandsLiveBrush();
+		}
+
 		if (History.undoLayers != null) {
 			// Symmetry
 			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
@@ -363,37 +444,37 @@ class RenderPathPaint {
 				if (UITrait.inst.symX) {
 					t.scale.set(-sx, sy, sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symY) {
 					t.scale.set(sx, -sy, sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symZ) {
 					t.scale.set(sx, sy, -sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symX && UITrait.inst.symY) {
 					t.scale.set(-sx, -sy, sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symX && UITrait.inst.symZ) {
 					t.scale.set(-sx, sy, -sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symY && UITrait.inst.symZ) {
 					t.scale.set(sx, -sy, -sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
 					t.scale.set(-sx, -sy, -sz);
 					t.buildMatrix();
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 				t.scale.set(sx, sy, sz);
 				t.buildMatrix();
@@ -412,7 +493,7 @@ class RenderPathPaint {
 						var _visible = highPoly.visible;
 						highPoly.visible = true;
 						Context.selectPaintObject(highPoly);
-						RenderPathPaint.commandsPaint();
+						commandsPaint();
 						highPoly.visible = _visible;
 						UITrait.inst.sub--;
 						if (pushUndoLast) History.paint();
@@ -422,7 +503,7 @@ class RenderPathPaint {
 							UITrait.inst.bakeType = _bakeType;
 							MaterialParser.parsePaintMaterial();
 							Context.pdirty = 1;
-							RenderPathPaint.commandsPaint();
+							commandsPaint();
 							Context.pdirty = 0;
 							iron.App.removeRender(_renderFinal);
 							baking = false;
@@ -431,7 +512,7 @@ class RenderPathPaint {
 							UITrait.inst.bakeType = BakeHeight;
 							MaterialParser.parsePaintMaterial();
 							Context.pdirty = 1;
-							RenderPathPaint.commandsPaint();
+							commandsPaint();
 							Context.pdirty = 0;
 							UITrait.inst.sub--;
 							if (pushUndoLast) History.paint();
@@ -451,7 +532,7 @@ class RenderPathPaint {
 
 					for (p in Project.paintObjects) {
 						Context.selectPaintObject(p);
-						RenderPathPaint.commandsPaint();
+						commandsPaint();
 					}
 
 					UITrait.inst.layerFilter = _layerFilter;
@@ -467,11 +548,11 @@ class RenderPathPaint {
 				}
 				#end
 				else {
-					RenderPathPaint.commandsPaint();
+					commandsPaint();
 				}
 			}
 			else { // Paint
-				RenderPathPaint.commandsPaint();
+				commandsPaint();
 			}
 		}
 
@@ -504,6 +585,9 @@ class RenderPathPaint {
 	}
 
 	public static function bindLayers() {
+
+		if (UITrait.inst.brushLive && liveLayerDrawn > 0) useLiveLayer(true);
+
 		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
 		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
@@ -521,6 +605,10 @@ class RenderPathPaint {
 				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
 			}
 		}
+	}
+
+	public static function unbindLayers() {
+		if (UITrait.inst.brushLive && liveLayerDrawn > 0) useLiveLayer(false);
 	}
 
 	public static function finishPaint() {
