@@ -330,6 +330,7 @@ class RenderPathPaint {
 			UITrait.inst.lastPaintVecY = UITrait.inst.lastPaintY;
 		}
 
+		commandsSymetry();
 		commandsPaint();
 
 		useLiveLayer(false);
@@ -391,6 +392,53 @@ class RenderPathPaint {
 
 		g.disableScissor();
 		path.end();
+	}
+
+	static function commandsSymetry() {
+		if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
+			Context.ddirty = 2;
+			var t = Context.paintObject.transform;
+			var sx = t.scale.x;
+			var sy = t.scale.y;
+			var sz = t.scale.z;
+			if (UITrait.inst.symX) {
+				t.scale.set(-sx, sy, sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symY) {
+				t.scale.set(sx, -sy, sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symZ) {
+				t.scale.set(sx, sy, -sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symY) {
+				t.scale.set(-sx, -sy, sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symZ) {
+				t.scale.set(-sx, sy, -sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symY && UITrait.inst.symZ) {
+				t.scale.set(sx, -sy, -sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
+				t.scale.set(-sx, -sy, -sz);
+				t.buildMatrix();
+				commandsPaint();
+			}
+			t.scale.set(sx, sy, sz);
+			t.buildMatrix();
+		}
 	}
 
 	public static function begin() {
@@ -469,51 +517,8 @@ class RenderPathPaint {
 		}
 
 		if (History.undoLayers != null) {
-			// Symmetry
-			if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
-				Context.ddirty = 2;
-				var t = Context.paintObject.transform;
-				var sx = t.scale.x;
-				var sy = t.scale.y;
-				var sz = t.scale.z;
-				if (UITrait.inst.symX) {
-					t.scale.set(-sx, sy, sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symY) {
-					t.scale.set(sx, -sy, sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symZ) {
-					t.scale.set(sx, sy, -sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symY) {
-					t.scale.set(-sx, -sy, sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symZ) {
-					t.scale.set(-sx, sy, -sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symY && UITrait.inst.symZ) {
-					t.scale.set(sx, -sy, -sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				if (UITrait.inst.symX && UITrait.inst.symY && UITrait.inst.symZ) {
-					t.scale.set(-sx, -sy, -sz);
-					t.buildMatrix();
-					commandsPaint();
-				}
-				t.scale.set(sx, sy, sz);
-				t.buildMatrix();
-			}
+
+			commandsSymetry();
 
 			if (Context.tool == ToolBake) {
 				if (Context.pdirty > 0) dilated = false;
