@@ -10,6 +10,7 @@ import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
 import arm.ui.UITrait;
 import arm.ui.UINodes;
+import arm.ui.UIView2D;
 import arm.node.MaterialParser;
 import arm.Tool;
 import arm.Project;
@@ -90,6 +91,7 @@ class Context {
 		if (current != null) current.begin(false);
 
 		UITrait.inst.hwnd.redraws = 2;
+		UIView2D.inst.hwnd.redraws = 2;
 	}
 
 	public static function selectTool(i: Int) {

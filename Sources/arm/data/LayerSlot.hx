@@ -248,7 +248,7 @@ class LayerSlot {
 		l.texpaint_pack.g2.pipeline = null;
 		l.texpaint_pack.g2.end();
 
-		l.texpaint_preview.g2.begin(true, 0xff000000);
+		l.texpaint_preview.g2.begin(true, 0x00000000);
 		l.texpaint_preview.g2.drawScaledImage(texpaint_preview, 0, 0, texpaint_preview.width, texpaint_preview.height);
 		l.texpaint_preview.g2.end();
 
@@ -260,7 +260,7 @@ class LayerSlot {
 			l.texpaint_mask.g2.pipeline = null;
 			l.texpaint_mask.g2.end();
 
-			l.texpaint_mask_preview.g2.begin(true, 0xff000000);
+			l.texpaint_mask_preview.g2.begin(true, 0x00000000);
 			l.texpaint_mask_preview.g2.drawScaledImage(texpaint_mask_preview, 0, 0, texpaint_mask_preview.width, texpaint_mask_preview.height);
 			l.texpaint_mask_preview.g2.end();
 		}

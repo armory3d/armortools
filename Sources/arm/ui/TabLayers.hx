@@ -134,10 +134,18 @@ class TabLayers {
 
 				if (l.getChildren() == null) {
 					var icon = l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon;
+					if (l.material_mask == null) {
+						var r = Res.tile50(icons, 4, 1);
+						var _x = ui._x;
+						var _y = ui._y;
+						ui.curRatio--;
+						ui.image(icons, 0xffffffff, null, r.x, r.y, r.w, r.h);
+						ui._x = _x;
+						ui._y = _y;
+					}
 					state = ui.image(icon, 0xffffffff, iconH);
 				}
 				else { // Group
-					var icons = Res.get("icons.k");
 					var folder = Res.tile50(icons, 2, 1);
 					state = ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
 				}
@@ -172,6 +180,14 @@ class TabLayers {
 					var uiy = ui._y;
 					ui._x += Std.int(4 * ui.SCALE());
 					ui._y += 3;
+
+					// var r = Res.tile50(icons, 4, 1);
+					// var _x = ui._x;
+					// var _y = ui._y;
+					// ui.curRatio--;
+					// ui.image(icons, 0xffffffff, null, r.x, r.y, r.w, r.h);
+					// ui._x = _x;
+					// ui._y = _y;
 
 					ui.g.pipeline = UIView2D.inst.pipe;
 					#if kha_opengl

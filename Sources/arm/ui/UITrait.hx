@@ -743,7 +743,7 @@ class UITrait {
 					var target = l.texpaint_mask_preview;
 					var source = l.texpaint_mask;
 					var g2 = target.g2;
-					g2.begin(true, 0xff000000);
+					g2.begin(true, 0x00000000);
 					g2.drawScaledImage(source, 0, 0, target.width, target.height);
 					g2.end();
 				}
@@ -757,7 +757,7 @@ class UITrait {
 			var target = Context.layerIsMask ? l.texpaint_mask_preview : l.texpaint_preview;
 			var source = Context.layerIsMask ? l.texpaint_mask : l.texpaint;
 			var g2 = target.g2;
-			g2.begin(true, 0xff000000);
+			g2.begin(true, 0x00000000);
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.end();
 			hwnd.redraws = 2;
