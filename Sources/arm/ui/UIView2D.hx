@@ -11,6 +11,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
+import arm.render.RenderPathPaint;
 import arm.Tool;
 
 @:access(zui.Zui)
@@ -101,6 +102,9 @@ class UIView2D {
 
 			if (type == View2DLayer) {
 				var layer = l.getChildren() == null ? l : l.getChildren()[0];
+				if (UITrait.inst.brushLive && RenderPathPaint.liveLayerDrawn > 0) {
+					layer = RenderPathPaint.liveLayer;
+				}
 				tex =
 					Context.layerIsMask   ? layer.texpaint_mask :
 					texType == TexBase    ? layer.texpaint :
@@ -245,7 +249,8 @@ class UIView2D {
 		if (type == View2DLayer &&
 			(Operator.shortcut(Config.keymap.action_paint) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
-			 setCloneSource)) {
+			 setCloneSource ||
+			 UITrait.inst.brushLive)) {
 			UITrait.inst.paint2d = true;
 		}
 

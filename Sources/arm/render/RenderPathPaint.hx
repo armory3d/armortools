@@ -26,9 +26,11 @@ class RenderPathPaint {
 	static var savedFov = 0.0;
 	static var dilated = true;
 	static var baking = false;
-	static var liveLayer: arm.data.LayerSlot = null;
-	static var liveLayerDrawn = 0;
+	public static var liveLayer: arm.data.LayerSlot = null;
+	public static var liveLayerDrawn = 0;
 	static var _texpaint: RenderTarget;
+	static var _texpaint_undo: RenderTarget;
+	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;
 	static var _texpaint_pack: RenderTarget;
 
@@ -245,16 +247,23 @@ class RenderPathPaint {
 
 	static function useLiveLayer(use: Bool) {
 		var tid = Context.layer.id;
+		var hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 		if (use) {
 			_texpaint = path.renderTargets.get("texpaint" + tid);
+			_texpaint_undo = path.renderTargets.get("texpaint_undo" + hid);
+			_texpaint_mask = path.renderTargets.get("texpaint_mask" + tid);
 			_texpaint_nor = path.renderTargets.get("texpaint_nor" + tid);
 			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
+			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
+			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, path.renderTargets.get("texpaint_mask_live"));
 			path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
 			path.renderTargets.set("texpaint_pack" + tid, path.renderTargets.get("texpaint_pack_live"));
 		}
 		else {
 			path.renderTargets.set("texpaint" + tid, _texpaint);
+			path.renderTargets.set("texpaint_undo" + hid, _texpaint_undo);
+			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, _texpaint_mask);
 			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
 			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
 		}
@@ -262,18 +271,37 @@ class RenderPathPaint {
 
 	public static function commandsLiveBrush() {
 
+		var tool = Context.tool;
+		if (tool != ToolBrush &&
+			tool != ToolEraser &&
+			tool != ToolClone &&
+			tool != ToolDecal &&
+			tool != ToolText &&
+			tool != ToolBlur) {
+				return;
+		}
+
 		if (liveLayer == null) {
 			liveLayer = new arm.data.LayerSlot("_live");
+			liveLayer.createMask(0x00000000);
 		}
 
 		var tid = Context.layer.id;
-		path.setTarget("texpaint_live", ["texpaint_nor_live", "texpaint_pack_live"]);
-		path.bindTarget("texpaint" + tid, "tex0");
-		path.bindTarget("texpaint_nor" + tid, "tex1");
-		path.bindTarget("texpaint_pack" + tid, "tex2");
-		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		if (Context.layerIsMask) {
+			path.setTarget("texpaint_mask_live");
+			path.bindTarget("texpaint_mask" + tid, "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
+		else {
+			path.setTarget("texpaint_live", ["texpaint_nor_live", "texpaint_pack_live"]);
+			path.bindTarget("texpaint" + tid, "tex0");
+			path.bindTarget("texpaint_nor" + tid, "tex1");
+			path.bindTarget("texpaint_pack" + tid, "tex2");
+			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		}
 
 		useLiveLayer(true);
+
 		liveLayerDrawn = 2;
 
 		var mx = Input.getMouse().viewX / iron.App.w();
@@ -283,6 +311,7 @@ class RenderPathPaint {
 			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
 		}
 
+		UIView2D.inst.hwnd.redraws = 2;
 		var _x = UITrait.inst.paintVec.x;
 		var _y = UITrait.inst.paintVec.y;
 		var _lastX = UITrait.inst.lastPaintVecX;
@@ -296,6 +325,11 @@ class RenderPathPaint {
 		Context.rdirty = 2;
 		UITrait.inst.sub = 0;
 
+		if (Operator.shortcut(Config.keymap.brush_ruler)) {
+			UITrait.inst.lastPaintVecX = UITrait.inst.lastPaintX;
+			UITrait.inst.lastPaintVecY = UITrait.inst.lastPaintY;
+		}
+
 		commandsPaint();
 
 		useLiveLayer(false);
@@ -305,6 +339,7 @@ class RenderPathPaint {
 		UITrait.inst.lastPaintVecX = _lastX;
 		UITrait.inst.lastPaintVecY = _lastY;
 		Context.pdirty = _pdirty;
+		Context.brushBlendDirty = true;
 	}
 
 	@:access(iron.RenderPath)
@@ -364,13 +399,6 @@ class RenderPathPaint {
 			History.paint();
 		}
 
-		if (liveLayerDrawn > 0) liveLayerDrawn--;
-
-		if (UITrait.inst.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && UITrait.inst.brushTime == 0) {
-			// Depth is unchnaged, draw before gbuffer gets updated
-			commandsLiveBrush();
-		}
-
 		// 2D paint
 		if (UITrait.inst.paint2d) {
 			// Set plane mesh
@@ -417,6 +445,13 @@ class RenderPathPaint {
 			planeo.transform.scale.set(sx, 1.0, sx);
 			planeo.transform.loc.set(m._30, -m._31, 0.0);
 			planeo.transform.buildMatrix();
+		}
+
+		if (liveLayerDrawn > 0) liveLayerDrawn--;
+
+		if (UITrait.inst.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && UITrait.inst.brushTime == 0) {
+			// Depth is unchnaged, draw before gbuffer gets updated
+			commandsLiveBrush();
 		}
 	}
 

@@ -111,8 +111,10 @@ class BoxPreferences {
 				UITrait.inst.dilateRadius = ui.slider(Id.handle({value: UITrait.inst.dilateRadius}), "Dilate Radius", 0.0, 64.0, true, 1);
 				if (ui.isHovered) ui.tooltip("Dilate baked textures to prevent seams");
 
-				UITrait.inst.brushLive = ui.check(Id.handle({selected: UITrait.inst.brushLive}), "Live Brush Preview");
+				var brushLiveHandle = Id.handle({selected: UITrait.inst.brushLive});
+				UITrait.inst.brushLive = ui.check(brushLiveHandle, "Live Brush Preview");
 				if (ui.isHovered) ui.tooltip("Draw live brush preview in viewport");
+				if (brushLiveHandle.changed) Context.ddirty = 2;
 
 				var brush3dHandle = Id.handle({selected: UITrait.inst.brush3d});
 				UITrait.inst.brush3d = ui.check(brush3dHandle, "3D Cursor");

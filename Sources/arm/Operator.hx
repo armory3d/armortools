@@ -27,6 +27,7 @@ class Operator {
 		if (s.indexOf("+") > 0) {
 			s = s.substr(s.lastIndexOf("+") + 1);
 		}
+		else if (shift || ctrl || alt) return flag;
 		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) : repeat ? kb.repeat(s) : kb.started(s);
 		return flag && key;
 	}

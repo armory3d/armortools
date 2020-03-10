@@ -13,7 +13,6 @@ class Log {
 		messageTimer = 5.0;
 		message = s;
 		messageColor = 0x00000000;
-		arm.ui.UITrait.inst.statusHandle.redraws = 2;
 		trace(s);
 	}
 
@@ -21,7 +20,6 @@ class Log {
 		messageTimer = 8.0;
 		message = s;
 		messageColor = 0xffaa0000;
-		arm.ui.UITrait.inst.statusHandle.redraws = 2;
 		trace(s);
 	}
 
@@ -40,5 +38,6 @@ class Log {
 		lastTraces.unshift(Std.string(v));
 		if (lastTraces.length > 10) lastTraces.pop();
 		haxeTrace(v, inf);
+		arm.ui.UITrait.inst.statusHandle.redraws = 2;
 	}
 }
