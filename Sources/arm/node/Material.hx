@@ -1530,6 +1530,7 @@ class Material {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";
+			tex.generate_mipmaps = true;
 		}
 		else {
 			tex.min_filter = "point";
@@ -1537,7 +1538,6 @@ class Material {
 			tex.mipmap_filter = "no";
 		}
 
-		tex.generate_mipmaps = true;
 		tex.u_addressing = "repeat";
 		tex.v_addressing = "repeat";
 		return tex;

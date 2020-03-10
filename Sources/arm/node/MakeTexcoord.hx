@@ -19,21 +19,17 @@ class MakeTexcoord {
 			if (decal) {
 				frag.write_attrib('uvsp -= inp.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
-
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
-
 				frag.add_uniform('float brushScaleX', '_brushScaleX');
 				frag.write_attrib('uvsp.x *= brushScaleX;');
-
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
-
-				frag.write_attrib('if (uvsp.x < 0.0001 || uvsp.y < 0.0001 || uvsp.x > 0.9999 || uvsp.y > 0.9999) discard;');
+				frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
 			}
 			else {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 			}
 
-			frag.write_attrib('vec2 texCoord = fract(uvsp * brushScale);');
+			frag.write_attrib('vec2 texCoord = uvsp * brushScale;');
 
 			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
 			if (uvRot > 0.0) {
@@ -60,9 +56,9 @@ class MakeTexcoord {
 			frag.write_attrib('float triMax = max(triWeight.x, max(triWeight.y, triWeight.z));');
 			frag.write_attrib('triWeight = max(triWeight - triMax * 0.75, 0.0);');
 			frag.write_attrib('vec3 texCoordBlend = triWeight * (1.0 / (triWeight.x + triWeight.y + triWeight.z));');
-			frag.write_attrib('vec2 texCoord = fract(wposition.yz * brushScale * 0.5);');
-			frag.write_attrib('vec2 texCoord1 = fract(wposition.xz * brushScale * 0.5);');
-			frag.write_attrib('vec2 texCoord2 = fract(wposition.xy * brushScale * 0.5);');
+			frag.write_attrib('vec2 texCoord = wposition.yz * brushScale * 0.5;');
+			frag.write_attrib('vec2 texCoord1 = wposition.xz * brushScale * 0.5;');
+			frag.write_attrib('vec2 texCoord2 = wposition.xy * brushScale * 0.5;');
 		}
 	}
 }
