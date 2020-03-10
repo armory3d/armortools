@@ -98,6 +98,7 @@ class Context {
 		MaterialParser.parseMeshMaterial();
 		UITrait.inst.headerHandle.redraws = 2;
 		UITrait.inst.toolbarHandle.redraws = 2;
+		ddirty = 3;
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {
@@ -109,7 +110,6 @@ class Context {
 			}
 
 			RenderUtil.makeDecalPreview();
-			ddirty = 2;
 
 			if (current != null) current.begin(false);
 		}

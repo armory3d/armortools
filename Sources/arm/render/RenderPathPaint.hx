@@ -29,10 +29,12 @@ class RenderPathPaint {
 	public static var liveLayer: arm.data.LayerSlot = null;
 	public static var liveLayerDrawn = 0;
 	static var _texpaint: RenderTarget;
-	static var _texpaint_undo: RenderTarget;
 	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;
 	static var _texpaint_pack: RenderTarget;
+	static var _texpaint_undo: RenderTarget;
+	static var _texpaint_nor_undo: RenderTarget;
+	static var _texpaint_pack_undo: RenderTarget;
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -251,9 +253,14 @@ class RenderPathPaint {
 		if (use) {
 			_texpaint = path.renderTargets.get("texpaint" + tid);
 			_texpaint_undo = path.renderTargets.get("texpaint_undo" + hid);
+			_texpaint_nor_undo = path.renderTargets.get("texpaint_nor_undo" + hid);
+			_texpaint_pack_undo = path.renderTargets.get("texpaint_pack_undo" + hid);
 			_texpaint_mask = path.renderTargets.get("texpaint_mask" + tid);
 			_texpaint_nor = path.renderTargets.get("texpaint_nor" + tid);
 			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
+			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
+			path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
+			path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
 			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
 			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, path.renderTargets.get("texpaint_mask_live"));
@@ -263,6 +270,8 @@ class RenderPathPaint {
 		else {
 			path.renderTargets.set("texpaint" + tid, _texpaint);
 			path.renderTargets.set("texpaint_undo" + hid, _texpaint_undo);
+			path.renderTargets.set("texpaint_nor_undo" + hid, _texpaint_nor_undo);
+			path.renderTargets.set("texpaint_pack_undo" + hid, _texpaint_pack_undo);
 			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, _texpaint_mask);
 			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
 			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
