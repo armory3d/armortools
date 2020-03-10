@@ -179,26 +179,4 @@ class RenderUtil {
 		if (fontName == "default.ttf") return UITrait.inst.ui.ops.font;
 		return ImportFont.fontMap.get(fontName);
 	}
-
-	public static function makeDecalMaskPreview() {
-		var texw = 1024;
-		var off = 12;
-		if (UITrait.inst.decalMaskImage == null) {
-			UITrait.inst.decalMaskImage = Image.createRenderTarget(texw, texw, TextureFormat.L8);
-		}
-		var g2 = UITrait.inst.decalMaskImage.g2;
-		g2.begin(true, 0xff000000);
-		g2.color = 0xffffffff;
-		var mask = UITrait.inst.decalMaskHandle.position;
-		if (mask == 0) {
-			g2.fillRect(off, off, texw - off, texw - off);
-		}
-		else if (mask == 1) {
-			kha.graphics2.GraphicsExtension.fillCircle(g2, texw / 2, texw / 2, texw / 2 - off);
-		}
-		else if (mask == 2) {
-			g2.fillTriangle(texw / 2, off, off, texw - off, texw - off, texw - off);
-		}
-		g2.end();
-	}
 }

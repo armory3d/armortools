@@ -104,10 +104,7 @@ class Context {
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			if (tool == ToolDecal) {
-				RenderUtil.makeDecalMaskPreview();
-			}
-			else if (tool == ToolText) {
+			if (tool == ToolText) {
 				RenderUtil.makeTextPreview();
 			}
 

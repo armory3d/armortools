@@ -76,11 +76,7 @@ class MakeMeshPreview {
 
 		var decal = UITrait.inst.decalPreview;
 		if (decal) {
-			if (Context.tool == ToolDecal) {
-				frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
-				frag.write('opacity *= textureLod(texdecalmask, texCoord, 0.0).r;');
-			}
-			else if (Context.tool == ToolText) {
+			if (Context.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
 				frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 			}

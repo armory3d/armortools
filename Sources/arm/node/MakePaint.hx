@@ -212,16 +212,16 @@ class MakePaint {
 			if (subs != "0") MaterialBuilder.subsUsed = true;
 		}
 
-		if (Context.tool == ToolDecal) {
-			frag.add_uniform('sampler2D texdecalmask', '_texdecalmask');
-			frag.write('opacity *= textureLod(texdecalmask, texCoord, 0.0).r;');
+		if (UITrait.inst.brushMaskImage != null && Context.tool == ToolDecal) {
+			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
+			frag.write('opacity *= textureLod(texbrushmask, texCoord, 0.0).r;');
 		}
 		else if (Context.tool == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 		}
 
-		if (UITrait.inst.brushMaskImage != null && Context.tool == ToolBrush) {
+		if (UITrait.inst.brushMaskImage != null && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
 			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
 			frag.write('vec2 binp_mask = inp.xy * 2.0 - 1.0;');
 			frag.write('binp_mask.x *= aspectRatio;');

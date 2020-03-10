@@ -302,9 +302,6 @@ class Uniforms {
 		if (link == "_textexttool") { // Opacity map for text
 			return UITrait.inst.textToolImage;
 		}
-		if (link == "_texdecalmask") { // Opacity map for decal
-			return UITrait.inst.decalMaskImage;
-		}
 		if (link == "_texbrushmask") {
 			return UITrait.inst.brushMaskImage;
 		}

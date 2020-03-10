@@ -144,8 +144,6 @@ class UITrait {
 	public var textToolImage: Image = null;
 	public var textToolText = "Text";
 	public var textToolHandle = new Handle();
-	public var decalMaskImage: Image = null;
-	public var decalMaskHandle = new Handle();
 	public var particleMaterial: MaterialData = null;
 
 	public var layerFilter = 0;
@@ -1107,7 +1105,6 @@ class UITrait {
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
-								RenderUtil.makeDecalMaskPreview();
 								RenderUtil.makeDecalPreview();
 								ui.g.begin(false);
 							}
@@ -1139,15 +1136,6 @@ class UITrait {
 						brushPaint = ui.combo(paintHandle, ["UV Map", "Triplanar", "Project"], "TexCoord");
 						if (paintHandle.changed) {
 							MaterialParser.parsePaintMaterial();
-						}
-					}
-					if (Context.tool == ToolDecal) {
-						ui.combo(decalMaskHandle, ["Rectangle", "Circle", "Triangle"], "Mask");
-						if (decalMaskHandle.changed) {
-							ui.g.end();
-							RenderUtil.makeDecalMaskPreview();
-							RenderUtil.makeDecalPreview();
-							ui.g.begin(false);
 						}
 					}
 					if (Context.tool == ToolText) {
