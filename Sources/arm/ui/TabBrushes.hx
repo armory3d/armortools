@@ -49,10 +49,6 @@ class TabBrushes {
 						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
-					#if (kha_opengl || kha_webgl)
-					ui.imageInvertY = Project.brushes[i].previewReady;
-					#end
-
 					//var uix = ui._x;
 					//var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
@@ -82,10 +78,6 @@ class TabBrushes {
 				}
 
 				ui._y += 6;
-
-				#if (kha_opengl || kha_webgl)
-				ui.imageInvertY = false; // Material preview
-				#end
 			}
 		}
 	}

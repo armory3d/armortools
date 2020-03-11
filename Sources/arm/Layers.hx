@@ -21,6 +21,10 @@ import arm.Project;
 class Layers {
 
 	public static var pipeMerge: PipelineState = null;
+	public static var pipeMergeR: PipelineState = null;
+	public static var pipeMergeG: PipelineState = null;
+	public static var pipeMergeB: PipelineState = null;
+	public static var pipeMergeA: PipelineState = null;
 	public static var pipeCopy: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
@@ -114,14 +118,27 @@ class Layers {
 		iron.App.removeRender(setLayerBits);
 	}
 
-	public static function makePipe() {
-		pipeMerge = new PipelineState();
-		pipeMerge.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
-		pipeMerge.fragmentShader = Reflect.field(kha.Shaders, "layer_merge_frag");
+	static function makeMergePipe(red: Bool, green: Bool, blue: Bool, alpha: Bool): PipelineState {
+		var pipe = new PipelineState();
+		pipe.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
+		pipe.fragmentShader = Reflect.field(kha.Shaders, "layer_merge_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
-		pipeMerge.inputLayout = [vs];
-		pipeMerge.compile();
+		pipe.inputLayout = [vs];
+		pipe.colorWriteMasksRed = [red];
+		pipe.colorWriteMasksGreen = [green];
+		pipe.colorWriteMasksBlue = [blue];
+		pipe.colorWriteMasksAlpha = [alpha];
+		pipe.compile();
+		return pipe;
+	}
+
+	public static function makePipe() {
+		pipeMerge = makeMergePipe(true, true, true, true);
+		pipeMergeR = makeMergePipe(true, false, false, false);
+		pipeMergeG = makeMergePipe(false, true, false, false);
+		pipeMergeB = makeMergePipe(false, false, true, false);
+		pipeMergeA = makeMergePipe(false, false, false, true);
 		tex0 = pipeMerge.getTextureUnit("tex0"); // Always binding texpaint.a for blending
 		tex1 = pipeMerge.getTextureUnit("tex1");
 		texmask = pipeMerge.getTextureUnit("texmask");
@@ -241,19 +258,22 @@ class Layers {
 		imga.g2.pipeline = null;
 		imga.g2.end();
 
-		l0.texpaint.g4.begin();
-		l0.texpaint.g4.setPipeline(pipeMerge);
-		l0.texpaint.g4.setTexture(tex0, l1.texpaint);
 		var empty = RenderPath.active.renderTargets.get("empty_white").image;
-		l0.texpaint.g4.setTexture(tex1, empty);
-		l0.texpaint.g4.setTexture(texmask, empty);
-		l0.texpaint.g4.setTexture(texa, imga);
-		l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
-		l0.texpaint.g4.setInt(blending, l1.blending);
-		l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-		l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-		l0.texpaint.g4.drawIndexedVertices();
-		l0.texpaint.g4.end();
+
+		if (l1.paintBase) {
+			l0.texpaint.g4.begin();
+			l0.texpaint.g4.setPipeline(pipeMerge);
+			l0.texpaint.g4.setTexture(tex0, l1.texpaint);
+			l0.texpaint.g4.setTexture(tex1, empty);
+			l0.texpaint.g4.setTexture(texmask, empty);
+			l0.texpaint.g4.setTexture(texa, imga);
+			l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
+			l0.texpaint.g4.setInt(blending, l1.blending);
+			l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+			l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			l0.texpaint.g4.drawIndexedVertices();
+			l0.texpaint.g4.end();
+		}
 
 		imga.g2.begin(false);
 		imga.g2.pipeline = pipeCopy;
@@ -261,18 +281,20 @@ class Layers {
 		imga.g2.pipeline = null;
 		imga.g2.end();
 
-		l0.texpaint_nor.g4.begin();
-		l0.texpaint_nor.g4.setPipeline(pipeMerge);
-		l0.texpaint_nor.g4.setTexture(tex0, l1.texpaint);
-		l0.texpaint_nor.g4.setTexture(tex1, l1.texpaint_nor);
-		l0.texpaint_nor.g4.setTexture(texmask, empty);
-		l0.texpaint_nor.g4.setTexture(texa, imga);
-		l0.texpaint_nor.g4.setFloat(opac, l1.maskOpacity);
-		l0.texpaint.g4.setInt(blending, -1);
-		l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-		l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-		l0.texpaint_nor.g4.drawIndexedVertices();
-		l0.texpaint_nor.g4.end();
+		if (l1.paintNor) {
+			l0.texpaint_nor.g4.begin();
+			l0.texpaint_nor.g4.setPipeline(pipeMerge);
+			l0.texpaint_nor.g4.setTexture(tex0, l1.texpaint);
+			l0.texpaint_nor.g4.setTexture(tex1, l1.texpaint_nor);
+			l0.texpaint_nor.g4.setTexture(texmask, empty);
+			l0.texpaint_nor.g4.setTexture(texa, imga);
+			l0.texpaint_nor.g4.setFloat(opac, l1.maskOpacity);
+			l0.texpaint_nor.g4.setInt(blending, -1);
+			l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+			l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			l0.texpaint_nor.g4.drawIndexedVertices();
+			l0.texpaint_nor.g4.end();
+		}
 
 		imga.g2.begin(false);
 		imga.g2.pipeline = pipeCopy;
@@ -280,18 +302,16 @@ class Layers {
 		imga.g2.pipeline = null;
 		imga.g2.end();
 
-		l0.texpaint_pack.g4.begin();
-		l0.texpaint_pack.g4.setPipeline(pipeMerge);
-		l0.texpaint_pack.g4.setTexture(tex0, l1.texpaint);
-		l0.texpaint_pack.g4.setTexture(tex1, l1.texpaint_pack);
-		l0.texpaint_pack.g4.setTexture(texmask, empty);
-		l0.texpaint_pack.g4.setTexture(texa, imga);
-		l0.texpaint_pack.g4.setFloat(opac, l1.maskOpacity);
-		l0.texpaint.g4.setInt(blending, -1);
-		l0.texpaint_pack.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-		l0.texpaint_pack.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-		l0.texpaint_pack.g4.drawIndexedVertices();
-		l0.texpaint_pack.g4.end();
+		if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
+			if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
+				commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+			}
+			else {
+				if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+				if (l1.paintRough) commandsMergePack(pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+				if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+			}
+		}
 
 		g.begin();
 
@@ -299,6 +319,22 @@ class Layers {
 		iron.App.removeRender(mergeSelectedLayer);
 		Context.setLayer(l0);
 		Context.layerPreviewDirty = true;
+	}
+
+	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float) {
+		var empty = RenderPath.active.renderTargets.get("empty_white").image;
+		i0.g4.begin();
+		i0.g4.setPipeline(pipe);
+		i0.g4.setTexture(tex0, i1);
+		i0.g4.setTexture(tex1, i1pack);
+		i0.g4.setTexture(texmask, empty);
+		i0.g4.setTexture(texa, imga);
+		i0.g4.setFloat(opac, i1maskOpacity);
+		i0.g4.setInt(blending, -1);
+		i0.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+		i0.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+		i0.g4.drawIndexedVertices();
+		i0.g4.end();
 	}
 
 	public static function isFillMaterial(): Bool {
