@@ -148,7 +148,8 @@ class UITrait {
 
 	public var layerFilter = 0;
 
-	public var onBrush: Int->Void = null;
+	public var runBrush: Int->Void = null;
+	public var parseBrushInputs: Void->Void = null;
 	public var paintVec = new Vec4();
 	public var lastPaintX = -1.0;
 	public var lastPaintY = -1.0;
@@ -714,7 +715,7 @@ class UITrait {
 						}
 					}
 					brushTime += Time.delta;
-					if (onBrush != null) onBrush(0);
+					if (runBrush != null) runBrush(0);
 				}
 			}
 		}

@@ -110,6 +110,21 @@ class RenderPathDeferred {
 			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.L8);
 			path.renderTargets.set(t.name, rt);
 		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "empty_black";
+			t.width = 1;
+			t.height = 1;
+			t.format = "RGBA32";
+			var rt = new RenderTarget(t);
+			var b = haxe.io.Bytes.alloc(4);
+			b.set(0, 0);
+			b.set(1, 0);
+			b.set(2, 0);
+			b.set(3, 0);
+			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.RGBA32);
+			path.renderTargets.set(t.name, rt);
+		}
 
 		path.loadShader("world_pass/world_pass/world_pass");
 		path.loadShader("deferred_light/deferred_light/deferred_light");

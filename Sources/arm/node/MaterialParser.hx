@@ -133,69 +133,66 @@ class MaterialParser {
 		sc = null;
 		_materialcontext = null;
 		//
-		// iron.data.Data.getMaterial("Scene", "Material", function(m:iron.data.MaterialData) {
 
-			var mat: TMaterial = {
-				name: "Material",
-				canvas: UINodes.inst.getCanvasMaterial()
-			};
-			var _sd = new MaterialShaderData(mat);
+		var mat: TMaterial = {
+			name: "Material",
+			canvas: UINodes.inst.getCanvasMaterial()
+		};
+		var _sd = new MaterialShaderData(mat);
 
-			if (sc == null) {
-				for (c in m.shader.contexts) {
-					if (c.raw.name == "paint") {
-						sc = c;
-						break;
-					}
+		if (sc == null) {
+			for (c in m.shader.contexts) {
+				if (c.raw.name == "paint") {
+					sc = c;
+					break;
 				}
 			}
-			if (_materialcontext == null) {
-				for (c in m.contexts) {
-					if (c.raw.name == "paint") {
-						_materialcontext = c;
-						_matcon = c.raw;
-						break;
-					}
+		}
+		if (_materialcontext == null) {
+			for (c in m.contexts) {
+				if (c.raw.name == "paint") {
+					_materialcontext = c;
+					_matcon = c.raw;
+					break;
 				}
 			}
+		}
 
-			if (sc != null) {
-				m.shader.raw.contexts.remove(sc.raw);
-				m.shader.contexts.remove(sc);
-			}
-			if (_materialcontext != null) {
-				m.raw.contexts.remove(_matcon);
-				m.contexts.remove(_materialcontext);
-			}
+		if (sc != null) {
+			m.shader.raw.contexts.remove(sc.raw);
+			m.shader.contexts.remove(sc);
+		}
+		if (_materialcontext != null) {
+			m.raw.contexts.remove(_matcon);
+			m.contexts.remove(_materialcontext);
+		}
 
-			_matcon = {
-				name: "paint",
-				bind_textures: []
-			}
+		_matcon = {
+			name: "paint",
+			bind_textures: []
+		}
 
-			var con = MaterialBuilder.make_paint(_sd, _matcon);
-			var cdata = con.data;
+		var con = MaterialBuilder.make_paint(_sd, _matcon);
 
-				// from_source is synchronous..
-				if (sc != null) sc.delete();
+		// from_source is synchronous..
+		if (sc != null) sc.delete();
 
-				var compileError = false;
-				sc = new ShaderContext(cdata, function(sc: ShaderContext) {
-					if (sc == null) compileError = true;
-				});
-				if (compileError) return;
-				sc.overrideContext = {}
-				sc.overrideContext.addressing = "repeat";
+		var compileError = false;
+		sc = new ShaderContext(con.data, function(sc: ShaderContext) {
+			if (sc == null) compileError = true;
+		});
+		if (compileError) return;
+		sc.overrideContext = {}
+		sc.overrideContext.addressing = "repeat";
 
-				m.shader.raw.contexts.push(sc.raw);
-				m.shader.contexts.push(sc);
-				m.raw.contexts.push(_matcon);
+		m.shader.raw.contexts.push(sc.raw);
+		m.shader.contexts.push(sc);
+		m.raw.contexts.push(_matcon);
 
-				new MaterialContext(_matcon, function(self: MaterialContext) {
-					_materialcontext = self;
-					m.contexts.push(self);
-				});
-		// });
+		new MaterialContext(_matcon, function(self: MaterialContext) {
+			_materialcontext = self;
+			m.contexts.push(self);
+		});
 	}
 
 	public static function parseBrush() {

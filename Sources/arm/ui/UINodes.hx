@@ -106,7 +106,9 @@ class UINodes {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (canvasType == CanvasBrush) MaterialParser.parseBrush();
+			if (canvasType == CanvasBrush) {
+				canvasChanged();
+			}
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
@@ -167,21 +169,29 @@ class UINodes {
 	}
 
 	public function canvasChanged() {
-		#if (!kha_direct3d12)
-		if (Layers.isFillMaterial()) {
-			Layers.updateFillLayers(); // TODO: only used as jitter
-			UITrait.inst.hwnd.redraws = 2;
+		if (canvasType == CanvasMaterial) {
+			#if (!kha_direct3d12)
+			if (Layers.isFillMaterial()) {
+				Layers.updateFillLayers(); // TODO: only used as jitter
+				UITrait.inst.hwnd.redraws = 2;
+			}
+			#end
+			function _parse(_) {
+				MaterialParser.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
+				UITrait.inst.hwnd1.redraws = 2;
+				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+				if (decal) RenderUtil.makeDecalPreview();
+				iron.App.removeRender(_parse);
+			}
+			iron.App.notifyOnRender(_parse);
 		}
-		#end
-		function _parse(_) {
-			MaterialParser.parsePaintMaterial();
-			RenderUtil.makeMaterialPreview();
+		else {
+			MaterialParser.parseBrush();
+			UITrait.inst.parseBrushInputs();
+			RenderUtil.makeBrushPreview();
 			UITrait.inst.hwnd1.redraws = 2;
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-			if (decal) RenderUtil.makeDecalPreview();
-			iron.App.removeRender(_parse);
 		}
-		iron.App.notifyOnRender(_parse);
 	}
 
 	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {

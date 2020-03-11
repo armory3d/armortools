@@ -247,7 +247,7 @@ class RenderPathPaint {
 		}
 	}
 
-	static function useLiveLayer(use: Bool) {
+	public static function useLiveLayer(use: Bool) {
 		var tid = Context.layer.id;
 		var hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 		if (use) {
@@ -339,7 +339,7 @@ class RenderPathPaint {
 			UITrait.inst.lastPaintVecY = UITrait.inst.lastPaintY;
 		}
 
-		commandsSymetry();
+		commandsSymmetry();
 		commandsPaint();
 
 		useLiveLayer(false);
@@ -388,7 +388,7 @@ class RenderPathPaint {
 		}
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(Layers.cursorRadius, UITrait.inst.brushRadius / 3.4);
+		g.setFloat(Layers.cursorRadius, UITrait.inst.brushNodesRadius * UITrait.inst.brushRadius / 3.4);
 		var right = Scene.active.camera.rightWorld().normalize();
 		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
 		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
@@ -403,7 +403,7 @@ class RenderPathPaint {
 		path.end();
 	}
 
-	static function commandsSymetry() {
+	static function commandsSymmetry() {
 		if (UITrait.inst.symX || UITrait.inst.symY || UITrait.inst.symZ) {
 			Context.ddirty = 2;
 			var t = Context.paintObject.transform;
@@ -527,7 +527,7 @@ class RenderPathPaint {
 
 		if (History.undoLayers != null) {
 
-			commandsSymetry();
+			commandsSymmetry();
 
 			if (Context.tool == ToolBake) {
 				if (Context.pdirty > 0) dilated = false;

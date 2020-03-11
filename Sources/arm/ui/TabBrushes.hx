@@ -12,11 +12,9 @@ class TabBrushes {
 		if (ui.tab(UITrait.inst.htab1, "Brushes")) {
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button("New")) {
-				// UITrait.inst.headerHandle.redraws = 2;
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
-				// MaterialParser.parsePaintMaterial();
-				// RenderUtil.makeMaterialPreview();
+				UINodes.inst.hwnd.redraws = 2;
 			}
 			if (ui.button("Import")) {}
 			if (ui.button("Nodes")) UITrait.inst.showBrushNodes();
@@ -58,7 +56,7 @@ class TabBrushes {
 					//var uix = ui._x;
 					//var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
-					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
+					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
 						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showBrushNodes();
@@ -80,7 +78,7 @@ class TabBrushes {
 							}
 						}, 2);
 					}
-					if (ui.isHovered) ui.tooltipImage(imgFull);
+					if (ui.isHovered && imgFull != null) ui.tooltipImage(imgFull);
 				}
 
 				ui._y += 6;

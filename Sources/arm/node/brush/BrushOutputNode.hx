@@ -9,10 +9,11 @@ class BrushOutputNode extends LogicNode {
 
 	public function new(tree: LogicTree) {
 		super(tree);
-		UITrait.inst.onBrush = run;
+		UITrait.inst.runBrush = run;
+		UITrait.inst.parseBrushInputs = parseInputs;
 	}
 
-	override function run(from: Int) {
+	function parseInputs() {
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
 		var opac: Dynamic = inputs[2].get(); // Float or texture name
@@ -33,6 +34,11 @@ class BrushOutputNode extends LogicNode {
 		}
 		UITrait.inst.brushNodesHardness = inputs[3].get();
 		UITrait.inst.brushNodesScale = inputs[4].get();
+	}
+
+	override function run(from: Int) {
+
+		parseInputs();
 
 		var left = 0;
 		var right = 1;
