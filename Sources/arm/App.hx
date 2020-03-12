@@ -424,6 +424,12 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
+	static function getDragBackground(): TRect {
+		var icons = Res.get("icons.k");
+		if (dragLayer != null) return Res.tile50(icons, 4, 1);
+		else return null;
+	}
+
 	static function getDragImage(): kha.Image {
 		dragTint = 0xffffffff;
 		dragRect = null;
@@ -455,6 +461,8 @@ class App {
 			var inv = 0;
 			#end
 			g.color = dragTint;
+			var bgRect = getDragBackground();
+			if (bgRect != null) g.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
 			dragRect == null ?
 				g.drawScaledImage(img, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2) :
 				g.drawScaledSubImage(img, dragRect.x, dragRect.y, dragRect.w, dragRect.h, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
