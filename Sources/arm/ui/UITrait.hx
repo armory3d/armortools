@@ -173,6 +173,7 @@ class UITrait {
 	public var brushNodesRadius = 1.0;
 	public var brushNodesOpacity = 1.0;
 	public var brushMaskImage: Image = null;
+	public var brushStencilImage: Image = null;
 	public var brushNodesScale = 1.0;
 	public var brushNodesHardness = 1.0;
 
@@ -792,16 +793,6 @@ class UITrait {
 	}
 
 	public function renderCursor(g: kha.graphics2.Graphics) {
-		// if (cursorImg == null) {
-		// 	g.end();
-		// 	cursorImg = Image.createRenderTarget(256, 256);
-		// 	cursorImg.g2.begin(true, 0x00000000);
-		// 	cursorImg.g2.color = 0xffcccccc;
-		// 	kha.graphics2.GraphicsExtension.drawCircle(cursorImg.g2, 128, 128, 124, 8);
-		// 	cursorImg.g2.end();
-		// 	g.begin(false);
-		// }
-
 		g.color = 0xffffffff;
 
 		// Brush
@@ -819,6 +810,12 @@ class UITrait {
 			if (brushLocked) {
 				mx += lockStartedX - System.windowWidth() / 2;
 				my += lockStartedY - System.windowHeight() / 2;
+			}
+
+			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
+				g.color = 0xaaffffff;
+				g.drawImage(brushStencilImage, 0, 0);
+				g.color = 0xffffffff;
 			}
 
 			// Show picked material next to cursor

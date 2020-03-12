@@ -14,11 +14,14 @@ class BrushOutputNode extends LogicNode {
 	}
 
 	function parseInputs() {
+		var lastMask = UITrait.inst.brushMaskImage;
+		var lastStencil = UITrait.inst.brushStencilImage;
+
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
+
 		var opac: Dynamic = inputs[2].get(); // Float or texture name
 		if (opac == null) opac = 1.0;
-		var lastMask = UITrait.inst.brushMaskImage;
 		if (Std.is(opac, String)) {
 			UITrait.inst.brushNodesOpacity = 1.0;
 			var index = Project.assetNames.indexOf(opac);
@@ -29,11 +32,25 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.brushNodesOpacity = opac;
 			UITrait.inst.brushMaskImage = null;
 		}
-		if (lastMask != UITrait.inst.brushMaskImage) {
-			MaterialParser.parsePaintMaterial();
-		}
+
 		UITrait.inst.brushNodesHardness = inputs[3].get();
 		UITrait.inst.brushNodesScale = inputs[4].get();
+
+		var stencil: Dynamic = inputs[5].get(); // Float or texture name
+		if (stencil == null) stencil = 1.0;
+		if (Std.is(stencil, String)) {
+			var index = Project.assetNames.indexOf(stencil);
+			var asset = Project.assets[index];
+			UITrait.inst.brushStencilImage = UITrait.inst.getImage(asset);
+		}
+		else {
+			UITrait.inst.brushStencilImage = null;
+		}
+
+		if (lastMask != UITrait.inst.brushMaskImage ||
+			lastStencil != UITrait.inst.brushStencilImage) {
+			MaterialParser.parsePaintMaterial();
+		}
 	}
 
 	override function run(from: Int) {

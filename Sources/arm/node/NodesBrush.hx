@@ -75,6 +75,14 @@ class NodesBrush {
 			// 			type: "VALUE",
 			// 			color: 0xffa1a1a1,
 			// 			default_value: 1.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Stencil",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
 			// 		}
 			// 	],
 			// 	outputs: [],
