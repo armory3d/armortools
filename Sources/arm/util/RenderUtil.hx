@@ -8,6 +8,8 @@ import iron.RenderPath;
 import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Vec4;
+import iron.data.MaterialData;
+import iron.data.ShaderData;
 import arm.ui.UITrait;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
@@ -20,7 +22,6 @@ class RenderUtil {
 
 	public static inline var matPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
-	static var defaultMaterial: arm.data.MaterialSlot;
 
 	public static function makeMaterialPreview() {
 		UITrait.inst.materialPreview = true;
@@ -210,13 +211,28 @@ class RenderUtil {
 			Context.brush.imageIcon = Image.createRenderTarget(50, 50);
 		}
 
-		// var _material = Context.material;
-		// if (defaultMaterial == null) {
-		// 	defaultMaterial = new arm.data.MaterialSlot();
-		// }
-
-		// Context.material = defaultMaterial;
-		// MaterialParser.parsePaintMaterial();
+		var scons = Project.materials[0].data.shader.contexts;
+		var mcons = Project.materials[0].data.contexts;
+		var _scon: ShaderContext = null;
+		var _mcon: MaterialContext = null;
+		var _si = 0;
+		var _mi = 0;
+		for (i in 0...scons.length) {
+			if (scons[i].raw.name == "paint") {
+				_si = i;
+				_scon = scons[i];
+				scons[i] = MaterialParser.defaultScon;
+				break;
+			}
+		}
+		for (i in 0...mcons.length) {
+			if (mcons[i].raw.name == "paint") {
+				_mi = i;
+				_mcon = mcons[i];
+				mcons[i] = MaterialParser.defaultMcon;
+				break;
+			}
+		}
 
 		RenderPathPaint.useLiveLayer(true);
 
@@ -296,7 +312,8 @@ class RenderUtil {
 		UITrait.inst.lastPaintVecX = _lastX;
 		UITrait.inst.lastPaintVecY = _lastY;
 		Context.pdirty = _pdirty;
-		// Context.material = _material;
+		scons[_si] = _scon;
+		mcons[_mi] = _mcon;
 
 		// Restore paint mesh
 		planeo.visible = false;
