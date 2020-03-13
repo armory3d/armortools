@@ -26,6 +26,7 @@ import arm.io.ImportFont;
 import arm.io.ExportTexture;
 import arm.Tool;
 import arm.Project;
+import arm.Res;
 
 @:access(zui.Zui)
 class UITrait {
@@ -174,6 +175,11 @@ class UITrait {
 	public var brushNodesOpacity = 1.0;
 	public var brushMaskImage: Image = null;
 	public var brushStencilImage: Image = null;
+	public var brushStencilX = 0.02;
+	public var brushStencilY = 0.02;
+	public var brushStencilRot = 0.0;
+	public var brushStencilScale = 0.9;
+	public var brushStencilScaling = false;
 	public var brushNodesScale = 1.0;
 	public var brushNodesHardness = 1.0;
 
@@ -656,6 +662,18 @@ class UITrait {
 		return 0.1;
 	}
 
+	static function hitRect(mx: Float, my: Float, x: Int, y: Int, w: Int, h: Int) {
+		return mx > x && mx < x + w && my > y && my < y + h;
+	}
+
+	function getBrushRect(): TRect {
+		var w = Std.int(brushStencilImage.width * (App.h() / brushStencilImage.height) * brushStencilScale);
+		var h = Std.int(App.h() * brushStencilScale);
+		var x = Std.int(App.x() + brushStencilX * App.w());
+		var y = Std.int(App.y() + brushStencilY * App.h());
+		return { w: w, h: h, x: x, y: y };
+	}
+
 	function updateUI() {
 
 		if (Log.messageTimer > 0) {
@@ -668,7 +686,36 @@ class UITrait {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut("alt+" + Config.keymap.action_paint);
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint);
+
+		if (brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform)) {
+			var r = getBrushRect();
+			if (mouse.started("left")) {
+				brushStencilScaling =
+					hitRect(mouse.x, mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
+					hitRect(mouse.x, mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
+					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
+					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
+			}
+			var _scale = brushStencilScale;
+			if (mouse.down("left")) {
+				if (brushStencilScaling) {
+					var mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
+					brushStencilScale += mouse.movementX / 500 * mult;
+				}
+				else {
+					brushStencilX += mouse.movementX / App.w();
+					brushStencilY += mouse.movementY / App.h();
+				}
+			}
+			else brushStencilScaling = false;
+			if (mouse.wheelDelta != 0) {
+				brushStencilScale -= mouse.wheelDelta / 10;
+			}
+			// Center after scale
+			brushStencilX += (_scale * brushStencilImage.width - brushStencilScale * brushStencilImage.width) / 2 / App.w();
+			brushStencilY += (_scale * brushStencilImage.height - brushStencilScale * brushStencilImage.height) / 2 / App.h();
+		}
 
 		var down = Operator.shortcut(Config.keymap.action_paint) ||
 				   setCloneSource ||
@@ -813,9 +860,18 @@ class UITrait {
 			}
 
 			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
-				g.color = 0xaaffffff;
-				g.drawImage(brushStencilImage, 0, 0);
+				var transform = Operator.shortcut(Config.keymap.stencil_transform);
+				g.color = 0x88ffffff;
+				var r = getBrushRect();
+				g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
 				g.color = 0xffffffff;
+				if (transform) {
+					g.drawRect(r.x, r.y, r.w, r.h);
+					g.drawRect(r.x - 8,       r.y - 8,       16, 16);
+					g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
+					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
+					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+				}
 			}
 
 			// Show picked material next to cursor

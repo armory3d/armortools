@@ -72,7 +72,9 @@ class Context {
 		if (Project.brushes.length <= i) return;
 		brush = Project.brushes[i];
 		MaterialParser.parseBrush();
+		UITrait.inst.parseBrushInputs();
 		UITrait.inst.hwnd1.redraws = 2;
+		UINodes.inst.hwnd.redraws = 2;
 	}
 
 	public static function setLayer(l: LayerSlot, isMask = false) {

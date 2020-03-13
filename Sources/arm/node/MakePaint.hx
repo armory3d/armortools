@@ -221,6 +221,22 @@ class MakePaint {
 			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 		}
 
+		if (UITrait.inst.brushStencilImage != null && (
+			Context.tool == ToolBrush  ||
+			Context.tool == ToolEraser ||
+			Context.tool == ToolFill ||
+			Context.tool == ToolClone  ||
+			Context.tool == ToolBlur   ||
+			Context.tool == ToolParticle ||
+			decal)) {
+			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');
+			frag.add_uniform('vec4 stencilTransform', '_stencilTransform');
+			frag.write('vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
+			frag.write('if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
+			frag.write('vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
+			frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
+		}
+
 		if (UITrait.inst.brushMaskImage != null && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
 			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
 			frag.write('vec2 binp_mask = inp.xy * 2.0 - 1.0;');

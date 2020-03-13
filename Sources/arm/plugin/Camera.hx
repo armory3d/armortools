@@ -67,14 +67,14 @@ class Camera {
 					dist -= f;
 				}
 
-				if (mouse.wheelDelta != 0) {
+				if (mouse.wheelDelta != 0 && !modif) {
 					redraws = 2;
 					var f = mouse.wheelDelta * (-0.1);
 					camera.transform.move(camera.look(), f);
 					dist -= f;
 				}
 
-				if (Operator.shortcut(Config.keymap.action_rotate_light)) {
+				if (Operator.shortcut(Config.keymap.rotate_light)) {
 					redraws = 2;
 					var light = iron.Scene.active.lights[0];
 					var m = iron.math.Mat4.identity();

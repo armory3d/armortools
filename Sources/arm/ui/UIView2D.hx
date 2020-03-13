@@ -95,7 +95,6 @@ class UIView2D {
 			ui.g.drawImage(UINodes.inst.grid, (panX * panScale) % 40 - 40, (panY * panScale) % 40 - 40);
 
 			// Texture
-			ui.g.pipeline = pipe;
 			var l = Context.layer;
 			var tex: Image = null;
 			var channel = 0;
@@ -127,9 +126,16 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
-				drawLayer(tex, tx, ty, tw, th, channel);
 			}
-			ui.g.pipeline = null;
+
+			if (type == View2DLayer) {
+				ui.g.pipeline = pipe;
+				drawLayer(tex, tx, ty, tw, th, channel);
+				ui.g.pipeline = null;
+			}
+			else {
+				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+			}
 
 			// UV map
 			if (type == View2DLayer && uvmapShow) {

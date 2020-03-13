@@ -58,6 +58,7 @@ class TabTextures {
 
 							if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView(1);
 							UITrait.inst.selectTime = Time.time();
+							UIView2D.inst.hwnd.redraws = 2;
 						}
 
 						var _uix = ui._x;

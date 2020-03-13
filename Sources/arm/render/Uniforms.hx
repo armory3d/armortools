@@ -281,6 +281,11 @@ class Uniforms {
 			if (UITrait.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}
+		if (link == "_stencilTransform") {
+			vec2.set(UITrait.inst.brushStencilX, UITrait.inst.brushStencilY, UITrait.inst.brushStencilScale, 0.0);
+			if (UITrait.inst.paint2d) vec2.x -= 1.0;
+			return vec2;
+		}
 		#end
 		return null;
 	}
@@ -304,6 +309,9 @@ class Uniforms {
 		}
 		if (link == "_texbrushmask") {
 			return UITrait.inst.brushMaskImage;
+		}
+		if (link == "_texbrushstencil") {
+			return UITrait.inst.brushStencilImage;
 		}
 		if (link == "_texpaint_undo") {
 			var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;

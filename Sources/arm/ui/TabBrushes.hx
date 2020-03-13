@@ -3,6 +3,7 @@ package arm.ui;
 import iron.system.Time;
 import zui.Zui;
 import arm.data.BrushSlot;
+import arm.node.MaterialParser;
 
 class TabBrushes {
 
@@ -14,6 +15,8 @@ class TabBrushes {
 			if (ui.button("New")) {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
+				MaterialParser.parseBrush();
+				UITrait.inst.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			if (ui.button("Import")) {}
