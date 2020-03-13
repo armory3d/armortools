@@ -112,6 +112,38 @@ class ExportArm {
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
+	public static function runBrush(path: String) {
+		var bnodes: Array<TNodeCanvas> = [];
+		var b = Context.brush;
+		var c: TNodeCanvas = Json.parse(Json.stringify(b.canvas));
+		var assets: Array<TAsset> = [];
+		for (n in c.nodes) {
+			if (n.type == "TEX_IMAGE") {
+				var index = n.buttons[0].default_value;
+				n.buttons[0].data = App.enumTexts(n.type)[index];
+
+				var asset = Project.assets[index];
+				if (assets.indexOf(asset) == -1) {
+					assets.push(asset);
+				}
+			}
+		}
+		bnodes.push(c);
+
+		var texture_files = assetsToFiles(assets);
+
+		var raw = {
+			version: App.version,
+			brush_nodes: bnodes,
+			brush_icons: [Lz4.encode(b.image.getPixels())],
+			assets: texture_files
+		};
+
+		var bytes = ArmPack.encode(raw);
+		if (!path.endsWith(".arm")) path += ".arm";
+		Krom.fileSaveBytes(path, bytes.getData());
+	}
+
 	static function assetsToFiles(assets: Array<TAsset>): Array<String> {
 		var texture_files: Array<String> = [];
 		for (a in assets) {

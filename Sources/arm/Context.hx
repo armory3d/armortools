@@ -70,7 +70,12 @@ class Context {
 
 	public static function selectBrush(i: Int) {
 		if (Project.brushes.length <= i) return;
-		brush = Project.brushes[i];
+		setBrush(Project.brushes[i]);
+	}
+
+	public static function setBrush(b: BrushSlot) {
+		if (Project.brushes.indexOf(b) == -1) return;
+		brush = b;
 		MaterialParser.parseBrush();
 		UITrait.inst.parseBrushInputs();
 		UITrait.inst.hwnd1.redraws = 2;

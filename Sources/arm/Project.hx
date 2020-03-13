@@ -235,6 +235,12 @@ class Project {
 		});
 	}
 
+	public static function importBrush() {
+		UIFiles.show("arm", false, function(path: String) {
+			ImportArm.runBrush(path);
+		});
+	}
+
 	public static function importMesh() {
 		UIFiles.show(Path.meshFormats.join(","), false, function(path: String) {
 			importMeshBox(path);
@@ -293,6 +299,7 @@ class Project {
 typedef TProjectFormat = {
 	public var version: String;
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
+	@:optional public var brush_icons: Array<haxe.io.Bytes>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
 	@:optional public var material_icons: Array<haxe.io.Bytes>;
 	@:optional public var assets: Array<String>; // texture_assets

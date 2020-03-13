@@ -316,6 +316,52 @@ class ImportArm {
 		Data.deleteBlob(path);
 	}
 
+	public static function runBrush(path: String) {
+		Data.getBlob(path, function(b: Blob) {
+			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+			if (project.version == null) { Data.deleteBlob(path); return; }
+			runBrushFromProject(project, path);
+		});
+	}
+
+	public static function runBrushFromProject(project: TProjectFormat, path: String) {
+		var base = Path.baseDir(path);
+		for (file in project.assets) {
+			#if krom_windows
+			file = file.replace("/", "\\");
+			#else
+			file = file.replace("\\", "/");
+			#end
+			// Convert image path from relative to absolute
+			var abs = Data.isAbsolute(file) ? file : base + file;
+			if (!File.exists(abs)) {
+				makePink(abs);
+			}
+			arm.io.ImportTexture.run(abs);
+		}
+
+		var imported: Array<BrushSlot> = [];
+
+		for (n in project.brush_nodes) {
+			initNodes(n.nodes);
+			Context.brush = new BrushSlot(n);
+			Project.brushes.push(Context.brush);
+			imported.push(Context.brush);
+		}
+
+		function makeBrushPreview(_) {
+			for (b in imported) {
+				Context.setBrush(b);
+				RenderUtil.makeBrushPreview();
+			}
+			iron.App.removeRender(makeBrushPreview);
+		}
+		iron.App.notifyOnRender(makeBrushPreview);
+
+		UITrait.inst.hwnd1.redraws = 2;
+		Data.deleteBlob(path);
+	}
+
 	static function makePink(abs: String) {
 		Log.error(Strings.error2 + abs);
 		var b = Bytes.alloc(4);
