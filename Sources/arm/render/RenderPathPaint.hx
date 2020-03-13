@@ -352,7 +352,6 @@ class RenderPathPaint {
 		Context.brushBlendDirty = true;
 	}
 
-	@:access(iron.RenderPath)
 	public static function commandsCursor() {
 		var tool = Context.tool;
 		if (tool != ToolBrush &&
@@ -362,11 +361,21 @@ class RenderPathPaint {
 			tool != ToolParticle) {
 				return;
 		}
-		if (!App.uienabled ||
-			UITrait.inst.worktab.position == SpaceScene) {
+		if (!App.uienabled || UITrait.inst.worktab.position == SpaceScene) {
 			return;
 		}
 
+		drawCursor();
+
+		if (UITrait.inst.brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+			UITrait.inst.brushRadius += UITrait.inst.brushLazy;
+			drawCursor(0.2, 0.2, 0.2);
+			UITrait.inst.brushRadius -= UITrait.inst.brushLazy;
+		}
+	}
+
+	@:access(iron.RenderPath)
+	static function drawCursor(tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
@@ -391,6 +400,7 @@ class RenderPathPaint {
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushNodesRadius * UITrait.inst.brushRadius / 3.4);
 		var right = Scene.active.camera.rightWorld().normalize();
 		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
+		g.setFloat3(Layers.cursorTint, tintR, tintG, tintB);
 		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);

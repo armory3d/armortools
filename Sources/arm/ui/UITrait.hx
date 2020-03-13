@@ -193,6 +193,7 @@ class UITrait {
 	public var brushScale = 1.0;
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
+	public var brushLazy = 0.0;
 	public var brushBias = 1.0;
 	public var brushPaint = UVMap;
 	public var brush3d = true;
@@ -916,6 +917,12 @@ class UITrait {
 						 Context.tool == ToolClone  ||
 						 Context.tool == ToolBlur   ||
 						 Context.tool == ToolParticle) {
+						if (brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+							var radius = psize + brushLazy;
+							g.color = 0x66ffffff;
+							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+							g.color = 0xffffffff;
+						}
 						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
 			}
@@ -1175,6 +1182,7 @@ class UITrait {
 
 					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
+						brushLazy = ui.slider(Id.handle({value: brushLazy}), "Lazy", 0.0, 1.0, true);
 					}
 
 					if (Context.tool != ToolEraser) {
