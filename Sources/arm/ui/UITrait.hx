@@ -194,6 +194,8 @@ class UITrait {
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
 	public var brushLazy = 0.0;
+	public var brushLazyX = 0.0;
+	public var brushLazyY = 0.0;
 	public var brushBias = 1.0;
 	public var brushPaint = UVMap;
 	public var brush3d = true;
@@ -307,6 +309,7 @@ class UITrait {
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
 			MaterialParser.parseBrush();
+			UITrait.inst.parseBrushInputs();
 		}
 
 		if (Project.layers == null) {
@@ -845,14 +848,8 @@ class UITrait {
 
 		// Brush
 		if (App.uienabled && worktab.position == SpacePaint) {
-			var mouse = Input.getMouse();
-			var mx = mouse.x;
-			var my = mouse.y;
-			var pen = Input.getPen();
-			if (pen.down()) {
-				mx = pen.x;
-				my = pen.y;
-			}
+			var mx = App.x() + paintVec.x * App.w();
+			var my = App.y() + paintVec.y * App.h();
 
 			// Radius being scaled
 			if (brushLocked) {
@@ -885,6 +882,8 @@ class UITrait {
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			// Clone source cursor
+			var mouse = Input.getMouse();
+			var pen = Input.getPen();
 			var kb = Input.getKeyboard();
 			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 				g.color = 0x66ffffff;
@@ -918,7 +917,7 @@ class UITrait {
 						 Context.tool == ToolBlur   ||
 						 Context.tool == ToolParticle) {
 						if (brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-							var radius = psize + brushLazy;
+							var radius = psize + brushLazy * 100;
 							g.color = 0x66ffffff;
 							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 							g.color = 0xffffffff;
@@ -1182,7 +1181,6 @@ class UITrait {
 
 					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), "Hardness", 0.0, 1.0, true);
-						brushLazy = ui.slider(Id.handle({value: brushLazy}), "Lazy", 0.0, 1.0, true);
 					}
 
 					if (Context.tool != ToolEraser) {
