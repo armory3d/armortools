@@ -15,7 +15,24 @@ class NodesBrush {
 				x: 0,
 				y: 0,
 				color: 0xff4982a0,
-				inputs: [],
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Lazy Radius",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Lazy Step",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
+					}
+				],
 				outputs: [
 					{
 						id: 0,

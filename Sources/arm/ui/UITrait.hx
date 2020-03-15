@@ -193,7 +193,8 @@ class UITrait {
 	public var brushScale = 1.0;
 	public var brushRot = 0.0;
 	public var brushHardness = 0.8;
-	public var brushLazy = 0.0;
+	public var brushLazyRadius = 0.0;
+	public var brushLazyStep = 0.0;
 	public var brushLazyX = 0.0;
 	public var brushLazyY = 0.0;
 	public var brushBias = 1.0;
@@ -916,8 +917,8 @@ class UITrait {
 						 Context.tool == ToolClone  ||
 						 Context.tool == ToolBlur   ||
 						 Context.tool == ToolParticle) {
-						if (brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-							var radius = psize + brushLazy * 100;
+						if (brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+							var radius = psize + brushLazyRadius * 100;
 							g.color = 0x66ffffff;
 							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 							g.color = 0xffffffff;

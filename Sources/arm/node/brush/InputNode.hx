@@ -1,6 +1,7 @@
 package arm.node.brush;
 
 import iron.math.Vec4;
+import arm.ui.UITrait;
 
 @:keep
 class InputNode extends LogicNode {
@@ -21,13 +22,18 @@ class InputNode extends LogicNode {
 		super(tree);
 		tree.notifyOnUpdate(function() {
 
-			if (arm.ui.UITrait.inst.splitView) {
-				arm.ui.UITrait.inst.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			if (UITrait.inst.splitView) {
+				UITrait.inst.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 			}
 
+			UITrait.inst.brushLazyRadius = inputs[0].get();
+			UITrait.inst.brushLazyStep = inputs[1].get();
+
+			var lazyPaint = UITrait.inst.brushLazyRadius > 0 && Operator.shortcut(Config.keymap.action_paint);
+
 			var mouse = iron.system.Input.getMouse();
-			coords.x = mouse.viewX / iron.App.w();
-			coords.y = mouse.viewY / iron.App.h();
+			var paintX = mouse.viewX / iron.App.w();
+			var paintY = mouse.viewY / iron.App.h();
 			if (mouse.started()) {
 				startX = mouse.viewX / iron.App.w();
 				startY = mouse.viewY / iron.App.h();
@@ -35,16 +41,30 @@ class InputNode extends LogicNode {
 
 			var pen = iron.system.Input.getPen();
 			if (pen.down()) {
-				coords.x = pen.viewX / iron.App.w();
-				coords.y = pen.viewY / iron.App.h();
+				paintX = pen.viewX / iron.App.w();
+				paintY = pen.viewY / iron.App.h();
 			}
 			if (pen.started()) {
 				startX = pen.viewX / iron.App.w();
 				startY = pen.viewY / iron.App.h();
 			}
 
-			if (arm.ui.UITrait.inst.splitView) {
-				arm.ui.UITrait.inst.viewIndex = -1;
+			if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint)) {
+				if (lockX) paintX = startX;
+				if (lockY) paintY = startY;
+			}
+
+			if (UITrait.inst.brushLazyRadius > 0) {
+				UITrait.inst.brushLazyX = paintX;
+				UITrait.inst.brushLazyY = paintY;
+			}
+			if (!lazyPaint) {
+				coords.x = paintX;
+				coords.y = paintY;
+			}
+
+			if (UITrait.inst.splitView) {
+				UITrait.inst.viewIndex = -1;
 			}
 
 			if (lockBegin) {
@@ -52,8 +72,7 @@ class InputNode extends LogicNode {
 				var dy = Math.abs(lockStartY - mouse.viewY);
 				if (dx > 1 || dy > 1) {
 					lockBegin = false;
-					if (dx > dy) lockY = true;
-					else lockX = true;
+					dx > dy ? lockY = true : lockX = true;
 				}
 			}
 
@@ -61,8 +80,25 @@ class InputNode extends LogicNode {
 			if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.viewX; lockStartY = mouse.viewY; lockBegin = true; }
 			else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
 
-			if (lockX) coords.x = startX;
-			if (lockY) coords.y = startY;
+			if (UITrait.inst.brushLazyRadius > 0) {
+				var v1 = new Vec4(UITrait.inst.brushLazyX, UITrait.inst.brushLazyY, 0.0);
+				var v2 = new Vec4(coords.x, coords.y, 0.0);
+				var d = Vec4.distance(v1, v2);
+
+				if (d > UITrait.inst.brushLazyRadius / 10) {
+					var v3 = new Vec4();
+					v3.subvecs(v2, v1);
+					v3.normalize();
+					v3.mult(1.0 - UITrait.inst.brushLazyStep);
+					v3.mult(UITrait.inst.brushLazyRadius / 10);
+					v2.addvecs(v1, v3);
+					coords.x = v2.x;
+					coords.y = v2.y;
+				}
+
+				UITrait.inst.lastPaintX = -1;
+				UITrait.inst.lastPaintY = -1;
+			}
 		});
 	}
 

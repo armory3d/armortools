@@ -373,17 +373,29 @@ class RenderPathPaint {
 			return;
 		}
 
-		drawCursor();
+		var mx = UITrait.inst.paintVec.x;
+		var my = 1.0 - UITrait.inst.paintVec.y;
+		if (UITrait.inst.brushLocked) {
+			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		}
+		drawCursor(mx, my);
 
-		if (UITrait.inst.brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-			UITrait.inst.brushRadius += UITrait.inst.brushLazy;
-			drawCursor(0.2, 0.2, 0.2);
-			UITrait.inst.brushRadius -= UITrait.inst.brushLazy;
+		if (UITrait.inst.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+			UITrait.inst.brushRadius += UITrait.inst.brushLazyRadius;
+			mx = UITrait.inst.brushLazyX;
+			my = 1.0 - UITrait.inst.brushLazyY;
+			if (UITrait.inst.brushLocked) {
+				mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+				my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+			}
+			drawCursor(mx, my, 0.2, 0.2, 0.2);
+			UITrait.inst.brushRadius -= UITrait.inst.brushLazyRadius;
 		}
 	}
 
 	@:access(iron.RenderPath)
-	static function drawCursor(tintR = 1.0, tintG = 1.0, tintB = 1.0) {
+	static function drawCursor(mx: Float, my: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
@@ -397,12 +409,6 @@ class RenderPathPaint {
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
-		var mx = UITrait.inst.paintVec.x;
-		var my = 1.0 - UITrait.inst.paintVec.y;
-		if (UITrait.inst.brushLocked) {
-			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
-		}
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushNodesRadius * UITrait.inst.brushRadius / 3.4);
