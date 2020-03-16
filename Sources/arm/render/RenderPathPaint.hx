@@ -28,7 +28,7 @@ class RenderPathPaint {
 	static var baking = false;
 	public static var liveLayer: arm.data.LayerSlot = null;
 	public static var liveLayerDrawn = 0;
-	public static var liveLayerLocked = true;
+	public static var liveLayerLocked = false;
 	static var _texpaint: RenderTarget;
 	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;

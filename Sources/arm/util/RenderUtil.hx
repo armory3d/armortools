@@ -187,6 +187,8 @@ class RenderUtil {
 
 	public static function makeBrushPreview() {
 
+		if (RenderPathPaint.liveLayerLocked) return;
+
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
@@ -211,28 +213,31 @@ class RenderUtil {
 			Context.brush.imageIcon = Image.createRenderTarget(50, 50);
 		}
 
-		var scons = Project.materials[0].data.shader.contexts;
-		var mcons = Project.materials[0].data.contexts;
-		var _scon: ShaderContext = null;
-		var _mcon: MaterialContext = null;
-		var _si = 0;
-		var _mi = 0;
-		for (i in 0...scons.length) {
-			if (scons[i].raw.name == "paint") {
-				_si = i;
-				_scon = scons[i];
-				scons[i] = MaterialParser.defaultScon;
-				break;
-			}
-		}
-		for (i in 0...mcons.length) {
-			if (mcons[i].raw.name == "paint") {
-				_mi = i;
-				_mcon = mcons[i];
-				mcons[i] = MaterialParser.defaultMcon;
-				break;
-			}
-		}
+		// var scons = Project.materials[0].data.shader.contexts;
+		// var mcons = Project.materials[0].data.contexts;
+		// var _scon: ShaderContext = null;
+		// var _mcon: MaterialContext = null;
+		// var _si = 0;
+		// var _mi = 0;
+		// for (i in 0...scons.length) {
+		// 	if (scons[i].raw.name == "paint") {
+		// 		_si = i;
+		// 		_scon = scons[i];
+		// 		scons[i] = MaterialParser.defaultScon;
+		// 		break;
+		// 	}
+		// }
+		// for (i in 0...mcons.length) {
+		// 	if (mcons[i].raw.name == "paint") {
+		// 		_mi = i;
+		// 		_mcon = mcons[i];
+		// 		mcons[i] = MaterialParser.defaultMcon;
+		// 		break;
+		// 	}
+		// }
+		var _material = Context.material;
+		Context.material = new arm.data.MaterialSlot();
+		MaterialParser.parsePaintMaterial();
 
 		RenderPathPaint.useLiveLayer(true);
 
@@ -276,6 +281,7 @@ class RenderUtil {
 		planeo.transform.loc.set(m._30, -m._31, 0.0);
 		planeo.transform.buildMatrix();
 
+		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathDeferred.drawGbuffer();
 
 		// Paint brush preview
@@ -312,8 +318,10 @@ class RenderUtil {
 		UITrait.inst.lastPaintVecX = _lastX;
 		UITrait.inst.lastPaintVecY = _lastY;
 		Context.pdirty = _pdirty;
-		scons[_si] = _scon;
-		mcons[_mi] = _mcon;
+		// scons[_si] = _scon;
+		// mcons[_mi] = _mcon;
+		Context.material = _material;
+		MaterialParser.parsePaintMaterial();
 
 		// Restore paint mesh
 		planeo.visible = false;

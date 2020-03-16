@@ -106,15 +106,10 @@ class UINodes {
 		if (ui.changed) {
 			mchanged = true;
 			if (!mdown) changed = true;
-			if (canvasType == CanvasBrush) {
-				canvasChanged();
-			}
 		}
 		if ((mreleased && mchanged) || changed) {
 			mchanged = changed = false;
-			if (canvasType == CanvasMaterial) {
-				canvasChanged();
-			}
+			canvasChanged();
 			if (mreleased) {
 				UITrait.inst.hwnd.redraws = 2;
 				History.editNodes(lastCanvas, canvasType);
@@ -187,10 +182,14 @@ class UINodes {
 			iron.App.notifyOnRender(_parse);
 		}
 		else {
-			MaterialParser.parseBrush();
-			UITrait.inst.parseBrushInputs();
-			RenderUtil.makeBrushPreview();
-			UITrait.inst.hwnd1.redraws = 2;
+			function _parse(_) {
+				MaterialParser.parseBrush();
+				UITrait.inst.parseBrushInputs();
+				RenderUtil.makeBrushPreview();
+				UITrait.inst.hwnd1.redraws = 2;
+				iron.App.removeRender(_parse);
+			}
+			iron.App.notifyOnRender(_parse);
 		}
 	}
 
@@ -297,11 +296,17 @@ class UINodes {
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
 			recompileMat = false;
-			if (Layers.isFillMaterial()) {
-				Layers.updateFillLayers();
+
+			if (canvasType == CanvasBrush) {
+				canvasChanged();
 			}
 			else {
-				RenderUtil.makeMaterialPreview();
+				if (Layers.isFillMaterial()) {
+					Layers.updateFillLayers();
+				}
+				else {
+					RenderUtil.makeMaterialPreview();
+				}
 			}
 			UITrait.inst.hwnd1.redraws = 2;
 		}
