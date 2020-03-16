@@ -7,6 +7,7 @@ project.addLibrary("iron");
 project.addLibrary("zui");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
 project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
+project.addAssets("Assets/fonts/*", { notinlist: true, destination: "data/{name}" });
 project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/themes/{name}" });

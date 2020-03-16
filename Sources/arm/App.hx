@@ -97,7 +97,7 @@ class App {
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 		#end
 
-		Data.getFont("font_default.ttf", function(f: Font) {
+		Data.getFont("font_ascii.ttf", function(f: Font) {
 			Data.getImage("color_wheel.k", function(image: Image) {
 				font = f;
 				theme = zui.Themes.dark;
