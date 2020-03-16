@@ -181,7 +181,9 @@ class UITrait {
 	public var brushStencilScale = 0.9;
 	public var brushStencilScaling = false;
 	public var brushNodesScale = 1.0;
+	public var brushNodesAngle = 0.0;
 	public var brushNodesHardness = 1.0;
+	public var brushDirectional = false;
 
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Handle({value: 0.5});
@@ -191,7 +193,7 @@ class UITrait {
 	public var brushOpacity = 1.0;
 	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
-	public var brushRot = 0.0;
+	public var brushAngle = 0.0;
 	public var brushHardness = 0.8;
 	public var brushLazyRadius = 0.0;
 	public var brushLazyStep = 0.0;
@@ -1162,7 +1164,7 @@ class UITrait {
 						Context.tool == ToolDecal  ||
 						Context.tool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, "UV Scale", 0.01, 5.0, true);
+						brushScale = ui.slider(brushScaleHandle, "Scale", 0.01, 5.0, true);
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
@@ -1171,9 +1173,9 @@ class UITrait {
 							}
 						}
 
-						var brushRotHandle = Id.handle({value: brushRot});
-						brushRot = ui.slider(brushRotHandle, "UV Rotate", 0.0, 360.0, true, 1);
-						if (brushRotHandle.changed) {
+						var brushAngleHandle = Id.handle({value: brushAngle});
+						brushAngle = ui.slider(brushAngleHandle, "Angle", 0.0, 360.0, true, 1);
+						if (brushAngleHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
 					}

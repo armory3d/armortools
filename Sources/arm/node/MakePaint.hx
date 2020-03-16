@@ -243,13 +243,27 @@ class MakePaint {
 			frag.write('binp_mask.x *= aspectRatio;');
 			frag.write('binp_mask = binp_mask * 0.5 + 0.5;');
 			frag.write('vec2 pa_mask = bsp.xy - binp_mask.xy;');
+			// if (UITrait.inst.brushDirectional) {
+			// 	frag.add_uniform('vec2 brushDirection', '_brushDirection');
+			// 	frag.write('pa_mask.xy = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
+			// }
+			if (UITrait.inst.brushDirectional) {
+				frag.write('float maskAngle = atan2(-inp.y + inplast.y, inp.x - inplast.x) - 3.141592 / 2;');
+				frag.write('pa_mask.xy = vec2(pa_mask.x * cos(maskAngle) - pa_mask.y * sin(maskAngle), pa_mask.x * sin(maskAngle) + pa_mask.y * cos(maskAngle));');
+			}
+			var angle = UITrait.inst.brushAngle + UITrait.inst.brushNodesAngle;
+			if (angle != 0.0) {
+				var a = angle * (Math.PI / 180);
+				frag.write('pa_mask.xy = vec2(pa_mask.x * ${Math.cos(a)} - pa_mask.y * ${Math.sin(a)}, pa_mask.x * ${Math.sin(a)} + pa_mask.y * ${Math.cos(a)});');
+			}
 			frag.write('pa_mask /= brushRadius;');
 			if (UITrait.inst.brush3d) {
 				frag.add_uniform('vec3 eye', '_cameraPosition');
 				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
 			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
-			frag.write('opacity *= textureLod(texbrushmask, pa_mask, 0.0).r;');
+			frag.write('float4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
+			frag.write('opacity *= mask_sample.r * mask_sample.a;');
 		}
 
 		if (Context.tool == ToolParticle) { // particle mask

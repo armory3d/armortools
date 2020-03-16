@@ -72,6 +72,22 @@ class NodesBrush {
 			// 		{
 			// 			id: 0,
 			// 			node_id: 0,
+			// 			name: "Scale",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 1.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
+			// 			name: "Angle",
+			// 			type: "VALUE",
+			// 			color: 0xffa1a1a1,
+			// 			default_value: 0.0
+			// 		},
+			// 		{
+			// 			id: 0,
+			// 			node_id: 0,
 			// 			name: "Opacity",
 			// 			type: "VALUE",
 			// 			color: 0xffa1a1a1,
@@ -88,14 +104,6 @@ class NodesBrush {
 			// 		{
 			// 			id: 0,
 			// 			node_id: 0,
-			// 			name: "UV Scale",
-			// 			type: "VALUE",
-			// 			color: 0xffa1a1a1,
-			// 			default_value: 1.0
-			// 		},
-			// 		{
-			// 			id: 0,
-			// 			node_id: 0,
 			// 			name: "Stencil",
 			// 			type: "VALUE",
 			// 			color: 0xffa1a1a1,
@@ -103,7 +111,14 @@ class NodesBrush {
 			// 		}
 			// 	],
 			// 	outputs: [],
-			// 	buttons: []
+			// 	buttons: [
+			//		{
+			//			name: "Directional",
+			//			type: "BOOL",
+			//			default_value: false,
+			//			output: 0
+			//		}
+			// ]
 			// },
 			{
 				id: 0,

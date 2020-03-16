@@ -7,6 +7,8 @@ import arm.Tool;
 @:keep
 class BrushOutputNode extends LogicNode {
 
+	public var Directional = false; // button 0
+
 	public function new(tree: LogicTree) {
 		super(tree);
 		UITrait.inst.runBrush = run;
@@ -19,8 +21,10 @@ class BrushOutputNode extends LogicNode {
 
 		UITrait.inst.paintVec = inputs[0].get();
 		UITrait.inst.brushNodesRadius = inputs[1].get();
+		UITrait.inst.brushNodesScale = inputs[2].get();
+		UITrait.inst.brushNodesAngle = inputs[3].get();
 
-		var opac: Dynamic = inputs[2].get(); // Float or texture name
+		var opac: Dynamic = inputs[4].get(); // Float or texture name
 		if (opac == null) opac = 1.0;
 		if (Std.is(opac, String)) {
 			UITrait.inst.brushNodesOpacity = 1.0;
@@ -33,10 +37,9 @@ class BrushOutputNode extends LogicNode {
 			UITrait.inst.brushMaskImage = null;
 		}
 
-		UITrait.inst.brushNodesHardness = inputs[3].get();
-		UITrait.inst.brushNodesScale = inputs[4].get();
+		UITrait.inst.brushNodesHardness = inputs[5].get();
 
-		var stencil: Dynamic = inputs[5].get(); // Float or texture name
+		var stencil: Dynamic = inputs[6].get(); // Float or texture name
 		if (stencil == null) stencil = 1.0;
 		if (Std.is(stencil, String)) {
 			var index = Project.assetNames.indexOf(stencil);
@@ -51,6 +54,8 @@ class BrushOutputNode extends LogicNode {
 			lastStencil != UITrait.inst.brushStencilImage) {
 			MaterialParser.parsePaintMaterial();
 		}
+
+		UITrait.inst.brushDirectional = Directional;
 	}
 
 	override function run(from: Int) {

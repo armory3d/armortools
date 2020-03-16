@@ -30,8 +30,8 @@ class LayerSlot {
 
 	public var blending = BlendMix;
 	public var objectMask = 0;
-	public var uvScale = 1.0;
-	public var uvRot = 0.0;
+	public var scale = 1.0;
+	public var angle = 0.0;
 	public var uvType = UVMap;
 	public var paintBase = true;
 	public var paintOpac = true;

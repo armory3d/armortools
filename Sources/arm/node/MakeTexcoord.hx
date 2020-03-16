@@ -31,9 +31,18 @@ class MakeTexcoord {
 
 			frag.write_attrib('vec2 texCoord = uvsp * brushScale;');
 
-			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
-			if (uvRot > 0.0) {
-				var a = uvRot * (Math.PI / 180);
+			// if (UITrait.inst.brushDirectional) {
+			// 	frag.add_uniform('vec2 brushDirection', '_brushDirection');
+			// 	frag.write('texCoord = vec2(texCoord.x * brushDirection.x - texCoord.y * brushDirection.y, texCoord.x * brushDirection.y + texCoord.y * brushDirection.x);');
+			// }
+			if (UITrait.inst.brushDirectional) {
+				frag.write('float maskAngleBrush = atan2(-inp.y + inplast.y, inp.x - inplast.x) - 3.141592 / 2;');
+				frag.write('texCoord = vec2(texCoord.x * cos(maskAngleBrush) - texCoord.y * sin(maskAngleBrush), texCoord.x * sin(maskAngleBrush) + texCoord.y * cos(maskAngleBrush));');
+			}
+			var angle = UITrait.inst.brushAngle + UITrait.inst.brushNodesAngle;
+			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
+			if (uvAngle != 0.0) {
+				var a = uvAngle * (Math.PI / 180);
 				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
@@ -42,9 +51,10 @@ class MakeTexcoord {
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');
 
-			var uvRot = Context.layer.material_mask != null ? Context.layer.uvRot : UITrait.inst.brushRot;
-			if (uvRot > 0.0) {
-				var a = uvRot * (Math.PI / 180);
+			var angle = UITrait.inst.brushAngle + UITrait.inst.brushNodesAngle;
+			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
+			if (uvAngle > 0.0) {
+				var a = uvAngle * (Math.PI / 180);
 				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
 			}
 		}
