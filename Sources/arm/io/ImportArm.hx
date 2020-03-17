@@ -232,8 +232,8 @@ class ImportArm {
 						l.texpaint_mask.g2.end();
 					}
 
-					l.uvScale = ld.uv_scale;
-					l.uvRot = ld.uv_rot;
+					l.scale = ld.uv_scale;
+					l.angle = ld.uv_rot;
 					l.uvType = ld.uv_type;
 					l.maskOpacity = ld.opacity_mask;
 					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;

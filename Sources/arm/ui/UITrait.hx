@@ -182,7 +182,9 @@ class UITrait {
 	public var brushStencilScale = 0.9;
 	public var brushStencilScaling = false;
 	public var brushNodesScale = 1.0;
+	public var brushNodesAngle = 0.0;
 	public var brushNodesHardness = 1.0;
+	public var brushDirectional = false;
 
 	public var brushRadius = 0.5;
 	public var brushRadiusHandle = new Handle({value: 0.5});
@@ -192,9 +194,12 @@ class UITrait {
 	public var brushOpacity = 1.0;
 	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
-	public var brushRot = 0.0;
+	public var brushAngle = 0.0;
 	public var brushHardness = 0.8;
-	public var brushLazy = 0.0;
+	public var brushLazyRadius = 0.0;
+	public var brushLazyStep = 0.0;
+	public var brushLazyX = 0.0;
+	public var brushLazyY = 0.0;
 	public var brushBias = 1.0;
 	public var brushPaint = UVMap;
 	public var brush3d = true;
@@ -320,6 +325,7 @@ class UITrait {
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
 			MaterialParser.parseBrush();
+			UITrait.inst.parseBrushInputs();
 		}
 
 		if (Project.layers == null) {
@@ -858,14 +864,8 @@ class UITrait {
 
 		// Brush
 		if (App.uienabled && worktab.position == SpacePaint) {
-			var mouse = Input.getMouse();
-			var mx = mouse.x;
-			var my = mouse.y;
-			var pen = Input.getPen();
-			if (pen.down()) {
-				mx = pen.x;
-				my = pen.y;
-			}
+			var mx = App.x() + paintVec.x * App.w();
+			var my = App.y() + paintVec.y * App.h();
 
 			// Radius being scaled
 			if (brushLocked) {
@@ -898,6 +898,8 @@ class UITrait {
 			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
 
 			// Clone source cursor
+			var mouse = Input.getMouse();
+			var pen = Input.getPen();
 			var kb = Input.getKeyboard();
 			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 				g.color = 0x66ffffff;
@@ -930,8 +932,8 @@ class UITrait {
 						 Context.tool == ToolClone  ||
 						 Context.tool == ToolBlur   ||
 						 Context.tool == ToolParticle) {
-						if (brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-							var radius = psize + brushLazy;
+						if (brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+							var radius = psize + brushLazyRadius * 100;
 							g.color = 0x66ffffff;
 							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 							g.color = 0xffffffff;
@@ -1040,6 +1042,11 @@ class UITrait {
 			menuButton(tr("Mode"), MenuMode);
 			menuButton(tr("Camera"), MenuCamera);
 			menuButton(tr("Help"), MenuHelp);
+
+			if (menubarw < ui._x + 10) {
+				menubarw = Std.int(ui._x + 10);
+				toolbarHandle.redraws = 2;
+			}
 
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
@@ -1187,7 +1194,7 @@ class UITrait {
 						Context.tool == ToolDecal  ||
 						Context.tool == ToolText) {
 						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
+						brushScale = ui.slider(brushScaleHandle, tr("Scale"), 0.01, 5.0, true);
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
@@ -1196,9 +1203,9 @@ class UITrait {
 							}
 						}
 
-						var brushRotHandle = Id.handle({value: brushRot});
-						brushRot = ui.slider(brushRotHandle, tr("UV Rotate"), 0.0, 360.0, true, 1);
-						if (brushRotHandle.changed) {
+						var brushAngleHandle = Id.handle({value: brushAngle});
+						brushAngle = ui.slider(brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
+						if (brushAngleHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
 					}
@@ -1207,7 +1214,6 @@ class UITrait {
 
 					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
 						brushHardness = ui.slider(Id.handle({value: brushHardness}), tr("Hardness"), 0.0, 1.0, true);
-						brushLazy = ui.slider(Id.handle({value: brushLazy}), tr("Lazy"), 0.0, 1.0, true);
 					}
 
 					if (Context.tool != ToolEraser) {

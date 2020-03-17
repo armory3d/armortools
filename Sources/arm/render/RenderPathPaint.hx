@@ -28,6 +28,7 @@ class RenderPathPaint {
 	static var baking = false;
 	public static var liveLayer: arm.data.LayerSlot = null;
 	public static var liveLayerDrawn = 0;
+	public static var liveLayerLocked = false;
 	static var _texpaint: RenderTarget;
 	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;
@@ -276,6 +277,7 @@ class RenderPathPaint {
 			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
 			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
 		}
+		liveLayerLocked = use;
 	}
 
 	public static function commandsLiveBrush() {
@@ -289,6 +291,18 @@ class RenderPathPaint {
 			tool != ToolBlur) {
 				return;
 		}
+
+		if (liveLayerLocked) return;
+
+		// var mouse = Input.getMouse();
+		// var mx = mouse.x;
+		// var my = mouse.y;
+		// var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
+		// 				 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
+		// var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+		// 				   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+		// 				   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+		// if (!inViewport && !in2dView) return;
 
 		if (liveLayer == null) {
 			liveLayer = new arm.data.LayerSlot("_live");
@@ -313,31 +327,25 @@ class RenderPathPaint {
 
 		liveLayerDrawn = 2;
 
-		var mx = Input.getMouse().viewX / iron.App.w();
-		var my = 1.0 - (Input.getMouse().viewY / iron.App.h());
-		if (UITrait.inst.brushLocked) {
-			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
-		}
-
 		UIView2D.inst.hwnd.redraws = 2;
 		var _x = UITrait.inst.paintVec.x;
 		var _y = UITrait.inst.paintVec.y;
+		if (UITrait.inst.brushLocked) {
+			UITrait.inst.paintVec.x = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+			UITrait.inst.paintVec.y = (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		}
 		var _lastX = UITrait.inst.lastPaintVecX;
 		var _lastY = UITrait.inst.lastPaintVecY;
 		var _pdirty = Context.pdirty;
-		UITrait.inst.paintVec.x = mx;
-		UITrait.inst.paintVec.y = 1.0 - my;
-		UITrait.inst.lastPaintVecX = mx;
-		UITrait.inst.lastPaintVecY = 1.0 - my;
-		Context.pdirty = 2;
-		Context.rdirty = 2;
-		UITrait.inst.sub = 0;
-
+		UITrait.inst.lastPaintVecX = UITrait.inst.paintVec.x;
+		UITrait.inst.lastPaintVecY = UITrait.inst.paintVec.y;
 		if (Operator.shortcut(Config.keymap.brush_ruler)) {
 			UITrait.inst.lastPaintVecX = UITrait.inst.lastPaintX;
 			UITrait.inst.lastPaintVecY = UITrait.inst.lastPaintY;
 		}
+		Context.pdirty = 2;
+		Context.rdirty = 2;
+		UITrait.inst.sub = 0;
 
 		commandsSymmetry();
 		commandsPaint();
@@ -365,17 +373,29 @@ class RenderPathPaint {
 			return;
 		}
 
-		drawCursor();
+		var mx = UITrait.inst.paintVec.x;
+		var my = 1.0 - UITrait.inst.paintVec.y;
+		if (UITrait.inst.brushLocked) {
+			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		}
+		drawCursor(mx, my);
 
-		if (UITrait.inst.brushLazy > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-			UITrait.inst.brushRadius += UITrait.inst.brushLazy;
-			drawCursor(0.2, 0.2, 0.2);
-			UITrait.inst.brushRadius -= UITrait.inst.brushLazy;
+		if (UITrait.inst.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+			UITrait.inst.brushRadius += UITrait.inst.brushLazyRadius;
+			mx = UITrait.inst.brushLazyX;
+			my = 1.0 - UITrait.inst.brushLazyY;
+			if (UITrait.inst.brushLocked) {
+				mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
+				my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
+			}
+			drawCursor(mx, my, 0.2, 0.2, 0.2);
+			UITrait.inst.brushRadius -= UITrait.inst.brushLazyRadius;
 		}
 	}
 
 	@:access(iron.RenderPath)
-	static function drawCursor(tintR = 1.0, tintG = 1.0, tintB = 1.0) {
+	static function drawCursor(mx: Float, my: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
@@ -389,12 +409,6 @@ class RenderPathPaint {
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
-		var mx = Input.getMouse().viewX / iron.App.w();
-		var my = 1.0 - (Input.getMouse().viewY / iron.App.h());
-		if (UITrait.inst.brushLocked) {
-			mx = (UITrait.inst.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (UITrait.inst.lockStartedY - iron.App.y()) / iron.App.h();
-		}
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
 		g.setFloat(Layers.cursorRadius, UITrait.inst.brushNodesRadius * UITrait.inst.brushRadius / 3.4);
@@ -517,7 +531,7 @@ class RenderPathPaint {
 		if (liveLayerDrawn > 0) liveLayerDrawn--;
 
 		if (UITrait.inst.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && UITrait.inst.brushTime == 0) {
-			// Depth is unchnaged, draw before gbuffer gets updated
+			// Depth is unchanged, draw before gbuffer gets updated
 			commandsLiveBrush();
 		}
 	}

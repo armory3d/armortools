@@ -573,18 +573,18 @@ class TabLayers {
 					if (l.material_mask != null) {
 						ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 						@:privateAccess ui.endElement();
-
-						var uvScaleHandle = Id.handle().nest(l.id, {value: l.uvScale});
-						l.uvScale = ui.slider(uvScaleHandle, tr("UV Scale"), 0.0, 5.0, true);
-						if (uvScaleHandle.changed) {
+            
+						var scaleHandle = Id.handle().nest(l.id, {value: l.scale});
+						l.scale = ui.slider(scaleHandle, tr("Scale"), 0.0, 5.0, true);
+						if (scaleHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);
 							Layers.updateFillLayers();
 						}
 
-						var uvRotHandle = Id.handle().nest(l.id, {value: l.uvRot});
-						l.uvRot = ui.slider(uvRotHandle, tr("UV Rotate"), 0.0, 360, true, 1);
-						if (uvRotHandle.changed) {
+						var angleHandle = Id.handle().nest(l.id, {value: l.angle});
+						l.angle = ui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
+						if (angleHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);
 							MaterialParser.parsePaintMaterial();

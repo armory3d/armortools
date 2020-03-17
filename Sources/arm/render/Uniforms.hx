@@ -56,7 +56,7 @@ class Uniforms {
 		if (link == "_brushScale") {
 			var nodesScale = UITrait.inst.brushNodesScale;
 			var fill = Context.layer.material_mask != null;
-			var val = (fill ? Context.layer.uvScale : UITrait.inst.brushScale) * nodesScale;
+			var val = (fill ? Context.layer.scale : UITrait.inst.brushScale) * nodesScale;
 			return val;
 		}
 		if (link == "_texpaintSize") {
@@ -132,6 +132,16 @@ class Uniforms {
 		}
 		if (link == "_cloneDelta") {
 			vec2.set(UITrait.inst.cloneDeltaX, UITrait.inst.cloneDeltaY, 0);
+			return vec2;
+		}
+		if (link == "_brushDirection") {
+			var x = UITrait.inst.paintVec.x;
+			var y = UITrait.inst.paintVec.y;
+			var lastx = UITrait.inst.lastPaintVecX;
+			var lasty = UITrait.inst.lastPaintVecY;
+			if (UITrait.inst.paint2d) { x -= 1.0; lastx -= 1.0; }
+			var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
+			vec2.set(Math.cos(angle), Math.sin(angle), 0);
 			return vec2;
 		}
 		#end
