@@ -1030,6 +1030,11 @@ class UITrait {
 			menuButton("Camera", MenuCamera);
 			menuButton("Help", MenuHelp);
 
+			if (menubarw < ui._x + 10) {
+				menubarw = Std.int(ui._x + 10);
+				toolbarHandle.redraws = 2;
+			}
+
 			ui._w = _w;
 			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
 			ui.t.BUTTON_COL = BUTTON_COL;
