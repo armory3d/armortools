@@ -5,6 +5,7 @@ import zui.Zui;
 import zui.Ext;
 import zui.Id;
 import iron.system.Input;
+import arm.App.tr;
 
 @:access(zui.Zui)
 class UIBox {
@@ -42,7 +43,7 @@ class UIBox {
 					ui.endElement();
 					ui.row([2 / 3, 1 / 3]);
 					ui.endElement();
-					if (ui.button("OK")) {
+					if (ui.button(tr("OK"))) {
 						show = false;
 						App.redrawUI();
 					}

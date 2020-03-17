@@ -4,6 +4,7 @@ import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
 import arm.io.ImportAsset;
+import arm.App.tr;
 
 class TabBrowser {
 
@@ -13,7 +14,7 @@ class TabBrowser {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.statustab, "Browser") && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(UITrait.inst.statustab, tr("Browser")) && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];
@@ -27,7 +28,7 @@ class TabBrowser {
 			if (hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				hpath.text = Config.raw.bookmarks[0];
 			}
-			hpath.text = ui.textInput(hpath, "Path");
+			hpath.text = ui.textInput(hpath, tr("Path"));
 			UIFiles.fileBrowser(ui, hpath, false, true);
 
 			if (known) {
@@ -57,7 +58,7 @@ class TabBrowser {
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(folder, Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button("Delete", Left)) {
+						if (ui.button(tr("Delete"), Left)) {
 							Config.raw.bookmarks.remove(b);
 							Config.save();
 						}

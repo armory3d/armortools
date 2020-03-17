@@ -1,11 +1,13 @@
 package arm.ui;
 
+import arm.App.tr;
+
 class TabHistory {
 
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab, "History")) {
+		if (ui.tab(UITrait.inst.htab, tr("History"))) {
 			for (i in 0...History.steps.length) {
 				var active = History.steps.length - 1 - History.redos;
 				if (i == active) {
