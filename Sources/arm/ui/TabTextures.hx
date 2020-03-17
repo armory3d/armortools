@@ -6,6 +6,7 @@ import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
 import arm.sys.Path;
+import arm.App.tr;
 using StringTools;
 
 class TabTextures {
@@ -13,17 +14,17 @@ class TabTextures {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab2, "Textures")) {
+		if (ui.tab(UITrait.inst.htab2, tr("Textures"))) {
 			ui.row([1 / 4, 1 / 4]);
 
-			if (ui.button("Import")) {
+			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, function(path: String) {
 					ImportAsset.run(path);
 				});
 			}
-			if (ui.isHovered) ui.tooltip("Import texture file (" + Config.keymap.file_import_assets + ")");
+			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			if (ui.button("2D View")) UITrait.inst.show2DView(1);
+			if (ui.button(tr("2D View"))) UITrait.inst.show2DView(1);
 
 			if (Project.assets.length > 0) {
 
@@ -84,7 +85,7 @@ class TabTextures {
 						if (ui.isHovered && ui.inputReleasedR) {
 							UIMenu.draw(function(ui: Zui) {
 								ui.text(asset.name, Right, ui.t.HIGHLIGHT_COL);
-								if (ui.button("Export", Left)) {
+								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, function(path: String) {
 										var target = kha.Image.createRenderTarget(img.width, img.height);
 										function exportTexture(g: kha.graphics4.Graphics) {
@@ -92,7 +93,7 @@ class TabTextures {
 											target.g2.drawImage(img, 0, 0);
 											target.g2.end();
 											var f = UIFiles.filename;
-											if (f == "") f = "untitled";
+											if (f == "") f = tr("untitled");
 											if (!f.endsWith(".png")) f += ".png";
 											var out = new haxe.io.BytesOutput();
 											var writer = new arm.format.PngWriter(out);
@@ -104,10 +105,10 @@ class TabTextures {
 										iron.App.notifyOnRender(exportTexture);
 									});
 								}
-								if (ui.button("To Mask", Left)) {
+								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);
 								}
-								if (ui.button("Delete", Left)) {
+								if (ui.button(tr("Delete"), Left)) {
 									UITrait.inst.hwnd2.redraws = 2;
 									Data.deleteImage(asset.file);
 									Project.assetMap.remove(asset.id);
@@ -128,7 +129,7 @@ class TabTextures {
 				var img = Res.get("icons.k");
 				var r = Res.tile50(img, 0, 1);
 				ui.image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
-				if (ui.isHovered) ui.tooltip("Drag and drop files here");
+				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
 			}
 		}
 	}

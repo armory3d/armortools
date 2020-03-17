@@ -183,6 +183,19 @@ class App {
 		else System.stop();
 	}
 
+	// Localize a string with the given placeholders replaced (format is `{placeholderName}`).
+	// `import arm.App.tr;` must be put at the top of the file in question for this to work.
+	// TODO: Implement localization support.
+	public static function tr(id: String, ?vars: Map<String, Dynamic>): String {
+		if (vars != null) {
+			for (key => value in vars) {
+				id = id.replace('{$key}', Std.string(value));
+			}
+		}
+		
+		return id;
+	}
+
 	public static function w(): Int {
 		// Draw material preview
 		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;

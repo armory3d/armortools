@@ -12,6 +12,7 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
 import arm.render.RenderPathPaint;
+import arm.App.tr;
 import arm.Tool;
 
 @:access(zui.Zui)
@@ -188,12 +189,19 @@ class UIView2D {
 				ui._w = ew;
 
 				if (!Context.layerIsMask) {
-					texType = ui.combo(Id.handle({position: texType}), ["Base Color", "Normal Map", "Occlusion", "Roughness", "Metallic", "Opacity"], "Texture");
+					texType = ui.combo(Id.handle({position: texType}), [
+						tr("Base Color"),
+						tr("Normal Map"),
+						tr("Occlusion"),
+						tr("Roughness"),
+						tr("Metallic"),
+						tr("Opacity"),
+					], tr("Texture"));
 					ui._x += ew + 3;
 					ui._y = 2;
 				}
 
-				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), "UV Map");
+				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), tr("UV Map"));
 				ui._x += ew + 3;
 				ui._y = 2;
 			}

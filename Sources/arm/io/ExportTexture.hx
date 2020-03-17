@@ -11,6 +11,7 @@ import arm.ui.UITrait;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
+import arm.App.tr;
 import arm.Tool;
 using StringTools;
 
@@ -49,7 +50,7 @@ class ExportTexture {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = UITrait.inst.formatQuality;
 		var f = UIFiles.filename;
-		if (f == "") f = "untitled";
+		if (f == "") f = tr("untitled");
 		var formatType = UITrait.inst.formatType;
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";

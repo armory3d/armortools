@@ -8,6 +8,7 @@ import kha.Blob;
 import iron.data.Data;
 import arm.sys.Path;
 import arm.io.ImportAsset;
+import arm.App.tr;
 using StringTools;
 
 class TabScript {
@@ -17,10 +18,10 @@ class TabScript {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.statustab, "Script") && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(UITrait.inst.statustab, tr("Script")) && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
 
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
-			if (ui.button("Run")) {
+			if (ui.button(tr("Run"))) {
 				try {
 					untyped eval(hscript.text);
 				}
@@ -28,10 +29,10 @@ class TabScript {
 					Log.trace(e);
 				}
 			}
-			if (ui.button("Clear")) {
+			if (ui.button(tr("Clear"))) {
 				hscript.text = "";
 			}
-			if (ui.button("Import")) {
+			if (ui.button(tr("Import"))) {
 				UIFiles.show("js", false, function(path: String) {
 					Data.getBlob(path, function(b: Blob) {
 						hscript.text = b.toString();
@@ -39,11 +40,11 @@ class TabScript {
 					});
 				});
 			}
-			if (ui.button("Export")) {
+			if (ui.button(tr("Export"))) {
 				var str = hscript.text;
 				UIFiles.show("js", true, function(path: String) {
 					var f = UIFiles.filename;
-					if (f == "") f = "untitled";
+					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".js")) path += ".js";
 					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());

@@ -11,6 +11,7 @@ import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
 import arm.sys.Path;
 import arm.sys.File;
+import arm.App.tr;
 using StringTools;
 
 class BoxPreferences {
@@ -23,10 +24,10 @@ class BoxPreferences {
 	@:access(zui.Zui)
 	public static function show() {
 		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(htab, "Interface", true)) {
+			if (ui.tab(htab, tr("Interface"), true)) {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
-				ui.slider(hscale, "UI Scale", 1.0, 4.0, false, 10);
+				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
 				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
@@ -36,7 +37,7 @@ class BoxPreferences {
 				UITrait.inst.hscaleWasChanged = hscale.changed;
 				var themeHandle = Id.handle();
 				var themes = ["Dark", "Light"];
-				ui.combo(themeHandle, themes, "Theme", true);
+				ui.combo(themeHandle, themes, tr("Theme"), true);
 				if (themeHandle.changed) {
 					var theme = themes[themeHandle.position].toLowerCase();
 					if (theme == "dark") { // Built-in default
@@ -55,14 +56,14 @@ class BoxPreferences {
 				}
 
 				#if (!krom_android && !krom_ios)
-				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), "Native File Browser");
+				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), tr("Native File Browser"));
 				#end
 
-				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), "Cache UI Draws");
-				if (ui.isHovered) ui.tooltip("Enabling may reduce GPU usage");
+				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), tr("Cache UI Draws"));
+				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));
 
 				ui.changed = false;
-				UITrait.inst.showAssetNames = ui.check(Id.handle({selected: UITrait.inst.showAssetNames}), "Show Asset Names");
+				UITrait.inst.showAssetNames = ui.check(Id.handle({selected: UITrait.inst.showAssetNames}), tr("Show Asset Names"));
 				if (ui.changed) {
 					UITrait.inst.tagUIRedraw();
 				}
@@ -72,10 +73,10 @@ class BoxPreferences {
 
 				ui.endElement();
 				ui.row([0.5]);
-				if (ui.button("Restore")) {
+				if (ui.button(tr("Restore"))) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text("Restore defaults?", Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button("Confirm", Left)) {
+						ui.text(tr("Restore defaults?"), Right, ui.t.HIGHLIGHT_COL);
+						if (ui.button(tr("Confirm"), Left)) {
 							ui.t.ELEMENT_H = App.ELEMENT_H;
 							Config.restore();
 							setScale();
@@ -86,9 +87,9 @@ class BoxPreferences {
 					}, 2);
 				}
 			}
-			if (ui.tab(htab, "Usage", true)) {
+			if (ui.tab(htab, tr("Usage"), true)) {
 				UITrait.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
-				Config.raw.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, "Undo Steps", 1, 64, false, 1));
+				Config.raw.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
 				if (UITrait.inst.undoHandle.changed) {
 					ui.g.end();
 					while (History.undoLayers.length < Config.raw.undo_steps) {
@@ -105,44 +106,44 @@ class BoxPreferences {
 					Config.save();
 				}
 
-				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), "Paint Bleed", 0.0, 2.0, true);
-				if (ui.isHovered) ui.tooltip("Stretch brush strokes on the uv map to prevent seams");
+				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
+				if (ui.isHovered) ui.tooltip(tr("Stretch brush strokes on the uv map to prevent seams"));
 
-				UITrait.inst.dilateRadius = ui.slider(Id.handle({value: UITrait.inst.dilateRadius}), "Dilate Radius", 0.0, 64.0, true, 1);
-				if (ui.isHovered) ui.tooltip("Dilate baked textures to prevent seams");
+				UITrait.inst.dilateRadius = ui.slider(Id.handle({value: UITrait.inst.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
+				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
 				var brushLiveHandle = Id.handle({selected: UITrait.inst.brushLive});
-				UITrait.inst.brushLive = ui.check(brushLiveHandle, "Live Brush Preview");
-				if (ui.isHovered) ui.tooltip("Draw live brush preview in viewport");
+				UITrait.inst.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
+				if (ui.isHovered) ui.tooltip(tr("Draw live brush preview in viewport"));
 				if (brushLiveHandle.changed) Context.ddirty = 2;
 
 				var brush3dHandle = Id.handle({selected: UITrait.inst.brush3d});
-				UITrait.inst.brush3d = ui.check(brush3dHandle, "3D Cursor");
+				UITrait.inst.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
 				ui.enabled = UITrait.inst.brush3d;
 				var brushDepthRejectHandle = Id.handle({selected: UITrait.inst.brushDepthReject});
-				UITrait.inst.brushDepthReject = ui.check(brushDepthRejectHandle, "Depth Reject");
+				UITrait.inst.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
 				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
 				ui.row([0.5, 0.5]);
 
 				var brushAngleRejectHandle = Id.handle({selected: UITrait.inst.brushAngleReject});
-				UITrait.inst.brushAngleReject = ui.check(brushAngleRejectHandle, "Angle Reject");
+				UITrait.inst.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
 				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
 				if (!UITrait.inst.brushAngleReject) ui.enabled = false;
 				var angleDotHandle = Id.handle({value: UITrait.inst.brushAngleRejectDot});
-				UITrait.inst.brushAngleRejectDot = ui.slider(angleDotHandle, "Angle", 0.0, 1.0, true);
+				UITrait.inst.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
 				if (angleDotHandle.changed) {
 					MaterialParser.parsePaintMaterial();
 				}
 				ui.enabled = true;
 			}
-			if (ui.tab(htab, "Pen", true)) {
-				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), "Brush Radius");
-				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), "Brush Hardness");
-				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), "Brush Opacity");
+			if (ui.tab(htab, tr("Pen"), true)) {
+				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), tr("Brush Radius"));
+				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), tr("Brush Hardness"));
+				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), tr("Brush Opacity"));
 			}
 
 			UITrait.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
@@ -150,19 +151,19 @@ class BoxPreferences {
 			UITrait.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
 			UITrait.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
 			UITrait.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
-			if (ui.tab(htab, "Viewport", true)) {
-				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], "Super Sample", true);
+			if (ui.tab(htab, tr("Viewport"), true)) {
+				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
 				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
 
 				#if arm_debug
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
-				Config.raw.window_vsync = ui.check(vsyncHandle, "VSync");
+				Config.raw.window_vsync = ui.check(vsyncHandle, tr("VSync"));
 				if (vsyncHandle.changed) Config.save();
 				#end
 
 				#if rp_voxelao
-				ui.check(UITrait.inst.hvxao, "Voxel AO");
-				if (ui.isHovered) ui.tooltip("Cone-traced AO and shadows");
+				ui.check(UITrait.inst.hvxao, tr("Voxel AO"));
+				if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
 				if (UITrait.inst.hvxao.changed) {
 					Config.applyConfig();
 					#if arm_creator
@@ -173,22 +174,22 @@ class BoxPreferences {
 				ui.row([0.5, 0.5]);
 				ui.enabled = UITrait.inst.hvxao.selected;
 				var h = Id.handle({value: UITrait.inst.vxaoOffset});
-				UITrait.inst.vxaoOffset = ui.slider(h, "Cone Offset", 1.0, 4.0, true);
+				UITrait.inst.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
 				var h = Id.handle({value: UITrait.inst.vxaoAperture});
-				UITrait.inst.vxaoAperture = ui.slider(h, "Aperture", 1.0, 4.0, true);
+				UITrait.inst.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
 				ui.enabled = true;
 				#end
-				ui.check(UITrait.inst.hssgi, "SSAO");
+				ui.check(UITrait.inst.hssgi, tr("SSAO"));
 				if (UITrait.inst.hssgi.changed) Config.applyConfig();
-				ui.check(UITrait.inst.hbloom, "Bloom");
+				ui.check(UITrait.inst.hbloom, tr("Bloom"));
 				if (UITrait.inst.hbloom.changed) Config.applyConfig();
-				ui.check(UITrait.inst.hssr, "SSR");
+				ui.check(UITrait.inst.hssr, tr("SSR"));
 				if (UITrait.inst.hssr.changed) Config.applyConfig();
 
 				var h = Id.handle({value: UITrait.inst.vignetteStrength});
-				UITrait.inst.vignetteStrength = ui.slider(h, "Vignette", 0.0, 1.0, true);
+				UITrait.inst.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
 				if (h.changed) Context.ddirty = 2;
 
 				// var h = Id.handle({value: UITrait.inst.autoExposureStrength});
@@ -197,14 +198,14 @@ class BoxPreferences {
 
 				#if arm_creator
 				var h = Id.handle({value: UITrait.inst.vxaoExt});
-				UITrait.inst.vxaoExt = ui.slider(h, "VXAO Ext", 1.0, 10.0);
+				UITrait.inst.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
 				if (h.changed) {
 					Context.ddirty = 2;
 					MaterialParser.parseMeshMaterial();
 				}
 				#end
 			}
-			if (ui.tab(htab, "Keymap", true)) {
+			if (ui.tab(htab, tr("Keymap"), true)) {
 
 				if (filesKeymap == null) {
 					fetchKeymaps();
@@ -213,19 +214,19 @@ class BoxPreferences {
 				ui.row([1 / 2, 1 / 4, 1 / 4]);
 
 				presetHandle = Id.handle({position: getPresetIndex()});
-				ui.combo(presetHandle, filesKeymap, "Preset");
+				ui.combo(presetHandle, filesKeymap, tr("Preset"));
 				if (presetHandle.changed) {
 					Config.raw.keymap = filesKeymap[presetHandle.position] + ".json";
 					Config.applyConfig();
 					Config.loadKeymap();
 				}
 
-				if (ui.button("Import")) {
+				if (ui.button(tr("Import"))) {
 					UIFiles.show("json", false, function(path: String) {
 						ImportKeymap.run(path);
 					});
 				}
-				if (ui.button("Export")) {
+				if (ui.button(tr("Export"))) {
 					UIFiles.show("json", true, function(dest: String) {
 						if (!UIFiles.filename.endsWith(".json")) UIFiles.filename += ".json";
 						var path = Path.data() + Path.sep + "keymap_presets" + Path.sep + Config.raw.keymap;
@@ -248,14 +249,14 @@ class BoxPreferences {
 					Config.saveKeymap();
 				}
 			}
-			if (ui.tab(htab, "Plugins", true)) {
+			if (ui.tab(htab, tr("Plugins"), true)) {
 				ui.row([1 / 4, 1 / 4]);
-				if (ui.button("New")) {
+				if (ui.button(tr("New"))) {
 					UIBox.showCustom(function(ui: Zui) {
-						if (ui.tab(Id.handle(), "New Plugin")) {
+						if (ui.tab(Id.handle(), tr("New Plugin"))) {
 							ui.row([0.5, 0.5]);
-							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), "Name");
-							if (ui.button("OK") || ui.isReturnDown) {
+							var pluginName = ui.textInput(Id.handle({text: "new_plugin"}), tr("Name"));
+							if (ui.button(tr("OK")) || ui.isReturnDown) {
 								var template =
 "let plugin = new arm.Plugin();
 let h1 = new zui.Handle();
@@ -279,7 +280,7 @@ plugin.drawUI = function(ui) {
 						}
 					});
 				}
-				if (ui.button("Import")) {
+				if (ui.button(tr("Import"))) {
 					UIFiles.show("js,wasm,zip", false, function(path: String) {
 						ImportPlugin.run(path);
 					});
@@ -315,10 +316,10 @@ plugin.drawUI = function(ui) {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(f, Right, ui.t.HIGHLIGHT_COL);
 							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
-							if (ui.button("Edit in Text Editor", Left)) {
+							if (ui.button(tr("Edit in Text Editor"), Left)) {
 								File.start(path);
 							}
-							if (ui.button("Edit in Script Tab", Left)) {
+							if (ui.button(tr("Edit in Script Tab"), Left)) {
 								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
 									TabScript.hscript.text = blob.toString();
 									iron.data.Data.deleteBlob("plugins/" + f);
@@ -326,13 +327,13 @@ plugin.drawUI = function(ui) {
 								});
 
 							}
-							if (ui.button("Export", Left)) {
+							if (ui.button(tr("Export"), Left)) {
 								UIFiles.show("js", true, function(dest: String) {
 									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
 									File.copy(path, dest + Path.sep + UIFiles.filename);
 								});
 							}
-							if (ui.button("Delete", Left)) {
+							if (ui.button(tr("Delete"), Left)) {
 								if (Config.raw.plugins.indexOf(f) >= 0) {
 									Config.raw.plugins.remove(f);
 									Plugin.stop(f);

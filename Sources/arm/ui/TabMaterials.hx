@@ -13,6 +13,7 @@ import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
+import arm.App.tr;
 import arm.Tool;
 
 class TabMaterials {
@@ -25,9 +26,9 @@ class TabMaterials {
 		var materials = isScene ? Project.materialsScene : Project.materials;
 		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
-		if (ui.tab(UITrait.inst.htab1, "Materials")) {
+		if (ui.tab(UITrait.inst.htab1, tr("Materials"))) {
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
-			if (ui.button("New")) {
+			if (ui.button(tr("New"))) {
 				if (isScene) {
 					if (Context.object != Context.paintObject && Std.is(Context.object, MeshObject)) {
 						MaterialUtil.removeMaterialCache();
@@ -51,14 +52,14 @@ class TabMaterials {
 				}
 			}
 
-			if (ui.button("Import")) {
+			if (ui.button(tr("Import"))) {
 				Project.importMaterial();
 			}
 
-			if (ui.button("Nodes")) {
+			if (ui.button(tr("Nodes"))) {
 				UITrait.inst.showMaterialNodes();
 			}
-			else if (ui.isHovered) ui.tooltip("Show Node Editor (" + Config.keymap.toggle_2d_view + ")");
+			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_2d_view})');
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UITrait.inst.windowW / slotw);
@@ -119,21 +120,21 @@ class TabMaterials {
 							var m = materials[i];
 							ui.text(materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
-							if (ui.button("To Fill Layer", Left)) {
+							if (ui.button(tr("To Fill Layer"), Left)) {
 								selectMaterial(i);
 								Layers.createFillLayer();
 							}
 
-							if (ui.button("Export", Left)) {
+							if (ui.button(tr("Export"), Left)) {
 								selectMaterial(i);
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
-									if (f == "") f = "untitled";
+									if (f == "") f = tr("untitled");
 									ExportArm.runMaterial(path + Path.sep + f);
 								});
 							}
 
-							if (ui.button("Duplicate", Left)) {
+							if (ui.button(tr("Duplicate"), Left)) {
 								function dupliMat(_) {
 									iron.App.removeRender(dupliMat);
 									Context.material = new MaterialSlot(materials[0].data);
@@ -145,7 +146,7 @@ class TabMaterials {
 								iron.App.notifyOnRender(dupliMat);
 							}
 
-							if (materials.length > 1 && ui.button("Delete", Left)) {
+							if (materials.length > 1 && ui.button(tr("Delete"), Left)) {
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
 								UITrait.inst.hwnd1.redraws = 2;
@@ -160,15 +161,15 @@ class TabMaterials {
 							var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
 							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
 							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
-							m.paintBase = ui.check(baseHandle, "Base Color");
-							m.paintOpac = ui.check(opacHandle, "Opacity");
-							m.paintNor = ui.check(norHandle, "Normal");
-							m.paintOcc = ui.check(occHandle, "Occlusion");
-							m.paintRough = ui.check(roughHandle, "Roughness");
-							m.paintMet = ui.check(metHandle, "Metallic");
-							m.paintHeight = ui.check(heightHandle, "Height");
-							m.paintEmis = ui.check(emisHandle, "Emission");
-							m.paintSubs = ui.check(subsHandle, "Subsurface");
+							m.paintBase = ui.check(baseHandle, tr("Base Color"));
+							m.paintOpac = ui.check(opacHandle, tr("Opacity"));
+							m.paintNor = ui.check(norHandle, tr("Normal"));
+							m.paintOcc = ui.check(occHandle, tr("Occlusion"));
+							m.paintRough = ui.check(roughHandle, tr("Roughness"));
+							m.paintMet = ui.check(metHandle, tr("Metallic"));
+							m.paintHeight = ui.check(heightHandle, tr("Height"));
+							m.paintEmis = ui.check(emisHandle, tr("Emission"));
+							m.paintSubs = ui.check(subsHandle, tr("Subsurface"));
 							if (baseHandle.changed ||
 								opacHandle.changed ||
 								norHandle.changed ||

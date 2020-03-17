@@ -25,6 +25,7 @@ import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
+import arm.App.tr;
 import arm.Tool;
 using StringTools;
 
@@ -80,7 +81,7 @@ class Project {
 	public static function projectSaveAs() {
 		UIFiles.show("arm", true, function(path: String) {
 			var f = UIFiles.filename;
-			if (f == "") f = "untitled";
+			if (f == "") f = tr("untitled");
 			filepath = path + Path.sep + f;
 			if (!filepath.endsWith(".arm")) filepath += ".arm";
 			projectSave();
@@ -89,10 +90,10 @@ class Project {
 
 	public static function projectNewBox() {
 		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(Id.handle(), "New Project")) {
+			if (ui.tab(Id.handle(), tr("New Project"))) {
 				ui.row([0.5, 0.5]);
-				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], "Template");
-				if (ui.button("OK") || ui.isReturnDown) {
+				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
+				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
 					UIBox.show = false;
@@ -249,28 +250,33 @@ class Project {
 
 	public static function importMeshBox(path: String) {
 		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(Id.handle(), "Import Mesh")) {
+			if (ui.tab(Id.handle(), tr("Import Mesh"))) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					UITrait.inst.splitBy = ui.combo(Id.handle(), ["Object", "Group", "Material", "UDIM Tile"], "Split By", true);
-					if (ui.isHovered) ui.tooltip("Split .obj mesh into objects");
+					UITrait.inst.splitBy = ui.combo(Id.handle(), [
+						tr("Object"),
+						tr("Group"),
+						tr("Material"),
+						tr("UDIM Tile"),
+					], tr("Split By"), true);
+					if (ui.isHovered) ui.tooltip(tr("Split .obj mesh into objects"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), "Parse Transforms");
-					if (ui.isHovered) ui.tooltip("Load per-object transforms from .fbx");
+					UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), tr("Parse Transforms"));
+					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					UITrait.inst.parseVCols = ui.check(Id.handle({selected: UITrait.inst.parseVCols}), "Parse Vertex Colors");
-					if (ui.isHovered) ui.tooltip("Import vertex color data");
+					UITrait.inst.parseVCols = ui.check(Id.handle({selected: UITrait.inst.parseVCols}), tr("Parse Vertex Colors"));
+					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 
 				ui.row([0.5, 0.5]);
-				if (ui.button("Cancel")) {
+				if (ui.button(tr("Cancel"))) {
 					UIBox.show = false;
 				}
-				if (ui.button("Import") || ui.isReturnDown) {
+				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
 					ImportMesh.run(path);

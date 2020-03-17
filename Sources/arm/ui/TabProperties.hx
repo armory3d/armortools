@@ -1,17 +1,18 @@
 package arm.ui;
 
 import zui.Id;
+import arm.App.tr;
 
 class TabProperties {
 
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab1, "Properties")) {
+		if (ui.tab(UITrait.inst.htab1, tr("Properties"))) {
 			if (Context.object != null) {
 
 				var h = Id.handle();
 				h.selected = Context.object.visible;
-				Context.object.visible = ui.check(h, "Visible");
+				Context.object.visible = ui.check(h, tr("Visible"));
 				if (h.changed) Context.ddirty = 2;
 
 				var loc = Context.object.transform.loc;
@@ -22,7 +23,7 @@ class TabProperties {
 				ui.changed = false;
 
 				ui.row(UITrait.inst.row4);
-				ui.text("Location");
+				ui.text(tr("Location"));
 
 				h = Id.handle();
 				h.text = roundfp(loc.x) + "";
@@ -64,7 +65,7 @@ class TabProperties {
 				}
 
 				ui.row(UITrait.inst.row4);
-				ui.text("Scale");
+				ui.text(tr("Scale"));
 
 				h = Id.handle();
 				h.text = roundfp(scale.x) + "";

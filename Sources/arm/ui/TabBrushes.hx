@@ -8,25 +8,26 @@ import arm.node.MaterialParser;
 import arm.util.RenderUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
+import arm.App.tr;
 
 class TabBrushes {
 
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab1, "Brushes")) {
+		if (ui.tab(UITrait.inst.htab1, tr("Brushes"))) {
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
-			if (ui.button("New")) {
+			if (ui.button(tr("New"))) {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
 				MaterialParser.parseBrush();
 				UITrait.inst.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}
-			if (ui.button("Import")) {
+			if (ui.button(tr("Import"))) {
 				Project.importBrush();
 			}
-			if (ui.button("Nodes")) UITrait.inst.showBrushNodes();
+			if (ui.button(tr("Nodes"))) UITrait.inst.showBrushNodes();
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UITrait.inst.windowW / slotw);
@@ -81,7 +82,7 @@ class TabBrushes {
 								Context.selectBrush(i);
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
-									if (f == "") f = "untitled";
+									if (f == "") f = tr("untitled");
 									ExportArm.runBrush(path + Path.sep + f);
 								});
 							}
@@ -99,7 +100,7 @@ class TabBrushes {
 								iron.App.notifyOnRender(dupliBrush);
 							}
 
-							if (Project.brushes.length > 1 && ui.button("Delete", Left)) {
+							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left)) {
 								Context.selectBrush(i == 0 ? 1 : 0);
 								Project.brushes.splice(i, 1);
 								UITrait.inst.hwnd1.redraws = 2;

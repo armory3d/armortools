@@ -12,6 +12,7 @@ import arm.node.NodesBrush;
 import arm.node.MaterialParser;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
+import arm.App.tr;
 import arm.Tool;
 
 @:access(zui.Zui)
@@ -438,8 +439,8 @@ class UINodes {
 			ui._x += ew + 3;
 			ui._y = 0;
 
-			if (ui.button("Search", Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
-			if (ui.isHovered) ui.tooltip("Search for nodes (" + Config.keymap.node_search + ")");
+			if (ui.button(tr("Search"), Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+			if (ui.isHovered) ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');
 
 			ui.t.BUTTON_COL = BUTTON_COL;
 		}
