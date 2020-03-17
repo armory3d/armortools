@@ -5,7 +5,6 @@ import zui.Id;
 import iron.object.Object;
 import iron.object.MeshObject;
 import iron.Scene;
-import arm.App.tr;
 
 class TabOutliner {
 

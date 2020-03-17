@@ -5,7 +5,6 @@ import zui.Zui;
 import zui.Ext;
 import zui.Id;
 import iron.system.Input;
-import arm.App.tr;
 
 @:access(zui.Zui)
 class UIBox {

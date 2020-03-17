@@ -12,7 +12,6 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
 import arm.render.RenderPathPaint;
-import arm.App.tr;
 import arm.Tool;
 
 @:access(zui.Zui)

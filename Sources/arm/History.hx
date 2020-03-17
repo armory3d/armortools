@@ -7,7 +7,6 @@ import arm.ui.UIFiles;
 import arm.ui.UINodes;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
-import arm.App.tr;
 
 class History {
 

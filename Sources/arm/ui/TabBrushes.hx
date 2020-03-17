@@ -8,7 +8,6 @@ import arm.node.MaterialParser;
 import arm.util.RenderUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
-import arm.App.tr;
 
 class TabBrushes {
 

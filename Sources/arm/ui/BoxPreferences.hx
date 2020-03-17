@@ -11,7 +11,6 @@ import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.App.tr;
 using StringTools;
 
 class BoxPreferences {

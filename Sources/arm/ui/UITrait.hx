@@ -24,7 +24,6 @@ import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
-import arm.App.tr;
 import arm.Tool;
 import arm.Project;
 import arm.Res;

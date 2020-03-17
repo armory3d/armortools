@@ -184,7 +184,6 @@ class App {
 	}
 
 	// Localize a string with the given placeholders replaced (format is `{placeholderName}`).
-	// `import arm.App.tr;` must be put at the top of the file in question for this to work.
 	// TODO: Implement localization support.
 	public static function tr(id: String, ?vars: Map<String, Dynamic>): String {
 		if (vars != null) {
@@ -192,7 +191,7 @@ class App {
 				id = id.replace('{$key}', Std.string(value));
 			}
 		}
-		
+
 		return id;
 	}
 

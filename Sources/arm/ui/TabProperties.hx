@@ -1,7 +1,6 @@
 package arm.ui;
 
 import zui.Id;
-import arm.App.tr;
 
 class TabProperties {
 

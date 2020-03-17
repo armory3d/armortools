@@ -12,7 +12,6 @@ import arm.node.NodesBrush;
 import arm.node.MaterialParser;
 import arm.util.RenderUtil;
 import arm.ui.UITrait;
-import arm.App.tr;
 import arm.Tool;
 
 @:access(zui.Zui)

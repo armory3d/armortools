@@ -25,7 +25,6 @@ import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
-import arm.App.tr;
 import arm.Tool;
 using StringTools;
 

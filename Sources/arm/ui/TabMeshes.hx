@@ -3,7 +3,6 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import arm.util.MeshUtil;
-import arm.App.tr;
 
 class TabMeshes {
 

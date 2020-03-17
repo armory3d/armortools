@@ -5,7 +5,6 @@ import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
 import arm.io.ImportAsset;
-import arm.App.tr;
 using StringTools;
 
 class TabConsole {

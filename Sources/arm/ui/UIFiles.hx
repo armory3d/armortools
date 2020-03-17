@@ -9,7 +9,6 @@ import iron.system.ArmPack;
 import arm.format.Lz4;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.App.tr;
 using StringTools;
 
 class UIFiles {

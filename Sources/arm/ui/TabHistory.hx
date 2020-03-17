@@ -1,7 +1,5 @@
 package arm.ui;
 
-import arm.App.tr;
-
 class TabHistory {
 
 	@:access(zui.Zui)

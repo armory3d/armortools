@@ -8,7 +8,6 @@ import arm.io.ExportMesh;
 import arm.io.ExportTexture;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.App.tr;
 import arm.Tool;
 using StringTools;
 

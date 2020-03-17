@@ -3,7 +3,6 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import arm.io.ImportFont;
-import arm.App.tr;
 
 class TabFonts {
 

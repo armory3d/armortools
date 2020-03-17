@@ -19,7 +19,6 @@ import arm.node.MaterialParser;
 import arm.io.ImportAsset;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
-import arm.App.tr;
 import arm.Tool;
 using StringTools;
 

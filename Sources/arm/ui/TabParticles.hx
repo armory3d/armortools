@@ -1,7 +1,5 @@
 package arm.ui;
 
-import arm.App.tr;
-
 class TabParticles {
 
 	public static function draw() {

@@ -11,7 +11,6 @@ import arm.ui.UITrait;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
-import arm.App.tr;
 import arm.Tool;
 using StringTools;
 

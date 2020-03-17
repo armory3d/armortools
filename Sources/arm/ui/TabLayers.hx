@@ -7,7 +7,6 @@ import iron.system.Input;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 import arm.util.UVUtil;
-import arm.App.tr;
 
 class TabLayers {
 
@@ -573,7 +572,7 @@ class TabLayers {
 					if (l.material_mask != null) {
 						ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 						@:privateAccess ui.endElement();
-            
+
 						var scaleHandle = Id.handle().nest(l.id, {value: l.scale});
 						l.scale = ui.slider(scaleHandle, tr("Scale"), 0.0, 5.0, true);
 						if (scaleHandle.changed) {

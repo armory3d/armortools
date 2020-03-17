@@ -13,7 +13,6 @@ import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
-import arm.App.tr;
 import arm.Tool;
 
 class TabMaterials {

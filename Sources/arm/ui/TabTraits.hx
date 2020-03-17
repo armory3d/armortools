@@ -2,7 +2,6 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Id;
-import arm.App.tr;
 
 #if arm_creator
 
