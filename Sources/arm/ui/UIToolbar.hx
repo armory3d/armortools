@@ -41,7 +41,19 @@ class UIToolbar {
 			ui.imageScrollAlign = false;
 
 			if (UISidebar.inst.worktab.position == SpacePaint) {
-				var keys = ["(B)", "(E)", "(G)", "(D)", "(T)", "(L) - " + tr("Hold ALT to set source"), "(U)", "(P)", "(K)", "(C)", "(V)"];
+				var keys = [
+					"(" + Config.keymap.tool_brush + ")",
+					"(" + Config.keymap.tool_eraser + ")",
+					"(" + Config.keymap.tool_fill + ")",
+					"(" + Config.keymap.tool_decal + ")",
+					"(" + Config.keymap.tool_text + ")",
+					"(" + Config.keymap.tool_clone + ") - " + tr("Hold") + " (" + Config.keymap.set_clone_source + ") " + tr("to set source"),
+					"(" + Config.keymap.tool_blur + ")",
+					"(" + Config.keymap.tool_particle + ")",
+					"(" + Config.keymap.tool_bake + ")",
+					"(" + Config.keymap.tool_colorid + ")",
+					"(" + Config.keymap.tool_picker + ")"
+				];
 				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				for (i in 0...toolNames.length) {
