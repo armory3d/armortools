@@ -23,7 +23,7 @@ class UIBox {
 	public static function render(g: kha.graphics2.Graphics) {
 		g.end();
 
-		var ui = App.uibox;
+		var ui = App.uiBox;
 		var appw = System.windowWidth();
 		var apph = System.windowHeight();
 		var mw = Std.int(modalW * ui.SCALE());
@@ -67,7 +67,7 @@ class UIBox {
 		if (UIMenu.show) return;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
-		var ui = App.uibox;
+		var ui = App.uiBox;
 		var inUse = ui.comboSelectedHandle != null;
 		var isEscape = kb.started("escape");
 		if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {

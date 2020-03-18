@@ -17,7 +17,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import iron.RenderPath;
 import arm.Project;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.sys.Path;
 import arm.sys.File;
@@ -29,8 +29,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ImportArm {
 
@@ -256,9 +255,9 @@ class ImportArm {
 			Context.setLayer(Project.layers[0]);
 
 			Context.ddirty = 4;
-			UITrait.inst.hwnd.redraws = 2;
-			UITrait.inst.hwnd1.redraws = 2;
-			UITrait.inst.hwnd2.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd2.redraws = 2;
 
 			Data.deleteBlob(path);
 		});
@@ -312,7 +311,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnRender(makeMaterialPreview);
 
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -358,7 +357,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnRender(makeBrushPreview);
 
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 

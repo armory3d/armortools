@@ -8,14 +8,13 @@ import iron.data.Data;
 import iron.math.Vec4;
 import arm.format.BlendParser;
 import zui.Nodes;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.node.NodesMaterial;
 import arm.node.MaterialParser;
 import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
-using StringTools;
 
 class ImportBlend {
 
@@ -57,7 +56,7 @@ class ImportBlend {
 				var nora = new Int16Array(numtri * 3 * 2);
 				var hasuv = m.get("mloopuv") != null;
 				var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-				var hascol = UITrait.inst.parseVCols && m.get("mloopcol") != null;
+				var hascol = UISidebar.inst.parseVCols && m.get("mloopcol") != null;
 				var cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
 
 				var tri = 0;
@@ -503,7 +502,7 @@ class ImportBlend {
 			}
 			iron.App.notifyOnRender(makeMaterialPreview);
 
-			UITrait.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
 			Data.deleteBlob(path);
 		});
 	}

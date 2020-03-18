@@ -11,8 +11,8 @@ class TabTraits {
 	static var traits = ["PhysicsBody"];
 
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab1, tr("Traits"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab1, tr("Traits"))) {
 			if (Context.object != null) {
 
 				ui.row([1 / 4]);

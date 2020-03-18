@@ -8,7 +8,7 @@ import iron.data.SceneFormat;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 
 class ParticleUtil {
 
@@ -19,7 +19,7 @@ class ParticleUtil {
 	}
 
 	public static function initParticle() {
-		if (UITrait.inst.particleMaterial != null) return;
+		if (UISidebar.inst.particleMaterial != null) return;
 
 		var raw: TParticleData = {
 			name: "Particles",
@@ -70,7 +70,7 @@ class ParticleUtil {
 		}
 
 		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
-			UITrait.inst.particleMaterial = md;
+			UISidebar.inst.particleMaterial = md;
 
 			for (obj in Scene.active.raw.objects) {
 				if (obj.name == ".Sphere") {

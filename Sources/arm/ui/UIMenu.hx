@@ -19,8 +19,7 @@ import arm.node.MaterialParser;
 import arm.io.ImportAsset;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class UIMenu {
 
@@ -39,7 +38,7 @@ class UIMenu {
 
 	@:access(zui.Zui)
 	public static function render(g: kha.graphics2.Graphics) {
-		var ui = App.uimenu;
+		var ui = App.uiMenu;
 		var menuW = Std.int(ui.ELEMENT_W() * 2.0);
 		var BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
@@ -111,8 +110,8 @@ class UIMenu {
 				}
 
 				if (ui.button("      " + tr("Distract Free"), Left, Config.keymap.view_distract_free)) {
-					UITrait.inst.toggleDistractFree();
-					UITrait.inst.ui.isHovered = false;
+					UISidebar.inst.toggleDistractFree();
+					UISidebar.inst.ui.isHovered = false;
 				}
 
 				ui.changed = false;
@@ -146,50 +145,50 @@ class UIMenu {
 					if (sxhandle.changed) Context.ddirty = 2;
 				}
 
-				var dispHandle = Id.handle({value: UITrait.inst.displaceStrength});
+				var dispHandle = Id.handle({value: UISidebar.inst.displaceStrength});
 				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				UITrait.inst.displaceStrength = ui.slider(dispHandle, tr("Displace"), 0.0, 2.0, true);
+				UISidebar.inst.displaceStrength = ui.slider(dispHandle, tr("Displace"), 0.0, 2.0, true);
 				if (dispHandle.changed) {
 					MaterialParser.parseMeshMaterial();
 				}
 
-				var splitViewHandle = Id.handle({selected: UITrait.inst.splitView});
-				UITrait.inst.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
+				var splitViewHandle = Id.handle({selected: UISidebar.inst.splitView});
+				UISidebar.inst.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					App.resize();
 				}
 
-				var cullHandle = Id.handle({selected: UITrait.inst.cullBackfaces});
-				UITrait.inst.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
+				var cullHandle = Id.handle({selected: UISidebar.inst.cullBackfaces});
+				UISidebar.inst.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
 					MaterialParser.parseMeshMaterial();
 				}
 
-				var filterHandle = Id.handle({selected: UITrait.inst.textureFilter});
-				UITrait.inst.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
+				var filterHandle = Id.handle({selected: UISidebar.inst.textureFilter});
+				UISidebar.inst.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
 					MaterialParser.parsePaintMaterial();
 					MaterialParser.parseMeshMaterial();
 				}
 
-				UITrait.inst.drawWireframe = ui.check(UITrait.inst.wireframeHandle, " " + tr("Wireframe"));
-				if (UITrait.inst.wireframeHandle.changed) {
+				UISidebar.inst.drawWireframe = ui.check(UISidebar.inst.wireframeHandle, " " + tr("Wireframe"));
+				if (UISidebar.inst.wireframeHandle.changed) {
 					ui.g.end();
 					UVUtil.cacheUVMap();
 					ui.g.begin(false);
 					MaterialParser.parseMeshMaterial();
 				}
-				UITrait.inst.drawTexels = ui.check(UITrait.inst.texelsHandle, " " + tr("Texels"));
-				if (UITrait.inst.texelsHandle.changed) {
+				UISidebar.inst.drawTexels = ui.check(UISidebar.inst.texelsHandle, " " + tr("Texels"));
+				if (UISidebar.inst.texelsHandle.changed) {
 					MaterialParser.parseMeshMaterial();
 				}
 
-				var compassHandle = Id.handle({selected: UITrait.inst.showCompass});
-				UITrait.inst.showCompass = ui.check(compassHandle, " " + tr("Compass"));
+				var compassHandle = Id.handle({selected: UISidebar.inst.showCompass});
+				UISidebar.inst.showCompass = ui.check(compassHandle, " " + tr("Compass"));
 				if (compassHandle.changed) Context.ddirty = 2;
 
-				UITrait.inst.showEnvmap = ui.check(UITrait.inst.showEnvmapHandle, " " + tr("Envmap"));
-				if (UITrait.inst.showEnvmapHandle.changed) {
+				UISidebar.inst.showEnvmap = ui.check(UISidebar.inst.showEnvmapHandle, " " + tr("Envmap"));
+				if (UISidebar.inst.showEnvmapHandle.changed) {
 					var world = Scene.active.world;
 					if (!envmapLoaded) {
 						// TODO: Unable to share texture for both radiance and envmap - reload image
@@ -197,42 +196,42 @@ class UIMenu {
 						iron.data.Data.cachedImages.remove("World_radiance.k");
 					}
 					world.loadEnvmap(function(_) {});
-					if (UITrait.inst.savedEnvmap == null) UITrait.inst.savedEnvmap = world.envmap;
+					if (UISidebar.inst.savedEnvmap == null) UISidebar.inst.savedEnvmap = world.envmap;
 					Context.ddirty = 2;
 				}
 
-				if (UITrait.inst.showEnvmap) {
-					UITrait.inst.showEnvmapBlur = ui.check(UITrait.inst.showEnvmapBlurHandle, " " + tr("Blurred"));
-					if (UITrait.inst.showEnvmapBlurHandle.changed) Context.ddirty = 2;
+				if (UISidebar.inst.showEnvmap) {
+					UISidebar.inst.showEnvmapBlur = ui.check(UISidebar.inst.showEnvmapBlurHandle, " " + tr("Blurred"));
+					if (UISidebar.inst.showEnvmapBlurHandle.changed) Context.ddirty = 2;
 				}
 				else {
 					if (ui.panel(viewportColorHandle, " " + tr("Viewport Color"), false, false, false)) {
 						var hwheel = Id.handle({color: 0xff030303});
 						var worldColor: kha.Color = Ext.colorWheel(ui, hwheel);
 						if (hwheel.changed) {
-							// var b = UITrait.inst.emptyEnvmap.lock(); // No lock for d3d11
+							// var b = UISidebar.inst.emptyEnvmap.lock(); // No lock for d3d11
 							// b.set(0, worldColor.Rb);
 							// b.set(1, worldColor.Gb);
 							// b.set(2, worldColor.Bb);
-							// UITrait.inst.emptyEnvmap.unlock();
-							// UITrait.inst.emptyEnvmap.unload(); //
+							// UISidebar.inst.emptyEnvmap.unlock();
+							// UISidebar.inst.emptyEnvmap.unload(); //
 							var b = Bytes.alloc(4);
 							b.set(0, worldColor.Rb);
 							b.set(1, worldColor.Gb);
 							b.set(2, worldColor.Bb);
 							b.set(3, 255);
-							UITrait.inst.emptyEnvmap = Image.fromBytes(b, 1, 1);
+							UISidebar.inst.emptyEnvmap = Image.fromBytes(b, 1, 1);
 							Context.ddirty = 2;
 							if (ui.inputStarted) changeStarted = true;
 						}
 					}
 				}
 
-				if (UITrait.inst.showEnvmap) {
-					Scene.active.world.envmap = UITrait.inst.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : UITrait.inst.savedEnvmap;
+				if (UISidebar.inst.showEnvmap) {
+					Scene.active.world.envmap = UISidebar.inst.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : UISidebar.inst.savedEnvmap;
 				}
 				else {
-					Scene.active.world.envmap = UITrait.inst.emptyEnvmap;
+					Scene.active.world.envmap = UISidebar.inst.emptyEnvmap;
 				}
 
 				#if arm_creator
@@ -273,9 +272,9 @@ class UIMenu {
 					ui.radio(modeHandle, i, modes[i]);
 				}
 
-				UITrait.inst.viewportMode = modeHandle.position;
+				UISidebar.inst.viewportMode = modeHandle.position;
 				if (modeHandle.changed) {
-					var deferred = UITrait.inst.viewportMode == ViewRender || UITrait.inst.viewportMode == ViewPathTrace;
+					var deferred = UISidebar.inst.viewportMode == ViewRender || UISidebar.inst.viewportMode == ViewPathTrace;
 					if (deferred) {
 						RenderPath.active.commands = RenderPathDeferred.commands;
 					}
@@ -322,22 +321,22 @@ class UIMenu {
 					Scene.active.camera.buildProjection();
 				}
 
-				UITrait.inst.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+				UISidebar.inst.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				cam.data.raw.fov = ui.slider(UITrait.inst.fovHandle, tr("FoV"), 0.3, 2.0, true);
-				if (UITrait.inst.fovHandle.changed) {
-					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+				cam.data.raw.fov = ui.slider(UISidebar.inst.fovHandle, tr("FoV"), 0.3, 2.0, true);
+				if (UISidebar.inst.fovHandle.changed) {
+					ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
 				}
 
 				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				UITrait.inst.cameraControls = Ext.inlineRadio(ui, Id.handle({position: UITrait.inst.cameraControls}), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				UISidebar.inst.cameraControls = Ext.inlineRadio(ui, Id.handle({position: UISidebar.inst.cameraControls}), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
 
 				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				UITrait.inst.cameraType = Ext.inlineRadio(ui, UITrait.inst.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
+				UISidebar.inst.cameraType = Ext.inlineRadio(ui, UISidebar.inst.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
 
 				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ' (${Config.keymap.view_camera_type})');
-				if (UITrait.inst.camHandle.changed) {
-					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+				if (UISidebar.inst.camHandle.changed) {
+					ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
 				}
 
 				if (ui.changed) keepOpen = true;
@@ -351,7 +350,7 @@ class UIMenu {
 					File.explorer("https://github.com/armory3d/armorpaint/issues");
 				}
 				if (ui.button("      " + tr("Report Bug"), Left)) {
-					var ver = App.version;
+					var ver = Main.version;
 					var sha = BuildMacros.sha();
 					sha = sha.substr(1, sha.length - 2);
 					var os = System.systemId;
@@ -386,7 +385,7 @@ class UIMenu {
 					sha = sha.substr(1, sha.length - 2);
 					var date = BuildMacros.date().split(" ")[0];
 					var gapi = #if (kha_direct3d11) "Direct3D11" #elseif (kha_direct3d12) "Direct3D12" #else "OpenGL" #end;
-					var msg = "ArmorPaint.org - v" + App.version + " (" + date + ") - " + sha + "\n";
+					var msg = "ArmorPaint.org - v" + Main.version + " (" + date + ") - " + sha + "\n";
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows
@@ -422,7 +421,7 @@ class UIMenu {
 	}
 
 	public static function update() {
-		//var ui = App.uimenu;
+		//var ui = App.uiMenu;
 		if (hideMenu) {
 			show = false;
 			App.redrawUI();
@@ -437,7 +436,7 @@ class UIMenu {
 		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuW = App.uimenu.ELEMENT_W() * 2.0;
+		var menuW = App.uiMenu.ELEMENT_W() * 2.0;
 		if (menuX + menuW > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuW);
 		}

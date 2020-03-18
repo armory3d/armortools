@@ -2,8 +2,8 @@ package arm.render;
 
 import iron.RenderPath;
 import arm.util.RenderUtil;
-import arm.ui.UITrait;
-import arm.Tool;
+import arm.ui.UISidebar;
+import arm.Enums;
 
 @:access(iron.RenderPath)
 class RenderPathPreview {
@@ -118,7 +118,7 @@ class RenderPathPreview {
 		#end
 
 		var framebuffer = "texpreview";
-		var selectedMat = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
+		var selectedMat = UISidebar.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
 		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 
@@ -167,7 +167,7 @@ class RenderPathPreview {
 		path.drawSkydome("world_pass/world_pass/world_pass");
 
 		var framebuffer = "texpreview";
-		RenderPath.active.renderTargets.get("texpreview").image = UITrait.inst.decalImage;
+		RenderPath.active.renderTargets.get("texpreview").image = UISidebar.inst.decalImage;
 
 		path.setTarget(framebuffer);
 

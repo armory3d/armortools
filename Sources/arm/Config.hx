@@ -5,10 +5,10 @@ import haxe.io.Bytes;
 import kha.Display;
 import iron.data.Data;
 #if arm_painter
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.render.Inc;
 import arm.sys.Path;
-import arm.Tool;
+import arm.Enums;
 #end
 
 class Config {
@@ -29,6 +29,8 @@ class Config {
 	}
 
 	public static function save() {
+		// Use system application data folder
+		// when running from protected path like "Program Files"
 		var path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.arm";
 		var bytes = Bytes.ofString(Json.stringify(raw));
 		Krom.fileSaveBytes(path, bytes.getData());
@@ -70,13 +72,13 @@ class Config {
 			#end
 		}
 		else {
-			// Upgrade config format
-			if (raw.version != App.version) {
+			// Upgrade config format created by older ArmorPaint build
+			if (raw.version != Main.version) {
 				{
 					// Upgrade logic here
 					// ...
 				}
-				raw.version = App.version;
+				raw.version = Main.version;
 				save();
 			}
 		}
@@ -87,7 +89,7 @@ class Config {
 	}
 
 	public static function restore() {
-		zui.Zui.Handle.global = new zui.Zui.Handle();
+		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
 		configLoaded = false;
 		init();
 		#if arm_painter
@@ -113,26 +115,24 @@ class Config {
 
 	#if arm_painter
 	public static function applyConfig() {
-		var C = Config.raw;
-		C.rp_ssgi = UITrait.inst.hssgi.selected;
-		C.rp_ssr = UITrait.inst.hssr.selected;
-		C.rp_bloom = UITrait.inst.hbloom.selected;
-		C.rp_gi = UITrait.inst.hvxao.selected;
-		C.rp_supersample = getSuperSampleSize(UITrait.inst.hsupersample.position);
-		iron.object.Uniforms.defaultFilter = C.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
+		var c = Config.raw;
+		c.rp_ssgi = UISidebar.inst.hssgi.selected;
+		c.rp_ssr = UISidebar.inst.hssr.selected;
+		c.rp_bloom = UISidebar.inst.hbloom.selected;
+		c.rp_gi = UISidebar.inst.hvxao.selected;
+		c.rp_supersample = getSuperSampleSize(UISidebar.inst.hsupersample.position);
+		iron.object.Uniforms.defaultFilter = c.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
+		save();
+		Context.ddirty = 2;
 
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
-
-		save();
 		Inc.applyConfig();
-
 		if (current != null) current.begin(false);
-		Context.ddirty = 2;
 	}
 
 	public static function loadKeymap() {
-		Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) { // Sync
+		Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) {
 			keymap = Json.parse(blob.toString());
 		});
 	}
@@ -144,44 +144,44 @@ class Config {
 	}
 
 	public static function getTextureRes(): Int {
-		if (App.resHandle.position == Res128) return 128;
-		if (App.resHandle.position == Res256) return 256;
-		if (App.resHandle.position == Res512) return 512;
-		if (App.resHandle.position == Res1024) return 1024;
-		if (App.resHandle.position == Res2048) return 2048;
-		if (App.resHandle.position == Res4096) return 4096;
-		if (App.resHandle.position == Res8192) return 8192;
-		if (App.resHandle.position == Res16384) return 16384;
-		return 0;
+		var res = App.resHandle.position;
+		return res == Res128 ? 128 :
+			   res == Res256 ? 256 :
+			   res == Res512 ? 512 :
+			   res == Res1024 ? 1024 :
+			   res == Res2048 ? 2048 :
+			   res == Res4096 ? 4096 :
+			   res == Res8192 ? 8192 :
+			   res == Res16384 ? 16384 : 0;
 	}
 
 	public static function getTextureResBias(): Float {
-		if (App.resHandle.position == Res128) return 16.0;
-		if (App.resHandle.position == Res256) return 8.0;
-		if (App.resHandle.position == Res512) return 4.0;
-		if (App.resHandle.position == Res1024) return 2.0;
-		if (App.resHandle.position == Res2048) return 1.5;
-		if (App.resHandle.position == Res4096) return 1.0;
-		if (App.resHandle.position == Res8192) return 0.5;
-		if (App.resHandle.position == Res16384) return 0.25;
-		return 1.0;
+		var res = App.resHandle.position;
+		return res == Res128 ? 16.0 :
+			   res == Res256 ? 8.0 :
+			   res == Res512 ? 4.0 :
+			   res == Res1024 ? 2.0 :
+			   res == Res2048 ? 1.5 :
+			   res == Res4096 ? 1.0 :
+			   res == Res8192 ? 0.5 :
+			   res == Res16384 ? 0.25 : 1.0;
 	}
 
 	public static function getTextureResPos(i: Int): Int {
-		if (i == 128) return Res128;
-		if (i == 256) return Res256;
-		if (i == 512) return Res512;
-		if (i == 1024) return Res1024;
-		if (i == 2048) return Res2048;
-		if (i == 4096) return Res4096;
-		if (i == 8192) return Res8192;
-		if (i == 16384) return Res16384;
-		return 0;
+		return i == 128 ? Res128 :
+			   i == 256 ? Res256 :
+			   i == 512 ? Res512 :
+			   i == 1024 ? Res1024 :
+			   i == 2048 ? Res2048 :
+			   i == 4096 ? Res4096 :
+			   i == 8192 ? Res8192 :
+			   i == 16384 ? Res16384 : 0;
 	}
 	#end
 }
 
 typedef TConfig = {
+	// Window
 	@:optional var window_mode: Null<Int>; // window, fullscreen
 	@:optional var window_w: Null<Int>;
 	@:optional var window_h: Null<Int>;
@@ -192,14 +192,15 @@ typedef TConfig = {
 	@:optional var window_minimizable: Null<Bool>;
 	@:optional var window_vsync: Null<Bool>;
 	@:optional var window_scale: Null<Float>;
+	// Render path
 	@:optional var rp_supersample: Null<Float>;
 	@:optional var rp_ssgi: Null<Bool>;
 	@:optional var rp_ssr: Null<Bool>;
 	@:optional var rp_bloom: Null<Bool>;
 	@:optional var rp_motionblur: Null<Bool>;
 	@:optional var rp_gi: Null<Bool>;
-	// Ext
-	@:optional var version: String;
+	// Application
+	@:optional var version: String; // ArmorPaint version
 	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
 	@:optional var undo_steps: Null<Int>;	// Number of undo steps to preserve

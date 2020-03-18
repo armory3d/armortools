@@ -23,12 +23,12 @@ class Res {
 	}
 
 	public static function tile50(img: kha.Image, x: Int, y: Int): TRect {
-		var size = arm.ui.UITrait.inst.ui.SCALE() > 1 ? 100 :  50;
+		var size = arm.ui.UISidebar.inst.ui.SCALE() > 1 ? 100 :  50;
 		return { x: x * size, y: y * size, w: size, h: size };
 	}
 
 	public static function tile18(img: kha.Image, x: Int, y: Int): TRect {
-		var size = arm.ui.UITrait.inst.ui.SCALE() > 1 ? 36 : 18;
+		var size = arm.ui.UISidebar.inst.ui.SCALE() > 1 ? 36 : 18;
 		return { x: x * size, y: img.height - (y + 1) * size, w: size, h: size };
 	}
 }

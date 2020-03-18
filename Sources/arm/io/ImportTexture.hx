@@ -2,10 +2,9 @@ package arm.io;
 
 import kha.Image;
 import iron.data.Data;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.sys.Path;
 import arm.Project;
-using StringTools;
 
 class ImportTexture {
 
@@ -30,7 +29,7 @@ class ImportTexture {
 			if (Context.texture == null) Context.texture = asset;
 			Project.assetNames.push(name);
 			Project.assetMap.set(asset.id, image);
-			UITrait.inst.hwnd2.redraws = 2;
+			UISidebar.inst.hwnd2.redraws = 2;
 
 			// Set envmap
 			if (path.toLowerCase().endsWith(".hdr") &&

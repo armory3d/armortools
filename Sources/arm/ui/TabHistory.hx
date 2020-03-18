@@ -4,8 +4,8 @@ class TabHistory {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab, tr("History"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab, tr("History"))) {
 			for (i in 0...History.steps.length) {
 				var active = History.steps.length - 1 - History.redos;
 				if (i == active) {

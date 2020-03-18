@@ -12,7 +12,7 @@ import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
 import arm.render.RenderPathPaint;
-import arm.Tool;
+import arm.Enums;
 
 @:access(zui.Zui)
 class UIView2D {
@@ -52,7 +52,7 @@ class UIView2D {
 		channelLocation = pipe.getConstantLocation("channel");
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
+		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.colorWheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 
 		iron.App.notifyOnRender2D(render);
@@ -63,8 +63,8 @@ class UIView2D {
 		if (UINodes.inst.defaultWindowW == 0) UINodes.inst.defaultWindowW = Std.int(iron.App.w() / 2);
 		if (UINodes.inst.defaultWindowH == 0) UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
 		ww = UINodes.inst.defaultWindowW;
-		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		wy = UITrait.inst.headerh * 2;
+		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wy = UIHeader.inst.headerh * 2;
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
@@ -101,7 +101,7 @@ class UIView2D {
 
 			if (type == View2DLayer) {
 				var layer = l.getChildren() == null ? l : l.getChildren()[0];
-				if (UITrait.inst.brushLive && RenderPathPaint.liveLayerDrawn > 0) {
+				if (UISidebar.inst.brushLive && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
 				tex =
@@ -120,7 +120,7 @@ class UIView2D {
 											  0;
 			}
 			else { // View2DAsset
-				tex = UITrait.inst.getImage(Context.texture);
+				tex = UISidebar.inst.getImage(Context.texture);
 			}
 
 			var th = tw;
@@ -171,7 +171,7 @@ class UIView2D {
 				}
 			}
 
-			if (h.changed) UITrait.inst.hwnd.redraws = 2;
+			if (h.changed) UISidebar.inst.hwnd.redraws = 2;
 			ui.t.ACCENT_COL = ACCENT_COL;
 			ui.t.BUTTON_H = BUTTON_H;
 			ui.t.ELEMENT_H = ELEMENT_H;
@@ -207,7 +207,7 @@ class UIView2D {
 
 			if (Context.tool == ToolPicker) {
 				var cursorImg = Res.get("cursor.k");
-				ui.g.drawScaledImage(cursorImg, tx + tw * UITrait.inst.uvxPicked - 16, ty + th * UITrait.inst.uvyPicked - 16, 32, 32);
+				ui.g.drawScaledImage(cursorImg, tx + tw * UISidebar.inst.uvxPicked - 16, ty + th * UISidebar.inst.uvyPicked - 16, 32, 32);
 			}
 		}
 		ui.end();
@@ -215,7 +215,7 @@ class UIView2D {
 	}
 
 	function drawLayer(tex: kha.Image, tx: Float, ty: Float, tw: Float, th: Float, channel: Int) {
-		if (!UITrait.inst.textureFilter) {
+		if (!UISidebar.inst.textureFilter) {
 			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
 		}
 
@@ -226,7 +226,7 @@ class UIView2D {
 
 		ui.g.drawScaledImage(tex, tx, ty, tw, th);
 
-		if (!UITrait.inst.textureFilter) {
+		if (!UISidebar.inst.textureFilter) {
 			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
 		}
 	}
@@ -236,9 +236,9 @@ class UIView2D {
 		var kb = Input.getKeyboard();
 
 		var headerh = ui.ELEMENT_H() * 1.4;
-		UITrait.inst.paint2d = false;
+		UISidebar.inst.paint2d = false;
 
-		if (!App.uienabled ||
+		if (!App.uiEnabled ||
 			!show ||
 			mouse.x < wx ||
 			mouse.x > wx + ww ||
@@ -263,8 +263,8 @@ class UIView2D {
 			(Operator.shortcut(Config.keymap.action_paint) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
 			 setCloneSource ||
-			 UITrait.inst.brushLive)) {
-			UITrait.inst.paint2d = true;
+			 UISidebar.inst.brushLive)) {
+			UISidebar.inst.paint2d = true;
 		}
 
 		if (ui.isTyping) return;

@@ -4,7 +4,7 @@ import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 #if arm_painter
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 #end
 
 class RenderPathDeferred {
@@ -188,7 +188,7 @@ class RenderPathDeferred {
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
-		var skipTaa = UITrait.inst.splitView;
+		var skipTaa = UISidebar.inst.splitView;
 		if (!skipTaa) {
 			@:privateAccess Scene.active.camera.frame = RenderPathDeferred.taaFrame;
 			@:privateAccess Scene.active.camera.projectionJitter();
@@ -207,7 +207,7 @@ class RenderPathDeferred {
 		#end
 
 		#if kha_direct3d12
-		if (UITrait.inst.viewportMode == ViewPathTrace) {
+		if (UISidebar.inst.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
 		}
@@ -225,7 +225,7 @@ class RenderPathDeferred {
 
 	public static function drawDeferred() {
 		#if arm_painter
-		var cameraType = UITrait.inst.cameraType;
+		var cameraType = UISidebar.inst.cameraType;
 		var ddirty = Context.ddirty;
 		#else
 		var cameraType = CameraPerspective;
@@ -542,7 +542,7 @@ class RenderPathDeferred {
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 		#if arm_painter
-		var skipTaa = UITrait.inst.splitView;
+		var skipTaa = UISidebar.inst.splitView;
 		#else
 		var skipTaa = false;
 		#end
@@ -589,25 +589,25 @@ class RenderPathDeferred {
 	}
 
 	static function drawSplit() {
-		if (UITrait.inst.splitView) {
+		if (UISidebar.inst.splitView) {
 			if (Context.pdirty > 0) {
 				var cam = Scene.active.camera;
 
-				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 
 				drawGbuffer();
 
 				#if kha_direct3d12
-				UITrait.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
+				UISidebar.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
 				#else
 				drawDeferred();
 				#end
 
-				UITrait.inst.viewIndex = UITrait.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UITrait.inst.viewIndex]);
+				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 			}

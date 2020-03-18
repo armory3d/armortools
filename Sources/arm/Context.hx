@@ -8,11 +8,13 @@ import arm.data.BrushSlot;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
+import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
+import arm.ui.UIHeader;
 import arm.node.MaterialParser;
-import arm.Tool;
+import arm.Enums;
 import arm.Project;
 
 class Context {
@@ -43,7 +45,7 @@ class Context {
 			for (i in 0...mats.length) mats[i] = materialScene.data;
 		}
 		MaterialParser.parsePaintMaterial();
-		UITrait.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd.redraws = 2;
 	}
 
 	public static function selectMaterial(i: Int) {
@@ -55,8 +57,8 @@ class Context {
 		if (Project.materials.indexOf(m) == -1) return;
 		material = m;
 		MaterialParser.parsePaintMaterial();
-		UITrait.inst.hwnd1.redraws = 2;
-		UITrait.inst.headerHandle.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 
 		var decal = tool == ToolDecal || tool == ToolText;
@@ -77,8 +79,8 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		brush = b;
 		MaterialParser.parseBrush();
-		UITrait.inst.parseBrushInputs();
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.parseBrushInputs();
+		UISidebar.inst.hwnd1.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 	}
 
@@ -86,7 +88,7 @@ class Context {
 		if (l == layer && layerIsMask == isMask) return;
 		layer = l;
 		layerIsMask = isMask;
-		UITrait.inst.headerHandle.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
 
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
@@ -97,7 +99,7 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UITrait.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
@@ -105,8 +107,8 @@ class Context {
 		tool = i;
 		MaterialParser.parsePaintMaterial();
 		MaterialParser.parseMeshMaterial();
-		UITrait.inst.headerHandle.redraws = 2;
-		UITrait.inst.toolbarHandle.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
+		UIToolbar.inst.toolbarHandle.redraws = 2;
 		ddirty = 3;
 
 		var decal = tool == ToolDecal || tool == ToolText;
@@ -132,13 +134,13 @@ class Context {
 	public static function selectObject(o: Object) {
 		object = o;
 
-		if (UITrait.inst.worktab.position == SpaceScene) {
+		if (UISidebar.inst.worktab.position == SpaceScene) {
 			if (Std.is(o, MeshObject)) {
 				for (i in 0...Project.materialsScene.length) {
 					if (Project.materialsScene[i].data == cast(o, MeshObject).materials[0]) {
 						// selectMaterial(i); // loop
 						materialScene = Project.materialsScene[i];
-						UITrait.inst.hwnd.redraws = 2;
+						UISidebar.inst.hwnd.redraws = 2;
 						break;
 					}
 				}
@@ -147,12 +149,12 @@ class Context {
 	}
 
 	public static function selectPaintObject(o: MeshObject) {
-		UITrait.inst.headerHandle.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
 		for (p in Project.paintObjects) p.skip_context = "paint";
 		paintObject = o;
 
 		var mask = layer.objectMask;
-		if (UITrait.inst.layerFilter > 0) mask = UITrait.inst.layerFilter;
+		if (UISidebar.inst.layerFilter > 0) mask = UISidebar.inst.layerFilter;
 
 		if (mergedObject == null || mask > 0) {
 			paintObject.skip_context = "";

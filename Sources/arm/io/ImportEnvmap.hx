@@ -6,9 +6,8 @@ import kha.graphics4.TextureFormat;
 import kha.arrays.Float32Array;
 import iron.data.Data;
 import iron.Scene;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.sys.Path;
-using StringTools;
 
 class ImportEnvmap {
 
@@ -83,8 +82,8 @@ class ImportEnvmap {
 		Scene.active.world.probe.raw.strength = 1.0;
 		Scene.active.world.envmap = image;
 		Scene.active.world.raw.envmap = path;
-		UITrait.inst.savedEnvmap = image;
-		UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = true;
+		UISidebar.inst.savedEnvmap = image;
+		UISidebar.inst.showEnvmapHandle.selected = UISidebar.inst.showEnvmap = true;
 
 		// Load envmap clone and set mipmaps
 		Data.cachedImages.remove(path);

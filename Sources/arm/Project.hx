@@ -13,7 +13,7 @@ import iron.Scene;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.sys.Path;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.data.LayerSlot;
@@ -25,8 +25,7 @@ import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class Project {
 
@@ -91,7 +90,7 @@ class Project {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("New Project"))) {
 				ui.row([0.5, 0.5]);
-				UITrait.inst.projectType = ui.combo(Id.handle({position: UITrait.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
+				UISidebar.inst.projectType = ui.combo(Id.handle({position: UISidebar.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
 				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
@@ -127,7 +126,7 @@ class Project {
 		var len = meshes.length;
 		for (i in 0...len) {
 			var m = meshes[len - i - 1];
-			if (UITrait.inst.projectObjects.indexOf(m) == -1) {
+			if (UISidebar.inst.projectObjects.indexOf(m) == -1) {
 				Data.deleteMesh(m.data.handle);
 				m.remove();
 			}
@@ -137,8 +136,8 @@ class Project {
 			Data.deleteMesh(handle);
 		}
 
-		if (UITrait.inst.projectType != ModelCube) {
-			var mesh: Dynamic = UITrait.inst.projectType == ModelSphere ?
+		if (UISidebar.inst.projectType != ModelCube) {
+			var mesh: Dynamic = UISidebar.inst.projectType == ModelSphere ?
 				new arm.format.proc.Sphere(1, 512, 256) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
@@ -157,27 +156,27 @@ class Project {
 			var md = new MeshData(raw, function(md: MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
-			if (UITrait.inst.projectType == ModelSphere) {
+			if (UISidebar.inst.projectType == ModelSphere) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
-			else if (UITrait.inst.projectType == ModelTessellatedPlane) {
+			else if (UISidebar.inst.projectType == ModelTessellatedPlane) {
 				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
 		}
 
-		var n = UITrait.inst.projectType == ModelCube ? "Cube" : "Tessellated";
+		var n = UISidebar.inst.projectType == ModelCube ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			UITrait.inst.pickerMaskHandle.position = MaskNone;
+			UISidebar.inst.pickerMaskHandle.position = MaskNone;
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
 			#if arm_creator
-			if (UITrait.inst.projectType == ModelTessellatedPlane) {
+			if (UISidebar.inst.projectType == ModelTessellatedPlane) {
 				Context.paintObject.transform.loc.set(0, 0, -0.15);
 				Context.paintObject.transform.scale.set(10, 10, 1);
 			}
@@ -202,9 +201,9 @@ class Project {
 			assetNames = [];
 			assetId = 0;
 			Context.ddirty = 4;
-			UITrait.inst.hwnd.redraws = 2;
-			UITrait.inst.hwnd1.redraws = 2;
-			UITrait.inst.hwnd2.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd2.redraws = 2;
 
 			if (resetLayers) {
 				while (layers.length > 0) layers.pop().unload();
@@ -216,13 +215,13 @@ class Project {
 
 			if (current != null) current.begin(false);
 
-			UITrait.inst.savedEnvmap = UITrait.inst.defaultEnvmap;
-			Scene.active.world.envmap = UITrait.inst.emptyEnvmap;
+			UISidebar.inst.savedEnvmap = UISidebar.inst.defaultEnvmap;
+			Scene.active.world.envmap = UISidebar.inst.emptyEnvmap;
 			Scene.active.world.raw.envmap = "World_radiance.k";
-			UITrait.inst.showEnvmapHandle.selected = UITrait.inst.showEnvmap = false;
-			Scene.active.world.probe.radiance = UITrait.inst.defaultRadiance;
-			Scene.active.world.probe.radianceMipmaps = UITrait.inst.defaultRadianceMipmaps;
-			Scene.active.world.probe.irradiance = UITrait.inst.defaultIrradiance;
+			UISidebar.inst.showEnvmapHandle.selected = UISidebar.inst.showEnvmap = false;
+			Scene.active.world.probe.radiance = UISidebar.inst.defaultRadiance;
+			Scene.active.world.probe.radianceMipmaps = UISidebar.inst.defaultRadianceMipmaps;
+			Scene.active.world.probe.irradiance = UISidebar.inst.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
 		});
 	}
@@ -252,7 +251,7 @@ class Project {
 			if (ui.tab(Id.handle(), tr("Import Mesh"))) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					UITrait.inst.splitBy = ui.combo(Id.handle(), [
+					UISidebar.inst.splitBy = ui.combo(Id.handle(), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
@@ -262,12 +261,12 @@ class Project {
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					UITrait.inst.parseTransform = ui.check(Id.handle({selected: UITrait.inst.parseTransform}), tr("Parse Transforms"));
+					UISidebar.inst.parseTransform = ui.check(Id.handle({selected: UISidebar.inst.parseTransform}), tr("Parse Transforms"));
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					UITrait.inst.parseVCols = ui.check(Id.handle({selected: UITrait.inst.parseVCols}), tr("Parse Vertex Colors"));
+					UISidebar.inst.parseVCols = ui.check(Id.handle({selected: UISidebar.inst.parseVCols}), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 

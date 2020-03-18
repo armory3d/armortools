@@ -4,12 +4,11 @@ import haxe.Json;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.system.ArmPack;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.format.Lz4;
 import arm.sys.Path;
 import arm.Project;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ExportArm {
 
@@ -65,7 +64,7 @@ class ExportArm {
 		}
 
 		Project.raw = {
-			version: App.version,
+			version: Main.version,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
 			mesh_datas: md,
@@ -101,7 +100,7 @@ class ExportArm {
 		var texture_files = assetsToFiles(assets);
 
 		var raw = {
-			version: App.version,
+			version: Main.version,
 			material_nodes: mnodes,
 			material_icons: [Lz4.encode(m.image.getPixels())],
 			assets: texture_files
@@ -133,7 +132,7 @@ class ExportArm {
 		var texture_files = assetsToFiles(assets);
 
 		var raw = {
-			version: App.version,
+			version: Main.version,
 			brush_nodes: bnodes,
 			brush_icons: [Lz4.encode(b.image.getPixels())],
 			assets: texture_files

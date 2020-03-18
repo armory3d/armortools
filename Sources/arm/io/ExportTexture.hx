@@ -7,12 +7,11 @@ import arm.format.ExrWriter;
 import arm.format.JpgWriter;
 import arm.format.PngWriter;
 import arm.format.PngTools;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ExportTexture {
 
@@ -31,7 +30,7 @@ class ExportTexture {
 			}
 		}
 
-		if (udimTiles.length > 0 && UITrait.inst.layersExport == 0) {
+		if (udimTiles.length > 0 && UISidebar.inst.layersExport == 0) {
 			for (udimTile in udimTiles) runLayers(path, udimTile);
 		}
 		else {
@@ -47,10 +46,10 @@ class ExportTexture {
 
 	static function runLayers(path: String, udimTile = "") {
 		var textureSize = Config.getTextureRes();
-		var formatQuality = UITrait.inst.formatQuality;
+		var formatQuality = UISidebar.inst.formatQuality;
 		var f = UIFiles.filename;
 		if (f == "") f = tr("untitled");
-		var formatType = UITrait.inst.formatType;
+		var formatType = UISidebar.inst.formatType;
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
@@ -61,7 +60,7 @@ class ExportTexture {
 		var layers = Project.layers;
 
 		// Export visible layers
-		if (UITrait.inst.layersExport == 0 && layers.length > 1) {
+		if (UISidebar.inst.layersExport == 0 && layers.length > 1) {
 			Layers.makeTempImg();
 			Layers.makeExportImg();
 			if (Layers.pipeMerge == null) Layers.makePipe();
@@ -258,7 +257,7 @@ class ExportTexture {
 		if (bits > 8) { // 16/32bit
 			var writer = new ExrWriter(out, res, res, pixels, bits, type, off);
 		}
-		else if (UITrait.inst.formatType == FormatPng) {
+		else if (UISidebar.inst.formatType == FormatPng) {
 			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
@@ -273,7 +272,7 @@ class ExportTexture {
 			writer.write({
 				width: res,
 				height: res,
-				quality: UITrait.inst.formatQuality,
+				quality: UISidebar.inst.formatQuality,
 				pixels: pixels
 			}, type, off);
 		}

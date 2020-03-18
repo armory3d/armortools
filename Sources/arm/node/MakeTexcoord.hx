@@ -1,14 +1,14 @@
 package arm.node;
 
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.node.MaterialShader;
-import arm.Tool;
+import arm.Enums;
 
 class MakeTexcoord {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
 
-		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UITrait.inst.brushPaint;
+		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UISidebar.inst.brushPaint;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 		// TexCoords - project
@@ -31,15 +31,15 @@ class MakeTexcoord {
 
 			frag.write_attrib('vec2 texCoord = uvsp * brushScale;');
 
-			// if (UITrait.inst.brushDirectional) {
+			// if (UISidebar.inst.brushDirectional) {
 			// 	frag.add_uniform('vec2 brushDirection', '_brushDirection');
 			// 	frag.write('texCoord = vec2(texCoord.x * brushDirection.x - texCoord.y * brushDirection.y, texCoord.x * brushDirection.y + texCoord.y * brushDirection.x);');
 			// }
-			if (UITrait.inst.brushDirectional) {
+			if (UISidebar.inst.brushDirectional) {
 				frag.write('float maskAngleBrush = atan2(-inp.y + inplast.y, inp.x - inplast.x) - 3.141592 / 2;');
 				frag.write('texCoord = vec2(texCoord.x * cos(maskAngleBrush) - texCoord.y * sin(maskAngleBrush), texCoord.x * sin(maskAngleBrush) + texCoord.y * cos(maskAngleBrush));');
 			}
-			var angle = UITrait.inst.brushAngle + UITrait.inst.brushNodesAngle;
+			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 			if (uvAngle != 0.0) {
 				var a = uvAngle * (Math.PI / 180);
@@ -51,7 +51,7 @@ class MakeTexcoord {
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');
 
-			var angle = UITrait.inst.brushAngle + UITrait.inst.brushNodesAngle;
+			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 			if (uvAngle > 0.0) {
 				var a = uvAngle * (Math.PI / 180);

@@ -11,7 +11,6 @@ import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
 import arm.sys.Path;
 import arm.sys.File;
-using StringTools;
 
 class BoxPreferences {
 
@@ -27,13 +26,13 @@ class BoxPreferences {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
-				if (!hscale.changed && UITrait.inst.hscaleWasChanged) {
+				if (!hscale.changed && UISidebar.inst.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					Config.save();
 					setScale();
 				}
-				UITrait.inst.hscaleWasChanged = hscale.changed;
+				UISidebar.inst.hscaleWasChanged = hscale.changed;
 				var themeHandle = Id.handle();
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, tr("Theme"), true);
@@ -48,23 +47,23 @@ class BoxPreferences {
 						});
 					}
 					ui.t = App.theme;
-					UITrait.inst.ui.t = App.theme;
+					UISidebar.inst.ui.t = App.theme;
 					UINodes.inst.ui.t = App.theme;
 					UIView2D.inst.ui.t = App.theme;
-					UITrait.inst.tagUIRedraw();
+					UISidebar.inst.tagUIRedraw();
 				}
 
 				#if (!krom_android && !krom_ios)
-				UITrait.inst.nativeBrowser = ui.check(Id.handle({selected: UITrait.inst.nativeBrowser}), tr("Native File Browser"));
+				UISidebar.inst.nativeBrowser = ui.check(Id.handle({selected: UISidebar.inst.nativeBrowser}), tr("Native File Browser"));
 				#end
 
-				UITrait.inst.cacheDraws = ui.check(Id.handle({selected: UITrait.inst.cacheDraws}), tr("Cache UI Draws"));
+				UISidebar.inst.cacheDraws = ui.check(Id.handle({selected: UISidebar.inst.cacheDraws}), tr("Cache UI Draws"));
 				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));
 
 				ui.changed = false;
-				UITrait.inst.showAssetNames = ui.check(Id.handle({selected: UITrait.inst.showAssetNames}), tr("Show Asset Names"));
+				UISidebar.inst.showAssetNames = ui.check(Id.handle({selected: UISidebar.inst.showAssetNames}), tr("Show Asset Names"));
 				if (ui.changed) {
-					UITrait.inst.tagUIRedraw();
+					UISidebar.inst.tagUIRedraw();
 				}
 
 				// ui.text("Node Editor");
@@ -76,7 +75,7 @@ class BoxPreferences {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Restore defaults?"), Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Confirm"), Left)) {
-							ui.t.ELEMENT_H = App.ELEMENT_H;
+							ui.t.ELEMENT_H = App.defaultElementH;
 							Config.restore();
 							setScale();
 							if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
@@ -87,9 +86,9 @@ class BoxPreferences {
 				}
 			}
 			if (ui.tab(htab, tr("Usage"), true)) {
-				UITrait.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
-				Config.raw.undo_steps = Std.int(ui.slider(UITrait.inst.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
-				if (UITrait.inst.undoHandle.changed) {
+				UISidebar.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
+				Config.raw.undo_steps = Std.int(ui.slider(UISidebar.inst.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
+				if (UISidebar.inst.undoHandle.changed) {
 					ui.g.end();
 					while (History.undoLayers.length < Config.raw.undo_steps) {
 						var l = new LayerSlot("_undo" + History.undoLayers.length);
@@ -105,54 +104,54 @@ class BoxPreferences {
 					Config.save();
 				}
 
-				UITrait.inst.brushBias = ui.slider(Id.handle({value: UITrait.inst.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
+				UISidebar.inst.brushBias = ui.slider(Id.handle({value: UISidebar.inst.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
 				if (ui.isHovered) ui.tooltip(tr("Stretch brush strokes on the uv map to prevent seams"));
 
-				UITrait.inst.dilateRadius = ui.slider(Id.handle({value: UITrait.inst.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
+				UISidebar.inst.dilateRadius = ui.slider(Id.handle({value: UISidebar.inst.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
 				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
-				var brushLiveHandle = Id.handle({selected: UITrait.inst.brushLive});
-				UITrait.inst.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
+				var brushLiveHandle = Id.handle({selected: UISidebar.inst.brushLive});
+				UISidebar.inst.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Draw live brush preview in viewport"));
 				if (brushLiveHandle.changed) Context.ddirty = 2;
 
-				var brush3dHandle = Id.handle({selected: UITrait.inst.brush3d});
-				UITrait.inst.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
+				var brush3dHandle = Id.handle({selected: UISidebar.inst.brush3d});
+				UISidebar.inst.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
-				ui.enabled = UITrait.inst.brush3d;
-				var brushDepthRejectHandle = Id.handle({selected: UITrait.inst.brushDepthReject});
-				UITrait.inst.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
+				ui.enabled = UISidebar.inst.brush3d;
+				var brushDepthRejectHandle = Id.handle({selected: UISidebar.inst.brushDepthReject});
+				UISidebar.inst.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
 				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
 				ui.row([0.5, 0.5]);
 
-				var brushAngleRejectHandle = Id.handle({selected: UITrait.inst.brushAngleReject});
-				UITrait.inst.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
+				var brushAngleRejectHandle = Id.handle({selected: UISidebar.inst.brushAngleReject});
+				UISidebar.inst.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
 				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
-				if (!UITrait.inst.brushAngleReject) ui.enabled = false;
-				var angleDotHandle = Id.handle({value: UITrait.inst.brushAngleRejectDot});
-				UITrait.inst.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
+				if (!UISidebar.inst.brushAngleReject) ui.enabled = false;
+				var angleDotHandle = Id.handle({value: UISidebar.inst.brushAngleRejectDot});
+				UISidebar.inst.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
 				if (angleDotHandle.changed) {
 					MaterialParser.parsePaintMaterial();
 				}
 				ui.enabled = true;
 			}
 			if (ui.tab(htab, tr("Pen"), true)) {
-				UITrait.penPressureRadius = ui.check(Id.handle({selected: UITrait.penPressureRadius}), tr("Brush Radius"));
-				UITrait.penPressureHardness = ui.check(Id.handle({selected: UITrait.penPressureHardness}), tr("Brush Hardness"));
-				UITrait.penPressureOpacity = ui.check(Id.handle({selected: UITrait.penPressureOpacity}), tr("Brush Opacity"));
+				UISidebar.penPressureRadius = ui.check(Id.handle({selected: UISidebar.penPressureRadius}), tr("Brush Radius"));
+				UISidebar.penPressureHardness = ui.check(Id.handle({selected: UISidebar.penPressureHardness}), tr("Brush Hardness"));
+				UISidebar.penPressureOpacity = ui.check(Id.handle({selected: UISidebar.penPressureOpacity}), tr("Brush Opacity"));
 			}
 
-			UITrait.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
-			UITrait.inst.hssr = Id.handle({selected: Config.raw.rp_ssr});
-			UITrait.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
-			UITrait.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
-			UITrait.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
+			UISidebar.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
+			UISidebar.inst.hssr = Id.handle({selected: Config.raw.rp_ssr});
+			UISidebar.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
+			UISidebar.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
+			UISidebar.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
-				ui.combo(UITrait.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
-				if (UITrait.inst.hsupersample.changed) Config.applyConfig();
+				ui.combo(UISidebar.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
+				if (UISidebar.inst.hsupersample.changed) Config.applyConfig();
 
 				#if arm_debug
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
@@ -161,9 +160,9 @@ class BoxPreferences {
 				#end
 
 				#if rp_voxelao
-				ui.check(UITrait.inst.hvxao, tr("Voxel AO"));
+				ui.check(UISidebar.inst.hvxao, tr("Voxel AO"));
 				if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
-				if (UITrait.inst.hvxao.changed) {
+				if (UISidebar.inst.hvxao.changed) {
 					Config.applyConfig();
 					#if arm_creator
 					MaterialParser.parseMeshMaterial();
@@ -171,33 +170,33 @@ class BoxPreferences {
 				}
 
 				ui.row([0.5, 0.5]);
-				ui.enabled = UITrait.inst.hvxao.selected;
-				var h = Id.handle({value: UITrait.inst.vxaoOffset});
-				UITrait.inst.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
+				ui.enabled = UISidebar.inst.hvxao.selected;
+				var h = Id.handle({value: UISidebar.inst.vxaoOffset});
+				UISidebar.inst.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
-				var h = Id.handle({value: UITrait.inst.vxaoAperture});
-				UITrait.inst.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
+				var h = Id.handle({value: UISidebar.inst.vxaoAperture});
+				UISidebar.inst.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
 				ui.enabled = true;
 				#end
-				ui.check(UITrait.inst.hssgi, tr("SSAO"));
-				if (UITrait.inst.hssgi.changed) Config.applyConfig();
-				ui.check(UITrait.inst.hbloom, tr("Bloom"));
-				if (UITrait.inst.hbloom.changed) Config.applyConfig();
-				ui.check(UITrait.inst.hssr, tr("SSR"));
-				if (UITrait.inst.hssr.changed) Config.applyConfig();
+				ui.check(UISidebar.inst.hssgi, tr("SSAO"));
+				if (UISidebar.inst.hssgi.changed) Config.applyConfig();
+				ui.check(UISidebar.inst.hbloom, tr("Bloom"));
+				if (UISidebar.inst.hbloom.changed) Config.applyConfig();
+				ui.check(UISidebar.inst.hssr, tr("SSR"));
+				if (UISidebar.inst.hssr.changed) Config.applyConfig();
 
-				var h = Id.handle({value: UITrait.inst.vignetteStrength});
-				UITrait.inst.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
+				var h = Id.handle({value: UISidebar.inst.vignetteStrength});
+				UISidebar.inst.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
 				if (h.changed) Context.ddirty = 2;
 
-				// var h = Id.handle({value: UITrait.inst.autoExposureStrength});
-				// UITrait.inst.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
+				// var h = Id.handle({value: UISidebar.inst.autoExposureStrength});
+				// UISidebar.inst.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.ddirty = 2;
 
 				#if arm_creator
-				var h = Id.handle({value: UITrait.inst.vxaoExt});
-				UITrait.inst.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
+				var h = Id.handle({value: UISidebar.inst.vxaoExt});
+				UISidebar.inst.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
 				if (h.changed) {
 					Context.ddirty = 2;
 					MaterialParser.parseMeshMaterial();
@@ -360,17 +359,17 @@ plugin.drawUI = function(ui) {
 
 	static function setScale() {
 		var scale = Config.raw.window_scale;
-		UITrait.inst.ui.setScale(scale);
-		UITrait.inst.windowW = Std.int(UITrait.defaultWindowW * scale);
-		UITrait.inst.toolbarw = Std.int(UITrait.defaultToolbarW * scale);
-		UITrait.inst.headerh = Std.int(UITrait.defaultHeaderH * scale);
-		UITrait.inst.statush = Std.int(UITrait.defaultStatusH * scale);
-		UITrait.inst.menubarw = Std.int(UITrait.defaultMenubarW * scale);
-		UITrait.inst.setIconScale();
+		UISidebar.inst.ui.setScale(scale);
+		UISidebar.inst.windowW = Std.int(UISidebar.defaultWindowW * scale);
+		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);
+		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * scale);
+		UIStatus.inst.statush = Std.int(UIStatus.defaultStatusH * scale);
+		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * scale);
+		UISidebar.inst.setIconScale();
 		UINodes.inst.ui.setScale(scale);
 		UIView2D.inst.ui.setScale(scale);
-		App.uibox.setScale(scale);
-		App.uimenu.setScale(scale);
+		App.uiBox.setScale(scale);
+		App.uiMenu.setScale(scale);
 		App.resize();
 	}
 }

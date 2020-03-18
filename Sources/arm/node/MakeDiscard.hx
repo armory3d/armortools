@@ -1,6 +1,6 @@
 package arm.node;
 
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.node.MaterialShader;
 
 class MakeDiscard {
@@ -48,7 +48,7 @@ class MakeDiscard {
 		frag.write('picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
-		var matid = UITrait.inst.materialIdPicked / 255;
+		var matid = UISidebar.inst.materialIdPicked / 255;
 		frag.write('if ($matid != textureLod(texpaint_nor_undo, picker_sample_tc, 0.0).a) discard;');
 	}
 }

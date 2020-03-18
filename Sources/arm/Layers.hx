@@ -10,12 +10,12 @@ import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
-import arm.Tool;
+import arm.Enums;
 import arm.Project;
 
 class Layers {
@@ -80,7 +80,7 @@ class Layers {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
 			C.undo_steps = 1;
-			if (UITrait.inst.undoHandle != null) UITrait.inst.undoHandle.value = C.undo_steps;
+			if (UISidebar.inst.undoHandle != null) UISidebar.inst.undoHandle.value = C.undo_steps;
 			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
 		}
 		g.end();
@@ -394,7 +394,7 @@ class Layers {
 		for (p in Project.paintObjects) ar.push(p.name);
 
 		var mask = Context.layer.objectMask;
-		if (UITrait.inst.layerFilter > 0) mask = UITrait.inst.layerFilter;
+		if (UISidebar.inst.layerFilter > 0) mask = UISidebar.inst.layerFilter;
 		if (mask > 0) {
 			if (Context.mergedObject != null) Context.mergedObject.visible = false;
 			var o = Project.paintObjects[0];
@@ -414,7 +414,7 @@ class Layers {
 	public static function newLayer(clear = true): LayerSlot {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
-		l.objectMask = UITrait.inst.layerFilter;
+		l.objectMask = UISidebar.inst.layerFilter;
 		Project.layers.push(l);
 		Context.setLayer(l);
 		if (clear) iron.App.notifyOnRender(l.clear);
@@ -435,7 +435,7 @@ class Layers {
 			g.end();
 			var l = newLayer(false);
 			History.newLayer();
-			l.objectMask = UITrait.inst.layerFilter;
+			l.objectMask = UISidebar.inst.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();
 			g.begin();
@@ -448,7 +448,7 @@ class Layers {
 		var l = Context.layer;
 		if (l != Project.layers[0]) {
 			History.newMask();
-			l.createMask(0x00000000, true, UITrait.inst.getImage(asset));
+			l.createMask(0x00000000, true, UISidebar.inst.getImage(asset));
 			Context.setLayer(l, true);
 			Context.layerPreviewDirty = true;
 		}

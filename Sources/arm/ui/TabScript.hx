@@ -8,7 +8,6 @@ import kha.Blob;
 import iron.data.Data;
 import arm.sys.Path;
 import arm.io.ImportAsset;
-using StringTools;
 
 class TabScript {
 
@@ -16,8 +15,8 @@ class TabScript {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.statustab, tr("Script")) && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.statustab, tr("Script")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
 			if (ui.button(tr("Run"))) {

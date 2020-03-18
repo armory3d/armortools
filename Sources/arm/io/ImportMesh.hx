@@ -10,11 +10,10 @@ import arm.util.MeshUtil;
 import arm.util.UVUtil;
 import arm.util.ViewportUtil;
 import arm.sys.Path;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.Project;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ImportMesh {
 
@@ -67,7 +66,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		if (UITrait.inst.worktab.position == SpacePaint) {
+		if (UISidebar.inst.worktab.position == SpacePaint) {
 			ViewportUtil.scaleToBounds();
 		}
 
@@ -93,7 +92,7 @@ class ImportMesh {
 		}
 
 		var raw: TMeshData = null;
-		if (UITrait.inst.worktab.position == SpaceScene) {
+		if (UISidebar.inst.worktab.position == SpaceScene) {
 			raw = rawMesh(mesh);
 			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
 		}
@@ -107,7 +106,7 @@ class ImportMesh {
 		new MeshData(raw, function(md: MeshData) {
 
 			// Append
-			if (UITrait.inst.worktab.position == SpaceScene) {
+			if (UISidebar.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = Context.materialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
@@ -162,9 +161,9 @@ class ImportMesh {
 			Data.cachedMeshes.set(md.handle, md);
 
 			Context.ddirty = 4;
-			UITrait.inst.hwnd.redraws = 2;
-			UITrait.inst.hwnd1.redraws = 2;
-			UITrait.inst.hwnd2.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd2.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
 		});
@@ -190,7 +189,7 @@ class ImportMesh {
 			Data.cachedMeshes.set(md.handle, md);
 
 			Context.ddirty = 4;
-			UITrait.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
 		});

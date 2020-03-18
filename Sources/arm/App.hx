@@ -10,12 +10,16 @@ import zui.Nodes;
 import iron.Scene;
 import iron.data.Data;
 import iron.system.Input;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
+import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIMenu;
 import arm.ui.UIBox;
 import arm.ui.UIFiles;
+import arm.ui.UIHeader;
+import arm.ui.UIStatus;
+import arm.ui.UIMenubar;
 import arm.ui.TabLayers;
 import arm.io.ImportAsset;
 import arm.sys.Path;
@@ -26,20 +30,13 @@ import arm.data.LayerSlot;
 import arm.data.ConstData;
 import arm.plugin.Camera;
 import arm.node.MaterialParser;
-import arm.Config;
-import arm.Tool;
+import arm.Enums;
 import arm.Project;
 import arm.Res;
-using StringTools;
 
 class App {
 
-	public static var version = "0.8";
-	static var appx = 0;
-	static var appy = 0;
-	static var winw = 0;
-	static var winh = 0;
-	public static var uienabled = true;
+	public static var uiEnabled = true;
 	public static var isDragging = false;
 	public static var isResizing = false;
 	public static var dragMaterial: MaterialSlot = null;
@@ -50,30 +47,31 @@ class App {
 	public static var dragRect: TRect = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
-	static var dropPaths: Array<String> = [];
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
 	public static var font: Font = null;
 	public static var theme: TTheme;
-	public static var color_wheel: Image;
-	public static var uibox: Zui;
-	public static var uimenu: Zui;
+	public static var colorWheel: Image;
+	public static var uiBox: Zui;
+	public static var uiMenu: Zui;
 	public static var fileArg = "";
-	public static var ELEMENT_H = 28;
+	public static var defaultElementH = 28;
 	public static var resHandle = new Handle({position: Res2048});
 	public static var bitsHandle = new Handle();
+	static var dropPaths: Array<String> = [];
+	static var appx = 0;
+	static var appy = 0;
+	static var lastWindowHeight = 0;
 
 	public function new() {
 		Log.init();
-		winw = System.windowWidth();
-		winh = System.windowHeight();
+		lastWindowHeight = System.windowHeight();
 
 		#if arm_resizable
 		iron.App.onResize = onResize;
 		#end
 
-		System.notifyOnDropFiles(function(filePath: String) {
-			var dropPath = filePath;
+		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);
 			dropPaths = dropPath.split("file://");
@@ -93,9 +91,7 @@ class App {
 			function(){} // Shutdown
 		);
 
-		#if krom_windows
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
-		#end
 
 		Data.getFont("font_ascii.ttf", function(f: Font) {
 			Data.getImage("color_wheel.k", function(image: Image) {
@@ -103,6 +99,7 @@ class App {
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;
 
+				// Precompiled font for fast startup
 				var kimg: kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
 				@:privateAccess kimg.mySize = 13;
 				@:privateAccess kimg.width = 128;
@@ -124,11 +121,11 @@ class App {
 					@:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
 				});
 
-				color_wheel = image;
+				colorWheel = image;
 				Nodes.enumTexts = enumTexts;
-				uibox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
-				uimenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: color_wheel });
-				ELEMENT_H = uimenu.t.ELEMENT_H;
+				uiBox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
+				uiMenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
+				defaultElementH = uiMenu.t.ELEMENT_H;
 
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
@@ -140,33 +137,35 @@ class App {
 						fileArg = path;
 					}
 				}
+
 				iron.App.notifyOnUpdate(update);
-				var root = Scene.active.root;
-				new UITrait();
+				new UISidebar();
 				new UINodes();
 				new UIView2D();
 				new Camera();
-				iron.App.notifyOnRender2D(UITrait.inst.renderCursor);
+				iron.App.notifyOnRender2D(UISidebar.inst.renderCursor);
 				iron.App.notifyOnUpdate(UINodes.inst.update);
 				iron.App.notifyOnRender2D(UINodes.inst.render);
-				iron.App.notifyOnUpdate(UITrait.inst.update);
-				iron.App.notifyOnRender2D(UITrait.inst.render);
+				iron.App.notifyOnUpdate(UISidebar.inst.update);
+				iron.App.notifyOnRender2D(UISidebar.inst.render);
 				iron.App.notifyOnRender2D(render);
-				appx = UITrait.inst.toolbarw;
-				appy = UITrait.inst.headerh * 2;
+				appx = UIToolbar.inst.toolbarw;
+				appy = UIHeader.inst.headerh * 2;
 				var cam = Scene.active.camera;
 				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
 				cam.buildProjection();
 				#if arm_creator
-				Project.projectNew(); // Spawn terrain plane
+				Project.projectNew(); // Spawns plane as default object
 				#end
+
+				// Open file passed as argument
 				if (fileArg != "") {
 					iron.App.notifyOnInit(function() {
 						ImportAsset.run(fileArg, -1, -1, false);
-						// Parse arguments
-						// armorpaint import_path export_path export_file_name
+						// Parse additional arguments
+						// ./armorpaint [import_path export_path export_file_name]
 						if (Krom.getArgCount() > 2) {
-							UITrait.inst.textureExportPath = Krom.getArg(2);
+							UISidebar.inst.textureExportPath = Krom.getArg(2);
 							if (Krom.getArgCount() > 3) {
 								UIFiles.filename = Krom.getArg(3);
 							}
@@ -183,66 +182,61 @@ class App {
 		else System.stop();
 	}
 
-	// Localize a string with the given placeholders replaced (format is `{placeholderName}`).
-	// TODO: Implement localization support.
-	public static function tr(id: String, ?vars: Map<String, Dynamic>): String {
-		if (vars != null) {
-			for (key => value in vars) {
-				id = id.replace('{$key}', Std.string(value));
-			}
-		}
-
-		return id;
-	}
-
 	public static function w(): Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
+		if (UISidebar.inst != null && UISidebar.inst.materialPreview) {
+			return RenderUtil.matPreviewSize;
+		}
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return RenderUtil.decalPreviewSize;
+		if (UISidebar.inst != null && UISidebar.inst.decalPreview) {
+			return RenderUtil.decalPreviewSize;
+		}
 
 		var res = 0;
-		if (UINodes.inst == null || UITrait.inst == null) {
-			res = System.windowWidth() - UITrait.defaultWindowW - UITrait.defaultToolbarW;
+		if (UINodes.inst == null || UISidebar.inst == null) {
+			res = System.windowWidth() - UISidebar.defaultWindowW - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = System.windowWidth() - UITrait.inst.windowW - UINodes.inst.defaultWindowW - UITrait.inst.toolbarw;
+			res = System.windowWidth() - UISidebar.inst.windowW - UINodes.inst.defaultWindowW - UIToolbar.inst.toolbarw;
 		}
-		else if (UITrait.inst.show) {
-			res = System.windowWidth() - UITrait.inst.windowW - UITrait.inst.toolbarw;
+		else if (UISidebar.inst.show) {
+			res = System.windowWidth() - UISidebar.inst.windowW - UIToolbar.inst.toolbarw;
 		}
 		else { // Distract free
 			res = System.windowWidth();
 		}
-
-		if (UITrait.inst != null && UITrait.inst.viewIndex > -1) res = Std.int(res / 2);
+		if (UISidebar.inst != null && UISidebar.inst.viewIndex > -1) {
+			res = Std.int(res / 2);
+		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
 	public static function h(): Int {
 		// Draw material preview
-		if (UITrait.inst != null && UITrait.inst.materialPreview) return RenderUtil.matPreviewSize;
+		if (UISidebar.inst != null && UISidebar.inst.materialPreview) {
+			return RenderUtil.matPreviewSize;
+		}
 
 		// Drawing decal preview
-		if (UITrait.inst != null && UITrait.inst.decalPreview) return RenderUtil.decalPreviewSize;
-
-		var res = 0;
-		res = System.windowHeight();
-		if (UITrait.inst == null) {
-			res -= UITrait.defaultHeaderH * 2 + UITrait.defaultStatusH;
+		if (UISidebar.inst != null && UISidebar.inst.decalPreview) {
+			return RenderUtil.decalPreviewSize;
 		}
-		else if (UITrait.inst != null && UITrait.inst.show && res > 0) {
-			res -= Std.int(UITrait.defaultHeaderH * 2 * Config.raw.window_scale) + UITrait.inst.statush;
+
+		var res = System.windowHeight();
+		if (UISidebar.inst == null) {
+			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
+		}
+		else if (UISidebar.inst != null && UISidebar.inst.show && res > 0) {
+			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + UIStatus.inst.statush;
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
 	public static function x(): Int {
-		if (UITrait.inst.viewIndex == 1) return appx + w();
-		return appx;
+		return UISidebar.inst.viewIndex == 1 ? appx + w() : appx;
 	}
 
 	public static function y(): Int {
@@ -253,13 +247,11 @@ class App {
 	static function onResize() {
 		resize();
 
-		var ratio = System.windowHeight() / winh;
-		UITrait.inst.tabh = Std.int(UITrait.inst.tabh * ratio);
-		UITrait.inst.tabh1 = Std.int(UITrait.inst.tabh1 * ratio);
-		UITrait.inst.tabh2 = System.windowHeight() - UITrait.inst.tabh - UITrait.inst.tabh1;
-
-		winw = System.windowWidth();
-		winh = System.windowHeight();
+		var ratio = System.windowHeight() / lastWindowHeight;
+		UISidebar.inst.tabh = Std.int(UISidebar.inst.tabh * ratio);
+		UISidebar.inst.tabh1 = Std.int(UISidebar.inst.tabh1 * ratio);
+		UISidebar.inst.tabh2 = System.windowHeight() - UISidebar.inst.tabh - UISidebar.inst.tabh1;
+		lastWindowHeight = System.windowHeight();
 	}
 	#end
 
@@ -283,16 +275,17 @@ class App {
 		}
 		cam.buildProjection();
 
-		if (UITrait.inst.cameraType == CameraOrthographic) {
-			ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+		if (UISidebar.inst.cameraType == CameraOrthographic) {
+			ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
 		}
 
 		Context.ddirty = 2;
 
-		appx = UITrait.inst.toolbarw;
-		appy = UITrait.inst.headerh * 2;
-
-		if (!UITrait.inst.show) {
+		if (UISidebar.inst.show) {
+			appx = UIToolbar.inst.toolbarw;
+			appy = UIHeader.inst.headerh * 2;
+		}
+		else {
 			appx = 0;
 			appy = 0;
 		}
@@ -306,16 +299,16 @@ class App {
 	}
 
 	public static function redrawUI() {
-		UITrait.inst.hwnd.redraws = 2;
-		UITrait.inst.hwnd1.redraws = 2;
-		UITrait.inst.hwnd2.redraws = 2;
-		UITrait.inst.headerHandle.redraws = 2;
-		UITrait.inst.toolbarHandle.redraws = 2;
-		UITrait.inst.statusHandle.redraws = 2;
-		UITrait.inst.menuHandle.redraws = 2;
-		UITrait.inst.workspaceHandle.redraws = 2;
+		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd2.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
+		UIToolbar.inst.toolbarHandle.redraws = 2;
+		UIStatus.inst.statusHandle.redraws = 2;
+		UIMenubar.inst.menuHandle.redraws = 2;
+		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
-		if (Context.ddirty < 0) Context.ddirty = 0; // Tag cached viewport texture redraw
+		if (Context.ddirty < 0) Context.ddirty = 0; // Redraw viewport
 	}
 
 	static function update() {
@@ -328,10 +321,10 @@ class App {
 		if (mouse.released() && (dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null)) {
 			var mx = mouse.x;
 			var my = mouse.y;
-			var inViewport = UITrait.inst.paintVec.x < 1 && UITrait.inst.paintVec.x > 0 &&
-							 UITrait.inst.paintVec.y < 1 && UITrait.inst.paintVec.y > 0;
-			var inLayers = UITrait.inst.htab.position == 0 &&
-						   mx > UITrait.inst.tabx && my < UITrait.inst.tabh;
+			var inViewport = UISidebar.inst.paintVec.x < 1 && UISidebar.inst.paintVec.x > 0 &&
+							 UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0;
+			var inLayers = UISidebar.inst.htab.position == 0 &&
+						   mx > UISidebar.inst.tabx && my < UISidebar.inst.tabh;
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
@@ -391,8 +384,8 @@ class App {
 			}
 			else if (dragFile != null) {
 				var inBrowser =
-					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UITrait.inst.toolbarw - UITrait.inst.windowW) &&
-					my > System.windowHeight() - UITrait.inst.statush;
+					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - UISidebar.inst.windowW) &&
+					my > System.windowHeight() - UIStatus.inst.statush;
 				if (!inBrowser) {
 					dropX = mouse.x;
 					dropY = mouse.y;
@@ -423,15 +416,15 @@ class App {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows
-		Zui.alwaysRedrawWindow = !UITrait.inst.cacheDraws ||
+		Zui.alwaysRedrawWindow = !UISidebar.inst.cacheDraws ||
 			UIMenu.show ||
 			UIBox.show ||
 			isDragging ||
 			isPicker ||
 			decal ||
 			UIView2D.inst.show ||
-			!UITrait.inst.brush3d ||
-			UITrait.inst.frame < 3;
+			!UISidebar.inst.brush3d ||
+			UISidebar.inst.frame < 3;
 		#end
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
@@ -445,13 +438,13 @@ class App {
 	static function getDragImage(): kha.Image {
 		dragTint = 0xffffffff;
 		dragRect = null;
-		if (dragAsset != null) return UITrait.inst.getImage(dragAsset);
+		if (dragAsset != null) return UISidebar.inst.getImage(dragAsset);
 		if (dragMaterial != null) return dragMaterial.imageIcon;
 		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
 		if (dragFile != null) {
 			var icons = Res.get("icons.k");
 			dragRect = dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
-			dragTint = UITrait.inst.ui.t.HIGHLIGHT_COL;
+			dragTint = UISidebar.inst.ui.t.HIGHLIGHT_COL;
 			return icons;
 		}
 		else return dragLayer.texpaint_preview;
@@ -464,7 +457,7 @@ class App {
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
 			var img = getDragImage();
-			@:privateAccess var size = 50 * UITrait.inst.ui.SCALE();
+			var size = 50 * UISidebar.inst.ui.ops.scaleFactor;
 			var ratio = size / img.width;
 			var h = img.height * ratio;
 			#if (kha_opengl || kha_webgl)
@@ -481,10 +474,8 @@ class App {
 			g.color = 0xffffffff;
 		}
 
-		var usingMenu = false;
-		if (UIMenu.show) usingMenu = mouse.y > UITrait.inst.headerh;
-
-		uienabled = !UIBox.show && !usingMenu;
+		var usingMenu = UIMenu.show && mouse.y > UIHeader.inst.headerh;
+		uiEnabled = !UIBox.show && !usingMenu;
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
 	}
@@ -506,8 +497,8 @@ class App {
 		return null;
 	}
 
-	public static function getAssetIndex(filename: String): Int {
-		var i = Project.assetNames.indexOf(filename);
+	public static function getAssetIndex(fileName: String): Int {
+		var i = Project.assetNames.indexOf(fileName);
 		return i >= 0 ? i : 0;
 	}
 }

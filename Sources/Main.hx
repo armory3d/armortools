@@ -10,22 +10,25 @@ import iron.RenderPath;
 import arm.render.Inc;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
-import arm.sys.Path;
 import arm.Config;
 #if arm_player
-using StringTools;
+import arm.sys.Path;
 #end
 
 class Main {
 
+	public static var version = "0.8";
+
 	static var tasks: Int;
 
 	public static function main() {
+		// Used to locate external application data folder
 		Krom.setApplicationName("ArmorPaint");
+
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
 		#if arm_physics
-		tasks++; loadPhysics();
+		tasks++; arm.plugin.PhysicsWorld.load();
 		#end
 		tasks--; start();
 	}
@@ -35,6 +38,7 @@ class Main {
 
 		Config.init();
 		var c = Config.raw;
+
 		var windowMode = c.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
 		var windowFeatures = None;
 		if (c.window_resizable) windowFeatures |= FeatureResizable;
@@ -88,21 +92,4 @@ class Main {
 			});
 		});
 	}
-
-	#if arm_physics
-	static function loadPhysics() {
-		var b = haxe.io.Bytes.ofData(Krom.loadBlob("data/ammo.wasm.js"));
-		var print = function(s: String) { trace(s); };
-		var loaded = function() { tasks--; start(); };
-		untyped __js__("(1, eval)({0})", b.toString());
-		var instantiateWasm = function(imports, successCallback) {
-			var wasmbin = Krom.loadBlob("data/ammo.wasm.wasm");
-			var module = new js.lib.webassembly.Module(wasmbin);
-			var inst = new js.lib.webassembly.Instance(module, imports);
-			successCallback(inst);
-			return inst.exports;
-		};
-		untyped __js__("Ammo({print:print, instantiateWasm:instantiateWasm}).then(loaded)");
-	}
-	#end
 }

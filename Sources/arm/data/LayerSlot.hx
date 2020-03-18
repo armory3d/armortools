@@ -3,9 +3,9 @@ package arm.data;
 import kha.graphics4.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.node.MaterialParser;
-import arm.Tool;
+import arm.Enums;
 
 class LayerSlot {
 	public var id = 0;
@@ -367,7 +367,7 @@ class LayerSlot {
 		function _parse(_) {
 			MaterialParser.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
-			UITrait.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
 			iron.App.removeRender(_parse);
 		}
 		iron.App.notifyOnRender(_parse);
@@ -378,7 +378,7 @@ class LayerSlot {
 		material_mask = null;
 		MaterialParser.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
-		UITrait.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd.redraws = 2;
 	}
 
 	public function isVisible(): Bool {

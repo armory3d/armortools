@@ -1,10 +1,11 @@
 package arm;
 
 import zui.Nodes;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
+import arm.ui.UIToolbar;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 
@@ -147,7 +148,7 @@ class History {
 			}
 			undos--;
 			redos++;
-			UITrait.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -247,7 +248,7 @@ class History {
 			}
 			undos++;
 			redos--;
-			UITrait.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -265,7 +266,7 @@ class History {
 		copyToUndo(Context.layer.id, undoI, isMask);
 
 		pushUndo = false;
-		push(UITrait.inst.toolNames[Context.tool]);
+		push(UIToolbar.inst.toolNames[Context.tool]);
 	}
 
 	public static function newLayer() {

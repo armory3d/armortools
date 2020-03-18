@@ -4,7 +4,7 @@ import iron.system.Input;
 import iron.system.Time;
 import iron.math.Vec4;
 import iron.math.Mat4;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.util.ViewportUtil;
 
 class Camera {
@@ -27,9 +27,9 @@ class Camera {
 
 		iron.App.notifyOnUpdate(function() {
 			if (Input.occupied ||
-				!App.uienabled ||
+				!App.uiEnabled ||
 				App.isDragging  ||
-				UITrait.inst.isScrolling ||
+				UISidebar.inst.isScrolling ||
 				mouse.viewX < 0 ||
 				mouse.viewX > iron.App.w() ||
 				mouse.viewY < 0 ||
@@ -45,7 +45,7 @@ class Camera {
 			}
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
-			var controls = UITrait.inst.cameraControls;
+			var controls = UISidebar.inst.cameraControls;
 			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
 					redraws = 2;
@@ -140,8 +140,8 @@ class Camera {
 				var d = Time.delta * speed * fast * ease;
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
-					if (UITrait.inst.cameraType == CameraOrthographic) {
-						ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+					if (UISidebar.inst.cameraType == CameraOrthographic) {
+						ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
 					}
 				}
 
@@ -154,8 +154,8 @@ class Camera {
 				redraws--;
 				Context.ddirty = 2;
 
-				if (UITrait.inst.cameraType == CameraOrthographic) {
-					ViewportUtil.updateCameraType(UITrait.inst.cameraType);
+				if (UISidebar.inst.cameraType == CameraOrthographic) {
+					ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
 				}
 			}
 		});

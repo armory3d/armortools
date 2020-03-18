@@ -19,7 +19,6 @@ package arm.node;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import arm.node.MaterialShader;
-using StringTools;
 
 class Material {
 
@@ -1526,7 +1525,7 @@ class Material {
 			file: filepath
 		};
 
-		if (arm.ui.UITrait.inst.textureFilter) {
+		if (arm.ui.UISidebar.inst.textureFilter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";
