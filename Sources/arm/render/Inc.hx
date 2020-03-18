@@ -8,6 +8,7 @@ import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
+import arm.ui.UIView2D;
 import arm.Enums;
 
 class Inc {
@@ -167,12 +168,25 @@ class Inc {
 
 	public static function isCached(): Bool {
 		#if (!arm_creator)
+		var mouse = Input.getMouse();
+		var mx = lastX;
+		var my = lastY;
+		lastX = mouse.viewX;
+		lastY = mouse.viewY;
+
+		if (UISidebar.inst.brushLive) {
+			var inViewport = UISidebar.inst.paintVec.x < 1 && UISidebar.inst.paintVec.x > 0 &&
+							 UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0;
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+			if ((mx != lastX || my != lastY) && (inViewport || in2dView)) {
+				Context.rdirty = 2;
+				UISidebar.inst.sub = 0;
+			}
+		}
+
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UISidebar.inst.worktab.position == SpaceScene)) {
-			var mouse = Input.getMouse();
-			var mx = lastX;
-			var my = lastY;
-			lastX = mouse.viewX;
-			lastY = mouse.viewY;
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");

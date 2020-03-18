@@ -295,16 +295,6 @@ class RenderPathPaint {
 
 		if (liveLayerLocked) return;
 
-		// var mouse = Input.getMouse();
-		// var mx = mouse.x;
-		// var my = mouse.y;
-		// var inViewport = UISidebar.inst.paintVec.x < 1 && UISidebar.inst.paintVec.x > 0 &&
-		// 				 UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0;
-		// var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
-		// 				   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
-		// 				   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-		// if (!inViewport && !in2dView) return;
-
 		if (liveLayer == null) {
 			liveLayer = new arm.data.LayerSlot("_live");
 			liveLayer.createMask(0x00000000);
@@ -345,8 +335,6 @@ class RenderPathPaint {
 			UISidebar.inst.lastPaintVecY = UISidebar.inst.lastPaintY;
 		}
 		Context.pdirty = 2;
-		Context.rdirty = 2;
-		UISidebar.inst.sub = 0;
 
 		commandsSymmetry();
 		commandsPaint();
