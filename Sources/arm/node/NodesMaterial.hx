@@ -1611,7 +1611,8 @@ class NodesMaterial {
 						name: "Rotation",
 						type: "VECTOR",
 						default_value: [0.0, 0.0, 0.0],
-						output: 0
+						output: 0,
+						max: 360.0
 					},
 					{
 						name: "Scale",
