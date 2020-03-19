@@ -777,6 +777,7 @@ class UISidebar {
 		if (Context.layersPreviewDirty) {
 			Context.layersPreviewDirty = false;
 			Context.layerPreviewDirty = false;
+			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
 				if (l.getChildren() != null) continue;
@@ -784,14 +785,18 @@ class UISidebar {
 				var source = l.texpaint;
 				var g2 = target.g2;
 				g2.begin(true, 0xff000000);
+				g2.pipeline = Layers.pipeCopy;
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
+				g2.pipeline = null;
 				g2.end();
 				if (l.texpaint_mask != null) {
 					var target = l.texpaint_mask_preview;
 					var source = l.texpaint_mask;
 					var g2 = target.g2;
 					g2.begin(true, 0x00000000);
+					g2.pipeline = Layers.pipeCopy;
 					g2.drawScaledImage(source, 0, 0, target.width, target.height);
+					g2.pipeline = null;
 					g2.end();
 				}
 			}
@@ -799,13 +804,16 @@ class UISidebar {
 		}
 		if (Context.layerPreviewDirty && Context.layer.getChildren() == null) {
 			Context.layerPreviewDirty = false;
+			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update layer preview
 			var l = Context.layer;
 			var target = Context.layerIsMask ? l.texpaint_mask_preview : l.texpaint_preview;
 			var source = Context.layerIsMask ? l.texpaint_mask : l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
+			g2.pipeline = Layers.pipeCopy;
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
+			g2.pipeline = null;
 			g2.end();
 			hwnd.redraws = 2;
 		}

@@ -87,8 +87,11 @@ class TabTextures {
 									UIFiles.show("png", true, function(path: String) {
 										var target = kha.Image.createRenderTarget(img.width, img.height);
 										function exportTexture(g: kha.graphics4.Graphics) {
+											if (Layers.pipeMerge == null) Layers.makePipe();
 											target.g2.begin(false);
+											target.g2.pipeline = Layers.pipeCopy;
 											target.g2.drawImage(img, 0, 0);
+											target.g2.pipeline = null;
 											target.g2.end();
 											var f = UIFiles.filename;
 											if (f == "") f = tr("untitled");
