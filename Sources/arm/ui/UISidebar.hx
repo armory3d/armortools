@@ -927,7 +927,11 @@ class UISidebar {
 			// Show picked material next to cursor
 			if (Context.tool == ToolPicker && pickerSelectMaterial) {
 				var img = Context.material.imageIcon;
+				#if kha_opengl
+				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
+				#else
 				g.drawImage(img, mx + 10, my + 10);
+				#end
 			}
 
 			var cursorImg = Res.get("cursor.k");

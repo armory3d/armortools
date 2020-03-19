@@ -321,7 +321,11 @@ class RenderUtil {
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;
 		Context.material = _material;
-		MaterialParser.parsePaintMaterial();
+		function _parse(_) {
+			MaterialParser.parsePaintMaterial();
+			iron.App.removeRender(_parse);
+		}
+		iron.App.notifyOnRender(_parse);
 
 		// Restore paint mesh
 		planeo.visible = false;
