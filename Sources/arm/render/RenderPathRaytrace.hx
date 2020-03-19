@@ -3,6 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.node.MaterialParser;
 
 #if kha_direct3d12
@@ -197,7 +198,7 @@ class RenderPathRaytrace {
 				raysTimer = 0;
 				raysCounter = 0;
 			}
-			UISidebar.inst.headerHandle.redraws = 2;
+			UIHeader.inst.headerHandle.redraws = 2;
 		}
 		else {
 			frame = 0;
