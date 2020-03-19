@@ -338,6 +338,10 @@ class Uniforms {
 			var tid = link.substr(link.length - 1);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
 		}
+		if (link.startsWith("_texpaint_mask_vert")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return Project.layers[tid].texpaint_mask;
+		}
 
 		if (link == "_texpaint_mask") {
 			return Context.layer.texpaint_mask;
