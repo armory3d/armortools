@@ -968,14 +968,18 @@ class UISidebar {
 						 Context.tool == ToolClone  ||
 						 Context.tool == ToolBlur   ||
 						 Context.tool == ToolParticle) {
-						if (brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-							var radius = psize + brushLazyRadius * 100;
-							g.color = 0x66ffffff;
-							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
-							g.color = 0xffffffff;
-						}
 						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
+			}
+
+			if (brushLazyRadius > 0 && !brushLocked && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+				g.fillRect(mx - 1, my - 1, 2, 2);
+				var mx = UISidebar.inst.brushLazyX * App.w() + App.x();
+				var my = UISidebar.inst.brushLazyY * App.h() + App.y();
+				var radius = brushLazyRadius * 180;
+				g.color = 0xff666666;
+				g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+				g.color = 0xffffffff;
 			}
 		}
 	}

@@ -368,23 +368,24 @@ class RenderPathPaint {
 			mx = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
 			my = 1.0 - (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		drawCursor(mx, my);
+		drawCursor(mx, my, UISidebar.inst.brushNodesRadius * UISidebar.inst.brushRadius / 3.4);
 
-		if (UISidebar.inst.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-			UISidebar.inst.brushRadius += UISidebar.inst.brushLazyRadius;
-			mx = UISidebar.inst.brushLazyX;
-			my = 1.0 - UISidebar.inst.brushLazyY;
-			if (UISidebar.inst.brushLocked) {
-				mx = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
-				my = 1.0 - (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
-			}
-			drawCursor(mx, my, 0.2, 0.2, 0.2);
-			UISidebar.inst.brushRadius -= UISidebar.inst.brushLazyRadius;
-		}
+		// if (UISidebar.inst.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+		// 	var _brushRadius = UISidebar.inst.brushRadius;
+		// 	UISidebar.inst.brushRadius = UISidebar.inst.brushLazyRadius;
+		// 	mx = UISidebar.inst.brushLazyX;
+		// 	my = 1.0 - UISidebar.inst.brushLazyY;
+		// 	if (UISidebar.inst.brushLocked) {
+		// 		mx = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
+		// 		my = 1.0 - (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		// 	}
+		// 	drawCursor(mx, my, 0.2, 0.2, 0.2);
+		// 	UISidebar.inst.brushRadius -= UISidebar.inst.brushLazyRadius;
+		// }
 	}
 
 	@:access(iron.RenderPath)
-	static function drawCursor(mx: Float, my: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
+	static function drawCursor(mx: Float, my: Float, radius: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
 		var geom = plane.data.geom;
 
@@ -400,7 +401,7 @@ class RenderPathPaint {
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
 		g.setFloat2(Layers.cursorMouse, mx, my);
 		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(Layers.cursorRadius, UISidebar.inst.brushNodesRadius * UISidebar.inst.brushRadius / 3.4);
+		g.setFloat(Layers.cursorRadius, radius);
 		var right = Scene.active.camera.rightWorld().normalize();
 		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(Layers.cursorTint, tintR, tintG, tintB);

@@ -81,18 +81,19 @@ class InputNode extends LogicNode {
 			else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
 
 			if (UISidebar.inst.brushLazyRadius > 0) {
-				var v1 = new Vec4(UISidebar.inst.brushLazyX, UISidebar.inst.brushLazyY, 0.0);
-				var v2 = new Vec4(coords.x, coords.y, 0.0);
+				var ratio = iron.App.w() / iron.App.h();
+				var v1 = new Vec4(UISidebar.inst.brushLazyX * ratio, UISidebar.inst.brushLazyY, 0.0);
+				var v2 = new Vec4(coords.x * ratio, coords.y, 0.0);
 				var d = Vec4.distance(v1, v2);
-
-				if (d > UISidebar.inst.brushLazyRadius / 10) {
+				var r = UISidebar.inst.brushLazyRadius / 10;
+				if (d > r) {
 					var v3 = new Vec4();
 					v3.subvecs(v2, v1);
 					v3.normalize();
 					v3.mult(1.0 - UISidebar.inst.brushLazyStep);
-					v3.mult(UISidebar.inst.brushLazyRadius / 10);
+					v3.mult(r);
 					v2.addvecs(v1, v3);
-					coords.x = v2.x;
+					coords.x = v2.x / ratio;
 					coords.y = v2.y;
 				}
 
