@@ -91,10 +91,12 @@ class ImportArm {
 
 			// Upgrade project format
 			if (project.version == "0.8") {
-				for (md in project.mesh_datas) {
-					for (va in md.vertex_arrays) {
-						if (va.data == null) {
-							va.data = va.attrib == "pos" ? "short4norm" : "short2norm";
+				if (project.mesh_datas != null) {
+					for (md in project.mesh_datas) {
+						for (va in md.vertex_arrays) {
+							if (va.data == null) {
+								va.data = va.attrib == "pos" ? "short4norm" : "short2norm";
+							}
 						}
 					}
 				}
