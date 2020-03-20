@@ -81,9 +81,6 @@ plugin.drawUI = function(ui) {
 				po.data.raw.index_arrays[0].values = ia32;
 
 				let geom = po.data.geom;
-				geom.positions = pa16;
-				geom.normals = na16;
-				geom.uvs = ua16;
 				geom.indices[0] = ia32;
 				geom.ready = false;
 				geom.build();
