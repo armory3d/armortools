@@ -846,7 +846,7 @@ class Material {
 			}
 			if (node_rotation[2] != 0.0) {
 				// ZYX rotation, Z axis for now..
-				var a = node_rotation[2];
+				var a = node_rotation[2] * (Math.PI / 180);
 				// x * cos(theta) - y * sin(theta)
 				// x * sin(theta) + y * cos(theta)
 				out = 'vec3(${out}.x * ${Math.cos(a)} - (${out}.y) * ${Math.sin(a)}, ${out}.x * ${Math.sin(a)} + (${out}.y) * ${Math.cos(a)}, 0.0)';
