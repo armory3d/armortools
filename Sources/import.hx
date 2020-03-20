@@ -2,7 +2,7 @@
 
 #if (!macro)
 
-import arm.Locale.tr;
+import arm.Translator.tr;
 using StringTools;
 
 #end

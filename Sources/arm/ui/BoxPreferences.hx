@@ -32,7 +32,7 @@ class BoxPreferences {
 					Config.raw.locale = localeCode;
 					Config.save();
 					App.loadTranslations(localeCode);
-					UITrait.inst.tagUIRedraw();
+					UISidebar.inst.tagUIRedraw();
 				}
 
 				var hscale = Id.handle({value: Config.raw.window_scale});

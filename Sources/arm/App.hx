@@ -42,7 +42,7 @@ class App {
 	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
 	public static var locale = "system";
-	static var translations: Map<String, String> = [];
+	public static var translations: Map<String, String> = [];
 	public static var isDragging = false;
 	public static var isResizing = false;
 	public static var dragMaterial: MaterialSlot = null;
@@ -229,25 +229,6 @@ class App {
 		saveWindowRect();
 		if (save) Project.projectSave(true);
 		else System.stop();
-	}
-
-	// Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
-	// If the string isn't available in the translation, this method will return the source English string.
-	public static function tr(id: String, ?vars: Map<String, Dynamic>): String {
-		var translation = id;
-
-		// English is the source language
-		if (locale != "en" && translations != null && translations.exists(id)) {
-			translation = translations[id];
-		}
-
-		if (vars != null) {
-			for (key => value in vars) {
-				translation = translation.replace('{$key}', Std.string(value));
-			}
-		}
-
-		return translation;
 	}
 
 	public static function w(): Int {
