@@ -542,7 +542,7 @@ class Material {
 			var val = parse_value_input(node.inputs[2]);
 			var fac = parse_value_input(node.inputs[3]);
 			var col = parse_vector_input(node.inputs[4]);
-			return "hue_sat($col, vec4($hue-0.5, $sat, $val, 1.0-$fac))";
+			return 'hue_sat($col, vec4($hue-0.5, $sat, $val, 1.0-$fac))';
 		}
 		else if (node.type == "INVERT") {
 			var fac = parse_value_input(node.inputs[0]);
