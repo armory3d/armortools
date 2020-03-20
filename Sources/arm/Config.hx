@@ -37,6 +37,7 @@ class Config {
 	public static function init() {
 		if (!configLoaded || raw == null) {
 			raw = {};
+			raw.locale = "system";
 			raw.window_mode = 0;
 			raw.window_resizable = true;
 			raw.window_minimizable = true;
@@ -182,6 +183,7 @@ class Config {
 }
 
 typedef TConfig = {
+	@:optional var locale: String; // ISO 639-1 locale code or "system" to use the system locale automatically
 	@:optional var window_mode: Null<Int>; // window, fullscreen
 	@:optional var window_w: Null<Int>;
 	@:optional var window_h: Null<Int>;

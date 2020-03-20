@@ -1,5 +1,6 @@
 package arm;
 
+import haxe.io.Bytes;
 import kha.graphics2.truetype.StbTruetype;
 import kha.Image;
 import kha.Font;
@@ -18,6 +19,7 @@ import arm.ui.UIBox;
 import arm.ui.UIFiles;
 import arm.ui.TabLayers;
 import arm.io.ImportAsset;
+import arm.sys.File;
 import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
@@ -39,6 +41,10 @@ class App {
 	static var appy = 0;
 	static var winw = 0;
 	static var winh = 0;
+	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+	// "system" is a special case that will use the system locale
+	public static var locale = "system";
+	static var translations: Map<String, String> = [];
 	public static var uienabled = true;
 	public static var isDragging = false;
 	public static var isResizing = false;
@@ -65,6 +71,12 @@ class App {
 
 	public function new() {
 		Log.init();
+
+		if (Config.raw.locale != null) {
+			locale = Config.raw.locale;
+		};
+		loadTranslations(locale);
+
 		winw = System.windowWidth();
 		winh = System.windowHeight();
 
@@ -177,22 +189,67 @@ class App {
 		});
 	}
 
+	// (Re)loads translations for the specified locale.
+	public static function loadTranslations(newLocale: String) {
+		if (newLocale == "system") {
+			locale = Krom.language();
+		}
+
+		// Check whether the requested or detected locale is available
+		if (getSupportedLocales().indexOf(newLocale) == -1) {
+			// Fall back to English
+			locale = "en";
+		}
+
+		if (locale == "en") {
+			// No translations to load, as source strings are in English.
+			// Clear existing translations if switching languages at runtime.
+			translations.clear();
+			return;
+		}
+
+		// Load the translation file
+		var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${locale}.json')).toString();
+		var data: haxe.DynamicAccess<String> = haxe.Json.parse(translationJson);
+        for (key => value in data) {
+            translations[Std.string(key)] = value;
+		}
+	}
+
+	// Returns a list of supported locales (plus English and the automatically detected system locale).
+	public static function getSupportedLocales(): Array<String> {
+		var locales = ["system", "en"];
+		for (localeFilename in File.readDirectory(Path.data() + Path.sep + "locale")) {
+			// Trim the `.json` file extension from file names
+			locales.push(localeFilename.substr(0, -5));
+		}
+
+		return locales;
+	}
+
 	static function saveAndQuitCallback(save: Bool) {
 		saveWindowRect();
 		if (save) Project.projectSave(true);
 		else System.stop();
 	}
 
-	// Localize a string with the given placeholders replaced (format is `{placeholderName}`).
-	// TODO: Implement localization support.
+	// Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
+	// If the string isn't available in the translation, this method will return the source English string.
 	public static function tr(id: String, ?vars: Map<String, Dynamic>): String {
+		var translation = id;
+
+		// English is the source language
+		if (locale != "en" && translations != null && translations.exists(id)) {
+			translation = translations[id];
+		}
+
 		if (vars != null) {
 			for (key => value in vars) {
-				id = id.replace('{$key}', Std.string(value));
+				translation = translation.replace('{$key}', Std.string(value));
 			}
 		}
 
-		return id;
+		return translation;
 	}
 
 	public static function w(): Int {
