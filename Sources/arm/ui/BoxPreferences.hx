@@ -24,6 +24,17 @@ class BoxPreferences {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(htab, tr("Interface"), true)) {
 
+				var locales = App.getSupportedLocales();
+				var localeHandle = Id.handle({position: locales.indexOf(App.locale)});
+				ui.combo(localeHandle, locales, tr("Language (restart to apply changes)"), true);
+				if (localeHandle.changed) {
+					var localeCode = locales[localeHandle.position];
+					Config.raw.locale = localeCode;
+					Config.save();
+					App.loadTranslations(localeCode);
+					UITrait.inst.tagUIRedraw();
+				}
+
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
 				if (!hscale.changed && UISidebar.inst.hscaleWasChanged) {
