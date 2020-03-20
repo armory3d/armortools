@@ -109,7 +109,7 @@ class MakePaint {
 			if (UISidebar.inst.brush3d && !UISidebar.inst.brushDepthReject) depthReject = false;
 
 			// TODO: sp.z needs to take height channel into account
-			if (MaterialBuilder.heightUsed) depthReject = false;
+			if (UISidebar.inst.brush3d && !decal && MaterialBuilder.heightUsed) depthReject = false;
 
 			if (depthReject) {
 				#if (kha_opengl || kha_webgl)
