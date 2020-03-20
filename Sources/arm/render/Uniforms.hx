@@ -117,12 +117,6 @@ class Uniforms {
 									vec2.set(-eps, eps, 0.0);
 			return vec2;
 		}
-		if (link == "_texcoloridSize") {
-			if (Project.assets.length == 0) return vec2;
-			var img = UISidebar.inst.getImage(Project.assets[UISidebar.inst.colorIdHandle.position]);
-			vec2.set(img.width, img.height, 0);
-			return vec2;
-		}
 		if (link == "_gbufferSize") {
 			vec2.set(0, 0, 0);
 			var gbuffer2 = RenderPath.active.renderTargets.get("gbuffer2");
