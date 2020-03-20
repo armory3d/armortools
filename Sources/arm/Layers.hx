@@ -149,7 +149,7 @@ class Layers {
 
 		pipeCopy = new PipelineState();
 		pipeCopy.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeCopy.fragmentShader = Reflect.field(kha.Shaders, "layer_view_frag");
+		pipeCopy.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
