@@ -11,8 +11,8 @@ import arm.node.NodesMaterial;
 import arm.node.NodesBrush;
 import arm.node.MaterialParser;
 import arm.util.RenderUtil;
-import arm.ui.UITrait;
-import arm.Tool;
+import arm.ui.UISidebar;
+import arm.Enums;
 
 @:access(zui.Zui)
 class UINodes {
@@ -59,7 +59,7 @@ class UINodes {
 		Nodes.onLinkDrag = onLinkDrag;
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.color_wheel, scaleFactor: scale});
+		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.colorWheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 	}
 
@@ -87,12 +87,12 @@ class UINodes {
 	}
 
 	public function getCanvasMaterial(): TNodeCanvas {
-		var isScene = UITrait.inst.worktab.position == SpaceScene;
+		var isScene = UISidebar.inst.worktab.position == SpaceScene;
 		return isScene ? Context.materialScene.canvas : Context.material.canvas;
 	}
 
 	public function getNodes(): Nodes {
-		var isScene = UITrait.inst.worktab.position == SpaceScene;
+		var isScene = UISidebar.inst.worktab.position == SpaceScene;
 		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
 		else return Context.brush.nodes;
 	}
@@ -111,7 +111,7 @@ class UINodes {
 			mchanged = changed = false;
 			canvasChanged();
 			if (mreleased) {
-				UITrait.inst.hwnd.redraws = 2;
+				UISidebar.inst.hwnd.redraws = 2;
 				History.editNodes(lastCanvas, canvasType);
 			}
 		}
@@ -121,14 +121,14 @@ class UINodes {
 		mstartedlast = mouse.started();
 
 		if (!show) return;
-		if (!App.uienabled) return;
+		if (!App.uiEnabled) return;
 		var kb = Input.getKeyboard();
 
 		if (defaultWindowW == 0) defaultWindowW = Std.int(iron.App.w() / 2);
 		if (defaultWindowH == 0) defaultWindowH = Std.int(iron.App.h() / 2);
 
-		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		wy = UITrait.inst.headerh * 2;
+		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wy = UIHeader.inst.headerh * 2;
 		if (UIView2D.inst.show) {
 			wy += iron.App.h() - defaultWindowH;
 		}
@@ -168,13 +168,13 @@ class UINodes {
 			#if (!kha_direct3d12)
 			if (Layers.isFillMaterial()) {
 				Layers.updateFillLayers(); // TODO: only used as jitter
-				UITrait.inst.hwnd.redraws = 2;
+				UISidebar.inst.hwnd.redraws = 2;
 			}
 			#end
 			function _parse(_) {
 				MaterialParser.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
-				UITrait.inst.hwnd1.redraws = 2;
+				UISidebar.inst.hwnd1.redraws = 2;
 				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				if (decal) RenderUtil.makeDecalPreview();
 				iron.App.removeRender(_parse);
@@ -184,9 +184,9 @@ class UINodes {
 		else {
 			function _parse(_) {
 				MaterialParser.parseBrush();
-				UITrait.inst.parseBrushInputs();
+				UISidebar.inst.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
-				UITrait.inst.hwnd1.redraws = 2;
+				UISidebar.inst.hwnd1.redraws = 2;
 				iron.App.removeRender(_parse);
 			}
 			iron.App.notifyOnRender(_parse);
@@ -308,14 +308,14 @@ class UINodes {
 					RenderUtil.makeMaterialPreview();
 				}
 			}
-			UITrait.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
 		}
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
-		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
+		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
+		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
 
 		if (ui.inputStarted) {
 			lastCanvas = Json.parse(Json.stringify(getCanvas()));
@@ -330,13 +330,13 @@ class UINodes {
 
 		// Make window
 		ww = defaultWindowW;
-		wx = Std.int(iron.App.w()) + UITrait.inst.toolbarw;
-		wy = UITrait.inst.headerh * 2;
+		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wy = UIHeader.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
 		if (UIView2D.inst.show) {
 			wh = defaultWindowH;
-			wy = iron.App.h() - defaultWindowH + UITrait.inst.headerh * 2;
+			wy = iron.App.h() - defaultWindowH + UIHeader.inst.headerh * 2;
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
@@ -356,7 +356,7 @@ class UINodes {
 				if (sel.type == "TEX_IMAGE") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.assets.length) {
-						img = UITrait.inst.getImage(Project.assets[id]);
+						img = UISidebar.inst.getImage(Project.assets[id]);
 					}
 				}
 				else if (sel.type == "LAYER") {
@@ -429,7 +429,7 @@ class UINodes {
 
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
-				if ((ui.button(cats[i], Left) && UITrait.inst.ui.comboSelectedHandle == null) || (ui.isHovered && drawMenu)) {
+				if ((ui.button(cats[i], Left) && UISidebar.inst.ui.comboSelectedHandle == null) || (ui.isHovered && drawMenu)) {
 					addNodeButton = true;
 					menuCategory = i;
 					popupX = wx + ui._x;

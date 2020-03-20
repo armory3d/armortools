@@ -61,7 +61,7 @@ let tick = function(g2) {
 	totalTime += frameTime;
 	frames++;
 	if (totalTime > 1.0) {
-		arm.UITrait.inst.hwnd.redraws = 1;
+		arm.Sidebar.inst.hwnd.redraws = 1;
 		frameTimeAvg = totalTime / frames;
 		totalTime = 0;
 		frames = 0;

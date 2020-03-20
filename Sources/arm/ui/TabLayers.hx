@@ -14,8 +14,8 @@ class TabLayers {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab, tr("Layers"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab, tr("Layers"))) {
 			ui.row([1 / 4, 1 / 4, 1 / 2]);
 			if (ui.button(tr("New"))) {
 
@@ -32,16 +32,16 @@ class TabLayers {
 				Layers.newLayer();
 				History.newLayer();
 			}
-			if (ui.button(tr("2D View"))) UITrait.inst.show2DView();
+			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView();
 			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_node_editor})');
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
-			UITrait.inst.layerFilter = ui.combo(filterHandle, ar, tr("Filter"));
+			UISidebar.inst.layerFilter = ui.combo(filterHandle, ar, tr("Filter"));
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) {
-					p.visible = UITrait.inst.layerFilter == 0 || p.name == ar[UITrait.inst.layerFilter];
+					p.visible = UISidebar.inst.layerFilter == 0 || p.name == ar[UISidebar.inst.layerFilter];
 					Layers.setObjectMask();
 				}
 				UVUtil.uvmapCached = false;
@@ -50,9 +50,9 @@ class TabLayers {
 
 			function drawList(l: LayerSlot, i: Int) {
 
-				if (UITrait.inst.layerFilter > 0 &&
+				if (UISidebar.inst.layerFilter > 0 &&
 					l.objectMask > 0 &&
-					l.objectMask != UITrait.inst.layerFilter) {
+					l.objectMask != UISidebar.inst.layerFilter) {
 					return;
 				}
 
@@ -86,7 +86,7 @@ class TabLayers {
 				var mouse = Input.getMouse();
 				var mx = mouse.x;
 				var my = mouse.y;
-				var inLayers = mx > UITrait.inst.tabx && my < UITrait.inst.tabh;
+				var inLayers = mx > UISidebar.inst.tabx && my < UISidebar.inst.tabh;
 				if (App.isDragging && App.dragLayer != null && my > ui._y - step && my < ui._y + step) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
@@ -165,8 +165,8 @@ class TabLayers {
 				}
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
-					UITrait.inst.selectTime = Time.time();
+					if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
+					UISidebar.inst.selectTime = Time.time();
 					if (l.getChildren() == null) {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
@@ -227,8 +227,8 @@ class TabLayers {
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
-						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
-						UITrait.inst.selectTime = Time.time();
+						if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
+						UISidebar.inst.selectTime = Time.time();
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -244,8 +244,8 @@ class TabLayers {
 
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView();
-					UITrait.inst.selectTime = Time.time();
+					if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
+					UISidebar.inst.selectTime = Time.time();
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
@@ -325,7 +325,7 @@ class TabLayers {
 								var target = Project.layers[i + 1];
 								Project.layers[i + 1] = Project.layers[i];
 								Project.layers[i] = target;
-								UITrait.inst.hwnd.redraws = 2;
+								UISidebar.inst.hwnd.redraws = 2;
 
 								// Move layer
 								if (!isGroup) {
@@ -370,7 +370,7 @@ class TabLayers {
 								var target = Project.layers[i - 1];
 								Project.layers[i - 1] = Project.layers[i];
 								Project.layers[i] = target;
-								UITrait.inst.hwnd.redraws = 2;
+								UISidebar.inst.hwnd.redraws = 2;
 
 								// Move layer
 								if (!isGroup) {

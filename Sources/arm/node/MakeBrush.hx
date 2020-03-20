@@ -1,8 +1,8 @@
 package arm.node;
 
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.node.MaterialShader;
-import arm.Tool;
+import arm.Enums;
 
 class MakeBrush {
 
@@ -11,7 +11,7 @@ class MakeBrush {
 		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
 			frag.write('float dist = 0.0;');
 		}
-		else if (UITrait.inst.brush3d) {
+		else if (UISidebar.inst.brush3d) {
 			#if (kha_opengl || kha_webgl)
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#else
@@ -24,7 +24,7 @@ class MakeBrush {
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			if (UITrait.inst.brushAngleReject || UITrait.inst.xray) {
+			if (UISidebar.inst.brushAngleReject || UISidebar.inst.xray) {
 				frag.add_function(MaterialFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_opengl || kha_webgl)
@@ -38,10 +38,10 @@ class MakeBrush {
 				frag.write('wn = normalize(wn);');
 				frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
 
-				if (UITrait.inst.brushAngleReject && !UITrait.inst.xray) {
+				if (UISidebar.inst.brushAngleReject && !UISidebar.inst.xray) {
 					frag.write('if (planeDist < -0.01) discard;');
 					frag.n = true;
-					var angle = UITrait.inst.brushAngleRejectDot;
+					var angle = UISidebar.inst.brushAngleRejectDot;
 					frag.write('if (dot(wn, n) < $angle) discard;');
 				}
 			}
@@ -57,7 +57,7 @@ class MakeBrush {
 			frag.write('winplast.xyz /= winplast.w;');
 
 			frag.write('vec3 pa = wposition - winp.xyz;');
-			if (UITrait.inst.xray) {
+			if (UISidebar.inst.xray) {
 				frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
 			}
 			frag.write('vec3 ba = winplast.xyz - winp.xyz;');

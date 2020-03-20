@@ -17,7 +17,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import iron.RenderPath;
 import arm.Project;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.sys.Path;
 import arm.sys.File;
@@ -29,8 +29,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ImportArm {
 
@@ -89,6 +88,19 @@ class ImportArm {
 	public static function runProject(path: String) {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+
+			// Upgrade project format
+			if (project.version == "0.8") {
+				if (project.mesh_datas != null) {
+					for (md in project.mesh_datas) {
+						for (va in md.vertex_arrays) {
+							if (va.data == null) {
+								va.data = va.attrib == "pos" ? "short4norm" : "short2norm";
+							}
+						}
+					}
+				}
+			}
 
 			// Import as material instead
 			if (project.version != null && project.layer_datas == null) {
@@ -207,20 +219,28 @@ class ImportArm {
 				Project.layers.push(l);
 
 				if (!isGroup) {
+					if (Layers.pipeMerge == null) Layers.makePipe();
+
 					// TODO: create render target from bytes
 					var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint.g2.begin(false);
+					l.texpaint.g2.pipeline = Layers.pipeCopy;
 					l.texpaint.g2.drawImage(texpaint, 0, 0);
+					l.texpaint.g2.pipeline = null;
 					l.texpaint.g2.end();
 
 					var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_nor.g2.begin(false);
+					l.texpaint_nor.g2.pipeline = Layers.pipeCopy;
 					l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+					l.texpaint_nor.g2.pipeline = null;
 					l.texpaint_nor.g2.end();
 
 					var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_pack.g2.begin(false);
+					l.texpaint_pack.g2.pipeline = Layers.pipeCopy;
 					l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+					l.texpaint_pack.g2.pipeline = null;
 					l.texpaint_pack.g2.end();
 
 					var texpaint_mask: kha.Image = null;
@@ -228,7 +248,9 @@ class ImportArm {
 						l.createMask(0, false);
 						texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
 						l.texpaint_mask.g2.begin(false);
+						l.texpaint_mask.g2.pipeline = Layers.pipeCopy;
 						l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+						l.texpaint_mask.g2.pipeline = null;
 						l.texpaint_mask.g2.end();
 					}
 
@@ -256,9 +278,9 @@ class ImportArm {
 			Context.setLayer(Project.layers[0]);
 
 			Context.ddirty = 4;
-			UITrait.inst.hwnd.redraws = 2;
-			UITrait.inst.hwnd1.redraws = 2;
-			UITrait.inst.hwnd2.redraws = 2;
+			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
+			UISidebar.inst.hwnd2.redraws = 2;
 
 			Data.deleteBlob(path);
 		});
@@ -312,7 +334,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnRender(makeMaterialPreview);
 
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -358,7 +380,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnRender(makeBrushPreview);
 
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 

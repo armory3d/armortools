@@ -9,14 +9,6 @@ SamplerState _texa_sampler; // direct3d12 unit align
 Texture2D<float4> gbufferD;
 SamplerState _gbufferD_sampler;
 
-// float3x3 rotAxis(float3 axis, float a) {
-// 	float c = cos(a);
-// 	float3 as = axis * sin(a).xxx;
-// 	float3x3 p = float3x3(axis.xxx * axis, axis.yyy * axis, axis.zzz * axis);
-// 	float3x3 q = float3x3(c, -as.z, as.y, as.z, c, -as.x, -as.y, as.x, c);
-// 	return p * (1.0 - c) + q;
-// }
-
 float3 getPos(float2 uv) {
 	float2 uvinv = float2(uv.x, 1.0 - uv.y);
 	float depth = gbufferD.SampleLevel(_gbufferD_sampler, uvinv, 0).r;
@@ -53,12 +45,6 @@ SPIRV_Cross_Output main(float2 nor : TEXCOORD0, float4 pos : TEXCOORD1, float2 t
 		getNormal(wpos1, uv1) +
 		getNormal(wpos2, uv2)
 	);
-
-	// float ax = acos(dot(float3(1,0,0), float3(n.x,0,0)));
-	// float az = acos(dot(float3(0,0,1), float3(0,0,n.z)));
-	// float sy = -sign(n.y);
-	// wpos += mul(mul(pos.xyz * radius.xxx, rotAxis(float3(0,0,1), ax + 3.14/2)),
-	// 			rotAxis(float3(1,0,0), -az * sy + 3.14/2));
 
 	float3 n_tan;
 	float3 n_bin;

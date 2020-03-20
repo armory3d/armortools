@@ -1,7 +1,6 @@
 package arm.sys;
 
 import iron.data.Data;
-using StringTools;
 
 class Path {
 

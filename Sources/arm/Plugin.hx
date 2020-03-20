@@ -79,7 +79,7 @@ class ArmBridge {
 	public static var File = arm.sys.File;
 	public static var NodesMaterial = arm.node.NodesMaterial;
 	public static var Material = arm.node.Material;
-	public static var UITrait = arm.ui.UITrait;
+	public static var UISidebar = arm.ui.UISidebar;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;
 	public static var UIMenu = arm.ui.UIMenu;

@@ -3,8 +3,8 @@ package arm.util;
 import kha.arrays.Float32Array;
 import iron.Scene;
 import iron.math.Vec4;
-import arm.ui.UITrait;
-import arm.Tool;
+import arm.ui.UISidebar;
+import arm.Enums;
 
 class ViewportUtil {
 
@@ -27,8 +27,8 @@ class ViewportUtil {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (UITrait.inst.fovHandle != null) UITrait.inst.fovHandle.value = 0.92;
-				UITrait.inst.camHandle.position = 0;
+				if (UISidebar.inst.fovHandle != null) UISidebar.inst.fovHandle.value = 0.92;
+				UISidebar.inst.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
 				Context.ddirty = 2;

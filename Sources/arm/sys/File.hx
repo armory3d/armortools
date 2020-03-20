@@ -1,7 +1,6 @@
 package arm.sys;
 
 import haxe.io.Bytes;
-using StringTools;
 
 class File {
 

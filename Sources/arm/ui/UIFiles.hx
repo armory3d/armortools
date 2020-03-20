@@ -9,7 +9,6 @@ import iron.system.ArmPack;
 import arm.format.Lz4;
 import arm.sys.Path;
 import arm.sys.File;
-using StringTools;
 
 class UIFiles {
 
@@ -22,7 +21,7 @@ class UIFiles {
 	static var showExtensions = true;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
-		if (!UITrait.inst.nativeBrowser) {
+		if (!UISidebar.inst.nativeBrowser) {
 			if (path == null) path = defaultPath;
 			showCustom(filters, isSave, filesDone);
 			return;
@@ -162,7 +161,7 @@ class UIFiles {
 					}
 
 					selected = i;
-					if (Time.time() - UITrait.inst.selectTime < 0.25) {
+					if (Time.time() - UISidebar.inst.selectTime < 0.25) {
 						App.dragFile = null;
 						App.isDragging = false;
 						handle.changed = ui.changed = true;
@@ -179,7 +178,7 @@ class UIFiles {
 						}
 						selected = -1;
 					}
-					UITrait.inst.selectTime = Time.time();
+					UISidebar.inst.selectTime = Time.time();
 				}
 
 				ui._x = _x;

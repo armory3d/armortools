@@ -19,7 +19,6 @@ package arm.node;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import arm.node.MaterialShader;
-using StringTools;
 
 class Material {
 
@@ -543,7 +542,7 @@ class Material {
 			var val = parse_value_input(node.inputs[2]);
 			var fac = parse_value_input(node.inputs[3]);
 			var col = parse_vector_input(node.inputs[4]);
-			return "hue_sat($col, vec4($hue-0.5, $sat, $val, 1.0-$fac))";
+			return 'hue_sat($col, vec4($hue-0.5, $sat, $val, 1.0-$fac))';
 		}
 		else if (node.type == "INVERT") {
 			var fac = parse_value_input(node.inputs[0]);
@@ -847,7 +846,7 @@ class Material {
 			}
 			if (node_rotation[2] != 0.0) {
 				// ZYX rotation, Z axis for now..
-				var a = node_rotation[2];
+				var a = node_rotation[2] * (Math.PI / 180);
 				// x * cos(theta) - y * sin(theta)
 				// x * sin(theta) + y * cos(theta)
 				out = 'vec3(${out}.x * ${Math.cos(a)} - (${out}.y) * ${Math.sin(a)}, ${out}.x * ${Math.sin(a)} + (${out}.y) * ${Math.cos(a)}, 0.0)';
@@ -1526,7 +1525,7 @@ class Material {
 			file: filepath
 		};
 
-		if (arm.ui.UITrait.inst.textureFilter) {
+		if (arm.ui.UISidebar.inst.textureFilter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";

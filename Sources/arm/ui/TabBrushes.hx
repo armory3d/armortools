@@ -13,23 +13,23 @@ class TabBrushes {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab1, tr("Brushes"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab1, tr("Brushes"))) {
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
 				MaterialParser.parseBrush();
-				UITrait.inst.parseBrushInputs();
+				UISidebar.inst.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			if (ui.button(tr("Import"))) {
 				Project.importBrush();
 			}
-			if (ui.button(tr("Nodes"))) UITrait.inst.showBrushNodes();
+			if (ui.button(tr("Nodes"))) UISidebar.inst.showBrushNodes();
 
 			var slotw = Std.int(51 * ui.SCALE());
-			var num = Std.int(UITrait.inst.windowW / slotw);
+			var num = Std.int(UISidebar.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
 				ui.row([for (i in 0...num) 1 / num]);
@@ -64,8 +64,8 @@ class TabBrushes {
 					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
-						if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.showBrushNodes();
-						UITrait.inst.selectTime = Time.time();
+						if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.showBrushNodes();
+						UISidebar.inst.selectTime = Time.time();
 						// var mouse = Input.getMouse();
 						// App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						// App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -102,7 +102,7 @@ class TabBrushes {
 							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left)) {
 								Context.selectBrush(i == 0 ? 1 : 0);
 								Project.brushes.splice(i, 1);
-								UITrait.inst.hwnd1.redraws = 2;
+								UISidebar.inst.hwnd1.redraws = 2;
 							}
 						}, 3 + add);
 					}

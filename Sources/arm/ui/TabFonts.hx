@@ -8,8 +8,8 @@ class TabFonts {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab2, tr("Fonts"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab2, tr("Fonts"))) {
 			ui.row([1 / 4]);
 
 			if (ui.button(tr("Import"))) Project.importAsset("ttf");

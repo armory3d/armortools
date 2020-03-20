@@ -51,6 +51,7 @@
 	"tool_bake": "k",
 	"tool_colorid": "c",
 	"tool_picker": "v",
+	"swap_brush_eraser": "",
 	"toggle_2d_view": "shift+tab",
 	"toggle_node_editor": "tab",
 	"toggle_browser": "`",

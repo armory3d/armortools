@@ -1,7 +1,12 @@
-let project = new Project("ArmorPaint");
+
+let debug = false;
 let android = false; // Temp
 let ios = false; // Temp
+let win_hlsl = true; // GraphicsApi.Direct3D11 && GraphicsApi.Direct3D12
+let raytrace = process.argv.indexOf("direct3d12") >= 0;
+let build = "painter"; // painter || creator || player
 
+let project = new Project("ArmorPaint");
 project.addSources("Sources");
 project.addLibrary("iron");
 project.addLibrary("zui");
@@ -16,6 +21,7 @@ project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/theme
 project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
+
 if (!android && !ios) {
 	project.addDefine("arm_data_dir");
 }
@@ -38,11 +44,6 @@ else if (process.platform === "linux") {
 else if (process.platform === "darwin") {
 	project.addDefine("krom_darwin");
 }
-
-let debug = false;
-let raytrace = process.argv.indexOf("direct3d12") >= 0;
-let build = "painter"; // painter || creator || player
-let win_hlsl = true; // GraphicsApi.Direct3D11 && GraphicsApi.Direct3D12
 
 if (debug) {
 	project.addDefine("arm_debug");

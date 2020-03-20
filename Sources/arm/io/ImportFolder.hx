@@ -3,7 +3,7 @@ package arm.io;
 import zui.Nodes;
 import iron.data.Data;
 import iron.data.MaterialData;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.sys.Path;
@@ -11,8 +11,7 @@ import arm.sys.File;
 import arm.node.NodesMaterial;
 import arm.node.MaterialParser;
 import arm.data.MaterialSlot;
-import arm.Tool;
-using StringTools;
+import arm.Enums;
 
 class ImportFolder {
 
@@ -67,7 +66,7 @@ class ImportFolder {
 		}
 
 		// Create material
-		var isScene = UITrait.inst.worktab.position == SpaceScene;
+		var isScene = UISidebar.inst.worktab.position == SpaceScene;
 		if (isScene) {
 			MaterialUtil.removeMaterialCache();
 			Data.getMaterial("Scene", "Material2", function(md: MaterialData) {
@@ -122,7 +121,7 @@ class ImportFolder {
 
 		MaterialParser.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
-		UITrait.inst.hwnd1.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 	}
 
 	static function placeImageNode(nodes: Nodes, canvas: TNodeCanvas, asset: String, ny: Int, to_id: Int, to_socket: Int) {

@@ -6,14 +6,13 @@ import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
 import arm.sys.Path;
-using StringTools;
 
 class TabTextures {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
-		if (ui.tab(UITrait.inst.htab2, tr("Textures"))) {
+		var ui = UISidebar.inst.ui;
+		if (ui.tab(UISidebar.inst.htab2, tr("Textures"))) {
 			ui.row([1 / 4, 1 / 4]);
 
 			if (ui.button(tr("Import"))) {
@@ -23,12 +22,12 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			if (ui.button(tr("2D View"))) UITrait.inst.show2DView(1);
+			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(1);
 
 			if (Project.assets.length > 0) {
 
 				var slotw = Std.int(51 * ui.SCALE());
-				var num = Std.int(UITrait.inst.windowW / slotw);
+				var num = Std.int(UISidebar.inst.windowW / slotw);
 
 				for (row in 0...Std.int(Math.ceil(Project.assets.length / num))) {
 					ui.row([for (i in 0...num) 1 / num]);
@@ -45,7 +44,7 @@ class TabTextures {
 						}
 
 						var asset = Project.assets[i];
-						var img = UITrait.inst.getImage(asset);
+						var img = UISidebar.inst.getImage(asset);
 						var uix = ui._x;
 						var uiy = ui._y;
 						var sw = img.height < img.width ? img.height : 0;
@@ -56,8 +55,8 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.texture = asset;
 
-							if (Time.time() - UITrait.inst.selectTime < 0.25) UITrait.inst.show2DView(1);
-							UITrait.inst.selectTime = Time.time();
+							if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView(1);
+							UISidebar.inst.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
 						}
 
@@ -88,8 +87,11 @@ class TabTextures {
 									UIFiles.show("png", true, function(path: String) {
 										var target = kha.Image.createRenderTarget(img.width, img.height);
 										function exportTexture(g: kha.graphics4.Graphics) {
+											if (Layers.pipeMerge == null) Layers.makePipe();
 											target.g2.begin(false);
+											target.g2.pipeline = Layers.pipeCopy;
 											target.g2.drawImage(img, 0, 0);
+											target.g2.pipeline = null;
 											target.g2.end();
 											var f = UIFiles.filename;
 											if (f == "") f = tr("untitled");
@@ -108,7 +110,7 @@ class TabTextures {
 									Layers.createImageMask(asset);
 								}
 								if (ui.button(tr("Delete"), Left)) {
-									UITrait.inst.hwnd2.redraws = 2;
+									UISidebar.inst.hwnd2.redraws = 2;
 									Data.deleteImage(asset.file);
 									Project.assetMap.remove(asset.id);
 									Project.assets.splice(i, 1);
@@ -116,7 +118,7 @@ class TabTextures {
 									iron.system.Tween.timer(0.1, function() {
 										arm.node.MaterialParser.parsePaintMaterial();
 										arm.util.RenderUtil.makeMaterialPreview();
-										UITrait.inst.hwnd1.redraws = 2;
+										UISidebar.inst.hwnd1.redraws = 2;
 									});
 								}
 							}, 4);

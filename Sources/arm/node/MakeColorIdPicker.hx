@@ -1,7 +1,7 @@
 package arm.node;
 
 import arm.node.MaterialShader;
-import arm.Tool;
+import arm.Enums;
 
 class MakeColorIdPicker {
 

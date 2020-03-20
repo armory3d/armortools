@@ -3,12 +3,12 @@ package arm.io;
 import kha.Blob;
 import iron.data.Data;
 import arm.format.ObjParser;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 
 class ImportObj {
 
 	public static function run(path: String) {
-		var i = UITrait.inst.splitBy;
+		var i = UISidebar.inst.splitBy;
 		var isUdim = i == SplitUdim;
 		ObjParser.splitCode =
 			(i == SplitObject || isUdim) ? "o".code :

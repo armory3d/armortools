@@ -5,18 +5,17 @@ import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
 import arm.io.ImportAsset;
-using StringTools;
 
 class TabConsole {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UITrait.inst.ui;
+		var ui = UISidebar.inst.ui;
 
 		var title = Log.messageTimer > 0 ? Log.message + "        " : tr("Console");
 		var color = Log.messageTimer > 0 ? Log.messageColor : -1;
 
-		if (ui.tab(UITrait.inst.statustab, title, false, color) && UITrait.inst.statush > UITrait.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(UISidebar.inst.statustab, title, false, color) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.row([1 / 20, 1 / 20]);
 

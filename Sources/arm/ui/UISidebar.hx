@@ -24,28 +24,21 @@ import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
-import arm.Tool;
+import arm.Enums;
 import arm.Project;
 import arm.Res;
 
 @:access(zui.Zui)
-class UITrait {
+class UISidebar {
 
-	public static var inst: UITrait;
+	public static var inst: UISidebar;
 	public static var defaultWindowW = 280;
-	public static inline var defaultToolbarW = 54;
-	public static inline var defaultHeaderH = 28;
-	public static inline var defaultStatusH = 32;
-	public static inline var defaultMenubarW = 330;
+
 	public static var penPressureRadius = true;
 	public static var penPressureHardness = true;
 	public static var penPressureOpacity = false;
 
 	public var windowW = 280; // Panel width
-	public var toolbarw = defaultToolbarW;
-	public var headerh = defaultHeaderH;
-	public var statush = defaultStatusH;
-	public var menubarw = defaultMenubarW;
 	public var tabx = 0;
 	public var tabh = 0;
 	public var tabh1 = 0;
@@ -266,14 +259,9 @@ class UITrait {
 	public var vignetteStrength = 0.4;
 	// public var autoExposureStrength = 1.0;
 	public var textureExportPath = "";
-	public var headerHandle = new Handle({layout: Horizontal});
-	public var toolbarHandle = new Handle();
-	public var statusHandle = new Handle();
-	public var menuHandle = new Handle({layout: Horizontal});
-	public var workspaceHandle = new Handle({layout: Horizontal});
 	var lastCombo: Handle = null;
 	var lastTooltip: Image = null;
-	var lastStatusPosition = 0;
+	public var lastStatusPosition = 0;
 
 	public var cameraControls = ControlsOrbit;
 	public var htab = Id.handle();
@@ -281,28 +269,19 @@ class UITrait {
 	public var htab2 = Id.handle();
 	public var worktab = Id.handle();
 	public var statustab = Id.handle();
-	public var toolNames = [
-		tr("Brush"),
-		tr("Eraser"),
-		tr("Fill"),
-		tr("Decal"),
-		tr("Text"),
-		tr("Clone"),
-		tr("Blur"),
-		tr("Particle"),
-		tr("Bake"),
-		tr("ColorID"),
-		tr("Picker"),
-	];
 
 	public function new() {
 		inst = this;
+		new UIToolbar();
+		new UIHeader();
+		new UIStatus();
+		new UIMenubar();
 
 		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
-		toolbarw = Std.int(defaultToolbarW * Config.raw.window_scale);
-		headerh = Std.int(defaultHeaderH * Config.raw.window_scale);
-		statush = Std.int(defaultStatusH * Config.raw.window_scale);
-		menubarw = Std.int(defaultMenubarW * Config.raw.window_scale);
+		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
+		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
+		UIStatus.inst.statush = Std.int(UIStatus.defaultStatusH * Config.raw.window_scale);
+		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * Config.raw.window_scale);
 
 		if (Project.materials == null) {
 			Project.materials = [];
@@ -324,7 +303,7 @@ class UITrait {
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
 			MaterialParser.parseBrush();
-			UITrait.inst.parseBrushInputs();
+			UISidebar.inst.parseBrushInputs();
 		}
 
 		if (Project.layers == null) {
@@ -408,7 +387,7 @@ class UITrait {
 		}); //
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.color_wheel } );
+		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel } );
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 
@@ -452,7 +431,7 @@ class UITrait {
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 
-		if (!App.uienabled) return;
+		if (!App.uiEnabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
 			if (Operator.shortcut(Config.keymap.cycle_layers)) {
@@ -514,7 +493,7 @@ class UITrait {
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
 					}
-					headerHandle.redraws = 2;
+					UIHeader.inst.headerHandle.redraws = 2;
 				}
 				else if (brushCanLock) {
 					brushCanLock = false;
@@ -553,6 +532,7 @@ class UITrait {
 					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
 					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
 					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
+					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.tool == ToolBrush ? ToolEraser : ToolBrush);
 				}
 
 				// Radius
@@ -574,13 +554,13 @@ class UITrait {
 						brushRadius -= getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
-						headerHandle.redraws = 2;
+						UIHeader.inst.headerHandle.redraws = 2;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_increase, true)) {
 						brushRadius += getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
-						headerHandle.redraws = 2;
+						UIHeader.inst.headerHandle.redraws = 2;
 					}
 				}
 			}
@@ -636,10 +616,10 @@ class UITrait {
 					else if (UINodes.inst.defaultWindowH > iron.App.h() * 0.95) UINodes.inst.defaultWindowH = Std.int(iron.App.h() * 0.95);
 				}
 			}
-			else if (borderHandle == statusHandle) {
+			else if (borderHandle == UIStatus.inst.statusHandle) {
 				var my = Std.int(mouse.movementY);
-				if (statush - my >= defaultStatusH * Config.raw.window_scale && statush - my < System.windowHeight() * 0.7) {
-					statush -= my;
+				if (UIStatus.inst.statush - my >= UIStatus.defaultStatusH * Config.raw.window_scale && UIStatus.inst.statush - my < System.windowHeight() * 0.7) {
+					UIStatus.inst.statush -= my;
 				}
 			}
 			else {
@@ -697,10 +677,10 @@ class UITrait {
 
 		if (Log.messageTimer > 0) {
 			Log.messageTimer -= Time.delta;
-			if (Log.messageTimer <= 0) statusHandle.redraws = 2;
+			if (Log.messageTimer <= 0) UIStatus.inst.statusHandle.redraws = 2;
 		}
 
-		if (!App.uienabled) return;
+		if (!App.uiEnabled) return;
 
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
@@ -798,6 +778,7 @@ class UITrait {
 		if (Context.layersPreviewDirty) {
 			Context.layersPreviewDirty = false;
 			Context.layerPreviewDirty = false;
+			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
 				if (l.getChildren() != null) continue;
@@ -805,14 +786,18 @@ class UITrait {
 				var source = l.texpaint;
 				var g2 = target.g2;
 				g2.begin(true, 0xff000000);
+				g2.pipeline = Layers.pipeCopy;
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
+				g2.pipeline = null;
 				g2.end();
 				if (l.texpaint_mask != null) {
 					var target = l.texpaint_mask_preview;
 					var source = l.texpaint_mask;
 					var g2 = target.g2;
 					g2.begin(true, 0x00000000);
+					g2.pipeline = Layers.pipeCopy;
 					g2.drawScaledImage(source, 0, 0, target.width, target.height);
+					g2.pipeline = null;
 					g2.end();
 				}
 			}
@@ -820,13 +805,16 @@ class UITrait {
 		}
 		if (Context.layerPreviewDirty && Context.layer.getChildren() == null) {
 			Context.layerPreviewDirty = false;
+			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update layer preview
 			var l = Context.layer;
 			var target = Context.layerIsMask ? l.texpaint_mask_preview : l.texpaint_preview;
 			var source = Context.layerIsMask ? l.texpaint_mask : l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
+			g2.pipeline = Layers.pipeCopy;
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
+			g2.pipeline = null;
 			g2.end();
 			hwnd.redraws = 2;
 		}
@@ -855,470 +843,18 @@ class UITrait {
 	public function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		renderUI(g);
-	}
-
-	public function renderCursor(g: kha.graphics2.Graphics) {
-		g.color = 0xffffffff;
-
-		// Brush
-		if (App.uienabled && worktab.position == SpacePaint) {
-			var mx = App.x() + paintVec.x * App.w();
-			var my = App.y() + paintVec.y * App.h();
-
-			// Radius being scaled
-			if (brushLocked) {
-				mx += lockStartedX - System.windowWidth() / 2;
-				my += lockStartedY - System.windowHeight() / 2;
-			}
-
-			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
-				var transform = Operator.shortcut(Config.keymap.stencil_transform);
-				g.color = 0x88ffffff;
-				var r = getBrushRect();
-				g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
-				g.color = 0xffffffff;
-				if (transform) {
-					g.drawRect(r.x, r.y, r.w, r.h);
-					g.drawRect(r.x - 8,       r.y - 8,       16, 16);
-					g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
-					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
-					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
-				}
-			}
-
-			// Show picked material next to cursor
-			if (Context.tool == ToolPicker && pickerSelectMaterial) {
-				var img = Context.material.imageIcon;
-				g.drawImage(img, mx + 10, my + 10);
-			}
-
-			var cursorImg = Res.get("cursor.k");
-			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
-
-			// Clone source cursor
-			var mouse = Input.getMouse();
-			var pen = Input.getPen();
-			var kb = Input.getKeyboard();
-			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
-				g.color = 0x66ffffff;
-				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
-				g.color = 0xffffffff;
-			}
-
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
-						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
-						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			var inNodes = UINodes.inst.show &&
-						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
-						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-
-			if (!brush3d || in2dView || (decal && !brushLive)) {
-				if (decal && !inNodes) {
-					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
-					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
-					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
-					#if (kha_direct3d11 || kha_direct3d12)
-					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
-					#else
-					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
-					#end
-					g.color = 0xffffffff;
-				}
-				else if (Context.tool == ToolBrush  ||
-						 Context.tool == ToolEraser ||
-						 Context.tool == ToolClone  ||
-						 Context.tool == ToolBlur   ||
-						 Context.tool == ToolParticle) {
-						if (brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-							var radius = psize + brushLazyRadius * 100;
-							g.color = 0x66ffffff;
-							g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
-							g.color = 0xffffffff;
-						}
-						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				}
-			}
-		}
-	}
-
-	public function showMaterialNodes() {
-		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UINodes.inst.ui.endInput();
-
-		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasMaterial) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasMaterial; }
-		App.resize();
-	}
-
-	public function showBrushNodes() {
-		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UINodes.inst.ui.endInput();
-
-		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasBrush) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasBrush; }
-		App.resize();
-	}
-
-	public function show2DView(type = 0) {
-		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UIView2D.inst.ui.endInput();
-		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
-		else UIView2D.inst.show = !UIView2D.inst.show;
-		UIView2D.inst.type = type;
-		App.resize();
-	}
-
-	function toggleBrowser() {
-		var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-		statush = minimized ? 240 : defaultStatusH;
-		statush = Std.int(statush * Config.raw.window_scale);
-	}
-
-	public function getImage(asset: TAsset): Image {
-		return asset != null ? Project.assetMap.get(asset.id) : null;
-	}
-
-	function renderUI(g: kha.graphics2.Graphics) {
-
-		if (!App.uienabled && ui.inputRegistered) ui.unregisterInput();
-		if (App.uienabled && !ui.inputRegistered) ui.registerInput();
+		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
+		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
 
 		if (!show) return;
 
 		g.end();
 		ui.begin(g);
 
-		if (ui.window(toolbarHandle, 0, headerh, toolbarw, System.windowHeight() - headerh)) {
-			ui._y += 2;
-
-			ui.imageScrollAlign = false;
-
-			if (worktab.position == SpacePaint) {
-				var keys = ["(B)", "(E)", "(G)", "(D)", "(T)", "(L) - " + tr("Hold ALT to set source"), "(U)", "(P)", "(K)", "(C)", "(V)"];
-				var img = Res.get("icons.k");
-				var imgw = ui.SCALE() > 1 ? 100 : 50;
-				for (i in 0...toolNames.length) {
-					ui._x += 2;
-					if (Context.tool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-					if (ui.image(img, -1, null, i * imgw, 0, imgw, imgw) == State.Started) Context.selectTool(i);
-					if (ui.isHovered) ui.tooltip(toolNames[i] + " " + keys[i]);
-					ui._x -= 2;
-					ui._y += 2;
-				}
-			}
-			else if (worktab.position == SpaceScene) {
-				var img = Res.get("icons.k");
-				var imgw = ui.SCALE() > 1 ? 100 : 50;
-				ui._x += 2;
-				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
-				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
-				ui._x -= 2;
-				ui._y += 2;
-			}
-
-			ui.imageScrollAlign = true;
-		}
-
-		var panelx = iron.App.x() - toolbarw;
-
-		var WINDOW_BG_COL = ui.t.WINDOW_BG_COL;
-		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
-		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(defaultHeaderH * ui.SCALE()))) {
-			var _w = ui._w;
-			ui._x += 1; // Prevent "File" button highlight on startup
-
-			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
-			ui.t.ELEMENT_OFFSET = 0;
-			var BUTTON_COL = ui.t.BUTTON_COL;
-			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-
-			menuButton(tr("File"), MenuFile);
-			menuButton(tr("Edit"), MenuEdit);
-			menuButton(tr("Viewport"), MenuViewport);
-			menuButton(tr("Mode"), MenuMode);
-			menuButton(tr("Camera"), MenuCamera);
-			menuButton(tr("Help"), MenuHelp);
-
-			if (menubarw < ui._x + 10) {
-				menubarw = Std.int(ui._x + 10);
-				toolbarHandle.redraws = 2;
-			}
-
-			ui._w = _w;
-			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-			ui.t.BUTTON_COL = BUTTON_COL;
-		}
-		ui.t.WINDOW_BG_COL = WINDOW_BG_COL;
-
-		var panelx = (iron.App.x() - toolbarw) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - windowW - menubarw, Std.int(defaultHeaderH * ui.SCALE()))) {
-			ui.tab(worktab, tr("Paint"));
-			// ui.tab(worktab, "Sculpt");
-			ui.tab(worktab, tr("Scene"));
-			#if arm_creator
-			ui.tab(worktab, tr("Render"));
-			#end
-			if (worktab.changed) {
-				Context.ddirty = 2;
-				toolbarHandle.redraws = 2;
-				headerHandle.redraws = 2;
-				hwnd.redraws = 2;
-				hwnd1.redraws = 2;
-				hwnd2.redraws = 2;
-
-				if (worktab.position == SpaceScene) {
-					Context.selectTool(ToolGizmo);
-				}
-
-				MaterialParser.parseMeshMaterial();
-				Context.mainObject().skip_context = null;
-			}
-		}
-
-		var panelx = iron.App.x();
-		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - toolbarw - windowW, Std.int(defaultHeaderH * ui.SCALE()))) {
-			ui._y += 2;
-
-			if (worktab.position == SpacePaint) {
-
-				if (Context.tool == ToolColorId) {
-					ui.text(tr("Picked Color"));
-					if (colorIdPicked) {
-						ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
-					}
-					if (ui.button("Clear")) colorIdPicked = false;
-					ui.text(tr("Color ID Map"));
-					var cid = ui.combo(colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
-					if (colorIdHandle.changed) Context.ddirty = 2;
-					if (Project.assets.length > 0) ui.image(getImage(Project.assets[cid]));
-				}
-				else if (Context.tool == ToolPicker) {
-					baseRPicked = Math.round(baseRPicked * 10) / 10;
-					baseGPicked = Math.round(baseGPicked * 10) / 10;
-					baseBPicked = Math.round(baseBPicked * 10) / 10;
-					normalRPicked = Math.round(normalRPicked * 10) / 10;
-					normalGPicked = Math.round(normalGPicked * 10) / 10;
-					normalBPicked = Math.round(normalBPicked * 10) / 10;
-					occlusionPicked = Math.round(occlusionPicked * 100) / 100;
-					roughnessPicked = Math.round(roughnessPicked * 100) / 100;
-					metallicPicked = Math.round(metallicPicked * 100) / 100;
-					ui.text(tr("Base") + ' $baseRPicked,$baseGPicked,$baseBPicked');
-					ui.text(tr("Nor") + ' $normalRPicked,$normalGPicked,$normalBPicked');
-					ui.text(tr("Occlusion") + ' $occlusionPicked');
-					ui.text(tr("Roughness") + ' $roughnessPicked');
-					ui.text(tr("Metallic") + ' $metallicPicked');
-					pickerSelectMaterial = ui.check(Id.handle({selected: pickerSelectMaterial}), tr("Select Material"));
-					ui.combo(pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
-					if (pickerMaskHandle.changed) {
-						MaterialParser.parsePaintMaterial();
-					}
-				}
-				else if (Context.tool == ToolBake) {
-					ui.changed = false;
-					var bakeHandle = Id.handle({position: bakeType});
-					var bakes = [
-						tr("AO"),
-						tr("Curvature"),
-						tr("Normal"),
-						tr("Normal (Object)"),
-						tr("Height"),
-						tr("Derivative"),
-						tr("Position"),
-						tr("TexCoord"),
-						tr("Material ID"),
-						tr("Object ID"),
-						tr("Vertex Color"),
-					];
-					#if kha_direct3d12
-					bakes.push(tr("Lightmap"));
-					bakes.push(tr("Bent Normal"));
-					bakes.push(tr("Thickness"));
-					#end
-					bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
-					if (bakeType == BakeNormalObject || bakeType == BakePosition || bakeType == BakeBentNormal) {
-						var bakeUpAxisHandle = Id.handle({position: bakeUpAxis});
-						bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], tr("Up Axis"), true);
-					}
-					if (bakeType == BakeAO || bakeType == BakeCurvature) {
-						var bakeAxisHandle = Id.handle({position: bakeAxis});
-						bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], tr("Axis"), true);
-					}
-					if (bakeType == BakeAO) {
-						var strengthHandle = Id.handle({value: bakeAoStrength});
-						bakeAoStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-						var radiusHandle = Id.handle({value: bakeAoRadius});
-						bakeAoRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-						var offsetHandle = Id.handle({value: bakeAoOffset});
-						bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
-					}
-					#if kha_direct3d12
-					if (bakeType == BakeAO || bakeType == BakeLightmap || bakeType == BakeBentNormal || bakeType == BakeThickness) {
-						ui.text(tr("Rays/pix:") + ' ${arm.render.RenderPathRaytrace.raysPix}');
-						ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytrace.raysSec}');
-					}
-					#end
-					if (bakeType == BakeCurvature) {
-						var strengthHandle = Id.handle({value: bakeCurvStrength});
-						bakeCurvStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-						var radiusHandle = Id.handle({value: bakeCurvRadius});
-						bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-						var offsetHandle = Id.handle({value: bakeCurvOffset});
-						bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
-						var smoothHandle = Id.handle({value: bakeCurvSmooth});
-						bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
-					}
-					if (bakeType == BakeNormal || bakeType == BakeHeight || bakeType == BakeDerivative) {
-						var ar = [for (p in Project.paintObjects) p.name];
-						var polyHandle = Id.handle({position: bakeHighPoly});
-						bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
-					}
-					if (ui.changed) {
-						MaterialParser.parsePaintMaterial();
-					}
-				}
-				else {
-					if (Context.tool != ToolFill) {
-						brushRadius = ui.slider(brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
-					}
-
-					if (Context.tool == ToolDecal) {
-						brushScaleX = ui.slider(brushScaleXHandle, tr("Scale X"), 0.01, 2.0, true);
-					}
-
-					if (Context.tool == ToolBrush  ||
-						Context.tool == ToolFill   ||
-						Context.tool == ToolDecal  ||
-						Context.tool == ToolText) {
-						var brushScaleHandle = Id.handle({value: brushScale});
-						brushScale = ui.slider(brushScaleHandle, tr("Scale"), 0.01, 5.0, true);
-						if (brushScaleHandle.changed) {
-							if (Context.tool == ToolDecal || Context.tool == ToolText) {
-								ui.g.end();
-								RenderUtil.makeDecalPreview();
-								ui.g.begin(false);
-							}
-						}
-
-						var brushAngleHandle = Id.handle({value: brushAngle});
-						brushAngle = ui.slider(brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
-						if (brushAngleHandle.changed) {
-							MaterialParser.parsePaintMaterial();
-						}
-					}
-
-					brushOpacity = ui.slider(brushOpacityHandle, tr("Opacity"), 0.0, 1.0, true);
-
-					if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
-						brushHardness = ui.slider(Id.handle({value: brushHardness}), tr("Hardness"), 0.0, 1.0, true);
-					}
-
-					if (Context.tool != ToolEraser) {
-						var brushBlendingHandle = Id.handle({value: brushBlending});
-						brushBlending = ui.combo(brushBlendingHandle, [
-							tr("Mix"),
-							tr("Darken"),
-							tr("Multiply"),
-							tr("Burn"),
-							tr("Lighten"),
-							tr("Screen"),
-							tr("Dodge"),
-							tr("Add"),
-							tr("Overlay"),
-							tr("Soft Light"),
-							tr("Linear Light"),
-							tr("Difference"),
-							tr("Subtract"),
-							tr("Divide"),
-							tr("Hue"),
-							tr("Saturation"),
-							tr("Color"),
-							tr("Value"),
-						], tr("Blending"));
-						if (brushBlendingHandle.changed) {
-							MaterialParser.parsePaintMaterial();
-						}
-					}
-
-					if (Context.tool == ToolBrush || Context.tool == ToolFill) {
-						var paintHandle = Id.handle();
-						brushPaint = ui.combo(paintHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
-						if (paintHandle.changed) {
-							MaterialParser.parsePaintMaterial();
-						}
-					}
-					if (Context.tool == ToolText) {
-						ui.combo(textToolHandle, ImportFont.fontList, tr("Font"));
-						var h = Id.handle();
-						h.text = textToolText;
-						textToolText = ui.textInput(h, "");
-						if (h.changed || textToolHandle.changed) {
-							ui.g.end();
-							RenderUtil.makeTextPreview();
-							RenderUtil.makeDecalPreview();
-							ui.g.begin(false);
-						}
-					}
-
-					if (Context.tool == ToolFill) {
-						ui.combo(fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle")], tr("Fill Mode"));
-						if (fillTypeHandle.changed) {
-							if (fillTypeHandle.position == FillFace) {
-								ui.g.end();
-								// UVUtil.cacheUVMap();
-								UVUtil.cacheTriangleMap();
-								ui.g.begin(false);
-								// wireframeHandle.selected = drawWireframe = true;
-							}
-							MaterialParser.parsePaintMaterial();
-							MaterialParser.parseMeshMaterial();
-						}
-					}
-					else {
-						var _w = ui._w;
-						var sc = ui.SCALE();
-						ui._w = Std.int(60 * sc);
-
-						var xrayHandle = Id.handle({selected: xray});
-						xray = ui.check(xrayHandle, tr("X-Ray"));
-						if (xrayHandle.changed) {
-							MaterialParser.parsePaintMaterial();
-						}
-
-						var symXHandle = Id.handle({selected: false});
-						var symYHandle = Id.handle({selected: false});
-						var symZHandle = Id.handle({selected: false});
-						ui._w = Std.int(55 * sc);
-						ui.text("Symmetry");
-						ui._w = Std.int(25 * sc);
-						symX = ui.check(symXHandle, "X");
-						symY = ui.check(symYHandle, "Y");
-						symZ = ui.check(symZHandle, "Z");
-						if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
-							MaterialParser.parsePaintMaterial();
-						}
-
-						ui._w = _w;
-					}
-				}
-			}
-		}
-
-		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - toolbarw - windowW, statush)) {
-			ui._y += 2;
-
-			TabBrowser.draw();
-			TabScript.draw();
-			TabConsole.draw();
-
-			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-			if (statustab.changed && (statustab.position == lastStatusPosition || minimized)) {
-				toggleBrowser();
-			}
-			lastStatusPosition = statustab.position;
-		}
+		UIToolbar.inst.renderUI(g);
+		UIMenubar.inst.renderUI(g);
+		UIHeader.inst.renderUI(g);
+		UIStatus.inst.renderUI(g);
 
 		tabx = System.windowWidth() - windowW;
 		if (tabh == 0) {
@@ -1368,14 +904,134 @@ class UITrait {
 		g.begin(false);
 	}
 
-	function menuButton(name: String, category: Int) {
-		ui._w = Std.int(ui.ops.font.width(ui.fontSize, name) + 25);
-		if (ui.button(name) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
-			UIMenu.show = true;
-			UIMenu.menuCategory = category;
-			UIMenu.menuX = Std.int(ui._x - ui._w);
-			UIMenu.menuY = headerh;
+	public function renderCursor(g: kha.graphics2.Graphics) {
+		g.color = 0xffffffff;
+
+		// Brush
+		if (App.uiEnabled && worktab.position == SpacePaint) {
+			var mx = App.x() + paintVec.x * App.w();
+			var my = App.y() + paintVec.y * App.h();
+
+			// Radius being scaled
+			if (brushLocked) {
+				mx += lockStartedX - System.windowWidth() / 2;
+				my += lockStartedY - System.windowHeight() / 2;
+			}
+
+			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
+				var transform = Operator.shortcut(Config.keymap.stencil_transform);
+				g.color = 0x88ffffff;
+				var r = getBrushRect();
+				g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
+				g.color = 0xffffffff;
+				if (transform) {
+					g.drawRect(r.x, r.y, r.w, r.h);
+					g.drawRect(r.x - 8,       r.y - 8,       16, 16);
+					g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
+					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
+					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+				}
+			}
+
+			// Show picked material next to cursor
+			if (Context.tool == ToolPicker && pickerSelectMaterial) {
+				var img = Context.material.imageIcon;
+				#if kha_opengl
+				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
+				#else
+				g.drawImage(img, mx + 10, my + 10);
+				#end
+			}
+
+			var cursorImg = Res.get("cursor.k");
+			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
+
+			// Clone source cursor
+			var mouse = Input.getMouse();
+			var pen = Input.getPen();
+			var kb = Input.getKeyboard();
+			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
+				g.color = 0x66ffffff;
+				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+				g.color = 0xffffffff;
+			}
+
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+			var inNodes = UINodes.inst.show &&
+						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
+						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+
+			if (!brush3d || in2dView || (decal && !brushLive)) {
+				if (decal && !inNodes) {
+					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
+					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
+					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
+					#if (kha_direct3d11 || kha_direct3d12)
+					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
+					#else
+					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
+					#end
+					g.color = 0xffffffff;
+				}
+				else if (Context.tool == ToolBrush  ||
+						 Context.tool == ToolEraser ||
+						 Context.tool == ToolClone  ||
+						 Context.tool == ToolBlur   ||
+						 Context.tool == ToolParticle) {
+						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				}
+			}
+
+			if (brushLazyRadius > 0 && !brushLocked && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+				g.fillRect(mx - 1, my - 1, 2, 2);
+				var mx = UISidebar.inst.brushLazyX * App.w() + App.x();
+				var my = UISidebar.inst.brushLazyY * App.h() + App.y();
+				var radius = brushLazyRadius * 180;
+				g.color = 0xff666666;
+				g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+				g.color = 0xffffffff;
+			}
 		}
+	}
+
+	public function showMaterialNodes() {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UINodes.inst.ui.endInput();
+
+		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasMaterial) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasMaterial; }
+		App.resize();
+	}
+
+	public function showBrushNodes() {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UINodes.inst.ui.endInput();
+
+		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasBrush) UINodes.inst.show = false;
+		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasBrush; }
+		App.resize();
+	}
+
+	public function show2DView(type = 0) {
+		// Clear input state as ui receives input events even when not drawn
+		@:privateAccess UIView2D.inst.ui.endInput();
+		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
+		else UIView2D.inst.show = !UIView2D.inst.show;
+		UIView2D.inst.type = type;
+		App.resize();
+	}
+
+	public function toggleBrowser() {
+		var minimized = UIStatus.inst.statush <= UIStatus.defaultStatusH * Config.raw.window_scale;
+		UIStatus.inst.statush = minimized ? 240 : UIStatus.defaultStatusH;
+		UIStatus.inst.statush = Std.int(UIStatus.inst.statush * Config.raw.window_scale);
+	}
+
+	public function getImage(asset: TAsset): Image {
+		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 
 	public function setIconScale() {
@@ -1390,11 +1046,11 @@ class UITrait {
 	}
 
 	function onBorderHover(handle: Handle, side: Int) {
-		if (!App.uienabled) return;
+		if (!App.uiEnabled) return;
 		if (handle != hwnd &&
 			handle != hwnd1 &&
 			handle != hwnd2 &&
-			handle != statusHandle &&
+			handle != UIStatus.inst.statusHandle &&
 			handle != UINodes.inst.hwnd &&
 			handle != UIView2D.inst.hwnd) return; // Scalable handles
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
@@ -1402,7 +1058,7 @@ class UITrait {
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
 		if (handle == hwnd && side == SideTop) return;
 		if (handle == hwnd2 && side == SideBottom) return;
-		if (handle == statusHandle && side != SideTop) return;
+		if (handle == UIStatus.inst.statusHandle && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?
@@ -1421,11 +1077,11 @@ class UITrait {
 	}
 
 	public function tagUIRedraw() {
-		headerHandle.redraws = 2;
-		toolbarHandle.redraws = 2;
-		statusHandle.redraws = 2;
-		workspaceHandle.redraws = 2;
-		menuHandle.redraws = 2;
+		UIHeader.inst.headerHandle.redraws = 2;
+		UIToolbar.inst.toolbarHandle.redraws = 2;
+		UIStatus.inst.statusHandle.redraws = 2;
+		UIMenubar.inst.workspaceHandle.redraws = 2;
+		UIMenubar.inst.menuHandle.redraws = 2;
 		hwnd.redraws = 2;
 		hwnd1.redraws = 2;
 		hwnd2.redraws = 2;

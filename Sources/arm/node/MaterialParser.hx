@@ -3,10 +3,10 @@ package arm.node;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
-import arm.ui.UITrait;
+import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.node.MaterialShader;
-import arm.Tool;
+import arm.Enums;
 
 class MaterialParser {
 
@@ -19,7 +19,7 @@ class MaterialParser {
 	}
 
 	public static function parseMeshMaterial() {
-		if (UITrait.inst.worktab.position == SpaceScene) return;
+		if (UISidebar.inst.worktab.position == SpaceScene) return;
 		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
@@ -35,7 +35,7 @@ class MaterialParser {
 			var sampler = con.frag.sharedSamplers[0];
 			scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!UITrait.inst.textureFilter) {
+		if (!UISidebar.inst.textureFilter) {
 			scon.overrideContext.filter = "point";
 		}
 		m.shader.raw.contexts.push(scon.raw);
@@ -46,7 +46,7 @@ class MaterialParser {
 	}
 
 	public static function parseParticleMaterial() {
-		var m = UITrait.inst.particleMaterial;
+		var m = UISidebar.inst.particleMaterial;
 		var sc: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
 		if (sc != null) {
@@ -63,7 +63,7 @@ class MaterialParser {
 	public static function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		var m = UITrait.inst.worktab.position == SpaceScene ? Context.materialScene.data : Project.materials[0].data;
+		var m = UISidebar.inst.worktab.position == SpaceScene ? Context.materialScene.data : Project.materials[0].data;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
 		m.shader.raw.contexts.remove(scon.raw);
@@ -92,7 +92,7 @@ class MaterialParser {
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
 
-		if (UITrait.inst.worktab.position == SpaceScene) {
+		if (UISidebar.inst.worktab.position == SpaceScene) {
 			makeVoxel(m);
 		}
 	}
@@ -114,7 +114,7 @@ class MaterialParser {
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
 
-		if (UITrait.inst.worktab.position == SpaceScene) {
+		if (UISidebar.inst.worktab.position == SpaceScene) {
 			parseMeshPreviewMaterial();
 			return;
 		}
