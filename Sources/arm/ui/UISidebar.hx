@@ -532,6 +532,7 @@ class UISidebar {
 					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
 					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
 					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
+					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.tool == ToolBrush ? ToolEraser : ToolBrush);
 				}
 
 				// Radius
