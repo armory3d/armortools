@@ -667,7 +667,7 @@ class UISidebar {
 		return mx > x && mx < x + w && my > y && my < y + h;
 	}
 
-	function getBrushRect(): TRect {
+	function getBrushStencilRect(): TRect {
 		var w = Std.int(brushStencilImage.width * (App.h() / brushStencilImage.height) * brushStencilScale);
 		var h = Std.int(App.h() * brushStencilScale);
 		var x = Std.int(App.x() + brushStencilX * App.w());
@@ -690,7 +690,7 @@ class UISidebar {
 		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint);
 
 		if (brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform)) {
-			var r = getBrushRect();
+			var r = getBrushStencilRect();
 			if (mouse.started("left")) {
 				brushStencilScaling =
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
@@ -702,7 +702,7 @@ class UISidebar {
 			if (mouse.down("left")) {
 				if (brushStencilScaling) {
 					var mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
-					brushStencilScale += mouse.movementX / 500 * mult;
+					brushStencilScale += mouse.movementX / 400 * mult;
 				}
 				else {
 					brushStencilX += mouse.movementX / App.w();
@@ -714,8 +714,13 @@ class UISidebar {
 				brushStencilScale -= mouse.wheelDelta / 10;
 			}
 			// Center after scale
-			brushStencilX += (_scale * brushStencilImage.width - brushStencilScale * brushStencilImage.width) / 2 / App.w();
-			brushStencilY += (_scale * brushStencilImage.height - brushStencilScale * brushStencilImage.height) / 2 / App.h();
+			var ratio = App.h() / brushStencilImage.height;
+			var oldW = _scale * brushStencilImage.width * ratio;
+			var newW = brushStencilScale * brushStencilImage.width * ratio;
+			var oldH = _scale * App.h();
+			var newH = brushStencilScale * App.h();
+			brushStencilX += (oldW - newW) / App.w() / 2;
+			brushStencilY += (oldH - newH) / App.h() / 2;
 		}
 
 		var down = Operator.shortcut(Config.keymap.action_paint) ||
@@ -923,7 +928,7 @@ class UISidebar {
 			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
 				var transform = Operator.shortcut(Config.keymap.stencil_transform);
 				g.color = 0x88ffffff;
-				var r = getBrushRect();
+				var r = getBrushStencilRect();
 				g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
 				g.color = 0xffffffff;
 				if (transform) {
