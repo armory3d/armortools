@@ -12,7 +12,7 @@ import arm.sys.File;
 
 class UIFiles {
 
-	public static var filename = tr("untitled");
+	public static var filename: String;
 	public static var path = defaultPath;
 	static var lastPath = "";
 	static var files: Array<String> = null;

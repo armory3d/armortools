@@ -39,10 +39,6 @@ import arm.Res;
 class App {
 
 	public static var uiEnabled = true;
-	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-	// "system" is a special case that will use the system locale
-	public static var locale = "system";
-	public static var translations: Map<String, String> = [];
 	public static var isDragging = false;
 	public static var isResizing = false;
 	public static var dragMaterial: MaterialSlot = null;
@@ -71,12 +67,10 @@ class App {
 
 	public function new() {
 		Log.init();
-		lastWindowHeight = System.windowHeight();
+		Translator.loadTranslations(Config.raw.locale);
 
-		if (Config.raw.locale != null) {
-			locale = Config.raw.locale;
-		};
-		loadTranslations(locale);
+		lastWindowHeight = System.windowHeight();
+		UIFiles.filename = tr("untitled");
 
 		#if arm_resizable
 		iron.App.onResize = onResize;
@@ -185,44 +179,6 @@ class App {
 				}
 			});
 		});
-	}
-
-	// (Re)loads translations for the specified locale.
-	public static function loadTranslations(newLocale: String) {
-		if (newLocale == "system") {
-			locale = Krom.language();
-		}
-
-		// Check whether the requested or detected locale is available
-		if (getSupportedLocales().indexOf(newLocale) == -1) {
-			// Fall back to English
-			locale = "en";
-		}
-
-		if (locale == "en") {
-			// No translations to load, as source strings are in English.
-			// Clear existing translations if switching languages at runtime.
-			translations.clear();
-			return;
-		}
-
-		// Load the translation file
-		var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${locale}.json')).toString();
-		var data: haxe.DynamicAccess<String> = haxe.Json.parse(translationJson);
-        for (key => value in data) {
-            translations[Std.string(key)] = value;
-		}
-	}
-
-	// Returns a list of supported locales (plus English and the automatically detected system locale).
-	public static function getSupportedLocales(): Array<String> {
-		var locales = ["system", "en"];
-		for (localeFilename in File.readDirectory(Path.data() + Path.sep + "locale")) {
-			// Trim the `.json` file extension from file names
-			locales.push(localeFilename.substr(0, -5));
-		}
-
-		return locales;
 	}
 
 	static function saveAndQuitCallback(save: Bool) {

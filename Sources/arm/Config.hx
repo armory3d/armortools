@@ -93,6 +93,7 @@ class Config {
 		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
 		configLoaded = false;
 		init();
+		Translator.loadTranslations(raw.locale);
 		#if arm_painter
 		applyConfig();
 		#end
@@ -182,8 +183,10 @@ class Config {
 }
 
 typedef TConfig = {
-	@:optional var locale: String; // ISO 639-1 locale code or "system" to use the system locale automatically
-  // Window
+	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+	// "system" is a special case that will use the system locale
+	@:optional var locale: String;
+	// Window
 	@:optional var window_mode: Null<Int>; // window, fullscreen
 	@:optional var window_w: Null<Int>;
 	@:optional var window_h: Null<Int>;

@@ -136,7 +136,7 @@ class UISidebar {
 	public var showAssetNames = false;
 
 	public var textToolImage: Image = null;
-	public var textToolText = tr("Text");
+	public var textToolText: String;
 	public var textToolHandle = new Handle();
 	public var particleMaterial: MaterialData = null;
 
@@ -276,6 +276,8 @@ class UISidebar {
 		new UIHeader();
 		new UIStatus();
 		new UIMenubar();
+
+		textToolText = tr("Text");
 
 		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);

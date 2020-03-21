@@ -18,20 +18,24 @@ class BoxPreferences {
 	public static var filesPlugin: Array<String> = null;
 	public static var filesKeymap: Array<String> = null;
 	public static var presetHandle: Handle;
+	static var locales: Array<String> = null;
 
 	@:access(zui.Zui)
 	public static function show() {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(htab, tr("Interface"), true)) {
 
-				var locales = App.getSupportedLocales();
-				var localeHandle = Id.handle({position: locales.indexOf(App.locale)});
-				ui.combo(localeHandle, locales, tr("Language (restart to apply changes)"), true);
+				if (locales == null) {
+					locales = Translator.getSupportedLocales();
+				}
+
+				var localeHandle = Id.handle({position: locales.indexOf(Config.raw.locale)});
+				ui.combo(localeHandle, locales, tr("Language"), true);
 				if (localeHandle.changed) {
 					var localeCode = locales[localeHandle.position];
 					Config.raw.locale = localeCode;
 					Config.save();
-					App.loadTranslations(localeCode);
+					Translator.loadTranslations(localeCode);
 					UISidebar.inst.tagUIRedraw();
 				}
 
