@@ -552,13 +552,13 @@ class UISidebar {
 						lockStartedX = mouse.x;
 						lockStartedY = mouse.y;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, true)) {
+					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
 						brushRadius -= getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_increase, true)) {
+					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
 						brushRadius += getRadiusIncrement();
 						brushRadius = Math.round(brushRadius * 100) / 100;
 						brushRadiusHandle.value = brushRadius;
@@ -583,13 +583,13 @@ class UISidebar {
 				camHandle.position = cameraType;
 				ViewportUtil.updateCameraType(cameraType);
 			}
-			else if (Operator.shortcut(Config.keymap.view_orbit_left, true)) ViewportUtil.orbit(-Math.PI / 12, 0);
-			else if (Operator.shortcut(Config.keymap.view_orbit_right, true)) ViewportUtil.orbit(Math.PI / 12, 0);
-			else if (Operator.shortcut(Config.keymap.view_orbit_up, true)) ViewportUtil.orbit(0, -Math.PI / 12);
-			else if (Operator.shortcut(Config.keymap.view_orbit_down, true)) ViewportUtil.orbit(0, Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) ViewportUtil.orbit(-Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) ViewportUtil.orbit(Math.PI / 12, 0);
+			else if (Operator.shortcut(Config.keymap.view_orbit_up, ShortcutRepeat)) ViewportUtil.orbit(0, -Math.PI / 12);
+			else if (Operator.shortcut(Config.keymap.view_orbit_down, ShortcutRepeat)) ViewportUtil.orbit(0, Math.PI / 12);
 			else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbit(Math.PI, 0);
-			else if (Operator.shortcut(Config.keymap.view_zoom_in, true)) ViewportUtil.zoom(0.2);
-			else if (Operator.shortcut(Config.keymap.view_zoom_out, true)) ViewportUtil.zoom(-0.2);
+			else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutRepeat)) ViewportUtil.zoom(0.2);
+			else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) ViewportUtil.zoom(-0.2);
 		}
 
 		if (brushCanLock || brushLocked) {
@@ -926,11 +926,13 @@ class UISidebar {
 			}
 
 			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
-				var transform = Operator.shortcut(Config.keymap.stencil_transform);
-				g.color = 0x88ffffff;
 				var r = getBrushStencilRect();
-				g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
-				g.color = 0xffffffff;
+				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
+					g.color = 0x88ffffff;
+					g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
+					g.color = 0xffffffff;
+				}
+				var transform = Operator.shortcut(Config.keymap.stencil_transform);
 				if (transform) {
 					g.drawRect(r.x, r.y, r.w, r.h);
 					g.drawRect(r.x - 8,       r.y - 8,       16, 16);

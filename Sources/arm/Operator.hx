@@ -14,7 +14,7 @@ class Operator {
 
 	public static function update() {}
 
-	public static function shortcut(s: String, repeat = false): Bool {
+	public static function shortcut(s: String, type = ShortcutStarted): Bool {
 		if (s == "") return false;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
@@ -28,7 +28,15 @@ class Operator {
 			s = s.substr(s.lastIndexOf("+") + 1);
 		}
 		else if (shift || ctrl || alt) return flag;
-		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) : repeat ? kb.repeat(s) : kb.started(s);
+		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) :
+			type == ShortcutRepeat ? kb.repeat(s) :
+			type == ShortcutDown ? kb.down(s) : kb.started(s);
 		return flag && key;
 	}
+}
+
+@:enum abstract ShortcutType(Int) from Int to Int {
+	var ShortcutStarted = 0;
+	var ShortcutRepeat = 1;
+	var ShortcutDown = 2;
 }
