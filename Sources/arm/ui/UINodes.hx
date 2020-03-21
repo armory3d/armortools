@@ -251,7 +251,7 @@ class UINodes {
 				searchHandle.text = "";
 			}
 			ui.t.BUTTON_COL = BUTTON_COL;
-		}, x, y);
+		}, 0, x, y);
 	}
 
 	public function getNodeX(): Int {
