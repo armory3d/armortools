@@ -6,10 +6,12 @@ import arm.node.MaterialShader;
 class MakeDiscard {
 
 	public static function colorId(vert: MaterialShader, frag: MaterialShader) {
+		vert.add_out('vec2 texCoordPick');
+		vert.write('texCoordPick = subtex;');
 		frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
 		frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
 		frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
-		frag.write('vec3 c2 = textureLod(texcolorid, subtex, 0).rgb;');
+		frag.write('vec3 c2 = textureLod(texcolorid, texCoordPick, 0).rgb;');
 		#if kha_opengl
 		frag.write('if (c1 != c2) discard;');
 		#else
