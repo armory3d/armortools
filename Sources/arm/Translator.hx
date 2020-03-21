@@ -53,6 +53,10 @@ class Translator {
 		for (key => value in data) {
 			translations[Std.string(key)] = value;
 		}
+
+		// Generate extended font atlas
+		// Basic Latin + Latin-1 Supplement + Latin Extended-A
+		kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
 	}
 
 	// Returns a list of supported locales (plus English and the automatically detected system locale).

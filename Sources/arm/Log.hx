@@ -38,6 +38,8 @@ class Log {
 		lastTraces.unshift(Std.string(v));
 		if (lastTraces.length > 10) lastTraces.pop();
 		haxeTrace(v, inf);
-		arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		if (arm.ui.UIStatus.inst != null) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
 	}
 }

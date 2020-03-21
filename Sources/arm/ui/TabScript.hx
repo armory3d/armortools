@@ -51,7 +51,7 @@ class TabScript {
 
 			var _font = ui.ops.font;
 			var _fontSize = ui.fontSize;
-			Data.getFont("font_mono_ascii.ttf", function(f: kha.Font) { ui.ops.font = f; }); // Sync
+			Data.getFont("font_mono.ttf", function(f: kha.Font) { ui.ops.font = f; }); // Sync
 			ui.fontSize = 15;
 			Ext.textArea(ui, hscript);
 			ui.ops.font = _font;
