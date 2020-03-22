@@ -111,6 +111,11 @@ class MakeMesh {
 				}
 				frag.write('basecol = texpaint_sample.rgb * texpaint_sample.a;');
 
+				if (l.texpaint_mask != null) {
+					frag.add_shared_sampler('sampler2D texpaint_mask');
+					frag.write('float maskTexture = textureLodShared(texpaint_mask, texCoord, 0.0).r;');
+				}
+
 				if (l.paintNor || MaterialBuilder.emisUsed) {
 					frag.add_shared_sampler('sampler2D texpaint_nor');
 					frag.write('vec4 texpaint_nor_sample = textureLodShared(texpaint_nor, texCoord, 0.0);');
@@ -123,6 +128,9 @@ class MakeMesh {
 						frag.write('vec3 ntex = texpaint_nor_sample.rgb;');
 						frag.write('n = ntex * 2.0 - 1.0;');
 						frag.write('n.y = -n.y;');
+						if (l.texpaint_mask != null) {
+							frag.write('n.xy *= maskTexture;');
+						}
 						frag.write('n = normalize(mul(n, TBN));');
 					}
 				}
@@ -188,8 +196,6 @@ class MakeMesh {
 				}
 
 				if (l.texpaint_mask != null) {
-					frag.add_shared_sampler('sampler2D texpaint_mask');
-					frag.write('float maskTexture = textureLodShared(texpaint_mask, texCoord, 0.0).r;');
 					frag.write('basecol *= maskTexture;');
 					frag.write('occlusion *= maskTexture;');
 					frag.write('roughness *= maskTexture;');
