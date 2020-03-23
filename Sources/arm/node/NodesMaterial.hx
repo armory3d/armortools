@@ -1,6 +1,7 @@
 package arm.node;
 
 import zui.Nodes;
+import arm.Enums;
 
 class NodesMaterial {
 
@@ -2167,8 +2168,10 @@ class NodesMaterial {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var canvas = Context.material.canvas;
-					var nodes = Context.material.nodes;
+					var isScene = arm.ui.UISidebar.inst.worktab.position == SpaceScene;
+					var material = isScene ? Context.materialScene : Context.material;
+					var canvas = material.canvas;
+					var nodes = material.nodes;
 					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

@@ -455,7 +455,6 @@ class UINodes {
 
 		if (drawMenu) {
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
-			var canvas = canvasType == CanvasMaterial ? Context.material.canvas : Context.brush.canvas;
 			var numNodes = list[menuCategory].length;
 
 			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
@@ -472,6 +471,7 @@ class UINodes {
 
 			for (n in list[menuCategory]) {
 				if (ui.button("      " + n.name, Left)) {
+					var canvas = getCanvas();
 					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
