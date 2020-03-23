@@ -214,7 +214,8 @@ class MakePaint {
 
 		if (UISidebar.inst.brushMaskImage != null && Context.tool == ToolDecal) {
 			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
-			frag.write('opacity *= textureLod(texbrushmask, texCoord, 0.0).r;');
+			frag.write('vec4 mask_sample = textureLod(texbrushmask, texCoord, 0.0);');
+			frag.write('opacity *= mask_sample.r * mask_sample.a;');
 		}
 		else if (Context.tool == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
@@ -262,7 +263,7 @@ class MakePaint {
 				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}
 			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
-			frag.write('float4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
+			frag.write('vec4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
 			frag.write('opacity *= mask_sample.r * mask_sample.a;');
 		}
 
@@ -316,8 +317,8 @@ class MakePaint {
 				frag.write('metallic = 0.0;');
 				frag.write('matid = 0.0;');
 			}
-			else if (decal) {
-				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, basecol, str), max(str, sample_undo.a));');
+			else if (decal || UISidebar.inst.brushMaskImage != null) {
+				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, UISidebar.inst.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 			}
 			else {
 				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, UISidebar.inst.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
