@@ -26,7 +26,9 @@ class TabBrushes {
 			if (ui.button(tr("Import"))) {
 				Project.importBrush();
 			}
-			if (ui.button(tr("Nodes"))) UISidebar.inst.showBrushNodes();
+			if (ui.button(tr("Nodes"))) {
+				UISidebar.inst.showBrushNodes();
+			}
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);

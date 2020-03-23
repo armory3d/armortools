@@ -444,7 +444,7 @@ class UISidebar {
 				show2DView();
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
-				showMaterialNodes();
+				UINodes.inst.canvasType == CanvasMaterial ? showMaterialNodes() : showBrushNodes();
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_browser)) {
 				toggleBrowser();
@@ -1016,18 +1016,16 @@ class UISidebar {
 	public function showMaterialNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
-
-		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasMaterial) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasMaterial; }
+		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasMaterial;
+		UINodes.inst.canvasType = CanvasMaterial;
 		App.resize();
 	}
 
 	public function showBrushNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
-
-		if (UINodes.inst.show && UINodes.inst.canvasType == CanvasBrush) UINodes.inst.show = false;
-		else { UINodes.inst.show = true; UINodes.inst.canvasType = CanvasBrush; }
+		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasBrush;
+		UINodes.inst.canvasType = CanvasBrush;
 		App.resize();
 	}
 
