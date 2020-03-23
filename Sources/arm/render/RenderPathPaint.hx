@@ -182,7 +182,7 @@ class RenderPathPaint {
 					}
 					path.clearImage("voxels", 0x00000000);
 					path.setTarget("");
-					path.setViewport(256, 256);
+					path.setViewport(Inc.getVoxelRes(), Inc.getVoxelRes());
 					path.bindTarget("voxels", "voxels");
 					path.drawMeshes("voxel");
 					path.generateMipmaps("voxels");
