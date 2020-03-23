@@ -994,7 +994,14 @@ class UISidebar {
 				}
 			}
 
-			if (brushLazyRadius > 0 && !brushLocked && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+			if (brushLazyRadius > 0 && !brushLocked &&
+				(Context.tool == ToolBrush ||
+				 Context.tool == ToolEraser ||
+				 Context.tool == ToolDecal ||
+				 Context.tool == ToolText ||
+				 Context.tool == ToolClone ||
+				 Context.tool == ToolBlur ||
+				 Context.tool == ToolParticle)) {
 				g.fillRect(mx - 1, my - 1, 2, 2);
 				var mx = UISidebar.inst.brushLazyX * App.w() + App.x();
 				var my = UISidebar.inst.brushLazyY * App.h() + App.y();
