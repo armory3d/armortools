@@ -493,9 +493,9 @@ class UISidebar {
 						brushOpacityHandle.value = brushOpacity;
 					}
 					else if(Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
-						brushAngle += mouse.movementX / 5;
-						brushAngle = Math.max(0.0, Math.min(360.0, brushAngle));
-						brushAngle = Std.int(brushAngle);
+						brushAngle -= mouse.movementX / 5;
+						brushAngle = Std.int(brushAngle) % 360;
+						if (brushAngle < 0) brushAngle += 360;
 						brushAngleHandle.value = brushAngle;
 						MaterialParser.parsePaintMaterial();
 					}
