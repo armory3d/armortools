@@ -317,6 +317,8 @@ class RenderUtil {
 		UISidebar.inst.paintVec.y = _y;
 		UISidebar.inst.lastPaintVecX = _lastX;
 		UISidebar.inst.lastPaintVecY = _lastY;
+		UISidebar.inst.prevPaintVecX = -1;
+		UISidebar.inst.prevPaintVecY = -1;
 		Context.pdirty = _pdirty;
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;

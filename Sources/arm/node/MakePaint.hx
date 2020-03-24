@@ -244,13 +244,10 @@ class MakePaint {
 			frag.write('binp_mask.x *= aspectRatio;');
 			frag.write('binp_mask = binp_mask * 0.5 + 0.5;');
 			frag.write('vec2 pa_mask = bsp.xy - binp_mask.xy;');
-			// if (UISidebar.inst.brushDirectional) {
-			// 	frag.add_uniform('vec2 brushDirection', '_brushDirection');
-			// 	frag.write('pa_mask.xy = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
-			// }
 			if (UISidebar.inst.brushDirectional) {
-				frag.write('float maskAngle = atan2(-inp.y + inplast.y, inp.x - inplast.x) - 3.141592 / 2;');
-				frag.write('pa_mask.xy = vec2(pa_mask.x * cos(maskAngle) - pa_mask.y * sin(maskAngle), pa_mask.x * sin(maskAngle) + pa_mask.y * cos(maskAngle));');
+				frag.add_uniform('vec3 brushDirection', '_brushDirection');
+				frag.write('if (brushDirection.z == 0.0) discard;');
+				frag.write('pa_mask.xy = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
 			}
 			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			if (angle != 0.0) {

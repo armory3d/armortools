@@ -20,9 +20,24 @@ class MakeTexcoord {
 				frag.write_attrib('uvsp -= inp.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
+
+				if (UISidebar.inst.brushDirectional) {
+					frag.add_uniform('vec3 brushDirection', '_brushDirection');
+					frag.write_attrib('if (brushDirection.z == 0.0) discard;');
+					frag.write_attrib('uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');
+				}
+				var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
+				var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
+				if (uvAngle != 0.0) {
+					var a = uvAngle * (Math.PI / 180);
+					frag.write_attrib('uvsp = vec2(uvsp.x * ${Math.cos(a)} - uvsp.y * ${Math.sin(a)}, uvsp.x * ${Math.sin(a)} + uvsp.y * ${Math.cos(a)});');
+				}
+
 				frag.add_uniform('float brushScaleX', '_brushScaleX');
 				frag.write_attrib('uvsp.x *= brushScaleX;');
+
 				frag.write_attrib('uvsp += vec2(0.5, 0.5);');
+
 				frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
 			}
 			else {
@@ -30,21 +45,6 @@ class MakeTexcoord {
 			}
 
 			frag.write_attrib('vec2 texCoord = uvsp * brushScale;');
-
-			// if (UISidebar.inst.brushDirectional) {
-			// 	frag.add_uniform('vec2 brushDirection', '_brushDirection');
-			// 	frag.write('texCoord = vec2(texCoord.x * brushDirection.x - texCoord.y * brushDirection.y, texCoord.x * brushDirection.y + texCoord.y * brushDirection.x);');
-			// }
-			if (UISidebar.inst.brushDirectional) {
-				frag.write('float maskAngleBrush = atan2(-inp.y + inplast.y, inp.x - inplast.x) - 3.141592 / 2;');
-				frag.write('texCoord = vec2(texCoord.x * cos(maskAngleBrush) - texCoord.y * sin(maskAngleBrush), texCoord.x * sin(maskAngleBrush) + texCoord.y * cos(maskAngleBrush));');
-			}
-			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
-			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
-			if (uvAngle != 0.0) {
-				var a = uvAngle * (Math.PI / 180);
-				frag.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
-			}
 		}
 		else if (uvType == UVMap) { // TexCoords - uvmap
 			vert.add_uniform('float brushScale', '_brushScale');

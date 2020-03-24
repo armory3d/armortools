@@ -127,16 +127,6 @@ class Uniforms {
 			vec2.set(UISidebar.inst.cloneDeltaX, UISidebar.inst.cloneDeltaY, 0);
 			return vec2;
 		}
-		if (link == "_brushDirection") {
-			var x = UISidebar.inst.paintVec.x;
-			var y = UISidebar.inst.paintVec.y;
-			var lastx = UISidebar.inst.lastPaintVecX;
-			var lasty = UISidebar.inst.lastPaintVecY;
-			if (UISidebar.inst.paint2d) { x -= 1.0; lastx -= 1.0; }
-			var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
-			vec2.set(Math.cos(angle), Math.sin(angle), 0);
-			return vec2;
-		}
 		#end
 		return null;
 	}
@@ -262,6 +252,23 @@ class Uniforms {
 				v.y = arm.data.HosekWilkie.data.hosekZ.y;
 				v.z = arm.data.HosekWilkie.data.hosekZ.z;
 			}
+			return v;
+		}
+		#end
+		#if arm_painter
+		if (link == "_brushDirection") {
+			v = iron.object.Uniforms.helpVec;
+			if (UISidebar.inst.lastPaintVecX != UISidebar.inst.paintVec.x) UISidebar.inst.prevPaintVecX = UISidebar.inst.lastPaintVecX;
+			if (UISidebar.inst.lastPaintVecY != UISidebar.inst.paintVec.y) UISidebar.inst.prevPaintVecY = UISidebar.inst.lastPaintVecY;
+			var x = UISidebar.inst.paintVec.x;
+			var y = UISidebar.inst.paintVec.y;
+			var lastx = UISidebar.inst.prevPaintVecX;
+			var lasty = UISidebar.inst.prevPaintVecY;
+			if (UISidebar.inst.paint2d) { x -= 1.0; lastx -= 1.0; }
+			var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
+			// Discard first paint for directional brush
+			var allowPaint = (UISidebar.inst.prevPaintVecX > 0 && UISidebar.inst.prevPaintVecY > 0) ? 1 : 0;
+			v.set(Math.cos(angle), Math.sin(angle), allowPaint);
 			return v;
 		}
 		#end

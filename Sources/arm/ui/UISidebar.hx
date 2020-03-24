@@ -231,6 +231,8 @@ class UISidebar {
 
 	public var lastPaintVecX = -1.0;
 	public var lastPaintVecY = -1.0;
+	public var prevPaintVecX = -1.0;
+	public var prevPaintVecY = -1.0;
 	public var frame = 0;
 	public var paint2d = false;
 
@@ -786,6 +788,8 @@ class UISidebar {
 		}
 		else if (brushTime > 0) { // Brush released
 			brushTime = 0;
+			prevPaintVecX = -1;
+			prevPaintVecY = -1;
 			#if (!kha_direct3d12) // Keep accumulated samples for D3D12
 			Context.ddirty = 3;
 			#end
