@@ -18,7 +18,14 @@ class ImportAsset {
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;
 			if (UINodes.inst.show && dropX > x0 && dropX < x1) {
-				UINodes.inst.acceptAssetDrag(Project.assets.length - 1);
+				var assetIndex = 0;
+				for (i in 0...Project.assets.length) {
+					if (Project.assets[i].file == path) {
+						assetIndex = i;
+						break;
+					}
+				}
+				UINodes.inst.acceptAssetDrag(assetIndex);
 				UINodes.inst.getNodes().nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}
