@@ -189,8 +189,8 @@ vec3 brightcontrast(const vec3 col, const float bright, const float contr) {
 
 //
 
+	#if rp_voxelao
 	static inline var voxRes = arm.render.Inc.getVoxelRes();
-
 	public static var str_traceAO = '
 float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist, const float offset) {
 	const ivec3 voxelgiResolution = ivec3($voxRes, $voxRes, $voxRes);
@@ -241,6 +241,7 @@ float traceAO(const vec3 origin, const vec3 normal, const float vrange, const fl
 	return col / 9.0;
 }
 ';
+	#end
 
 	public static var str_cotangentFrame = "
 mat3 cotangentFrame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2) {
