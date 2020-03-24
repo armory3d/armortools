@@ -13,6 +13,7 @@
 	"brush_radius_decrease": "[",
 	"brush_radius_increase": "]",
 	"brush_opacity": "shift+f",
+	"brush_angle": "alt+f",
 	"brush_ruler": "shift",
 	"file_new": "ctrl+n",
 	"file_open": "ctrl+o",

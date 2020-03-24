@@ -160,9 +160,8 @@ class UIHeader {
 							}
 						}
 
-						var brushAngleHandle = Id.handle({value: UISidebar.inst.brushAngle});
-						UISidebar.inst.brushAngle = ui.slider(brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
-						if (brushAngleHandle.changed) {
+						UISidebar.inst.brushAngle = ui.slider(UISidebar.inst.brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
+						if (UISidebar.inst.brushAngleHandle.changed) {
 							MaterialParser.parsePaintMaterial();
 						}
 					}

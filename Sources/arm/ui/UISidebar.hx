@@ -187,6 +187,7 @@ class UISidebar {
 	public var brushOpacityHandle = new Handle({value: 1.0});
 	public var brushScale = 1.0;
 	public var brushAngle = 0.0;
+	public var brushAngleHandle = new Handle({value: 0.0});
 	public var brushHardness = 0.8;
 	public var brushLazyRadius = 0.0;
 	public var brushLazyStep = 0.0;
@@ -480,14 +481,23 @@ class UISidebar {
 
 		var mouse = Input.getMouse();
 
-		if (brushCanLock || brushLocked) {
-			if (kb.down(Config.keymap.brush_radius) && mouse.moved) {
+		if ((brushCanLock || brushLocked) && mouse.moved) {
+			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) ||
+				Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) ||
+				Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
 				if (brushLocked) {
-					if (kb.down("shift")) {
+					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown)) {
 						brushOpacity += mouse.movementX / 500;
 						brushOpacity = Math.max(0.0, Math.min(1.0, brushOpacity));
 						brushOpacity = Math.round(brushOpacity * 100) / 100;
 						brushOpacityHandle.value = brushOpacity;
+					}
+					else if(Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
+						brushAngle += mouse.movementX / 5;
+						brushAngle = Math.max(0.0, Math.min(360.0, brushAngle));
+						brushAngle = Std.int(brushAngle);
+						brushAngleHandle.value = brushAngle;
+						MaterialParser.parsePaintMaterial();
 					}
 					else {
 						brushRadius += mouse.movementX / 150;
@@ -546,7 +556,8 @@ class UISidebar {
 					Context.tool == ToolBlur   ||
 					Context.tool == ToolParticle) {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
-						Operator.shortcut(Config.keymap.brush_opacity)) {
+						Operator.shortcut(Config.keymap.brush_opacity) ||
+						Operator.shortcut(Config.keymap.brush_angle)) {
 						brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
 						lockStartedX = mouse.x;
@@ -978,11 +989,14 @@ class UISidebar {
 					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
 					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
 					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
+					var angle = (brushAngle + brushNodesAngle) * (Math.PI / 180);
+					g.pushRotation(-angle, mx, my);
 					#if (kha_direct3d11 || kha_direct3d12)
 					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
 					#else
 					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
 					#end
+					g.popTransformation();
 					g.color = 0xffffffff;
 				}
 				else if (Context.tool == ToolBrush  ||
