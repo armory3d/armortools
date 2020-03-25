@@ -154,9 +154,11 @@ class BoxPreferences {
 				ui.enabled = true;
 			}
 			if (ui.tab(htab, tr("Pen"), true)) {
+				ui.text(tr("Pressure controls"));
 				UISidebar.penPressureRadius = ui.check(Id.handle({selected: UISidebar.penPressureRadius}), tr("Brush Radius"));
 				UISidebar.penPressureHardness = ui.check(Id.handle({selected: UISidebar.penPressureHardness}), tr("Brush Hardness"));
 				UISidebar.penPressureOpacity = ui.check(Id.handle({selected: UISidebar.penPressureOpacity}), tr("Brush Opacity"));
+				UISidebar.penPressureAngle = ui.check(Id.handle({selected: UISidebar.penPressureAngle}), tr("Brush Angle"));
 				UISidebar.penPressureSensitivity = ui.slider(Id.handle({value: UISidebar.penPressureSensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
 			}
 

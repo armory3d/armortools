@@ -139,6 +139,10 @@ class Uniforms {
 			var brushAngle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			var angle = Context.layer.material_mask != null ? Context.layer.angle : brushAngle;
 			angle *= (Math.PI / 180);
+			var pen = Input.getPen();
+			if (UISidebar.penPressureAngle && pen.down()) {
+				angle *= pen.pressure * UISidebar.penPressureSensitivity;
+			}
 			vec2.set(Math.cos(angle), Math.sin(angle), 0);
 			return vec2;
 		}
