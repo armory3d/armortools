@@ -61,8 +61,17 @@ class MakeBrush {
 				frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
 			}
 			frag.write('vec3 ba = winplast.xyz - winp.xyz;');
-			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-			frag.write('float dist = length(pa - ba * h);');
+
+			if (UISidebar.inst.brushLazyRadius > 0 && UISidebar.inst.brushLazyStep > 0) {
+				// Sphere
+				frag.write('float dist = distance(wposition, winp.xyz);');
+			}
+			else {
+				// Capsule
+				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+				frag.write('float dist = length(pa - ba * h);');
+			}
+
 			frag.write('if (dist > brushRadius) discard;');
 		}
 		else { // !brush3d

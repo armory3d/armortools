@@ -214,12 +214,12 @@ class MakePaint {
 
 		if (UISidebar.inst.brushMaskImage != null && Context.tool == ToolDecal) {
 			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
-			frag.write('vec4 mask_sample = textureLod(texbrushmask, texCoord, 0.0);');
+			frag.write('vec4 mask_sample = textureLod(texbrushmask, uvsp, 0.0);');
 			frag.write('opacity *= mask_sample.r * mask_sample.a;');
 		}
 		else if (Context.tool == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
-			frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
+			frag.write('opacity *= textureLod(textexttool, uvsp, 0.0).r;');
 		}
 
 		if (UISidebar.inst.brushStencilImage != null && (
