@@ -85,11 +85,14 @@ class App {
 		});
 
 		System.notifyOnApplicationState(
-			// Release alt after alt-tab
-			function(){ @:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt); }, // Foreground
+			function(){}, // Foreground
 			function(){}, // Resume
 			function(){}, // Pause
-			function(){}, // Background
+			function(){ // Background
+				// Release keys after alt-tab / win-tab
+				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt);
+				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Win);
+			},
 			function(){} // Shutdown
 		);
 
