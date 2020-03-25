@@ -574,7 +574,7 @@ class TabLayers {
 						@:privateAccess ui.endElement();
 
 						var scaleHandle = Id.handle().nest(l.id, {value: l.scale});
-						l.scale = ui.slider(scaleHandle, tr("Scale"), 0.0, 5.0, true);
+						l.scale = ui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
 						if (scaleHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);

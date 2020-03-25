@@ -151,7 +151,7 @@ class UIHeader {
 						Context.tool == ToolDecal  ||
 						Context.tool == ToolText) {
 						var brushScaleHandle = Id.handle({value: UISidebar.inst.brushScale});
-						UISidebar.inst.brushScale = ui.slider(brushScaleHandle, tr("Scale"), 0.01, 5.0, true);
+						UISidebar.inst.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 						if (brushScaleHandle.changed) {
 							if (Context.tool == ToolDecal || Context.tool == ToolText) {
 								ui.g.end();
