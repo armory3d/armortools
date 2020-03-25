@@ -29,7 +29,9 @@ class InputNode extends LogicNode {
 			UISidebar.inst.brushLazyRadius = inputs[0].get();
 			UISidebar.inst.brushLazyStep = inputs[1].get();
 
-			var lazyPaint = UISidebar.inst.brushLazyRadius > 0 && Operator.shortcut(Config.keymap.action_paint);
+			var lazyPaint = UISidebar.inst.brushLazyRadius > 0 &&
+				(Operator.shortcut(Config.keymap.action_paint) ||
+				 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint));
 
 			var mouse = iron.system.Input.getMouse();
 			var paintX = mouse.viewX / iron.App.w();
