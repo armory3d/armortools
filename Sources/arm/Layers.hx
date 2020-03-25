@@ -306,12 +306,12 @@ class Layers {
 
 		if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 			if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-				commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+				commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, empty);
 			}
 			else {
-				if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
-				if (l1.paintRough) commandsMergePack(pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
-				if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity);
+				if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, empty);
+				if (l1.paintRough) commandsMergePack(pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, empty);
+				if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, empty);
 			}
 		}
 
@@ -323,13 +323,12 @@ class Layers {
 		Context.layerPreviewDirty = true;
 	}
 
-	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float) {
-		var empty = RenderPath.active.renderTargets.get("empty_white").image;
+	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float, i1texmask: kha.Image) {
 		i0.g4.begin();
 		i0.g4.setPipeline(pipe);
 		i0.g4.setTexture(tex0, i1);
 		i0.g4.setTexture(tex1, i1pack);
-		i0.g4.setTexture(texmask, empty);
+		i0.g4.setTexture(texmask, i1texmask);
 		i0.g4.setTexture(texa, imga);
 		i0.g4.setFloat(opac, i1maskOpacity);
 		i0.g4.setInt(blending, -1);
