@@ -251,8 +251,8 @@ class MakePaint {
 			}
 			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			if (angle != 0.0) {
-				var a = angle * (Math.PI / 180);
-				frag.write('pa_mask.xy = vec2(pa_mask.x * ${Math.cos(a)} - pa_mask.y * ${Math.sin(a)}, pa_mask.x * ${Math.sin(a)} + pa_mask.y * ${Math.cos(a)});');
+				frag.add_uniform('vec2 brushAngle', '_brushAngle');
+				frag.write('pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);');
 			}
 			frag.write('pa_mask /= brushRadius;');
 			if (UISidebar.inst.brush3d) {

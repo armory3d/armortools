@@ -127,6 +127,13 @@ class Uniforms {
 			vec2.set(UISidebar.inst.cloneDeltaX, UISidebar.inst.cloneDeltaY, 0);
 			return vec2;
 		}
+		if (link == "_brushAngle") {
+			var brushAngle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
+			var angle = Context.layer.material_mask != null ? Context.layer.angle : brushAngle;
+			angle *= (Math.PI / 180);
+			vec2.set(Math.cos(angle), Math.sin(angle), 0);
+			return vec2;
+		}
 		#end
 		return null;
 	}

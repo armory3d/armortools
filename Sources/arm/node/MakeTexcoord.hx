@@ -29,8 +29,8 @@ class MakeTexcoord {
 				var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 				var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 				if (uvAngle != 0.0) {
-					var a = uvAngle * (Math.PI / 180);
-					frag.write_attrib('uvsp = vec2(uvsp.x * ${Math.cos(a)} - uvsp.y * ${Math.sin(a)}, uvsp.x * ${Math.sin(a)} + uvsp.y * ${Math.cos(a)});');
+					frag.add_uniform('vec2 brushAngle', '_brushAngle');
+					frag.write_attrib('uvsp = vec2(uvsp.x * brushAngle.x - uvsp.y * brushAngle.y, uvsp.x * brushAngle.y + uvsp.y * brushAngle.x);');
 				}
 
 				frag.add_uniform('float brushScaleX', '_brushScaleX');
@@ -54,8 +54,8 @@ class MakeTexcoord {
 			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 			if (uvAngle > 0.0) {
-				var a = uvAngle * (Math.PI / 180);
-				vert.write('texCoord = vec2(texCoord.x * ${Math.cos(a)} - texCoord.y * ${Math.sin(a)}, texCoord.x * ${Math.sin(a)} + texCoord.y * ${Math.cos(a)});');
+				vert.add_uniform('vec2 brushAngle', '_brushAngle');
+				vert.write('texCoord = vec2(texCoord.x * brushAngle.x - texCoord.y * brushAngle.y, texCoord.x * brushAngle.y + texCoord.y * brushAngle.x);');
 			}
 		}
 		else { // Triplanar
