@@ -153,6 +153,43 @@ class NodesBrush {
 			},
 			{
 				id: 0,
+				name: "Random",
+				type: "RandomNode",
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Min",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: "Max",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					}
+				],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: "Value",
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.5
+					}
+				],
+				buttons: []
+			},
+			{
+				id: 0,
 				name: "Vector",
 				type: "VectorNode",
 				x: 0,
