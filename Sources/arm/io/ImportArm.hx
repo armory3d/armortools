@@ -153,7 +153,12 @@ class ImportArm {
 
 			Project.brushes = [];
 			for (n in project.brush_nodes) {
-				Project.brushes.push(new BrushSlot(n));
+				initNodes(n.nodes);
+				Context.brush = new BrushSlot(n);
+				Project.brushes.push(Context.brush);
+				MaterialParser.parseBrush();
+				UISidebar.inst.parseBrushInputs();
+				RenderUtil.makeBrushPreview();
 			}
 
 			// Synchronous for now
