@@ -157,6 +157,7 @@ class BoxPreferences {
 				UISidebar.penPressureRadius = ui.check(Id.handle({selected: UISidebar.penPressureRadius}), tr("Brush Radius"));
 				UISidebar.penPressureHardness = ui.check(Id.handle({selected: UISidebar.penPressureHardness}), tr("Brush Hardness"));
 				UISidebar.penPressureOpacity = ui.check(Id.handle({selected: UISidebar.penPressureOpacity}), tr("Brush Opacity"));
+				UISidebar.penPressureSensitivity = ui.slider(Id.handle({value: UISidebar.penPressureSensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
 			}
 
 			UISidebar.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});

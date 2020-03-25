@@ -27,7 +27,9 @@ class Uniforms {
 		if (link == "_brushRadius") {
 			var val = (UISidebar.inst.brushRadius * UISidebar.inst.brushNodesRadius) / 15.0;
 			var pen = Input.getPen();
-			if (UISidebar.penPressureRadius && pen.down()) val *= pen.pressure;
+			if (UISidebar.penPressureRadius && pen.down()) {
+				val *= pen.pressure * UISidebar.penPressureSensitivity;
+			}
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (UISidebar.inst.brush3d && !decal) {
 				val *= UISidebar.inst.paint2d ? 0.6 : 2;
@@ -41,15 +43,21 @@ class Uniforms {
 		if (link == "_brushOpacity") {
 			var val = UISidebar.inst.brushOpacity * UISidebar.inst.brushNodesOpacity;
 			var pen = Input.getPen();
-			if (UISidebar.penPressureOpacity && pen.down()) val *= pen.pressure;
+			if (UISidebar.penPressureOpacity && pen.down()) {
+				val *= pen.pressure * UISidebar.penPressureSensitivity;
+			}
 			return val;
 		}
 		if (link == "_brushHardness") {
 			if (Context.tool != ToolBrush && Context.tool != ToolEraser) return 1.0;
 			var val = UISidebar.inst.brushHardness * UISidebar.inst.brushNodesHardness;
 			var pen = Input.getPen();
-			if (UISidebar.penPressureHardness && pen.down()) val *= pen.pressure;
-			if (UISidebar.inst.brush3d && !UISidebar.inst.paint2d) val *= val;
+			if (UISidebar.penPressureHardness && pen.down()) {
+				val *= pen.pressure * UISidebar.penPressureSensitivity;
+			}
+			if (UISidebar.inst.brush3d && !UISidebar.inst.paint2d) {
+				val *= val;
+			}
 			return val;
 		}
 		if (link == "_brushScale") {

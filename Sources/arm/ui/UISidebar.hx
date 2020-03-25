@@ -37,6 +37,7 @@ class UISidebar {
 	public static var penPressureRadius = true;
 	public static var penPressureHardness = true;
 	public static var penPressureOpacity = false;
+	public static var penPressureSensitivity = 1.0;
 
 	public var windowW = 280; // Panel width
 	public var tabx = 0;
