@@ -25,7 +25,7 @@ import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
 import arm.Enums;
-import arm.Project;
+import arm.ProjectFormat;
 import arm.Res;
 
 @:access(zui.Zui)

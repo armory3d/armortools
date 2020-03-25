@@ -16,7 +16,7 @@ import iron.object.Object;
 import iron.object.MeshObject;
 import iron.Scene;
 import iron.RenderPath;
-import arm.Project;
+import arm.ProjectFormat;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.sys.Path;

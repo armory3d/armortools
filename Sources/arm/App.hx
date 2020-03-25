@@ -33,7 +33,7 @@ import arm.data.ConstData;
 import arm.plugin.Camera;
 import arm.node.MaterialParser;
 import arm.Enums;
-import arm.Project;
+import arm.ProjectFormat;
 import arm.Res;
 
 class App {

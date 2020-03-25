@@ -16,7 +16,7 @@ import arm.node.MaterialParser;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
 import arm.Enums;
-import arm.Project;
+import arm.ProjectFormat;
 
 class Layers {
 

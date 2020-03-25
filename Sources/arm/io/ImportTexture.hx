@@ -4,7 +4,7 @@ import kha.Image;
 import iron.data.Data;
 import arm.ui.UISidebar;
 import arm.sys.Path;
-import arm.Project;
+import arm.ProjectFormat;
 
 class ImportTexture {
 
