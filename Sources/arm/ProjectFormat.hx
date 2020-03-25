@@ -4,7 +4,7 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 
 typedef TProjectFormat = {
-	@:optional public var version: String;
+	public var version: String;
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
 	@:optional public var brush_icons: Array<haxe.io.Bytes>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
@@ -30,6 +30,15 @@ typedef TLayerData = {
 	public var object_mask: Int;
 	public var blending: Int;
 	public var parent: Int;
+	public var paint_base: Bool;
+	public var paint_opac: Bool;
+	public var paint_occ: Bool;
+	public var paint_rough: Bool;
+	public var paint_met: Bool;
+	public var paint_nor: Bool;
+	public var paint_height: Bool;
+	public var paint_emis: Bool;
+	public var paint_subs: Bool;
 }
 
 typedef TAsset = {

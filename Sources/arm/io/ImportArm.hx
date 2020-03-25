@@ -267,6 +267,16 @@ class ImportArm {
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
 
+					l.paintBase = ld.paint_base;
+					l.paintOpac = ld.paint_opac;
+					l.paintOcc = ld.paint_occ;
+					l.paintRough = ld.paint_rough;
+					l.paintMet = ld.paint_met;
+					l.paintNor = ld.paint_nor;
+					l.paintHeight = ld.paint_height;
+					l.paintEmis = ld.paint_emis;
+					l.paintSubs = ld.paint_subs;
+
 					// texpaint.unload();
 					// texpaint_nor.unload();
 					// texpaint_pack.unload();

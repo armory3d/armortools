@@ -59,7 +59,16 @@ class ExportArm {
 				material_mask: l.material_mask != null ? Project.materials.indexOf(l.material_mask) : -1,
 				object_mask: l.objectMask,
 				blending: l.blending,
-				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1
+				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1,
+				paint_base: l.paintBase,
+				paint_opac: l.paintOpac,
+				paint_occ: l.paintOcc,
+				paint_rough: l.paintRough,
+				paint_met: l.paintMet,
+				paint_nor: l.paintNor,
+				paint_height: l.paintHeight,
+				paint_emis: l.paintEmis,
+				paint_subs: l.paintSubs
 			});
 		}
 
