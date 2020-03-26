@@ -1,6 +1,7 @@
 package arm.io;
 
 import haxe.io.Bytes;
+import haxe.io.BytesOutput;
 
 class ExportObj {
 
@@ -9,7 +10,9 @@ class ExportObj {
 		var height = applyDisplacement ? Project.layers[0].texpaint_pack.getPixels() : null;
 		var res = Project.layers[0].texpaint_pack.width;
 
-		var s = "";
+		var o = new BytesOutput();
+		o.bigEndian = false;
+
 		var off = 0;
 		for (p in Project.paintObjects) {
 			var mesh = p.data.raw;
@@ -23,20 +26,31 @@ class ExportObj {
 			// if (applyDisplacement) {
 			// }
 
-			s += "o " + p.name + "\n";
+			o.writeString("o " + p.name + "\n");
 			for (i in 0...len) {
-				s += "v " + posa[i * 4    ] * sc  + " " +
-							posa[i * 4 + 2] * sc  + " " +
-						  (-posa[i * 4 + 1] * sc) + "\n";
+				o.writeString("v ");
+				o.writeString(posa[i * 4] * sc + "");
+				o.writeString(" ");
+				o.writeString(posa[i * 4 + 2] * sc + "");
+				o.writeString(" ");
+				o.writeString(-posa[i * 4 + 1] * sc + "");
+				o.writeString("\n");
 			}
 			for (i in 0...len) {
-				s += "vn " + nora[i * 2    ] * inv  + " " +
-							 posa[i * 4 + 3] * inv  + " " +
-						   (-nora[i * 2 + 1] * inv) + "\n";
+				o.writeString("vn ");
+				o.writeString(nora[i * 2] * inv + "");
+				o.writeString(" ");
+				o.writeString(posa[i * 4 + 3] * inv + "");
+				o.writeString(" ");
+				o.writeString(-nora[i * 2 + 1] * inv + "");
+				o.writeString("\n");
 			}
 			for (i in 0...len) {
-				s += "vt " +        texa[i * 2    ] * inv  + " " +
-							 (1.0 - texa[i * 2 + 1] * inv) + "\n";
+				o.writeString("vt ");
+				o.writeString(texa[i * 2] * inv + "");
+				o.writeString(" ");
+				o.writeString(1.0 - texa[i * 2 + 1] * inv + "");
+				o.writeString("\n");
 			}
 
 			var inda = mesh.index_arrays[0].values;
@@ -44,15 +58,31 @@ class ExportObj {
 				var i1 = inda[i * 3    ] + 1 + off;
 				var i2 = inda[i * 3 + 1] + 1 + off;
 				var i3 = inda[i * 3 + 2] + 1 + off;
-				s += "f " + i1 + "/" + i1 + "/" + i1 + " " +
-							i2 + "/" + i2 + "/" + i2 + " " +
-							i3 + "/" + i3 + "/" + i3 + "\n";
+				o.writeString("f ");
+				o.writeString(i1 + "");
+				o.writeString("/");
+				o.writeString(i1 + "");
+				o.writeString("/");
+				o.writeString(i1 + "");
+				o.writeString(" ");
+				o.writeString(i2 + "");
+				o.writeString("/");
+				o.writeString(i2 + "");
+				o.writeString("/");
+				o.writeString(i2 + "");
+				o.writeString(" ");
+				o.writeString(i3 + "");
+				o.writeString("/");
+				o.writeString(i3 + "");
+				o.writeString("/");
+				o.writeString(i3 + "");
+				o.writeString("\n");
 			}
 			off += inda.length;
 		}
 
 		if (!path.endsWith(".obj")) path += ".obj";
 
-		Krom.fileSaveBytes(path, Bytes.ofString(s).getData());
+		Krom.fileSaveBytes(path, o.getBytes().getData());
 	}
 }

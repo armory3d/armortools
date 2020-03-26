@@ -194,9 +194,12 @@ class BoxExport {
 
 				var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
 
-				var mesh = Context.paintObject.data.raw;
-				var inda = mesh.index_arrays[0].values;
-				var tris = Std.int(inda.length / 3);
+				var tris = 0;
+				for (po in Project.paintObjects) {
+					for (inda in po.data.raw.index_arrays) {
+						tris += Std.int(inda.values.length / 3);
+					}
+				}
 				ui.text(tris + " triangles");
 
 				ui.row([0.5, 0.5]);
