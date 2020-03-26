@@ -126,15 +126,14 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
-			}
-
-			if (type == View2DLayer) {
-				ui.g.pipeline = pipe;
-				drawLayer(tex, tx, ty, tw, th, channel);
-				ui.g.pipeline = null;
-			}
-			else {
-				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+				if (type == View2DLayer) {
+					ui.g.pipeline = pipe;
+					drawLayer(tex, tx, ty, tw, th, channel);
+					ui.g.pipeline = null;
+				}
+				else {
+					ui.g.drawScaledImage(tex, tx, ty, tw, th);
+				}
 			}
 
 			// UV map

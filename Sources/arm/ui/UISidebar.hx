@@ -853,6 +853,7 @@ class UISidebar {
 		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
 		else UIView2D.inst.show = !UIView2D.inst.show;
 		UIView2D.inst.type = type;
+		UIView2D.inst.hwnd.redraws = 2;
 		App.resize();
 	}
 
