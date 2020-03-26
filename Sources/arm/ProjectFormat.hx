@@ -30,6 +30,7 @@ typedef TLayerData = {
 	public var object_mask: Int;
 	public var blending: Int;
 	public var parent: Int;
+	public var visible: Bool;
 	public var paint_base: Bool;
 	public var paint_opac: Bool;
 	public var paint_occ: Bool;

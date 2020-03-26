@@ -60,6 +60,7 @@ class ExportArm {
 				object_mask: l.objectMask,
 				blending: l.blending,
 				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1,
+				visible: l.visible,
 				paint_base: l.paintBase,
 				paint_opac: l.paintOpac,
 				paint_occ: l.paintOcc,

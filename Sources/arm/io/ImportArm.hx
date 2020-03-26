@@ -266,7 +266,7 @@ class ImportArm {
 					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
-
+					l.visible = ld.visible;
 					l.paintBase = ld.paint_base;
 					l.paintOpac = ld.paint_opac;
 					l.paintOcc = ld.paint_occ;
