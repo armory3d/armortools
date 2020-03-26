@@ -29,8 +29,8 @@ class Uniforms {
 		if (link == "_brushRadius") {
 			var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
 			var pen = Input.getPen();
-			if (Context.penPressureRadius && pen.down()) {
-				val *= pen.pressure * Context.penPressureSensitivity;
+			if (Config.raw.pressure_radius && pen.down()) {
+				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (Context.brush3d && !decal) {
@@ -45,8 +45,8 @@ class Uniforms {
 		if (link == "_brushOpacity") {
 			var val = Context.brushOpacity * Context.brushNodesOpacity;
 			var pen = Input.getPen();
-			if (Context.penPressureOpacity && pen.down()) {
-				val *= pen.pressure * Context.penPressureSensitivity;
+			if (Config.raw.pressure_opacity && pen.down()) {
+				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			return val;
 		}
@@ -54,8 +54,8 @@ class Uniforms {
 			if (Context.tool != ToolBrush && Context.tool != ToolEraser) return 1.0;
 			var val = Context.brushHardness * Context.brushNodesHardness;
 			var pen = Input.getPen();
-			if (Context.penPressureHardness && pen.down()) {
-				val *= pen.pressure * Context.penPressureSensitivity;
+			if (Config.raw.pressure_hardness && pen.down()) {
+				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			if (Context.brush3d && !Context.paint2d) {
 				val *= val;
@@ -141,8 +141,8 @@ class Uniforms {
 			var angle = Context.layer.material_mask != null ? Context.layer.angle : brushAngle;
 			angle *= (Math.PI / 180);
 			var pen = Input.getPen();
-			if (Context.penPressureAngle && pen.down()) {
-				angle *= pen.pressure * Context.penPressureSensitivity;
+			if (Config.raw.pressure_angle && pen.down()) {
+				angle *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			vec.set(Math.cos(angle), Math.sin(angle), 0);
 			return vec;

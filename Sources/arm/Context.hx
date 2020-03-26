@@ -43,12 +43,6 @@ class Context {
 	public static var layerPreviewDirty = true;
 	public static var layersPreviewDirty = false;
 
-	public static var penPressureRadius = true;
-	public static var penPressureHardness = true;
-	public static var penPressureAngle = false;
-	public static var penPressureOpacity = false;
-	public static var penPressureSensitivity = 1.0;
-
 	public static var colorIdPicked = false;
 	public static var splitView = false;
 	public static var viewIndex = -1;

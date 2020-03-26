@@ -24,8 +24,13 @@ typedef TConfig = {
 	@:optional var rp_gi: Null<Bool>;
 	// Application
 	@:optional var version: String; // ArmorPaint version
-	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
-	@:optional var undo_steps: Null<Int>;	// Number of undo steps to preserve
+	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var keymap: String; // Link to keymap file
+	@:optional var undo_steps: Null<Int>; // Number of undo steps to preserve
+	@:optional var pressure_radius: Null<Bool>; // Pen pressure controls
+	@:optional var pressure_hardness: Null<Bool>;
+	@:optional var pressure_angle: Null<Bool>;
+	@:optional var pressure_opacity: Null<Bool>;
+	@:optional var pressure_sensitivity: Null<Float>;
 }

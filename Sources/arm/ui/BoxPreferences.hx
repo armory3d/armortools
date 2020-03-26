@@ -155,11 +155,11 @@ class BoxPreferences {
 			}
 			if (ui.tab(htab, tr("Pen"), true)) {
 				ui.text(tr("Pressure controls"));
-				Context.penPressureRadius = ui.check(Id.handle({selected: Context.penPressureRadius}), tr("Brush Radius"));
-				Context.penPressureHardness = ui.check(Id.handle({selected: Context.penPressureHardness}), tr("Brush Hardness"));
-				Context.penPressureOpacity = ui.check(Id.handle({selected: Context.penPressureOpacity}), tr("Brush Opacity"));
-				Context.penPressureAngle = ui.check(Id.handle({selected: Context.penPressureAngle}), tr("Brush Angle"));
-				Context.penPressureSensitivity = ui.slider(Id.handle({value: Context.penPressureSensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
+				Config.raw.pressure_radius = ui.check(Id.handle({selected: Config.raw.pressure_radius}), tr("Brush Radius"));
+				Config.raw.pressure_hardness = ui.check(Id.handle({selected: Config.raw.pressure_hardness}), tr("Brush Hardness"));
+				Config.raw.pressure_opacity = ui.check(Id.handle({selected: Config.raw.pressure_opacity}), tr("Brush Opacity"));
+				Config.raw.pressure_angle = ui.check(Id.handle({selected: Config.raw.pressure_angle}), tr("Brush Angle"));
+				Config.raw.pressure_sensitivity = ui.slider(Id.handle({value: Config.raw.pressure_sensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
 			}
 
 			Context.hssgi = Id.handle({selected: Config.raw.rp_ssgi});

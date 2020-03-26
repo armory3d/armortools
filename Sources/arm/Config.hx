@@ -68,9 +68,17 @@ class Config {
 			#if (krom_android || krom_ios)
 			raw.window_scale = 2.0;
 			#end
+
 			#if arm_painter
-			raw.undo_steps = 4;
+			raw.bookmarks = [];
+			raw.plugins = [];
 			raw.keymap = "default.json";
+			raw.undo_steps = 4;
+			raw.pressure_radius = true;
+			raw.pressure_hardness = true;
+			raw.pressure_angle = false;
+			raw.pressure_opacity = false;
+			raw.pressure_sensitivity = 1.0;
 			#end
 		}
 		else {
