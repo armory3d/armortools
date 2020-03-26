@@ -307,6 +307,7 @@ class TabLayers {
 								if (l.parent != null && l.parent.getChildren() == null) {
 									l.parent.delete();
 								}
+								Context.ddirty = 2;
 							}
 						}
 						if (ui.button(tr("Move Up"), Left)) {
