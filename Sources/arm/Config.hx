@@ -70,6 +70,8 @@ class Config {
 			#end
 
 			#if arm_painter
+			raw.version = Main.version;
+			raw.sha = Main.sha;
 			raw.bookmarks = [];
 			raw.plugins = [];
 			raw.keymap = "default.json";
@@ -86,13 +88,14 @@ class Config {
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
-			if (raw.version != Main.version) {
-				{
-					// Upgrade logic here
-					// ...
-				}
-				raw.version = Main.version;
-				save();
+			// if (raw.version != Main.version) {
+			// 	raw.version = Main.version;
+			// 	save();
+			// }
+			if (raw.sha != Main.sha) {
+				configLoaded = false;
+				init();
+				return;
 			}
 		}
 
@@ -130,13 +133,12 @@ class Config {
 
 	#if arm_painter
 	public static function applyConfig() {
-		var c = Config.raw;
-		c.rp_ssgi = Context.hssgi.selected;
-		c.rp_ssr = Context.hssr.selected;
-		c.rp_bloom = Context.hbloom.selected;
-		c.rp_gi = Context.hvxao.selected;
-		c.rp_supersample = getSuperSampleSize(Context.hsupersample.position);
-		iron.object.Uniforms.defaultFilter = c.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
+		Config.raw.rp_ssgi = Context.hssgi.selected;
+		Config.raw.rp_ssr = Context.hssr.selected;
+		Config.raw.rp_bloom = Context.hbloom.selected;
+		Config.raw.rp_gi = Context.hvxao.selected;
+		Config.raw.rp_supersample = getSuperSampleSize(Context.hsupersample.position);
+		iron.object.Uniforms.defaultFilter = Config.raw.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
 		save();
 		Context.ddirty = 2;
 

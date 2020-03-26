@@ -350,11 +350,7 @@ class UIMenu {
 					File.explorer("https://github.com/armory3d/armorpaint/issues");
 				}
 				if (ui.button("      " + tr("Report Bug"), Left)) {
-					var ver = Main.version;
-					var sha = BuildMacros.sha();
-					sha = sha.substr(1, sha.length - 2);
-					var os = System.systemId;
-					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + ver + "-" + sha + ",%20" + os + "*";
+					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*";
 					File.explorer(url);
 				}
 				if (ui.button("      " + tr("Check for Updates..."), Left)) {
@@ -381,11 +377,8 @@ class UIMenu {
 					}
 				}
 				if (ui.button("      " + tr("About..."), Left)) {
-					var sha = BuildMacros.sha();
-					sha = sha.substr(1, sha.length - 2);
-					var date = BuildMacros.date().split(" ")[0];
 					var gapi = #if (kha_direct3d11) "Direct3D11" #elseif (kha_direct3d12) "Direct3D12" #else "OpenGL" #end;
-					var msg = "ArmorPaint.org - v" + Main.version + " (" + date + ") - " + sha + "\n";
+					var msg = "ArmorPaint.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows

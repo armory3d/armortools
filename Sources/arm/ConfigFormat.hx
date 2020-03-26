@@ -24,6 +24,7 @@ typedef TConfig = {
 	@:optional var rp_gi: Null<Bool>;
 	// Application
 	@:optional var version: String; // ArmorPaint version
+	@:optional var sha: String; // Commit id
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
 	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var keymap: String; // Link to keymap file

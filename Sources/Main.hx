@@ -10,6 +10,7 @@ import iron.RenderPath;
 import arm.render.Inc;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
+import arm.util.BuildMacros;
 import arm.Config;
 #if arm_player
 import arm.sys.Path;
@@ -18,6 +19,8 @@ import arm.sys.Path;
 class Main {
 
 	public static var version = "0.8";
+	public static var sha = BuildMacros.sha().substr(1, 7);
+	public static var date = BuildMacros.date().split(" ")[0];
 
 	static var tasks: Int;
 
