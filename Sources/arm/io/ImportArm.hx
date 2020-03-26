@@ -109,8 +109,8 @@ class ImportArm {
 			}
 
 			Context.layersPreviewDirty = true;
-			Project.filepath = path;
 			Project.projectNew(false);
+			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 
