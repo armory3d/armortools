@@ -183,6 +183,11 @@ class App {
 						}
 					});
 				}
+
+				// Non-default theme selected
+				if (Config.raw.theme != "dark.json") {
+					arm.ui.BoxPreferences.loadTheme(Config.raw.theme);
+				}
 			});
 		});
 	}

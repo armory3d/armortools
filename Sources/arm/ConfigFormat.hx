@@ -27,6 +27,7 @@ typedef TConfig = {
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
 	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var keymap: String; // Link to keymap file
+	@:optional var theme: String; // Link to theme file
 	@:optional var undo_steps: Null<Int>; // Number of undo steps to preserve
 	@:optional var pressure_radius: Null<Bool>; // Pen pressure controls
 	@:optional var pressure_hardness: Null<Bool>;

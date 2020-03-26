@@ -19,6 +19,7 @@ class BoxPreferences {
 	public static var filesKeymap: Array<String> = null;
 	public static var presetHandle: Handle;
 	static var locales: Array<String> = null;
+	static var themes: Array<String> = null;
 
 	@:access(zui.Zui)
 	public static function show() {
@@ -48,24 +49,17 @@ class BoxPreferences {
 					setScale();
 				}
 				Context.hscaleWasChanged = hscale.changed;
-				var themeHandle = Id.handle();
-				var themes = ["Dark", "Light"];
+
+				if (themes == null) {
+					themes = File.readDirectory(Path.data() + Path.sep + "themes");
+					for (i in 0...themes.length) themes[i] = themes[i].substr(0, themes[i].length - 5); // Trim .json
+					themes.unshift("dark");
+				}
+				var themeHandle = Id.handle({position: themes.indexOf(Config.raw.theme.substr(0, Config.raw.theme.length - 5))});
 				ui.combo(themeHandle, themes, tr("Theme"), true);
 				if (themeHandle.changed) {
-					var theme = themes[themeHandle.position].toLowerCase();
-					if (theme == "dark") { // Built-in default
-						App.theme = zui.Themes.dark;
-					}
-					else {
-						Data.getBlob("themes/theme_" + theme + ".arm", function(b: kha.Blob) {
-							App.theme = Json.parse(b.toString());
-						});
-					}
-					ui.t = App.theme;
-					UISidebar.inst.ui.t = App.theme;
-					UINodes.inst.ui.t = App.theme;
-					UIView2D.inst.ui.t = App.theme;
-					UISidebar.inst.tagUIRedraw();
+					Config.raw.theme = themes[themeHandle.position] + ".json";
+					loadTheme(Config.raw.theme);
 				}
 
 				#if (!krom_android && !krom_ios)
@@ -389,5 +383,21 @@ plugin.drawUI = function(ui) {
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);
 		App.resize();
+	}
+
+	public static function loadTheme(theme: String) {
+		if (theme == "dark.json") { // Built-in default
+			App.theme = zui.Themes.dark;
+		}
+		else {
+			Data.getBlob("themes/" + theme, function(b: kha.Blob) {
+				App.theme = Json.parse(b.toString());
+			});
+		}
+		App.uiBox.t = App.theme;
+		UISidebar.inst.ui.t = App.theme;
+		UINodes.inst.ui.t = App.theme;
+		UIView2D.inst.ui.t = App.theme;
+		UISidebar.inst.tagUIRedraw();
 	}
 }

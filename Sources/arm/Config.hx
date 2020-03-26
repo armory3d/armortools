@@ -73,6 +73,7 @@ class Config {
 			raw.bookmarks = [];
 			raw.plugins = [];
 			raw.keymap = "default.json";
+			raw.theme = "dark.json";
 			raw.undo_steps = 4;
 			raw.pressure_radius = true;
 			raw.pressure_hardness = true;
@@ -105,6 +106,7 @@ class Config {
 		Translator.loadTranslations(raw.locale);
 		#if arm_painter
 		applyConfig();
+		arm.ui.BoxPreferences.loadTheme(raw.theme);
 		#end
 	}
 
