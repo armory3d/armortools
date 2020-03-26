@@ -41,13 +41,13 @@ class BoxPreferences {
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
 				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
-				if (!hscale.changed && UISidebar.inst.hscaleWasChanged) {
+				if (!hscale.changed && Context.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					Config.save();
 					setScale();
 				}
-				UISidebar.inst.hscaleWasChanged = hscale.changed;
+				Context.hscaleWasChanged = hscale.changed;
 				var themeHandle = Id.handle();
 				var themes = ["Dark", "Light"];
 				ui.combo(themeHandle, themes, tr("Theme"), true);
@@ -69,14 +69,14 @@ class BoxPreferences {
 				}
 
 				#if (!krom_android && !krom_ios)
-				UISidebar.inst.nativeBrowser = ui.check(Id.handle({selected: UISidebar.inst.nativeBrowser}), tr("Native File Browser"));
+				Context.nativeBrowser = ui.check(Id.handle({selected: Context.nativeBrowser}), tr("Native File Browser"));
 				#end
 
-				UISidebar.inst.cacheDraws = ui.check(Id.handle({selected: UISidebar.inst.cacheDraws}), tr("Cache UI Draws"));
+				Context.cacheDraws = ui.check(Id.handle({selected: Context.cacheDraws}), tr("Cache UI Draws"));
 				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));
 
 				ui.changed = false;
-				UISidebar.inst.showAssetNames = ui.check(Id.handle({selected: UISidebar.inst.showAssetNames}), tr("Show Asset Names"));
+				Context.showAssetNames = ui.check(Id.handle({selected: Context.showAssetNames}), tr("Show Asset Names"));
 				if (ui.changed) {
 					UISidebar.inst.tagUIRedraw();
 				}
@@ -101,9 +101,9 @@ class BoxPreferences {
 				}
 			}
 			if (ui.tab(htab, tr("Usage"), true)) {
-				UISidebar.inst.undoHandle = Id.handle({value: Config.raw.undo_steps});
-				Config.raw.undo_steps = Std.int(ui.slider(UISidebar.inst.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
-				if (UISidebar.inst.undoHandle.changed) {
+				Context.undoHandle = Id.handle({value: Config.raw.undo_steps});
+				Config.raw.undo_steps = Std.int(ui.slider(Context.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
+				if (Context.undoHandle.changed) {
 					ui.g.end();
 					while (History.undoLayers.length < Config.raw.undo_steps) {
 						var l = new LayerSlot("_undo" + History.undoLayers.length);
@@ -119,35 +119,35 @@ class BoxPreferences {
 					Config.save();
 				}
 
-				UISidebar.inst.brushBias = ui.slider(Id.handle({value: UISidebar.inst.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
+				Context.brushBias = ui.slider(Id.handle({value: Context.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
 				if (ui.isHovered) ui.tooltip(tr("Stretch brush strokes on the uv map to prevent seams"));
 
-				UISidebar.inst.dilateRadius = ui.slider(Id.handle({value: UISidebar.inst.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
+				Context.dilateRadius = ui.slider(Id.handle({value: Context.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
 				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
-				var brushLiveHandle = Id.handle({selected: UISidebar.inst.brushLive});
-				UISidebar.inst.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
+				var brushLiveHandle = Id.handle({selected: Context.brushLive});
+				Context.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Draw live brush preview in viewport"));
 				if (brushLiveHandle.changed) Context.ddirty = 2;
 
-				var brush3dHandle = Id.handle({selected: UISidebar.inst.brush3d});
-				UISidebar.inst.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
+				var brush3dHandle = Id.handle({selected: Context.brush3d});
+				Context.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
-				ui.enabled = UISidebar.inst.brush3d;
-				var brushDepthRejectHandle = Id.handle({selected: UISidebar.inst.brushDepthReject});
-				UISidebar.inst.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
+				ui.enabled = Context.brush3d;
+				var brushDepthRejectHandle = Id.handle({selected: Context.brushDepthReject});
+				Context.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
 				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
 				ui.row([0.5, 0.5]);
 
-				var brushAngleRejectHandle = Id.handle({selected: UISidebar.inst.brushAngleReject});
-				UISidebar.inst.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
+				var brushAngleRejectHandle = Id.handle({selected: Context.brushAngleReject});
+				Context.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
 				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
 
-				if (!UISidebar.inst.brushAngleReject) ui.enabled = false;
-				var angleDotHandle = Id.handle({value: UISidebar.inst.brushAngleRejectDot});
-				UISidebar.inst.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
+				if (!Context.brushAngleReject) ui.enabled = false;
+				var angleDotHandle = Id.handle({value: Context.brushAngleRejectDot});
+				Context.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
 				if (angleDotHandle.changed) {
 					MaterialParser.parsePaintMaterial();
 				}
@@ -155,21 +155,21 @@ class BoxPreferences {
 			}
 			if (ui.tab(htab, tr("Pen"), true)) {
 				ui.text(tr("Pressure controls"));
-				UISidebar.penPressureRadius = ui.check(Id.handle({selected: UISidebar.penPressureRadius}), tr("Brush Radius"));
-				UISidebar.penPressureHardness = ui.check(Id.handle({selected: UISidebar.penPressureHardness}), tr("Brush Hardness"));
-				UISidebar.penPressureOpacity = ui.check(Id.handle({selected: UISidebar.penPressureOpacity}), tr("Brush Opacity"));
-				UISidebar.penPressureAngle = ui.check(Id.handle({selected: UISidebar.penPressureAngle}), tr("Brush Angle"));
-				UISidebar.penPressureSensitivity = ui.slider(Id.handle({value: UISidebar.penPressureSensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
+				Context.penPressureRadius = ui.check(Id.handle({selected: Context.penPressureRadius}), tr("Brush Radius"));
+				Context.penPressureHardness = ui.check(Id.handle({selected: Context.penPressureHardness}), tr("Brush Hardness"));
+				Context.penPressureOpacity = ui.check(Id.handle({selected: Context.penPressureOpacity}), tr("Brush Opacity"));
+				Context.penPressureAngle = ui.check(Id.handle({selected: Context.penPressureAngle}), tr("Brush Angle"));
+				Context.penPressureSensitivity = ui.slider(Id.handle({value: Context.penPressureSensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
 			}
 
-			UISidebar.inst.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
-			UISidebar.inst.hssr = Id.handle({selected: Config.raw.rp_ssr});
-			UISidebar.inst.hbloom = Id.handle({selected: Config.raw.rp_bloom});
-			UISidebar.inst.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
-			UISidebar.inst.hvxao = Id.handle({selected: Config.raw.rp_gi});
+			Context.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
+			Context.hssr = Id.handle({selected: Config.raw.rp_ssr});
+			Context.hbloom = Id.handle({selected: Config.raw.rp_bloom});
+			Context.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
+			Context.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
-				ui.combo(UISidebar.inst.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
-				if (UISidebar.inst.hsupersample.changed) Config.applyConfig();
+				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
+				if (Context.hsupersample.changed) Config.applyConfig();
 
 				#if arm_debug
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
@@ -178,9 +178,9 @@ class BoxPreferences {
 				#end
 
 				#if rp_voxelao
-				ui.check(UISidebar.inst.hvxao, tr("Voxel AO"));
+				ui.check(Context.hvxao, tr("Voxel AO"));
 				if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
-				if (UISidebar.inst.hvxao.changed) {
+				if (Context.hvxao.changed) {
 					Config.applyConfig();
 					#if arm_creator
 					MaterialParser.parseMeshMaterial();
@@ -188,33 +188,33 @@ class BoxPreferences {
 				}
 
 				ui.row([0.5, 0.5]);
-				ui.enabled = UISidebar.inst.hvxao.selected;
-				var h = Id.handle({value: UISidebar.inst.vxaoOffset});
-				UISidebar.inst.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
+				ui.enabled = Context.hvxao.selected;
+				var h = Id.handle({value: Context.vxaoOffset});
+				Context.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
-				var h = Id.handle({value: UISidebar.inst.vxaoAperture});
-				UISidebar.inst.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
+				var h = Id.handle({value: Context.vxaoAperture});
+				Context.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
 				if (h.changed) Context.ddirty = 2;
 				ui.enabled = true;
 				#end
-				ui.check(UISidebar.inst.hssgi, tr("SSAO"));
-				if (UISidebar.inst.hssgi.changed) Config.applyConfig();
-				ui.check(UISidebar.inst.hbloom, tr("Bloom"));
-				if (UISidebar.inst.hbloom.changed) Config.applyConfig();
-				ui.check(UISidebar.inst.hssr, tr("SSR"));
-				if (UISidebar.inst.hssr.changed) Config.applyConfig();
+				ui.check(Context.hssgi, tr("SSAO"));
+				if (Context.hssgi.changed) Config.applyConfig();
+				ui.check(Context.hbloom, tr("Bloom"));
+				if (Context.hbloom.changed) Config.applyConfig();
+				ui.check(Context.hssr, tr("SSR"));
+				if (Context.hssr.changed) Config.applyConfig();
 
-				var h = Id.handle({value: UISidebar.inst.vignetteStrength});
-				UISidebar.inst.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
+				var h = Id.handle({value: Context.vignetteStrength});
+				Context.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
 				if (h.changed) Context.ddirty = 2;
 
-				// var h = Id.handle({value: UISidebar.inst.autoExposureStrength});
-				// UISidebar.inst.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
+				// var h = Id.handle({value: Context.autoExposureStrength});
+				// Context.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.ddirty = 2;
 
 				#if arm_creator
-				var h = Id.handle({value: UISidebar.inst.vxaoExt});
-				UISidebar.inst.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
+				var h = Id.handle({value: Context.vxaoExt});
+				Context.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
 				if (h.changed) {
 					Context.ddirty = 2;
 					MaterialParser.parseMeshMaterial();

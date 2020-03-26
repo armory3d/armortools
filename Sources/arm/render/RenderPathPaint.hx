@@ -7,7 +7,6 @@ import iron.object.MeshObject;
 import iron.RenderPath;
 import iron.Scene;
 import arm.util.ViewportUtil;
-import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.node.MaterialParser;
@@ -98,12 +97,12 @@ class RenderPathPaint {
 	public static function commandsPaint() {
 		var tid = Context.layer.id;
 
-		if (Context.pdirty > 0 && UISidebar.inst.worktab.position != SpaceScene) {
+		if (Context.pdirty > 0 && UIHeader.inst.worktab.position != SpaceScene) {
 			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
-				if ((UISidebar.inst.xray || UISidebar.inst.brushAngleReject) && UISidebar.inst.brush3d) {
+				if ((Context.xray || Context.brushAngleReject) && Context.brush3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 
@@ -144,24 +143,24 @@ class RenderPathPaint {
 				var b = texpaint_nor_picker.getPixels();
 				var c = texpaint_pack_picker.getPixels();
 				// Picked surface values
-				UISidebar.inst.baseRPicked = a.get(0) / 255;
-				UISidebar.inst.baseGPicked = a.get(1) / 255;
-				UISidebar.inst.baseBPicked = a.get(2) / 255;
-				UISidebar.inst.uvxPicked = a.get(3) / 255;
-				UISidebar.inst.normalRPicked = b.get(0) / 255;
-				UISidebar.inst.normalGPicked = b.get(1) / 255;
-				UISidebar.inst.normalBPicked = b.get(2) / 255;
-				UISidebar.inst.uvyPicked = c.get(3) / 255;
-				UISidebar.inst.occlusionPicked = c.get(0) / 255;
-				UISidebar.inst.roughnessPicked = c.get(1) / 255;
-				UISidebar.inst.metallicPicked = c.get(2) / 255;
+				Context.baseRPicked = a.get(0) / 255;
+				Context.baseGPicked = a.get(1) / 255;
+				Context.baseBPicked = a.get(2) / 255;
+				Context.uvxPicked = a.get(3) / 255;
+				Context.normalRPicked = b.get(0) / 255;
+				Context.normalGPicked = b.get(1) / 255;
+				Context.normalBPicked = b.get(2) / 255;
+				Context.uvyPicked = c.get(3) / 255;
+				Context.occlusionPicked = c.get(0) / 255;
+				Context.roughnessPicked = c.get(1) / 255;
+				Context.metallicPicked = c.get(2) / 255;
 				// Pick material
-				if (UISidebar.inst.pickerSelectMaterial) {
+				if (Context.pickerSelectMaterial) {
 					var matid = b.get(3);
 					for (m in Project.materials) {
 						if (m.id == matid) {
 							Context.setMaterial(m);
-							UISidebar.inst.materialIdPicked = matid;
+							Context.materialIdPicked = matid;
 							break;
 						}
 					}
@@ -169,7 +168,7 @@ class RenderPathPaint {
 			}
 			else {
 				#if rp_voxelao
-				if (Context.tool == ToolBake && UISidebar.inst.bakeType == BakeAO) {
+				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
@@ -189,7 +188,7 @@ class RenderPathPaint {
 				}
 				#end
 
-				if (Context.tool == ToolBake && UISidebar.inst.brushTime == iron.system.Time.delta) {
+				if (Context.tool == ToolBake && Context.brushTime == iron.system.Time.delta) {
 					// Clear to black on bake start
 					path.setTarget("texpaint" + tid);
 					path.clearTarget(0xff000000);
@@ -203,21 +202,21 @@ class RenderPathPaint {
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				path.bindTarget("_main", "gbufferD");
-				if ((UISidebar.inst.xray || UISidebar.inst.brushAngleReject) && UISidebar.inst.brush3d) {
+				if ((Context.xray || Context.brushAngleReject) && Context.brush3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
 				#if rp_voxelao
-				if (Context.tool == ToolBake && UISidebar.inst.bakeType == BakeAO) {
+				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}
 				#end
-				if (UISidebar.inst.colorIdPicked) {
+				if (Context.colorIdPicked) {
 					path.bindTarget("texpaint_colorid", "texpaint_colorid");
 				}
 
 				// Read texcoords from gbuffer
-				var readTC = (Context.tool == ToolFill && UISidebar.inst.fillTypeHandle.position == FillFace) ||
+				var readTC = (Context.tool == ToolFill && Context.fillTypeHandle.position == FillFace) ||
 							  Context.tool == ToolClone ||
 							  Context.tool == ToolBlur;
 				if (readTC) {
@@ -226,7 +225,7 @@ class RenderPathPaint {
 
 				path.drawMeshes("paint");
 
-				if (Context.tool == ToolBake && UISidebar.inst.bakeType == BakeCurvature && UISidebar.inst.bakeCurvSmooth > 0) {
+				if (Context.tool == ToolBake && Context.bakeType == BakeCurvature && Context.bakeCurvSmooth > 0) {
 					if (path.renderTargets.get("texpaint_blur") == null) {
 						var t = new RenderTargetRaw();
 						t.name = "texpaint_blur";
@@ -235,7 +234,7 @@ class RenderPathPaint {
 						t.format = "RGBA32";
 						path.createRenderTarget(t);
 					}
-					var blurs = Math.round(UISidebar.inst.bakeCurvSmooth);
+					var blurs = Math.round(Context.bakeCurvSmooth);
 					for (i in 0...blurs) {
 						path.setTarget("texpaint_blur");
 						path.bindTarget(texpaint, "tex");
@@ -319,20 +318,20 @@ class RenderPathPaint {
 		liveLayerDrawn = 2;
 
 		UIView2D.inst.hwnd.redraws = 2;
-		var _x = UISidebar.inst.paintVec.x;
-		var _y = UISidebar.inst.paintVec.y;
-		if (UISidebar.inst.brushLocked) {
-			UISidebar.inst.paintVec.x = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
-			UISidebar.inst.paintVec.y = (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		var _x = Context.paintVec.x;
+		var _y = Context.paintVec.y;
+		if (Context.brushLocked) {
+			Context.paintVec.x = (Context.lockStartedX - iron.App.x()) / iron.App.w();
+			Context.paintVec.y = (Context.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		var _lastX = UISidebar.inst.lastPaintVecX;
-		var _lastY = UISidebar.inst.lastPaintVecY;
+		var _lastX = Context.lastPaintVecX;
+		var _lastY = Context.lastPaintVecY;
 		var _pdirty = Context.pdirty;
-		UISidebar.inst.lastPaintVecX = UISidebar.inst.paintVec.x;
-		UISidebar.inst.lastPaintVecY = UISidebar.inst.paintVec.y;
+		Context.lastPaintVecX = Context.paintVec.x;
+		Context.lastPaintVecY = Context.paintVec.y;
 		if (Operator.shortcut(Config.keymap.brush_ruler)) {
-			UISidebar.inst.lastPaintVecX = UISidebar.inst.lastPaintX;
-			UISidebar.inst.lastPaintVecY = UISidebar.inst.lastPaintY;
+			Context.lastPaintVecX = Context.lastPaintX;
+			Context.lastPaintVecY = Context.lastPaintY;
 		}
 		Context.pdirty = 2;
 
@@ -341,10 +340,10 @@ class RenderPathPaint {
 
 		useLiveLayer(false);
 
-		UISidebar.inst.paintVec.x = _x;
-		UISidebar.inst.paintVec.y = _y;
-		UISidebar.inst.lastPaintVecX = _lastX;
-		UISidebar.inst.lastPaintVecY = _lastY;
+		Context.paintVec.x = _x;
+		Context.paintVec.y = _y;
+		Context.lastPaintVecX = _lastX;
+		Context.lastPaintVecY = _lastY;
 		Context.pdirty = _pdirty;
 		Context.brushBlendDirty = true;
 	}
@@ -358,29 +357,29 @@ class RenderPathPaint {
 			tool != ToolParticle) {
 				return;
 		}
-		if (!App.uiEnabled || UISidebar.inst.worktab.position == SpaceScene) {
+		if (!App.uiEnabled || UIHeader.inst.worktab.position == SpaceScene) {
 			return;
 		}
 
-		var mx = UISidebar.inst.paintVec.x;
-		var my = 1.0 - UISidebar.inst.paintVec.y;
-		if (UISidebar.inst.brushLocked) {
-			mx = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		var mx = Context.paintVec.x;
+		var my = 1.0 - Context.paintVec.y;
+		if (Context.brushLocked) {
+			mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		drawCursor(mx, my, UISidebar.inst.brushNodesRadius * UISidebar.inst.brushRadius / 3.4);
+		drawCursor(mx, my, Context.brushNodesRadius * Context.brushRadius / 3.4);
 
-		// if (UISidebar.inst.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-		// 	var _brushRadius = UISidebar.inst.brushRadius;
-		// 	UISidebar.inst.brushRadius = UISidebar.inst.brushLazyRadius;
-		// 	mx = UISidebar.inst.brushLazyX;
-		// 	my = 1.0 - UISidebar.inst.brushLazyY;
-		// 	if (UISidebar.inst.brushLocked) {
-		// 		mx = (UISidebar.inst.lockStartedX - iron.App.x()) / iron.App.w();
-		// 		my = 1.0 - (UISidebar.inst.lockStartedY - iron.App.y()) / iron.App.h();
+		// if (Context.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
+		// 	var _brushRadius = Context.brushRadius;
+		// 	Context.brushRadius = Context.brushLazyRadius;
+		// 	mx = Context.brushLazyX;
+		// 	my = 1.0 - Context.brushLazyY;
+		// 	if (Context.brushLocked) {
+		// 		mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
+		// 		my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
 		// 	}
 		// 	drawCursor(mx, my, 0.2, 0.2, 0.2);
-		// 	UISidebar.inst.brushRadius -= UISidebar.inst.brushLazyRadius;
+		// 	Context.brushRadius -= Context.brushLazyRadius;
 		// }
 	}
 
@@ -395,7 +394,7 @@ class RenderPathPaint {
 		path.setTarget("");
 		g.setPipeline(Layers.pipeCursor);
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var img = decal ? UISidebar.inst.decalImage : Res.get("cursor.k");
+		var img = decal ? Context.decalImage : Res.get("cursor.k");
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
@@ -418,43 +417,43 @@ class RenderPathPaint {
 	}
 
 	static function commandsSymmetry() {
-		if (UISidebar.inst.symX || UISidebar.inst.symY || UISidebar.inst.symZ) {
+		if (Context.symX || Context.symY || Context.symZ) {
 			Context.ddirty = 2;
 			var t = Context.paintObject.transform;
 			var sx = t.scale.x;
 			var sy = t.scale.y;
 			var sz = t.scale.z;
-			if (UISidebar.inst.symX) {
+			if (Context.symX) {
 				t.scale.set(-sx, sy, sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symY) {
+			if (Context.symY) {
 				t.scale.set(sx, -sy, sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symZ) {
+			if (Context.symZ) {
 				t.scale.set(sx, sy, -sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symX && UISidebar.inst.symY) {
+			if (Context.symX && Context.symY) {
 				t.scale.set(-sx, -sy, sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symX && UISidebar.inst.symZ) {
+			if (Context.symX && Context.symZ) {
 				t.scale.set(-sx, sy, -sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symY && UISidebar.inst.symZ) {
+			if (Context.symY && Context.symZ) {
 				t.scale.set(sx, -sy, -sz);
 				t.buildMatrix();
 				commandsPaint();
 			}
-			if (UISidebar.inst.symX && UISidebar.inst.symY && UISidebar.inst.symZ) {
+			if (Context.symX && Context.symY && Context.symZ) {
 				t.scale.set(-sx, -sy, -sz);
 				t.buildMatrix();
 				commandsPaint();
@@ -471,7 +470,7 @@ class RenderPathPaint {
 		}
 
 		// 2D paint
-		if (UISidebar.inst.paint2d) {
+		if (Context.paint2d) {
 			// Set plane mesh
 			painto = Context.paintObject;
 			visibles = [];
@@ -485,7 +484,7 @@ class RenderPathPaint {
 			}
 
 			var cam = Scene.active.camera;
-			UISidebar.inst.savedCamera.setFrom(cam.transform.local);
+			Context.savedCamera.setFrom(cam.transform.local);
 			savedFov = cam.data.raw.fov;
 			ViewportUtil.updateCameraType(CameraPerspective);
 			var m = Mat4.identity();
@@ -520,21 +519,21 @@ class RenderPathPaint {
 
 		if (liveLayerDrawn > 0) liveLayerDrawn--;
 
-		if (UISidebar.inst.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && UISidebar.inst.brushTime == 0) {
+		if (Context.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && Context.brushTime == 0) {
 			// Depth is unchanged, draw before gbuffer gets updated
 			commandsLiveBrush();
 		}
 	}
 
 	public static function end() {
-		if (UISidebar.inst.brush3d) commandsCursor();
+		if (Context.brush3d) commandsCursor();
 		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
 	}
 
 	public static function draw() {
-		if (UISidebar.inst.brushLive && Context.pdirty <= 0 && Context.ddirty > 0 && UISidebar.inst.brushTime == 0) {
+		if (Context.brushLive && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
 			commandsLiveBrush();
 		}
@@ -545,25 +544,25 @@ class RenderPathPaint {
 
 			if (Context.tool == ToolBake) {
 				if (Context.pdirty > 0) dilated = false;
-				if (UISidebar.inst.bakeType == BakeNormal || UISidebar.inst.bakeType == BakeHeight || UISidebar.inst.bakeType == BakeDerivative) {
+				if (Context.bakeType == BakeNormal || Context.bakeType == BakeHeight || Context.bakeType == BakeDerivative) {
 					if (!baking && Context.pdirty > 0) {
 						baking = true;
-						var _bakeType = UISidebar.inst.bakeType;
-						UISidebar.inst.bakeType = UISidebar.inst.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
+						var _bakeType = Context.bakeType;
+						Context.bakeType = Context.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
 						MaterialParser.parsePaintMaterial();
 						var _paintObject = Context.paintObject;
-						var highPoly = Project.paintObjects[UISidebar.inst.bakeHighPoly];
+						var highPoly = Project.paintObjects[Context.bakeHighPoly];
 						var _visible = highPoly.visible;
 						highPoly.visible = true;
 						Context.selectPaintObject(highPoly);
 						commandsPaint();
 						highPoly.visible = _visible;
-						UISidebar.inst.sub--;
+						Context.sub--;
 						if (pushUndoLast) History.paint();
 						Context.selectPaintObject(_paintObject);
 
 						function _renderFinal(_) {
-							UISidebar.inst.bakeType = _bakeType;
+							Context.bakeType = _bakeType;
 							MaterialParser.parsePaintMaterial();
 							Context.pdirty = 1;
 							commandsPaint();
@@ -572,25 +571,25 @@ class RenderPathPaint {
 							baking = false;
 						}
 						function _renderDeriv(_) {
-							UISidebar.inst.bakeType = BakeHeight;
+							Context.bakeType = BakeHeight;
 							MaterialParser.parsePaintMaterial();
 							Context.pdirty = 1;
 							commandsPaint();
 							Context.pdirty = 0;
-							UISidebar.inst.sub--;
+							Context.sub--;
 							if (pushUndoLast) History.paint();
 							iron.App.removeRender(_renderDeriv);
 							iron.App.notifyOnRender(_renderFinal);
 						}
-						iron.App.notifyOnRender(UISidebar.inst.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
+						iron.App.notifyOnRender(Context.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
-				else if (UISidebar.inst.bakeType == BakeObjectID) {
-					var _layerFilter = UISidebar.inst.layerFilter;
+				else if (Context.bakeType == BakeObjectID) {
+					var _layerFilter = Context.layerFilter;
 					var _paintObject = Context.paintObject;
 					var isMerged = Context.mergedObject != null;
 					var _visible = isMerged && Context.mergedObject.visible;
-					UISidebar.inst.layerFilter = 1;
+					Context.layerFilter = 1;
 					if (isMerged) Context.mergedObject.visible = false;
 
 					for (p in Project.paintObjects) {
@@ -598,15 +597,15 @@ class RenderPathPaint {
 						commandsPaint();
 					}
 
-					UISidebar.inst.layerFilter = _layerFilter;
+					Context.layerFilter = _layerFilter;
 					Context.selectPaintObject(_paintObject);
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
 				#if kha_direct3d12
-				else if (UISidebar.inst.bakeType == BakeAO  ||
-						 UISidebar.inst.bakeType == BakeLightmap ||
-						 UISidebar.inst.bakeType == BakeBentNormal ||
-						 UISidebar.inst.bakeType == BakeThickness) {
+				else if (Context.bakeType == BakeAO  ||
+						 Context.bakeType == BakeLightmap ||
+						 Context.bakeType == BakeBentNormal ||
+						 Context.bakeType == BakeThickness) {
 					RenderPathRaytrace.commandsBake();
 				}
 				#end
@@ -627,7 +626,7 @@ class RenderPathPaint {
 			path.clearTarget(0x00000000);
 		}
 
-		if (UISidebar.inst.paint2d) {
+		if (Context.paint2d) {
 			// Restore paint mesh
 			planeo.visible = false;
 			for (i in 0...Project.paintObjects.length) {
@@ -637,9 +636,9 @@ class RenderPathPaint {
 				Context.mergedObject.visible = mergedObjectVisible;
 			}
 			Context.paintObject = painto;
-			Scene.active.camera.transform.setMatrix(UISidebar.inst.savedCamera);
+			Scene.active.camera.transform.setMatrix(Context.savedCamera);
 			Scene.active.camera.data.raw.fov = savedFov;
-			ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+			ViewportUtil.updateCameraType(Context.cameraType);
 			Scene.active.camera.buildProjection();
 			Scene.active.camera.buildMatrix();
 
@@ -649,7 +648,7 @@ class RenderPathPaint {
 
 	public static function bindLayers() {
 
-		if (UISidebar.inst.brushLive && liveLayerDrawn > 0) useLiveLayer(true);
+		if (Context.brushLive && liveLayerDrawn > 0) useLiveLayer(true);
 
 		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
@@ -671,11 +670,11 @@ class RenderPathPaint {
 	}
 
 	public static function unbindLayers() {
-		if (UISidebar.inst.brushLive && liveLayerDrawn > 0) useLiveLayer(false);
+		if (Context.brushLive && liveLayerDrawn > 0) useLiveLayer(false);
 	}
 
 	public static function finishPaint() {
-		if (Context.tool == ToolBake && !dilated && UISidebar.inst.dilateRadius > 0) {
+		if (Context.tool == ToolBake && !dilated && Context.dilateRadius > 0) {
 			Layers.makeTempImg();
 			dilated = true;
 			path.setTarget("temptex0");

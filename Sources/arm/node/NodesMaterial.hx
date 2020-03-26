@@ -2168,7 +2168,7 @@ class NodesMaterial {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var isScene = arm.ui.UISidebar.inst.worktab.position == SpaceScene;
+					var isScene = arm.ui.UIHeader.inst.worktab.position == SpaceScene;
 					var material = isScene ? Context.materialScene : Context.material;
 					var canvas = material.canvas;
 					var nodes = material.nodes;

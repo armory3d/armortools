@@ -80,7 +80,7 @@ class Layers {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
 			C.undo_steps = 1;
-			if (UISidebar.inst.undoHandle != null) UISidebar.inst.undoHandle.value = C.undo_steps;
+			if (Context.undoHandle != null) Context.undoHandle.value = C.undo_steps;
 			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
 		}
 		g.end();
@@ -393,7 +393,7 @@ class Layers {
 		for (p in Project.paintObjects) ar.push(p.name);
 
 		var mask = Context.layer.objectMask;
-		if (UISidebar.inst.layerFilter > 0) mask = UISidebar.inst.layerFilter;
+		if (Context.layerFilter > 0) mask = Context.layerFilter;
 		if (mask > 0) {
 			if (Context.mergedObject != null) Context.mergedObject.visible = false;
 			var o = Project.paintObjects[0];
@@ -413,7 +413,7 @@ class Layers {
 	public static function newLayer(clear = true): LayerSlot {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
-		l.objectMask = UISidebar.inst.layerFilter;
+		l.objectMask = Context.layerFilter;
 		Project.layers.push(l);
 		Context.setLayer(l);
 		if (clear) iron.App.notifyOnRender(l.clear);
@@ -434,7 +434,7 @@ class Layers {
 			g.end();
 			var l = newLayer(false);
 			History.newLayer();
-			l.objectMask = UISidebar.inst.layerFilter;
+			l.objectMask = Context.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();
 			g.begin();

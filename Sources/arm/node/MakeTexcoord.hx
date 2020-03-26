@@ -8,7 +8,7 @@ class MakeTexcoord {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
 
-		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : UISidebar.inst.brushPaint;
+		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : Context.brushPaint;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 		// TexCoords - project
@@ -21,12 +21,12 @@ class MakeTexcoord {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
 
-				if (UISidebar.inst.brushDirectional) {
+				if (Context.brushDirectional) {
 					frag.add_uniform('vec3 brushDirection', '_brushDirection');
 					frag.write_attrib('if (brushDirection.z == 0.0) discard;');
 					frag.write_attrib('uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');
 				}
-				var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
+				var angle = Context.brushAngle + Context.brushNodesAngle;
 				var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 				if (uvAngle != 0.0) {
 					frag.add_uniform('vec2 brushAngle', '_brushAngle');
@@ -51,7 +51,7 @@ class MakeTexcoord {
 			vert.add_out('vec2 texCoord');
 			vert.write('texCoord = subtex * brushScale;');
 
-			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
+			var angle = Context.brushAngle + Context.brushNodesAngle;
 			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
 			if (uvAngle > 0.0) {
 				vert.add_uniform('vec2 brushAngle', '_brushAngle');

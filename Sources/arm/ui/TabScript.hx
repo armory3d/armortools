@@ -16,7 +16,7 @@ class TabScript {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.statustab, tr("Script")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(UIStatus.inst.statustab, tr("Script")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
 			if (ui.button(tr("Run"))) {

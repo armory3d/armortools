@@ -57,13 +57,13 @@ class UIMenubar {
 
 		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
 		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - UISidebar.inst.windowW - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
-			ui.tab(UISidebar.inst.worktab, tr("Paint"));
-			// ui.tab(UISidebar.inst.worktab, "Sculpt");
-			ui.tab(UISidebar.inst.worktab, tr("Scene"));
+			ui.tab(UIHeader.inst.worktab, tr("Paint"));
+			// ui.tab(UIHeader.inst.worktab, "Sculpt");
+			ui.tab(UIHeader.inst.worktab, tr("Scene"));
 			#if arm_creator
-			ui.tab(UISidebar.inst.worktab, tr("Render"));
+			ui.tab(UIHeader.inst.worktab, tr("Render"));
 			#end
-			if (UISidebar.inst.worktab.changed) {
+			if (UIHeader.inst.worktab.changed) {
 				Context.ddirty = 2;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				UIHeader.inst.headerHandle.redraws = 2;
@@ -71,7 +71,7 @@ class UIMenubar {
 				UISidebar.inst.hwnd1.redraws = 2;
 				UISidebar.inst.hwnd2.redraws = 2;
 
-				if (UISidebar.inst.worktab.position == SpaceScene) {
+				if (UIHeader.inst.worktab.position == SpaceScene) {
 					Context.selectTool(ToolGizmo);
 				}
 

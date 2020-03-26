@@ -24,7 +24,7 @@ class RenderPathForward {
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
-		var skipTaa = UISidebar.inst.splitView;
+		var skipTaa = Context.splitView;
 		if (!skipTaa) {
 			@:privateAccess Scene.active.camera.frame = RenderPathDeferred.taaFrame;
 			@:privateAccess Scene.active.camera.projectionJitter();
@@ -43,7 +43,7 @@ class RenderPathForward {
 		#end
 
 		#if kha_direct3d12
-		if (UISidebar.inst.viewportMode == ViewPathTrace) {
+		if (Context.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
 		}
@@ -112,7 +112,7 @@ class RenderPathForward {
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 		#if arm_painter
-		var skipTaa = UISidebar.inst.splitView;
+		var skipTaa = Context.splitView;
 		#else
 		var skipTaa = false;
 		#end
@@ -144,25 +144,25 @@ class RenderPathForward {
 	}
 
 	static function drawSplit() {
-		if (UISidebar.inst.splitView) {
+		if (Context.splitView) {
 			if (Context.pdirty > 0) {
 				var cam = Scene.active.camera;
 
-				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
+				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 
 				drawGbuffer();
 
 				#if kha_direct3d12
-				UISidebar.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
+				Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
 				#else
 				drawForward();
 				#end
 
-				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
+				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 			}

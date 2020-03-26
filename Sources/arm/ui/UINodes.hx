@@ -11,7 +11,7 @@ import arm.node.NodesMaterial;
 import arm.node.NodesBrush;
 import arm.node.MaterialParser;
 import arm.util.RenderUtil;
-import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.Enums;
 
 @:access(zui.Zui)
@@ -87,12 +87,12 @@ class UINodes {
 	}
 
 	public function getCanvasMaterial(): TNodeCanvas {
-		var isScene = UISidebar.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceScene;
 		return isScene ? Context.materialScene.canvas : Context.material.canvas;
 	}
 
 	public function getNodes(): Nodes {
-		var isScene = UISidebar.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceScene;
 		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
 		else return Context.brush.nodes;
 	}
@@ -184,7 +184,7 @@ class UINodes {
 		else {
 			function _parse(_) {
 				MaterialParser.parseBrush();
-				UISidebar.inst.parseBrushInputs();
+				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 				UISidebar.inst.hwnd1.redraws = 2;
 				iron.App.removeRender(_parse);

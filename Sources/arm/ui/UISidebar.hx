@@ -33,248 +33,22 @@ class UISidebar {
 
 	public static var inst: UISidebar;
 	public static var defaultWindowW = 280;
-
-	public static var penPressureRadius = true;
-	public static var penPressureHardness = true;
-	public static var penPressureAngle = false;
-	public static var penPressureOpacity = false;
-	public static var penPressureSensitivity = 1.0;
-
 	public var windowW = 280; // Panel width
 	public var tabx = 0;
 	public var tabh = 0;
 	public var tabh1 = 0;
 	public var tabh2 = 0;
-
-	public var isScrolling = false;
-	public var colorIdPicked = false;
 	public var show = true;
-	public var splitView = false;
-	public var viewIndex = -1;
-	public var viewIndexLast = -1;
-	public var materialPreview = false; // Drawing material previews
-	public var savedCamera = Mat4.identity();
-	public var baseRPicked = 0.0;
-	public var baseGPicked = 0.0;
-	public var baseBPicked = 0.0;
-	public var normalRPicked = 0.0;
-	public var normalGPicked = 0.0;
-	public var normalBPicked = 0.0;
-	public var roughnessPicked = 0.0;
-	public var metallicPicked = 0.0;
-	public var occlusionPicked = 0.0;
-	public var materialIdPicked = 0;
-	public var uvxPicked = 0.0;
-	public var uvyPicked = 0.0;
-	public var pickerSelectMaterial = true;
-	public var pickerMaskHandle = new Handle();
-	var borderStarted = 0;
-	var borderHandle: Handle = null;
-
-	public var defaultEnvmap: Image = null;
-	public var defaultIrradiance: kha.arrays.Float32Array = null;
-	public var defaultRadiance: Image = null;
-	public var defaultRadianceMipmaps: Array<Image> = null;
-	public var savedEnvmap: Image = null;
-	public var emptyEnvmap: Image = null;
-	public var previewEnvmap: Image = null;
-	public var showEnvmap = false;
-	public var showEnvmapHandle = new Handle({selected: false});
-	public var showEnvmapBlur = false;
-	public var showEnvmapBlurHandle = new Handle({selected: false});
-	public var drawWireframe = false;
-	public var wireframeHandle = new Handle({selected: false});
-	public var drawTexels = false;
-	public var texelsHandle = new Handle({selected: false});
-	public var cullBackfaces = true;
-	public var textureFilter = true;
-
+	public var isScrolling = false;
 	public var ui: Zui;
-	public var colorIdHandle = Id.handle();
-	public var formatType = FormatPng;
-	public var formatQuality = 100.0;
-	public var layersExport = 0;
-	public var isBase = true;
-	public var isBaseSpace = 0;
-	public var isOpac = false;
-	public var isOpacSpace = 0;
-	public var isOcc = true;
-	public var isOccSpace = 0;
-	public var isRough = true;
-	public var isRoughSpace = 0;
-	public var isMet = true;
-	public var isMetSpace = 0;
-	public var isNor = true;
-	public var isNorSpace = 0;
-	public var isEmis = false;
-	public var isEmisSpace = 0;
-	public var isHeight = false;
-	public var isHeightSpace = 0;
-	public var isSubs = false;
-	public var isSubsSpace = 0;
-	public var splitBy = SplitObject;
-	public var parseTransform = false;
-	public var parseVCols = false;
 	public var hwnd = Id.handle();
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();
-	public var selectTime = 0.0;
-	#if arm_creator
-	public var displaceStrength = 100.0;
-	#else
-	public var displaceStrength = 1.0;
-	#end
-	public var decalImage: Image = null;
-	public var decalPreview = false;
-	public var viewportMode = ViewRender;
-	public var hscaleWasChanged = false;
-	public var exportMeshFormat = FormatObj;
-	#if (krom_android || krom_ios)
-	public var nativeBrowser = false;
-	#else
-	public var nativeBrowser = true;
-	#end
-	public var cacheDraws = false;
-	public var showAssetNames = false;
-
-	public var textToolImage: Image = null;
-	public var textToolText: String;
-	public var textToolHandle = new Handle();
-	public var particleMaterial: MaterialData = null;
-
-	public var layerFilter = 0;
-
-	public var runBrush: Int->Void = null;
-	public var parseBrushInputs: Void->Void = null;
-	public var paintVec = new Vec4();
-	public var lastPaintX = -1.0;
-	public var lastPaintY = -1.0;
-	public var painted = 0;
-	public var brushTime = 0.0;
-	public var cloneStartX = -1.0;
-	public var cloneStartY = -1.0;
-	public var cloneDeltaX = 0.0;
-	public var cloneDeltaY = 0.0;
-
-	public var gizmo: Object = null;
-	public var gizmoX: Object = null;
-	public var gizmoY: Object = null;
-	public var gizmoZ: Object = null;
-	public var axisX = false;
-	public var axisY = false;
-	public var axisZ = false;
-	public var axisStart = 0.0;
-	public var row4 = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-
-	public var brushNodesRadius = 1.0;
-	public var brushNodesOpacity = 1.0;
-	public var brushMaskImage: Image = null;
-	public var brushStencilImage: Image = null;
-	public var brushStencilX = 0.02;
-	public var brushStencilY = 0.02;
-	public var brushStencilScale = 0.9;
-	public var brushStencilScaling = false;
-	public var brushStencilAngle = 0.0;
-	public var brushStencilRotating = false;
-	public var brushNodesScale = 1.0;
-	public var brushNodesAngle = 0.0;
-	public var brushNodesHardness = 1.0;
-	public var brushDirectional = false;
-
-	public var brushRadius = 0.5;
-	public var brushRadiusHandle = new Handle({value: 0.5});
-	public var brushScaleX = 1.0;
-	public var brushScaleXHandle = new Handle({value: 1.0});
-	public var brushBlending = BlendMix;
-	public var brushOpacity = 1.0;
-	public var brushOpacityHandle = new Handle({value: 1.0});
-	public var brushScale = 1.0;
-	public var brushAngle = 0.0;
-	public var brushAngleHandle = new Handle({value: 0.0});
-	public var brushHardness = 0.8;
-	public var brushLazyRadius = 0.0;
-	public var brushLazyStep = 0.0;
-	public var brushLazyX = 0.0;
-	public var brushLazyY = 0.0;
-	public var brushBias = 1.0;
-	public var brushPaint = UVMap;
-	public var brush3d = true;
-	public var brushLive = false;
-	public var brushDepthReject = true;
-	public var brushAngleReject = true;
-	public var brushAngleRejectDot = 0.5;
-	public var bakeType = BakeAO;
-	public var bakeAxis = BakeXYZ;
-	public var bakeUpAxis = BakeUpZ;
-	public var bakeAoStrength = 1.0;
-	public var bakeAoRadius = 1.0;
-	public var bakeAoOffset = 1.0;
-	public var bakeCurvStrength = 1.0;
-	public var bakeCurvRadius = 1.0;
-	public var bakeCurvOffset = 0.0;
-	public var bakeCurvSmooth = 1;
-	public var bakeHighPoly = 0;
-	public var dilateRadius = 8.0;
-
-	public var xray = false;
-	public var symX = false;
-	public var symY = false;
-	public var symZ = false;
-	public var showCompass = true;
-	public var fillTypeHandle = new Handle();
-	#if arm_creator
-	public var projectType = ModelTessellatedPlane;
-	#else
-	public var projectType = ModelCube;
-	#end
-	public var projectObjects: Array<MeshObject>;
-
-	public var sub = 0;
-	public var vec2 = new Vec4();
-
-	public var lastPaintVecX = -1.0;
-	public var lastPaintVecY = -1.0;
-	public var prevPaintVecX = -1.0;
-	public var prevPaintVecY = -1.0;
-	public var frame = 0;
-	public var paint2d = false;
-
-	var altStartedX = -1.0;
-	var altStartedY = -1.0;
-	public var lockStartedX = -1.0;
-	public var lockStartedY = -1.0;
-	public var brushLocked = false;
-	var brushCanLock = false;
-	var brushCanUnlock = false;
-	public var cameraType = CameraPerspective;
-	public var camHandle = new Handle();
-	public var fovHandle: Handle = null;
-	public var undoHandle: Handle = null;
-	public var hssgi: Handle = null;
-	public var hssr: Handle = null;
-	public var hbloom: Handle = null;
-	public var hsupersample: Handle = null;
-	public var hvxao: Handle = null;
-	#if arm_creator
-	public var vxaoExt = 5.0;
-	#else
-	public var vxaoExt = 1.0;
-	#end
-	public var vxaoOffset = 1.5;
-	public var vxaoAperture = 1.2;
-	public var vignetteStrength = 0.4;
-	// public var autoExposureStrength = 1.0;
-	public var textureExportPath = "";
-	var lastCombo: Handle = null;
-	var lastTooltip: Image = null;
-	public var lastStatusPosition = 0;
-
-	public var cameraControls = ControlsOrbit;
 	public var htab = Id.handle();
 	public var htab1 = Id.handle();
 	public var htab2 = Id.handle();
-	public var worktab = Id.handle();
-	public var statustab = Id.handle();
+	var borderStarted = 0;
+	var borderHandle: Handle = null;
 
 	public function new() {
 		inst = this;
@@ -283,7 +57,7 @@ class UISidebar {
 		new UIStatus();
 		new UIMenubar();
 
-		textToolText = tr("Text");
+		Context.textToolText = tr("Text");
 
 		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
@@ -311,7 +85,7 @@ class UISidebar {
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
 			MaterialParser.parseBrush();
-			UISidebar.inst.parseBrushInputs();
+			Context.parseBrushInputs();
 		}
 
 		if (Project.layers == null) {
@@ -320,37 +94,37 @@ class UISidebar {
 			Context.layer = Project.layers[0];
 		}
 
-		if (emptyEnvmap == null) {
+		if (Context.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 3);
 			b.set(1, 3);
 			b.set(2, 3);
 			b.set(3, 255);
-			emptyEnvmap = Image.fromBytes(b, 1, 1);
+			Context.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}
-		if (previewEnvmap == null) {
+		if (Context.previewEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 0);
 			b.set(1, 0);
 			b.set(2, 0);
 			b.set(3, 255);
-			previewEnvmap = Image.fromBytes(b, 1, 1);
+			Context.previewEnvmap = Image.fromBytes(b, 1, 1);
 		}
 
 		var world = Scene.active.world;
-		if (savedEnvmap == null) {
-			// savedEnvmap = world.envmap;
+		if (Context.savedEnvmap == null) {
+			// Context.savedEnvmap = world.envmap;
 			// defaultEnvmap = world.envmap;
-			defaultIrradiance = world.probe.irradiance;
-			defaultRadiance = world.probe.radiance;
-			defaultRadianceMipmaps = world.probe.radianceMipmaps;
+			Context.defaultIrradiance = world.probe.irradiance;
+			Context.defaultRadiance = world.probe.radiance;
+			Context.defaultRadianceMipmaps = world.probe.radianceMipmaps;
 		}
-		world.envmap = showEnvmap ? savedEnvmap : emptyEnvmap;
+		world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 		Context.ddirty = 1;
 
 		// Save last pos for continuos paint
 		iron.App.notifyOnRender(function(g: kha.graphics4.Graphics) { //
-			if (frame == 2) {
+			if (Context.frame == 2) {
 				RenderUtil.makeMaterialPreview();
 				hwnd1.redraws = 2;
 				MaterialParser.parseMeshMaterial();
@@ -366,30 +140,30 @@ class UISidebar {
 					}
 				}
 			}
-			else if (frame == 3) {
+			else if (Context.frame == 3) {
 				Context.ddirty = 1;
 			}
-			frame++;
+			Context.frame++;
 
 			var mouse = Input.getMouse();
 			if (mouse.down()) { //
-				lastPaintVecX = paintVec.x; //
-				lastPaintVecY = paintVec.y; //
+				Context.lastPaintVecX = Context.paintVec.x; //
+				Context.lastPaintVecY = Context.paintVec.y; //
 			} //
 			else {
-				if (splitView) {
-					viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				if (Context.splitView) {
+					Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 				}
 
-				lastPaintVecX = mouse.viewX / iron.App.w();
-				lastPaintVecY = mouse.viewY / iron.App.h();
+				Context.lastPaintVecX = mouse.viewX / iron.App.w();
+				Context.lastPaintVecY = mouse.viewY / iron.App.h();
 
-				viewIndex = -1;
+				Context.viewIndex = -1;
 
 				#if (kha_android || kha_ios)
 				// No mouse move events for touch, re-init last paint position on touch start
-				lastPaintX = -1;
-				lastPaintY = -1;
+				Context.lastPaintX = -1;
+				Context.lastPaintY = -1;
 				#end
 			}
 		}); //
@@ -402,19 +176,19 @@ class UISidebar {
 		var resources = ["cursor.k", "icons.k"];
 		Res.load(resources, done);
 
-		projectObjects = [];
-		for (m in Scene.active.meshes) projectObjects.push(m);
+		Context.projectObjects = [];
+		for (m in Scene.active.meshes) Context.projectObjects.push(m);
 	}
 
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
 		//
-		gizmo = Scene.active.getChild(".GizmoTranslate");
-		gizmo.transform.scale.set(0.5, 0.5, 0.5);
-		gizmo.transform.buildMatrix();
-		gizmoX = Scene.active.getChild("GizmoX");
-		gizmoY = Scene.active.getChild("GizmoY");
-		gizmoZ = Scene.active.getChild("GizmoZ");
+		Context.gizmo = Scene.active.getChild(".GizmoTranslate");
+		Context.gizmo.transform.scale.set(0.5, 0.5, 0.5);
+		Context.gizmo.transform.buildMatrix();
+		Context.gizmoX = Scene.active.getChild("GizmoX");
+		Context.gizmoY = Scene.active.getChild("GizmoY");
+		Context.gizmoZ = Scene.active.getChild("GizmoZ");
 		//
 
 		Context.object = Scene.active.getChild("Cube");
@@ -463,12 +237,12 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
-			if (textureExportPath == "") { // First export, ask for path
+			if (Context.textureExportPath == "") { // First export, ask for path
 				BoxExport.showTextures();
 			}
 			else {
 				function export(_) {
-					ExportTexture.run(textureExportPath);
+					ExportTexture.run(Context.textureExportPath);
 					iron.App.removeRender(export);
 				}
 				iron.App.notifyOnRender(export);
@@ -486,35 +260,35 @@ class UISidebar {
 
 		var mouse = Input.getMouse();
 
-		if ((brushCanLock || brushLocked) && mouse.moved) {
+		if ((Context.brushCanLock || Context.brushLocked) && mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
-				if (brushLocked) {
+				if (Context.brushLocked) {
 					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown)) {
-						brushOpacity += mouse.movementX / 500;
-						brushOpacity = Math.max(0.0, Math.min(1.0, brushOpacity));
-						brushOpacity = Math.round(brushOpacity * 100) / 100;
-						brushOpacityHandle.value = brushOpacity;
+						Context.brushOpacity += mouse.movementX / 500;
+						Context.brushOpacity = Math.max(0.0, Math.min(1.0, Context.brushOpacity));
+						Context.brushOpacity = Math.round(Context.brushOpacity * 100) / 100;
+						Context.brushOpacityHandle.value = Context.brushOpacity;
 					}
 					else if(Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
-						brushAngle -= mouse.movementX / 5;
-						brushAngle = Std.int(brushAngle) % 360;
-						if (brushAngle < 0) brushAngle += 360;
-						brushAngleHandle.value = brushAngle;
+						Context.brushAngle -= mouse.movementX / 5;
+						Context.brushAngle = Std.int(Context.brushAngle) % 360;
+						if (Context.brushAngle < 0) Context.brushAngle += 360;
+						Context.brushAngleHandle.value = Context.brushAngle;
 						MaterialParser.parsePaintMaterial();
 					}
 					else {
-						brushRadius += mouse.movementX / 150;
-						brushRadius = Math.max(0.05, Math.min(4.0, brushRadius));
-						brushRadius = Math.round(brushRadius * 100) / 100;
-						brushRadiusHandle.value = brushRadius;
+						Context.brushRadius += mouse.movementX / 150;
+						Context.brushRadius = Math.max(0.05, Math.min(4.0, Context.brushRadius));
+						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
+						Context.brushRadiusHandle.value = Context.brushRadius;
 					}
 					UIHeader.inst.headerHandle.redraws = 2;
 				}
-				else if (brushCanLock) {
-					brushCanLock = false;
-					brushLocked = true;
+				else if (Context.brushCanLock) {
+					Context.brushCanLock = false;
+					Context.brushLocked = true;
 				}
 			}
 		}
@@ -527,7 +301,7 @@ class UISidebar {
 			mouse.viewY > 0 && mouse.viewY < iron.App.h() &&
 			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
 
-			if (worktab.position == SpacePaint) {
+			if (UIHeader.inst.worktab.position == SpacePaint) {
 				if (kb.down("shift")) {
 					if (kb.started("1")) Context.selectMaterial(0);
 					else if (kb.started("2")) Context.selectMaterial(1);
@@ -563,21 +337,21 @@ class UISidebar {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
 						Operator.shortcut(Config.keymap.brush_opacity) ||
 						Operator.shortcut(Config.keymap.brush_angle)) {
-						brushCanLock = true;
+						Context.brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
-						lockStartedX = mouse.x;
-						lockStartedY = mouse.y;
+						Context.lockStartedX = mouse.x;
+						Context.lockStartedY = mouse.y;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-						brushRadius -= getRadiusIncrement();
-						brushRadius = Math.round(brushRadius * 100) / 100;
-						brushRadiusHandle.value = brushRadius;
+						Context.brushRadius -= getRadiusIncrement();
+						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
+						Context.brushRadiusHandle.value = Context.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-						brushRadius += getRadiusIncrement();
-						brushRadius = Math.round(brushRadius * 100) / 100;
-						brushRadiusHandle.value = brushRadius;
+						Context.brushRadius += getRadiusIncrement();
+						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
+						Context.brushRadiusHandle.value = Context.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 				}
@@ -595,9 +369,9 @@ class UISidebar {
 			else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
 			else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
 			else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-				cameraType = cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
-				camHandle.position = cameraType;
-				ViewportUtil.updateCameraType(cameraType);
+				Context.cameraType = Context.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
+				Context.camHandle.position = Context.cameraType;
+				ViewportUtil.updateCameraType(Context.cameraType);
 			}
 			else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) ViewportUtil.orbit(-Math.PI / 12, 0);
 			else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) ViewportUtil.orbit(Math.PI / 12, 0);
@@ -608,16 +382,16 @@ class UISidebar {
 			else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) ViewportUtil.zoom(-0.2);
 		}
 
-		if (brushCanLock || brushLocked) {
-			if (mouse.moved && brushCanUnlock) {
-				brushLocked = false;
-				brushCanUnlock = false;
+		if (Context.brushCanLock || Context.brushLocked) {
+			if (mouse.moved && Context.brushCanUnlock) {
+				Context.brushLocked = false;
+				Context.brushCanUnlock = false;
 			}
 			if (kb.released(Config.keymap.brush_radius)) {
 				mouse.unlock();
-				brushCanUnlock = true;
-				lastPaintX = -1;
-				lastPaintY = -1;
+				Context.brushCanUnlock = true;
+				Context.lastPaintX = -1;
+				Context.lastPaintY = -1;
 			}
 		}
 
@@ -684,10 +458,10 @@ class UISidebar {
 	}
 
 	function getBrushStencilRect(): TRect {
-		var w = Std.int(brushStencilImage.width * (App.h() / brushStencilImage.height) * brushStencilScale);
-		var h = Std.int(App.h() * brushStencilScale);
-		var x = Std.int(App.x() + brushStencilX * App.w());
-		var y = Std.int(App.y() + brushStencilY * App.h());
+		var w = Std.int(Context.brushStencilImage.width * (App.h() / Context.brushStencilImage.height) * Context.brushStencilScale);
+		var h = Std.int(App.h() * Context.brushStencilScale);
+		var x = Std.int(App.x() + Context.brushStencilX * App.w());
+		var y = Std.int(App.y() + Context.brushStencilY * App.h());
 		return { w: w, h: h, x: x, y: y };
 	}
 
@@ -705,52 +479,53 @@ class UISidebar {
 
 		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint);
 
-		if (brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform)) {
+		if (Context.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform)) {
 			var r = getBrushStencilRect();
 			if (mouse.started("left")) {
-				brushStencilScaling =
+				Context.brushStencilScaling =
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
-				var cosa = Math.cos(-brushStencilAngle);
-				var sina = Math.sin(-brushStencilAngle);
+				var cosa = Math.cos(-Context.brushStencilAngle);
+				var sina = Math.sin(-Context.brushStencilAngle);
 				var ox = 0;
 				var oy = -r.h / 2;
 				var x = ox * cosa - oy * sina;
 				var y = ox * sina + oy * cosa;
 				x += r.x + r.w / 2;
 				y += r.y + r.h / 2;
-				brushStencilRotating = hitRect(mouse.x, mouse.y, Std.int(x - 16), Std.int(y - 16), 32, 32);
+				Context.brushStencilRotating =
+					hitRect(mouse.x, mouse.y, Std.int(x - 16), Std.int(y - 16), 32, 32);
 			}
-			var _scale = brushStencilScale;
+			var _scale = Context.brushStencilScale;
 			if (mouse.down("left")) {
-				if (brushStencilScaling) {
+				if (Context.brushStencilScaling) {
 					var mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
-					brushStencilScale += mouse.movementX / 400 * mult;
+					Context.brushStencilScale += mouse.movementX / 400 * mult;
 				}
-				else if (brushStencilRotating) {
+				else if (Context.brushStencilRotating) {
 					var gizmoX = r.x + r.w / 2;
 					var gizmoY = r.y + r.h / 2;
-					brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
+					Context.brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
 				}
 				else {
-					brushStencilX += mouse.movementX / App.w();
-					brushStencilY += mouse.movementY / App.h();
+					Context.brushStencilX += mouse.movementX / App.w();
+					Context.brushStencilY += mouse.movementY / App.h();
 				}
 			}
-			else brushStencilScaling = false;
+			else Context.brushStencilScaling = false;
 			if (mouse.wheelDelta != 0) {
-				brushStencilScale -= mouse.wheelDelta / 10;
+				Context.brushStencilScale -= mouse.wheelDelta / 10;
 			}
 			// Center after scale
-			var ratio = App.h() / brushStencilImage.height;
-			var oldW = _scale * brushStencilImage.width * ratio;
-			var newW = brushStencilScale * brushStencilImage.width * ratio;
+			var ratio = App.h() / Context.brushStencilImage.height;
+			var oldW = _scale * Context.brushStencilImage.width * ratio;
+			var newW = Context.brushStencilScale * Context.brushStencilImage.width * ratio;
 			var oldH = _scale * App.h();
-			var newH = brushStencilScale * App.h();
-			brushStencilX += (oldW - newW) / App.w() / 2;
-			brushStencilY += (oldH - newH) / App.h() / 2;
+			var newH = Context.brushStencilScale * App.h();
+			Context.brushStencilX += (oldW - newW) / App.w() / 2;
+			Context.brushStencilY += (oldH - newH) / App.h() / 2;
 		}
 
 		var down = Operator.shortcut(Config.keymap.action_paint) ||
@@ -760,32 +535,32 @@ class UISidebar {
 		if (down) {
 			var mx = mouse.viewX;
 			var my = mouse.viewY;
-			if (paint2d) mx -= iron.App.w();
+			if (Context.paint2d) mx -= iron.App.w();
 
 			if (mx < iron.App.w() && mx > iron.App.x() &&
 				my < iron.App.h() && my > iron.App.y()) {
 
 				if (setCloneSource) {
-					cloneStartX = mx;
-					cloneStartY = my;
+					Context.cloneStartX = mx;
+					Context.cloneStartY = my;
 				}
 				else {
-					if (brushTime == 0 &&
+					if (Context.brushTime == 0 &&
 						!App.isDragging &&
 						!App.isResizing &&
 						@:privateAccess ui.comboSelectedHandle == null) { // Paint started
 
 						// Draw line
 						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint)) {
-							lastPaintVecX = lastPaintX;
-							lastPaintVecY = lastPaintY;
+							Context.lastPaintVecX = Context.lastPaintX;
+							Context.lastPaintVecY = Context.lastPaintY;
 						}
 
 						History.pushUndo = true;
-						if (Context.tool == ToolClone && cloneStartX >= 0.0) { // Clone delta
-							cloneDeltaX = (cloneStartX - mx) / iron.App.w();
-							cloneDeltaY = (cloneStartY - my) / iron.App.h();
-							cloneStartX = -1;
+						if (Context.tool == ToolClone && Context.cloneStartX >= 0.0) { // Clone delta
+							Context.cloneDeltaX = (Context.cloneStartX - mx) / iron.App.w();
+							Context.cloneDeltaY = (Context.cloneStartY - my) / iron.App.h();
+							Context.cloneStartX = -1;
 						}
 						else if (Context.tool == ToolParticle) {
 							// Reset particles
@@ -798,15 +573,15 @@ class UISidebar {
 							#end
 						}
 					}
-					brushTime += Time.delta;
-					if (runBrush != null) runBrush(0);
+					Context.brushTime += Time.delta;
+					if (Context.runBrush != null) Context.runBrush(0);
 				}
 			}
 		}
-		else if (brushTime > 0) { // Brush released
-			brushTime = 0;
-			prevPaintVecX = -1;
-			prevPaintVecY = -1;
+		else if (Context.brushTime > 0) { // Brush released
+			Context.brushTime = 0;
+			Context.prevPaintVecX = -1;
+			Context.prevPaintVecY = -1;
 			#if (!kha_direct3d12) // Keep accumulated samples for D3D12
 			Context.ddirty = 3;
 			#end
@@ -870,13 +645,13 @@ class UISidebar {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		if (worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceScene) {
 			arm.plugin.Gizmo.update();
 		}
 
-		if (lastCombo != null || (ui.tooltipImg == null && lastTooltip != null)) App.redrawUI();
-		lastCombo = ui.comboSelectedHandle;
-		lastTooltip = ui.tooltipImg;
+		if (Context.lastCombo != null || (ui.tooltipImg == null && Context.lastTooltip != null)) App.redrawUI();
+		Context.lastCombo = ui.comboSelectedHandle;
+		Context.lastTooltip = ui.tooltipImg;
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
@@ -899,9 +674,9 @@ class UISidebar {
 		if (tabh == 0) {
 			tabh = tabh1 = tabh2 = Std.int(System.windowHeight() / 3);
 		}
-		gizmo.visible = false;
+		Context.gizmo.visible = false;
 
-		if (worktab.position == SpacePaint) {
+		if (UIHeader.inst.worktab.position == SpacePaint) {
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				TabLayers.draw();
 				TabHistory.draw();
@@ -919,8 +694,8 @@ class UISidebar {
 				TabFonts.draw();
 			}
 		}
-		else if (worktab.position == SpaceScene) {
-			gizmo.visible = true;
+		else if (UIHeader.inst.worktab.position == SpaceScene) {
+			Context.gizmo.visible = true;
 			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 				TabOutliner.draw();
 				TabPlugins.draw();
@@ -947,22 +722,22 @@ class UISidebar {
 		g.color = 0xffffffff;
 
 		// Brush
-		if (App.uiEnabled && worktab.position == SpacePaint) {
-			var mx = App.x() + paintVec.x * App.w();
-			var my = App.y() + paintVec.y * App.h();
+		if (App.uiEnabled && UIHeader.inst.worktab.position == SpacePaint) {
+			var mx = App.x() + Context.paintVec.x * App.w();
+			var my = App.y() + Context.paintVec.y * App.h();
 
 			// Radius being scaled
-			if (brushLocked) {
-				mx += lockStartedX - System.windowWidth() / 2;
-				my += lockStartedY - System.windowHeight() / 2;
+			if (Context.brushLocked) {
+				mx += Context.lockStartedX - System.windowWidth() / 2;
+				my += Context.lockStartedY - System.windowHeight() / 2;
 			}
 
-			if (brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
+			if (Context.brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
 				var r = getBrushStencilRect();
 				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
 					g.color = 0x88ffffff;
-					g.pushRotation(-brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
-					g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
+					g.pushRotation(-Context.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					g.drawScaledImage(Context.brushStencilImage, r.x, r.y, r.w, r.h);
 					g.popTransformation();
 					g.color = 0xffffffff;
 				}
@@ -976,14 +751,14 @@ class UISidebar {
 					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 					// Rotate
-					g.pushRotation(-brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					g.pushRotation(-Context.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
 					kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
 					g.popTransformation();
 				}
 			}
 
 			// Show picked material next to cursor
-			if (Context.tool == ToolPicker && pickerSelectMaterial) {
+			if (Context.tool == ToolPicker && Context.pickerSelectMaterial) {
 				var img = Context.material.imageIcon;
 				#if kha_opengl
 				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
@@ -993,7 +768,7 @@ class UISidebar {
 			}
 
 			var cursorImg = Res.get("cursor.k");
-			var psize = Std.int(cursorImg.width * (brushRadius * brushNodesRadius));
+			var psize = Std.int(cursorImg.width * (Context.brushRadius * Context.brushNodesRadius));
 
 			// Clone source cursor
 			var mouse = Input.getMouse();
@@ -1001,7 +776,7 @@ class UISidebar {
 			var kb = Input.getKeyboard();
 			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 				g.color = 0x66ffffff;
-				g.drawScaledImage(cursorImg, mx + cloneDeltaX * iron.App.w() - psize / 2, my + cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+				g.drawScaledImage(cursorImg, mx + Context.cloneDeltaX * iron.App.w() - psize / 2, my + Context.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
 				g.color = 0xffffffff;
 			}
 
@@ -1013,17 +788,17 @@ class UISidebar {
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
-			if (!brush3d || in2dView || (decal && !brushLive)) {
+			if (!Context.brush3d || in2dView || (decal && !Context.brushLive)) {
 				if (decal && !inNodes) {
-					var psizex = Std.int(256 * (brushRadius * brushNodesRadius * brushScaleX));
-					var psizey = Std.int(256 * (brushRadius * brushNodesRadius));
-					g.color = kha.Color.fromFloats(1, 1, 1, brushOpacity);
-					var angle = (brushAngle + brushNodesAngle) * (Math.PI / 180);
+					var psizex = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
+					var psizey = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius));
+					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
+					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);
 					#if (kha_direct3d11 || kha_direct3d12)
-					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
+					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
 					#else
-					g.drawScaledImage(decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
+					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
 					#end
 					g.popTransformation();
 					g.color = 0xffffffff;
@@ -1037,7 +812,7 @@ class UISidebar {
 				}
 			}
 
-			if (brushLazyRadius > 0 && !brushLocked &&
+			if (Context.brushLazyRadius > 0 && !Context.brushLocked &&
 				(Context.tool == ToolBrush ||
 				 Context.tool == ToolEraser ||
 				 Context.tool == ToolDecal ||
@@ -1046,9 +821,9 @@ class UISidebar {
 				 Context.tool == ToolBlur ||
 				 Context.tool == ToolParticle)) {
 				g.fillRect(mx - 1, my - 1, 2, 2);
-				var mx = UISidebar.inst.brushLazyX * App.w() + App.x();
-				var my = UISidebar.inst.brushLazyY * App.h() + App.y();
-				var radius = brushLazyRadius * 180;
+				var mx = Context.brushLazyX * App.w() + App.x();
+				var my = Context.brushLazyY * App.h() + App.y();
+				var radius = Context.brushLazyRadius * 180;
 				g.color = 0xff666666;
 				g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 				g.color = 0xffffffff;

@@ -21,7 +21,7 @@ class UIFiles {
 	static var showExtensions = true;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
-		if (!UISidebar.inst.nativeBrowser) {
+		if (!Context.nativeBrowser) {
 			if (path == null) path = defaultPath;
 			showCustom(filters, isSave, filesDone);
 			return;
@@ -161,7 +161,7 @@ class UIFiles {
 					}
 
 					selected = i;
-					if (Time.time() - UISidebar.inst.selectTime < 0.25) {
+					if (Time.time() - Context.selectTime < 0.25) {
 						App.dragFile = null;
 						App.isDragging = false;
 						handle.changed = ui.changed = true;
@@ -178,7 +178,7 @@ class UIFiles {
 						}
 						selected = -1;
 					}
-					UISidebar.inst.selectTime = Time.time();
+					Context.selectTime = Time.time();
 				}
 
 				ui._x = _x;

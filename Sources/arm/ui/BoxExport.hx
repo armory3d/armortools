@@ -47,16 +47,16 @@ class BoxExport {
 
 				ui.row([0.5, 0.5]);
 				if (App.bitsHandle.position == Bits8) {
-					UISidebar.inst.formatType = ui.combo(Id.handle({position: UISidebar.inst.formatType}), ["png", "jpg"], tr("Format"), true);
+					Context.formatType = ui.combo(Id.handle({position: Context.formatType}), ["png", "jpg"], tr("Format"), true);
 				}
 				else {
-					UISidebar.inst.formatType = ui.combo(Id.handle({position: UISidebar.inst.formatType}), ["exr"], tr("Format"), true);
+					Context.formatType = ui.combo(Id.handle({position: Context.formatType}), ["exr"], tr("Format"), true);
 				}
-				ui.enabled = UISidebar.inst.formatType == FormatJpg && App.bitsHandle.position == Bits8;
-				UISidebar.inst.formatQuality = ui.slider(Id.handle({value: UISidebar.inst.formatQuality}), tr("Quality"), 0.0, 100.0, true, 1);
+				ui.enabled = Context.formatType == FormatJpg && App.bitsHandle.position == Bits8;
+				Context.formatQuality = ui.slider(Id.handle({value: Context.formatQuality}), tr("Quality"), 0.0, 100.0, true, 1);
 				ui.enabled = true;
 				ui.row([0.5, 0.5]);
-				UISidebar.inst.layersExport = ui.combo(Id.handle({position: UISidebar.inst.layersExport}), [tr("Visible"), tr("Selected")], tr("Layers"), true);
+				Context.layersExport = ui.combo(Id.handle({position: Context.layersExport}), [tr("Visible"), tr("Selected")], tr("Layers"), true);
 				ui.combo(hpreset, files, tr("Preset"), true);
 				if (hpreset.changed) preset = null;
 
@@ -68,9 +68,9 @@ class BoxExport {
 				}
 				if (ui.button(tr("Export"))) {
 					UIBox.show = false;
-					var filters = App.bitsHandle.position != Bits8 ? "exr" : UISidebar.inst.formatType == FormatPng ? "png" : "jpg";
+					var filters = App.bitsHandle.position != Bits8 ? "exr" : Context.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, function(path: String) {
-						UISidebar.inst.textureExportPath = path;
+						Context.textureExportPath = path;
 						function export(_) {
 							ExportTexture.run(path);
 							iron.App.removeRender(export);
@@ -190,7 +190,7 @@ class BoxExport {
 			var htab = Id.handle();
 			if (ui.tab(htab, tr("Export Mesh"))) {
 
-				UISidebar.inst.exportMeshFormat = ui.combo(Id.handle({position: UISidebar.inst.exportMeshFormat}), ["obj", "arm"], tr("Format"), true);
+				Context.exportMeshFormat = ui.combo(Id.handle({position: Context.exportMeshFormat}), ["obj", "arm"], tr("Format"), true);
 
 				var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
 
@@ -205,7 +205,7 @@ class BoxExport {
 				}
 				if (ui.button("Export")) {
 					UIBox.show = false;
-					UIFiles.show(UISidebar.inst.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
+					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						ExportMesh.run(path + Path.sep + f, applyDisplacement);

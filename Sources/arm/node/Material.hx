@@ -1525,7 +1525,7 @@ class Material {
 			file: filepath
 		};
 
-		if (arm.ui.UISidebar.inst.textureFilter) {
+		if (Context.textureFilter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";

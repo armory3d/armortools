@@ -40,7 +40,7 @@ class UIToolbar {
 
 			ui.imageScrollAlign = false;
 
-			if (UISidebar.inst.worktab.position == SpacePaint) {
+			if (UIHeader.inst.worktab.position == SpacePaint) {
 				var keys = [
 					"(" + Config.keymap.tool_brush + ")",
 					"(" + Config.keymap.tool_eraser + ")",
@@ -65,7 +65,7 @@ class UIToolbar {
 					ui._y += 2;
 				}
 			}
-			else if (UISidebar.inst.worktab.position == SpaceScene) {
+			else if (UIHeader.inst.worktab.position == SpaceScene) {
 				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui._x += 2;

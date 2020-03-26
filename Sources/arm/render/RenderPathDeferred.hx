@@ -188,7 +188,7 @@ class RenderPathDeferred {
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
-		var skipTaa = UISidebar.inst.splitView;
+		var skipTaa = Context.splitView;
 		if (!skipTaa) {
 			@:privateAccess Scene.active.camera.frame = RenderPathDeferred.taaFrame;
 			@:privateAccess Scene.active.camera.projectionJitter();
@@ -207,7 +207,7 @@ class RenderPathDeferred {
 		#end
 
 		#if kha_direct3d12
-		if (UISidebar.inst.viewportMode == ViewPathTrace) {
+		if (Context.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
 		}
@@ -225,7 +225,7 @@ class RenderPathDeferred {
 
 	public static function drawDeferred() {
 		#if arm_painter
-		var cameraType = UISidebar.inst.cameraType;
+		var cameraType = Context.cameraType;
 		var ddirty = Context.ddirty;
 		#else
 		var cameraType = CameraPerspective;
@@ -542,7 +542,7 @@ class RenderPathDeferred {
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 		#if arm_painter
-		var skipTaa = UISidebar.inst.splitView;
+		var skipTaa = Context.splitView;
 		#else
 		var skipTaa = false;
 		#end
@@ -589,25 +589,25 @@ class RenderPathDeferred {
 	}
 
 	static function drawSplit() {
-		if (UISidebar.inst.splitView) {
+		if (Context.splitView) {
 			if (Context.pdirty > 0) {
 				var cam = Scene.active.camera;
 
-				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
+				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 
 				drawGbuffer();
 
 				#if kha_direct3d12
-				UISidebar.inst.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
+				Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
 				#else
 				drawDeferred();
 				#end
 
-				UISidebar.inst.viewIndex = UISidebar.inst.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
+				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
 				cam.buildMatrix();
 				cam.buildProjection();
 			}

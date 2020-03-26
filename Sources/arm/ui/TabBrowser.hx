@@ -13,7 +13,7 @@ class TabBrowser {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.statustab, tr("Browser")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];

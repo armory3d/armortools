@@ -91,7 +91,7 @@ class Project {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("New Project"))) {
 				ui.row([0.5, 0.5]);
-				UISidebar.inst.projectType = ui.combo(Id.handle({position: UISidebar.inst.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
+				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
 				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
@@ -127,7 +127,7 @@ class Project {
 		var len = meshes.length;
 		for (i in 0...len) {
 			var m = meshes[len - i - 1];
-			if (UISidebar.inst.projectObjects.indexOf(m) == -1) {
+			if (Context.projectObjects.indexOf(m) == -1) {
 				Data.deleteMesh(m.data.handle);
 				m.remove();
 			}
@@ -137,8 +137,8 @@ class Project {
 			Data.deleteMesh(handle);
 		}
 
-		if (UISidebar.inst.projectType != ModelCube) {
-			var mesh: Dynamic = UISidebar.inst.projectType == ModelSphere ?
+		if (Context.projectType != ModelCube) {
+			var mesh: Dynamic = Context.projectType == ModelSphere ?
 				new arm.format.proc.Sphere(1, 512, 256) :
 				new arm.format.proc.Plane(1, 1, 512, 512);
 			var raw = {
@@ -157,27 +157,27 @@ class Project {
 			var md = new MeshData(raw, function(md: MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
-			if (UISidebar.inst.projectType == ModelSphere) {
+			if (Context.projectType == ModelSphere) {
 				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
-			else if (UISidebar.inst.projectType == ModelTessellatedPlane) {
+			else if (Context.projectType == ModelTessellatedPlane) {
 				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
 		}
 
-		var n = UISidebar.inst.projectType == ModelCube ? "Cube" : "Tessellated";
+		var n = Context.projectType == ModelCube ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;
 			if (current != null) current.end();
 
-			UISidebar.inst.pickerMaskHandle.position = MaskNone;
+			Context.pickerMaskHandle.position = MaskNone;
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
 			#if arm_creator
-			if (UISidebar.inst.projectType == ModelTessellatedPlane) {
+			if (Context.projectType == ModelTessellatedPlane) {
 				Context.paintObject.transform.loc.set(0, 0, -0.15);
 				Context.paintObject.transform.scale.set(10, 10, 1);
 			}
@@ -216,13 +216,13 @@ class Project {
 
 			if (current != null) current.begin(false);
 
-			UISidebar.inst.savedEnvmap = UISidebar.inst.defaultEnvmap;
-			Scene.active.world.envmap = UISidebar.inst.emptyEnvmap;
+			Context.savedEnvmap = Context.defaultEnvmap;
+			Scene.active.world.envmap = Context.emptyEnvmap;
 			Scene.active.world.raw.envmap = "World_radiance.k";
-			UISidebar.inst.showEnvmapHandle.selected = UISidebar.inst.showEnvmap = false;
-			Scene.active.world.probe.radiance = UISidebar.inst.defaultRadiance;
-			Scene.active.world.probe.radianceMipmaps = UISidebar.inst.defaultRadianceMipmaps;
-			Scene.active.world.probe.irradiance = UISidebar.inst.defaultIrradiance;
+			Context.showEnvmapHandle.selected = Context.showEnvmap = false;
+			Scene.active.world.probe.radiance = Context.defaultRadiance;
+			Scene.active.world.probe.radianceMipmaps = Context.defaultRadianceMipmaps;
+			Scene.active.world.probe.irradiance = Context.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
 		});
 	}
@@ -252,7 +252,7 @@ class Project {
 			if (ui.tab(Id.handle(), tr("Import Mesh"))) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					UISidebar.inst.splitBy = ui.combo(Id.handle(), [
+					Context.splitBy = ui.combo(Id.handle(), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
@@ -262,12 +262,12 @@ class Project {
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					UISidebar.inst.parseTransform = ui.check(Id.handle({selected: UISidebar.inst.parseTransform}), tr("Parse Transforms"));
+					Context.parseTransform = ui.check(Id.handle({selected: Context.parseTransform}), tr("Parse Transforms"));
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					UISidebar.inst.parseVCols = ui.check(Id.handle({selected: UISidebar.inst.parseVCols}), tr("Parse Vertex Colors"));
+					Context.parseVCols = ui.check(Id.handle({selected: Context.parseVCols}), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 

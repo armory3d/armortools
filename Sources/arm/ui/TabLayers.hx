@@ -38,10 +38,10 @@ class TabLayers {
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
-			UISidebar.inst.layerFilter = ui.combo(filterHandle, ar, tr("Filter"));
+			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"));
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) {
-					p.visible = UISidebar.inst.layerFilter == 0 || p.name == ar[UISidebar.inst.layerFilter];
+					p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
 					Layers.setObjectMask();
 				}
 				UVUtil.uvmapCached = false;
@@ -50,9 +50,9 @@ class TabLayers {
 
 			function drawList(l: LayerSlot, i: Int) {
 
-				if (UISidebar.inst.layerFilter > 0 &&
+				if (Context.layerFilter > 0 &&
 					l.objectMask > 0 &&
-					l.objectMask != UISidebar.inst.layerFilter) {
+					l.objectMask != Context.layerFilter) {
 					return;
 				}
 
@@ -162,8 +162,8 @@ class TabLayers {
 				}
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
-					UISidebar.inst.selectTime = Time.time();
+					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+					Context.selectTime = Time.time();
 					if (l.getChildren() == null) {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
@@ -224,8 +224,8 @@ class TabLayers {
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
-						if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
-						UISidebar.inst.selectTime = Time.time();
+						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+						Context.selectTime = Time.time();
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -241,8 +241,8 @@ class TabLayers {
 
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView();
-					UISidebar.inst.selectTime = Time.time();
+					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+					Context.selectTime = Time.time();
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {

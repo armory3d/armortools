@@ -3,6 +3,7 @@ package arm.io;
 import zui.Nodes;
 import iron.data.Data;
 import iron.data.MaterialData;
+import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
@@ -66,7 +67,7 @@ class ImportFolder {
 		}
 
 		// Create material
-		var isScene = UISidebar.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceScene;
 		if (isScene) {
 			MaterialUtil.removeMaterialCache();
 			Data.getMaterial("Scene", "Material2", function(md: MaterialData) {

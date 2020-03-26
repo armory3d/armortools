@@ -20,7 +20,7 @@ class TabBrushes {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
 				MaterialParser.parseBrush();
-				UISidebar.inst.parseBrushInputs();
+				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			if (ui.button(tr("Import"))) {
@@ -66,8 +66,8 @@ class TabBrushes {
 					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
 					if (state == State.Started) {
 						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
-						if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.showBrushNodes();
-						UISidebar.inst.selectTime = Time.time();
+						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.showBrushNodes();
+						Context.selectTime = Time.time();
 						// var mouse = Input.getMouse();
 						// App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						// App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);

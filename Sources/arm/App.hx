@@ -176,7 +176,7 @@ class App {
 						// Parse additional arguments
 						// ./armorpaint [import_path export_path export_file_name]
 						if (Krom.getArgCount() > 2) {
-							UISidebar.inst.textureExportPath = Krom.getArg(2);
+							Context.textureExportPath = Krom.getArg(2);
 							if (Krom.getArgCount() > 3) {
 								UIFiles.filename = Krom.getArg(3);
 							}
@@ -195,12 +195,12 @@ class App {
 
 	public static function w(): Int {
 		// Draw material preview
-		if (UISidebar.inst != null && UISidebar.inst.materialPreview) {
+		if (UISidebar.inst != null && Context.materialPreview) {
 			return RenderUtil.matPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && UISidebar.inst.decalPreview) {
+		if (UISidebar.inst != null && Context.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
@@ -217,7 +217,7 @@ class App {
 		else { // Distract free
 			res = System.windowWidth();
 		}
-		if (UISidebar.inst != null && UISidebar.inst.viewIndex > -1) {
+		if (UISidebar.inst != null && Context.viewIndex > -1) {
 			res = Std.int(res / 2);
 		}
 
@@ -226,12 +226,12 @@ class App {
 
 	public static function h(): Int {
 		// Draw material preview
-		if (UISidebar.inst != null && UISidebar.inst.materialPreview) {
+		if (UISidebar.inst != null && Context.materialPreview) {
 			return RenderUtil.matPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && UISidebar.inst.decalPreview) {
+		if (UISidebar.inst != null && Context.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
@@ -247,7 +247,7 @@ class App {
 	}
 
 	public static function x(): Int {
-		return UISidebar.inst.viewIndex == 1 ? appx + w() : appx;
+		return Context.viewIndex == 1 ? appx + w() : appx;
 	}
 
 	public static function y(): Int {
@@ -286,8 +286,8 @@ class App {
 		}
 		cam.buildProjection();
 
-		if (UISidebar.inst.cameraType == CameraOrthographic) {
-			ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+		if (Context.cameraType == CameraOrthographic) {
+			ViewportUtil.updateCameraType(Context.cameraType);
 		}
 
 		Context.ddirty = 2;
@@ -332,8 +332,8 @@ class App {
 		if (mouse.released() && (dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null)) {
 			var mx = mouse.x;
 			var my = mouse.y;
-			var inViewport = UISidebar.inst.paintVec.x < 1 && UISidebar.inst.paintVec.x > 0 &&
-							 UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0;
+			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
+							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
 			var inLayers = UISidebar.inst.htab.position == 0 &&
 						   mx > UISidebar.inst.tabx && my < UISidebar.inst.tabh;
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
@@ -427,15 +427,15 @@ class App {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows
-		Zui.alwaysRedrawWindow = !UISidebar.inst.cacheDraws ||
+		Zui.alwaysRedrawWindow = !Context.cacheDraws ||
 			UIMenu.show ||
 			UIBox.show ||
 			isDragging ||
 			isPicker ||
 			decal ||
 			UIView2D.inst.show ||
-			!UISidebar.inst.brush3d ||
-			UISidebar.inst.frame < 3;
+			!Context.brush3d ||
+			Context.frame < 3;
 		#end
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}

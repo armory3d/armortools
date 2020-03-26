@@ -10,6 +10,7 @@ import arm.util.MeshUtil;
 import arm.util.UVUtil;
 import arm.util.ViewportUtil;
 import arm.sys.Path;
+import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.Project;
@@ -66,7 +67,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		if (UISidebar.inst.worktab.position == SpacePaint) {
+		if (UIHeader.inst.worktab.position == SpacePaint) {
 			ViewportUtil.scaleToBounds();
 		}
 
@@ -92,7 +93,7 @@ class ImportMesh {
 		}
 
 		var raw: TMeshData = null;
-		if (UISidebar.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceScene) {
 			raw = rawMesh(mesh);
 			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
 		}
@@ -106,7 +107,7 @@ class ImportMesh {
 		new MeshData(raw, function(md: MeshData) {
 
 			// Append
-			if (UISidebar.inst.worktab.position == SpaceScene) {
+			if (UIHeader.inst.worktab.position == SpaceScene) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = Context.materialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));

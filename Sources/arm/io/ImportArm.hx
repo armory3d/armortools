@@ -157,7 +157,7 @@ class ImportArm {
 				Context.brush = new BrushSlot(n);
 				Project.brushes.push(Context.brush);
 				MaterialParser.parseBrush();
-				UISidebar.inst.parseBrushInputs();
+				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 			}
 

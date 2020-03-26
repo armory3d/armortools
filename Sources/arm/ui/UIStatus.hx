@@ -13,6 +13,7 @@ class UIStatus {
 
 	public var statusHandle = new Handle();
 	public var statush = defaultStatusH;
+	public var statustab = Id.handle();
 
 	public function new() {
 		inst = this;
@@ -30,10 +31,10 @@ class UIStatus {
 			TabConsole.draw();
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-			if (UISidebar.inst.statustab.changed && (UISidebar.inst.statustab.position == UISidebar.inst.lastStatusPosition || minimized)) {
+			if (statustab.changed && (statustab.position == Context.lastStatusPosition || minimized)) {
 				UISidebar.inst.toggleBrowser();
 			}
-			UISidebar.inst.lastStatusPosition = UISidebar.inst.statustab.position;
+			Context.lastStatusPosition = statustab.position;
 		}
 	}
 }

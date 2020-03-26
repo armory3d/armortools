@@ -118,11 +118,11 @@ class Config {
 	#if arm_painter
 	public static function applyConfig() {
 		var c = Config.raw;
-		c.rp_ssgi = UISidebar.inst.hssgi.selected;
-		c.rp_ssr = UISidebar.inst.hssr.selected;
-		c.rp_bloom = UISidebar.inst.hbloom.selected;
-		c.rp_gi = UISidebar.inst.hvxao.selected;
-		c.rp_supersample = getSuperSampleSize(UISidebar.inst.hsupersample.position);
+		c.rp_ssgi = Context.hssgi.selected;
+		c.rp_ssr = Context.hssr.selected;
+		c.rp_bloom = Context.hbloom.selected;
+		c.rp_gi = Context.hvxao.selected;
+		c.rp_supersample = getSuperSampleSize(Context.hsupersample.position);
 		iron.object.Uniforms.defaultFilter = c.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
 		save();
 		Context.ddirty = 2;

@@ -11,51 +11,51 @@ class BrushOutputNode extends LogicNode {
 
 	public function new(tree: LogicTree) {
 		super(tree);
-		UISidebar.inst.runBrush = run;
-		UISidebar.inst.parseBrushInputs = parseInputs;
+		Context.runBrush = run;
+		Context.parseBrushInputs = parseInputs;
 	}
 
 	function parseInputs() {
-		var lastMask = UISidebar.inst.brushMaskImage;
-		var lastStencil = UISidebar.inst.brushStencilImage;
+		var lastMask = Context.brushMaskImage;
+		var lastStencil = Context.brushStencilImage;
 
-		UISidebar.inst.paintVec = inputs[0].get();
-		UISidebar.inst.brushNodesRadius = inputs[1].get();
-		UISidebar.inst.brushNodesScale = inputs[2].get();
-		UISidebar.inst.brushNodesAngle = inputs[3].get();
+		Context.paintVec = inputs[0].get();
+		Context.brushNodesRadius = inputs[1].get();
+		Context.brushNodesScale = inputs[2].get();
+		Context.brushNodesAngle = inputs[3].get();
 
 		var opac: Dynamic = inputs[4].get(); // Float or texture name
 		if (opac == null) opac = 1.0;
 		if (Std.is(opac, String)) {
-			UISidebar.inst.brushNodesOpacity = 1.0;
+			Context.brushNodesOpacity = 1.0;
 			var index = Project.assetNames.indexOf(opac);
 			var asset = Project.assets[index];
-			UISidebar.inst.brushMaskImage = UISidebar.inst.getImage(asset);
+			Context.brushMaskImage = UISidebar.inst.getImage(asset);
 		}
 		else {
-			UISidebar.inst.brushNodesOpacity = opac;
-			UISidebar.inst.brushMaskImage = null;
+			Context.brushNodesOpacity = opac;
+			Context.brushMaskImage = null;
 		}
 
-		UISidebar.inst.brushNodesHardness = inputs[5].get();
+		Context.brushNodesHardness = inputs[5].get();
 
 		var stencil: Dynamic = inputs[6].get(); // Float or texture name
 		if (stencil == null) stencil = 1.0;
 		if (Std.is(stencil, String)) {
 			var index = Project.assetNames.indexOf(stencil);
 			var asset = Project.assets[index];
-			UISidebar.inst.brushStencilImage = UISidebar.inst.getImage(asset);
+			Context.brushStencilImage = UISidebar.inst.getImage(asset);
 		}
 		else {
-			UISidebar.inst.brushStencilImage = null;
+			Context.brushStencilImage = null;
 		}
 
-		if (lastMask != UISidebar.inst.brushMaskImage ||
-			lastStencil != UISidebar.inst.brushStencilImage) {
+		if (lastMask != Context.brushMaskImage ||
+			lastStencil != Context.brushStencilImage) {
 			MaterialParser.parsePaintMaterial();
 		}
 
-		UISidebar.inst.brushDirectional = Directional;
+		Context.brushDirectional = Directional;
 	}
 
 	override function run(from: Int) {
@@ -64,15 +64,15 @@ class BrushOutputNode extends LogicNode {
 
 		var left = 0;
 		var right = 1;
-		if (UISidebar.inst.paint2d) {
+		if (Context.paint2d) {
 			left = 1;
 			right = 2;
 		}
 
 		// First time init
-		if (UISidebar.inst.lastPaintX < 0 || UISidebar.inst.lastPaintY < 0) {
-			UISidebar.inst.lastPaintVecX = UISidebar.inst.paintVec.x;
-			UISidebar.inst.lastPaintVecY = UISidebar.inst.paintVec.y;
+		if (Context.lastPaintX < 0 || Context.lastPaintY < 0) {
+			Context.lastPaintVecX = Context.paintVec.x;
+			Context.lastPaintVecY = Context.paintVec.y;
 		}
 
 		// Do not paint over fill layer
@@ -82,13 +82,13 @@ class BrushOutputNode extends LogicNode {
 		var groupLayer = Context.layer.getChildren() != null;
 
 		// Paint bounds
-		if (UISidebar.inst.paintVec.x < right && UISidebar.inst.paintVec.x > left &&
-			UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0 &&
+		if (Context.paintVec.x < right && Context.paintVec.x > left &&
+			Context.paintVec.y < 1 && Context.paintVec.y > 0 &&
 			!UISidebar.inst.ui.isHovered &&
 			!UISidebar.inst.ui.isScrolling &&
 			!fillLayer &&
 			!groupLayer &&
-			(Context.layer.isVisible() || UISidebar.inst.paint2d) &&
+			(Context.layer.isVisible() || Context.paint2d) &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			@:privateAccess UISidebar.inst.ui.comboSelectedHandle == null &&
@@ -97,26 +97,26 @@ class BrushOutputNode extends LogicNode {
 			// Set color pick
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			if (down && Context.tool == ToolColorId && Project.assets.length > 0) {
-				UISidebar.inst.colorIdPicked = true;
+				Context.colorIdPicked = true;
 			}
 			// Prevent painting the same spot
-			if (down && UISidebar.inst.paintVec.x == UISidebar.inst.lastPaintX && UISidebar.inst.paintVec.y == UISidebar.inst.lastPaintY) {
-				UISidebar.inst.painted++;
+			if (down && Context.paintVec.x == Context.lastPaintX && Context.paintVec.y == Context.lastPaintY) {
+				Context.painted++;
 			}
 			else {
-				UISidebar.inst.painted = 0;
+				Context.painted = 0;
 			}
-			UISidebar.inst.lastPaintX = UISidebar.inst.paintVec.x;
-			UISidebar.inst.lastPaintY = UISidebar.inst.paintVec.y;
+			Context.lastPaintX = Context.paintVec.x;
+			Context.lastPaintY = Context.paintVec.y;
 
 			if (Context.tool == ToolParticle) {
-				UISidebar.inst.painted = 0; // Always paint particles
+				Context.painted = 0; // Always paint particles
 			}
 
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			var paintFrames = decal ? 1 : 4;
 
-			if (UISidebar.inst.painted <= paintFrames) {
+			if (Context.painted <= paintFrames) {
 				Context.pdirty = 1;
 				Context.rdirty = 2;
 			}

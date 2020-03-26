@@ -7,7 +7,7 @@ import arm.Enums;
 class MakeBake {
 
 	public static function run(con: MaterialShaderContext, vert: MaterialShader, frag: MaterialShader) {
-		if (UISidebar.inst.bakeType == BakeAO) { // Voxel
+		if (Context.bakeType == BakeAO) { // Voxel
 			#if rp_voxelao
 			// Apply normal channel
 			frag.wposition = true;
@@ -28,34 +28,34 @@ class MakeBake {
 			frag.add_uniform('sampler3D voxels');
 			frag.add_function(MaterialFunctions.str_traceAO);
 			frag.n = true;
-			var strength = UISidebar.inst.bakeAoStrength;
-			var radius = UISidebar.inst.bakeAoRadius;
-			var offset = UISidebar.inst.bakeAoOffset;
+			var strength = Context.bakeAoStrength;
+			var radius = Context.bakeAoRadius;
+			var offset = Context.bakeAoOffset;
 			frag.write('float ao = traceAO(voxpos, n, $radius, $offset) * $strength;');
-			if (UISidebar.inst.bakeAxis != BakeXYZ) {
-				var axis = axisString(UISidebar.inst.bakeAxis);
+			if (Context.bakeAxis != BakeXYZ) {
+				var axis = axisString(Context.bakeAxis);
 				frag.write('ao *= dot(n, $axis);');
 			}
 			frag.write('ao = 1.0 - ao;');
 			frag.write('fragColor[0] = vec4(ao, ao, ao, 1.0);');
 			#end
 		}
-		else if (UISidebar.inst.bakeType == BakeCurvature) {
-			var strength = UISidebar.inst.bakeCurvStrength * 2.0;
-			var radius = (1.0 / UISidebar.inst.bakeCurvRadius) * 0.25;
-			var offset = UISidebar.inst.bakeCurvOffset / 10;
+		else if (Context.bakeType == BakeCurvature) {
+			var strength = Context.bakeCurvStrength * 2.0;
+			var radius = (1.0 / Context.bakeCurvRadius) * 0.25;
+			var offset = Context.bakeCurvOffset / 10;
 			frag.n = true;
 			frag.write('vec3 dx = dFdx(n);');
 			frag.write('vec3 dy = dFdy(n);');
 			frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
 			frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
-			if (UISidebar.inst.bakeAxis != BakeXYZ) {
-				var axis = axisString(UISidebar.inst.bakeAxis);
+			if (Context.bakeAxis != BakeXYZ) {
+				var axis = axisString(Context.bakeAxis);
 				frag.write('curvature *= dot(n, $axis);');
 			}
 			frag.write('fragColor[0] = vec4(curvature, curvature, curvature, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeNormal) { // Tangent
+		else if (Context.bakeType == BakeNormal) { // Tangent
 			frag.n = true;
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly normals
 			frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
@@ -64,21 +64,21 @@ class MakeBake {
 			frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 			frag.write('fragColor[0] = vec4(res, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeNormalObject) {
+		else if (Context.bakeType == BakeNormalObject) {
 			frag.n = true;
 			frag.write('fragColor[0] = vec4(n * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			if (UISidebar.inst.bakeUpAxis == BakeUpY) {
+			if (Context.bakeUpAxis == BakeUpY) {
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UISidebar.inst.bakeType == BakeHeight) {
+		else if (Context.bakeType == BakeHeight) {
 			frag.wposition = true;
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly positions
 			frag.write('vec3 wpos0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
 			frag.write('float res = distance(wpos0, wposition) * 10.0;');
 			frag.write('fragColor[0] = vec4(res, res, res, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeDerivative) {
+		else if (Context.bakeType == BakeDerivative) {
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked height
 			frag.write('vec2 texDx = dFdx(texCoord);');
 			frag.write('vec2 texDy = dFdy(texCoord);');
@@ -87,17 +87,17 @@ class MakeBake {
 			frag.write('float h2 = textureLod(texpaint_undo, texCoord + texDy, 0.0).r * 100;');
 			frag.write('fragColor[0] = vec4((h1 - h0) * 0.5 + 0.5, (h2 - h0) * 0.5 + 0.5, 0.0, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakePosition) {
+		else if (Context.bakeType == BakePosition) {
 			frag.wposition = true;
 			frag.write('fragColor[0] = vec4(wposition * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), 1.0);');
-			if (UISidebar.inst.bakeUpAxis == BakeUpY) {
+			if (Context.bakeUpAxis == BakeUpY) {
 				frag.write('fragColor[0].rgb = vec3(fragColor[0].r, fragColor[0].b, 1.0 - fragColor[0].g);');
 			}
 		}
-		else if (UISidebar.inst.bakeType == BakeTexCoord) {
+		else if (Context.bakeType == BakeTexCoord) {
 			frag.write('fragColor[0] = vec4(texCoord.xy, 0.0, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeMaterialID) {
+		else if (Context.bakeType == BakeMaterialID) {
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.write('float sample_matid = textureLod(texpaint_nor_undo, texCoord, 0.0).a + 1.0 / 255.0;');
 			frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -105,7 +105,7 @@ class MakeBake {
 			frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(matid_r, matid_g, matid_b, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeObjectID) {
+		else if (Context.bakeType == BakeObjectID) {
 			frag.add_uniform('float objectId', '_objectId');
 			frag.write('float obid = objectId + 1.0 / 255.0;');
 			frag.write('float id_r = fract(sin(dot(vec2(obid, obid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
@@ -113,7 +113,7 @@ class MakeBake {
 			frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 			frag.write('fragColor[0] = vec4(id_r, id_g, id_b, 1.0);');
 		}
-		else if (UISidebar.inst.bakeType == BakeVertexColor) {
+		else if (Context.bakeType == BakeVertexColor) {
 			if (con.allow_vcols) {
 				con.add_elem("col", "short4norm");
 				frag.write('fragColor[0] = vec4(vcolor.r, vcolor.g, vcolor.b, 1.0);');

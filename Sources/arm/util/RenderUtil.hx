@@ -10,7 +10,7 @@ import iron.math.Mat4;
 import iron.math.Vec4;
 import iron.data.MaterialData;
 import iron.data.ShaderData;
-import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathDeferred;
@@ -24,7 +24,7 @@ class RenderUtil {
 	public static inline var decalPreviewSize = 512;
 
 	public static function makeMaterialPreview() {
-		UISidebar.inst.materialPreview = true;
+		Context.materialPreview = true;
 
 		var sphere: MeshObject = cast Scene.active.getChild(".Sphere");
 		sphere.visible = true;
@@ -33,7 +33,7 @@ class RenderUtil {
 		var painto = Context.paintObject;
 		Context.paintObject = sphere;
 
-		if (UISidebar.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceScene) {
 			sphere.materials[0] = Context.materialScene.data;
 			Context.materialScene.previewReady = true;
 		}
@@ -42,7 +42,7 @@ class RenderUtil {
 			Context.material.previewReady = true;
 		}
 
-		UISidebar.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
+		Context.savedCamera.setFrom(Scene.active.camera.transform.local);
 		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
@@ -60,7 +60,7 @@ class RenderUtil {
 		probe.raw.strength = 4;
 		#end
 
-		Scene.active.world.envmap = UISidebar.inst.previewEnvmap;
+		Scene.active.world.envmap = Context.previewEnvmap;
 		// No resize
 		@:privateAccess RenderPath.active.lastW = matPreviewSize;
 		@:privateAccess RenderPath.active.lastH = matPreviewSize;
@@ -73,7 +73,7 @@ class RenderUtil {
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
 		RenderPath.active.commands = _commands;
 
-		UISidebar.inst.materialPreview = false;
+		Context.materialPreview = false;
 		@:privateAccess RenderPath.active.lastW = iron.App.w();
 		@:privateAccess RenderPath.active.lastH = iron.App.h();
 
@@ -82,23 +82,23 @@ class RenderUtil {
 		Scene.active.meshes = meshes;
 		Context.paintObject = painto;
 
-		Scene.active.camera.transform.setMatrix(UISidebar.inst.savedCamera);
-		ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+		Scene.active.camera.transform.setMatrix(Context.savedCamera);
+		ViewportUtil.updateCameraType(Context.cameraType);
 		Scene.active.camera.data.raw.fov = savedFov;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 		light.data.raw.strength = savedLight;
 		probe.raw.strength = savedProbe;
-		Scene.active.world.envmap = UISidebar.inst.showEnvmap ? UISidebar.inst.savedEnvmap : UISidebar.inst.emptyEnvmap;
+		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 		MaterialParser.parseMeshMaterial();
 		Context.ddirty = 0;
 	}
 
 	public static function makeDecalPreview() {
-		if (UISidebar.inst.decalImage == null) {
-			UISidebar.inst.decalImage = Image.createRenderTarget(RenderUtil.decalPreviewSize, RenderUtil.decalPreviewSize);
+		if (Context.decalImage == null) {
+			Context.decalImage = Image.createRenderTarget(RenderUtil.decalPreviewSize, RenderUtil.decalPreviewSize);
 		}
-		UISidebar.inst.decalPreview = true;
+		Context.decalPreview = true;
 
 		var plane: MeshObject = cast Scene.active.getChild(".Plane");
 		plane.transform.scale.set(1, 1, 1);
@@ -110,7 +110,7 @@ class RenderUtil {
 		var painto = Context.paintObject;
 		Context.paintObject = plane;
 
-		UISidebar.inst.savedCamera.setFrom(Scene.active.camera.transform.local);
+		Context.savedCamera.setFrom(Scene.active.camera.transform.local);
 		var m = Mat4.identity();
 		m.translate(0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
@@ -119,7 +119,7 @@ class RenderUtil {
 		ViewportUtil.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		light.visible = false;
-		Scene.active.world.envmap = UISidebar.inst.previewEnvmap;
+		Scene.active.world.envmap = Context.previewEnvmap;
 
 		// No resize
 		@:privateAccess RenderPath.active.lastW = RenderUtil.decalPreviewSize;
@@ -133,7 +133,7 @@ class RenderUtil {
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
 		RenderPath.active.commands = _commands;
 
-		UISidebar.inst.decalPreview = false;
+		Context.decalPreview = false;
 		@:privateAccess RenderPath.active.lastW = iron.App.w();
 		@:privateAccess RenderPath.active.lastH = iron.App.h();
 
@@ -142,35 +142,35 @@ class RenderUtil {
 		Scene.active.meshes = meshes;
 		Context.paintObject = painto;
 
-		Scene.active.camera.transform.setMatrix(UISidebar.inst.savedCamera);
+		Scene.active.camera.transform.setMatrix(Context.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
-		ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+		ViewportUtil.updateCameraType(Context.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 		var light = Scene.active.lights[0];
 		light.visible = true;
-		Scene.active.world.envmap = UISidebar.inst.showEnvmap ? UISidebar.inst.savedEnvmap : UISidebar.inst.emptyEnvmap;
+		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 
 		MaterialParser.parseMeshMaterial();
 		Context.ddirty = 0;
 	}
 
 	public static function makeTextPreview() {
-		var text = UISidebar.inst.textToolText;
+		var text = Context.textToolText;
 		var font = getTextToolFont();
 		var fontSize = 200;
 		var textW = Std.int(font.width(fontSize, text));
 		var textH = Std.int(font.height(fontSize));
 		var texW = textW + 32;
 		if (texW < 512) texW = 512;
-		if (UISidebar.inst.textToolImage != null && UISidebar.inst.textToolImage.width < texW) {
-			UISidebar.inst.textToolImage.unload();
-			UISidebar.inst.textToolImage = null;
+		if (Context.textToolImage != null && Context.textToolImage.width < texW) {
+			Context.textToolImage.unload();
+			Context.textToolImage = null;
 		}
-		if (UISidebar.inst.textToolImage == null) {
-			UISidebar.inst.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
+		if (Context.textToolImage == null) {
+			Context.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
 		}
-		var g2 = UISidebar.inst.textToolImage.g2;
+		var g2 = Context.textToolImage.g2;
 		g2.begin(true, 0xff000000);
 		g2.font = font;
 		g2.fontSize = fontSize;
@@ -180,8 +180,8 @@ class RenderUtil {
 	}
 
 	static function getTextToolFont(): Font {
-		var fontName = ImportFont.fontList[UISidebar.inst.textToolHandle.position];
-		if (fontName == "default.ttf") return UISidebar.inst.ui.ops.font;
+		var fontName = ImportFont.fontList[Context.textToolHandle.position];
+		if (fontName == "default.ttf") return arm.ui.UISidebar.inst.ui.ops.font;
 		return ImportFont.fontMap.get(fontName);
 	}
 
@@ -259,7 +259,7 @@ class RenderUtil {
 		}
 
 		var cam = Scene.active.camera;
-		UISidebar.inst.savedCamera.setFrom(cam.transform.local);
+		Context.savedCamera.setFrom(cam.transform.local);
 		var savedFov = cam.data.raw.fov;
 		ViewportUtil.updateCameraType(CameraPerspective);
 		var m = Mat4.identity();
@@ -285,16 +285,16 @@ class RenderUtil {
 		RenderPathDeferred.drawGbuffer();
 
 		// Paint brush preview
-		var _brushRadius = UISidebar.inst.brushRadius;
-		var _brushOpacity = UISidebar.inst.brushOpacity;
-		var _brushHardness = UISidebar.inst.brushHardness;
-		UISidebar.inst.brushRadius = 0.25;
-		UISidebar.inst.brushOpacity = 1.0;
-		UISidebar.inst.brushHardness = 0.8;
-		var _x = UISidebar.inst.paintVec.x;
-		var _y = UISidebar.inst.paintVec.y;
-		var _lastX = UISidebar.inst.lastPaintVecX;
-		var _lastY = UISidebar.inst.lastPaintVecY;
+		var _brushRadius = Context.brushRadius;
+		var _brushOpacity = Context.brushOpacity;
+		var _brushHardness = Context.brushHardness;
+		Context.brushRadius = 0.25;
+		Context.brushOpacity = 1.0;
+		Context.brushHardness = 0.8;
+		var _x = Context.paintVec.x;
+		var _y = Context.paintVec.y;
+		var _lastX = Context.lastPaintVecX;
+		var _lastY = Context.lastPaintVecY;
 		var _pdirty = Context.pdirty;
 		Context.pdirty = 2;
 
@@ -303,22 +303,22 @@ class RenderUtil {
 		var pointsX = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
 		var pointsY = [0.5, 0.5,  0.35, 0.2,  0.4, 0.6,  0.45, 0.3,  0.5, 0.7];
 		for (i in 1...pointsX.length) {
-			UISidebar.inst.lastPaintVecX = pointsX[i - 1];
-			UISidebar.inst.lastPaintVecY = pointsY[i - 1];
-			UISidebar.inst.paintVec.x = pointsX[i];
-			UISidebar.inst.paintVec.y = pointsY[i];
+			Context.lastPaintVecX = pointsX[i - 1];
+			Context.lastPaintVecY = pointsY[i - 1];
+			Context.paintVec.x = pointsX[i];
+			Context.paintVec.y = pointsY[i];
 			RenderPathPaint.commandsPaint();
 		}
 
-		UISidebar.inst.brushRadius = _brushRadius;
-		UISidebar.inst.brushOpacity = _brushOpacity;
-		UISidebar.inst.brushHardness = _brushHardness;
-		UISidebar.inst.paintVec.x = _x;
-		UISidebar.inst.paintVec.y = _y;
-		UISidebar.inst.lastPaintVecX = _lastX;
-		UISidebar.inst.lastPaintVecY = _lastY;
-		UISidebar.inst.prevPaintVecX = -1;
-		UISidebar.inst.prevPaintVecY = -1;
+		Context.brushRadius = _brushRadius;
+		Context.brushOpacity = _brushOpacity;
+		Context.brushHardness = _brushHardness;
+		Context.paintVec.x = _x;
+		Context.paintVec.y = _y;
+		Context.lastPaintVecX = _lastX;
+		Context.lastPaintVecY = _lastY;
+		Context.prevPaintVecX = -1;
+		Context.prevPaintVecY = -1;
 		Context.pdirty = _pdirty;
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;
@@ -338,9 +338,9 @@ class RenderUtil {
 			Context.mergedObject.visible = mergedObjectVisible;
 		}
 		Context.paintObject = painto;
-		Scene.active.camera.transform.setMatrix(UISidebar.inst.savedCamera);
+		Scene.active.camera.transform.setMatrix(Context.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
-		ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+		ViewportUtil.updateCameraType(Context.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 

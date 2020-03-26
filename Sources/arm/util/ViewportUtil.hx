@@ -27,8 +27,8 @@ class ViewportUtil {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (UISidebar.inst.fovHandle != null) UISidebar.inst.fovHandle.value = 0.92;
-				UISidebar.inst.camHandle.position = 0;
+				if (Context.fovHandle != null) Context.fovHandle.value = 0.92;
+				Context.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
 				Context.ddirty = 2;

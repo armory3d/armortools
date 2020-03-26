@@ -55,8 +55,8 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.texture = asset;
 
-							if (Time.time() - UISidebar.inst.selectTime < 0.25) UISidebar.inst.show2DView(1);
-							UISidebar.inst.selectTime = Time.time();
+							if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(1);
+							Context.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
 						}
 

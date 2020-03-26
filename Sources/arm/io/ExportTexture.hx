@@ -30,7 +30,7 @@ class ExportTexture {
 			}
 		}
 
-		if (udimTiles.length > 0 && UISidebar.inst.layersExport == 0) {
+		if (udimTiles.length > 0 && Context.layersExport == 0) {
 			for (udimTile in udimTiles) runLayers(path, udimTile);
 		}
 		else {
@@ -46,10 +46,10 @@ class ExportTexture {
 
 	static function runLayers(path: String, udimTile = "") {
 		var textureSize = Config.getTextureRes();
-		var formatQuality = UISidebar.inst.formatQuality;
+		var formatQuality = Context.formatQuality;
 		var f = UIFiles.filename;
 		if (f == "") f = tr("untitled");
-		var formatType = UISidebar.inst.formatType;
+		var formatType = Context.formatType;
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
@@ -62,7 +62,7 @@ class ExportTexture {
 		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
 
 		// Append object mask name
-		var exportAll = UISidebar.inst.layersExport == 0;
+		var exportAll = Context.layersExport == 0;
 		if (!exportAll && Context.layer.objectMask > 0) {
 			f += "_" + Project.paintObjects[Context.layer.objectMask].name;
 		}
@@ -229,7 +229,7 @@ class ExportTexture {
 		if (bits > 8) { // 16/32bit
 			var writer = new ExrWriter(out, res, res, pixels, bits, type, off);
 		}
-		else if (UISidebar.inst.formatType == FormatPng) {
+		else if (Context.formatType == FormatPng) {
 			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
@@ -244,7 +244,7 @@ class ExportTexture {
 			writer.write({
 				width: res,
 				height: res,
-				quality: UISidebar.inst.formatQuality,
+				quality: Context.formatQuality,
 				pixels: pixels
 			}, type, off);
 		}

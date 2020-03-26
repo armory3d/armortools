@@ -7,7 +7,7 @@ import iron.object.MeshObject;
 import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
-import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.ui.UIView2D;
 import arm.Enums;
 
@@ -96,7 +96,7 @@ class Inc {
 
 	#if arm_painter
 	public static function drawCompass(currentG: kha.graphics4.Graphics) {
-		if (UISidebar.inst.showCompass) {
+		if (Context.showCompass) {
 			var scene = Scene.active;
 			var cam = Scene.active.camera;
 			var gizmo: MeshObject = cast scene.getChild(".GizmoTranslate");
@@ -129,37 +129,37 @@ class Inc {
 	#end
 
 	public static function beginSplit() {
-		if (UISidebar.inst.splitView) {
+		if (Context.splitView) {
 
-			if (UISidebar.inst.viewIndexLast == -1 && UISidebar.inst.viewIndex == -1) {
+			if (Context.viewIndexLast == -1 && Context.viewIndex == -1) {
 				// Begin split, draw right viewport first
-				UISidebar.inst.viewIndex = 1;
+				Context.viewIndex = 1;
 			}
 			else {
 				// Set current viewport
-				UISidebar.inst.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 			}
 
 			var cam = Scene.active.camera;
-			if (UISidebar.inst.viewIndexLast > -1) {
+			if (Context.viewIndexLast > -1) {
 				// Save current viewport camera
-				arm.plugin.Camera.inst.views[UISidebar.inst.viewIndexLast].setFrom(cam.transform.local);
+				arm.plugin.Camera.inst.views[Context.viewIndexLast].setFrom(cam.transform.local);
 			}
 
-			if (UISidebar.inst.viewIndexLast != UISidebar.inst.viewIndex) {
+			if (Context.viewIndexLast != Context.viewIndex) {
 				// Redraw on current viewport change
 				Context.ddirty = 1;
 			}
 
-			cam.transform.setMatrix(arm.plugin.Camera.inst.views[UISidebar.inst.viewIndex]);
+			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
 	}
 
 	public static function endSplit() {
-		UISidebar.inst.viewIndexLast = UISidebar.inst.viewIndex;
-		UISidebar.inst.viewIndex = -1;
+		Context.viewIndexLast = Context.viewIndex;
+		Context.viewIndex = -1;
 	}
 
 	public static inline function ssaa4(): Bool {
@@ -174,19 +174,19 @@ class Inc {
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
 
-		if (UISidebar.inst.brushLive) {
-			var inViewport = UISidebar.inst.paintVec.x < 1 && UISidebar.inst.paintVec.x > 0 &&
-							 UISidebar.inst.paintVec.y < 1 && UISidebar.inst.paintVec.y > 0;
+		if (Context.brushLive) {
+			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
+							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			if ((mx != lastX || my != lastY || UISidebar.inst.brushLocked) && (inViewport || in2dView)) {
+			if ((mx != lastX || my != lastY || Context.brushLocked) && (inViewport || in2dView)) {
 				Context.rdirty = 2;
-				UISidebar.inst.sub = 0;
+				Context.sub = 0;
 			}
 		}
 
-		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UISidebar.inst.worktab.position == SpaceScene)) {
+		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UIHeader.inst.worktab.position == SpaceScene)) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			if (Context.ddirty > -2) {
 				path.setTarget("");
@@ -194,7 +194,7 @@ class Inc {
 				ssaa4() ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
-				if (UISidebar.inst.brush3d) RenderPathPaint.commandsCursor();
+				if (Context.brush3d) RenderPathPaint.commandsCursor();
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
 			endSplit();

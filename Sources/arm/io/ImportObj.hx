@@ -8,7 +8,7 @@ import arm.ui.UISidebar;
 class ImportObj {
 
 	public static function run(path: String) {
-		var i = UISidebar.inst.splitBy;
+		var i = Context.splitBy;
 		var isUdim = i == SplitUdim;
 		ObjParser.splitCode =
 			(i == SplitObject || isUdim) ? "o".code :

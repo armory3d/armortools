@@ -45,7 +45,7 @@ class Camera {
 			}
 
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
-			var controls = UISidebar.inst.cameraControls;
+			var controls = Context.cameraControls;
 			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
 					redraws = 2;
@@ -140,8 +140,8 @@ class Camera {
 				var d = Time.delta * speed * fast * ease;
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
-					if (UISidebar.inst.cameraType == CameraOrthographic) {
-						ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+					if (Context.cameraType == CameraOrthographic) {
+						ViewportUtil.updateCameraType(Context.cameraType);
 					}
 				}
 
@@ -154,8 +154,8 @@ class Camera {
 				redraws--;
 				Context.ddirty = 2;
 
-				if (UISidebar.inst.cameraType == CameraOrthographic) {
-					ViewportUtil.updateCameraType(UISidebar.inst.cameraType);
+				if (Context.cameraType == CameraOrthographic) {
+					ViewportUtil.updateCameraType(Context.cameraType);
 				}
 			}
 		});

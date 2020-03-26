@@ -11,7 +11,7 @@ import arm.ui.UISidebar;
 class Gizmo {
 
 	public static function update() {
-		var gizmo = UISidebar.inst.gizmo;
+		var gizmo = Context.gizmo;
 		if (!gizmo.visible) return;
 
 		if (Context.object != null) {
@@ -19,9 +19,9 @@ class Gizmo {
 			gizmo.transform.loc.setFrom(Context.object.transform.loc);
 			var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 10;
 			gizmo.transform.scale.set(dist, dist, dist);
-			UISidebar.inst.gizmoX.transform.scale.set(dist, dist, dist);
-			UISidebar.inst.gizmoY.transform.scale.set(dist, dist, dist);
-			UISidebar.inst.gizmoZ.transform.scale.set(dist, dist, dist);
+			Context.gizmoX.transform.scale.set(dist, dist, dist);
+			Context.gizmoY.transform.scale.set(dist, dist, dist);
+			Context.gizmoZ.transform.scale.set(dist, dist, dist);
 			gizmo.transform.buildMatrix();
 		}
 
@@ -92,29 +92,29 @@ class Gizmo {
 
 		if (mouse.started("left") && Context.object.name != "Scene") {
 			gizmo.transform.buildMatrix();
-			var trs = [UISidebar.inst.gizmoX.transform, UISidebar.inst.gizmoY.transform, UISidebar.inst.gizmoZ.transform];
+			var trs = [Context.gizmoX.transform, Context.gizmoY.transform, Context.gizmoZ.transform];
 			var hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
 			if (hit != null) {
-				if (hit.object == UISidebar.inst.gizmoX) UISidebar.inst.axisX = true;
-				else if (hit.object == UISidebar.inst.gizmoY) UISidebar.inst.axisY = true;
-				else if (hit.object == UISidebar.inst.gizmoZ) UISidebar.inst.axisZ = true;
-				if (UISidebar.inst.axisX || UISidebar.inst.axisY || UISidebar.inst.axisZ) UISidebar.inst.axisStart = 0.0;
+				if (hit.object == Context.gizmoX) Context.axisX = true;
+				else if (hit.object == Context.gizmoY) Context.axisY = true;
+				else if (hit.object == Context.gizmoZ) Context.axisZ = true;
+				if (Context.axisX || Context.axisY || Context.axisZ) Context.axisStart = 0.0;
 			}
 		}
 		else if (mouse.released("left")) {
-			UISidebar.inst.axisX = UISidebar.inst.axisY = UISidebar.inst.axisZ = false;
+			Context.axisX = Context.axisY = Context.axisZ = false;
 		}
 
-		if (UISidebar.inst.axisX || UISidebar.inst.axisY || UISidebar.inst.axisZ) {
+		if (Context.axisX || Context.axisY || Context.axisZ) {
 			var t = Context.object.transform;
 			var v = new Vec4();
 			v.set(t.worldx(), t.worldy(), t.worldz());
 
-			if (UISidebar.inst.axisX) {
+			if (Context.axisX) {
 				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (UISidebar.inst.axisStart == 0) UISidebar.inst.axisStart = hit.x - Context.object.transform.loc.x;
-					Context.object.transform.loc.x = hit.x - UISidebar.inst.axisStart;
+					if (Context.axisStart == 0) Context.axisStart = hit.x - Context.object.transform.loc.x;
+					Context.object.transform.loc.x = hit.x - Context.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
 					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
@@ -122,11 +122,11 @@ class Gizmo {
 					#end
 				}
 			}
-			else if (UISidebar.inst.axisY) {
+			else if (Context.axisY) {
 				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (UISidebar.inst.axisStart == 0) UISidebar.inst.axisStart = hit.y - Context.object.transform.loc.y;
-					Context.object.transform.loc.y = hit.y - UISidebar.inst.axisStart;
+					if (Context.axisStart == 0) Context.axisStart = hit.y - Context.object.transform.loc.y;
+					Context.object.transform.loc.y = hit.y - Context.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
 					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
@@ -134,11 +134,11 @@ class Gizmo {
 					#end
 				}
 			}
-			else if (UISidebar.inst.axisZ) {
+			else if (Context.axisZ) {
 				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (UISidebar.inst.axisStart == 0) UISidebar.inst.axisStart = hit.z - Context.object.transform.loc.z;
-					Context.object.transform.loc.z = hit.z - UISidebar.inst.axisStart;
+					if (Context.axisStart == 0) Context.axisStart = hit.z - Context.object.transform.loc.z;
+					Context.object.transform.loc.z = hit.z - Context.axisStart;
 					Context.object.transform.buildMatrix();
 					#if arm_physics
 					var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
@@ -148,6 +148,6 @@ class Gizmo {
 			}
 		}
 
-		Input.occupied = (UISidebar.inst.axisX || UISidebar.inst.axisY || UISidebar.inst.axisZ) && mouse.viewX < App.w();
+		Input.occupied = (Context.axisX || Context.axisY || Context.axisZ) && mouse.viewX < App.w();
 	}
 }

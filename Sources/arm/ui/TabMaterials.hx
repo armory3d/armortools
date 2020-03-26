@@ -21,7 +21,7 @@ class TabMaterials {
 	public static function draw() {
 
 		var ui = UISidebar.inst.ui;
-		var isScene = UISidebar.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceScene;
 		var materials = isScene ? Project.materialsScene : Project.materials;
 		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
@@ -64,11 +64,11 @@ class TabMaterials {
 			var num = Std.int(UISidebar.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
-				var mult = UISidebar.inst.showAssetNames ? 2 : 1;
+				var mult = Context.showAssetNames ? 2 : 1;
 				ui.row([for (i in 0...num * mult) 1 / num]);
 
 				ui._x += 2;
-				var off = UISidebar.inst.showAssetNames ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+				var off = Context.showAssetNames ? ui.ELEMENT_OFFSET() * 10.0 : 6;
 				if (row > 0) ui._y += off;
 
 				for (j in 0...num) {
@@ -106,12 +106,12 @@ class TabMaterials {
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragMaterial = getSelectedMaterial();
-						if (Time.time() - UISidebar.inst.selectTime < 0.25) {
+						if (Time.time() - Context.selectTime < 0.25) {
 							UISidebar.inst.showMaterialNodes();
 							App.dragMaterial = null;
 							App.isDragging = false;
 						}
-						UISidebar.inst.selectTime = Time.time();
+						Context.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						var add = materials.length > 1 ? 1 : 0;
@@ -185,7 +185,7 @@ class TabMaterials {
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
 
-					if (UISidebar.inst.showAssetNames) {
+					if (Context.showAssetNames) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
 						ui.text(materials[i].canvas.name, Center);
@@ -212,6 +212,6 @@ class TabMaterials {
 	}
 
 	static function getSelectedMaterial():MaterialSlot {
-		return UISidebar.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
+		return UIHeader.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
 	}
 }

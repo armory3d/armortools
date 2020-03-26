@@ -9,8 +9,8 @@ class ImportFbx {
 
 	public static function run(path: String) {
 		Data.getBlob(path, function(b: Blob) {
-			FbxParser.parseTransform = UISidebar.inst.parseTransform;
-			FbxParser.parseVCols = UISidebar.inst.parseVCols;
+			FbxParser.parseTransform = Context.parseTransform;
+			FbxParser.parseVCols = Context.parseVCols;
 			var obj = new FbxParser(b);
 			ImportMesh.makeMesh(obj, path);
 			while (obj.next()) {

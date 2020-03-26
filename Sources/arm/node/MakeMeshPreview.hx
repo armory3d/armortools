@@ -2,7 +2,7 @@ package arm.node;
 
 import iron.object.MeshObject;
 import iron.data.SceneFormat;
-import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.ui.UINodes;
 import arm.node.MaterialShader;
 import arm.Enums;
@@ -13,13 +13,13 @@ class MakeMeshPreview {
 	public static var opacityDiscardScene = 0.5;
 
 	public static function run(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
-		var isScene = UISidebar.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceScene;
 		var context_id = "mesh";
 		var con_mesh: MaterialShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: "less",
-			cull_mode: (UISidebar.inst.cullBackfaces || !isScene) ? "clockwise" : "none",
+			cull_mode: (Context.cullBackfaces || !isScene) ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}] });
 
 		var vert = con_mesh.make_vert();
@@ -74,7 +74,7 @@ class MakeMeshPreview {
 		frag.write('float opacity = $opac;');
 		frag.write('vec3 nortan = $nortan;');
 
-		var decal = UISidebar.inst.decalPreview;
+		var decal = Context.decalPreview;
 		if (decal) {
 			if (Context.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');

@@ -11,7 +11,7 @@ class MakeBrush {
 		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
 			frag.write('float dist = 0.0;');
 		}
-		else if (UISidebar.inst.brush3d) {
+		else if (Context.brush3d) {
 			#if (kha_opengl || kha_webgl)
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#else
@@ -24,7 +24,7 @@ class MakeBrush {
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			if (UISidebar.inst.brushAngleReject || UISidebar.inst.xray) {
+			if (Context.brushAngleReject || Context.xray) {
 				frag.add_function(MaterialFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_opengl || kha_webgl)
@@ -38,10 +38,10 @@ class MakeBrush {
 				frag.write('wn = normalize(wn);');
 				frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
 
-				if (UISidebar.inst.brushAngleReject && !UISidebar.inst.xray) {
+				if (Context.brushAngleReject && !Context.xray) {
 					frag.write('if (planeDist < -0.01) discard;');
 					frag.n = true;
-					var angle = UISidebar.inst.brushAngleRejectDot;
+					var angle = Context.brushAngleRejectDot;
 					frag.write('if (dot(wn, n) < $angle) discard;');
 				}
 			}
@@ -57,12 +57,12 @@ class MakeBrush {
 			frag.write('winplast.xyz /= winplast.w;');
 
 			frag.write('vec3 pa = wposition - winp.xyz;');
-			if (UISidebar.inst.xray) {
+			if (Context.xray) {
 				frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
 			}
 			frag.write('vec3 ba = winplast.xyz - winp.xyz;');
 
-			if (UISidebar.inst.brushLazyRadius > 0 && UISidebar.inst.brushLazyStep > 0) {
+			if (Context.brushLazyRadius > 0 && Context.brushLazyStep > 0) {
 				// Sphere
 				frag.write('float dist = distance(wposition, winp.xyz);');
 			}

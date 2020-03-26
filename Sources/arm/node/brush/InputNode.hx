@@ -22,14 +22,14 @@ class InputNode extends LogicNode {
 		super(tree);
 		tree.notifyOnUpdate(function() {
 
-			if (UISidebar.inst.splitView) {
-				UISidebar.inst.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			if (Context.splitView) {
+				Context.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 			}
 
-			UISidebar.inst.brushLazyRadius = inputs[0].get();
-			UISidebar.inst.brushLazyStep = inputs[1].get();
+			Context.brushLazyRadius = inputs[0].get();
+			Context.brushLazyStep = inputs[1].get();
 
-			var lazyPaint = UISidebar.inst.brushLazyRadius > 0 &&
+			var lazyPaint = Context.brushLazyRadius > 0 &&
 				(Operator.shortcut(Config.keymap.action_paint) ||
 				 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint));
 
@@ -56,17 +56,17 @@ class InputNode extends LogicNode {
 				if (lockY) paintY = startY;
 			}
 
-			if (UISidebar.inst.brushLazyRadius > 0) {
-				UISidebar.inst.brushLazyX = paintX;
-				UISidebar.inst.brushLazyY = paintY;
+			if (Context.brushLazyRadius > 0) {
+				Context.brushLazyX = paintX;
+				Context.brushLazyY = paintY;
 			}
 			if (!lazyPaint) {
 				coords.x = paintX;
 				coords.y = paintY;
 			}
 
-			if (UISidebar.inst.splitView) {
-				UISidebar.inst.viewIndex = -1;
+			if (Context.splitView) {
+				Context.viewIndex = -1;
 			}
 
 			if (lockBegin) {
@@ -82,23 +82,23 @@ class InputNode extends LogicNode {
 			if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.viewX; lockStartY = mouse.viewY; lockBegin = true; }
 			else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
 
-			if (UISidebar.inst.brushLazyRadius > 0) {
-				var v1 = new Vec4(UISidebar.inst.brushLazyX * iron.App.w(), UISidebar.inst.brushLazyY * iron.App.h(), 0.0);
+			if (Context.brushLazyRadius > 0) {
+				var v1 = new Vec4(Context.brushLazyX * iron.App.w(), Context.brushLazyY * iron.App.h(), 0.0);
 				var v2 = new Vec4(coords.x * iron.App.w(), coords.y * iron.App.h(), 0.0);
 				var d = Vec4.distance(v1, v2);
-				var r = UISidebar.inst.brushLazyRadius * 85;
+				var r = Context.brushLazyRadius * 85;
 				if (d > r) {
 					var v3 = new Vec4();
 					v3.subvecs(v2, v1);
 					v3.normalize();
-					v3.mult(1.0 - UISidebar.inst.brushLazyStep);
+					v3.mult(1.0 - Context.brushLazyStep);
 					v3.mult(r);
 					v2.addvecs(v1, v3);
 					coords.x = v2.x / iron.App.w();
 					coords.y = v2.y / iron.App.h();
 				}
-				UISidebar.inst.lastPaintX = -1;
-				UISidebar.inst.lastPaintY = -1;
+				Context.lastPaintX = -1;
+				Context.lastPaintY = -1;
 			}
 		});
 	}

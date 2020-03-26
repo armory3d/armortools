@@ -19,7 +19,7 @@ class ParticleUtil {
 	}
 
 	public static function initParticle() {
-		if (UISidebar.inst.particleMaterial != null) return;
+		if (Context.particleMaterial != null) return;
 
 		var raw: TParticleData = {
 			name: "Particles",
@@ -70,7 +70,7 @@ class ParticleUtil {
 		}
 
 		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
-			UISidebar.inst.particleMaterial = md;
+			Context.particleMaterial = md;
 
 			for (obj in Scene.active.raw.objects) {
 				if (obj.name == ".Sphere") {

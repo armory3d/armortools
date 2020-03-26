@@ -20,7 +20,7 @@ class UVUtil {
 
 		uvmapCached = true;
 		var merged = Context.mergedObject;
-		var mesh = (UISidebar.inst.layerFilter == 0 && merged != null) ?
+		var mesh = (Context.layerFilter == 0 && merged != null) ?
 					merged.data.raw : Context.paintObject.data.raw;
 
 		var texa = mesh.vertex_arrays[2].values;

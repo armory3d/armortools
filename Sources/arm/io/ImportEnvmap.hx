@@ -82,8 +82,8 @@ class ImportEnvmap {
 		Scene.active.world.probe.raw.strength = 1.0;
 		Scene.active.world.envmap = image;
 		Scene.active.world.raw.envmap = path;
-		UISidebar.inst.savedEnvmap = image;
-		UISidebar.inst.showEnvmapHandle.selected = UISidebar.inst.showEnvmap = true;
+		Context.savedEnvmap = image;
+		Context.showEnvmapHandle.selected = Context.showEnvmap = true;
 
 		// Load envmap clone and set mipmaps
 		Data.cachedImages.remove(path);

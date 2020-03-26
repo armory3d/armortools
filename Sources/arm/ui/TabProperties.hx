@@ -4,6 +4,8 @@ import zui.Id;
 
 class TabProperties {
 
+	static var row4 = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UISidebar.inst.htab1, tr("Properties"))) {
@@ -21,7 +23,7 @@ class TabProperties {
 				var f = 0.0;
 				ui.changed = false;
 
-				ui.row(UISidebar.inst.row4);
+				ui.row(row4);
 				ui.text(tr("Location"));
 
 				h = Id.handle();
@@ -39,7 +41,7 @@ class TabProperties {
 				f = Std.parseFloat(ui.textInput(h, "Z"));
 				if (h.changed) { loc.z = f; Context.ddirty = 2; }
 
-				ui.row(UISidebar.inst.row4);
+				ui.row(row4);
 				ui.text("Rotation");
 
 				h = Id.handle();
@@ -63,7 +65,7 @@ class TabProperties {
 					Context.object.transform.buildMatrix();
 				}
 
-				ui.row(UISidebar.inst.row4);
+				ui.row(row4);
 				ui.text(tr("Scale"));
 
 				h = Id.handle();
