@@ -60,9 +60,6 @@ class TabLayers {
 					return;
 				}
 
-				var h = Id.handle().nest(l.id, {selected: l.visible});
-				var layerPanel = h.nest(0);
-				layerPanel.selected = l.show_panel;
 				var off = ui.t.ELEMENT_OFFSET;
 				var step = ui.t.ELEMENT_H;
 				var checkw = (ui._windowW / 100 * 8) / ui.SCALE();
@@ -428,15 +425,24 @@ class TabLayers {
 						}
 
 						if (l.getChildren() == null) {
-							var baseHandle = Id.handle().nest(l.id, {selected: l.paintBase});
-							var opacHandle = Id.handle().nest(l.id, {selected: l.paintOpac});
-							var norHandle = Id.handle().nest(l.id, {selected: l.paintNor});
-							var occHandle = Id.handle().nest(l.id, {selected: l.paintOcc});
-							var roughHandle = Id.handle().nest(l.id, {selected: l.paintRough});
-							var metHandle = Id.handle().nest(l.id, {selected: l.paintMet});
-							var heightHandle = Id.handle().nest(l.id, {selected: l.paintHeight});
-							var emisHandle = Id.handle().nest(l.id, {selected: l.paintEmis});
-							var subsHandle = Id.handle().nest(l.id, {selected: l.paintSubs});
+							var baseHandle = Id.handle().nest(l.id);
+							var opacHandle = Id.handle().nest(l.id);
+							var norHandle = Id.handle().nest(l.id);
+							var occHandle = Id.handle().nest(l.id);
+							var roughHandle = Id.handle().nest(l.id);
+							var metHandle = Id.handle().nest(l.id);
+							var heightHandle = Id.handle().nest(l.id);
+							var emisHandle = Id.handle().nest(l.id);
+							var subsHandle = Id.handle().nest(l.id);
+							baseHandle.selected = l.paintBase;
+							opacHandle.selected = l.paintOpac;
+							norHandle.selected = l.paintNor;
+							occHandle.selected = l.paintOcc;
+							roughHandle.selected = l.paintRough;
+							metHandle.selected = l.paintMet;
+							heightHandle.selected = l.paintHeight;
+							emisHandle.selected = l.paintEmis;
+							subsHandle.selected = l.paintSubs;
 							l.paintBase = ui.check(baseHandle, tr("Base Color"));
 							l.paintOpac = ui.check(opacHandle, tr("Opacity"));
 							l.paintNor = ui.check(norHandle, tr("Normal"));
@@ -497,8 +503,9 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				ui.panel(layerPanel, "", true, false, false);
-				l.show_panel = layerPanel.selected;
+				var layerPanel = Id.handle().nest(l.id);
+				layerPanel.selected = l.show_panel;
+				l.show_panel = ui.panel(layerPanel, "", true, false, false);
 				ui._y -= center;
 
 				if (l.getChildren() != null) {
@@ -514,10 +521,10 @@ class TabLayers {
 
 					var ar = [tr("Shared")];
 					for (p in Project.paintObjects) ar.push(p.name);
-					var h = Id.handle().nest(l.id);
-					h.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
-					l.objectMask = ui.combo(h, ar, tr("Object"));
-					if (h.changed) {
+					var objectHandle = Id.handle().nest(l.id);
+					objectHandle.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
+					l.objectMask = ui.combo(objectHandle, ar, tr("Object"));
+					if (objectHandle.changed) {
 						Context.setLayer(l);
 						MaterialParser.parseMeshMaterial();
 						if (l.material_mask != null) { // Fill layer
@@ -543,7 +550,6 @@ class TabLayers {
 					ui._y += 2;
 
 					var layerOpacHandle = Id.handle().nest(l.id);
-
 					layerOpacHandle.value = l.maskOpacity;
 					ui.slider(layerOpacHandle, tr("Opacity"), 0.0, 1.0, true);
 					if (layerOpacHandle.changed) {
@@ -573,7 +579,8 @@ class TabLayers {
 						ui.row([8 / 100, 92 / 100 / 3, 92 / 100 / 3, 92 / 100 / 3]);
 						@:privateAccess ui.endElement();
 
-						var scaleHandle = Id.handle().nest(l.id, {value: l.scale});
+						var scaleHandle = Id.handle().nest(l.id);
+						scaleHandle.value = l.scale;
 						l.scale = ui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
 						if (scaleHandle.changed) {
 							Context.setMaterial(l.material_mask);
@@ -581,7 +588,8 @@ class TabLayers {
 							Layers.updateFillLayers();
 						}
 
-						var angleHandle = Id.handle().nest(l.id, {value: l.angle});
+						var angleHandle = Id.handle().nest(l.id);
+						angleHandle.value = l.angle;
 						l.angle = ui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
 						if (angleHandle.changed) {
 							Context.setMaterial(l.material_mask);
@@ -590,7 +598,8 @@ class TabLayers {
 							Layers.updateFillLayers();
 						}
 
-						var uvTypeHandle = Id.handle().nest(l.id, {position: l.uvType});
+						var uvTypeHandle = Id.handle().nest(l.id);
+						uvTypeHandle.position = l.uvType;
 						l.uvType = ui.combo(uvTypeHandle, [tr("UV Map"), tr("Triplanar")], tr("TexCoord"));
 						if (uvTypeHandle.changed) {
 							Context.setMaterial(l.material_mask);
