@@ -439,7 +439,7 @@ class App {
 			isPicker ||
 			decal ||
 			UIView2D.inst.show ||
-			!Context.brush3d ||
+			!Config.raw.brush_3d ||
 			Context.frame < 3;
 		#end
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;

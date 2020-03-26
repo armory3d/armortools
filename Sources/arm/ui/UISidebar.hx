@@ -788,7 +788,7 @@ class UISidebar {
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
-			if (!Context.brush3d || in2dView || (decal && !Context.brushLive)) {
+			if (!Config.raw.brush_3d || in2dView || (decal && !Config.raw.brush_live)) {
 				if (decal && !inNodes) {
 					var psizex = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius));

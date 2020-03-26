@@ -260,7 +260,7 @@ class RenderPathRaytrace {
 		path.bindTarget("taa", "tex");
 		path.drawShader("shader_datas/copy_pass/copy_pass");
 		#if arm_painter
-		if (Context.brush3d) {
+		if (Config.raw.brush_3d) {
 			RenderPathPaint.commandsCursor();
 		}
 		#end

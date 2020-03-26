@@ -119,16 +119,16 @@ class BoxPreferences {
 				Context.dilateRadius = ui.slider(Id.handle({value: Context.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
 				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
-				var brushLiveHandle = Id.handle({selected: Context.brushLive});
-				Context.brushLive = ui.check(brushLiveHandle, tr("Live Brush Preview"));
+				var brushLiveHandle = Id.handle({selected: Config.raw.brush_live});
+				Config.raw.brush_live = ui.check(brushLiveHandle, tr("Live Brush Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Draw live brush preview in viewport"));
 				if (brushLiveHandle.changed) Context.ddirty = 2;
 
-				var brush3dHandle = Id.handle({selected: Context.brush3d});
-				Context.brush3d = ui.check(brush3dHandle, tr("3D Cursor"));
+				var brush3dHandle = Id.handle({selected: Config.raw.brush_3d});
+				Config.raw.brush_3d = ui.check(brush3dHandle, tr("3D Cursor"));
 				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
 
-				ui.enabled = Context.brush3d;
+				ui.enabled = Config.raw.brush_3d;
 				var brushDepthRejectHandle = Id.handle({selected: Context.brushDepthReject});
 				Context.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
 				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();

@@ -106,10 +106,10 @@ class MakePaint {
 			decal) {
 
 			var depthReject = !Context.xray;
-			if (Context.brush3d && !Context.brushDepthReject) depthReject = false;
+			if (Config.raw.brush_3d && !Context.brushDepthReject) depthReject = false;
 
 			// TODO: sp.z needs to take height channel into account
-			if (Context.brush3d && !decal && MaterialBuilder.heightUsed) depthReject = false;
+			if (Config.raw.brush_3d && !decal && MaterialBuilder.heightUsed) depthReject = false;
 
 			if (depthReject) {
 				#if (kha_opengl || kha_webgl)
@@ -258,7 +258,7 @@ class MakePaint {
 				frag.write('pa_mask.xy = vec2(pa_mask.x * brushAngle.x - pa_mask.y * brushAngle.y, pa_mask.x * brushAngle.y + pa_mask.y * brushAngle.x);');
 			}
 			frag.write('pa_mask /= brushRadius;');
-			if (Context.brush3d) {
+			if (Config.raw.brush_3d) {
 				frag.add_uniform('vec3 eye', '_cameraPosition');
 				frag.write('pa_mask *= distance(eye, winp.xyz) / 1.5;');
 			}

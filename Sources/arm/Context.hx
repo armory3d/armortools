@@ -168,8 +168,6 @@ class Context {
 	public static var brushLazyY = 0.0;
 	public static var brushBias = 1.0;
 	public static var brushPaint = UVMap;
-	public static var brush3d = true;
-	public static var brushLive = false;
 	public static var brushDepthReject = true;
 	public static var brushAngleReject = true;
 	public static var brushAngleRejectDot = 0.5;

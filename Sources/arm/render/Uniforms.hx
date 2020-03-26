@@ -33,7 +33,7 @@ class Uniforms {
 				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-			if (Context.brush3d && !decal) {
+			if (Config.raw.brush_3d && !decal) {
 				val *= Context.paint2d ? 0.6 : 2;
 			}
 			else val *= 900 / App.h(); // Projection ratio
@@ -57,7 +57,7 @@ class Uniforms {
 			if (Config.raw.pressure_hardness && pen.down()) {
 				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
-			if (Context.brush3d && !Context.paint2d) {
+			if (Config.raw.brush_3d && !Context.paint2d) {
 				val *= val;
 			}
 			return val;

@@ -101,7 +101,7 @@ class UIView2D {
 
 			if (type == View2DLayer) {
 				var layer = l.getChildren() == null ? l : l.getChildren()[0];
-				if (Context.brushLive && RenderPathPaint.liveLayerDrawn > 0) {
+				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
 				tex =
@@ -263,7 +263,7 @@ class UIView2D {
 			(Operator.shortcut(Config.keymap.action_paint) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
 			 setCloneSource ||
-			 Context.brushLive)) {
+			 Config.raw.brush_live)) {
 			Context.paint2d = true;
 		}
 

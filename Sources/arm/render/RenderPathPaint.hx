@@ -102,7 +102,7 @@ class RenderPathPaint {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Context.brushAngleReject) && Context.brush3d) {
+				if ((Context.xray || Context.brushAngleReject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 
@@ -202,7 +202,7 @@ class RenderPathPaint {
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Context.brushAngleReject) && Context.brush3d) {
+				if ((Context.xray || Context.brushAngleReject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
@@ -519,21 +519,21 @@ class RenderPathPaint {
 
 		if (liveLayerDrawn > 0) liveLayerDrawn--;
 
-		if (Context.brushLive && Context.pdirty <= 0 && Context.ddirty <= 0 && Context.brushTime == 0) {
+		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty <= 0 && Context.brushTime == 0) {
 			// Depth is unchanged, draw before gbuffer gets updated
 			commandsLiveBrush();
 		}
 	}
 
 	public static function end() {
-		if (Context.brush3d) commandsCursor();
+		if (Config.raw.brush_3d) commandsCursor();
 		Context.ddirty--;
 		Context.pdirty--;
 		Context.rdirty--;
 	}
 
 	public static function draw() {
-		if (Context.brushLive && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
+		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
 			commandsLiveBrush();
 		}
@@ -648,7 +648,7 @@ class RenderPathPaint {
 
 	public static function bindLayers() {
 
-		if (Context.brushLive && liveLayerDrawn > 0) useLiveLayer(true);
+		if (Config.raw.brush_live && liveLayerDrawn > 0) useLiveLayer(true);
 
 		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
@@ -670,7 +670,7 @@ class RenderPathPaint {
 	}
 
 	public static function unbindLayers() {
-		if (Context.brushLive && liveLayerDrawn > 0) useLiveLayer(false);
+		if (Config.raw.brush_live && liveLayerDrawn > 0) useLiveLayer(false);
 	}
 
 	public static function finishPaint() {

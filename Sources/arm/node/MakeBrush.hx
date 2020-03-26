@@ -11,7 +11,7 @@ class MakeBrush {
 		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
 			frag.write('float dist = 0.0;');
 		}
-		else if (Context.brush3d) {
+		else if (Config.raw.brush_3d) {
 			#if (kha_opengl || kha_webgl)
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#else

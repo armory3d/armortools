@@ -174,7 +174,7 @@ class Inc {
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
 
-		if (Context.brushLive) {
+		if (Config.raw.brush_live) {
 			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
 							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
@@ -194,7 +194,7 @@ class Inc {
 				ssaa4() ?
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
-				if (Context.brush3d) RenderPathPaint.commandsCursor();
+				if (Config.raw.brush_3d) RenderPathPaint.commandsCursor();
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
 			endSplit();
