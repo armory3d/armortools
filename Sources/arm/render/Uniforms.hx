@@ -311,7 +311,7 @@ class Uniforms {
 			return vec2;
 		}
 		if (link == "_stencilTransform") {
-			vec2.set(UISidebar.inst.brushStencilX, UISidebar.inst.brushStencilY, UISidebar.inst.brushStencilScale, 0.0);
+			vec2.set(UISidebar.inst.brushStencilX, UISidebar.inst.brushStencilY, UISidebar.inst.brushStencilScale, UISidebar.inst.brushStencilAngle);
 			if (UISidebar.inst.paint2d) vec2.x -= 1.0;
 			return vec2;
 		}

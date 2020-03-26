@@ -233,6 +233,9 @@ class MakePaint {
 			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');
 			frag.add_uniform('vec4 stencilTransform', '_stencilTransform');
 			frag.write('vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
+			frag.write('stencil_uv -= vec2(0.5, 0.5);');
+			frag.write('stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w), stencil_uv.x * sin(stencilTransform.w) + stencil_uv.y * cos(stencilTransform.w));');
+			frag.write('stencil_uv += vec2(0.5, 0.5);');
 			frag.write('if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
 			frag.write('vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
 			frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
@@ -247,7 +250,7 @@ class MakePaint {
 			if (UISidebar.inst.brushDirectional) {
 				frag.add_uniform('vec3 brushDirection', '_brushDirection');
 				frag.write('if (brushDirection.z == 0.0) discard;');
-				frag.write('pa_mask.xy = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
+				frag.write('pa_mask = vec2(pa_mask.x * brushDirection.x - pa_mask.y * brushDirection.y, pa_mask.x * brushDirection.y + pa_mask.y * brushDirection.x);');
 			}
 			var angle = UISidebar.inst.brushAngle + UISidebar.inst.brushNodesAngle;
 			if (angle != 0.0) {

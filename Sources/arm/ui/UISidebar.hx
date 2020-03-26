@@ -172,9 +172,10 @@ class UISidebar {
 	public var brushStencilImage: Image = null;
 	public var brushStencilX = 0.02;
 	public var brushStencilY = 0.02;
-	public var brushStencilRot = 0.0;
 	public var brushStencilScale = 0.9;
 	public var brushStencilScaling = false;
+	public var brushStencilAngle = 0.0;
+	public var brushStencilRotating = false;
 	public var brushNodesScale = 1.0;
 	public var brushNodesAngle = 0.0;
 	public var brushNodesHardness = 1.0;
@@ -712,12 +713,26 @@ class UISidebar {
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
+				var cosa = Math.cos(-brushStencilAngle);
+				var sina = Math.sin(-brushStencilAngle);
+				var ox = 0;
+				var oy = -r.h / 2;
+				var x = ox * cosa - oy * sina;
+				var y = ox * sina + oy * cosa;
+				x += r.x + r.w / 2;
+				y += r.y + r.h / 2;
+				brushStencilRotating = hitRect(mouse.x, mouse.y, Std.int(x - 16), Std.int(y - 16), 32, 32);
 			}
 			var _scale = brushStencilScale;
 			if (mouse.down("left")) {
 				if (brushStencilScaling) {
 					var mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
 					brushStencilScale += mouse.movementX / 400 * mult;
+				}
+				else if (brushStencilRotating) {
+					var gizmoX = r.x + r.w / 2;
+					var gizmoY = r.y + r.h / 2;
+					brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
 				}
 				else {
 					brushStencilX += mouse.movementX / App.w();
@@ -946,16 +961,24 @@ class UISidebar {
 				var r = getBrushStencilRect();
 				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
 					g.color = 0x88ffffff;
+					g.pushRotation(-brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
 					g.drawScaledImage(brushStencilImage, r.x, r.y, r.w, r.h);
+					g.popTransformation();
 					g.color = 0xffffffff;
 				}
 				var transform = Operator.shortcut(Config.keymap.stencil_transform);
 				if (transform) {
+					// Outline
 					g.drawRect(r.x, r.y, r.w, r.h);
+					// Scale
 					g.drawRect(r.x - 8,       r.y - 8,       16, 16);
 					g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
 					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+					// Rotate
+					g.pushRotation(-brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
+					g.popTransformation();
 				}
 			}
 
