@@ -59,6 +59,7 @@ class BoxPreferences {
 				ui.combo(themeHandle, themes, tr("Theme"), true);
 				if (themeHandle.changed) {
 					Config.raw.theme = themes[themeHandle.position] + ".json";
+					Config.save();
 					loadTheme(Config.raw.theme);
 				}
 
