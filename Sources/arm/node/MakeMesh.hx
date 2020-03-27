@@ -151,8 +151,12 @@ class MakeMesh {
 					frag.wposition = true;
 					frag.write('vec3 dpdx = dFdx(wposition);');
 					frag.write('vec3 dpdy = dFdy(wposition);');
-					frag.write('float dhdx = dFdx(pack.a * $ds);');
-					frag.write('float dhdy = dFdy(pack.a * $ds);');
+					frag.write('float height_sample = pack.a;');
+					if (l.texpaint_mask != null) {
+						frag.write('height_sample *= maskTexture;');
+					}
+					frag.write('float dhdx = dFdx(height_sample * $ds);');
+					frag.write('float dhdy = dFdy(height_sample * $ds);');
 					frag.write('vec3 cross_x = cross(n, dpdx);');
 					frag.write('vec3 cross_y = cross(dpdy, n);');
 					frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
