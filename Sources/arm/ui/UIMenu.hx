@@ -54,7 +54,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 14, #if kha_direct3d12 13 #else 12 #end, 19, 5];
+			var menuItems = [12, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -308,19 +308,6 @@ class UIMenu {
 				// ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 
 				var cam = Scene.active.camera;
-				var camRaw = cam.data.raw;
-				var near_handle = Id.handle({value: camRaw.near_plane});
-				var far_handle = Id.handle({value: camRaw.far_plane});
-				near_handle.value = Std.int(near_handle.value * 1000) / 1000;
-				far_handle.value = Std.int(far_handle.value * 100) / 100;
-				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				camRaw.near_plane = ui.slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
-				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				camRaw.far_plane = ui.slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
-				if (near_handle.changed || far_handle.changed) {
-					Scene.active.camera.buildProjection();
-				}
-
 				Context.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
 				ui.row([1 / 8, 7 / 8]); ui.endElement();
 				cam.data.raw.fov = ui.slider(Context.fovHandle, tr("FoV"), 0.3, 2.0, true);

@@ -182,7 +182,6 @@ class BoxPreferences {
 					#end
 				}
 
-				ui.row([0.5, 0.5]);
 				ui.enabled = Context.hvxao.selected;
 				var h = Id.handle({value: Context.vxaoOffset});
 				Context.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
@@ -209,6 +208,18 @@ class BoxPreferences {
 				// var h = Id.handle({value: Context.autoExposureStrength});
 				// Context.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.ddirty = 2;
+
+				var cam = iron.Scene.active.camera;
+				var camRaw = cam.data.raw;
+				var near_handle = Id.handle();
+				var far_handle = Id.handle();
+				near_handle.value = Std.int(camRaw.near_plane * 1000) / 1000;
+				far_handle.value = Std.int(camRaw.far_plane * 100) / 100;
+				camRaw.near_plane = ui.slider(near_handle, tr("Clip Start"), 0.001, 1.0, true);
+				camRaw.far_plane = ui.slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
+				if (near_handle.changed || far_handle.changed) {
+					cam.buildProjection();
+				}
 
 				#if arm_creator
 				var h = Id.handle({value: Context.vxaoExt});
