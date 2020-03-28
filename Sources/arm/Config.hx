@@ -53,6 +53,7 @@ class Config {
 			raw.window_vsync = true;
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
+			raw.rp_vignette = 0.4;
 			raw.rp_motionblur = false;
 			#if (krom_android || krom_ios)
 			raw.rp_ssgi = false;

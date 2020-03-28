@@ -86,7 +86,7 @@ class Uniforms {
 		#end
 		if (link == "_vignetteStrength") {
 			#if arm_painter
-			return Context.vignetteStrength;
+			return Config.raw.rp_vignette;
 			#else
 			return 0.4;
 			#end

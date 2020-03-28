@@ -22,6 +22,7 @@ typedef TConfig = {
 	@:optional var rp_bloom: Null<Bool>;
 	@:optional var rp_motionblur: Null<Bool>;
 	@:optional var rp_gi: Null<Bool>;
+	@:optional var rp_vignette: Null<Float>;
 	// Application
 	@:optional var version: String; // ArmorPaint version
 	@:optional var sha: String; // Commit id

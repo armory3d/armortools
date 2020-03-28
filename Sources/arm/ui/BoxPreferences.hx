@@ -194,14 +194,17 @@ class BoxPreferences {
 				#end
 				ui.check(Context.hssgi, tr("SSAO"));
 				if (Context.hssgi.changed) Config.applyConfig();
-				ui.check(Context.hbloom, tr("Bloom"));
-				if (Context.hbloom.changed) Config.applyConfig();
 				ui.check(Context.hssr, tr("SSR"));
 				if (Context.hssr.changed) Config.applyConfig();
+				ui.check(Context.hbloom, tr("Bloom"));
+				if (Context.hbloom.changed) Config.applyConfig();
 
-				var h = Id.handle({value: Context.vignetteStrength});
-				Context.vignetteStrength = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
-				if (h.changed) Context.ddirty = 2;
+				var h = Id.handle({value: Config.raw.rp_vignette});
+				Config.raw.rp_vignette = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
+				if (h.changed) {
+					Context.ddirty = 2;
+					Config.save();
+				}
 
 				// var h = Id.handle({value: Context.autoExposureStrength});
 				// Context.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);

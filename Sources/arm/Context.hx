@@ -226,7 +226,6 @@ class Context {
 	#end
 	public static var vxaoOffset = 1.5;
 	public static var vxaoAperture = 1.2;
-	public static var vignetteStrength = 0.4;
 	public static var textureExportPath = "";
 	public static var lastCombo: Handle = null;
 	public static var lastTooltip: Image = null;
