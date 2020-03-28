@@ -112,11 +112,12 @@ class UIView2D {
 										    layer.texpaint_pack;
 
 				channel =
-					Context.layerIsMask ? 1 :
+					Context.layerIsMask     ? 1 :
 					texType == TexOcclusion ? 1 :
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
 					texType == TexOpacity   ? 4 :
+					texType == TexNormal    ? 5 :
 											  0;
 			}
 			else { // View2DAsset

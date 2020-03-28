@@ -17,6 +17,9 @@ void main() {
 	else if (channel == 4) {
 		FragColor = textureLod(tex, texCoord, 0).aaaa * color;
 	}
+	else if (channel == 5) {
+		FragColor = textureLod(tex, texCoord, 0).rgba * color;
+	}
 	else {
 		vec4 tex_sample = textureLod(tex, texCoord, 0).rgba;
 		tex_sample.rgb *= tex_sample.a;

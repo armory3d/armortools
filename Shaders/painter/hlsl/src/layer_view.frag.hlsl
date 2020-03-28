@@ -14,6 +14,9 @@ float4 main(float4 color : TEXCOORD0, float2 texCoord : TEXCOORD1) : SV_Target0 
 	else if (channel == 4) {
 		return tex.SampleLevel(_tex_sampler, texCoord, 0).aaaa * color;
 	}
+	else if (channel == 5) {
+		return tex.SampleLevel(_tex_sampler, texCoord, 0).rgba * color;
+	}
 	else {
 		float4 sample = tex.SampleLevel(_tex_sampler, texCoord, 0).rgba;
 		sample.rgb *= sample.a;
