@@ -252,7 +252,7 @@ class UIMenu {
 			else if (menuCategory == MenuMode) {
 				var modeHandle = Id.handle();
 				var modes = [
-					tr("Render"),
+					tr("Lit"),
 					tr("Base Color"),
 					tr("Normal"),
 					tr("Occlusion"),
@@ -260,13 +260,13 @@ class UIMenu {
 					tr("Metallic"),
 					tr("Opacity"),
 					tr("TexCoord"),
-					tr("Normal (Object)"),
+					tr("Object Normal"),
 					tr("Material ID"),
 					tr("Object ID"),
 					tr("Mask"),
 				];
 				#if kha_direct3d12
-				modes.push(tr("Path Trace"));
+				modes.push(tr("Path Traced"));
 				#end
 				for (i in 0...modes.length) {
 					ui.radio(modeHandle, i, modes[i]);
