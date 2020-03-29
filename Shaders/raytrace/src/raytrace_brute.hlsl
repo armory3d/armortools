@@ -179,10 +179,24 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 	payload.color.xyz = color.xyz;
+
+	// #ifdef _EMISSION
+	if (texpaint1.a == 1.0) { // matid
+		payload.color.xyz *= 100.0f;
+		payload.color.a = -1.0;
+	}
+	// #endif
 }
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
+
+	// #ifdef _EMISSION
+	// if (payload.color.a == -1.0) {
+	// 	return;
+	// }
+	// #endif
+
 	float2 tex_coord = equirect(WorldRayDirection());
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
