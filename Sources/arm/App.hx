@@ -22,7 +22,10 @@ import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.ui.UIMenubar;
 import arm.ui.TabLayers;
+import arm.ui.BoxExport;
 import arm.io.ImportAsset;
+import arm.io.ExportMesh;
+import arm.io.ExportTexture;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.util.RenderUtil;
@@ -138,14 +141,40 @@ class App {
 				uiMenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
 				defaultElementH = uiMenu.t.ELEMENT_H;
 
+				// Argument variables
+				var useArgs = false;
+				var projectPath = "";
+				var meshPath = "";
+				var reloadMesh = false;
+				var exportTextures = false;
+				var exportTexturesType = "";
+				var exportTexturesPreset = "";
+				var exportTexturesPath = "";
+				var exportMesh = false;
+				var exportMeshPath = "";
+				var backgroundProcessing = false;
+
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
-					var path = Krom.getArg(1);
-					if (Path.isProject(path) ||
-						Path.isMesh(path) ||
-						Path.isTexture(path) ||
-						Path.isFont(path)) {
-						fileArg = path;
+					useArgs = true;
+					
+					for (v in 0...(Krom.getArgCount())) {
+						// Process each args
+						var currentArg = Krom.getArg(v);
+						if (Path.isProject(currentArg)) projectPath = currentArg;
+						if (Path.isMesh(currentArg)) meshPath = currentArg;
+						if (currentArg == "--reload-mesh") reloadMesh = true;
+						if (currentArg == "--export-textures" && v+3 <= Krom.getArgCount()) {
+							exportTextures = true;
+							exportTexturesType = Krom.getArg(v+1);
+							exportTexturesPreset = Krom.getArg(v+2);
+							exportTexturesPath = Krom.getArg(v+3);
+						}
+						if (currentArg == "--export-mesh" && v+1 <= Krom.getArgCount()) {
+							exportMesh = true;
+							exportMeshPath = Krom.getArg(v+1);
+						}
+						if (currentArg == "--b" || currentArg == "--background") backgroundProcessing = true;
 					}
 				}
 
@@ -170,18 +199,77 @@ class App {
 				#end
 
 				// Open file passed as argument
-				if (fileArg != "") {
+				if(useArgs) {
 					iron.App.notifyOnInit(function() {
-						ImportAsset.run(fileArg, -1, -1, false);
-						// Parse additional arguments
-						// ./armorpaint [import_path export_path export_file_name]
-						if (Krom.getArgCount() > 2) {
-							Context.textureExportPath = Krom.getArg(2);
-							if (Krom.getArgCount() > 3) {
-								UIFiles.filename = Krom.getArg(3);
+							if(projectPath != "") ImportAsset.run(projectPath, -1, -1, false);
+							if(meshPath != "") ImportAsset.run(meshPath, -1, -1, false);
+							if(reloadMesh) Project.reimportMesh();
+							if(exportTextures) {
+								if(exportTexturesType == "png" ||
+									exportTexturesType == "jpg"||
+									exportTexturesType == "exr16"||
+									exportTexturesType == "exr32") {
+									if(Path.isFolder(exportTexturesPath)) {
+										//Applying the correct format type from args
+										if(exportTexturesType == "png") {
+											App.bitsHandle.position = Bits8;
+											Context.formatType = FormatPng;
+										}
+										if(exportTexturesType == "jpg") {
+											App.bitsHandle.position = Bits8;
+											Context.formatType = FormatJpg;
+										}
+										if(exportTexturesType == "exr16") {
+											App.bitsHandle.position = Bits16;
+										}
+										if(exportTexturesType == "exr32") {
+											App.bitsHandle.position = Bits32;
+										}
+
+										Context.layersExport = 0;
+										
+										//Get export preset and apply the correct one from args
+										BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");
+										for (i in 0...BoxExport.files.length) {
+											BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
+										}
+										
+										var file = "export_presets/" + BoxExport.files[0] + ".json";
+										for (f in BoxExport.files) if (f == exportTexturesPreset) {
+											file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
+										}
+
+										iron.data.Data.getBlob(file, function(blob: kha.Blob) {
+											BoxExport.preset = haxe.Json.parse(blob.toString());
+											iron.data.Data.deleteBlob("export_presets/" + file);
+										});
+
+										//Export queue
+										function export(_) {
+											ExportTexture.run(exportTexturesPath);
+											iron.App.removeRender(export);
+										}
+										iron.App.notifyOnRender(export);
+										trace("Export Texures: done!");
+									} else {
+										trace("Export Textures: export directory invalid!");
+									}
+								} else {
+									trace("Export Texture: type invalid!");
+								}
 							}
-						}
-					});
+							if(exportMesh) {
+								if(Path.isFolder(exportMeshPath)) {
+									var f = UIFiles.filename;
+									if (f == "") f = tr("untitled");
+									ExportMesh.run(exportMeshPath + Path.sep + f, false);
+									trace("Export Mesh: done!");
+								} else {
+									trace("Export Mesh: export directory invalid!");
+								}
+							}
+							if(backgroundProcessing) System.stop();
+						});
 				}
 
 				// Non-default theme selected
