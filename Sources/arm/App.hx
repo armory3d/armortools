@@ -59,7 +59,6 @@ class App {
 	public static var colorWheel: Image;
 	public static var uiBox: Zui;
 	public static var uiMenu: Zui;
-	public static var fileArg = "";
 	public static var defaultElementH = 28;
 	public static var resHandle = new Handle({position: Res2048});
 	public static var bitsHandle = new Handle();
@@ -157,11 +156,14 @@ class App {
 				// File to open passed as argument
 				if (Krom.getArgCount() > 1) {
 					useArgs = true;
-					
+
 					for (v in 0...(Krom.getArgCount())) {
 						// Process each args
 						var currentArg = Krom.getArg(v);
-						if (Path.isProject(currentArg)) projectPath = currentArg;
+						if (Path.isProject(currentArg)) {
+							projectPath = currentArg;
+							Project.filepath = projectPath;
+						}
 						if (Path.isMesh(currentArg)) meshPath = currentArg;
 						if (currentArg == "--reload-mesh") reloadMesh = true;
 						if (currentArg == "--export-textures" && v+3 <= Krom.getArgCount()) {
@@ -227,13 +229,13 @@ class App {
 										}
 
 										Context.layersExport = 0;
-										
+
 										//Get export preset and apply the correct one from args
 										BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");
 										for (i in 0...BoxExport.files.length) {
 											BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
 										}
-										
+
 										var file = "export_presets/" + BoxExport.files[0] + ".json";
 										for (f in BoxExport.files) if (f == exportTexturesPreset) {
 											file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";

@@ -195,7 +195,7 @@ class UISidebar {
 		Context.paintObject = cast(Context.object, MeshObject);
 		Project.paintObjects = [Context.paintObject];
 
-		if (App.fileArg == "") {
+		if (Project.filepath == "") {
 			iron.App.notifyOnRender(Layers.initLayers);
 		}
 
