@@ -87,15 +87,18 @@ class App {
 		});
 
 		System.notifyOnApplicationState(
-			function(){}, // Foreground
-			function(){}, // Resume
-			function(){}, // Pause
-			function(){ // Background
+			function() { // Foreground
+				Context.lastPaintX = -1;
+				Context.lastPaintY = -1;
+			},
+			function() {}, // Resume
+			function() {}, // Pause
+			function() { // Background
 				// Release keys after alt-tab / win-tab
 				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt);
 				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Win);
 			},
-			function(){} // Shutdown
+			function() {} // Shutdown
 		);
 
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
