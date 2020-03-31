@@ -307,6 +307,7 @@ class RenderUtil {
 			Context.lastPaintVecY = pointsY[i - 1];
 			Context.paintVec.x = pointsX[i];
 			Context.paintVec.y = pointsY[i];
+			Context.parseBrushInputs();
 			RenderPathPaint.commandsPaint();
 		}
 

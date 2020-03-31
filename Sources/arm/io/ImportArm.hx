@@ -121,8 +121,15 @@ class ImportArm {
 			}
 
 			Project.raw = project;
-			var base = Path.baseDir(path);
 
+			var l0 = project.layer_datas[0];
+			App.resHandle.position = Config.getTextureResPos(l0.res);
+			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
+			App.bitsHandle.position = bitsPos;
+			var bytesPerPixel = Std.int(l0.bpp / 8);
+			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
+
+			var base = Path.baseDir(path);
 			for (file in project.assets) {
 				#if krom_windows
 				file = file.replace("/", "\\");
@@ -192,13 +199,6 @@ class ImportArm {
 			ViewportUtil.scaleToBounds();
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
-
-			var l0 = project.layer_datas[0];
-			App.resHandle.position = Config.getTextureResPos(l0.res);
-			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
-			App.bitsHandle.position = bitsPos;
-			var bytesPerPixel = Std.int(l0.bpp / 8);
-			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
 
 			if (Project.layers[0].texpaint.width != Config.getTextureRes()) {
 				for (l in Project.layers) l.resizeAndSetBits();
