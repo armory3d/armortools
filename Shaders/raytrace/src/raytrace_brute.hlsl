@@ -13,7 +13,7 @@ struct Vertex {
 struct RayGenConstantBuffer {
 	float4 eye; // xyz, frame
 	float4x4 inv_vp;
-	float4 params; // envstr, envshow
+	float4 params; // envstr
 };
 
 struct RayPayload {
@@ -36,12 +36,16 @@ Texture2D<float4> mytexture_sobol : register(t7);
 Texture2D<float4> mytexture_scramble : register(t8);
 Texture2D<float4> mytexture_rank : register(t9);
 
-static const int rrStart = 2;
-static const float rrProbability = 0.5; // map to albedo
 static const int SAMPLES = 64;
 static const int DEPTH = 3; // Opaque hits
-static const int DEPTH_TRANSPARENT = 16; // Transparent hits
 static uint seed = 0;
+#ifdef _TRANSPARENCY
+static const int DEPTH_TRANSPARENT = 16; // Transparent hits
+#endif
+#ifdef _ROULETTE
+static const int rrStart = 2;
+static const float rrProbability = 0.5; // Map to albedo
+#endif
 
 [shader("raygeneration")]
 void raygeneration() {
@@ -54,7 +58,6 @@ void raygeneration() {
 		xy.y += rand(DispatchRaysIndex().x, DispatchRaysIndex().y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 
 		float2 screen_pos = xy / DispatchRaysDimensions().xy * 2.0 - 1.0;
-
 		RayDesc ray;
 		ray.TMin = 0.0001;
 		ray.TMax = 10.0;
@@ -62,58 +65,70 @@ void raygeneration() {
 
 		RayPayload payload;
 		payload.color = float4(1, 1, 1, j);
+
+		#ifdef _TRANSPARENCY
 		int transparentHits = 0;
+		#endif
 
 		for (int i = 0; i < DEPTH; ++i) {
 
+			#ifdef _ROULETTE
 			float rrFactor = 1.0;
-			// if (i >= rrStart) {
-			// 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-			// 	if (f <= rrProbability) {
-			// 		break;
-			// 	}
-			// 	rrFactor = 1.0 / (1.0 - rrProbability);
-			// }
+			if (i >= rrStart) {
+				float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				if (f <= rrProbability) {
+					break;
+				}
+				rrFactor = 1.0 / (1.0 - rrProbability);
+			}
+			#endif
 
+			#ifdef _SUBSURFACE
+			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
+			#else
 			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
+			#endif
+
+			// Miss
 			if (payload.color.a < 0) {
-				// Transparent
+				#ifdef _TRANSPARENCY
 				if (payload.color.a == -2 && transparentHits < DEPTH_TRANSPARENT) {
 					payload.color.a = j;
 					transparentHits++;
 					i--;
 				}
-				else {
-					// Miss
-					if (i == 0 && constant_buffer.params.y == 0) { // No envmap
-						payload.color.rgb = float3(0.05, 0.05, 0.05);
-					}
-					break;
-				}
+				// else {
+				#endif
+
+				// if (i == 0 && constant_buffer.params.x < 0) { // No envmap
+				// 	payload.color.rgb = float3(0.05, 0.05, 0.05);
+				// }
+				accum += payload.color.rgb;
+				break;
 			}
 
+			#ifdef _ROULETTE
 			payload.color.rgb *= rrFactor;
+			#endif
 
 			ray.Origin = payload.ray_origin;
 			ray.Direction = payload.ray_dir;
 		}
-
-		accum += payload.color.rgb;
 	}
 
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
 
-	// #ifdef _RENDER
-	// float a = 1.0 / (constant_buffer.eye.w + 1);
-	// float b = 1.0 - a;
-	// color = color * b + (accum.xyz / SAMPLES) * a;
-	// render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
-	// #else // _PAINT
+	#ifdef _RENDER
+	float a = 1.0 / (constant_buffer.eye.w + 1);
+	float b = 1.0 - a;
+	color = color * b + (accum.xyz / SAMPLES) * a;
+	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
+	#else
 	if (constant_buffer.eye.w == 0) {
 		color = accum.xyz / SAMPLES;
 	}
 	render_target[DispatchRaysIndex().xy] = float4(lerp(color.xyz, accum.xyz / SAMPLES, 1.0 / 4.0), 0.0f);
-	// #endif
+	#endif
 }
 
 [shader("closesthit")]
@@ -133,7 +148,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	mytexture0.GetDimensions(size.x, size.y);
 	float4 texpaint0 = mytexture0.Load(uint3(tex_coord * size, 0));
 
-	#ifdef _DISCARD
+	#ifdef _TRANSPARENCY
 	if (texpaint0.a <= 0.1) {
 		payload.ray_dir = WorldRayDirection();
 		payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
@@ -151,7 +166,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	float4 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0));
 	float4 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0));
-	float3 color = payload.color.rgb * texpaint0.rgb;
+	float3 color = payload.color.rgb * pow(texpaint0.rgb, float3(2.2, 2.2, 2.2));
 
 	float3 tangent = float3(0, 0, 0);
 	float3 binormal = float3(0, 0, 0);
@@ -162,7 +177,6 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	n = mul(texpaint1.rgb, float3x3(tangent, binormal, n));
 
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-	float3 wo = -WorldRayDirection();
 	if (f > 0.5) {
 		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), pow(texpaint2.g, 1.2));
 	}
@@ -170,32 +184,36 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 		payload.ray_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 		color = color * (1.0 - texpaint2.b);
 	}
-	float dotNL = dot(n, wo);
-	if (dotNL < 0.0) color = float3(0, 0, 0);
 
-	float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
-	float dotNV = dot(n, wi);
-	if (dotNV < 0.0) color = float3(0, 0, 0);
+	// float dotNL = dot(n, -WorldRayDirection());
+	// float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
+	// float dotNV = dot(n, wi);
 
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 	payload.color.xyz = color.xyz;
 
-	// #ifdef _EMISSION
+	#ifdef _EMISSION
 	if (texpaint1.a == 1.0) { // matid
 		payload.color.xyz *= 100.0f;
 		payload.color.a = -1.0;
 	}
-	// #endif
+	#endif
+
+	#ifdef _SUBSURFACE
+	if (texpaint1.a == (254.0f / 255.0f)) {
+		payload.ray_origin += WorldRayDirection() * f;
+	}
+	#endif
 }
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
 
-	// #ifdef _EMISSION
-	// if (payload.color.a == -1.0) {
-	// 	return;
-	// }
-	// #endif
+	#ifdef _EMISSION
+	if (payload.color.a == -1.0) {
+		return;
+	}
+	#endif
 
 	float2 tex_coord = equirect(WorldRayDirection());
 	uint2 size;

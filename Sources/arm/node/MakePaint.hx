@@ -302,10 +302,10 @@ class MakePaint {
 		// TODO: Use emission/subsurface matid
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 		if (Context.material.paintSubs) {
-			frag.write('if (subs > 0.0) { matid = float(254) / float(255); }');
+			frag.write('if (subs > 0.0) { matid = 254.0 / 255.0; }');
 		}
 		if (Context.material.paintEmis) {
-			frag.write('if (emis > 0.0) { matid = float(255) / float(255); }');
+			frag.write('if (emis > 0.0) { matid = 1.0; }');
 		}
 
 		if (layered) {

@@ -81,7 +81,11 @@ class RenderPathRaytrace {
 		f32[18] = helpMat._32;
 		f32[19] = helpMat._33;
 		f32[20] = Scene.active.world.probe.raw.strength;
-		f32[21] = Context.showEnvmap ? 1.0 : 0.0;
+		// f32[21] = Context.showEnvmap ? 1.0 : 0.0;
+		// var right = cam.rightWorld().normalize();
+		// f32[21] = right.x;
+		// f32[22] = right.y;
+		// f32[23] = right.z;
 
 		var framebuffer = path.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
@@ -244,7 +248,7 @@ class RenderPathRaytrace {
 
 	public static function draw() {
 		#if arm_painter
-		if (Context.ddirty > 1) frame = 0;
+		if (Context.ddirty > 1 || Context.pdirty > 0) frame = 0;
 		#else
 		frame = 0;
 		#end
