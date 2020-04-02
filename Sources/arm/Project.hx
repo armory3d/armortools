@@ -12,6 +12,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
+import arm.sys.File;
 import arm.sys.Path;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
@@ -45,6 +46,7 @@ class Project {
 	#if arm_world
 	public static var waterPass = true;
 	#end
+	static var meshList: Array<String> = null;
 
 	public static function projectOpen() {
 		UIFiles.show("arm", false, function(path: String) {
@@ -91,7 +93,15 @@ class Project {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("New Project"))) {
 				ui.row([0.5, 0.5]);
-				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), ["Cube", "Sphere", "Tessellated Plane"], tr("Template"));
+				if (meshList == null) {
+					meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
+					for (i in 0...meshList.length) meshList[i] = meshList[i].substr(0, meshList[i].length - 4); // Trim .arm
+					meshList.unshift("tessellated_plane");
+					meshList.unshift("sphere");
+					meshList.unshift("rounded_cube");
+
+				}
+				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), meshList, tr("Template"));
 				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
@@ -137,37 +147,42 @@ class Project {
 			Data.deleteMesh(handle);
 		}
 
-		if (Context.projectType != ModelCube) {
-			var mesh: Dynamic = Context.projectType == ModelSphere ?
-				new arm.format.proc.Sphere(1, 512, 256) :
-				new arm.format.proc.Plane(1, 1, 512, 512);
-			var raw = {
-				name: "Tessellated",
-				vertex_arrays: [
-					{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-					{ values: mesh.nora, attrib: "nor", data: "short2norm" },
-					{ values: mesh.texa, attrib: "tex", data: "short2norm" }
-				],
-				index_arrays: [
-					{ values: mesh.inda, material: 0 }
-				],
-				scale_pos: mesh.scalePos,
-				scale_tex: mesh.scaleTex
-			};
+		if (Context.projectType != ModelRoundedCube) {
+			var raw: TMeshData = null;
+			if (Context.projectType == ModelSphere || Context.projectType == ModelTessellatedPlane) {
+				var mesh: Dynamic = Context.projectType == ModelSphere ?
+					new arm.format.proc.Sphere(1, 512, 256) :
+					new arm.format.proc.Plane(1, 1, 512, 512);
+				raw = {
+					name: "Tessellated",
+					vertex_arrays: [
+						{ values: mesh.posa, attrib: "pos", data: "short4norm" },
+						{ values: mesh.nora, attrib: "nor", data: "short2norm" },
+						{ values: mesh.texa, attrib: "tex", data: "short2norm" }
+					],
+					index_arrays: [
+						{ values: mesh.inda, material: 0 }
+					],
+					scale_pos: mesh.scalePos,
+					scale_tex: mesh.scaleTex
+				};
+			}
+			else {
+				Data.getBlob("meshes/" + meshList[Context.projectType] + ".arm", function(b: kha.Blob) {
+					raw = iron.system.ArmPack.decode(b.toBytes()).mesh_datas[0];
+				});
+			}
+
 			var md = new MeshData(raw, function(md: MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
-			if (Context.projectType == ModelSphere) {
-				ViewportUtil.setView(0, 0, 1, 0, 0, 0); // Top
-				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
-			}
-			else if (Context.projectType == ModelTessellatedPlane) {
+			if (Context.projectType == ModelTessellatedPlane) {
 				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
 				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
 			}
 		}
 
-		var n = Context.projectType == ModelCube ? "Cube" : "Tessellated";
+		var n = Context.projectType == ModelRoundedCube ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics4.Graphics2.current;

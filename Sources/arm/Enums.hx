@@ -201,7 +201,8 @@ package arm;
 }
 
 @:enum abstract ProjectModel(Int) from Int to Int {
-	var ModelCube = 0;
+	var ModelRoundedCube = 0;
 	var ModelSphere = 1;
 	var ModelTessellatedPlane = 2;
+	var ModelCustom = 3;
 }

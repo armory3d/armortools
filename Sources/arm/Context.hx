@@ -193,7 +193,7 @@ class Context {
 	#if arm_creator
 	public static var projectType = ModelTessellatedPlane;
 	#else
-	public static var projectType = ModelCube;
+	public static var projectType = ModelRoundedCube;
 	#end
 	public static var projectObjects: Array<MeshObject>;
 

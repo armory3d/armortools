@@ -17,6 +17,7 @@ project.addAssets("Assets/locale/*", { notinlist: true, destination: "data/local
 project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*", { notinlist: true, destination: "data/themes/{name}" });
+project.addAssets("Assets/meshes/*", { notinlist: true, destination: "data/meshes/{name}" });
 
 project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
