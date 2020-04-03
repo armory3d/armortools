@@ -82,7 +82,7 @@ class UIHeader {
 						tr("AO"),
 						tr("Curvature"),
 						tr("Normal"),
-						tr("Normal (Object)"),
+						tr("Object Normal"),
 						tr("Height"),
 						tr("Derivative"),
 						tr("Position"),
