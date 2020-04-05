@@ -111,6 +111,9 @@ class ImportEnvmap {
 						image.setMipmaps(mips);
 						Scene.active.world.probe.radiance = image;
 						Scene.active.world.probe.radianceMipmaps = mips;
+						if (Context.showEnvmapBlur) {
+							Scene.active.world.envmap = Scene.active.world.probe.radianceMipmaps[0];
+						}
 						Context.ddirty = 2;
 					}
 				}, true); // Readable
