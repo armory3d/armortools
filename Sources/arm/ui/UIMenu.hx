@@ -54,7 +54,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [12, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [13, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -69,6 +69,7 @@ class UIMenu {
 				if (ui.button("      " + tr("Import Texture..."), Left, Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","));
 				if (ui.button("      " + tr("Import Font..."), Left)) Project.importAsset("ttf");
 				if (ui.button("      " + tr("Import Material..."), Left)) Project.importMaterial();
+				if (ui.button("      " + tr("Import Brush..."), Left)) Project.importBrush();
 				if (ui.button("      " + tr("Import Mesh..."), Left)) Project.importMesh();
 				if (ui.button("      " + tr("Reimport Mesh"), Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
