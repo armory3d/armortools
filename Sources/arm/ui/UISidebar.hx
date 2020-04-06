@@ -645,7 +645,7 @@ class UISidebar {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			arm.plugin.Gizmo.update();
 		}
 
@@ -676,43 +676,35 @@ class UISidebar {
 		}
 		Context.gizmo.visible = false;
 
-		if (UIHeader.inst.worktab.position == SpacePaint) {
-			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
-				TabLayers.draw();
-				TabHistory.draw();
-				TabPlugins.draw();
-			}
-			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
-				Context.object = Context.paintObject;
-				TabMaterials.draw();
-				TabBrushes.draw();
-				TabParticles.draw();
-			}
-			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
-				TabTextures.draw();
-				TabMeshes.draw();
-				TabFonts.draw();
+		if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
+			TabLayers.draw();
+			TabHistory.draw();
+			TabPlugins.draw();
+
+			if (UIHeader.inst.worktab.position == SpaceRender) {
+				TabOutliner.draw();
 			}
 		}
-		else if (UIHeader.inst.worktab.position == SpaceScene) {
-			Context.gizmo.visible = true;
-			if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
-				TabOutliner.draw();
-				TabPlugins.draw();
-			}
-			if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
-				TabMaterials.draw();
+		if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
+			Context.object = Context.paintObject;
+			TabMaterials.draw();
+			TabBrushes.draw();
+			TabParticles.draw();
+
+			if (UIHeader.inst.worktab.position == SpaceRender) {
 				TabProperties.draw();
 				#if arm_creator
 				TabTraits.draw();
 				#end
 			}
-			if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
-				TabTextures.draw();
-				TabMeshes.draw();
-				TabFonts.draw();
-			}
 		}
+		if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
+			TabTextures.draw();
+			TabMeshes.draw();
+			TabFonts.draw();
+		}
+
+		Context.gizmo.visible = UIHeader.inst.worktab.position == SpaceRender;
 
 		ui.end();
 		g.begin(false);

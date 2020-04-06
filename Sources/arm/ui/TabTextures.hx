@@ -115,11 +115,13 @@ class TabTextures {
 									Project.assetMap.remove(asset.id);
 									Project.assets.splice(i, 1);
 									Project.assetNames.splice(i, 1);
-									iron.system.Tween.timer(0.1, function() {
-										arm.node.MaterialParser.parsePaintMaterial();
-										arm.util.RenderUtil.makeMaterialPreview();
-										UISidebar.inst.hwnd1.redraws = 2;
-									});
+									function _parse(g: kha.graphics4.Graphics) {
+											arm.node.MaterialParser.parsePaintMaterial();
+											arm.util.RenderUtil.makeMaterialPreview();
+											UISidebar.inst.hwnd1.redraws = 2;
+											iron.App.removeRender(_parse);
+									}
+									iron.App.notifyOnRender(_parse);
 								}
 							}, 4);
 						}

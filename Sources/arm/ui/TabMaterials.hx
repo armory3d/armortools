@@ -21,7 +21,7 @@ class TabMaterials {
 	public static function draw() {
 
 		var ui = UISidebar.inst.ui;
-		var isScene = UIHeader.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		var materials = isScene ? Project.materialsScene : Project.materials;
 		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
@@ -212,6 +212,6 @@ class TabMaterials {
 	}
 
 	static function getSelectedMaterial():MaterialSlot {
-		return UIHeader.inst.worktab.position == SpaceScene ? Context.materialScene : Context.material;
+		return UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene : Context.material;
 	}
 }

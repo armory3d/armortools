@@ -19,7 +19,7 @@ class MaterialParser {
 	}
 
 	public static function parseMeshMaterial() {
-		if (UIHeader.inst.worktab.position == SpaceScene) return;
+		if (UIHeader.inst.worktab.position == SpaceRender) return;
 		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
@@ -63,7 +63,7 @@ class MaterialParser {
 	public static function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		var m = UIHeader.inst.worktab.position == SpaceScene ? Context.materialScene.data : Project.materials[0].data;
+		var m = UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene.data : Project.materials[0].data;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
 		m.shader.raw.contexts.remove(scon.raw);
@@ -92,7 +92,7 @@ class MaterialParser {
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
 
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			makeVoxel(m);
 		}
 	}
@@ -114,7 +114,7 @@ class MaterialParser {
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
 
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			parseMeshPreviewMaterial();
 			return;
 		}

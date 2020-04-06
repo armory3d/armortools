@@ -65,7 +65,7 @@ class UIToolbar {
 					ui._y += 2;
 				}
 			}
-			else if (UIHeader.inst.worktab.position == SpaceScene) {
+			else if (UIHeader.inst.worktab.position == SpaceRender) {
 				var img = Res.get("icons.k");
 				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui._x += 2;

@@ -67,7 +67,7 @@ class ImportFolder {
 		}
 
 		// Create material
-		var isScene = UIHeader.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		if (isScene) {
 			MaterialUtil.removeMaterialCache();
 			Data.getMaterial("Scene", "Material2", function(md: MaterialData) {

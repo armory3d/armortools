@@ -13,7 +13,7 @@ class MakeMeshPreview {
 	public static var opacityDiscardScene = 0.5;
 
 	public static function run(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
-		var isScene = UIHeader.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		var context_id = "mesh";
 		var con_mesh: MaterialShaderContext = data.add_context({
 			name: context_id,

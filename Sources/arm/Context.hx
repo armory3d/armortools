@@ -329,7 +329,7 @@ class Context {
 	public static function selectObject(o: Object) {
 		object = o;
 
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			if (Std.is(o, MeshObject)) {
 				for (i in 0...Project.materialsScene.length) {
 					if (Project.materialsScene[i].data == cast(o, MeshObject).materials[0]) {

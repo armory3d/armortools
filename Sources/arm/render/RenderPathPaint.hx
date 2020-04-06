@@ -97,7 +97,7 @@ class RenderPathPaint {
 	public static function commandsPaint() {
 		var tid = Context.layer.id;
 
-		if (Context.pdirty > 0 && UIHeader.inst.worktab.position != SpaceScene) {
+		if (Context.pdirty > 0 && UIHeader.inst.worktab.position != SpaceRender) {
 			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
@@ -357,7 +357,7 @@ class RenderPathPaint {
 			tool != ToolParticle) {
 				return;
 		}
-		if (!App.uiEnabled || UIHeader.inst.worktab.position == SpaceScene) {
+		if (!App.uiEnabled || UIHeader.inst.worktab.position == SpaceRender) {
 			return;
 		}
 

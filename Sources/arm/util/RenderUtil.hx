@@ -33,7 +33,7 @@ class RenderUtil {
 		var painto = Context.paintObject;
 		Context.paintObject = sphere;
 
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			sphere.materials[0] = Context.materialScene.data;
 			Context.materialScene.previewReady = true;
 		}

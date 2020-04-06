@@ -93,7 +93,7 @@ class ImportMesh {
 		}
 
 		var raw: TMeshData = null;
-		if (UIHeader.inst.worktab.position == SpaceScene) {
+		if (UIHeader.inst.worktab.position == SpaceRender) {
 			raw = rawMesh(mesh);
 			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
 		}
@@ -107,7 +107,7 @@ class ImportMesh {
 		new MeshData(raw, function(md: MeshData) {
 
 			// Append
-			if (UIHeader.inst.worktab.position == SpaceScene) {
+			if (UIHeader.inst.worktab.position == SpaceRender) {
 				var mats = new haxe.ds.Vector(1);
 				mats[0] = Context.materialScene.data;
 				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));

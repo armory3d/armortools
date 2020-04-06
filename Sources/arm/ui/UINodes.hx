@@ -87,12 +87,12 @@ class UINodes {
 	}
 
 	public function getCanvasMaterial(): TNodeCanvas {
-		var isScene = UIHeader.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		return isScene ? Context.materialScene.canvas : Context.material.canvas;
 	}
 
 	public function getNodes(): Nodes {
-		var isScene = UIHeader.inst.worktab.position == SpaceScene;
+		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
 		else return Context.brush.nodes;
 	}
