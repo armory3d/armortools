@@ -87,7 +87,7 @@ class ImportMesh {
 	}
 
 	public static function makeMesh(mesh: Dynamic, path: String) {
-		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null) {
+		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 			Log.error(Strings.error3);
 			return;
 		}
