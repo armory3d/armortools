@@ -98,7 +98,9 @@ class ImportEnvmap {
 			var mw = Std.int(image.width / 2);
 			var mh = Std.int(image.width / 4);
 			for (i in 0...mipsCount) {
-				Data.getImage("tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr", function(mip: Image) {
+				var radiance_file = "tmp_rad_" + i + "_" + mw + "x" + mh + ".hdr";
+				Data.cachedImages.remove(radiance_file);
+				Data.getImage(radiance_file, function(mip: Image) {
 					mips[i] = mip;
 					mipsLoaded++;
 					if (mipsLoaded == mipsCount) {
