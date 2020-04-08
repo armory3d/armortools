@@ -16,7 +16,7 @@ cd armorpaint
 # Windows
 node Kromx/make -g direct3d11
 cd Kromx
-# Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip (exceeds 100MB)
+# Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 node Kinc/make -g direct3d11
 # Open generated Visual Studio project
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
