@@ -39,6 +39,8 @@ class UIToolbar {
 			ui._y += 2;
 
 			ui.imageScrollAlign = false;
+			var img = Res.get("icons.k");
+			var imgw = ui.SCALE() > 1 ? 100 : 50;
 
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				var keys = [
@@ -54,8 +56,7 @@ class UIToolbar {
 					"(" + Config.keymap.tool_colorid + ")",
 					"(" + Config.keymap.tool_picker + ")"
 				];
-				var img = Res.get("icons.k");
-				var imgw = ui.SCALE() > 1 ? 100 : 50;
+
 				for (i in 0...toolNames.length) {
 					ui._x += 2;
 					if (Context.tool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
@@ -65,9 +66,22 @@ class UIToolbar {
 					ui._y += 2;
 				}
 			}
+			else if (UIHeader.inst.worktab.position == SpaceMaterial) {
+				ui._x += 2;
+				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
+				ui._x -= 2;
+				ui._y += 2;
+
+				ui._x += 2;
+				if (Context.tool == ToolPicker) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
+				if (ui.isHovered) ui.tooltip(tr("Picker") + " (V)");
+				ui._x -= 2;
+				ui._y += 2;
+			}
 			else if (UIHeader.inst.worktab.position == SpaceRender) {
-				var img = Res.get("icons.k");
-				var imgw = ui.SCALE() > 1 ? 100 : 50;
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
 				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);

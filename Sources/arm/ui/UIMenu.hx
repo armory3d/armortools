@@ -54,7 +54,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [13, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [14, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
@@ -75,6 +75,7 @@ class UIMenu {
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("      " + tr("Export Textures..."), Left, Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 				if (ui.button("      " + tr("Export Mesh..."), Left)) BoxExport.showMesh();
+				if (ui.button("      " + tr("Bake Material..."), Left)) BoxExport.showBakeMaterial();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("      " + tr("Exit"), Left)) System.stop();
 			}

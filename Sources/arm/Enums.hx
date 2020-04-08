@@ -1,6 +1,6 @@
 package arm;
 
-@:enum abstract PaintTool(Int) from Int to Int {
+@:enum abstract WorkspaceTool(Int) from Int to Int {
 	var ToolBrush = 0;
 	var ToolEraser = 1;
 	var ToolFill = 2;
@@ -12,14 +12,7 @@ package arm;
 	var ToolBake = 8;
 	var ToolColorId = 9;
 	var ToolPicker = 10;
-}
-
-@:enum abstract SceneTool(Int) from Int to Int {
-	var ToolGizmo = 0;
-}
-
-@:enum abstract RenderTool(Int) from Int to Int {
-	var ToolGizmo = 0;
+	var ToolGizmo = 11;
 }
 
 @:enum abstract SpaceType(Int) from Int to Int {

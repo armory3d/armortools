@@ -11,6 +11,7 @@ import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import arm.ui.UISidebar;
+import arm.ui.UIHeader;
 import arm.data.LayerSlot;
 import arm.node.MaterialParser;
 import arm.render.RenderPathPaint;
@@ -340,6 +341,7 @@ class Layers {
 	}
 
 	public static function isFillMaterial(): Bool {
+		if (UIHeader.inst.worktab.position == SpaceMaterial) return true;
 		var m = Context.material;
 		for (l in Project.layers) if (l.material_mask == m) return true;
 		return false;
@@ -351,6 +353,34 @@ class Layers {
 		var isMask = Context.layerIsMask;
 		var selectedTool = Context.tool;
 		var current: kha.graphics4.Graphics2 = null;
+
+		if (UIHeader.inst.worktab.position == SpaceMaterial) {
+			if (RenderPathPaint.liveLayer == null) {
+				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
+				RenderPathPaint.liveLayer.createMask(0x00000000);
+			}
+
+			current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+
+			UIHeader.inst.worktab.position = SpacePaint;
+			Context.tool = ToolFill;
+			MaterialParser.parsePaintMaterial();
+			Context.pdirty = 1;
+			Context.layer = RenderPathPaint.liveLayer;
+			RenderPathPaint.useLiveLayer(true);
+			RenderPathPaint.commandsPaint();
+			RenderPathPaint.useLiveLayer(false);
+			Context.tool = selectedTool;
+			Context.layer = selectedLayer;
+			Context.pdirty = 0;
+			Context.rdirty = 2;
+			UIHeader.inst.worktab.position = SpaceMaterial;
+
+			if (current != null) current.begin(false);
+
+			return;
+		}
 
 		var first = true;
 		for (l in layers) {

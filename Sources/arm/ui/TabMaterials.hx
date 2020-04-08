@@ -101,7 +101,12 @@ class TabMaterials {
 					var tile = ui.SCALE() > 1 ? 100 : 50;
 					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
-						if (getSelectedMaterial() != materials[i]) selectMaterial(i);
+						if (getSelectedMaterial() != materials[i]) {
+							selectMaterial(i);
+							if (UIHeader.inst.worktab.position == SpaceMaterial) {
+								Layers.updateFillLayers();
+							}
+						}
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -131,6 +136,11 @@ class TabMaterials {
 									if (f == "") f = tr("untitled");
 									ExportArm.runMaterial(path + Path.sep + f);
 								});
+							}
+
+							if (ui.button(tr("Bake"), Left)) {
+								selectMaterial(i);
+								BoxExport.showBakeMaterial();
 							}
 
 							if (ui.button(tr("Duplicate"), Left)) {
@@ -181,7 +191,7 @@ class TabMaterials {
 								MaterialParser.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
-						}, 13 + add);
+						}, 14 + add);
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
 

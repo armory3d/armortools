@@ -97,7 +97,7 @@ class RenderPathPaint {
 	public static function commandsPaint() {
 		var tid = Context.layer.id;
 
-		if (Context.pdirty > 0 && UIHeader.inst.worktab.position != SpaceRender) {
+		if (Context.pdirty > 0 && UIHeader.inst.worktab.position == SpacePaint) {
 			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
@@ -648,7 +648,9 @@ class RenderPathPaint {
 
 	public static function bindLayers() {
 
-		if (Config.raw.brush_live && liveLayerDrawn > 0) useLiveLayer(true);
+		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
+		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
+		if (isLive || isMaterialSpace) useLiveLayer(true);
 
 		var tid = Project.layers[0].id;
 		path.bindTarget("texpaint" + tid, "texpaint");
@@ -670,7 +672,9 @@ class RenderPathPaint {
 	}
 
 	public static function unbindLayers() {
-		if (Config.raw.brush_live && liveLayerDrawn > 0) useLiveLayer(false);
+		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
+		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
+		if (isLive || isMaterialSpace) useLiveLayer(false);
 	}
 
 	public static function finishPaint() {

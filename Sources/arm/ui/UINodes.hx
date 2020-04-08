@@ -43,6 +43,7 @@ class UINodes {
 	var mchanged = false;
 	var mstartedlast = false;
 	var recompileMat = false; // Mat preview
+	var recompileMatFinal = false;
 	var nodeSearchSpawn: TNode = null;
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
@@ -164,33 +165,8 @@ class UINodes {
 	}
 
 	public function canvasChanged() {
-		if (canvasType == CanvasMaterial) {
-			#if (!kha_direct3d12)
-			if (Layers.isFillMaterial()) {
-				Layers.updateFillLayers(); // TODO: only used as jitter
-				UISidebar.inst.hwnd.redraws = 2;
-			}
-			#end
-			function _parse(_) {
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-				UISidebar.inst.hwnd1.redraws = 2;
-				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-				if (decal) RenderUtil.makeDecalPreview();
-				iron.App.removeRender(_parse);
-			}
-			iron.App.notifyOnRender(_parse);
-		}
-		else {
-			function _parse(_) {
-				MaterialParser.parseBrush();
-				Context.parseBrushInputs();
-				RenderUtil.makeBrushPreview();
-				UISidebar.inst.hwnd1.redraws = 2;
-				iron.App.removeRender(_parse);
-			}
-			iron.App.notifyOnRender(_parse);
-		}
+		recompileMat = true;
+		recompileMatFinal = true;
 	}
 
 	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {
@@ -295,10 +271,11 @@ class UINodes {
 
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
-			recompileMat = false;
-
 			if (canvasType == CanvasBrush) {
-				canvasChanged();
+				MaterialParser.parseBrush();
+				Context.parseBrushInputs();
+				RenderUtil.makeBrushPreview();
+				UISidebar.inst.hwnd1.redraws = 2;
 			}
 			else {
 				if (Layers.isFillMaterial()) {
@@ -307,8 +284,21 @@ class UINodes {
 				else {
 					RenderUtil.makeMaterialPreview();
 				}
+
+				if (recompileMatFinal) {
+					UISidebar.inst.hwnd.redraws = 2;
+					MaterialParser.parsePaintMaterial();
+					if (Layers.isFillMaterial()) {
+						RenderUtil.makeMaterialPreview();
+					}
+					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+					if (decal) RenderUtil.makeDecalPreview();
+				}
 			}
+
 			UISidebar.inst.hwnd1.redraws = 2;
+			recompileMat = false;
+			recompileMatFinal = false;
 		}
 
 		if (!show) return;

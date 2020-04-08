@@ -106,6 +106,7 @@ class UIBox {
 	}
 
 	static function init() {
+		hwnd.redraws = 2;
 		hwnd.dragX = 0;
 		hwnd.dragY = 0;
 		show = true;

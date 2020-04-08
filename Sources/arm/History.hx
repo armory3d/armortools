@@ -444,11 +444,7 @@ class History {
 			Context.brush = Project.brushes[step.brush];
 		}
 
-		function canvasChanged(_) {
-			UINodes.inst.canvasChanged();
-			iron.App.removeRender(canvasChanged);
-		}
-		iron.App.notifyOnRender(canvasChanged);
+		UINodes.inst.canvasChanged();
 		@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 		UINodes.inst.hwnd.redraws = 2;
 	}

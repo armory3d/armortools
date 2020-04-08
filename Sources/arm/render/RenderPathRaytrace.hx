@@ -5,6 +5,7 @@ import iron.Scene;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
 import arm.node.MaterialParser;
+import arm.Enums;
 
 #if kha_direct3d12
 
@@ -43,7 +44,8 @@ class RenderPathRaytrace {
 
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
-		var layer = Context.layer;
+		var materialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
+		var layer = materialSpace ? RenderPathPaint.liveLayer : Context.layer;
 		if (lastEnvmap != savedEnvmap || lastLayer != layer.texpaint) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = layer.texpaint;

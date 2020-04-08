@@ -5,6 +5,7 @@ import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
 import arm.node.MaterialParser;
+import arm.render.RenderPathPaint;
 import arm.Enums;
 
 class UIMenubar {
@@ -68,10 +69,18 @@ class UIMenubar {
 				UISidebar.inst.hwnd1.redraws = 2;
 				UISidebar.inst.hwnd2.redraws = 2;
 
-				if (UIHeader.inst.worktab.position == SpaceRender) {
+				if (UIHeader.inst.worktab.position == SpacePaint) {
+					Context.selectTool(ToolBrush);
+				}
+				else {
 					Context.selectTool(ToolGizmo);
 				}
 
+				if (UIHeader.inst.worktab.position == SpaceMaterial) {
+					Layers.updateFillLayers();
+				}
+
+				MaterialParser.parsePaintMaterial();
 				MaterialParser.parseMeshMaterial();
 				Context.mainObject().skip_context = null;
 			}
