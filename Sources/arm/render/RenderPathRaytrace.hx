@@ -44,8 +44,9 @@ class RenderPathRaytrace {
 
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		var materialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
-		var layer = materialSpace ? RenderPathPaint.liveLayer : Context.layer;
+		var layer = (isLive || materialSpace) ? RenderPathPaint.liveLayer : Context.layer;
 		if (lastEnvmap != savedEnvmap || lastLayer != layer.texpaint) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = layer.texpaint;
@@ -250,7 +251,8 @@ class RenderPathRaytrace {
 
 	public static function draw() {
 		#if arm_painter
-		if (Context.ddirty > 1 || Context.pdirty > 0) frame = 0;
+		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
+		if (Context.ddirty > 1 || Context.pdirty > 0 || isLive) frame = 0;
 		#else
 		frame = 0;
 		#end
