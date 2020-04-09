@@ -3,10 +3,14 @@ package arm.io;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
+import iron.Scene;
 import arm.format.ExrWriter;
 import arm.format.JpgWriter;
 import arm.format.PngWriter;
 import arm.format.PngTools;
+import arm.render.RenderPathPaint;
+import arm.node.MaterialParser;
+import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
@@ -15,7 +19,7 @@ import arm.Enums;
 
 class ExportTexture {
 
-	public static function run(path: String) {
+	public static function run(path: String, bakeMaterial = false) {
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
 		#end
@@ -30,7 +34,10 @@ class ExportTexture {
 			}
 		}
 
-		if (udimTiles.length > 0 && Context.layersExport == 0) {
+		if (bakeMaterial) {
+			runBakeMaterial(path);
+		}
+		else if (udimTiles.length > 0 && Context.layersExport == 0) {
 			for (udimTile in udimTiles) runLayers(path, udimTile);
 		}
 		else {
@@ -44,7 +51,36 @@ class ExportTexture {
 		Log.info("Textures exported.");
 	}
 
-	static function runLayers(path: String, udimTile = "") {
+	static function runBakeMaterial(path: String) {
+		if (RenderPathPaint.liveLayer == null) {
+			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
+			RenderPathPaint.liveLayer.createMask(0x00000000);
+		}
+
+		var _space = UIHeader.inst.worktab.position;
+		var _tool = Context.tool;
+		UIHeader.inst.worktab.position = SpacePaint;
+		Context.tool = ToolFill;
+		MaterialParser.parsePaintMaterial();
+		var _paintObject = Context.paintObject;
+		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
+		planeo.visible = true;
+		Context.paintObject = planeo;
+		Context.pdirty = 1;
+		RenderPathPaint.useLiveLayer(true);
+		RenderPathPaint.commandsPaint();
+		RenderPathPaint.useLiveLayer(false);
+		Context.tool = _tool;
+		MaterialParser.parsePaintMaterial();
+		Context.pdirty = 0;
+		UIHeader.inst.worktab.position = _space;
+		planeo.visible = false;
+		Context.paintObject = _paintObject;
+
+		runLayers(path, "", true);
+	}
+
+	static function runLayers(path: String, udimTile = "", bakeMaterial = false) {
 		var textureSize = Config.getTextureRes();
 		var formatQuality = Context.formatQuality;
 		var f = UIFiles.filename;
@@ -79,7 +115,8 @@ class ExportTexture {
 		Layers.expc.g4.end();
 
 		// Export all visible layers or selected only
-		var layers = exportAll ? Project.layers : [Context.layer];
+		var layers = bakeMaterial ? [RenderPathPaint.liveLayer] :
+					 exportAll ? Project.layers : [Context.layer];
 
 		// Flatten layers
 		for (l1 in layers) {
@@ -89,7 +126,7 @@ class ExportTexture {
 				if (!Project.paintObjects[l1.objectMask - 1].name.endsWith(udimTile)) continue;
 			}
 
-			var hasMask = l1.texpaint_mask != null;
+			var hasMask = l1.texpaint_mask != null && !bakeMaterial;
 
 			if (l1.paintBase) {
 				Layers.imga.g2.begin(false); // Copy to temp

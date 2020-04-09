@@ -96,7 +96,7 @@ class BoxExport {
 				UIFiles.show(filters, true, function(path: String) {
 					Context.textureExportPath = path;
 					function export(_) {
-						ExportTexture.run(path);
+						ExportTexture.run(path, bakeMaterial);
 						iron.App.removeRender(export);
 					}
 					iron.App.notifyOnRender(export);

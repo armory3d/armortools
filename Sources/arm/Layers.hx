@@ -367,12 +367,10 @@ class Layers {
 			Context.tool = ToolFill;
 			MaterialParser.parsePaintMaterial();
 			Context.pdirty = 1;
-			Context.layer = RenderPathPaint.liveLayer;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint();
 			RenderPathPaint.useLiveLayer(false);
 			Context.tool = selectedTool;
-			Context.layer = selectedLayer;
 			Context.pdirty = 0;
 			Context.rdirty = 2;
 			UIHeader.inst.worktab.position = SpaceMaterial;
