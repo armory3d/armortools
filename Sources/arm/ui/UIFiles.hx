@@ -138,13 +138,13 @@ class UIFiles {
 						}
 					}
 					if (icon != null) {
-						state = ui.image(icon, 0xffffffff, rect.h);
+						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
 						generic = false;
 					}
 				}
 
 				if (generic) {
-					state = ui.image(icons, col, rect.h, rect.x, rect.y, rect.w, rect.h);
+					state = ui.image(icons, col, 50 * ui.SCALE(), rect.x, rect.y, rect.w, rect.h);
 				}
 
 				if (state == Started) {
