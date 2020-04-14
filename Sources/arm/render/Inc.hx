@@ -174,7 +174,7 @@ class Inc {
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
 
-		if (Config.raw.brush_live) {
+		if (Config.raw.brush_live && Context.pdirty <= 0) {
 			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
 							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
