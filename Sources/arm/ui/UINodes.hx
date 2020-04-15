@@ -278,26 +278,21 @@ class UINodes {
 				UISidebar.inst.hwnd1.redraws = 2;
 			}
 			else {
-				if (Layers.isFillMaterial()) {
-					Layers.updateFillLayers();
-				}
-				else {
-					RenderUtil.makeMaterialPreview();
-				}
-
-				if (recompileMatFinal) {
-					UISidebar.inst.hwnd.redraws = 2;
-					MaterialParser.parsePaintMaterial();
-					if (Layers.isFillMaterial()) {
-						RenderUtil.makeMaterialPreview();
-					}
-					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-					if (decal) RenderUtil.makeDecalPreview();
-				}
+				Layers.isFillMaterial() ? Layers.updateFillLayers() : RenderUtil.makeMaterialPreview();
 			}
 
 			UISidebar.inst.hwnd1.redraws = 2;
 			recompileMat = false;
+		}
+		else if (recompileMatFinal) {
+			MaterialParser.parsePaintMaterial();
+			if (Layers.isFillMaterial()) {
+				RenderUtil.makeMaterialPreview();
+			}
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+			if (decal) RenderUtil.makeDecalPreview();
+
+			UISidebar.inst.hwnd.redraws = 2;
 			recompileMatFinal = false;
 		}
 
