@@ -23,10 +23,11 @@ class PhysicsWorld extends iron.Trait {
 	var timeStep = 1 / 60;
 	var maxSteps = 1;
 
+	@:access(Main)
 	public static function load() {
 		var b = haxe.io.Bytes.ofData(Krom.loadBlob("data/ammo.wasm.js"));
 		var print = function(s: String) { trace(s); };
-		var loaded = function() { tasks--; start(); };
+		var loaded = function() { Main.tasks--; Main.start(); };
 		untyped __js__("(1, eval)({0})", b.toString());
 		var instantiateWasm = function(imports, successCallback) {
 			var wasmbin = Krom.loadBlob("data/ammo.wasm.wasm");

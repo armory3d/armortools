@@ -29,7 +29,7 @@ class MakeMeshPreview {
 
 		#if arm_skin
 		var isMesh = Std.is(Context.object, MeshObject);
-		var skin = isMesh && cast(Context.object, MeshObject).data.geom.bones != null;
+		var skin = isMesh && cast(Context.object, MeshObject).data.geom.getVArray("bone") != null;
 		if (skin) {
 			pos = "spos";
 			con_mesh.add_elem("bone", 'short4norm');
