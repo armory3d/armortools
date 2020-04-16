@@ -132,11 +132,12 @@ class TabLayers {
 				if (l.getChildren() == null) {
 					var icon = l.material_mask == null ? l.texpaint_preview : l.material_mask.imageIcon;
 					if (l.material_mask == null) {
+						// Checker
 						var r = Res.tile50(icons, 4, 1);
 						var _x = ui._x;
 						var _y = ui._y;
 						ui.curRatio--;
-						ui.image(icons, 0xffffffff, null, r.x, r.y, r.w, r.h);
+						ui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
 						ui._x = _x;
 						ui._y = _y;
 					}
