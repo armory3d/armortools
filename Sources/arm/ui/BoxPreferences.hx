@@ -22,6 +22,7 @@ class BoxPreferences {
 	public static var presetHandle: Handle;
 	static var locales: Array<String> = null;
 	static var themes: Array<String> = null;
+	static var worldColor = kha.Color.fromValue(0xff030303);
 
 	@:access(zui.Zui)
 	public static function show() {
@@ -140,10 +141,44 @@ class BoxPreferences {
 				var i = 0;
 				var theme = arm.App.theme;
 				var hlist = Id.handle();
+
+				// Viewport color
+				var h = hlist.nest(i++, { color: worldColor });
+				ui.row([1 / 8, 7 / 8]);
+				ui.text("", 0, h.color);
+				if (ui.isHovered && ui.inputReleased) {
+					UIMenu.draw(function(ui) {
+						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
+						ui.changed = false;
+						zui.Ext.colorWheel(ui, h, false, null, false, false);
+						if (ui.changed) UIMenu.keepOpen = true;
+					}, 3);
+				}
+				var val = untyped h.color;
+				if (val < 0) val += untyped 4294967296;
+				h.text = untyped val.toString(16);
+				ui.textInput(h, "VIEWPORT_COL");
+				h.color = untyped parseInt(h.text, 16);
+
+				if (worldColor != h.color) {
+					worldColor = h.color;
+					var b = Bytes.alloc(4);
+					b.set(0, worldColor.Rb);
+					b.set(1, worldColor.Gb);
+					b.set(2, worldColor.Bb);
+					b.set(3, 255);
+					Context.emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+					Context.ddirty = 2;
+					if (!Context.showEnvmap) {
+						iron.Scene.active.world.envmap = Context.emptyEnvmap;
+					}
+				}
+
+				// Theme fields
 				for (key in Reflect.fields(theme)) {
 					if (key == "NAME") continue;
 
-					var h = hlist.nest(i);
+					var h = hlist.nest(i++);
 					var val: Int = untyped theme[key];
 					var isHex = key.endsWith("_COL");
 					if (isHex && val < 0) val += untyped 4294967296;
@@ -168,9 +203,7 @@ class BoxPreferences {
 					else if (res == "false") untyped theme[key] = false;
 					else if (isHex) untyped theme[key] = parseInt(h.text, 16);
 					else untyped theme[key] = parseInt(h.text);
-					i++;
 				}
-				ui.enabled = true;
 			}
 
 			if (ui.tab(htab, tr("Usage"), true)) {

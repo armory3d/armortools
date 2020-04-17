@@ -33,7 +33,6 @@ class UIMenu {
 	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
-	static var viewportColorHandle = Id.handle({selected: false});
 	static var envmapLoaded = false;
 
 	@:access(zui.Zui)
@@ -55,7 +54,6 @@ class UIMenu {
 		}
 		else {
 			var menuItems = [14, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
-			if (viewportColorHandle.selected) menuItems[2] += 6;
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -202,32 +200,8 @@ class UIMenu {
 					Context.ddirty = 2;
 				}
 
-				if (Context.showEnvmap) {
-					Context.showEnvmapBlur = ui.check(Context.showEnvmapBlurHandle, " " + tr("Blurred"));
-					if (Context.showEnvmapBlurHandle.changed) Context.ddirty = 2;
-				}
-				else {
-					if (ui.panel(viewportColorHandle, " " + tr("Viewport Color"), false, false, false)) {
-						var hwheel = Id.handle({color: 0xff030303});
-						var worldColor: kha.Color = Ext.colorWheel(ui, hwheel);
-						if (hwheel.changed) {
-							// var b = Context.emptyEnvmap.lock(); // No lock for d3d11
-							// b.set(0, worldColor.Rb);
-							// b.set(1, worldColor.Gb);
-							// b.set(2, worldColor.Bb);
-							// Context.emptyEnvmap.unlock();
-							// Context.emptyEnvmap.unload(); //
-							var b = Bytes.alloc(4);
-							b.set(0, worldColor.Rb);
-							b.set(1, worldColor.Gb);
-							b.set(2, worldColor.Bb);
-							b.set(3, 255);
-							Context.emptyEnvmap = Image.fromBytes(b, 1, 1);
-							Context.ddirty = 2;
-							if (ui.inputStarted) changeStarted = true;
-						}
-					}
-				}
+				Context.showEnvmapBlur = ui.check(Context.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
+				if (Context.showEnvmapBlurHandle.changed) Context.ddirty = 2;
 
 				if (Context.showEnvmap) {
 					Scene.active.world.envmap = Context.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.savedEnvmap;
