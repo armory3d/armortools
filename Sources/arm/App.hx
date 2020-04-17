@@ -278,7 +278,7 @@ class App {
 				}
 
 				// Non-default theme selected
-				if (Config.raw.theme != "dark.json") {
+				if (Config.raw.theme != "default.json") {
 					arm.ui.BoxPreferences.loadTheme(Config.raw.theme);
 				}
 			});

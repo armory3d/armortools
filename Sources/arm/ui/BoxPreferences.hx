@@ -9,6 +9,7 @@ import arm.node.MaterialParser;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
+import arm.io.ImportTheme;
 import arm.sys.Path;
 import arm.sys.File;
 
@@ -17,6 +18,7 @@ class BoxPreferences {
 	public static var htab = Id.handle();
 	public static var filesPlugin: Array<String> = null;
 	public static var filesKeymap: Array<String> = null;
+	public static var themeHandle: Handle;
 	public static var presetHandle: Handle;
 	static var locales: Array<String> = null;
 	static var themes: Array<String> = null;
@@ -50,19 +52,6 @@ class BoxPreferences {
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
-				if (themes == null) {
-					themes = File.readDirectory(Path.data() + Path.sep + "themes");
-					for (i in 0...themes.length) themes[i] = themes[i].substr(0, themes[i].length - 5); // Trim .json
-					themes.unshift("dark");
-				}
-				var themeHandle = Id.handle({position: themes.indexOf(Config.raw.theme.substr(0, Config.raw.theme.length - 5))});
-				ui.combo(themeHandle, themes, tr("Theme"), true);
-				if (themeHandle.changed) {
-					Config.raw.theme = themes[themeHandle.position] + ".json";
-					Config.save();
-					loadTheme(Config.raw.theme);
-				}
-
 				#if (!krom_android && !krom_ios)
 				Context.nativeBrowser = ui.check(Id.handle({selected: Context.nativeBrowser}), tr("Native File Browser"));
 				#end
@@ -95,6 +84,95 @@ class BoxPreferences {
 					}, 2);
 				}
 			}
+
+			if (ui.tab(htab, tr("Theme"), true)) {
+
+				if (themes == null) {
+					fetchThemes();
+				}
+				themeHandle = Id.handle({position: getThemeIndex()});
+
+				ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+
+				ui.combo(themeHandle, themes, tr("Theme"));
+				if (themeHandle.changed) {
+					Config.raw.theme = themes[themeHandle.position] + ".json";
+					Config.save();
+					loadTheme(Config.raw.theme);
+				}
+
+				if (ui.button("New")) {
+					UIBox.showCustom(function(ui: Zui) {
+						if (ui.tab(Id.handle(), tr("New Theme"))) {
+							ui.row([0.5, 0.5]);
+							var themeName = ui.textInput(Id.handle({text: "new_theme"}), tr("Name"));
+							if (ui.button(tr("OK")) || ui.isReturnDown) {
+								var template = Json.stringify(arm.App.theme);
+								if (!themeName.endsWith(".json")) themeName += ".json";
+								var path = Path.data() + Path.sep + "themes" + Path.sep + themeName;
+								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+								fetchThemes(); // Refresh file list
+								Config.raw.theme = themeName;
+								themeHandle.position = getThemeIndex();
+								UIBox.show = false;
+								App.redrawUI();
+								BoxPreferences.htab.position = 1; // Themes
+								BoxPreferences.show();
+							}
+						}
+					});
+				}
+
+				if (ui.button("Import")) {
+					UIFiles.show("json", false, function(path: String) {
+						ImportTheme.run(path);
+					});
+				}
+
+				if (ui.button("Export")) {
+					UIFiles.show("json", true, function(path) {
+						path += Path.sep + UIFiles.filename;
+						if (!path.endsWith(".json")) path += ".json";
+						Krom.fileSaveBytes(path, Bytes.ofString(Json.stringify(arm.App.theme)).getData());
+					});
+				}
+
+				var i = 0;
+				var theme = arm.App.theme;
+				var hlist = Id.handle();
+				for (key in Reflect.fields(theme)) {
+					if (key == "NAME") continue;
+
+					var h = hlist.nest(i);
+					var val: Int = untyped theme[key];
+					var isHex = key.endsWith("_COL");
+					if (isHex && val < 0) val += untyped 4294967296;
+
+					if (isHex) {
+						ui.row([1 / 8, 7 / 8]);
+						ui.text("", 0, val);
+						if (ui.isHovered && ui.inputReleased) {
+							h.color = untyped theme[key];
+							UIMenu.draw(function(ui) {
+								ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
+								ui.changed = false;
+								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, false, false);
+								if (ui.changed) UIMenu.keepOpen = true;
+							}, 3);
+						}
+					}
+
+					h.text = isHex ? untyped val.toString(16) : untyped val.toString();
+					var res = ui.textInput(h, key);
+					if (res == "true") untyped theme[key] = true;
+					else if (res == "false") untyped theme[key] = false;
+					else if (isHex) untyped theme[key] = parseInt(h.text, 16);
+					else untyped theme[key] = parseInt(h.text);
+					i++;
+				}
+				ui.enabled = true;
+			}
+
 			if (ui.tab(htab, tr("Usage"), true)) {
 				Context.undoHandle = Id.handle({value: Config.raw.undo_steps});
 				Config.raw.undo_steps = Std.int(ui.slider(Context.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
@@ -148,6 +226,7 @@ class BoxPreferences {
 				}
 				ui.enabled = true;
 			}
+
 			if (ui.tab(htab, tr("Pen"), true)) {
 				ui.text(tr("Pressure controls"));
 				Config.raw.pressure_radius = ui.check(Id.handle({selected: Config.raw.pressure_radius}), tr("Brush Radius"));
@@ -299,7 +378,7 @@ plugin.drawUI = function(ui) {
 								filesPlugin = null; // Refresh file list
 								UIBox.show = false;
 								App.redrawUI();
-								BoxPreferences.htab.position = 5; // Plugins
+								BoxPreferences.htab.position = 6; // Plugins
 								BoxPreferences.show();
 							}
 						}
@@ -373,11 +452,21 @@ plugin.drawUI = function(ui) {
 		}, 600, 400);
 	}
 
+	public static function fetchThemes() {
+		themes = File.readDirectory(Path.data() + Path.sep + "themes");
+		for (i in 0...themes.length) themes[i] = themes[i].substr(0, themes[i].length - 5); // Strip .json
+		themes.unshift("default");
+	}
+
 	public static function fetchKeymaps() {
 		filesKeymap = File.readDirectory(Path.data() + Path.sep + "keymap_presets");
 		for (i in 0...filesKeymap.length) {
 			filesKeymap[i] = filesKeymap[i].substr(0, filesKeymap[i].length - 5); // Strip .json
 		}
+	}
+
+	public static function getThemeIndex(): Int {
+		return themes.indexOf(Config.raw.theme.substr(0, Config.raw.theme.length - 5)); // Strip .json
 	}
 
 	public static function getPresetIndex(): Int {
@@ -401,7 +490,7 @@ plugin.drawUI = function(ui) {
 	}
 
 	public static function loadTheme(theme: String) {
-		if (theme == "dark.json") { // Built-in default
+		if (theme == "default.json") { // Built-in default
 			App.theme = zui.Themes.dark;
 		}
 		else {

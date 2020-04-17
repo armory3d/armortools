@@ -76,7 +76,7 @@ class Config {
 			raw.bookmarks = [];
 			raw.plugins = [];
 			raw.keymap = "default.json";
-			raw.theme = "dark.json";
+			raw.theme = "default.json";
 			raw.undo_steps = 4;
 			raw.pressure_radius = true;
 			raw.pressure_hardness = true;

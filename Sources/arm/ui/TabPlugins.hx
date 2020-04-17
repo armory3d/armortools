@@ -8,7 +8,7 @@ class TabPlugins {
 
 			ui.row([1 / 4]);
 			if (ui.button(tr("Manager"))) {
-				BoxPreferences.htab.position = 5; // Plugins
+				BoxPreferences.htab.position = 6; // Plugins
 				BoxPreferences.show();
 			}
 
