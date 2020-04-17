@@ -19,7 +19,7 @@ class FbxBinaryParser {
 		if (!valid) return;
 		var version = read32();
 		is64 = false;
-		if (version == 7500) is64 = true;
+		if (version >= 7500) is64 = true;
 		root = {
 			name : "Root",
 			props : [PInt(0), PString("Root"), PString("Root")],
