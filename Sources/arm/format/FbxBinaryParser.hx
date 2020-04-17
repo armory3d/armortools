@@ -18,12 +18,11 @@ class FbxBinaryParser {
 		var valid = readChars(magic.length) == magic;
 		if (!valid) return;
 		var version = read32();
-		is64 = false;
-		if (version >= 7500) is64 = true;
+		is64 = version >= 7500;
 		root = {
 			name : "Root",
 			props : [PInt(0), PString("Root"), PString("Root")],
-			childs : parseNodes(is64)
+			childs : parseNodes()
 		};
 	}
 
@@ -99,16 +98,17 @@ class FbxBinaryParser {
 		}
 	}
 
-	function parseNode(is64): FbxNode {
-		var endPos = null;
-		var numProps = null;
-		var propListLen = null;
+	function parseNode(): FbxNode {
+		var endPos = 0;
+		var numProps = 0;
+		var propListLen = 0;
 
-		if(is64) {
+		if (is64) {
 			endPos = read64();
 			numProps = read64();
 			propListLen = read64();
-		} else {
+		}
+		else {
 			endPos = read32();
 			numProps = read32();
 			propListLen = read32();
@@ -127,17 +127,17 @@ class FbxBinaryParser {
 		if (listLen > 0) {
 			childs = [];
 			while (true) {
-				var nested = parseNode(is64);
+				var nested = parseNode();
 				nested == null ? break : childs.push(nested);
 			}
 		}
 		return { name: name, props: props, childs: childs };
 	}
 
-	function parseNodes(is64): Array<FbxNode> {
+	function parseNodes(): Array<FbxNode> {
 		var nodes = [];
 		while (true) {
-			var n = parseNode(is64);
+			var n = parseNode();
 			n == null ? break : nodes.push(n);
 		}
 		return nodes;
