@@ -207,30 +207,31 @@ class ExportTexture {
 
 		for (t in preset.textures) {
 			var c = t.channels;
+			var tex_name = t.name != "" ? "_" + t.name : "";
 			var singleChannel = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 			if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint, 1);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 1);
 			}
 			else if (c[0] == "nor_r" && c[1] == "nor_g" && c[2] == "nor_b" && c[3] == "1.0") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_nor, 1);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_nor, 1);
 			}
 			else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_pack, 1);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 1);
 			}
 			else if (singleChannel && c[0] == "occ") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_pack, 2, 0);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 0);
 			}
 			else if (singleChannel && c[0] == "rough") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_pack, 2, 1);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 1);
 			}
 			else if (singleChannel && c[0] == "metal") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_pack, 2, 2);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 2);
 			}
 			else if (singleChannel && c[0] == "height") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint_pack, 2, 3);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 3);
 			}
 			else if (singleChannel && c[0] == "opac") {
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pixpaint, 2, 3);
+				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
 				if (pix == null) pix = Bytes.alloc(textureSize * textureSize * 4 * Std.int(bits / 8));
@@ -253,7 +254,7 @@ class ExportTexture {
 					else if (c == "0.0") setChannel(0, pix, i);
 					else if (c == "1.0") setChannel(255, pix, i);
 				}
-				writeTexture(path + Path.sep + f + "_" + t.name + ext, pix, 3);
+				writeTexture(path + Path.sep + f + tex_name + ext, pix, 3);
 			}
 		}
 	}
