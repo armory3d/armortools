@@ -1,6 +1,6 @@
 {
 	"textures": [
-		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"] },
+		{ "name": "", "channels": ["base_r", "base_g", "base_b", "1.0"] },
 		{ "name": "normal", "channels": ["nor_r", "nor_g", "nor_b", "1.0"] },
 		{ "name": "mer", "channels": ["metal", "emis", "rough", "1.0"] }
 	]
