@@ -267,6 +267,12 @@ class BoxPreferences {
 				Config.raw.pressure_opacity = ui.check(Id.handle({selected: Config.raw.pressure_opacity}), tr("Brush Opacity"));
 				Config.raw.pressure_angle = ui.check(Id.handle({selected: Config.raw.pressure_angle}), tr("Brush Angle"));
 				Config.raw.pressure_sensitivity = ui.slider(Id.handle({value: Config.raw.pressure_sensitivity}), tr("Sensitivity"), 0.0, 2.0, true);
+
+				ui.endElement();
+				ui.row([0.5]);
+				if (ui.button("Help")) {
+					File.explorer("https://github.com/armory3d/armorpaint_docs#pen");
+				}
 			}
 
 			Context.hssgi = Id.handle({selected: Config.raw.rp_ssgi});
