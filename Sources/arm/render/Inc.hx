@@ -180,7 +180,8 @@ class Inc {
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			if ((mx != lastX || my != lastY || Context.brushLocked) && (inViewport || in2dView)) {
+			var moved = (mx != lastX || my != lastY) && (inViewport || in2dView);
+			if (moved || Context.brushLocked) {
 				Context.rdirty = 2;
 				Context.sub = 0;
 			}
