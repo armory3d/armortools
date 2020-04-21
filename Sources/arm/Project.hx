@@ -96,7 +96,7 @@ class Project {
 				if (meshList == null) {
 					meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
 					for (i in 0...meshList.length) meshList[i] = meshList[i].substr(0, meshList[i].length - 4); // Trim .arm
-					meshList.unshift("tessellated_plane");
+					meshList.unshift("plane");
 					meshList.unshift("sphere");
 					meshList.unshift("rounded_cube");
 
