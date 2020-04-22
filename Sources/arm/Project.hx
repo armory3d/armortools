@@ -17,6 +17,7 @@ import arm.sys.Path;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
+import arm.ui.UINodes;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
@@ -26,6 +27,7 @@ import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
+import arm.node.NodesBrush;
 import arm.ProjectFormat;
 import arm.Enums;
 
@@ -251,8 +253,51 @@ class Project {
 	}
 
 	public static function importBrush() {
-		UIFiles.show("arm", false, function(path: String) {
-			ImportArm.runBrush(path);
+		UIFiles.show("arm," + Path.textureFormats.join(","), false, function(path: String) {
+			// Create brush from texture
+			if (Path.isTexture(path)) {
+				// Import texture
+				ImportAsset.run(path);
+				var assetIndex = 0;
+				for (i in 0...Project.assets.length) {
+					if (Project.assets[i].file == path) {
+						assetIndex = i;
+						break;
+					}
+				}
+
+				// Create a new brush
+				Context.brush = new BrushSlot();
+				Project.brushes.push(Context.brush);
+
+				// Create and link image node
+				var n = NodesBrush.createNode("TEX_IMAGE");
+				n.x = 83;
+				n.y = 340;
+				n.buttons[0].default_value = assetIndex;
+				var links = Context.brush.canvas.links;
+				links.push({
+					id: Context.brush.nodes.getLinkId(links),
+					from_id: n.id,
+					from_socket: 0,
+					to_id: 0,
+					to_socket: 4
+				});
+
+				// Parse brush
+				MaterialParser.parseBrush();
+				Context.parseBrushInputs();
+				UINodes.inst.hwnd.redraws = 2;
+				function makeBrushPreview(_) {
+					RenderUtil.makeBrushPreview();
+					iron.App.removeRender(makeBrushPreview);
+				}
+				iron.App.notifyOnRender(makeBrushPreview);
+			}
+			// Import from project file
+			else {
+				ImportArm.runBrush(path);
+			}
 		});
 	}
 
