@@ -84,6 +84,7 @@ class RenderPathRaytrace {
 		f32[18] = helpMat._32;
 		f32[19] = helpMat._33;
 		f32[20] = Scene.active.world.probe.raw.strength;
+		if (!Context.showEnvmap) f32[20] = -f32[20];
 		// f32[21] = Context.showEnvmap ? 1.0 : 0.0;
 		// var right = cam.rightWorld().normalize();
 		// f32[21] = right.x;

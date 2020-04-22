@@ -100,9 +100,10 @@ void raygeneration() {
 				// else {
 				#endif
 
-				// if (i == 0 && constant_buffer.params.x < 0) { // No envmap
-				// 	payload.color.rgb = float3(0.05, 0.05, 0.05);
-				// }
+				if (i == 0 && constant_buffer.params.x < 0) { // No envmap
+					payload.color.rgb = float3(0.05, 0.05, 0.05);
+				}
+
 				accum += payload.color.rgb;
 				break;
 			}
@@ -218,6 +219,6 @@ void miss(inout RayPayload payload) {
 	float2 tex_coord = equirect(WorldRayDirection());
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
-	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * constant_buffer.params.x;
+	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * abs(constant_buffer.params.x);
 	payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 }
