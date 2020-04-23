@@ -60,8 +60,6 @@ class BrushOutputNode extends LogicNode {
 
 	override function run(from: Int) {
 
-		parseInputs();
-
 		var left = 0;
 		var right = 1;
 		if (Context.paint2d) {
@@ -100,7 +98,9 @@ class BrushOutputNode extends LogicNode {
 				Context.colorIdPicked = true;
 			}
 			// Prevent painting the same spot
-			if (down && Context.paintVec.x == Context.lastPaintX && Context.paintVec.y == Context.lastPaintY) {
+			var sameSpot = Context.paintVec.x == Context.lastPaintX && Context.paintVec.y == Context.lastPaintY;
+			var lazy = Context.tool == ToolBrush && Context.brushLazyRadius > 0;
+			if (down && (sameSpot || lazy)) {
 				Context.painted++;
 			}
 			else {
@@ -111,6 +111,10 @@ class BrushOutputNode extends LogicNode {
 
 			if (Context.tool == ToolParticle) {
 				Context.painted = 0; // Always paint particles
+			}
+
+			if (Context.painted == 0) {
+				parseInputs();
 			}
 
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
