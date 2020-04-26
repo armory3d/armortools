@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import zui.Nodes;
 import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
@@ -116,12 +117,15 @@ class TabTextures {
 									Project.assets.splice(i, 1);
 									Project.assetNames.splice(i, 1);
 									function _parse(g: kha.graphics4.Graphics) {
-											arm.node.MaterialParser.parsePaintMaterial();
-											arm.util.RenderUtil.makeMaterialPreview();
-											UISidebar.inst.hwnd1.redraws = 2;
-											iron.App.removeRender(_parse);
+										arm.node.MaterialParser.parsePaintMaterial();
+										arm.util.RenderUtil.makeMaterialPreview();
+										UISidebar.inst.hwnd1.redraws = 2;
+										iron.App.removeRender(_parse);
 									}
 									iron.App.notifyOnRender(_parse);
+
+									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
+									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 								}
 							}, 4);
 						}
@@ -133,6 +137,19 @@ class TabTextures {
 				var r = Res.tile50(img, 0, 1);
 				ui.image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
+			}
+		}
+	}
+
+	static function updateTexturePointers(nodes: Array<TNode>, i: Int) {
+		for (n in nodes) {
+			if (n.type == "TEX_IMAGE") {
+				if (n.buttons[0].default_value == i) {
+					n.buttons[0].default_value = 9999; // Texture deleted, use pink now
+				}
+				else if (n.buttons[0].default_value > i) {
+					n.buttons[0].default_value--; // Offset by deleted texture
+				}
 			}
 		}
 	}
