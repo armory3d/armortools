@@ -33,6 +33,7 @@ class UIView2D {
 	public var channelLocation: ConstantLocation;
 	var texType = TexBase;
 	var uvmapShow = false;
+	var tiledShow = false;
 
 	public function new() {
 		inst = this;
@@ -127,13 +128,36 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
+
 				if (type == View2DLayer) {
 					ui.g.pipeline = pipe;
-					drawLayer(tex, tx, ty, tw, th, channel);
-					ui.g.pipeline = null;
+					if (!Context.textureFilter) {
+						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
+					}
+					#if kha_opengl
+					ui.currentWindow.texture.g4.setPipeline(pipe);
+					#end
+					ui.currentWindow.texture.g4.setInt(channelLocation, channel);
 				}
-				else {
-					ui.g.drawScaledImage(tex, tx, ty, tw, th);
+
+				ui.g.drawScaledImage(tex, tx, ty, tw, th);
+
+				if (tiledShow) {
+					ui.g.drawScaledImage(tex, tx - tw, ty, tw, th);
+					ui.g.drawScaledImage(tex, tx - tw, ty - th, tw, th);
+					ui.g.drawScaledImage(tex, tx - tw, ty + th, tw, th);
+					ui.g.drawScaledImage(tex, tx + tw, ty, tw, th);
+					ui.g.drawScaledImage(tex, tx + tw, ty - th, tw, th);
+					ui.g.drawScaledImage(tex, tx + tw, ty + th, tw, th);
+					ui.g.drawScaledImage(tex, tx, ty - th, tw, th);
+					ui.g.drawScaledImage(tex, tx, ty + th, tw, th);
+				}
+
+				if (type == View2DLayer) {
+					ui.g.pipeline = null;
+					if (!Context.textureFilter) {
+						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
+					}
 				}
 			}
 
@@ -178,15 +202,15 @@ class UIView2D {
 			ui.fontSize = FONT_SIZE;
 
 			// Controls
-			if (type == View2DLayer) {
-				var ew = Std.int(ui.ELEMENT_W());
-				ui.g.color = ui.t.WINDOW_BG_COL;
-				ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
-				ui.g.color = 0xffffffff;
-				ui._x = 2;
-				ui._y = 2;
-				ui._w = ew;
+			var ew = Std.int(ui.ELEMENT_W());
+			ui.g.color = ui.t.WINDOW_BG_COL;
+			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
+			ui.g.color = 0xffffffff;
+			ui._x = 2;
+			ui._y = 2;
+			ui._w = ew;
 
+			if (type == View2DLayer) {
 				if (!Context.layerIsMask) {
 					texType = ui.combo(Id.handle({position: texType}), [
 						tr("Base Color"),
@@ -205,6 +229,8 @@ class UIView2D {
 				ui._y = 2;
 			}
 
+			tiledShow = ui.check(Id.handle({selected: tiledShow}), tr("Tiled"));
+
 			if (Context.tool == ToolPicker) {
 				var cursorImg = Res.get("cursor.k");
 				ui.g.drawScaledImage(cursorImg, tx + tw * Context.uvxPicked - 16, ty + th * Context.uvyPicked - 16, 32, 32);
@@ -212,23 +238,6 @@ class UIView2D {
 		}
 		ui.end();
 		g.begin(false);
-	}
-
-	function drawLayer(tex: kha.Image, tx: Float, ty: Float, tw: Float, th: Float, channel: Int) {
-		if (!Context.textureFilter) {
-			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
-		}
-
-		#if kha_opengl
-		ui.currentWindow.texture.g4.setPipeline(pipe);
-		#end
-		ui.currentWindow.texture.g4.setInt(channelLocation, channel);
-
-		ui.g.drawScaledImage(tex, tx, ty, tw, th);
-
-		if (!Context.textureFilter) {
-			ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
-		}
 	}
 
 	function update() {
