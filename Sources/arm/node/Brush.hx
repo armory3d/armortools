@@ -221,7 +221,7 @@ class Brush {
 	static function createClassInstance(className: String, args: Array<Dynamic>): Dynamic {
 		if (customNodes.get(className) != null) {
 			var node = new LogicNode(args[0]);
-			untyped node.get = customNodes.get(className);
+			untyped node.get = function(from: Int) { return customNodes.get(className)(node, from); }
 			return node;
 		}
 		var cname = Type.resolveClass(packageName + "." + className);
