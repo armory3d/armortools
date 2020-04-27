@@ -759,7 +759,7 @@ class UISidebar {
 			}
 
 			var cursorImg = Res.get("cursor.k");
-			var psize = Std.int(cursorImg.width * (Context.brushRadius * Context.brushNodesRadius));
+			var psize = Std.int(cursorImg.width * (Context.brushRadius * Context.brushNodesRadius) * ui.SCALE());
 
 			// Clone source cursor
 			var mouse = Input.getMouse();
@@ -781,8 +781,8 @@ class UISidebar {
 
 			if (!Config.raw.brush_3d || in2dView || (decal && !Config.raw.brush_live)) {
 				if (decal && !inNodes) {
-					var psizex = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
-					var psizey = Std.int(256 * (Context.brushRadius * Context.brushNodesRadius));
+					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
+					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
 					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);

@@ -233,7 +233,9 @@ class UIView2D {
 
 			if (Context.tool == ToolPicker) {
 				var cursorImg = Res.get("cursor.k");
-				ui.g.drawScaledImage(cursorImg, tx + tw * Context.uvxPicked - 16, ty + th * Context.uvyPicked - 16, 32, 32);
+				var hsize = 16 * ui.SCALE();
+				var size = hsize * 2;
+				ui.g.drawScaledImage(cursorImg, tx + tw * Context.uvxPicked - hsize, ty + th * Context.uvyPicked - hsize, size, size);
 			}
 		}
 		ui.end();

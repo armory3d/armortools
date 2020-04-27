@@ -32,11 +32,14 @@ class Uniforms {
 			if (Config.raw.pressure_radius && pen.down()) {
 				val *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
+			var scale2d = (900 / App.h()) * Config.raw.window_scale;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (Config.raw.brush_3d && !decal) {
-				val *= Context.paint2d ? 0.6 : 2;
+				val *= Context.paint2d ? 0.55 * scale2d : 2;
 			}
-			else val *= 900 / App.h(); // Projection ratio
+			else {
+				val *= scale2d; // Projection ratio
+			}
 			return val;
 		}
 		if (link == "_brushScaleX") {
