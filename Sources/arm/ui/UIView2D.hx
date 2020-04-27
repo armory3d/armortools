@@ -256,7 +256,7 @@ class UIView2D {
 			return;
 		}
 
-		if (mouse.down("right") || mouse.down("middle")) {
+		if (mouse.down("right") || mouse.down("middle") || (mouse.down("left") && kb.down("alt"))) {
 			panX += mouse.movementX;
 			panY += mouse.movementY;
 		}
