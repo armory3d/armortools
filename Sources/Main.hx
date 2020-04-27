@@ -8,10 +8,12 @@ import iron.object.Object;
 import iron.Scene;
 import iron.RenderPath;
 import arm.render.Inc;
+import arm.render.RenderPathForward;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
 import arm.util.BuildMacros;
 import arm.Config;
+import arm.Context;
 #if arm_player
 import arm.sys.Path;
 #end
@@ -80,8 +82,17 @@ class Main {
 					Uniforms.init();
 					var path = new RenderPath();
 					Inc.init(path);
-					RenderPathDeferred.init(path);
-					path.commands = RenderPathDeferred.commands;
+
+					if (Context.renderMode == RenderForward) {
+						RenderPathDeferred.init(path); // Allocate gbuffer
+						RenderPathForward.init(path);
+						path.commands = RenderPathForward.commands;
+					}
+					else {
+						RenderPathDeferred.init(path);
+						path.commands = RenderPathDeferred.commands;
+					}
+
 					RenderPath.setActive(path);
 					#if arm_player
 					new arm.Player();

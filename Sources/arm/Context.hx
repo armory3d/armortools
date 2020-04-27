@@ -98,7 +98,12 @@ class Context {
 	#end
 	public static var decalImage: Image = null;
 	public static var decalPreview = false;
-	public static var viewportMode = ViewRender;
+	public static var viewportMode = ViewLit;
+	#if (krom_android || krom_ios)
+	public static var renderMode = RenderForward;
+	#else
+	public static var renderMode = RenderDeferred;
+	#end
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
 	#if (krom_android || krom_ios)

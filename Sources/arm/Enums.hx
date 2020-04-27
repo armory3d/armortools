@@ -65,7 +65,7 @@ package arm;
 }
 
 @:enum abstract ViewportMode(Int) from Int to Int {
-	var ViewRender = 0;
+	var ViewLit = 0;
 	var ViewBaseColor = 1;
 	var ViewNormalMap = 2;
 	var ViewOcclusion = 3;
@@ -78,6 +78,12 @@ package arm;
 	var ViewObjectID = 10;
 	var ViewMask = 11;
 	var ViewPathTrace = 12;
+}
+
+@:enum abstract RenderMode(Int) from Int to Int {
+	var RenderDeferred = 0;
+	var RenderForward = 1;
+	var RenderPathTrace = 2;
 }
 
 @:enum abstract FillType(Int) from Int to Int {

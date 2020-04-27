@@ -313,4 +313,167 @@ void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
 }
 ";
 
+	public static var str_shIrradiance = "
+vec3 shIrradiance(const vec3 nor) {
+	const float c1 = 0.429043;
+	const float c2 = 0.511664;
+	const float c3 = 0.743125;
+	const float c4 = 0.886227;
+	const float c5 = 0.247708;
+	vec3 cl00 = vec3(shirr[0].x, shirr[0].y, shirr[0].z);
+	vec3 cl1m1 = vec3(shirr[0].w, shirr[1].x, shirr[1].y);
+	vec3 cl10 = vec3(shirr[1].z, shirr[1].w, shirr[2].x);
+	vec3 cl11 = vec3(shirr[2].y, shirr[2].z, shirr[2].w);
+	vec3 cl2m2 = vec3(shirr[3].x, shirr[3].y, shirr[3].z);
+	vec3 cl2m1 = vec3(shirr[3].w, shirr[4].x, shirr[4].y);
+	vec3 cl20 = vec3(shirr[4].z, shirr[4].w, shirr[5].x);
+	vec3 cl21 = vec3(shirr[5].y, shirr[5].z, shirr[5].w);
+	vec3 cl22 = vec3(shirr[6].x, shirr[6].y, shirr[6].z);
+	return (
+		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) +
+		c3 * cl20 * nor.x * nor.x +
+		c4 * cl00 -
+		c5 * cl20 +
+		2.0 * c1 * cl2m2 * nor.y * (-nor.z) +
+		2.0 * c1 * cl21  * nor.y * nor.x +
+		2.0 * c1 * cl2m1 * (-nor.z) * nor.x +
+		2.0 * c2 * cl11  * nor.y +
+		2.0 * c2 * cl1m1 * (-nor.z) +
+		2.0 * c2 * cl10  * nor.x
+	);
+}
+";
+
+	public static var str_envMapEquirect = "
+vec2 envMapEquirect(const vec3 normal) {
+	const float PI = 3.1415926535;
+	const float PI2 = PI * 2.0;
+	float phi = acos(normal.z);
+	float theta = atan(-normal.y, normal.x) + PI;
+	return vec2(theta / PI2, phi / PI);
+}
+";
+
+	// Linearly Transformed Cosines
+	// https://eheitzresearch.wordpress.com/415-2/
+	public static var str_ltcEvaluate = "
+float integrateEdge(vec3 v1, vec3 v2) {
+	float cosTheta = dot(v1, v2);
+	float theta = acos(cosTheta);
+	float res = cross(v1, v2).z * ((theta > 0.001) ? theta / sin(theta) : 1.0);
+	return res;
+}
+int clipQuadToHorizon(inout vec3 L[5]) {
+	int n = 0;
+	int config = 0;
+	if (L[0].z > 0.0) config += 1;
+	if (L[1].z > 0.0) config += 2;
+	if (L[2].z > 0.0) config += 4;
+	if (L[3].z > 0.0) config += 8;
+	if (config == 0) {}
+	else if (config == 1) { // V1 clip V2 V3 V4
+		n = 3;
+		L[1] = -L[1].z * L[0] + L[0].z * L[1];
+		L[2] = -L[3].z * L[0] + L[0].z * L[3];
+	}
+	else if (config == 2) { // V2 clip V1 V3 V4
+		n = 3;
+		L[0] = -L[0].z * L[1] + L[1].z * L[0];
+		L[2] = -L[2].z * L[1] + L[1].z * L[2];
+	}
+	else if (config == 3) { // V1 V2 clip V3 V4
+		n = 4;
+		L[2] = -L[2].z * L[1] + L[1].z * L[2];
+		L[3] = -L[3].z * L[0] + L[0].z * L[3];
+	}
+	else if (config == 4) { // V3 clip V1 V2 V4
+		n = 3;
+		L[0] = -L[3].z * L[2] + L[2].z * L[3];
+		L[1] = -L[1].z * L[2] + L[2].z * L[1];
+	}
+	else if (config == 5) { // V1 V3 clip V2 V4) impossible
+		n = 0;
+	}
+	else if (config == 6) { // V2 V3 clip V1 V4
+		n = 4;
+		L[0] = -L[0].z * L[1] + L[1].z * L[0];
+		L[3] = -L[3].z * L[2] + L[2].z * L[3];
+	}
+	else if (config == 7) { // V1 V2 V3 clip V4
+		n = 5;
+		L[4] = -L[3].z * L[0] + L[0].z * L[3];
+		L[3] = -L[3].z * L[2] + L[2].z * L[3];
+	}
+	else if (config == 8) { // V4 clip V1 V2 V3
+		n = 3;
+		L[0] = -L[0].z * L[3] + L[3].z * L[0];
+		L[1] = -L[2].z * L[3] + L[3].z * L[2];
+		L[2] =  L[3];
+	}
+	else if (config == 9) { // V1 V4 clip V2 V3
+		n = 4;
+		L[1] = -L[1].z * L[0] + L[0].z * L[1];
+		L[2] = -L[2].z * L[3] + L[3].z * L[2];
+	}
+	else if (config == 10) { // V2 V4 clip V1 V3) impossible
+		n = 0;
+	}
+	else if (config == 11) { // V1 V2 V4 clip V3
+		n = 5;
+		L[4] = L[3];
+		L[3] = -L[2].z * L[3] + L[3].z * L[2];
+		L[2] = -L[2].z * L[1] + L[1].z * L[2];
+	}
+	else if (config == 12) { // V3 V4 clip V1 V2
+		n = 4;
+		L[1] = -L[1].z * L[2] + L[2].z * L[1];
+		L[0] = -L[0].z * L[3] + L[3].z * L[0];
+	}
+	else if (config == 13) { // V1 V3 V4 clip V2
+		n = 5;
+		L[4] = L[3];
+		L[3] = L[2];
+		L[2] = -L[1].z * L[2] + L[2].z * L[1];
+		L[1] = -L[1].z * L[0] + L[0].z * L[1];
+	}
+	else if (config == 14) { // V2 V3 V4 clip V1
+		n = 5;
+		L[4] = -L[0].z * L[3] + L[3].z * L[0];
+		L[0] = -L[0].z * L[1] + L[1].z * L[0];
+	}
+	else if (config == 15) { // V1 V2 V3 V4
+		n = 4;
+	}
+	if (n == 3) L[3] = L[0];
+	if (n == 4) L[4] = L[0];
+	return n;
+}
+float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
+	vec3 T1, T2;
+	T1 = normalize(V - N * dotNV);
+	T2 = cross(N, T1);
+	Minv = mul(transpose(mat3(T1, T2, N)), Minv);
+	vec3 L[5];
+	L[0] = mul(points0 - P, Minv);
+	L[1] = mul(points1 - P, Minv);
+	L[2] = mul(points2 - P, Minv);
+	L[3] = mul(points3 - P, Minv);
+	L[4] = vec3(0.0, 0.0, 0.0);
+	int n = clipQuadToHorizon(L);
+	if (n == 0) return 0.0;
+	L[0] = normalize(L[0]);
+	L[1] = normalize(L[1]);
+	L[2] = normalize(L[2]);
+	L[3] = normalize(L[3]);
+	L[4] = normalize(L[4]);
+	float sum = 0.0;
+	sum += integrateEdge(L[0], L[1]);
+	sum += integrateEdge(L[1], L[2]);
+	sum += integrateEdge(L[2], L[3]);
+	if (n >= 4) sum += integrateEdge(L[3], L[4]);
+	if (n == 5) sum += integrateEdge(L[4], L[0]);
+	return max(0.0, -sum);
+}
+";
+
 }

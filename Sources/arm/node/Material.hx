@@ -1254,7 +1254,7 @@ class Material {
 				out_val = 'atan($val1)';
 			}
 			else if (op == "ARCTAN2") {
-				out_val = 'atan2($val1, $val2)';
+				out_val = 'atan($val2, $val1)';
 			}
 			if (use_clamp) {
 				return 'clamp($out_val, 0.0, 1.0)';

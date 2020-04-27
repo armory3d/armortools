@@ -239,7 +239,7 @@ class UIMenu {
 					tr("Object Normal"),
 					tr("Material ID"),
 					tr("Object ID"),
-					tr("Mask"),
+					tr("Mask")
 				];
 				#if kha_direct3d12
 				modes.push(tr("Path Traced"));
@@ -250,12 +250,16 @@ class UIMenu {
 
 				Context.viewportMode = modeHandle.position;
 				if (modeHandle.changed) {
-					var deferred = Context.viewportMode == ViewRender || Context.viewportMode == ViewPathTrace;
+					var deferred = Context.renderMode != RenderForward && (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace);
 					if (deferred) {
 						RenderPath.active.commands = RenderPathDeferred.commands;
 					}
+					// else if (Context.viewportMode == ViewPathTrace) {
+					// }
 					else {
-						if (RenderPathForward.path == null) RenderPathForward.init(RenderPath.active);
+						if (RenderPathForward.path == null) {
+							RenderPathForward.init(RenderPath.active);
+						}
 						RenderPath.active.commands = RenderPathForward.commands;
 					}
 					MaterialParser.parseMeshMaterial();

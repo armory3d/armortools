@@ -5,6 +5,7 @@ import haxe.Json;
 import zui.Id;
 import zui.Zui;
 import iron.data.Data;
+import iron.RenderPath;
 import arm.node.MaterialParser;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
@@ -12,6 +13,9 @@ import arm.io.ImportKeymap;
 import arm.io.ImportTheme;
 import arm.sys.Path;
 import arm.sys.File;
+import arm.render.RenderPathDeferred;
+import arm.render.RenderPathForward;
+import arm.Enums;
 
 class BoxPreferences {
 
@@ -281,6 +285,21 @@ class BoxPreferences {
 			Context.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
 			Context.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
+				var hrendermode = Id.handle({position: Context.renderMode});
+				Context.renderMode = ui.combo(hrendermode, ["Full", "Mobile"], tr("Renderer"), true);
+				if (hrendermode.changed) {
+					if (hrendermode.position == RenderForward) {
+						if (RenderPathForward.path == null) {
+							RenderPathForward.init(RenderPath.active);
+						}
+						RenderPath.active.commands = RenderPathForward.commands;
+					}
+					else {
+						RenderPath.active.commands = RenderPathDeferred.commands;
+					}
+					MaterialParser.parseMeshMaterial();
+				}
+
 				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
 				if (Context.hsupersample.changed) Config.applyConfig();
 
@@ -290,31 +309,33 @@ class BoxPreferences {
 				if (vsyncHandle.changed) Config.save();
 				#end
 
-				#if rp_voxelao
-				ui.check(Context.hvxao, tr("Voxel AO"));
-				if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
-				if (Context.hvxao.changed) {
-					Config.applyConfig();
-					#if arm_creator
-					MaterialParser.parseMeshMaterial();
-					#end
-				}
+				if (Context.renderMode == RenderDeferred) {
+					#if rp_voxelao
+					ui.check(Context.hvxao, tr("Voxel AO"));
+					if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
+					if (Context.hvxao.changed) {
+						Config.applyConfig();
+						#if arm_creator
+						MaterialParser.parseMeshMaterial();
+						#end
+					}
 
-				ui.enabled = Context.hvxao.selected;
-				var h = Id.handle({value: Context.vxaoOffset});
-				Context.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
-				if (h.changed) Context.ddirty = 2;
-				var h = Id.handle({value: Context.vxaoAperture});
-				Context.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
-				if (h.changed) Context.ddirty = 2;
-				ui.enabled = true;
-				#end
-				ui.check(Context.hssgi, tr("SSAO"));
-				if (Context.hssgi.changed) Config.applyConfig();
-				ui.check(Context.hssr, tr("SSR"));
-				if (Context.hssr.changed) Config.applyConfig();
-				ui.check(Context.hbloom, tr("Bloom"));
-				if (Context.hbloom.changed) Config.applyConfig();
+					ui.enabled = Context.hvxao.selected;
+					var h = Id.handle({value: Context.vxaoOffset});
+					Context.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
+					if (h.changed) Context.ddirty = 2;
+					var h = Id.handle({value: Context.vxaoAperture});
+					Context.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
+					if (h.changed) Context.ddirty = 2;
+					ui.enabled = true;
+					#end
+					ui.check(Context.hssgi, tr("SSAO"));
+					if (Context.hssgi.changed) Config.applyConfig();
+					ui.check(Context.hssr, tr("SSR"));
+					if (Context.hssr.changed) Config.applyConfig();
+					ui.check(Context.hbloom, tr("Bloom"));
+					if (Context.hbloom.changed) Config.applyConfig();
+				}
 
 				var h = Id.handle({value: Config.raw.rp_vignette});
 				Config.raw.rp_vignette = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);

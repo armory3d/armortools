@@ -101,7 +101,7 @@ class MakeMesh {
 					frag.add_shared_sampler('sampler2D texpaint');
 					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
 					#if kha_direct3d12
-					if (Context.viewportMode == ViewRender) {
+					if (Context.viewportMode == ViewLit) {
 						frag.write('if (texpaint_sample.a < 0.1) discard;');
 					}
 					#end
@@ -328,15 +328,69 @@ class MakeMesh {
 				// frag.write('if (basecol == vec3(0,0,0)) discard;');
 			}
 
+			if (Context.renderMode == RenderForward) {
+				frag.write('vec3 wn = n;');
+			}
+
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
 
-			var deferred = Context.viewportMode == ViewRender || Context.viewportMode == ViewPathTrace;
-			if (deferred) {
-				if (MaterialBuilder.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
-				frag.write('fragColor[1] = vec4(basecol, packFloat2(occlusion, 1.0));'); // occ/spec
+			if (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace) {
+				if (Context.renderMode == RenderForward) {
+					frag.wposition = true;
+					frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
+					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
+					frag.write('float dotNV = max(dot(wn, vVec), 0.0);');
+					frag.add_uniform('sampler2D senvmapBrdf', "$brdf.k");
+					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
+					frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
+					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
+					frag.write('vec3 wreflect = reflect(-vVec, wn);');
+					frag.write('float envlod = roughness * envmapNumMipmaps;');
+					frag.add_function(MaterialFunctions.str_envMapEquirect);
+					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect), envlod).rgb;');
+
+					frag.add_uniform('vec3 lightArea0', '_lightArea0');
+					frag.add_uniform('vec3 lightArea1', '_lightArea1');
+					frag.add_uniform('vec3 lightArea2', '_lightArea2');
+					frag.add_uniform('vec3 lightArea3', '_lightArea3');
+					frag.add_uniform('sampler2D sltcMat', '_ltcMat');
+					frag.add_uniform('sampler2D sltcMag', '_ltcMag');
+					frag.add_function(MaterialFunctions.str_ltcEvaluate);
+					frag.add_uniform('vec3 lightPos', '_pointPosition');
+					frag.add_uniform('vec3 lightColor', '_pointColor');
+					// frag.write('float dotNL = max(dot(wn, normalize(lightPos - wposition)), 0.0);');
+					// frag.write('vec3 direct = albedo * dotNL;');
+					frag.write('float ldist = distance(wposition, lightPos);');
+					frag.write('const float LUT_SIZE = 64.0;');
+					frag.write('const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;');
+					frag.write('const float LUT_BIAS = 0.5 / LUT_SIZE;');
+					frag.write('float theta = acos(dotNV);');
+					frag.write('vec2 tuv = vec2(roughness, theta / (0.5 * 3.14159265));');
+					frag.write('tuv = tuv * LUT_SCALE + LUT_BIAS;');
+					frag.write('vec4 t = textureLod(sltcMat, tuv, 0.0);');
+					frag.write('mat3 minv = mat3(vec3(1.0, 0.0, t.y), vec3(0.0, t.z, 0.0), vec3(t.w, 0.0, t.x));');
+					frag.write('float ltcspec = ltcEvaluate(wn, vVec, dotNV, wposition, minv, lightArea0, lightArea1, lightArea2, lightArea3);');
+					frag.write('ltcspec *= textureLod(sltcMag, tuv, 0.0).a;');
+					frag.write('mat3 mident = mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);');
+					frag.write('float ltcdiff = ltcEvaluate(wn, vVec, dotNV, wposition, mident, lightArea0, lightArea1, lightArea2, lightArea3);');
+					frag.write('vec3 direct = albedo * ltcdiff + ltcspec * 0.05;');
+					frag.write('direct *= lightColor * (1.0 / (ldist * ldist));');
+
+					frag.add_uniform('float envmapStrength', '_envmapStrength');
+					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
+					frag.add_function(MaterialFunctions.str_shIrradiance);
+					frag.write('vec3 indirect = albedo * (shIrradiance(wn) / 3.14159265);');
+					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
+					frag.write('indirect *= envmapStrength * occlusion;');
+					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
+				}
+				else { // Deferred, Pathtraced
+					if (MaterialBuilder.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
+					frag.write('fragColor[1] = vec4(basecol, packFloat2(occlusion, 1.0));'); // occ/spec
+				}
 			}
 			else if (Context.viewportMode == ViewBaseColor) {
 				frag.write('fragColor[1] = vec4(basecol, 1.0);');
