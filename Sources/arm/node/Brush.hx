@@ -2,8 +2,9 @@ package arm.node;
 
 import zui.Nodes;
 
-class Logic {
+class Brush {
 
+	public static var customNodes = untyped __js__("new Map()");
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
 
@@ -11,7 +12,7 @@ class Logic {
 	static var parsed_labels: Map<String, String> = null;
 	static var nodeMap: Map<String, LogicNode>;
 
-	public static var packageName = "arm.node.logic";
+	public static var packageName = "arm.node.brush";
 
 	public static function getNode(id: Int): TNode {
 		for (n in nodes) if (n.id == id) return n;
@@ -218,6 +219,11 @@ class Logic {
 	}
 
 	static function createClassInstance(className: String, args: Array<Dynamic>): Dynamic {
+		if (customNodes.get(className) != null) {
+			var node = new LogicNode(args[0]);
+			untyped node.get = customNodes.get(className);
+			return node;
+		}
 		var cname = Type.resolveClass(packageName + "." + className);
 		if (cname == null) return null;
 		return Type.createInstance(cname, args);

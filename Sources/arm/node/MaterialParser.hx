@@ -161,7 +161,6 @@ class MaterialParser {
 	}
 
 	public static function parseBrush() {
-		Logic.packageName = "arm.node.brush";
-		Logic.parse(Context.brush.canvas, false);
+		Brush.parse(Context.brush.canvas, false);
 	}
 }

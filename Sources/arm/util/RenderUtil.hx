@@ -189,6 +189,9 @@ class RenderUtil {
 
 		if (RenderPathPaint.liveLayerLocked) return;
 
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
@@ -366,5 +369,7 @@ class RenderUtil {
 
 		Context.brush.previewReady = true;
 		Context.brushBlendDirty = true;
+
+		if (current != null) current.begin(false);
 	}
 }
