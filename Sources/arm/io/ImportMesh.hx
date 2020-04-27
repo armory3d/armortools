@@ -67,7 +67,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		if (UIHeader.inst.worktab.position == SpacePaint) {
+		if (UIHeader.inst.worktab.position != SpaceRender) {
 			ViewportUtil.scaleToBounds();
 		}
 

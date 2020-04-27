@@ -9,18 +9,18 @@ package arm;
 	var ToolClone = 5;
 	var ToolBlur = 6;
 	var ToolParticle = 7;
-	var ToolBake = 8;
-	var ToolColorId = 9;
-	var ToolPicker = 10;
-	var ToolGizmo = 11;
+	var ToolColorId = 8;
+	var ToolPicker = 9;
+	var ToolGizmo = 10;
+	var ToolBake = 11;
 }
 
 @:enum abstract SpaceType(Int) from Int to Int {
 	var SpacePaint = 0;
 	// var SpaceSculpt = 0;
 	var SpaceMaterial = 1;
-	// var SpaceBake = 0;
-	var SpaceRender = 2;
+	var SpaceBake = 2;
+	var SpaceRender = 3;
 }
 
 @:enum abstract BakeType(Int) from Int to Int {

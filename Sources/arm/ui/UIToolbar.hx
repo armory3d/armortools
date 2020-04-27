@@ -22,7 +22,6 @@ class UIToolbar {
 		tr("Clone"),
 		tr("Blur"),
 		tr("Particle"),
-		tr("Bake"),
 		tr("ColorID"),
 		tr("Picker")
 	];
@@ -52,7 +51,6 @@ class UIToolbar {
 					"(" + Config.keymap.tool_clone + ") - " + tr("Hold") + " (" + Config.keymap.set_clone_source + ") " + tr("to set source"),
 					"(" + Config.keymap.tool_blur + ")",
 					"(" + Config.keymap.tool_particle + ")",
-					"(" + Config.keymap.tool_bake + ")",
 					"(" + Config.keymap.tool_colorid + ")",
 					"(" + Config.keymap.tool_picker + ")"
 				];
@@ -69,22 +67,30 @@ class UIToolbar {
 			else if (UIHeader.inst.worktab.position == SpaceMaterial) {
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
 				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
 				if (Context.tool == ToolPicker) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
+				if (ui.image(img, -1, null, imgw * 9, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
 				if (ui.isHovered) ui.tooltip(tr("Picker") + " (V)");
+				ui._x -= 2;
+				ui._y += 2;
+			}
+			else if (UIHeader.inst.worktab.position == SpaceBake) {
+				ui._x += 2;
+				if (Context.tool == ToolBake) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
+				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolBake);
+				if (ui.isHovered) ui.tooltip(tr("Bake") + " (K)");
 				ui._x -= 2;
 				ui._y += 2;
 			}
 			else if (UIHeader.inst.worktab.position == SpaceRender) {
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
-				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
 				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
 				ui._x -= 2;
 				ui._y += 2;

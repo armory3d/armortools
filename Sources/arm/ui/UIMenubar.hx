@@ -60,6 +60,7 @@ class UIMenubar {
 		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - UISidebar.inst.windowW - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
 			ui.tab(UIHeader.inst.worktab, tr("Paint"));
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
+			ui.tab(UIHeader.inst.worktab, tr("Bake"));
 			ui.tab(UIHeader.inst.worktab, tr("Render"));
 			if (UIHeader.inst.worktab.changed) {
 				Context.ddirty = 2;
@@ -71,6 +72,9 @@ class UIMenubar {
 
 				if (UIHeader.inst.worktab.position == SpacePaint) {
 					Context.selectTool(ToolBrush);
+				}
+				else if (UIHeader.inst.worktab.position == SpaceBake) {
+					Context.selectTool(ToolBake);
 				}
 				else {
 					Context.selectTool(ToolGizmo);

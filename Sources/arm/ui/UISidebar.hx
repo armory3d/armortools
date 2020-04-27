@@ -315,7 +315,6 @@ class UISidebar {
 					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
 					else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
 					else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
-					else if (Operator.shortcut(Config.keymap.tool_bake)) Context.selectTool(ToolBake);
 					else if (Operator.shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
 					else if (Operator.shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
 					else if (Operator.shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
