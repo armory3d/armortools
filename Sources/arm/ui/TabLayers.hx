@@ -32,7 +32,7 @@ class TabLayers {
 				Layers.newLayer();
 				History.newLayer();
 			}
-			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView();
+			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DLayer);
 			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_node_editor})');
 
 			var ar = [tr("All")];
@@ -163,7 +163,7 @@ class TabLayers {
 				}
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
 					Context.selectTime = Time.time();
 					if (l.getChildren() == null) {
 						var mouse = Input.getMouse();
@@ -225,7 +225,7 @@ class TabLayers {
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
-						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
 						Context.selectTime = Time.time();
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
@@ -242,7 +242,7 @@ class TabLayers {
 
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView();
+					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
 					Context.selectTime = Time.time();
 				}
 

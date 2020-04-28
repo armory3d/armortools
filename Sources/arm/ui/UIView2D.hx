@@ -11,6 +11,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import arm.util.UVUtil;
+import arm.util.RenderUtil;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 
@@ -84,6 +85,9 @@ class UIView2D {
 		// Ensure UV map is drawn
 		if (uvmapShow) UVUtil.cacheUVMap();
 
+		// Ensure font image is drawn
+		if (Context.font.image == null) RenderUtil.makeFontPreview();
+
 		ui.begin(g);
 		wh = iron.App.h();
 		if (UINodes.inst.show) {
@@ -121,8 +125,12 @@ class UIView2D {
 					texType == TexNormal    ? 5 :
 											  0;
 			}
-			else { // View2DAsset
+			else if (type == View2DAsset) {
 				tex = UISidebar.inst.getImage(Context.texture);
+			}
+			else { // View2DFont
+				tex = Context.font.image;
+				tw = tex.width;
 			}
 
 			var th = tw;
@@ -184,7 +192,7 @@ class UIView2D {
 				h.text = l.name;
 				l.name = ui.textInput(h, "", Right);
 			}
-			else {
+			else if (type == View2DAsset) {
 				var asset = Context.texture;
 				if (asset != null) {
 					var assetNames = Project.assetNames;
@@ -193,6 +201,10 @@ class UIView2D {
 					asset.name = ui.textInput(h, "", Right);
 					assetNames[i] = asset.name;
 				}
+			}
+			else { // View2DFont
+				h.text = Context.font.name;
+				Context.font.name = ui.textInput(h, "", Right);
 			}
 
 			if (h.changed) UISidebar.inst.hwnd.redraws = 2;

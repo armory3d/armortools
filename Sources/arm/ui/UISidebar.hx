@@ -21,6 +21,7 @@ import arm.util.ViewportUtil;
 import arm.util.UVUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
+import arm.data.FontSlot;
 import arm.data.MaterialSlot;
 import arm.io.ImportFont;
 import arm.io.ExportTexture;
@@ -86,6 +87,12 @@ class UISidebar {
 			Context.brush = Project.brushes[0];
 			MaterialParser.parseBrush();
 			Context.parseBrushInputs();
+		}
+
+		if (Project.fonts == null) {
+			Project.fonts = [];
+			Project.fonts.push(new FontSlot("default.ttf", App.font));
+			Context.font = Project.fonts[0];
 		}
 
 		if (Project.layers == null) {
@@ -221,7 +228,7 @@ class UISidebar {
 				Context.setLayer(Project.layers[i]);
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
-				show2DView();
+				show2DView(View2DLayer);
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
 				UINodes.inst.canvasType == CanvasMaterial ? showMaterialNodes() : showBrushNodes();
@@ -838,7 +845,7 @@ class UISidebar {
 		App.resize();
 	}
 
-	public function show2DView(type = 0) {
+	public function show2DView(type: View2DType) {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UIView2D.inst.ui.endInput();
 		if (UIView2D.inst.type != type) UIView2D.inst.show = true;

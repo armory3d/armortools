@@ -183,6 +183,7 @@ package arm;
 @:enum abstract View2DType(Int) from Int to Int {
 	var View2DLayer = 0;
 	var View2DAsset = 1;
+	var View2DFont = 2;
 }
 
 @:enum abstract BorderSide(Int) from Int to Int {

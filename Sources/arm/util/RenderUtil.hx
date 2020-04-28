@@ -95,6 +95,9 @@ class RenderUtil {
 	}
 
 	public static function makeDecalPreview() {
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+
 		if (Context.decalImage == null) {
 			Context.decalImage = Image.createRenderTarget(RenderUtil.decalPreviewSize, RenderUtil.decalPreviewSize);
 		}
@@ -153,11 +156,16 @@ class RenderUtil {
 
 		MaterialParser.parseMeshMaterial();
 		Context.ddirty = 0;
+
+		if (current != null) current.begin(false);
 	}
 
 	public static function makeTextPreview() {
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+
 		var text = Context.textToolText;
-		var font = getTextToolFont();
+		var font = Context.font.font;
 		var fontSize = 200;
 		var textW = Std.int(font.width(fontSize, text));
 		var textH = Std.int(font.height(fontSize));
@@ -177,12 +185,33 @@ class RenderUtil {
 		g2.color = 0xffffffff;
 		g2.drawString(text, texW / 2 - textW / 2, texW / 2 - textH / 2);
 		g2.end();
+
+		if (current != null) current.begin(false);
 	}
 
-	static function getTextToolFont(): Font {
-		var fontName = ImportFont.fontList[Context.textToolHandle.position];
-		if (fontName == "default.ttf") return arm.ui.UISidebar.inst.ui.ops.font;
-		return ImportFont.fontMap.get(fontName);
+	public static function makeFontPreview() {
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+
+		var text = "Abg";
+		var font = Context.font.font;
+		var fontSize = 120;
+		var textW = Std.int(font.width(fontSize, text)) + 8;
+		var textH = Std.int(font.height(fontSize)) + 8;
+		if (Context.font.image == null) {
+			// Context.font.image = Image.createRenderTarget(200, 200, TextureFormat.L8);
+			Context.font.image = Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
+		}
+		var g2 = Context.font.image.g2;
+		g2.begin(true, 0x00000000);
+		g2.font = font;
+		g2.fontSize = fontSize;
+		g2.color = 0xffffffff;
+		g2.drawString(text, 200 / 2 - textW / 2, 200 / 2 - textH / 2);
+		g2.end();
+		Context.font.previewReady = true;
+
+		if (current != null) current.begin(false);
 	}
 
 	public static function makeBrushPreview() {

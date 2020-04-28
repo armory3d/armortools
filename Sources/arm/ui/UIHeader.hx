@@ -214,11 +214,10 @@ class UIHeader {
 					}
 				}
 				if (Context.tool == ToolText) {
-					ui.combo(Context.textToolHandle, ImportFont.fontList, tr("Font"));
 					var h = Id.handle();
 					h.text = Context.textToolText;
 					Context.textToolText = ui.textInput(h, "");
-					if (h.changed || Context.textToolHandle.changed) {
+					if (h.changed) {
 						ui.g.end();
 						RenderUtil.makeTextPreview();
 						RenderUtil.makeDecalPreview();

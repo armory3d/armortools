@@ -11,6 +11,7 @@ import iron.data.MaterialData;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
+import arm.data.FontSlot;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
@@ -30,6 +31,7 @@ class Context {
 	public static var layer: LayerSlot;
 	public static var layerIsMask = false; // Mask selected for active layer
 	public static var brush: BrushSlot;
+	public static var font: FontSlot;
 	public static var texture: TAsset = null;
 	public static var object: Object;
 	public static var paintObject: MeshObject;
@@ -116,7 +118,6 @@ class Context {
 
 	public static var textToolImage: Image = null;
 	public static var textToolText: String;
-	public static var textToolHandle = new Handle();
 	public static var particleMaterial: MaterialData = null;
 
 	public static var layerFilter = 0;
@@ -282,6 +283,20 @@ class Context {
 		Context.parseBrushInputs();
 		UISidebar.inst.hwnd1.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
+	}
+
+	public static function selectFont(i: Int) {
+		if (Project.fonts.length <= i) return;
+		setFont(Project.fonts[i]);
+	}
+
+	public static function setFont(f: FontSlot) {
+		if (Project.fonts.indexOf(f) == -1) return;
+		font = f;
+		RenderUtil.makeTextPreview();
+		RenderUtil.makeDecalPreview();
+		UISidebar.inst.hwnd2.redraws = 2;
+		UIView2D.inst.hwnd.redraws = 2;
 	}
 
 	public static function setLayer(l: LayerSlot, isMask = false) {

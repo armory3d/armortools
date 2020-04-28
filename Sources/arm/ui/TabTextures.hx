@@ -23,7 +23,7 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(1);
+			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DAsset);
 
 			if (Project.assets.length > 0) {
 
@@ -56,7 +56,7 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.texture = asset;
 
-							if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(1);
+							if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DAsset);
 							Context.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
 						}

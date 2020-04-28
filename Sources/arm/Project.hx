@@ -20,6 +20,7 @@ import arm.ui.UIBox;
 import arm.ui.UINodes;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
+import arm.data.FontSlot;
 import arm.data.MaterialSlot;
 import arm.node.MaterialParser;
 import arm.io.ImportAsset;
@@ -43,6 +44,7 @@ class Project {
 	public static var materialsScene: Array<MaterialSlot> = null;
 	public static var brushes: Array<BrushSlot> = null;
 	public static var layers: Array<LayerSlot> = null;
+	public static var fonts: Array<FontSlot> = null;
 	public static var paintObjects: Array<MeshObject> = null;
 	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
 	#if arm_world
@@ -209,6 +211,8 @@ class Project {
 			Context.material = materials[0];
 			brushes = [new BrushSlot()];
 			Context.brush = brushes[0];
+			fonts = [new FontSlot("default.ttf", App.font)];
+			Context.font = fonts[0];
 
 			History.reset();
 
