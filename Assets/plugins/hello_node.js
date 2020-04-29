@@ -51,7 +51,7 @@ arm.Material.customNodes.set(nodeType, function(node) {
 	let scale = arm.Material.parse_value_input(node.inputs[0]);
 
 	frag.write(`
-		float my_out = cos(sin(texCoord.x * 200 * ${scale}) + cos(texCoord.y * 200 * ${scale}));
+		float my_out = cos(sin(texCoord.x * 200.0 * ${scale}) + cos(texCoord.y * 200.0 * ${scale}));
 	`);
 	return `vec3(my_out, my_out, my_out)`;
 });
