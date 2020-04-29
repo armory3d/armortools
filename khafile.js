@@ -23,7 +23,7 @@ project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
 
-if (!android && !ios) {
+if (!android) {
 	project.addDefine("arm_data_dir");
 }
 
