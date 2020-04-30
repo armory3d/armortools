@@ -169,15 +169,15 @@ class App {
 						}
 						if (Path.isMesh(currentArg)) meshPath = currentArg;
 						if (currentArg == "--reload-mesh") reloadMesh = true;
-						if (currentArg == "--export-textures" && v+3 <= Krom.getArgCount()) {
+						if (currentArg == "--export-textures" && (v + 3) <= Krom.getArgCount()) {
 							exportTextures = true;
-							exportTexturesType = Krom.getArg(v+1);
-							exportTexturesPreset = Krom.getArg(v+2);
-							exportTexturesPath = Krom.getArg(v+3);
+							exportTexturesType = Krom.getArg(v + 1);
+							exportTexturesPreset = Krom.getArg(v + 2);
+							exportTexturesPath = Krom.getArg(v + 3);
 						}
-						if (currentArg == "--export-mesh" && v+1 <= Krom.getArgCount()) {
+						if (currentArg == "--export-mesh" && (v + 1) <= Krom.getArgCount()) {
 							exportMesh = true;
-							exportMeshPath = Krom.getArg(v+1);
+							exportMeshPath = Krom.getArg(v + 1);
 						}
 						if (currentArg == "--b" || currentArg == "--background") backgroundProcessing = true;
 					}
@@ -204,30 +204,30 @@ class App {
 				#end
 
 				// Open file passed as argument
-				if(useArgs) {
+				if (useArgs) {
 					iron.App.notifyOnInit(function() {
-							if(projectPath != "") ImportAsset.run(projectPath, -1, -1, false);
-							if(meshPath != "") ImportAsset.run(meshPath, -1, -1, false);
-							if(reloadMesh) Project.reimportMesh();
-							if(exportTextures) {
-								if(exportTexturesType == "png" ||
+							if (projectPath != "") ImportAsset.run(projectPath, -1, -1, false);
+							if (meshPath != "") ImportAsset.run(meshPath, -1, -1, false);
+							if (reloadMesh) Project.reimportMesh();
+							if (exportTextures) {
+								if (exportTexturesType == "png" ||
 									exportTexturesType == "jpg"||
 									exportTexturesType == "exr16"||
 									exportTexturesType == "exr32") {
-									if(Path.isFolder(exportTexturesPath)) {
+									if (Path.isFolder(exportTexturesPath)) {
 										//Applying the correct format type from args
-										if(exportTexturesType == "png") {
+										if (exportTexturesType == "png") {
 											App.bitsHandle.position = Bits8;
 											Context.formatType = FormatPng;
 										}
-										if(exportTexturesType == "jpg") {
+										if (exportTexturesType == "jpg") {
 											App.bitsHandle.position = Bits8;
 											Context.formatType = FormatJpg;
 										}
-										if(exportTexturesType == "exr16") {
+										if (exportTexturesType == "exr16") {
 											App.bitsHandle.position = Bits16;
 										}
-										if(exportTexturesType == "exr32") {
+										if (exportTexturesType == "exr32") {
 											App.bitsHandle.position = Bits32;
 										}
 
@@ -255,25 +255,28 @@ class App {
 											iron.App.removeRender(export);
 										}
 										iron.App.notifyOnRender(export);
-										trace("Export Texures: done!");
-									} else {
-										trace("Export Textures: export directory invalid!");
+										trace("Export Textures: done");
 									}
-								} else {
-									trace("Export Texture: type invalid!");
+									else {
+										trace("Export Textures: export directory invalid");
+									}
+								}
+								else {
+									trace("Export Textures: type invalid");
 								}
 							}
-							if(exportMesh) {
-								if(Path.isFolder(exportMeshPath)) {
+							if (exportMesh) {
+								if (Path.isFolder(exportMeshPath)) {
 									var f = UIFiles.filename;
 									if (f == "") f = tr("untitled");
 									ExportMesh.run(exportMeshPath + Path.sep + f, false);
-									trace("Export Mesh: done!");
-								} else {
-									trace("Export Mesh: export directory invalid!");
+									trace("Export Mesh: done");
+								}
+								else {
+									trace("Export Mesh: export directory invalid");
 								}
 							}
-							if(backgroundProcessing) System.stop();
+							if (backgroundProcessing) System.stop();
 						});
 				}
 
