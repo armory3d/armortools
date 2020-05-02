@@ -1,8 +1,8 @@
 
 let debug = false;
-let android = false; // Temp
-let ios = false; // Temp
-let win_hlsl = true; // GraphicsApi.Direct3D11 && GraphicsApi.Direct3D12
+let android = process.argv.indexOf("android") >= 0;
+let ios = process.argv.indexOf("ios") >= 0;
+let win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
 let raytrace = process.argv.indexOf("direct3d12") >= 0;
 let build = "painter"; // painter || creator || player
 
