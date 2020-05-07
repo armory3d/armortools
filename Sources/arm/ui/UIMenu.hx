@@ -344,7 +344,15 @@ class UIMenu {
 					}
 				}
 				if (ui.button("      " + tr("About..."), Left)) {
-					var gapi = #if (kha_direct3d11) "Direct3D11" #elseif (kha_direct3d12) "Direct3D12" #else "OpenGL" #end;
+					#if kha_direct3d11
+					var gapi = "Direct3D11";
+					#elseif kha_direct3d12
+					var gapi = "Direct3D12";
+					#elseif kha_metal
+					var gapi = "Metal";
+					#else
+					var gapi = "OpenGL";
+					#end
 					var msg = "ArmorPaint.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
 					msg += System.systemId + " - " + gapi;
 
