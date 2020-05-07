@@ -480,6 +480,57 @@ class MaterialShader {
 		}
 		s += '}\n';
 
+		#elseif kha_metal
+
+		var s = '\n';
+
+		s += '#include <metal_stdlib>\n';
+		s += '#include <simd/simd.h>\n';
+		s += 'using namespace metal;\n';
+
+		s += 'struct main_uniforms {\n';
+		s += 'float3 eye;\n';
+		s += '};\n';
+
+		s += 'struct main_in {\n';
+		if (shader_type == 'vert') {
+			s += 'float2 pos [[attribute(0)]];\n';
+			s += 'float4 nor [[attribute(1)]];\n';
+			s += 'float2 tex [[attribute(2)]];\n';
+		}
+		else {
+			s += 'float2 texCoord [[user(locn0)]];\n';
+		}
+		s += '};\n';
+
+		s += 'struct main_out {\n';
+
+		if (shader_type == 'vert') {
+			s += 'float2 texCoord [[user(locn0)]];\n';
+			s += 'float4 gl_Position [[position]];\n';
+		}
+		else {
+			s += 'float4 fragColor [[color(0)]];\n';
+		}
+
+		s += '};\n';
+
+		s += shader_type == 'vert' ? 'vertex ' : 'fragment ';
+		s += 'main_out my_main(main_in in [[stage_in]], constant main_uniforms& uniforms [[buffer(1)]]) {\n';
+		s += '     main_out out = {};\n';
+
+		if (shader_type == 'vert') {
+			s += '     out.texCoord = in.tex + in.nor.x * 0.00001;\n';
+			s += '     out.gl_Position = float4(in.pos, 0.0, 1.0);\n';
+			s += '     out.gl_Position.z = (out.gl_Position.z + out.gl_Position.w) * 0.5;\n';
+		}
+		else {
+			s += '     out.fragColor = float4(1.0);\n';
+		}
+
+		s += '     return out;\n';
+		s += '}\n';
+
 		#else // kha_opengl
 
 		#if (kha_webgl || krom_android || krom_ios)
