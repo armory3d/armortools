@@ -44,7 +44,7 @@ uniform vec3 eyeSnap;
 
 uniform float envmapStrength;
 #ifdef _Irr
-//!uniform vec4 shirr[7];
+uniform vec4 shirr[7];
 #endif
 #ifdef _Brdf
 uniform sampler2D senvmapBrdf;
@@ -203,7 +203,7 @@ void main() {
 
 	// Envmap
 #ifdef _Irr
-	vec3 envl = shIrradiance(n);
+	vec3 envl = shIrradiance(n, shirr);
 	#ifdef _EnvTex
 	envl /= PI;
 	#endif
