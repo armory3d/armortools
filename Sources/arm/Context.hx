@@ -101,7 +101,7 @@ class Context {
 	public static var decalImage: Image = null;
 	public static var decalPreview = false;
 	public static var viewportMode = ViewLit;
-	#if (krom_android || krom_ios)
+	#if (krom_android || krom_ios || krom_darwin)
 	public static var renderMode = RenderForward;
 	#else
 	public static var renderMode = RenderDeferred;

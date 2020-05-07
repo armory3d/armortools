@@ -10,6 +10,11 @@ let project = new Project("ArmorPaint");
 project.addSources("Sources");
 project.addLibrary("iron");
 project.addLibrary("zui");
+project.addLibrary("syslib");
+project.addLibrary("formatlib");
+project.addLibrary("geomlib");
+project.addLibrary("nodelib");
+project.addLibrary("shaderlib");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
 project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
 project.addAssets("Assets/fonts/*", { notinlist: true, destination: "data/{name}" });
@@ -59,7 +64,8 @@ else {
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
 
 if (raytrace) {
-	project.addAssets("Assets/raytrace/*", { notinlist: true, destination: "data/{name}" });
+	project.addLibrary("xenon");
+	project.addAssets("Libraries/xenon/Assets/*", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Shaders/raytrace/*.cso", { notinlist: true, destination: "data/{name}" });
 	project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 }

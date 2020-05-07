@@ -1,0 +1,3 @@
+# geomlib
+
+Procedural geometry generator.
