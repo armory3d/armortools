@@ -22,7 +22,10 @@ out vec2 texCoord;
 // }
 vec3 getPos(vec2 uv) {
 	#ifdef HLSL
-	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r + pos.x + nor.x; // direct3d12 unit align
+	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
+	#endif
+	#if defined(HLSL) || defined(METAL)
+	float keep2 = pos.x + nor.x;
 	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
 	#else
 	float depth = textureLod(gbufferD, uv, 0.0).r;
