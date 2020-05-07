@@ -124,12 +124,6 @@ else { // painter, creator
 
 	project.addAssets("Assets/painter/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 	project.addAssets("Assets/painter/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
-	if (process.platform === "win32" && win_hlsl && !android && !ios) {
-		project.addShaders("Shaders/painter/hlsl/*.glsl", { noprocessing: true, noembed: false });
-	}
-	else {
-		project.addShaders("Shaders/painter/glsl/*.glsl", { noembed: false });
-	}
 }
 
 if (build === "painter") {
