@@ -45,7 +45,7 @@ node Kinc/make -g opengl
 # Android - wip
 node Kromx/make android -g opengl --shaderversion 300
 cd Kromx
-node Kinc/make android -g opengl --noshaders
+node Kinc/make android -g opengl
 # Manual tweaking is required for now:
 # https://github.com/armory3d/Kromx/blob/master/kincfile.js#L68
 # Open generated Android Studio project
@@ -55,7 +55,7 @@ node Kinc/make android -g opengl --noshaders
 # iOS - wip
 node Kromx/make ios -g opengl --shaderversion 300
 cd Kromx
-node Kinc/make ios -g opengl --noshaders
+node Kinc/make ios -g opengl
 # Manual tweaking is required for now:
 # https://github.com/armory3d/Kromx/blob/master/kincfile.js#L84
 # Open generated Xcode project
