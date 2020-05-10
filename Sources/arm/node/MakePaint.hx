@@ -18,7 +18,9 @@ class MakePaint {
 			compare_mode: "always", // TODO: align texcoords winding order
 			// cull_mode: "counter_clockwise",
 			cull_mode: "none",
-			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}]
+			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
+			color_attachment_count: 4,
+			color_attachment: "RGBA32"
 		});
 
 		con_paint.data.color_writes_red = [true, true, true, true];

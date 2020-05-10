@@ -13,7 +13,10 @@ class MakeMesh {
 			depth_write: true,
 			compare_mode: "less",
 			cull_mode: Context.cullBackfaces ? "clockwise" : "none",
-			vertex_elements: [{name: "pos", data: "short4norm"},{name: "nor", data: "short2norm"},{name: "tex", data: "short2norm"}] });
+			vertex_elements: [{name: "pos", data: "short4norm"},{name: "nor", data: "short2norm"},{name: "tex", data: "short2norm"}],
+			color_attachment_count: 3,
+			color_attachment: "RGBA64"
+		});
 
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();

@@ -42,7 +42,9 @@ class MaterialShaderContext {
 			alpha_blend_operation: props.alpha_blend_operation,
 			fragment_shader: '',
 			vertex_shader: '',
-			vertex_elements: Reflect.hasField(props, 'vertex_elements') ? props.vertex_elements : [ {name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}]
+			vertex_elements: Reflect.hasField(props, 'vertex_elements') ? props.vertex_elements : [ {name: "pos", data: 'short4norm'}, {name: "nor", data: 'short2norm'}],
+			color_attachment_count: props.color_attachment_count,
+			color_attachment: props.color_attachment
 		};
 
 		if (props.color_writes_red != null)
