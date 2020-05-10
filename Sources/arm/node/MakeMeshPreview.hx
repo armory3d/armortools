@@ -21,8 +21,7 @@ class MakeMeshPreview {
 			compare_mode: "less",
 			cull_mode: (Context.cullBackfaces || !isScene) ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
-			color_attachment_count: 3,
-			color_attachment: "RGBA64"
+			color_attachments: ["RGBA64", "RGBA64", "RGBA64"]
 		});
 
 		var vert = con_mesh.make_vert();
