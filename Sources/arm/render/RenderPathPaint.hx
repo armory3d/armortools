@@ -623,8 +623,16 @@ class RenderPathPaint {
 
 		if (Context.brushBlendDirty) {
 			Context.brushBlendDirty = false;
+			#if kha_metal
+			path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth8_pass";
+			path.setTarget("texpaint_blend0");
+			path.clearTarget(0x00000000);
+			path.setTarget("texpaint_blend1");
+			path.clearTarget(0x00000000);
+			#else
 			path.setTarget("texpaint_blend0", ["texpaint_blend1"]);
 			path.clearTarget(0x00000000);
+			#end
 		}
 
 		if (Context.paint2d) {

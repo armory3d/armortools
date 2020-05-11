@@ -22,6 +22,16 @@ class RenderPathDeferred {
 	public static function init(_path: RenderPath) {
 
 		path = _path;
+
+		#if kha_metal
+		{
+			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth8_pass");
+			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass");
+			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass");
+			path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass";
+		}
+		#end
+
 		path.createDepthBuffer("main", "DEPTH24");
 
 		{
@@ -530,6 +540,9 @@ class RenderPathDeferred {
 		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
 
+		#if kha_metal
+		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass";
+		#end
 		path.setTarget(current);
 		path.clearTarget(0x00000000);
 		path.bindTarget("buf", "colorTex");
@@ -579,6 +592,9 @@ class RenderPathDeferred {
 	}
 
 	public static function drawGbuffer() {
+		#if kha_metal
+		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass";
+		#end
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		path.clearTarget(null, 1.0);
 		path.setTarget("gbuffer2");

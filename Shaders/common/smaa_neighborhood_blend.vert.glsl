@@ -7,7 +7,7 @@ uniform vec2 screenSizeInv;
 out vec2 texCoord;
 out vec4 offset;
 
-#ifdef HLSL
+#if defined(HLSL) || defined(METAL)
 #define V_DIR(v) -(v)
 #else
 #define V_DIR(v) v
@@ -17,7 +17,7 @@ void main() {
 	// Scale vertex attribute to [0-1] range
 	const vec2 madd = vec2(0.5, 0.5);
 	texCoord = pos.xy * madd + madd;
-	#ifdef HLSL
+	#if defined(HLSL) || defined(METAL)
 	texCoord.y = 1.0 - texCoord.y;
 	#endif
 

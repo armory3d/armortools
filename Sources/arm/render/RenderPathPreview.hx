@@ -83,14 +83,21 @@ class RenderPathPreview {
 	}
 
 	public static function commandsPreview() {
+		#if kha_metal
+		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass";
+		#end
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
-		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
+
 		#if arm_world
-		path.clearTarget(0xffffffff, 1.0);
+		var clearColor = 0xffffffff;
 		#else
-		path.clearTarget(null, 1.0);
+		var clearColor: Null<Int> = null;
 		#end
+
+		path.setTarget("mgbuffer0");
+		path.clearTarget(clearColor, 1.0);
+		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
 		path.drawMeshes("mesh");
 
 		// ---

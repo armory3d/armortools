@@ -33,7 +33,7 @@ out vec4 fragColor;
 vec2 cdw_end;
 
 vec4 textureLodA(sampler2D tex, vec2 coord, float lod) {
-	#ifdef HLSL
+	#if defined(HLSL) || defined(METAL)
 	coord.y = 1.0 - coord.y;
 	#endif
 	return textureLod(tex, coord, lod);

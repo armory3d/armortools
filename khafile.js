@@ -4,6 +4,7 @@ let android = process.argv.indexOf("android") >= 0;
 let ios = process.argv.indexOf("ios") >= 0;
 let win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
 let raytrace = process.argv.indexOf("direct3d12") >= 0;
+let metal = process.argv.indexOf("metal") >= 0;
 let build = "painter"; // painter || creator || player
 
 let project = new Project("ArmorPaint");
@@ -129,6 +130,10 @@ else { // painter, creator
 if (build === "painter") {
 	project.addShaders("Shaders/painter/*.glsl", { noembed: false});
 	project.addAssets("Assets/painter/*", { notinlist: true, destination: "data/{name}" });
+	if (metal) {
+		project.addShaders("Shaders/painter/metal/*.glsl", { noembed: false});
+		project.addAssets("Assets/painter/metal/*", { notinlist: true, destination: "data/{name}" });
+	}
 	project.addDefine("kha_no_ogg");
 	project.addDefine("arm_ltc");
 }

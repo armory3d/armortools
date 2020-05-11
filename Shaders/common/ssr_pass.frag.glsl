@@ -31,7 +31,7 @@ vec2 getProjectedCoord(const vec3 hit) {
 	vec4 projectedCoord = P * vec4(hit, 1.0);
 	projectedCoord.xy /= projectedCoord.w;
 	projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-	#ifdef HLSL
+	#if defined(HLSL) || defined(METAL)
 	projectedCoord.y = 1.0 - projectedCoord.y;
 	#endif
 	return projectedCoord.xy;

@@ -35,7 +35,7 @@ vec3 getPosNoEye(const vec3 eyeLook, const vec3 viewRay, const float depth, cons
 	return wposition;
 }
 
-#ifdef HLSL
+#if defined(HLSL) || defined(METAL)
 vec3 getPos2(const mat4 invVP, const float depth, vec2 coord) {
 	coord.y = 1.0 - coord.y;
 #else
@@ -47,7 +47,7 @@ vec3 getPos2(const mat4 invVP, const float depth, const vec2 coord) {
 	return pos.xyz;
 }
 
-#ifdef HLSL
+#if defined(HLSL) || defined(METAL)
 vec3 getPosView2(const mat4 invP, const float depth, vec2 coord) {
 	coord.y = 1.0 - coord.y;
 #else
@@ -59,7 +59,7 @@ vec3 getPosView2(const mat4 invP, const float depth, const vec2 coord) {
 	return pos.xyz;
 }
 
-#ifdef HLSL
+#if defined(HLSL) || defined(METAL)
 vec3 getPos2NoEye(const vec3 eye, const mat4 invVP, const float depth, vec2 coord) {
 	coord.y = 1.0 - coord.y;
 #else

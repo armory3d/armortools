@@ -21,7 +21,7 @@ void main() {
 	// Velocity is assumed to be calculated for motion blur, so we need to inverse it for reprojection
 	vec2 velocity = -textureLod(sveloc, texCoord, 0.0).rg;
 
-	#ifdef HLSL
+	#if defined(HLSL) || defined(METAL)
 	velocity.y = -velocity.y;
 	#endif
 
