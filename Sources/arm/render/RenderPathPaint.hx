@@ -197,7 +197,7 @@ class RenderPathPaint {
 
 				path.setTarget("texpaint_blend1");
 				path.bindTarget("texpaint_blend0", "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.drawShader("shader_datas/copy_pass/copyR8_pass");
 
 				var isMask = Context.layerIsMask;
 				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;

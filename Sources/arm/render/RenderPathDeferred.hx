@@ -134,6 +134,7 @@ class RenderPathDeferred {
 		path.loadShader("deferred_light/deferred_light/deferred_light");
 		path.loadShader("shader_datas/compositor_pass/compositor_pass");
 		path.loadShader("shader_datas/copy_pass/copy_pass");
+		path.loadShader("shader_datas/copy_pass/copyR8_pass");
 		path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 		path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 		path.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");

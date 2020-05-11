@@ -418,7 +418,7 @@ class History {
 		if (isMask) {
 			path.setTarget("texpaint_mask_undo" + toId);
 			path.bindTarget("texpaint_mask" + fromId, "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
+			path.drawShader("shader_datas/copy_pass/copyR8_pass");
 		}
 		else {
 			path.setTarget("texpaint_undo" + toId, ["texpaint_nor_undo" + toId, "texpaint_pack_undo" + toId]);
