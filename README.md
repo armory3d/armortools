@@ -34,9 +34,9 @@ strip Krom
 ```bash
 # macOS
 node Kromx/make -g opengl
+cp -a build/krom/ Kromx/Deployment
 cd Kromx
 node Kinc/make -g opengl
-# Copy contents of `path/to/armorpaint/build/krom` to `path/to/armorpaint/Kromx/Deployment`
 # Open generated Xcode project
 # Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Build
