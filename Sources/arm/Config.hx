@@ -83,11 +83,7 @@ class Config {
 			raw.pressure_angle = false;
 			raw.pressure_opacity = false;
 			raw.pressure_sensitivity = 1.0;
-			#if kha_metal
-			raw.brush_3d = false;
-			#else
 			raw.brush_3d = true;
-			#end
 			raw.brush_live = false;
 			#end
 		}
