@@ -4,30 +4,30 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 
 class MaterialShaderData {
-	var material:TMaterial;
+	var material: TMaterial;
 
-	public function new(material:TMaterial) {
+	public function new(material: TMaterial) {
 		this.material = material;
 	}
 
-	public function add_context(props:Dynamic):MaterialShaderContext {
+	public function add_context(props: Dynamic): MaterialShaderContext {
 		return new MaterialShaderContext(material, props);
 	}
 }
 
 class MaterialShaderContext {
-	public var vert:MaterialShader;
-	public var frag:MaterialShader;
-	public var geom:MaterialShader;
-	public var tesc:MaterialShader;
-	public var tese:MaterialShader;
-	public var data:TShaderContext;
+	public var vert: MaterialShader;
+	public var frag: MaterialShader;
+	public var geom: MaterialShader;
+	public var tesc: MaterialShader;
+	public var tese: MaterialShader;
+	public var data: TShaderContext;
 	public var allow_vcols = false;
-	var material:TMaterial;
-	var constants:Array<TShaderConstant>;
-	var tunits:Array<TTextureUnit>;
+	var material: TMaterial;
+	var constants: Array<TShaderConstant>;
+	var tunits: Array<TTextureUnit>;
 
-	public function new(material:TMaterial, props:Dynamic) {
+	public function new(material: TMaterial, props: Dynamic) {
 		this.material = material;
 		data = {
 			name: props.name,
@@ -59,22 +59,22 @@ class MaterialShaderContext {
 		constants = data.constants = [];
 	}
 
-	public function add_elem(name:String, data_type:String) {
+	public function add_elem(name: String, data_type: String) {
 		for (e in data.vertex_elements) {
 			if (e.name == name) return;
 		}
-		var elem:TVertexElement = { name: name, data: data_type };
+		var elem: TVertexElement = { name: name, data: data_type };
 		data.vertex_elements.push(elem);
 	}
 
-	public function is_elem(name:String):Bool {
+	public function is_elem(name: String): Bool {
 		for (elem in data.vertex_elements)
 			if (elem.name == name)
 				return true;
 		return false;
 	}
 
-	public function get_elem(name:String):TVertexElement {
+	public function get_elem(name: String): TVertexElement {
 		for (elem in data.vertex_elements) {
 			#if cpp
 			if (Reflect.field(elem, "name") == name)
@@ -87,7 +87,7 @@ class MaterialShaderContext {
 		return null;
 	}
 
-	public function add_constant(ctype:String, name:String, link:String = null) {
+	public function add_constant(ctype: String, name: String, link: String = null) {
 		for (c in constants)
 			if (c.name == name)
 				return;
@@ -98,26 +98,30 @@ class MaterialShaderContext {
 		constants.push(c);
 	}
 
-	public function add_texture_unit(ctype:String, name:String, link:String = null, is_image = false) {
-		for (c in tunits)
-			if (c.name == name)
+	public function add_texture_unit(ctype: String, name: String, link: String = null, is_image = false) {
+		for (c in tunits) {
+			if (c.name == name) {
 				return;
+			}
+		}
 
-		var c:TTextureUnit = { name: name };
-		if (link != null)
+		var c: TTextureUnit = { name: name };
+		if (link != null) {
 			c.link = link;
-		if (is_image)
+		}
+		if (is_image) {
 			c.is_image = is_image;
+		}
 		tunits.push(c);
 	}
 
-	public function make_vert():MaterialShader {
+	public function make_vert(): MaterialShader {
 		data.vertex_shader = material.name + '_' + data.name + '.vert';
 		vert = new MaterialShader(this, 'vert');
 		return vert;
 	}
 
-	public function make_frag():MaterialShader {
+	public function make_frag(): MaterialShader {
 		data.fragment_shader = material.name + '_' + data.name + '.frag';
 		frag = new MaterialShader(this, 'frag');
 		return frag;
@@ -126,13 +130,13 @@ class MaterialShaderContext {
 
 class MaterialShader {
 
-	public var context:MaterialShaderContext;
+	public var context: MaterialShaderContext;
 	var shader_type = '';
-	var includes:Array<String> = [];
-	public var ins:Array<String> = [];
-	public var outs:Array<String> = [];
-	public var sharedSamplers:Array<String> = [];
-	var uniforms:Array<String> = [];
+	var includes: Array<String> = [];
+	public var ins: Array<String> = [];
+	public var outs: Array<String> = [];
+	public var sharedSamplers: Array<String> = [];
+	var uniforms: Array<String> = [];
 	var functions = new Map<String, String>();
 	public var main = '';
 	public var main_init = '';
@@ -162,24 +166,24 @@ class MaterialShader {
 	public var dotNV = false;
 	public var invTBN = false;
 
-	public function new(context:MaterialShaderContext, shader_type:String) {
+	public function new(context: MaterialShaderContext, shader_type: String) {
 		this.context = context;
 		this.shader_type = shader_type;
 	}
 
-	public function add_include(s:String) {
+	public function add_include(s: String) {
 		includes.push(s);
 	}
 
-	public function add_in(s:String) {
+	public function add_in(s: String) {
 		ins.push(s);
 	}
 
-	public function add_out(s:String) {
+	public function add_out(s: String) {
 		outs.push(s);
 	}
 
-	public function add_uniform(s:String, link:String = null, included = false) {
+	public function add_uniform(s: String, link: String = null, included = false) {
 		var ar = s.split(' ');
 		// layout(RGBA8) image3D voxels
 		var utype = ar[ar.length - 2];
@@ -205,7 +209,7 @@ class MaterialShader {
 		}
 	}
 
-	public function add_shared_sampler(s:String) {
+	public function add_shared_sampler(s: String) {
 		if (sharedSamplers.indexOf(s) == -1) {
 			sharedSamplers.push(s);
 			var ar = s.split(' ');
@@ -216,13 +220,13 @@ class MaterialShader {
 		}
 	}
 
-	public function add_function(s:String) {
+	public function add_function(s: String) {
 		var fname = s.split('(')[0];
 		if (functions.exists(fname)) return;
 		functions.set(fname, s);
 	}
 
-	public function contains(s:String):Bool {
+	public function contains(s: String): Bool {
 		return main.indexOf(s) >= 0 ||
 			   main_init.indexOf(s) >= 0 ||
 			   main_normal.indexOf(s) >= 0 ||
@@ -231,11 +235,11 @@ class MaterialShader {
 			   main_attribs.indexOf(s) >= 0;
 	}
 
-	public function write_init(s:String) {
+	public function write_init(s: String) {
 		main_init = s + '\n' + main_init;
 	}
 
-	public function write(s:String) {
+	public function write(s: String) {
 		if (lock) return;
 		if (write_textures > 0) {
 			main_textures += s + '\n';
@@ -251,19 +255,19 @@ class MaterialShader {
 		}
 	}
 
-	public function write_header(s:String) {
+	public function write_header(s: String) {
 		header += s + '\n';
 	}
 
-	public function write_end(s:String) {
+	public function write_end(s: String) {
 		main_end += s + '\n';
 	}
 
-	public function write_attrib(s:String) {
+	public function write_attrib(s: String) {
 		main_attribs += s + '\n';
 	}
 
-	function dataSize(data:String):String {
+	function dataSize(data: String): String {
 		if (data == 'float1') return '1';
 		else if (data == 'float2') return '2';
 		else if (data == 'float3') return '3';
@@ -282,7 +286,7 @@ class MaterialShader {
 		}
 	}
 
-	public function get():String {
+	public function get(): String {
 
 		if (shader_type == 'vert' && vstruct_as_vsin) {
 			vstruct_to_vsin();
@@ -336,7 +340,7 @@ class MaterialShader {
 		if (ins.length > 0) {
 			s += 'struct SPIRV_Cross_Input {\n';
 			index = 0;
-			ins.sort(function(a, b):Int {
+			ins.sort(function(a, b): Int {
 				// Sort inputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
@@ -360,7 +364,7 @@ class MaterialShader {
 		var num = 0;
 		if (outs.length > 0 || shader_type == 'vert') {
 			s += 'struct SPIRV_Cross_Output {\n';
-			outs.sort(function(a, b):Int {
+			outs.sort(function(a, b): Int {
 				// Sort outputs by name
 				return a.substring(4) >= b.substring(4) ? 1 : -1;
 			});
@@ -483,53 +487,226 @@ class MaterialShader {
 
 		#elseif kha_metal
 
-		var s = '\n';
-
+		var s = '#define METAL\n';
 		s += '#include <metal_stdlib>\n';
 		s += '#include <simd/simd.h>\n';
 		s += 'using namespace metal;\n';
 
-		s += 'struct main_uniforms {\n';
-		s += 'float3 eye;\n';
-		s += '};\n';
+		s += '#define sampler2D texture2d<float>\n';
+		s += '#define sampler3D texture3d<float>\n';
+		s += '#define texture(tex, coord) tex.sample(tex ## _sampler, coord)\n';
+		s += '#define textureShared(tex, coord) tex.sample($sharedSampler, coord)\n';
+		s += '#define textureLod(tex, coord, lod) tex.sample(tex ## _sampler, coord, level(lod))\n';
+		s += '#define textureLodShared(tex, coord, lod) tex.sample($sharedSampler, coord, level(lod))\n';
+		s += '#define texelFetch(tex, coord, lod) tex.read(float3(coord.xy, level(lod)))\n';
+		s += 'uint2 _getDimensions(texture2d<float> tex, uint lod) { return uint2(tex.get_width(lod), tex.get_height(lod)); }\n';
+		s += '#define textureSize _getDimensions\n';
+		s += '#define mod(a, b) (a % b)\n';
+		s += '#define vec2 float2\n';
+		s += '#define vec3 float3\n';
+		s += '#define vec4 float4\n';
+		s += '#define ivec2 int2\n';
+		s += '#define ivec3 int3\n';
+		s += '#define ivec4 int4\n';
+		s += '#define mat2 float2x2\n';
+		s += '#define mat3 float3x3\n';
+		s += '#define mat4 float4x4\n';
+		s += '#define dFdx dfdx\n';
+		s += '#define dFdy dfdy\n';
+		s += '#define inversesqrt rsqrt\n';
+		s += '#define atan(x, y) atan2(y, x)\n';
+		s += '#define mul(a, b) b * a\n';
+		s += '#define discard discard_fragment()\n';
 
-		s += 'struct main_in {\n';
-		if (shader_type == 'vert') {
-			s += 'float2 pos [[attribute(0)]];\n';
-			s += 'float4 nor [[attribute(1)]];\n';
-			s += 'float2 tex [[attribute(2)]];\n';
-		}
-		else {
-			s += 'float2 texCoord [[user(locn0)]];\n';
-		}
-		s += '};\n';
-
-		s += 'struct main_out {\n';
-
-		if (shader_type == 'vert') {
-			s += 'float2 texCoord [[user(locn0)]];\n';
-			s += 'float4 gl_Position [[position]];\n';
-		}
-		else {
-			s += 'float4 fragColor [[color(0)]];\n';
+		for (a in includes) {
+			s += '#include "' + a + '"\n';
 		}
 
-		s += '};\n';
+		s += header;
+
+		// Input structure
+		var index = 0;
+		if (ins.length > 0) {
+			s += 'struct main_in {\n';
+			index = 0;
+			ins.sort(function(a, b): Int {
+				// Sort inputs by name
+				return a.substring(4) >= b.substring(4) ? 1 : -1;
+			});
+			if (shader_type == 'vert') {
+				for (a in ins) {
+					s += '$a [[attribute($index)]];\n';
+					index++;
+				}
+			}
+			else {
+				for (a in ins) {
+					s += '$a [[user(locn$index)]];\n';
+					index++;
+				}
+			}
+			// Built-ins
+			if (shader_type == 'vert' && main.indexOf("gl_VertexID") >= 0) {
+				s += 'uint gl_VertexID [[vertex_id]];\n';
+				ins.push('uint gl_VertexID');
+			}
+			if (shader_type == 'vert' && main.indexOf("gl_InstanceID") >= 0) {
+				s += 'uint gl_InstanceID [[instance_id]];\n';
+				ins.push('uint gl_InstanceID');
+			}
+			s += '};\n';
+		}
+
+		// Output structure
+		var num = 0;
+		if (outs.length > 0 || shader_type == 'vert') {
+			s += 'struct main_out {\n';
+			outs.sort(function(a, b): Int {
+				// Sort outputs by name
+				return a.substring(4) >= b.substring(4) ? 1 : -1;
+			});
+			index = 0;
+			if (shader_type == 'vert') {
+				for (a in outs) {
+					s += '$a [[user(locn$index)]];\n';
+					index++;
+				}
+				s += 'float4 svpos [[position]];\n';
+			}
+			else {
+				var out = outs[0];
+				// Multiple render targets
+				if (out.charAt(out.length - 1) == ']') {
+					num = Std.parseInt(out.charAt(out.length - 2));
+					for (i in 0...num) {
+						s += 'float4 fragColor_$i [[color($i)]];\n';
+					}
+				}
+				else {
+					s += 'float4 fragColor [[color(0)]];\n';
+				}
+			}
+			s += '};\n';
+		}
+
+		var samplers: Array<String> = [];
+
+		if (uniforms.length > 0) {
+			s += 'struct main_uniforms {\n';
+
+			for (a in uniforms) {
+				if (StringTools.startsWith(a, 'sampler')) {
+					samplers.push(a);
+				}
+				else {
+					s += a + ';\n';
+				}
+			}
+
+			s += '};\n';
+		}
+
+		for (f in functions) {
+			s += f + '\n';
+		}
+
+		// Begin main
+		s += '#undef texture\n';
 
 		s += shader_type == 'vert' ? 'vertex ' : 'fragment ';
-		s += 'main_out my_main(main_in in [[stage_in]], constant main_uniforms& uniforms [[buffer(1)]]) {\n';
-		s += '     main_out out = {};\n';
+		s += outs.length > 0 ? 'main_out ' : 'void ';
+		s += 'my_main(';
+		if (ins.length > 0) {
+			s += 'main_in in [[stage_in]]';
+		}
+		if (uniforms.length > 0) {
+			var bufi = shader_type == 'vert' ? 1 : 0;
+			s += ', constant main_uniforms& uniforms [[buffer($bufi)]]';
+		}
+
+		if (samplers.length > 0) {
+			for (i in 0...samplers.length) {
+				s += ', ${samplers[i]} [[texture($i)]]';
+				s += ', sampler ' + samplers[i].split(' ')[1] + '_sampler [[sampler($i)]]';
+			}
+		}
+
+		if (sharedSamplers.length > 0) {
+			for (i in 0...sharedSamplers.length) {
+				var index = samplers.length + i;
+				s += ', ${sharedSamplers[i]} [[texture($index)]]';
+				s += ', sampler ' + sharedSamplers[i].split(' ')[1] + '_sampler [[sampler($index)]]';
+			}
+		}
+		//if (sharedSamplers.length > 0) {
+		//	for (i in 0...sharedSamplers.length) {
+		//		var index = samplers.length + i;
+		//		s += ', ${sharedSamplers[i]} [[texture($index)]]';
+		//	}
+		//	s += ', sampler $sharedSampler [[sampler(${samplers.length})]]';
+		//}
+
+		s += ') {\n';
+		s += '#define texture(tex, coord) tex.sample(tex ## _sampler, coord)\n';
+
+		// Declare inputs
+		for (a in ins) {
+			var b = a.substring(5); // Remove type 'vec4 '
+			s += '$a = in.$b;\n';
+		}
+
+		for (a in uniforms) {
+			if (!StringTools.startsWith(a, 'sampler')) {
+				var b = a.split(" ")[1]; // Remove type 'vec4 '
+				s += '$a = uniforms.$b;\n';
+			}
+		}
 
 		if (shader_type == 'vert') {
-			s += '     out.texCoord = in.tex + in.nor.x * 0.00001;\n';
-			s += '     out.gl_Position = float4(in.pos, 0.0, 1.0);\n';
-			s += '     out.gl_Position.z = (out.gl_Position.z + out.gl_Position.w) * 0.5;\n';
+			s += 'vec4 gl_Position;\n';
+			for (a in outs) {
+				s += '$a;\n';
+			}
 		}
 		else {
-			s += '     out.fragColor = float4(1.0);\n';
+			if (outs.length > 0) {
+				if (num > 0) s += 'vec4 fragColor[$num];\n';
+				else s += 'vec4 fragColor;\n';
+			}
 		}
 
-		s += '     return out;\n';
+		s += main_attribs;
+		s += main_textures;
+		s += main_normal;
+		s += main_init;
+		s += main;
+		s += main_end;
+
+		// Write output structure
+		if (shader_type == 'vert') {
+			s += 'main_out out = {};\n';
+			s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
+			s += 'out.svpos = gl_Position;\n';
+			for (a in outs) {
+				var b = a.split(" ")[1]; // Remove type 'vec4 '
+				s += 'out.$b = $b;\n';
+			}
+			s += 'return out;\n';
+		}
+		else {
+			if (outs.length > 0) {
+				s += 'main_out out = {};\n';
+				if (num > 0) {
+					for (i in 0...num) {
+						s += 'out.fragColor_$i = fragColor[$i];\n';
+					}
+				}
+				else {
+					s += 'out.fragColor = fragColor;\n';
+				}
+				s += 'return out;\n';
+			}
+		}
 		s += '}\n';
 
 		#else // kha_opengl
@@ -580,6 +757,6 @@ class MaterialShader {
 }
 
 typedef TMaterial = {
-	var name:String;
-	var canvas:TNodeCanvas;
+	var name: String;
+	var canvas: TNodeCanvas;
 }
