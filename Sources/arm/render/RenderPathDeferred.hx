@@ -67,7 +67,11 @@ class RenderPathDeferred {
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
+			#if kha_direct3d12
 			t.format = "RGBA64"; // Match raytrace_target format
+			#else
+			t.format = "RGBA32";
+			#end
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
 		}

@@ -384,7 +384,7 @@ class MakeMesh {
 					frag.add_uniform('float envmapStrength', '_envmapStrength');
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
 					frag.add_function(MaterialFunctions.str_shIrradiance);
-					frag.write('vec3 indirect = albedo * (shIrradiance(wn) / 3.14159265);');
+					frag.write('vec3 indirect = albedo * (shIrradiance(wn, shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
 					frag.write('indirect *= envmapStrength * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
