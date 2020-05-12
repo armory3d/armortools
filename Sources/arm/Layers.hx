@@ -27,6 +27,7 @@ class Layers {
 	public static var pipeMergeB: PipelineState = null;
 	public static var pipeMergeA: PipelineState = null;
 	public static var pipeCopy: PipelineState;
+	public static var pipeCopy8: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
 	public static var tex1: TextureUnit;
@@ -159,6 +160,22 @@ class Layers {
 		pipeCopy.inputLayout = [vs];
 		pipeCopy.compile();
 
+		#if kha_metal
+		pipeCopy8 = new PipelineState();
+		pipeCopy8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipeCopy8.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
+		pipeCopy8.inputLayout = [vs];
+		pipeCopy8.colorAttachmentCount = 1;
+		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
+		pipeCopy8.compile();
+		#else
+		pipeCopy8 = pipeCopy;
+		#end
+
 		pipeMask = new PipelineState();
 		pipeMask.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
 		pipeMask.fragmentShader = Reflect.field(kha.Shaders, "mask_merge_frag");
@@ -175,9 +192,13 @@ class Layers {
 		pipeCursor.vertexShader = Reflect.field(kha.Shaders, "cursor_vert");
 		pipeCursor.fragmentShader = Reflect.field(kha.Shaders, "cursor_frag");
 		var vs = new VertexStructure();
+		#if kha_metal
+		vs.add("tex", VertexData.Short2Norm);
+		#else
 		vs.add("pos", VertexData.Short4Norm);
 		vs.add("nor", VertexData.Short2Norm);
 		vs.add("tex", VertexData.Short2Norm);
+		#end
 		pipeCursor.inputLayout = [vs];
 		pipeCursor.blendSource = BlendingFactor.SourceAlpha;
 		pipeCursor.blendDestination = BlendingFactor.InverseSourceAlpha;

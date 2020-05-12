@@ -61,7 +61,11 @@ class RenderPathForward {
 
 	static function drawGbuffer() {
 		path.setTarget("gbuffer0");
+		#if kha_metal
+		path.clearTarget(0x00000000, 1.0);
+		#else
 		path.clearTarget(null, 1.0);
+		#end
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);

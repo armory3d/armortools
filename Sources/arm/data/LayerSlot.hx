@@ -261,13 +261,13 @@ class LayerSlot {
 		if (texpaint_mask != null) {
 			l.createMask(0, false);
 			l.texpaint_mask.g2.begin(false);
-			l.texpaint_mask.g2.pipeline = Layers.pipeCopy;
+			l.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
 			l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
 			l.texpaint_mask.g2.pipeline = null;
 			l.texpaint_mask.g2.end();
 
 			l.texpaint_mask_preview.g2.begin(true, 0x00000000);
-			l.texpaint_mask_preview.g2.pipeline = Layers.pipeCopy;
+			l.texpaint_mask_preview.g2.pipeline = Layers.pipeCopy8;
 			l.texpaint_mask_preview.g2.drawScaledImage(texpaint_mask_preview, 0, 0, texpaint_mask_preview.width, texpaint_mask_preview.height);
 			l.texpaint_mask_preview.g2.pipeline = null;
 			l.texpaint_mask_preview.g2.end();
@@ -342,7 +342,7 @@ class LayerSlot {
 			this.texpaint_mask = Image.createRenderTarget(res, res, TextureFormat.L8);
 
 			this.texpaint_mask.g2.begin(false);
-			this.texpaint_mask.g2.pipeline = Layers.pipeCopy;
+			this.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
 			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
 			this.texpaint_mask.g2.pipeline = null;
 			this.texpaint_mask.g2.end();

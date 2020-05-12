@@ -253,7 +253,7 @@ class ImportArm {
 						l.createMask(0, false);
 						texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
 						l.texpaint_mask.g2.begin(false);
-						l.texpaint_mask.g2.pipeline = Layers.pipeCopy;
+						l.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
 						l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
 						l.texpaint_mask.g2.pipeline = null;
 						l.texpaint_mask.g2.end();

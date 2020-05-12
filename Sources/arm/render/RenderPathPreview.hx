@@ -86,7 +86,7 @@ class RenderPathPreview {
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 
-		#if arm_world
+		#if (arm_world || kha_metal)
 		var clearColor = 0xffffffff;
 		#else
 		var clearColor: Null<Int> = null;
@@ -144,8 +144,9 @@ class RenderPathPreview {
 	public static function commandsDecal() {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
-		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		path.setTarget("gbuffer0");
 		path.clearTarget(null, 1.0);
+		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		path.drawMeshes("mesh");
 
 		// ---

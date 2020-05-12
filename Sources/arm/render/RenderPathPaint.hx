@@ -127,8 +127,18 @@ class RenderPathPaint {
 				UIHeader.inst.headerHandle.redraws = 2;
 			}
 			else if (Context.tool == ToolPicker) {
+				#if kha_metal
+				path.setTarget("texpaint_picker");
+				path.clearTarget(0xff000000);
+				path.setTarget("texpaint_nor_picker");
+				path.clearTarget(0xff000000);
+				path.setTarget("texpaint_pack_picker");
+				path.clearTarget(0xff000000);
+				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+				#else
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				path.clearTarget(0xff000000);
+				#end
 				path.bindTarget("gbuffer2", "gbuffer2");
 				tid = Context.layer.id;
 				path.bindTarget("texpaint" + tid, "texpaint");
@@ -409,7 +419,11 @@ class RenderPathPaint {
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(Layers.cursorInvVP, helpMat.self);
+		#if kha_metal
+		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
+		#else
 		g.setVertexBuffer(geom.vertexBuffer);
+		#end
 		g.setIndexBuffer(geom.indexBuffers[0]);
 		g.drawIndexedVertices();
 

@@ -176,7 +176,11 @@ class RenderUtil {
 			Context.textToolImage = null;
 		}
 		if (Context.textToolImage == null) {
+			#if kha_metal
+			Context.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.RGBA32);
+			#else
 			Context.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
+			#end
 		}
 		var g2 = Context.textToolImage.g2;
 		g2.begin(true, 0xff000000);

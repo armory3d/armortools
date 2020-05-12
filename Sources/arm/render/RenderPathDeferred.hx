@@ -458,11 +458,19 @@ class RenderPathDeferred {
 
 		if (Config.raw.rp_ssr != false) {
 			if (@:privateAccess path.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
+				{
+					var t = new RenderTargetRaw();
+					t.name = "bufb";
+					t.width = 0;
+					t.height = 0;
+					t.format = "RGBA64";
+					path.createRenderTarget(t);
+				}
 				path.loadShader("shader_datas/ssr_pass/ssr_pass");
 				path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_x");
 				path.loadShader("shader_datas/blur_adaptive_pass/blur_adaptive_pass_y3_blend");
 			}
-			var targeta = "buf";
+			var targeta = "bufb";
 			var targetb = "gbuffer1";
 
 			path.setTarget(targeta);
@@ -596,7 +604,11 @@ class RenderPathDeferred {
 
 	public static function drawGbuffer() {
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
+		#if kha_metal
+		path.clearTarget(0x00000000, 1.0);
+		#else
 		path.clearTarget(null, 1.0);
+		#end
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);

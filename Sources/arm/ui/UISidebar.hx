@@ -632,7 +632,7 @@ class UISidebar {
 			var source = Context.layerIsMask ? l.texpaint_mask : l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
-			g2.pipeline = Layers.pipeCopy;
+			g2.pipeline = Context.layerIsMask ? Layers.pipeCopy8 : Layers.pipeCopy;
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();

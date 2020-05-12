@@ -19,7 +19,7 @@ class MakePaint {
 			// cull_mode: "counter_clockwise",
 			cull_mode: "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
-			color_attachments: ["RGBA32", "RGBA32", "RGBA32", "R8"]
+			color_attachments: [Context.layerIsMask ? "R8" : "RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
 		con_paint.data.color_writes_red = [true, true, true, true];
