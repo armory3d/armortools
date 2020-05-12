@@ -26,7 +26,7 @@ class MakeVoxel {
 
 		var ds = MaterialBuilder.getDisplaceStrength();
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if kha_direct3d11
 		"#define vec3 float3
 		uniform float4x4 W;
 		uniform float3x3 N;

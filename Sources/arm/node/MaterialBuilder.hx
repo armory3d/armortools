@@ -59,7 +59,7 @@ class MaterialBuilder {
 			return 'mix($cola, $cola + $colb, $opac)';
 		}
 		else if (blending == BlendOverlay) {
-			#if (kha_direct3d11 || kha_direct3d12)
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 			return 'mix($cola, ($cola < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $cola * $colb : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $colb) * (vec3(1.0, 1.0, 1.0) - $cola)), $opac)';
 			#else
 			return 'mix($cola, $colb, $opac)'; // TODO

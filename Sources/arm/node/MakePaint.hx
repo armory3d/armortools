@@ -65,7 +65,7 @@ class MakePaint {
 			vert.write('vec2 subtex = tex;');
 		}
 
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
 		#else
 		vert.write('vec2 tpos = vec2(subtex.xy * 2.0 - 1.0);');
@@ -283,7 +283,7 @@ class MakePaint {
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
 		frag.write('vec2 sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');

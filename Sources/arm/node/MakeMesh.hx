@@ -84,7 +84,7 @@ class MakeMesh {
 
 			frag.vVec = true;
 			frag.add_function(MaterialFunctions.str_cotangentFrame);
-			#if (kha_direct3d11 || kha_direct3d12)
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -456,7 +456,7 @@ class MakeMesh {
 	}
 
 	static function getMaxVisibleLayers(): Int {
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 		// 128 texture slots available
 		// 4 textures per layer (3 + 1 mask)
 		// 32 layers - base + 31 on top

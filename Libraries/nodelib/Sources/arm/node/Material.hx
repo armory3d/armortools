@@ -940,7 +940,7 @@ class Material {
 				frag.add_function(MaterialFunctions.str_cotangentFrame);
 			}
 			frag.n = true;
-			#if (kha_direct3d11 || kha_direct3d12)
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -981,7 +981,7 @@ class Material {
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth
 				curshader.add_uniform("vec2 cameraProj", "_cameraPlaneProj");
-				#if (kha_direct3d11 || kha_direct3d12)
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 				curshader.wvpposition = true;
 				return "(cameraProj.y / ((wvpposition.z / wvpposition.w) - cameraProj.x))";
 				#else
@@ -1038,7 +1038,7 @@ class Material {
 		}
 		else if (node.type == "NEW_GEOMETRY") {
 			if (socket == node.outputs[6]) { // Backfacing
-				#if (kha_direct3d11 || kha_direct3d12)
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 				return "0.0"; // SV_IsFrontFace
 				#else
 				return "(1.0 - float(gl_FrontFacing))";
@@ -1474,7 +1474,7 @@ class Material {
 	}
 
 	public static inline function to_vec3(s: String): String {
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 		return '($s).xxx';
 		#else
 		return 'vec3($s)';

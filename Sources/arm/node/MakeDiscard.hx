@@ -43,7 +43,7 @@ class MakeDiscard {
 	public static function materialId(vert: MaterialShader, frag: MaterialShader) {
 		frag.wvpposition = true;
 		frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 		frag.write('picker_sample_tc.y = 1.0 - picker_sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');

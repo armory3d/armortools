@@ -793,7 +793,7 @@ class UISidebar {
 					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);
-					#if (kha_direct3d11 || kha_direct3d12)
+					#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
 					#else
 					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);

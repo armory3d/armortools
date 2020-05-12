@@ -25,10 +25,16 @@ class RenderPathDeferred {
 
 		#if kha_metal
 		{
-			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth8_pass");
-			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass");
-			path.loadShader("clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass");
-			path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass";
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_r8");
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_rgba32");
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_rgba64");
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_r8");
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_rgba32");
+			path.loadShader("clear_pass/clear_pass/clear_pass_color_rgba64");
+			path.loadShader("clear_pass/clear_pass/clear_pass_depth_r8");
+			path.loadShader("clear_pass/clear_pass/clear_pass_depth_rgba32");
+			path.loadShader("clear_pass/clear_pass/clear_pass_depth_rgba64");
+			path.clearShader = "clear_pass/clear_pass/clear_pass";
 		}
 		#end
 
@@ -540,9 +546,6 @@ class RenderPathDeferred {
 		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
 
-		#if kha_metal
-		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass";
-		#end
 		path.setTarget(current);
 		path.clearTarget(0x00000000);
 		path.bindTarget("buf", "colorTex");
@@ -592,9 +595,6 @@ class RenderPathDeferred {
 	}
 
 	public static function drawGbuffer() {
-		#if kha_metal
-		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass";
-		#end
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		path.clearTarget(null, 1.0);
 		path.setTarget("gbuffer2");

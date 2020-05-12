@@ -56,12 +56,9 @@ class UIView2D {
 		var scale = Config.raw.window_scale;
 		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.colorWheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
-
-		iron.App.notifyOnRender2D(render);
-		iron.App.notifyOnUpdate(update);
 	}
 
-	function render(g: kha.graphics2.Graphics) {
+	public function render(g: kha.graphics2.Graphics) {
 		if (UINodes.inst.defaultWindowW == 0) UINodes.inst.defaultWindowW = Std.int(iron.App.w() / 2);
 		if (UINodes.inst.defaultWindowH == 0) UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
 		ww = UINodes.inst.defaultWindowW;
@@ -254,7 +251,7 @@ class UIView2D {
 		g.begin(false);
 	}
 
-	function update() {
+	public function update() {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 

@@ -25,7 +25,6 @@ class ParticleUtil {
 			name: "Particles",
 			type: 0,
 			loop: false,
-			render_emitter: false,
 			count: 1000,
 			frame_start: 0,
 			frame_end: 1000,

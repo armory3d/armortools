@@ -60,9 +60,6 @@ class RenderPathForward {
 	}
 
 	static function drawGbuffer() {
-		#if kha_metal
-		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass";
-		#end
 		path.setTarget("gbuffer0");
 		path.clearTarget(null, 1.0);
 		path.setTarget("gbuffer2");
@@ -97,10 +94,6 @@ class RenderPathForward {
 		var taaFrame = RenderPathDeferred.taaFrame;
 		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
-
-		#if kha_metal
-		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth32_pass";
-		#end
 
 		path.setTarget(current);
 		path.clearTarget(0x00000000);

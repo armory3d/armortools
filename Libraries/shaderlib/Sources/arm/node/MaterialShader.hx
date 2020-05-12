@@ -392,20 +392,16 @@ class MaterialShader {
 
 		for (a in uniforms) {
 			s += 'uniform ' + a + ';\n';
-			#if (kha_direct3d11 || kha_direct3d12)
 			if (StringTools.startsWith(a, 'sampler')) {
 				s += 'SamplerState ' + a.split(' ')[1] + '_sampler;\n';
 			}
-			#end
 		}
 
 		if (sharedSamplers.length > 0) {
 			for (a in sharedSamplers) {
 				s += 'uniform ' + a + ';\n';
 			}
-			#if (kha_direct3d11 || kha_direct3d12)
 			s += 'SamplerState $sharedSampler;\n';
-			#end
 		}
 
 		for (f in functions) {

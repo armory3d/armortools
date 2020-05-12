@@ -171,7 +171,7 @@ class LayerSlot {
 	function clearMask(g: kha.graphics4.Graphics) {
 		g.end();
 
-		texpaint_mask.g2.begin();
+		texpaint_mask.g2.begin(false);
 
 		if (createMaskImage != null) {
 			texpaint_mask.g2.drawScaledImage(createMaskImage, 0, 0, texpaint_mask.width, texpaint_mask.height);

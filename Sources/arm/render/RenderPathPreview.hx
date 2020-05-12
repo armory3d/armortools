@@ -83,9 +83,6 @@ class RenderPathPreview {
 	}
 
 	public static function commandsPreview() {
-		#if kha_metal
-		path.clearShader = "clear_color_depth_pass/clear_color_depth_pass/clear_color_depth64_pass";
-		#end
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 

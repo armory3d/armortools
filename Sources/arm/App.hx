@@ -150,6 +150,13 @@ class App {
 				new UINodes();
 				new UIView2D();
 				new Camera();
+				#if kha_metal // TODO: fix first draw flicker
+				iron.App.notifyOnRender2D(function(g) {
+					g.drawScaledImage(Res.get("cursor.k"), 0, 0, 0, 0);
+				});
+				#end
+				iron.App.notifyOnRender2D(UIView2D.inst.render);
+				iron.App.notifyOnUpdate(UIView2D.inst.update);
 				iron.App.notifyOnRender2D(UISidebar.inst.renderCursor);
 				iron.App.notifyOnUpdate(UINodes.inst.update);
 				iron.App.notifyOnRender2D(UINodes.inst.render);
