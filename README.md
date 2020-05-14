@@ -32,11 +32,11 @@ strip Krom
 ./Krom ../../build/krom
 ```
 ```bash
-# macOS
-node Kromx/make -g opengl
+# macOS - wip
+node Kromx/make -g metal
 cp -a build/krom/ Kromx/Deployment
 cd Kromx
-node Kinc/make -g opengl
+node Kinc/make -g metal
 # Open generated Xcode project
 # Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Build
@@ -53,11 +53,10 @@ node Kinc/make android -g opengl
 ```
 ```bash
 # iOS - wip
-node Kromx/make ios -g opengl --shaderversion 300
+node Kromx/make ios -g metal
+cp -a build/krom/ Kromx/Deployment
 cd Kromx
-node Kinc/make ios -g opengl
-# Manual tweaking is required for now:
-# https://github.com/armory3d/Kromx/blob/master/kincfile.js#L84
+node Kinc/make ios -g metal
 # Open generated Xcode project
 # Add `path/to/Kromx/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Build for device
