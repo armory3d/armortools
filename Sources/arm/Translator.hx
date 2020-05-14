@@ -35,7 +35,7 @@ class Translator {
 		}
 
 		// Check whether the requested or detected locale is available
-		if (Config.raw.locale != "en" && getSupportedLocales().indexOf(newLocale) == -1) {
+		if (Config.raw.locale != "en" && getSupportedLocales().indexOf(Config.raw.locale) == -1) {
 			// Fall back to English
 			Config.raw.locale = "en";
 		}
