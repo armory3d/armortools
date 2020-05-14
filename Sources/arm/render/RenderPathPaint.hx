@@ -128,16 +128,16 @@ class RenderPathPaint {
 			}
 			else if (Context.tool == ToolPicker) {
 				#if kha_metal
-				path.setTarget("texpaint_picker");
-				path.clearTarget(0xff000000);
-				path.setTarget("texpaint_nor_picker");
-				path.clearTarget(0xff000000);
-				path.setTarget("texpaint_pack_picker");
-				path.clearTarget(0xff000000);
+				//path.setTarget("texpaint_picker");
+				//path.clearTarget(0xff000000);
+				//path.setTarget("texpaint_nor_picker");
+				//path.clearTarget(0xff000000);
+				//path.setTarget("texpaint_pack_picker");
+				//path.clearTarget(0xff000000);
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
 				#else
 				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
-				path.clearTarget(0xff000000);
+				//path.clearTarget(0xff000000);
 				#end
 				path.bindTarget("gbuffer2", "gbuffer2");
 				tid = Context.layer.id;

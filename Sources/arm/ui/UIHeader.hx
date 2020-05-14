@@ -62,6 +62,9 @@ class UIHeader {
 				var occlusionPicked = Context.occlusionPicked;
 				var roughnessPicked = Context.roughnessPicked;
 				var metallicPicked = Context.metallicPicked;
+				#if kha_metal
+				ui.text('TODO'); // Skips first draw
+				#end
 				ui.text(tr("Base") + ' $baseRPicked,$baseGPicked,$baseBPicked');
 				ui.text(tr("Nor") + ' $normalRPicked,$normalGPicked,$normalBPicked');
 				ui.text(tr("Occlusion") + ' $occlusionPicked');
