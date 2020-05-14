@@ -453,21 +453,17 @@ class MaterialShader {
 		s += main_end;
 
 		// Write output structure
-		if (shader_type == 'vert') {
+		if (outs.length > 0 || shader_type == 'vert') {
 			s += 'SPIRV_Cross_Output stage_output;\n';
-			s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
-			s += 'stage_output.svpos = gl_Position;\n';
-			for (a in outs) {
-				var b = a.substring(5); // Remove type 'vec4 '
-				s += 'stage_output.$b = $b;\n';
+			if (shader_type == 'vert') {
+				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
+				s += 'stage_output.svpos = gl_Position;\n';
+				for (a in outs) {
+					var b = a.substring(5); // Remove type 'vec4 '
+					s += 'stage_output.$b = $b;\n';
+				}
 			}
-
-			s += 'return stage_output;\n';
-
-		}
-		else {
-			if (outs.length > 0) {
-				s += 'SPIRV_Cross_Output stage_output;\n';
+			else {
 				if (num > 0) {
 					for (i in 0...num) {
 						s += 'stage_output.fragColor[$i] = fragColor[$i];\n';
@@ -476,8 +472,8 @@ class MaterialShader {
 				else {
 					s += 'stage_output.fragColor = fragColor;\n';
 				}
-				s += 'return stage_output;\n';
 			}
+			s += 'return stage_output;\n';
 		}
 		s += '}\n';
 
@@ -494,7 +490,7 @@ class MaterialShader {
 		s += '#define textureShared(tex, coord) tex.sample($sharedSampler, coord)\n';
 		s += '#define textureLod(tex, coord, lod) tex.sample(tex ## _sampler, coord, level(lod))\n';
 		s += '#define textureLodShared(tex, coord, lod) tex.sample($sharedSampler, coord, level(lod))\n';
-		s += '#define texelFetch(tex, coord, lod) tex.read(float3(coord.xy, level(lod)))\n';
+		s += '#define texelFetch(tex, coord, lod) tex.read(uint2(coord), uint(lod))\n';
 		s += 'uint2 _getDimensions(texture2d<float> tex, uint lod) { return uint2(tex.get_width(lod), tex.get_height(lod)); }\n';
 		s += '#define textureSize _getDimensions\n';
 		s += '#define mod(a, b) (a % b)\n';
@@ -522,7 +518,7 @@ class MaterialShader {
 
 		// Input structure
 		var index = 0;
-		if (ins.length > 0) {
+		//if (ins.length > 0) {
 			s += 'struct main_in {\n';
 			index = 0;
 			ins.sort(function(a, b): Int {
@@ -541,17 +537,8 @@ class MaterialShader {
 					index++;
 				}
 			}
-			// Built-ins
-			if (shader_type == 'vert' && main.indexOf("gl_VertexID") >= 0) {
-				s += 'uint gl_VertexID [[vertex_id]];\n';
-				ins.push('uint gl_VertexID');
-			}
-			if (shader_type == 'vert' && main.indexOf("gl_InstanceID") >= 0) {
-				s += 'uint gl_InstanceID [[instance_id]];\n';
-				ins.push('uint gl_InstanceID');
-			}
 			s += '};\n';
-		}
+		//}
 
 		// Output structure
 		var num = 0;
@@ -606,15 +593,15 @@ class MaterialShader {
 			s += f + '\n';
 		}
 
-		// Begin main
+		// Begin main declaration
 		s += '#undef texture\n';
 
 		s += shader_type == 'vert' ? 'vertex ' : 'fragment ';
-		s += outs.length > 0 ? 'main_out ' : 'void ';
+		s += (outs.length > 0 || shader_type == 'vert') ? 'main_out ' : 'void ';
 		s += 'my_main(';
-		if (ins.length > 0) {
+		//if (ins.length > 0) {
 			s += 'main_in in [[stage_in]]';
-		}
+		//}
 		if (uniforms.length > 0) {
 			var bufi = shader_type == 'vert' ? 1 : 0;
 			s += ', constant main_uniforms& uniforms [[buffer($bufi)]]';
@@ -642,6 +629,15 @@ class MaterialShader {
 		//	s += ', sampler $sharedSampler [[sampler(${samplers.length})]]';
 		//}
 
+		// Built-ins
+		if (shader_type == 'vert' && main.indexOf("gl_VertexID") >= 0) {
+			s += ', uint gl_VertexID [[vertex_id]]';
+		}
+		if (shader_type == 'vert' && main.indexOf("gl_InstanceID") >= 0) {
+			s += ', uint gl_InstanceID [[instance_id]]';
+		}
+
+		// End main declaration
 		s += ') {\n';
 		s += '#define texture(tex, coord) tex.sample(tex ## _sampler, coord)\n';
 
@@ -654,7 +650,14 @@ class MaterialShader {
 		for (a in uniforms) {
 			if (!StringTools.startsWith(a, 'sampler')) {
 				var b = a.split(" ")[1]; // Remove type 'vec4 '
-				s += '$a = uniforms.$b;\n';
+				if (b.indexOf("[") >= 0) {
+					b = b.substring(0, b.indexOf("["));
+					var type = a.split(" ")[0];
+					s += 'constant $type *$b = uniforms.$b;\n';
+				}
+				else {
+					s += '$a = uniforms.$b;\n';
+				}
 			}
 		}
 
@@ -679,19 +682,17 @@ class MaterialShader {
 		s += main_end;
 
 		// Write output structure
-		if (shader_type == 'vert') {
+		if (outs.length > 0 || shader_type == 'vert') {
 			s += 'main_out out = {};\n';
-			s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
-			s += 'out.svpos = gl_Position;\n';
-			for (a in outs) {
-				var b = a.split(" ")[1]; // Remove type 'vec4 '
-				s += 'out.$b = $b;\n';
+			if (shader_type == 'vert') {
+				s += 'gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n';
+				s += 'out.svpos = gl_Position;\n';
+				for (a in outs) {
+					var b = a.split(" ")[1]; // Remove type 'vec4 '
+					s += 'out.$b = $b;\n';
+				}
 			}
-			s += 'return out;\n';
-		}
-		else {
-			if (outs.length > 0) {
-				s += 'main_out out = {};\n';
+			else {
 				if (num > 0) {
 					for (i in 0...num) {
 						s += 'out.fragColor_$i = fragColor[$i];\n';
@@ -700,8 +701,8 @@ class MaterialShader {
 				else {
 					s += 'out.fragColor = fragColor;\n';
 				}
-				s += 'return out;\n';
 			}
+			s += 'return out;\n';
 		}
 		s += '}\n';
 

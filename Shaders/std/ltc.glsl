@@ -5,12 +5,6 @@ const float LUT_SIZE = 64.0;
 const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;
 const float LUT_BIAS = 0.5 / LUT_SIZE;
 
-vec3 L0;
-vec3 L1;
-vec3 L2;
-vec3 L3;
-vec3 L4;
-
 float integrateEdge(vec3 v1, vec3 v2) {
 	float cosTheta = dot(v1, v2);
 	float theta = acos(cosTheta);
@@ -18,7 +12,22 @@ float integrateEdge(vec3 v1, vec3 v2) {
 	return res;
 }
 
-int clipQuadToHorizon(/*inout vec3 L[5], out int n*/) {
+float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
+	// Construct orthonormal basis around N
+	vec3 T1, T2;
+	T1 = normalize(V - N * dotNV);
+	T2 = cross(N, T1);
+
+	// Rotate area light in (T1, T2, R) basis
+	Minv = Minv * transpose(mat3(T1, T2, N));
+
+	// Polygon (allocate 5 vertices for clipping)
+	vec3 L0 = Minv * (points0 - P);
+	vec3 L1 = Minv * (points1 - P);
+	vec3 L2 = Minv * (points2 - P);
+	vec3 L3 = Minv * (points3 - P);
+	vec3 L4 = vec3(0.0);
+
 	int n = 0;
 	// Detect clipping config
 	int config = 0;
@@ -105,32 +114,9 @@ int clipQuadToHorizon(/*inout vec3 L[5], out int n*/) {
 		n = 4;
 	}
 
+	if (n == 0) return 0.0;
 	if (n == 3) L3 = L0;
 	if (n == 4) L4 = L0;
-	return n;
-}
-
-float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
-	// Construct orthonormal basis around N
-	vec3 T1, T2;
-	T1 = normalize(V - N * dotNV);
-	T2 = cross(N, T1);
-
-	// Rotate area light in (T1, T2, R) basis
-	Minv = Minv * transpose(mat3(T1, T2, N));
-
-	// Polygon (allocate 5 vertices for clipping)
-	// vec3 L[5];
-	L0 = Minv * (points0 - P);
-	L1 = Minv * (points1 - P);
-	L2 = Minv * (points2 - P);
-	L3 = Minv * (points3 - P);
-	L4 = vec3(0.0);
-
-	// int n;
-	int n = clipQuadToHorizon(/*L, n*/);
-
-	if (n == 0) return 0.0;
 
 	// Project onto sphere
 	L0 = normalize(L0);
