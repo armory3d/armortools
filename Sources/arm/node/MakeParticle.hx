@@ -11,7 +11,8 @@ class MakeParticle {
 			depth_write: false,
 			compare_mode: "always",
 			cull_mode: "clockwise",
-			vertex_elements: [{name: "pos", data: "short4norm"}]
+			vertex_elements: [{name: "pos", data: "short4norm"}],
+			color_attachments: ["R8"]
 		});
 
 		var vert = con_part.make_vert();
