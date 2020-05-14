@@ -271,20 +271,41 @@ class ExportTexture {
 			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
+					#if kha_metal
+					PngTools.build32BGR1(res, res, pixels) :
+					#else
 					PngTools.build32RGB1(res, res, pixels) :
+					#end
 				type == 2 ?
+					#if kha_metal
+					PngTools.build32RRR1(res, res, pixels, 2 - off) :
+					#else
 					PngTools.build32RRR1(res, res, pixels, off) :
+					#end
+
+					#if kha_metal
+					PngTools.build32BGRA(res, res, pixels);
+					#else
 					PngTools.build32RGBA(res, res, pixels);
+					#end
 			writer.write(data);
 		}
 		else {
 			var writer = new JpgWriter(out);
-			writer.write({
-				width: res,
-				height: res,
-				quality: Context.formatQuality,
-				pixels: pixels
-			}, type, off);
+			writer.write(
+				{
+					width: res,
+					height: res,
+					quality: Context.formatQuality,
+					pixels: pixels
+				},
+				type,
+				#if kha_metal
+				2 - off, true
+				#else
+				off, false
+				#end
+			);
 		}
 		Krom.fileSaveBytes(file, out.getBytes().getData());
 	}

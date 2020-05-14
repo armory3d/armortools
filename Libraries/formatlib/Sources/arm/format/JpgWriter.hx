@@ -531,7 +531,7 @@ class JpgWriter {
 	var UDU: Array<Float>;
 	var VDU: Array<Float>;
 
-	function RGB2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int) {
+	function ARGB2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int) {
 		var pos = 0;
 		for( y in 0...8 ) {
 			var offset = ((y + ypos) * width + xpos) << 2;
@@ -587,7 +587,7 @@ class JpgWriter {
 		initCategoryNumber();
 	}
 
-	public function write( image : JpgData, type = 0, off = 0 ) {
+	public function write( image : JpgData, type = 0, off = 0, swapRG = false ) {
 		// init quality table
 		var quality = image.quality;
 		if( quality <= 0 ) quality = 1;
@@ -622,7 +622,7 @@ class JpgWriter {
 			while( ypos < height ) {
 				var xpos = 0;
 				while( xpos < width ) {
-					RGB2YUV(image.pixels, width, xpos, ypos);
+					ARGB2YUV(image.pixels, width, xpos, ypos);
 					DCY = processDU(YDU, fdtbl_Y, DCY, YDC_HT, YAC_HT);
 					DCU = processDU(UDU, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
 					DCV = processDU(VDU, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
@@ -631,7 +631,20 @@ class JpgWriter {
 				ypos += 8;
 			}
 		}
-		else if (type == 1) {
+		else if (type == 1 && !swapRG) {
+			while( ypos < height ) {
+				var xpos = 0;
+				while( xpos < width ) {
+					RGBA2YUV(image.pixels, width, xpos, ypos);
+					DCY = processDU(YDU, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+					DCU = processDU(UDU, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
+					DCV = processDU(VDU, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
+					xpos += 8;
+				}
+				ypos += 8;
+			}
+		}
+		else if (type == 1 && swapRG) {
 			while( ypos < height ) {
 				var xpos = 0;
 				while( xpos < width ) {
@@ -648,7 +661,7 @@ class JpgWriter {
 			while( ypos < height ) {
 				var xpos = 0;
 				while( xpos < width ) {
-					BGRA2YUV_(image.pixels, width, xpos, ypos, off);
+					RRR2YUV(image.pixels, width, xpos, ypos, off);
 					DCY = processDU(YDU, fdtbl_Y, DCY, YDC_HT, YAC_HT);
 					DCU = processDU(UDU, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
 					DCV = processDU(VDU, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
@@ -668,7 +681,7 @@ class JpgWriter {
 	}
 
 	// armory
-	function BGRA2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int) {
+	function RGBA2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int) {
 		var pos = 0;
 		for( y in 0...8 ) {
 			var offset = ((y + ypos) * width + xpos) << 2;
@@ -684,7 +697,23 @@ class JpgWriter {
 			}
 		}
 	}
-	function BGRA2YUV_(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int, off: Int) {
+	function BGRA2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int) {
+		var pos = 0;
+		for( y in 0...8 ) {
+			var offset = ((y + ypos) * width + xpos) << 2;
+			for( x in 0...8 ) {
+				var B = img.get(offset++);
+				var G = img.get(offset++);
+				var R = img.get(offset++);
+				offset++; // skip alpha
+				YDU[pos] = ((( 0.29900) * R + ( 0.58700) * G + ( 0.11400) * B)) -128;
+				UDU[pos] = (((-0.16874) * R + (-0.33126) * G + ( 0.50000) * B));
+				VDU[pos] = ((( 0.50000) * R + (-0.41869) * G + (-0.08131) * B));
+				pos++;
+			}
+		}
+	}
+	function RRR2YUV(img: haxe.io.Bytes, width : Int, xpos: Int, ypos: Int, off: Int) {
 		var pos = 0;
 		for( y in 0...8 ) {
 			var offset = ((y + ypos) * width + xpos) << 2;
