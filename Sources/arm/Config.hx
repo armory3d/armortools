@@ -63,7 +63,7 @@ class Config {
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
 			var disp = Display.primary;
-			if (disp != null && disp.width >= 3000 && disp.height >= 2000) {
+			if (disp != null && disp.width >= 2560 && disp.height >= 1600) {
 				raw.window_scale = 2.0;
 			}
 			#if (krom_android || krom_ios)
