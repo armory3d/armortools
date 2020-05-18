@@ -429,13 +429,13 @@ class App {
 
 	static function handleDropPaths() {
 		if (dropPaths.length > 0) {
+			var mouse = Input.getMouse();
 			#if krom_linux
 			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
 			#else
 			var wait = false;
 			#end
 			if (!wait) {
-				var mouse = Input.getMouse();
 				dropX = mouse.x;
 				dropY = mouse.y;
 				var dropPath = dropPaths.shift();
