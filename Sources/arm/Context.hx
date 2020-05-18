@@ -108,7 +108,7 @@ class Context {
 	#end
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
-	#if (krom_android || krom_ios)
+	#if krom_android
 	public static var nativeBrowser = false;
 	#else
 	public static var nativeBrowser = true;

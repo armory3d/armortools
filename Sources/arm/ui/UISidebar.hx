@@ -167,7 +167,7 @@ class UISidebar {
 
 				Context.viewIndex = -1;
 
-				#if (kha_android || kha_ios)
+				#if (krom_android || krom_ios)
 				// No mouse move events for touch, re-init last paint position on touch start
 				Context.lastPaintX = -1;
 				Context.lastPaintY = -1;

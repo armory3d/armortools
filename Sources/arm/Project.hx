@@ -312,6 +312,12 @@ class Project {
 	}
 
 	public static function importMeshBox(path: String) {
+
+		#if krom_ios
+		// Import immediately while access to resource is unlocked
+		Data.getBlob(path, function(b: kha.Blob) {});
+		#end
+
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("Import Mesh"))) {
 

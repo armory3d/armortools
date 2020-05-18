@@ -84,6 +84,10 @@ class App {
 			dropPath = dropPath.rtrim();
 			dropPaths.push(dropPath);
 			#end
+			#if krom_ios
+			// Import immediately while access to resource is unlocked
+			handleDropPaths();
+			#end
 		});
 
 		System.notifyOnApplicationState(
@@ -402,19 +406,7 @@ class App {
 			isDragging = false;
 		}
 
-		if (dropPaths.length > 0) {
-			#if krom_linux
-			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
-			#else
-			var wait = false;
-			#end
-			if (!wait) {
-				dropX = mouse.x;
-				dropY = mouse.y;
-				var dropPath = dropPaths.shift();
-				ImportAsset.run(dropPath, dropX, dropY);
-			}
-		}
+		handleDropPaths();
 
 		if (UIBox.show) UIBox.update();
 		if (UIMenu.show) UIMenu.update();
@@ -433,6 +425,23 @@ class App {
 			Context.frame < 3;
 		#end
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
+	}
+
+	static function handleDropPaths() {
+		if (dropPaths.length > 0) {
+			#if krom_linux
+			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
+			#else
+			var wait = false;
+			#end
+			if (!wait) {
+				var mouse = Input.getMouse();
+				dropX = mouse.x;
+				dropY = mouse.y;
+				var dropPath = dropPaths.shift();
+				ImportAsset.run(dropPath, dropX, dropY);
+			}
+		}
 	}
 
 	static function getDragBackground(): TRect {
