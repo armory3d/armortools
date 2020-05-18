@@ -330,12 +330,13 @@ class ObjParser {
 			var c = bytes.get(pos);
 			if (c == " ".code || c == "\n".code || c == "\r".code) break;
 			if (c == "E".code || c == "e".code) {
-				while (true) {
-					pos++;
-					c = bytes.get(pos);
-					if (c == " ".code || c == "\n".code || c == "\r".code) break;
-				}
-				return 0.0; // Assume number close to zero for now
+				pos++;
+				var first = buf[0] == "-".code ? -(buf[1] - 48) : buf[0] - 48;
+				var exp = readInt();
+				var dec = 1;
+				var loop = exp > 0 ? exp : -exp;
+				for (i in 0...loop) dec *= 10;
+				return exp > 0 ? first * dec : first / dec;
 			}
 			pos++;
 			buf[bi++] = c;
