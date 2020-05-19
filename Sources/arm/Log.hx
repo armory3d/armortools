@@ -13,6 +13,9 @@ class Log {
 		messageTimer = 5.0;
 		message = s;
 		messageColor = 0x00000000;
+		if (arm.ui.UIStatus.inst != null) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
 		trace(s);
 	}
 
@@ -20,6 +23,9 @@ class Log {
 		messageTimer = 8.0;
 		message = s;
 		messageColor = 0xffaa0000;
+		if (arm.ui.UIStatus.inst != null) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
 		trace(s);
 	}
 
@@ -35,11 +41,11 @@ class Log {
 	}
 
 	static function consoleTrace(v: Dynamic, ?inf: haxe.PosInfos) {
+		if (arm.ui.UIStatus.inst != null && arm.ui.UIStatus.inst.statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UISidebar.inst.ui.SCALE()) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
 		lastTraces.unshift(Std.string(v));
 		if (lastTraces.length > 10) lastTraces.pop();
 		haxeTrace(v, inf);
-		if (arm.ui.UIStatus.inst != null) {
-			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
-		}
 	}
 }
