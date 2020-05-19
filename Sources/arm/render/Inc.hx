@@ -189,7 +189,11 @@ class Inc {
 
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UIHeader.inst.worktab.position == SpaceRender)) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
+			#if kha_metal
+			if (Context.ddirty > -4) {
+			#else
 			if (Context.ddirty > -2) {
+			#end
 				path.setTarget("");
 				path.bindTarget("taa", "tex");
 				ssaa4() ?
