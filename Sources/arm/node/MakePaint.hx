@@ -115,6 +115,8 @@ class MakePaint {
 			// TODO: sp.z needs to take height channel into account
 			if (Config.raw.brush_3d && !decal && MaterialBuilder.heightUsed) depthReject = false;
 
+			if (Context.symX || Context.symY || Context.symZ) depthReject = false;
+
 			if (depthReject) {
 				#if (kha_opengl || kha_webgl)
 				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
