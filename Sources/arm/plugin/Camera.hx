@@ -47,7 +47,7 @@ class Camera {
 			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
 			var controls = Context.cameraControls;
 			if (controls == ControlsOrbit) {
-				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
+				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
 					redraws = 2;
 					camera.transform.move(camera.lookWorld(), dist);
 					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
@@ -60,7 +60,7 @@ class Camera {
 
 				panAction(modif);
 
-				if (Operator.shortcut(Config.keymap.action_zoom)) {
+				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
 					var f = -mouse.movementY / 150;
 					camera.transform.move(camera.look(), f);
@@ -74,7 +74,7 @@ class Camera {
 					dist -= f;
 				}
 
-				if (Operator.shortcut(Config.keymap.rotate_light)) {
+				if (Operator.shortcut(Config.keymap.rotate_light, ShortcutDown)) {
 					redraws = 2;
 					var light = iron.Scene.active.lights[0];
 					var m = iron.math.Mat4.identity();
@@ -82,9 +82,14 @@ class Camera {
 					light.transform.local.multmat(m);
 					light.transform.decompose();
 				}
+
+				if (Operator.shortcut(Config.keymap.rotate_envmap, ShortcutDown)) {
+					redraws = 2;
+					Context.envmapAngle -= mouse.movementX / 100;
+				}
 			}
 			else if (controls == ControlsRotate) {
-				if (Operator.shortcut(Config.keymap.action_rotate) || (mouse.down("right") && !modif)) {
+				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
 					redraws = 2;
 					var t = Context.object.transform;
 					var up = t.up().normalize();
@@ -99,7 +104,7 @@ class Camera {
 
 				panAction(modif);
 
-				if (Operator.shortcut(Config.keymap.action_zoom)) {
+				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
 					camera.transform.move(camera.look(), -mouse.movementY / 150);
 				}
@@ -170,7 +175,7 @@ class Camera {
 	function panAction(modif: Bool) {
 		var camera = iron.Scene.active.camera;
 		var mouse = Input.getMouse();
-		if (Operator.shortcut(Config.keymap.action_pan) || (mouse.down("middle") && !modif)) {
+		if (Operator.shortcut(Config.keymap.action_pan, ShortcutDown) || (mouse.down("middle") && !modif)) {
 			redraws = 2;
 			var look = camera.transform.look().normalize().mult(mouse.movementY / 150);
 			var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);

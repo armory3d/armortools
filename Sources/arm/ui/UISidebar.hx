@@ -483,9 +483,9 @@ class UISidebar {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint);
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
-		if (Context.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform)) {
+		if (Context.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown)) {
 			var r = getBrushStencilRect();
 			if (mouse.started("left")) {
 				Context.brushStencilScaling =
@@ -534,9 +534,9 @@ class UISidebar {
 			Context.brushStencilY += (oldH - newH) / App.h() / 2;
 		}
 
-		var down = Operator.shortcut(Config.keymap.action_paint) ||
+		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 				   setCloneSource ||
-				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
+				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 				   (Input.getPen().down() && !kb.down("alt"));
 		if (down) {
 			var mx = mouse.viewX;
@@ -557,7 +557,7 @@ class UISidebar {
 						@:privateAccess ui.comboSelectedHandle == null) { // Paint started
 
 						// Draw line
-						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint)) {
+						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
 							Context.lastPaintVecX = Context.lastPaintX;
 							Context.lastPaintVecY = Context.lastPaintY;
 						}
@@ -739,7 +739,7 @@ class UISidebar {
 					g.popTransformation();
 					g.color = 0xffffffff;
 				}
-				var transform = Operator.shortcut(Config.keymap.stencil_transform);
+				var transform = Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown);
 				if (transform) {
 					// Outline
 					g.drawRect(r.x, r.y, r.w, r.h);

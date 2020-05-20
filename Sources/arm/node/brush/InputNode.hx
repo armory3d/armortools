@@ -35,8 +35,8 @@ class InputNode extends LogicNode {
 		}
 
 		var lazyPaint = Context.brushLazyRadius > 0 &&
-			(Operator.shortcut(Config.keymap.action_paint) ||
-			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint));
+			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
+			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown));
 
 		var mouse = iron.system.Input.getMouse();
 		var paintX = mouse.viewX / iron.App.w();
@@ -56,7 +56,7 @@ class InputNode extends LogicNode {
 			startY = pen.viewY / iron.App.h();
 		}
 
-		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint)) {
+		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
 			if (lockX) paintX = startX;
 			if (lockY) paintY = startY;
 		}

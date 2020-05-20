@@ -28,9 +28,11 @@ class Operator {
 			s = s.substr(s.lastIndexOf("+") + 1);
 		}
 		else if (shift || ctrl || alt) return flag;
-		var key = (s == "left" || s == "right" || s == "middle") ? mouse.down(s) :
-			type == ShortcutRepeat ? kb.repeat(s) :
-			type == ShortcutDown ? kb.down(s) : kb.started(s);
+		var key = (s == "left" || s == "right" || s == "middle") ?
+			// Mouse
+			(type == ShortcutDown ? mouse.down(s) : mouse.started(s)) :
+			// Keyboard
+			(type == ShortcutRepeat ? kb.repeat(s) : type == ShortcutDown ? kb.down(s) : kb.started(s));
 		return flag && key;
 	}
 }

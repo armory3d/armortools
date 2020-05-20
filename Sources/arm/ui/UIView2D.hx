@@ -277,11 +277,11 @@ class UIView2D {
 			if (panScale > 3.0) panScale = 3.0;
 		}
 
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut("alt+" + Config.keymap.action_paint);
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		if (type == View2DLayer &&
-			(Operator.shortcut(Config.keymap.action_paint) ||
-			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint) ||
+			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
+			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 			 setCloneSource ||
 			 Config.raw.brush_live)) {
 			Context.paint2d = true;
