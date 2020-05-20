@@ -77,6 +77,9 @@ class Uniforms {
 		if (link == "_objectId") {
 			return Project.paintObjects.indexOf(Context.paintObject);
 		}
+		if (link == "_envmapAngle") {
+			return Context.envmapAngle;
+		}
 		#end
 		#if arm_world
 		if (link == "_voxelgiHalfExtentsUni") {

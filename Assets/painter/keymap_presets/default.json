@@ -4,6 +4,7 @@
 	"action_pan": "alt+middle",
 	"action_zoom": "alt+right",
 	"rotate_light": "shift+middle",
+	"rotate_envmap": "ctrl+middle",
 	"set_clone_source": "alt",
 	"stencil_transform": "ctrl",
 	"stencil_hide": "z",

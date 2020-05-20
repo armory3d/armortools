@@ -85,7 +85,7 @@ class RenderPathRaytrace {
 		f32[19] = helpMat._33;
 		f32[20] = Scene.active.world.probe.raw.strength;
 		if (!Context.showEnvmap) f32[20] = -f32[20];
-		// f32[21] = Context.showEnvmap ? 1.0 : 0.0;
+		f32[21] = Context.envmapAngle;
 		// var right = cam.rightWorld().normalize();
 		// f32[21] = right.x;
 		// f32[22] = right.y;
@@ -190,6 +190,7 @@ class RenderPathRaytrace {
 			f32[3] = Context.bakeAoOffset;
 			f32[4] = Scene.active.world.probe.raw.strength;
 			f32[5] = Context.bakeUpAxis;
+			f32[6] = Context.envmapAngle;
 
 			var framebuffer = path.renderTargets.get("baketex2").image;
 			Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);

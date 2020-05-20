@@ -29,11 +29,11 @@ void generate_camera_ray(float2 screen_pos, out float3 ray_origin, out float3 ra
 	ray_dir = normalize(world.xyz - ray_origin);
 }
 
-float2 equirect(float3 normal) {
+float2 equirect(float3 normal, float angle) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
 	float phi = acos(normal.z);
-	float theta = atan2(-normal.y, normal.x) + PI;
+	float theta = atan2(-normal.y, normal.x) + PI + angle;
 	return float2(theta / PI2, phi / PI);
 }
 

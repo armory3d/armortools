@@ -10,11 +10,11 @@ float hash(const vec2 p) {
 	return fract(sin(h) * 43758.5453123);
 }
 
-vec2 envMapEquirect(const vec3 normal) {
+vec2 envMapEquirect(const vec3 normal, const float angle) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
 	float phi = acos(normal.z);
-	float theta = atan(-normal.y, normal.x) + PI;
+	float theta = atan(-normal.y, normal.x) + PI + angle;
 	return vec2(theta / PI2, phi / PI);
 }
 

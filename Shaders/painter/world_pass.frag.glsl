@@ -40,6 +40,7 @@
 #ifdef _EnvStr
 uniform float envmapStrength;
 #endif
+uniform float envmapAngle;
 
 in vec3 normal;
 out vec4 fragColor;
@@ -137,7 +138,7 @@ void main() {
 #ifndef _EnvSky // Prevent case when sky radiance is enabled
 #ifdef _EnvTex
 	vec3 n = normalize(normal);
-	fragColor.rgb = texture(envmap, envMapEquirect(n)).rgb * envmapStrength;
+	fragColor.rgb = texture(envmap, envMapEquirect(n, envmapAngle)).rgb * envmapStrength;
 	#ifdef _EnvLDR
 	fragColor.rgb = pow(fragColor.rgb, vec3(2.2));
 	#endif

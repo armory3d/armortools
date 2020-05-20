@@ -13,7 +13,7 @@ struct Vertex {
 struct RayGenConstantBuffer {
 	float4 eye; // xyz, frame
 	float4x4 inv_vp;
-	float4 params; // envstr
+	float4 params; // envstr, envangle
 };
 
 struct RayPayload {
@@ -216,7 +216,7 @@ void miss(inout RayPayload payload) {
 	}
 	#endif
 
-	float2 tex_coord = equirect(WorldRayDirection());
+	float2 tex_coord = equirect(WorldRayDirection(), constant_buffer.params.y);
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
 	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * abs(constant_buffer.params.x);

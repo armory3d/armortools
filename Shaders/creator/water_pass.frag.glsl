@@ -79,7 +79,7 @@ void main() {
 	float fresnel = 1.0 - max(dot(n2, v), 0.0);
 	fresnel = pow(fresnel, 30.0) * 0.45;
 	vec3 r = reflect(-v, n2);
-	vec3 reflected =  textureLod(senvmapRadiance, envMapEquirect(r), 0).rgb;
+	vec3 reflected =  textureLod(senvmapRadiance, envMapEquirect(r, 0.0), 0).rgb;
 	vec3 refracted = textureLod(tex, tc, 0.0).rgb;
 	fragColor.rgb = mix(refracted, reflected, fresnel * waterReflect);
 	fragColor.rgb *= waterColor;

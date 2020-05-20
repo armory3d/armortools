@@ -377,11 +377,11 @@ void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
 #end
 
 	public static var str_envMapEquirect = "
-vec2 envMapEquirect(const vec3 normal) {
+vec2 envMapEquirect(const vec3 normal, const float angle) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
 	float phi = acos(normal.z);
-	float theta = atan(-normal.y, normal.x) + PI;
+	float theta = atan(-normal.y, normal.x) + PI + angle;
 	return vec2(theta / PI2, phi / PI);
 }
 ";

@@ -349,10 +349,11 @@ class MakeMesh {
 					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
 					frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
+					frag.add_uniform('float envmapAngle', '_envmapAngle');
 					frag.write('vec3 wreflect = reflect(-vVec, wn);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
 					frag.add_function(MaterialFunctions.str_envMapEquirect);
-					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect), envlod).rgb;');
+					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapAngle), envlod).rgb;');
 
 					frag.add_uniform('vec3 lightArea0', '_lightArea0');
 					frag.add_uniform('vec3 lightArea1', '_lightArea1');

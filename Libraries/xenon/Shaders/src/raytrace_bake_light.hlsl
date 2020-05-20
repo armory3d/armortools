@@ -12,7 +12,7 @@ struct Vertex {
 
 struct RayGenConstantBuffer {
 	float4 v0; // frame, strength, radius, offset
-	float4 v1; // envstr
+	float4 v1; // envstr, upaxis, envangle
 	float4 v2;
 	float4 v3;
 	float4 v4;
@@ -113,7 +113,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
-	float2 tex_coord = equirect(WorldRayDirection());
+	float2 tex_coord = equirect(WorldRayDirection(), constant_buffer.v1.z);
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
 	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * constant_buffer.v1.x;
