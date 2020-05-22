@@ -24,7 +24,7 @@ float tex_checker_f(const vec3 co, const float scale) {
 	// Created by inigo quilez - iq/2013
 	// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
 	public static var str_tex_voronoi = "
-vec4 tex_voronoi(const vec3 x) {
+vec4 tex_voronoi(const vec3 x, textureArg(snoise256)) {
 	vec3 p = floor(x);
 	vec3 f = fract(x);
 	float id = 0.0;

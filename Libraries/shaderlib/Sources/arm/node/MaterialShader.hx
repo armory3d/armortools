@@ -299,6 +299,8 @@ class MaterialShader {
 
 		#if (kha_direct3d11 || kha_direct3d12)
 		var s = '#define HLSL\n';
+		s += '#define textureArg(tex) Texture2D tex,SamplerState tex ## _sampler\n';
+		s += '#define texturePass(tex) tex,tex ## _sampler\n';
 		s += '#define sampler2D Texture2D\n';
 		s += '#define sampler3D Texture3D\n';
 		s += '#define texture(tex, coord) tex.Sample(tex ## _sampler, coord)\n';
@@ -484,6 +486,8 @@ class MaterialShader {
 		s += '#include <simd/simd.h>\n';
 		s += 'using namespace metal;\n';
 
+		s += '#define textureArg(tex) texture2d<float> tex,sampler tex ## _sampler\n';
+		s += '#define texturePass(tex) tex,tex ## _sampler\n';
 		s += '#define sampler2D texture2d<float>\n';
 		s += '#define sampler3D texture3d<float>\n';
 		s += '#define texture(tex, coord) tex.sample(tex ## _sampler, coord)\n';
@@ -493,7 +497,7 @@ class MaterialShader {
 		s += '#define texelFetch(tex, coord, lod) tex.read(uint2(coord), uint(lod))\n';
 		s += 'uint2 _getDimensions(texture2d<float> tex, uint lod) { return uint2(tex.get_width(lod), tex.get_height(lod)); }\n';
 		s += '#define textureSize _getDimensions\n';
-		s += '#define mod(a, b) (a % b)\n';
+		s += '#define mod(a, b) fmod(a, b)\n';
 		s += '#define vec2 float2\n';
 		s += '#define vec3 float3\n';
 		s += '#define vec4 float4\n';
@@ -718,6 +722,8 @@ class MaterialShader {
 		var s = '#version 330\n';
 		#end
 
+		s += '#define textureArg(tex) Sampler2D tex\n';
+		s += '#define texturePass(tex) tex\n';
 		s += '#define mul(a, b) b * a\n';
 		s += '#define textureShared texture\n';
 		s += '#define textureLodShared textureLod\n';

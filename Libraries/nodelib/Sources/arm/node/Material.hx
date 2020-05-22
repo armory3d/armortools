@@ -175,7 +175,7 @@ class Material {
 			con.add_elem("tang", "short4norm");
 			vert.add_uniform("mat3 N", "_normalMatrix");
 			vert.add_out("vec3 wtangent");
-			vert.write_attrib('wtangent = normalize(mul(tang, N));');
+			vert.write_attrib('wtangent = normalize(mul(tang.xyz, N));');
 		}
 		if (frag.vVecCam) {
 			vert.add_uniform("mat4 WV", "_worldViewMatrix");
@@ -465,7 +465,6 @@ class Material {
 		}
 		else if (node.type == "TEX_NOISE") {
 			curshader.add_function(MaterialFunctions.str_tex_noise);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'vec3(tex_noise($co * $scale), tex_noise($co * $scale + 0.33), tex_noise($co * $scale + 0.66))';
@@ -482,10 +481,10 @@ class Material {
 			coloring = coloring.replace(" ", "_");
 			var res = "";
 			if (coloring == "INTENSITY") {
-				res = to_vec3('tex_voronoi($co * $scale).a');
+				res = to_vec3('tex_voronoi($co * $scale, texturePass(snoise256)).a');
 			}
 			else { // Cells
-				res = 'tex_voronoi($co * $scale).rgb';
+				res = 'tex_voronoi($co * $scale, texturePass(snoise256)).rgb';
 			}
 			if (sample_bump) write_bump(node, res);
 			return res;
@@ -528,7 +527,7 @@ class Material {
 			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
 			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
 			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
-			curshader.write('texCoordBlur = texCoord + vec2(i, j) / textureSize($texture, 0);');
+			curshader.write('texCoordBlur = texCoord + vec2(i, j) / vec2(textureSize($texture, 0));');
 			curshader.write('res1 += $out_col;');
 			curshader.write('}');
 			curshader.write('}');
@@ -1137,7 +1136,6 @@ class Material {
 		}
 		else if (node.type == "TEX_NOISE") {
 			curshader.add_function(MaterialFunctions.str_tex_noise);
-			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_noise($co * $scale)';
@@ -1154,10 +1152,10 @@ class Material {
 			coloring = coloring.replace(" ", "_");
 			var res = "";
 			if (coloring == "INTENSITY") {
-				res = 'tex_voronoi($co * $scale).a';
+				res = 'tex_voronoi($co * $scale, texturePass(snoise256)).a';
 			}
 			else { // Cells
-				res = 'tex_voronoi($co * $scale).r';
+				res = 'tex_voronoi($co * $scale, texturePass(snoise256)).r';
 			}
 			if (sample_bump) write_bump(node, res);
 			return res;
@@ -1474,7 +1472,7 @@ class Material {
 	}
 
 	public static inline function to_vec3(s: String): String {
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+		#if (kha_direct3d11 || kha_direct3d12)
 		return '($s).xxx';
 		#else
 		return 'vec3($s)';
