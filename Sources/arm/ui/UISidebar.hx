@@ -639,14 +639,9 @@ class UISidebar {
 			hwnd.redraws = 2;
 		}
 
-		#if krom_darwin
-		var undoPressed = !kb.down("shift") && kb.started("z"); // cmd+z on macos
-		var redoPressed = (kb.down("shift") && kb.started("z")) || kb.started("y"); // cmd+y on macos
-		#else
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
 		var redoPressed = Operator.shortcut(Config.keymap.edit_redo) ||
 						  (kb.down("control") && kb.started("y"));
-		#end
 
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
