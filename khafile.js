@@ -44,12 +44,15 @@ else if (ios) {
 }
 else if (process.platform === "win32") {
 	project.addDefine("krom_windows");
+	project.addDefine("kha_windows");
 }
 else if (process.platform === "linux") {
 	project.addDefine("krom_linux");
+	project.addDefine("kha_linux");
 }
 else if (process.platform === "darwin") {
 	project.addDefine("krom_darwin");
+	project.addDefine("kha_darwin");
 }
 
 if (debug) {
