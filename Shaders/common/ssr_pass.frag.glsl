@@ -12,7 +12,7 @@ const float ssrJitter = 0.6;
 uniform sampler2D tex;
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0; // Normal, roughness
-uniform sampler2D gbuffer1; // basecol, spec
+uniform sampler2D gbuffer1; // basecol, occ
 uniform mat4 P;
 uniform mat3 V3;
 uniform vec2 cameraProj;
@@ -70,9 +70,6 @@ void main() {
 	vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
 	float roughness = g0.b;
 	if (roughness == 1.0) { fragColor.rgb = vec3(0.0); return; }
-
-	float spec = fract(textureLod(gbuffer1, texCoord, 0.0).a);
-	if (spec == 0.0) { fragColor.rgb = vec3(0.0); return; }
 
 	float d = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
 	if (d == 1.0) { fragColor.rgb = vec3(0.0); return; }

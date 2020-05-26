@@ -186,8 +186,8 @@ void main() {
 	float metallic;
 	uint matid;
 	unpackFloatInt16(g0.a, metallic, matid);
-	vec4 g1 = textureLod(gbuffer1, texCoord, 0.0); // Basecolor.rgb, spec/occ
-	vec2 occspec = unpackFloat2(g1.a);
+	vec4 g1 = textureLod(gbuffer1, texCoord, 0.0); // Basecolor.rgb, occ
+	float occ = g1.a;
 	vec3 albedo = surfaceAlbedo(g1.rgb, metallic); // g1.rgb - basecolor
 	vec3 f0 = surfaceF0(g1.rgb, metallic);
 
@@ -197,7 +197,7 @@ void main() {
 	float dotNV = max(dot(n, v), 0.0);
 
 #ifdef _MicroShadowing
-	occspec.x = mix(1.0, occspec.x, dotNV); // AO Fresnel
+	occ = mix(1.0, occ, dotNV); // AO Fresnel
 #endif
 
 #ifdef _Brdf
@@ -230,14 +230,14 @@ void main() {
 	envl.rgb *= albedo;
 
 #ifdef _Rad // Indirect specular
-	envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5 * occspec.y;
+	envl.rgb += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;
 #else
 	#ifdef _EnvCol
 	envl.rgb += backgroundCol * surfaceF0(g1.rgb, metallic); // f0
 	#endif
 #endif
 
-	envl.rgb *= envmapStrength * occspec.x;
+	envl.rgb *= envmapStrength * occ;
 
 #ifdef _VoxelAOvar
 
@@ -295,7 +295,7 @@ void main() {
 	float sdotNL = dot(n, sunDir);
 	float svisibility = 1.0;
 	vec3 sdirect = lambertDiffuseBRDF(albedo, sdotNL) +
-				   specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * occspec.y;
+				   specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH);
 
 	#ifdef _ShadowMap
 		#ifdef _CSM
@@ -326,7 +326,7 @@ void main() {
 	#endif
 
 	#ifdef _MicroShadowing
-	svisibility *= sdotNL + 2.0 * occspec.x * occspec.x - 1.0;
+	svisibility *= sdotNL + 2.0 * occ * occ - 1.0;
 	#endif
 
 	fragColor.rgb += sdirect * svisibility * sunCol;
@@ -356,7 +356,7 @@ void main() {
 #ifdef _SinglePoint
 
 	fragColor.rgb += sampleLight(
-		p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0
+		p, n, v, dotNV, pointPos, pointCol, albedo, roughness, f0
 		#ifdef _ShadowMap
 			, 0, pointBias
 		#endif
@@ -369,7 +369,7 @@ void main() {
 		#endif
 		#endif
 		#ifdef _MicroShadowing
-		, occspec.x
+		, occ
 		#endif
 	);
 
@@ -406,7 +406,6 @@ void main() {
 			lightsArray[li * 2 + 1].xyz, // lightCol
 			albedo,
 			roughness,
-			occspec.y,
 			f0
 			#ifdef _ShadowMap
 				, li, lightsArray[li * 2].w // bias
@@ -418,7 +417,7 @@ void main() {
 			, lightsArraySpot[li].xyz // spotDir
 			#endif
 			#ifdef _MicroShadowing
-			, occspec.x
+			, occ
 			#endif
 		);
 	}

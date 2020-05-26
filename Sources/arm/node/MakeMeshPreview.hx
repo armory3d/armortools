@@ -21,7 +21,8 @@ class MakeMeshPreview {
 			compare_mode: "less",
 			cull_mode: (Context.cullBackfaces || !isScene) ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
-			color_attachments: ["RGBA64", "RGBA64", "RGBA64"]
+			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+			depth_attachment: "DEPTH32"
 		});
 
 		var vert = con_mesh.make_vert();
@@ -92,7 +93,6 @@ class MakeMeshPreview {
 		frag.n = true;
 
 		frag.add_function(MaterialFunctions.str_packFloatInt16);
-		frag.add_function(MaterialFunctions.str_packFloat2);
 		frag.add_function(MaterialFunctions.str_cotangentFrame);
 		frag.add_function(MaterialFunctions.str_octahedronWrap);
 
@@ -116,7 +116,7 @@ class MakeMeshPreview {
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 		// uint matid = 0;
 		frag.write('fragColor[0] = vec4(n.x, n.y, roughness, packFloatInt16(metallic, uint(0)));'); // metallic/matid
-		frag.write('fragColor[1] = vec4(basecol.r, basecol.g, basecol.b, packFloat2(occlusion, 1.0));'); // occ/spec
+		frag.write('fragColor[1] = vec4(basecol.r, basecol.g, basecol.b, occlusion);');
 		frag.write('fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);'); // veloc
 
 		Material.finalize(con_mesh);

@@ -71,15 +71,6 @@ vec3 getPos2NoEye(const vec3 eye, const mat4 invVP, const float depth, const vec
 	return pos.xyz - eye;
 }
 
-float packFloat2(const float f1, const float f2) {
-	// Higher f1 = less precise f2
-	return floor(f1 * 255.0) + min(f2, 1.0 - 1.0 / 100.0);
-}
-
-vec2 unpackFloat2(const float f) {
-	return vec2(floor(f) / 255.0, fract(f));
-}
-
 vec4 encodeRGBM(const vec3 rgb) {
 	const float maxRange = 6.0;
 	float maxRGB = max(rgb.x, max(rgb.g, rgb.b));

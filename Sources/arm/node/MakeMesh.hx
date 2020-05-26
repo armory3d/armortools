@@ -14,7 +14,8 @@ class MakeMesh {
 			compare_mode: "less",
 			cull_mode: Context.cullBackfaces ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"},{name: "nor", data: "short2norm"},{name: "tex", data: "short2norm"}],
-			color_attachments: ["RGBA64", "RGBA64", "RGBA64"]
+			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+			depth_attachment: "DEPTH32"
 		});
 
 		var vert = con_mesh.make_vert();
@@ -64,13 +65,12 @@ class MakeMesh {
 		frag.n = true;
 
 		frag.add_function(MaterialFunctions.str_packFloatInt16);
-		frag.add_function(MaterialFunctions.str_packFloat2);
 
 		if (Context.tool == ToolColorId) {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, 1.0, packFloatInt16(0.0, uint(0)));'); // met/rough
 			frag.write('vec3 idcol = pow(textureLod(texcolorid, texCoord, 0.0).rgb, vec3(2.2, 2.2, 2.2));');
-			frag.write('fragColor[1] = vec4(idcol.rgb, packFloat2(1.0, 1.0));'); // occ/spec
+			frag.write('fragColor[1] = vec4(idcol.rgb, 1.0);'); // occ
 		}
 		else {
 			frag.add_function(MaterialFunctions.str_octahedronWrap);
@@ -392,7 +392,7 @@ class MakeMesh {
 				}
 				else { // Deferred, Pathtraced
 					if (MaterialBuilder.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
-					frag.write('fragColor[1] = vec4(basecol, packFloat2(occlusion, 1.0));'); // occ/spec
+					frag.write('fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
 			else if (Context.viewportMode == ViewBaseColor) {

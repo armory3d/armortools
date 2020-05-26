@@ -265,12 +265,6 @@ vec2 octahedronWrap(const vec2 v) {
 }
 ";
 
-	public static var str_packFloat2 = "
-float packFloat2(const float f1, const float f2) {
-	return floor(f1 * 255.0) + min(f2, 1.0 - 1.0 / 100.0);
-}
-";
-
 	public static var str_packFloatInt16 = "
 float packFloatInt16(const float f, const uint i) {
 	const float prec = float(1 << 16);
