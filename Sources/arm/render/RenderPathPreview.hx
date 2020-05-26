@@ -39,7 +39,6 @@ class RenderPathPreview {
 			t.height = RenderUtil.matPreviewSize;
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
-			t.depth_buffer = "mmain";
 			path.createRenderTarget(t);
 		}
 
@@ -100,9 +99,6 @@ class RenderPathPreview {
 		// ---
 		// Deferred light
 		// ---
-		#if (!kha_opengl && !kha_direct3d12)
-		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth so we can read it
-		#end
 		path.setTarget("mtex");
 		path.bindTarget("_mmain", "gbufferD");
 		path.bindTarget("mgbuffer0", "gbuffer0");
@@ -113,12 +109,16 @@ class RenderPathPreview {
 		path.drawShader("deferred_light/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)
-		path.setDepthFrom("mtex", "mgbuffer0"); // Re-bind depth
+		path.setDepthFrom("mtex", "mgbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("mtex"); // Re-binds depth
 		#if (!arm_world)
 		path.drawSkydome("world_pass/world_pass/world_pass");
+		#end
+
+		#if (!kha_opengl && !kha_direct3d12)
+		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
 		#end
 
 		var framebuffer = "texpreview";
@@ -152,9 +152,6 @@ class RenderPathPreview {
 		// ---
 		// Deferred light
 		// ---
-		#if (!kha_opengl && !kha_direct3d12)
-		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
-		#end
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
@@ -165,11 +162,15 @@ class RenderPathPreview {
 		path.drawShader("deferred_light/deferred_light/deferred_light");
 
 		#if (!kha_opengl && !kha_direct3d12)
-		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
+		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
-		path.setTarget("tex"); // Re-binds depth
+		path.setTarget("tex");
 		path.drawSkydome("world_pass/world_pass/world_pass");
+
+		#if (!kha_opengl && !kha_direct3d12)
+		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
+		#end
 
 		var framebuffer = "texpreview";
 		RenderPath.active.renderTargets.get("texpreview").image = Context.decalImage;

@@ -75,7 +75,6 @@ class RenderPathDeferred {
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
-			t.depth_buffer = "main";
 			path.createRenderTarget(t);
 		}
 		{
@@ -151,6 +150,7 @@ class RenderPathDeferred {
 		path.loadShader("shader_datas/compositor_pass/compositor_pass");
 		path.loadShader("shader_datas/copy_pass/copy_pass");
 		path.loadShader("shader_datas/copy_pass/copyR8_pass");
+		//path.loadShader("shader_datas/copy_pass/copyD32_pass");
 		path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 		path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 		path.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
@@ -333,9 +333,6 @@ class RenderPathDeferred {
 		// ---
 		// Deferred light
 		// ---
-		#if (!kha_opengl)
-		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth so we can read it
-		#end
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
@@ -386,11 +383,15 @@ class RenderPathDeferred {
 		#end
 
 		#if (!kha_opengl)
-		path.setDepthFrom("tex", "gbuffer0"); // Re-bind depth
+		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
-		path.setTarget("tex"); // Re-binds depth
+		path.setTarget("tex");
 		path.drawSkydome("world_pass/world_pass/world_pass");
+
+		#if (!kha_opengl)
+		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
+		#end
 
 		if (Config.raw.rp_bloom != false) {
 
