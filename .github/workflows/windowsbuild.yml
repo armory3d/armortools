@@ -20,7 +20,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Kromx process
-        run: node Kromx/make
+      run: node Kromx/make
 
     - name: extract v8_monolith
       uses: DuckSoft/extract-7z-action@v1.0
@@ -32,4 +32,4 @@ jobs:
         run: node Kromx/Kinc/make -g direct3d11
 
     - name: build solution
-        run: msbuild Kromx/build/Krom.sln /property:Configuration=Release
+      run: msbuild Kromx/build/Krom.sln /property:Configuration=Release
