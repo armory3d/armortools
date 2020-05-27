@@ -1,0 +1,32 @@
+name: Windows (Direct3D 11)
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Get Submodules
+      run: git submodule update --init --recursive
+    - name: Get Node.js
+      uses: actions/setup-node@v1.4.2
+    - name: install msbuild
+      uses: microsoft/setup-msbuild@v1
+    - name: kromx
+      run: node Kromx/make -g direct3d11
+    - name: Unpack v8_monolith
+      uses: DuckSoft/extract-7z-action@v1.0
+      with:
+        pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
+        pathTarget: Kromx/v8/libraries/win32/release/
+    - name: Kinc and compile
+      run: cd Kromx;node Kinc/make -g direct3d11 --compile
