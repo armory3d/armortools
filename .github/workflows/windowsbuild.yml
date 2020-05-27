@@ -27,4 +27,4 @@ jobs:
         pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
         pathTarget: Kromx/v8/libraries/win32/release/
     - name: Kinc and compile
-      run: node Kinc/make -g direct3d11 --compile
+      run: node Kromx/Kinc/make -g direct3d11 --compile
