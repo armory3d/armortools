@@ -47,6 +47,10 @@ class Config {
 			raw.window_maximizable = true;
 			raw.window_w = 1600;
 			raw.window_h = 900;
+			#if krom_darwin
+			raw.window_w *= 2;
+			raw.window_h *= 2;
+			#end
 			raw.window_x = -1;
 			raw.window_y = -1;
 			raw.window_scale = 1.0;
@@ -62,11 +66,14 @@ class Config {
 			#end
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
+			#if krom_darwin
+			raw.rp_supersample = 0.5;
+			#end
 			var disp = Display.primary;
 			if (disp != null && disp.width >= 2560 && disp.height >= 1600) {
 				raw.window_scale = 2.0;
 			}
-			#if (krom_android || krom_ios)
+			#if (krom_android || krom_ios || krom_darwin)
 			raw.window_scale = 2.0;
 			#end
 
