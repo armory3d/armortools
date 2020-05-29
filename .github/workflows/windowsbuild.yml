@@ -29,7 +29,7 @@ jobs:
         pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
         pathTarget: Kromx/v8/libraries/win32/release/
     - name: Kinc and compile
-    - run: cd Kromx;node Kinc/make -g direct3d11 --compile
+      run: cd Kromx;node Kinc/make -g direct3d11 --compile
       shell: pwsh
     - name: publish build
       uses: actions/upload-artifact@v2
