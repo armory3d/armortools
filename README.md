@@ -22,6 +22,12 @@ node Kinc/make -g direct3d11
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build for x64 & release
 ```
+
+If you don't do the "Project - Properties - Debugging - Command Arguments" step, you can launc from command line with
+```bash
+cd whereisyourkromexecutable
+.\Krom.exe whereisthekromjsfileloacated
+```
 ```bash
 # Linux
 node Kromx/make -g opengl
