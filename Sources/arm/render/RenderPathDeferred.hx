@@ -75,6 +75,9 @@ class RenderPathDeferred {
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
+			#if kha_opengl
+			t.depth_buffer = "main";
+			#end
 			path.createRenderTarget(t);
 		}
 		{

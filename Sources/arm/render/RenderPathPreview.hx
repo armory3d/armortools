@@ -39,6 +39,9 @@ class RenderPathPreview {
 			t.height = RenderUtil.matPreviewSize;
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
+			#if kha_opengl
+			t.depth_buffer = "mmain";
+			#end
 			path.createRenderTarget(t);
 		}
 
