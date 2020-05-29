@@ -144,30 +144,6 @@ class ImportArm {
 				ImportTexture.run(abs);
 			}
 
-			var m0: MaterialData = null;
-			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
-				m0 = m;
-			});
-
-			Project.materials = [];
-			for (n in project.material_nodes) {
-				initNodes(n.nodes);
-				Context.material = new MaterialSlot(m0, n);
-				Project.materials.push(Context.material);
-				MaterialParser.parsePaintMaterial();
-				RenderUtil.makeMaterialPreview();
-			}
-
-			Project.brushes = [];
-			for (n in project.brush_nodes) {
-				initNodes(n.nodes);
-				Context.brush = new BrushSlot(n);
-				Project.brushes.push(Context.brush);
-				MaterialParser.parseBrush();
-				Context.parseBrushInputs();
-				RenderUtil.makeBrushPreview();
-			}
-
 			// Synchronous for now
 			new MeshData(project.mesh_datas[0], function(md: MeshData) {
 				Context.paintObject.setData(md);
@@ -263,7 +239,6 @@ class ImportArm {
 					l.angle = ld.uv_rot;
 					l.uvType = ld.uv_type;
 					l.maskOpacity = ld.opacity_mask;
-					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
 					l.visible = ld.visible;
@@ -291,6 +266,41 @@ class ImportArm {
 			}
 
 			Context.setLayer(Project.layers[0]);
+
+			// Materials
+			var m0: MaterialData = null;
+			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
+				m0 = m;
+			});
+
+			Project.materials = [];
+			for (n in project.material_nodes) {
+				initNodes(n.nodes);
+				Context.material = new MaterialSlot(m0, n);
+				Project.materials.push(Context.material);
+				MaterialParser.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
+			}
+
+			Project.brushes = [];
+			for (n in project.brush_nodes) {
+				initNodes(n.nodes);
+				Context.brush = new BrushSlot(n);
+				Project.brushes.push(Context.brush);
+				MaterialParser.parseBrush();
+				Context.parseBrushInputs();
+				RenderUtil.makeBrushPreview();
+			}
+
+			// Fill layers
+			for (i in 0...project.layer_datas.length) {
+				var ld = project.layer_datas[i];
+				var l = Project.layers[i];
+				var isGroup = ld.texpaint == null;
+				if (!isGroup) {
+					l.material_mask = ld.material_mask > -1 ? Project.materials[ld.material_mask] : null;
+				}
+			}
 
 			Context.ddirty = 4;
 			UISidebar.inst.hwnd.redraws = 2;
