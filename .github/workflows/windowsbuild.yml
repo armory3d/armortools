@@ -30,7 +30,8 @@ jobs:
         pathTarget: Kromx/v8/libraries/win32/release/
     - name: Kinc and compile
     - run: cd Kromx;node Kinc/make -g direct3d11 --compile
-      - name: publish build
-        uses: actions/upload-artifact@v2
-        with:
-          path: *build *Kromx
+      shell: pwsh
+    - name: publish build
+      uses: actions/upload-artifact@v2
+      with:
+        path: *build *Kromx
