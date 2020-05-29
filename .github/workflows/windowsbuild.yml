@@ -34,5 +34,4 @@ jobs:
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
-        path: '**build'
-        path: '**Kromx'
+        path: '**build **Kromx'
