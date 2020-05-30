@@ -27,6 +27,7 @@ class UIToolbar {
 		tr("Gizmo"),
 		tr("Bake")
 	];
+	var toolCount = [10, 2, 1, 1];
 
 	public function new() {
 		inst = this;
@@ -57,7 +58,7 @@ class UIToolbar {
 					"(" + Config.keymap.tool_picker + ")"
 				];
 
-				for (i in 0...toolNames.length) {
+				for (i in 0...toolCount[SpacePaint]) {
 					ui._x += 2;
 					if (Context.tool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
 					if (ui.image(img, -1, null, i * imgw, 0, imgw, imgw) == State.Started) Context.selectTool(i);
