@@ -139,6 +139,23 @@ class LayerSlot {
 		other.texpaint_pack = _texpaint_pack;
 	}
 
+	public function clearLayer(baseColor = 0x00000000) {
+		texpaint.g4.begin();
+		texpaint.g4.clear(baseColor); // Base
+		texpaint.g4.end();
+
+		texpaint_nor.g4.begin();
+		texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		texpaint_nor.g4.end();
+
+		texpaint_pack.g4.begin();
+		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, Layers.defaultRough, 0.0, 0.0)); // Occ, rough, met
+		texpaint_pack.g4.end();
+
+		Context.layerPreviewDirty = true;
+		Context.ddirty = 3;
+	}
+
 	public function swapMask(other: LayerSlot) {
 		RenderPath.active.renderTargets.get("texpaint_mask" + ext).image = other.texpaint_mask;
 		RenderPath.active.renderTargets.get("texpaint_mask" + other.ext).image = texpaint_mask;
@@ -164,29 +181,30 @@ class LayerSlot {
 		if (clear) {
 			createMaskColor = color;
 			createMaskImage = image;
-			iron.App.notifyOnRender(clearMask);
+			iron.App.notifyOnRender(_clearMask);
 		}
 	}
 
-	function clearMask(g: kha.graphics4.Graphics) {
+	function _clearMask(g: kha.graphics4.Graphics) {
 		g.end();
+		clearMask(createMaskColor);
+		g.begin();
+		iron.App.removeRender(_clearMask);
+		createMaskColor = 0;
+		createMaskImage = null;
+	}
 
+	public function clearMask(color = 0x00000000) {
 		texpaint_mask.g2.begin(false);
-
 		if (createMaskImage != null) {
 			texpaint_mask.g2.drawScaledImage(createMaskImage, 0, 0, texpaint_mask.width, texpaint_mask.height);
 		}
 		else {
-			texpaint_mask.g2.clear(createMaskColor);
+			texpaint_mask.g2.clear(color);
 		}
 		texpaint_mask.g2.end();
-
-		g.begin();
-		iron.App.removeRender(clearMask);
-
 		Context.layerPreviewDirty = true;
-		createMaskColor = 0;
-		createMaskImage = null;
+		Context.ddirty = 3;
 	}
 
 	public function deleteMask() {

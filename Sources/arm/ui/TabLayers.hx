@@ -209,6 +209,24 @@ class TabLayers {
 								l.deleteMask();
 								Context.setLayer(l);
 							}
+							if (ui.button(tr("Clear to Black"), Left)) {
+								function clear(g: kha.graphics4.Graphics) {
+									g.end();
+									l.clearMask(0x00000000);
+									g.begin();
+									iron.App.removeRender(clear);
+								}
+								iron.App.notifyOnRender(clear);
+							}
+							if (ui.button(tr("Clear to White"), Left)) {
+								function clear(g: kha.graphics4.Graphics) {
+									g.end();
+									l.clearMask(0xffffffff);
+									g.begin();
+									iron.App.removeRender(clear);
+								}
+								iron.App.notifyOnRender(clear);
+							}
 							if (ui.button(tr("Apply"), Left)) {
 								function makeApply(g: kha.graphics4.Graphics) {
 									g.end();
@@ -221,7 +239,7 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(makeApply);
 							}
-						}, 3);
+						}, 5);
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
@@ -253,7 +271,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.material_mask != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 6 : (20 + add);
+					var menuElements = l.getChildren() != null ? 6 : (21 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -310,6 +328,15 @@ class TabLayers {
 								}
 								Context.ddirty = 2;
 							}
+						}
+						if (ui.button(tr("Clear"), Left)) {
+							function clear(g: kha.graphics4.Graphics) {
+								g.end();
+								l.clearLayer();
+								g.begin();
+								iron.App.removeRender(clear);
+							}
+							iron.App.notifyOnRender(clear);
 						}
 						if (ui.button(tr("Move Up"), Left)) {
 							if (i < Project.layers.length - 1) {

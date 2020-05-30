@@ -57,25 +57,9 @@ class Layers {
 
 	public static function initLayers(g: kha.graphics4.Graphics) {
 		g.end();
-
-		var layers = Project.layers;
-		layers[0].texpaint.g4.begin();
-		layers[0].texpaint.g4.clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0)); // Base
-		layers[0].texpaint.g4.end();
-
-		layers[0].texpaint_nor.g4.begin();
-		layers[0].texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
-		layers[0].texpaint_nor.g4.end();
-
-		layers[0].texpaint_pack.g4.begin();
-		layers[0].texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, defaultRough, 0.0, 0.0)); // Occ, rough, met
-		layers[0].texpaint_pack.g4.end();
-
+		Project.layers[0].clearLayer(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
 		g.begin();
 		iron.App.removeRender(initLayers);
-
-		Context.layerPreviewDirty = true;
-		Context.ddirty = 3;
 	}
 
 	public static function resizeLayers(g: kha.graphics4.Graphics) {
