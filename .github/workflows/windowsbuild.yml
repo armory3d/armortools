@@ -33,9 +33,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: build/krom
-	name: armorpaintbuild
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
         path: Kromx/build/x64/
-	name: armorpaintbuild
