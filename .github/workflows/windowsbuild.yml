@@ -19,8 +19,6 @@ jobs:
       run: git submodule update --init --recursive
     - name: Get Node.js
       uses: actions/setup-node@v1.4.2
-    - name: install msbuild
-      uses: microsoft/setup-msbuild@v1
     - name: kromx
       run: node Kromx/make -g direct3d11
     - name: Unpack v8_monolith
@@ -35,7 +33,9 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: build/krom
+	name: armorpaintbuild
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
         path: Kromx/build/x64/
+	name: armorpaintbuild
