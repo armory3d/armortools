@@ -23,7 +23,9 @@ class UIToolbar {
 		tr("Blur"),
 		tr("Particle"),
 		tr("ColorID"),
-		tr("Picker")
+		tr("Picker"),
+		tr("Gizmo"),
+		tr("Bake")
 	];
 
 	public function new() {

@@ -374,19 +374,19 @@ class Uniforms {
 		}
 		if (link.startsWith("_texpaint_mask")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return Project.layers[tid].texpaint_mask;
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_mask : null;
 		}
 		if (link.startsWith("_texpaint_nor")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return Project.layers[tid].texpaint_nor;
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_nor : null;
 		}
 		if (link.startsWith("_texpaint_pack")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return Project.layers[tid].texpaint_pack;
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_pack : null;
 		}
 		if (link.startsWith("_texpaint")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return Project.layers[tid].texpaint;
+			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 		}
 
 		if (link == "_texparticle") {
