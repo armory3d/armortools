@@ -20,14 +20,14 @@ jobs:
     - name: Get Node.js
       uses: actions/setup-node@v1.4.2
     - name: kromx
-      run: node Kromx/make -g direct3d11
+      run: node Kromx/make -g direct3d12
     - name: Unpack v8_monolith
       uses: DuckSoft/extract-7z-action@v1.0
       with:
         pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
         pathTarget: Kromx/v8/libraries/win32/release/
     - name: Kinc and compile
-      run: cd Kromx;node Kinc/make -g direct3d11 --compile
+      run: cd Kromx;node Kinc/make -g direct3d12 --compile
       shell: pwsh
     - name: publish build
       uses: actions/upload-artifact@v2
