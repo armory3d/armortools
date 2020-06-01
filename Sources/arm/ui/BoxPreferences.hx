@@ -360,6 +360,13 @@ class BoxPreferences {
 					cam.buildProjection();
 				}
 
+				var dispHandle = Id.handle({value: Context.displaceStrength});
+				Context.displaceStrength = ui.slider(dispHandle, tr("Displace"), 0.0, 10.0, true);
+				if (dispHandle.changed) {
+					Context.ddirty = 2;
+					MaterialParser.parseMeshMaterial();
+				}
+
 				#if arm_creator
 				var h = Id.handle({value: Context.vxaoExt});
 				Context.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
