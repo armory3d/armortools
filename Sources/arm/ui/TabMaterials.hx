@@ -64,11 +64,11 @@ class TabMaterials {
 			var num = Std.int(UISidebar.inst.windowW / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
-				var mult = Context.showAssetNames ? 2 : 1;
+				var mult = Config.raw.show_asset_names ? 2 : 1;
 				ui.row([for (i in 0...num * mult) 1 / num]);
 
 				ui._x += 2;
-				var off = Context.showAssetNames ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+				var off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
 				if (row > 0) ui._y += off;
 
 				for (j in 0...num) {
@@ -195,7 +195,7 @@ class TabMaterials {
 					}
 					if (ui.isHovered) ui.tooltipImage(imgFull);
 
-					if (Context.showAssetNames) {
+					if (Config.raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
 						ui.text(materials[i].canvas.name, Center);

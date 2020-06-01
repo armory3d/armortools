@@ -17,6 +17,7 @@ class UIBox {
 	public static var clickToHide = true;
 	static var modalW = 400;
 	static var modalH = 170;
+	static var modalOnHide: Void->Void = null;
 	static var draws = 0;
 	static var copyable = false;
 
@@ -82,6 +83,7 @@ class UIBox {
 			var mx = mouse.x;
 			var my = mouse.y;
 			if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
+				if (modalOnHide != null) modalOnHide();
 				show = false;
 				App.redrawUI();
 			}
@@ -98,10 +100,11 @@ class UIBox {
 		UIBox.copyable = copyable;
 	}
 
-	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200) {
+	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200, onHide: Void->Void = null) {
 		init();
 		modalW = mw;
 		modalH = mh;
+		modalOnHide = onHide;
 		boxCommands = commands;
 	}
 

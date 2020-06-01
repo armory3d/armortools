@@ -93,6 +93,17 @@ class Config {
 			raw.brush_3d = true;
 			raw.brush_live = false;
 			raw.camera_speed = 1.0;
+			raw.displace_strength = 1.0;
+			#if krom_android
+			raw.native_file_browser = false;
+			#else
+			raw.native_file_browser = true;
+			#end
+			raw.show_asset_names = false;
+			#end
+
+			#if arm_creator
+			// raw.displace_strength = 100.0;
 			#end
 		}
 		else {
