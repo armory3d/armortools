@@ -390,15 +390,14 @@ float integrateEdge(vec3 v1, vec3 v2) {
 	return res;
 }
 float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, vec3 points1, vec3 points2, vec3 points3) {
-	vec3 T1, T2;
-	T1 = normalize(V - N * dotNV);
-	T2 = cross(N, T1);
-	Minv = Minv * transpose(mat3(T1, T2, N));
-	vec3 L0 = Minv * (points0 - P);
-	vec3 L1 = Minv * (points1 - P);
-	vec3 L2 = Minv * (points2 - P);
-	vec3 L3 = Minv * (points3 - P);
-	vec3 L4 = vec3(0.0);
+	vec3 T1 = normalize(V - N * dotNV);
+	vec3 T2 = cross(N, T1);
+	Minv = mul(transpose(mat3(T1, T2, N)), Minv);
+	vec3 L0 = mul((points0 - P), Minv);
+	vec3 L1 = mul((points1 - P), Minv);
+	vec3 L2 = mul((points2 - P), Minv);
+	vec3 L3 = mul((points3 - P), Minv);
+	vec3 L4 = vec3(0.0, 0.0, 0.0);
 	int n = 0;
 	int config = 0;
 	if (L0.z > 0.0) config += 1;
