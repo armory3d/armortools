@@ -54,6 +54,13 @@ class Config {
 			raw.window_x = -1;
 			raw.window_y = -1;
 			raw.window_scale = 1.0;
+			var disp = Display.primary;
+			if (disp != null && disp.width >= 2560 && disp.height >= 1600) {
+				raw.window_scale = 2.0;
+			}
+			#if (krom_android || krom_ios || krom_darwin)
+			raw.window_scale = 2.0;
+			#end
 			raw.window_vsync = true;
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
@@ -68,13 +75,6 @@ class Config {
 			raw.rp_supersample = 1.0;
 			#if krom_darwin
 			raw.rp_supersample = 0.5;
-			#end
-			var disp = Display.primary;
-			if (disp != null && disp.width >= 2560 && disp.height >= 1600) {
-				raw.window_scale = 2.0;
-			}
-			#if (krom_android || krom_ios || krom_darwin)
-			raw.window_scale = 2.0;
 			#end
 
 			#if arm_painter
@@ -92,6 +92,7 @@ class Config {
 			raw.pressure_sensitivity = 1.0;
 			raw.brush_3d = true;
 			raw.brush_live = false;
+			raw.camera_speed = 1.0;
 			#end
 		}
 		else {

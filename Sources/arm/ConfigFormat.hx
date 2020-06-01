@@ -24,6 +24,7 @@ typedef TConfig = {
 	@:optional var rp_gi: Null<Bool>;
 	@:optional var rp_vignette: Null<Float>;
 	// Application
+	#if arm_painter
 	@:optional var version: String; // ArmorPaint version
 	@:optional var sha: String; // Commit id
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
@@ -38,4 +39,6 @@ typedef TConfig = {
 	@:optional var pressure_sensitivity: Null<Float>;
 	@:optional var brush_live: Null<Bool>;
 	@:optional var brush_3d: Null<Bool>;
+	@:optional var camera_speed: Null<Float>;
+	#end
 }

@@ -48,7 +48,7 @@ class BoxPreferences {
 				}
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
-				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
+				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
 				if (!hscale.changed && Context.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
@@ -57,12 +57,17 @@ class BoxPreferences {
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
+				var hspeed = Id.handle({value: Config.raw.camera_speed});
+				Config.raw.camera_speed = ui.slider(hspeed, tr("Camera Speed"), 0.1, 4.0, true);
+
 				#if (!krom_android && !krom_ios)
 				Context.nativeBrowser = ui.check(Id.handle({selected: Context.nativeBrowser}), tr("Native File Browser"));
 				#end
 
+				#if arm_debug
 				Context.cacheDraws = ui.check(Id.handle({selected: Context.cacheDraws}), tr("Cache UI Draws"));
 				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));
+				#end
 
 				ui.changed = false;
 				Context.showAssetNames = ui.check(Id.handle({selected: Context.showAssetNames}), tr("Show Asset Names"));
