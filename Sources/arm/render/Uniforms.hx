@@ -77,9 +77,6 @@ class Uniforms {
 		if (link == "_objectId") {
 			return Project.paintObjects.indexOf(Context.paintObject);
 		}
-		if (link == "_envmapAngle") {
-			return Context.envmapAngle;
-		}
 		#end
 		#if arm_world
 		if (link == "_voxelgiHalfExtentsUni") {
@@ -319,6 +316,10 @@ class Uniforms {
 		if (link == "_stencilTransform") {
 			vec.set(Context.brushStencilX, Context.brushStencilY, Context.brushStencilScale, Context.brushStencilAngle);
 			if (Context.paint2d) vec.x -= 1.0;
+			return vec;
+		}
+		if (link == "_envmapData") {
+			vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Scene.active.world.probe.raw.strength);
 			return vec;
 		}
 		#end

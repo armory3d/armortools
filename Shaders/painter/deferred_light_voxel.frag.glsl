@@ -45,8 +45,7 @@ uniform float voxelBlend;
 uniform vec3 eyeSnap;
 #endif
 
-uniform float envmapStrength;
-uniform float envmapAngle;
+uniform vec4 envmapData;
 #ifdef _Irr
 uniform vec4 shirr[7];
 #endif
@@ -207,7 +206,7 @@ void main() {
 
 	// Envmap
 #ifdef _Irr
-	vec3 envl = shIrradiance(n, shirr);
+	vec3 envl = shIrradiance(vec3(n.x * envmapData.z - n.y * envmapData.y, n.x * envmapData.y + n.y * envmapData.z, n.z), shirr);
 	#ifdef _EnvTex
 	envl /= PI;
 	#endif
@@ -218,7 +217,7 @@ void main() {
 #ifdef _Rad
 	vec3 reflectionWorld = reflect(-v, n);
 	float lod = getMipFromRoughness(roughness, envmapNumMipmaps);
-	vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(reflectionWorld, envmapAngle), lod).rgb;
+	vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(reflectionWorld, envmapData.x), lod).rgb;
 #endif
 
 #ifdef _EnvLDR
@@ -238,7 +237,7 @@ void main() {
 	#endif
 #endif
 
-	envl.rgb *= envmapStrength * occ;
+	envl.rgb *= envmapData.w * occ;
 
 #ifdef _VoxelAOvar
 

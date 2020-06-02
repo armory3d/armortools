@@ -349,11 +349,11 @@ class MakeMesh {
 					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
 					frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
-					frag.add_uniform('float envmapAngle', '_envmapAngle');
+					frag.add_uniform('vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					frag.write('vec3 wreflect = reflect(-vVec, wn);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
 					frag.add_function(MaterialFunctions.str_envMapEquirect);
-					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapAngle), envlod).rgb;');
+					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapData.x), envlod).rgb;');
 
 					frag.add_uniform('vec3 lightArea0', '_lightArea0');
 					frag.add_uniform('vec3 lightArea1', '_lightArea1');
@@ -382,12 +382,11 @@ class MakeMesh {
 					frag.write('vec3 direct = albedo * ltcdiff + ltcspec * 0.05;');
 					frag.write('direct *= lightColor * (1.0 / (ldist * ldist));');
 
-					frag.add_uniform('float envmapStrength', '_envmapStrength');
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
 					frag.add_function(MaterialFunctions.str_shIrradiance);
-					frag.write('vec3 indirect = albedo * (shIrradiance(wn, shirr) / 3.14159265);');
+					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(wn.x * envmapData.z - wn.y * envmapData.y, wn.x * envmapData.y + wn.y * envmapData.z, wn.z), shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
-					frag.write('indirect *= envmapStrength * occlusion;');
+					frag.write('indirect *= envmapData.w * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
 				}
 				else { // Deferred, Pathtraced
