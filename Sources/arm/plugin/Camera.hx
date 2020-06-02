@@ -11,7 +11,6 @@ class Camera {
 
 	public static var inst: Camera;
 	public static var dist = 0.0;
-	static inline var speed = 2.0;
 	public var views: Array<Mat4>;
 	var redraws = 0;
 	var first = true;
@@ -63,6 +62,7 @@ class Camera {
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
 					var f = -mouse.movementY / 150;
+					f *= Config.raw.camera_speed;
 					camera.transform.move(camera.look(), f);
 					dist -= f;
 				}
@@ -70,6 +70,7 @@ class Camera {
 				if (mouse.wheelDelta != 0 && !modif) {
 					redraws = 2;
 					var f = mouse.wheelDelta * (-0.1);
+					f *= Config.raw.camera_speed;
 					camera.transform.move(camera.look(), f);
 					dist -= f;
 				}
@@ -106,12 +107,16 @@ class Camera {
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
-					camera.transform.move(camera.look(), -mouse.movementY / 150);
+					var f = -mouse.movementY / 150;
+					f *= Config.raw.camera_speed;
+					camera.transform.move(camera.look(), f);
 				}
 
 				if (mouse.wheelDelta != 0) {
 					redraws = 2;
-					camera.transform.move(camera.look(), mouse.wheelDelta * (-0.1));
+					var f = mouse.wheelDelta * (-0.1);
+					f *= Config.raw.camera_speed;
+					camera.transform.move(camera.look(), f);
 				}
 			}
 			else if (controls == ControlsFly && mouse.down("right")) {
@@ -142,7 +147,7 @@ class Camera {
 					if (ease < 0.0) ease = 0.0;
 				}
 
-				var d = Time.delta * speed * fast * ease;
+				var d = Time.delta * fast * ease * 2.0 * Config.raw.camera_speed;
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
 					if (Context.cameraType == CameraOrthographic) {

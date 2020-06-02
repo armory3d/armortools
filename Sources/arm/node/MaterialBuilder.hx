@@ -100,7 +100,7 @@ class MaterialBuilder {
 
 	public static inline function getDisplaceStrength():Float {
 		var sc = Context.mainObject().transform.scale.x;
-		return Context.displaceStrength * 0.02 * sc;
+		return Config.raw.displace_strength * 0.02 * sc;
 	}
 
 	public static inline function voxelgiHalfExtents():String {

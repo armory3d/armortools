@@ -94,11 +94,6 @@ class Context {
 	public static var parseVCols = false;
 
 	public static var selectTime = 0.0;
-	#if arm_creator
-	public static var displaceStrength = 100.0;
-	#else
-	public static var displaceStrength = 1.0;
-	#end
 	public static var decalImage: Image = null;
 	public static var decalPreview = false;
 	public static var viewportMode = ViewLit;
@@ -109,13 +104,7 @@ class Context {
 	#end
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
-	#if krom_android
-	public static var nativeBrowser = false;
-	#else
-	public static var nativeBrowser = true;
-	#end
 	public static var cacheDraws = false;
-	public static var showAssetNames = false;
 
 	public static var textToolImage: Image = null;
 	public static var textToolText: String;

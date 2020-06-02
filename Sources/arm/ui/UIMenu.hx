@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [14, 3, 14, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [14, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -143,13 +143,6 @@ class UIMenu {
 					ui.row([1 / 8, 7 / 8]); ui.endElement();
 					light.data.raw.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
 					if (sxhandle.changed) Context.ddirty = 2;
-				}
-
-				var dispHandle = Id.handle({value: Context.displaceStrength});
-				ui.row([1 / 8, 7 / 8]); ui.endElement();
-				Context.displaceStrength = ui.slider(dispHandle, tr("Displace"), 0.0, 2.0, true);
-				if (dispHandle.changed) {
-					MaterialParser.parseMeshMaterial();
 				}
 
 				var splitViewHandle = Id.handle({selected: Context.splitView});

@@ -623,16 +623,9 @@ class MaterialShader {
 			for (i in 0...sharedSamplers.length) {
 				var index = samplers.length + i;
 				s += ', ${sharedSamplers[i]} [[texture($index)]]';
-				s += ', sampler ' + sharedSamplers[i].split(' ')[1] + '_sampler [[sampler($index)]]';
 			}
+			s += ', sampler $sharedSampler [[sampler(${samplers.length})]]';
 		}
-		//if (sharedSamplers.length > 0) {
-		//	for (i in 0...sharedSamplers.length) {
-		//		var index = samplers.length + i;
-		//		s += ', ${sharedSamplers[i]} [[texture($index)]]';
-		//	}
-		//	s += ', sampler $sharedSampler [[sampler(${samplers.length})]]';
-		//}
 
 		// Built-ins
 		if (shader_type == 'vert' && main.indexOf("gl_VertexID") >= 0) {

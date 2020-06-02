@@ -42,30 +42,33 @@ class BoxPreferences {
 				if (localeHandle.changed) {
 					var localeCode = locales[localeHandle.position];
 					Config.raw.locale = localeCode;
-					Config.save();
 					Translator.loadTranslations(localeCode);
 					UISidebar.inst.tagUIRedraw();
 				}
 
 				var hscale = Id.handle({value: Config.raw.window_scale});
-				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, false, 10);
+				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
 				if (!hscale.changed && Context.hscaleWasChanged) {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
-					Config.save();
 					setScale();
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
+				var hspeed = Id.handle({value: Config.raw.camera_speed});
+				Config.raw.camera_speed = ui.slider(hspeed, tr("Camera Speed"), 0.1, 4.0, true);
+
 				#if (!krom_android && !krom_ios)
-				Context.nativeBrowser = ui.check(Id.handle({selected: Context.nativeBrowser}), tr("Native File Browser"));
+				Config.raw.native_file_browser = ui.check(Id.handle({selected: Config.raw.native_file_browser}), tr("Native File Browser"));
 				#end
 
+				#if arm_debug
 				Context.cacheDraws = ui.check(Id.handle({selected: Context.cacheDraws}), tr("Cache UI Draws"));
 				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));
+				#end
 
 				ui.changed = false;
-				Context.showAssetNames = ui.check(Id.handle({selected: Context.showAssetNames}), tr("Show Asset Names"));
+				Config.raw.show_asset_names = ui.check(Id.handle({selected: Config.raw.show_asset_names}), tr("Show Asset Names"));
 				if (ui.changed) {
 					UISidebar.inst.tagUIRedraw();
 				}
@@ -102,7 +105,6 @@ class BoxPreferences {
 				ui.combo(themeHandle, themes, tr("Theme"));
 				if (themeHandle.changed) {
 					Config.raw.theme = themes[themeHandle.position] + ".json";
-					Config.save();
 					loadTheme(Config.raw.theme);
 				}
 
@@ -226,7 +228,6 @@ class BoxPreferences {
 					}
 					History.reset();
 					ui.g.begin(false);
-					Config.save();
 				}
 
 				Context.brushBias = ui.slider(Id.handle({value: Context.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
@@ -306,7 +307,6 @@ class BoxPreferences {
 				#if arm_debug
 				var vsyncHandle = Id.handle({selected: Config.raw.window_vsync});
 				Config.raw.window_vsync = ui.check(vsyncHandle, tr("VSync"));
-				if (vsyncHandle.changed) Config.save();
 				#end
 
 				if (Context.renderMode == RenderDeferred) {
@@ -339,10 +339,7 @@ class BoxPreferences {
 
 				var h = Id.handle({value: Config.raw.rp_vignette});
 				Config.raw.rp_vignette = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
-				if (h.changed) {
-					Context.ddirty = 2;
-					Config.save();
-				}
+				if (h.changed) Context.ddirty = 2;
 
 				// var h = Id.handle({value: Context.autoExposureStrength});
 				// Context.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
@@ -358,6 +355,13 @@ class BoxPreferences {
 				camRaw.far_plane = ui.slider(far_handle, tr("Clip End"), 50.0, 100.0, true);
 				if (near_handle.changed || far_handle.changed) {
 					cam.buildProjection();
+				}
+
+				var dispHandle = Id.handle({value: Config.raw.displace_strength});
+				Config.raw.displace_strength = ui.slider(dispHandle, tr("Displacement Strength"), 0.0, 10.0, true);
+				if (dispHandle.changed) {
+					Context.ddirty = 2;
+					MaterialParser.parseMeshMaterial();
 				}
 
 				#if arm_creator
@@ -473,7 +477,6 @@ plugin.drawUI = function(ui) {
 							Config.raw.plugins.remove(f);
 							Plugin.stop(f);
 						}
-						Config.save();
 						App.redrawUI();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
@@ -509,7 +512,7 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-		}, 600, 400);
+		}, 600, 400, function() { Config.save(); });
 	}
 
 	public static function fetchThemes() {

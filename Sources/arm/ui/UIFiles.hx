@@ -21,7 +21,7 @@ class UIFiles {
 	static var showExtensions = true;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
-		if (!Context.nativeBrowser) {
+		if (!Config.raw.native_file_browser) {
 			if (path == null) path = defaultPath;
 			showCustom(filters, isSave, filesDone);
 			return;

@@ -1,6 +1,5 @@
 #version 450
 
-#define _EnvStr
 #define _EnvTex
 
 #ifdef _EnvTex
@@ -37,10 +36,7 @@
 	uniform sampler2D envmap;
 #endif
 
-#ifdef _EnvStr
-uniform float envmapStrength;
-#endif
-uniform float envmapAngle;
+uniform vec4 envmapData; // angle, sin(angle), cos(angle), strength
 
 in vec3 normal;
 out vec4 fragColor;
@@ -138,7 +134,7 @@ void main() {
 #ifndef _EnvSky // Prevent case when sky radiance is enabled
 #ifdef _EnvTex
 	vec3 n = normalize(normal);
-	fragColor.rgb = texture(envmap, envMapEquirect(n, envmapAngle)).rgb * envmapStrength;
+	fragColor.rgb = texture(envmap, envMapEquirect(n, envmapData.x)).rgb * envmapData.w;
 	#ifdef _EnvLDR
 	fragColor.rgb = pow(fragColor.rgb, vec3(2.2));
 	#endif
@@ -148,7 +144,7 @@ void main() {
 #ifdef _EnvImg // Static background
 	// Will have to get rid of gl_FragCoord, pass tc from VS
 	vec2 texco = gl_FragCoord.xy / screenSize;
-	fragColor.rgb = texture(envmap, vec2(texco.x, 1.0 - texco.y)).rgb * envmapStrength;
+	fragColor.rgb = texture(envmap, vec2(texco.x, 1.0 - texco.y)).rgb * envmapData.w;
 #endif
 
 #ifdef _EnvSky
@@ -160,7 +156,7 @@ void main() {
 	float cos_gamma = dot(n, hosekSunDirection);
 	float gamma_val = acos(cos_gamma);
 
-	fragColor.rgb = Z * hosekWilkie(cos_theta, gamma_val, cos_gamma) * envmapStrength;
+	fragColor.rgb = Z * hosekWilkie(cos_theta, gamma_val, cos_gamma) * envmapData.w;
 #endif
 
 #ifdef _EnvClouds
