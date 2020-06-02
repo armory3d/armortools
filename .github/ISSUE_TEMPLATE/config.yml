@@ -1,0 +1,2 @@
+# Disallow blank issues to make sure people follow one of the templates.
+blank_issues_enabled: false
