@@ -211,21 +211,21 @@ class ImportArm {
 					// TODO: create render target from bytes
 					var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint.g2.begin(false);
-					l.texpaint.g2.pipeline = Layers.pipeCopy;
+					l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
 					l.texpaint.g2.drawImage(texpaint, 0, 0);
 					l.texpaint.g2.pipeline = null;
 					l.texpaint.g2.end();
 
 					var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_nor.g2.begin(false);
-					l.texpaint_nor.g2.pipeline = Layers.pipeCopy;
+					l.texpaint_nor.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
 					l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
 					l.texpaint_nor.g2.pipeline = null;
 					l.texpaint_nor.g2.end();
 
 					var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_pack.g2.begin(false);
-					l.texpaint_pack.g2.pipeline = Layers.pipeCopy;
+					l.texpaint_pack.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
 					l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 					l.texpaint_pack.g2.pipeline = null;
 					l.texpaint_pack.g2.end();

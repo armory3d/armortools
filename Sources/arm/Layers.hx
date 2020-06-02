@@ -28,6 +28,7 @@ class Layers {
 	public static var pipeMergeA: PipelineState = null;
 	public static var pipeCopy: PipelineState;
 	public static var pipeCopy8: PipelineState;
+	public static var pipeCopyBGRA: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
 	public static var tex1: TextureUnit;
@@ -143,6 +144,16 @@ class Layers {
 		vs.add("col", VertexData.Float4);
 		pipeCopy.inputLayout = [vs];
 		pipeCopy.compile();
+
+		pipeCopyBGRA = new PipelineState();
+		pipeCopyBGRA.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipeCopyBGRA.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_bgra_frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
+		pipeCopyBGRA.inputLayout = [vs];
+		pipeCopyBGRA.compile();
 
 		#if kha_metal
 		pipeCopy8 = new PipelineState();
