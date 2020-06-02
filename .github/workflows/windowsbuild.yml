@@ -30,7 +30,7 @@ jobs:
       run: cd Kromx && node Kinc/make -g direct3d11
       shell: cmd
     - name: MSbuild
-      run: dotnet msbuild ..\..\Kromx\build\Krom.sln -property:Configuration=Release;OutDir=build/Krom/ -verbosity:diag
+      run: dotnet msbuild Kromx\build\Krom.sln -property:Configuration=Release;OutDir=build/Krom/ -verbosity:diag
       shell: cmd
     - name: publish build
       uses: actions/upload-artifact@v2
