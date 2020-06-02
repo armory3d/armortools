@@ -26,14 +26,12 @@ jobs:
       with:
         pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
         pathTarget: Kromx/v8/libraries/win32/release/
-    - name: Kinc and compile
-      run: cd Kromx;node Kinc/make -g direct3d11 --compile
+    - name: Kinc
+      run: cd Kromx;node Kinc/make -g direct3d11
       shell: pwsh
+    - name: MSbuild
+      run: cd build/Krom;MSBuild.exe -property:Configuration=Release -verbosity:diag
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
         path: build/krom
-    - name: publish build
-      uses: actions/upload-artifact@v2
-      with:
-        path: Kromx/build/x64/
