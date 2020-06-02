@@ -93,16 +93,7 @@ class NodesMaterial {
 				x: 0,
 				y: 0,
 				color: 0xff4982a0,
-				inputs: [
-					{
-						id: 0,
-						node_id: 0,
-						name: "Vector",
-						type: "VECTOR",
-						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
-					}
-				],
+				inputs: [],
 				outputs: [
 					{
 						id: 0,
@@ -193,16 +184,7 @@ class NodesMaterial {
 				x: 0,
 				y: 0,
 				color: 0xff4982a0,
-				inputs: [
-					{
-						id: 0,
-						node_id: 0,
-						name: "Vector",
-						type: "VECTOR",
-						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
-					}
-				],
+				inputs: [],
 				outputs: [
 					{
 						id: 0,
