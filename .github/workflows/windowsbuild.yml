@@ -30,7 +30,7 @@ jobs:
       run: cd Kromx;node Kinc/make -g direct3d11
       shell: pwsh
     - name: MSbuild
-      run: cd build/Krom;devenv Kromx/build/krom.sln /build [/ProjectConfig Release]
+      run: cd build/Krom;dotnet msbuild -property:Configuration=Release -verbosity:diag
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
