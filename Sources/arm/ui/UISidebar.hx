@@ -241,6 +241,7 @@ class UISidebar {
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
 		else if (Operator.shortcut(Config.keymap.file_save)) Project.projectSave();
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
+		else if (Operator.shortcut(Config.keymap.file_open_recent)) Project.projectOpenRecentBox();
 		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {

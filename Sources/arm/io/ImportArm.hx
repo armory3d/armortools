@@ -120,6 +120,12 @@ class ImportArm {
 				return;
 			}
 
+			// Save to recent
+			var recent = Config.raw.recent_projects;
+			recent.remove(path);
+			recent.unshift(path);
+			Config.save();
+
 			Project.raw = project;
 
 			var l0 = project.layer_datas[0];

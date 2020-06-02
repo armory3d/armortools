@@ -27,6 +27,7 @@ typedef TConfig = {
 	#if arm_painter
 	@:optional var version: String; // ArmorPaint version
 	@:optional var sha: String; // Commit id
+	@:optional var recent_projects: Array<String>; // Recently opened projects
 	@:optional var bookmarks: Array<String>; // Bookmarked folders in browser
 	@:optional var plugins: Array<String>; // List of enabled plugins
 	@:optional var keymap: String; // Link to keymap file
