@@ -164,8 +164,8 @@ class MakeMesh {
 					frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
 					frag.write('n = normalize(n - ngrad);');
 
-					// frag.add_uniform('float texpaintSize', '_texpaintSize');
-					// frag.write('float tex_step = 1.0 / texpaintSize;');
+					// frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
+					// frag.write('float tex_step = 1.0 / texpaintSize.x;');
 					// frag.wposition = true;
 					// frag.write('float pack_a = textureLodShared(texpaint_pack, vec2(texCoord.x + tex_step, texCoord.y), 0.0).a;');
 					// frag.write('float pack_b = textureLodShared(texpaint_pack, vec2(texCoord.x - tex_step, texCoord.y), 0.0).a;');
@@ -317,7 +317,7 @@ class MakeMesh {
 			}
 
 			if (Context.drawTexels) {
-				frag.add_uniform('float texpaintSize', '_texpaintSize');
+				frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
 				frag.write('vec2 texel = texCoord * texpaintSize;');
 				frag.write('basecol *= max(float(mod(int(texel.x), 2.0) == mod(int(texel.y), 2.0)), 0.9);');
 			}

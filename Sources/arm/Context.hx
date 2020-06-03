@@ -191,6 +191,7 @@ class Context {
 	#else
 	public static var projectType = ModelRoundedCube;
 	#end
+	public static var projectAspectRatio = 0; // 1:1, 2:1, 1:2
 	public static var projectObjects: Array<MeshObject>;
 
 	public static var sub = 0;

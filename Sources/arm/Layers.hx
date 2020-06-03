@@ -75,20 +75,21 @@ class Layers {
 		for (l in History.undoLayers) l.resizeAndSetBits();
 		var rts = RenderPath.active.renderTargets;
 		rts.get("texpaint_blend0").image.unload();
-		rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
-		rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
+		rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
+		rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
+		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
 		rts.get("texpaint_blend1").image.unload();
-		rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
-		rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8);
+		rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
+		rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
+		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
 		Context.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
 			rts.get("texpaint_blur").image.unload();
-			var size = Std.int(Config.getTextureRes() * 0.95);
-			rts.get("texpaint_blur").raw.width = size;
-			rts.get("texpaint_blur").raw.height = size;
-			rts.get("texpaint_blur").image = Image.createRenderTarget(size, size);
+			var sizeX = Std.int(Config.getTextureResX() * 0.95);
+			var sizeY = Std.int(Config.getTextureResY() * 0.95);
+			rts.get("texpaint_blur").raw.width = sizeX;
+			rts.get("texpaint_blur").raw.height = sizeY;
+			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
 		#if kha_direct3d12
@@ -213,7 +214,7 @@ class Layers {
 
 	public static function makeTempImg() {
 		var l = Project.layers[0];
-		if (imga != null && imga.width != l.texpaint.width) {
+		if (imga != null && (imga.width != l.texpaint.width || imga.height != l.texpaint.height)) {
 			RenderPath.active.renderTargets.get("temptex0").unload();
 			RenderPath.active.renderTargets.remove("temptex0");
 			imga = null;
@@ -233,7 +234,7 @@ class Layers {
 
 	public static function makeExportImg() {
 		var l = Project.layers[0];
-		if (expa != null && expa.width != l.texpaint.width) {
+		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height)) {
 			expa.unload();
 			expb.unload();
 			expc.unload();

@@ -24,7 +24,7 @@ class MakeDiscard {
 		vert.write('texCoordPick = subtex;');
 		frag.add_uniform('sampler2D gbuffer2');
 		frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
-		frag.add_uniform('float textrianglemapSize', '_texpaintSize');
+		frag.add_uniform('vec2 textrianglemapSize', '_texpaintSize');
 		frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 		#if (kha_opengl || kha_webgl)
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');

@@ -169,18 +169,19 @@ class ImportArm {
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 
-			if (Project.layers[0].texpaint.width != Config.getTextureRes()) {
+			var tex = Project.layers[0].texpaint;
+			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 				for (l in Project.layers) l.resizeAndSetBits();
 				if (History.undoLayers != null) for (l in History.undoLayers) l.resizeAndSetBits();
 				var rts = RenderPath.active.renderTargets;
 				rts.get("texpaint_blend0").image.unload();
-				rts.get("texpaint_blend0").raw.width = Config.getTextureRes();
-				rts.get("texpaint_blend0").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
+				rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
+				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				rts.get("texpaint_blend1").image.unload();
-				rts.get("texpaint_blend1").raw.width = Config.getTextureRes();
-				rts.get("texpaint_blend1").raw.height = Config.getTextureRes();
-				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureRes(), Config.getTextureRes(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
+				rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
+				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				Context.brushBlendDirty = true;
 			}
 

@@ -118,7 +118,6 @@ class Project {
 	public static function projectNewBox() {
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("New Project"))) {
-				ui.row([0.5, 0.5]);
 				if (meshList == null) {
 					meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
 					for (i in 0...meshList.length) meshList[i] = meshList[i].substr(0, meshList[i].length - 4); // Trim .arm
@@ -127,7 +126,16 @@ class Project {
 					meshList.unshift("rounded_cube");
 
 				}
-				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), meshList, tr("Template"));
+
+				ui.row([0.5, 0.5]);
+				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), meshList, tr("Template"), true);
+				Context.projectAspectRatio = ui.combo(Id.handle({position: Context.projectAspectRatio}), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+
+				@:privateAccess ui.endElement();
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.show = false;
+				}
 				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
 					ViewportUtil.scaleToBounds();
@@ -250,10 +258,14 @@ class Project {
 			UISidebar.inst.hwnd2.redraws = 2;
 
 			if (resetLayers) {
+				var aspectRatioChanged = layers[0].texpaint.width != Config.getTextureResX() || layers[0].texpaint.height != Config.getTextureResY();
 				while (layers.length > 0) layers.pop().unload();
 				var layer = new LayerSlot();
 				layers.push(layer);
 				Context.setLayer(layer);
+				if (aspectRatioChanged) {
+					iron.App.notifyOnRender(Layers.resizeLayers);
+				}
 				iron.App.notifyOnRender(Layers.initLayers);
 			}
 

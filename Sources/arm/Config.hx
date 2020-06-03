@@ -181,7 +181,7 @@ class Config {
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
-	public static function getTextureRes(): Int {
+	static function getTextureRes(): Int {
 		var res = App.resHandle.position;
 		return res == Res128 ? 128 :
 			   res == Res256 ? 256 :
@@ -191,6 +191,14 @@ class Config {
 			   res == Res4096 ? 4096 :
 			   res == Res8192 ? 8192 :
 			   res == Res16384 ? 16384 : 0;
+	}
+
+	public static function getTextureResX(): Int {
+		return Context.projectAspectRatio == 2 ? Std.int(getTextureRes() / 2) : getTextureRes();
+	}
+
+	public static function getTextureResY(): Int {
+		return Context.projectAspectRatio == 1 ? Std.int(getTextureRes() / 2) : getTextureRes();
 	}
 
 	public static function getTextureResBias(): Float {

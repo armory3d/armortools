@@ -68,24 +68,24 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint" + ext;
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = format;
 			texpaint = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_nor" + ext;
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = format;
 			texpaint_nor = RenderPath.active.createRenderTarget(t).image;
 		}
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_pack" + ext;
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = format;
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
@@ -170,8 +170,8 @@ class LayerSlot {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_mask" + ext;
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = "R8";
 			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
 		}
@@ -314,34 +314,35 @@ class LayerSlot {
 					 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
 					 									 TextureFormat.RGBA128;
 
-		var res = Config.getTextureRes();
+		var resX = Config.getTextureResX();
+		var resY = Config.getTextureResY();
 		var rts = RenderPath.active.renderTargets;
 
 		var texpaint = this.texpaint;
 		var texpaint_nor = this.texpaint_nor;
 		var texpaint_pack = this.texpaint_pack;
 
-		this.texpaint = Image.createRenderTarget(res, res, format);
-		this.texpaint_nor = Image.createRenderTarget(res, res, format);
-		this.texpaint_pack = Image.createRenderTarget(res, res, format);
+		this.texpaint = Image.createRenderTarget(resX, resY, format);
+		this.texpaint_nor = Image.createRenderTarget(resX, resY, format);
+		this.texpaint_pack = Image.createRenderTarget(resX, resY, format);
 
 		if (Layers.pipeMerge == null) Layers.makePipe();
 
 		this.texpaint.g2.begin(false);
 		this.texpaint.g2.pipeline = Layers.pipeCopy;
-		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, res, res);
+		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, resX, resY);
 		this.texpaint.g2.pipeline = null;
 		this.texpaint.g2.end();
 
 		this.texpaint_nor.g2.begin(false);
 		this.texpaint_nor.g2.pipeline = Layers.pipeCopy;
-		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, res, res);
+		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, resX, resY);
 		this.texpaint_nor.g2.pipeline = null;
 		this.texpaint_nor.g2.end();
 
 		this.texpaint_pack.g2.begin(false);
 		this.texpaint_pack.g2.pipeline = Layers.pipeCopy;
-		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, res, res);
+		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, resX, resY);
 		this.texpaint_pack.g2.pipeline = null;
 		this.texpaint_pack.g2.end();
 
@@ -355,13 +356,13 @@ class LayerSlot {
 		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
 		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
 
-		if (this.texpaint_mask != null && this.texpaint_mask.width != res) {
+		if (this.texpaint_mask != null && (this.texpaint_mask.width != resX || this.texpaint_mask.height != resY)) {
 			var texpaint_mask = this.texpaint_mask;
-			this.texpaint_mask = Image.createRenderTarget(res, res, TextureFormat.L8);
+			this.texpaint_mask = Image.createRenderTarget(resX, resY, TextureFormat.L8);
 
 			this.texpaint_mask.g2.begin(false);
 			this.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
-			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, res, res);
+			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, resX, resY);
 			this.texpaint_mask.g2.pipeline = null;
 			this.texpaint_mask.g2.end();
 

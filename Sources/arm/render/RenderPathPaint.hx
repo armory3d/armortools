@@ -43,16 +43,16 @@ class RenderPathPaint {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_blend0";
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = "R8";
 			path.createRenderTarget(t);
 		}
 		{
 			var t = new RenderTargetRaw();
 			t.name = "texpaint_blend1";
-			t.width = Config.getTextureRes();
-			t.height = Config.getTextureRes();
+			t.width = Config.getTextureResX();
+			t.height = Config.getTextureResY();
 			t.format = "R8";
 			path.createRenderTarget(t);
 		}
@@ -240,8 +240,8 @@ class RenderPathPaint {
 					if (path.renderTargets.get("texpaint_blur") == null) {
 						var t = new RenderTargetRaw();
 						t.name = "texpaint_blur";
-						t.width = Std.int(Config.getTextureRes() * 0.95);
-						t.height = Std.int(Config.getTextureRes() * 0.95);
+						t.width = Std.int(Config.getTextureResX() * 0.95);
+						t.height = Std.int(Config.getTextureResY() * 0.95);
 						t.format = "RGBA32";
 						path.createRenderTarget(t);
 					}

@@ -120,24 +120,24 @@ class RenderPathRaytrace {
 			{
 				var t = new RenderTargetRaw();
 				t.name = "baketex0";
-				t.width = Config.getTextureRes();
-				t.height = Config.getTextureRes();
+				t.width = Config.getTextureResX();
+				t.height = Config.getTextureResY();
 				t.format = "RGBA64";
 				path.createRenderTarget(t);
 			}
 			{
 				var t = new RenderTargetRaw();
 				t.name = "baketex1";
-				t.width = Config.getTextureRes();
-				t.height = Config.getTextureRes();
+				t.width = Config.getTextureResX();
+				t.height = Config.getTextureResY();
 				t.format = "RGBA64";
 				path.createRenderTarget(t);
 			}
 			{
 				var t = new RenderTargetRaw();
 				t.name = "baketex2";
-				t.width = Config.getTextureRes();
-				t.height = Config.getTextureRes();
+				t.width = Config.getTextureResX();
+				t.height = Config.getTextureResY();
 				t.format = "RGBA64"; // Match raytrace_target format
 				path.createRenderTarget(t);
 			}

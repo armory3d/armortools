@@ -13,9 +13,10 @@ class UVUtil {
 	public static function cacheUVMap() {
 		if (uvmapCached) return;
 
-		var res = Config.getTextureRes();
+		var resX = Config.getTextureResX();
+		var resY = Config.getTextureResY();
 		if (uvmap == null) {
-			uvmap = Image.createRenderTarget(res, res);
+			uvmap = Image.createRenderTarget(resX, resY);
 		}
 
 		uvmapCached = true;
@@ -27,7 +28,7 @@ class UVUtil {
 		var inda = mesh.index_arrays[0].values;
 		uvmap.g2.begin(true, 0x00000000);
 		uvmap.g2.color = 0xffcccccc;
-		var strength = res > 2048 ? 2.0 : 1.0;
+		var strength = resX > 2048 ? 2.0 : 1.0;
 		var f = (1 / 32767) * uvmap.width;
 		for (i in 0...Std.int(inda.length / 3)) {
 			var x1 = (texa[inda[i * 3    ] * 2    ]) * f;
@@ -46,9 +47,8 @@ class UVUtil {
 	public static function cacheTriangleMap() {
 		if (trianglemapCached) return;
 
-		var res = Config.getTextureRes();
 		if (trianglemap == null) {
-			trianglemap = Image.createRenderTarget(res, res);
+			trianglemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		}
 
 		trianglemapCached = true;

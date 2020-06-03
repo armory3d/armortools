@@ -81,7 +81,8 @@ class ExportTexture {
 	}
 
 	static function runLayers(path: String, udimTile = "", bakeMaterial = false) {
-		var textureSize = Config.getTextureRes();
+		var textureSizeX = Config.getTextureResX();
+		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.formatQuality;
 		var f = UIFiles.filename;
 		if (f == "") f = tr("untitled");
@@ -234,7 +235,7 @@ class ExportTexture {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
-				if (pix == null) pix = Bytes.alloc(textureSize * textureSize * 4 * Std.int(bits / 8));
+				if (pix == null) pix = Bytes.alloc(textureSizeX * textureSizeY * 4 * Std.int(bits / 8));
 				for (i in 0...4) {
 					var c = t.channels[i];
 					if      (c == "base_r") copyChannel(pixpaint, 0, pix, i); // copyChannelGamma
@@ -261,32 +262,33 @@ class ExportTexture {
 
 	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
 		var out = new BytesOutput();
-		var res = Config.getTextureRes();
+		var resX = Config.getTextureResX();
+		var resY = Config.getTextureResY();
 		var bitsHandle = App.bitsHandle.position;
 		var bits = bitsHandle == Bits8 ? 8 : bitsHandle == Bits16 ? 16 : 32;
 		if (bits > 8) { // 16/32bit
-			var writer = new ExrWriter(out, res, res, pixels, bits, type, off);
+			var writer = new ExrWriter(out, resX, resY, pixels, bits, type, off);
 		}
 		else if (Context.formatType == FormatPng) {
 			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
 					#if kha_metal
-					PngTools.build32BGR1(res, res, pixels) :
+					PngTools.build32BGR1(resX, resY, pixels) :
 					#else
-					PngTools.build32RGB1(res, res, pixels) :
+					PngTools.build32RGB1(resX, resY, pixels) :
 					#end
 				type == 2 ?
 					#if kha_metal
-					PngTools.build32RRR1(res, res, pixels, 2 - off) :
+					PngTools.build32RRR1(resX, resY, pixels, 2 - off) :
 					#else
-					PngTools.build32RRR1(res, res, pixels, off) :
+					PngTools.build32RRR1(resX, resY, pixels, off) :
 					#end
 
 					#if kha_metal
-					PngTools.build32BGRA(res, res, pixels);
+					PngTools.build32BGRA(resX, resY, pixels);
 					#else
-					PngTools.build32RGBA(res, res, pixels);
+					PngTools.build32RGBA(resX, resY, pixels);
 					#end
 			writer.write(data);
 		}
@@ -294,8 +296,8 @@ class ExportTexture {
 			var writer = new JpgWriter(out);
 			writer.write(
 				{
-					width: res,
-					height: res,
+					width: resX,
+					height: resY,
 					quality: Context.formatQuality,
 					pixels: pixels
 				},

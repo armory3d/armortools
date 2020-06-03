@@ -71,9 +71,6 @@ class Uniforms {
 			var val = (fill ? Context.layer.scale : Context.brushScale) * nodesScale;
 			return val;
 		}
-		if (link == "_texpaintSize") {
-			return Config.getTextureRes();
-		}
 		if (link == "_objectId") {
 			return Project.paintObjects.indexOf(Context.paintObject);
 		}
@@ -148,6 +145,10 @@ class Uniforms {
 				angle *= pen.pressure * Config.raw.pressure_sensitivity;
 			}
 			vec.set(Math.cos(angle), Math.sin(angle), 0);
+			return vec;
+		}
+		if (link == "_texpaintSize") {
+			vec.set(Config.getTextureResX(), Config.getTextureResY(), 0);
 			return vec;
 		}
 		#end
