@@ -32,8 +32,13 @@ jobs:
       run: cd Kromx && node Kinc/make -g direct3d11
       shell: cmd
     - name: MSbuild
-      run: msbuild Kromx\build\Krom.sln -property:Configuration=Release;OutDir=build/Krom/ -verbosity:diag
+      run: msbuild Kromx\build\Krom.sln -property:Configuration=Release -verbosity:diag
       shell: cmd
+    - name: copy build files
+      uses: canastro/copy-file-action@master
+      with:
+        source: "Kromx/build/x64/"
+        target: "build/Krom"
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
