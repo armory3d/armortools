@@ -38,6 +38,7 @@ typedef TConfig = {
 	@:optional var pressure_angle: Null<Bool>;
 	@:optional var pressure_opacity: Null<Bool>;
 	@:optional var pressure_sensitivity: Null<Float>;
+	@:optional var material_live: Null<Bool>;
 	@:optional var brush_live: Null<Bool>;
 	@:optional var brush_3d: Null<Bool>;
 	@:optional var camera_speed: Null<Float>;

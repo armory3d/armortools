@@ -116,7 +116,7 @@ class UINodes {
 				History.editNodes(lastCanvas, canvasType);
 			}
 		}
-		else if (ui.changed && (mstartedlast || mouse.moved)) {
+		else if (ui.changed && (mstartedlast || mouse.moved) && Config.raw.material_live) {
 			recompileMat = true; // Instant preview
 		}
 		mstartedlast = mouse.started();
