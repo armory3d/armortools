@@ -204,10 +204,10 @@ class TabLayers {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text('${l.name} ' + tr("Mask"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Delete"), Left)) {
-								Context.setLayer(l);
+								Context.setLayer(l, true);
 								History.deleteMask();
 								l.deleteMask();
-								Context.setLayer(l);
+								Context.setLayer(l, false);
 							}
 							if (ui.button(tr("Clear to Black"), Left)) {
 								function clear(g: kha.graphics4.Graphics) {
