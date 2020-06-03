@@ -89,19 +89,6 @@ class ImportArm {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
-			// Upgrade project format
-			if (project.version == "0.8") {
-				if (project.mesh_datas != null) {
-					for (md in project.mesh_datas) {
-						for (va in md.vertex_arrays) {
-							if (va.data == null) {
-								va.data = va.attrib == "pos" ? "short4norm" : "short2norm";
-							}
-						}
-					}
-				}
-			}
-
 			// Import as material instead
 			if (project.version != null && project.layer_datas == null) {
 				runMaterialFromProject(project, path);
