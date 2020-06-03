@@ -91,6 +91,12 @@ class ExportArm {
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData());
 
+		// Save to recent
+		var recent = Config.raw.recent_projects;
+		recent.remove(Project.filepath);
+		recent.unshift(Project.filepath);
+		Config.save();
+
 		Log.info("Project saved.");
 	}
 
