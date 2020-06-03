@@ -33,7 +33,7 @@ jobs:
     - name: MSbuild
       run: msbuild Kromx\build\Krom.sln -property:Configuration=Release -verbosity:diag
     - name: copy build files
-      run: copy-item "Kromx/build/x64/*" "build/Krom" -recurse
+      run: copy-item "Kromx/build/x64/Release/*" "build/Krom" -recurse
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
