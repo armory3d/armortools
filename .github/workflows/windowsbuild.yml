@@ -17,8 +17,10 @@ jobs:
     - uses: actions/checkout@v1
     - name: Get Submodules
       run: git submodule update --init --recursive
-    - name: Get Node.js
+    - name: setup Node.js
       uses: actions/setup-node@v1.4.2
+    - name: setup MSbuild
+      uses: microsoft/setup-msbuild@v1
     - name: kromx
       run: node Kromx/make -g direct3d11
     - name: Unpack v8_monolith
@@ -30,7 +32,7 @@ jobs:
       run: cd Kromx && node Kinc/make -g direct3d11
       shell: cmd
     - name: MSbuild
-      run: dotnet msbuild Kromx\build\Krom.sln -property:Configuration=Release;OutDir=build/Krom/ -verbosity:diag
+      run: msbuild Kromx\build\Krom.sln -property:Configuration=Release;OutDir=build/Krom/ -verbosity:diag
       shell: cmd
     - name: publish build
       uses: actions/upload-artifact@v2
