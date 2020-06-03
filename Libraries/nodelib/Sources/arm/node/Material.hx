@@ -708,19 +708,33 @@ class Material {
 			return "vVecCam";
 		}
 		else if (node.type == "LAYER") {
+			var l = node.buttons[0].default_value;
 			if (socket == node.outputs[0]) { // Base
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
 				return "texture(texpaint, texCoord).rgb";
 			}
 			else if (socket == node.outputs[5]) { // Normal
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint_nor", "_texpaint_nor" + l);
 				return "texture(texpaint_nor, texCoord).rgb";
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			return "vec3(0.0, 0.0, 0.0)";
+			var m = Project.materials[node.buttons[0].default_value];
+			var _nodes = nodes;
+			var _links = links;
+			nodes = m.canvas.nodes;
+			links = m.canvas.links;
+			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
+			var result = "vec3(0.0, 0.0, 0.0)";
+			if (socket == node.outputs[0]) { // Base
+				result = parse_vector_input(output_node.inputs[0]);
+			}
+			else if (socket == node.outputs[5]) { // Normal
+				result = parse_vector_input(output_node.inputs[5]);
+			}
+			nodes = _nodes;
+			links = _links;
+			return result;
 		}
 		else if (node.type == "NEW_GEOMETRY") {
 			if (socket == node.outputs[0]) { // Position
@@ -994,28 +1008,24 @@ class Material {
 			}
 		}
 		else if (node.type == "LAYER") {
+			var l = node.buttons[0].default_value;
 			if (socket == node.outputs[1]) { // Opac
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
 				return "texture(texpaint, texCoord).a";
 			}
 			else if (socket == node.outputs[2]) { // Occ
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
 				return "texture(texpaint_pack, texCoord).r";
 			}
 			else if (socket == node.outputs[3]) { // Rough
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
 				return "texture(texpaint_pack, texCoord).g";
 			}
 			else if (socket == node.outputs[4]) { // Metal
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
 				return "texture(texpaint_pack, texCoord).b";
 			}
 			else if (socket == node.outputs[7]) { // Height
-				var l = node.buttons[0].default_value;
 				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
 				return "texture(texpaint_pack, texCoord).a";
 			}
@@ -1028,7 +1038,31 @@ class Material {
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			return "0.0";
+			var m = Project.materials[node.buttons[0].default_value];
+			var _nodes = nodes;
+			var _links = links;
+			nodes = m.canvas.nodes;
+			links = m.canvas.links;
+			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
+			var result = "0.0";
+			if (socket == node.outputs[1]) { // Opac
+				result = parse_value_input(output_node.inputs[1]);
+			}
+			else if (socket == node.outputs[2]) { // Occ
+				result = parse_value_input(output_node.inputs[2]);
+			}
+			else if (socket == node.outputs[3]) { // Rough
+				result = parse_value_input(output_node.inputs[3]);
+			}
+			else if (socket == node.outputs[4]) { // Metal
+				result = parse_value_input(output_node.inputs[4]);
+			}
+			else if (socket == node.outputs[7]) { // Height
+				result = parse_value_input(output_node.inputs[7]);
+			}
+			nodes = _nodes;
+			links = _links;
+			return result;
 		}
 		else if (node.type == "FRESNEL") {
 			var ior = parse_value_input(node.inputs[0]);
