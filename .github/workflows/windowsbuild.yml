@@ -29,16 +29,11 @@ jobs:
         pathSource: Kromx/v8/libraries/win32/release/v8_monolith.7z
         pathTarget: Kromx/v8/libraries/win32/release/
     - name: Kinc
-      run: cd Kromx && node Kinc/make -g direct3d11
-      shell: cmd
+      run: cd Kromx;node Kinc/make -g direct3d11
     - name: MSbuild
       run: msbuild Kromx\build\Krom.sln -property:Configuration=Release -verbosity:diag
-      shell: cmd
     - name: copy build files
-      uses: canastro/copy-file-action@master
-      with:
-        source: "Kromx/build/x64/"
-        target: "build/Krom"
+      run: copy-item "Kromx/build/x64/" "build/Krom"
     - name: publish build
       uses: actions/upload-artifact@v2
       with:
