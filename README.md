@@ -1,3 +1,5 @@
+![Windows (Direct3D 11)](https://github.com/Xephobia/armorpaint/workflows/Windows%20(Direct3D%2011)/badge.svg)
+![Linux](https://github.com/Xephobia/armorpaint/workflows/Linux/badge.svg)
 ![](https://armorpaint.org/img/git.jpg)
 
 armorpaint
