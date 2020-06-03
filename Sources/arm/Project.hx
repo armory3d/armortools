@@ -68,6 +68,28 @@ class Project {
 		});
 	}
 
+	public static function projectOpenRecentBox() {
+		UIBox.showCustom(function(ui: Zui) {
+			if (ui.tab(Id.handle(), tr("Recent Projects"))) {
+				for (path in Config.raw.recent_projects) {
+					if (ui.button(path, Left)) {
+						var current = @:privateAccess kha.graphics4.Graphics2.current;
+						if (current != null) current.end();
+
+						ImportArm.runProject(path);
+
+						if (current != null) current.begin(false);
+						UIBox.show = false;
+					}
+				}
+				if (ui.button("Clear", Left)) {
+					Config.raw.recent_projects = [];
+					Config.save();
+				}
+			}
+		}, 400, 320);
+	}
+
 	public static function projectSave(saveAndQuit = false) {
 		if (filepath == "") {
 			projectSaveAs();

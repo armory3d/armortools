@@ -18,6 +18,7 @@
 	"brush_ruler": "shift",
 	"file_new": "ctrl+n",
 	"file_open": "ctrl+o",
+	"file_open_recent": "ctrl+shift+o",
 	"file_save": "ctrl+s",
 	"file_save_as": "ctrl+shift+s",
 	"file_reimport_mesh": "ctrl+r",

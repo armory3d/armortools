@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [14, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [15, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -61,6 +61,7 @@ class UIMenu {
 			if (menuCategory == MenuFile) {
 				if (ui.button("      " + tr("New Project..."), Left, Config.keymap.file_new)) Project.projectNewBox();
 				if (ui.button("      " + tr("Open..."), Left, Config.keymap.file_open)) Project.projectOpen();
+				if (ui.button("      " + tr("Open Recent..."), Left, Config.keymap.file_open_recent)) Project.projectOpenRecentBox();
 				if (ui.button("      " + tr("Save"), Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("      " + tr("Save As..."), Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);

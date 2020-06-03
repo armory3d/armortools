@@ -291,7 +291,7 @@ class RenderPathPaint {
 		liveLayerLocked = use;
 	}
 
-	public static function commandsLiveBrush() {
+	static function commandsLiveBrush() {
 
 		var tool = Context.tool;
 		if (tool != ToolBrush &&

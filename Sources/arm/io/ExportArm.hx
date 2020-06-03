@@ -80,7 +80,12 @@ class ExportArm {
 			mesh_datas: md,
 			layer_datas: ld,
 			assets: texture_files,
-			mesh_assets: mesh_files
+			mesh_assets: mesh_files,
+			#if kha_metal
+			is_bgra: true
+			#else
+			is_bgra: false
+			#end
 		};
 
 		var bytes = ArmPack.encode(Project.raw);

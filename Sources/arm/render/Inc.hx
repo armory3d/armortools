@@ -183,8 +183,8 @@ class Inc {
 			var moved = (mx != lastX || my != lastY) && (inViewport || in2dView);
 			if (moved || Context.brushLocked) {
 				Context.rdirty = 2;
-				Context.sub = 0;
 			}
+			Context.sub = 0;
 		}
 
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UIHeader.inst.worktab.position == SpaceRender)) {

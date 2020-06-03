@@ -80,6 +80,7 @@ class Config {
 			#if arm_painter
 			raw.version = Main.version;
 			raw.sha = Main.sha;
+			raw.recent_projects = [];
 			raw.bookmarks = [];
 			raw.plugins = [];
 			raw.keymap = "default.json";

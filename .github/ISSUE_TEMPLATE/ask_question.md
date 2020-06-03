@@ -1,8 +1,8 @@
 ---
-name: Feature request
-about: Create a feature request
+name: Ask a question
+about: Post a question about ArmorPaint
 title: ''
-labels: feature request
+labels: question
 assignees: ''
 ---
 
