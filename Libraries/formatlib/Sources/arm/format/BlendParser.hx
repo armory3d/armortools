@@ -31,9 +31,7 @@ class BlendParser {
 		this.blob = blob;
 		this.pos = 0;
 		if (readChars(7) != "BLENDER") {
-			var input = haxe.io.UInt8Array.fromBytes(blob.toBytes());
-			var output = arm.format.pako.Pako.inflate(input);
-			this.blob = kha.Blob.fromBytes(output.view.buffer);
+			this.blob = Blob.fromBytes(haxe.io.Bytes.ofData(Krom.inflate(blob.toBytes().getData(), false)));
 			this.pos = 0;
 			if (readChars(7) != "BLENDER") return;
 		}

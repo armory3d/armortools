@@ -201,9 +201,6 @@ class PngTools {
 	}
 
 	public static function deflate(b:haxe.io.Bytes, ?level = 9):haxe.io.Bytes {
-		// return haxe.zip.Compress.run(b,level);
-		var input = haxe.io.UInt8Array.fromBytes(b);
-		var output = arm.format.pako.Pako.deflate(input);
-		return output.view.buffer;
+		return haxe.io.Bytes.ofData(Krom.deflate(b.getData(), false));
 	}
 }

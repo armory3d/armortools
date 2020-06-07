@@ -38,9 +38,8 @@ class FbxBinaryParser {
 		var _blob = blob;
 		if (encoding != 0) {
 			pos += 2;
-			var input = haxe.io.UInt8Array.fromBytes(blob.sub(pos, compressedLen).toBytes());
-			var output = arm.format.pako.Pako.inflate(input, { raw: true });
-			blob = kha.Blob.fromBytes(output.view.buffer);
+			var input = blob.sub(pos, compressedLen).toBytes().getData();
+			blob = kha.Blob.fromBytes(haxe.io.Bytes.ofData(Krom.inflate(input, true)));
 			pos = 0;
 		}
 		var res = isFloat ? parseArrayf(readVal, len) : parseArrayi(readVal, len);
