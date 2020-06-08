@@ -191,6 +191,7 @@ class ImportArm {
 				var ld = project.layer_datas[i];
 				var isGroup = ld.texpaint == null;
 				var l = new LayerSlot("", isGroup);
+				if (ld.name != null) l.name = ld.name;
 				Project.layers.push(l);
 
 				if (!isGroup) {

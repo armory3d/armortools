@@ -46,6 +46,7 @@ class ExportArm {
 		var ld: Array<TLayerData> = [];
 		for (l in Project.layers) {
 			ld.push({
+				name: l.name,
 				res: l.texpaint != null ? l.texpaint.width : Project.layers[0].texpaint.width,
 				bpp: bpp,
 				texpaint: l.texpaint != null ? Lz4.encode(l.texpaint.getPixels()) : null,

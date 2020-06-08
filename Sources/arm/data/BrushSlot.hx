@@ -25,11 +25,10 @@ class BrushSlot {
 				});
 			}
 			canvas = Json.parse(defaultCanvas);
+			canvas.name = "Brush " + (id + 1);
 		}
 		else {
 			canvas = c;
 		}
-
-		canvas.name = "Brush " + (id + 1);
 	}
 }

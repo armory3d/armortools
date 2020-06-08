@@ -44,12 +44,11 @@ class MaterialSlot {
 				});
 			}
 			canvas = Json.parse(defaultCanvas);
+			canvas.name = "Material " + (id + 1);
 		}
 		else {
 			canvas = c;
 		}
-
-		canvas.name = "Material " + (id + 1);
 	}
 
 	public function unload() {

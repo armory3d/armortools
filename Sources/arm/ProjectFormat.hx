@@ -17,6 +17,7 @@ typedef TProjectFormat = {
 }
 
 typedef TLayerData = {
+	public var name: String;
 	public var res: Int; // Width pixels
 	public var bpp: Int; // Bits per pixel
 	public var texpaint: haxe.io.Bytes;
