@@ -478,7 +478,15 @@ class RenderPathPaint {
 		}
 	}
 
+	static function paintEnabled(): Bool {
+		var fillLayer = Context.layer.material_mask != null && !Context.layerIsMask;
+		var groupLayer = Context.layer.getChildren() != null;
+		return !fillLayer && !groupLayer;
+	}
+
 	public static function begin() {
+		if (!paintEnabled())return;
+
 		pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {
 			History.paint();
@@ -543,11 +551,15 @@ class RenderPathPaint {
 	public static function end() {
 		if (Config.raw.brush_3d) commandsCursor();
 		Context.ddirty--;
-		Context.pdirty--;
 		Context.rdirty--;
+
+		if (!paintEnabled())return;
+		Context.pdirty--;
 	}
 
 	public static function draw() {
+		if (!paintEnabled())return;
+
 		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
 			commandsLiveBrush();
