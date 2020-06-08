@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [15, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [16, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -71,6 +71,7 @@ class UIMenu {
 				if (ui.button("      " + tr("Import Brush..."), Left)) Project.importBrush();
 				if (ui.button("      " + tr("Import Mesh..."), Left)) Project.importMesh();
 				if (ui.button("      " + tr("Reimport Mesh"), Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
+				if (ui.button("      " + tr("Reimport Textures"), Left, Config.keymap.file_reimport_textures)) Project.reimportTextures();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("      " + tr("Export Textures..."), Left, Config.keymap.file_export_textures_as)) BoxExport.showTextures();
 				if (ui.button("      " + tr("Export Mesh..."), Left)) BoxExport.showMesh();

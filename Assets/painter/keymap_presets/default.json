@@ -22,6 +22,7 @@
 	"file_save": "ctrl+s",
 	"file_save_as": "ctrl+shift+s",
 	"file_reimport_mesh": "ctrl+r",
+	"file_reimport_textures": "ctrl+shift+r",
 	"file_import_assets": "ctrl+i",
 	"file_export_textures": "ctrl+e",
 	"file_export_textures_as": "ctrl+shift+e",

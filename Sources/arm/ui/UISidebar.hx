@@ -243,6 +243,7 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
 		else if (Operator.shortcut(Config.keymap.file_open_recent)) Project.projectOpenRecentBox();
 		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimportMesh();
+		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimportTextures();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (Context.textureExportPath == "") { // First export, ask for path

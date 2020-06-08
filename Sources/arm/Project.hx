@@ -403,4 +403,13 @@ class Project {
 			ImportAsset.run(path);
 		});
 	}
+
+	public static function reimportTextures() {
+		for (asset in Project.assets) {
+			Data.deleteImage(asset.file);
+			Data.getImage(asset.file, function(image: kha.Image) {
+				Project.assetMap.set(asset.id, image);
+			});
+		}
+	}
 }
