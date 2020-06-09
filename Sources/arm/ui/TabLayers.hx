@@ -629,7 +629,7 @@ class TabLayers {
 
 						var uvTypeHandle = Id.handle().nest(l.id);
 						uvTypeHandle.position = l.uvType;
-						l.uvType = ui.combo(uvTypeHandle, [tr("UV Map"), tr("Triplanar")], tr("TexCoord"));
+						l.uvType = ui.combo(uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 						if (uvTypeHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);

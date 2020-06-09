@@ -43,6 +43,10 @@ class LayerSlot {
 	public var paintEmis = true;
 	public var paintSubs = true;
 
+	public var projectX = 0.0; // Decal layer
+	public var projectY = 0.0;
+	public var projectZ = 0.0;
+
 	var createMaskColor: Int;
 	var createMaskImage: Image;
 

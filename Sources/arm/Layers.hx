@@ -393,7 +393,6 @@ class Layers {
 			UIHeader.inst.worktab.position = SpaceMaterial;
 
 			if (current != null) current.begin(false);
-
 			return;
 		}
 
@@ -412,8 +411,13 @@ class Layers {
 				setObjectMask();
 
 				if (first) {
-					first = false;
 					MaterialParser.parsePaintMaterial();
+					first = false;
+				}
+
+				// Decal layer
+				if (l.uvType == UVProject) {
+					l.clearLayer();
 				}
 
 				for (i in 0...fills) {
@@ -432,6 +436,31 @@ class Layers {
 			setObjectMask();
 			Context.tool = selectedTool;
 		}
+	}
+
+	public static function updateFillLayer(fills = 1) {
+		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		if (current != null) current.end();
+
+		var selectedTool = Context.tool;
+		Context.pdirty = fills;
+		Context.layerIsMask = false;
+		Context.tool = ToolFill;
+
+		// Decal layer
+		if (Context.layer.uvType == UVProject) {
+			Context.layer.clearLayer();
+		}
+
+		MaterialParser.parsePaintMaterial();
+
+		for (i in 0...fills) {
+			RenderPathPaint.commandsPaint();
+		}
+
+		Context.rdirty = 2;
+		Context.tool = selectedTool;
+		if (current != null) current.begin(false);
 	}
 
 	public static function setObjectMask() {

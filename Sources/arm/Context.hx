@@ -131,6 +131,7 @@ class Context {
 	public static var axisY = false;
 	public static var axisZ = false;
 	public static var axisStart = 0.0;
+	public static var axisLoc = 0.0;
 
 	public static var brushNodesRadius = 1.0;
 	public static var brushNodesOpacity = 1.0;

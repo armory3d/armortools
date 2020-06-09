@@ -76,7 +76,14 @@ class MakePaint {
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		var decalLayer = Context.layer.material_mask != null && Context.layer.uvType == UVProject;
+		if (decalLayer) {
+			vert.add_uniform('mat4 WVP', '_decalLayerMatrix');
+		}
+		else {
+			vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
+		}
+
 		vert.add_out('vec4 ndc');
 		vert.write_attrib('ndc = mul(vec4(pos.xyz, 1.0), WVP);');
 

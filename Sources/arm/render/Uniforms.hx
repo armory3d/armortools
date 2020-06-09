@@ -4,6 +4,7 @@ import iron.data.MaterialData;
 import iron.object.Object;
 import iron.system.Input;
 import iron.math.Vec4;
+import iron.math.Mat4;
 import iron.RenderPath;
 import iron.Scene;
 #if arm_painter
@@ -21,6 +22,7 @@ class Uniforms {
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
 		iron.object.Uniforms.externalVec3Links = [linkVec3];
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
+		iron.object.Uniforms.externalMat4Links = [linkMat4];
 		iron.object.Uniforms.externalTextureLinks = [linkTex];
 	}
 
@@ -324,6 +326,20 @@ class Uniforms {
 			return vec;
 		}
 		#end
+		return null;
+	}
+
+	public static function linkMat4(object: Object, mat: MaterialData, link: String): iron.math.Mat4 {
+		if (link == "_decalLayerMatrix") { // Decal layer
+			var camera = Scene.active.camera;
+			var m = iron.object.Uniforms.helpMat;
+			m.setFrom(object.transform.worldUnpack);
+			var V = Mat4.identity();
+			V.setLookAt(new Vec4(Context.layer.projectX, -5, Context.layer.projectZ), new Vec4(Context.layer.projectX, 0, Context.layer.projectZ), new Vec4(0, 0, 1));
+			m.multmat(V);
+			m.multmat(camera.P);
+			return m;
+		}
 		return null;
 	}
 

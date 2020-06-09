@@ -648,9 +648,7 @@ class UISidebar {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		if (UIHeader.inst.worktab.position == SpaceRender) {
-			arm.plugin.Gizmo.update();
-		}
+		arm.plugin.Gizmo.update();
 
 		if (Context.lastCombo != null || (ui.tooltipImg == null && Context.lastTooltip != null)) App.redrawUI();
 		Context.lastCombo = ui.comboSelectedHandle;
@@ -677,7 +675,6 @@ class UISidebar {
 		if (tabh == 0) {
 			tabh = tabh1 = tabh2 = Std.int(System.windowHeight() / 3);
 		}
-		Context.gizmo.visible = false;
 
 		if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
 			TabLayers.draw();
@@ -706,8 +703,6 @@ class UISidebar {
 			TabMeshes.draw();
 			TabFonts.draw();
 		}
-
-		Context.gizmo.visible = UIHeader.inst.worktab.position == SpaceRender;
 
 		ui.end();
 		g.begin(false);

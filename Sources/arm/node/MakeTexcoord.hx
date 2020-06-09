@@ -8,7 +8,8 @@ class MakeTexcoord {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
 
-		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : Context.brushPaint;
+		var fillLayer = Context.layer.material_mask != null;
+		var uvType = fillLayer ? Context.layer.uvType : Context.brushPaint;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 		// TexCoords - project
@@ -16,7 +17,12 @@ class MakeTexcoord {
 			frag.add_uniform('float brushScale', '_brushScale');
 			frag.write_attrib('vec2 uvsp = sp.xy;');
 
-			if (decal) {
+			if (fillLayer) { // Decal layer
+				frag.write_attrib('uvsp.x *= aspectRatio;');
+				frag.write_attrib('uvsp.xy *= 4.0;');
+				//frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
+			}
+			else if (decal) {
 				frag.write_attrib('uvsp -= inp.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
