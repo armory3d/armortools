@@ -32,7 +32,7 @@ strip Krom
 ./Krom ../../build/krom
 ```
 ```bash
-# macOS - wip
+# macOS
 node Kromx/make -g metal
 cp -a build/krom/ Kromx/Deployment
 cd Kromx
