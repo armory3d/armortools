@@ -32,7 +32,7 @@ class Gizmo {
 			gizmo.transform.loc.setFrom(Context.object.transform.loc);
 		}
 		else if (isDecal) {
-			gizmo.transform.loc.set(Context.layer.projectX, Context.layer.projectY, Context.layer.projectZ);
+			gizmo.transform.loc.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
 		}
 		var cam = Scene.active.camera;
 		var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 10;
@@ -128,13 +128,13 @@ class Gizmo {
 		else if (isDecal) {
 			if (Context.axisX || Context.axisY || Context.axisZ) {
 				if (Context.axisX) {
-					Context.layer.projectX = Context.axisLoc;
+					Context.layer.decalMat._30 = Context.axisLoc;
 				}
 				else if (Context.axisY) {
-					Context.layer.projectY = Context.axisLoc;
+					Context.layer.decalMat._31 = Context.axisLoc;
 				}
 				else if (Context.axisZ) {
-					Context.layer.projectZ = Context.axisLoc;
+					Context.layer.decalMat._32 = Context.axisLoc;
 				}
 				Layers.updateFillLayer();
 			}
@@ -163,7 +163,7 @@ class Gizmo {
 				v.set(t.worldx(), t.worldy(), t.worldz());
 			}
 			else if (isDecal) {
-				v.set(Context.layer.projectX, Context.layer.projectY, Context.layer.projectZ);
+				v.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
 			}
 
 			if (Context.axisX) {

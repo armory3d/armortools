@@ -333,10 +333,8 @@ class Uniforms {
 		if (link == "_decalLayerMatrix") { // Decal layer
 			var camera = Scene.active.camera;
 			var m = iron.object.Uniforms.helpMat;
-			m.setFrom(object.transform.worldUnpack);
-			var V = Mat4.identity();
-			V.setLookAt(new Vec4(Context.layer.projectX, -5, Context.layer.projectZ), new Vec4(Context.layer.projectX, 0, Context.layer.projectZ), new Vec4(0, 0, 1));
-			m.multmat(V);
+			m.setFrom(Context.layer.decalMat);
+			m.getInverse(m);
 			m.multmat(camera.P);
 			return m;
 		}

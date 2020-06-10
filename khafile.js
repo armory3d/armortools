@@ -57,7 +57,6 @@ else if (process.platform === "darwin") {
 
 if (debug) {
 	project.addDefine("arm_debug");
-	project.addShaders("Shaders/debug/*.glsl");
 	project.addParameter("--times");
 	// project.addParameter("--no-inline");
 }

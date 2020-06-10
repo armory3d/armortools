@@ -616,6 +616,7 @@ class RenderPathDeferred {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		var currentG = path.currentG;
 		#if arm_painter
 		RenderPathPaint.bindLayers();
 		#end
@@ -623,6 +624,7 @@ class RenderPathDeferred {
 		#if arm_painter
 		RenderPathPaint.unbindLayers();
 		#end
+		LineDraw.render(currentG);
 	}
 
 	static function drawSplit() {
