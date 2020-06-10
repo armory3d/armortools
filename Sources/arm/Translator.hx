@@ -57,6 +57,32 @@ class Translator {
 		// Generate extended font atlas
 		// Basic Latin + Latin-1 Supplement + Latin Extended-A
 		kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
+
+		// Push additional char codes contained in translation file
+		var cjk = false;
+		for (s in translations) {
+			for (i in 0...s.length) {
+				if (kha.graphics2.Graphics.fontGlyphs.indexOf(s.charCodeAt(i)) == -1) {
+					kha.graphics2.Graphics.fontGlyphs.push(s.charCodeAt(i));
+					// Assume cjk in the > 383 range for now
+					cjk = true;
+				}
+			}
+		}
+
+		if (cjk) {
+			// Load and assign font with cjk characters
+			iron.data.Data.getFont("font_cjk.ttf", function(f: kha.Font) {
+				App.font = f;
+				var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
+				// Scale up the font size a bit
+				uis[0].t.FONT_SIZE = Std.int(uis[0].t.FONT_SIZE * 1.3);
+				for (ui in uis) {
+					ui.ops.font = f;
+					ui.setScale(ui.ops.scaleFactor);
+				}
+			});
+		}
 	}
 
 	// Returns a list of supported locales (plus English and the automatically detected system locale).
