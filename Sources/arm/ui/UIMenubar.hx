@@ -21,8 +21,6 @@ class UIMenubar {
 		inst = this;
 	}
 
-	var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
-
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UISidebar.inst.ui;
@@ -35,6 +33,7 @@ class UIMenubar {
 
 			var menuCategories = 6;
 			for (i in 0...menuCategories) {
+				var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 				if (Ext.menuButton(ui, categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
 					UIMenu.show = true;
 					UIMenu.menuCategory = i;
