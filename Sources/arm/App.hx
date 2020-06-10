@@ -425,8 +425,8 @@ class App {
 	static function handleDropPaths() {
 		if (dropPaths.length > 0) {
 			var mouse = Input.getMouse();
-			#if krom_linux
-			var wait = !mouse.moved; // Mouse coords not updated on Linux during drag
+			#if (krom_linux || krom_darwin)
+			var wait = !mouse.moved; // Mouse coords not updated during drag
 			#else
 			var wait = false;
 			#end
