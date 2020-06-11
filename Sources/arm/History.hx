@@ -266,7 +266,7 @@ class History {
 		copyToUndo(Context.layer.id, undoI, isMask);
 
 		pushUndo = false;
-		push(UIToolbar.inst.toolNames[Context.tool]);
+		push(tr(UIToolbar.inst.toolNames[Context.tool]));
 	}
 
 	public static function newLayer() {

@@ -62,7 +62,7 @@ class UIToolbar {
 					ui._x += 2;
 					if (Context.tool == i) ui.rect(-1, -1, 50 + 2, 50 + 2, ui.t.HIGHLIGHT_COL, 2);
 					if (ui.image(img, -1, null, i * imgw, 0, imgw, imgw) == State.Started) Context.selectTool(i);
-					if (ui.isHovered) ui.tooltip(toolNames[i] + " " + keys[i]);
+					if (ui.isHovered) ui.tooltip(tr(toolNames[i]) + " " + keys[i]);
 					ui._x -= 2;
 					ui._y += 2;
 				}
