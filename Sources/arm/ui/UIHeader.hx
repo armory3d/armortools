@@ -37,7 +37,7 @@ class UIHeader {
 				if (Context.colorIdPicked) {
 					ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
-				if (ui.button("Clear")) Context.colorIdPicked = false;
+				if (ui.button(tr("Clear"))) Context.colorIdPicked = false;
 				ui.text(tr("Color ID Map"));
 				var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
 				if (Context.colorIdHandle.changed) Context.ddirty = 2;
@@ -257,7 +257,7 @@ class UIHeader {
 					var symYHandle = Id.handle({selected: false});
 					var symZHandle = Id.handle({selected: false});
 					ui._w = Std.int(55 * sc);
-					ui.text("Symmetry");
+					ui.text(tr("Symmetry"));
 					ui._w = Std.int(25 * sc);
 					Context.symX = ui.check(symXHandle, "X");
 					Context.symY = ui.check(symYHandle, "Y");
