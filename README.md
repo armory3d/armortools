@@ -76,3 +76,13 @@ node Kinc/make -g direct3d12 --raytrace dxr
 git pull origin master
 git submodule update --init --recursive
 ```
+
+If you get build failures or crashing at startup, try cleaning the repository
+and its submodules:
+
+```bash
+# Warning: This removes all untracked and ignored files in the repository.
+# If you're working on a contribution, make sure to commit it first.
+git clean -dfx
+git submodule foreach --recursive git clean -dfx
+```
