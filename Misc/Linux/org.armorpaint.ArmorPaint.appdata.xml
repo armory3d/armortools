@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+    <id>org.armorpaint.ArmorPaint.desktop</id>
+    <name>ArmorPaint</name>
+    <summary>3D PBR texture painting software</summary>
+    <description>
+        <p>
+            ArmorPaint is a stand-alone software designed for physically-based texture painting. Drag &amp; drop your 3D models and start painting. Receive instant visual feedback in the viewport as you paint.
+        </p>
+        <ul>
+            <li>
+                <strong>Node-based:</strong>
+                Work fast with the convenience of nodes. Paint with fully procedural materials. Build fill layers with material nodes. Use brush nodes to create patterns and procedural brushes.
+            </li>
+            <li>
+                <strong>GPU-accelerated:</strong>
+                ArmorPaint is designed from scratch to run completely on the GPU. This results in a smooth 4K painting experience on a medium-power integrated hardware. Up to 16K texture painting is seamless using a high-end graphics card.
+            </li>
+            <li>
+                <strong>Baking:</strong>
+                Bake texture maps for high-poly models instantly on your GPU.
+            </li>
+            <li>
+                <strong>Plugins:</strong>
+                ArmorPaint bets heavily on extensibility. Enhance any part of the software through plugins with god-mode powers. Integrate new node systems or build custom material nodes.
+            </li>
+        </ul>
+    </description>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>Zlib</project_license>
+    <url type="homepage">https://armorpaint.org/</url>
+    <screenshots>
+        <screenshot type="default">
+            <image type="source" width="1600" height="900">https://armorpaint.org/img/x.jpg</image>
+            <caption>3D painting</caption>
+        </screenshot>
+        <screenshot>
+            <image type="source" width="1600" height="900">https://armorpaint.org/img/2.jpg</image>
+            <caption>Node-based material setup</caption>
+        </screenshot>
+        <screenshot>
+            <image type="source" width="1600" height="900">https://armorpaint.org/img/plugin.jpg</image>
+            <caption>Texture synthesis using plugins</caption>
+        </screenshot>
+    </screenshots>
+    <content_rating type="oars-1.1" />
+    <releases>
+        <release version="0.7" date="2020-01-03" />
+        <release version="0.6" date="2019-08-07" />
+        <release version="0.5" date="2018-11-07" />
+        <release version="0.4" date="2018-07-11" />
+        <release version="0.3" date="2018-05-04" />
+        <release version="0.2" date="2018-02-26" />
+    </releases>
+</component>

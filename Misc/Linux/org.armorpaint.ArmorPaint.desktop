@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ArmorPaint
+GenericName=3D painting software
+Comment=3D PBR texture painting software
+Exec=armorpaint %f
+Icon=armorpaint
+Terminal=false
+PrefersNonDefaultGPU=true
+Type=Application
+Categories=Graphics;3DGraphics;
