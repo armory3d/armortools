@@ -104,23 +104,6 @@ else { // painter, creator
 	project.addDefine("arm_appwh");
 	project.addDefine("arm_skip_envmap");
 	project.addDefine("arm_resizable");
-
-	if (android) {
-
-	}
-	else if (ios) {
-
-	}
-	else if (process.platform === "win32") {
-		project.addAssets("Assets/bin/cmft.exe", { notinlist: true, destination: "data/{name}" });
-	}
-	else if (process.platform === "linux") {
-		project.addAssets("Assets/bin/cmft-linux64", { notinlist: true, destination: "data/{name}" });
-	}
-	else if (process.platform === "darwin") {
-		project.addAssets("Assets/bin/cmft-osx", { notinlist: true, destination: "data/{name}" });
-	}
-
 	if (build === "creator") {
 		project.addDefine("arm_creator");
 	}
