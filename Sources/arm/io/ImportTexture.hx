@@ -32,8 +32,7 @@ class ImportTexture {
 			UISidebar.inst.hwnd2.redraws = 2;
 
 			// Set envmap
-			if (path.toLowerCase().endsWith(".hdr") &&
-				(image.width == 1024 || image.width == 2048 || image.width == 4096)) {
+			if (path.toLowerCase().endsWith(".hdr")) {
 				ImportEnvmap.run(path, image);
 			}
 		});
