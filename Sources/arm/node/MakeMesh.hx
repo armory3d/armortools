@@ -394,22 +394,22 @@ class MakeMesh {
 					frag.write('fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
-			else if (Context.viewportMode == ViewBaseColor) {
+			else if (Context.viewportMode == ViewBaseColor && Context.layer.paintBase) {
 				frag.write('fragColor[1] = vec4(basecol, 1.0);');
 			}
-			else if (Context.viewportMode == ViewNormalMap) {
+			else if (Context.viewportMode == ViewNormalMap && Context.layer.paintNor) {
 				frag.write('fragColor[1] = vec4(ntex.rgb, 1.0);');
 			}
-			else if (Context.viewportMode == ViewOcclusion) {
+			else if (Context.viewportMode == ViewOcclusion && Context.layer.paintOcc) {
 				frag.write('fragColor[1] = vec4(vec3(occlusion, occlusion, occlusion), 1.0);');
 			}
-			else if (Context.viewportMode == ViewRoughness) {
+			else if (Context.viewportMode == ViewRoughness && Context.layer.paintRough) {
 				frag.write('fragColor[1] = vec4(vec3(roughness, roughness, roughness), 1.0);');
 			}
-			else if (Context.viewportMode == ViewMetallic) {
+			else if (Context.viewportMode == ViewMetallic && Context.layer.paintMet) {
 				frag.write('fragColor[1] = vec4(vec3(metallic, metallic, metallic), 1.0);');
 			}
-			else if (Context.viewportMode == ViewOpacity) {
+			else if (Context.viewportMode == ViewOpacity && Context.layer.paintOpac) {
 				frag.write('fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 			}
 			else if (Context.viewportMode == ViewTexCoord) {
@@ -434,13 +434,13 @@ class MakeMesh {
 				frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
 			}
-			else if (Context.viewportMode == ViewMask) {
-				frag.write('float sample_mask = 1.0;');
-				if (Context.layer.texpaint_mask != null) {
-					frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
-					frag.write('sample_mask = textureLod(texpaint_mask_view, texCoord, 0.0).r;');
-				}
+			else if (Context.viewportMode == ViewMask && Context.layer.texpaint_mask != null) {
+				frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
+				frag.write('float sample_mask = textureLod(texpaint_mask_view, texCoord, 0.0).r;');
 				frag.write('fragColor[1] = vec4(sample_mask, sample_mask, sample_mask, 1.0);');
+			}
+			else {
+				frag.write('fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 			}
 		}
 
