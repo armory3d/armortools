@@ -76,6 +76,7 @@ class Translator {
 		}
 
 		if (cjk) {
+			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
 			// Load and assign font with cjk characters
 			iron.App.notifyOnInit(function() {
 				iron.data.Data.getFont("font_cjk.ttf", function(f: kha.Font) {
