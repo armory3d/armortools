@@ -68,13 +68,13 @@ def main() -> None:
 
     template_data: Dict[str, str] = {}
     for filename in matches:
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf8") as f:
             # Read source files for localizable strings.
             process_file(f, filename, template_data)
 
     if os.path.exists(output_path):
         print(f'Updating the translation at "{output_path}"...')
-        with open(output_path, "r") as f:
+        with open(output_path, "r", encoding="utf8") as f:
             existing_data = json.loads(f.read())
             # Remove obsolete translations (i.e. translations that are no longer
             # present in the generated data).
@@ -87,11 +87,11 @@ def main() -> None:
             # existing translations).
             template_data = {**template_data, **existing_data_no_obsolete}
 
-        with open(output_path, "w") as f:
+        with open(output_path, "w", encoding="utf8") as f:
             json.dump(template_data, f, ensure_ascii=False, indent=4)
     else:
         print(f'Creating new translation template at "{output_path}"...')
-        with open(output_path, "w") as f:
+        with open(output_path, "w", encoding="utf8") as f:
             json.dump(template_data, f, ensure_ascii=False, indent=4)
 
 
