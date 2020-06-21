@@ -50,7 +50,7 @@ def main() -> None:
 
     # Change to the directory where the script is located,
     # so that the script can be run from any location.
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../..")
 
     output_path: Final = f"Assets/locale/{sys.argv[1]}.json"
 
