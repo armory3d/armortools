@@ -316,8 +316,7 @@
     "ColorID": "カラーID",
     "Picker": "ピッカー",
     "Gizmo": "ギズモ",
-    "Hold": "",
-    "to set source": "を長押ししてソースを設定します",
+    "Hold {key} to set source": "{key}を長押ししてソースを設定します",
     "Normal Map": "法線マップ",
     "Tiled": "タイル"
 }
