@@ -262,7 +262,7 @@
     "Bake": "烘焙",
     "ColorID": "颜色ID",
     "Picker": "拾取器",
-    "Hold ALT to set source": "按住ALT键设置源文件",
+    "Hold {key} to set source": "按住{key}键设置源文件",
     "Gizmo": "Gizmo",
     "Edit": "编辑",
     "Mode": "模式",

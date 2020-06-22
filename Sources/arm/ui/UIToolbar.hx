@@ -51,7 +51,7 @@ class UIToolbar {
 					"(" + Config.keymap.tool_fill + ")",
 					"(" + Config.keymap.tool_decal + ")",
 					"(" + Config.keymap.tool_text + ")",
-					"(" + Config.keymap.tool_clone + ") - " + tr("Hold") + " (" + Config.keymap.set_clone_source + ") " + tr("to set source"),
+					"(" + Config.keymap.tool_clone + ") - " + tr("Hold {key} to set source", ["key" => Config.keymap.set_clone_source]),
 					"(" + Config.keymap.tool_blur + ")",
 					"(" + Config.keymap.tool_particle + ")",
 					"(" + Config.keymap.tool_colorid + ")",

@@ -263,7 +263,7 @@
     "Bake": "Renderizar",
     "ColorID": "ColorID",
     "Picker": "Seleccionador",
-    "Hold ALT to set source": "Manten Alt para definir la fuente",
+    "Hold {key} to set source": "Manten {key} para definir la fuente",
     "Gizmo": "Gizmo",
     "Edit": "Editar",
     "Mode": "Modo",
