@@ -108,7 +108,7 @@ class BoxPreferences {
 					loadTheme(Config.raw.theme);
 				}
 
-				if (ui.button("New")) {
+				if (ui.button(tr("New"))) {
 					UIBox.showCustom(function(ui: Zui) {
 						if (ui.tab(Id.handle(), tr("New Theme"))) {
 							ui.row([0.5, 0.5]);
@@ -130,13 +130,13 @@ class BoxPreferences {
 					});
 				}
 
-				if (ui.button("Import")) {
+				if (ui.button(tr("Import"))) {
 					UIFiles.show("json", false, function(path: String) {
 						ImportTheme.run(path);
 					});
 				}
 
-				if (ui.button("Export")) {
+				if (ui.button(tr("Export"))) {
 					UIFiles.show("json", true, function(path) {
 						path += Path.sep + UIFiles.filename;
 						if (!path.endsWith(".json")) path += ".json";

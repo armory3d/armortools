@@ -42,7 +42,7 @@ class TabProperties {
 				if (h.changed) { loc.z = f; Context.ddirty = 2; }
 
 				ui.row(row4);
-				ui.text("Rotation");
+				ui.text(tr("Rotation"));
 
 				h = Id.handle();
 				h.text = roundfp(rot.x) + "";

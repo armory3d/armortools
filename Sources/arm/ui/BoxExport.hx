@@ -118,7 +118,7 @@ class BoxExport {
 					if (ui.tab(Id.handle(), tr("New Preset"))) {
 						ui.row([0.5, 0.5]);
 						var presetName = ui.textInput(Id.handle({text: "new_preset"}), tr("Name"));
-						if (ui.button("OK") || ui.isReturnDown) {
+						if (ui.button(tr("OK")) || ui.isReturnDown) {
 							newPreset(presetName);
 							fetchPresets();
 							preset = null;
@@ -228,10 +228,10 @@ class BoxExport {
 				ui.text(tris + " triangles");
 
 				ui.row([0.5, 0.5]);
-				if (ui.button("Cancel")) {
+				if (ui.button(tr("Cancel"))) {
 					UIBox.show = false;
 				}
-				if (ui.button("Export")) {
+				if (ui.button(tr("Export"))) {
 					UIBox.show = false;
 					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
 						var f = UIFiles.filename;
