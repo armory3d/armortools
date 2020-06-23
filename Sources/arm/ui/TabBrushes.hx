@@ -79,7 +79,7 @@ class TabBrushes {
 							//var b = Project.brushes[i];
 							ui.text(Project.brushes[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
-							if (ui.button("Export", Left)) {
+							if (ui.button(tr("Export"), Left)) {
 								Context.selectBrush(i);
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
@@ -88,7 +88,7 @@ class TabBrushes {
 								});
 							}
 
-							if (ui.button("Duplicate", Left)) {
+							if (ui.button(tr("Duplicate"), Left)) {
 								function dupliBrush(_) {
 									iron.App.removeRender(dupliBrush);
 									Context.brush = new BrushSlot();
