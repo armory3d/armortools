@@ -79,3 +79,9 @@ node Kinc/make -g direct3d12 --raytrace dxr
 git pull origin master
 git submodule update --init --recursive
 ```
+```bash
+# How to generate or update a locale file
+pip install typing_extensions -t Assets/locale/tools
+python ./Assets/locale/tools/extract_locales.py <locale code>
+# Generated or updated in `Assets/locale/<locale code>.json`
+```
