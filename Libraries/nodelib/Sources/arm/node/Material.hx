@@ -710,12 +710,12 @@ class Material {
 		else if (node.type == "LAYER") {
 			var l = node.buttons[0].default_value;
 			if (socket == node.outputs[0]) { // Base
-				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
-				return "texture(texpaint, texCoord).rgb";
+				curshader.add_uniform("sampler2D texpaint" + l, "_texpaint" + l);
+				return "texture(texpaint" + l + ", texCoord).rgb";
 			}
 			else if (socket == node.outputs[5]) { // Normal
-				curshader.add_uniform("sampler2D texpaint_nor", "_texpaint_nor" + l);
-				return "texture(texpaint_nor, texCoord).rgb";
+				curshader.add_uniform("sampler2D texpaint_nor" + l, "_texpaint_nor" + l);
+				return "texture(texpaint_nor" + l + ", texCoord).rgb";
 			}
 		}
 		else if (node.type == "MATERIAL") {
@@ -1010,31 +1010,31 @@ class Material {
 		else if (node.type == "LAYER") {
 			var l = node.buttons[0].default_value;
 			if (socket == node.outputs[1]) { // Opac
-				curshader.add_uniform("sampler2D texpaint", "_texpaint" + l);
-				return "texture(texpaint, texCoord).a";
+				curshader.add_uniform("sampler2D texpaint" + l, "_texpaint" + l);
+				return "texture(texpaint" + l + ", texCoord).a";
 			}
 			else if (socket == node.outputs[2]) { // Occ
-				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
-				return "texture(texpaint_pack, texCoord).r";
+				curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				return "texture(texpaint_pack" + l + ", texCoord).r";
 			}
 			else if (socket == node.outputs[3]) { // Rough
-				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
-				return "texture(texpaint_pack, texCoord).g";
+				curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				return "texture(texpaint_pack" + l + ", texCoord).g";
 			}
 			else if (socket == node.outputs[4]) { // Metal
-				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
-				return "texture(texpaint_pack, texCoord).b";
+				curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				return "texture(texpaint_pack" + l + ", texCoord).b";
 			}
 			else if (socket == node.outputs[7]) { // Height
-				curshader.add_uniform("sampler2D texpaint_pack", "_texpaint_pack" + l);
-				return "texture(texpaint_pack, texCoord).a";
+				curshader.add_uniform("sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+				return "texture(texpaint_pack" + l + ", texCoord).a";
 			}
 		}
 		else if (node.type == "LAYER_MASK") {
 			if (socket == node.outputs[0]) {
 				var l = node.buttons[0].default_value;
-				curshader.add_uniform("sampler2D texpaint_mask", "_texpaint_mask" + l);
-				return "texture(texpaint_mask, texCoord).r";
+				curshader.add_uniform("sampler2D texpaint_mask" + l, "_texpaint_mask" + l);
+				return "texture(texpaint_mask" + l + ", texCoord).r";
 			}
 		}
 		else if (node.type == "MATERIAL") {
