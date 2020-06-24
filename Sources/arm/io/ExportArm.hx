@@ -124,7 +124,11 @@ class ExportArm {
 		var raw = {
 			version: Main.version,
 			material_nodes: mnodes,
+			#if kha_metal
+			material_icons: [Lz4.encode(bgraSwap(m.image.getPixels()))],
+			#else
 			material_icons: [Lz4.encode(m.image.getPixels())],
+			#end
 			assets: texture_files
 		};
 
@@ -132,6 +136,17 @@ class ExportArm {
 		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
+
+	#if kha_metal
+	static function bgraSwap(bytes: haxe.io.Bytes) {
+		for (i in 0...Std.int(bytes.length / 4)) {
+			var r = bytes.get(i * 4);
+			bytes.set(i * 4, bytes.get(i * 4 + 2));
+			bytes.set(i * 4 + 2, r);
+		}
+		return bytes;
+	}
+	#end
 
 	public static function runBrush(path: String) {
 		var bnodes: Array<TNodeCanvas> = [];
