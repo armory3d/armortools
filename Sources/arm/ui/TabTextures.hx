@@ -107,6 +107,12 @@ class TabTextures {
 										iron.App.notifyOnRender(exportTexture);
 									});
 								}
+								if (ui.button(tr("Reimport"), Left)) {
+									Data.deleteImage(asset.file);
+									Data.getImage(asset.file, function(image: kha.Image) {
+										Project.assetMap.set(asset.id, image);
+									});
+								}
 								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);
 								}
@@ -127,7 +133,7 @@ class TabTextures {
 									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 								}
-							}, 4);
+							}, 5);
 						}
 					}
 				}
