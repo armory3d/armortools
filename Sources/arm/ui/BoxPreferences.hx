@@ -185,7 +185,7 @@ class BoxPreferences {
 					if (key == "NAME") continue;
 
 					var h = hlist.nest(i++);
-					var val: Int = untyped theme[key];
+					var val: Dynamic = untyped theme[key];
 					var isHex = key.endsWith("_COL");
 					if (isHex && val < 0) val += untyped 4294967296;
 
@@ -203,12 +203,21 @@ class BoxPreferences {
 						}
 					}
 
-					h.text = isHex ? untyped val.toString(16) : untyped val.toString();
-					var res = ui.textInput(h, key);
-					if (res == "true") untyped theme[key] = true;
-					else if (res == "false") untyped theme[key] = false;
-					else if (isHex) untyped theme[key] = parseInt(h.text, 16);
-					else untyped theme[key] = parseInt(h.text);
+					if (Std.is(val, Bool)) {
+						h.selected = val;
+						untyped theme[key] = ui.check(h, key);
+					}
+					else if (key == "LINK_STYLE") {
+						var styles = [tr("Straight"), tr("Curved")];
+						h.position = val;
+						untyped theme[key] = ui.combo(h, styles, key, true);
+					}
+					else {
+						h.text = isHex ? untyped val.toString(16) : untyped val.toString();
+						var res = ui.textInput(h, key);
+						if (isHex) untyped theme[key] = parseInt(h.text, 16);
+						else untyped theme[key] = parseInt(h.text);
+					}
 				}
 			}
 
@@ -291,7 +300,7 @@ class BoxPreferences {
 			Context.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
 				var hrendermode = Id.handle({position: Context.renderMode});
-				Context.renderMode = ui.combo(hrendermode, ["Full", "Mobile"], tr("Renderer"), true);
+				Context.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
 					if (hrendermode.position == RenderForward) {
 						if (RenderPathForward.path == null) {
