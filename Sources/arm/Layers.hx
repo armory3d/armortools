@@ -28,6 +28,7 @@ class Layers {
 	public static var pipeMergeA: PipelineState = null;
 	public static var pipeCopy: PipelineState;
 	public static var pipeCopy8: PipelineState;
+	public static var pipeCopy128: PipelineState;
 	public static var pipeCopyBGRA: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
@@ -168,8 +169,21 @@ class Layers {
 		pipeCopy8.colorAttachmentCount = 1;
 		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
 		pipeCopy8.compile();
+
+		pipeCopy128 = new PipelineState();
+		pipeCopy128.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipeCopy128.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
+		pipeCopy128.inputLayout = [vs];
+		pipeCopy128.colorAttachmentCount = 1;
+		pipeCopy128.colorAttachments[0] = TextureFormat.RGBA128;
+		pipeCopy128.compile();
 		#else
 		pipeCopy8 = pipeCopy;
+		pipeCopy128 = pipeCopy;
 		#end
 
 		pipeMask = new PipelineState();
