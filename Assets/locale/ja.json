@@ -69,6 +69,8 @@
     "Confirm": "確認",
     "Theme": "テーマ",
     "New Theme": "新規テーマ",
+    "Straight": "直線",
+    "Curved": "曲線",
     "Usage": "使い方",
     "Undo Steps": "アンドゥ回数",
     "Paint Bleed": "にじみ",
@@ -92,6 +94,8 @@
     "Sensitivity": "感度",
     "Help": "ヘルプ",
     "Viewport": "ビューポート",
+    "Full": "フル",
+    "Mobile": "モバイル",
     "Renderer": "レンダラー",
     "Super Sample": "スーパーサンプリング",
     "VSync": "垂直同期",
@@ -195,6 +199,7 @@
     "Run": "実行",
     "Textures": "テクスチャ",
     "Import texture file": "テクスチャファイルをインポート",
+    "Reimport": "再インポート",
     "To Mask": "マスクへ",
     "Drag and drop files here": "ファイルをここにドラッグアンドドロップします",
     "Traits": "特性",
@@ -319,5 +324,5 @@
     "Gizmo": "ギズモ",
     "Hold {key} to set source": "{key}を長押ししてソースを設定します",
     "Normal Map": "法線マップ",
-    "Tiled": "タイル"
+    "Tiled": "タイル状"
 }
