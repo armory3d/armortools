@@ -14,7 +14,18 @@ class ImportTexture {
 			return;
 		}
 
-		for (a in Project.assets) if (a.file == path) { Log.info(Strings.info0); return; }
+		for (a in Project.assets) {
+			if (a.file == path) {
+				// Set envmap
+				if (path.toLowerCase().endsWith(".hdr")) {
+					Data.getImage(path, function(image: kha.Image) {
+						ImportEnvmap.run(path, image);
+					});
+				}
+				Log.info(Strings.info0);
+				return;
+			}
+		}
 
 		var ext = path.substr(path.lastIndexOf(".") + 1);
 		var importer = Path.textureImporters.get(ext);

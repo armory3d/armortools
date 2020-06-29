@@ -22,14 +22,6 @@ float rand(const vec2 co) { // Unreliable
 	return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-vec2 rand2(const vec2 coord) {
-	const float width = 1100;
-	const float height = 500;
-	float noiseX = ((fract(1.0 - coord.s * (width / 2.0)) * 0.25) + (fract(coord.t * (height / 2.0)) * 0.75)) * 2.0 - 1.0;
-	float noiseY = ((fract(1.0 - coord.s * (width / 2.0)) * 0.75) + (fract(coord.t * (height / 2.0)) * 0.25)) * 2.0 - 1.0;
-	return vec2(noiseX, noiseY);
-}
-
 float linearize(const float depth, vec2 cameraProj) {
 	// to viewz
 	return cameraProj.y / (depth - cameraProj.x);
