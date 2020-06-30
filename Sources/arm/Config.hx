@@ -62,6 +62,10 @@ class Config {
 			raw.window_scale = 2.0;
 			#end
 			raw.window_vsync = true;
+			raw.window_frequency = 60;
+			if (disp != null) {
+				raw.window_frequency = disp.frequency;
+			}
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_vignette = 0.4;

@@ -71,7 +71,8 @@ class Main {
 			},
 			framebuffer: {
 				samplesPerPixel: 1,
-				verticalSync: c.window_vsync
+				verticalSync: c.window_vsync,
+				frequency: c.window_frequency
 			}
 		};
 

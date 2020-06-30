@@ -14,6 +14,7 @@ typedef TConfig = {
 	@:optional var window_maximizable: Null<Bool>;
 	@:optional var window_minimizable: Null<Bool>;
 	@:optional var window_vsync: Null<Bool>;
+	@:optional var window_frequency: Null<Int>;
 	@:optional var window_scale: Null<Float>;
 	// Render path
 	@:optional var rp_supersample: Null<Float>;
