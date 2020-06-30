@@ -80,9 +80,6 @@ if (android) {
 else if (ios) {
 	project.addAssets("Assets/readme/readme_ios.txt", { notinlist: true, destination: "{name}" });
 }
-else if (process.platform === "darwin") {
-	project.addAssets("Assets/readme/readme_macos.txt", { notinlist: true, destination: "INSTRUCTIONS.txt" });
-}
 
 if (process.platform !== "darwin" && !raytrace && !android && !ios) {
 	project.addDefine("rp_voxelao");
