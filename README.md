@@ -37,6 +37,7 @@ strip Krom
 node Kromx/make -g metal
 cp -a build/krom/ Kromx/Deployment
 cd Kromx
+git apply patch/metal_shared_sampler.diff --directory=Kinc
 node Kinc/make -g metal
 # Open generated Xcode project
 # Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
@@ -57,6 +58,8 @@ node Kinc/make android -g opengl
 node Kromx/make ios -g metal
 cp -a build/krom/ Kromx/Deployment
 cd Kromx
+git apply patch/metal_shared_sampler.diff --directory=Kinc
+git apply patch/ios_document_picker.diff --directory=Kinc
 node Kinc/make ios -g metal
 # Open generated Xcode project
 # Add `path/to/Kromx/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
