@@ -62,6 +62,7 @@ if (debug) {
 }
 else {
 	project.addParameter("-dce full");
+	project.addDefine("analyzer-optimize");
 }
 
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
