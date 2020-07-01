@@ -46,6 +46,7 @@ node Kinc/make -g metal
 ```bash
 # Android - wip
 node Kromx/make android -g opengl --shaderversion 300
+cp -r build/krom/ Kromx/build/Krom/app/src/main/assets/
 cd Kromx
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:
