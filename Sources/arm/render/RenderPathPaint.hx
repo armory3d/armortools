@@ -715,10 +715,11 @@ class RenderPathPaint {
 		if (Context.tool == ToolBake && !dilated && Context.dilateRadius > 0) {
 			Layers.makeTempImg();
 			dilated = true;
+			var tid = Context.layer.id;
 			path.setTarget("temptex0");
-			path.bindTarget("texpaint0", "tex");
+			path.bindTarget("texpaint" + tid, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
-			path.setTarget("texpaint0");
+			path.setTarget("texpaint" + tid);
 			path.bindTarget("temptex0", "tex");
 			path.drawShader("shader_datas/dilate_pass/dilate_pass");
 		}
@@ -726,9 +727,9 @@ class RenderPathPaint {
 		// arm.util.UVUtil.cacheTriangleMap();
 		// Layers.makeTempImg();
 		// path.setTarget("temptex0");
-		// path.bindTarget("texpaint0", "tex");
+		// path.bindTarget("texpaint" + tid, "tex");
 		// path.drawShader("shader_datas/copy_pass/copy_pass");
-		// path.setTarget("texpaint0");
+		// path.setTarget("texpaint" + tid);
 		// path.bindTarget("temptex0", "tex");
 		// path.drawShader("shader_datas/dilate_pass/dilate_pass");
 	}

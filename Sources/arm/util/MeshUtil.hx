@@ -26,6 +26,7 @@ class MeshUtil {
 		var va0 = new Int16Array(vlen * 4);
 		var va1 = new Int16Array(vlen * 2);
 		var va2 = new Int16Array(vlen * 2);
+		var va3 = paintObjects[0].data.raw.vertex_arrays.length > 3 ? new Int16Array(vlen * 3) : null; // +1 padding
 		var ia = new Uint32Array(ilen);
 
 		var voff = 0;
@@ -43,6 +44,7 @@ class MeshUtil {
 			}
 			for (j in 0...vas[1].values.length) va1[j + voff * 2] = vas[1].values[j];
 			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
+			if (va3 != null) for (j in 0...vas[3].values.length) va3[j + voff * 4] = vas[3].values[j];
 			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
 
 			voff += Std.int(vas[0].values.length / 4);
@@ -62,6 +64,7 @@ class MeshUtil {
 			scale_pos: maxScale,
 			scale_tex: 1.0
 		};
+		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
 		new MeshData(raw, function(md: MeshData) {
 			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
@@ -105,14 +108,15 @@ class MeshUtil {
 				g.vertexBufferMap.remove("pos");
 			}
 
+			var l = g.structLength;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
-			for (i in 0...Std.int(vertices.length / 8)) {
-				vertices[i * 8    ] = vas[0].values[i * 4    ];
-				vertices[i * 8 + 1] = vas[0].values[i * 4 + 1];
-				vertices[i * 8 + 2] = vas[0].values[i * 4 + 2];
-				vertices[i * 8 + 3] = vas[0].values[i * 4 + 3];
-				vertices[i * 8 + 4] = vas[1].values[i * 2    ];
-				vertices[i * 8 + 5] = vas[1].values[i * 2 + 1];
+			for (i in 0...Std.int(vertices.length / l)) {
+				vertices[i * l    ] = vas[0].values[i * 4    ];
+				vertices[i * l + 1] = vas[0].values[i * 4 + 1];
+				vertices[i * l + 2] = vas[0].values[i * 4 + 2];
+				vertices[i * l + 3] = vas[0].values[i * 4 + 3];
+				vertices[i * l + 4] = vas[1].values[i * 2    ];
+				vertices[i * l + 5] = vas[1].values[i * 2 + 1];
 			}
 			g.vertexBuffer.unlock();
 		}
@@ -129,11 +133,12 @@ class MeshUtil {
 		var objects = UIHeader.inst.worktab.position == SpaceRender ? [cast(Context.object, MeshObject)] : Project.paintObjects;
 		for (o in objects) {
 			var g = o.data.geom;
+			var l = g.structLength;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
-			for (i in 0...Std.int(vertices.length / 8)) {
-				vertices[i * 8 + 3] = -vertices[i * 8 + 3];
-				vertices[i * 8 + 4] = -vertices[i * 8 + 4];
-				vertices[i * 8 + 5] = -vertices[i * 8 + 5];
+			for (i in 0...Std.int(vertices.length / l)) {
+				vertices[i * l + 3] = -vertices[i * l + 3];
+				vertices[i * l + 4] = -vertices[i * l + 4];
+				vertices[i * l + 5] = -vertices[i * l + 5];
 			}
 			g.vertexBuffer.unlock();
 		}
@@ -152,28 +157,29 @@ class MeshUtil {
 		var objects = UIHeader.inst.worktab.position == SpaceRender ? [cast(Context.object, MeshObject)] : Project.paintObjects;
 		for (o in objects) {
 			var g = o.data.geom;
+			var l = g.structLength;
 			var inda = g.indices[0];
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(inda.length / 3)) {
 				var i1 = inda[i * 3    ];
 				var i2 = inda[i * 3 + 1];
 				var i3 = inda[i * 3 + 2];
-				va.set(vertices[i1 * 8], vertices[i1 * 8 + 1], vertices[i1 * 8 + 2]);
-				vb.set(vertices[i2 * 8], vertices[i2 * 8 + 1], vertices[i2 * 8 + 2]);
-				vc.set(vertices[i3 * 8], vertices[i3 * 8 + 1], vertices[i3 * 8 + 2]);
+				va.set(vertices[i1 * l], vertices[i1 * l + 1], vertices[i1 * l + 2]);
+				vb.set(vertices[i2 * l], vertices[i2 * l + 1], vertices[i2 * l + 2]);
+				vc.set(vertices[i3 * l], vertices[i3 * l + 1], vertices[i3 * l + 2]);
 				cb.subvecs(vc, vb);
 				ab.subvecs(va, vb);
 				cb.cross(ab);
 				cb.normalize();
-				vertices[i1 * 8 + 4] = Std.int(cb.x * 32767);
-				vertices[i1 * 8 + 5] = Std.int(cb.y * 32767);
-				vertices[i1 * 8 + 3] = Std.int(cb.z * 32767);
-				vertices[i2 * 8 + 4] = Std.int(cb.x * 32767);
-				vertices[i2 * 8 + 5] = Std.int(cb.y * 32767);
-				vertices[i2 * 8 + 3] = Std.int(cb.z * 32767);
-				vertices[i3 * 8 + 4] = Std.int(cb.x * 32767);
-				vertices[i3 * 8 + 5] = Std.int(cb.y * 32767);
-				vertices[i3 * 8 + 3] = Std.int(cb.z * 32767);
+				vertices[i1 * l + 4] = Std.int(cb.x * 32767);
+				vertices[i1 * l + 5] = Std.int(cb.y * 32767);
+				vertices[i1 * l + 3] = Std.int(cb.z * 32767);
+				vertices[i2 * l + 4] = Std.int(cb.x * 32767);
+				vertices[i2 * l + 5] = Std.int(cb.y * 32767);
+				vertices[i2 * l + 3] = Std.int(cb.z * 32767);
+				vertices[i3 * l + 4] = Std.int(cb.x * 32767);
+				vertices[i3 * l + 5] = Std.int(cb.y * 32767);
+				vertices[i3 * l + 3] = Std.int(cb.z * 32767);
 			}
 			g.vertexBuffer.unlock();
 		}
