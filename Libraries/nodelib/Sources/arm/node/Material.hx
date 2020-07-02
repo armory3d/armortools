@@ -1376,20 +1376,20 @@ class Material {
 		}
 	}
 
-	static function vector_curve(name: String, fac: String, points: Array<Float>): String {
+	static function vector_curve(name: String, fac: String, points: Array<kha.arrays.Float32Array>): String {
 		// Write Ys array
 		var ys_var = name + "_ys";
-		var num = Std.int(points.length / 2);
+		var num = points.length;
 		curshader.write('float $ys_var[$num];'); // TODO: Make const
 		for (i in 0...num) {
-			curshader.write('$ys_var[$i] = ${points[i * 2 + 1]};');
+			curshader.write('$ys_var[$i] = ${points[i][1]};');
 		}
 		// Get index
 		var fac_var = name + "_fac";
 		curshader.write('float $fac_var = $fac;');
 		var index = "0";
 		for (i in 1...num) {
-			index += ' + ($fac_var > ${points[i * 2]} ? 1 : 0)';
+			index += ' + ($fac_var > ${points[i][0]} ? 1 : 0)';
 		}
 		// Write index
 		var index_var = name + "_i";
@@ -1399,7 +1399,7 @@ class Material {
 		var facs_var = name + "_xs";
 		curshader.write('float $facs_var[$num];'); // TODO: Make const
 		for (i in 0...num) {
-			curshader.write('$facs_var[$i] = ${points[i * 2]};');
+			curshader.write('$facs_var[$i] = ${points[i][0]};');
 		}
 		// Map vector
 		return 'mix($ys_var[$index_var], $ys_var[$index_var + 1], ($fac_var - $facs_var[$index_var]) * (1.0 / ($facs_var[$index_var + 1] - $facs_var[$index_var])))';

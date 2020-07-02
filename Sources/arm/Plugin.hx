@@ -105,7 +105,8 @@ class ZuiBridge {
 class Keep {
 	public static function keep() {
 		var x = iron.system.ArmPack.decode;
-		var x = iron.system.ArmPack.encode;
+		var y = iron.system.ArmPack.encode;
+		return [x, y];
 		#if arm_creator
 		var x = arm.sys.Path.workingDir;
 		var x = arm.sys.File.createDirectory;

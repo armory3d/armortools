@@ -420,9 +420,6 @@ class ImportArm {
 			if (node.type == "TEX_IMAGE") {
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 			}
-			for (inp in node.inputs) { // Round input socket values
-				if (inp.type == "VALUE") inp.default_value = Math.round(inp.default_value * 100) / 100;
-			}
 		}
 	}
 }

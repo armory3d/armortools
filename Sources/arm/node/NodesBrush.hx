@@ -59,7 +59,7 @@ class NodesBrush {
 			// 			name: "Position",
 			// 			type: "VECTOR",
 			// 			color: 0xff63c763,
-			// 			default_value: [0.0, 0.0, 0.0]
+			// 			default_value: f32([0.0, 0.0, 0.0])
 			// 		},
 			// 		{
 			// 			id: 0,
@@ -228,7 +228,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
 				buttons: []
@@ -247,7 +247,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -292,7 +292,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -300,7 +300,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -310,7 +310,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					},
 					{
 						id: 0,
@@ -432,7 +432,7 @@ class NodesBrush {
 						name: "Vector",
 						type: "VECTOR",
 						color: 0xff6363c7,
-						default_value: [0.0, 0.0, 0.0]
+						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [
@@ -442,7 +442,7 @@ class NodesBrush {
 						name: "Color",
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: [0.0, 0.0, 0.0, 1.0]
+						default_value: f32([0.0, 0.0, 0.0, 1.0])
 					},
 					{
 						id: 0,
@@ -484,5 +484,11 @@ class NodesBrush {
 			}
 		}
 		return null;
+	}
+
+	static function f32(ar: Array<kha.FastFloat>): kha.arrays.Float32Array {
+		var res = new kha.arrays.Float32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
 	}
 }

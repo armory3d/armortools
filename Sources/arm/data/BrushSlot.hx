@@ -13,18 +13,18 @@ class BrushSlot {
 	public var imageIcon: Image = null; // 50px
 	public var previewReady = false;
 	public var id = 0;
-	static var defaultCanvas: String = null;
+	static var defaultCanvas: Blob = null;
 
 	public function new(c: TNodeCanvas = null) {
 		for (brush in Project.brushes) if (brush.id >= id) id = brush.id + 1;
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob("default_brush.json", function(b: Blob) {
-					defaultCanvas = b.toString();
+				Data.getBlob("default_brush.arm", function(b: Blob) {
+					defaultCanvas = b;
 				});
 			}
-			canvas = Json.parse(defaultCanvas);
+			canvas = iron.system.ArmPack.decode(defaultCanvas.toBytes());
 			canvas.name = "Brush " + (id + 1);
 		}
 		else {

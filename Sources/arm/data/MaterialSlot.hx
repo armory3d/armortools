@@ -16,7 +16,7 @@ class MaterialSlot {
 	public var previewReady = false;
 	public var data: MaterialData;
 	public var id = 0;
-	static var defaultCanvas: String = null;
+	static var defaultCanvas: Blob = null;
 
 	public var paintBase = true;
 	public var paintOpac = true;
@@ -39,11 +39,11 @@ class MaterialSlot {
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob("default_material.json", function(b: Blob) {
-					defaultCanvas = b.toString();
+				Data.getBlob("default_material.arm", function(b: Blob) {
+					defaultCanvas = b;
 				});
 			}
-			canvas = Json.parse(defaultCanvas);
+			canvas = iron.system.ArmPack.decode(defaultCanvas.toBytes());
 			canvas.name = "Material " + (id + 1);
 		}
 		else {
