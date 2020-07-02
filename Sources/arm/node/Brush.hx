@@ -4,7 +4,7 @@ import zui.Nodes;
 
 class Brush {
 
-	public static var customNodes = untyped __js__("new Map()");
+	public static var customNodes = js.Syntax.code("new Map()");
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
 

@@ -53,15 +53,15 @@ class ImportObj {
 								var texa = (texa0 != null && texa1 != null) ? new kha.arrays.Int16Array(texa0.length + texa1.length) : null;
 								var inda = new kha.arrays.Uint32Array(inda0.length + inda1.length);
 								var voff = Std.int(posa0.length / 4);
-								untyped __js__("posa.set(posa0)");
-								untyped __js__("posa.set(posa1, posa0.length)");
-								untyped __js__("nora.set(nora0)");
-								untyped __js__("nora.set(nora1, nora0.length)");
+								js.Syntax.code("posa.set(posa0)");
+								js.Syntax.code("posa.set(posa1, posa0.length)");
+								js.Syntax.code("nora.set(nora0)");
+								js.Syntax.code("nora.set(nora1, nora0.length)");
 								if (texa != null) {
-									untyped __js__("texa.set(texa0)");
-									untyped __js__("texa.set(texa1, texa0.length)");
+									js.Syntax.code("texa.set(texa0)");
+									js.Syntax.code("texa.set(texa1, texa0.length)");
 								}
-								untyped __js__("inda.set(inda0)");
+								js.Syntax.code("inda.set(inda0)");
 								for (k in 0...inda1.length) inda[k + inda0.length] = inda1[k] + voff;
 								parts[i].posa = posa;
 								parts[i].nora = nora;

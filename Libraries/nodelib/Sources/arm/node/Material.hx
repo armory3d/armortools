@@ -42,7 +42,7 @@ class Material {
 	static var sample_bump_res: String;
 	static var tex_coord = "texCoord";
 
-	public static var customNodes = untyped __js__("new Map()");
+	public static var customNodes = js.Syntax.code("new Map()");
 	public static var parse_surface = true;
 	public static var parse_opacity = true;
 	public static var parse_height = false;

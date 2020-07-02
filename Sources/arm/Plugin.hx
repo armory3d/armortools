@@ -26,7 +26,7 @@ class Plugin {
 			iron.data.Data.getBlob("plugins/" + plugin, function(blob: kha.Blob) {
 				pluginName = plugin;
 				#if js
-				untyped __js__("(1, eval)({0})", blob.toString());
+				js.Syntax.code("(1, eval)({0})", blob.toString());
 				#end
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
