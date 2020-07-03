@@ -284,17 +284,20 @@ class Uniforms {
 		#if arm_painter
 		if (link == "_brushDirection") {
 			v = iron.object.Uniforms.helpVec;
-			if (Context.lastPaintVecX != Context.paintVec.x) Context.prevPaintVecX = Context.lastPaintVecX;
-			if (Context.lastPaintVecY != Context.paintVec.y) Context.prevPaintVecY = Context.lastPaintVecY;
+			// Discard first paint for directional brush
+			var allowPaint = Context.prevPaintVecX != Context.lastPaintVecX &&
+							 Context.prevPaintVecY != Context.lastPaintVecY &&
+							 Context.prevPaintVecX > 0 &&
+							 Context.prevPaintVecY > 0;
 			var x = Context.paintVec.x;
 			var y = Context.paintVec.y;
 			var lastx = Context.prevPaintVecX;
 			var lasty = Context.prevPaintVecY;
 			if (Context.paint2d) { x -= 1.0; lastx -= 1.0; }
 			var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
-			// Discard first paint for directional brush
-			var allowPaint = (Context.prevPaintVecX > 0 && Context.prevPaintVecY > 0) ? 1 : 0;
-			v.set(Math.cos(angle), Math.sin(angle), allowPaint);
+			v.set(Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
+			Context.prevPaintVecX = Context.lastPaintVecX;
+			Context.prevPaintVecY = Context.lastPaintVecY;
 			return v;
 		}
 		#end

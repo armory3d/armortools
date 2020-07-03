@@ -129,52 +129,6 @@ class UISidebar {
 		world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 		Context.ddirty = 1;
 
-		// Save last pos for continuos paint
-		iron.App.notifyOnRender(function(g: kha.graphics4.Graphics) { //
-			if (Context.frame == 2) {
-				RenderUtil.makeMaterialPreview();
-				hwnd1.redraws = 2;
-				MaterialParser.parseMeshMaterial();
-				MaterialParser.parsePaintMaterial();
-				Context.ddirty = 0;
-				History.reset();
-				if (History.undoLayers == null) {
-					History.undoLayers = [];
-					for (i in 0...Config.raw.undo_steps) {
-						var l = new LayerSlot("_undo" + History.undoLayers.length);
-						l.createMask(0, false);
-						History.undoLayers.push(l);
-					}
-				}
-			}
-			else if (Context.frame == 3) {
-				Context.ddirty = 1;
-			}
-			Context.frame++;
-
-			var mouse = Input.getMouse();
-			if (mouse.down()) { //
-				Context.lastPaintVecX = Context.paintVec.x; //
-				Context.lastPaintVecY = Context.paintVec.y; //
-			} //
-			else {
-				if (Context.splitView) {
-					Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
-				}
-
-				Context.lastPaintVecX = mouse.viewX / iron.App.w();
-				Context.lastPaintVecY = mouse.viewY / iron.App.h();
-
-				Context.viewIndex = -1;
-
-				#if (krom_android || krom_ios)
-				// No mouse move events for touch, re-init last paint position on touch start
-				Context.lastPaintX = -1;
-				Context.lastPaintY = -1;
-				#end
-			}
-		}); //
-
 		var scale = Config.raw.window_scale;
 		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel } );
 		Zui.onBorderHover = onBorderHover;

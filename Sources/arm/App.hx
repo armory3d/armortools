@@ -463,6 +463,27 @@ class App {
 	static function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
+		if (Context.frame == 2) {
+			RenderUtil.makeMaterialPreview();
+			UISidebar.inst.hwnd1.redraws = 2;
+			MaterialParser.parseMeshMaterial();
+			MaterialParser.parsePaintMaterial();
+			Context.ddirty = 0;
+			History.reset();
+			if (History.undoLayers == null) {
+				History.undoLayers = [];
+				for (i in 0...Config.raw.undo_steps) {
+					var l = new LayerSlot("_undo" + History.undoLayers.length);
+					l.createMask(0, false);
+					History.undoLayers.push(l);
+				}
+			}
+		}
+		else if (Context.frame == 3) {
+			Context.ddirty = 1;
+		}
+		Context.frame++;
+
 		var mouse = Input.getMouse();
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
@@ -488,6 +509,28 @@ class App {
 		uiEnabled = !UIBox.show && !usingMenu;
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
+
+		// Save last pos for continuos paint
+		if (mouse.down()) {
+			Context.lastPaintVecX = Context.paintVec.x;
+			Context.lastPaintVecY = Context.paintVec.y;
+		}
+		else {
+			if (Context.splitView) {
+				Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			}
+
+			Context.lastPaintVecX = mouse.viewX / iron.App.w();
+			Context.lastPaintVecY = mouse.viewY / iron.App.h();
+
+			Context.viewIndex = -1;
+
+			#if (krom_android || krom_ios)
+			// No mouse move events for touch, re-init last paint position on touch start
+			Context.lastPaintX = -1;
+			Context.lastPaintY = -1;
+			#end
+		}
 	}
 
 	public static function enumTexts(nodeType: String): Array<String> {
