@@ -111,6 +111,13 @@ class TabTextures {
 									Data.deleteImage(asset.file);
 									Data.getImage(asset.file, function(image: kha.Image) {
 										Project.assetMap.set(asset.id, image);
+										// Set envmap
+										if (asset.file.toLowerCase().endsWith(".hdr")) {
+											var current = @:privateAccess kha.graphics4.Graphics2.current;
+											if (current != null) current.end();
+											arm.io.ImportEnvmap.run(asset.file, image);
+											if (current != null) current.begin(false);
+										}
 									});
 								}
 								if (ui.button(tr("To Mask"), Left)) {
