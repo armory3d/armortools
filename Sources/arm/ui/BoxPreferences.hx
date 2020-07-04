@@ -156,7 +156,7 @@ class BoxPreferences {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
 						ui.changed = false;
-						zui.Ext.colorWheel(ui, h, false, null, false, false);
+						zui.Ext.colorWheel(ui, h, false, null, false);
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 3);
 				}
@@ -197,7 +197,7 @@ class BoxPreferences {
 							UIMenu.draw(function(ui) {
 								ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 6, ui.t.SEPARATOR_COL);
 								ui.changed = false;
-								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, false, false);
+								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, false);
 								if (ui.changed) UIMenu.keepOpen = true;
 							}, 3);
 						}
