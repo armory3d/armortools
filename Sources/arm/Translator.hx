@@ -8,6 +8,14 @@ import arm.sys.Path;
 class Translator {
 
 	static var translations: Map<String, String> = [];
+	// The font index is a value specific to font_cjk.ttc.
+	static var cjkFontIndices: Map<String, Int> = [
+		"ja" => 0,
+		"ko" => 1,
+		"zh_cn" => 2,
+		"zh_tw" => 3,
+		"zh_tw.big5" => 4
+	];
 
 	// Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
 	// If the string isn't available in the translation, this method will return the source English string.
@@ -79,7 +87,9 @@ class Translator {
 			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
 			// Load and assign font with cjk characters
 			iron.App.notifyOnInit(function() {
-				iron.data.Data.getFont("font_cjk.ttf", function(f: kha.Font) {
+				iron.data.Data.getFont("font_cjk.ttc", function(f: kha.Font) {
+					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
+					f.setFontIndex(fontIndex);
 					App.font = f;
 					var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
 					// Scale up the font size a bit
