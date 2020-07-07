@@ -92,12 +92,15 @@ class Translator {
 					f.setFontIndex(fontIndex);
 					App.font = f;
 					var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
+					var originFontSize = uis[0].t.FONT_SIZE;
 					// Scale up the font size a bit
 					uis[0].t.FONT_SIZE = Std.int(uis[0].t.FONT_SIZE * 1.4);
 					for (ui in uis) {
 						ui.ops.font = f;
 						ui.setScale(ui.ops.scaleFactor);
 					}
+					// Restore font size in theme
+					uis[0].t.FONT_SIZE = originFontSize;
 				});
 			});
 		}
