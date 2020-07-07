@@ -13,7 +13,7 @@ class TabFonts {
 		if (ui.tab(UISidebar.inst.htab2, tr("Fonts"))) {
 			ui.row([1 / 4, 1 / 4]);
 
-			if (ui.button(tr("Import"))) Project.importAsset("ttf");
+			if (ui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
 			if (ui.isHovered) ui.tooltip(tr("Import font file") + ' (${Config.keymap.file_import_assets})');
 
 			if (ui.button(tr("2D View"))) {

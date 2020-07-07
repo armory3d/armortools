@@ -71,7 +71,9 @@ class Path {
 
 	public static function isFont(path: String): Bool {
 		var p = path.toLowerCase();
-		return p.endsWith(".ttf");
+		return p.endsWith(".ttf") ||
+				p.endsWith(".ttc") ||
+				p.endsWith(".otf");
 	}
 
 	public static function isProject(path: String): Bool {

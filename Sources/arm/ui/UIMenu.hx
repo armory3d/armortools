@@ -66,7 +66,7 @@ class UIMenu {
 				if (ui.button("      " + tr("Save As..."), Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("      " + tr("Import Texture..."), Left, Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","));
-				if (ui.button("      " + tr("Import Font..."), Left)) Project.importAsset("ttf");
+				if (ui.button("      " + tr("Import Font..."), Left)) Project.importAsset("ttf,ttc,otf");
 				if (ui.button("      " + tr("Import Material..."), Left)) Project.importMaterial();
 				if (ui.button("      " + tr("Import Brush..."), Left)) Project.importBrush();
 				if (ui.button("      " + tr("Import Mesh..."), Left)) Project.importMesh();
