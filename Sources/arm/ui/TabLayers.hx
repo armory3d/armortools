@@ -38,7 +38,7 @@ class TabLayers {
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
-			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"));
+			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) {
 					p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
@@ -552,7 +552,7 @@ class TabLayers {
 					for (p in Project.paintObjects) ar.push(p.name);
 					var objectHandle = Id.handle().nest(l.id);
 					objectHandle.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
-					l.objectMask = ui.combo(objectHandle, ar, tr("Object"));
+					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left, 16);
 					if (objectHandle.changed) {
 						Context.setLayer(l);
 						MaterialParser.parseMeshMaterial();
