@@ -210,6 +210,20 @@ class LayerSlot {
 		Context.ddirty = 3;
 	}
 
+	public function invertMask() {
+		if (Layers.pipeInvert8 == null) Layers.makePipe();
+		var inverted = Image.createRenderTarget(texpaint_mask.width, texpaint_mask.height, TextureFormat.L8);
+		inverted.g2.begin(false);
+		inverted.g2.pipeline = Layers.pipeInvert8;
+		inverted.g2.drawImage(texpaint_mask, 0, 0);
+		inverted.g2.pipeline = null;
+		inverted.g2.end();
+		texpaint_mask.unload();
+		texpaint_mask = RenderPath.active.renderTargets.get("texpaint_mask" + id).image = inverted;
+		Context.layerPreviewDirty = true;
+		Context.ddirty = 3;
+	}
+
 	public function deleteMask() {
 		if (texpaint_mask == null) return;
 

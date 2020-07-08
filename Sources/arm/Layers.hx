@@ -30,6 +30,7 @@ class Layers {
 	public static var pipeCopy8: PipelineState;
 	public static var pipeCopy128: PipelineState;
 	public static var pipeCopyBGRA: PipelineState;
+	public static var pipeInvert8: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
 	public static var tex1: TextureUnit;
@@ -185,6 +186,18 @@ class Layers {
 		pipeCopy8 = pipeCopy;
 		pipeCopy128 = pipeCopy;
 		#end
+
+		pipeInvert8 = new PipelineState();
+		pipeInvert8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
+		pipeInvert8.fragmentShader = Reflect.field(kha.Shaders, "layer_invert_frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
+		pipeInvert8.inputLayout = [vs];
+		pipeCopy8.colorAttachmentCount = 1;
+		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
+		pipeInvert8.compile();
 
 		pipeMask = new PipelineState();
 		pipeMask.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");

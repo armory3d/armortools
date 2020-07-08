@@ -227,6 +227,15 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(clear);
 							}
+							if (ui.button(tr("Invert"), Left)) {
+								function invert(g: kha.graphics4.Graphics) {
+									g.end();
+									l.invertMask();
+									g.begin();
+									iron.App.removeRender(invert);
+								}
+								iron.App.notifyOnRender(invert);
+							}
 							if (ui.button(tr("Apply"), Left)) {
 								function makeApply(g: kha.graphics4.Graphics) {
 									g.end();
@@ -239,7 +248,7 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(makeApply);
 							}
-						}, 5);
+						}, 6);
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
