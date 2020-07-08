@@ -18,6 +18,7 @@ class TabScript {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UIStatus.inst.statustab, tr("Script")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
+			ui.beginSticky();
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
 			if (ui.button(tr("Run"))) {
 				try {
@@ -48,6 +49,7 @@ class TabScript {
 					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
 				});
 			}
+			ui.endSticky();
 
 			var _font = ui.ops.font;
 			var _fontSize = ui.fontSize;

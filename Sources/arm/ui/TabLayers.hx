@@ -16,6 +16,9 @@ class TabLayers {
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UISidebar.inst.htab, tr("Layers"))) {
+
+			ui.beginSticky();
+
 			ui.row([1 / 4, 1 / 4, 1 / 2]);
 			if (ui.button(tr("New"))) {
 
@@ -47,6 +50,8 @@ class TabLayers {
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
 			}
+
+			ui.endSticky();
 
 			function drawList(l: LayerSlot, i: Int) {
 

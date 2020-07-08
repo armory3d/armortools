@@ -100,6 +100,7 @@ class BoxPreferences {
 				}
 				themeHandle = Id.handle({position: getThemeIndex()});
 
+				ui.beginSticky();
 				ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 
 				ui.combo(themeHandle, themes, tr("Theme"));
@@ -143,6 +144,8 @@ class BoxPreferences {
 						Krom.fileSaveBytes(path, Bytes.ofString(Json.stringify(arm.App.theme)).getData());
 					});
 				}
+
+				ui.endSticky();
 
 				var i = 0;
 				var theme = arm.App.theme;
@@ -392,6 +395,7 @@ class BoxPreferences {
 					fetchKeymaps();
 				}
 
+				ui.beginSticky();
 				ui.row([1 / 2, 1 / 4, 1 / 4]);
 
 				presetHandle = Id.handle({position: getPresetIndex()});
@@ -415,6 +419,8 @@ class BoxPreferences {
 					});
 				}
 
+				ui.endSticky();
+
 				ui.separator(8, false);
 
 				var i = 0;
@@ -431,6 +437,7 @@ class BoxPreferences {
 				}
 			}
 			if (ui.tab(htab, tr("Plugins"), true)) {
+				ui.beginSticky();
 				ui.row([1 / 4, 1 / 4]);
 				if (ui.button(tr("New"))) {
 					UIBox.showCustom(function(ui: Zui) {
@@ -466,6 +473,7 @@ plugin.drawUI = function(ui) {
 						ImportPlugin.run(path);
 					});
 				}
+				ui.endSticky();
 
 				if (filesPlugin == null) {
 					filesPlugin = File.readDirectory(Path.data() + Path.sep + "plugins");

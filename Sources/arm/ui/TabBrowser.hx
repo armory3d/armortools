@@ -27,7 +27,11 @@ class TabBrowser {
 			if (hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				hpath.text = Config.raw.bookmarks[0];
 			}
+
+			// ui.beginSticky();
 			hpath.text = ui.textInput(hpath, tr("Path"));
+			// ui.endSticky();
+
 			UIFiles.fileBrowser(ui, hpath, false, true);
 
 			if (known) {

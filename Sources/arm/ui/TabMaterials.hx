@@ -26,6 +26,7 @@ class TabMaterials {
 		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
 
 		if (ui.tab(UISidebar.inst.htab1, tr("Materials"))) {
+			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
 				if (isScene) {
@@ -59,6 +60,7 @@ class TabMaterials {
 				UISidebar.inst.showMaterialNodes();
 			}
 			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_2d_view})');
+			ui.endSticky();
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);

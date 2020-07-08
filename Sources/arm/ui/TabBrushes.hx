@@ -15,6 +15,7 @@ class TabBrushes {
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UISidebar.inst.htab1, tr("Brushes"))) {
+			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
 				Context.brush = new BrushSlot();
@@ -29,6 +30,7 @@ class TabBrushes {
 			if (ui.button(tr("Nodes"))) {
 				UISidebar.inst.showBrushNodes();
 			}
+			ui.endSticky();
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);

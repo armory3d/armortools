@@ -17,6 +17,7 @@ class TabConsole {
 
 		if (ui.tab(UIStatus.inst.statustab, title, false, color) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
+			ui.beginSticky();
 			ui.row([1 / 20, 1 / 20]);
 
 			if (ui.button(tr("Clear"))) {
@@ -32,6 +33,8 @@ class TabConsole {
 					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
 				});
 			}
+
+			ui.endSticky();
 
 			for (t in Log.lastTraces) {
 				ui.text(t);

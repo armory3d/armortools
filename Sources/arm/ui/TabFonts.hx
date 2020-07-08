@@ -11,6 +11,8 @@ class TabFonts {
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UISidebar.inst.htab2, tr("Fonts"))) {
+
+			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4]);
 
 			if (ui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
@@ -19,6 +21,7 @@ class TabFonts {
 			if (ui.button(tr("2D View"))) {
 				UISidebar.inst.show2DView(View2DFont);
 			}
+			ui.endSticky();
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);

@@ -10,6 +10,8 @@ class TabMeshes {
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 		if (ui.tab(UISidebar.inst.htab2, tr("Meshes"))) {
+
+			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4]);
 
 			if (ui.button(tr("Import"))) Project.importMesh();
@@ -40,6 +42,8 @@ class TabMeshes {
 					}
 				}, 6);
 			}
+
+			ui.endSticky();
 
 			if (ui.panel(Id.handle({selected: false}), tr("Scene"), true, false, false)) {
 				ui.indent();
