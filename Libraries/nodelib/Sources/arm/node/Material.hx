@@ -391,7 +391,7 @@ class Material {
 			}
 			else { // Vector
 				curshader.context.add_elem("tex", "short2norm"); // UVMaps only for now
-				return "vec3(texCoord.x, 1.0 - texCoord.y, 0.0)";
+				return "vec3(texCoord.x, texCoord.y, 0.0)";
 			}
 		}
 		else if (node.type == "RGB") {
@@ -792,7 +792,7 @@ class Material {
 			}
 			else if (socket == node.outputs[2]) {// UV
 				curshader.context.add_elem("tex", "short2norm");
-				return "vec3(texCoord.x, 1.0 - texCoord.y, 0.0)";
+				return "vec3(texCoord.x, texCoord.y, 0.0)";
 			}
 			else if (socket == node.outputs[3]) { // Object
 				curshader.mposition = true;
@@ -812,7 +812,7 @@ class Material {
 		}
 		else if (node.type == "UVMAP") {
 			curshader.context.add_elem("tex", "short2norm");
-			return "vec3(texCoord.x, 1.0 - texCoord.y, 0.0)";
+			return "vec3(texCoord.x, texCoord.y, 0.0)";
 		}
 		else if (node.type == "BUMP") {
 			var res = "";
