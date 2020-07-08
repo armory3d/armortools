@@ -91,7 +91,8 @@ class UISidebar {
 
 		if (Project.fonts == null) {
 			Project.fonts = [];
-			Project.fonts.push(new FontSlot("default.ttf", App.font));
+			var fontNames = App.font.getFontNames();
+			Project.fonts.push(new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font));
 			Context.font = Project.fonts[0];
 		}
 

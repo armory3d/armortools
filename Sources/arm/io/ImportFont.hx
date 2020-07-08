@@ -11,13 +11,24 @@ class ImportFont {
 
 	public static function run(path: String) {
 		Data.getFont(path, function(font: Font) {
-			var ar = path.split(Path.sep);
-			var name = ar[ar.length - 1];
-			Context.font = new FontSlot(name, font);
-			Project.fonts.push(Context.font);
+			var fn = font.getFontNames();
+			var fontSlots = new Array<FontSlot>();
+			for (i in 0...fn.length) {
+				var ar = path.split(Path.sep);
+				var name = fn[i] != null ? fn[i] : ar[ar.length - 1];
+				var f = font.clone();
+				f.setFontIndex(i);
+				var fontSlot = new FontSlot(name, f);
+				fontSlots.push(fontSlot);
+			}
+			font.unload();
 
 			function makeFontPreview(_) {
-				RenderUtil.makeFontPreview();
+				for (f in fontSlots) {
+					Context.font = f;
+					Project.fonts.push(f);
+					RenderUtil.makeFontPreview();
+				}
 				iron.App.removeRender(makeFontPreview);
 			}
 			iron.App.notifyOnRender(makeFontPreview);

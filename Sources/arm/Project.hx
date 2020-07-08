@@ -241,7 +241,8 @@ class Project {
 			Context.material = materials[0];
 			brushes = [new BrushSlot()];
 			Context.brush = brushes[0];
-			fonts = [new FontSlot("default.ttf", App.font)];
+			var fontNames = App.font.getFontNames();
+			fonts = [new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font)];
 			Context.font = fonts[0];
 
 			History.reset();
