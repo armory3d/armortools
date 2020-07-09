@@ -274,8 +274,8 @@ class Material {
 
 	static function parse_shader_input(inp: TNodeSocket): TShaderOut {
 		var l = getInputLink(inp);
-		if (l != null) {
-			var from_node = getNode(l.from_id);
+		var from_node = l != null ? getNode(l.from_id) : null;
+		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return parse_shader_input(from_node.inputs[0]);
 			}
@@ -346,8 +346,8 @@ class Material {
 
 	static function parse_vector_input(inp: TNodeSocket): String {
 		var l = getInputLink(inp);
-		if (l != null) {
-			var from_node = getNode(l.from_id);
+		var from_node = l != null ? getNode(l.from_id) : null;
+		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return parse_vector_input(from_node.inputs[0]);
 			}
@@ -966,8 +966,8 @@ class Material {
 
 	static function parse_value_input(inp: TNodeSocket): String {
 		var l = getInputLink(inp);
-		if (l != null) {
-			var from_node = getNode(l.from_id);
+		var from_node = l != null ? getNode(l.from_id) : null;
+		if (from_node != null) {
 			if (from_node.type == "REROUTE") {
 				return parse_value_input(from_node.inputs[0]);
 			}
