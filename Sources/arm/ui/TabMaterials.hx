@@ -61,6 +61,7 @@ class TabMaterials {
 			}
 			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_2d_view})');
 			ui.endSticky();
+			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);
