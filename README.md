@@ -73,6 +73,7 @@ cd Kromx
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 git apply patch/d3d12_raytrace.diff --directory=Kinc
+git apply patch/d3d12_wrap_sampler.diff --directory=Kinc
 node Kinc/make -g direct3d12 --raytrace dxr
 # Open generated Visual Studio project
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
