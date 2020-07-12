@@ -22,6 +22,7 @@ class TabFonts {
 				UISidebar.inst.show2DView(View2DFont);
 			}
 			ui.endSticky();
+			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);
