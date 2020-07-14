@@ -85,7 +85,11 @@ class Translator {
 
 		if (cjk) {
 			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
-			if (!File.exists(Path.data() + Path.sep + "font_cjk.ttc")) {
+			var cjkFontPath = Path.data() + Path.sep + "font_cjk.ttc";
+			if (!File.exists(cjkFontPath)) {
+				File.download("https://github.com/armory3d/armorpaint/raw/master/Assets/fonts/font_cjk.ttc", cjkFontPath);
+			}
+			if (!File.exists(cjkFontPath)) {
 				translations.clear();
 				return;
 			}
