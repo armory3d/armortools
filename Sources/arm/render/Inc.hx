@@ -111,9 +111,9 @@ class Inc {
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			gizmo.visible = true;
 			gizmo.parent = cam;
-			gizmo.transform.loc = new Vec4(7.2 * ratio, -7.6, -1);
+			gizmo.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
 			gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-			gizmo.transform.scale.set(0.5, 0.5, 0.5);
+			gizmo.transform.scale.set(0.4, 0.4, 0.4);
 			gizmo.transform.buildMatrix();
 
 			gizmo.render(currentG, "overlay", []);
