@@ -84,15 +84,22 @@ class Translator {
 		}
 
 		if (cjk) {
-			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
 			var cjkFontPath = Path.data() + Path.sep + "font_cjk.ttc";
 			if (!File.exists(cjkFontPath)) {
 				File.download("https://github.com/armory3d/armorpaint/raw/master/Assets/fonts/font_cjk.ttc", cjkFontPath);
 			}
 			if (!File.exists(cjkFontPath)) {
+				// Fall back to English
+				Config.raw.locale = "en";
+				// Basic Latin + Latin-1 Supplement + Latin Extended-A
+				kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
+				// + Cyrillic
+				for (i in 1024...1119) kha.graphics2.Graphics.fontGlyphs.push(i);
 				translations.clear();
 				return;
 			}
+
+			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
 			// Load and assign font with cjk characters
 			iron.App.notifyOnInit(function() {
 				iron.data.Data.getFont("font_cjk.ttc", function(f: kha.Font) {
