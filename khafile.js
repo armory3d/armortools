@@ -3,7 +3,9 @@ let debug = false;
 let android = process.argv.indexOf("android") >= 0;
 let ios = process.argv.indexOf("ios") >= 0;
 let win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
-let raytrace = process.argv.indexOf("direct3d12") >= 0;
+let d3d12 = process.argv.indexOf("direct3d12") >= 0;
+let vulkan = process.argv.indexOf("vulkan") >= 0;
+let raytrace = d3d12 || vulkan;
 let metal = process.argv.indexOf("metal") >= 0;
 let build = "painter"; // painter || creator || player
 
@@ -70,8 +72,13 @@ project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{
 if (raytrace) {
 	project.addLibrary("xenon");
 	project.addAssets("Libraries/xenon/Assets/*", { notinlist: true, destination: "data/{name}" });
-	project.addAssets("Libraries/xenon/Shaders/*.cso", { notinlist: true, destination: "data/{name}" });
-	project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
+	if (d3d12) {
+		project.addAssets("Libraries/xenon/Shaders/*.cso", { notinlist: true, destination: "data/{name}" });
+		project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
+	}
+	else if (vulkan) {
+		project.addAssets("Assets/readme/readme_vkrt.txt", { notinlist: true, destination: "{name}" });
+	}
 }
 
 if (android) {
