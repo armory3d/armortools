@@ -31,6 +31,7 @@ class TabBrushes {
 				UISidebar.inst.showBrushNodes();
 			}
 			ui.endSticky();
+			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(UISidebar.inst.windowW / slotw);
