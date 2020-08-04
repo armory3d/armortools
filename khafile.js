@@ -77,6 +77,7 @@ if (raytrace) {
 		project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
 	}
 	else if (vulkan) {
+		project.addAssets("Libraries/xenon/Shaders/*.spirv", { notinlist: true, destination: "data/{name}" });
 		project.addAssets("Assets/readme/readme_vkrt.txt", { notinlist: true, destination: "{name}" });
 	}
 }
