@@ -41,7 +41,7 @@ class Log {
 	}
 
 	static function consoleTrace(v: Dynamic, ?inf: haxe.PosInfos) {
-		if (arm.ui.UIStatus.inst != null && arm.ui.UIStatus.inst.statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UISidebar.inst.ui.SCALE()) {
+		if (arm.ui.UIStatus.inst != null && arm.ui.UISidebar.inst != null && arm.ui.UISidebar.inst.ui != null && arm.ui.UIStatus.inst.statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UISidebar.inst.ui.SCALE()) {
 			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
 		}
 		lastTraces.unshift(Std.string(v));

@@ -628,7 +628,7 @@ class RenderPathPaint {
 					Context.selectPaintObject(_paintObject);
 					if (isMerged) Context.mergedObject.visible = _visible;
 				}
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				else if (Context.bakeType == BakeAO  ||
 						 Context.bakeType == BakeLightmap ||
 						 Context.bakeType == BakeBentNormal ||

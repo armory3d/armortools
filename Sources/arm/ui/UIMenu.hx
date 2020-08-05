@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [16, 3, 13, #if kha_direct3d12 13 #else 12 #end, 17, 5];
+			var menuItems = [16, 3, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 5];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -236,7 +236,7 @@ class UIMenu {
 					tr("Object ID"),
 					tr("Mask")
 				];
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				modes.push(tr("Path Traced"));
 				#end
 				for (i in 0...modes.length) {
@@ -345,6 +345,8 @@ class UIMenu {
 					var gapi = "Direct3D12";
 					#elseif kha_metal
 					var gapi = "Metal";
+					#elseif kha_vulkan
+					var gapi = "Vulkan";
 					#else
 					var gapi = "OpenGL";
 					#end

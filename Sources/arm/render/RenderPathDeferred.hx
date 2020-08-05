@@ -85,7 +85,7 @@ class RenderPathDeferred {
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
-			#if kha_direct3d12
+			#if (kha_direct3d12 || kha_vulkan)
 			t.format = "RGBA64"; // Match raytrace_target format
 			#else
 			t.format = "RGBA32";
@@ -195,7 +195,7 @@ class RenderPathDeferred {
 		RenderPathPreview.init(path);
 		#end
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		RenderPathRaytrace.init(path);
 		#end
 	}
@@ -230,7 +230,7 @@ class RenderPathDeferred {
 		RenderPathPaint.draw();
 		#end
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
@@ -385,14 +385,14 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("tex");
 		path.drawSkydome("world_pass/world_pass/world_pass");
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
 		#end
 
@@ -639,7 +639,7 @@ class RenderPathDeferred {
 
 				drawGbuffer();
 
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawDeferred();
 				#else
 				drawDeferred();

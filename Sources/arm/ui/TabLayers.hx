@@ -121,7 +121,7 @@ class TabLayers {
 
 				var contextMenu = false;
 
-				#if (kha_opengl || kha_webgl)
+				#if kha_opengl
 				ui.imageInvertY = l.material_mask != null;
 				#end
 
@@ -156,7 +156,7 @@ class TabLayers {
 				ui._x -= 2;
 				ui._y -= 3;
 
-				#if (kha_opengl || kha_webgl)
+				#if kha_opengl
 				ui.imageInvertY = false;
 				#end
 
@@ -609,7 +609,7 @@ class TabLayers {
 						UVUtil.uvmapCached = false;
 						UVUtil.trianglemap = null;
 						UVUtil.trianglemapCached = false;
-						#if kha_direct3d12
+						#if (kha_direct3d12 || kha_vulkan)
 						arm.render.RenderPathRaytrace.ready = false;
 						#end
 					}

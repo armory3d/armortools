@@ -25,7 +25,7 @@ vec3 getPos(vec2 uv) {
 	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
 	float keep2 = pos.x + nor.x;
 	#endif
-	#if defined(HLSL) || defined(METAL)
+	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
 	#else
 	float depth = textureLod(gbufferD, uv, 0.0).r;
@@ -35,8 +35,9 @@ vec3 getPos(vec2 uv) {
 	return wpos.xyz / wpos.w;
 }
 vec3 getNormal(vec3 p0, vec2 uv) {
-	vec3 p1 = getPos(uv + vec2(texStep.x * 4, 0));
-	vec3 p2 = getPos(uv + vec2(0, texStep.y * 4));
+	vec2 texStepLocal = texStep; // TODO: SPIRV workaround
+	vec3 p1 = getPos(uv + vec2(texStepLocal.x * 4, 0));
+	vec3 p2 = getPos(uv + vec2(0, texStepLocal.y * 4));
 	return normalize(cross(p2 - p0, p1 - p0));
 }
 void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {

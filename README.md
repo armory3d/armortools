@@ -80,6 +80,15 @@ node Kinc/make -g direct3d12 --raytrace dxr
 # Build for x64 & release
 ```
 ```bash
+# Vulkan VKRT - wip
+node Kromx/make -g vulkan
+cd Kromx
+node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
+cd Deployment
+strip Krom
+./Krom ../../build/krom
+```
+```bash
 # Updating cloned repository
 git pull origin master
 git submodule update --init --recursive

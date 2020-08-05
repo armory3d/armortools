@@ -35,7 +35,7 @@ class MakePaint {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.tool == ToolBake && Context.bakeType == BakeInit) {
 			// Init raytraced bake
 			MakeBake.positionAndNormal(vert, frag);
@@ -68,7 +68,7 @@ class MakePaint {
 			vert.write('vec2 subtex = tex;');
 		}
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
 		#else
 		vert.write('vec2 tpos = vec2(subtex.xy * 2.0 - 1.0);');
@@ -125,10 +125,10 @@ class MakePaint {
 			if (Context.symX || Context.symY || Context.symZ) depthReject = false;
 
 			if (depthReject) {
-				#if (kha_opengl || kha_webgl)
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
-				#else
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) discard;');
+				#else
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
 				#end
 			}
 
@@ -282,10 +282,10 @@ class MakePaint {
 
 		if (Context.tool == ToolParticle) { // particle mask
 			frag.add_uniform('sampler2D texparticle', '_texparticle');
-			#if (kha_opengl || kha_webgl)
-			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
-			#else
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 			frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
+			#else
+			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
 			#end
 		}
 		else { // brush cursor mask
@@ -295,7 +295,7 @@ class MakePaint {
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
 		frag.write('vec2 sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');

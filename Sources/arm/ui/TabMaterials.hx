@@ -95,7 +95,7 @@ class TabMaterials {
 						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
-					#if (kha_opengl || kha_webgl)
+					#if kha_opengl
 					ui.imageInvertY = materials[i].previewReady;
 					#end
 
@@ -208,7 +208,7 @@ class TabMaterials {
 
 				ui._y += 6;
 
-				#if (kha_opengl || kha_webgl)
+				#if kha_opengl
 				ui.imageInvertY = false; // Material preview
 				#end
 			}

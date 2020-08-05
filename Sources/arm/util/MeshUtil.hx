@@ -73,7 +73,7 @@ class MeshUtil {
 			Context.mainObject().addChild(Context.mergedObject);
 		});
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
@@ -143,7 +143,7 @@ class MeshUtil {
 			g.vertexBuffer.unlock();
 		}
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
@@ -184,7 +184,7 @@ class MeshUtil {
 			g.vertexBuffer.unlock();
 		}
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}

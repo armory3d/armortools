@@ -58,7 +58,7 @@ class BoxExport {
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemap = null;
 				UVUtil.trianglemapCached = false;
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				arm.render.RenderPathRaytrace.ready = false;
 				#end
 			}

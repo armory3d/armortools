@@ -706,7 +706,9 @@ class MaterialShader {
 
 		#else // kha_opengl
 
-		#if (kha_webgl || krom_android || krom_ios)
+		#if kha_vulkan
+		var s = '#version 450\n';
+		#elseif krom_android
 		var s = '#version 300 es\n';
 		if (shader_type == 'frag') {
 			s += 'precision highp float;\n';

@@ -368,7 +368,7 @@ class UINodes {
 					var tx = ww - tw - 8 * ui.SCALE();
 					var ty = wh - th - 40 * ui.SCALE();
 
-					#if (kha_opengl || kha_webgl)
+					#if kha_opengl
 					var invertY = sel.type == "MATERIAL";
 					#else
 					var invertY = false;

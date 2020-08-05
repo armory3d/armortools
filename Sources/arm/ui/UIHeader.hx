@@ -92,7 +92,7 @@ class UIHeader {
 					tr("Object ID"),
 					tr("Vertex Color"),
 				];
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				bakes.push(tr("Lightmap"));
 				bakes.push(tr("Bent Normal"));
 				bakes.push(tr("Thickness"));
@@ -114,7 +114,7 @@ class UIHeader {
 					var offsetHandle = Id.handle({value: Context.bakeAoOffset});
 					Context.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 				}
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				if (Context.bakeType == BakeAO || Context.bakeType == BakeLightmap || Context.bakeType == BakeBentNormal || Context.bakeType == BakeThickness) {
 					ui.text(tr("Rays/pix:") + ' ${arm.render.RenderPathRaytrace.raysPix}');
 					ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytrace.raysSec}');

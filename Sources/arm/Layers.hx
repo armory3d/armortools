@@ -94,7 +94,7 @@ class Layers {
 			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
 		g.begin();
@@ -158,7 +158,7 @@ class Layers {
 		pipeCopyBGRA.inputLayout = [vs];
 		pipeCopyBGRA.compile();
 
-		#if kha_metal
+		#if (kha_metal || kha_vulkan)
 		pipeCopy8 = new PipelineState();
 		pipeCopy8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
 		pipeCopy8.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");

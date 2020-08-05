@@ -9,6 +9,5 @@ uniform mat4 SMVP;
 
 void main() {
 	normal = nor;
-	vec4 position = SMVP * vec4(pos, 1.0);
-	gl_Position = vec4(position);
+	gl_Position = SMVP * vec4(pos, 1.0);
 }

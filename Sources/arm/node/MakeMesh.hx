@@ -84,7 +84,7 @@ class MakeMesh {
 
 			frag.vVec = true;
 			frag.add_function(MaterialFunctions.str_cotangentFrame);
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -102,7 +102,7 @@ class MakeMesh {
 				if (l.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
 					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
-					#if kha_direct3d12
+					#if (kha_direct3d12 || kha_vulkan)
 					if (Context.viewportMode == ViewLit) {
 						frag.write('if (texpaint_sample.a < 0.1) discard;');
 					}
@@ -353,7 +353,8 @@ class MakeMesh {
 					frag.write('vec3 wreflect = reflect(-vVec, wn);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
 					frag.add_function(MaterialFunctions.str_envMapEquirect);
-					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapData.x), envlod).rgb;');
+					frag.write('vec4 envmapDataLocal = envmapData;'); // TODO: spirv workaround
+					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapDataLocal.x), envlod).rgb;');
 
 					frag.add_uniform('vec3 lightArea0', '_lightArea0');
 					frag.add_uniform('vec3 lightArea1', '_lightArea1');
@@ -384,9 +385,9 @@ class MakeMesh {
 
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
 					frag.add_function(MaterialFunctions.str_shIrradiance);
-					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(wn.x * envmapData.z - wn.y * envmapData.y, wn.x * envmapData.y + wn.y * envmapData.z, wn.z), shirr) / 3.14159265);');
+					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(wn.x * envmapDataLocal.z - wn.y * envmapDataLocal.y, wn.x * envmapDataLocal.y + wn.y * envmapDataLocal.z, wn.z), shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
-					frag.write('indirect *= envmapData.w * occlusion;');
+					frag.write('indirect *= envmapDataLocal.w * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
 				}
 				else { // Deferred, Pathtraced

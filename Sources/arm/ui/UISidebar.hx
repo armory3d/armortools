@@ -545,7 +545,7 @@ class UISidebar {
 			Context.brushTime = 0;
 			Context.prevPaintVecX = -1;
 			Context.prevPaintVecY = -1;
-			#if (!kha_direct3d12) // Keep accumulated samples for D3D12
+			#if (!kha_direct3d12 && !kha_vulkan) // Keep accumulated samples for D3D12
 			Context.ddirty = 3;
 			#end
 			Context.brushBlendDirty = true; // Update brush mask
@@ -562,7 +562,7 @@ class UISidebar {
 				var target = l.texpaint_preview;
 				var source = l.texpaint;
 				var g2 = target.g2;
-				g2.begin(true, 0xff000000);
+				g2.begin(true, 0x00000000);
 				g2.pipeline = Layers.pipeCopy;
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
 				g2.pipeline = null;
@@ -740,7 +740,7 @@ class UISidebar {
 					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);
-					#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
 					#else
 					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);

@@ -491,10 +491,10 @@ class App {
 			var size = 50 * UISidebar.inst.ui.ops.scaleFactor;
 			var ratio = size / img.width;
 			var h = img.height * ratio;
-			#if (kha_opengl || kha_webgl)
-			var inv = (dragMaterial != null || dragLayer != null) ? h : 0;
-			#else
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 			var inv = 0;
+			#else
+			var inv = (dragMaterial != null || dragLayer != null) ? h : 0;
 			#end
 			g.color = dragTint;
 			var bgRect = getDragBackground();

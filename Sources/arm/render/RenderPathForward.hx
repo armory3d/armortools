@@ -42,7 +42,7 @@ class RenderPathForward {
 		RenderPathPaint.draw();
 		#end
 
-		#if kha_direct3d12
+		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.viewportMode == ViewPathTrace) {
 			RenderPathRaytrace.draw();
 			return;
@@ -161,7 +161,7 @@ class RenderPathForward {
 
 				drawGbuffer();
 
-				#if kha_direct3d12
+				#if (kha_direct3d12 || kha_vulkan)
 				Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
 				#else
 				drawForward();

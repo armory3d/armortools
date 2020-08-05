@@ -40,10 +40,11 @@ vec3 cos_weighted_hemisphere_direction(vec3 n, vec2 co, uint seed) {
 }
 
 void main() {
+	vec4 paramsLocal = params; // TODO: spirv workaround
 	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 	vec3 n = reverseEquirect(texCoord);
 	for (int i = 0; i < samples; i++) {
-		vec3 dir = normalize(mix(n, cos_weighted_hemisphere_direction(n, texCoord, i), params.x));
+		vec3 dir = normalize(mix(n, cos_weighted_hemisphere_direction(n, texCoord, i), paramsLocal.x));
 		fragColor.rgb += texture(radiance, equirect(dir)).rgb;
 	}
 	fragColor.rgb /= float(samples);

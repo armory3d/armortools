@@ -7,7 +7,7 @@ import arm.ui.UIHeader;
 import arm.node.MaterialParser;
 import arm.Enums;
 
-#if kha_direct3d12
+#if (kha_direct3d12 || kha_vulkan)
 
 class RenderPathRaytrace {
 
@@ -86,10 +86,7 @@ class RenderPathRaytrace {
 		f32[20] = Scene.active.world.probe.raw.strength;
 		if (!Context.showEnvmap) f32[20] = -f32[20];
 		f32[21] = Context.envmapAngle;
-		// var right = cam.rightWorld().normalize();
-		// f32[21] = right.x;
-		// f32[22] = right.y;
-		// f32[23] = right.z;
+		f32[22] = Project.layers.length;
 
 		var framebuffer = path.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);

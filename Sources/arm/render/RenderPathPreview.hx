@@ -111,7 +111,7 @@ class RenderPathPreview {
 		}
 		path.drawShader("deferred_light/deferred_light/deferred_light");
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("mtex", "mgbuffer0"); // Bind depth for world pass
 		#end
 
@@ -120,7 +120,7 @@ class RenderPathPreview {
 		path.drawSkydome("world_pass/world_pass/world_pass");
 		#end
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
 		#end
 
@@ -164,14 +164,14 @@ class RenderPathPreview {
 		}
 		path.drawShader("deferred_light/deferred_light/deferred_light");
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("tex");
 		path.drawSkydome("world_pass/world_pass/world_pass");
 
-		#if (!kha_opengl)
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
 		#end
 

@@ -5,10 +5,10 @@ import arm.node.MaterialShader;
 class MakeBlur {
 
 	public static function run(vert: MaterialShader, frag: MaterialShader) {
-		#if (kha_opengl || kha_webgl)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
-		#else
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
+		#else
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
 		#end
 
 		frag.write('vec3 basecol = vec3(0.0, 0.0, 0.0);');

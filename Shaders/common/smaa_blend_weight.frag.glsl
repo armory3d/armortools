@@ -29,11 +29,14 @@ in vec4 offset1;
 in vec4 offset2;
 out vec4 fragColor;
 
+vec2 screenSizeLocal;
+vec2 screenSizeInvLocal;
+
 // Blending Weight Calculation Pixel Shader (Second Pass)
 vec2 cdw_end;
 
 vec4 textureLodA(sampler2D tex, vec2 coord, float lod) {
-	#if defined(HLSL) || defined(METAL)
+	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	coord.y = 1.0 - coord.y;
 	#endif
 	return textureLod(tex, coord, lod);
@@ -89,7 +92,7 @@ vec2 SMAASearchDiag1(vec2 texcoord, vec2 dir/*, out vec2 e*/) {
 
 vec2 SMAASearchDiag2(vec2 texcoord, vec2 dir) {
 	vec4 coord = vec4(texcoord, -1.0, 1.0);
-	coord.x += 0.25 * screenSizeInv.x; // See @SearchDiag2Optimization
+	coord.x += 0.25 * screenSizeInvLocal.x; // See @SearchDiag2Optimization
 	vec3 t = vec3(screenSizeInv.xy, 1.0);
 	float cw = coord.w; // TODO: krafix hlsl bug
 	while (coord.z < float(SMAA_MAX_SEARCH_STEPS_DIAG - 1) && cw > 0.9) {
@@ -145,7 +148,7 @@ vec2 SMAACalculateDiagWeights(vec2 texcoord, vec2 e, vec4 subsampleIndices) {
 	//SMAA_BRANCH
 	if (d.x + d.y > 2.0) { // d.x + d.y + 1 > 3
 		// Fetch the crossing edges:
-		vec4 coords = mad(vec4(-d.x + 0.25, d.x, d.y, -d.y - 0.25), screenSizeInv.xyxy, texcoord.xyxy);
+		vec4 coords = mad(vec4(-d.x + 0.25, d.x, d.y, -d.y - 0.25), screenSizeInvLocal.xyxy, texcoord.xyxy);
 		vec4 c;
 
 		c.xy = SMAASampleLevelZeroOffset(edgesTex, coords.xy, ivec2(-1,  0)).rg;
@@ -180,7 +183,7 @@ vec2 SMAACalculateDiagWeights(vec2 texcoord, vec2 e, vec4 subsampleIndices) {
 	// SMAA_BRANCH
 	if (d.x + d.y > 2.0) { // d.x + d.y + 1 > 3
 		// Fetch the crossing edges:
-		vec4 coords = mad(vec4(-d.x, -d.x, d.y, d.y), screenSizeInv.xyxy, texcoord.xyxy);
+		vec4 coords = mad(vec4(-d.x, -d.x, d.y, d.y), screenSizeInvLocal.xyxy, texcoord.xyxy);
 		vec4 c;
 		c.x  = SMAASampleLevelZeroOffset(edgesTex, coords.xy, ivec2(-1,  0)).g;
 		c.y  = SMAASampleLevelZeroOffset(edgesTex, coords.xy, ivec2( 0, -1)).r;
@@ -248,11 +251,11 @@ float SMAASearchXLeft(vec2 texcoord, float end) {
 		   e.g > 0.8281 && // Is there some edge not activated?
 		   e.r == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
-		texcoord = mad(-vec2(2.0, 0.0), screenSizeInv.xy, texcoord);
+		texcoord = mad(-vec2(2.0, 0.0), screenSizeInvLocal.xy, texcoord);
 	}
 
 	float offset = mad(-(255.0 / 127.0), SMAASearchLength(e, 0.0), 3.25);
-	return mad(screenSizeInv.x, offset, texcoord.x);
+	return mad(screenSizeInvLocal.x, offset, texcoord.x);
 }
 
 float SMAASearchXRight(vec2 texcoord, float end) {
@@ -261,11 +264,11 @@ float SMAASearchXRight(vec2 texcoord, float end) {
 		   e.g > 0.8281 && // Is there some edge not activated?
 		   e.r == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
-		texcoord = mad(vec2(2.0, 0.0), screenSizeInv.xy, texcoord);
+		texcoord = mad(vec2(2.0, 0.0), screenSizeInvLocal.xy, texcoord);
 	}
 
 	float offset = mad(-(255.0 / 127.0), SMAASearchLength(e, 0.5), 3.25);
-	return mad(-screenSizeInv.x, offset, texcoord.x);
+	return mad(-screenSizeInvLocal.x, offset, texcoord.x);
 }
 
 float SMAASearchYUp(vec2 texcoord, float end) {
@@ -274,10 +277,10 @@ float SMAASearchYUp(vec2 texcoord, float end) {
 		   e.r > 0.8281 && // Is there some edge not activated?
 		   e.g == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
-		texcoord = mad(-vec2(0.0, 2.0), screenSizeInv.xy, texcoord);
+		texcoord = mad(-vec2(0.0, 2.0), screenSizeInvLocal.xy, texcoord);
 	}
 	float offset = mad(-(255.0 / 127.0), SMAASearchLength(e.gr, 0.0), 3.25);
-	return mad(screenSizeInv.y, offset, texcoord.y);
+	return mad(screenSizeInvLocal.y, offset, texcoord.y);
 }
 
 float SMAASearchYDown(vec2 texcoord, float end) {
@@ -286,10 +289,10 @@ float SMAASearchYDown(vec2 texcoord, float end) {
 		   e.r > 0.8281 && // Is there some edge not activated?
 		   e.g == 0.0) { // Or is there a crossing edge that breaks the line?
 		e = textureLodA(edgesTex, texcoord, 0.0).rg;
-		texcoord = mad(vec2(0.0, 2.0), screenSizeInv.xy, texcoord);
+		texcoord = mad(vec2(0.0, 2.0), screenSizeInvLocal.xy, texcoord);
 	}
 	float offset = mad(-(255.0 / 127.0), SMAASearchLength(/*searchTex,*/ e.gr, 0.5), 3.25);
-	return mad(-screenSizeInv.y, offset, texcoord.y);
+	return mad(-screenSizeInvLocal.y, offset, texcoord.y);
 }
 
 /**
@@ -388,7 +391,7 @@ vec4 SMAABlendingWeightCalculationPS(vec2 texcoord, vec2 pixcoord,
 
 		// We want the distances to be in pixel units (doing this here allow to
 		// better interleave arithmetic and memory accesses):
-		d = abs(round(mad(screenSize.xx, d, -pixcoord.xx)));
+		d = abs(round(mad(screenSizeLocal.xx, d, -pixcoord.xx)));
 
 		// SMAAArea below needs a sqrt, as the areas texture is compressed
 		// quadratically:
@@ -431,7 +434,7 @@ vec4 SMAABlendingWeightCalculationPS(vec2 texcoord, vec2 pixcoord,
 		d.y = coords.z;
 
 		// We want the distances to be in pixel units:
-		d = abs(round(mad(screenSize.yy, d, -pixcoord.yy)));
+		d = abs(round(mad(screenSizeLocal.yy, d, -pixcoord.yy)));
 
 		// SMAAArea below needs a sqrt, as the areas texture is compressed
 		// quadratically:
@@ -452,5 +455,7 @@ vec4 SMAABlendingWeightCalculationPS(vec2 texcoord, vec2 pixcoord,
 }
 
 void main() {
+	screenSizeLocal = screenSize; // TODO: SPIRV workaround
+	screenSizeInvLocal = screenSizeInv; // TODO: SPIRV workaround
 	fragColor = SMAABlendingWeightCalculationPS(texCoord, pixcoord, vec4(0.0));
 }
