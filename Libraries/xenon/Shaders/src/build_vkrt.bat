@@ -1,0 +1,5 @@
+.\dxc.exe -Zpr -Fo ..\raytrace_brute.spirv -T lib_6_4 .\raytrace_brute.hlsl -spirv -fvk-use-scalar-layout -fspv-target-env="vulkan1.2"
+.\dxc.exe -Zpr -Fo ..\raytrace_bake_ao.spirv -T lib_6_4 .\raytrace_bake_ao.hlsl -spirv -fvk-use-scalar-layout -fspv-target-env="vulkan1.2"
+.\dxc.exe -Zpr -Fo ..\raytrace_bake_light.spirv -T lib_6_4 .\raytrace_bake_light.hlsl -spirv -fvk-use-scalar-layout -fspv-target-env="vulkan1.2"
+.\dxc.exe -Zpr -Fo ..\raytrace_bake_bent.spirv -T lib_6_4 .\raytrace_bake_bent.hlsl -spirv -fvk-use-scalar-layout -fspv-target-env="vulkan1.2"
+.\dxc.exe -Zpr -Fo ..\raytrace_bake_thick.spirv -T lib_6_4 .\raytrace_bake_thick.hlsl -spirv -fvk-use-scalar-layout -fspv-target-env="vulkan1.2"
