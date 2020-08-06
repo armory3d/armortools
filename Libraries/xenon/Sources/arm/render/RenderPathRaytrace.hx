@@ -29,6 +29,12 @@ class RenderPathRaytrace {
 	static var isBake = false;
 	static var lastBake = 0;
 
+	#if kha_direct3d12
+	static inline var ext = ".cso";
+	#else
+	static inline var ext = ".spirv";
+	#end
+
 	public static function init(_path: RenderPath) {
 		path = _path;
 	}
@@ -37,7 +43,7 @@ class RenderPathRaytrace {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
-			raytraceInit("raytrace_brute.cso");
+			raytraceInit("raytrace_brute" + ext);
 			lastEnvmap = null;
 			lastLayer = null;
 		}
@@ -242,10 +248,10 @@ class RenderPathRaytrace {
 
 	static function getBakeShaderName(): String {
 		return
-			Context.bakeType == BakeAO  		? "raytrace_bake_ao.cso" :
-			Context.bakeType == BakeLightmap 	? "raytrace_bake_light.cso" :
-			Context.bakeType == BakeBentNormal ? "raytrace_bake_bent.cso" :
-													  "raytrace_bake_thick.cso";
+			Context.bakeType == BakeAO  		? "raytrace_bake_ao" + ext :
+			Context.bakeType == BakeLightmap 	? "raytrace_bake_light" + ext :
+			Context.bakeType == BakeBentNormal  ? "raytrace_bake_bent" + ext :
+												  "raytrace_bake_thick" + ext;
 	}
 
 	public static function draw() {
