@@ -59,16 +59,16 @@ class RenderPathForward {
 		RenderPathDeferred.taaFrame++;
 	}
 
-	static function drawGbuffer() {
-		path.setTarget("gbuffer0");
+	public static function drawGbuffer(gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2") {
+		path.setTarget(gbuffer0);
 		#if kha_metal
 		path.clearTarget(0x00000000, 1.0);
 		#else
 		path.clearTarget(null, 1.0);
 		#end
-		path.setTarget("gbuffer2");
+		path.setTarget(gbuffer2);
 		path.clearTarget(0xff000000);
-		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		path.setTarget(gbuffer0, [gbuffer1, gbuffer2]);
 		var currentG = path.currentG;
 		#if arm_painter
 		RenderPathPaint.bindLayers();
@@ -80,71 +80,73 @@ class RenderPathForward {
 		LineDraw.render(path.currentG);
 	}
 
-	static function drawForward() {
-		path.setDepthFrom("gbuffer1", "gbuffer0");
-		path.setTarget("gbuffer1");
+	public static function drawForward(eye = false, output = "", gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2", buf = "buf", bufa = "bufa", taa = "taa", taa2 = "taa2") {
+		path.setDepthFrom(gbuffer1, gbuffer0);
+		path.setTarget(gbuffer1);
 		path.drawSkydome("world_pass/world_pass/world_pass");
-		path.setDepthFrom("gbuffer1", "gbuffer2");
+		path.setDepthFrom(gbuffer1, gbuffer2);
 
-		path.setTarget("buf");
-		path.bindTarget("gbuffer1", "tex");
+		path.setTarget(buf);
+		path.bindTarget(gbuffer1, "tex");
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 
-		path.setTarget("buf");
-		var currentG = path.currentG;
-		path.drawMeshes("overlay");
-		#if arm_painter
-		Inc.drawCompass(currentG);
-		#end
+		if (output == "") {
+			path.setTarget(buf);
+			var currentG = path.currentG;
+			path.drawMeshes("overlay");
+			#if arm_painter
+			Inc.drawCompass(currentG);
+			#end
+		}
 
 		var taaFrame = RenderPathDeferred.taaFrame;
-		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
-		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
+		var current = taaFrame % 2 == 0 ? bufa : taa2;
+		var last = taaFrame % 2 == 0 ? taa2 : bufa;
 
 		path.setTarget(current);
 		path.clearTarget(0x00000000);
-		path.bindTarget("buf", "colorTex");
+		path.bindTarget(buf, "colorTex");
 		path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 
-		path.setTarget("taa");
+		path.setTarget(taa);
 		path.clearTarget(0x00000000);
 		path.bindTarget(current, "edgesTex");
 		path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 
 		path.setTarget(current);
-		path.bindTarget("buf", "colorTex");
-		path.bindTarget("taa", "blendTex");
-		path.bindTarget("gbuffer2", "sveloc");
+		path.bindTarget(buf, "colorTex");
+		path.bindTarget(taa, "blendTex");
+		path.bindTarget(gbuffer2, "sveloc");
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
 		#if arm_painter
-		var skipTaa = Context.splitView;
+		var skipTaa = Context.splitView || eye;
 		#else
 		var skipTaa = false;
 		#end
 
 		if (skipTaa) {
-			path.setTarget("taa");
+			path.setTarget(taa);
 			path.bindTarget(current, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 		else {
-			path.setTarget("taa");
+			path.setTarget(taa);
 			path.bindTarget(current, "tex");
 			path.bindTarget(last, "tex2");
-			path.bindTarget("gbuffer2", "sveloc");
+			path.bindTarget(gbuffer2, "sveloc");
 			path.drawShader("shader_datas/taa_pass/taa_pass");
 		}
 
 		if (!Inc.ssaa4()) {
-			path.setTarget("");
-			path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
+			path.setTarget(output);
+			path.bindTarget(taaFrame % 2 == 0 ? current : taa, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 
 		if (Inc.ssaa4()) {
-			path.setTarget("");
-			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
+			path.setTarget(output);
+			path.bindTarget(taaFrame % 2 == 0 ? taa2 : taa, "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
 		}
 	}

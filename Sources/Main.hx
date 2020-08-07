@@ -17,6 +17,9 @@ import arm.Context;
 #if arm_player
 import arm.sys.Path;
 #end
+#if arm_vr
+import arm.render.RenderPathForwardVR;
+#end
 
 class Main {
 
@@ -84,6 +87,12 @@ class Main {
 					var path = new RenderPath();
 					Inc.init(path);
 
+					#if arm_vr
+					RenderPathDeferred.init(path); // Allocate gbuffer
+					RenderPathForward.init(path);
+					RenderPathForwardVR.init(path);
+					path.commands = RenderPathForwardVR.commands;
+					#else
 					if (Context.renderMode == RenderForward) {
 						RenderPathDeferred.init(path); // Allocate gbuffer
 						RenderPathForward.init(path);
@@ -93,6 +102,7 @@ class Main {
 						RenderPathDeferred.init(path);
 						path.commands = RenderPathDeferred.commands;
 					}
+					#end
 
 					RenderPath.setActive(path);
 					#if arm_player

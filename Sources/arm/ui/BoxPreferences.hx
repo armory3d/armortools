@@ -302,6 +302,7 @@ class BoxPreferences {
 			Context.hsupersample = Id.handle({position: Config.getSuperSampleQuality(Config.raw.rp_supersample)});
 			Context.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
+				#if (!arm_vr)
 				var hrendermode = Id.handle({position: Context.renderMode});
 				Context.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
@@ -316,6 +317,7 @@ class BoxPreferences {
 					}
 					MaterialParser.parseMeshMaterial();
 				}
+				#end
 
 				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
 				if (Context.hsupersample.changed) Config.applyConfig();

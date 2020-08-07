@@ -89,6 +89,17 @@ strip Krom
 ./Krom ../../build/krom
 ```
 ```bash
+# Windows VR - wip
+node Kromx/make -g direct3d11 --vr oculus
+cd Kromx
+# Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
+git apply patch/window_handling.diff --directory=Kinc
+node Kinc/make -g direct3d11 --vr oculus
+# Open generated Visual Studio project
+# Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
+# Build for x64 & release
+```
+```bash
 # Updating cloned repository
 git pull origin master
 git submodule update --init --recursive
