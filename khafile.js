@@ -70,6 +70,7 @@ else {
 
 if (vr) {
 	project.addDefine("arm_vr");
+	project.addAssets("Assets/readme/readme_vr.txt", { notinlist: true, destination: "{name}" });
 }
 
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });

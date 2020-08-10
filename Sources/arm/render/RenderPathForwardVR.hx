@@ -11,6 +11,8 @@ class RenderPathForwardVR {
 
 	public static var path: RenderPath;
 	static var m = iron.math.Mat4.identity();
+	static var m0 = iron.math.Mat4.identity();
+	static var q = new iron.math.Quat();
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -111,34 +113,36 @@ class RenderPathForwardVR {
 
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		{
+		if (Krom.vrGetSensorStateHmdMounted()) {
 			var current = RenderPathDeferred.taaFrame % 2 == 0 ? "bufa" : "taa2";
 			var output = RenderPathDeferred.taaFrame % 2 == 0 ? current : "taa";
 
 			m.setFrom(Scene.active.camera.transform.world);
-			var t = Context.object.transform;
-			t.translate(0, 1, -1);
-			t.buildMatrix();
 
 			for (eye in 0...2) {
 				var view = Krom.vrGetSensorStateView(eye);
 				var proj = Krom.vrGetSensorStateProjection(eye);
-				Scene.active.camera.V._00 = view._00;
-				Scene.active.camera.V._01 = view._01;
-				Scene.active.camera.V._02 = view._02;
-				Scene.active.camera.V._03 = view._03;
-				Scene.active.camera.V._10 = view._10;
-				Scene.active.camera.V._11 = view._11;
-				Scene.active.camera.V._12 = view._12;
-				Scene.active.camera.V._13 = view._13;
-				Scene.active.camera.V._20 = view._20;
-				Scene.active.camera.V._21 = view._21;
-				Scene.active.camera.V._22 = view._22;
-				Scene.active.camera.V._23 = view._23;
-				Scene.active.camera.V._30 = view._30;
-				Scene.active.camera.V._31 = view._31;
-				Scene.active.camera.V._32 = view._32;
-				Scene.active.camera.V._33 = view._33;
+				// Convert up axis
+				q.fromAxisAngle(new iron.math.Vec4(1, 0, 0), -Math.PI / 2);
+				Scene.active.camera.V.fromQuat(q);
+				Scene.active.camera.V.translate(0, 1, -1);
+				m0._00 = view._00;
+				m0._01 = view._01;
+				m0._02 = view._02;
+				m0._03 = view._03;
+				m0._10 = view._10;
+				m0._11 = view._11;
+				m0._12 = view._12;
+				m0._13 = view._13;
+				m0._20 = view._20;
+				m0._21 = view._21;
+				m0._22 = view._22;
+				m0._23 = view._23;
+				m0._30 = view._30;
+				m0._31 = view._31;
+				m0._32 = view._32;
+				m0._33 = view._33;
+				Scene.active.camera.V.multmat(m0);
 				Scene.active.camera.P._00 = proj._00;
 				Scene.active.camera.P._01 = proj._01;
 				Scene.active.camera.P._02 = proj._02;
@@ -162,8 +166,7 @@ class RenderPathForwardVR {
 			}
 
 			Scene.active.camera.transform.world.setFrom(m);
-			t.translate(0, -1, 1);
-			t.buildMatrix();
+			Scene.active.camera.buildProjection();
 
 			Krom.vrBegin();
 
@@ -180,7 +183,7 @@ class RenderPathForwardVR {
 
 		#if arm_painter
 		RenderPathPaint.begin();
-		#end // arm_painter
+		#end
 
 		RenderPathForward.drawGbuffer();
 		RenderPathForward.drawForward();
