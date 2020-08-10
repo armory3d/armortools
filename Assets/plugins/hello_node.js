@@ -37,7 +37,7 @@ let nodes = [
 				name: "Color",
 				type: "RGBA",
 				color: 0xffc7c729,
-				default_value: [0.8, 0.8, 0.8, 1.0]
+				default_value: new Float32Array([0.8, 0.8, 0.8, 1.0])
 			}
 		],
 		buttons: []
