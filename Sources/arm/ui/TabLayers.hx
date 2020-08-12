@@ -149,7 +149,9 @@ class TabLayers {
 					state = ui.image(icon, 0xffffffff, iconH);
 				}
 				else { // Group
-					var folder = Res.tile50(icons, 2, 1);
+					var folderClosed = Res.tile50(icons, 2, 1);
+					var folderOpen = Res.tile50(icons, 8, 1);
+					var folder = l.show_panel ? folderOpen : folderClosed;
 					state = ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
 				}
 
