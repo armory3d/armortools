@@ -38,11 +38,18 @@ class UIToolbar {
 		var ui = UISidebar.inst.ui;
 
 		if (ui.window(toolbarHandle, 0, UIHeader.inst.headerh, toolbarw, System.windowHeight() - UIHeader.inst.headerh)) {
-			ui._y += 1;
+			ui._y -= 4 * ui.SCALE();
 
 			ui.imageScrollAlign = false;
 			var img = Res.get("icons.k");
 			var imgw = ui.SCALE() > 1 ? 100 : 50;
+
+			var light = ui.t.WINDOW_BG_COL > 0xff666666;
+			var iconAccent = light ? 0xff666666 : -1;
+
+			var rect = Res.tile50(img, 7, 1);
+			ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h);
+			ui._y -= 4 * ui.SCALE();
 
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				var keys = [
@@ -62,7 +69,7 @@ class UIToolbar {
 					ui._x += 2;
 					if (Context.tool == i) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
 					var rect = Res.tile50(img, i, 0);
-					if (ui.image(img, -1, null, rect.x, rect.y, rect.w, rect.h) == State.Started) Context.selectTool(i);
+					if (ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Started) Context.selectTool(i);
 					if (ui.isHovered) ui.tooltip(tr(toolNames[i]) + " " + keys[i]);
 					ui._x -= 2;
 					ui._y += 2;
@@ -71,14 +78,14 @@ class UIToolbar {
 			else if (UIHeader.inst.worktab.position == SpaceMaterial) {
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				if (ui.image(img, iconAccent, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
 				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
 				ui._x -= 2;
 				ui._y += 2;
 
 				ui._x += 2;
 				if (Context.tool == ToolPicker) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, -1, null, imgw * 9, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
+				if (ui.image(img, iconAccent, null, imgw * 9, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
 				if (ui.isHovered) ui.tooltip(tr("Picker") + " (V)");
 				ui._x -= 2;
 				ui._y += 2;
@@ -86,7 +93,7 @@ class UIToolbar {
 			else if (UIHeader.inst.worktab.position == SpaceBake) {
 				ui._x += 2;
 				if (Context.tool == ToolBake) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, -1, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolBake);
+				if (ui.image(img, iconAccent, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolBake);
 				if (ui.isHovered) ui.tooltip(tr("Bake") + " (K)");
 				ui._x -= 2;
 				ui._y += 2;
@@ -94,7 +101,7 @@ class UIToolbar {
 			else if (UIHeader.inst.worktab.position == SpaceRender) {
 				ui._x += 2;
 				if (Context.tool == ToolGizmo) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, -1, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				if (ui.image(img, iconAccent, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
 				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
 				ui._x -= 2;
 				ui._y += 2;
