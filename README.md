@@ -80,9 +80,10 @@ node Kinc/make -g direct3d12 --raytrace dxr
 # Build for x64 & release
 ```
 ```bash
-# Vulkan VKRT - wip
+# Linux VKRT - wip
 node Kromx/make -g vulkan
 cd Kromx
+git apply patch/vulkan_raytrace.diff --directory=Kinc
 node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
 cd Deployment
 strip Krom
