@@ -44,7 +44,9 @@ class UIToolbar {
 			var img = Res.get("icons.k");
 			var imgw = ui.SCALE() > 1 ? 100 : 50;
 
-			var light = ui.t.WINDOW_BG_COL > 0xff666666;
+			var col = ui.t.WINDOW_BG_COL;
+			if (col < 0) col += untyped 4294967296;
+			var light = col > 0xff666666 + 4294967296;
 			var iconAccent = light ? 0xff666666 : -1;
 
 			var rect = Res.tile50(img, 7, 1);
