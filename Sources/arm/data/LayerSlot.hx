@@ -4,7 +4,7 @@ import kha.graphics4.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
 import arm.ui.UISidebar;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 
 class LayerSlot {
@@ -419,7 +419,7 @@ class LayerSlot {
 		material_mask = Context.material;
 		Layers.updateFillLayers(4);
 		function _parse(_) {
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
 			UISidebar.inst.hwnd.redraws = 2;
 			iron.App.removeRender(_parse);
@@ -430,7 +430,7 @@ class LayerSlot {
 	public function toPaintLayer() {
 		Context.setLayer(this);
 		material_mask = null;
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
 		UISidebar.inst.hwnd.redraws = 2;
 	}

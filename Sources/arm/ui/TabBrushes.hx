@@ -4,7 +4,7 @@ import haxe.Json;
 import iron.system.Time;
 import zui.Zui;
 import arm.data.BrushSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
@@ -20,7 +20,7 @@ class TabBrushes {
 			if (ui.button(tr("New"))) {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
-				MaterialParser.parseBrush();
+				MakeMaterial.parseBrush();
 				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}

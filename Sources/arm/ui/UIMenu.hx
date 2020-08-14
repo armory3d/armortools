@@ -15,7 +15,7 @@ import arm.util.UVUtil;
 import arm.util.BuildMacros;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
@@ -156,14 +156,14 @@ class UIMenu {
 				var cullHandle = Id.handle({selected: Context.cullBackfaces});
 				Context.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 
 				var filterHandle = Id.handle({selected: Context.textureFilter});
 				Context.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
-					MaterialParser.parsePaintMaterial();
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parsePaintMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 
 				Context.drawWireframe = ui.check(Context.wireframeHandle, " " + tr("Wireframe"));
@@ -171,11 +171,11 @@ class UIMenu {
 					ui.g.end();
 					UVUtil.cacheUVMap();
 					ui.g.begin(false);
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 				Context.drawTexels = ui.check(Context.texelsHandle, " " + tr("Texels"));
 				if (Context.texelsHandle.changed) {
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 
 				var compassHandle = Id.handle({selected: Context.showCompass});
@@ -257,7 +257,7 @@ class UIMenu {
 						}
 						RenderPath.active.commands = RenderPathForward.commands;
 					}
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 			}
 			else if (menuCategory == MenuCamera) {

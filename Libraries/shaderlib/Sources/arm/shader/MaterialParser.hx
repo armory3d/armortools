@@ -14,21 +14,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package arm.node;
+package arm.shader;
 
 import zui.Nodes;
 import iron.data.SceneFormat;
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
 
-class Material {
+class MaterialParser {
 
-	static var con: MaterialShaderContext;
-	static var vert: MaterialShader;
-	static var frag: MaterialShader;
-	static var geom: MaterialShader;
-	static var tesc: MaterialShader;
-	static var tese: MaterialShader;
-	static var curshader: MaterialShader;
+	static var con: NodeShaderContext;
+	static var vert: NodeShader;
+	static var frag: NodeShader;
+	static var geom: NodeShader;
+	static var tesc: NodeShader;
+	static var tese: NodeShader;
+	static var curshader: NodeShader;
 	static var matcon: TMaterialContext;
 	static var parsed: Array<String>;
 
@@ -90,7 +90,7 @@ class Material {
 		return ls;
 	}
 
-	public static function parse(canvas: TNodeCanvas, _con: MaterialShaderContext, _vert: MaterialShader, _frag: MaterialShader, _geom: MaterialShader, _tesc: MaterialShader, _tese: MaterialShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
+	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _geom: NodeShader, _tesc: NodeShader, _tese: NodeShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
 		nodes = canvas.nodes;
 		links = canvas.links;
 
@@ -123,7 +123,7 @@ class Material {
 		return null;
 	}
 
-	public static function finalize(con: MaterialShaderContext) {
+	public static function finalize(con: NodeShaderContext) {
 		var vert = con.vert;
 		var frag = con.frag;
 
@@ -398,7 +398,7 @@ class Material {
 			return vec3(socket.default_value);
 		}
 		else if (node.type == "TEX_BRICK") {
-			curshader.add_function(MaterialFunctions.str_tex_brick);
+			curshader.add_function(ShaderFunctions.str_tex_brick);
 			var co = getCoord(node);
 			var col1 = parse_vector_input(node.inputs[1]);
 			var col2 = parse_vector_input(node.inputs[2]);
@@ -409,7 +409,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
-			curshader.add_function(MaterialFunctions.str_tex_checker);
+			curshader.add_function(ShaderFunctions.str_tex_checker);
 			var co = getCoord(node);
 			var col1 = parse_vector_input(node.inputs[1]);
 			var col2 = parse_vector_input(node.inputs[2]);
@@ -448,7 +448,7 @@ class Material {
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
-			curshader.add_function(MaterialFunctions.str_tex_magic);
+			curshader.add_function(ShaderFunctions.str_tex_magic);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_magic($co * $scale * 4.0)';
@@ -456,7 +456,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_MUSGRAVE") {
-			curshader.add_function(MaterialFunctions.str_tex_musgrave);
+			curshader.add_function(ShaderFunctions.str_tex_musgrave);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = to_vec3('tex_musgrave_f($co * $scale * 0.5)');
@@ -464,7 +464,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
-			curshader.add_function(MaterialFunctions.str_tex_noise);
+			curshader.add_function(ShaderFunctions.str_tex_noise);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'vec3(tex_noise($co * $scale), tex_noise($co * $scale + 0.33), tex_noise($co * $scale + 0.66))';
@@ -472,7 +472,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
-			curshader.add_function(MaterialFunctions.str_tex_voronoi);
+			curshader.add_function(ShaderFunctions.str_tex_voronoi);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
@@ -490,7 +490,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
-			curshader.add_function(MaterialFunctions.str_tex_wave);
+			curshader.add_function(ShaderFunctions.str_tex_wave);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = to_vec3('tex_wave_f($co * $scale)');
@@ -501,7 +501,7 @@ class Material {
 			var out_col = parse_vector_input(node.inputs[0]);
 			var bright = parse_value_input(node.inputs[1]);
 			var contr = parse_value_input(node.inputs[2]);
-			curshader.add_function(MaterialFunctions.str_brightcontrast);
+			curshader.add_function(ShaderFunctions.str_brightcontrast);
 			return 'brightcontrast($out_col, $bright, $contr)';
 		}
 		else if (node.type == "GAMMA") {
@@ -535,7 +535,7 @@ class Material {
 			return "res1";
 		}
 		else if (node.type == "HUE_SAT") {
-			curshader.add_function(MaterialFunctions.str_hue_sat);
+			curshader.add_function(ShaderFunctions.str_hue_sat);
 			var hue = parse_value_input(node.inputs[0]);
 			var sat = parse_value_input(node.inputs[1]);
 			var val = parse_value_input(node.inputs[2]);
@@ -603,19 +603,19 @@ class Material {
 				out_col = "(" + to_vec3('(1.0 - $fac_var) * $col1 + $fac_var * $col1 / $col2') + ")";
 			}
 			else if (blend == "HUE") {
-				curshader.add_function(MaterialFunctions.str_hue_sat);
+				curshader.add_function(ShaderFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col1).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == "SATURATION") {
-				curshader.add_function(MaterialFunctions.str_hue_sat);
+				curshader.add_function(ShaderFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == "COLOR") {
-				curshader.add_function(MaterialFunctions.str_hue_sat);
+				curshader.add_function(ShaderFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col2).r, rgb_to_hsv($col2).g, rgb_to_hsv($col1).b)), $fac_var)';
 			}
 			else if (blend == "VALUE") {
-				curshader.add_function(MaterialFunctions.str_hue_sat);
+				curshader.add_function(ShaderFunctions.str_hue_sat);
 				out_col = 'mix($col1, hsv_to_rgb(vec3(rgb_to_hsv($col1).r, rgb_to_hsv($col1).g, rgb_to_hsv($col2).b)), $fac_var)';
 			}
 			if (use_clamp) return 'clamp($out_col, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0))';
@@ -685,7 +685,7 @@ class Material {
 			return '(sqrt(vec3($vc0, $vc1, $vc2) * vec3($vc3a, $vc3b, $vc3c)) * $fac)';
 		}
 		else if (node.type == "COMBHSV") {
-			curshader.add_function(MaterialFunctions.str_hue_sat);
+			curshader.add_function(ShaderFunctions.str_hue_sat);
 			var h = parse_value_input(node.inputs[0]);
 			var s = parse_value_input(node.inputs[1]);
 			var v = parse_value_input(node.inputs[2]);
@@ -698,9 +698,9 @@ class Material {
 			return 'vec3($r, $g, $b)';
 		}
 		else if (node.type == "WAVELENGTH") {
-			curshader.add_function(MaterialFunctions.str_wavelength_to_rgb);
+			curshader.add_function(ShaderFunctions.str_wavelength_to_rgb);
 			var wl = parse_value_input(node.inputs[0]);
-			curshader.add_function(MaterialFunctions.str_wavelength_to_rgb);
+			curshader.add_function(ShaderFunctions.str_wavelength_to_rgb);
 			return 'wavelength_to_rgb(($wl - 450.0) / 150.0)';
 		}
 		else if (node.type == "CAMERA") {
@@ -843,7 +843,7 @@ class Material {
 			if (!curshader.invTBN) {
 				curshader.invTBN = true;
 				curshader.nAttr = true;
-				curshader.add_function(MaterialFunctions.str_cotangentFrame);
+				curshader.add_function(ShaderFunctions.str_cotangentFrame);
 				curshader.write('mat3 invTBN = transpose(cotangentFrame(nAttr, -nAttr, texCoord));');
 			}
 			res = '(normalize(mul($res, invTBN)) * 0.5 + 0.5)';
@@ -950,7 +950,7 @@ class Material {
 			frag.write('texn.y = -texn.y;');
 			if (!cotangentFrameWritten) {
 				cotangentFrameWritten = true;
-				frag.add_function(MaterialFunctions.str_cotangentFrame);
+				frag.add_function(ShaderFunctions.str_cotangentFrame);
 			}
 			frag.n = true;
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -1113,7 +1113,7 @@ class Material {
 			return vec1(node.outputs[0].default_value);
 		}
 		else if (node.type == "TEX_BRICK") {
-			curshader.add_function(MaterialFunctions.str_tex_brick);
+			curshader.add_function(ShaderFunctions.str_tex_brick);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[4]);
 			var res = 'tex_brick_f($co * $scale)';
@@ -1121,7 +1121,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
-			curshader.add_function(MaterialFunctions.str_tex_checker);
+			curshader.add_function(ShaderFunctions.str_tex_checker);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[3]);
 			var res = 'tex_checker_f($co, $scale)';
@@ -1153,7 +1153,7 @@ class Material {
 			}
 		}
 		else if (node.type == "TEX_MAGIC") {
-			curshader.add_function(MaterialFunctions.str_tex_magic);
+			curshader.add_function(ShaderFunctions.str_tex_magic);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_magic_f($co * $scale * 4.0)';
@@ -1161,7 +1161,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_MUSGRAVE") {
-			curshader.add_function(MaterialFunctions.str_tex_musgrave);
+			curshader.add_function(ShaderFunctions.str_tex_musgrave);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_musgrave_f($co * $scale * 0.5)';
@@ -1169,7 +1169,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
-			curshader.add_function(MaterialFunctions.str_tex_noise);
+			curshader.add_function(ShaderFunctions.str_tex_noise);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_noise($co * $scale)';
@@ -1177,7 +1177,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
-			curshader.add_function(MaterialFunctions.str_tex_voronoi);
+			curshader.add_function(ShaderFunctions.str_tex_voronoi);
 			curshader.add_uniform("sampler2D snoise256", "$noise256.k");
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
@@ -1195,7 +1195,7 @@ class Material {
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
-			curshader.add_function(MaterialFunctions.str_tex_wave);
+			curshader.add_function(ShaderFunctions.str_tex_wave);
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_wave_f($co * $scale)';

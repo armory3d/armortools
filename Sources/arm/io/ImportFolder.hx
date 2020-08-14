@@ -9,8 +9,8 @@ import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.node.NodesMaterial;
-import arm.node.MaterialParser;
+import arm.shader.NodesMaterial;
+import arm.node.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.Enums;
 
@@ -120,7 +120,7 @@ class ImportFolder {
 			pos++;
 		}
 
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UISidebar.inst.hwnd1.redraws = 2;
 	}

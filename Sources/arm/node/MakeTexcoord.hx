@@ -1,12 +1,12 @@
 package arm.node;
 
 import arm.ui.UISidebar;
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
 import arm.Enums;
 
 class MakeTexcoord {
 
-	public static function run(vert: MaterialShader, frag: MaterialShader) {
+	public static function run(vert: NodeShader, frag: NodeShader) {
 
 		var fillLayer = Context.layer.material_mask != null;
 		var uvType = fillLayer ? Context.layer.uvType : Context.brushPaint;

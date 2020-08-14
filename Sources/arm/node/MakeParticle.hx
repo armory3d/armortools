@@ -1,12 +1,14 @@
 package arm.node;
 
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
+import arm.shader.NodeShaderContext;
+import arm.shader.NodeShaderData;
 
 class MakeParticle {
 
-	public static function run(data: MaterialShaderData): MaterialShaderContext {
+	public static function run(data: NodeShaderData): NodeShaderContext {
 		var context_id = "mesh";
-		var con_part:MaterialShaderContext = data.add_context({
+		var con_part:NodeShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always",

@@ -20,7 +20,7 @@ import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 import arm.ProjectFormat;
 
@@ -237,7 +237,7 @@ class Context {
 			var mats = cast(object, MeshObject).materials;
 			for (i in 0...mats.length) mats[i] = materialScene.data;
 		}
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		UISidebar.inst.hwnd.redraws = 2;
 	}
 
@@ -249,7 +249,7 @@ class Context {
 	public static function setMaterial(m: MaterialSlot) {
 		if (Project.materials.indexOf(m) == -1) return;
 		material = m;
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		UISidebar.inst.hwnd1.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
@@ -271,7 +271,7 @@ class Context {
 	public static function setBrush(b: BrushSlot) {
 		if (Project.brushes.indexOf(b) == -1) return;
 		brush = b;
-		MaterialParser.parseBrush();
+		MakeMaterial.parseBrush();
 		Context.parseBrushInputs();
 		UISidebar.inst.hwnd1.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
@@ -301,8 +301,8 @@ class Context {
 		if (current != null) current.end();
 
 		Layers.setObjectMask();
-		MaterialParser.parseMeshMaterial();
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parseMeshMaterial();
+		MakeMaterial.parsePaintMaterial();
 
 		if (current != null) current.begin(false);
 
@@ -312,8 +312,8 @@ class Context {
 
 	public static function selectTool(i: Int) {
 		tool = i;
-		MaterialParser.parsePaintMaterial();
-		MaterialParser.parseMeshMaterial();
+		MakeMaterial.parsePaintMaterial();
+		MakeMaterial.parseMeshMaterial();
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		ddirty = 3;
@@ -334,7 +334,7 @@ class Context {
 
 		if (tool == ToolParticle) {
 			ParticleUtil.initParticle();
-			MaterialParser.parseParticleMaterial();
+			MakeMaterial.parseParticleMaterial();
 		}
 	}
 

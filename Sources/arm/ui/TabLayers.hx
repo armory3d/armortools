@@ -5,7 +5,7 @@ import zui.Id;
 import iron.system.Time;
 import iron.system.Input;
 import arm.data.LayerSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 
 class TabLayers {
@@ -113,7 +113,7 @@ class TabLayers {
 
 				if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
 					l.visible = !l.visible;
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 				ui._x -= 2;
 				ui._y -= 3;
@@ -249,7 +249,7 @@ class TabLayers {
 									Context.setLayer(l);
 									History.applyMask();
 									l.applyMask();
-									MaterialParser.parseMeshMaterial();
+									MakeMaterial.parseMeshMaterial();
 									g.begin();
 									iron.App.removeRender(makeApply);
 								}
@@ -506,7 +506,7 @@ class TabLayers {
 								heightHandle.changed ||
 								emisHandle.changed ||
 								subsHandle.changed) {
-								MaterialParser.parseMeshMaterial();
+								MakeMaterial.parseMeshMaterial();
 								UIMenu.keepOpen = true;
 							}
 						}
@@ -543,7 +543,7 @@ class TabLayers {
 						Context.setLayer(l);
 						History.layerBlending();
 						l.blending = blendingHandle.position;
-						MaterialParser.parseMeshMaterial();
+						MakeMaterial.parseMeshMaterial();
 					}
 				}
 
@@ -571,7 +571,7 @@ class TabLayers {
 					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left, 16);
 					if (objectHandle.changed) {
 						Context.setLayer(l);
-						MaterialParser.parseMeshMaterial();
+						MakeMaterial.parseMeshMaterial();
 						if (l.material_mask != null) { // Fill layer
 							iron.App.notifyOnRender(l.clear);
 							function updateFillLayers(_) {
@@ -601,7 +601,7 @@ class TabLayers {
 						Context.setLayer(l);
 						if (ui.inputStarted) History.layerOpacity();
 						l.maskOpacity = layerOpacHandle.value;
-						MaterialParser.parseMeshMaterial();
+						MakeMaterial.parseMeshMaterial();
 					}
 
 					ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Res"), true);
@@ -639,7 +639,7 @@ class TabLayers {
 						if (angleHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);
-							MaterialParser.parsePaintMaterial();
+							MakeMaterial.parsePaintMaterial();
 							Layers.updateFillLayers();
 						}
 
@@ -649,7 +649,7 @@ class TabLayers {
 						if (uvTypeHandle.changed) {
 							Context.setMaterial(l.material_mask);
 							Context.setLayer(l);
-							MaterialParser.parsePaintMaterial();
+							MakeMaterial.parsePaintMaterial();
 							Layers.updateFillLayers();
 						}
 					}

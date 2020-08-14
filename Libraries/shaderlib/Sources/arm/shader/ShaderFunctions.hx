@@ -1,6 +1,6 @@
-package arm.node;
+package arm.shader;
 
-class MaterialFunctions {
+class ShaderFunctions {
 
 	public static var str_tex_checker = "
 vec3 tex_checker(const vec3 co, const vec3 col1, const vec3 col2, const float scale) {

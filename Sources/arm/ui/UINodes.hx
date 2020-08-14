@@ -7,9 +7,9 @@ import zui.Zui;
 import zui.Id;
 import zui.Nodes;
 import iron.system.Input;
-import arm.node.NodesMaterial;
+import arm.shader.NodesMaterial;
 import arm.node.NodesBrush;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Enums;
@@ -272,7 +272,7 @@ class UINodes {
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
 			if (canvasType == CanvasBrush) {
-				MaterialParser.parseBrush();
+				MakeMaterial.parseBrush();
 				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 				UISidebar.inst.hwnd1.redraws = 2;
@@ -285,7 +285,7 @@ class UINodes {
 			recompileMat = false;
 		}
 		else if (recompileMatFinal) {
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			if (Layers.isFillMaterial()) {
 				RenderUtil.makeMaterialPreview();
 			}

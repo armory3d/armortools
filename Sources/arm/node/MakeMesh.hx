@@ -1,14 +1,18 @@
 package arm.node;
 
 import arm.ui.UISidebar;
-import arm.node.MaterialShader;
+import arm.shader.MaterialParser;
+import arm.shader.NodeShader;
+import arm.shader.NodeShaderContext;
+import arm.shader.NodeShaderData;
+import arm.shader.ShaderFunctions;
 import arm.Enums;
 
 class MakeMesh {
 
-	public static function run(data: MaterialShaderData): MaterialShaderContext {
+	public static function run(data: NodeShaderData): NodeShaderContext {
 		var context_id = "mesh";
-		var con_mesh: MaterialShaderContext = data.add_context({
+		var con_mesh: NodeShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: "less",
@@ -31,8 +35,8 @@ class MakeMesh {
 
 		// Height
 		// TODO: can cause TAA issues
-		if (MaterialBuilder.heightUsed) {
-			var displaceStrength = MaterialBuilder.getDisplaceStrength();
+		if (MakeMaterial.heightUsed) {
+			var displaceStrength = MakeMaterial.getDisplaceStrength();
 			vert.n = true;
 			vert.write('float height = 0.0;');
 			var numLayers = 0;
@@ -53,7 +57,7 @@ class MakeMesh {
 
 		vert.write('gl_Position = mul(vec4(wposition.xyz, 1.0), VP);');
 		vert.write('texCoord = tex;');
-		if (MaterialBuilder.heightUsed) {
+		if (MakeMaterial.heightUsed) {
 			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
 			vert.write('prevwvpposition = mul(mul(vec4(wposition, 1.0), invW), prevWVP);');
 		}
@@ -64,7 +68,7 @@ class MakeMesh {
 		frag.add_out('vec4 fragColor[3]');
 		frag.n = true;
 
-		frag.add_function(MaterialFunctions.str_packFloatInt16);
+		frag.add_function(ShaderFunctions.str_packFloatInt16);
 
 		if (Context.tool == ToolColorId) {
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
@@ -73,7 +77,7 @@ class MakeMesh {
 			frag.write('fragColor[1] = vec4(idcol.rgb, 1.0);'); // occ
 		}
 		else {
-			frag.add_function(MaterialFunctions.str_octahedronWrap);
+			frag.add_function(ShaderFunctions.str_octahedronWrap);
 
 			frag.write('vec3 basecol;');
 			frag.write('float roughness;');
@@ -83,7 +87,7 @@ class MakeMesh {
 			frag.write('float matid = 0.0;');
 
 			frag.vVec = true;
-			frag.add_function(MaterialFunctions.str_cotangentFrame);
+			frag.add_function(ShaderFunctions.str_cotangentFrame);
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
@@ -118,11 +122,11 @@ class MakeMesh {
 					frag.write('float maskTexture = textureLodShared(texpaint_mask, texCoord, 0.0).r;');
 				}
 
-				if (l.paintNor || MaterialBuilder.emisUsed) {
+				if (l.paintNor || MakeMaterial.emisUsed) {
 					frag.add_shared_sampler('sampler2D texpaint_nor');
 					frag.write('vec4 texpaint_nor_sample = textureLodShared(texpaint_nor, texCoord, 0.0);');
 
-					if (MaterialBuilder.emisUsed) {
+					if (MakeMaterial.emisUsed) {
 						frag.write('matid = texpaint_nor_sample.a;');
 					}
 
@@ -137,7 +141,7 @@ class MakeMesh {
 					}
 				}
 
-				if ((l.paintHeight && MaterialBuilder.heightUsed) ||
+				if ((l.paintHeight && MakeMaterial.heightUsed) ||
 					l.paintOcc ||
 					l.paintRough ||
 					l.paintMet) {
@@ -146,8 +150,8 @@ class MakeMesh {
 				}
 
 				// Height
-				if (l.paintHeight && MaterialBuilder.heightUsed) {
-					var ds = MaterialBuilder.getDisplaceStrength() * 5;
+				if (l.paintHeight && MakeMaterial.heightUsed) {
+					var ds = MakeMaterial.getDisplaceStrength() * 5;
 					if (ds < 0.1) ds = 0.1;
 					else if (ds > 2.0) ds = 2.0;
 					frag.wposition = true;
@@ -275,15 +279,15 @@ class MakeMesh {
 					}
 
 					if (l.paintBase) {
-						frag.write('basecol = ' + MaterialBuilder.blendMode(frag, l.blending, 'basecol', 'col_tex0.rgb', 'factor0') + ';');
+						frag.write('basecol = ' + MakeMaterial.blendMode(frag, l.blending, 'basecol', 'col_tex0.rgb', 'factor0') + ';');
 					}
 
-					if (MaterialBuilder.emisUsed || l.paintNor) {
+					if (MakeMaterial.emisUsed || l.paintNor) {
 
 						frag.add_shared_sampler('sampler2D texpaint_nor' + id);
 						frag.write('col_nor0 = textureLodShared(texpaint_nor' + id + ', texCoord, 0.0);');
 
-						if (MaterialBuilder.emisUsed) {
+						if (MakeMaterial.emisUsed) {
 							frag.write('matid = col_nor0.a;');
 						}
 
@@ -352,7 +356,7 @@ class MakeMesh {
 					frag.add_uniform('vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					frag.write('vec3 wreflect = reflect(-vVec, wn);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
-					frag.add_function(MaterialFunctions.str_envMapEquirect);
+					frag.add_function(ShaderFunctions.str_envMapEquirect);
 					frag.write('vec4 envmapDataLocal = envmapData;'); // TODO: spirv workaround
 					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapDataLocal.x), envlod).rgb;');
 
@@ -362,7 +366,7 @@ class MakeMesh {
 					frag.add_uniform('vec3 lightArea3', '_lightArea3');
 					frag.add_uniform('sampler2D sltcMat', '_ltcMat');
 					frag.add_uniform('sampler2D sltcMag', '_ltcMag');
-					frag.add_function(MaterialFunctions.str_ltcEvaluate);
+					frag.add_function(ShaderFunctions.str_ltcEvaluate);
 					frag.add_uniform('vec3 lightPos', '_pointPosition');
 					frag.add_uniform('vec3 lightColor', '_pointColor');
 					// frag.write('float dotNL = max(dot(wn, normalize(lightPos - wposition)), 0.0);');
@@ -384,14 +388,14 @@ class MakeMesh {
 					frag.write('direct *= lightColor * (1.0 / (ldist * ldist));');
 
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
-					frag.add_function(MaterialFunctions.str_shIrradiance);
+					frag.add_function(ShaderFunctions.str_shIrradiance);
 					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(wn.x * envmapDataLocal.z - wn.y * envmapDataLocal.y, wn.x * envmapDataLocal.y + wn.y * envmapDataLocal.z, wn.z), shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
 					frag.write('indirect *= envmapDataLocal.w * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
 				}
 				else { // Deferred, Pathtraced
-					if (MaterialBuilder.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
+					if (MakeMaterial.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
 					frag.write('fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
@@ -449,7 +453,7 @@ class MakeMesh {
 		frag.write('vec2 posb = (prevwvpposition.xy / prevwvpposition.w) * 0.5 + 0.5;');
 		frag.write('fragColor[2] = vec4(posa - posb, texCoord.xy);');
 
-		Material.finalize(con_mesh);
+		MaterialParser.finalize(con_mesh);
 		con_mesh.data.shader_from_source = true;
 		con_mesh.data.vertex_shader = vert.get();
 		con_mesh.data.fragment_shader = frag.get();

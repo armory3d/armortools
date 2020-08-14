@@ -28,7 +28,7 @@ import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 
 class ImportArm {
@@ -273,7 +273,7 @@ class ImportArm {
 				initNodes(n.nodes);
 				Context.material = new MaterialSlot(m0, n);
 				Project.materials.push(Context.material);
-				MaterialParser.parsePaintMaterial();
+				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 
@@ -282,7 +282,7 @@ class ImportArm {
 				initNodes(n.nodes);
 				Context.brush = new BrushSlot(n);
 				Project.brushes.push(Context.brush);
-				MaterialParser.parseBrush();
+				MakeMaterial.parseBrush();
 				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 			}
@@ -347,7 +347,7 @@ class ImportArm {
 		function makeMaterialPreview(_) {
 			for (m in imported) {
 				Context.setMaterial(m);
-				MaterialParser.parsePaintMaterial();
+				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
 			iron.App.removeRender(makeMaterialPreview);

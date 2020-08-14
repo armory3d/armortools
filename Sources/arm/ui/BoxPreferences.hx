@@ -6,7 +6,7 @@ import zui.Id;
 import zui.Zui;
 import iron.data.Data;
 import iron.RenderPath;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.data.LayerSlot;
 import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
@@ -259,24 +259,24 @@ class BoxPreferences {
 
 				var brush3dHandle = Id.handle({selected: Config.raw.brush_3d});
 				Config.raw.brush_3d = ui.check(brush3dHandle, tr("3D Cursor"));
-				if (brush3dHandle.changed) MaterialParser.parsePaintMaterial();
+				if (brush3dHandle.changed) MakeMaterial.parsePaintMaterial();
 
 				ui.enabled = Config.raw.brush_3d;
 				var brushDepthRejectHandle = Id.handle({selected: Context.brushDepthReject});
 				Context.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
-				if (brushDepthRejectHandle.changed) MaterialParser.parsePaintMaterial();
+				if (brushDepthRejectHandle.changed) MakeMaterial.parsePaintMaterial();
 
 				ui.row([0.5, 0.5]);
 
 				var brushAngleRejectHandle = Id.handle({selected: Context.brushAngleReject});
 				Context.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
-				if (brushAngleRejectHandle.changed) MaterialParser.parsePaintMaterial();
+				if (brushAngleRejectHandle.changed) MakeMaterial.parsePaintMaterial();
 
 				if (!Context.brushAngleReject) ui.enabled = false;
 				var angleDotHandle = Id.handle({value: Context.brushAngleRejectDot});
 				Context.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
 				if (angleDotHandle.changed) {
-					MaterialParser.parsePaintMaterial();
+					MakeMaterial.parsePaintMaterial();
 				}
 				ui.enabled = true;
 			}
@@ -315,7 +315,7 @@ class BoxPreferences {
 					else {
 						RenderPath.active.commands = RenderPathDeferred.commands;
 					}
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 				#end
 
@@ -334,7 +334,7 @@ class BoxPreferences {
 					if (Context.hvxao.changed) {
 						Config.applyConfig();
 						#if arm_creator
-						MaterialParser.parseMeshMaterial();
+						MakeMaterial.parseMeshMaterial();
 						#end
 					}
 
@@ -379,7 +379,7 @@ class BoxPreferences {
 				Config.raw.displace_strength = ui.slider(dispHandle, tr("Displacement Strength"), 0.0, 10.0, true);
 				if (dispHandle.changed) {
 					Context.ddirty = 2;
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 
 				#if arm_creator
@@ -387,7 +387,7 @@ class BoxPreferences {
 				Context.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
 				if (h.changed) {
 					Context.ddirty = 2;
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 				#end
 			}

@@ -1,10 +1,10 @@
 package arm.node;
 
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
 
 class MakeBlur {
 
-	public static function run(vert: MaterialShader, frag: MaterialShader) {
+	public static function run(vert: NodeShader, frag: NodeShader) {
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
 		#else

@@ -7,7 +7,7 @@ import iron.system.Time;
 import iron.system.Input;
 import iron.object.MeshObject;
 import iron.data.Data;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
@@ -191,7 +191,7 @@ class TabMaterials {
 								heightHandle.changed ||
 								emisHandle.changed ||
 								subsHandle.changed) {
-								MaterialParser.parsePaintMaterial();
+								MakeMaterial.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
 						}, 14 + add);
@@ -218,7 +218,7 @@ class TabMaterials {
 	static function updateMaterial() {
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		if (decal) RenderUtil.makeDecalPreview();

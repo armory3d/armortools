@@ -9,7 +9,7 @@ import arm.format.JpgWriter;
 import arm.format.PngWriter;
 import arm.format.PngTools;
 import arm.render.RenderPathPaint;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
@@ -61,7 +61,7 @@ class ExportTexture {
 		var _tool = Context.tool;
 		UIHeader.inst.worktab.position = SpacePaint;
 		Context.tool = ToolFill;
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		var _paintObject = Context.paintObject;
 		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
 		planeo.visible = true;
@@ -71,7 +71,7 @@ class ExportTexture {
 		RenderPathPaint.commandsPaint();
 		RenderPathPaint.useLiveLayer(false);
 		Context.tool = _tool;
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 		Context.pdirty = 0;
 		UIHeader.inst.worktab.position = _space;
 		planeo.visible = false;

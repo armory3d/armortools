@@ -1,12 +1,13 @@
 package arm.node;
 
 import arm.ui.UISidebar;
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
+import arm.shader.ShaderFunctions;
 import arm.Enums;
 
 class MakeBrush {
 
-	public static function run(vert: MaterialShader, frag: MaterialShader) {
+	public static function run(vert: NodeShader, frag: NodeShader) {
 
 		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
 			frag.write('float dist = 0.0;');
@@ -25,7 +26,7 @@ class MakeBrush {
 			frag.wposition = true;
 
 			if (Context.brushAngleReject || Context.xray) {
-				frag.add_function(MaterialFunctions.str_octahedronWrap);
+				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');

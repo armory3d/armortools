@@ -1,19 +1,22 @@
 package arm.node;
 
 import arm.ui.UISidebar;
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
+import arm.shader.NodeShaderContext;
+import arm.shader.NodeShaderData;
+import arm.shader.ShaderFunctions;
 import arm.Enums;
 
 class MakeBake {
 
-	public static function run(con: MaterialShaderContext, vert: MaterialShader, frag: MaterialShader) {
+	public static function run(con: NodeShaderContext, vert: NodeShader, frag: NodeShader) {
 		if (Context.bakeType == BakeAO) { // Voxel
 			#if rp_voxelao
 			// Apply normal channel
 			frag.wposition = true;
 			frag.n = true;
 			frag.vVec = true;
-			frag.add_function(MaterialFunctions.str_cotangentFrame);
+			frag.add_function(ShaderFunctions.str_cotangentFrame);
 			#if kha_direct3d11
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
@@ -23,10 +26,10 @@ class MakeBake {
 			frag.write('n.y = -n.y;');
 			frag.write('n = normalize(mul(n, TBN));');
 
-			frag.write(MaterialBuilder.voxelgiHalfExtents());
+			frag.write(MakeMaterial.voxelgiHalfExtents());
 			frag.write('vec3 voxpos = wposition / voxelgiHalfExtents;');
 			frag.add_uniform('sampler3D voxels');
-			frag.add_function(MaterialFunctions.str_traceAO);
+			frag.add_function(ShaderFunctions.str_traceAO);
 			frag.n = true;
 			var strength = Context.bakeAoStrength;
 			var radius = Context.bakeAoRadius;
@@ -59,7 +62,7 @@ class MakeBake {
 			frag.n = true;
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo'); // Baked high-poly normals
 			frag.write('vec3 n0 = textureLod(texpaint_undo, texCoord, 0.0).rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
-			frag.add_function(MaterialFunctions.str_cotangentFrame);
+			frag.add_function(ShaderFunctions.str_cotangentFrame);
 			frag.write('mat3 invTBN = transpose(cotangentFrame(n, n, texCoord));');
 			frag.write('vec3 res = normalize(mul(n0, invTBN)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
 			frag.write('fragColor[0] = vec4(res, 1.0);');
@@ -124,7 +127,7 @@ class MakeBake {
 		}
 	}
 
-	public static function positionAndNormal(vert: MaterialShader, frag: MaterialShader) {
+	public static function positionAndNormal(vert: NodeShader, frag: NodeShader) {
 		vert.add_out('vec3 position');
 		vert.add_out('vec3 normal');
 		vert.add_uniform('mat4 W', '_worldMatrix');
@@ -139,7 +142,7 @@ class MakeBake {
 		frag.write('fragColor[1] = vec4(normal, 1.0);');
 	}
 
-	public static function setColorWrites(con_paint: MaterialShaderContext) {
+	public static function setColorWrites(con_paint: NodeShaderContext) {
 		// Bake into base color, disable other slots
 		con_paint.data.color_writes_red[1] = false;
 		con_paint.data.color_writes_green[1] = false;

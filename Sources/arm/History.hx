@@ -7,7 +7,7 @@ import arm.ui.UIFiles;
 import arm.ui.UINodes;
 import arm.ui.UIToolbar;
 import arm.data.LayerSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 
 class History {
 
@@ -126,14 +126,14 @@ class History {
 				var t = Context.layer.maskOpacity;
 				Context.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
-				MaterialParser.parseMeshMaterial();
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Layer Blending")) {
 				Context.setLayer(Project.layers[step.layer]);
 				var t = Context.layer.blending;
 				Context.layer.blending = step.layer_blending;
 				step.layer_blending = t;
-				MaterialParser.parseMeshMaterial();
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);
@@ -226,14 +226,14 @@ class History {
 				var t = Context.layer.maskOpacity;
 				Context.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
-				MaterialParser.parseMeshMaterial();
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Layer Blending")) {
 				Context.setLayer(Project.layers[step.layer]);
 				var t = Context.layer.blending;
 				Context.layer.blending = step.layer_blending;
 				step.layer_blending = t;
-				MaterialParser.parseMeshMaterial();
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);

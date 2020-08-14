@@ -15,7 +15,7 @@ import iron.system.Input;
 import iron.system.Time;
 import iron.RenderPath;
 import iron.Scene;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.util.ViewportUtil;
 import arm.util.UVUtil;
@@ -85,7 +85,7 @@ class UISidebar {
 			Project.brushes = [];
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
-			MaterialParser.parseBrush();
+			MakeMaterial.parseBrush();
 			Context.parseBrushInputs();
 		}
 
@@ -240,7 +240,7 @@ class UISidebar {
 						Context.brushAngle = Std.int(Context.brushAngle) % 360;
 						if (Context.brushAngle < 0) Context.brushAngle += 360;
 						Context.brushAngleHandle.value = Context.brushAngle;
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 					else {
 						Context.brushRadius += mouse.movementX / 150;

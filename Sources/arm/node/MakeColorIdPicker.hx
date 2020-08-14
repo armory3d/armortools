@@ -1,11 +1,11 @@
 package arm.node;
 
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
 import arm.Enums;
 
 class MakeColorIdPicker {
 
-	public static function run(vert: MaterialShader, frag: MaterialShader) {
+	public static function run(vert: NodeShader, frag: NodeShader) {
 		// Mangle vertices to form full screen triangle
 		vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 

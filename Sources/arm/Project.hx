@@ -22,7 +22,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
 import arm.data.MaterialSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;
@@ -185,8 +185,8 @@ class Project {
 			var raw: TMeshData = null;
 			if (Context.projectType == ModelSphere || Context.projectType == ModelTessellatedPlane) {
 				var mesh: Dynamic = Context.projectType == ModelSphere ?
-					new arm.format.proc.Sphere(1, 512, 256) :
-					new arm.format.proc.Plane(1, 1, 512, 512);
+					new arm.geom.Sphere(1, 512, 256) :
+					new arm.geom.Plane(1, 1, 512, 512);
 				raw = {
 					name: "Tessellated",
 					vertex_arrays: [
@@ -247,7 +247,7 @@ class Project {
 
 			History.reset();
 
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
 			for (a in assets) Data.deleteImage(a.file);
 			assets = [];
@@ -324,7 +324,7 @@ class Project {
 				});
 
 				// Parse brush
-				MaterialParser.parseBrush();
+				MakeMaterial.parseBrush();
 				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 				function makeBrushPreview(_) {

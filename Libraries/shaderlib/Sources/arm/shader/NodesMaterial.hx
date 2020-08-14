@@ -1,4 +1,4 @@
-package arm.node;
+package arm.shader;
 
 import zui.Nodes;
 import arm.Enums;

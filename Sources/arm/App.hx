@@ -34,7 +34,7 @@ import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.ConstData;
 import arm.plugin.Camera;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 import arm.ProjectFormat;
 import arm.Res;
@@ -383,7 +383,7 @@ class App {
 				else if (inLayers && isDragging) {
 					Project.layers.remove(dragLayer);
 					Project.layers.insert(TabLayers.dragDestination, dragLayer);
-					MaterialParser.parseMeshMaterial();
+					MakeMaterial.parseMeshMaterial();
 				}
 				dragLayer = null;
 			}
@@ -466,8 +466,8 @@ class App {
 		if (Context.frame == 2) {
 			RenderUtil.makeMaterialPreview();
 			UISidebar.inst.hwnd1.redraws = 2;
-			MaterialParser.parseMeshMaterial();
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parseMeshMaterial();
+			MakeMaterial.parsePaintMaterial();
 			Context.ddirty = 0;
 			History.reset();
 			if (History.undoLayers == null) {

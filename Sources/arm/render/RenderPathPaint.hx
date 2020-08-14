@@ -9,7 +9,7 @@ import iron.Scene;
 import arm.util.ViewportUtil;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 
 #if arm_painter
@@ -576,7 +576,7 @@ class RenderPathPaint {
 						baking = true;
 						var _bakeType = Context.bakeType;
 						Context.bakeType = Context.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 						var _paintObject = Context.paintObject;
 						var highPoly = Project.paintObjects[Context.bakeHighPoly];
 						var _visible = highPoly.visible;
@@ -590,7 +590,7 @@ class RenderPathPaint {
 
 						function _renderFinal(_) {
 							Context.bakeType = _bakeType;
-							MaterialParser.parsePaintMaterial();
+							MakeMaterial.parsePaintMaterial();
 							Context.pdirty = 1;
 							commandsPaint();
 							Context.pdirty = 0;
@@ -599,7 +599,7 @@ class RenderPathPaint {
 						}
 						function _renderDeriv(_) {
 							Context.bakeType = BakeHeight;
-							MaterialParser.parsePaintMaterial();
+							MakeMaterial.parsePaintMaterial();
 							Context.pdirty = 1;
 							commandsPaint();
 							Context.pdirty = 0;

@@ -5,7 +5,7 @@ import zui.Zui;
 import zui.Id;
 import zui.Ext;
 import iron.RenderPath;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 
@@ -78,8 +78,8 @@ class UIMenubar {
 					Layers.updateFillLayers();
 				}
 
-				MaterialParser.parsePaintMaterial();
-				MaterialParser.parseMeshMaterial();
+				MakeMaterial.parsePaintMaterial();
+				MakeMaterial.parseMeshMaterial();
 				Context.mainObject().skip_context = null;
 			}
 		}

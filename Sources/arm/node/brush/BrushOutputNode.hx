@@ -52,7 +52,7 @@ class BrushOutputNode extends LogicNode {
 
 		if (lastMask != Context.brushMaskImage ||
 			lastStencil != Context.brushStencilImage) {
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 		}
 
 		Context.brushDirectional = Directional;

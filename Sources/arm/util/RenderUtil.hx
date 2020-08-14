@@ -14,7 +14,7 @@ import arm.ui.UIHeader;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathDeferred;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.io.ImportFont;
 import arm.Enums;
 
@@ -67,7 +67,7 @@ class RenderUtil {
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		MaterialParser.parseMeshPreviewMaterial();
+		MakeMaterial.parseMeshPreviewMaterial();
 		var _commands = RenderPath.active.commands;
 		RenderPath.active.commands = RenderPathPreview.commandsPreview;
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
@@ -90,7 +90,7 @@ class RenderUtil {
 		light.data.raw.strength = savedLight;
 		probe.raw.strength = savedProbe;
 		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
-		MaterialParser.parseMeshMaterial();
+		MakeMaterial.parseMeshMaterial();
 		Context.ddirty = 0;
 	}
 
@@ -130,7 +130,7 @@ class RenderUtil {
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		MaterialParser.parseMeshPreviewMaterial();
+		MakeMaterial.parseMeshPreviewMaterial();
 		var _commands = RenderPath.active.commands;
 		RenderPath.active.commands = RenderPathPreview.commandsDecal;
 		RenderPath.active.renderFrame(RenderPath.active.frameG);
@@ -154,7 +154,7 @@ class RenderUtil {
 		light.visible = true;
 		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 
-		MaterialParser.parseMeshMaterial();
+		MakeMaterial.parseMeshMaterial();
 		Context.ddirty = 0;
 
 		if (current != null) current.begin(false);
@@ -259,7 +259,7 @@ class RenderUtil {
 		// 	if (scons[i].raw.name == "paint") {
 		// 		_si = i;
 		// 		_scon = scons[i];
-		// 		scons[i] = MaterialParser.defaultScon;
+		// 		scons[i] = MakeMaterial.defaultScon;
 		// 		break;
 		// 	}
 		// }
@@ -267,13 +267,13 @@ class RenderUtil {
 		// 	if (mcons[i].raw.name == "paint") {
 		// 		_mi = i;
 		// 		_mcon = mcons[i];
-		// 		mcons[i] = MaterialParser.defaultMcon;
+		// 		mcons[i] = MakeMaterial.defaultMcon;
 		// 		break;
 		// 	}
 		// }
 		var _material = Context.material;
 		Context.material = new arm.data.MaterialSlot();
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 
 		RenderPathPaint.useLiveLayer(true);
 
@@ -361,7 +361,7 @@ class RenderUtil {
 		// mcons[_mi] = _mcon;
 		Context.material = _material;
 		function _parse(_) {
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			iron.App.removeRender(_parse);
 		}
 		iron.App.notifyOnRender(_parse);

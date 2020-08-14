@@ -322,7 +322,7 @@ class RenderPathDeferred {
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
 				#if arm_painter
-				if (arm.node.MaterialBuilder.heightUsed) {
+				if (arm.node.MakeMaterial.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}

@@ -13,7 +13,7 @@ import iron.RenderPath;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
 import arm.Enums;
@@ -409,7 +409,7 @@ class Layers {
 
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint();
@@ -438,7 +438,7 @@ class Layers {
 				setObjectMask();
 
 				if (first) {
-					MaterialParser.parsePaintMaterial();
+					MakeMaterial.parsePaintMaterial();
 					first = false;
 				}
 
@@ -479,7 +479,7 @@ class Layers {
 			Context.layer.clearLayer();
 		}
 
-		MaterialParser.parsePaintMaterial();
+		MakeMaterial.parsePaintMaterial();
 
 		for (i in 0...fills) {
 			RenderPathPaint.commandsPaint();

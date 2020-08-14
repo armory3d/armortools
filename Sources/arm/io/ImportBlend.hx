@@ -10,8 +10,8 @@ import arm.format.BlendParser;
 import zui.Nodes;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
-import arm.node.NodesMaterial;
-import arm.node.MaterialParser;
+import arm.shader.NodesMaterial;
+import arm.node.MakeMaterial;
 import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
@@ -495,7 +495,7 @@ class ImportBlend {
 			function makeMaterialPreview(_) {
 				for (m in imported) {
 					Context.setMaterial(m);
-					MaterialParser.parsePaintMaterial();
+					MakeMaterial.parsePaintMaterial();
 					RenderUtil.makeMaterialPreview();
 				}
 				iron.App.removeRender(makeMaterialPreview);

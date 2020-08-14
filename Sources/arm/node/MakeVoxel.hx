@@ -24,7 +24,7 @@ class MakeVoxel {
 		// }
 		// #end
 
-		var ds = MaterialBuilder.getDisplaceStrength();
+		var ds = MakeMaterial.getDisplaceStrength();
 		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
 		#if kha_direct3d11
 		"#define vec3 float3
@@ -36,7 +36,7 @@ class MakeVoxel {
 		struct SPIRV_Cross_Output { float4 svpos : SV_POSITION; };
 		SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input) {
 			SPIRV_Cross_Output stage_output;
-			" + MaterialBuilder.voxelgiHalfExtents() + "
+			" + MakeMaterial.voxelgiHalfExtents() + "
 			stage_output.svpos.xyz = mul(float4(stage_input.pos.xyz, 1.0), W).xyz / voxelgiHalfExtents.xxx;
 			float3 wnormal = normalize(mul(float3(stage_input.nor.xy, stage_input.pos.w), N));
 			float height = texpaint_pack.SampleLevel(_texpaint_pack_sampler, stage_input.tex, 0.0).a;
@@ -54,7 +54,7 @@ class MakeVoxel {
 		uniform mat3 N;
 		uniform sampler2D texpaint_pack;
 		void main() {
-			" + MaterialBuilder.voxelgiHalfExtents() + "
+			" + MakeMaterial.voxelgiHalfExtents() + "
 			voxpositionGeom = vec3(W * vec4(pos.xyz, 1.0)) / voxelgiHalfExtents;
 			vec3 wnormal = normalize(N * vec3(nor.xy, pos.w));
 			float height = textureLod(texpaint_pack, tex, 0.0).a;

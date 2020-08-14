@@ -4,7 +4,7 @@ import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportFont;
@@ -73,7 +73,7 @@ class UIHeader {
 				Context.pickerSelectMaterial = ui.check(Id.handle({selected: Context.pickerSelectMaterial}), tr("Select Material"));
 				ui.combo(Context.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
 				if (Context.pickerMaskHandle.changed) {
-					MaterialParser.parsePaintMaterial();
+					MakeMaterial.parsePaintMaterial();
 				}
 			}
 			else if (Context.tool == ToolBake) {
@@ -136,7 +136,7 @@ class UIHeader {
 					Context.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
 				}
 				if (ui.changed) {
-					MaterialParser.parsePaintMaterial();
+					MakeMaterial.parsePaintMaterial();
 				}
 			}
 			else if (Context.tool == ToolBrush ||
@@ -172,7 +172,7 @@ class UIHeader {
 
 					Context.brushAngle = ui.slider(Context.brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
 					if (Context.brushAngleHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 				}
 
@@ -205,7 +205,7 @@ class UIHeader {
 						tr("Value"),
 					], tr("Blending"));
 					if (brushBlendingHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 				}
 
@@ -213,7 +213,7 @@ class UIHeader {
 					var paintHandle = Id.handle();
 					Context.brushPaint = ui.combo(paintHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 					if (paintHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 				}
 				if (Context.tool == ToolText) {
@@ -238,8 +238,8 @@ class UIHeader {
 							ui.g.begin(false);
 							// wireframeHandle.selected = drawWireframe = true;
 						}
-						MaterialParser.parsePaintMaterial();
-						MaterialParser.parseMeshMaterial();
+						MakeMaterial.parsePaintMaterial();
+						MakeMaterial.parseMeshMaterial();
 					}
 				}
 				else {
@@ -250,7 +250,7 @@ class UIHeader {
 					var xrayHandle = Id.handle({selected: Context.xray});
 					Context.xray = ui.check(xrayHandle, tr("X-Ray"));
 					if (xrayHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 
 					var symXHandle = Id.handle({selected: false});
@@ -263,7 +263,7 @@ class UIHeader {
 					Context.symY = ui.check(symYHandle, "Y");
 					Context.symZ = ui.check(symZHandle, "Z");
 					if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
-						MaterialParser.parsePaintMaterial();
+						MakeMaterial.parsePaintMaterial();
 					}
 
 					ui._w = _w;

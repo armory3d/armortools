@@ -3,16 +3,20 @@ package arm.node;
 import iron.data.SceneFormat;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
-import arm.node.MaterialShader;
+import arm.shader.MaterialParser;
+import arm.shader.NodeShader;
+import arm.shader.NodeShaderContext;
+import arm.shader.NodeShaderData;
+import arm.shader.ShaderFunctions;
 import arm.Enums;
 
 class MakePaint {
 
-	public static function run(data: MaterialShaderData, matcon: TMaterialContext): MaterialShaderContext {
+	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
 		var layered = Context.layer != Project.layers[0];
 		var eraser = Context.tool == ToolEraser;
 		var context_id = "paint";
-		var con_paint:MaterialShaderContext = data.add_context({
+		var con_paint:NodeShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
 			compare_mode: "always", // TODO: align texcoords winding order
@@ -120,7 +124,7 @@ class MakePaint {
 			if (Config.raw.brush_3d && !Context.brushDepthReject) depthReject = false;
 
 			// TODO: sp.z needs to take height channel into account
-			if (Config.raw.brush_3d && !decal && MaterialBuilder.heightUsed) depthReject = false;
+			if (Config.raw.brush_3d && !decal && MakeMaterial.heightUsed) depthReject = false;
 
 			if (Context.symX || Context.symY || Context.symZ) depthReject = false;
 
@@ -138,7 +142,7 @@ class MakePaint {
 			frag.write('float dist = 0.0;');
 			var angleFill = Context.tool == ToolFill && Context.fillTypeHandle.position == FillAngle;
 			if (angleFill) {
-				frag.add_function(MaterialFunctions.str_octahedronWrap);
+				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				frag.write('vec3 wn;');
@@ -179,22 +183,22 @@ class MakePaint {
 			}
 		}
 		else {
-			Material.parse_emission = Context.material.paintEmis;
-			Material.parse_subsurface = Context.material.paintSubs;
-			Material.parse_height = Context.material.paintHeight;
-			Material.parse_height_as_channel = true;
+			MaterialParser.parse_emission = Context.material.paintEmis;
+			MaterialParser.parse_subsurface = Context.material.paintSubs;
+			MaterialParser.parse_height = Context.material.paintHeight;
+			MaterialParser.parse_height_as_channel = true;
 			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : Context.brushPaint;
-			Material.triplanar = uvType == UVTriplanar && !decal;
-			var sout = Material.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon);
-			Material.parse_emission = false;
-			Material.parse_subsurface = false;
-			Material.parse_height_as_channel = false;
-			Material.parse_height = false;
+			MaterialParser.triplanar = uvType == UVTriplanar && !decal;
+			var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon);
+			MaterialParser.parse_emission = false;
+			MaterialParser.parse_subsurface = false;
+			MaterialParser.parse_height_as_channel = false;
+			MaterialParser.parse_height = false;
 			var base = sout.out_basecol;
 			var rough = sout.out_roughness;
 			var met = sout.out_metallic;
 			var occ = sout.out_occlusion;
-			var nortan = Material.out_normaltan;
+			var nortan = MaterialParser.out_normaltan;
 			var height = sout.out_height;
 			var opac = sout.out_opacity;
 			var emis = sout.out_emission;
@@ -216,13 +220,13 @@ class MakePaint {
 			if (Context.material.paintSubs) {
 				frag.write('float subs = $subs;');
 			}
-			if (height != "0" && !MaterialBuilder.heightUsed) {
-				MaterialBuilder.heightUsed = true;
+			if (height != "0" && !MakeMaterial.heightUsed) {
+				MakeMaterial.heightUsed = true;
 				// Height used for the first time, also rebuild vertex shader
 				return run(data, matcon);
 			}
-			if (emis != "0") MaterialBuilder.emisUsed = true;
-			if (subs != "0") MaterialBuilder.subsUsed = true;
+			if (emis != "0") MakeMaterial.emisUsed = true;
+			if (subs != "0") MakeMaterial.subsUsed = true;
 		}
 
 		if (Context.brushMaskImage != null && Context.tool == ToolDecal) {
@@ -309,7 +313,7 @@ class MakePaint {
 		if (Context.pickerMaskHandle.position == MaskMaterial) {
 			matid = Context.materialIdPicked / 255; // Keep existing material id in place when mask is set
 		}
-		var matidString = Material.vec1(matid);
+		var matidString = MaterialParser.vec1(matid);
 		frag.write('float matid = $matidString;');
 
 		// TODO: Use emission/subsurface matid
@@ -331,16 +335,16 @@ class MakePaint {
 				frag.write('matid = 0.0;');
 			}
 			else if (decal || Context.brushMaskImage != null) {
-				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
+				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 			}
 			else {
-				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
+				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
 
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
 
 			var height = "0.0";
-			if (Context.material.paintHeight && MaterialBuilder.heightUsed) {
+			if (Context.material.paintHeight && MakeMaterial.heightUsed) {
 				height = "height";
 			}
 
@@ -365,12 +369,12 @@ class MakePaint {
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
 				// #if kha_direct3d12
-				// frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
+				// frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
 				// #else
-				frag.write('fragColor[0] = vec4(' + MaterialBuilder.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
+				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 				// #end
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
-				if (Context.material.paintHeight && MaterialBuilder.heightUsed) {
+				if (Context.material.paintHeight && MakeMaterial.heightUsed) {
 					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
 				}
 				else {
@@ -424,8 +428,8 @@ class MakePaint {
 			MakeBake.run(con_paint, vert, frag);
 		}
 
-		Material.finalize(con_paint);
-		Material.triplanar = false;
+		MaterialParser.finalize(con_paint);
+		MaterialParser.triplanar = false;
 		con_paint.data.shader_from_source = true;
 		con_paint.data.vertex_shader = vert.get();
 		con_paint.data.fragment_shader = frag.get();

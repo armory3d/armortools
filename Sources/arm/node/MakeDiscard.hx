@@ -1,11 +1,11 @@
 package arm.node;
 
 import arm.ui.UISidebar;
-import arm.node.MaterialShader;
+import arm.shader.NodeShader;
 
 class MakeDiscard {
 
-	public static function colorId(vert: MaterialShader, frag: MaterialShader) {
+	public static function colorId(vert: NodeShader, frag: NodeShader) {
 		vert.add_out('vec2 texCoordPick');
 		vert.write('texCoordPick = subtex;');
 		frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
@@ -19,7 +19,7 @@ class MakeDiscard {
 		#end
 	}
 
-	public static function face(vert: MaterialShader, frag: MaterialShader) {
+	public static function face(vert: NodeShader, frag: NodeShader) {
 		vert.add_out('vec2 texCoordPick');
 		vert.write('texCoordPick = subtex;');
 		frag.add_uniform('sampler2D gbuffer2');
@@ -40,7 +40,7 @@ class MakeDiscard {
 		#end
 	}
 
-	public static function materialId(vert: MaterialShader, frag: MaterialShader) {
+	public static function materialId(vert: NodeShader, frag: NodeShader) {
 		frag.wvpposition = true;
 		frag.write('vec2 picker_sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)

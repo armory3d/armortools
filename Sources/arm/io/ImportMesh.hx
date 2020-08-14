@@ -72,8 +72,8 @@ class ImportMesh {
 		}
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
-		arm.node.MaterialParser.parsePaintMaterial();
-		arm.node.MaterialParser.parseMeshMaterial();
+		arm.node.MakeMaterial.parsePaintMaterial();
+		arm.node.MakeMaterial.parseMeshMaterial();
 
 		UIView2D.inst.hwnd.redraws = 2;
 
