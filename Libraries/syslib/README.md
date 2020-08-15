@@ -1,3 +1,3 @@
 # syslib
 
-System library for Kromx.
+System library for armorcore.

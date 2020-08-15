@@ -14,4 +14,4 @@ jobs:
     - name: Get Node.js
       run: git clone https://github.com/Kode/nodejs_bin.git --depth 1
     - name: Compile
-      run: nodejs_bin/node-linux64 Kromx/make.js -g opengl
+      run: nodejs_bin/node-linux64 armorcore/make.js -g opengl

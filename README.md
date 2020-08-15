@@ -14,8 +14,8 @@ cd armorpaint
 ```
 ```bash
 # Windows
-node Kromx/make -g direct3d11
-cd Kromx
+node armorcore/make -g direct3d11
+cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11
@@ -25,8 +25,8 @@ node Kinc/make -g direct3d11
 ```
 ```bash
 # Linux
-node Kromx/make -g opengl
-cd Kromx
+node armorcore/make -g opengl
+cd armorcore
 node Kinc/make -g opengl --compiler clang --compile
 cd Deployment
 strip Krom
@@ -34,42 +34,42 @@ strip Krom
 ```
 ```bash
 # macOS
-node Kromx/make -g metal
-cp -a build/krom/ Kromx/Deployment
-cd Kromx
+node armorcore/make -g metal
+cp -a build/krom/ armorcore/Deployment
+cd armorcore
 git apply patch/metal_shared_sampler.diff --directory=Kinc
 node Kinc/make -g metal
 # Open generated Xcode project
-# Add `path/to/armorpaint/Kromx/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
+# Add `path/to/armorpaint/armorcore/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Build
 ```
 ```bash
 # Android - wip
-node Kromx/make android -g opengl --shaderversion 300
-cp -r build/krom/ Kromx/build/Krom/app/src/main/assets/
-cd Kromx
+node armorcore/make android -g opengl --shaderversion 300
+cp -r build/krom/ armorcore/build/Krom/app/src/main/assets/
+cd armorcore
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:
-# https://github.com/armory3d/Kromx/blob/master/kincfile.js#L68
+# https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68
 # Open generated Android Studio project
 # Build for device
 ```
 ```bash
 # iOS - wip
-node Kromx/make ios -g metal
-cp -a build/krom/ Kromx/Deployment
-cd Kromx
+node armorcore/make ios -g metal
+cp -a build/krom/ armorcore/Deployment
+cd armorcore
 git apply patch/metal_shared_sampler.diff --directory=Kinc
 git apply patch/ios_document_picker.diff --directory=Kinc
 node Kinc/make ios -g metal
 # Open generated Xcode project
-# Add `path/to/Kromx/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
+# Add `path/to/armorcore/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
 # Build for device
 ```
 ```bash
 # Windows DXR - wip
-node Kromx/make -g direct3d12
-cd Kromx
+node armorcore/make -g direct3d12
+cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 git apply patch/d3d12_raytrace.diff --directory=Kinc
@@ -81,8 +81,8 @@ node Kinc/make -g direct3d12 --raytrace dxr
 ```
 ```bash
 # Linux VKRT - wip
-node Kromx/make -g vulkan
-cd Kromx
+node armorcore/make -g vulkan
+cd armorcore
 git apply patch/vulkan_raytrace.diff --directory=Kinc
 node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
 cd Deployment
@@ -91,8 +91,8 @@ strip Krom
 ```
 ```bash
 # Windows VR - wip
-node Kromx/make -g direct3d11 --vr oculus
-cd Kromx
+node armorcore/make -g direct3d11 --vr oculus
+cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11 --vr oculus
