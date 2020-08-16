@@ -319,6 +319,10 @@ class App {
 	static function update() {
 		var mouse = Input.getMouse();
 
+		if (mouse.movementX != 0 || mouse.movementY != 0) {
+			Krom.setMouseCursor(0); // Arrow
+		}
+
 		if ((dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null) &&
 			(mouse.movementX != 0 || mouse.movementY != 0)) {
 			isDragging = true;
@@ -398,6 +402,7 @@ class App {
 				}
 				dragFile = null;
 			}
+			Krom.setMouseCursor(0); // Arrow
 			isDragging = false;
 		}
 

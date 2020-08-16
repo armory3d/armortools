@@ -840,8 +840,8 @@ class UISidebar {
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?
-			Krom.setMouseCursor(6) : // Horizontal
-			Krom.setMouseCursor(5);  // Vertical
+			Krom.setMouseCursor(3) : // Horizontal
+			Krom.setMouseCursor(4);  // Vertical
 
 		if (ui.inputStarted) {
 			borderStarted = side;
@@ -851,7 +851,7 @@ class UISidebar {
 	}
 
 	function onTextHover() {
-		Krom.setMouseCursor(3); // I-cursor
+		Krom.setMouseCursor(2); // I-cursor
 	}
 
 	public function tagUIRedraw() {
