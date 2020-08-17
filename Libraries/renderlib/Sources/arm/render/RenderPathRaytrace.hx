@@ -4,7 +4,7 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
-import arm.node.MaterialParser;
+import arm.node.MakeMaterial;
 import arm.Enums;
 
 #if (kha_direct3d12 || kha_vulkan)
@@ -147,7 +147,7 @@ class RenderPathRaytrace {
 
 			var _bakeType = Context.bakeType;
 			Context.bakeType = BakeInit;
-			MaterialParser.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial();
 			path.setTarget("baketex0");
 			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
 			for (i in 0...4) { // Jitter
@@ -156,7 +156,7 @@ class RenderPathRaytrace {
 			}
 			Context.bakeType = _bakeType;
 			function _render(_) {
-				MaterialParser.parsePaintMaterial();
+				MakeMaterial.parsePaintMaterial();
 				iron.App.removeRender(_render);
 			}
 			iron.App.notifyOnRender(_render);
