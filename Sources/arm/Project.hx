@@ -280,6 +280,13 @@ class Project {
 			Scene.active.world.probe.radianceMipmaps = Context.defaultRadianceMipmaps;
 			Scene.active.world.probe.irradiance = Context.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
+
+			if (Context.tool == ToolDecal || Context.tool == ToolText) {
+				if (Context.tool == ToolText) {
+					RenderUtil.makeTextPreview();
+				}
+				RenderUtil.makeDecalPreview();
+			}
 		});
 	}
 
