@@ -216,7 +216,7 @@ void miss(inout RayPayload payload) {
 	}
 	#endif
 
-	float2 tex_coord = equirect(WorldRayDirection(), constant_buffer.params.y);
+	float2 tex_coord = frac(equirect(WorldRayDirection(), constant_buffer.params.y));
 	uint2 size;
 	mytexture_env.GetDimensions(size.x, size.y);
 	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb * abs(constant_buffer.params.x);
