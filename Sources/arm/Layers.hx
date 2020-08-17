@@ -158,7 +158,7 @@ class Layers {
 		pipeCopyBGRA.inputLayout = [vs];
 		pipeCopyBGRA.compile();
 
-		#if (kha_metal || kha_vulkan)
+		#if (kha_metal || kha_vulkan || kha_direct3d12)
 		pipeCopy8 = new PipelineState();
 		pipeCopy8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
 		pipeCopy8.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
@@ -363,8 +363,8 @@ class Layers {
 
 		g.begin();
 
-		Context.layer.delete();
 		iron.App.removeRender(mergeSelectedLayer);
+		Context.layer.delete();
 		Context.setLayer(l0);
 		Context.layerPreviewDirty = true;
 	}
