@@ -86,7 +86,9 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			#if (kha_direct3d12 || kha_vulkan)
-			t.format = "RGBA64"; // Match raytrace_target format
+			// Match raytrace_target format
+			// Will cause "The render target format in slot 0 does not match that specified by the current pipeline state"
+			t.format = "RGBA64";
 			#else
 			t.format = "RGBA32";
 			#end
