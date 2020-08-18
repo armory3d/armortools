@@ -30,15 +30,12 @@ uniform vec4 envmapData; // angle, sin(angle), cos(angle), strength
 uniform vec4 shirr[7];
 uniform sampler2D senvmapBrdf;
 uniform sampler2D senvmapRadiance;
+#ifdef SPIRV
+uniform float envmapNumMipmaps;
+#else
 uniform int envmapNumMipmaps;
+#endif
 uniform sampler2D ssaotex;
-
-//!uniform vec3 lightArea0;
-//!uniform vec3 lightArea1;
-//!uniform vec3 lightArea2;
-//!uniform vec3 lightArea3;
-//!uniform sampler2D sltcMat;
-//!uniform sampler2D sltcMag;
 
 uniform vec2 cameraProj;
 uniform vec3 eye;
