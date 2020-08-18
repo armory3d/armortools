@@ -641,7 +641,9 @@ class UISidebar {
 			}
 		}
 		if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
-			Context.object = Context.paintObject;
+			if (UIHeader.inst.worktab.position != SpaceRender) {
+				Context.object = Context.paintObject;
+			}
 			TabMaterials.draw();
 			TabBrushes.draw();
 			TabParticles.draw();
