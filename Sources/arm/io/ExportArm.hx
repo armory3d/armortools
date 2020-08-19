@@ -82,7 +82,7 @@ class ExportArm {
 			layer_datas: ld,
 			assets: texture_files,
 			mesh_assets: mesh_files,
-			#if kha_metal
+			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
 			is_bgra: false
@@ -124,7 +124,7 @@ class ExportArm {
 		var raw = {
 			version: Main.version,
 			material_nodes: mnodes,
-			#if kha_metal
+			#if (kha_metal || kha_vulkan)
 			material_icons: [Lz4.encode(bgraSwap(m.image.getPixels()))],
 			#else
 			material_icons: [Lz4.encode(m.image.getPixels())],
@@ -137,7 +137,7 @@ class ExportArm {
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
-	#if kha_metal
+	#if (kha_metal || kha_vulkan)
 	static function bgraSwap(bytes: haxe.io.Bytes) {
 		for (i in 0...Std.int(bytes.length / 4)) {
 			var r = bytes.get(i * 4);

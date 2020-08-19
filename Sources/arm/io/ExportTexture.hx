@@ -273,19 +273,19 @@ class ExportTexture {
 			var writer = new PngWriter(out);
 			var data =
 				type == 1 ?
-					#if kha_metal
+					#if (kha_metal || kha_vulkan)
 					PngTools.build32BGR1(resX, resY, pixels) :
 					#else
 					PngTools.build32RGB1(resX, resY, pixels) :
 					#end
 				type == 2 ?
-					#if kha_metal
+					#if (kha_metal || kha_vulkan)
 					PngTools.build32RRR1(resX, resY, pixels, 2 - off) :
 					#else
 					PngTools.build32RRR1(resX, resY, pixels, off) :
 					#end
 
-					#if kha_metal
+					#if (kha_metal || kha_vulkan)
 					PngTools.build32BGRA(resX, resY, pixels);
 					#else
 					PngTools.build32RGBA(resX, resY, pixels);
@@ -302,7 +302,7 @@ class ExportTexture {
 					pixels: pixels
 				},
 				type,
-				#if kha_metal
+				#if (kha_metal || kha_vulkan)
 				2 - off, true
 				#else
 				off, false
