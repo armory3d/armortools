@@ -12,11 +12,13 @@ class MakeColorIdPicker {
 		frag.add_uniform('sampler2D gbuffer2');
 		frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 		frag.add_uniform('vec4 inp', '_inputBrush');
+		frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
+		frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inpLocal.x * gbufferSizeLocal.x, inpLocal.y * gbufferSizeLocal.y), 0).ba;');
 		#else
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inpLocal.x * gbufferSizeLocal.x, (1.0 - inpLocal.y) * gbufferSizeLocal.y), 0).ba;');
 		#end
 
 		if (Context.tool == ToolColorId) {
