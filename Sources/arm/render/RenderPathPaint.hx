@@ -553,12 +553,12 @@ class RenderPathPaint {
 		Context.ddirty--;
 		Context.rdirty--;
 
-		if (!paintEnabled())return;
+		if (!paintEnabled()) return;
 		Context.pdirty--;
 	}
 
 	public static function draw() {
-		if (!paintEnabled())return;
+		if (!paintEnabled()) return;
 
 		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
