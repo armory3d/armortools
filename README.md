@@ -84,6 +84,7 @@ node Kinc/make -g direct3d12 --raytrace dxr
 node armorcore/make -g vulkan
 cd armorcore
 git apply patch/vulkan_raytrace.diff --directory=Kinc
+git clone --recusive https://github.com/Kode/krafix Libraries/krafix
 node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
 cd Deployment
 strip Krom
