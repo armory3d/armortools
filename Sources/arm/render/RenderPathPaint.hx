@@ -419,7 +419,7 @@ class RenderPathPaint {
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(Layers.cursorInvVP, helpMat.self);
-		#if kha_metal
+		#if (kha_metal || kha_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
 		g.setVertexBuffer(geom.vertexBuffer);
