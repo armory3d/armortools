@@ -646,6 +646,7 @@ class UISidebar {
 			}
 			TabMaterials.draw();
 			TabBrushes.draw();
+			TabFilters.draw();
 			TabParticles.draw();
 
 			if (UIHeader.inst.worktab.position == SpaceRender) {

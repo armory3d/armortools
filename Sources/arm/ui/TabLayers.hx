@@ -8,6 +8,8 @@ import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 
+import arm.filter.FilterFrame;
+
 class TabLayers {
 
 	public static var dragDestination = 1;
@@ -291,6 +293,8 @@ class TabLayers {
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
+
+						if (ui.button(tr("Filter Effect"), Left)) l.filters.push(new FilterFrame());
 
 						if (ui.button(tr("Export"), Left)) BoxExport.showTextures();
 
