@@ -4,6 +4,7 @@ import haxe.Json;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.system.ArmPack;
+import arm.data.FontSlot;
 import arm.ui.UISidebar;
 import arm.format.Lz4;
 import arm.sys.Path;
@@ -38,6 +39,7 @@ class ExportArm {
 		for (p in Project.paintObjects) md.push(p.data.raw);
 
 		var texture_files = assetsToFiles(Project.assets);
+		var font_files = fontsToFiles(Project.fonts);
 		var mesh_files = meshesToFiles();
 
 		var bitsPos = App.bitsHandle.position;
@@ -81,6 +83,7 @@ class ExportArm {
 			mesh_datas: md,
 			layer_datas: ld,
 			assets: texture_files,
+			font_assets: font_files,
 			mesh_assets: mesh_files,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
@@ -208,5 +211,21 @@ class ExportArm {
 			}
 		}
 		return mesh_files;
+	}
+
+	static function fontsToFiles(fonts: Array<FontSlot>): Array<String> {
+		var font_files: Array<String> = [];
+		for (i in 1...fonts.length) {
+			var f = fonts[i];
+			// Convert font path from absolute to relative
+			var sameDrive = Project.filepath.charAt(0) == f.file.charAt(0);
+			if (sameDrive) {
+				font_files.push(Path.toRelative(Project.filepath, f.file));
+			}
+			else {
+				font_files.push(f.file);
+			}
+		}
+		return font_files;
 	}
 }
