@@ -9,7 +9,7 @@ class TabFilters {
 		var lay = Context.layer;
 
 		if (ui.tab(UISidebar.inst.htab1, tr("Filters"))) {
-			ui.beginSticky();
+			// ui.beginSticky();
 
 			if ( ui.button(tr("Add")) ) { lay.filters.push(new FilterFrame()); }
 
@@ -19,7 +19,7 @@ class TabFilters {
 				lay.filters[j].draw();
 			}
 
-			ui.endSticky();
+			// ui.endSticky();
 		}
 	}
 }

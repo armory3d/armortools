@@ -3,7 +3,6 @@ package arm.filter;
 // import arm.format.BlendParser.Handle;
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
-import zui.Id;
 
 class FilterFrame extends FilterBase
 {
