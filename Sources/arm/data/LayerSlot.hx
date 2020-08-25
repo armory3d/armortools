@@ -10,7 +10,7 @@ import arm.filter.FilterBase;
 
 class LayerSlot {
 
-	public var filters: Array<FilterBase>;
+	public var filters: Array<FilterBase> = [];
 	public var id = 0;
 	public var visible = true;
 	public var ext = "";

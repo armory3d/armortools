@@ -6,16 +6,19 @@ class TabFilters {
 
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
+		var lay = Context.layer;
 
 		if (ui.tab(UISidebar.inst.htab1, tr("Filters"))) {
 			ui.beginSticky();
-			if ( ui.button(tr("Add")) ) { Context.layer.filters.push(new FilterFrame()); }
 
-			for (i in 0...Context.layer.filters.length)
-			{
-				var j = Context.layer.filters.length - i - 1;
-				ui.button(tr("Add"));
+			if ( ui.button(tr("Add")) ) { lay.filters.push(new FilterFrame()); }
+
+			// draw all filters
+			for (i in 0...lay.filters.length) {
+				var j = lay.filters.length - i - 1;
+				lay.filters[j].draw();
 			}
+
 			ui.endSticky();
 		}
 	}
