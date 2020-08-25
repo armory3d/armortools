@@ -1,13 +1,13 @@
 package arm.filter;
 
-// import arm.format.BlendParser.Handle;
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
 
 class FilterFrame extends FilterBase
 {
     var filter: FilterBase = null;
-    var ch = new Handle();
+    var h = new Handle();  // panel handle
+    var ch = new Handle();  // combo handle
 
     public function new() {
         this.name = "None";
