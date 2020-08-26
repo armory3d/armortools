@@ -155,12 +155,17 @@ class MakePaint {
 			}
 		}
 
-		if (Context.colorIdPicked) {
-			MakeDiscard.colorId(vert, frag);
+		if (Context.colorIdPicked || faceFill) {
+			vert.add_out('vec2 texCoordPick');
+			vert.write('texCoordPick = subtex;');
+			if (Context.colorIdPicked) {
+				MakeDiscard.colorId(vert, frag);
+			}
+			if (faceFill) {
+				MakeDiscard.face(vert, frag);
+			}
 		}
-		else if (faceFill) { // TODO: allow to combine with colorid mask
-			MakeDiscard.face(vert, frag);
-		}
+
 		if (Context.pickerMaskHandle.position == MaskMaterial) {
 			MakeDiscard.materialId(vert, frag);
 		}
