@@ -24,9 +24,8 @@ class FilterFrame extends FilterBase
             ui.row([4/5, 1/5]);
 
             // header
-            // var ch = new Handle({position: FilterFactory.filterNames.indexOf(title)});
             ch.position = FilterFactory.filterNames.indexOf(title);
-            ui.combo(ch, FilterFactory.filterNames, tr("Type"), true, zui.Zui.Align.Right);
+            ui.combo(ch, FilterFactory.filterNames);
             if (ch.changed) {
                 filter = FilterFactory.CreateFilterByIndex(ch.position);
             }
