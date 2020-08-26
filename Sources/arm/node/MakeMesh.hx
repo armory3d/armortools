@@ -25,6 +25,7 @@ class MakeMesh {
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
 		frag.ins = vert.outs;
+		frag.add_function(ShaderFunctions.str_hue_sat);
 
 		vert.add_out('vec2 texCoord');
 		frag.wvpposition = true;
