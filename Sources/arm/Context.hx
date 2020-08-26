@@ -307,6 +307,7 @@ class Context {
 		if (current != null) current.begin(false);
 
 		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd1.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 

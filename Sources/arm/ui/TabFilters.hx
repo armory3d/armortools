@@ -15,8 +15,8 @@ class TabFilters {
 
 			// draw all filters
 			for (i in 0...lay.filters.length) {
-				var j = lay.filters.length - i - 1;
-				lay.filters[j].draw();
+				// var j = lay.filters.length - i - 1;
+				lay.filters[i].draw();
 			}
 
 			// ui.endSticky();

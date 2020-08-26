@@ -2,12 +2,15 @@ package arm.filter;
 
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
+import arm.Context;
+import arm.node.MakeMaterial;
 
 class FilterFrame extends FilterBase
 {
     var filter: FilterBase = null;
-    var h = new Handle();  // panel handle
+    public var h = new Handle();  // panel handle
     var ch = new Handle();  // combo handle
+    static var delCount = 0;
 
     public function new() {
         this.name = "None";
@@ -28,7 +31,7 @@ class FilterFrame extends FilterBase
                 filter = FilterFactory.CreateFilterByIndex(ch.position);
             }
 
-            ui.button(tr("Remove"));
+            if (ui.button(tr("Remove"))) delete();
             if (filter != null) filter.draw();
 
             ui.unindent(false);
@@ -39,6 +42,31 @@ class FilterFrame extends FilterBase
     override function getShaderText(color: String) : String {
         if (filter != null) return filter.getShaderText(color);
         return "";
+    }
+
+    public function delete() {
+        // delete self from layer
+
+        if (delCount != 0) {
+            delCount = 0;
+            return;
+        }
+
+        var lay = Context.layer;
+        var i = lay.filters.indexOf(this) + 1;
+        if (i <= 0) return;
+        if (lay.filters.length != i) {
+            for (j in i...lay.filters.length) {
+                var f = cast(lay.filters[j], FilterFrame);
+                if (!f.h.selected) continue;
+                delCount = 10;
+                break;
+            }
+        }
+
+        lay.filters.remove(this);
+		UISidebar.inst.hwnd1.redraws = 2;
+        MakeMaterial.parseMeshMaterial();
     }
 
 }
