@@ -2,6 +2,7 @@ package arm.filter;
 
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
+import arm.node.MakeMaterial;
 
 class ColorCorrection extends FilterBase
 {
@@ -28,16 +29,19 @@ class ColorCorrection extends FilterBase
         ui.slider(hh, tr("Hue Shift"), -180, 180, true);
         ui.slider(oh, tr("Opacity"), 0, 100, true);
 
-        if (gh.changed) {}
-        if (ch.changed) {}
-        if (bh.changed) {}
-        if (sh.changed) {}
-        if (hh.changed) {}
-        if (oh.changed) {}
+        if (gh.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (ch.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (bh.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (sh.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (hh.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (oh.changed) { MakeMaterial.parseMeshMaterial(); }
     }
 
-    override function getShaderText() : String {
-        return super.getShaderText();
+    override function getShaderText(color: String) : String {
+        var ret = "";
+        ret += '${color}.rgb += ${bh.value};';
+        // ret += "basecol = vec3(1, 0, 0);";
+        return ret;
     }
 
 }

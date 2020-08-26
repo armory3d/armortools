@@ -6,5 +6,5 @@ class FilterBase {
 
     public function draw() { /* paint ui of filter base. */ }
 
-    public function getShaderText() : String { return ""; }
+    public function getShaderText(color: String) : String { return ""; }
 }

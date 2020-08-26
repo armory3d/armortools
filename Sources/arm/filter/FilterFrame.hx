@@ -36,4 +36,9 @@ class FilterFrame extends FilterBase
         }
     }
 
+    override function getShaderText(color: String) : String {
+        if (filter != null) return filter.getShaderText(color);
+        return "";
+    }
+
 }
