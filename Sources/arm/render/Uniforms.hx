@@ -351,11 +351,23 @@ class Uniforms {
 			else return UISidebar.inst.getImage(Project.assets[Context.colorIdHandle.position]);
 		}
 		if (link == "_texuvmap") {
-			UVUtil.cacheUVMap(); // TODO: Check overlapping g4 calls here
+			if (!UVUtil.uvmapCached) {
+				function _render(_) {
+					UVUtil.cacheUVMap();
+					iron.App.removeRender(_render);
+				}
+				iron.App.notifyOnRender(_render);
+			}
 			return UVUtil.uvmap;
 		}
 		if (link == "_textrianglemap") {
-			UVUtil.cacheTriangleMap(); // TODO: Check overlapping g4 calls here
+			if (!UVUtil.trianglemapCached) {
+				function _render(_) {
+					UVUtil.cacheTriangleMap();
+					iron.App.removeRender(_render);
+				}
+				iron.App.notifyOnRender(_render);
+			}
 			return UVUtil.trianglemap;
 		}
 		if (link == "_textexttool") { // Opacity map for text
