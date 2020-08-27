@@ -215,7 +215,7 @@ class Layers {
 		pipeCursor.vertexShader = Reflect.field(kha.Shaders, "cursor_vert");
 		pipeCursor.fragmentShader = Reflect.field(kha.Shaders, "cursor_frag");
 		var vs = new VertexStructure();
-		#if kha_metal
+		#if (kha_metal || kha_vulkan)
 		vs.add("tex", VertexData.Short2Norm);
 		#else
 		vs.add("pos", VertexData.Short4Norm);

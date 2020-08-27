@@ -5,6 +5,9 @@ Supported GPUs:
 - NVIDIA GTX 16 Series
 - NVIDIA RTX 20 Series
 
+Requires Vulkan beta driver on NVIDIA cards:
+https://developer.nvidia.com/vulkan-driver
+
 Learn more:
 https://www.khronos.org/blog/ray-tracing-in-vulkan
 

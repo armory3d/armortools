@@ -585,7 +585,11 @@ class MaterialParser {
 				out_col = 'mix($col1, $col1 + $col2, $fac_var)';
 			}
 			else if (blend == "OVERLAY") {
-				out_col = '($col1 < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $col1 * $col2 : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))';
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+				out_col = 'mix($col1, ($col1 < vec3(0.5, 0.5, 0.5) ? vec3(2.0, 2.0, 2.0) * $col1 * $col2 : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $col1) * (vec3(1.0, 1.0, 1.0) - $col2)), $fac_var)';
+				#else
+				out_col = 'mix($col1, (all(lessThan($col1, vec3(0.5, 0.5, 0.5))) ? vec3(2.0, 2.0, 2.0) * $col1 * $col2 : vec3(1.0, 1.0, 1.0) - vec3(2.0, 2.0, 2.0) * (vec3(1.0, 1.0, 1.0) - $col1) * (vec3(1.0, 1.0, 1.0) - $col2)), $fac_var)';
+				#end
 			}
 			else if (blend == "SOFT_LIGHT") {
 				out_col = '((1.0 - $fac_var) * $col1 + $fac_var * ((vec3(1.0, 1.0, 1.0) - $col1) * $col2 * $col1 + $col1 * (vec3(1.0, 1.0, 1.0) - (vec3(1.0, 1.0, 1.0) - $col2) * (vec3(1.0, 1.0, 1.0) - $col1))))';

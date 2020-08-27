@@ -350,7 +350,10 @@ class UISidebar {
 				Context.brushLocked = false;
 				Context.brushCanUnlock = false;
 			}
-			if (kb.released(Config.keymap.brush_radius)) {
+			if (Context.brushLocked &&
+				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
+				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
+				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
 				mouse.unlock();
 				Context.brushCanUnlock = true;
 				Context.lastPaintX = -1;

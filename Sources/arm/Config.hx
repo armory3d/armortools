@@ -95,12 +95,12 @@ class Config {
 			raw.pressure_angle = false;
 			raw.pressure_opacity = false;
 			raw.pressure_sensitivity = 1.0;
-			raw.material_live = true;
 			#if kha_vulkan
-			raw.brush_3d = false; // TODO
+			raw.material_live = false;
 			#else
-			raw.brush_3d = true;
+			raw.material_live = true;
 			#end
+			raw.brush_3d = true;
 			raw.brush_live = false;
 			raw.camera_speed = 1.0;
 			raw.displace_strength = 1.0;

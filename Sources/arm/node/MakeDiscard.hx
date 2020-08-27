@@ -6,22 +6,19 @@ import arm.shader.NodeShader;
 class MakeDiscard {
 
 	public static function colorId(vert: NodeShader, frag: NodeShader) {
-		vert.add_out('vec2 texCoordPick');
-		vert.write('texCoordPick = subtex;');
 		frag.add_uniform('sampler2D texpaint_colorid'); // 1x1 picker
 		frag.add_uniform('sampler2D texcolorid', '_texcolorid'); // color map
-		frag.write('vec3 c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
-		frag.write('vec3 c2 = textureLod(texcolorid, texCoordPick, 0).rgb;');
+		frag.write('vec3 colorid_c1 = texelFetch(texpaint_colorid, ivec2(0, 0), 0).rgb;');
+		frag.write('vec3 colorid_c2 = textureLod(texcolorid, texCoordPick, 0).rgb;');
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
-		frag.write('if (any(c1 != c2)) discard;');
+		frag.write('if (any(colorid_c1 != colorid_c2)) discard;');
 		#else
-		frag.write('if (c1 != c2) discard;');
+		frag.write('if (colorid_c1 != colorid_c2) discard;');
 		#end
 	}
 
 	public static function face(vert: NodeShader, frag: NodeShader) {
-		vert.add_out('vec2 texCoordPick');
-		vert.write('texCoordPick = subtex;');
+
 		frag.add_uniform('sampler2D gbuffer2');
 		frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
 		frag.add_uniform('vec2 textrianglemapSize', '_texpaintSize');
@@ -31,12 +28,12 @@ class MakeDiscard {
 		#else
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
 		#end
-		frag.write('vec4 c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
-		frag.write('vec4 c2 = textureLod(textrianglemap, texCoordPick, 0);');
+		frag.write('vec4 face_c1 = texelFetch(textrianglemap, ivec2(texCoordInp * textrianglemapSize), 0);');
+		frag.write('vec4 face_c2 = textureLod(textrianglemap, texCoordPick, 0);');
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
-		frag.write('if (any(c1 != c2)) discard;');
+		frag.write('if (any(face_c1 != face_c2)) discard;');
 		#else
-		frag.write('if (c1 != c2) discard;');
+		frag.write('if (face_c1 != face_c2) discard;');
 		#end
 	}
 

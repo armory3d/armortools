@@ -37,7 +37,6 @@ strip Krom
 node armorcore/make -g metal
 cp -a build/krom/ armorcore/Deployment
 cd armorcore
-git apply patch/metal_shared_sampler.diff --directory=Kinc
 node Kinc/make -g metal
 # Open generated Xcode project
 # Add `path/to/armorpaint/armorcore/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
@@ -59,7 +58,6 @@ node Kinc/make android -g opengl
 node armorcore/make ios -g metal
 cp -a build/krom/ armorcore/Deployment
 cd armorcore
-git apply patch/metal_shared_sampler.diff --directory=Kinc
 git apply patch/ios_document_picker.diff --directory=Kinc
 node Kinc/make ios -g metal
 # Open generated Xcode project
@@ -84,6 +82,7 @@ node Kinc/make -g direct3d12 --raytrace dxr
 node armorcore/make -g vulkan
 cd armorcore
 git apply patch/vulkan_raytrace.diff --directory=Kinc
+git clone --recursive https://github.com/Kode/krafix Libraries/krafix
 node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
 cd Deployment
 strip Krom

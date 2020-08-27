@@ -155,12 +155,17 @@ class MakePaint {
 			}
 		}
 
-		if (Context.colorIdPicked) {
-			MakeDiscard.colorId(vert, frag);
+		if (Context.colorIdPicked || faceFill) {
+			vert.add_out('vec2 texCoordPick');
+			vert.write('texCoordPick = subtex;');
+			if (Context.colorIdPicked) {
+				MakeDiscard.colorId(vert, frag);
+			}
+			if (faceFill) {
+				MakeDiscard.face(vert, frag);
+			}
 		}
-		else if (faceFill) { // TODO: allow to combine with colorid mask
-			MakeDiscard.face(vert, frag);
-		}
+
 		if (Context.pickerMaskHandle.position == MaskMaterial) {
 			MakeDiscard.materialId(vert, frag);
 		}
@@ -319,10 +324,16 @@ class MakePaint {
 		// TODO: Use emission/subsurface matid
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 		if (Context.material.paintSubs) {
-			frag.write('if (subs > 0.0) { matid = 254.0 / 255.0; }');
+			frag.write('if (subs > 0.0) {');
+			frag.write('    matid = 254.0 / 255.0;');
+			frag.write('	if (str == 0.0) discard;');
+			frag.write('}');
 		}
 		if (Context.material.paintEmis) {
-			frag.write('if (emis > 0.0) { matid = 1.0; }');
+			frag.write('if (emis > 0.0) {');
+			frag.write('	matid = 1.0;');
+			frag.write('	if (str == 0.0) discard;');
+			frag.write('}');
 		}
 
 		if (layered) {
@@ -338,8 +349,12 @@ class MakePaint {
 				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 			}
 			else {
-				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
-
+				if (Context.layer.material_mask != null) {
+					frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', mat_opacity);');
+				}
+				else {
+					frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', max(str, sample_undo.a));');
+				}
 			}
 			frag.write('fragColor[1] = vec4(nortan, matid);');
 
@@ -368,11 +383,7 @@ class MakePaint {
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				// #if kha_direct3d12
-				// frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
-				// #else
 				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
-				// #end
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.material.paintHeight && MakeMaterial.heightUsed) {
 					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');

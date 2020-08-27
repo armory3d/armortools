@@ -69,18 +69,30 @@ class TabFonts {
 					}
 
 					if (state == State.Started) {
-						if (Context.font != Project.fonts[i]) Context.selectFont(i);
+						if (Context.font != Project.fonts[i]) {
+							function _render(_) {
+								Context.selectFont(i);
+								iron.App.removeRender(_render);
+							}
+							iron.App.notifyOnRender(_render);
+						}
 						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DFont);
 						Context.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						var add = Project.fonts.length > 1 ? 1 : 0;
+						var fontName = Project.fonts[i].name;
 						UIMenu.draw(function(ui: Zui) {
-							ui.text(Project.fonts[i].name, Right, ui.t.HIGHLIGHT_COL);
+							ui.text(fontName, Right, ui.t.HIGHLIGHT_COL);
 
-							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left)) {
-								Context.selectFont(i == 0 ? 1 : 0);
-								Project.fonts.splice(i, 1);
+							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left) && Project.fonts[i].file != "") {
+								function _render(_) {
+									Context.selectFont(i == 0 ? 1 : 0);
+									iron.data.Data.deleteFont(Project.fonts[i].file);
+									Project.fonts.splice(i, 1);
+									iron.App.removeRender(_render);
+								}
+								iron.App.notifyOnRender(_render);
 								UISidebar.inst.hwnd2.redraws = 2;
 							}
 						}, 1 + add);

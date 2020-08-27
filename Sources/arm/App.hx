@@ -257,11 +257,15 @@ class App {
 		UISidebar.inst.tabh1 = Std.int(UISidebar.inst.tabh1 * ratio);
 		UISidebar.inst.tabh2 = System.windowHeight() - UISidebar.inst.tabh - UISidebar.inst.tabh1;
 		lastWindowHeight = System.windowHeight();
+
+		#if krom_linux
+		saveWindowRect();
+		#end
 	}
 	#end
 
 	static function saveWindowRect() {
-		#if krom_windows
+		#if (krom_windows || krom_linux)
 		Config.raw.window_w = System.windowWidth();
 		Config.raw.window_h = System.windowHeight();
 		Config.raw.window_x = kha.Window.get(0).x;

@@ -123,6 +123,7 @@ class ImportArm {
 			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
 
 			var base = Path.baseDir(path);
+
 			for (file in project.assets) {
 				#if krom_windows
 				file = file.replace("/", "\\");
@@ -135,6 +136,21 @@ class ImportArm {
 					makePink(abs);
 				}
 				ImportTexture.run(abs);
+			}
+
+			if (project.font_assets != null) {
+				for (file in project.font_assets) {
+					#if krom_windows
+					file = file.replace("/", "\\");
+					#else
+					file = file.replace("\\", "/");
+					#end
+					// Convert font path from relative to absolute
+					var abs = Data.isAbsolute(file) ? file : base + file;
+					if (File.exists(abs)) {
+						ImportFont.run(abs);
+					}
+				}
 			}
 
 			// Synchronous for now
