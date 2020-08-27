@@ -12,20 +12,20 @@ class FilterFrame extends FilterBase
     var ch = new Handle();  // combo handle
     static var delCount = 0;
 
-    public function new() {
-        this.name = "None";
+    override function name() : String {
+        return tr("None");
     }
 
     override public function draw() {
         var ui = UISidebar.inst.ui;
-        var title = filter == null ? name : filter.name;
-        if (ui.panel(h, tr(title))) {
+        var title = filter == null ? name() : filter.name();
+        if (ui.panel(h, title)) {
             ui.indent(false);
             ui.row([4/5, 1/5]);
 
             // header
-            ch.position = FilterFactory.filterNames.indexOf(title);
-            ui.combo(ch, FilterFactory.filterNames);
+            ch.position = FilterFactory.getFilterNames().indexOf(title);
+            ui.combo(ch, FilterFactory.getFilterNames());
             if (ch.changed) {
                 filter = FilterFactory.CreateFilterByIndex(ch.position);
             }

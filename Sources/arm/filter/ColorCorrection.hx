@@ -13,8 +13,8 @@ class ColorCorrection extends FilterBase
     public var sh = new Handle({value: 1});
     public var hh = new Handle();
 
-    public function new() {
-        this.name = "Color Correction";
+    override function name() : String {
+        return tr("Color Correction");
     }
 
     override public function draw() {
