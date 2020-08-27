@@ -131,7 +131,7 @@ class MakeBake {
 		vert.add_out('vec3 position');
 		vert.add_out('vec3 normal');
 		vert.add_uniform('mat4 W', '_worldMatrix');
-		vert.write('position = mul(vec4(pos.xyz, 1.0), W);');
+		vert.write('position = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;');
 		vert.write('normal = vec3(nor.xy, pos.w);');
 		vert.add_uniform('vec2 sub', '_sub');
 		vert.write('vec2 subtex = tex + sub;');
