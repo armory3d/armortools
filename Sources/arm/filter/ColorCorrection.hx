@@ -2,7 +2,6 @@ package arm.filter;
 
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
-import arm.node.MakeMaterial;
 
 class ColorCorrection extends FilterBase
 {
@@ -27,11 +26,11 @@ class ColorCorrection extends FilterBase
         ui.slider(sh, tr("Saturation"), 0, 5, true);
         ui.slider(hh, tr("Hue Shift"), 0, 1, true);
 
-        if (gh.changed) { MakeMaterial.parseMeshMaterial(); }
-        if (ch.changed) { MakeMaterial.parseMeshMaterial(); }
-        if (bh.changed) { MakeMaterial.parseMeshMaterial(); }
-        if (sh.changed) { MakeMaterial.parseMeshMaterial(); }
-        if (hh.changed) { MakeMaterial.parseMeshMaterial(); }
+        if (gh.changed) { update(); }
+        if (ch.changed) { update(); }
+        if (bh.changed) { update(); }
+        if (sh.changed) { update(); }
+        if (hh.changed) { update(); }
     }
 
     override function getShaderText(color: String) : String {

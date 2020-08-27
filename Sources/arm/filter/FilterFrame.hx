@@ -3,7 +3,6 @@ package arm.filter;
 import arm.ui.UISidebar;
 import zui.Zui.Handle;
 import arm.Context;
-import arm.node.MakeMaterial;
 
 class FilterFrame extends FilterBase
 {
@@ -28,6 +27,7 @@ class FilterFrame extends FilterBase
             ui.combo(ch, FilterFactory.getFilterNames());
             if (ch.changed) {
                 filter = FilterFactory.CreateFilterByIndex(ch.position);
+                update();
             }
 
             if (ui.button(tr("Remove"))) delete();
@@ -65,7 +65,7 @@ class FilterFrame extends FilterBase
 
         lay.filters.remove(this);
 		UISidebar.inst.hwnd1.redraws = 2;
-        MakeMaterial.parseMeshMaterial();
+        update();
     }
 
 }
