@@ -61,6 +61,12 @@ class ViewportUtil {
 		Context.ddirty = 2;
 	}
 
+	public static function orbitOpposite() {
+		var cam = Scene.active.camera;
+		var z = Math.abs(cam.look().z) - 1.0;
+		(z < 0.0001 && z > -0.0001) ? ViewportUtil.orbit(0, Math.PI) : ViewportUtil.orbit(Math.PI, 0);
+	}
+
 	public static function zoom(f: Float) {
 		var cam = Scene.active.camera;
 		cam.transform.move(cam.look(), f);
