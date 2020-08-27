@@ -6,8 +6,11 @@ import iron.RenderPath;
 import arm.ui.UISidebar;
 import arm.node.MakeMaterial;
 import arm.Enums;
+import arm.filter.FilterBase;
 
 class LayerSlot {
+
+	public var filters: Array<FilterBase> = [];
 	public var id = 0;
 	public var visible = true;
 	public var ext = "";

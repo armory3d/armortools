@@ -25,6 +25,7 @@ class MakeMesh {
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
 		frag.ins = vert.outs;
+		frag.add_function(ShaderFunctions.str_hue_sat);
 
 		vert.add_out('vec2 texCoord');
 		frag.wvpposition = true;
@@ -116,6 +117,11 @@ class MakeMesh {
 					frag.write('vec4 texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 				}
 				frag.write('basecol = texpaint_sample.rgb * texpaint_sample.a;');
+
+				// TODO add filters for other layers
+				for (fi in 0...l.filters.length) {
+					frag.write(l.filters[fi].getShaderText("basecol"));
+				}
 
 				if (l.texpaint_mask != null) {
 					frag.add_shared_sampler('sampler2D texpaint_mask');
@@ -269,6 +275,11 @@ class MakeMesh {
 					frag.add_shared_sampler('sampler2D texpaint' + id);
 					frag.write('col_tex0 = textureLodShared(texpaint' + id + ', texCoord, 0.0);');
 					frag.write('factor0 = col_tex0.a;');
+
+					// TODO add filters for first layer
+					for (fi in 0...l.filters.length) {
+						frag.write(l.filters[fi].getShaderText("col_tex0"));
+					}
 
 					if (l.texpaint_mask != null) {
 						frag.add_shared_sampler('sampler2D texpaint_mask' + id);
