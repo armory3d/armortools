@@ -90,11 +90,20 @@ class MaterialParser {
 		return ls;
 	}
 
+	static function init() {
+		parsed = [];
+		parsing_disp = false;
+		normal_written = false;
+		cotangentFrameWritten = false;
+		sample_bump = false;
+		sample_bump_res = "";
+		out_normaltan = "vec3(0.5, 0.5, 1.0)";
+	}
+
 	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _geom: NodeShader, _tesc: NodeShader, _tese: NodeShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
+		init();
 		nodes = canvas.nodes;
 		links = canvas.links;
-
-		parsed = [];
 		con = _con;
 		vert = _vert;
 		frag = _frag;
@@ -103,14 +112,6 @@ class MaterialParser {
 		tese = _tese;
 		curshader = frag;
 		matcon = _matcon;
-
-		parsing_disp = false;
-		normal_written = false;
-		cotangentFrameWritten = false;
-		sample_bump = false;
-		sample_bump_res = "";
-
-		out_normaltan = "vec3(0.5, 0.5, 1.0)";
 
 		var output_node = node_by_type(nodes, "OUTPUT_MATERIAL");
 		if (output_node != null) {
@@ -1517,7 +1518,7 @@ class MaterialParser {
 		#end
 	}
 
-	static function node_by_type(nodes: Array<TNode>, ntype: String): TNode {
+	public static function node_by_type(nodes: Array<TNode>, ntype: String): TNode {
 		for (n in nodes) if (n.type == ntype) return n;
 		return null;
 	}

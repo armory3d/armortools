@@ -35,7 +35,7 @@ class MakeMaterial {
 			m.shader.raw.contexts.remove(scon.raw);
 			m.shader.contexts.remove(scon);
 		}
-		var con = make_mesh(new NodeShaderData({name: "Material", canvas: null}));
+		var con = MakeMesh.run(new NodeShaderData({name: "Material", canvas: null}));
 		if (scon != null) scon.delete();
 		scon = new ShaderContext(con.data, function(scon: ShaderContext){});
 		scon.overrideContext = {}
@@ -61,7 +61,7 @@ class MakeMaterial {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
 		}
-		var con = make_particle(new NodeShaderData({name: "MaterialParticle", canvas: null}));
+		var con = MakeParticle.run(new NodeShaderData({name: "MaterialParticle", canvas: null}));
 		if (sc != null) sc.delete();
 		sc = new ShaderContext(con.data, function(sc: ShaderContext){});
 		m.shader.raw.contexts.push(sc.raw);
@@ -80,7 +80,7 @@ class MakeMaterial {
 		var mcon: TMaterialContext = { name: "mesh", bind_textures: [] };
 
 		var sd = new NodeShaderData({name: "Material", canvas: null});
-		var con = make_mesh_preview(sd, mcon);
+		var con = MakeMeshPreview.run(sd, mcon);
 
 		for (i in 0...m.contexts.length) {
 			if (m.contexts[i].raw.name == "mesh") {
@@ -114,7 +114,7 @@ class MakeMaterial {
 		if (Config.raw.rp_gi != false && rebuild) {
 			var scon: ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "voxel") { scon = c; break; }
-			if (scon != null) make_voxel(scon);
+			if (scon != null) MakeVoxel.run(scon);
 		}
 		#end
 	}
@@ -148,7 +148,7 @@ class MakeMaterial {
 
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
 		var mcon = { name: "paint", bind_textures: [] };
-		var con = make_paint(sdata, mcon);
+		var con = MakePaint.run(sdata, mcon);
 
 		var compileError = false;
 		var scon = new ShaderContext(con.data, function(scon: ShaderContext) {
@@ -168,30 +168,20 @@ class MakeMaterial {
 		if (defaultMcon == null) defaultMcon = mcon;
 	}
 
+	public static function parseNodePreviewMaterial(): ShaderContext {
+		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
+		var mcon = { name: "mesh", bind_textures: [] };
+		var con = MakeNodePreview.run(sdata, mcon);
+		var compileError = false;
+		var scon = new ShaderContext(con.data, function(scon: ShaderContext) {
+			if (scon == null) compileError = true;
+		});
+		if (compileError) return null;
+		return scon;
+	}
+
 	public static function parseBrush() {
 		Brush.parse(Context.brush.canvas, false);
-	}
-
-	public static inline function make_paint(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
-		return MakePaint.run(data, matcon);
-	}
-
-	public static inline function make_mesh(data: NodeShaderData): NodeShaderContext {
-		return MakeMesh.run(data);
-	}
-
-	public static inline function make_mesh_preview(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
-		return MakeMeshPreview.run(data, matcon);
-	}
-
-	public static inline function make_voxel(data: iron.data.ShaderData.ShaderContext) {
-		#if rp_voxelao
-		MakeVoxel.run(data);
-		#end
-	}
-
-	public static inline function make_particle(data: NodeShaderData): NodeShaderContext {
-		return MakeParticle.run(data);
 	}
 
 	public static function blendMode(frag: NodeShader, blending: Int, cola: String, colb: String, opac: String): String {

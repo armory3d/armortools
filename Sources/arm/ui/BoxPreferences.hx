@@ -62,6 +62,8 @@ class BoxPreferences {
 				Config.raw.native_file_browser = ui.check(Id.handle({selected: Config.raw.native_file_browser}), tr("Native File Browser"));
 				#end
 
+				Config.raw.node_preview = ui.check(Id.handle({selected: Config.raw.node_preview}), tr("Show Node Preview"));
+
 				#if arm_debug
 				Context.cacheDraws = ui.check(Id.handle({selected: Context.cacheDraws}), tr("Cache UI Draws"));
 				if (ui.isHovered) ui.tooltip(tr("Enabling may reduce GPU usage"));

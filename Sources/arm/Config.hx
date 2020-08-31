@@ -110,6 +110,7 @@ class Config {
 			raw.native_file_browser = true;
 			#end
 			raw.show_asset_names = false;
+			raw.node_preview = true;
 			#end
 
 			#if arm_creator

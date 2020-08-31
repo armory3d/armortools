@@ -44,6 +44,7 @@ class Context {
 	public static var brushBlendDirty = true;
 	public static var layerPreviewDirty = true;
 	public static var layersPreviewDirty = false;
+	public static var nodePreviewDirty = false;
 
 	public static var colorIdPicked = false;
 	public static var splitView = false;

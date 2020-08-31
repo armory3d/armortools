@@ -38,6 +38,7 @@ class UINodes {
 	var popupY = 0.0;
 
 	public var changed = false;
+	public var nodePreview: Image = null;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
@@ -48,6 +49,7 @@ class UINodes {
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
 	var lastCanvas: TNodeCanvas;
+	var lastNodeSelected: TNode = null;
 
 	public var grid: Image = null;
 	public var hwnd = Id.handle();
@@ -294,7 +296,16 @@ class UINodes {
 
 			UISidebar.inst.hwnd.redraws = 2;
 			recompileMatFinal = false;
+			Context.nodePreviewDirty = true;
 		}
+
+		var nodes = getNodes();
+		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
+			lastNodeSelected = nodes.nodesSelected[0];
+			Context.nodePreviewDirty = true;
+		}
+
+		if (Config.raw.node_preview && Context.nodePreviewDirty) RenderUtil.makeNodePreview();
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
@@ -326,7 +337,6 @@ class UINodes {
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
 			// Grid
-			var nodes = getNodes();
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 100 - 100, (nodes.panY * nodes.SCALE()) % 100 - 100);
 
@@ -335,7 +345,7 @@ class UINodes {
 			nodes.nodeCanvas(ui, c);
 
 			// Node previews
-			if (nodes.nodesSelected.length > 0) {
+			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
 				if (sel.type == "TEX_IMAGE") {
@@ -361,6 +371,12 @@ class UINodes {
 					if (id < Project.materials.length) {
 						img = Project.materials[id].image;
 					}
+				}
+				else if (sel.type == "OUTPUT_MATERIAL_PBR") {
+					img = Context.material.image;
+				}
+				else {
+					img = nodePreview;
 				}
 				if (img != null) {
 					var tw = 64 * ui.SCALE();
