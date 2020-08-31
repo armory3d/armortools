@@ -3,6 +3,11 @@ package arm.util;
 import kha.Image;
 import kha.Font;
 import kha.graphics4.TextureFormat;
+import kha.graphics4.VertexBuffer;
+import kha.graphics4.IndexBuffer;
+import kha.graphics4.Usage;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.VertexData;
 import iron.Scene;
 import iron.RenderPath;
 import iron.object.MeshObject;
@@ -23,6 +28,8 @@ class RenderUtil {
 
 	public static inline var matPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
+	static var screenAligned3VB: VertexBuffer = null;
+	static var screenAligned3IB: IndexBuffer = null;
 
 	public static function makeMaterialPreview() {
 		Context.materialPreview = true;
@@ -407,6 +414,25 @@ class RenderUtil {
 		if (current != null) current.begin(false);
 	}
 
+	static function createScreenAligned3Data() {
+		// Over-sized triangle
+		var data = [-1.0, -1.0, 0.0, 3.0, -1.0, 0.0, -1.0, 3.0, 0.0];
+		var indices = [0, 1, 2];
+
+		// Mandatory vertex data names and sizes
+		var structure = new VertexStructure();
+		structure.add("pos", VertexData.Float3);
+		screenAligned3VB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
+		var vertices = screenAligned3VB.lock();
+		for (i in 0...vertices.length) vertices.set(i, data[i]);
+		screenAligned3VB.unlock();
+
+		screenAligned3IB = new IndexBuffer(indices.length, Usage.StaticUsage);
+		var id = screenAligned3IB.lock();
+		for (i in 0...id.length) id[i] = indices[i];
+		screenAligned3IB.unlock();
+	}
+
 	public static function makeNodePreview() {
 		var nodes = Context.material.nodes;
 		if (nodes.nodesSelected.length == 0) return;
@@ -423,18 +449,22 @@ class RenderUtil {
 		}
 
 		Context.nodePreviewDirty = false;
+		UINodes.inst.hwnd.redraws = 2;
 
 		var scon = MakeMaterial.parseNodePreviewMaterial();
 		if (scon == null) return;
 
 		var g4 = UINodes.inst.nodePreview.g4;
-		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+		if (screenAligned3VB == null) {
+			createScreenAligned3Data();
+		}
+
 		g4.begin();
 		g4.setPipeline(scon.pipeState);
 		iron.object.Uniforms.setContextConstants(g4, scon, [""]);
 		iron.object.Uniforms.setObjectConstants(g4, scon, Context.paintObject);
-		g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-		g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+		g4.setVertexBuffer(screenAligned3VB);
+		g4.setIndexBuffer(screenAligned3IB);
 		g4.drawIndexedVertices();
 		g4.end();
 	}

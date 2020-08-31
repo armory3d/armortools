@@ -17,7 +17,7 @@ class MakeNodePreview {
 			depth_write: true,
 			compare_mode: "less",
 			cull_mode: "clockwise",
-			vertex_elements: [{name: "pos", data: "float2"}],
+			vertex_elements: [{name: "pos", data: "float3"}],
 			color_attachments: ["RGBA32"]
 		});
 
@@ -32,6 +32,7 @@ class MakeNodePreview {
 		#if (!kha_opengl)
 		vert.write_attrib('texCoord.y = 1.0 - texCoord.y;');
 		#end
+		vert.write_attrib('vec3 nor = vec3(0.0, 0.0, 1.0);');
 
 		var canvas_nodes = Context.material.canvas.nodes;
 		var canvas_links = Context.material.canvas.links;
