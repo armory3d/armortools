@@ -592,7 +592,7 @@ class NodeShader {
 		var s = '#version 330\n';
 		#end
 
-		s += '#define textureArg(tex) Sampler2D tex\n';
+		s += '#define textureArg(tex) sampler2D tex\n';
 		s += '#define texturePass(tex) tex\n';
 		s += '#define mul(a, b) b * a\n';
 		s += '#define textureShared texture\n';
