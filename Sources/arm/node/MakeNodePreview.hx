@@ -61,6 +61,10 @@ class MakeNodePreview {
 		frag.write('vec3 basecol = $res;');
 		frag.write('fragColor = vec4(basecol.rgb, 1.0);');
 
+		frag.ndcpos = true;
+		vert.add_out('vec4 ndc');
+		vert.write_attrib('ndc = vec4(pos.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
+
 		MaterialParser.finalize(con_mesh);
 
 		con_mesh.data.shader_from_source = true;

@@ -375,11 +375,14 @@ class UINodes {
 				else if (sel.type == "OUTPUT_MATERIAL_PBR") {
 					img = Context.material.image;
 				}
-				else {
+				else if (sel.type == "BrushOutputNode") {
+					img = Context.brush.image;
+				}
+				else if (canvasType == CanvasMaterial) {
 					img = nodePreview;
 				}
 				if (img != null) {
-					var tw = 64 * ui.SCALE();
+					var tw = 80 * ui.SCALE();
 					var th = tw * (img.height / img.width);
 					var tx = ww - tw - 8 * ui.SCALE();
 					var ty = wh - th - 40 * ui.SCALE();
@@ -390,6 +393,7 @@ class UINodes {
 					var invertY = false;
 					#end
 
+					ui.g.color = 0xffffffff;
 					invertY ?
 						ui.g.drawScaledImage(img, tx, ty + th, tw, -th) :
 						ui.g.drawScaledImage(img, tx, ty, tw, th);

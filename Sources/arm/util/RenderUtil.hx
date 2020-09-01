@@ -444,6 +444,8 @@ class RenderUtil {
 			node.type == "MATERIAL" ||
 			node.type == "OUTPUT_MATERIAL_PBR") return;
 
+		if (Context.material.canvas.nodes.indexOf(node) == -1) return;
+
 		if (UINodes.inst.nodePreview == null) {
 			UINodes.inst.nodePreview = kha.Image.createRenderTarget(matPreviewSize, matPreviewSize);
 		}
