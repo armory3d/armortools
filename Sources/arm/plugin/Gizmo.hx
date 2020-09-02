@@ -19,7 +19,7 @@ class Gizmo {
 		var isRender = UIHeader.inst.worktab.position == SpaceRender;
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
 		var isObject = isRender && Context.object != null;
-		var isDecal = isPaint && Context.layer.material_mask != null && Context.layer.uvType == UVProject;
+		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 
 		var gizmo = Context.gizmo;
 		gizmo.visible = isObject || isDecal;

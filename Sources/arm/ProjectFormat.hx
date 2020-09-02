@@ -29,7 +29,8 @@ typedef TLayerData = {
 	public var uv_rot: Float;
 	public var uv_type: Int;
 	public var opacity_mask: Float;
-	public var material_mask: Int;
+	public var fill_layer: Int;
+	public var fill_mask: Int;
 	public var object_mask: Int;
 	public var blending: Int;
 	public var parent: Int;

@@ -25,7 +25,8 @@ class LayerSlot {
 	public var texpaint_mask: Image = null; // Texture mask
 	public var texpaint_mask_preview: Image;
 	public var maskOpacity = 1.0; // Opacity mask
-	public var material_mask: MaterialSlot = null; // Fill layer
+	public var fill_layer: MaterialSlot = null;
+	public var fill_mask: MaterialSlot = null;
 	public var show_panel = false;
 
 	public var blending = BlendMix;
@@ -310,7 +311,7 @@ class LayerSlot {
 
 		l.visible = visible;
 		l.maskOpacity = maskOpacity;
-		l.material_mask = material_mask;
+		l.fill_layer = fill_layer;
 		l.objectMask = objectMask;
 		l.blending = blending;
 		l.paintBase = paintBase;
@@ -416,7 +417,7 @@ class LayerSlot {
 
 	public function toFillLayer() {
 		Context.setLayer(this);
-		material_mask = Context.material;
+		fill_layer = Context.material;
 		Layers.updateFillLayers(4);
 		function _parse(_) {
 			MakeMaterial.parsePaintMaterial();
@@ -429,7 +430,28 @@ class LayerSlot {
 
 	public function toPaintLayer() {
 		Context.setLayer(this);
-		material_mask = null;
+		fill_layer = null;
+		MakeMaterial.parsePaintMaterial();
+		Context.layerPreviewDirty = true;
+		UISidebar.inst.hwnd.redraws = 2;
+	}
+
+	public function toFillMask() {
+		Context.setLayer(this, true);
+		fill_mask = Context.material;
+		Layers.updateFillLayers(4);
+		function _parse(_) {
+			MakeMaterial.parsePaintMaterial();
+			Context.layerPreviewDirty = true;
+			UISidebar.inst.hwnd.redraws = 2;
+			iron.App.removeRender(_parse);
+		}
+		iron.App.notifyOnRender(_parse);
+	}
+
+	public function toPaintMask() {
+		Context.setLayer(this, true);
+		fill_mask = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
 		UISidebar.inst.hwnd.redraws = 2;

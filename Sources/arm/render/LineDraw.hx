@@ -43,7 +43,7 @@ class LineDraw {
 	public static function render(g4: kha.graphics4.Graphics) {
 
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
-		var isDecal = isPaint && Context.layer.material_mask != null && Context.layer.uvType == UVProject;
+		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 		if (!isDecal) return;
 
 		mat = Context.layer.decalMat;

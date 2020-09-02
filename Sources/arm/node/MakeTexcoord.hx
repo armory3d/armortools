@@ -8,7 +8,7 @@ class MakeTexcoord {
 
 	public static function run(vert: NodeShader, frag: NodeShader) {
 
-		var fillLayer = Context.layer.material_mask != null;
+		var fillLayer = Context.layer.fill_layer != null;
 		var uvType = fillLayer ? Context.layer.uvType : Context.brushPaint;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
@@ -33,7 +33,7 @@ class MakeTexcoord {
 					frag.write_attrib('uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');
 				}
 				var angle = Context.brushAngle + Context.brushNodesAngle;
-				var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
+				var uvAngle = Context.layer.fill_layer != null ? Context.layer.angle : angle;
 				if (uvAngle != 0.0) {
 					frag.add_uniform('vec2 brushAngle', '_brushAngle');
 					frag.write_attrib('uvsp = vec2(uvsp.x * brushAngle.x - uvsp.y * brushAngle.y, uvsp.x * brushAngle.y + uvsp.y * brushAngle.x);');
@@ -58,7 +58,7 @@ class MakeTexcoord {
 			vert.write('texCoord = subtex * brushScale;');
 
 			var angle = Context.brushAngle + Context.brushNodesAngle;
-			var uvAngle = Context.layer.material_mask != null ? Context.layer.angle : angle;
+			var uvAngle = Context.layer.fill_layer != null ? Context.layer.angle : angle;
 			if (uvAngle > 0.0) {
 				vert.add_uniform('vec2 brushAngle', '_brushAngle');
 				vert.write('texCoord = vec2(texCoord.x * brushAngle.x - texCoord.y * brushAngle.y, texCoord.x * brushAngle.y + texCoord.y * brushAngle.x);');

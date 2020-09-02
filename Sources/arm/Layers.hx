@@ -387,7 +387,8 @@ class Layers {
 	public static function isFillMaterial(): Bool {
 		if (UIHeader.inst.worktab.position == SpaceMaterial) return true;
 		var m = Context.material;
-		for (l in Project.layers) if (l.material_mask == m) return true;
+		for (l in Project.layers) if (l.fill_layer == m) return true;
+		for (l in Project.layers) if (l.fill_mask == m) return true;
 		return false;
 	}
 
@@ -423,37 +424,56 @@ class Layers {
 			return;
 		}
 
-		var first = true;
-		for (l in layers) {
-			if (l.material_mask == Context.material) {
-				if (first) {
-					current = @:privateAccess kha.graphics4.Graphics2.current;
-					if (current != null) current.end();
-					Context.pdirty = fills;
-					Context.layerIsMask = false;
-					Context.tool = ToolFill;
-				}
+		var hasFillLayer = false;
+		var hasFillMask = false;
+		for (l in layers) if (l.fill_layer == Context.material) hasFillLayer = true;
+		for (l in layers) if (l.fill_mask == Context.material) hasFillMask = true;
 
-				Context.layer = l;
-				setObjectMask();
+		if (hasFillLayer || hasFillMask) {
 
-				if (first) {
-					MakeMaterial.parsePaintMaterial();
-					first = false;
-				}
+			current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+			Context.pdirty = fills;
+			Context.tool = ToolFill;
 
-				// Decal layer
-				if (l.uvType == UVProject) {
-					l.clearLayer();
-				}
+			if (hasFillLayer) {
+				Context.layerIsMask = false;
+				MakeMaterial.parsePaintMaterial();
 
-				for (i in 0...fills) {
-					RenderPathPaint.commandsPaint();
+				for (l in layers) {
+					if (l.fill_layer == Context.material) {
+						Context.layer = l;
+						setObjectMask();
+
+						// Decal layer
+						if (l.uvType == UVProject) {
+							l.clearLayer();
+						}
+
+						for (i in 0...fills) {
+							RenderPathPaint.commandsPaint();
+						}
+					}
 				}
 			}
-		}
 
-		if (!first) {
+			if (hasFillMask) {
+				Context.layerIsMask = true;
+				MakeMaterial.parsePaintMaterial();
+
+				for (l in layers) {
+					trace(Std.random(100));
+					if (l.fill_mask == Context.material) {
+						Context.layer = l;
+						setObjectMask();
+
+						for (i in 0...fills) {
+							RenderPathPaint.commandsPaint();
+						}
+					}
+				}
+			}
+
 			Context.pdirty = 0;
 			Context.ddirty = 2;
 			Context.rdirty = 2;

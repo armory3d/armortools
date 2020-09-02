@@ -119,7 +119,19 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
-				Context.layer.material_mask = Project.materials[step.material];
+				Context.layer.fill_layer = Project.materials[step.material];
+			}
+			else if (step.name == tr("To Fill Mask")) {
+				Context.layer.toPaintMask();
+				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+				var lay = undoLayers[undoI];
+				Context.layer.swapMask(lay);
+			}
+			else if (step.name == tr("To Paint Mask")) {
+				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+				var lay = undoLayers[undoI];
+				Context.layer.swapMask(lay);
+				Context.layer.fill_mask = Project.materials[step.material];
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.setLayer(Project.layers[step.layer]);
@@ -212,13 +224,25 @@ class History {
 			else if (step.name == tr("To Fill Layer")) {
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
-				Context.layer.material_mask = Project.materials[step.material];
+				Context.layer.fill_layer = Project.materials[step.material];
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Paint Layer")) {
 				Context.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
+				undoI = (undoI + 1) % Config.raw.undo_steps;
+			}
+			else if (step.name == tr("To Fill Mask")) {
+				var lay = undoLayers[undoI];
+				Context.layer.swapMask(lay);
+				Context.layer.fill_mask = Project.materials[step.material];
+				undoI = (undoI + 1) % Config.raw.undo_steps;
+			}
+			else if (step.name == tr("To Paint Mask")) {
+				Context.layer.toPaintMask();
+				var lay = undoLayers[undoI];
+				Context.layer.swapMask(lay);
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("Layer Opacity")) {
@@ -320,6 +344,16 @@ class History {
 	public static function toPaintLayer() {
 		copyToUndo(Context.layer.id, undoI, false);
 		push(tr("To Paint Layer"));
+	}
+
+	public static function toFillMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Fill Mask"));
+	}
+
+	public static function toPaintMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Paint Mask"));
 	}
 
 	public static function layerOpacity() {

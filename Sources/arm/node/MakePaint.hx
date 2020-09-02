@@ -80,7 +80,7 @@ class MakePaint {
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		var decalLayer = Context.layer.material_mask != null && Context.layer.uvType == UVProject;
+		var decalLayer = Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 		if (decalLayer) {
 			vert.add_uniform('mat4 WVP', '_decalLayerMatrix');
 		}
@@ -95,7 +95,7 @@ class MakePaint {
 		frag.write_attrib('sp.y = 1.0 - sp.y;');
 		frag.write_attrib('sp.z -= 0.0001;'); // small bias
 
-		var uvType = Context.layer.material_mask != null ? Context.layer.uvType : Context.brushPaint;
+		var uvType = Context.layer.fill_layer != null ? Context.layer.uvType : Context.brushPaint;
 		if (uvType == UVProject) frag.ndcpos = true;
 
 		frag.add_uniform('vec4 inp', '_inputBrush');
@@ -192,7 +192,7 @@ class MakePaint {
 			MaterialParser.parse_subsurface = Context.material.paintSubs;
 			MaterialParser.parse_height = Context.material.paintHeight;
 			MaterialParser.parse_height_as_channel = true;
-			var uvType = Context.layer.material_mask != null ? Context.layer.uvType : Context.brushPaint;
+			var uvType = Context.layer.fill_layer != null ? Context.layer.uvType : Context.brushPaint;
 			MaterialParser.triplanar = uvType == UVTriplanar && !decal;
 			var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon);
 			MaterialParser.parse_emission = false;
@@ -216,7 +216,7 @@ class MakePaint {
 			frag.write('float height = $height;');
 			frag.write('float mat_opacity = $opac;');
 			frag.write('float opacity = mat_opacity;');
-			if (Context.layer.material_mask == null) {
+			if (Context.layer.fill_layer == null) {
 				frag.write('opacity *= brushOpacity;');
 			}
 			if (Context.material.paintEmis) {
@@ -349,7 +349,7 @@ class MakePaint {
 				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
 			}
 			else {
-				if (Context.layer.material_mask != null) {
+				if (Context.layer.fill_layer != null) {
 					frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'opacity') + ', mat_opacity);');
 				}
 				else {

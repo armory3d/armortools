@@ -69,7 +69,7 @@ class Uniforms {
 		}
 		if (link == "_brushScale") {
 			var nodesScale = Context.brushNodesScale;
-			var fill = Context.layer.material_mask != null;
+			var fill = Context.layer.fill_layer != null;
 			var val = (fill ? Context.layer.scale : Context.brushScale) * nodesScale;
 			return val;
 		}
@@ -140,7 +140,7 @@ class Uniforms {
 		}
 		if (link == "_brushAngle") {
 			var brushAngle = Context.brushAngle + Context.brushNodesAngle;
-			var angle = Context.layer.material_mask != null ? Context.layer.angle : brushAngle;
+			var angle = Context.layer.fill_layer != null ? Context.layer.angle : brushAngle;
 			angle *= (Math.PI / 180);
 			var pen = Input.getPen();
 			if (Config.raw.pressure_angle && pen.down()) {

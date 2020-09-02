@@ -479,7 +479,7 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
-		var fillLayer = Context.layer.material_mask != null && !Context.layerIsMask;
+		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
 		var groupLayer = Context.layer.getChildren() != null;
 		return !fillLayer && !groupLayer;
 	}
