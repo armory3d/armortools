@@ -48,8 +48,9 @@ class RenderPathRaytrace {
 			lastLayer = null;
 		}
 
+		if (!Context.envmapLoaded) Context.loadEnvmap();
 		var probe = Scene.active.world.probe;
-		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.savedEnvmap;
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		var materialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
 		var layer = (isLive || materialSpace) ? RenderPathPaint.liveLayer : Context.layer;
@@ -166,8 +167,9 @@ class RenderPathRaytrace {
 			return;
 		}
 
+		if (!Context.envmapLoaded) Context.loadEnvmap();
 		var probe = Scene.active.world.probe;
-		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : probe.radiance;
+		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.savedEnvmap;
 		if (lastEnvmap != savedEnvmap || lastLayer != Context.layer.texpaint) {
 			lastEnvmap = savedEnvmap;
 			lastLayer = Context.layer.texpaint;

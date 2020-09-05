@@ -1,4 +1,3 @@
-
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"
 #include "std/math.hlsl"
@@ -89,6 +88,13 @@ void raygeneration() {
 			TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
 			#endif
 
+			#ifdef _EMISSION
+			if (payload.color.a  == -2) {
+				accum += payload.color.rgb;
+				break;
+			}
+			#endif
+
 			// Miss
 			if (payload.color.a < 0) {
 				#ifdef _TRANSPARENCY
@@ -97,7 +103,6 @@ void raygeneration() {
 					transparentHits++;
 					i--;
 				}
-				// else {
 				#endif
 
 				if (i == 0 && constant_buffer.params.x < 0) { // No envmap
@@ -167,7 +172,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	float4 texpaint1 = mytexture1.Load(uint3(tex_coord * size, 0));
 	float4 texpaint2 = mytexture2.Load(uint3(tex_coord * size, 0));
-	float3 color = payload.color.rgb * pow(texpaint0.rgb, float3(2.2, 2.2, 2.2));
+	float3 texcolor = pow(texpaint0.rgb, float3(2.2, 2.2, 2.2));
 
 	float3 tangent = float3(0, 0, 0);
 	float3 binormal = float3(0, 0, 0);
@@ -177,26 +182,27 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	texpaint1.g = -texpaint1.g;
 	n = mul(texpaint1.rgb, float3x3(tangent, binormal, n));
 
+	float3 diffuseDir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-	if (f > 0.5) {
-		payload.ray_dir = lerp(reflect(WorldRayDirection(), n), cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank), pow(texpaint2.g, 1.2));
+	if (f < 0.5) {
+		float3 specularDir = reflect(WorldRayDirection(), n);
+		payload.ray_dir = lerp(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
+		float3 v = normalize(constant_buffer.eye.xyz - hit_world_position());
+		float dotNV = max(dot(n, v), 0.0);
+		float3 specular = surfaceSpecular(texcolor, texpaint2.b);
+		payload.color.xyz *= envBRDFApprox(specular, texpaint2.g, dotNV);
 	}
 	else {
-		payload.ray_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-		color = color * (1.0 - texpaint2.b);
+		payload.ray_dir = diffuseDir;
+		payload.color.xyz *= surfaceAlbedo(texcolor, texpaint2.b);
 	}
 
-	// float dotNL = dot(n, -WorldRayDirection());
-	// float3 wi = payload.ray_dir.x * tangent + payload.ray_dir.y * binormal + payload.ray_dir.z * n;
-	// float dotNV = dot(n, wi);
-
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
-	payload.color.xyz = color.xyz;
 
 	#ifdef _EMISSION
 	if (texpaint1.a == 1.0) { // matid
 		payload.color.xyz *= 100.0f;
-		payload.color.a = -1.0;
+		payload.color.a = -2.0;
 	}
 	#endif
 
@@ -211,7 +217,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 void miss(inout RayPayload payload) {
 
 	#ifdef _EMISSION
-	if (payload.color.a == -1.0) {
+	if (payload.color.a == -2.0) {
 		return;
 	}
 	#endif
