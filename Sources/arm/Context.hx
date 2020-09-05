@@ -74,6 +74,7 @@ class Context {
 	public static var savedEnvmap: Image = null;
 	public static var emptyEnvmap: Image = null;
 	public static var previewEnvmap: Image = null;
+	public static var envmapLoaded = false;
 	public static var showEnvmap = false;
 	public static var showEnvmapHandle = new Handle({selected: false});
 	public static var showEnvmapBlur = false;
@@ -374,5 +375,15 @@ class Context {
 	public static function mainObject(): MeshObject {
 		for (po in Project.paintObjects) if (po.children.length > 0) return po;
 		return Project.paintObjects[0];
+	}
+
+	public static function loadEnvmap() {
+		if (!envmapLoaded) {
+			// TODO: Unable to share texture for both radiance and envmap - reload image
+			envmapLoaded = true;
+			iron.data.Data.cachedImages.remove("World_radiance.k");
+		}
+		iron.Scene.active.world.loadEnvmap(function(_) {});
+		if (Context.savedEnvmap == null) Context.savedEnvmap = iron.Scene.active.world.envmap;
 	}
 }

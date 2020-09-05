@@ -122,7 +122,6 @@ class UISidebar {
 		var world = Scene.active.world;
 		if (Context.savedEnvmap == null) {
 			// Context.savedEnvmap = world.envmap;
-			// defaultEnvmap = world.envmap;
 			Context.defaultIrradiance = world.probe.irradiance;
 			Context.defaultRadiance = world.probe.radiance;
 			Context.defaultRadianceMipmaps = world.probe.radianceMipmaps;
