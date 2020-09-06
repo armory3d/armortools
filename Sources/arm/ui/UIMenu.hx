@@ -33,6 +33,7 @@ class UIMenu {
 	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
+	static var askToResetLayout = false;
 
 	@:access(zui.Zui)
 	public static function render(g: kha.graphics2.Graphics) {
@@ -52,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [16, 3, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 5];
+			var menuItems = [16, 4, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 5];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -93,6 +94,7 @@ class UIMenu {
 				if (ui.button("      " + tr("Redo {step}", ["step" => stepRedo]), Left, Config.keymap.edit_redo)) History.redo();
 				ui.enabled = true;
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
+				if (ui.button("      " + tr("Reset Layout"), Left)) askToResetLayout = true;
 				if (ui.button("      " + tr("Preferences..."), Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
 			else if (menuCategory == MenuViewport) {
@@ -384,6 +386,19 @@ class UIMenu {
 			App.redrawUI();
 			showMenuFirst = true;
 			menuCommands = null;
+		}
+
+		if (askToResetLayout) {
+			askToResetLayout = false;
+			UIMenu.draw(function(ui: Zui) {
+				ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
+				if (ui.button(tr("Confirm"), Left)) {
+					UISidebar.inst.tabh = UISidebar.inst.tabh1 = UISidebar.inst.tabh2 = Std.int(System.windowHeight() / 3);
+					UINodes.inst.defaultWindowW = UINodes.inst.show ? Std.int((iron.App.w() + UINodes.inst.defaultWindowW) / 2) : Std.int(iron.App.w() / 2);
+					UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
+					UIStatus.inst.statush = UIStatus.defaultStatusH;
+				}
+			}, 2);
 		}
 	}
 
