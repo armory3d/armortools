@@ -6,7 +6,7 @@ import zui.Id;
 import iron.system.Input;
 import iron.system.Time;
 import iron.system.ArmPack;
-import arm.format.Lz4;
+import iron.system.Lz4;
 import arm.sys.Path;
 import arm.sys.File;
 
