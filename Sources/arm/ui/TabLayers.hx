@@ -318,7 +318,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 6 : (21 + add);
+					var menuElements = l.getChildren() != null ? 7 : (21 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -379,7 +379,14 @@ class TabLayers {
 						if (ui.button(tr("Clear"), Left)) {
 							function clear(g: kha.graphics4.Graphics) {
 								g.end();
-								l.clearLayer();
+								if (l.getChildren() == null) {
+									l.clearLayer();
+								}
+								else {
+									for (c in l.getChildren()) {
+										c.clearLayer();
+									}
+								}
 								g.begin();
 								iron.App.removeRender(clear);
 							}
