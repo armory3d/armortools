@@ -5,6 +5,7 @@ import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
 import arm.io.ImportAsset;
+import arm.Enums;
 
 class TabConsole {
 
@@ -15,7 +16,8 @@ class TabConsole {
 		var title = Log.messageTimer > 0 ? Log.message + "        " : tr("Console");
 		var color = Log.messageTimer > 0 ? Log.messageColor : -1;
 
-		if (ui.tab(UIStatus.inst.statustab, title, false, color) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			ui.row([1 / 20, 1 / 20]);

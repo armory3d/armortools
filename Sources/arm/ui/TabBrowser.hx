@@ -4,6 +4,7 @@ import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
 import arm.io.ImportAsset;
+import arm.Enums;
 
 class TabBrowser {
 
@@ -13,7 +14,8 @@ class TabBrowser {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];

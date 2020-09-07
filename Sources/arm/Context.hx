@@ -240,7 +240,7 @@ class Context {
 			for (i in 0...mats.length) mats[i] = materialScene.data;
 		}
 		MakeMaterial.parsePaintMaterial();
-		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd0.redraws = 2;
 	}
 
 	public static function selectMaterial(i: Int) {
@@ -308,7 +308,7 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd0.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
@@ -349,7 +349,7 @@ class Context {
 					if (Project.materialsScene[i].data == cast(o, MeshObject).materials[0]) {
 						// selectMaterial(i); // loop
 						materialScene = Project.materialsScene[i];
-						UISidebar.inst.hwnd.redraws = 2;
+						UISidebar.inst.hwnd0.redraws = 2;
 						break;
 					}
 				}

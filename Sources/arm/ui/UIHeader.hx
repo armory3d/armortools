@@ -29,7 +29,7 @@ class UIHeader {
 		var ui = UISidebar.inst.ui;
 
 		var panelx = iron.App.x();
-		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - UISidebar.inst.windowW, Std.int(defaultHeaderH * ui.SCALE()))) {
+		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], Std.int(defaultHeaderH * ui.SCALE()))) {
 			ui._y += 2;
 
 			if (Context.tool == ToolColorId) {

@@ -33,19 +33,15 @@ import arm.Res;
 class UISidebar {
 
 	public static var inst: UISidebar;
-	public static var defaultWindowW = 280;
-	public var windowW = 280; // Panel width
+	public static inline var defaultWindowW = 280;
 	public var tabx = 0;
-	public var tabh = 0;
-	public var tabh1 = 0;
-	public var tabh2 = 0;
 	public var show = true;
 	public var isScrolling = false;
 	public var ui: Zui;
-	public var hwnd = Id.handle();
+	public var hwnd0 = Id.handle();
 	public var hwnd1 = Id.handle();
 	public var hwnd2 = Id.handle();
-	public var htab = Id.handle();
+	public var htab0 = Id.handle();
 	public var htab1 = Id.handle();
 	public var htab2 = Id.handle();
 	var borderStarted = 0;
@@ -60,10 +56,8 @@ class UISidebar {
 
 		Context.textToolText = tr("Text");
 
-		windowW = Std.int(defaultWindowW * Config.raw.window_scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
 		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
-		UIStatus.inst.statush = Std.int(UIStatus.defaultStatusH * Config.raw.window_scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * Config.raw.window_scale);
 
 		if (Project.materials == null) {
@@ -363,41 +357,40 @@ class UISidebar {
 		if (borderHandle != null) {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
 				if (borderStarted == SideLeft) {
-					UINodes.inst.defaultWindowW -= Std.int(mouse.movementX);
-					if (UINodes.inst.defaultWindowW < 32) UINodes.inst.defaultWindowW = 32;
-					else if (UINodes.inst.defaultWindowW > System.windowWidth() * 0.7) UINodes.inst.defaultWindowW = Std.int(System.windowWidth() * 0.7);
+					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
+					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
+					else if (Config.raw.layout[LayoutNodesW] > System.windowWidth() * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.windowWidth() * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
-					UINodes.inst.defaultWindowH -= Std.int(mouse.movementY);
-					if (UINodes.inst.defaultWindowH < 32) UINodes.inst.defaultWindowH = 32;
-					else if (UINodes.inst.defaultWindowH > iron.App.h() * 0.95) UINodes.inst.defaultWindowH = Std.int(iron.App.h() * 0.95);
+					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
+					if (Config.raw.layout[LayoutNodesH] < 32) Config.raw.layout[LayoutNodesH] = 32;
+					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
 				}
 			}
 			else if (borderHandle == UIStatus.inst.statusHandle) {
 				var my = Std.int(mouse.movementY);
-				if (UIStatus.inst.statush - my >= UIStatus.defaultStatusH * Config.raw.window_scale && UIStatus.inst.statush - my < System.windowHeight() * 0.7) {
-					UIStatus.inst.statush -= my;
+				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
+					Config.raw.layout[LayoutStatusH] -= my;
 				}
 			}
 			else {
 				if (borderStarted == SideLeft) {
-					defaultWindowW -= Std.int(mouse.movementX);
-					if (defaultWindowW < 32) defaultWindowW = 32;
-					else if (defaultWindowW > System.windowWidth() - 32) defaultWindowW = System.windowWidth() - 32;
-					windowW = Std.int(defaultWindowW * Config.raw.window_scale);
+					Config.raw.layout[LayoutSidebarW] -= Std.int(mouse.movementX);
+					if (Config.raw.layout[LayoutSidebarW] < 32) Config.raw.layout[LayoutSidebarW] = 32;
+					else if (Config.raw.layout[LayoutSidebarW] > System.windowWidth() - 32) Config.raw.layout[LayoutSidebarW] = System.windowWidth() - 32;
 				}
 				else {
 					var my = Std.int(mouse.movementY);
 					if (borderHandle == hwnd1 && borderStarted == SideTop) {
-						if (tabh + my > 32 && tabh1 - my > 32) {
-							tabh += my;
-							tabh1 -= my;
+						if (Config.raw.layout[LayoutSidebarH0] + my > 32 && Config.raw.layout[LayoutSidebarH1] - my > 32) {
+							Config.raw.layout[LayoutSidebarH0] += my;
+							Config.raw.layout[LayoutSidebarH1] -= my;
 						}
 					}
 					else if (borderHandle == hwnd2 && borderStarted == SideTop) {
-						if (tabh1 + my > 32 && tabh2 - my > 32) {
-							tabh1 += my;
-							tabh2 -= my;
+						if (Config.raw.layout[LayoutSidebarH1] + my > 32 && Config.raw.layout[LayoutSidebarH2] - my > 32) {
+							Config.raw.layout[LayoutSidebarH1] += my;
+							Config.raw.layout[LayoutSidebarH2] -= my;
 						}
 					}
 				}
@@ -580,7 +573,7 @@ class UISidebar {
 					g2.end();
 				}
 			}
-			hwnd.redraws = 2;
+			hwnd0.redraws = 2;
 		}
 		if (Context.layerPreviewDirty && Context.layer.getChildren() == null) {
 			Context.layerPreviewDirty = false;
@@ -595,7 +588,7 @@ class UISidebar {
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();
-			hwnd.redraws = 2;
+			hwnd0.redraws = 2;
 		}
 
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
@@ -628,12 +621,8 @@ class UISidebar {
 		UIHeader.inst.renderUI(g);
 		UIStatus.inst.renderUI(g);
 
-		tabx = System.windowWidth() - windowW;
-		if (tabh == 0) {
-			tabh = tabh1 = tabh2 = Std.int(System.windowHeight() / 3);
-		}
-
-		if (ui.window(hwnd, tabx, 0, windowW, tabh)) {
+		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
+		if (ui.window(hwnd0, tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
 			TabLayers.draw();
 			TabHistory.draw();
 			TabPlugins.draw();
@@ -642,7 +631,7 @@ class UISidebar {
 				TabOutliner.draw();
 			}
 		}
-		if (ui.window(hwnd1, tabx, tabh, windowW, tabh1)) {
+		if (ui.window(hwnd1, tabx, Config.raw.layout[LayoutSidebarH0], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH1])) {
 			if (UIHeader.inst.worktab.position != SpaceRender) {
 				Context.object = Context.paintObject;
 			}
@@ -657,7 +646,7 @@ class UISidebar {
 				#end
 			}
 		}
-		if (ui.window(hwnd2, tabx, tabh + tabh1, windowW, tabh2)) {
+		if (ui.window(hwnd2, tabx, Config.raw.layout[LayoutSidebarH0] + Config.raw.layout[LayoutSidebarH1], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH2])) {
 			TabTextures.draw();
 			TabMeshes.draw();
 			TabFonts.draw();
@@ -807,9 +796,9 @@ class UISidebar {
 	}
 
 	public function toggleBrowser() {
-		var minimized = UIStatus.inst.statush <= UIStatus.defaultStatusH * Config.raw.window_scale;
-		UIStatus.inst.statush = minimized ? 240 : UIStatus.defaultStatusH;
-		UIStatus.inst.statush = Std.int(UIStatus.inst.statush * Config.raw.window_scale);
+		var minimized = Config.raw.layout[LayoutStatusH] <= (UIStatus.defaultStatusH * Config.raw.window_scale);
+		Config.raw.layout[LayoutStatusH] = minimized ? 240 : UIStatus.defaultStatusH;
+		Config.raw.layout[LayoutStatusH] = Std.int(Config.raw.layout[LayoutStatusH] * Config.raw.window_scale);
 	}
 
 	public function getImage(asset: TAsset): Image {
@@ -829,7 +818,7 @@ class UISidebar {
 
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uiEnabled) return;
-		if (handle != hwnd &&
+		if (handle != hwnd0 &&
 			handle != hwnd1 &&
 			handle != hwnd2 &&
 			handle != UIStatus.inst.statusHandle &&
@@ -838,7 +827,7 @@ class UISidebar {
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
 		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
-		if (handle == hwnd && side == SideTop) return;
+		if (handle == hwnd0 && side == SideTop) return;
 		if (handle == hwnd2 && side == SideBottom) return;
 		if (handle == UIStatus.inst.statusHandle && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
@@ -864,7 +853,7 @@ class UISidebar {
 		UIStatus.inst.statusHandle.redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
-		hwnd.redraws = 2;
+		hwnd0.redraws = 2;
 		hwnd1.redraws = 2;
 		hwnd2.redraws = 2;
 	}

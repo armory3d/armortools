@@ -4,7 +4,7 @@ class TabPlugins {
 
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab, tr("Plugins"))) {
+		if (ui.tab(UISidebar.inst.htab0, tr("Plugins"))) {
 
 			ui.beginSticky();
 			ui.row([1 / 4]);

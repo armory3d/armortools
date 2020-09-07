@@ -4,6 +4,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Time;
 import arm.io.ImportFont;
+import arm.Enums;
 
 class TabFonts {
 
@@ -25,7 +26,7 @@ class TabFonts {
 			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
-			var num = Std.int(UISidebar.inst.windowW / slotw);
+			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.fonts.length / num))) {
 				ui.row([for (i in 0...num) 1 / num]);

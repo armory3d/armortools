@@ -59,9 +59,7 @@ class UIView2D {
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
-		if (UINodes.inst.defaultWindowW == 0) UINodes.inst.defaultWindowW = Std.int(iron.App.w() / 2);
-		if (UINodes.inst.defaultWindowH == 0) UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
-		ww = UINodes.inst.defaultWindowW;
+		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
 
@@ -88,7 +86,7 @@ class UIView2D {
 		ui.begin(g);
 		wh = iron.App.h();
 		if (UINodes.inst.show) {
-			wh -= UINodes.inst.defaultWindowH;
+			wh -= Config.raw.layout[LayoutNodesH];
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
@@ -204,7 +202,7 @@ class UIView2D {
 				Context.font.name = ui.textInput(h, "", Right);
 			}
 
-			if (h.changed) UISidebar.inst.hwnd.redraws = 2;
+			if (h.changed) UISidebar.inst.hwnd0.redraws = 2;
 			ui.t.ACCENT_COL = ACCENT_COL;
 			ui.t.BUTTON_H = BUTTON_H;
 			ui.t.ELEMENT_H = ELEMENT_H;

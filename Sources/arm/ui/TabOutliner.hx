@@ -11,7 +11,7 @@ class TabOutliner {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab, tr("Outliner"))) {
+		if (ui.tab(UISidebar.inst.htab0, tr("Outliner"))) {
 			ui.row([1 / 4]);
 			if (ui.button(tr("Import"))) Project.importMesh();
 

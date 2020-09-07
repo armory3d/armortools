@@ -6,6 +6,8 @@ import kha.Display;
 import iron.data.Data;
 #if arm_painter
 import arm.ui.UISidebar;
+import arm.ui.UINodes;
+import arm.ui.UIStatus;
 import arm.render.Inc;
 import arm.sys.Path;
 import arm.Enums;
@@ -138,7 +140,10 @@ class Config {
 	public static function restore() {
 		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
 		configLoaded = false;
+		var _layout = raw.layout;
 		init();
+		raw.layout = _layout;
+		initLayout();
 		Translator.loadTranslations(raw.locale);
 		#if arm_painter
 		applyConfig();
@@ -232,6 +237,18 @@ class Config {
 			   i == 4096 ? Res4096 :
 			   i == 8192 ? Res8192 :
 			   i == 16384 ? Res16384 : 0;
+	}
+
+	public static function initLayout() {
+		raw.layout = [
+			Std.int(UISidebar.defaultWindowW * raw.window_scale),
+			Std.int(kha.System.windowHeight() / 3),
+			Std.int(kha.System.windowHeight() / 3),
+			Std.int(kha.System.windowHeight() / 3),
+			(UINodes.inst != null && UINodes.inst.show) ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
+			Std.int(iron.App.h() / 2),
+			Std.int(UIStatus.defaultStatusH * raw.window_scale)
+		];
 	}
 	#end
 }

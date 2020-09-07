@@ -208,3 +208,13 @@ package arm;
 	var ModelTessellatedPlane = 2;
 	var ModelCustom = 3;
 }
+
+@:enum abstract LayoutSize(Int) from Int to Int {
+	var LayoutSidebarW = 0;
+	var LayoutSidebarH0 = 1;
+	var LayoutSidebarH1 = 2;
+	var LayoutSidebarH2 = 3;
+	var LayoutNodesW = 4;
+	var LayoutNodesH = 5;
+	var LayoutStatusH = 6;
+}

@@ -7,6 +7,7 @@ import iron.system.Input;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
+import arm.Enums;
 
 class TabLayers {
 
@@ -15,7 +16,7 @@ class TabLayers {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab, tr("Layers"))) {
+		if (ui.tab(UISidebar.inst.htab0, tr("Layers"))) {
 
 			ui.beginSticky();
 
@@ -88,7 +89,7 @@ class TabLayers {
 				var mouse = Input.getMouse();
 				var mx = mouse.x;
 				var my = mouse.y;
-				var inLayers = mx > UISidebar.inst.tabx && my < UISidebar.inst.tabh;
+				var inLayers = mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
 				if (App.isDragging && App.dragLayer != null && my > ui._y - step && my < ui._y + step) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
@@ -397,7 +398,7 @@ class TabLayers {
 								var target = Project.layers[i + 1];
 								Project.layers[i + 1] = Project.layers[i];
 								Project.layers[i] = target;
-								UISidebar.inst.hwnd.redraws = 2;
+								UISidebar.inst.hwnd0.redraws = 2;
 
 								// Move layer
 								if (!isGroup) {
@@ -442,7 +443,7 @@ class TabLayers {
 								var target = Project.layers[i - 1];
 								Project.layers[i - 1] = Project.layers[i];
 								Project.layers[i] = target;
-								UISidebar.inst.hwnd.redraws = 2;
+								UISidebar.inst.hwnd0.redraws = 2;
 
 								// Move layer
 								if (!isGroup) {

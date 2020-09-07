@@ -20,8 +20,6 @@ class UINodes {
 	public static var inst: UINodes;
 
 	public var show = false;
-	public var defaultWindowW = 0;
-	public var defaultWindowH = 0;
 	public var wx: Int;
 	public var wy: Int;
 	public var ww: Int;
@@ -114,7 +112,7 @@ class UINodes {
 			mchanged = changed = false;
 			canvasChanged();
 			if (mreleased) {
-				UISidebar.inst.hwnd.redraws = 2;
+				UISidebar.inst.hwnd0.redraws = 2;
 				History.editNodes(lastCanvas, canvasType);
 			}
 		}
@@ -127,15 +125,12 @@ class UINodes {
 		if (!App.uiEnabled) return;
 		var kb = Input.getKeyboard();
 
-		if (defaultWindowW == 0) defaultWindowW = Std.int(iron.App.w() / 2);
-		if (defaultWindowH == 0) defaultWindowH = Std.int(iron.App.h() / 2);
-
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
 		if (UIView2D.inst.show) {
-			wy += iron.App.h() - defaultWindowH;
+			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
-		var ww = defaultWindowW;
+		var ww = Config.raw.layout[LayoutNodesW];
 		var mx = mouse.x;
 		var my = mouse.y;
 		if (mx < wx || mx > wx + ww || my < wy) return;
@@ -243,7 +238,7 @@ class UINodes {
 	}
 
 	public function drawGrid() {
-		var ww = defaultWindowW;
+		var ww = Config.raw.layout[LayoutNodesW];
 		var wh = iron.App.h();
 		var w = ww + 100 * 2;
 		var h = wh + 100 * 2;
@@ -294,7 +289,7 @@ class UINodes {
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 
-			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd0.redraws = 2;
 			recompileMatFinal = false;
 			Context.nodePreviewDirty = true;
 		}
@@ -325,14 +320,14 @@ class UINodes {
 		ui.begin(g);
 
 		// Make window
-		ww = defaultWindowW;
+		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
 		if (UIView2D.inst.show) {
-			wh = defaultWindowH;
-			wy = iron.App.h() - defaultWindowH + UIHeader.inst.headerh * 2;
+			wh = Config.raw.layout[LayoutNodesH];
+			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.inst.headerh * 2;
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 

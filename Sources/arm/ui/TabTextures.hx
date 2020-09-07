@@ -7,6 +7,7 @@ import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
 import arm.sys.Path;
+import arm.Enums;
 
 class TabTextures {
 
@@ -32,7 +33,7 @@ class TabTextures {
 			if (Project.assets.length > 0) {
 
 				var slotw = Std.int(51 * ui.SCALE());
-				var num = Std.int(UISidebar.inst.windowW / slotw);
+				var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 				for (row in 0...Std.int(Math.ceil(Project.assets.length / num))) {
 					ui.row([for (i in 0...num) 1 / num]);

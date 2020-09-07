@@ -393,10 +393,8 @@ class UIMenu {
 			UIMenu.draw(function(ui: Zui) {
 				ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
 				if (ui.button(tr("Confirm"), Left)) {
-					UISidebar.inst.tabh = UISidebar.inst.tabh1 = UISidebar.inst.tabh2 = Std.int(System.windowHeight() / 3);
-					UINodes.inst.defaultWindowW = UINodes.inst.show ? Std.int((iron.App.w() + UINodes.inst.defaultWindowW) / 2) : Std.int(iron.App.w() / 2);
-					UINodes.inst.defaultWindowH = Std.int(iron.App.h() / 2);
-					UIStatus.inst.statush = UIStatus.defaultStatusH;
+					Config.initLayout();
+					Config.save();
 				}
 			}, 2);
 		}

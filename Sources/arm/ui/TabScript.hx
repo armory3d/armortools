@@ -8,6 +8,7 @@ import kha.Blob;
 import iron.data.Data;
 import arm.sys.Path;
 import arm.io.ImportAsset;
+import arm.Enums;
 
 class TabScript {
 
@@ -16,7 +17,8 @@ class TabScript {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UIStatus.inst.statustab, tr("Script")) && UIStatus.inst.statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (ui.tab(UIStatus.inst.statustab, tr("Script")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);

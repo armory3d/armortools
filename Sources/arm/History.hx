@@ -160,7 +160,7 @@ class History {
 			}
 			undos--;
 			redos++;
-			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd0.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -272,7 +272,7 @@ class History {
 			}
 			undos++;
 			redos--;
-			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd0.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}

@@ -422,7 +422,7 @@ class LayerSlot {
 		function _parse(_) {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
-			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd0.redraws = 2;
 			iron.App.removeRender(_parse);
 		}
 		iron.App.notifyOnRender(_parse);
@@ -433,7 +433,7 @@ class LayerSlot {
 		fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
-		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd0.redraws = 2;
 	}
 
 	public function toFillMask() {
@@ -443,7 +443,7 @@ class LayerSlot {
 		function _parse(_) {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
-			UISidebar.inst.hwnd.redraws = 2;
+			UISidebar.inst.hwnd0.redraws = 2;
 			iron.App.removeRender(_parse);
 		}
 		iron.App.notifyOnRender(_parse);
@@ -454,7 +454,7 @@ class LayerSlot {
 		fill_mask = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.layerPreviewDirty = true;
-		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd0.redraws = 2;
 	}
 
 	public function isVisible(): Bool {

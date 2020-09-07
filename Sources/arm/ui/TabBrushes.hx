@@ -8,6 +8,7 @@ import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.io.ExportArm;
 import arm.sys.Path;
+import arm.Enums;
 
 class TabBrushes {
 
@@ -34,7 +35,7 @@ class TabBrushes {
 			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
-			var num = Std.int(UISidebar.inst.windowW / slotw);
+			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.brushes.length / num))) {
 				ui.row([for (i in 0...num) 1 / num]);

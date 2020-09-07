@@ -200,13 +200,14 @@ class App {
 
 		var res = 0;
 		if (UINodes.inst == null || UISidebar.inst == null) {
-			res = System.windowWidth() - UISidebar.defaultWindowW - UIToolbar.defaultToolbarW;
+			var sidebarw = Config.raw.layout == null ? UISidebar.defaultWindowW : Config.raw.layout[LayoutSidebarW];
+			res = System.windowWidth() - sidebarw - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = System.windowWidth() - UISidebar.inst.windowW - UINodes.inst.defaultWindowW - UIToolbar.inst.toolbarw;
+			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - Config.raw.layout[LayoutNodesW] - UIToolbar.inst.toolbarw;
 		}
 		else if (UISidebar.inst.show) {
-			res = System.windowWidth() - UISidebar.inst.windowW - UIToolbar.inst.toolbarw;
+			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - UIToolbar.inst.toolbarw;
 		}
 		else { // Distract free
 			res = System.windowWidth();
@@ -234,7 +235,8 @@ class App {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
 		else if (UISidebar.inst != null && UISidebar.inst.show && res > 0) {
-			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + UIStatus.inst.statush;
+			var statush = Config.raw.layout[LayoutStatusH];
+			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -253,9 +255,9 @@ class App {
 		resize();
 
 		var ratio = System.windowHeight() / lastWindowHeight;
-		UISidebar.inst.tabh = Std.int(UISidebar.inst.tabh * ratio);
-		UISidebar.inst.tabh1 = Std.int(UISidebar.inst.tabh1 * ratio);
-		UISidebar.inst.tabh2 = System.windowHeight() - UISidebar.inst.tabh - UISidebar.inst.tabh1;
+		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratio);
+		Config.raw.layout[LayoutSidebarH1] = Std.int(Config.raw.layout[LayoutSidebarH1] * ratio);
+		Config.raw.layout[LayoutSidebarH2] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0] - Config.raw.layout[LayoutSidebarH1];
 		lastWindowHeight = System.windowHeight();
 
 		#if (krom_linux || krom_darwin)
@@ -308,7 +310,7 @@ class App {
 	}
 
 	public static function redrawUI() {
-		UISidebar.inst.hwnd.redraws = 2;
+		UISidebar.inst.hwnd0.redraws = 2;
 		UISidebar.inst.hwnd1.redraws = 2;
 		UISidebar.inst.hwnd2.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
@@ -336,8 +338,8 @@ class App {
 			var my = mouse.y;
 			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
 							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
-			var inLayers = UISidebar.inst.htab.position == 0 &&
-						   mx > UISidebar.inst.tabx && my < UISidebar.inst.tabh;
+			var inLayers = UISidebar.inst.htab0.position == 0 &&
+						   mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
@@ -396,9 +398,10 @@ class App {
 				dragLayer = null;
 			}
 			else if (dragFile != null) {
+				var statush = Config.raw.layout[LayoutStatusH];
 				var inBrowser =
-					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - UISidebar.inst.windowW) &&
-					my > System.windowHeight() - UIStatus.inst.statush;
+					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW]) &&
+					my > System.windowHeight() - statush;
 				if (!inBrowser) {
 					dropX = mouse.x;
 					dropY = mouse.y;

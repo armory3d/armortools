@@ -64,7 +64,7 @@ class TabMaterials {
 			ui.separator(3, false);
 
 			var slotw = Std.int(51 * ui.SCALE());
-			var num = Std.int(UISidebar.inst.windowW / slotw);
+			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
 				var mult = Config.raw.show_asset_names ? 2 : 1;

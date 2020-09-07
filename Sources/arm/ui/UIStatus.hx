@@ -12,7 +12,6 @@ class UIStatus {
 	public static inline var defaultStatusH = 32;
 
 	public var statusHandle = new Handle();
-	public var statush = defaultStatusH;
 	public var statustab = Id.handle();
 
 	public function new() {
@@ -23,7 +22,8 @@ class UIStatus {
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UISidebar.inst.ui;
 
-		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - UISidebar.inst.windowW, statush)) {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 			ui._y += 2;
 
 			TabBrowser.draw();

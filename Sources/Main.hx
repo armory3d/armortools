@@ -80,6 +80,7 @@ class Main {
 		};
 
 		System.start(options, function(window: Window) {
+			if (Config.raw.layout == null) Config.initLayout();
 			Krom.setApplicationName("ArmorPaint");
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {

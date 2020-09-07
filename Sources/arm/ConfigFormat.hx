@@ -47,5 +47,6 @@ typedef TConfig = {
 	@:optional var displace_strength: Null<Float>;
 	@:optional var native_file_browser: Null<Bool>;
 	@:optional var show_asset_names: Null<Bool>;
+	@:optional var layout: Array<Int>;
 	#end
 }
