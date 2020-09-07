@@ -43,6 +43,12 @@ class History {
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
 			}
+			else if (step.name == tr("Clear Layer")) {
+				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+				var lay = undoLayers[undoI];
+				Context.layer.swap(lay);
+				Context.layerPreviewDirty = true;
+			}
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.layer = Project.layers[step.layer + 1];
 				Context.layer.delete();
@@ -180,6 +186,12 @@ class History {
 				swapActive();
 				Context.layer.delete();
 			}
+			else if (step.name == tr("Clear Layer")) {
+				Context.layer = Project.layers[step.layer];
+				swapActive();
+				Context.layer.clearLayer();
+				Context.layerPreviewDirty = true;
+			}
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.layer = Project.layers[step.layer];
 				Context.layer = Context.layer.duplicate();
@@ -304,6 +316,11 @@ class History {
 	public static function deleteLayer() {
 		swapActive();
 		push(tr("Delete Layer"));
+	}
+
+	public static function clearLayer() {
+		swapActive();
+		push(tr("Clear Layer"));
 	}
 
 	public static function orderLayers(prevOrder: Int) {

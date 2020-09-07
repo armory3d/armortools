@@ -380,12 +380,16 @@ class TabLayers {
 							function clear(g: kha.graphics4.Graphics) {
 								g.end();
 								if (l.getChildren() == null) {
+									History.clearLayer();
 									l.clearLayer();
 								}
 								else {
 									for (c in l.getChildren()) {
+										Context.layer = c;
+										History.clearLayer();
 										c.clearLayer();
 									}
+									Context.layer = l;
 								}
 								g.begin();
 								iron.App.removeRender(clear);
