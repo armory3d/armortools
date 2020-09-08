@@ -255,9 +255,13 @@ class MakePaint {
 			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');
 			frag.add_uniform('vec4 stencilTransform', '_stencilTransform');
 			frag.write('vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
-			frag.write('stencil_uv -= vec2(0.5, 0.5);');
-			frag.write('stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w), stencil_uv.x * sin(stencilTransform.w) + stencil_uv.y * cos(stencilTransform.w));');
-			frag.write('stencil_uv += vec2(0.5, 0.5);');
+			frag.write('vec2 stencil_size = textureSize(texbrushstencil, 0);');
+			frag.write('float stencil_ratio = stencil_size.y / stencil_size.x;');
+			frag.write('stencil_uv -= vec2(0.5 / stencil_ratio, 0.5);');
+			frag.write('stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w),
+										  stencil_uv.x * sin(stencilTransform.w) + stencil_uv.y * cos(stencilTransform.w));');
+			frag.write('stencil_uv += vec2(0.5 / stencil_ratio, 0.5);');
+			frag.write('stencil_uv.x *= stencil_ratio;');
 			frag.write('if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
 			frag.write('vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
 			frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
