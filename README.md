@@ -103,6 +103,7 @@ node Kinc/make -g direct3d11 --vr oculus
 # Updating cloned repository
 git pull origin master
 git submodule update --init --recursive
+# Delete `armorpaint/build` directory if present
 ```
 ```bash
 # How to generate or update a locale file
