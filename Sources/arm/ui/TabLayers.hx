@@ -478,7 +478,21 @@ class TabLayers {
 							}
 						}
 						if (l.getChildren() != null && ui.button(tr("Merge Group"), Left)) {
-
+							function mergeGroup(g: kha.graphics4.Graphics) {
+								g.end();
+								var children = l.getChildren();
+								for (i in 0...children.length - 1) {
+									Context.setLayer(children[children.length - 1 - i]);
+									History.mergeLayers(g);
+									Layers.mergeSelectedLayer(g);
+								}
+								children[0].parent = null;
+								children[0].name = l.name;
+								l.delete();
+								g.begin();
+								iron.App.removeRender(mergeGroup);
+							}
+							iron.App.notifyOnRender(mergeGroup);
 						}
 						if (l.getChildren() == null && ui.button(tr("Merge Down"), Left)) {
 							Context.setLayer(l);
