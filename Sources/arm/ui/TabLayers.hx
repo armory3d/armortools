@@ -318,7 +318,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 7 : (21 + add);
+					var menuElements = l.getChildren() != null ? 8 : (21 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -365,7 +365,11 @@ class TabLayers {
 									History.deleteLayer();
 								}
 								else {
-									// History.deleteGroup();
+									for (c in l.getChildren()) {
+										Context.layer = c;
+										History.deleteLayer();
+										c.delete();
+									}
 								}
 								l.delete();
 
@@ -377,6 +381,7 @@ class TabLayers {
 							}
 						}
 						if (ui.button(tr("Clear"), Left)) {
+							Context.setLayer(l);
 							function clear(g: kha.graphics4.Graphics) {
 								g.end();
 								if (l.getChildren() == null) {
@@ -480,13 +485,30 @@ class TabLayers {
 							iron.App.notifyOnRender(History.mergeLayers);
 							iron.App.notifyOnRender(Layers.mergeSelectedLayer);
 						}
-						if (l.getChildren() == null && ui.button(tr("Duplicate"), Left)) {
-							Context.setLayer(l);
-							History.duplicateLayer();
+						if (ui.button(tr("Duplicate"), Left)) {
 							function makeDupli(g: kha.graphics4.Graphics) {
 								g.end();
-								l = l.duplicate();
-								Context.setLayer(l);
+								if (l.getChildren() == null) {
+									Context.setLayer(l);
+									History.duplicateLayer();
+									l = l.duplicate();
+									Context.setLayer(l);
+								}
+								else {
+									var group = Layers.newGroup();
+									Project.layers.remove(group);
+									Project.layers.insert(Project.layers.indexOf(l) + 1, group);
+									// group.show_panel = true;
+									for (c in l.getChildren()) {
+										Context.setLayer(c);
+										History.duplicateLayer();
+										c = c.duplicate();
+										c.parent = group;
+										Project.layers.remove(c);
+										Project.layers.insert(Project.layers.indexOf(group), c);
+									}
+									Context.setLayer(group);
+								}
 								g.begin();
 								iron.App.removeRender(makeDupli);
 							}

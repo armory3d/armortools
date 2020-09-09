@@ -309,6 +309,7 @@ class LayerSlot {
 			l.texpaint_mask_preview.g2.end();
 		}
 
+		l.parent = parent;
 		l.visible = visible;
 		l.maskOpacity = maskOpacity;
 		l.fill_layer = fill_layer;
