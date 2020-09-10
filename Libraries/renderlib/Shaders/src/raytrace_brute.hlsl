@@ -1,3 +1,11 @@
+
+// #define _EMISSION
+// #define _SUBSURFACE
+// #define _RENDER
+// #define _ROULETTE
+// #define _TRANSPARENCY
+// #define _TRANSLUCENCY
+
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"
 #include "std/math.hlsl"
@@ -36,7 +44,11 @@ Texture2D<float4> mytexture_scramble : register(t8);
 Texture2D<float4> mytexture_rank : register(t9);
 
 static const int SAMPLES = 64;
+#ifdef _TRANSLUCENCY
+static const int DEPTH = 6;
+#else
 static const int DEPTH = 3; // Opaque hits
+#endif
 static uint seed = 0;
 #ifdef _TRANSPARENCY
 static const int DEPTH_TRANSPARENT = 16; // Transparent hits
@@ -182,10 +194,23 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	texpaint1.g = -texpaint1.g;
 	n = mul(texpaint1.rgb, float3x3(tangent, binormal, n));
 
-	float3 diffuseDir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+
+	#ifdef _TRANSLUCENCY
+	float3 diffuseDir = texpaint0.a < f ?
+		cos_weighted_hemisphere_direction(WorldRayDirection(), payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
+		cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	#else
+	float3 diffuseDir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	#endif
+
 	if (f < 0.5) {
+		#ifdef _TRANSLUCENCY
+		float3 specularDir = texpaint0.a < f * 2 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
+		#else
 		float3 specularDir = reflect(WorldRayDirection(), n);
+		#endif
+
 		payload.ray_dir = lerp(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
 		float3 v = normalize(constant_buffer.eye.xyz - hit_world_position());
 		float dotNV = max(dot(n, v), 0.0);
