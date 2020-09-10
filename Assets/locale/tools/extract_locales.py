@@ -60,10 +60,11 @@ def main() -> None:
         )
 
     matches: List[str] = []
-    for root, dirnames, filenames in os.walk("Sources"):
-        dirnames[:] = [d for d in dirnames]
-        for filename in fnmatch.filter(filenames, "*.hx"):
-            matches.append(os.path.join(root, filename))
+    for folder in ["Sources", "Libraries"]:
+        for root, dirnames, filenames in os.walk(folder):
+            dirnames[:] = [d for d in dirnames]
+            for filename in fnmatch.filter(filenames, "*.hx"):
+                matches.append(os.path.join(root, filename))
     matches.sort()
 
     template_data: Dict[str, str] = {}
