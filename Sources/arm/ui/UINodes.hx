@@ -198,7 +198,7 @@ class UINodes {
 			var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			for (list in nodeList) {
 				for (n in list) {
-					if (n.name.toLowerCase().indexOf(search) >= 0) {
+					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
 						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
 						if (ui.button(tr(n.name), Left) || (enter && count == nodeSearchOffset)) {
 							var nodes = getNodes();
@@ -516,7 +516,6 @@ class UINodes {
 
 	public static function makeNode(n: TNode, nodes: Nodes, canvas: TNodeCanvas): TNode {
 		var node: TNode = Json.parse(Json.stringify(n));
-		translateNode(node);
 		node.id = nodes.getNodeId(canvas.nodes);
 		node.x = UINodes.inst.getNodeX();
 		node.y = UINodes.inst.getNodeY();
@@ -529,12 +528,5 @@ class UINodes {
 			soc.node_id = node.id;
 		}
 		return node;
-	}
-
-	public static function translateNode(node: TNode) {
-		node.name = tr(node.name);
-		for (inp in node.inputs) inp.name = tr(inp.name);
-		for (out in node.outputs) out.name = tr(out.name);
-		for (but in node.buttons) but.name = tr(but.name);
 	}
 }

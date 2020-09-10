@@ -30,6 +30,5 @@ class BrushSlot {
 		else {
 			canvas = c;
 		}
-		for (node in canvas.nodes) arm.ui.UINodes.translateNode(node);
 	}
 }

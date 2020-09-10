@@ -143,6 +143,7 @@ class App {
 
 				colorWheel = image;
 				Nodes.enumTexts = enumTexts;
+				Nodes.tr = tr;
 				uiBox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
 				uiMenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
 				defaultElementH = uiMenu.t.ELEMENT_H;

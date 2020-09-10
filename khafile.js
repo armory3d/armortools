@@ -30,6 +30,7 @@ project.addAssets("Assets/meshes/*", { notinlist: true, destination: "data/meshe
 project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
+project.addDefine("zui_translate");
 
 if (!android) {
 	project.addDefine("arm_data_dir");

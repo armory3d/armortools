@@ -49,7 +49,6 @@ class MaterialSlot {
 		else {
 			canvas = c;
 		}
-		for (node in canvas.nodes) arm.ui.UINodes.translateNode(node);
 	}
 
 	public function unload() {
