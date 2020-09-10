@@ -50,6 +50,9 @@ class TabLayers {
 				}
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
+				#if (kha_direct3d12 || kha_vulkan)
+				arm.render.RenderPathRaytrace.ready = false;
+				#end
 			}
 
 			ui.endSticky();

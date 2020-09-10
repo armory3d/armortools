@@ -240,10 +240,11 @@ class RenderPathRaytrace {
 
 	static function buildData() {
 		if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
-		var mo = Context.mergedObject;
+		var mo = Context.layerFilter == 0 ? Context.mergedObject : Context.paintObject;
 		var md = mo.data;
 		var geom = md.geom;
-		vb_scale = mo.parent.transform.scale.x * md.scalePos;
+		var mo_scale = mo.transform.scale.x; // Uniform scale only
+		vb_scale = mo.parent.transform.scale.x * md.scalePos * mo_scale;
 		vb = geom.vertexBuffer;
 		ib = geom.indexBuffers[0];
 	}
