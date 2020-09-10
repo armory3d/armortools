@@ -18,7 +18,6 @@ class MakeDiscard {
 	}
 
 	public static function face(vert: NodeShader, frag: NodeShader) {
-
 		frag.add_uniform('sampler2D gbuffer2');
 		frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
 		frag.add_uniform('vec2 textrianglemapSize', '_texpaintSize');

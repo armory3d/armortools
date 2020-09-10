@@ -57,17 +57,14 @@ class Config {
 			raw.window_y = -1;
 			raw.window_scale = 1.0;
 			var disp = Display.primary;
-			if (disp != null && disp.width >= 2560 && disp.height >= 1600) {
+			if (disp.width >= 2560 && disp.height >= 1600) {
 				raw.window_scale = 2.0;
 			}
 			#if (krom_android || krom_ios || krom_darwin)
 			raw.window_scale = 2.0;
 			#end
 			raw.window_vsync = true;
-			raw.window_frequency = 60;
-			if (disp != null) {
-				raw.window_frequency = disp.frequency;
-			}
+			raw.window_frequency = disp.frequency;
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_vignette = 0.4;
