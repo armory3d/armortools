@@ -5,13 +5,16 @@ import arm.Enums;
 
 class NodesMaterial {
 
-	public static var categories = ["Input", "Texture", "Color", "Vector", "Converter"];
+	// Mark strings as localizable
+	public static inline function _tr(s: String) { return s; }
+
+	public static var categories = [_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter")];
 
 	public static var list: Array<Array<TNode>> = [
 		[ // Input
 			{
 				id: 0,
-				name: "Attribute",
+				name: _tr("Attribute"),
 				type: "ATTRIBUTE",
 				x: 0,
 				y: 0,
@@ -21,7 +24,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -29,7 +32,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -37,7 +40,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -45,14 +48,14 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Name",
+						name: _tr("Name"),
 						type: "STRING"
 					}
 				]
 			},
 			{
 				id: 0,
-				name: "Camera Data",
+				name: _tr("Camera Data"),
 				type: "CAMERA",
 				x: 0,
 				y: 0,
@@ -62,7 +65,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "View Vector",
+						name: _tr("View Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -70,7 +73,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "View Z Depth",
+						name: _tr("View Z Depth"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -78,7 +81,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "View Distance",
+						name: _tr("View Distance"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -88,7 +91,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Layer",
+				name: _tr("Layer"),
 				type: "LAYER", // extension
 				x: 0,
 				y: 0,
@@ -98,7 +101,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Base Color",
+						name: _tr("Base Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 1.0])
@@ -106,7 +109,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Opacity",
+						name: _tr("Opacity"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -114,7 +117,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Occlusion",
+						name: _tr("Occlusion"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -122,7 +125,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Roughness",
+						name: _tr("Roughness"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -130,7 +133,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Metallic",
+						name: _tr("Metallic"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -138,7 +141,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal Map",
+						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
 						default_value: f32([0.5, 0.5, 1.0])
@@ -146,7 +149,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Emission",
+						name: _tr("Emission"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -154,7 +157,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Height",
+						name: _tr("Height"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -162,7 +165,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Subsurface",
+						name: _tr("Subsurface"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -170,7 +173,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Layer",
+						name: _tr("Layer"),
 						type: "ENUM",
 						default_value: 0,
 						data: ""
@@ -179,7 +182,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Layer Mask",
+				name: _tr("Layer Mask"),
 				type: "LAYER_MASK", // extension
 				x: 0,
 				y: 0,
@@ -189,7 +192,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -197,7 +200,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Layer",
+						name: _tr("Layer"),
 						type: "ENUM",
 						default_value: 0,
 						data: ""
@@ -206,7 +209,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Material",
+				name: _tr("Material"),
 				type: "MATERIAL", // extension
 				x: 0,
 				y: 0,
@@ -216,7 +219,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Base Color",
+						name: _tr("Base Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 1.0])
@@ -224,7 +227,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Opacity",
+						name: _tr("Opacity"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -232,7 +235,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Occlusion",
+						name: _tr("Occlusion"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -240,7 +243,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Roughness",
+						name: _tr("Roughness"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -248,7 +251,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Metallic",
+						name: _tr("Metallic"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -256,7 +259,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal Map",
+						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
 						default_value: f32([0.5, 0.5, 1.0])
@@ -264,7 +267,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Emission",
+						name: _tr("Emission"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -272,7 +275,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Height",
+						name: _tr("Height"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -280,7 +283,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Subsurface",
+						name: _tr("Subsurface"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -288,7 +291,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Material",
+						name: _tr("Material"),
 						type: "ENUM",
 						default_value: 0,
 						data: ""
@@ -297,7 +300,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Fresnel",
+				name: _tr("Fresnel"),
 				type: "FRESNEL",
 				x: 0,
 				y: 0,
@@ -306,7 +309,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "IOR",
+						name: _tr("IOR"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.45,
@@ -316,7 +319,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -326,7 +329,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -336,7 +339,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Geometry",
+				name: _tr("Geometry"),
 				type: "NEW_GEOMETRY",
 				x: 0,
 				y: 0,
@@ -346,7 +349,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Position",
+						name: _tr("Position"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -354,7 +357,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -362,7 +365,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Tangent",
+						name: _tr("Tangent"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -370,7 +373,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "True Normal",
+						name: _tr("True Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -378,7 +381,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Incoming",
+						name: _tr("Incoming"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -386,7 +389,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Parametric",
+						name: _tr("Parametric"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -394,7 +397,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Backfacing",
+						name: _tr("Backfacing"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -402,7 +405,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Pointiness",
+						name: _tr("Pointiness"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -412,7 +415,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Layer Weight",
+				name: _tr("Layer Weight"),
 				type: "LAYER_WEIGHT",
 				x: 0,
 				y: 0,
@@ -421,7 +424,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Blend",
+						name: _tr("Blend"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -429,7 +432,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -439,7 +442,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fresnel",
+						name: _tr("Fresnel"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -447,7 +450,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Facing",
+						name: _tr("Facing"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -457,7 +460,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Object Info",
+				name: _tr("Object Info"),
 				type: "OBJECT_INFO",
 				x: 0,
 				y: 0,
@@ -467,7 +470,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Location",
+						name: _tr("Location"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -475,7 +478,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Object Index",
+						name: _tr("Object Index"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -483,7 +486,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Material Index",
+						name: _tr("Material Index"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -491,7 +494,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Random",
+						name: _tr("Random"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -501,7 +504,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "RGB",
+				name: _tr("RGB"),
 				type: "RGB",
 				x: 0,
 				y: 0,
@@ -511,7 +514,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.5, 0.5, 0.5, 1.0])
@@ -519,7 +522,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "default_value",
+						name: _tr("default_value"),
 						type: "RGBA",
 						output: 0
 					}
@@ -527,7 +530,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Tangent",
+				name: _tr("Tangent"),
 				type: "TANGENT",
 				x: 0,
 				y: 0,
@@ -537,7 +540,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Tangent",
+						name: _tr("Tangent"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -547,7 +550,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Texture Coord",
+				name: _tr("Texture Coord"),
 				type: "TEX_COORD",
 				x: 0,
 				y: 0,
@@ -557,7 +560,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Generated",
+						name: _tr("Generated"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -565,7 +568,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -573,7 +576,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "UV",
+						name: _tr("UV"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -581,7 +584,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Object",
+						name: _tr("Object"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -589,7 +592,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Camera",
+						name: _tr("Camera"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -597,7 +600,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Window",
+						name: _tr("Window"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -605,7 +608,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Reflection",
+						name: _tr("Reflection"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -615,7 +618,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "UV Map",
+				name: _tr("UV Map"),
 				type: "UVMAP",
 				x: 0,
 				y: 0,
@@ -625,7 +628,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "UV",
+						name: _tr("UV"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -635,7 +638,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Value",
+				name: _tr("Value"),
 				type: "VALUE",
 				x: 0,
 				y: 0,
@@ -645,7 +648,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -653,7 +656,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "default_value",
+						name: _tr("default_value"),
 						type: "VALUE",
 						output: 0,
 						min: 0.0,
@@ -665,7 +668,7 @@ class NodesMaterial {
 		// [ // Output
 		// 	{
 		// 		id: 0,
-		// 		name: "Material Output",
+		// 		name: _tr("Material Output"),
 		// 		type: "OUTPUT_MATERIAL_PBR",
 		// 		x: 0,
 		// 		y: 0,
@@ -674,7 +677,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Base Color",
+		// 				name: _tr("Base Color"),
 		// 				type: "RGBA",
 		// 				color: 0xffc7c729,
 		// 				default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -682,7 +685,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Opacity",
+		// 				name: _tr("Opacity"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 1.0
@@ -690,7 +693,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Occlusion",
+		// 				name: _tr("Occlusion"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 1.0
@@ -698,7 +701,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Roughness",
+		// 				name: _tr("Roughness"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 0.1
@@ -706,7 +709,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Metallic",
+		// 				name: _tr("Metallic"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 0.0
@@ -714,7 +717,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Normal Map",
+		// 				name: _tr("Normal Map"),
 		// 				type: "VECTOR",
 		// 				color: -10238109,
 		// 				default_value: f32([0.5, 0.5, 1.0])
@@ -722,7 +725,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Emission",
+		// 				name: _tr("Emission"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 0.0
@@ -730,7 +733,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Height",
+		// 				name: _tr("Height"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 0.0
@@ -738,7 +741,7 @@ class NodesMaterial {
 		// 			{
 		// 				id: 0,
 		// 				node_id: 0,
-		// 				name: "Subsurface",
+		// 				name: _tr("Subsurface"),
 		// 				type: "VALUE",
 		// 				color: 0xffa1a1a1,
 		// 				default_value: 0.0
@@ -751,7 +754,7 @@ class NodesMaterial {
 		[ // Texture
 			{
 				id: 0,
-				name: "Brick Texture",
+				name: _tr("Brick Texture"),
 				type: "TEX_BRICK",
 				x: 0,
 				y: 0,
@@ -760,7 +763,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -768,7 +771,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color 1",
+						name: _tr("Color 1"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8])
@@ -776,7 +779,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color 2",
+						name: _tr("Color 2"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.2, 0.2, 0.2])
@@ -784,7 +787,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color 3",
+						name: _tr("Color 3"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -792,7 +795,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -804,7 +807,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -812,7 +815,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -822,7 +825,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Checker Texture",
+				name: _tr("Checker Texture"),
 				type: "TEX_CHECKER",
 				x: 0,
 				y: 0,
@@ -831,7 +834,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -839,7 +842,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color 1",
+						name: _tr("Color 1"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8])
@@ -847,7 +850,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color 2",
+						name: _tr("Color 2"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.2, 0.2, 0.2])
@@ -855,7 +858,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -867,7 +870,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -875,7 +878,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -885,7 +888,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Gradient Texture",
+				name: _tr("Gradient Texture"),
 				type: "TEX_GRADIENT",
 				x: 0,
 				y: 0,
@@ -894,7 +897,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -904,7 +907,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -912,7 +915,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -920,7 +923,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "gradient_type",
+						name: _tr("gradient_type"),
 						type: "ENUM",
 						// data: ["Linear", "Quadratic", "Easing", "Diagonal", "Radial", "Quadratic Sphere", "Spherical"],
 						data: ["Linear", "Diagonal", "Radial", "Spherical"],
@@ -931,7 +934,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Image Texture",
+				name: _tr("Image Texture"),
 				type: "TEX_IMAGE",
 				x: 0,
 				y: 0,
@@ -940,7 +943,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -950,7 +953,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 1.0])
@@ -958,7 +961,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Alpha",
+						name: _tr("Alpha"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -966,13 +969,13 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "File",
+						name: _tr("File"),
 						type: "ENUM",
 						default_value: 0,
 						data: ""
 					},
 					{
-						name: "Color Space",
+						name: _tr("Color Space"),
 						type: "ENUM",
 						default_value: 0,
 						data: ["linear", "srgb"]
@@ -981,7 +984,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Magic Texture",
+				name: _tr("Magic Texture"),
 				type: "TEX_MAGIC",
 				x: 0,
 				y: 0,
@@ -990,7 +993,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -998,7 +1001,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -1010,7 +1013,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1018,7 +1021,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1028,7 +1031,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Musgrave Texture",
+				name: _tr("Musgrave Texture"),
 				type: "TEX_MUSGRAVE",
 				x: 0,
 				y: 0,
@@ -1037,7 +1040,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1045,7 +1048,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -1057,7 +1060,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1065,7 +1068,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1075,7 +1078,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Noise Texture",
+				name: _tr("Noise Texture"),
 				type: "TEX_NOISE",
 				x: 0,
 				y: 0,
@@ -1084,7 +1087,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1092,7 +1095,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -1104,7 +1107,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1112,7 +1115,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1122,7 +1125,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Voronoi Texture",
+				name: _tr("Voronoi Texture"),
 				type: "TEX_VORONOI",
 				x: 0,
 				y: 0,
@@ -1131,7 +1134,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1139,7 +1142,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -1151,7 +1154,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1159,7 +1162,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1167,7 +1170,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "coloring",
+						name: _tr("coloring"),
 						type: "ENUM",
 						data: ["Intensity", "Cells"],
 						default_value: 0,
@@ -1177,7 +1180,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Wave Texture",
+				name: _tr("Wave Texture"),
 				type: "TEX_WAVE",
 				x: 0,
 				y: 0,
@@ -1186,7 +1189,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1194,7 +1197,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 5.0,
@@ -1206,7 +1209,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1214,7 +1217,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1226,7 +1229,7 @@ class NodesMaterial {
 		[ // Color
 			{
 				id: 0,
-				name: "BrightContrast",
+				name: _tr("BrightContrast"),
 				type: "BRIGHTCONTRAST",
 				x: 0,
 				y: 0,
@@ -1235,7 +1238,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1243,7 +1246,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Bright",
+						name: _tr("Bright"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1251,7 +1254,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Contrast",
+						name: _tr("Contrast"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1261,7 +1264,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1271,7 +1274,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Gamma",
+				name: _tr("Gamma"),
 				type: "GAMMA",
 				x: 0,
 				y: 0,
@@ -1280,7 +1283,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1288,7 +1291,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Gamma",
+						name: _tr("Gamma"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1298,7 +1301,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1308,7 +1311,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Blur (Image)",
+				name: _tr("Blur (Image)"),
 				type: "BLUR", // extension
 				x: 0,
 				y: 0,
@@ -1317,7 +1320,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1325,7 +1328,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Strength",
+						name: _tr("Strength"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1335,7 +1338,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1345,7 +1348,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "HueSatVal",
+				name: _tr("HueSatVal"),
 				type: "HUE_SAT",
 				x: 0,
 				y: 0,
@@ -1354,7 +1357,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Hue",
+						name: _tr("Hue"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1362,7 +1365,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Sat",
+						name: _tr("Sat"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1370,7 +1373,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Val",
+						name: _tr("Val"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1378,7 +1381,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1386,7 +1389,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1396,7 +1399,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1406,7 +1409,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Invert",
+				name: _tr("Invert"),
 				type: "INVERT",
 				x: 0,
 				y: 0,
@@ -1415,7 +1418,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1423,7 +1426,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1433,7 +1436,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1443,7 +1446,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "MixRGB",
+				name: _tr("MixRGB"),
 				type: "MIX_RGB",
 				x: 0,
 				y: 0,
@@ -1452,7 +1455,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1460,7 +1463,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color1",
+						name: _tr("Color1"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.5, 0.5, 0.5, 1.0])
@@ -1468,7 +1471,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color2",
+						name: _tr("Color2"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.5, 0.5, 0.5, 1.0])
@@ -1478,7 +1481,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1486,14 +1489,14 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "blend_type",
+						name: _tr("blend_type"),
 						type: "ENUM",
 						data: ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"],
 						default_value: 0,
 						output: 0
 					},
 					{
-						name: "use_clamp",
+						name: _tr("use_clamp"),
 						type: "BOOL",
 						default_value: false,
 						output: 0
@@ -1504,7 +1507,7 @@ class NodesMaterial {
 		[ // Vector
 			{
 				id: 0,
-				name: "Bump",
+				name: _tr("Bump"),
 				type: "BUMP",
 				x: 0,
 				y: 0,
@@ -1513,7 +1516,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Strength",
+						name: _tr("Strength"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1521,7 +1524,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Distance",
+						name: _tr("Distance"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1529,7 +1532,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Height",
+						name: _tr("Height"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1537,7 +1540,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1547,8 +1550,8 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						// name: "Normal",
-						name: "Normal Map",
+						// name: _tr("Normal"),
+						name: _tr("Normal Map"),
 						type: "VECTOR",
 						color: -10238109,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1558,7 +1561,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Mapping",
+				name: _tr("Mapping"),
 				type: "MAPPING",
 				x: 0,
 				y: 0,
@@ -1567,7 +1570,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1577,7 +1580,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1585,20 +1588,20 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Location",
+						name: _tr("Location"),
 						type: "VECTOR",
 						default_value: f32([0.0, 0.0, 0.0]),
 						output: 0
 					},
 					{
-						name: "Rotation",
+						name: _tr("Rotation"),
 						type: "VECTOR",
 						default_value: f32([0.0, 0.0, 0.0]),
 						output: 0,
 						max: 360.0
 					},
 					{
-						name: "Scale",
+						name: _tr("Scale"),
 						type: "VECTOR",
 						default_value: f32([1.0, 1.0, 1.0]),
 						output: 0
@@ -1607,7 +1610,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Normal",
+				name: _tr("Normal"),
 				type: "NORMAL",
 				x: 0,
 				y: 0,
@@ -1616,7 +1619,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1626,7 +1629,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Normal",
+						name: _tr("Normal"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1634,7 +1637,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Dot",
+						name: _tr("Dot"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1642,7 +1645,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						default_value: f32([0.0, 0.0, 0.0]),
 						output: 0
@@ -1651,7 +1654,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Vector Curves",
+				name: _tr("Vector Curves"),
 				type: "CURVE_VEC",
 				x: 0,
 				y: 0,
@@ -1660,7 +1663,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1668,7 +1671,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1678,7 +1681,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1686,7 +1689,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "CURVES",
 						default_value: [[f32([0.0, 0.0]), f32([0.0, 0.0])], [f32([0.0, 0.0]), f32([0.0, 0.0])], [f32([0.0, 0.0]), f32([0.0, 0.0])]],
 						output: 0
@@ -1697,7 +1700,7 @@ class NodesMaterial {
 		[ // Converter
 			{
 				id: 0,
-				name: "Color Ramp",
+				name: _tr("Color Ramp"),
 				type: "VALTORGB",
 				x: 0,
 				y: 0,
@@ -1706,7 +1709,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Fac",
+						name: _tr("Fac"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1716,7 +1719,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 1.0])
@@ -1724,7 +1727,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Alpha",
+						name: _tr("Alpha"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1732,7 +1735,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "Ramp",
+						name: _tr("Ramp"),
 						type: "RAMP",
 						default_value: [f32([1.0, 1.0, 1.0, 1.0, 0.0])],
 						data: 0,
@@ -1742,7 +1745,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Combine HSV",
+				name: _tr("Combine HSV"),
 				type: "COMBHSV",
 				x: 0,
 				y: 0,
@@ -1751,7 +1754,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "H",
+						name: _tr("H"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1759,7 +1762,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "S",
+						name: _tr("S"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1767,7 +1770,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "V",
+						name: _tr("V"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1777,7 +1780,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1787,7 +1790,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Combine RGB",
+				name: _tr("Combine RGB"),
 				type: "COMBRGB",
 				x: 0,
 				y: 0,
@@ -1796,7 +1799,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "R",
+						name: _tr("R"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1804,7 +1807,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "G",
+						name: _tr("G"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1812,7 +1815,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "B",
+						name: _tr("B"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1822,7 +1825,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -1832,7 +1835,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Combine XYZ",
+				name: _tr("Combine XYZ"),
 				type: "COMBXYZ",
 				x: 0,
 				y: 0,
@@ -1841,7 +1844,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "X",
+						name: _tr("X"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1849,7 +1852,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Y",
+						name: _tr("Y"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1857,7 +1860,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Z",
+						name: _tr("Z"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1867,7 +1870,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1877,7 +1880,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Math",
+				name: _tr("Math"),
 				type: "MATH",
 				x: 0,
 				y: 0,
@@ -1886,7 +1889,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1894,7 +1897,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.5
@@ -1904,7 +1907,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1912,14 +1915,14 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "operation",
+						name: _tr("operation"),
 						type: "ENUM",
 						data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Absolute", "Minimum", "Maximum", "Less Than", "Greater Than", "Round", "Floor", "Ceil", "Fract", "Modulo", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2"],
 						default_value: 0,
 						output: 0
 					},
 					{
-						name: "use_clamp",
+						name: _tr("use_clamp"),
 						type: "BOOL",
 						default_value: false,
 						output: 0
@@ -1928,7 +1931,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "RGB to BW",
+				name: _tr("RGB to BW"),
 				type: "RGBTOBW",
 				x: 0,
 				y: 0,
@@ -1937,7 +1940,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 0.0])
@@ -1947,7 +1950,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Val",
+						name: _tr("Val"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1957,7 +1960,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Separate HSV",
+				name: _tr("Separate HSV"),
 				type: "SEPHSV",
 				x: 0,
 				y: 0,
@@ -1966,7 +1969,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.5, 0.5, 0.5, 1.0])
@@ -1976,7 +1979,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "H",
+						name: _tr("H"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1984,7 +1987,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "S",
+						name: _tr("S"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1992,7 +1995,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "V",
+						name: _tr("V"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2002,7 +2005,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Separate RGB",
+				name: _tr("Separate RGB"),
 				type: "SEPRGB",
 				x: 0,
 				y: 0,
@@ -2011,7 +2014,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Color",
+						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -2021,7 +2024,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "R",
+						name: _tr("R"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2029,7 +2032,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "G",
+						name: _tr("G"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2037,7 +2040,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "B",
+						name: _tr("B"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2047,7 +2050,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Separate XYZ",
+				name: _tr("Separate XYZ"),
 				type: "SEPXYZ",
 				x: 0,
 				y: 0,
@@ -2056,7 +2059,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -2066,7 +2069,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "X",
+						name: _tr("X"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2074,7 +2077,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Y",
+						name: _tr("Y"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2082,7 +2085,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Z",
+						name: _tr("Z"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2092,7 +2095,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: "Vector Math",
+				name: _tr("Vector Math"),
 				type: "VECT_MATH",
 				x: 0,
 				y: 0,
@@ -2101,7 +2104,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -2109,7 +2112,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -2119,7 +2122,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Vector",
+						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -2127,7 +2130,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: "Value",
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2135,7 +2138,7 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: "operation",
+						name: _tr("operation"),
 						type: "ENUM",
 						data: ["Add", "Subtract", "Average", "Dot Product", "Cross Product", "Normalize"],
 						default_value: 0,
