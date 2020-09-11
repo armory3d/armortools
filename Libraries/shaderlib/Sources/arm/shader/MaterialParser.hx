@@ -50,6 +50,8 @@ class MaterialParser {
 	public static var parse_emission = false;
 	public static var parse_subsurface = false;
 	public static var triplanar = false; // Sample using texCoord/1/2 & texCoordBlend
+	public static var sample_keep_aspect = false; // Adjust uvs to preserve texture aspect ratio
+	public static var sample_uv_scale = '1.0';
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -1460,6 +1462,16 @@ class MaterialParser {
 			uv_name = tex_coord;
 		}
 		var tex_store = store_var_name(node);
+
+		if (sample_keep_aspect) {
+			curshader.write('vec2 ${tex_store}_size = textureSize($tex_name, 0);');
+			curshader.write('float ${tex_store}_ax = ${tex_store}_size.x / ${tex_store}_size.y;');
+			curshader.write('float ${tex_store}_ay = ${tex_store}_size.y / ${tex_store}_size.x;');
+			curshader.write('vec2 ${tex_store}_uv = ((${uv_name}.xy / ${sample_uv_scale} - vec2(0.5, 0.5)) * vec2(max(${tex_store}_ay, 1.0), max(${tex_store}_ax, 1.0))) + vec2(0.5, 0.5);');
+			curshader.write('if (${tex_store}_uv.x < 0.0 || ${tex_store}_uv.y < 0.0 || ${tex_store}_uv.x > 1.0 || ${tex_store}_uv.y > 1.0) discard;');
+			curshader.write('${tex_store}_uv *= ${sample_uv_scale};');
+			uv_name = '${tex_store}_uv';
+		}
 
 		if (triplanar) {
 			curshader.write('vec4 $tex_store = vec4(0.0, 0.0, 0.0, 0.0);');

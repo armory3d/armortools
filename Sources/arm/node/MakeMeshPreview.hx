@@ -58,16 +58,21 @@ class MakeMeshPreview {
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write_attrib('gl_Position = mul(vec4($pos.xyz, 1.0), WVP);');
 
+		var brushScale = (Context.brushScale * Context.brushNodesScale) + "";
 		vert.add_out('vec2 texCoord');
-		vert.write_attrib('texCoord = tex;');
+		vert.write_attrib('texCoord = tex * ${brushScale};');
 
 		if (MakeMaterial.heightUsed) {
 			frag.bposition = true;
 		}
 
+		var decal = Context.decalPreview;
+		MaterialParser.sample_keep_aspect = decal;
+		MaterialParser.sample_uv_scale = brushScale;
 		MaterialParser.parse_height = MakeMaterial.heightUsed;
 		var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_mesh, vert, frag, null, null, null, matcon);
 		MaterialParser.parse_height = false;
+		MaterialParser.sample_keep_aspect = false;
 		var base = sout.out_basecol;
 		var rough = sout.out_roughness;
 		var met = sout.out_metallic;
@@ -81,7 +86,6 @@ class MakeMeshPreview {
 		frag.write('float opacity = $opac;');
 		frag.write('vec3 nortan = $nortan;');
 
-		var decal = Context.decalPreview;
 		if (decal) {
 			if (Context.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');

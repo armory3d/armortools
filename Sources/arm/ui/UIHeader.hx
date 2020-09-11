@@ -152,7 +152,7 @@ class UIHeader {
 					Context.brushRadius = ui.slider(Context.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
 				}
 
-				if (Context.tool == ToolDecal) {
+				if (Context.tool == ToolDecal || Context.tool == ToolText) {
 					Context.brushScaleX = ui.slider(Context.brushScaleXHandle, tr("Scale X"), 0.01, 2.0, true);
 				}
 

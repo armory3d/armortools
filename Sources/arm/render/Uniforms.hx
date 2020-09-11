@@ -68,9 +68,8 @@ class Uniforms {
 			return val;
 		}
 		if (link == "_brushScale") {
-			var nodesScale = Context.brushNodesScale;
 			var fill = Context.layer.fill_layer != null;
-			var val = (fill ? Context.layer.scale : Context.brushScale) * nodesScale;
+			var val = (fill ? Context.layer.scale : Context.brushScale) * Context.brushNodesScale;
 			return val;
 		}
 		if (link == "_objectId") {
