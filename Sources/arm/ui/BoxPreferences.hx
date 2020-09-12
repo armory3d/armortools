@@ -250,6 +250,12 @@ class BoxPreferences {
 				Context.dilateRadius = ui.slider(Id.handle({value: Context.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
 				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
+				var workspaceHandle = Id.handle({position: Config.raw.workspace});
+				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake"), tr("Render")], tr("Default Workspace"), true);
+				if (workspaceHandle.changed) {
+					Config.raw.workspace = workspaceHandle.position;
+				}
+
 				var materialLiveHandle = Id.handle({selected: Config.raw.material_live});
 				Config.raw.material_live = ui.check(materialLiveHandle, tr("Live Material Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Instantly update material preview on node change"));

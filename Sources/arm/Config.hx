@@ -110,6 +110,7 @@ class Config {
 			#end
 			raw.show_asset_names = false;
 			raw.node_preview = true;
+			raw.workspace = 0;
 			#end
 
 			#if arm_creator

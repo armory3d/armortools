@@ -498,6 +498,21 @@ class App {
 					History.undoLayers.push(l);
 				}
 			}
+			// Default workspace
+			if (Config.raw.workspace != 0) {
+				UIHeader.inst.worktab.position = Config.raw.workspace;
+				UIMenubar.inst.workspaceHandle.redraws = 2;
+				if (UIHeader.inst.worktab.position == SpaceBake) {
+					Context.selectTool(ToolBake);
+				}
+				else {
+					Context.selectTool(ToolGizmo);
+				}
+				if (UIHeader.inst.worktab.position == SpaceMaterial) {
+					Layers.updateFillLayers();
+					UINodes.inst.show = true;
+				}
+			}
 		}
 		else if (Context.frame == 3) {
 			Context.ddirty = 1;
