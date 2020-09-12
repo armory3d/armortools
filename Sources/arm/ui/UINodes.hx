@@ -503,6 +503,7 @@ class UINodes {
 	}
 
 	public function acceptLayerDrag(layerIndex: Int) {
+		if (Project.layers[layerIndex].getChildren() != null) return;
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
 		n.buttons[0].default_value = layerIndex;
 		getNodes().nodesSelected = [n];

@@ -472,4 +472,58 @@ class LayerSlot {
 		}
 		return children;
 	}
+
+	public function move(to: Int) {
+		var i = Project.layers.indexOf(this);
+		var delta = to - i;
+		if (i + delta < 0 || i + delta > Project.layers.length - 1) return;
+
+		var isGroup = this.getChildren() != null;
+		var j = delta > 0 ? to : to - 1; // One element down
+		var k = delta > 0 ? to + 1 : to; // One element up
+		var jParent = j >= 0 ? Project.layers[j].parent : null;
+		var kParent = k < Project.layers.length ? Project.layers[k].parent : null;
+		var kGroup = k < Project.layers.length ? Project.layers[k].getChildren() != null : false;
+		var kLayer = k < Project.layers.length ? Project.layers[k] : null;
+
+		// Prevent group nesting for now
+		if (isGroup && jParent != null) {
+			return;
+		}
+
+		Context.setLayer(this);
+		History.orderLayers(i + delta);
+		UISidebar.inst.hwnd0.redraws = 2;
+
+		Project.layers.remove(this);
+		Project.layers.insert(i + delta, this);
+
+		if (isGroup) {
+			var children = this.getChildren();
+			for (l in 0...children.length) {
+				var c = children[delta > 0 ? l : children.length - 1 - l];
+				Project.layers.remove(c);
+				Project.layers.insert(delta > 0 ? i + delta - 1 : i + delta, c);
+			}
+		}
+		else {
+			// Moved to group
+			if (this.parent == null && jParent != null) {
+				this.parent = jParent;
+			}
+			// Moved out of group
+			if (this.parent != null && kParent == null && !kGroup) {
+				var parent = this.parent;
+				this.parent = null;
+				// Remove empty group
+				if (parent.getChildren() == null) {
+					parent.delete();
+				}
+			}
+			// Moved to different group
+			if (this.parent != null && (kParent != null || kGroup)) {
+				this.parent = kGroup ? kLayer : kParent;
+			}
+		}
+	}
 }

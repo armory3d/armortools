@@ -231,6 +231,7 @@ class Context {
 	public static var lastTooltip: Image = null;
 	public static var lastStatusPosition = 0;
 	public static var cameraControls = ControlsOrbit;
+	public static var dragDestination = 0;
 
 	public static function selectMaterialScene(i: Int) {
 		if (Project.materialsScene.length <= i || object == paintObject) return;

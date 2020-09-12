@@ -11,8 +11,6 @@ import arm.Enums;
 
 class TabLayers {
 
-	public static var dragDestination = 1;
-
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
@@ -93,9 +91,15 @@ class TabLayers {
 				var mx = mouse.x;
 				var my = mouse.y;
 				var inLayers = mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
-				if (App.isDragging && App.dragLayer != null && my > ui._y - step && my < ui._y + step) {
-					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
-					dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
+				if (App.isDragging && App.dragLayer != null && inLayers) {
+					if (my > ui._y - step && my < ui._y + step) {
+						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+						Context.dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
+					}
+					else if (i == 0 && my > ui._y + step) {
+						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+						Context.dragDestination = 0;
+					}
 				}
 
 				if (l.texpaint_mask != null) {
@@ -176,12 +180,10 @@ class TabLayers {
 					Context.setLayer(l);
 					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
 					Context.selectTime = Time.time();
-					if (l.getChildren() == null) {
-						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragLayer = Context.layer;
-					}
+					var mouse = Input.getMouse();
+					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					App.dragLayer = Context.layer;
 				}
 
 				if (l.texpaint_mask != null) {
@@ -312,6 +314,10 @@ class TabLayers {
 					Context.setLayer(l);
 					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
 					Context.selectTime = Time.time();
+					var mouse = Input.getMouse();
+					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					App.dragLayer = Context.layer;
 				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
@@ -321,7 +327,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 8 : (21 + add);
+					var menuElements = l.getChildren() != null ? 6 : (19 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -403,82 +409,6 @@ class TabLayers {
 								iron.App.removeRender(clear);
 							}
 							iron.App.notifyOnRender(clear);
-						}
-						if (ui.button(tr("Move Up"), Left)) {
-							if (i < Project.layers.length - 1) {
-
-								var isGroup = Project.layers[i].getChildren() != null;
-								if (isGroup) {
-									if (Project.layers[i + 1].parent != null) return; // Move over group
-								}
-
-								Context.setLayer(l);
-								History.orderLayers(i + 1);
-								var target = Project.layers[i + 1];
-								Project.layers[i + 1] = Project.layers[i];
-								Project.layers[i] = target;
-								UISidebar.inst.hwnd0.redraws = 2;
-
-								// Move layer
-								if (!isGroup) {
-									Project.layers[i + 1].parent = Project.layers[i].parent;
-
-									// Remove empty group
-									if (Project.layers[i].texpaint == null && Project.layers[i].getChildren() == null) {
-										Project.layers[i].delete();
-									}
-								}
-								// Move group
-								else {
-									var children = Project.layers[i + 1].getChildren();
-									var j = i;
-									for (c in children) {
-										var target = Project.layers[j - 1];
-										Project.layers[j - 1] = Project.layers[j];
-										Project.layers[j] = target;
-										j--;
-									}
-								}
-							}
-						}
-						if (ui.button(tr("Move Down"), Left)) {
-							if (i > 0) {
-
-								var isGroup = l.getChildren() != null;
-								if (isGroup) {
-									var children = l.getChildren();
-									if (i - children.length <= 1) return;
-									if (Project.layers[i - children.length - 2].parent != null) return; // Move over group
-									for (c in children) {
-										var k = Project.layers.indexOf(c);
-										var target = Project.layers[k - 1];
-										Project.layers[k - 1] = Project.layers[k];
-										Project.layers[k] = target;
-									}
-								}
-
-								Context.setLayer(l);
-								History.orderLayers(i - 1);
-								var target = Project.layers[i - 1];
-								Project.layers[i - 1] = Project.layers[i];
-								Project.layers[i] = target;
-								UISidebar.inst.hwnd0.redraws = 2;
-
-								// Move layer
-								if (!isGroup) {
-									Project.layers[i - 1].parent = Project.layers[i].parent;
-
-									// Move to group
-									if (Project.layers[i].getChildren() != null) {
-										Project.layers[i - 1].parent = Project.layers[i];
-									}
-
-									// Remove empty group
-									if (Project.layers.length > i + 1 && Project.layers[i + 1].texpaint == null && Project.layers[i + 1].getChildren() == null) {
-										Project.layers[i + 1].delete();
-									}
-								}
-							}
 						}
 						if (l.getChildren() != null && ui.button(tr("Merge Group"), Left)) {
 							function mergeGroup(g: kha.graphics4.Graphics) {

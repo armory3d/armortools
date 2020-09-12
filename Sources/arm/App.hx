@@ -392,8 +392,7 @@ class App {
 					UINodes.inst.acceptLayerDrag(index);
 				}
 				else if (inLayers && isDragging) {
-					Project.layers.remove(dragLayer);
-					Project.layers.insert(TabLayers.dragDestination, dragLayer);
+					dragLayer.move(Context.dragDestination);
 					MakeMaterial.parseMeshMaterial();
 				}
 				dragLayer = null;
@@ -454,7 +453,7 @@ class App {
 
 	static function getDragBackground(): TRect {
 		var icons = Res.get("icons.k");
-		if (dragLayer != null) return Res.tile50(icons, 4, 1);
+		if (dragLayer != null && dragLayer.getChildren() == null) return Res.tile50(icons, 4, 1);
 		else return null;
 	}
 
@@ -464,6 +463,14 @@ class App {
 		if (dragAsset != null) return UISidebar.inst.getImage(dragAsset);
 		if (dragMaterial != null) return dragMaterial.imageIcon;
 		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
+		if (dragLayer != null && dragLayer.getChildren() != null) {
+			var icons = Res.get("icons.k");
+			var folderClosed = Res.tile50(icons, 2, 1);
+			var folderOpen = Res.tile50(icons, 8, 1);
+			dragRect = dragLayer.show_panel ? folderOpen : folderClosed;
+			dragTint = UISidebar.inst.ui.t.LABEL_COL - 0x00202020;
+			return icons;
+		}
 		if (dragFile != null) {
 			var icons = Res.get("icons.k");
 			dragRect = dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
