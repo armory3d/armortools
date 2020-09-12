@@ -208,6 +208,7 @@ class ImportArm {
 				var isGroup = ld.texpaint == null;
 				var l = new LayerSlot("", isGroup);
 				if (ld.name != null) l.name = ld.name;
+				l.visible = ld.visible;
 				Project.layers.push(l);
 
 				if (!isGroup) {
@@ -252,7 +253,6 @@ class ImportArm {
 					l.maskOpacity = ld.opacity_mask;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
-					l.visible = ld.visible;
 					l.paintBase = ld.paint_base;
 					l.paintOpac = ld.paint_opac;
 					l.paintOcc = ld.paint_occ;
