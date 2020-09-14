@@ -175,10 +175,11 @@ class MaterialParser {
 			}
 		}
 		if (frag.wtangent) {
-			con.add_elem("tang", "short4norm");
-			vert.add_uniform("mat3 N", "_normalMatrix");
+			// con.add_elem("tang", "short4norm");
+			// vert.add_uniform("mat3 N", "_normalMatrix");
 			vert.add_out("vec3 wtangent");
-			vert.write_attrib('wtangent = normalize(mul(tang.xyz, N));');
+			// vert.write_attrib('wtangent = normalize(mul(tang.xyz, N));');
+			vert.write_attrib('wtangent = vec3(0.0, 0.0, 0.0);');
 		}
 		if (frag.vVecCam) {
 			vert.add_uniform("mat4 WV", "_worldViewMatrix");

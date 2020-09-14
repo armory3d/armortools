@@ -17,28 +17,28 @@ class MakeNodePreview {
 			depth_write: true,
 			compare_mode: "less",
 			cull_mode: "clockwise",
-			vertex_elements: [{name: "pos", data: "float3"}],
+			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}, {name: "col", data: "short4norm"}],
 			color_attachments: ["RGBA32"]
 		});
 
+		con_mesh.allow_vcols = true;
 		var vert = con_mesh.make_vert();
 		var frag = con_mesh.make_frag();
 		frag.ins = vert.outs;
 
-		vert.write_attrib('gl_Position = vec4(pos.xy, 0.0, 1.0);');
-		vert.add_out('vec2 texCoord');
+		vert.write_attrib('gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);'); // Pos unpack
 		vert.write_attrib('const vec2 madd = vec2(0.5, 0.5);');
-		vert.write_attrib('texCoord = pos.xy * madd + madd;');
+		vert.add_out('vec2 texCoord');
+		vert.write_attrib('texCoord = gl_Position.xy * madd + madd;');
 		#if (!kha_opengl)
 		vert.write_attrib('texCoord.y = 1.0 - texCoord.y;');
 		#end
-		vert.write_attrib('vec3 nor = vec3(0.0, 0.0, 1.0);');
 
 		var canvas_nodes = Context.material.canvas.nodes;
 		var canvas_links = Context.material.canvas.links;
 		var nodes = Context.material.nodes;
 
-		var link: TNodeLink = { id: nodes.getLinkId(canvas_links), from_id: nodes.nodesSelected[0].id, from_socket: 0, to_id: 0, to_socket: 0 };
+		var link: TNodeLink = { id: nodes.getLinkId(canvas_links), from_id: nodes.nodesSelected[0].id, from_socket: Context.nodePreviewSocket, to_id: 0, to_socket: 0 };
 		canvas_links.push(link);
 
 		MaterialParser.init();
@@ -63,7 +63,7 @@ class MakeNodePreview {
 
 		frag.ndcpos = true;
 		vert.add_out('vec4 ndc');
-		vert.write_attrib('ndc = vec4(pos.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
+		vert.write_attrib('ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
 
 		MaterialParser.finalize(con_mesh);
 

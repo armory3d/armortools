@@ -28,8 +28,8 @@ class RenderUtil {
 
 	public static inline var matPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
-	static var screenAligned3VB: VertexBuffer = null;
-	static var screenAligned3IB: IndexBuffer = null;
+	static var screenAlignedFullVB: VertexBuffer = null;
+	static var screenAlignedFullIB: IndexBuffer = null;
 
 	public static function makeMaterialPreview() {
 		Context.materialPreview = true;
@@ -414,23 +414,28 @@ class RenderUtil {
 		if (current != null) current.begin(false);
 	}
 
-	static function createScreenAligned3Data() {
+	static function createScreenAlignedFullData() {
 		// Over-sized triangle
-		var data = [-1.0, -1.0, 0.0, 3.0, -1.0, 0.0, -1.0, 3.0, 0.0];
+		var data = [-Std.int(32767 / 3), -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
+					 32767,              -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
+					-Std.int(32767 / 3),  32767,              0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
 		var indices = [0, 1, 2];
 
 		// Mandatory vertex data names and sizes
 		var structure = new VertexStructure();
-		structure.add("pos", VertexData.Float3);
-		screenAligned3VB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
-		var vertices = screenAligned3VB.lock();
+		structure.add("pos", VertexData.Short4Norm);
+		structure.add("nor", VertexData.Short2Norm);
+		structure.add("tex", VertexData.Short2Norm);
+		structure.add("col", VertexData.Short4Norm);
+		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
+		var vertices = screenAlignedFullVB.lockInt16();
 		for (i in 0...vertices.length) vertices.set(i, data[i]);
-		screenAligned3VB.unlock();
+		screenAlignedFullVB.unlock();
 
-		screenAligned3IB = new IndexBuffer(indices.length, Usage.StaticUsage);
-		var id = screenAligned3IB.lock();
+		screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);
+		var id = screenAlignedFullIB.lock();
 		for (i in 0...id.length) id[i] = indices[i];
-		screenAligned3IB.unlock();
+		screenAlignedFullIB.unlock();
 	}
 
 	public static function makeNodePreview() {
@@ -457,17 +462,24 @@ class RenderUtil {
 		if (scon == null) return;
 
 		var g4 = UINodes.inst.nodePreview.g4;
-		if (screenAligned3VB == null) {
-			createScreenAligned3Data();
+		if (screenAlignedFullVB == null) {
+			createScreenAlignedFullData();
 		}
+
+		var _scaleWorld = Context.paintObject.transform.scaleWorld;
+		Context.paintObject.transform.scaleWorld = 3.0;
+		Context.paintObject.transform.buildMatrix();
 
 		g4.begin();
 		g4.setPipeline(scon.pipeState);
 		iron.object.Uniforms.setContextConstants(g4, scon, [""]);
 		iron.object.Uniforms.setObjectConstants(g4, scon, Context.paintObject);
-		g4.setVertexBuffer(screenAligned3VB);
-		g4.setIndexBuffer(screenAligned3IB);
+		g4.setVertexBuffer(screenAlignedFullVB);
+		g4.setIndexBuffer(screenAlignedFullIB);
 		g4.drawIndexedVertices();
 		g4.end();
+
+		Context.paintObject.transform.scaleWorld = _scaleWorld;
+		Context.paintObject.transform.buildMatrix();
 	}
 }

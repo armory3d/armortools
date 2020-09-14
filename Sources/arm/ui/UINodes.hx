@@ -15,6 +15,7 @@ import arm.ui.UIHeader;
 import arm.Enums;
 
 @:access(zui.Zui)
+@:access(zui.Nodes)
 class UINodes {
 
 	public static var inst: UINodes;
@@ -66,19 +67,36 @@ class UINodes {
 
 	function onLinkDrag(linkDrag: TNodeLink, isNewLink: Bool) {
 		if (isNewLink) {
-			nodeSearch(-1, -1, function() {
-				var n = getNodes().nodesSelected[0];
-				if (linkDrag.to_id == -1 && n.inputs.length > 0) {
-					linkDrag.to_id = n.id;
-					linkDrag.to_socket = 0;
-					getCanvas().links.push(linkDrag);
-				}
-				else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
-					linkDrag.from_id = n.id;
-					linkDrag.from_socket = 0;
-					getCanvas().links.push(linkDrag);
-				}
-			});
+			var nodes = getNodes();
+			var node = nodes.getNode(getCanvas().nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
+			var linkX = ui._windowX + nodes.NODE_X(node);
+			var linkY = ui._windowY + nodes.NODE_Y(node);
+			if (linkDrag.from_id > -1) {
+				linkX += nodes.NODE_W();
+				linkY += nodes.SOCKET_Y(linkDrag.from_socket);
+			}
+			else {
+				linkY += nodes.SOCKET_Y(linkDrag.to_socket + node.outputs.length) + nodes.BUTTONS_H(node);
+			}
+			var mouse = Input.getMouse();
+			if (Math.abs(mouse.x - linkX) > 5 || Math.abs(mouse.y - linkY) > 5) { // Link length
+				nodeSearch(-1, -1, function() {
+					var n = nodes.nodesSelected[0];
+					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
+						linkDrag.to_id = n.id;
+						linkDrag.to_socket = 0;
+						getCanvas().links.push(linkDrag);
+					}
+					else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
+						linkDrag.from_id = n.id;
+						linkDrag.from_socket = 0;
+						getCanvas().links.push(linkDrag);
+					}
+				});
+			}
+			else {
+				Context.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+			}
 		}
 	}
 
@@ -298,6 +316,7 @@ class UINodes {
 		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
 			lastNodeSelected = nodes.nodesSelected[0];
 			Context.nodePreviewDirty = true;
+			Context.nodePreviewSocket = 0;
 		}
 
 		if (Config.raw.node_preview && Context.nodePreviewDirty) RenderUtil.makeNodePreview();
