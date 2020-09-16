@@ -253,6 +253,7 @@ class App {
 
 	#if arm_resizable
 	static function onResize() {
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 		resize();
 
 		var ratio = System.windowHeight() / lastWindowHeight;
