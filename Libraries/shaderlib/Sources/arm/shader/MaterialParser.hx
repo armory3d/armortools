@@ -524,7 +524,7 @@ class MaterialParser {
 			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
 			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
 			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
-			curshader.write('res1 += texture($tex_name, texCoord + vec2(i, j) / vec2(textureSize($tex_name, 0)));');
+			curshader.write('res1 += texture($tex_name, texCoord + vec2(i, j) / vec2(textureSize($tex_name, 0))).rgb;');
 			curshader.write('}');
 			curshader.write('}');
 			curshader.write('res1 /= ($steps * 2 + 1) * ($steps * 2 + 1);');
