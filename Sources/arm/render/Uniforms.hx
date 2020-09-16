@@ -419,6 +419,10 @@ class Uniforms {
 			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 		}
 
+		if (link.startsWith("_texblur_")) {
+			var id = link.substr(9);
+			return Context.nodePreviewsBlur != null ? Context.nodePreviewsBlur.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+		}
 		if (link == "_texparticle") {
 			return RenderPath.active.renderTargets.get("texparticle").image;
 		}

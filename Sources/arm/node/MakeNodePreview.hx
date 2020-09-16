@@ -10,7 +10,7 @@ import arm.shader.NodeShaderContext;
 class MakeNodePreview {
 
 	@:access(arm.shader.MaterialParser)
-	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
+	public static function run(data: NodeShaderData, matcon: TMaterialContext, node: TNode): NodeShaderContext {
 		var context_id = "mesh";
 		var con_mesh: NodeShaderContext = data.add_context({
 			name: context_id,
@@ -38,7 +38,7 @@ class MakeNodePreview {
 		var canvas_links = Context.material.canvas.links;
 		var nodes = Context.material.nodes;
 
-		var link: TNodeLink = { id: nodes.getLinkId(canvas_links), from_id: nodes.nodesSelected[0].id, from_socket: Context.nodePreviewSocket, to_id: 0, to_socket: 0 };
+		var link: TNodeLink = { id: nodes.getLinkId(canvas_links), from_id: node.id, from_socket: Context.nodePreviewSocket, to_id: 0, to_socket: 0 };
 		canvas_links.push(link);
 
 		MaterialParser.init();
@@ -51,7 +51,7 @@ class MakeNodePreview {
 		MaterialParser.matcon = matcon;
 
 		var res = MaterialParser.write_result(link);
-		var st = nodes.nodesSelected[0].outputs[link.from_socket].type;
+		var st = node.outputs[link.from_socket].type;
 		if (st != "RGB" && st != "RGBA" && st != "VECTOR") {
 			res = MaterialParser.to_vec3(res);
 		}
@@ -61,9 +61,9 @@ class MakeNodePreview {
 		frag.write('vec3 basecol = $res;');
 		frag.write('fragColor = vec4(basecol.rgb, 1.0);');
 
-		frag.ndcpos = true;
-		vert.add_out('vec4 ndc');
-		vert.write_attrib('ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
+		// frag.ndcpos = true;
+		// vert.add_out('vec4 ndc');
+		// vert.write_attrib('ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);');
 
 		MaterialParser.finalize(con_mesh);
 

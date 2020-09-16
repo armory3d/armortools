@@ -37,7 +37,6 @@ class UINodes {
 	var popupY = 0.0;
 
 	public var changed = false;
-	public var nodePreview: Image = null;
 	var mdown = false;
 	var mreleased = false;
 	var mchanged = false;
@@ -319,7 +318,7 @@ class UINodes {
 			Context.nodePreviewSocket = 0;
 		}
 
-		if (Config.raw.node_preview && Context.nodePreviewDirty) RenderUtil.makeNodePreview();
+		if (Config.raw.node_preview && Context.nodePreviewDirty) makeNodePreview();
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
@@ -393,7 +392,7 @@ class UINodes {
 					img = Context.brush.image;
 				}
 				else if (canvasType == CanvasMaterial) {
-					img = nodePreview;
+					img = Context.nodePreview;
 				}
 				if (img != null) {
 					var tw = 80 * ui.SCALE();
@@ -548,5 +547,27 @@ class UINodes {
 			soc.node_id = node.id;
 		}
 		return node;
+	}
+
+	function makeNodePreview() {
+		var nodes = Context.material.nodes;
+		if (nodes.nodesSelected.length == 0) return;
+
+		var node = nodes.nodesSelected[0];
+		if (node.type == "TEX_IMAGE" ||
+			node.type == "LAYER" ||
+			node.type == "LAYER_MASK" ||
+			node.type == "MATERIAL" ||
+			node.type == "OUTPUT_MATERIAL_PBR") return;
+
+		if (Context.material.canvas.nodes.indexOf(node) == -1) return;
+
+		if (Context.nodePreview == null) {
+			Context.nodePreview = kha.Image.createRenderTarget(RenderUtil.matPreviewSize, RenderUtil.matPreviewSize);
+		}
+
+		Context.nodePreviewDirty = false;
+		UINodes.inst.hwnd.redraws = 2;
+		RenderUtil.makeNodePreview(Context.material.canvas, node, Context.nodePreview);
 	}
 }

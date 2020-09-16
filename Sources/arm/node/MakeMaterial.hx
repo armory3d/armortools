@@ -1,5 +1,6 @@
 package arm.node;
 
+import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
@@ -10,6 +11,8 @@ import arm.shader.NodeShader;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;
+import arm.shader.MaterialParser;
+import arm.util.RenderUtil;
 import arm.Enums;
 
 class MakeMaterial {
@@ -127,6 +130,8 @@ class MakeMaterial {
 			return;
 		}
 
+		bakeBlurNodes();
+
 		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
 		var mcon: MaterialContext = null;
@@ -168,16 +173,38 @@ class MakeMaterial {
 		if (defaultMcon == null) defaultMcon = mcon;
 	}
 
-	public static function parseNodePreviewMaterial(): ShaderContext {
+	static function bakeBlurNodes() {
+		if (Context.nodePreviewsBlur != null) {
+			for (image in Context.nodePreviewsBlur) {
+				image.unload();
+			}
+			Context.nodePreviewsBlur = null;
+		}
+		for (node in UINodes.inst.getCanvasMaterial().nodes) {
+			if (node.type == "BLUR") {
+				if (Context.nodePreviewsBlur == null) {
+					Context.nodePreviewsBlur = new Map();
+				}
+				var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
+				Context.nodePreviewsBlur.set(MaterialParser.node_name(node), image);
+				MaterialParser.blur_passthrough = true;
+				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
+				MaterialParser.blur_passthrough = false;
+			}
+		}
+	}
+
+	public static function parseNodePreviewMaterial(node: TNode): { scon: ShaderContext, mcon: MaterialContext } {
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
-		var mcon = { name: "mesh", bind_textures: [] };
-		var con = MakeNodePreview.run(sdata, mcon);
+		var mcon_raw = { name: "mesh", bind_textures: [] };
+		var con = MakeNodePreview.run(sdata, mcon_raw, node);
 		var compileError = false;
 		var scon = new ShaderContext(con.data, function(scon: ShaderContext) {
 			if (scon == null) compileError = true;
 		});
 		if (compileError) return null;
-		return scon;
+		var mcon = new MaterialContext(mcon_raw, function(mcon: MaterialContext) {});
+		return { scon: scon, mcon: mcon };
 	}
 
 	public static function parseBrush() {

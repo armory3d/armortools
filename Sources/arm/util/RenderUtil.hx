@@ -8,6 +8,7 @@ import kha.graphics4.IndexBuffer;
 import kha.graphics4.Usage;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
+import zui.Nodes;
 import iron.Scene;
 import iron.RenderPath;
 import iron.object.MeshObject;
@@ -438,30 +439,11 @@ class RenderUtil {
 		screenAlignedFullIB.unlock();
 	}
 
-	public static function makeNodePreview() {
-		var nodes = Context.material.nodes;
-		if (nodes.nodesSelected.length == 0) return;
+	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image) {
+		var res = MakeMaterial.parseNodePreviewMaterial(node);
+		if (res.scon == null) return;
 
-		var node = nodes.nodesSelected[0];
-		if (node.type == "TEX_IMAGE" ||
-			node.type == "LAYER" ||
-			node.type == "LAYER_MASK" ||
-			node.type == "MATERIAL" ||
-			node.type == "OUTPUT_MATERIAL_PBR") return;
-
-		if (Context.material.canvas.nodes.indexOf(node) == -1) return;
-
-		if (UINodes.inst.nodePreview == null) {
-			UINodes.inst.nodePreview = kha.Image.createRenderTarget(matPreviewSize, matPreviewSize);
-		}
-
-		Context.nodePreviewDirty = false;
-		UINodes.inst.hwnd.redraws = 2;
-
-		var scon = MakeMaterial.parseNodePreviewMaterial();
-		if (scon == null) return;
-
-		var g4 = UINodes.inst.nodePreview.g4;
+		var g4 = image.g4;
 		if (screenAlignedFullVB == null) {
 			createScreenAlignedFullData();
 		}
@@ -471,9 +453,10 @@ class RenderUtil {
 		Context.paintObject.transform.buildMatrix();
 
 		g4.begin();
-		g4.setPipeline(scon.pipeState);
-		iron.object.Uniforms.setContextConstants(g4, scon, [""]);
-		iron.object.Uniforms.setObjectConstants(g4, scon, Context.paintObject);
+		g4.setPipeline(res.scon.pipeState);
+		iron.object.Uniforms.setContextConstants(g4, res.scon, [""]);
+		iron.object.Uniforms.setObjectConstants(g4, res.scon, Context.paintObject);
+		iron.object.Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
 		g4.setVertexBuffer(screenAlignedFullVB);
 		g4.setIndexBuffer(screenAlignedFullIB);
 		g4.drawIndexedVertices();

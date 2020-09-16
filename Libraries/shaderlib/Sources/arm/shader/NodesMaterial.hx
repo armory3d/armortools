@@ -1311,7 +1311,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: _tr("Blur (Image)"),
+				name: _tr("Blur"),
 				type: "BLUR", // extension
 				x: 0,
 				y: 0,

@@ -52,6 +52,7 @@ class MaterialParser {
 	public static var triplanar = false; // Sample using texCoord/1/2 & texCoordBlend
 	public static var sample_keep_aspect = false; // Adjust uvs to preserve texture aspect ratio
 	public static var sample_uv_scale = '1.0';
+	public static var blur_passthrough = false;
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -514,25 +515,16 @@ class MaterialParser {
 			return 'pow($out_col, ' + to_vec3('$gamma') + ")";
 		}
 		else if (node.type == "BLUR") {
-			// Image nodes only for now
-			tex_coord = "texCoordBlur";
-			curshader.write('vec2 texCoordBlur = texCoord;');
-			var out_col = parse_vector_input(node.inputs[0]);
-			tex_coord = "texCoord";
-			out_col = parsedMap.get(out_col);
-			if (out_col == null) return "vec3(0.0, 0.0, 0.0)";
-			out_col = textureMap.get(out_col.split(".")[0]);
-			if (out_col == null) return "vec3(0.0, 0.0, 0.0)";
-			out_col += ".rgb";
+			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
 			var strength = parse_value_input(node.inputs[1]);
 			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
 			var steps = 'int($strength * 10 + 1)';
-			var texture = out_col.substring(out_col.indexOf("(") + 1, out_col.indexOf(","));
+			var tex_name = "texblur_" + node_name(node);
+			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
 			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
 			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
 			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
-			curshader.write('texCoordBlur = texCoord + vec2(i, j) / vec2(textureSize($texture, 0));');
-			curshader.write('res1 += $out_col;');
+			curshader.write('res1 += texture($tex_name, texCoord + vec2(i, j) / vec2(textureSize($tex_name, 0)));');
 			curshader.write('}');
 			curshader.write('}');
 			curshader.write('res1 /= ($steps * 2 + 1) * ($steps * 2 + 1);');
@@ -1541,7 +1533,7 @@ class MaterialParser {
 		return -1;
 	}
 
-	static function node_name(node: TNode): String {
+	public static function node_name(node: TNode): String {
 		var s = safesrc(node.name) + node.id;
 		return s;
 	}
