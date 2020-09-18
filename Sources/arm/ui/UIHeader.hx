@@ -126,7 +126,7 @@ class UIHeader {
 					var radiusHandle = Id.handle({value: Context.bakeCurvRadius});
 					Context.bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
 					var offsetHandle = Id.handle({value: Context.bakeCurvOffset});
-					Context.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
+					Context.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), -2.0, 2.0, true);
 					var smoothHandle = Id.handle({value: Context.bakeCurvSmooth});
 					Context.bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
 				}
