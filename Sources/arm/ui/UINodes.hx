@@ -318,8 +318,6 @@ class UINodes {
 			Context.nodePreviewSocket = 0;
 		}
 
-		if (Config.raw.node_preview && Context.nodePreviewDirty) makeNodePreview();
-
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
@@ -333,6 +331,8 @@ class UINodes {
 		g.end();
 
 		if (grid == null) drawGrid();
+
+		if (Config.raw.node_preview && Context.nodePreviewDirty) makeNodePreview();
 
 		// Start with UI
 		ui.begin(g);
