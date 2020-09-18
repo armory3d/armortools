@@ -937,7 +937,7 @@ class MaterialParser {
 			return to_vec3('$height');
 		}
 		else if (customNodes.get(node.type) != null) {
-			return customNodes.get(node.type)(node);
+			return customNodes.get(node.type)(node, socket);
 		}
 		return "vec3(0.0, 0.0, 0.0)";
 	}
@@ -1337,7 +1337,7 @@ class MaterialParser {
 			}
 		}
 		else if (customNodes.get(node.type) != null) {
-			return customNodes.get(node.type)(node);
+			return customNodes.get(node.type)(node, socket);
 		}
 		return "0.0";
 	}
