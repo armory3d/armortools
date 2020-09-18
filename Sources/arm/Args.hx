@@ -13,7 +13,7 @@ class Args {
 
 	static var useArgs = false;
 	static var projectPath = "";
-	static var meshPath = "";
+	static var assetPath = "";
 	static var reloadMesh = false;
 	static var exportTextures = false;
 	static var exportTexturesType = "";
@@ -34,7 +34,7 @@ class Args {
 					projectPath = currentArg;
 					Project.filepath = projectPath;
 				}
-				if (Path.isMesh(currentArg)) meshPath = currentArg;
+				if (Path.isMesh(currentArg) || Path.isTexture(currentArg)) assetPath = currentArg;
 				if (currentArg == "--reload-mesh") reloadMesh = true;
 				if (currentArg == "--export-textures" && (v + 3) <= Krom.getArgCount()) {
 					exportTextures = true;
@@ -55,7 +55,7 @@ class Args {
 		if (useArgs) {
 			iron.App.notifyOnInit(function() {
 				if (projectPath != "") ImportAsset.run(projectPath, -1, -1, false);
-				if (meshPath != "") ImportAsset.run(meshPath, -1, -1, false);
+				if (assetPath != "") ImportAsset.run(assetPath, -1, -1, false);
 				if (reloadMesh) Project.reimportMesh();
 				if (exportTextures) {
 					if (exportTexturesType == "png" ||
