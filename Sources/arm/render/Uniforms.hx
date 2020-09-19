@@ -354,8 +354,8 @@ class Uniforms {
 	}
 
 	public static function linkTex(object: Object, mat: MaterialData, link: String): kha.Image {
-		#if arm_painter
 		switch (link) {
+			#if arm_painter
 			case "_texcolorid": {
 				if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
 				else return UISidebar.inst.getImage(Project.assets[Context.colorIdHandle.position]);
@@ -401,38 +401,8 @@ class Uniforms {
 				var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 				return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 			}
-			if (link.startsWith("_texpaint_pack_vert")) {
-				var tid = link.substr(link.length - 1);
-				return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
-			}
-			if (link.startsWith("_texpaint_mask_vert")) {
-				var tid = Std.parseInt(link.substr(link.length - 1));
-				return Project.layers[tid].texpaint_mask;
-			}
-
 			case "_texpaint_mask": {
 				return Context.layer.texpaint_mask;
-			}
-			if (link.startsWith("_texpaint_mask")) {
-				var tid = Std.parseInt(link.substr(link.length - 1));
-				return tid < Project.layers.length ? Project.layers[tid].texpaint_mask : null;
-			}
-			if (link.startsWith("_texpaint_nor")) {
-				var tid = Std.parseInt(link.substr(link.length - 1));
-				return tid < Project.layers.length ? Project.layers[tid].texpaint_nor : null;
-			}
-			if (link.startsWith("_texpaint_pack")) {
-				var tid = Std.parseInt(link.substr(link.length - 1));
-				return tid < Project.layers.length ? Project.layers[tid].texpaint_pack : null;
-			}
-			if (link.startsWith("_texpaint")) {
-				var tid = Std.parseInt(link.substr(link.length - 1));
-				return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
-			}
-
-			if (link.startsWith("_texblur_")) {
-				var id = link.substr(9);
-				return Context.nodePreviewsBlur != null ? Context.nodePreviewsBlur.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 			}
 			case "_texparticle": {
 				return RenderPath.active.renderTargets.get("texparticle").image;
@@ -449,6 +419,38 @@ class Uniforms {
 			}
 			#end
 		}
+
+		#if arm_painter
+		if (link.startsWith("_texpaint_pack_vert")) {
+			var tid = link.substr(link.length - 1);
+			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
+		}
+		if (link.startsWith("_texpaint_mask_vert")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return Project.layers[tid].texpaint_mask;
+		}
+		if (link.startsWith("_texpaint_mask")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_mask : null;
+		}
+		if (link.startsWith("_texpaint_nor")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_nor : null;
+		}
+		if (link.startsWith("_texpaint_pack")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return tid < Project.layers.length ? Project.layers[tid].texpaint_pack : null;
+		}
+		if (link.startsWith("_texpaint")) {
+			var tid = Std.parseInt(link.substr(link.length - 1));
+			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
+		}
+		if (link.startsWith("_texblur_")) {
+			var id = link.substr(9);
+			return Context.nodePreviewsBlur != null ? Context.nodePreviewsBlur.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+		}
+		#end
+
 		return null;
 	}
 }
