@@ -435,8 +435,6 @@ class UISidebar {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
-
 		if (Context.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown)) {
 			var r = getBrushStencilRect();
 			if (mouse.started("left")) {
@@ -486,7 +484,12 @@ class UISidebar {
 			Context.brushStencilY += (oldH - newH) / App.h() / 2;
 		}
 
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
+
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
+				   decalPaint ||
 				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 				   (Input.getPen().down() && !kb.down("alt"));
@@ -730,13 +733,19 @@ class UISidebar {
 				if (decal && !inNodes) {
 					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
+					if (!Operator.shortcut(Config.keymap.decal_paint, ShortcutDown)) {
+						Context.decalX = Context.paintVec.x;
+						Context.decalY = Context.paintVec.y;
+					}
+					var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
+					var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
 					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);
 					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2, psizex, psizey);
+					g.drawScaledImage(Context.decalImage, decalX, decalY, psizex, psizey);
 					#else
-					g.drawScaledImage(Context.decalImage, mx - psizex / 2, my - psizey / 2 + psizey, psizex, -psizey);
+					g.drawScaledImage(Context.decalImage, decalX, decalY + psizey, psizex, -psizey);
 					#end
 					g.popTransformation();
 					g.color = 0xffffffff;

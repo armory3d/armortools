@@ -8,6 +8,7 @@
 	"set_clone_source": "alt",
 	"stencil_transform": "ctrl",
 	"stencil_hide": "z",
+	"decal_paint": "ctrl",
 	"select_material": "shift+number",
 	"cycle_layers": "ctrl+tab",
 	"brush_radius": "f",

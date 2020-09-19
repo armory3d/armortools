@@ -2,6 +2,7 @@ package arm.node.brush;
 
 import iron.math.Vec4;
 import arm.ui.UISidebar;
+import arm.Enums;
 
 @:keep
 class InputNode extends LogicNode {
@@ -34,9 +35,13 @@ class InputNode extends LogicNode {
 			Context.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 		}
 
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+
 		var lazyPaint = Context.brushLazyRadius > 0 &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
-			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown));
+			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
+			 decalPaint);
 
 		var mouse = iron.system.Input.getMouse();
 		var paintX = mouse.viewX / iron.App.w();

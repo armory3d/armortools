@@ -304,6 +304,11 @@ class Uniforms {
 				Context.prevPaintVecY = Context.lastPaintVecY;
 				return v;
 			}
+			case "_decalPaint": {
+				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+				vec.set(Context.decalX, Context.decalY, decalPaint ? 1 : 0);
+				return vec;
+			}
 			#end
 		}
 

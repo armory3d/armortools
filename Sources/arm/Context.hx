@@ -101,6 +101,8 @@ class Context {
 	public static var selectTime = 0.0;
 	public static var decalImage: Image = null;
 	public static var decalPreview = false;
+	public static var decalX = 0.0;
+	public static var decalY = 0.0;
 	public static var viewportMode = ViewLit;
 	#if (krom_android || krom_ios || arm_vr)
 	public static var renderMode = RenderForward;
