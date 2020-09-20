@@ -53,7 +53,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [16, 4, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 5];
+			var menuItems = [16, 4, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 7];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -302,6 +302,9 @@ class UIMenu {
 				if (ui.button("      " + tr("Manual"), Left)) {
 					File.explorer("https://armorpaint.org/manual");
 				}
+				if (ui.button("      " + tr("What's New"), Left)) {
+					File.explorer("https://armorpaint.org/notes");
+				}
 				if (ui.button("      " + tr("Issue Tracker"), Left)) {
 					File.explorer("https://github.com/armory3d/armorpaint/issues");
 				}
@@ -309,6 +312,11 @@ class UIMenu {
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
 					File.explorer(url);
 				}
+				if (ui.button("      " + tr("Request Feature"), Left)) {
+					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					File.explorer(url);
+				}
+				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
 				if (ui.button("      " + tr("Check for Updates..."), Left)) {
 					// Retrieve latest version number
 					var url = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
