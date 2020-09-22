@@ -101,7 +101,7 @@ class ExportTexture {
 		// Append object mask name
 		var exportAll = Context.layersExport == 0;
 		if (!exportAll && Context.layer.objectMask > 0) {
-			f += "_" + Project.paintObjects[Context.layer.objectMask].name;
+			f += "_" + Project.paintObjects[Context.layer.objectMask - 1].name;
 		}
 
 		// Clear export layer
