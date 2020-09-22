@@ -360,12 +360,15 @@ class RenderPathPaint {
 	}
 
 	public static function commandsCursor() {
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint);
 		var tool = Context.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
 			tool != ToolClone &&
 			tool != ToolBlur &&
-			tool != ToolParticle) {
+			tool != ToolParticle &&
+			!decalPaint) {
 				return;
 		}
 		if (!App.uiEnabled || UIHeader.inst.worktab.position == SpaceRender) {
@@ -405,7 +408,8 @@ class RenderPathPaint {
 		path.setTarget("");
 		g.setPipeline(Layers.pipeCursor);
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var img = decal ? Context.decalImage : Res.get("cursor.k");
+		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint);
+		var img = (decal && !decalPaint) ? Context.decalImage : Res.get("cursor.k");
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
