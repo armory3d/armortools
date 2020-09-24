@@ -195,6 +195,7 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (Context.textureExportPath == "") { // First export, ask for path
+				Context.layersExport = 0;
 				BoxExport.showTextures();
 			}
 			else {
@@ -205,7 +206,10 @@ class UISidebar {
 				iron.App.notifyOnRender(export);
 			}
 		}
-		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) BoxExport.showTextures();
+		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
+			Context.layersExport = 0;
+			BoxExport.showTextures();
+		}
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 

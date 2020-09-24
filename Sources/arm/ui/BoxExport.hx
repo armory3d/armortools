@@ -79,7 +79,9 @@ class BoxExport {
 			ui.enabled = true;
 			ui.row([0.5, 0.5]);
 			ui.enabled = !bakeMaterial;
-			Context.layersExport = ui.combo(Id.handle({position: Context.layersExport}), [tr("Visible"), tr("Selected")], tr("Layers"), true);
+			var layersExportHandle = Id.handle();
+			layersExportHandle.position = Context.layersExport;
+			Context.layersExport = ui.combo(layersExportHandle, [tr("Visible"), tr("Selected")], tr("Layers"), true);
 			ui.enabled = true;
 			ui.combo(hpreset, files, tr("Preset"), true);
 			if (hpreset.changed) preset = null;

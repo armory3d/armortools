@@ -73,7 +73,10 @@ class UIMenu {
 				if (ui.button("      " + tr("Reimport Mesh"), Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (ui.button("      " + tr("Reimport Textures"), Left, Config.keymap.file_reimport_textures)) Project.reimportTextures();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("      " + tr("Export Textures..."), Left, Config.keymap.file_export_textures_as)) BoxExport.showTextures();
+				if (ui.button("      " + tr("Export Textures..."), Left, Config.keymap.file_export_textures_as)) {
+					Context.layersExport = 0;
+					BoxExport.showTextures();
+				}
 				if (ui.button("      " + tr("Export Mesh..."), Left)) BoxExport.showMesh();
 				if (ui.button("      " + tr("Bake Material..."), Left)) BoxExport.showBakeMaterial();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);

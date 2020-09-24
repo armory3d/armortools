@@ -332,7 +332,10 @@ class TabLayers {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
-						if (ui.button(tr("Export"), Left)) BoxExport.showTextures();
+						if (ui.button(tr("Export"), Left)) {
+							Context.layersExport = 1;
+							BoxExport.showTextures();
+						}
 
 						if (l.getChildren() == null && l.fill_layer == null && ui.button(tr("To Fill Layer"), Left)) {
 							function makeFill(g: kha.graphics4.Graphics) {
