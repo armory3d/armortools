@@ -556,6 +556,32 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
+				name: _tr("Shader"),
+				type: "SHADER_GPU", // extension
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Value"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.5
+					}
+				],
+				buttons: [
+					{
+						name: " ",
+						type: "STRING",
+						default_value: ""
+					}
+				]
+			},
+			{
+				id: 0,
 				name: _tr("Tangent"),
 				type: "TANGENT",
 				x: 0,

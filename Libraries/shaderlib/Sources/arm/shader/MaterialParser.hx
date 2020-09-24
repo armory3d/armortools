@@ -1306,6 +1306,10 @@ class MaterialParser {
 			curshader.add_uniform("float " + link, "_" + link);
 			return link;
 		}
+		else if (node.type == "SHADER_GPU") {
+			var shader = node.buttons[0].default_value;
+			return shader == "" ? "0.0" : shader;
+		}
 		else if (node.type == "RGBTOBW") {
 			var col = parse_vector_input(node.inputs[0]);
 			return '((($col.r * 0.3 + $col.g * 0.59 + $col.b * 0.11) / 3.0) * 2.5)';
