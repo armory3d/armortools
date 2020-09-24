@@ -300,7 +300,7 @@ class UISidebar {
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
 						Context.brushRadius -= getRadiusIncrement();
-						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
+						Context.brushRadius = Math.max(Math.round(Context.brushRadius * 100) / 100, 0.01);
 						Context.brushRadiusHandle.value = Context.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
