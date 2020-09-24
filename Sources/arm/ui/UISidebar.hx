@@ -739,6 +739,13 @@ class UISidebar {
 					}
 					var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
 					var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
+
+					// Radius being scaled
+					if (Context.brushLocked) {
+						decalX += Context.lockStartedX - System.windowWidth() / 2;
+						decalY += Context.lockStartedY - System.windowHeight() / 2;
+					}
+
 					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
 					g.pushRotation(-angle, mx, my);
