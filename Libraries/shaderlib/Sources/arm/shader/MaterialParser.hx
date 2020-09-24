@@ -57,6 +57,8 @@ class MaterialParser {
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
 
+	public static var script_links: Map<String, String> = null;
+
 	public static function getNode(id: Int): TNode {
 		for (n in nodes) if (n.id == id) return n;
 		return null;
@@ -101,6 +103,7 @@ class MaterialParser {
 		sample_bump = false;
 		sample_bump_res = "";
 		out_normaltan = "vec3(0.5, 0.5, 1.0)";
+		script_links = null;
 	}
 
 	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _geom: NodeShader, _tesc: NodeShader, _tese: NodeShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
@@ -1294,6 +1297,14 @@ class MaterialParser {
 			else {
 				return out_val;
 			}
+		}
+		else if (node.type == "SCRIPT_CPU") {
+			if (script_links == null) script_links = [];
+			var script = node.buttons[0].default_value;
+			var link = node_name(node);
+			script_links.set(link, script);
+			curshader.add_uniform("float " + link, "_" + link);
+			return link;
 		}
 		else if (node.type == "RGBTOBW") {
 			var col = parse_vector_input(node.inputs[0]);

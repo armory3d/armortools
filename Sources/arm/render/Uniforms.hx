@@ -10,6 +10,7 @@ import iron.Scene;
 #if arm_painter
 import arm.ui.UISidebar;
 import arm.util.UVUtil;
+import arm.shader.MaterialParser;
 import arm.Enums;
 #end
 
@@ -27,8 +28,8 @@ class Uniforms {
 	}
 
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
-		#if arm_painter
 		switch (link) {
+			#if arm_painter
 			case "_brushRadius": {
 				var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
 				var pen = Input.getPen();
@@ -113,6 +114,12 @@ class Uniforms {
 				#else
 				return 8.0;
 				#end
+			}
+		}
+		if (MaterialParser.script_links != null) {
+			for (key in MaterialParser.script_links.keys()) {
+				var script = MaterialParser.script_links[key];
+				return script == "" ? 0.0 : js.Lib.eval(script);
 			}
 		}
 		return null;

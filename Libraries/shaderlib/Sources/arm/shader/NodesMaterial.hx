@@ -663,6 +663,32 @@ class NodesMaterial {
 						max: 10.0
 					}
 				]
+			},
+			{
+				id: 0,
+				name: _tr("Script"),
+				type: "SCRIPT_CPU", // extension
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Value"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.5
+					}
+				],
+				buttons: [
+					{
+						name: " ",
+						type: "STRING",
+						default_value: ""
+					}
+				]
 			}
 		],
 		// [ // Output
