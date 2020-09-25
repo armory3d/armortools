@@ -157,7 +157,16 @@ class Inc {
 		}
 	}
 
-	public static function endSplit() {
+	public static function end() {
+		endSplit();
+
+		if (Context.foregroundEvent && !iron.system.Input.getMouse().down()) {
+			Context.foregroundEvent = false;
+			Context.pdirty = 0;
+		}
+	}
+
+	static function endSplit() {
 		Context.viewIndexLast = Context.viewIndex;
 		Context.viewIndex = -1;
 	}
@@ -202,7 +211,7 @@ class Inc {
 				if (Config.raw.brush_3d) RenderPathPaint.commandsCursor();
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
-			endSplit();
+			end();
 			RenderPathPaint.finishPaint();
 			return true;
 		}

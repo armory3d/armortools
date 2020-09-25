@@ -53,7 +53,7 @@ class RenderPathForward {
 
 		#if arm_painter
 		RenderPathPaint.end();
-		Inc.endSplit();
+		Inc.end();
 		#end
 
 		RenderPathDeferred.taaFrame++;

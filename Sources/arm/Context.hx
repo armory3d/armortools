@@ -123,6 +123,7 @@ class Context {
 	public static var paintVec = new Vec4();
 	public static var lastPaintX = -1.0;
 	public static var lastPaintY = -1.0;
+	public static var foregroundEvent = false;
 	public static var painted = 0;
 	public static var brushTime = 0.0;
 	public static var cloneStartX = -1.0;

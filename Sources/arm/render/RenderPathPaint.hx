@@ -484,12 +484,13 @@ class RenderPathPaint {
 
 	static function paintEnabled(): Bool {
 		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
+		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
 		var groupLayer = Context.layer.getChildren() != null;
-		return !fillLayer && !groupLayer;
+		return !fillLayer && !fillMask && !groupLayer && !Context.foregroundEvent;
 	}
 
 	public static function begin() {
-		if (!paintEnabled())return;
+		if (!paintEnabled()) return;
 
 		pushUndoLast = History.pushUndo;
 		if (History.pushUndo && History.undoLayers != null) {

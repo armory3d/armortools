@@ -243,7 +243,7 @@ class RenderPathDeferred {
 
 		#if arm_painter
 		RenderPathPaint.end();
-		Inc.endSplit();
+		Inc.end();
 		#end
 
 		taaFrame++;

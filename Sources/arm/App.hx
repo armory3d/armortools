@@ -92,6 +92,7 @@ class App {
 
 		System.notifyOnApplicationState(
 			function() { // Foreground
+				Context.foregroundEvent = true;
 				Context.lastPaintX = -1;
 				Context.lastPaintY = -1;
 			},
