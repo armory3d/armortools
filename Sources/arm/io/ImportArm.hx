@@ -96,6 +96,7 @@ class ImportArm {
 			}
 
 			Context.layersPreviewDirty = true;
+			Context.layerFilter = 0;
 			Project.projectNew(false);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));

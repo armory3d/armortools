@@ -27,6 +27,7 @@ class ImportMesh {
 		}
 
 		clearLayers = _clearLayers;
+		Context.layerFilter = 0;
 
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
@@ -139,8 +140,8 @@ class ImportMesh {
 				}
 
 				if (clearLayers) {
-					while (Project.layers.length > 1) { var l = Project.layers.pop(); l.unload(); }
-					Context.setLayer(Project.layers[0]);
+					while (Project.layers.length > 0) { var l = Project.layers.pop(); l.unload(); }
+					Layers.newLayer(false);
 					iron.App.notifyOnRender(Layers.initLayers);
 					History.reset();
 				}

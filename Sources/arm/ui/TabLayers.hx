@@ -40,6 +40,7 @@ class TabLayers {
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
 			var filterHandle = Id.handle();
+			filterHandle.position = Context.layerFilter;
 			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) {

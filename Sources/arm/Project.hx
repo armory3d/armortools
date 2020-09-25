@@ -157,6 +157,7 @@ class Project {
 
 		ViewportUtil.resetViewport();
 		Context.layerPreviewDirty = true;
+		Context.layerFilter = 0;
 
 		Context.paintObject = Context.mainObject();
 
