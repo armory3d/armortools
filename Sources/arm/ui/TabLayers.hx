@@ -2,6 +2,7 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Id;
+import zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
 import arm.data.LayerSlot;
@@ -361,6 +362,7 @@ class TabLayers {
 
 						if (l.getChildren() == null && ui.button(tr("To Group"), Left)) {
 							if (l.parent == null) { // 1-level nesting only
+								var pointers = initLayerMap();
 								Context.setLayer(l);
 								var group = Layers.newGroup();
 								Project.layers.remove(group);
@@ -369,10 +371,12 @@ class TabLayers {
 								l.parent = group;
 								Context.setLayer(l);
 								// History.newGroup();
+								for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 							}
 						}
 						if (ui.button(tr("Delete"), Left)) {
 							if (arm.Project.layers.length > 1) {
+								var pointers = initLayerMap();
 								Context.layer = l;
 								if (l.getChildren() == null) {
 									History.deleteLayer();
@@ -391,6 +395,7 @@ class TabLayers {
 									l.parent.delete();
 								}
 								Context.ddirty = 2;
+								for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 							}
 						}
 						if (ui.button(tr("Clear"), Left)) {
@@ -676,5 +681,28 @@ class TabLayers {
 				drawList(l, j);
 			}
 		}
+	}
+
+	public static function remapLayerPointers(nodes: Array<TNode>, pointerMap: Map<Int, Int>) {
+		for (n in nodes) {
+			if (n.type == "LAYER" || n.type == "LAYER_MASK") {
+				var i = n.buttons[0].default_value;
+				if (pointerMap.exists(i)) {
+					n.buttons[0].default_value = pointerMap.get(i);
+				}
+			}
+		}
+	}
+
+	public static function initLayerMap(): Map<LayerSlot, Int> {
+		var res: Map<LayerSlot, Int> = [];
+		for (i in 0...Project.layers.length) res.set(Project.layers[i], i);
+		return res;
+	}
+
+	public static function fillLayerMap(map: Map<LayerSlot, Int>): Map<Int, Int> {
+		var res: Map<Int, Int> = [];
+		for (l in map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
+		return res;
 	}
 }

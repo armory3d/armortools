@@ -4,6 +4,7 @@ import kha.graphics4.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
 import arm.ui.UISidebar;
+import arm.ui.TabLayers;
 import arm.node.MakeMaterial;
 import arm.Enums;
 
@@ -478,6 +479,7 @@ class LayerSlot {
 		var delta = to - i;
 		if (i + delta < 0 || i + delta > Project.layers.length - 1) return;
 
+		var pointers = TabLayers.initLayerMap();
 		var isGroup = this.getChildren() != null;
 		var j = delta > 0 ? to : to - 1; // One element down
 		var k = delta > 0 ? to + 1 : to; // One element up
@@ -525,5 +527,7 @@ class LayerSlot {
 				this.parent = kGroup ? kLayer : kParent;
 			}
 		}
+
+		for (m in Project.materials) TabLayers.remapLayerPointers(m.canvas.nodes, TabLayers.fillLayerMap(pointers));
 	}
 }

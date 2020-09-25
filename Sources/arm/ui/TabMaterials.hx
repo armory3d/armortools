@@ -3,6 +3,7 @@ package arm.ui;
 import haxe.Json;
 import zui.Zui;
 import zui.Id;
+import zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
 import iron.object.MeshObject;
@@ -162,6 +163,7 @@ class TabMaterials {
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
 								UISidebar.inst.hwnd1.redraws = 2;
+								for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
 							}
 
 							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
@@ -226,5 +228,18 @@ class TabMaterials {
 
 	static function getSelectedMaterial():MaterialSlot {
 		return UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene : Context.material;
+	}
+
+	static function updateMaterialPointers(nodes: Array<TNode>, i: Int) {
+		for (n in nodes) {
+			if (n.type == "MATERIAL") {
+				if (n.buttons[0].default_value == i) {
+					n.buttons[0].default_value = 9999; // Material deleted
+				}
+				else if (n.buttons[0].default_value > i) {
+					n.buttons[0].default_value--; // Offset by deleted material
+				}
+			}
+		}
 	}
 }

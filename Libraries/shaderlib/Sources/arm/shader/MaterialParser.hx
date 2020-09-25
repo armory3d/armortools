@@ -722,13 +722,15 @@ class MaterialParser {
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			var m = Project.materials[node.buttons[0].default_value];
+			var result = "vec3(0.0, 0.0, 0.0)";
+			var mi = node.buttons[0].default_value;
+			if (mi >= Project.materials.length) return result;
+			var m = Project.materials[mi];
 			var _nodes = nodes;
 			var _links = links;
 			nodes = m.canvas.nodes;
 			links = m.canvas.links;
 			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
-			var result = "vec3(0.0, 0.0, 0.0)";
 			if (socket == node.outputs[0]) { // Base
 				result = parse_vector_input(output_node.inputs[0]);
 			}
@@ -1041,13 +1043,15 @@ class MaterialParser {
 			}
 		}
 		else if (node.type == "MATERIAL") {
-			var m = Project.materials[node.buttons[0].default_value];
+			var result = "0.0";
+			var mi = node.buttons[0].default_value;
+			if (mi >= Project.materials.length) return result;
+			var m = Project.materials[mi];
 			var _nodes = nodes;
 			var _links = links;
 			nodes = m.canvas.nodes;
 			links = m.canvas.links;
 			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
-			var result = "0.0";
 			if (socket == node.outputs[1]) { // Opac
 				result = parse_value_input(output_node.inputs[1]);
 			}
