@@ -70,7 +70,10 @@ class MakeMesh {
 
 		frag.add_function(ShaderFunctions.str_packFloatInt16);
 
+		var textureCount = 0;
+
 		if (Context.tool == ToolColorId) {
+			textureCount++;
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('fragColor[0] = vec4(n.xy, 1.0, packFloatInt16(0.0, uint(0)));'); // met/rough
 			frag.write('vec3 idcol = pow(textureLod(texcolorid, texCoord, 0.0).rgb, vec3(2.2, 2.2, 2.2));');
@@ -96,6 +99,7 @@ class MakeMesh {
 
 			if (Project.layers[0].isVisible()) {
 				var l = Project.layers[0];
+				textureCount += l.texpaint_mask != null ? 4 : 3;
 
 				if (l.objectMask > 0) {
 					var uid = Project.paintObjects[l.objectMask - 1].uid;
@@ -236,6 +240,24 @@ class MakeMesh {
 				frag.write('metallic = 0.0;');
 			}
 
+			if (Context.drawWireframe) {
+				textureCount++;
+				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
+			}
+
+			if (Context.viewportMode == ViewMask && Context.layer.texpaint_mask != null) {
+				textureCount++;
+				frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
+			}
+
+			if (Context.viewportMode == ViewLit && Context.renderMode == RenderForward) {
+				textureCount += 4;
+				frag.add_uniform('sampler2D senvmapBrdf', "$brdf.k");
+				frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
+				frag.add_uniform('sampler2D sltcMat', '_ltcMat');
+				frag.add_uniform('sampler2D sltcMag', '_ltcMag');
+			}
+
 			if (Project.layers.length > 1) {
 				frag.write('float factor0;');
 				frag.write('vec4 col_tex0;');
@@ -244,16 +266,15 @@ class MakeMesh {
 				frag.write('vec3 n0;');
 				var len = Project.layers.length;
 				var start = len - 1;
-				var maxLayers = getMaxVisibleLayers();
-				var count = 1;
+				var maxTextures = getMaxTextures();
 				for (i in 1...len) {
-					if (start == 1) break;
-					start--;
 					var l = Project.layers[len - i];
 					if (l.isVisible() && l.getChildren() == null) {
-						count++;
-						if (count >= maxLayers) break;
+						textureCount += l.texpaint_mask != null ? 4 : 3;
+						if (textureCount >= maxTextures) break;
 					}
+					if (start == 1) break;
+					start--;
 				}
 				for (i in start...len) {
 					var l = Project.layers[i];
@@ -327,11 +348,7 @@ class MakeMesh {
 			}
 
 			if (Context.drawWireframe) {
-				// GL_NV_fragment_shader_barycentric
-				// VK_AMD_shader_explicit_vertex_parameter
-				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
 				frag.write('basecol *= 1.0 - textureLod(texuvmap, texCoord, 0.0).r;');
-				// frag.write('if (basecol == vec3(0,0,0)) discard;');
 			}
 
 			if (Context.renderMode == RenderForward) {
@@ -349,9 +366,7 @@ class MakeMesh {
 					frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
 					frag.write('float dotNV = max(dot(wn, vVec), 0.0);');
-					frag.add_uniform('sampler2D senvmapBrdf', "$brdf.k");
 					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
-					frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
 					frag.add_uniform('vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					frag.write('vec3 wreflect = reflect(-vVec, wn);');
@@ -359,13 +374,10 @@ class MakeMesh {
 					frag.add_function(ShaderFunctions.str_envMapEquirect);
 					frag.write('vec4 envmapDataLocal = envmapData;'); // TODO: spirv workaround
 					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapDataLocal.x), envlod).rgb;');
-
 					frag.add_uniform('vec3 lightArea0', '_lightArea0');
 					frag.add_uniform('vec3 lightArea1', '_lightArea1');
 					frag.add_uniform('vec3 lightArea2', '_lightArea2');
 					frag.add_uniform('vec3 lightArea3', '_lightArea3');
-					frag.add_uniform('sampler2D sltcMat', '_ltcMat');
-					frag.add_uniform('sampler2D sltcMag', '_ltcMag');
 					frag.add_function(ShaderFunctions.str_ltcEvaluate);
 					frag.add_uniform('vec3 lightPos', '_pointPosition');
 					frag.add_uniform('vec3 lightColor', '_pointColor');
@@ -440,7 +452,6 @@ class MakeMesh {
 				frag.write('fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
 			}
 			else if (Context.viewportMode == ViewMask && Context.layer.texpaint_mask != null) {
-				frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
 				frag.write('float sample_mask = textureLod(texpaint_mask_view, texCoord, 0.0).r;');
 				frag.write('fragColor[1] = vec4(sample_mask, sample_mask, sample_mask, 1.0);');
 			}
@@ -460,15 +471,14 @@ class MakeMesh {
 		return con_mesh;
 	}
 
-	static function getMaxVisibleLayers(): Int {
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
-		// 128 texture slots available
-		// 4 textures per layer (3 + 1 mask)
-		// 32 layers - base + 31 on top
-		return 31;
+	static function getMaxTextures(): Int {
+		#if (kha_direct3d11 || kha_metal)
+		return 128 - 66;
+		#elseif (kha_direct3d12 || kha_vulkan)
+		// CommandList5Impl->textureCount = 16;
+		return 16 - 3;
 		#else
-		// 32 texture slots available
-		return 4; // base + 4 on top
+		return 16 - 3;
 		#end
 	}
 }
