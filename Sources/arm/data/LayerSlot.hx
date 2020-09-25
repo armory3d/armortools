@@ -105,7 +105,9 @@ class LayerSlot {
 		var lpos = Project.layers.indexOf(this);
 		Project.layers.remove(this);
 		// Undo can remove base layer and then restore it from undo layers
-		Context.setLayer(Project.layers[lpos > 0 ? lpos - 1 : 0]);
+		if (Project.layers.length > 0) {
+			Context.setLayer(Project.layers[lpos > 0 ? lpos - 1 : 0]);
+		}
 	}
 
 	public function unload() {
