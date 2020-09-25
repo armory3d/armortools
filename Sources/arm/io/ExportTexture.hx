@@ -117,7 +117,8 @@ class ExportTexture {
 
 		// Export all visible layers or selected only
 		var layers = bakeMaterial ? [RenderPathPaint.liveLayer] :
-					 exportAll ? Project.layers : [Context.layer];
+					 exportAll    ? Project.layers :
+									[Context.layer];
 
 		// Flatten layers
 		for (l1 in layers) {
@@ -143,7 +144,7 @@ class ExportTexture {
 				Layers.expa.g4.setTexture(Layers.texmask, hasMask ? l1.texpaint_mask : empty);
 				Layers.expa.g4.setTexture(Layers.texa, Layers.imga);
 				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
-				Layers.expa.g4.setInt(Layers.blending, l1.blending);
+				Layers.expa.g4.setInt(Layers.blending, layers.length > 1 ? l1.blending : 0);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				Layers.expa.g4.drawIndexedVertices();
