@@ -37,6 +37,7 @@ strip Krom
 node armorcore/make -g metal
 cp -a build/krom/ armorcore/Deployment
 cd armorcore
+git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make -g metal
 # Open generated Xcode project
 # Add `path/to/armorpaint/armorcore/v8/libraries/macos/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
@@ -59,6 +60,7 @@ node armorcore/make ios -g metal
 cp -a build/krom/ armorcore/Deployment
 cd armorcore
 git apply patch/ios_document_picker.diff --directory=Kinc
+git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make ios -g metal
 # Open generated Xcode project
 # Add `path/to/armorcore/v8/libraries/ios/release` into `Project - Krom - Build Settings - Search Paths - Library Search Paths`
