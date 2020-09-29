@@ -55,10 +55,7 @@ class File {
 	}
 
 	public static function exists(path: String): Bool {
-		var slash = path.lastIndexOf(Path.sep);
-		var dir = path.substr(0, slash);
-		var file = path.substr(slash + 1);
-		return readDirectory(dir).indexOf(file) >= 0;
+		return Krom.fileExists(path);
 	}
 
 	public static function download(url: String, dstPath: String) {
