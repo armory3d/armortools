@@ -78,14 +78,6 @@ class ImportObj {
 								parts.splice(j, 1);
 							}
 							else j++;
-							posa0 = null;
-							posa1 = null;
-							nora0 = null;
-							nora1 = null;
-							texa0 = null;
-							texa1 = null;
-							inda0 = null;
-							inda1 = null;
 						}
 					}
 				}
