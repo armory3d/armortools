@@ -37,7 +37,10 @@ class TabBrowser {
 			UIFiles.fileBrowser(ui, hpath, false, true);
 
 			if (known) {
-				ImportAsset.run(hpath.text);
+				var path = hpath.text;
+				iron.App.notifyOnInit(function() {
+					ImportAsset.run(path);
+				});
 				hpath.text = hpath.text.substr(0, hpath.text.lastIndexOf(Path.sep));
 			}
 			known = hpath.text.indexOf(".") > 0;

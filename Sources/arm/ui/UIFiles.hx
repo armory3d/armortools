@@ -189,7 +189,11 @@ class UIFiles {
 				var label = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				ui.text(label, Center);
 				ui._y -= slotw * 0.75;
+
+				if (handle.changed) break;
 			}
+
+			if (handle.changed) break;
 		}
 		ui._y += slotw * 0.8;
 
