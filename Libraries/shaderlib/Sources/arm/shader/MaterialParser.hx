@@ -517,10 +517,43 @@ class MaterialParser {
 			var gamma = parse_value_input(node.inputs[1]);
 			return 'pow($out_col, ' + to_vec3('$gamma') + ")";
 		}
+
+		else if(node.type == "DIRECT_WARP"){
+			// Already fetched
+			if (parsed.indexOf(res_var_name(node, node.outputs[0])) >= 0) {
+			 	var varname = store_var_name(node);
+			}
+
+			// Load the warp mask
+			var mask_name = node_name(node);
+			var tex = make_texture(node, mask_name);
+			// Initialize the grayscale value in case no mask registered
+			curshader.write('float gray = 0;');
+			if (tex != null) {
+				var texstore = texture_store(node, tex, mask_name, true);
+				// Get the relevant mask-fragment grayscale value 
+				curshader.write('vec3 color = texture($mask_name, texCoord).rgb;');
+				curshader.write('gray = dot(color, vec3(0.299, 0.587, 0.114));');
+			}
+
+			// Load the current exisitng material texture and transform it
+			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
+			var strength = Std.parseFloat(parse_value_input(node.inputs[1])) * 500;
+			var tex_name = "texblur_" + node_name(node);
+			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			var angle_rad = Std.parseFloat(parse_value_input(node.inputs[2])) * (Math.PI / 180);
+			var x =  Math.cos(angle_rad) * strength;
+			var y =  Math.sin(angle_rad) * strength;
+			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
+			curshader.write('res1 += texture($tex_name, texCoord + vec2($x, $y) * gray / vec2(textureSize($tex_name, 0))).rgb;');
+
+			return "res1";
+		}
+
 		else if (node.type == "BLUR") {
 			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
 			var strength = parse_value_input(node.inputs[1]);
-			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
+			if (strength == "0") return "vec3(0.0, 0.0, 0.0)";
 			var steps = 'int($strength * 10 + 1)';
 			var tex_name = "texblur_" + node_name(node);
 			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);

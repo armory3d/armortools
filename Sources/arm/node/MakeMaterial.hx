@@ -181,7 +181,7 @@ class MakeMaterial {
 			Context.nodePreviewsBlur = null;
 		}
 		for (node in UINodes.inst.getCanvasMaterial().nodes) {
-			if (node.type == "BLUR") {
+			if (node.type == "BLUR" || node.type ==  "DIRECT_WARP") {
 				if (Context.nodePreviewsBlur == null) {
 					Context.nodePreviewsBlur = new Map();
 				}
