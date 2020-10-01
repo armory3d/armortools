@@ -230,7 +230,6 @@ class MakeMaterial {
 				if (mask_node == null){
 					mask_node = node;
 				} 
-				// TODO: can't we add a node without inputs??
 				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), mask_node, mask);
 				MaterialParser.warp_passthrough = false;
 			}
