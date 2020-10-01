@@ -461,6 +461,12 @@ class Uniforms {
 			var id = link.substr(9);
 			return Context.nodePreviewsBlur != null ? Context.nodePreviewsBlur.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
+
+		// Warp uniforms
+		if (link.startsWith("_texwarp_")) {
+			var id = link.substr(9);
+			return Context.nodePreviewsWrap != null ? Context.nodePreviewsWrap.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+		}
 		#end
 
 		return null;

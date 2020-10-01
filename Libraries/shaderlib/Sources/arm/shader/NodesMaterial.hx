@@ -1314,6 +1314,14 @@ class NodesMaterial {
 						default_value: 0.0,
 						min: 0.0,
 						max: 360.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Mask"),
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: f32([0.8, 0.8, 0.8, 1.0])
 					}
 				],
 				outputs: [
@@ -1326,14 +1334,7 @@ class NodesMaterial {
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
 					}
 				],
-				buttons: [
-					{
-						name: _tr("File"),
-						type: "ENUM",
-						default_value: 0,
-						data: ""
-					}
-				]
+				buttons: []
 			},
 			{
 				id: 0,
