@@ -206,31 +206,8 @@ class MakeMaterial {
 				// Crate render target for the original image
 				var wimage = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
 				Context.nodePreviewsWrap.set(MaterialParser.node_name(node), wimage);
-				// Crate render target for the mask
-				var mask = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
-				Context.nodePreviewsWrap.set("mask_" + MaterialParser.node_name(node), mask);
-
 				MaterialParser.warp_passthrough = true;
 				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, wimage);
-				var nid = node.inputs[3].node_id;
-
-				// Search the previous mask node
-				var mask_node_id = -1;
-				for (lnk in UINodes.inst.getCanvasMaterial().links){
-					if (lnk.to_socket == 3 && lnk.to_id == nid){
-						mask_node_id = lnk.from_id;
-					}
-				}
-				var mask_node = null;
-				for (n in  UINodes.inst.getCanvasMaterial().nodes){
-					if (n.id == mask_node_id){
-						mask_node = n;
-					}
-				}
-				if (mask_node == null){
-					mask_node = node;
-				} 
-				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), mask_node, mask);
 				MaterialParser.warp_passthrough = false;
 			}
 		}
