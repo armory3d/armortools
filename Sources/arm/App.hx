@@ -571,7 +571,7 @@ class App {
 	}
 
 	public static function enumTexts(nodeType: String): Array<String> {
-		if (nodeType == "TEX_IMAGE" || nodeType == "DIRECT_WARP") {
+		if (nodeType == "TEX_IMAGE") {
 			return Project.assetNames.length > 0 ? Project.assetNames : [""];
 		}
 		else if (nodeType == "LAYER" || nodeType == "LAYER_MASK") {
