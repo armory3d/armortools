@@ -549,7 +549,7 @@ class MaterialParser {
 		else if (node.type == "BLUR") {
 			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
 			var strength = parse_value_input(node.inputs[1]);
-			if (strength == "0") return "vec3(0.0, 0.0, 0.0)";
+			if (strength == "0.0") return "vec3(0.0, 0.0, 0.0)";
 			var steps = 'int($strength * 10 + 1)';
 			var tex_name = "texblur_" + node_name(node);
 			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
