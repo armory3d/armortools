@@ -35,19 +35,27 @@ class ImportObj {
 					parts.push(obj);
 				}
 				if (Context.splitBy == SplitMaterial) {
+					var posa0;
+					var posa1;
+					var nora0;
+					var nora1;
+					var texa0;
+					var texa1;
+					var inda0;
+					var inda1;
 					// Merge to single object per material
 					for (i in 0...parts.length) {
 						var j = i + 1;
 						while (j < parts.length) {
 							if (parts[i].name == parts[j].name) {
-								var posa0 = parts[i].posa;
-								var posa1 = parts[j].posa;
-								var nora0 = parts[i].nora;
-								var nora1 = parts[j].nora;
-								var texa0 = parts[i].texa != null ? parts[i].texa : null;
-								var texa1 = parts[j].texa != null ? parts[j].texa : null;
-								var inda0 = parts[i].inda;
-								var inda1 = parts[j].inda;
+								posa0 = parts[i].posa;
+								posa1 = parts[j].posa;
+								nora0 = parts[i].nora;
+								nora1 = parts[j].nora;
+								texa0 = parts[i].texa != null ? parts[i].texa : null;
+								texa1 = parts[j].texa != null ? parts[j].texa : null;
+								inda0 = parts[i].inda;
+								inda1 = parts[j].inda;
 								var posa = new kha.arrays.Int16Array(posa0.length + posa1.length);
 								var nora = new kha.arrays.Int16Array(nora0.length + nora1.length);
 								var texa = (texa0 != null && texa1 != null) ? new kha.arrays.Int16Array(texa0.length + texa1.length) : null;
