@@ -52,7 +52,10 @@ class MaterialParser {
 	public static var triplanar = false; // Sample using texCoord/1/2 & texCoordBlend
 	public static var sample_keep_aspect = false; // Adjust uvs to preserve texture aspect ratio
 	public static var sample_uv_scale = '1.0';
+	
 	public static var blur_passthrough = false;
+	public static var warp_passthrough = false;
+
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -517,6 +520,24 @@ class MaterialParser {
 			var gamma = parse_value_input(node.inputs[1]);
 			return 'pow($out_col, ' + to_vec3('$gamma') + ")";
 		}
+
+		else if(node.type == "DIRECT_WARP"){
+			// Get the current rendered material texture
+			if (warp_passthrough) return parse_vector_input(node.inputs[0]);
+			
+			var angle = parse_value_input(node.inputs[1], true);
+			var mask = parse_value_input(node.inputs[2], true);
+			
+			var tex_name = "texwarp_" + node_name(node);			
+			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			curshader.write('float x = cos($angle * ${Math.PI} / 180);');
+			curshader.write('float y = sin($angle * ${Math.PI} / 180);');
+			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
+			curshader.write('res1 = texture($tex_name, texCoord + vec2(x, y) * $mask).rgb;');
+
+			return "res1;";
+		}
+
 		else if (node.type == "BLUR") {
 			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
 			var strength = parse_value_input(node.inputs[1]);
@@ -969,7 +990,7 @@ class MaterialParser {
 		frag.write_normal--;
 	}
 
-	static function parse_value_input(inp: TNodeSocket): String {
+	static function parse_value_input(inp: TNodeSocket, vector_as_grayscale: Bool = false) : String {
 		var l = getInputLink(inp);
 		var from_node = l != null ? getNode(l.from_id) : null;
 		if (from_node != null) {
@@ -980,7 +1001,12 @@ class MaterialParser {
 			var res_var = write_result(l);
 			var st = from_node.outputs[l.from_socket].type;
 			if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
-				return '$res_var.x';
+				if(vector_as_grayscale) {
+					return 'dot($res_var.rbg, vec3(0.299, 0.587, 0.114))';
+				}
+				else {
+					return '$res_var.x';
+				}
 			}
 			else { // VALUE
 				return res_var;
