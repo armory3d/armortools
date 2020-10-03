@@ -48,7 +48,7 @@ class Context {
 	public static var nodePreviewSocket = 0;
 	public static var nodePreview: Image = null;
 	public static var nodePreviewsBlur: Map<String, Image> = null;
-	public static var nodePreviewsWrap: Map<String, Image> = null;
+	public static var nodePreviewsWarp: Map<String, Image> = null;
 
 
 	public static var colorIdPicked = false;

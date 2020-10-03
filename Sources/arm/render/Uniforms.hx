@@ -465,7 +465,7 @@ class Uniforms {
 		// Warp uniforms
 		if (link.startsWith("_texwarp_")) {
 			var id = link.substr(9);
-			return Context.nodePreviewsWrap != null ? Context.nodePreviewsWrap.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.nodePreviewsWarp != null ? Context.nodePreviewsWarp.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
 		#end
 

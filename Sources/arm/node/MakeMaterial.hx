@@ -174,19 +174,17 @@ class MakeMaterial {
 	}
 
 	static function bakeBlurNodes() {
-		// Clean Blur nodes
 		if (Context.nodePreviewsBlur != null) {
 			for (image in Context.nodePreviewsBlur) {
 				image.unload();
 			}
 			Context.nodePreviewsBlur = null;
 		}
-		// Clean Wrap Nodes
-		if (Context.nodePreviewsWrap != null) {
-			for (img in Context.nodePreviewsWrap) {
+		if (Context.nodePreviewsWarp != null) {
+			for (img in Context.nodePreviewsWarp) {
 				img.unload();
 			}
-			Context.nodePreviewsWrap = null;
+			Context.nodePreviewsWarp = null;
 		}
 		for (node in UINodes.inst.getCanvasMaterial().nodes) {
 			if (node.type == "BLUR") {
@@ -200,14 +198,13 @@ class MakeMaterial {
 				MaterialParser.blur_passthrough = false;
 			}
 			if (node.type ==  "DIRECT_WARP") {
-				if (Context.nodePreviewsWrap == null) {
-					Context.nodePreviewsWrap = new Map();
+				if (Context.nodePreviewsWarp == null) {
+					Context.nodePreviewsWarp = new Map();
 				}
-				// Crate render target for the original image
-				var wimage = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
-				Context.nodePreviewsWrap.set(MaterialParser.node_name(node), wimage);
+				var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()));
+				Context.nodePreviewsWarp.set(MaterialParser.node_name(node), image);
 				MaterialParser.warp_passthrough = true;
-				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, wimage);
+				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
 				MaterialParser.warp_passthrough = false;
 			}
 		}

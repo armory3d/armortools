@@ -52,7 +52,7 @@ class MaterialParser {
 	public static var triplanar = false; // Sample using texCoord/1/2 & texCoordBlend
 	public static var sample_keep_aspect = false; // Adjust uvs to preserve texture aspect ratio
 	public static var sample_uv_scale = '1.0';
-	
+
 	public static var blur_passthrough = false;
 	public static var warp_passthrough = false;
 
@@ -520,24 +520,18 @@ class MaterialParser {
 			var gamma = parse_value_input(node.inputs[1]);
 			return 'pow($out_col, ' + to_vec3('$gamma') + ")";
 		}
-
-		else if(node.type == "DIRECT_WARP"){
-			// Get the current rendered material texture
+		else if (node.type == "DIRECT_WARP") {
 			if (warp_passthrough) return parse_vector_input(node.inputs[0]);
-			
 			var angle = parse_value_input(node.inputs[1], true);
 			var mask = parse_value_input(node.inputs[2], true);
-			
-			var tex_name = "texwarp_" + node_name(node);			
+			var tex_name = "texwarp_" + node_name(node);
 			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
-			curshader.write('float x = cos($angle * ${Math.PI} / 180);');
-			curshader.write('float y = sin($angle * ${Math.PI} / 180);');
-			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
-			curshader.write('res1 = texture($tex_name, texCoord + vec2(x, y) * $mask).rgb;');
-
-			return "res1;";
+			var store = store_var_name(node);
+			curshader.write('float ${store}_rad = $angle * (${Math.PI} / 180);');
+			curshader.write('float ${store}_x = cos(${store}_rad);');
+			curshader.write('float ${store}_y = sin(${store}_rad);');
+			return 'texture($tex_name, texCoord + vec2(${store}_x, ${store}_y) * $mask).rgb;';
 		}
-
 		else if (node.type == "BLUR") {
 			if (blur_passthrough) return parse_vector_input(node.inputs[0]);
 			var strength = parse_value_input(node.inputs[1]);
@@ -545,14 +539,15 @@ class MaterialParser {
 			var steps = 'int($strength * 10 + 1)';
 			var tex_name = "texblur_" + node_name(node);
 			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
-			curshader.write('vec3 res1 = vec3(0.0, 0.0, 0.0);');
+			var store = store_var_name(node);
+			curshader.write('vec3 ${store}_res = vec3(0.0, 0.0, 0.0);');
 			curshader.write('for (int i = -$steps; i <= $steps; ++i) {');
 			curshader.write('for (int j = -$steps; j <= $steps; ++j) {');
-			curshader.write('res1 += texture($tex_name, texCoord + vec2(i, j) / vec2(textureSize($tex_name, 0))).rgb;');
+			curshader.write('${store}_res += texture($tex_name, texCoord + vec2(i, j) / vec2(textureSize($tex_name, 0))).rgb;');
 			curshader.write('}');
 			curshader.write('}');
-			curshader.write('res1 /= ($steps * 2 + 1) * ($steps * 2 + 1);');
-			return "res1";
+			curshader.write('${store}_res /= ($steps * 2 + 1) * ($steps * 2 + 1);');
+			return '${store}_res';
 		}
 		else if (node.type == "HUE_SAT") {
 			curshader.add_function(ShaderFunctions.str_hue_sat);
@@ -990,7 +985,7 @@ class MaterialParser {
 		frag.write_normal--;
 	}
 
-	static function parse_value_input(inp: TNodeSocket, vector_as_grayscale: Bool = false) : String {
+	static function parse_value_input(inp: TNodeSocket, vector_as_grayscale = false) : String {
 		var l = getInputLink(inp);
 		var from_node = l != null ? getNode(l.from_id) : null;
 		if (from_node != null) {
@@ -1001,7 +996,7 @@ class MaterialParser {
 			var res_var = write_result(l);
 			var st = from_node.outputs[l.from_socket].type;
 			if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
-				if(vector_as_grayscale) {
+				if (vector_as_grayscale) {
 					return 'dot($res_var.rbg, vec3(0.299, 0.587, 0.114))';
 				}
 				else {
