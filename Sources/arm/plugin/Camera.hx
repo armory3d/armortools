@@ -62,7 +62,7 @@ class Camera {
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
 					var f = -mouse.movementY / 150;
-					f *= Config.raw.camera_speed;
+					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 					dist -= f;
 				}
@@ -70,7 +70,7 @@ class Camera {
 				if (mouse.wheelDelta != 0 && !modif) {
 					redraws = 2;
 					var f = mouse.wheelDelta * (-0.1);
-					f *= Config.raw.camera_speed;
+					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 					dist -= f;
 				}
@@ -108,14 +108,14 @@ class Camera {
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
 					var f = -mouse.movementY / 150;
-					f *= Config.raw.camera_speed;
+					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
 
 				if (mouse.wheelDelta != 0) {
 					redraws = 2;
 					var f = mouse.wheelDelta * (-0.1);
-					f *= Config.raw.camera_speed;
+					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
 			}
@@ -169,6 +169,10 @@ class Camera {
 				}
 			}
 		});
+	}
+
+	function getCameraSpeed(): Float {
+		return Config.raw.camera_speed * (Config.raw.invert_zoom_direction ? -1 : 1);
 	}
 
 	public function reset() {

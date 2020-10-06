@@ -58,6 +58,8 @@ class BoxPreferences {
 				var hspeed = Id.handle({value: Config.raw.camera_speed});
 				Config.raw.camera_speed = ui.slider(hspeed, tr("Camera Speed"), 0.1, 4.0, true);
 
+				Config.raw.invert_zoom_direction = ui.check(Id.handle({selected: Config.raw.invert_zoom_direction}), tr("Invert Zoom Direction"));
+
 				#if (!krom_android && !krom_ios)
 				Config.raw.native_file_browser = ui.check(Id.handle({selected: Config.raw.native_file_browser}), tr("Native File Browser"));
 				#end
