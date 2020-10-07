@@ -346,6 +346,10 @@ class Uniforms {
 				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Scene.active.world.probe.raw.strength);
 				return vec;
 			}
+			case "_envmapDataWorld": {
+				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Context.showEnvmap ? Scene.active.world.probe.raw.strength : 4.0);
+				return vec;
+			}
 		}
 		#end
 		return null;
