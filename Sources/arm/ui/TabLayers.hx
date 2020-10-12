@@ -8,6 +8,7 @@ import iron.system.Input;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
+import arm.sys.Path;
 import arm.Enums;
 
 class TabLayers {
@@ -225,6 +226,18 @@ class TabLayers {
 						var add = l.fill_mask == null ? 2 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							ui.text('${l.name} ' + tr("Mask"), Right, ui.t.HIGHLIGHT_COL);
+							if (ui.button(tr("Export"), Left)) {
+								UIFiles.show("png", true, function(path: String) {
+									var f = UIFiles.filename;
+									if (f == "") f = tr("untitled");
+									if (!f.endsWith(".png")) f += ".png";
+									var out = new haxe.io.BytesOutput();
+									var writer = new arm.format.PngWriter(out);
+									var data = arm.format.PngTools.buildGrey(l.texpaint_mask.width, l.texpaint_mask.height, l.texpaint_mask.getPixels());
+									writer.write(data);
+									Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
+								});
+							}
 							if (l.fill_mask == null && ui.button(tr("To Fill Mask"), Left)) {
 								function makeFill(g: kha.graphics4.Graphics) {
 									g.end();
@@ -293,7 +306,7 @@ class TabLayers {
 								}
 								iron.App.notifyOnRender(makeApply);
 							}
-						}, 5 + add);
+						}, 6 + add);
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
