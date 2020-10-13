@@ -313,6 +313,17 @@ class BoxPreferences {
 			Context.hvxao = Id.handle({selected: Config.raw.rp_gi});
 			if (ui.tab(htab, tr("Viewport"), true)) {
 				#if (!arm_vr)
+
+				#if (kha_direct3d12 || kha_vulkan)
+
+				var hpathtracemode = Id.handle({position: Context.pathTraceMode});
+				Context.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
+				if (hpathtracemode.changed) {
+					arm.render.RenderPathRaytrace.ready = false;
+				}
+
+				#else
+
 				var hrendermode = Id.handle({position: Context.renderMode});
 				Context.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
@@ -327,6 +338,9 @@ class BoxPreferences {
 					}
 					MakeMaterial.parseMeshMaterial();
 				}
+
+				#end
+
 				#end
 
 				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);

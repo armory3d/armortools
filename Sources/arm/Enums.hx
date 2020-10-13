@@ -86,6 +86,13 @@ package arm;
 	var RenderPathTrace = 2;
 }
 
+#if (kha_direct3d12 || kha_vulkan)
+@:enum abstract PathTraceMode(Int) from Int to Int {
+	var TraceCore = 0;
+	var TraceFull = 1;
+}
+#end
+
 @:enum abstract FillType(Int) from Int to Int {
 	var FillObject = 0;
 	var FillFace = 1;

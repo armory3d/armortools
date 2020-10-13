@@ -43,7 +43,8 @@ class RenderPathRaytrace {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
-			raytraceInit("raytrace_brute" + ext);
+			var mode = Context.pathTraceMode == TraceCore ? "core" : "full";
+			raytraceInit("raytrace_brute_" + mode + ext);
 			lastEnvmap = null;
 			lastLayer = null;
 		}

@@ -1,10 +1,12 @@
 
-// #define _EMISSION
-// #define _SUBSURFACE
+#ifdef _FULL
+#define _EMISSION
+#define _SUBSURFACE
+#define _TRANSLUCENCY
+#endif
 // #define _RENDER
 // #define _ROULETTE
 // #define _TRANSPARENCY
-// #define _TRANSLUCENCY
 
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"

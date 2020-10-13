@@ -111,6 +111,9 @@ class Context {
 	#else
 	public static var renderMode = RenderDeferred;
 	#end
+	#if (kha_direct3d12 || kha_vulkan)
+	public static var pathTraceMode = TraceCore;
+	#end
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
 	public static var cacheDraws = false;
