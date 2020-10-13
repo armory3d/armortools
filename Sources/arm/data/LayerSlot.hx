@@ -169,6 +169,9 @@ class LayerSlot {
 		var _texpaint_mask = texpaint_mask;
 		texpaint_mask = other.texpaint_mask;
 		other.texpaint_mask = _texpaint_mask;
+		var _texpaint_mask_preview = texpaint_mask_preview;
+		texpaint_mask_preview = other.texpaint_mask_preview;
+		other.texpaint_mask_preview = _texpaint_mask_preview;
 	}
 
 	public function createMask(color: Int, clear = true, image: Image = null) {

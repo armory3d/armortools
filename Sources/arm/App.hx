@@ -322,6 +322,7 @@ class App {
 		UIMenubar.inst.menuHandle.redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
+		UIView2D.inst.hwnd.redraws = 2;
 		if (Context.ddirty < 0) Context.ddirty = 0; // Redraw viewport
 	}
 

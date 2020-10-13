@@ -115,6 +115,16 @@ class History {
 				Context.layersPreviewDirty = true;
 				Context.setLayer(Context.layer, true);
 			}
+			else if (step.name == "Apply Filter") {
+				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+				var lay = undoLayers[undoI];
+				Context.setLayer(Project.layers[step.layer], step.is_mask);
+				Context.layer.swap(lay);
+				Context.layer.createMask(0, false);
+				Context.layer.swapMask(lay);
+				lay.deleteMask();
+				Context.layerPreviewDirty = true;
+			}
 			else if (step.name == tr("To Fill Layer")) {
 				Context.layer.toPaintLayer();
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -232,6 +242,16 @@ class History {
 					iron.App.removeRender(makeApply);
 				}
 				iron.App.notifyOnRender(makeApply);
+			}
+			else if (step.name == tr("Apply Filter")) {
+				var lay = undoLayers[undoI];
+				Context.setLayer(Project.layers[step.layer], false);
+				Context.layer.swap(lay);
+				lay.createMask(0, false);
+				Context.layer.swapMask(lay);
+				Context.layer.deleteMask();
+				Context.layerPreviewDirty = true;
+				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Fill Layer")) {
 				var lay = undoLayers[undoI];
@@ -351,6 +371,12 @@ class History {
 	public static function applyMask() {
 		copyToUndoWithMask();
 		push(tr("Apply Mask"));
+	}
+
+	@:keep
+	public static function applyFilter() {
+		copyToUndoWithMask();
+		push(tr("Apply Filter"));
 	}
 
 	public static function toFillLayer() {

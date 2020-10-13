@@ -22,22 +22,39 @@ function texsynthInpaint(tiling) {
 	let w = arm.Config.getTextureResX();
 	let h = arm.Config.getTextureResY();
 	let l = arm.Context.layer;
-	if (l.texpaint_mask == null) return;
-	let bytes_img = l.texpaint.getPixels().b.bufferValue;
-	let bytes_mask = l.texpaint_mask.getPixels().b.bufferValue;
-	let view_img = new Uint8Array(bytes_img);
-	let view_mask = new Uint8Array(bytes_mask);
-	for (let i = 0; i < view_img.length / 4; ++i) {
-		view_img[i * 4 + 3] = view_mask[i];
+	if (l.texpaint_mask == null) {
+		return;
 	}
 
+	let bytes_img = l.texpaint.getPixels().b.bufferValue;
+	let bytes_mask = l.texpaint_mask.getPixels().b.bufferValue;
 	let bytes_out = new arm.Bytes(new ArrayBuffer(w * h * 4));
-	Krom.texsynthInpaint(w, h, bytes_out.b.bufferValue, bytes_img, tiling);
-
+	Krom.texsynthInpaint(w, h, bytes_out.b.bufferValue, bytes_img, bytes_mask, tiling);
 	let image = arm.Image.fromBytes(bytes_out, w, h);
-	var asset = {name: "tex_synth.png", file: "/tex_synth.png", id: arm.Project.assetId++};
-	iron.Data.cachedImages.h[asset.file] = image;
-	arm.Project.assets.push(asset);
-	arm.Project.assetNames.push(asset.name);
-	arm.Project.assetMap.h[asset.id] = image;
+
+	function apply(g) {
+		g.end();
+
+		arm.Context.layerIsMask = false;
+		arm.History.applyFilter();
+
+		l.deleteMask();
+		l.texpaint.unload();
+
+		l.texpaint = arm.Image.createRenderTarget(w, h);
+		let g2 = l.texpaint.get_g2();
+		g2.begin(false);
+		g2.drawImage(image, 0, 0);
+		g2.end();
+
+		let rts = iron.RenderPath.active.renderTargets;
+		rts.h["texpaint" + l.ext].image = l.texpaint;
+		arm.MakeMaterial.parseMeshMaterial();
+		arm.App.redrawUI();
+		arm.Context.layerPreviewDirty = true;
+
+		g.begin();
+		iron.App.removeRender(apply);
+	}
+	iron.App.notifyOnRender(apply);
 }
