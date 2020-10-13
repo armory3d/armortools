@@ -435,6 +435,6 @@
     "ColorID": "カラーID",
     "Picker": "ピッカー",
     "Gizmo": "ギズモ",
-    "Hold {key} to set source": "{key}を長押ししてソースを設定します",
+    "Hold {key} to set source": "{key}を押しながらソースを設定します",
     "Tiled": "タイル状"
 }
