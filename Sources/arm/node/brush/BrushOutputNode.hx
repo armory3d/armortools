@@ -60,11 +60,11 @@ class BrushOutputNode extends LogicNode {
 
 	override function run(from: Int) {
 
-		var left = 0;
-		var right = 1;
+		var left = 0.0;
+		var right = 1.0;
 		if (Context.paint2d) {
-			left = 1;
-			right = 2;
+			left = 1.0;
+			right = 1.0 + UIView2D.inst.ww / App.w();
 		}
 
 		// First time init
@@ -80,8 +80,10 @@ class BrushOutputNode extends LogicNode {
 		var groupLayer = Context.layer.getChildren() != null;
 
 		// Paint bounds
-		if (Context.paintVec.x < right && Context.paintVec.x > left &&
-			Context.paintVec.y < 1 && Context.paintVec.y > 0 &&
+		if (Context.paintVec.x > left &&
+			Context.paintVec.x < right &&
+			Context.paintVec.y > 0 &&
+			Context.paintVec.y < 1 &&
 			!UISidebar.inst.ui.isHovered &&
 			!UISidebar.inst.ui.isScrolling &&
 			!fillLayer &&

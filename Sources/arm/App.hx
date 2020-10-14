@@ -217,6 +217,9 @@ class App {
 		if (UISidebar.inst != null && Context.viewIndex > -1) {
 			res = Std.int(res / 2);
 		}
+		if (Context.paint2dView) {
+			res = UIView2D.inst.ww;
+		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
@@ -555,7 +558,7 @@ class App {
 		}
 		else {
 			if (Context.splitView) {
-				Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				Context.viewIndex = mouse.viewX > arm.App.w() / 2 ? 1 : 0;
 			}
 
 			Context.lastPaintVecX = mouse.viewX / iron.App.w();

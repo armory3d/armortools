@@ -7,6 +7,7 @@ import iron.data.Data;
 #if arm_painter
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
+import arm.ui.UIView2D;
 import arm.ui.UIStatus;
 import arm.render.Inc;
 import arm.sys.Path;
@@ -239,12 +240,13 @@ class Config {
 	}
 
 	public static function initLayout() {
+		var show2d = (UINodes.inst != null && UINodes.inst.show) || (UIView2D.inst != null && UIView2D.inst.show);
 		raw.layout = [
 			Std.int(UISidebar.defaultWindowW * raw.window_scale),
 			Std.int(kha.System.windowHeight() / 3),
 			Std.int(kha.System.windowHeight() / 3),
 			Std.int(kha.System.windowHeight() / 3),
-			(UINodes.inst != null && UINodes.inst.show) ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
 			Std.int(iron.App.h() / 2),
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)
 		];

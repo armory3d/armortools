@@ -499,6 +499,7 @@ class RenderPathPaint {
 
 		// 2D paint
 		if (Context.paint2d) {
+			Context.paint2dView = true;
 			// Set plane mesh
 			painto = Context.paintObject;
 			visibles = [];
@@ -523,7 +524,7 @@ class RenderPathPaint {
 			cam.buildMatrix();
 
 			var tw = 0.95 * UIView2D.inst.panScale;
-			var tx = UIView2D.inst.panX / iron.App.w();
+			var tx = UIView2D.inst.panX / UIView2D.inst.ww;
 			var ty = UIView2D.inst.panY / iron.App.h();
 
 			m.setIdentity();
@@ -666,6 +667,7 @@ class RenderPathPaint {
 		}
 
 		if (Context.paint2d) {
+			Context.paint2dView = false;
 			// Restore paint mesh
 			planeo.visible = false;
 			for (i in 0...Project.paintObjects.length) {

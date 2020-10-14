@@ -68,8 +68,8 @@ class UIView2D {
 
 		if (Context.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
-		var tw = iron.App.w() * 0.95 * panScale;
-		var tx = iron.App.w() / 2 - tw / 2 + panX;
+		var tw = ww * 0.95 * panScale;
+		var tx = ww / 2 - tw / 2 + panX;
 		var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 		g.end();

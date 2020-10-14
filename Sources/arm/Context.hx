@@ -215,6 +215,7 @@ class Context {
 	public static var prevPaintVecY = -1.0;
 	public static var frame = 0;
 	public static var paint2d = false;
+	public static var paint2dView = false;
 
 	public static var lockStartedX = -1.0;
 	public static var lockStartedY = -1.0;

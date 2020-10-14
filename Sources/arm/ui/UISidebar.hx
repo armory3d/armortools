@@ -255,7 +255,7 @@ class UISidebar {
 		}
 
 		var right = iron.App.w();
-		if (UIView2D.inst.show) right = iron.App.w() * 2;
+		if (UIView2D.inst.show) right += UIView2D.inst.ww;
 
 		// Viewport shortcuts
 		if (mouse.viewX > 0 && mouse.viewX < right &&
@@ -500,10 +500,16 @@ class UISidebar {
 		if (down) {
 			var mx = mouse.viewX;
 			var my = mouse.viewY;
-			if (Context.paint2d) mx -= iron.App.w();
+			var ww = iron.App.w();
+			if (Context.paint2d) {
+				mx -= iron.App.w();
+				ww = UIView2D.inst.ww;
+			}
 
-			if (mx < iron.App.w() && mx > iron.App.x() &&
-				my < iron.App.h() && my > iron.App.y()) {
+			if (mx < ww &&
+				mx > iron.App.x() &&
+				my < iron.App.h() &&
+				my > iron.App.y()) {
 
 				if (setCloneSource) {
 					Context.cloneStartX = mx;
@@ -523,7 +529,7 @@ class UISidebar {
 
 						History.pushUndo = true;
 						if (Context.tool == ToolClone && Context.cloneStartX >= 0.0) { // Clone delta
-							Context.cloneDeltaX = (Context.cloneStartX - mx) / iron.App.w();
+							Context.cloneDeltaX = (Context.cloneStartX - mx) / ww;
 							Context.cloneDeltaY = (Context.cloneStartY - my) / iron.App.h();
 							Context.cloneStartX = -1;
 						}
@@ -741,7 +747,7 @@ class UISidebar {
 						Context.decalX = Context.paintVec.x;
 						Context.decalY = Context.paintVec.y;
 					}
-					var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
+					var decalX = App.x() + Context.decalX * iron.App.w() - psizex / 2;
 					var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
 
 					// Radius being scaled

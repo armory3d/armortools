@@ -9,6 +9,7 @@ import iron.RenderPath;
 import iron.Scene;
 #if arm_painter
 import arm.ui.UISidebar;
+import arm.ui.UIView2D;
 import arm.util.UVUtil;
 import arm.shader.MaterialParser;
 import arm.Enums;
@@ -304,7 +305,7 @@ class Uniforms {
 				var y = Context.paintVec.y;
 				var lastx = Context.prevPaintVecX;
 				var lasty = Context.prevPaintVecY;
-				if (Context.paint2d) { x -= 1.0; lastx -= 1.0; }
+				if (Context.paint2d) { x = vec2d(x); lastx = vec2d(lastx); }
 				var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
 				v.set(Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
 				Context.prevPaintVecX = Context.lastPaintVecX;
@@ -322,24 +323,32 @@ class Uniforms {
 		return v;
 	}
 
+	static function vec2d(x: Float) {
+		// Transform from 3d viewport coord to 2d view coord
+		Context.paint2dView = false;
+		var res = (x * App.w() - App.w()) / UIView2D.inst.ww;
+		Context.paint2dView = true;
+		return res;
+	}
+
 	public static function linkVec4(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
 		#if arm_painter
 		switch (link) {
 			case "_inputBrush": {
 				var down = Input.getMouse().down() || Input.getPen().down();
 				vec.set(Context.paintVec.x, Context.paintVec.y, down ? 1.0 : 0.0, 0.0);
-				if (Context.paint2d) vec.x -= 1.0;
+				if (Context.paint2d) vec.x = vec2d(vec.x);
 				return vec;
 			}
 			case "_inputBrushLast": {
 				var down = Input.getMouse().down() || Input.getPen().down();
 				vec.set(Context.lastPaintVecX, Context.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
-				if (Context.paint2d) vec.x -= 1.0;
+				if (Context.paint2d) vec.x = vec2d(vec.x);
 				return vec;
 			}
 			case "_stencilTransform": {
 				vec.set(Context.brushStencilX, Context.brushStencilY, Context.brushStencilScale, Context.brushStencilAngle);
-				if (Context.paint2d) vec.x -= 1.0;
+				if (Context.paint2d) vec.x = vec2d(vec.x);
 				return vec;
 			}
 			case "_envmapData": {
