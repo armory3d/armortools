@@ -364,8 +364,14 @@ class App {
 					}
 					UINodes.inst.acceptAssetDrag(index);
 				}
-				else if (inViewport || inLayers || in2dView) { // Create mask
+				else if (inLayers || in2dView) { // Create mask
 					Layers.createImageMask(dragAsset);
+				}
+				else if (inViewport) {
+					if (dragAsset.file.toLowerCase().endsWith(".hdr")) {
+						var image = UISidebar.inst.getImage(dragAsset);
+						arm.io.ImportEnvmap.run(dragAsset.file, image);
+					}
 				}
 				dragAsset = null;
 			}

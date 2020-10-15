@@ -44,7 +44,9 @@ class ImportTexture {
 
 			// Set envmap
 			if (path.toLowerCase().endsWith(".hdr")) {
-				ImportEnvmap.run(path, image);
+				iron.App.notifyOnInit(function() { // Make sure file browser process did finish
+					ImportEnvmap.run(path, image);
+				});
 			}
 		});
 	}
