@@ -70,6 +70,11 @@ class MakePaint {
 		}
 		else {
 			vert.write('vec2 subtex = tex;');
+			if (decal) {
+				vert.add_uniform('vec2 sub', '_sub');
+				vert.add_uniform('vec4 decalPaint', '_decalPaint');
+				vert.write('if (decalPaint.z > 0.0) subtex += sub;');
+			}
 		}
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
