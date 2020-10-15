@@ -164,7 +164,7 @@ class RenderUtil {
 		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 
 		MakeMaterial.parseMeshMaterial();
-		Context.ddirty = 0;
+		Context.ddirty = 1; // Refresh depth for decal paint
 
 		if (current != null) current.begin(false);
 	}

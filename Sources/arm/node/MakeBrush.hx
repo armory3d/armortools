@@ -9,10 +9,14 @@ class MakeBrush {
 
 	public static function run(vert: NodeShader, frag: NodeShader) {
 
-		if (Context.tool == ToolDecal || Context.tool == ToolText || Context.tool == ToolParticle) {
-			frag.write('float dist = 0.0;');
-		}
-		else if (Config.raw.brush_3d) {
+		frag.write('float dist = 0.0;');
+
+		if (Context.tool == ToolParticle) return;
+
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		if (decal) frag.write('if (decalPaint.z > 0) {');
+
+		if (Config.raw.brush_3d) {
 			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
 			frag.write('vec4 inplastLocal = inplast;'); // TODO: spirv workaround
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -67,12 +71,12 @@ class MakeBrush {
 
 			if (Context.brushLazyRadius > 0 && Context.brushLazyStep > 0) {
 				// Sphere
-				frag.write('float dist = distance(wposition, winp.xyz);');
+				frag.write('dist = distance(wposition, winp.xyz);');
 			}
 			else {
 				// Capsule
 				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-				frag.write('float dist = length(pa - ba * h);');
+				frag.write('dist = length(pa - ba * h);');
 			}
 
 			frag.write('if (dist > brushRadius) discard;');
@@ -89,9 +93,11 @@ class MakeBrush {
 			frag.write('vec2 pa = bsp.xy - binp.xy;');
 			frag.write('vec2 ba = binplast.xy - binp.xy;');
 			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
-			frag.write('float dist = length(pa - ba * h);');
+			frag.write('dist = length(pa - ba * h);');
 
 			frag.write('if (dist > brushRadius) discard;');
 		}
+
+		if (decal) frag.write('}');
 	}
 }

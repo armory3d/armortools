@@ -23,9 +23,10 @@ class MakeTexcoord {
 				//frag.write_attrib('if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) discard;');
 			}
 			else if (decal) {
-				frag.write_attrib('uvsp -= inp.xy;');
+				frag.add_uniform('vec4 decalPaint', '_decalPaint');
+				frag.write_attrib('uvsp -= decalPaint.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
-				frag.write_attrib('uvsp *= 0.21 / (brushRadius * 0.9);');
+				frag.write_attrib('uvsp *= 0.21 / (decalPaint.w * 0.9);'); // Decal radius
 
 				if (Context.brushDirectional) {
 					frag.add_uniform('vec3 brushDirection', '_brushDirection');

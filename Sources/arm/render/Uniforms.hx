@@ -32,20 +32,9 @@ class Uniforms {
 		switch (link) {
 			#if arm_painter
 			case "_brushRadius": {
-				var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
-				var pen = Input.getPen();
-				if (Config.raw.pressure_radius && pen.down()) {
-					val *= pen.pressure * Config.raw.pressure_sensitivity;
-				}
-				var scale2d = (900 / App.h()) * Config.raw.window_scale;
-				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-				if (Config.raw.brush_3d && !decal) {
-					val *= Context.paint2d ? 0.55 * scale2d : 2;
-				}
-				else {
-					val *= scale2d; // Projection ratio
-				}
-				return val;
+				var val = radiusUniform();
+				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+				return decalPaint ? val * 2 : val;
 			}
 			case "_brushScaleX": {
 				return 1 / Context.brushScaleX;
@@ -124,6 +113,23 @@ class Uniforms {
 			}
 		}
 		return null;
+	}
+
+	static function radiusUniform(): Float {
+		var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
+		var pen = Input.getPen();
+		if (Config.raw.pressure_radius && pen.down()) {
+			val *= pen.pressure * Config.raw.pressure_sensitivity;
+		}
+		var scale2d = (900 / App.h()) * Config.raw.window_scale;
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		if (Config.raw.brush_3d && !decal) {
+			val *= Context.paint2d ? 0.55 * scale2d : 2;
+		}
+		else {
+			val *= scale2d; // Projection ratio
+		}
+		return val;
 	}
 
 	public static function linkVec2(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
@@ -312,11 +318,6 @@ class Uniforms {
 				Context.prevPaintVecY = Context.lastPaintVecY;
 				return v;
 			}
-			case "_decalPaint": {
-				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
-				vec.set(Context.decalX, Context.decalY, decalPaint ? 1 : 0);
-				return vec;
-			}
 			#end
 		}
 
@@ -357,6 +358,11 @@ class Uniforms {
 			}
 			case "_envmapDataWorld": {
 				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Context.showEnvmap ? Scene.active.world.probe.raw.strength : 4.0);
+				return vec;
+			}
+			case "_decalPaint": {
+				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+				vec.set(Context.decalX, Context.decalY, decalPaint ? 1 : 0, radiusUniform());
 				return vec;
 			}
 		}

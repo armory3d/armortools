@@ -743,11 +743,13 @@ class UISidebar {
 				if (decal && !inNodes) {
 					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
+					var decalAlpha = 0.5;
 					if (!Operator.shortcut(Config.keymap.decal_paint, ShortcutDown)) {
 						Context.decalX = Context.paintVec.x;
 						Context.decalY = Context.paintVec.y;
+						decalAlpha = Context.brushOpacity;
 					}
-					var decalX = App.x() + Context.decalX * iron.App.w() - psizex / 2;
+					var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
 					var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
 
 					// Radius being scaled
@@ -756,9 +758,9 @@ class UISidebar {
 						decalY += Context.lockStartedY - System.windowHeight() / 2;
 					}
 
-					g.color = kha.Color.fromFloats(1, 1, 1, Context.brushOpacity);
+					g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
 					var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
-					g.pushRotation(-angle, mx, my);
+					g.pushRotation(-angle, decalX + psizex / 2, decalY + psizey / 2);
 					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 					g.drawScaledImage(Context.decalImage, decalX, decalY, psizex, psizey);
 					#else
