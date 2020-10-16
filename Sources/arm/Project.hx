@@ -2,6 +2,7 @@ package arm;
 
 import kha.System;
 import kha.Window;
+import kha.Image;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
@@ -420,5 +421,9 @@ class Project {
 				Project.assetMap.set(asset.id, image);
 			});
 		}
+	}
+
+	public static function getImage(asset: TAsset): Image {
+		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 }

@@ -364,7 +364,7 @@ class UINodes {
 				if (sel.type == "TEX_IMAGE") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.assets.length) {
-						img = UISidebar.inst.getImage(Project.assets[id]);
+						img = Project.getImage(Project.assets[id]);
 					}
 				}
 				else if (sel.type == "LAYER") {

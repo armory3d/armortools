@@ -569,7 +569,7 @@ class Layers {
 		var l = Context.layer;
 		if (l != Project.layers[0]) {
 			History.newMask();
-			l.createMask(0x00000000, true, UISidebar.inst.getImage(asset));
+			l.createMask(0x00000000, true, Project.getImage(asset));
 			Context.setLayer(l, true);
 			Context.layerPreviewDirty = true;
 		}

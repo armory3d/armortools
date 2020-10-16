@@ -389,7 +389,7 @@ class Uniforms {
 			#if arm_painter
 			case "_texcolorid": {
 				if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
-				else return UISidebar.inst.getImage(Project.assets[Context.colorIdHandle.position]);
+				else return Project.getImage(Project.assets[Context.colorIdHandle.position]);
 			}
 			case "_texuvmap": {
 				if (!UVUtil.uvmapCached) {

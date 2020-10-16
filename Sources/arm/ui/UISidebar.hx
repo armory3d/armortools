@@ -829,10 +829,6 @@ class UISidebar {
 		Config.raw.layout[LayoutStatusH] = Std.int(Config.raw.layout[LayoutStatusH] * Config.raw.window_scale);
 	}
 
-	public function getImage(asset: TAsset): Image {
-		return asset != null ? Project.assetMap.get(asset.id) : null;
-	}
-
 	public function setIconScale() {
 		if (ui.SCALE() > 1) {
 			Res.load(["icons2x.k"], function() {

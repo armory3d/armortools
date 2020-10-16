@@ -30,7 +30,7 @@ class BrushOutputNode extends LogicNode {
 			Context.brushNodesOpacity = 1.0;
 			var index = Project.assetNames.indexOf(opac);
 			var asset = Project.assets[index];
-			Context.brushMaskImage = UISidebar.inst.getImage(asset);
+			Context.brushMaskImage = Project.getImage(asset);
 		}
 		else {
 			Context.brushNodesOpacity = opac;
@@ -44,7 +44,7 @@ class BrushOutputNode extends LogicNode {
 		if (Std.is(stencil, String)) {
 			var index = Project.assetNames.indexOf(stencil);
 			var asset = Project.assets[index];
-			Context.brushStencilImage = UISidebar.inst.getImage(asset);
+			Context.brushStencilImage = Project.getImage(asset);
 		}
 		else {
 			Context.brushStencilImage = null;

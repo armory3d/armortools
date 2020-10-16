@@ -50,7 +50,7 @@ class TabTextures {
 						}
 
 						var asset = Project.assets[i];
-						var img = UISidebar.inst.getImage(asset);
+						var img = Project.getImage(asset);
 						var uix = ui._x;
 						var uiy = ui._y;
 						var sw = img.height < img.width ? img.height : 0;

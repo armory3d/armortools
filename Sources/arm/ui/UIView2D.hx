@@ -121,7 +121,7 @@ class UIView2D {
 											  0;
 			}
 			else if (type == View2DAsset) {
-				tex = UISidebar.inst.getImage(Context.texture);
+				tex = Project.getImage(Context.texture);
 			}
 			else { // View2DFont
 				tex = Context.font.image;

@@ -369,7 +369,7 @@ class App {
 				}
 				else if (inViewport) {
 					if (dragAsset.file.toLowerCase().endsWith(".hdr")) {
-						var image = UISidebar.inst.getImage(dragAsset);
+						var image = Project.getImage(dragAsset);
 						arm.io.ImportEnvmap.run(dragAsset.file, image);
 					}
 				}
@@ -472,7 +472,7 @@ class App {
 	static function getDragImage(): kha.Image {
 		dragTint = 0xffffffff;
 		dragRect = null;
-		if (dragAsset != null) return UISidebar.inst.getImage(dragAsset);
+		if (dragAsset != null) return Project.getImage(dragAsset);
 		if (dragMaterial != null) return dragMaterial.imageIcon;
 		if (dragLayer != null && Context.layerIsMask) return dragLayer.texpaint_mask_preview;
 		if (dragLayer != null && dragLayer.getChildren() != null) {

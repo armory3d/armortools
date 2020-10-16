@@ -41,7 +41,7 @@ class UIHeader {
 				ui.text(tr("Color ID Map"));
 				var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
 				if (Context.colorIdHandle.changed) Context.ddirty = 2;
-				if (Project.assets.length > 0) ui.image(UISidebar.inst.getImage(Project.assets[cid]));
+				if (Project.assets.length > 0) ui.image(Project.getImage(Project.assets[cid]));
 			}
 			else if (Context.tool == ToolPicker) {
 				Context.baseRPicked = Math.round(Context.baseRPicked * 10) / 10;
