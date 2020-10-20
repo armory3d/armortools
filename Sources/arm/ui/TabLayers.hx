@@ -661,7 +661,11 @@ class TabLayers {
 						if (scaleHandle.changed) {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
-							Layers.updateFillLayers();
+							function updateFillLayers(_) {
+								Layers.updateFillLayers();
+								iron.App.removeRender(updateFillLayers);
+							}
+							iron.App.notifyOnRender(updateFillLayers);
 						}
 
 						var angleHandle = Id.handle().nest(l.id);
@@ -671,7 +675,11 @@ class TabLayers {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
 							MakeMaterial.parsePaintMaterial();
-							Layers.updateFillLayers();
+							function updateFillLayers(_) {
+								Layers.updateFillLayers();
+								iron.App.removeRender(updateFillLayers);
+							}
+							iron.App.notifyOnRender(updateFillLayers);
 						}
 
 						var uvTypeHandle = Id.handle().nest(l.id);
@@ -681,7 +689,11 @@ class TabLayers {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
 							MakeMaterial.parsePaintMaterial();
-							Layers.updateFillLayers();
+							function updateFillLayers(_) {
+								Layers.updateFillLayers();
+								iron.App.removeRender(updateFillLayers);
+							}
+							iron.App.notifyOnRender(updateFillLayers);
 						}
 					}
 				}
