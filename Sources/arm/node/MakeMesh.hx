@@ -88,6 +88,8 @@ class MakeMesh {
 			frag.write('float occlusion;');
 			frag.write('float opacity;');
 			frag.write('float matid = 0.0;');
+			frag.write('vec3 ntex;');
+			frag.write('vec4 texpaint_sample;');
 
 			frag.vVec = true;
 			frag.add_function(ShaderFunctions.str_cotangentFrame);
@@ -109,7 +111,7 @@ class MakeMesh {
 
 				if (l.paintBase) {
 					frag.add_shared_sampler('sampler2D texpaint');
-					frag.write('vec4 texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
+					frag.write('texpaint_sample = textureLodShared(texpaint, texCoord, 0.0);');
 					#if (kha_direct3d12 || kha_vulkan)
 					if (Context.viewportMode == ViewLit) {
 						frag.write('if (texpaint_sample.a < 0.1) discard;');
@@ -117,7 +119,7 @@ class MakeMesh {
 					#end
 				}
 				else {
-					frag.write('vec4 texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
+					frag.write('texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 				}
 				frag.write('basecol = texpaint_sample.rgb * texpaint_sample.a;');
 
@@ -135,7 +137,7 @@ class MakeMesh {
 					}
 
 					if (l.paintNor) {
-						frag.write('vec3 ntex = texpaint_nor_sample.rgb;');
+						frag.write('ntex = texpaint_nor_sample.rgb;');
 						frag.write('n = ntex * 2.0 - 1.0;');
 						frag.write('n.y = -n.y;');
 						if (l.texpaint_mask != null) {
@@ -230,6 +232,8 @@ class MakeMesh {
 					frag.write('occlusion = 1.0;');
 					frag.write('roughness = 0.0;');
 					frag.write('metallic = 0.0;');
+					frag.write('ntex = vec3(0.5, 0.5, 1.0);');
+					frag.write('texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 					frag.write('}');
 				}
 			}
