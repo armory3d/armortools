@@ -105,8 +105,8 @@ class MakeMesh {
 
 				if (l.objectMask > 0) {
 					var uid = Project.paintObjects[l.objectMask - 1].uid;
-					frag.add_uniform('int objectId', '_uid');
-					frag.write('if ($uid == objectId) {');
+					frag.add_uniform('int uid', '_uid');
+					frag.write('if ($uid == uid) {');
 				}
 
 				if (l.paintBase) {
@@ -287,8 +287,8 @@ class MakeMesh {
 
 					if (l.objectMask > 0) {
 						var uid = Project.paintObjects[l.objectMask - 1].uid;
-						frag.add_uniform('int objectId', '_uid');
-						frag.write('if ($uid == objectId) {');
+						frag.add_uniform('int uid', '_uid');
+						frag.write('if ($uid == uid) {');
 					}
 
 					frag.add_shared_sampler('sampler2D texpaint' + id);

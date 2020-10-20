@@ -65,7 +65,7 @@ class Uniforms {
 				return val;
 			}
 			case "_objectId": {
-				return Project.paintObjects.indexOf(Context.paintObject);
+				return Project.paintObjects.indexOf(cast object);
 			}
 			#end
 			#if arm_world
