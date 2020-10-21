@@ -42,6 +42,7 @@ class History {
 				l.maskOpacity = step.layer_opacity;
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Clear Layer")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -82,6 +83,7 @@ class History {
 				Context.layer.blending = step.layer_blending;
 				Context.layer.objectMask = step.layer_object;
 				Context.layersPreviewDirty = true;
+				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("New Mask")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
