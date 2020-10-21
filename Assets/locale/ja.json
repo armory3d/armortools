@@ -137,6 +137,7 @@
     "Layer Opacity": "レイヤーの不透明度",
     "Layer Blending": "レイヤーをブレンド",
     "Edit Nodes": "ノードを編集",
+    "Apply Filter": "フィルターを適用",
     "New": "新規",
     "Recent Projects": "最近使用したプロジェクト",
     "New Project": "新規プロジェクト",
@@ -231,7 +232,9 @@
     "Sensitivity": "感度",
     "Help": "ヘルプ",
     "Viewport": "ビューポート",
+    "Core": "コア",
     "Full": "フル",
+    "Path Tracer": "パストレーサー",
     "Mobile": "モバイル",
     "Renderer": "レンダラー",
     "Super Sample": "スーパーサンプリング",
@@ -432,6 +435,6 @@
     "ColorID": "カラーID",
     "Picker": "ピッカー",
     "Gizmo": "ギズモ",
-    "Hold {key} to set source": "{key}を長押ししてソースを設定します",
+    "Hold {key} to set source": "{key}を押しながらソースを設定します",
     "Tiled": "タイル状"
 }
