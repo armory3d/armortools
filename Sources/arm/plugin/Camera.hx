@@ -92,7 +92,7 @@ class Camera {
 			else if (controls == ControlsRotate) {
 				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
 					redraws = 2;
-					var t = Context.object.transform;
+					var t = Context.mainObject().transform;
 					var up = t.up().normalize();
 					t.rotate(up, mouse.movementX / 100);
 					var right = camera.rightWorld().normalize();
