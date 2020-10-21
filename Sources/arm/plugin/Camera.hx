@@ -43,7 +43,8 @@ class Camera {
 				reset();
 			}
 
-			var modif = kb.down("alt") || kb.down("shift") || kb.down("control") || Config.keymap.action_rotate == "middle";
+			var modifKey = kb.down("alt") || kb.down("shift") || kb.down("control");
+			var modif = modifKey || Config.keymap.action_rotate == "middle";
 			var controls = Context.cameraControls;
 			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
@@ -67,7 +68,7 @@ class Camera {
 					dist -= f;
 				}
 
-				if (mouse.wheelDelta != 0 && !modif) {
+				if (mouse.wheelDelta != 0 && !modifKey) {
 					redraws = 2;
 					var f = mouse.wheelDelta * (-0.1);
 					f *= getCameraSpeed();
