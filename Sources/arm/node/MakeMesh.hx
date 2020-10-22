@@ -33,25 +33,31 @@ class MakeMesh {
 		vert.add_uniform('mat4 prevWVP', '_prevWorldViewProjectionMatrix');
 		vert.wposition = true;
 
+		var textureCount = 0;
+
 		// Height
 		// TODO: can cause TAA issues
 		if (MakeMaterial.heightUsed) {
 			var displaceStrength = MakeMaterial.getDisplaceStrength();
-			vert.n = true;
-			vert.write('float height = 0.0;');
-			var numLayers = 0;
-			for (l in Project.layers) {
-				if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
-				if (numLayers > 16) break;
-				numLayers++;
-				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
-				vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
-				if (l.texpaint_mask != null) {
-					vert.add_uniform('sampler2D texpaint_mask_vert' + l.id, '_texpaint_mask_vert' + l.id);
-					vert.write('height *= textureLod(texpaint_mask_vert' + l.id + ', tex, 0.0).r;');
+			if (displaceStrength > 0.0) {
+				vert.n = true;
+				vert.write('float height = 0.0;');
+				var numLayers = 0;
+				for (l in Project.layers) {
+					if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
+					if (numLayers > 16) break;
+					numLayers++;
+					textureCount++;
+					vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
+					vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
+					if (l.texpaint_mask != null) {
+						textureCount++;
+						vert.add_uniform('sampler2D texpaint_mask_vert' + l.id, '_texpaint_mask_vert' + l.id);
+						vert.write('height *= textureLod(texpaint_mask_vert' + l.id + ', tex, 0.0).r;');
+					}
 				}
+				vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
 			}
-			vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
 		}
 		//
 
@@ -69,8 +75,6 @@ class MakeMesh {
 		frag.n = true;
 
 		frag.add_function(ShaderFunctions.str_packFloatInt16);
-
-		var textureCount = 0;
 
 		if (Context.tool == ToolColorId) {
 			textureCount++;
