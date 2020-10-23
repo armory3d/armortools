@@ -490,10 +490,12 @@ class Layers {
 		var current = @:privateAccess kha.graphics4.Graphics2.current;
 		if (current != null) current.end();
 
-		var selectedTool = Context.tool;
+		var _tool = Context.tool;
+		Context.tool = ToolFill;
 		Context.pdirty = fills;
 		Context.layerIsMask = false;
-		Context.tool = ToolFill;
+		var _workspace = UIHeader.inst.worktab.position;
+		UIHeader.inst.worktab.position = SpacePaint;
 
 		// Decal layer
 		if (Context.layer.uvType == UVProject) {
@@ -507,7 +509,8 @@ class Layers {
 		}
 
 		Context.rdirty = 2;
-		Context.tool = selectedTool;
+		Context.tool = _tool;
+		UIHeader.inst.worktab.position = _workspace;
 		if (current != null) current.begin(false);
 	}
 

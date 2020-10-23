@@ -425,7 +425,7 @@ class LayerSlot {
 	public function toFillLayer() {
 		Context.setLayer(this);
 		fill_layer = Context.material;
-		Layers.updateFillLayers(4);
+		Layers.updateFillLayer(4);
 		function _parse(_) {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
