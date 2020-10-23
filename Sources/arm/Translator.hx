@@ -65,6 +65,8 @@ class Translator {
 		// Generate extended font atlas
 		// Basic Latin + Latin-1 Supplement + Latin Extended-A
 		kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
+		// + Greek
+		for (i in 880...1023) kha.graphics2.Graphics.fontGlyphs.push(i);
 		// + Cyrillic
 		for (i in 1024...1119) kha.graphics2.Graphics.fontGlyphs.push(i);
 
