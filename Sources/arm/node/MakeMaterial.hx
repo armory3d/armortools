@@ -130,7 +130,12 @@ class MakeMaterial {
 			return;
 		}
 
-		bakeBlurNodes();
+		{
+			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			if (current != null) current.end();
+			bakeBlurNodes();
+			if (current != null) current.begin(false);
+		}
 
 		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
