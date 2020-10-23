@@ -411,9 +411,11 @@ class Layers {
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
 			MakeMaterial.parsePaintMaterial();
-			Context.pdirty = 1;
+			Context.pdirty = fills;
 			RenderPathPaint.useLiveLayer(true);
-			RenderPathPaint.commandsPaint();
+			for (i in 0...fills) {
+				RenderPathPaint.commandsPaint();
+			}
 			RenderPathPaint.useLiveLayer(false);
 			Context.tool = selectedTool;
 			Context.pdirty = 0;

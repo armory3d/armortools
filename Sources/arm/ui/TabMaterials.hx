@@ -108,7 +108,11 @@ class TabMaterials {
 						if (getSelectedMaterial() != materials[i]) {
 							selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
-								Layers.updateFillLayers();
+								function updateFillLayers(_) {
+									Layers.updateFillLayers(4);
+									iron.App.removeRender(updateFillLayers);
+								}
+								iron.App.notifyOnRender(updateFillLayers);
 							}
 						}
 						var mouse = Input.getMouse();
