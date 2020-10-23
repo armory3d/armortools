@@ -464,7 +464,6 @@ class Layers {
 				MakeMaterial.parsePaintMaterial();
 
 				for (l in layers) {
-					trace(Std.random(100));
 					if (l.fill_mask == Context.material) {
 						Context.layer = l;
 						setObjectMask();
