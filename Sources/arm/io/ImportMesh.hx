@@ -19,14 +19,16 @@ import arm.Enums;
 class ImportMesh {
 
 	public static var clearLayers = true;
+	public static var replaceExisting = true;
 
-	public static function run(path: String, _clearLayers = true) {
+	public static function run(path: String, _clearLayers = true, _replaceExisting = true) {
 		if (!Path.isMesh(path)) {
 			Log.error(Strings.error1);
 			return;
 		}
 
 		clearLayers = _clearLayers;
+		replaceExisting = _replaceExisting;
 		Context.layerFilter = 0;
 
 		#if arm_debug
@@ -68,7 +70,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		if (UIHeader.inst.worktab.position != SpaceRender) {
+		if (replaceExisting) {
 			ViewportUtil.scaleToBounds();
 		}
 
@@ -106,25 +108,7 @@ class ImportMesh {
 		}
 
 		new MeshData(raw, function(md: MeshData) {
-
-			// Append
-			if (UIHeader.inst.worktab.position == SpaceRender) {
-				var mats = new haxe.ds.Vector(1);
-				mats[0] = Context.materialScene.data;
-				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
-				var ar = path.split(Path.sep);
-				var s = ar[ar.length - 1];
-				object.name = s.substring(0, s.length - 4);
-				// md.geom.calculateAABB();
-				// var aabb = md.geom.aabb;
-				// var dim = new TFloat32Array(3);
-				// dim[0] = aabb.x;
-				// dim[1] = aabb.y;
-				// dim[2] = aabb.z;
-				// object.raw.dimensions = dim;
-				Context.selectObject(object);
-			}
-			else { // Replace
+			if (replaceExisting) {
 				Context.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
@@ -157,6 +141,22 @@ class ImportMesh {
 				}
 
 				Project.paintObjects = [Context.paintObject];
+			}
+			else { // Append
+				var mats = new haxe.ds.Vector(1);
+				mats[0] = Context.materialScene.data;
+				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
+				var ar = path.split(Path.sep);
+				var s = ar[ar.length - 1];
+				object.name = s.substring(0, s.length - 4);
+				// md.geom.calculateAABB();
+				// var aabb = md.geom.aabb;
+				// var dim = new TFloat32Array(3);
+				// dim[0] = aabb.x;
+				// dim[1] = aabb.y;
+				// dim[2] = aabb.z;
+				// object.raw.dimensions = dim;
+				Context.selectObject(object);
 			}
 
 			md.handle = raw.name;

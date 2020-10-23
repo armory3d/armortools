@@ -19,6 +19,7 @@ import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.ui.UINodes;
+import arm.ui.UIHeader;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
@@ -392,7 +393,8 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					ImportMesh.run(path);
+					var replaceExisting = UIHeader.inst.worktab.position != SpaceRender;
+					ImportMesh.run(path, true, replaceExisting);
 				}
 			}
 		});

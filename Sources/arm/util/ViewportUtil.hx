@@ -18,7 +18,12 @@ class ViewportUtil {
 		po.transform.dim.y = md.geom.aabb.y;
 		po.transform.dim.z = md.geom.aabb.z;
 		po.transform.scale.set(2 / r, 2 / r, 2 / r);
+		po.transform.loc.set(0, 0, 0);
 		po.transform.buildMatrix();
+		for (c in po.children) {
+			c.transform.loc.set(0, 0, 0);
+			c.transform.buildMatrix();
+		}
 	}
 
 	public static function resetViewport() {
