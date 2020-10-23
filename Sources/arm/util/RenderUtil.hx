@@ -441,7 +441,7 @@ class RenderUtil {
 
 	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image) {
 		var res = MakeMaterial.parseNodePreviewMaterial(node);
-		if (res.scon == null) return;
+		if (res == null || res.scon == null) return;
 
 		var g4 = image.g4;
 		if (screenAlignedFullVB == null) {
