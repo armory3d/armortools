@@ -73,7 +73,8 @@ class MakePaint {
 			if (decal) {
 				vert.add_uniform('vec2 sub', '_sub');
 				vert.add_uniform('vec4 decalMask', '_decalMask');
-				vert.write('if (decalMask.z > 0.0) subtex += sub;');
+				vert.write('vec4 decalMaskLocal = decalMask;'); // TODO: spirv workaround
+				vert.write('if (decalMaskLocal.z > 0.0) subtex += sub;');
 			}
 		}
 
