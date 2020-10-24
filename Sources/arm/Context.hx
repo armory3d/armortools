@@ -333,21 +333,17 @@ class Context {
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		ddirty = 3;
+		initTool();
+	}
 
+	public static function initTool() {
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {
-			var current = @:privateAccess kha.graphics4.Graphics2.current;
-			if (current != null) current.end();
-
 			if (tool == ToolText) {
 				RenderUtil.makeTextPreview();
 			}
-
 			RenderUtil.makeDecalPreview();
-
-			if (current != null) current.begin(false);
 		}
-
 		if (tool == ToolParticle) {
 			ParticleUtil.initParticle();
 			MakeMaterial.parseParticleMaterial();

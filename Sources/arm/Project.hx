@@ -175,7 +175,9 @@ class Project {
 		var len = meshes.length;
 		for (i in 0...len) {
 			var m = meshes[len - i - 1];
-			if (Context.projectObjects.indexOf(m) == -1) {
+			if (Context.projectObjects.indexOf(m) == -1 &&
+				m.name != ".ParticleEmitter" &&
+				m.name != ".Particle") {
 				Data.deleteMesh(m.data.handle);
 				m.remove();
 			}
@@ -284,13 +286,7 @@ class Project {
 			Scene.active.world.probe.radianceMipmaps = Context.defaultRadianceMipmaps;
 			Scene.active.world.probe.irradiance = Context.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
-
-			if (Context.tool == ToolDecal || Context.tool == ToolText) {
-				if (Context.tool == ToolText) {
-					RenderUtil.makeTextPreview();
-				}
-				RenderUtil.makeDecalPreview();
-			}
+			Context.initTool();
 		});
 	}
 
