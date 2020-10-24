@@ -254,7 +254,10 @@ class UIMenu {
 						}
 						RenderPath.active.commands = RenderPathForward.commands;
 					}
+					var _workspace = UIHeader.inst.worktab.position;
+					UIHeader.inst.worktab.position = SpacePaint;
 					MakeMaterial.parseMeshMaterial();
+					UIHeader.inst.worktab.position = _workspace;
 				}
 			}
 			else if (menuCategory == MenuCamera) {
