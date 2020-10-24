@@ -253,7 +253,7 @@ class BoxPreferences {
 				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
 
 				var workspaceHandle = Id.handle({position: Config.raw.workspace});
-				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake"), tr("Render")], tr("Default Workspace"), true);
+				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake")], tr("Default Workspace"), true);
 				if (workspaceHandle.changed) {
 					Config.raw.workspace = workspaceHandle.position;
 				}
