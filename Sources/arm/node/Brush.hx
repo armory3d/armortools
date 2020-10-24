@@ -7,6 +7,7 @@ class Brush {
 	public static var customNodes = js.Syntax.code("new Map()");
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
+	static var tree: LogicTree;
 
 	static var parsed_nodes: Array<String> = null;
 	static var parsed_labels: Map<String, String> = null;
@@ -56,8 +57,7 @@ class Brush {
 		return s;
 	}
 
-	static var tree: LogicTree;
-	public static function parse(canvas: TNodeCanvas, onAdd = true): LogicTree {
+	public static function parse(canvas: TNodeCanvas, onAdd = true) {
 
 		nodes = canvas.nodes;
 		links = canvas.links;
@@ -76,13 +76,12 @@ class Brush {
 		else {
 			for (node in root_nodes) build_node(node);
 		}
-		return tree;
 	}
 
 	static function build_node(node: TNode): String {
 
 		// Get node name
-		var name =  node_name(node);
+		var name = node_name(node);
 
 		// Check if node already exists
 		if (parsed_nodes.indexOf(name) != -1) {
@@ -117,12 +116,19 @@ class Brush {
 			if (l != null) {
 				var n = getNode(l.from_id);
 				var socket = n.outputs[l.from_socket];
-				inp_node = nodeMap.get(build_node(n));
-				for (i in 0...n.outputs.length) {
-					if (n.outputs[i] == socket) {
-						inp_from = i;
-						break;
+				// Ensure matching socket types
+				if (socket.type == node.inputs[i].type) {
+					inp_node = nodeMap.get(build_node(n));
+					for (i in 0...n.outputs.length) {
+						if (n.outputs[i] == socket) {
+							inp_from = i;
+							break;
+						}
 					}
+				}
+				else {
+					inp_node = build_default_node(inp);
+					inp_from = 0;
 				}
 			}
 			// Not linked - create node with default values

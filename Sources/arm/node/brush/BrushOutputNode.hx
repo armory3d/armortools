@@ -19,12 +19,30 @@ class BrushOutputNode extends LogicNode {
 		var lastMask = Context.brushMaskImage;
 		var lastStencil = Context.brushStencilImage;
 
-		Context.paintVec = inputs[0].get();
-		Context.brushNodesRadius = inputs[1].get();
-		Context.brushNodesScale = inputs[2].get();
-		Context.brushNodesAngle = inputs[3].get();
+		var input0: Dynamic;
+		var input1: Dynamic;
+		var input2: Dynamic;
+		var input3: Dynamic;
+		var input4: Dynamic;
+		var input5: Dynamic;
+		var input6: Dynamic;
+		try {
+			input0 = inputs[0].get();
+			input1 = inputs[1].get();
+			input2 = inputs[2].get();
+			input3 = inputs[3].get();
+			input4 = inputs[4].get();
+			input5 = inputs[5].get();
+			input6 = inputs[6].get();
+		}
+		catch (_) { return; }
 
-		var opac: Dynamic = inputs[4].get(); // Float or texture name
+		Context.paintVec = input0;
+		Context.brushNodesRadius = input1;
+		Context.brushNodesScale = input2;
+		Context.brushNodesAngle = input3;
+
+		var opac: Dynamic = input4; // Float or texture name
 		if (opac == null) opac = 1.0;
 		if (Std.is(opac, String)) {
 			Context.brushNodesOpacity = 1.0;
@@ -37,9 +55,9 @@ class BrushOutputNode extends LogicNode {
 			Context.brushMaskImage = null;
 		}
 
-		Context.brushNodesHardness = inputs[5].get();
+		Context.brushNodesHardness = input5;
 
-		var stencil: Dynamic = inputs[6].get(); // Float or texture name
+		var stencil: Dynamic = input6; // Float or texture name
 		if (stencil == null) stencil = 1.0;
 		if (Std.is(stencil, String)) {
 			var index = Project.assetNames.indexOf(stencil);
