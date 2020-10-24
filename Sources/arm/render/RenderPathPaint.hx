@@ -361,7 +361,7 @@ class RenderPathPaint {
 
 	public static function commandsCursor() {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask);
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 		var tool = Context.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
@@ -408,7 +408,7 @@ class RenderPathPaint {
 		path.setTarget("");
 		g.setPipeline(Layers.pipeCursor);
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask);
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 		var img = (decal && !decalMask) ? Context.decalImage : Res.get("cursor.k");
 		g.setTexture(Layers.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
