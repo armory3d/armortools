@@ -65,10 +65,12 @@ class App {
 	static var dropPaths: Array<String> = [];
 	static var appx = 0;
 	static var appy = 0;
+	static var lastWindowWidth = 0;
 	static var lastWindowHeight = 0;
 
 	public function new() {
 		Log.init();
+		lastWindowWidth = System.windowWidth();
 		lastWindowHeight = System.windowHeight();
 
 		#if arm_resizable
@@ -258,13 +260,18 @@ class App {
 	#if arm_resizable
 	static function onResize() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
-		resize();
 
-		var ratio = System.windowHeight() / lastWindowHeight;
-		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratio);
-		Config.raw.layout[LayoutSidebarH1] = Std.int(Config.raw.layout[LayoutSidebarH1] * ratio);
-		Config.raw.layout[LayoutSidebarH2] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0] - Config.raw.layout[LayoutSidebarH1];
+		var ratioW = System.windowWidth() / lastWindowWidth;
+		lastWindowWidth = System.windowWidth();
+		var ratioH = System.windowHeight() / lastWindowHeight;
 		lastWindowHeight = System.windowHeight();
+
+		Config.raw.layout[LayoutNodesW] = Std.int(Config.raw.layout[LayoutNodesW] * ratioW);
+		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratioH);
+		Config.raw.layout[LayoutSidebarH1] = Std.int(Config.raw.layout[LayoutSidebarH1] * ratioH);
+		Config.raw.layout[LayoutSidebarH2] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0] - Config.raw.layout[LayoutSidebarH1];
+
+		resize();
 
 		#if (krom_linux || krom_darwin)
 		saveWindowRect();
