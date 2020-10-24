@@ -63,7 +63,7 @@ class Args {
 						exportTexturesType == "exr16"||
 						exportTexturesType == "exr32") {
 						if (Path.isFolder(exportTexturesPath)) {
-							//Applying the correct format type from args
+							// Applying the correct format type from args
 							if (exportTexturesType == "png") {
 								App.bitsHandle.position = Bits8;
 								Context.formatType = FormatPng;
@@ -81,7 +81,7 @@ class Args {
 
 							Context.layersExport = 0;
 
-							//Get export preset and apply the correct one from args
+							// Get export preset and apply the correct one from args
 							BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");
 							for (i in 0...BoxExport.files.length) {
 								BoxExport.files[i] = BoxExport.files[i].substr(0, BoxExport.files[i].length - 5); // Strip .json
@@ -97,12 +97,11 @@ class Args {
 								iron.data.Data.deleteBlob("export_presets/" + file);
 							});
 
-							//Export queue
-							function export(_) {
+							// Export queue
+							function _init() {
 								ExportTexture.run(exportTexturesPath);
-								iron.App.removeRender(export);
 							}
-							iron.App.notifyOnRender(export);
+							iron.App.notifyOnInit(_init);
 							trace("Export Textures: done");
 						}
 						else {

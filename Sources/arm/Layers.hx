@@ -58,21 +58,17 @@ class Layers {
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
 
-	public static function initLayers(g: kha.graphics4.Graphics) {
-		g.end();
+	public static function initLayers() {
 		Project.layers[0].clearLayer(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
-		g.begin();
-		iron.App.removeRender(initLayers);
 	}
 
-	public static function resizeLayers(g: kha.graphics4.Graphics) {
+	public static function resizeLayers() {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
 			C.undo_steps = 1;
 			if (Context.undoHandle != null) Context.undoHandle.value = C.undo_steps;
 			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
 		}
-		g.end();
 		for (l in Project.layers) l.resizeAndSetBits();
 		for (l in History.undoLayers) l.resizeAndSetBits();
 		var rts = RenderPath.active.renderTargets;
@@ -97,17 +93,12 @@ class Layers {
 		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
-		g.begin();
 		Context.ddirty = 2;
-		iron.App.removeRender(resizeLayers);
 	}
 
-	public static function setLayerBits(g: kha.graphics4.Graphics) {
-		g.end();
+	public static function setLayerBits() {
 		for (l in Project.layers) l.resizeAndSetBits();
 		for (l in History.undoLayers) l.resizeAndSetBits();
-		g.begin();
-		iron.App.removeRender(setLayerBits);
 	}
 
 	static function makeMergePipe(red: Bool, green: Bool, blue: Bool, alpha: Bool): PipelineState {
@@ -276,7 +267,7 @@ class Layers {
 		}
 	}
 
-	public static function mergeSelectedLayer(g: kha.graphics4.Graphics) {
+	public static function mergeSelectedLayer() {
 		if (pipeMerge == null) makePipe();
 
 		var l0 = Project.layers[0];
@@ -288,8 +279,6 @@ class Layers {
 				break;
 			}
 		}
-
-		g.end();
 
 		makeTempImg();
 
@@ -361,9 +350,6 @@ class Layers {
 			}
 		}
 
-		g.begin();
-
-		iron.App.removeRender(mergeSelectedLayer);
 		Context.layer.delete();
 		Context.setLayer(l0);
 		Context.layerPreviewDirty = true;
@@ -542,7 +528,7 @@ class Layers {
 		l.objectMask = Context.layerFilter;
 		Project.layers.push(l);
 		Context.setLayer(l);
-		if (clear) iron.App.notifyOnRender(l.clear);
+		if (clear) iron.App.notifyOnInit(l.clear);
 		Context.layerPreviewDirty = true;
 		return l;
 	}
@@ -556,17 +542,14 @@ class Layers {
 	}
 
 	public static function createFillLayer() {
-		function makeFill(g: kha.graphics4.Graphics) {
-			g.end();
+		function _init() {
 			var l = newLayer(false);
 			History.newLayer();
 			l.objectMask = Context.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();
-			g.begin();
-			iron.App.removeRender(makeFill);
 		}
-		iron.App.notifyOnRender(makeFill);
+		iron.App.notifyOnInit(_init);
 	}
 
 	public static function createImageMask(asset: TAsset) {

@@ -55,7 +55,7 @@ class ImportArm {
 				Project.paintObjects.push(object);
 			});
 		}
-		iron.App.notifyOnRender(Layers.initLayers);
+		iron.App.notifyOnInit(Layers.initLayers);
 		History.reset();
 	}
 
@@ -365,15 +365,14 @@ class ImportArm {
 			imported.push(Context.material);
 		}
 
-		function makeMaterialPreview(_) {
+		function _init() {
 			for (m in imported) {
 				Context.setMaterial(m);
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
-			iron.App.removeRender(makeMaterialPreview);
 		}
-		iron.App.notifyOnRender(makeMaterialPreview);
+		iron.App.notifyOnInit(_init);
 
 		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
@@ -412,14 +411,13 @@ class ImportArm {
 			imported.push(Context.brush);
 		}
 
-		function makeBrushPreview(_) {
+		function _init() {
 			for (b in imported) {
 				Context.setBrush(b);
 				RenderUtil.makeBrushPreview();
 			}
-			iron.App.removeRender(makeBrushPreview);
 		}
-		iron.App.notifyOnRender(makeBrushPreview);
+		iron.App.notifyOnInit(_init);
 
 		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);

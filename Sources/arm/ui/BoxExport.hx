@@ -53,7 +53,7 @@ class BoxExport {
 			ui.row([0.5, 0.5]);
 			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			if (App.resHandle.changed) {
-				iron.App.notifyOnRender(Layers.resizeLayers);
+				iron.App.notifyOnInit(Layers.resizeLayers);
 				UVUtil.uvmap = null;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemap = null;
@@ -64,7 +64,7 @@ class BoxExport {
 			}
 			ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
 			if (App.bitsHandle.changed) {
-				iron.App.notifyOnRender(Layers.setLayerBits);
+				iron.App.notifyOnInit(Layers.setLayerBits);
 			}
 
 			ui.row([0.5, 0.5]);
@@ -97,11 +97,10 @@ class BoxExport {
 				var filters = App.bitsHandle.position != Bits8 ? "exr" : Context.formatType == FormatPng ? "png" : "jpg";
 				UIFiles.show(filters, true, function(path: String) {
 					Context.textureExportPath = path;
-					function export(_) {
+					function _init() {
 						ExportTexture.run(path, bakeMaterial);
-						iron.App.removeRender(export);
 					}
-					iron.App.notifyOnRender(export);
+					iron.App.notifyOnInit(_init);
 				});
 			}
 			if (ui.isHovered) ui.tooltip(tr("Export texture files") + ' (${Config.keymap.file_export_textures})');

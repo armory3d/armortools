@@ -92,7 +92,7 @@ class TabTextures {
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, function(path: String) {
 										var target = kha.Image.createRenderTarget(img.width, img.height);
-										function exportTexture(g: kha.graphics4.Graphics) {
+										function _init() {
 											if (Layers.pipeMerge == null) Layers.makePipe();
 											target.g2.begin(false);
 											target.g2.pipeline = Layers.pipeCopy;
@@ -107,9 +107,8 @@ class TabTextures {
 											var data = arm.format.PngTools.build32RGB1(target.width, target.height, target.getPixels());
 											writer.write(data);
 											Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
-											iron.App.removeRender(exportTexture);
 										};
-										iron.App.notifyOnRender(exportTexture);
+										iron.App.notifyOnInit(_init);
 									});
 								}
 								if (ui.button(tr("Reimport"), Left)) {
@@ -133,13 +132,12 @@ class TabTextures {
 									Project.assetMap.remove(asset.id);
 									Project.assets.splice(i, 1);
 									Project.assetNames.splice(i, 1);
-									function _parse(g: kha.graphics4.Graphics) {
+									function _init() {
 										arm.node.MakeMaterial.parsePaintMaterial();
 										arm.util.RenderUtil.makeMaterialPreview();
 										UISidebar.inst.hwnd1.redraws = 2;
-										iron.App.removeRender(_parse);
 									}
-									iron.App.notifyOnRender(_parse);
+									iron.App.notifyOnInit(_init);
 
 									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);

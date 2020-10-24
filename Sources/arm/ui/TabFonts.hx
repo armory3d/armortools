@@ -71,11 +71,10 @@ class TabFonts {
 
 					if (state == State.Started) {
 						if (Context.font != Project.fonts[i]) {
-							function _render(_) {
+							function _init() {
 								Context.selectFont(i);
-								iron.App.removeRender(_render);
 							}
-							iron.App.notifyOnRender(_render);
+							iron.App.notifyOnInit(_init);
 						}
 						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DFont);
 						Context.selectTime = Time.time();
@@ -87,13 +86,12 @@ class TabFonts {
 							ui.text(fontName, Right, ui.t.HIGHLIGHT_COL);
 
 							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left) && Project.fonts[i].file != "") {
-								function _render(_) {
+								function _init() {
 									Context.selectFont(i == 0 ? 1 : 0);
 									iron.data.Data.deleteFont(Project.fonts[i].file);
 									Project.fonts.splice(i, 1);
-									iron.App.removeRender(_render);
 								}
-								iron.App.notifyOnRender(_render);
+								iron.App.notifyOnInit(_init);
 								UISidebar.inst.hwnd2.redraws = 2;
 							}
 						}, 1 + add);

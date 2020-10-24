@@ -28,15 +28,14 @@ class ImportFont {
 				fontSlots.push(fontSlot);
 			}
 
-			function makeFontPreview(_) {
+			function _init() {
 				for (f in fontSlots) {
 					Context.font = f;
 					Project.fonts.push(f);
 					RenderUtil.makeFontPreview();
 				}
-				iron.App.removeRender(makeFontPreview);
 			}
-			iron.App.notifyOnRender(makeFontPreview);
+			iron.App.notifyOnInit(_init);
 
 			UISidebar.inst.hwnd2.redraws = 2;
 		});

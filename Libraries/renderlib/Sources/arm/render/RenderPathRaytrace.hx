@@ -157,11 +157,10 @@ class RenderPathRaytrace {
 				path.drawMeshes("paint");
 			}
 			Context.bakeType = _bakeType;
-			function _render(_) {
+			function _init() {
 				MakeMaterial.parsePaintMaterial();
-				iron.App.removeRender(_render);
 			}
-			iron.App.notifyOnRender(_render);
+			iron.App.notifyOnInit(_init);
 
 			raytraceInit(getBakeShaderName(), rebuild);
 

@@ -393,21 +393,19 @@ class Uniforms {
 			}
 			case "_texuvmap": {
 				if (!UVUtil.uvmapCached) {
-					function _render(_) {
+					function _init() {
 						UVUtil.cacheUVMap();
-						iron.App.removeRender(_render);
 					}
-					iron.App.notifyOnRender(_render);
+					iron.App.notifyOnInit(_init);
 				}
 				return UVUtil.uvmap;
 			}
 			case "_textrianglemap": {
 				if (!UVUtil.trianglemapCached) {
-					function _render(_) {
+					function _init() {
 						UVUtil.cacheTriangleMap();
-						iron.App.removeRender(_render);
 					}
-					iron.App.notifyOnRender(_render);
+					iron.App.notifyOnInit(_init);
 				}
 				return UVUtil.trianglemap;
 			}

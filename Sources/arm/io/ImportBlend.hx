@@ -492,15 +492,14 @@ class ImportBlend {
 				}
 			}
 
-			function makeMaterialPreview(_) {
+			function _init() {
 				for (m in imported) {
 					Context.setMaterial(m);
 					MakeMaterial.parsePaintMaterial();
 					RenderUtil.makeMaterialPreview();
 				}
-				iron.App.removeRender(makeMaterialPreview);
 			}
-			iron.App.notifyOnRender(makeMaterialPreview);
+			iron.App.notifyOnInit(_init);
 
 			UISidebar.inst.hwnd1.redraws = 2;
 			Data.deleteBlob(path);

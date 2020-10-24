@@ -271,11 +271,10 @@ class Context {
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {
-			function render(_) {
+			function _init() {
 				RenderUtil.makeDecalPreview();
-				iron.App.removeRender(render);
 			}
-			iron.App.notifyOnRender(render);
+			iron.App.notifyOnInit(_init);
 		}
 	}
 

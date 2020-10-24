@@ -93,8 +93,7 @@ class TabBrushes {
 							}
 
 							if (ui.button(tr("Duplicate"), Left)) {
-								function dupliBrush(_) {
-									iron.App.removeRender(dupliBrush);
+								function _init() {
 									Context.brush = new BrushSlot();
 									Project.brushes.push(Context.brush);
 									var cloned = Json.parse(Json.stringify(Project.brushes[i].canvas));
@@ -102,7 +101,7 @@ class TabBrushes {
 									Context.setBrush(Context.brush);
 									RenderUtil.makeBrushPreview();
 								}
-								iron.App.notifyOnRender(dupliBrush);
+								iron.App.notifyOnInit(_init);
 							}
 
 							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left)) {

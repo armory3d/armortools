@@ -99,12 +99,11 @@ class Project {
 		}
 		Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 
-		function export(_) {
+		function _init() {
 			ExportArm.runProject();
-			iron.App.removeRender(export);
 			if (saveAndQuit) System.stop();
 		}
-		iron.App.notifyOnRender(export);
+		iron.App.notifyOnInit(_init);
 	}
 
 	public static function projectSaveAs() {
@@ -271,9 +270,9 @@ class Project {
 				layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
-					iron.App.notifyOnRender(Layers.resizeLayers);
+					iron.App.notifyOnInit(Layers.resizeLayers);
 				}
-				iron.App.notifyOnRender(Layers.initLayers);
+				iron.App.notifyOnInit(Layers.initLayers);
 			}
 
 			if (current != null) current.begin(false);
@@ -334,11 +333,10 @@ class Project {
 				MakeMaterial.parseBrush();
 				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
-				function makeBrushPreview(_) {
+				function _init() {
 					RenderUtil.makeBrushPreview();
-					iron.App.removeRender(makeBrushPreview);
 				}
-				iron.App.notifyOnRender(makeBrushPreview);
+				iron.App.notifyOnInit(_init);
 			}
 			// Import from project file
 			else {

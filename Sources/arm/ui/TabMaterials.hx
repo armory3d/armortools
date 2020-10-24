@@ -108,11 +108,10 @@ class TabMaterials {
 						if (getSelectedMaterial() != materials[i]) {
 							selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
-								function updateFillLayers(_) {
+								function _init() {
 									Layers.updateFillLayers(4);
-									iron.App.removeRender(updateFillLayers);
 								}
-								iron.App.notifyOnRender(updateFillLayers);
+								iron.App.notifyOnInit(_init);
 							}
 						}
 						var mouse = Input.getMouse();
@@ -152,15 +151,14 @@ class TabMaterials {
 							}
 
 							if (ui.button(tr("Duplicate"), Left)) {
-								function dupliMat(_) {
-									iron.App.removeRender(dupliMat);
+								function _init() {
 									Context.material = new MaterialSlot(materials[0].data);
 									materials.push(Context.material);
 									var cloned = Json.parse(Json.stringify(materials[i].canvas));
 									Context.material.canvas = cloned;
 									updateMaterial();
 								}
-								iron.App.notifyOnRender(dupliMat);
+								iron.App.notifyOnInit(_init);
 							}
 
 							if (materials.length > 1 && ui.button(tr("Delete"), Left)) {

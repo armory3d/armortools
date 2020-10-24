@@ -151,7 +151,7 @@ class UISidebar {
 		Project.paintObjects = [Context.paintObject];
 
 		if (Project.filepath == "") {
-			iron.App.notifyOnRender(Layers.initLayers);
+			iron.App.notifyOnInit(Layers.initLayers);
 		}
 
 		// Init plugins
@@ -199,11 +199,10 @@ class UISidebar {
 				BoxExport.showTextures();
 			}
 			else {
-				function export(_) {
+				function _init() {
 					ExportTexture.run(Context.textureExportPath);
-					iron.App.removeRender(export);
 				}
-				iron.App.notifyOnRender(export);
+				iron.App.notifyOnInit(_init);
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {

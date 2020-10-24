@@ -608,4 +608,12 @@ class App {
 		var i = Project.assetNames.indexOf(fileName);
 		return i >= 0 ? i : 0;
 	}
+
+	public static function notifyOnNextFrame(f: Void->Void) {
+		function _update() {
+			iron.App.notifyOnInit(f);
+			iron.App.removeUpdate(_update);
+		}
+		iron.App.notifyOnUpdate(_update);
+	}
 }

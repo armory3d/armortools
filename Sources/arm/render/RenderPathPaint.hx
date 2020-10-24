@@ -594,16 +594,15 @@ class RenderPathPaint {
 						if (pushUndoLast) History.paint();
 						Context.selectPaintObject(_paintObject);
 
-						function _renderFinal(_) {
+						function _renderFinal() {
 							Context.bakeType = _bakeType;
 							MakeMaterial.parsePaintMaterial();
 							Context.pdirty = 1;
 							commandsPaint();
 							Context.pdirty = 0;
-							iron.App.removeRender(_renderFinal);
 							baking = false;
 						}
-						function _renderDeriv(_) {
+						function _renderDeriv() {
 							Context.bakeType = BakeHeight;
 							MakeMaterial.parsePaintMaterial();
 							Context.pdirty = 1;
@@ -611,10 +610,9 @@ class RenderPathPaint {
 							Context.pdirty = 0;
 							Context.sub--;
 							if (pushUndoLast) History.paint();
-							iron.App.removeRender(_renderDeriv);
-							iron.App.notifyOnRender(_renderFinal);
+							iron.App.notifyOnInit(_renderFinal);
 						}
-						iron.App.notifyOnRender(Context.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
+						iron.App.notifyOnInit(Context.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
 				else if (Context.bakeType == BakeObjectID) {

@@ -215,8 +215,8 @@ class History {
 			}
 			else if (step.name == tr("Merge Layers")) {
 				Context.layer = Project.layers[step.layer + 1];
-				iron.App.notifyOnRender(redoMergeLayers);
-				iron.App.notifyOnRender(Layers.mergeSelectedLayer);
+				iron.App.notifyOnInit(redoMergeLayers);
+				iron.App.notifyOnInit(Layers.mergeSelectedLayer);
 			}
 			else if (step.name == tr("New Mask")) {
 				Context.layer = Project.layers[step.layer];
@@ -234,16 +234,13 @@ class History {
 				Context.setLayer(Context.layer, false);
 			}
 			else if (step.name == tr("Apply Mask")) {
-				function makeApply(g: kha.graphics4.Graphics) {
-					g.end();
+				function _init() {
 					Context.layer = Project.layers[step.layer];
 					copyToUndoWithMask();
 					Context.layer.applyMask();
 					Context.setLayer(Context.layer, false);
-					g.begin();
-					iron.App.removeRender(makeApply);
 				}
-				iron.App.notifyOnRender(makeApply);
+				iron.App.notifyOnInit(_init);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];
@@ -350,14 +347,13 @@ class History {
 		step.prev_order = prevOrder;
 	}
 
-	public static function mergeLayers(g: kha.graphics4.Graphics) {
+	public static function mergeLayers() {
 		copyMergingLayers();
 
 		var step = push(tr("Merge Layers"));
 		step.layer -= 1; // Merge down
 		steps.shift(); // Merge consumes 2 steps
 		undos--;
-		iron.App.removeRender(mergeLayers);
 		// TODO: use undo layer in Layers.mergeSelectedLayer to save memory
 	}
 
@@ -453,9 +449,8 @@ class History {
 		return steps[steps.length - 1];
 	}
 
-	static function redoMergeLayers(g: kha.graphics4.Graphics) {
+	static function redoMergeLayers() {
 		copyMergingLayers();
-		iron.App.removeRender(redoMergeLayers);
 	}
 
 	static function copyMergingLayers() {

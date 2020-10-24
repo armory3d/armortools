@@ -113,15 +113,17 @@ class LayerSlot {
 	public function unload() {
 		if (texpaint == null) return; // Layer is group
 
-		texpaint.unload();
-		texpaint_nor.unload();
-		texpaint_pack.unload();
+		function _next() {
+			texpaint.unload();
+			texpaint_nor.unload();
+			texpaint_pack.unload();
+			texpaint_preview.unload();
+		}
+		App.notifyOnNextFrame(_next);
 
 		RenderPath.active.renderTargets.remove("texpaint" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_nor" + ext);
 		RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
-
-		texpaint_preview.unload();
 
 		deleteMask();
 	}
@@ -189,19 +191,15 @@ class LayerSlot {
 		texpaint_mask_preview = Image.createRenderTarget(200, 200, TextureFormat.L8);
 
 		if (clear) {
+			function _clearMask() {
+				clearMask(createMaskColor);
+				createMaskColor = 0;
+				createMaskImage = null;
+			}
 			createMaskColor = color;
 			createMaskImage = image;
-			iron.App.notifyOnRender(_clearMask);
+			iron.App.notifyOnInit(_clearMask);
 		}
-	}
-
-	function _clearMask(g: kha.graphics4.Graphics) {
-		g.end();
-		clearMask(createMaskColor);
-		g.begin();
-		iron.App.removeRender(_clearMask);
-		createMaskColor = 0;
-		createMaskImage = null;
 	}
 
 	public function clearMask(color = 0x00000000) {
@@ -234,11 +232,17 @@ class LayerSlot {
 	public function deleteMask() {
 		if (texpaint_mask == null) return;
 
-		texpaint_mask.unload();
+		var _mask = texpaint_mask;
+		var _preview = texpaint_mask_preview;
+		function _next() {
+			_mask.unload();
+			_preview.unload();
+		}
+		App.notifyOnNextFrame(_next);
+
 		RenderPath.active.renderTargets.remove("texpaint_mask" + ext);
 		texpaint_mask = null;
-
-		texpaint_mask_preview.unload();
+		fill_mask = null;
 	}
 
 	public function applyMask() {
@@ -399,9 +403,7 @@ class LayerSlot {
 		}
 	}
 
-	public function clear(g: kha.graphics4.Graphics) {
-		g.end();
-
+	public function clear() {
 		texpaint.g4.begin();
 		texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
 		texpaint.g4.end();
@@ -414,9 +416,6 @@ class LayerSlot {
 		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
 		texpaint_pack.g4.end();
 
-		g.begin();
-		iron.App.removeRender(clear);
-
 		#if krom_linux
 		Context.layerPreviewDirty = true;
 		#end
@@ -426,13 +425,12 @@ class LayerSlot {
 		Context.setLayer(this);
 		fill_layer = Context.material;
 		Layers.updateFillLayer(4);
-		function _parse(_) {
+		function _init() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
 			UISidebar.inst.hwnd0.redraws = 2;
-			iron.App.removeRender(_parse);
 		}
-		iron.App.notifyOnRender(_parse);
+		iron.App.notifyOnInit(_init);
 	}
 
 	public function toPaintLayer() {
@@ -447,13 +445,12 @@ class LayerSlot {
 		Context.setLayer(this, true);
 		fill_mask = Context.material;
 		Layers.updateFillLayers(4);
-		function _parse(_) {
+		function _init() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
 			UISidebar.inst.hwnd0.redraws = 2;
-			iron.App.removeRender(_parse);
 		}
-		iron.App.notifyOnRender(_parse);
+		iron.App.notifyOnInit(_init);
 	}
 
 	public function toPaintMask() {

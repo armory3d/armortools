@@ -239,24 +239,18 @@ class TabLayers {
 								});
 							}
 							if (l.fill_mask == null && ui.button(tr("To Fill Mask"), Left)) {
-								function makeFill(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									History.toFillMask();
 									l.toFillMask();
-									g.begin();
-									iron.App.removeRender(makeFill);
 								}
-								iron.App.notifyOnRender(makeFill);
+								iron.App.notifyOnInit(_init);
 							}
 							if (l.fill_mask != null && ui.button(tr("To Paint Mask"), Left)) {
-								function makePaint(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									History.toPaintMask();
 									l.toPaintMask();
-									g.begin();
-									iron.App.removeRender(makePaint);
 								}
-								iron.App.notifyOnRender(makePaint);
+								iron.App.notifyOnInit(_init);
 							}
 							if (l.fill_mask != null && ui.button(tr("Select Material"), Left)) {
 								Context.setMaterial(l.fill_mask);
@@ -268,43 +262,31 @@ class TabLayers {
 								Context.setLayer(l, false);
 							}
 							if (l.fill_mask == null && ui.button(tr("Clear to Black"), Left)) {
-								function clear(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									l.clearMask(0x00000000);
-									g.begin();
-									iron.App.removeRender(clear);
 								}
-								iron.App.notifyOnRender(clear);
+								iron.App.notifyOnInit(_init);
 							}
 							if (l.fill_mask == null && ui.button(tr("Clear to White"), Left)) {
-								function clear(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									l.clearMask(0xffffffff);
-									g.begin();
-									iron.App.removeRender(clear);
 								}
-								iron.App.notifyOnRender(clear);
+								iron.App.notifyOnInit(_init);
 							}
 							if (l.fill_mask == null && ui.button(tr("Invert"), Left)) {
-								function invert(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									l.invertMask();
-									g.begin();
-									iron.App.removeRender(invert);
 								}
-								iron.App.notifyOnRender(invert);
+								iron.App.notifyOnInit(_init);
 							}
 							if (ui.button(tr("Apply"), Left)) {
-								function makeApply(g: kha.graphics4.Graphics) {
-									g.end();
+								function _init() {
 									Context.setLayer(l);
 									History.applyMask();
 									l.applyMask();
 									MakeMaterial.parseMeshMaterial();
-									g.begin();
-									iron.App.removeRender(makeApply);
 								}
-								iron.App.notifyOnRender(makeApply);
+								iron.App.notifyOnInit(_init);
 							}
 						}, 6 + add);
 					}
@@ -353,24 +335,18 @@ class TabLayers {
 						}
 
 						if (l.getChildren() == null && l.fill_layer == null && ui.button(tr("To Fill Layer"), Left)) {
-							function makeFill(g: kha.graphics4.Graphics) {
-								g.end();
+							function _init() {
 								History.toFillLayer();
 								l.toFillLayer();
-								g.begin();
-								iron.App.removeRender(makeFill);
 							}
-							iron.App.notifyOnRender(makeFill);
+							iron.App.notifyOnInit(_init);
 						}
 						if (l.getChildren() == null && l.fill_layer != null && ui.button(tr("To Paint Layer"), Left)) {
-							function makePaint(g: kha.graphics4.Graphics) {
-								g.end();
+							function _init() {
 								History.toPaintLayer();
 								l.toPaintLayer();
-								g.begin();
-								iron.App.removeRender(makePaint);
 							}
-							iron.App.notifyOnRender(makePaint);
+							iron.App.notifyOnInit(_init);
 						}
 
 						if (l.getChildren() == null && ui.button(tr("To Group"), Left)) {
@@ -413,8 +389,7 @@ class TabLayers {
 						}
 						if (ui.button(tr("Clear"), Left)) {
 							Context.setLayer(l);
-							function clear(g: kha.graphics4.Graphics) {
-								g.end();
+							function _init() {
 								if (l.getChildren() == null) {
 									History.clearLayer();
 									l.clearLayer();
@@ -427,36 +402,30 @@ class TabLayers {
 									}
 									Context.layer = l;
 								}
-								g.begin();
-								iron.App.removeRender(clear);
 							}
-							iron.App.notifyOnRender(clear);
+							iron.App.notifyOnInit(_init);
 						}
 						if (l.getChildren() != null && ui.button(tr("Merge Group"), Left)) {
-							function mergeGroup(g: kha.graphics4.Graphics) {
-								g.end();
+							function _init() {
 								var children = l.getChildren();
 								for (i in 0...children.length - 1) {
 									Context.setLayer(children[children.length - 1 - i]);
-									History.mergeLayers(g);
-									Layers.mergeSelectedLayer(g);
+									History.mergeLayers();
+									Layers.mergeSelectedLayer();
 								}
 								children[0].parent = null;
 								children[0].name = l.name;
 								l.delete();
-								g.begin();
-								iron.App.removeRender(mergeGroup);
 							}
-							iron.App.notifyOnRender(mergeGroup);
+							iron.App.notifyOnInit(_init);
 						}
 						if (l.getChildren() == null && ui.button(tr("Merge Down"), Left)) {
 							Context.setLayer(l);
-							iron.App.notifyOnRender(History.mergeLayers);
-							iron.App.notifyOnRender(Layers.mergeSelectedLayer);
+							iron.App.notifyOnInit(History.mergeLayers);
+							iron.App.notifyOnInit(Layers.mergeSelectedLayer);
 						}
 						if (ui.button(tr("Duplicate"), Left)) {
-							function makeDupli(g: kha.graphics4.Graphics) {
-								g.end();
+							function _init() {
 								if (l.getChildren() == null) {
 									Context.setLayer(l);
 									History.duplicateLayer();
@@ -478,10 +447,8 @@ class TabLayers {
 									}
 									Context.setLayer(group);
 								}
-								g.begin();
-								iron.App.removeRender(makeDupli);
 							}
-							iron.App.notifyOnRender(makeDupli);
+							iron.App.notifyOnInit(_init);
 						}
 						if (l.getChildren() == null && ui.button(tr("Black Mask"), Left)) {
 							l.createMask(0x00000000);
@@ -604,12 +571,11 @@ class TabLayers {
 						Context.setLayer(l);
 						MakeMaterial.parseMeshMaterial();
 						if (l.fill_layer != null) { // Fill layer
-							iron.App.notifyOnRender(l.clear);
-							function updateFillLayers(_) {
+							iron.App.notifyOnInit(l.clear);
+							function _init() {
 								Layers.updateFillLayers(4);
-								iron.App.removeRender(updateFillLayers);
 							}
-							iron.App.notifyOnRender(updateFillLayers);
+							iron.App.notifyOnInit(_init);
 						}
 						else {
 							Layers.setObjectMask();
@@ -637,7 +603,7 @@ class TabLayers {
 
 					ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Res"), true);
 					if (App.resHandle.changed) {
-						iron.App.notifyOnRender(Layers.resizeLayers);
+						iron.App.notifyOnInit(Layers.resizeLayers);
 						UVUtil.uvmap = null;
 						UVUtil.uvmapCached = false;
 						UVUtil.trianglemap = null;
@@ -648,7 +614,7 @@ class TabLayers {
 					}
 					ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
 					if (App.bitsHandle.changed) {
-						iron.App.notifyOnRender(Layers.setLayerBits);
+						iron.App.notifyOnInit(Layers.setLayerBits);
 					}
 
 					if (l.fill_layer != null) {
@@ -661,11 +627,10 @@ class TabLayers {
 						if (scaleHandle.changed) {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
-							function updateFillLayers(_) {
+							function _init() {
 								Layers.updateFillLayers();
-								iron.App.removeRender(updateFillLayers);
 							}
-							iron.App.notifyOnRender(updateFillLayers);
+							iron.App.notifyOnInit(_init);
 						}
 
 						var angleHandle = Id.handle().nest(l.id);
@@ -675,11 +640,10 @@ class TabLayers {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
 							MakeMaterial.parsePaintMaterial();
-							function updateFillLayers(_) {
+							function _init() {
 								Layers.updateFillLayers();
-								iron.App.removeRender(updateFillLayers);
 							}
-							iron.App.notifyOnRender(updateFillLayers);
+							iron.App.notifyOnInit(_init);
 						}
 
 						var uvTypeHandle = Id.handle().nest(l.id);
@@ -689,11 +653,10 @@ class TabLayers {
 							Context.setMaterial(l.fill_layer);
 							Context.setLayer(l);
 							MakeMaterial.parsePaintMaterial();
-							function updateFillLayers(_) {
+							function _init() {
 								Layers.updateFillLayers();
-								iron.App.removeRender(updateFillLayers);
 							}
-							iron.App.notifyOnRender(updateFillLayers);
+							iron.App.notifyOnInit(_init);
 						}
 					}
 				}
