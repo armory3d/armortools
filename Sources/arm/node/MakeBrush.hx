@@ -14,7 +14,7 @@ class MakeBrush {
 		if (Context.tool == ToolParticle) return;
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		if (decal) frag.write('if (decalPaint.z > 0) {');
+		if (decal) frag.write('if (decalMask.z > 0) {');
 
 		if (Config.raw.brush_3d) {
 			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround

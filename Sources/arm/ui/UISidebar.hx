@@ -489,11 +489,11 @@ class UISidebar {
 		}
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
-				   decalPaint ||
+				   decalMask ||
 				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 				   (Input.getPen().down() && !kb.down("alt"));
@@ -744,7 +744,7 @@ class UISidebar {
 					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
 					var decalAlpha = 0.5;
-					if (!Operator.shortcut(Config.keymap.decal_paint, ShortcutDown)) {
+					if (!Operator.shortcut(Config.keymap.decal_mask, ShortcutDown)) {
 						Context.decalX = Context.paintVec.x;
 						Context.decalY = Context.paintVec.y;
 						decalAlpha = Context.brushOpacity;

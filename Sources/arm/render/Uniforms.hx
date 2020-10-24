@@ -33,8 +33,8 @@ class Uniforms {
 			#if arm_painter
 			case "_brushRadius": {
 				var val = radiusUniform();
-				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
-				return decalPaint ? val * 2 : val;
+				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
+				return decalMask ? val * 2 : val;
 			}
 			case "_brushScaleX": {
 				return 1 / Context.brushScaleX;
@@ -360,9 +360,9 @@ class Uniforms {
 				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Context.showEnvmap ? Scene.active.world.probe.raw.strength : 4.0);
 				return vec;
 			}
-			case "_decalPaint": {
-				var decalPaint = Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
-				vec.set(Context.decalX, Context.decalY, decalPaint ? 1 : 0, radiusUniform());
+			case "_decalMask": {
+				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
+				vec.set(Context.decalX, Context.decalY, decalMask ? 1 : 0, radiusUniform());
 				return vec;
 			}
 		}

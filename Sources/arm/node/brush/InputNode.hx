@@ -36,12 +36,12 @@ class InputNode extends LogicNode {
 		}
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var decalPaint = decal && Operator.shortcut(Config.keymap.decal_paint + "+" + Config.keymap.action_paint, ShortcutDown);
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		var lazyPaint = Context.brushLazyRadius > 0 &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
-			 decalPaint);
+			 decalMask);
 
 		var mouse = iron.system.Input.getMouse();
 		var paintX = mouse.viewX / iron.App.w();

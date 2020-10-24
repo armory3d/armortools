@@ -72,8 +72,8 @@ class MakePaint {
 			vert.write('vec2 subtex = tex;');
 			if (decal) {
 				vert.add_uniform('vec2 sub', '_sub');
-				vert.add_uniform('vec4 decalPaint', '_decalPaint');
-				vert.write('if (decalPaint.z > 0.0) subtex += sub;');
+				vert.add_uniform('vec4 decalMask', '_decalMask');
+				vert.write('if (decalMask.z > 0.0) subtex += sub;');
 			}
 		}
 
