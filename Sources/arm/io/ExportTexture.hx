@@ -190,6 +190,16 @@ class ExportTexture {
 			}
 		}
 
+		#if kha_metal
+		// Flush command list
+		Layers.expa.g2.begin(false);
+		Layers.expa.g2.end();
+		Layers.expb.g2.begin(false);
+		Layers.expb.g2.end();
+		Layers.expc.g2.begin(false);
+		Layers.expc.g2.end();
+		#end
+
 		var texpaint = Layers.expa;
 		var texpaint_nor = Layers.expb;
 		var texpaint_pack = Layers.expc;
