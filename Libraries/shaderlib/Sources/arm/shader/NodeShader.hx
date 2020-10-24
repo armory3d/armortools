@@ -370,7 +370,7 @@ class NodeShader {
 		s += '#define textureLod(tex, coord, lod) tex.sample(tex ## _sampler, coord, level(lod))\n';
 		s += '#define textureLodShared(tex, coord, lod) tex.sample($sharedSampler, coord, level(lod))\n';
 		s += '#define texelFetch(tex, coord, lod) tex.read(uint2(coord), uint(lod))\n';
-		s += 'uint2 _getDimensions(texture2d<float> tex, uint lod) { return uint2(tex.get_width(lod), tex.get_height(lod)); }\n';
+		s += 'float2 _getDimensions(texture2d<float> tex, uint lod) { return float2(tex.get_width(lod), tex.get_height(lod)); }\n';
 		s += '#define textureSize _getDimensions\n';
 		s += '#define mod(a, b) fmod(a, b)\n';
 		s += '#define vec2 float2\n';
