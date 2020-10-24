@@ -132,11 +132,6 @@ class RenderPathPreview {
 		path.setTarget(framebuffer);
 
 		path.bindTarget("mtex", "tex");
-		#if rp_compositordepth
-		{
-			path.bindTarget("_mmain", "gbufferD");
-		}
-		#end
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 
 		path.setTarget("texpreview_icon");
@@ -147,8 +142,15 @@ class RenderPathPreview {
 	public static function commandsDecal() {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
+
+		#if (arm_world || kha_metal)
+		var clearColor = 0xffffffff;
+		#else
+		var clearColor: Null<Int> = null;
+		#end
+
 		path.setTarget("gbuffer0");
-		path.clearTarget(null, 1.0);
+		path.clearTarget(clearColor, 1.0);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		path.drawMeshes("mesh");
 
@@ -181,11 +183,6 @@ class RenderPathPreview {
 		path.setTarget(framebuffer);
 
 		path.bindTarget("tex", "tex");
-		#if rp_compositordepth
-		{
-			path.bindTarget("_main", "gbufferD");
-		}
-		#end
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
 	}
 }
