@@ -160,6 +160,7 @@ class Project {
 		ViewportUtil.resetViewport();
 		Context.layerPreviewDirty = true;
 		Context.layerFilter = 0;
+		Project.meshAssets = [];
 
 		Context.paintObject = Context.mainObject();
 
