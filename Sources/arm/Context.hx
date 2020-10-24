@@ -271,10 +271,11 @@ class Context {
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {
-			var current = @:privateAccess kha.graphics4.Graphics2.current;
-			if (current != null) current.end();
-			RenderUtil.makeDecalPreview();
-			if (current != null) current.begin(false);
+			function render(_) {
+				RenderUtil.makeDecalPreview();
+				iron.App.removeRender(render);
+			}
+			iron.App.notifyOnRender(render);
 		}
 	}
 
