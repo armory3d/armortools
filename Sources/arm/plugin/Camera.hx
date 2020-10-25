@@ -10,7 +10,7 @@ import arm.util.ViewportUtil;
 class Camera {
 
 	public static var inst: Camera;
-	public static var dist = 0.0;
+	public var distances = [0.0, 0.0];
 	public var views: Array<Mat4>;
 	var redraws = 0;
 	var first = true;
@@ -49,13 +49,13 @@ class Camera {
 			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
 					redraws = 2;
-					camera.transform.move(camera.lookWorld(), dist);
+					camera.transform.move(camera.lookWorld(), distances[index()]);
 					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
 					camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100);
 					if (camera.upWorld().z < 0) {
 						camera.transform.rotate(camera.rightWorld(), mouse.movementY / 100);
 					}
-					camera.transform.move(camera.lookWorld(), -dist);
+					camera.transform.move(camera.lookWorld(), -distances[index()]);
 				}
 
 				panAction(modif);
@@ -65,7 +65,7 @@ class Camera {
 					var f = -mouse.movementY / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
-					dist -= f;
+					distances[index()] -= f;
 				}
 
 				if (mouse.wheelDelta != 0 && !modifKey) {
@@ -73,7 +73,7 @@ class Camera {
 					var f = mouse.wheelDelta * (-0.1);
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
-					dist -= f;
+					distances[index()] -= f;
 				}
 
 				if (Operator.shortcut(Config.keymap.rotate_light, ShortcutDown)) {
@@ -172,14 +172,24 @@ class Camera {
 		});
 	}
 
+	public function index(): Int {
+		return Context.viewIndexLast > 0 ? 1 : 0;
+	}
+
 	function getCameraSpeed(): Float {
 		return Config.raw.camera_speed * (Config.raw.invert_zoom_direction ? -1 : 1);
 	}
 
-	public function reset() {
+	public function reset(viewIndex = -1) {
 		var camera = iron.Scene.active.camera;
-		dist = camera.transform.loc.length();
-		views = [camera.transform.local.clone(), camera.transform.local.clone()];
+		if (viewIndex == -1) {
+			distances = [camera.transform.loc.length(), camera.transform.loc.length()];
+			views = [camera.transform.local.clone(), camera.transform.local.clone()];
+		}
+		else {
+			distances[viewIndex] = camera.transform.loc.length();
+			views[viewIndex] = camera.transform.local.clone();
+		}
 	}
 
 	function panAction(modif: Bool) {

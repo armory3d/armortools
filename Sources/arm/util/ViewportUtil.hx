@@ -4,6 +4,7 @@ import kha.arrays.Float32Array;
 import iron.Scene;
 import iron.math.Vec4;
 import arm.ui.UISidebar;
+import arm.plugin.Camera;
 import arm.Enums;
 
 class ViewportUtil {
@@ -37,7 +38,7 @@ class ViewportUtil {
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
 				Context.ddirty = 2;
-				arm.plugin.Camera.inst.reset();
+				Camera.inst.reset();
 				break;
 			}
 		}
@@ -53,12 +54,12 @@ class ViewportUtil {
 		cam.transform.buildMatrix();
 		cam.buildProjection();
 		Context.ddirty = 2;
-		arm.plugin.Camera.inst.reset();
+		Camera.inst.reset(Context.viewIndexLast);
 	}
 
 	public static function orbit(x: Float, y: Float) {
 		var cam = Scene.active.camera;
-		var dist = arm.plugin.Camera.dist;
+		var dist = Camera.inst.distances[Camera.inst.index()];
 		cam.transform.move(cam.lookWorld(), dist);
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
 		cam.transform.rotate(cam.rightWorld(), y);
@@ -75,7 +76,7 @@ class ViewportUtil {
 	public static function zoom(f: Float) {
 		var cam = Scene.active.camera;
 		cam.transform.move(cam.look(), f);
-		arm.plugin.Camera.dist -= f;
+		Camera.inst.distances[Camera.inst.index()] -= f;
 		Context.ddirty = 2;
 	}
 
