@@ -10,7 +10,7 @@ import arm.util.ViewportUtil;
 class Camera {
 
 	public static var inst: Camera;
-	public var distances = [0.0, 0.0];
+	public var distances: Array<Float>;
 	public var views: Array<Mat4>;
 	var redraws = 0;
 	var first = true;
@@ -25,6 +25,12 @@ class Camera {
 		var kb = Input.getKeyboard();
 
 		iron.App.notifyOnUpdate(function() {
+
+			if (first) {
+				first = false;
+				reset();
+			}
+
 			if (Input.occupied ||
 				!App.uiEnabled ||
 				App.isDragging  ||
@@ -37,12 +43,6 @@ class Camera {
 			}
 
 			var camera = iron.Scene.active.camera;
-
-			if (first) {
-				first = false;
-				reset();
-			}
-
 			var modifKey = kb.down("alt") || kb.down("shift") || kb.down("control");
 			var modif = modifKey || Config.keymap.action_rotate == "middle";
 			var controls = Context.cameraControls;
