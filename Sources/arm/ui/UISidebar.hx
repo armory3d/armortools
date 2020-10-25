@@ -673,8 +673,10 @@ class UISidebar {
 
 		// Brush
 		if (App.uiEnabled && UIHeader.inst.worktab.position == SpacePaint) {
+			Context.viewIndex = Context.viewIndexLast;
 			var mx = App.x() + Context.paintVec.x * App.w();
 			var my = App.y() + Context.paintVec.y * App.h();
+			Context.viewIndex = -1;
 
 			// Radius being scaled
 			if (Context.brushLocked) {

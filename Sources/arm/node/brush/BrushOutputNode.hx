@@ -82,7 +82,7 @@ class BrushOutputNode extends LogicNode {
 		var right = 1.0;
 		if (Context.paint2d) {
 			left = 1.0;
-			right = 1.0 + UIView2D.inst.ww / App.w();
+			right = (Context.splitView ? 2.0 : 1.0) + UIView2D.inst.ww / App.w();
 		}
 
 		// First time init

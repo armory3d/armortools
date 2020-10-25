@@ -152,7 +152,7 @@ class RenderPathForward {
 	}
 
 	static function drawSplit() {
-		if (Context.splitView) {
+		if (Context.splitView && !Context.paint2dView) {
 			Context.ddirty = 1;
 			var cam = Scene.active.camera;
 

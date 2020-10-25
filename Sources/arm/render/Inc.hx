@@ -129,7 +129,7 @@ class Inc {
 	#end
 
 	public static function beginSplit() {
-		if (Context.splitView) {
+		if (Context.splitView && !Context.paint2dView) {
 
 			if (Context.viewIndexLast == -1 && Context.viewIndex == -1) {
 				// Begin split, draw right viewport first
