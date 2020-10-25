@@ -17,6 +17,8 @@ class Translator {
 		"zh_tw.big5" => 4
 	];
 
+	static var lastLocale = "en";
+
 	// Localizes a string with the given placeholders replaced (format is `{placeholderName}`).
 	// If the string isn't available in the translation, this method will return the source English string.
 	public static function tr(id: String, vars: Map<String, String> = null): String {
@@ -51,6 +53,13 @@ class Translator {
 		// No translations to load, as source strings are in English.
 		// Clear existing translations if switching languages at runtime.
 		translations.clear();
+
+		if (Config.raw.locale == "en" && lastLocale == "en") {
+			// No need to generate extended font atlas for English locale
+			return;
+		}
+		lastLocale = Config.raw.locale;
+
 		if (Config.raw.locale != "en") {
 			// Load the translation file
 			var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${Config.raw.locale}.json')).toString();
@@ -108,8 +117,7 @@ class Translator {
 		// Load and assign font with cjk characters
 		iron.App.notifyOnInit(function() {
 			iron.data.Data.getFont(newFont.path, function(f: kha.Font) {
-				if (cjk)
-				{
+				if (cjk) {
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
 					f.setFontIndex(fontIndex);
 				}
