@@ -108,7 +108,7 @@ class NodesBrush {
 						id: 0,
 						node_id: 0,
 						name: _tr("Color"),
-						type: "RGBA",
+						type: "VALUE", // Match brush output socket type
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0, 1.0])
 					},
