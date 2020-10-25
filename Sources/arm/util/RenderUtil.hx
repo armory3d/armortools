@@ -282,6 +282,8 @@ class RenderUtil {
 		// }
 		var _material = Context.material;
 		Context.material = new arm.data.MaterialSlot();
+		var _tool = Context.tool;
+		Context.tool = ToolBrush;
 		MakeMaterial.parsePaintMaterial();
 
 		RenderPathPaint.useLiveLayer(true);
@@ -369,6 +371,7 @@ class RenderUtil {
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;
 		Context.material = _material;
+		Context.tool = _tool;
 		function _init() {
 			MakeMaterial.parsePaintMaterial();
 		}
