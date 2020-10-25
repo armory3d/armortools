@@ -48,10 +48,10 @@ class Translator {
 			Config.raw.locale = "en";
 		}
 
+		// No translations to load, as source strings are in English.
+		// Clear existing translations if switching languages at runtime.
+		translations.clear();
 		if (Config.raw.locale == "en") {
-			// No translations to load, as source strings are in English.
-			// Clear existing translations if switching languages at runtime.
-			translations.clear();
 			return;
 		}
 
