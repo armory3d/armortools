@@ -85,8 +85,10 @@ class Translator {
 			}
 		}
 
+		var newFont = { path : "font.ttf", scale : 1.0 };
 		if (cjk) {
-			var cjkFontPath = Path.data() + Path.sep + "font_cjk.ttc";
+			newFont = { path : "font_cjk.ttc", scale : 1.4 };
+			var cjkFontPath = Path.data() + Path.sep + newFont.path;
 			if (!File.exists(cjkFontPath)) {
 				File.download("https://github.com/armory3d/armorpaint/raw/master/Assets/fonts/font_cjk.ttc", cjkFontPath);
 			}
@@ -95,32 +97,37 @@ class Translator {
 				Config.raw.locale = "en";
 				// Basic Latin + Latin-1 Supplement + Latin Extended-A
 				kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
+				// + Greek
+				for (i in 880...1023) kha.graphics2.Graphics.fontGlyphs.push(i);
 				// + Cyrillic
 				for (i in 1024...1119) kha.graphics2.Graphics.fontGlyphs.push(i);
 				translations.clear();
-				return;
+				newFont = { path : "font.ttf", scale : 1.0 };
 			}
+		}
 
-			kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
-			// Load and assign font with cjk characters
-			iron.App.notifyOnInit(function() {
-				iron.data.Data.getFont("font_cjk.ttc", function(f: kha.Font) {
+		kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
+		// Load and assign font with cjk characters
+		iron.App.notifyOnInit(function() {
+			iron.data.Data.getFont(newFont.path, function(f: kha.Font) {
+				if (cjk)
+				{
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
 					f.setFontIndex(fontIndex);
-					App.font = f;
-					var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
-					var originFontSize = uis[0].t.FONT_SIZE;
-					// Scale up the font size a bit
-					uis[0].t.FONT_SIZE = Std.int(uis[0].t.FONT_SIZE * 1.4);
-					for (ui in uis) {
-						ui.ops.font = f;
-						ui.setScale(ui.ops.scaleFactor);
-					}
-					// Restore font size in theme
-					uis[0].t.FONT_SIZE = originFontSize;
-				});
+				}
+				App.font = f;
+				var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
+				var originFontSize = uis[0].t.FONT_SIZE;
+				// Scale up the font size a bit
+				uis[0].t.FONT_SIZE = Std.int(uis[0].t.FONT_SIZE * newFont.scale);
+				for (ui in uis) {
+					ui.ops.font = f;
+					ui.setScale(ui.ops.scaleFactor);
+				}
+				// Restore font size in theme
+				uis[0].t.FONT_SIZE = originFontSize;
 			});
-		}
+		});
 	}
 
 	// Returns a list of supported locales (plus English and the automatically detected system locale).
