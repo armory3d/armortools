@@ -10,19 +10,18 @@ import arm.util.ViewportUtil;
 class Camera {
 
 	public static var inst: Camera;
-	public var distances: Array<Float>;
+	public var origins: Array<Vec4>;
 	public var views: Array<Mat4>;
 	var redraws = 0;
 	var first = true;
 	var dir = new Vec4();
-	var xvec = new Vec4();
-	var yvec = new Vec4();
 	var ease = 1.0;
 
 	public function new() {
 		inst = this;
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
+		var camera = iron.Scene.active.camera;
 
 		iron.App.notifyOnUpdate(function() {
 
@@ -42,20 +41,20 @@ class Camera {
 				return;
 			}
 
-			var camera = iron.Scene.active.camera;
 			var modifKey = kb.down("alt") || kb.down("shift") || kb.down("control");
 			var modif = modifKey || Config.keymap.action_rotate == "middle";
 			var controls = Context.cameraControls;
 			if (controls == ControlsOrbit) {
 				if (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif)) {
 					redraws = 2;
-					camera.transform.move(camera.lookWorld(), distances[index()]);
-					camera.transform.rotate(new iron.math.Vec4(0, 0, 1), -mouse.movementX / 100);
+					var dist = distance();
+					camera.transform.move(camera.lookWorld(), dist);
+					camera.transform.rotate(Vec4.zAxis(), -mouse.movementX / 100);
 					camera.transform.rotate(camera.rightWorld(), -mouse.movementY / 100);
 					if (camera.upWorld().z < 0) {
 						camera.transform.rotate(camera.rightWorld(), mouse.movementY / 100);
 					}
-					camera.transform.move(camera.lookWorld(), -distances[index()]);
+					camera.transform.move(camera.lookWorld(), -dist);
 				}
 
 				panAction(modif);
@@ -65,7 +64,6 @@ class Camera {
 					var f = -mouse.movementY / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
-					distances[index()] -= f;
 				}
 
 				if (mouse.wheelDelta != 0 && !modifKey) {
@@ -73,7 +71,6 @@ class Camera {
 					var f = mouse.wheelDelta * (-0.1);
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
-					distances[index()] -= f;
 				}
 
 				if (Operator.shortcut(Config.keymap.rotate_light, ShortcutDown)) {
@@ -172,6 +169,11 @@ class Camera {
 		});
 	}
 
+	public function distance(): Float {
+		var camera = iron.Scene.active.camera;
+		return Vec4.distance(origins[index()], camera.transform.loc);
+	}
+
 	public function index(): Int {
 		return Context.viewIndexLast > 0 ? 1 : 0;
 	}
@@ -183,11 +185,11 @@ class Camera {
 	public function reset(viewIndex = -1) {
 		var camera = iron.Scene.active.camera;
 		if (viewIndex == -1) {
-			distances = [camera.transform.loc.length(), camera.transform.loc.length()];
+			origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
 			views = [camera.transform.local.clone(), camera.transform.local.clone()];
 		}
 		else {
-			distances[viewIndex] = camera.transform.loc.length();
+			origins[viewIndex] = new Vec4(0, 0, 0);
 			views[viewIndex] = camera.transform.local.clone();
 		}
 	}
@@ -201,6 +203,8 @@ class Camera {
 			var right = camera.transform.right().normalize().mult(-mouse.movementX / 150);
 			camera.transform.loc.add(look);
 			camera.transform.loc.add(right);
+			origins[index()].add(look);
+			origins[index()].add(right);
 			camera.buildMatrix();
 		}
 	}

@@ -59,7 +59,7 @@ class ViewportUtil {
 
 	public static function orbit(x: Float, y: Float) {
 		var cam = Scene.active.camera;
-		var dist = Camera.inst.distances[Camera.inst.index()];
+		var dist = Camera.inst.distance();
 		cam.transform.move(cam.lookWorld(), dist);
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
 		cam.transform.rotate(cam.rightWorld(), y);
@@ -76,7 +76,6 @@ class ViewportUtil {
 	public static function zoom(f: Float) {
 		var cam = Scene.active.camera;
 		cam.transform.move(cam.look(), f);
-		Camera.inst.distances[Camera.inst.index()] -= f;
 		Context.ddirty = 2;
 	}
 
