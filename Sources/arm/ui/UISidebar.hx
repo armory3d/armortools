@@ -748,8 +748,11 @@ class UISidebar {
 						Context.decalY = Context.paintVec.y;
 						decalAlpha = Context.brushOpacity;
 					}
+
+					Context.viewIndex = Context.viewIndexLast;
 					var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
 					var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
+					Context.viewIndex = -1;
 
 					// Radius being scaled
 					if (Context.brushLocked) {

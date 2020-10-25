@@ -153,27 +153,26 @@ class RenderPathForward {
 
 	static function drawSplit() {
 		if (Context.splitView) {
-			if (Context.pdirty > 0) {
-				var cam = Scene.active.camera;
+			Context.ddirty = 1;
+			var cam = Scene.active.camera;
 
-				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
-				cam.buildMatrix();
-				cam.buildProjection();
+			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
+			cam.buildMatrix();
+			cam.buildProjection();
 
-				drawGbuffer();
+			drawGbuffer();
 
-				#if (kha_direct3d12 || kha_vulkan)
-				Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
-				#else
-				drawForward();
-				#end
+			#if (kha_direct3d12 || kha_vulkan)
+			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
+			#else
+			drawForward();
+			#end
 
-				Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-				cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
-				cam.buildMatrix();
-				cam.buildProjection();
-			}
+			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
+			cam.buildMatrix();
+			cam.buildProjection();
 		}
 	}
 }
