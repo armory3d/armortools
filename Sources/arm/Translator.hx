@@ -51,15 +51,13 @@ class Translator {
 		// No translations to load, as source strings are in English.
 		// Clear existing translations if switching languages at runtime.
 		translations.clear();
-		if (Config.raw.locale == "en") {
-			return;
-		}
-
-		// Load the translation file
-		var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${Config.raw.locale}.json')).toString();
-		var data: haxe.DynamicAccess<String> = Json.parse(translationJson);
-		for (key => value in data) {
-			translations[Std.string(key)] = value;
+		if (Config.raw.locale != "en") {
+			// Load the translation file
+			var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${Config.raw.locale}.json')).toString();
+			var data: haxe.DynamicAccess<String> = Json.parse(translationJson);
+			for (key => value in data) {
+				translations[Std.string(key)] = value;
+			}
 		}
 
 		// Generate extended font atlas
