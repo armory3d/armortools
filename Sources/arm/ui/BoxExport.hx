@@ -29,6 +29,7 @@ class BoxExport {
 
 			tabExportTextures(ui, tr("Export Textures"));
 			tabPresets(ui);
+			tabAtlases(ui);
 
 		}, 500, 310);
 	}
@@ -207,6 +208,26 @@ class BoxExport {
 				preset.textures.push({name: "base", channels: ["base_r", "base_g", "base_b", "1.0"]});
 				@:privateAccess hpreset.children = null;
 				savePreset();
+			}
+		}
+	}
+
+	static function tabAtlases(ui: Zui) {
+		if (ui.tab(htab, tr("Atlases"))) {
+			if (Project.atlasObjects == null || Project.atlasObjects.length != Project.paintObjects.length) {
+				Project.atlasObjects = [];
+				Project.atlasNames = [];
+				for (i in 0...Project.paintObjects.length) {
+					Project.atlasObjects.push(0);
+					Project.atlasNames.push(tr("Atlas") + " " + (i + 1));
+				}
+			}
+			for (i in 0...Project.paintObjects.length) {
+				ui.row([1 / 2, 1 / 2]);
+				ui.text(Project.paintObjects[i].name);
+				var hatlas = Id.handle().nest(i);
+				hatlas.position = Project.atlasObjects[i];
+				Project.atlasObjects[i] = ui.combo(hatlas, Project.atlasNames, tr("Atlas"));
 			}
 		}
 	}

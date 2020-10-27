@@ -10,6 +10,7 @@ import arm.format.PngWriter;
 import arm.format.PngTools;
 import arm.render.RenderPathPaint;
 import arm.node.MakeMaterial;
+import arm.data.LayerSlot;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
@@ -38,9 +39,9 @@ class ExportTexture {
 				}
 			}
 			if (udimTiles.length > 0) {
-				for (udimTile in udimTiles) runLayers(path, udimTile, true);
+				for (udimTile in udimTiles) runLayers(path, Project.layers, udimTile);
 			}
-			else runLayers(path);
+			else runLayers(path, Project.layers);
 		}
 		else if (Context.layersExport == ExportPerObject) {
 			var objectNames: Array<String> = [];
@@ -53,12 +54,36 @@ class ExportTexture {
 				}
 			}
 			if (objectNames.length > 0) {
-				for (name in objectNames) runLayers(path, name);
+				for (name in objectNames) runLayers(path, Project.layers, name);
 			}
-			else runLayers(path);
+			else runLayers(path, Project.layers);
 		}
 		else { // Visible or selected
-			runLayers(path);
+			var atlasExport = false;
+			if (Project.atlasObjects != null) {
+				for (i in 1...Project.atlasObjects.length) {
+					if (Project.atlasObjects[i - 1] != Project.atlasObjects[i]) {
+						atlasExport = true;
+						break;
+					}
+				}
+			}
+			if (atlasExport) {
+				for (atlasIndex in 0...Project.atlasObjects.length) {
+					var layers: Array<LayerSlot> = [];
+					for (objectIndex in 0...Project.atlasObjects.length) {
+						if (Project.atlasObjects[objectIndex] == atlasIndex) {
+							for (l in Project.layers) {
+								if (l.objectMask - 1 == objectIndex) layers.push(l);
+							}
+						}
+					}
+					if (layers.length > 0) {
+						runLayers(path, layers, Project.atlasNames[atlasIndex]);
+					}
+				}
+			}
+			else runLayers(path, Context.layersExport == ExportSelected ? [Context.layer] : Project.layers);
 		}
 
 		#if arm_debug
@@ -94,10 +119,10 @@ class ExportTexture {
 		planeo.visible = false;
 		Context.paintObject = _paintObject;
 
-		runLayers(path, "", false, true);
+		runLayers(path, [RenderPathPaint.liveLayer], "", true);
 	}
 
-	static function runLayers(path: String, objectName = "", isUdim = false, bakeMaterial = false) {
+	static function runLayers(path: String, layers: Array<LayerSlot>, objectName = "", bakeMaterial = false) {
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.formatQuality;
@@ -107,6 +132,7 @@ class ExportTexture {
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
+		var isUdim = Context.layersExport == ExportPerUdimTile;
 		if (isUdim) ext = objectName + ext;
 
 		Layers.makeTempImg();
@@ -117,11 +143,10 @@ class ExportTexture {
 
 		// Append object mask name
 		var exportSelected = Context.layersExport == ExportSelected;
-		if (exportSelected && Context.layer.objectMask > 0) {
-			f += "_" + Project.paintObjects[Context.layer.objectMask - 1].name;
+		if (exportSelected && layers[0].objectMask > 0) {
+			f += "_" + Project.paintObjects[layers[0].objectMask - 1].name;
 		}
-		var exportPerObject = Context.layersExport == ExportPerObject;
-		if (exportPerObject) {
+		if (!isUdim && !exportSelected && objectName != "") {
 			f += "_" + objectName;
 		}
 
@@ -136,18 +161,14 @@ class ExportTexture {
 		Layers.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
 		Layers.expc.g4.end();
 
-		// Export all visible layers or selected only
-		var layers = bakeMaterial   ? [RenderPathPaint.liveLayer] :
-					 exportSelected ? [Context.layer] :
-									  Project.layers;
-
 		// Flatten layers
 		for (l1 in layers) {
 			if (!exportSelected && !l1.isVisible()) continue;
 
 			if (objectName != "" && l1.objectMask > 0) {
 				if (isUdim && !Project.paintObjects[l1.objectMask - 1].name.endsWith(objectName)) continue;
-				if (!isUdim && Project.paintObjects[l1.objectMask - 1].name != objectName) continue;
+				var perObject = Context.layersExport == ExportPerObject;
+				if (perObject && Project.paintObjects[l1.objectMask - 1].name != objectName) continue;
 			}
 
 			var hasMask = l1.texpaint_mask != null && !bakeMaterial;

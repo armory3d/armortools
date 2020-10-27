@@ -48,6 +48,8 @@ class Project {
 	public static var layers: Array<LayerSlot> = null;
 	public static var fonts: Array<FontSlot> = null;
 	public static var paintObjects: Array<MeshObject> = null;
+	public static var atlasObjects: Array<Int> = null;
+	public static var atlasNames: Array<String> = null;
 	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
 	static var meshList: Array<String> = null;
 
