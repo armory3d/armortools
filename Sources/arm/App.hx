@@ -171,9 +171,6 @@ class App {
 				var cam = Scene.active.camera;
 				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
 				cam.buildProjection();
-				#if arm_creator
-				Project.projectNew(); // Spawns plane as default object
-				#end
 
 				Args.run();
 

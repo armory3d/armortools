@@ -133,11 +133,7 @@ class UIMenu {
 					var light = Scene.active.lights[0];
 
 					var lhandle = Id.handle();
-					#if arm_world
-					var scale = 1;
-					#else
 					var scale = 1333;
-					#end
 					lhandle.value = light.data.raw.strength / scale;
 					lhandle.value = Std.int(lhandle.value * 100) / 100;
 					ui.row([1 / 8, 7 / 8]); ui.endElement();
@@ -201,19 +197,6 @@ class UIMenu {
 				else {
 					Scene.active.world.envmap = Context.emptyEnvmap;
 				}
-
-				#if arm_creator
-				// ui.check(Id.handle({selected: true}), "Sun");
-				// ui.check(Id.handle({selected: true}), "Clouds");
-				Project.waterPass = ui.check(Id.handle({selected: Project.waterPass}), " " + tr("Water"));
-				// var world = iron.Scene.active.world;
-				// var light = iron.Scene.active.lights[0];
-				// // Sync sun direction
-				// var v = light.look();
-				// world.raw.sun_direction[0] = v.x;
-				// world.raw.sun_direction[1] = v.y;
-				// world.raw.sun_direction[2] = v.z;
-				#end
 
 				if (ui.changed) keepOpen = true;
 			}

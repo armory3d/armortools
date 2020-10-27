@@ -12,8 +12,6 @@ import arm.ui.UIHeader;
 import arm.node.MakeMaterial;
 import arm.Enums;
 
-#if arm_painter
-
 class RenderPathPaint {
 
 	static var path: RenderPath;
@@ -739,5 +737,3 @@ class RenderPathPaint {
 		// path.drawShader("shader_datas/dilate_pass/dilate_pass");
 	}
 }
-
-#end

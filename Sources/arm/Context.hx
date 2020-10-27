@@ -200,11 +200,7 @@ class Context {
 	public static var symZ = false;
 	public static var showCompass = true;
 	public static var fillTypeHandle = new Handle();
-	#if arm_creator
-	public static var projectType = ModelTessellatedPlane;
-	#else
 	public static var projectType = ModelRoundedCube;
-	#end
 	public static var projectAspectRatio = 0; // 1:1, 2:1, 1:2
 	public static var projectObjects: Array<MeshObject>;
 
@@ -231,11 +227,7 @@ class Context {
 	public static var hbloom: Handle = null;
 	public static var hsupersample: Handle = null;
 	public static var hvxao: Handle = null;
-	#if arm_creator
-	public static var vxaoExt = 5.0;
-	#else
 	public static var vxaoExt = 1.0;
-	#end
 	public static var vxaoOffset = 1.5;
 	public static var vxaoAperture = 1.2;
 	public static var textureExportPath = "";

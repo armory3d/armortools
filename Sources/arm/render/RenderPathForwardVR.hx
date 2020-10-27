@@ -181,21 +181,11 @@ class RenderPathForwardVR {
 
 		iron.Scene.active.camera.buildMatrix();
 
-		#if arm_painter
 		RenderPathPaint.begin();
-		#end
-
 		RenderPathForward.drawGbuffer();
 		RenderPathForward.drawForward();
-
-		#if arm_painter
 		RenderPathPaint.draw();
-		#end
-
-		#if arm_painter
 		RenderPathPaint.end();
-		#end
-
 		RenderPathDeferred.taaFrame++;
 	}
 }

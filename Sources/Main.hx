@@ -14,9 +14,6 @@ import arm.render.Uniforms;
 import arm.util.BuildMacros;
 import arm.Config;
 import arm.Context;
-#if arm_player
-import arm.sys.Path;
-#end
 #if arm_vr
 import arm.render.RenderPathForwardVR;
 #end
@@ -52,16 +49,7 @@ class Main {
 		if (c.window_resizable) windowFeatures |= FeatureResizable;
 		if (c.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (c.window_minimizable) windowFeatures |= FeatureMinimizable;
-
-		#if arm_player
-		var title = Krom.getArg(0);
-		var lasti = title.lastIndexOf(Path.sep);
-		if (lasti >= 0) title = title.substr(lasti + 1);
-		if (title.endsWith(".exe")) title = title.substr(0, title.length - 4);
-		#else
 		var title = "untitled - ArmorPaint";
-		#end
-
 		var options: kha.SystemOptions = {
 			title: title,
 			window: {
@@ -106,11 +94,7 @@ class Main {
 					#end
 
 					RenderPath.setActive(path);
-					#if arm_player
-					new arm.Player();
-					#else
 					new arm.App();
-					#end
 					#if arm_physics
 					o.addTrait(new arm.plugin.PhysicsWorld());
 					#end

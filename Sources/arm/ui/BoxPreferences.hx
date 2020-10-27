@@ -357,9 +357,6 @@ class BoxPreferences {
 					if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
 					if (Context.hvxao.changed) {
 						Config.applyConfig();
-						#if arm_creator
-						MakeMaterial.parseMeshMaterial();
-						#end
 					}
 
 					ui.enabled = Context.hvxao.selected;
@@ -405,15 +402,6 @@ class BoxPreferences {
 					Context.ddirty = 2;
 					MakeMaterial.parseMeshMaterial();
 				}
-
-				#if arm_creator
-				var h = Id.handle({value: Context.vxaoExt});
-				Context.vxaoExt = ui.slider(h, tr("VXAO Ext"), 1.0, 10.0);
-				if (h.changed) {
-					Context.ddirty = 2;
-					MakeMaterial.parseMeshMaterial();
-				}
-				#end
 			}
 			if (ui.tab(htab, tr("Keymap"), true)) {
 

@@ -49,9 +49,6 @@ class Project {
 	public static var fonts: Array<FontSlot> = null;
 	public static var paintObjects: Array<MeshObject> = null;
 	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
-	#if arm_world
-	public static var waterPass = true;
-	#end
 	static var meshList: Array<String> = null;
 
 	public static function projectOpen() {
@@ -230,12 +227,6 @@ class Project {
 			Context.pickerMaskHandle.position = MaskNone;
 			Context.paintObject.setData(md);
 			Context.paintObject.transform.scale.set(1, 1, 1);
-			#if arm_creator
-			if (Context.projectType == ModelTessellatedPlane) {
-				Context.paintObject.transform.loc.set(0, 0, -0.15);
-				Context.paintObject.transform.scale.set(10, 10, 1);
-			}
-			#end
 			Context.paintObject.transform.buildMatrix();
 			Context.paintObject.name = n;
 			paintObjects = [Context.paintObject];

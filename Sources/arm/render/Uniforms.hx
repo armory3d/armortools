@@ -7,13 +7,11 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.RenderPath;
 import iron.Scene;
-#if arm_painter
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.util.UVUtil;
 import arm.shader.MaterialParser;
 import arm.Enums;
-#end
 
 class Uniforms {
 
@@ -30,7 +28,6 @@ class Uniforms {
 
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
 		switch (link) {
-			#if arm_painter
 			case "_brushRadius": {
 				var val = radiusUniform();
 				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
@@ -67,43 +64,17 @@ class Uniforms {
 			case "_objectId": {
 				return Project.paintObjects.indexOf(cast object);
 			}
-			#end
-			#if arm_world
-			case "_voxelgiHalfExtentsUni": {
-				#if arm_painter
-				return Context.vxaoExt;
-				#else
-				return 10.0;
-				#end
-			}
-			#end
 			case "_vignetteStrength": {
-				#if arm_painter
 				return Config.raw.rp_vignette;
-				#else
-				return 0.4;
-				#end
 			}
 			case "_coneOffset": {
-				#if arm_painter
 				return Context.vxaoOffset;
-				#else
-				return 1.5;
-				#end
 			}
 			case "_coneAperture": {
-				#if arm_painter
 				return Context.vxaoAperture;
-				#else
-				return 1.2;
-				#end
 			}
 			case "_dilateRadius": {
-				#if arm_painter
 				return Context.dilateRadius;
-				#else
-				return 8.0;
-				#end
 			}
 		}
 		if (MaterialParser.script_links != null) {
@@ -133,7 +104,6 @@ class Uniforms {
 	}
 
 	public static function linkVec2(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
-		#if arm_painter
 		switch (link) {
 			case "_sub": {
 				Context.sub = (Context.sub + 1) % 4;
@@ -170,136 +140,12 @@ class Uniforms {
 				return vec;
 			}
 		}
-		#end
 		return null;
 	}
 
 	public static function linkVec3(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
 		var v: Vec4 = null;
 		switch (link) {
-			#if arm_world
-			case "_hosekA": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekA.x;
-					v.y = arm.data.HosekWilkie.data.hosekA.y;
-					v.z = arm.data.HosekWilkie.data.hosekA.z;
-				}
-				return v;
-			}
-			case "_hosekB": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekB.x;
-					v.y = arm.data.HosekWilkie.data.hosekB.y;
-					v.z = arm.data.HosekWilkie.data.hosekB.z;
-				}
-				return v;
-			}
-			case "_hosekC": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekC.x;
-					v.y = arm.data.HosekWilkie.data.hosekC.y;
-					v.z = arm.data.HosekWilkie.data.hosekC.z;
-				}
-				return v;
-			}
-			case "_hosekD": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekD.x;
-					v.y = arm.data.HosekWilkie.data.hosekD.y;
-					v.z = arm.data.HosekWilkie.data.hosekD.z;
-				}
-				return v;
-			}
-			case "_hosekE": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekE.x;
-					v.y = arm.data.HosekWilkie.data.hosekE.y;
-					v.z = arm.data.HosekWilkie.data.hosekE.z;
-				}
-				return v;
-			}
-			case "_hosekF": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekF.x;
-					v.y = arm.data.HosekWilkie.data.hosekF.y;
-					v.z = arm.data.HosekWilkie.data.hosekF.z;
-				}
-				return v;
-			}
-			case "_hosekG": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekG.x;
-					v.y = arm.data.HosekWilkie.data.hosekG.y;
-					v.z = arm.data.HosekWilkie.data.hosekG.z;
-				}
-				return v;
-			}
-			case "_hosekH": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekH.x;
-					v.y = arm.data.HosekWilkie.data.hosekH.y;
-					v.z = arm.data.HosekWilkie.data.hosekH.z;
-				}
-				return v;
-			}
-			case "_hosekI": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekI.x;
-					v.y = arm.data.HosekWilkie.data.hosekI.y;
-					v.z = arm.data.HosekWilkie.data.hosekI.z;
-				}
-				return v;
-			}
-			case "_hosekZ": {
-				if (arm.data.HosekWilkie.data == null) {
-					arm.data.HosekWilkie.recompute(Scene.active.world);
-				}
-				if (arm.data.HosekWilkie.data != null) {
-					v = iron.object.Uniforms.helpVec;
-					v.x = arm.data.HosekWilkie.data.hosekZ.x;
-					v.y = arm.data.HosekWilkie.data.hosekZ.y;
-					v.z = arm.data.HosekWilkie.data.hosekZ.z;
-				}
-				return v;
-			}
-			#end
-			#if arm_painter
 			case "_brushDirection": {
 				v = iron.object.Uniforms.helpVec;
 				// Discard first paint for directional brush
@@ -318,7 +164,6 @@ class Uniforms {
 				Context.prevPaintVecY = Context.lastPaintVecY;
 				return v;
 			}
-			#end
 		}
 
 		return v;
@@ -333,7 +178,6 @@ class Uniforms {
 	}
 
 	public static function linkVec4(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
-		#if arm_painter
 		switch (link) {
 			case "_inputBrush": {
 				var down = Input.getMouse().down() || Input.getPen().down();
@@ -366,7 +210,6 @@ class Uniforms {
 				return vec;
 			}
 		}
-		#end
 		return null;
 	}
 
@@ -386,7 +229,6 @@ class Uniforms {
 
 	public static function linkTex(object: Object, mat: MaterialData, link: String): kha.Image {
 		switch (link) {
-			#if arm_painter
 			case "_texcolorid": {
 				if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
 				else return Project.getImage(Project.assets[Context.colorIdHandle.position]);
@@ -436,7 +278,6 @@ class Uniforms {
 			case "_texparticle": {
 				return RenderPath.active.renderTargets.get("texparticle").image;
 			}
-			#end
 			#if arm_ltc
 			case "_ltcMat": {
 				if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
@@ -449,7 +290,6 @@ class Uniforms {
 			#end
 		}
 
-		#if arm_painter
 		if (link.startsWith("_texpaint_pack_vert")) {
 			var tid = link.substr(link.length - 1);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
@@ -484,7 +324,6 @@ class Uniforms {
 			var id = link.substr(9);
 			return Context.nodePreviewsWarp != null ? Context.nodePreviewsWarp.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
-		#end
 
 		return null;
 	}

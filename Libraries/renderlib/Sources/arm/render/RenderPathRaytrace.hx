@@ -258,12 +258,8 @@ class RenderPathRaytrace {
 	}
 
 	public static function draw() {
-		#if arm_painter
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		if (Context.ddirty > 1 || Context.pdirty > 0 || isLive) frame = 0;
-		#else
-		frame = 0;
-		#end
 
 		commands();
 
@@ -275,11 +271,9 @@ class RenderPathRaytrace {
 		path.setTarget("");
 		path.bindTarget("taa", "tex");
 		path.drawShader("shader_datas/copy_pass/copy_pass");
-		#if arm_painter
 		if (Config.raw.brush_3d) {
 			RenderPathPaint.commandsCursor();
 		}
-		#end
 	}
 }
 

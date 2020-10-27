@@ -15,12 +15,9 @@ class RenderPathForward {
 
 	@:access(iron.RenderPath)
 	public static function commands() {
-
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		#if arm_painter
 		Inc.beginSplit();
-
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
@@ -32,15 +29,9 @@ class RenderPathForward {
 		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
-
 		drawSplit();
-		#end // arm_painter
-
 		drawGbuffer();
-
-		#if arm_painter
 		RenderPathPaint.draw();
-		#end
 
 		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.viewportMode == ViewPathTrace) {
@@ -50,12 +41,8 @@ class RenderPathForward {
 		#end
 
 		drawForward();
-
-		#if arm_painter
 		RenderPathPaint.end();
 		Inc.end();
-		#end
-
 		RenderPathDeferred.taaFrame++;
 	}
 
@@ -70,13 +57,9 @@ class RenderPathForward {
 		path.clearTarget(0xff000000);
 		path.setTarget(gbuffer0, [gbuffer1, gbuffer2]);
 		var currentG = path.currentG;
-		#if arm_painter
 		RenderPathPaint.bindLayers();
-		#end
 		path.drawMeshes("mesh");
-		#if arm_painter
 		RenderPathPaint.unbindLayers();
-		#end
 		LineDraw.render(path.currentG);
 	}
 
@@ -94,9 +77,7 @@ class RenderPathForward {
 			path.setTarget(buf);
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
-			#if arm_painter
 			Inc.drawCompass(currentG);
-			#end
 		}
 
 		var taaFrame = RenderPathDeferred.taaFrame;
@@ -119,12 +100,7 @@ class RenderPathForward {
 		path.bindTarget(gbuffer2, "sveloc");
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-		#if arm_painter
 		var skipTaa = Context.splitView || eye;
-		#else
-		var skipTaa = false;
-		#end
-
 		if (skipTaa) {
 			path.setTarget(taa);
 			path.bindTarget(current, "tex");

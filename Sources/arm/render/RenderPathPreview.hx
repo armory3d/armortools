@@ -88,7 +88,7 @@ class RenderPathPreview {
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 
-		#if (arm_world || kha_metal)
+		#if (kha_metal)
 		var clearColor = 0xffffffff;
 		#else
 		var clearColor: Null<Int> = null;
@@ -116,9 +116,7 @@ class RenderPathPreview {
 		#end
 
 		path.setTarget("mtex"); // Re-binds depth
-		#if (!arm_world)
 		path.drawSkydome("world_pass/world_pass/world_pass");
-		#end
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
@@ -143,7 +141,7 @@ class RenderPathPreview {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 
-		#if (arm_world || kha_metal)
+		#if (kha_metal)
 		var clearColor = 0xffffffff;
 		#else
 		var clearColor: Null<Int> = null;

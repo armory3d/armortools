@@ -653,9 +653,6 @@ class UISidebar {
 
 			if (UIHeader.inst.worktab.position == SpaceRender) {
 				TabProperties.draw();
-				#if arm_creator
-				TabTraits.draw();
-				#end
 			}
 		}
 		if (ui.window(hwnd2, tabx, Config.raw.layout[LayoutSidebarH0] + Config.raw.layout[LayoutSidebarH1], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH2])) {

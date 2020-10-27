@@ -25,7 +25,6 @@ typedef TConfig = {
 	@:optional var rp_gi: Null<Bool>;
 	@:optional var rp_vignette: Null<Float>;
 	// Application
-	#if arm_painter
 	@:optional var version: String; // ArmorPaint version
 	@:optional var sha: String; // Commit id
 	@:optional var recent_projects: Array<String>; // Recently opened projects
@@ -50,5 +49,4 @@ typedef TConfig = {
 	@:optional var show_asset_names: Null<Bool>;
 	@:optional var layout: Array<Int>;
 	@:optional var workspace: Null<Int>;
-	#end
 }

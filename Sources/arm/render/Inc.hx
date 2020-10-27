@@ -94,7 +94,6 @@ class Inc {
 		return superSample;
 	}
 
-	#if arm_painter
 	public static function drawCompass(currentG: kha.graphics4.Graphics) {
 		if (Context.showCompass) {
 			var scene = Scene.active;
@@ -126,7 +125,6 @@ class Inc {
 			gizmo.transform.buildMatrix();
 		}
 	}
-	#end
 
 	public static function beginSplit() {
 		if (Context.splitView && !Context.paint2dView) {
@@ -176,7 +174,6 @@ class Inc {
 	}
 
 	public static function isCached(): Bool {
-		#if (!arm_creator)
 		var mouse = Input.getMouse();
 		var mx = lastX;
 		var my = lastY;
@@ -215,7 +212,6 @@ class Inc {
 			RenderPathPaint.finishPaint();
 			return true;
 		}
-		#end
 		return false;
 	}
 }

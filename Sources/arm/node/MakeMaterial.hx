@@ -111,9 +111,6 @@ class MakeMaterial {
 	static function makeVoxel(m: MaterialData) {
 		#if rp_voxelao
 		var rebuild = heightUsed;
-		#if arm_world
-		rebuild = true;
-		#end
 		if (Config.raw.rp_gi != false && rebuild) {
 			var scon: ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "voxel") { scon = c; break; }

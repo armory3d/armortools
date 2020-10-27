@@ -3,9 +3,7 @@ package arm.render;
 import kha.System;
 import iron.RenderPath;
 import iron.Scene;
-#if arm_painter
 import arm.ui.UISidebar;
-#end
 
 class RenderPathDeferred {
 
@@ -162,19 +160,6 @@ class RenderPathDeferred {
 		path.loadShader("shader_datas/taa_pass/taa_pass");
 		path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
 
-		#if arm_world
-		{
-			path.loadShader("water_pass/water_pass/water_pass");
-			Scene.active.embedData("water_base.k", function() {});
-			Scene.active.embedData("water_detail.k", function() {});
-			Scene.active.embedData("water_foam.k", function() {});
-			Scene.active.embedData("water_foam.k", function() {});
-			Scene.active.embedData("clouds_base.raw", function() {});
-			Scene.active.embedData("clouds_detail.raw", function() {});
-			Scene.active.embedData("clouds_map.k", function() {});
-		}
-		#end
-
 		#if (rp_motionblur == "Camera")
 		{
 			path.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
@@ -192,10 +177,8 @@ class RenderPathDeferred {
 		}
 		#end
 
-		#if arm_painter
 		RenderPathPaint.init(path);
 		RenderPathPreview.init(path);
-		#end
 
 		#if (kha_direct3d12 || kha_vulkan)
 		RenderPathRaytrace.init(path);
@@ -204,13 +187,9 @@ class RenderPathDeferred {
 
 	@:access(iron.RenderPath)
 	public static function commands() {
-
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		#if arm_painter
-
 		Inc.beginSplit();
-
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
@@ -222,15 +201,9 @@ class RenderPathDeferred {
 		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
-
 		drawSplit();
-		#end // arm_painter
-
 		drawGbuffer();
-
-		#if arm_painter
 		RenderPathPaint.draw();
-		#end
 
 		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.viewportMode == ViewPathTrace) {
@@ -240,23 +213,14 @@ class RenderPathDeferred {
 		#end
 
 		drawDeferred();
-
-		#if arm_painter
 		RenderPathPaint.end();
 		Inc.end();
-		#end
-
 		taaFrame++;
 	}
 
 	public static function drawDeferred() {
-		#if arm_painter
 		var cameraType = Context.cameraType;
 		var ddirty = Context.ddirty;
-		#else
-		var cameraType = CameraPerspective;
-		var ddirty = 2;
-		#end
 
 		var ssgi = Config.raw.rp_ssgi != false && cameraType == CameraPerspective;
 		if (ssgi && ddirty > 0 && taaFrame > 0) {
@@ -323,12 +287,10 @@ class RenderPathDeferred {
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
-				#if arm_painter
 				if (arm.node.MakeMaterial.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}
-				#end
 				path.drawMeshes("voxel");
 				path.generateMipmaps(voxels);
 			}
@@ -366,26 +328,6 @@ class RenderPathDeferred {
 		voxelao_pass ?
 			path.drawShader("deferred_light/deferred_light/deferred_light_voxel") :
 			path.drawShader("deferred_light/deferred_light/deferred_light");
-
-		#if arm_world
-		{
-			#if arm_creator
-			var waterPass = Project.waterPass;
-			#else
-			var waterPass = true;
-			#end
-
-			if (waterPass) {
-				path.setTarget("buf");
-				path.bindTarget("tex", "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-				path.setTarget("tex");
-				path.bindTarget("_main", "gbufferD");
-				path.bindTarget("buf", "tex");
-				path.drawShader("water_pass/water_pass/water_pass");
-			}
-		}
-		#end
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
@@ -553,9 +495,7 @@ class RenderPathDeferred {
 		path.setTarget("buf");
 		var currentG = path.currentG;
 		path.drawMeshes("overlay");
-		#if arm_painter
 		Inc.drawCompass(currentG);
-		#end
 
 		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
@@ -576,12 +516,7 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer2", "sveloc");
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-		#if arm_painter
 		var skipTaa = Context.splitView;
-		#else
-		var skipTaa = false;
-		#end
-
 		if (skipTaa) {
 			path.setTarget("taa");
 			path.bindTarget(current, "tex");
@@ -619,13 +554,9 @@ class RenderPathDeferred {
 		path.clearTarget(0xff000000);
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		var currentG = path.currentG;
-		#if arm_painter
 		RenderPathPaint.bindLayers();
-		#end
 		path.drawMeshes("mesh");
-		#if arm_painter
 		RenderPathPaint.unbindLayers();
-		#end
 		LineDraw.render(currentG);
 	}
 

@@ -4,7 +4,6 @@ import haxe.Json;
 import haxe.io.Bytes;
 import kha.Display;
 import iron.data.Data;
-#if arm_painter
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
@@ -12,7 +11,6 @@ import arm.ui.UIStatus;
 import arm.render.Inc;
 import arm.sys.Path;
 import arm.Enums;
-#end
 import arm.ConfigFormat;
 
 class Config {
@@ -81,7 +79,6 @@ class Config {
 			raw.rp_supersample = 0.5;
 			#end
 
-			#if arm_painter
 			raw.version = Main.version;
 			raw.sha = Main.sha;
 			raw.recent_projects = [];
@@ -113,11 +110,6 @@ class Config {
 			raw.show_asset_names = false;
 			raw.node_preview = true;
 			raw.workspace = 0;
-			#end
-
-			#if arm_creator
-			// raw.displace_strength = 100.0;
-			#end
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
@@ -132,9 +124,7 @@ class Config {
 			}
 		}
 
-		#if arm_painter
 		loadKeymap();
-		#end
 	}
 
 	public static function restore() {
@@ -145,10 +135,8 @@ class Config {
 		raw.layout = _layout;
 		initLayout();
 		Translator.loadTranslations(raw.locale);
-		#if arm_painter
 		applyConfig();
 		arm.ui.BoxPreferences.loadTheme(raw.theme);
-		#end
 	}
 
 	public static inline function getSuperSampleQuality(f: Float): Int {
@@ -167,7 +155,6 @@ class Config {
 			   i == 4 ? 2.0 : 4.0;
 	}
 
-	#if arm_painter
 	public static function applyConfig() {
 		Config.raw.rp_ssgi = Context.hssgi.selected;
 		Config.raw.rp_ssr = Context.hssr.selected;
@@ -251,5 +238,4 @@ class Config {
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)
 		];
 	}
-	#end
 }
