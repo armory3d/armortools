@@ -159,6 +159,14 @@ class MakePaint {
 				var angle = Context.brushAngleRejectDot;
 				frag.write('if (dot(wn, n) < $angle) discard;');
 			}
+			var stencilFill = Context.tool == ToolFill && Context.brushStencilImage != null;
+			if (stencilFill) {
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) discard;');
+				#else
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
+				#end
+			}
 		}
 
 		if (Context.colorIdPicked || faceFill) {
