@@ -24,21 +24,23 @@ class ExportTexture {
 		var timer = iron.system.Time.realTime();
 		#end
 
-		var udimTiles: Array<String> = [];
-		for (l in Project.layers) {
-			if (l.objectMask > 0) {
-				var name = Project.paintObjects[l.objectMask - 1].name;
-				if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
-					udimTiles.push(name.substr(name.length - 5));
-				}
-			}
-		}
-
 		if (bakeMaterial) {
 			runBakeMaterial(path);
 		}
-		else if (udimTiles.length > 0 && Context.layersExport == ExportVisible) {
-			for (udimTile in udimTiles) runLayers(path, udimTile, true);
+		else if (Context.layersExport == ExportPerUdimTile) {
+			var udimTiles: Array<String> = [];
+			for (l in Project.layers) {
+				if (l.objectMask > 0) {
+					var name = Project.paintObjects[l.objectMask - 1].name;
+					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
+						udimTiles.push(name.substr(name.length - 5));
+					}
+				}
+			}
+			if (udimTiles.length > 0) {
+				for (udimTile in udimTiles) runLayers(path, udimTile, true);
+			}
+			else runLayers(path);
 		}
 		else if (Context.layersExport == ExportPerObject) {
 			var objectNames: Array<String> = [];

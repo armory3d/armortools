@@ -90,6 +90,7 @@ package arm;
 	var ExportVisible = 0;
 	var ExportSelected = 1;
 	var ExportPerObject = 2;
+	var ExportPerUdimTile = 3;
 }
 
 #if (kha_direct3d12 || kha_vulkan)
