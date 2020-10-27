@@ -95,7 +95,7 @@ class Context {
 	public static var colorIdHandle = Id.handle();
 	public static var formatType = FormatPng;
 	public static var formatQuality = 100.0;
-	public static var layersExport = 0;
+	public static var layersExport = ExportVisible;
 	public static var splitBy = SplitObject;
 	public static var parseTransform = false;
 	public static var parseVCols = false;

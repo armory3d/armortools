@@ -37,10 +37,25 @@ class ExportTexture {
 		if (bakeMaterial) {
 			runBakeMaterial(path);
 		}
-		else if (udimTiles.length > 0 && Context.layersExport == 0) {
-			for (udimTile in udimTiles) runLayers(path, udimTile);
+		else if (udimTiles.length > 0 && Context.layersExport == ExportVisible) {
+			for (udimTile in udimTiles) runLayers(path, udimTile, true);
 		}
-		else {
+		else if (Context.layersExport == ExportPerObject) {
+			var objectNames: Array<String> = [];
+			for (l in Project.layers) {
+				if (l.objectMask > 0) {
+					var name = Project.paintObjects[l.objectMask - 1].name;
+					if (objectNames.indexOf(name) == -1) {
+						objectNames.push(name);
+					}
+				}
+			}
+			if (objectNames.length > 0) {
+				for (name in objectNames) runLayers(path, name);
+			}
+			else runLayers(path);
+		}
+		else { // Visible or selected
 			runLayers(path);
 		}
 
@@ -77,10 +92,10 @@ class ExportTexture {
 		planeo.visible = false;
 		Context.paintObject = _paintObject;
 
-		runLayers(path, "", true);
+		runLayers(path, "", false, true);
 	}
 
-	static function runLayers(path: String, udimTile = "", bakeMaterial = false) {
+	static function runLayers(path: String, objectName = "", isUdim = false, bakeMaterial = false) {
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.formatQuality;
@@ -90,7 +105,7 @@ class ExportTexture {
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
-		ext = udimTile + ext;
+		if (isUdim) ext = objectName + ext;
 
 		Layers.makeTempImg();
 		Layers.makeExportImg();
@@ -99,9 +114,13 @@ class ExportTexture {
 		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
 
 		// Append object mask name
-		var exportAll = Context.layersExport == 0;
-		if (!exportAll && Context.layer.objectMask > 0) {
+		var exportSelected = Context.layersExport == ExportSelected;
+		if (exportSelected && Context.layer.objectMask > 0) {
 			f += "_" + Project.paintObjects[Context.layer.objectMask - 1].name;
+		}
+		var exportPerObject = Context.layersExport == ExportPerObject;
+		if (exportPerObject) {
+			f += "_" + objectName;
 		}
 
 		// Clear export layer
@@ -116,16 +135,17 @@ class ExportTexture {
 		Layers.expc.g4.end();
 
 		// Export all visible layers or selected only
-		var layers = bakeMaterial ? [RenderPathPaint.liveLayer] :
-					 exportAll    ? Project.layers :
-									[Context.layer];
+		var layers = bakeMaterial   ? [RenderPathPaint.liveLayer] :
+					 exportSelected ? [Context.layer] :
+									  Project.layers;
 
 		// Flatten layers
 		for (l1 in layers) {
-			if (exportAll && !l1.isVisible()) continue;
+			if (!exportSelected && !l1.isVisible()) continue;
 
-			if (udimTile != "" && l1.objectMask > 0) {
-				if (!Project.paintObjects[l1.objectMask - 1].name.endsWith(udimTile)) continue;
+			if (objectName != "" && l1.objectMask > 0) {
+				if (isUdim && !Project.paintObjects[l1.objectMask - 1].name.endsWith(objectName)) continue;
+				if (!isUdim && Project.paintObjects[l1.objectMask - 1].name != objectName) continue;
 			}
 
 			var hasMask = l1.texpaint_mask != null && !bakeMaterial;

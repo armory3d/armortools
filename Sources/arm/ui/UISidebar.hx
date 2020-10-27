@@ -195,7 +195,7 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (Context.textureExportPath == "") { // First export, ask for path
-				Context.layersExport = 0;
+				Context.layersExport = ExportVisible;
 				BoxExport.showTextures();
 			}
 			else {
@@ -206,7 +206,7 @@ class UISidebar {
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
-			Context.layersExport = 0;
+			Context.layersExport = ExportVisible;
 			BoxExport.showTextures();
 		}
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();

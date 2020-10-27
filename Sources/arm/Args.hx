@@ -79,7 +79,7 @@ class Args {
 								App.bitsHandle.position = Bits32;
 							}
 
-							Context.layersExport = 0;
+							Context.layersExport = ExportVisible;
 
 							// Get export preset and apply the correct one from args
 							BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");

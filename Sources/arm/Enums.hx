@@ -86,6 +86,12 @@ package arm;
 	var RenderPathTrace = 2;
 }
 
+@:enum abstract ExportMode(Int) from Int to Int {
+	var ExportVisible = 0;
+	var ExportSelected = 1;
+	var ExportPerObject = 2;
+}
+
 #if (kha_direct3d12 || kha_vulkan)
 @:enum abstract PathTraceMode(Int) from Int to Int {
 	var TraceCore = 0;

@@ -330,7 +330,7 @@ class TabLayers {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
 
 						if (ui.button(tr("Export"), Left)) {
-							Context.layersExport = 1;
+							Context.layersExport = ExportSelected;
 							BoxExport.showTextures();
 						}
 
