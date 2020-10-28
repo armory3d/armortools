@@ -66,23 +66,39 @@ class Layers {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
 			C.undo_steps = 1;
-			if (Context.undoHandle != null) Context.undoHandle.value = C.undo_steps;
-			while (History.undoLayers.length > C.undo_steps) { var l = History.undoLayers.pop(); l.unload(); }
+			if (Context.undoHandle != null) {
+				Context.undoHandle.value = C.undo_steps;
+			}
+			while (History.undoLayers.length > C.undo_steps) {
+				var l = History.undoLayers.pop();
+				App.notifyOnNextFrame(function() {
+					l.unload();
+				});
+			}
 		}
 		for (l in Project.layers) l.resizeAndSetBits();
 		for (l in History.undoLayers) l.resizeAndSetBits();
 		var rts = RenderPath.active.renderTargets;
-		rts.get("texpaint_blend0").image.unload();
+		var _texpaint_blend0 = rts.get("texpaint_blend0").image;
+		App.notifyOnNextFrame(function() {
+			_texpaint_blend0.unload();
+		});
 		rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
 		rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
 		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
-		rts.get("texpaint_blend1").image.unload();
+		var _texpaint_blend1 = rts.get("texpaint_blend1").image;
+		App.notifyOnNextFrame(function() {
+			_texpaint_blend1.unload();
+		});
 		rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
 		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
 		Context.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
-			rts.get("texpaint_blur").image.unload();
+			var _texpaint_blur = rts.get("texpaint_blur").image;
+			App.notifyOnNextFrame(function() {
+				_texpaint_blur.unload();
+			});
 			var sizeX = Std.int(Config.getTextureResX() * 0.95);
 			var sizeY = Std.int(Config.getTextureResY() * 0.95);
 			rts.get("texpaint_blur").raw.width = sizeX;
@@ -233,7 +249,10 @@ class Layers {
 	public static function makeTempImg() {
 		var l = Project.layers[0];
 		if (imga != null && (imga.width != l.texpaint.width || imga.height != l.texpaint.height)) {
-			RenderPath.active.renderTargets.get("temptex0").unload();
+			var _temptex0 = RenderPath.active.renderTargets.get("temptex0");
+			App.notifyOnNextFrame(function() {
+				_temptex0.unload();
+			});
 			RenderPath.active.renderTargets.remove("temptex0");
 			imga = null;
 		}
@@ -253,9 +272,14 @@ class Layers {
 	public static function makeExportImg() {
 		var l = Project.layers[0];
 		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height)) {
-			expa.unload();
-			expb.unload();
-			expc.unload();
+			var _expa = expa;
+			var _expb = expb;
+			var _expc = expc;
+			App.notifyOnNextFrame(function() {
+				_expa.unload();
+				_expb.unload();
+				_expc.unload();
+			});
 			expa = null;
 			expb = null;
 			expc = null;

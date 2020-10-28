@@ -188,21 +188,26 @@ class ImportArm {
 
 			var tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
-				for (l in Project.layers) l.resizeAndSetBits();
 				if (History.undoLayers != null) for (l in History.undoLayers) l.resizeAndSetBits();
 				var rts = RenderPath.active.renderTargets;
-				rts.get("texpaint_blend0").image.unload();
+				var _texpaint_blend0 = rts.get("texpaint_blend0").image;
+				App.notifyOnNextFrame(function() {
+					_texpaint_blend0.unload();
+				});
 				rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
 				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
-				rts.get("texpaint_blend1").image.unload();
+				var _texpaint_blend1 = rts.get("texpaint_blend1").image;
+				App.notifyOnNextFrame(function() {
+					_texpaint_blend1.unload();
+				});
 				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
 				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
 				Context.brushBlendDirty = true;
 			}
 
-			// for (l in Project.layers) l.unload();
+			for (l in Project.layers) l.unload();
 			Project.layers = [];
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
@@ -216,34 +221,34 @@ class ImportArm {
 					if (Layers.pipeMerge == null) Layers.makePipe();
 
 					// TODO: create render target from bytes
-					var texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					var _texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint.g2.begin(false);
 					l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint.g2.drawImage(texpaint, 0, 0);
+					l.texpaint.g2.drawImage(_texpaint, 0, 0);
 					l.texpaint.g2.pipeline = null;
 					l.texpaint.g2.end();
 
-					var texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					var _texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_nor.g2.begin(false);
 					l.texpaint_nor.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
+					l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
 					l.texpaint_nor.g2.pipeline = null;
 					l.texpaint_nor.g2.end();
 
-					var texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+					var _texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 					l.texpaint_pack.g2.begin(false);
 					l.texpaint_pack.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
+					l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
 					l.texpaint_pack.g2.pipeline = null;
 					l.texpaint_pack.g2.end();
 
-					var texpaint_mask: kha.Image = null;
+					var _texpaint_mask: kha.Image = null;
 					if (ld.texpaint_mask != null) {
 						l.createMask(0, false);
-						texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
+						_texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
 						l.texpaint_mask.g2.begin(false);
 						l.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
-						l.texpaint_mask.g2.drawImage(texpaint_mask, 0, 0);
+						l.texpaint_mask.g2.drawImage(_texpaint_mask, 0, 0);
 						l.texpaint_mask.g2.pipeline = null;
 						l.texpaint_mask.g2.end();
 					}
@@ -264,10 +269,12 @@ class ImportArm {
 					l.paintEmis = ld.paint_emis;
 					l.paintSubs = ld.paint_subs;
 
-					// texpaint.unload();
-					// texpaint_nor.unload();
-					// texpaint_pack.unload();
-					// if (texpaint_mask != null) texpaint_mask.unload();
+					App.notifyOnNextFrame(function() {
+						_texpaint.unload();
+						_texpaint_nor.unload();
+						_texpaint_pack.unload();
+						if (_texpaint_mask != null) _texpaint_mask.unload();
+					});
 				}
 			}
 

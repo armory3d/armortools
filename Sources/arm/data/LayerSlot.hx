@@ -113,11 +113,15 @@ class LayerSlot {
 	public function unload() {
 		if (texpaint == null) return; // Layer is group
 
+		var _texpaint = texpaint;
+		var _texpaint_nor = texpaint_nor;
+		var _texpaint_pack = texpaint_pack;
+		var _texpaint_preview = texpaint_preview;
 		function _next() {
-			texpaint.unload();
-			texpaint_nor.unload();
-			texpaint_pack.unload();
-			texpaint_preview.unload();
+			_texpaint.unload();
+			_texpaint_nor.unload();
+			_texpaint_pack.unload();
+			_texpaint_preview.unload();
 		}
 		App.notifyOnNextFrame(_next);
 
@@ -223,7 +227,11 @@ class LayerSlot {
 		inverted.g2.drawImage(texpaint_mask, 0, 0);
 		inverted.g2.pipeline = null;
 		inverted.g2.end();
-		texpaint_mask.unload();
+		var _texpaint_mask = texpaint_mask;
+		function _next() {
+			_texpaint_mask.unload();
+		}
+		App.notifyOnNextFrame(_next);
 		texpaint_mask = RenderPath.active.renderTargets.get("texpaint_mask" + id).image = inverted;
 		Context.layerPreviewDirty = true;
 		Context.ddirty = 3;
@@ -232,11 +240,11 @@ class LayerSlot {
 	public function deleteMask() {
 		if (texpaint_mask == null) return;
 
-		var _mask = texpaint_mask;
-		var _preview = texpaint_mask_preview;
+		var _texpaint_mask = texpaint_mask;
+		var _texpaint_mask_preview = texpaint_mask_preview;
 		function _next() {
-			_mask.unload();
-			_preview.unload();
+			_texpaint_mask.unload();
+			_texpaint_mask_preview.unload();
 		}
 		App.notifyOnNextFrame(_next);
 
@@ -347,9 +355,9 @@ class LayerSlot {
 		var resY = Config.getTextureResY();
 		var rts = RenderPath.active.renderTargets;
 
-		var texpaint = this.texpaint;
-		var texpaint_nor = this.texpaint_nor;
-		var texpaint_pack = this.texpaint_pack;
+		var _texpaint = this.texpaint;
+		var _texpaint_nor = this.texpaint_nor;
+		var _texpaint_pack = this.texpaint_pack;
 
 		this.texpaint = Image.createRenderTarget(resX, resY, format);
 		this.texpaint_nor = Image.createRenderTarget(resX, resY, format);
@@ -359,45 +367,47 @@ class LayerSlot {
 
 		this.texpaint.g2.begin(false);
 		this.texpaint.g2.pipeline = Layers.pipeCopy;
-		this.texpaint.g2.drawScaledImage(texpaint, 0, 0, resX, resY);
+		this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
 		this.texpaint.g2.pipeline = null;
 		this.texpaint.g2.end();
 
 		this.texpaint_nor.g2.begin(false);
 		this.texpaint_nor.g2.pipeline = Layers.pipeCopy;
-		this.texpaint_nor.g2.drawScaledImage(texpaint_nor, 0, 0, resX, resY);
+		this.texpaint_nor.g2.drawScaledImage(_texpaint_nor, 0, 0, resX, resY);
 		this.texpaint_nor.g2.pipeline = null;
 		this.texpaint_nor.g2.end();
 
 		this.texpaint_pack.g2.begin(false);
 		this.texpaint_pack.g2.pipeline = Layers.pipeCopy;
-		this.texpaint_pack.g2.drawScaledImage(texpaint_pack, 0, 0, resX, resY);
+		this.texpaint_pack.g2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
 		this.texpaint_pack.g2.pipeline = null;
 		this.texpaint_pack.g2.end();
 
-		iron.App.notifyOnInit(function() { // Out of command list execution
-			texpaint.unload();
-			texpaint_nor.unload();
-			texpaint_pack.unload();
-		});
+		function _next() { // Out of command list execution
+			_texpaint.unload();
+			_texpaint_nor.unload();
+			_texpaint_pack.unload();
+		}
+		App.notifyOnNextFrame(_next);
 
 		rts.get("texpaint" + this.ext).image = this.texpaint;
 		rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
 		rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
 
 		if (this.texpaint_mask != null && (this.texpaint_mask.width != resX || this.texpaint_mask.height != resY)) {
-			var texpaint_mask = this.texpaint_mask;
+			var _texpaint_mask = this.texpaint_mask;
 			this.texpaint_mask = Image.createRenderTarget(resX, resY, TextureFormat.L8);
 
 			this.texpaint_mask.g2.begin(false);
 			this.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
-			this.texpaint_mask.g2.drawScaledImage(texpaint_mask, 0, 0, resX, resY);
+			this.texpaint_mask.g2.drawScaledImage(_texpaint_mask, 0, 0, resX, resY);
 			this.texpaint_mask.g2.pipeline = null;
 			this.texpaint_mask.g2.end();
 
-			iron.App.notifyOnInit(function() { // Out of command list execution
-				texpaint_mask.unload();
-			});
+			function _next() { // Out of command list execution
+				_texpaint_mask.unload();
+			}
+			App.notifyOnNextFrame(_next);
 
 			rts.get("texpaint_mask" + this.ext).image = this.texpaint_mask;
 		}

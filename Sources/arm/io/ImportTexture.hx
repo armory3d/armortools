@@ -19,7 +19,7 @@ class ImportTexture {
 				// Set envmap
 				if (path.toLowerCase().endsWith(".hdr")) {
 					Data.getImage(path, function(image: kha.Image) {
-						iron.App.notifyOnInit(function() { // Make sure file browser process did finish
+						App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
 						});
 					});
@@ -46,7 +46,7 @@ class ImportTexture {
 
 			// Set envmap
 			if (path.toLowerCase().endsWith(".hdr")) {
-				iron.App.notifyOnInit(function() { // Make sure file browser process did finish
+				App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 					ImportEnvmap.run(path, image);
 				});
 			}

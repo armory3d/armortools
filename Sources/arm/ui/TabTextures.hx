@@ -117,7 +117,7 @@ class TabTextures {
 										Project.assetMap.set(asset.id, image);
 										// Set envmap
 										if (asset.file.toLowerCase().endsWith(".hdr")) {
-											iron.App.notifyOnInit(function() { // Make sure file browser process did finish
+											App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 												arm.io.ImportEnvmap.run(asset.file, image);
 											});
 										}
