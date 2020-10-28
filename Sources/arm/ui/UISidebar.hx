@@ -383,15 +383,22 @@ class UISidebar {
 				Context.brushLocked = false;
 				Context.brushCanUnlock = false;
 			}
-			if (Context.brushLocked &&
+			if ((Context.brushCanLock || Context.brushLocked) &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) &&
 				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
 				mouse.unlock();
-				Context.brushCanUnlock = true;
 				Context.lastPaintX = -1;
 				Context.lastPaintY = -1;
+				if (Context.brushCanLock) {
+					Context.brushCanLock = false;
+					Context.brushCanUnlock = false;
+					Context.brushLocked = false;
+				}
+				else {
+					Context.brushCanUnlock = true;
+				}
 			}
 		}
 
