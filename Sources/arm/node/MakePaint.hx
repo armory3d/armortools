@@ -136,9 +136,9 @@ class MakePaint {
 
 			if (depthReject) {
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) discard;');
+				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				#else
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
 				#end
 			}
 
@@ -162,9 +162,9 @@ class MakePaint {
 			var stencilFill = Context.tool == ToolFill && Context.brushStencilImage != null;
 			if (stencilFill) {
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r) discard;');
+				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				#else
-				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r) discard;');
+				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
 				#end
 			}
 		}
