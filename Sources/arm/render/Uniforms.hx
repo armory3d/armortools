@@ -29,9 +29,23 @@ class Uniforms {
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
 		switch (link) {
 			case "_brushRadius": {
-				var val = radiusUniform();
-				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-				return decalMask ? val * 2 : val;
+				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
+				var radius = decalMask ? Context.brushDecalMaskRadius * 2.0 : Context.brushRadius;
+				var val = (radius * Context.brushNodesRadius) / 15.0;
+				var pen = Input.getPen();
+				if (Config.raw.pressure_radius && pen.down()) {
+					val *= pen.pressure * Config.raw.pressure_sensitivity;
+				}
+				var scale2d = (900 / App.h()) * Config.raw.window_scale;
+
+				if (Config.raw.brush_3d && !decal) {
+					val *= Context.paint2d ? 0.55 * scale2d : 2;
+				}
+				else {
+					val *= scale2d; // Projection ratio
+				}
+				return val;
 			}
 			case "_brushScaleX": {
 				return 1 / Context.brushScaleX;
@@ -84,23 +98,6 @@ class Uniforms {
 			}
 		}
 		return null;
-	}
-
-	static function radiusUniform(): Float {
-		var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
-		var pen = Input.getPen();
-		if (Config.raw.pressure_radius && pen.down()) {
-			val *= pen.pressure * Config.raw.pressure_sensitivity;
-		}
-		var scale2d = (900 / App.h()) * Config.raw.window_scale;
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		if (Config.raw.brush_3d && !decal) {
-			val *= Context.paint2d ? 0.55 * scale2d : 2;
-		}
-		else {
-			val *= scale2d; // Projection ratio
-		}
-		return val;
 	}
 
 	public static function linkVec2(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
@@ -205,8 +202,12 @@ class Uniforms {
 				return vec;
 			}
 			case "_decalMask": {
+				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-				vec.set(Context.decalX, Context.decalY, decalMask ? 1 : 0, radiusUniform());
+				var val = (Context.brushRadius * Context.brushNodesRadius) / 15.0;
+				var scale2d = (900 / App.h()) * Config.raw.window_scale;
+				val *= scale2d; // Projection ratio
+				vec.set(Context.decalX, Context.decalY, decalMask ? 1 : 0, val);
 				return vec;
 			}
 		}

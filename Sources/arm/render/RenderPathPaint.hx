@@ -379,7 +379,8 @@ class RenderPathPaint {
 			mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
 			my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		drawCursor(mx, my, Context.brushNodesRadius * Context.brushRadius / 3.4);
+		var radius = decalMask ? Context.brushDecalMaskRadius : Context.brushRadius;
+		drawCursor(mx, my, Context.brushNodesRadius * radius / 3.4);
 
 		// if (Context.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
 		// 	var _brushRadius = Context.brushRadius;

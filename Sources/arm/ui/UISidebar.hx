@@ -219,11 +219,14 @@ class UISidebar {
 		}
 
 		var mouse = Input.getMouse();
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
 		if ((Context.brushCanLock || Context.brushLocked) && mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) ||
-				Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
+				Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) ||
+				(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
 				if (Context.brushLocked) {
 					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown)) {
 						Context.brushOpacity += mouse.movementX / 500;
@@ -237,6 +240,12 @@ class UISidebar {
 						if (Context.brushAngle < 0) Context.brushAngle += 360;
 						Context.brushAngleHandle.value = Context.brushAngle;
 						MakeMaterial.parsePaintMaterial();
+					}
+					else if (decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown)) {
+						Context.brushDecalMaskRadius += mouse.movementX / 150;
+						Context.brushDecalMaskRadius = Math.max(0.05, Math.min(4.0, Context.brushDecalMaskRadius));
+						Context.brushDecalMaskRadius = Math.round(Context.brushDecalMaskRadius * 100) / 100;
+						Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
 					}
 					else {
 						Context.brushRadius += mouse.movementX / 150;
@@ -255,6 +264,9 @@ class UISidebar {
 
 		var right = iron.App.w();
 		if (UIView2D.inst.show) right += UIView2D.inst.ww;
+
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
 		// Viewport shortcuts
 		if (mouse.viewX > 0 && mouse.viewX < right &&
@@ -295,7 +307,8 @@ class UISidebar {
 					Context.tool == ToolParticle) {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
 						Operator.shortcut(Config.keymap.brush_opacity) ||
-						Operator.shortcut(Config.keymap.brush_angle)) {
+						Operator.shortcut(Config.keymap.brush_angle) ||
+						(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
 						Context.brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
 						Context.lockStartedX = mouse.x;
@@ -313,6 +326,24 @@ class UISidebar {
 						Context.brushRadiusHandle.value = Context.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
+					else if (decalMask) {
+						if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
+							Context.brushDecalMaskRadius -= getRadiusIncrement();
+							Context.brushDecalMaskRadius = Math.max(Math.round(Context.brushDecalMaskRadius * 100) / 100, 0.01);
+							Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
+							UIHeader.inst.headerHandle.redraws = 2;
+						}
+						else if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_increase, ShortcutRepeat)) {
+							Context.brushDecalMaskRadius += getRadiusIncrement();
+							Context.brushDecalMaskRadius = Math.round(Context.brushDecalMaskRadius * 100) / 100;
+							Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
+							UIHeader.inst.headerHandle.redraws = 2;
+						}
+					}
+				}
+
+				if (decalMask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutReleased))) {
+					UIHeader.inst.headerHandle.redraws = 2;
 				}
 			}
 
@@ -349,7 +380,8 @@ class UISidebar {
 			if (Context.brushLocked &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
-				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
+				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) &&
+				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
 				mouse.unlock();
 				Context.brushCanUnlock = true;
 				Context.lastPaintX = -1;
@@ -742,7 +774,8 @@ class UISidebar {
 					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
 					var decalAlpha = 0.5;
-					if (!Operator.shortcut(Config.keymap.decal_mask, ShortcutDown)) {
+					var decalMask = Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
+					if (!decalMask) {
 						Context.decalX = Context.paintVec.x;
 						Context.decalY = Context.paintVec.y;
 						decalAlpha = Context.brushOpacity;
@@ -754,7 +787,7 @@ class UISidebar {
 					Context.viewIndex = -1;
 
 					// Radius being scaled
-					if (Context.brushLocked) {
+					if (Context.brushLocked && !decalMask) {
 						decalX += Context.lockStartedX - System.windowWidth() / 2;
 						decalY += Context.lockStartedY - System.windowHeight() / 2;
 					}

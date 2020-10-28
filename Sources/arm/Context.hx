@@ -163,6 +163,8 @@ class Context {
 
 	public static var brushRadius = 0.5;
 	public static var brushRadiusHandle = new Handle({value: 0.5});
+	public static var brushDecalMaskRadius = 0.5;
+	public static var brushDecalMaskRadiusHandle = new Handle({value: 0.5});
 	public static var brushScaleX = 1.0;
 	public static var brushScaleXHandle = new Handle({value: 1.0});
 	public static var brushBlending = BlendMix;

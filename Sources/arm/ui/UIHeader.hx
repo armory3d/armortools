@@ -149,7 +149,14 @@ class UIHeader {
 					 Context.tool == ToolParticle) {
 
 				if (Context.tool != ToolFill) {
-					Context.brushRadius = ui.slider(Context.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+					var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
+					if (decalMask) {
+						Context.brushDecalMaskRadius = ui.slider(Context.brushDecalMaskRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+					}
+					else {
+						Context.brushRadius = ui.slider(Context.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+					}
 				}
 
 				if (Context.tool == ToolDecal || Context.tool == ToolText) {

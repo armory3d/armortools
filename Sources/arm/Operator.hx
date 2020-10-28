@@ -32,7 +32,7 @@ class Operator {
 			// Mouse
 			(type == ShortcutDown ? mouse.down(s) : mouse.started(s)) :
 			// Keyboard
-			(type == ShortcutRepeat ? kb.repeat(s) : type == ShortcutDown ? kb.down(s) : kb.started(s));
+			(type == ShortcutRepeat ? kb.repeat(s) : type == ShortcutDown ? kb.down(s) : type == ShortcutReleased ? kb.released(s) : kb.started(s));
 		return flag && key;
 	}
 }
@@ -41,4 +41,5 @@ class Operator {
 	var ShortcutStarted = 0;
 	var ShortcutRepeat = 1;
 	var ShortcutDown = 2;
+	var ShortcutReleased = 3;
 }
