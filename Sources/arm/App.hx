@@ -613,4 +613,15 @@ class App {
 		}
 		iron.App.notifyOnUpdate(_update);
 	}
+
+	public static function toggleFullscreen() {
+		if (kha.Window.get(0).mode == kha.WindowMode.Windowed) {
+			kha.Window.get(0).mode = kha.WindowMode.Fullscreen;
+		}
+		else {
+			kha.Window.get(0).mode = kha.WindowMode.Windowed;
+			kha.Window.get(0).resize(Config.raw.window_w, Config.raw.window_h);
+			kha.Window.get(0).move(Config.raw.window_x, Config.raw.window_y);
+		}
+	}
 }

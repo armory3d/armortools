@@ -53,7 +53,14 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
-			var menuItems = [16, 4, 13, #if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, 17, 7];
+			var menuItems = [
+				16, // MenuFile
+				4, // MenuEdit
+				#if (krom_windows || krom_linux) 14 #else 13 #end, // MenuViewport
+				#if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, // MenuMode
+				17, // MenuCamera
+				7 // MenuHelp
+			];
 			var sepw = menuW / ui.SCALE();
 			g.color = ui.t.SEPARATOR_COL;
 			g.fillRect(menuX, menuY, menuW, 28 * menuItems[menuCategory] * ui.SCALE());
@@ -118,6 +125,10 @@ class UIMenu {
 				if (ui.button("      " + tr("Distract Free"), Left, Config.keymap.view_distract_free)) {
 					UISidebar.inst.toggleDistractFree();
 					UISidebar.inst.ui.isHovered = false;
+				}
+
+				if (ui.button("      " + tr("Toggle Fullscreen"), Left, "alt+enter")) {
+					App.toggleFullscreen();
 				}
 
 				ui.changed = false;

@@ -218,6 +218,12 @@ class UISidebar {
 			toggleDistractFree();
 		}
 
+		#if krom_linux
+		if (Operator.shortcut("alt+enter", ShortcutStarted)) {
+			App.toggleFullscreen();
+		}
+		#end
+
 		var mouse = Input.getMouse();
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
