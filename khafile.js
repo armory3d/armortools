@@ -23,7 +23,7 @@ project.addAssets("Assets/export_presets/*", { notinlist: true, destination: "da
 project.addAssets("Assets/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
 project.addAssets("Assets/fonts/*", { notinlist: true, destination: "data/{name}" });
 project.addAssets("Assets/locale/*", { notinlist: true, destination: "data/locale/{name}" });
-project.addAssets("Assets/licenses/*", { notinlist: true, destination: "data/licenses/{name}" });
+project.addAssets("Assets/licenses/**", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*.json", { notinlist: true, destination: "data/themes/{name}" });
 project.addAssets("Assets/meshes/*", { notinlist: true, destination: "data/meshes/{name}" });
