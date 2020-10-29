@@ -92,6 +92,7 @@ class BoxPreferences {
 							if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
 							filesPlugin = null;
 							filesKeymap = null;
+							MakeMaterial.parsePaintMaterial();
 						}
 					}, 2);
 				}
