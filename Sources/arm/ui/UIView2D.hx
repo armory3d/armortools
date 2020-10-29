@@ -68,10 +68,6 @@ class UIView2D {
 
 		if (Context.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
-		var tw = ww * 0.95 * panScale;
-		var tx = ww / 2 - tw / 2 + panX;
-		var ty = iron.App.h() / 2 - tw / 2 + panY;
-
 		g.end();
 
 		// Cache grid
@@ -98,6 +94,10 @@ class UIView2D {
 			var l = Context.layer;
 			var tex: Image = null;
 			var channel = 0;
+
+			var tw = ww * 0.95 * panScale;
+			var tx = ww / 2 - tw / 2 + panX;
+			var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 			if (type == View2DLayer) {
 				var layer = l.getChildren() == null ? l : l.getChildren()[0];
@@ -131,6 +131,7 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
+				ty = iron.App.h() / 2 - th / 2 + panY;
 
 				if (type == View2DLayer) {
 					ui.g.pipeline = pipe;

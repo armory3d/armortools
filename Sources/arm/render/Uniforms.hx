@@ -31,7 +31,9 @@ class Uniforms {
 			case "_brushRadius": {
 				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-				var radius = decalMask ? Context.brushDecalMaskRadius * 2.0 : Context.brushRadius;
+				var brushDecalMaskRadius = Context.brushDecalMaskRadius;
+				if (Config.raw.brush_3d) brushDecalMaskRadius *= 2.0;
+				var radius = decalMask ? brushDecalMaskRadius : Context.brushRadius;
 				var val = (radius * Context.brushNodesRadius) / 15.0;
 				var pen = Input.getPen();
 				if (Config.raw.pressure_radius && pen.down()) {
@@ -208,6 +210,7 @@ class Uniforms {
 				var scale2d = (900 / App.h()) * Config.raw.window_scale;
 				val *= scale2d; // Projection ratio
 				vec.set(Context.decalX, Context.decalY, decalMask ? 1 : 0, val);
+				if (Context.paint2d) vec.x = vec2d(vec.x);
 				return vec;
 			}
 		}

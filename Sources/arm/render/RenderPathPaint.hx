@@ -525,7 +525,6 @@ class RenderPathPaint {
 			var tw = 0.95 * UIView2D.inst.panScale;
 			var tx = UIView2D.inst.panX / UIView2D.inst.ww;
 			var ty = UIView2D.inst.panY / iron.App.h();
-
 			m.setIdentity();
 			m.scale(new Vec4(tw, tw, 1));
 			m.setLoc(new Vec4(tx, ty, 0));
@@ -541,6 +540,7 @@ class RenderPathPaint {
 			var sx = v.set(m._00, m._01, m._02).length();
 			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 			planeo.transform.scale.set(sx, 1.0, sx);
+			planeo.transform.scale.z *= Config.getTextureResY() / Config.getTextureResX();
 			planeo.transform.loc.set(m._30, -m._31, 0.0);
 			planeo.transform.buildMatrix();
 		}

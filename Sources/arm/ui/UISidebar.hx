@@ -783,11 +783,11 @@ class UISidebar {
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 			if (!Config.raw.brush_3d || in2dView || (decal && !Config.raw.brush_live)) {
+				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 				if (decal && !inNodes) {
 					var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
 					var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
 					var decalAlpha = 0.5;
-					var decalMask = Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 					if (!decalMask) {
 						Context.decalX = Context.paintVec.x;
 						Context.decalY = Context.paintVec.y;
@@ -816,12 +816,16 @@ class UISidebar {
 					g.popTransformation();
 					g.color = 0xffffffff;
 				}
-				else if (Context.tool == ToolBrush  ||
-						 Context.tool == ToolEraser ||
-						 Context.tool == ToolClone  ||
-						 Context.tool == ToolBlur   ||
-						 Context.tool == ToolParticle) {
-						g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
+				if (Context.tool == ToolBrush  ||
+					Context.tool == ToolEraser ||
+					Context.tool == ToolClone  ||
+					Context.tool == ToolBlur   ||
+					Context.tool == ToolParticle ||
+					decalMask) {
+					if (decalMask) {
+						psize = Std.int(cursorImg.width * (Context.brushDecalMaskRadius * Context.brushNodesRadius) * ui.SCALE());
+					}
+					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
 			}
 
