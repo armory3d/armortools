@@ -32,7 +32,9 @@ class Uniforms {
 				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 				var brushDecalMaskRadius = Context.brushDecalMaskRadius;
-				if (Config.raw.brush_3d) brushDecalMaskRadius *= 2.0;
+				if (Config.raw.brush_3d) {
+					brushDecalMaskRadius *= Context.paint2d ? 0.55 : 2.0;
+				}
 				var radius = decalMask ? brushDecalMaskRadius : Context.brushRadius;
 				var val = (radius * Context.brushNodesRadius) / 15.0;
 				var pen = Input.getPen();

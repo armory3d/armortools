@@ -821,7 +821,8 @@ class UISidebar {
 					Context.tool == ToolClone  ||
 					Context.tool == ToolBlur   ||
 					Context.tool == ToolParticle ||
-					decalMask) {
+					(decalMask && !Config.raw.brush_3d) ||
+					(decalMask && in2dView)) {
 					if (decalMask) {
 						psize = Std.int(cursorImg.width * (Context.brushDecalMaskRadius * Context.brushNodesRadius) * ui.SCALE());
 					}
