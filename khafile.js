@@ -31,6 +31,7 @@ if (metal) {
 	project.addShaders("Shaders/common/metal/*.glsl", { noembed: false});
 	project.addAssets("Assets/common/metal/*", { notinlist: true, destination: "data/{name}" });
 }
+project.addDefine("js-es=6");
 project.addParameter("--macro include('arm.node.brush')");
 project.addDefine("kha_no_ogg");
 project.addDefine("zui_translate");
