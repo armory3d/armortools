@@ -29,9 +29,7 @@ function texsynthInpaint(tiling) {
 	Krom.texsynthInpaint(w, h, bytes_out.b.bufferValue, bytes_img, bytes_mask, tiling);
 	let image = arm.Image.fromBytes(bytes_out, w, h);
 
-	function apply(g) {
-		g.end();
-
+	function _next() {
 		arm.Context.layerIsMask = false;
 		arm.History.applyFilter();
 
@@ -49,9 +47,6 @@ function texsynthInpaint(tiling) {
 		arm.MakeMaterial.parseMeshMaterial();
 		arm.App.redrawUI();
 		arm.Context.layerPreviewDirty = true;
-
-		g.begin();
-		iron.App.removeRender(apply);
 	}
-	iron.App.notifyOnRender(apply);
+	arm.App.notifyOnNextFrame(_next);
 }
