@@ -1,5 +1,5 @@
 
-Module = {}
+let Module = {};
 Module["instantiateWasm"] = function(imports, successCallback) {
 	let wasmbin = Krom.loadBlob("data/plugins/import_gltf.wasm");
 	let module = new WebAssembly.Module(wasmbin);
