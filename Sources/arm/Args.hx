@@ -5,23 +5,24 @@ import arm.sys.File;
 import arm.io.ExportTexture;
 import arm.io.ExportMesh;
 import arm.io.ImportAsset;
+import arm.io.ImportArm;
 import arm.ui.BoxExport;
 import arm.ui.UIFiles;
+import arm.ui.UISidebar;
 import arm.Enums;
 
 class Args {
 
 	static var useArgs = false;
-	static var projectPath = "";
 	static var assetPath = "";
-	static var reloadMesh = false;
+	static var reimportMesh = false;
 	static var exportTextures = false;
 	static var exportTexturesType = "";
 	static var exportTexturesPreset = "";
 	static var exportTexturesPath = "";
 	static var exportMesh = false;
 	static var exportMeshPath = "";
-	static var backgroundProcessing = false;
+	static var background = false;
 
 	public static function parse() {
 		if (Krom.getArgCount() > 1) {
@@ -31,22 +32,27 @@ class Args {
 				// Process each arg
 				var currentArg = Krom.getArg(v);
 				if (Path.isProject(currentArg)) {
-					projectPath = currentArg;
-					Project.filepath = projectPath;
+					Project.filepath = currentArg;
 				}
-				if (Path.isMesh(currentArg) || Path.isTexture(currentArg)) assetPath = currentArg;
-				if (currentArg == "--reload-mesh") reloadMesh = true;
-				if (currentArg == "--export-textures" && (v + 3) <= Krom.getArgCount()) {
+				else if (Path.isMesh(currentArg) || Path.isTexture(currentArg)) {
+					assetPath = currentArg;
+				}
+				else if (currentArg == "--reload-mesh") {
+					reimportMesh = true;
+				}
+				else if (currentArg == "--export-textures" && (v + 3) <= Krom.getArgCount()) {
 					exportTextures = true;
 					exportTexturesType = Krom.getArg(v + 1);
 					exportTexturesPreset = Krom.getArg(v + 2);
 					exportTexturesPath = Krom.getArg(v + 3);
 				}
-				if (currentArg == "--export-mesh" && (v + 1) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-mesh" && (v + 1) <= Krom.getArgCount()) {
 					exportMesh = true;
 					exportMeshPath = Krom.getArg(v + 1);
 				}
-				if (currentArg == "--b" || currentArg == "--background") backgroundProcessing = true;
+				else if (currentArg == "--b" || currentArg == "--background") {
+					background = true;
+				}
 			}
 		}
 	}
@@ -54,10 +60,17 @@ class Args {
 	public static function run() {
 		if (useArgs) {
 			iron.App.notifyOnInit(function() {
-				if (projectPath != "") ImportAsset.run(projectPath, -1, -1, false);
-				if (assetPath != "") ImportAsset.run(assetPath, -1, -1, false);
-				if (reloadMesh) Project.reimportMesh();
-				if (exportTextures) {
+				if (Project.filepath != "") {
+					ImportArm.runProject(Project.filepath);
+				}
+				else if (assetPath != "") {
+					ImportAsset.run(assetPath, -1, -1, false);
+					if (Path.isTexture(assetPath)) UISidebar.inst.show2DView(View2DAsset);
+				}
+				else if (reimportMesh) {
+					Project.reimportMesh();
+				}
+				else if (exportTextures) {
 					if (exportTexturesType == "png" ||
 						exportTexturesType == "jpg"||
 						exportTexturesType == "exr16"||
@@ -68,14 +81,14 @@ class Args {
 								App.bitsHandle.position = Bits8;
 								Context.formatType = FormatPng;
 							}
-							if (exportTexturesType == "jpg") {
+							else if (exportTexturesType == "jpg") {
 								App.bitsHandle.position = Bits8;
 								Context.formatType = FormatJpg;
 							}
-							if (exportTexturesType == "exr16") {
+							else if (exportTexturesType == "exr16") {
 								App.bitsHandle.position = Bits16;
 							}
-							if (exportTexturesType == "exr32") {
+							else if (exportTexturesType == "exr32") {
 								App.bitsHandle.position = Bits32;
 							}
 
@@ -102,28 +115,26 @@ class Args {
 								ExportTexture.run(exportTexturesPath);
 							}
 							iron.App.notifyOnInit(_init);
-							trace("Export Textures: done");
 						}
 						else {
-							trace("Export Textures: export directory invalid");
+							trace("Invalid export directory");
 						}
 					}
 					else {
-						trace("Export Textures: type invalid");
+						trace("Invalid texture type");
 					}
 				}
-				if (exportMesh) {
+				else if (exportMesh) {
 					if (Path.isFolder(exportMeshPath)) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						ExportMesh.run(exportMeshPath + Path.sep + f, false);
-						trace("Export Mesh: done");
 					}
 					else {
-						trace("Export Mesh: export directory invalid");
+						trace("Invalid export directory");
 					}
 				}
-				if (backgroundProcessing) kha.System.stop();
+				if (background) kha.System.stop();
 			});
 		}
 	}

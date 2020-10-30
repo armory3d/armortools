@@ -151,6 +151,13 @@ class App {
 				uiMenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
 				defaultElementH = uiMenu.t.ELEMENT_H;
 
+				// Init plugins
+				if (Config.raw.plugins != null) {
+					for (plugin in Config.raw.plugins) {
+						Plugin.start(plugin);
+					}
+				}
+
 				Args.parse();
 
 				iron.App.notifyOnUpdate(update);

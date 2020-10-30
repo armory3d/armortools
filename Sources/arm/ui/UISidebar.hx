@@ -153,13 +153,6 @@ class UISidebar {
 		if (Project.filepath == "") {
 			iron.App.notifyOnInit(Layers.initLayers);
 		}
-
-		// Init plugins
-		if (Config.raw.plugins != null) {
-			for (plugin in Config.raw.plugins) {
-				Plugin.start(plugin);
-			}
-		}
 	}
 
 	public function update() {
