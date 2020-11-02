@@ -42,6 +42,24 @@ class Plugin {
 	}
 }
 
+@:expose("core")
+class CoreBridge {
+	public static var Json = haxe.Json;
+	public static var ReflectFields = Reflect.fields;
+	public static var ReflectField = Reflect.field;
+	public static var ReflectSetField = Reflect.setField;
+	public static var StdIs = Std.is;
+	public static var Bytes = haxe.io.Bytes;
+	public static var BytesInput = haxe.io.BytesInput;
+	public static var BytesOutput = haxe.io.BytesOutput;
+	public static var Blob = kha.Blob;
+	public static var Image = kha.Image;
+	public static var Scheduler = kha.Scheduler;
+	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
+		return kha.Color.fromFloats(r, g, b, a);
+	}
+}
+
 @:expose("iron")
 class IronBridge {
 	public static var App = iron.App;
@@ -56,16 +74,6 @@ class IronBridge {
 
 @:expose("arm")
 class ArmBridge {
-	public static var Json = haxe.Json;
-	public static var ReflectFields = Reflect.fields;
-	public static var ReflectField = Reflect.field;
-	public static var ReflectSetField = Reflect.setField;
-	public static var StdIs = Std.is;
-	public static var Bytes = haxe.io.Bytes;
-	public static var BytesInput = haxe.io.BytesInput;
-	public static var Blob = kha.Blob;
-	public static var Image = kha.Image;
-	public static var Scheduler = kha.Scheduler;
 	public static var App = arm.App;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
@@ -92,14 +100,14 @@ class ArmBridge {
 	public static var RenderUtil = arm.util.RenderUtil;
 	public static var UVUtil = arm.util.UVUtil;
 	public static var ViewportUtil = arm.util.ViewportUtil;
-	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
-		return kha.Color.fromFloats(r, g, b, a);
-	}
+	public static var PngWriter = arm.format.PngWriter;
+	public static var PngTools = arm.format.PngTools;
 }
 
 @:expose("zui")
 class ZuiBridge {
 	public static var Handle = zui.Zui.Handle;
+	public static var Zui = zui.Zui;
 	public static var Ext = zui.Ext;
 }
 

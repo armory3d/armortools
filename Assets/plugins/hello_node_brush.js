@@ -47,7 +47,7 @@ arm.NodesBrush.list.push(nodes);
 
 // Brush node
 arm.Brush.customNodes.set(nodeType, function(node, from) {
-	return Math.sin(arm.Scheduler.time() * node.inputs[0].get(0));
+	return Math.sin(core.Scheduler.time() * node.inputs[0].get(0));
 });
 
 // Cleanup

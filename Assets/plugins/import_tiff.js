@@ -9,7 +9,7 @@ let import_tiff = function(path, done) {
 		let ifds = UTIF.decode(b.bytes.b.bufferValue);
 		UTIF.decodeImage(b.bytes.b.bufferValue, ifds[0]);
 		let rgba = UTIF.toRGBA8(ifds[0]);
-		let image = arm.Image.fromBytes(arm.Bytes.ofData(rgba.buffer), ifds[0].width, ifds[0].height);
+		let image = core.Image.fromBytes(core.Bytes.ofData(rgba.buffer), ifds[0].width, ifds[0].height);
 		done(image);
 	});
 }

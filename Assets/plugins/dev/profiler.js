@@ -34,8 +34,8 @@ plugin.drawUI = function(ui) {
 
 let updateGraph = function() {
 	if (graph === null) {
-		graphA = arm.Image.createRenderTarget(280, 33);
-		graphB = arm.Image.createRenderTarget(280, 33);
+		graphA = core.Image.createRenderTarget(280, 33);
+		graphB = core.Image.createRenderTarget(280, 33);
 		graph = graphA;
 	}
 	else graph = graph === graphA ? graphB : graphA;
@@ -48,7 +48,7 @@ let updateGraph = function() {
 
 	let avg = Math.round(frameTimeAvg * 1000);
 	let miss = avg > 16.7 ? (avg - 16.7) / 16.7 : 0.0;
-	g2.set_color(arm.colorFromFloats(miss, 1 - miss, 0, 1.0));
+	g2.set_color(core.colorFromFloats(miss, 1 - miss, 0, 1.0));
 	g2.fillRect(280 - 3, 33 - avg, 3, avg);
 
 	g2.set_color(0xff000000);
@@ -69,6 +69,6 @@ let tick = function(g2) {
 		updateGraph();
 		g2.begin(false);
 	}
-	frameTime = arm.Scheduler.realTime() - lastTime;
-	lastTime = arm.Scheduler.realTime();
+	frameTime = core.Scheduler.realTime() - lastTime;
+	lastTime = core.Scheduler.realTime();
 }

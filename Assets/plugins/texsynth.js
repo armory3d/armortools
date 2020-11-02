@@ -25,9 +25,9 @@ function texsynthInpaint(tiling) {
 
 	let bytes_img = l.texpaint.getPixels().b.bufferValue;
 	let bytes_mask = l.texpaint_mask != null ? l.texpaint_mask.getPixels().b.bufferValue : new ArrayBuffer(w * h);
-	let bytes_out = new arm.Bytes(new ArrayBuffer(w * h * 4));
+	let bytes_out = new core.Bytes(new ArrayBuffer(w * h * 4));
 	Krom.texsynthInpaint(w, h, bytes_out.b.bufferValue, bytes_img, bytes_mask, tiling);
-	let image = arm.Image.fromBytes(bytes_out, w, h);
+	let image = core.Image.fromBytes(bytes_out, w, h);
 
 	function _next() {
 		arm.Context.layerIsMask = false;
@@ -36,7 +36,7 @@ function texsynthInpaint(tiling) {
 		l.deleteMask();
 		l.texpaint.unload();
 
-		l.texpaint = arm.Image.createRenderTarget(w, h);
+		l.texpaint = core.Image.createRenderTarget(w, h);
 		let g2 = l.texpaint.get_g2();
 		g2.begin(false);
 		g2.drawImage(image, 0, 0);

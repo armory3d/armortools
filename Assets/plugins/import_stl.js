@@ -1,7 +1,7 @@
 
 let import_stl = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let input = new arm.BytesInput(b.bytes);
+		let input = new core.BytesInput(b.bytes);
 		let header = input.read(80);
 		if (header.getString(0, 5) == "solid") {
 			return; // ascii not supported
