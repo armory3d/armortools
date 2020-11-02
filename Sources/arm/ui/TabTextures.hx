@@ -91,24 +91,26 @@ class TabTextures {
 								ui.text(asset.name, Right, ui.t.HIGHLIGHT_COL);
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, function(path: String) {
-										var target = kha.Image.createRenderTarget(img.width, img.height);
-										function _init() {
+										App.notifyOnNextFrame(function () {
 											if (Layers.pipeMerge == null) Layers.makePipe();
+											var target = kha.Image.createRenderTarget(to_pow2(img.width), to_pow2(img.height));
 											target.g2.begin(false);
 											target.g2.pipeline = Layers.pipeCopy;
-											target.g2.drawImage(img, 0, 0);
+											target.g2.drawScaledImage(img, 0, 0, target.width, target.height);
 											target.g2.pipeline = null;
 											target.g2.end();
-											var f = UIFiles.filename;
-											if (f == "") f = tr("untitled");
-											if (!f.endsWith(".png")) f += ".png";
-											var out = new haxe.io.BytesOutput();
-											var writer = new arm.format.PngWriter(out);
-											var data = arm.format.PngTools.build32RGB1(target.width, target.height, target.getPixels());
-											writer.write(data);
-											Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
-										};
-										iron.App.notifyOnInit(_init);
+											App.notifyOnNextFrame(function () {
+												var f = UIFiles.filename;
+												if (f == "") f = tr("untitled");
+												if (!f.endsWith(".png")) f += ".png";
+												var out = new haxe.io.BytesOutput();
+												var writer = new arm.format.PngWriter(out);
+												var data = arm.format.PngTools.build32RGBA(target.width, target.height, target.getPixels());
+												writer.write(data);
+												Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
+												target.unload();
+											});
+										});
 									});
 								}
 								if (ui.button(tr("Reimport"), Left)) {
@@ -154,6 +156,17 @@ class TabTextures {
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
 			}
 		}
+	}
+
+	static function to_pow2(i: Int): Int {
+		i--;
+		i |= i >> 1;
+		i |= i >> 2;
+		i |= i >> 4;
+		i |= i >> 8;
+		i |= i >> 16;
+		i++;
+		return i;
 	}
 
 	static function updateTexturePointers(nodes: Array<TNode>, i: Int) {
