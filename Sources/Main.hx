@@ -26,7 +26,14 @@ class Main {
 
 	static var tasks: Int;
 
+	// Generating snapshot
 	public static function main() {
+		js.Syntax.code("globalThis.kickstart = Main.kickstart");
+	}
+
+	// Program startup
+	@:keep
+	public static function kickstart() {
 		// Used to locate external application data folder
 		Krom.setApplicationName("ArmorPaint");
 

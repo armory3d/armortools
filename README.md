@@ -116,9 +116,15 @@ git submodule update --init --recursive
 # Delete `armorpaint/build` directory if present
 ```
 
-**How to generate or update a locale file**
+**Generating a v8 snapshot file**
+```bash
+./Krom . . --snapshot
+# Generates a `krom.bin` file
+```
+
+**Generating a locale file**
 ```bash
 pip install typing_extensions -t Assets/locale/tools
 python ./Assets/locale/tools/extract_locales.py <locale code>
-# Generated or updated in `Assets/locale/<locale code>.json`
+# Generates an `Assets/locale/<locale code>.json` file
 ```
