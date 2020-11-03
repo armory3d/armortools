@@ -118,7 +118,7 @@ git submodule update --init --recursive
 
 **Generating a v8 snapshot file**
 ```bash
-./Krom . . --snapshot
+./Krom . --snapshot
 # Generates a `krom.bin` file
 ```
 
