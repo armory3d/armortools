@@ -10,7 +10,7 @@ class ImportTexture {
 
 	public static function run(path: String) {
 		if (!Path.isTexture(path)) {
-			Log.error(Strings.error1);
+			Log.error(Strings.error1());
 			return;
 		}
 
@@ -24,7 +24,7 @@ class ImportTexture {
 						});
 					});
 				}
-				Log.info(Strings.info0);
+				Log.info(Strings.info0());
 				return;
 			}
 		}

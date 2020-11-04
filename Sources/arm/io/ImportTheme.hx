@@ -7,7 +7,7 @@ class ImportTheme {
 
 	public static function run(path: String) {
 		if (!Path.isJson(path)) {
-			Log.error(Strings.error1);
+			Log.error(Strings.error1());
 			return;
 		}
 

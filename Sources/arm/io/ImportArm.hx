@@ -431,7 +431,7 @@ class ImportArm {
 	}
 
 	static function makePink(abs: String) {
-		Log.error(Strings.error2 + abs);
+		Log.error(Strings.error2() + " " + abs);
 		var b = Bytes.alloc(4);
 		b.set(0, 255);
 		b.set(1, 0);

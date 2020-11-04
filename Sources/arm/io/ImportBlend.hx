@@ -22,7 +22,7 @@ class ImportBlend {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				Log.error(Strings.error3);
+				Log.error(Strings.error3());
 				return;
 			}
 
@@ -277,7 +277,7 @@ class ImportBlend {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				Log.error(Strings.error3);
+				Log.error(Strings.error3());
 				return;
 			}
 

@@ -23,7 +23,7 @@ class ImportMesh {
 
 	public static function run(path: String, _clearLayers = true, _replaceExisting = true) {
 		if (!Path.isMesh(path)) {
-			Log.error(Strings.error1);
+			Log.error(Strings.error1());
 			return;
 		}
 
@@ -91,7 +91,7 @@ class ImportMesh {
 
 	public static function makeMesh(mesh: Dynamic, path: String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
-			Log.error(Strings.error3);
+			Log.error(Strings.error3());
 			return;
 		}
 
@@ -198,7 +198,7 @@ class ImportMesh {
 	}
 
 	static function equirectUnwrap(mesh: Dynamic) {
-		Log.error(Strings.error4);
+		Log.error(Strings.error4());
 		var verts = Std.int(mesh.posa.length / 4);
 		mesh.texa = new Int16Array(verts * 2);
 		var n = new Vec4();
