@@ -8,6 +8,7 @@ let vulkan = process.argv.indexOf("vulkan") >= 0;
 let raytrace = d3d12 || vulkan;
 let metal = process.argv.indexOf("metal") >= 0;
 let vr = process.argv.indexOf("--vr") >= 0;
+let snapshot = process.argv.indexOf("--snapshot") >= 0;
 
 let project = new Project("ArmorPaint");
 project.addSources("Sources");
@@ -84,6 +85,10 @@ else {
 if (vr) {
 	project.addDefine("arm_vr");
 	project.addAssets("Assets/readme/readme_vr.txt", { notinlist: true, destination: "{name}" });
+}
+
+if (snapshot) {
+	project.addDefine("arm_snapshot");
 }
 
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });

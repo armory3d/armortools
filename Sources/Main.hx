@@ -23,15 +23,20 @@ class Main {
 	public static var version = "0.8";
 	public static var sha = BuildMacros.sha().substr(1, 7);
 	public static var date = BuildMacros.date().split(" ")[0];
-
 	static var tasks: Int;
 
-	// Generating snapshot
 	public static function main() {
+		#if arm_snapshot
+
 		js.Syntax.code("globalThis.kickstart = Main.kickstart");
+
+		#else
+
+		kickstart();
+
+		#end
 	}
 
-	// Program startup
 	@:keep
 	public static function kickstart() {
 		// Used to locate external application data folder

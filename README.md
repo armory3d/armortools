@@ -118,8 +118,10 @@ git submodule update --init --recursive
 
 **Generating a v8 snapshot file**
 ```bash
+# Optional, used in release builds for best performance
+node armorcore/make -g api --snapshot
 ./Krom . --snapshot
-# Generates a `krom.bin` file
+# Generates a `krom.bin` file from `krom.js` file
 ```
 
 **Generating a locale file**
