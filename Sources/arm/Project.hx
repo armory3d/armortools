@@ -374,7 +374,7 @@ class Project {
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 
-				ui.row([0.5, 0.5]);
+				ui.row([0.45, 0.45, 0.1]);
 				if (ui.button(tr("Cancel"))) {
 					UIBox.show = false;
 				}
@@ -383,6 +383,9 @@ class Project {
 					App.redrawUI();
 					var replaceExisting = UIHeader.inst.worktab.position != SpaceRender;
 					ImportMesh.run(path, true, replaceExisting);
+				}
+				if (ui.button(tr("?"))) {
+					File.explorer("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 				}
 			}
 		});
