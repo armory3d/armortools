@@ -57,8 +57,8 @@ class Inc {
 		var t = new RenderTargetRaw();
 		t.name = tname;
 		t.format = "R8";
-		var res = getVoxelRes();
-		var resZ =  getVoxelResZ();
+		var res = 256;
+		var resZ =  1.0;
 		t.width = res;
 		t.height = res;
 		t.depth = Std.int(res * resZ);
@@ -79,14 +79,6 @@ class Inc {
 			path.createRenderTarget(tB);
 		}
 		#end
-	}
-
-	public static inline function getVoxelRes(): Int {
-		return 256;
-	}
-
-	public static inline function getVoxelResZ(): Float {
-		return 1.0;
 	}
 	#end
 

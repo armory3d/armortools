@@ -190,10 +190,9 @@ vec3 brightcontrast(const vec3 col, const float bright, const float contr) {
 //
 
 	#if rp_voxelao
-	static inline var voxRes = arm.render.Inc.getVoxelRes();
 	public static var str_traceAO = '
 float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist, const float offset) {
-	const ivec3 voxelgiResolution = ivec3($voxRes, $voxRes, $voxRes);
+	const ivec3 voxelgiResolution = ivec3(256, 256, 256);
 	const float voxelgiStep = 1.0;
 	const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
 	dir = normalize(dir);
@@ -225,7 +224,7 @@ float traceAO(const vec3 origin, const vec3 normal, const float vrange, const fl
 	vec3 c1 = 0.5f * (o1 + o2);
 	vec3 c2 = 0.5f * (o1 - o2);
 	float MAX_DISTANCE = 1.73205080757 * 2.0 * vrange;
-	const ivec3 voxelgiResolution = ivec3($voxRes, $voxRes, $voxRes);
+	const ivec3 voxelgiResolution = ivec3(256, 256, 256);
 	const float voxelgiStep = 1.0;
 	const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
 	float offset = 1.5 * VOXEL_SIZE * 2.5 * voffset;

@@ -19,10 +19,11 @@ project.addLibrary("formatlib");
 project.addLibrary("geomlib");
 project.addLibrary("shaderlib");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
-project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
+if (!snapshot) {
+	project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
+}
 project.addAssets("Assets/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
 project.addAssets("Assets/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
-project.addAssets("Assets/fonts/*", { notinlist: true, destination: "data/{name}" });
 project.addAssets("Assets/locale/*", { notinlist: true, destination: "data/locale/{name}" });
 project.addAssets("Assets/licenses/**", { notinlist: true, destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
@@ -89,6 +90,7 @@ if (vr) {
 
 if (snapshot) {
 	project.addDefine("arm_snapshot");
+	project.addDefine("arm_image_embed");
 }
 
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });

@@ -148,8 +148,8 @@ class RenderPathDeferred {
 			path.renderTargets.set(t.name, rt);
 		}
 
-		path.loadShader("world_pass/world_pass/world_pass");
-		path.loadShader("deferred_light/deferred_light/deferred_light");
+		path.loadShader("shader_datas/world_pass/world_pass");
+		path.loadShader("shader_datas/deferred_light/deferred_light");
 		path.loadShader("shader_datas/compositor_pass/compositor_pass");
 		path.loadShader("shader_datas/copy_pass/copy_pass");
 		path.loadShader("shader_datas/copy_pass/copyR8_pass");
@@ -173,7 +173,7 @@ class RenderPathDeferred {
 		#if rp_voxelao
 		{
 			Inc.initGI();
-			path.loadShader("deferred_light/deferred_light/deferred_light_voxel");
+			path.loadShader("shader_datas/deferred_light/deferred_light_voxel");
 		}
 		#end
 
@@ -280,7 +280,7 @@ class RenderPathDeferred {
 			#end
 
 			if (voxelize) {
-				var res = Inc.getVoxelRes();
+				var res = 256;
 				var voxtex = voxels;
 
 				path.clearImage(voxtex, 0x00000000);
@@ -326,15 +326,15 @@ class RenderPathDeferred {
 		#end
 
 		voxelao_pass ?
-			path.drawShader("deferred_light/deferred_light/deferred_light_voxel") :
-			path.drawShader("deferred_light/deferred_light/deferred_light");
+			path.drawShader("shader_datas/deferred_light/deferred_light_voxel") :
+			path.drawShader("shader_datas/deferred_light/deferred_light");
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("tex");
-		path.drawSkydome("world_pass/world_pass/world_pass");
+		path.drawSkydome("shader_datas/world_pass/world_pass");
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
