@@ -91,6 +91,7 @@ if (vr) {
 if (snapshot) {
 	project.addDefine("arm_snapshot");
 	project.addDefine("arm_image_embed");
+	project.addParameter("--no-traces");
 }
 
 project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });

@@ -18,7 +18,7 @@ class Log {
 		if (arm.ui.UIStatus.inst != null) {
 			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
 		}
-		trace(s);
+		consoleTrace(s);
 	}
 
 	public static function error(s: String) {
@@ -28,11 +28,11 @@ class Log {
 		if (arm.ui.UIStatus.inst != null) {
 			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
 		}
-		trace(s);
+		consoleTrace(s);
 	}
 
 	public static function trace(s: String) {
-		trace(s);
+		consoleTrace(s);
 	}
 
 	public static function init() {
