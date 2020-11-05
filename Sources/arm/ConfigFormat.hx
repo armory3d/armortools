@@ -45,7 +45,6 @@ typedef TConfig = {
 	@:optional var camera_speed: Null<Float>;
 	@:optional var invert_zoom_direction: Null<Bool>;
 	@:optional var displace_strength: Null<Float>;
-	@:optional var native_file_browser: Null<Bool>;
 	@:optional var show_asset_names: Null<Bool>;
 	@:optional var layout: Array<Int>;
 	@:optional var workspace: Null<Int>;

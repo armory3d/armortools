@@ -102,11 +102,6 @@ class Config {
 			raw.camera_speed = 1.0;
 			raw.invert_zoom_direction = false;
 			raw.displace_strength = 0.0;
-			#if krom_android
-			raw.native_file_browser = false;
-			#else
-			raw.native_file_browser = true;
-			#end
 			raw.show_asset_names = false;
 			raw.node_preview = true;
 			raw.workspace = 0;

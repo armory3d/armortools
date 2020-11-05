@@ -60,10 +60,6 @@ class BoxPreferences {
 
 				Config.raw.invert_zoom_direction = ui.check(Id.handle({selected: Config.raw.invert_zoom_direction}), tr("Invert Zoom Direction"));
 
-				#if (!krom_android && !krom_ios)
-				Config.raw.native_file_browser = ui.check(Id.handle({selected: Config.raw.native_file_browser}), tr("Native File Browser"));
-				#end
-
 				Config.raw.node_preview = ui.check(Id.handle({selected: Config.raw.node_preview}), tr("Show Node Preview"));
 
 				#if arm_debug
