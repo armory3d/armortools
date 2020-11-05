@@ -234,13 +234,13 @@ class History {
 				Context.setLayer(Context.layer, false);
 			}
 			else if (step.name == tr("Apply Mask")) {
-				function _init() {
+				function _next() {
 					Context.layer = Project.layers[step.layer];
 					copyToUndoWithMask();
 					Context.layer.applyMask();
 					Context.setLayer(Context.layer, false);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];

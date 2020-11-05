@@ -265,10 +265,10 @@ class Context {
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {
-			function _init() {
+			function _next() {
 				RenderUtil.makeDecalPreview();
 			}
-			iron.App.notifyOnInit(_init);
+			App.notifyOnNextFrame(_next);
 		}
 	}
 

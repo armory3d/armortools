@@ -195,14 +195,14 @@ class LayerSlot {
 		texpaint_mask_preview = Image.createRenderTarget(200, 200, TextureFormat.L8);
 
 		if (clear) {
-			function _clearMask() {
+			function _next() {
 				clearMask(createMaskColor);
 				createMaskColor = 0;
 				createMaskImage = null;
 			}
 			createMaskColor = color;
 			createMaskImage = image;
-			iron.App.notifyOnInit(_clearMask);
+			App.notifyOnNextFrame(_next);
 		}
 	}
 
@@ -435,12 +435,12 @@ class LayerSlot {
 		Context.setLayer(this);
 		fill_layer = Context.material;
 		Layers.updateFillLayer(4);
-		function _init() {
+		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
 			UISidebar.inst.hwnd0.redraws = 2;
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnNextFrame(_next);
 	}
 
 	public function toPaintLayer() {
@@ -455,12 +455,12 @@ class LayerSlot {
 		Context.setLayer(this, true);
 		fill_mask = Context.material;
 		Layers.updateFillLayers(4);
-		function _init() {
+		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
 			UISidebar.inst.hwnd0.redraws = 2;
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnNextFrame(_next);
 	}
 
 	public function toPaintMask() {
