@@ -66,7 +66,7 @@ class RenderPathForward {
 	public static function drawForward(eye = false, output = "", gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2", buf = "buf", bufa = "bufa", taa = "taa", taa2 = "taa2") {
 		path.setDepthFrom(gbuffer1, gbuffer0);
 		path.setTarget(gbuffer1);
-		path.drawSkydome("world_pass/world_pass/world_pass");
+		path.drawSkydome("shader_datas/world_pass/world_pass");
 		path.setDepthFrom(gbuffer1, gbuffer2);
 
 		path.setTarget(buf);
