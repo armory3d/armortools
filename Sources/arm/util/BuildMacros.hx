@@ -12,10 +12,4 @@ class BuildMacros {
 		var proc = new sys.io.Process("git", ["log", "--pretty=format:'%h'", "-n", "1"]);
 		return Context.makeExpr(proc.stdout.readLine(), Context.currentPos());
 	}
-
-	macro public static function embed(path: String) {
-		var bytes = sys.io.File.getBytes(path);
-		Context.addResource(path, bytes);
-		return Context.makeExpr("", Context.currentPos());
-	}
 }

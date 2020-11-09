@@ -26,117 +26,74 @@ class Main {
 	static var tasks: Int;
 
 	#if arm_snapshot
-	static function embedRaw(handle: String, name: String, file: String) {
-		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.Resource.getBytes(file)));
+	static function embedRaw(handle: String, name: String, file: js.lib.ArrayBuffer) {
+		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.io.Bytes.ofData(file)));
 		iron.data.Data.getSceneRaw(handle, function(_) {});
 		iron.data.Data.cachedBlobs.remove(name);
 	}
-	static function embedBlob(name: String, file: String) {
-		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.Resource.getBytes(file)));
+	static function embedBlob(name: String, file: js.lib.ArrayBuffer) {
+		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.io.Bytes.ofData(file)));
 	}
-	static function embedFont(name: String, file: String) {
-		iron.data.Data.cachedFonts.set(name, new kha.Kravur(kha.Blob.fromBytes(haxe.Resource.getBytes(file))));
+	static function embedFont(name: String, file: js.lib.ArrayBuffer) {
+		iron.data.Data.cachedFonts.set(name, new kha.Kravur(kha.Blob.fromBytes(haxe.io.Bytes.ofData(file))));
 	}
 	#end
 
 	public static function main() {
 		#if arm_snapshot
 
-		js.Syntax.code("globalThis.kickstart = Main.kickstart");
+		var global = js.Syntax.code("globalThis");
+		global.kickstart = kickstart;
 
-		BuildMacros.embed("../Assets/common/Scene.arm");
-		embedRaw("Scene", "Scene.arm", "../Assets/common/Scene.arm");
+		embedRaw("Scene", "Scene.arm", untyped global['data/Scene.arm']);
+		untyped global['data/Scene.arm'] = null;
 
-		BuildMacros.embed("../Assets/common/shader_datas.arm");
-		embedRaw("shader_datas", "shader_datas.arm", "../Assets/common/shader_datas.arm");
+		embedRaw("shader_datas", "shader_datas.arm", untyped global['data/shader_datas.arm']);
+		untyped global['data/shader_datas.arm'] = null;
 
-		BuildMacros.embed("../Assets/common/font.ttf");
-		embedFont("font.ttf", "../Assets/common/font.ttf");
+		embedFont("font.ttf", untyped global['data/font.ttf']);
+		untyped global['data/font.ttf'] = null;
 
-		BuildMacros.embed("../Assets/common/font_mono.ttf");
-		embedFont("font_mono.ttf", "../Assets/common/font_mono.ttf");
+		embedFont("font_mono.ttf", untyped global['data/font_mono.ttf']);
+		untyped global['data/font_mono.ttf'] = null;
 
-		BuildMacros.embed("../Assets/common/font13.bin");
-		embedBlob("font13.bin", "../Assets/common/font13.bin");
+		var files = [
+			"font13.bin",
+			"ltc_mag.arm",
+			"ltc_mat.arm",
+			"default_brush.arm",
+			"default_material.arm",
+			"World_irradiance.arm",
+			"World_radiance.k",
+			"World_radiance_0.k",
+			"World_radiance_1.k",
+			"World_radiance_2.k",
+			"World_radiance_3.k",
+			"World_radiance_4.k",
+			"World_radiance_5.k",
+			"World_radiance_6.k",
+			"World_radiance_7.k",
+			"World_radiance_8.k",
+			"World_radiance_9.k",
+			"brdf.k",
+			"color_wheel.k",
+			"cursor.k",
+			"icons.k",
+			"icons2x.k",
+			"noise256.k",
+			"smaa_search.k",
+			"smaa_area.k"
+		];
 
-		BuildMacros.embed("../Assets/common/ltc_mag.arm");
-		embedBlob("ltc_mag.arm", "../Assets/common/ltc_mag.arm");
+		for (file in files) {
+			embedBlob(file, untyped global['data/' + file]);
+			untyped global['data/' + file] = null;
+		}
 
-		BuildMacros.embed("../Assets/common/ltc_mat.arm");
-		embedBlob("ltc_mat.arm", "../Assets/common/ltc_mat.arm");
+		#end // arm_snapshot
 
-		BuildMacros.embed("../Assets/common/World_irradiance.arm");
-		embedBlob("World_irradiance.arm", "../Assets/common/World_irradiance.arm");
-
-		BuildMacros.embed("../Assets/common/default_brush.arm");
-		embedBlob("default_brush.arm", "../Assets/common/default_brush.arm");
-
-		BuildMacros.embed("../Assets/common/default_material.arm");
-		embedBlob("default_material.arm", "../Assets/common/default_material.arm");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance.k");
-		embedBlob("World_radiance.k", "../Assets/common/embed/World_radiance.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_0.k");
-		embedBlob("World_radiance_0.k", "../Assets/common/embed/World_radiance_0.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_1.k");
-		embedBlob("World_radiance_1.k", "../Assets/common/embed/World_radiance_1.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_2.k");
-		embedBlob("World_radiance_2.k", "../Assets/common/embed/World_radiance_2.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_3.k");
-		embedBlob("World_radiance_3.k", "../Assets/common/embed/World_radiance_3.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_4.k");
-		embedBlob("World_radiance_4.k", "../Assets/common/embed/World_radiance_4.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_5.k");
-		embedBlob("World_radiance_5.k", "../Assets/common/embed/World_radiance_5.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_6.k");
-		embedBlob("World_radiance_6.k", "../Assets/common/embed/World_radiance_6.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_7.k");
-		embedBlob("World_radiance_7.k", "../Assets/common/embed/World_radiance_7.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_8.k");
-		embedBlob("World_radiance_8.k", "../Assets/common/embed/World_radiance_8.k");
-
-		BuildMacros.embed("../Assets/common/embed/World_radiance_9.k");
-		embedBlob("World_radiance_9.k", "../Assets/common/embed/World_radiance_9.k");
-
-		BuildMacros.embed("../Assets/common/embed/brdf.k");
-		embedBlob("brdf.k", "../Assets/common/embed/brdf.k");
-
-		BuildMacros.embed("../Assets/common/embed/color_wheel.k");
-		embedBlob("color_wheel.k", "../Assets/common/embed/color_wheel.k");
-
-		BuildMacros.embed("../Assets/common/embed/cursor.k");
-		embedBlob("cursor.k", "../Assets/common/embed/cursor.k");
-
-		BuildMacros.embed("../Assets/common/embed/icons.k");
-		embedBlob("icons.k", "../Assets/common/embed/icons.k");
-
-		BuildMacros.embed("../Assets/common/embed/icons2x.k");
-		embedBlob("icons2x.k", "../Assets/common/embed/icons2x.k");
-
-		BuildMacros.embed("../Assets/common/embed/noise256.k");
-		embedBlob("noise256.k", "../Assets/common/embed/noise256.k");
-
-		BuildMacros.embed("../Assets/common/embed/smaa_search.k");
-		embedBlob("smaa_search.k", "../Assets/common/embed/smaa_search.k");
-
-		BuildMacros.embed("../Assets/common/embed/smaa_area.k");
-		embedBlob("smaa_area.k", "../Assets/common/embed/smaa_area.k");
-
-		@:privateAccess haxe.Resource.content = null;
-
-		#else
-
+		#if (!arm_snapshot)
 		kickstart();
-
 		#end
 	}
 

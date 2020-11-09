@@ -19,19 +19,20 @@ project.addLibrary("formatlib");
 project.addLibrary("geomlib");
 project.addLibrary("shaderlib");
 project.addShaders("Shaders/common/*.glsl", { noembed: false});
+project.addAssets("Assets/common/*", { destination: "data/{name}", embed: snapshot });
 if (!snapshot) {
-	project.addAssets("Assets/common/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Assets/common/extra/*", { destination: "data/{name}" });
 }
-project.addAssets("Assets/export_presets/*", { notinlist: true, destination: "data/export_presets/{name}" });
-project.addAssets("Assets/keymap_presets/*", { notinlist: true, destination: "data/keymap_presets/{name}" });
-project.addAssets("Assets/locale/*", { notinlist: true, destination: "data/locale/{name}" });
-project.addAssets("Assets/licenses/**", { notinlist: true, destination: "data/licenses/{name}" });
-project.addAssets("Assets/plugins/*", { notinlist: true, destination: "data/plugins/{name}" });
-project.addAssets("Assets/themes/*.json", { notinlist: true, destination: "data/themes/{name}" });
-project.addAssets("Assets/meshes/*", { notinlist: true, destination: "data/meshes/{name}" });
+project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
+project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
+project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
+project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
+project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
+project.addAssets("Assets/themes/*.json", { destination: "data/themes/{name}" });
+project.addAssets("Assets/meshes/*", { destination: "data/meshes/{name}" });
 if (metal) {
 	project.addShaders("Shaders/common/metal/*.glsl", { noembed: false});
-	project.addAssets("Assets/common/metal/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Assets/common/metal/*", { destination: "data/{name}" });
 }
 project.addDefine("js-es=6");
 project.addParameter("--macro include('arm.node.brush')");
@@ -85,7 +86,7 @@ else {
 
 if (vr) {
 	project.addDefine("arm_vr");
-	project.addAssets("Assets/readme/readme_vr.txt", { notinlist: true, destination: "{name}" });
+	project.addAssets("Assets/readme/readme_vr.txt", { destination: "{name}" });
 }
 
 if (snapshot) {
@@ -94,26 +95,26 @@ if (snapshot) {
 	project.addParameter("--no-traces");
 }
 
-project.addAssets("Assets/readme/readme.txt", { notinlist: true, destination: "{name}" });
+project.addAssets("Assets/readme/readme.txt", { destination: "{name}" });
 
 if (raytrace) {
 	project.addLibrary("renderlib");
-	project.addAssets("Libraries/renderlib/Assets/*", { notinlist: true, destination: "data/{name}" });
+	project.addAssets("Libraries/renderlib/Assets/*", { destination: "data/{name}" });
 	if (d3d12) {
-		project.addAssets("Libraries/renderlib/Shaders/*.cso", { notinlist: true, destination: "data/{name}" });
-		project.addAssets("Assets/readme/readme_dxr.txt", { notinlist: true, destination: "{name}" });
+		project.addAssets("Libraries/renderlib/Shaders/*.cso", { destination: "data/{name}" });
+		project.addAssets("Assets/readme/readme_dxr.txt", { destination: "{name}" });
 	}
 	else if (vulkan) {
-		project.addAssets("Libraries/renderlib/Shaders/*.spirv", { notinlist: true, destination: "data/{name}" });
-		project.addAssets("Assets/readme/readme_vkrt.txt", { notinlist: true, destination: "{name}" });
+		project.addAssets("Libraries/renderlib/Shaders/*.spirv", { destination: "data/{name}" });
+		project.addAssets("Assets/readme/readme_vkrt.txt", { destination: "{name}" });
 	}
 }
 
 if (android) {
-	project.addAssets("Assets/readme/readme_android.txt", { notinlist: true, destination: "{name}" });
+	project.addAssets("Assets/readme/readme_android.txt", { destination: "{name}" });
 }
 else if (ios) {
-	project.addAssets("Assets/readme/readme_ios.txt", { notinlist: true, destination: "{name}" });
+	project.addAssets("Assets/readme/readme_ios.txt", { destination: "{name}" });
 }
 
 if (process.platform !== "darwin" && !raytrace && !android && !ios) {
