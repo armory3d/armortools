@@ -90,6 +90,29 @@ class Main {
 			untyped global['data/' + file] = null;
 		}
 
+		#if (kha_direct3d12 || kha_vulkan)
+
+		var ext = #if kha_direct3d12 ".cso" #else ".spirv" #end ;
+
+		var files_renderlib = [
+			"bnoise_rank.k",
+			"bnoise_scramble.k",
+			"bnoise_sobol.k",
+			"raytrace_bake_ao" + ext,
+			"raytrace_bake_bent" + ext,
+			"raytrace_bake_light" + ext,
+			"raytrace_bake_thick" + ext,
+			"raytrace_brute_core" + ext,
+			"raytrace_brute_full" + ext
+		];
+
+		for (file in files_renderlib) {
+			embedBlob(file, untyped global['data/' + file]);
+			untyped global['data/' + file] = null;
+		}
+
+		#end
+
 		#end // arm_snapshot
 
 		#if (!arm_snapshot)

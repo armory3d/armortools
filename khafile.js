@@ -99,13 +99,13 @@ project.addAssets("Assets/readme/readme.txt", { destination: "{name}" });
 
 if (raytrace) {
 	project.addLibrary("renderlib");
-	project.addAssets("Libraries/renderlib/Assets/*", { destination: "data/{name}" });
+	project.addAssets("Libraries/renderlib/Assets/*", { destination: "data/{name}", embed: snapshot });
 	if (d3d12) {
-		project.addAssets("Libraries/renderlib/Shaders/*.cso", { destination: "data/{name}" });
+		project.addAssets("Libraries/renderlib/Shaders/*.cso", { destination: "data/{name}", embed: snapshot });
 		project.addAssets("Assets/readme/readme_dxr.txt", { destination: "{name}" });
 	}
 	else if (vulkan) {
-		project.addAssets("Libraries/renderlib/Shaders/*.spirv", { destination: "data/{name}" });
+		project.addAssets("Libraries/renderlib/Shaders/*.spirv", { destination: "data/{name}", embed: snapshot });
 		project.addAssets("Assets/readme/readme_vkrt.txt", { destination: "{name}" });
 	}
 }
