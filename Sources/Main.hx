@@ -74,7 +74,6 @@ class Main {
 			"World_radiance_6.k",
 			"World_radiance_7.k",
 			"World_radiance_8.k",
-			"World_radiance_9.k",
 			"brdf.k",
 			"color_wheel.k",
 			"cursor.k",
