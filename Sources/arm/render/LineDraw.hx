@@ -57,8 +57,8 @@ class LineDraw {
 			structure.add("col", VertexData.Float3);
 			pipeline = new PipelineState();
 			pipeline.inputLayout = [structure];
-			pipeline.fragmentShader = Reflect.field(kha.Shaders, "line_frag");
-			pipeline.vertexShader = Reflect.field(kha.Shaders, "line_vert");
+			pipeline.fragmentShader = kha.Shaders.getFragment("line.frag");
+			pipeline.vertexShader = kha.Shaders.getVertex("line.vert");
 			pipeline.depthWrite = true;
 			pipeline.depthMode = CompareMode.Less;
 			pipeline.cullMode = CullMode.None;

@@ -18,9 +18,10 @@ project.addLibrary("syslib");
 project.addLibrary("formatlib");
 project.addLibrary("geomlib");
 project.addLibrary("shaderlib");
-project.addShaders("Shaders/common/*.glsl", { noembed: false});
+project.addShaders("Shaders/common/*.glsl", { embed: snapshot});
 project.addAssets("Assets/common/*", { destination: "data/{name}", embed: snapshot });
 if (!snapshot) {
+	project.addDefine("arm_noembed");
 	project.addAssets("Assets/common/extra/*", { destination: "data/{name}" });
 }
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
@@ -31,7 +32,7 @@ project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*.json", { destination: "data/themes/{name}" });
 project.addAssets("Assets/meshes/*", { destination: "data/meshes/{name}" });
 if (metal) {
-	project.addShaders("Shaders/common/metal/*.glsl", { noembed: false});
+	project.addShaders("Shaders/common/metal/*.glsl", { embed: snapshot});
 	project.addAssets("Assets/common/metal/*", { destination: "data/{name}" });
 }
 project.addDefine("js-es=6");
@@ -92,6 +93,7 @@ if (vr) {
 if (snapshot) {
 	project.addDefine("arm_snapshot");
 	project.addDefine("arm_image_embed");
+	project.addDefine("arm_shader_embed");
 	project.addParameter("--no-traces");
 }
 
@@ -122,10 +124,10 @@ if (process.platform !== "darwin" && !raytrace && !android && !ios) {
 	project.addDefine("arm_voxelgi_revox");
 
 	if (process.platform === "win32" && win_hlsl) {
-		project.addShaders("Shaders/voxel_hlsl/*.glsl", { noprocessing: true, noembed: false });
+		project.addShaders("Shaders/voxel_hlsl/*.glsl", { embed: snapshot, noprocessing: true });
 	}
 	else {
-		project.addShaders("Shaders/voxel_glsl/*.glsl", { noembed: false });
+		project.addShaders("Shaders/voxel_glsl/*.glsl", { embed: snapshot });
 	}
 }
 

@@ -115,6 +115,7 @@ class Main {
 		#end // arm_snapshot
 
 		#if (!arm_snapshot)
+		iron.data.ShaderData.shaderPath = ""; // Use arm_data_dir
 		kickstart();
 		#end
 	}

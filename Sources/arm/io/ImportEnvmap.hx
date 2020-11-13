@@ -35,8 +35,8 @@ class ImportEnvmap {
 		// Init
 		if (pipeline == null) {
 			pipeline = new PipelineState();
-			pipeline.vertexShader = Reflect.field(kha.Shaders, "pass_vert");
-			pipeline.fragmentShader = Reflect.field(kha.Shaders, "prefilter_envmap_frag");
+			pipeline.vertexShader = kha.Shaders.getVertex("pass.vert");
+			pipeline.fragmentShader = kha.Shaders.getFragment("prefilter_envmap.frag");
 			var vs = new VertexStructure();
 			vs.add("pos", VertexData.Float2);
 			pipeline.inputLayout = [vs];

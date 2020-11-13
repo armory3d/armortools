@@ -119,8 +119,8 @@ class Layers {
 
 	static function makeMergePipe(red: Bool, green: Bool, blue: Bool, alpha: Bool): PipelineState {
 		var pipe = new PipelineState();
-		pipe.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
-		pipe.fragmentShader = Reflect.field(kha.Shaders, "layer_merge_frag");
+		pipe.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipe.fragmentShader = kha.Shaders.getFragment("layer_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
 		pipe.inputLayout = [vs];
@@ -146,8 +146,8 @@ class Layers {
 		blending = pipeMerge.getConstantLocation("blending");
 
 		pipeCopy = new PipelineState();
-		pipeCopy.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeCopy.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
+		pipeCopy.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeCopy.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -156,8 +156,8 @@ class Layers {
 		pipeCopy.compile();
 
 		pipeCopyBGRA = new PipelineState();
-		pipeCopyBGRA.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeCopyBGRA.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_bgra_frag");
+		pipeCopyBGRA.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeCopyBGRA.fragmentShader = kha.Shaders.getFragment("layer_copy_bgra.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -167,8 +167,8 @@ class Layers {
 
 		#if (kha_metal || kha_vulkan || kha_direct3d12)
 		pipeCopy8 = new PipelineState();
-		pipeCopy8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeCopy8.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
+		pipeCopy8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeCopy8.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -179,8 +179,8 @@ class Layers {
 		pipeCopy8.compile();
 
 		pipeCopy128 = new PipelineState();
-		pipeCopy128.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeCopy128.fragmentShader = Reflect.field(kha.Shaders, "layer_copy_frag");
+		pipeCopy128.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeCopy128.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -195,8 +195,8 @@ class Layers {
 		#end
 
 		pipeInvert8 = new PipelineState();
-		pipeInvert8.vertexShader = Reflect.field(kha.Shaders, "layer_view_vert");
-		pipeInvert8.fragmentShader = Reflect.field(kha.Shaders, "layer_invert_frag");
+		pipeInvert8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeInvert8.fragmentShader = kha.Shaders.getFragment("layer_invert.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
@@ -207,8 +207,8 @@ class Layers {
 		pipeInvert8.compile();
 
 		pipeMask = new PipelineState();
-		pipeMask.vertexShader = Reflect.field(kha.Shaders, "layer_merge_vert");
-		pipeMask.fragmentShader = Reflect.field(kha.Shaders, "mask_merge_frag");
+		pipeMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
 		pipeMask.inputLayout = [vs];
@@ -219,8 +219,8 @@ class Layers {
 
 	public static function makeCursorPipe() {
 		pipeCursor = new PipelineState();
-		pipeCursor.vertexShader = Reflect.field(kha.Shaders, "cursor_vert");
-		pipeCursor.fragmentShader = Reflect.field(kha.Shaders, "cursor_frag");
+		pipeCursor.vertexShader = kha.Shaders.getVertex("cursor.vert");
+		pipeCursor.fragmentShader = kha.Shaders.getFragment("cursor.frag");
 		var vs = new VertexStructure();
 		#if (kha_metal || kha_vulkan)
 		vs.add("tex", VertexData.Short2Norm);
