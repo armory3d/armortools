@@ -116,17 +116,19 @@ git submodule update --init --recursive
 # Delete `armorpaint/build` directory if present
 ```
 
-**Generating a v8 snapshot file**
-```bash
-# Optional, used in release builds for best performance
-node armorcore/make -g api --snapshot
-./Krom . --snapshot
-# Generates a `krom.bin` file from `krom.js` file
-```
-
 **Generating a locale file**
 ```bash
 pip install typing_extensions -t Assets/locale/tools
 python ./Assets/locale/tools/extract_locales.py <locale code>
 # Generates an `Assets/locale/<locale code>.json` file
+```
+
+**Release builds** *Optional, used for best performance*
+```bash
+# Compile krom.js using the closure compiler
+https://developers.google.com/closure/compiler
+# Generate a v8 snapshot file
+node armorcore/make -g api --snapshot
+./Krom . --snapshot
+# Generates a `krom.bin` file from `krom.js` file
 ```
