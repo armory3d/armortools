@@ -130,7 +130,7 @@ class ImportFolder {
 		n.buttons[0].default_value = App.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;
-		var l = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
+		var l: TNodeLink = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };
 		canvas.links.push(l);
 	}
 }

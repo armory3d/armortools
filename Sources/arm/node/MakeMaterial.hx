@@ -154,7 +154,7 @@ class MakeMaterial {
 		}
 
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
-		var mcon = { name: "paint", bind_textures: [] };
+		var mcon: TMaterialContext = { name: "paint", bind_textures: [] };
 		var con = MakePaint.run(sdata, mcon);
 
 		var compileError = false;
@@ -214,7 +214,7 @@ class MakeMaterial {
 
 	public static function parseNodePreviewMaterial(node: TNode): { scon: ShaderContext, mcon: MaterialContext } {
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
-		var mcon_raw = { name: "mesh", bind_textures: [] };
+		var mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
 		var con = MakeNodePreview.run(sdata, mcon_raw, node);
 		var compileError = false;
 		var scon = new ShaderContext(con.data, function(scon: ShaderContext) {

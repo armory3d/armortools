@@ -643,7 +643,7 @@ class MaterialParser {
 		else if (node.type == "VALTORGB") { // ColorRamp
 			var fac = parse_value_input(node.inputs[0]);
 			var interp = node.buttons[0].data == 0 ? "LINEAR" : "CONSTANT";
-			var elems = node.buttons[0].default_value;
+			var elems: Array<Array<Float>> = node.buttons[0].default_value;
 			if (elems.length == 1) {
 				return vec3(elems[0]);
 			}

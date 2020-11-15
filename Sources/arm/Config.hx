@@ -12,11 +12,12 @@ import arm.render.Inc;
 import arm.sys.Path;
 import arm.Enums;
 import arm.ConfigFormat;
+import arm.KeymapFormat;
 
 class Config {
 
 	public static var raw: TConfig = null;
-	public static var keymap: Dynamic;
+	public static var keymap: TKeymap;
 	public static var configLoaded = false;
 
 	public static function load(done: Void->Void) {
