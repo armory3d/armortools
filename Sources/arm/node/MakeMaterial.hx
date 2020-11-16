@@ -128,7 +128,7 @@ class MakeMaterial {
 		}
 
 		{
-			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			var current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 			bakeBlurNodes();
 			if (current != null) current.begin(false);

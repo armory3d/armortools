@@ -60,7 +60,7 @@ class Project {
 				return;
 			}
 
-			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			var current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 
 			ImportArm.runProject(path);
@@ -74,7 +74,7 @@ class Project {
 			if (ui.tab(Id.handle(), tr("Recent Projects"))) {
 				for (path in Config.raw.recent_projects) {
 					if (ui.button(path, Left)) {
-						var current = @:privateAccess kha.graphics4.Graphics2.current;
+						var current = @:privateAccess kha.graphics2.Graphics.current;
 						if (current != null) current.end();
 
 						ImportArm.runProject(path);
@@ -223,7 +223,7 @@ class Project {
 		var n = Context.projectType == ModelRoundedCube ? "Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
-			var current = @:privateAccess kha.graphics4.Graphics2.current;
+			var current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 
 			Context.pickerMaskHandle.position = MaskNone;

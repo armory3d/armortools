@@ -35,7 +35,7 @@ class Main {
 		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.io.Bytes.ofData(file)));
 	}
 	static function embedFont(name: String, file: js.lib.ArrayBuffer) {
-		iron.data.Data.cachedFonts.set(name, new kha.Kravur(kha.Blob.fromBytes(haxe.io.Bytes.ofData(file))));
+		iron.data.Data.cachedFonts.set(name, new kha.Font(kha.Blob.fromBytes(haxe.io.Bytes.ofData(file))));
 	}
 	#end
 

@@ -306,7 +306,7 @@ class Context {
 		layerIsMask = isMask;
 		UIHeader.inst.headerHandle.redraws = 2;
 
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		Layers.setObjectMask();

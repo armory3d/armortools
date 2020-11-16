@@ -99,7 +99,7 @@ class RenderUtil {
 	}
 
 	public static function makeDecalPreview() {
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		if (Context.decalImage == null) {
@@ -165,7 +165,7 @@ class RenderUtil {
 	}
 
 	public static function makeTextPreview() {
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		var text = Context.textToolText;
@@ -198,7 +198,7 @@ class RenderUtil {
 	}
 
 	public static function makeFontPreview() {
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		var text = "Abg";
@@ -226,7 +226,7 @@ class RenderUtil {
 
 		if (RenderPathPaint.liveLayerLocked) return;
 
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		// Prepare layers

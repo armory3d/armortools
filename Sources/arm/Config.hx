@@ -161,7 +161,7 @@ class Config {
 		save();
 		Context.ddirty = 2;
 
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 		Inc.applyConfig();
 		if (current != null) current.begin(false);

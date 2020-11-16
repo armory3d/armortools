@@ -122,7 +122,7 @@ class App {
 
 				// Precompiled font for fast startup
 				if (Config.raw.locale == "en") {
-					var kimg: kha.Kravur.KravurImage = js.lib.Object.create(untyped kha.Kravur.KravurImage.prototype);
+					var kimg: kha.Font.KravurImage = js.lib.Object.create(untyped kha.Font.KravurImage.prototype);
 					@:privateAccess kimg.mySize = 13;
 					@:privateAccess kimg.width = 128;
 					@:privateAccess kimg.height = 128;
@@ -140,7 +140,7 @@ class App {
 					@:privateAccess kimg.chars = chars;
 					Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
 						@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
-						@:privateAccess cast(font, kha.Kravur).images.set(130095, kimg);
+						@:privateAccess cast(font, kha.Font).images.set(130095, kimg);
 					});
 				}
 

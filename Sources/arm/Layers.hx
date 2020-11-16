@@ -407,7 +407,7 @@ class Layers {
 		var selectedLayer = Context.layer;
 		var isMask = Context.layerIsMask;
 		var selectedTool = Context.tool;
-		var current: kha.graphics4.Graphics2 = null;
+		var current: kha.graphics2.Graphics = null;
 
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
@@ -415,7 +415,7 @@ class Layers {
 				RenderPathPaint.liveLayer.createMask(0x00000000);
 			}
 
-			current = @:privateAccess kha.graphics4.Graphics2.current;
+			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 
 			UIHeader.inst.worktab.position = SpacePaint;
@@ -443,7 +443,7 @@ class Layers {
 
 		if (hasFillLayer || hasFillMask) {
 
-			current = @:privateAccess kha.graphics4.Graphics2.current;
+			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 			Context.pdirty = fills;
 			Context.tool = ToolFill;
@@ -497,7 +497,7 @@ class Layers {
 	}
 
 	public static function updateFillLayer(fills = 1) {
-		var current = @:privateAccess kha.graphics4.Graphics2.current;
+		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		var _tool = Context.tool;
