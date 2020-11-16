@@ -7,6 +7,7 @@ import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
 import arm.sys.Path;
+import arm.sys.File;
 import arm.Enums;
 
 class TabTextures {
@@ -144,7 +145,10 @@ class TabTextures {
 									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 								}
-							}, 5);
+								if (ui.button(tr("Open Containing Directory..."), Left)) {
+									File.explorer(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
+								}
+							}, 6);
 						}
 					}
 				}
