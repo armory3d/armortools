@@ -1,4 +1,4 @@
-name: Linux (OpenGL)
+name: Linux (Vulkan)
 
 on:
   push:
