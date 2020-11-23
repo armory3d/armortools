@@ -248,7 +248,7 @@ class Layers {
 
 	public static function makeTempImg() {
 		var l = Project.layers[0];
-		if (imga != null && (imga.width != l.texpaint.width || imga.height != l.texpaint.height)) {
+		if (imga != null && (imga.width != l.texpaint.width || imga.height != l.texpaint.height || imga.format != l.texpaint.format)) {
 			var _temptex0 = RenderPath.active.renderTargets.get("temptex0");
 			App.notifyOnNextFrame(function() {
 				_temptex0.unload();
@@ -257,21 +257,22 @@ class Layers {
 			imga = null;
 		}
 		if (imga == null) {
-			{
-				var t = new RenderTargetRaw();
-				t.name = "temptex0";
-				t.width = l.texpaint.width;
-				t.height = l.texpaint.height;
-				t.format = "RGBA32";
-				var rt = RenderPath.active.createRenderTarget(t);
-				imga = rt.image;
-			}
+			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
+					 	 App.bitsHandle.position == Bits16 ? "RGBA64" :
+					 										 "RGBA128";
+			var t = new RenderTargetRaw();
+			t.name = "temptex0";
+			t.width = l.texpaint.width;
+			t.height = l.texpaint.height;
+			t.format = format;
+			var rt = RenderPath.active.createRenderTarget(t);
+			imga = rt.image;
 		}
 	}
 
 	public static function makeExportImg() {
 		var l = Project.layers[0];
-		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height)) {
+		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height || expa.format != l.texpaint.format)) {
 			var _expa = expa;
 			var _expb = expb;
 			var _expc = expc;
@@ -285,9 +286,12 @@ class Layers {
 			expc = null;
 		}
 		if (expa == null) {
-			expa = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			expb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
-			expc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height);
+			var format = App.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
+					 	 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
+					 									 	 TextureFormat.RGBA128;
+			expa = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
+			expb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
+			expc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
 		}
 	}
 
