@@ -685,26 +685,17 @@ class RenderPathPaint {
 	}
 
 	public static function bindLayers() {
-
 		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
 		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
 		if (isLive || isMaterialSpace) useLiveLayer(true);
 
-		var tid = Project.layers[0].id;
-		path.bindTarget("texpaint" + tid, "texpaint");
-		path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
-		path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-		if (Project.layers[0].texpaint_mask != null) {
-			path.bindTarget("texpaint_mask" + tid, "texpaint_mask");
-		}
-		for (i in 1...Project.layers.length) {
+		for (i in 0...Project.layers.length) {
 			var l = Project.layers[i];
-			tid = l.id;
-			path.bindTarget("texpaint" + tid, "texpaint" + tid);
-			path.bindTarget("texpaint_nor" + tid, "texpaint_nor" + tid);
-			path.bindTarget("texpaint_pack" + tid, "texpaint_pack" + tid);
+			path.bindTarget("texpaint" + l.id, "texpaint" + l.id);
+			path.bindTarget("texpaint_nor" + l.id, "texpaint_nor" + l.id);
+			path.bindTarget("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 			if (l.texpaint_mask != null) {
-				path.bindTarget("texpaint_mask" + tid, "texpaint_mask" + tid);
+				path.bindTarget("texpaint_mask" + l.id, "texpaint_mask" + l.id);
 			}
 		}
 	}

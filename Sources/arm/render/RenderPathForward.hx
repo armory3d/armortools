@@ -4,6 +4,7 @@ import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
+import arm.node.MakeMesh;
 
 class RenderPathForward {
 
@@ -60,6 +61,23 @@ class RenderPathForward {
 		RenderPathPaint.bindLayers();
 		path.drawMeshes("mesh");
 		RenderPathPaint.unbindLayers();
+		if (MakeMesh.layerPassCount > 1) {
+			RenderPathDeferred.makeGbufferCopyTextures();
+			for (i in 1...MakeMesh.layerPassCount) {
+				var ping = i % 2 == 1 ? "_copy" : "";
+				var pong = i % 2 == 1 ? "" : "_copy";
+				path.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
+				path.bindTarget("gbuffer0" + pong, "gbuffer0");
+				path.bindTarget("gbuffer1" + pong, "gbuffer1");
+				path.bindTarget("gbuffer2" + pong, "gbuffer2");
+				RenderPathPaint.bindLayers();
+				path.drawMeshes("mesh" + i);
+				RenderPathPaint.unbindLayers();
+			}
+			if (MakeMesh.layerPassCount % 2 == 0) {
+				RenderPathDeferred.copyToGbuffer();
+			}
+		}
 		LineDraw.render(path.currentG);
 	}
 

@@ -32,16 +32,50 @@ class MakeMaterial {
 	public static function parseMeshMaterial() {
 		if (UIHeader.inst.worktab.position == SpaceRender) return;
 		var m = Project.materials[0].data;
-		var scon: ShaderContext = null;
-		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
-		if (scon != null) {
-			m.shader.raw.contexts.remove(scon.raw);
-			m.shader.contexts.remove(scon);
+
+		for (c in m.shader.contexts) {
+			if (c.raw.name == "mesh") {
+				m.shader.raw.contexts.remove(c.raw);
+				m.shader.contexts.remove(c);
+				c.delete();
+				break;
+			}
 		}
+
+		if (MakeMesh.layerPassCount > 1) {
+			var i = 0;
+			while (i < m.shader.contexts.length) {
+				var c = m.shader.contexts[i];
+				for (j in 1...MakeMesh.layerPassCount) {
+					if (c.raw.name == "mesh" + j) {
+						m.shader.raw.contexts.remove(c.raw);
+						m.shader.contexts.remove(c);
+						c.delete();
+						i--;
+						break;
+					}
+				}
+				i++;
+			}
+
+			i = 0;
+			while (i < m.contexts.length) {
+				var c = m.contexts[i];
+				for (j in 1...MakeMesh.layerPassCount) {
+					if (c.raw.name == "mesh" + j) {
+						m.raw.contexts.remove(c.raw);
+						m.contexts.remove(c);
+						i--;
+						break;
+					}
+				}
+				i++;
+			}
+		}
+
 		var con = MakeMesh.run(new NodeShaderData({name: "Material", canvas: null}));
-		if (scon != null) scon.delete();
-		scon = new ShaderContext(con.data, function(scon: ShaderContext){});
-		scon.overrideContext = {}
+		var scon = new ShaderContext(con.data, function(scon: ShaderContext){});
+		scon.overrideContext = {};
 		if (con.frag.sharedSamplers.length > 0) {
 			var sampler = con.frag.sharedSamplers[0];
 			scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
@@ -51,9 +85,31 @@ class MakeMaterial {
 		}
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
+
+		for (i in 1...MakeMesh.layerPassCount) {
+			var con = MakeMesh.run(new NodeShaderData({name: "Material", canvas: null}), i);
+			var scon = new ShaderContext(con.data, function(scon: ShaderContext){});
+			scon.overrideContext = {};
+			if (con.frag.sharedSamplers.length > 0) {
+				var sampler = con.frag.sharedSamplers[0];
+				scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
+			}
+			if (!Context.textureFilter) {
+				scon.overrideContext.filter = "point";
+			}
+			m.shader.raw.contexts.push(scon.raw);
+			m.shader.contexts.push(scon);
+
+			var mcon = new MaterialContext({ name: "mesh" + i, bind_textures: [] }, function(self: MaterialContext) {});
+			m.raw.contexts.push(mcon.raw);
+			m.contexts.push(mcon);
+		}
+
 		Context.ddirty = 2;
 
+		#if rp_voxelao
 		makeVoxel(m);
+		#end
 	}
 
 	public static function parseParticleMaterial() {
@@ -103,21 +159,23 @@ class MakeMaterial {
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
 
+		#if rp_voxelao
 		if (UIHeader.inst.worktab.position == SpaceRender) {
 			makeVoxel(m);
 		}
+		#end
 	}
 
+	#if rp_voxelao
 	static function makeVoxel(m: MaterialData) {
-		#if rp_voxelao
 		var rebuild = heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
 			var scon: ShaderContext = null;
 			for (c in m.shader.contexts) if (c.raw.name == "voxel") { scon = c; break; }
 			if (scon != null) MakeVoxel.run(scon);
 		}
-		#end
 	}
+	#end
 
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
@@ -162,7 +220,7 @@ class MakeMaterial {
 			if (scon == null) compileError = true;
 		});
 		if (compileError) return;
-		scon.overrideContext = {}
+		scon.overrideContext = {};
 		scon.overrideContext.addressing = "repeat";
 		var mcon = new MaterialContext(mcon, function(mcon: MaterialContext) {});
 

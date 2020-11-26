@@ -4,6 +4,7 @@ import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
+import arm.node.MakeMesh;
 
 class RenderPathDeferred {
 
@@ -557,7 +558,65 @@ class RenderPathDeferred {
 		RenderPathPaint.bindLayers();
 		path.drawMeshes("mesh");
 		RenderPathPaint.unbindLayers();
+		if (MakeMesh.layerPassCount > 1) {
+			makeGbufferCopyTextures();
+			for (i in 1...MakeMesh.layerPassCount) {
+				var ping = i % 2 == 1 ? "_copy" : "";
+				var pong = i % 2 == 1 ? "" : "_copy";
+				path.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
+				path.bindTarget("gbuffer0" + pong, "gbuffer0");
+				path.bindTarget("gbuffer1" + pong, "gbuffer1");
+				path.bindTarget("gbuffer2" + pong, "gbuffer2");
+				RenderPathPaint.bindLayers();
+				path.drawMeshes("mesh" + i);
+				RenderPathPaint.unbindLayers();
+			}
+			if (MakeMesh.layerPassCount % 2 == 0) {
+				copyToGbuffer();
+			}
+		}
 		LineDraw.render(currentG);
+	}
+
+	public static function makeGbufferCopyTextures() {
+		var copy = path.renderTargets.get("gbuffer0_copy");
+		if (copy == null || copy.image.width != path.renderTargets.get("gbuffer0").image.width || copy.image.height != path.renderTargets.get("gbuffer0").image.height) {
+			{
+				var t = new RenderTargetRaw();
+				t.name = "gbuffer0_copy";
+				t.width = 0;
+				t.height = 0;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "gbuffer1_copy";
+				t.width = 0;
+				t.height = 0;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+			{
+				var t = new RenderTargetRaw();
+				t.name = "gbuffer2_copy";
+				t.width = 0;
+				t.height = 0;
+				t.format = "RGBA64";
+				t.scale = Inc.getSuperSampling();
+				path.createRenderTarget(t);
+			}
+		}
+	}
+
+	public static function copyToGbuffer() {
+		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		path.bindTarget("gbuffer0_copy", "tex0");
+		path.bindTarget("gbuffer1_copy", "tex1");
+		path.bindTarget("gbuffer2_copy", "tex2");
+		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 	}
 
 	static function drawSplit() {
