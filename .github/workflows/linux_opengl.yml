@@ -1,0 +1,23 @@
+name: Linux (OpenGL)
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Get Submodules
+      run: git submodule update --init --recursive
+    - name: Get Node.js
+      run: git clone https://github.com/armory3d/nodejs_bin.git --depth 1
+    - name: Compile
+      run: nodejs_bin/node-linux64 armorcore/make -g opengl
