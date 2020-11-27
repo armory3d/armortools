@@ -313,6 +313,8 @@ class MakePaint {
 			frag.write('opacity *= mask_sample.r * mask_sample.a;');
 		}
 
+		frag.write('if (opacity == 0.0) discard;');
+
 		if (Context.tool == ToolParticle) { // particle mask
 			frag.add_uniform('sampler2D texparticle', '_texparticle');
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -327,7 +329,7 @@ class MakePaint {
 
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
-		frag.write('vec2 sample_tc = vec2(wvpposition.x / wvpposition.w, wvpposition.y / wvpposition.w) * 0.5 + 0.5;');
+		frag.write('vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
