@@ -148,9 +148,9 @@ class UIHeader {
 					 Context.tool == ToolBlur ||
 					 Context.tool == ToolParticle) {
 
+				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 				if (Context.tool != ToolFill) {
-					var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-					var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 					if (decalMask) {
 						Context.brushDecalMaskRadius = ui.slider(Context.brushDecalMaskRadiusHandle, tr("Radius"), 0.01, 2.0, true);
 					}
@@ -185,7 +185,7 @@ class UIHeader {
 
 				Context.brushOpacity = ui.slider(Context.brushOpacityHandle, tr("Opacity"), 0.0, 1.0, true);
 
-				if (Context.tool == ToolBrush || Context.tool == ToolEraser) {
+				if (Context.tool == ToolBrush || Context.tool == ToolEraser || decalMask) {
 					Context.brushHardness = ui.slider(Id.handle({value: Context.brushHardness}), tr("Hardness"), 0.0, 1.0, true);
 				}
 
