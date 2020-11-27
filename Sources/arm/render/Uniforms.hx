@@ -98,7 +98,16 @@ class Uniforms {
 		if (MaterialParser.script_links != null) {
 			for (key in MaterialParser.script_links.keys()) {
 				var script = MaterialParser.script_links[key];
-				return script == "" ? 0.0 : js.Lib.eval(script);
+				var result = 0.0;
+				if (script != "") {
+					try {
+						result = js.Lib.eval(script);
+					}
+					catch(e: Dynamic) {
+						Log.trace(e);
+					}
+				}
+				return result;
 			}
 		}
 		return null;

@@ -24,7 +24,7 @@ class TabScript {
 			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
 			if (ui.button(tr("Run"))) {
 				try {
-					untyped eval(hscript.text);
+					js.Lib.eval(hscript.text);
 				}
 				catch(e: Dynamic) {
 					Log.trace(e);
