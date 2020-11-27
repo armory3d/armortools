@@ -551,8 +551,10 @@ class RenderPathDeferred {
 		#else
 		path.clearTarget(null, 1.0);
 		#end
-		path.setTarget("gbuffer2");
-		path.clearTarget(0xff000000);
+		if (MakeMesh.layerPassCount == 1) {
+			path.setTarget("gbuffer2");
+			path.clearTarget(0xff000000);
+		}
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		var currentG = path.currentG;
 		RenderPathPaint.bindLayers();
@@ -563,6 +565,10 @@ class RenderPathDeferred {
 			for (i in 1...MakeMesh.layerPassCount) {
 				var ping = i % 2 == 1 ? "_copy" : "";
 				var pong = i % 2 == 1 ? "" : "_copy";
+				if (i == MakeMesh.layerPassCount - 1) {
+					path.setTarget("gbuffer2" + ping);
+					path.clearTarget(0xff000000);
+				}
 				path.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
 				path.bindTarget("gbuffer0" + pong, "gbuffer0");
 				path.bindTarget("gbuffer1" + pong, "gbuffer1");
