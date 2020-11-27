@@ -234,9 +234,9 @@ class MakeMesh {
 						frag.write('{');
 						frag.write('vec3 dpdx = dFdx(wposition);');
 						frag.write('vec3 dpdy = dFdy(wposition);');
-						frag.write('height = pack.a * texpaint_opac;');
-						frag.write('float dhdx = dFdx(height_sample * $ds);');
-						frag.write('float dhdy = dFdy(height_sample * $ds);');
+						frag.write('height = texpaint_pack_sample.a * texpaint_opac;');
+						frag.write('float dhdx = dFdx(height * $ds);');
+						frag.write('float dhdy = dFdy(height * $ds);');
 						frag.write('vec3 cross_x = cross(n, dpdx);');
 						frag.write('vec3 cross_y = cross(dpdy, n);');
 						frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
