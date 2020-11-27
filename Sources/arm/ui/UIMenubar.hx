@@ -78,8 +78,6 @@ class UIMenubar {
 					Layers.updateFillLayers(4);
 				}
 
-				MakeMaterial.parsePaintMaterial();
-				MakeMaterial.parseMeshMaterial();
 				Context.mainObject().skip_context = null;
 			}
 		}

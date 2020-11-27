@@ -124,7 +124,14 @@ class TabTextures {
 												arm.io.ImportEnvmap.run(asset.file, image);
 											});
 										}
+										function _next() {
+											arm.node.MakeMaterial.parsePaintMaterial();
+											arm.util.RenderUtil.makeMaterialPreview();
+											UISidebar.inst.hwnd1.redraws = 2;
+										}
+										App.notifyOnNextFrame(_next);
 									});
+
 								}
 								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);
@@ -135,12 +142,12 @@ class TabTextures {
 									Project.assetMap.remove(asset.id);
 									Project.assets.splice(i, 1);
 									Project.assetNames.splice(i, 1);
-									function _init() {
+									function _next() {
 										arm.node.MakeMaterial.parsePaintMaterial();
 										arm.util.RenderUtil.makeMaterialPreview();
 										UISidebar.inst.hwnd1.redraws = 2;
 									}
-									iron.App.notifyOnInit(_init);
+									App.notifyOnNextFrame(_next);
 
 									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
