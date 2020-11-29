@@ -1,6 +1,10 @@
 package arm.util;
 
 import kha.Image;
+import kha.graphics4.PipelineState;
+import kha.graphics4.VertexData;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.CompareMode;
 import arm.ui.UISidebar;
 
 class UVUtil {
@@ -9,8 +13,17 @@ class UVUtil {
 	public static var uvmapCached = false;
 	public static var trianglemap: Image = null;
 	public static var trianglemapCached = false;
+	public static var dilatemap: Image = null;
+	public static var dilatemapCached = false;
+	static var pipeDilate: PipelineState = null;
 
 	public static function cacheUVMap() {
+		if (uvmap != null && (uvmap.width != Config.getTextureResX() || uvmap.height != Config.getTextureResY())) {
+			uvmap.unload();
+			uvmap = null;
+			uvmapCached = false;
+		}
+
 		if (uvmapCached) return;
 
 		var resX = Config.getTextureResX();
@@ -45,6 +58,12 @@ class UVUtil {
 	}
 
 	public static function cacheTriangleMap() {
+		if (trianglemap != null && (trianglemap.width != Config.getTextureResX() || trianglemap.height != Config.getTextureResY())) {
+			trianglemap.unload();
+			trianglemap = null;
+			trianglemapCached = false;
+		}
+
 		if (trianglemapCached) return;
 
 		if (trianglemap == null) {
@@ -58,9 +77,9 @@ class UVUtil {
 		var inda = mesh.index_arrays[0].values;
 		trianglemap.g2.begin(true, 0xff000000);
 		var f = (1 / 32767) * trianglemap.width;
-		var color = 0xff000000;
+		var color = 0xff000001;
 		for (i in 0...Std.int(inda.length / 3)) {
-			if (color == 0xffffffff) color = 0xff000000;
+			if (color == 0xffffffff) color = 0xff000001;
 			color++;
 			trianglemap.g2.color = color;
 			var x1 = (texa[inda[i * 3    ] * 2    ]) * f;
@@ -72,5 +91,49 @@ class UVUtil {
 			trianglemap.g2.fillTriangle(x1, y1, x2, y2, x3, y3);
 		}
 		trianglemap.g2.end();
+	}
+
+	public static function cacheDilateMap() {
+		if (dilatemap != null && (dilatemap.width != Config.getTextureResX() || dilatemap.height != Config.getTextureResY())) {
+			dilatemap.unload();
+			dilatemap = null;
+			dilatemapCached = false;
+		}
+
+		if (dilatemapCached) return;
+
+		if (dilatemap == null) {
+			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.L8);
+		}
+
+		if (pipeDilate == null) {
+			pipeDilate = new PipelineState();
+			pipeDilate.vertexShader = kha.Shaders.getVertex("dilate_mask.vert");
+			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_mask.frag");
+			var vs = new VertexStructure();
+			#if (kha_metal || kha_vulkan)
+			vs.add("tex", VertexData.Short2Norm);
+			#else
+			vs.add("pos", VertexData.Short4Norm);
+			vs.add("nor", VertexData.Short2Norm);
+			vs.add("tex", VertexData.Short2Norm);
+			#end
+			pipeDilate.inputLayout = [vs];
+			pipeDilate.depthWrite = false;
+			pipeDilate.depthMode = CompareMode.Always;
+			pipeDilate.compile();
+			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
+		}
+
+		var merged = Context.mergedObject != null ? Context.mergedObject.data : Context.paintObject.data;
+		var g4 = dilatemap.g4;
+		g4.begin();
+		g4.clear(0x00000000);
+		g4.setPipeline(pipeDilate);
+		g4.setVertexBuffer(merged.geom.vertexBuffer);
+		g4.setIndexBuffer(merged.geom.indexBuffers[0]);
+		g4.drawIndexedVertices();
+		g4.end();
+		dilatemapCached = true;
 	}
 }

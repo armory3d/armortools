@@ -106,6 +106,8 @@ class Config {
 			raw.show_asset_names = false;
 			raw.node_preview = true;
 			raw.workspace = 0;
+			raw.dilate = DilateInstant;
+			raw.dilate_radius = 2;
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build

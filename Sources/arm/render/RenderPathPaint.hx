@@ -14,6 +14,10 @@ import arm.Enums;
 
 class RenderPathPaint {
 
+	public static var dilated = true;
+	public static var liveLayer: arm.data.LayerSlot = null;
+	public static var liveLayerDrawn = 0;
+	public static var liveLayerLocked = false;
 	static var path: RenderPath;
 	static var initVoxels = true; // Bake AO
 	static var pushUndoLast: Bool;
@@ -22,11 +26,7 @@ class RenderPathPaint {
 	static var visibles: Array<Bool> = null;
 	static var mergedObjectVisible = false;
 	static var savedFov = 0.0;
-	static var dilated = true;
 	static var baking = false;
-	public static var liveLayer: arm.data.LayerSlot = null;
-	public static var liveLayerDrawn = 0;
-	public static var liveLayerLocked = false;
 	static var _texpaint: RenderTarget;
 	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;
@@ -252,6 +252,10 @@ class RenderPathPaint {
 						path.bindTarget("texpaint_blur", "tex");
 						path.drawShader("shader_datas/copy_pass/copy_pass");
 					}
+				}
+
+				if (Config.raw.dilate == DilateInstant) {
+					dilate(true, false);
 				}
 			}
 		}
@@ -574,8 +578,8 @@ class RenderPathPaint {
 
 			commandsSymmetry();
 
+			if (Context.pdirty > 0) dilated = false;
 			if (Context.tool == ToolBake) {
-				if (Context.pdirty > 0) dilated = false;
 				if (Context.bakeType == BakeNormal || Context.bakeType == BakeHeight || Context.bakeType == BakeDerivative) {
 					if (!baking && Context.pdirty > 0) {
 						baking = true;
@@ -589,7 +593,6 @@ class RenderPathPaint {
 						Context.selectPaintObject(highPoly);
 						commandsPaint();
 						highPoly.visible = _visible;
-						Context.sub--;
 						if (pushUndoLast) History.paint();
 						Context.selectPaintObject(_paintObject);
 
@@ -607,7 +610,6 @@ class RenderPathPaint {
 							Context.pdirty = 1;
 							commandsPaint();
 							Context.pdirty = 0;
-							Context.sub--;
 							if (pushUndoLast) History.paint();
 							iron.App.notifyOnInit(_renderFinal);
 						}
@@ -706,26 +708,34 @@ class RenderPathPaint {
 		if (isLive || isMaterialSpace) useLiveLayer(false);
 	}
 
-	public static function finishPaint() {
-		if (Context.tool == ToolBake && !dilated && Context.dilateRadius > 0) {
+	public static function dilate(base: Bool, nor_pack: Bool) {
+		if (Config.raw.dilate_radius > 0) {
+			arm.util.UVUtil.cacheDilateMap();
 			Layers.makeTempImg();
-			dilated = true;
 			var tid = Context.layer.id;
-			path.setTarget("temptex0");
-			path.bindTarget("texpaint" + tid, "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-			path.setTarget("texpaint" + tid);
-			path.bindTarget("temptex0", "tex");
-			path.drawShader("shader_datas/dilate_pass/dilate_pass");
+			if (base) {
+				path.setTarget("temptex0");
+				path.bindTarget("texpaint" + tid, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.setTarget("texpaint" + tid);
+				path.bindTarget("temptex0", "tex");
+				path.drawShader("shader_datas/dilate_pass/dilate_pass");
+			}
+			if (nor_pack) {
+				path.setTarget("temptex0");
+				path.bindTarget("texpaint_nor" + tid, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.setTarget("texpaint_nor" + tid);
+				path.bindTarget("temptex0", "tex");
+				path.drawShader("shader_datas/dilate_pass/dilate_pass");
+
+				path.setTarget("temptex0");
+				path.bindTarget("texpaint_pack" + tid, "tex");
+				path.drawShader("shader_datas/copy_pass/copy_pass");
+				path.setTarget("texpaint_pack" + tid);
+				path.bindTarget("temptex0", "tex");
+				path.drawShader("shader_datas/dilate_pass/dilate_pass");
+			}
 		}
-		// Brush stroke dilate
-		// arm.util.UVUtil.cacheTriangleMap();
-		// Layers.makeTempImg();
-		// path.setTarget("temptex0");
-		// path.bindTarget("texpaint" + tid, "tex");
-		// path.drawShader("shader_datas/copy_pass/copy_pass");
-		// path.setTarget("texpaint" + tid);
-		// path.bindTarget("temptex0", "tex");
-		// path.drawShader("shader_datas/dilate_pass/dilate_pass");
 	}
 }

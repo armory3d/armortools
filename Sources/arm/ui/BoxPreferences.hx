@@ -243,11 +243,14 @@ class BoxPreferences {
 					ui.g.begin(false);
 				}
 
-				Context.brushBias = ui.slider(Id.handle({value: Context.brushBias}), tr("Paint Bleed"), 0.0, 2.0, true);
-				if (ui.isHovered) ui.tooltip(tr("Stretch brush strokes on the uv map to prevent seams"));
+				Config.raw.dilate_radius = Std.int(ui.slider(Id.handle({value: Config.raw.dilate_radius}), tr("Dilate Radius"), 0.0, 16.0, true, 1));
+				if (ui.isHovered) ui.tooltip(tr("Dilate painted textures to prevent seams"));
 
-				Context.dilateRadius = ui.slider(Id.handle({value: Context.dilateRadius}), tr("Dilate Radius"), 0.0, 64.0, true, 1);
-				if (ui.isHovered) ui.tooltip(tr("Dilate baked textures to prevent seams"));
+				var dilateHandle = Id.handle({position: Config.raw.dilate});
+				ui.combo(dilateHandle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
+				if (dilateHandle.changed) {
+					Config.raw.dilate = dilateHandle.position;
+				}
 
 				var workspaceHandle = Id.handle({position: Config.raw.workspace});
 				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake")], tr("Default Workspace"), true);

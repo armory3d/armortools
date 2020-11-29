@@ -182,7 +182,6 @@ class Inc {
 			if (moved || Context.brushLocked) {
 				Context.rdirty = 2;
 			}
-			Context.sub = 0;
 		}
 
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UIHeader.inst.worktab.position == SpaceRender)) {
@@ -201,7 +200,10 @@ class Inc {
 				if (Context.ddirty <= 0) Context.ddirty--;
 			}
 			end();
-			RenderPathPaint.finishPaint();
+			if (!RenderPathPaint.dilated) {
+				RenderPathPaint.dilate(Config.raw.dilate == DilateDelayed, true);
+				RenderPathPaint.dilated = true;
+			}
 			return true;
 		}
 		return false;

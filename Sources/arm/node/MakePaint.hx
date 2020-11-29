@@ -64,24 +64,11 @@ class MakePaint {
 
 		var faceFill = Context.tool == ToolFill && Context.fillTypeHandle.position == FillFace;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		if (!faceFill && !decal) { // Fix seams at uv borders
-			vert.add_uniform('vec2 sub', '_sub');
-			vert.write('vec2 subtex = tex + sub;');
-		}
-		else {
-			vert.write('vec2 subtex = tex;');
-			if (decal) {
-				vert.add_uniform('vec2 sub', '_sub');
-				vert.add_uniform('vec4 decalMask', '_decalMask');
-				vert.write('vec4 decalMaskLocal = decalMask;'); // TODO: spirv workaround
-				vert.write('if (decalMaskLocal.z > 0.0) subtex += sub;');
-			}
-		}
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
+		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		#else
-		vert.write('vec2 tpos = vec2(subtex.xy * 2.0 - 1.0);');
+		vert.write('vec2 tpos = vec2(tex.xy * 2.0 - 1.0);');
 		#end
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
@@ -171,7 +158,7 @@ class MakePaint {
 
 		if (Context.colorIdPicked || faceFill) {
 			vert.add_out('vec2 texCoordPick');
-			vert.write('texCoordPick = subtex;');
+			vert.write('texCoordPick = tex;');
 			if (Context.colorIdPicked) {
 				MakeDiscard.colorId(vert, frag);
 			}

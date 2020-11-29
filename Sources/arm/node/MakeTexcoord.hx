@@ -57,7 +57,7 @@ class MakeTexcoord {
 		else if (uvType == UVMap) { // TexCoords - uvmap
 			vert.add_uniform('float brushScale', '_brushScale');
 			vert.add_out('vec2 texCoord');
-			vert.write('texCoord = subtex * brushScale;');
+			vert.write('texCoord = tex * brushScale;');
 
 			var angle = Context.brushAngle + Context.brushNodesAngle;
 			var uvAngle = Context.layer.fill_layer != null ? Context.layer.angle : angle;

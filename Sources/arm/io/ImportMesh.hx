@@ -168,6 +168,7 @@ class ImportMesh {
 			UISidebar.inst.hwnd2.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
+			UVUtil.dilatemapCached = false;
 		});
 	}
 
@@ -194,6 +195,7 @@ class ImportMesh {
 			UISidebar.inst.hwnd0.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
+			UVUtil.dilatemapCached = false;
 		});
 	}
 

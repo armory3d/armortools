@@ -133,9 +133,7 @@ class MakeBake {
 		vert.add_uniform('mat4 W', '_worldMatrix');
 		vert.write('position = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;');
 		vert.write('normal = vec3(nor.xy, pos.w);');
-		vert.add_uniform('vec2 sub', '_sub');
-		vert.write('vec2 subtex = tex + sub;');
-		vert.write('vec2 tpos = vec2(subtex.x * 2.0 - 1.0, (1.0 - subtex.y) * 2.0 - 1.0);');
+		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 		frag.add_out('vec4 fragColor[2]');
 		frag.write('fragColor[0] = vec4(position, 1.0);');

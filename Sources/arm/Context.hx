@@ -178,7 +178,6 @@ class Context {
 	public static var brushLazyStep = 0.0;
 	public static var brushLazyX = 0.0;
 	public static var brushLazyY = 0.0;
-	public static var brushBias = 1.0;
 	public static var brushPaint = UVMap;
 	public static var brushDepthReject = true;
 	public static var brushAngleReject = true;
@@ -194,7 +193,6 @@ class Context {
 	public static var bakeCurvOffset = 0.0;
 	public static var bakeCurvSmooth = 1;
 	public static var bakeHighPoly = 0;
-	public static var dilateRadius = 8.0;
 
 	public static var xray = false;
 	public static var symX = false;
@@ -206,7 +204,6 @@ class Context {
 	public static var projectAspectRatio = 0; // 1:1, 2:1, 1:2
 	public static var projectObjects: Array<MeshObject>;
 
-	public static var sub = 0;
 	public static var lastPaintVecX = -1.0;
 	public static var lastPaintVecY = -1.0;
 	public static var prevPaintVecX = -1.0;
@@ -373,6 +370,7 @@ class Context {
 		}
 		UVUtil.uvmapCached = false;
 		UVUtil.trianglemapCached = false;
+		UVUtil.dilatemapCached = false;
 	}
 
 	public static function mainObject(): MeshObject {

@@ -23,6 +23,11 @@ package arm;
 	var SpaceRender = 3;
 }
 
+@:enum abstract DilateType(Int) from Int to Int {
+	var DilateInstant = 0;
+	var DilateDelayed = 1;
+}
+
 @:enum abstract BakeType(Int) from Int to Int {
 	var BakeInit = -1;
 	var BakeAO = 0;

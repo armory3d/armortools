@@ -94,7 +94,7 @@ class Uniforms {
 				return Context.vxaoAperture;
 			}
 			case "_dilateRadius": {
-				return Context.dilateRadius;
+				return Config.raw.dilate_radius;
 			}
 		}
 		if (MaterialParser.script_links != null) {
@@ -117,15 +117,6 @@ class Uniforms {
 
 	public static function linkVec2(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
 		switch (link) {
-			case "_sub": {
-				Context.sub = (Context.sub + 1) % 4;
-				var eps = Context.brushBias * 0.00022 * Config.getTextureResBias();
-				Context.sub == 0 ? vec.set(eps, eps, 0.0) :
-				Context.sub == 1 ? vec.set(eps, -eps, 0.0) :
-				Context.sub == 2 ? vec.set(-eps, -eps, 0.0) :
-										  vec.set(-eps, eps, 0.0);
-				return vec;
-			}
 			case "_gbufferSize": {
 				vec.set(0, 0, 0);
 				var gbuffer2 = RenderPath.active.renderTargets.get("gbuffer2");
@@ -267,6 +258,9 @@ class Uniforms {
 					iron.App.notifyOnInit(_init);
 				}
 				return UVUtil.trianglemap;
+			}
+			case "_texdilatemap": {
+				return UVUtil.dilatemap;
 			}
 			case "_textexttool": { // Opacity map for text
 				return Context.textToolImage;
