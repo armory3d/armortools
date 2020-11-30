@@ -237,3 +237,12 @@ package arm;
 	var LayoutNodesH = 5;
 	var LayoutStatusH = 6;
 }
+
+@:enum abstract ZoomDirection(Int) from Int to Int {
+	var ZoomVertical = 0;
+	var ZoomVerticalInverted = 1;
+	var ZoomHorizontal = 2;
+	var ZoomHorizontalInverted = 3;
+	var ZoomVerticalAndHorizontal = 4;
+	var ZoomVerticalAndHorizontalInverted = 5;
+}

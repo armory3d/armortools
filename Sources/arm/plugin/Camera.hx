@@ -6,6 +6,7 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import arm.ui.UISidebar;
 import arm.util.ViewportUtil;
+import arm.Enums;
 
 class Camera {
 
@@ -61,7 +62,7 @@ class Camera {
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
-					var f = -mouse.movementY / 150;
+					var f = getDirectionToZoom() / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
@@ -105,7 +106,7 @@ class Camera {
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
-					var f = -mouse.movementY / 150;
+					var f = getDirectionToZoom() / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
@@ -179,7 +180,10 @@ class Camera {
 	}
 
 	function getCameraSpeed(): Float {
-		return Config.raw.camera_speed * (Config.raw.invert_zoom_direction ? -1 : 1);
+		var sign = Config.raw.zoom_direction == ZoomVerticalInverted ||
+				   Config.raw.zoom_direction == ZoomHorizontalInverted ||
+				   Config.raw.zoom_direction == ZoomVerticalAndHorizontalInverted ? -1 : 1;
+		return Config.raw.camera_speed * sign;
 	}
 
 	public function reset(viewIndex = -1) {
@@ -207,5 +211,14 @@ class Camera {
 			origins[index()].add(right);
 			camera.buildMatrix();
 		}
+	}
+
+	function getDirectionToZoom(): Float {
+		var mouse = Input.getMouse();
+		return Config.raw.zoom_direction == ZoomVertical ? -mouse.movementY :
+			   Config.raw.zoom_direction == ZoomVerticalInverted ? -mouse.movementY :
+			   Config.raw.zoom_direction == ZoomHorizontal ? mouse.movementX :
+			   Config.raw.zoom_direction == ZoomHorizontalInverted ? mouse.movementX :
+			   -(mouse.movementY - mouse.movementX);
 	}
 }

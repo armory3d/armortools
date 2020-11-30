@@ -58,7 +58,11 @@ class BoxPreferences {
 				var hspeed = Id.handle({value: Config.raw.camera_speed});
 				Config.raw.camera_speed = ui.slider(hspeed, tr("Camera Speed"), 0.1, 4.0, true);
 
-				Config.raw.invert_zoom_direction = ui.check(Id.handle({selected: Config.raw.invert_zoom_direction}), tr("Invert Zoom Direction"));
+				var zoomDirectionHandle = Id.handle({position: Config.raw.zoom_direction});
+				ui.combo(zoomDirectionHandle, [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")], tr("Direction to Zoom"), true);
+				if (zoomDirectionHandle.changed) {
+					Config.raw.zoom_direction = zoomDirectionHandle.position;
+				}
 
 				Config.raw.node_preview = ui.check(Id.handle({selected: Config.raw.node_preview}), tr("Show Node Preview"));
 

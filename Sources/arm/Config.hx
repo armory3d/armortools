@@ -101,7 +101,7 @@ class Config {
 			raw.brush_3d = true;
 			raw.brush_live = false;
 			raw.camera_speed = 1.0;
-			raw.invert_zoom_direction = false;
+			raw.zoom_direction = ZoomVertical;
 			raw.displace_strength = 0.0;
 			raw.show_asset_names = false;
 			raw.node_preview = true;

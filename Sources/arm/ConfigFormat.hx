@@ -43,7 +43,7 @@ typedef TConfig = {
 	@:optional var brush_3d: Null<Bool>;
 	@:optional var node_preview: Null<Bool>;
 	@:optional var camera_speed: Null<Float>;
-	@:optional var invert_zoom_direction: Null<Bool>;
+	@:optional var zoom_direction: Null<Int>;
 	@:optional var displace_strength: Null<Float>;
 	@:optional var show_asset_names: Null<Bool>;
 	@:optional var layout: Array<Int>;
