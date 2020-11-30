@@ -338,6 +338,7 @@ class App {
 		UINodes.inst.hwnd.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 		if (Context.ddirty < 0) Context.ddirty = 0; // Redraw viewport
+		if (Context.splitView) Context.ddirty = 1;
 	}
 
 	static function update() {
