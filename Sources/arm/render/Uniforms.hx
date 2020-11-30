@@ -94,7 +94,7 @@ class Uniforms {
 				return Context.vxaoAperture;
 			}
 			case "_dilateRadius": {
-				return Config.raw.dilate_radius;
+				return UVUtil.dilatemap != null ? Config.raw.dilate_radius : 0.0;
 			}
 		}
 		if (MaterialParser.script_links != null) {

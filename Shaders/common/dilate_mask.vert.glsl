@@ -1,7 +1,7 @@
 #version 450
 
-// in vec4 pos;
-// in vec2 nor;
+in vec4 pos;
+in vec2 nor;
 in vec2 tex;
 // uniform float texUnpack;
 void main() {
@@ -11,4 +11,7 @@ void main() {
 	vec2 texCoord = tex * 2.0 - 1.0;
 	#endif
 	gl_Position = vec4(texCoord, 0.0, 1.0);
+	#ifdef HLSL
+	float keep = pos.x + nor.x;
+	#endif
 }
