@@ -271,9 +271,13 @@ class UIView2D {
 			panY += mouse.movementY;
 		}
 		if (mouse.wheelDelta != 0) {
+			var _panX = panX / panScale;
+			var _panY = panY / panScale;
 			panScale -= mouse.wheelDelta / 10;
 			if (panScale < 0.1) panScale = 0.1;
-			if (panScale > 3.0) panScale = 3.0;
+			if (panScale > 6.0) panScale = 6.0;
+			panX = _panX * panScale;
+			panY = _panY * panScale;
 		}
 
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
