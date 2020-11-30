@@ -709,7 +709,7 @@ class RenderPathPaint {
 	}
 
 	public static function dilate(base: Bool, nor_pack: Bool) {
-		if (Config.raw.dilate_radius > 0) {
+		if (Config.raw.dilate_radius > 0 && !Context.paint2d) {
 			arm.util.UVUtil.cacheDilateMap();
 			Layers.makeTempImg();
 			var tid = Context.layer.id;
