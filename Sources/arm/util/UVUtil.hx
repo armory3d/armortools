@@ -121,17 +121,22 @@ class UVUtil {
 			pipeDilate.inputLayout = [vs];
 			pipeDilate.depthWrite = false;
 			pipeDilate.depthMode = CompareMode.Always;
+			pipeDilate.colorAttachments[0] = kha.graphics4.TextureFormat.L8;
 			pipeDilate.compile();
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
 
-		var merged = Context.mergedObject != null ? Context.mergedObject.data : Context.paintObject.data;
+		var geom = Context.mergedObject != null ? Context.mergedObject.data.geom : Context.paintObject.data.geom;
 		var g4 = dilatemap.g4;
 		g4.begin();
 		g4.clear(0x00000000);
 		g4.setPipeline(pipeDilate);
-		g4.setVertexBuffer(merged.geom.vertexBuffer);
-		g4.setIndexBuffer(merged.geom.indexBuffers[0]);
+		#if (kha_metal || kha_vulkan)
+		g4.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
+		#else
+		g4.setVertexBuffer(geom.vertexBuffer);
+		#end
+		g4.setIndexBuffer(geom.indexBuffers[0]);
 		g4.drawIndexedVertices();
 		g4.end();
 		dilatemapCached = true;
