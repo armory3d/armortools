@@ -110,7 +110,7 @@ class ExportTexture {
 		Context.paintObject = planeo;
 		Context.pdirty = 1;
 		RenderPathPaint.useLiveLayer(true);
-		RenderPathPaint.commandsPaint();
+		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.useLiveLayer(false);
 		Context.tool = _tool;
 		MakeMaterial.parsePaintMaterial();

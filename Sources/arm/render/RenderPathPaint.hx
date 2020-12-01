@@ -92,7 +92,7 @@ class RenderPathPaint {
 	}
 
 	@:access(iron.RenderPath)
-	public static function commandsPaint() {
+	public static function commandsPaint(dilation = true) {
 		var tid = Context.layer.id;
 
 		var paintSpace = UIHeader.inst.worktab.position == SpacePaint || UIHeader.inst.worktab.position == SpaceBake;
@@ -254,7 +254,7 @@ class RenderPathPaint {
 					}
 				}
 
-				if (Config.raw.dilate == DilateInstant) {
+				if (dilation && Config.raw.dilate == DilateInstant) {
 					dilate(true, false);
 				}
 			}
@@ -448,37 +448,37 @@ class RenderPathPaint {
 			if (Context.symX) {
 				t.scale.set(-sx, sy, sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symY) {
 				t.scale.set(sx, -sy, sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symZ) {
 				t.scale.set(sx, sy, -sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symX && Context.symY) {
 				t.scale.set(-sx, -sy, sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symX && Context.symZ) {
 				t.scale.set(-sx, sy, -sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symY && Context.symZ) {
 				t.scale.set(sx, -sy, -sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			if (Context.symX && Context.symY && Context.symZ) {
 				t.scale.set(-sx, -sy, -sz);
 				t.buildMatrix();
-				commandsPaint();
+				commandsPaint(false);
 			}
 			t.scale.set(sx, sy, sz);
 			t.buildMatrix();

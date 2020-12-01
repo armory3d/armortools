@@ -406,7 +406,7 @@ class Layers {
 		return false;
 	}
 
-	public static function updateFillLayers(fills = 1) {
+	public static function updateFillLayers() {
 		var layers = Project.layers;
 		var selectedLayer = Context.layer;
 		var isMask = Context.layerIsMask;
@@ -425,11 +425,10 @@ class Layers {
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
 			MakeMaterial.parsePaintMaterial();
-			Context.pdirty = fills;
+			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
-			for (i in 0...fills) {
-				RenderPathPaint.commandsPaint();
-			}
+			RenderPathPaint.commandsPaint(false);
+			RenderPathPaint.dilate(true, true);
 			RenderPathPaint.useLiveLayer(false);
 			Context.tool = selectedTool;
 			Context.pdirty = 0;
@@ -449,7 +448,7 @@ class Layers {
 
 			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
-			Context.pdirty = fills;
+			Context.pdirty = 1;
 			Context.tool = ToolFill;
 
 			if (hasFillLayer) {
@@ -465,10 +464,8 @@ class Layers {
 						if (l.uvType == UVProject) {
 							l.clearLayer();
 						}
-
-						for (i in 0...fills) {
-							RenderPathPaint.commandsPaint();
-						}
+						RenderPathPaint.commandsPaint(false);
+						RenderPathPaint.dilate(true, true);
 					}
 				}
 			}
@@ -481,10 +478,8 @@ class Layers {
 					if (l.fill_mask == Context.material) {
 						Context.layer = l;
 						setObjectMask();
-
-						for (i in 0...fills) {
-							RenderPathPaint.commandsPaint();
-						}
+						RenderPathPaint.commandsPaint(false);
+						RenderPathPaint.dilate(true, true);
 					}
 				}
 			}
@@ -500,13 +495,13 @@ class Layers {
 		}
 	}
 
-	public static function updateFillLayer(fills = 1) {
+	public static function updateFillLayer() {
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
 		var _tool = Context.tool;
 		Context.tool = ToolFill;
-		Context.pdirty = fills;
+		Context.pdirty = 1;
 		Context.layerIsMask = false;
 		var _workspace = UIHeader.inst.worktab.position;
 		UIHeader.inst.worktab.position = SpacePaint;
@@ -517,10 +512,8 @@ class Layers {
 		}
 
 		MakeMaterial.parsePaintMaterial();
-
-		for (i in 0...fills) {
-			RenderPathPaint.commandsPaint();
-		}
+		RenderPathPaint.commandsPaint(false);
+		RenderPathPaint.dilate(true, true);
 
 		Context.rdirty = 2;
 		Context.tool = _tool;

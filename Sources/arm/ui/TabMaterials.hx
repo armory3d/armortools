@@ -109,7 +109,7 @@ class TabMaterials {
 							selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
-									Layers.updateFillLayers(4);
+									Layers.updateFillLayers();
 								}
 								iron.App.notifyOnInit(_init);
 							}

@@ -350,7 +350,7 @@ class RenderUtil {
 			Context.paintVec.x = pointsX[i];
 			Context.paintVec.y = pointsY[i];
 			Context.parseBrushInputs();
-			RenderPathPaint.commandsPaint();
+			RenderPathPaint.commandsPaint(false);
 		}
 
 		Context.brushRadius = _brushRadius;

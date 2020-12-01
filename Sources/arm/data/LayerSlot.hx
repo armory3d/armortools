@@ -434,7 +434,7 @@ class LayerSlot {
 	public function toFillLayer() {
 		Context.setLayer(this);
 		fill_layer = Context.material;
-		Layers.updateFillLayer(4);
+		Layers.updateFillLayer();
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;
@@ -454,7 +454,7 @@ class LayerSlot {
 	public function toFillMask() {
 		Context.setLayer(this, true);
 		fill_mask = Context.material;
-		Layers.updateFillLayers(4);
+		Layers.updateFillLayers();
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.layerPreviewDirty = true;

@@ -75,7 +75,7 @@ class UIMenubar {
 				}
 
 				if (UIHeader.inst.worktab.position == SpaceMaterial) {
-					Layers.updateFillLayers(4);
+					Layers.updateFillLayers();
 				}
 
 				Context.mainObject().skip_context = null;

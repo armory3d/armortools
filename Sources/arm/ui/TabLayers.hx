@@ -573,7 +573,7 @@ class TabLayers {
 						if (l.fill_layer != null) { // Fill layer
 							iron.App.notifyOnInit(l.clear);
 							function _init() {
-								Layers.updateFillLayers(4);
+								Layers.updateFillLayers();
 							}
 							iron.App.notifyOnInit(_init);
 						}

@@ -172,11 +172,11 @@ class MakeMesh {
 				frag.add_shared_sampler('sampler2D texpaint' + l.id);
 				frag.write('texpaint_sample = textureLodShared(texpaint' + l.id + ', texCoord, 0.0);');
 				frag.write('texpaint_opac = texpaint_sample.a;');
-				#if (kha_direct3d12 || kha_vulkan)
-				if (Context.viewportMode == ViewLit) {
-					frag.write('if (texpaint_opac < 0.1) discard;');
-				}
-				#end
+				// #if (kha_direct3d12 || kha_vulkan)
+				// if (Context.viewportMode == ViewLit) {
+				// 	frag.write('if (texpaint_opac < 0.1) discard;');
+				// }
+				// #end
 
 				if (l.texpaint_mask != null) {
 					frag.add_shared_sampler('sampler2D texpaint_mask' + l.id);
