@@ -9,19 +9,17 @@ class MakeClone {
 		frag.write('vec2 cloneDeltaLocal = cloneDelta;'); // TODO: spirv workaround
 		frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDeltaLocal.x) * gbufferSizeLocal.x, (sp.y + cloneDeltaLocal.y) * gbufferSizeLocal.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp + cloneDeltaLocal) * gbufferSizeLocal), 0).ba;');
 		#else
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDeltaLocal.x) * gbufferSizeLocal.x, (1.0 - (sp.y + cloneDeltaLocal.y)) * gbufferSizeLocal.y), 0).ba;');
 		#end
 
-		frag.write('ivec2 texpaint_size = textureSize(texpaint_pack_undo, 0).xy;');
-		frag.write('ivec2 texpaint_coord = ivec2(texCoordInp * texpaint_size);');
-		frag.write('vec3 texpaint_pack_sample = texelFetch(texpaint_pack_undo, texpaint_coord, 0).rgb;');
-		var base = 'texelFetch(texpaint_undo, texpaint_coord, 0).rgb';
+		frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
+		var base = 'textureLod(texpaint_undo, texCoordInp, 0.0).rgb';
 		var rough = 'texpaint_pack_sample.g';
 		var met = 'texpaint_pack_sample.b';
 		var occ = 'texpaint_pack_sample.r';
-		var nortan = 'texelFetch(texpaint_nor_undo, texpaint_coord, 0).rgb';
+		var nortan = 'textureLod(texpaint_nor_undo, texCoordInp, 0.0).rgb';
 		var height = '0.0';
 		var opac = '1.0';
 		frag.write('vec3 basecol = $base;');

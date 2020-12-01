@@ -5,6 +5,7 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
 import arm.node.MakeMesh;
+import arm.Enums;
 
 class RenderPathDeferred {
 
@@ -194,11 +195,9 @@ class RenderPathDeferred {
 		if (Inc.isCached()) return;
 
 		// Match projection matrix jitter
-		var skipTaa = Context.splitView;
-		if (!skipTaa) {
-			@:privateAccess Scene.active.camera.frame = RenderPathDeferred.taaFrame;
-			@:privateAccess Scene.active.camera.projectionJitter();
-		}
+		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
+		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathDeferred.taaFrame;
+		@:privateAccess Scene.active.camera.projectionJitter();
 		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
