@@ -110,6 +110,10 @@ class MakeMaterial {
 		#if rp_voxelao
 		makeVoxel(m);
 		#end
+
+		#if (kha_direct3d12 || kha_vulkan)
+		arm.render.RenderPathRaytrace.dirty = 1;
+		#end
 	}
 
 	public static function parseParticleMaterial() {

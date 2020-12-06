@@ -411,7 +411,7 @@ class TabLayers {
 								for (i in 0...children.length - 1) {
 									Context.setLayer(children[children.length - 1 - i]);
 									History.mergeLayers();
-									Layers.mergeSelectedLayer();
+									Layers.mergeDown();
 								}
 								children[0].parent = null;
 								children[0].name = l.name;
@@ -422,7 +422,7 @@ class TabLayers {
 						if (l.getChildren() == null && ui.button(tr("Merge Down"), Left)) {
 							Context.setLayer(l);
 							iron.App.notifyOnInit(History.mergeLayers);
-							iron.App.notifyOnInit(Layers.mergeSelectedLayer);
+							iron.App.notifyOnInit(Layers.mergeDown);
 						}
 						if (ui.button(tr("Duplicate"), Left)) {
 							function _init() {

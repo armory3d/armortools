@@ -284,35 +284,66 @@ class Layers {
 			expa = null;
 			expb = null;
 			expc = null;
+			RenderPath.active.renderTargets.remove("expa");
+			RenderPath.active.renderTargets.remove("expb");
+			RenderPath.active.renderTargets.remove("expc");
 		}
 		if (expa == null) {
-			var format = App.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
-					 	 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
-					 									 	 TextureFormat.RGBA128;
-			expa = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
-			expb = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
-			expc = Image.createRenderTarget(l.texpaint.width, l.texpaint.height, format);
+			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
+					 	 App.bitsHandle.position == Bits16 ? "RGBA64" :
+					 										 "RGBA128";
+			var t = new RenderTargetRaw();
+			t.name = "expa";
+			t.width = l.texpaint.width;
+			t.height = l.texpaint.height;
+			t.format = format;
+			var rt = RenderPath.active.createRenderTarget(t);
+			expa = rt.image;
+
+			var t = new RenderTargetRaw();
+			t.name = "expb";
+			t.width = l.texpaint.width;
+			t.height = l.texpaint.height;
+			t.format = format;
+			var rt = RenderPath.active.createRenderTarget(t);
+			expb = rt.image;
+
+			var t = new RenderTargetRaw();
+			t.name = "expc";
+			t.width = l.texpaint.width;
+			t.height = l.texpaint.height;
+			t.format = format;
+			var rt = RenderPath.active.createRenderTarget(t);
+			expc = rt.image;
 		}
 	}
 
-	public static function mergeSelectedLayer() {
-		if (pipeMerge == null) makePipe();
-
+	public static function mergeDown() {
 		var l0 = Project.layers[0];
 		var l1 = Context.layer;
-
-		for (i in 1...Project.layers.length) { // Merge down
+		for (i in 1...Project.layers.length) {
 			if (Project.layers[i] == l1) {
 				l0 = Project.layers[i - 1];
 				break;
 			}
 		}
 
-		makeTempImg();
-
 		if (l1.texpaint_mask != null) {
 			l1.applyMask();
 		}
+
+		mergeLayer(l0, l1);
+
+		Context.layer.delete();
+		Context.setLayer(l0);
+		Context.layerPreviewDirty = true;
+	}
+
+	public static function mergeLayer(l0 : LayerSlot, l1: LayerSlot, use_mask = false) {
+		if (!l1.visible) return;
+
+		if (pipeMerge == null) makePipe();
+		makeTempImg();
 
 		// Merge into layer below
 		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
@@ -330,7 +361,7 @@ class Layers {
 			l0.texpaint.g4.setPipeline(pipeMerge);
 			l0.texpaint.g4.setTexture(tex0, l1.texpaint);
 			l0.texpaint.g4.setTexture(tex1, empty);
-			l0.texpaint.g4.setTexture(texmask, empty);
+			l0.texpaint.g4.setTexture(texmask, use_mask ? l1.texpaint_mask : empty);
 			l0.texpaint.g4.setTexture(texa, imga);
 			l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
 			l0.texpaint.g4.setInt(blending, l1.blending);
@@ -377,10 +408,31 @@ class Layers {
 				if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, empty);
 			}
 		}
+	}
 
-		Context.layer.delete();
-		Context.setLayer(l0);
-		Context.layerPreviewDirty = true;
+	public static function applyMask(l: LayerSlot) {
+		if (l.texpaint_mask == null) return;
+
+		if (Layers.pipeMerge == null) Layers.makePipe();
+		Layers.makeTempImg();
+
+		// Copy layer to temp
+		Layers.imga.g2.begin(false);
+		Layers.imga.g2.pipeline = Layers.pipeCopy;
+		Layers.imga.g2.drawImage(l.texpaint, 0, 0);
+		Layers.imga.g2.pipeline = null;
+		Layers.imga.g2.end();
+
+		// Merge mask
+		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+		l.texpaint.g4.begin();
+		l.texpaint.g4.setPipeline(Layers.pipeMask);
+		l.texpaint.g4.setTexture(Layers.tex0Mask, Layers.imga);
+		l.texpaint.g4.setTexture(Layers.texaMask, l.texpaint_mask);
+		l.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+		l.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+		l.texpaint.g4.drawIndexedVertices();
+		l.texpaint.g4.end();
 	}
 
 	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float, i1texmask: kha.Image) {

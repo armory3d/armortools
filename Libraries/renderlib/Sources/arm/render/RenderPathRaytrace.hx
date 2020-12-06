@@ -15,6 +15,7 @@ class RenderPathRaytrace {
 	public static var raysPix = 0;
 	public static var raysSec = 0;
 	public static var ready = false;
+	public static var dirty = 0;
 	static var path: RenderPath;
 	static var first = true;
 	static var f32 = new kha.arrays.Float32Array(24);
@@ -46,7 +47,6 @@ class RenderPathRaytrace {
 			var mode = Context.pathTraceMode == TraceCore ? "core" : "full";
 			raytraceInit("raytrace_brute_" + mode + ext);
 			lastEnvmap = null;
-			lastLayer = null;
 		}
 
 		if (!Context.envmapLoaded) Context.loadEnvmap();
@@ -55,13 +55,19 @@ class RenderPathRaytrace {
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		var materialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
 		var layer = (isLive || materialSpace) ? RenderPathPaint.liveLayer : Context.layer;
-		if (lastEnvmap != savedEnvmap || lastLayer != layer.texpaint) {
+		if (lastEnvmap != savedEnvmap) {
 			lastEnvmap = savedEnvmap;
-			lastLayer = layer.texpaint;
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			Krom.raytraceSetTextures(layer.texpaint.renderTarget_, layer.texpaint_nor.renderTarget_, layer.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			Layers.makeExportImg();
+			Layers.makeTempImg();
+			flattenLayers();
+			Krom.raytraceSetTextures(Layers.expa.renderTarget_, Layers.expb.renderTarget_, Layers.expc.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		}
+
+		if (Context.pdirty > 0 || dirty > 0) {
+			flattenLayers();
 		}
 
 		var cam = Scene.active.camera;
@@ -105,6 +111,26 @@ class RenderPathRaytrace {
 		Context.rdirty--;
 
 		// Context.ddirty = 1; // _RENDER
+	}
+
+	static function flattenLayers() {
+		var l = Project.layers[0];
+		path.setTarget("expa", ["expb", "expc"]);
+		path.bindTarget("texpaint" + l.id, "tex0");
+		path.bindTarget("texpaint_nor" + l.id, "tex1");
+		path.bindTarget("texpaint_pack" + l.id, "tex2");
+		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+
+		var l0 = { texpaint: Layers.expa, texpaint_nor: Layers.expb, texpaint_pack: Layers.expc, texpaint_mask: l.texpaint_mask };
+		if (l0.texpaint_mask != null) {
+			Layers.applyMask(untyped l0);
+		}
+
+		if (Project.layers.length > 1) {
+			for (i in 1...Project.layers.length) {
+				Layers.mergeLayer(untyped l0, Project.layers[i], true);
+			}
+		}
 	}
 
 	public static function commandsBake() {

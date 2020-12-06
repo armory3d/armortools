@@ -216,7 +216,7 @@ class History {
 			else if (step.name == tr("Merge Layers")) {
 				Context.layer = Project.layers[step.layer + 1];
 				iron.App.notifyOnInit(redoMergeLayers);
-				iron.App.notifyOnInit(Layers.mergeSelectedLayer);
+				iron.App.notifyOnInit(Layers.mergeDown);
 			}
 			else if (step.name == tr("New Mask")) {
 				Context.layer = Project.layers[step.layer];
@@ -354,7 +354,7 @@ class History {
 		step.layer -= 1; // Merge down
 		steps.shift(); // Merge consumes 2 steps
 		undos--;
-		// TODO: use undo layer in Layers.mergeSelectedLayer to save memory
+		// TODO: use undo layer in Layers.mergeDown to save memory
 	}
 
 	public static function newMask() {
