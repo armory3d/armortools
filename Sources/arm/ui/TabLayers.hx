@@ -208,11 +208,11 @@ class TabLayers {
 						state = ui.image(l.fill_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
 					}
 					else {
-						ui.g.pipeline = UIView2D.inst.pipe;
+						ui.g.pipeline = UIView2D.pipe;
 						#if kha_opengl
-						ui.currentWindow.texture.g4.setPipeline(UIView2D.inst.pipe);
+						ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
 						#end
-						ui.currentWindow.texture.g4.setInt(UIView2D.inst.channelLocation, 1);
+						ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
 						state = ui.image(l.texpaint_mask_preview, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
 						ui.g.pipeline = null;
 					}

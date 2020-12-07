@@ -15,10 +15,11 @@ import arm.util.RenderUtil;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 
-@:access(zui.Zui)
 class UIView2D {
 
 	public static var inst: UIView2D;
+	public static var pipe: PipelineState;
+	public static var channelLocation: ConstantLocation;
 	public var show = false;
 	public var type = View2DLayer;
 	public var wx: Int;
@@ -30,8 +31,6 @@ class UIView2D {
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	public var pipe: PipelineState;
-	public var channelLocation: ConstantLocation;
 	var texType = TexBase;
 	var uvmapShow = false;
 	var tiledShow = false;
@@ -58,6 +57,7 @@ class UIView2D {
 		ui.scrollEnabled = false;
 	}
 
+	@:access(zui.Zui)
 	public function render(g: kha.graphics2.Graphics) {
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
