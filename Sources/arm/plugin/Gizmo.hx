@@ -136,11 +136,15 @@ class Gizmo {
 				else if (Context.axisZ) {
 					Context.layer.decalMat._32 = Context.axisLoc;
 				}
-				Layers.updateFillLayer();
+				if (Context.material != Context.layer.fill_layer) {
+					Context.setMaterial(Context.layer.fill_layer);
+				}
+				Layers.updateFillLayer(Context.axisStarted);
 			}
 		}
 
 		// Axis movement
+		Context.axisStarted = false;
 		if (mouse.started("left") && Context.object.name != "Scene") {
 			var trs = [Context.gizmoX.transform, Context.gizmoY.transform, Context.gizmoZ.transform];
 			var hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
@@ -148,7 +152,10 @@ class Gizmo {
 				if (hit.object == Context.gizmoX) Context.axisX = true;
 				else if (hit.object == Context.gizmoY) Context.axisY = true;
 				else if (hit.object == Context.gizmoZ) Context.axisZ = true;
-				if (Context.axisX || Context.axisY || Context.axisZ) Context.axisStart = 0.0;
+				if (Context.axisX || Context.axisY || Context.axisZ) {
+					Context.axisStart = 0.0;
+					Context.axisStarted = true;
+				}
 			}
 		}
 		else if (mouse.released("left")) {

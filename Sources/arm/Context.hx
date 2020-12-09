@@ -143,6 +143,7 @@ class Context {
 	public static var axisX = false;
 	public static var axisY = false;
 	public static var axisZ = false;
+	public static var axisStarted = false;
 	public static var axisStart = 0.0;
 	public static var axisLoc = 0.0;
 

@@ -513,7 +513,7 @@ class Layers {
 						setObjectMask();
 
 						// Decal layer
-						if (l.uvType == UVProject) {
+						if (l.uvType == UVProject && !Context.layerIsMask) {
 							l.clearLayer();
 						}
 						RenderPathPaint.commandsPaint(false);
@@ -547,7 +547,7 @@ class Layers {
 		}
 	}
 
-	public static function updateFillLayer() {
+	public static function updateFillLayer(parsePaint = true) {
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
@@ -559,11 +559,11 @@ class Layers {
 		UIHeader.inst.worktab.position = SpacePaint;
 
 		// Decal layer
-		if (Context.layer.uvType == UVProject) {
+		if (Context.layer.uvType == UVProject && !Context.layerIsMask) {
 			Context.layer.clearLayer();
 		}
 
-		MakeMaterial.parsePaintMaterial();
+		if (parsePaint) MakeMaterial.parsePaintMaterial();
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.dilate(true, true);
 

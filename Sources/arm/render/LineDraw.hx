@@ -19,7 +19,7 @@ import arm.Enums;
 class LineDraw {
 
 	public static var color: kha.Color = 0xffff0000;
-	public static var strength = 0.02;
+	public static var strength = 0.005;
 	public static var mat: iron.math.Mat4 = null;
 	public static var dim: iron.math.Vec4 = null;
 

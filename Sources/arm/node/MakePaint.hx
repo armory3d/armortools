@@ -73,7 +73,7 @@ class MakePaint {
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		var decalLayer = Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
+		var decalLayer = Context.layer.fill_layer != null && Context.layer.uvType == UVProject && !Context.layerIsMask;
 		if (decalLayer) {
 			vert.add_uniform('mat4 WVP', '_decalLayerMatrix');
 		}
