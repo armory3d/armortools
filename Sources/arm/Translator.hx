@@ -97,7 +97,7 @@ class Translator {
 			newFont = { path : "font_cjk.ttc", scale : 1.4 };
 			var cjkFontPath = Path.data() + Path.sep + newFont.path;
 			if (!File.exists(cjkFontPath)) {
-				File.download("https://github.com/armory3d/armorpaint/raw/master/Assets/common/font_cjk.ttc", cjkFontPath);
+				File.download("https://github.com/armory3d/armorpaint/raw/master/Assets/common/extra/font_cjk.ttc", cjkFontPath);
 			}
 			if (!File.exists(cjkFontPath)) {
 				// Fall back to English
