@@ -16,6 +16,7 @@ import arm.Enums;
 class Uniforms {
 
 	static var vec = new Vec4();
+	static var orthoP = Mat4.ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	public static function init() {
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
@@ -167,6 +168,11 @@ class Uniforms {
 				Context.prevPaintVecY = Context.lastPaintVecY;
 				return v;
 			}
+			case "_decalLayerLoc": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
+				return v;
+			}
 		}
 
 		return v;
@@ -228,7 +234,7 @@ class Uniforms {
 				var m = iron.object.Uniforms.helpMat;
 				m.setFrom(Context.layer.decalMat);
 				m.getInverse(m);
-				m.multmat(camera.P);
+				m.multmat(orthoP);
 				return m;
 			}
 		}

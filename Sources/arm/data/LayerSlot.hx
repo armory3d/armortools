@@ -311,6 +311,7 @@ class LayerSlot {
 		l.fill_layer = fill_layer;
 		l.objectMask = objectMask;
 		l.blending = blending;
+		l.uvType = uvType;
 		l.paintBase = paintBase;
 		l.paintOpac = paintOpac;
 		l.paintOcc = paintOcc;

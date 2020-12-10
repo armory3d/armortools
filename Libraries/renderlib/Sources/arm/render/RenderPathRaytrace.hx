@@ -290,6 +290,8 @@ class RenderPathRaytrace {
 		commands();
 
 		path.setTarget("buf");
+		path.drawMeshes("overlay");
+		path.setTarget("buf");
 		Inc.drawCompass(path.currentG);
 		path.setTarget("taa");
 		path.bindTarget("buf", "tex");
