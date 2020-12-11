@@ -137,16 +137,16 @@ class UISidebar {
 
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
-		//
-		Context.gizmo = Scene.active.getChild(".GizmoTranslate");
-		Context.gizmo.transform.scale.set(0.5, 0.5, 0.5);
-		Context.gizmo.transform.buildMatrix();
-		Context.gizmoX = Scene.active.getChild("GizmoX");
-		Context.gizmoY = Scene.active.getChild("GizmoY");
-		Context.gizmoZ = Scene.active.getChild("GizmoZ");
-		//
 
-		Context.object = Scene.active.getChild("Cube");
+		Context.gizmo = Scene.active.getChild(".Gizmo");
+		Context.gizmoTranslateX = Context.gizmo.getChild(".TranslateX");
+		Context.gizmoTranslateY = Context.gizmo.getChild(".TranslateY");
+		Context.gizmoTranslateZ = Context.gizmo.getChild(".TranslateZ");
+		Context.gizmoScaleX = Context.gizmo.getChild(".ScaleX");
+		Context.gizmoScaleY = Context.gizmo.getChild(".ScaleY");
+		Context.gizmoScaleZ = Context.gizmo.getChild(".ScaleZ");
+
+		Context.object = Scene.active.getChild(".Cube");
 		Context.paintObject = cast(Context.object, MeshObject);
 		Project.paintObjects = [Context.paintObject];
 

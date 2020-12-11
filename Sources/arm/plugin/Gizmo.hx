@@ -5,6 +5,7 @@ import iron.object.LightObject;
 import iron.system.Input;
 import iron.math.RayCaster;
 import iron.math.Vec4;
+import iron.math.Quat;
 import iron.Scene;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
@@ -13,6 +14,8 @@ import arm.Enums;
 class Gizmo {
 
 	static var v = new Vec4();
+	static var v0 = new Vec4();
+	static var q = new Quat();
 
 	public static function update() {
 
@@ -37,9 +40,12 @@ class Gizmo {
 		var cam = Scene.active.camera;
 		var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 10;
 		gizmo.transform.scale.set(dist, dist, dist);
-		Context.gizmoX.transform.scale.set(dist, dist, dist);
-		Context.gizmoY.transform.scale.set(dist, dist, dist);
-		Context.gizmoZ.transform.scale.set(dist, dist, dist);
+		Context.gizmoTranslateX.transform.scale.set(dist / 2, dist, dist);
+		Context.gizmoTranslateY.transform.scale.set(dist, dist / 2, dist);
+		Context.gizmoTranslateZ.transform.scale.set(dist, dist, dist / 2);
+		Context.gizmoScaleX.transform.scale.set(dist, dist, dist);
+		Context.gizmoScaleY.transform.scale.set(dist, dist, dist);
+		Context.gizmoScaleZ.transform.scale.set(dist, dist, dist);
 		gizmo.transform.buildMatrix();
 
 		// Scene control
@@ -106,16 +112,26 @@ class Gizmo {
 				#end
 			}
 
-			if (Context.axisX || Context.axisY || Context.axisZ) {
-				if (Context.axisX) {
-					Context.object.transform.loc.x = Context.axisLoc;
+			if (Context.translateX || Context.translateY || Context.translateZ || Context.scaleX || Context.scaleY || Context.scaleZ) {
+				if (Context.translateX) {
+					Context.object.transform.loc.x = Context.gizmoDrag;
 				}
-				else if (Context.axisY) {
-					Context.object.transform.loc.y = Context.axisLoc;
+				else if (Context.translateY) {
+					Context.object.transform.loc.y = Context.gizmoDrag;
 				}
-				else if (Context.axisZ) {
-					Context.object.transform.loc.z = Context.axisLoc;
+				else if (Context.translateZ) {
+					Context.object.transform.loc.z = Context.gizmoDrag;
 				}
+				else if (Context.scaleX) {
+					Context.object.transform.scale.x += Context.gizmoDrag - Context.gizmoDragLast;
+				}
+				else if (Context.scaleY) {
+					Context.object.transform.scale.y += Context.gizmoDrag - Context.gizmoDragLast;
+				}
+				else if (Context.scaleZ) {
+					Context.object.transform.scale.z += Context.gizmoDrag - Context.gizmoDragLast;
+				}
+				Context.gizmoDragLast = Context.gizmoDrag;
 
 				Context.object.transform.buildMatrix();
 				#if arm_physics
@@ -126,43 +142,76 @@ class Gizmo {
 		}
 		// Decal layer control
 		else if (isDecal) {
-			if (Context.axisX || Context.axisY || Context.axisZ) {
-				if (Context.axisX) {
-					Context.layer.decalMat._30 = Context.axisLoc;
+			if (Context.translateX || Context.translateY || Context.translateZ || Context.scaleX || Context.scaleY || Context.scaleZ) {
+				if (Context.translateX) {
+					Context.layer.decalMat._30 = Context.gizmoDrag;
 				}
-				else if (Context.axisY) {
-					Context.layer.decalMat._31 = Context.axisLoc;
+				else if (Context.translateY) {
+					Context.layer.decalMat._31 = Context.gizmoDrag;
 				}
-				else if (Context.axisZ) {
-					Context.layer.decalMat._32 = Context.axisLoc;
+				else if (Context.translateZ) {
+					Context.layer.decalMat._32 = Context.gizmoDrag;
 				}
+				else if (Context.scaleX) {
+					Context.layer.decalMat.decompose(v, q, v0);
+					v0.x += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.layer.decalMat.compose(v, q, v0);
+				}
+				else if (Context.scaleY) {
+					Context.layer.decalMat.decompose(v, q, v0);
+					v0.y += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.layer.decalMat.compose(v, q, v0);
+				}
+				else if (Context.scaleZ) {
+					Context.layer.decalMat.decompose(v, q, v0);
+					v0.z += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.layer.decalMat.compose(v, q, v0);
+				}
+				Context.gizmoDragLast = Context.gizmoDrag;
+
 				if (Context.material != Context.layer.fill_layer) {
 					Context.setMaterial(Context.layer.fill_layer);
 				}
-				Layers.updateFillLayer(Context.axisStarted);
+				Layers.updateFillLayer(Context.gizmoStarted);
 			}
 		}
 
-		// Axis movement
-		Context.axisStarted = false;
+		Context.gizmoStarted = false;
 		if (mouse.started("left") && Context.object.name != "Scene") {
-			var trs = [Context.gizmoX.transform, Context.gizmoY.transform, Context.gizmoZ.transform];
+			// Translate
+			var trs = [Context.gizmoTranslateX.transform, Context.gizmoTranslateY.transform, Context.gizmoTranslateZ.transform];
 			var hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
 			if (hit != null) {
-				if (hit.object == Context.gizmoX) Context.axisX = true;
-				else if (hit.object == Context.gizmoY) Context.axisY = true;
-				else if (hit.object == Context.gizmoZ) Context.axisZ = true;
-				if (Context.axisX || Context.axisY || Context.axisZ) {
-					Context.axisStart = 0.0;
-					Context.axisStarted = true;
+				if (hit.object == Context.gizmoTranslateX) Context.translateX = true;
+				else if (hit.object == Context.gizmoTranslateY) Context.translateY = true;
+				else if (hit.object == Context.gizmoTranslateZ) Context.translateZ = true;
+				if (Context.translateX || Context.translateY || Context.translateZ) {
+					Context.gizmoOffset = 0.0;
+					Context.gizmoStarted = true;
 				}
 			}
+			else {
+				// Scale
+				var trs = [Context.gizmoScaleX.transform, Context.gizmoScaleY.transform, Context.gizmoScaleZ.transform];
+				var hit = RayCaster.closestBoxIntersect(trs, mouse.viewX, mouse.viewY, Scene.active.camera);
+				if (hit != null) {
+					if (hit.object == Context.gizmoScaleX) Context.scaleX = true;
+					else if (hit.object == Context.gizmoScaleY) Context.scaleY = true;
+					else if (hit.object == Context.gizmoScaleZ) Context.scaleZ = true;
+					if (Context.scaleX || Context.scaleY || Context.scaleZ) {
+						Context.gizmoOffset = 0.0;
+						Context.gizmoStarted = true;
+					}
+				}
+			}
+
 		}
 		else if (mouse.released("left")) {
-			Context.axisX = Context.axisY = Context.axisZ = false;
+			Context.translateX = Context.translateY = Context.translateZ = false;
+			Context.scaleX = Context.scaleY = Context.scaleZ = false;
 		}
 
-		if (Context.axisX || Context.axisY || Context.axisZ) {
+		if (Context.translateX || Context.translateY || Context.translateZ || Context.scaleX || Context.scaleY || Context.scaleZ) {
 			Context.rdirty = 2;
 
 			if (isObject) {
@@ -173,29 +222,31 @@ class Gizmo {
 				v.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
 			}
 
-			if (Context.axisX) {
+			if (Context.translateX || Context.scaleX) {
 				var hit = RayCaster.planeIntersect(Vec4.yAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (Context.axisStart == 0) Context.axisStart = hit.x - v.x;
-					Context.axisLoc = hit.x - Context.axisStart;
+					if (Context.gizmoStarted) Context.gizmoOffset = hit.x - v.x;
+					Context.gizmoDrag = hit.x - Context.gizmoOffset;
 				}
 			}
-			else if (Context.axisY) {
+			else if (Context.translateY || Context.scaleY) {
 				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (Context.axisStart == 0) Context.axisStart = hit.y - v.y;
-					Context.axisLoc = hit.y - Context.axisStart;
+					if (Context.gizmoStarted) Context.gizmoOffset = hit.y - v.y;
+					Context.gizmoDrag = hit.y - Context.gizmoOffset;
 				}
 			}
-			else if (Context.axisZ) {
+			else if (Context.translateZ || Context.scaleZ) {
 				var hit = RayCaster.planeIntersect(Vec4.xAxis(), v, mouse.viewX, mouse.viewY, Scene.active.camera);
 				if (hit != null) {
-					if (Context.axisStart == 0) Context.axisStart = hit.z - v.z;
-					Context.axisLoc = hit.z - Context.axisStart;
+					if (Context.gizmoStarted) Context.gizmoOffset = hit.z - v.z;
+					Context.gizmoDrag = hit.z - Context.gizmoOffset;
 				}
 			}
+
+			if (Context.gizmoStarted) Context.gizmoDragLast = Context.gizmoDrag;
 		}
 
-		Input.occupied = (Context.axisX || Context.axisY || Context.axisZ) && mouse.viewX < App.w();
+		Input.occupied = (Context.translateX || Context.translateY || Context.translateZ || Context.scaleX || Context.scaleY || Context.scaleZ) && mouse.viewX < App.w();
 	}
 }

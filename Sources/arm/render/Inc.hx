@@ -90,31 +90,31 @@ class Inc {
 		if (Context.showCompass) {
 			var scene = Scene.active;
 			var cam = Scene.active.camera;
-			var gizmo: MeshObject = cast scene.getChild(".GizmoTranslate");
+			var compass: MeshObject = cast scene.getChild(".Compass");
 
-			var visible = gizmo.visible;
-			var parent = gizmo.parent;
-			var loc = gizmo.transform.loc;
-			var rot = gizmo.transform.rot;
+			var visible = compass.visible;
+			var parent = compass.parent;
+			var loc = compass.transform.loc;
+			var rot = compass.transform.rot;
 			var crot = cam.transform.rot;
 			var ratio = iron.App.w() / iron.App.h();
 			var P = cam.P;
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
-			gizmo.visible = true;
-			gizmo.parent = cam;
-			gizmo.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
-			gizmo.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
-			gizmo.transform.scale.set(0.4, 0.4, 0.4);
-			gizmo.transform.buildMatrix();
+			compass.visible = true;
+			compass.parent = cam;
+			compass.transform.loc = new Vec4(7.4 * ratio, 7.0, -1);
+			compass.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
+			compass.transform.scale.set(0.4, 0.4, 0.4);
+			compass.transform.buildMatrix();
 
-			gizmo.render(currentG, "overlay", []);
+			compass.render(currentG, "overlay", []);
 
 			cam.P = P;
-			gizmo.visible = visible;
-			gizmo.parent = parent;
-			gizmo.transform.loc = loc;
-			gizmo.transform.rot = rot;
-			gizmo.transform.buildMatrix();
+			compass.visible = visible;
+			compass.parent = parent;
+			compass.transform.loc = loc;
+			compass.transform.rot = rot;
+			compass.transform.buildMatrix();
 		}
 	}
 

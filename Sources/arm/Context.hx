@@ -137,15 +137,25 @@ class Context {
 	public static var cloneDeltaY = 0.0;
 
 	public static var gizmo: Object = null;
-	public static var gizmoX: Object = null;
-	public static var gizmoY: Object = null;
-	public static var gizmoZ: Object = null;
-	public static var axisX = false;
-	public static var axisY = false;
-	public static var axisZ = false;
-	public static var axisStarted = false;
-	public static var axisStart = 0.0;
-	public static var axisLoc = 0.0;
+	public static var gizmoTranslateX: Object = null;
+	public static var gizmoTranslateY: Object = null;
+	public static var gizmoTranslateZ: Object = null;
+	public static var gizmoScaleX: Object = null;
+	public static var gizmoScaleY: Object = null;
+	public static var gizmoScaleZ: Object = null;
+	public static var gizmoStarted = false;
+	public static var gizmoOffset = 0.0;
+	public static var gizmoDrag = 0.0;
+	public static var gizmoDragLast = 0.0;
+	public static var translateX = false;
+	public static var translateY = false;
+	public static var translateZ = false;
+	public static var scaleX = false;
+	public static var scaleY = false;
+	public static var scaleZ = false;
+	public static var rotateX = false;
+	public static var rotateY = false;
+	public static var rotateZ = false;
 
 	public static var brushNodesRadius = 1.0;
 	public static var brushNodesOpacity = 1.0;

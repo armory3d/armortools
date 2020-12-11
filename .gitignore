@@ -1,3 +1,4 @@
 build*/
 .vscode
 *.DS_Store
+*.blend1

@@ -220,7 +220,7 @@ class Project {
 			}
 		}
 
-		var n = Context.projectType == ModelRoundedCube ? "Cube" : "Tessellated";
+		var n = Context.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics2.Graphics.current;
