@@ -143,6 +143,9 @@ class Context {
 	public static var gizmoScaleX: Object = null;
 	public static var gizmoScaleY: Object = null;
 	public static var gizmoScaleZ: Object = null;
+	public static var gizmoRotateX: Object = null;
+	public static var gizmoRotateY: Object = null;
+	public static var gizmoRotateZ: Object = null;
 	public static var gizmoStarted = false;
 	public static var gizmoOffset = 0.0;
 	public static var gizmoDrag = 0.0;

@@ -23,10 +23,10 @@ class MakeTexcoord {
 				frag.n = true;
 				frag.write('if (abs(dot(n, vec3(0, 0, 1)) - 1.0) > 0.2) discard;');
 
-				frag.add_uniform('vec3 decalLayerLoc', '_decalLayerLoc');
-				frag.write_attrib('vec3 sdbox_q = abs(decalLayerLoc) - vec3(0.5, 0.5, 0.5);');
-				frag.write_attrib('float sdbox = length(max(sdbox_q, 0.0)) + min(max(sdbox_q.x, max(sdbox_q.y, sdbox_q.z)), 0.0);');
-				frag.write_attrib('if (sdbox > 0.5) discard;');
+				// frag.add_uniform('vec3 decalLayerLoc', '_decalLayerLoc');
+				// frag.write_attrib('vec3 sdbox_q = abs(decalLayerLoc) - vec3(0.5, 0.5, 0.5);');
+				// frag.write_attrib('float sdbox = length(max(sdbox_q, 0.0)) + min(max(sdbox_q.x, max(sdbox_q.y, sdbox_q.z)), 0.0);');
+				// frag.write_attrib('if (sdbox > 0.5) discard;');
 			}
 			else if (decal) {
 				frag.add_uniform('vec4 decalMask', '_decalMask');

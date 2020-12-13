@@ -145,6 +145,9 @@ class UISidebar {
 		Context.gizmoScaleX = Context.gizmo.getChild(".ScaleX");
 		Context.gizmoScaleY = Context.gizmo.getChild(".ScaleY");
 		Context.gizmoScaleZ = Context.gizmo.getChild(".ScaleZ");
+		Context.gizmoRotateX = Context.gizmo.getChild(".RotateX");
+		Context.gizmoRotateY = Context.gizmo.getChild(".RotateY");
+		Context.gizmoRotateZ = Context.gizmo.getChild(".RotateZ");
 
 		Context.object = Scene.active.getChild(".Cube");
 		Context.paintObject = cast(Context.object, MeshObject);
