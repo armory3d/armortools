@@ -28,6 +28,7 @@ typedef TLayerData = {
 	public var uv_scale: Float;
 	public var uv_rot: Float;
 	public var uv_type: Int;
+	public var decal_mat: kha.arrays.Float32Array;
 	public var opacity_mask: Float;
 	public var fill_layer: Int;
 	public var fill_mask: Int;

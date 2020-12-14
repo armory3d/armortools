@@ -390,7 +390,8 @@ class App {
 			else if (dragMaterial != null) {
 				// Material dragged onto viewport or layers tab
 				if (inViewport || inLayers || in2dView) {
-					Layers.createFillLayer();
+					var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
+					Layers.createFillLayer(uvType);
 				}
 				else if (inNodes) {
 					var index = 0;

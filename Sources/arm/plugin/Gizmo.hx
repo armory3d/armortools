@@ -16,6 +16,7 @@ class Gizmo {
 	static var v = new Vec4();
 	static var v0 = new Vec4();
 	static var q = new Quat();
+	static var q0 = new Quat();
 
 	public static function update() {
 
@@ -132,19 +133,16 @@ class Gizmo {
 					Context.object.transform.scale.z += Context.gizmoDrag - Context.gizmoDragLast;
 				}
 				else if (Context.rotateX) {
-					var euler = Context.object.transform.rot.getEuler();
-					euler.x = Context.gizmoDrag;
-					Context.object.transform.rot.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.xAxis(), Context.gizmoDrag - Context.gizmoDragLast);
+					Context.object.transform.rot.mult(q0);
 				}
 				else if (Context.rotateY) {
-					var euler = Context.object.transform.rot.getEuler();
-					euler.y = Context.gizmoDrag;
-					Context.object.transform.rot.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.yAxis(), Context.gizmoDrag - Context.gizmoDragLast);
+					Context.object.transform.rot.mult(q0);
 				}
 				else if (Context.rotateZ) {
-					var euler = Context.object.transform.rot.getEuler();
-					euler.z = Context.gizmoDrag;
-					Context.object.transform.rot.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.zAxis(), Context.gizmoDrag - Context.gizmoDragLast);
+					Context.object.transform.rot.mult(q0);
 				}
 				Context.gizmoDragLast = Context.gizmoDrag;
 
@@ -184,23 +182,20 @@ class Gizmo {
 				}
 				else if (Context.rotateX) {
 					Context.layer.decalMat.decompose(v, q, v0);
-					var euler = q.getEuler();
-					euler.x = Context.gizmoDrag;
-					q.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.xAxis(), -Context.gizmoDrag + Context.gizmoDragLast);
+					q.multquats(q0, q);
 					Context.layer.decalMat.compose(v, q, v0);
 				}
 				else if (Context.rotateY) {
 					Context.layer.decalMat.decompose(v, q, v0);
-					var euler = q.getEuler();
-					euler.y = Context.gizmoDrag;
-					q.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.yAxis(), -Context.gizmoDrag + Context.gizmoDragLast);
+					q.multquats(q0, q);
 					Context.layer.decalMat.compose(v, q, v0);
 				}
 				else if (Context.rotateZ) {
 					Context.layer.decalMat.decompose(v, q, v0);
-					var euler = q.getEuler();
-					euler.z = Context.gizmoDrag;
-					q.fromEuler(euler.x, euler.y, euler.z);
+					q0.fromAxisAngle(Vec4.zAxis(), Context.gizmoDrag - Context.gizmoDragLast);
+					q.multquats(q0, q);
 					Context.layer.decalMat.compose(v, q, v0);
 				}
 				Context.gizmoDragLast = Context.gizmoDrag;
@@ -288,9 +283,9 @@ class Gizmo {
 				if (hit != null) {
 					if (Context.gizmoStarted) {
 						Context.layer.decalMat.decompose(v, q, v0);
-						Context.gizmoOffset = q.getEuler().x - Math.atan2(hit.y - v.y, hit.z - v.z);
+						Context.gizmoOffset = Math.atan2(hit.y - v.y, hit.z - v.z);
 					}
-					Context.gizmoDrag = Context.gizmoOffset + Math.atan2(hit.y - v.y, hit.z - v.z);
+					Context.gizmoDrag = Math.atan2(hit.y - v.y, hit.z - v.z) - Context.gizmoOffset;
 				}
 			}
 			else if (Context.rotateY) {
@@ -298,9 +293,9 @@ class Gizmo {
 				if (hit != null) {
 					if (Context.gizmoStarted) {
 						Context.layer.decalMat.decompose(v, q, v0);
-						Context.gizmoOffset = q.getEuler().y - Math.atan2(hit.z - v.z, hit.x - v.x);
+						Context.gizmoOffset = Math.atan2(hit.z - v.z, hit.x - v.x);
 					}
-					Context.gizmoDrag = Context.gizmoOffset + Math.atan2(hit.z - v.z, hit.x - v.x);
+					Context.gizmoDrag = Math.atan2(hit.z - v.z, hit.x - v.x) - Context.gizmoOffset;
 				}
 			}
 			else if (Context.rotateZ) {
@@ -308,9 +303,9 @@ class Gizmo {
 				if (hit != null) {
 					if (Context.gizmoStarted) {
 						Context.layer.decalMat.decompose(v, q, v0);
-						Context.gizmoOffset = q.getEuler().z - Math.atan2(hit.y - v.y, hit.x - v.x);
+						Context.gizmoOffset = Math.atan2(hit.y - v.y, hit.x - v.x);
 					}
-					Context.gizmoDrag = Context.gizmoOffset + Math.atan2(hit.y - v.y, hit.x - v.x);
+					Context.gizmoDrag = Math.atan2(hit.y - v.y, hit.x - v.x) - Context.gizmoOffset;
 				}
 			}
 

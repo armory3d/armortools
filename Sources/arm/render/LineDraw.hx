@@ -42,14 +42,13 @@ class LineDraw {
 
 	public static function render(g4: kha.graphics4.Graphics) {
 
-		return; ////
-
+		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown);
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
 		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
-		if (!isDecal) return;
+		if (!isDecal || hide) return;
 
 		mat = Context.layer.decalMat;
-		dim = Context.layer.decalDim;
+		dim = Context.layer.decalMat.getScale();
 
 		g = g4;
 

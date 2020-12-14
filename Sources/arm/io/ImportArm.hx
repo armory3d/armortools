@@ -11,6 +11,7 @@ import iron.data.MaterialData;
 import iron.data.MeshData;
 import iron.data.Data;
 import iron.data.SceneFormat;
+import iron.math.Mat4;
 import iron.system.ArmPack;
 import iron.system.Lz4;
 import iron.object.Object;
@@ -256,6 +257,7 @@ class ImportArm {
 					l.scale = ld.uv_scale;
 					l.angle = ld.uv_rot;
 					l.uvType = ld.uv_type;
+					if (ld.decal_mat != null) l.decalMat = Mat4.fromFloat32Array(ld.decal_mat);
 					l.maskOpacity = ld.opacity_mask;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;

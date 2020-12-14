@@ -58,6 +58,7 @@ class ExportArm {
 				uv_scale: l.scale,
 				uv_rot: l.angle,
 				uv_type: l.uvType,
+				decal_mat: l.uvType == UVProject ? l.decalMat.toFloat32Array() : null,
 				opacity_mask: l.maskOpacity,
 				fill_layer: l.fill_layer != null ? Project.materials.indexOf(l.fill_layer) : -1,
 				fill_mask: l.fill_mask != null ? Project.materials.indexOf(l.fill_mask) : -1,

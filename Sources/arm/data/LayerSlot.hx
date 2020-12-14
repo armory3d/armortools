@@ -44,9 +44,7 @@ class LayerSlot {
 	public var paintHeight = true;
 	public var paintEmis = true;
 	public var paintSubs = true;
-
 	public var decalMat = iron.math.Mat4.identity(); // Decal layer
-	public var decalDim = new iron.math.Vec4(1, 1, 1);
 
 	var createMaskColor: Int;
 	var createMaskImage: Image;

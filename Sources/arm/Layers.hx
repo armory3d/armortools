@@ -614,10 +614,11 @@ class Layers {
 		return l;
 	}
 
-	public static function createFillLayer() {
+	public static function createFillLayer(uvType = UVMap) {
 		function _init() {
 			var l = newLayer(false);
 			History.newLayer();
+			l.uvType = uvType;
 			l.objectMask = Context.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();

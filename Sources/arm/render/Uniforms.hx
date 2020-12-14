@@ -97,6 +97,9 @@ class Uniforms {
 			case "_dilateRadius": {
 				return UVUtil.dilatemap != null ? Config.raw.dilate_radius : 0.0;
 			}
+			case "_decalLayerDim": {
+				return Context.layer.decalMat.getScale().z * 0.5;
+			}
 		}
 		if (MaterialParser.script_links != null) {
 			for (key in MaterialParser.script_links.keys()) {
@@ -171,6 +174,11 @@ class Uniforms {
 			case "_decalLayerLoc": {
 				v = iron.object.Uniforms.helpVec;
 				v.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
+				return v;
+			}
+			case "_decalLayerNor": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.layer.decalMat._20, Context.layer.decalMat._21, Context.layer.decalMat._22).normalize();
 				return v;
 			}
 		}
