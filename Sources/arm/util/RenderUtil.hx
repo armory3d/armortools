@@ -482,7 +482,7 @@ class RenderUtil {
 		var decalMat = Mat4.identity();
 		var loc = new Vec4(Context.posXPicked, Context.posYPicked, Context.posZPicked);
 		var rot = new Quat().fromTo(new Vec4(0.0, 0.0, -1.0), new Vec4(Context.norXPicked, Context.norYPicked, Context.norZPicked));
-		var scale = new Vec4(0.5, 0.5, 0.5);
+		var scale = new Vec4(Context.brushRadius * 0.5, Context.brushRadius * 0.5, Context.brushRadius * 0.5);
 		decalMat.compose(loc, rot, scale);
 		return decalMat;
 	}
