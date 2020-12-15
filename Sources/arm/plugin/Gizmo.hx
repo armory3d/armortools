@@ -40,7 +40,8 @@ class Gizmo {
 			gizmo.transform.loc.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
 		}
 		var cam = Scene.active.camera;
-		var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 10;
+		var fov = cam.data.raw.fov;
+		var dist = Vec4.distance(cam.transform.loc, gizmo.transform.loc) / 8 * fov;
 		gizmo.transform.scale.set(dist, dist, dist);
 		Context.gizmoTranslateX.transform.scale.set(dist, dist, dist);
 		Context.gizmoTranslateY.transform.scale.set(dist, dist, dist);
