@@ -10,6 +10,7 @@ import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
+import iron.math.Mat4;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
@@ -614,11 +615,12 @@ class Layers {
 		return l;
 	}
 
-	public static function createFillLayer(uvType = UVMap) {
+	public static function createFillLayer(uvType = UVMap, decalMat: Mat4 = null) {
 		function _init() {
 			var l = newLayer(false);
 			History.newLayer();
 			l.uvType = uvType;
+			if (decalMat != null) l.decalMat = decalMat;
 			l.objectMask = Context.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();

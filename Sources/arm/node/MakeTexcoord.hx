@@ -22,7 +22,8 @@ class MakeTexcoord {
 
 				frag.n = true;
 				frag.add_uniform('vec3 decalLayerNor', '_decalLayerNor');
-				frag.write('if (abs(dot(n, decalLayerNor) - 1.0) > 0.2) discard;');
+				var angle = Context.brushAngleRejectDot;
+				frag.write('if (abs(dot(n, decalLayerNor) - 1.0) > $angle) discard;');
 
 				frag.wposition = true;
 				frag.add_uniform('vec3 decalLayerLoc', '_decalLayerLoc');

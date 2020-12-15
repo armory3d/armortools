@@ -1,5 +1,6 @@
 package arm.node;
 
+import arm.shader.ShaderFunctions;
 import arm.shader.NodeShader;
 import arm.Enums;
 
@@ -28,15 +29,26 @@ class MakeColorIdPicker {
 			frag.write('fragColor = vec4(idcol, 1.0);');
 		}
 		else if (Context.tool == ToolPicker) {
-			frag.add_out('vec4 fragColor[3]');
-			frag.add_uniform('sampler2D texpaint');
-			frag.add_uniform('sampler2D texpaint_nor');
-			frag.add_uniform('sampler2D texpaint_pack');
-			frag.write('fragColor[0] = textureLod(texpaint, texCoordInp, 0.0);');
-			frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
-			frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
-			frag.write('fragColor[0].a = texCoordInp.x;');
-			frag.write('fragColor[2].a = texCoordInp.y;');
+			if (Context.pickPosNor) {
+				frag.add_out('vec4 fragColor[2]');
+				frag.add_uniform('sampler2D gbufferD');
+				frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
+				frag.add_function(ShaderFunctions.str_get_pos_from_depth);
+				frag.add_function(ShaderFunctions.str_get_nor_from_depth);
+				frag.write('fragColor[0] = vec4(get_pos_from_depth(vec2(inpLocal.x, 1.0 - inpLocal.y), invVP), 0.0);');
+				frag.write('fragColor[1] = vec4(get_nor_from_depth(fragColor[0].rgb, vec2(inpLocal.x, 1.0 - inpLocal.y), invVP, vec2(1.0, 1.0) / gbufferSize), 0.0);');
+			}
+			else {
+				frag.add_out('vec4 fragColor[3]');
+				frag.add_uniform('sampler2D texpaint');
+				frag.add_uniform('sampler2D texpaint_nor');
+				frag.add_uniform('sampler2D texpaint_pack');
+				frag.write('fragColor[0] = textureLod(texpaint, texCoordInp, 0.0);');
+				frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
+				frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
+				frag.write('fragColor[0].a = texCoordInp.x;');
+				frag.write('fragColor[2].a = texCoordInp.y;');
+			}
 		}
 	}
 }

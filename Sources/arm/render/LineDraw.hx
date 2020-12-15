@@ -42,7 +42,7 @@ class LineDraw {
 
 	public static function render(g4: kha.graphics4.Graphics) {
 
-		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown);
+		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || iron.system.Input.getKeyboard().down("control");
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
 		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 		if (!isDecal || hide) return;

@@ -71,6 +71,13 @@ class Context {
 	public static var uvyPicked = 0.0;
 	public static var pickerSelectMaterial = true;
 	public static var pickerMaskHandle = new Handle();
+	public static var pickPosNor = false;
+	public static var posXPicked = 0.0;
+	public static var posYPicked = 0.0;
+	public static var posZPicked = 0.0;
+	public static var norXPicked = 0.0;
+	public static var norYPicked = 0.0;
+	public static var norZPicked = 0.0;
 
 	public static var defaultEnvmap: Image = null;
 	public static var defaultIrradiance: kha.arrays.Float32Array = null;

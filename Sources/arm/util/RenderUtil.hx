@@ -14,6 +14,7 @@ import iron.RenderPath;
 import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Vec4;
+import iron.math.Quat;
 import iron.data.MaterialData;
 import iron.data.ShaderData;
 import arm.ui.UIHeader;
@@ -461,5 +462,28 @@ class RenderUtil {
 
 		Context.paintObject.transform.scaleWorld = _scaleWorld;
 		Context.paintObject.transform.buildMatrix();
+	}
+
+	public static function pickPositionAndNormal() {
+		Context.pickPosNor = true;
+		Context.pdirty = 1;
+		var _tool = Context.tool;
+		Context.tool = ToolPicker;
+		MakeMaterial.parsePaintMaterial();
+		arm.render.RenderPathPaint.commandsPaint(false);
+		Context.tool = _tool;
+		Context.pickPosNor = false;
+		MakeMaterial.parsePaintMaterial();
+		Context.pdirty = 0;
+	}
+
+	public static function getDecalMat(): Mat4 {
+		RenderUtil.pickPositionAndNormal();
+		var decalMat = Mat4.identity();
+		var loc = new Vec4(Context.posXPicked, Context.posYPicked, Context.posZPicked);
+		var rot = new Quat().fromTo(new Vec4(0.0, 0.0, -1.0), new Vec4(Context.norXPicked, Context.norYPicked, Context.norZPicked));
+		var scale = new Vec4(0.5, 0.5, 0.5);
+		decalMat.compose(loc, rot, scale);
+		return decalMat;
 	}
 }

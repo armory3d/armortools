@@ -391,7 +391,8 @@ class App {
 				// Material dragged onto viewport or layers tab
 				if (inViewport || inLayers || in2dView) {
 					var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
-					Layers.createFillLayer(uvType);
+					var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
+					Layers.createFillLayer(uvType, decalMat);
 				}
 				else if (inNodes) {
 					var index = 0;

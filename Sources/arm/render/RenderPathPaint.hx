@@ -86,6 +86,22 @@ class RenderPathPaint {
 			t.format = "RGBA32";
 			path.createRenderTarget(t);
 		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_posnor_picker0";
+			t.width = 1;
+			t.height = 1;
+			t.format = "RGBA128";
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texpaint_posnor_picker1";
+			t.width = 1;
+			t.height = 1;
+			t.format = "RGBA128";
+			path.createRenderTarget(t);
+		}
 
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		path.loadShader("shader_datas/dilate_pass/dilate_pass");
@@ -125,52 +141,71 @@ class RenderPathPaint {
 				UIHeader.inst.headerHandle.redraws = 2;
 			}
 			else if (Context.tool == ToolPicker) {
-				#if kha_metal
-				//path.setTarget("texpaint_picker");
-				//path.clearTarget(0xff000000);
-				//path.setTarget("texpaint_nor_picker");
-				//path.clearTarget(0xff000000);
-				//path.setTarget("texpaint_pack_picker");
-				//path.clearTarget(0xff000000);
-				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
-				#else
-				path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
-				//path.clearTarget(0xff000000);
-				#end
-				path.bindTarget("gbuffer2", "gbuffer2");
-				tid = Context.layer.id;
-				path.bindTarget("texpaint" + tid, "texpaint");
-				path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
-				path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-				path.drawMeshes("paint");
-				UIHeader.inst.headerHandle.redraws = 2;
+				if (Context.pickPosNor) {
+					path.setTarget("texpaint_posnor_picker0", ["texpaint_posnor_picker1"]);
+					path.bindTarget("gbuffer2", "gbuffer2");
+					path.bindTarget("_main", "gbufferD");
+					path.drawMeshes("paint");
+					var texpaint_posnor_picker0 = path.renderTargets.get("texpaint_posnor_picker0").image;
+					var texpaint_posnor_picker1 = path.renderTargets.get("texpaint_posnor_picker1").image;
+					var a = texpaint_posnor_picker0.getPixels();
+					var b = texpaint_posnor_picker1.getPixels();
+					Context.posXPicked = a.getFloat(0);
+					Context.posYPicked = a.getFloat(4);
+					Context.posZPicked = a.getFloat(8);
+					Context.norXPicked = b.getFloat(0);
+					Context.norYPicked = b.getFloat(4);
+					Context.norZPicked = b.getFloat(8);
+				}
+				else {
+					#if kha_metal
+					//path.setTarget("texpaint_picker");
+					//path.clearTarget(0xff000000);
+					//path.setTarget("texpaint_nor_picker");
+					//path.clearTarget(0xff000000);
+					//path.setTarget("texpaint_pack_picker");
+					//path.clearTarget(0xff000000);
+					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+					#else
+					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+					//path.clearTarget(0xff000000);
+					#end
+					path.bindTarget("gbuffer2", "gbuffer2");
+					tid = Context.layer.id;
+					path.bindTarget("texpaint" + tid, "texpaint");
+					path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
+					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
+					path.drawMeshes("paint");
+					UIHeader.inst.headerHandle.redraws = 2;
 
-				var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
-				var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
-				var texpaint_pack_picker = path.renderTargets.get("texpaint_pack_picker").image;
-				var a = texpaint_picker.getPixels();
-				var b = texpaint_nor_picker.getPixels();
-				var c = texpaint_pack_picker.getPixels();
-				// Picked surface values
-				Context.baseRPicked = a.get(0) / 255;
-				Context.baseGPicked = a.get(1) / 255;
-				Context.baseBPicked = a.get(2) / 255;
-				Context.uvxPicked = a.get(3) / 255;
-				Context.normalRPicked = b.get(0) / 255;
-				Context.normalGPicked = b.get(1) / 255;
-				Context.normalBPicked = b.get(2) / 255;
-				Context.uvyPicked = c.get(3) / 255;
-				Context.occlusionPicked = c.get(0) / 255;
-				Context.roughnessPicked = c.get(1) / 255;
-				Context.metallicPicked = c.get(2) / 255;
-				// Pick material
-				if (Context.pickerSelectMaterial) {
-					var matid = b.get(3);
-					for (m in Project.materials) {
-						if (m.id == matid) {
-							Context.setMaterial(m);
-							Context.materialIdPicked = matid;
-							break;
+					var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
+					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
+					var texpaint_pack_picker = path.renderTargets.get("texpaint_pack_picker").image;
+					var a = texpaint_picker.getPixels();
+					var b = texpaint_nor_picker.getPixels();
+					var c = texpaint_pack_picker.getPixels();
+
+					// Picked surface values
+					Context.baseRPicked = a.get(0) / 255;
+					Context.baseGPicked = a.get(1) / 255;
+					Context.baseBPicked = a.get(2) / 255;
+					Context.uvxPicked = a.get(3) / 255;
+					Context.normalRPicked = b.get(0) / 255;
+					Context.normalGPicked = b.get(1) / 255;
+					Context.normalBPicked = b.get(2) / 255;
+					Context.uvyPicked = c.get(3) / 255;
+					Context.occlusionPicked = c.get(0) / 255;
+					Context.roughnessPicked = c.get(1) / 255;
+					Context.metallicPicked = c.get(2) / 255;
+					// Pick material
+					if (Context.pickerSelectMaterial) {
+						var matid = b.get(3);
+						for (m in Project.materials) {
+							if (m.id == matid) {
+								Context.setMaterial(m);
+								Context.materialIdPicked = matid;
+								break;
+							}
 						}
 					}
 				}
