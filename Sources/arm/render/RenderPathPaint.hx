@@ -408,7 +408,10 @@ class RenderPathPaint {
 			!decalMask) {
 				return;
 		}
-		if (!App.uiEnabled || UIHeader.inst.worktab.position == SpaceRender) {
+
+		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
+		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
+		if (!App.uiEnabled || App.isDragging || UIHeader.inst.worktab.position == SpaceRender || fillLayer || fillMask) {
 			return;
 		}
 

@@ -44,7 +44,7 @@ class LineDraw {
 
 		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || iron.system.Input.getKeyboard().down("control");
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
-		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
+		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject && !Context.layerIsMask;
 		if (!isDecal || hide) return;
 
 		mat = Context.layer.decalMat;
