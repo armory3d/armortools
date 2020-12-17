@@ -490,7 +490,7 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 ";
 
 	public static var str_get_pos_from_depth = "
-vec3 get_pos_from_depth(vec2 uv, mat4 invVP) {
+vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) {
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)
 	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r;
 	#else
@@ -503,9 +503,9 @@ vec3 get_pos_from_depth(vec2 uv, mat4 invVP) {
 ";
 
 	public static var str_get_nor_from_depth = "
-vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 texStep) {
-	vec3 p1 = get_pos_from_depth(uv + vec2(texStep.x * 4.0, 0.0), invVP);
-	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, texStep.y * 4.0), invVP);
+vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 texStep, textureArg(gbufferD)) {
+	vec3 p1 = get_pos_from_depth(uv + vec2(texStep.x * 4.0, 0.0), invVP, texturePass(gbufferD));
+	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, texStep.y * 4.0), invVP, texturePass(gbufferD));
 	return normalize(cross(p2 - p0, p1 - p0));
 }
 ";
