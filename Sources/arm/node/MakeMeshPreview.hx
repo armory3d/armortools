@@ -123,8 +123,15 @@ class MakeMeshPreview {
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 		// uint matid = 0;
-		frag.write('fragColor[0] = vec4(n.x, n.y, roughness, packFloatInt16(metallic, uint(0)));'); // metallic/matid
-		frag.write('fragColor[1] = vec4(basecol.r, basecol.g, basecol.b, occlusion);');
+
+		if (decal) {
+			frag.write('fragColor[0] = vec4(n.x, n.y, roughness, packFloatInt16(metallic, uint(0)));'); // metallic/matid
+			frag.write('fragColor[1] = vec4(basecol, occlusion);');
+		}
+		else {
+			frag.write('fragColor[0] = vec4(n.x, n.y, mix(1.0, roughness, opacity), packFloatInt16(mix(1.0, metallic, opacity), uint(0)));'); // metallic/matid
+			frag.write('fragColor[1] = vec4(mix(vec3(0.0, 0.0, 0.0), basecol, opacity), occlusion);');
+		}
 		frag.write('fragColor[2] = vec4(0.0, 0.0, 0.0, 0.0);'); // veloc
 
 		MaterialParser.finalize(con_mesh);
