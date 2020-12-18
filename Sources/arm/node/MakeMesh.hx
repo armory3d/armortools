@@ -377,7 +377,8 @@ class MakeMesh {
 				frag.write('fragColor[1] = vec4(nAttr, 1.0);');
 			}
 			else if (Context.viewportMode == ViewMaterialID) {
-				frag.write('float sample_matid = textureLodShared(texpaint_nor, texCoord, 0.0).a + 1.0 / 255.0;');
+				frag.add_shared_sampler('sampler2D texpaint_nor' + Context.layer.id);
+				frag.write('float sample_matid = textureLodShared(texpaint_nor' + Context.layer.id + ', texCoord, 0.0).a + 1.0 / 255.0;');
 				frag.write('float matid_r = fract(sin(dot(vec2(sample_matid, sample_matid * 20.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('float matid_g = fract(sin(dot(vec2(sample_matid * 20.0, sample_matid), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('float matid_b = fract(sin(dot(vec2(sample_matid, sample_matid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
