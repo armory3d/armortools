@@ -126,6 +126,10 @@ class Translator {
 				var originFontSize = uis[0].t.FONT_SIZE;
 				// Scale up the font size a bit
 				uis[0].t.FONT_SIZE = Std.int(uis[0].t.FONT_SIZE * newFont.scale);
+				// Japanese has a lot of characters, so increase the width
+				if (Config.raw.locale == "ja") {
+					uis[0].t.ELEMENT_W = Std.int(App.theme.ELEMENT_W * newFont.scale);
+				}
 				for (ui in uis) {
 					ui.ops.font = f;
 					ui.setScale(ui.ops.scaleFactor);
