@@ -13,6 +13,9 @@ import arm.Enums;
 
 class TabLayers {
 
+	static var layerNameEdit = -1;
+	static var layerNameHandle = Id.handle();
+
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
@@ -302,20 +305,30 @@ class TabLayers {
 				}
 
 				ui._y += center;
-				var state = ui.text(l.name);
+				if (layerNameEdit == l.id) {
+					layerNameHandle.text = l.name;
+					l.name = ui.textInput(layerNameHandle);
+					if (ui.textSelectedHandle != layerNameHandle) layerNameEdit = -1;
+				}
+				else {
+					var state = ui.text(l.name);
+					if (state == State.Started) {
+						Context.setLayer(l);
+						if (Time.time() - Context.selectTime < 0.25) {
+							layerNameEdit = l.id;
+							layerNameHandle.text = l.name;
+							ui.startTextEdit(layerNameHandle);
+						}
+						Context.selectTime = Time.time();
+						var mouse = Input.getMouse();
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						App.dragLayer = Context.layer;
+					}
+				}
 				ui._y -= center;
 
 				if (l.parent != null) ui._x -= 10 * ui.SCALE();
-
-				if (state == State.Started) {
-					Context.setLayer(l);
-					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
-					Context.selectTime = Time.time();
-					var mouse = Input.getMouse();
-					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragLayer = Context.layer;
-				}
 
 				if (ui.isHovered && ui.inputReleasedR) {
 					contextMenu = true;
