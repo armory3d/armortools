@@ -59,7 +59,9 @@ class App {
 	public static var colorWheel: Image;
 	public static var uiBox: Zui;
 	public static var uiMenu: Zui;
+	public static var defaultElementW = 100;
 	public static var defaultElementH = 28;
+	public static var defaultFontSize = 13;
 	public static var resHandle = new Handle({position: Res2048});
 	public static var bitsHandle = new Handle();
 	static var dropPaths: Array<String> = [];
@@ -114,11 +116,12 @@ class App {
 			Data.getImage("color_wheel.k", function(image: Image) {
 
 				font = f;
-				Translator.loadTranslations(Config.raw.locale);
-				UIFiles.filename = tr("untitled");
-
 				theme = zui.Themes.dark;
 				theme.FILL_WINDOW_BG = true;
+				defaultElementW = theme.ELEMENT_W;
+				defaultFontSize = theme.FONT_SIZE;
+				Translator.loadTranslations(Config.raw.locale);
+				UIFiles.filename = tr("untitled");
 
 				// Precompiled font for fast startup
 				if (Config.raw.locale == "en") {
