@@ -114,17 +114,10 @@ class MakeMesh {
 				frag.write('vec3 ntex = vec3(0.5, 0.5, 1.0);');
 				frag.write('float height = 0.0;');
 			}
-			frag.write('vec3 n0;');
 			frag.write('vec4 texpaint_sample = vec4(0.0, 0.0, 0.0, 1.0);');
 			frag.write('vec4 texpaint_nor_sample;');
 			frag.write('vec4 texpaint_pack_sample;');
 			frag.write('float texpaint_opac;');
-			frag.vVec = true;
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
-			#else
-			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
-			#end
 
 			if (Context.drawWireframe) {
 				textureCount++;
@@ -205,11 +198,7 @@ class MakeMesh {
 					}
 
 					if (l.paintNor) {
-						frag.write('ntex = texpaint_nor_sample.rgb;');
-						frag.write('n0 = ntex * 2.0 - 1.0;');
-						frag.write('n0.y = -n0.y;');
-						frag.write('n0 = normalize(mul(n0, TBN));');
-						frag.write('n = normalize(mix(n, n0, texpaint_opac));');
+						frag.write('ntex = mix(ntex, texpaint_nor_sample.rgb, texpaint_opac);');
 					}
 				}
 
@@ -280,10 +269,6 @@ class MakeMesh {
 				frag.write('basecol *= 1.0 - textureLod(texuvmap, texCoord, 0.0).r;');
 			}
 
-			if (lastPass && Context.renderMode == RenderForward) {
-				frag.write('vec3 wn = n;');
-			}
-
 			if (!lastPass) {
 				frag.write('fragColor[0] = vec4(basecol, opacity);');
 				frag.write('fragColor[1] = vec4(ntex, matid);');
@@ -293,6 +278,20 @@ class MakeMesh {
 				con_mesh.data.vertex_shader = vert.get();
 				con_mesh.data.fragment_shader = frag.get();
 				return con_mesh;
+			}
+
+			frag.vVec = true;
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
+			#else
+			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
+			#end
+			frag.write('n = ntex * 2.0 - 1.0;');
+			frag.write('n.y = -n.y;');
+			frag.write('n = normalize(mul(n, TBN));');
+
+			if (lastPass && Context.renderMode == RenderForward) {
+				frag.write('vec3 wn = n;');
 			}
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
@@ -305,6 +304,7 @@ class MakeMesh {
 					frag.wposition = true;
 					frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
+					frag.vVec = true;
 					frag.write('float dotNV = max(dot(wn, vVec), 0.0);');
 					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
