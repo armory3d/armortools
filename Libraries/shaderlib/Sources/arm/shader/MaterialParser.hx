@@ -41,6 +41,7 @@ class MaterialParser {
 	static var sample_bump: Bool;
 	static var sample_bump_res: String;
 	static var tex_coord = "texCoord";
+	static inline var eps = 0.000001;
 
 	public static var customNodes = js.Syntax.code("new Map()");
 	public static var parse_surface = true;
@@ -55,7 +56,6 @@ class MaterialParser {
 
 	public static var blur_passthrough = false;
 	public static var warp_passthrough = false;
-
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -619,6 +619,8 @@ class MaterialParser {
 				out_col = 'mix($col1, $col1 - $col2, $fac_var)';
 			}
 			else if (blend == "DIVIDE") {
+				var eps = 0.000001;
+				col2 = 'max($col2, vec3($eps, $eps, $eps))';
 				out_col = "(" + to_vec3('(1.0 - $fac_var) * $col1 + $fac_var * $col1 / $col2') + ")";
 			}
 			else if (blend == "HUE") {
@@ -1254,6 +1256,7 @@ class MaterialParser {
 				out_val = '($val1 * $val2)';
 			}
 			else if (op == "DIVIDE") {
+				val2 = '($val2 == 0.0 ? $eps : $val2)';
 				out_val = '($val1 / $val2)';
 			}
 			else if (op == "POWER") {
