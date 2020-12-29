@@ -60,7 +60,7 @@ class UINodes {
 		Nodes.onLinkDrag = onLinkDrag;
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({font: App.font, theme: App.theme, color_wheel: App.colorWheel, scaleFactor: scale});
+		ui = new Zui({theme: App.theme, font: App.font, color_wheel: App.colorWheel, scaleFactor: scale});
 		ui.scrollEnabled = false;
 	}
 

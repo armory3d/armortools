@@ -17,7 +17,7 @@ class ImportTheme {
 		arm.ui.BoxPreferences.fetchThemes(); // Refresh file list
 		Config.raw.theme = filename;
 		arm.ui.BoxPreferences.themeHandle.position = arm.ui.BoxPreferences.getThemeIndex();
-		arm.ui.BoxPreferences.loadTheme(Config.raw.theme);
+		Config.loadTheme(Config.raw.theme);
 		Log.info("Theme '" + filename + "' imported.");
 	}
 }

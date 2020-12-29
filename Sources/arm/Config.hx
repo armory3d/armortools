@@ -134,7 +134,7 @@ class Config {
 		initLayout();
 		Translator.loadTranslations(raw.locale);
 		applyConfig();
-		arm.ui.BoxPreferences.loadTheme(raw.theme);
+		loadTheme(raw.theme);
 	}
 
 	public static inline function getSuperSampleQuality(f: Float): Int {
@@ -235,5 +235,25 @@ class Config {
 			Std.int(iron.App.h() / 2),
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)
 		];
+	}
+
+	public static function loadTheme(theme: String, tagRedraw = true) {
+		if (theme == "default.json") { // Built-in default
+			App.theme = zui.Themes.dark;
+		}
+		else {
+			Data.getBlob("themes/" + theme, function(b: kha.Blob) {
+				App.theme = Json.parse(b.toString());
+			});
+		}
+		App.theme.FILL_WINDOW_BG = true;
+		if (tagRedraw) {
+			App.uiBox.t = App.theme;
+			App.uiMenu.t = App.theme;
+			UISidebar.inst.ui.t = App.theme;
+			UINodes.inst.ui.t = App.theme;
+			UIView2D.inst.ui.t = App.theme;
+			UISidebar.inst.tagUIRedraw();
+		}
 	}
 }

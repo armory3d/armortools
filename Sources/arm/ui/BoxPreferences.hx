@@ -86,13 +86,16 @@ class BoxPreferences {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Restore defaults?"), Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Confirm"), Left)) {
-							ui.t.ELEMENT_H = App.defaultElementH;
-							Config.restore();
-							setScale();
-							if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
-							filesPlugin = null;
-							filesKeymap = null;
-							MakeMaterial.parsePaintMaterial();
+							iron.App.notifyOnInit(function() {
+								ui.t.ELEMENT_H = App.defaultElementH;
+								Config.restore();
+								setScale();
+								if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
+								filesPlugin = null;
+								filesKeymap = null;
+								MakeMaterial.parseMeshMaterial();
+								MakeMaterial.parsePaintMaterial();
+							});
 						}
 					}, 2);
 				}
@@ -111,7 +114,7 @@ class BoxPreferences {
 				ui.combo(themeHandle, themes, tr("Theme"));
 				if (themeHandle.changed) {
 					Config.raw.theme = themes[themeHandle.position] + ".json";
-					loadTheme(Config.raw.theme);
+					Config.loadTheme(Config.raw.theme);
 				}
 
 				if (ui.button(tr("New"))) {
@@ -589,21 +592,5 @@ plugin.drawUI = function(ui) {
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);
 		App.resize();
-	}
-
-	public static function loadTheme(theme: String) {
-		if (theme == "default.json") { // Built-in default
-			App.theme = zui.Themes.dark;
-		}
-		else {
-			Data.getBlob("themes/" + theme, function(b: kha.Blob) {
-				App.theme = Json.parse(b.toString());
-			});
-		}
-		App.uiBox.t = App.theme;
-		UISidebar.inst.ui.t = App.theme;
-		UINodes.inst.ui.t = App.theme;
-		UIView2D.inst.ui.t = App.theme;
-		UISidebar.inst.tagUIRedraw();
 	}
 }

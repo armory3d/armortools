@@ -116,8 +116,7 @@ class App {
 			Data.getImage("color_wheel.k", function(image: Image) {
 
 				font = f;
-				theme = zui.Themes.dark;
-				theme.FILL_WINDOW_BG = true;
+				Config.loadTheme(Config.raw.theme, false);
 				defaultElementW = theme.ELEMENT_W;
 				defaultFontSize = theme.FONT_SIZE;
 				Translator.loadTranslations(Config.raw.locale);
@@ -150,8 +149,8 @@ class App {
 				colorWheel = image;
 				Nodes.enumTexts = enumTexts;
 				Nodes.tr = tr;
-				uiBox = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
-				uiMenu = new Zui({ font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
+				uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
+				uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
 				defaultElementH = uiMenu.t.ELEMENT_H;
 
 				// Init plugins
@@ -183,11 +182,6 @@ class App {
 				cam.buildProjection();
 
 				Args.run();
-
-				// Non-default theme selected
-				if (Config.raw.theme != "default.json") {
-					arm.ui.BoxPreferences.loadTheme(Config.raw.theme);
-				}
 			});
 		});
 	}
