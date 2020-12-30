@@ -290,26 +290,23 @@ class MakeMesh {
 			frag.write('n.y = -n.y;');
 			frag.write('n = normalize(mul(n, TBN));');
 
-			if (lastPass && Context.renderMode == RenderForward) {
-				frag.write('vec3 wn = n;');
-			}
-
-			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
-			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
-			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
 
 			if (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace) {
-				if (Context.renderMode == RenderForward) {
+				if (Context.viewportShader != null) {
+					var color = Context.viewportShader(frag);
+					frag.write('fragColor[1] = vec4($color, 1.0);');
+				}
+				else if (Context.renderMode == RenderForward) {
 					frag.wposition = true;
 					frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
 					frag.vVec = true;
-					frag.write('float dotNV = max(dot(wn, vVec), 0.0);');
+					frag.write('float dotNV = max(dot(n, vVec), 0.0);');
 					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
 					frag.add_uniform('vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
-					frag.write('vec3 wreflect = reflect(-vVec, wn);');
+					frag.write('vec3 wreflect = reflect(-vVec, n);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
 					frag.add_function(ShaderFunctions.str_envMapEquirect);
 					frag.write('vec4 envmapDataLocal = envmapData;'); // TODO: spirv workaround
@@ -321,7 +318,7 @@ class MakeMesh {
 					frag.add_function(ShaderFunctions.str_ltcEvaluate);
 					frag.add_uniform('vec3 lightPos', '_pointPosition');
 					frag.add_uniform('vec3 lightColor', '_pointColor');
-					// frag.write('float dotNL = max(dot(wn, normalize(lightPos - wposition)), 0.0);');
+					// frag.write('float dotNL = max(dot(n, normalize(lightPos - wposition)), 0.0);');
 					// frag.write('vec3 direct = albedo * dotNL;');
 					frag.write('float ldist = distance(wposition, lightPos);');
 					frag.write('const float LUT_SIZE = 64.0;');
@@ -332,16 +329,16 @@ class MakeMesh {
 					frag.write('tuv = tuv * LUT_SCALE + LUT_BIAS;');
 					frag.write('vec4 t = textureLod(sltcMat, tuv, 0.0);');
 					frag.write('mat3 minv = mat3(vec3(1.0, 0.0, t.y), vec3(0.0, t.z, 0.0), vec3(t.w, 0.0, t.x));');
-					frag.write('float ltcspec = ltcEvaluate(wn, vVec, dotNV, wposition, minv, lightArea0, lightArea1, lightArea2, lightArea3);');
+					frag.write('float ltcspec = ltcEvaluate(n, vVec, dotNV, wposition, minv, lightArea0, lightArea1, lightArea2, lightArea3);');
 					frag.write('ltcspec *= textureLod(sltcMag, tuv, 0.0).a;');
 					frag.write('mat3 mident = mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);');
-					frag.write('float ltcdiff = ltcEvaluate(wn, vVec, dotNV, wposition, mident, lightArea0, lightArea1, lightArea2, lightArea3);');
+					frag.write('float ltcdiff = ltcEvaluate(n, vVec, dotNV, wposition, mident, lightArea0, lightArea1, lightArea2, lightArea3);');
 					frag.write('vec3 direct = albedo * ltcdiff + ltcspec * 0.05;');
 					frag.write('direct *= lightColor * (1.0 / (ldist * ldist));');
 
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
 					frag.add_function(ShaderFunctions.str_shIrradiance);
-					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(wn.x * envmapDataLocal.z - wn.y * envmapDataLocal.y, wn.x * envmapDataLocal.y + wn.y * envmapDataLocal.z, wn.z), shirr) / 3.14159265);');
+					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(n.x * envmapDataLocal.z - n.y * envmapDataLocal.y, n.x * envmapDataLocal.y + n.y * envmapDataLocal.z, n.z), shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
 					frag.write('indirect *= envmapDataLocal.w * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
@@ -399,6 +396,10 @@ class MakeMesh {
 			else {
 				frag.write('fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 			}
+
+			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
+			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
+			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');

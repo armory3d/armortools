@@ -13,8 +13,6 @@ import arm.io.ImportKeymap;
 import arm.io.ImportTheme;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
 import arm.Enums;
 
 class BoxPreferences {
@@ -334,16 +332,7 @@ class BoxPreferences {
 				var hrendermode = Id.handle({position: Context.renderMode});
 				Context.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
-					if (hrendermode.position == RenderForward) {
-						if (RenderPathForward.path == null) {
-							RenderPathForward.init(RenderPath.active);
-						}
-						RenderPath.active.commands = RenderPathForward.commands;
-					}
-					else {
-						RenderPath.active.commands = RenderPathDeferred.commands;
-					}
-					MakeMaterial.parseMeshMaterial();
+					Context.setRenderPath();
 				}
 
 				#end

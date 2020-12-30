@@ -3,6 +3,7 @@ package arm;
 import kha.Image;
 import zui.Zui;
 import zui.Id;
+import iron.RenderPath;
 import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.object.Object;
@@ -12,9 +13,12 @@ import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
+import arm.shader.NodeShader;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
+import arm.render.RenderPathDeferred;
+import arm.render.RenderPathForward;
 import arm.ui.UISidebar;
 import arm.ui.UIToolbar;
 import arm.ui.UINodes;
@@ -49,7 +53,6 @@ class Context {
 	public static var nodePreview: Image = null;
 	public static var nodePreviewsBlur: Map<String, Image> = null;
 	public static var nodePreviewsWarp: Map<String, Image> = null;
-
 
 	public static var colorIdPicked = false;
 	public static var splitView = false;
@@ -121,6 +124,7 @@ class Context {
 	#if (kha_direct3d12 || kha_vulkan)
 	public static var pathTraceMode = TraceCore;
 	#end
+	public static var viewportShader: NodeShader->String = null;
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
 	public static var cacheDraws = false;
@@ -407,5 +411,26 @@ class Context {
 		}
 		iron.Scene.active.world.loadEnvmap(function(_) {});
 		if (Context.savedEnvmap == null) Context.savedEnvmap = iron.Scene.active.world.envmap;
+	}
+
+	@:keep
+	public static function setViewportShader(viewportShader: NodeShader->String) {
+		Context.viewportShader = viewportShader;
+		setRenderPath();
+	}
+
+	public static function setRenderPath() {
+		if (Context.renderMode == RenderForward || Context.viewportShader != null) {
+			if (RenderPathForward.path == null) {
+				RenderPathForward.init(RenderPath.active);
+			}
+			RenderPath.active.commands = RenderPathForward.commands;
+		}
+		else {
+			RenderPath.active.commands = RenderPathDeferred.commands;
+		}
+		iron.App.notifyOnInit(function() {
+			MakeMaterial.parseMeshMaterial();
+		});
 	}
 }
