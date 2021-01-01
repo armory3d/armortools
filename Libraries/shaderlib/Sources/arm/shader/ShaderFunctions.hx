@@ -157,12 +157,23 @@ float tex_magic_f(const vec3 p) {
 ";
 
 	public static var str_tex_brick = "
+float noise(int n) { /* fast integer noise */ 
+	int nn;
+	n = (n >> 13) ^ n;
+	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+	return 0.5f * float(nn) / 1073741824.0;
+}
 vec3 tex_brick(vec3 p, const vec3 c1, const vec3 c2, const vec3 c3) {
-	p /= vec3(0.9, 0.49, 0.49) / 2;
+	vec3 brickSize = vec3(0.9, 0.49, 0.49);
+	vec3 mortarSize = vec3(0.05, 0.1, 0.1);
+	p /= brickSize / 2;
 	if (fract(p.y * 0.5) > 0.5) p.x += 0.5;
+	float col = floor(p.x / (brickSize.x + (mortarSize.x * 2.0)));
+	float row = p.y;
 	p = fract(p);
-	vec3 b = step(p, vec3(0.95, 0.9, 0.9));
-	return mix(c3, c1, b.x * b.y * b.z);
+	vec3 b = step(p, 1.0 - mortarSize);
+	float tint = min(max(noise((int(col) << 16) + (int(row) & 0xFFFF)), 0.0), 1.0);
+	return mix(c3, mix(c1, c2, tint), b.x * b.y * b.z);
 }
 float tex_brick_f(vec3 p) {
 	p /= vec3(0.9, 0.49, 0.49) / 2;
