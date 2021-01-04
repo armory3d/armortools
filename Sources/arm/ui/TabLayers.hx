@@ -311,6 +311,13 @@ class TabLayers {
 					if (ui.textSelectedHandle != layerNameHandle) layerNameEdit = -1;
 				}
 				else {
+
+					if (ui.inputReleasedR && ui.enabled && ui.inputEnabled &&
+						ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._x + ui._w &&
+						ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
+						contextMenu = true;
+					}
+
 					var state = ui.text(l.name);
 					if (state == State.Started) {
 						Context.setLayer(l);
@@ -329,10 +336,6 @@ class TabLayers {
 				ui._y -= center;
 
 				if (l.parent != null) ui._x -= 10 * ui.SCALE();
-
-				if (ui.isHovered && ui.inputReleasedR) {
-					contextMenu = true;
-				}
 
 				if (contextMenu) {
 
