@@ -5,7 +5,7 @@ Supported GPUs:
 - NVIDIA GTX 16 Series
 - NVIDIA RTX 20 Series
 
-Requires Vulkan beta driver on NVIDIA cards:
+Requires Vulkan driver 455.46.04 or newer on NVIDIA cards:
 https://developer.nvidia.com/vulkan-driver
 
 Learn more:
