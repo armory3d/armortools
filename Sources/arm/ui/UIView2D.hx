@@ -20,6 +20,7 @@ class UIView2D {
 	public static var inst: UIView2D;
 	public static var pipe: PipelineState;
 	public static var channelLocation: ConstantLocation;
+	public static var textInputHover = false;
 	public var show = false;
 	public var type = View2DLayer;
 	public var wx: Int;
@@ -187,6 +188,7 @@ class UIView2D {
 			if (type == View2DLayer) {
 				h.text = l.name;
 				l.name = ui.textInput(h, "", Right);
+				textInputHover = ui.isHovered;
 			}
 			else if (type == View2DAsset) {
 				var asset = Context.texture;
@@ -286,6 +288,7 @@ class UIView2D {
 		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		if (type == View2DLayer &&
+			!textInputHover &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 			 decalMask ||
