@@ -615,7 +615,13 @@ class App {
 
 	public static function notifyOnNextFrame(f: Void->Void) {
 		function _update() {
-			iron.App.notifyOnInit(f);
+			iron.App.notifyOnInit(function() {
+				function __update() {
+					iron.App.notifyOnInit(f);
+					iron.App.removeUpdate(__update);
+				}
+				iron.App.notifyOnUpdate(__update);
+			});
 			iron.App.removeUpdate(_update);
 		}
 		iron.App.notifyOnUpdate(_update);
