@@ -448,6 +448,14 @@ class ImportArm {
 			if (node.type == "TEX_IMAGE") {
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 			}
+			else if (node.type == "VALTORGB") { // TODO: deprecated
+				var but = node.buttons[0];
+				if (but.type != "CUSTOM") {
+					but.type = "CUSTOM";
+					but.name = "arm.shader.NodesMaterial.colorRampButton";
+					but.height = 4.5;
+				}
+			}
 		}
 	}
 }

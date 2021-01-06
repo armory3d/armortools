@@ -1,5 +1,7 @@
 package arm.shader;
 
+import zui.Zui;
+import zui.Id;
 import zui.Nodes;
 import arm.Enums;
 
@@ -1790,10 +1792,11 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: _tr("Vector"),
-						type: "CURVES",
+						name: "arm.shader.NodesMaterial.vectorCurvesButton",
+						type: "CUSTOM",
 						default_value: [[f32([0.0, 0.0]), f32([0.0, 0.0])], [f32([0.0, 0.0]), f32([0.0, 0.0])], [f32([0.0, 0.0]), f32([0.0, 0.0])]],
-						output: 0
+						output: 0,
+						height: 8.5
 					}
 				]
 			}
@@ -1836,11 +1839,12 @@ class NodesMaterial {
 				],
 				buttons: [
 					{
-						name: _tr("Ramp"),
-						type: "RAMP",
+						name: "arm.shader.NodesMaterial.colorRampButton",
+						type: "CUSTOM",
 						default_value: [f32([1.0, 1.0, 1.0, 1.0, 0.0])],
 						data: 0,
-						output: 0
+						output: 0,
+						height: 4.5
 					}
 				]
 			},
@@ -2249,6 +2253,89 @@ class NodesMaterial {
 			}
 		]
 	];
+
+	@:keep
+	@:access(zui.Zui)
+	public static function vectorCurvesButton(ui: Zui, nodes: Nodes, node: TNode) {
+		var but = node.buttons[0];
+		var nhandle = Id.handle().nest(node.id);
+		ui.row([1 / 3, 1 / 3, 1 / 3]);
+		ui.radio(nhandle.nest(0).nest(1), 0, "X");
+		ui.radio(nhandle.nest(0).nest(1), 1, "Y");
+		ui.radio(nhandle.nest(0).nest(1), 2, "Z");
+		// Preview
+		var axis = nhandle.nest(0).nest(1).position;
+		var val: Array<kha.arrays.Float32Array> = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
+		var num = val.length;
+		// for (i in 0...num) { ui.line(); }
+		ui._y += nodes.LINE_H() * 5;
+		// Edit
+		ui.row([1 / 5, 1 / 5, 3 / 5]);
+		if (ui.button("+")) {
+			var f32 = new kha.arrays.Float32Array(2);
+			f32[0] = 0; f32[1] = 0;
+			val.push(f32);
+		}
+		if (ui.button("-")) {
+			if (val.length > 2) { val.pop(); }
+		}
+		var i = Std.int(ui.slider(nhandle.nest(0).nest(2).nest(axis, {position: 0}), "Index", 0, num - 1, false, 1, true, Left));
+		ui.row([1 / 2, 1 / 2]);
+		nhandle.nest(0).nest(3).value = val[i][0];
+		nhandle.nest(0).nest(4).value = val[i][1];
+		val[i][0] = ui.slider(nhandle.nest(0).nest(3, {value: 0}), "X", -1, 1, true, 100, true, Left);
+		val[i][1] = ui.slider(nhandle.nest(0).nest(4, {value: 0}), "Y", -1, 1, true, 100, true, Left);
+	}
+
+	@:keep
+	@:access(zui.Zui)
+	public static function colorRampButton(ui: Zui, nodes: Nodes, node: TNode) {
+		var but = node.buttons[0];
+		var nhandle = Id.handle().nest(node.id);
+		var nx = ui._x;
+		var ny = ui._y;
+
+		// Preview
+		var vals: Array<kha.arrays.Float32Array> = but.default_value; // [[r, g, b, a, pos], ..]
+		var sw = ui._w / nodes.SCALE();
+		for (val in vals) {
+			var pos = val[4];
+			var col = kha.Color.fromFloats(val[0], val[1], val[2]);
+			ui.fill(pos * sw, 0, (1.0 - pos) * sw, nodes.LINE_H() - 2 * nodes.SCALE(), col);
+		}
+		ui._y += nodes.LINE_H();
+		// Edit
+		var ihandle = nhandle.nest(0).nest(2);
+		ui.row([1 / 4, 1 / 4, 2 / 4]);
+		if (ui.button("+")) {
+			var last = vals[vals.length - 1];
+			var f32 = new kha.arrays.Float32Array(5);
+			f32[0] = last[0]; f32[1] = last[1]; f32[2] = last[2]; f32[3] = last[3]; f32[4] = 1.0;
+			vals.push(f32);
+			ihandle.value += 1;
+		}
+		if (ui.button("-") && vals.length > 1) {
+			vals.pop();
+			ihandle.value -= 1;
+		}
+		but.data = ui.combo(nhandle.nest(0).nest(1, {position: but.data}), ["Linear", "Constant"], "Interpolate");
+		ui.row([1 / 2, 1 / 2]);
+		var i = Std.int(ui.slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, Left));
+		var val = vals[i];
+		nhandle.nest(0).nest(3).value = val[4];
+		val[4] = ui.slider(nhandle.nest(0).nest(3), "Pos", 0, 1, true, 100, true, Left);
+		var chandle = nhandle.nest(0).nest(4);
+		chandle.color = kha.Color.fromFloats(val[0], val[1], val[2]);
+		if (ui.text("", Right, chandle.color) == Started) {
+			var rx = nx + ui._w - nodes.p(37);
+			var ry = ny - nodes.p(5);
+			nodes._inputStarted = ui.inputStarted = false;
+			nodes.rgbaPopup(ui, chandle, val, Std.int(rx), Std.int(ry + ui.ELEMENT_H()));
+		}
+		val[0] = chandle.color.R;
+		val[1] = chandle.color.G;
+		val[2] = chandle.color.B;
+	}
 
 	public static function createNode(nodeType: String): TNode {
 		for (c in list) {
