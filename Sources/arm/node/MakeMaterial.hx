@@ -275,6 +275,7 @@ class MakeMaterial {
 	}
 
 	public static function parseNodePreviewMaterial(node: TNode): { scon: ShaderContext, mcon: MaterialContext } {
+		if (node.outputs.length == 0) return null;
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
 		var mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
 		var con = MakeNodePreview.run(sdata, mcon_raw, node);

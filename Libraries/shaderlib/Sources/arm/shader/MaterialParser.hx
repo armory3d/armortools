@@ -31,7 +31,9 @@ class MaterialParser {
 	static var curshader: NodeShader;
 	static var matcon: TMaterialContext;
 	static var parsed: Array<String>;
+	static var parents: Array<TNode>;
 
+	static var canvases: Array<TNodeCanvas>;
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
 
@@ -100,6 +102,7 @@ class MaterialParser {
 
 	static function init() {
 		parsed = [];
+		parents = [];
 		parsing_disp = false;
 		normal_written = false;
 		cotangentFrameWritten = false;
@@ -111,6 +114,7 @@ class MaterialParser {
 
 	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _geom: NodeShader, _tesc: NodeShader, _tese: NodeShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
 		init();
+		canvases = [canvas];
 		nodes = canvas.nodes;
 		links = canvas.links;
 		con = _con;
@@ -243,32 +247,50 @@ class MaterialParser {
 		// Parse volume, displacement..
 	}
 
-	static function parse_group(node: TNode, socket: TNodeSocket) { // Entering group
-	//     index = socket_index(node, socket)
-	//     output_node = node_by_type(node.node_tree.nodes, 'GROUP_OUTPUT')
-	//     if output_node == None:
-	//         return
-	//     inp = output_node.inputs[index]
-	//     parents.push(node)
-	//     out_group = parse_input(inp)
-	//     parents.pop()
-	//     return out_group
+	static function get_group(name: String): TNodeCanvas {
+		for (g in Project.materialGroups) if (g.canvas.name == name) return g.canvas;
+		return null;
 	}
 
-	static function parse_group_input(node: TNode, socket: TNodeSocket) {
-	//     index = socket_index(node, socket)
-	//     parent = parents.pop() # Leaving group
-	//     inp = parent.inputs[index]
-	//     res = parse_input(inp)
-	//     parents.push(parent) # Return to group
-	//     return res
+	static function push_group(g: TNodeCanvas) {
+		canvases.push(g);
+		nodes = g.nodes;
+		links = g.links;
 	}
 
-	static function parse_input(inp: TNodeSocket): Dynamic {
-		if (inp.type == "SHADER") {
-			return parse_shader_input(inp);
-		}
-		else if (inp.type == "RGB") {
+	static function pop_group() {
+		canvases.pop();
+		var g = canvases[canvases.length - 1];
+		nodes = g.nodes;
+		links = g.links;
+	}
+
+	static function parse_group(node: TNode, socket: TNodeSocket): String { // Entering group
+		parents.push(node);
+		push_group(get_group(node.name));
+		var output_node = node_by_type(nodes, 'GROUP_OUTPUT');
+		if (output_node == null) return null;
+		var index = socket_index(node, socket);
+		var inp = output_node.inputs[index];
+		var out_group = parse_input(inp);
+		parents.pop();
+		pop_group();
+		return out_group;
+	}
+
+	static function parse_group_input(node: TNode, socket: TNodeSocket): String {
+		var parent = parents.pop(); // Leaving group
+		pop_group();
+		var index = socket_index(node, socket);
+		var inp = parent.inputs[index];
+		var res = parse_input(inp);
+		parents.push(parent); // Return to group
+		push_group(get_group(parent.name));
+		return res;
+	}
+
+	static function parse_input(inp: TNodeSocket): String {
+		if (inp.type == "RGB") {
 			return parse_vector_input(inp);
 		}
 		else if (inp.type == "RGBA") {
@@ -383,14 +405,13 @@ class MaterialParser {
 	}
 
 	static function parse_vector(node: TNode, socket: TNodeSocket): String {
-
-		// RGB
-		//     if (node.type == 'GROUP')
-		//         return parse_group(node, socket)
-		//     else if (node.type == 'GROUP_INPUT')
-		//         return parse_group_input(node, socket)
-
-		if (node.type == "ATTRIBUTE") {
+		if (node.type == 'GROUP') {
+			return parse_group(node, socket);
+		}
+		else if (node.type == 'GROUP_INPUT') {
+			return parse_group_input(node, socket);
+		}
+		else if (node.type == "ATTRIBUTE") {
 			if (socket == node.outputs[0]) { // Color
 				if (curshader.context.allow_vcols) {
 					curshader.context.add_elem("col", "short4norm"); // Vcols only for now
@@ -1015,7 +1036,13 @@ class MaterialParser {
 	}
 
 	static function parse_value(node: TNode, socket: TNodeSocket): String {
-		if (node.type == "ATTRIBUTE") {
+		if (node.type == 'GROUP') {
+			return parse_group(node, socket);
+		}
+		else if (node.type == 'GROUP_INPUT') {
+			return parse_group_input(node, socket);
+		}
+		else if (node.type == "ATTRIBUTE") {
 			curshader.add_uniform("float time", "_time");
 			return "time";
 		}
@@ -1577,7 +1604,9 @@ class MaterialParser {
 	}
 
 	public static function node_name(node: TNode): String {
-		var s = safesrc(node.name) + node.id;
+		var s = node.name;
+		for (p in parents) s = p.name + p.id + '_' + s;
+		s = safesrc(s) + node.id;
 		return s;
 	}
 
@@ -1585,7 +1614,9 @@ class MaterialParser {
 		for (i in 0...s.length) {
 			var code = s.charCodeAt(i);
 			var letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-			if (!letter) s = s.replace(s.charAt(i), "_");
+			var digit = code >= 48 && code <= 57;
+			if (!letter && !digit) s = s.replace(s.charAt(i), "_");
+			if (i == 0 && digit) s = "_" + s;
 		}
 		#if kha_opengl
 		while (s.indexOf("__") >= 0) s = s.replace("__", "_");

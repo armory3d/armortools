@@ -222,6 +222,7 @@ class TabMaterials {
 	static function updateMaterial() {
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
+		UINodes.inst.groupStack = [];
 		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;

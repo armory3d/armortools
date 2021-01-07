@@ -44,6 +44,7 @@ class Project {
 	public static var meshAssets: Array<String> = [];
 	public static var materials: Array<MaterialSlot> = null;
 	public static var materialsScene: Array<MaterialSlot> = null;
+	public static var materialGroups: Array<TNodeGroup> = [];
 	public static var brushes: Array<BrushSlot> = null;
 	public static var layers: Array<LayerSlot> = null;
 	public static var fonts: Array<FontSlot> = null;
@@ -245,6 +246,9 @@ class Project {
 				materials.push(new MaterialSlot(m));
 			});
 			Context.material = materials[0];
+			arm.ui.UINodes.inst.hwnd.redraws = 2;
+			arm.ui.UINodes.inst.groupStack = [];
+			materialGroups = [];
 			brushes = [new BrushSlot()];
 			Context.brush = brushes[0];
 			var fontNames = App.font.getFontNames();
@@ -427,4 +431,9 @@ class Project {
 	public static function getImage(asset: TAsset): Image {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
+}
+
+typedef TNodeGroup = {
+	public var nodes: Nodes;
+	public var canvas: TNodeCanvas;
 }

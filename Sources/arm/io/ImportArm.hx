@@ -299,6 +299,16 @@ class ImportArm {
 				initNodes(n.nodes);
 				Context.material = new MaterialSlot(m0, n);
 				Project.materials.push(Context.material);
+			}
+
+			arm.ui.UINodes.inst.hwnd.redraws = 2;
+			arm.ui.UINodes.inst.groupStack = [];
+			Project.materialGroups = [];
+			if (project.material_groups != null) {
+				for (g in project.material_groups) Project.materialGroups.push({ canvas: g, nodes: new Nodes() });
+			}
+
+			for (m in Project.materials) {
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
@@ -367,11 +377,19 @@ class ImportArm {
 
 		var imported: Array<MaterialSlot> = [];
 
-		for (n in project.material_nodes) {
-			initNodes(n.nodes);
-			Context.material = new MaterialSlot(m0, n);
+		for (c in project.material_nodes) {
+			initNodes(c.nodes);
+			Context.material = new MaterialSlot(m0, c);
 			Project.materials.push(Context.material);
 			imported.push(Context.material);
+		}
+
+		if (project.material_groups != null) {
+			for (c in project.material_groups) {
+				while (groupExists(c)) renameGroup(c.name, imported, project.material_groups); // Ensure unique group name
+				initNodes(c.nodes);
+				Project.materialGroups.push({ canvas: c, nodes: new Nodes() });
+			}
 		}
 
 		function _init() {
@@ -383,8 +401,30 @@ class ImportArm {
 		}
 		iron.App.notifyOnInit(_init);
 
+		arm.ui.UINodes.inst.groupStack = [];
 		UISidebar.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
+	}
+
+	static function groupExists(c: TNodeCanvas): Bool {
+		for (g in Project.materialGroups) {
+			if (g.canvas.name == c.name) return true;
+		}
+		return false;
+	}
+
+	static function renameGroup(name: String, materials: Array<MaterialSlot>, groups: Array<TNodeCanvas>) {
+		for (m in materials) {
+			for (n in m.canvas.nodes) {
+				if (n.type == "GROUP" && n.name == name) n.name += ".1";
+			}
+		}
+		for (c in groups) {
+			if (c.name == name) c.name += ".1";
+			for (n in c.nodes) {
+				if (n.type == "GROUP" && n.name == name) n.name += ".1";
+			}
+		}
 	}
 
 	public static function runBrush(path: String) {

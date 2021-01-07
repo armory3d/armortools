@@ -22,18 +22,24 @@ class ExportArm {
 
 	public static function runProject() {
 		var mnodes: Array<TNodeCanvas> = [];
-		var bnodes: Array<TNodeCanvas> = [];
-
 		for (m in Project.materials) {
 			var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
-			for (n in c.nodes) {
-				if (n.type == "TEX_IMAGE") {
-					n.buttons[0].data = App.enumTexts(n.type)[n.buttons[0].default_value];
-				}
-			}
+			for (n in c.nodes) exportNode(n);
 			mnodes.push(c);
 		}
+
+		var bnodes: Array<TNodeCanvas> = [];
 		for (b in Project.brushes) bnodes.push(b.canvas);
+
+		var mgroups: Array<TNodeCanvas> = null;
+		if (Project.materialGroups.length > 0) {
+			mgroups = [];
+			for (g in Project.materialGroups) {
+				var c: TNodeCanvas = Json.parse(Json.stringify(g.canvas));
+				for (n in c.nodes) exportNode(n);
+				mgroups.push(c);
+			}
+		}
 
 		var md: Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
@@ -81,6 +87,7 @@ class ExportArm {
 		Project.raw = {
 			version: Main.version,
 			material_nodes: mnodes,
+			material_groups: mgroups,
 			brush_nodes: bnodes,
 			mesh_datas: md,
 			layer_datas: ld,
@@ -106,22 +113,56 @@ class ExportArm {
 		Log.info("Project saved.");
 	}
 
-	public static function runMaterial(path: String) {
-		var mnodes: Array<TNodeCanvas> = [];
-		var m = Context.material;
-		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
-		var assets: Array<TAsset> = [];
-		for (n in c.nodes) {
-			if (n.type == "TEX_IMAGE") {
-				var index = n.buttons[0].default_value;
-				n.buttons[0].data = App.enumTexts(n.type)[index];
+	static function getGroup(canvases: Array<TNodeCanvas>, name: String): TNodeCanvas {
+		for (c in canvases) if (c.name == name) return c;
+		return null;
+	}
 
+	static function hasGroup(c: TNodeCanvas): Bool {
+		for (n in c.nodes) if (n.type == "GROUP") return true;
+		return false;
+	}
+
+	static function traverseGroup(mgroups: Array<TNodeCanvas>, c: TNodeCanvas) {
+		for (n in c.nodes) {
+			if (n.type == "GROUP") {
+				if (getGroup(mgroups, n.name) == null) {
+					var canvases: Array<TNodeCanvas> = [];
+					for (g in Project.materialGroups) canvases.push(g.canvas);
+					var group = getGroup(canvases, n.name);
+					mgroups.push(Json.parse(Json.stringify(group)));
+					traverseGroup(mgroups, group);
+				}
+			}
+		}
+	}
+
+	static function exportNode(n: TNode, assets: Array<TAsset> = null) {
+		if (n.type == "TEX_IMAGE") {
+			var index = n.buttons[0].default_value;
+			n.buttons[0].data = App.enumTexts(n.type)[index];
+
+			if (assets != null) {
 				var asset = Project.assets[index];
 				if (assets.indexOf(asset) == -1) {
 					assets.push(asset);
 				}
 			}
 		}
+	}
+
+	public static function runMaterial(path: String) {
+		var mnodes: Array<TNodeCanvas> = [];
+		var mgroups: Array<TNodeCanvas> = null;
+		var m = Context.material;
+		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+		var assets: Array<TAsset> = [];
+		if (hasGroup(c)) {
+			mgroups = [];
+			traverseGroup(mgroups, c);
+			for (gc in mgroups) for (n in gc.nodes) exportNode(n, assets);
+		}
+		for (n in c.nodes) exportNode(n, assets);
 		mnodes.push(c);
 
 		var texture_files = assetsToFiles(assets);
@@ -129,6 +170,7 @@ class ExportArm {
 		var raw = {
 			version: Main.version,
 			material_nodes: mnodes,
+			material_groups: mgroups,
 			#if (kha_metal || kha_vulkan)
 			material_icons: [Lz4.encode(bgraSwap(m.image.getPixels()))],
 			#else
@@ -158,17 +200,7 @@ class ExportArm {
 		var b = Context.brush;
 		var c: TNodeCanvas = Json.parse(Json.stringify(b.canvas));
 		var assets: Array<TAsset> = [];
-		for (n in c.nodes) {
-			if (n.type == "TEX_IMAGE") {
-				var index = n.buttons[0].default_value;
-				n.buttons[0].data = App.enumTexts(n.type)[index];
-
-				var asset = Project.assets[index];
-				if (assets.indexOf(asset) == -1) {
-					assets.push(asset);
-				}
-			}
-		}
+		for (n in c.nodes) exportNode(n, assets);
 		bnodes.push(c);
 
 		var texture_files = assetsToFiles(assets);

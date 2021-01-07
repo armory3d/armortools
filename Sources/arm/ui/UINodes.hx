@@ -13,6 +13,7 @@ import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Enums;
+import arm.Project;
 
 @:access(zui.Zui)
 @:access(zui.Nodes)
@@ -51,13 +52,18 @@ class UINodes {
 
 	public var grid: Image = null;
 	public var hwnd = Id.handle();
+	public var groupStack: Array<TNodeGroup> = [];
 
 	public function new() {
 		inst = this;
 
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
+		Nodes.excludeRemove.push("GROUP_OUTPUT");
+		Nodes.excludeRemove.push("GROUP_INPUT");
 		Nodes.excludeRemove.push("BrushOutputNode");
 		Nodes.onLinkDrag = onLinkDrag;
+		Nodes.onSocketReleased = onSocketReleased;
+		Nodes.onNodeRemove = onNodeRemove;
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui({theme: App.theme, font: App.font, color_wheel: App.colorWheel, scaleFactor: scale});
@@ -67,7 +73,7 @@ class UINodes {
 	function onLinkDrag(linkDrag: TNodeLink, isNewLink: Bool) {
 		if (isNewLink) {
 			var nodes = getNodes();
-			var node = nodes.getNode(getCanvas().nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
+			var node = nodes.getNode(getCanvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
 			var linkX = ui._windowX + nodes.NODE_X(node);
 			var linkY = ui._windowY + nodes.NODE_Y(node);
 			if (linkDrag.from_id > -1) {
@@ -84,12 +90,12 @@ class UINodes {
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 						linkDrag.to_id = n.id;
 						linkDrag.to_socket = 0;
-						getCanvas().links.push(linkDrag);
+						getCanvas(true).links.push(linkDrag);
 					}
 					else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
 						linkDrag.from_id = n.id;
 						linkDrag.from_socket = 0;
-						getCanvas().links.push(linkDrag);
+						getCanvas(true).links.push(linkDrag);
 					}
 				});
 			}
@@ -99,8 +105,69 @@ class UINodes {
 		}
 	}
 
-	public function getCanvas(): TNodeCanvas {
-		if (canvasType == CanvasMaterial) return getCanvasMaterial();
+	function onSocketReleased(socket: TNodeSocket) {
+		if (ui.inputReleasedR) {
+			var nodes = getNodes();
+			var node = nodes.getNode(getCanvas(true).nodes, socket.node_id);
+			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
+				App.notifyOnNextFrame(function() {
+					arm.ui.UIMenu.draw(function(ui: Zui) {
+						ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
+						if (ui.button(tr("Rename"), Left)) {
+							UIBox.showCustom(function(ui: Zui) {
+							if (ui.tab(Id.handle(), tr("Socket"))) {
+								ui.row([0.5, 0.5]);
+								var name = ui.textInput(Id.handle({text: socket.name}), tr("Name"));
+								if (ui.button(tr("OK")) || ui.isReturnDown) {
+									socket.name = name;
+									UIBox.show = false;
+									NodesMaterial.syncSockets(node);
+									hwnd.redraws = 2;
+								}
+							}
+						});
+						}
+						if (ui.button(tr("Delete"), Left)) {
+							node.inputs.remove(socket);
+							node.outputs.remove(socket);
+							NodesMaterial.syncSockets(node);
+						}
+					}, 3);
+				});
+			}
+		}
+	}
+
+	function onNodeRemove(node: TNode) {
+		if (node.type == "GROUP") { // Remove unused groups
+			var found = false;
+			var canvases: Array<TNodeCanvas> = [];
+			for (m in Project.materials) canvases.push(m.canvas);
+			for (m in Project.materialGroups) canvases.push(m.canvas);
+			for (canvas in canvases) {
+				for (n in canvas.nodes) {
+					if (n.type == "GROUP" && n.name == node.name) {
+						found = true;
+						break;
+					}
+				}
+			}
+			if (!found) {
+				for (g in Project.materialGroups) {
+					if (g.canvas.name == node.name) {
+						Project.materialGroups.remove(g);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	public function getCanvas(groups = false): TNodeCanvas {
+		if (canvasType == CanvasMaterial) {
+			if (groups && groupStack.length > 0) return groupStack[groupStack.length - 1].canvas;
+			else return getCanvasMaterial();
+		}
 		else return Context.brush.canvas;
 	}
 
@@ -110,8 +177,13 @@ class UINodes {
 	}
 
 	public function getNodes(): Nodes {
-		var isScene = UIHeader.inst.worktab.position == SpaceRender;
-		if (canvasType == CanvasMaterial) return isScene ? Context.materialScene.nodes : Context.material.nodes;
+		if (canvasType == CanvasMaterial) {
+			if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
+			else {
+				var isScene = UIHeader.inst.worktab.position == SpaceRender;
+				return isScene ? Context.materialScene.nodes : Context.material.nodes;
+			}
+		}
 		else return Context.brush.nodes;
 	}
 
@@ -130,7 +202,8 @@ class UINodes {
 			canvasChanged();
 			if (mreleased) {
 				UISidebar.inst.hwnd0.redraws = 2;
-				History.editNodes(lastCanvas, canvasType);
+				var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
+				History.editNodes(lastCanvas, canvasType, canvasGroup);
 			}
 		}
 		else if (ui.changed && (mstartedlast || mouse.moved) && Config.raw.material_live) {
@@ -219,7 +292,7 @@ class UINodes {
 						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
 						if (ui.button(tr(n.name), Left) || (enter && count == nodeSearchOffset)) {
 							var nodes = getNodes();
-							var canvas = getCanvas();
+							var canvas = getCanvas(true);
 							nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
 							canvas.nodes.push(nodeSearchSpawn);
 							nodes.nodesSelected = [nodeSearchSpawn];
@@ -325,7 +398,7 @@ class UINodes {
 		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
 
 		if (ui.inputStarted) {
-			lastCanvas = Json.parse(Json.stringify(getCanvas()));
+			lastCanvas = Json.parse(Json.stringify(getCanvas(true)));
 		}
 
 		g.end();
@@ -354,7 +427,7 @@ class UINodes {
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 100 - 100, (nodes.panY * nodes.SCALE()) % 100 - 100);
 
 			// Nodes
-			var c = getCanvas();
+			var c = getCanvas(true);
 			nodes.nodeCanvas(ui, c);
 
 			// Node previews
@@ -427,11 +500,32 @@ class UINodes {
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
 			h.text = c.name;
+			var oldName = c.name;
 			c.name = ui.textInput(h, "", Right);
+			if (h.changed && groupStack.length > 0) { // Update group links
+				var canvases: Array<TNodeCanvas> = [];
+				for (m in Project.materials) canvases.push(m.canvas);
+				for (m in Project.materialGroups) canvases.push(m.canvas);
+				for (canvas in canvases) {
+					for (n in canvas.nodes) {
+						if (n.type == "GROUP" && n.name == oldName) {
+							n.name = c.name;
+						}
+					}
+				}
+			}
 			ui.t.ACCENT_COL = ACCENT_COL;
 			ui.t.BUTTON_H = BUTTON_H;
 			ui.t.ELEMENT_H = ELEMENT_H;
 			ui.fontSize = FONT_SIZE;
+
+			// Close node group
+			if (groupStack.length > 0) {
+				ui._x = 5;
+				ui._y = wh - ui.ELEMENT_H() * 1.2;
+				ui._w = Std.int(ui.ELEMENT_W() * 1.4);
+				if (ui.button(tr("Close"))) groupStack.pop();
+			}
 
 			// Menu
 			ui.g.color = ui.t.WINDOW_BG_COL;
@@ -475,6 +569,9 @@ class UINodes {
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			var numNodes = list[menuCategory].length;
 
+			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == tr("Group");
+			if (isGroupCategory) numNodes += Project.materialGroups.length;
+
 			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
 			var py = popupY;
 			g.color = ui.t.WINDOW_BG_COL;
@@ -489,12 +586,24 @@ class UINodes {
 
 			for (n in list[menuCategory]) {
 				if (ui.button("      " + tr(n.name), Left)) {
-					var canvas = getCanvas();
+					var canvas = getCanvas(true);
 					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					nodes.nodesSelected = [node];
 					nodes.nodesDrag = true;
+				}
+			}
+			if (isGroupCategory) {
+				for (g in Project.materialGroups) {
+					if (ui.button("      " + g.canvas.name, Left)) {
+						var canvas = getCanvas(true);
+						var nodes = getNodes();
+						var node = makeGroupNode(g.canvas, nodes, canvas);
+						canvas.nodes.push(node);
+						nodes.nodesSelected = [node];
+						nodes.nodesDrag = true;
+					}
 				}
 			}
 
@@ -506,7 +615,6 @@ class UINodes {
 		if (showMenu) {
 			showMenu = false;
 			drawMenu = true;
-
 		}
 		if (hideMenu) {
 			hideMenu = false;
@@ -545,6 +653,27 @@ class UINodes {
 		for (soc in node.outputs) {
 			soc.id = nodes.getSocketId(canvas.nodes);
 			soc.node_id = node.id;
+		}
+		return node;
+	}
+
+	public static function makeGroupNode(groupCanvas: TNodeCanvas, nodes: Nodes, canvas: TNodeCanvas): TNode {
+		var n = NodesMaterial.list[5][0];
+		var node: TNode = Json.parse(Json.stringify(n));
+		node.name = groupCanvas.name;
+		node.id = nodes.getNodeId(canvas.nodes);
+		node.x = UINodes.inst.getNodeX();
+		node.y = UINodes.inst.getNodeY();
+		var origin: TNode = null;
+		for (m in Project.materials) for (n in m.canvas.nodes) if (n.type == "GROUP" && n.name == node.name) { origin = n; break; }
+		if (origin == null) for (g in Project.materialGroups) for (n in g.canvas.nodes) if (n.type == "GROUP" && n.name == node.name) { origin = n; break; }
+		if (origin != null) {
+			for (soc in origin.inputs) {
+				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas));
+			}
+			for (soc in origin.outputs) {
+				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas));
+			}
 		}
 		return node;
 	}

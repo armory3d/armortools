@@ -284,6 +284,7 @@ class Context {
 		UISidebar.inst.hwnd1.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
+		UINodes.inst.groupStack = [];
 
 		var decal = tool == ToolDecal || tool == ToolText;
 		if (decal) {

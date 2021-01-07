@@ -1,16 +1,18 @@
 package arm.shader;
 
+import haxe.Json;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
 import arm.Enums;
+import arm.Project;
 
 class NodesMaterial {
 
 	// Mark strings as localizable
 	public static inline function _tr(s: String) { return s; }
 
-	public static var categories = [_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter")];
+	public static var categories = [_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter"), _tr("Group")];
 
 	public static var list: Array<Array<TNode>> = [
 		[ // Input
@@ -980,7 +982,7 @@ class NodesMaterial {
 						name: _tr("gradient_type"),
 						type: "ENUM",
 						// data: ["Linear", "Quadratic", "Easing", "Diagonal", "Radial", "Quadratic Sphere", "Spherical"],
-						data: ["Linear", "Diagonal", "Radial", "Spherical"],
+						data: [_tr("Linear"), _tr("Diagonal"), _tr("Radial"), _tr("Spherical")],
 						default_value: 0,
 						output: 0
 					}
@@ -1032,7 +1034,7 @@ class NodesMaterial {
 						name: _tr("Color Space"),
 						type: "ENUM",
 						default_value: 0,
-						data: ["linear", "srgb"]
+						data: [_tr("linear"), _tr("srgb")]
 					}
 				]
 			},
@@ -1226,7 +1228,7 @@ class NodesMaterial {
 					{
 						name: _tr("coloring"),
 						type: "ENUM",
-						data: ["Intensity", "Cells"],
+						data: [_tr("Intensity"), _tr("Cells")],
 						default_value: 0,
 						output: 0
 					}
@@ -1594,7 +1596,7 @@ class NodesMaterial {
 					{
 						name: _tr("blend_type"),
 						type: "ENUM",
-						data: ["Mix", "Darken", "Multiply", "Burn", "Lighten", "Screen", "Dodge", "Add", "Overlay", "Soft Light", "Linear Light", "Difference", "Subtract", "Divide", "Hue", "Saturation", "Color", "Value"],
+						data: [_tr("Mix"), _tr("Darken"), _tr("Multiply"), _tr("Burn"), _tr("Lighten"), _tr("Screen"), _tr("Dodge"), _tr("Add"), _tr("Overlay"), _tr("Soft Light"), _tr("Linear Light"), _tr("Difference"), _tr("Subtract"), _tr("Divide"), _tr("Hue"), _tr("Saturation"), _tr("Color"), _tr("Value")],
 						default_value: 0,
 						output: 0
 					},
@@ -2022,7 +2024,7 @@ class NodesMaterial {
 					{
 						name: _tr("operation"),
 						type: "ENUM",
-						data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Absolute", "Minimum", "Maximum", "Less Than", "Greater Than", "Round", "Floor", "Ceil", "Fract", "Modulo", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2"],
+						data: [_tr("Add"), _tr("Subtract"), _tr("Multiply"), _tr("Divide"), _tr("Power"), _tr("Logarithm"), _tr("Square Root"), _tr("Absolute"), _tr("Minimum"), _tr("Maximum"), _tr("Less Than"), _tr("Greater Than"), _tr("Round"), _tr("Floor"), _tr("Ceil"), _tr("Fract"), _tr("Modulo"), _tr("Sine"), _tr("Cosine"), _tr("Tangent"), _tr("Arcsine"), _tr("Arccosine"), _tr("Arctangent"), _tr("Arctan2")],
 						default_value: 0,
 						output: 0
 					},
@@ -2245,9 +2247,28 @@ class NodesMaterial {
 					{
 						name: _tr("operation"),
 						type: "ENUM",
-						data: ["Add", "Subtract", "Average", "Dot Product", "Cross Product", "Normalize"],
+						data: [_tr("Add"), _tr("Subtract"), _tr("Average"), _tr("Dot Product"), _tr("Cross Product"), _tr("Normalize")],
 						default_value: 0,
 						output: 0
+					}
+				]
+			}
+		],
+		[ // Input
+			{
+				id: 0,
+				name: _tr("New Group"),
+				type: "GROUP",
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [],
+				outputs: [],
+				buttons: [
+					{
+						name: "arm.shader.NodesMaterial.newGroupButton",
+						type: "CUSTOM",
+						height: 1
 					}
 				]
 			}
@@ -2318,7 +2339,7 @@ class NodesMaterial {
 			vals.pop();
 			ihandle.value -= 1;
 		}
-		but.data = ui.combo(nhandle.nest(0).nest(1, {position: but.data}), ["Linear", "Constant"], "Interpolate");
+		but.data = ui.combo(nhandle.nest(0).nest(1, {position: but.data}), [tr("Linear"), tr("Constant")], tr("Interpolate"));
 		ui.row([1 / 2, 1 / 2]);
 		var i = Std.int(ui.slider(ihandle, "Index", 0, vals.length - 1, false, 1, true, Left));
 		var val = vals[i];
@@ -2335,6 +2356,142 @@ class NodesMaterial {
 		val[0] = chandle.color.R;
 		val[1] = chandle.color.G;
 		val[2] = chandle.color.B;
+	}
+
+	@:keep
+	public static function newGroupButton(ui: Zui, nodes: Nodes, node: TNode) {
+		if (node.name == "New Group") {
+			for (i in 1...999) {
+				node.name = tr("Group") + " " + i;
+				var found = false;
+				for (g in Project.materialGroups) if (g.canvas.name == node.name) { found = true; break; }
+				if (!found) break;
+			}
+			var canvas: TNodeCanvas = {
+				name: node.name,
+				nodes: [
+					{
+						id: 0,
+						x: 50,
+						y: 200,
+						name: _tr("Group Input"),
+						type: "GROUP_INPUT",
+						inputs: [],
+						outputs: [],
+						buttons: [
+							{
+								name: "arm.shader.NodesMaterial.groupInputButton",
+								type: "CUSTOM",
+								height: 1
+							}
+						],
+						color: 0xff448c6d
+					},
+					{
+						id: 1,
+						x: 450,
+						y: 200,
+						name: _tr("Group Output"),
+						type: "GROUP_OUTPUT",
+						inputs: [],
+						outputs: [],
+						buttons: [
+							{
+								name: "arm.shader.NodesMaterial.groupOutputButton",
+								type: "CUSTOM",
+								height: 1
+							}
+						],
+						color: 0xff448c6d
+					}
+				],
+				links: []
+			};
+			Project.materialGroups.push({ canvas: canvas, nodes: new Nodes() });
+		}
+
+		var group: TNodeGroup = null;
+		for (g in Project.materialGroups) if (g.canvas.name == node.name) { group = g; break; }
+
+		if (ui.button(tr("Nodes"))) {
+			arm.ui.UINodes.inst.groupStack.push(group);
+		}
+	}
+
+	@:keep
+	public static function groupInputButton(ui: Zui, nodes: Nodes, node: TNode) {
+		addSocketButton(ui, nodes, node, node.outputs);
+	}
+
+	@:keep
+	public static function groupOutputButton(ui: Zui, nodes: Nodes, node: TNode) {
+		addSocketButton(ui, nodes, node, node.inputs);
+	}
+
+	static function addSocketButton(ui: Zui, nodes: Nodes, node: TNode, sockets: Array<TNodeSocket>) {
+		if (ui.button(tr("Add"))) {
+			arm.ui.UIMenu.draw(function(ui: Zui) {
+				ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
+				var groupStack = arm.ui.UINodes.inst.groupStack;
+				var c = groupStack[groupStack.length - 1].canvas;
+				if (ui.button(tr("RGBA"), Left)) {
+					sockets.push(createSocket(nodes, node, "RGBA", c));
+					syncSockets(node);
+				}
+				if (ui.button(tr("Vector"), Left)) {
+					sockets.push(createSocket(nodes, node, "VECTOR", c));
+					syncSockets(node);
+				}
+				if (ui.button(tr("Value"), Left)) {
+					sockets.push(createSocket(nodes, node, "VALUE", c));
+					syncSockets(node);
+				}
+			}, 4);
+		}
+	}
+
+	public static function syncSockets(node: TNode) {
+		var groupStack = arm.ui.UINodes.inst.groupStack;
+		var c = groupStack[groupStack.length - 1].canvas;
+		for (m in Project.materials) syncGroupSockets(m.canvas, c.name, node);
+		for (g in Project.materialGroups) syncGroupSockets(g.canvas, c.name, node);
+	}
+
+	static function syncGroupSockets(canvas: TNodeCanvas, groupName: String, node: TNode) {
+		for (n in canvas.nodes) {
+			if (n.type == "GROUP" && n.name == groupName) {
+				var isInputs = node.name == "Group Input";
+				var oldSockets = isInputs ? n.inputs : n.outputs;
+				var sockets = Json.parse(Json.stringify(isInputs ? node.outputs : node.inputs));
+				isInputs ? n.inputs = sockets : n.outputs = sockets;
+				for (s in sockets) s.node_id = n.id;
+				var numSockets = sockets.length < oldSockets.length ? sockets.length : oldSockets.length;
+				for (i in 0...numSockets) if (sockets[i].type == oldSockets[i].type) sockets[i].default_value = oldSockets[i].default_value;
+			}
+		}
+	}
+
+	static inline function get_socket_color(type: String): Int {
+		return type == "RGBA" ? 0xffc7c729 : type == "VECTOR" ? 0xff6363c7 : 0xffa1a1a1;
+	}
+
+	static inline function get_socket_default_value(type: String): Dynamic {
+		return type == "RGBA" ? f32([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? f32([0.0, 0.0, 0.0]) : 0.0;
+	}
+
+	static inline function get_socket_name(type: String): String {
+		return type == "RGBA" ? _tr("Color") : type == "VECTOR" ? _tr("Vector") : _tr("Value");
+	}
+
+	public static function createSocket(nodes: Nodes, node: TNode, type: String, canvas: TNodeCanvas): TNodeSocket {
+		return {
+			id: nodes.getSocketId(canvas.nodes),
+			node_id: node.id,
+			name: get_socket_name(type),
+			type: type,
+			color: get_socket_color(type),
+			default_value: get_socket_default_value(type)
+		}
 	}
 
 	public static function createNode(nodeType: String): TNode {

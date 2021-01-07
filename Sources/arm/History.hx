@@ -412,9 +412,10 @@ class History {
 	// public static function newMaterial() {}
 	// public static function deleteMaterial() {}
 
-	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int) {
+	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
 		var step = push(tr("Edit Nodes"));
 		step.canvas_type = canvas_type;
+		step.canvas_group = canvas_group;
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
 	}
 
@@ -504,10 +505,14 @@ class History {
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
 
+	static function getCanvasOwner(step: TStep): Dynamic {
+		return step.canvas_group == null ? Project.materials[step.material] : Project.materialGroups[step.canvas_group];
+	}
+
 	static function swapCanvas(step: TStep) {
 		if (step.canvas_type == 0) {
-			var _canvas = Project.materials[step.material].canvas;
-			Project.materials[step.material].canvas = step.canvas;
+			var _canvas = getCanvasOwner(step).canvas;
+			getCanvasOwner(step).canvas = step.canvas;
 			step.canvas = _canvas;
 			Context.material = Project.materials[step.material];
 		}
@@ -538,4 +543,5 @@ typedef TStep = {
 	@:optional public var prev_order: Int; // Previous layer position
 	@:optional public var canvas: TNodeCanvas; // Node history
 	@:optional public var canvas_type: Int;
+	@:optional public var canvas_group: Int;
 }
