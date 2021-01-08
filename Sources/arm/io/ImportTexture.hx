@@ -10,8 +10,10 @@ class ImportTexture {
 
 	public static function run(path: String) {
 		if (!Path.isTexture(path)) {
-			Log.error(Strings.error1());
-			return;
+			if (!Context.enableImportPlugin(path)) {
+				Log.error(Strings.error1());
+				return;
+			}
 		}
 
 		for (a in Project.assets) {

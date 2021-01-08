@@ -256,4 +256,14 @@ class Config {
 			UISidebar.inst.tagUIRedraw();
 		}
 	}
+
+	public static function enablePlugin(f: String) {
+		raw.plugins.push(f);
+		Plugin.start(f);
+	}
+
+	public static function disablePlugin(f: String) {
+		raw.plugins.remove(f);
+		Plugin.stop(f);
+	}
 }

@@ -486,7 +486,7 @@ plugin.drawUI = function(ui) {
 				ui.endSticky();
 
 				if (filesPlugin == null) {
-					filesPlugin = File.readDirectory(Path.data() + Path.sep + "plugins");
+					fetchPlugins();
 				}
 
 				if (Config.raw.plugins == null) Config.raw.plugins = [];
@@ -500,14 +500,7 @@ plugin.drawUI = function(ui) {
 					var tag = isJs ? f.split(".")[0] : f;
 					ui.check(h, tag);
 					if (h.changed && h.selected != enabled) {
-						if (h.selected) {
-							Config.raw.plugins.push(f);
-							Plugin.start(f);
-						}
-						else {
-							Config.raw.plugins.remove(f);
-							Plugin.stop(f);
-						}
+						h.selected ? Config.enablePlugin(f) : Config.disablePlugin(f);
 						App.redrawUI();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
@@ -557,6 +550,10 @@ plugin.drawUI = function(ui) {
 		for (i in 0...filesKeymap.length) {
 			filesKeymap[i] = filesKeymap[i].substr(0, filesKeymap[i].length - 5); // Strip .json
 		}
+	}
+
+	public static function fetchPlugins() {
+		filesPlugin = File.readDirectory(Path.data() + Path.sep + "plugins");
 	}
 
 	public static function getThemeIndex(): Int {

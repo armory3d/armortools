@@ -24,6 +24,7 @@ import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
+import arm.ui.BoxPreferences;
 import arm.node.MakeMaterial;
 import arm.Enums;
 import arm.ProjectFormat;
@@ -433,5 +434,21 @@ class Context {
 		iron.App.notifyOnInit(function() {
 			MakeMaterial.parseMeshMaterial();
 		});
+	}
+
+	public static function enableImportPlugin(file: String): Bool {
+		// Return plugin name suitable for importing the specified file
+		if (BoxPreferences.filesPlugin == null) {
+			BoxPreferences.fetchPlugins();
+		}
+		var ext = file.substr(file.lastIndexOf(".") + 1);
+		for (f in BoxPreferences.filesPlugin) {
+			if (f.indexOf(ext) >= 0) {
+				Config.enablePlugin(f);
+				Log.info(f + " " + tr("plugin enabled"));
+				return true;
+			}
+		}
+		return false;
 	}
 }

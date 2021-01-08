@@ -43,7 +43,12 @@ class ImportAsset {
 			ImportFolder.run(path);
 		}
 		else {
-			Log.error(Strings.error1());
+			if (Context.enableImportPlugin(path)) {
+				run(path, dropX, dropY, showBox);
+			}
+			else {
+				Log.error(Strings.error1());
+			}
 		}
 	}
 }

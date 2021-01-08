@@ -23,8 +23,10 @@ class ImportMesh {
 
 	public static function run(path: String, _clearLayers = true, _replaceExisting = true) {
 		if (!Path.isMesh(path)) {
-			Log.error(Strings.error1());
-			return;
+			if (!Context.enableImportPlugin(path)) {
+				Log.error(Strings.error1());
+				return;
+			}
 		}
 
 		clearLayers = _clearLayers;
