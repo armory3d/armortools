@@ -108,7 +108,7 @@ class Context {
 	public static var formatQuality = 100.0;
 	public static var layersExport = ExportVisible;
 	public static var splitBy = SplitObject;
-	public static var parseTransform = false;
+	public static var parseTransform = true;
 	public static var parseVCols = false;
 
 	public static var selectTime = 0.0;

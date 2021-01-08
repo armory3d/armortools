@@ -62,19 +62,21 @@ class FbxParser {
 				var node = lib.ids.get(c);
 				for (p in FbxTools.getAll(node, "Properties70.P")) {
 					switch (FbxTools.toString(p.props[0])) {
-					case "Lcl Translation":
-						tx = FbxTools.toFloat(p.props[4]) / 100;
-						ty = FbxTools.toFloat(p.props[5]) / 100;
-						tz = FbxTools.toFloat(p.props[6]) / 100;
-					case "Lcl Rotation":
-						rx = FbxTools.toFloat(p.props[4]) * Math.PI / 180;
-						ry = FbxTools.toFloat(p.props[5]) * Math.PI / 180;
-						rz = FbxTools.toFloat(p.props[6]) * Math.PI / 180;
-					case "Lcl Scaling":
-						sx = FbxTools.toFloat(p.props[4]) / 100;
-						sy = FbxTools.toFloat(p.props[5]) / 100;
-						sz = FbxTools.toFloat(p.props[6]) / 100;
-					default:
+						case "Lcl Translation": {
+							tx = FbxTools.toFloat(p.props[4]);
+							ty = FbxTools.toFloat(p.props[5]);
+							tz = FbxTools.toFloat(p.props[6]);
+						}
+						case "Lcl Rotation": {
+							rx = FbxTools.toFloat(p.props[4]) * Math.PI / 180;
+							ry = FbxTools.toFloat(p.props[5]) * Math.PI / 180;
+							rz = FbxTools.toFloat(p.props[6]) * Math.PI / 180;
+						}
+						case "Lcl Scaling": {
+							sx = FbxTools.toFloat(p.props[4]);
+							sy = FbxTools.toFloat(p.props[5]);
+							sz = FbxTools.toFloat(p.props[6]);
+						}
 					}
 				}
 			}

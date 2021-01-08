@@ -697,15 +697,26 @@ class Geometry {
 		var polys = getPolygons();
 
 		if (FbxParser.parseTransform) {
+			var m = iron.math.Mat4.identity();
+			var v = new iron.math.Vec4(p.tx, p.ty, p.tz);
+			var q = new iron.math.Quat();
+			q.fromEuler(p.rx, p.ry, p.rz);
+			var sc = new iron.math.Vec4(p.sx, p.sy, p.sz);
+			m.compose(v, q, sc);
+
 			for (i in 0...Std.int(pbuf.length / 3)) {
-				pbuf[i * 3    ] *= p.sx;
-				// q.fromEuler(p.rx, p.ry, p.rz);
-				// v.applyQuat(q);
-				pbuf[i * 3    ] += p.tx;
-				pbuf[i * 3 + 1] *= p.sy;
-				pbuf[i * 3 + 1] += p.ty;
-				pbuf[i * 3 + 2] *= p.sz;
-				pbuf[i * 3 + 2] += p.tz;
+				v.set(pbuf[i * 3], pbuf[i * 3 + 1], pbuf[i * 3 + 2]);
+				v.applymat(m);
+				pbuf[i * 3    ] = v.x;
+				pbuf[i * 3 + 1] = v.y;
+				pbuf[i * 3 + 2] = v.z;
+			}
+			for (i in 0...Std.int(nbuf.length / 3)) {
+				v.set(nbuf[i * 3], nbuf[i * 3 + 1], nbuf[i * 3 + 2]);
+				v.applyQuat(q);
+				nbuf[i * 3    ] = v.x;
+				nbuf[i * 3 + 1] = v.y;
+				nbuf[i * 3 + 2] = v.z;
 			}
 		}
 
