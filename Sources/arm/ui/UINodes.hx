@@ -487,10 +487,10 @@ class UINodes {
 			}
 
 			// Editable canvas name
-			var ACCENT_COL = ui.t.ACCENT_COL;
-			var BUTTON_H = ui.t.BUTTON_H;
-			var ELEMENT_H = ui.t.ELEMENT_H;
-			var FONT_SIZE = ui.fontSize;
+			var _ACCENT_COL = ui.t.ACCENT_COL;
+			var _BUTTON_H = ui.t.BUTTON_H;
+			var _ELEMENT_H = ui.t.ELEMENT_H;
+			var _FONT_SIZE = ui.fontSize;
 			ui.t.ACCENT_COL = 0x00000000;
 			ui.t.BUTTON_H = 30;
 			ui.t.ELEMENT_H = 30;
@@ -514,10 +514,10 @@ class UINodes {
 					}
 				}
 			}
-			ui.t.ACCENT_COL = ACCENT_COL;
-			ui.t.BUTTON_H = BUTTON_H;
-			ui.t.ELEMENT_H = ELEMENT_H;
-			ui.fontSize = FONT_SIZE;
+			ui.t.ACCENT_COL = _ACCENT_COL;
+			ui.t.BUTTON_H = _BUTTON_H;
+			ui.t.ELEMENT_H = _ELEMENT_H;
+			ui.fontSize = _FONT_SIZE;
 
 			// Close node group
 			if (groupStack.length > 0) {
@@ -536,7 +536,7 @@ class UINodes {
 			ui._y = 0;
 			ui._w = ew;
 
-			var BUTTON_COL = ui.t.BUTTON_COL;
+			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
@@ -558,7 +558,7 @@ class UINodes {
 			if (ui.button(tr("Search"), Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
 			if (ui.isHovered) ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');
 
-			ui.t.BUTTON_COL = BUTTON_COL;
+			ui.t.BUTTON_COL = _BUTTON_COL;
 		}
 
 		ui.end(!drawMenu);
@@ -579,9 +579,9 @@ class UINodes {
 			g.fillRect(popupX, py, menuw, ph);
 
 			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
-			var BUTTON_COL = ui.t.BUTTON_COL;
+			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
-			var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+			var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 
 			for (n in list[menuCategory]) {
@@ -607,8 +607,8 @@ class UINodes {
 				}
 			}
 
-			ui.t.BUTTON_COL = BUTTON_COL;
-			ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
+			ui.t.BUTTON_COL = _BUTTON_COL;
+			ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 			ui.endRegion();
 		}
 
