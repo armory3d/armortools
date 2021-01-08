@@ -120,8 +120,6 @@ class Translator {
 					ui.ops.font = f;
 					ui.setScale(ui.ops.scaleFactor);
 				}
-				// Restore font size in theme
-				App.theme.FONT_SIZE = App.defaultFontSize;
 			});
 		});
 	}
