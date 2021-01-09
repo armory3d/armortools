@@ -443,7 +443,7 @@ class Context {
 		}
 		var ext = file.substr(file.lastIndexOf(".") + 1);
 		for (f in BoxPreferences.filesPlugin) {
-			if (f.indexOf(ext) >= 0) {
+			if (f.startsWith("import_") && f.indexOf(ext) >= 0) {
 				Config.enablePlugin(f);
 				Log.info(f + " " + tr("plugin enabled"));
 				return true;
