@@ -64,6 +64,7 @@ class UINodes {
 		Nodes.onLinkDrag = onLinkDrag;
 		Nodes.onSocketReleased = onSocketReleased;
 		Nodes.onNodeRemove = onNodeRemove;
+		Nodes.onCanvasControl = onCanvasControl;
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui({theme: App.theme, font: App.font, color_wheel: App.colorWheel, scaleFactor: scale});
@@ -161,6 +162,28 @@ class UINodes {
 				}
 			}
 		}
+	}
+
+	function onCanvasControl(): zui.Nodes.CanvasControl {
+		return getCanvasControl(ui);
+	}
+
+	public static function getCanvasControl(ui: Zui): zui.Nodes.CanvasControl {
+		var pan = ui.inputDownR || Operator.shortcut(Config.keymap.action_pan, ShortcutDown);
+		var zoomDelta = Operator.shortcut(Config.keymap.action_zoom, ShortcutDown) ? getZoomDelta(ui) / 100.0 : 0.0;
+		return {
+			panX: pan ? ui.inputDX : 0.0,
+			panY: pan ? ui.inputDY : 0.0,
+			zoom: ui.inputWheelDelta != 0.0 ? -ui.inputWheelDelta / 10 : zoomDelta
+		}
+	}
+
+	static function getZoomDelta(ui: Zui): Float {
+		return Config.raw.zoom_direction == ZoomVertical ? -ui.inputDY :
+			   Config.raw.zoom_direction == ZoomVerticalInverted ? -ui.inputDY :
+			   Config.raw.zoom_direction == ZoomHorizontal ? ui.inputDX :
+			   Config.raw.zoom_direction == ZoomHorizontalInverted ? ui.inputDX :
+			   -(ui.inputDY - ui.inputDX);
 	}
 
 	public function getCanvas(groups = false): TNodeCanvas {

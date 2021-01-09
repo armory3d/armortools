@@ -268,22 +268,20 @@ class UIView2D {
 			return;
 		}
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-
-		if (mouse.down("right") || mouse.down("middle") || (mouse.down("left") && kb.down("control") && !decal)) {
-			panX += mouse.movementX;
-			panY += mouse.movementY;
-		}
-		if (mouse.wheelDelta != 0) {
+		var control = UINodes.getCanvasControl(ui);
+		panX += control.panX;
+		panY += control.panY;
+		if (control.zoom != 0) {
 			var _panX = panX / panScale;
 			var _panY = panY / panScale;
-			panScale -= mouse.wheelDelta / 10;
+			panScale += control.zoom;
 			if (panScale < 0.1) panScale = 0.1;
 			if (panScale > 6.0) panScale = 6.0;
 			panX = _panX * panScale;
 			panY = _panY * panScale;
 		}
 
+		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 

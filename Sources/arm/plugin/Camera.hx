@@ -62,7 +62,7 @@ class Camera {
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
-					var f = getDirectionToZoom() / 150;
+					var f = getZoomDelta() / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
@@ -106,7 +106,7 @@ class Camera {
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
-					var f = getDirectionToZoom() / 150;
+					var f = getZoomDelta() / 150;
 					f *= getCameraSpeed();
 					camera.transform.move(camera.look(), f);
 				}
@@ -213,7 +213,7 @@ class Camera {
 		}
 	}
 
-	function getDirectionToZoom(): Float {
+	static function getZoomDelta(): Float {
 		var mouse = Input.getMouse();
 		return Config.raw.zoom_direction == ZoomVertical ? -mouse.movementY :
 			   Config.raw.zoom_direction == ZoomVerticalInverted ? -mouse.movementY :
