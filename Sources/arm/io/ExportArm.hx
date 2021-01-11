@@ -171,11 +171,12 @@ class ExportArm {
 			version: Main.version,
 			material_nodes: mnodes,
 			material_groups: mgroups,
-			#if (kha_metal || kha_vulkan)
-			material_icons: [Lz4.encode(bgraSwap(m.image.getPixels()))],
-			#else
-			material_icons: [Lz4.encode(m.image.getPixels())],
-			#end
+			material_icons:
+				#if (kha_metal || kha_vulkan)
+				[Lz4.encode(bgraSwap(m.image.getPixels()))],
+				#else
+				[Lz4.encode(m.image.getPixels())],
+				#end
 			assets: texture_files
 		};
 
