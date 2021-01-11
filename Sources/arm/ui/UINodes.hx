@@ -114,11 +114,13 @@ class UINodes {
 				App.notifyOnNextFrame(function() {
 					arm.ui.UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Rename"), Left)) {
+						if (ui.button(tr("Edit"), Left)) {
+							var h = Id.handle();
+							h.text = socket.name;
 							UIBox.showCustom(function(ui: Zui) {
 							if (ui.tab(Id.handle(), tr("Socket"))) {
 								ui.row([0.5, 0.5]);
-								var name = ui.textInput(Id.handle({text: socket.name}), tr("Name"));
+								var name = ui.textInput(h, tr("Name"));
 								if (ui.button(tr("OK")) || ui.isReturnDown) {
 									socket.name = name;
 									UIBox.show = false;
