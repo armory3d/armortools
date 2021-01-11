@@ -16,7 +16,14 @@ class File {
 	static inline var cmd_del = "rm";
 	#end
 
+	static var cloud: Map<String, Array<String>> = null;
+
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
+		if (path.startsWith("cloud")) {
+			if (cloud == null) initCloud();
+			var files = cloud.get(path.replace("\\", "/"));
+			return files != null ? files : [];
+		}
 		return Krom.readDirectory(path, foldersOnly).split("\n");
 	}
 
@@ -74,6 +81,31 @@ class File {
 		}
 		catch (e: Dynamic) {
 			return null;
+		}
+	}
+
+	static function initCloud() {
+		cloud = [];
+		var files: Array<String> = [];
+		var bytes = File.downloadBytes(Config.raw.server_dir);
+		for (e in Xml.parse(bytes.toString()).firstElement().elementsNamed("Contents")) {
+			for (k in e.elementsNamed("Key")) {
+				files.push(k.firstChild().nodeValue);
+			}
+		}
+		for (file in files) {
+			if (Path.isFolder(file)) {
+				cloud.set(file.substr(0, file.length - 1), []);
+			}
+		}
+		for (file in files) {
+			var nested = file.indexOf("/") != file.lastIndexOf("/");
+			if (nested) {
+				var delim = Path.isFolder(file) ? file.substr(0, file.length - 1).lastIndexOf("/") : file.lastIndexOf("/");
+				var parent = file.substr(0, delim);
+				var child = Path.isFolder(file) ? file.substring(delim + 1, file.length - 1)  : file.substr(delim + 1);
+				cloud.get(parent).push(child);
+			}
 		}
 	}
 }
