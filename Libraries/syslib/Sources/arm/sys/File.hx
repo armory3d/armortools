@@ -88,6 +88,11 @@ class File {
 		cloud = [];
 		var files: Array<String> = [];
 		var bytes = File.downloadBytes(Config.raw.server_dir);
+		if (!File.exists(Path.workingDir() + Path.sep + Path.data() + Path.sep + "download.bin")) {
+			cloud.set("cloud", []);
+			Log.error(Strings.error5());
+			return;
+		}
 		for (e in Xml.parse(bytes.toString()).firstElement().elementsNamed("Contents")) {
 			for (k in e.elementsNamed("Key")) {
 				files.push(k.firstChild().nodeValue);

@@ -17,6 +17,10 @@ class ImportAsset {
 				File.createDirectory(fileDir);
 				var url = Config.raw.server + "/" + path;
 				File.download(url, path);
+				if (!File.exists(abs)) {
+					Log.error(Strings.error5());
+					return;
+				}
 			}
 			path = abs;
 		}
