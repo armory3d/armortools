@@ -108,6 +108,8 @@ class Config {
 			raw.workspace = 0;
 			raw.dilate = DilateInstant;
 			raw.dilate_radius = 2;
+			raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
+			raw.server_dir = "https://fra1.digitaloceanspaces.com/armorpaint";
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
