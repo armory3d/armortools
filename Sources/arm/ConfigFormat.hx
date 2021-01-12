@@ -51,5 +51,4 @@ typedef TConfig = {
 	@:optional var dilate: Null<Int>;
 	@:optional var dilate_radius: Null<Int>;
 	@:optional var server: String;
-	@:optional var server_dir: String;
 }

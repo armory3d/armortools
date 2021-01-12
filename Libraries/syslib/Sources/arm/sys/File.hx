@@ -87,7 +87,7 @@ class File {
 	static function initCloud() {
 		cloud = [];
 		var files: Array<String> = [];
-		var bytes = File.downloadBytes(Config.raw.server_dir);
+		var bytes = File.downloadBytes(Config.raw.server);
 		if (!File.exists(Path.workingDir() + Path.sep + Path.data() + Path.sep + "download.bin")) {
 			cloud.set("cloud", []);
 			Log.error(Strings.error5());
