@@ -2466,31 +2466,37 @@ class NodesMaterial {
 				isInputs ? n.inputs = sockets : n.outputs = sockets;
 				for (s in sockets) s.node_id = n.id;
 				var numSockets = sockets.length < oldSockets.length ? sockets.length : oldSockets.length;
-				for (i in 0...numSockets) if (sockets[i].type == oldSockets[i].type) sockets[i].default_value = oldSockets[i].default_value;
+				for (i in 0...numSockets) {
+					if (sockets[i].type == oldSockets[i].type) {
+						sockets[i].default_value = oldSockets[i].default_value;
+					}
+				}
 			}
 		}
 	}
 
-	static inline function get_socket_color(type: String): Int {
+	public static inline function get_socket_color(type: String): Int {
 		return type == "RGBA" ? 0xffc7c729 : type == "VECTOR" ? 0xff6363c7 : 0xffa1a1a1;
 	}
 
-	static inline function get_socket_default_value(type: String): Dynamic {
+	public static inline function get_socket_default_value(type: String): Dynamic {
 		return type == "RGBA" ? f32([0.8, 0.8, 0.8, 1.0]) : type == "VECTOR" ? f32([0.0, 0.0, 0.0]) : 0.0;
 	}
 
-	static inline function get_socket_name(type: String): String {
+	public static inline function get_socket_name(type: String): String {
 		return type == "RGBA" ? _tr("Color") : type == "VECTOR" ? _tr("Vector") : _tr("Value");
 	}
 
-	public static function createSocket(nodes: Nodes, node: TNode, type: String, canvas: TNodeCanvas): TNodeSocket {
+	public static function createSocket(nodes: Nodes, node: TNode, type: String, canvas: TNodeCanvas, min = 0.0, max = 1.0, default_value: Dynamic = null): TNodeSocket {
 		return {
 			id: nodes.getSocketId(canvas.nodes),
 			node_id: node.id,
 			name: get_socket_name(type),
 			type: type,
 			color: get_socket_color(type),
-			default_value: get_socket_default_value(type)
+			default_value: default_value == null ? get_socket_default_value(type) : default_value,
+			min: min,
+			max: max
 		}
 	}
 

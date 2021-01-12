@@ -115,20 +115,69 @@ class UINodes {
 					arm.ui.UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Edit"), Left)) {
-							var h = Id.handle();
-							h.text = socket.name;
-							UIBox.showCustom(function(ui: Zui) {
-							if (ui.tab(Id.handle(), tr("Socket"))) {
-								ui.row([0.5, 0.5]);
-								var name = ui.textInput(h, tr("Name"));
-								if (ui.button(tr("OK")) || ui.isReturnDown) {
-									socket.name = name;
-									UIBox.show = false;
-									NodesMaterial.syncSockets(node);
-									hwnd.redraws = 2;
+							var htype = Id.handle();
+							var hname = Id.handle();
+							var hmin = Id.handle();
+							var hmax = Id.handle();
+							var hval0 = Id.handle();
+							var hval1 = Id.handle();
+							var hval2 = Id.handle();
+							var hval3 = Id.handle();
+							htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
+							hname.text = socket.name;
+							hmin.value = socket.min;
+							hmax.value = socket.max;
+							if (socket.type == "RGBA" || socket.type == "VECTOR") {
+								hval0.value = socket.default_value[0];
+								hval1.value = socket.default_value[1];
+								hval2.value = socket.default_value[2];
+								if (socket.type == "RGBA") {
+									hval3.value = socket.default_value[3];
 								}
 							}
-						});
+							else hval0.value = socket.default_value;
+							App.notifyOnNextFrame(function() {
+								App.uiBox.endInput();
+								UIBox.showCustom(function(ui: Zui) {
+									if (ui.tab(Id.handle(), tr("Socket"))) {
+										var type = ui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
+										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
+										var name = ui.textInput(hname, tr("Name"));
+										var min = zui.Ext.floatInput(ui, hmin, tr("Min"));
+										var max = zui.Ext.floatInput(ui, hmax, tr("Max"));
+										var default_value: Dynamic = null;
+										if (type == 0) {
+											ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+											zui.Ext.floatInput(ui, hval0, tr("R"));
+											zui.Ext.floatInput(ui, hval1, tr("G"));
+											zui.Ext.floatInput(ui, hval2, tr("B"));
+											zui.Ext.floatInput(ui, hval3, tr("A"));
+											default_value = [hval0.value, hval1.value, hval2.value, hval3.value];
+										}
+										else if (type == 1) {
+											ui.row([1 / 3, 1 / 3, 1 / 3]);
+											hval0.value = zui.Ext.floatInput(ui, hval0, tr("X"));
+											hval1.value = zui.Ext.floatInput(ui, hval1, tr("Y"));
+											hval2.value = zui.Ext.floatInput(ui, hval2, tr("Z"));
+											default_value = [hval0.value, hval1.value, hval2.value];
+										}
+										else {
+											default_value = zui.Ext.floatInput(ui, hval0, tr("default_value"));
+										}
+										if (ui.button(tr("OK"))) { // || ui.isReturnDown
+											socket.name = name;
+											socket.type = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
+											socket.color = NodesMaterial.get_socket_color(socket.type);
+											socket.min = min;
+											socket.max = max;
+											socket.default_value = default_value;
+											UIBox.show = false;
+											NodesMaterial.syncSockets(node);
+											hwnd.redraws = 2;
+										}
+									}
+								}, 400, 250);
+							});
 						}
 						if (ui.button(tr("Delete"), Left)) {
 							node.inputs.remove(socket);
@@ -689,15 +738,23 @@ class UINodes {
 		node.id = nodes.getNodeId(canvas.nodes);
 		node.x = UINodes.inst.getNodeX();
 		node.y = UINodes.inst.getNodeY();
-		var origin: TNode = null;
-		for (m in Project.materials) for (n in m.canvas.nodes) if (n.type == "GROUP" && n.name == node.name) { origin = n; break; }
-		if (origin == null) for (g in Project.materialGroups) for (n in g.canvas.nodes) if (n.type == "GROUP" && n.name == node.name) { origin = n; break; }
-		if (origin != null) {
-			for (soc in origin.inputs) {
-				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas));
+		var groupInput: TNode = null;
+		var groupOutput: TNode = null;
+		for (g in Project.materialGroups) {
+			if (g.canvas.name == node.name) {
+				for (n in g.canvas.nodes) {
+					if (n.type == "GROUP_INPUT") groupInput = n;
+					else if (n.type == "GROUP_OUTPUT") groupOutput = n;
+				}
+				break;
 			}
-			for (soc in origin.outputs) {
-				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas));
+		}
+		if (groupInput != null && groupOutput != null) {
+			for (soc in groupInput.outputs) {
+				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas, soc.min, soc.max, soc.default_value));
+			}
+			for (soc in groupOutput.inputs) {
+				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas, soc.min, soc.max, soc.default_value));
 			}
 		}
 		return node;
