@@ -152,6 +152,7 @@ class ExportArm {
 	}
 
 	public static function runMaterial(path: String) {
+		if (!path.endsWith(".arm")) path += ".arm";
 		var mnodes: Array<TNodeCanvas> = [];
 		var mgroups: Array<TNodeCanvas> = null;
 		var m = Context.material;
@@ -167,11 +168,33 @@ class ExportArm {
 
 		var texture_files = assetsToFiles(assets);
 
+		var isCloud = path.endsWith("_cloud_.arm");
+		if (isCloud) {
+			path = path.replace("_cloud_", "");
+			// Separate icon files
+			var out = new haxe.io.BytesOutput();
+			var writer = new arm.format.JpgWriter(out);
+			writer.write(
+				{
+					width: m.image.width,
+					height: m.image.height,
+					quality: 50,
+					pixels: m.image.getPixels()
+				}, 1
+			);
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", out.getBytes().getData());
+			var out = new haxe.io.BytesOutput();
+			var writer = new arm.format.PngWriter(out);
+			var data = arm.format.PngTools.build32RGBA(m.image.width, m.image.height, m.image.getPixels());
+			writer.write(data);
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", out.getBytes().getData());
+		}
+
 		var raw = {
 			version: Main.version,
 			material_nodes: mnodes,
 			material_groups: mgroups,
-			material_icons:
+			material_icons: isCloud ? null :
 				#if (kha_metal || kha_vulkan)
 				[Lz4.encode(bgraSwap(m.image.getPixels()))],
 				#else
@@ -181,7 +204,6 @@ class ExportArm {
 		};
 
 		var bytes = ArmPack.encode(raw);
-		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, bytes.getData());
 	}
 
