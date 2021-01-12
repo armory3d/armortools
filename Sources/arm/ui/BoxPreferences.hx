@@ -95,7 +95,21 @@ class BoxPreferences {
 								MakeMaterial.parsePaintMaterial();
 							});
 						}
-					}, 2);
+						if (ui.button(tr("Import..."), Left)) {
+							UIFiles.show("arm", false, function(path: String) {
+								Data.getBlob(path, function(b: kha.Blob) {
+									var raw = Json.parse(b.toString());
+									iron.App.notifyOnInit(function() {
+										ui.t.ELEMENT_H = App.defaultElementH;
+										Config.importFrom(raw);
+										setScale();
+										MakeMaterial.parseMeshMaterial();
+										MakeMaterial.parsePaintMaterial();
+									});
+								});
+							});
+						}
+					}, 3);
 				}
 			}
 

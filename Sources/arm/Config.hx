@@ -137,6 +137,20 @@ class Config {
 		loadTheme(raw.theme);
 	}
 
+	public static function importFrom(from: TConfig) {
+		var _sha = raw.sha;
+		var _version = raw.version;
+		raw = from;
+		raw.sha = _sha;
+		raw.version = _version;
+		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
+		loadKeymap();
+		initLayout();
+		Translator.loadTranslations(raw.locale);
+		applyConfig();
+		loadTheme(raw.theme);
+	}
+
 	public static inline function getSuperSampleQuality(f: Float): Int {
 		return f == 0.25 ? 0 :
 			   f == 0.5 ? 1 :
