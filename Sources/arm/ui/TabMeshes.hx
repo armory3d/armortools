@@ -45,12 +45,11 @@ class TabMeshes {
 
 			ui.endSticky();
 
-			if (ui.panel(Id.handle({selected: false}), tr("Scene"), true, false, false)) {
-				ui.indent();
-				for (o in Project.paintObjects) {
-					ui.text(o.name);
-				}
-				ui.unindent();
+			for (o in Project.paintObjects) {
+				var h = Id.handle();
+				h.selected = o.visible;
+				o.visible = ui.check(h, o.name);
+				if (h.changed) Context.ddirty = 2;
 			}
 		}
 	}
