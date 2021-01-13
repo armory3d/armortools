@@ -15,6 +15,8 @@ typedef TProjectFormat = {
 	@:optional public var layer_datas: Array<TLayerData>;
 	@:optional public var mesh_datas: Array<TMeshData>;
 	@:optional public var mesh_assets: Array<String>;
+	@:optional public var atlas_objects: Array<Int>;
+	@:optional public var atlas_names: Array<String>;
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
 }
 

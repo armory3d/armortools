@@ -94,6 +94,8 @@ class ExportArm {
 			assets: texture_files,
 			font_assets: font_files,
 			mesh_assets: mesh_files,
+			atlas_objects: Project.atlasObjects,
+			atlas_names: Project.atlasNames,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else

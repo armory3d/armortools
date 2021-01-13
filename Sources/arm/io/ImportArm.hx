@@ -180,6 +180,9 @@ class ImportArm {
 				Project.meshAssets = [abs];
 			}
 
+			if (project.atlas_objects != null) Project.atlasObjects = project.atlas_objects;
+			if (project.atlas_names != null) Project.atlasNames = project.atlas_names;
+
 			// No mask by default
 			if (Context.mergedObject == null) MeshUtil.mergeMesh();
 			Context.selectPaintObject(Context.mainObject());
