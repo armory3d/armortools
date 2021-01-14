@@ -361,7 +361,7 @@ class Context {
 		paintObject = o;
 
 		var mask = layer.objectMask;
-		if (Context.layerFilter > 0) mask = Context.layerFilter;
+		if (Context.layerFilterUsed()) mask = Context.layerFilter;
 
 		if (mergedObject == null || mask > 0) {
 			paintObject.skip_context = "";
@@ -421,5 +421,13 @@ class Context {
 			}
 		}
 		return false;
+	}
+
+	public static function layerFilterUsed(): Bool {
+		return layerFilter > 0 && layerFilter <= Project.paintObjects.length;
+	}
+
+	public static function objectMaskUsed(): Bool {
+		return layer.objectMask > 0 && layer.objectMask <= Project.paintObjects.length;
 	}
 }
