@@ -18,10 +18,9 @@ import arm.Enums;
 
 class ImportMesh {
 
-	public static var clearLayers = true;
-	public static var replaceExisting = true;
+	static var clearLayers = true;
 
-	public static function run(path: String, _clearLayers = true, _replaceExisting = true) {
+	public static function run(path: String, _clearLayers = true, replaceExisting = true) {
 		if (!Path.isMesh(path)) {
 			if (!Context.enableImportPlugin(path)) {
 				Log.error(Strings.error1());
@@ -30,7 +29,6 @@ class ImportMesh {
 		}
 
 		clearLayers = _clearLayers;
-		replaceExisting = _replaceExisting;
 		Context.layerFilter = 0;
 
 		#if arm_debug
@@ -45,7 +43,7 @@ class ImportMesh {
 			var ext = path.substr(path.lastIndexOf(".") + 1);
 			var importer = Path.meshImporters.get(ext);
 			importer(path, function(mesh: Dynamic) {
-				ImportMesh.makeMesh(mesh, path);
+				replaceExisting ? ImportMesh.makeMesh(mesh, path) : ImportMesh.addMesh(mesh);
 			});
 		}
 
@@ -72,9 +70,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		if (replaceExisting) {
-			ViewportUtil.scaleToBounds();
-		}
+		ViewportUtil.scaleToBounds();
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
 		arm.node.MakeMaterial.parsePaintMaterial();
@@ -103,41 +99,30 @@ class ImportMesh {
 		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
 		new MeshData(raw, function(md: MeshData) {
-			if (replaceExisting) {
-				Context.paintObject = Context.mainObject();
+			Context.paintObject = Context.mainObject();
 
-				Context.selectPaintObject(Context.mainObject());
-				for (i in 0...Project.paintObjects.length) {
-					var p = Project.paintObjects[i];
-					if (p == Context.paintObject) continue;
-					Data.deleteMesh(p.data.handle);
-					p.remove();
-				}
-				var handle = Context.paintObject.data.handle;
-				if (handle != "SceneSphere" && handle != "ScenePlane") {
-					Data.deleteMesh(handle);
-				}
-
-				if (clearLayers) {
-					while (Project.layers.length > 0) { var l = Project.layers.pop(); l.unload(); }
-					Layers.newLayer(false);
-					iron.App.notifyOnInit(Layers.initLayers);
-					History.reset();
-				}
-
-				Context.paintObject.setData(md);
-				Context.paintObject.name = mesh.name;
-				Project.paintObjects = [Context.paintObject];
+			Context.selectPaintObject(Context.mainObject());
+			for (i in 0...Project.paintObjects.length) {
+				var p = Project.paintObjects[i];
+				if (p == Context.paintObject) continue;
+				Data.deleteMesh(p.data.handle);
+				p.remove();
 			}
-			else { // Append
-				// var mats = new haxe.ds.Vector(1);
-				// mats[0] = Context.materialScene.data;
-				// var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
-				// var ar = path.split(Path.sep);
-				// var s = ar[ar.length - 1];
-				// object.name = s.substring(0, s.length - 4);
-				// Context.selectObject(object);
+			var handle = Context.paintObject.data.handle;
+			if (handle != "SceneSphere" && handle != "ScenePlane") {
+				Data.deleteMesh(handle);
 			}
+
+			if (clearLayers) {
+				while (Project.layers.length > 0) { var l = Project.layers.pop(); l.unload(); }
+				Layers.newLayer(false);
+				iron.App.notifyOnInit(Layers.initLayers);
+				History.reset();
+			}
+
+			Context.paintObject.setData(md);
+			Context.paintObject.name = mesh.name;
+			Project.paintObjects = [Context.paintObject];
 
 			md.handle = raw.name;
 			Data.cachedMeshes.set(md.handle, md);

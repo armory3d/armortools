@@ -349,13 +349,13 @@ class Project {
 		});
 	}
 
-	public static function importMesh() {
+	public static function importMesh(replaceExisting = true) {
 		UIFiles.show(Path.meshFormats.join(","), false, function(path: String) {
-			importMeshBox(path);
+			importMeshBox(path, replaceExisting);
 		});
 	}
 
-	public static function importMeshBox(path: String) {
+	public static function importMeshBox(path: String, replaceExisting = true) {
 
 		#if krom_ios
 		// Import immediately while access to resource is unlocked
@@ -392,7 +392,7 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					ImportMesh.run(path, true, true);
+					ImportMesh.run(path, true, replaceExisting);
 				}
 				if (ui.button(tr("?"))) {
 					File.explorer("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
