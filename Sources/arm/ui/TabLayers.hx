@@ -44,14 +44,14 @@ class TabLayers {
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
+			var atlases = getUsedAtlases();
+			if (atlases != null) for (a in atlases) ar.push(a);
 			var filterHandle = Id.handle();
 			filterHandle.position = Context.layerFilter;
 			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
 			if (filterHandle.changed) {
-				for (p in Project.paintObjects) {
-					p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
-					Layers.setObjectMask();
-				}
+				for (p in Project.paintObjects) p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
+				Layers.setObjectMask();
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
 				#if (kha_direct3d12 || kha_vulkan)
@@ -580,6 +580,8 @@ class TabLayers {
 
 					var ar = [tr("Shared")];
 					for (p in Project.paintObjects) ar.push(p.name);
+					var atlases = getUsedAtlases();
+					if (atlases != null) for (a in atlases) ar.push(a);
 					var objectHandle = Id.handle().nest(l.id);
 					objectHandle.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
 					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left, 16);
@@ -709,5 +711,17 @@ class TabLayers {
 		var res: Map<Int, Int> = [];
 		for (l in map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
 		return res;
+	}
+
+	static function getUsedAtlases(): Array<String> {
+		if (Project.atlasObjects == null) return null;
+		var used: Array<Int> = [];
+		for (i in Project.atlasObjects) if (used.indexOf(i) == -1) used.push(i);
+		if (used.length > 1) {
+			var res: Array<String> = [];
+			for (i in used) res.push(Project.atlasNames[i]);
+			return res;
+		}
+		else return null;
 	}
 }
