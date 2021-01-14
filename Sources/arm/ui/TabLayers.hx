@@ -5,6 +5,7 @@ import zui.Id;
 import zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
+import iron.object.MeshObject;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
@@ -45,14 +46,23 @@ class TabLayers {
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
-			var atlases = getUsedAtlases();
+			var atlases = Project.getUsedAtlases();
 			if (atlases != null) for (a in atlases) ar.push(a);
 			var filterHandle = Id.handle();
 			filterHandle.position = Context.layerFilter;
 			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
 			if (filterHandle.changed) {
-				for (p in Project.paintObjects) p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
-				if (Context.layerFilter == 0 && Context.mergedObjectIsAtlas) MeshUtil.mergeMesh();
+				for (p in Project.paintObjects) {
+					p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter] || Project.isAtlasObject(p);
+				}
+				if (Context.layerFilter == 0 && Context.mergedObjectIsAtlas) { // All
+					MeshUtil.mergeMesh();
+				}
+				else if (Context.layerFilter > Project.paintObjects.length) { // Atlas
+					var visibles: Array<MeshObject> = [];
+					for (p in Project.paintObjects) if (p.visible) visibles.push(p);
+					MeshUtil.mergeMesh(visibles);
+				}
 				Layers.setObjectMask();
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
@@ -582,7 +592,7 @@ class TabLayers {
 
 					var ar = [tr("Shared")];
 					for (p in Project.paintObjects) ar.push(p.name);
-					var atlases = getUsedAtlases();
+					var atlases = Project.getUsedAtlases();
 					if (atlases != null) for (a in atlases) ar.push(a);
 					var objectHandle = Id.handle().nest(l.id);
 					objectHandle.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
@@ -591,8 +601,8 @@ class TabLayers {
 						Context.setLayer(l);
 						MakeMaterial.parseMeshMaterial();
 						if (l.fill_layer != null) { // Fill layer
-							iron.App.notifyOnInit(l.clear);
 							function _init() {
+								l.clear();
 								Layers.updateFillLayers();
 							}
 							iron.App.notifyOnInit(_init);
@@ -713,17 +723,5 @@ class TabLayers {
 		var res: Map<Int, Int> = [];
 		for (l in map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
 		return res;
-	}
-
-	static function getUsedAtlases(): Array<String> {
-		if (Project.atlasObjects == null) return null;
-		var used: Array<Int> = [];
-		for (i in Project.atlasObjects) if (used.indexOf(i) == -1) used.push(i);
-		if (used.length > 1) {
-			var res: Array<String> = [];
-			for (i in used) res.push(Project.atlasNames[i]);
-			return res;
-		}
-		else return null;
 	}
 }

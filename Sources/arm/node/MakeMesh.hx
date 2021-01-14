@@ -157,9 +157,20 @@ class MakeMesh {
 
 			for (l in layers) {
 				if (l.objectMask > 0) {
-					var uid = Project.paintObjects[l.objectMask - 1].uid;
 					frag.add_uniform('int uid', '_uid');
-					frag.write('if ($uid == uid) {');
+					if (l.objectMask > Project.paintObjects.length) { // Atlas
+						var visibles = Project.getAtlasObjects(l.objectMask);
+						frag.write('if (');
+						for (i in 0...visibles.length) {
+							if (i > 0) frag.write(' || ');
+							frag.write('${visibles[i].uid} == uid');
+						}
+						frag.write(') {');
+					}
+					else { // Object mask
+						var uid = Project.paintObjects[l.objectMask - 1].uid;
+						frag.write('if ($uid == uid) {');
+					}
 				}
 
 				frag.add_shared_sampler('sampler2D texpaint' + l.id);

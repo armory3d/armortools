@@ -429,6 +429,33 @@ class Project {
 	public static function getImage(asset: TAsset): Image {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
+
+	public static function getUsedAtlases(): Array<String> {
+		if (Project.atlasObjects == null) return null;
+		var used: Array<Int> = [];
+		for (i in Project.atlasObjects) if (used.indexOf(i) == -1) used.push(i);
+		if (used.length > 1) {
+			var res: Array<String> = [];
+			for (i in used) res.push(Project.atlasNames[i]);
+			return res;
+		}
+		else return null;
+	}
+
+	public static function isAtlasObject(p: MeshObject): Bool {
+		if (Context.layerFilter <= Project.paintObjects.length) return false;
+		var atlasName = getUsedAtlases()[Context.layerFilter - Project.paintObjects.length - 1];
+		var atlasI = Project.atlasNames.indexOf(atlasName);
+		return atlasI == Project.atlasObjects[Project.paintObjects.indexOf(p)];
+	}
+
+	public static function getAtlasObjects(objectMask: Int): Array<MeshObject> {
+		var atlasName = Project.getUsedAtlases()[objectMask - Project.paintObjects.length - 1];
+		var atlasI = Project.atlasNames.indexOf(atlasName);
+		var visibles: Array<MeshObject> = [];
+		for (i in 0...Project.paintObjects.length) if (Project.atlasObjects[i] == atlasI) visibles.push(Project.paintObjects[i]);
+		return visibles;
+	}
 }
 
 typedef TNodeGroup = {

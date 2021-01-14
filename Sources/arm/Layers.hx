@@ -579,8 +579,8 @@ class Layers {
 		var ar = [tr("None")];
 		for (p in Project.paintObjects) ar.push(p.name);
 
-		var mask = Context.layer.objectMask;
-		if (Context.layerFilter > 0) mask = Context.layerFilter;
+		var mask = Context.objectMaskUsed() ? Context.layer.objectMask : 0;
+		if (Context.layerFilterUsed()) mask = Context.layerFilter;
 		if (mask > 0) {
 			if (Context.mergedObject != null) {
 				Context.mergedObject.visible = false;
@@ -590,8 +590,10 @@ class Layers {
 			Context.selectPaintObject(o);
 		}
 		else {
-			if (Context.mergedObject == null) {
-				MeshUtil.mergeMesh();
+			var isAtlas = Context.layer.objectMask > 0 && Context.layer.objectMask <= Project.paintObjects.length;
+			if (Context.mergedObject == null || isAtlas || Context.mergedObjectIsAtlas) {
+				var visibles = isAtlas ? Project.getAtlasObjects(Context.layer.objectMask) : null;
+				MeshUtil.mergeMesh(visibles);
 			}
 			Context.selectPaintObject(Context.mainObject());
 			Context.paintObject.skip_context = "paint";
