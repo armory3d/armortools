@@ -2,6 +2,7 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Id;
+import iron.object.MeshObject;
 import arm.util.MeshUtil;
 
 class TabMeshes {
@@ -59,7 +60,12 @@ class TabMeshes {
 				var h = Id.handle();
 				h.selected = o.visible;
 				o.visible = ui.check(h, o.name);
-				if (h.changed) Context.ddirty = 2;
+				if (h.changed) {
+					var visibles: Array<MeshObject> = [];
+					for (p in Project.paintObjects) if (p.visible) visibles.push(p);
+					MeshUtil.mergeMesh(visibles);
+					Context.ddirty = 2;
+				}
 			}
 		}
 	}

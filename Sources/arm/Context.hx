@@ -39,6 +39,7 @@ class Context {
 	public static var texture: TAsset = null;
 	public static var paintObject: MeshObject;
 	public static var mergedObject: MeshObject = null; // For object mask
+	public static var mergedObjectIsAtlas = false; // Only objects referenced by atlas are merged
 	public static var tool = 0;
 
 	public static var ddirty = 0; // depth

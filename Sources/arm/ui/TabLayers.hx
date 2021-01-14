@@ -8,6 +8,7 @@ import iron.system.Input;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
+import arm.util.MeshUtil;
 import arm.sys.Path;
 import arm.Enums;
 
@@ -51,6 +52,7 @@ class TabLayers {
 			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter];
+				if (Context.layerFilter == 0 && Context.mergedObjectIsAtlas) MeshUtil.mergeMesh();
 				Layers.setObjectMask();
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;

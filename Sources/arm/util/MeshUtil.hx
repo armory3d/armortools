@@ -12,8 +12,10 @@ import arm.Enums;
 
 class MeshUtil {
 
-	public static function mergeMesh() {
-		var paintObjects = Project.paintObjects;
+	public static function mergeMesh(paintObjects: Array<MeshObject> = null) {
+		if (paintObjects == null) paintObjects = Project.paintObjects;
+		if (paintObjects.length == 0) return;
+		Context.mergedObjectIsAtlas = paintObjects.length < Project.paintObjects.length;
 		var vlen = 0;
 		var ilen = 0;
 		var maxScale = 0.0;
@@ -67,12 +69,13 @@ class MeshUtil {
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
 		if (Context.mergedObject != null) {
+			Context.mergedObject.remove();
 			Data.deleteMesh(Context.mergedObject.data.handle);
 		}
 
 		new MeshData(raw, function(md: MeshData) {
 			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
-			Context.mergedObject.name = Context.paintObject.name;
+			Context.mergedObject.name = Context.paintObject.name + "_merged";
 			Context.mergedObject.force_context = "paint";
 			Context.mainObject().addChild(Context.mergedObject);
 		});
