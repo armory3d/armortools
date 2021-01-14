@@ -127,14 +127,6 @@ class ImportMesh {
 
 				Context.paintObject.setData(md);
 				Context.paintObject.name = mesh.name;
-
-				var g = Context.paintObject.data.geom;
-				var posbuf = g.vertexBufferMap.get("pos");
-				if (posbuf != null) { // Remove cache
-					posbuf.delete();
-					g.vertexBufferMap.remove("pos");
-				}
-
 				Project.paintObjects = [Context.paintObject];
 			}
 			else { // Append
