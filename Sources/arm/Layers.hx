@@ -576,13 +576,15 @@ class Layers {
 	}
 
 	public static function setObjectMask() {
-		var ar = ["None"];
+		var ar = [tr("None")];
 		for (p in Project.paintObjects) ar.push(p.name);
 
 		var mask = Context.layer.objectMask;
 		if (Context.layerFilter > 0) mask = Context.layerFilter;
 		if (mask > 0) {
-			if (Context.mergedObject != null) Context.mergedObject.visible = false;
+			if (Context.mergedObject != null) {
+				Context.mergedObject.visible = false;
+			}
 			var o = Project.paintObjects[0];
 			for (p in Project.paintObjects) if (p.name == ar[mask]) { o = p; break; }
 			Context.selectPaintObject(o);
