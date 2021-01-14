@@ -2504,10 +2504,8 @@ class NodesMaterial {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var isScene = arm.ui.UIHeader.inst.worktab.position == SpaceRender;
-					var material = isScene ? Context.materialScene : Context.material;
-					var canvas = material.canvas;
-					var nodes = material.nodes;
+					var canvas = Context.material.canvas;
+					var nodes = Context.material.nodes;
 					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

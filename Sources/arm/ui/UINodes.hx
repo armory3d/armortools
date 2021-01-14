@@ -246,17 +246,13 @@ class UINodes {
 	}
 
 	public function getCanvasMaterial(): TNodeCanvas {
-		var isScene = UIHeader.inst.worktab.position == SpaceRender;
-		return isScene ? Context.materialScene.canvas : Context.material.canvas;
+		return Context.material.canvas;
 	}
 
 	public function getNodes(): Nodes {
 		if (canvasType == CanvasMaterial) {
 			if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
-			else {
-				var isScene = UIHeader.inst.worktab.position == SpaceRender;
-				return isScene ? Context.materialScene.nodes : Context.material.nodes;
-			}
+			else return Context.material.nodes;
 		}
 		else return Context.brush.nodes;
 	}

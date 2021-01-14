@@ -67,20 +67,10 @@ class ImportFolder {
 		}
 
 		// Create material
-		var isScene = UIHeader.inst.worktab.position == SpaceRender;
-		if (isScene) {
-			MaterialUtil.removeMaterialCache();
-			Data.getMaterial("Scene", "Material2", function(md: MaterialData) {
-				Context.materialScene = new MaterialSlot(md);
-				Project.materialsScene.push(Context.materialScene);
-			});
-		}
-		else {
-			Context.material = new MaterialSlot(Project.materials[0].data);
-			Project.materials.push(Context.material);
-		}
-		var nodes = isScene ? Context.materialScene.nodes : Context.material.nodes;
-		var canvas = isScene ? Context.materialScene.canvas : Context.material.canvas;
+		Context.material = new MaterialSlot(Project.materials[0].data);
+		Project.materials.push(Context.material);
+		var nodes = Context.material.nodes;
+		var canvas = Context.material.canvas;
 		var dirs = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
 		var nout: TNode = null;

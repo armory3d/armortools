@@ -19,10 +19,8 @@ class Gizmo {
 	static var q0 = new Quat();
 
 	public static function update() {
-
-		var isRender = UIHeader.inst.worktab.position == SpaceRender;
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
-		var isObject = isRender && Context.object != null;
+		var isObject = Context.tool == ToolGizmo;
 		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject && !Context.layerIsMask;
 
 		var gizmo = Context.gizmo;
@@ -34,7 +32,7 @@ class Gizmo {
 		var kb = Input.getKeyboard();
 
 		if (isObject) {
-			gizmo.transform.loc.setFrom(Context.object.transform.loc);
+			gizmo.transform.loc.setFrom(Context.paintObject.transform.loc);
 		}
 		else if (isDecal) {
 			gizmo.transform.loc.set(Context.layer.decalMat._30, Context.layer.decalMat._31, Context.layer.decalMat._32);
@@ -56,100 +54,42 @@ class Gizmo {
 
 		// Scene control
 		if (isObject) {
-			if (mouse.viewX < App.w()) {
-				if (kb.started("delete") || kb.started("backspace")) {
-					if (Context.object != null) {
-						Context.object.remove();
-						Context.selectObject(Scene.active.getChild("Scene"));
-					}
-				}
-				if (kb.started("c") && Context.object != null) {
-					if (Std.is(Context.object, MeshObject)) {
-						var mo = cast(Context.object, MeshObject);
-						var object = Scene.active.addMeshObject(mo.data, mo.materials, Scene.active.getChild("Scene"));
-						object.name = mo.name + ".1";
-
-						object.transform.loc.setFrom(mo.transform.loc);
-						object.transform.rot.setFrom(mo.transform.rot);
-						object.transform.scale.setFrom(mo.transform.scale);
-
-						var hit = RayCaster.planeIntersect(Vec4.zAxis(), new Vec4(), mouse.viewX, mouse.viewY, Scene.active.camera);
-						if (hit != null) {
-							object.transform.loc.x = hit.x;
-							object.transform.loc.y = hit.y;
-							object.transform.setRotation(0, 0, Math.random() * 3.1516 * 2);
-						}
-
-						object.transform.buildMatrix();
-
-						for (t in mo.traits) { // Clone traits
-							var trait = Type.createInstance(Type.getClass(t), []);
-							object.addTrait(trait);
-						}
-
-						Context.selectObject(object);
-					}
-					else if (Std.is(Context.object, LightObject)) {
-						var lo = cast(Context.object, LightObject);
-						var object = Scene.active.addLightObject(lo.data, Scene.active.getChild("Scene"));
-						object.name = lo.name + ".1";
-
-						object.transform.loc.setFrom(lo.transform.loc);
-						object.transform.rot.setFrom(lo.transform.rot);
-						object.transform.scale.setFrom(lo.transform.scale);
-						object.transform.buildMatrix();
-
-						Context.selectObject(object);
-					}
-					Context.rdirty = 3;
-					Context.ddirty = 3;
-				}
-			}
-
-			if (mouse.started("middle")) {
-				#if arm_physics
-				var physics = arm.plugin.PhysicsWorld.active;
-				var pb = physics.pickClosest(mouse.viewX, mouse.viewY);
-				if (pb != null) Context.selectObject(pb.object);
-				#end
-			}
-
 			if (Context.translateX || Context.translateY || Context.translateZ || Context.scaleX || Context.scaleY || Context.scaleZ || Context.rotateX || Context.rotateY || Context.rotateZ) {
 				if (Context.translateX) {
-					Context.object.transform.loc.x = Context.gizmoDrag;
+					Context.paintObject.transform.loc.x = Context.gizmoDrag;
 				}
 				else if (Context.translateY) {
-					Context.object.transform.loc.y = Context.gizmoDrag;
+					Context.paintObject.transform.loc.y = Context.gizmoDrag;
 				}
 				else if (Context.translateZ) {
-					Context.object.transform.loc.z = Context.gizmoDrag;
+					Context.paintObject.transform.loc.z = Context.gizmoDrag;
 				}
 				else if (Context.scaleX) {
-					Context.object.transform.scale.x += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.paintObject.transform.scale.x += Context.gizmoDrag - Context.gizmoDragLast;
 				}
 				else if (Context.scaleY) {
-					Context.object.transform.scale.y += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.paintObject.transform.scale.y += Context.gizmoDrag - Context.gizmoDragLast;
 				}
 				else if (Context.scaleZ) {
-					Context.object.transform.scale.z += Context.gizmoDrag - Context.gizmoDragLast;
+					Context.paintObject.transform.scale.z += Context.gizmoDrag - Context.gizmoDragLast;
 				}
 				else if (Context.rotateX) {
 					q0.fromAxisAngle(Vec4.xAxis(), Context.gizmoDrag - Context.gizmoDragLast);
-					Context.object.transform.rot.mult(q0);
+					Context.paintObject.transform.rot.mult(q0);
 				}
 				else if (Context.rotateY) {
 					q0.fromAxisAngle(Vec4.yAxis(), Context.gizmoDrag - Context.gizmoDragLast);
-					Context.object.transform.rot.mult(q0);
+					Context.paintObject.transform.rot.mult(q0);
 				}
 				else if (Context.rotateZ) {
 					q0.fromAxisAngle(Vec4.zAxis(), Context.gizmoDrag - Context.gizmoDragLast);
-					Context.object.transform.rot.mult(q0);
+					Context.paintObject.transform.rot.mult(q0);
 				}
 				Context.gizmoDragLast = Context.gizmoDrag;
 
-				Context.object.transform.buildMatrix();
+				Context.paintObject.transform.buildMatrix();
 				#if arm_physics
-				var pb = Context.object.getTrait(arm.plugin.PhysicsBody);
+				var pb = Context.paintObject.getTrait(arm.plugin.PhysicsBody);
 				if (pb != null) pb.syncTransform();
 				#end
 			}
@@ -209,7 +149,7 @@ class Gizmo {
 		}
 
 		Context.gizmoStarted = false;
-		if (mouse.started("left") && Context.object.name != "Scene") {
+		if (mouse.started("left") && Context.paintObject.name != "Scene") {
 			// Translate, scale
 			var trs = [Context.gizmoTranslateX.transform, Context.gizmoTranslateY.transform, Context.gizmoTranslateZ.transform,
 					   Context.gizmoScaleX.transform, Context.gizmoScaleY.transform, Context.gizmoScaleZ.transform];
@@ -251,7 +191,7 @@ class Gizmo {
 			Context.rdirty = 2;
 
 			if (isObject) {
-				var t = Context.object.transform;
+				var t = Context.paintObject.transform;
 				v.set(t.worldx(), t.worldy(), t.worldz());
 			}
 			else if (isDecal) {

@@ -30,7 +30,6 @@ class MakeMaterial {
 	}
 
 	public static function parseMeshMaterial() {
-		if (UIHeader.inst.worktab.position == SpaceRender) return;
 		var m = Project.materials[0].data;
 
 		for (c in m.shader.contexts) {
@@ -134,7 +133,7 @@ class MakeMaterial {
 	public static function parseMeshPreviewMaterial() {
 		if (!getMOut()) return;
 
-		var m = UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene.data : Project.materials[0].data;
+		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
 		m.shader.raw.contexts.remove(scon.raw);
@@ -162,12 +161,6 @@ class MakeMaterial {
 
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
-
-		#if rp_voxelao
-		if (UIHeader.inst.worktab.position == SpaceRender) {
-			makeVoxel(m);
-		}
-		#end
 	}
 
 	#if rp_voxelao
@@ -183,11 +176,6 @@ class MakeMaterial {
 
 	public static function parsePaintMaterial() {
 		if (!getMOut()) return;
-
-		if (UIHeader.inst.worktab.position == SpaceRender) {
-			parseMeshPreviewMaterial();
-			return;
-		}
 
 		{
 			var current = @:privateAccess kha.graphics2.Graphics.current;

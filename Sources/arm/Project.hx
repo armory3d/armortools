@@ -43,7 +43,6 @@ class Project {
 	public static var assetId = 0;
 	public static var meshAssets: Array<String> = [];
 	public static var materials: Array<MaterialSlot> = null;
-	public static var materialsScene: Array<MaterialSlot> = null;
 	public static var materialGroups: Array<TNodeGroup> = [];
 	public static var brushes: Array<BrushSlot> = null;
 	public static var layers: Array<LayerSlot> = null;
@@ -393,8 +392,7 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					var replaceExisting = UIHeader.inst.worktab.position != SpaceRender;
-					ImportMesh.run(path, true, replaceExisting);
+					ImportMesh.run(path, true, true);
 				}
 				if (ui.button(tr("?"))) {
 					File.explorer("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");

@@ -123,7 +123,7 @@ class RenderPathPreview {
 		#end
 
 		var framebuffer = "texpreview";
-		var selectedMat = UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene : Context.material;
+		var selectedMat = Context.material;
 		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 

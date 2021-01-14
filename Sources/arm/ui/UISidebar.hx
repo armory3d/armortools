@@ -67,13 +67,6 @@ class UISidebar {
 				Context.material = Project.materials[0];
 			});
 		}
-		if (Project.materialsScene == null) {
-			Project.materialsScene = [];
-			Data.getMaterial("Scene", "Material2", function(m: MaterialData) {
-				Project.materialsScene.push(new MaterialSlot(m));
-				Context.materialScene = Project.materialsScene[0];
-			});
-		}
 
 		if (Project.brushes == null) {
 			Project.brushes = [];
@@ -149,8 +142,7 @@ class UISidebar {
 		Context.gizmoRotateY = Context.gizmo.getChild(".RotateY");
 		Context.gizmoRotateZ = Context.gizmo.getChild(".RotateZ");
 
-		Context.object = Scene.active.getChild(".Cube");
-		Context.paintObject = cast(Context.object, MeshObject);
+		Context.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
 		Project.paintObjects = [Context.paintObject];
 
 		if (Project.filepath == "") {
@@ -679,22 +671,11 @@ class UISidebar {
 			TabLayers.draw();
 			TabHistory.draw();
 			TabPlugins.draw();
-
-			if (UIHeader.inst.worktab.position == SpaceRender) {
-				TabOutliner.draw();
-			}
 		}
 		if (ui.window(hwnd1, tabx, Config.raw.layout[LayoutSidebarH0], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH1])) {
-			if (UIHeader.inst.worktab.position != SpaceRender) {
-				Context.object = Context.paintObject;
-			}
 			TabMaterials.draw();
 			TabBrushes.draw();
 			TabParticles.draw();
-
-			if (UIHeader.inst.worktab.position == SpaceRender) {
-				TabProperties.draw();
-			}
 		}
 		if (ui.window(hwnd2, tabx, Config.raw.layout[LayoutSidebarH0] + Config.raw.layout[LayoutSidebarH1], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH2])) {
 			TabTextures.draw();

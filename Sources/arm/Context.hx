@@ -32,13 +32,11 @@ import arm.ProjectFormat;
 class Context {
 
 	public static var material: MaterialSlot;
-	public static var materialScene: MaterialSlot;
 	public static var layer: LayerSlot;
 	public static var layerIsMask = false; // Mask selected for active layer
 	public static var brush: BrushSlot;
 	public static var font: FontSlot;
 	public static var texture: TAsset = null;
-	public static var object: Object;
 	public static var paintObject: MeshObject;
 	public static var mergedObject: MeshObject = null; // For object mask
 	public static var tool = 0;
@@ -262,17 +260,6 @@ class Context {
 	public static var cameraControls = ControlsOrbit;
 	public static var dragDestination = 0;
 
-	public static function selectMaterialScene(i: Int) {
-		if (Project.materialsScene.length <= i || object == paintObject) return;
-		materialScene = Project.materialsScene[i];
-		if (Std.is(object, MeshObject)) {
-			var mats = cast(object, MeshObject).materials;
-			for (i in 0...mats.length) mats[i] = materialScene.data;
-		}
-		MakeMaterial.parsePaintMaterial();
-		UISidebar.inst.hwnd0.redraws = 2;
-	}
-
 	public static function selectMaterial(i: Int) {
 		if (Project.materials.length <= i) return;
 		setMaterial(Project.materials[i]);
@@ -364,23 +351,6 @@ class Context {
 		if (tool == ToolParticle) {
 			ParticleUtil.initParticle();
 			MakeMaterial.parseParticleMaterial();
-		}
-	}
-
-	public static function selectObject(o: Object) {
-		object = o;
-
-		if (UIHeader.inst.worktab.position == SpaceRender) {
-			if (Std.is(o, MeshObject)) {
-				for (i in 0...Project.materialsScene.length) {
-					if (Project.materialsScene[i].data == cast(o, MeshObject).materials[0]) {
-						// selectMaterial(i); // loop
-						materialScene = Project.materialsScene[i];
-						UISidebar.inst.hwnd0.redraws = 2;
-						break;
-					}
-				}
-			}
 		}
 	}
 

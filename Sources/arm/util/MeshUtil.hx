@@ -13,10 +13,10 @@ import arm.Enums;
 class MeshUtil {
 
 	public static function mergeMesh() {
+		var paintObjects = Project.paintObjects;
 		var vlen = 0;
 		var ilen = 0;
 		var maxScale = 0.0;
-		var paintObjects = Project.paintObjects;
 		for (i in 0...paintObjects.length) {
 			vlen += paintObjects[i].data.raw.vertex_arrays[0].values.length;
 			ilen += paintObjects[i].data.raw.index_arrays[0].values.length;
@@ -66,6 +66,10 @@ class MeshUtil {
 		};
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
+		if (Context.mergedObject != null) {
+			Data.deleteMesh(Context.mergedObject.data.handle);
+		}
+
 		new MeshData(raw, function(md: MeshData) {
 			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
 			Context.mergedObject.name = Context.paintObject.name;
@@ -79,7 +83,7 @@ class MeshUtil {
 	}
 
 	public static function swapAxis(a: Int, b: Int) {
-		var objects = UIHeader.inst.worktab.position == SpaceRender ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		var objects = Project.paintObjects;
 		for (o in objects) {
 			// Remapping vertices, backle up
 			// 0 - x, 1 - y, 2 - z
@@ -130,7 +134,7 @@ class MeshUtil {
 	}
 
 	public static function flipNormals() {
-		var objects = UIHeader.inst.worktab.position == SpaceRender ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		var objects = Project.paintObjects;
 		for (o in objects) {
 			var g = o.data.geom;
 			var l = g.structLength;
@@ -154,7 +158,7 @@ class MeshUtil {
 		var vc = new Vec4();
 		var cb = new Vec4();
 		var ab = new Vec4();
-		var objects = UIHeader.inst.worktab.position == SpaceRender ? [cast(Context.object, MeshObject)] : Project.paintObjects;
+		var objects = Project.paintObjects;
 		for (o in objects) {
 			var g = o.data.geom;
 			var l = g.structLength;

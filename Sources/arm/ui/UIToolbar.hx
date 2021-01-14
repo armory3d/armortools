@@ -76,15 +76,15 @@ class UIToolbar {
 					ui._x -= 2;
 					ui._y += 2;
 				}
+
+				// ui._x += 2;
+				// if (Context.tool == ToolGizmo) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
+				// if (ui.image(img, iconAccent, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
+				// if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
+				// ui._x -= 2;
+				// ui._y += 2;
 			}
 			else if (UIHeader.inst.worktab.position == SpaceMaterial) {
-				ui._x += 2;
-				if (Context.tool == ToolGizmo) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, iconAccent, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
-				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
-				ui._x -= 2;
-				ui._y += 2;
-
 				ui._x += 2;
 				if (Context.tool == ToolPicker) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
 				if (ui.image(img, iconAccent, null, imgw * 9, 0, imgw, imgw) == State.Started) Context.selectTool(ToolPicker);
@@ -97,14 +97,6 @@ class UIToolbar {
 				if (Context.tool == ToolBake) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
 				if (ui.image(img, iconAccent, null, imgw * 11, 0, imgw, imgw) == State.Started) Context.selectTool(ToolBake);
 				if (ui.isHovered) ui.tooltip(tr("Bake") + " (K)");
-				ui._x -= 2;
-				ui._y += 2;
-			}
-			else if (UIHeader.inst.worktab.position == SpaceRender) {
-				ui._x += 2;
-				if (Context.tool == ToolGizmo) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
-				if (ui.image(img, iconAccent, null, imgw * 10, 0, imgw, imgw) == State.Started) Context.selectTool(ToolGizmo);
-				if (ui.isHovered) ui.tooltip(tr("Gizmo") + " (G)");
 				ui._x -= 2;
 				ui._y += 2;
 			}

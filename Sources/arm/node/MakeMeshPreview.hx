@@ -14,16 +14,14 @@ import arm.Enums;
 class MakeMeshPreview {
 
 	public static var opacityDiscardDecal = 0.05;
-	public static var opacityDiscardScene = 0.5;
 
 	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
-		var isScene = UIHeader.inst.worktab.position == SpaceRender;
 		var context_id = "mesh";
 		var con_mesh: NodeShaderContext = data.add_context({
 			name: context_id,
 			depth_write: true,
 			compare_mode: "less",
-			cull_mode: (Context.cullBackfaces || !isScene) ? "clockwise" : "none",
+			cull_mode: "clockwise",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 			depth_attachment: "DEPTH32"
@@ -92,8 +90,8 @@ class MakeMeshPreview {
 				frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
 			}
 		}
-		if (decal || isScene) {
-			var opac = isScene ? opacityDiscardScene : opacityDiscardDecal;
+		if (decal) {
+			var opac = opacityDiscardDecal;
 			frag.write('if (opacity < $opac) discard;');
 		}
 

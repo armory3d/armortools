@@ -411,7 +411,7 @@ class RenderPathPaint {
 
 		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
 		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
-		if (!App.uiEnabled || App.isDragging || UIHeader.inst.worktab.position == SpaceRender || fillLayer || fillMask) {
+		if (!App.uiEnabled || App.isDragging || fillLayer || fillMask) {
 			return;
 		}
 

@@ -184,7 +184,7 @@ class Inc {
 			}
 		}
 
-		if (Context.ddirty <= 0 && Context.rdirty <= 0 && (Context.pdirty <= 0 || UIHeader.inst.worktab.position == SpaceRender)) {
+		if (Context.ddirty <= 0 && Context.rdirty <= 0 && Context.pdirty <= 0) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
 			#if kha_metal
 			if (Context.ddirty > -4) {

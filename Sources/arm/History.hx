@@ -428,7 +428,7 @@ class History {
 			redos = 0;
 		}
 
-		var opos = Project.paintObjects.indexOf(cast Context.object);
+		var opos = Project.paintObjects.indexOf(Context.paintObject);
 		var lpos = Project.layers.indexOf(Context.layer);
 		var mpos = Project.materials.indexOf(Context.material);
 		var bpos = Project.brushes.indexOf(Context.brush);

@@ -60,32 +60,6 @@ class ImportArm {
 		History.reset();
 	}
 
-	public static function runScene(raw: TSceneFormat, path: String) {
-		var _dataPath = Data.dataPath;
-		Data.dataPath = path.substring(0, path.lastIndexOf(Path.sep) + 1);
-		raw.name += "_imported";
-		Data.cachedSceneRaws.set(raw.name, raw);
-		Scene.active.addScene(raw.name, null, function(sceneObject: Object) {
-			traverseObjects(sceneObject.children);
-		});
-		Data.dataPath = _dataPath;
-	}
-
-	static function traverseObjects(objects: Array<Object>) {
-		if (objects == null) return;
-		for (o in objects) {
-			if (Std.is(o, MeshObject)) {
-				var mo = cast(o, MeshObject);
-				var count = mo.data.geom.indices.length;
-				mo.materials = new haxe.ds.Vector(count);
-				for (i in 0...count) {
-					mo.materials[i] = Context.materialScene.data;
-				}
-			}
-			traverseObjects(o.children);
-		}
-	}
-
 	public static function runProject(path: String) {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
@@ -105,7 +79,7 @@ class ImportArm {
 
 			// Import as mesh instead
 			if (project.version == null) {
-				untyped project.objects == null ? runMesh(untyped project) : runScene(untyped project, path);
+				runMesh(untyped project);
 				return;
 			}
 

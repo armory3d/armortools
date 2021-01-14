@@ -22,35 +22,18 @@ class TabMaterials {
 	public static function draw() {
 
 		var ui = UISidebar.inst.ui;
-		var isScene = UIHeader.inst.worktab.position == SpaceRender;
-		var materials = isScene ? Project.materialsScene : Project.materials;
-		var selectMaterial = isScene ? Context.selectMaterialScene : Context.selectMaterial;
+		var materials = Project.materials;
+		var selectMaterial = Context.selectMaterial;
 
 		if (ui.tab(UISidebar.inst.htab1, tr("Materials"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
-				if (isScene) {
-					if (Context.object != Context.paintObject && Std.is(Context.object, MeshObject)) {
-						MaterialUtil.removeMaterialCache();
-						Data.getMaterial("Scene", "Material2", function(md: iron.data.MaterialData) {
-							ui.g.end();
-							md.name = "Material2." + materials.length;
-							Context.materialScene = new MaterialSlot(md);
-							materials.push(Context.materialScene);
-							selectMaterial(materials.length - 1);
-							RenderUtil.makeMaterialPreview();
-							ui.g.begin(false);
-						});
-					}
-				}
-				else {
-					ui.g.end();
-					Context.material = new MaterialSlot(materials[0].data);
-					materials.push(Context.material);
-					updateMaterial();
-					ui.g.begin(false);
-				}
+				ui.g.end();
+				Context.material = new MaterialSlot(materials[0].data);
+				materials.push(Context.material);
+				updateMaterial();
+				ui.g.begin(false);
 			}
 
 			if (ui.button(tr("Import"))) {
@@ -85,7 +68,7 @@ class TabMaterials {
 					var img = ui.SCALE() > 1 ? materials[i].image : materials[i].imageIcon;
 					var imgFull = materials[i].image;
 
-					if (getSelectedMaterial() == materials[i]) {
+					if (Context.material == materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 50;
@@ -105,7 +88,7 @@ class TabMaterials {
 					var tile = ui.SCALE() > 1 ? 100 : 50;
 					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
-						if (getSelectedMaterial() != materials[i]) {
+						if (Context.material != materials[i]) {
 							selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
@@ -117,7 +100,7 @@ class TabMaterials {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragMaterial = getSelectedMaterial();
+						App.dragMaterial = Context.material;
 						if (Time.time() - Context.selectTime < 0.25) {
 							UISidebar.inst.showMaterialNodes();
 							App.dragMaterial = null;
@@ -227,10 +210,6 @@ class TabMaterials {
 		RenderUtil.makeMaterialPreview();
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		if (decal) RenderUtil.makeDecalPreview();
-	}
-
-	static function getSelectedMaterial():MaterialSlot {
-		return UIHeader.inst.worktab.position == SpaceRender ? Context.materialScene : Context.material;
 	}
 
 	static function updateMaterialPointers(nodes: Array<TNode>, i: Int) {

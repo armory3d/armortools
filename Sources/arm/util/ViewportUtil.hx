@@ -45,8 +45,8 @@ class ViewportUtil {
 	}
 
 	public static function setView(x: Float, y: Float, z: Float, rx: Float, ry: Float, rz: Float) {
-		Context.object.transform.rot.set(0, 0, 0, 1);
-		Context.object.transform.dirty = true;
+		Context.paintObject.transform.rot.set(0, 0, 0, 1);
+		Context.paintObject.transform.dirty = true;
 		var cam = Scene.active.camera;
 		var dist = cam.transform.loc.length();
 		cam.transform.loc.set(x * dist, y * dist, z * dist);

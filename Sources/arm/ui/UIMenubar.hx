@@ -55,7 +55,6 @@ class UIMenubar {
 			ui.tab(UIHeader.inst.worktab, tr("Paint"));
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
-			// ui.tab(UIHeader.inst.worktab, tr("Render"));
 			if (UIHeader.inst.worktab.changed) {
 				Context.ddirty = 2;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
@@ -70,11 +69,8 @@ class UIMenubar {
 				else if (UIHeader.inst.worktab.position == SpaceBake) {
 					Context.selectTool(ToolBake);
 				}
-				else {
-					Context.selectTool(ToolGizmo);
-				}
-
-				if (UIHeader.inst.worktab.position == SpaceMaterial) {
+				else if (UIHeader.inst.worktab.position == SpaceMaterial) {
+					Context.selectTool(ToolPicker);
 					Layers.updateFillLayers();
 				}
 

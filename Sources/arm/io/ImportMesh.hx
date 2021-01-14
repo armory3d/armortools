@@ -97,17 +97,10 @@ class ImportMesh {
 			return;
 		}
 
-		var raw: TMeshData = null;
-		if (UIHeader.inst.worktab.position == SpaceRender) {
-			raw = rawMesh(mesh);
-			if (mesh.texa != null) raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
-		}
-		else {
-			raw = rawMesh(mesh);
-			if (mesh.texa == null) equirectUnwrap(mesh);
-			raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
-		}
+		var raw = rawMesh(mesh);
+		if (mesh.texa == null) equirectUnwrap(mesh);
+		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
+		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
 		new MeshData(raw, function(md: MeshData) {
 			if (replaceExisting) {
@@ -145,20 +138,13 @@ class ImportMesh {
 				Project.paintObjects = [Context.paintObject];
 			}
 			else { // Append
-				var mats = new haxe.ds.Vector(1);
-				mats[0] = Context.materialScene.data;
-				var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
-				var ar = path.split(Path.sep);
-				var s = ar[ar.length - 1];
-				object.name = s.substring(0, s.length - 4);
-				// md.geom.calculateAABB();
-				// var aabb = md.geom.aabb;
-				// var dim = new TFloat32Array(3);
-				// dim[0] = aabb.x;
-				// dim[1] = aabb.y;
-				// dim[2] = aabb.z;
-				// object.raw.dimensions = dim;
-				Context.selectObject(object);
+				// var mats = new haxe.ds.Vector(1);
+				// mats[0] = Context.materialScene.data;
+				// var object = Scene.active.addMeshObject(md, mats, Scene.active.getChild("Scene"));
+				// var ar = path.split(Path.sep);
+				// var s = ar[ar.length - 1];
+				// object.name = s.substring(0, s.length - 4);
+				// Context.selectObject(object);
 			}
 
 			md.handle = raw.name;

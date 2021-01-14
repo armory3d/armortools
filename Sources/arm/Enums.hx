@@ -20,7 +20,6 @@ package arm;
 	// var SpaceSculpt = 0;
 	var SpaceMaterial = 1;
 	var SpaceBake = 2;
-	var SpaceRender = 3;
 }
 
 @:enum abstract DilateType(Int) from Int to Int {
