@@ -131,7 +131,8 @@ class UIFiles {
 				var state = Idle;
 				var generic = true;
 
-				if (f.endsWith(".arm")) {
+				var isCloud = handle.text.startsWith("cloud");
+				if (f.endsWith(".arm") && !isCloud) {
 					if (iconMap == null) iconMap = [];
 					var icon = iconMap.get(handle.text + Path.sep + f);
 					if (icon == null) {
@@ -203,7 +204,7 @@ class UIFiles {
 		return handle.text;
 	}
 
-	static inline var defaultPath =
+	public static inline var defaultPath =
 		#if krom_windows
 		"C:\\Users"
 		#elseif krom_android
