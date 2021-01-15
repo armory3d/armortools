@@ -56,6 +56,10 @@ class TabBrowser {
 				Config.save();
 			}
 
+			if (ui.button(tr("Cloud"), Left)) {
+				hpath.text = "cloud";
+			}
+
 			for (b in Config.raw.bookmarks) {
 				var folder = b.substr(b.lastIndexOf(Path.sep) + 1);
 
