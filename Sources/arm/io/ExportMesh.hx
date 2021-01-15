@@ -6,6 +6,6 @@ class ExportMesh {
 
 	public static function run(path: String, applyDisplacement = false) {
 		if (Context.exportMeshFormat == FormatObj) ExportObj.run(path, applyDisplacement);
-		else ExportArm.run(path);
+		else ExportArm.runMesh(path);
 	}
 }

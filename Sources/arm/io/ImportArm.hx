@@ -54,6 +54,8 @@ class ImportArm {
 				object.transform.buildMatrix();
 				object.name = md.name;
 				Project.paintObjects.push(object);
+				MeshUtil.mergeMesh();
+				ViewportUtil.scaleToBounds();
 			});
 		}
 		iron.App.notifyOnInit(Layers.initLayers);
@@ -286,6 +288,7 @@ class ImportArm {
 			}
 
 			for (m in Project.materials) {
+				Context.material = m;
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}

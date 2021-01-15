@@ -13,8 +13,10 @@ import arm.Enums;
 
 class ExportArm {
 
-	public static function run(path: String) {
-		var raw: TSceneFormat = { mesh_datas: [ Context.paintObject.data.raw ] };
+	public static function runMesh(path: String) {
+		var mesh_datas: Array<TMeshData> = [];
+		for (p in Project.paintObjects) mesh_datas.push(p.data.raw);
+		var raw: TSceneFormat = { mesh_datas: mesh_datas };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, b.getData());
