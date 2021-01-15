@@ -261,6 +261,7 @@ class Project {
 			for (a in assets) Data.deleteImage(a.file);
 			assets = [];
 			assetNames = [];
+			assetMap = [];
 			assetId = 0;
 			Context.ddirty = 4;
 			UISidebar.inst.hwnd0.redraws = 2;
