@@ -126,7 +126,7 @@ class UIView2D {
 			}
 			else { // View2DFont
 				tex = Context.font.image;
-				tw = tex.width;
+				tw = tex != null ? tex.width : 0;
 			}
 
 			var th = tw;
