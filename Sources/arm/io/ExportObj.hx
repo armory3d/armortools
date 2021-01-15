@@ -2,7 +2,6 @@ package arm.io;
 
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
-import kha.arrays.Uint32Array;
 import kha.arrays.Int16Array;
 
 class ExportObj {
