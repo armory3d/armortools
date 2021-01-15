@@ -2,18 +2,22 @@ package arm.io;
 
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
+import kha.arrays.Uint32Array;
+import kha.arrays.Int16Array;
 
 class ExportObj {
 
 	public static function run(path: String, applyDisplacement = false) {
-
-		var height = applyDisplacement ? Project.layers[0].texpaint_pack.getPixels() : null;
-		var res = Project.layers[0].texpaint_pack.width;
+		// var height = applyDisplacement ? Project.layers[0].texpaint_pack.getPixels() : null;
+		// var res = Project.layers[0].texpaint_pack.width;
 
 		var o = new BytesOutput();
 		o.bigEndian = false;
+		o.writeString("# armorpaint.org\n");
 
-		var off = 0;
+		var poff = 0;
+		var noff = 0;
+		var toff = 0;
 		for (p in Project.paintObjects) {
 			var mesh = p.data.raw;
 			var inv = 1 / 32767;
@@ -23,62 +27,135 @@ class ExportObj {
 			var texa = mesh.vertex_arrays[2].values;
 			var len = Std.int(posa.length / 4);
 
+			// Merge shared vertices and remap indices
+			var posa2 = new Int16Array(len * 3);
+			var nora2 = new Int16Array(len * 3);
+			var texa2 = new Int16Array(len * 2);
+			var posmap = new Map<Int, Int>();
+			var normap = new Map<Int, Int>();
+			var texmap = new Map<Int, Int>();
+
+			var pi = 0;
+			var ni = 0;
+			var ti = 0;
+			for (i in 0...len) {
+				var found = false;
+				for (j in 0...pi) {
+					if (posa2[j * 3    ] == posa[i * 4    ] &&
+						posa2[j * 3 + 1] == posa[i * 4 + 1] &&
+						posa2[j * 3 + 2] == posa[i * 4 + 2]) {
+						posmap.set(i, j);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					posmap.set(i, pi);
+					posa2[pi * 3    ] = posa[i * 4    ];
+					posa2[pi * 3 + 1] = posa[i * 4 + 1];
+					posa2[pi * 3 + 2] = posa[i * 4 + 2];
+					pi++;
+				}
+
+				found = false;
+				for (j in 0...ni) {
+					if (nora2[j * 3    ] == nora[i * 2    ] &&
+						nora2[j * 3 + 1] == nora[i * 2 + 1] &&
+						nora2[j * 3 + 2] == posa[i * 4 + 3]) {
+						normap.set(i, j);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					normap.set(i, ni);
+					nora2[ni * 3    ] = nora[i * 2    ];
+					nora2[ni * 3 + 1] = nora[i * 2 + 1];
+					nora2[ni * 3 + 2] = posa[i * 4 + 3];
+					ni++;
+				}
+
+				found = false;
+				for (j in 0...ti) {
+					if (texa2[j * 2    ] == texa[i * 2    ] &&
+						texa2[j * 2 + 1] == texa[i * 2 + 1]) {
+						texmap.set(i, j);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					texmap.set(i, ti);
+					texa2[ti * 2    ] = texa[i * 2    ];
+					texa2[ti * 2 + 1] = texa[i * 2 + 1];
+					ti++;
+				}
+			}
+
 			// if (applyDisplacement) {
 			// }
 
 			o.writeString("o " + p.name + "\n");
-			for (i in 0...len) {
+			for (i in 0...pi) {
 				o.writeString("v ");
-				o.writeString(posa[i * 4] * sc + "");
+				o.writeString(posa2[i * 3] * sc + "");
 				o.writeString(" ");
-				o.writeString(posa[i * 4 + 2] * sc + "");
+				o.writeString(posa2[i * 3 + 2] * sc + "");
 				o.writeString(" ");
-				o.writeString(-posa[i * 4 + 1] * sc + "");
+				o.writeString(-posa2[i * 3 + 1] * sc + "");
 				o.writeString("\n");
 			}
-			for (i in 0...len) {
+			for (i in 0...ni) {
 				o.writeString("vn ");
-				o.writeString(nora[i * 2] * inv + "");
+				o.writeString(nora2[i * 3] * inv + "");
 				o.writeString(" ");
-				o.writeString(posa[i * 4 + 3] * inv + "");
+				o.writeString(nora2[i * 3 + 2] * inv + "");
 				o.writeString(" ");
-				o.writeString(-nora[i * 2 + 1] * inv + "");
+				o.writeString(-nora2[i * 3 + 1] * inv + "");
 				o.writeString("\n");
 			}
-			for (i in 0...len) {
+			for (i in 0...ti) {
 				o.writeString("vt ");
-				o.writeString(texa[i * 2] * inv + "");
+				o.writeString(texa2[i * 2] * inv + "");
 				o.writeString(" ");
-				o.writeString(1.0 - texa[i * 2 + 1] * inv + "");
+				o.writeString(1.0 - texa2[i * 2 + 1] * inv + "");
 				o.writeString("\n");
 			}
 
 			var inda = mesh.index_arrays[0].values;
 			for (i in 0...Std.int(inda.length / 3)) {
-				var i1 = inda[i * 3    ] + 1 + off;
-				var i2 = inda[i * 3 + 1] + 1 + off;
-				var i3 = inda[i * 3 + 2] + 1 + off;
+				var pi1 = posmap.get(inda[i * 3    ]) + 1 + poff;
+				var pi2 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
+				var pi3 = posmap.get(inda[i * 3 + 2]) + 1 + poff;
+				var ni1 = normap.get(inda[i * 3    ]) + 1 + noff;
+				var ni2 = normap.get(inda[i * 3 + 1]) + 1 + noff;
+				var ni3 = normap.get(inda[i * 3 + 2]) + 1 + noff;
+				var ti1 = texmap.get(inda[i * 3    ]) + 1 + toff;
+				var ti2 = texmap.get(inda[i * 3 + 1]) + 1 + toff;
+				var ti3 = texmap.get(inda[i * 3 + 2]) + 1 + toff;
 				o.writeString("f ");
-				o.writeString(i1 + "");
+				o.writeString(pi1 + "");
 				o.writeString("/");
-				o.writeString(i1 + "");
+				o.writeString(ti1 + "");
 				o.writeString("/");
-				o.writeString(i1 + "");
+				o.writeString(ni1 + "");
 				o.writeString(" ");
-				o.writeString(i2 + "");
+				o.writeString(pi2 + "");
 				o.writeString("/");
-				o.writeString(i2 + "");
+				o.writeString(ti2 + "");
 				o.writeString("/");
-				o.writeString(i2 + "");
+				o.writeString(ni2 + "");
 				o.writeString(" ");
-				o.writeString(i3 + "");
+				o.writeString(pi3 + "");
 				o.writeString("/");
-				o.writeString(i3 + "");
+				o.writeString(ti3 + "");
 				o.writeString("/");
-				o.writeString(i3 + "");
+				o.writeString(ni3 + "");
 				o.writeString("\n");
 			}
-			off += inda.length;
+			poff += pi;
+			noff += ni;
+			toff += ti;
 		}
 
 		if (!path.endsWith(".obj")) path += ".obj";
