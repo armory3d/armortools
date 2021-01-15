@@ -60,6 +60,10 @@ class TabBrowser {
 				hpath.text = "cloud";
 			}
 
+			if (ui.button(tr("Disk"), Left)) {
+				hpath.text = UIFiles.defaultPath;
+			}
+
 			for (b in Config.raw.bookmarks) {
 				var folder = b.substr(b.lastIndexOf(Path.sep) + 1);
 
