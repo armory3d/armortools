@@ -250,7 +250,7 @@ class TabLayers {
 									var writer = new arm.format.PngWriter(out);
 									var data = arm.format.PngTools.buildGrey(l.texpaint_mask.width, l.texpaint_mask.height, l.texpaint_mask.getPixels());
 									writer.write(data);
-									Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData());
+									Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData(), out.getBytes().length);
 								});
 							}
 							if (l.fill_mask == null && ui.button(tr("To Fill Mask"), Left)) {

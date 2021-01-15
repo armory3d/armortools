@@ -19,7 +19,7 @@ class ExportArm {
 		var raw: TSceneFormat = { mesh_datas: mesh_datas };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
-		Krom.fileSaveBytes(path, b.getData());
+		Krom.fileSaveBytes(path, b.getData(), b.length + 1);
 	}
 
 	public static function runProject() {
@@ -106,7 +106,7 @@ class ExportArm {
 		};
 
 		var bytes = ArmPack.encode(Project.raw);
-		Krom.fileSaveBytes(Project.filepath, bytes.getData());
+		Krom.fileSaveBytes(Project.filepath, bytes.getData(), bytes.length + 1);
 
 		// Save to recent
 		var recent = Config.raw.recent_projects;
@@ -186,12 +186,12 @@ class ExportArm {
 					pixels: m.image.getPixels()
 				}, 1
 			);
-			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", out.getBytes().getData());
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", out.getBytes().getData(), out.getBytes().length);
 			var out = new haxe.io.BytesOutput();
 			var writer = new arm.format.PngWriter(out);
 			var data = arm.format.PngTools.build32RGBA(m.image.width, m.image.height, m.image.getPixels());
 			writer.write(data);
-			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", out.getBytes().getData());
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", out.getBytes().getData(), out.getBytes().length);
 		}
 
 		var raw = {
@@ -208,7 +208,7 @@ class ExportArm {
 		};
 
 		var bytes = ArmPack.encode(raw);
-		Krom.fileSaveBytes(path, bytes.getData());
+		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 
 	#if (kha_metal || kha_vulkan)
@@ -241,7 +241,7 @@ class ExportArm {
 
 		var bytes = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
-		Krom.fileSaveBytes(path, bytes.getData());
+		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 
 	static function assetsToFiles(assets: Array<TAsset>): Array<String> {

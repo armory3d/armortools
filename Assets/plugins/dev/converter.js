@@ -55,8 +55,8 @@ plugin.drawUI = function(ui) {
 						}
 					}
 					iterate(parsed);
-					let out = iron.ArmPack.encode(parsed).b.bufferValue;
-					Krom.fileSaveBytes(path.substr(0, path.length - 4) + "arm", out);
+					let out = iron.ArmPack.encode(parsed);
+					Krom.fileSaveBytes(path.substr(0, path.length - 4) + "arm", out.b.bufferValue, out.length + 1);
 				});
 			});
 		}

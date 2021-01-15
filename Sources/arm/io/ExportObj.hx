@@ -83,6 +83,6 @@ class ExportObj {
 
 		if (!path.endsWith(".obj")) path += ".obj";
 
-		Krom.fileSaveBytes(path, o.getBytes().getData());
+		Krom.fileSaveBytes(path, o.getBytes().getData(), o.getBytes().length);
 	}
 }

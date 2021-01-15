@@ -52,7 +52,7 @@ plugin.drawUI = function(ui) {
 					var writer = new arm.PngWriter(out);
 					var data = arm.PngTools.build32RGBA(breakdown.get_width(), breakdown.get_height(), breakdown.getPixels());
 					writer.write(data);
-					Krom.fileSaveBytes(path + arm.Path.sep + f, out.b.buffer);
+					Krom.fileSaveBytes(path + arm.Path.sep + f, out.b.buffer, out.getBytes().length);
 				});
 			});
 		}

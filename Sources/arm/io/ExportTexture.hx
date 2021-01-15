@@ -363,7 +363,7 @@ class ExportTexture {
 				#end
 			);
 		}
-		Krom.fileSaveBytes(file, out.getBytes().getData());
+		Krom.fileSaveBytes(file, out.getBytes().getData(), out.getBytes().length);
 	}
 
 	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
