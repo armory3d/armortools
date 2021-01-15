@@ -614,17 +614,17 @@ class App {
 	}
 
 	public static function notifyOnNextFrame(f: Void->Void) {
-		function _update() {
+		function _render(_) {
 			iron.App.notifyOnInit(function() {
-				function __update() {
+				function _update() {
 					iron.App.notifyOnInit(f);
-					iron.App.removeUpdate(__update);
+					iron.App.removeUpdate(_update);
 				}
-				iron.App.notifyOnUpdate(__update);
+				iron.App.notifyOnUpdate(_update);
 			});
-			iron.App.removeUpdate(_update);
+			iron.App.removeRender(_render);
 		}
-		iron.App.notifyOnUpdate(_update);
+		iron.App.notifyOnRender(_render);
 	}
 
 	public static function toggleFullscreen() {
