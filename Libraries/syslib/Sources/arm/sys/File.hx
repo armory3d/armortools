@@ -84,11 +84,27 @@ class File {
 		}
 	}
 
+	public static function cacheCloud(path: String): String {
+		var dest = Path.workingDir() + Path.sep + path;
+		if (!File.exists(dest)) {
+			var fileDir = Krom.getFilesLocation() + Path.sep + path.substr(0, path.lastIndexOf(Path.sep));
+			File.createDirectory(fileDir);
+			var url = Config.raw.server + "/" + path;
+			File.download(url, path);
+			if (!File.exists(dest)) {
+				Log.error(Strings.error5());
+				return null;
+			}
+		}
+		return dest;
+	}
+
 	static function initCloud() {
 		cloud = [];
 		var files: Array<String> = [];
 		var bytes = File.downloadBytes(Config.raw.server);
-		if (!File.exists(Path.workingDir() + Path.sep + Path.data() + Path.sep + "download.bin")) {
+		var dataPath = Path.data().startsWith(Path.workingDir()) ? Path.data() : Path.workingDir() + Path.sep + Path.data();
+		if (!File.exists(dataPath + Path.sep + "download.bin")) {
 			cloud.set("cloud", []);
 			Log.error(Strings.error5());
 			return;

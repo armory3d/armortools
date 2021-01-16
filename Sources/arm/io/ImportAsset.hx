@@ -11,17 +11,8 @@ class ImportAsset {
 	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true) {
 
 		if (path.startsWith("cloud")) {
-			var abs = Path.workingDir() + Path.sep + path;
-			if (!File.exists(abs)) {
-				var fileDir = Krom.getFilesLocation() + Path.sep + path.substr(0, path.lastIndexOf(Path.sep));
-				File.createDirectory(fileDir);
-				var url = Config.raw.server + "/" + path;
-				File.download(url, path);
-				if (!File.exists(abs)) {
-					Log.error(Strings.error5());
-					return;
-				}
-			}
+			var abs = File.cacheCloud(path);
+			if (abs == null) return;
 			path = abs;
 		}
 
