@@ -79,6 +79,7 @@ class UIFiles {
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
 		var file = Res.tile50(icons, 3, 1);
+		var isCloud = handle.text.startsWith("cloud");
 
 		if (handle.text == "") handle.text = defaultPath;
 		if (handle.text != lastPath) {
@@ -93,6 +94,7 @@ class UIFiles {
 			for (f in filesAll) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
 				if (f.indexOf(".") > 0 && !Path.isKnown(f)) continue; // Skip unknown extensions
+				if (isCloud && f.indexOf("_icon.") >= 0) continue; // Skip thumbnails
 				files.push(f);
 			}
 		}
@@ -131,7 +133,27 @@ class UIFiles {
 				var state = Idle;
 				var generic = true;
 
-				var isCloud = handle.text.startsWith("cloud");
+				if (isCloud && f != "..") {
+					if (iconMap == null) iconMap = [];
+					var icon = iconMap.get(handle.text + Path.sep + f);
+					if (icon == null) {
+						var filesAll = File.readDirectory(handle.text);
+						var iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
+						if (filesAll.indexOf(iconFile) >= 0) {
+							var abs = File.cacheCloud(handle.text + Path.sep + iconFile);
+							if (abs != null) {
+								iron.data.Data.getImage(abs, function(image: kha.Image) {
+									icon = image;
+									iconMap.set(handle.text + Path.sep + f, icon);
+								});
+							}
+						}
+					}
+					if (icon != null) {
+						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
+						generic = false;
+					}
+				}
 				if (f.endsWith(".arm") && !isCloud) {
 					if (iconMap == null) iconMap = [];
 					var icon = iconMap.get(handle.text + Path.sep + f);
