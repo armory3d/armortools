@@ -221,11 +221,26 @@ class UIFiles {
 					Context.selectTime = Time.time();
 				}
 
+				// Label
 				ui._x = _x;
 				ui._y += slotw * 0.75;
-				var label = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
-				ui.text(label, Center);
-				if (ui.isHovered) ui.tooltip(label);
+				var label0 = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
+				var label1 = "";
+				while (label0.length > 0 && ui.ops.font.width(ui.fontSize, label0) > ui._w - 6) { // 2 line split
+					label1 = label0.charAt(label0.length - 1) + label1;
+					label0 = label0.substr(0, label0.length - 1);
+				}
+				if (label1 != "") ui.curRatio--;
+				ui.text(label0, Center);
+				if (ui.isHovered) ui.tooltip(label0 + label1);
+				if (label1 != "") { // Second line
+					ui._x = _x;
+					ui._y += ui.ops.font.height(ui.fontSize);
+					ui.text(label1, Center);
+					if (ui.isHovered) ui.tooltip(label0 + label1);
+					ui._y -= ui.ops.font.height(ui.fontSize);
+				}
+
 				ui._y -= slotw * 0.75;
 
 				if (handle.changed) break;
