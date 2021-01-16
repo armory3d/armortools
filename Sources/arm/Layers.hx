@@ -31,6 +31,7 @@ class Layers {
 	public static var pipeCopy8: PipelineState;
 	public static var pipeCopy128: PipelineState;
 	public static var pipeCopyBGRA: PipelineState;
+	public static var pipeCopyRGB: PipelineState = null;
 	public static var pipeInvert8: PipelineState;
 	public static var pipeMask: PipelineState;
 	public static var tex0: TextureUnit;
@@ -216,6 +217,19 @@ class Layers {
 		pipeMask.compile();
 		tex0Mask = pipeMask.getTextureUnit("tex0");
 		texaMask = pipeMask.getTextureUnit("texa");
+	}
+
+	public static function makePipeCopyRGB() {
+		pipeCopyRGB = new PipelineState();
+		pipeCopyRGB.vertexShader = kha.Shaders.getVertex("layer_view.vert");
+		pipeCopyRGB.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float3);
+		vs.add("tex", VertexData.Float2);
+		vs.add("col", VertexData.Float4);
+		pipeCopyRGB.inputLayout = [vs];
+		pipeCopyRGB.colorWriteMasksAlpha = [false];
+		pipeCopyRGB.compile();
 	}
 
 	public static function makeCursorPipe() {

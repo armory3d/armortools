@@ -143,8 +143,17 @@ class UIFiles {
 							var abs = File.cacheCloud(handle.text + Path.sep + iconFile);
 							if (abs != null) {
 								iron.data.Data.getImage(abs, function(image: kha.Image) {
-									icon = image;
-									iconMap.set(handle.text + Path.sep + f, icon);
+									iron.App.notifyOnInit(function() {
+										if (Layers.pipeCopyRGB == null) Layers.makePipeCopyRGB();
+										icon = kha.Image.createRenderTarget(image.width, image.height);
+										icon.g2.begin(false);
+										icon.g2.drawImage(Project.materials[0].image, 0, 0); // Used for alpha cutout
+										icon.g2.pipeline = Layers.pipeCopyRGB;
+										icon.g2.drawImage(image, 0, 0);
+										icon.g2.pipeline = null;
+										icon.g2.end();
+										iconMap.set(handle.text + Path.sep + f, icon);
+									});
 								});
 							}
 						}
