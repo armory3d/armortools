@@ -151,6 +151,7 @@ class UIFiles {
 					}
 					if (icon != null) {
 						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
+						if (ui.isHovered) ui.tooltipImage(icon);
 						generic = false;
 					}
 				}
@@ -168,6 +169,7 @@ class UIFiles {
 					}
 					if (icon != null) {
 						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
+						if (ui.isHovered) ui.tooltipImage(icon);
 						generic = false;
 					}
 				}
@@ -214,6 +216,7 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				var label = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				ui.text(label, Center);
+				if (ui.isHovered) ui.tooltip(label);
 				ui._y -= slotw * 0.75;
 
 				if (handle.changed) break;
