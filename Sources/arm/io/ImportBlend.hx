@@ -100,13 +100,19 @@ class ImportBlend {
 						nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
 						if (hasuv) {
 							var uv0: Float32Array = m.get("mloopuv", loopstart    ).get("uv");
+							if (uv0[0] > 1.0) uv0[0] = uv0[0] - Std.int(uv0[0]);
+							if (uv0[1] > 1.0) uv0[1] = uv0[1] - Std.int(uv0[1]);
 							var uv1: Float32Array = m.get("mloopuv", loopstart + 1).get("uv");
+							if (uv1[0] > 1.0) uv1[0] = uv1[0] - Std.int(uv1[0]);
+							if (uv1[1] > 1.0) uv1[1] = uv1[1] - Std.int(uv1[1]);
 							var uv2: Float32Array = m.get("mloopuv", loopstart + 2).get("uv");
-							texa[tri * 6    ] = Std.int(uv0[0] * 32767);
+							if (uv2[0] > 1.0) uv2[0] = uv2[0] - Std.int(uv2[0]);
+							if (uv2[1] > 1.0) uv2[1] = uv2[1] - Std.int(uv2[1]);
+							texa[tri * 6    ] = Std.int(       uv0[0]  * 32767);
 							texa[tri * 6 + 1] = Std.int((1.0 - uv0[1]) * 32767);
-							texa[tri * 6 + 2] = Std.int(uv1[0] * 32767);
+							texa[tri * 6 + 2] = Std.int(       uv1[0]  * 32767);
 							texa[tri * 6 + 3] = Std.int((1.0 - uv1[1]) * 32767);
-							texa[tri * 6 + 4] = Std.int(uv2[0] * 32767);
+							texa[tri * 6 + 4] = Std.int(       uv2[0]  * 32767);
 							texa[tri * 6 + 5] = Std.int((1.0 - uv2[1]) * 32767);
 						}
 						if (hascol) {
@@ -148,7 +154,11 @@ class ImportBlend {
 						var uv2: Float32Array = null;
 						if (hasuv) {
 							uv0 = m.get("mloopuv", loopstart + totloop - 1).get("uv");
+							if (uv0[0] > 1.0) uv0[0] = uv0[0] - Std.int(uv0[0]);
+							if (uv0[1] > 1.0) uv0[1] = uv0[1] - Std.int(uv0[1]);
 							uv1 = m.get("mloopuv", loopstart).get("uv");
+							if (uv1[0] > 1.0) uv1[0] = uv1[0] - Std.int(uv1[0]);
+							if (uv1[1] > 1.0) uv1[1] = uv1[1] - Std.int(uv1[1]);
 						}
 						var col0r: Int = 0;
 						var col0g: Int = 0;
@@ -197,6 +207,8 @@ class ImportBlend {
 							vec1.setFrom(vec2);
 							if (hasuv) {
 								uv2 = m.get("mloopuv", loopstart + j + 1).get("uv");
+								if (uv2[0] > 1.0) uv2[0] = uv2[0] - Std.int(uv2[0]);
+								if (uv2[1] > 1.0) uv2[1] = uv2[1] - Std.int(uv2[1]);
 								texa[tri * 6    ] = Std.int(uv0[0] * 32767);
 								texa[tri * 6 + 1] = Std.int((1.0 - uv0[1]) * 32767);
 								texa[tri * 6 + 2] = Std.int(uv1[0] * 32767);

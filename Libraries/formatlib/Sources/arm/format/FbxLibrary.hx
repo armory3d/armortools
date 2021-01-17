@@ -769,8 +769,12 @@ class Geometry {
 					nora[vlen * 2 + 1] = Std.int(nbuf[k * 3 + 1] * 32767);
 					if (tbuf != null) {
 						var iuv = tbuf.index[k];
-						texa[vlen * 2    ] = Std.int(       tbuf.values[iuv * 2    ]  * 32767);
-						texa[vlen * 2 + 1] = Std.int((1.0 - tbuf.values[iuv * 2 + 1]) * 32767);
+						var uvx = tbuf.values[iuv * 2];
+						if (uvx > 1.0) uvx = uvx - Std.int(uvx);
+						var uvy = tbuf.values[iuv * 2 + 1];
+						if (uvy > 1.0) uvy = uvy - Std.int(uvy);
+						texa[vlen * 2    ] = Std.int(       uvx  * 32767);
+						texa[vlen * 2 + 1] = Std.int((1.0 - uvy) * 32767);
 					}
 					if (cbuf != null) {
 						var icol = cbuf.index[k];

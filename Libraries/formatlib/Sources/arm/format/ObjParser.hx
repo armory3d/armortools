@@ -282,8 +282,12 @@ class ObjParser {
 
 			texa = new kha.arrays.Int16Array(uvIndices.length * 2);
 			for (i in 0...posIndices.length) {
-				texa[i * 2    ] = Std.int(       uvTemp[uvIndices[i] * 2    ]  * 32767);
-				texa[i * 2 + 1] = Std.int((1.0 - uvTemp[uvIndices[i] * 2 + 1]) * 32767);
+				var uvx = uvTemp[uvIndices[i] * 2];
+				if (uvx > 1.0) uvx = uvx - Std.int(uvx);
+				var uvy = uvTemp[uvIndices[i] * 2 + 1];
+				if (uvy > 1.0) uvy = uvy - Std.int(uvy);
+				texa[i * 2    ] = Std.int(       uvx  * 32767);
+				texa[i * 2 + 1] = Std.int((1.0 - uvy) * 32767);
 			}
 		}
 		bytes = null;
