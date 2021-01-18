@@ -57,6 +57,7 @@ class UIMenubar {
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
 			if (UIHeader.inst.worktab.changed) {
 				Context.ddirty = 2;
+				Context.brushBlendDirty = true;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				UIHeader.inst.headerHandle.redraws = 2;
 				UISidebar.inst.hwnd0.redraws = 2;
