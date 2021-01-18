@@ -100,11 +100,11 @@ class UIHeader {
 				Context.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
 				if (Context.bakeType == BakeNormalObject || Context.bakeType == BakePosition || Context.bakeType == BakeBentNormal) {
 					var bakeUpAxisHandle = Id.handle({position: Context.bakeUpAxis});
-					Context.bakeUpAxis = ui.combo(bakeUpAxisHandle, ["Z", "Y"], tr("Up Axis"), true);
+					Context.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 				}
 				if (Context.bakeType == BakeAO || Context.bakeType == BakeCurvature) {
 					var bakeAxisHandle = Id.handle({position: Context.bakeAxis});
-					Context.bakeAxis = ui.combo(bakeAxisHandle, ["XYZ", "X", "Y", "Z", "-X", "-Y", "-Z"], tr("Axis"), true);
+					Context.bakeAxis = ui.combo(bakeAxisHandle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 				}
 				if (Context.bakeType == BakeAO) {
 					var strengthHandle = Id.handle({value: Context.bakeAoStrength});
@@ -266,9 +266,9 @@ class UIHeader {
 					ui._w = Std.int(55 * sc);
 					ui.text(tr("Symmetry"));
 					ui._w = Std.int(25 * sc);
-					Context.symX = ui.check(symXHandle, "X");
-					Context.symY = ui.check(symYHandle, "Y");
-					Context.symZ = ui.check(symZHandle, "Z");
+					Context.symX = ui.check(symXHandle, tr("X"));
+					Context.symY = ui.check(symYHandle, tr("Y"));
+					Context.symZ = ui.check(symZHandle, tr("Z"));
 					if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
