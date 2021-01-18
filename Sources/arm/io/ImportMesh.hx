@@ -64,6 +64,7 @@ class ImportMesh {
 			});
 
 			// No mask by default
+			for (p in Project.paintObjects) p.visible = true;
 			if (Context.mergedObject == null) MeshUtil.mergeMesh();
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;

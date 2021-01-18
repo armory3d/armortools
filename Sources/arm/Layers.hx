@@ -17,6 +17,7 @@ import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
+import arm.util.UVUtil;
 import arm.Enums;
 import arm.ProjectFormat;
 
@@ -613,6 +614,7 @@ class Layers {
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 		}
+		UVUtil.dilatemapCached = false;
 	}
 
 	public static function newLayer(clear = true): LayerSlot {
