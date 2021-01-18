@@ -117,6 +117,7 @@ class BrushOutputNode extends LogicNode {
 			if (down && Context.tool == ToolColorId && Project.assets.length > 0) {
 				Context.colorIdPicked = true;
 			}
+
 			// Prevent painting the same spot
 			var sameSpot = Context.paintVec.x == Context.lastPaintX && Context.paintVec.y == Context.lastPaintY;
 			var lazy = Context.tool == ToolBrush && Context.brushLazyRadius > 0;
@@ -137,10 +138,7 @@ class BrushOutputNode extends LogicNode {
 				parseInputs();
 			}
 
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-			var paintFrames = decal ? 1 : 4;
-
-			if (Context.painted <= paintFrames) {
+			if (Context.painted <= 1) {
 				Context.pdirty = 1;
 				Context.rdirty = 2;
 			}
