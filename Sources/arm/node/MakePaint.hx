@@ -13,8 +13,6 @@ import arm.Enums;
 class MakePaint {
 
 	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
-		var layered = Context.layer != Project.layers[0];
-		var eraser = Context.tool == ToolEraser;
 		var context_id = "paint";
 		var con_paint:NodeShaderContext = data.add_context({
 			name: context_id,
@@ -351,8 +349,9 @@ class MakePaint {
 			frag.write('}');
 		}
 
+		var layered = Context.layer != Project.layers[0];
 		if (layered) {
-			if (eraser) {
+			if (Context.tool == ToolEraser) {
 				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 				frag.write('nortan = vec3(0.5, 0.5, 1.0);');
 				frag.write('occlusion = 1.0;');
@@ -388,7 +387,7 @@ class MakePaint {
 			}
 		}
 		else {
-			if (eraser) {
+			if (Context.tool == ToolEraser) {
 				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 				frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');
 				frag.write('fragColor[2] = vec4(1.0, 0.0, 0.0, 0.0);');
