@@ -33,7 +33,8 @@ class ImportTexture {
 
 		var ext = path.substr(path.lastIndexOf(".") + 1);
 		var importer = Path.textureImporters.get(ext);
-		if (importer == null) importer = defaultImporter;
+		var cached = Data.cachedImages.get(path) != null; // Already loaded or pink texture for missing file
+		if (importer == null || cached) importer = defaultImporter;
 
 		importer(path, function(image: Image) {
 			Data.cachedImages.set(path, image);
