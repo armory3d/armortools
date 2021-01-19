@@ -19,6 +19,7 @@ class UIFiles {
 	static var iconMap: Map<String, kha.Image> = null;
 	static var selected = -1;
 	static var showExtensions = true;
+	static var offline = false;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 
@@ -133,7 +134,7 @@ class UIFiles {
 				var state = Idle;
 				var generic = true;
 
-				if (isCloud && f != "..") {
+				if (isCloud && f != ".." && !offline) {
 					if (iconMap == null) iconMap = [];
 					var icon = iconMap.get(handle.text + Path.sep + f);
 					if (icon == null) {
@@ -156,6 +157,7 @@ class UIFiles {
 									});
 								});
 							}
+							else offline = true;
 						}
 					}
 					if (icon != null) {
