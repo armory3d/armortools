@@ -310,7 +310,6 @@ class RenderPathPaint {
 			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
 			path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
-			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
 			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, path.renderTargets.get("texpaint_mask_live"));
 			path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
