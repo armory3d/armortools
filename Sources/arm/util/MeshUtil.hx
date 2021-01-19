@@ -182,6 +182,32 @@ class MeshUtil {
 				vertices[i3 * l + 5] = Std.int(cb.y * 32767);
 				vertices[i3 * l + 3] = Std.int(cb.z * 32767);
 			}
+			// if (smooth) {
+			// 	for (i in 0...inda.length) {
+			// 		var i1 = inda[i];
+			// 		var shared = [i1];
+			// 		for (j in (i + 1)...inda.length) {
+			// 			var i2 = inda[j];
+			// 			if (vertices[i1 * l] == vertices[i2 * l] && vertices[i1 * l + 1] == vertices[i2 * l + 1] && vertices[i1 * l + 2] == vertices[i2 * l + 2]) {
+			// 				// if (n1.dot(n2) > 0)
+			// 				shared.push(i2);
+			// 			}
+			// 		}
+			// 		if (shared.length > 1) {
+			// 			va.set(0, 0, 0);
+			// 			for (i1 in shared) {
+			// 				va.addf(vertices[i1 * l + 4], vertices[i1 * l + 5], vertices[i1 * l + 3]);
+			// 			}
+			// 			va.mult(1 / shared.length);
+			// 			va.normalize();
+			// 			for (i1 in shared) {
+			// 				vertices[i1 * l + 4] = Std.int(va.x * 32767);
+			// 				vertices[i1 * l + 5] = Std.int(va.y * 32767);
+			// 				vertices[i1 * l + 3] = Std.int(va.z * 32767);
+			// 			}
+			// 		}
+			// 	}
+			// }
 			g.vertexBuffer.unlock();
 		}
 
