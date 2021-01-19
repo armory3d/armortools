@@ -593,6 +593,7 @@ class RenderPathDeferred {
 				t.height = 0;
 				t.format = "RGBA64";
 				t.scale = Inc.getSuperSampling();
+				t.depth_buffer = "main";
 				path.createRenderTarget(t);
 			}
 			{
