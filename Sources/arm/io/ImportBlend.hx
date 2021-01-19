@@ -278,6 +278,7 @@ class ImportBlend {
 				}
 				mat.getInverse(mat);
 				mat.transpose3x3();
+				mat._30 = mat._31 = mat._32 = mat._33 = 0;
 				for (i in 0...Std.int(nora.length / 2)) {
 					v.set(nora[i * 2] / 32767, nora[i * 2 + 1] / 32767, posa[i * 4 + 3] / 32767);
 					v.applymat(mat);
