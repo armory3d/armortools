@@ -263,7 +263,7 @@ class UIHeader {
 					var symXHandle = Id.handle({selected: false});
 					var symYHandle = Id.handle({selected: false});
 					var symZHandle = Id.handle({selected: false});
-					ui._w = Std.int(55 * sc);
+					ui._w = Std.int(56 * sc);
 					ui.text(tr("Symmetry"));
 					ui._w = Std.int(25 * sc);
 					Context.symX = ui.check(symXHandle, tr("X"));
