@@ -65,6 +65,7 @@ class ImportBlend {
 				var vec2 = new Vec4();
 				for (i in 0...totpoly) {
 					var poly = m.get("mpoly", i);
+					var smooth = poly.get("flag") & 1 == 1; // ME_SMOOTH
 					var loopstart = poly.get("loopstart");
 					var totloop = poly.get("totloop");
 					if (totloop == 3) {
@@ -74,12 +75,23 @@ class ImportBlend {
 						var co0 = v0.get("co");
 						var co1 = v1.get("co");
 						var co2 = v2.get("co");
-						var no0 = v0.get("no");
-						var no1 = v1.get("no");
-						var no2 = v2.get("no");
-						vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
-						vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
-						vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+						if (smooth) {
+							var no0 = v0.get("no");
+							var no1 = v1.get("no");
+							var no2 = v2.get("no");
+							vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
+							vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
+							vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+						}
+						else {
+							vec2.set(co2[0], co2[1], co2[2]);
+							vec1.set(co1[0], co1[1], co1[2]);
+							vec0.subvecs(vec2, vec1);
+							vec2.set(co0[0], co0[1], co0[2]);
+							vec1.subvecs(vec2, vec1);
+							vec0.cross(vec1);
+							vec0.normalize();
+						}
 						posa32[tri * 9    ] = co0[0];
 						posa32[tri * 9 + 1] = co0[1];
 						posa32[tri * 9 + 2] = co0[2];
@@ -90,14 +102,14 @@ class ImportBlend {
 						posa32[tri * 9 + 7] = co2[1];
 						posa32[tri * 9 + 8] = co2[2];
 						posa[tri * 12 + 3] = Std.int(vec0.z * 32767);
-						posa[tri * 12 + 7] = Std.int(vec1.z * 32767);
-						posa[tri * 12 + 11] = Std.int(vec2.z * 32767);
+						posa[tri * 12 + 7] = Std.int((smooth ? vec1.z : vec0.z) * 32767);
+						posa[tri * 12 + 11] = Std.int((smooth ? vec2.z : vec0.z) * 32767);
 						nora[tri * 6    ] = Std.int(vec0.x * 32767);
 						nora[tri * 6 + 1] = Std.int(vec0.y * 32767);
-						nora[tri * 6 + 2] = Std.int(vec1.x * 32767);
-						nora[tri * 6 + 3] = Std.int(vec1.y * 32767);
-						nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
-						nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
+						nora[tri * 6 + 2] = Std.int((smooth ? vec1.x : vec0.x) * 32767);
+						nora[tri * 6 + 3] = Std.int((smooth ? vec1.y : vec0.y) * 32767);
+						nora[tri * 6 + 4] = Std.int((smooth ? vec2.x : vec0.x) * 32767);
+						nora[tri * 6 + 5] = Std.int((smooth ? vec2.y : vec0.y) * 32767);
 						if (hasuv) {
 							var uv0: Float32Array = m.get("mloopuv", loopstart    ).get("uv");
 							if (uv0[0] > 1.0) uv0[0] = uv0[0] - Std.int(uv0[0]);
@@ -147,8 +159,10 @@ class ImportBlend {
 						var co1 = v1.get("co");
 						var no0 = v0.get("no");
 						var no1 = v1.get("no");
-						vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
-						vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
+						if (smooth) {
+							vec0.set(no0[0] / 32767, no0[1] / 32767, no0[2] / 32767).normalize(); // shortmax
+							vec1.set(no1[0] / 32767, no1[1] / 32767, no1[2] / 32767).normalize();
+						}
 						var uv0: Float32Array = null;
 						var uv1: Float32Array = null;
 						var uv2: Float32Array = null;
@@ -183,7 +197,18 @@ class ImportBlend {
 							var v2 = m.get("mvert", m.get("mloop", loopstart + j + 1).get("v"));
 							var co2 = v2.get("co");
 							var no2 = v2.get("no");
-							vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+							if (smooth) {
+								vec2.set(no2[0] / 32767, no2[1] / 32767, no2[2] / 32767).normalize();
+							}
+							else {
+								vec2.set(co2[0], co2[1], co2[2]);
+								vec1.set(co1[0], co1[1], co1[2]);
+								vec0.subvecs(vec2, vec1);
+								vec2.set(co0[0], co0[1], co0[2]);
+								vec1.subvecs(vec2, vec1);
+								vec0.cross(vec1);
+								vec0.normalize();
+							}
 							posa32[tri * 9    ] = co0[0];
 							posa32[tri * 9 + 1] = co0[1];
 							posa32[tri * 9 + 2] = co0[2];
@@ -194,14 +219,14 @@ class ImportBlend {
 							posa32[tri * 9 + 7] = co2[1];
 							posa32[tri * 9 + 8] = co2[2];
 							posa[tri * 12 + 3] = Std.int(vec0.z * 32767);
-							posa[tri * 12 + 7] = Std.int(vec1.z * 32767);
-							posa[tri * 12 + 11] = Std.int(vec2.z * 32767);
+							posa[tri * 12 + 7] = Std.int((smooth ? vec1.z : vec0.z) * 32767);
+							posa[tri * 12 + 11] = Std.int((smooth ? vec2.z : vec0.z) * 32767);
 							nora[tri * 6    ] = Std.int(vec0.x * 32767);
 							nora[tri * 6 + 1] = Std.int(vec0.y * 32767);
-							nora[tri * 6 + 2] = Std.int(vec1.x * 32767);
-							nora[tri * 6 + 3] = Std.int(vec1.y * 32767);
-							nora[tri * 6 + 4] = Std.int(vec2.x * 32767);
-							nora[tri * 6 + 5] = Std.int(vec2.y * 32767);
+							nora[tri * 6 + 2] = Std.int((smooth ? vec1.x : vec0.x) * 32767);
+							nora[tri * 6 + 3] = Std.int((smooth ? vec1.y : vec0.y) * 32767);
+							nora[tri * 6 + 4] = Std.int((smooth ? vec2.x : vec0.x) * 32767);
+							nora[tri * 6 + 5] = Std.int((smooth ? vec2.y : vec0.y) * 32767);
 							co1 = co2;
 							no1 = no2;
 							vec1.setFrom(vec2);
