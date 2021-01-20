@@ -189,6 +189,7 @@ class TabMaterials {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
 						ui.text(materials[i].canvas.name, Center);
+						if (ui.isHovered) ui.tooltip(materials[i].canvas.name);
 						ui._y -= slotw * 0.9;
 					}
 				}
