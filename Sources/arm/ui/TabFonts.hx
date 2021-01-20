@@ -29,16 +29,19 @@ class TabFonts {
 			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.fonts.length / num))) {
-				ui.row([for (i in 0...num) 1 / num]);
+				var mult = Config.raw.show_asset_names ? 2 : 1;
+				ui.row([for (i in 0...num * mult) 1 / num]);
 
 				ui._x += 2;
-				if (row > 0) ui._y += 6;
+				var off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+				if (row > 0) ui._y += off;
 
 				for (j in 0...num) {
 					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= Project.fonts.length) {
 						@:privateAccess ui.endElement(imgw);
+						if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
 						continue;
 					}
 					var img = Project.fonts[i].image;
@@ -54,6 +57,7 @@ class TabFonts {
 						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
 					}
 
+					var uix = ui._x;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
 					var state = State.Idle;
 					if (Project.fonts[i].previewReady) {
@@ -97,6 +101,17 @@ class TabFonts {
 						}, 1 + add);
 					}
 					if (ui.isHovered && img != null) ui.tooltipImage(img);
+
+					if (Config.raw.show_asset_names) {
+						ui._x = uix;
+						ui._y += slotw * 0.9;
+						ui.text(Project.fonts[i].name, Center);
+						if (ui.isHovered) ui.tooltip(Project.fonts[i].name);
+						ui._y -= slotw * 0.9;
+						if (i == Project.fonts.length - 1) {
+							ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+						}
+					}
 				}
 
 				ui._y += 6;

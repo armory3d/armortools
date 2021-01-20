@@ -63,6 +63,7 @@ class TabMaterials {
 					var i = j + row * num;
 					if (i >= materials.length) {
 						@:privateAccess ui.endElement(imgw);
+						if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
 						continue;
 					}
 					var img = ui.SCALE() > 1 ? materials[i].image : materials[i].imageIcon;
@@ -191,6 +192,9 @@ class TabMaterials {
 						ui.text(materials[i].canvas.name, Center);
 						if (ui.isHovered) ui.tooltip(materials[i].canvas.name);
 						ui._y -= slotw * 0.9;
+						if (i == materials.length - 1) {
+							ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+						}
 					}
 				}
 

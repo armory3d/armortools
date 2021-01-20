@@ -37,16 +37,19 @@ class TabTextures {
 				var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
 				for (row in 0...Std.int(Math.ceil(Project.assets.length / num))) {
-					ui.row([for (i in 0...num) 1 / num]);
+					var mult = Config.raw.show_asset_names ? 2 : 1;
+					ui.row([for (i in 0...num * mult) 1 / num]);
 
 					ui._x += 2;
-					if (row > 0) ui._y += 6;
+					var off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
+					if (row > 0) ui._y += off;
 
 					for (j in 0...num) {
 						var imgw = Std.int(50 * ui.SCALE());
 						var i = j + row * num;
 						if (i >= Project.assets.length) {
 							@:privateAccess ui.endElement(imgw);
+							if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
 							continue;
 						}
 
@@ -67,23 +70,21 @@ class TabTextures {
 							UIView2D.inst.hwnd.redraws = 2;
 						}
 
-						var _uix = ui._x;
-						var _uiy = ui._y;
-						ui._x = uix;
-						ui._y = uiy;
+
 						if (asset == Context.texture) {
+							var _uix = ui._x;
+							var _uiy = ui._y;
+							ui._x = uix;
+							ui._y = uiy;
 							var off = i % 2 == 1 ? 1 : 0;
 							var w = 50;
 							ui.fill(0,               0, w + 3,       2, ui.t.HIGHLIGHT_COL);
 							ui.fill(0,     w - off + 2, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
 							ui.fill(0,               0,     2,   w + 3, ui.t.HIGHLIGHT_COL);
 							ui.fill(w + 2,           0,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+							ui._x = _uix;
+							ui._y = _uiy;
 						}
-						ui._x = _uix;
-						ui._y = _uiy;
-
-						// End of row align
-						if (i % num == num - 1) ui._y = uiy + slotw;
 
 						if (ui.isHovered) ui.tooltipImage(img, 256);
 
@@ -156,6 +157,17 @@ class TabTextures {
 									File.explorer(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
 							}, 6);
+						}
+
+						if (Config.raw.show_asset_names) {
+							ui._x = uix;
+							ui._y += slotw * 0.9;
+							ui.text(Project.assets[i].name, Center);
+							if (ui.isHovered) ui.tooltip(Project.assets[i].name);
+							ui._y -= slotw * 0.9;
+							if (i == Project.assets.length - 1) {
+								ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+							}
 						}
 					}
 				}
