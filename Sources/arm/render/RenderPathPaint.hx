@@ -706,6 +706,7 @@ class RenderPathPaint {
 			Context.paint2dView = false;
 			// Restore paint mesh
 			planeo.visible = false;
+			planeo.transform.loc.set(0.0, 0.0, 0.0);
 			for (i in 0...Project.paintObjects.length) {
 				Project.paintObjects[i].visible = visibles[i];
 			}
