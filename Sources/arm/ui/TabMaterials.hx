@@ -125,7 +125,9 @@ class TabMaterials {
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
 									if (f == "") f = tr("untitled");
-									ExportArm.runMaterial(path + Path.sep + f);
+									iron.App.notifyOnInit(function() {
+										ExportArm.runMaterial(path + Path.sep + f);
+									});
 								});
 							}
 

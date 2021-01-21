@@ -110,7 +110,10 @@ class ImportArm {
 				#end
 				// Convert image path from relative to absolute
 				var abs = Data.isAbsolute(file) ? file : base + file;
-				if (!File.exists(abs)) {
+				if (project.packed_assets != null) {
+					unpackAsset(project, abs, file);
+				}
+				if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
 					makePink(abs);
 				}
 				ImportTexture.run(abs);
@@ -344,7 +347,10 @@ class ImportArm {
 			#end
 			// Convert image path from relative to absolute
 			var abs = Data.isAbsolute(file) ? file : base + file;
-			if (!File.exists(abs)) {
+			if (project.packed_assets != null) {
+				unpackAsset(project, abs, file);
+			}
+			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
 				makePink(abs);
 			}
 			arm.io.ImportTexture.run(abs);
@@ -425,7 +431,10 @@ class ImportArm {
 			#end
 			// Convert image path from relative to absolute
 			var abs = Data.isAbsolute(file) ? file : base + file;
-			if (!File.exists(abs)) {
+			if (project.packed_assets != null) {
+				unpackAsset(project, abs, file);
+			}
+			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
 				makePink(abs);
 			}
 			arm.io.ImportTexture.run(abs);
@@ -475,6 +484,24 @@ class ImportArm {
 					but.name = "arm.shader.NodesMaterial.colorRampButton";
 					but.height = 4.5;
 				}
+			}
+		}
+	}
+
+	static function unpackAsset(project: TProjectFormat, abs: String, file: String) {
+		if (Project.raw.packed_assets == null) {
+			Project.raw.packed_assets = [];
+		}
+		for (pa in project.packed_assets) {
+			if (pa.name == file) pa.name = abs; // From relative to absolute
+			if (pa.name == abs) {
+				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
+					Project.raw.packed_assets.push(pa);
+				}
+				kha.Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", function(image: kha.Image) {
+					Data.cachedImages.set(abs, image);
+				}, null, false);
+				break;
 			}
 		}
 	}

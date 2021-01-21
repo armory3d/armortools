@@ -4,7 +4,7 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 
 typedef TProjectFormat = {
-	public var version: String;
+	@:optional public var version: String;
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
 	@:optional public var brush_icons: Array<haxe.io.Bytes>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
@@ -18,6 +18,7 @@ typedef TProjectFormat = {
 	@:optional public var atlas_objects: Array<Int>;
 	@:optional public var atlas_names: Array<String>;
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
+	@:optional public var packed_assets: Array<TPackedAsset>;
 }
 
 typedef TLayerData = {
@@ -54,4 +55,9 @@ typedef TAsset = {
 	public var id: Int;
 	public var name: String;
 	public var file: String;
+}
+
+typedef TPackedAsset = {
+	public var name: String;
+	public var bytes: haxe.io.Bytes;
 }

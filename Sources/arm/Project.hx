@@ -36,7 +36,7 @@ import arm.Enums;
 
 class Project {
 
-	public static var raw: TProjectFormat;
+	public static var raw: TProjectFormat = {};
 	public static var filepath = "";
 	public static var assets: Array<TAsset> = [];
 	public static var assetNames: Array<String> = [];
@@ -263,6 +263,7 @@ class Project {
 			assetNames = [];
 			assetMap = [];
 			assetId = 0;
+			Project.raw.packed_assets = [];
 			Context.ddirty = 4;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
@@ -456,6 +457,11 @@ class Project {
 		var visibles: Array<MeshObject> = [];
 		for (i in 0...Project.paintObjects.length) if (Project.atlasObjects[i] == atlasI) visibles.push(Project.paintObjects[i]);
 		return visibles;
+	}
+
+	public static function packedAssetExists(packed_assets: Array<TPackedAsset>, name: String): Bool {
+		for (pa in packed_assets) if (pa.name == name) return true;
+		return false;
 	}
 }
 

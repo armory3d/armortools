@@ -86,6 +86,8 @@ class ExportArm {
 			});
 		}
 
+		var packed_assets = Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0 ? null : Project.raw.packed_assets;
+
 		Project.raw = {
 			version: Main.version,
 			material_nodes: mnodes,
@@ -98,6 +100,7 @@ class ExportArm {
 			mesh_assets: mesh_files,
 			atlas_objects: Project.atlasObjects,
 			atlas_names: Project.atlasNames,
+			packed_assets: packed_assets,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
@@ -171,30 +174,27 @@ class ExportArm {
 		mnodes.push(c);
 
 		var texture_files = assetsToFiles(assets);
-
 		var isCloud = path.endsWith("_cloud_.arm");
-		if (isCloud) {
-			path = path.replace("_cloud_", "");
-			// Separate icon files
-			var out = new haxe.io.BytesOutput();
-			var writer = new arm.format.JpgWriter(out);
-			writer.write(
-				{
-					width: m.image.width,
-					height: m.image.height,
-					quality: 50,
-					pixels: m.image.getPixels()
-				}, 1
-			);
-			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", out.getBytes().getData(), out.getBytes().length);
-			var out = new haxe.io.BytesOutput();
-			var writer = new arm.format.PngWriter(out);
-			var data = arm.format.PngTools.build32RGBA(m.image.width, m.image.height, m.image.getPixels());
-			writer.write(data);
-			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", out.getBytes().getData(), out.getBytes().length);
+
+		var packed_assets: Array<TPackedAsset> = null;
+		if (Project.raw.packed_assets != null) {
+			for (pa in Project.raw.packed_assets) {
+				// Convert path from absolute to relative
+				var sameDrive = Project.filepath.charAt(0) == pa.name.charAt(0);
+				pa.name = sameDrive ? Path.toRelative(Project.filepath, pa.name) : pa.name;
+				for (a in texture_files) {
+					if (pa.name == a) {
+						if (packed_assets == null) {
+							packed_assets = [];
+						}
+						packed_assets.push(pa);
+						break;
+					}
+				}
+			}
 		}
 
-		var raw = {
+		var raw: TProjectFormat = {
 			version: Main.version,
 			material_nodes: mnodes,
 			material_groups: mgroups,
@@ -204,8 +204,37 @@ class ExportArm {
 				#else
 				[Lz4.encode(m.image.getPixels())],
 				#end
-			assets: texture_files
+			assets: texture_files,
+			packed_assets: packed_assets
 		};
+
+		if (isCloud) {
+			path = path.replace("_cloud_", "");
+			// Separate icon files
+			var jpgBytes = getJpgBytes(m.image);
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", jpgBytes.getData(), jpgBytes.length);
+			var pngBytes = getPngBytes(m.image);
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", pngBytes.getData(), pngBytes.length);
+			// Pack textures
+			if (raw.packed_assets == null) {
+				raw.packed_assets = [];
+			}
+			var tempImages: Array<kha.Image> = [];
+			for (i in 0...assets.length) {
+				if (!Project.packedAssetExists(raw.packed_assets, raw.assets[i])) {
+					var image = Project.getImage(assets[i]);
+					var temp = kha.Image.createRenderTarget(image.width, image.height);
+					temp.g2.begin(false);
+					temp.g2.drawImage(image, 0, 0);
+					temp.g2.end();
+					tempImages.push(temp);
+					raw.packed_assets.push({ name: raw.assets[i], bytes: assets[i].name.endsWith(".jpg") ? getJpgBytes(temp, 80) : getPngBytes(temp) });
+				}
+			}
+			App.notifyOnNextFrame(function() {
+				for (image in tempImages) image.unload();
+			});
+		}
 
 		var bytes = ArmPack.encode(raw);
 		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
@@ -288,5 +317,27 @@ class ExportArm {
 			}
 		}
 		return font_files;
+	}
+
+	static function getJpgBytes(image: kha.Image, quality = 50): haxe.io.Bytes {
+		var out = new haxe.io.BytesOutput();
+		var writer = new arm.format.JpgWriter(out);
+		writer.write(
+			{
+				width: image.width,
+				height: image.height,
+				quality: quality,
+				pixels: image.getPixels()
+			}, 1
+		);
+		return out.getBytes();
+	}
+
+	static function getPngBytes(image: kha.Image): haxe.io.Bytes {
+		var out = new haxe.io.BytesOutput();
+		var writer = new arm.format.PngWriter(out);
+		var data = arm.format.PngTools.build32RGBA(image.width, image.height, image.getPixels());
+		writer.write(data);
+		return out.getBytes();
 	}
 }
