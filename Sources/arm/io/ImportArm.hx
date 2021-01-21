@@ -66,9 +66,15 @@ class ImportArm {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
-			// Import as material instead
 			if (project.version != null && project.layer_datas == null) {
-				runMaterialFromProject(project, path);
+				// Import as material
+				if (project.material_nodes != null) {
+					runMaterialFromProject(project, path);
+				}
+				// Import as brush
+				else if (project.brush_nodes != null) {
+					runBrushFromProject(project, path);
+				}
 				return;
 			}
 
