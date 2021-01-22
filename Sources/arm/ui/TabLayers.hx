@@ -617,6 +617,7 @@ class TabLayers {
 						MakeMaterial.parseMeshMaterial();
 						if (l.fill_layer != null) { // Fill layer
 							function _init() {
+								Context.material = l.fill_layer;
 								l.clear();
 								Layers.updateFillLayers();
 							}
