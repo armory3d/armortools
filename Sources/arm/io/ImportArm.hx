@@ -318,10 +318,7 @@ class ImportArm {
 				var l = Project.layers[i];
 				var isGroup = ld.texpaint == null;
 				if (!isGroup) {
-					var material_mask = untyped ld.material_mask; // TODO: deprecated
-					if (material_mask != null) l.fill_layer = material_mask > -1 ? Project.materials[material_mask] : null;
-
-					else l.fill_layer = ld.fill_layer > -1 ? Project.materials[ld.fill_layer] : null;
+					l.fill_layer = ld.fill_layer > -1 ? Project.materials[ld.fill_layer] : null;
 					l.fill_mask = ld.fill_mask > -1 ? Project.materials[ld.fill_mask] : null;
 				}
 			}

@@ -610,7 +610,7 @@ class TabLayers {
 					var atlases = Project.getUsedAtlases();
 					if (atlases != null) for (a in atlases) ar.push(a);
 					var objectHandle = Id.handle().nest(l.id);
-					objectHandle.position = l.objectMask == null ? 0 : l.objectMask; // TODO: deprecated
+					objectHandle.position = l.objectMask;
 					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left, 16);
 					if (objectHandle.changed) {
 						Context.setLayer(l);
