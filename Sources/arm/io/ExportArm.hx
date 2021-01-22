@@ -46,9 +46,9 @@ class ExportArm {
 		var md: Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
 
-		var texture_files = assetsToFiles(Project.assets);
-		var font_files = fontsToFiles(Project.fonts);
-		var mesh_files = meshesToFiles();
+		var texture_files = assetsToFiles(Project.filepath, Project.assets);
+		var font_files = fontsToFiles(Project.filepath, Project.fonts);
+		var mesh_files = meshesToFiles(Project.filepath);
 
 		var bitsPos = App.bitsHandle.position;
 		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
@@ -173,7 +173,7 @@ class ExportArm {
 		for (n in c.nodes) exportNode(n, assets);
 		mnodes.push(c);
 
-		var texture_files = assetsToFiles(assets);
+		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
 
 		var packed_assets: Array<TPackedAsset> = null;
@@ -259,7 +259,7 @@ class ExportArm {
 		for (n in c.nodes) exportNode(n, assets);
 		bnodes.push(c);
 
-		var texture_files = assetsToFiles(assets);
+		var texture_files = assetsToFiles(path, assets);
 
 		var raw = {
 			version: Main.version,
@@ -273,13 +273,13 @@ class ExportArm {
 		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 
-	static function assetsToFiles(assets: Array<TAsset>): Array<String> {
+	static function assetsToFiles(projectPath: String, assets: Array<TAsset>): Array<String> {
 		var texture_files: Array<String> = [];
 		for (a in assets) {
 			// Convert image path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == a.file.charAt(0);
+			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
 			if (sameDrive) {
-				texture_files.push(Path.toRelative(Project.filepath, a.file));
+				texture_files.push(Path.toRelative(projectPath, a.file));
 			}
 			else {
 				texture_files.push(a.file);
@@ -288,13 +288,13 @@ class ExportArm {
 		return texture_files;
 	}
 
-	static function meshesToFiles(): Array<String> {
+	static function meshesToFiles(projectPath: String): Array<String> {
 		var mesh_files: Array<String> = [];
 		for (file in Project.meshAssets) {
 			// Convert mesh path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == file.charAt(0);
+			var sameDrive = projectPath.charAt(0) == file.charAt(0);
 			if (sameDrive) {
-				mesh_files.push(Path.toRelative(Project.filepath, file));
+				mesh_files.push(Path.toRelative(projectPath, file));
 			}
 			else {
 				mesh_files.push(file);
@@ -303,14 +303,14 @@ class ExportArm {
 		return mesh_files;
 	}
 
-	static function fontsToFiles(fonts: Array<FontSlot>): Array<String> {
+	static function fontsToFiles(projectPath: String, fonts: Array<FontSlot>): Array<String> {
 		var font_files: Array<String> = [];
 		for (i in 1...fonts.length) {
 			var f = fonts[i];
 			// Convert font path from absolute to relative
-			var sameDrive = Project.filepath.charAt(0) == f.file.charAt(0);
+			var sameDrive = projectPath.charAt(0) == f.file.charAt(0);
 			if (sameDrive) {
-				font_files.push(Path.toRelative(Project.filepath, f.file));
+				font_files.push(Path.toRelative(projectPath, f.file));
 			}
 			else {
 				font_files.push(f.file);
