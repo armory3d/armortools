@@ -476,10 +476,9 @@ class Layers {
 	}
 
 	public static function updateFillLayers() {
-		var layers = Project.layers;
-		var selectedLayer = Context.layer;
-		var isMask = Context.layerIsMask;
-		var selectedTool = Context.tool;
+		var _layer = Context.layer;
+		var _layerIsMask = Context.layerIsMask;
+		var _tool = Context.tool;
 		var current: kha.graphics2.Graphics = null;
 
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
@@ -499,7 +498,7 @@ class Layers {
 			RenderPathPaint.commandsPaint(false);
 			RenderPathPaint.dilate(true, true);
 			RenderPathPaint.useLiveLayer(false);
-			Context.tool = selectedTool;
+			Context.tool = _tool;
 			Context.pdirty = 0;
 			Context.rdirty = 2;
 			UIHeader.inst.worktab.position = SpaceMaterial;
@@ -510,8 +509,8 @@ class Layers {
 
 		var hasFillLayer = false;
 		var hasFillMask = false;
-		for (l in layers) if (l.fill_layer == Context.material) hasFillLayer = true;
-		for (l in layers) if (l.fill_mask == Context.material) hasFillMask = true;
+		for (l in Project.layers) if (l.fill_layer == Context.material) hasFillLayer = true;
+		for (l in Project.layers) if (l.fill_mask == Context.material) hasFillMask = true;
 
 		if (hasFillLayer || hasFillMask) {
 
@@ -524,7 +523,7 @@ class Layers {
 				Context.layerIsMask = false;
 				MakeMaterial.parsePaintMaterial();
 
-				for (l in layers) {
+				for (l in Project.layers) {
 					if (l.fill_layer == Context.material) {
 						Context.layer = l;
 						setObjectMask();
@@ -543,7 +542,7 @@ class Layers {
 				Context.layerIsMask = true;
 				MakeMaterial.parsePaintMaterial();
 
-				for (l in layers) {
+				for (l in Project.layers) {
 					if (l.fill_mask == Context.material) {
 						Context.layer = l;
 						setObjectMask();
@@ -557,10 +556,10 @@ class Layers {
 			Context.ddirty = 2;
 			Context.rdirty = 2;
 			if (current != null) current.begin(false);
-			Context.layer = selectedLayer;
-			Context.layerIsMask = isMask;
+			Context.layer = _layer;
+			Context.layerIsMask = _layerIsMask;
 			setObjectMask();
-			Context.tool = selectedTool;
+			Context.tool = _tool;
 		}
 	}
 
