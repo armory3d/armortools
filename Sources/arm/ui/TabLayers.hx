@@ -196,8 +196,12 @@ class TabLayers {
 				}
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
-					Context.selectTime = Time.time();
+					if (Time.time() - Context.selectTime < 0.25) {
+						UISidebar.inst.show2DView(View2DLayer);
+					}
+					if (Time.time() - Context.selectTime > 0.25) {
+						Context.selectTime = Time.time();
+					}
 					var mouse = Input.getMouse();
 					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -307,8 +311,12 @@ class TabLayers {
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
-						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DLayer);
-						Context.selectTime = Time.time();
+						if (Time.time() - Context.selectTime < 0.25) {
+							UISidebar.inst.show2DView(View2DLayer);
+						}
+						if (Time.time() - Context.selectTime > 0.25) {
+							Context.selectTime = Time.time();
+						}
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
@@ -324,25 +332,32 @@ class TabLayers {
 				}
 				else {
 
-					if (ui.inputReleasedR && ui.enabled && ui.inputEnabled &&
+					if (ui.enabled && ui.inputEnabled &&
 						ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._x + ui._w &&
 						ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
-						contextMenu = true;
+						if (ui.inputStarted) {
+							Context.setLayer(l);
+							if (Time.time() - Context.selectTime > 0.25) {
+								Context.selectTime = Time.time();
+							}
+							var mouse = Input.getMouse();
+							App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+							App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+							App.dragLayer = Context.layer;
+						}
+						else if (ui.inputReleasedR) {
+							contextMenu = true;
+						}
 					}
 
 					var state = ui.text(l.name);
 					if (state == State.Started) {
-						Context.setLayer(l);
-						if (Time.time() - Context.selectTime < 0.25) {
+						var td = Time.time() - Context.selectTime;
+						if (td < 0.25 && td > 0.0) {
 							layerNameEdit = l.id;
 							layerNameHandle.text = l.name;
 							ui.startTextEdit(layerNameHandle);
 						}
-						Context.selectTime = Time.time();
-						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragLayer = Context.layer;
 					}
 				}
 				ui._y -= center;
