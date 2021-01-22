@@ -175,24 +175,7 @@ class ExportArm {
 
 		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
-
-		var packed_assets: Array<TPackedAsset> = null;
-		if (Project.raw.packed_assets != null) {
-			for (pa in Project.raw.packed_assets) {
-				// Convert path from absolute to relative
-				var sameDrive = Project.filepath.charAt(0) == pa.name.charAt(0);
-				pa.name = sameDrive ? Path.toRelative(Project.filepath, pa.name) : pa.name;
-				for (a in texture_files) {
-					if (pa.name == a) {
-						if (packed_assets == null) {
-							packed_assets = [];
-						}
-						packed_assets.push(pa);
-						break;
-					}
-				}
-			}
-		}
+		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
 
 		var raw: TProjectFormat = {
 			version: Main.version,
@@ -216,24 +199,7 @@ class ExportArm {
 			var pngBytes = getPngBytes(m.image);
 			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", pngBytes.getData(), pngBytes.length);
 			// Pack textures
-			if (raw.packed_assets == null) {
-				raw.packed_assets = [];
-			}
-			var tempImages: Array<kha.Image> = [];
-			for (i in 0...assets.length) {
-				if (!Project.packedAssetExists(raw.packed_assets, raw.assets[i])) {
-					var image = Project.getImage(assets[i]);
-					var temp = kha.Image.createRenderTarget(image.width, image.height);
-					temp.g2.begin(false);
-					temp.g2.drawImage(image, 0, 0);
-					temp.g2.end();
-					tempImages.push(temp);
-					raw.packed_assets.push({ name: raw.assets[i], bytes: assets[i].name.endsWith(".jpg") ? getJpgBytes(temp, 80) : getPngBytes(temp) });
-				}
-			}
-			App.notifyOnNextFrame(function() {
-				for (image in tempImages) image.unload();
-			});
+			packAssets(raw, assets);
 		}
 
 		var bytes = ArmPack.encode(raw);
@@ -252,6 +218,7 @@ class ExportArm {
 	#end
 
 	public static function runBrush(path: String) {
+		if (!path.endsWith(".arm")) path += ".arm";
 		var bnodes: Array<TNodeCanvas> = [];
 		var b = Context.brush;
 		var c: TNodeCanvas = Json.parse(Json.stringify(b.canvas));
@@ -260,16 +227,27 @@ class ExportArm {
 		bnodes.push(c);
 
 		var texture_files = assetsToFiles(path, assets);
+		var isCloud = path.endsWith("_cloud_.arm");
+		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
 
 		var raw = {
 			version: Main.version,
 			brush_nodes: bnodes,
 			brush_icons: [Lz4.encode(b.image.getPixels())],
-			assets: texture_files
+			assets: texture_files,
+			packed_assets: packed_assets
 		};
 
+		if (isCloud) {
+			path = path.replace("_cloud_", "");
+			// Separate icon file
+			var pngBytes = getPngBytes(b.image);
+			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", pngBytes.getData(), pngBytes.length);
+			// Pack textures
+			packAssets(raw, assets);
+		}
+
 		var bytes = ArmPack.encode(raw);
-		if (!path.endsWith(".arm")) path += ".arm";
 		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 
@@ -339,5 +317,47 @@ class ExportArm {
 		var data = arm.format.PngTools.build32RGBA(image.width, image.height, image.getPixels());
 		writer.write(data);
 		return out.getBytes();
+	}
+
+	static function getPackedAssets(projectPath: String, texture_files: Array<String>): Array<TPackedAsset> {
+		var packed_assets: Array<TPackedAsset> = null;
+		if (Project.raw.packed_assets != null) {
+			for (pa in Project.raw.packed_assets) {
+				// Convert path from absolute to relative
+				var sameDrive = projectPath.charAt(0) == pa.name.charAt(0);
+				pa.name = sameDrive ? Path.toRelative(projectPath, pa.name) : pa.name;
+				for (tf in texture_files) {
+					if (pa.name == tf) {
+						if (packed_assets == null) {
+							packed_assets = [];
+						}
+						packed_assets.push(pa);
+						break;
+					}
+				}
+			}
+		}
+		return packed_assets;
+	}
+
+	static function packAssets(raw: TProjectFormat, assets: Array<TAsset>) {
+		if (raw.packed_assets == null) {
+			raw.packed_assets = [];
+		}
+		var tempImages: Array<kha.Image> = [];
+		for (i in 0...assets.length) {
+			if (!Project.packedAssetExists(raw.packed_assets, raw.assets[i])) {
+				var image = Project.getImage(assets[i]);
+				var temp = kha.Image.createRenderTarget(image.width, image.height);
+				temp.g2.begin(false);
+				temp.g2.drawImage(image, 0, 0);
+				temp.g2.end();
+				tempImages.push(temp);
+				raw.packed_assets.push({ name: raw.assets[i], bytes: assets[i].name.endsWith(".jpg") ? getJpgBytes(temp, 80) : getPngBytes(temp) });
+			}
+		}
+		App.notifyOnNextFrame(function() {
+			for (image in tempImages) image.unload();
+		});
 	}
 }

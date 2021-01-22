@@ -91,7 +91,9 @@ class TabBrushes {
 								UIFiles.show("arm", true, function(path: String) {
 									var f = UIFiles.filename;
 									if (f == "") f = tr("untitled");
-									ExportArm.runBrush(path + Path.sep + f);
+									iron.App.notifyOnInit(function() {
+										ExportArm.runBrush(path + Path.sep + f);
+									});
 								});
 							}
 
