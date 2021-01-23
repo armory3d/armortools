@@ -7,6 +7,7 @@ import iron.system.ArmPack;
 import iron.system.Lz4;
 import arm.data.FontSlot;
 import arm.ui.UISidebar;
+import arm.ui.UINodes;
 import arm.sys.Path;
 import arm.ProjectFormat;
 import arm.Enums;
@@ -120,30 +121,6 @@ class ExportArm {
 		Log.info("Project saved.");
 	}
 
-	static function getGroup(canvases: Array<TNodeCanvas>, name: String): TNodeCanvas {
-		for (c in canvases) if (c.name == name) return c;
-		return null;
-	}
-
-	static function hasGroup(c: TNodeCanvas): Bool {
-		for (n in c.nodes) if (n.type == "GROUP") return true;
-		return false;
-	}
-
-	static function traverseGroup(mgroups: Array<TNodeCanvas>, c: TNodeCanvas) {
-		for (n in c.nodes) {
-			if (n.type == "GROUP") {
-				if (getGroup(mgroups, n.name) == null) {
-					var canvases: Array<TNodeCanvas> = [];
-					for (g in Project.materialGroups) canvases.push(g.canvas);
-					var group = getGroup(canvases, n.name);
-					mgroups.push(Json.parse(Json.stringify(group)));
-					traverseGroup(mgroups, group);
-				}
-			}
-		}
-	}
-
 	static function exportNode(n: TNode, assets: Array<TAsset> = null) {
 		if (n.type == "TEX_IMAGE") {
 			var index = n.buttons[0].default_value;
@@ -165,9 +142,9 @@ class ExportArm {
 		var m = Context.material;
 		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 		var assets: Array<TAsset> = [];
-		if (hasGroup(c)) {
+		if (UINodes.hasGroup(c)) {
 			mgroups = [];
-			traverseGroup(mgroups, c);
+			UINodes.traverseGroup(mgroups, c);
 			for (gc in mgroups) for (n in gc.nodes) exportNode(n, assets);
 		}
 		for (n in c.nodes) exportNode(n, assets);

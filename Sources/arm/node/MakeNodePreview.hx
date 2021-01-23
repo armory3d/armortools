@@ -10,7 +10,7 @@ import arm.shader.NodeShaderContext;
 class MakeNodePreview {
 
 	@:access(arm.shader.MaterialParser)
-	public static function run(data: NodeShaderData, matcon: TMaterialContext, node: TNode): NodeShaderContext {
+	public static function run(data: NodeShaderData, matcon: TMaterialContext, node: TNode, group: TNodeCanvas, parents: Array<TNode>): NodeShaderContext {
 		var context_id = "mesh";
 		var con_mesh: NodeShaderContext = data.add_context({
 			name: context_id,
@@ -34,16 +34,20 @@ class MakeNodePreview {
 		vert.write_attrib('texCoord.y = 1.0 - texCoord.y;');
 		#end
 
-		var canvas_nodes = Context.material.canvas.nodes;
-		var canvas_links = Context.material.canvas.links;
+		MaterialParser.init();
+		MaterialParser.canvases = [Context.material.canvas];
+		MaterialParser.nodes = Context.material.canvas.nodes;
+		MaterialParser.links = Context.material.canvas.links;
+		if (group != null) {
+			MaterialParser.push_group(group);
+			MaterialParser.parents = parents;
+		}
+		var links = MaterialParser.links;
 		var nodes = Context.material.nodes;
 
-		var link: TNodeLink = { id: nodes.getLinkId(canvas_links), from_id: node.id, from_socket: Context.nodePreviewSocket, to_id: 0, to_socket: 0 };
-		canvas_links.push(link);
+		var link: TNodeLink = { id: nodes.getLinkId(links), from_id: node.id, from_socket: Context.nodePreviewSocket, to_id: -1, to_socket: -1 };
+		links.push(link);
 
-		MaterialParser.init();
-		MaterialParser.nodes = canvas_nodes;
-		MaterialParser.links = canvas_links;
 		MaterialParser.con = con_mesh;
 		MaterialParser.vert = vert;
 		MaterialParser.frag = frag;
@@ -55,7 +59,7 @@ class MakeNodePreview {
 		if (st != "RGB" && st != "RGBA" && st != "VECTOR") {
 			res = MaterialParser.to_vec3(res);
 		}
-		canvas_links.remove(link);
+		links.remove(link);
 
 		frag.add_out('vec4 fragColor');
 		frag.write('vec3 basecol = $res;');

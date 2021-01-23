@@ -4,6 +4,7 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
+import iron.RenderPath;
 import arm.ui.UIHeader;
 import arm.ui.UINodes;
 import arm.ui.UISidebar;
@@ -12,6 +13,7 @@ import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;
 import arm.shader.MaterialParser;
+import arm.render.RenderPathPaint;
 import arm.util.RenderUtil;
 import arm.Enums;
 
@@ -174,13 +176,13 @@ class MakeMaterial {
 	}
 	#end
 
-	public static function parsePaintMaterial() {
+	public static function parsePaintMaterial(bakePreviews = true) {
 		if (!getMOut()) return;
 
-		{
+		if (bakePreviews) {
 			var current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
-			bakeBlurNodes();
+			bakeNodePreviews();
 			if (current != null) current.begin(false);
 		}
 
@@ -225,7 +227,7 @@ class MakeMaterial {
 		if (defaultMcon == null) defaultMcon = mcon;
 	}
 
-	static function bakeBlurNodes() {
+	static function bakeNodePreviews() {
 		if (Context.nodePreviewsBlur != null) {
 			for (image in Context.nodePreviewsBlur) {
 				image.unload();
@@ -238,35 +240,110 @@ class MakeMaterial {
 			}
 			Context.nodePreviewsWarp = null;
 		}
-		for (node in UINodes.inst.getCanvasMaterial().nodes) {
-			if (node.type == "BLUR") {
-				if (Context.nodePreviewsBlur == null) {
-					Context.nodePreviewsBlur = new Map();
-				}
-				var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
-				Context.nodePreviewsBlur.set(MaterialParser.node_name(node), image);
-				MaterialParser.blur_passthrough = true;
-				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
-				MaterialParser.blur_passthrough = false;
+		if (Context.nodePreviewsBake != null) {
+			for (img in Context.nodePreviewsBake) {
+				img.unload();
 			}
-			if (node.type ==  "DIRECT_WARP") {
-				if (Context.nodePreviewsWarp == null) {
-					Context.nodePreviewsWarp = new Map();
+			Context.nodePreviewsBake = null;
+		}
+		traverseNodes(UINodes.inst.getCanvasMaterial().nodes, null, []);
+	}
+
+	static function traverseNodes(nodes: Array<TNode>, group: TNodeCanvas, parents: Array<TNode>) {
+		for (node in nodes) {
+			bakeNodePreview(node, group, parents);
+			if (node.type == "GROUP") {
+				for (g in Project.materialGroups) {
+					if (g.canvas.name == node.name) {
+						parents.push(node);
+						traverseNodes(g.canvas.nodes, g.canvas, parents);
+						parents.pop();
+						break;
+					}
 				}
-				var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()));
-				Context.nodePreviewsWarp.set(MaterialParser.node_name(node), image);
-				MaterialParser.warp_passthrough = true;
-				RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
-				MaterialParser.warp_passthrough = false;
 			}
 		}
 	}
 
-	public static function parseNodePreviewMaterial(node: TNode): { scon: ShaderContext, mcon: MaterialContext } {
+	static function bakeNodePreview(node: TNode, group: TNodeCanvas, parents: Array<TNode>) {
+		if (node.type == "BLUR") {
+			if (Context.nodePreviewsBlur == null) {
+				Context.nodePreviewsBlur = new Map();
+			}
+			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
+			Context.nodePreviewsBlur.set(MaterialParser.node_name(node, parents), image);
+			MaterialParser.blur_passthrough = true;
+			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
+			MaterialParser.blur_passthrough = false;
+		}
+		else if (node.type == "DIRECT_WARP") {
+			if (Context.nodePreviewsWarp == null) {
+				Context.nodePreviewsWarp = new Map();
+			}
+			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()));
+			Context.nodePreviewsWarp.set(MaterialParser.node_name(node, parents), image);
+			MaterialParser.warp_passthrough = true;
+			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
+			MaterialParser.warp_passthrough = false;
+		}
+		else if (node.type == "BAKE_CURVATURE") {
+			if (Context.nodePreviewsBake == null) {
+				Context.nodePreviewsBake = new Map();
+			}
+			var id = MaterialParser.node_name(node, parents);
+			var image = Context.nodePreviewsBake.get(id);
+
+			if (image == null) {
+				image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()), kha.graphics4.TextureFormat.L8);
+				Context.nodePreviewsBake.set(id, image);
+			}
+
+			MaterialParser.bake_passthrough = true;
+			var res = parseNodePreviewMaterial(node, group, parents);
+			MaterialParser.bake_passthrough = false;
+			if (res == null || res.scon == null) return;
+
+			if (RenderPathPaint.liveLayer == null) {
+				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
+				RenderPathPaint.liveLayer.createMask(0x00000000);
+			}
+
+			var _space = UIHeader.inst.worktab.position;
+			var _tool = Context.tool;
+			var _bakeType = Context.bakeType;
+			UIHeader.inst.worktab.position = SpacePaint;
+			Context.tool = ToolBake;
+			Context.bakeType = BakeCurvature;
+
+			MaterialParser.bake_passthrough = true;
+			parsePaintMaterial(false);
+			Context.pdirty = 1;
+			RenderPathPaint.useLiveLayer(true);
+			RenderPathPaint.commandsPaint(false);
+			RenderPathPaint.dilate(true, true);
+			RenderPathPaint.useLiveLayer(false);
+			MaterialParser.bake_passthrough = false;
+			Context.pdirty = 0;
+
+			UIHeader.inst.worktab.position = _space;
+			Context.tool = _tool;
+			Context.bakeType = _bakeType;
+			parsePaintMaterial(false);
+
+			var rts = RenderPath.active.renderTargets;
+			var texpaint_live = rts.get("texpaint_live");
+
+			image.g2.begin(false);
+			image.g2.drawImage(texpaint_live.image, 0, 0);
+			image.g2.end();
+		}
+	}
+
+	public static function parseNodePreviewMaterial(node: TNode, group: TNodeCanvas = null, parents: Array<TNode> = null): { scon: ShaderContext, mcon: MaterialContext } {
 		if (node.outputs.length == 0) return null;
 		var sdata = new NodeShaderData({ name: "Material", canvas: UINodes.inst.getCanvasMaterial() });
 		var mcon_raw: TMaterialContext = { name: "mesh", bind_textures: [] };
-		var con = MakeNodePreview.run(sdata, mcon_raw, node);
+		var con = MakeNodePreview.run(sdata, mcon_raw, node, group, parents);
 		var compileError = false;
 		var scon = new ShaderContext(con.data, function(scon: ShaderContext) {
 			if (scon == null) compileError = true;

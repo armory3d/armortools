@@ -777,4 +777,28 @@ class UINodes {
 		UINodes.inst.hwnd.redraws = 2;
 		RenderUtil.makeNodePreview(Context.material.canvas, node, Context.nodePreview);
 	}
+
+	public static function hasGroup(c: TNodeCanvas): Bool {
+		for (n in c.nodes) if (n.type == "GROUP") return true;
+		return false;
+	}
+
+	public static function traverseGroup(mgroups: Array<TNodeCanvas>, c: TNodeCanvas) {
+		for (n in c.nodes) {
+			if (n.type == "GROUP") {
+				if (getGroup(mgroups, n.name) == null) {
+					var canvases: Array<TNodeCanvas> = [];
+					for (g in Project.materialGroups) canvases.push(g.canvas);
+					var group = getGroup(canvases, n.name);
+					mgroups.push(Json.parse(Json.stringify(group)));
+					traverseGroup(mgroups, group);
+				}
+			}
+		}
+	}
+
+	static function getGroup(canvases: Array<TNodeCanvas>, name: String): TNodeCanvas {
+		for (c in canvases) if (c.name == name) return c;
+		return null;
+	}
 }

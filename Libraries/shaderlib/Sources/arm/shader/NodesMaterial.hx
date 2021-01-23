@@ -944,6 +944,57 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
+				name: _tr("Curvature Bake"),
+				type: "BAKE_CURVATURE",
+				x: 0,
+				y: 0,
+				color: 0xff4982a0,
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Strength"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0,
+						min: 0.0,
+						max: 2.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Radius"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0,
+						min: 0.0,
+						max: 2.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Offset"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0,
+						min: -2.0,
+						max: 2.0
+					}
+				],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Value"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 1.0
+					}
+				],
+				buttons: []
+			},
+			{
+				id: 0,
 				name: _tr("Gradient Texture"),
 				type: "TEX_GRADIENT",
 				x: 0,

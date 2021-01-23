@@ -5,6 +5,7 @@ import arm.shader.NodeShader;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;
+import arm.shader.MaterialParser;
 import arm.Enums;
 
 class MakeBake {
@@ -44,14 +45,15 @@ class MakeBake {
 			#end
 		}
 		else if (Context.bakeType == BakeCurvature) {
-			var strength = Context.bakeCurvStrength * 2.0;
-			var radius = (1.0 / Context.bakeCurvRadius) * 0.25;
-			var offset = Context.bakeCurvOffset / 10;
+			var pass = MaterialParser.bake_passthrough;
+			var strength = pass ? MaterialParser.bake_passthrough_strength : Context.bakeCurvStrength + "";
+			var radius = pass ? MaterialParser.bake_passthrough_radius : Context.bakeCurvRadius + "";
+			var offset = pass ? MaterialParser.bake_passthrough_offset : Context.bakeCurvOffset + "";
 			frag.n = true;
 			frag.write('vec3 dx = dFdx(n);');
 			frag.write('vec3 dy = dFdy(n);');
 			frag.write('float curvature = max(dot(dx, dx), dot(dy, dy));');
-			frag.write('curvature = clamp(pow(curvature, $radius) * $strength + $offset, 0.0, 1.0);');
+			frag.write('curvature = clamp(pow(curvature, (1.0 / ' + radius + ') * 0.25) * ' + strength + ' * 2.0 + ' + offset + ' / 10.0, 0.0, 1.0);');
 			if (Context.bakeAxis != BakeXYZ) {
 				var axis = axisString(Context.bakeAxis);
 				frag.write('curvature *= dot(n, $axis);');

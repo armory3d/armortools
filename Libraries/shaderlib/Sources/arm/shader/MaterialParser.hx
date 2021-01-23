@@ -58,6 +58,10 @@ class MaterialParser {
 
 	public static var blur_passthrough = false;
 	public static var warp_passthrough = false;
+	public static var bake_passthrough = false;
+	public static var bake_passthrough_strength = "0.0";
+	public static var bake_passthrough_radius = "0.0";
+	public static var bake_passthrough_offset = "0.0";
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -1259,6 +1263,19 @@ class MaterialParser {
 			if (sample_bump) write_bump(node, res);
 			return res;
 		}
+		else if (node.type == "BAKE_CURVATURE") {
+			if (bake_passthrough) {
+				bake_passthrough_strength = parse_value_input(node.inputs[0]);
+				bake_passthrough_radius = parse_value_input(node.inputs[1]);
+				bake_passthrough_offset = parse_value_input(node.inputs[2]);
+				return "0.0";
+			}
+			var tex_name = "texbake_" + node_name(node);
+			curshader.add_uniform("sampler2D " + tex_name, "_" + tex_name);
+			var store = store_var_name(node);
+			curshader.write('float ${store}_res = texture($tex_name, texCoord).r;');
+			return '${store}_res';
+		}
 		else if (node.type == "NORMAL") {
 			var nor = parse_vector_input(node.inputs[0]);
 			var norout = vec3(node.outputs[0].default_value);
@@ -1603,9 +1620,10 @@ class MaterialParser {
 		return -1;
 	}
 
-	public static function node_name(node: TNode): String {
+	public static function node_name(node: TNode, _parents: Array<TNode> = null): String {
+		if (_parents == null) _parents = parents;
 		var s = node.name;
-		for (p in parents) s = p.name + p.id + '_' + s;
+		for (p in _parents) s = p.name + p.id + '_' + s;
 		s = safesrc(s) + node.id;
 		return s;
 	}

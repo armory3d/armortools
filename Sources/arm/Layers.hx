@@ -492,7 +492,7 @@ class Layers {
 
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
-			MakeMaterial.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial(false);
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint(false);
@@ -521,7 +521,7 @@ class Layers {
 
 			if (hasFillLayer) {
 				Context.layerIsMask = false;
-				MakeMaterial.parsePaintMaterial();
+				MakeMaterial.parsePaintMaterial(false);
 
 				for (l in Project.layers) {
 					if (l.fill_layer == Context.material) {
@@ -540,7 +540,7 @@ class Layers {
 
 			if (hasFillMask) {
 				Context.layerIsMask = true;
-				MakeMaterial.parsePaintMaterial();
+				MakeMaterial.parsePaintMaterial(false);
 
 				for (l in Project.layers) {
 					if (l.fill_mask == Context.material) {
@@ -579,7 +579,7 @@ class Layers {
 			Context.layer.clearLayer();
 		}
 
-		if (parsePaint) MakeMaterial.parsePaintMaterial();
+		if (parsePaint) MakeMaterial.parsePaintMaterial(false);
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.dilate(true, true);
 
