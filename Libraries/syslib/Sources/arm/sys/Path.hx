@@ -99,7 +99,7 @@ class Path {
 
 	static function checkExt(p: String, exts: Array<String>): Bool {
 		p = p.replace("-", "_");
-		for (ext in exts) if (p.endsWith("_" + ext)) return true;
+		for (ext in exts) if (p.endsWith("_" + ext) || p.indexOf("_" + ext + "_") >= 0) return true;
 		return false;
 	}
 
