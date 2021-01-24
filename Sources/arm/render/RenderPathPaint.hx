@@ -232,9 +232,12 @@ class RenderPathPaint {
 				}
 				#end
 
+				var isMask = Context.layerIsMask;
+				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
+
 				if (Context.tool == ToolBake && Context.brushTime == iron.system.Time.delta) {
 					// Clear to black on bake start
-					path.setTarget("texpaint" + tid);
+					path.setTarget(texpaint);
 					path.clearTarget(0xff000000);
 				}
 
@@ -242,8 +245,6 @@ class RenderPathPaint {
 				path.bindTarget("texpaint_blend0", "tex");
 				path.drawShader("shader_datas/copy_pass/copyR8_pass");
 
-				var isMask = Context.layerIsMask;
-				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				path.bindTarget("_main", "gbufferD");
 				if ((Context.xray || Context.brushAngleReject) && Config.raw.brush_3d) {
