@@ -129,6 +129,8 @@ class Context {
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
 	public static var cacheDraws = false;
+	public static var packAssetsOnExport = true;
+	public static var writeIconOnExport = false;
 
 	public static var textToolImage: Image = null;
 	public static var textToolText: String;

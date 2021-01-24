@@ -12,7 +12,6 @@ import arm.node.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
 import arm.util.MaterialUtil;
-import arm.io.ExportArm;
 import arm.sys.Path;
 import arm.Enums;
 
@@ -122,13 +121,7 @@ class TabMaterials {
 
 							if (ui.button(tr("Export"), Left)) {
 								selectMaterial(i);
-								UIFiles.show("arm", true, function(path: String) {
-									var f = UIFiles.filename;
-									if (f == "") f = tr("untitled");
-									iron.App.notifyOnInit(function() {
-										ExportArm.runMaterial(path + Path.sep + f);
-									});
-								});
+								BoxExport.showMaterial();
 							}
 
 							if (ui.button(tr("Bake"), Left)) {

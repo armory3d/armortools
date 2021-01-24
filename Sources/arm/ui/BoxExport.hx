@@ -6,6 +6,7 @@ import zui.Id;
 import arm.util.UVUtil;
 import arm.io.ExportMesh;
 import arm.io.ExportTexture;
+import arm.io.ExportArm;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Enums;
@@ -260,6 +261,62 @@ class BoxExport {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						ExportMesh.run(path + Path.sep + f, applyDisplacement);
+					});
+				}
+			}
+		});
+	}
+
+	public static function showMaterial() {
+		UIBox.showCustom(function(ui: Zui) {
+			var htab = Id.handle();
+			if (ui.tab(htab, tr("Export Material"))) {
+				var h1 = Id.handle();
+				var h2 = Id.handle();
+				h1.selected = Context.packAssetsOnExport;
+				h2.selected = Context.writeIconOnExport;
+				Context.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));
+				Context.writeIconOnExport = ui.check(h2, tr("Export Icon"));
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.show = false;
+				}
+				if (ui.button(tr("Export"))) {
+					UIBox.show = false;
+					UIFiles.show("arm", true, function(path: String) {
+						var f = UIFiles.filename;
+						if (f == "") f = tr("untitled");
+						iron.App.notifyOnInit(function() {
+							ExportArm.runMaterial(path + Path.sep + f);
+						});
+					});
+				}
+			}
+		});
+	}
+
+	public static function showBrush() {
+		UIBox.showCustom(function(ui: Zui) {
+			var htab = Id.handle();
+			if (ui.tab(htab, tr("Export Brush"))) {
+				var h1 = Id.handle();
+				var h2 = Id.handle();
+				h1.selected = Context.packAssetsOnExport;
+				h2.selected = Context.writeIconOnExport;
+				Context.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));
+				Context.writeIconOnExport = ui.check(h2, tr("Export Icon"));
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.show = false;
+				}
+				if (ui.button(tr("Export"))) {
+					UIBox.show = false;
+					UIFiles.show("arm", true, function(path: String) {
+						var f = UIFiles.filename;
+						if (f == "") f = tr("untitled");
+						iron.App.notifyOnInit(function() {
+							ExportArm.runBrush(path + Path.sep + f);
+						});
 					});
 				}
 			}

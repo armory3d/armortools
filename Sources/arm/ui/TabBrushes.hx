@@ -6,7 +6,6 @@ import zui.Zui;
 import arm.data.BrushSlot;
 import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
-import arm.io.ExportArm;
 import arm.sys.Path;
 import arm.Enums;
 
@@ -88,13 +87,7 @@ class TabBrushes {
 
 							if (ui.button(tr("Export"), Left)) {
 								Context.selectBrush(i);
-								UIFiles.show("arm", true, function(path: String) {
-									var f = UIFiles.filename;
-									if (f == "") f = tr("untitled");
-									iron.App.notifyOnInit(function() {
-										ExportArm.runBrush(path + Path.sep + f);
-									});
-								});
+								BoxExport.showBrush();
 							}
 
 							if (ui.button(tr("Duplicate"), Left)) {

@@ -152,6 +152,7 @@ class ExportArm {
 
 		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
+		if (isCloud) path = path.replace("_cloud_", "");
 		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
 
 		var raw: TProjectFormat = {
@@ -168,14 +169,16 @@ class ExportArm {
 			packed_assets: packed_assets
 		};
 
-		if (isCloud) {
-			path = path.replace("_cloud_", "");
-			// Separate icon files
-			var jpgBytes = getJpgBytes(m.image);
-			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", jpgBytes.getData(), jpgBytes.length);
+		if (Context.writeIconOnExport) { // Separate icon files
 			var pngBytes = getPngBytes(m.image);
 			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", pngBytes.getData(), pngBytes.length);
-			// Pack textures
+			if (isCloud) {
+				var jpgBytes = getJpgBytes(m.image);
+				Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.jpg", jpgBytes.getData(), jpgBytes.length);
+			}
+		}
+
+		if (Context.packAssetsOnExport) { // Pack textures
 			packAssets(raw, assets);
 		}
 
@@ -205,22 +208,28 @@ class ExportArm {
 
 		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
+		if (isCloud) path = path.replace("_cloud_", "");
 		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
 
 		var raw = {
 			version: Main.version,
 			brush_nodes: bnodes,
-			brush_icons: [Lz4.encode(b.image.getPixels())],
+			brush_icons: isCloud ? null :
+			#if (kha_metal || kha_vulkan)
+			[Lz4.encode(bgraSwap(b.image.getPixels()))],
+			#else
+			[Lz4.encode(b.image.getPixels())],
+			#end
 			assets: texture_files,
 			packed_assets: packed_assets
 		};
 
-		if (isCloud) {
-			path = path.replace("_cloud_", "");
-			// Separate icon file
+		if (Context.writeIconOnExport) { // Separate icon file
 			var pngBytes = getPngBytes(b.image);
 			Krom.fileSaveBytes(path.substr(0, path.length - 4) + "_icon.png", pngBytes.getData(), pngBytes.length);
-			// Pack textures
+		}
+
+		if (Context.packAssetsOnExport) { // Pack textures
 			packAssets(raw, assets);
 		}
 
