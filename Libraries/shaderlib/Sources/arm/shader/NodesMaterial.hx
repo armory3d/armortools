@@ -2551,12 +2551,12 @@ class NodesMaterial {
 		}
 	}
 
-	public static function createNode(nodeType: String): TNode {
+	public static function createNode(nodeType: String, group: TNodeGroup = null): TNode {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var canvas = Context.material.canvas;
-					var nodes = Context.material.nodes;
+					var canvas = group != null ? group.canvas : Context.material.canvas;
+					var nodes = group != null ? group.nodes : Context.material.nodes;
 					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

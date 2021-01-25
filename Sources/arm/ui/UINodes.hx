@@ -693,20 +693,23 @@ class UINodes {
 	}
 
 	public function acceptAssetDrag(assetIndex: Int) {
-		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE") : NodesBrush.createNode("TEX_IMAGE");
+		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
+		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = assetIndex;
 		getNodes().nodesSelected = [n];
 	}
 
 	public function acceptLayerDrag(layerIndex: Int) {
 		if (Project.layers[layerIndex].getChildren() != null) return;
-		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER");
+		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
+		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = layerIndex;
 		getNodes().nodesSelected = [n];
 	}
 
 	public function acceptMaterialDrag(layerIndex: Int) {
-		var n = NodesMaterial.createNode("MATERIAL");
+		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
+		var n = NodesMaterial.createNode("MATERIAL", g);
 		n.buttons[0].default_value = layerIndex;
 		getNodes().nodesSelected = [n];
 	}
