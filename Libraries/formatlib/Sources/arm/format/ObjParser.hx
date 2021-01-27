@@ -133,6 +133,8 @@ class ObjParser {
 					}
 				}
 				else { // Convex or concave, ear clipping
+					var vindOff = splitCode == "u".code ? 0 : vindOff;
+					var nindOff = splitCode == "u".code ? 0 : nindOff;
 					var nx = 0.0;
 					var ny = 0.0;
 					var nz = 0.0;
