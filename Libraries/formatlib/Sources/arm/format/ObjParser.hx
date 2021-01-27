@@ -50,6 +50,7 @@ class ObjParser {
 		ua = new kha.arrays.Uint32Array(60);
 		na = new kha.arrays.Uint32Array(60);
 		buf = new haxe.io.UInt8Array(64);
+		if (startPos == 0) vindOff = tindOff = nindOff = 0;
 
 		if (splitCode == "u".code && startPos > 0) {
 			posTemp = posFirst;
@@ -98,37 +99,136 @@ class ObjParser {
 			else if (c0 == "f".code) {
 				pos++; // Space
 				readingFaces = true;
-				vi = 0;
-				ui = 0;
-				ni = 0;
+				vi = ui = ni = 0;
 				fullAttrib ? readFaceFast() : readFace();
 
-				posIndices.push(va[0]);
-				posIndices.push(va[1]);
-				posIndices.push(va[2]);
-				for (i in 3...vi) {
+				if (vi <= 4) { // Convex, fan triangulation
 					posIndices.push(va[0]);
-					posIndices.push(va[i - 1]);
-					posIndices.push(va[i]);
-				}
-				if (uvTemp.length > 0) {
-					uvIndices.push(ua[0]);
-					uvIndices.push(ua[1]);
-					uvIndices.push(ua[2]);
-					for (i in 3...ui) {
+					posIndices.push(va[1]);
+					posIndices.push(va[2]);
+					for (i in 3...vi) {
+						posIndices.push(va[0]);
+						posIndices.push(va[i - 1]);
+						posIndices.push(va[i]);
+					}
+					if (uvTemp.length > 0) {
 						uvIndices.push(ua[0]);
-						uvIndices.push(ua[i - 1]);
-						uvIndices.push(ua[i]);
+						uvIndices.push(ua[1]);
+						uvIndices.push(ua[2]);
+						for (i in 3...ui) {
+							uvIndices.push(ua[0]);
+							uvIndices.push(ua[i - 1]);
+							uvIndices.push(ua[i]);
+						}
+					}
+					if (norTemp.length > 0) {
+						norIndices.push(na[0]);
+						norIndices.push(na[1]);
+						norIndices.push(na[2]);
+						for (i in 3...ni) {
+							norIndices.push(na[0]);
+							norIndices.push(na[i - 1]);
+							norIndices.push(na[i]);
+						}
 					}
 				}
-				if (norTemp.length > 0) {
-					norIndices.push(na[0]);
-					norIndices.push(na[1]);
-					norIndices.push(na[2]);
-					for (i in 3...ni) {
+				else { // Convex or concave, ear clipping
+					var nx = 0.0;
+					var ny = 0.0;
+					var nz = 0.0;
+					if (norTemp.length > 0) {
+						nx = norTemp[(na[0] - nindOff) * 3    ];
+						ny = norTemp[(na[0] - nindOff) * 3 + 1];
+						nz = norTemp[(na[0] - nindOff) * 3 + 2];
+					}
+					else {
+						var n = MeshParser.calcNormal(
+							new iron.math.Vec4(posTemp[(va[0] - vindOff) * 3], posTemp[(va[0] - vindOff) * 3 + 1], posTemp[(va[0] - vindOff) * 3 + 2]),
+							new iron.math.Vec4(posTemp[(va[1] - vindOff) * 3], posTemp[(va[1] - vindOff) * 3 + 1], posTemp[(va[1] - vindOff) * 3 + 2]),
+							new iron.math.Vec4(posTemp[(va[2] - vindOff) * 3], posTemp[(va[2] - vindOff) * 3 + 1], posTemp[(va[2] - vindOff) * 3 + 2])
+						);
+						nx = n.x;
+						ny = n.y;
+						nz = n.z;
+					}
+					var nxabs = Math.abs(nx);
+					var nyabs = Math.abs(ny);
+					var nzabs = Math.abs(nz);
+					var flip = nx + ny + nz > 0;
+					var axis = nxabs > nyabs && nxabs > nzabs ? 0 : nyabs > nxabs && nyabs > nzabs ? 1 : 2;
+					var axis0 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
+					var axis1 = axis == 0 ? (flip ? 1 : 2) : axis == 1 ? (flip ? 2 : 0) : (flip ? 0 : 1);
+
+					var loops = 0;
+					var i = -1;
+					while (vi > 3 && loops++ < vi) {
+						i = (i + 1) % vi;
+						var i1 = (i + 1) % vi;
+						var i2 = (i + 2) % vi;
+						var vi0 = (va[i ] - vindOff) * 3;
+						var vi1 = (va[i1] - vindOff) * 3;
+						var vi2 = (va[i2] - vindOff) * 3;
+						var v0x = posTemp[vi0 + axis0];
+						var v0y = posTemp[vi0 + axis1];
+						var v1x = posTemp[vi1 + axis0];
+						var v1y = posTemp[vi1 + axis1];
+						var v2x = posTemp[vi2 + axis0];
+						var v2y = posTemp[vi2 + axis1];
+
+						var e0x = v0x - v1x; // Not an interior vertex
+						var e0y = v0y - v1y;
+						var e1x = v2x - v1x;
+						var e1y = v2y - v1y;
+						var cross = e0x * e1y - e0y * e1x;
+						if (cross <= 0) continue;
+
+						var overlap = false; // Other vertex found inside this triangle
+						for (j in 0...vi - 3) {
+							var j0 = (va[(i + 3 + j) % vi] - vindOff) * 3;
+							var px = posTemp[j0 + axis0];
+							var py = posTemp[j0 + axis1];
+							if (MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+								overlap = true;
+								break;
+							}
+						}
+						if (overlap) continue;
+
+						posIndices.push(va[i ]); // Found ear
+						posIndices.push(va[i1]);
+						posIndices.push(va[i2]);
+						if (uvTemp.length > 0) {
+							uvIndices.push(ua[i ]);
+							uvIndices.push(ua[i1]);
+							uvIndices.push(ua[i2]);
+						}
+						if (norTemp.length > 0) {
+							norIndices.push(na[i ]);
+							norIndices.push(na[i1]);
+							norIndices.push(na[i2]);
+						}
+
+						for (j in ((i + 1) % vi)...vi - 1) { // Consume vertex
+							va[j] = va[j + 1];
+							ua[j] = ua[j + 1];
+							na[j] = na[j + 1];
+						}
+						vi--;
+						i--;
+						loops = 0;
+					}
+					posIndices.push(va[0]); // Last one
+					posIndices.push(va[1]);
+					posIndices.push(va[2]);
+					if (uvTemp.length > 0) {
+						uvIndices.push(ua[0]);
+						uvIndices.push(ua[1]);
+						uvIndices.push(ua[2]);
+					}
+					if (norTemp.length > 0) {
 						norIndices.push(na[0]);
-						norIndices.push(na[i - 1]);
-						norIndices.push(na[i]);
+						norIndices.push(na[1]);
+						norIndices.push(na[2]);
 					}
 				}
 			}
@@ -149,8 +249,6 @@ class ObjParser {
 			}
 		}
 		else {
-			vindOff = tindOff = nindOff = 0;
-
 			if (splitCode == "u".code) {
 				posFirst = posTemp;
 				norFirst = norTemp;

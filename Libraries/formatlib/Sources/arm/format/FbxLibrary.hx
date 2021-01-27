@@ -785,12 +785,78 @@ class Geometry {
 					}
 					vlen++;
 				}
-				// polygons are actually triangle fans
-				for (n in 0...count - 2) {
-					inda[ilen + 2] = start + n;
-					inda[ilen + 1] = start + count - 1;
-					inda[ilen    ] = start + n + 1;
-					ilen += 3;
+				if (count <= 4) { // Convex, fan triangulation
+					for (n in 0...count - 2) {
+						inda[ilen + 2] = start + n;
+						inda[ilen + 1] = start + count - 1;
+						inda[ilen    ] = start + n + 1;
+						ilen += 3;
+					}
+				}
+				else { // Convex or concave, ear clipping
+					var va: Array<Int> = [];
+					for (i in 0...count) va.push(start + i);
+					var nx = nbuf[start * 3    ];
+					var ny = nbuf[start * 3 + 1];
+					var nz = nbuf[start * 3 + 2];
+					var nxabs = Math.abs(nx);
+					var nyabs = Math.abs(ny);
+					var nzabs = Math.abs(nz);
+					var flip = nx + ny + nz > 0;
+					var axis = nxabs > nyabs && nxabs > nzabs ? 0 : nyabs > nxabs && nyabs > nzabs ? 1 : 2;
+					var axis0 = axis == 0 ? (flip ? 2 : 1) : axis == 1 ? (flip ? 0 : 2) : (flip ? 1 : 0);
+					var axis1 = axis == 0 ? (flip ? 1 : 2) : axis == 1 ? (flip ? 2 : 0) : (flip ? 0 : 1);
+
+					var vi = count;
+					var loops = 0;
+					var i = -1;
+					while (vi > 3 && loops++ < vi) {
+						i = (i + 1) % vi;
+						var i1 = (i + 1) % vi;
+						var i2 = (i + 2) % vi;
+						var vi0 = polys[va[i ]] * 3;
+						var vi1 = polys[va[i1]] * 3;
+						var vi2 = polys[va[i2]] * 3;
+						var v0x = pbuf[vi0 + axis0];
+						var v0y = pbuf[vi0 + axis1];
+						var v1x = pbuf[vi1 + axis0];
+						var v1y = pbuf[vi1 + axis1];
+						var v2x = pbuf[vi2 + axis0];
+						var v2y = pbuf[vi2 + axis1];
+
+						var e0x = v0x - v1x; // Not an interior vertex
+						var e0y = v0y - v1y;
+						var e1x = v2x - v1x;
+						var e1y = v2y - v1y;
+						var cross = e0x * e1y - e0y * e1x;
+						if (cross <= 0) continue;
+
+						var overlap = false; // Other vertex found inside this triangle
+						for (j in 0...vi - 3) {
+							var j0 = polys[va[(i + 3 + j) % vi]] * 3;
+							var px = pbuf[j0 + axis0];
+							var py = pbuf[j0 + axis1];
+							if (MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+								overlap = true;
+								break;
+							}
+						}
+						if (overlap) continue;
+
+						inda[ilen++] = va[i ]; // Found ear
+						inda[ilen++] = va[i1];
+						inda[ilen++] = va[i2];
+
+						for (j in ((i + 1) % vi)...vi - 1) { // Consume vertex
+							va[j] = va[j + 1];
+						}
+						vi--;
+						i--;
+						loops = 0;
+					}
+					inda[ilen++] = va[0]; // Last one
+					inda[ilen++] = va[1];
+					inda[ilen++] = va[2];
 				}
 				polys[pos] = i; // restore
 				count = 0;
