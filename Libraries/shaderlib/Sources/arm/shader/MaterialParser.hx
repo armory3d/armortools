@@ -773,6 +773,7 @@ class MaterialParser {
 			var _links = links;
 			nodes = m.canvas.nodes;
 			links = m.canvas.links;
+			parents.push(node);
 			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
 			if (socket == node.outputs[0]) { // Base
 				result = parse_vector_input(output_node.inputs[0]);
@@ -782,6 +783,7 @@ class MaterialParser {
 			}
 			nodes = _nodes;
 			links = _links;
+			parents.pop();
 			return result;
 		}
 		else if (node.type == "NEW_GEOMETRY") {
@@ -1105,6 +1107,7 @@ class MaterialParser {
 			var _links = links;
 			nodes = m.canvas.nodes;
 			links = m.canvas.links;
+			parents.push(node);
 			var output_node = node_by_type(nodes, "OUTPUT_MATERIAL_PBR");
 			if (socket == node.outputs[1]) { // Opac
 				result = parse_value_input(output_node.inputs[1]);
@@ -1123,6 +1126,7 @@ class MaterialParser {
 			}
 			nodes = _nodes;
 			links = _links;
+			parents.pop();
 			return result;
 		}
 		else if (node.type == "FRESNEL") {
