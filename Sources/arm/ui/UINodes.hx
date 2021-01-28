@@ -281,8 +281,7 @@ class UINodes {
 		}
 		mstartedlast = mouse.started();
 
-		if (!show) return;
-		if (!App.uiEnabled) return;
+		if (!show || !App.uiEnabled) return;
 		var kb = Input.getKeyboard();
 
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
@@ -461,8 +460,7 @@ class UINodes {
 			Context.nodePreviewSocket = 0;
 		}
 
-		if (!show) return;
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
@@ -498,7 +496,9 @@ class UINodes {
 
 			// Nodes
 			var c = getCanvas(true);
+			ui.inputEnabled = !drawMenu;
 			nodes.nodeCanvas(ui, c);
+			ui.inputEnabled = true;
 
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
@@ -642,15 +642,13 @@ class UINodes {
 			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == tr("Group");
 			if (isGroupCategory) numNodes += Project.materialGroups.length;
 
-			var ph = numNodes * ui.t.ELEMENT_H * ui.SCALE();
 			var py = popupY;
-			g.color = ui.t.WINDOW_BG_COL;
 			var menuw = Std.int(ew * 2.0);
-			g.fillRect(popupX, py, menuw, ph);
-
 			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
 			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+			var _BUTTON_H = ui.t.BUTTON_H;
+			ui.t.BUTTON_H = ui.t.ELEMENT_H;
 			var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 
@@ -663,6 +661,7 @@ class UINodes {
 					nodes.nodesSelected = [node];
 					nodes.nodesDrag = true;
 				}
+				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) { ui._x += menuw; ui._y = py; }
 			}
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
@@ -678,6 +677,7 @@ class UINodes {
 			}
 
 			ui.t.BUTTON_COL = _BUTTON_COL;
+			ui.t.BUTTON_H = _BUTTON_H;
 			ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 			ui.endRegion();
 		}
