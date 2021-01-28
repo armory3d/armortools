@@ -39,11 +39,11 @@ class UIMenu {
 	public static function render(g: kha.graphics2.Graphics) {
 		var ui = App.uiMenu;
 		var menuW = Std.int(ui.ELEMENT_W() * 2.0);
-		var BUTTON_COL = ui.t.BUTTON_COL;
+		var _BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-		var ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
+		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
-		var ELEMENT_H = ui.t.ELEMENT_H;
+		var _ELEMENT_H = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = 28;
 
 		ui.beginRegion(g, menuX, menuY, menuW);
@@ -381,9 +381,9 @@ class UIMenu {
 		keepOpen = false;
 		if (ui.inputReleased) changeStarted = false;
 
-		ui.t.BUTTON_COL = BUTTON_COL;
-		ui.t.ELEMENT_OFFSET = ELEMENT_OFFSET;
-		ui.t.ELEMENT_H = ELEMENT_H;
+		ui.t.BUTTON_COL = _BUTTON_COL;
+		ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
+		ui.t.ELEMENT_H = _ELEMENT_H;
 		ui.endRegion();
 	}
 
