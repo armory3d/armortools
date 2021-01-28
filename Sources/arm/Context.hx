@@ -213,6 +213,7 @@ class Context {
 	public static var bakeType = BakeAO;
 	public static var bakeAxis = BakeXYZ;
 	public static var bakeUpAxis = BakeUpZ;
+	public static var bakeSamples = 128;
 	public static var bakeAoStrength = 1.0;
 	public static var bakeAoRadius = 1.0;
 	public static var bakeAoOffset = 1.0;

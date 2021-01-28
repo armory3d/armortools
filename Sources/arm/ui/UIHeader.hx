@@ -78,6 +78,26 @@ class UIHeader {
 			}
 			else if (Context.tool == ToolBake) {
 				ui.changed = false;
+
+				var rtBake = Context.bakeType == BakeAO || Context.bakeType == BakeLightmap || Context.bakeType == BakeBentNormal || Context.bakeType == BakeThickness;
+				var baking = false;
+
+				#if (kha_direct3d12 || kha_vulkan)
+				baking = Context.pdirty > 0;
+				if (baking && ui.button(tr("Stop"))) {
+					Context.pdirty = 0;
+					Context.rdirty = 2;
+				}
+				#end
+
+				if (!baking && ui.button(tr("Bake"))) {
+					Context.pdirty = rtBake ? Context.bakeSamples : 1;
+					Context.rdirty = 3;
+					Context.layerPreviewDirty = true;
+					UISidebar.inst.hwnd0.redraws = 2;
+					History.pushUndo = true;
+				}
+
 				var bakeHandle = Id.handle({position: Context.bakeType});
 				var bakes = [
 					tr("AO"),
@@ -98,6 +118,14 @@ class UIHeader {
 				bakes.push(tr("Thickness"));
 				#end
 				Context.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
+
+				#if (kha_direct3d12 || kha_vulkan)
+				if (rtBake) {
+					var samplesHandle = Id.handle({value: Context.bakeSamples});
+					Context.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
+				}
+				#end
+
 				if (Context.bakeType == BakeNormalObject || Context.bakeType == BakePosition || Context.bakeType == BakeBentNormal) {
 					var bakeUpAxisHandle = Id.handle({position: Context.bakeUpAxis});
 					Context.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
@@ -115,7 +143,7 @@ class UIHeader {
 					Context.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 				}
 				#if (kha_direct3d12 || kha_vulkan)
-				if (Context.bakeType == BakeAO || Context.bakeType == BakeLightmap || Context.bakeType == BakeBentNormal || Context.bakeType == BakeThickness) {
+				if (rtBake) {
 					ui.text(tr("Rays/pix:") + ' ${arm.render.RenderPathRaytrace.raysPix}');
 					ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytrace.raysSec}');
 				}

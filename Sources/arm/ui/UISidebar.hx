@@ -560,6 +560,7 @@ class UISidebar {
 						}
 
 						History.pushUndo = true;
+
 						if (Context.tool == ToolClone && Context.cloneStartX >= 0.0) { // Clone delta
 							Context.cloneDeltaX = (Context.cloneStartX - mx) / ww;
 							Context.cloneDeltaY = (Context.cloneStartY - my) / iron.App.h();
