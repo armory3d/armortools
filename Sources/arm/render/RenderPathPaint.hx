@@ -677,6 +677,9 @@ class RenderPathPaint {
 						 Context.bakeType == BakeBentNormal ||
 						 Context.bakeType == BakeThickness) {
 					RenderPathRaytrace.commandsBake();
+					if (Config.raw.dilate == DilateInstant) { // && Context.pdirty == 1
+						dilate(true, false);
+					}
 				}
 				#end
 				else {
