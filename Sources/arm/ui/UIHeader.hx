@@ -65,11 +65,26 @@ class UIHeader {
 				#if kha_metal
 				ui.text('TODO'); // Skips first draw
 				#end
-				ui.text(tr("Base") + ' $baseRPicked,$baseGPicked,$baseBPicked');
-				ui.text(tr("Nor") + ' $normalRPicked,$normalGPicked,$normalBPicked');
-				ui.text(tr("Occlusion") + ' $occlusionPicked');
-				ui.text(tr("Roughness") + ' $roughnessPicked');
-				ui.text(tr("Metallic") + ' $metallicPicked');
+				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
+
+				var h = Id.handle();
+				h.color.R = baseRPicked;
+				h.color.G = baseGPicked;
+				h.color.B = baseBPicked;
+				ui.text("", 0, h.color);
+				if (ui.isHovered && ui.inputReleased) {
+					UIMenu.draw(function(ui) {
+						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
+						ui.changed = false;
+						zui.Ext.colorWheel(ui, h, false, null, false);
+						if (ui.changed) UIMenu.keepOpen = true;
+					}, 3);
+				}
+
+				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');
+				ui.text(tr("Occlusion") + ' ($occlusionPicked)');
+				ui.text(tr("Roughness") + ' ($roughnessPicked)');
+				ui.text(tr("Metallic") + ' ($metallicPicked)');
 				Context.pickerSelectMaterial = ui.check(Id.handle({selected: Context.pickerSelectMaterial}), tr("Select Material"));
 				ui.combo(Context.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
 				if (Context.pickerMaskHandle.changed) {
