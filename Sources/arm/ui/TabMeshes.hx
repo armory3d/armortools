@@ -60,6 +60,14 @@ class TabMeshes {
 				var h = Id.handle();
 				h.selected = o.visible;
 				o.visible = ui.check(h, o.name);
+				if (ui.isHovered && ui.inputReleasedR) {
+					UIMenu.draw(function(ui: Zui) {
+						ui.text(o.name, Right, ui.t.HIGHLIGHT_COL);
+						if (ui.button(tr("Export"), Left)) {
+							BoxExport.showMesh();
+						}
+					}, 2);
+				}
 				if (h.changed) {
 					var visibles: Array<MeshObject> = [];
 					for (p in Project.paintObjects) if (p.visible) visibles.push(p);

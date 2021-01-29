@@ -89,6 +89,12 @@ class UISidebar {
 			Context.layer = Project.layers[0];
 		}
 
+		if (Project.raw.swatches == null) {
+			Project.raw.swatches = [];
+			Project.raw.swatches.push(Project.makeSwatch());
+			Context.swatch = Project.raw.swatches[0];
+		}
+
 		if (Context.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 3);
@@ -682,6 +688,7 @@ class UISidebar {
 			TabTextures.draw();
 			TabMeshes.draw();
 			TabFonts.draw();
+			TabSwatches.draw();
 		}
 
 		ui.end();

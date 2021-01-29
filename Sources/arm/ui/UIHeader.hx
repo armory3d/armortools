@@ -44,24 +44,15 @@ class UIHeader {
 				if (Project.assets.length > 0) ui.image(Project.getImage(Project.assets[cid]));
 			}
 			else if (Context.tool == ToolPicker) {
-				Context.baseRPicked = Math.round(Context.baseRPicked * 10) / 10;
-				Context.baseGPicked = Math.round(Context.baseGPicked * 10) / 10;
-				Context.baseBPicked = Math.round(Context.baseBPicked * 10) / 10;
-				Context.normalRPicked = Math.round(Context.normalRPicked * 10) / 10;
-				Context.normalGPicked = Math.round(Context.normalGPicked * 10) / 10;
-				Context.normalBPicked = Math.round(Context.normalBPicked * 10) / 10;
-				Context.occlusionPicked = Math.round(Context.occlusionPicked * 100) / 100;
-				Context.roughnessPicked = Math.round(Context.roughnessPicked * 100) / 100;
-				Context.metallicPicked = Math.round(Context.metallicPicked * 100) / 100;
-				var baseRPicked = Context.baseRPicked;
-				var baseGPicked = Context.baseGPicked;
-				var baseBPicked = Context.baseBPicked;
-				var normalRPicked = Context.normalRPicked;
-				var normalGPicked = Context.normalGPicked;
-				var normalBPicked = Context.normalBPicked;
-				var occlusionPicked = Context.occlusionPicked;
-				var roughnessPicked = Context.roughnessPicked;
-				var metallicPicked = Context.metallicPicked;
+				var baseRPicked = Math.round(Context.swatch.base.R * 10) / 10;
+				var baseGPicked = Math.round(Context.swatch.base.G * 10) / 10;
+				var baseBPicked = Math.round(Context.swatch.base.B * 10) / 10;
+				var normalRPicked = Math.round(Context.swatch.normal.R * 10) / 10;
+				var normalGPicked = Math.round(Context.swatch.normal.G * 10) / 10;
+				var normalBPicked = Math.round(Context.swatch.normal.B * 10) / 10;
+				var occlusionPicked = Math.round(Context.swatch.occlusion * 100) / 100;
+				var roughnessPicked = Math.round(Context.swatch.roughness * 100) / 100;
+				var metallicPicked = Math.round(Context.swatch.metallic * 100) / 100;
 				#if kha_metal
 				ui.text('TODO'); // Skips first draw
 				#end

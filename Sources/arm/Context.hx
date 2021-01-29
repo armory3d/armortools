@@ -61,17 +61,8 @@ class Context {
 	public static var viewIndexLast = -1;
 	public static var materialPreview = false; // Drawing material previews
 	public static var savedCamera = Mat4.identity();
-	public static var baseRPicked = 0.0;
-	public static var baseGPicked = 0.0;
-	public static var baseBPicked = 0.0;
-	public static var normalRPicked = 0.0;
-	public static var normalGPicked = 0.0;
-	public static var normalBPicked = 0.0;
-	public static var opacityPicked = 0.0;
-	public static var roughnessPicked = 0.0;
-	public static var metallicPicked = 0.0;
-	public static var occlusionPicked = 0.0;
-	public static var heightPicked = 0.0;
+
+	public static var swatch: TSwatch;
 	public static var materialIdPicked = 0;
 	public static var uvxPicked = 0.0;
 	public static var uvyPicked = 0.0;
@@ -316,6 +307,15 @@ class Context {
 		RenderUtil.makeDecalPreview();
 		UISidebar.inst.hwnd2.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
+	}
+
+	public static function setSwatch(s: TSwatch) {
+		swatch = s;
+		App.notifyOnNextFrame(function() {
+			MakeMaterial.parsePaintMaterial();
+			RenderUtil.makeMaterialPreview();
+			UISidebar.inst.hwnd1.redraws = 2;
+		});
 	}
 
 	public static function setLayer(l: LayerSlot, isMask = false) {

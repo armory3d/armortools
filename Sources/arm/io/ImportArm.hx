@@ -75,6 +75,10 @@ class ImportArm {
 				else if (project.brush_nodes != null) {
 					runBrushFromProject(project, path);
 				}
+				// Import as swatches
+				else if (project.swatches != null) {
+					runSwatchesFromProject(project, path);
+				}
 				return;
 			}
 
@@ -462,6 +466,14 @@ class ImportArm {
 		iron.App.notifyOnInit(_init);
 
 		UISidebar.inst.hwnd1.redraws = 2;
+		Data.deleteBlob(path);
+	}
+
+	public static function runSwatchesFromProject(project: TProjectFormat, path: String) {
+		for (s in project.swatches) {
+			Project.raw.swatches.push(s);
+		}
+		UISidebar.inst.hwnd2.redraws = 2;
 		Data.deleteBlob(path);
 	}
 

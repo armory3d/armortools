@@ -54,7 +54,7 @@ class UIMenu {
 		}
 		else {
 			var menuItems = [
-				16, // MenuFile
+				18, // MenuFile
 				4, // MenuEdit
 				#if (krom_windows || krom_linux) 14 #else 13 #end, // MenuViewport
 				#if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, // MenuMode
@@ -76,6 +76,7 @@ class UIMenu {
 				if (ui.button("      " + tr("Import Font..."), Left)) Project.importAsset("ttf,ttc,otf");
 				if (ui.button("      " + tr("Import Material..."), Left)) Project.importMaterial();
 				if (ui.button("      " + tr("Import Brush..."), Left)) Project.importBrush();
+				if (ui.button("      " + tr("Import Swatches..."), Left)) Project.importAsset("arm");
 				if (ui.button("      " + tr("Import Mesh..."), Left)) Project.importMesh();
 				if (ui.button("      " + tr("Reimport Mesh"), Left, Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (ui.button("      " + tr("Reimport Textures"), Left, Config.keymap.file_reimport_textures)) Project.reimportTextures();
@@ -84,6 +85,7 @@ class UIMenu {
 					Context.layersExport = ExportVisible;
 					BoxExport.showTextures();
 				}
+				if (ui.button("      " + tr("Export Swatches..."), Left)) Project.exportSwatches();
 				if (ui.button("      " + tr("Export Mesh..."), Left)) BoxExport.showMesh();
 				if (ui.button("      " + tr("Bake Material..."), Left)) BoxExport.showBakeMaterial();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);

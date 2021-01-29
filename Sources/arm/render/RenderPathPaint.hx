@@ -9,6 +9,7 @@ import iron.Scene;
 import arm.util.ViewportUtil;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
+import arm.ui.UISidebar;
 import arm.node.MakeMaterial;
 import arm.Enums;
 
@@ -177,6 +178,7 @@ class RenderPathPaint {
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 					path.drawMeshes("paint");
 					UIHeader.inst.headerHandle.redraws = 2;
+					UISidebar.inst.hwnd2.redraws = 2;
 
 					var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
@@ -186,17 +188,17 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 
 					// Picked surface values
-					Context.baseRPicked = a.get(0) / 255;
-					Context.baseGPicked = a.get(1) / 255;
-					Context.baseBPicked = a.get(2) / 255;
+					Context.swatch.base.Rb = a.get(0);
+					Context.swatch.base.Gb = a.get(1);
+					Context.swatch.base.Bb = a.get(2);
 					Context.uvxPicked = a.get(3) / 255;
-					Context.normalRPicked = b.get(0) / 255;
-					Context.normalGPicked = b.get(1) / 255;
-					Context.normalBPicked = b.get(2) / 255;
+					Context.swatch.normal.Rb = b.get(0);
+					Context.swatch.normal.Gb = b.get(1);
+					Context.swatch.normal.Bb = b.get(2);
 					Context.uvyPicked = c.get(3) / 255;
-					Context.occlusionPicked = c.get(0) / 255;
-					Context.roughnessPicked = c.get(1) / 255;
-					Context.metallicPicked = c.get(2) / 255;
+					Context.swatch.occlusion = c.get(0) / 255;
+					Context.swatch.roughness = c.get(1) / 255;
+					Context.swatch.metallic = c.get(2) / 255;
 					// Pick material
 					if (Context.pickerSelectMaterial) {
 						var matid = b.get(3);

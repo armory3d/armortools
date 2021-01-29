@@ -102,6 +102,7 @@ class ExportArm {
 			mesh_assets: mesh_files,
 			atlas_objects: Project.atlasObjects,
 			atlas_names: Project.atlasNames,
+			swatches: Project.raw.swatches,
 			packed_assets: packed_assets,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
@@ -346,5 +347,15 @@ class ExportArm {
 		App.notifyOnNextFrame(function() {
 			for (image in tempImages) image.unload();
 		});
+	}
+
+	public static function runSwatches(path: String) {
+		if (!path.endsWith(".arm")) path += ".arm";
+		var raw = {
+			version: Main.version,
+			swatches: Project.raw.swatches
+		};
+		var bytes = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 }

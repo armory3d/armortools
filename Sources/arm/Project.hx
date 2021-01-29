@@ -253,6 +253,8 @@ class Project {
 			var fontNames = App.font.getFontNames();
 			fonts = [new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font)];
 			Context.font = fonts[0];
+			Project.raw.swatches = [makeSwatch()];
+			Context.swatch = Project.raw.swatches[0];
 
 			History.reset();
 
@@ -462,6 +464,16 @@ class Project {
 	public static function packedAssetExists(packed_assets: Array<TPackedAsset>, name: String): Bool {
 		for (pa in packed_assets) if (pa.name == name) return true;
 		return false;
+	}
+
+	public static function exportSwatches() {
+		UIFiles.show("arm", true, function(path: String) {
+			ExportArm.runSwatches(path);
+		});
+	}
+
+	public static function makeSwatch(): TSwatch {
+		return { base: 0xffffffff, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
 	}
 }
 
