@@ -30,9 +30,10 @@ class TabSwatches {
 				UIMenu.draw(function(ui: Zui) {
 					ui.text(tr("Tools"), Right, ui.t.HIGHLIGHT_COL);
 					if (ui.button(tr("Clear"), Left)) {
-						Project.raw.swatches = [Project.makeSwatch()];
+						Context.setSwatch(Project.makeSwatch());
+						Project.raw.swatches = [Context.swatch];
 					}
-				}, 3);
+				}, 2);
 			}
 
 			ui.endSticky();
