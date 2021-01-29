@@ -65,7 +65,6 @@ class UIHeader {
 				#if kha_metal
 				ui.text('TODO'); // Skips first draw
 				#end
-				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 
 				var h = Id.handle();
 				h.color.R = baseRPicked;
@@ -81,6 +80,7 @@ class UIHeader {
 					}, 3);
 				}
 
+				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');
 				ui.text(tr("Occlusion") + ' ($occlusionPicked)');
 				ui.text(tr("Roughness") + ' ($roughnessPicked)');
