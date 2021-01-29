@@ -67,9 +67,11 @@ class Context {
 	public static var normalRPicked = 0.0;
 	public static var normalGPicked = 0.0;
 	public static var normalBPicked = 0.0;
+	public static var opacityPicked = 0.0;
 	public static var roughnessPicked = 0.0;
 	public static var metallicPicked = 0.0;
 	public static var occlusionPicked = 0.0;
+	public static var heightPicked = 0.0;
 	public static var materialIdPicked = 0;
 	public static var uvxPicked = 0.0;
 	public static var uvyPicked = 0.0;

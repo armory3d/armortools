@@ -100,6 +100,21 @@ class Uniforms {
 			case "_decalLayerDim": {
 				return Context.layer.decalMat.getScale().z * 0.5;
 			}
+			case "_pickerOpacity": {
+				return Context.opacityPicked;
+			}
+			case "_pickerOcclusion": {
+				return Context.occlusionPicked;
+			}
+			case "_pickerRoughness": {
+				return Context.roughnessPicked;
+			}
+			case "_pickerMetallic": {
+				return Context.metallicPicked;
+			}
+			case "_pickerHeight": {
+				return Context.heightPicked;
+			}
 		}
 		if (MaterialParser.script_links != null) {
 			for (key in MaterialParser.script_links.keys()) {
@@ -179,6 +194,16 @@ class Uniforms {
 			case "_decalLayerNor": {
 				v = iron.object.Uniforms.helpVec;
 				v.set(Context.layer.decalMat._20, Context.layer.decalMat._21, Context.layer.decalMat._22).normalize();
+				return v;
+			}
+			case "_pickerBase": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.baseRPicked, Context.baseGPicked, Context.baseBPicked);
+				return v;
+			}
+			case "_pickerNormal": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.normalRPicked, Context.normalGPicked, Context.normalBPicked);
 				return v;
 			}
 		}

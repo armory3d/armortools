@@ -786,6 +786,16 @@ class MaterialParser {
 			parents.pop();
 			return result;
 		}
+		else if (node.type == "PICKER") {
+			if (socket == node.outputs[0]) { // Base
+				curshader.add_uniform("vec3 pickerBase", "_pickerBase");
+				return "pickerBase";
+			}
+			else if (socket == node.outputs[5]) { // Normal
+				curshader.add_uniform("vec3 pickerNormal", "_pickerNormal");
+				return "pickerNormal";
+			}
+		}
 		else if (node.type == "NEW_GEOMETRY") {
 			if (socket == node.outputs[0]) { // Position
 				curshader.wposition = true;
@@ -1128,6 +1138,28 @@ class MaterialParser {
 			links = _links;
 			parents.pop();
 			return result;
+		}
+		else if (node.type == "PICKER") {
+			if (socket == node.outputs[1]) {
+				curshader.add_uniform("float pickerOpacity", "_pickerOpacity");
+				return "pickerOpacity";
+			}
+			else if (socket == node.outputs[2]) {
+				curshader.add_uniform("float pickerOcclusion", "_pickerOcclusion");
+				return "pickerOcclusion";
+			}
+			else if (socket == node.outputs[3]) {
+				curshader.add_uniform("float pickerRoughness", "_pickerRoughness");
+				return "pickerRoughness";
+			}
+			else if (socket == node.outputs[4]) {
+				curshader.add_uniform("float pickerMetallic", "_pickerMetallic");
+				return "pickerMetallic";
+			}
+			else if (socket == node.outputs[7]) {
+				curshader.add_uniform("float pickerHeight", "_pickerHeight");
+				return "pickerHeight";
+			}
 		}
 		else if (node.type == "FRESNEL") {
 			var ior = parse_value_input(node.inputs[0]);
