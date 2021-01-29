@@ -255,6 +255,7 @@ class ImportArm {
 					l.paintRough = ld.paint_rough;
 					l.paintMet = ld.paint_met;
 					l.paintNor = ld.paint_nor;
+					l.paintNorBlend = ld.paint_nor_blend != null ? ld.paint_nor_blend : true; // TODO: deprecated
 					l.paintHeight = ld.paint_height;
 					l.paintEmis = ld.paint_emis;
 					l.paintSubs = ld.paint_subs;

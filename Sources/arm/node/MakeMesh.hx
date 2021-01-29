@@ -209,7 +209,17 @@ class MakeMesh {
 					}
 
 					if (l.paintNor) {
-						frag.write('ntex = mix(ntex, texpaint_nor_sample.rgb, texpaint_opac);');
+						if (l.paintNorBlend) {
+							// Whiteout blend
+							frag.write('{');
+							frag.write('vec3 n1 = ntex * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
+							frag.write('vec3 n2 = mix(vec3(0.5, 0.5, 1.0), texpaint_nor_sample.rgb, texpaint_opac) * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
+							frag.write('ntex = normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
+							frag.write('}');
+						}
+						else {
+							frag.write('ntex = mix(ntex, texpaint_nor_sample.rgb, texpaint_opac);');
+						}
 					}
 				}
 

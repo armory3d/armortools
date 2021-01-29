@@ -41,6 +41,7 @@ class LayerSlot {
 	public var paintRough = true;
 	public var paintMet = true;
 	public var paintNor = true;
+	public var paintNorBlend = true;
 	public var paintHeight = true;
 	public var paintEmis = true;
 	public var paintSubs = true;

@@ -367,7 +367,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 6 : (19 + add);
+					var menuElements = l.getChildren() != null ? 6 : (20 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -458,14 +458,19 @@ class TabLayers {
 								}
 								children[0].parent = null;
 								children[0].name = l.name;
+								if (children[0].fill_layer != null) children[0].toPaintLayer();
 								l.delete();
 							}
 							iron.App.notifyOnInit(_init);
 						}
 						if (l.getChildren() == null && ui.button(tr("Merge Down"), Left)) {
-							Context.setLayer(l);
-							iron.App.notifyOnInit(History.mergeLayers);
-							iron.App.notifyOnInit(Layers.mergeDown);
+							function _init() {
+								Context.setLayer(l);
+								History.mergeLayers();
+								Layers.mergeDown();
+								if (Context.layer.fill_layer != null) Context.layer.toPaintLayer();
+							}
+							iron.App.notifyOnInit(_init);
 						}
 						if (ui.button(tr("Duplicate"), Left)) {
 							function _init() {
@@ -514,6 +519,7 @@ class TabLayers {
 							var baseHandle = Id.handle().nest(l.id);
 							var opacHandle = Id.handle().nest(l.id);
 							var norHandle = Id.handle().nest(l.id);
+							var norBlendHandle = Id.handle().nest(l.id);
 							var occHandle = Id.handle().nest(l.id);
 							var roughHandle = Id.handle().nest(l.id);
 							var metHandle = Id.handle().nest(l.id);
@@ -523,6 +529,7 @@ class TabLayers {
 							baseHandle.selected = l.paintBase;
 							opacHandle.selected = l.paintOpac;
 							norHandle.selected = l.paintNor;
+							norBlendHandle.selected = l.paintNorBlend;
 							occHandle.selected = l.paintOcc;
 							roughHandle.selected = l.paintRough;
 							metHandle.selected = l.paintMet;
@@ -532,6 +539,7 @@ class TabLayers {
 							l.paintBase = ui.check(baseHandle, tr("Base Color"));
 							l.paintOpac = ui.check(opacHandle, tr("Opacity"));
 							l.paintNor = ui.check(norHandle, tr("Normal"));
+							l.paintNorBlend = ui.check(norBlendHandle, tr("Normal Blending"));
 							l.paintOcc = ui.check(occHandle, tr("Occlusion"));
 							l.paintRough = ui.check(roughHandle, tr("Roughness"));
 							l.paintMet = ui.check(metHandle, tr("Metallic"));
@@ -541,6 +549,7 @@ class TabLayers {
 							if (baseHandle.changed ||
 								opacHandle.changed ||
 								norHandle.changed ||
+								norBlendHandle.changed ||
 								occHandle.changed ||
 								roughHandle.changed ||
 								metHandle.changed ||

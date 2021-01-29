@@ -208,7 +208,7 @@ class ExportTexture {
 				Layers.expb.g4.setTexture(Layers.texmask, hasMask ? l1.texpaint_mask : empty);
 				Layers.expb.g4.setTexture(Layers.texa, Layers.imga);
 				Layers.expb.g4.setFloat(Layers.opac, l1.maskOpacity);
-				Layers.expb.g4.setInt(Layers.blending, -1);
+				Layers.expb.g4.setInt(Layers.blending, l1.paintNorBlend ? -2 : -1);
 				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				Layers.expb.g4.drawIndexedVertices();

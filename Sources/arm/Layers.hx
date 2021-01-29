@@ -402,7 +402,7 @@ class Layers {
 			l0.texpaint_nor.g4.setTexture(texmask, mask);
 			l0.texpaint_nor.g4.setTexture(texa, imga);
 			l0.texpaint_nor.g4.setFloat(opac, l1.maskOpacity);
-			l0.texpaint_nor.g4.setInt(blending, -1);
+			l0.texpaint_nor.g4.setInt(blending, l1.paintNorBlend ? -2 : -1);
 			l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 			l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 			l0.texpaint_nor.g4.drawIndexedVertices();
