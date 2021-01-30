@@ -90,8 +90,7 @@ class UISidebar {
 		}
 
 		if (Project.raw.swatches == null) {
-			Project.raw.swatches = [];
-			Project.raw.swatches.push(Project.makeSwatch());
+			Project.setDefaultSwatches();
 			Context.swatch = Project.raw.swatches[0];
 		}
 

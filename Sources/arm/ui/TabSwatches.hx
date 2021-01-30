@@ -33,7 +33,11 @@ class TabSwatches {
 						Context.setSwatch(Project.makeSwatch());
 						Project.raw.swatches = [Context.swatch];
 					}
-				}, 2);
+					if (ui.button(tr("Restore"), Left)) {
+						Project.setDefaultSwatches();
+						Context.setSwatch(Project.raw.swatches[0]);
+					}
+				}, 3);
 			}
 
 			ui.endSticky();
