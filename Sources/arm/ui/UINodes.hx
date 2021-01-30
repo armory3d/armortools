@@ -692,25 +692,33 @@ class UINodes {
 		}
 	}
 
-	public function acceptAssetDrag(assetIndex: Int) {
+	public function acceptAssetDrag(index: Int) {
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
-		n.buttons[0].default_value = assetIndex;
+		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptLayerDrag(layerIndex: Int) {
-		if (Project.layers[layerIndex].getChildren() != null) return;
+	public function acceptLayerDrag(index: Int) {
+		if (Project.layers[index].getChildren() != null) return;
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER", g);
-		n.buttons[0].default_value = layerIndex;
+		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptMaterialDrag(layerIndex: Int) {
+	public function acceptMaterialDrag(index: Int) {
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("MATERIAL", g);
-		n.buttons[0].default_value = layerIndex;
+		n.buttons[0].default_value = index;
+		getNodes().nodesSelected = [n];
+	}
+
+	public function acceptSwatchDrag(index: Int) {
+		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
+		var n = NodesMaterial.createNode("RGB", g);
+		var color = Project.raw.swatches[index].base;
+		n.outputs[0].default_value = [color.R, color.G, color.B, color.A];
 		getNodes().nodesSelected = [n];
 	}
 

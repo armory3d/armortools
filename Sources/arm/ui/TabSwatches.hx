@@ -10,7 +10,7 @@ import arm.Enums;
 
 class TabSwatches {
 
-	static var empty: kha.Image = null;
+	public static var empty: kha.Image = null;
 
 	@:access(zui.Zui)
 	public static function draw() {
@@ -71,10 +71,18 @@ class TabSwatches {
 						b.set(3, 255);
 						empty = kha.Image.fromBytes(b, 1, 1);
 					}
+
+					var uix = ui._x;
+					var uiy = ui._y;
 					var state = ui.image(empty, Project.raw.swatches[i].base, slotw);
 
 					if (state == State.Started) {
 						Context.setSwatch(Project.raw.swatches[i]);
+
+						var mouse = Input.getMouse();
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						App.dragSwatch = Context.swatch;
 					}
 					else if (state == State.Released) {
 						if (Time.time() - Context.selectTime < 0.25) {
