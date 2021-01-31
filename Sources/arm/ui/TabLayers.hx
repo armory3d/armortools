@@ -110,13 +110,19 @@ class TabLayers {
 				var my = mouse.y;
 				var inLayers = mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
 				if (App.isDragging && App.dragLayer != null && inLayers) {
-					if (my > ui._y - step && my < ui._y + step) {
-						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
-						Context.dragDestination = Project.layers.indexOf(App.dragLayer) < i ? i : i + 1;
+					if (my > ui._y + step && my < ui._y + step * 3) {
+						var down = Project.layers.indexOf(App.dragLayer) >= i;
+						Context.dragDestination = down ? i : i - 1;
+
+						var ls = Project.layers;
+						var dest = Context.dragDestination;
+						var toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
+						var nestedGroup = App.dragLayer.getChildren() != null && toGroup;
+						if (!nestedGroup) ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
-					else if (i == 0 && my > ui._y + step) {
-						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
-						Context.dragDestination = 0;
+					else if (i == Project.layers.length - 1 && my < ui._y + step) {
+						Context.dragDestination = Project.layers.length - 1;
+						ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
 				}
 

@@ -467,7 +467,7 @@ class LayerSlot {
 	public function move(to: Int) {
 		var i = Project.layers.indexOf(this);
 		var delta = to - i;
-		if (i + delta < 0 || i + delta > Project.layers.length - 1) return;
+		if (i + delta < 0 || i + delta > Project.layers.length - 1 || delta == 0) return;
 
 		var pointers = TabLayers.initLayerMap();
 		var isGroup = this.getChildren() != null;
@@ -479,8 +479,12 @@ class LayerSlot {
 		var kLayer = k < Project.layers.length ? Project.layers[k] : null;
 
 		// Prevent group nesting for now
-		if (isGroup && jParent != null) {
+		if (isGroup && jParent != null && jParent.show_panel) {
 			return;
+		}
+
+		if (kGroup && !kLayer.show_panel) {
+			delta -= Project.layers[k].getChildren().length;
 		}
 
 		Context.setLayer(this);
@@ -500,7 +504,7 @@ class LayerSlot {
 		}
 		else {
 			// Moved to group
-			if (this.parent == null && jParent != null) {
+			if (this.parent == null && jParent != null && jParent.show_panel) {
 				this.parent = jParent;
 			}
 			// Moved out of group
@@ -513,8 +517,13 @@ class LayerSlot {
 				}
 			}
 			// Moved to different group
-			if (this.parent != null && (kParent != null || kGroup)) {
+			if (this.parent != null && ((kParent != null && kParent.show_panel) || kGroup)) {
+				var parent = this.parent;
 				this.parent = kGroup ? kLayer : kParent;
+				// Remove empty group
+				if (parent.getChildren() == null) {
+					parent.delete();
+				}
 			}
 		}
 
