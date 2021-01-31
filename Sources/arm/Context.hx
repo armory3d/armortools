@@ -62,7 +62,7 @@ class Context {
 	public static var materialPreview = false; // Drawing material previews
 	public static var savedCamera = Mat4.identity();
 
-	public static var swatch: TSwatch;
+	public static var swatch: TSwatchColor;
 	public static var materialIdPicked = 0;
 	public static var uvxPicked = 0.0;
 	public static var uvyPicked = 0.0;
@@ -309,7 +309,7 @@ class Context {
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
-	public static function setSwatch(s: TSwatch) {
+	public static function setSwatch(s: TSwatchColor) {
 		swatch = s;
 		App.notifyOnNextFrame(function() {
 			MakeMaterial.parsePaintMaterial();

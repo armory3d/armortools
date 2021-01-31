@@ -472,7 +472,7 @@ class Project {
 		});
 	}
 
-	public static function makeSwatch(base = 0xffffffff): TSwatch {
+	public static function makeSwatch(base = 0xffffffff): TSwatchColor {
 		return { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
 	}
 

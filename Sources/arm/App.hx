@@ -48,7 +48,7 @@ class App {
 	public static var dragMaterial: MaterialSlot = null;
 	public static var dragLayer: LayerSlot = null;
 	public static var dragAsset: TAsset = null;
-	public static var dragSwatch: TSwatch = null;
+	public static var dragSwatch: TSwatchColor = null;
 	public static var dragFile: String = null;
 	public static var dragTint = 0xffffffff;
 	public static var dragSize = -1;

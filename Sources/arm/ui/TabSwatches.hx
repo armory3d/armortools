@@ -115,7 +115,11 @@ class TabSwatches {
 							}
 						}, 1 + add);
 					}
-					if (ui.isHovered) ui.tooltip(tr("Swatch"));
+					if (ui.isHovered) {
+						var val = untyped Project.raw.swatches[i].base;
+						if (val < 0) val += untyped 4294967296;
+						ui.tooltip("#" + untyped val.toString(16));
+					}
 				}
 			}
 		}

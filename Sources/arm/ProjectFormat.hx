@@ -17,7 +17,7 @@ typedef TProjectFormat = {
 	@:optional public var mesh_assets: Array<String>;
 	@:optional public var atlas_objects: Array<Int>;
 	@:optional public var atlas_names: Array<String>;
-	@:optional public var swatches: Array<TSwatch>;
+	@:optional public var swatches: Array<TSwatchColor>;
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
 	@:optional public var packed_assets: Array<TPackedAsset>;
 }
@@ -64,7 +64,7 @@ typedef TPackedAsset = {
 	public var bytes: haxe.io.Bytes;
 }
 
-typedef TSwatch = {
+typedef TSwatchColor = {
 	public var base: kha.Color;
 	public var opacity: Float;
 	public var occlusion: Float;
