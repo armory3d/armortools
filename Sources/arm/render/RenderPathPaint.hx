@@ -413,7 +413,8 @@ class RenderPathPaint {
 
 		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
 		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
-		if (!App.uiEnabled || App.isDragging || fillLayer || fillMask) {
+		var groupLayer = Context.layer.getChildren() != null;
+		if (!App.uiEnabled || App.isDragging || fillLayer || fillMask || groupLayer) {
 			return;
 		}
 
