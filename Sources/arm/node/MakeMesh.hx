@@ -387,6 +387,9 @@ class MakeMesh {
 			else if (Context.viewportMode == ViewOpacity && Context.layer.paintOpac) {
 				frag.write('fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 			}
+			else if (Context.viewportMode == ViewHeight && Context.layer.paintHeight) {
+				frag.write('fragColor[1] = vec4(vec3(height, height, height), 1.0);');
+			}
 			else if (Context.viewportMode == ViewTexCoord) {
 				frag.write('fragColor[1] = vec4(texCoord, 0.0, 1.0);');
 			}

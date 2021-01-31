@@ -76,12 +76,13 @@ package arm;
 	var ViewRoughness = 4;
 	var ViewMetallic = 5;
 	var ViewOpacity = 6;
-	var ViewTexCoord = 7;
-	var ViewObjectNormal = 8;
-	var ViewMaterialID = 9;
-	var ViewObjectID = 10;
-	var ViewMask = 11;
-	var ViewPathTrace = 12;
+	var ViewHeight = 7;
+	var ViewTexCoord = 8;
+	var ViewObjectNormal = 9;
+	var ViewMaterialID = 10;
+	var ViewObjectID = 11;
+	var ViewMask = 12;
+	var ViewPathTrace = 13;
 }
 
 @:enum abstract RenderMode(Int) from Int to Int {

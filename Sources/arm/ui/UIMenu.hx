@@ -57,7 +57,7 @@ class UIMenu {
 				18, // MenuFile
 				4, // MenuEdit
 				#if (krom_windows || krom_linux) 14 #else 13 #end, // MenuViewport
-				#if (kha_direct3d12 || kha_vulkan) 13 #else 12 #end, // MenuMode
+				#if (kha_direct3d12 || kha_vulkan) 14 #else 13 #end, // MenuMode
 				17, // MenuCamera
 				7 // MenuHelp
 			];
@@ -223,6 +223,7 @@ class UIMenu {
 					tr("Roughness"),
 					tr("Metallic"),
 					tr("Opacity"),
+					tr("Height"),
 					tr("TexCoord"),
 					tr("Object Normal"),
 					tr("Material ID"),
