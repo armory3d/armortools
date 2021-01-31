@@ -758,10 +758,10 @@ class UINodes {
 		}
 		if (groupInput != null && groupOutput != null) {
 			for (soc in groupInput.outputs) {
-				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas, soc.min, soc.max, soc.default_value));
+				node.inputs.push(NodesMaterial.createSocket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 			}
 			for (soc in groupOutput.inputs) {
-				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.type, canvas, soc.min, soc.max, soc.default_value));
+				node.outputs.push(NodesMaterial.createSocket(nodes, node, soc.name, soc.type, canvas, soc.min, soc.max, soc.default_value));
 			}
 		}
 		return node;

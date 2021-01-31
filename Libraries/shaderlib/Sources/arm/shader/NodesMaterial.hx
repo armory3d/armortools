@@ -2570,15 +2570,15 @@ class NodesMaterial {
 				var groupStack = arm.ui.UINodes.inst.groupStack;
 				var c = groupStack[groupStack.length - 1].canvas;
 				if (ui.button(tr("RGBA"), Left)) {
-					sockets.push(createSocket(nodes, node, "RGBA", c));
+					sockets.push(createSocket(nodes, node, null, "RGBA", c));
 					syncSockets(node);
 				}
 				if (ui.button(tr("Vector"), Left)) {
-					sockets.push(createSocket(nodes, node, "VECTOR", c));
+					sockets.push(createSocket(nodes, node, null, "VECTOR", c));
 					syncSockets(node);
 				}
 				if (ui.button(tr("Value"), Left)) {
-					sockets.push(createSocket(nodes, node, "VALUE", c));
+					sockets.push(createSocket(nodes, node, null, "VALUE", c));
 					syncSockets(node);
 				}
 			}, 4);
@@ -2622,11 +2622,11 @@ class NodesMaterial {
 		return type == "RGBA" ? _tr("Color") : type == "VECTOR" ? _tr("Vector") : _tr("Value");
 	}
 
-	public static function createSocket(nodes: Nodes, node: TNode, type: String, canvas: TNodeCanvas, min = 0.0, max = 1.0, default_value: Dynamic = null): TNodeSocket {
+	public static function createSocket(nodes: Nodes, node: TNode, name: String, type: String, canvas: TNodeCanvas, min = 0.0, max = 1.0, default_value: Dynamic = null): TNodeSocket {
 		return {
 			id: nodes.getSocketId(canvas.nodes),
 			node_id: node.id,
-			name: get_socket_name(type),
+			name: name == null ? get_socket_name(type) : name,
 			type: type,
 			color: get_socket_color(type),
 			default_value: default_value == null ? get_socket_default_value(type) : default_value,
