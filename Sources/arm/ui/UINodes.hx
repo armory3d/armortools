@@ -79,10 +79,10 @@ class UINodes {
 			var linkY = ui._windowY + nodes.NODE_Y(node);
 			if (linkDrag.from_id > -1) {
 				linkX += nodes.NODE_W();
-				linkY += nodes.SOCKET_Y(linkDrag.from_socket);
+				linkY += nodes.SOCKET_Y(node.outputs, linkDrag.from_socket);
 			}
 			else {
-				linkY += nodes.SOCKET_Y(linkDrag.to_socket + node.outputs.length) + nodes.BUTTONS_H(node);
+				linkY += nodes.SOCKET_Y(node.inputs, linkDrag.to_socket) + nodes.SOCKETS_H(node.outputs) + nodes.BUTTONS_H(node);
 			}
 			var mouse = Input.getMouse();
 			if (Math.abs(mouse.x - linkX) > 5 || Math.abs(mouse.y - linkY) > 5) { // Link length
