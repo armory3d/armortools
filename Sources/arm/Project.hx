@@ -223,8 +223,7 @@ class Project {
 			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (Context.projectType == ModelTessellatedPlane) {
-				ViewportUtil.setView(0, 0, 5, 0, 0, 0); // Top
-				ViewportUtil.orbit(0, Math.PI / 6); // Orbit down
+				ViewportUtil.setView(0, 0, 0.75, 0, 0, 0); // Top
 			}
 		}
 
