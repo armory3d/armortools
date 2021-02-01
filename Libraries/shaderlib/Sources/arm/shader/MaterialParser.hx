@@ -885,12 +885,15 @@ class MaterialParser {
 			sample_bump = false;
 			var nor = parse_vector_input(node.inputs[3]);
 			if (sample_bump_res != "") {
-				curshader.nAttr = true;
+				// curshader.nAttr = true;
 				curshader.write('${sample_bump_res}_x *= ($strength) * 16.0;');
 				curshader.write('${sample_bump_res}_y *= ($strength) * 16.0;');
-				curshader.write('vec3 ${sample_bump_res}_a = normalize(vec3(1.0, 0.0, ${sample_bump_res}_x));');
-				curshader.write('vec3 ${sample_bump_res}_b = normalize(vec3(0.0, 1.0, ${sample_bump_res}_y));');
-				res = 'normalize(mul(nAttr, mat3(${sample_bump_res}_a, ${sample_bump_res}_b, normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0)))))';
+				// curshader.write('vec3 ${sample_bump_res}_a = normalize(vec3(1.0, 0.0, ${sample_bump_res}_x));');
+				// curshader.write('vec3 ${sample_bump_res}_b = normalize(vec3(0.0, 1.0, ${sample_bump_res}_y));');
+				// res = 'normalize(mul(nAttr, mat3(${sample_bump_res}_a, ${sample_bump_res}_b, normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0)))))';
+				// sample_bump_res = "";
+
+				res = '(normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0) + $nor) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))';
 				sample_bump_res = "";
 			}
 			else {
@@ -898,15 +901,21 @@ class MaterialParser {
 				res = "n";
 			}
 
-			res = '($res + $nor)';
+			// res = '($res + $nor)';
 
-			if (!curshader.invTBN) {
-				curshader.invTBN = true;
-				curshader.nAttr = true;
-				curshader.add_function(ShaderFunctions.str_cotangentFrame);
-				curshader.write('mat3 invTBN = transpose(cotangentFrame(nAttr, -nAttr, texCoord));');
-			}
-			res = '(normalize(mul($res, invTBN)) * 0.5 + 0.5)';
+			// if (!curshader.invTBN) {
+			// 	curshader.invTBN = true;
+			// 	curshader.nAttr = true;
+			// 	curshader.add_function(ShaderFunctions.str_cotangentFrame);
+			// 	frag.vVec = true;
+			// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			// 	frag.write('mat3 invTBN = transpose(cotangentFrame(nAttr, vVec, texCoord));');
+			// 	#else
+			// 	frag.write('mat3 invTBN = transpose(cotangentFrame(nAttr, -vVec, texCoord));');
+			// 	#end
+
+			// }
+			// res = '(normalize(mul($res, invTBN)) * 0.5 + 0.5)';
 			return res;
 		}
 		else if (node.type == "MAPPING") {
