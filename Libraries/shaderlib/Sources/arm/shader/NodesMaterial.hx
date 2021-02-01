@@ -204,6 +204,14 @@ class NodesMaterial {
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Random Per Island"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
 					}
 				],
 				buttons: []
@@ -482,6 +490,14 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
+						name: _tr("Color"),
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: f32([0.0, 0.0, 0.0, 1.0])
+					},
+					{
+						id: 0,
+						node_id: 0,
 						name: _tr("Object Index"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
@@ -690,7 +706,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: _tr("Texture Coord"),
+				name: _tr("Texture Coordinate"),
 				type: "TEX_COORD",
 				x: 0,
 				y: 0,
@@ -927,7 +943,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: _tr("Color 3"),
+						name: _tr("Mortar"),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.0, 0.0, 0.0])
@@ -1251,15 +1267,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: _tr("Color"),
-						type: "RGBA",
-						color: 0xffc7c729,
-						default_value: f32([0.8, 0.8, 0.8, 1.0])
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: _tr("Fac"),
+						name: _tr("Height"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1506,7 +1514,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: _tr("BrightContrast"),
+				name: _tr("Bright/Contrast"),
 				type: "BRIGHTCONTRAST",
 				x: 0,
 				y: 0,
@@ -1588,7 +1596,7 @@ class NodesMaterial {
 			},
 			{
 				id: 0,
-				name: _tr("HueSatVal"),
+				name: _tr("Hue/Saturation"),
 				type: "HUE_SAT",
 				x: 0,
 				y: 0,
@@ -1605,7 +1613,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: _tr("Sat"),
+						name: _tr("Saturation"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1613,7 +1621,7 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
-						name: _tr("Val"),
+						name: _tr("Value"),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1669,7 +1677,7 @@ class NodesMaterial {
 						name: _tr("Color"),
 						type: "RGBA",
 						color: 0xffc7c729,
-						default_value: f32([0.8, 0.8, 0.8, 1.0])
+						default_value: f32([0.0, 0.0, 0.0, 1.0])
 					}
 				],
 				outputs: [
@@ -1810,6 +1818,14 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
+						name: _tr("Vector"),
+						type: "VECTOR",
+						color: 0xff6363c7,
+						default_value: f32([0.0, 0.0, 0.0])
+					},
+					{
+						id: 0,
+						node_id: 0,
 						name: _tr("Location"),
 						type: "VECTOR",
 						color: 0xff6363c7,
@@ -1834,14 +1850,6 @@ class NodesMaterial {
 						color: 0xff6363c7,
 						default_value: f32([1.0, 1.0, 1.0]),
 						display: 1
-					},
-					{
-						id: 0,
-						node_id: 0,
-						name: _tr("Vector"),
-						type: "VECTOR",
-						color: 0xff6363c7,
-						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
 				outputs: [

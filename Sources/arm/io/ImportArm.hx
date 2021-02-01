@@ -505,7 +505,8 @@ class ImportArm {
 				if (node.inputs.length < 4) {
 					var latest: TNode = haxe.Json.parse(haxe.Json.stringify(arm.shader.NodesMaterial.getTNode("MAPPING")));
 					node.inputs = latest.inputs;
-					for (i in 0...node.buttons.length) node.inputs[i].default_value = node.buttons[i].default_value;
+					for (inp in node.inputs) inp.node_id = node.id;
+					for (i in 0...node.buttons.length) node.inputs[i + 1].default_value = node.buttons[i].default_value;
 					node.buttons = [];
 				}
 			}

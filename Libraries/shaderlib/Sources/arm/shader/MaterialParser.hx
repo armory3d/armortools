@@ -491,14 +491,6 @@ class MaterialParser {
 			if (sample_bump) write_bump(node, res);
 			return res;
 		}
-		else if (node.type == "TEX_MUSGRAVE") {
-			curshader.add_function(ShaderFunctions.str_tex_musgrave);
-			var co = getCoord(node);
-			var scale = parse_value_input(node.inputs[1]);
-			var res = to_vec3('tex_musgrave_f($co * $scale * 0.5)');
-			if (sample_bump) write_bump(node, res);
-			return res;
-		}
 		else if (node.type == "TEX_NOISE") {
 			curshader.add_function(ShaderFunctions.str_tex_noise);
 			var co = getCoord(node);
@@ -823,8 +815,13 @@ class MaterialParser {
 			}
 		}
 		else if (node.type == "OBJECT_INFO") {
-			curshader.wposition = true;
-			return "wposition";
+			if (socket == node.outputs[0]) { // Location
+				curshader.wposition = true;
+				return "wposition";
+			}
+			else if (socket == node.outputs[1]) { // Color
+				return "vec3(0.0, 0.0, 0.0)";
+			}
 		}
 		// else if (node.type == "PARTICLE_INFO") {
 		// 	if (socket == node.outputs[3]) { // Location
@@ -919,10 +916,10 @@ class MaterialParser {
 			return res;
 		}
 		else if (node.type == "MAPPING") {
-			var node_translation = parse_vector_input(node.inputs[0]);
-			var node_rotation = parse_vector_input(node.inputs[1]);
-			var node_scale = parse_vector_input(node.inputs[2]);
-			var out = parse_vector_input(node.inputs[3]);
+			var out = parse_vector_input(node.inputs[0]);
+			var node_translation = parse_vector_input(node.inputs[1]);
+			var node_rotation = parse_vector_input(node.inputs[2]);
+			var node_scale = parse_vector_input(node.inputs[3]);
 			if (node_scale != 'vec3(1, 1, 1)') {
 				out = '($out * $node_scale)';
 			}
@@ -1184,6 +1181,9 @@ class MaterialParser {
 				#end
 			}
 			else if (socket == node.outputs[7]) { // Pointiness
+				return "0.0";
+			}
+			else if (socket == node.outputs[8]) { // Random Per Island
 				return "0.0";
 			}
 		}
