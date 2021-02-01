@@ -919,19 +919,19 @@ class MaterialParser {
 			return res;
 		}
 		else if (node.type == "MAPPING") {
-			var out = parse_vector_input(node.inputs[0]);
-			var node_translation = node.buttons[0].default_value;
-			var node_rotation = node.buttons[1].default_value;
-			var node_scale = node.buttons[2].default_value;
-			if (node_scale[0] != 1.0 || node_scale[1] != 1.0 || node_scale[2] != 1.0) {
-				out = '($out * ${vec3(node_scale)})';
+			var node_translation = parse_vector_input(node.inputs[0]);
+			var node_rotation = parse_vector_input(node.inputs[1]);
+			var node_scale = parse_vector_input(node.inputs[2]);
+			var out = parse_vector_input(node.inputs[3]);
+			if (node_scale != 'vec3(1, 1, 1)') {
+				out = '($out * $node_scale)';
 			}
-			if (node_rotation[2] != 0.0) {
+			if (node_rotation != 'vec3(0, 0, 0)') {
 				// ZYX rotation, Z axis for now..
-				var a = node_rotation[2] * (Math.PI / 180);
+				var a = '${node_rotation}.z * (3.1415926535 / 180)';
 				// x * cos(theta) - y * sin(theta)
 				// x * sin(theta) + y * cos(theta)
-				out = 'vec3(${out}.x * ${Math.cos(a)} - (${out}.y) * ${Math.sin(a)}, ${out}.x * ${Math.sin(a)} + (${out}.y) * ${Math.cos(a)}, 0.0)';
+				out = 'vec3(${out}.x * cos($a) - ${out}.y * sin($a), ${out}.x * sin($a) + ${out}.y * cos($a), 0.0)';
 			}
 			// if node.rotation[1] != 0.0:
 			//     a = node.rotation[1]
@@ -939,8 +939,8 @@ class MaterialParser {
 			// if node.rotation[0] != 0.0:
 			//     a = node.rotation[0]
 			//     out = 'vec3({0}.y * {1} - {0}.z * {2}, {0}.y * {2} + {0}.z * {1}, 0.0)'.format(out, math.cos(a), math.sin(a))
-			if (node_translation[0] != 0.0 || node_translation[1] != 0.0 || node_translation[2] != 0.0) {
-				out = '($out + ${vec3(node_translation)})';
+			if (node_translation != 'vec3(0, 0, 0)') {
+				out = '($out + $node_translation)';
 			}
 			// if node.use_min:
 				// out = 'max({0}, vec3({1}, {2}, {3}))'.format(out, node.min[0], node.min[1])

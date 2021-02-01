@@ -1810,6 +1810,34 @@ class NodesMaterial {
 					{
 						id: 0,
 						node_id: 0,
+						name: _tr("Location"),
+						type: "VECTOR",
+						color: 0xff6363c7,
+						default_value: f32([0.0, 0.0, 0.0]),
+						display: 1
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Rotation"),
+						type: "VECTOR",
+						color: 0xff6363c7,
+						default_value: f32([0.0, 0.0, 0.0]),
+						max: 360.0,
+						display: 1
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Scale"),
+						type: "VECTOR",
+						color: 0xff6363c7,
+						default_value: f32([1.0, 1.0, 1.0]),
+						display: 1
+					},
+					{
+						id: 0,
+						node_id: 0,
 						name: _tr("Vector"),
 						type: "VECTOR",
 						color: 0xff6363c7,
@@ -1826,27 +1854,7 @@ class NodesMaterial {
 						default_value: f32([0.0, 0.0, 0.0])
 					}
 				],
-				buttons: [
-					{
-						name: _tr("Location"),
-						type: "VECTOR",
-						default_value: f32([0.0, 0.0, 0.0]),
-						output: 0
-					},
-					{
-						name: _tr("Rotation"),
-						type: "VECTOR",
-						default_value: f32([0.0, 0.0, 0.0]),
-						output: 0,
-						max: 360.0
-					},
-					{
-						name: _tr("Scale"),
-						type: "VECTOR",
-						default_value: f32([1.0, 1.0, 1.0]),
-						output: 0
-					}
-				]
+				buttons: []
 			},
 			{
 				id: 0,
@@ -2635,19 +2643,19 @@ class NodesMaterial {
 		}
 	}
 
-	public static function createNode(nodeType: String, group: TNodeGroup = null): TNode {
-		for (c in list) {
-			for (n in c) {
-				if (n.type == nodeType) {
-					var canvas = group != null ? group.canvas : Context.material.canvas;
-					var nodes = group != null ? group.nodes : Context.material.nodes;
-					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
-					canvas.nodes.push(node);
-					return node;
-				}
-			}
-		}
+	public static function getTNode(nodeType: String): TNode {
+		for (c in list) for (n in c) if (n.type == nodeType) return n;
 		return null;
+	}
+
+	public static function createNode(nodeType: String, group: TNodeGroup = null): TNode {
+		var n = getTNode(nodeType);
+		if (n == null) return null;
+		var canvas = group != null ? group.canvas : Context.material.canvas;
+		var nodes = group != null ? group.nodes : Context.material.nodes;
+		var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
+		canvas.nodes.push(node);
+		return node;
 	}
 
 	static function f32(ar: Array<kha.FastFloat>): kha.arrays.Float32Array {

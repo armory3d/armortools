@@ -501,6 +501,14 @@ class ImportArm {
 					but.height = 4.5;
 				}
 			}
+			else if (node.type == "MAPPING") { // TODO: deprecated
+				if (node.inputs.length < 4) {
+					var latest: TNode = haxe.Json.parse(haxe.Json.stringify(arm.shader.NodesMaterial.getTNode("MAPPING")));
+					node.inputs = latest.inputs;
+					for (i in 0...node.buttons.length) node.inputs[i].default_value = node.buttons[i].default_value;
+					node.buttons = [];
+				}
+			}
 		}
 	}
 
