@@ -131,6 +131,29 @@ class RenderPathRaytrace {
 				Layers.mergeLayer(untyped l0, Project.layers[i], true);
 			}
 		}
+
+		// Merge height map into normal map
+		if (MakeMaterial.heightUsed) {
+			Layers.imga.g2.begin(false);
+			Layers.imga.g2.pipeline = Layers.pipeCopy;
+			Layers.imga.g2.drawImage(l0.texpaint_nor, 0, 0);
+			Layers.imga.g2.pipeline = null;
+			Layers.imga.g2.end();
+
+			var empty = RenderPath.active.renderTargets.get("empty_white").image;
+			l0.texpaint_nor.g4.begin();
+			l0.texpaint_nor.g4.setPipeline(Layers.pipeMerge);
+			l0.texpaint_nor.g4.setTexture(Layers.tex0, Layers.imga);
+			l0.texpaint_nor.g4.setTexture(Layers.tex1, l0.texpaint_pack);
+			l0.texpaint_nor.g4.setTexture(Layers.texmask, empty);
+			l0.texpaint_nor.g4.setTexture(Layers.texa, empty);
+			l0.texpaint_nor.g4.setFloat(Layers.opac, 1.0);
+			l0.texpaint_nor.g4.setInt(Layers.blending, -4);
+			l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+			l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			l0.texpaint_nor.g4.drawIndexedVertices();
+			l0.texpaint_nor.g4.end();
+		}
 	}
 
 	public static function commandsBake() {

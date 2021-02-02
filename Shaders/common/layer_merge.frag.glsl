@@ -40,6 +40,19 @@ void main() {
 		vec4 col1 = textureLod(tex1, texCoord, 0);
 		FragColor = vec4(mix(cola.rgb, col1.rgb, str), cola.a + col1.a);
 	}
+	else if (blending == -4) { // Merge _pack.height into _nor
+		float tex_step = 1.0 / textureSize(tex1, 0).x;
+		float height0 = textureLod(tex1, vec2(texCoord.x - tex_step, texCoord.y), 0.0).a;
+		float height1 = textureLod(tex1, vec2(texCoord.x + tex_step, texCoord.y), 0.0).a;
+		float height2 = textureLod(tex1, vec2(texCoord.x, texCoord.y - tex_step), 0.0).a;
+		float height3 = textureLod(tex1, vec2(texCoord.x, texCoord.y + tex_step), 0.0).a;
+		float height_dx = height0 - height1;
+		float height_dy = height2 - height3;
+		// Whiteout blend
+		vec3 n1 = col0.rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);
+		vec3 n2 = normalize(vec3(height_dx * 16.0, height_dy * 16.0, 1.0));
+		FragColor = vec4(normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), col0.a);
+	}
 	else if (blending == 0) { // Mix
 		FragColor = vec4(mix(cola.rgb, col0.rgb, str), max(col0.a, cola.a));
 	}
