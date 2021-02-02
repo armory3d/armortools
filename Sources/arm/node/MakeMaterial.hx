@@ -230,19 +230,25 @@ class MakeMaterial {
 	static function bakeNodePreviews() {
 		if (Context.nodePreviewsBlur != null) {
 			for (image in Context.nodePreviewsBlur) {
-				image.unload();
+				App.notifyOnNextFrame(function() {
+					image.unload();
+				});
 			}
 			Context.nodePreviewsBlur = null;
 		}
 		if (Context.nodePreviewsWarp != null) {
-			for (img in Context.nodePreviewsWarp) {
-				img.unload();
+			for (image in Context.nodePreviewsWarp) {
+				App.notifyOnNextFrame(function() {
+					image.unload();
+				});
 			}
 			Context.nodePreviewsWarp = null;
 		}
 		if (Context.nodePreviewsBake != null) {
-			for (img in Context.nodePreviewsBake) {
-				img.unload();
+			for (image in Context.nodePreviewsBake) {
+				App.notifyOnNextFrame(function() {
+					image.unload();
+				});
 			}
 			Context.nodePreviewsBake = null;
 		}

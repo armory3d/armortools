@@ -319,7 +319,11 @@ class App {
 		}
 
 		if (UINodes.inst.grid != null) {
-			UINodes.inst.grid.unload();
+			var _grid = UINodes.inst.grid;
+			function _next() {
+				_grid.unload();
+			}
+			App.notifyOnNextFrame(_next);
 			UINodes.inst.grid = null;
 		}
 

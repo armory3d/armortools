@@ -52,7 +52,10 @@ class MaterialSlot {
 	}
 
 	public function unload() {
-		image.unload();
-		imageIcon.unload();
+		function _next() {
+			image.unload();
+			imageIcon.unload();
+		}
+		App.notifyOnNextFrame(_next);
 	}
 }
