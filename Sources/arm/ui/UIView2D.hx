@@ -118,6 +118,7 @@ class UIView2D {
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
 					texType == TexOpacity   ? 4 :
+					texType == TexHeight    ? 4 :
 					texType == TexNormal    ? 5 :
 											  0;
 			}
@@ -229,6 +230,7 @@ class UIView2D {
 						tr("Roughness"),
 						tr("Metallic"),
 						tr("Opacity"),
+						tr("Height"),
 					], tr("Texture"));
 					ui._x += ew + 3;
 					ui._y = 2;

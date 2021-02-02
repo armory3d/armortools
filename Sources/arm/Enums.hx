@@ -219,6 +219,7 @@ package arm;
 	var TexRoughness = 3;
 	var TexMetallic = 4;
 	var TexOpacity = 5;
+	var TexHeight = 6;
 }
 
 @:enum abstract ProjectModel(Int) from Int to Int {
