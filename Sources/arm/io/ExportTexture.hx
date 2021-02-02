@@ -101,8 +101,10 @@ class ExportTexture {
 
 		var _space = UIHeader.inst.worktab.position;
 		var _tool = Context.tool;
+		var _layerIsMask = Context.layerIsMask;
 		UIHeader.inst.worktab.position = SpacePaint;
 		Context.tool = ToolFill;
+		Context.layerIsMask = false;
 		MakeMaterial.parsePaintMaterial();
 		var _paintObject = Context.paintObject;
 		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
@@ -113,6 +115,7 @@ class ExportTexture {
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.useLiveLayer(false);
 		Context.tool = _tool;
+		Context.layerIsMask = _layerIsMask;
 		MakeMaterial.parsePaintMaterial();
 		Context.pdirty = 0;
 		UIHeader.inst.worktab.position = _space;

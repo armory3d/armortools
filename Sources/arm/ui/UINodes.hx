@@ -442,10 +442,12 @@ class UINodes {
 		}
 		else if (recompileMatFinal) {
 			MakeMaterial.parsePaintMaterial();
-			if (Layers.isFillMaterial()) {
+
+			if (canvasType == CanvasMaterial && Layers.isFillMaterial()) {
 				Layers.updateFillLayers();
 				RenderUtil.makeMaterialPreview();
 			}
+
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 

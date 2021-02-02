@@ -227,7 +227,7 @@ class RenderUtil {
 		// Prepare layers
 		if (RenderPathPaint.liveLayer == null) {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
-			RenderPathPaint.liveLayer.createMask(0x00000000);
+			RenderPathPaint.liveLayer.createMask(0xffffffff);
 		}
 
 		var l = RenderPathPaint.liveLayer;
@@ -274,9 +274,16 @@ class RenderUtil {
 		Context.material = new arm.data.MaterialSlot();
 		var _tool = Context.tool;
 		Context.tool = ToolBrush;
-		MakeMaterial.parsePaintMaterial();
+		var _layerIsMask = Context.layerIsMask;
+		Context.layerIsMask = false;
+
+		var _fill_layer = Context.layer.fill_layer;
+		var _fill_mask = Context.layer.fill_mask;
+		Context.layer.fill_layer = null;
+		Context.layer.fill_mask = null;
 
 		RenderPathPaint.useLiveLayer(true);
+		MakeMaterial.parsePaintMaterial(false);
 
 		var path = RenderPath.active;
 		var hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
@@ -358,12 +365,16 @@ class RenderUtil {
 		Context.prevPaintVecX = -1;
 		Context.prevPaintVecY = -1;
 		Context.pdirty = _pdirty;
+		Context.layer.fill_layer = _fill_layer;
+		Context.layer.fill_mask = _fill_mask;
+		RenderPathPaint.useLiveLayer(false);
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;
 		Context.material = _material;
 		Context.tool = _tool;
+		Context.layerIsMask = _layerIsMask;
 		function _init() {
-			MakeMaterial.parsePaintMaterial();
+			MakeMaterial.parsePaintMaterial(false);
 		}
 		iron.App.notifyOnInit(_init);
 
@@ -381,8 +392,6 @@ class RenderUtil {
 		ViewportUtil.updateCameraType(Context.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
-
-		RenderPathPaint.useLiveLayer(false);
 
 		// Scale layer down to to image preview
 		if (Layers.pipeMerge == null) Layers.makePipe();
@@ -463,9 +472,12 @@ class RenderUtil {
 		Context.pdirty = 1;
 		var _tool = Context.tool;
 		Context.tool = ToolPicker;
+		var _layerIsMask = Context.layerIsMask;
+		Context.layerIsMask = false;
 		MakeMaterial.parsePaintMaterial();
 		arm.render.RenderPathPaint.commandsPaint(false);
 		Context.tool = _tool;
+		Context.layerIsMask = _layerIsMask;
 		Context.pickPosNor = false;
 		MakeMaterial.parsePaintMaterial();
 		Context.pdirty = 0;

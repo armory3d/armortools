@@ -484,7 +484,7 @@ class Layers {
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
-				RenderPathPaint.liveLayer.createMask(0x00000000);
+				RenderPathPaint.liveLayer.createMask(0xffffffff);
 			}
 
 			current = @:privateAccess kha.graphics2.Graphics.current;
@@ -492,6 +492,7 @@ class Layers {
 
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
+			Context.layerIsMask = false;
 			MakeMaterial.parsePaintMaterial(false);
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
@@ -499,6 +500,7 @@ class Layers {
 			RenderPathPaint.dilate(true, true);
 			RenderPathPaint.useLiveLayer(false);
 			Context.tool = _tool;
+			Context.layerIsMask = _layerIsMask;
 			Context.pdirty = 0;
 			Context.rdirty = 2;
 			UIHeader.inst.worktab.position = SpaceMaterial;
