@@ -547,7 +547,7 @@ class Layers {
 						Context.layer = l;
 						setObjectMask();
 						RenderPathPaint.commandsPaint(false);
-						RenderPathPaint.dilate(true, true);
+						RenderPathPaint.dilate(true, false);
 					}
 				}
 			}

@@ -320,7 +320,7 @@ class MakeMaterial {
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint(false);
-			RenderPathPaint.dilate(true, true);
+			RenderPathPaint.dilate(true, false);
 			RenderPathPaint.useLiveLayer(false);
 			MaterialParser.bake_passthrough = false;
 			Context.pdirty = 0;

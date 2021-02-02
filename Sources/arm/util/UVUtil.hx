@@ -108,8 +108,8 @@ class UVUtil {
 
 		if (pipeDilate == null) {
 			pipeDilate = new PipelineState();
-			pipeDilate.vertexShader = kha.Shaders.getVertex("dilate_mask.vert");
-			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_mask.frag");
+			pipeDilate.vertexShader = kha.Shaders.getVertex("dilate_map.vert");
+			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_map.frag");
 			var vs = new VertexStructure();
 			#if (kha_metal || kha_vulkan)
 			vs.add("tex", VertexData.Short2Norm);

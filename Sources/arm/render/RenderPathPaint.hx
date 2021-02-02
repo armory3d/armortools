@@ -759,14 +759,15 @@ class RenderPathPaint {
 			Layers.makeTempImg();
 			var tid = Context.layer.id;
 			if (base) {
+				var texpaint = Context.layerIsMask ? "texpaint_mask" : "texpaint";
 				path.setTarget("temptex0");
-				path.bindTarget("texpaint" + tid, "tex");
+				path.bindTarget(texpaint + tid, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
-				path.setTarget("texpaint" + tid);
+				path.setTarget(texpaint + tid);
 				path.bindTarget("temptex0", "tex");
 				path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
-			if (nor_pack) {
+			if (nor_pack && !Context.layerIsMask) {
 				path.setTarget("temptex0");
 				path.bindTarget("texpaint_nor" + tid, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
