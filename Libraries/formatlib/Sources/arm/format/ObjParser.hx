@@ -71,8 +71,7 @@ class ObjParser {
 			if (c0 == "v".code) {
 				var c1 = bytes.get(pos++);
 				if (c1 == " ".code) {
-					// Some exporters put additional space directly after "v"
-					if (bytes.get(pos) == " ".code) pos++;
+					if (bytes.get(pos) == " ".code) pos++; // Some exporters put additional space directly after "v"
 					posTemp.push(readFloat());
 					pos++; // Space
 					posTemp.push(readFloat());
@@ -98,6 +97,7 @@ class ObjParser {
 			}
 			else if (c0 == "f".code) {
 				pos++; // Space
+				if (bytes.get(pos) == " ".code) pos++; // Some exporters put additional space directly after "f"
 				readingFaces = true;
 				vi = ui = ni = 0;
 				fullAttrib ? readFaceFast() : readFace();
