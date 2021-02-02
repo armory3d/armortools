@@ -109,7 +109,11 @@ class Context {
 	public static var decalPreview = false;
 	public static var decalX = 0.0;
 	public static var decalY = 0.0;
+	#if (kha_direct3d12 || kha_vulkan)
+	public static var viewportMode = ViewPathTrace;
+	#else
 	public static var viewportMode = ViewLit;
+	#end
 	#if (krom_android || krom_ios || arm_vr)
 	public static var renderMode = RenderForward;
 	#else
