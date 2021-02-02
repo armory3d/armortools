@@ -37,32 +37,30 @@ class MakeMesh {
 		vert.wposition = true;
 
 		var textureCount = 0;
-		if (MakeMaterial.heightUsed) {
-			var displaceStrength = MakeMaterial.getDisplaceStrength();
-			if (displaceStrength > 0.0) {
-				vert.n = true;
-				vert.write('float height = 0.0;');
-				var numLayers = 0;
-				for (l in Project.layers) {
-					if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
-					if (numLayers > 16) break;
-					numLayers++;
+		var displaceStrength = MakeMaterial.getDisplaceStrength();
+		if (MakeMaterial.heightUsed && displaceStrength > 0.0) {
+			vert.n = true;
+			vert.write('float height = 0.0;');
+			var numLayers = 0;
+			for (l in Project.layers) {
+				if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
+				if (numLayers > 16) break;
+				numLayers++;
+				textureCount++;
+				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
+				vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
+				if (l.texpaint_mask != null) {
 					textureCount++;
-					vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
-					vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
-					if (l.texpaint_mask != null) {
-						textureCount++;
-						vert.add_uniform('sampler2D texpaint_mask_vert' + l.id, '_texpaint_mask_vert' + l.id);
-						vert.write('height *= textureLod(texpaint_mask_vert' + l.id + ', tex, 0.0).r;');
-					}
+					vert.add_uniform('sampler2D texpaint_mask_vert' + l.id, '_texpaint_mask_vert' + l.id);
+					vert.write('height *= textureLod(texpaint_mask_vert' + l.id + ', tex, 0.0).r;');
 				}
-				vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
 			}
+			vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
 		}
 
 		vert.write('gl_Position = mul(vec4(wposition.xyz, 1.0), VP);');
 		vert.write('texCoord = tex;');
-		if (MakeMaterial.heightUsed) {
+		if (MakeMaterial.heightUsed && displaceStrength > 0) {
 			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
 			vert.write('prevwvpposition = mul(mul(vec4(wposition, 1.0), invW), prevWVP);');
 		}
@@ -119,6 +117,13 @@ class MakeMesh {
 			frag.write('vec4 texpaint_pack_sample;');
 			frag.write('float texpaint_opac;');
 
+			if (MakeMaterial.heightUsed) {
+				frag.write('float height0 = 0.0;');
+				frag.write('float height1 = 0.0;');
+				frag.write('float height2 = 0.0;');
+				frag.write('float height3 = 0.0;');
+			}
+
 			if (Context.drawWireframe) {
 				textureCount++;
 				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
@@ -154,6 +159,8 @@ class MakeMesh {
 					}
 				}
 			}
+
+			var lastPass = layerPass == layerPassCount - 1;
 
 			for (l in layers) {
 				if (l.objectMask > 0) {
@@ -237,39 +244,16 @@ class MakeMesh {
 						frag.write('metallic = mix(metallic, texpaint_pack_sample.b, texpaint_opac);');
 					}
 					if (l.paintHeight && MakeMaterial.heightUsed) {
-						var ds = MakeMaterial.getDisplaceStrength() * 5;
-						if (ds < 0.1) ds = 0.1;
-						else if (ds > 2.0) ds = 2.0;
-						frag.wposition = true;
+						var assign = l.paintHeightBlend ? "+=" : "=";
+						frag.write('height $assign texpaint_pack_sample.a * texpaint_opac;');
 						frag.write('{');
-						frag.write('vec3 dpdx = dFdx(wposition);');
-						frag.write('vec3 dpdy = dFdy(wposition);');
-						frag.write('height = texpaint_pack_sample.a * texpaint_opac;');
-						frag.write('float dhdx = dFdx(height * $ds);');
-						frag.write('float dhdy = dFdy(height * $ds);');
-						frag.write('vec3 cross_x = cross(n, dpdx);');
-						frag.write('vec3 cross_y = cross(dpdy, n);');
-						frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
-						frag.write('n = normalize(n - ngrad);');
+						frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
+						frag.write('float tex_step = 1.0 / texpaintSize.x;');
+						frag.write('height0 $assign textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x - tex_step, texCoord.y), 0.0).a * texpaint_opac;');
+						frag.write('height1 $assign textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x + tex_step, texCoord.y), 0.0).a * texpaint_opac;');
+						frag.write('height2 $assign textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x, texCoord.y - tex_step), 0.0).a * texpaint_opac;');
+						frag.write('height3 $assign textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x, texCoord.y + tex_step), 0.0).a * texpaint_opac;');
 						frag.write('}');
-
-						// frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
-						// frag.write('float tex_step = 1.0 / texpaintSize.x;');
-						// frag.wposition = true;
-						// frag.write('{');
-						// frag.write('float pack_a = textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x + tex_step, texCoord.y), 0.0).a;');
-						// frag.write('float pack_b = textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x - tex_step, texCoord.y), 0.0).a;');
-						// frag.write('float pack_c = textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x, texCoord.y + tex_step), 0.0).a;');
-						// frag.write('float pack_d = textureLodShared(texpaint_pack' + l.id + ', vec2(texCoord.x, texCoord.y - tex_step), 0.0).a;');
-						// frag.write('vec3 dpdx = dFdx(wposition);');
-						// frag.write('vec3 dpdy = dFdy(wposition);');
-						// frag.write('float dhdx = pack_a - pack_b;');
-						// frag.write('float dhdy = pack_c - pack_d;');
-						// frag.write('vec3 cross_x = cross(n, dpdx);');
-						// frag.write('vec3 cross_y = cross(dpdy, n);');
-						// frag.write('vec3 ngrad = (cross_y * dhdx + cross_x * dhdy) / dot(dpdx, cross_y);');
-						// frag.write('n = normalize(n - ngrad);');
-						// frag.write('}');
 					}
 				}
 
@@ -277,8 +261,6 @@ class MakeMesh {
 					frag.write('}');
 				}
 			}
-
-			var lastPass = layerPass == layerPassCount - 1;
 
 			if (lastPass && Context.drawTexels) {
 				frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
@@ -288,6 +270,19 @@ class MakeMesh {
 
 			if (lastPass && Context.drawWireframe) {
 				frag.write('basecol *= 1.0 - textureLod(texuvmap, texCoord, 0.0).r;');
+			}
+
+			if (MakeMaterial.heightUsed) {
+				frag.write('if (height > 0.0) {');
+				// frag.write('float height_dx = dFdx(height * 16.0);');
+				// frag.write('float height_dy = dFdy(height * 16.0);');
+				frag.write('float height_dx = height0 - height1;');
+				frag.write('float height_dy = height2 - height3;');
+				// Whiteout blend
+				frag.write('vec3 n1 = ntex * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);');
+				frag.write('vec3 n2 = normalize(vec3(height_dx * 16.0, height_dy * 16.0, 1.0));');
+				frag.write('ntex = normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5);');
+				frag.write('}');
 			}
 
 			if (!lastPass) {

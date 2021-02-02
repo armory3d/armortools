@@ -417,7 +417,7 @@ class Layers {
 
 		if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 			if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-				commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
+				commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask, l1.paintHeightBlend ? -3 : -1);
 			}
 			else {
 				if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
@@ -452,7 +452,7 @@ class Layers {
 		l.texpaint.g4.end();
 	}
 
-	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float, i1texmask: kha.Image) {
+	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float, i1texmask: kha.Image, i1blending = -1) {
 		i0.g4.begin();
 		i0.g4.setPipeline(pipe);
 		i0.g4.setTexture(tex0, i1);
@@ -460,7 +460,7 @@ class Layers {
 		i0.g4.setTexture(texmask, i1texmask);
 		i0.g4.setTexture(texa, imga);
 		i0.g4.setFloat(opac, i1maskOpacity);
-		i0.g4.setInt(blending, -1);
+		i0.g4.setInt(blending, i1blending);
 		i0.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 		i0.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 		i0.g4.drawIndexedVertices();

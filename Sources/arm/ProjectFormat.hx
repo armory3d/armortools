@@ -49,6 +49,7 @@ typedef TLayerData = {
 	public var paint_nor: Bool;
 	public var paint_nor_blend: Bool;
 	public var paint_height: Bool;
+	public var paint_height_blend: Bool;
 	public var paint_emis: Bool;
 	public var paint_subs: Bool;
 }

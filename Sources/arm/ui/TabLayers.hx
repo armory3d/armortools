@@ -373,7 +373,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 6 : (20 + add);
+					var menuElements = l.getChildren() != null ? 6 : (21 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -530,6 +530,7 @@ class TabLayers {
 							var roughHandle = Id.handle().nest(l.id);
 							var metHandle = Id.handle().nest(l.id);
 							var heightHandle = Id.handle().nest(l.id);
+							var heightBlendHandle = Id.handle().nest(l.id);
 							var emisHandle = Id.handle().nest(l.id);
 							var subsHandle = Id.handle().nest(l.id);
 							baseHandle.selected = l.paintBase;
@@ -540,6 +541,7 @@ class TabLayers {
 							roughHandle.selected = l.paintRough;
 							metHandle.selected = l.paintMet;
 							heightHandle.selected = l.paintHeight;
+							heightBlendHandle.selected = l.paintHeightBlend;
 							emisHandle.selected = l.paintEmis;
 							subsHandle.selected = l.paintSubs;
 							l.paintBase = ui.check(baseHandle, tr("Base Color"));
@@ -550,6 +552,7 @@ class TabLayers {
 							l.paintRough = ui.check(roughHandle, tr("Roughness"));
 							l.paintMet = ui.check(metHandle, tr("Metallic"));
 							l.paintHeight = ui.check(heightHandle, tr("Height"));
+							l.paintHeightBlend = ui.check(heightBlendHandle, tr("Height Blending"));
 							l.paintEmis = ui.check(emisHandle, tr("Emission"));
 							l.paintSubs = ui.check(subsHandle, tr("Subsurface"));
 							if (baseHandle.changed ||
@@ -560,6 +563,7 @@ class TabLayers {
 								roughHandle.changed ||
 								metHandle.changed ||
 								heightHandle.changed ||
+								heightBlendHandle.changed ||
 								emisHandle.changed ||
 								subsHandle.changed) {
 								MakeMaterial.parseMeshMaterial();

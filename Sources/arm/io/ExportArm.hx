@@ -83,6 +83,7 @@ class ExportArm {
 				paint_nor: l.paintNor,
 				paint_nor_blend: l.paintNorBlend,
 				paint_height: l.paintHeight,
+				paint_height_blend: l.paintHeightBlend,
 				paint_emis: l.paintEmis,
 				paint_subs: l.paintSubs
 			});

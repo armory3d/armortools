@@ -43,6 +43,7 @@ class LayerSlot {
 	public var paintNor = true;
 	public var paintNorBlend = true;
 	public var paintHeight = true;
+	public var paintHeightBlend = true;
 	public var paintEmis = true;
 	public var paintSubs = true;
 	public var decalMat = iron.math.Mat4.identity(); // Decal layer

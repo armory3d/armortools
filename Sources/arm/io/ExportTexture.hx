@@ -223,7 +223,7 @@ class ExportTexture {
 				Layers.imga.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty);
+					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
 					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty);
