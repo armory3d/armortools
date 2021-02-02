@@ -97,7 +97,7 @@ class RenderPathRaytrace {
 		f32[17] = helpMat._31;
 		f32[18] = helpMat._32;
 		f32[19] = helpMat._33;
-		f32[20] = Scene.active.world.probe.raw.strength;
+		f32[20] = Scene.active.world.probe.raw.strength * 1.5;
 		if (!Context.showEnvmap) f32[20] = -f32[20];
 		f32[21] = Context.envmapAngle;
 		f32[22] = Project.layers.length;
