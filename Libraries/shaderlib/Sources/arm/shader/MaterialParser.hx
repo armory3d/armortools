@@ -40,8 +40,6 @@ class MaterialParser {
 	static var parsing_disp: Bool;
 	static var normal_written: Bool; // Normal socket is linked on shader node - overwrite fs normal
 	static var cotangentFrameWritten: Bool;
-	static var sample_bump: Bool;
-	static var sample_bump_res: String;
 	static var tex_coord = "texCoord";
 	static inline var eps = 0.000001;
 
@@ -110,8 +108,6 @@ class MaterialParser {
 		parsing_disp = false;
 		normal_written = false;
 		cotangentFrameWritten = false;
-		sample_bump = false;
-		sample_bump_res = "";
 		out_normaltan = "vec3(0.5, 0.5, 1.0)";
 		script_links = null;
 	}
@@ -441,7 +437,6 @@ class MaterialParser {
 			var col3 = parse_vector_input(node.inputs[3]);
 			var scale = parse_value_input(node.inputs[4]);
 			var res = 'tex_brick($co * $scale, $col1, $col2, $col3)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
@@ -451,7 +446,6 @@ class MaterialParser {
 			var col2 = parse_vector_input(node.inputs[2]);
 			var scale = parse_value_input(node.inputs[3]);
 			var res = 'tex_checker($co, $col1, $col2, $scale)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_GRADIENT") {
@@ -461,7 +455,6 @@ class MaterialParser {
 			grad = grad.replace(" ", "_");
 			var f = getGradient(grad, co);
 			var res = to_vec3('clamp($f, 0.0, 1.0)');
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_IMAGE") {
@@ -488,7 +481,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_magic($co * $scale * 4.0)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
@@ -496,7 +488,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'vec3(tex_noise($co * $scale), tex_noise($co * $scale + 0.33), tex_noise($co * $scale + 0.66))';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
@@ -514,7 +505,6 @@ class MaterialParser {
 			else { // Cells
 				res = 'tex_voronoi($co * $scale, texturePass(snoise256)).rgb';
 			}
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
@@ -522,7 +512,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = to_vec3('tex_wave_f($co * $scale)');
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "BRIGHTCONTRAST") {
@@ -872,48 +861,14 @@ class MaterialParser {
 			return "vec3(texCoord.x, texCoord.y, 0.0)";
 		}
 		else if (node.type == "BUMP") {
-			var res = "";
-			// Interpolation strength
 			var strength = parse_value_input(node.inputs[0]);
-			// Height multiplier
 			// var distance = parse_value_input(node.inputs[1]);
-			sample_bump = true;
 			var height = parse_value_input(node.inputs[2]);
-			sample_bump = false;
 			var nor = parse_vector_input(node.inputs[3]);
-			if (sample_bump_res != "") {
-				// curshader.nAttr = true;
-				curshader.write('${sample_bump_res}_x *= ($strength) * 16.0;');
-				curshader.write('${sample_bump_res}_y *= ($strength) * 16.0;');
-				// curshader.write('vec3 ${sample_bump_res}_a = normalize(vec3(1.0, 0.0, ${sample_bump_res}_x));');
-				// curshader.write('vec3 ${sample_bump_res}_b = normalize(vec3(0.0, 1.0, ${sample_bump_res}_y));');
-				// res = 'normalize(mul(nAttr, mat3(${sample_bump_res}_a, ${sample_bump_res}_b, normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0)))))';
-				// sample_bump_res = "";
-
-				res = '(normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0) + $nor) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))';
-				sample_bump_res = "";
-			}
-			else {
-				curshader.n = true;
-				res = "n";
-			}
-
-			// res = '($res + $nor)';
-
-			// if (!curshader.invTBN) {
-			// 	curshader.invTBN = true;
-			// 	curshader.nAttr = true;
-			// 	curshader.add_function(ShaderFunctions.str_cotangentFrame);
-			// 	frag.vVec = true;
-			// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			// 	frag.write('mat3 invTBN = transpose(cotangentFrame(nAttr, vVec, texCoord));');
-			// 	#else
-			// 	frag.write('mat3 invTBN = transpose(cotangentFrame(nAttr, -vVec, texCoord));');
-			// 	#end
-
-			// }
-			// res = '(normalize(mul($res, invTBN)) * 0.5 + 0.5)';
-			return res;
+			var sample_bump_res = store_var_name(node) + "_bump";
+			curshader.write('float ${sample_bump_res}_x = dFdx($height) * ($strength) * 16.0;');
+			curshader.write('float ${sample_bump_res}_y = dFdy($height) * ($strength) * 16.0;');
+			return '(normalize(vec3(${sample_bump_res}_x, ${sample_bump_res}_y, 1.0) + $nor) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))';
 		}
 		else if (node.type == "MAPPING") {
 			var out = parse_vector_input(node.inputs[0]);
@@ -1223,7 +1178,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[4]);
 			var res = 'tex_brick_f($co * $scale)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_CHECKER") {
@@ -1231,7 +1185,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[3]);
 			var res = 'tex_checker_f($co, $scale)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_GRADIENT") {
@@ -1241,7 +1194,6 @@ class MaterialParser {
 			grad = grad.replace(" ", "_");
 			var f = getGradient(grad, co);
 			var res = '(clamp($f, 0.0, 1.0))';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_IMAGE") {
@@ -1263,7 +1215,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_magic_f($co * $scale * 4.0)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_MUSGRAVE") {
@@ -1271,7 +1222,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_musgrave_f($co * $scale * 0.5)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_NOISE") {
@@ -1279,7 +1229,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_noise($co * $scale)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_VORONOI") {
@@ -1297,7 +1246,6 @@ class MaterialParser {
 			else { // Cells
 				res = 'tex_voronoi($co * $scale, texturePass(snoise256)).r';
 			}
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "TEX_WAVE") {
@@ -1305,7 +1253,6 @@ class MaterialParser {
 			var co = getCoord(node);
 			var scale = parse_value_input(node.inputs[1]);
 			var res = 'tex_wave_f($co * $scale)';
-			if (sample_bump) write_bump(node, res);
 			return res;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
@@ -1612,23 +1559,10 @@ class MaterialParser {
 			}
 		}
 
-		if (sample_bump) {
-			sample_bump_res = tex_store;
-			curshader.write('float ${tex_store}_x = dFdx($tex_store).x;');
-			curshader.write('float ${tex_store}_y = dFdy($tex_store).x;');
-			sample_bump = false;
-		}
 		if (to_linear) {
 			curshader.write('$tex_store.rgb = pow($tex_store.rgb, vec3(2.2, 2.2, 2.2));');
 		}
 		return tex_store;
-	}
-
-	static function write_bump(node: TNode, res: String) {
-		sample_bump_res = store_var_name(node) + "_bump";
-		curshader.write('float ${sample_bump_res}_x = dFdx($res);');
-		curshader.write('float ${sample_bump_res}_y = dFdy($res);');
-		sample_bump = false;
 	}
 
 	public static inline function vec1(v: Float): String {
