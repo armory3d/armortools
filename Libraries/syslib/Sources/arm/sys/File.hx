@@ -29,7 +29,11 @@ class File {
 	}
 
 	public static function createDirectory(path: String) {
-		Krom.sysCommand("mkdir " + path);
+		#if krom_windows
+		Krom.sysCommand("mkdir " + path); // -p by default
+		#else
+		Krom.sysCommand("mkdir -p " + path);
+		#end
 	}
 
 	public static function copy(srcPath: String, dstPath: String) {
@@ -93,21 +97,25 @@ class File {
 	}
 
 	public static function cacheCloud(path: String): String {
-		var dest = Path.workingDir() + Path.sep + path;
+		var dest = Krom.getFilesLocation() + Path.sep + path;
 		if (!File.exists(dest)) {
-			var fileDir = Krom.getFilesLocation() + Path.sep + path.substr(0, path.lastIndexOf(Path.sep));
+			var fileDir = dest.substr(0, dest.lastIndexOf(Path.sep));
 			File.createDirectory(fileDir);
 			#if krom_windows
 			path = path.replace("\\", "/");
 			#end
 			var url = Config.raw.server + "/" + path;
-			File.download(url, path, cloudSizes.get(path));
+			File.download(url, dest, cloudSizes.get(path));
 			if (!File.exists(dest)) {
 				Log.error(Strings.error5());
 				return null;
 			}
 		}
+		#if krom_darwin
 		return dest;
+		#else
+		return Path.workingDir() + Path.sep + path;
+		#end
 	}
 
 	static function initCloud() {
