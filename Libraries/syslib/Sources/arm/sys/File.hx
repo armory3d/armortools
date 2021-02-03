@@ -77,7 +77,7 @@ class File {
 			});
 		}
 		#else
-		Krom.sysCommand("curl " + url + " -o " + dstPath);
+		Krom.sysCommand("curl -L " + url + " -o " + dstPath);
 		#end
 	}
 
