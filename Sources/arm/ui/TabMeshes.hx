@@ -39,6 +39,10 @@ class TabMeshes {
 						MeshUtil.calcNormals();
 						Context.ddirty = 2;
 					}
+					if (ui.button(tr("Geometry to Origin"), Left)) {
+						MeshUtil.toOrigin();
+						Context.ddirty = 2;
+					}
 					if (ui.button(tr("Rotate X"), Left)) {
 						MeshUtil.swapAxis(1, 2);
 						Context.ddirty = 2;
@@ -51,7 +55,7 @@ class TabMeshes {
 						MeshUtil.swapAxis(0, 1);
 						Context.ddirty = 2;
 					}
-				}, 6);
+				}, 7);
 			}
 
 			ui.endSticky();

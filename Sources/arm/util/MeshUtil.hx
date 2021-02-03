@@ -215,4 +215,66 @@ class MeshUtil {
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
+
+	public static function toOrigin() {
+		var dx = 0.0;
+		var dy = 0.0;
+		var dz = 0.0;
+		for (o in Project.paintObjects) {
+			var l = 4;
+			var sc = o.data.scalePos / 32767;
+			var va = o.data.raw.vertex_arrays[0].values;
+			var minx = va[0];
+			var maxx = va[0];
+			var miny = va[1];
+			var maxy = va[1];
+			var minz = va[2];
+			var maxz = va[2];
+			for (i in 1...Std.int(va.length / l)) {
+				if (va[i * l] < minx) minx = va[i * l];
+				else if (va[i * l] > maxx) maxx = va[i * l];
+				if (va[i * l + 1] < miny) miny = va[i * l + 1];
+				else if (va[i * l + 1] > maxy) maxy = va[i * l + 1];
+				if (va[i * l + 2] < minz) minz = va[i * l + 2];
+				else if (va[i * l + 2] > maxz) maxz = va[i * l + 2];
+			}
+			dx += (minx + maxx) / 2 * sc;
+			dy += (miny + maxy) / 2 * sc;
+			dz += (minz + maxz) / 2 * sc;
+		}
+		dx /= Project.paintObjects.length;
+		dy /= Project.paintObjects.length;
+		dz /= Project.paintObjects.length;
+
+		for (o in Project.paintObjects) {
+			var g = o.data.geom;
+			var sc = o.data.scalePos / 32767;
+			var va = o.data.raw.vertex_arrays[0].values;
+			var maxScale = 0.0;
+			for (i in 0...Std.int(va.length / 4)) {
+				if (Math.abs(va[i * 4    ] * sc - dx) > maxScale) maxScale = Math.abs(va[i * 4    ] * sc - dx);
+				if (Math.abs(va[i * 4 + 1] * sc - dy) > maxScale) maxScale = Math.abs(va[i * 4 + 1] * sc - dy);
+				if (Math.abs(va[i * 4 + 2] * sc - dz) > maxScale) maxScale = Math.abs(va[i * 4 + 2] * sc - dz);
+			}
+			o.transform.scaleWorld = o.data.scalePos = maxScale;
+			o.transform.buildMatrix();
+
+			for (i in 0...Std.int(va.length / 4)) {
+				va[i * 4    ] = Std.int((va[i * 4    ] * sc - dx) / maxScale * 32767);
+				va[i * 4 + 1] = Std.int((va[i * 4 + 1] * sc - dy) / maxScale * 32767);
+				va[i * 4 + 2] = Std.int((va[i * 4 + 2] * sc - dz) / maxScale * 32767);
+			}
+
+			var l = g.structLength;
+			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			for (i in 0...Std.int(vertices.length / l)) {
+				vertices[i * l    ] = va[i * 4    ];
+				vertices[i * l + 1] = va[i * 4 + 1];
+				vertices[i * l + 2] = va[i * 4 + 2];
+			}
+			g.vertexBuffer.unlock();
+		}
+
+		mergeMesh();
+	}
 }
