@@ -65,7 +65,7 @@ class App {
 	public static var defaultElementW = 100;
 	public static var defaultElementH = 28;
 	public static var defaultFontSize = 13;
-	public static var resHandle = new Handle({position: Res2048});
+	public static var resHandle = new Handle();
 	public static var bitsHandle = new Handle();
 	static var dropPaths: Array<String> = [];
 	static var appx = 0;

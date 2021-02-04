@@ -277,6 +277,12 @@ class BoxPreferences {
 					Config.raw.workspace = workspaceHandle.position;
 				}
 
+				var layerResHandle = Id.handle({position: Config.raw.layer_res});
+				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
+				if (layerResHandle.changed) {
+					Config.raw.layer_res = layerResHandle.position;
+				}
+
 				var materialLiveHandle = Id.handle({selected: Config.raw.material_live});
 				Config.raw.material_live = ui.check(materialLiveHandle, tr("Live Material Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Instantly update material preview on node change"));

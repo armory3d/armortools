@@ -106,6 +106,7 @@ class Config {
 			raw.show_asset_names = false;
 			raw.node_preview = true;
 			raw.workspace = 0;
+			raw.layer_res = Res2048;
 			raw.dilate = DilateInstant;
 			raw.dilate_radius = 2;
 			raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
@@ -123,6 +124,7 @@ class Config {
 			}
 		}
 
+		App.resHandle.position = raw.layer_res;
 		loadKeymap();
 	}
 
