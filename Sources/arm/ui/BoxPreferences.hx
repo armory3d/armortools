@@ -247,6 +247,7 @@ class BoxPreferences {
 			if (ui.tab(htab, tr("Usage"), true)) {
 				Context.undoHandle = Id.handle({value: Config.raw.undo_steps});
 				Config.raw.undo_steps = Std.int(ui.slider(Context.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
+				if (Config.raw.undo_steps < 1) Config.raw.undo_steps = Std.int(Context.undoHandle.value = 1);
 				if (Context.undoHandle.changed) {
 					ui.g.end();
 					while (History.undoLayers.length < Config.raw.undo_steps) {
