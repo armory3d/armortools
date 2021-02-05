@@ -214,7 +214,7 @@ class UIMenu {
 				if (ui.changed) keepOpen = true;
 			}
 			else if (menuCategory == MenuMode) {
-				var modeHandle = Id.handle();
+				var modeHandle = Id.handle({position: Context.viewportMode});
 				var modes = [
 					tr("Lit"),
 					tr("Base Color"),
