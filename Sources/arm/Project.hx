@@ -284,7 +284,8 @@ class Project {
 
 			if (current != null) current.begin(false);
 
-			Context.savedEnvmap = Context.defaultEnvmap;
+			Context.savedEnvmap = null;
+			Context.envmapLoaded = false;
 			Scene.active.world.envmap = Context.emptyEnvmap;
 			Scene.active.world.raw.envmap = "World_radiance.k";
 			Context.showEnvmapHandle.selected = Context.showEnvmap = false;

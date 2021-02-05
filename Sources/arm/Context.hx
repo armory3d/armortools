@@ -76,7 +76,6 @@ class Context {
 	public static var norYPicked = 0.0;
 	public static var norZPicked = 0.0;
 
-	public static var defaultEnvmap: Image = null;
 	public static var defaultIrradiance: kha.arrays.Float32Array = null;
 	public static var defaultRadiance: Image = null;
 	public static var defaultRadianceMipmaps: Array<Image> = null;
