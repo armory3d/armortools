@@ -69,6 +69,12 @@ class UIMenubar {
 				}
 				else if (UIHeader.inst.worktab.position == SpaceBake) {
 					Context.selectTool(ToolBake);
+					#if (kha_direct3d12 || kha_vulkan)
+					// Bake in lit mode for now
+					if (Context.viewportMode == ViewPathTrace) {
+						Context.viewportMode = ViewLit;
+					}
+					#end
 				}
 				else if (UIHeader.inst.worktab.position == SpaceMaterial) {
 					Context.selectTool(ToolPicker);
