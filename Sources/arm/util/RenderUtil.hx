@@ -440,8 +440,8 @@ class RenderUtil {
 		screenAlignedFullIB.unlock();
 	}
 
-	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image) {
-		var res = MakeMaterial.parseNodePreviewMaterial(node);
+	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image, group: TNodeCanvas = null, parents: Array<TNode> = null) {
+		var res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 
 		var g4 = image.g4;

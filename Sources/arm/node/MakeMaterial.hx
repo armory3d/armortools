@@ -279,7 +279,7 @@ class MakeMaterial {
 			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
 			Context.nodePreviewsBlur.set(MaterialParser.node_name(node, parents), image);
 			MaterialParser.blur_passthrough = true;
-			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
+			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
 			MaterialParser.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
@@ -289,7 +289,7 @@ class MakeMaterial {
 			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()));
 			Context.nodePreviewsWarp.set(MaterialParser.node_name(node, parents), image);
 			MaterialParser.warp_passthrough = true;
-			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image);
+			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
 			MaterialParser.warp_passthrough = false;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
