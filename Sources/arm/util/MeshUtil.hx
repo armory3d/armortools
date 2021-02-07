@@ -256,7 +256,7 @@ class MeshUtil {
 				if (Math.abs(va[i * 4 + 1] * sc - dy) > maxScale) maxScale = Math.abs(va[i * 4 + 1] * sc - dy);
 				if (Math.abs(va[i * 4 + 2] * sc - dz) > maxScale) maxScale = Math.abs(va[i * 4 + 2] * sc - dz);
 			}
-			o.transform.scaleWorld = o.data.scalePos = maxScale;
+			o.transform.scaleWorld = o.data.scalePos = o.data.raw.scale_pos = maxScale;
 			o.transform.buildMatrix();
 
 			for (i in 0...Std.int(va.length / 4)) {
