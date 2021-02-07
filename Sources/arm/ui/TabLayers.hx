@@ -202,10 +202,11 @@ class TabLayers {
 				}
 				if (state == State.Started) {
 					Context.setLayer(l);
-					if (Time.time() - Context.selectTime < 0.25) {
+					if (l.fill_layer != null) Context.setMaterial(l.fill_layer);
+					if (Time.time() - Context.selectTime < 0.2) {
 						UISidebar.inst.show2DView(View2DLayer);
 					}
-					if (Time.time() - Context.selectTime > 0.25) {
+					if (Time.time() - Context.selectTime > 0.2) {
 						Context.selectTime = Time.time();
 					}
 					var mouse = Input.getMouse();
@@ -277,9 +278,6 @@ class TabLayers {
 								}
 								iron.App.notifyOnInit(_init);
 							}
-							if (l.fill_mask != null && ui.button(tr("Select Material"), Left)) {
-								Context.setMaterial(l.fill_mask);
-							}
 							if (ui.button(tr("Delete"), Left)) {
 								Context.setLayer(l, true);
 								History.deleteMask();
@@ -313,14 +311,15 @@ class TabLayers {
 								}
 								iron.App.notifyOnInit(_init);
 							}
-						}, 6 + add);
+						}, 5 + add);
 					}
 					if (state == State.Started) {
 						Context.setLayer(l, true);
-						if (Time.time() - Context.selectTime < 0.25) {
+						if (l.fill_mask != null) Context.setMaterial(l.fill_mask);
+						if (Time.time() - Context.selectTime < 0.2) {
 							UISidebar.inst.show2DView(View2DLayer);
 						}
-						if (Time.time() - Context.selectTime > 0.25) {
+						if (Time.time() - Context.selectTime > 0.2) {
 							Context.selectTime = Time.time();
 						}
 						var mouse = Input.getMouse();
@@ -343,7 +342,7 @@ class TabLayers {
 						ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
 						if (ui.inputStarted) {
 							Context.setLayer(l);
-							if (Time.time() - Context.selectTime > 0.25) {
+							if (Time.time() - Context.selectTime > 0.2) {
 								Context.selectTime = Time.time();
 							}
 							var mouse = Input.getMouse();
@@ -359,7 +358,7 @@ class TabLayers {
 					var state = ui.text(l.name);
 					if (state == State.Started) {
 						var td = Time.time() - Context.selectTime;
-						if (td < 0.25 && td > 0.0) {
+						if (td < 0.2 && td > 0.0) {
 							layerNameEdit = l.id;
 							layerNameHandle.text = l.name;
 							ui.startTextEdit(layerNameHandle);
@@ -373,7 +372,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
-					var menuElements = l.getChildren() != null ? 6 : (21 + add);
+					var menuElements = l.getChildren() != null ? 6 : (20 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -515,10 +514,6 @@ class TabLayers {
 							Context.setLayer(l, true);
 							Context.layerPreviewDirty = true;
 							History.newMask();
-						}
-
-						if (l.fill_layer != null && ui.button(tr("Select Material"), Left)) {
-							Context.setMaterial(l.fill_layer);
 						}
 
 						if (l.getChildren() == null) {
