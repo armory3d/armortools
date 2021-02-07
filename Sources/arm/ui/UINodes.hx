@@ -190,7 +190,7 @@ class UINodes {
 		}
 	}
 
-	function onNodeRemove(node: TNode) {
+	public static function onNodeRemove(node: TNode) {
 		if (node.type == "GROUP") { // Remove unused groups
 			var found = false;
 			var canvases: Array<TNodeCanvas> = [];

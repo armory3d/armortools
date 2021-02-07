@@ -145,6 +145,7 @@ class TabMaterials {
 								materials.splice(i, 1);
 								UISidebar.inst.hwnd1.redraws = 2;
 								for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
+								for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
 							}
 
 							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
