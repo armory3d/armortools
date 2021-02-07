@@ -312,6 +312,9 @@ class RenderPathRaytrace {
 
 		commands();
 
+		if (Config.raw.rp_bloom != false) {
+			RenderPathDeferred.commandsBloom("buf");
+		}
 		path.setTarget("buf");
 		path.drawMeshes("overlay");
 		path.setTarget("buf");
