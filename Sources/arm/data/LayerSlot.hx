@@ -309,6 +309,7 @@ class LayerSlot {
 		l.visible = visible;
 		l.maskOpacity = maskOpacity;
 		l.fill_layer = fill_layer;
+		l.fill_mask = fill_mask;
 		l.objectMask = objectMask;
 		l.blending = blending;
 		l.uvType = uvType;
