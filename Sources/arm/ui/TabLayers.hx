@@ -210,9 +210,7 @@ class TabLayers {
 						Context.selectTime = Time.time();
 					}
 					var mouse = Input.getMouse();
-					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragLayer = Context.layer;
+					setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 				}
 
 				if (l.texpaint_mask != null) {
@@ -323,9 +321,7 @@ class TabLayers {
 							Context.selectTime = Time.time();
 						}
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragLayer = Context.layer;
+						setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 					}
 				}
 
@@ -346,9 +342,7 @@ class TabLayers {
 								Context.selectTime = Time.time();
 							}
 							var mouse = Input.getMouse();
-							App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-							App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-							App.dragLayer = Context.layer;
+							setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 						}
 						else if (ui.inputReleasedR) {
 							contextMenu = true;
@@ -753,5 +747,12 @@ class TabLayers {
 		var res: Map<Int, Int> = [];
 		for (l in map.keys()) res.set(map.get(l), Project.layers.indexOf(l) > -1 ? Project.layers.indexOf(l) : 9999);
 		return res;
+	}
+
+	static function setDragLayer(layer: LayerSlot, offX: Float, offY: Float) {
+		App.dragOffX = offX;
+		App.dragOffY = offY;
+		App.dragLayer = layer;
+		Context.dragDestination = Project.layers.indexOf(layer);
 	}
 }
