@@ -356,7 +356,7 @@ class Layers {
 	}
 
 	public static function mergeLayer(l0 : LayerSlot, l1: LayerSlot, use_mask = false) {
-		if (!l1.visible) return;
+		if (!l1.visible || l1.getChildren() != null) return;
 
 		if (pipeMerge == null) makePipe();
 		makeTempImg();
