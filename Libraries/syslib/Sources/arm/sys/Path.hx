@@ -123,6 +123,8 @@ class Path {
 	public static function isProtected(): Bool {
 		#if krom_windows
 		return Krom.getFilesLocation().indexOf("Program Files") >= 0;
+		#elseif krom_android
+		return true;
 		#else
 		return false;
 		#end
