@@ -39,6 +39,7 @@ project.addDefine("js-es=6");
 project.addParameter("--macro include('arm.node.brush')");
 project.addDefine("kha_no_ogg");
 project.addDefine("zui_translate");
+project.addDefine("arm_data_dir");
 project.addDefine("arm_ltc");
 project.addDefine("arm_appwh");
 project.addDefine("arm_skip_envmap");
@@ -48,10 +49,6 @@ project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
 // project.addDefine("arm_physics");
 // project.addDefine("arm_skin");
-
-if (!android) {
-	project.addDefine("arm_data_dir");
-}
 
 if (android) {
 	project.addDefine("krom_android");

@@ -259,7 +259,7 @@ class UIFiles {
 		#if krom_windows
 		"C:\\Users"
 		#elseif krom_android
-		"/sdcard"
+		"/sdcard/Android/data/org.armorpaint/files"
 		#elseif krom_darwin
 		"/Users"
 		#else

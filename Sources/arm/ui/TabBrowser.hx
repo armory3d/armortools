@@ -43,7 +43,10 @@ class TabBrowser {
 				});
 				hpath.text = hpath.text.substr(0, hpath.text.lastIndexOf(Path.sep));
 			}
-			known = hpath.text.indexOf(".") > 0;
+			known = hpath.text.substr(hpath.text.lastIndexOf(Path.sep)).indexOf(".") > 0;
+			#if krom_android
+			if (hpath.text.endsWith(".armorpaint")) known = false;
+			#end
 
 			var bottomY = ui._y;
 			var _h = ui._h;
