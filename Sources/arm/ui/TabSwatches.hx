@@ -63,7 +63,6 @@ class TabSwatches {
 					if (Context.swatch == Project.raw.swatches[i]) {
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 32;
-						if (Config.raw.window_scale > 1) w += Std.int(Config.raw.window_scale * 2);
 						ui.fill(-2, -2, w, w, ui.t.HIGHLIGHT_COL);
 					}
 
