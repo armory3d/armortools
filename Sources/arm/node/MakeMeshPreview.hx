@@ -58,7 +58,7 @@ class MakeMeshPreview {
 
 		var brushScale = (Context.brushScale * Context.brushNodesScale) + "";
 		vert.add_out('vec2 texCoord');
-		vert.write_attrib('texCoord = tex * ${brushScale};');
+		vert.write_attrib('texCoord = tex * float(${brushScale});');
 
 		if (MakeMaterial.heightUsed) {
 			frag.bposition = true;
