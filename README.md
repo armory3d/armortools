@@ -50,7 +50,7 @@ node Kinc/make -g metal
 **Android** *wip*
 ```bash
 node armorcore/make android -g opengl --shaderversion 300
-cp -r build/krom/ armorcore/build/Krom/app/src/main/assets/
+cp -r build/krom/* armorcore/build/Krom/app/src/main/assets/
 cd armorcore
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:

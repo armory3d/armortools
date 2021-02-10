@@ -9,7 +9,6 @@ Installation:
 - Copy .apk file to Android device
 - Open the .apk with file browser to install it
 - Allow installing from unknown sources
-- Go to 'Settings - Apps - ArmorPaint - Permissions' and enable 'Storage'
 
 Controls:
 - Paint with one finger, rotate and scroll with two fingers
