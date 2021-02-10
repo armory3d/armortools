@@ -56,7 +56,7 @@ class UIMenu {
 			var menuItems = [
 				18, // MenuFile
 				4, // MenuEdit
-				#if (krom_windows || krom_linux) 14 #else 13 #end, // MenuViewport
+				14, // MenuViewport
 				#if (kha_direct3d12 || kha_vulkan) 14 #else 13 #end, // MenuMode
 				17, // MenuCamera
 				7 // MenuHelp
@@ -110,10 +110,6 @@ class UIMenu {
 				if (ui.button("      " + tr("Preferences..."), Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
 			else if (menuCategory == MenuViewport) {
-				// if (Scene.active.world.probe.radianceMipmaps.length > 0) {
-					// ui.image(Scene.active.world.probe.radianceMipmaps[0]);
-				// }
-
 				if (ui.button("      " + tr("Import Envmap..."), Left)) {
 					UIFiles.show("hdr", false, function(path: String) {
 						if (!path.endsWith(".hdr")) {
