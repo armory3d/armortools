@@ -28,7 +28,20 @@ class Config {
 				done();
 			});
 		}
-		catch (e: Dynamic) { done(); }
+		catch (e: Dynamic) {
+			#if krom_linux
+			try { // Protected directory
+				Data.getBlob(Krom.savePath() + "config.arm", function(blob: kha.Blob) {
+					configLoaded = true;
+					raw = Json.parse(blob.toString());
+					done();
+				});
+			}
+			catch (e: Dynamic) { done(); }
+			#else
+			done();
+			#end
+		}
 	}
 
 	public static function save() {
@@ -37,6 +50,10 @@ class Config {
 		var path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.arm";
 		var bytes = Bytes.ofString(Json.stringify(raw));
 		Krom.fileSaveBytes(path, bytes.getData());
+
+		#if krom_linux // Protected directory
+		if (!File.exists(path)) Krom.fileSaveBytes(Krom.savePath() + "config.arm", bytes.getData());
+		#end
 	}
 
 	public static function init() {
