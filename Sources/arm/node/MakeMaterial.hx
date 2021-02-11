@@ -228,31 +228,16 @@ class MakeMaterial {
 	}
 
 	static function bakeNodePreviews() {
-		if (Context.nodePreviewsBlur != null) {
-			for (image in Context.nodePreviewsBlur) {
-				App.notifyOnNextFrame(function() {
-					image.unload();
-				});
-			}
-			Context.nodePreviewsBlur = null;
-		}
-		if (Context.nodePreviewsWarp != null) {
-			for (image in Context.nodePreviewsWarp) {
-				App.notifyOnNextFrame(function() {
-					image.unload();
-				});
-			}
-			Context.nodePreviewsWarp = null;
-		}
-		if (Context.nodePreviewsBake != null) {
-			for (image in Context.nodePreviewsBake) {
-				App.notifyOnNextFrame(function() {
-					image.unload();
-				});
-			}
-			Context.nodePreviewsBake = null;
-		}
+		Context.nodePreviewsUsed = [];
+		if (Context.nodePreviews == null) Context.nodePreviews = [];
 		traverseNodes(UINodes.inst.getCanvasMaterial().nodes, null, []);
+		for (key in Context.nodePreviews.keys()) {
+			if (Context.nodePreviewsUsed.indexOf(key) == -1) {
+				var image = Context.nodePreviews.get(key);
+				App.notifyOnNextFrame(image.unload);
+				Context.nodePreviews.remove(key);
+			}
+		}
 	}
 
 	static function traverseNodes(nodes: Array<TNode>, group: TNodeCanvas, parents: Array<TNode>) {
@@ -273,41 +258,48 @@ class MakeMaterial {
 
 	static function bakeNodePreview(node: TNode, group: TNodeCanvas, parents: Array<TNode>) {
 		if (node.type == "BLUR") {
-			if (Context.nodePreviewsBlur == null) {
-				Context.nodePreviewsBlur = new Map();
+			var id = MaterialParser.node_name(node, parents);
+			var image = Context.nodePreviews.get(id);
+			Context.nodePreviewsUsed.push(id);
+			var resX = Std.int(Config.getTextureResX() / 4);
+			var resY = Std.int(Config.getTextureResY() / 4);
+			if (image == null || image.width != resX || image.height != resY) {
+				if (image != null) image.unload();
+				image = kha.Image.createRenderTarget(resX, resY);
+				Context.nodePreviews.set(id, image);
 			}
-			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX() / 4), Std.int(Config.getTextureResY() / 4));
-			Context.nodePreviewsBlur.set(MaterialParser.node_name(node, parents), image);
+
 			MaterialParser.blur_passthrough = true;
 			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
 			MaterialParser.blur_passthrough = false;
 		}
 		else if (node.type == "DIRECT_WARP") {
-			if (Context.nodePreviewsWarp == null) {
-				Context.nodePreviewsWarp = new Map();
+			var id = MaterialParser.node_name(node, parents);
+			var image = Context.nodePreviews.get(id);
+			Context.nodePreviewsUsed.push(id);
+			var resX = Std.int(Config.getTextureResX());
+			var resY = Std.int(Config.getTextureResY());
+			if (image == null || image.width != resX || image.height != resY) {
+				if (image != null) image.unload();
+				image = kha.Image.createRenderTarget(resX, resY);
+				Context.nodePreviews.set(id, image);
 			}
-			var image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()));
-			Context.nodePreviewsWarp.set(MaterialParser.node_name(node, parents), image);
+
 			MaterialParser.warp_passthrough = true;
 			RenderUtil.makeNodePreview(UINodes.inst.getCanvasMaterial(), node, image, group, parents);
 			MaterialParser.warp_passthrough = false;
 		}
 		else if (node.type == "BAKE_CURVATURE") {
-			if (Context.nodePreviewsBake == null) {
-				Context.nodePreviewsBake = new Map();
-			}
 			var id = MaterialParser.node_name(node, parents);
-			var image = Context.nodePreviewsBake.get(id);
-
-			if (image == null) {
-				image = kha.Image.createRenderTarget(Std.int(Config.getTextureResX()), Std.int(Config.getTextureResY()), kha.graphics4.TextureFormat.L8);
-				Context.nodePreviewsBake.set(id, image);
+			var image = Context.nodePreviews.get(id);
+			Context.nodePreviewsUsed.push(id);
+			var resX = Std.int(Config.getTextureResX());
+			var resY = Std.int(Config.getTextureResY());
+			if (image == null || image.width != resX || image.height != resY) {
+				if (image != null) image.unload();
+				image = kha.Image.createRenderTarget(resX, resY, kha.graphics4.TextureFormat.L8);
+				Context.nodePreviews.set(id, image);
 			}
-
-			MaterialParser.bake_passthrough = true;
-			var res = parseNodePreviewMaterial(node, group, parents);
-			MaterialParser.bake_passthrough = false;
-			if (res == null || res.scon == null) return;
 
 			if (RenderPathPaint.liveLayer == null) {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
@@ -324,13 +316,19 @@ class MakeMaterial {
 			Context.bakeType = BakeCurvature;
 
 			MaterialParser.bake_passthrough = true;
+			MaterialParser.start_node = node;
+			MaterialParser.start_group = group;
+			MaterialParser.start_parents = parents;
 			parsePaintMaterial(false);
+			MaterialParser.bake_passthrough = false;
+			MaterialParser.start_node = null;
+			MaterialParser.start_group = null;
+			MaterialParser.start_parents = null;
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint(false);
 			RenderPathPaint.dilate(true, false);
 			RenderPathPaint.useLiveLayer(false);
-			MaterialParser.bake_passthrough = false;
 			Context.pdirty = 0;
 
 			UIHeader.inst.worktab.position = _space;

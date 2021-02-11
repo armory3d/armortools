@@ -60,6 +60,9 @@ class MaterialParser {
 	public static var bake_passthrough_strength = "0.0";
 	public static var bake_passthrough_radius = "0.0";
 	public static var bake_passthrough_offset = "0.0";
+	public static var start_group: TNodeCanvas = null;
+	public static var start_parents: Array<TNode> = null;
+	public static var start_node: TNode = null;
 
 	public static var arm_export_tangents = true;
 	public static var out_normaltan: String; // Raw tangent space normal parsed from normal map
@@ -125,6 +128,26 @@ class MaterialParser {
 		tese = _tese;
 		curshader = frag;
 		matcon = _matcon;
+
+		if (start_group != null) {
+			push_group(start_group);
+			parents = start_parents;
+		}
+
+		if (start_node != null) {
+			var link: TNodeLink = { id: 99999, from_id: start_node.id, from_socket: 0, to_id: -1, to_socket: -1 };
+			write_result(link);
+			return {
+				out_basecol: 'vec3(0.0, 0.0, 0.0)',
+				out_roughness: '0.0',
+				out_metallic: '0.0',
+				out_occlusion: '1.0',
+				out_opacity: '1.0',
+				out_height: '0.0',
+				out_emission: '0.0',
+				out_subsurface: '0.0'
+			}
+		}
 
 		var output_node = node_by_type(nodes, "OUTPUT_MATERIAL");
 		if (output_node != null) {
@@ -1136,7 +1159,16 @@ class MaterialParser {
 				#end
 			}
 			else if (socket == node.outputs[7]) { // Pointiness
-				return "0.0";
+				var strength = 1.0;
+				var radius = 1.0;
+				var offset = 0.0;
+				var store = store_var_name(node);
+				curshader.n = true;
+				curshader.write('vec3 ${store}_dx = dFdx(n);');
+				curshader.write('vec3 ${store}_dy = dFdy(n);');
+				curshader.write('float ${store}_curvature = max(dot(${store}_dx, ${store}_dx), dot(${store}_dy, ${store}_dy));');
+				curshader.write('${store}_curvature = clamp(pow(${store}_curvature, (1.0 / ' + radius + ') * 0.25) * ' + strength + ' * 2.0 + ' + offset + ' / 10.0, 0.0, 1.0);');
+				return '${store}_curvature';
 			}
 			else if (socket == node.outputs[8]) { // Random Per Island
 				return "0.0";

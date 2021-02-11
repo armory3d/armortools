@@ -366,15 +366,15 @@ class Uniforms {
 		}
 		if (link.startsWith("_texblur_")) {
 			var id = link.substr(9);
-			return Context.nodePreviewsBlur != null ? Context.nodePreviewsBlur.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.nodePreviews != null ? Context.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
 		if (link.startsWith("_texwarp_")) {
 			var id = link.substr(9);
-			return Context.nodePreviewsWarp != null ? Context.nodePreviewsWarp.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.nodePreviews != null ? Context.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
 		if (link.startsWith("_texbake_")) {
 			var id = link.substr(9);
-			return Context.nodePreviewsBake != null ? Context.nodePreviewsBake.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
+			return Context.nodePreviews != null ? Context.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;
 		}
 
 		return null;

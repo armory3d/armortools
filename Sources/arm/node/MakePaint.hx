@@ -1,6 +1,7 @@
 package arm.node;
 
 import iron.data.SceneFormat;
+import zui.Nodes;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.shader.MaterialParser;
@@ -197,7 +198,7 @@ class MakePaint {
 			MaterialParser.triplanar = uvType == UVTriplanar && !decal;
 			MaterialParser.sample_keep_aspect = decal;
 			MaterialParser.sample_uv_scale = 'brushScale';
-			var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon);
+			var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_paint, vert, frag, null, null, null, matcon, false);
 			MaterialParser.parse_emission = false;
 			MaterialParser.parse_subsurface = false;
 			MaterialParser.parse_height_as_channel = false;
