@@ -68,7 +68,7 @@ class MakeMeshPreview {
 		MaterialParser.sample_keep_aspect = decal;
 		MaterialParser.sample_uv_scale = brushScale;
 		MaterialParser.parse_height = MakeMaterial.heightUsed;
-		var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_mesh, vert, frag, null, null, null, matcon);
+		var sout = MaterialParser.parse(UINodes.inst.getCanvasMaterial(), con_mesh, vert, frag, matcon);
 		MaterialParser.parse_height = false;
 		MaterialParser.sample_keep_aspect = false;
 		var base = sout.out_basecol;

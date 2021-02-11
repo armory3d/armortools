@@ -25,9 +25,6 @@ class MaterialParser {
 	static var con: NodeShaderContext;
 	static var vert: NodeShader;
 	static var frag: NodeShader;
-	static var geom: NodeShader;
-	static var tesc: NodeShader;
-	static var tese: NodeShader;
 	static var curshader: NodeShader;
 	static var matcon: TMaterialContext;
 	static var parsed: Array<String>;
@@ -37,8 +34,6 @@ class MaterialParser {
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
 
-	static var parsing_disp: Bool;
-	static var normal_written: Bool; // Normal socket is linked on shader node - overwrite fs normal
 	static var cotangentFrameWritten: Bool;
 	static var tex_coord = "texCoord";
 	static inline var eps = 0.000001;
@@ -108,14 +103,12 @@ class MaterialParser {
 	static function init() {
 		parsed = [];
 		parents = [];
-		parsing_disp = false;
-		normal_written = false;
 		cotangentFrameWritten = false;
 		out_normaltan = "vec3(0.5, 0.5, 1.0)";
 		script_links = null;
 	}
 
-	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _geom: NodeShader, _tesc: NodeShader, _tese: NodeShader, _matcon: TMaterialContext, _parse_displacement = false): TShaderOut {
+	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _matcon: TMaterialContext): TShaderOut {
 		init();
 		canvases = [canvas];
 		nodes = canvas.nodes;
@@ -123,9 +116,6 @@ class MaterialParser {
 		con = _con;
 		vert = _vert;
 		frag = _frag;
-		geom = _geom;
-		tesc = _tesc;
-		tese = _tese;
 		curshader = frag;
 		matcon = _matcon;
 
