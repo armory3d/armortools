@@ -24,7 +24,7 @@ class TabSwatches {
 				Context.setSwatch(Project.makeSwatch());
 				Project.raw.swatches.push(Context.swatch);
 			}
-			if (ui.button(tr("Import"))) Project.importAsset("arm");
+			if (ui.button(tr("Import"))) Project.importSwatches();
 			if (ui.isHovered) ui.tooltip(tr("Import swatches") + ' (${Config.keymap.file_import_assets})');
 			if (ui.button(tr("Tools..."))) {
 				UIMenu.draw(function(ui: Zui) {

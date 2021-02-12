@@ -421,6 +421,12 @@ class Project {
 		});
 	}
 
+	public static function importSwatches() {
+		UIFiles.show("arm", false, function(path: String) {
+			ImportArm.runSwatches(path);
+		});
+	}
+
 	public static function reimportTextures() {
 		for (asset in Project.assets) {
 			Data.deleteImage(asset.file);
@@ -468,7 +474,10 @@ class Project {
 
 	public static function exportSwatches() {
 		UIFiles.show("arm", true, function(path: String) {
-			ExportArm.runSwatches(path);
+			var f = UIFiles.filename;
+			if (f == "") f = tr("untitled");
+			filepath = path + Path.sep + f;
+			ExportArm.runSwatches(filepath);
 		});
 	}
 

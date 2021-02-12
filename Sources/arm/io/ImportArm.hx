@@ -470,6 +470,14 @@ class ImportArm {
 		Data.deleteBlob(path);
 	}
 
+	public static function runSwatches(path: String) {
+		Data.getBlob(path, function(b: Blob) {
+			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+			if (project.version == null) { Data.deleteBlob(path); return; }
+			runSwatchesFromProject(project, path);
+		});
+	}
+
 	public static function runSwatchesFromProject(project: TProjectFormat, path: String) {
 		for (s in project.swatches) {
 			Project.raw.swatches.push(s);
