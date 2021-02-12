@@ -112,7 +112,7 @@ class Translator {
 					f.setFontIndex(fontIndex);
 				}
 				App.font = f;
-				// Scale up the font size and width a bit
+				// Scale up the font size and elements width a bit
 				App.theme.FONT_SIZE = Std.int(App.defaultFontSize * newFont.scale);
 				App.theme.ELEMENT_W = Std.int(App.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
 				var uis = [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];

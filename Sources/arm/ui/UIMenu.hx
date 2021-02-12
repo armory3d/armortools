@@ -38,7 +38,7 @@ class UIMenu {
 	@:access(zui.Zui)
 	public static function render(g: kha.graphics2.Graphics) {
 		var ui = App.uiMenu;
-		var menuW = Std.int(ui.ELEMENT_W() * 2.0);
+		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0) : Std.int(ui.ELEMENT_W() * 2.0);
 		var _BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -414,7 +414,7 @@ class UIMenu {
 		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuW = App.uiMenu.ELEMENT_W() * 2.0;
+		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.0;
 		if (menuX + menuW > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuW);
 		}
