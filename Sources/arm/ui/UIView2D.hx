@@ -33,6 +33,7 @@ class UIView2D {
 	public var panY = 0.0;
 	public var panScale = 1.0;
 	var texType = TexBase;
+	var layerMode = View2DSelected;
 	var uvmapShow = false;
 	var tiledShow = false;
 
@@ -105,6 +106,14 @@ class UIView2D {
 				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
+
+				if (layerMode == View2DVisible) {
+					var current = @:privateAccess kha.graphics2.Graphics.current;
+					if (current != null) current.end();
+					layer = untyped Layers.flatten();
+					if (current != null) current.begin(false);
+				}
+
 				tex =
 					Context.layerIsMask   ? layer.texpaint_mask :
 					texType == TexBase    ? layer.texpaint :
@@ -222,6 +231,13 @@ class UIView2D {
 			ui._w = ew;
 
 			if (type == View2DLayer) {
+				layerMode = ui.combo(Id.handle({position: layerMode}), [
+					tr("Visible"),
+					tr("Selected"),
+				], tr("Layers"));
+				ui._x += ew + 3;
+				ui._y = 2;
+
 				if (!Context.layerIsMask) {
 					texType = ui.combo(Id.handle({position: texType}), [
 						tr("Base Color"),

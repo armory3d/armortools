@@ -145,6 +145,7 @@ class TabLayers {
 
 				if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
 					l.visible = !l.visible;
+					UIView2D.inst.hwnd.redraws = 2;
 					MakeMaterial.parseMeshMaterial();
 				}
 				ui._x -= 2;

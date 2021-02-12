@@ -427,6 +427,59 @@ class Layers {
 		}
 	}
 
+	public static function flatten(heightToNormal = false): TLayerData {
+		Layers.makeExportImg();
+		Layers.makeTempImg();
+
+		var path = RenderPath.active;
+		var l = Project.layers[0];
+		if (l.visible) {
+			path.setTarget("expa", ["expb", "expc"]);
+			path.bindTarget("texpaint" + l.id, "tex0");
+			path.bindTarget("texpaint_nor" + l.id, "tex1");
+			path.bindTarget("texpaint_pack" + l.id, "tex2");
+			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		}
+		else {
+			Layers.expa.g2.begin(true, 0x00000000);
+			Layers.expa.g2.end();
+		}
+
+		var l0 = { texpaint: Layers.expa, texpaint_nor: Layers.expb, texpaint_pack: Layers.expc, texpaint_mask: l.visible ? l.texpaint_mask : null };
+		if (l0.texpaint_mask != null) {
+			Layers.applyMask(untyped l0);
+		}
+
+		for (i in 1...Project.layers.length) {
+			Layers.mergeLayer(untyped l0, Project.layers[i], true);
+		}
+
+		// Merge height map into normal map
+		if (heightToNormal && MakeMaterial.heightUsed) {
+			Layers.imga.g2.begin(false);
+			Layers.imga.g2.pipeline = Layers.pipeCopy;
+			Layers.imga.g2.drawImage(l0.texpaint_nor, 0, 0);
+			Layers.imga.g2.pipeline = null;
+			Layers.imga.g2.end();
+
+			var empty = path.renderTargets.get("empty_white").image;
+			l0.texpaint_nor.g4.begin();
+			l0.texpaint_nor.g4.setPipeline(Layers.pipeMerge);
+			l0.texpaint_nor.g4.setTexture(Layers.tex0, Layers.imga);
+			l0.texpaint_nor.g4.setTexture(Layers.tex1, l0.texpaint_pack);
+			l0.texpaint_nor.g4.setTexture(Layers.texmask, empty);
+			l0.texpaint_nor.g4.setTexture(Layers.texa, empty);
+			l0.texpaint_nor.g4.setFloat(Layers.opac, 1.0);
+			l0.texpaint_nor.g4.setInt(Layers.blending, -4);
+			l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+			l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			l0.texpaint_nor.g4.drawIndexedVertices();
+			l0.texpaint_nor.g4.end();
+		}
+
+		return untyped l0;
+	}
+
 	public static function applyMask(l: LayerSlot) {
 		if (l.texpaint_mask == null) return;
 

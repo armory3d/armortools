@@ -205,6 +205,11 @@ package arm;
 	var View2DFont = 2;
 }
 
+@:enum abstract View2DLayerMode(Int) from Int to Int {
+	var View2DVisible = 0;
+	var View2DSelected = 1;
+}
+
 @:enum abstract BorderSide(Int) from Int to Int {
 	var SideLeft = 0;
 	var SideRight = 1;
