@@ -53,10 +53,9 @@ class TabSwatches {
 				if (row > 0) ui._y += 6;
 
 				for (j in 0...num) {
-					var imgw = Std.int(20 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= Project.raw.swatches.length) {
-						@:privateAccess ui.endElement(imgw);
+						@:privateAccess ui.endElement(slotw);
 						continue;
 					}
 
