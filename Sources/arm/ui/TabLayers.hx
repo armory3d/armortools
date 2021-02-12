@@ -229,7 +229,15 @@ class TabLayers {
 
 					var state = State.Idle;
 					if (l.fill_mask != null) {
+						#if kha_opengl
+						ui.imageInvertY = true;
+						#end
+
 						state = ui.image(l.fill_mask.imageIcon, 0xffffffff, (ui.ELEMENT_H() - 3) * 2);
+
+						#if kha_opengl
+						ui.imageInvertY = false;
+						#end
 					}
 					else {
 						ui.g.pipeline = UIView2D.pipe;

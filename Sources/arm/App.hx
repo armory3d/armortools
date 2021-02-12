@@ -468,8 +468,10 @@ class App {
 
 	static function getDragBackground(): TRect {
 		var icons = Res.get("icons.k");
-		if (dragLayer != null && dragLayer.getChildren() == null) return Res.tile50(icons, 4, 1);
-		else return null;
+		if (dragLayer != null && dragLayer.getChildren() == null && ((dragLayer.fill_layer == null && !Context.layerIsMask) || (dragLayer.fill_mask == null && Context.layerIsMask))) {
+			return Res.tile50(icons, 4, 1);
+		}
+		return null;
 	}
 
 	static function getDragImage(): kha.Image {
@@ -488,7 +490,7 @@ class App {
 			return dragMaterial.imageIcon;
 		}
 		if (dragLayer != null && Context.layerIsMask) {
-			return dragLayer.texpaint_mask_preview;
+			return dragLayer.fill_mask != null ? dragLayer.fill_mask.imageIcon : dragLayer.texpaint_mask_preview;
 		}
 		if (dragLayer != null && dragLayer.getChildren() != null) {
 			var icons = Res.get("icons.k");
@@ -504,7 +506,10 @@ class App {
 			dragTint = UISidebar.inst.ui.t.HIGHLIGHT_COL;
 			return icons;
 		}
-		else return dragLayer.texpaint_preview;
+		if (dragLayer != null) {
+			return dragLayer.fill_layer != null ? dragLayer.fill_layer.imageIcon : dragLayer.texpaint_preview;
+		}
+		return null;
 	}
 
 	static function render(g: kha.graphics2.Graphics) {
@@ -556,7 +561,7 @@ class App {
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 			var inv = 0;
 			#else
-			var inv = (dragMaterial != null || dragLayer != null) ? h : 0;
+			var inv = (dragMaterial != null || (dragLayer != null && ((dragLayer.fill_layer != null && !Context.layerIsMask) || (dragLayer.fill_mask != null && Context.layerIsMask)))) ? h : 0;
 			#end
 			g.color = dragTint;
 			var bgRect = getDragBackground();
