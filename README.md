@@ -52,6 +52,7 @@ node Kinc/make -g metal
 node armorcore/make android -g opengl --shaderversion 300
 cp -r build/krom/* armorcore/build/Krom/app/src/main/assets/
 cd armorcore
+git apply patch/android_document_picker.diff --directory=Kinc
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:
 # https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68

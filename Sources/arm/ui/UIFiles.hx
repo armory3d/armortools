@@ -24,9 +24,12 @@ class UIFiles {
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
 
 		#if krom_android
-		if (path == null) path = defaultPath;
-		showCustom(filters, isSave, filesDone);
-		#else
+		if (isSave) {
+			if (path == null) path = defaultPath;
+			showCustom(filters, isSave, filesDone);
+		}
+		else {
+		#end
 
 		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
 		if (path != null) {
@@ -37,6 +40,9 @@ class UIFiles {
 			filesDone(path);
 		}
 		releaseKeys();
+
+		#if krom_android
+		}
 		#end
 	}
 
@@ -259,7 +265,8 @@ class UIFiles {
 		#if krom_windows
 		"C:\\Users"
 		#elseif krom_android
-		"/sdcard/Android/data/org.armorpaint/files"
+		// "/sdcard/Android/data/org.armorpaint/files"
+		"/sdcard/Download"
 		#elseif krom_darwin
 		"/Users"
 		#else
