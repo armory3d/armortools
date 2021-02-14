@@ -1,9 +1,9 @@
 ! This is an experimental build with hardware accelerated ray-tracing using DXR and Direct3D12 !
 
 Supported GPUs:
-- NVIDIA GTX 10 Series (GTX 1060 or better)
-- NVIDIA GTX 16 Series
 - NVIDIA RTX 20 Series
+- NVIDIA RTX 30 Series
+- AMD RX 6800 XT or better
 
 Up to date Windows 10 and graphics drivers required.
 
