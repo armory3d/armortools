@@ -375,6 +375,7 @@ class TabLayers {
 				if (contextMenu) {
 
 					var add = l.fill_layer != null ? 1 : 0;
+					if (Project.layers.indexOf(l) > 0) add++;
 					var menuElements = l.getChildren() != null ? 6 : (20 + add);
 
 					UIMenu.draw(function(ui: Zui) {
@@ -471,7 +472,7 @@ class TabLayers {
 							}
 							iron.App.notifyOnInit(_init);
 						}
-						if (l.getChildren() == null && ui.button(tr("Merge Down"), Left)) {
+						if (l.getChildren() == null && Project.layers.indexOf(l) > 0 && ui.button(tr("Merge Down"), Left)) {
 							function _init() {
 								Context.setLayer(l);
 								History.mergeLayers();
