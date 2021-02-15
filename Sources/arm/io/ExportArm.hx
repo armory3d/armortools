@@ -90,7 +90,7 @@ class ExportArm {
 		}
 
 		var packed_assets = Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0 ? null : Project.raw.packed_assets;
-		var sameDrive = Project.filepath.charAt(0) == Project.raw.envmap.charAt(0);
+		var sameDrive = Project.raw.envmap != null ? Project.filepath.charAt(0) == Project.raw.envmap.charAt(0) : true;
 
 		Project.raw = {
 			version: Main.version,
@@ -106,7 +106,7 @@ class ExportArm {
 			atlas_names: Project.atlasNames,
 			swatches: Project.raw.swatches,
 			packed_assets: packed_assets,
-			envmap: sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap,
+			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
