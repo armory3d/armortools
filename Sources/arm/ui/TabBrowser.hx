@@ -24,16 +24,21 @@ class TabBrowser {
 			var bookmarksW = Std.int(100 * ui.SCALE());
 
 			var _y = ui._y;
-			ui._x = bookmarksW;
-			ui._w -= bookmarksW;
 			if (hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				hpath.text = Config.raw.bookmarks[0];
 			}
 
-			// ui.beginSticky();
+			ui.beginSticky();
+			ui.row([bookmarksW / ui._w, 1 - bookmarksW / ui._w]);
+			if (ui.button("+")) {
+				Config.raw.bookmarks.push(hpath.text);
+				Config.save();
+			}
 			hpath.text = ui.textInput(hpath, tr("Path"));
-			// ui.endSticky();
+			ui.endSticky();
 
+			ui._x = bookmarksW;
+			ui._w -= bookmarksW;
 			UIFiles.fileBrowser(ui, hpath, false, true);
 
 			if (known) {
@@ -49,15 +54,9 @@ class TabBrowser {
 			#end
 
 			var bottomY = ui._y;
-			var _h = ui._h;
 			ui._x = 0;
 			ui._y = _y;
 			ui._w = bookmarksW;
-
-			if (ui.button("+")) {
-				Config.raw.bookmarks.push(hpath.text);
-				Config.save();
-			}
 
 			if (ui.button(tr("Cloud"), Left)) {
 				hpath.text = "cloud";
@@ -85,7 +84,7 @@ class TabBrowser {
 				}
 			}
 
-			ui._y = bottomY;
+			if (ui._y < bottomY) ui._y = bottomY;
 		}
 	}
 }

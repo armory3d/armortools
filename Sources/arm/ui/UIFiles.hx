@@ -174,15 +174,16 @@ class UIFiles {
 				}
 				if (f.endsWith(".arm") && !isCloud) {
 					if (iconMap == null) iconMap = [];
-					var icon = iconMap.get(handle.text + Path.sep + f);
-					if (icon == null) {
-						var bytes = Bytes.ofData(Krom.loadBlob(handle.text + Path.sep + f));
+					var key = handle.text + Path.sep + f;
+					var icon = iconMap.get(key);
+					if (!iconMap.exists(key)) {
+						var bytes = Bytes.ofData(Krom.loadBlob(key));
 						var raw = ArmPack.decode(bytes);
 						if (raw.material_icons != null) {
 							var bytesIcon = raw.material_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
-							iconMap.set(handle.text + Path.sep + f, icon);
 						}
+						iconMap.set(key, icon);
 					}
 					if (icon != null) {
 						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
