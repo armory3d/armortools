@@ -25,7 +25,7 @@ class TabSwatches {
 				Project.raw.swatches.push(Context.swatch);
 			}
 			if (ui.button(tr("Import"))) Project.importSwatches();
-			if (ui.isHovered) ui.tooltip(tr("Import swatches") + ' (${Config.keymap.file_import_assets})');
+			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
 			if (ui.button(tr("Tools..."))) {
 				UIMenu.draw(function(ui: Zui) {
 					ui.text(tr("Tools"), Right, ui.t.HIGHLIGHT_COL);

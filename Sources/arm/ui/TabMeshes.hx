@@ -18,7 +18,7 @@ class TabMeshes {
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {
 					ui.text(tr("Import"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Replace Existing"), Left)) {
+					if (ui.button(tr("Replace Existing"), Left, '${Config.keymap.file_import_assets}')) {
 						Project.importMesh(true);
 					}
 					if (ui.button(tr("Append"), Left)) {
@@ -26,7 +26,7 @@ class TabMeshes {
 					}
 				}, 3);
 			}
-			if (ui.isHovered) ui.tooltip(tr("Import mesh file") + ' (${Config.keymap.file_import_assets})');
+			if (ui.isHovered) ui.tooltip(tr("Import mesh file"));
 
 			if (ui.button(tr("Tools..."))) {
 				UIMenu.draw(function(ui: Zui) {
