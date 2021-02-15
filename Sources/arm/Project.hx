@@ -104,7 +104,8 @@ class Project {
 			projectSaveAs();
 			return;
 		}
-		Window.get(0).title = UIFiles.filename + " - ArmorPaint";
+		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
+		Window.get(0).title = filename + " - ArmorPaint";
 
 		function _init() {
 			ExportArm.runProject();
@@ -476,8 +477,7 @@ class Project {
 		UIFiles.show("arm", true, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
-			filepath = path + Path.sep + f;
-			ExportArm.runSwatches(filepath);
+			ExportArm.runSwatches(path + Path.sep + f);
 		});
 	}
 

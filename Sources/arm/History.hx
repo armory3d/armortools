@@ -6,6 +6,7 @@ import arm.ui.UIView2D;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
 import arm.ui.UIToolbar;
+import arm.sys.Path;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 
@@ -420,7 +421,8 @@ class History {
 	}
 
 	static function push(name: String): TStep {
-		kha.Window.get(0).title = UIFiles.filename + "* - ArmorPaint";
+		var filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
+		kha.Window.get(0).title = filename + "* - ArmorPaint";
 
 		if (undos < Config.raw.undo_steps) undos++;
 		if (redos > 0) {
