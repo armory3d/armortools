@@ -8,7 +8,7 @@ import arm.ProjectFormat;
 
 class ImportTexture {
 
-	public static function run(path: String) {
+	public static function run(path: String, hdrAsEnvmap = true) {
 		if (!Path.isTexture(path)) {
 			if (!Context.enableImportPlugin(path)) {
 				Log.error(Strings.error1());
@@ -17,9 +17,10 @@ class ImportTexture {
 		}
 
 		for (a in Project.assets) {
+			// Already imported
 			if (a.file == path) {
-				// Set envmap
-				if (path.toLowerCase().endsWith(".hdr")) {
+				// Set as envmap
+				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
 					Data.getImage(path, function(image: kha.Image) {
 						App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
@@ -30,6 +31,7 @@ class ImportTexture {
 				return;
 			}
 		}
+
 
 		var ext = path.substr(path.lastIndexOf(".") + 1);
 		var importer = Path.textureImporters.get(ext);
@@ -47,8 +49,8 @@ class ImportTexture {
 			Project.assetMap.set(asset.id, image);
 			UISidebar.inst.hwnd2.redraws = 2;
 
-			// Set envmap
-			if (path.toLowerCase().endsWith(".hdr")) {
+			// Set as envmap
+			if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
 				App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 					ImportEnvmap.run(path, image);
 				});

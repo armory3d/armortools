@@ -8,7 +8,7 @@ import arm.Project;
 
 class ImportAsset {
 
-	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true) {
+	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true, hdrAsEnvmap = true) {
 
 		if (path.startsWith("cloud")) {
 			var abs = File.cacheCloud(path);
@@ -21,7 +21,7 @@ class ImportAsset {
 			if (dropX > 0) UIBox.clickToHide = false; // Prevent closing when going back to window after drag and drop
 		}
 		else if (Path.isTexture(path)) {
-			ImportTexture.run(path);
+			ImportTexture.run(path, hdrAsEnvmap);
 			// Place image node
 			var x0 = UINodes.inst.wx;
 			var x1 = UINodes.inst.wx + UINodes.inst.ww;

@@ -22,7 +22,7 @@ class TabTextures {
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, function(path: String) {
-					ImportAsset.run(path);
+					ImportAsset.run(path, -1.0, -1.0, true, false);
 				});
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');

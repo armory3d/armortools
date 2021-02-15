@@ -94,6 +94,7 @@ class ImportEnvmap {
 			Scene.active.world.envmap = Scene.active.world.probe.radianceMipmaps[0];
 		}
 		Context.ddirty = 2;
+		Project.raw.envmap = path;
 	}
 
 	static function getRadianceMip(mip: kha.Image, level: Int, radiance: kha.Image) {

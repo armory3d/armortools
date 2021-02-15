@@ -415,10 +415,10 @@ class Project {
 		else importAsset();
 	}
 
-	public static function importAsset(filters: String = null) {
+	public static function importAsset(filters: String = null, hdrAsEnvmap = true) {
 		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
 		UIFiles.show(filters, false, function(path: String) {
-			ImportAsset.run(path);
+			ImportAsset.run(path, -1.0, -1.0, true, hdrAsEnvmap);
 		});
 	}
 

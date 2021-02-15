@@ -111,6 +111,7 @@ class ImportArm {
 			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
 
 			var base = Path.baseDir(path);
+			Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 
 			for (file in project.assets) {
 				#if krom_windows
@@ -126,7 +127,8 @@ class ImportArm {
 				if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
 					makePink(abs);
 				}
-				ImportTexture.run(abs);
+				var hdrAsEnvmap = abs.endsWith(".hdr") && Project.raw.envmap == abs;
+				ImportTexture.run(abs, hdrAsEnvmap);
 			}
 
 			if (project.font_assets != null) {

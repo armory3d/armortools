@@ -20,6 +20,7 @@ typedef TProjectFormat = {
 	@:optional public var swatches: Array<TSwatchColor>;
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
 	@:optional public var packed_assets: Array<TPackedAsset>;
+	@:optional public var envmap: String; // Asset name
 }
 
 typedef TLayerData = {

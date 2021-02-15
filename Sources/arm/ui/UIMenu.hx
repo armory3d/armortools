@@ -54,9 +54,9 @@ class UIMenu {
 		}
 		else {
 			var menuItems = [
-				18, // MenuFile
+				19, // MenuFile
 				4, // MenuEdit
-				14, // MenuViewport
+				13, // MenuViewport
 				#if (kha_direct3d12 || kha_vulkan) 14 #else 13 #end, // MenuMode
 				17, // MenuCamera
 				7 // MenuHelp
@@ -72,7 +72,16 @@ class UIMenu {
 				if (ui.button("      " + tr("Save"), Left, Config.keymap.file_save)) Project.projectSave();
 				if (ui.button("      " + tr("Save As..."), Left, Config.keymap.file_save_as)) Project.projectSaveAs();
 				ui.fill(0, 0, sepw, 1, ui.t.ACCENT_SELECT_COL);
-				if (ui.button("      " + tr("Import Texture..."), Left, Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","));
+				if (ui.button("      " + tr("Import Texture..."), Left, Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","), false);
+				if (ui.button("      " + tr("Import Envmap..."), Left)) {
+					UIFiles.show("hdr", false, function(path: String) {
+						if (!path.endsWith(".hdr")) {
+							Log.error("Error: .hdr file expected");
+							return;
+						}
+						ImportAsset.run(path);
+					});
+				}
 				if (ui.button("      " + tr("Import Font..."), Left)) Project.importAsset("ttf,ttc,otf");
 				if (ui.button("      " + tr("Import Material..."), Left)) Project.importMaterial();
 				if (ui.button("      " + tr("Import Brush..."), Left)) Project.importBrush();
@@ -110,16 +119,6 @@ class UIMenu {
 				if (ui.button("      " + tr("Preferences..."), Left, Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
 			else if (menuCategory == MenuViewport) {
-				if (ui.button("      " + tr("Import Envmap..."), Left)) {
-					UIFiles.show("hdr", false, function(path: String) {
-						if (!path.endsWith(".hdr")) {
-							Log.error("Error: .hdr file expected");
-							return;
-						}
-						ImportAsset.run(path);
-					});
-				}
-
 				if (ui.button("      " + tr("Distract Free"), Left, Config.keymap.view_distract_free)) {
 					UISidebar.inst.toggleDistractFree();
 					UISidebar.inst.ui.isHovered = false;
