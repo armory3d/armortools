@@ -374,9 +374,10 @@ class TabLayers {
 
 				if (contextMenu) {
 
-					var add = l.fill_layer != null ? 1 : 0;
-					if (Project.layers.indexOf(l) > 0) add++;
-					var menuElements = l.getChildren() != null ? 6 : (20 + add);
+					var add = 0;
+					if (Project.layers.indexOf(l) > 0) add++; // Merge down
+					if (l.fill_layer == null) add++; // Clear
+					var menuElements = l.getChildren() != null ? 6 : (19 + add);
 
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -439,7 +440,7 @@ class TabLayers {
 								for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 							}
 						}
-						if (ui.button(tr("Clear"), Left)) {
+						if (l.fill_layer == null && ui.button(tr("Clear"), Left)) {
 							Context.setLayer(l);
 							function _init() {
 								if (l.getChildren() == null) {
