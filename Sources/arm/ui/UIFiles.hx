@@ -15,6 +15,7 @@ class UIFiles {
 	public static var filename: String;
 	public static var path = defaultPath;
 	static var lastPath = "";
+	static var lastSearch = "";
 	static var files: Array<String> = null;
 	static var iconMap: Map<String, kha.Image> = null;
 	static var selected = -1;
@@ -81,7 +82,7 @@ class UIFiles {
 	}
 
 	@:access(zui.Zui)
-	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false): String {
+	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = ""): String {
 
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
@@ -89,7 +90,7 @@ class UIFiles {
 		var isCloud = handle.text.startsWith("cloud");
 
 		if (handle.text == "") handle.text = defaultPath;
-		if (handle.text != lastPath) {
+		if (handle.text != lastPath || search != lastSearch) {
 			files = [];
 
 			// Up directory
@@ -102,10 +103,12 @@ class UIFiles {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
 				if (f.indexOf(".") > 0 && !Path.isKnown(f)) continue; // Skip unknown extensions
 				if (isCloud && f.indexOf("_icon.") >= 0) continue; // Skip thumbnails
+				if (f.toLowerCase().indexOf(search.toLowerCase()) < 0) continue; // Search filter
 				files.push(f);
 			}
 		}
 		lastPath = handle.text;
+		lastSearch = search;
 		handle.changed = false;
 
 		var slotw = Std.int(70 * ui.SCALE());

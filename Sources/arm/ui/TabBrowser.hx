@@ -9,7 +9,9 @@ import arm.Enums;
 class TabBrowser {
 
 	static var hpath = new Handle();
+	static var hsearch = new Handle();
 	static var known = false;
+	static var lastPath =  "";
 
 	@:access(zui.Zui)
 	public static function draw() {
@@ -28,18 +30,24 @@ class TabBrowser {
 			}
 
 			ui.beginSticky();
-			ui.row([bookmarksW / ui._w, 1 - bookmarksW / ui._w]);
+			ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.8, (1 - bookmarksW / ui._w) * 0.2]);
 			if (ui.button("+")) {
 				Config.raw.bookmarks.push(hpath.text);
 				Config.save();
 			}
 			hpath.text = ui.textInput(hpath, tr("Path"));
+			hsearch.text = ui.textInput(hsearch, tr("Search"));
 			ui.endSticky();
+
+			if (lastPath != hpath.text) {
+				hsearch.text = "";
+			}
+			lastPath = hpath.text;
 
 			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
-			UIFiles.fileBrowser(ui, hpath, false, true);
+			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text);
 
 			if (known) {
 				var path = hpath.text;
