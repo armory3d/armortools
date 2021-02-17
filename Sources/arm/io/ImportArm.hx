@@ -114,6 +114,9 @@ class ImportArm {
 			if (Project.raw.envmap != null) {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
+			if (Project.raw.envmap_strength != null) {
+				iron.Scene.active.world.probe.raw.strength = Project.raw.envmap_strength;
+			}
 
 			for (file in project.assets) {
 				#if krom_windows

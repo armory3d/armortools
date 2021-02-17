@@ -107,6 +107,7 @@ class ExportArm {
 			swatches: Project.raw.swatches,
 			packed_assets: packed_assets,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
+			envmap_strength: iron.Scene.active.world.probe.raw.strength,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
