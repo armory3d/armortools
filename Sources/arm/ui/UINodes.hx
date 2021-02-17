@@ -37,17 +37,13 @@ class UINodes {
 	var popupX = 0.0;
 	var popupY = 0.0;
 
-	public var changed = false;
-	var mdown = false;
-	var mreleased = false;
-	var mchanged = false;
-	var mstartedlast = false;
+	var uichangedLast = false;
 	var recompileMat = false; // Mat preview
 	var recompileMatFinal = false;
 	var nodeSearchSpawn: TNode = null;
 	var nodeSearchOffset = 0;
 	var nodeSearchLast = "";
-	var lastCanvas: TNodeCanvas;
+	var lastCanvas: TNodeCanvas = null;
 	var lastNodeSelected: TNode = null;
 
 	public var grid: Image = null;
@@ -258,30 +254,9 @@ class UINodes {
 	}
 
 	public function update() {
-		var mouse = Input.getMouse();
-		mreleased = mouse.released();
-		mdown = mouse.down();
-
-		// Recompile material on change
-		if (ui.changed) {
-			mchanged = true;
-			if (!mdown) changed = true;
-		}
-		if ((mreleased && mchanged) || changed) {
-			mchanged = changed = false;
-			canvasChanged();
-			if (mreleased) {
-				UISidebar.inst.hwnd0.redraws = 2;
-				var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
-				History.editNodes(lastCanvas, canvasType, canvasGroup);
-			}
-		}
-		else if (ui.changed && (mstartedlast || mouse.moved) && Config.raw.material_live) {
-			recompileMat = true; // Instant preview
-		}
-		mstartedlast = mouse.started();
-
 		if (!show || !App.uiEnabled) return;
+
+		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
@@ -293,7 +268,7 @@ class UINodes {
 		var mx = mouse.x;
 		var my = mouse.y;
 		if (mx < wx || mx > wx + ww || my < wy) return;
-		if (ui.isTyping) return;
+		if (ui.isTyping || !ui.inputEnabled) return;
 
 		if (addNodeButton) {
 			showMenu = true;
@@ -360,6 +335,7 @@ class UINodes {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
 						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
 						if (ui.button(tr(n.name), Left) || (enter && count == nodeSearchOffset)) {
+							pushUndo();
 							var nodes = getNodes();
 							var canvas = getCanvas(true);
 							nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
@@ -468,10 +444,6 @@ class UINodes {
 		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
 		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
 
-		if (ui.inputStarted) {
-			lastCanvas = Json.parse(Json.stringify(getCanvas(true)));
-		}
-
 		g.end();
 
 		if (grid == null) drawGrid();
@@ -497,11 +469,26 @@ class UINodes {
 			ui.g.color = 0xffffffff;
 			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 100 - 100, (nodes.panY * nodes.SCALE()) % 100 - 100);
 
+			// Undo
+			if (ui.inputStarted || ui.isKeyPressed) {
+				lastCanvas = Json.parse(Json.stringify(getCanvas(true)));
+			}
+
 			// Nodes
 			var c = getCanvas(true);
 			ui.inputEnabled = !drawMenu;
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = true;
+
+			// Recompile material on change
+			if (ui.changed) {
+				recompileMat = (ui.inputDX != 0 || ui.inputDY != 0 || !uichangedLast) && Config.raw.material_live; // Instant preview
+			}
+			else if (uichangedLast) {
+				canvasChanged();
+				pushUndo(lastCanvas);
+			}
+			uichangedLast = ui.changed;
 
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
@@ -657,6 +644,7 @@ class UINodes {
 
 			for (n in list[menuCategory]) {
 				if (ui.button("      " + tr(n.name), Left)) {
+					pushUndo();
 					var canvas = getCanvas(true);
 					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
@@ -669,6 +657,7 @@ class UINodes {
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
 					if (ui.button("      " + g.canvas.name, Left)) {
+						pushUndo();
 						var canvas = getCanvas(true);
 						var nodes = getNodes();
 						var node = makeGroupNode(g.canvas, nodes, canvas);
@@ -695,7 +684,15 @@ class UINodes {
 		}
 	}
 
+	function pushUndo(lastCanvas: TNodeCanvas = null) {
+		if (lastCanvas == null) lastCanvas = getCanvas(true);
+		UISidebar.inst.hwnd0.redraws = 2;
+		var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
+		History.editNodes(lastCanvas, canvasType, canvasGroup);
+	}
+
 	public function acceptAssetDrag(index: Int) {
+		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
 		n.buttons[0].default_value = index;
@@ -703,6 +700,7 @@ class UINodes {
 	}
 
 	public function acceptLayerDrag(index: Int) {
+		pushUndo();
 		if (Project.layers[index].getChildren() != null) return;
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER", g);
@@ -711,6 +709,7 @@ class UINodes {
 	}
 
 	public function acceptMaterialDrag(index: Int) {
+		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("MATERIAL", g);
 		n.buttons[0].default_value = index;
@@ -718,6 +717,7 @@ class UINodes {
 	}
 
 	public function acceptSwatchDrag(index: Int) {
+		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
 		var color = Project.raw.swatches[index].base;
