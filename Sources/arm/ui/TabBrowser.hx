@@ -23,7 +23,6 @@ class TabBrowser {
 
 			var bookmarksW = Std.int(100 * ui.SCALE());
 
-			var _y = ui._y;
 			if (hpath.text == "" && Config.raw.bookmarks.length > 0) { // Init to first bookmark
 				hpath.text = Config.raw.bookmarks[0];
 			}
@@ -37,6 +36,7 @@ class TabBrowser {
 			hpath.text = ui.textInput(hpath, tr("Path"));
 			ui.endSticky();
 
+			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
 			UIFiles.fileBrowser(ui, hpath, false, true);
