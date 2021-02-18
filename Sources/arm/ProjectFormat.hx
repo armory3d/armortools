@@ -21,7 +21,10 @@ typedef TProjectFormat = {
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
 	@:optional public var packed_assets: Array<TPackedAsset>;
 	@:optional public var envmap: String; // Asset name
-	@:optional public var envmap_strength: Float;
+	@:optional public var envmap_strength: Null<Float>;
+	@:optional public var camera_world: kha.arrays.Float32Array;
+	@:optional public var camera_origin: kha.arrays.Float32Array;
+	@:optional public var camera_fov: Null<Float>;
 }
 
 typedef TLayerData = {

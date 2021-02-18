@@ -108,6 +108,9 @@ class ExportArm {
 			packed_assets: packed_assets,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			envmap_strength: iron.Scene.active.world.probe.raw.strength,
+			camera_world: iron.Scene.active.camera.transform.local.toFloat32Array(),
+			camera_origin: vec3f32(arm.plugin.Camera.inst.origins[0]),
+			camera_fov: iron.Scene.active.camera.data.raw.fov,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
@@ -361,5 +364,13 @@ class ExportArm {
 		};
 		var bytes = ArmPack.encode(raw);
 		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+	}
+
+	static function vec3f32(v: iron.math.Vec4): kha.arrays.Float32Array {
+		var res = new kha.arrays.Float32Array(3);
+		res[0] = v.x;
+		res[1] = v.y;
+		res[2] = v.z;
+		return res;
 	}
 }

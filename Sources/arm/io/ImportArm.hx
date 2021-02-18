@@ -117,6 +117,16 @@ class ImportArm {
 			if (Project.raw.envmap_strength != null) {
 				iron.Scene.active.world.probe.raw.strength = Project.raw.envmap_strength;
 			}
+			if (Project.raw.camera_world != null) {
+				iron.Scene.active.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
+				iron.Scene.active.camera.transform.decompose();
+				iron.Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
+				iron.Scene.active.camera.buildProjection();
+				var origin = Project.raw.camera_origin;
+				arm.plugin.Camera.inst.origins[0].x = origin[0];
+				arm.plugin.Camera.inst.origins[0].y = origin[1];
+				arm.plugin.Camera.inst.origins[0].z = origin[2];
+			}
 
 			for (file in project.assets) {
 				#if krom_windows
