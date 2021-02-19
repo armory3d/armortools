@@ -428,16 +428,26 @@ class MaterialParser {
 			if (socket == node.outputs[0]) { // Color
 				if (curshader.context.allow_vcols) {
 					curshader.context.add_elem("col", "short4norm"); // Vcols only for now
+					return "vcolor";
 				}
 				else {
-					curshader.write_attrib("vec3 vcolor = vec3(1.0, 1.0, 1.0);");
+					return("vec3(0.0, 0.0, 0.0)");
 				}
-				return "vcolor";
 			}
 			else { // Vector
 				curshader.context.add_elem("tex", "short2norm"); // UVMaps only for now
 				return "vec3(texCoord.x, texCoord.y, 0.0)";
 			}
+		}
+		else if (node.type == "VERTEX_COLOR") {
+			if (curshader.context.allow_vcols) {
+				curshader.context.add_elem("col", "short4norm");
+				return "vcolor";
+			}
+			else {
+				return("vec3(0.0, 0.0, 0.0)");
+			}
+
 		}
 		else if (node.type == "RGB") {
 			return vec3(socket.default_value);
@@ -1035,6 +1045,9 @@ class MaterialParser {
 		else if (node.type == "ATTRIBUTE") {
 			curshader.add_uniform("float time", "_time");
 			return "time";
+		}
+		else if (node.type == "VERTEX_COLOR") {
+			return "1.0";
 		}
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth

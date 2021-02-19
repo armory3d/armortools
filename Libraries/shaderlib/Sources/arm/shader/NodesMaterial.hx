@@ -819,7 +819,35 @@ class NodesMaterial {
 						max: 10.0
 					}
 				]
-			}
+			},
+			{
+				id: 0,
+				name: _tr("Vertex Color"),
+				type: "VERTEX_COLOR",
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Color"),
+						type: "RGBA",
+						color: 0xffc7c729,
+						default_value: f32([0.8, 0.8, 0.8, 1.0])
+					},
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Alpha"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
+					}
+				],
+				buttons: []
+			},
 		],
 		// [ // Output
 		// 	{
