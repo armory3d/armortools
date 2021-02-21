@@ -32,7 +32,6 @@ class ImportTexture {
 			}
 		}
 
-
 		var ext = path.substr(path.lastIndexOf(".") + 1);
 		var importer = Path.textureImporters.get(ext);
 		var cached = Data.cachedImages.get(path) != null; // Already loaded or pink texture for missing file

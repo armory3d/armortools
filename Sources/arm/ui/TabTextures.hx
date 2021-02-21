@@ -6,6 +6,7 @@ import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
+import arm.io.ImportTexture;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Enums;
@@ -117,22 +118,16 @@ class TabTextures {
 								}
 								if (ui.button(tr("Reimport"), Left)) {
 									Data.deleteImage(asset.file);
-									Data.getImage(asset.file, function(image: kha.Image) {
-										Project.assetMap.set(asset.id, image);
-										// Set envmap
-										if (asset.file.toLowerCase().endsWith(".hdr")) {
-											App.notifyOnNextFrame(function() { // Make sure file browser process did finish
-												arm.io.ImportEnvmap.run(asset.file, image);
-											});
-										}
-										function _next() {
-											arm.node.MakeMaterial.parsePaintMaterial();
-											arm.util.RenderUtil.makeMaterialPreview();
-											UISidebar.inst.hwnd1.redraws = 2;
-										}
-										App.notifyOnNextFrame(_next);
-									});
-
+									Project.assetMap.remove(asset.id);
+									Project.assets.splice(i, 1);
+									Project.assetNames.splice(i, 1);
+									ImportTexture.run(asset.file);
+									function _next() {
+										arm.node.MakeMaterial.parsePaintMaterial();
+										arm.util.RenderUtil.makeMaterialPreview();
+										UISidebar.inst.hwnd1.redraws = 2;
+									}
+									App.notifyOnNextFrame(_next);
 								}
 								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);
