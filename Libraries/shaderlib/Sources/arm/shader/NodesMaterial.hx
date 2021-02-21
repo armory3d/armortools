@@ -848,6 +848,43 @@ class NodesMaterial {
 				],
 				buttons: []
 			},
+			{
+				id: 0,
+				name: _tr("Wireframe"),
+				type: "WIREFRAME",
+				x: 0,
+				y: 0,
+				color: 0xffb34f5a,
+				inputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Size"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.01,
+						max: 0.1
+					},
+				],
+				outputs: [
+					{
+						id: 0,
+						node_id: 0,
+						name: _tr("Fac"),
+						type: "VALUE",
+						color: 0xffa1a1a1,
+						default_value: 0.0
+					}
+				],
+				buttons: [
+					{
+						name: _tr("Pixel Size"),
+						type: "BOOL",
+						default_value: false,
+						output: 0
+					}
+				]
+			},
 		],
 		// [ // Output
 		// 	{

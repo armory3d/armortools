@@ -1049,6 +1049,12 @@ class MaterialParser {
 		else if (node.type == "VERTEX_COLOR") {
 			return "1.0";
 		}
+		else if (node.type == "WIREFRAME") {
+			curshader.add_uniform('sampler2D texuvmap', '_texuvmap');
+			var use_pixel_size = node.buttons[0].default_value == "true";
+			var pixel_size = parse_value_input(node.inputs[0]);
+			return "textureLod(texuvmap, texCoord, 0.0).r";
+		}
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth
 				curshader.add_uniform("vec2 cameraProj", "_cameraPlaneProj");
