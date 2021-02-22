@@ -18,7 +18,7 @@ import arm.data.MaterialSlot;
 
 class ImportBlend {
 
-	public static function run(path: String) {
+	public static function run(path: String, replaceExisting = true) {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
@@ -399,7 +399,7 @@ class ImportBlend {
 
 				var obj = {posa: posa, nora: nora, texa: texa, cola: cola, inda: inda, name: name, scalePos: scalePos, scaleTes: 1.0};
 
-				first ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
+				(first && replaceExisting) ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
 				first = false;
 			}
 

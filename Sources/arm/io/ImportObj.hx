@@ -7,7 +7,7 @@ import arm.ui.UISidebar;
 
 class ImportObj {
 
-	public static function run(path: String) {
+	public static function run(path: String, replaceExisting = true) {
 		var i = Context.splitBy;
 		var isUdim = i == SplitUdim;
 		ObjParser.splitCode =
@@ -23,7 +23,7 @@ class ImportObj {
 					var v = Std.int(i / obj.udimsU);
 					obj.name = name + "." + (1000 + v * 10 + u + 1);
 					obj.inda = obj.udims[i];
-					i == 0 ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj);
+					i == 0 ? (replaceExisting ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj)) : ImportMesh.addMesh(obj);
 				}
 			}
 			else {
@@ -106,7 +106,7 @@ class ImportObj {
 						}
 					}
 				}
-				ImportMesh.makeMesh(parts[0], path);
+				replaceExisting ? ImportMesh.makeMesh(parts[0], path) : ImportMesh.addMesh(parts[0]);
 				for (i in 1...parts.length) {
 					ImportMesh.addMesh(parts[i]);
 				}

@@ -36,9 +36,9 @@ class ImportMesh {
 		#end
 
 		var p = path.toLowerCase();
-		if (p.endsWith(".obj")) ImportObj.run(path);
-		else if (p.endsWith(".fbx")) ImportFbx.run(path);
-		else if (p.endsWith(".blend")) ImportBlend.run(path);
+		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
+		else if (p.endsWith(".fbx")) ImportFbx.run(path, replaceExisting);
+		else if (p.endsWith(".blend")) ImportBlend.run(path, replaceExisting);
 		else {
 			var ext = path.substr(path.lastIndexOf(".") + 1);
 			var importer = Path.meshImporters.get(ext);
