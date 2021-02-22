@@ -360,7 +360,7 @@ class Project {
 		});
 	}
 
-	public static function importMeshBox(path: String, replaceExisting = true) {
+	public static function importMeshBox(path: String, replaceExisting = true, clearLayers = true) {
 
 		#if krom_ios
 		// Import immediately while access to resource is unlocked
@@ -397,7 +397,7 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					ImportMesh.run(path, true, replaceExisting);
+					ImportMesh.run(path, clearLayers, replaceExisting);
 				}
 				if (ui.button(tr("?"))) {
 					File.explorer("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
@@ -409,8 +409,7 @@ class Project {
 
 	public static function reimportMesh() {
 		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
-			ImportMesh.run(Project.meshAssets[0], false);
-			Log.info("Mesh reimported.");
+			importMeshBox(Project.meshAssets[0], true, false);
 		}
 		else importAsset();
 	}
