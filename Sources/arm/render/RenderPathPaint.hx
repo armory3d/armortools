@@ -201,7 +201,8 @@ class RenderPathPaint {
 					Context.swatch.metallic = c.get(2) / 255;
 					// Pick material
 					if (Context.pickerSelectMaterial) {
-						var matid = b.get(3);
+						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
+						var matid = Std.int((b.get(3) - (b.get(3) % 3)) / 3);
 						for (m in Project.materials) {
 							if (m.id == matid) {
 								Context.setMaterial(m);

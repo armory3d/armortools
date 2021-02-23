@@ -332,20 +332,19 @@ class MakePaint {
 		if (Context.pickerMaskHandle.position == MaskMaterial) {
 			matid = Context.materialIdPicked / 255; // Keep existing material id in place when mask is set
 		}
-		var matidString = MaterialParser.vec1(matid);
+		var matidString = MaterialParser.vec1(matid * 3.0);
 		frag.write('float matid = $matidString;');
 
-		// TODO: Use emission/subsurface matid
 		// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-		if (Context.material.paintSubs) {
-			frag.write('if (subs > 0.0) {');
-			frag.write('    matid = 254.0 / 255.0;');
+		if (Context.material.paintEmis) {
+			frag.write('if (emis > 0.0) {');
+			frag.write('	matid += 1.0 / 255.0;');
 			frag.write('	if (str == 0.0) discard;');
 			frag.write('}');
 		}
-		if (Context.material.paintEmis) {
-			frag.write('if (emis > 0.0) {');
-			frag.write('	matid = 1.0;');
+		else if (Context.material.paintSubs) {
+			frag.write('if (subs > 0.0) {');
+			frag.write('    matid += 2.0 / 255.0;');
 			frag.write('	if (str == 0.0) discard;');
 			frag.write('}');
 		}
