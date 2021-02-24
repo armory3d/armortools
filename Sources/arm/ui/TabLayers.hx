@@ -42,7 +42,7 @@ class TabLayers {
 				History.newLayer();
 			}
 			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DLayer);
-			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_node_editor})');
+			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_2d_view})');
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);

@@ -42,7 +42,7 @@ class TabMaterials {
 			if (ui.button(tr("Nodes"))) {
 				UISidebar.inst.showMaterialNodes();
 			}
-			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_2d_view})');
+			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_node_editor})');
 			ui.endSticky();
 			ui.separator(3, false);
 
