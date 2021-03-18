@@ -521,7 +521,6 @@ class App {
 			MakeMaterial.parseMeshMaterial();
 			MakeMaterial.parsePaintMaterial();
 			Context.ddirty = 0;
-			History.reset();
 			if (History.undoLayers == null) {
 				History.undoLayers = [];
 				for (i in 0...Config.raw.undo_steps) {

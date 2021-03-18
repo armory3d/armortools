@@ -38,7 +38,7 @@ class Translator {
 		return translation;
 	}
 
-	// (Re)loads translations for the specified locale.
+	// (Re)loads translations for the specified locale
 	public static function loadTranslations(newLocale: String) {
 		if (newLocale == "system") {
 			Config.raw.locale = Krom.language();
@@ -50,8 +50,8 @@ class Translator {
 			Config.raw.locale = "en";
 		}
 
-		// No translations to load, as source strings are in English.
-		// Clear existing translations if switching languages at runtime.
+		// No translations to load, as source strings are in English
+		// Clear existing translations if switching languages at runtime
 		translations.clear();
 
 		if (Config.raw.locale == "en" && lastLocale == "en") {
@@ -133,14 +133,13 @@ class Translator {
 		for (i in 1024...1119) kha.graphics2.Graphics.fontGlyphs.push(i);
 	}
 
-	// Returns a list of supported locales (plus English and the automatically detected system locale).
+	// Returns a list of supported locales (plus English and the automatically detected system locale)
 	public static function getSupportedLocales(): Array<String> {
 		var locales = ["system", "en"];
 		for (localeFilename in File.readDirectory(Path.data() + Path.sep + "locale")) {
 			// Trim the `.json` file extension from file names
 			locales.push(localeFilename.substr(0, -5));
 		}
-
 		return locales;
 	}
 }

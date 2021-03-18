@@ -121,6 +121,8 @@ class UISidebar {
 		world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 		Context.ddirty = 1;
 
+		History.reset();
+
 		var scale = Config.raw.window_scale;
 		ui = new Zui( { theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel } );
 		Zui.onBorderHover = onBorderHover;
