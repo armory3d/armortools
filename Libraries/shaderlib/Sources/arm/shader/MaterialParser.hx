@@ -601,8 +601,7 @@ class MaterialParser {
 			var but = node.buttons[0]; // blend_type
 			var blend: String = but.data[but.default_value].toUpperCase();
 			blend = blend.replace(" ", "_");
-			but = node.buttons[1]; // use_clamp
-			var use_clamp = but.default_value == "true";
+			var use_clamp = node.buttons[1].default_value == true;
 			var out_col = "";
 			if (blend == "MIX") {
 				out_col = 'mix($col1, $col2, $fac_var)';
@@ -1320,8 +1319,7 @@ class MaterialParser {
 			var but = node.buttons[0]; // operation
 			var op: String = but.data[but.default_value].toUpperCase();
 			op = op.replace(" ", "_");
-			but = node.buttons[1]; // use_clamp
-			var use_clamp = but.default_value == "true";
+			var use_clamp = node.buttons[1].default_value == true;
 			var out_val = "";
 			if (op == "ADD") {
 				out_val = '($val1 + $val2)';
