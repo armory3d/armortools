@@ -298,17 +298,17 @@ class BoxPreferences {
 				if (brush3dHandle.changed) MakeMaterial.parsePaintMaterial();
 
 				ui.enabled = Config.raw.brush_3d;
-				var brushDepthRejectHandle = Id.handle({selected: Context.brushDepthReject});
-				Context.brushDepthReject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
+				var brushDepthRejectHandle = Id.handle({selected: Config.raw.brush_depth_reject});
+				Config.raw.brush_depth_reject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
 				if (brushDepthRejectHandle.changed) MakeMaterial.parsePaintMaterial();
 
 				ui.row([0.5, 0.5]);
 
-				var brushAngleRejectHandle = Id.handle({selected: Context.brushAngleReject});
-				Context.brushAngleReject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
+				var brushAngleRejectHandle = Id.handle({selected: Config.raw.brush_angle_reject});
+				Config.raw.brush_angle_reject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
 				if (brushAngleRejectHandle.changed) MakeMaterial.parsePaintMaterial();
 
-				if (!Context.brushAngleReject) ui.enabled = false;
+				if (!Config.raw.brush_angle_reject) ui.enabled = false;
 				var angleDotHandle = Id.handle({value: Context.brushAngleRejectDot});
 				Context.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
 				if (angleDotHandle.changed) {

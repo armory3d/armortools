@@ -202,8 +202,6 @@ class Context {
 	public static var brushLazyX = 0.0;
 	public static var brushLazyY = 0.0;
 	public static var brushPaint = UVMap;
-	public static var brushDepthReject = true;
-	public static var brushAngleReject = true;
 	public static var brushAngleRejectDot = 0.5;
 	public static var bakeType = BakeAO;
 	public static var bakeAxis = BakeXYZ;

@@ -115,7 +115,7 @@ class MakePaint {
 			decal) {
 
 			var depthReject = !Context.xray;
-			if (Config.raw.brush_3d && !Context.brushDepthReject) depthReject = false;
+			if (Config.raw.brush_3d && !Config.raw.brush_depth_reject) depthReject = false;
 
 			// TODO: sp.z needs to take height channel into account
 			if (Config.raw.brush_3d && !decal && MakeMaterial.heightUsed) depthReject = false;

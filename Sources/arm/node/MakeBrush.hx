@@ -31,7 +31,7 @@ class MakeBrush {
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			if (Context.brushAngleReject || Context.xray) {
+			if (Config.raw.brush_angle_reject || Context.xray) {
 				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -45,7 +45,7 @@ class MakeBrush {
 				frag.write('wn = normalize(wn);');
 				frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
 
-				if (Context.brushAngleReject && !Context.xray) {
+				if (Config.raw.brush_angle_reject && !Context.xray) {
 					frag.write('if (planeDist < -0.01) discard;');
 					frag.n = true;
 					var angle = Context.brushAngleRejectDot;

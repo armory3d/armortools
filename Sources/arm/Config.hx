@@ -117,6 +117,8 @@ class Config {
 			raw.material_live = true;
 			#end
 			raw.brush_3d = true;
+			raw.brush_depth_reject = true;
+			raw.brush_angle_reject = true;
 			raw.brush_live = false;
 			raw.camera_speed = 1.0;
 			raw.zoom_direction = ZoomVertical;

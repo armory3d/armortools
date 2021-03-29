@@ -41,6 +41,8 @@ typedef TConfig = {
 	@:optional var material_live: Null<Bool>;
 	@:optional var brush_live: Null<Bool>;
 	@:optional var brush_3d: Null<Bool>;
+	@:optional var brush_depth_reject: Null<Bool>;
+	@:optional var brush_angle_reject: Null<Bool>;
 	@:optional var node_preview: Null<Bool>;
 	@:optional var camera_speed: Null<Float>;
 	@:optional var zoom_direction: Null<Int>;

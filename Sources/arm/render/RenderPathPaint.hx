@@ -118,7 +118,7 @@ class RenderPathPaint {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Context.brushAngleReject) && Config.raw.brush_3d) {
+				if ((Context.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 
@@ -250,7 +250,7 @@ class RenderPathPaint {
 
 				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Context.brushAngleReject) && Config.raw.brush_3d) {
+				if ((Context.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
