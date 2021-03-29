@@ -18,6 +18,7 @@ class BoxExport {
 	public static var files: Array<String> = null;
 	public static var preset: TExportPreset = null;
 	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
+	static var colorSpaces = ["linear", "srgb"];
 
 	public static function showTextures() {
 		UIBox.showCustom(function(ui: Zui) {
@@ -32,7 +33,7 @@ class BoxExport {
 			tabPresets(ui);
 			tabAtlases(ui);
 
-		}, 500, 310);
+		}, 540, 310);
 	}
 
 	public static function showBakeMaterial() {
@@ -47,7 +48,7 @@ class BoxExport {
 			tabExportTextures(ui, tr("Bake to Textures"), true);
 			tabPresets(ui);
 
-		}, 500, 310);
+		}, 540, 310);
 	}
 
 	static function tabExportTextures(ui: Zui, title: String, bakeMaterial = false) {
@@ -158,16 +159,17 @@ class BoxExport {
 
 			// Texture list
 			ui.separator(10, false);
-			ui.row([0.2, 0.2, 0.2, 0.2, 0.2]);
+			ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 			ui.text(tr("Texture"));
 			ui.text(tr("R"));
 			ui.text(tr("G"));
 			ui.text(tr("B"));
 			ui.text(tr("A"));
+			ui.text(tr("Color Space"));
 			ui.changed = false;
 			for (i in 0...preset.textures.length) {
 				var t = preset.textures[i];
-				ui.row([0.2, 0.2, 0.2, 0.2, 0.2]);
+				ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 				var htex = hpreset.nest(i);
 				htex.text = t.name;
 				t.name = ui.textInput(htex);
@@ -199,6 +201,11 @@ class BoxExport {
 				if (hb.changed) t.channels[2] = channels[hb.position];
 				ui.combo(ha, channels, tr("A"));
 				if (ha.changed) t.channels[3] = channels[ha.position];
+
+				var hspace = htex.nest(4);
+				hspace.position = colorSpaces.indexOf(t.color_space);
+				ui.combo(hspace, colorSpaces, tr("Color Space"));
+				if (hspace.changed) t.color_space = colorSpaces[hspace.position];
 			}
 
 			if (ui.changed) {
@@ -207,7 +214,7 @@ class BoxExport {
 
 			ui.row([1 / 8]);
 			if (ui.button(tr("Add"))) {
-				preset.textures.push({name: "base", channels: ["base_r", "base_g", "base_b", "1.0"]});
+				preset.textures.push({name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear"});
 				@:privateAccess hpreset.children = null;
 				savePreset();
 			}

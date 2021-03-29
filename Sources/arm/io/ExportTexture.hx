@@ -20,6 +20,8 @@ import arm.Enums;
 
 class ExportTexture {
 
+	static inline var gamma = 1.0 / 2.2;
+
 	public static function run(path: String, bakeMaterial = false) {
 		#if arm_debug
 		var timer = iron.system.Time.realTime();
@@ -267,48 +269,48 @@ class ExportTexture {
 			var c = t.channels;
 			var tex_name = t.name != "" ? "_" + t.name : "";
 			var singleChannel = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
-			if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0") {
+			if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 1);
 			}
-			else if (c[0] == "nor_r" && c[1] == "nor_g" && c[2] == "nor_b" && c[3] == "1.0") {
+			else if (c[0] == "nor_r" && c[1] == "nor_g" && c[2] == "nor_b" && c[3] == "1.0" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_nor, 1);
 			}
-			else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0") {
+			else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 1);
 			}
-			else if (singleChannel && c[0] == "occ") {
+			else if (singleChannel && c[0] == "occ" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 0);
 			}
-			else if (singleChannel && c[0] == "rough") {
+			else if (singleChannel && c[0] == "rough" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 1);
 			}
-			else if (singleChannel && c[0] == "metal") {
+			else if (singleChannel && c[0] == "metal" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 2);
 			}
-			else if (singleChannel && c[0] == "height") {
+			else if (singleChannel && c[0] == "height" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint_pack, 2, 3);
 			}
-			else if (singleChannel && c[0] == "opac") {
+			else if (singleChannel && c[0] == "opac" && t.color_space == "linear") {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
 				if (pix == null) pix = Bytes.alloc(textureSizeX * textureSizeY * 4 * Std.int(bits / 8));
 				for (i in 0...4) {
 					var c = t.channels[i];
-					if      (c == "base_r") copyChannel(pixpaint, 0, pix, i); // copyChannelGamma
-					else if (c == "base_g") copyChannel(pixpaint, 1, pix, i); // copyChannelGamma
-					else if (c == "base_b") copyChannel(pixpaint, 2, pix, i); // copyChannelGamma
-					else if (c == "height") copyChannel(pixpaint_pack, 3, pix, i);
-					else if (c == "metal") copyChannel(pixpaint_pack, 2, pix, i);
-					else if (c == "nor_r") copyChannel(pixpaint_nor, 0, pix, i);
-					else if (c == "nor_g") copyChannel(pixpaint_nor, 1, pix, i);
-					else if (c == "nor_b") copyChannel(pixpaint_nor, 2, pix, i);
-					else if (c == "occ") copyChannel(pixpaint_pack, 0, pix, i);
-					else if (c == "opac") copyChannel(pixpaint, 3, pix, i);
-					else if (c == "rough") copyChannel(pixpaint_pack, 1, pix, i);
-					else if (c == "smooth") copyChannelInv(pixpaint_pack, 1, pix, i);
-					else if (c == "emis") extractChannel(pixpaint_nor, 3, pix, i, 255);
-					else if (c == "subs") extractChannel(pixpaint_nor, 3, pix, i, 254);
+					if      (c == "base_r") copyChannel(pixpaint, 0, pix, i, t.color_space == "linear");
+					else if (c == "base_g") copyChannel(pixpaint, 1, pix, i, t.color_space == "linear");
+					else if (c == "base_b") copyChannel(pixpaint, 2, pix, i, t.color_space == "linear");
+					else if (c == "height") copyChannel(pixpaint_pack, 3, pix, i, t.color_space == "linear");
+					else if (c == "metal") copyChannel(pixpaint_pack, 2, pix, i, t.color_space == "linear");
+					else if (c == "nor_r") copyChannel(pixpaint_nor, 0, pix, i, t.color_space == "linear");
+					else if (c == "nor_g") copyChannel(pixpaint_nor, 1, pix, i, t.color_space == "linear");
+					else if (c == "nor_b") copyChannel(pixpaint_nor, 2, pix, i, t.color_space == "linear");
+					else if (c == "occ") copyChannel(pixpaint_pack, 0, pix, i, t.color_space == "linear");
+					else if (c == "opac") copyChannel(pixpaint, 3, pix, i, t.color_space == "linear");
+					else if (c == "rough") copyChannel(pixpaint_pack, 1, pix, i, t.color_space == "linear");
+					else if (c == "smooth") copyChannelInv(pixpaint_pack, 1, pix, i, t.color_space == "linear");
+					else if (c == "emis") extractChannel(pixpaint_nor, 3, pix, i, 255, t.color_space == "linear");
+					else if (c == "subs") extractChannel(pixpaint_nor, 3, pix, i, 254, t.color_space == "linear");
 					else if (c == "0.0") setChannel(0, pix, i);
 					else if (c == "1.0") setChannel(255, pix, i);
 				}
@@ -369,34 +371,37 @@ class ExportTexture {
 		Krom.fileSaveBytes(file, out.getBytes().getData(), out.getBytes().length);
 	}
 
-	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
+	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, linear = true) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel));
 		}
+		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static inline var gamma = 1.0 / 2.2;
-	static function copyChannelGamma(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, Std.int(Math.pow(from.get(i * 4 + fromChannel) / 255, gamma) * 255));
-		}
-	}
-
-	static function copyChannelInv(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int) {
+	static function copyChannelInv(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, linear = true) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, 255 - from.get(i * 4 + fromChannel));
 		}
+		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static function setChannel(value: Int, to: Bytes, toChannel: Int) {
+	static function extractChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, mask: Int, linear = true) {
+		for (i in 0...Std.int(to.length / 4)) {
+			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel) == mask ? 255 : 0);
+		}
+		if (!linear) toSrgb(to, toChannel);
+	}
+
+	static function setChannel(value: Int, to: Bytes, toChannel: Int, linear = true) {
 		for (i in 0...Std.int(to.length / 4)) {
 			to.set(i * 4 + toChannel, value);
 		}
+		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static function extractChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, mask: Int) {
+	static function toSrgb(to: Bytes, toChannel: Int) {
 		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel) == mask ? 255 : 0);
+			to.set(i * 4 + toChannel, Std.int(Math.pow(to.get(i * 4 + toChannel) / 255, gamma) * 255));
 		}
 	}
 }
@@ -408,4 +413,5 @@ typedef TExportPreset = {
 typedef TExportPresetTexture = {
 	public var name: String;
 	public var channels: Array<String>;
+	public var color_space: String;
 }

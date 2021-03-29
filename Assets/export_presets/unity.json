@@ -1,8 +1,8 @@
 {
 	"textures": [
-		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"] },
-		{ "name": "nor", "channels": ["nor_r", "nor_g", "nor_b", "1.0"] },
-		{ "name": "mos", "channels": ["metal", "occ", "1.0", "smooth"] },
-		{ "name": "height", "channels": ["0.0", "height", "0.0", "1.0"] }
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" },
+		{ "name": "nor", "channels": ["nor_r", "nor_g", "nor_b", "1.0"], "color_space": "linear" },
+		{ "name": "mos", "channels": ["metal", "occ", "1.0", "smooth"], "color_space": "linear" },
+		{ "name": "height", "channels": ["0.0", "height", "0.0", "1.0"], "color_space": "linear" }
 	]
 }
