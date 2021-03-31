@@ -33,8 +33,8 @@ class Plane {
 			nora[i * 2    ] = 0;
 			nora[i * 2 + 1] = 0;
 			posa[i * 4 + 3] = 32767;
-			x = (i % vertsX) / vertsX;
-			y = (Std.int(i / vertsX)) / vertsY;
+			x = (i % vertsX) / (vertsX - 1);
+			y = Std.int(i / vertsX) / (vertsY - 1);
 			texa[i * 2    ] = Std.int(x * 32767);
 			texa[i * 2 + 1] = Std.int(y * 32767);
 		}
