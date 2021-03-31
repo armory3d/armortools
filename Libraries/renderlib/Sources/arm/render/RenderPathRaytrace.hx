@@ -2,10 +2,6 @@ package arm.render;
 
 import iron.RenderPath;
 import iron.Scene;
-import arm.ui.UISidebar;
-import arm.ui.UIHeader;
-import arm.node.MakeMaterial;
-import arm.Enums;
 
 #if (kha_direct3d12 || kha_vulkan)
 
@@ -40,7 +36,7 @@ class RenderPathRaytrace {
 		path = _path;
 	}
 
-	public static function commands() {
+	static function commands(useLiveLayer: Bool) {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
@@ -53,8 +49,7 @@ class RenderPathRaytrace {
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.savedEnvmap;
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
-		var materialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
-		var layer = (isLive || materialSpace) ? RenderPathPaint.liveLayer : Context.layer;
+		var layer = (isLive || useLiveLayer) ? RenderPathPaint.liveLayer : Context.layer;
 		if (lastEnvmap != savedEnvmap) {
 			lastEnvmap = savedEnvmap;
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
@@ -111,7 +106,7 @@ class RenderPathRaytrace {
 		// Context.ddirty = 1; // _RENDER
 	}
 
-	public static function commandsBake() {
+	public static function commandsBake(parsePaintMaterial: ?Bool->Void): Bool {
 		if (!ready || !isBake || lastBake != Context.bakeType) {
 			var rebuild = !(ready && isBake && lastBake != Context.bakeType);
 			lastBake = Context.bakeType;
@@ -153,22 +148,20 @@ class RenderPathRaytrace {
 
 			var _bakeType = Context.bakeType;
 			Context.bakeType = BakeInit;
-			MakeMaterial.parsePaintMaterial();
+			parsePaintMaterial();
 			path.setTarget("baketex0");
 			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
-			for (i in 0...4) { // Jitter
-				path.setTarget("baketex0", ["baketex1"]);
-				path.drawMeshes("paint");
-			}
+			path.setTarget("baketex0", ["baketex1"]);
+			path.drawMeshes("paint");
 			Context.bakeType = _bakeType;
 			function _next() {
-				MakeMaterial.parsePaintMaterial();
+				parsePaintMaterial();
 			}
 			App.notifyOnNextFrame(_next);
 
 			raytraceInit(getBakeShaderName(), rebuild);
 
-			return;
+			return false;
 		}
 
 		if (!Context.envmapLoaded) Context.loadEnvmap();
@@ -216,12 +209,13 @@ class RenderPathRaytrace {
 				raysTimer = 0;
 				raysCounter = 0;
 			}
-			UIHeader.inst.headerHandle.redraws = 2;
+			return true;
 		}
 		else {
 			frame = 0;
 			raysTimer = 0;
 			raysCounter = 0;
+			return false;
 		}
 	}
 
@@ -261,11 +255,11 @@ class RenderPathRaytrace {
 												  "raytrace_bake_thick" + ext;
 	}
 
-	public static function draw() {
+	public static function draw(useLiveLayer: Bool) {
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		if (Context.ddirty > 1 || Context.pdirty > 0 || isLive) frame = 0;
 
-		commands();
+		commands(useLiveLayer);
 
 		if (Config.raw.rp_bloom != false) {
 			RenderPathDeferred.commandsBloom("buf");

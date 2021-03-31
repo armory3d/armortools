@@ -35,7 +35,8 @@ class RenderPathForward {
 
 		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.viewportMode == ViewPathTrace) {
-			RenderPathRaytrace.draw();
+			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			RenderPathRaytrace.draw(useLiveLayer);
 			return;
 		}
 		#end
@@ -157,7 +158,8 @@ class RenderPathForward {
 			drawGbuffer();
 
 			#if (kha_direct3d12 || kha_vulkan)
-			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw() : drawForward();
+			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawForward();
 			#else
 			drawForward();
 			#end

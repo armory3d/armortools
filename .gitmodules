@@ -8,3 +8,6 @@
 	path = armorcore
 	url = https://github.com/armory3d/armorcore
 	shallow = true
+[submodule "Libraries/armorbase"]
+	path = Libraries/armorbase
+	url = https://github.com/armory3d/armorbase
