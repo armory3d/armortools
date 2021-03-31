@@ -96,6 +96,7 @@ class ArmBridge {
 	public static var UIFiles = arm.ui.UIFiles;
 	public static var UIMenu = arm.ui.UIMenu;
 	public static var UIView2D = arm.ui.UIView2D;
+	public static var UIBox = arm.ui.UIBox;
 	public static var MeshUtil = arm.util.MeshUtil;
 	public static var MaterialUtil = arm.util.MaterialUtil;
 	public static var RenderUtil = arm.util.RenderUtil;
