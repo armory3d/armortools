@@ -357,7 +357,7 @@ class BoxExport {
 		var template =
 '{
 	"textures": [
-		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"] }
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" }
 	]
 }
 ';
