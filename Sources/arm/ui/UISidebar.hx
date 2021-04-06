@@ -898,7 +898,7 @@ class UISidebar {
 			Krom.setMouseCursor(3) : // Horizontal
 			Krom.setMouseCursor(4);  // Vertical
 
-		if (ui.inputStarted) {
+		if (Zui.current.inputStarted) {
 			borderStarted = side;
 			borderHandle = handle;
 			App.isResizing = true;

@@ -265,6 +265,11 @@ class UINodes {
 			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
 		var ww = Config.raw.layout[LayoutNodesW];
+		if (!UISidebar.inst.show) {
+			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
+			wx -= UIToolbar.inst.toolbarw;
+			wy = 0;
+		}
 		var mx = mouse.x;
 		var my = mouse.y;
 		if (mx < wx || mx > wx + ww || my < wy) return;
@@ -374,6 +379,9 @@ class UINodes {
 
 	public function drawGrid() {
 		var ww = Config.raw.layout[LayoutNodesW];
+		if (!UISidebar.inst.show) {
+			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
+		}
 		var wh = iron.App.h();
 		var w = ww + 100 * 2;
 		var h = wh + 100 * 2;
@@ -457,11 +465,19 @@ class UINodes {
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
+		if (!UISidebar.inst.show) {
+			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
+			wx -= UIToolbar.inst.toolbarw;
+			wy = 0;
+		}
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
 			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.inst.headerh * 2;
+			if (!UISidebar.inst.show) {
+				wy -= UIHeader.inst.headerh * 2;
+			}
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
