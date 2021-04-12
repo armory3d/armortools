@@ -19,7 +19,7 @@ class UIFiles {
 	static var files: Array<String> = null;
 	static var iconMap: Map<String, kha.Image> = null;
 	static var selected = -1;
-	static var showExtensions = true;
+	static var showExtensions = false;
 	static var offline = false;
 
 	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
@@ -156,8 +156,13 @@ class UIFiles {
 									iron.App.notifyOnInit(function() {
 										if (Layers.pipeCopyRGB == null) Layers.makePipeCopyRGB();
 										icon = kha.Image.createRenderTarget(image.width, image.height);
-										icon.g2.begin(false);
-										icon.g2.drawImage(Project.materials[0].image, 0, 0); // Used for alpha cutout
+										if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
+											icon.g2.begin(false);
+											icon.g2.drawImage(Project.materials[0].image, 0, 0);
+										}
+										else {
+											icon.g2.begin(true, 0xffffffff);
+										}
 										icon.g2.pipeline = Layers.pipeCopyRGB;
 										icon.g2.drawImage(image, 0, 0);
 										icon.g2.pipeline = null;
