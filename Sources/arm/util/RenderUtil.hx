@@ -53,11 +53,17 @@ class RenderUtil {
 		Scene.active.camera.data.raw.fov = 0.92;
 		ViewportUtil.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
-		var savedLight = light.data.raw.strength;
+		var _lightStrength = light.data.raw.strength;
 		var probe = Scene.active.world.probe;
-		var savedProbe = probe.raw.strength;
-		light.data.raw.strength = 1500;
-		probe.raw.strength = 4;
+		var _probeStrength = probe.raw.strength;
+		light.data.raw.strength = 0;
+		probe.raw.strength = 7;
+		var _envmapAngle = Context.envmapAngle;
+		Context.envmapAngle = 6.0;
+		var _brushScale = Context.brushScale;
+		Context.brushScale = 1.5;
+		var _brushNodesScale = Context.brushNodesScale;
+		Context.brushNodesScale = 1.0;
 
 		Scene.active.world.envmap = Context.previewEnvmap;
 		// No resize
@@ -86,8 +92,11 @@ class RenderUtil {
 		Scene.active.camera.data.raw.fov = savedFov;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
-		light.data.raw.strength = savedLight;
-		probe.raw.strength = savedProbe;
+		light.data.raw.strength = _lightStrength;
+		probe.raw.strength = _probeStrength;
+		Context.envmapAngle = _envmapAngle;
+		Context.brushScale = _brushScale;
+		Context.brushNodesScale = _brushNodesScale;
 		Scene.active.world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
 		MakeMaterial.parseMeshMaterial();
 		Context.ddirty = 0;
