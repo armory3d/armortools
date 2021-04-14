@@ -284,6 +284,9 @@ class BoxPreferences {
 					Config.raw.layer_res = layerResHandle.position;
 				}
 
+				var serverHandle = Id.handle({text: Config.raw.server});
+				Config.raw.server = ui.textInput(serverHandle, tr("Cloud Server"));
+
 				var materialLiveHandle = Id.handle({selected: Config.raw.material_live});
 				Config.raw.material_live = ui.check(materialLiveHandle, tr("Live Material Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Instantly update material preview on node change"));
