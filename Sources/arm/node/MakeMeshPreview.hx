@@ -84,6 +84,16 @@ class MakeMeshPreview {
 		frag.write('vec3 nortan = $nortan;');
 		frag.write('float height = $height;');
 
+		// MaterialParser.parse_height_as_channel = false;
+		// vert.write('float vheight = $height;');
+		// vert.add_out('float height');
+		// vert.write('height = vheight;');
+		// var displaceStrength = 0.1;
+		// if (MakeMaterial.heightUsed && displaceStrength > 0.0) {
+		// 	vert.write('vec3 pos2 = $pos.xyz + vec3(nor.xy, pos.w) * vec3($height, $height, $height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
+		// 	vert.write('gl_Position = mul(vec4(pos2.xyz, 1.0), WVP);');
+		// }
+
 		if (decal) {
 			if (Context.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
