@@ -7,9 +7,6 @@ import kha.arrays.Int16Array;
 class ExportObj {
 
 	public static function run(path: String, applyDisplacement = false) {
-		// var height = applyDisplacement ? Project.layers[0].texpaint_pack.getPixels() : null;
-		// var res = Project.layers[0].texpaint_pack.width;
-
 		var o = new BytesOutput();
 		o.bigEndian = false;
 		o.writeString("# armorpaint.org\n");
@@ -91,8 +88,19 @@ class ExportObj {
 				}
 			}
 
-			// if (applyDisplacement) {
-			// }
+			if (applyDisplacement) {
+				// var height = Project.layers[0].texpaint_pack.getPixels();
+				// var res = Project.layers[0].texpaint_pack.width;
+				// var strength = 0.1;
+				// for (i in 0...len) {
+				// 	var x = Std.int(texa2[i * 2    ] / 32767 * res);
+				// 	var y = Std.int((1.0 - texa2[i * 2 + 1] / 32767) * res);
+				// 	var h = (1.0 - height.get((y * res + x) * 4 + 3) / 255) * strength;
+				// 	posa2[i * 3    ] -= Std.int(nora2[i * 3    ] * inv * h / sc);
+				// 	posa2[i * 3 + 1] -= Std.int(nora2[i * 3 + 1] * inv * h / sc);
+				// 	posa2[i * 3 + 2] -= Std.int(nora2[i * 3 + 2] * inv * h / sc);
+				// }
+			}
 
 			o.writeString("o " + p.name + "\n");
 			for (i in 0...pi) {
