@@ -43,6 +43,11 @@ class TabMeshes {
 						MeshUtil.toOrigin();
 						Context.ddirty = 2;
 					}
+					if (ui.button(tr("Apply Displacement"), Left)) {
+						MeshUtil.applyDisplacement();
+						MeshUtil.calcNormals();
+						Context.ddirty = 2;
+					}
 					if (ui.button(tr("Rotate X"), Left)) {
 						MeshUtil.swapAxis(1, 2);
 						Context.ddirty = 2;
@@ -55,7 +60,7 @@ class TabMeshes {
 						MeshUtil.swapAxis(0, 1);
 						Context.ddirty = 2;
 					}
-				}, 7);
+				}, 8);
 			}
 
 			ui.endSticky();
