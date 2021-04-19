@@ -186,7 +186,7 @@ class MeshUtil {
 			if (smooth) {
 				var shared = new Uint32Array(1024);
 				var sharedLen = 0;
-				var found:Array<Int> = [];
+				var found: Array<Int> = [];
 				for (i in 0...(inda.length - 1)) {
 					if (found.indexOf(i) >= 0) continue;
 					var i1 = inda[i];
