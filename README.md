@@ -21,7 +21,7 @@ cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11
-# Open generated Visual Studio project
+# Open generated Visual Studio project at `build\Krom.sln`
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
@@ -43,7 +43,7 @@ cp -a build/krom/ armorcore/Deployment
 cd armorcore
 git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make -g metal
-# Open generated Xcode project
+# Open generated Xcode project at `build/Krom.xcodeproj`
 # Build and run
 ```
 
@@ -56,7 +56,7 @@ git apply patch/android_document_picker.diff --directory=Kinc
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:
 # https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68
-# Open generated Android Studio project
+# Open generated Android Studio project at `build/Krom`
 # Build for device
 ```
 
@@ -68,7 +68,7 @@ cd armorcore
 git apply patch/ios_document_picker.diff --directory=Kinc
 git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make ios -g metal
-# Open generated Xcode project
+# Open generated Xcode project `build/Krom.xcodeproj`
 # Build for device
 ```
 
@@ -81,7 +81,7 @@ git apply patch/window_handling.diff --directory=Kinc
 git apply patch/d3d12_raytrace.diff --directory=Kinc
 git apply patch/d3d12_wrap_sampler.diff --directory=Kinc
 node Kinc/make -g direct3d12 --raytrace dxr
-# Open generated Visual Studio project
+# Open generated Visual Studio project at `build\Krom.sln`
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
@@ -105,7 +105,7 @@ cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11 --vr oculus
-# Open generated Visual Studio project
+# Open generated Visual Studio project at `build\Krom.sln`
 # Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
