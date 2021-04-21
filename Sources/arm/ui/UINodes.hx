@@ -96,16 +96,18 @@ class UINodes {
 					}
 				});
 			}
-			else {
+			// Selecting which node socket to preview
+			else if (node == nodes.nodesSelected[0]) {
 				Context.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+				Context.nodePreviewDirty = true;
 			}
 		}
 	}
 
 	function onSocketReleased(socket: TNodeSocket) {
+		var nodes = getNodes();
+		var node = nodes.getNode(getCanvas(true).nodes, socket.node_id);
 		if (ui.inputReleasedR) {
-			var nodes = getNodes();
-			var node = nodes.getNode(getCanvas(true).nodes, socket.node_id);
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 				App.notifyOnNextFrame(function() {
 					arm.ui.UIMenu.draw(function(ui: Zui) {
@@ -182,6 +184,14 @@ class UINodes {
 						}
 					}, 3);
 				});
+			}
+		}
+		// Selecting which node socket to preview
+		else if (node == nodes.nodesSelected[0]) {
+			var i = node.outputs.indexOf(socket);
+			if (i > -1) {
+				Context.nodePreviewSocket = i;
+				Context.nodePreviewDirty = true;
 			}
 		}
 	}
