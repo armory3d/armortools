@@ -28,12 +28,12 @@ class MathNode extends LogicNode {
 			f = Math.max(v1, v2);
 		case "Min":
 			f = Math.min(v1, v2);
-		case "Abs":
+		case "Absolute":
 			f = Math.abs(v1);
 		case "Subtract":
 			f = v1 - v2;
 		case "Divide":
-			f = v1 / v2;
+			f = v1 / (v2 == 0.0 ? 0.000001 : v2);
 		case "Tangent":
 			f = Math.tan(v1);
 		case "Arcsine":
@@ -42,18 +42,28 @@ class MathNode extends LogicNode {
 			f = Math.acos(v1);
 		case "Arctangent":
 			f = Math.atan(v1);
+		case "Arctan2":
+		    f = Math.atan2(v2,v1);
 		case "Power":
 			f = Math.pow(v1, v2);
 		case "Logarithm":
 			f = Math.log(v1);
 		case "Round":
 			f = Math.round(v1);
+		case "Floor":
+		    f = Math.floor(v1);
+		case "Ceil":
+		    f = Math.ceil(v1);
+		case "Fract":
+		    f = v1 - Math.floor(v1);
 		case "Less Than":
 			f = v1 < v2 ? 1.0 : 0.0;
 		case "Greater Than":
 			f = v1 > v2 ? 1.0 : 0.0;
 		case "Modulo":
 			f = v1 % v2;
+		case "Square Root":
+		    f = Math.sqrt(v1);
 		}
 
 		if (use_clamp) f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
