@@ -38,6 +38,24 @@ class VectorMathNode extends LogicNode {
 			v.x *= v2.x;
 			v.y *= v2.y;
 			v.z *= v2.z;
+		case "Divide":
+			v.x /= v2.x == 0.0 ? 0.000001 : v2.x;
+			v.y /= v2.y == 0.0 ? 0.000001 : v2.y;
+			v.z /= v2.z == 0.0 ? 0.000001 : v2.z;
+		case "Length":
+			f = v.length();
+			v.set(f, f, f);
+		case "Distance":
+			f = v.distanceTo(v2);
+			v.set(f, f, f);
+		case "Project":
+			v.setFrom(v2);
+			v.mult(v1.dot(v2)/v2.dot(v2));
+		case "Reflect":
+			var tmp = new Vec4();
+			tmp.setFrom(v2);
+			tmp.normalize();
+			v.reflect(tmp);
 		}
 
 		if (from == 0) return v;

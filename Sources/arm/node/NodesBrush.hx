@@ -465,7 +465,7 @@ class NodesBrush {
 					{
 						name: _tr("operation"),
 						type: "ENUM",
-						data: ["Add", "Subtract", "Average", "Dot Product", "Cross Product", "Normalize", "Multiply" ],
+						data: ["Add", "Subtract", "Multiply", "Divide", "Average", "Dot Product", "Cross Product", "Normalize", "Project", "Reflect", "Length", "Distance" ],
 						default_value: 0,
 						output: 0
 					}
