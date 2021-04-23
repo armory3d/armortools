@@ -50,7 +50,7 @@ class VectorMathNode extends LogicNode {
 			v.set(f, f, f);
 		case "Project":
 			v.setFrom(v2);
-			v.mult(v1.dot(v2)/v2.dot(v2));
+			v.mult(v1.dot(v2) / v2.dot(v2));
 		case "Reflect":
 			var tmp = new Vec4();
 			tmp.setFrom(v2);

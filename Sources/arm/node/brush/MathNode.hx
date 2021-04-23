@@ -43,7 +43,7 @@ class MathNode extends LogicNode {
 		case "Arctangent":
 			f = Math.atan(v1);
 		case "Arctan2":
-		    f = Math.atan2(v2,v1);
+		    f = Math.atan2(v2, v1);
 		case "Power":
 			f = Math.pow(v1, v2);
 		case "Logarithm":
