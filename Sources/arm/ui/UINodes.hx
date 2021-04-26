@@ -506,6 +506,33 @@ class UINodes {
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = true;
 
+			// Remove nodes with unknown id for this canvas type
+			if (Zui.isPaste) {
+				var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+				var i = 0;
+				while (i++ < c.nodes.length) {
+					var canvasNode = c.nodes[i];
+					if (Nodes.excludeRemove.indexOf(canvasNode.type) >= 0) {
+						continue;
+					}
+					var found = false;
+					for (list in nodeList) {
+						for (listNode in list) {
+							if (canvasNode.type == listNode.type) {
+								found = true;
+								break;
+							}
+						}
+						if (found) break;
+					}
+					if (!found) {
+						nodes.removeNode(canvasNode, c);
+						nodes.nodesSelected.remove(canvasNode);
+						i--;
+					}
+				}
+			}
+
 			// Recompile material on change
 			if (ui.changed) {
 				recompileMat = (ui.inputDX != 0 || ui.inputDY != 0 || !uichangedLast) && Config.raw.material_live; // Instant preview
