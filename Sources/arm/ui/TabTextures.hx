@@ -118,16 +118,15 @@ class TabTextures {
 								}
 								if (ui.button(tr("Reimport"), Left)) {
 									Data.deleteImage(asset.file);
-									Project.assetMap.remove(asset.id);
-									Project.assets.splice(i, 1);
-									Project.assetNames.splice(i, 1);
-									ImportTexture.run(asset.file);
-									function _next() {
-										arm.node.MakeMaterial.parsePaintMaterial();
-										arm.util.RenderUtil.makeMaterialPreview();
-										UISidebar.inst.hwnd1.redraws = 2;
-									}
-									App.notifyOnNextFrame(_next);
+									Data.getImage(asset.file, function(image: kha.Image) {
+										Project.assetMap.set(asset.id, image);
+										function _next() {
+											arm.node.MakeMaterial.parsePaintMaterial();
+											arm.util.RenderUtil.makeMaterialPreview();
+											UISidebar.inst.hwnd1.redraws = 2;
+										}
+										App.notifyOnNextFrame(_next);
+									});
 								}
 								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);
