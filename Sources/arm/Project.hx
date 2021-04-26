@@ -340,7 +340,6 @@ class Project {
 
 				// Parse brush
 				MakeMaterial.parseBrush();
-				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 				function _init() {
 					RenderUtil.makeBrushPreview();

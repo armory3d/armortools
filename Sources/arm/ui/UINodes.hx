@@ -423,7 +423,6 @@ class UINodes {
 		if (recompileMat) {
 			if (canvasType == CanvasBrush) {
 				MakeMaterial.parseBrush();
-				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 				UISidebar.inst.hwnd1.redraws = 2;
 			}

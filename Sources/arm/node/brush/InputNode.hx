@@ -112,6 +112,8 @@ class InputNode extends LogicNode {
 			Context.lastPaintX = -1;
 			Context.lastPaintY = -1;
 		}
+
+		Context.parseBrushInputs();
 	}
 
 	override function get(from: Int): Dynamic {

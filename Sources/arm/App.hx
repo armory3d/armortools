@@ -577,26 +577,16 @@ class App {
 		if (UIMenu.show) UIMenu.render(g);
 
 		// Save last pos for continuos paint
-		if (mouse.down()) {
-			Context.lastPaintVecX = Context.paintVec.x;
-			Context.lastPaintVecY = Context.paintVec.y;
-		}
-		else {
-			if (Context.splitView) {
-				Context.viewIndex = mouse.viewX > arm.App.w() / 2 ? 1 : 0;
-			}
+		Context.lastPaintVecX = Context.paintVec.x;
+		Context.lastPaintVecY = Context.paintVec.y;
 
-			Context.lastPaintVecX = mouse.viewX / iron.App.w();
-			Context.lastPaintVecY = mouse.viewY / iron.App.h();
-
-			Context.viewIndex = -1;
-
-			#if (krom_android || krom_ios)
-			// No mouse move events for touch, re-init last paint position on touch start
+		#if (krom_android || krom_ios)
+		// No mouse move events for touch, re-init last paint position on touch start
+		if (!mouse.down()) {
 			Context.lastPaintX = -1;
 			Context.lastPaintY = -1;
-			#end
 		}
+		#end
 	}
 
 	public static function enumTexts(nodeType: String): Array<String> {

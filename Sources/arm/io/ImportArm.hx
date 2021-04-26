@@ -331,7 +331,6 @@ class ImportArm {
 				Context.brush = new BrushSlot(n);
 				Project.brushes.push(Context.brush);
 				MakeMaterial.parseBrush();
-				Context.parseBrushInputs();
 				RenderUtil.makeBrushPreview();
 			}
 

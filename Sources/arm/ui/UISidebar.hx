@@ -73,7 +73,6 @@ class UISidebar {
 			Project.brushes.push(new BrushSlot());
 			Context.brush = Project.brushes[0];
 			MakeMaterial.parseBrush();
-			Context.parseBrushInputs();
 		}
 
 		if (Project.fonts == null) {

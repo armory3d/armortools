@@ -77,7 +77,6 @@ class BrushOutputNode extends LogicNode {
 	}
 
 	override function run(from: Int) {
-
 		var left = 0.0;
 		var right = 1.0;
 		if (Context.paint2d) {

@@ -290,7 +290,6 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		brush = b;
 		MakeMaterial.parseBrush();
-		Context.parseBrushInputs();
 		UISidebar.inst.hwnd1.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 	}

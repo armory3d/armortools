@@ -21,7 +21,6 @@ class TabBrushes {
 				Context.brush = new BrushSlot();
 				Project.brushes.push(Context.brush);
 				MakeMaterial.parseBrush();
-				Context.parseBrushInputs();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			if (ui.button(tr("Import"))) {
