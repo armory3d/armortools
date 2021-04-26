@@ -117,16 +117,7 @@ class TabTextures {
 									});
 								}
 								if (ui.button(tr("Reimport"), Left)) {
-									Data.deleteImage(asset.file);
-									Data.getImage(asset.file, function(image: kha.Image) {
-										Project.assetMap.set(asset.id, image);
-										function _next() {
-											arm.node.MakeMaterial.parsePaintMaterial();
-											arm.util.RenderUtil.makeMaterialPreview();
-											UISidebar.inst.hwnd1.redraws = 2;
-										}
-										App.notifyOnNextFrame(_next);
-									});
+									Project.reimportTexture(asset);
 								}
 								if (ui.button(tr("To Mask"), Left)) {
 									Layers.createImageMask(asset);

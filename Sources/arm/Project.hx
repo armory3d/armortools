@@ -29,6 +29,7 @@ import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
+import arm.io.ImportTexture;
 import arm.io.ExportArm;
 import arm.node.NodesBrush;
 import arm.ProjectFormat;
@@ -407,7 +408,7 @@ class Project {
 	}
 
 	public static function reimportMesh() {
-		if (Project.meshAssets != null && Project.meshAssets.length > 0) {
+		if (Project.meshAssets != null && Project.meshAssets.length > 0 && File.exists(Project.meshAssets[0])) {
 			importMeshBox(Project.meshAssets[0], true, false);
 		}
 		else importAsset();
@@ -428,11 +429,35 @@ class Project {
 
 	public static function reimportTextures() {
 		for (asset in Project.assets) {
+			reimportTexture(asset);
+		}
+	}
+
+	public static function reimportTexture(asset: TAsset) {
+		function load(path: String) {
+			asset.file = path;
+			var i = Project.assets.indexOf(asset);
 			Data.deleteImage(asset.file);
-			Data.getImage(asset.file, function(image: kha.Image) {
-				Project.assetMap.set(asset.id, image);
+			Project.assetMap.remove(asset.id);
+			Project.assets.splice(i, 1);
+			Project.assetNames.splice(i, 1);
+			ImportTexture.run(asset.file);
+			Project.assets.insert(i, Project.assets.pop());
+			Project.assetNames.insert(i, Project.assetNames.pop());
+			function _next() {
+				arm.node.MakeMaterial.parsePaintMaterial();
+				arm.util.RenderUtil.makeMaterialPreview();
+				UISidebar.inst.hwnd1.redraws = 2;
+			}
+			App.notifyOnNextFrame(_next);
+		}
+		if (!File.exists(asset.file)) {
+			var filters = Path.textureFormats.join(",");
+			UIFiles.show(filters, false, function(path: String) {
+				load(path);
 			});
 		}
+		else load(asset.file);
 	}
 
 	public static function getImage(asset: TAsset): Image {
