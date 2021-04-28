@@ -393,6 +393,7 @@ class ImportArm {
 			Context.material = new MaterialSlot(m0, c);
 			Project.materials.push(Context.material);
 			imported.push(Context.material);
+			History.newMaterial();
 		}
 
 		if (project.material_groups != null) {

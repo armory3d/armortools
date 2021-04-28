@@ -8,6 +8,7 @@ import arm.ui.UINodes;
 import arm.ui.UIToolbar;
 import arm.sys.Path;
 import arm.data.LayerSlot;
+import arm.data.MaterialSlot;
 import arm.node.MakeMaterial;
 
 class History {
@@ -169,6 +170,24 @@ class History {
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);
 			}
+			else if (step.name == tr("New Material")) {
+				Context.material = Project.materials[step.material];
+				step.canvas = Context.material.canvas;
+				Context.material.delete();
+			}
+			else if (step.name == tr("Delete Material")) {
+				Context.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.material);
+				Context.material.canvas = step.canvas;
+				UINodes.inst.canvasChanged();
+				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.hwnd.redraws = 2;
+			}
+			else if (step.name == tr("Duplicate Material")) {
+				Context.material = Project.materials[step.material];
+				step.canvas = Context.material.canvas;
+				Context.material.delete();
+			}
 			else { // Paint operation
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
@@ -180,6 +199,7 @@ class History {
 			undos--;
 			redos++;
 			UISidebar.inst.hwnd0.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -294,6 +314,27 @@ class History {
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);
 			}
+			else if (step.name == tr("New Material")) {
+				Context.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.material);
+				Context.material.canvas = step.canvas;
+				UINodes.inst.canvasChanged();
+				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.hwnd.redraws = 2;
+			}
+			else if (step.name == tr("Delete Material")) {
+				Context.material = Project.materials[step.material];
+				step.canvas = Context.material.canvas;
+				Context.material.delete();
+			}
+			else if (step.name == tr("Duplicate Material")) {
+				Context.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.material);
+				Context.material.canvas = step.canvas;
+				UINodes.inst.canvasChanged();
+				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.hwnd.redraws = 2;
+			}
 			else { // Paint operation
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
@@ -305,6 +346,7 @@ class History {
 			undos++;
 			redos--;
 			UISidebar.inst.hwnd0.redraws = 2;
+			UISidebar.inst.hwnd1.redraws = 2;
 			Context.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -410,8 +452,23 @@ class History {
 		push(tr("Layer Blending"));
 	}
 
-	// public static function newMaterial() {}
-	// public static function deleteMaterial() {}
+	public static function newMaterial() {
+		var step = push(tr("New Material"));
+		step.canvas_type = 0;
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+	}
+
+	public static function deleteMaterial() {
+		var step = push(tr("Delete Material"));
+		step.canvas_type = 0;
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+	}
+
+	public static function duplicateMaterial() {
+		var step = push(tr("Duplicate Material"));
+		step.canvas_type = 0;
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+	}
 
 	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
 		var step = push(tr("Edit Nodes"));

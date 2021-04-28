@@ -113,6 +113,7 @@ class ImportFolder {
 		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
 		UISidebar.inst.hwnd1.redraws = 2;
+		History.newMaterial();
 	}
 
 	static function placeImageNode(nodes: Nodes, canvas: TNodeCanvas, asset: String, ny: Int, to_id: Int, to_socket: Int) {

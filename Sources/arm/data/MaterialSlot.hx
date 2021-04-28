@@ -58,4 +58,13 @@ class MaterialSlot {
 		}
 		App.notifyOnNextFrame(_next);
 	}
+
+	public function delete() {
+		unload();
+		var mpos = Project.materials.indexOf(this);
+		Project.materials.remove(this);
+		if (Project.materials.length > 0) {
+			Context.setMaterial(Project.materials[mpos > 0 ? mpos - 1 : 0]);
+		}
+	}
 }

@@ -33,6 +33,7 @@ class TabMaterials {
 				materials.push(Context.material);
 				updateMaterial();
 				ui.g.begin(false);
+				History.newMaterial();
 			}
 
 			if (ui.button(tr("Import"))) {
@@ -136,11 +137,13 @@ class TabMaterials {
 									var cloned = Json.parse(Json.stringify(materials[i].canvas));
 									Context.material.canvas = cloned;
 									updateMaterial();
+									History.duplicateMaterial();
 								}
 								iron.App.notifyOnInit(_init);
 							}
 
 							if (materials.length > 1 && ui.button(tr("Delete"), Left)) {
+								History.deleteMaterial();
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
 								UISidebar.inst.hwnd1.redraws = 2;

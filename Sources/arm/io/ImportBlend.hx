@@ -624,6 +624,7 @@ class ImportBlend {
 					link = link.get("next");
 					if (last.block == link.block) break;
 				}
+				History.newMaterial();
 			}
 
 			function _init() {
