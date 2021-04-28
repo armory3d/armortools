@@ -510,7 +510,7 @@ class UINodes {
 				var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 				var i = 0;
 				while (i++ < c.nodes.length) {
-					var canvasNode = c.nodes[i];
+					var canvasNode = c.nodes[i - 1];
 					if (Nodes.excludeRemove.indexOf(canvasNode.type) >= 0) {
 						continue;
 					}
