@@ -329,10 +329,12 @@ class UIView2D {
 		var border = 32;
 		var tw = ww * 0.95 * panScale;
 		var tx = ww / 2 - tw / 2 + panX;
-		var ty = iron.App.h() / 2 - tw / 2 + panY;
+		var hh = iron.App.h();
+		var ty = hh / 2 - tw / 2 + panY;
+
 		if      (tx + border >  ww) panX =  ww / 2 + tw / 2 - border;
 		else if (tx - border < -tw) panX = -tw / 2 - ww / 2 + border;
-		if      (ty + border >  wh) panY =  wh / 2 + tw / 2 - border;
-		else if (ty - border < -tw) panY = -tw / 2 - wh / 2 + border;
+		if      (ty + border >  hh) panY =  hh / 2 + tw / 2 - border;
+		else if (ty - border < -tw) panY = -tw / 2 - hh / 2 + border;
 	}
 }
