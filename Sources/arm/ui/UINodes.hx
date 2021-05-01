@@ -308,6 +308,12 @@ class UINodes {
 			ui.inputY = mouse.y;
 			nodeSearchSpawn = null;
 		}
+
+		if (Operator.shortcut(Config.keymap.view_reset)) {
+			nodes.panX = 0.0;
+			nodes.panY = 0.0;
+			nodes.zoom = 1.0;
+		}
 	}
 
 	public function canvasChanged() {

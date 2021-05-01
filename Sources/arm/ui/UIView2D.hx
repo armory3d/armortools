@@ -336,5 +336,11 @@ class UIView2D {
 		else if (tx - border < -tw) panX = -tw / 2 - ww / 2 + border;
 		if      (ty + border >  hh) panY =  hh / 2 + tw / 2 - border;
 		else if (ty - border < -tw) panY = -tw / 2 - hh / 2 + border;
+
+		if (Operator.shortcut(Config.keymap.view_reset)) {
+			panX = 0.0;
+			panY = 0.0;
+			panScale = 1.0;
+		}
 	}
 }
