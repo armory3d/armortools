@@ -582,11 +582,7 @@ class Layers {
 					if (l.fill_layer == Context.material) {
 						Context.layer = l;
 						setObjectMask();
-
-						// Decal layer
-						if (l.uvType == UVProject && !Context.layerIsMask) {
-							l.clearLayer();
-						}
+						l.clearLayer();
 						RenderPathPaint.commandsPaint(false);
 						RenderPathPaint.dilate(true, true);
 					}
@@ -628,11 +624,7 @@ class Layers {
 		Context.layerIsMask = false;
 		var _workspace = UIHeader.inst.worktab.position;
 		UIHeader.inst.worktab.position = SpacePaint;
-
-		// Decal layer
-		if (Context.layer.uvType == UVProject && !Context.layerIsMask) {
-			Context.layer.clearLayer();
-		}
+		Context.layer.clearLayer();
 
 		if (parsePaint) MakeMaterial.parsePaintMaterial(false);
 		RenderPathPaint.commandsPaint(false);
