@@ -45,6 +45,7 @@ class UINodes {
 	var nodeSearchLast = "";
 	var lastCanvas: TNodeCanvas = null;
 	var lastNodeSelected: TNode = null;
+	var releaseLink = false;
 
 	public var grid: Image = null;
 	public var hwnd = Id.handle();
@@ -462,6 +463,14 @@ class UINodes {
 			Context.nodePreviewSocket = 0;
 		}
 
+		// Remove dragged link when mouse is released out of the node viewport
+		var c = getCanvas(true);
+		if (releaseLink && nodes.linkDrag != null) {
+			c.links.remove(nodes.linkDrag);
+			nodes.linkDrag = null;
+		}
+		releaseLink = ui.inputReleased;
+
 		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
@@ -506,7 +515,6 @@ class UINodes {
 			}
 
 			// Nodes
-			var c = getCanvas(true);
 			ui.inputEnabled = !drawMenu;
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = true;
