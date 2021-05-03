@@ -516,6 +516,9 @@ class UINodes {
 
 			// Nodes
 			ui.inputEnabled = !drawMenu;
+			ui.windowBorderRight = Config.raw.layout[LayoutSidebarW];
+			ui.windowBorderTop = UIHeader.inst.headerh * 2;
+			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = true;
 
@@ -718,6 +721,7 @@ class UINodes {
 					nodes.nodesSelected = [node];
 					nodes.nodesDrag = true;
 				}
+				// Next column
 				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) { ui._x += menuw; ui._y = py; }
 			}
 			if (isGroupCategory) {

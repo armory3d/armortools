@@ -50,7 +50,7 @@ class TabLayers {
 			if (atlases != null) for (a in atlases) ar.push(a);
 			var filterHandle = Id.handle();
 			filterHandle.position = Context.layerFilter;
-			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left, 16);
+			Context.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left);
 			if (filterHandle.changed) {
 				for (p in Project.paintObjects) {
 					p.visible = Context.layerFilter == 0 || p.name == ar[Context.layerFilter] || Project.isAtlasObject(p);
@@ -630,7 +630,7 @@ class TabLayers {
 					if (atlases != null) for (a in atlases) ar.push(a);
 					var objectHandle = Id.handle().nest(l.id);
 					objectHandle.position = l.objectMask;
-					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left, 16);
+					l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left);
 					if (objectHandle.changed) {
 						Context.setLayer(l);
 						MakeMaterial.parseMeshMaterial();
