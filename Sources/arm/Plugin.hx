@@ -113,6 +113,11 @@ class ZuiBridge {
 	public static var Ext = zui.Ext;
 }
 
+@:expose("console")
+class Console {
+	public static var log = arm.Log.trace;
+}
+
 @:keep
 class Keep {
 	public static function keep() {
