@@ -112,8 +112,7 @@ class RenderPathPaint {
 	public static function commandsPaint(dilation = true) {
 		var tid = Context.layer.id;
 
-		var paintSpace = UIHeader.inst.worktab.position == SpacePaint || UIHeader.inst.worktab.position == SpaceBake;
-		if (Context.pdirty > 0 && paintSpace) {
+		if (Context.pdirty > 0) {
 			if (Context.tool == ToolParticle) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
@@ -173,10 +172,13 @@ class RenderPathPaint {
 					#end
 					path.bindTarget("gbuffer2", "gbuffer2");
 					tid = Context.layer.id;
+					var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+					if (useLiveLayer) RenderPathPaint.useLiveLayer(true);
 					path.bindTarget("texpaint" + tid, "texpaint");
 					path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 					path.drawMeshes("paint");
+					if (useLiveLayer) RenderPathPaint.useLiveLayer(false);
 					UIHeader.inst.headerHandle.redraws = 2;
 					UISidebar.inst.hwnd2.redraws = 2;
 
@@ -528,8 +530,9 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
-		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
-		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
+		var isPicker = Context.tool == ToolPicker;
+		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask && !isPicker;
+		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask && !isPicker;
 		var groupLayer = Context.layer.getChildren() != null;
 		return !fillLayer && !fillMask && !groupLayer && !Context.foregroundEvent;
 	}
