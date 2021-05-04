@@ -563,13 +563,7 @@ class UINodes {
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
-				if (sel.type == "TEX_IMAGE") {
-					var id = sel.buttons[0].default_value;
-					if (id < Project.assets.length) {
-						img = Project.getImage(Project.assets[id]);
-					}
-				}
-				else if (sel.type == "LAYER") {
+				if (sel.type == "LAYER") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.layers.length) {
 						img = Project.layers[id].texpaint_preview;
@@ -845,8 +839,7 @@ class UINodes {
 		if (nodes.nodesSelected.length == 0) return;
 
 		var node = nodes.nodesSelected[0];
-		if (node.type == "TEX_IMAGE" ||
-			node.type == "LAYER" ||
+		if (node.type == "LAYER" ||
 			node.type == "LAYER_MASK" ||
 			node.type == "MATERIAL" ||
 			node.type == "OUTPUT_MATERIAL_PBR") return;
