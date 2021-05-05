@@ -212,7 +212,7 @@ class NodesBrush {
 					{
 						name: _tr("operation"),
 						type: "ENUM",
-						data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Absolute", "Minimum", "Maximum", "Less Than", "Greater Than", "Round", "Floor", "Ceil", "Fract", "Modulo", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2"],
+						data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Absolute", "Minimum", "Maximum", "Less Than", "Greater Than", "Round", "Floor", "Ceil", "Fract", "Modulo", "Ping-Pong", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2"],
 						default_value: 0,
 						output: 0
 					},

@@ -64,6 +64,8 @@ class MathNode extends LogicNode {
 			f = v1 % v2;
 		case "Square Root":
 		    f = Math.sqrt(v1);
+		case "Ping-Pong":
+		    f = (v2 != 0.0) ? v2 - Math.abs( (Math.abs(v1) % (2*v2)) - v2) : 0.0;
 		}
 
 		if (use_clamp) f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
