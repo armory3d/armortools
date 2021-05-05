@@ -17,7 +17,7 @@ class BoxExport {
 	public static var hpreset = Id.handle();
 	public static var files: Array<String> = null;
 	public static var preset: TExportPreset = null;
-	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
+	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_DirectX", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static var colorSpaces = ["linear", "srgb"];
 
 	public static function showTextures() {
