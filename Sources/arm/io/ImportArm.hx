@@ -548,6 +548,11 @@ class ImportArm {
 			Project.raw.packed_assets = [];
 		}
 		for (pa in project.packed_assets) {
+			#if krom_windows
+			pa.name = pa.name.replace("/", "\\");
+			#else
+			pa.name = pa.name.replace("\\", "/");
+			#end
 			if (pa.name == file) pa.name = abs; // From relative to absolute
 			if (pa.name == abs) {
 				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
