@@ -294,6 +294,9 @@ class Config {
 			UIView2D.inst.ui.t = App.theme;
 			UISidebar.inst.tagUIRedraw();
 		}
+		#if (krom_android || krom_ios)
+		App.theme.FULL_TABS = true;
+		#end
 	}
 
 	public static function enablePlugin(f: String) {
