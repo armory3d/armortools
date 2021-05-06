@@ -14,8 +14,14 @@ class TabHistory {
 				ui.text(History.steps[i].name);
 				if (ui.isReleased) { // Jump to undo step
 					var diff = i - active;
-					while (diff > 0) { diff--; History.redo(); }
-					while (diff < 0) { diff++; History.undo(); }
+					while (diff > 0) {
+						diff--;
+						History.redo();
+					}
+					while (diff < 0) {
+						diff++;
+						History.undo();
+					}
 				}
 			}
 		}

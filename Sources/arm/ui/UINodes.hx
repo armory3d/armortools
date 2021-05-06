@@ -716,7 +716,10 @@ class UINodes {
 					nodes.nodesDrag = true;
 				}
 				// Next column
-				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) { ui._x += menuw; ui._y = py; }
+				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) {
+					ui._x += menuw;
+					ui._y = py;
+				}
 			}
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {

@@ -260,7 +260,7 @@ class ExportTexture {
 		for (t in preset.textures) {
 			for (c in t.channels) {
 				if      ((c == "base_r" || c == "base_g" || c == "base_b" || c == "opac") && pixpaint == null) pixpaint = texpaint.getPixels();
-				else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_DirectX" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = texpaint_nor.getPixels();
+				else if ((c == "nor_r" || c == "nor_g" || c == "nor_g_directx" || c == "nor_b" || c == "emis" || c == "subs") && pixpaint_nor == null) pixpaint_nor = texpaint_nor.getPixels();
 				else if ((c == "occ" || c == "rough" || c == "metal" || c == "height" || c == "smooth") && pixpaint_pack == null) pixpaint_pack = texpaint_pack.getPixels();
 			}
 		}
@@ -304,7 +304,7 @@ class ExportTexture {
 					else if (c == "metal") copyChannel(pixpaint_pack, 2, pix, i, t.color_space == "linear");
 					else if (c == "nor_r") copyChannel(pixpaint_nor, 0, pix, i, t.color_space == "linear");
 					else if (c == "nor_g") copyChannel(pixpaint_nor, 1, pix, i, t.color_space == "linear");
-					else if (c == "nor_g_DirectX") copyChannelInv(pixpaint_nor, 1, pix, i, t.color_space == "linear");
+					else if (c == "nor_g_directx") copyChannelInv(pixpaint_nor, 1, pix, i, t.color_space == "linear");
 					else if (c == "nor_b") copyChannel(pixpaint_nor, 2, pix, i, t.color_space == "linear");
 					else if (c == "occ") copyChannel(pixpaint_pack, 0, pix, i, t.color_space == "linear");
 					else if (c == "opac") copyChannel(pixpaint, 3, pix, i, t.color_space == "linear");

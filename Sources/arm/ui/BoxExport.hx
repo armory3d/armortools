@@ -17,7 +17,7 @@ class BoxExport {
 	public static var hpreset = Id.handle();
 	public static var files: Array<String> = null;
 	public static var preset: TExportPreset = null;
-	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_DirectX", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
+	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static var colorSpaces = ["linear", "srgb"];
 
 	public static function showTextures() {
@@ -256,7 +256,7 @@ class BoxExport {
 						tris += Std.int(inda.values.length / 3);
 					}
 				}
-				ui.text(tris + " triangles");
+				ui.text(tris + " " + tr("triangles"));
 
 				ui.row([0.5, 0.5]);
 				if (ui.button(tr("Cancel"))) {

@@ -432,8 +432,18 @@ class ImportBlend {
 				var canvas = Context.material.canvas;
 				canvas.name = mat.get("id").get("name").substr(2); // MAWood
 				var nout: TNode = null;
-				for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
-				for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
+				for (n in canvas.nodes) {
+					if (n.type == "OUTPUT_MATERIAL_PBR") {
+						nout = n;
+						break;
+					}
+				}
+				for (n in canvas.nodes) {
+					if (n.name == "RGB") {
+						nodes.removeNode(n, canvas);
+						break;
+					}
+				}
 
 				// Parse nodetree
 				var nodetree = mat.get("nodetree"); // bNodeTree
@@ -572,8 +582,18 @@ class ImportBlend {
 
 					var from_id = -1;
 					var to_id = -1;
-					for (n in canvas.nodes) if (n.name == fromnode) { from_id = n.id; break; }
-					for (n in canvas.nodes) if (n.name == tonode) { to_id = n.id; break; }
+					for (n in canvas.nodes) {
+						if (n.name == fromnode) {
+							from_id = n.id;
+							break;
+						}
+					}
+					for (n in canvas.nodes) {
+						if (n.name == tonode) {
+							to_id = n.id;
+							break;
+						}
+					}
 
 					if (from_id >= 0 && to_id >= 0) {
 						var from_socket = 0;

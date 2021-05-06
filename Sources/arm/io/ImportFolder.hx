@@ -74,8 +74,18 @@ class ImportFolder {
 		var dirs = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
 		var nout: TNode = null;
-		for (n in canvas.nodes) if (n.type == "OUTPUT_MATERIAL_PBR") { nout = n; break; }
-		for (n in canvas.nodes) if (n.name == "RGB") { nodes.removeNode(n, canvas); break; }
+		for (n in canvas.nodes) {
+			if (n.type == "OUTPUT_MATERIAL_PBR") {
+				nout = n;
+				break;
+			}
+		}
+		for (n in canvas.nodes) {
+			if (n.name == "RGB") {
+				nodes.removeNode(n, canvas);
+				break;
+			}
+		}
 
 		// Place nodes
 		var pos = 0;

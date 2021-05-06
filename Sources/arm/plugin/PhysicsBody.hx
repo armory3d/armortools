@@ -89,7 +89,9 @@ class PhysicsBody extends iron.Trait {
 		notifyOnAdd(init);
 	}
 
-	inline function withMargin(f: Float) { return f - f * collisionMargin; }
+	inline function withMargin(f: Float) {
+		return f - f * collisionMargin;
+	}
 
 	function init() {
 		if (ready) return;

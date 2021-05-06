@@ -42,7 +42,9 @@ class LogicNode {
 	}
 
 	@:allow(arm.node.LogicNodeInput)
-	function get(from: Int): Dynamic { return this; }
+	function get(from: Int): Dynamic {
+		return this;
+	}
 
 	@:allow(arm.node.LogicNodeInput)
 	function set(value: Dynamic) {}

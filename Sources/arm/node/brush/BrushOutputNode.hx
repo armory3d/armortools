@@ -35,7 +35,9 @@ class BrushOutputNode extends LogicNode {
 			input5 = inputs[5].get();
 			input6 = inputs[6].get();
 		}
-		catch (_) { return; }
+		catch (_) {
+			return;
+		}
 
 		Context.paintVec = input0;
 		Context.brushNodesRadius = input1;

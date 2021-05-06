@@ -89,8 +89,14 @@ class InputNode extends LogicNode {
 		}
 
 		var kb = iron.system.Input.getKeyboard();
-		if (kb.started(Config.keymap.brush_ruler)) { lockStartX = mouse.viewX; lockStartY = mouse.viewY; lockBegin = true; }
-		else if (kb.released(Config.keymap.brush_ruler)) { lockX = lockY = lockBegin = false; }
+		if (kb.started(Config.keymap.brush_ruler)) {
+			lockStartX = mouse.viewX;
+			lockStartY = mouse.viewY;
+			lockBegin = true;
+		}
+		else if (kb.released(Config.keymap.brush_ruler)) {
+			lockX = lockY = lockBegin = false;
+		}
 
 		if (Context.brushLazyRadius > 0) {
 			var v1 = new Vec4(Context.brushLazyX * iron.App.w(), Context.brushLazyY * iron.App.h(), 0.0);

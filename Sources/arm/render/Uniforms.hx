@@ -179,7 +179,10 @@ class Uniforms {
 				var y = Context.paintVec.y;
 				var lastx = Context.prevPaintVecX;
 				var lasty = Context.prevPaintVecY;
-				if (Context.paint2d) { x = vec2d(x); lastx = vec2d(lastx); }
+				if (Context.paint2d) {
+					x = vec2d(x);
+					lastx = vec2d(lastx);
+				}
 				var angle = Math.atan2(-y + lasty, x - lastx) - Math.PI / 2;
 				v.set(Math.cos(angle), Math.sin(angle), allowPaint ? 1 : 0);
 				Context.prevPaintVecX = Context.lastPaintVecX;

@@ -7,5 +7,7 @@ class NullNode extends LogicNode {
 		super(tree);
 	}
 
-	override function get(from: Int): Dynamic { return null; }
+	override function get(from: Int): Dynamic {
+		return null;
+	}
 }

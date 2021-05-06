@@ -5,7 +5,9 @@ import zui.Nodes;
 class NodesBrush {
 
 	// Mark strings as localizable
-	public static inline function _tr(s: String) { return s; }
+	public static inline function _tr(s: String) {
+		return s;
+	}
 
 	public static var categories = [_tr("Nodes")];
 

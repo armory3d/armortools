@@ -38,7 +38,9 @@ class Config {
 					done();
 				});
 			}
-			catch (e: Dynamic) { done(); }
+			catch (e: Dynamic) {
+				done();
+			}
 			#else
 			done();
 			#end

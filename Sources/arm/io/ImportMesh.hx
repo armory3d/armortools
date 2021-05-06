@@ -115,7 +115,10 @@ class ImportMesh {
 			}
 
 			if (clearLayers) {
-				while (Project.layers.length > 0) { var l = Project.layers.pop(); l.unload(); }
+				while (Project.layers.length > 0) {
+					var l = Project.layers.pop();
+					l.unload();
+				}
 				Layers.newLayer(false);
 				iron.App.notifyOnInit(Layers.initLayers);
 				History.reset();

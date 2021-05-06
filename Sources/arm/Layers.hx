@@ -647,7 +647,12 @@ class Layers {
 				Context.mergedObject.visible = false;
 			}
 			var o = Project.paintObjects[0];
-			for (p in Project.paintObjects) if (p.name == ar[mask]) { o = p; break; }
+			for (p in Project.paintObjects) {
+				if (p.name == ar[mask]) {
+					o = p;
+					break;
+				}
+			}
 			Context.selectPaintObject(o);
 		}
 		else {

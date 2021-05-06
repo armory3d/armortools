@@ -58,7 +58,6 @@ class Brush {
 	}
 
 	public static function parse(canvas: TNodeCanvas, onAdd = true) {
-
 		nodes = canvas.nodes;
 		links = canvas.links;
 
@@ -79,7 +78,6 @@ class Brush {
 	}
 
 	static function build_node(node: TNode): String {
-
 		// Get node name
 		var name = node_name(node);
 

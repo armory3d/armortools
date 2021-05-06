@@ -66,7 +66,7 @@ class MakeVoxel {
 		pipeState.compile();
 		data.raw.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];
 		data.constants = [pipeState.getConstantLocation("W"), pipeState.getConstantLocation("N")];
-		data.raw.texture_units = [{name: "texpaint_pack"}, {name: "voxels", is_image: true}];
+		data.raw.texture_units = [{ name: "texpaint_pack" }, { name: "voxels", is_image: true }];
 		data.textureUnits = [pipeState.getTextureUnit("texpaint_pack"), pipeState.getTextureUnit("voxels")];
 	}
 	#end

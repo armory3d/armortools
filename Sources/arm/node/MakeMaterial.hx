@@ -120,7 +120,12 @@ class MakeMaterial {
 	public static function parseParticleMaterial() {
 		var m = Context.particleMaterial;
 		var sc: ShaderContext = null;
-		for (c in m.shader.contexts) if (c.raw.name == "mesh") { sc = c; break; }
+		for (c in m.shader.contexts) {
+			if (c.raw.name == "mesh") {
+				sc = c;
+				break;
+			}
+		}
 		if (sc != null) {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
@@ -137,13 +142,18 @@ class MakeMaterial {
 
 		var m = Project.materials[0].data;
 		var scon: ShaderContext = null;
-		for (c in m.shader.contexts) if (c.raw.name == "mesh") { scon = c; break; }
+		for (c in m.shader.contexts) {
+			if (c.raw.name == "mesh") {
+				scon = c;
+				break;
+			}
+		}
 		m.shader.raw.contexts.remove(scon.raw);
 		m.shader.contexts.remove(scon);
 
 		var mcon: TMaterialContext = { name: "mesh", bind_textures: [] };
 
-		var sd = new NodeShaderData({name: "Material", canvas: null});
+		var sd = new NodeShaderData({ name: "Material", canvas: null });
 		var con = MakeMeshPreview.run(sd, mcon);
 
 		for (i in 0...m.contexts.length) {
@@ -170,7 +180,12 @@ class MakeMaterial {
 		var rebuild = heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
 			var scon: ShaderContext = null;
-			for (c in m.shader.contexts) if (c.raw.name == "voxel") { scon = c; break; }
+			for (c in m.shader.contexts) {
+				if (c.raw.name == "voxel") {
+					scon = c;
+					break;
+				}
+			}
 			if (scon != null) MakeVoxel.run(scon);
 		}
 	}

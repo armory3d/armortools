@@ -32,7 +32,10 @@ class Plugin {
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}
-		catch (e: Dynamic) { trace("Failed to load plugin '" + plugin + "'"); trace(e); }
+		catch (e: Dynamic) {
+			trace("Failed to load plugin '" + plugin + "'");
+			trace(e);
+		}
 	}
 
 	public static function stop(plugin: String) {
@@ -48,7 +51,7 @@ class CoreBridge {
 	public static var ReflectFields = Reflect.fields;
 	public static var ReflectField = Reflect.field;
 	public static var ReflectSetField = Reflect.setField;
-	public static var StdIs = Std.is;
+	public static var StdIs = Std.isOfType;
 	public static var Bytes = haxe.io.Bytes;
 	public static var BytesInput = haxe.io.BytesInput;
 	public static var BytesOutput = haxe.io.BytesOutput;

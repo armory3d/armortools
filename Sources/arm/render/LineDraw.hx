@@ -146,7 +146,10 @@ class LineDraw {
 	static var cameraLook = new Vec4();
 	public static function line(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float) {
 
-		if (lines >= maxLines) { end(); begin(); }
+		if (lines >= maxLines) {
+			end();
+			begin();
+		}
 
 		midPoint.set(x1 + x2, y1 + y2, z1 + z2);
 		midPoint.mult(0.5);
