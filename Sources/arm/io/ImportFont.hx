@@ -12,7 +12,7 @@ class ImportFont {
 	public static function run(path: String) {
 		for (f in Project.fonts) {
 			if (f.file == path) {
-				Log.info(Strings.info0());
+				Console.info(Strings.info0());
 				return;
 			}
 		}

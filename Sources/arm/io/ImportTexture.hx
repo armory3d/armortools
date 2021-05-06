@@ -11,7 +11,7 @@ class ImportTexture {
 	public static function run(path: String, hdrAsEnvmap = true) {
 		if (!Path.isTexture(path)) {
 			if (!Context.enableImportPlugin(path)) {
-				Log.error(Strings.error1());
+				Console.error(Strings.error1());
 				return;
 			}
 		}
@@ -27,7 +27,7 @@ class ImportTexture {
 						});
 					});
 				}
-				Log.info(Strings.info0());
+				Console.info(Strings.info0());
 				return;
 			}
 		}

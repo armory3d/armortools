@@ -146,9 +146,9 @@ class BoxExport {
 						fetchPresets();
 						preset = null;
 						hpreset.position = files.indexOf(filename.substr(0, filename.length - 5)); // Strip .json
-						Log.info("Preset '" + filename + "' imported.");
+						Console.info("Preset '" + filename + "' imported.");
 					}
-					else Log.error(Strings.error1());
+					else Console.error(Strings.error1());
 				});
 			}
 

@@ -421,7 +421,7 @@ class Context {
 		for (f in BoxPreferences.filesPlugin) {
 			if (f.startsWith("import_") && f.indexOf(ext) >= 0) {
 				Config.enablePlugin(f);
-				Log.info(f + " " + tr("plugin enabled"));
+				Console.info(f + " " + tr("plugin enabled"));
 				return true;
 			}
 		}

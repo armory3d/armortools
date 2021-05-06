@@ -27,7 +27,7 @@ class TabScript {
 					js.Lib.eval(hscript.text);
 				}
 				catch(e: Dynamic) {
-					Log.trace(e);
+					Console.log(e);
 				}
 			}
 			if (ui.button(tr("Clear"))) {

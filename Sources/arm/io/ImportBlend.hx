@@ -22,7 +22,7 @@ class ImportBlend {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				Log.error(Strings.error3());
+				Console.error(Strings.error3());
 				return;
 			}
 
@@ -411,13 +411,13 @@ class ImportBlend {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
-				Log.error(Strings.error3());
+				Console.error(Strings.error3());
 				return;
 			}
 
 			var mats = bl.get("Material");
 			if (mats.length == 0) {
-				Log.error("Error: No materials found");
+				Console.error("Error: No materials found");
 				return;
 			}
 
@@ -459,7 +459,7 @@ class ImportBlend {
 					node = node.get("next");
 				}
 				if (node.get("idname") != "ShaderNodeBsdfPrincipled") {
-					Log.error("Error: No Principled BSDF node found");
+					Console.error("Error: No Principled BSDF node found");
 					continue;
 				}
 

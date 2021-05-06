@@ -127,7 +127,7 @@ class ExportArm {
 		recent.unshift(Project.filepath);
 		Config.save();
 
-		Log.info("Project saved.");
+		Console.info("Project saved.");
 	}
 
 	static function exportNode(n: TNode, assets: Array<TAsset> = null) {

@@ -57,7 +57,7 @@ class Project {
 	public static function projectOpen() {
 		UIFiles.show("arm", false, function(path: String) {
 			if (!path.endsWith(".arm")) {
-				Log.error(Strings.error0());
+				Console.error(Strings.error0());
 				return;
 			}
 

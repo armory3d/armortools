@@ -13,8 +13,8 @@ class TabConsole {
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
 
-		var title = Log.messageTimer > 0 ? Log.message + "        " : tr("Console");
-		var color = Log.messageTimer > 0 ? Log.messageColor : -1;
+		var title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
+		var color = Console.messageTimer > 0 ? Console.messageColor : -1;
 
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
@@ -23,10 +23,10 @@ class TabConsole {
 			ui.row([1 / 20, 1 / 20]);
 
 			if (ui.button(tr("Clear"))) {
-				Log.lastTraces = [];
+				Console.lastTraces = [];
 			}
 			if (ui.button(tr("Export"))) {
-				var str = Log.lastTraces.join("\n");
+				var str = Console.lastTraces.join("\n");
 				UIFiles.show("txt", true, function(path: String) {
 					var f = UIFiles.filename;
 					if (f == "") f = tr("untitled");
@@ -38,7 +38,7 @@ class TabConsole {
 
 			ui.endSticky();
 
-			for (t in Log.lastTraces) {
+			for (t in Console.lastTraces) {
 				ui.text(t);
 			}
 		}

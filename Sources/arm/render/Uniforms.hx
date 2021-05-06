@@ -125,7 +125,7 @@ class Uniforms {
 						result = js.Lib.eval(script);
 					}
 					catch(e: Dynamic) {
-						Log.trace(e);
+						Console.log(e);
 					}
 				}
 				return result;

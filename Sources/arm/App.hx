@@ -74,7 +74,7 @@ class App {
 	static var lastWindowHeight = 0;
 
 	public function new() {
-		Log.init();
+		Console.init();
 		lastWindowWidth = System.windowWidth();
 		lastWindowHeight = System.windowHeight();
 

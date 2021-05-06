@@ -55,7 +55,7 @@ class ImportAsset {
 				run(path, dropX, dropY, showBox);
 			}
 			else {
-				Log.error(Strings.error1());
+				Console.error(Strings.error1());
 			}
 		}
 	}

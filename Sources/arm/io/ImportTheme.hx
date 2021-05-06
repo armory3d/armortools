@@ -7,7 +7,7 @@ class ImportTheme {
 
 	public static function run(path: String) {
 		if (!Path.isJson(path)) {
-			Log.error(Strings.error1());
+			Console.error(Strings.error1());
 			return;
 		}
 
@@ -18,6 +18,6 @@ class ImportTheme {
 		Config.raw.theme = filename;
 		arm.ui.BoxPreferences.themeHandle.position = arm.ui.BoxPreferences.getThemeIndex();
 		Config.loadTheme(Config.raw.theme);
-		Log.info("Theme '" + filename + "' imported.");
+		Console.info("Theme '" + filename + "' imported.");
 	}
 }

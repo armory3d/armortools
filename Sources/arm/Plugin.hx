@@ -82,7 +82,6 @@ class ArmBridge {
 	public static var Context = arm.Context;
 	public static var History = arm.History;
 	public static var Layers = arm.Layers;
-	public static var Log = arm.Log;
 	public static var Operator = arm.Operator;
 	public static var Plugin = arm.Plugin;
 	public static var Project = arm.Project;
@@ -117,8 +116,9 @@ class ZuiBridge {
 }
 
 @:expose("console")
-class Console {
-	public static var log = arm.Log.trace;
+class ConsoleBridge {
+	public static var log = arm.Console.log;
+	public static var error = arm.Console.error;
 }
 
 @:keep

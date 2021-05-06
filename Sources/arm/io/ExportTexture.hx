@@ -92,7 +92,7 @@ class ExportTexture {
 		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
 		#end
 
-		Log.info("Textures exported.");
+		Console.info("Textures exported.");
 	}
 
 	static function runBakeMaterial(path: String) {

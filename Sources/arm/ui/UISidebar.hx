@@ -469,9 +469,9 @@ class UISidebar {
 
 	function updateUI() {
 
-		if (Log.messageTimer > 0) {
-			Log.messageTimer -= Time.delta;
-			if (Log.messageTimer <= 0) UIStatus.inst.statusHandle.redraws = 2;
+		if (Console.messageTimer > 0) {
+			Console.messageTimer -= Time.delta;
+			if (Console.messageTimer <= 0) UIStatus.inst.statusHandle.redraws = 2;
 		}
 
 		if (!App.uiEnabled) return;

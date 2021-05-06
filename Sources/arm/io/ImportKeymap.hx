@@ -7,7 +7,7 @@ class ImportKeymap {
 
 	public static function run(path: String) {
 		if (!Path.isJson(path)) {
-			Log.error(Strings.error1());
+			Console.error(Strings.error1());
 			return;
 		}
 
@@ -16,6 +16,6 @@ class ImportKeymap {
 		File.copy(path, dstPath); // Copy to preset folder
 		arm.ui.BoxPreferences.fetchKeymaps(); // Refresh file list
 		arm.ui.BoxPreferences.presetHandle.position = arm.ui.BoxPreferences.getPresetIndex();
-		Log.info("Keymap '" + filename + "' imported.");
+		Console.info("Keymap '" + filename + "' imported.");
 	}
 }

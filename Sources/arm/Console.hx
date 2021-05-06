@@ -3,7 +3,7 @@ package arm;
 import arm.Enums;
 
 @:keep
-class Log {
+class Console {
 
 	public static var message = "";
 	public static var messageTimer = 0.0;
@@ -31,7 +31,7 @@ class Log {
 		consoleTrace(s);
 	}
 
-	public static function trace(s: String) {
+	public static function log(s: String) {
 		consoleTrace(s);
 	}
 
@@ -48,7 +48,7 @@ class Log {
 			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
 		}
 		lastTraces.unshift(Std.string(v));
-		if (lastTraces.length > 10) lastTraces.pop();
+		if (lastTraces.length > 100) lastTraces.pop();
 		haxeTrace(v, inf);
 	}
 }

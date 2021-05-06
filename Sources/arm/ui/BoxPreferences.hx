@@ -485,7 +485,7 @@ let h1 = new zui.Handle();
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, 'New Plugin')) {
 		if (ui.button('Button')) {
-			arm.Log.error('Hello');
+			console.error('Hello');
 		}
 	}
 }
@@ -538,7 +538,7 @@ plugin.drawUI = function(ui) {
 								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
 									TabScript.hscript.text = blob.toString();
 									iron.data.Data.deleteBlob("plugins/" + f);
-									Log.info("Script opened");
+									Console.info("Script opened");
 								});
 
 							}
