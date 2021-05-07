@@ -13,13 +13,7 @@ in vec4 pos;
 in vec2 nor;
 in vec2 tex;
 out vec2 texCoord;
-// mat3 rotAxis(vec3 axis, float a) {
-// 	float c = cos(a);
-// 	vec3 as = axis * sin(a);
-// 	mat3 p = mat3(axis.x * axis, axis.y * axis, axis.z * axis);
-// 	mat3 q = mat3(c, -as.z, as.y, as.z, c, -as.x, -as.y, as.x, c);
-// 	return p * (1.0 - c) + q;
-// }
+
 vec3 getPos(vec2 uv) {
 	#ifdef HLSL
 	float keep = textureLod(texa, vec2(0.0, 0.0), 0.0).r; // direct3d12 unit align
@@ -56,13 +50,6 @@ void main() {
 		getNormal(wpos1, uv1) +
 		getNormal(wpos2, uv2)
 	);
-	// float ax = acos(dot(vec3(1,0,0), vec3(n.x,0,0)));
-	// float az = acos(dot(vec3(0,0,1), vec3(0,0,n.z)));
-	// float sy = -sign(n.y);
-	// wpos +=
-	// 	rotAxis(vec3(1,0,0), -az * sy + 3.14/2) *
-	// 	rotAxis(vec3(0,0,1), ax + 3.14/2) *
-	// 	(pos.xyz * radius);
 	vec3 n_tan;
 	vec3 n_bin;
 	createBasis(n, n_tan, n_bin);

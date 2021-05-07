@@ -2,8 +2,6 @@
 #ifndef _CONETRACE_GLSL_
 #define _CONETRACE_GLSL_
 
-#define _VoxelCones5
-
 // References
 // https://github.com/Friduric/voxel-cone-tracing
 // https://github.com/Cigg/Voxel-Cone-Tracing
@@ -18,21 +16,11 @@ const vec3 voxelgiHalfExtents = vec3(1, 1, 1);
 const float voxelgiOcc = 1.0;
 const float voxelgiStep = 1.0;
 const float voxelgiRange = 2.0;
-// const float voxelgiOffset = 1.5;
-// const float voxelgiAperture = 1.2;
 const float MAX_DISTANCE = 1.73205080757 * voxelgiRange;
 const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
 
-// uniform sampler3D voxels;
-// uniform sampler3D voxelsLast;
 uniform float coneOffset;
 uniform float coneAperture;
-
-// vec3 orthogonal(const vec3 u) {
-// 	// Pass normalized u
-// 	const vec3 v = vec3(0.99146, 0.11664, 0.05832); // Pick any normalized vector
-// 	return abs(dot(u, v)) > 0.99999 ? cross(u, vec3(0.0, 1.0, 0.0)) : cross(u, v);
-// }
 
 vec3 tangent(const vec3 n) {
 	vec3 t1 = cross(n, vec3(0, 0, 1));
@@ -77,39 +65,12 @@ float traceAO(const vec3 origin, const vec3 normal, sampler3D voxels) {
 	const float factor = voxelgiOcc * 0.90;
 	#endif
 
-	#ifdef _VoxelCones1
-	return traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE) * factor;
-	#endif
-
-	#ifdef _VoxelCones3
-	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE);
-	return (col / 3.0) * factor;
-	#endif
-
-	#ifdef _VoxelCones5
 	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE);
 	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE);
 	col += traceConeAO(voxels, origin, mix(normal, o2, angleMix), aperture, MAX_DISTANCE);
 	col += traceConeAO(voxels, origin, mix(normal, -c1, angleMix), aperture, MAX_DISTANCE);
 	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE);
 	return (col / 5.0) * factor;
-	#endif
-
-	#ifdef _VoxelCones9
-	float col = traceConeAO(voxels, origin, normal, aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, o1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, o2, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -c1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -c2, angleMix), aperture, MAX_DISTANCE);
-
-	col += traceConeAO(voxels, origin, mix(normal, -o1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, -o2, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, c1, angleMix), aperture, MAX_DISTANCE);
-	col += traceConeAO(voxels, origin, mix(normal, c2, angleMix), aperture, MAX_DISTANCE);
-	return (col / 9.0) * factor;
-	#endif
 
 	return 0.0;
 }

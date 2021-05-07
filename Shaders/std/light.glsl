@@ -1,3 +1,4 @@
+
 #ifndef _LIGHT_GLSL_
 #define _LIGHT_GLSL_
 

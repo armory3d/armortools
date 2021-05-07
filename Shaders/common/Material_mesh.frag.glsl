@@ -5,7 +5,6 @@ in vec3 wnormal;
 in vec4 wvpposition;
 in vec4 prevwvpposition;
 out vec4 fragColor[3];
-// uniform sampler2D ImageTexture;
 void main() {
 	vec3 n = normalize(wnormal);
 	vec3 basecol;
@@ -15,9 +14,6 @@ void main() {
 	float emission;
 	float Mix_fac = 0.0;
 	vec3 RGB_Color_res = vec3(0.2176000028848648, 0.2176000028848648, 0.2176000028848648);
-	// vec4 ImageTexture_store = texture(ImageTexture, texCoord.xy);
-	// vec3 ImageTexture_Color_res = ImageTexture_store.rgb;
-	// vec3 Mix_Color_res = mix(RGB_Color_res, ImageTexture_Color_res, Mix_fac);
 	vec3 Mix_Color_res = RGB_Color_res + texCoord.x * 0.0000001; // keep texCoord
 	basecol = Mix_Color_res;
 	roughness = 0.4000000059604645;

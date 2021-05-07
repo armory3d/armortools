@@ -1,4 +1,7 @@
 
+#ifndef _SHIRR_GLSL_
+#define _SHIRR_GLSL_
+
 vec3 shIrradiance(const vec3 nor, const vec4 shirr[7]) {
 	const float c1 = 0.429043;
 	const float c2 = 0.511664;
@@ -28,3 +31,5 @@ vec3 shIrradiance(const vec3 nor, const vec4 shirr[7]) {
 		2.0 * c2 * cl10  * nor.x
 	);
 }
+
+#endif

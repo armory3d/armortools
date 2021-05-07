@@ -1,6 +1,9 @@
 // Linearly Transformed Cosines
 // https://eheitzresearch.wordpress.com/415-2/
 
+#ifndef _LTC_GLSL_
+#define _LTC_GLSL_
+
 const float LUT_SIZE = 64.0;
 const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;
 const float LUT_BIAS = 0.5 / LUT_SIZE;
@@ -135,9 +138,7 @@ float ltcEvaluate(vec3 N, vec3 V, float dotNV, vec3 P, mat3 Minv, vec3 points0, 
 	if (n >= 4) sum += integrateEdge(L3, L4);
 	if (n == 5) sum += integrateEdge(L4, L0);
 
-#ifdef _TwoSidedAreaLight
-	return abs(sum);
-#else
 	return max(0.0, -sum);
-#endif
 }
+
+#endif

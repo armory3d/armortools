@@ -1,11 +1,7 @@
 #version 450
 
-#define _CToneFilmic
-#define _CVignette
 #define _CGrainStatic
 // #define _AutoExposure
-
-#include "../std/tonemap.glsl"
 
 uniform sampler2D tex;
 
@@ -13,12 +9,16 @@ uniform sampler2D tex;
 uniform sampler2D histogram;
 #endif
 
-#ifdef _CVignette
 uniform float vignetteStrength;
-#endif
 
 in vec2 texCoord;
 out vec4 fragColor;
+
+// Based on Filmic Tonemapping Operators http://filmicgames.com/archives/75
+vec3 tonemapFilmic(const vec3 color) {
+	vec3 x = max(vec3(0.0), color - 0.004);
+	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+}
 
 void main() {
 	fragColor = textureLod(tex, texCoord, 0.0);
@@ -28,9 +28,7 @@ void main() {
 	fragColor.rgb += vec3(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01) - 0.005) * 0.09;
 #endif
 
-#ifdef _CVignette
 	fragColor.rgb *= (1.0 - vignetteStrength) + vignetteStrength * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
-#endif
 
 #ifdef _AutoExposure
 	const float autoExposureStrength = 1.0;
@@ -38,7 +36,5 @@ void main() {
 	fragColor.rgb *= pow(expo, autoExposureStrength * 2.0);
 #endif
 
-#ifdef _CToneFilmic
 	fragColor.rgb = tonemapFilmic(fragColor.rgb); // With gamma
-#endif
 }
