@@ -331,7 +331,7 @@ class BoxPreferences {
 				ui.endElement();
 				ui.row([0.5]);
 				if (ui.button(tr("Help"))) {
-					File.explorer("https://github.com/armory3d/armorpaint_docs#pen");
+					File.start("https://github.com/armory3d/armorpaint_docs#pen");
 				}
 			}
 
