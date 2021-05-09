@@ -106,11 +106,7 @@ class TabTextures {
 												var f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
-												var out = new haxe.io.BytesOutput();
-												var writer = new arm.format.PngWriter(out);
-												var data = arm.format.PngTools.build32RGBA(target.width, target.height, target.getPixels());
-												writer.write(data);
-												Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData(), out.getBytes().length);
+												Krom.writePng(path + Path.sep + f, target.getPixels().getData(), target.width, target.height, 0);
 												target.unload();
 											});
 										});

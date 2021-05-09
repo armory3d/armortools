@@ -264,11 +264,7 @@ class TabLayers {
 									var f = UIFiles.filename;
 									if (f == "") f = tr("untitled");
 									if (!f.endsWith(".png")) f += ".png";
-									var out = new haxe.io.BytesOutput();
-									var writer = new arm.format.PngWriter(out);
-									var data = arm.format.PngTools.buildGrey(l.texpaint_mask.width, l.texpaint_mask.height, l.texpaint_mask.getPixels());
-									writer.write(data);
-									Krom.fileSaveBytes(path + Path.sep + f, out.getBytes().getData(), out.getBytes().length);
+									Krom.writePng(path + Path.sep + f, l.texpaint_mask.getPixels().getData(), l.texpaint_mask.width, l.texpaint_mask.height, 1);
 								});
 							}
 							if (l.fill_mask == null && ui.button(tr("To Fill Mask"), Left)) {

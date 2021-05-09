@@ -4,10 +4,6 @@ import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
 import iron.Scene;
-import arm.format.ExrWriter;
-import arm.format.JpgWriter;
-import arm.format.PngWriter;
-import arm.format.PngTools;
 import arm.render.RenderPathPaint;
 import arm.node.MakeMaterial;
 import arm.data.LayerSlot;
@@ -321,55 +317,26 @@ class ExportTexture {
 	}
 
 	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
-		var out = new BytesOutput();
 		var resX = Config.getTextureResX();
 		var resY = Config.getTextureResY();
 		var bitsHandle = App.bitsHandle.position;
 		var bits = bitsHandle == Bits8 ? 8 : bitsHandle == Bits16 ? 16 : 32;
-		if (bits > 8) { // 16/32bit
-			var writer = new ExrWriter(out, resX, resY, pixels, bits, type, off);
+		var format = 0; // RGBA
+		if (type == 1) format = 2; // RGB1
+		if (type == 2 && off == 0) format = 3; // RRR1
+		if (type == 2 && off == 1) format = 4; // GGG1
+		if (type == 2 && off == 2) format = 5; // BBB1
+		if (bits == 8 && Context.formatType == FormatPng) {
+			Krom.writePng(file, pixels.getData(), resX, resY, format);
 		}
-		else if (Context.formatType == FormatPng) {
-			var writer = new PngWriter(out);
-			var data =
-				type == 1 ?
-					#if (kha_metal || kha_vulkan)
-					PngTools.build32BGR1(resX, resY, pixels) :
-					#else
-					PngTools.build32RGB1(resX, resY, pixels) :
-					#end
-				type == 2 ?
-					#if (kha_metal || kha_vulkan)
-					PngTools.build32RRR1(resX, resY, pixels, 2 - off) :
-					#else
-					PngTools.build32RRR1(resX, resY, pixels, off) :
-					#end
-
-					#if (kha_metal || kha_vulkan)
-					PngTools.build32BGRA(resX, resY, pixels);
-					#else
-					PngTools.build32RGBA(resX, resY, pixels);
-					#end
-			writer.write(data);
+		else if (bits == 8 && Context.formatType == FormatJpg) {
+			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.formatQuality));
 		}
-		else {
-			var writer = new JpgWriter(out);
-			writer.write(
-				{
-					width: resX,
-					height: resY,
-					quality: Context.formatQuality,
-					pixels: pixels
-				},
-				type,
-				#if (kha_metal || kha_vulkan)
-				2 - off, true
-				#else
-				off, false
-				#end
-			);
+		else { // Exr
+			var out = new BytesOutput();
+			var writer = new arm.format.ExrWriter(out, resX, resY, pixels, bits, type, off);
+			Krom.fileSaveBytes(file, out.getBytes().getData(), out.getBytes().length);
 		}
-		Krom.fileSaveBytes(file, out.getBytes().getData(), out.getBytes().length);
 	}
 
 	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, linear = true) {

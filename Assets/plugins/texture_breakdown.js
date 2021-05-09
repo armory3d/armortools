@@ -48,11 +48,7 @@ plugin.drawUI = function(ui) {
 					var f = arm.UIFiles.filename;
 					if (f === "") f = "untitled";
 					if (!f.endsWith(".png")) f += ".png";
-					var out = new core.BytesOutput();
-					var writer = new arm.PngWriter(out);
-					var data = arm.PngTools.build32RGBA(breakdown.get_width(), breakdown.get_height(), breakdown.getPixels());
-					writer.write(data);
-					Krom.fileSaveBytes(path + arm.Path.sep + f, out.b.buffer, out.getBytes().length);
+					Krom.writePng(path + arm.Path.sep + f, breakdown.getPixels().b.buffer, breakdown.get_width(), breakdown.get_height(), 2);
 				});
 			});
 		}

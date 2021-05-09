@@ -104,8 +104,6 @@ class ArmBridge {
 	public static var RenderUtil = arm.util.RenderUtil;
 	public static var UVUtil = arm.util.UVUtil;
 	public static var ViewportUtil = arm.util.ViewportUtil;
-	public static var PngWriter = arm.format.PngWriter;
-	public static var PngTools = arm.format.PngTools;
 }
 
 @:expose("zui")
