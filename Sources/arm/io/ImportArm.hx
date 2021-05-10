@@ -82,15 +82,17 @@ class ImportArm {
 				return;
 			}
 
+			var importAsMesh = project.version == null;
+
 			Context.layersPreviewDirty = true;
 			Context.layerFilter = 0;
-			Project.projectNew(false);
+			Project.projectNew(importAsMesh);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
 
 			// Import as mesh instead
-			if (project.version == null) {
+			if (importAsMesh) {
 				runMesh(untyped project);
 				return;
 			}
