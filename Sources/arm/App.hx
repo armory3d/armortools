@@ -391,16 +391,7 @@ class App {
 				dragSwatch = null;
 			}
 			else if (dragMaterial != null) {
-				// Material dragged onto viewport or layers tab
-				if (inViewport || inLayers || in2dView) {
-					var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
-					var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
-					Layers.createFillLayer(uvType, decalMat);
-				}
-				else if (inNodes) {
-					UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
-				}
-				dragMaterial = null;
+				materialDropped(inViewport, inLayers, in2dView, inNodes);
 			}
 			else if (dragLayer != null) {
 				if (inNodes) {
@@ -420,7 +411,13 @@ class App {
 				if (!inBrowser) {
 					dropX = mouse.x;
 					dropY = mouse.y;
+					var materialCount = Project.materials.length;
 					ImportAsset.run(dragFile, dropX, dropY);
+					// Asset was material
+					if (Project.materials.length > materialCount) {
+						dragMaterial = Context.material;
+						materialDropped(inViewport, inLayers, in2dView, inNodes);
+					}
 				}
 				dragFile = null;
 			}
@@ -447,6 +444,19 @@ class App {
 			Context.frame < 3;
 		#end
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
+	}
+
+	static function materialDropped(inViewport: Bool, inLayers: Bool, in2dView: Bool, inNodes: Bool) {
+		// Material drag and dropped onto viewport or layers tab
+		if (inViewport || inLayers || in2dView) {
+			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
+			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
+			Layers.createFillLayer(uvType, decalMat);
+		}
+		else if (inNodes) {
+			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
+		}
+		dragMaterial = null;
 	}
 
 	static function handleDropPaths() {
