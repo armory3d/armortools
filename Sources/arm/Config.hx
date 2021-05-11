@@ -20,6 +20,13 @@ class Config {
 	public static var raw: TConfig = null;
 	public static var keymap: TKeymap;
 	public static var configLoaded = false;
+	#if (krom_android || krom_ios)
+	public static inline var buttonAlign = zui.Zui.Align.Center;
+	public static inline var buttonSpacing = "";
+	#else
+	public static inline var buttonAlign = zui.Zui.Align.Left;
+	public static inline var buttonSpacing = "      ";
+	#end
 
 	public static function load(done: Void->Void) {
 		try {

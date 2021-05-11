@@ -706,7 +706,7 @@ class UINodes {
 			ui.t.ELEMENT_OFFSET = 0;
 
 			for (n in list[menuCategory]) {
-				if (ui.button("      " + tr(n.name), Left)) {
+				if (ui.button(Config.buttonSpacing + tr(n.name), Config.buttonAlign)) {
 					pushUndo();
 					var canvas = getCanvas(true);
 					var nodes = getNodes();

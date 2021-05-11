@@ -135,8 +135,7 @@ class UIMenu {
 				var p = Scene.active.world.probe;
 				var envHandle = Id.handle();
 				envHandle.value = p.raw.strength;
-				ui.row([1 / 8, 7 / 8]);
-				ui.endElement();
+				menuAlign(ui);
 				p.raw.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.ddirty = 2;
 
@@ -148,16 +147,14 @@ class UIMenu {
 					var scale = 1333;
 					lhandle.value = light.data.raw.strength / scale;
 					lhandle.value = Std.int(lhandle.value * 100) / 100;
-					ui.row([1 / 8, 7 / 8]);
-					ui.endElement();
+					menuAlign(ui);
 					light.data.raw.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
 					if (lhandle.changed) Context.ddirty = 2;
 
 					menuFill(ui);
 					var sxhandle = Id.handle();
 					sxhandle.value = light.data.raw.size;
-					ui.row([1 / 8, 7 / 8]);
-					ui.endElement();
+					menuAlign(ui);
 					light.data.raw.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
 					if (sxhandle.changed) Context.ddirty = 2;
 				}
@@ -323,21 +320,18 @@ class UIMenu {
 				menuFill(ui);
 				var cam = Scene.active.camera;
 				Context.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
-				ui.row([1 / 8, 7 / 8]);
-				ui.endElement();
+				menuAlign(ui);
 				cam.data.raw.fov = ui.slider(Context.fovHandle, tr("FoV"), 0.3, 2.0, true);
 				if (Context.fovHandle.changed) {
 					ViewportUtil.updateCameraType(Context.cameraType);
 				}
 
 				menuFill(ui);
-				ui.row([1 / 8, 7 / 8]);
-				ui.endElement();
+				menuAlign(ui);
 				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({position: Context.cameraControls}), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
 
 				menuFill(ui);
-				ui.row([1 / 8, 7 / 8]);
-				ui.endElement();
+				menuAlign(ui);
 				Context.cameraType = Ext.inlineRadio(ui, Context.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
 				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ' (${Config.keymap.view_camera_type})');
 				if (Context.camHandle.changed) {
@@ -491,6 +485,16 @@ class UIMenu {
 
 	static function menuButton(ui: Zui, text: String, label = ""): Bool {
 		menuFill(ui);
-		return ui.button("      " + text, Left, label);
+		#if (krom_android || krom_ios)
+		label = "";
+		#end
+		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
+	}
+
+	static function menuAlign(ui: Zui) {
+		#if !(krom_android || krom_ios)
+		ui.row([1 / 8, 7 / 8]);
+		ui.endElement();
+		#end
 	}
 }
