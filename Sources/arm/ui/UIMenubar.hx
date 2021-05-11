@@ -9,6 +9,7 @@ import arm.node.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 
+@:access(zui.Zui)
 class UIMenubar {
 
 	public static var inst: UIMenubar;
@@ -21,7 +22,6 @@ class UIMenubar {
 		inst = this;
 	}
 
-	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UISidebar.inst.ui;
 
@@ -31,16 +31,35 @@ class UIMenubar {
 
 			Ext.beginMenu(ui);
 
-			var menuCategories = 6;
-			for (i in 0...menuCategories) {
-				var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
+			#if (krom_android || krom_ios)
+			ui._w = Std.int(UIToolbar.defaultToolbarW * ui.SCALE());
+			if (iconButton(ui, 0)) BoxPreferences.show();
+			if (iconButton(ui, 1)) Project.projectNewBox();
+			if (iconButton(ui, 2)) Project.projectOpen();
+			if (iconButton(ui, 3)) Project.projectSave();
+			if (iconButton(ui, 4)) Project.importAsset();
+			if (iconButton(ui, 5)) BoxExport.showTextures();
+			ui.enabled = History.undos > 0;
+			if (iconButton(ui, 6)) History.undo();
+			ui.enabled = History.redos > 0;
+			if (iconButton(ui, 7)) History.redo();
+			ui.enabled = true;
+			if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+			if (iconButton(ui, 8)) showMenu(ui, MenuViewport);
+			if (UIMenu.show && UIMenu.menuCategory == MenuMode) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+			if (iconButton(ui, 9)) showMenu(ui, MenuMode);
+			if (UIMenu.show && UIMenu.menuCategory == MenuCamera) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+			if (iconButton(ui, 10)) showMenu(ui, MenuCamera);
+			if (UIMenu.show && UIMenu.menuCategory == MenuHelp) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+			if (iconButton(ui, 11)) showMenu(ui, MenuHelp);
+			#else
+			var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
+			for (i in 0...categories.length) {
 				if (Ext.menuButton(ui, categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
-					UIMenu.show = true;
-					UIMenu.menuCategory = i;
-					UIMenu.menuX = Std.int(ui._x - ui._w);
-					UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
+					showMenu(ui, i);
 				}
 			}
+			#end
 
 			if (menubarw < ui._x + 10) {
 				menubarw = Std.int(ui._x + 10);
@@ -85,4 +104,28 @@ class UIMenubar {
 			}
 		}
 	}
+
+	function showMenu(ui: Zui, category: Int) {
+		UIMenu.show = true;
+		UIMenu.menuCategory = category;
+		UIMenu.menuX = Std.int(ui._x - ui._w);
+		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
+		#if (krom_android || krom_ios)
+		var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
+		UIMenu.menuX -= Std.int((menuW - ui._w) / 2);
+		UIMenu.menuY += 4;
+		#end
+	}
+
+	#if (krom_android || krom_ios)
+	function iconButton(ui: Zui, i: Int): Bool {
+		var col = ui.t.WINDOW_BG_COL;
+		if (col < 0) col += untyped 4294967296;
+		var light = col > 0xff666666 + 4294967296;
+		var iconAccent = light ? 0xff666666 : 0xffbbbbbb;
+		var img = Res.get("icons.k");
+		var rect = Res.tile50(img, i, 2);
+		return ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;
+	}
+	#end
 }

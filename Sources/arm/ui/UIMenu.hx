@@ -55,17 +55,9 @@ class UIMenu {
 			if (menuCategory == MenuFile) {
 				if (menuButton(ui, tr("New Project..."), Config.keymap.file_new)) Project.projectNewBox();
 				if (menuButton(ui, tr("Open..."), Config.keymap.file_open)) Project.projectOpen();
-
-				#if !(krom_android || krom_ios)
 				if (menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) Project.projectOpenRecentBox();
-				#end
-
 				if (menuButton(ui, tr("Save"), Config.keymap.file_save)) Project.projectSave();
-
-				#if !(krom_android || krom_ios)
 				if (menuButton(ui, tr("Save As..."), Config.keymap.file_save_as)) Project.projectSaveAs();
-				#end
-
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Import Texture..."), Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","), false);
 				if (menuButton(ui, tr("Import Envmap..."))) {
@@ -93,10 +85,8 @@ class UIMenu {
 				if (menuButton(ui, tr("Export Mesh..."))) BoxExport.showMesh();
 				if (menuButton(ui, tr("Bake Material..."))) BoxExport.showBakeMaterial();
 
-				#if !(krom_android || krom_ios)
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Exit"))) System.stop();
-				#end
 			}
 			else if (menuCategory == MenuEdit) {
 				var stepUndo = "";
