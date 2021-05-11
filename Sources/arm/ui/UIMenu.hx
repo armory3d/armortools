@@ -34,7 +34,6 @@ class UIMenu {
 	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
-	static var askToResetLayout = false;
 
 	public static function render(g: kha.graphics2.Graphics) {
 		var ui = App.uiMenu;
@@ -114,7 +113,6 @@ class UIMenu {
 				if (menuButton(ui, tr("Redo {step}", ["step" => stepRedo]), Config.keymap.edit_redo)) History.redo();
 				ui.enabled = true;
 				menuSeparator(ui);
-				if (menuButton(ui, tr("Reset Layout"))) askToResetLayout = true;
 				if (menuButton(ui, tr("Preferences..."), Config.keymap.edit_prefs)) BoxPreferences.show();
 			}
 			else if (menuCategory == MenuViewport) {
@@ -441,17 +439,6 @@ class UIMenu {
 			App.redrawUI();
 			showMenuFirst = true;
 			menuCommands = null;
-		}
-
-		if (askToResetLayout) {
-			askToResetLayout = false;
-			UIMenu.draw(function(ui: Zui) {
-				ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
-				if (ui.button(tr("Confirm"), Left)) {
-					Config.initLayout();
-					Config.save();
-				}
-			}, 2);
 		}
 	}
 

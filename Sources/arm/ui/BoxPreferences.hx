@@ -79,7 +79,7 @@ class BoxPreferences {
 				// var gridSnap = ui.check(Id.handle({selected: false}), "Grid Snap");
 
 				ui.endElement();
-				ui.row([0.5]);
+				ui.row([0.5, 0.5]);
 				if (ui.button(tr("Restore"))) {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Restore defaults?"), Right, ui.t.HIGHLIGHT_COL);
@@ -110,6 +110,15 @@ class BoxPreferences {
 							});
 						}
 					}, 3);
+				}
+				if (ui.button(tr("Reset Layout"))) {
+					UIMenu.draw(function(ui: Zui) {
+						ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
+						if (ui.button(tr("Confirm"), Left)) {
+							Config.initLayout();
+							Config.save();
+						}
+					}, 2);
 				}
 			}
 
