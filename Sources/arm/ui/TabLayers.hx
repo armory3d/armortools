@@ -10,6 +10,7 @@ import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.MeshUtil;
+import arm.util.RenderUtil;
 import arm.sys.Path;
 import arm.Enums;
 
@@ -17,6 +18,7 @@ class TabLayers {
 
 	static var layerNameEdit = -1;
 	static var layerNameHandle = Id.handle();
+	static var maskPreviewTemp: kha.Image = null;
 
 	@:access(zui.Zui)
 	public static function draw() {
@@ -253,7 +255,21 @@ class TabLayers {
 					ui._x -= Std.int(4 * ui.SCALE());
 					ui._y -= 3;
 					if (ui.isHovered) {
-						ui.tooltipImage(l.texpaint_mask_preview);
+						if (maskPreviewTemp == null) {
+							maskPreviewTemp = kha.Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
+						}
+						// Convert from R8 to RGBA32 for tooltip display
+						if (kha.Scheduler.time() - ui.tooltipTime > ui.TOOLTIP_DELAY()) {
+							iron.App.notifyOnInit(function() {
+								maskPreviewTemp.g2.begin();
+								maskPreviewTemp.g2.pipeline = UIView2D.pipe;
+								maskPreviewTemp.g4.setInt(UIView2D.channelLocation, 1);
+								maskPreviewTemp.g2.drawImage(l.texpaint_mask_preview, 0, 0);
+								maskPreviewTemp.g2.end();
+								maskPreviewTemp.g2.pipeline = null;
+							});
+						}
+						ui.tooltipImage(maskPreviewTemp);
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						var add = l.fill_mask == null ? 2 : 0;

@@ -5,6 +5,7 @@ import kha.Image;
 import iron.RenderPath;
 import arm.ui.UISidebar;
 import arm.ui.TabLayers;
+import arm.util.RenderUtil;
 import arm.node.MakeMaterial;
 import arm.Enums;
 
@@ -95,7 +96,7 @@ class LayerSlot {
 			texpaint_pack = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_preview = Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
+		texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.RGBA32);
 	}
 
 	public function delete() {
@@ -192,7 +193,7 @@ class LayerSlot {
 			texpaint_mask = RenderPath.active.createRenderTarget(t).image;
 		}
 
-		texpaint_mask_preview = Image.createRenderTarget(200, 200, TextureFormat.L8);
+		texpaint_mask_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.L8);
 
 		if (clear) {
 			function _next() {

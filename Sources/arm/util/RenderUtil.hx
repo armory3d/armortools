@@ -30,6 +30,7 @@ class RenderUtil {
 
 	public static inline var matPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
+	public static inline var layerPreviewSize = 200;
 	static var screenAlignedFullVB: VertexBuffer = null;
 	static var screenAlignedFullIB: IndexBuffer = null;
 
