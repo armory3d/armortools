@@ -520,10 +520,6 @@ class ImportArm {
 		for (node in nodes) {
 			if (node.type == "TEX_IMAGE") {
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
-				if (node.buttons.length < 3) { // TODO: deprecated
-					var latest: TNode = haxe.Json.parse(haxe.Json.stringify(arm.shader.NodesMaterial.getTNode("TEX_IMAGE")));
-					node.buttons.push(latest.buttons[2]);
-				}
 			}
 			else if (node.type == "VALTORGB") { // TODO: deprecated
 				var but = node.buttons[0];
