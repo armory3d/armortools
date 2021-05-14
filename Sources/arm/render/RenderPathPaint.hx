@@ -4,6 +4,8 @@ import iron.math.Mat4;
 import iron.math.Vec4;
 import iron.system.Input;
 import iron.object.MeshObject;
+import iron.data.SceneFormat;
+import iron.data.MeshData;
 import iron.RenderPath;
 import iron.Scene;
 import arm.util.ViewportUtil;
@@ -581,7 +583,34 @@ class RenderPathPaint {
 			m2.getInverse(Scene.active.camera.VP);
 			m.multmat(m2);
 
-			planeo = cast Scene.active.getChild(".Plane");
+			var tiled = UIView2D.inst.tiledShow;
+			if (tiled && Scene.active.getChild(".PlaneTiled") == null) {
+				// 3x3 planes
+				var posa = [32767,0,-32767,0,10922,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,10922,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,32767,0,-32767,0,10922,0,10922,0,10922,0,-10922,0,32767,0,-10922,0,10922,0,32767,0,10922,0,10922,0,32767,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,10922,0,-32767,0,-10922,0,32767,0,-10922,0,10922,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,-32767,0,-10922,0,-32767,0,-32767,0,10922,0,-32767,0,-10922,0,-10922,0,-10922,0,-32767,0,32767,0,-32767,0,32767,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,32767,0,-32767,0,32767,0,10922,0,10922,0,10922,0,32767,0,-10922,0,32767,0,32767,0,10922,0,32767,0,32767,0,10922,0,32767,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,10922,0,32767,0,-10922,0,32767,0,10922,0,10922,0,10922,0,-10922,0,-32767,0,-10922,0,-10922,0,-32767,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,-10922,0];
+				var nora = [0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767,0,32767];
+				var texa = [32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0];
+				var inda = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53];
+				var raw: TMeshData = {
+					name: ".PlaneTiled",
+					vertex_arrays: [
+						{ attrib: "pos", values: i16(posa), data: "short4norm" },
+						{ attrib: "nor", values: i16(nora), data: "short2norm" },
+						{ attrib: "tex", values: i16(texa), data: "short2norm" }
+					],
+					index_arrays: [
+						{ values: u32(inda), material: 0 }
+					],
+					scale_pos: 1.5,
+					scale_tex: 1.0
+				};
+				new MeshData(raw, function(md: MeshData) {
+					var materials = cast(Scene.active.getChild(".Plane"), MeshObject).materials;
+					planeo = Scene.active.addMeshObject(md, materials);
+					planeo.name = ".PlaneTiled";
+				});
+			}
+
+			planeo = cast Scene.active.getChild(tiled ? ".PlaneTiled" : ".Plane");
 			planeo.visible = true;
 			Context.paintObject = planeo;
 
@@ -788,5 +817,17 @@ class RenderPathPaint {
 				path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
 		}
+	}
+
+	static function u32(ar: Array<Int>): kha.arrays.Uint32Array {
+		var res = new kha.arrays.Uint32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
+	}
+
+	static function i16(ar: Array<Int>): kha.arrays.Int16Array {
+		var res = new kha.arrays.Int16Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
 	}
 }

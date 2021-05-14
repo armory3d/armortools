@@ -32,10 +32,10 @@ class UIView2D {
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
+	public var uvmapShow = false;
+	public var tiledShow = false;
 	var texType = TexBase;
 	var layerMode = View2DSelected;
-	var uvmapShow = false;
-	var tiledShow = false;
 
 	public function new() {
 		inst = this;
