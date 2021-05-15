@@ -155,6 +155,15 @@ class ImportMesh {
 			object.name = mesh.name;
 			object.skip_context = "paint";
 
+			// Ensure unique names
+			for (p in Project.paintObjects) {
+				if (p.name == object.name) {
+					p.name += ".001";
+					p.data.handle += ".001";
+					Data.cachedMeshes.set(p.data.handle, p.data);
+				}
+			}
+
 			Project.paintObjects.push(object);
 
 			md.handle = raw.name;
