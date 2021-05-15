@@ -268,21 +268,17 @@ class UISidebar {
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
+		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+		if (!isTyping) {
+			if (kb.down("shift")) {
+				for (i in 1...10) if (kb.started(i + "")) Context.selectMaterial(i - 1);
+			}
+		}
 		// Viewport shortcuts
-		if (mouse.viewX > 0 && mouse.viewX < right &&
-			mouse.viewY > 0 && mouse.viewY < iron.App.h() &&
-			!ui.isTyping && !UIView2D.inst.ui.isTyping && !UINodes.inst.ui.isTyping) {
-
+		var inViewport = mouse.viewX > 0 && mouse.viewX < right &&
+						 mouse.viewY > 0 && mouse.viewY < iron.App.h();
+		if (inViewport && !isTyping) {
 			if (UIHeader.inst.worktab.position == SpacePaint) {
-				if (kb.down("shift")) {
-					if (kb.started("1")) Context.selectMaterial(0);
-					else if (kb.started("2")) Context.selectMaterial(1);
-					else if (kb.started("3")) Context.selectMaterial(2);
-					else if (kb.started("4")) Context.selectMaterial(3);
-					else if (kb.started("5")) Context.selectMaterial(4);
-					else if (kb.started("6")) Context.selectMaterial(5);
-				}
-
 				if (!mouse.down("right")) { // Fly mode off
 					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
 					else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
