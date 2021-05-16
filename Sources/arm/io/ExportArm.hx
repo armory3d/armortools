@@ -143,6 +143,10 @@ class ExportArm {
 				}
 			}
 		}
+		// Pack colors
+		if (n.color > 0) n.color -= untyped 4294967296;
+		for (inp in n.inputs) if (inp.color > 0) inp.color -= untyped 4294967296;
+		for (out in n.outputs) if (out.color > 0) out.color -= untyped 4294967296;
 	}
 
 	public static function runMaterial(path: String) {
