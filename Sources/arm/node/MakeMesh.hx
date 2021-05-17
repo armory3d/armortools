@@ -146,17 +146,20 @@ class MakeMesh {
 			layerPassCount = 1;
 			var layers: Array<LayerSlot> = [];
 			var startCount = textureCount;
+			var isMaterialSpace = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
 			for (l in Project.layers) {
-				if (l.isVisible() && l.getChildren() == null) {
-					var count = l.texpaint_mask != null ? 4 : 3;
-					textureCount += count;
-					if (textureCount >= getMaxTextures()) {
-						textureCount = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
-						layerPassCount++;
-					}
-					if (layerPass == layerPassCount - 1) {
-						layers.push(l);
-					}
+				if (isMaterialSpace && l != Context.layer) continue;
+				if (!l.isVisible()) continue;
+				if (l.getChildren() != null) continue;
+
+				var count = l.texpaint_mask != null ? 4 : 3;
+				textureCount += count;
+				if (textureCount >= getMaxTextures()) {
+					textureCount = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
+					layerPassCount++;
+				}
+				if (layerPass == layerPassCount - 1) {
+					layers.push(l);
 				}
 			}
 
