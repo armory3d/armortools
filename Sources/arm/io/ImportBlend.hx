@@ -18,6 +18,8 @@ import arm.data.MaterialSlot;
 
 class ImportBlend {
 
+	static inline var eps = 1.0 / 32767;
+
 	public static function run(path: String, replaceExisting = true) {
 		Data.getBlob(path, function(b: Blob) {
 			var bl = new BlendParser(b);
@@ -84,11 +86,11 @@ class ImportBlend {
 						var uv2: Float32Array = null;
 						if (hasuv) {
 							uv0 = m.get("mloopuv", loopstart + totloop - 1).get("uv");
-							if (uv0[0] > 1.0) uv0[0] = uv0[0] - Std.int(uv0[0]);
-							if (uv0[1] > 1.0) uv0[1] = uv0[1] - Std.int(uv0[1]);
+							if (uv0[0] > 1.0 + eps) uv0[0] = uv0[0] - Std.int(uv0[0]);
+							if (uv0[1] > 1.0 + eps) uv0[1] = uv0[1] - Std.int(uv0[1]);
 							uv1 = m.get("mloopuv", loopstart).get("uv");
-							if (uv1[0] > 1.0) uv1[0] = uv1[0] - Std.int(uv1[0]);
-							if (uv1[1] > 1.0) uv1[1] = uv1[1] - Std.int(uv1[1]);
+							if (uv1[0] > 1.0 + eps) uv1[0] = uv1[0] - Std.int(uv1[0]);
+							if (uv1[1] > 1.0 + eps) uv1[1] = uv1[1] - Std.int(uv1[1]);
 						}
 						var col0r: Int = 0;
 						var col0g: Int = 0;
@@ -148,8 +150,8 @@ class ImportBlend {
 							vec1.setFrom(vec2);
 							if (hasuv) {
 								uv2 = m.get("mloopuv", loopstart + j + 1).get("uv");
-								if (uv2[0] > 1.0) uv2[0] = uv2[0] - Std.int(uv2[0]);
-								if (uv2[1] > 1.0) uv2[1] = uv2[1] - Std.int(uv2[1]);
+								if (uv2[0] > 1.0 + eps) uv2[0] = uv2[0] - Std.int(uv2[0]);
+								if (uv2[1] > 1.0 + eps) uv2[1] = uv2[1] - Std.int(uv2[1]);
 								texa[tri * 6    ] = Std.int(uv0[0] * 32767);
 								texa[tri * 6 + 1] = Std.int((1.0 - uv0[1]) * 32767);
 								texa[tri * 6 + 2] = Std.int(uv1[0] * 32767);
@@ -279,14 +281,14 @@ class ImportBlend {
 								var uv2: Float32Array = null;
 								if (hasuv) {
 									uv0 = m.get("mloopuv", va[i ]).get("uv");
-									if (uv0[0] > 1.0) uv0[0] = uv0[0] - Std.int(uv0[0]);
-									if (uv0[1] > 1.0) uv0[1] = uv0[1] - Std.int(uv0[1]);
+									if (uv0[0] > 1.0 + eps) uv0[0] = uv0[0] - Std.int(uv0[0]);
+									if (uv0[1] > 1.0 + eps) uv0[1] = uv0[1] - Std.int(uv0[1]);
 									uv1 = m.get("mloopuv", va[i1]).get("uv");
-									if (uv1[0] > 1.0) uv1[0] = uv1[0] - Std.int(uv1[0]);
-									if (uv1[1] > 1.0) uv1[1] = uv1[1] - Std.int(uv1[1]);
+									if (uv1[0] > 1.0 + eps) uv1[0] = uv1[0] - Std.int(uv1[0]);
+									if (uv1[1] > 1.0 + eps) uv1[1] = uv1[1] - Std.int(uv1[1]);
 									uv2 = m.get("mloopuv", va[i2]).get("uv");
-									if (uv2[0] > 1.0) uv2[0] = uv2[0] - Std.int(uv2[0]);
-									if (uv2[1] > 1.0) uv2[1] = uv2[1] - Std.int(uv2[1]);
+									if (uv2[0] > 1.0 + eps) uv2[0] = uv2[0] - Std.int(uv2[0]);
+									if (uv2[1] > 1.0 + eps) uv2[1] = uv2[1] - Std.int(uv2[1]);
 								}
 								var col0r: Int = 0;
 								var col0g: Int = 0;
