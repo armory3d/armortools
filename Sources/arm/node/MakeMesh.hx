@@ -20,7 +20,7 @@ class MakeMesh {
 			depth_write: layerPass == 0 ? true : false,
 			compare_mode: layerPass == 0 ? "less" : "equal",
 			cull_mode: (Context.cullBackfaces || layerPass > 0) ? "clockwise" : "none",
-			vertex_elements: [{name: "pos", data: "short4norm"},{name: "nor", data: "short2norm"},{name: "tex", data: "short2norm"}],
+			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 			depth_attachment: "DEPTH32"
 		});
