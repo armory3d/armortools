@@ -317,6 +317,11 @@ class Context {
 		});
 	}
 
+	public static function selectLayer(i: Int) {
+		if (Project.layers.length <= i) return;
+		setLayer(Project.layers[i]);
+	}
+
 	public static function setLayer(l: LayerSlot, isMask = false) {
 		if (l == layer && layerIsMask == isMask) return;
 		layer = l;

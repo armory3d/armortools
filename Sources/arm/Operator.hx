@@ -26,6 +26,7 @@ class Operator {
 				   alt == kb.down("alt");
 		if (s.indexOf("+") > 0) {
 			s = s.substr(s.lastIndexOf("+") + 1);
+			if (s == "number") return flag;
 		}
 		else if (shift || ctrl || alt) return flag;
 		var key = (s == "left" || s == "right" || s == "middle") ?

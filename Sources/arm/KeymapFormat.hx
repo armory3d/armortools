@@ -12,7 +12,7 @@ typedef TKeymap = {
 	public var stencil_hide: String;
 	public var decal_mask: String;
 	public var select_material: String;
-	public var cycle_layers: String;
+	public var select_layer: String;
 	public var brush_radius: String;
 	public var brush_radius_decrease: String;
 	public var brush_radius_increase: String;

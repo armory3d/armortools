@@ -165,11 +165,7 @@ class UISidebar {
 		if (!App.uiEnabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
-			if (Operator.shortcut(Config.keymap.cycle_layers)) {
-				var i = (Project.layers.indexOf(Context.layer) + 1) % Project.layers.length;
-				Context.setLayer(Project.layers[i]);
-			}
-			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
+			if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
 				show2DView(View2DLayer);
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
@@ -270,10 +266,14 @@ class UISidebar {
 
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 		if (!isTyping) {
-			if (kb.down("shift")) {
+			if (Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
 				for (i in 1...10) if (kb.started(i + "")) Context.selectMaterial(i - 1);
 			}
+			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
+				for (i in 1...10) if (kb.started(i + "")) Context.selectLayer(i - 1);
+			}
 		}
+
 		// Viewport shortcuts
 		var inViewport = mouse.viewX > 0 && mouse.viewX < right &&
 						 mouse.viewY > 0 && mouse.viewY < iron.App.h();
@@ -344,7 +344,7 @@ class UISidebar {
 			}
 
 			// Viewpoint
-			if (mouse.viewX < iron.App.w()) {
+			if (mouse.viewX < iron.App.w() && !kb.down("control") && !kb.down("shift")) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
 					ViewportUtil.resetViewport();
 					ViewportUtil.scaleToBounds();
