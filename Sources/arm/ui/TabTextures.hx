@@ -90,8 +90,9 @@ class TabTextures {
 						if (ui.isHovered) ui.tooltipImage(img, 256);
 
 						if (ui.isHovered && ui.inputReleasedR) {
+							var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 							UIMenu.draw(function(ui: Zui) {
-								ui.text(asset.name, Right, ui.t.HIGHLIGHT_COL);
+								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, function(path: String) {
 										App.notifyOnNextFrame(function () {
@@ -134,10 +135,10 @@ class TabTextures {
 									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 								}
-								if (ui.button(tr("Open Containing Directory..."), Left)) {
+								if (!isPacked && ui.button(tr("Open Containing Directory..."), Left)) {
 									File.start(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-							}, 6);
+							}, isPacked ? 5 : 6);
 						}
 
 						if (Config.raw.show_asset_names) {
