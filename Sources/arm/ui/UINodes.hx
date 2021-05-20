@@ -60,6 +60,7 @@ class UINodes {
 		Nodes.excludeRemove.push("BrushOutputNode");
 		Nodes.onLinkDrag = onLinkDrag;
 		Nodes.onSocketReleased = onSocketReleased;
+		Nodes.onCanvasReleased = onCanvasReleased;
 		Nodes.onNodeRemove = onNodeRemove;
 		Nodes.onCanvasControl = onCanvasControl;
 
@@ -194,6 +195,37 @@ class UINodes {
 				Context.nodePreviewSocket = i;
 				Context.nodePreviewDirty = true;
 			}
+		}
+	}
+
+	function onCanvasReleased() {
+		if (ui.inputReleasedR && Math.abs(ui.inputX - ui.inputStartedX) < 2 && Math.abs(ui.inputY - ui.inputStartedY) < 2) {
+			UIMenu.draw(function(uiMenu: Zui) {
+				var nodes = getNodes();
+				uiMenu._y += 1;
+				uiMenu.enabled = nodes.nodesSelected.length > 0;
+				if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
+					Zui.isCopy = true;
+					Zui.isCut = true;
+				}
+				if (menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
+					Zui.isCopy = true;
+				}
+				uiMenu.enabled = Nodes.clipboard != "";
+				if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
+					Zui.isPaste = true;
+				}
+				uiMenu.enabled = nodes.nodesSelected.length > 0;
+				if (menuButton(uiMenu, tr("Delete"), "delete")) {
+					ui.isDeleteDown = true;
+					App.notifyOnNextFrame(function() { ui.isDeleteDown = false; });
+				}
+				if (menuButton(uiMenu, tr("Duplicate"))) {
+					Zui.isCopy = true;
+					Zui.isPaste = true;
+				}
+				uiMenu.enabled = true;
+			}, 5);
 		}
 	}
 
@@ -880,5 +912,12 @@ class UINodes {
 	static function getGroup(canvases: Array<TNodeCanvas>, name: String): TNodeCanvas {
 		for (c in canvases) if (c.name == name) return c;
 		return null;
+	}
+
+	static function menuButton(ui: Zui, text: String, label = ""): Bool {
+		#if (krom_android || krom_ios)
+		label = "";
+		#end
+		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 }
