@@ -252,8 +252,6 @@ class Context {
 	public static var vxaoOffset = 1.5;
 	public static var vxaoAperture = 1.2;
 	public static var textureExportPath = "";
-	public static var lastCombo: Handle = null;
-	public static var lastTooltip: Image = null;
 	public static var lastStatusPosition = 0;
 	public static var cameraControls = ControlsOrbit;
 	public static var dragDestination = 0;

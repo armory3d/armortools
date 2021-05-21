@@ -649,10 +649,6 @@ class UISidebar {
 		else if (redoPressed) History.redo();
 
 		arm.plugin.Gizmo.update();
-
-		if (Context.lastCombo != null || (ui.tooltipImg == null && Context.lastTooltip != null)) App.redrawUI();
-		Context.lastCombo = ui.comboSelectedHandle;
-		Context.lastTooltip = ui.tooltipImg;
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
