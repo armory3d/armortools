@@ -139,6 +139,7 @@ class ImportArm {
 				// Convert image path from relative to absolute
 				var abs = Data.isAbsolute(file) ? file : base + file;
 				if (project.packed_assets != null) {
+					abs = Path.normalize(abs);
 					unpackAsset(project, abs, file);
 				}
 				if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
@@ -551,6 +552,7 @@ class ImportArm {
 			#else
 			pa.name = pa.name.replace("\\", "/");
 			#end
+			pa.name = Path.normalize(pa.name);
 			if (pa.name == file) pa.name = abs; // From relative to absolute
 			if (pa.name == abs) {
 				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
