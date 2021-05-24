@@ -391,7 +391,7 @@ class App {
 				dragSwatch = null;
 			}
 			else if (dragMaterial != null) {
-				materialDropped(inViewport, inLayers, in2dView, inNodes);
+				materialDropped(inViewport, inLayers, inNodes);
 			}
 			else if (dragLayer != null) {
 				if (inNodes) {
@@ -416,7 +416,7 @@ class App {
 					// Asset was material
 					if (Project.materials.length > materialCount) {
 						dragMaterial = Context.material;
-						materialDropped(inViewport, inLayers, in2dView, inNodes);
+						materialDropped(inViewport, inLayers, inNodes);
 					}
 				}
 				dragFile = null;
@@ -446,9 +446,9 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
-	static function materialDropped(inViewport: Bool, inLayers: Bool, in2dView: Bool, inNodes: Bool) {
+	static function materialDropped(inViewport: Bool, inLayers: Bool, inNodes: Bool) {
 		// Material drag and dropped onto viewport or layers tab
-		if (inViewport || inLayers || in2dView) {
+		if (inViewport || inLayers) {
 			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
 			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
 			Layers.createFillLayer(uvType, decalMat);
