@@ -361,6 +361,11 @@ class Context {
 			ParticleUtil.initParticle();
 			MakeMaterial.parseParticleMaterial();
 		}
+
+		#if krom_ios
+		// No hover on iPad, decals are painted by pen release
+		Config.raw.brush_live = decal;
+		#end
 	}
 
 	public static function selectPaintObject(o: MeshObject) {
