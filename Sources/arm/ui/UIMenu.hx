@@ -451,13 +451,17 @@ class UIMenu {
 
 	static function menuFill(ui: Zui) {
 		ui.g.color = ui.t.SEPARATOR_COL;
-		ui.g.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H());
+		ui.g.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H() + 1);
 		ui.g.color = 0xffffffff;
 	}
 
 	static function menuSeparator(ui: Zui) {
 		ui._y++;
+		#if (krom_android || krom_ios)
 		ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
+		#else
+		ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
+		#end
 	}
 
 	static function menuButton(ui: Zui, text: String, label = ""): Bool {
