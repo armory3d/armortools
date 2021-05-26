@@ -7,6 +7,8 @@ Module["instantiateWasm"] = function(imports, successCallback) {
 	successCallback(inst);
 	return inst.exports;
 };
+Module.print = console.log;
+Module.printErr = console.log;
 
 // emscripten-generated glue
 var a;a||(a=typeof Module !== 'undefined' ? Module : {});var h={},k;for(k in a)a.hasOwnProperty(k)&&(h[k]=a[k]);var l;l=function(b){if("function"===typeof readbuffer)return new Uint8Array(readbuffer(b));b=read(b,"binary");"object"===typeof b||m("Assertion failed: undefined");return b};"undefined"!==typeof print&&("undefined"===typeof console&&(console={}),console.log=print,console.warn=console.error="undefined"!==typeof printErr?printErr:print);

@@ -7,7 +7,8 @@ Module["instantiateWasm"] = function(imports, successCallback) {
 	successCallback(inst);
 	return inst.exports;
 };
-// Module["print"] = Krom.log;
+Module.print = console.log;
+Module.printErr = console.log;
 
 // emscripten-generated glue
 var a;a||(a=typeof Module !== 'undefined' ? Module : {});var g={},h;for(h in a)a.hasOwnProperty(h)&&(g[h]=a[h]);var k;k=function(b){if("function"===typeof readbuffer)return new Uint8Array(readbuffer(b));b=read(b,"binary");"object"===typeof b||m("Assertion failed: undefined");return b};"undefined"!==typeof print&&("undefined"===typeof console&&(console={}),console.log=print,console.warn=console.error="undefined"!==typeof printErr?printErr:print);
