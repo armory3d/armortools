@@ -37,7 +37,7 @@ class UIMenu {
 
 	public static function render(g: kha.graphics2.Graphics) {
 		var ui = App.uiMenu;
-		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0) : Std.int(ui.ELEMENT_W() * 2.0);
+		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.3) : Std.int(ui.ELEMENT_W() * 2.3);
 		var _BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -48,6 +48,7 @@ class UIMenu {
 		ui.beginRegion(g, menuX, menuY, menuW);
 
 		if (menuCommands != null) {
+			ui.fill(-1, -1, ui._w / ui.SCALE() + 2, ui.t.ELEMENT_H * menuElements + 2, ui.t.ACCENT_SELECT_COL);
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * menuElements, ui.t.SEPARATOR_COL);
 			menuCommands(ui);
 		}
@@ -438,7 +439,7 @@ class UIMenu {
 		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
-		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.0;
+		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
 		if (menuX + menuW > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuW);
 		}
@@ -450,6 +451,8 @@ class UIMenu {
 	}
 
 	static function menuFill(ui: Zui) {
+		ui.g.color = ui.t.ACCENT_SELECT_COL;
+		ui.g.fillRect(ui._x - 1, ui._y, ui._w + 2, ui.ELEMENT_H() + 1 + 1);
 		ui.g.color = ui.t.SEPARATOR_COL;
 		ui.g.fillRect(ui._x, ui._y, ui._w, ui.ELEMENT_H() + 1);
 		ui.g.color = 0xffffffff;
