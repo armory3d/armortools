@@ -434,6 +434,7 @@ class UIMenu {
 	}
 
 	public static function draw(commands: Zui->Void = null, elements: Int, x = -1, y = -1) {
+		App.uiMenu.endInput();
 		show = true;
 		menuCommands = commands;
 		menuElements = elements;

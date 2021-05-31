@@ -93,10 +93,10 @@ class BrushOutputNode extends LogicNode {
 		}
 
 		// Do not paint over fill layer
-		var fillLayer = Context.layer.fill_layer != null && Context.tool != ToolPicker && !Context.layerIsMask;
+		var fillLayer = Context.layer.fill_layer != null && Context.tool != ToolPicker;
 
 		// Do not paint over groups
-		var groupLayer = Context.layer.getChildren() != null;
+		var groupLayer = Context.layer.isGroup();
 
 		// Paint bounds
 		if (Context.paintVec.x > left &&

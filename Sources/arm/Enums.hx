@@ -252,3 +252,9 @@ package arm;
 	var ZoomVerticalAndHorizontal = 4;
 	var ZoomVerticalAndHorizontalInverted = 5;
 }
+
+@:enum abstract LayerSlotType(Int) from Int to Int {
+	var SlotLayer = 0;
+	var SlotMask = 1;
+	var SlotGroup = 2;
+}

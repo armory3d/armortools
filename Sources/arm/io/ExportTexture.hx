@@ -94,15 +94,12 @@ class ExportTexture {
 	static function runBakeMaterial(path: String) {
 		if (RenderPathPaint.liveLayer == null) {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
-			RenderPathPaint.liveLayer.createMask(0x00000000);
 		}
 
 		var _space = UIHeader.inst.worktab.position;
 		var _tool = Context.tool;
-		var _layerIsMask = Context.layerIsMask;
 		UIHeader.inst.worktab.position = SpacePaint;
 		Context.tool = ToolFill;
-		Context.layerIsMask = false;
 		MakeMaterial.parsePaintMaterial();
 		var _paintObject = Context.paintObject;
 		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
@@ -113,7 +110,6 @@ class ExportTexture {
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.useLiveLayer(false);
 		Context.tool = _tool;
-		Context.layerIsMask = _layerIsMask;
 		MakeMaterial.parsePaintMaterial();
 		Context.pdirty = 0;
 		UIHeader.inst.worktab.position = _space;
@@ -172,21 +168,35 @@ class ExportTexture {
 				if (perObject && Project.paintObjects[l1.objectMask - 1].name != objectName) continue;
 			}
 
-			var hasMask = l1.texpaint_mask != null && !bakeMaterial;
+			var mask = empty;
+			var l1masks = l1.getMasks();
+			if (l1masks != null && !bakeMaterial) {
+				if (l1masks.length > 1) {
+					Layers.makeTempMaskImg();
+					Layers.tempMaskImage.g2.begin(true, 0x00000000);
+					Layers.tempMaskImage.g2.end();
+					for (i in 0...l1masks.length - 1) {
+						var l1 = { texpaint: Layers.tempMaskImage, visible: true, isGroup: function() { return false; }, getMasks: function() { return null; }, isMask: function() { return true; }, isLayer: function() { return false; }, maskOpacity: 1.0, blending: BlendAdd };
+						Layers.mergeLayer(l1masks[i], untyped l1);
+					}
+					mask = Layers.tempMaskImage;
+				}
+				else mask = l1masks[0].texpaint;
+			}
 
 			if (l1.paintBase) {
-				Layers.imga.g2.begin(false); // Copy to temp
-				Layers.imga.g2.pipeline = Layers.pipeCopy;
-				Layers.imga.g2.drawImage(Layers.expa, 0, 0);
-				Layers.imga.g2.pipeline = null;
-				Layers.imga.g2.end();
+				Layers.tempImage.g2.begin(false); // Copy to temp
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expa, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
 
 				Layers.expa.g4.begin();
 				Layers.expa.g4.setPipeline(Layers.pipeMerge);
 				Layers.expa.g4.setTexture(Layers.tex0, l1.texpaint);
 				Layers.expa.g4.setTexture(Layers.tex1, empty);
-				Layers.expa.g4.setTexture(Layers.texmask, hasMask ? l1.texpaint_mask : empty);
-				Layers.expa.g4.setTexture(Layers.texa, Layers.imga);
+				Layers.expa.g4.setTexture(Layers.texmask, mask);
+				Layers.expa.g4.setTexture(Layers.texa, Layers.tempImage);
 				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
 				Layers.expa.g4.setInt(Layers.blending, layers.length > 1 ? l1.blending : 0);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
@@ -196,18 +206,18 @@ class ExportTexture {
 			}
 
 			if (l1.paintNor) {
-				Layers.imga.g2.begin(false);
-				Layers.imga.g2.pipeline = Layers.pipeCopy;
-				Layers.imga.g2.drawImage(Layers.expb, 0, 0);
-				Layers.imga.g2.pipeline = null;
-				Layers.imga.g2.end();
+				Layers.tempImage.g2.begin(false);
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expb, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
 
 				Layers.expb.g4.begin();
 				Layers.expb.g4.setPipeline(Layers.pipeMerge);
 				Layers.expb.g4.setTexture(Layers.tex0, l1.texpaint);
 				Layers.expb.g4.setTexture(Layers.tex1, l1.texpaint_nor);
-				Layers.expb.g4.setTexture(Layers.texmask, hasMask ? l1.texpaint_mask : empty);
-				Layers.expb.g4.setTexture(Layers.texa, Layers.imga);
+				Layers.expb.g4.setTexture(Layers.texmask, mask);
+				Layers.expb.g4.setTexture(Layers.texa, Layers.tempImage);
 				Layers.expb.g4.setFloat(Layers.opac, l1.maskOpacity);
 				Layers.expb.g4.setInt(Layers.blending, l1.paintNorBlend ? -2 : -1);
 				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
@@ -217,19 +227,19 @@ class ExportTexture {
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				Layers.imga.g2.begin(false);
-				Layers.imga.g2.pipeline = Layers.pipeCopy;
-				Layers.imga.g2.drawImage(Layers.expc, 0, 0);
-				Layers.imga.g2.pipeline = null;
-				Layers.imga.g2.end();
+				Layers.tempImage.g2.begin(false);
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expc, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty, l1.paintHeightBlend ? -3 : -1);
+					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty);
-					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty);
-					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, hasMask ? l1.texpaint_mask : empty);
+					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
+					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
+					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
 				}
 			}
 		}

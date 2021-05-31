@@ -76,7 +76,7 @@ class UINodes {
 			var linkX = ui._windowX + nodes.NODE_X(node);
 			var linkY = ui._windowY + nodes.NODE_Y(node);
 			if (linkDrag.from_id > -1) {
-				linkX += nodes.NODE_W();
+				linkX += nodes.NODE_W(node);
 				linkY += nodes.OUTPUT_Y(node.outputs, linkDrag.from_socket);
 			}
 			else {
@@ -359,7 +359,7 @@ class UINodes {
 		var searchHandle = Id.handle();
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
-			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.WINDOW_BG_COL);
+			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
 			ui.textInput(searchHandle, "");
 			ui.changed = false;
 			if (first) {
@@ -387,7 +387,7 @@ class UINodes {
 			for (list in nodeList) {
 				for (n in list) {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
-						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.WINDOW_BG_COL;
+						ui.t.BUTTON_COL = count == nodeSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
 						if (ui.button(tr(n.name), Left) || (enter && count == nodeSearchOffset)) {
 							pushUndo();
 							var nodes = getNodes();
@@ -413,7 +413,7 @@ class UINodes {
 				searchHandle.text = "";
 			}
 			ui.t.BUTTON_COL = BUTTON_COL;
-		}, 0, x, y);
+		}, 8, x, y);
 	}
 
 	public function getNodeX(): Int {
@@ -595,16 +595,10 @@ class UINodes {
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
-				if (sel.type == "LAYER") {
+				if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.layers.length) {
 						img = Project.layers[id].texpaint_preview;
-					}
-				}
-				else if (sel.type == "LAYER_MASK") {
-					var id = sel.buttons[0].default_value;
-					if (id < Project.layers.length) {
-						img = Project.layers[id].texpaint_mask_preview;
 					}
 				}
 				else if (sel.type == "MATERIAL") {
@@ -683,7 +677,7 @@ class UINodes {
 			}
 
 			// Menu
-			ui.g.color = ui.t.WINDOW_BG_COL;
+			ui.g.color = ui.t.SEPARATOR_COL;
 			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 			ui.g.color = 0xffffffff;
 
@@ -692,7 +686,7 @@ class UINodes {
 			ui._w = ew;
 
 			var _BUTTON_COL = ui.t.BUTTON_COL;
-			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
@@ -731,13 +725,14 @@ class UINodes {
 			var menuw = Std.int(ew * 2.0);
 			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
 			var _BUTTON_COL = ui.t.BUTTON_COL;
-			ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
+			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 			var _BUTTON_H = ui.t.BUTTON_H;
 			ui.t.BUTTON_H = ui.t.ELEMENT_H;
 			var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 
 			for (n in list[menuCategory]) {
+				ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
 				if (ui.button(Config.buttonSpacing + tr(n.name), Config.buttonAlign)) {
 					pushUndo();
 					var canvas = getCanvas(true);
@@ -800,9 +795,9 @@ class UINodes {
 
 	public function acceptLayerDrag(index: Int) {
 		pushUndo();
-		if (Project.layers[index].getChildren() != null) return;
+		if (Project.layers[index].isGroup()) return;
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
-		var n = NodesMaterial.createNode(Context.layerIsMask ? "LAYER_MASK" : "LAYER", g);
+		var n = NodesMaterial.createNode(Context.layer.isMask() ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
 	}

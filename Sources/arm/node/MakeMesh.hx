@@ -43,16 +43,20 @@ class MakeMesh {
 			vert.write('float height = 0.0;');
 			var numLayers = 0;
 			for (l in Project.layers) {
-				if (!l.isVisible() || !l.paintHeight || l.getChildren() != null) continue;
+				if (!l.isVisible() || !l.paintHeight || !l.isLayer()) continue;
 				if (numLayers > 16) break;
 				numLayers++;
 				textureCount++;
 				vert.add_uniform('sampler2D texpaint_pack_vert' + l.id, '_texpaint_pack_vert' + l.id);
 				vert.write('height += textureLod(texpaint_pack_vert' + l.id + ', tex, 0.0).a;');
-				if (l.texpaint_mask != null) {
-					textureCount++;
-					vert.add_uniform('sampler2D texpaint_mask_vert' + l.id, '_texpaint_mask_vert' + l.id);
-					vert.write('height *= textureLod(texpaint_mask_vert' + l.id + ', tex, 0.0).r;');
+				var masks = l.getMasks();
+				if (masks != null) {
+					for (m in masks) {
+						if (!m.isVisible()) continue;
+						textureCount++;
+						vert.add_uniform('sampler2D texpaint_vert' + m.id, '_texpaint_vert' + m.id);
+						vert.write('height *= textureLod(texpaint_vert' + m.id + ', tex, 0.0).r;');
+					}
 				}
 			}
 			vert.write('wposition += wnormal * vec3(height, height, height) * vec3($displaceStrength, $displaceStrength, $displaceStrength);');
@@ -129,9 +133,12 @@ class MakeMesh {
 				frag.add_uniform('sampler2D texuvmap', '_texuvmap');
 			}
 
-			if (Context.viewportMode == ViewMask && Context.layer.texpaint_mask != null) {
-				textureCount++;
-				frag.add_uniform('sampler2D texpaint_mask_view', '_texpaint_mask');
+			if (Context.viewportMode == ViewMask && Context.layer.getMasks() != null) {
+				for (m in Context.layer.getMasks()) {
+					if (!m.isVisible()) continue;
+					textureCount++;
+					frag.add_uniform('sampler2D texpaint_view_mask' + m.id, '_texpaint' + m.id);
+				}
 			}
 
 			if (Context.viewportMode == ViewLit && Context.renderMode == RenderForward) {
@@ -149,10 +156,11 @@ class MakeMesh {
 			var isMaterialSpace = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
 			for (l in Project.layers) {
 				if (isMaterialSpace && l != Context.layer) continue;
-				if (!l.isVisible()) continue;
-				if (l.getChildren() != null) continue;
+				if (!l.isLayer() || !l.isVisible()) continue;
 
-				var count = l.texpaint_mask != null ? 4 : 3;
+				var count = 3;
+				var masks = l.getMasks();
+				if (masks != null) count += masks.length;
 				textureCount += count;
 				if (textureCount >= getMaxTextures()) {
 					textureCount = startCount + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
@@ -192,9 +200,16 @@ class MakeMesh {
 				// }
 				// #end
 
-				if (l.texpaint_mask != null) {
-					frag.add_shared_sampler('sampler2D texpaint_mask' + l.id);
-					frag.write('texpaint_opac *= textureLodShared(texpaint_mask' + l.id + ', texCoord, 0.0).r;');
+				var masks = l.getMasks();
+				if (masks != null) {
+					var texpaint_mask = 'texpaint_mask' + l.id;
+					frag.write('float $texpaint_mask = 1.0;');
+					for (m in masks) {
+						if (!m.isVisible()) continue;
+						frag.add_shared_sampler('sampler2D texpaint' + m.id);
+						frag.write('$texpaint_mask -= 1.0 - textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
+					}
+					frag.write('texpaint_opac *= max($texpaint_mask, 0.0);');
 				}
 
 				if (l.maskOpacity < 1) {
@@ -411,8 +426,12 @@ class MakeMesh {
 				frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
 			}
-			else if (Context.viewportMode == ViewMask && Context.layer.texpaint_mask != null) {
-				frag.write('float sample_mask = textureLod(texpaint_mask_view, texCoord, 0.0).r;');
+			else if (Context.viewportMode == ViewMask && Context.layer.getMasks() != null) {
+				frag.write('float sample_mask = 1.0');
+				for (m in Context.layer.getMasks()) {
+					if (!m.isVisible()) continue;
+					frag.write('float sample_mask = textureLod(texpaint_view_mask' + m.id + ', texCoord, 0.0).r;');
+				}
 				frag.write('fragColor[1] = vec4(sample_mask, sample_mask, sample_mask, 1.0);');
 			}
 			else {

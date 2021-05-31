@@ -23,6 +23,7 @@ class TabHistory {
 						History.undo();
 					}
 				}
+				ui.fill(0, 0, (ui._windowW / ui.SCALE() - 2), 1 * ui.SCALE(), ui.t.SEPARATOR_COL);
 			}
 		}
 	}

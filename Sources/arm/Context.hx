@@ -33,7 +33,6 @@ class Context {
 
 	public static var material: MaterialSlot;
 	public static var layer: LayerSlot;
-	public static var layerIsMask = false; // Mask selected for active layer
 	public static var brush: BrushSlot;
 	public static var font: FontSlot;
 	public static var texture: TAsset = null;
@@ -320,10 +319,9 @@ class Context {
 		setLayer(Project.layers[i]);
 	}
 
-	public static function setLayer(l: LayerSlot, isMask = false) {
-		if (l == layer && layerIsMask == isMask) return;
+	public static function setLayer(l: LayerSlot) {
+		if (l == layer) return;
 		layer = l;
-		layerIsMask = isMask;
 		UIHeader.inst.headerHandle.redraws = 2;
 
 		var current = @:privateAccess kha.graphics2.Graphics.current;

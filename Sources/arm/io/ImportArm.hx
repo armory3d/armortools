@@ -225,7 +225,8 @@ class ImportArm {
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
 				var isGroup = ld.texpaint == null;
-				var l = new LayerSlot("", isGroup);
+				var isMask = ld.texpaint != null && ld.texpaint_nor == null;
+				var l = new LayerSlot("", isGroup ? SlotGroup : isMask ? SlotMask : SlotLayer);
 				if (ld.name != null) l.name = ld.name;
 				l.visible = ld.visible;
 				Project.layers.push(l);
@@ -233,37 +234,39 @@ class ImportArm {
 				if (!isGroup) {
 					if (Layers.pipeMerge == null) Layers.makePipe();
 
-					// TODO: create render target from bytes
-					var _texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					l.texpaint.g2.begin(false);
-					l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint.g2.drawImage(_texpaint, 0, 0);
-					l.texpaint.g2.pipeline = null;
-					l.texpaint.g2.end();
+					var _texpaint: kha.Image = null;
+					var _texpaint_nor: kha.Image = null;
+					var _texpaint_pack: kha.Image = null;
+					if (isMask) {
+						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
+						l.texpaint.g2.begin(false);
+						l.texpaint.g2.pipeline = Layers.pipeCopy8;
+						l.texpaint.g2.drawImage(_texpaint, 0, 0);
+						l.texpaint.g2.pipeline = null;
+						l.texpaint.g2.end();
+					}
+					else { // Layer
+						// TODO: create render target from bytes
+						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						l.texpaint.g2.begin(false);
+						l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint.g2.drawImage(_texpaint, 0, 0);
+						l.texpaint.g2.pipeline = null;
+						l.texpaint.g2.end();
 
-					var _texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					l.texpaint_nor.g2.begin(false);
-					l.texpaint_nor.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
-					l.texpaint_nor.g2.pipeline = null;
-					l.texpaint_nor.g2.end();
+						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						l.texpaint_nor.g2.begin(false);
+						l.texpaint_nor.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
+						l.texpaint_nor.g2.pipeline = null;
+						l.texpaint_nor.g2.end();
 
-					var _texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
-					l.texpaint_pack.g2.begin(false);
-					l.texpaint_pack.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
-					l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
-					l.texpaint_pack.g2.pipeline = null;
-					l.texpaint_pack.g2.end();
-
-					var _texpaint_mask: kha.Image = null;
-					if (ld.texpaint_mask != null) {
-						l.createMask(0, false);
-						_texpaint_mask = Image.fromBytes(Lz4.decode(ld.texpaint_mask, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
-						l.texpaint_mask.g2.begin(false);
-						l.texpaint_mask.g2.pipeline = Layers.pipeCopy8;
-						l.texpaint_mask.g2.drawImage(_texpaint_mask, 0, 0);
-						l.texpaint_mask.g2.pipeline = null;
-						l.texpaint_mask.g2.end();
+						_texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
+						l.texpaint_pack.g2.begin(false);
+						l.texpaint_pack.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
+						l.texpaint_pack.g2.pipeline = null;
+						l.texpaint_pack.g2.end();
 					}
 
 					l.scale = ld.uv_scale;
@@ -287,14 +290,13 @@ class ImportArm {
 
 					App.notifyOnNextFrame(function() {
 						_texpaint.unload();
-						_texpaint_nor.unload();
-						_texpaint_pack.unload();
-						if (_texpaint_mask != null) _texpaint_mask.unload();
+						if (_texpaint_nor != null) _texpaint_nor.unload();
+						if (_texpaint_pack != null) _texpaint_pack.unload();
 					});
 				}
 			}
 
-			// Create groups
+			// Assign parents to groups and masks
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
 				if (ld.parent >= 0) Project.layers[i].parent = Project.layers[ld.parent];
@@ -344,7 +346,6 @@ class ImportArm {
 				var isGroup = ld.texpaint == null;
 				if (!isGroup) {
 					l.fill_layer = ld.fill_layer > -1 ? Project.materials[ld.fill_layer] : null;
-					l.fill_mask = ld.fill_mask > -1 ? Project.materials[ld.fill_mask] : null;
 				}
 			}
 

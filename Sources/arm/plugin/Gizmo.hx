@@ -21,7 +21,7 @@ class Gizmo {
 	public static function update() {
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
 		var isObject = Context.tool == ToolGizmo;
-		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject && !Context.layerIsMask;
+		var isDecal = isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 
 		var gizmo = Context.gizmo;
 		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown);

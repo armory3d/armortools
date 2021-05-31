@@ -261,7 +261,6 @@ class BoxPreferences {
 					ui.g.end();
 					while (History.undoLayers.length < Config.raw.undo_steps) {
 						var l = new LayerSlot("_undo" + History.undoLayers.length);
-						l.createMask(0, false);
 						History.undoLayers.push(l);
 					}
 					while (History.undoLayers.length > Config.raw.undo_steps) {

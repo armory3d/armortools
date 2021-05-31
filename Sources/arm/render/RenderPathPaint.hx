@@ -31,7 +31,6 @@ class RenderPathPaint {
 	static var savedFov = 0.0;
 	static var baking = false;
 	static var _texpaint: RenderTarget;
-	static var _texpaint_mask: RenderTarget;
 	static var _texpaint_nor: RenderTarget;
 	static var _texpaint_pack: RenderTarget;
 	static var _texpaint_undo: RenderTarget;
@@ -239,9 +238,7 @@ class RenderPathPaint {
 				}
 				#end
 
-				var isMask = Context.layerIsMask;
-				var texpaint = isMask ? "texpaint_mask" + tid : "texpaint" + tid;
-
+				var texpaint = "texpaint" + tid;
 				if (Context.tool == ToolBake && Context.brushTime == iron.system.Time.delta) {
 					// Clear to black on bake start
 					path.setTarget(texpaint);
@@ -251,8 +248,14 @@ class RenderPathPaint {
 				path.setTarget("texpaint_blend1");
 				path.bindTarget("texpaint_blend0", "tex");
 				path.drawShader("shader_datas/copy_pass/copyR8_pass");
-
-				path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
+				var isMask = Context.layer.isMask();
+				if (isMask) {
+					var ptid = Context.layer.parent.id;
+					path.setTarget(texpaint, ["texpaint_nor" + ptid, "texpaint_pack" + ptid, "texpaint_blend0"]);
+				}
+				else {
+					path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
+				}
 				path.bindTarget("_main", "gbufferD");
 				if ((Context.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
@@ -312,14 +315,12 @@ class RenderPathPaint {
 			_texpaint_undo = path.renderTargets.get("texpaint_undo" + hid);
 			_texpaint_nor_undo = path.renderTargets.get("texpaint_nor_undo" + hid);
 			_texpaint_pack_undo = path.renderTargets.get("texpaint_pack_undo" + hid);
-			_texpaint_mask = path.renderTargets.get("texpaint_mask" + tid);
 			_texpaint_nor = path.renderTargets.get("texpaint_nor" + tid);
 			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
 			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
 			path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
-			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, path.renderTargets.get("texpaint_mask_live"));
 			path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
 			path.renderTargets.set("texpaint_pack" + tid, path.renderTargets.get("texpaint_pack_live"));
 		}
@@ -328,7 +329,6 @@ class RenderPathPaint {
 			path.renderTargets.set("texpaint_undo" + hid, _texpaint_undo);
 			path.renderTargets.set("texpaint_nor_undo" + hid, _texpaint_nor_undo);
 			path.renderTargets.set("texpaint_pack_undo" + hid, _texpaint_pack_undo);
-			if (_texpaint_mask != null) path.renderTargets.set("texpaint_mask" + tid, _texpaint_mask);
 			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
 			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
 		}
@@ -351,13 +351,12 @@ class RenderPathPaint {
 
 		if (liveLayer == null) {
 			liveLayer = new arm.data.LayerSlot("_live");
-			liveLayer.createMask(0x00000000);
 		}
 
 		var tid = Context.layer.id;
-		if (Context.layerIsMask) {
-			path.setTarget("texpaint_mask_live");
-			path.bindTarget("texpaint_mask" + tid, "tex");
+		if (Context.layer.isMask()) {
+			path.setTarget("texpaint_live");
+			path.bindTarget("texpaint" + tid, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 		else {
@@ -416,10 +415,9 @@ class RenderPathPaint {
 				return;
 		}
 
-		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask;
-		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask;
-		var groupLayer = Context.layer.getChildren() != null;
-		if (!App.uiEnabled || App.isDragging || fillLayer || fillMask || groupLayer) {
+		var fillLayer = Context.layer.fill_layer != null;
+		var groupLayer = Context.layer.isGroup();
+		if (!App.uiEnabled || App.isDragging || fillLayer || groupLayer) {
 			return;
 		}
 
@@ -533,10 +531,9 @@ class RenderPathPaint {
 
 	static function paintEnabled(): Bool {
 		var isPicker = Context.tool == ToolPicker;
-		var fillLayer = Context.layer.fill_layer != null && !Context.layerIsMask && !isPicker;
-		var fillMask = Context.layer.fill_mask != null && Context.layerIsMask && !isPicker;
-		var groupLayer = Context.layer.getChildren() != null;
-		return !fillLayer && !fillMask && !groupLayer && !Context.foregroundEvent;
+		var fillLayer = Context.layer.fill_layer != null && !isPicker;
+		var groupLayer = Context.layer.isGroup();
+		return !fillLayer && !groupLayer && !Context.foregroundEvent;
 	}
 
 	public static function begin() {
@@ -773,10 +770,9 @@ class RenderPathPaint {
 		for (i in 0...Project.layers.length) {
 			var l = Project.layers[i];
 			path.bindTarget("texpaint" + l.id, "texpaint" + l.id);
-			path.bindTarget("texpaint_nor" + l.id, "texpaint_nor" + l.id);
-			path.bindTarget("texpaint_pack" + l.id, "texpaint_pack" + l.id);
-			if (l.texpaint_mask != null) {
-				path.bindTarget("texpaint_mask" + l.id, "texpaint_mask" + l.id);
+			if (l.isLayer()) {
+				path.bindTarget("texpaint_nor" + l.id, "texpaint_nor" + l.id);
+				path.bindTarget("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 			}
 		}
 	}
@@ -793,7 +789,7 @@ class RenderPathPaint {
 			Layers.makeTempImg();
 			var tid = Context.layer.id;
 			if (base) {
-				var texpaint = Context.layerIsMask ? "texpaint_mask" : "texpaint";
+				var texpaint = "texpaint";
 				path.setTarget("temptex0");
 				path.bindTarget(texpaint + tid, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -801,7 +797,7 @@ class RenderPathPaint {
 				path.bindTarget("temptex0", "tex");
 				path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
-			if (nor_pack && !Context.layerIsMask) {
+			if (nor_pack && !Context.layer.isMask()) {
 				path.setTarget("temptex0");
 				path.bindTarget("texpaint_nor" + tid, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");

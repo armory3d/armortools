@@ -107,7 +107,7 @@ class UIView2D {
 			var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 			if (type == View2DLayer) {
-				var layer = l.getChildren() == null ? l : l.getChildren()[0];
+				var layer = !l.isGroup() ? l : l.getChildren()[0];
 				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
@@ -120,14 +120,14 @@ class UIView2D {
 				}
 
 				tex =
-					Context.layerIsMask   ? layer.texpaint_mask :
-					texType == TexBase    ? layer.texpaint :
-					texType == TexOpacity ? layer.texpaint :
-					texType == TexNormal  ? layer.texpaint_nor :
-										    layer.texpaint_pack;
+					Context.layer.isMask() ? layer.texpaint :
+					texType == TexBase     ? layer.texpaint :
+					texType == TexOpacity  ? layer.texpaint :
+					texType == TexNormal   ? layer.texpaint_nor :
+										     layer.texpaint_pack;
 
 				channel =
-					Context.layerIsMask     ? 1 :
+					Context.layer.isMask()  ? 1 :
 					texType == TexOcclusion ? 1 :
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
@@ -228,7 +228,7 @@ class UIView2D {
 
 			// Controls
 			var ew = Std.int(ui.ELEMENT_W());
-			ui.g.color = ui.t.WINDOW_BG_COL;
+			ui.g.color = ui.t.SEPARATOR_COL;
 			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 			ui.g.color = 0xffffffff;
 			ui._x = 2;
@@ -243,7 +243,7 @@ class UIView2D {
 				ui._x += ew + 3;
 				ui._y = 2;
 
-				if (!Context.layerIsMask) {
+				if (!Context.layer.isMask()) {
 					texType = ui.combo(Id.handle({position: texType}), [
 						tr("Base Color"),
 						tr("Normal Map"),

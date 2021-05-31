@@ -325,9 +325,6 @@ class Uniforms {
 				var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 				return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 			}
-			case "_texpaint_mask": {
-				return Context.layer.texpaint_mask;
-			}
 			case "_texparticle": {
 				return RenderPath.active.renderTargets.get("texparticle").image;
 			}
@@ -347,13 +344,9 @@ class Uniforms {
 			var tid = link.substr(link.length - 1);
 			return RenderPath.active.renderTargets.get("texpaint_pack" + tid).image;
 		}
-		if (link.startsWith("_texpaint_mask_vert")) {
+		if (link.startsWith("_texpaint_vert")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return tid < Project.layers.length ? Project.layers[tid].texpaint_mask : null;
-		}
-		if (link.startsWith("_texpaint_mask")) {
-			var tid = Std.parseInt(link.substr(link.length - 1));
-			return tid < Project.layers.length ? Project.layers[tid].texpaint_mask : null;
+			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 		}
 		if (link.startsWith("_texpaint_nor")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));

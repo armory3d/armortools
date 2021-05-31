@@ -10,6 +10,7 @@ import arm.sys.Path;
 import arm.data.LayerSlot;
 import arm.data.MaterialSlot;
 import arm.node.MakeMaterial;
+import arm.Enums;
 
 class History {
 
@@ -35,12 +36,6 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				l.swap(lay);
-				if (step.has_mask) {
-					l.createMask(0, false);
-					l.swapMask(lay);
-					Context.setLayer(l, true);
-					Context.layersPreviewDirty = true;
-				}
 				l.maskOpacity = step.layer_opacity;
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
@@ -76,33 +71,11 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
-				if (step.has_mask) {
-					Context.layer.createMask(0, false);
-					Context.layer.swapMask(lay);
-					Context.setLayer(Context.layer, true);
-				}
 				Context.layer.maskOpacity = step.layer_opacity;
 				Context.layer.blending = step.layer_blending;
 				Context.layer.objectMask = step.layer_object;
 				Context.layersPreviewDirty = true;
 				MakeMaterial.parseMeshMaterial();
-			}
-			else if (step.name == tr("New Mask")) {
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				Context.setLayer(Project.layers[step.layer], true);
-				Context.layer.swapMask(lay);
-				Context.layer.deleteMask();
-				Context.setLayer(Project.layers[step.layer], false);
-			}
-			else if (step.name == tr("Delete Mask")) {
-				Context.setLayer(Project.layers[step.layer], false);
-				Context.layer.createMask(0, false);
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
-				Context.layersPreviewDirty = true;
-				Context.setLayer(Context.layer, true);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.layer = Project.layers[step.layer];
@@ -113,20 +86,18 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
-				Context.layer.createMask(0, false);
-				Context.layer.swapMask(lay);
-
+				Layers.newMask(false, Context.layer);
+				Context.layer.swap(lay);
 				Context.layersPreviewDirty = true;
-				Context.setLayer(Context.layer, true);
+				Context.setLayer(Context.layer);
 			}
 			else if (step.name == "Apply Filter") {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.setLayer(Project.layers[step.layer], step.is_mask);
+				Context.setLayer(Project.layers[step.layer]);
 				Context.layer.swap(lay);
-				Context.layer.createMask(0, false);
-				Context.layer.swapMask(lay);
-				lay.deleteMask();
+				Layers.newMask(false, Context.layer);
+				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("To Fill Layer")) {
@@ -140,18 +111,6 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 				Context.layer.fill_layer = Project.materials[step.material];
-			}
-			else if (step.name == tr("To Fill Mask")) {
-				Context.layer.toPaintMask();
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
-			}
-			else if (step.name == tr("To Paint Mask")) {
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
-				Context.layer.fill_mask = Project.materials[step.material];
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.setLayer(Project.layers[step.layer]);
@@ -192,8 +151,8 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
-				Context.setLayer(Project.layers[step.layer], step.is_mask);
-				step.is_mask ? Context.layer.swapMask(lay) : Context.layer.swap(lay);
+				Context.setLayer(Project.layers[step.layer]);
+				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
 			undos--;
@@ -222,7 +181,7 @@ class History {
 			else if (step.name == tr("Clear Layer")) {
 				Context.layer = Project.layers[step.layer];
 				swapActive();
-				Context.layer.clearLayer();
+				Context.layer.clear();
 				Context.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
@@ -239,37 +198,21 @@ class History {
 				iron.App.notifyOnInit(redoMergeLayers);
 				iron.App.notifyOnInit(Layers.mergeDown);
 			}
-			else if (step.name == tr("New Mask")) {
-				Context.layer = Project.layers[step.layer];
-				Context.layer.createMask(0, false);
-				Context.setLayer(Project.layers[step.layer], true);
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
-				Context.layerPreviewDirty = true;
-				undoI = (undoI + 1) % Config.raw.undo_steps;
-			}
-			else if (step.name == tr("Delete Mask")) {
-				Context.layer = Project.layers[step.layer];
-				swapMaskActive();
-				Context.layer.deleteMask();
-				Context.setLayer(Context.layer, false);
-			}
 			else if (step.name == tr("Apply Mask")) {
 				function _next() {
 					Context.layer = Project.layers[step.layer];
-					copyToUndoWithMask();
+					copyToUndo(Context.layer.id, undoI, true);
 					Context.layer.applyMask();
-					Context.setLayer(Context.layer, false);
+					Context.setLayer(Context.layer);
 				}
 				App.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];
-				Context.setLayer(Project.layers[step.layer], false);
+				Context.setLayer(Project.layers[step.layer]);
 				Context.layer.swap(lay);
-				lay.createMask(0, false);
-				Context.layer.swapMask(lay);
-				Context.layer.deleteMask();
+				Layers.newMask(false, lay);
+				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
@@ -283,18 +226,6 @@ class History {
 				Context.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
-				undoI = (undoI + 1) % Config.raw.undo_steps;
-			}
-			else if (step.name == tr("To Fill Mask")) {
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
-				Context.layer.fill_mask = Project.materials[step.material];
-				undoI = (undoI + 1) % Config.raw.undo_steps;
-			}
-			else if (step.name == tr("To Paint Mask")) {
-				Context.layer.toPaintMask();
-				var lay = undoLayers[undoI];
-				Context.layer.swapMask(lay);
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("Layer Opacity")) {
@@ -338,8 +269,8 @@ class History {
 			else { // Paint operation
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
-				Context.setLayer(Project.layers[step.layer], step.is_mask);
-				step.is_mask ? Context.layer.swapMask(lay) : Context.layer.swap(lay);
+				Context.setLayer(Project.layers[step.layer]);
+				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
@@ -353,14 +284,14 @@ class History {
 	}
 
 	public static function reset() {
-		steps = [{name: tr("New"), layer: 0, object: 0, material: 0, brush: 0, is_mask: false, has_mask: false}];
+		steps = [{name: tr("New"), layer: 0, layer_type: SlotLayer, layer_parent: -1, object: 0, material: 0, brush: 0}];
 		undos = 0;
 		redos = 0;
 		undoI = 0;
 	}
 
 	public static function paint() {
-		var isMask = Context.layerIsMask;
+		var isMask = Context.layer.isMask();
 		copyToUndo(Context.layer.id, undoI, isMask);
 
 		pushUndo = false;
@@ -400,44 +331,25 @@ class History {
 		// TODO: use undo layer in Layers.mergeDown to save memory
 	}
 
-	public static function newMask() {
-		push(tr("New Mask"));
-	}
-
-	public static function deleteMask() {
-		swapMaskActive();
-		push(tr("Delete Mask"));
-	}
-
 	public static function applyMask() {
-		copyToUndoWithMask();
+		copyToUndo(Context.layer.id, undoI, true);
 		push(tr("Apply Mask"));
 	}
 
 	@:keep
 	public static function applyFilter() {
-		copyToUndoWithMask();
+		copyToUndo(Context.layer.id, undoI, true);
 		push(tr("Apply Filter"));
 	}
 
 	public static function toFillLayer() {
-		copyToUndo(Context.layer.id, undoI, false);
+		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
 		push(tr("To Fill Layer"));
 	}
 
 	public static function toPaintLayer() {
-		copyToUndo(Context.layer.id, undoI, false);
+		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
 		push(tr("To Paint Layer"));
-	}
-
-	public static function toFillMask() {
-		copyToUndo(Context.layer.id, undoI, true);
-		push(tr("To Fill Mask"));
-	}
-
-	public static function toPaintMask() {
-		copyToUndo(Context.layer.id, undoI, true);
-		push(tr("To Paint Mask"));
 	}
 
 	public static function layerOpacity() {
@@ -495,11 +407,11 @@ class History {
 		steps.push({
 			name: name,
 			layer: lpos,
+			layer_type: Context.layer.isMask() ? SlotMask : Context.layer.isGroup() ? SlotGroup : SlotLayer,
+			layer_parent: Context.layer.parent == null ? -1 : Project.layers.indexOf(Context.layer.parent),
 			object: opos,
 			material: mpos,
 			brush: bpos,
-			is_mask: Context.layerIsMask,
-			has_mask: Context.layer.texpaint_mask != null,
 			layer_opacity: Context.layer.maskOpacity,
 			layer_object: Context.layer.objectMask,
 			layer_blending: Context.layer.blending
@@ -515,43 +427,24 @@ class History {
 
 	static function copyMergingLayers() {
 		var lay = Context.layer;
-		copyToUndo(lay.id, undoI, false);
-		if (lay.texpaint_mask != null) {
-			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-			copyToUndo(lay.id, undoI, true);
-		}
+		copyToUndo(lay.id, undoI, Context.layer.isMask());
 
 		var below = Project.layers.indexOf(lay) - 1;
 		lay = Project.layers[below];
-		copyToUndo(lay.id, undoI, false);
-	}
-
-	static function copyToUndoWithMask() {
-		copyToUndo(Context.layer.id, undoI, false);
-		undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-		copyToUndo(Context.layer.id, undoI, true);
+		copyToUndo(lay.id, undoI, Context.layer.isMask());
 	}
 
 	static function swapActive() {
 		var undoLayer = undoLayers[undoI];
 		undoLayer.swap(Context.layer);
-		if (Context.layer.texpaint_mask != null) {
-			undoLayer.swapMask(Context.layer);
-		}
-		undoI = (undoI + 1) % Config.raw.undo_steps;
-	}
-
-	static function swapMaskActive() {
-		var undoLayer = undoLayers[undoI];
-		undoLayer.swapMask(Context.layer);
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
 
 	static function copyToUndo(fromId: Int, toId: Int, isMask: Bool) {
 		var path = iron.RenderPath.active;
 		if (isMask) {
-			path.setTarget("texpaint_mask_undo" + toId);
-			path.bindTarget("texpaint_mask" + fromId, "tex");
+			path.setTarget("texpaint_undo" + toId);
+			path.bindTarget("texpaint" + fromId, "tex");
 			path.drawShader("shader_datas/copy_pass/copyR8_pass");
 		}
 		else {
@@ -591,11 +484,11 @@ class History {
 typedef TStep = {
 	public var name: String;
 	public var layer: Int;
+	public var layer_type: LayerSlotType;
+	public var layer_parent: Int;
 	public var object: Int;
 	public var material: Int;
 	public var brush: Int;
-	public var is_mask: Bool; // Mask operation
-	public var has_mask: Bool; // Layer contains mask
 	@:optional public var layer_opacity: Float;
 	@:optional public var layer_object: Int;
 	@:optional public var layer_blending: Int;

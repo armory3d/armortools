@@ -25,9 +25,9 @@ class MakePaint {
 			color_attachments:
 				Context.tool == ToolColorId ? ["RGBA32"] :
 				(Context.tool == ToolPicker && Context.pickPosNor) ? ["RGBA128", "RGBA128"] :
-				(Context.tool == ToolPicker && Context.layerIsMask) ? ["R8", "RGBA32", "RGBA32"] :
+				(Context.tool == ToolPicker && Context.layer.isMask()) ? ["R8", "RGBA32", "RGBA32"] :
 				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32"] :
-					[Context.layerIsMask ? "R8" : "RGBA32", "RGBA32", "RGBA32", "R8"]
+					[Context.layer.isMask() ? "R8" : "RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
 		con_paint.data.color_writes_red = [true, true, true, true];
@@ -74,7 +74,7 @@ class MakePaint {
 
 		vert.write('gl_Position = vec4(tpos, 0.0, 1.0);');
 
-		var decalLayer = Context.layer.fill_layer != null && Context.layer.uvType == UVProject && !Context.layerIsMask;
+		var decalLayer = Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
 		if (decalLayer) {
 			vert.add_uniform('mat4 WVP', '_decalLayerMatrix');
 		}
@@ -440,7 +440,7 @@ class MakePaint {
 		}
 
 		// Base color only as mask
-		var isMask = Context.layerIsMask;
+		var isMask = Context.layer.isMask();
 		if (isMask) {
 			// TODO: Apply opacity into base
 			// frag.write('fragColor[0].rgb *= fragColor[0].a;');

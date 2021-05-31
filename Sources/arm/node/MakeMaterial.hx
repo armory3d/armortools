@@ -318,16 +318,13 @@ class MakeMaterial {
 
 			if (RenderPathPaint.liveLayer == null) {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
-				RenderPathPaint.liveLayer.createMask(0x00000000);
 			}
 
 			var _space = UIHeader.inst.worktab.position;
 			var _tool = Context.tool;
-			var _layerIsMask = Context.layerIsMask;
 			var _bakeType = Context.bakeType;
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolBake;
-			Context.layerIsMask = false;
 			Context.bakeType = BakeCurvature;
 
 			MaterialParser.bake_passthrough = true;
@@ -348,7 +345,6 @@ class MakeMaterial {
 
 			UIHeader.inst.worktab.position = _space;
 			Context.tool = _tool;
-			Context.layerIsMask = _layerIsMask;
 			Context.bakeType = _bakeType;
 			parsePaintMaterial(false);
 
