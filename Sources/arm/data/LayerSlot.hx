@@ -91,7 +91,7 @@ class LayerSlot {
 			name = "Mask " + (id + 1);
 			var format = "R8";
 			blending = BlendAdd;
-			objectMask = parent.objectMask;
+			if (parent != null) objectMask = parent.objectMask;
 
 			{
 				var t = new RenderTargetRaw();
