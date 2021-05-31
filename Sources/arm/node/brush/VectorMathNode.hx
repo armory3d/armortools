@@ -56,6 +56,54 @@ class VectorMathNode extends LogicNode {
 				tmp.setFrom(v2);
 				tmp.normalize();
 				v.reflect(tmp);
+			case "Scale":
+				v.x *= v2.x;
+				v.y *= v2.x;
+				v.z *= v2.x;
+			case "Absolute":
+				v.x = Math.abs(v.x);
+				v.y = Math.abs(v.y);
+				v.z = Math.abs(v.z);
+			case "Minimum":
+				v.x = Math.min(v1.x,v2.x);
+				v.y = Math.min(v1.y,v2.y);
+				v.z = Math.min(v1.z,v2.z);
+			case "Maximum":
+				v.x = Math.max(v1.x,v2.x);
+				v.y = Math.max(v1.y,v2.y);
+				v.z = Math.max(v1.z,v2.z);
+			case "Floor": 
+				v.x = Math.floor(v1.x);
+				v.y = Math.floor(v1.y);
+				v.z = Math.floor(v1.z);
+			case "Ceil":
+				v.x = Math.ceil(v1.x);
+				v.y = Math.ceil(v1.y);
+				v.z = Math.ceil(v1.z);
+			case "Fraction":
+				v.x = v1.x - Math.floor(v1.x);
+				v.y = v1.y - Math.floor(v1.y);
+				v.z = v1.z - Math.floor(v1.z);
+			case "Modulo":
+				v.x = v1.x % v2.x;
+				v.y = v1.y % v2.y;
+				v.z = v1.z % v2.z;
+			case "Snap":
+				v.x = Math.floor(v1.x / v2.x) * v2.x;
+				v.y = Math.floor(v1.y / v2.y) * v2.y;
+				v.z = Math.floor(v1.z / v2.z) * v2.z;
+			case "Sine":
+				v.x = Math.sin(v1.x);
+				v.y = Math.sin(v1.y);
+				v.z = Math.sin(v1.z);
+			case "Cosine":
+				v.x = Math.cos(v1.x);
+				v.y = Math.cos(v1.y);
+				v.z = Math.cos(v1.z);
+			case "Tangent":
+				v.x = Math.tan(v1.x);
+				v.y = Math.tan(v1.y);
+				v.z = Math.tan(v1.z);
 		}
 
 		if (from == 0) return v;
