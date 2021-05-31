@@ -65,13 +65,13 @@ class VectorMathNode extends LogicNode {
 				v.y = Math.abs(v.y);
 				v.z = Math.abs(v.z);
 			case "Minimum":
-				v.x = Math.min(v1.x,v2.x);
-				v.y = Math.min(v1.y,v2.y);
-				v.z = Math.min(v1.z,v2.z);
+				v.x = Math.min(v1.x, v2.x);
+				v.y = Math.min(v1.y, v2.y);
+				v.z = Math.min(v1.z, v2.z);
 			case "Maximum":
-				v.x = Math.max(v1.x,v2.x);
-				v.y = Math.max(v1.y,v2.y);
-				v.z = Math.max(v1.z,v2.z);
+				v.x = Math.max(v1.x, v2.x);
+				v.y = Math.max(v1.y, v2.y);
+				v.z = Math.max(v1.z, v2.z);
 			case "Floor": 
 				v.x = Math.floor(v1.x);
 				v.y = Math.floor(v1.y);

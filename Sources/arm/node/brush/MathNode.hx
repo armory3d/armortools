@@ -81,7 +81,7 @@ class MathNode extends LogicNode {
 		case "Hyperbolic Cosine":
 			f = (Math.exp(v1) + Math.exp(-v1)) / 2.0;
 		case "Hyperbolic Tangent":
-			f = 1.0 - (2.0 / (Math.exp(2*v1) + 1));
+			f = 1.0 - (2.0 / (Math.exp(2 * v1) + 1));
 		case "To Radians":
 			f = v1 / 180.0 * Math.PI;
 		case "To Degrees":
