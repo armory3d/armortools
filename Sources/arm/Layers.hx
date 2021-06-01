@@ -667,8 +667,13 @@ class Layers {
 		if (Project.layers.length > 255) return null;
 		var l = new LayerSlot();
 		l.objectMask = Context.layerFilter;
-		Project.layers.push(l);
+		if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
+		Project.layers.insert(Project.layers.indexOf(Context.layer) + 1, l);
 		Context.setLayer(l);
+		var below = Project.layers[Project.layers.indexOf(Context.layer) - 1];
+		if (below.isLayer()) {
+			Context.layer.parent = below.parent;
+		}
 		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
 		Context.layerPreviewDirty = true;
 		return l;

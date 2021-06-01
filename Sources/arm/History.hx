@@ -63,13 +63,15 @@ class History {
 				Context.layer.delete();
 
 				Context.layer = Layers.newLayer(false);
-				Project.layers.insert(step.layer, Project.layers.pop());
+				Project.layers.remove(Context.layer);
+				Project.layers.insert(step.layer, Context.layer);
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 
 				Context.layer = Layers.newLayer(false);
-				Project.layers.insert(step.layer + 1, Project.layers.pop());
+				Project.layers.remove(Context.layer);
+				Project.layers.insert(step.layer + 1, Context.layer);
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -84,7 +86,8 @@ class History {
 				Context.layer.delete();
 
 				Context.layer = Layers.newLayer(false);
-				Project.layers.insert(step.layer, Project.layers.pop());
+				Project.layers.remove(Context.layer);
+				Project.layers.insert(step.layer, Context.layer);
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);

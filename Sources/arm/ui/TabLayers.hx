@@ -465,7 +465,8 @@ class TabLayers {
 		var canMergeDown = !l.isGroup() && li > 0 && (l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
 		if (canMergeDown) add++;
 		if (l.fill_layer == null) add += 1; // Clear
-		if (l.fill_layer != null) add += 3;
+		if (l.fill_layer != null && !l.isMask()) add += 3;
+		if (l.fill_layer != null && l.isMask()) add += 2;
 		if (l.isMask()) add += 2;
 		var menuElements = l.isGroup() ? 7 : (19 + add);
 
