@@ -228,8 +228,8 @@ class TabLayers {
 		ui._x += 2;
 		ui._y += 3;
 		var col = ui.t.ACCENT_SELECT_COL;
-		var groupVisible = l.parent == null || l.parent.visible;
-		if (!groupVisible) col -= 0x99000000;
+		var parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
+		if (parentHidden) col -= 0x99000000;
 
 		if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
 			l.visible = !l.visible;
@@ -270,15 +270,17 @@ class TabLayers {
 				ui._x = _x;
 				ui._y = _y;
 			}
-			if (l.isMask()) {
+			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = UIView2D.pipe;
 				#if kha_opengl
 				ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
 				#end
 				ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
 			}
+
 			state = ui.image(icon, 0xffffffff, iconH);
-			if (l.isMask()) {
+
+			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = null;
 			}
 		}
