@@ -467,7 +467,7 @@ class TabLayers {
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null) add += 3;
 		if (l.isMask()) add += 2;
-		var menuElements = l.isGroup() ? 6 : (19 + add);
+		var menuElements = l.isGroup() ? 7 : (19 + add);
 
 		UIMenu.draw(function(ui: Zui) {
 			ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -622,34 +622,36 @@ class TabLayers {
 			}
 			ui.text(tr("Opacity"));
 
-			ui.row([7 / 10, 3 / 10]);
-			var resHandleChangedLast = App.resHandle.changed;
-			var ar = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
-			App.resHandle.value = App.resHandle.position;
-			App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, 7, false, 1, false, Left, false));
-			if (App.resHandle.changed) {
-				UIMenu.keepOpen = true;
-			}
-			if (resHandleChangedLast && !App.resHandle.changed) {
-				iron.App.notifyOnInit(Layers.resizeLayers);
-				UVUtil.uvmap = null;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemap = null;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
-				#if (kha_direct3d12 || kha_vulkan)
-				arm.render.RenderPathRaytrace.ready = false;
-				#end
-			}
-			ui.text(tr("Res"));
+			if (!l.isGroup()) {
+				ui.row([7 / 10, 3 / 10]);
+				var resHandleChangedLast = App.resHandle.changed;
+				var ar = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
+				App.resHandle.value = App.resHandle.position;
+				App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, 7, false, 1, false, Left, false));
+				if (App.resHandle.changed) {
+					UIMenu.keepOpen = true;
+				}
+				if (resHandleChangedLast && !App.resHandle.changed) {
+					iron.App.notifyOnInit(Layers.resizeLayers);
+					UVUtil.uvmap = null;
+					UVUtil.uvmapCached = false;
+					UVUtil.trianglemap = null;
+					UVUtil.trianglemapCached = false;
+					UVUtil.dilatemapCached = false;
+					#if (kha_direct3d12 || kha_vulkan)
+					arm.render.RenderPathRaytrace.ready = false;
+					#end
+				}
+				ui.text(tr("Res"));
 
-			ui.row([7 / 10, 3 / 10]);
-			zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit", "16bit", "32bit"]);
-			if (App.bitsHandle.changed) {
-				iron.App.notifyOnInit(Layers.setLayerBits);
-				UIMenu.keepOpen = true;
+				ui.row([7 / 10, 3 / 10]);
+				zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit", "16bit", "32bit"]);
+				if (App.bitsHandle.changed) {
+					iron.App.notifyOnInit(Layers.setLayerBits);
+					UIMenu.keepOpen = true;
+				}
+				ui.text(tr("Color"));
 			}
-			ui.text(tr("Color"));
 
 			if (l.fill_layer != null) {
 				ui.row([7 / 10, 3 / 10]);
