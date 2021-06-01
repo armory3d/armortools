@@ -90,7 +90,7 @@ class LayerSlot {
 		else { // Mask
 			name = "Mask " + (id + 1);
 			var format = "R8";
-			blending = BlendAdd;
+			blending = BlendDarken;
 			if (parent != null) objectMask = parent.objectMask;
 
 			{

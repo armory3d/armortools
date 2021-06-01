@@ -351,14 +351,10 @@ class Layers {
 	public static function mergeDown() {
 		var l1 = Context.layer;
 
-		// Merge masks
+		// Apply masks
 		var masks = l1.getMasks();
 		if (masks != null) {
-			for (i in 0...masks.length - 1) {
-				mergeLayer(masks[i + 1], masks[i]);
-				masks[i].delete();
-			}
-			masks[masks.length - 1].applyMask();
+			for (m in masks) m.applyMask();
 			Context.setLayer(l1);
 		}
 
