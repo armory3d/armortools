@@ -238,7 +238,7 @@ class ImportArm {
 					var _texpaint_nor: kha.Image = null;
 					var _texpaint_pack: kha.Image = null;
 					if (isMask) {
-						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res), ld.res, ld.res, TextureFormat.L8);
+						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
 						l.texpaint.g2.begin(false);
 						l.texpaint.g2.pipeline = Layers.pipeCopy8;
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);

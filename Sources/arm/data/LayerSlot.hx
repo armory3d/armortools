@@ -89,7 +89,7 @@ class LayerSlot {
 		}
 		else { // Mask
 			name = "Mask " + (id + 1);
-			var format = "R8";
+			var format = "RGBA32"; // Full bits for undo support, R8 is used
 			blending = BlendDarken;
 			if (parent != null) objectMask = parent.objectMask;
 
@@ -102,7 +102,7 @@ class LayerSlot {
 				texpaint = RenderPath.active.createRenderTarget(t).image;
 			}
 
-			texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.L8);
+			texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.RGBA32);
 		}
 	}
 
@@ -191,7 +191,7 @@ class LayerSlot {
 
 	public function invertMask() {
 		if (Layers.pipeInvert8 == null) Layers.makePipe();
-		var inverted = Image.createRenderTarget(texpaint.width, texpaint.height, TextureFormat.L8);
+		var inverted = Image.createRenderTarget(texpaint.width, texpaint.height, TextureFormat.RGBA32);
 		inverted.g2.begin(false);
 		inverted.g2.pipeline = Layers.pipeInvert8;
 		inverted.g2.drawImage(texpaint, 0, 0);
@@ -325,7 +325,7 @@ class LayerSlot {
 		}
 		else if (isMask()) {
 			var _texpaint = this.texpaint;
-			this.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.L8);
+			this.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.RGBA32);
 
 			this.texpaint.g2.begin(false);
 			this.texpaint.g2.pipeline = Layers.pipeCopy8;

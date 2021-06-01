@@ -25,9 +25,8 @@ class MakePaint {
 			color_attachments:
 				Context.tool == ToolColorId ? ["RGBA32"] :
 				(Context.tool == ToolPicker && Context.pickPosNor) ? ["RGBA128", "RGBA128"] :
-				(Context.tool == ToolPicker && Context.layer.isMask()) ? ["R8", "RGBA32", "RGBA32"] :
 				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32"] :
-					[Context.layer.isMask() ? "R8" : "RGBA32", "RGBA32", "RGBA32", "R8"]
+					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
 		con_paint.data.color_writes_red = [true, true, true, true];
@@ -444,9 +443,13 @@ class MakePaint {
 		if (isMask) {
 			// TODO: Apply opacity into base
 			// frag.write('fragColor[0].rgb *= fragColor[0].a;');
+			con_paint.data.color_writes_green[0] = false;
+			con_paint.data.color_writes_blue[0] = false;
+			con_paint.data.color_writes_alpha[0] = false;
 			con_paint.data.color_writes_red[1] = false;
 			con_paint.data.color_writes_green[1] = false;
 			con_paint.data.color_writes_blue[1] = false;
+			con_paint.data.color_writes_alpha[1] = false;
 			con_paint.data.color_writes_red[2] = false;
 			con_paint.data.color_writes_green[2] = false;
 			con_paint.data.color_writes_blue[2] = false;

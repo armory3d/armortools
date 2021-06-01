@@ -31,8 +31,10 @@ class History {
 				Context.layer.delete();
 			}
 			else if (step.name == tr("Delete Layer")) {
-				var l = Layers.newLayer(false);
-				Project.layers.insert(step.layer, Project.layers.pop());
+				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
+				var l = new LayerSlot("", step.layer_type, parent);
+				Project.layers.insert(step.layer, l);
+				Context.setLayer(l);
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				l.swap(lay);
@@ -170,8 +172,10 @@ class History {
 			var step = steps[active];
 
 			if (step.name == tr("New Layer")) {
-				Layers.newLayer();
-				Project.layers.insert(step.layer, Project.layers.pop());
+				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
+				var l = new LayerSlot("", step.layer_type, parent);
+				Project.layers.insert(step.layer, l);
+				Context.setLayer(l);
 			}
 			else if (step.name == tr("Delete Layer")) {
 				Context.layer = Project.layers[step.layer];
