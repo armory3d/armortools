@@ -174,10 +174,10 @@ class MakeMesh {
 			var lastPass = layerPass == layerPassCount - 1;
 
 			for (l in layers) {
-				if (l.objectMask > 0) {
+				if (l.getObjectMask() > 0) {
 					frag.add_uniform('int uid', '_uid');
-					if (l.objectMask > Project.paintObjects.length) { // Atlas
-						var visibles = Project.getAtlasObjects(l.objectMask);
+					if (l.getObjectMask() > Project.paintObjects.length) { // Atlas
+						var visibles = Project.getAtlasObjects(l.getObjectMask());
 						frag.write('if (');
 						for (i in 0...visibles.length) {
 							if (i > 0) frag.write(' || ');
@@ -186,7 +186,7 @@ class MakeMesh {
 						frag.write(') {');
 					}
 					else { // Object mask
-						var uid = Project.paintObjects[l.objectMask - 1].uid;
+						var uid = Project.paintObjects[l.getObjectMask() - 1].uid;
 						frag.write('if ($uid == uid) {');
 					}
 				}
@@ -275,7 +275,7 @@ class MakeMesh {
 					}
 				}
 
-				if (l.objectMask > 0) {
+				if (l.getObjectMask() > 0) {
 					frag.write('}');
 				}
 			}

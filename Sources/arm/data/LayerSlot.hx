@@ -91,7 +91,6 @@ class LayerSlot {
 			name = "Mask " + (id + 1);
 			var format = "RGBA32"; // Full bits for undo support, R8 is used
 			blending = BlendDarken;
-			if (parent != null) objectMask = parent.objectMask;
 
 			{
 				var t = new RenderTargetRaw();
@@ -392,6 +391,10 @@ class LayerSlot {
 		var f = maskOpacity;
 		if (isLayer() && parent != null) f *= parent.maskOpacity;
 		return f;
+	}
+
+	public function getObjectMask(): Int {
+		return isMask() ? parent.objectMask : objectMask;
 	}
 
 	public function isLayer(): Bool {

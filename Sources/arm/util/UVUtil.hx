@@ -126,7 +126,7 @@ class UVUtil {
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
 
-		var mask = Context.objectMaskUsed() ? Context.layer.objectMask : 0;
+		var mask = Context.objectMaskUsed() ? Context.layer.getObjectMask() : 0;
 		if (Context.layerFilterUsed()) mask = Context.layerFilter;
 		var geom = mask == 0 && Context.mergedObject != null ? Context.mergedObject.data.geom : Context.paintObject.data.geom;
 		var g4 = dilatemap.g4;

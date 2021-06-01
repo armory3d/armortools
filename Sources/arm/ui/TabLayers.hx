@@ -171,8 +171,8 @@ class TabLayers {
 		var ui = UISidebar.inst.ui;
 
 		if (Context.layerFilter > 0 &&
-			l.objectMask > 0 &&
-			l.objectMask != Context.layerFilter) {
+			l.getObjectMask() > 0 &&
+			l.getObjectMask() != Context.layerFilter) {
 			return;
 		}
 

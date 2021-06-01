@@ -301,9 +301,6 @@ class ImportArm {
 				var ld = project.layer_datas[i];
 				if (ld.parent >= 0) {
 					Project.layers[i].parent = Project.layers[ld.parent];
-					if (Project.layers[i].isMask()) {
-						Project.layers[i].objectMask = Project.layers[i].parent.objectMask;
-					}
 				}
 			}
 

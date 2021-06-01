@@ -635,7 +635,7 @@ class Layers {
 		var ar = [tr("None")];
 		for (p in Project.paintObjects) ar.push(p.name);
 
-		var mask = Context.objectMaskUsed() ? Context.layer.objectMask : 0;
+		var mask = Context.objectMaskUsed() ? Context.layer.getObjectMask() : 0;
 		if (Context.layerFilterUsed()) mask = Context.layerFilter;
 		if (mask > 0) {
 			if (Context.mergedObject != null) {
@@ -651,9 +651,9 @@ class Layers {
 			Context.selectPaintObject(o);
 		}
 		else {
-			var isAtlas = Context.layer.objectMask > 0 && Context.layer.objectMask <= Project.paintObjects.length;
+			var isAtlas = Context.layer.getObjectMask() > 0 && Context.layer.getObjectMask() <= Project.paintObjects.length;
 			if (Context.mergedObject == null || isAtlas || Context.mergedObjectIsAtlas) {
-				var visibles = isAtlas ? Project.getAtlasObjects(Context.layer.objectMask) : null;
+				var visibles = isAtlas ? Project.getAtlasObjects(Context.layer.getObjectMask()) : null;
 				MeshUtil.mergeMesh(visibles);
 			}
 			Context.selectPaintObject(Context.mainObject());
@@ -670,9 +670,12 @@ class Layers {
 		if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
 		Project.layers.insert(Project.layers.indexOf(Context.layer) + 1, l);
 		Context.setLayer(l);
-		var below = Project.layers[Project.layers.indexOf(Context.layer) - 1];
-		if (below.isLayer()) {
-			Context.layer.parent = below.parent;
+		var li = Project.layers.indexOf(Context.layer);
+		if (li > 0) {
+			var below = Project.layers[li - 1];
+			if (below.isLayer()) {
+				Context.layer.parent = below.parent;
+			}
 		}
 		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
 		Context.layerPreviewDirty = true;

@@ -371,7 +371,7 @@ class Context {
 		for (p in Project.paintObjects) p.skip_context = "paint";
 		paintObject = o;
 
-		var mask = layer.objectMask;
+		var mask = layer.getObjectMask();
 		if (Context.layerFilterUsed()) mask = Context.layerFilter;
 
 		if (mergedObject == null || mask > 0) {
@@ -439,6 +439,6 @@ class Context {
 	}
 
 	public static function objectMaskUsed(): Bool {
-		return layer.objectMask > 0 && layer.objectMask <= Project.paintObjects.length;
+		return layer.getObjectMask() > 0 && layer.getObjectMask() <= Project.paintObjects.length;
 	}
 }

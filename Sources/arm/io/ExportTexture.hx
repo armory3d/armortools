@@ -29,8 +29,8 @@ class ExportTexture {
 		else if (Context.layersExport == ExportPerUdimTile) {
 			var udimTiles: Array<String> = [];
 			for (l in Project.layers) {
-				if (l.objectMask > 0) {
-					var name = Project.paintObjects[l.objectMask - 1].name;
+				if (l.getObjectMask() > 0) {
+					var name = Project.paintObjects[l.getObjectMask() - 1].name;
 					if (name.substr(name.length - 5, 2) == ".1") { // tile.1001
 						udimTiles.push(name.substr(name.length - 5));
 					}
@@ -44,8 +44,8 @@ class ExportTexture {
 		else if (Context.layersExport == ExportPerObject) {
 			var objectNames: Array<String> = [];
 			for (l in Project.layers) {
-				if (l.objectMask > 0) {
-					var name = Project.paintObjects[l.objectMask - 1].name;
+				if (l.getObjectMask() > 0) {
+					var name = Project.paintObjects[l.getObjectMask() - 1].name;
 					if (objectNames.indexOf(name) == -1) {
 						objectNames.push(name);
 					}
@@ -72,7 +72,7 @@ class ExportTexture {
 					for (objectIndex in 0...Project.atlasObjects.length) {
 						if (Project.atlasObjects[objectIndex] == atlasIndex) {
 							for (l in Project.layers) {
-								if (l.objectMask - 1 == objectIndex) layers.push(l);
+								if (l.getObjectMask() - 1 == objectIndex) layers.push(l);
 							}
 						}
 					}
@@ -140,8 +140,8 @@ class ExportTexture {
 
 		// Append object mask name
 		var exportSelected = Context.layersExport == ExportSelected;
-		if (exportSelected && layers[0].objectMask > 0) {
-			f += "_" + Project.paintObjects[layers[0].objectMask - 1].name;
+		if (exportSelected && layers[0].getObjectMask() > 0) {
+			f += "_" + Project.paintObjects[layers[0].getObjectMask() - 1].name;
 		}
 		if (!isUdim && !exportSelected && objectName != "") {
 			f += "_" + objectName;
@@ -163,10 +163,10 @@ class ExportTexture {
 			if (!exportSelected && !l1.isVisible()) continue;
 			if (!l1.isLayer()) continue;
 
-			if (objectName != "" && l1.objectMask > 0) {
-				if (isUdim && !Project.paintObjects[l1.objectMask - 1].name.endsWith(objectName)) continue;
+			if (objectName != "" && l1.getObjectMask() > 0) {
+				if (isUdim && !Project.paintObjects[l1.getObjectMask() - 1].name.endsWith(objectName)) continue;
 				var perObject = Context.layersExport == ExportPerObject;
-				if (perObject && Project.paintObjects[l1.objectMask - 1].name != objectName) continue;
+				if (perObject && Project.paintObjects[l1.getObjectMask() - 1].name != objectName) continue;
 			}
 
 			var mask = empty;
