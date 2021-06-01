@@ -212,8 +212,8 @@ class MakeMesh {
 					frag.write('texpaint_opac *= max($texpaint_mask, 0.0);');
 				}
 
-				if (l.maskOpacity < 1) {
-					frag.write('texpaint_opac *= ${l.maskOpacity};');
+				if (l.getOpacity() < 1) {
+					frag.write('texpaint_opac *= ${l.getOpacity()};');
 				}
 
 				if (l.paintBase) {

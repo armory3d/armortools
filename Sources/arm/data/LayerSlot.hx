@@ -388,6 +388,12 @@ class LayerSlot {
 		return children;
 	}
 
+	public function getOpacity(): Float {
+		var f = maskOpacity;
+		if (isLayer() && parent != null) f *= parent.maskOpacity;
+		return f;
+	}
+
 	public function isLayer(): Bool {
 		return texpaint != null && texpaint_nor != null;
 	}

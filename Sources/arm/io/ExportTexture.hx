@@ -199,7 +199,7 @@ class ExportTexture {
 				Layers.expa.g4.setTexture(Layers.tex1, empty);
 				Layers.expa.g4.setTexture(Layers.texmask, mask);
 				Layers.expa.g4.setTexture(Layers.texa, Layers.tempImage);
-				Layers.expa.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expa.g4.setFloat(Layers.opac, l1.getOpacity());
 				Layers.expa.g4.setInt(Layers.blending, layers.length > 1 ? l1.blending : 0);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
@@ -220,7 +220,7 @@ class ExportTexture {
 				Layers.expb.g4.setTexture(Layers.tex1, l1.texpaint_nor);
 				Layers.expb.g4.setTexture(Layers.texmask, mask);
 				Layers.expb.g4.setTexture(Layers.texa, Layers.tempImage);
-				Layers.expb.g4.setFloat(Layers.opac, l1.maskOpacity);
+				Layers.expb.g4.setFloat(Layers.opac, l1.getOpacity());
 				Layers.expb.g4.setInt(Layers.blending, l1.paintNorBlend ? -2 : -1);
 				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
@@ -236,12 +236,12 @@ class ExportTexture {
 				Layers.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask, l1.paintHeightBlend ? -3 : -1);
+					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
-					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
-					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
+					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
 		}

@@ -396,7 +396,7 @@ class Layers {
 			l0.texpaint.g4.setTexture(tex1, empty);
 			l0.texpaint.g4.setTexture(texmask, mask);
 			l0.texpaint.g4.setTexture(texa, tempImage);
-			l0.texpaint.g4.setFloat(opac, l1.maskOpacity);
+			l0.texpaint.g4.setFloat(opac, l1.getOpacity());
 			l0.texpaint.g4.setInt(blending, l1.blending);
 			l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 			l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
@@ -418,7 +418,7 @@ class Layers {
 				l0.texpaint_nor.g4.setTexture(tex1, l1.texpaint_nor);
 				l0.texpaint_nor.g4.setTexture(texmask, mask);
 				l0.texpaint_nor.g4.setTexture(texa, tempImage);
-				l0.texpaint_nor.g4.setFloat(opac, l1.maskOpacity);
+				l0.texpaint_nor.g4.setFloat(opac, l1.getOpacity());
 				l0.texpaint_nor.g4.setInt(blending, l1.paintNorBlend ? -2 : -1);
 				l0.texpaint_nor.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				l0.texpaint_nor.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
@@ -434,12 +434,12 @@ class Layers {
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask, l1.paintHeightBlend ? -3 : -1);
+					commandsMergePack(pipeMerge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
-					if (l1.paintRough) commandsMergePack(pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
-					if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.maskOpacity, mask);
+					if (l1.paintOcc) commandsMergePack(pipeMergeR, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintRough) commandsMergePack(pipeMergeG, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
 		}
