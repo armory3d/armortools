@@ -440,6 +440,54 @@ class MakeMaterial {
 		}
 	}
 
+	public static function blendModeMask(frag: NodeShader, blending: Int, cola: String, colb: String, opac: String): String {
+		if (blending == BlendMix) {
+			return 'mix($cola, $colb, $opac)';
+		}
+		else if (blending == BlendDarken) {
+			return 'mix($cola, min($cola, $colb), $opac)';
+		}
+		else if (blending == BlendMultiply) {
+			return 'mix($cola, $cola * $colb, $opac)';
+		}
+		else if (blending == BlendBurn) {
+			return 'mix($cola, 1.0 - (1.0 - $cola) / $colb, $opac)';
+		}
+		else if (blending == BlendLighten) {
+			return 'max($cola, $colb * $opac)';
+		}
+		else if (blending == BlendScreen) {
+			return '(1.0 - ((1.0 - $opac) + $opac * (1.0 - $colb)) * (1.0 - $cola))';
+		}
+		else if (blending == BlendDodge) {
+			return 'mix($cola, $cola / (1.0 - $colb), $opac)';
+		}
+		else if (blending == BlendAdd) {
+			return 'mix($cola, $cola + $colb, $opac)';
+		}
+		else if (blending == BlendOverlay) {
+			return 'mix($cola, $cola < 0.5 ? 2.0 * $cola * $colb : 1.0 - 2.0 * (1.0 - $cola) * (1.0 - $colb), $opac)';
+		}
+		else if (blending == BlendSoftLight) {
+			return '((1.0 - $opac) * $cola + $opac * ((1.0 - $cola) * $colb * $cola + $cola * (1.0 - (1.0 - $colb) * (1.0 - $cola))))';
+		}
+		else if (blending == BlendLinearLight) {
+			return '($cola + $opac * (2.0 * ($colb - 0.5)))';
+		}
+		else if (blending == BlendDifference) {
+			return 'mix($cola, abs($cola - $colb), $opac)';
+		}
+		else if (blending == BlendSubtract) {
+			return 'mix($cola, $cola - $colb, $opac)';
+		}
+		else if (blending == BlendDivide) {
+			return '(1.0 - $opac) * $cola + $opac * $cola / $colb';
+		}
+		else { // BlendHue, BlendSaturation, BlendColor, BlendValue
+			return 'mix($cola, $colb, $opac)';
+		}
+	}
+
 	public static inline function getDisplaceStrength():Float {
 		var sc = Context.mainObject().transform.scale.x;
 		return Config.raw.displace_strength * 0.02 * sc;

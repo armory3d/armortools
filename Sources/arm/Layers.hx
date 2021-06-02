@@ -34,7 +34,8 @@ class Layers {
 	public static var pipeCopyBGRA: PipelineState;
 	public static var pipeCopyRGB: PipelineState = null;
 	public static var pipeInvert8: PipelineState;
-	public static var pipeMask: PipelineState;
+	public static var pipeApplyMask: PipelineState;
+	public static var pipeMergeMask: PipelineState;
 	public static var tex0: TextureUnit;
 	public static var tex1: TextureUnit;
 	public static var texmask: TextureUnit;
@@ -43,6 +44,10 @@ class Layers {
 	public static var blending: ConstantLocation;
 	public static var tex0Mask: TextureUnit;
 	public static var texaMask: TextureUnit;
+	public static var tex0MergeMask: TextureUnit;
+	public static var texaMergeMask: TextureUnit;
+	public static var opacMergeMask: ConstantLocation;
+	public static var blendingMergeMask: ConstantLocation;
 	public static var tempImage: Image = null;
 	public static var tempMaskImage: Image = null;
 	public static var expa: Image = null;
@@ -210,15 +215,27 @@ class Layers {
 		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
 		pipeInvert8.compile();
 
-		pipeMask = new PipelineState();
-		pipeMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
-		pipeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
+		pipeApplyMask = new PipelineState();
+		pipeApplyMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
-		pipeMask.inputLayout = [vs];
-		pipeMask.compile();
-		tex0Mask = pipeMask.getTextureUnit("tex0");
-		texaMask = pipeMask.getTextureUnit("texa");
+		pipeApplyMask.inputLayout = [vs];
+		pipeApplyMask.compile();
+		tex0Mask = pipeApplyMask.getTextureUnit("tex0");
+		texaMask = pipeApplyMask.getTextureUnit("texa");
+
+		pipeMergeMask = new PipelineState();
+		pipeMergeMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeMergeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float2);
+		pipeMergeMask.inputLayout = [vs];
+		pipeMergeMask.compile();
+		tex0MergeMask = pipeMergeMask.getTextureUnit("tex0");
+		texaMergeMask = pipeMergeMask.getTextureUnit("texa");
+		opacMergeMask = pipeMergeMask.getConstantLocation("opac");
+		blendingMergeMask = pipeMergeMask.getConstantLocation("blending");
 	}
 
 	public static function makePipeCopyRGB() {
@@ -354,7 +371,11 @@ class Layers {
 		// Apply masks
 		var masks = l1.getMasks();
 		if (masks != null) {
-			for (m in masks) m.applyMask();
+			for (i in 0...masks.length - 1) {
+				mergeLayer(masks[i + 1], masks[i]);
+				masks[i].delete();
+			}
+			masks[masks.length - 1].applyMask();
 			Context.setLayer(l1);
 		}
 
@@ -389,15 +410,13 @@ class Layers {
 			mask = l1masks[0].texpaint;
 		}
 
-		if (l1.isMask() || l1.paintBase) {
+		if (l1.isMask()) {
 			l0.texpaint.g4.begin();
-			l0.texpaint.g4.setPipeline(pipeMerge);
-			l0.texpaint.g4.setTexture(tex0, l1.texpaint);
-			l0.texpaint.g4.setTexture(tex1, empty);
-			l0.texpaint.g4.setTexture(texmask, mask);
-			l0.texpaint.g4.setTexture(texa, tempImage);
-			l0.texpaint.g4.setFloat(opac, l1.getOpacity());
-			l0.texpaint.g4.setInt(blending, l1.blending);
+			l0.texpaint.g4.setPipeline(pipeMergeMask);
+			l0.texpaint.g4.setTexture(Layers.tex0MergeMask, l1.texpaint);
+			l0.texpaint.g4.setTexture(Layers.texaMergeMask, tempImage);
+			l0.texpaint.g4.setFloat(opacMergeMask, l1.getOpacity());
+			l0.texpaint.g4.setInt(blendingMergeMask, l1.blending);
 			l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 			l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 			l0.texpaint.g4.drawIndexedVertices();
@@ -405,6 +424,21 @@ class Layers {
 		}
 
 		if (l1.isLayer()) {
+			if (l1.paintBase) {
+				l0.texpaint.g4.begin();
+				l0.texpaint.g4.setPipeline(pipeMerge);
+				l0.texpaint.g4.setTexture(tex0, l1.texpaint);
+				l0.texpaint.g4.setTexture(tex1, empty);
+				l0.texpaint.g4.setTexture(texmask, mask);
+				l0.texpaint.g4.setTexture(texa, tempImage);
+				l0.texpaint.g4.setFloat(opac, l1.getOpacity());
+				l0.texpaint.g4.setInt(blending, l1.blending);
+				l0.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				l0.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				l0.texpaint.g4.drawIndexedVertices();
+				l0.texpaint.g4.end();
+			}
+
 			tempImage.g2.begin(false);
 			tempImage.g2.pipeline = pipeCopy;
 			tempImage.g2.drawImage(l0.texpaint_nor, 0, 0);
@@ -513,10 +547,10 @@ class Layers {
 		tempImage.g2.pipeline = null;
 		tempImage.g2.end();
 
-		// Merge mask
+		// Apply mask
 		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 		l.texpaint.g4.begin();
-		l.texpaint.g4.setPipeline(Layers.pipeMask);
+		l.texpaint.g4.setPipeline(Layers.pipeApplyMask);
 		l.texpaint.g4.setTexture(Layers.tex0Mask, tempImage);
 		l.texpaint.g4.setTexture(Layers.texaMask, m.texpaint);
 		l.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);

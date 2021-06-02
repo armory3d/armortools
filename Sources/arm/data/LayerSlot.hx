@@ -90,7 +90,7 @@ class LayerSlot {
 		else { // Mask
 			name = "Mask " + (id + 1);
 			var format = "RGBA32"; // Full bits for undo support, R8 is used
-			blending = BlendDarken;
+			blending = BlendAdd;
 
 			{
 				var t = new RenderTargetRaw();

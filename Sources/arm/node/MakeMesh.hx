@@ -202,14 +202,24 @@ class MakeMesh {
 
 				var masks = l.getMasks();
 				if (masks != null) {
-					var texpaint_mask = 'texpaint_mask' + l.id;
-					frag.write('float $texpaint_mask = 1.0;');
+					var hasVisible = false;
 					for (m in masks) {
-						if (!m.isVisible()) continue;
-						frag.add_shared_sampler('sampler2D texpaint' + m.id);
-						frag.write('$texpaint_mask -= 1.0 - textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
+						if (m.isVisible()) {
+							hasVisible = true;
+							break;
+						}
 					}
-					frag.write('texpaint_opac *= max($texpaint_mask, 0.0);');
+					if (hasVisible) {
+						var texpaint_mask = 'texpaint_mask' + l.id;
+						frag.write('float $texpaint_mask = 0.0;');
+						for (m in masks) {
+							if (!m.isVisible()) continue;
+							frag.add_shared_sampler('sampler2D texpaint' + m.id);
+							frag.write('float texpaint_mask_sample' + m.id + ' = textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
+							frag.write('$texpaint_mask = ' + MakeMaterial.blendModeMask(frag, m.blending, '$texpaint_mask', 'texpaint_mask_sample' + m.id, m.getOpacity() + "") + ';');
+						}
+						frag.write('texpaint_opac *= clamp($texpaint_mask, 0.0, 1.0);');
+					}
 				}
 
 				if (l.getOpacity() < 1) {

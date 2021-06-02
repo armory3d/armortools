@@ -174,11 +174,10 @@ class ExportTexture {
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
 					Layers.makeTempMaskImg();
-					Layers.tempMaskImage.g2.begin(false);
-					Layers.tempMaskImage.g2.drawImage(l1masks[0].texpaint, 0, 0);
+					Layers.tempMaskImage.g2.begin(true, 0x00000000);
 					Layers.tempMaskImage.g2.end();
 					var l1 = { texpaint: Layers.tempMaskImage };
-					for (i in 1...l1masks.length) {
+					for (i in 0...l1masks.length) {
 						Layers.mergeLayer(untyped l1, l1masks[i]);
 					}
 					mask = Layers.tempMaskImage;
