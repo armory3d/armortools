@@ -480,43 +480,115 @@ class Layers {
 	}
 
 	public static function flatten(heightToNormal = false): TLayerData {
-		Layers.makeExportImg();
 		Layers.makeTempImg();
+		Layers.makeExportImg();
+		if (Layers.pipeMerge == null) Layers.makePipe();
+		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
 
-		var path = RenderPath.active;
-		var l = Project.layers[0];
-		if (l.visible) {
-			path.setTarget("expa", ["expb", "expc"]);
-			path.bindTarget("texpaint" + l.id, "tex0");
-			path.bindTarget("texpaint_nor" + l.id, "tex1");
-			path.bindTarget("texpaint_pack" + l.id, "tex2");
-			path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-		}
-		else {
-			Layers.expa.g2.begin(true, 0x00000000);
-			Layers.expa.g2.end();
-		}
+		// Clear export layer
+		Layers.expa.g4.begin();
+		Layers.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+		Layers.expa.g4.end();
+		Layers.expb.g4.begin();
+		Layers.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+		Layers.expb.g4.end();
+		Layers.expc.g4.begin();
+		Layers.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+		Layers.expc.g4.end();
 
-		var l0 = { texpaint: Layers.expa, texpaint_nor: Layers.expb, texpaint_pack: Layers.expc };
-		if (l.visible && l.getMasks() != null) {
-			for (m in l.getMasks()) {
-				Layers.applyMask(untyped l0, m);
+		// Flatten layers
+		for (l1 in Project.layers) {
+			if (!l1.isVisible()) continue;
+			if (!l1.isLayer()) continue;
+
+			var mask = empty;
+			var l1masks = l1.getMasks();
+			if (l1masks != null) {
+				if (l1masks.length > 1) {
+					Layers.makeTempMaskImg();
+					Layers.tempMaskImage.g2.begin(true, 0x00000000);
+					Layers.tempMaskImage.g2.end();
+					var l1 = { texpaint: Layers.tempMaskImage };
+					for (i in 0...l1masks.length) {
+						Layers.mergeLayer(untyped l1, l1masks[i]);
+					}
+					mask = Layers.tempMaskImage;
+				}
+				else mask = l1masks[0].texpaint;
+			}
+
+			if (l1.paintBase) {
+				Layers.tempImage.g2.begin(false); // Copy to temp
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expa, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
+
+				Layers.expa.g4.begin();
+				Layers.expa.g4.setPipeline(Layers.pipeMerge);
+				Layers.expa.g4.setTexture(Layers.tex0, l1.texpaint);
+				Layers.expa.g4.setTexture(Layers.tex1, empty);
+				Layers.expa.g4.setTexture(Layers.texmask, mask);
+				Layers.expa.g4.setTexture(Layers.texa, Layers.tempImage);
+				Layers.expa.g4.setFloat(Layers.opac, l1.getOpacity());
+				Layers.expa.g4.setInt(Layers.blending, Project.layers.length > 1 ? l1.blending : 0);
+				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				Layers.expa.g4.drawIndexedVertices();
+				Layers.expa.g4.end();
+			}
+
+			if (l1.paintNor) {
+				Layers.tempImage.g2.begin(false);
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expb, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
+
+				Layers.expb.g4.begin();
+				Layers.expb.g4.setPipeline(Layers.pipeMerge);
+				Layers.expb.g4.setTexture(Layers.tex0, l1.texpaint);
+				Layers.expb.g4.setTexture(Layers.tex1, l1.texpaint_nor);
+				Layers.expb.g4.setTexture(Layers.texmask, mask);
+				Layers.expb.g4.setTexture(Layers.texa, Layers.tempImage);
+				Layers.expb.g4.setFloat(Layers.opac, l1.getOpacity());
+				Layers.expb.g4.setInt(Layers.blending, l1.paintNorBlend ? -2 : -1);
+				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				Layers.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				Layers.expb.g4.drawIndexedVertices();
+				Layers.expb.g4.end();
+			}
+
+			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
+				Layers.tempImage.g2.begin(false);
+				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
+				Layers.tempImage.g2.drawImage(Layers.expc, 0, 0);
+				Layers.tempImage.g2.pipeline = null;
+				Layers.tempImage.g2.end();
+
+				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
+					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+				}
+				else {
+					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+				}
 			}
 		}
 
-		for (i in 1...Project.layers.length) {
-			Layers.mergeLayer(untyped l0, Project.layers[i], true);
-		}
+		var l0 = { texpaint: Layers.expa, texpaint_nor: Layers.expb, texpaint_pack: Layers.expc };
 
 		// Merge height map into normal map
 		if (heightToNormal && MakeMaterial.heightUsed) {
+
 			tempImage.g2.begin(false);
 			tempImage.g2.pipeline = Layers.pipeCopy;
 			tempImage.g2.drawImage(l0.texpaint_nor, 0, 0);
 			tempImage.g2.pipeline = null;
 			tempImage.g2.end();
 
-			var empty = path.renderTargets.get("empty_white").image;
 			l0.texpaint_nor.g4.begin();
 			l0.texpaint_nor.g4.setPipeline(Layers.pipeMerge);
 			l0.texpaint_nor.g4.setTexture(Layers.tex0, tempImage);
