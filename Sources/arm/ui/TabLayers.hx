@@ -556,6 +556,7 @@ class TabLayers {
 					Context.setLayer(l);
 					History.applyMask();
 					l.applyMask();
+					Context.setLayer(l.parent);
 					MakeMaterial.parseMeshMaterial();
 				}
 				iron.App.notifyOnInit(_init);

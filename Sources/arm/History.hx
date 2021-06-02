@@ -62,19 +62,23 @@ class History {
 				Context.layer = Project.layers[step.layer];
 				Context.layer.delete();
 
-				Context.layer = Layers.newLayer(false);
-				Project.layers.remove(Context.layer);
-				Project.layers.insert(step.layer, Context.layer);
+				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 2] : null;
+				var l = new LayerSlot("", step.layer_type, parent);
+				Project.layers.insert(step.layer, l);
+				Context.setLayer(l);
+
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 
-				Context.layer = Layers.newLayer(false);
-				Project.layers.remove(Context.layer);
-				Project.layers.insert(step.layer + 1, Context.layer);
+				var l = new LayerSlot("", step.layer_type, parent);
+				Project.layers.insert(step.layer + 1, l);
+				Context.setLayer(l);
+
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
+
 				Context.layer.maskOpacity = step.layer_opacity;
 				Context.layer.blending = step.layer_blending;
 				Context.layer.objectMask = step.layer_object;
@@ -88,9 +92,11 @@ class History {
 				Context.layer = Layers.newLayer(false);
 				Project.layers.remove(Context.layer);
 				Project.layers.insert(step.layer, Context.layer);
+
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
+
 				Layers.newMask(false, Context.layer);
 				Context.layer.swap(lay);
 				Context.layersPreviewDirty = true;
