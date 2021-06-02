@@ -547,12 +547,13 @@ class UINodes {
 			}
 
 			// Nodes
-			ui.inputEnabled = !drawMenu;
+			var _inputEnabled = ui.inputEnabled;
+			ui.inputEnabled = _inputEnabled && !drawMenu;
 			ui.windowBorderRight = Config.raw.layout[LayoutSidebarW];
 			ui.windowBorderTop = UIHeader.inst.headerh * 2;
 			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
 			nodes.nodeCanvas(ui, c);
-			ui.inputEnabled = true;
+			ui.inputEnabled = _inputEnabled;
 
 			// Remove nodes with unknown id for this canvas type
 			if (Zui.isPaste) {
