@@ -516,6 +516,15 @@ class LayerSlot {
 					parent.delete();
 				}
 			}
+
+			var lmasks = this.getMasks();
+			if (lmasks != null) {
+				for (m in 0...lmasks.length) {
+					var mc = lmasks[delta > 0 ? m : lmasks.length - 1 - m];
+					Project.layers.remove(mc);
+					Project.layers.insert(delta > 0 ? i + delta - 1 : i + delta, mc);
+				}
+			}
 		}
 
 		for (m in Project.materials) TabLayers.remapLayerPointers(m.canvas.nodes, TabLayers.fillLayerMap(pointers));
