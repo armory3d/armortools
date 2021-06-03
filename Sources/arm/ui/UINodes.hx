@@ -108,7 +108,8 @@ class UINodes {
 
 	function onSocketReleased(socket: TNodeSocket) {
 		var nodes = getNodes();
-		var node = nodes.getNode(getCanvas(true).nodes, socket.node_id);
+		var canvas = getCanvas(true);
+		var node = nodes.getNode(canvas.nodes, socket.node_id);
 		if (ui.inputReleasedR) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 				App.notifyOnNextFrame(function() {
@@ -180,6 +181,17 @@ class UINodes {
 							});
 						}
 						if (ui.button(tr("Delete"), Left)) {
+							var i = 0;
+							// Remove links connected to the socket
+							while (i < canvas.links.length) {
+								var l = canvas.links[i];
+								if ((l.from_id == node.id && l.from_socket == node.outputs.indexOf(socket)) ||
+									(l.to_id == node.id && l.to_socket == node.inputs.indexOf(socket))) {
+									canvas.links.splice(i, 1);
+								}
+								else i++;
+							}
+							// Remove socket
 							node.inputs.remove(socket);
 							node.outputs.remove(socket);
 							NodesMaterial.syncSockets(node);
