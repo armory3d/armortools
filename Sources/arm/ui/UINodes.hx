@@ -754,10 +754,8 @@ class UINodes {
 			}
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
-					if (!canPlaceGroup(g.canvas.name)) {
-						continue;
-					}
 					ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
+					ui.enabled = canPlaceGroup(g.canvas.name);
 					if (ui.button("      " + g.canvas.name, Left)) {
 						pushUndo();
 						var canvas = getCanvas(true);
@@ -767,6 +765,7 @@ class UINodes {
 						nodes.nodesSelected = [node];
 						nodes.nodesDrag = true;
 					}
+					ui.enabled = true;
 				}
 			}
 
@@ -790,6 +789,14 @@ class UINodes {
 		// Pasting group into itself
 		if (groupStack.length > 0 && groupName == groupStack[groupStack.length - 1].canvas.name) {
 			return false;
+		}
+		// Recursive node groups
+		if (groupStack.length > 0) {
+			for (g in groupStack) {
+				if (g.canvas.name == groupName) {
+					return false;
+				}
+			}
 		}
 		// Group was deleted / renamed
 		var groupExists = false;
