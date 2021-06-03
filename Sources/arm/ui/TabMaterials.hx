@@ -143,6 +143,7 @@ class TabMaterials {
 							}
 
 							if (materials.length > 1 && ui.button(tr("Delete"), Left)) {
+								for (l in Project.layers) if (l.fill_layer == m) l.fill_layer = null;
 								History.deleteMaterial();
 								selectMaterial(i == 0 ? 1 : 0);
 								materials.splice(i, 1);
