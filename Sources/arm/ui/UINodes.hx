@@ -574,6 +574,9 @@ class UINodes {
 						}
 						if (found) break;
 					}
+					if (canvasNode.type == "GROUP" && !canPlaceGroup(canvasNode.name)) {
+						found = false;
+					}
 					if (!found) {
 						nodes.removeNode(canvasNode, c);
 						nodes.nodesSelected.remove(canvasNode);
@@ -751,6 +754,10 @@ class UINodes {
 			}
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
+					if (!canPlaceGroup(g.canvas.name)) {
+						continue;
+					}
+					ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
 					if (ui.button("      " + g.canvas.name, Left)) {
 						pushUndo();
 						var canvas = getCanvas(true);
@@ -777,6 +784,22 @@ class UINodes {
 			hideMenu = false;
 			drawMenu = false;
 		}
+	}
+
+	function canPlaceGroup(groupName: String): Bool {
+		// Pasting group into itself
+		if (groupStack.length > 0 && groupName == groupStack[groupStack.length - 1].canvas.name) {
+			return false;
+		}
+		// Group was deleted / renamed
+		var groupExists = false;
+		for (group in Project.materialGroups) {
+			if (groupName == group.canvas.name) {
+				groupExists = true;
+			}
+		}
+		if (!groupExists) return false;
+		return true;
 	}
 
 	function pushUndo(lastCanvas: TNodeCanvas = null) {
