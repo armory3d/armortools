@@ -22,7 +22,6 @@ cd armorcore
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11
 # Open generated Visual Studio project at `build\Krom.sln`
-# Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
 
@@ -82,7 +81,6 @@ git apply patch/d3d12_raytrace.diff --directory=Kinc
 git apply patch/d3d12_wrap_sampler.diff --directory=Kinc
 node Kinc/make -g direct3d12 --raytrace dxr
 # Open generated Visual Studio project at `build\Krom.sln`
-# Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
 
@@ -106,7 +104,6 @@ cd armorcore
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11 --vr oculus
 # Open generated Visual Studio project at `build\Krom.sln`
-# Set `Project - Properties - Debugging - Command Arguments` to `..\..\build\krom`
 # Build and run for x64 & release
 ```
 
