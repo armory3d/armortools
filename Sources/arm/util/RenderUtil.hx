@@ -284,6 +284,11 @@ class RenderUtil {
 		var _tool = Context.tool;
 		Context.tool = ToolBrush;
 
+		var _layer = Context.layer;
+		if (Context.layer.isMask()) {
+			Context.layer = Context.layer.parent;
+		}
+
 		var _fill_layer = Context.layer.fill_layer;
 		Context.layer.fill_layer = null;
 
@@ -369,8 +374,9 @@ class RenderUtil {
 		Context.prevPaintVecX = -1;
 		Context.prevPaintVecY = -1;
 		Context.pdirty = _pdirty;
-		Context.layer.fill_layer = _fill_layer;
 		RenderPathPaint.useLiveLayer(false);
+		Context.layer.fill_layer = _fill_layer;
+		Context.layer = _layer;
 		// scons[_si] = _scon;
 		// mcons[_mi] = _mcon;
 		Context.material = _material;
