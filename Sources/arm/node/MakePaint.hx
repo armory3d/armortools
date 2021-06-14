@@ -348,8 +348,9 @@ class MakePaint {
 			frag.write('}');
 		}
 
+		var isMask = Context.layer.isMask();
 		var layered = Context.layer != Project.layers[0];
-		if (layered) {
+		if (layered && !isMask) {
 			if (Context.tool == ToolEraser) {
 				frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 				frag.write('nortan = vec3(0.5, 0.5, 1.0);');
@@ -439,7 +440,6 @@ class MakePaint {
 		}
 
 		// Base color only as mask
-		var isMask = Context.layer.isMask();
 		if (isMask) {
 			// TODO: Apply opacity into base
 			// frag.write('fragColor[0].rgb *= fragColor[0].a;');
