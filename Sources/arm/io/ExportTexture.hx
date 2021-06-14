@@ -81,7 +81,7 @@ class ExportTexture {
 					}
 				}
 			}
-			else runLayers(path, Context.layersExport == ExportSelected ? [Context.layer] : Project.layers);
+			else runLayers(path, Context.layersExport == ExportSelected ? (Context.layer.isGroup() ? Context.layer.getChildren() : [Context.layer]) : Project.layers);
 		}
 
 		#if arm_debug
