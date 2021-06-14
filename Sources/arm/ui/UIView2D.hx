@@ -107,7 +107,8 @@ class UIView2D {
 			var ty = iron.App.h() / 2 - tw / 2 + panY;
 
 			if (type == View2DLayer) {
-				var layer = !l.isGroup() ? l : l.getChildren()[0];
+				var layer = l;
+
 				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
 					layer = RenderPathPaint.liveLayer;
 				}
@@ -116,6 +117,12 @@ class UIView2D {
 					var current = @:privateAccess kha.graphics2.Graphics.current;
 					if (current != null) current.end();
 					layer = untyped Layers.flatten();
+					if (current != null) current.begin(false);
+				}
+				else if (layer.isGroup()) {
+					var current = @:privateAccess kha.graphics2.Graphics.current;
+					if (current != null) current.end();
+					layer = untyped Layers.flatten(false, layer.getChildren());
 					if (current != null) current.begin(false);
 				}
 

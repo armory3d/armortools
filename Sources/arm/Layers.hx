@@ -479,7 +479,8 @@ class Layers {
 		}
 	}
 
-	public static function flatten(heightToNormal = false): TLayerData {
+	public static function flatten(heightToNormal = false, layers: Array<LayerSlot> = null): TLayerData {
+		if (layers == null) layers = Project.layers;
 		Layers.makeTempImg();
 		Layers.makeExportImg();
 		if (Layers.pipeMerge == null) Layers.makePipe();
@@ -498,7 +499,7 @@ class Layers {
 		Layers.expc.g4.end();
 
 		// Flatten layers
-		for (l1 in Project.layers) {
+		for (l1 in layers) {
 			if (!l1.isVisible()) continue;
 			if (!l1.isLayer()) continue;
 
@@ -532,7 +533,7 @@ class Layers {
 				Layers.expa.g4.setTexture(Layers.texmask, mask);
 				Layers.expa.g4.setTexture(Layers.texa, Layers.tempImage);
 				Layers.expa.g4.setFloat(Layers.opac, l1.getOpacity());
-				Layers.expa.g4.setInt(Layers.blending, Project.layers.length > 1 ? l1.blending : 0);
+				Layers.expa.g4.setInt(Layers.blending, layers.length > 1 ? l1.blending : 0);
 				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				Layers.expa.g4.drawIndexedVertices();
