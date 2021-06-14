@@ -462,14 +462,13 @@ class TabLayers {
 	static function drawLayerContextMenu(l: LayerSlot) {
 		var add = 0;
 		var li = Project.layers.indexOf(l);
-		var canMergeDown = !l.isGroup() && li > 0 && (l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
+		var canMergeDown = li > 0 && (l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
 		if (l.isLayer() && l.getMasks() != null && li == l.getMasks().length) canMergeDown = false; // First layer
-		if (canMergeDown) add++;
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;
 		if (l.isMask()) add += 2;
-		var menuElements = l.isGroup() ? 7 : (19 + add);
+		var menuElements = l.isGroup() ? 7 : (20 + add);
 
 		UIMenu.draw(function(ui: Zui) {
 			ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -507,30 +506,37 @@ class TabLayers {
 				iron.App.notifyOnInit(_init);
 			}
 
-			if (ui.button(tr("Delete"), Left)) {
-				if (Project.layers.length > 1) {
-					var pointers = initLayerMap();
-					Context.layer = l;
-					if (!l.isGroup()) {
-						History.deleteLayer();
-					}
-					else {
-						for (c in l.getChildren()) {
-							Context.layer = c;
-							History.deleteLayer();
-							c.delete();
-						}
-					}
-					l.delete();
+			var canDelete = Project.layers.length > 1;
+			if (l.isLayer() && l.parent != null && l.parent.getChildren().length == 1 && Project.layers.length == 2) canDelete = false;
+			if (l.isLayer() && l.parent != null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 2) canDelete = false;
+			if (l.isLayer() && l.parent == null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 1) canDelete = false;
+			if (l.isGroup() && Project.layers.length == getSlotCount(l.getChildren()) + 1) canDelete = false;
 
-					// Remove empty group
-					if (l.parent != null && l.parent.isGroup() && l.parent.getChildren() == null) {
-						l.parent.delete();
-					}
-					Context.ddirty = 2;
-					for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
+			ui.enabled = canDelete;
+			if (ui.button(tr("Delete"), Left)) {
+				var pointers = initLayerMap();
+				Context.layer = l;
+				if (!l.isGroup()) {
+					History.deleteLayer();
 				}
+				else {
+					for (c in l.getChildren()) {
+						Context.layer = c;
+						History.deleteLayer();
+						c.delete();
+					}
+				}
+				l.delete();
+
+				// Remove empty group
+				if (l.parent != null && l.parent.isGroup() && l.parent.getChildren() == null) {
+					l.parent.delete();
+				}
+				Context.ddirty = 2;
+				for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 			}
+			ui.enabled = true;
+
 			if (l.fill_layer == null && ui.button(tr("Clear"), Left)) {
 				Context.setLayer(l);
 				function _init() {
@@ -581,7 +587,8 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			if (canMergeDown && ui.button(tr("Merge Down"), Left)) {
+			ui.enabled = canMergeDown;
+			if (!l.isGroup() && ui.button(tr("Merge Down"), Left)) {
 				function _init() {
 					Context.setLayer(l);
 					History.mergeLayers();
@@ -590,6 +597,7 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
+			ui.enabled = true;
 			if (ui.button(tr("Duplicate"), Left)) {
 				function _init() {
 					if (!l.isGroup()) {
@@ -777,5 +785,14 @@ class TabLayers {
 				maskPreviewRgba32.g2.pipeline = null;
 			});
 		}
+	}
+
+	static function getSlotCount(layers: Array<LayerSlot>): Int {
+		var count = 0;
+		for (l in layers) {
+			count += 1;
+			if (l.getMasks() != null) count += l.getMasks().length;
+		}
+		return count;
 	}
 }
