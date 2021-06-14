@@ -463,6 +463,7 @@ class TabLayers {
 		var add = 0;
 		var li = Project.layers.indexOf(l);
 		var canMergeDown = !l.isGroup() && li > 0 && (l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
+		if (l.isLayer() && l.getMasks() != null && li == l.getMasks().length) canMergeDown = false; // First layer
 		if (canMergeDown) add++;
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
