@@ -685,20 +685,41 @@ class Layers {
 		}
 
 		var hasFillLayer = false;
-		for (l in Project.layers) if (l.fill_layer == Context.material) hasFillLayer = true;
+		var hasFillMask = false;
+		for (l in Project.layers) if (l.isLayer() && l.fill_layer == Context.material) hasFillLayer = true;
+		for (l in Project.layers) if (l.isMask() && l.fill_layer == Context.material) hasFillMask = true;
 
-		if (hasFillLayer) {
-
+		if (hasFillLayer || hasFillMask) {
 			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 			Context.pdirty = 1;
 			Context.tool = ToolFill;
 
 			if (hasFillLayer) {
-				MakeMaterial.parsePaintMaterial(false);
+				var first = true;
 				for (l in Project.layers) {
-					if (l.fill_layer == Context.material) {
+					if (l.isLayer() && l.fill_layer == Context.material) {
 						Context.layer = l;
+						if (first) {
+							first = false;
+							MakeMaterial.parsePaintMaterial(false);
+						}
+						setObjectMask();
+						l.clear();
+						RenderPathPaint.commandsPaint(false);
+						RenderPathPaint.dilate(true, true);
+					}
+				}
+			}
+			if (hasFillMask) {
+				var first = true;
+				for (l in Project.layers) {
+					if (l.isMask() && l.fill_layer == Context.material) {
+						Context.layer = l;
+						if (first) {
+							first = false;
+							MakeMaterial.parsePaintMaterial(false);
+						}
 						setObjectMask();
 						l.clear();
 						RenderPathPaint.commandsPaint(false);
