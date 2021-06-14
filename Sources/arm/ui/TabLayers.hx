@@ -507,7 +507,7 @@ class TabLayers {
 			}
 
 			if (ui.button(tr("Delete"), Left)) {
-				if (arm.Project.layers.length > 1) {
+				if (Project.layers.length > 1) {
 					var pointers = initLayerMap();
 					Context.layer = l;
 					if (!l.isGroup()) {

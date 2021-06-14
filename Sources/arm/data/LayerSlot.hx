@@ -108,7 +108,7 @@ class LayerSlot {
 	public function delete() {
 		unload();
 		var masks = getMasks();
-		if (masks != null) for (m in masks) m.unload();
+		if (masks != null) for (m in masks) m.delete();
 		var children = getChildren();
 		if (children != null) for (c in children) c.parent = null;
 		var lpos = Project.layers.indexOf(this);
