@@ -488,14 +488,17 @@ class TabLayers {
 				}
 			}
 
-			if (!l.isGroup() && l.fill_layer == null && ui.button(tr("To Fill Layer"), Left)) {
+			var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
+			var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
+
+			if (!l.isGroup() && l.fill_layer == null && ui.button(toFillString, Left)) {
 				function _init() {
 					History.toFillLayer();
 					l.toFillLayer();
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			if (!l.isGroup() && l.fill_layer != null && ui.button(tr("To Paint Layer"), Left)) {
+			if (!l.isGroup() && l.fill_layer != null && ui.button(toPaintString, Left)) {
 				function _init() {
 					History.toPaintLayer();
 					l.toPaintLayer();
