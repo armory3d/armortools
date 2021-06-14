@@ -479,7 +479,7 @@ class TabLayers {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
-						Krom.writePng(path + Path.sep + f, l.texpaint.getPixels().getData(), l.texpaint.width, l.texpaint.height, 1);
+						Krom.writePng(path + Path.sep + f, l.texpaint.getPixels().getData(), l.texpaint.width, l.texpaint.height, 3); // RRR1
 					});
 				}
 				else {
