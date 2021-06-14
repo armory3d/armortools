@@ -312,7 +312,6 @@ class TabLayers {
 		}
 		if (state == State.Started) {
 			Context.setLayer(l);
-			if (l.fill_layer != null) Context.setMaterial(l.fill_layer);
 			if (Time.time() - Context.selectTime < 0.2) {
 				UISidebar.inst.show2DView(View2DLayer);
 			}
@@ -321,6 +320,9 @@ class TabLayers {
 			}
 			var mouse = Input.getMouse();
 			setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
+		}
+		else if (state == State.Released) {
+			if (l.fill_layer != null) Context.setMaterial(l.fill_layer);
 		}
 
 		ui._y += center;
