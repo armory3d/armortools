@@ -216,10 +216,7 @@ class LayerSlot {
 
 	public function duplicate(): LayerSlot {
 		var layers = Project.layers;
-		var i = 0;
-		while (i++ < layers.length) if (layers[i] == this) break;
-		i++;
-
+		var i = layers.indexOf(this) + 1;
 		var l = new LayerSlot("", isLayer() ? SlotLayer : isMask() ? SlotMask : SlotGroup, parent);
 		layers.insert(i, l);
 
