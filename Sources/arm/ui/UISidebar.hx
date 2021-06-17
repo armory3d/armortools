@@ -344,7 +344,7 @@ class UISidebar {
 			}
 
 			// Viewpoint
-			if (mouse.viewX < iron.App.w() && !kb.down("control") && !kb.down("shift")) {
+			if (mouse.viewX < iron.App.w()) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
 					ViewportUtil.resetViewport();
 					ViewportUtil.scaleToBounds();
