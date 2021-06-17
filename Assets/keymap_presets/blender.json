@@ -10,7 +10,7 @@
 	"stencil_hide": "z",
 	"decal_mask": "ctrl",
 	"select_material": "shift+number",
-	"select_layer": "ctrl+number",
+	"select_layer": "alt+number",
 	"brush_radius": "f",
 	"brush_radius_decrease": "[",
 	"brush_radius_increase": "]",
