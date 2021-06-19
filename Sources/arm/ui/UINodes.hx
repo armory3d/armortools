@@ -953,7 +953,7 @@ class UINodes {
 	}
 
 	static function menuButton(ui: Zui, text: String, label = ""): Bool {
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		label = "";
 		#end
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);

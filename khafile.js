@@ -69,6 +69,11 @@ else if (process.platform === "darwin") {
 	project.addDefine("kha_darwin");
 }
 
+if (android || ios) {
+	project.addDefine("arm_touchui"); // Use touch friendly UI
+	project.addDefine("zui_touchui");
+}
+
 if (debug) {
 	project.addDefine("arm_debug");
 	project.addParameter("--times");

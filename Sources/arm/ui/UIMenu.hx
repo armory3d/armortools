@@ -328,25 +328,24 @@ class UIMenu {
 				}
 
 				if (ui.changed) keepOpen = true;
-
 			}
 			else if (menuCategory == MenuHelp) {
 				if (menuButton(ui, tr("Manual"))) {
-					File.start("https://armorpaint.org/manual");
+					File.loadUrl("https://armorpaint.org/manual");
 				}
 				if (menuButton(ui, tr("What's New"))) {
-					File.start("https://armorpaint.org/notes");
+					File.loadUrl("https://armorpaint.org/notes");
 				}
 				if (menuButton(ui, tr("Issue Tracker"))) {
-					File.start("https://github.com/armory3d/armorpaint/issues");
+					File.loadUrl("https://github.com/armory3d/armorpaint/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
-					File.start(url);
+					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
-					File.start(url);
+					File.loadUrl(url);
 				}
 				menuSeparator(ui);
 
@@ -461,7 +460,7 @@ class UIMenu {
 
 	static function menuSeparator(ui: Zui) {
 		ui._y++;
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
 		#else
 		ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
@@ -470,14 +469,14 @@ class UIMenu {
 
 	static function menuButton(ui: Zui, text: String, label = ""): Bool {
 		menuFill(ui);
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		label = "";
 		#end
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 
 	static function menuAlign(ui: Zui) {
-		#if !(krom_android || krom_ios)
+		#if !arm_touchui
 		ui.row([1 / 8, 7 / 8]);
 		ui.endElement();
 		#end

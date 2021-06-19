@@ -400,7 +400,7 @@ class Project {
 					ImportMesh.run(path, clearLayers, replaceExisting);
 				}
 				if (ui.button(tr("?"))) {
-					File.start("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
+					File.loadUrl("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");
 				}
 			}
 		});
