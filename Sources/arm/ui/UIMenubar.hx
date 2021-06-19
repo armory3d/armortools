@@ -31,7 +31,7 @@ class UIMenubar {
 
 			Ext.beginMenu(ui);
 
-			#if (krom_android || krom_ios)
+			#if arm_touchui
 			ui._w = Std.int(UIToolbar.defaultToolbarW * ui.SCALE());
 			if (iconButton(ui, 0)) BoxPreferences.show();
 			if (iconButton(ui, 1)) Project.projectNewBox();
@@ -39,11 +39,6 @@ class UIMenubar {
 			if (iconButton(ui, 3)) Project.projectSave();
 			if (iconButton(ui, 4)) Project.importAsset();
 			if (iconButton(ui, 5)) BoxExport.showTextures();
-			ui.enabled = History.undos > 0;
-			if (iconButton(ui, 6)) History.undo();
-			ui.enabled = History.redos > 0;
-			if (iconButton(ui, 7)) History.redo();
-			ui.enabled = true;
 			if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
 			if (iconButton(ui, 8)) showMenu(ui, MenuViewport);
 			if (UIMenu.show && UIMenu.menuCategory == MenuMode) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
@@ -52,6 +47,11 @@ class UIMenubar {
 			if (iconButton(ui, 10)) showMenu(ui, MenuCamera);
 			if (UIMenu.show && UIMenu.menuCategory == MenuHelp) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
 			if (iconButton(ui, 11)) showMenu(ui, MenuHelp);
+			ui.enabled = History.undos > 0;
+			if (iconButton(ui, 6)) History.undo();
+			ui.enabled = History.redos > 0;
+			if (iconButton(ui, 7)) History.redo();
+			ui.enabled = true;
 			#else
 			var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 			for (i in 0...categories.length) {
@@ -110,19 +110,19 @@ class UIMenubar {
 		UIMenu.menuCategory = category;
 		UIMenu.menuX = Std.int(ui._x - ui._w);
 		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
-		UIMenu.menuX -= Std.int((menuW - ui._w) / 2);
+		UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.inst.headerh / 2);
 		UIMenu.menuY += 4;
 		#end
 	}
 
-	#if (krom_android || krom_ios)
+	#if arm_touchui
 	function iconButton(ui: Zui, i: Int): Bool {
 		var col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += untyped 4294967296;
 		var light = col > 0xff666666 + 4294967296;
-		var iconAccent = light ? 0xff666666 : 0xffbbbbbb;
+		var iconAccent = light ? 0xff666666 : 0xff999999;
 		var img = Res.get("icons.k");
 		var rect = Res.tile50(img, i, 2);
 		return ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;
