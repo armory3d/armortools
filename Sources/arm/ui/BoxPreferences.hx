@@ -28,6 +28,13 @@ class BoxPreferences {
 
 	@:access(zui.Zui)
 	public static function show() {
+
+		#if arm_touchui
+		var modalH = kha.System.windowHeight() - UIHeader.inst.headerh;
+		#else
+		var modalH = 400;
+		#end
+
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(htab, tr("Interface"), true)) {
 
@@ -568,7 +575,17 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-		}, 600, 400, function() { Config.save(); });
+		}, 600, modalH, function() { Config.save(); });
+
+		#if arm_touchui
+		// Align modal to the left side
+		var appw = kha.System.windowWidth();
+		var apph = kha.System.windowHeight();
+		var mw = @:privateAccess Std.int(UIBox.modalW * App.uiBox.SCALE());
+		var mh = @:privateAccess Std.int(UIBox.modalH * App.uiBox.SCALE());
+		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);
+		UIBox.hwnd.dragY = Std.int(-apph / 2 + mh / 2 + UIHeader.inst.headerh);
+		#end
 	}
 
 	public static function fetchThemes() {
