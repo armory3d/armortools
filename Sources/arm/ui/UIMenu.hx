@@ -328,7 +328,6 @@ class UIMenu {
 				}
 
 				if (ui.changed) keepOpen = true;
-
 			}
 			else if (menuCategory == MenuHelp) {
 				if (menuButton(ui, tr("Manual"))) {

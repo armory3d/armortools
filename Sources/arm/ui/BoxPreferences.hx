@@ -29,12 +29,6 @@ class BoxPreferences {
 	@:access(zui.Zui)
 	public static function show() {
 
-		#if arm_touchui
-		var modalH = kha.System.windowHeight() - UIHeader.inst.headerh;
-		#else
-		var modalH = 400;
-		#end
-
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(htab, tr("Interface"), true)) {
 
@@ -57,6 +51,9 @@ class BoxPreferences {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					setScale();
+					#if arm_touchui
+					alignToLeftSide();
+					#end
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
@@ -575,18 +572,24 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-		}, 600, modalH, function() { Config.save(); });
+		}, 600, 400, function() { Config.save(); });
 
 		#if arm_touchui
-		// Align modal to the left side
+		alignToLeftSide();
+		#end
+	}
+
+	#if arm_touchui
+	static function alignToLeftSide() {
+		@:privateAccess UIBox.modalH = Std.int((kha.System.windowHeight() - UIHeader.inst.headerh) / App.uiBox.SCALE());
 		var appw = kha.System.windowWidth();
 		var apph = kha.System.windowHeight();
 		var mw = @:privateAccess Std.int(UIBox.modalW * App.uiBox.SCALE());
 		var mh = @:privateAccess Std.int(UIBox.modalH * App.uiBox.SCALE());
 		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);
 		UIBox.hwnd.dragY = Std.int(-apph / 2 + mh / 2 + UIHeader.inst.headerh);
-		#end
 	}
+	#end
 
 	public static function fetchThemes() {
 		themes = File.readDirectory(Path.data() + Path.sep + "themes");
