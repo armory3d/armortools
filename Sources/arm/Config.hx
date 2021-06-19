@@ -20,7 +20,7 @@ class Config {
 	public static var raw: TConfig = null;
 	public static var keymap: TKeymap;
 	public static var configLoaded = false;
-	#if (krom_android || krom_ios)
+	#if arm_touchui
 	public static inline var buttonAlign = zui.Zui.Align.Center;
 	public static inline var buttonSpacing = "";
 	#else
@@ -301,7 +301,7 @@ class Config {
 			UIView2D.inst.ui.t = App.theme;
 			UISidebar.inst.tagUIRedraw();
 		}
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		App.theme.FULL_TABS = true;
 		#end
 	}

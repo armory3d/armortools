@@ -31,7 +31,7 @@ class UIMenubar {
 
 			Ext.beginMenu(ui);
 
-			#if (krom_android || krom_ios)
+			#if arm_touchui
 			ui._w = Std.int(UIToolbar.defaultToolbarW * ui.SCALE());
 			if (iconButton(ui, 0)) BoxPreferences.show();
 			if (iconButton(ui, 1)) Project.projectNewBox();
@@ -110,14 +110,14 @@ class UIMenubar {
 		UIMenu.menuCategory = category;
 		UIMenu.menuX = Std.int(ui._x - ui._w);
 		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
-		#if (krom_android || krom_ios)
+		#if arm_touchui
 		var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
 		UIMenu.menuX -= Std.int((menuW - ui._w) / 2);
 		UIMenu.menuY += 4;
 		#end
 	}
 
-	#if (krom_android || krom_ios)
+	#if arm_touchui
 	function iconButton(ui: Zui, i: Int): Bool {
 		var col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += untyped 4294967296;
