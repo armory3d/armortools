@@ -384,6 +384,15 @@ class LayerSlot {
 		return children;
 	}
 
+	public function hasMasks(): Bool {
+		for (l in Project.layers) {
+			if (l.parent == this && l.isMask()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public function getOpacity(): Float {
 		var f = maskOpacity;
 		if (isLayer() && parent != null) f *= parent.maskOpacity;
