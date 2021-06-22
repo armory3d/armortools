@@ -843,6 +843,9 @@ class Layers {
 
 	public static function createImageMask(asset: TAsset) {
 		var l = Context.layer;
+		if(l.isMask() || l.isGroup())
+			return;
+
 		History.newLayer();
 		var m = Layers.newMask(false, l);
 		m.clear(0x00000000, Project.getImage(asset));
