@@ -104,11 +104,10 @@ class TabSwatches {
 					if (ui.isHovered && ui.inputReleasedR) {
 						var add = Project.raw.swatches.length > 1 ? 1 : 0;
 						Context.setSwatch(Project.raw.swatches[i]);
-						UISidebar.inst.hwnd2.redraws = 2;
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
-								Context.setSwatch(Project.raw.swatches[i]);
+								Context.setSwatch(Project.raw.swatches[i == 0 ? 1 : 0]);
 								Project.raw.swatches.splice(i, 1);
 								UISidebar.inst.hwnd2.redraws = 2;
 							}
