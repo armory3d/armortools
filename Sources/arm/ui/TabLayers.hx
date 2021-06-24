@@ -467,14 +467,15 @@ class TabLayers {
 		var canMergeDown = li > 0 && (l.isGroup() || l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
 		if (l.isLayer() && l.hasMasks() && li == l.getMasks().length) canMergeDown = false; // First layer
 
-		//Is the current group the first group?
+		// Is the current group the first group?
 		var firstGroup = true;
-		for(i in 0...li-1) {
-			if(!Project.layers[i].isMask() && Project.layers[i].parent != l)
+		for (i in 0...li - 1) {
+			if (!Project.layers[i].isMask() && Project.layers[i].parent != l) {
 				firstGroup = false;
-		}	
-		
+			}
+		}
 		if (firstGroup) canMergeDown = false;
+
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;

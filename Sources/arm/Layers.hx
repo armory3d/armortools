@@ -365,7 +365,7 @@ class Layers {
 		}
 	}
 
-	public static function applyMasks(l : LayerSlot) {
+	public static function applyMasks(l: LayerSlot) {
 		var masks = l.getMasks();
 
 		if (masks != null) {
@@ -400,7 +400,7 @@ class Layers {
 			l1 = children[0];
 			Context.setLayer(l1);
 		}
-		if(l1.hasMasks()) {
+		if (l1.hasMasks()) {
 			applyMasks(l1);
 			Context.setLayer(l1);
 		}
@@ -426,8 +426,7 @@ class Layers {
 			l0 = children[0];
 			Context.setLayer(l1);
 		}
-		else if(l0.hasMasks())
-		{
+		else if (l0.hasMasks()) {
 			applyMasks(l0);
 			Context.setLayer(l1);
 		}
