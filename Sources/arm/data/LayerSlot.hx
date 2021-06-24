@@ -430,6 +430,7 @@ class LayerSlot {
 		var kParent = k < Project.layers.length ? Project.layers[k].parent : null;
 		var kIsGroup = k < Project.layers.length ? Project.layers[k].isGroup() : false;
 		var kIsMask = k < Project.layers.length ? Project.layers[k].isMask() : false;
+		var jIsMask = j < Project.layers.length ? Project.layers[j].isMask() : false;
 		var kIsLayer = k < Project.layers.length ? Project.layers[k].isLayer() : false;
 		var kLayer = k < Project.layers.length ? Project.layers[k] : null;
 
@@ -455,6 +456,11 @@ class LayerSlot {
 
 		// Prevent moving layer to mask
 		if (isLayer && kIsMask) {
+			return;
+		}
+
+		// Prevent moving layer between layer and mask
+		if (isLayer && jIsMask) {
 			return;
 		}
 
