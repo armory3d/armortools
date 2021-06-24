@@ -510,23 +510,17 @@ class LayerSlot {
 			if (this.parent == null && jParent != null && jParent.show_panel) {
 				this.parent = jParent;
 			}
+
+			var oldParent = null;
 			// Moved out of group
 			if (this.parent != null && kParent == null && !kIsGroup) {
-				var parent = this.parent;
+				oldParent = this.parent;
 				this.parent = null;
-				// Remove empty group
-				if (parent.getChildren() == null) {
-					parent.delete();
-				}
 			}
 			// Moved to different group
 			if (this.parent != null && ((kParent != null && kParent.show_panel) || kIsGroup)) {
-				var parent = this.parent;
+				oldParent = this.parent;
 				this.parent = kIsGroup ? kLayer : kParent;
-				// Remove empty group
-				if (parent.getChildren() == null) {
-					parent.delete();
-				}
 			}
 
 			var lmasks = this.getMasks();
@@ -536,6 +530,11 @@ class LayerSlot {
 					Project.layers.remove(mc);
 					Project.layers.insert(delta > 0 ? i + delta - 1 : i + delta, mc);
 				}
+			}
+
+			// Remove empty group
+			if (oldParent != null && oldParent.getChildren() == null) {
+				oldParent.delete();
 			}
 		}
 
