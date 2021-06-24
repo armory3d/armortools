@@ -608,8 +608,8 @@ class TabLayers {
 						History.duplicateLayer();
 						l = l.duplicate();
 						Context.setLayer(l);
-						if(masks != null){
-							for(m in masks){
+						if (masks != null) {
+							for (m in masks) {
 								Context.setLayer(m);
 								History.duplicateLayer();
 								m = m.duplicate();
@@ -632,8 +632,8 @@ class TabLayers {
 							c.parent = group;
 							Project.layers.remove(c);
 							Project.layers.insert(Project.layers.indexOf(group), c);
-							if(masks != null){
-								for (m in masks){
+							if (masks != null) {
+								for (m in masks) {
 									Context.setLayer(m);
 									History.duplicateLayer();
 									m = m.duplicate();
@@ -641,7 +641,7 @@ class TabLayers {
 									Project.layers.remove(m);
 									Project.layers.insert(Project.layers.indexOf(c), m);
 								}
-						}	
+							}
 						}
 						Context.setLayer(group);
 					}
