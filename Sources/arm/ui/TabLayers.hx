@@ -474,7 +474,7 @@ class TabLayers {
 				firstGroup = false;
 			}
 		}
-		if (firstGroup) canMergeDown = false;
+		if (l.isGroup() && firstGroup) canMergeDown = false;
 
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
