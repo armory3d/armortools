@@ -26,36 +26,58 @@ class MakeBlur {
 		if (Context.material.paintSubs) {
 			frag.write('float subs = 0.0;');
 		}
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
-		frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
-		#else
-		frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
-		#end
+
 		frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
 		frag.write('vec2 texpaintSizeLocal = texpaintSize;'); // TODO: spirv workaround
 		frag.write('float blur_step = 1.0 / texpaintSizeLocal.x;');
-		// X
-		frag.write('for (int i = -7; i <= 7; ++i) {');
-		frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + vec2(blur_step * float(i), 0.0));');
-		frag.write('opacity += texpaint_sample.a * blur_weight[i + 7];');
-		frag.write('basecol += texpaint_sample.rgb * blur_weight[i + 7];');
-		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
-		frag.write('roughness += texpaint_pack_sample.g;');
-		frag.write('metallic += texpaint_pack_sample.b;');
-		frag.write('occlusion += texpaint_pack_sample.r;');
-		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
-		frag.write('}');
-		// Y
-		frag.write('for (int j = -7; j <= 7; ++j) {');
-		frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * float(j)));');
-		frag.write('opacity += texpaint_sample.a * blur_weight[j + 7];');
-		frag.write('basecol += texpaint_sample.rgb * blur_weight[j + 7];');
-		frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * float(j))).rgb * blur_weight[j + 7];');
-		frag.write('roughness += texpaint_pack_sample.g;');
-		frag.write('metallic += texpaint_pack_sample.b;');
-		frag.write('occlusion += texpaint_pack_sample.r;');
-		frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * float(j))).rgb * blur_weight[j + 7];');
-		frag.write('}');
+		if (Context.blurDirectional) {
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+			frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
+			#else
+			frag.write('const float blur_weight[7] = float[](1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0);');
+			#end
+			frag.add_uniform('vec3 brushDirection', '_brushDirection');
+			frag.write('vec2 blur_direction = -brushDirection.yx;');
+			frag.write('for (int i = 0; i < 7; ++i) {');
+			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + blur_direction * blur_step * float(i));');
+			frag.write('opacity += texpaint_sample.a * blur_weight[i];');
+			frag.write('basecol += texpaint_sample.rgb * blur_weight[i];');
+			frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + blur_direction * blur_step * float(i)).rgb * blur_weight[i];');
+			frag.write('roughness += texpaint_pack_sample.g;');
+			frag.write('metallic += texpaint_pack_sample.b;');
+			frag.write('occlusion += texpaint_pack_sample.r;');
+			frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + blur_direction * blur_step * float(i)).rgb * blur_weight[i];');
+			frag.write('}');
+		}
+		else {
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+			frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
+			#else
+			frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
+			#end
+			// X
+			frag.write('for (int i = -7; i <= 7; ++i) {');
+			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + vec2(blur_step * float(i), 0.0));');
+			frag.write('opacity += texpaint_sample.a * blur_weight[i + 7];');
+			frag.write('basecol += texpaint_sample.rgb * blur_weight[i + 7];');
+			frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
+			frag.write('roughness += texpaint_pack_sample.g;');
+			frag.write('metallic += texpaint_pack_sample.b;');
+			frag.write('occlusion += texpaint_pack_sample.r;');
+			frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(blur_step * float(i), 0.0)).rgb * blur_weight[i + 7];');
+			frag.write('}');
+			// Y
+			frag.write('for (int j = -7; j <= 7; ++j) {');
+			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + vec2(0.0, blur_step * float(j)));');
+			frag.write('opacity += texpaint_sample.a * blur_weight[j + 7];');
+			frag.write('basecol += texpaint_sample.rgb * blur_weight[j + 7];');
+			frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + vec2(0.0, blur_step * float(j))).rgb * blur_weight[j + 7];');
+			frag.write('roughness += texpaint_pack_sample.g;');
+			frag.write('metallic += texpaint_pack_sample.b;');
+			frag.write('occlusion += texpaint_pack_sample.r;');
+			frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + vec2(0.0, blur_step * float(j))).rgb * blur_weight[j + 7];');
+			frag.write('}');
+		}
 		frag.write('opacity *= brushOpacity;');
 	}
 }

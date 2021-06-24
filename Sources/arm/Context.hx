@@ -219,6 +219,7 @@ class Context {
 	public static var symX = false;
 	public static var symY = false;
 	public static var symZ = false;
+	public static var blurDirectional = false;
 	public static var showCompass = true;
 	public static var fillTypeHandle = new Handle();
 	public static var projectType = ModelRoundedCube;
