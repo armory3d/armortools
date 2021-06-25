@@ -309,8 +309,16 @@ class UIHeader {
 					if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
-
 					ui._w = _w;
+				}
+
+				if (Context.tool == ToolBlur) {
+					ui._x += 10 * ui.SCALE();
+					var dirHandle = Id.handle({selected: false});
+					Context.blurDirectional = ui.check(dirHandle, tr("Directional"));
+					if (dirHandle.changed) {
+						MakeMaterial.parsePaintMaterial();
+					}
 				}
 			}
 		}

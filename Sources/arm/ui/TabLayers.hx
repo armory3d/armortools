@@ -205,11 +205,17 @@ class TabLayers {
 				var dest = Context.dragDestination;
 				var toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
 				var nestedGroup = App.dragLayer.isGroup() && toGroup;
-				if (!nestedGroup) ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				if (!nestedGroup) {
+					if (Context.layer.canMove(Context.dragDestination)) {
+						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					}
+				} 
 			}
 			else if (i == Project.layers.length - 1 && my < ui._y + step) {
 				Context.dragDestination = Project.layers.length - 1;
-				ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				if (Context.layer.canMove(Context.dragDestination)) {
+					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				}
 			}
 		}
 
@@ -464,8 +470,18 @@ class TabLayers {
 	static function drawLayerContextMenu(l: LayerSlot) {
 		var add = 0;
 		var li = Project.layers.indexOf(l);
-		var canMergeDown = li > 0 && (l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
-		if (l.isLayer() && l.getMasks() != null && li == l.getMasks().length) canMergeDown = false; // First layer
+		var canMergeDown = li > 0 && (l.isGroup() || l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
+		if (l.isLayer() && l.hasMasks() && li == l.getMasks().length) canMergeDown = false; // First layer
+
+		// Is the current group the first group?
+		var firstGroup = true;
+		for (i in 0...li - 1) {
+			if (!Project.layers[i].isMask() && Project.layers[i].parent != l) {
+				firstGroup = false;
+			}
+		}
+		if (l.isGroup() && firstGroup) canMergeDown = false;
+
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;
@@ -577,6 +593,11 @@ class TabLayers {
 			if (l.isGroup() && ui.button(tr("Merge Group"), Left)) {
 				function _init() {
 					var children = l.getChildren();
+
+					if (children.length == 1 && children[0].hasMasks()) {
+						Layers.applyMasks(children[0]);
+					}
+
 					for (i in 0...children.length - 1) {
 						Context.setLayer(children[children.length - 1 - i]);
 						History.mergeLayers();
@@ -590,7 +611,7 @@ class TabLayers {
 				iron.App.notifyOnInit(_init);
 			}
 			ui.enabled = canMergeDown;
-			if (!l.isGroup() && ui.button(tr("Merge Down"), Left)) {
+			if (ui.button(tr("Merge Down"), Left)) {
 				function _init() {
 					Context.setLayer(l);
 					History.mergeLayers();
@@ -603,10 +624,21 @@ class TabLayers {
 			if (ui.button(tr("Duplicate"), Left)) {
 				function _init() {
 					if (!l.isGroup()) {
+						var masks = l.getMasks();
 						Context.setLayer(l);
 						History.duplicateLayer();
 						l = l.duplicate();
 						Context.setLayer(l);
+						if (masks != null) {
+							for (m in masks) {
+								Context.setLayer(m);
+								History.duplicateLayer();
+								m = m.duplicate();
+								m.parent = l;
+								Project.layers.remove(m);
+								Project.layers.insert(Project.layers.indexOf(l), m);
+							}
+						}
 					}
 					else {
 						var group = Layers.newGroup();
@@ -614,12 +646,23 @@ class TabLayers {
 						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
 						// group.show_panel = true;
 						for (c in l.getChildren()) {
+							var masks = c.getMasks();
 							Context.setLayer(c);
 							History.duplicateLayer();
 							c = c.duplicate();
 							c.parent = group;
 							Project.layers.remove(c);
 							Project.layers.insert(Project.layers.indexOf(group), c);
+							if (masks != null) {
+								for (m in masks) {
+									Context.setLayer(m);
+									History.duplicateLayer();
+									m = m.duplicate();
+									m.parent = c;
+									Project.layers.remove(m);
+									Project.layers.insert(Project.layers.indexOf(c), m);
+								}
+							}
 						}
 						Context.setLayer(group);
 					}

@@ -365,21 +365,72 @@ class Layers {
 		}
 	}
 
-	public static function mergeDown() {
-		var l1 = Context.layer;
+	public static function applyMasks(l: LayerSlot) {
+		var masks = l.getMasks();
 
-		// Apply masks
-		var masks = l1.getMasks();
 		if (masks != null) {
 			for (i in 0...masks.length - 1) {
 				mergeLayer(masks[i + 1], masks[i]);
 				masks[i].delete();
 			}
 			masks[masks.length - 1].applyMask();
+			Context.layerPreviewDirty = true;
+		}
+	}
+
+	public static function mergeDown() {
+		var l1 = Context.layer;
+
+		if (l1.isGroup()) {
+			var children = l1.getChildren();
+
+			if (children.length == 1 && children[0].hasMasks()) {
+				applyMasks(children[0]);
+			}
+
+			for (i in 0...children.length - 1) {
+				Context.setLayer(children[children.length - 1 - i]);
+				mergeDown();
+			}
+		
+			children[0].parent = null;
+			children[0].name = l1.name;
+			if (children[0].fill_layer != null) children[0].toPaintLayer();
+			l1.delete();
+			l1 = children[0];
+			Context.setLayer(l1);
+		}
+		if (l1.hasMasks()) {
+			applyMasks(l1);
 			Context.setLayer(l1);
 		}
 
 		var l0 = Project.layers[Project.layers.indexOf(l1) - 1];
+
+		if (l0.isGroup()) {
+			var children = l0.getChildren();
+
+			if (children.length == 1 && children[0].hasMasks()) {
+				applyMasks(children[0]);
+			}
+
+			for (i in 0...children.length - 1) {
+				Context.setLayer(children[children.length - 1 - i]);
+				mergeDown();
+			}
+		
+			children[0].parent = null;
+			children[0].name = l0.name;
+			if (children[0].fill_layer != null) children[0].toPaintLayer();
+			l0.delete();
+			l0 = children[0];
+			Context.setLayer(l1);
+		}
+		else if (l0.hasMasks()) {
+			applyMasks(l0);
+			Context.setLayer(l1);
+		}
+
 		mergeLayer(l0, l1);
 
 		Context.layer.delete();
