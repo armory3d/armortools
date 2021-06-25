@@ -415,7 +415,7 @@ class LayerSlot {
 		return texpaint != null && texpaint_nor == null;
 	}
 
-	public function canMove(to : Int): Bool {
+	public function canMove(to: Int): Bool {
 		var i = Project.layers.indexOf(this);
 		var delta = to - i;
 		if (i + delta < 0 || i + delta > Project.layers.length - 1 || delta == 0) return false;
@@ -464,8 +464,9 @@ class LayerSlot {
 	}
 
 	public function move(to: Int) {
-		if (!canMove(to))
+		if (!canMove(to)) {
 			return;
+		}
 
 		var i = Project.layers.indexOf(this);
 		var delta = to - i;
@@ -481,7 +482,6 @@ class LayerSlot {
 		var kIsMask = k < Project.layers.length ? Project.layers[k].isMask() : false;
 		var kIsLayer = k < Project.layers.length ? Project.layers[k].isLayer() : false;
 		var kLayer = k < Project.layers.length ? Project.layers[k] : null;
-
 
 		if (kIsGroup && !kLayer.show_panel) {
 			delta -= kLayer.getChildren().length;

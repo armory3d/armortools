@@ -207,7 +207,7 @@ class TabLayers {
 				var nestedGroup = App.dragLayer.isGroup() && toGroup;
 				if (!nestedGroup) {
 					if (Context.layer.canMove(Context.dragDestination)) {
-					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
 					else {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.ACCENT_HOVER_COL);
