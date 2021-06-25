@@ -415,54 +415,73 @@ class LayerSlot {
 		return texpaint != null && texpaint_nor == null;
 	}
 
-	public function move(to: Int) {
+	public function canMove(to : Int): Bool {
 		var i = Project.layers.indexOf(this);
 		var delta = to - i;
-		if (i + delta < 0 || i + delta > Project.layers.length - 1 || delta == 0) return;
+		if (i + delta < 0 || i + delta > Project.layers.length - 1 || delta == 0) return false;
+
+		var isGroup = this.isGroup();
+		var isMask = this.isMask();
+		var isLayer = this.isLayer();
+		var j = delta > 0 ? to : (to == 0 ? 0 : to - 1); // One element down
+		var k = delta > 0 ? to + 1 : to; // One element up
+		var jParent = j >= 0 ? Project.layers[j].parent : null;
+		var kIsGroup = k < Project.layers.length ? Project.layers[k].isGroup() : false;
+		var kIsMask = k < Project.layers.length ? Project.layers[k].isMask() : false;
+		var jIsMask = j < Project.layers.length ? Project.layers[j].isMask() : false;
+
+		// Prevent group nesting for now
+		if (isGroup && jParent != null && jParent.show_panel) {
+			return false;
+		}
+
+		// Prevent moving mask to group
+		if (isMask && kIsGroup) {
+			return false;
+		}
+
+		// Prevent moving mask to top
+		if (isMask && i + delta == Project.layers.length - 1) {
+			return false;
+		}
+
+		// Prevent moving group to mask
+		if (isGroup && kIsMask) {
+			return false;
+		}
+
+		// Prevent moving layer to mask
+		if (isLayer && kIsMask) {
+			return false;
+		}
+
+		// Prevent moving layer between layer and mask
+		if (isLayer && jIsMask) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function move(to: Int) {
+		if (!canMove(to))
+			return;
+
+		var i = Project.layers.indexOf(this);
+		var delta = to - i;
 
 		var pointers = TabLayers.initLayerMap();
 		var isGroup = this.isGroup();
 		var isMask = this.isMask();
-		var isLayer = this.isLayer();
-		var j = delta > 0 ? to : to - 1; // One element down
+		var j = delta > 0 ? to : (to == 0 ? 0 : to - 1); // One element down
 		var k = delta > 0 ? to + 1 : to; // One element up
 		var jParent = j >= 0 ? Project.layers[j].parent : null;
 		var kParent = k < Project.layers.length ? Project.layers[k].parent : null;
 		var kIsGroup = k < Project.layers.length ? Project.layers[k].isGroup() : false;
 		var kIsMask = k < Project.layers.length ? Project.layers[k].isMask() : false;
-		var jIsMask = j < Project.layers.length ? Project.layers[j].isMask() : false;
 		var kIsLayer = k < Project.layers.length ? Project.layers[k].isLayer() : false;
 		var kLayer = k < Project.layers.length ? Project.layers[k] : null;
 
-		// Prevent group nesting for now
-		if (isGroup && jParent != null && jParent.show_panel) {
-			return;
-		}
-
-		// Prevent moving mask to group
-		if (isMask && kIsGroup) {
-			return;
-		}
-
-		// Prevent moving mask to top
-		if (isMask && i + delta == Project.layers.length - 1) {
-			return;
-		}
-
-		// Prevent moving group to mask
-		if (isGroup && kIsMask) {
-			return;
-		}
-
-		// Prevent moving layer to mask
-		if (isLayer && kIsMask) {
-			return;
-		}
-
-		// Prevent moving layer between layer and mask
-		if (isLayer && jIsMask) {
-			return;
-		}
 
 		if (kIsGroup && !kLayer.show_panel) {
 			delta -= kLayer.getChildren().length;

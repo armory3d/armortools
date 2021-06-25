@@ -205,11 +205,23 @@ class TabLayers {
 				var dest = Context.dragDestination;
 				var toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
 				var nestedGroup = App.dragLayer.isGroup() && toGroup;
-				if (!nestedGroup) ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				if (!nestedGroup) {
+					if (Context.layer.canMove(Context.dragDestination)) {
+					ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+					}
+					else {
+						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.ACCENT_HOVER_COL);
+					}
+				} 
 			}
 			else if (i == Project.layers.length - 1 && my < ui._y + step) {
 				Context.dragDestination = Project.layers.length - 1;
-				ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				if (Context.layer.canMove(Context.dragDestination)) {
+					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+				}
+				else {
+					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.ACCENT_HOVER_COL);
+				}
 			}
 		}
 
