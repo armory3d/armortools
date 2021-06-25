@@ -209,7 +209,7 @@ class TabLayers {
 					if (Context.layer.canMove(Context.dragDestination)) {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 					}
-				} 
+				}
 			}
 			else if (i == Project.layers.length - 1 && my < ui._y + step) {
 				Context.dragDestination = Project.layers.length - 1;
