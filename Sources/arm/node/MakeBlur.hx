@@ -37,16 +37,21 @@ class MakeBlur {
 			frag.write('const float blur_weight[7] = float[](1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0);');
 			#end
 			frag.add_uniform('vec3 brushDirection', '_brushDirection');
-			frag.write('vec2 blur_direction = -brushDirection.yx;');
+			frag.write('vec2 blur_direction = brushDirection.yx;');
 			frag.write('for (int i = 0; i < 7; ++i) {');
-			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp + blur_direction * blur_step * float(i));');
+			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSizeLocal.y), 0).ba;');
+			#else
+			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSizeLocal.y), 0).ba;');
+			#end
+			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp2);');
 			frag.write('opacity += texpaint_sample.a * blur_weight[i];');
 			frag.write('basecol += texpaint_sample.rgb * blur_weight[i];');
-			frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp + blur_direction * blur_step * float(i)).rgb * blur_weight[i];');
+			frag.write('vec3 texpaint_pack_sample = texture(texpaint_pack_undo, texCoordInp2).rgb * blur_weight[i];');
 			frag.write('roughness += texpaint_pack_sample.g;');
 			frag.write('metallic += texpaint_pack_sample.b;');
 			frag.write('occlusion += texpaint_pack_sample.r;');
-			frag.write('nortan += texture(texpaint_nor_undo, texCoordInp + blur_direction * blur_step * float(i)).rgb * blur_weight[i];');
+			frag.write('nortan += texture(texpaint_nor_undo, texCoordInp2).rgb * blur_weight[i];');
 			frag.write('}');
 		}
 		else {
