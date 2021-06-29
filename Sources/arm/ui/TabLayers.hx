@@ -493,7 +493,7 @@ class TabLayers {
 
 			if (ui.button(tr("Export"), Left)) {
 				if (l.isMask()) {
-					UIFiles.show("png", true, function(path: String) {
+					UIFiles.show("png", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";

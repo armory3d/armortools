@@ -27,7 +27,7 @@ class TabConsole {
 			}
 			if (ui.button(tr("Export"))) {
 				var str = Console.lastTraces.join("\n");
-				UIFiles.show("txt", true, function(path: String) {
+				UIFiles.show("txt", true, false, function(path: String) {
 					var f = UIFiles.filename;
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
