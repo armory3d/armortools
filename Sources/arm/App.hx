@@ -637,6 +637,12 @@ class App {
 
 	public static function toggleFullscreen() {
 		if (kha.Window.get(0).mode == kha.WindowMode.Windowed) {
+			#if (krom_windows || krom_linux || krom_darwin)
+			Config.raw.window_w = System.windowWidth();
+			Config.raw.window_h = System.windowHeight();
+			Config.raw.window_x = kha.Window.get(0).x;
+			Config.raw.window_y = kha.Window.get(0).y;
+			#end
 			kha.Window.get(0).mode = kha.WindowMode.Fullscreen;
 		}
 		else {
