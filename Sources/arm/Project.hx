@@ -55,7 +55,7 @@ class Project {
 	static var meshList: Array<String> = null;
 
 	public static function projectOpen() {
-		UIFiles.show("arm", false, function(path: String) {
+		UIFiles.show("arm", false, false, function(path: String) {
 			if (!path.endsWith(".arm")) {
 				Console.error(Strings.error0());
 				return;
@@ -116,7 +116,7 @@ class Project {
 	}
 
 	public static function projectSaveAs() {
-		UIFiles.show("arm", true, function(path: String) {
+		UIFiles.show("arm", true,false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
 			filepath = path + Path.sep + f;
@@ -300,7 +300,7 @@ class Project {
 	}
 
 	public static function importMaterial() {
-		UIFiles.show("arm,blend", false, function(path: String) {
+		UIFiles.show("arm,blend", false, true, function(path: String) {
 			path.endsWith(".blend") ?
 				ImportBlend.runMaterial(path) :
 				ImportArm.runMaterial(path);
@@ -308,7 +308,7 @@ class Project {
 	}
 
 	public static function importBrush() {
-		UIFiles.show("arm," + Path.textureFormats.join(","), false, function(path: String) {
+		UIFiles.show("arm," + Path.textureFormats.join(","), false, true, function(path: String) {
 			// Create brush from texture
 			if (Path.isTexture(path)) {
 				// Import texture
@@ -355,7 +355,7 @@ class Project {
 	}
 
 	public static function importMesh(replaceExisting = true) {
-		UIFiles.show(Path.meshFormats.join(","), false, function(path: String) {
+		UIFiles.show(Path.meshFormats.join(","), false, false, function(path: String) {
 			importMeshBox(path, replaceExisting);
 		});
 	}
@@ -416,13 +416,13 @@ class Project {
 
 	public static function importAsset(filters: String = null, hdrAsEnvmap = true) {
 		if (filters == null) filters = Path.textureFormats.join(",") + "," + Path.meshFormats.join(",");
-		UIFiles.show(filters, false, function(path: String) {
+		UIFiles.show(filters, false, true, function(path: String) {
 			ImportAsset.run(path, -1.0, -1.0, true, hdrAsEnvmap);
 		});
 	}
 
 	public static function importSwatches() {
-		UIFiles.show("arm", false, function(path: String) {
+		UIFiles.show("arm", false, false, function(path: String) {
 			ImportArm.runSwatches(path);
 		});
 	}
@@ -453,7 +453,7 @@ class Project {
 		}
 		if (!File.exists(asset.file)) {
 			var filters = Path.textureFormats.join(",");
-			UIFiles.show(filters, false, function(path: String) {
+			UIFiles.show(filters, false, false, function(path: String) {
 				load(path);
 			});
 		}
@@ -497,7 +497,7 @@ class Project {
 	}
 
 	public static function exportSwatches() {
-		UIFiles.show("arm", true, function(path: String) {
+		UIFiles.show("arm", true, false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
 			ExportArm.runSwatches(path + Path.sep + f);

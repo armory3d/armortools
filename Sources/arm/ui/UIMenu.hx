@@ -62,7 +62,7 @@ class UIMenu {
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Import Texture..."), Config.keymap.file_import_assets)) Project.importAsset(Path.textureFormats.join(","), false);
 				if (menuButton(ui, tr("Import Envmap..."))) {
-					UIFiles.show("hdr", false, function(path: String) {
+					UIFiles.show("hdr", false, false, function(path: String) {
 						if (!path.endsWith(".hdr")) {
 							Console.error("Error: .hdr file expected");
 							return;

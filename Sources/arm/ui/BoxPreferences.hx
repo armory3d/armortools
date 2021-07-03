@@ -100,7 +100,7 @@ class BoxPreferences {
 							});
 						}
 						if (ui.button(tr("Import..."), Left)) {
-							UIFiles.show("arm", false, function(path: String) {
+							UIFiles.show("arm", false, false, function(path: String) {
 								Data.getBlob(path, function(b: kha.Blob) {
 									var raw = Json.parse(b.toString());
 									iron.App.notifyOnInit(function() {
@@ -165,13 +165,13 @@ class BoxPreferences {
 				}
 
 				if (ui.button(tr("Import"))) {
-					UIFiles.show("json", false, function(path: String) {
+					UIFiles.show("json", false, false, function(path: String) {
 						ImportTheme.run(path);
 					});
 				}
 
 				if (ui.button(tr("Export"))) {
-					UIFiles.show("json", true, function(path) {
+					UIFiles.show("json", true, false, function(path) {
 						path += Path.sep + UIFiles.filename;
 						if (!path.endsWith(".json")) path += ".json";
 						Krom.fileSaveBytes(path, Bytes.ofString(Json.stringify(arm.App.theme)).getData());
@@ -453,12 +453,12 @@ class BoxPreferences {
 				}
 
 				if (ui.button(tr("Import"))) {
-					UIFiles.show("json", false, function(path: String) {
+					UIFiles.show("json", false, false, function(path: String) {
 						ImportKeymap.run(path);
 					});
 				}
 				if (ui.button(tr("Export"))) {
-					UIFiles.show("json", true, function(dest: String) {
+					UIFiles.show("json", true, false, function(dest: String) {
 						if (!UIFiles.filename.endsWith(".json")) UIFiles.filename += ".json";
 						var path = Path.data() + Path.sep + "keymap_presets" + Path.sep + Config.raw.keymap;
 						File.copy(path, dest + Path.sep + UIFiles.filename);
@@ -515,7 +515,7 @@ plugin.drawUI = function(ui) {
 					});
 				}
 				if (ui.button(tr("Import"))) {
-					UIFiles.show("js,wasm,zip", false, function(path: String) {
+					UIFiles.show("js,wasm,zip", false, false, function(path: String) {
 						ImportPlugin.run(path);
 					});
 				}
@@ -555,7 +555,7 @@ plugin.drawUI = function(ui) {
 
 							}
 							if (ui.button(tr("Export"), Left)) {
-								UIFiles.show("js", true, function(dest: String) {
+								UIFiles.show("js", true, false, function(dest: String) {
 									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
 									File.copy(path, dest + Path.sep + UIFiles.filename);
 								});

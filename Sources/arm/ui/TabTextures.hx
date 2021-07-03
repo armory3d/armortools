@@ -22,7 +22,7 @@ class TabTextures {
 			ui.row([1 / 4, 1 / 4]);
 
 			if (ui.button(tr("Import"))) {
-				UIFiles.show(Path.textureFormats.join(","), false, function(path: String) {
+				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
 				});
 			}
@@ -94,7 +94,7 @@ class TabTextures {
 							UIMenu.draw(function(ui: Zui) {
 								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);
 								if (ui.button(tr("Export"), Left)) {
-									UIFiles.show("png", true, function(path: String) {
+									UIFiles.show("png", true, false, function(path: String) {
 										App.notifyOnNextFrame(function () {
 											if (Layers.pipeMerge == null) Layers.makePipe();
 											var target = kha.Image.createRenderTarget(to_pow2(img.width), to_pow2(img.height));

@@ -34,7 +34,7 @@ class TabScript {
 				hscript.text = "";
 			}
 			if (ui.button(tr("Import"))) {
-				UIFiles.show("js", false, function(path: String) {
+				UIFiles.show("js", false, false, function(path: String) {
 					Data.getBlob(path, function(b: Blob) {
 						hscript.text = b.toString();
 						Data.deleteBlob(path);
@@ -43,7 +43,7 @@ class TabScript {
 			}
 			if (ui.button(tr("Export"))) {
 				var str = hscript.text;
-				UIFiles.show("js", true, function(path: String) {
+				UIFiles.show("js", true, false, function(path: String) {
 					var f = UIFiles.filename;
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
