@@ -116,7 +116,7 @@ class Project {
 	}
 
 	public static function projectSaveAs() {
-		UIFiles.show("arm", true,false, function(path: String) {
+		UIFiles.show("arm", true, false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
 			filepath = path + Path.sep + f;

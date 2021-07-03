@@ -43,7 +43,7 @@ plugin.drawUI = function(ui) {
 		}
 
 		if (ui.button("Export")) {
-			arm.UIFiles.show("png", true, function(path) {
+			arm.UIFiles.show("png", true, false, function(path) {
 				arm.App.notifyOnNextFrame(function() {
 					var f = arm.UIFiles.filename;
 					if (f === "") f = "untitled";

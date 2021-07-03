@@ -22,7 +22,7 @@ class UIFiles {
 	static var showExtensions = false;
 	static var offline = false;
 
-	public static function show(filters: String, isSave: Bool, openMultiple : Bool, filesDone: String->Void) {
+	public static function show(filters: String, isSave: Bool, openMultiple: Bool, filesDone: String->Void) {
 
 		#if krom_android
 		if (isSave) {
@@ -44,7 +44,7 @@ class UIFiles {
 		}
 		else {
 			var paths = Krom.openDialog(filters, "", openMultiple);
-			if (paths != null && paths.length > 0) {
+			if (paths != null) {
 				for (path in paths) {
 					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
 					path = path.replace("\r", "");
