@@ -71,7 +71,6 @@ class TabTextures {
 							UIView2D.inst.hwnd.redraws = 2;
 						}
 
-
 						if (asset == Context.texture) {
 							var _uix = ui._x;
 							var _uiy = ui._y;
@@ -90,6 +89,7 @@ class TabTextures {
 						if (ui.isHovered) ui.tooltipImage(img, 256);
 
 						if (ui.isHovered && ui.inputReleasedR) {
+							Context.texture = asset;
 							var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 							UIMenu.draw(function(ui: Zui) {
 								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);

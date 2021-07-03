@@ -84,6 +84,7 @@ class TabFonts {
 						Context.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
+						Context.selectFont(i);
 						var add = Project.fonts.length > 1 ? 1 : 0;
 						var fontName = Project.fonts[i].name;
 						UIMenu.draw(function(ui: Zui) {

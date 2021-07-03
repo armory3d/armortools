@@ -102,8 +102,8 @@ class TabSwatches {
 						Context.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						var add = Project.raw.swatches.length > 1 ? 1 : 0;
 						Context.setSwatch(Project.raw.swatches[i]);
+						var add = Project.raw.swatches.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
