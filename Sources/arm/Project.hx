@@ -515,6 +515,12 @@ class Project {
 		var colors = [0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec, 0xff2d69cb, 0xff00a6ee, 0xff6febff, 0xff08a29a, 0xff2a666a, 0xff063619, 0xff4a4957, 0xff8e7ba4, 0xffb7c0ff, 0xffacbe9c, 0xff827c70, 0xff5a3b1c, 0xffae6507, 0xfff7aa30, 0xfff4ea5c, 0xff9b9500, 0xff566204, 0xff11963b, 0xff51e113, 0xff08fdcc];
 		for (c in colors) Project.raw.swatches.push(Project.makeSwatch(c));
 	}
+
+	public static function getMaterialGroupByName(groupName: String): TNodeGroup {
+		for (g in materialGroups) if (g.canvas.name == groupName) return g;
+
+		return null;
+	}
 }
 
 typedef TNodeGroup = {
