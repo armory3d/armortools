@@ -314,6 +314,7 @@ class TabLayers {
 			}
 		}
 		if (ui.isHovered && ui.inputReleasedR) {
+			Context.setLayer(l);
 			contextMenu = true;
 		}
 		if (state == State.Started) {
@@ -351,6 +352,7 @@ class TabLayers {
 					setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 				}
 				else if (ui.inputReleasedR) {
+					Context.setLayer(l);
 					contextMenu = true;
 				}
 			}
@@ -493,7 +495,7 @@ class TabLayers {
 
 			if (ui.button(tr("Export"), Left)) {
 				if (l.isMask()) {
-					UIFiles.show("png", true, function(path: String) {
+					UIFiles.show("png", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";

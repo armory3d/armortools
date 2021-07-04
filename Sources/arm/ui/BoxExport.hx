@@ -99,7 +99,7 @@ class BoxExport {
 			if (ui.button(tr("Export"))) {
 				UIBox.show = false;
 				var filters = App.bitsHandle.position != Bits8 ? "exr" : Context.formatType == FormatPng ? "png" : "jpg";
-				UIFiles.show(filters, true, function(path: String) {
+				UIFiles.show(filters, true, false, function(path: String) {
 					Context.textureExportPath = path;
 					function _init() {
 						ExportTexture.run(path, bakeMaterial);
@@ -137,7 +137,7 @@ class BoxExport {
 			}
 
 			if (ui.button(tr("Import"))) {
-				UIFiles.show("json", false, function(path: String) {
+				UIFiles.show("json", false, false, function(path: String) {
 					path = path.toLowerCase();
 					if (path.endsWith(".json")) {
 						var filename = path.substr(path.lastIndexOf(Path.sep) + 1);
@@ -264,7 +264,7 @@ class BoxExport {
 				}
 				if (ui.button(tr("Export"))) {
 					UIBox.show = false;
-					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, function(path: String) {
+					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						ExportMesh.run(path + Path.sep + f, applyDisplacement);
@@ -290,7 +290,7 @@ class BoxExport {
 				}
 				if (ui.button(tr("Export"))) {
 					UIBox.show = false;
-					UIFiles.show("arm", true, function(path: String) {
+					UIFiles.show("arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						iron.App.notifyOnInit(function() {
@@ -318,7 +318,7 @@ class BoxExport {
 				}
 				if (ui.button(tr("Export"))) {
 					UIBox.show = false;
-					UIFiles.show("arm", true, function(path: String) {
+					UIFiles.show("arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						iron.App.notifyOnInit(function() {

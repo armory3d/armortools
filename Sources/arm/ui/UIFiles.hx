@@ -22,7 +22,7 @@ class UIFiles {
 	static var showExtensions = false;
 	static var offline = false;
 
-	public static function show(filters: String, isSave: Bool, filesDone: String->Void) {
+	public static function show(filters: String, isSave: Bool, openMultiple: Bool, filesDone: String->Void) {
 
 		#if krom_android
 		if (isSave) {
@@ -32,14 +32,28 @@ class UIFiles {
 		else {
 		#end
 
-		path = isSave ? Krom.saveDialog(filters, "") : Krom.openDialog(filters, "");
-		if (path != null) {
-			while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
-			path = path.replace("\r", "");
-			filename = path.substr(path.lastIndexOf(Path.sep) + 1);
-			if (isSave) path = path.substr(0, path.lastIndexOf(Path.sep));
-			filesDone(path);
+		if (isSave) {
+			path = Krom.saveDialog(filters, "");
+			if (path != null) {
+				while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
+				path = path.replace("\r", "");
+				filename = path.substr(path.lastIndexOf(Path.sep) + 1);
+				path = path.substr(0, path.lastIndexOf(Path.sep));
+				filesDone(path);
+			}
 		}
+		else {
+			var paths = Krom.openDialog(filters, "", openMultiple);
+			if (paths != null) {
+				for (path in paths) {
+					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
+					path = path.replace("\r", "");
+					filename = path.substr(path.lastIndexOf(Path.sep) + 1);
+					filesDone(path); 
+				}
+			}
+		}
+	
 		releaseKeys();
 
 		#if krom_android

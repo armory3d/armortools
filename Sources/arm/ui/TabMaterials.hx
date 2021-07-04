@@ -19,18 +19,14 @@ class TabMaterials {
 
 	@:access(zui.Zui)
 	public static function draw() {
-
 		var ui = UISidebar.inst.ui;
-		var materials = Project.materials;
-		var selectMaterial = Context.selectMaterial;
-
 		if (ui.tab(UISidebar.inst.htab1, tr("Materials"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
 				ui.g.end();
-				Context.material = new MaterialSlot(materials[0].data);
-				materials.push(Context.material);
+				Context.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.push(Context.material);
 				updateMaterial();
 				ui.g.begin(false);
 				History.newMaterial();
@@ -50,7 +46,7 @@ class TabMaterials {
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
 
-			for (row in 0...Std.int(Math.ceil(materials.length / num))) {
+			for (row in 0...Std.int(Math.ceil(Project.materials.length / num))) {
 				var mult = Config.raw.show_asset_names ? 2 : 1;
 				ui.row([for (i in 0...num * mult) 1 / num]);
 
@@ -61,15 +57,15 @@ class TabMaterials {
 				for (j in 0...num) {
 					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
-					if (i >= materials.length) {
+					if (i >= Project.materials.length) {
 						@:privateAccess ui.endElement(imgw);
 						if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
 						continue;
 					}
-					var img = ui.SCALE() > 1 ? materials[i].image : materials[i].imageIcon;
-					var imgFull = materials[i].image;
+					var img = ui.SCALE() > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
+					var imgFull = Project.materials[i].image;
 
-					if (Context.material == materials[i]) {
+					if (Context.material == Project.materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 50;
@@ -81,16 +77,16 @@ class TabMaterials {
 					}
 
 					#if kha_opengl
-					ui.imageInvertY = materials[i].previewReady;
+					ui.imageInvertY = Project.materials[i].previewReady;
 					#end
 
 					var uix = ui._x;
 					var uiy = ui._y;
 					var tile = ui.SCALE() > 1 ? 100 : 50;
-					var state = materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
+					var state = Project.materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
 					if (state == State.Started && ui.inputY > ui._windowY) {
-						if (Context.material != materials[i]) {
-							selectMaterial(i);
+						if (Context.material != Project.materials[i]) {
+							Context.selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
 									Layers.updateFillLayers();
@@ -110,31 +106,32 @@ class TabMaterials {
 						Context.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						var add = materials.length > 1 ? 1 : 0;
+						Context.selectMaterial(i);
+						var add = Project.materials.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
-							var m = materials[i];
-							ui.text(materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
+							var m = Project.materials[i];
+							ui.text(Project.materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
 							if (ui.button(tr("To Fill Layer"), Left)) {
-								selectMaterial(i);
+								Context.selectMaterial(i);
 								Layers.createFillLayer();
 							}
 
 							if (ui.button(tr("Export"), Left)) {
-								selectMaterial(i);
+								Context.selectMaterial(i);
 								BoxExport.showMaterial();
 							}
 
 							if (ui.button(tr("Bake"), Left)) {
-								selectMaterial(i);
+								Context.selectMaterial(i);
 								BoxExport.showBakeMaterial();
 							}
 
 							if (ui.button(tr("Duplicate"), Left)) {
 								function _init() {
-									Context.material = new MaterialSlot(materials[0].data);
-									materials.push(Context.material);
-									var cloned = Json.parse(Json.stringify(materials[i].canvas));
+									Context.material = new MaterialSlot(Project.materials[0].data);
+									Project.materials.push(Context.material);
+									var cloned = Json.parse(Json.stringify(Project.materials[i].canvas));
 									Context.material.canvas = cloned;
 									updateMaterial();
 									History.duplicateMaterial();
@@ -142,11 +139,11 @@ class TabMaterials {
 								iron.App.notifyOnInit(_init);
 							}
 
-							if (materials.length > 1 && ui.button(tr("Delete"), Left)) {
+							if (Project.materials.length > 1 && ui.button(tr("Delete"), Left)) {
 								for (l in Project.layers) if (l.fill_layer == m) l.fill_layer = null;
 								History.deleteMaterial();
-								selectMaterial(i == 0 ? 1 : 0);
-								materials.splice(i, 1);
+								Context.selectMaterial(i == 0 ? 1 : 0);
+								Project.materials.splice(i, 1);
 								UISidebar.inst.hwnd1.redraws = 2;
 								for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
 								for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
@@ -189,10 +186,10 @@ class TabMaterials {
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;
 						ui._y += slotw * 0.9;
-						ui.text(materials[i].canvas.name, Center);
-						if (ui.isHovered) ui.tooltip(materials[i].canvas.name);
+						ui.text(Project.materials[i].canvas.name, Center);
+						if (ui.isHovered) ui.tooltip(Project.materials[i].canvas.name);
 						ui._y -= slotw * 0.9;
-						if (i == materials.length - 1) {
+						if (i == Project.materials.length - 1) {
 							ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
 						}
 					}

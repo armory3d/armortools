@@ -79,6 +79,7 @@ class TabBrushes {
 						// App.dragBrush = Context.brush;
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
+						Context.selectBrush(i);
 						var add = Project.brushes.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							//var b = Project.brushes[i];
