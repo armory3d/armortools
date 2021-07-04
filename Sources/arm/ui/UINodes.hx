@@ -665,16 +665,25 @@ class UINodes {
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
 			h.text = c.name;
-			var oldName = c.name;
-			c.name = ui.textInput(h, "", Right);
-			if (h.changed && groupStack.length > 0) { // Update group links
-				var canvases: Array<TNodeCanvas> = [];
-				for (m in Project.materials) canvases.push(m.canvas);
-				for (m in Project.materialGroups) canvases.push(m.canvas);
-				for (canvas in canvases) {
-					for (n in canvas.nodes) {
-						if (n.type == "GROUP" && n.name == oldName) {
-							n.name = c.name;
+			var newName = ui.textInput(h, "", Right);
+
+			if (h.changed && groupStack.length > 0) { // Check whether renaming is possible and update group links
+				var canRename = true;
+				for (m in Project.materialGroups) {
+					if(m.canvas.name == newName) canRename = false; //name already used
+				}
+
+				if(canRename) {
+					var oldName = c.name;
+					c.name = newName;
+					var canvases: Array<TNodeCanvas> = [];
+					for (m in Project.materials) canvases.push(m.canvas);
+					for (m in Project.materialGroups) canvases.push(m.canvas);
+					for (canvas in canvases) {
+						for (n in canvas.nodes) {
+							if (n.type == "GROUP" && n.name == oldName) {
+								n.name = c.name;
+							}
 						}
 					}
 				}
