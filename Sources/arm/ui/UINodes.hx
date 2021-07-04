@@ -744,7 +744,7 @@ class UINodes {
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			var numNodes = list[menuCategory].length;
 
-			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == tr("Group");
+			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == "Group";
 			if (isGroupCategory) numNodes += Project.materialGroups.length;
 
 			var py = popupY;
