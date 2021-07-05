@@ -8,7 +8,7 @@ import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.RenderPath;
 import iron.Scene;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
@@ -562,7 +562,7 @@ class RenderPathPaint {
 			var cam = Scene.active.camera;
 			Context.savedCamera.setFrom(cam.transform.local);
 			savedFov = cam.data.raw.fov;
-			ViewportUtil.updateCameraType(CameraPerspective);
+			Viewport.updateCameraType(CameraPerspective);
 			var m = Mat4.identity();
 			m.translate(0, 0, 0.5);
 			cam.transform.setMatrix(m);
@@ -754,7 +754,7 @@ class RenderPathPaint {
 			Context.paintObject = painto;
 			Scene.active.camera.transform.setMatrix(Context.savedCamera);
 			Scene.active.camera.data.raw.fov = savedFov;
-			ViewportUtil.updateCameraType(Context.cameraType);
+			Viewport.updateCameraType(Context.cameraType);
 			Scene.active.camera.buildProjection();
 			Scene.active.camera.buildMatrix();
 

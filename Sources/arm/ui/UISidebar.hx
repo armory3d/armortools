@@ -17,7 +17,7 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.util.UVUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -36,7 +36,6 @@ class UISidebar {
 	public static inline var defaultWindowW = 280;
 	public var tabx = 0;
 	public var show = true;
-	public var isScrolling = false;
 	public var ui: Zui;
 	public var hwnd0 = Id.handle();
 	public var hwnd1 = Id.handle();
@@ -157,7 +156,6 @@ class UISidebar {
 	}
 
 	public function update() {
-		isScrolling = ui.isScrolling;
 		updateUI();
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
@@ -346,27 +344,27 @@ class UISidebar {
 			// Viewpoint
 			if (mouse.viewX < iron.App.w()) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
-					ViewportUtil.resetViewport();
-					ViewportUtil.scaleToBounds();
+					Viewport.reset();
+					Viewport.scaleToBounds();
 				}
-				else if (Operator.shortcut(Config.keymap.view_back)) ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_front)) ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
-				else if (Operator.shortcut(Config.keymap.view_left)) ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_right)) ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
-				else if (Operator.shortcut(Config.keymap.view_bottom)) ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_top)) ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+				else if (Operator.shortcut(Config.keymap.view_back)) Viewport.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+				else if (Operator.shortcut(Config.keymap.view_front)) Viewport.setView(0, -1, 0, Math.PI / 2, 0, 0);
+				else if (Operator.shortcut(Config.keymap.view_left)) Viewport.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+				else if (Operator.shortcut(Config.keymap.view_right)) Viewport.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
+				else if (Operator.shortcut(Config.keymap.view_top)) Viewport.setView(0, 0, 1, 0, 0, 0);
 				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
 					Context.cameraType = Context.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
 					Context.camHandle.position = Context.cameraType;
-					ViewportUtil.updateCameraType(Context.cameraType);
+					Viewport.updateCameraType(Context.cameraType);
 				}
-				else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) ViewportUtil.orbit(-Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) ViewportUtil.orbit(Math.PI / 12, 0);
-				else if (Operator.shortcut(Config.keymap.view_orbit_up, ShortcutRepeat)) ViewportUtil.orbit(0, -Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_down, ShortcutRepeat)) ViewportUtil.orbit(0, Math.PI / 12);
-				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) ViewportUtil.orbitOpposite();
-				else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutRepeat)) ViewportUtil.zoom(0.2);
-				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) ViewportUtil.zoom(-0.2);
+				else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) Viewport.orbit(-Math.PI / 12, 0);
+				else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) Viewport.orbit(Math.PI / 12, 0);
+				else if (Operator.shortcut(Config.keymap.view_orbit_up, ShortcutRepeat)) Viewport.orbit(0, -Math.PI / 12);
+				else if (Operator.shortcut(Config.keymap.view_orbit_down, ShortcutRepeat)) Viewport.orbit(0, Math.PI / 12);
+				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) Viewport.orbitOpposite();
+				else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutRepeat)) Viewport.zoom(0.2);
+				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) Viewport.zoom(-0.2);
 			}
 		}
 
@@ -644,7 +642,7 @@ class UISidebar {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		arm.plugin.Gizmo.update();
+		arm.Gizmo.update();
 	}
 
 	public function render(g: kha.graphics2.Graphics) {

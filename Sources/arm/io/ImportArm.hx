@@ -24,7 +24,7 @@ import arm.ui.UIFiles;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.util.RenderUtil;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -55,7 +55,7 @@ class ImportArm {
 				object.name = md.name;
 				Project.paintObjects.push(object);
 				MeshUtil.mergeMesh();
-				ViewportUtil.scaleToBounds();
+				Viewport.scaleToBounds();
 			});
 		}
 		iron.App.notifyOnInit(Layers.initLayers);
@@ -125,9 +125,9 @@ class ImportArm {
 				iron.Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
 				iron.Scene.active.camera.buildProjection();
 				var origin = Project.raw.camera_origin;
-				arm.plugin.Camera.inst.origins[0].x = origin[0];
-				arm.plugin.Camera.inst.origins[0].y = origin[1];
-				arm.plugin.Camera.inst.origins[0].z = origin[2];
+				arm.Camera.inst.origins[0].x = origin[0];
+				arm.Camera.inst.origins[0].y = origin[1];
+				arm.Camera.inst.origins[0].z = origin[2];
 			}
 
 			for (file in project.assets) {
@@ -195,7 +195,7 @@ class ImportArm {
 			// No mask by default
 			if (Context.mergedObject == null) MeshUtil.mergeMesh();
 			Context.selectPaintObject(Context.mainObject());
-			ViewportUtil.scaleToBounds();
+			Viewport.scaleToBounds();
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 

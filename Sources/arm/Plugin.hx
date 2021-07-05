@@ -75,6 +75,13 @@ class IronBridge {
 	public static var Data = iron.data.Data;
 }
 
+@:expose("zui")
+class ZuiBridge {
+	public static var Handle = zui.Zui.Handle;
+	public static var Zui = zui.Zui;
+	public static var Ext = zui.Ext;
+}
+
 @:expose("arm")
 class ArmBridge {
 	public static var App = arm.App;
@@ -100,17 +107,9 @@ class ArmBridge {
 	public static var UIView2D = arm.ui.UIView2D;
 	public static var UIBox = arm.ui.UIBox;
 	public static var MeshUtil = arm.util.MeshUtil;
-	public static var MaterialUtil = arm.util.MaterialUtil;
 	public static var RenderUtil = arm.util.RenderUtil;
 	public static var UVUtil = arm.util.UVUtil;
-	public static var ViewportUtil = arm.util.ViewportUtil;
-}
-
-@:expose("zui")
-class ZuiBridge {
-	public static var Handle = zui.Zui.Handle;
-	public static var Zui = zui.Zui;
-	public static var Ext = zui.Ext;
+	public static var Viewport = arm.Viewport;
 }
 
 @:expose("console")

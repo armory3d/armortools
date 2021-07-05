@@ -6,7 +6,6 @@ import iron.data.MaterialData;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.util.RenderUtil;
-import arm.util.MaterialUtil;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.NodesMaterial;

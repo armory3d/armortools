@@ -52,7 +52,7 @@ class RenderUtil {
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
 		Scene.active.camera.data.raw.fov = 0.92;
-		ViewportUtil.updateCameraType(CameraPerspective);
+		Viewport.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		var _lightStrength = light.data.raw.strength;
 		var probe = Scene.active.world.probe;
@@ -89,7 +89,7 @@ class RenderUtil {
 		Context.paintObject = painto;
 
 		Scene.active.camera.transform.setMatrix(Context.savedCamera);
-		ViewportUtil.updateCameraType(Context.cameraType);
+		Viewport.updateCameraType(Context.cameraType);
 		Scene.active.camera.data.raw.fov = savedFov;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
@@ -128,7 +128,7 @@ class RenderUtil {
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
 		Scene.active.camera.data.raw.fov = 0.92;
-		ViewportUtil.updateCameraType(CameraPerspective);
+		Viewport.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		light.visible = false;
 		Scene.active.world.envmap = Context.previewEnvmap;
@@ -156,7 +156,7 @@ class RenderUtil {
 
 		Scene.active.camera.transform.setMatrix(Context.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
-		ViewportUtil.updateCameraType(Context.cameraType);
+		Viewport.updateCameraType(Context.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 		var light = Scene.active.lights[0];
@@ -315,7 +315,7 @@ class RenderUtil {
 		var cam = Scene.active.camera;
 		Context.savedCamera.setFrom(cam.transform.local);
 		var savedFov = cam.data.raw.fov;
-		ViewportUtil.updateCameraType(CameraPerspective);
+		Viewport.updateCameraType(CameraPerspective);
 		var m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
@@ -397,7 +397,7 @@ class RenderUtil {
 		Context.paintObject = painto;
 		Scene.active.camera.transform.setMatrix(Context.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
-		ViewportUtil.updateCameraType(Context.cameraType);
+		Viewport.updateCameraType(Context.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 

@@ -8,7 +8,7 @@ import iron.math.Vec4;
 import iron.Scene;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.sys.Path;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
@@ -71,7 +71,7 @@ class ImportMesh {
 		}
 		Project.meshAssets = [path];
 
-		ViewportUtil.scaleToBounds();
+		Viewport.scaleToBounds();
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
 		arm.node.MakeMaterial.parsePaintMaterial();

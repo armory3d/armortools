@@ -572,7 +572,7 @@ class RenderPathDeferred {
 			var cam = Scene.active.camera;
 
 			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 
@@ -586,7 +586,7 @@ class RenderPathDeferred {
 			#end
 
 			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}

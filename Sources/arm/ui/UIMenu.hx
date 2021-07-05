@@ -10,9 +10,9 @@ import zui.Ext;
 import iron.Scene;
 import iron.RenderPath;
 import iron.system.Input;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.util.UVUtil;
-import arm.util.BuildMacros;
+import arm.sys.BuildMacros;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.node.MakeMaterial;
@@ -257,52 +257,52 @@ class UIMenu {
 			}
 			else if (menuCategory == MenuCamera) {
 				if (menuButton(ui, tr("Reset"), Config.keymap.view_reset)) {
-					ViewportUtil.resetViewport();
-					ViewportUtil.scaleToBounds();
+					Viewport.reset();
+					Viewport.scaleToBounds();
 				}
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Front"), Config.keymap.view_front)) {
-					ViewportUtil.setView(0, -1, 0, Math.PI / 2, 0, 0);
+					Viewport.setView(0, -1, 0, Math.PI / 2, 0, 0);
 				}
 				if (menuButton(ui, tr("Back"), Config.keymap.view_back)) {
-					ViewportUtil.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
+					Viewport.setView(0, 1, 0, Math.PI / 2, 0, Math.PI);
 				}
 				if (menuButton(ui, tr("Right"), Config.keymap.view_right)) {
-					ViewportUtil.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
+					Viewport.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
 				}
 				if (menuButton(ui, tr("Left"), Config.keymap.view_left)) {
-					ViewportUtil.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
+					Viewport.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
 				}
 				if (menuButton(ui, tr("Top"), Config.keymap.view_top)) {
-					ViewportUtil.setView(0, 0, 1, 0, 0, 0);
+					Viewport.setView(0, 0, 1, 0, 0, 0);
 				}
 				if (menuButton(ui, tr("Bottom"), Config.keymap.view_bottom)) {
-					ViewportUtil.setView(0, 0, -1, Math.PI, 0, Math.PI);
+					Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
 				}
 				menuSeparator(ui);
 
 				ui.changed = false;
 
 				if (menuButton(ui, tr("Orbit Left"), Config.keymap.view_orbit_left)) {
-					ViewportUtil.orbit(-Math.PI / 12, 0);
+					Viewport.orbit(-Math.PI / 12, 0);
 				}
 				if (menuButton(ui, tr("Orbit Right"), Config.keymap.view_orbit_right)) {
-					ViewportUtil.orbit(Math.PI / 12, 0);
+					Viewport.orbit(Math.PI / 12, 0);
 				}
 				if (menuButton(ui, tr("Orbit Up"), Config.keymap.view_orbit_up)) {
-					ViewportUtil.orbit(0, -Math.PI / 12);
+					Viewport.orbit(0, -Math.PI / 12);
 				}
 				if (menuButton(ui, tr("Orbit Down"), Config.keymap.view_orbit_down)) {
-					ViewportUtil.orbit(0, Math.PI / 12);
+					Viewport.orbit(0, Math.PI / 12);
 				}
 				if (menuButton(ui, tr("Orbit Opposite"), Config.keymap.view_orbit_opposite)) {
-					ViewportUtil.orbitOpposite();
+					Viewport.orbitOpposite();
 				}
 				if (menuButton(ui, tr("Zoom In"), Config.keymap.view_zoom_in)) {
-					ViewportUtil.zoom(0.2);
+					Viewport.zoom(0.2);
 				}
 				if (menuButton(ui, tr("Zoom Out"), Config.keymap.view_zoom_out)) {
-					ViewportUtil.zoom(-0.2);
+					Viewport.zoom(-0.2);
 				}
 				// menuSeparator(ui);
 
@@ -312,7 +312,7 @@ class UIMenu {
 				menuAlign(ui);
 				cam.data.raw.fov = ui.slider(Context.fovHandle, tr("FoV"), 0.3, 2.0, true);
 				if (Context.fovHandle.changed) {
-					ViewportUtil.updateCameraType(Context.cameraType);
+					Viewport.updateCameraType(Context.cameraType);
 				}
 
 				menuFill(ui);
@@ -324,7 +324,7 @@ class UIMenu {
 				Context.cameraType = Ext.inlineRadio(ui, Context.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
 				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ' (${Config.keymap.view_camera_type})');
 				if (Context.camHandle.changed) {
-					ViewportUtil.updateCameraType(Context.cameraType);
+					Viewport.updateCameraType(Context.cameraType);
 				}
 
 				if (ui.changed) keepOpen = true;

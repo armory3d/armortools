@@ -1,11 +1,11 @@
-package arm.plugin;
+package arm;
 
 import iron.system.Input;
 import iron.system.Time;
 import iron.math.Vec4;
 import iron.math.Mat4;
 import arm.ui.UISidebar;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.Enums;
 
 class Camera {
@@ -34,7 +34,7 @@ class Camera {
 			if (Input.occupied ||
 				!App.uiEnabled ||
 				App.isDragging  ||
-				UISidebar.inst.isScrolling ||
+				UISidebar.inst.ui.isScrolling ||
 				mouse.viewX < 0 ||
 				mouse.viewX > iron.App.w() ||
 				mouse.viewY < 0 ||
@@ -150,7 +150,7 @@ class Camera {
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
 					if (Context.cameraType == CameraOrthographic) {
-						ViewportUtil.updateCameraType(Context.cameraType);
+						Viewport.updateCameraType(Context.cameraType);
 					}
 				}
 
@@ -164,7 +164,7 @@ class Camera {
 				Context.ddirty = 2;
 
 				if (Context.cameraType == CameraOrthographic) {
-					ViewportUtil.updateCameraType(Context.cameraType);
+					Viewport.updateCameraType(Context.cameraType);
 				}
 			}
 		});

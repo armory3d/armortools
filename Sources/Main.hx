@@ -11,7 +11,7 @@ import arm.render.Inc;
 import arm.render.RenderPathForward;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
-import arm.util.BuildMacros;
+import arm.sys.BuildMacros;
 import arm.Config;
 import arm.Context;
 #if arm_vr

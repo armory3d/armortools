@@ -108,7 +108,7 @@ class ExportArm {
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			envmap_strength: iron.Scene.active.world.probe.raw.strength,
 			camera_world: iron.Scene.active.camera.transform.local.toFloat32Array(),
-			camera_origin: vec3f32(arm.plugin.Camera.inst.origins[0]),
+			camera_origin: vec3f32(arm.Camera.inst.origins[0]),
 			camera_fov: iron.Scene.active.camera.data.raw.fov,
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true

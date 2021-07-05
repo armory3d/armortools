@@ -30,12 +30,12 @@ import arm.io.ExportTexture;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.util.RenderUtil;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.ConstData;
-import arm.plugin.Camera;
 import arm.node.MakeMaterial;
+import arm.Camera;
 import arm.Enums;
 import arm.ProjectFormat;
 import arm.Res;
@@ -304,7 +304,7 @@ class App {
 		cam.buildProjection();
 
 		if (Context.cameraType == CameraOrthographic) {
-			ViewportUtil.updateCameraType(Context.cameraType);
+			Viewport.updateCameraType(Context.cameraType);
 		}
 
 		Context.ddirty = 2;

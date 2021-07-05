@@ -11,7 +11,6 @@ import iron.data.Data;
 import arm.node.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
-import arm.util.MaterialUtil;
 import arm.sys.Path;
 import arm.Enums;
 

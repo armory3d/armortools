@@ -1,13 +1,12 @@
-package arm.util;
+package arm;
 
 import kha.arrays.Float32Array;
 import iron.Scene;
 import iron.math.Vec4;
-import arm.ui.UISidebar;
-import arm.plugin.Camera;
+import arm.Camera;
 import arm.Enums;
 
-class ViewportUtil {
+class Viewport {
 
 	public static function scaleToBounds() {
 		var po = Context.mergedObject == null ? Context.mainObject() : Context.mergedObject;
@@ -27,7 +26,7 @@ class ViewportUtil {
 		}
 	}
 
-	public static function resetViewport() {
+	public static function reset() {
 		var cam = Scene.active.camera;
 		for (o in Scene.active.raw.objects) {
 			if (o.type == "camera_object") {
@@ -70,7 +69,7 @@ class ViewportUtil {
 	public static function orbitOpposite() {
 		var cam = Scene.active.camera;
 		var z = Math.abs(cam.look().z) - 1.0;
-		(z < 0.0001 && z > -0.0001) ? ViewportUtil.orbit(0, Math.PI) : ViewportUtil.orbit(Math.PI, 0);
+		(z < 0.0001 && z > -0.0001) ? orbit(0, Math.PI) : orbit(Math.PI, 0);
 	}
 
 	public static function zoom(f: Float) {

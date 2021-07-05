@@ -12,7 +12,7 @@ import iron.data.Data;
 import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.RenderUtil;
-import arm.util.ViewportUtil;
+import arm.Viewport;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.ui.UISidebar;
@@ -148,7 +148,7 @@ class Project {
 				}
 				if (ui.button(tr("OK")) || ui.isReturnDown) {
 					Project.projectNew();
-					ViewportUtil.scaleToBounds();
+					Viewport.scaleToBounds();
 					UIBox.show = false;
 					App.redrawUI();
 				}
@@ -165,7 +165,7 @@ class Project {
 			Context.mergedObject = null;
 		}
 
-		ViewportUtil.resetViewport();
+		Viewport.reset();
 		Context.layerPreviewDirty = true;
 		Context.layerFilter = 0;
 		Project.meshAssets = [];
@@ -225,7 +225,7 @@ class Project {
 			Data.cachedMeshes.set("SceneTessellated", md);
 
 			if (Context.projectType == ModelTessellatedPlane) {
-				ViewportUtil.setView(0, 0, 0.75, 0, 0, 0); // Top
+				Viewport.setView(0, 0, 0.75, 0, 0, 0); // Top
 			}
 		}
 

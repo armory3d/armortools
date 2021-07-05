@@ -1,4 +1,4 @@
-package arm.plugin;
+package arm;
 
 import iron.object.MeshObject;
 import iron.object.LightObject;

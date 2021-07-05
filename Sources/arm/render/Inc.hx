@@ -133,7 +133,7 @@ class Inc {
 			var cam = Scene.active.camera;
 			if (Context.viewIndexLast > -1) {
 				// Save current viewport camera
-				arm.plugin.Camera.inst.views[Context.viewIndexLast].setFrom(cam.transform.local);
+				arm.Camera.inst.views[Context.viewIndexLast].setFrom(cam.transform.local);
 			}
 
 			if (Context.viewIndexLast != Context.viewIndex) {
@@ -141,7 +141,7 @@ class Inc {
 				Context.ddirty = 1;
 			}
 
-			cam.transform.setMatrix(arm.plugin.Camera.inst.views[Context.viewIndex]);
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
