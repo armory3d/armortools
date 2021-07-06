@@ -237,13 +237,13 @@ class UISidebar {
 					}
 					else if (decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown)) {
 						Context.brushDecalMaskRadius += mouse.movementX / 150;
-						Context.brushDecalMaskRadius = Math.max(0.05, Math.min(4.0, Context.brushDecalMaskRadius));
+						Context.brushDecalMaskRadius = Math.max(0.01, Math.min(4.0, Context.brushDecalMaskRadius));
 						Context.brushDecalMaskRadius = Math.round(Context.brushDecalMaskRadius * 100) / 100;
 						Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
 					}
 					else {
 						Context.brushRadius += mouse.movementX / 150;
-						Context.brushRadius = Math.max(0.05, Math.min(4.0, Context.brushRadius));
+						Context.brushRadius = Math.max(0.01, Math.min(4.0, Context.brushRadius));
 						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
 						Context.brushRadiusHandle.value = Context.brushRadius;
 					}
