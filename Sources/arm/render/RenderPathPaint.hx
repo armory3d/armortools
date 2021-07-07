@@ -318,19 +318,23 @@ class RenderPathPaint {
 			_texpaint_nor = path.renderTargets.get("texpaint_nor" + tid);
 			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
 			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
-			path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
-			path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
-			path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
-			path.renderTargets.set("texpaint_pack" + tid, path.renderTargets.get("texpaint_pack_live"));
+			if (Context.layer.isLayer()) {
+				path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
+				path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
+				path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
+				path.renderTargets.set("texpaint_pack" + tid, path.renderTargets.get("texpaint_pack_live"));
+			}
 		}
 		else {
 			path.renderTargets.set("texpaint" + tid, _texpaint);
 			path.renderTargets.set("texpaint_undo" + hid, _texpaint_undo);
-			path.renderTargets.set("texpaint_nor_undo" + hid, _texpaint_nor_undo);
-			path.renderTargets.set("texpaint_pack_undo" + hid, _texpaint_pack_undo);
-			path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
-			path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
+			if (Context.layer.isLayer()) {
+				path.renderTargets.set("texpaint_nor_undo" + hid, _texpaint_nor_undo);
+				path.renderTargets.set("texpaint_pack_undo" + hid, _texpaint_pack_undo);
+				path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
+				path.renderTargets.set("texpaint_pack" + tid, _texpaint_pack);
+			}
 		}
 		liveLayerLocked = use;
 	}
