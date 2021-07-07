@@ -488,7 +488,7 @@ class TabLayers {
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;
 		if (l.isMask()) add += 2;
-		var menuElements = l.isGroup() ? 7 : (20 + add);
+		var menuElements = l.isGroup() ? 8 : (20 + add);
 
 		UIMenu.draw(function(ui: Zui) {
 			ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
@@ -570,6 +570,7 @@ class TabLayers {
 							History.clearLayer();
 							c.clear();
 						}
+						Context.layersPreviewDirty = true;
 						Context.layer = l;
 					}
 				}
