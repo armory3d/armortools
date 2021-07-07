@@ -199,6 +199,7 @@ class UINodes {
 					}, 3);
 				});
 			}
+			else onCanvasReleased();
 		}
 		// Selecting which node socket to preview
 		else if (node == nodes.nodesSelected[0]) {
@@ -212,32 +213,47 @@ class UINodes {
 
 	function onCanvasReleased() {
 		if (ui.inputReleasedR && Math.abs(ui.inputX - ui.inputStartedX) < 2 && Math.abs(ui.inputY - ui.inputStartedY) < 2) {
-			UIMenu.draw(function(uiMenu: Zui) {
-				var nodes = getNodes();
-				uiMenu._y += 1;
-				uiMenu.enabled = nodes.nodesSelected.length > 0;
-				if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
-					Zui.isCopy = true;
-					Zui.isCut = true;
+			// Node selection
+			var nodes = getNodes();
+			var canvas = getCanvas(true);
+			var selected: TNode = null;
+			for (node in canvas.nodes) {
+				if (ui.getInputInRect(ui._windowX + nodes.NODE_X(node), ui._windowY + nodes.NODE_Y(node), nodes.NODE_W(node), nodes.NODE_H(canvas, node))) {
+					selected = node;
+					break;
 				}
-				if (menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
-					Zui.isCopy = true;
-				}
-				uiMenu.enabled = Nodes.clipboard != "";
-				if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
-					Zui.isPaste = true;
-				}
-				uiMenu.enabled = nodes.nodesSelected.length > 0;
-				if (menuButton(uiMenu, tr("Delete"), "delete")) {
-					ui.isDeleteDown = true;
-					App.notifyOnNextFrame(function() { ui.isDeleteDown = false; });
-				}
-				if (menuButton(uiMenu, tr("Duplicate"))) {
-					Zui.isCopy = true;
-					Zui.isPaste = true;
-				}
-				uiMenu.enabled = true;
-			}, 5);
+			}
+			if (selected == null) nodes.nodesSelected = [];
+			else if (nodes.nodesSelected.indexOf(selected) == -1) nodes.nodesSelected = [selected];
+
+			// Node context menu
+			if (!Nodes.socketReleased) {
+				UIMenu.draw(function(uiMenu: Zui) {
+					uiMenu._y += 1;
+					uiMenu.enabled = nodes.nodesSelected.length > 0;
+					if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
+						Zui.isCopy = true;
+						Zui.isCut = true;
+					}
+					if (menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
+						Zui.isCopy = true;
+					}
+					uiMenu.enabled = Nodes.clipboard != "";
+					if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
+						Zui.isPaste = true;
+					}
+					uiMenu.enabled = nodes.nodesSelected.length > 0;
+					if (menuButton(uiMenu, tr("Delete"), "delete")) {
+						ui.isDeleteDown = true;
+						App.notifyOnNextFrame(function() { ui.isDeleteDown = false; });
+					}
+					if (menuButton(uiMenu, tr("Duplicate"))) {
+						Zui.isCopy = true;
+						Zui.isPaste = true;
+					}
+					uiMenu.enabled = true;
+				}, 5);
+			}
 		}
 	}
 
