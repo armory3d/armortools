@@ -34,7 +34,7 @@ class Uniforms {
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 				var brushDecalMaskRadius = Context.brushDecalMaskRadius;
 				if (Config.raw.brush_3d) {
-					brushDecalMaskRadius *= Context.paint2d ? 0.55 : 2.0;
+					brushDecalMaskRadius *= Context.paint2d ? 0.55 * UIView2D.inst.panScale : 2.0;
 				}
 				var radius = decalMask ? brushDecalMaskRadius : Context.brushRadius;
 				var val = (radius * Context.brushNodesRadius) / 15.0;
