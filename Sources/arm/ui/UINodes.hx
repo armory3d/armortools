@@ -627,6 +627,7 @@ class UINodes {
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
+				var singleChannel = sel.type == "LAYER_MASK";
 				if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.layers.length) {
@@ -660,10 +661,22 @@ class UINodes {
 					var invertY = false;
 					#end
 
+					if (singleChannel) {
+						ui.g.pipeline = UIView2D.pipe;
+						#if kha_opengl
+						ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
+						#end
+						ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
+					}
+
 					ui.g.color = 0xffffffff;
 					invertY ?
 						ui.g.drawScaledImage(img, tx, ty + th, tw, -th) :
 						ui.g.drawScaledImage(img, tx, ty, tw, th);
+
+					if  (singleChannel) {
+						ui.g.pipeline = null;
+					}
 				}
 			}
 
