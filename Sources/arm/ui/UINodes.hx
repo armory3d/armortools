@@ -1,5 +1,6 @@
 package arm.ui;
 
+import arm.shader.MaterialParser;
 import haxe.Json;
 import kha.Image;
 import kha.System;
@@ -699,16 +700,25 @@ class UINodes {
 			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
 			var h = Id.handle();
 			h.text = c.name;
-			var oldName = c.name;
-			c.name = ui.textInput(h, "", Right);
-			if (h.changed && groupStack.length > 0) { // Update group links
-				var canvases: Array<TNodeCanvas> = [];
-				for (m in Project.materials) canvases.push(m.canvas);
-				for (m in Project.materialGroups) canvases.push(m.canvas);
-				for (canvas in canvases) {
-					for (n in canvas.nodes) {
-						if (n.type == "GROUP" && n.name == oldName) {
-							n.name = c.name;
+			var newName = ui.textInput(h, "", Right);
+
+			if (h.changed && groupStack.length > 0) { // Check whether renaming is possible and update group links
+				var canRename = true;
+				for (m in Project.materialGroups) {
+					if (m.canvas.name == newName) canRename = false; //name already used
+				}
+
+				if (canRename) {
+					var oldName = c.name;
+					c.name = newName;
+					var canvases: Array<TNodeCanvas> = [];
+					for (m in Project.materials) canvases.push(m.canvas);
+					for (m in Project.materialGroups) canvases.push(m.canvas);
+					for (canvas in canvases) {
+						for (n in canvas.nodes) {
+							if (n.type == "GROUP" && n.name == oldName) {
+								n.name = c.name;
+							}
 						}
 					}
 				}
@@ -768,7 +778,7 @@ class UINodes {
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			var numNodes = list[menuCategory].length;
 
-			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == tr("Group");
+			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == "Group";
 			if (isGroupCategory) numNodes += Project.materialGroups.length;
 
 			var py = popupY;
@@ -831,17 +841,27 @@ class UINodes {
 		}
 	}
 
-	function canPlaceGroup(groupName: String): Bool {
-		// Pasting group into itself
-		if (groupStack.length > 0 && groupName == groupStack[groupStack.length - 1].canvas.name) {
-			return false;
+	function containsNodeGroupRecursive(group: TNodeGroup, groupName: String): Bool {
+		if (group.canvas.name == groupName) {
+			return true;
 		}
-		// Recursive node groups
-		if (groupStack.length > 0) {
-			for (g in groupStack) {
-				if (g.canvas.name == groupName) {
-					return false;
+		for (n in group.canvas.nodes) {
+			if (n.type == "GROUP") {
+				var g = Project.getMaterialGroupByName(n.name);
+				if (g != null && containsNodeGroupRecursive(g, groupName)) {
+					return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	function canPlaceGroup(groupName: String): Bool {
+		// Prevent Recursive node groups 
+		// The group to place must not contain the current group or a group that contains the current group
+		if (groupStack.length > 0) {
+			for (g in groupStack) { 
+				if (containsNodeGroupRecursive(Project.getMaterialGroupByName(groupName), g.canvas.name)) return false;
 			}
 		}
 		// Group was deleted / renamed
