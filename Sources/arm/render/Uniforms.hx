@@ -45,7 +45,7 @@ class Uniforms {
 				var scale2d = (900 / App.h()) * Config.raw.window_scale;
 
 				if (Config.raw.brush_3d && !decal) {
-					val *= Context.paint2d ? 0.55 * scale2d : 2;
+					val *= Context.paint2d ? 0.55 * scale2d * UIView2D.inst.panScale : 2;
 				}
 				else {
 					val *= scale2d; // Projection ratio
@@ -72,8 +72,13 @@ class Uniforms {
 				if (Config.raw.pressure_hardness && pen.down()) {
 					val *= pen.pressure * Config.raw.pressure_sensitivity;
 				}
-				if (Config.raw.brush_3d && !Context.paint2d) {
-					val *= val;
+				if (Config.raw.brush_3d) {
+					if (Context.paint2d) {
+						val *= 1.0 / UIView2D.inst.panScale;
+					}
+					else {
+						val *= val;
+					}
 				}
 				return val;
 			}

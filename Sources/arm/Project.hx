@@ -518,7 +518,6 @@ class Project {
 
 	public static function getMaterialGroupByName(groupName: String): TNodeGroup {
 		for (g in materialGroups) if (g.canvas.name == groupName) return g;
-
 		return null;
 	}
 }

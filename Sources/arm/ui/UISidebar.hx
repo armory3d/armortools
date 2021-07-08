@@ -802,6 +802,9 @@ class UISidebar {
 					if (decalMask) {
 						psize = Std.int(cursorImg.width * (Context.brushDecalMaskRadius * Context.brushNodesRadius) * ui.SCALE());
 					}
+					if (Config.raw.brush_3d && in2dView) {
+						psize = Std.int(psize * UIView2D.inst.panScale);
+					}
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 				}
 			}

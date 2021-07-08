@@ -1,6 +1,5 @@
 package arm.ui;
 
-import arm.shader.MaterialParser;
 import haxe.Json;
 import kha.Image;
 import kha.System;
@@ -9,6 +8,7 @@ import zui.Id;
 import zui.Nodes;
 import iron.system.Input;
 import arm.shader.NodesMaterial;
+import arm.shader.MaterialParser;
 import arm.node.NodesBrush;
 import arm.node.MakeMaterial;
 import arm.util.RenderUtil;
@@ -705,7 +705,7 @@ class UINodes {
 			if (h.changed && groupStack.length > 0) { // Check whether renaming is possible and update group links
 				var canRename = true;
 				for (m in Project.materialGroups) {
-					if (m.canvas.name == newName) canRename = false; //name already used
+					if (m.canvas.name == newName) canRename = false; // Name already used
 				}
 
 				if (canRename) {
