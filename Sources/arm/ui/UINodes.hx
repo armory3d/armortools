@@ -230,7 +230,12 @@ class UINodes {
 			if (!Nodes.socketReleased) {
 				UIMenu.draw(function(uiMenu: Zui) {
 					uiMenu._y += 1;
-					uiMenu.enabled = nodes.nodesSelected.length > 0;
+					var protected = selected == null ||
+									selected.type == "OUTPUT_MATERIAL_PBR" ||
+									selected.type == "GROUP_INPUT" ||
+									selected.type == "GROUP_OUTPUT" ||
+									selected.type == "BrushOutputNode";
+					uiMenu.enabled = !protected;
 					if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
 						Zui.isCopy = true;
 						Zui.isCut = true;
@@ -242,7 +247,7 @@ class UINodes {
 					if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
 						Zui.isPaste = true;
 					}
-					uiMenu.enabled = nodes.nodesSelected.length > 0;
+					uiMenu.enabled = !protected;
 					if (menuButton(uiMenu, tr("Delete"), "delete")) {
 						ui.isDeleteDown = true;
 						App.notifyOnNextFrame(function() { ui.isDeleteDown = false; });
