@@ -651,4 +651,78 @@ class App {
 			kha.Window.get(0).move(Config.raw.window_x, Config.raw.window_y);
 		}
 	}
+
+	public static function isScrolling(): Bool {
+		return UISidebar.inst.ui.isScrolling;
+	}
+
+	public static function getUIs(): Array<Zui> {
+		return [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
+	}
+
+	public static function isDecalLayer(): Bool {
+		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
+		return isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
+	}
+
+	public static function redrawStatus() {
+		if (arm.ui.UIStatus.inst != null) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
+	}
+
+	public static function redrawConsole() {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (arm.ui.UIStatus.inst != null && arm.ui.UISidebar.inst != null && arm.ui.UISidebar.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UISidebar.inst.ui.SCALE()) {
+			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+		}
+	}
+
+	public static function initLayout() {
+		var show2d = (UINodes.inst != null && UINodes.inst.show) || (UIView2D.inst != null && UIView2D.inst.show);
+		var raw = Config.raw;
+		raw.layout = [
+			Std.int(UISidebar.defaultWindowW * raw.window_scale),
+			Std.int(kha.System.windowHeight() / 3),
+			Std.int(kha.System.windowHeight() / 3),
+			Std.int(kha.System.windowHeight() / 3),
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
+			Std.int(iron.App.h() / 2),
+			Std.int(UIStatus.defaultStatusH * raw.window_scale)
+		];
+	}
+
+	public static function initConfig() {
+		var raw = Config.raw;
+		raw.recent_projects = [];
+		raw.bookmarks = [];
+		raw.plugins = [];
+		raw.keymap = "default.json";
+		raw.theme = "default.json";
+		raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
+		raw.undo_steps = 4;
+		raw.pressure_radius = true;
+		raw.pressure_hardness = true;
+		raw.pressure_angle = false;
+		raw.pressure_opacity = false;
+		raw.pressure_sensitivity = 1.0;
+		#if kha_vulkan
+		raw.material_live = false;
+		#else
+		raw.material_live = true;
+		#end
+		raw.brush_3d = true;
+		raw.brush_depth_reject = true;
+		raw.brush_angle_reject = true;
+		raw.brush_live = false;
+		raw.camera_speed = 1.0;
+		raw.zoom_direction = ZoomVertical;
+		raw.displace_strength = 0.0;
+		raw.show_asset_names = false;
+		raw.node_preview = true;
+		raw.workspace = 0;
+		raw.layer_res = Res2048;
+		raw.dilate = DilateInstant;
+		raw.dilate_radius = 2;
+	}
 }

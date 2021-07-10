@@ -1,8 +1,6 @@
 package;
 
 import kha.Window;
-import kha.WindowOptions;
-import kha.WindowMode;
 import kha.System;
 import iron.object.Object;
 import iron.Scene;
@@ -14,30 +12,18 @@ import arm.render.Uniforms;
 import arm.sys.BuildMacros;
 import arm.Config;
 import arm.Context;
+import arm.Res;
 #if arm_vr
 import arm.render.RenderPathForwardVR;
 #end
 
 class Main {
 
+	public static inline var title = "ArmorPaint";
 	public static var version = "0.8";
 	public static var sha = BuildMacros.sha().substr(1, 7);
 	public static var date = BuildMacros.date().split(" ")[0];
 	static var tasks: Int;
-
-	#if arm_snapshot
-	static function embedRaw(handle: String, name: String, file: js.lib.ArrayBuffer) {
-		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.io.Bytes.ofData(file)));
-		iron.data.Data.getSceneRaw(handle, function(_) {});
-		iron.data.Data.cachedBlobs.remove(name);
-	}
-	static function embedBlob(name: String, file: js.lib.ArrayBuffer) {
-		iron.data.Data.cachedBlobs.set(name, kha.Blob.fromBytes(haxe.io.Bytes.ofData(file)));
-	}
-	static function embedFont(name: String, file: js.lib.ArrayBuffer) {
-		iron.data.Data.cachedFonts.set(name, new kha.Font(kha.Blob.fromBytes(haxe.io.Bytes.ofData(file))));
-	}
-	#end
 
 	public static function main() {
 		#if arm_snapshot
@@ -45,16 +31,16 @@ class Main {
 		var global = js.Syntax.code("globalThis");
 		global.kickstart = kickstart;
 
-		embedRaw("Scene", "Scene.arm", untyped global['data/Scene.arm']);
+		Res.embedRaw("Scene", "Scene.arm", untyped global['data/Scene.arm']);
 		untyped global['data/Scene.arm'] = null;
 
-		embedRaw("shader_datas", "shader_datas.arm", untyped global['data/shader_datas.arm']);
+		Res.embedRaw("shader_datas", "shader_datas.arm", untyped global['data/shader_datas.arm']);
 		untyped global['data/shader_datas.arm'] = null;
 
-		embedFont("font.ttf", untyped global['data/font.ttf']);
+		Res.embedFont("font.ttf", untyped global['data/font.ttf']);
 		untyped global['data/font.ttf'] = null;
 
-		embedFont("font_mono.ttf", untyped global['data/font_mono.ttf']);
+		Res.embedFont("font_mono.ttf", untyped global['data/font_mono.ttf']);
 		untyped global['data/font_mono.ttf'] = null;
 
 		var files = [
@@ -85,7 +71,7 @@ class Main {
 		];
 
 		for (file in files) {
-			embedBlob(file, untyped global['data/' + file]);
+			Res.embedBlob(file, untyped global['data/' + file]);
 			untyped global['data/' + file] = null;
 		}
 
@@ -106,7 +92,7 @@ class Main {
 		];
 
 		for (file in files_renderlib) {
-			embedBlob(file, untyped global['data/' + file]);
+			Res.embedBlob(file, untyped global['data/' + file]);
 			untyped global['data/' + file] = null;
 		}
 
@@ -123,7 +109,7 @@ class Main {
 	@:keep
 	public static function kickstart() {
 		// Used to locate external application data folder
-		Krom.setApplicationName("ArmorPaint");
+		Krom.setApplicationName(Main.title);
 
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
@@ -137,34 +123,9 @@ class Main {
 		if (tasks > 0) return;
 
 		Config.init();
-		var c = Config.raw;
-
-		var windowMode = c.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
-		var windowFeatures = None;
-		if (c.window_resizable) windowFeatures |= FeatureResizable;
-		if (c.window_maximizable) windowFeatures |= FeatureMaximizable;
-		if (c.window_minimizable) windowFeatures |= FeatureMinimizable;
-		var title = "untitled - ArmorPaint";
-		var options: kha.SystemOptions = {
-			title: title,
-			window: {
-				width: c.window_w,
-				height: c.window_h,
-				x: c.window_x,
-				y: c.window_y,
-				mode: windowMode,
-				windowFeatures: windowFeatures
-			},
-			framebuffer: {
-				samplesPerPixel: 1,
-				verticalSync: c.window_vsync,
-				frequency: c.window_frequency
-			}
-		};
-
-		System.start(options, function(window: Window) {
-			if (Config.raw.layout == null) Config.initLayout();
-			Krom.setApplicationName("ArmorPaint");
+		System.start(Config.getOptions(), function(window: Window) {
+			if (Config.raw.layout == null) arm.App.initLayout();
+			Krom.setApplicationName(Main.title);
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
 					Uniforms.init();

@@ -642,7 +642,7 @@ class UISidebar {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		arm.Gizmo.update();
+		arm.render.Gizmo.update();
 	}
 
 	public function render(g: kha.graphics2.Graphics) {

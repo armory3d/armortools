@@ -119,7 +119,7 @@ class BoxPreferences {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Confirm"), Left)) {
-							Config.initLayout();
+							App.initLayout();
 							Config.save();
 						}
 					}, 2);

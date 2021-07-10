@@ -157,7 +157,7 @@ class Project {
 	}
 
 	public static function projectNew(resetLayers = true) {
-		Window.get(0).title = "ArmorPaint";
+		Window.get(0).title = Main.title;
 		filepath = "";
 		if (Context.mergedObject != null) {
 			Context.mergedObject.remove();

@@ -404,7 +404,7 @@ class History {
 
 	static function push(name: String): TStep {
 		var filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		kha.Window.get(0).title = filename + "* - ArmorPaint";
+		kha.Window.get(0).title = filename + "* - " + Main.title;
 
 		if (undos < Config.raw.undo_steps) undos++;
 		if (redos > 0) {
