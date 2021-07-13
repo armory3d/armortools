@@ -11,9 +11,11 @@ class ImportAsset {
 	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true, hdrAsEnvmap = true) {
 
 		if (path.startsWith("cloud")) {
-			var abs = File.cacheCloud(path);
-			if (abs == null) return;
-			path = abs;
+			File.cacheCloud(path, function(abs: String) {
+				if (abs == null) return;
+				run(abs, dropX, dropY, showBox, hdrAsEnvmap);
+			});
+			return;
 		}
 
 		if (Path.isMesh(path)) {

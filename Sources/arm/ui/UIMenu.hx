@@ -352,26 +352,27 @@ class UIMenu {
 				#if !(krom_android || krom_ios)
 				if (menuButton(ui, tr("Check for Updates..."))) {
 					// Retrieve latest version number
-					var url = "'https://luboslenco.gitlab.io/armorpaint/index.html'";
-					var blob = File.downloadBytes(url);
-					if (blob != null)  {
-						// Compare versions
-						var update = Json.parse(blob.toString());
-						var updateVersion = Std.int(update.version);
-						if (updateVersion > 0) {
-							var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
-							var dateInt = Std.parseInt(date.replace("-", ""));
-							if (updateVersion > dateInt) {
-								UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorpaint.org to download."));
-							}
-							else {
-								UIBox.showMessage(tr("Update"), tr("You are up to date!"));
+					var url = "https://luboslenco.gitlab.io/armorpaint/index.html";
+					File.downloadBytes(url, function(bytes: Bytes) {
+						if (bytes != null)  {
+							// Compare versions
+							var update = Json.parse(bytes.toString());
+							var updateVersion = Std.int(update.version);
+							if (updateVersion > 0) {
+								var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
+								var dateInt = Std.parseInt(date.replace("-", ""));
+								if (updateVersion > dateInt) {
+									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorpaint.org to download."));
+								}
+								else {
+									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
+								}
 							}
 						}
-					}
-					else {
-						UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorpaint.org."));
-					}
+						else {
+							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorpaint.org."));
+						}
+					});
 				}
 				#end
 
