@@ -193,8 +193,6 @@ class UIFiles {
 								}
 								else offline = true;
 							});
-
-
 						}
 					}
 					if (icon != null) {
