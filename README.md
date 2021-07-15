@@ -68,6 +68,7 @@ git apply patch/ios_document_picker.diff --directory=Kinc
 git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make ios -g metal
 # Open generated Xcode project `build/Krom.xcodeproj`
+# Set iOS Deployment Target to 11.0
 # Build for device in release mode
 ```
 
