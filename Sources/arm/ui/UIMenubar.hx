@@ -122,7 +122,7 @@ class UIMenubar {
 		var col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += untyped 4294967296;
 		var light = col > 0xff666666 + 4294967296;
-		var iconAccent = light ? 0xff666666 : 0xff999999;
+		var iconAccent = light ? 0xff666666 : 0xffaaaaaa;
 		var img = Res.get("icons.k");
 		var rect = Res.tile50(img, i, 2);
 		return ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;

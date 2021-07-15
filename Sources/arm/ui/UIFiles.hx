@@ -107,6 +107,11 @@ class UIFiles {
 		if (isCloud && File.cloud == null) File.initCloud();
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
+		#if krom_ios
+		var documentDirectory = Krom.saveDialog("", "");
+		documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
+		#end
+
 		if (handle.text == "") handle.text = defaultPath;
 		if (handle.text != lastPath || search != lastSearch) {
 			files = [];
@@ -116,7 +121,12 @@ class UIFiles {
 			var nested = i1 > -1 && handle.text.length - 1 > i1;
 			if (nested) files.push("..");
 
-			var filesAll = File.readDirectory(handle.text, foldersOnly);
+			var dirPath = handle.text;
+			#if krom_ios
+			if (!isCloud) dirPath = documentDirectory;
+			#end
+			var filesAll = File.readDirectory(dirPath, foldersOnly);
+
 			for (f in filesAll) {
 				if (f == "" || f.charAt(0) == ".") continue; // Skip hidden
 				if (f.indexOf(".") > 0 && !Path.isKnown(f)) continue; // Skip unknown extensions
@@ -206,7 +216,11 @@ class UIFiles {
 					var key = handle.text + Path.sep + f;
 					var icon = iconMap.get(key);
 					if (!iconMap.exists(key)) {
-						var bytes = Bytes.ofData(Krom.loadBlob(key));
+						var blobPath = key;
+						#if krom_ios
+						blobPath = documentDirectory + blobPath;
+						#end
+						var bytes = Bytes.ofData(Krom.loadBlob(blobPath));
 						var raw = ArmPack.decode(bytes);
 						if (raw.material_icons != null) {
 							var bytesIcon = raw.material_icons[0];
@@ -232,6 +246,9 @@ class UIFiles {
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragFile = handle.text;
+						#if krom_ios
+						if (!isCloud) App.dragFile = documentDirectory + App.dragFile;
+						#end
 						if (App.dragFile.charAt(App.dragFile.length - 1) != Path.sep) {
 							App.dragFile += Path.sep;
 						}

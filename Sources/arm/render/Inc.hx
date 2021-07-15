@@ -186,8 +186,8 @@ class Inc {
 
 		if (Context.ddirty <= 0 && Context.rdirty <= 0 && Context.pdirty <= 0) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
-			#if kha_metal
-			if (Context.ddirty > -4) {
+			#if (kha_metal || krom_android)
+			if (Context.ddirty > -6) {
 			#else
 			if (Context.ddirty > -2) {
 			#end

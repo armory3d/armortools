@@ -53,9 +53,6 @@ class UIHeader {
 				var occlusionPicked = Math.round(Context.swatch.occlusion * 100) / 100;
 				var roughnessPicked = Math.round(Context.swatch.roughness * 100) / 100;
 				var metallicPicked = Math.round(Context.swatch.metallic * 100) / 100;
-				#if kha_metal
-				ui.text('TODO'); // Skips first draw
-				#end
 
 				var h = Id.handle();
 				h.color.R = baseRPicked;
@@ -300,8 +297,12 @@ class UIHeader {
 					var symXHandle = Id.handle({selected: false});
 					var symYHandle = Id.handle({selected: false});
 					var symZHandle = Id.handle({selected: false});
+					#if krom_ios
+					ui._x -= 10 * sc;
+					#else
 					ui._w = Std.int(56 * sc);
 					ui.text(tr("Symmetry"));
+					#end
 					ui._w = Std.int(25 * sc);
 					Context.symX = ui.check(symXHandle, tr("X"));
 					Context.symY = ui.check(symYHandle, tr("Y"));
