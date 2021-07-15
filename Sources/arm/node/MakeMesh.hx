@@ -137,7 +137,7 @@ class MakeMesh {
 				for (m in Context.layer.getMasks()) {
 					if (!m.isVisible()) continue;
 					textureCount++;
-					frag.add_uniform('sampler2D texpaint_view_mask' + m.id, '_texpaint' + m.id);
+					frag.add_uniform('sampler2D texpaint_view_mask' + m.id, '_texpaint' + Project.layers.indexOf(m));
 				}
 			}
 
@@ -436,13 +436,19 @@ class MakeMesh {
 				frag.write('float id_b = fract(sin(dot(vec2(obid, obid * 40.0), vec2(12.9898, 78.233))) * 43758.5453);');
 				frag.write('fragColor[1] = vec4(id_r, id_g, id_b, 1.0);');
 			}
-			else if (Context.viewportMode == ViewMask && Context.layer.getMasks() != null) {
-				frag.write('float sample_mask = 1.0');
-				for (m in Context.layer.getMasks()) {
-					if (!m.isVisible()) continue;
-					frag.write('float sample_mask = textureLod(texpaint_view_mask' + m.id + ', texCoord, 0.0).r;');
+			else if (Context.viewportMode == ViewMask && (Context.layer.getMasks() != null || Context.layer.isMask())) {
+				if (Context.layer.isMask()) {
+					frag.write('float mask_view = textureLodShared(texpaint' + Context.layer.id + ', texCoord, 0.0).r;');
 				}
-				frag.write('fragColor[1] = vec4(sample_mask, sample_mask, sample_mask, 1.0);');
+				else {
+					frag.write('float mask_view = 0.0;');
+					for (m in Context.layer.getMasks()) {
+						if (!m.isVisible()) continue;
+						frag.write('float mask_sample' + m.id + ' = textureLodShared(texpaint_view_mask' + m.id + ', texCoord, 0.0).r;');
+						frag.write('mask_view = ' + MakeMaterial.blendModeMask(frag, m.blending, 'mask_view', 'mask_sample' + m.id, 'float(' + m.getOpacity() + ')') + ';');
+					}
+				}
+				frag.write('fragColor[1] = vec4(mask_view, mask_view, mask_view, 1.0);');
 			}
 			else {
 				frag.write('fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
