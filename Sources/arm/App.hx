@@ -412,12 +412,13 @@ class App {
 					dropX = mouse.x;
 					dropY = mouse.y;
 					var materialCount = Project.materials.length;
-					ImportAsset.run(dragFile, dropX, dropY);
-					// Asset was material
-					if (Project.materials.length > materialCount) {
-						dragMaterial = Context.material;
-						materialDropped(inViewport, inLayers, inNodes);
-					}
+					ImportAsset.run(dragFile, dropX, dropY, true, true, function() {
+						// Asset was material
+						if (Project.materials.length > materialCount) {
+							dragMaterial = Context.material;
+							materialDropped(inViewport, inLayers, inNodes);
+						}
+					});
 				}
 				dragFile = null;
 			}

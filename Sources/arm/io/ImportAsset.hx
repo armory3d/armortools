@@ -8,12 +8,12 @@ import arm.Project;
 
 class ImportAsset {
 
-	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true, hdrAsEnvmap = true) {
+	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true, hdrAsEnvmap = true, done: Void->Void = null) {
 
 		if (path.startsWith("cloud")) {
 			File.cacheCloud(path, function(abs: String) {
 				if (abs == null) return;
-				run(abs, dropX, dropY, showBox, hdrAsEnvmap);
+				run(abs, dropX, dropY, showBox, hdrAsEnvmap, done);
 			});
 			return;
 		}
@@ -60,5 +60,7 @@ class ImportAsset {
 				Console.error(Strings.error1());
 			}
 		}
+
+		if (done != null) done();
 	}
 }
