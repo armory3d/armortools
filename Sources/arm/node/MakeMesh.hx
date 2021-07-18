@@ -388,7 +388,7 @@ class MakeMesh {
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
 				}
 				else { // Deferred, Pathtraced
-					if (MakeMaterial.emisUsed) frag.write('if (matid == 1.0) basecol *= 10.0;'); // Boost for bloom
+					if (MakeMaterial.emisUsed) frag.write('if (uint(matid * 255.0) % 3 == 1) basecol *= 10.0;'); // Boost for bloom
 					frag.write('fragColor[1] = vec4(basecol, occlusion);');
 				}
 			}
@@ -456,7 +456,7 @@ class MakeMesh {
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 			frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
-			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid)));');
+			frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(matid * 255.0) % 3));');
 		}
 
 		frag.write('vec2 posa = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');

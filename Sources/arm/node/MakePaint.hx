@@ -174,7 +174,6 @@ class MakePaint {
 		MakeTexcoord.run(vert, frag);
 
 		if (Context.tool == ToolClone || Context.tool == ToolBlur) {
-
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
