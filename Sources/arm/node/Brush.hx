@@ -186,13 +186,7 @@ class Brush {
 
 		var v: LogicNode = null;
 
-		if (inp.type == "OBJECT") {
-			v = createClassInstance("ObjectNode", [tree, inp.default_value]);
-		}
-		else if (inp.type == "ANIMACTION") {
-			v = createClassInstance("StringNode", [tree, inp.default_value]);
-		}
-		else if (inp.type == "VECTOR") {
+		if (inp.type == "VECTOR") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
 			v = createClassInstance("VectorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
@@ -216,7 +210,7 @@ class Brush {
 		else if (inp.type == "STRING") {
 			v = createClassInstance("StringNode", [tree, inp.default_value]);
 		}
-		else { // ACTION, ARRAY
+		else {
 			v = createClassInstance("NullNode", [tree]);
 		}
 		return v;

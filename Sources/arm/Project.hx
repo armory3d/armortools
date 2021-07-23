@@ -106,7 +106,7 @@ class Project {
 			return;
 		}
 		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		Window.get(0).title = filename + " - ArmorPaint";
+		Window.get(0).title = filename + " - " + Main.title;
 
 		function _init() {
 			ExportArm.runProject();
