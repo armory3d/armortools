@@ -16,9 +16,6 @@ class Inc {
 	static var path: RenderPath;
 	public static var superSample = 1.0;
 
-	static var pointIndex = 0;
-	static var spotIndex = 0;
-	static var lastFrame = -1;
 	static var lastX = -1.0;
 	static var lastY = -1.0;
 
