@@ -29,6 +29,10 @@ class UIStatus {
 			TabBrowser.draw();
 			TabScript.draw();
 			TabConsole.draw();
+			TabTextures.draw();
+			TabMeshes.draw();
+			TabFonts.draw();
+			TabSwatches.draw();
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
 			if (statustab.changed && (statustab.position == Context.lastStatusPosition || minimized)) {

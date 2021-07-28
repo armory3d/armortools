@@ -134,7 +134,6 @@ class ImportMesh {
 			Context.ddirty = 4;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
-			UISidebar.inst.hwnd2.redraws = 2;
 			UVUtil.uvmapCached = false;
 			UVUtil.trianglemapCached = false;
 			UVUtil.dilatemapCached = false;

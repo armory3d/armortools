@@ -127,6 +127,15 @@ class TabLayers {
 			}
 
 			ui.endSticky();
+			ui._y += 2;
+
+			var step = ui.t.ELEMENT_H * 2;
+			var fullH = ui._windowH - UISidebar.inst.hwnd0.scrollOffset;
+			for (i in 0...Std.int(fullH / step)) {
+				if (i % 2 == 0) {
+					ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
+				}
+			}
 
 			for (i in 0...Project.layers.length) {
 				if (i >= Project.layers.length) break; // Layer was deleted
@@ -183,13 +192,8 @@ class TabLayers {
 			return;
 		}
 
-		var off = ui.t.ELEMENT_OFFSET;
 		var step = ui.t.ELEMENT_H;
 		var checkw = (ui._windowW / 100 * 8) / ui.SCALE();
-
-		if (Context.layer == l) {
-			ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, step * 2, ui.t.HIGHLIGHT_COL);
-		}
 
 		// Highlight drag destination
 		var mouse = Input.getMouse();
@@ -227,12 +231,12 @@ class TabLayers {
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100]);
 		}
 
-		var center = (step / 2) * ui.SCALE();
-		ui._y += center;
 		var icons = Res.get("icons.k");
 		var r = Res.tile18(icons, l.visible ? 0 : 1, 0);
+		var center = (step / 2) * ui.SCALE();
 		ui._x += 2;
 		ui._y += 3;
+		ui._y += center;
 		var col = ui.t.ACCENT_SELECT_COL;
 		var parentHidden = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 		if (parentHidden) col -= 0x99000000;
@@ -339,7 +343,6 @@ class TabLayers {
 			if (ui.textSelectedHandle != layerNameHandle) layerNameEdit = -1;
 		}
 		else {
-
 			if (ui.enabled && ui.inputEnabled &&
 				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._x + ui._w &&
 				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
@@ -429,11 +432,12 @@ class TabLayers {
 		}
 
 		if (l.isGroup() || l.isMask()) {
-			ui._y -= ui.t.ELEMENT_OFFSET;
+			ui._y -= ui.ELEMENT_OFFSET();
 			@:privateAccess ui.endElement();
 		}
 		else {
-			ui._y -= ui.t.ELEMENT_OFFSET;
+			ui._y -= ui.ELEMENT_OFFSET();
+
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 			@:privateAccess ui.endElement();
 			@:privateAccess ui.endElement();
@@ -464,9 +468,13 @@ class TabLayers {
 			@:privateAccess ui.endElement();
 		}
 
-		ui._y -= ui.t.ELEMENT_OFFSET;
+		ui._y -= ui.ELEMENT_OFFSET();
 
-		ui.fill(0, 0, (ui._windowW / ui.SCALE() - 2), 1 * ui.SCALE(), ui.t.SEPARATOR_COL);
+		ui.fill(0, 0, (ui._w / ui.SCALE() - 2), 1 * ui.SCALE(), ui.t.SEPARATOR_COL);
+
+		if (Context.layer == l) {
+			ui.rect(1, -step * 2 - 1, (ui._w / ui.SCALE() - 2), step * 2 + 1, ui.t.HIGHLIGHT_COL, 2);
+		}
 	}
 
 	static function drawLayerContextMenu(l: LayerSlot) {

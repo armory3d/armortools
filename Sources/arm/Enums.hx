@@ -238,10 +238,9 @@ package arm;
 	var LayoutSidebarW = 0;
 	var LayoutSidebarH0 = 1;
 	var LayoutSidebarH1 = 2;
-	var LayoutSidebarH2 = 3;
-	var LayoutNodesW = 4;
-	var LayoutNodesH = 5;
-	var LayoutStatusH = 6;
+	var LayoutNodesW = 3;
+	var LayoutNodesH = 4;
+	var LayoutStatusH = 5;
 }
 
 @:enum abstract ZoomDirection(Int) from Int to Int {

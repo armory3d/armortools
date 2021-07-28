@@ -11,10 +11,10 @@ class TabFonts {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab2, tr("Fonts"))) {
+		if (ui.tab(UIStatus.inst.statustab, tr("Fonts"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 4, 1 / 4]);
+			ui.row([1 / 20, 1 / 20]);
 
 			if (ui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
 			if (ui.isHovered) ui.tooltip(tr("Import font file"));
@@ -97,7 +97,7 @@ class TabFonts {
 									Project.fonts.splice(i, 1);
 								}
 								iron.App.notifyOnInit(_init);
-								UISidebar.inst.hwnd2.redraws = 2;
+								UIStatus.inst.statusHandle.redraws = 2;
 							}
 						}, 1 + add);
 					}

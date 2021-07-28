@@ -10,10 +10,10 @@ class TabMeshes {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab2, tr("Meshes"))) {
+		if (ui.tab(UIStatus.inst.statustab, tr("Meshes"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 4, 1 / 4]);
+			ui.row([1 / 20, 1 / 20]);
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {

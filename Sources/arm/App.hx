@@ -272,8 +272,7 @@ class App {
 
 		Config.raw.layout[LayoutNodesW] = Std.int(Config.raw.layout[LayoutNodesW] * ratioW);
 		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratioH);
-		Config.raw.layout[LayoutSidebarH1] = Std.int(Config.raw.layout[LayoutSidebarH1] * ratioH);
-		Config.raw.layout[LayoutSidebarH2] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0] - Config.raw.layout[LayoutSidebarH1];
+		Config.raw.layout[LayoutSidebarH1] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0];
 
 		resize();
 
@@ -333,7 +332,6 @@ class App {
 	public static function redrawUI() {
 		UISidebar.inst.hwnd0.redraws = 2;
 		UISidebar.inst.hwnd1.redraws = 2;
-		UISidebar.inst.hwnd2.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		UIStatus.inst.statusHandle.redraws = 2;
@@ -684,9 +682,8 @@ class App {
 		var raw = Config.raw;
 		raw.layout = [
 			Std.int(UISidebar.defaultWindowW * raw.window_scale),
-			Std.int(kha.System.windowHeight() / 3),
-			Std.int(kha.System.windowHeight() / 3),
-			Std.int(kha.System.windowHeight() / 3),
+			Std.int(kha.System.windowHeight() / 2),
+			Std.int(kha.System.windowHeight() / 2),
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
 			Std.int(iron.App.h() / 2),
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)

@@ -24,6 +24,7 @@ import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
+import arm.ui.UIStatus;
 import arm.ui.BoxPreferences;
 import arm.node.MakeMaterial;
 import arm.Enums;
@@ -302,7 +303,7 @@ class Context {
 		font = f;
 		RenderUtil.makeTextPreview();
 		RenderUtil.makeDecalPreview();
-		UISidebar.inst.hwnd2.redraws = 2;
+		UIStatus.inst.statusHandle.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 

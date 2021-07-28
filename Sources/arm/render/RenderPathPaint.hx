@@ -11,7 +11,7 @@ import iron.Scene;
 import arm.Viewport;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
-import arm.ui.UISidebar;
+import arm.ui.UIStatus;
 import arm.node.MakeMaterial;
 import arm.Enums;
 
@@ -181,7 +181,7 @@ class RenderPathPaint {
 					path.drawMeshes("paint");
 					if (useLiveLayer) RenderPathPaint.useLiveLayer(false);
 					UIHeader.inst.headerHandle.redraws = 2;
-					UISidebar.inst.hwnd2.redraws = 2;
+					UIStatus.inst.statusHandle.redraws = 2;
 
 					var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;

@@ -39,10 +39,8 @@ class UISidebar {
 	public var ui: Zui;
 	public var hwnd0 = Id.handle();
 	public var hwnd1 = Id.handle();
-	public var hwnd2 = Id.handle();
 	public var htab0 = Id.handle();
 	public var htab1 = Id.handle();
-	public var htab2 = Id.handle();
 	var borderStarted = 0;
 	var borderHandle: Handle = null;
 
@@ -94,9 +92,9 @@ class UISidebar {
 
 		if (Context.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
-			b.set(0, 3);
-			b.set(1, 3);
-			b.set(2, 3);
+			b.set(0, 2);
+			b.set(1, 2);
+			b.set(2, 2);
 			b.set(3, 255);
 			Context.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}
@@ -425,12 +423,6 @@ class UISidebar {
 							Config.raw.layout[LayoutSidebarH1] -= my;
 						}
 					}
-					else if (borderHandle == hwnd2 && borderStarted == SideTop) {
-						if (Config.raw.layout[LayoutSidebarH1] + my > 32 && Config.raw.layout[LayoutSidebarH2] - my > 32) {
-							Config.raw.layout[LayoutSidebarH1] += my;
-							Config.raw.layout[LayoutSidebarH2] -= my;
-						}
-					}
 				}
 			}
 		}
@@ -672,12 +664,6 @@ class UISidebar {
 			TabBrushes.draw();
 			TabParticles.draw();
 		}
-		if (ui.window(hwnd2, tabx, Config.raw.layout[LayoutSidebarH0] + Config.raw.layout[LayoutSidebarH1], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH2])) {
-			TabTextures.draw();
-			TabMeshes.draw();
-			TabFonts.draw();
-			TabSwatches.draw();
-		}
 
 		ui.end();
 		g.begin(false);
@@ -875,7 +861,6 @@ class UISidebar {
 		if (!App.uiEnabled) return;
 		if (handle != hwnd0 &&
 			handle != hwnd1 &&
-			handle != hwnd2 &&
 			handle != UIStatus.inst.statusHandle &&
 			handle != UINodes.inst.hwnd &&
 			handle != UIView2D.inst.hwnd) return; // Scalable handles
@@ -883,7 +868,6 @@ class UISidebar {
 		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
 		if (handle == hwnd0 && side == SideTop) return;
-		if (handle == hwnd2 && side == SideBottom) return;
 		if (handle == UIStatus.inst.statusHandle && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
@@ -910,6 +894,5 @@ class UISidebar {
 		UIMenubar.inst.menuHandle.redraws = 2;
 		hwnd0.redraws = 2;
 		hwnd1.redraws = 2;
-		hwnd2.redraws = 2;
 	}
 }

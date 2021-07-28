@@ -16,10 +16,10 @@ class TabTextures {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab2, tr("Textures"))) {
+		if (ui.tab(UIStatus.inst.statustab, tr("Textures"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 4, 1 / 4]);
+			ui.row([1 / 20, 1 / 20]);
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
@@ -34,8 +34,9 @@ class TabTextures {
 
 			if (Project.assets.length > 0) {
 
-				var slotw = Std.int(51 * ui.SCALE());
-				var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
+				var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
+				var slotw = Std.int(52 * ui.SCALE());
+				var num = Std.int(statusw / slotw);
 
 				for (row in 0...Std.int(Math.ceil(Project.assets.length / num))) {
 					var mult = Config.raw.show_asset_names ? 2 : 1;
@@ -120,7 +121,7 @@ class TabTextures {
 									Layers.createImageMask(asset);
 								}
 								if (ui.button(tr("Delete"), Left)) {
-									UISidebar.inst.hwnd2.redraws = 2;
+									UIStatus.inst.statusHandle.redraws = 2;
 									Data.deleteImage(asset.file);
 									Project.assetMap.remove(asset.id);
 									Project.assets.splice(i, 1);
