@@ -240,7 +240,6 @@ class UIFiles {
 				}
 
 				if (state == Started) {
-
 					if (f != ".." && dragFiles) {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);

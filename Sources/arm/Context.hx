@@ -40,7 +40,7 @@ class Context {
 	public static var paintObject: MeshObject;
 	public static var mergedObject: MeshObject = null; // For object mask
 	public static var mergedObjectIsAtlas = false; // Only objects referenced by atlas are merged
-	public static var tool = 0;
+	public static var tool = ToolBrush;
 
 	public static var ddirty = 0; // depth
 	public static var pdirty = 0; // paint
