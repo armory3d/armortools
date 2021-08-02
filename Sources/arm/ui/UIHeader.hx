@@ -282,6 +282,14 @@ class UIHeader {
 						MakeMaterial.parsePaintMaterial();
 						MakeMaterial.parseMeshMaterial();
 					}
+
+					Context.drawWireframe = ui.check(Context.wireframeHandle, " " + tr("Wireframe"));
+					if (Context.wireframeHandle.changed) {
+						ui.g.end();
+						UVUtil.cacheUVMap();
+						ui.g.begin(false);
+						MakeMaterial.parseMeshMaterial();
+					}
 				}
 				else {
 					var _w = ui._w;
