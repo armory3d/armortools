@@ -90,7 +90,7 @@ class ImportArm {
 			Project.projectNew(importAsMesh);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
-			Window.get(0).title = UIFiles.filename + " - ArmorPaint";
+			Window.get(0).title = UIFiles.filename + " - " + Main.title;
 
 			// Import as mesh instead
 			if (importAsMesh) {

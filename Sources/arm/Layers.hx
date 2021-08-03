@@ -211,8 +211,8 @@ class Layers {
 		vs.add("tex", VertexData.Float2);
 		vs.add("col", VertexData.Float4);
 		pipeInvert8.inputLayout = [vs];
-		pipeCopy8.colorAttachmentCount = 1;
-		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
+		pipeInvert8.colorAttachmentCount = 1;
+		pipeInvert8.colorAttachments[0] = TextureFormat.L8;
 		pipeInvert8.compile();
 
 		pipeApplyMask = new PipelineState();
