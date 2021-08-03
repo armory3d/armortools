@@ -25,8 +25,9 @@ class TabFonts {
 			ui.endSticky();
 			ui.separator(3, false);
 
+			var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 			var slotw = Std.int(51 * ui.SCALE());
-			var num = Std.int(Config.raw.layout[LayoutSidebarW] / slotw);
+			var num = Std.int(statusw / slotw);
 
 			for (row in 0...Std.int(Math.ceil(Project.fonts.length / num))) {
 				var mult = Config.raw.show_asset_names ? 2 : 1;
