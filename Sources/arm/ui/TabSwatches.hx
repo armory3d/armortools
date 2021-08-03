@@ -18,26 +18,24 @@ class TabSwatches {
 		if (ui.tab(UIStatus.inst.statustab, tr("Swatches"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 20, 1 / 20]);
+			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
 
 			if (ui.button(tr("New"))) {
 				Context.setSwatch(Project.makeSwatch());
 				Project.raw.swatches.push(Context.swatch);
 			}
+
 			if (ui.button(tr("Import"))) Project.importSwatches();
 			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
-			if (ui.button(tr("Tools..."))) {
-				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Tools"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Clear"), Left)) {
-						Context.setSwatch(Project.makeSwatch());
-						Project.raw.swatches = [Context.swatch];
-					}
-					if (ui.button(tr("Restore"), Left)) {
-						Project.setDefaultSwatches();
-						Context.setSwatch(Project.raw.swatches[0]);
-					}
-				}, 3);
+
+			if (ui.button(tr("Clear"))) {
+				Context.setSwatch(Project.makeSwatch());
+				Project.raw.swatches = [Context.swatch];
+			}
+
+			if (ui.button(tr("Restore"))) {
+				Project.setDefaultSwatches();
+				Context.setSwatch(Project.raw.swatches[0]);
 			}
 
 			ui.endSticky();
