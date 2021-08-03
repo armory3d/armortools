@@ -337,6 +337,7 @@ class ExportTexture {
 		if (type == 2 && off == 0) format = 3; // RRR1
 		if (type == 2 && off == 1) format = 4; // GGG1
 		if (type == 2 && off == 2) format = 5; // BBB1
+		if (type == 2 && off == 3) format = 6; // AAA1
 		if (bits == 8 && Context.formatType == FormatPng) {
 			Krom.writePng(file, pixels.getData(), resX, resY, format);
 		}
