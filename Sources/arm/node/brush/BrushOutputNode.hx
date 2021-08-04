@@ -103,15 +103,14 @@ class BrushOutputNode extends LogicNode {
 			Context.paintVec.x < right &&
 			Context.paintVec.y > 0 &&
 			Context.paintVec.y < 1 &&
-			!UISidebar.inst.ui.isHovered &&
-			!UISidebar.inst.ui.isScrolling &&
 			!fillLayer &&
 			!groupLayer &&
 			(Context.layer.isVisible() || Context.paint2d) &&
+			!UISidebar.inst.ui.isHovered &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
-			@:privateAccess UISidebar.inst.ui.comboSelectedHandle == null &&
-			@:privateAccess UIView2D.inst.ui.comboSelectedHandle == null) { // Header combos are in use
+			!arm.App.isScrolling() &&
+			!arm.App.isComboSelected()) {
 
 			// Set color pick
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();

@@ -652,7 +652,13 @@ class App {
 	}
 
 	public static function isScrolling(): Bool {
-		return UISidebar.inst.ui.isScrolling;
+		for (ui in getUIs()) if (ui.isScrolling) return true;
+		return false;
+	}
+
+	public static function isComboSelected(): Bool {
+		for (ui in getUIs()) if (@:privateAccess ui.comboSelectedHandle != null) return true;
+		return false;
 	}
 
 	public static function getUIs(): Array<Zui> {
