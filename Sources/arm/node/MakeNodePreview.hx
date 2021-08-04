@@ -54,7 +54,9 @@ class MakeNodePreview {
 		MaterialParser.curshader = frag;
 		MaterialParser.matcon = matcon;
 
+		MaterialParser.transform_color_space = false;
 		var res = MaterialParser.write_result(link);
+		MaterialParser.transform_color_space = true;
 		var st = node.outputs[link.from_socket].type;
 		if (st != "RGB" && st != "RGBA" && st != "VECTOR") {
 			res = MaterialParser.to_vec3(res);
