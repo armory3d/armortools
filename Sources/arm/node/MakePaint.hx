@@ -231,13 +231,13 @@ class MakePaint {
 			if (Context.material.paintSubs) {
 				frag.write('float subs = $subs;');
 			}
-			if (height != "0" && !MakeMaterial.heightUsed) {
+			if (Std.parseFloat(height) != 0.0 && !MakeMaterial.heightUsed) {
 				MakeMaterial.heightUsed = true;
 				// Height used for the first time, also rebuild vertex shader
 				return run(data, matcon);
 			}
-			if (emis != "0") MakeMaterial.emisUsed = true;
-			if (subs != "0") MakeMaterial.subsUsed = true;
+			if (Std.parseFloat(emis) != 0.0) MakeMaterial.emisUsed = true;
+			if (Std.parseFloat(subs) != 0.0) MakeMaterial.subsUsed = true;
 		}
 
 		if (Context.brushMaskImage != null && Context.tool == ToolDecal) {
