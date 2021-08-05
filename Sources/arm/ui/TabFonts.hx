@@ -14,7 +14,7 @@ class TabFonts {
 		if (ui.tab(UIStatus.inst.statustab, tr("Fonts"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 20]);
+			ui.row([1 / 14, 1 / 14]);
 
 			if (ui.button(tr("Import"))) Project.importAsset("ttf,ttc,otf");
 			if (ui.isHovered) ui.tooltip(tr("Import font file"));

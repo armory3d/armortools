@@ -18,7 +18,7 @@ class TabSwatches {
 		if (ui.tab(UIStatus.inst.statustab, tr("Swatches"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 20, 1 / 20, 1 / 20]);
+			ui.row([1 / 14, 1 / 14, 1 / 14, 1 / 14]);
 
 			if (ui.button(tr("New"))) {
 				Context.setSwatch(Project.makeSwatch());

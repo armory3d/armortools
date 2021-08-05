@@ -19,7 +19,7 @@ class TabTextures {
 		if (ui.tab(UIStatus.inst.statustab, tr("Textures"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 20]);
+			ui.row([1 / 14, 1 / 14]);
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {

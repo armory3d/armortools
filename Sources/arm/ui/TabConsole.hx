@@ -20,7 +20,7 @@ class TabConsole {
 		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 20]);
+			ui.row([1 / 14, 1 / 14]);
 
 			if (ui.button(tr("Clear"))) {
 				Console.lastTraces = [];

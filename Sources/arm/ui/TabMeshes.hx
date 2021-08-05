@@ -13,7 +13,7 @@ class TabMeshes {
 		if (ui.tab(UIStatus.inst.statustab, tr("Meshes"))) {
 
 			ui.beginSticky();
-			ui.row([1 / 20, 1 / 11, 1 / 11, 1 / 11, 1 / 11, 1 / 20, 1 / 20, 1 / 20]);
+			ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14, 1 / 14, 1 / 14]);
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {
