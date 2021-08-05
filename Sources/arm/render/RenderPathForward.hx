@@ -89,7 +89,12 @@ class RenderPathForward {
 
 		path.setTarget(buf);
 		path.bindTarget(gbuffer1, "tex");
-		path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		if (Context.viewportMode == ViewLit) {
+			path.drawShader("shader_datas/compositor_pass/compositor_pass");
+		}
+		else {
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+		}
 
 		if (output == "") {
 			path.setTarget(buf);

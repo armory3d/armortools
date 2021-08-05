@@ -334,9 +334,10 @@ class MakeMesh {
 			frag.write('n.y = -n.y;');
 			frag.write('n = normalize(mul(n, TBN));');
 
-			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
-
 			if (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace) {
+
+				frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
+
 				if (Context.viewportShader != null) {
 					var color = Context.viewportShader(frag);
 					frag.write('fragColor[1] = vec4($color, 1.0);');
