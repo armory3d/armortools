@@ -26,6 +26,9 @@ class UIStatus {
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 			ui._y += 2;
 
+			ui.fill(0, 0, 1, statush, ui.t.SEPARATOR_COL);
+			ui.fill(ui._w / ui.SCALE() - 1, 0, 1, statush, ui.t.SEPARATOR_COL);
+
 			TabBrowser.draw();
 			TabTextures.draw();
 			TabMeshes.draw();
