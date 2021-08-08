@@ -120,8 +120,8 @@ class UIFiles {
 			var i1 = handle.text.indexOf(Path.sep);
 			var nested = i1 > -1 && handle.text.length - 1 > i1;
 			#if krom_windows
-			//server adresses like \\server are not nested
-            nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == Path.sep && handle.text.charAt(1) == Path.sep && handle.text.lastIndexOf(Path.sep) == 1);
+			// Server addresses like \\server are not nested
+			nested = nested && !(handle.text.length >= 2 && handle.text.charAt(0) == Path.sep && handle.text.charAt(1) == Path.sep && handle.text.lastIndexOf(Path.sep) == 1);
 			#end
 			if (nested) files.push("..");
 
