@@ -46,7 +46,7 @@ class MeshUtil {
 			}
 			for (j in 0...vas[1].values.length) va1[j + voff * 2] = vas[1].values[j];
 			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
-			if (va3 != null) for (j in 0...vas[3].values.length) va3[j + voff * 4] = vas[3].values[j];
+			if (va3 != null) for (j in 0...vas[3].values.length) va3[j + voff * 3] = vas[3].values[j];
 			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
 
 			voff += Std.int(vas[0].values.length / 4);
