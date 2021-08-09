@@ -534,8 +534,7 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
-		var isPicker = Context.tool == ToolPicker;
-		var fillLayer = Context.layer.fill_layer != null && !isPicker;
+		var fillLayer = Context.layer.fill_layer != null && Context.tool != ToolPicker && Context.tool != ToolColorId;
 		var groupLayer = Context.layer.isGroup();
 		return !fillLayer && !groupLayer && !Context.foregroundEvent;
 	}

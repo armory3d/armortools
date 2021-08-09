@@ -591,6 +591,14 @@ class UISidebar {
 			#end
 			Context.brushBlendDirty = true; // Update brush mask
 			Context.layerPreviewDirty = true; // Update layer preview
+
+			// New color id picked, update fill layer
+			if (Context.tool == ToolColorId && Context.layer.fill_layer != null) {
+				App.notifyOnNextFrame(function() {
+					Layers.updateFillLayer();
+					MakeMaterial.parsePaintMaterial(false);
+				});
+			}
 		}
 
 		if (Context.layersPreviewDirty) {
