@@ -21,7 +21,7 @@ cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11
-# Open generated Visual Studio project at `build\Krom.sln`
+# Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
 
@@ -31,8 +31,8 @@ node armorcore/make -g opengl
 cd armorcore
 node Kinc/make -g opengl --compiler clang --compile
 cd Deployment
-strip Krom
-./Krom ../../build/krom
+strip ArmorPaint
+./ArmorPaint ../../build/krom
 ```
 
 **macOS**
@@ -42,20 +42,20 @@ cp -a build/krom/ armorcore/Deployment
 cd armorcore
 git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make -g metal
-# Open generated Xcode project at `build/Krom.xcodeproj`
+# Open generated Xcode project at `build/ArmorPaint.xcodeproj`
 # Build and run
 ```
 
 **Android** *wip*
 ```bash
 node armorcore/make android -g opengl --shaderversion 300
-cp -r build/krom/* armorcore/build/Krom/app/src/main/assets/
+cp -r build/krom/* armorcore/build/ArmorPaint/app/src/main/assets/
 cd armorcore
 git apply patch/android_document_picker.diff --directory=Kinc
 node Kinc/make android -g opengl
 # Manual tweaking is required for now:
 # https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68
-# Open generated Android Studio project at `build/Krom`
+# Open generated Android Studio project at `build/ArmorPaint`
 # Build for device
 ```
 
@@ -67,7 +67,7 @@ cd armorcore
 git apply patch/ios_document_picker.diff --directory=Kinc
 git apply patch/metal_depth.diff --directory=Kinc
 node Kinc/make ios -g metal
-# Open generated Xcode project `build/Krom.xcodeproj`
+# Open generated Xcode project `build/ArmorPaint.xcodeproj`
 # Set iOS Deployment Target to 11.0
 # Build for device in release mode
 ```
@@ -81,7 +81,7 @@ git apply patch/window_handling.diff --directory=Kinc
 git apply patch/d3d12_raytrace.diff --directory=Kinc
 git apply patch/d3d12_wrap_sampler.diff --directory=Kinc
 node Kinc/make -g direct3d12 --raytrace dxr
-# Open generated Visual Studio project at `build\Krom.sln`
+# Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
 
@@ -93,8 +93,8 @@ git apply patch/vulkan_raytrace.diff --directory=Kinc
 git clone --recursive https://github.com/armory3d/glsl_to_spirv Libraries/glsl_to_spirv
 node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
 cd Deployment
-strip Krom
-./Krom ../../build/krom
+strip ArmorPaint
+./ArmorPaint ../../build/krom
 ```
 
 **Windows VR** *wip*
@@ -104,7 +104,7 @@ cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
 node Kinc/make -g direct3d11 --vr oculus
-# Open generated Visual Studio project at `build\Krom.sln`
+# Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
 
@@ -128,6 +128,6 @@ python ./Assets/locale/tools/extract_locales.py <locale code>
 https://developers.google.com/closure/compiler
 # Generate a v8 snapshot file
 node armorcore/make -g api --snapshot
-./Krom . --snapshot
+./ArmorPaint . --snapshot
 # Generates a `krom.bin` file from `krom.js` file
 ```
