@@ -26,8 +26,10 @@ class UIStatus {
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 			ui._y += 2;
 
-			ui.fill(0, 0, 1, statush, ui.t.SEPARATOR_COL);
-			ui.fill(ui._w / ui.SCALE() - 1, 0, 1, statush, ui.t.SEPARATOR_COL);
+			// Border
+			ui.g.color = ui.t.SEPARATOR_COL;
+			ui.g.fillRect(0, 0, 1, ui._windowH);
+			ui.g.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
 
 			TabBrowser.draw();
 			TabTextures.draw();

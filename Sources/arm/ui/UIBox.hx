@@ -61,6 +61,13 @@ class UIBox {
 		}
 
 		g.begin(false);
+
+		// Border
+		g.color = ui.t.SEPARATOR_COL;
+		g.fillRect(left + hwnd.dragX, top + hwnd.dragY, 1, ui._windowH);
+		g.fillRect(left + hwnd.dragX + ui._windowW - 1, top + hwnd.dragY, 1, ui._windowH);
+		g.fillRect(left + hwnd.dragX, top + hwnd.dragY + ui._windowH - 1, ui._windowW, 1);
+
 		draws++;
 	}
 
