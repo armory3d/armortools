@@ -646,12 +646,9 @@ class UISidebar {
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
-		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
-
-		if (!show) return;
+		ui.inputEnabled = App.uiEnabled;
 
 		g.end();
 		ui.begin(g);

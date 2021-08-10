@@ -541,8 +541,7 @@ class UINodes {
 
 		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (!App.uiEnabled && ui.inputRegistered) ui.unregisterInput();
-		if (App.uiEnabled && !ui.inputRegistered) ui.registerInput();
+		ui.inputEnabled = App.uiEnabled;
 
 		g.end();
 
