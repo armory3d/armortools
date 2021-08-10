@@ -243,7 +243,12 @@ class MakePaint {
 		if (Context.brushMaskImage != null && Context.tool == ToolDecal) {
 			frag.add_uniform('sampler2D texbrushmask', '_texbrushmask');
 			frag.write('vec4 mask_sample = textureLod(texbrushmask, uvsp, 0.0);');
-			frag.write('opacity *= mask_sample.r * mask_sample.a;');
+			if (Context.brushMaskImageIsAlpha) {
+				frag.write('opacity *= mask_sample.a;');
+			}
+			else {
+				frag.write('opacity *= mask_sample.r * mask_sample.a;');
+			}
 		}
 		else if (Context.tool == ToolText) {
 			frag.add_uniform('sampler2D textexttool', '_textexttool');
@@ -270,7 +275,12 @@ class MakePaint {
 			frag.write('stencil_uv.x *= stencil_ratio;');
 			frag.write('if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) discard;');
 			frag.write('vec4 texbrushstencil_sample = textureLod(texbrushstencil, stencil_uv, 0.0);');
-			frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
+			if (Context.brushStencilImageIsAlpha) {
+				frag.write('opacity *= texbrushstencil_sample.a;');
+			}
+			else {
+				frag.write('opacity *= texbrushstencil_sample.r * texbrushstencil_sample.a;');
+			}
 		}
 
 		if (Context.brushMaskImage != null && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
@@ -296,7 +306,12 @@ class MakePaint {
 			}
 			frag.write('pa_mask = pa_mask.xy * 0.5 + 0.5;');
 			frag.write('vec4 mask_sample = textureLod(texbrushmask, pa_mask, 0.0);');
-			frag.write('opacity *= mask_sample.r * mask_sample.a;');
+			if (Context.brushMaskImageIsAlpha) {
+				frag.write('opacity *= mask_sample.a;');
+			}
+			else {
+				frag.write('opacity *= mask_sample.r * mask_sample.a;');
+			}
 		}
 
 		frag.write('if (opacity == 0.0) discard;');

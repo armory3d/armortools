@@ -172,7 +172,9 @@ class Context {
 	public static var brushNodesRadius = 1.0;
 	public static var brushNodesOpacity = 1.0;
 	public static var brushMaskImage: Image = null;
+	public static var brushMaskImageIsAlpha = false;
 	public static var brushStencilImage: Image = null;
+	public static var brushStencilImageIsAlpha = false;
 	public static var brushStencilX = 0.02;
 	public static var brushStencilY = 0.02;
 	public static var brushStencilScale = 0.9;

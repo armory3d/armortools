@@ -47,6 +47,8 @@ class BrushOutputNode extends LogicNode {
 		var opac: Dynamic = input4; // Float or texture name
 		if (opac == null) opac = 1.0;
 		if (Std.is(opac, String)) {
+			Context.brushMaskImageIsAlpha = opac.endsWith(".a");
+			opac = opac.substr(0, opac.lastIndexOf("."));
 			Context.brushNodesOpacity = 1.0;
 			var index = Project.assetNames.indexOf(opac);
 			var asset = Project.assets[index];
@@ -62,6 +64,8 @@ class BrushOutputNode extends LogicNode {
 		var stencil: Dynamic = input6; // Float or texture name
 		if (stencil == null) stencil = 1.0;
 		if (Std.is(stencil, String)) {
+			Context.brushStencilImageIsAlpha = stencil.endsWith(".a");
+			stencil = stencil.substr(0, stencil.lastIndexOf("."));
 			var index = Project.assetNames.indexOf(stencil);
 			var asset = Project.assets[index];
 			Context.brushStencilImage = Project.getImage(asset);

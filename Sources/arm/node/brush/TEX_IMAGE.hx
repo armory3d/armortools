@@ -11,6 +11,7 @@ class TEX_IMAGE extends LogicNode {
 	}
 
 	override function get(from: Int): Dynamic {
-		return file;
+		if (from == 0) return file + ".rgb";
+		return file + ".a";
 	}
 }
