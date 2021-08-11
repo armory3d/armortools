@@ -337,6 +337,7 @@ class MakePaint {
 		frag.add_uniform('sampler2D paintmask');
 		frag.write('float sample_mask = textureLod(paintmask, sample_tc, 0.0).r;');
 		frag.write('str = max(str, sample_mask);');
+		// frag.write('str = clamp(str + sample_mask, 0.0, 1.0);');
 
 		frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
 		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');

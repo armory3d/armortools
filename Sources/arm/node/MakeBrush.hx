@@ -78,8 +78,6 @@ class MakeBrush {
 				frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 				frag.write('dist = length(pa - ba * h);');
 			}
-
-			frag.write('if (dist > brushRadius) discard;');
 		}
 		else { // !brush3d
 			frag.write('vec2 binp = inp.xy * 2.0 - 1.0;');
@@ -94,9 +92,9 @@ class MakeBrush {
 			frag.write('vec2 ba = binplast.xy - binp.xy;');
 			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
 			frag.write('dist = length(pa - ba * h);');
-
-			frag.write('if (dist > brushRadius) discard;');
 		}
+
+		frag.write('if (dist > brushRadius) discard;');
 
 		if (decal) frag.write('}');
 	}
