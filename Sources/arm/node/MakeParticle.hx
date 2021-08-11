@@ -59,6 +59,7 @@ class MakeParticle {
 		vert.add_out('vec3 p_location');
 		vert.write('p_location = p_velocity * p_age;');
 		vert.write('spos.xyz += p_location;');
+		vert.write('spos.xyz *= vec3(0.01, 0.01, 0.01);');
 
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write('gl_Position = mul(spos, WVP);');
