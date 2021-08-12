@@ -306,6 +306,13 @@ class Uniforms {
 				}
 				return UVUtil.trianglemap;
 			}
+			case "_texuvislandmap": {
+				function _init() {
+					UVUtil.cacheUVIslandMap();
+				}
+				iron.App.notifyOnInit(_init);
+				return UVUtil.uvislandmapCached ? UVUtil.uvislandmap : RenderPath.active.renderTargets.get("empty_black").image;
+			}
 			case "_texdilatemap": {
 				return UVUtil.dilatemap;
 			}

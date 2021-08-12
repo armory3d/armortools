@@ -15,6 +15,9 @@ class UVUtil {
 	public static var trianglemapCached = false;
 	public static var dilatemap: Image = null;
 	public static var dilatemapCached = false;
+	public static var uvislandmap: Image = null;
+	public static var uvislandmapCached = false;
+	static var dilateBytes: haxe.io.Bytes = null;
 	static var pipeDilate: PipelineState = null;
 
 	public static function cacheUVMap() {
@@ -142,5 +145,47 @@ class UVUtil {
 		g4.drawIndexedVertices();
 		g4.end();
 		dilatemapCached = true;
+		dilateBytes = null;
 	}
+
+	public static function cacheUVIslandMap() {
+		cacheDilateMap();
+		if (dilateBytes == null) {
+			dilateBytes = dilatemap.getPixels();
+		}
+		RenderUtil.pickPosNorTex();
+		var w = 2048; // Config.getTextureResX()
+		var h = 2048; // Config.getTextureResY()
+		var x = Std.int(Context.uvxPicked * w);
+		var y = Std.int(Context.uvyPicked * h);
+		var bytes = haxe.io.Bytes.alloc(w * h);
+		var coords: Array<TCoord> = [{ x: x, y: y }];
+		var r = Std.int(dilatemap.width / w);
+
+		function check(c: TCoord) {
+			if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) return;
+			if (bytes.get(c.y * w + c.x) == 255) return;
+			if (dilateBytes.get(c.y * r * dilatemap.width + c.x * r) == 0) return;
+			bytes.set(c.y * w + c.x, 255);
+			coords.push({ x: c.x + 1, y: c.y });
+			coords.push({ x: c.x - 1, y: c.y });
+			coords.push({ x: c.x, y: c.y + 1 });
+			coords.push({ x: c.x, y: c.y - 1 });
+		}
+
+		while (coords.length > 0) {
+			check(coords.pop());
+		}
+
+		if (uvislandmap != null) {
+			uvislandmap.unload();
+		}
+		uvislandmap = Image.fromBytes(bytes, w, h, kha.graphics4.TextureFormat.L8);
+		uvislandmapCached = true;
+	}
+}
+
+typedef TCoord = {
+	public var x: Int;
+	public var y: Int;
 }

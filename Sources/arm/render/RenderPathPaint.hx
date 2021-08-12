@@ -90,7 +90,7 @@ class RenderPathPaint {
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_posnor_picker0";
+			t.name = "texpaint_posnortex_picker0";
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA128";
@@ -98,7 +98,7 @@ class RenderPathPaint {
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "texpaint_posnor_picker1";
+			t.name = "texpaint_posnortex_picker1";
 			t.width = 1;
 			t.height = 1;
 			t.format = "RGBA128";
@@ -142,21 +142,27 @@ class RenderPathPaint {
 				UIHeader.inst.headerHandle.redraws = 2;
 			}
 			else if (Context.tool == ToolPicker) {
-				if (Context.pickPosNor) {
-					path.setTarget("texpaint_posnor_picker0", ["texpaint_posnor_picker1"]);
+				if (Context.pickPosNorTex) {
+					if (Context.paint2d) {
+						path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+						path.drawMeshes("mesh");
+					}
+					path.setTarget("texpaint_posnortex_picker0", ["texpaint_posnortex_picker1"]);
 					path.bindTarget("gbuffer2", "gbuffer2");
 					path.bindTarget("_main", "gbufferD");
 					path.drawMeshes("paint");
-					var texpaint_posnor_picker0 = path.renderTargets.get("texpaint_posnor_picker0").image;
-					var texpaint_posnor_picker1 = path.renderTargets.get("texpaint_posnor_picker1").image;
-					var a = texpaint_posnor_picker0.getPixels();
-					var b = texpaint_posnor_picker1.getPixels();
+					var texpaint_posnortex_picker0 = path.renderTargets.get("texpaint_posnortex_picker0").image;
+					var texpaint_posnortex_picker1 = path.renderTargets.get("texpaint_posnortex_picker1").image;
+					var a = texpaint_posnortex_picker0.getPixels();
+					var b = texpaint_posnortex_picker1.getPixels();
 					Context.posXPicked = a.getFloat(0);
 					Context.posYPicked = a.getFloat(4);
 					Context.posZPicked = a.getFloat(8);
+					Context.uvxPicked = a.getFloat(12);
 					Context.norXPicked = b.getFloat(0);
 					Context.norYPicked = b.getFloat(4);
 					Context.norZPicked = b.getFloat(8);
+					Context.uvyPicked = b.getFloat(12);
 				}
 				else {
 					#if kha_metal
@@ -547,80 +553,8 @@ class RenderPathPaint {
 			History.paint();
 		}
 
-		// 2D paint
 		if (Context.paint2d) {
-			Context.paint2dView = true;
-			// Set plane mesh
-			painto = Context.paintObject;
-			visibles = [];
-			for (p in Project.paintObjects) {
-				visibles.push(p.visible);
-				p.visible = false;
-			}
-			if (Context.mergedObject != null) {
-				mergedObjectVisible = Context.mergedObject.visible;
-				Context.mergedObject.visible = false;
-			}
-
-			var cam = Scene.active.camera;
-			Context.savedCamera.setFrom(cam.transform.local);
-			savedFov = cam.data.raw.fov;
-			Viewport.updateCameraType(CameraPerspective);
-			var m = Mat4.identity();
-			m.translate(0, 0, 0.5);
-			cam.transform.setMatrix(m);
-			cam.data.raw.fov = 0.92;
-			cam.buildProjection();
-			cam.buildMatrix();
-
-			var tw = 0.95 * UIView2D.inst.panScale;
-			var tx = UIView2D.inst.panX / UIView2D.inst.ww;
-			var ty = UIView2D.inst.panY / iron.App.h();
-			m.setIdentity();
-			m.scale(new Vec4(tw, tw, 1));
-			m.setLoc(new Vec4(tx, ty, 0));
-			var m2 = Mat4.identity();
-			m2.getInverse(Scene.active.camera.VP);
-			m.multmat(m2);
-
-			var tiled = UIView2D.inst.tiledShow;
-			if (tiled && Scene.active.getChild(".PlaneTiled") == null) {
-				// 3x3 planes
-				var posa = [32767,0,-32767,0,10922,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,10922,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,32767,0,-32767,0,10922,0,10922,0,10922,0,-10922,0,32767,0,-10922,0,10922,0,32767,0,10922,0,10922,0,32767,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,10922,0,-32767,0,-10922,0,32767,0,-10922,0,10922,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,-32767,0,-10922,0,-32767,0,-32767,0,10922,0,-32767,0,-10922,0,-10922,0,-10922,0,-32767,0,32767,0,-32767,0,32767,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,32767,0,-32767,0,32767,0,10922,0,10922,0,10922,0,32767,0,-10922,0,32767,0,32767,0,10922,0,32767,0,32767,0,10922,0,32767,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,10922,0,32767,0,-10922,0,32767,0,10922,0,10922,0,10922,0,-10922,0,-32767,0,-10922,0,-10922,0,-32767,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,-10922,0];
-				var nora = [0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767];
-				var texa = [32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0];
-				var inda = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53];
-				var raw: TMeshData = {
-					name: ".PlaneTiled",
-					vertex_arrays: [
-						{ attrib: "pos", values: i16(posa), data: "short4norm" },
-						{ attrib: "nor", values: i16(nora), data: "short2norm" },
-						{ attrib: "tex", values: i16(texa), data: "short2norm" }
-					],
-					index_arrays: [
-						{ values: u32(inda), material: 0 }
-					],
-					scale_pos: 1.5,
-					scale_tex: 1.0
-				};
-				new MeshData(raw, function(md: MeshData) {
-					var materials = cast(Scene.active.getChild(".Plane"), MeshObject).materials;
-					var o = Scene.active.addMeshObject(md, materials);
-					o.name = ".PlaneTiled";
-				});
-			}
-
-			planeo = cast Scene.active.getChild(tiled ? ".PlaneTiled" : ".Plane");
-			planeo.visible = true;
-			Context.paintObject = planeo;
-
-			var v = new Vec4();
-			var sx = v.set(m._00, m._01, m._02).length();
-			planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-			planeo.transform.scale.set(sx, 1.0, sx);
-			planeo.transform.scale.z *= Config.getTextureResY() / Config.getTextureResX();
-			planeo.transform.loc.set(m._30, -m._31, 0.0);
-			planeo.transform.buildMatrix();
+			setPlaneMesh();
 		}
 
 		if (liveLayerDrawn > 0) liveLayerDrawn--;
@@ -744,25 +678,104 @@ class RenderPathPaint {
 		}
 
 		if (Context.paint2d) {
-			Context.paint2dView = false;
-			// Restore paint mesh
-			planeo.visible = false;
-			planeo.transform.loc.set(0.0, 0.0, 0.0);
-			for (i in 0...Project.paintObjects.length) {
-				Project.paintObjects[i].visible = visibles[i];
-			}
-			if (Context.mergedObject != null) {
-				Context.mergedObject.visible = mergedObjectVisible;
-			}
-			Context.paintObject = painto;
-			Scene.active.camera.transform.setMatrix(Context.savedCamera);
-			Scene.active.camera.data.raw.fov = savedFov;
-			Viewport.updateCameraType(Context.cameraType);
-			Scene.active.camera.buildProjection();
-			Scene.active.camera.buildMatrix();
-
-			RenderPathDeferred.drawGbuffer();
+			restorePlaneMesh();
 		}
+	}
+
+	public static function setPlaneMesh() {
+		Context.paint2dView = true;
+		// Set plane mesh
+		painto = Context.paintObject;
+		visibles = [];
+		for (p in Project.paintObjects) {
+			visibles.push(p.visible);
+			p.visible = false;
+		}
+		if (Context.mergedObject != null) {
+			mergedObjectVisible = Context.mergedObject.visible;
+			Context.mergedObject.visible = false;
+		}
+
+		var cam = Scene.active.camera;
+		Context.savedCamera.setFrom(cam.transform.local);
+		savedFov = cam.data.raw.fov;
+		Viewport.updateCameraType(CameraPerspective);
+		var m = Mat4.identity();
+		m.translate(0, 0, 0.5);
+		cam.transform.setMatrix(m);
+		cam.data.raw.fov = 0.92;
+		cam.buildProjection();
+		cam.buildMatrix();
+
+		var tw = 0.95 * UIView2D.inst.panScale;
+		var tx = UIView2D.inst.panX / UIView2D.inst.ww;
+		var ty = UIView2D.inst.panY / iron.App.h();
+		m.setIdentity();
+		m.scale(new Vec4(tw, tw, 1));
+		m.setLoc(new Vec4(tx, ty, 0));
+		var m2 = Mat4.identity();
+		m2.getInverse(Scene.active.camera.VP);
+		m.multmat(m2);
+
+		var tiled = UIView2D.inst.tiledShow;
+		if (tiled && Scene.active.getChild(".PlaneTiled") == null) {
+			// 3x3 planes
+			var posa = [32767,0,-32767,0,10922,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,10922,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,32767,0,-32767,0,10922,0,10922,0,10922,0,-10922,0,32767,0,-10922,0,10922,0,32767,0,10922,0,10922,0,32767,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,10922,0,-32767,0,-10922,0,32767,0,-10922,0,10922,0,10922,0,10922,0,-10922,0,-10922,0,-32767,0,-32767,0,-10922,0,-32767,0,-32767,0,10922,0,-32767,0,-10922,0,-10922,0,-10922,0,-32767,0,32767,0,-32767,0,32767,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,10922,0,-10922,0,10922,0,-10922,0,10922,0,-10922,0,32767,0,-32767,0,32767,0,10922,0,10922,0,10922,0,32767,0,-10922,0,32767,0,32767,0,10922,0,32767,0,32767,0,10922,0,32767,0,-10922,0,-10922,0,-10922,0,10922,0,-32767,0,10922,0,32767,0,-10922,0,32767,0,10922,0,10922,0,10922,0,-10922,0,-32767,0,-10922,0,-10922,0,-32767,0,-10922,0,10922,0,-32767,0,10922,0,-10922,0,-10922,0,-10922,0];
+			var nora = [0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767,0,-32767];
+			var texa = [32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0,32767,32767,32767,0,0,0];
+			var inda = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53];
+			var raw: TMeshData = {
+				name: ".PlaneTiled",
+				vertex_arrays: [
+					{ attrib: "pos", values: i16(posa), data: "short4norm" },
+					{ attrib: "nor", values: i16(nora), data: "short2norm" },
+					{ attrib: "tex", values: i16(texa), data: "short2norm" }
+				],
+				index_arrays: [
+					{ values: u32(inda), material: 0 }
+				],
+				scale_pos: 1.5,
+				scale_tex: 1.0
+			};
+			new MeshData(raw, function(md: MeshData) {
+				var materials = cast(Scene.active.getChild(".Plane"), MeshObject).materials;
+				var o = Scene.active.addMeshObject(md, materials);
+				o.name = ".PlaneTiled";
+			});
+		}
+
+		planeo = cast Scene.active.getChild(tiled ? ".PlaneTiled" : ".Plane");
+		planeo.visible = true;
+		Context.paintObject = planeo;
+
+		var v = new Vec4();
+		var sx = v.set(m._00, m._01, m._02).length();
+		planeo.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
+		planeo.transform.scale.set(sx, 1.0, sx);
+		planeo.transform.scale.z *= Config.getTextureResY() / Config.getTextureResX();
+		planeo.transform.loc.set(m._30, -m._31, 0.0);
+		planeo.transform.buildMatrix();
+	}
+
+	public static function restorePlaneMesh() {
+		Context.paint2dView = false;
+		// Restore paint mesh
+		planeo.visible = false;
+		planeo.transform.loc.set(0.0, 0.0, 0.0);
+		for (i in 0...Project.paintObjects.length) {
+			Project.paintObjects[i].visible = visibles[i];
+		}
+		if (Context.mergedObject != null) {
+			Context.mergedObject.visible = mergedObjectVisible;
+		}
+		Context.paintObject = painto;
+		Scene.active.camera.transform.setMatrix(Context.savedCamera);
+		Scene.active.camera.data.raw.fov = savedFov;
+		Viewport.updateCameraType(Context.cameraType);
+		Scene.active.camera.buildProjection();
+		Scene.active.camera.buildMatrix();
+
+		RenderPathDeferred.drawGbuffer();
 	}
 
 	public static function bindLayers() {

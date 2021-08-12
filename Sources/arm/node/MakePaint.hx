@@ -24,7 +24,7 @@ class MakePaint {
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments:
 				Context.tool == ToolColorId ? ["RGBA32"] :
-				(Context.tool == ToolPicker && Context.pickPosNor) ? ["RGBA128", "RGBA128"] :
+				(Context.tool == ToolPicker && Context.pickPosNorTex) ? ["RGBA128", "RGBA128"] :
 				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
@@ -63,6 +63,7 @@ class MakePaint {
 		}
 
 		var faceFill = Context.tool == ToolFill && Context.fillTypeHandle.position == FillFace;
+		var uvIslandFill = Context.tool == ToolFill && Context.fillTypeHandle.position == FillUVIsland;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -156,7 +157,7 @@ class MakePaint {
 			}
 		}
 
-		if (Context.colorIdPicked || faceFill) {
+		if (Context.colorIdPicked || faceFill || uvIslandFill) {
 			vert.add_out('vec2 texCoordPick');
 			vert.write('texCoordPick = tex;');
 			if (Context.colorIdPicked) {
@@ -164,6 +165,9 @@ class MakePaint {
 			}
 			if (faceFill) {
 				MakeDiscard.face(vert, frag);
+			}
+			else if (uvIslandFill) {
+				MakeDiscard.uvIsland(vert, frag);
 			}
 		}
 

@@ -576,6 +576,9 @@ class UISidebar {
 							// @:privateAccess psys.seed++;
 							#end
 						}
+						else if (Context.tool == ToolFill && Context.fillTypeHandle.position == FillUVIsland) {
+							UVUtil.uvislandmapCached = false;
+						}
 					}
 					Context.brushTime += Time.delta;
 					if (Context.runBrush != null) Context.runBrush(0);

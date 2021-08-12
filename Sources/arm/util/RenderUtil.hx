@@ -475,21 +475,27 @@ class RenderUtil {
 		Context.paintObject.transform.buildMatrix();
 	}
 
-	public static function pickPositionAndNormal() {
-		Context.pickPosNor = true;
+	public static function pickPosNorTex() {
+		Context.pickPosNorTex = true;
 		Context.pdirty = 1;
 		var _tool = Context.tool;
 		Context.tool = ToolPicker;
 		MakeMaterial.parsePaintMaterial();
+		if (Context.paint2d) {
+			arm.render.RenderPathPaint.setPlaneMesh();
+		}
 		arm.render.RenderPathPaint.commandsPaint(false);
+		if (Context.paint2d) {
+			arm.render.RenderPathPaint.restorePlaneMesh();
+		}
 		Context.tool = _tool;
-		Context.pickPosNor = false;
+		Context.pickPosNorTex = false;
 		MakeMaterial.parsePaintMaterial();
 		Context.pdirty = 0;
 	}
 
 	public static function getDecalMat(): Mat4 {
-		RenderUtil.pickPositionAndNormal();
+		RenderUtil.pickPosNorTex();
 		var decalMat = Mat4.identity();
 		var loc = new Vec4(Context.posXPicked, Context.posYPicked, Context.posZPicked);
 		var rot = new Quat().fromTo(new Vec4(0.0, 0.0, -1.0), new Vec4(Context.norXPicked, Context.norYPicked, Context.norZPicked));

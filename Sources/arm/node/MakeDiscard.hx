@@ -19,7 +19,7 @@ class MakeDiscard {
 
 	public static function face(vert: NodeShader, frag: NodeShader) {
 		frag.add_uniform('sampler2D gbuffer2');
-		frag.add_uniform('sampler2D textrianglemap', '_textrianglemap'); // triangle map
+		frag.add_uniform('sampler2D textrianglemap', '_textrianglemap');
 		frag.add_uniform('vec2 textrianglemapSize', '_texpaintSize');
 		frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -34,6 +34,11 @@ class MakeDiscard {
 		#else
 		frag.write('if (face_c1 != face_c2) discard;');
 		#end
+	}
+
+	public static function uvIsland(vert: NodeShader, frag: NodeShader) {
+		frag.add_uniform('sampler2D texuvislandmap', '_texuvislandmap');
+		frag.write('if (textureLod(texuvislandmap, texCoordPick, 0).r == 0.0) discard;');
 	}
 
 	public static function materialId(vert: NodeShader, frag: NodeShader) {

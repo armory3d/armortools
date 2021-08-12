@@ -109,6 +109,7 @@ package arm;
 	var FillObject = 0;
 	var FillFace = 1;
 	var FillAngle = 2;
+	var FillUVIsland = 3;
 }
 
 @:enum abstract UVType(Int) from Int to Int {

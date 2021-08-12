@@ -270,7 +270,7 @@ class UIHeader {
 				}
 
 				if (Context.tool == ToolFill) {
-					ui.combo(Context.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle")], tr("Fill Mode"));
+					ui.combo(Context.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
 					if (Context.fillTypeHandle.changed) {
 						if (Context.fillTypeHandle.position == FillFace) {
 							ui.g.end();
