@@ -708,6 +708,7 @@ class Layers {
 	public static function updateFillLayers() {
 		var _layer = Context.layer;
 		var _tool = Context.tool;
+		var _fillType = Context.fillTypeHandle.position;
 		var current: kha.graphics2.Graphics = null;
 
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
@@ -720,6 +721,7 @@ class Layers {
 
 			UIHeader.inst.worktab.position = SpacePaint;
 			Context.tool = ToolFill;
+			Context.fillTypeHandle.position = FillObject;
 			MakeMaterial.parsePaintMaterial(false);
 			Context.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
@@ -727,6 +729,7 @@ class Layers {
 			RenderPathPaint.dilate(true, true);
 			RenderPathPaint.useLiveLayer(false);
 			Context.tool = _tool;
+			Context.fillTypeHandle.position = _fillType;
 			Context.pdirty = 0;
 			Context.rdirty = 2;
 			UIHeader.inst.worktab.position = SpaceMaterial;
@@ -745,6 +748,7 @@ class Layers {
 			if (current != null) current.end();
 			Context.pdirty = 1;
 			Context.tool = ToolFill;
+			Context.fillTypeHandle.position = FillObject;
 
 			if (hasFillLayer) {
 				var first = true;
@@ -786,6 +790,7 @@ class Layers {
 			Context.layer = _layer;
 			setObjectMask();
 			Context.tool = _tool;
+			Context.fillTypeHandle.position = _fillType;
 		}
 	}
 
@@ -794,7 +799,9 @@ class Layers {
 		if (current != null) current.end();
 
 		var _tool = Context.tool;
+		var _fillType = Context.fillTypeHandle.position;
 		Context.tool = ToolFill;
+		Context.fillTypeHandle.position = FillObject;
 		Context.pdirty = 1;
 		var _workspace = UIHeader.inst.worktab.position;
 		UIHeader.inst.worktab.position = SpacePaint;
@@ -806,6 +813,7 @@ class Layers {
 
 		Context.rdirty = 2;
 		Context.tool = _tool;
+		Context.fillTypeHandle.position = _fillType;
 		UIHeader.inst.worktab.position = _workspace;
 		if (current != null) current.begin(false);
 	}
