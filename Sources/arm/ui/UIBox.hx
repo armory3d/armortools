@@ -48,6 +48,7 @@ class UIBox {
 						App.redrawUI();
 					}
 				}
+				windowBorder(ui);
 			}
 			ui.end();
 		}
@@ -56,17 +57,12 @@ class UIBox {
 			if (ui.window(hwnd, left, top, mw, mh, true)) {
 				ui._y += 10;
 				boxCommands(ui);
+				windowBorder(ui);
 			}
 			ui.end();
 		}
 
 		g.begin(false);
-
-		// Border
-		g.color = ui.t.SEPARATOR_COL;
-		g.fillRect(left + hwnd.dragX, top + hwnd.dragY, 1, ui._windowH);
-		g.fillRect(left + hwnd.dragX + ui._windowW - 1, top + hwnd.dragY, 1, ui._windowH);
-		g.fillRect(left + hwnd.dragX, top + hwnd.dragY + ui._windowH - 1, ui._windowW, 1);
 
 		draws++;
 	}
@@ -122,5 +118,17 @@ class UIBox {
 		show = true;
 		draws = 0;
 		clickToHide = true;
+	}
+
+	static function windowBorder(ui: Zui) {
+		if (ui.scissor) {
+			ui.scissor = false;
+			ui.g.disableScissor();
+		}
+		// Border
+		ui.g.color = ui.t.SEPARATOR_COL;
+		ui.g.fillRect(0, 0, 1, ui._windowH);
+		ui.g.fillRect(0 + ui._windowW - 1, 0, 1, ui._windowH);
+		ui.g.fillRect(0, 0 + ui._windowH - 1, ui._windowW, 1);
 	}
 }
