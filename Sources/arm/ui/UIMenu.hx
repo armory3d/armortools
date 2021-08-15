@@ -31,7 +31,6 @@ class UIMenu {
 	public static var menuElements = 0;
 	public static var keepOpen = false;
 	public static var menuCommands: Zui->Void = null;
-	static var changeStarted = false;
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 
@@ -411,20 +410,15 @@ class UIMenu {
 			}
 		}
 
-		var first = showMenuFirst;
-		hideMenu = ui.comboSelectedHandle == null && !changeStarted && !keepOpen && !first && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
+		hideMenu = ui.comboSelectedHandle == null && !keepOpen && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
 		showMenuFirst = false;
 		keepOpen = false;
-		if (ui.inputReleased) changeStarted = false;
 
 		ui.t.BUTTON_COL = _BUTTON_COL;
 		ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 		ui.t.ELEMENT_H = _ELEMENT_H;
 		ui.endRegion();
-	}
 
-	public static function update() {
-		//var ui = App.uiMenu;
 		if (hideMenu) {
 			show = false;
 			App.redrawUI();

@@ -426,9 +426,6 @@ class App {
 
 		handleDropPaths();
 
-		if (UIBox.show) UIBox.update();
-		if (UIMenu.show) UIMenu.update();
-
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var isPicker = Context.tool == ToolPicker;
 		#if krom_windows

@@ -22,6 +22,31 @@ class UIBox {
 	static var copyable = false;
 
 	public static function render(g: kha.graphics2.Graphics) {
+		if (!UIMenu.show) {
+			var mouse = Input.getMouse();
+			var kb = Input.getKeyboard();
+			var ui = App.uiBox;
+			var inUse = ui.comboSelectedHandle != null;
+			var isEscape = kb.started("escape");
+			if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
+				var appw = System.windowWidth();
+				var apph = System.windowHeight();
+				var mw = Std.int(modalW * ui.SCALE());
+				var mh = Std.int(modalH * ui.SCALE());
+				var left = (appw / 2 - mw / 2) + hwnd.dragX;
+				var right = (appw / 2 + mw / 2) + hwnd.dragX;
+				var top = (apph / 2 - mh / 2) + hwnd.dragY;
+				var bottom = (apph / 2 + mh / 2) + hwnd.dragY;
+				var mx = mouse.x;
+				var my = mouse.y;
+				if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
+					if (modalOnHide != null) modalOnHide();
+					show = false;
+					App.redrawUI();
+				}
+			}
+		}
+
 		g.end();
 
 		var ui = App.uiBox;
@@ -65,32 +90,6 @@ class UIBox {
 		g.begin(false);
 
 		draws++;
-	}
-
-	public static function update() {
-		if (UIMenu.show) return;
-		var mouse = Input.getMouse();
-		var kb = Input.getKeyboard();
-		var ui = App.uiBox;
-		var inUse = ui.comboSelectedHandle != null;
-		var isEscape = kb.started("escape");
-		if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
-			var appw = System.windowWidth();
-			var apph = System.windowHeight();
-			var mw = Std.int(modalW * ui.SCALE());
-			var mh = Std.int(modalH * ui.SCALE());
-			var left = (appw / 2 - mw / 2) + hwnd.dragX;
-			var right = (appw / 2 + mw / 2) + hwnd.dragX;
-			var top = (apph / 2 - mh / 2) + hwnd.dragY;
-			var bottom = (apph / 2 + mh / 2) + hwnd.dragY;
-			var mx = mouse.x;
-			var my = mouse.y;
-			if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
-				if (modalOnHide != null) modalOnHide();
-				show = false;
-				App.redrawUI();
-			}
-		}
 	}
 
 	public static function showMessage(title: String, text: String, copyable = false) {

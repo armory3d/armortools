@@ -30,11 +30,10 @@ class UINodes {
 
 	public var ui: Zui;
 	public var canvasType = CanvasMaterial;
-	var drawMenu = false;
 	var showMenu = false;
+	var showMenuFirst = true;
 	var hideMenu = false;
 	var menuCategory = 0;
-	var addNodeButton = false;
 	var popupX = 0.0;
 	var popupY = 0.0;
 
@@ -354,14 +353,6 @@ class UINodes {
 		if (mx < wx || mx > wx + ww || my < wy) return;
 		if (ui.isTyping || !ui.inputEnabled) return;
 
-		if (addNodeButton) {
-			showMenu = true;
-			addNodeButton = false;
-		}
-		else if (mouse.released()) {
-			hideMenu = true;
-		}
-
 		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && ui.isKeyPressed) {
 			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelected) n.x -= 1;
@@ -583,7 +574,7 @@ class UINodes {
 
 			// Nodes
 			var _inputEnabled = ui.inputEnabled;
-			ui.inputEnabled = _inputEnabled && !drawMenu;
+			ui.inputEnabled = _inputEnabled && !showMenu;
 			ui.windowBorderRight = Config.raw.layout[LayoutSidebarW];
 			ui.windowBorderTop = UIHeader.inst.headerh * 2;
 			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
@@ -751,8 +742,8 @@ class UINodes {
 
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
 			for (i in 0...cats.length) {
-				if ((ui.button(tr(cats[i]), Left) && !arm.App.isComboSelected()) || (ui.isHovered && drawMenu)) {
-					addNodeButton = true;
+				if ((ui.button(tr(cats[i]), Left)) || (ui.isHovered && showMenu)) {
+					showMenu = true;
 					menuCategory = i;
 					popupX = wx + ui._x;
 					popupY = wy + ui._y;
@@ -771,11 +762,11 @@ class UINodes {
 			ui.t.BUTTON_COL = _BUTTON_COL;
 		}
 
-		ui.end(!drawMenu);
+		ui.end(!showMenu);
 
 		g.begin(false);
 
-		if (drawMenu) {
+		if (showMenu) {
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			var numNodes = list[menuCategory].length;
 
@@ -826,19 +817,18 @@ class UINodes {
 				}
 			}
 
+			hideMenu = ui.comboSelectedHandle == null && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
+			showMenuFirst = false;
+
 			ui.t.BUTTON_COL = _BUTTON_COL;
 			ui.t.BUTTON_H = _BUTTON_H;
 			ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 			ui.endRegion();
 		}
 
-		if (showMenu) {
-			showMenu = false;
-			drawMenu = true;
-		}
 		if (hideMenu) {
-			hideMenu = false;
-			drawMenu = false;
+			showMenu = false;
+			showMenuFirst = true;
 		}
 	}
 
