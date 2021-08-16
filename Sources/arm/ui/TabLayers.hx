@@ -275,10 +275,12 @@ class TabLayers {
 				var r = Res.tile50(icons, 4, 1);
 				var _x = ui._x;
 				var _y = ui._y;
-				ui.curRatio--;
+				var _w = ui._w;
 				ui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
+				ui.curRatio--;
 				ui._x = _x;
 				ui._y = _y;
+				ui._w = _w;
 			}
 			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = UIView2D.pipe;
