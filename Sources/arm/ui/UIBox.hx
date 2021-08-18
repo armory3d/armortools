@@ -10,6 +10,7 @@ import iron.system.Input;
 class UIBox {
 
 	public static var show = false;
+	public static var draggable = true;
 	public static var hwnd = new Handle();
 	public static var boxTitle = "";
 	public static var boxText = "";
@@ -59,7 +60,7 @@ class UIBox {
 
 		if (boxCommands == null) {
 			ui.begin(g);
-			if (ui.window(hwnd, left, top, mw, mh, true)) {
+			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
 				if (ui.tab(Id.handle(), boxTitle)) {
 					copyable ?
@@ -79,7 +80,7 @@ class UIBox {
 		}
 		else {
 			ui.begin(g);
-			if (ui.window(hwnd, left, top, mw, mh, true)) {
+			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
 				boxCommands(ui);
 				windowBorder(ui);
@@ -100,14 +101,16 @@ class UIBox {
 		boxText = text;
 		boxCommands = null;
 		UIBox.copyable = copyable;
+		draggable = true;
 	}
 
-	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200, onHide: Void->Void = null) {
+	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200, onHide: Void->Void = null, draggable = true) {
 		init();
 		modalW = mw;
 		modalH = mh;
 		modalOnHide = onHide;
 		boxCommands = commands;
+		UIBox.draggable = draggable;
 	}
 
 	static function init() {
