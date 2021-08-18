@@ -134,7 +134,6 @@ class Project {
 					meshList.unshift("plane");
 					meshList.unshift("sphere");
 					meshList.unshift("rounded_cube");
-
 				}
 
 				ui.row([0.5, 0.5]);
