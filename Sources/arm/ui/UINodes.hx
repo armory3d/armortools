@@ -694,25 +694,30 @@ class UINodes {
 			h.text = c.name;
 			var newName = ui.textInput(h, "", Right);
 
-			if (h.changed && groupStack.length > 0) { // Check whether renaming is possible and update group links
-				var canRename = true;
-				for (m in Project.materialGroups) {
-					if (m.canvas.name == newName) canRename = false; // Name already used
-				}
+			if (h.changed) { // Check whether renaming is possible and update group links
+				if (groupStack.length > 0) {
+					var canRename = true;
+					for (m in Project.materialGroups) {
+						if (m.canvas.name == newName) canRename = false; // Name already used
+					}
 
-				if (canRename) {
-					var oldName = c.name;
-					c.name = newName;
-					var canvases: Array<TNodeCanvas> = [];
-					for (m in Project.materials) canvases.push(m.canvas);
-					for (m in Project.materialGroups) canvases.push(m.canvas);
-					for (canvas in canvases) {
-						for (n in canvas.nodes) {
-							if (n.type == "GROUP" && n.name == oldName) {
-								n.name = c.name;
+					if (canRename) {
+						var oldName = c.name;
+						c.name = newName;
+						var canvases: Array<TNodeCanvas> = [];
+						for (m in Project.materials) canvases.push(m.canvas);
+						for (m in Project.materialGroups) canvases.push(m.canvas);
+						for (canvas in canvases) {
+							for (n in canvas.nodes) {
+								if (n.type == "GROUP" && n.name == oldName) {
+									n.name = c.name;
+								}
 							}
 						}
 					}
+				}
+				else {
+					c.name = newName;
 				}
 			}
 			ui.t.ACCENT_COL = _ACCENT_COL;
