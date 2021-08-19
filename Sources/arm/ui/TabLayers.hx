@@ -318,6 +318,7 @@ class TabLayers {
 			else {
 				ui.tooltipImage(l.texpaint_preview);
 			}
+			ui.tooltip(l.name);
 		}
 		if (ui.isHovered && ui.inputReleasedR) {
 			Context.setLayer(l);

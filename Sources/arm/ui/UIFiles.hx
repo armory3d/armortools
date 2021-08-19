@@ -211,7 +211,10 @@ class UIFiles {
 					}
 					if (icon != null) {
 						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
-						if (ui.isHovered) ui.tooltipImage(icon);
+						if (ui.isHovered) {
+							ui.tooltipImage(icon);
+							ui.tooltip(f);
+						}
 						generic = false;
 					}
 				}
@@ -238,7 +241,10 @@ class UIFiles {
 					}
 					if (icon != null) {
 						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
-						if (ui.isHovered) ui.tooltipImage(icon);
+						if (ui.isHovered) {
+							ui.tooltipImage(icon);
+							ui.tooltip(f);
+						}
 						generic = false;
 					}
 				}

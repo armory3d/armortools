@@ -180,7 +180,10 @@ class TabMaterials {
 							}
 						}, 14 + add);
 					}
-					if (ui.isHovered) ui.tooltipImage(imgFull);
+					if (ui.isHovered) {
+						ui.tooltipImage(imgFull);
+						ui.tooltip(Project.materials[i].canvas.name);
+					}
 
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;

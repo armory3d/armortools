@@ -102,7 +102,10 @@ class TabFonts {
 							}
 						}, 1 + add);
 					}
-					if (ui.isHovered && img != null) ui.tooltipImage(img);
+					if (ui.isHovered && img != null) {
+						ui.tooltipImage(img);
+						ui.tooltip(Project.fonts[i].name);
+					}
 
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;

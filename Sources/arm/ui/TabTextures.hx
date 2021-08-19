@@ -87,7 +87,10 @@ class TabTextures {
 							ui._y = _uiy;
 						}
 
-						if (ui.isHovered) ui.tooltipImage(img, 256);
+						if (ui.isHovered) {
+							ui.tooltipImage(img, 256);
+							ui.tooltip(asset.name);
+						}
 
 						if (ui.isHovered && ui.inputReleasedR) {
 							Context.texture = asset;

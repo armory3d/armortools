@@ -109,7 +109,10 @@ class TabBrushes {
 							}
 						}, 3 + add);
 					}
-					if (ui.isHovered && imgFull != null) ui.tooltipImage(imgFull);
+					if (ui.isHovered && imgFull != null) {
+						ui.tooltipImage(imgFull);
+						ui.tooltip(Project.brushes[i].canvas.name);
+					}
 
 					if (Config.raw.show_asset_names) {
 						ui._x = uix;
