@@ -325,16 +325,16 @@ class TabLayers {
 		}
 		if (state == State.Started) {
 			Context.setLayer(l);
+			var mouse = Input.getMouse();
+			setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
+		}
+		else if (state == State.Released) {
 			if (Time.time() - Context.selectTime < 0.2) {
 				UISidebar.inst.show2DView(View2DLayer);
 			}
 			if (Time.time() - Context.selectTime > 0.2) {
 				Context.selectTime = Time.time();
 			}
-			var mouse = Input.getMouse();
-			setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
-		}
-		else if (state == State.Released) {
 			if (l.fill_layer != null) Context.setMaterial(l.fill_layer);
 		}
 
@@ -350,11 +350,13 @@ class TabLayers {
 				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
+					var mouse = Input.getMouse();
+					setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
+				}
+				else if (ui.inputReleased) {
 					if (Time.time() - Context.selectTime > 0.2) {
 						Context.selectTime = Time.time();
 					}
-					var mouse = Input.getMouse();
-					setDragLayer(Context.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 				}
 				else if (ui.inputReleasedR) {
 					Context.setLayer(l);
@@ -363,7 +365,7 @@ class TabLayers {
 			}
 
 			var state = ui.text(l.name);
-			if (state == State.Started) {
+			if (state == State.Released) {
 				var td = Time.time() - Context.selectTime;
 				if (td < 0.2 && td > 0.0) {
 					layerNameEdit = l.id;
