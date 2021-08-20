@@ -50,6 +50,7 @@ class UINodes {
 	public var grid: Image = null;
 	public var hwnd = Id.handle();
 	public var groupStack: Array<TNodeGroup> = [];
+	public var controlsDown = false;
 
 	public function new() {
 		inst = this;
@@ -288,10 +289,49 @@ class UINodes {
 	}
 
 	function onCanvasControl(): zui.Nodes.CanvasControl {
-		return getCanvasControl(ui);
+		return getCanvasControl(ui, inst);
 	}
 
-	public static function getCanvasControl(ui: Zui): zui.Nodes.CanvasControl {
+	public static function getCanvasControl(ui: Zui, parent: Dynamic): zui.Nodes.CanvasControl {
+		if (Config.raw.wrap_mouse && parent.controlsDown) {
+			if (ui.inputX < ui._windowX) {
+				@:privateAccess ui.inputX = ui._windowX + ui._windowW;
+				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+			}
+			else if (ui.inputX > ui._windowX + ui._windowW) {
+				@:privateAccess ui.inputX = ui._windowX;
+				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+			}
+			else if (ui.inputY < ui._windowY) {
+				@:privateAccess ui.inputY = ui._windowY + ui._windowH;
+				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+			}
+			else if (ui.inputY > ui._windowY + ui._windowH) {
+				@:privateAccess ui.inputY = ui._windowY;
+				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+			}
+		}
+
+		if (Operator.shortcut(Config.keymap.action_pan, ShortcutStarted) ||
+			Operator.shortcut(Config.keymap.action_zoom, ShortcutStarted) ||
+			ui.inputStartedR ||
+			ui.inputWheelDelta != 0.0) {
+			parent.controlsDown = true;
+		}
+		else if (!Operator.shortcut(Config.keymap.action_pan, ShortcutDown) &&
+			!Operator.shortcut(Config.keymap.action_zoom, ShortcutDown) &&
+			!ui.inputDownR &&
+			ui.inputWheelDelta == 0.0) {
+			parent.controlsDown = false;
+		}
+		if (!parent.controlsDown) {
+			return {
+				panX: 0,
+				panY: 0,
+				zoom: 0
+			}
+		}
+
 		var pan = ui.inputDownR || Operator.shortcut(Config.keymap.action_pan, ShortcutDown);
 		var zoomDelta = Operator.shortcut(Config.keymap.action_zoom, ShortcutDown) ? getZoomDelta(ui) / 100.0 : 0.0;
 		var control = {

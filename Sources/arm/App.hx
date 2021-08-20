@@ -720,6 +720,7 @@ class App {
 		raw.zoom_direction = ZoomVertical;
 		raw.displace_strength = 0.0;
 		raw.show_asset_names = false;
+		raw.wrap_mouse = false;
 		raw.node_preview = true;
 		raw.workspace = 0;
 		raw.layer_res = Res2048;

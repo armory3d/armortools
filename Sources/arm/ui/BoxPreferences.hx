@@ -66,6 +66,9 @@ class BoxPreferences {
 					Config.raw.zoom_direction = zoomDirectionHandle.position;
 				}
 
+				Config.raw.wrap_mouse = ui.check(Id.handle({selected: Config.raw.wrap_mouse}), tr("Wrap Mouse"));
+				if (ui.isHovered) ui.tooltip(tr("Wrap mouse around view boundaries during camera control"));
+
 				Config.raw.node_preview = ui.check(Id.handle({selected: Config.raw.node_preview}), tr("Show Node Preview"));
 
 				#if arm_debug

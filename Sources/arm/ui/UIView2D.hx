@@ -34,6 +34,7 @@ class UIView2D {
 	public var panScale = 1.0;
 	public var uvmapShow = false;
 	public var tiledShow = false;
+	public var controlsDown = false;
 	var texType = TexBase;
 	var layerMode = View2DSelected;
 
@@ -295,10 +296,13 @@ class UIView2D {
 			mouse.x > wx + ww ||
 			mouse.y < wy + headerh ||
 			mouse.y > wy + wh) {
+			if (UIView2D.inst.controlsDown) {
+				UINodes.getCanvasControl(ui, inst);
+			}
 			return;
 		}
 
-		var control = UINodes.getCanvasControl(ui);
+		var control = UINodes.getCanvasControl(ui, inst);
 		panX += control.panX;
 		panY += control.panY;
 		if (control.zoom != 0) {
