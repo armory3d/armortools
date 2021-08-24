@@ -524,6 +524,10 @@ class ImportArm {
 		for (node in nodes) {
 			if (node.type == "TEX_IMAGE") {
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
+
+				if (node.buttons[1].data.length == 2) { // TODO: deprecated
+					node.buttons[1].data = [tr("Auto"), tr("Linear"), tr("sRGB"), tr("DirectX Normal Map")];
+				}
 			}
 			else if (node.type == "VALTORGB") { // TODO: deprecated
 				var but = node.buttons[0];
