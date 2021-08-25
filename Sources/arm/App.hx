@@ -50,6 +50,7 @@ class App {
 	public static var dragAsset: TAsset = null;
 	public static var dragSwatch: TSwatchColor = null;
 	public static var dragFile: String = null;
+	public static var dragFileIcon: Image = null;
 	public static var dragTint = 0xffffffff;
 	public static var dragSize = -1;
 	public static var dragRect: TRect = null;
@@ -419,6 +420,7 @@ class App {
 					});
 				}
 				dragFile = null;
+				dragFileIcon = null;
 			}
 			Krom.setMouseCursor(0); // Arrow
 			isDragging = false;
@@ -511,6 +513,7 @@ class App {
 			return dragLayer.fill_layer != null ? dragLayer.fill_layer.imageIcon : dragLayer.texpaint_preview;
 		}
 		if (dragFile != null) {
+			if (dragFileIcon != null) return dragFileIcon;
 			var icons = Res.get("icons.k");
 			dragRect = dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
 			dragTint = UISidebar.inst.ui.t.HIGHLIGHT_COL;

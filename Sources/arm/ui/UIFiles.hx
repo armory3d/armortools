@@ -174,10 +174,11 @@ class UIFiles {
 				var uiy = ui._y;
 				var state = Idle;
 				var generic = true;
+				var icon: kha.Image = null;
 
 				if (isCloud && f != ".." && !offline) {
 					if (iconMap == null) iconMap = [];
-					var icon = iconMap.get(handle.text + Path.sep + f);
+					icon = iconMap.get(handle.text + Path.sep + f);
 					if (icon == null) {
 						var filesAll = File.readDirectory(handle.text);
 						var iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
@@ -221,7 +222,7 @@ class UIFiles {
 				if (f.endsWith(".arm") && !isCloud) {
 					if (iconMap == null) iconMap = [];
 					var key = handle.text + Path.sep + f;
-					var icon = iconMap.get(key);
+					icon = iconMap.get(key);
 					if (!iconMap.exists(key)) {
 						var blobPath = key;
 						#if krom_ios
@@ -266,11 +267,13 @@ class UIFiles {
 							App.dragFile += Path.sep;
 						}
 						App.dragFile += f;
+						App.dragFileIcon = icon;
 					}
 
 					selected = i;
 					if (Time.time() - Context.selectTime < 0.25) {
 						App.dragFile = null;
+						App.dragFileIcon = null;
 						App.isDragging = false;
 						handle.changed = ui.changed = true;
 						if (f == "..") { // Up
