@@ -103,7 +103,9 @@ class Project {
 	public static function projectSave(saveAndQuit = false) {
 		if (filepath == "") {
 			#if krom_ios
-			filepath = Krom.saveDialog() + "/project" + Config.raw.recent_projects.length + ".arm";
+			var documentDirectory = Krom.saveDialog("", "");
+			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
+			filepath = documentDirectory + "/project" + Config.raw.recent_projects.length + ".arm";
 			#elseif krom_android
 			filepath = Krom.savePath() + "/project" + Config.raw.recent_projects.length + ".arm";
 			#else
