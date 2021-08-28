@@ -111,7 +111,11 @@ class App {
 				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt);
 				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Win);
 			},
-			function() {} // Shutdown
+			function() { // Shutdown
+				#if (krom_android || krom_ios)
+				Project.projectSave();
+				#end
+			}
 		);
 
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
