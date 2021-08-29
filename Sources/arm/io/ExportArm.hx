@@ -144,9 +144,14 @@ class ExportArm {
 		Krom.fileSaveBytes(Project.filepath, bytes.getData(), bytes.length + 1);
 
 		// Save to recent
+		#if krom_ios
+		var recent_path = Project.filepath.substr(Project.filepath.lastIndexOf("/") + 1);
+		#else
+		var recent_path = Project.filepath;
+		#end
 		var recent = Config.raw.recent_projects;
-		recent.remove(Project.filepath);
-		recent.unshift(Project.filepath);
+		recent.remove(recent_path);
+		recent.unshift(recent_path);
 		Config.save();
 
 		Console.info("Project saved.");

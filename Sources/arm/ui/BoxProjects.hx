@@ -10,6 +10,8 @@ class BoxProjects {
 
 	public static var htab = Id.handle();
 
+	static var iconMap: Map<String, kha.Image> = null;
+
 	@:access(zui.Zui)
 	public static function show() {
 
@@ -27,8 +29,27 @@ class BoxProjects {
 				ui.separator(3, false);
 
 				for (path in Config.raw.recent_projects) {
-					if (ui.button("")) {
+
+					#if krom_ios
+					var documentDirectory = Krom.saveDialog("", "");
+					documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
+					path = documentDirectory + path;
+					#end
+
+					var iconPath = path.substr(0, path.length - 4) + "_icon.png";
+					if (iconMap == null) iconMap = [];
+					var icon = iconMap.get(iconPath);
+					if (icon == null) {
+						iron.data.Data.getImage(iconPath, function(image: kha.Image) {
+							icon = image;
+							iconMap.set(iconPath, icon);
+						});
+					}
+
+					var state = ui.image(icon);
+					if (state == Released) {
 						ImportArm.runProject(path);
+						UIBox.show = false;
 					}
 				}
 
