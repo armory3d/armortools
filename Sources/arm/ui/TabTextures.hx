@@ -121,7 +121,9 @@ class TabTextures {
 									Project.reimportTexture(asset);
 								}
 								if (ui.button(tr("To Mask"), Left)) {
-									Layers.createImageMask(asset);
+									App.notifyOnNextFrame(function() {
+										Layers.createImageMask(asset);
+									});
 								}
 								if (ui.button(tr("Delete"), Left)) {
 									UIStatus.inst.statusHandle.redraws = 2;
