@@ -118,11 +118,15 @@ class ExportArm {
 		};
 
 		#if (krom_android || krom_ios)
-		var tex = iron.RenderPath.active.renderTargets.get("tex").image;
+		var tex = iron.RenderPath.active.renderTargets.get(Context.renderMode == RenderForward ? "buf" : "tex").image;
 		var mesh_icon = kha.Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);
+		#if kha_opengl
+		mesh_icon.g2.drawScaledImage(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
+		#else
 		mesh_icon.g2.drawScaledImage(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
+		#end
 		mesh_icon.g2.end();
 		var mesh_icon_pixels = mesh_icon.getPixels();
 		for (i in 0...256 * 256 * 4) {

@@ -73,16 +73,15 @@ class BoxProjects {
 							UIMenu.draw(function(ui: Zui) {
 								var name = path.substr(Project.filepath.lastIndexOf("/") + 1);
 								ui.text(name, Right, ui.t.HIGHLIGHT_COL);
-								if (ui.button(tr("Duplicate"), Left)) {
-
-								}
+								// if (ui.button(tr("Duplicate"), Left)) {}
 								if (ui.button(tr("Delete"), Left)) {
 									iron.App.notifyOnInit(function() {
 										arm.sys.File.delete(path);
+										arm.sys.File.delete(iconPath);
 										recent_projects.splice(i, 1);
 									});
 								}
-							}, 3);
+							}, 2);
 						}
 					}
 
