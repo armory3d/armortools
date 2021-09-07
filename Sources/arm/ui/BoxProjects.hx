@@ -15,6 +15,11 @@ class BoxProjects {
 	@:access(zui.Zui)
 	public static function show() {
 
+		if (iconMap != null) {
+			for (handle in iconMap.keys()) iron.data.Data.deleteImage(handle);
+			iconMap = null;
+		}
+
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(htab, tr("Projects"), true)) {
 
@@ -62,30 +67,33 @@ class BoxProjects {
 						}
 
 						ui.fill(0, 0, 256, 256, ui.t.SEPARATOR_COL);
-						var state = ui.image(icon);
-						if (state == Released) {
-							iron.App.notifyOnInit(function() {
-								ImportArm.runProject(path);
-							});
-							UIBox.show = false;
-						}
-						if (ui.isHovered && ui.inputReleasedR) {
-							UIMenu.draw(function(ui: Zui) {
-								var name = path.substr(Project.filepath.lastIndexOf("/") + 1);
-								ui.text(name, Right, ui.t.HIGHLIGHT_COL);
-								// if (ui.button(tr("Duplicate"), Left)) {}
-								if (ui.button(tr("Delete"), Left)) {
-									iron.App.notifyOnInit(function() {
-										arm.sys.File.delete(path);
-										arm.sys.File.delete(iconPath);
-										recent_projects.splice(i, 1);
-									});
-								}
-							}, 2);
+
+						if (icon != null) {
+							var state = ui.image(icon);
+							if (state == Released) {
+								iron.App.notifyOnInit(function() {
+									ImportArm.runProject(path);
+								});
+								UIBox.show = false;
+							}
+							if (ui.isHovered && ui.inputReleasedR) {
+								UIMenu.draw(function(ui: Zui) {
+									var name = path.substr(path.lastIndexOf("/") + 1);
+									ui.text(name, Right, ui.t.HIGHLIGHT_COL);
+									// if (ui.button(tr("Duplicate"), Left)) {}
+									if (ui.button(tr("Delete"), Left)) {
+										iron.App.notifyOnInit(function() {
+											arm.sys.File.delete(path);
+											arm.sys.File.delete(iconPath);
+											recent_projects.splice(i, 1);
+										});
+									}
+								}, 2);
+							}
 						}
 					}
 
-					ui._y += 6;
+					ui._y += 32;
 				}
 			}
 		}, 600, 400, null, false);

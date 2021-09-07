@@ -128,6 +128,11 @@ class ExportArm {
 		mesh_icon.g2.drawScaledImage(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 		#end
 		mesh_icon.g2.end();
+		#if kha_metal
+		// Flush command list
+		mesh_icon.g2.begin(false);
+		mesh_icon.g2.end();
+		#end
 		var mesh_icon_pixels = mesh_icon.getPixels();
 		for (i in 0...256 * 256 * 4) {
 			mesh_icon_pixels.set(i, Std.int(Math.pow(mesh_icon_pixels.get(i) / 255, 1.0 / 2.2) * 255));
