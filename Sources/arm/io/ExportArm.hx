@@ -137,6 +137,9 @@ class ExportArm {
 		for (i in 0...256 * 256 * 4) {
 			mesh_icon_pixels.set(i, Std.int(Math.pow(mesh_icon_pixels.get(i) / 255, 1.0 / 2.2) * 255));
 		}
+		#if (kha_metal || kha_vulkan)
+		bgraSwap(mesh_icon_pixels);
+		#end
 		App.notifyOnNextFrame(function() {
 			mesh_icon.unload();
 		});
