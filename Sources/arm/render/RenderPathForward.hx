@@ -152,7 +152,11 @@ class RenderPathForward {
 
 	static function drawSplit() {
 		if (Context.splitView && !Context.paint2dView) {
+			#if (kha_metal || krom_android)
+			Context.ddirty = 2;
+			#else
 			Context.ddirty = 1;
+			#end
 			var cam = Scene.active.camera;
 
 			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
