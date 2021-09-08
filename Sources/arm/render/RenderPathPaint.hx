@@ -197,17 +197,29 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 
 					// Picked surface values
+					#if (kha_metal || kha_vulkan)
+					Context.swatch.base.Rb = a.get(2);
+					Context.swatch.base.Gb = a.get(1);
+					Context.swatch.base.Bb = a.get(0);
+					Context.swatch.normal.Rb = b.get(2);
+					Context.swatch.normal.Gb = b.get(1);
+					Context.swatch.normal.Bb = b.get(0);
+					Context.swatch.occlusion = c.get(2) / 255;
+					Context.swatch.roughness = c.get(1) / 255;
+					Context.swatch.metallic = c.get(0) / 255;
+					#else
 					Context.swatch.base.Rb = a.get(0);
 					Context.swatch.base.Gb = a.get(1);
 					Context.swatch.base.Bb = a.get(2);
-					Context.uvxPicked = a.get(3) / 255;
 					Context.swatch.normal.Rb = b.get(0);
 					Context.swatch.normal.Gb = b.get(1);
 					Context.swatch.normal.Bb = b.get(2);
-					Context.uvyPicked = c.get(3) / 255;
 					Context.swatch.occlusion = c.get(0) / 255;
 					Context.swatch.roughness = c.get(1) / 255;
 					Context.swatch.metallic = c.get(2) / 255;
+					#end
+					Context.uvxPicked = a.get(3) / 255;
+					Context.uvyPicked = c.get(3) / 255;
 					// Pick material
 					if (Context.pickerSelectMaterial) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
