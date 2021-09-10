@@ -658,7 +658,7 @@ class RenderPathPaint {
 						 Context.bakeType == BakeLightmap ||
 						 Context.bakeType == BakeBentNormal ||
 						 Context.bakeType == BakeThickness) {
-					var dirty = RenderPathRaytrace.commandsBake(MakeMaterial.parsePaintMaterial);
+					var dirty = RenderPathRaytraceBake.commands(MakeMaterial.parsePaintMaterial);
 					if (dirty) UIHeader.inst.headerHandle.redraws = 2;
 					if (Config.raw.dilate == DilateInstant) { // && Context.pdirty == 1
 						dilate(true, false);
