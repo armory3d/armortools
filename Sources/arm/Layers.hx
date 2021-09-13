@@ -530,7 +530,7 @@ class Layers {
 		}
 	}
 
-	public static function flatten(heightToNormal = false, layers: Array<LayerSlot> = null): TLayerData {
+	public static function flatten(heightToNormal = false, layers: Array<LayerSlot> = null): Dynamic {
 		if (layers == null) layers = Project.layers;
 		Layers.makeTempImg();
 		Layers.makeExportImg();
