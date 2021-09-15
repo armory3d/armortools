@@ -240,7 +240,7 @@ class BoxPreferences {
 						}
 					}
 
-					if (Std.is(val, Bool)) {
+					if (Std.isOfType(val, Bool)) {
 						h.selected = val;
 						untyped theme[key] = ui.check(h, key);
 					}

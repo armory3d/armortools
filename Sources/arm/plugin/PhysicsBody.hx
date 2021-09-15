@@ -97,7 +97,7 @@ class PhysicsBody extends iron.Trait {
 		if (ready) return;
 		ready = true;
 
-		if (!Std.is(object, MeshObject)) return; // No mesh data
+		if (!Std.isOfType(object, MeshObject)) return; // No mesh data
 		var transform = object.transform;
 		var physics = PhysicsWorld.active;
 

@@ -95,7 +95,7 @@ class Brush {
 		// Expose button values in node class
 		for (b in node.buttons) {
 			if (b.type == "ENUM") {
-				var arrayData = Std.is(b.data, Array);
+				var arrayData = Std.isOfType(b.data, Array);
 				var texts = arrayData ? b.data : Nodes.enumTexts(node.type);
 				Reflect.setProperty(v, b.name, texts[b.default_value]);
 			}

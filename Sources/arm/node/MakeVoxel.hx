@@ -14,7 +14,7 @@ class MakeVoxel {
 		data.raw.vertex_elements = [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}];
 
 		// #if arm_skin
-		// var isMesh = Std.is(Context.object, MeshObject);
+		// var isMesh = Std.isOfType(Context.object, MeshObject);
 		// var skin = isMesh && cast(Context.object, MeshObject).data.geom.bones != null;
 		// if (skin) {
 		// 	structure.add("bone", kha.graphics4.VertexData.Short4Norm);

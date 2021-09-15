@@ -33,7 +33,7 @@ class MakeMeshPreview {
 		var pos = "pos";
 
 		#if arm_skin
-		var isMesh = Std.is(Context.object, MeshObject);
+		var isMesh = Std.isOfType(Context.object, MeshObject);
 		var skin = isMesh && cast(Context.object, MeshObject).data.geom.getVArray("bone") != null;
 		if (skin) {
 			pos = "spos";
