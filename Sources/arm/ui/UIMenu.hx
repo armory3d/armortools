@@ -401,13 +401,12 @@ class UIMenu {
 					}
 
 					var gpus = gpuRaw.split("\n");
-					gpus = gpus.splice(1,gpus.length-2);
+					gpus = gpus.splice(1, gpus.length - 2);
 					var gpu = "";
 					for (g in gpus) {
 						gpu += g.rtrim() + ", ";
 					}
-					gpu = gpu.substr(0,gpu.length-2);
-
+					gpu = gpu.substr(0, gpu.length - 2);
 					msg += '\n$gpu';
 					#else
 					// { lshw -C display }
