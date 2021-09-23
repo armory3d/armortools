@@ -102,14 +102,19 @@ class TabSwatches {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.setSwatch(Project.raw.swatches[i]);
-						var add = Project.raw.swatches.length > 1 ? 1 : 0;
+						var add = Project.raw.swatches.length > 1 ? 2 : 1;
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
-							if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
+							if (ui.button(tr("Duplicate"), Left)) {
+								Context.setSwatch(Project.makeSwatch(Context.swatch.base));
+								Project.raw.swatches.push(Context.swatch);
+							}
+							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
 								Context.setSwatch(Project.raw.swatches[i == 0 ? 1 : 0]);
 								Project.raw.swatches.splice(i, 1);
 								UIStatus.inst.statusHandle.redraws = 2;
 							}
+							
 						}, 1 + add);
 					}
 					if (ui.isHovered) {
