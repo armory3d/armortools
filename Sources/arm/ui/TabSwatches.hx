@@ -87,7 +87,6 @@ class TabSwatches {
 					}
 					else if (state == State.Released) {
 						if (Time.time() - Context.selectTime < 0.25) {
-
 							UIMenu.draw(function(ui) {
 								ui.changed = false;
 								var h = Id.handle();
@@ -102,7 +101,7 @@ class TabSwatches {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.setSwatch(Project.raw.swatches[i]);
-						var add = Project.raw.swatches.length > 1 ? 2 : 1;
+						var add = Project.raw.swatches.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Duplicate"), Left)) {
@@ -114,8 +113,7 @@ class TabSwatches {
 								Project.raw.swatches.splice(i, 1);
 								UIStatus.inst.statusHandle.redraws = 2;
 							}
-							
-						}, 1 + add);
+						}, 2 + add);
 					}
 					if (ui.isHovered) {
 						var val = untyped Project.raw.swatches[i].base;
