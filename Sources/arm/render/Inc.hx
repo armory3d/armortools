@@ -133,7 +133,9 @@ class Inc {
 				arm.Camera.inst.views[Context.viewIndexLast].setFrom(cam.transform.local);
 			}
 
-			if (Context.viewIndexLast != Context.viewIndex) {
+			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+
+			if (Context.viewIndexLast != Context.viewIndex || decal || !Config.raw.brush_3d) {
 				// Redraw on current viewport change
 				Context.ddirty = 1;
 			}
