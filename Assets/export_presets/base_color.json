@@ -1,0 +1,5 @@
+{
+	"textures": [
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" }
+	]
+}
