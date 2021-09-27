@@ -98,6 +98,7 @@ class Context {
 	public static var formatType = FormatPng;
 	public static var formatQuality = 100.0;
 	public static var layersExport = ExportVisible;
+	public static var layersDestination = DestinationDisk;
 	public static var splitBy = SplitObject;
 	public static var parseTransform = true;
 	public static var parseVCols = false;

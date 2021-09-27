@@ -359,7 +359,7 @@ class ExportArm {
 		}
 		var tempImages: Array<kha.Image> = [];
 		for (i in 0...assets.length) {
-			if (!Project.packedAssetExists(raw.packed_assets, raw.assets[i])) {
+			if (!Project.packedAssetExists(raw.packed_assets, assets[i].file)) {
 				var image = Project.getImage(assets[i]);
 				var temp = kha.Image.createRenderTarget(image.width, image.height);
 				temp.g2.begin(false);
@@ -367,8 +367,8 @@ class ExportArm {
 				temp.g2.end();
 				tempImages.push(temp);
 				raw.packed_assets.push({
-					name: raw.assets[i],
-					bytes: Bytes.ofData(assets[i].name.endsWith(".jpg") ?
+					name: assets[i].file,
+					bytes: Bytes.ofData(assets[i].file.endsWith(".jpg") ?
 						Krom.encodeJpg(temp.getPixels().getData(), temp.width, temp.height, 0, 80) :
 						Krom.encodePng(temp.getPixels().getData(), temp.width, temp.height, 0)
 					)

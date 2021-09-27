@@ -98,6 +98,11 @@ package arm;
 	var ExportPerUdimTile = 3;
 }
 
+@:enum abstract ExportDestination(Int) from Int to Int {
+	var DestinationDisk = 0;
+	var DestinationPacked = 1;
+}
+
 #if (kha_direct3d12 || kha_vulkan)
 @:enum abstract PathTraceMode(Int) from Int to Int {
 	var TraceCore = 0;
