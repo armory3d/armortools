@@ -23,7 +23,10 @@ class BoxExport {
 	public static function showTextures() {
 		UIBox.showCustom(function(ui: Zui) {
 
-			if (files == null) fetchPresets();
+			if (files == null) {
+				fetchPresets();
+				hpreset.position = files.indexOf("generic");
+			}
 			if (preset == null) {
 				parsePreset();
 				@:privateAccess hpreset.children = null;
@@ -39,7 +42,10 @@ class BoxExport {
 	public static function showBakeMaterial() {
 		UIBox.showCustom(function(ui: Zui) {
 
-			if (files == null) fetchPresets();
+			if (files == null) {
+				fetchPresets();
+				hpreset.position = files.indexOf("generic");
+			}
 			if (preset == null) {
 				parsePreset();
 				@:privateAccess hpreset.children = null;
