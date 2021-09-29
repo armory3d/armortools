@@ -445,11 +445,13 @@ class Project {
 			var i = Project.assets.indexOf(asset);
 			Data.deleteImage(asset.file);
 			Project.assetMap.remove(asset.id);
+			var oldAsset = Project.assets[i];
 			Project.assets.splice(i, 1);
 			Project.assetNames.splice(i, 1);
 			ImportTexture.run(asset.file);
 			Project.assets.insert(i, Project.assets.pop());
 			Project.assetNames.insert(i, Project.assetNames.pop());
+			if (Context.texture == oldAsset) Context.texture = Project.assets[i];
 			function _next() {
 				arm.node.MakeMaterial.parsePaintMaterial();
 				arm.util.RenderUtil.makeMaterialPreview();
