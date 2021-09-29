@@ -75,6 +75,7 @@ class TabMeshes {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(o.name, Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Export"), Left)) {
+							Context.exportMeshIndex = i + 1;
 							BoxExport.showMesh();
 						}
 						if (Project.paintObjects.length > 1 && ui.button(tr("Delete"), Left)) {

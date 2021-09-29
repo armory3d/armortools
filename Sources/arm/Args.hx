@@ -128,7 +128,7 @@ class Args {
 					if (Path.isFolder(exportMeshPath)) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						ExportMesh.run(exportMeshPath + Path.sep + f, false);
+						ExportMesh.run(exportMeshPath + Path.sep + f, null, false);
 					}
 					else {
 						trace("Invalid export directory");

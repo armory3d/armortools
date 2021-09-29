@@ -3,10 +3,11 @@ package arm.io;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.arrays.Int16Array;
+import iron.object.MeshObject;
 
 class ExportObj {
 
-	public static function run(path: String, applyDisplacement = false) {
+	public static function run(path: String, paintObjects: Array<MeshObject>, applyDisplacement = false) {
 		var o = new BytesOutput();
 		o.bigEndian = false;
 		o.writeString("# armorpaint.org\n");
@@ -14,7 +15,7 @@ class ExportObj {
 		var poff = 0;
 		var noff = 0;
 		var toff = 0;
-		for (p in Project.paintObjects) {
+		for (p in paintObjects) {
 			var mesh = p.data.raw;
 			var inv = 1 / 32767;
 			var sc = p.data.scalePos * inv;

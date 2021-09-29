@@ -124,6 +124,7 @@ class Context {
 	public static var viewportShader: NodeShader->String = null;
 	public static var hscaleWasChanged = false;
 	public static var exportMeshFormat = FormatObj;
+	public static var exportMeshIndex = 0;
 	public static var cacheDraws = false;
 	public static var packAssetsOnExport = true;
 	public static var writeIconOnExport = false;

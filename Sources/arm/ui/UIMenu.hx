@@ -82,7 +82,10 @@ class UIMenu {
 					BoxExport.showTextures();
 				}
 				if (menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
-				if (menuButton(ui, tr("Export Mesh..."))) BoxExport.showMesh();
+				if (menuButton(ui, tr("Export Mesh..."))) {
+					Context.exportMeshIndex = 0; // All
+					BoxExport.showMesh();
+				}
 				if (menuButton(ui, tr("Bake Material..."))) BoxExport.showBakeMaterial();
 
 				menuSeparator(ui);

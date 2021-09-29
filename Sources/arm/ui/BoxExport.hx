@@ -261,11 +261,21 @@ class BoxExport {
 	}
 
 	public static function showMesh() {
+
+		var exportMeshHandle = Id.handle();
+		exportMeshHandle.position = Context.exportMeshIndex;
+
 		UIBox.showCustom(function(ui: Zui) {
 			var htab = Id.handle();
 			if (ui.tab(htab, tr("Export Mesh"))) {
 
+				ui.row([1 / 2, 1 / 2]);
+
 				Context.exportMeshFormat = ui.combo(Id.handle({position: Context.exportMeshFormat}), ["obj", "arm"], tr("Format"), true);
+
+				var ar = [tr("All")];
+				for (p in Project.paintObjects) ar.push(p.name);
+				ui.combo(exportMeshHandle, ar, tr("Meshes"), true);
 
 				var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
 
@@ -286,7 +296,7 @@ class BoxExport {
 					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						ExportMesh.run(path + Path.sep + f, applyDisplacement);
+						ExportMesh.run(path + Path.sep + f, exportMeshHandle.position == 0 ? null : [Project.paintObjects[exportMeshHandle.position - 1]], applyDisplacement);
 					});
 				}
 			}

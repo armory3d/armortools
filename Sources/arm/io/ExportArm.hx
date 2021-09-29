@@ -4,6 +4,7 @@ import haxe.Json;
 import haxe.io.Bytes;
 import zui.Nodes;
 import iron.data.SceneFormat;
+import iron.object.MeshObject;
 import iron.system.ArmPack;
 import iron.system.Lz4;
 import arm.data.FontSlot;
@@ -15,9 +16,9 @@ import arm.Enums;
 
 class ExportArm {
 
-	public static function runMesh(path: String) {
+	public static function runMesh(path: String, paintObjects: Array<MeshObject>) {
 		var mesh_datas: Array<TMeshData> = [];
-		for (p in Project.paintObjects) mesh_datas.push(p.data.raw);
+		for (p in paintObjects) mesh_datas.push(p.data.raw);
 		var raw: TSceneFormat = { mesh_datas: mesh_datas };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
