@@ -97,7 +97,7 @@ class MakeMeshPreview {
 		if (decal) {
 			if (Context.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
-				frag.write('opacity *= textureLod(textexttool, texCoord, 0.0).r;');
+				frag.write('opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;');
 			}
 		}
 		if (decal) {
