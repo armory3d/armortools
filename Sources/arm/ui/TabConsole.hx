@@ -20,7 +20,7 @@ class TabConsole {
 		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
-			ui.row([1 / 14, 1 / 14]);
+			ui.row([1 / 14, 1 / 14 #if !(kha_android || kha_ios) , 1 / 14 #end]);
 
 			if (ui.button(tr("Clear"))) {
 				Console.lastTraces = [];
@@ -35,6 +35,12 @@ class TabConsole {
 					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
 				});
 			}
+			#if !(kha_android || kha_ios)
+			if (ui.button(tr("Copy"))) {
+				var str = Console.lastTraces.join("\n");
+				Krom.copyToClipboard(str);
+			}
+			#end
 
 			ui.endSticky();
 
