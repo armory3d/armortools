@@ -108,12 +108,19 @@ class TabSwatches {
 								Context.setSwatch(Project.makeSwatch(Context.swatch.base));
 								Project.raw.swatches.push(Context.swatch);
 							}
+							#if !(kha_android || kha_ios)
+							else if (ui.button(tr("Copy Hex code"), Left)) {
+								var val = untyped Context.swatch.base;
+								if (val < 0) val += untyped 4294967296;
+								Krom.copyToClipboard(untyped val.toString(16));
+							}
+							#end
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
 								Context.setSwatch(Project.raw.swatches[i == 0 ? 1 : 0]);
 								Project.raw.swatches.splice(i, 1);
 								UIStatus.inst.statusHandle.redraws = 2;
 							}
-						}, 2 + add);
+						}, #if !(kha_android || kha_ios) 3 + add #else 2 + add #end);
 					}
 					if (ui.isHovered) {
 						var val = untyped Project.raw.swatches[i].base;
