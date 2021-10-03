@@ -102,14 +102,18 @@ class TabSwatches {
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.setSwatch(Project.raw.swatches[i]);
 						var add = Project.raw.swatches.length > 1 ? 1 : 0;
+						#if (krom_windows || krom_linux || krom_darwin)
+						add += 1; // Copy
+						#end
+
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Duplicate"), Left)) {
 								Context.setSwatch(Project.makeSwatch(Context.swatch.base));
 								Project.raw.swatches.push(Context.swatch);
 							}
-							#if !(kha_android || kha_ios)
-							else if (ui.button(tr("Copy Hex code"), Left)) {
+							#if (krom_windows || krom_linux || krom_darwin)
+							else if (ui.button(tr("Copy"), Left)) {
 								var val = untyped Context.swatch.base;
 								if (val < 0) val += untyped 4294967296;
 								Krom.copyToClipboard(untyped val.toString(16));
@@ -120,7 +124,7 @@ class TabSwatches {
 								Project.raw.swatches.splice(i, 1);
 								UIStatus.inst.statusHandle.redraws = 2;
 							}
-						}, #if !(kha_android || kha_ios) 3 + add #else 2 + add #end);
+						}, 2 + add);
 					}
 					if (ui.isHovered) {
 						var val = untyped Project.raw.swatches[i].base;

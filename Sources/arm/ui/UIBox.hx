@@ -67,16 +67,17 @@ class UIBox {
 						Ext.textArea(ui, Id.handle({text: boxText}), false) :
 						ui.text(boxText);
 					ui.endElement();
-					#if !(kha_android || kha_ios)
-					if(copyable) ui.row([1 / 3, 1 / 3, 1 / 3]);
+
+					#if (krom_windows || krom_linux || krom_darwin)
+					if (copyable) ui.row([1 / 3, 1 / 3, 1 / 3]);
 					else ui.row([2 / 3, 1 / 3]);
 					#else
 					ui.row([2 / 3, 1 / 3]);
 					#end
 
-
 					ui.endElement();
-					#if !(kha_android || kha_ios)
+
+					#if (krom_windows || krom_linux || krom_darwin)
 					if (copyable && ui.button(tr("Copy"))) {
 						Krom.copyToClipboard(boxText);
 					}
