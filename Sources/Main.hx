@@ -20,7 +20,7 @@ import arm.render.RenderPathForwardVR;
 class Main {
 
 	public static inline var title = "ArmorPaint";
-	public static var version = "0.8";
+	public static var version = "0.9";
 	public static var sha = BuildMacros.sha().substr(1, 7);
 	public static var date = BuildMacros.date().split(" ")[0];
 	static var tasks: Int;
