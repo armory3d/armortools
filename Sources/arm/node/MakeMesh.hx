@@ -240,7 +240,7 @@ class MakeMesh {
 					frag.write('texpaint_nor_sample = textureLodShared(texpaint_nor' + l.id + ', texCoord, 0.0);');
 
 					if (MakeMaterial.emisUsed) {
-						frag.write('matid = texpaint_nor_sample.a;');
+						frag.write('if (texpaint_opac > 0.0) matid = texpaint_nor_sample.a;');
 					}
 
 					if (l.paintNor) {

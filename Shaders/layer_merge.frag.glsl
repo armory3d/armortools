@@ -34,7 +34,7 @@ void main() {
 		// Whiteout blend
 		vec3 n1 = cola.rgb * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);
 		vec3 n2 = mix(vec3(0.5, 0.5, 1.0), col1.rgb, str) * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0);
-		FragColor = vec4(normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), max(col0.a, cola.a));
+		FragColor = vec4(normalize(vec3(n1.xy + n2.xy, n1.z * n2.z)) * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5), max(col1.a, cola.a));
 	}
 	else if (blending == -3) { // Merging _pack with height blending
 		vec4 col1 = textureLod(tex1, texCoord, 0);
