@@ -66,6 +66,11 @@ class Layers {
 
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
+	#if (krom_android || krom_ios)
+	public static inline var maxLayers = 18;
+	#else
+	public static inline var maxLayers = 255;
+	#end
 
 	public static function initLayers() {
 		Project.layers[0].clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
@@ -851,7 +856,7 @@ class Layers {
 	}
 
 	public static function newLayer(clear = true): LayerSlot {
-		if (Project.layers.length > 255) return null;
+		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot();
 		l.objectMask = Context.layerFilter;
 		if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
@@ -870,7 +875,7 @@ class Layers {
 	}
 
 	public static function newMask(clear = true, parent: LayerSlot): LayerSlot {
-		if (Project.layers.length > 255) return null;
+		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot("", SlotMask, parent);
 		Project.layers.insert(Project.layers.indexOf(parent), l);
 		Context.setLayer(l);
@@ -880,7 +885,7 @@ class Layers {
 	}
 
 	public static function newGroup(): LayerSlot {
-		if (Project.layers.length > 255) return null;
+		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot("", SlotGroup);
 		Project.layers.push(l);
 		Context.setLayer(l);

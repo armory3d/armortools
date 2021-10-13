@@ -60,7 +60,11 @@ class BoxExport {
 	static function tabExportTextures(ui: Zui, title: String, bakeMaterial = false) {
 		if (ui.tab(htab, title)) {
 			ui.row([0.5, 0.5]);
+			#if (krom_android || krom_ios)
+			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
+			#else
 			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			#end
 			if (App.resHandle.changed) {
 				iron.App.notifyOnInit(Layers.resizeLayers);
 				UVUtil.uvmap = null;
@@ -72,7 +76,11 @@ class BoxExport {
 				arm.render.RenderPathRaytrace.ready = false;
 				#end
 			}
+			#if (krom_android || krom_ios)
+			ui.combo(App.bitsHandle, ["8bit"], tr("Color"), true);
+			#else
 			ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
+			#end
 			if (App.bitsHandle.changed) {
 				iron.App.notifyOnInit(Layers.setLayerBits);
 			}

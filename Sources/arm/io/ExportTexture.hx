@@ -89,7 +89,11 @@ class ExportTexture {
 		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
 		#end
 
-		Console.info("Textures exported.");
+		#if krom_ios
+		Console.info(tr("Textures exported.") + " ('Files/On My iPad/" + Main.title + "')");
+		#else
+		Console.info(tr("Textures exported."));
+		#end
 	}
 
 	static function runBakeMaterial(path: String) {

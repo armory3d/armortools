@@ -292,7 +292,11 @@ class BoxPreferences {
 				}
 
 				var layerResHandle = Id.handle({position: Config.raw.layer_res});
+				#if (krom_android || krom_ios)
+				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
+				#else
 				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
+				#end
 				if (layerResHandle.changed) {
 					Config.raw.layer_res = layerResHandle.position;
 				}

@@ -203,6 +203,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											iconMap.set(handle.text + Path.sep + f, icon);
+											ui.currentWindow.redraws = 3;
 										});
 									});
 								}

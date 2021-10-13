@@ -701,9 +701,13 @@ class TabLayers {
 			if (!l.isGroup()) {
 				ui.row([7 / 10, 3 / 10]);
 				var resHandleChangedLast = App.resHandle.changed;
+				#if (krom_android || krom_ios)
+				var ar = ["128", "256", "512", "1K", "2K", "4K"];
+				#else
 				var ar = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
+				#end
 				App.resHandle.value = App.resHandle.position;
-				App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, 7, false, 1, false, Left, false));
+				App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, ar.length - 1, false, 1, false, Left, false));
 				if (App.resHandle.changed) {
 					UIMenu.keepOpen = true;
 				}
@@ -721,7 +725,11 @@ class TabLayers {
 				ui.text(tr("Res"));
 
 				ui.row([7 / 10, 3 / 10]);
+				#if (krom_android || krom_ios)
+				zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit"]);
+				#else
 				zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit", "16bit", "32bit"]);
+				#end
 				if (App.bitsHandle.changed) {
 					iron.App.notifyOnInit(Layers.setLayerBits);
 					UIMenu.keepOpen = true;

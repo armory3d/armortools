@@ -86,6 +86,10 @@ class ImportMesh {
 		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
+
+		#if (krom_android || krom_ios)
+		arm.ui.UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		#end
 	}
 
 	public static function makeMesh(mesh: Dynamic, path: String) {

@@ -25,6 +25,7 @@ class TabTextures {
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
+					UIStatus.inst.statusHandle.redraws = 2;
 				});
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
