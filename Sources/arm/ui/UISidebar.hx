@@ -649,6 +649,21 @@ class UISidebar {
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
+		#if (krom_android || krom_ios)
+		if (!show) {
+			ui.inputEnabled = true;
+			g.end();
+			ui.begin(g);
+			if (ui.window(Id.handle(), 0, 0, 150, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET()))) {
+				if (ui.button(tr("Close"))) {
+					toggleDistractFree();
+				}
+			}
+			ui.end();
+			g.begin(false);
+		}
+		#end
+
 		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		ui.inputEnabled = App.uiEnabled;
