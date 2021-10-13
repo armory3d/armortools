@@ -4,8 +4,6 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Time;
 import iron.system.Input;
-import arm.io.ImportFont;
-import arm.util.RenderUtil;
 import arm.Enums;
 
 class TabSwatches {
