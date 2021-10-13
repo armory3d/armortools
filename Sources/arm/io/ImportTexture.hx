@@ -47,6 +47,7 @@ class ImportTexture {
 			Project.assetNames.push(name);
 			Project.assetMap.set(asset.id, image);
 			UIStatus.inst.statusHandle.redraws = 2;
+			Console.info(tr("Texture imported:") + " " + name);
 
 			// Set as envmap
 			if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {

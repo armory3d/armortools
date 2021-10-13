@@ -15,6 +15,6 @@ class ImportPlugin {
 		var dstPath = Path.data() + Path.sep + "plugins" + Path.sep + filename;
 		File.copy(path, dstPath); // Copy to plugin folder
 		arm.ui.BoxPreferences.filesPlugin = null; // Refresh file list
-		Console.info("Plugin '" + filename + "' imported.");
+		Console.info(tr("Plugin imported:") + " " + filename);
 	}
 }

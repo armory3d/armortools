@@ -16,6 +16,6 @@ class ImportKeymap {
 		File.copy(path, dstPath); // Copy to preset folder
 		arm.ui.BoxPreferences.fetchKeymaps(); // Refresh file list
 		arm.ui.BoxPreferences.presetHandle.position = arm.ui.BoxPreferences.getPresetIndex();
-		Console.info("Keymap '" + filename + "' imported.");
+		Console.info(tr("Keymap imported:") + " " + filename);
 	}
 }
