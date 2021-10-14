@@ -190,6 +190,12 @@ class App {
 				cam.buildProjection();
 
 				Args.run();
+
+				#if arm_touchui
+				if (Config.raw.recent_projects.length > 0) {
+					arm.ui.BoxProjects.show();
+				}
+				#end
 			});
 		});
 	}
