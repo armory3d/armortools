@@ -129,6 +129,9 @@ class App {
 				defaultFontSize = theme.FONT_SIZE;
 				Translator.loadTranslations(Config.raw.locale);
 				UIFiles.filename = tr("untitled");
+				#if (krom_android || krom_ios)
+				kha.Window.get(0).title = tr("untitled");
+				#end
 
 				// Precompiled font for fast startup
 				if (Config.raw.locale == "en") {
