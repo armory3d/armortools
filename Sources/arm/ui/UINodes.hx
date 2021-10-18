@@ -46,6 +46,7 @@ class UINodes {
 	var lastCanvas: TNodeCanvas = null;
 	var lastNodeSelected: TNode = null;
 	var releaseLink = false;
+	var isNodeMenuOperation = false;
 
 	public var grid: Image = null;
 	public var hwnd = Id.handle();
@@ -238,24 +239,42 @@ class UINodes {
 									selected.type == "BrushOutputNode";
 					uiMenu.enabled = !protected;
 					if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
-						Zui.isCopy = true;
-						Zui.isCut = true;
+						App.notifyOnNextFrame(function() {
+							hwnd.redraws = 2;
+							Zui.isCopy = true;
+							Zui.isCut = true;
+							isNodeMenuOperation = true;
+						});
 					}
 					if (menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
-						Zui.isCopy = true;
+						App.notifyOnNextFrame(function() {
+							Zui.isCopy = true;
+							isNodeMenuOperation = true;
+						});
 					}
 					uiMenu.enabled = Nodes.clipboard != "";
 					if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
-						Zui.isPaste = true;
+						App.notifyOnNextFrame(function() {
+							hwnd.redraws = 2;
+							Zui.isPaste = true;
+							isNodeMenuOperation = true;
+						});
 					}
 					uiMenu.enabled = !protected;
 					if (menuButton(uiMenu, tr("Delete"), "delete")) {
-						ui.isDeleteDown = true;
-						App.notifyOnNextFrame(function() { ui.isDeleteDown = false; });
+						App.notifyOnNextFrame(function() {
+							hwnd.redraws = 2;
+							ui.isDeleteDown = true;
+							isNodeMenuOperation = true;
+						});
 					}
 					if (menuButton(uiMenu, tr("Duplicate"))) {
-						Zui.isCopy = true;
-						Zui.isPaste = true;
+						App.notifyOnNextFrame(function() {
+							hwnd.redraws = 2;
+							Zui.isCopy = true;
+							Zui.isPaste = true;
+							isNodeMenuOperation = true;
+						});
 					}
 					uiMenu.enabled = true;
 				}, 5);
@@ -620,6 +639,9 @@ class UINodes {
 			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = _inputEnabled;
+			if (isNodeMenuOperation) {
+				Zui.isCopy = Zui.isCut = Zui.isPaste = ui.isDeleteDown = false;
+			}
 
 			// Remove nodes with unknown id for this canvas type
 			if (Zui.isPaste) {
