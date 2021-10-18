@@ -348,7 +348,7 @@ class TabLayers {
 		else {
 			if (ui.enabled && ui.inputEnabled &&
 				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._x + ui._w &&
-				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + step * 2) {
+				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * ui.SCALE()) * 2) {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
 					var mouse = Input.getMouse();
