@@ -22,6 +22,8 @@ class TabConsole {
 			ui.beginSticky();
 			#if (krom_windows || krom_linux || krom_darwin)
 			ui.row([1 / 14, 1 / 14, 1 / 14]); // Copy
+			#elseif arm_touchui
+			ui.row([1 / 4, 1 / 4]);
 			#else
 			ui.row([1 / 14, 1 / 14]);
 			#end

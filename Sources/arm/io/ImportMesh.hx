@@ -88,7 +88,7 @@ class ImportMesh {
 		#end
 
 		#if (krom_android || krom_ios)
-		arm.ui.UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		kha.Window.get(0).title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		#end
 	}
 

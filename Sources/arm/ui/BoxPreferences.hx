@@ -30,6 +30,10 @@ class BoxPreferences {
 	public static function show() {
 
 		UIBox.showCustom(function(ui: Zui) {
+			#if arm_touchui
+			alignToLeftSide();
+			#end
+
 			if (ui.tab(htab, tr("Interface"), true)) {
 
 				if (locales == null) {
@@ -51,9 +55,6 @@ class BoxPreferences {
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					setScale();
-					#if arm_touchui
-					alignToLeftSide();
-					#end
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
@@ -578,10 +579,6 @@ plugin.drawUI = function(ui) {
 				}
 			}
 		}, 600, 400, function() { Config.save(); });
-
-		#if arm_touchui
-		alignToLeftSide();
-		#end
 	}
 
 	#if arm_touchui

@@ -104,7 +104,7 @@ class UIFiles {
 		var file = Res.tile50(icons, 3, 1);
 		var isCloud = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud();
+		if (isCloud && File.cloud == null) File.initCloud(function() { UIStatus.inst.statusHandle.redraws = 3; });
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		#if krom_ios
@@ -127,7 +127,7 @@ class UIFiles {
 
 			var dirPath = handle.text;
 			#if krom_ios
-			if (!isCloud) dirPath = documentDirectory;
+			if (!isCloud) dirPath = documentDirectory + dirPath;
 			#end
 			var filesAll = File.readDirectory(dirPath, foldersOnly);
 
@@ -203,7 +203,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											iconMap.set(handle.text + Path.sep + f, icon);
-											ui.currentWindow.redraws = 3;
+											UIStatus.inst.statusHandle.redraws = 3;
 										});
 									});
 								}

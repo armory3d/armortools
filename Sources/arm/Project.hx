@@ -105,16 +105,19 @@ class Project {
 			#if krom_ios
 			var documentDirectory = Krom.saveDialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			filepath = documentDirectory + "/" + UIFiles.filename + ".arm";
+			filepath = documentDirectory + "/" + kha.Window.get(0).title + ".arm";
 			#elseif krom_android
-			filepath = Krom.savePath() + "/" + UIFiles.filename + ".arm";
+			filepath = Krom.savePath() + "/" + kha.Window.get(0).title + ".arm";
 			#else
 			projectSaveAs();
 			return;
 			#end
 		}
+
+		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
 		Window.get(0).title = filename + " - " + Main.title;
+		#end
 
 		function _init() {
 			ExportArm.runProject();
@@ -164,7 +167,9 @@ class Project {
 	}
 
 	public static function projectNew(resetLayers = true) {
+		#if (krom_windows || krom_linux || krom_darwin)
 		Window.get(0).title = Main.title;
+		#end
 		filepath = "";
 		if (Context.mergedObject != null) {
 			Context.mergedObject.remove();

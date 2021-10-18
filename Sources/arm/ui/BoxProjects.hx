@@ -21,8 +21,9 @@ class BoxProjects {
 		}
 
 		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(htab, tr("Projects"), true)) {
+			alignToFullScreen();
 
+			if (ui.tab(htab, tr("Projects"), true)) {
 				ui.beginSticky();
 				if (ui.button(tr("New"))) {
 					Project.projectNew();
@@ -43,7 +44,7 @@ class BoxProjects {
 							j = 0;
 						}
 					}
-					UIFiles.filename = title;
+					kha.Window.get(0).title = title;
 				}
 				ui.endSticky();
 				ui.separator(3, false);
@@ -88,12 +89,16 @@ class BoxProjects {
 							});
 						}
 
-						ui.fill(0, 0, 128, 128, ui.t.SEPARATOR_COL);
-
+						var uix = ui._x;
 						if (icon != null) {
-							var uix = ui._x;
+							ui.fill(0, 0, 128, 128, ui.t.SEPARATOR_COL);
+
 							var state = ui.image(icon, 0xffffffff, 128  * ui.SCALE());
 							if (state == Released) {
+								var _uix = ui._x;
+								ui._x = uix;
+								ui.fill(0, 0, 128, 128, 0x66000000);
+								ui._x = _uix;
 								iron.App.notifyOnInit(function() {
 									ImportArm.runProject(path);
 								});
@@ -109,6 +114,8 @@ class BoxProjects {
 										iron.App.notifyOnInit(function() {
 											arm.sys.File.delete(path);
 											arm.sys.File.delete(iconPath);
+											var dataPath = path.substr(0, path.length - 4);
+											arm.sys.File.delete(dataPath);
 											recent_projects.splice(i, 1);
 										});
 									}
@@ -126,14 +133,17 @@ class BoxProjects {
 								}
 							}
 						}
+						else {
+							@:privateAccess ui.endElement(0);
+							if (show_asset_names) @:privateAccess ui.endElement(0);
+							ui._x = uix;
+						}
 					}
 
 					ui._y += 150;
 				}
 			}
 		}, 600, 400, null, false);
-
-		@:privateAccess alignToFullScreen();
 	}
 
 	static function alignToFullScreen() {

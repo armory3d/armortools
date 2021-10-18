@@ -90,7 +90,11 @@ class ImportArm {
 			Project.projectNew(importAsMesh);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+			#if (krom_android || krom_ios)
+			Window.get(0).title = UIFiles.filename;
+			#else
 			Window.get(0).title = UIFiles.filename + " - " + Main.title;
+			#end
 
 			// Import as mesh instead
 			if (importAsMesh) {

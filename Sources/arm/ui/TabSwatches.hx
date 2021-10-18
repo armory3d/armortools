@@ -17,7 +17,11 @@ class TabSwatches {
 		if (ui.tab(UIStatus.inst.statustab, tr("Swatches")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
+			#if arm_touchui
+			ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+			#else
 			ui.row([1 / 14, 1 / 14, 1 / 14, 1 / 14]);
+			#end
 
 			if (ui.button(tr("New"))) {
 				Context.setSwatch(Project.makeSwatch());

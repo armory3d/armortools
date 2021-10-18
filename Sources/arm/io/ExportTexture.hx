@@ -94,6 +94,7 @@ class ExportTexture {
 		#else
 		Console.info(tr("Textures exported."));
 		#end
+		@:privateAccess UIFiles.lastPath = "";
 	}
 
 	static function runBakeMaterial(path: String) {
@@ -128,7 +129,11 @@ class ExportTexture {
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.formatQuality;
+		#if (krom_android || krom_ios)
+		var f = kha.Window.get(0).title;
+		#else
 		var f = UIFiles.filename;
+		#end
 		if (f == "") f = tr("untitled");
 		var formatType = Context.formatType;
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
