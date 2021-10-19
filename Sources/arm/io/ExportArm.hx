@@ -90,7 +90,11 @@ class ExportArm {
 		}
 
 		var packed_assets = Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0 ? null : Project.raw.packed_assets;
+		#if krom_ios
+		var sameDrive = false;
+		#else
 		var sameDrive = Project.raw.envmap != null ? Project.filepath.charAt(0) == Project.raw.envmap.charAt(0) : true;
+		#end
 
 		Project.raw = {
 			version: Main.version,
@@ -290,8 +294,12 @@ class ExportArm {
 	static function assetsToFiles(projectPath: String, assets: Array<TAsset>): Array<String> {
 		var texture_files: Array<String> = [];
 		for (a in assets) {
-			// Convert image path from absolute to relative
+			#if krom_ios
+			var sameDrive = false;
+			#else
 			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+			#end
+			// Convert image path from absolute to relative
 			if (sameDrive) {
 				texture_files.push(Path.toRelative(projectPath, a.file));
 			}
@@ -305,8 +313,12 @@ class ExportArm {
 	static function meshesToFiles(projectPath: String): Array<String> {
 		var mesh_files: Array<String> = [];
 		for (file in Project.meshAssets) {
+			#if krom_ios
+			var sameDrive = false;
+			#else
+			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+			#end
 			// Convert mesh path from absolute to relative
-			var sameDrive = projectPath.charAt(0) == file.charAt(0);
 			if (sameDrive) {
 				mesh_files.push(Path.toRelative(projectPath, file));
 			}
@@ -321,8 +333,12 @@ class ExportArm {
 		var font_files: Array<String> = [];
 		for (i in 1...fonts.length) {
 			var f = fonts[i];
+			#if krom_ios
+			var sameDrive = false;
+			#else
+			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+			#end
 			// Convert font path from absolute to relative
-			var sameDrive = projectPath.charAt(0) == f.file.charAt(0);
 			if (sameDrive) {
 				font_files.push(Path.toRelative(projectPath, f.file));
 			}
@@ -337,8 +353,12 @@ class ExportArm {
 		var packed_assets: Array<TPackedAsset> = null;
 		if (Project.raw.packed_assets != null) {
 			for (pa in Project.raw.packed_assets) {
+				#if krom_ios
+				var sameDrive = false;
+				#else
+				var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+				#end
 				// Convert path from absolute to relative
-				var sameDrive = projectPath.charAt(0) == pa.name.charAt(0);
 				pa.name = sameDrive ? Path.toRelative(projectPath, pa.name) : pa.name;
 				for (tf in texture_files) {
 					if (pa.name == tf) {
