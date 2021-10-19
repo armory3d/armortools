@@ -316,7 +316,7 @@ class ExportArm {
 			#if krom_ios
 			var sameDrive = false;
 			#else
-			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+			var sameDrive = projectPath.charAt(0) == file.charAt(0);
 			#end
 			// Convert mesh path from absolute to relative
 			if (sameDrive) {
@@ -336,7 +336,7 @@ class ExportArm {
 			#if krom_ios
 			var sameDrive = false;
 			#else
-			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+			var sameDrive = projectPath.charAt(0) == f.file.charAt(0);
 			#end
 			// Convert font path from absolute to relative
 			if (sameDrive) {
@@ -356,7 +356,7 @@ class ExportArm {
 				#if krom_ios
 				var sameDrive = false;
 				#else
-				var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
+				var sameDrive = projectPath.charAt(0) == pa.name.charAt(0);
 				#end
 				// Convert path from absolute to relative
 				pa.name = sameDrive ? Path.toRelative(projectPath, pa.name) : pa.name;
