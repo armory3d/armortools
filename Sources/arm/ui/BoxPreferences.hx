@@ -338,7 +338,11 @@ class BoxPreferences {
 				ui.enabled = true;
 			}
 
+			#if krom_ios
+			if (ui.tab(htab, tr("Pencil"), true)) {
+			#else
 			if (ui.tab(htab, tr("Pen"), true)) {
+			#end
 				ui.text(tr("Pressure controls"));
 				Config.raw.pressure_radius = ui.check(Id.handle({selected: Config.raw.pressure_radius}), tr("Brush Radius"));
 				Config.raw.pressure_hardness = ui.check(Id.handle({selected: Config.raw.pressure_hardness}), tr("Brush Hardness"));
