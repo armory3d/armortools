@@ -260,6 +260,9 @@ class Context {
 	public static var lastStatusPosition = 0;
 	public static var cameraControls = ControlsOrbit;
 	public static var dragDestination = 0;
+	#if (krom_android || krom_ios)
+	public static var penPaintingOnly = false; // Reject painting with finger when using pen
+	#end
 
 	public static function selectMaterial(i: Int) {
 		if (Project.materials.length <= i) return;
