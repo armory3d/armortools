@@ -130,6 +130,19 @@ class UIMenu {
 				p.raw.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.ddirty = 2;
 
+				menuFill(ui);
+				var envaHandle = Id.handle();
+				envaHandle.value = Context.envmapAngle / Math.PI * 180.0;
+				if (envaHandle.value < 0) {
+					envaHandle.value += (Std.int(-envaHandle.value / 360) + 1) * 360;
+				}
+				else if (envaHandle.value > 360) {
+					envaHandle.value -= Std.int(envaHandle.value / 360) * 360;
+				}
+				menuAlign(ui);
+				Context.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				if (envaHandle.changed) Context.ddirty = 2;
+
 				if (Scene.active.lights.length > 0) {
 					var light = Scene.active.lights[0];
 
@@ -141,6 +154,28 @@ class UIMenu {
 					menuAlign(ui);
 					light.data.raw.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
 					if (lhandle.changed) Context.ddirty = 2;
+
+					menuFill(ui);
+					var light = iron.Scene.active.lights[0];
+					var lahandle = Id.handle();
+					if (lahandle.value < 0) {
+						lahandle.value += (Std.int(-lahandle.value / 360) + 1) * 360;
+					}
+					else if (lahandle.value > 360) {
+						lahandle.value -= Std.int(lahandle.value / 360) * 360;
+					}
+					menuAlign(ui);
+					var lightAngle = lahandle.value;
+					ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1);
+					var ldiff = lahandle.value - lightAngle;
+					if (ldiff != 0) {
+						ldiff = (ldiff) / 180.0 * Math.PI;
+						var m = iron.math.Mat4.identity();
+						m.self = kha.math.FastMatrix4.rotationZ(ldiff);
+						light.transform.local.multmat(m);
+						light.transform.decompose();
+					}
+					if (lahandle.changed) Context.ddirty = 2;
 
 					menuFill(ui);
 					var sxhandle = Id.handle();
