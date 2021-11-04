@@ -408,7 +408,17 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.show = false;
 					App.redrawUI();
-					ImportMesh.run(path, clearLayers, replaceExisting);
+					function doImport() {
+						ImportMesh.run(path, clearLayers, replaceExisting);
+					}
+					#if (krom_android || krom_ios)
+					arm.App.notifyOnNextFrame(function() {
+						Console.toast(tr("Importing mesh"));
+						arm.App.notifyOnNextFrame(doImport);
+					});
+					#else
+					doImport();
+					#end
 				}
 				if (ui.button(tr("?"))) {
 					File.loadUrl("https://github.com/armory3d/armorpaint_docs/blob/master/faq.md");

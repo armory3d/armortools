@@ -37,6 +37,7 @@ class UIMenubar {
 			if (iconButton(ui, 0, 3)) {
 				ui.fill(0, 2, -(32 + 4), 32, 0x66000000);
 				#if (krom_android || krom_ios)
+				Console.toast(tr("Saving project"));
 				Project.projectSave();
 				#end
 				App.notifyOnNextFrame(function() {

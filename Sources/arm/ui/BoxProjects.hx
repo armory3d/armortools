@@ -99,10 +99,21 @@ class BoxProjects {
 								ui._x = uix;
 								ui.fill(0, 0, 128, 128, 0x66000000);
 								ui._x = _uix;
-								iron.App.notifyOnInit(function() {
-									ImportArm.runProject(path);
+								function doImport() {
+									iron.App.notifyOnInit(function() {
+										UIBox.show = false;
+										ImportArm.runProject(path);
+									});
+								}
+
+								#if (krom_android || krom_ios)
+								arm.App.notifyOnNextFrame(function() {
+									Console.toast(tr("Opening project"));
+									arm.App.notifyOnNextFrame(doImport);
 								});
-								UIBox.show = false;
+								#else
+								doImport();
+								#end
 							}
 
 							var name = path.substring(path.lastIndexOf(arm.sys.Path.sep) + 1, path.lastIndexOf("."));
