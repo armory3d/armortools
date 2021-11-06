@@ -66,6 +66,7 @@ cp -a build/krom/ armorcore/Deployment
 cd armorcore
 git apply patch/ios_document_picker.diff --directory=Kinc
 git apply patch/metal_depth.diff --directory=Kinc
+git clone https://github.com/armory3d/armorpaint_plugins Libraries/plugins
 node Kinc/make ios -g metal
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
 # Set iOS Deployment Target to 11.0

@@ -9,6 +9,7 @@ let raytrace = d3d12 || vulkan;
 let metal = process.argv.indexOf("metal") >= 0;
 let vr = process.argv.indexOf("--vr") >= 0;
 let snapshot = process.argv.indexOf("--snapshot") >= 0;
+let plugin_embed = ios;
 
 let project = new Project("ArmorPaint");
 project.addSources("Sources");
@@ -28,6 +29,12 @@ project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets
 project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
+if (plugin_embed) {
+	project.addAssets("Assets/plugins/embed/*", { destination: "data/plugins/{name}" });
+}
+else {
+	project.addAssets("Assets/plugins/wasm/*", { destination: "data/plugins/{name}" });
+}
 project.addAssets("Assets/meshes/*", { destination: "data/meshes/{name}" });
 project.addAssets("Libraries/armorbase/Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("Libraries/armorbase/Assets/themes/*.json", { destination: "data/themes/{name}" });
