@@ -1,5 +1,6 @@
 package arm;
 
+import arm.ui.TabMaterials;
 import haxe.io.Bytes;
 import kha.graphics2.truetype.StbTruetype;
 import kha.Image;
@@ -376,6 +377,8 @@ class App {
 							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
 			var inLayers = UISidebar.inst.htab0.position == 0 &&
 						   mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
+			var inMaterials = UISidebar.inst.htab1.position == 0 &&
+						   mx > UISidebar.inst.tabx && my > Config.raw.layout[LayoutSidebarH0] && my < Config.raw.layout[LayoutSidebarH1] + Config.raw.layout[LayoutSidebarH0];
 			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
 						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
 						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
@@ -400,6 +403,12 @@ class App {
 			else if (dragSwatch != null) {
 				if (inNodes) { // Create RGB node
 					UINodes.inst.acceptSwatchDrag(Project.raw.swatches.indexOf(dragSwatch));
+				}
+				else if (inMaterials) {
+					TabMaterials.acceptSwatchDrag(Project.raw.swatches.indexOf(dragSwatch));
+				}
+				else if (inLayers || inViewport) {
+					Layers.createColorLayer(dragSwatch.base.value);
 				}
 				dragSwatch = null;
 			}
@@ -469,7 +478,7 @@ class App {
 			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
 		}
 		dragMaterial = null;
-	}
+	} 
 
 	static function handleDropPaths() {
 		if (dropPaths.length > 0) {

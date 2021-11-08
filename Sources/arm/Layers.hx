@@ -916,4 +916,16 @@ class Layers {
 		m.clear(0x00000000, Project.getImage(asset));
 		Context.layerPreviewDirty = true;
 	}
+
+	public static function createColorLayer(baseColor: Int) {
+		function _init() {
+			var l = newLayer(false);
+			History.newLayer();
+			l.uvType = UVMap;
+			l.objectMask = Context.layerFilter;
+			l.clear(baseColor);
+		}
+		iron.App.notifyOnInit(_init);
+	}
+
 }

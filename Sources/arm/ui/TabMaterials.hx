@@ -228,4 +228,17 @@ class TabMaterials {
 			}
 		}
 	}
+
+	public static function acceptSwatchDrag(index: Int) {
+		Context.material = new MaterialSlot(Project.materials[0].data);
+		for (node in Context.material.canvas.nodes) {
+			if (node.type == "RGB" ) {
+				var color = Project.raw.swatches[index].base;
+				node.outputs[0].default_value = [color.R, color.G, color.B, color.A];
+			}
+		}
+		Project.materials.push(Context.material);
+		updateMaterial();
+		History.newMaterial();
+	}
 }
