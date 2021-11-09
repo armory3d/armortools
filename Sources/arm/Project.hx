@@ -12,7 +12,7 @@ import iron.data.Data;
 import iron.object.MeshObject;
 import iron.Scene;
 import arm.util.RenderUtil;
-import arm.Viewport;
+import arm.util.MeshUtil;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.ui.UISidebar;
@@ -20,6 +20,7 @@ import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.ui.UINodes;
 import arm.ui.UIHeader;
+import arm.ui.BoxPreferences;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
@@ -32,6 +33,7 @@ import arm.io.ImportMesh;
 import arm.io.ImportTexture;
 import arm.io.ExportArm;
 import arm.node.NodesBrush;
+import arm.Viewport;
 import arm.ProjectFormat;
 import arm.Enums;
 
@@ -433,6 +435,57 @@ class Project {
 			importMeshBox(Project.meshAssets[0], true, false);
 		}
 		else importAsset();
+	}
+
+	public static function unwrapMeshBox(mesh: Dynamic, done: Void->Void) {
+		UIBox.showCustom(function(ui: Zui) {
+			if (ui.tab(Id.handle(), tr("Unwrap Mesh"))) {
+
+				var unwrapPlugins = [];
+				if (BoxPreferences.filesPlugin == null) {
+					BoxPreferences.fetchPlugins();
+				}
+				for (f in BoxPreferences.filesPlugin) {
+					if (f.indexOf("uv_unwrap") >= 0 && f.endsWith(".js")) {
+						unwrapPlugins.push(f);
+					}
+				}
+				unwrapPlugins.push("equirect");
+
+				var unwrapBy = ui.combo(Id.handle(), unwrapPlugins, tr("Plugin"), true);
+
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.show = false;
+				}
+				if (ui.button(tr("Unwrap")) || ui.isReturnDown) {
+					UIBox.show = false;
+					App.redrawUI();
+					function doImport() {
+						if (unwrapBy == unwrapPlugins.length - 1) {
+							MeshUtil.equirectUnwrap(mesh);
+						}
+						else {
+							var f = unwrapPlugins[unwrapBy];
+							if (Config.raw.plugins.indexOf(f) == -1) {
+								Config.enablePlugin(f);
+								Console.info(f + " " + tr("plugin enabled"));
+							}
+							MeshUtil.unwrappers.get(f)(mesh);
+						}
+						done();
+					}
+					#if (krom_android || krom_ios)
+					arm.App.notifyOnNextFrame(function() {
+						Console.toast(tr("Unwrapping mesh"));
+						arm.App.notifyOnNextFrame(doImport);
+					});
+					#else
+					doImport();
+					#end
+				}
+			}
+		});
 	}
 
 	public static function importAsset(filters: String = null, hdrAsEnvmap = true) {

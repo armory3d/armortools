@@ -43,10 +43,18 @@ class ImportMesh {
 			var ext = path.substr(path.lastIndexOf(".") + 1);
 			var importer = Path.meshImporters.get(ext);
 			importer(path, function(mesh: Dynamic) {
-				replaceExisting ? ImportMesh.makeMesh(mesh, path) : ImportMesh.addMesh(mesh);
+				replaceExisting ? makeMesh(mesh, path) : addMesh(mesh);
 			});
 		}
 
+		Project.meshAssets = [path];
+
+		#if (krom_android || krom_ios)
+		kha.Window.get(0).title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		#end
+	}
+
+	static function finishImport() {
 		if (Context.mergedObject != null) {
 			Context.mergedObject.remove();
 			Data.deleteMesh(Context.mergedObject.data.handle);
@@ -69,7 +77,6 @@ class ImportMesh {
 			Context.paintObject.skip_context = "paint";
 			Context.mergedObject.visible = true;
 		}
-		Project.meshAssets = [path];
 
 		Viewport.scaleToBounds();
 
@@ -86,10 +93,6 @@ class ImportMesh {
 		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
-
-		#if (krom_android || krom_ios)
-		kha.Window.get(0).title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
-		#end
 	}
 
 	public static function makeMesh(mesh: Dynamic, path: String) {
@@ -98,100 +101,101 @@ class ImportMesh {
 			return;
 		}
 
-		var raw = rawMesh(mesh);
-		if (mesh.texa == null) equirectUnwrap(mesh);
-		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+		function _makeMesh() {
+			var raw = rawMesh(mesh);
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		new MeshData(raw, function(md: MeshData) {
-			Context.paintObject = Context.mainObject();
+			new MeshData(raw, function(md: MeshData) {
+				Context.paintObject = Context.mainObject();
 
-			Context.selectPaintObject(Context.mainObject());
-			for (i in 0...Project.paintObjects.length) {
-				var p = Project.paintObjects[i];
-				if (p == Context.paintObject) continue;
-				Data.deleteMesh(p.data.handle);
-				p.remove();
-			}
-			var handle = Context.paintObject.data.handle;
-			if (handle != "SceneSphere" && handle != "ScenePlane") {
-				Data.deleteMesh(handle);
-			}
-
-			if (clearLayers) {
-				while (Project.layers.length > 0) {
-					var l = Project.layers.pop();
-					l.unload();
+				Context.selectPaintObject(Context.mainObject());
+				for (i in 0...Project.paintObjects.length) {
+					var p = Project.paintObjects[i];
+					if (p == Context.paintObject) continue;
+					Data.deleteMesh(p.data.handle);
+					p.remove();
 				}
-				Layers.newLayer(false);
-				iron.App.notifyOnInit(Layers.initLayers);
-				History.reset();
-			}
+				var handle = Context.paintObject.data.handle;
+				if (handle != "SceneSphere" && handle != "ScenePlane") {
+					Data.deleteMesh(handle);
+				}
 
-			Context.paintObject.setData(md);
-			Context.paintObject.name = mesh.name;
-			Project.paintObjects = [Context.paintObject];
+				if (clearLayers) {
+					while (Project.layers.length > 0) {
+						var l = Project.layers.pop();
+						l.unload();
+					}
+					Layers.newLayer(false);
+					iron.App.notifyOnInit(Layers.initLayers);
+					History.reset();
+				}
 
-			md.handle = raw.name;
-			Data.cachedMeshes.set(md.handle, md);
+				Context.paintObject.setData(md);
+				Context.paintObject.name = mesh.name;
+				Project.paintObjects = [Context.paintObject];
 
-			Context.ddirty = 4;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UISidebar.inst.hwnd1.redraws = 2;
-			UVUtil.uvmapCached = false;
-			UVUtil.trianglemapCached = false;
-			UVUtil.dilatemapCached = false;
-		});
+				md.handle = raw.name;
+				Data.cachedMeshes.set(md.handle, md);
+
+				Context.ddirty = 4;
+				UISidebar.inst.hwnd0.redraws = 2;
+				UISidebar.inst.hwnd1.redraws = 2;
+				UVUtil.uvmapCached = false;
+				UVUtil.trianglemapCached = false;
+				UVUtil.dilatemapCached = false;
+
+				// Wait for addMesh calls to finish
+				iron.App.notifyOnInit(finishImport);
+			});
+		}
+
+		if (mesh.texa == null) {
+			Project.unwrapMeshBox(mesh, _makeMesh);
+		}
+		else {
+			_makeMesh();
+		}
 	}
 
 	public static function addMesh(mesh: Dynamic) {
 
-		if (mesh.texa == null) equirectUnwrap(mesh);
-		var raw = rawMesh(mesh);
-		raw.vertex_arrays.push({ values: mesh.texa, attrib: "tex", data: "short2norm" });
-		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+		function _addMesh() {
+			var raw = rawMesh(mesh);
+			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		new MeshData(raw, function(md: MeshData) {
+			new MeshData(raw, function(md: MeshData) {
 
-			var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
-			object.name = mesh.name;
-			object.skip_context = "paint";
+				var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
+				object.name = mesh.name;
+				object.skip_context = "paint";
 
-			// Ensure unique names
-			for (p in Project.paintObjects) {
-				if (p.name == object.name) {
-					p.name += ".001";
-					p.data.handle += ".001";
-					Data.cachedMeshes.set(p.data.handle, p.data);
+				// Ensure unique names
+				for (p in Project.paintObjects) {
+					if (p.name == object.name) {
+						p.name += ".001";
+						p.data.handle += ".001";
+						Data.cachedMeshes.set(p.data.handle, p.data);
+					}
 				}
-			}
 
-			Project.paintObjects.push(object);
+				Project.paintObjects.push(object);
 
-			md.handle = raw.name;
-			Data.cachedMeshes.set(md.handle, md);
+				md.handle = raw.name;
+				Data.cachedMeshes.set(md.handle, md);
 
-			Context.ddirty = 4;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UVUtil.uvmapCached = false;
-			UVUtil.trianglemapCached = false;
-			UVUtil.dilatemapCached = false;
-		});
-	}
+				Context.ddirty = 4;
+				UISidebar.inst.hwnd0.redraws = 2;
+				UVUtil.uvmapCached = false;
+				UVUtil.trianglemapCached = false;
+				UVUtil.dilatemapCached = false;
+			});
+		}
 
-	static function equirectUnwrap(mesh: Dynamic) {
-		Console.error(Strings.error4());
-		var verts = Std.int(mesh.posa.length / 4);
-		mesh.texa = new Int16Array(verts * 2);
-		var n = new Vec4();
-		for (i in 0...verts) {
-			n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
-			// Sphere projection
-			// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
-			// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
-			// Equirect
-			mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
-			mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
+		if (mesh.texa == null) {
+			Project.unwrapMeshBox(mesh, _addMesh);
+		}
+		else {
+			_addMesh();
 		}
 	}
 
@@ -200,7 +204,8 @@ class ImportMesh {
 			name: mesh.name,
 			vertex_arrays: [
 				{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-				{ values: mesh.nora, attrib: "nor", data: "short2norm" }
+				{ values: mesh.nora, attrib: "nor", data: "short2norm" },
+				{ values: mesh.texa, attrib: "tex", data: "short2norm" }
 			],
 			index_arrays: [
 				{ values: mesh.inda, material: 0 }

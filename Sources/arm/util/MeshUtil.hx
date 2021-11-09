@@ -12,6 +12,8 @@ import arm.Enums;
 
 class MeshUtil {
 
+	public static var unwrappers: Map<String, Dynamic->Void> = [];
+
 	public static function mergeMesh(paintObjects: Array<MeshObject> = null) {
 		if (paintObjects == null) paintObjects = Project.paintObjects;
 		if (paintObjects.length == 0) return;
@@ -330,6 +332,21 @@ class MeshUtil {
 			va0[i * 4    ] = vertices[i * l    ];
 			va0[i * 4 + 1] = vertices[i * l + 1];
 			va0[i * 4 + 2] = vertices[i * l + 2];
+		}
+	}
+
+	public static function equirectUnwrap(mesh: Dynamic) {
+		var verts = Std.int(mesh.posa.length / 4);
+		mesh.texa = new Int16Array(verts * 2);
+		var n = new Vec4();
+		for (i in 0...verts) {
+			n.set(mesh.posa[i * 4] / 32767, mesh.posa[i * 4 + 1] / 32767, mesh.posa[i * 4 + 2] / 32767).normalize();
+			// Sphere projection
+			// mesh.texa[i * 2    ] = Math.atan2(n.x, n.y) / (Math.PI * 2) + 0.5;
+			// mesh.texa[i * 2 + 1] = n.z * 0.5 + 0.5;
+			// Equirect
+			mesh.texa[i * 2    ] = Std.int(((Math.atan2(-n.z, n.x) + Math.PI) / (Math.PI * 2)) * 32767);
+			mesh.texa[i * 2 + 1] = Std.int((Math.acos(n.y) / Math.PI) * 32767);
 		}
 	}
 }

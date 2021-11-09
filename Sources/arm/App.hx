@@ -478,7 +478,7 @@ class App {
 			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
 		}
 		dragMaterial = null;
-	} 
+	}
 
 	static function handleDropPaths() {
 		if (dropPaths.length > 0) {
