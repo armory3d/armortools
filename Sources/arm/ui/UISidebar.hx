@@ -535,7 +535,12 @@ class UISidebar {
 
 		#if krom_ios
 		// No hover on iPad, decals are painted by pen release
-		if (decal) down = Input.getMouse().released() || Input.getPen().released();
+		if (decal) {
+			down = Input.getPen().released();
+			if (!Context.penPaintingOnly) {
+				down = down || Input.getMouse().released();
+			}
+		}
 		#end
 
 		if (down) {
