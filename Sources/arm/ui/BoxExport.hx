@@ -19,6 +19,7 @@ class BoxExport {
 	public static var preset: TExportPreset = null;
 	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static var colorSpaces = ["linear", "srgb"];
+	static var exportMeshHandle = Id.handle();
 
 	public static function showTextures() {
 		UIBox.showCustom(function(ui: Zui) {
@@ -35,6 +36,9 @@ class BoxExport {
 			tabExportTextures(ui, tr("Export Textures"));
 			tabPresets(ui);
 			tabAtlases(ui);
+			#if (krom_android || krom_ios)
+			tabExportMesh(ui, htab);
+			#end
 
 		}, 540, 310);
 	}
@@ -279,46 +283,57 @@ class BoxExport {
 	}
 
 	public static function showMesh() {
-
-		var exportMeshHandle = Id.handle();
 		exportMeshHandle.position = Context.exportMeshIndex;
-
 		UIBox.showCustom(function(ui: Zui) {
 			var htab = Id.handle();
-			if (ui.tab(htab, tr("Export Mesh"))) {
+			tabExportMesh(ui, htab);
+		});
+	}
 
-				ui.row([1 / 2, 1 / 2]);
+	static function tabExportMesh(ui: Zui, htab: zui.Zui.Handle) {
+		if (ui.tab(htab, tr("Export Mesh"))) {
 
-				Context.exportMeshFormat = ui.combo(Id.handle({position: Context.exportMeshFormat}), ["obj", "arm"], tr("Format"), true);
+			ui.row([1 / 2, 1 / 2]);
 
-				var ar = [tr("All")];
-				for (p in Project.paintObjects) ar.push(p.name);
-				ui.combo(exportMeshHandle, ar, tr("Meshes"), true);
+			Context.exportMeshFormat = ui.combo(Id.handle({position: Context.exportMeshFormat}), ["obj", "arm"], tr("Format"), true);
 
-				var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
+			var ar = [tr("All")];
+			for (p in Project.paintObjects) ar.push(p.name);
+			ui.combo(exportMeshHandle, ar, tr("Meshes"), true);
 
-				var tris = 0;
-				for (po in Project.paintObjects) {
-					for (inda in po.data.raw.index_arrays) {
-						tris += Std.int(inda.values.length / 3);
-					}
-				}
-				ui.text(tris + " " + tr("triangles"));
+			var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
 
-				ui.row([0.5, 0.5]);
-				if (ui.button(tr("Cancel"))) {
-					UIBox.show = false;
-				}
-				if (ui.button(tr("Export"))) {
-					UIBox.show = false;
-					UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
-						var f = UIFiles.filename;
-						if (f == "") f = tr("untitled");
-						ExportMesh.run(path + Path.sep + f, exportMeshHandle.position == 0 ? null : [Project.paintObjects[exportMeshHandle.position - 1]], applyDisplacement);
-					});
+			var tris = 0;
+			for (po in Project.paintObjects) {
+				for (inda in po.data.raw.index_arrays) {
+					tris += Std.int(inda.values.length / 3);
 				}
 			}
-		});
+			ui.text(tris + " " + tr("triangles"));
+
+			ui.row([0.5, 0.5]);
+			if (ui.button(tr("Cancel"))) {
+				UIBox.show = false;
+			}
+			if (ui.button(tr("Export"))) {
+				UIBox.show = false;
+				UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
+					var f = UIFiles.filename;
+					if (f == "") f = tr("untitled");
+					function doExport() {
+						ExportMesh.run(path + Path.sep + f, exportMeshHandle.position == 0 ? null : [Project.paintObjects[exportMeshHandle.position - 1]], applyDisplacement);
+					}
+					#if (krom_android || krom_ios)
+					arm.App.notifyOnNextFrame(function() {
+						Console.toast(tr("Exporting mesh"));
+						arm.App.notifyOnNextFrame(doExport);
+					});
+					#else
+					doExport();
+					#end
+				});
+			}
+		}
 	}
 
 	public static function showMaterial() {
