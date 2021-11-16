@@ -589,10 +589,12 @@ class RenderPathPaint {
 	public static function draw() {
 		if (!paintEnabled()) return;
 
+		#if (!krom_ios) // No hover on iPad, decals are painted by pen release
 		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
 			commandsLiveBrush();
 		}
+		#end
 
 		if (History.undoLayers != null) {
 
