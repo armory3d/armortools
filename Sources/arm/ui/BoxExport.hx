@@ -318,7 +318,11 @@ class BoxExport {
 			if (ui.button(tr("Export"))) {
 				UIBox.show = false;
 				UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
+					#if (krom_android || krom_ios)
+					var f = kha.Window.get(0).title;
+					#else
 					var f = UIFiles.filename;
+					#end
 					if (f == "") f = tr("untitled");
 					function doExport() {
 						ExportMesh.run(path + Path.sep + f, exportMeshHandle.position == 0 ? null : [Project.paintObjects[exportMeshHandle.position - 1]], applyDisplacement);
