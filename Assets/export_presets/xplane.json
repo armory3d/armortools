@@ -1,6 +1,6 @@
 {
 	"textures": [
-		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "rough"], "color_space": "linear" },
-		{ "name": "nor", "channels": ["nor_r", "nor_g", "smooth", "metal"], "color_space": "linear" }
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "opac"], "color_space": "linear" },
+		{ "name": "nor", "channels": ["nor_r", "nor_g", "metal", "smooth"], "color_space": "linear" }
 	]
 }
