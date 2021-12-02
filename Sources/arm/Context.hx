@@ -53,6 +53,8 @@ class Context {
 	public static var nodePreview: Image = null;
 	public static var nodePreviews: Map<String, Image> = null;
 	public static var nodePreviewsUsed: Array<String> = null;
+	public static var maskPreviewRgba32: kha.Image = null;
+	public static var maskPreviewLast: LayerSlot = null;
 
 	public static var colorIdPicked = false;
 	public static var splitView = false;

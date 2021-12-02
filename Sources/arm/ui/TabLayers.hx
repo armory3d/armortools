@@ -17,8 +17,6 @@ import arm.Enums;
 @:access(zui.Zui)
 class TabLayers {
 
-	public static var maskPreviewRgba32: kha.Image = null;
-	static var maskPreviewLast: LayerSlot = null;
 	static var layerNameEdit = -1;
 	static var layerNameHandle = Id.handle();
 
@@ -313,7 +311,7 @@ class TabLayers {
 		if (ui.isHovered && l.texpaint_preview != null) {
 			if (l.isMask()) {
 				makeMaskPreviewRgba32(l);
-				ui.tooltipImage(maskPreviewRgba32);
+				ui.tooltipImage(Context.maskPreviewRgba32);
 			}
 			else {
 				ui.tooltipImage(l.texpaint_preview);
@@ -839,19 +837,19 @@ class TabLayers {
 	}
 
 	public static function makeMaskPreviewRgba32(l: LayerSlot) {
-		if (maskPreviewRgba32 == null) {
-			maskPreviewRgba32 = kha.Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
+		if (Context.maskPreviewRgba32 == null) {
+			Context.maskPreviewRgba32 = kha.Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
 		}
 		// Convert from R8 to RGBA32 for tooltip display
-		if (maskPreviewLast != l) {
-			maskPreviewLast = l;
+		if (Context.maskPreviewLast != l) {
+			Context.maskPreviewLast = l;
 			iron.App.notifyOnInit(function() {
-				maskPreviewRgba32.g2.begin();
-				maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
-				maskPreviewRgba32.g4.setInt(UIView2D.channelLocation, 1);
-				maskPreviewRgba32.g2.drawImage(l.texpaint_preview, 0, 0);
-				maskPreviewRgba32.g2.end();
-				maskPreviewRgba32.g2.pipeline = null;
+				Context.maskPreviewRgba32.g2.begin();
+				Context.maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
+				Context.maskPreviewRgba32.g4.setInt(UIView2D.channelLocation, 1);
+				Context.maskPreviewRgba32.g2.drawImage(l.texpaint_preview, 0, 0);
+				Context.maskPreviewRgba32.g2.end();
+				Context.maskPreviewRgba32.g2.pipeline = null;
 			});
 		}
 	}

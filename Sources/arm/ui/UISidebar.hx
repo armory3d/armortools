@@ -621,6 +621,7 @@ class UISidebar {
 		if (Context.layersPreviewDirty) {
 			Context.layersPreviewDirty = false;
 			Context.layerPreviewDirty = false;
+			Context.maskPreviewLast = null;
 			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
@@ -638,6 +639,7 @@ class UISidebar {
 		}
 		if (Context.layerPreviewDirty && !Context.layer.isGroup()) {
 			Context.layerPreviewDirty = false;
+			Context.maskPreviewLast = null;
 			if (Layers.pipeMerge == null) Layers.makePipe();
 			// Update layer preview
 			var l = Context.layer;

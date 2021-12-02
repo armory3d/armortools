@@ -530,7 +530,7 @@ class App {
 		}
 		if (dragLayer != null && dragLayer.isMask() && dragLayer.fill_layer == null) {
 			TabLayers.makeMaskPreviewRgba32(dragLayer);
-			return TabLayers.maskPreviewRgba32;
+			return Context.maskPreviewRgba32;
 		}
 		if (dragLayer != null) {
 			return dragLayer.fill_layer != null ? dragLayer.fill_layer.imageIcon : dragLayer.texpaint_preview;
