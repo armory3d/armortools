@@ -118,9 +118,10 @@ class MakePaint {
 			if (Config.raw.brush_3d && !Config.raw.brush_depth_reject) depthReject = false;
 
 			// TODO: sp.z needs to take height channel into account
-			if (Config.raw.brush_3d && !decal && MakeMaterial.heightUsed) depthReject = false;
-
-			if (Context.symX || Context.symY || Context.symZ) depthReject = false;
+			var particle = Context.tool == ToolParticle;
+			if (Config.raw.brush_3d && !decal && !particle) {
+				if (MakeMaterial.heightUsed || Context.symX || Context.symY || Context.symZ) depthReject = false;
+			}
 
 			if (depthReject) {
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
