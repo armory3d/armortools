@@ -103,9 +103,7 @@ class TabBrushes {
 							}
 
 							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left)) {
-								Context.selectBrush(i == 0 ? 1 : 0);
-								Project.brushes.splice(i, 1);
-								UISidebar.inst.hwnd1.redraws = 2;
+								deleteBrush(Project.brushes[i]);
 							}
 						}, 3 + add);
 					}
@@ -128,6 +126,18 @@ class TabBrushes {
 
 				ui._y += 6;
 			}
+
+			if (ui.isDeleteDown && Project.brushes.length > 1) {
+				ui.isDeleteDown = false;
+				deleteBrush(Context.brush);
+			}
 		}
+	}
+
+	static function deleteBrush(b: BrushSlot) {
+		var i = Project.brushes.indexOf(b);
+		Context.selectBrush(i == Project.brushes.length - 1 ? i - 1 : i + 1);
+		Project.brushes.splice(i, 1);
+		UISidebar.inst.hwnd1.redraws = 2;
 	}
 }

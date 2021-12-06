@@ -4,6 +4,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Time;
 import arm.io.ImportFont;
+import arm.data.FontSlot;
 import arm.Enums;
 
 class TabFonts {
@@ -97,13 +98,7 @@ class TabFonts {
 							ui.text(fontName, Right, ui.t.HIGHLIGHT_COL);
 
 							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left) && Project.fonts[i].file != "") {
-								function _init() {
-									Context.selectFont(i == 0 ? 1 : 0);
-									iron.data.Data.deleteFont(Project.fonts[i].file);
-									Project.fonts.splice(i, 1);
-								}
-								iron.App.notifyOnInit(_init);
-								UIStatus.inst.statusHandle.redraws = 2;
+								deleteFont(Project.fonts[i]);
 							}
 						}, 1 + add);
 					}
@@ -126,6 +121,22 @@ class TabFonts {
 
 				ui._y += 6;
 			}
+
+			if (ui.isDeleteDown && Project.fonts.length > 1 && Context.font.file != "") {
+				ui.isDeleteDown = false;
+				deleteFont(Context.font);
+			}
 		}
+	}
+
+	static function deleteFont(font: FontSlot) {
+		var i = Project.fonts.indexOf(font);
+		function _init() {
+			Context.selectFont(i == Project.fonts.length - 1 ? i - 1 : i + 1);
+			iron.data.Data.deleteFont(Project.fonts[i].file);
+			Project.fonts.splice(i, 1);
+		}
+		iron.App.notifyOnInit(_init);
+		UIStatus.inst.statusHandle.redraws = 2;
 	}
 }

@@ -5,6 +5,7 @@ import zui.Id;
 import iron.system.Time;
 import iron.system.Input;
 import arm.Enums;
+import arm.ProjectFormat;
 
 class TabSwatches {
 
@@ -123,9 +124,7 @@ class TabSwatches {
 							}
 							#end
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
-								Context.setSwatch(Project.raw.swatches[i == 0 ? 1 : 0]);
-								Project.raw.swatches.splice(i, 1);
-								UIStatus.inst.statusHandle.redraws = 2;
+								deleteSwatch(Project.raw.swatches[i]);
 							}
 						}, 2 + add);
 					}
@@ -136,6 +135,18 @@ class TabSwatches {
 					}
 				}
 			}
+
+			if (ui.isDeleteDown && Project.raw.swatches.length > 1) {
+				ui.isDeleteDown = false;
+				deleteSwatch(Context.swatch);
+			}
 		}
+	}
+
+	static function deleteSwatch(swatch: TSwatchColor) {
+		var i = Project.raw.swatches.indexOf(swatch);
+		Context.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
+		Project.raw.swatches.splice(i, 1);
+		UIStatus.inst.statusHandle.redraws = 2;
 	}
 }

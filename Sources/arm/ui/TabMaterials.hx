@@ -139,13 +139,7 @@ class TabMaterials {
 							}
 
 							if (Project.materials.length > 1 && ui.button(tr("Delete"), Left)) {
-								for (l in Project.layers) if (l.fill_layer == m) l.fill_layer = null;
-								History.deleteMaterial();
-								Context.selectMaterial(i == 0 ? 1 : 0);
-								Project.materials.splice(i, 1);
-								UISidebar.inst.hwnd1.redraws = 2;
-								for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
-								for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
+								deleteMaterial(m);
 							}
 
 							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
@@ -203,6 +197,11 @@ class TabMaterials {
 				ui.imageInvertY = false; // Material preview
 				#end
 			}
+
+			if (ui.isDeleteDown && Project.materials.length > 1) {
+				ui.isDeleteDown = false;
+				deleteMaterial(Context.material);
+			}
 		}
 	}
 
@@ -240,5 +239,16 @@ class TabMaterials {
 		Project.materials.push(Context.material);
 		updateMaterial();
 		History.newMaterial();
+	}
+
+	static function deleteMaterial(m: MaterialSlot) {
+		var i = Project.materials.indexOf(m);
+		for (l in Project.layers) if (l.fill_layer == m) l.fill_layer = null;
+		History.deleteMaterial();
+		Context.selectMaterial(i == Project.materials.length - 1 ? i - 1 : i + 1);
+		Project.materials.splice(i, 1);
+		UISidebar.inst.hwnd1.redraws = 2;
+		for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
+		for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
 	}
 }

@@ -10,6 +10,7 @@ import arm.io.ImportTexture;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Enums;
+import arm.ProjectFormat;
 
 class TabTextures {
 
@@ -132,20 +133,7 @@ class TabTextures {
 									});
 								}
 								if (ui.button(tr("Delete"), Left)) {
-									UIStatus.inst.statusHandle.redraws = 2;
-									Data.deleteImage(asset.file);
-									Project.assetMap.remove(asset.id);
-									Project.assets.splice(i, 1);
-									Project.assetNames.splice(i, 1);
-									function _next() {
-										arm.node.MakeMaterial.parsePaintMaterial();
-										arm.util.RenderUtil.makeMaterialPreview();
-										UISidebar.inst.hwnd1.redraws = 2;
-									}
-									App.notifyOnNextFrame(_next);
-
-									for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
-									for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
+									deleteTexture(asset);
 								}
 								if (!isPacked && ui.button(tr("Open Containing Directory..."), Left)) {
 									File.start(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
@@ -172,6 +160,11 @@ class TabTextures {
 				ui.image(img, ui.t.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
 			}
+
+			if (ui.isDeleteDown) {
+				ui.isDeleteDown = false;
+				deleteTexture(Context.texture);
+			}
 		}
 	}
 
@@ -197,5 +190,25 @@ class TabTextures {
 				}
 			}
 		}
+	}
+
+	static function deleteTexture(asset: TAsset) {
+		var i = Project.assets.indexOf(asset);
+		if (Project.assets.length > 1) {
+			Context.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
+		}
+		UIStatus.inst.statusHandle.redraws = 2;
+		Data.deleteImage(asset.file);
+		Project.assetMap.remove(asset.id);
+		Project.assets.splice(i, 1);
+		Project.assetNames.splice(i, 1);
+		function _next() {
+			arm.node.MakeMaterial.parsePaintMaterial();
+			arm.util.RenderUtil.makeMaterialPreview();
+			UISidebar.inst.hwnd1.redraws = 2;
+		}
+		App.notifyOnNextFrame(_next);
+		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
+		for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 	}
 }
