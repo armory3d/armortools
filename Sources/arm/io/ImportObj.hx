@@ -19,6 +19,7 @@ class ImportObj {
 				var obj = new ObjParser(b, 0, isUdim);
 				var name = obj.name;
 				for (i in 0...obj.udims.length) {
+					if (obj.udims[i].length == 0) continue;
 					var u = i % obj.udimsU;
 					var v = Std.int(i / obj.udimsU);
 					obj.name = name + "." + (1000 + v * 10 + u + 1);
