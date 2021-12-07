@@ -39,15 +39,14 @@ class MakeColorIdPicker {
 				frag.write('fragColor[1] = vec4(get_nor_from_depth(fragColor[0].rgb, vec2(inpLocal.x, 1.0 - inpLocal.y), invVP, vec2(1.0, 1.0) / gbufferSize, texturePass(gbufferD)), texCoordInp.y);');
 			}
 			else {
-				frag.add_out('vec4 fragColor[3]');
+				frag.add_out('vec4 fragColor[4]');
 				frag.add_uniform('sampler2D texpaint');
 				frag.add_uniform('sampler2D texpaint_nor');
 				frag.add_uniform('sampler2D texpaint_pack');
 				frag.write('fragColor[0] = textureLod(texpaint, texCoordInp, 0.0);');
 				frag.write('fragColor[1] = textureLod(texpaint_nor, texCoordInp, 0.0);');
 				frag.write('fragColor[2] = textureLod(texpaint_pack, texCoordInp, 0.0);');
-				frag.write('fragColor[0].a = texCoordInp.x;');
-				frag.write('fragColor[2].a = texCoordInp.y;');
+				frag.write('fragColor[3].rg = texCoordInp.xy;');
 			}
 		}
 	}

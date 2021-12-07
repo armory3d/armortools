@@ -25,7 +25,7 @@ class MakePaint {
 			color_attachments:
 				Context.tool == ToolColorId ? ["RGBA32"] :
 				(Context.tool == ToolPicker && Context.pickPosNorTex) ? ["RGBA128", "RGBA128"] :
-				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32"] :
+				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 

@@ -53,6 +53,8 @@ class UIHeader {
 				var occlusionPicked = Math.round(Context.swatch.occlusion * 100) / 100;
 				var roughnessPicked = Math.round(Context.swatch.roughness * 100) / 100;
 				var metallicPicked = Math.round(Context.swatch.metallic * 100) / 100;
+				var heightPicked = Math.round(Context.swatch.height * 100) / 100;
+				var opacityPicked = Math.round(Context.swatch.opacity * 100) / 100;
 
 				var h = Id.handle();
 				h.color.R = baseRPicked;
@@ -73,6 +75,8 @@ class UIHeader {
 				ui.text(tr("Occlusion") + ' ($occlusionPicked)');
 				ui.text(tr("Roughness") + ' ($roughnessPicked)');
 				ui.text(tr("Metallic") + ' ($metallicPicked)');
+				ui.text(tr("Height") + ' ($heightPicked)');
+				ui.text(tr("Opacity") + ' ($opacityPicked)');
 				Context.pickerSelectMaterial = ui.check(Id.handle({selected: Context.pickerSelectMaterial}), tr("Select Material"));
 				ui.combo(Context.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
 				if (Context.pickerMaskHandle.changed) {

@@ -90,6 +90,14 @@ class RenderPathPaint {
 		}
 		{
 			var t = new RenderTargetRaw();
+			t.name = "texpaint_uv_picker";
+			t.width = 1;
+			t.height = 1;
+			t.format = "RGBA32";
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
 			t.name = "texpaint_posnortex_picker0";
 			t.width = 1;
 			t.height = 1;
@@ -172,9 +180,9 @@ class RenderPathPaint {
 					//path.clearTarget(0xff000000);
 					//path.setTarget("texpaint_pack_picker");
 					//path.clearTarget(0xff000000);
-					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
 					#else
-					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker"]);
+					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
 					//path.clearTarget(0xff000000);
 					#end
 					path.bindTarget("gbuffer2", "gbuffer2");
@@ -192,9 +200,11 @@ class RenderPathPaint {
 					var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
 					var texpaint_pack_picker = path.renderTargets.get("texpaint_pack_picker").image;
+					var texpaint_uv_picker = path.renderTargets.get("texpaint_uv_picker").image;
 					var a = texpaint_picker.getPixels();
 					var b = texpaint_nor_picker.getPixels();
 					var c = texpaint_pack_picker.getPixels();
+					var d = texpaint_uv_picker.getPixels();
 
 					// Picked surface values
 					#if (kha_metal || kha_vulkan)
@@ -207,6 +217,10 @@ class RenderPathPaint {
 					Context.swatch.occlusion = c.get(2) / 255;
 					Context.swatch.roughness = c.get(1) / 255;
 					Context.swatch.metallic = c.get(0) / 255;
+					Context.swatch.height = c.get(3) / 255;
+					Context.swatch.opacity = a.get(3) / 255;
+					Context.uvxPicked = d.get(2) / 255;
+					Context.uvyPicked = d.get(1) / 255;
 					#else
 					Context.swatch.base.Rb = a.get(0);
 					Context.swatch.base.Gb = a.get(1);
@@ -217,9 +231,11 @@ class RenderPathPaint {
 					Context.swatch.occlusion = c.get(0) / 255;
 					Context.swatch.roughness = c.get(1) / 255;
 					Context.swatch.metallic = c.get(2) / 255;
+					Context.swatch.height = c.get(3) / 255;
+					Context.swatch.opacity = a.get(3) / 255;
+					Context.uvxPicked = d.get(0) / 255;
+					Context.uvyPicked = d.get(1) / 255;
 					#end
-					Context.uvxPicked = a.get(3) / 255;
-					Context.uvyPicked = c.get(3) / 255;
 					// Pick material
 					if (Context.pickerSelectMaterial) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
