@@ -90,7 +90,7 @@ class MeshUtil {
 	public static function swapAxis(a: Int, b: Int) {
 		var objects = Project.paintObjects;
 		for (o in objects) {
-			// Remapping vertices, backle up
+			// Remapping vertices, buckle up
 			// 0 - x, 1 - y, 2 - z
 			var vas = o.data.raw.vertex_arrays;
 			var pa  = vas[0].values;
@@ -135,10 +135,16 @@ class MeshUtil {
 	public static function flipNormals() {
 		var objects = Project.paintObjects;
 		for (o in objects) {
+			var vas = o.data.raw.vertex_arrays;
+			var va0 = vas[0].values;
+			var va1 = vas[1].values;
 			var g = o.data.geom;
 			var l = g.structLength;
 			var vertices = g.vertexBuffer.lockInt16(); // posnortex
 			for (i in 0...Std.int(vertices.length / l)) {
+				va0[i * 4 + 3] = -va0[i * 4 + 3];
+				va1[i * 2] = -va1[i * 2];
+				va1[i * 2 + 1] = -va1[i * 2 + 1];
 				vertices[i * l + 3] = -vertices[i * l + 3];
 				vertices[i * l + 4] = -vertices[i * l + 4];
 				vertices[i * l + 5] = -vertices[i * l + 5];
