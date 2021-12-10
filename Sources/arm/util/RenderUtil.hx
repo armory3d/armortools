@@ -212,15 +212,14 @@ class RenderUtil {
 		var textW = Std.int(font.width(fontSize, text)) + 8;
 		var textH = Std.int(font.height(fontSize)) + 8;
 		if (Context.font.image == null) {
-			// Context.font.image = Image.createRenderTarget(200, 200, TextureFormat.L8);
-			Context.font.image = Image.createRenderTarget(200, 200, TextureFormat.RGBA32);
+			Context.font.image = Image.createRenderTarget(512, 512, TextureFormat.RGBA32);
 		}
 		var g2 = Context.font.image.g2;
 		g2.begin(true, 0x00000000);
 		g2.font = font;
 		g2.fontSize = fontSize;
 		g2.color = 0xffffffff;
-		g2.drawString(text, 200 / 2 - textW / 2, 200 / 2 - textH / 2);
+		g2.drawString(text, 512 / 2 - textW / 2, 512 / 2 - textH / 2);
 		g2.end();
 		Context.font.previewReady = true;
 
