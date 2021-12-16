@@ -5,6 +5,7 @@ import zui.Id;
 import iron.system.Time;
 import arm.io.ImportFont;
 import arm.data.FontSlot;
+import arm.util.RenderUtil;
 import arm.Enums;
 
 class TabFonts {
@@ -102,9 +103,19 @@ class TabFonts {
 							}
 						}, 1 + add);
 					}
-					if (ui.isHovered && img != null) {
-						ui.tooltipImage(img);
-						ui.tooltip(Project.fonts[i].name);
+					if (ui.isHovered) {
+						if (img == null) {
+							iron.App.notifyOnInit(function() {
+								var _font = Context.font;
+								Context.font = Project.fonts[i];
+								RenderUtil.makeFontPreview();
+								Context.font = _font;
+							});
+						}
+						else {
+							ui.tooltipImage(img);
+							ui.tooltip(Project.fonts[i].name);
+						}
 					}
 
 					if (Config.raw.show_asset_names) {
