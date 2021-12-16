@@ -208,7 +208,7 @@ class RenderUtil {
 
 		var text = "Abg";
 		var font = Context.font.font;
-		var fontSize = 120;
+		var fontSize = 318;
 		var textW = Std.int(font.width(fontSize, text)) + 8;
 		var textH = Std.int(font.height(fontSize)) + 8;
 		if (Context.font.image == null) {
