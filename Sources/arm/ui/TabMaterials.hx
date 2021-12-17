@@ -198,7 +198,9 @@ class TabMaterials {
 				#end
 			}
 
-			if (ui.isDeleteDown && Project.materials.length > 1) {
+			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
+						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
+			if (inFocus && ui.isDeleteDown && Project.materials.length > 1) {
 				ui.isDeleteDown = false;
 				deleteMaterial(Context.material);
 			}

@@ -161,7 +161,9 @@ class TabTextures {
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop files here"));
 			}
 
-			if (ui.isDeleteDown) {
+			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
+						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
+			if (inFocus && ui.isDeleteDown && Project.assets.length > 0 && Project.assets.indexOf(Context.texture) >= 0) {
 				ui.isDeleteDown = false;
 				deleteTexture(Context.texture);
 			}

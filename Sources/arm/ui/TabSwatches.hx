@@ -136,7 +136,9 @@ class TabSwatches {
 				}
 			}
 
-			if (ui.isDeleteDown && Project.raw.swatches.length > 1) {
+			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
+						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
+			if (inFocus && ui.isDeleteDown && Project.raw.swatches.length > 1) {
 				ui.isDeleteDown = false;
 				deleteSwatch(Context.swatch);
 			}

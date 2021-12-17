@@ -127,7 +127,9 @@ class TabBrushes {
 				ui._y += 6;
 			}
 
-			if (ui.isDeleteDown && Project.brushes.length > 1) {
+			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
+						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
+			if (inFocus && ui.isDeleteDown && Project.brushes.length > 1) {
 				ui.isDeleteDown = false;
 				deleteBrush(Context.brush);
 			}
