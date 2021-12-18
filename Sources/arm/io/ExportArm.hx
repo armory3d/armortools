@@ -157,6 +157,11 @@ class ExportArm {
 		Krom.writePng(Project.filepath.substr(0, Project.filepath.length - 4) + "_icon.png", mesh_icon_pixels.getData(), 256, 256, 0);
 		#end
 
+		var isPacked = Project.filepath.endsWith("_packed_.arm");
+		if (isPacked) { // Pack textures
+			packAssets(Project.raw, Project.assets);
+		}
+
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData(), bytes.length + 1);
 
