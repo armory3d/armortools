@@ -97,7 +97,7 @@ class UIFiles {
 
 	@:access(zui.Zui)
 	@:access(arm.sys.File)
-	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = ""): String {
+	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false): String {
 
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
@@ -113,7 +113,7 @@ class UIFiles {
 		#end
 
 		if (handle.text == "") handle.text = defaultPath;
-		if (handle.text != lastPath || search != lastSearch) {
+		if (handle.text != lastPath || search != lastSearch || refresh) {
 			files = [];
 
 			// Up directory
