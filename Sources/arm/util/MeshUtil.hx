@@ -79,7 +79,7 @@ class MeshUtil {
 			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
 			Context.mergedObject.name = Context.paintObject.name + "_merged";
 			Context.mergedObject.force_context = "paint";
-			Context.mainObject().addChild(Context.mergedObject);
+			Context.mergedObject.setParent(Context.mainObject());
 		});
 
 		#if (kha_direct3d12 || kha_vulkan)

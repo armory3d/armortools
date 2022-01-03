@@ -88,9 +88,9 @@ class TabMeshes {
 							Project.paintObjects.remove(o);
 							while (o.children.length > 0) {
 								var child = o.children[0];
-								o.removeChild(child);
+								child.setParent(null);
 								if (Project.paintObjects[0] != child) {
-									Project.paintObjects[0].addChild(child);
+									child.setParent(Project.paintObjects[0]);
 								}
 								if (o.children.length == 0) {
 									Project.paintObjects[0].transform.scale.setFrom(o.transform.scale);
