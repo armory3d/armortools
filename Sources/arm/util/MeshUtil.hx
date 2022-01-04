@@ -112,7 +112,7 @@ class MeshUtil {
 
 			var g = o.data.geom;
 			var l = g.structLength;
-			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var vertices: kha.arrays.Int16Array = cast g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.length / l)) {
 				vertices[i * l    ] = vas[0].values[i * 4    ];
 				vertices[i * l + 1] = vas[0].values[i * 4 + 1];
@@ -140,7 +140,7 @@ class MeshUtil {
 			var va1 = vas[1].values;
 			var g = o.data.geom;
 			var l = g.structLength;
-			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var vertices: kha.arrays.Int16Array = cast g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.length / l)) {
 				va0[i * 4 + 3] = -va0[i * 4 + 3];
 				va1[i * 2] = -va1[i * 2];
@@ -168,7 +168,7 @@ class MeshUtil {
 			var g = o.data.geom;
 			var l = g.structLength;
 			var inda = g.indices[0];
-			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var vertices: kha.arrays.Int16Array = cast g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(inda.length / 3)) {
 				var i1 = inda[i * 3    ];
 				var i2 = inda[i * 3 + 1];
@@ -302,7 +302,7 @@ class MeshUtil {
 			}
 
 			var l = g.structLength;
-			var vertices = g.vertexBuffer.lockInt16(); // posnortex
+			var vertices: kha.arrays.Int16Array = cast g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.length / l)) {
 				vertices[i * l    ] = va[i * 4    ];
 				vertices[i * l + 1] = va[i * 4 + 1];
@@ -321,7 +321,7 @@ class MeshUtil {
 		var o = Project.paintObjects[0];
 		var g = o.data.geom;
 		var l = g.structLength;
-		var vertices = g.vertexBuffer.lockInt16(); // posnortex
+		var vertices: kha.arrays.Int16Array = cast g.vertexBuffer.lock(); // posnortex
 		for (i in 0...Std.int(vertices.length / l)) {
 			var x = Std.int(vertices[i * l + 6] / 32767 * res);
 			var y = Std.int(vertices[i * l + 7] / 32767 * res);
