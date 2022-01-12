@@ -81,7 +81,7 @@ cd armorcore
 git apply patch/window_handling.diff --directory=Kinc
 git apply patch/d3d12_raytrace.diff --directory=Kinc
 git apply patch/d3d12_wrap_sampler.diff --directory=Kinc
-node Kinc/make -g direct3d12 --raytrace dxr
+node Kinc/make -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
@@ -92,7 +92,7 @@ node armorcore/make -g vulkan
 cd armorcore
 git apply patch/vulkan_raytrace.diff --directory=Kinc
 git clone --recursive https://github.com/armory3d/glsl_to_spirv Libraries/glsl_to_spirv
-node Kinc/make -g vulkan --raytrace vkrt --compiler clang --compile
+node Kinc/make -g vulkan --compiler clang --compile
 cd Deployment
 strip ArmorPaint
 ./ArmorPaint ../../build/krom
