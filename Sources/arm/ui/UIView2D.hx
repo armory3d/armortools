@@ -47,7 +47,7 @@ class UIView2D {
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float3);
 		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.Float4);
+		vs.add("col", VertexData.UInt8_4X_Normalized);
 		pipe.inputLayout = [vs];
 		pipe.blendSource = BlendingFactor.BlendOne;
 		pipe.blendDestination = BlendingFactor.BlendZero;

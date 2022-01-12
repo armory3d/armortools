@@ -437,8 +437,8 @@ class RenderUtil {
 		structure.add("tex", VertexData.Short2Norm);
 		structure.add("col", VertexData.Short4Norm);
 		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
-		var vertices: kha.arrays.Int16Array = cast screenAlignedFullVB.lock();
-		for (i in 0...vertices.length) vertices.set(i, data[i]);
+		var vertices = screenAlignedFullVB.lock();
+		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i]);
 		screenAlignedFullVB.unlock();
 
 		screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);

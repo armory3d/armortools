@@ -1,6 +1,5 @@
 package arm.io;
 
-import kha.arrays.Int16Array;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
