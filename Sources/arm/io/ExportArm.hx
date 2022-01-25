@@ -215,7 +215,10 @@ class ExportArm {
 		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
 		if (isCloud) path = path.replace("_cloud_", "");
-		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
+		var packed_assets: Array<TPackedAsset> = null;
+		if (!Context.packAssetsOnExport) {
+			packed_assets = getPackedAssets(path, texture_files);
+		}
 
 		var raw: TProjectFormat = {
 			version: Main.version,
@@ -269,7 +272,10 @@ class ExportArm {
 		var texture_files = assetsToFiles(path, assets);
 		var isCloud = path.endsWith("_cloud_.arm");
 		if (isCloud) path = path.replace("_cloud_", "");
-		var packed_assets: Array<TPackedAsset> = getPackedAssets(path, texture_files);
+		var packed_assets: Array<TPackedAsset> = null;
+		if (!Context.packAssetsOnExport) {
+			packed_assets = getPackedAssets(path, texture_files);
+		}
 
 		var raw = {
 			version: Main.version,
