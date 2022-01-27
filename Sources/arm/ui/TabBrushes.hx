@@ -107,9 +107,21 @@ class TabBrushes {
 							}
 						}, 3 + add);
 					}
-					if (ui.isHovered && imgFull != null) {
-						ui.tooltipImage(imgFull);
-						ui.tooltip(Project.brushes[i].canvas.name);
+
+					if (ui.isHovered) {
+						if (imgFull == null) {
+							iron.App.notifyOnInit(function() {
+								var _brush = Context.brush;
+								Context.brush = Project.brushes[i];
+								MakeMaterial.parseBrush();
+								RenderUtil.makeBrushPreview();
+								Context.brush = _brush;
+							});
+						}
+						else {
+							ui.tooltipImage(imgFull);
+							ui.tooltip(Project.brushes[i].canvas.name);
+						}
 					}
 
 					if (Config.raw.show_asset_names) {

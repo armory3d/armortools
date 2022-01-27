@@ -229,6 +229,7 @@ class RenderUtil {
 	public static function makeBrushPreview() {
 
 		if (RenderPathPaint.liveLayerLocked) return;
+		Context.materialPreview = true;
 
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
@@ -337,11 +338,13 @@ class RenderUtil {
 		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathDeferred.drawGbuffer();
 
+
+
 		// Paint brush preview
 		var _brushRadius = Context.brushRadius;
 		var _brushOpacity = Context.brushOpacity;
 		var _brushHardness = Context.brushHardness;
-		Context.brushRadius = 0.25;
+		Context.brushRadius = 0.33;
 		Context.brushOpacity = 1.0;
 		Context.brushHardness = 0.8;
 		var _x = Context.paintVec.x;
@@ -352,9 +355,9 @@ class RenderUtil {
 		Context.pdirty = 2;
 
 		// var pointsX = [0.2, 0.5, 0.5, 0.8, 0.8];
-		// var pointsY = [0.5, 0.2, 0.6, 0.3, 0.7];
+		// var pointsY = [0.5, 0.2 - 0.08, 0.6 + 0.03, 0.3 - 0.05, 0.7 + 0.05];
 		var pointsX = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
-		var pointsY = [0.5, 0.5,  0.35, 0.2,  0.4, 0.6,  0.45, 0.3,  0.5, 0.7];
+		var pointsY = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
 		for (i in 1...pointsX.length) {
 			Context.lastPaintVecX = pointsX[i - 1];
 			Context.lastPaintVecY = pointsY[i - 1];
@@ -386,6 +389,7 @@ class RenderUtil {
 		iron.App.notifyOnInit(_init);
 
 		// Restore paint mesh
+		Context.materialPreview = false;
 		planeo.visible = false;
 		for (i in 0...Project.paintObjects.length) {
 			Project.paintObjects[i].visible = visibles[i];
