@@ -209,6 +209,7 @@ package arm;
 	var View2DLayer = 0;
 	var View2DAsset = 1;
 	var View2DFont = 2;
+	var View2DNode = 3;
 }
 
 @:enum abstract View2DLayerMode(Int) from Int to Int {

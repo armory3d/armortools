@@ -338,8 +338,6 @@ class RenderUtil {
 		RenderPathPaint.liveLayerDrawn = 0;
 		RenderPathDeferred.drawGbuffer();
 
-
-
 		// Paint brush preview
 		var _brushRadius = Context.brushRadius;
 		var _brushOpacity = Context.brushOpacity;

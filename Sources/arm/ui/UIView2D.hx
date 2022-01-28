@@ -147,8 +147,11 @@ class UIView2D {
 			else if (type == View2DAsset) {
 				tex = Project.getImage(Context.texture);
 			}
-			else { // View2DFont
+			else if (type == View2DFont) {
 				tex = Context.font.image;
+			}
+			else { // View2DNode
+				tex = Context.nodePreview;
 			}
 
 			var th = tw;
@@ -222,10 +225,12 @@ class UIView2D {
 					assetNames[i] = asset.name;
 				}
 			}
-			else { // View2DFont
+			else if (type == View2DFont) {
 				h.text = Context.font.name;
 				Context.font.name = ui.textInput(h, "", Right);
 			}
+			// else { // View2DNode
+			// }
 
 			if (h.changed) UISidebar.inst.hwnd0.redraws = 2;
 			ui.t.ACCENT_COL = ACCENT_COL;

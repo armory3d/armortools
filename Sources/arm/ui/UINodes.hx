@@ -7,6 +7,7 @@ import zui.Zui;
 import zui.Id;
 import zui.Nodes;
 import iron.system.Input;
+import iron.system.Time;
 import arm.shader.NodesMaterial;
 import arm.shader.MaterialParser;
 import arm.node.NodesBrush;
@@ -276,8 +277,28 @@ class UINodes {
 							isNodeMenuOperation = true;
 						});
 					}
+					if (canvasType == CanvasMaterial) {
+						menuSeparator(uiMenu);
+						if (menuButton(uiMenu, tr("2D View"))) {
+							UISidebar.inst.show2DView(View2DNode);
+						}
+					}
 					uiMenu.enabled = true;
-				}, 5);
+				}, canvasType == CanvasMaterial ? 6 : 5);
+			}
+		}
+		if (ui.inputReleased) {
+			var nodes = getNodes();
+			var canvas = getCanvas(true);
+			for (node in canvas.nodes) {
+				if (ui.getInputInRect(ui._windowX + nodes.NODE_X(node), ui._windowY + nodes.NODE_Y(node), nodes.NODE_W(node), nodes.NODE_H(canvas, node))) {
+					if (node == nodes.nodesSelected[0]) {
+						UIView2D.inst.hwnd.redraws = 2;
+						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DNode);
+						Context.selectTime = Time.time();
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -553,6 +574,9 @@ class UINodes {
 			}
 			else {
 				Layers.isFillMaterial() ? Layers.updateFillLayers() : RenderUtil.makeMaterialPreview();
+				if (UIView2D.inst.show && UIView2D.inst.type == View2DNode) {
+					UIView2D.inst.hwnd.redraws = 2;
+				}
 			}
 
 			UISidebar.inst.hwnd1.redraws = 2;
@@ -1069,5 +1093,14 @@ class UINodes {
 		label = "";
 		#end
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
+	}
+
+	static function menuSeparator(ui: Zui) {
+		ui._y++;
+		#if arm_touchui
+		ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
+		#else
+		ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
+		#end
 	}
 }
