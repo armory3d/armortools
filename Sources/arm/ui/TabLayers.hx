@@ -43,7 +43,6 @@ class TabLayers {
 					}
 					if (ui.button(tr("Black Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
-						else if (l.isGroup()) Context.setLayer(l.getChildren()[0]);
 						var l = Context.layer;
 
 						var m = Layers.newMask(false, l);
@@ -56,7 +55,6 @@ class TabLayers {
 					}
 					if (ui.button(tr("White Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
-						else if (l.isGroup()) Context.setLayer(l.getChildren()[0]);
 						var l = Context.layer;
 
 						var m = Layers.newMask(false, l);
@@ -69,7 +67,6 @@ class TabLayers {
 					}
 					if (ui.button(tr("Fill Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
-						else if (l.isGroup()) Context.setLayer(l.getChildren()[0]);
 						var l = Context.layer;
 
 						var m = Layers.newMask(false, l);
@@ -582,7 +579,7 @@ class TabLayers {
 					l.applyMask();
 					Context.setLayer(l.parent);
 					MakeMaterial.parseMeshMaterial();
-					Context.layerPreviewDirty = true;
+					Context.layersPreviewDirty = true;
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -862,6 +859,10 @@ class TabLayers {
 
 		// Remove empty group
 		if (l.parent != null && l.parent.isGroup() && l.parent.getChildren() == null) {
+			// Remove group masks
+			var masks = l.parent.getMasks();
+			if (masks != null) for (m in masks) m.delete();
+			// Remove group
 			l.parent.delete();
 		}
 		Context.ddirty = 2;

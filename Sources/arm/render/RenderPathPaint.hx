@@ -285,6 +285,12 @@ class RenderPathPaint {
 				var isMask = Context.layer.isMask();
 				if (isMask) {
 					var ptid = Context.layer.parent.id;
+					if (Context.layer.parent.isGroup()) { // Group mask
+						for (c in Context.layer.parent.getChildren()) {
+							ptid = c.id;
+							break;
+						}
+					}
 					path.setTarget(texpaint, ["texpaint_nor" + ptid, "texpaint_pack" + ptid, "texpaint_blend0"]);
 				}
 				else {

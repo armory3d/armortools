@@ -215,8 +215,10 @@ class MakeMesh {
 						for (m in masks) {
 							if (!m.isVisible()) continue;
 							frag.add_shared_sampler('sampler2D texpaint' + m.id);
+							frag.write('{'); // Group mask is sampled across multiple layers
 							frag.write('float texpaint_mask_sample' + m.id + ' = textureLodShared(texpaint' + m.id + ', texCoord, 0.0).r;');
 							frag.write('$texpaint_mask = ' + MakeMaterial.blendModeMask(frag, m.blending, '$texpaint_mask', 'texpaint_mask_sample' + m.id, 'float(' + m.getOpacity() + ')') + ';');
+							frag.write('}');
 						}
 						frag.write('texpaint_opac *= clamp($texpaint_mask, 0.0, 1.0);');
 					}

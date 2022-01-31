@@ -210,7 +210,14 @@ class LayerSlot {
 		if (parent.fill_layer != null) {
 			parent.toPaintLayer();
 		}
-		Layers.applyMask(parent, this);
+		if (parent.isGroup()) {
+			for (c in parent.getChildren()) {
+				Layers.applyMask(c, this);
+			}
+		}
+		else {
+			Layers.applyMask(parent, this);
+		}
 		delete();
 	}
 
@@ -374,20 +381,41 @@ class LayerSlot {
 	}
 
 	public function getMasks(): Array<LayerSlot> {
-		var children: Array<LayerSlot> = null; // Child masks of a layer
+		if (this.isMask()) return null;
+
+		var children: Array<LayerSlot> = null;
+		// Child masks of a layer
 		for (l in Project.layers) {
 			if (l.parent == this && l.isMask()) {
 				if (children == null) children = [];
 				children.push(l);
 			}
 		}
+		// Child masks of a parent group
+		if (this.parent != null && this.parent.isGroup()) {
+			for (l in Project.layers) {
+				if (l.parent == this.parent && l.isMask()) {
+					if (children == null) children = [];
+					children.push(l);
+				}
+			}
+		}
 		return children;
 	}
 
 	public function hasMasks(): Bool {
+		// Layer mask
 		for (l in Project.layers) {
 			if (l.parent == this && l.isMask()) {
 				return true;
+			}
+		}
+		// Group mask
+		if (this.parent != null && this.parent.isGroup()) {
+			for (l in Project.layers) {
+				if (l.parent == this.parent && l.isMask()) {
+					return true;
+				}
 			}
 		}
 		return false;
