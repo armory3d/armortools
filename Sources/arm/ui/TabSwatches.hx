@@ -19,18 +19,33 @@ class TabSwatches {
 
 			ui.beginSticky();
 			#if arm_touchui
-			ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+			ui.row([1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5]);
 			#else
-			ui.row([1 / 14, 1 / 14, 1 / 14, 1 / 14]);
+			ui.row([1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14]);
 			#end
 
 			if (ui.button(tr("New"))) {
 				Context.setSwatch(Project.makeSwatch());
 				Project.raw.swatches.push(Context.swatch);
 			}
+			if (ui.isHovered) ui.tooltip(tr("Add new swatch"));
 
-			if (ui.button(tr("Import"))) Project.importSwatches();
+			if (ui.button(tr("Import"))) {
+				UIMenu.draw(function(ui: Zui) {
+					ui.text(tr("Import"), Right, ui.t.HIGHLIGHT_COL);
+					if (ui.button(tr("Replace Existing"), Left)) {
+						Project.importSwatches(true);
+						Context.setSwatch(Project.raw.swatches[0]);
+					}
+					if (ui.button(tr("Append"), Left)) {
+						Project.importSwatches(false);
+					}
+				}, 3);
+			}	
 			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
+
+			if (ui.button(tr("Export"))) Project.exportSwatches();
+			if (ui.isHovered) ui.tooltip(tr("Export swatches"));
 
 			if (ui.button(tr("Clear"))) {
 				Context.setSwatch(Project.makeSwatch());
@@ -41,6 +56,7 @@ class TabSwatches {
 				Project.setDefaultSwatches();
 				Context.setSwatch(Project.raw.swatches[0]);
 			}
+			if (ui.isHovered) ui.tooltip(tr("Restore default swatches"));
 
 			ui.endSticky();
 			ui.separator(3, false);

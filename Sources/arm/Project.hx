@@ -495,9 +495,9 @@ class Project {
 		});
 	}
 
-	public static function importSwatches() {
+	public static function importSwatches(replaceExisting = false) {
 		UIFiles.show("arm", false, false, function(path: String) {
-			ImportArm.runSwatches(path);
+			ImportArm.runSwatches(path, replaceExisting);
 		});
 	}
 

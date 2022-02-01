@@ -502,17 +502,27 @@ class ImportArm {
 		Data.deleteBlob(path);
 	}
 
-	public static function runSwatches(path: String) {
+	public static function runSwatches(path: String, replaceExisting = false) {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 			if (project.version == null) { Data.deleteBlob(path); return; }
-			runSwatchesFromProject(project, path);
+			runSwatchesFromProject(project, path, replaceExisting);
 		});
 	}
 
-	public static function runSwatchesFromProject(project: TProjectFormat, path: String) {
-		for (s in project.swatches) {
-			Project.raw.swatches.push(s);
+	public static function runSwatchesFromProject(project: TProjectFormat, path: String, replaceExisting = false) {
+		if (replaceExisting) {
+			Project.raw.swatches = [];
+
+			if (project.swatches == null) { //no swatches contained
+				Project.raw.swatches.push(Project.makeSwatch());
+			}
+		}
+
+		if (project.swatches != null) {
+			for (s in project.swatches) {
+				Project.raw.swatches.push(s);
+			}
 		}
 		UIStatus.inst.statusHandle.redraws = 2;
 		Data.deleteBlob(path);
