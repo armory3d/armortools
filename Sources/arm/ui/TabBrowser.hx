@@ -30,11 +30,11 @@ class TabBrowser {
 			}
 
 			ui.beginSticky();
-			if(hsearch.text != "") {
-				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75,(1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.17,(1 - bookmarksW / ui._w) * 0.03]);	
+			if (hsearch.text != "") {
+				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75, (1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.17, (1 - bookmarksW / ui._w) * 0.03]);
 			}
 			else {
-				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75,(1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.2]);
+				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75, (1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.2]);
 			}
 
 			if (ui.button("+")) {

@@ -514,7 +514,7 @@ class ImportArm {
 		if (replaceExisting) {
 			Project.raw.swatches = [];
 
-			if (project.swatches == null) { //no swatches contained
+			if (project.swatches == null) { // No swatches contained
 				Project.raw.swatches.push(Project.makeSwatch());
 			}
 		}
