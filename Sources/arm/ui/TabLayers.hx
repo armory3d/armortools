@@ -218,7 +218,7 @@ class TabLayers {
 			}
 		}
 
-		var hasPanel = l.isGroup() || (l.isLayer() && l.getMasks() != null);
+		var hasPanel = l.isGroup() || (l.isLayer() && l.getMasks(false) != null);
 		if (hasPanel) {
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
 		}

@@ -380,7 +380,7 @@ class LayerSlot {
 		return children;
 	}
 
-	public function getMasks(): Array<LayerSlot> {
+	public function getMasks(includeGroupMasks = true): Array<LayerSlot> {
 		if (this.isMask()) return null;
 
 		var children: Array<LayerSlot> = null;
@@ -392,11 +392,13 @@ class LayerSlot {
 			}
 		}
 		// Child masks of a parent group
-		if (this.parent != null && this.parent.isGroup()) {
-			for (l in Project.layers) {
-				if (l.parent == this.parent && l.isMask()) {
-					if (children == null) children = [];
-					children.push(l);
+		if (includeGroupMasks) {
+			if (this.parent != null && this.parent.isGroup()) {
+				for (l in Project.layers) {
+					if (l.parent == this.parent && l.isMask()) {
+						if (children == null) children = [];
+						children.push(l);
+					}
 				}
 			}
 		}
