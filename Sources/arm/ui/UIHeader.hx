@@ -69,6 +69,13 @@ class UIHeader {
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 10);
 				}
+				if (ui.button("Add swatch")) {
+					var newSwatch = Project.makeSwatch(Context.pickedColor.base);
+					Context.setSwatch(newSwatch);
+					Project.raw.swatches.push(newSwatch);
+					UIStatus.inst.statusHandle.redraws = 1;
+				}
+				if (ui.isHovered) ui.tooltip(tr("Add picker color to swatches"));
 
 				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');
