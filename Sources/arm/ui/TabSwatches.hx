@@ -111,10 +111,10 @@ class TabSwatches {
 								ui.changed = false;
 								var h = Id.handle();
 								h.color = Context.swatch.base;
-								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, false);
+								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, true);
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
 								if (ui.inputReleased) Context.setSwatch(Context.swatch); // Trigger material preview update
-							}, 10, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
+							}, 11, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
 						}
 
 						Context.selectTime = Time.time();
