@@ -208,31 +208,31 @@ class RenderPathPaint {
 
 					// Picked surface values
 					#if (kha_metal || kha_vulkan)
-					Context.swatch.base.Rb = a.get(2);
-					Context.swatch.base.Gb = a.get(1);
-					Context.swatch.base.Bb = a.get(0);
-					Context.swatch.normal.Rb = b.get(2);
-					Context.swatch.normal.Gb = b.get(1);
-					Context.swatch.normal.Bb = b.get(0);
-					Context.swatch.occlusion = c.get(2) / 255;
-					Context.swatch.roughness = c.get(1) / 255;
-					Context.swatch.metallic = c.get(0) / 255;
-					Context.swatch.height = c.get(3) / 255;
-					Context.swatch.opacity = a.get(3) / 255;
+					Context.pickedColor.base.Rb = a.get(2);
+					Context.pickedColor.base.Gb = a.get(1);
+					Context.pickedColor.base.Bb = a.get(0);
+					Context.pickedColor.normal.Rb = b.get(2);
+					Context.pickedColor.normal.Gb = b.get(1);
+					Context.pickedColor.normal.Bb = b.get(0);
+					Context.pickedColor.occlusion = c.get(2) / 255;
+					Context.pickedColor.roughness = c.get(1) / 255;
+					Context.pickedColor.metallic = c.get(0) / 255;
+					Context.pickedColor.height = c.get(3) / 255;
+					Context.pickedColor.opacity = a.get(3) / 255;
 					Context.uvxPicked = d.get(2) / 255;
 					Context.uvyPicked = d.get(1) / 255;
 					#else
-					Context.swatch.base.Rb = a.get(0);
-					Context.swatch.base.Gb = a.get(1);
-					Context.swatch.base.Bb = a.get(2);
-					Context.swatch.normal.Rb = b.get(0);
-					Context.swatch.normal.Gb = b.get(1);
-					Context.swatch.normal.Bb = b.get(2);
-					Context.swatch.occlusion = c.get(0) / 255;
-					Context.swatch.roughness = c.get(1) / 255;
-					Context.swatch.metallic = c.get(2) / 255;
-					Context.swatch.height = c.get(3) / 255;
-					Context.swatch.opacity = a.get(3) / 255;
+					Context.pickedColor.base.Rb = a.get(0);
+					Context.pickedColor.base.Gb = a.get(1);
+					Context.pickedColor.base.Bb = a.get(2);
+					Context.pickedColor.normal.Rb = b.get(0);
+					Context.pickedColor.normal.Gb = b.get(1);
+					Context.pickedColor.normal.Bb = b.get(2);
+					Context.pickedColor.occlusion = c.get(0) / 255;
+					Context.pickedColor.roughness = c.get(1) / 255;
+					Context.pickedColor.metallic = c.get(2) / 255;
+					Context.pickedColor.height = c.get(3) / 255;
+					Context.pickedColor.opacity = a.get(3) / 255;
 					Context.uvxPicked = d.get(0) / 255;
 					Context.uvyPicked = d.get(1) / 255;
 					#end
