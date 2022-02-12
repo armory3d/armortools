@@ -138,7 +138,10 @@ class TabTextures {
 								if (!isPacked && ui.button(tr("Open Containing Directory..."), Left)) {
 									File.start(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-							}, isPacked ? 5 : 6);
+								if (!isPacked && ui.button(tr("Open in Browser"), Left)) {
+									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
+								}
+							}, isPacked ? 5 : 7);
 						}
 
 						if (Config.raw.show_asset_names) {
