@@ -73,7 +73,7 @@ class ExportTexture {
 					for (objectIndex in 0...Project.atlasObjects.length) {
 						if (Project.atlasObjects[objectIndex] == atlasIndex) {
 							for (l in Project.layers) {
-								if (l.getObjectMask() - 1 == objectIndex) layers.push(l);
+								if (l.getObjectMask() == 0 /* shared object */ || l.getObjectMask() - 1 == objectIndex) layers.push(l);
 							}
 						}
 					}
