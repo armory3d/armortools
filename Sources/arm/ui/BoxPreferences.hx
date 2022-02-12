@@ -195,9 +195,9 @@ class BoxPreferences {
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.changed = false;
-						zui.Ext.colorWheel(ui, h, false, null, false);
+						zui.Ext.colorWheel(ui, h, false, null, true);
 						if (ui.changed) UIMenu.keepOpen = true;
-					}, 10);
+					}, 11);
 				}
 				var val = untyped h.color;
 				if (val < 0) val += untyped 4294967296;
@@ -235,9 +235,9 @@ class BoxPreferences {
 							h.color = untyped theme[key];
 							UIMenu.draw(function(ui) {
 								ui.changed = false;
-								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, false);
+								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, true);
 								if (ui.changed) UIMenu.keepOpen = true;
-							}, 10);
+							}, 11);
 						}
 					}
 
