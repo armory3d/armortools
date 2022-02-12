@@ -13,19 +13,23 @@ class UIToolbar {
 	public var toolbarHandle = new Handle();
 	public var toolbarw = defaultToolbarW;
 
+	// Mark strings as localizable
+	private static inline function _tr(s: String) {
+		return s;
+	}
 	public var toolNames = [
-		tr("Brush"),
-		tr("Eraser"),
-		tr("Fill"),
-		tr("Decal"),
-		tr("Text"),
-		tr("Clone"),
-		tr("Blur"),
-		tr("Particle"),
-		tr("ColorID"),
-		tr("Picker"),
-		tr("Gizmo"),
-		tr("Bake")
+		_tr("Brush"),
+		_tr("Eraser"),
+		_tr("Fill"),
+		_tr("Decal"),
+		_tr("Text"),
+		_tr("Clone"),
+		_tr("Blur"),
+		_tr("Particle"),
+		_tr("ColorID"),
+		_tr("Picker"),
+		_tr("Gizmo"),
+		_tr("Bake")
 	];
 	var toolCount = [10, 2, 1, 1];
 
