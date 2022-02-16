@@ -56,7 +56,6 @@ typedef TKeymap = {
 	public var tool_clone: String;
 	public var tool_blur: String;
 	public var tool_particle: String;
-	public var tool_bake: String;
 	public var tool_colorid: String;
 	public var tool_picker: String;
 	public var swap_brush_eraser: String;
