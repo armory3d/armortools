@@ -3,6 +3,7 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import arm.Enums;
+import arm.Translator._tr;
 
 class UIToolbar {
 
@@ -13,10 +14,6 @@ class UIToolbar {
 	public var toolbarHandle = new Handle();
 	public var toolbarw = defaultToolbarW;
 
-	// Mark strings as localizable
-	private static inline function _tr(s: String) {
-		return s;
-	}
 	public var toolNames = [
 		_tr("Brush"),
 		_tr("Eraser"),
