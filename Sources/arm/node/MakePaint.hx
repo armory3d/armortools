@@ -222,11 +222,7 @@ class MakePaint {
 			frag.write('vec3 nortan = $nortan;');
 			frag.write('float height = $height;');
 			frag.write('float mat_opacity = $opac;');
-			#if (kha_direct3d12 || kha_vulkan)
-			frag.write('float opacity = 1.0;');
-			#else
 			frag.write('float opacity = mat_opacity;');
-			#end
 			if (Context.layer.fill_layer == null) {
 				frag.write('opacity *= brushOpacity;');
 			}
@@ -417,11 +413,7 @@ class MakePaint {
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				#if (kha_direct3d12 || kha_vulkan)
-				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
-				#else
 				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
-				#end
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.material.paintHeight && MakeMaterial.heightUsed) {
 					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');
