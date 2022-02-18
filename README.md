@@ -20,9 +20,7 @@ node armorcore/make -g direct3d11
 cd armorcore
 # Unpack `v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply patch/window_handling.diff --directory=Kinc
-node Kinc/make -g direct3d11
-# Open generated Visual Studio project at `build\ArmorPaint.sln`
-# Build and run for x64 & release
+node Kinc/make -g direct3d11 --compile
 ```
 
 **Linux**
