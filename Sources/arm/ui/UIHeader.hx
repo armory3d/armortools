@@ -65,7 +65,7 @@ class UIHeader {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
 						ui.changed = false;
-						zui.Ext.colorWheel(ui, h, false, null, false);
+						zui.Ext.colorWheel(ui, h, false, null, 10 * ui.t.ELEMENT_H * ui.SCALE(), false);
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 10);
 				}
