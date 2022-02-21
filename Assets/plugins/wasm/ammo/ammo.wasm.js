@@ -1,4 +1,6 @@
 
+let console = undefined; // TODO: Make console.log.bind available before enabling console
+
   // This is ammo.js, a port of Bullet Physics to JavaScript. zlib licensed.
   
 var Ammo = (function() {

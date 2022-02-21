@@ -10,6 +10,7 @@ let metal = process.argv.indexOf("metal") >= 0;
 let vr = process.argv.indexOf("--vr") >= 0;
 let snapshot = process.argv.indexOf("--snapshot") >= 0;
 let plugin_embed = ios;
+let physics = !ios;
 
 let project = new Project("ArmorPaint");
 project.addSources("Sources");
@@ -54,8 +55,12 @@ project.addDefine("arm_resizable");
 project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
-// project.addDefine("arm_physics");
 // project.addDefine("arm_skin");
+
+if (physics) {
+	project.addDefine("arm_physics");
+	project.addAssets("Assets/plugins/wasm/ammo/*", { destination: "data/plugins/{name}" });
+}
 
 if (android) {
 	project.addDefine("krom_android");
