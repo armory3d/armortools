@@ -1,7 +1,7 @@
 package arm.ui;
 
-import kha.Color;
 import haxe.Json;
+import kha.Color;
 import kha.Image;
 import kha.System;
 import zui.Zui;
@@ -285,7 +285,7 @@ class UINodes {
 					if (selected != null && selected.type == "RGB") {
 						if (menuButton(uiMenu, tr("Add Swatch"))) {
 							var color = selected.outputs[0].default_value;
-							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0],color[1],color[2],color[3]));
+							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
 							Context.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
 							UIStatus.inst.statusHandle.redraws = 1;
