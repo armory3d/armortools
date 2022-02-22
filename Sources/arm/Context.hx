@@ -134,6 +134,10 @@ class Context {
 	public static var textToolImage: Image = null;
 	public static var textToolText: String;
 	public static var particleMaterial: MaterialData = null;
+	public static var particlePhysics = false;
+	public static var particleHitX = 0.0;
+	public static var particleHitY = 0.0;
+	public static var particleHitZ = 0.0;
 
 	public static var layerFilter = 0;
 	public static var runBrush: Int->Void = null;

@@ -214,6 +214,11 @@ class Uniforms {
 				v.set(Context.swatch.normal.R, Context.swatch.normal.G, Context.swatch.normal.B);
 				return v;
 			}
+			case "_particleHit": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.particleHitX, Context.particleHitY, Context.particleHitZ);
+				return v;
+			}
 		}
 
 		return v;

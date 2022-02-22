@@ -318,12 +318,20 @@ class MakePaint {
 		frag.write('if (opacity == 0.0) discard;');
 
 		if (Context.tool == ToolParticle) { // Particle mask
-			frag.add_uniform('sampler2D texparticle', '_texparticle');
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
-			#else
-			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
-			#end
+			if (Context.particlePhysics) {
+				vert.add_out('vec4 wpos');
+				vert.add_uniform('mat4 W', '_worldMatrix');
+				vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
+				frag.add_uniform('vec3 particleHit', '_particleHit');
+			}
+			else {
+				frag.add_uniform('sampler2D texparticle', '_texparticle');
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
+				#else
+				frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
+				#end
+			}
 		}
 		else { // Brush cursor mask
 			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
