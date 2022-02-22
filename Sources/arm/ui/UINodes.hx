@@ -1,6 +1,7 @@
 package arm.ui;
 
 import haxe.Json;
+import kha.Color;
 import kha.Image;
 import kha.System;
 import zui.Zui;
@@ -231,6 +232,10 @@ class UINodes {
 
 			// Node context menu
 			if (!Nodes.socketReleased) {
+				var numberOfEntries = 5;
+				if (canvasType == CanvasMaterial) ++numberOfEntries;
+				if (selected != null && selected.type == "RGB") ++numberOfEntries;
+				
 				UIMenu.draw(function(uiMenu: Zui) {
 					uiMenu._y += 1;
 					var protected = selected == null ||
@@ -277,6 +282,15 @@ class UINodes {
 							isNodeMenuOperation = true;
 						});
 					}
+					if (selected != null && selected.type == "RGB") {
+						if (menuButton(uiMenu, tr("Add Swatch"))) {
+							var color = selected.outputs[0].default_value;
+							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
+							Context.setSwatch(newSwatch);
+							Project.raw.swatches.push(newSwatch);
+							UIStatus.inst.statusHandle.redraws = 1;
+						}
+					}
 					if (canvasType == CanvasMaterial) {
 						menuSeparator(uiMenu);
 						if (menuButton(uiMenu, tr("2D View"))) {
@@ -284,7 +298,7 @@ class UINodes {
 						}
 					}
 					uiMenu.enabled = true;
-				}, canvasType == CanvasMaterial ? 6 : 5);
+				}, numberOfEntries);
 			}
 		}
 		if (ui.inputReleased) {

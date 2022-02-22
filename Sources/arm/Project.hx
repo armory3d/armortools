@@ -377,7 +377,7 @@ class Project {
 
 		#if krom_ios
 		// Import immediately while access to resource is unlocked
-		Data.getBlob(path, function(b: kha.Blob) {});
+		// Data.getBlob(path, function(b: kha.Blob) {});
 		#end
 
 		UIBox.showCustom(function(ui: Zui) {

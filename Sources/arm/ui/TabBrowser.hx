@@ -13,7 +13,7 @@ class TabBrowser {
 	static var known = false;
 	static var lastPath =  "";
 
-	public static function showDirectory(directory : String) {
+	public static function showDirectory(directory: String) {
 		hpath.text = directory;
 		hsearch.text = "";
 		UIStatus.inst.statustab.position = 0;

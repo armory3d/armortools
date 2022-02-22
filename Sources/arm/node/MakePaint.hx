@@ -222,11 +222,7 @@ class MakePaint {
 			frag.write('vec3 nortan = $nortan;');
 			frag.write('float height = $height;');
 			frag.write('float mat_opacity = $opac;');
-			#if (kha_direct3d12 || kha_vulkan)
-			frag.write('float opacity = 1.0;');
-			#else
 			frag.write('float opacity = mat_opacity;');
-			#end
 			if (Context.layer.fill_layer == null) {
 				frag.write('opacity *= brushOpacity;');
 			}
@@ -322,12 +318,20 @@ class MakePaint {
 		frag.write('if (opacity == 0.0) discard;');
 
 		if (Context.tool == ToolParticle) { // Particle mask
-			frag.add_uniform('sampler2D texparticle', '_texparticle');
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
-			#else
-			frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
-			#end
+			if (Context.particlePhysics) {
+				vert.add_out('vec4 wpos');
+				vert.add_uniform('mat4 W', '_worldMatrix');
+				vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
+				frag.add_uniform('vec3 particleHit', '_particleHit');
+			}
+			else {
+				frag.add_uniform('sampler2D texparticle', '_texparticle');
+				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
+				#else
+				frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
+				#end
+			}
 		}
 		else { // Brush cursor mask
 			frag.write('float str = clamp((brushRadius - dist) * brushHardness * 400.0, 0.0, 1.0) * opacity;');
@@ -417,11 +421,7 @@ class MakePaint {
 				frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 				frag.write('vec4 sample_nor_undo = textureLod(texpaint_nor_undo, sample_tc, 0.0);');
 				frag.write('vec4 sample_pack_undo = textureLod(texpaint_pack_undo, sample_tc, 0.0);');
-				#if (kha_direct3d12 || kha_vulkan)
-				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', mat_opacity);');
-				#else
 				frag.write('fragColor[0] = vec4(' + MakeMaterial.blendMode(frag, Context.brushBlending, 'sample_undo.rgb', 'basecol', 'str') + ', max(str, sample_undo.a));');
-				#end
 				frag.write('fragColor[1] = vec4(mix(sample_nor_undo.rgb, nortan, str), matid);');
 				if (Context.material.paintHeight && MakeMaterial.heightUsed) {
 					frag.write('fragColor[2] = mix(sample_pack_undo, vec4(occlusion, roughness, metallic, height), str);');

@@ -195,7 +195,7 @@ class BoxPreferences {
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.changed = false;
-						zui.Ext.colorWheel(ui, h, false, null, true);
+						zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true);
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 11);
 				}
@@ -235,7 +235,7 @@ class BoxPreferences {
 							h.color = untyped theme[key];
 							UIMenu.draw(function(ui) {
 								ui.changed = false;
-								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, true);
+								untyped theme[key] = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true);
 								if (ui.changed) UIMenu.keepOpen = true;
 							}, 11);
 						}

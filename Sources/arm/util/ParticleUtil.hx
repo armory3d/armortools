@@ -86,6 +86,7 @@ class ParticleUtil {
 			Scene.active.spawnObject(".Sphere", null, function(o: Object) {
 				var mo: MeshObject = cast o;
 				mo.name = ".ParticleEmitter";
+				mo.raw = Json.parse(Json.stringify(mo.raw));
 				mo.raw.particle_refs = particle_refs;
 				#if arm_particles
 				mo.setupParticleSystem("Scene", particle_refs[0]);
@@ -93,4 +94,26 @@ class ParticleUtil {
 			});
 		});
 	}
+
+	#if arm_physics
+
+	public static function initParticlePhysics() {
+		if (arm.plugin.PhysicsWorld.active != null) return;
+
+		arm.plugin.PhysicsWorld.load(function() {
+			Scene.active.sceneParent.addTrait(new arm.plugin.PhysicsWorld());
+
+			var po = Context.mergedObject != null ? Context.mergedObject : Context.paintObject;
+
+			po.transform.scale.x = po.parent.transform.scale.x;
+			po.transform.scale.y = po.parent.transform.scale.y;
+			po.transform.scale.z = po.parent.transform.scale.z;
+
+			var paintBody = new arm.plugin.PhysicsBody();
+			paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
+			po.addTrait(paintBody);
+		});
+	}
+
+	#end
 }

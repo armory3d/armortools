@@ -41,7 +41,7 @@ class PhysicsBody extends iron.Trait {
 	public var trigger = false;
 	public var group = 1;
 	public var mask = 1;
-	var shape = ShapeBox;
+	public var shape = ShapeBox;
 	var destroyed = false;
 	var bodyScaleX: Float; // Transform scale at creation time
 	var bodyScaleY: Float;

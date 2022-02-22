@@ -113,9 +113,6 @@ class Main {
 
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
-		#if arm_physics
-		tasks++; arm.plugin.PhysicsWorld.load();
-		#end
 		tasks--; start();
 	}
 
@@ -151,9 +148,6 @@ class Main {
 
 					RenderPath.setActive(path);
 					new arm.App();
-					#if arm_physics
-					o.addTrait(new arm.plugin.PhysicsWorld());
-					#end
 				});
 			});
 		});
