@@ -89,4 +89,25 @@ class MakeParticle {
 
 		return con_part;
 	}
+
+	public static function mask(vert: NodeShader, frag: NodeShader) {
+		#if arm_physics
+		if (Context.particlePhysics) {
+			vert.add_out('vec4 wpos');
+			vert.add_uniform('mat4 W', '_worldMatrix');
+			vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
+			frag.add_uniform('vec3 particleHit', '_particleHit');
+			frag.write('float str = clamp(1.0 - distance(particleHit, wpos.xyz) * 2.0, 0.0, 1.0);');
+			frag.write('if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;');
+			return;
+		}
+		#end
+
+		frag.add_uniform('sampler2D texparticle', '_texparticle');
+		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
+		#else
+		frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');
+		#end
+	}
 }
