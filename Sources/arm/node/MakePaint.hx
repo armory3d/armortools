@@ -319,10 +319,12 @@ class MakePaint {
 
 		if (Context.tool == ToolParticle) { // Particle mask
 			if (Context.particlePhysics) {
+				#if arm_physics
 				vert.add_out('vec4 wpos');
 				vert.add_uniform('mat4 W', '_worldMatrix');
 				vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
 				frag.add_uniform('vec3 particleHit', '_particleHit');
+				#end
 			}
 			else {
 				frag.add_uniform('sampler2D texparticle', '_texparticle');

@@ -333,10 +333,12 @@ class UIHeader {
 					}
 				}
 
+				#if arm_physics
 				if (Context.tool == ToolParticle) {
 					ui._x += 10 * ui.SCALE();
 					var physHandle = Id.handle({selected: false});
 				}
+				#end
 			}
 		}
 	}

@@ -214,11 +214,13 @@ class Uniforms {
 				v.set(Context.pickedColor.normal.R, Context.pickedColor.normal.G, Context.pickedColor.normal.B);
 				return v;
 			}
+			#if arm_physics
 			case "_particleHit": {
 				v = iron.object.Uniforms.helpVec;
 				v.set(Context.particleHitX, Context.particleHitY, Context.particleHitZ);
 				return v;
 			}
+			#end
 		}
 
 		return v;
