@@ -270,7 +270,7 @@ class Project {
 			Context.font = fonts[0];
 			Project.setDefaultSwatches();
 			Context.swatch = Project.raw.swatches[0];
-
+			Context.pickedColor = Project.makeSwatch();
 			History.reset();
 
 			MakeMaterial.parsePaintMaterial();

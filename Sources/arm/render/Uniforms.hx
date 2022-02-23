@@ -106,19 +106,19 @@ class Uniforms {
 				return Context.layer.decalMat.getScale().z * 0.5;
 			}
 			case "_pickerOpacity": {
-				return Context.swatch.opacity;
+				return Context.pickedColor.opacity;
 			}
 			case "_pickerOcclusion": {
-				return Context.swatch.occlusion;
+				return Context.pickedColor.occlusion;
 			}
 			case "_pickerRoughness": {
-				return Context.swatch.roughness;
+				return Context.pickedColor.roughness;
 			}
 			case "_pickerMetallic": {
-				return Context.swatch.metallic;
+				return Context.pickedColor.metallic;
 			}
 			case "_pickerHeight": {
-				return Context.swatch.height;
+				return Context.pickedColor.height;
 			}
 		}
 		if (MaterialParser.script_links != null) {
@@ -206,12 +206,12 @@ class Uniforms {
 			}
 			case "_pickerBase": {
 				v = iron.object.Uniforms.helpVec;
-				v.set(Context.swatch.base.R, Context.swatch.base.G, Context.swatch.base.B);
+				v.set(Context.pickedColor.base.R, Context.pickedColor.base.G, Context.pickedColor.base.B);
 				return v;
 			}
 			case "_pickerNormal": {
 				v = iron.object.Uniforms.helpVec;
-				v.set(Context.swatch.normal.R, Context.swatch.normal.G, Context.swatch.normal.B);
+				v.set(Context.pickedColor.normal.R, Context.pickedColor.normal.G, Context.pickedColor.normal.B);
 				return v;
 			}
 			case "_particleHit": {

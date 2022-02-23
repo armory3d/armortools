@@ -44,17 +44,17 @@ class UIHeader {
 				if (Project.assets.length > 0) ui.image(Project.getImage(Project.assets[cid]));
 			}
 			else if (Context.tool == ToolPicker) {
-				var baseRPicked = Math.round(Context.swatch.base.R * 10) / 10;
-				var baseGPicked = Math.round(Context.swatch.base.G * 10) / 10;
-				var baseBPicked = Math.round(Context.swatch.base.B * 10) / 10;
-				var normalRPicked = Math.round(Context.swatch.normal.R * 10) / 10;
-				var normalGPicked = Math.round(Context.swatch.normal.G * 10) / 10;
-				var normalBPicked = Math.round(Context.swatch.normal.B * 10) / 10;
-				var occlusionPicked = Math.round(Context.swatch.occlusion * 100) / 100;
-				var roughnessPicked = Math.round(Context.swatch.roughness * 100) / 100;
-				var metallicPicked = Math.round(Context.swatch.metallic * 100) / 100;
-				var heightPicked = Math.round(Context.swatch.height * 100) / 100;
-				var opacityPicked = Math.round(Context.swatch.opacity * 100) / 100;
+				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;
+				var baseGPicked = Math.round(Context.pickedColor.base.G * 10) / 10;
+				var baseBPicked = Math.round(Context.pickedColor.base.B * 10) / 10;
+				var normalRPicked = Math.round(Context.pickedColor.normal.R * 10) / 10;
+				var normalGPicked = Math.round(Context.pickedColor.normal.G * 10) / 10;
+				var normalBPicked = Math.round(Context.pickedColor.normal.B * 10) / 10;
+				var occlusionPicked = Math.round(Context.pickedColor.occlusion * 100) / 100;
+				var roughnessPicked = Math.round(Context.pickedColor.roughness * 100) / 100;
+				var metallicPicked = Math.round(Context.pickedColor.metallic * 100) / 100;
+				var heightPicked = Math.round(Context.pickedColor.height * 100) / 100;
+				var opacityPicked = Math.round(Context.pickedColor.opacity * 100) / 100;
 
 				var h = Id.handle();
 				h.color.R = baseRPicked;
@@ -69,6 +69,13 @@ class UIHeader {
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 10);
 				}
+				if (ui.button("Add swatch")) {
+					var newSwatch = Project.makeSwatch(Context.pickedColor.base);
+					Context.setSwatch(newSwatch);
+					Project.raw.swatches.push(newSwatch);
+					UIStatus.inst.statusHandle.redraws = 1;
+				}
+				if (ui.isHovered) ui.tooltip(tr("Add picker color to swatches"));
 
 				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');

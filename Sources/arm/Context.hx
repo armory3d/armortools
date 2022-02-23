@@ -64,6 +64,7 @@ class Context {
 	public static var savedCamera = Mat4.identity();
 
 	public static var swatch: TSwatchColor;
+	public static var pickedColor: TSwatchColor = Project.makeSwatch();
 	public static var materialIdPicked = 0;
 	public static var uvxPicked = 0.0;
 	public static var uvyPicked = 0.0;
