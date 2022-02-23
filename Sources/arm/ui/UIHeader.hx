@@ -218,7 +218,7 @@ class UIHeader {
 					}
 
 					Context.brushAngle = ui.slider(Context.brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
-					if (ui.isHovered) ui.tooltip(tr("Hold {brush_angle} and move mouse to the right to decrease the angle\nHold {brush_angle} and move mouse to the left to increase the angle", ["brush_angle" => Config.keymap.brush_angle]));
+					if (ui.isHovered) ui.tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", ["brush_angle" => Config.keymap.brush_angle]));
 
 					if (Context.brushAngleHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
