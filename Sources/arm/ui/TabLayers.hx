@@ -313,7 +313,7 @@ class TabLayers {
 			else {
 				ui.tooltipImage(l.texpaint_preview);
 			}
-			if(i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i+1) + ")");
+			if (i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
 			else ui.tooltip(l.name);
 		}
 		if (ui.isHovered && ui.inputReleasedR) {

@@ -69,7 +69,7 @@ class UIHeader {
 						if (ui.changed) UIMenu.keepOpen = true;
 					}, 10);
 				}
-				if (ui.button("Add swatch")) {
+				if (ui.button(tr("Add Swatch"))) {
 					var newSwatch = Project.makeSwatch(Context.pickedColor.base);
 					Context.setSwatch(newSwatch);
 					Project.raw.swatches.push(newSwatch);

@@ -176,7 +176,7 @@ class TabMaterials {
 					}
 					if (ui.isHovered) {
 						ui.tooltipImage(imgFull);
-						if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i+1) + ")");
+						if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
 						else ui.tooltip(Project.materials[i].canvas.name);
 					}
 
@@ -185,7 +185,7 @@ class TabMaterials {
 						ui._y += slotw * 0.9;
 						ui.text(Project.materials[i].canvas.name, Center);
 						if (ui.isHovered) {
-							if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i+1) + ")");
+							if (i < 9) ui.tooltip(Project.materials[i].canvas.name + " - (" + Config.keymap.select_material + " " + (i + 1) + ")");
 							else ui.tooltip(Project.materials[i].canvas.name);
 						}
 						ui._y -= slotw * 0.9;
