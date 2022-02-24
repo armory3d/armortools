@@ -56,11 +56,11 @@ class UIToolbar {
 
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				var keys = [
-					"(" + Config.keymap.tool_brush + ")",
-					"(" + Config.keymap.tool_eraser + ")",
+					"(" + Config.keymap.tool_brush + ") - "+ tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", ["key" => Config.keymap.brush_ruler, "action_paint" => Config.keymap.action_paint]),
+					"(" + Config.keymap.tool_eraser + ") - "+ tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", ["key" => Config.keymap.brush_ruler, "action_paint" => Config.keymap.action_paint]),
 					"(" + Config.keymap.tool_fill + ")",
-					"(" + Config.keymap.tool_decal + ")",
-					"(" + Config.keymap.tool_text + ")",
+					"(" + Config.keymap.tool_decal + ") - "+ tr("Hold {key} to paint on a decal mask", ["key" => Config.keymap.decal_mask]),
+					"(" + Config.keymap.tool_text + ") - "+ tr("Hold {key} to use the text as a mask", ["key" => Config.keymap.decal_mask]),
 					"(" + Config.keymap.tool_clone + ") - " + tr("Hold {key} to set source", ["key" => Config.keymap.set_clone_source]),
 					"(" + Config.keymap.tool_blur + ")",
 					"(" + Config.keymap.tool_particle + ")",

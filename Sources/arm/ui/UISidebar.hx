@@ -228,7 +228,7 @@ class UISidebar {
 						Context.brushOpacityHandle.value = Context.brushOpacity;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
-						Context.brushAngle -= mouse.movementX / 5;
+						Context.brushAngle += mouse.movementX / 5;
 						Context.brushAngle = Std.int(Context.brushAngle) % 360;
 						if (Context.brushAngle < 0) Context.brushAngle += 360;
 						Context.brushAngleHandle.value = Context.brushAngle;
