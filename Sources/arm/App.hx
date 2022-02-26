@@ -62,6 +62,7 @@ class App {
 	public static var font: Font = null;
 	public static var theme: TTheme;
 	public static var colorWheel: Image;
+	public static var blackWhiteGradient: Image;
 	public static var uiBox: Zui;
 	public static var uiMenu: Zui;
 	public static var defaultElementW = 100;
@@ -122,84 +123,86 @@ class App {
 		Krom.setSaveAndQuitCallback(saveAndQuitCallback);
 
 		Data.getFont("font.ttf", function(f: Font) {
-			Data.getImage("color_wheel.k", function(image: Image) {
+			Data.getImage("color_wheel.k", function(imageColorWheel: Image) {
+				Data.getImage("black_white_gradient.k", function(imageBlackWhiteGradient: Image) {
+					font = f;
+					Config.loadTheme(Config.raw.theme, false);
+					defaultElementW = theme.ELEMENT_W;
+					defaultFontSize = theme.FONT_SIZE;
+					Translator.loadTranslations(Config.raw.locale);
+					UIFiles.filename = tr("untitled");
+					#if (krom_android || krom_ios)
+					kha.Window.get(0).title = tr("untitled");
+					#end
 
-				font = f;
-				Config.loadTheme(Config.raw.theme, false);
-				defaultElementW = theme.ELEMENT_W;
-				defaultFontSize = theme.FONT_SIZE;
-				Translator.loadTranslations(Config.raw.locale);
-				UIFiles.filename = tr("untitled");
-				#if (krom_android || krom_ios)
-				kha.Window.get(0).title = tr("untitled");
-				#end
-
-				// Precompiled font for fast startup
-				if (Config.raw.locale == "en") {
-					var kimg: kha.Font.KravurImage = js.lib.Object.create(untyped kha.Font.KravurImage.prototype);
-					@:privateAccess kimg.mySize = 13;
-					@:privateAccess kimg.width = 128;
-					@:privateAccess kimg.height = 128;
-					@:privateAccess kimg.baseline = 10;
-					var chars = new haxe.ds.Vector(ConstData.font_x0.length);
-					kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
-					for (i in 0...95) chars[i] = new Stbtt_bakedchar();
-					for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
-					for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
-					for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
-					for (i in 0...ConstData.font_y1.length) chars[i].y1 = ConstData.font_y1[i];
-					for (i in 0...ConstData.font_xoff.length) chars[i].xoff = ConstData.font_xoff[i];
-					for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
-					for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
-					@:privateAccess kimg.chars = chars;
-					Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
-						@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
-						@:privateAccess cast(font, kha.Font).images.set(130095, kimg);
-					});
-				}
-
-				colorWheel = image;
-				Nodes.enumTexts = enumTexts;
-				Nodes.tr = tr;
-				uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
-				uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel });
-				defaultElementH = uiMenu.t.ELEMENT_H;
-
-				// Init plugins
-				if (Config.raw.plugins != null) {
-					for (plugin in Config.raw.plugins) {
-						Plugin.start(plugin);
+					// Precompiled font for fast startup
+					if (Config.raw.locale == "en") {
+						var kimg: kha.Font.KravurImage = js.lib.Object.create(untyped kha.Font.KravurImage.prototype);
+						@:privateAccess kimg.mySize = 13;
+						@:privateAccess kimg.width = 128;
+						@:privateAccess kimg.height = 128;
+						@:privateAccess kimg.baseline = 10;
+						var chars = new haxe.ds.Vector(ConstData.font_x0.length);
+						kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
+						for (i in 0...95) chars[i] = new Stbtt_bakedchar();
+						for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
+						for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
+						for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
+						for (i in 0...ConstData.font_y1.length) chars[i].y1 = ConstData.font_y1[i];
+						for (i in 0...ConstData.font_xoff.length) chars[i].xoff = ConstData.font_xoff[i];
+						for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
+						for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
+						@:privateAccess kimg.chars = chars;
+						Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
+							@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
+							@:privateAccess cast(font, kha.Font).images.set(130095, kimg);
+						});
 					}
-				}
 
-				Args.parse();
+					colorWheel = imageColorWheel;
+					blackWhiteGradient = imageBlackWhiteGradient;
+					Nodes.enumTexts = enumTexts;
+					Nodes.tr = tr;
+					uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: blackWhiteGradient });
+					uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: blackWhiteGradient });
+					defaultElementH = uiMenu.t.ELEMENT_H;
 
-				iron.App.notifyOnUpdate(update);
-				new UISidebar();
-				new UINodes();
-				new UIView2D();
-				new Camera();
-				iron.App.notifyOnRender2D(UIView2D.inst.render);
-				iron.App.notifyOnUpdate(UIView2D.inst.update);
-				iron.App.notifyOnRender2D(UISidebar.inst.renderCursor);
-				iron.App.notifyOnUpdate(UINodes.inst.update);
-				iron.App.notifyOnRender2D(UINodes.inst.render);
-				iron.App.notifyOnUpdate(UISidebar.inst.update);
-				iron.App.notifyOnRender2D(UISidebar.inst.render);
-				iron.App.notifyOnRender2D(render);
-				appx = UIToolbar.inst.toolbarw;
-				appy = UIHeader.inst.headerh * 2;
-				var cam = Scene.active.camera;
-				cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
-				cam.buildProjection();
+					// Init plugins
+					if (Config.raw.plugins != null) {
+						for (plugin in Config.raw.plugins) {
+							Plugin.start(plugin);
+						}
+					}
 
-				Args.run();
+					Args.parse();
 
-				#if arm_touchui
-				if (Config.raw.recent_projects.length > 0) {
-					arm.ui.BoxProjects.show();
-				}
-				#end
+					iron.App.notifyOnUpdate(update);
+					new UISidebar();
+					new UINodes();
+					new UIView2D();
+					new Camera();
+					iron.App.notifyOnRender2D(UIView2D.inst.render);
+					iron.App.notifyOnUpdate(UIView2D.inst.update);
+					iron.App.notifyOnRender2D(UISidebar.inst.renderCursor);
+					iron.App.notifyOnUpdate(UINodes.inst.update);
+					iron.App.notifyOnRender2D(UINodes.inst.render);
+					iron.App.notifyOnUpdate(UISidebar.inst.update);
+					iron.App.notifyOnRender2D(UISidebar.inst.render);
+					iron.App.notifyOnRender2D(render);
+					appx = UIToolbar.inst.toolbarw;
+					appy = UIHeader.inst.headerh * 2;
+					var cam = Scene.active.camera;
+					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
+					cam.buildProjection();
+
+					Args.run();
+
+					#if arm_touchui
+					if (Config.raw.recent_projects.length > 0) {
+						arm.ui.BoxProjects.show();
+					}
+					#end
+				});
 			});
 		});
 	}
