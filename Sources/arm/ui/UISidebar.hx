@@ -717,7 +717,6 @@ class UISidebar {
 			Config.raw.layout[LayoutSidebarW] = 0 ;
 		}
 		Context.lastHtab0Position = htab0.position;
-		ui.g.end();
 		ui.end();
 		g.begin(false);
 	}
