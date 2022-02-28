@@ -19,8 +19,8 @@ class MakeVoxel {
 		// if (skin) {
 		// 	structure.add("bone", kha.graphics4.VertexData.Short4Norm);
 		// 	structure.add("weight", kha.graphics4.VertexData.Short4Norm);
-		// 	data.raw.vertex_elements.push({name: "bone", data: 'short4norm'});
-		// 	data.raw.vertex_elements.push({name: "weight", data: 'short4norm'});
+		// 	data.raw.vertex_elements.push({ name: "bone", data: 'short4norm' });
+		// 	data.raw.vertex_elements.push({ name: "weight", data: 'short4norm' });
 		// }
 		// #end
 

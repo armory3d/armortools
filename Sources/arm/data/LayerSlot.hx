@@ -383,11 +383,11 @@ class LayerSlot {
 	public function getRecursiveChildren(): Array<LayerSlot> {
 		var children: Array<LayerSlot> = null;
 		for (l in Project.layers) {
-			if (l.parent == this) { //child layers and group masks
+			if (l.parent == this) { // Child layers and group masks
 				if (children == null) children = [];
 				children.push(l);
 			}
-			if (l.parent != null && l.parent.parent == this) { // layer masks
+			if (l.parent != null && l.parent.parent == this) { // Layer masks
 				if (children == null) children = [];
 				children.push(l);
 			}
@@ -483,23 +483,23 @@ class LayerSlot {
 	public function canMove(to: Int): Bool {
 		var oldIndex = Project.layers.indexOf(this);
 
-		var delta = to - oldIndex; //If delta > 0 the layer is moved up, otherwise down
+		var delta = to - oldIndex; // If delta > 0 the layer is moved up, otherwise down
 		if (to < 0 || to > Project.layers.length - 1 || delta == 0) return false;
 
 		// If the layer is moved up, all layers between the old position and the new one move one down.
 		// The layers above the new position stay where they are.
 		// If the new position is on top or on bottom no upper resp. lower layer exists.
-		var newUpperLayer = delta > 0 ? (to < Project.layers.length-1 ? Project.layers[to+1] : null) : Project.layers[to];
+		var newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (newUpperLayer != null && !newUpperLayer.show_panel) {
 			var children = newUpperLayer.getRecursiveChildren();
 			to -= children != null ? children.length : 0;
 			delta = to - oldIndex;
-			newUpperLayer = delta > 0 ? (to < Project.layers.length-1 ? Project.layers[to+1] : null) : Project.layers[to];
+			newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 		}
 
-		var newLowerLayer = delta > 0 ? Project.layers[to] : (to > 0 ? Project.layers[to-1] : null);
+		var newLowerLayer = delta > 0 ? Project.layers[to] : (to > 0 ? Project.layers[to - 1] : null);
 
 		if (this.isMask()) {
 			// Masks can not be on top.
@@ -543,14 +543,14 @@ class LayerSlot {
 		var pointers = TabLayers.initLayerMap();
 		var oldIndex = Project.layers.indexOf(this);
 		var delta = to - oldIndex;
-		var newUpperLayer = delta > 0 ? (to < Project.layers.length-1 ? Project.layers[to+1] : null) : Project.layers[to];
+		var newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 
 		// Group or layer is collapsed so we check below and update the upper layer.
 		if (newUpperLayer != null && !newUpperLayer.show_panel) {
 			var children = newUpperLayer.getRecursiveChildren();
 			to -= children != null ? children.length : 0;
 			delta = to - oldIndex;
-			newUpperLayer = delta > 0 ? (to < Project.layers.length-1 ? Project.layers[to+1] : null) : Project.layers[to];
+			newUpperLayer = delta > 0 ? (to < Project.layers.length - 1 ? Project.layers[to + 1] : null) : Project.layers[to];
 		}
 
 		Context.setLayer(this);
@@ -565,9 +565,9 @@ class LayerSlot {
 
 			if (newUpperLayer == null)
 				this.parent = null; // Placed on top.
-			else if(newUpperLayer.isInGroup() && !newUpperLayer.getContainingGroup().show_panel)
+			else if (newUpperLayer.isInGroup() && !newUpperLayer.getContainingGroup().show_panel)
 				this.parent = null; // Placed below a collapsed group.
-			else if(newUpperLayer.isLayer())
+			else if (newUpperLayer.isLayer())
 				this.parent = newUpperLayer.parent; // Placed below a layer, use the same parent.
 			else if (newUpperLayer.isGroup()) 
 				this.parent = newUpperLayer; // Placed as top layer in a group.
@@ -583,7 +583,7 @@ class LayerSlot {
 					var mask = layerMasks[idx];
 					Project.layers.remove(mask);
 					// If the masks are moved down each step increases the index below the layer by one.
-					Project.layers.insert( delta > 0 ? oldIndex+delta-1 : oldIndex+delta+idx,mask);
+					Project.layers.insert(delta > 0 ? oldIndex + delta - 1 : oldIndex + delta + idx, mask);
 				}
 			}
 
@@ -606,7 +606,7 @@ class LayerSlot {
 					var child = children[idx];
 					Project.layers.remove(child);
 					// If the children are moved down each step increases the index below the layer by one.
-					Project.layers.insert( delta > 0 ? oldIndex+delta-1 : oldIndex+delta+idx,child);
+					Project.layers.insert(delta > 0 ? oldIndex + delta - 1 : oldIndex + delta + idx, child);
 				}
 			}
 		}

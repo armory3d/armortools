@@ -64,7 +64,7 @@ class UIBox {
 				ui._y += 10;
 				if (ui.tab(Id.handle(), boxTitle)) {
 					copyable ?
-						Ext.textArea(ui, Id.handle({text: boxText}), false) :
+						Ext.textArea(ui, Id.handle({ text: boxText }), false) :
 						ui.text(boxText);
 					ui.endElement();
 

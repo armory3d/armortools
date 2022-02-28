@@ -150,8 +150,8 @@ class Project {
 				}
 
 				ui.row([0.5, 0.5]);
-				Context.projectType = ui.combo(Id.handle({position: Context.projectType}), meshList, tr("Template"), true);
-				Context.projectAspectRatio = ui.combo(Id.handle({position: Context.projectAspectRatio}), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+				Context.projectType = ui.combo(Id.handle({ position: Context.projectType }), meshList, tr("Template"), true);
+				Context.projectAspectRatio = ui.combo(Id.handle({ position: Context.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 				@:privateAccess ui.endElement();
 				ui.row([0.5, 0.5]);
@@ -394,12 +394,12 @@ class Project {
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					Context.parseTransform = ui.check(Id.handle({selected: Context.parseTransform}), tr("Parse Transforms"));
+					Context.parseTransform = ui.check(Id.handle({ selected: Context.parseTransform }), tr("Parse Transforms"));
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					Context.parseVCols = ui.check(Id.handle({selected: Context.parseVCols}), tr("Parse Vertex Colors"));
+					Context.parseVCols = ui.check(Id.handle({ selected: Context.parseVCols }), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 

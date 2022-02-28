@@ -74,7 +74,7 @@ class MakeMaterial {
 			}
 		}
 
-		var con = MakeMesh.run(new NodeShaderData({name: "Material", canvas: null}));
+		var con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }));
 		var scon = new ShaderContext(con.data, function(scon: ShaderContext){});
 		scon.overrideContext = {};
 		if (con.frag.sharedSamplers.length > 0) {
@@ -88,7 +88,7 @@ class MakeMaterial {
 		m.shader.contexts.push(scon);
 
 		for (i in 1...MakeMesh.layerPassCount) {
-			var con = MakeMesh.run(new NodeShaderData({name: "Material", canvas: null}), i);
+			var con = MakeMesh.run(new NodeShaderData({ name: "Material", canvas: null }), i);
 			var scon = new ShaderContext(con.data, function(scon: ShaderContext){});
 			scon.overrideContext = {};
 			if (con.frag.sharedSamplers.length > 0) {
@@ -130,7 +130,7 @@ class MakeMaterial {
 			m.shader.raw.contexts.remove(sc.raw);
 			m.shader.contexts.remove(sc);
 		}
-		var con = MakeParticle.run(new NodeShaderData({name: "MaterialParticle", canvas: null}));
+		var con = MakeParticle.run(new NodeShaderData({ name: "MaterialParticle", canvas: null }));
 		if (sc != null) sc.delete();
 		sc = new ShaderContext(con.data, function(sc: ShaderContext){});
 		m.shader.raw.contexts.push(sc.raw);

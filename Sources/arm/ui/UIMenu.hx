@@ -186,21 +186,21 @@ class UIMenu {
 				}
 
 				menuFill(ui);
-				var splitViewHandle = Id.handle({selected: Context.splitView});
+				var splitViewHandle = Id.handle({ selected: Context.splitView });
 				Context.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					App.resize();
 				}
 
 				menuFill(ui);
-				var cullHandle = Id.handle({selected: Context.cullBackfaces});
+				var cullHandle = Id.handle({ selected: Context.cullBackfaces });
 				Context.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				menuFill(ui);
-				var filterHandle = Id.handle({selected: Context.textureFilter});
+				var filterHandle = Id.handle({ selected: Context.textureFilter });
 				Context.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
@@ -223,7 +223,7 @@ class UIMenu {
 				}
 
 				menuFill(ui);
-				var compassHandle = Id.handle({selected: Context.showCompass});
+				var compassHandle = Id.handle({ selected: Context.showCompass });
 				Context.showCompass = ui.check(compassHandle, " " + tr("Compass"));
 				if (compassHandle.changed) Context.ddirty = 2;
 
@@ -345,7 +345,7 @@ class UIMenu {
 
 				menuFill(ui);
 				var cam = Scene.active.camera;
-				Context.fovHandle = Id.handle({value: Std.int(cam.data.raw.fov * 100) / 100});
+				Context.fovHandle = Id.handle({ value: Std.int(cam.data.raw.fov * 100) / 100 });
 				menuAlign(ui);
 				cam.data.raw.fov = ui.slider(Context.fovHandle, tr("FoV"), 0.3, 2.0, true);
 				if (Context.fovHandle.changed) {
@@ -354,7 +354,7 @@ class UIMenu {
 
 				menuFill(ui);
 				menuAlign(ui);
-				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({position: Context.cameraControls}), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
 
 				menuFill(ui);
 				menuAlign(ui);

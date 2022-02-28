@@ -16,7 +16,7 @@ class UIHeader {
 
 	public static inline var defaultHeaderH = 28;
 
-	public var headerHandle = new Handle({layout: Horizontal});
+	public var headerHandle = new Handle({ layout: Horizontal });
 	public var headerh = defaultHeaderH;
 	public var worktab = Id.handle();
 
@@ -84,7 +84,7 @@ class UIHeader {
 				ui.text(tr("Metallic") + ' ($metallicPicked)');
 				ui.text(tr("Height") + ' ($heightPicked)');
 				ui.text(tr("Opacity") + ' ($opacityPicked)');
-				Context.pickerSelectMaterial = ui.check(Id.handle({selected: Context.pickerSelectMaterial}), tr("Select Material"));
+				Context.pickerSelectMaterial = ui.check(Id.handle({ selected: Context.pickerSelectMaterial }), tr("Select Material"));
 				ui.combo(Context.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
 				if (Context.pickerMaskHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
@@ -115,7 +115,7 @@ class UIHeader {
 					History.pushUndo = true;
 				}
 
-				var bakeHandle = Id.handle({position: Context.bakeType});
+				var bakeHandle = Id.handle({ position: Context.bakeType });
 				var bakes = [
 					tr("AO"),
 					tr("Curvature"),
@@ -138,25 +138,25 @@ class UIHeader {
 
 				#if (kha_direct3d12 || kha_vulkan)
 				if (rtBake) {
-					var samplesHandle = Id.handle({value: Context.bakeSamples});
+					var samplesHandle = Id.handle({ value: Context.bakeSamples });
 					Context.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
 				}
 				#end
 
 				if (Context.bakeType == BakeNormalObject || Context.bakeType == BakePosition || Context.bakeType == BakeBentNormal) {
-					var bakeUpAxisHandle = Id.handle({position: Context.bakeUpAxis});
+					var bakeUpAxisHandle = Id.handle({ position: Context.bakeUpAxis });
 					Context.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 				}
 				if (Context.bakeType == BakeAO || Context.bakeType == BakeCurvature) {
-					var bakeAxisHandle = Id.handle({position: Context.bakeAxis});
+					var bakeAxisHandle = Id.handle({ position: Context.bakeAxis });
 					Context.bakeAxis = ui.combo(bakeAxisHandle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 				}
 				if (Context.bakeType == BakeAO) {
-					var strengthHandle = Id.handle({value: Context.bakeAoStrength});
+					var strengthHandle = Id.handle({ value: Context.bakeAoStrength });
 					Context.bakeAoStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-					var radiusHandle = Id.handle({value: Context.bakeAoRadius});
+					var radiusHandle = Id.handle({ value: Context.bakeAoRadius });
 					Context.bakeAoRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-					var offsetHandle = Id.handle({value: Context.bakeAoOffset});
+					var offsetHandle = Id.handle({ value: Context.bakeAoOffset });
 					Context.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 				}
 				#if (kha_direct3d12 || kha_vulkan)
@@ -166,18 +166,18 @@ class UIHeader {
 				}
 				#end
 				if (Context.bakeType == BakeCurvature) {
-					var strengthHandle = Id.handle({value: Context.bakeCurvStrength});
+					var strengthHandle = Id.handle({ value: Context.bakeCurvStrength });
 					Context.bakeCurvStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-					var radiusHandle = Id.handle({value: Context.bakeCurvRadius});
+					var radiusHandle = Id.handle({ value: Context.bakeCurvRadius });
 					Context.bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-					var offsetHandle = Id.handle({value: Context.bakeCurvOffset});
+					var offsetHandle = Id.handle({ value: Context.bakeCurvOffset });
 					Context.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), -2.0, 2.0, true);
-					var smoothHandle = Id.handle({value: Context.bakeCurvSmooth});
+					var smoothHandle = Id.handle({ value: Context.bakeCurvSmooth });
 					Context.bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
 				}
 				if (Context.bakeType == BakeNormal || Context.bakeType == BakeHeight || Context.bakeType == BakeDerivative) {
 					var ar = [for (p in Project.paintObjects) p.name];
-					var polyHandle = Id.handle({position: Context.bakeHighPoly});
+					var polyHandle = Id.handle({ position: Context.bakeHighPoly });
 					Context.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
 				}
 				if (ui.changed) {
@@ -214,7 +214,7 @@ class UIHeader {
 					Context.tool == ToolFill   ||
 					Context.tool == ToolDecal  ||
 					Context.tool == ToolText) {
-					var brushScaleHandle = Id.handle({value: Context.brushScale});
+					var brushScaleHandle = Id.handle({ value: Context.brushScale });
 					Context.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 					if (brushScaleHandle.changed) {
 						if (Context.tool == ToolDecal || Context.tool == ToolText) {
@@ -236,11 +236,11 @@ class UIHeader {
 				if (ui.isHovered) ui.tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", ["brush_opacity" => Config.keymap.brush_opacity]));
 
 				if (Context.tool == ToolBrush || Context.tool == ToolEraser || decalMask) {
-					Context.brushHardness = ui.slider(Id.handle({value: Context.brushHardness}), tr("Hardness"), 0.0, 1.0, true);
+					Context.brushHardness = ui.slider(Id.handle({ value: Context.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
 				}
 
 				if (Context.tool != ToolEraser) {
-					var brushBlendingHandle = Id.handle({value: Context.brushBlending});
+					var brushBlendingHandle = Id.handle({ value: Context.brushBlending });
 					Context.brushBlending = ui.combo(brushBlendingHandle, [
 						tr("Mix"),
 						tr("Darken"),
@@ -304,15 +304,15 @@ class UIHeader {
 					var sc = ui.SCALE();
 					ui._w = Std.int(60 * sc);
 
-					var xrayHandle = Id.handle({selected: Context.xray});
+					var xrayHandle = Id.handle({ selected: Context.xray });
 					Context.xray = ui.check(xrayHandle, tr("X-Ray"));
 					if (xrayHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
 
-					var symXHandle = Id.handle({selected: false});
-					var symYHandle = Id.handle({selected: false});
-					var symZHandle = Id.handle({selected: false});
+					var symXHandle = Id.handle({ selected: false });
+					var symYHandle = Id.handle({ selected: false });
+					var symZHandle = Id.handle({ selected: false });
 					#if krom_ios
 					ui._x -= 10 * sc;
 					#else
@@ -331,7 +331,7 @@ class UIHeader {
 
 				if (Context.tool == ToolBlur) {
 					ui._x += 10 * ui.SCALE();
-					var dirHandle = Id.handle({selected: false});
+					var dirHandle = Id.handle({ selected: false });
 					Context.blurDirectional = ui.check(dirHandle, tr("Directional"));
 					if (dirHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
@@ -341,7 +341,7 @@ class UIHeader {
 				#if arm_physics
 				if (Context.tool == ToolParticle) {
 					ui._x += 10 * ui.SCALE();
-					var physHandle = Id.handle({selected: false});
+					var physHandle = Id.handle({ selected: false });
 				}
 				#end
 			}

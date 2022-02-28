@@ -56,7 +56,7 @@ class UIView2D {
 		channelLocation = pipe.getConstantLocation("channel");
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.blackWhiteGradient, scaleFactor: scale});
+		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.blackWhiteGradient, scaleFactor: scale });
 		ui.scrollEnabled = false;
 	}
 
@@ -248,7 +248,7 @@ class UIView2D {
 			ui._w = ew;
 
 			if (type == View2DLayer) {
-				layerMode = ui.combo(Id.handle({position: layerMode}), [
+				layerMode = ui.combo(Id.handle({ position: layerMode }), [
 					tr("Visible"),
 					tr("Selected"),
 				], tr("Layers"));
@@ -256,7 +256,7 @@ class UIView2D {
 				ui._y = 2;
 
 				if (!Context.layer.isMask()) {
-					texType = ui.combo(Id.handle({position: texType}), [
+					texType = ui.combo(Id.handle({ position: texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),
 						tr("Occlusion"),
@@ -269,12 +269,12 @@ class UIView2D {
 					ui._y = 2;
 				}
 
-				uvmapShow = ui.check(Id.handle({selected: uvmapShow}), tr("UV Map"));
+				uvmapShow = ui.check(Id.handle({ selected: uvmapShow }), tr("UV Map"));
 				ui._x += ew + 3;
 				ui._y = 2;
 			}
 
-			tiledShow = ui.check(Id.handle({selected: tiledShow}), tr("Tiled"));
+			tiledShow = ui.check(Id.handle({ selected: tiledShow }), tr("Tiled"));
 
 			if (type == View2DAsset && tex != null) { // Texture resolution
 				ui._x += ew + 3;

@@ -86,14 +86,14 @@ class Context {
 	public static var previewEnvmap: Image = null;
 	public static var envmapLoaded = false;
 	public static var showEnvmap = false;
-	public static var showEnvmapHandle = new Handle({selected: false});
+	public static var showEnvmapHandle = new Handle({ selected: false });
 	public static var showEnvmapBlur = false;
-	public static var showEnvmapBlurHandle = new Handle({selected: false});
+	public static var showEnvmapBlurHandle = new Handle({ selected: false });
 	public static var envmapAngle = 0.0;
 	public static var drawWireframe = false;
-	public static var wireframeHandle = new Handle({selected: false});
+	public static var wireframeHandle = new Handle({ selected: false });
 	public static var drawTexels = false;
-	public static var texelsHandle = new Handle({selected: false});
+	public static var texelsHandle = new Handle({ selected: false });
 	public static var cullBackfaces = true;
 	public static var textureFilter = true;
 
@@ -198,17 +198,17 @@ class Context {
 	public static var brushDirectional = false;
 
 	public static var brushRadius = 0.5;
-	public static var brushRadiusHandle = new Handle({value: 0.5});
+	public static var brushRadiusHandle = new Handle({ value: 0.5 });
 	public static var brushDecalMaskRadius = 0.5;
-	public static var brushDecalMaskRadiusHandle = new Handle({value: 0.5});
+	public static var brushDecalMaskRadiusHandle = new Handle({ value: 0.5 });
 	public static var brushScaleX = 1.0;
-	public static var brushScaleXHandle = new Handle({value: 1.0});
+	public static var brushScaleXHandle = new Handle({ value: 1.0 });
 	public static var brushBlending = BlendMix;
 	public static var brushOpacity = 1.0;
-	public static var brushOpacityHandle = new Handle({value: 1.0});
+	public static var brushOpacityHandle = new Handle({ value: 1.0 });
 	public static var brushScale = 1.0;
 	public static var brushAngle = 0.0;
-	public static var brushAngleHandle = new Handle({value: 0.0});
+	public static var brushAngleHandle = new Handle({ value: 0.0 });
 	public static var brushHardness = 0.8;
 	public static var brushLazyRadius = 0.0;
 	public static var brushLazyStep = 0.0;
