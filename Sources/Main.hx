@@ -62,6 +62,7 @@ class Main {
 			"World_radiance_8.k",
 			"brdf.k",
 			"color_wheel.k",
+			"black_white_gradient.k",
 			"cursor.k",
 			"icons.k",
 			"icons2x.k",

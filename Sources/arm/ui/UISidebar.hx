@@ -121,7 +121,7 @@ class UISidebar {
 		History.reset();
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({ theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel });
+		ui = new Zui({ theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel, black_white_gradient: App.blackWhiteGradient });
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 
@@ -717,7 +717,6 @@ class UISidebar {
 			Config.raw.layout[LayoutSidebarW] = 0 ;
 		}
 		Context.lastHtab0Position = htab0.position;
-		
 		ui.end();
 		g.begin(false);
 	}
