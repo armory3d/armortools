@@ -745,7 +745,9 @@ class App {
 		raw.brush_depth_reject = true;
 		raw.brush_angle_reject = true;
 		raw.brush_live = false;
-		raw.camera_speed = 1.0;
+		raw.camera_zoom_speed = 1.0;
+		raw.camera_pan_speed = 1.0;
+		raw.camera_rotation_speed = 1.0;
 		raw.zoom_direction = ZoomVertical;
 		raw.displace_strength = 0.0;
 		raw.show_asset_names = false;
