@@ -4,10 +4,12 @@ import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
+import iron.system.Input;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportFont;
+import arm.ProjectFormat.TSwatchColor;
 import arm.Enums;
 
 class UIHeader {
@@ -60,7 +62,15 @@ class UIHeader {
 				h.color.R = baseRPicked;
 				h.color.G = baseGPicked;
 				h.color.B = baseBPicked;
-				ui.text("", 0, h.color);
+				var state = ui.text("", 0, h.color);
+				if (state == State.Started) {
+					var mouse = Input.getMouse();
+					var uix = ui._x;
+					var uiy = ui._y;
+					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					App.dragSwatch = Project.makeSwatch(h.color.value);
+				}
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);

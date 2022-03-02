@@ -409,10 +409,10 @@ class App {
 			}
 			else if (dragSwatch != null) {
 				if (inNodes) { // Create RGB node
-					UINodes.inst.acceptSwatchDrag(Project.raw.swatches.indexOf(dragSwatch));
+					UINodes.inst.acceptSwatchDrag(dragSwatch);
 				}
 				else if (inMaterials) {
-					TabMaterials.acceptSwatchDrag(Project.raw.swatches.indexOf(dragSwatch));
+					TabMaterials.acceptSwatchDrag(dragSwatch);
 				}
 				else if (inLayers || inViewport) {
 					Layers.createColorLayer(dragSwatch.base.value);
