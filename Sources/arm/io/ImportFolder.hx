@@ -64,7 +64,7 @@ class ImportFolder {
 			}
 
 			if (valid) {
-				ImportTexture.run(path + Path.sep + f);
+				ImportTexture.run(path + Path.sep + f, false);
 				foundTexture = true;
 			}
 		}
