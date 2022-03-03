@@ -71,6 +71,7 @@ class UIHeader {
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 					App.dragSwatch = Project.makeSwatch(h.color.value);
 				}
+				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor."));
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
@@ -85,7 +86,7 @@ class UIHeader {
 					Project.raw.swatches.push(newSwatch);
 					UIStatus.inst.statusHandle.redraws = 1;
 				}
-				if (ui.isHovered) ui.tooltip(tr("Add picker color to swatches"));
+				if (ui.isHovered) ui.tooltip(tr("Add picked color to swatches"));
 
 				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');
