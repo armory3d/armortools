@@ -25,6 +25,7 @@ class ImportFolder {
 		var mapmet = "";
 		var mapheight = "";
 
+		var foundTexture = false;
 		// Import maps
 		for (f in files) {
 			if (!Path.isTexture(f)) continue;
@@ -62,7 +63,15 @@ class ImportFolder {
 				valid = true;
 			}
 
-			if (valid) ImportTexture.run(path + Path.sep + f);
+			if (valid) {
+				ImportTexture.run(path + Path.sep + f, false);
+				foundTexture = true;
+			}
+		}
+
+		if (!foundTexture) {
+			Console.info(tr("Folder does not contain textures"));
+			return;
 		}
 
 		// Create material
