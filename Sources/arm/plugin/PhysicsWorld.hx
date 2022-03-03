@@ -47,8 +47,8 @@ class PhysicsWorld extends iron.Trait {
 		init();
 
 		// Ensure physics are updated first in the lateUpdate list
-		_lateUpdate = [lateUpdate];
-		@:privateAccess iron.App.traitLateUpdates.insert(0, lateUpdate);
+		// _lateUpdate = [lateUpdate];
+		// @:privateAccess iron.App.traitLateUpdates.insert(0, lateUpdate);
 	}
 
 	public function reset() {
@@ -106,7 +106,7 @@ class PhysicsWorld extends iron.Trait {
 		return res;
 	}
 
-	function lateUpdate() {
+	public function lateUpdate() {
 		var t = Time.delta * timeScale;
 		if (t == 0.0) return; // Simulation paused
 

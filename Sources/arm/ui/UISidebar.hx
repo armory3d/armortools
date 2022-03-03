@@ -431,6 +431,51 @@ class UISidebar {
 			borderHandle = null;
 			App.isResizing = false;
 		}
+
+		#if arm_physics
+		if (Context.tool == ToolParticle && Context.particlePhysics && inViewport && !Context.paint2d) {
+			var world = arm.plugin.PhysicsWorld.active;
+			world.lateUpdate();
+			Context.ddirty = 2;
+			Context.rdirty = 2;
+			if (mouse.started()) {
+				Scene.active.spawnObject(".Sphere", null, function(o: Object) {
+					iron.data.Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
+						var mo: MeshObject = cast o;
+						mo.name = ".Bullet";
+						mo.materials[0] = md;
+						mo.visible = true;
+
+						var camera = iron.Scene.active.camera;
+						var ct = camera.transform;
+						mo.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
+						mo.transform.scale.set(Context.brushRadius * 0.2, Context.brushRadius * 0.2, Context.brushRadius * 0.2);
+						mo.transform.buildMatrix();
+
+						var body = new arm.plugin.PhysicsBody();
+						body.shape = arm.plugin.PhysicsBody.ShapeType.ShapeSphere;
+						body.mass = 1.0;
+						mo.addTrait(body);
+
+						var ray = iron.math.RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
+						body.applyImpulse(ray.direction.mult(0.1));
+
+						iron.system.Tween.timer(5, mo.remove);
+					});
+				});
+			}
+
+			var pairs = world.getContactPairs(Context.paintBody);
+			if (pairs != null) {
+				for (p in pairs) {
+					Context.particleHitX = p.posA.x;
+					Context.particleHitY = p.posA.y;
+					Context.particleHitZ = p.posA.z;
+					Context.pdirty = 1;
+				}
+			}
+		}
+		#end
 	}
 
 	public function toggleDistractFree() {
@@ -530,6 +575,13 @@ class UISidebar {
 			Context.penPaintingOnly = true;
 		}
 		else if (Context.penPaintingOnly) {
+			down = false;
+		}
+		#end
+
+
+		#if arm_physics
+		if (Context.particlePhysics) {
 			down = false;
 		}
 		#end

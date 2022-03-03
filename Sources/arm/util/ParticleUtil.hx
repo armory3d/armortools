@@ -109,9 +109,9 @@ class ParticleUtil {
 			po.transform.scale.y = po.parent.transform.scale.y;
 			po.transform.scale.z = po.parent.transform.scale.z;
 
-			var paintBody = new arm.plugin.PhysicsBody();
-			paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
-			po.addTrait(paintBody);
+			Context.paintBody = new arm.plugin.PhysicsBody();
+			Context.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
+			po.addTrait(Context.paintBody);
 		});
 	}
 

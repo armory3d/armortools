@@ -342,6 +342,11 @@ class UIHeader {
 				if (Context.tool == ToolParticle) {
 					ui._x += 10 * ui.SCALE();
 					var physHandle = Id.handle({ selected: false });
+					Context.particlePhysics = ui.check(physHandle, tr("Physics"));
+					if (physHandle.changed) {
+						arm.util.ParticleUtil.initParticlePhysics();
+						MakeMaterial.parsePaintMaterial();
+					}
 				}
 				#end
 			}

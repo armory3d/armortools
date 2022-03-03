@@ -140,6 +140,7 @@ class Context {
 	public static var particleHitX = 0.0;
 	public static var particleHitY = 0.0;
 	public static var particleHitZ = 0.0;
+	public static var paintBody: arm.plugin.PhysicsBody = null;
 	#end
 
 	public static var layerFilter = 0;

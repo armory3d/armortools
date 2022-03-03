@@ -122,7 +122,12 @@ class RenderPathPaint {
 		var tid = Context.layer.id;
 
 		if (Context.pdirty > 0) {
-			if (Context.tool == ToolParticle) {
+			#if arm_physics
+			var particlePhysics = Context.particlePhysics;
+			#else
+			var particlePhysics = false;
+			#end
+			if (Context.tool == ToolParticle && !particlePhysics) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
