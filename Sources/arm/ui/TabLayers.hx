@@ -543,7 +543,7 @@ class TabLayers {
 			}
 
 			ui.enabled = canDelete(l);
-			if (ui.button(tr("Delete"), Left)) {
+			if (ui.button(tr("Delete"), Left, "delete")) {
 				deleteLayer(l);
 			}
 			ui.enabled = true;
