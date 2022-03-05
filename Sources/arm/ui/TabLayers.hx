@@ -77,8 +77,12 @@ class TabLayers {
 						Context.layerPreviewDirty = true;
 						History.newLayer();
 					}
-					if (ui.button(tr("Group"), Left) && !Context.layer.isGroup() && Context.layer.parent == null) {
-						if (l.parent != null || l.isGroup()) return;
+					ui.enabled = !Context.layer.isGroup() && !Context.layer.isInGroup();
+					if (ui.button(tr("Group"), Left)) {
+						if (l.isGroup() || l.isInGroup()) return;
+
+						if (l.isLayerMask()) l = l.parent;
+
 						var pointers = initLayerMap();
 						var group = Layers.newGroup();
 						Context.setLayer(l);
@@ -89,6 +93,7 @@ class TabLayers {
 						for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 						Context.setLayer(group);
 					}
+					ui.enabled = true;
 				}, 8);
 			}
 			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DLayer);
