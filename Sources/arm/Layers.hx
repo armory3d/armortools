@@ -370,6 +370,65 @@ class Layers {
 		}
 	}
 
+	public static function duplicateLayer(l: LayerSlot) {
+		if (!l.isGroup()) {
+			Context.setLayer(l);
+			History.duplicateLayer();
+			var newLayer = l.duplicate();
+			Context.setLayer(newLayer);
+			var masks = l.getMasks(false);
+			if (masks != null) {
+				for (m in masks) {
+					Context.setLayer(m);
+					History.duplicateLayer();
+					m = m.duplicate();
+					m.parent = newLayer;
+					Project.layers.remove(m);
+					Project.layers.insert(Project.layers.indexOf(newLayer), m);
+				}
+			}
+			Context.setLayer(newLayer);
+		}
+		else {
+			// TODO: add undo-redo support for creating a new group
+			var newGroup = Layers.newGroup();
+			Project.layers.remove(newGroup);
+			Project.layers.insert(Project.layers.indexOf(l) + 1, newGroup);
+			// group.show_panel = true;
+			for (c in l.getChildren()) {
+				var masks = c.getMasks(false);
+				Context.setLayer(c);
+				History.duplicateLayer();
+				var newLayer = c.duplicate();
+				newLayer.parent = newGroup;
+				Project.layers.remove(newLayer);
+				Project.layers.insert(Project.layers.indexOf(newGroup), newLayer);
+				if (masks != null) {
+					for (m in masks) {
+						Context.setLayer(m);
+						History.duplicateLayer();
+						var newMask = m.duplicate();
+						newMask.parent = newLayer;
+						Project.layers.remove(newMask);
+						Project.layers.insert(Project.layers.indexOf(newLayer), newMask);
+					}
+				}
+			}
+			var groupMasks = l.getMasks();
+			if (groupMasks != null) {
+				for (m in groupMasks) {
+					Context.setLayer(m);
+					History.duplicateLayer();
+					var newMask = m.duplicate();
+					newMask.parent = newGroup;
+					Project.layers.remove(newMask);
+					Project.layers.insert(Project.layers.indexOf(newGroup), newMask);
+				}
+			}
+			Context.setLayer(newGroup);
+		}
+	}
+
 	public static function applyMasks(l: LayerSlot) {
 		var masks = l.getMasks();
 
@@ -907,8 +966,8 @@ class Layers {
 
 	public static function createImageMask(asset: TAsset) {
 		var l = Context.layer;
-		if (l.isMask()) {
-			l = l.parent;
+		if (l.isMask() || l.isGroup()) {
+			return;
 		}
 
 		History.newLayer();

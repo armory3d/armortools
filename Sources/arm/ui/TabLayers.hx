@@ -623,49 +623,7 @@ class TabLayers {
 			ui.enabled = true;
 			if (ui.button(tr("Duplicate"), Left)) {
 				function _init() {
-					if (!l.isGroup()) {
-						var masks = l.getMasks();
-						Context.setLayer(l);
-						History.duplicateLayer();
-						l = l.duplicate();
-						Context.setLayer(l);
-						if (masks != null) {
-							for (m in masks) {
-								Context.setLayer(m);
-								History.duplicateLayer();
-								m = m.duplicate();
-								m.parent = l;
-								Project.layers.remove(m);
-								Project.layers.insert(Project.layers.indexOf(l), m);
-							}
-						}
-					}
-					else {
-						var group = Layers.newGroup();
-						Project.layers.remove(group);
-						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
-						// group.show_panel = true;
-						for (c in l.getChildren()) {
-							var masks = c.getMasks();
-							Context.setLayer(c);
-							History.duplicateLayer();
-							c = c.duplicate();
-							c.parent = group;
-							Project.layers.remove(c);
-							Project.layers.insert(Project.layers.indexOf(group), c);
-							if (masks != null) {
-								for (m in masks) {
-									Context.setLayer(m);
-									History.duplicateLayer();
-									m = m.duplicate();
-									m.parent = c;
-									Project.layers.remove(m);
-									Project.layers.insert(Project.layers.indexOf(c), m);
-								}
-							}
-						}
-						Context.setLayer(group);
-					}
+					Layers.duplicateLayer(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
