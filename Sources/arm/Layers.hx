@@ -907,8 +907,8 @@ class Layers {
 
 	public static function createImageMask(asset: TAsset) {
 		var l = Context.layer;
-		if (l.isMask() || l.isGroup()) {
-			return;
+		if (l.isMask()) {
+			l = l.parent;
 		}
 
 		History.newLayer();
