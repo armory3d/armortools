@@ -490,20 +490,21 @@ class TabLayers {
 		}
 	}
 
+	static function canMergeDown(l: LayerSlot) : Bool {
+		var index = Project.layers.indexOf(l);
+		// Lowest layer
+		if (index == 0) return false;
+		// Lowest layer that has masks
+		if (l.isLayer() && Project.layers[0].isMask() && Project.layers[0].parent == l) return false;
+		// The lowest toplevel layer is a group
+		if (l.isGroup() && Project.layers[0].isInGroup() && Project.layers[0].getContainingGroup() == l) return false;
+		// Masks must be merged down to masks
+		if (l.isMask() && !Project.layers[index - 1].isMask()) return false;
+		return true;
+	}
+
 	static function drawLayerContextMenu(l: LayerSlot) {
 		var add = 0;
-		var li = Project.layers.indexOf(l);
-		var canMergeDown = li > 0 && (l.isGroup() || l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
-		if (l.isLayer() && l.hasMasks() && li == l.getMasks().length) canMergeDown = false; // First layer
-
-		// Is the current group the first group?
-		var firstGroup = true;
-		for (i in 0...li - 1) {
-			if (!Project.layers[i].isMask() && Project.layers[i].parent != l) {
-				firstGroup = false;
-			}
-		}
-		if (l.isGroup() && firstGroup) canMergeDown = false;
 
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
@@ -609,7 +610,7 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			ui.enabled = canMergeDown;
+			ui.enabled = canMergeDown(l);
 			if (ui.button(tr("Merge Down"), Left)) {
 				function _init() {
 					Context.setLayer(l);
