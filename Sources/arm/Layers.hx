@@ -446,25 +446,9 @@ class Layers {
 		var l1 = Context.layer;
 
 		if (l1.isGroup()) {
-			var children = l1.getChildren();
-
-			if (children.length == 1 && children[0].hasMasks()) {
-				applyMasks(children[0]);
-			}
-
-			for (i in 0...children.length - 1) {
-				Context.setLayer(children[children.length - 1 - i]);
-				mergeDown();
-			}
-		
-			children[0].parent = null;
-			children[0].name = l1.name;
-			if (children[0].fill_layer != null) children[0].toPaintLayer();
-			l1.delete();
-			l1 = children[0];
-			Context.setLayer(l1);
+			l1 = mergeGroup(l1);
 		}
-		if (l1.hasMasks()) {
+		else if (l1.hasMasks()) { // It is a layer
 			applyMasks(l1);
 			Context.setLayer(l1);
 		}
@@ -472,34 +456,49 @@ class Layers {
 		var l0 = Project.layers[Project.layers.indexOf(l1) - 1];
 
 		if (l0.isGroup()) {
-			var children = l0.getChildren();
-
-			if (children.length == 1 && children[0].hasMasks()) {
-				applyMasks(children[0]);
-			}
-
-			for (i in 0...children.length - 1) {
-				Context.setLayer(children[children.length - 1 - i]);
-				mergeDown();
-			}
-		
-			children[0].parent = null;
-			children[0].name = l0.name;
-			if (children[0].fill_layer != null) children[0].toPaintLayer();
-			l0.delete();
-			l0 = children[0];
-			Context.setLayer(l1);
+			l0 = mergeGroup(l0);
 		}
-		else if (l0.hasMasks()) {
+		else if (l0.hasMasks()) { // It is a layer
 			applyMasks(l0);
-			Context.setLayer(l1);
+			Context.setLayer(l0);
 		}
 
 		mergeLayer(l0, l1);
-
-		Context.layer.delete();
+		l1.delete();
 		Context.setLayer(l0);
 		Context.layerPreviewDirty = true;
+	}
+
+	public static function mergeGroup(l : LayerSlot) {
+		if (!l.isGroup()) return null;
+
+		var children = l.getChildren();
+
+		if (children.length == 1 && children[0].hasMasks(false)) {
+			Layers.applyMasks(children[0]);
+		}
+
+		for (i in 0...children.length - 1) {
+			Context.setLayer(children[children.length - 1 - i]);
+			History.mergeLayers();
+			Layers.mergeDown();
+		}
+
+		// Now apply the group masks
+		var masks = l.getMasks();
+		if (masks != null) {
+			for (i in 0...masks.length - 1) {
+				mergeLayer(masks[i + 1], masks[i]);
+				masks[i].delete();
+			}
+			Layers.applyMask(children[0], masks[masks.length - 1]);
+		}
+
+		children[0].parent = null;
+		children[0].name = l.name;
+		if (children[0].fill_layer != null) children[0].toPaintLayer();
+		l.delete();
+		return children[0];
 	}
 
 	public static function mergeLayer(l0 : LayerSlot, l1: LayerSlot, use_mask = false) {

@@ -592,21 +592,7 @@ class TabLayers {
 			}
 			if (l.isGroup() && ui.button(tr("Merge Group"), Left)) {
 				function _init() {
-					var children = l.getChildren();
-
-					if (children.length == 1 && children[0].hasMasks()) {
-						Layers.applyMasks(children[0]);
-					}
-
-					for (i in 0...children.length - 1) {
-						Context.setLayer(children[children.length - 1 - i]);
-						History.mergeLayers();
-						Layers.mergeDown();
-					}
-					children[0].parent = null;
-					children[0].name = l.name;
-					if (children[0].fill_layer != null) children[0].toPaintLayer();
-					l.delete();
+					Layers.mergeGroup(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
