@@ -107,16 +107,26 @@ class LayerSlot {
 
 	public function delete() {
 		unload();
-		var masks = getMasks();
-		if (masks != null) for (m in masks) m.delete();
-		var children = getChildren();
-		if (children != null) for (c in children) c.parent = null;
+
+		if (isLayer()) {
+			var masks = getMasks(false); // Prevents deleting group masks
+			if (masks != null) for (m in masks) m.delete();
+		}
+		else if(isGroup()) {
+			var children = getChildren();
+			if (children != null) for (c in children) c.delete();
+			var masks = getMasks();
+			if (masks != null) for (m in masks) m.delete();
+		}
+
 		var lpos = Project.layers.indexOf(this);
 		Project.layers.remove(this);
 		// Undo can remove base layer and then restore it from undo layers
 		if (Project.layers.length > 0) {
 			Context.setLayer(Project.layers[lpos > 0 ? lpos - 1 : 0]);
 		}
+
+		// Do not remove empty groups if the last layer is deleted as this prevents redo from working properly
 	}
 
 	public function unload() {
@@ -142,6 +152,7 @@ class LayerSlot {
 	}
 
 	public function swap(other: LayerSlot) {
+		if ((isLayer() || isMask()) && (other.isLayer() || other.isMask())) {
 		RenderPath.active.renderTargets.get("texpaint" + ext).image = other.texpaint;
 		RenderPath.active.renderTargets.get("texpaint" + other.ext).image = texpaint;
 		var _texpaint = texpaint;
@@ -150,6 +161,7 @@ class LayerSlot {
 		var _texpaint_preview = texpaint_preview;
 		texpaint_preview = other.texpaint_preview;
 		other.texpaint_preview = _texpaint_preview;
+		}
 
 		if (isLayer() && other.isLayer()) {
 			RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
@@ -420,7 +432,7 @@ class LayerSlot {
 		return children;
 	}
 
-	public function hasMasks(): Bool {
+	public function hasMasks(includeGroupMasks = true): Bool {
 		// Layer mask
 		for (l in Project.layers) {
 			if (l.parent == this && l.isMask()) {
@@ -428,7 +440,7 @@ class LayerSlot {
 			}
 		}
 		// Group mask
-		if (this.parent != null && this.parent.isGroup()) {
+		if (includeGroupMasks && this.parent != null && this.parent.isGroup()) {
 			for (l in Project.layers) {
 				if (l.parent == this.parent && l.isMask()) {
 					return true;

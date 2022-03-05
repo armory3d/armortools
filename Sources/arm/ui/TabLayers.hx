@@ -839,36 +839,55 @@ class TabLayers {
 		}
 	}
 
-	static function getSlotCount(layers: Array<LayerSlot>): Int {
-		var count = 0;
-		for (l in layers) {
-			count += 1;
-			if (l.getMasks() != null) count += l.getMasks().length;
-		}
-		return count;
-	}
-
 	static function deleteLayer(l: LayerSlot) {
 		var pointers = initLayerMap();
-		Context.layer = l;
-		if (!l.isGroup()) {
-			History.deleteLayer();
+		
+		if (l.isLayer() && l.hasMasks(false)) {
+			for (m in l.getMasks(false)) {
+				Context.layer = m;
+				History.deleteLayer();
+				m.delete();
+			}
 		}
-		else {
+		if (l.isGroup()) {
 			for (c in l.getChildren()) {
+				if (c.hasMasks(false)) {
+					for (m in c.getMasks(false)) {
+						Context.layer = m;
+						History.deleteLayer();
+						m.delete();
+					}
+				}
 				Context.layer = c;
 				History.deleteLayer();
 				c.delete();
 			}
+			if (l.hasMasks()) {
+				for (m in l.getMasks()) {
+					Context.layer = m;
+					History.deleteLayer();
+					m.delete();
+				}
+			}
 		}
+		
+		Context.layer = l;
+		History.deleteLayer();
 		l.delete();
 
 		// Remove empty group
-		if (l.parent != null && l.parent.isGroup() && l.parent.getChildren() == null) {
-			// Remove group masks
-			var masks = l.parent.getMasks();
-			if (masks != null) for (m in masks) m.delete();
-			// Remove group
+		if (l.isInGroup() && l.getContainingGroup().getChildren() == null) {
+			var g = l.getContainingGroup();
+			//Maybe some group masks are left
+			if (g.hasMasks()) {
+				for (m in g.getMasks()) {
+					Context.layer = m;
+					History.deleteLayer();
+					m.delete();
+				}
+			}
+			Context.layer = l.parent;
+			History.deleteLayer();
 			l.parent.delete();
 		}
 		Context.ddirty = 2;
@@ -876,11 +895,18 @@ class TabLayers {
 	}
 
 	static function canDelete(l: LayerSlot) {
-		var result = Project.layers.length > 1;
-		if (l.isLayer() && l.parent != null && l.parent.getChildren().length == 1 && Project.layers.length == 2) result = false;
-		if (l.isLayer() && l.parent != null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 2) result = false;
-		if (l.isLayer() && l.parent == null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 1) result = false;
-		if (l.isGroup() && Project.layers.length == getSlotCount(l.getChildren()) + 1) result = false;
-		return result;
+		var numLayers = 0;
+
+		for (slot in Project.layers) {
+			if (slot.isLayer()) ++numLayers;
+		}
+
+		// All layers are in one group
+		if (l.isGroup() && l.getChildren().length == numLayers) return false;
+
+		// Do not delete last layer
+		return numLayers > 1;
+	}
+
 	}
 }
