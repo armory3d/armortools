@@ -42,6 +42,20 @@ class History {
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
 				MakeMaterial.parseMeshMaterial();
+
+				// Undo at least second time in order to avoid empty groups
+				if (step.layer_type == LayerSlotType.SlotGroup) {
+					App.notifyOnNextFrame(function() {
+						// 1. Undo deleting group masks
+						var n = 1;
+						while (steps[active - n].layer_type == LayerSlotType.SlotMask) {
+							undo();
+							++n;
+						}
+						// 2. Undo a mask to have a non empty group
+						undo();
+					});
+				}
 			}
 			else if (step.name == tr("Clear Layer")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -190,6 +204,18 @@ class History {
 				Context.layer = Project.layers[step.layer];
 				swapActive();
 				Context.layer.delete();
+
+				// Redoing the last delete would result in an empty group
+				// Redo deleting all group masks + the group itself
+				if (step.layer_type == LayerSlotType.SlotLayer && steps.length >= active + 2 && (steps[active + 1].layer_type == LayerSlotType.SlotGroup || steps[active + 1].layer_type == LayerSlotType.SlotMask)) {
+					var n = 1;
+					while (steps[active + n].layer_type == LayerSlotType.SlotMask) {
+						++n;
+					}
+					App.notifyOnNextFrame(function() {
+						for (i in 0...n) redo();
+						});
+				}
 			}
 			else if (step.name == tr("Clear Layer")) {
 				Context.layer = Project.layers[step.layer];
