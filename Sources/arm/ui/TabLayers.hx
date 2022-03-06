@@ -853,5 +853,4 @@ class TabLayers {
 		return numLayers > 1;
 	}
 
-	}
 }
