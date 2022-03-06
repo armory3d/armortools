@@ -29,6 +29,7 @@ class History {
 			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				Context.layer = Project.layers[step.layer];
 				Context.layer.delete();
+				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("New Group")) {
 				Context.layer = Project.layers[step.layer];
@@ -36,6 +37,7 @@ class History {
 				// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
 				Project.layers[step.layer - 1].parent = null;
 				Context.layer.delete();
+				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("Delete Layer")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
