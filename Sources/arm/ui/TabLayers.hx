@@ -575,6 +575,8 @@ class TabLayers {
 			}
 			if (l.isMask() && l.fill_layer == null && ui.button(tr("Invert"), Left)) {
 				function _init() {
+					Context.setLayer(l);
+					History.invertMask();
 					l.invertMask();
 				}
 				iron.App.notifyOnInit(_init);

@@ -116,6 +116,13 @@ class History {
 				Context.layersPreviewDirty = true;
 				Context.setLayer(Context.layer);
 			}
+			else if (step.name == tr("Invert Mask")) {
+				function _next() {
+					Context.layer = Project.layers[step.layer];
+					Context.layer.invertMask();
+				}
+				iron.App.notifyOnInit(_next);
+			}
 			else if (step.name == "Apply Filter") {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
@@ -246,6 +253,13 @@ class History {
 				}
 				App.notifyOnNextFrame(_next);
 			}
+			else if (step.name == tr("Invert Mask")) {
+				function _next() {
+					Context.layer = Project.layers[step.layer];
+					Context.layer.invertMask();
+				}
+				iron.App.notifyOnInit(_next);
+			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
@@ -373,6 +387,11 @@ class History {
 	public static function applyMask() {
 		copyToUndo(Context.layer.id, undoI, true);
 		push(tr("Apply Mask"));
+	}
+
+	
+	public static function invertMask() {
+		push(tr("Invert Mask"));
 	}
 
 	@:keep
