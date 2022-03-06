@@ -26,7 +26,7 @@ class History {
 			var active = steps.length - 1 - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer")) {
+			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				Context.layer = Project.layers[step.layer];
 				Context.layer.delete();
 			}
@@ -208,10 +208,27 @@ class History {
 			var active = steps.length - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer")) {
+			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
+				if (step.name == tr("New Black Mask")) {
+					App.notifyOnNextFrame(function() {
+						l.clear(0x00000000);
+					});
+				}
+				else if (step.name == tr("New White Mask")) {
+					App.notifyOnNextFrame(function() {
+						l.clear(0xffffffff);
+					});
+				}
+				else if (step.name == tr("New Fill Mask")) {
+					App.notifyOnNextFrame(function() {
+						Context.material = Project.materials[step.material];
+						l.toFillLayer();
+					});
+				}
+				Context.layerPreviewDirty = true;
 				Context.setLayer(l);
 			}
 			else if (step.name == tr("New Group")) {
@@ -370,6 +387,18 @@ class History {
 		push(tr("New Layer"));
 	}
 	
+	public static function newBlackMask() {
+		push(tr("New Black Mask"));
+	}
+
+	public static function newWhiteMask() {
+		push(tr("New White Mask"));
+	}
+
+	public static function newFillMask() {
+		push(tr("New Fill Mask"));
+	}
+
 	public static function newGroup() {
 		push(tr("New Group"));
 	}
