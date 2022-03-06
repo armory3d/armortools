@@ -89,9 +89,9 @@ class TabLayers {
 						Project.layers.remove(group);
 						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
 						l.parent = group;
-						// History.newGroup();
 						for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 						Context.setLayer(group);
+						History.newGroup();
 					}
 					ui.enabled = true;
 				}, 8);

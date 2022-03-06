@@ -30,6 +30,13 @@ class History {
 				Context.layer = Project.layers[step.layer];
 				Context.layer.delete();
 			}
+			else if (step.name == tr("New Group")) {
+				Context.layer = Project.layers[step.layer];
+				Console.info(Context.layer.name);
+				// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
+				Project.layers[step.layer - 1].parent = null;
+				Context.layer.delete();
+			}
 			else if (step.name == tr("Delete Layer")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
@@ -207,6 +214,14 @@ class History {
 				Project.layers.insert(step.layer, l);
 				Context.setLayer(l);
 			}
+			else if (step.name == tr("New Group")) {
+				var l = Project.layers[step.layer - 1];
+				var group = Layers.newGroup();
+				Project.layers.remove(group);
+				Project.layers.insert(step.layer, group);
+				l.parent = group;
+				Context.setLayer(group);
+			}
 			else if (step.name == tr("Delete Layer")) {
 				Context.layer = Project.layers[step.layer];
 				swapActive();
@@ -353,6 +368,10 @@ class History {
 
 	public static function newLayer() {
 		push(tr("New Layer"));
+	}
+	
+	public static function newGroup() {
+		push(tr("New Group"));
 	}
 
 	public static function duplicateLayer() {
