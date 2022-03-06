@@ -141,13 +141,13 @@ class History {
 				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
-			else if (step.name == tr("To Fill Layer")) {
+			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 				Context.layer.toPaintLayer();
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 			}
-			else if (step.name == tr("To Paint Layer")) {
+			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -303,13 +303,13 @@ class History {
 				Context.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
-			else if (step.name == tr("To Fill Layer")) {
+			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 				Context.layer.fill_layer = Project.materials[step.material];
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
-			else if (step.name == tr("To Paint Layer")) {
+			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 				Context.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -451,13 +451,23 @@ class History {
 	}
 
 	public static function toFillLayer() {
-		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
+		copyToUndo(Context.layer.id, undoI, false);
 		push(tr("To Fill Layer"));
 	}
 
+	public static function toFillMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Fill Mask"));
+	}
+
 	public static function toPaintLayer() {
-		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
+		copyToUndo(Context.layer.id, undoI, false);
 		push(tr("To Paint Layer"));
+	}
+
+	public static function toPaintMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Paint Mask"));
 	}
 
 	public static function layerOpacity() {

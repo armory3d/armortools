@@ -533,22 +533,24 @@ class TabLayers {
 				}
 			}
 
-			var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
-			var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
+			if (!l.isGroup()) {
+				var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
+				var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
 
-			if (!l.isGroup() && l.fill_layer == null && ui.button(toFillString, Left)) {
-				function _init() {
-					History.toFillLayer();
-					l.toFillLayer();
+				if (l.fill_layer == null && ui.button(toFillString, Left)) {
+					function _init() {
+						l.isLayer() ? History.toFillLayer() : History.toFillMask();
+						l.toFillLayer();
+					}
+					iron.App.notifyOnInit(_init);
 				}
-				iron.App.notifyOnInit(_init);
-			}
-			if (!l.isGroup() && l.fill_layer != null && ui.button(toPaintString, Left)) {
-				function _init() {
-					History.toPaintLayer();
-					l.toPaintLayer();
+				if (l.fill_layer != null && ui.button(toPaintString, Left)) {
+					function _init() {
+						l.isLayer() ? History.toPaintLayer() : History.toPaintMask();
+						l.toPaintLayer();
+					}
+					iron.App.notifyOnInit(_init);
 				}
-				iron.App.notifyOnInit(_init);
 			}
 
 			ui.enabled = canDelete(l);
