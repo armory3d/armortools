@@ -380,7 +380,10 @@ class TabLayers {
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
 			if (inFocus && ui.isDeleteDown && canDelete(Context.layer)) {
 				ui.isDeleteDown = false;
-				deleteLayer(Context.layer);
+				function _init() {
+					deleteLayer(Context.layer);
+				}
+				iron.App.notifyOnInit(_init);
 			}
 		}
 		ui._y -= center;
@@ -550,7 +553,10 @@ class TabLayers {
 
 			ui.enabled = canDelete(l);
 			if (ui.button(tr("Delete"), Left, "delete")) {
-				deleteLayer(l);
+				function _init() {
+					deleteLayer(Context.layer);
+				}
+				iron.App.notifyOnInit(_init);
 			}
 			ui.enabled = true;
 
