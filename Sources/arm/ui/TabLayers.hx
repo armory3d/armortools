@@ -850,6 +850,8 @@ class TabLayers {
 	static function canDelete(l: LayerSlot) {
 		var numLayers = 0;
 
+		if (l.isMask()) return true;
+		
 		for (slot in Project.layers) {
 			if (slot.isLayer()) ++numLayers;
 		}
