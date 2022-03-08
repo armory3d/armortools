@@ -132,6 +132,11 @@ class TabTextures {
 										Layers.createImageMask(asset);
 									});
 								}
+								if (ui.button(tr("Set as Envmap"), Left)) {
+									App.notifyOnNextFrame(function() {
+										arm.io.ImportEnvmap.run(asset.file, img);
+									});
+								}
 								if (ui.button(tr("Delete"), Left, "delete")) {
 									deleteTexture(asset);
 								}
@@ -141,7 +146,7 @@ class TabTextures {
 								if (!isPacked && ui.button(tr("Open in Browser"), Left)) {
 									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-							}, isPacked ? 5 : 7);
+							}, isPacked ? 6 : 8);
 						}
 
 						if (Config.raw.show_asset_names) {

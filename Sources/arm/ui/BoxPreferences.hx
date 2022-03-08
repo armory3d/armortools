@@ -58,13 +58,13 @@ class BoxPreferences {
 				}
 				Context.hscaleWasChanged = hscale.changed;
 
-				var hspeed = Id.handle({value: Config.raw.camera_zoom_speed});
+				var hspeed = Id.handle({ value: Config.raw.camera_zoom_speed });
 				Config.raw.camera_zoom_speed = ui.slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
 
-				hspeed = Id.handle({value: Config.raw.camera_rotation_speed});
+				hspeed = Id.handle({ value: Config.raw.camera_rotation_speed });
 				Config.raw.camera_rotation_speed = ui.slider(hspeed, tr("Camera Rotation Speed"), 0.1, 4.0, true);
 
-				hspeed = Id.handle({value: Config.raw.camera_pan_speed});
+				hspeed = Id.handle({ value: Config.raw.camera_pan_speed });
 				Config.raw.camera_pan_speed = ui.slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
 
 				var zoomDirectionHandle = Id.handle({ position: Config.raw.zoom_direction });

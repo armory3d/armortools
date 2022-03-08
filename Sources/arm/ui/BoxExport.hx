@@ -304,7 +304,9 @@ class BoxExport {
 			var applyDisplacement = ui.check(Id.handle(), tr("Apply Displacement"));
 
 			var tris = 0;
-			for (po in Project.paintObjects) {
+			var pos = exportMeshHandle.position;
+			var paintObjects = pos == 0 ? Project.paintObjects : [Project.paintObjects[pos - 1]];
+			for (po in paintObjects) {
 				for (inda in po.data.raw.index_arrays) {
 					tris += Std.int(inda.values.length / 3);
 				}

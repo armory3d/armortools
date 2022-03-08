@@ -160,26 +160,19 @@ class UIMenu {
 					menuFill(ui);
 					var light = iron.Scene.active.lights[0];
 					var lahandle = Id.handle();
-					if (lahandle.value < 0) {
-						lahandle.value += (Std.int(-lahandle.value / 360) + 1) * 360;
-					}
-					else if (lahandle.value > 360) {
-						lahandle.value -= Std.int(lahandle.value / 360) * 360;
-					}
+					lahandle.value = Context.lightAngle / Math.PI * 180;
 					menuAlign(ui);
-					var lightAngle = lahandle.value;
-					ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1);
-					if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_light]));
-
-					var ldiff = lahandle.value - lightAngle;
-					if (ldiff != 0) {
-						ldiff = (ldiff) / 180.0 * Math.PI;
+					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 359.0, true, 1) / 180 * Math.PI;
+          if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_light]));
+					var ldiff = newAngle - Context.lightAngle;
+					if (Math.abs(ldiff) > 0.005) {
+						Context.lightAngle = newAngle % (2*Math.PI);
 						var m = iron.math.Mat4.identity();
 						m.self = kha.math.FastMatrix4.rotationZ(ldiff);
 						light.transform.local.multmat(m);
 						light.transform.decompose();
+						Context.ddirty = 2;
 					}
-					if (lahandle.changed) Context.ddirty = 2;
 
 					menuFill(ui);
 					var sxhandle = Id.handle();

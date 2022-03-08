@@ -90,6 +90,7 @@ class Context {
 	public static var showEnvmapBlur = false;
 	public static var showEnvmapBlurHandle = new Handle({ selected: false });
 	public static var envmapAngle = 0.0;
+	public static var lightAngle = 0.0;
 	public static var drawWireframe = false;
 	public static var wireframeHandle = new Handle({ selected: false });
 	public static var drawTexels = false;
