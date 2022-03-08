@@ -132,9 +132,9 @@ class TabTextures {
 										Layers.createImageMask(asset);
 									});
 								}
-								if (ui.button(tr("Set as envmap"), Left)) {
+								if (ui.button(tr("Set as Envmap"), Left)) {
 									App.notifyOnNextFrame(function() {
-									arm.io.ImportEnvmap.run(asset.file, img);
+										arm.io.ImportEnvmap.run(asset.file, img);
 									});
 								}
 								if (ui.button(tr("Delete"), Left)) {
