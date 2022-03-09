@@ -8,7 +8,9 @@ import iron.system.Input;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
+import arm.io.ImportAsset;
 import arm.io.ImportFont;
+import arm.sys.Path;
 import arm.ProjectFormat.TSwatchColor;
 import arm.Enums;
 
@@ -39,11 +41,35 @@ class UIHeader {
 				if (Context.colorIdPicked) {
 					ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
-				if (ui.button(tr("Clear"))) Context.colorIdPicked = false;
+				if (ui.button(tr("Clear"))) {
+					Context.colorIdPicked = false;
+					UIToolbar.inst.toolbarHandle.redraws = 1;
+				}
 				ui.text(tr("Color ID Map"));
-				var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
-				if (Context.colorIdHandle.changed) Context.ddirty = 2;
-				if (Project.assets.length > 0) ui.image(Project.getImage(Project.assets[cid]));
+				if (Project.assetNames.length > 0) {
+					var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
+					if (Context.colorIdHandle.changed) {
+						Context.ddirty = 2;
+						Context.colorIdPicked = false;
+						UIToolbar.inst.toolbarHandle.redraws = 1;
+					}
+					ui.image(Project.getImage(Project.assets[cid]));
+				}
+				if (ui.button(tr("Import"))) {
+					UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
+						ImportAsset.run(path, -1.0, -1.0, true, false);
+
+						Context.colorIdHandle.position = Project.assetNames.length - 1;
+						for (a in Project.assets) {
+							// Already imported
+							if (a.file == path) Context.colorIdHandle.position = Project.assets.indexOf(a);
+						}
+						Context.ddirty = 2;
+						Context.colorIdPicked = false;
+						UIToolbar.inst.toolbarHandle.redraws = 1;
+						UIStatus.inst.statusHandle.redraws = 2;
+					});
+				}
 			}
 			else if (Context.tool == ToolPicker) {
 				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;
