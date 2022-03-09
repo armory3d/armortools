@@ -160,10 +160,12 @@ class UIMenu {
 					var lahandle = Id.handle();
 					lahandle.value = Context.lightAngle / Math.PI * 180;
 					menuAlign(ui);
-					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 359.0, true, 1) / 180 * Math.PI;
+					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
 					var ldiff = newAngle - Context.lightAngle;
 					if (Math.abs(ldiff) > 0.005) {
-						Context.lightAngle = newAngle % (2*Math.PI);
+						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
+						else if (newAngle > 2 * Math.PI) newAngle -= Std.int(newAngle / (2 * Math.PI)) * 2 * Math.PI;
+						Context.lightAngle = newAngle;
 						var m = iron.math.Mat4.identity();
 						m.self = kha.math.FastMatrix4.rotationZ(ldiff);
 						light.transform.local.multmat(m);
