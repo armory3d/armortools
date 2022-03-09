@@ -241,6 +241,13 @@ class TabMaterials {
 			if (node.type == "RGB" ) {
 				node.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
 			}
+			else if (node.type == "OUTPUT_MATERIAL_PBR") {
+				node.inputs[1].default_value = swatch.opacity;
+				node.inputs[2].default_value = swatch.occlusion;
+				node.inputs[3].default_value = swatch.roughness;
+				node.inputs[4].default_value = swatch.metallic;
+				node.inputs[7].default_value = swatch.height;
+			}
 		}
 		Project.materials.push(Context.material);
 		updateMaterial();
