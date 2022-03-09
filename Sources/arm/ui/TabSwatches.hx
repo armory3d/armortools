@@ -23,7 +23,7 @@ class TabSwatches {
 		return empty;
 	}
 
-	private static var dragPosition : Int = -1;
+	static var dragPosition: Int = -1;
 
 	@:access(zui.Zui)
 	public static function draw() {
@@ -191,7 +191,7 @@ class TabSwatches {
 		}
 	}
 
-	public static function acceptSwatchDrag(swatch : TSwatchColor) {
+	public static function acceptSwatchDrag(swatch: TSwatchColor) {
 		// No valid position available
 		if (TabSwatches.dragPosition == -1) return;
 

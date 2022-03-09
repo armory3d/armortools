@@ -1004,7 +1004,7 @@ class UINodes {
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptSwatchDrag(swatch : TSwatchColor) {
+	public function acceptSwatchDrag(swatch: TSwatchColor) {
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
