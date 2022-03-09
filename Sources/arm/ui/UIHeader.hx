@@ -46,7 +46,11 @@ class UIHeader {
 				ui.text(tr("Color ID Map"));
 				if (Project.assetNames.length > 0) {
 					var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
-					if (Context.colorIdHandle.changed) Context.ddirty = 2;
+					if (Context.colorIdHandle.changed) {
+						Context.ddirty = 2;
+						Context.colorIdPicked = false;
+						UIToolbar.inst.toolbarHandle.redraws = 1;
+					}
 					ui.image(Project.getImage(Project.assets[cid]));
 				}
 				if (ui.button(tr("Import"))) {
