@@ -4,10 +4,12 @@ import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
+import iron.system.Input;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportFont;
+import arm.ProjectFormat.TSwatchColor;
 import arm.Enums;
 
 class UIHeader {
@@ -60,7 +62,16 @@ class UIHeader {
 				h.color.R = baseRPicked;
 				h.color.G = baseGPicked;
 				h.color.B = baseBPicked;
-				ui.text("", 0, h.color);
+				var state = ui.text("", 0, h.color);
+				if (state == State.Started) {
+					var mouse = Input.getMouse();
+					var uix = ui._x;
+					var uiy = ui._y;
+					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					App.dragSwatch = Project.makeSwatch(h.color.value);
+				}
+				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor."));
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
@@ -75,7 +86,7 @@ class UIHeader {
 					Project.raw.swatches.push(newSwatch);
 					UIStatus.inst.statusHandle.redraws = 1;
 				}
-				if (ui.isHovered) ui.tooltip(tr("Add picker color to swatches"));
+				if (ui.isHovered) ui.tooltip(tr("Add picked color to swatches"));
 
 				ui.text(tr("Base") + ' ($baseRPicked,$baseGPicked,$baseBPicked)');
 				ui.text(tr("Normal") + ' ($normalRPicked,$normalGPicked,$normalBPicked)');
