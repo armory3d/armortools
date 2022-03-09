@@ -208,6 +208,13 @@ class TabTextures {
 			Context.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
 		UIStatus.inst.statusHandle.redraws = 2;
+
+		if (Context.tool == ToolColorId && i == Context.colorIdHandle.position) {
+			UIHeader.inst.headerHandle.redraws = 2;
+			Context.ddirty = 2;
+			Context.colorIdPicked = false;
+			UIToolbar.inst.toolbarHandle.redraws = 1;
+		}
 		Data.deleteImage(asset.file);
 		Project.assetMap.remove(asset.id);
 		Project.assets.splice(i, 1);
