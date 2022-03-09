@@ -49,12 +49,21 @@ class UIHeader {
 					if (Context.colorIdHandle.changed) Context.ddirty = 2;
 					ui.image(Project.getImage(Project.assets[cid]));
 				}
-				else if (ui.button(tr("Import"))) {
+				if (ui.button(tr("Import"))) {
 					UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
 						ImportAsset.run(path, -1.0, -1.0, true, false);
+
+						Context.colorIdHandle.position = Project.assetNames.length - 1;
+						for (a in Project.assets) {
+							// Already imported
+							if (a.file == path) Context.colorIdHandle.position = Project.assets.indexOf(a);
+						}
+						Context.ddirty = 2;
+						Context.colorIdPicked = false;
+						UIToolbar.inst.toolbarHandle.redraws = 1;
 						UIStatus.inst.statusHandle.redraws = 2;
 					});
-			}
+				}
 			}
 			else if (Context.tool == ToolPicker) {
 				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;
