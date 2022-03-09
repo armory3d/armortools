@@ -4,6 +4,7 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.ui.UINodes;
 import arm.ui.UIBox;
+import arm.ui.UIHeader;
 import arm.Project;
 
 class ImportAsset {
@@ -38,6 +39,10 @@ class ImportAsset {
 				UINodes.inst.acceptAssetDrag(assetIndex);
 				UINodes.inst.getNodes().nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
+			}
+			if (Context.tool == ToolColorId && Project.assetNames.length == 1) {
+				UIHeader.inst.headerHandle.redraws = 2;
+				Context.ddirty = 2;
 			}
 		}
 		else if (Path.isFont(path)) {
