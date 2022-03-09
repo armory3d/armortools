@@ -37,7 +37,10 @@ class UIHeader {
 				if (Context.colorIdPicked) {
 					ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
-				if (ui.button(tr("Clear"))) Context.colorIdPicked = false;
+				if (ui.button(tr("Clear"))) {
+					Context.colorIdPicked = false;
+					UIToolbar.inst.toolbarHandle.redraws = 1;
+				}
 				ui.text(tr("Color ID Map"));
 				var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
 				if (Context.colorIdHandle.changed) Context.ddirty = 2;
