@@ -17,6 +17,7 @@ import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Enums;
 import arm.Project;
+import arm.ProjectFormat.TSwatchColor;
 
 @:access(zui.Zui)
 @:access(zui.Nodes)
@@ -1003,12 +1004,11 @@ class UINodes {
 		getNodes().nodesSelected = [n];
 	}
 
-	public function acceptSwatchDrag(index: Int) {
+	public function acceptSwatchDrag(swatch: TSwatchColor) {
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
-		var color = Project.raw.swatches[index].base;
-		n.outputs[0].default_value = [color.R, color.G, color.B, color.A];
+		n.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
 		getNodes().nodesSelected = [n];
 	}
 

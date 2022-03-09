@@ -9,7 +9,21 @@ import arm.ProjectFormat;
 
 class TabSwatches {
 
-	public static var empty: kha.Image = null;
+	public static var empty(get, default): kha.Image = null;
+
+	public static function get_empty() {
+		if (empty == null) {
+			var b = haxe.io.Bytes.alloc(4);
+			b.set(0, 255);
+			b.set(1, 255);
+			b.set(2, 255);
+			b.set(3, 255);
+			empty = kha.Image.fromBytes(b, 1, 1);
+		}
+		return empty;
+	}
+
+	static var dragPosition: Int = -1;
 
 	@:access(zui.Zui)
 	public static function draw() {
@@ -64,7 +78,10 @@ class TabSwatches {
 			var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 			var slotw = Std.int(26 * ui.SCALE());
 			var num = Std.int(statusw / (slotw + 3));
+			var dragPositionSet = false;
 
+			var uix = 0.0;
+			var uiy = 0.0;
 			for (row in 0...Std.int(Math.ceil(Project.raw.swatches.length / num))) {
 				ui.row([for (i in 0...num) 1 / num]);
 
@@ -84,26 +101,28 @@ class TabSwatches {
 						ui.fill(-2, -2, w, w, ui.t.HIGHLIGHT_COL);
 					}
 
-					if (empty == null) {
-						var b = haxe.io.Bytes.alloc(4);
-						b.set(0, 255);
-						b.set(1, 255);
-						b.set(2, 255);
-						b.set(3, 255);
-						empty = kha.Image.fromBytes(b, 1, 1);
+					uix = ui._x;
+					uiy = ui._y;
+
+					// Draw the drag position indicator
+					if (App.dragSwatch != null && dragPosition == i) {
+						ui.fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
 					}
 
-					var uix = ui._x;
-					var uiy = ui._y;
 					var state = ui.image(empty, Project.raw.swatches[i].base, slotw);
 
 					if (state == State.Started) {
 						Context.setSwatch(Project.raw.swatches[i]);
 
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						App.dragOffX = -(mouse.x - uix - ui._windowX - 2 * slotw);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragSwatch = Context.swatch;
+					}
+					else if (state == State.Hovered) {
+						var mouse = Input.getMouse();
+						dragPosition = (mouse.x > uix + ui._windowX + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center
+						dragPositionSet = true;
 					}
 					else if (state == State.Released) {
 						if (Time.time() - Context.selectTime < 0.25) {
@@ -152,12 +171,40 @@ class TabSwatches {
 				}
 			}
 
+			// Draw the rightmost line next to the last swatch.
+			if (App.dragSwatch != null && dragPosition == Project.raw.swatches.length) {
+				ui._x = uix; // Reset the position because otherwise it would start in the row below
+				ui._y = uiy;
+				ui.fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
+			}
+
+			// Currently there is no valid dragPosition so reset it.
+			if (!dragPositionSet)
+				dragPosition = -1;
+
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
 			if (inFocus && ui.isDeleteDown && Project.raw.swatches.length > 1) {
 				ui.isDeleteDown = false;
 				deleteSwatch(Context.swatch);
 			}
+		}
+	}
+
+	public static function acceptSwatchDrag(swatch: TSwatchColor) {
+		// No valid position available
+		if (TabSwatches.dragPosition == -1) return;
+
+		var swatchPosition = Project.raw.swatches.indexOf(swatch);
+		// A new swatch from color picker.
+		if (swatchPosition == -1) { 
+			Project.raw.swatches.insert(dragPosition, swatch);
+		}
+		else if (Math.abs(swatchPosition - dragPosition) > 0) { // Existing swatch is reordered
+			Project.raw.swatches.remove(swatch);
+			// If the new position is after the old one, decrease by one because the swatch has been deleted.
+			var newPosition = dragPosition - swatchPosition > 0 ? dragPosition -1 : dragPosition;
+			Project.raw.swatches.insert(newPosition, swatch);
 		}
 	}
 
