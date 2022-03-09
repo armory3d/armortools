@@ -7,7 +7,9 @@ import iron.RenderPath;
 import arm.node.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
+import arm.io.ImportAsset;
 import arm.io.ImportFont;
+import arm.sys.Path;
 import arm.Enums;
 
 class UIHeader {
@@ -42,9 +44,17 @@ class UIHeader {
 					UIToolbar.inst.toolbarHandle.redraws = 1;
 				}
 				ui.text(tr("Color ID Map"));
-				var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
-				if (Context.colorIdHandle.changed) Context.ddirty = 2;
-				if (Project.assets.length > 0) ui.image(Project.getImage(Project.assets[cid]));
+				if (Project.assetNames.length > 0) {
+					var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
+					if (Context.colorIdHandle.changed) Context.ddirty = 2;
+					ui.image(Project.getImage(Project.assets[cid]));
+				}
+				else if (ui.button(tr("Import"))) {
+					UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
+						ImportAsset.run(path, -1.0, -1.0, true, false);
+						UIStatus.inst.statusHandle.redraws = 2;
+					});
+			}
 			}
 			else if (Context.tool == ToolPicker) {
 				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;
