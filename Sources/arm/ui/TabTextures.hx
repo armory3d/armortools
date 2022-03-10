@@ -146,7 +146,7 @@ class TabTextures {
 										Context.ddirty = 2;
 									}
 								}
-								if (ui.button(tr("Delete"), Left)) {
+								if (ui.button(tr("Delete"), Left, "delete")) {
 									deleteTexture(asset);
 								}
 								if (!isPacked && ui.button(tr("Open Containing Directory..."), Left)) {

@@ -158,7 +158,7 @@ class TabSwatches {
 								Krom.copyToClipboard(untyped val.toString(16));
 							}
 							#end
-							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left)) {
+							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
 						}, 2 + add);

@@ -102,7 +102,7 @@ class TabBrushes {
 								iron.App.notifyOnInit(_init);
 							}
 
-							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left)) {
+							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteBrush(Project.brushes[i]);
 							}
 						}, 3 + add);
