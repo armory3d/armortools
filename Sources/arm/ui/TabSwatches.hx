@@ -158,12 +158,14 @@ class TabSwatches {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Duplicate"), Left)) {
-								Context.setSwatch(Project.makeSwatch(Context.swatch.base));
+								Context.setSwatch(Project.cloneSwatch(Context.swatch));
 								Project.raw.swatches.push(Context.swatch);
 							}
 							#if (krom_windows || krom_linux || krom_darwin)
-							else if (ui.button(tr("Copy"), Left)) {
-								var val = untyped Context.swatch.base;
+							else if (ui.button(tr("Copy Hex code"), Left)) {
+								var color = Context.swatch.base;
+								color.A = Context.swatch.opacity;
+								var val = untyped color;
 								if (val < 0) val += untyped 4294967296;
 								Krom.copyToClipboard(untyped val.toString(16));
 							}
