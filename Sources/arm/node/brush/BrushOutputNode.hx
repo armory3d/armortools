@@ -1,5 +1,6 @@
 package arm.node.brush;
 
+import arm.ui.UIToolbar;
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.Enums;
@@ -120,6 +121,7 @@ class BrushOutputNode extends LogicNode {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 			if (down && Context.tool == ToolColorId && Project.assets.length > 0) {
 				Context.colorIdPicked = true;
+				UIToolbar.inst.toolbarHandle.redraws = 1;
 			}
 
 			// Prevent painting the same spot

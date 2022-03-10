@@ -137,6 +137,15 @@ class TabTextures {
 										arm.io.ImportEnvmap.run(asset.file, img);
 									});
 								}
+								if (ui.button(tr("Set as Color ID Map"), Left)) {
+									Context.colorIdHandle.position = i;
+									Context.colorIdPicked = false;
+									UIToolbar.inst.toolbarHandle.redraws = 1;
+									if (Context.tool == ToolColorId) {
+										UIHeader.inst.headerHandle.redraws = 2;
+										Context.ddirty = 2;
+									}
+								}
 								if (ui.button(tr("Delete"), Left, "delete")) {
 									deleteTexture(asset);
 								}
@@ -146,7 +155,7 @@ class TabTextures {
 								if (!isPacked && ui.button(tr("Open in Browser"), Left)) {
 									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-							}, isPacked ? 6 : 8);
+							}, isPacked ? 7 : 9);
 						}
 
 						if (Config.raw.show_asset_names) {
@@ -208,6 +217,13 @@ class TabTextures {
 			Context.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
 		UIStatus.inst.statusHandle.redraws = 2;
+
+		if (Context.tool == ToolColorId && i == Context.colorIdHandle.position) {
+			UIHeader.inst.headerHandle.redraws = 2;
+			Context.ddirty = 2;
+			Context.colorIdPicked = false;
+			UIToolbar.inst.toolbarHandle.redraws = 1;
+		}
 		Data.deleteImage(asset.file);
 		Project.assetMap.remove(asset.id);
 		Project.assets.splice(i, 1);

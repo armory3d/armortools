@@ -10,6 +10,7 @@ import iron.object.MeshObject;
 import iron.data.Data;
 import arm.node.MakeMaterial;
 import arm.data.MaterialSlot;
+import arm.ProjectFormat.TSwatchColor;
 import arm.util.RenderUtil;
 import arm.sys.Path;
 import arm.Enums;
@@ -234,12 +235,11 @@ class TabMaterials {
 		}
 	}
 
-	public static function acceptSwatchDrag(index: Int) {
+	public static function acceptSwatchDrag(swatch: TSwatchColor) {
 		Context.material = new MaterialSlot(Project.materials[0].data);
 		for (node in Context.material.canvas.nodes) {
 			if (node.type == "RGB" ) {
-				var color = Project.raw.swatches[index].base;
-				node.outputs[0].default_value = [color.R, color.G, color.B, color.A];
+				node.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
 			}
 		}
 		Project.materials.push(Context.material);

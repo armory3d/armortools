@@ -3,6 +3,7 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import arm.Enums;
+import iron.RenderPath;
 import arm.Translator._tr;
 
 class UIToolbar {
@@ -72,7 +73,11 @@ class UIToolbar {
 					ui._x += 2;
 					if (Context.tool == i) ui.fill(-1, 2, 32 + 2, 32 + 2, ui.t.HIGHLIGHT_COL);
 					var rect = Res.tile50(img, i, 0);
+					var _y = ui._y;
 					if (ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Started) Context.selectTool(i);
+					if (i == 8 && Context.colorIdPicked) {
+							ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
+					}
 					if (ui.isHovered) ui.tooltip(tr(toolNames[i]) + " " + keys[i]);
 					ui._x -= 2;
 					ui._y += 2;
