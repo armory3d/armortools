@@ -185,7 +185,9 @@ class TabSwatches {
 						}, 4 + add);
 					}
 					if (ui.isHovered) {
-						var val = untyped Project.raw.swatches[i].base;
+						var color = Project.raw.swatches[i].base;
+						color.A = Project.raw.swatches[i].opacity;
+						var val = untyped color;
 						if (val < 0) val += untyped 4294967296;
 						ui.tooltip("#" + untyped val.toString(16));
 					}
