@@ -11,7 +11,6 @@ import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import iron.math.Mat4;
-import arm.ui.UISidebar;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
