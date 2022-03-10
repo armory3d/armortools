@@ -415,7 +415,10 @@ class App {
 					TabMaterials.acceptSwatchDrag(dragSwatch);
 				}
 				else if (inLayers || inViewport) {
-					Layers.createColorLayer(dragSwatch.base.value);
+					var color = dragSwatch.base;
+					color.A = dragSwatch.opacity;
+
+					Layers.createColorLayer(color.value, dragSwatch.occlusion, dragSwatch.roughness, dragSwatch.metallic);
 				}
 				else if (inSwatches) {
 					TabSwatches.acceptSwatchDrag(dragSwatch);
