@@ -353,7 +353,14 @@ class UIMenu {
 				menuFill(ui);
 				menuAlign(ui);
 				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", 
+				["rotate_shortcut" => Config.keymap.action_rotate, 
+				"zoom_shortcut" => Config.keymap.action_zoom,  
+				"pan_shortcut" => Config.keymap.action_pan,
+				]);
 
+				var flyTooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
+				if (ui.isHovered) ui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
 				menuFill(ui);
 				menuAlign(ui);
 				Context.cameraType = Ext.inlineRadio(ui, Context.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
