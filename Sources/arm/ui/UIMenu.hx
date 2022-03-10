@@ -141,6 +141,7 @@ class UIMenu {
 				}
 				menuAlign(ui);
 				Context.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_envmap]));
 				if (envaHandle.changed) Context.ddirty = 2;
 
 				if (Scene.active.lights.length > 0) {
@@ -161,6 +162,7 @@ class UIMenu {
 					lahandle.value = Context.lightAngle / Math.PI * 180;
 					menuAlign(ui);
 					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
+					if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_light]));
 					var ldiff = newAngle - Context.lightAngle;
 					if (Math.abs(ldiff) > 0.005) {
 						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
