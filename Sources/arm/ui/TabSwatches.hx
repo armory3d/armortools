@@ -173,7 +173,16 @@ class TabSwatches {
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
-						}, 2 + add);
+							else if (ui.button(tr("Create Material"), Left)) {
+								TabMaterials.acceptSwatchDrag(Project.raw.swatches[i]);
+							}
+							else if (ui.button(tr("Create Color Layer"), Left)) {
+								var color = Project.raw.swatches[i].base;
+								color.A = Project.raw.swatches[i].opacity;
+			
+								Layers.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+							}
+						}, 4 + add);
 					}
 					if (ui.isHovered) {
 						var val = untyped Project.raw.swatches[i].base;
