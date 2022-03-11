@@ -76,7 +76,7 @@ class UIToolbar {
 					var _y = ui._y;
 					if (ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Started) Context.selectTool(i);
 					if (i == 8 && Context.colorIdPicked) {
-							ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
+						ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
 					}
 					if (ui.isHovered) ui.tooltip(tr(toolNames[i]) + " " + keys[i]);
 					ui._x -= 2;
