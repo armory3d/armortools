@@ -455,7 +455,29 @@ class UIMenu {
 					// { lshw -C display }
 					#end
 
-					UIBox.showMessage(tr("About"), msg, true);
+					UIBox.showCustom(function(ui: Zui) {
+						if (ui.tab(Id.handle(), tr("About"))) {
+							Ext.textArea(ui, Id.handle({ text: msg }), false);
+
+							ui.row([1 / 3, 1 / 3, 1 / 3]);
+
+							#if (krom_windows || krom_linux || krom_darwin)
+							if (ui.button(tr("Copy"))) {
+								Krom.copyToClipboard(msg);
+							}
+							#else
+							ui.endElement();
+							#end
+
+							if (ui.button(tr("Contributors"))) {
+								File.loadUrl("https://github.com/armory3d/armorpaint/graphs/contributors");
+							}
+							if (ui.button(tr("OK"))) {
+								UIBox.show = false;
+								App.redrawUI();
+							}
+						}
+					});
 				}
 			}
 		}
