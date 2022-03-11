@@ -139,7 +139,7 @@ class TabMaterials {
 								iron.App.notifyOnInit(_init);
 							}
 
-							if (Project.materials.length > 1 && ui.button(tr("Delete"), Left)) {
+							if (Project.materials.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteMaterial(m);
 							}
 

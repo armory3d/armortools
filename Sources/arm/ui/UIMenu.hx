@@ -141,6 +141,7 @@ class UIMenu {
 				}
 				menuAlign(ui);
 				Context.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_envmap]));
 				if (envaHandle.changed) Context.ddirty = 2;
 
 				if (Scene.active.lights.length > 0) {
@@ -161,6 +162,7 @@ class UIMenu {
 					lahandle.value = Context.lightAngle / Math.PI * 180;
 					menuAlign(ui);
 					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
+					if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_light]));
 					var ldiff = newAngle - Context.lightAngle;
 					if (Math.abs(ldiff) > 0.005) {
 						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
@@ -351,7 +353,14 @@ class UIMenu {
 				menuFill(ui);
 				menuAlign(ui);
 				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", 
+				["rotate_shortcut" => Config.keymap.action_rotate, 
+				"zoom_shortcut" => Config.keymap.action_zoom,  
+				"pan_shortcut" => Config.keymap.action_pan,
+				]);
 
+				var flyTooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
+				if (ui.isHovered) ui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
 				menuFill(ui);
 				menuAlign(ui);
 				Context.cameraType = Ext.inlineRadio(ui, Context.camHandle, [tr("Perspective"), tr("Orthographic")], Left);

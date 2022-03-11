@@ -98,7 +98,7 @@ class TabFonts {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(fontName, Right, ui.t.HIGHLIGHT_COL);
 
-							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left) && Project.fonts[i].file != "") {
+							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left, "delete") && Project.fonts[i].file != "") {
 								deleteFont(Project.fonts[i]);
 							}
 						}, 1 + add);
