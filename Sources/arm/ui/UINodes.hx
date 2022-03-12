@@ -688,7 +688,8 @@ class UINodes {
 				Context.colorPickerCallback = function(color : TSwatchColor) { 
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
-					UINodes.inst.canvasChanged();
+					if (Config.raw.material_live)
+						UINodes.inst.canvasChanged();
 				};
 				nodes.colorPickerCallback = null;
 			}
