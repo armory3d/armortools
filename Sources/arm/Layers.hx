@@ -791,11 +791,13 @@ class Layers {
 			Context.pdirty = 0;
 			Context.ddirty = 2;
 			Context.rdirty = 2;
+			Context.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
 			if (current != null) current.begin(false);
 			Context.layer = _layer;
 			setObjectMask();
 			Context.tool = _tool;
 			Context.fillTypeHandle.position = _fillType;
+			MakeMaterial.parsePaintMaterial(false);
 		}
 	}
 
