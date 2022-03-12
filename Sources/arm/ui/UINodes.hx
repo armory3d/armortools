@@ -682,6 +682,17 @@ class UINodes {
 				Zui.isCopy = Zui.isCut = Zui.isPaste = ui.isDeleteDown = false;
 			}
 
+			if (nodes.colorPickerCallback != null) {
+				Context.selectTool(ToolPicker);
+				var tmp = nodes.colorPickerCallback;
+				Context.colorPickerCallback = function(color : TSwatchColor) { 
+					tmp(color.base);
+					UINodes.inst.hwnd.redraws = 2;
+					UINodes.inst.canvasChanged();
+				};
+				nodes.colorPickerCallback = null;
+			}
+
 			// Remove nodes with unknown id for this canvas type
 			if (Zui.isPaste) {
 				var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;

@@ -211,6 +211,11 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 					var d = texpaint_uv_picker.getPixels();
 
+					if (Context.colorPickerCallback != null) {
+						Context.pickerSelectMaterial = false; // The selected material should not change while picking.
+						Context.colorPickerCallback(Context.pickedColor);
+					}
+
 					// Picked surface values
 					#if (kha_metal || kha_vulkan)
 					Context.pickedColor.base.Rb = a.get(2);
