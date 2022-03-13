@@ -132,7 +132,6 @@ class TabSwatches {
 								h.color = Context.swatch.base;
 								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true, function () {
 									Context.selectTool(ToolPicker);
-									Context.pickerSelectMaterial = false;
 									Context.colorPickerCallback = function (color: TSwatchColor) {
 										Project.raw.swatches[i].base = color.base;
 									};

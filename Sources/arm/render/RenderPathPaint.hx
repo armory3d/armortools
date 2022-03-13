@@ -212,7 +212,6 @@ class RenderPathPaint {
 					var d = texpaint_uv_picker.getPixels();
 
 					if (Context.colorPickerCallback != null) {
-						Context.pickerSelectMaterial = false; // The selected material should not change while picking.
 						Context.colorPickerCallback(Context.pickedColor);
 					}
 
@@ -247,7 +246,7 @@ class RenderPathPaint {
 					Context.uvyPicked = d.get(1) / 255;
 					#end
 					// Pick material
-					if (Context.pickerSelectMaterial) {
+					if (Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 						var matid = Std.int((b.get(3) - (b.get(3) % 3)) / 3);
 						for (m in Project.materials) {
