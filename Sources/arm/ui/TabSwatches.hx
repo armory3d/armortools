@@ -162,7 +162,7 @@ class TabSwatches {
 								Project.raw.swatches.push(Context.swatch);
 							}
 							#if (krom_windows || krom_linux || krom_darwin)
-							else if (ui.button(tr("Copy Hex code"), Left)) {
+							else if (ui.button(tr("Copy Hex Code"), Left)) {
 								var color = Context.swatch.base;
 								color.A = Context.swatch.opacity;
 								var val = untyped color;

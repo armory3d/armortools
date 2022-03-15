@@ -584,7 +584,7 @@ class Project {
 		return { base: base, opacity: 1.0, occlusion: 1.0, roughness: 0.0, metallic: 0.0, normal: 0xff8080ff, emission: 0.0, height: 0.0, subsurface: 0.0 };
 	}
 
-	public static function cloneSwatch(swatch: TSwatchColor) : TSwatchColor {
+	public static function cloneSwatch(swatch: TSwatchColor): TSwatchColor {
 		return { base: swatch.base, opacity: swatch.opacity, occlusion: swatch.occlusion, roughness: swatch.roughness, metallic: swatch.metallic, normal: swatch.normal, emission: swatch.emission, height: swatch.height, subsurface: swatch.subsurface };
 	}
 
