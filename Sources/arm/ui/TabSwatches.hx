@@ -134,7 +134,7 @@ class TabSwatches {
 								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true, function () {
 									Context.selectTool(ToolPicker);
 									Context.colorPickerCallback = function (color: TSwatchColor) {
-										Project.raw.swatches[i].base = color.base;
+										Project.raw.swatches[i] = Project.cloneSwatch(color);
 									};
 								});
 								var hopacity = Id.handle();
