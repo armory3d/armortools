@@ -111,7 +111,7 @@ class Project {
 			#elseif krom_android
 			filepath = Krom.savePath() + "/" + kha.Window.get(0).title + ".arm";
 			#else
-			projectSaveAs();
+			projectSaveAs(saveAndQuit);
 			return;
 			#end
 		}
@@ -128,13 +128,13 @@ class Project {
 		iron.App.notifyOnInit(_init);
 	}
 
-	public static function projectSaveAs() {
+	public static function projectSaveAs(saveAndQuit = false) {
 		UIFiles.show("arm", true, false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
 			filepath = path + Path.sep + f;
 			if (!filepath.endsWith(".arm")) filepath += ".arm";
-			projectSave();
+			projectSave(saveAndQuit);
 		});
 	}
 
