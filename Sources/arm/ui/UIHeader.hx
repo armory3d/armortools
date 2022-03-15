@@ -95,7 +95,7 @@ class UIHeader {
 					var uiy = ui._y;
 					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragSwatch = Project.makeSwatch(h.color.value);
+					App.dragSwatch = Project.cloneSwatch(Context.pickedColor);
 				}
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor."));
 				if (ui.isHovered && ui.inputReleased) {
@@ -107,7 +107,7 @@ class UIHeader {
 					}, 10);
 				}
 				if (ui.button(tr("Add Swatch"))) {
-					var newSwatch = Project.makeSwatch(Context.pickedColor.base);
+					var newSwatch = Project.cloneSwatch(Context.pickedColor);
 					Context.setSwatch(newSwatch);
 					Project.raw.swatches.push(newSwatch);
 					UIStatus.inst.statusHandle.redraws = 1;

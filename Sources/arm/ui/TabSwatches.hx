@@ -131,9 +131,19 @@ class TabSwatches {
 								var h = Id.handle();
 								h.color = Context.swatch.base;
 								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true);
+								var hopacity = Id.handle({ value: Context.swatch.opacity });
+								Context.swatch.opacity = ui.slider(hopacity, "Opacity", 0, 1, true);
+								var hocclusion = Id.handle({ value: Context.swatch.occlusion });
+								Context.swatch.occlusion = ui.slider(hocclusion, "Occlusion", 0, 1, true);
+								var hroughness = Id.handle({ value: Context.swatch.roughness });
+								Context.swatch.roughness = ui.slider(hroughness, "Roughness", 0, 1, true);
+								var hmetallic = Id.handle({ value: Context.swatch.metallic });
+								Context.swatch.metallic = ui.slider(hmetallic, "Metallic", 0, 1, true);
+								var hheight = Id.handle({ value: Context.swatch.height });
+								Context.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
 								if (ui.inputReleased) Context.setSwatch(Context.swatch); // Trigger material preview update
-							}, 11, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
+							}, 16, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
 						}
 
 						Context.selectTime = Time.time();
@@ -148,12 +158,14 @@ class TabSwatches {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Duplicate"), Left)) {
-								Context.setSwatch(Project.makeSwatch(Context.swatch.base));
+								Context.setSwatch(Project.cloneSwatch(Context.swatch));
 								Project.raw.swatches.push(Context.swatch);
 							}
 							#if (krom_windows || krom_linux || krom_darwin)
-							else if (ui.button(tr("Copy"), Left)) {
-								var val = untyped Context.swatch.base;
+							else if (ui.button(tr("Copy Hex code"), Left)) {
+								var color = Context.swatch.base;
+								color.A = Context.swatch.opacity;
+								var val = untyped color;
 								if (val < 0) val += untyped 4294967296;
 								Krom.copyToClipboard(untyped val.toString(16));
 							}
@@ -161,10 +173,21 @@ class TabSwatches {
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
-						}, 2 + add);
+							else if (ui.button(tr("Create Material"), Left)) {
+								TabMaterials.acceptSwatchDrag(Project.raw.swatches[i]);
+							}
+							else if (ui.button(tr("Create Color Layer"), Left)) {
+								var color = Project.raw.swatches[i].base;
+								color.A = Project.raw.swatches[i].opacity;
+			
+								Layers.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+							}
+						}, 4 + add);
 					}
 					if (ui.isHovered) {
-						var val = untyped Project.raw.swatches[i].base;
+						var color = Project.raw.swatches[i].base;
+						color.A = Project.raw.swatches[i].opacity;
+						var val = untyped color;
 						if (val < 0) val += untyped 4294967296;
 						ui.tooltip("#" + untyped val.toString(16));
 					}
