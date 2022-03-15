@@ -685,7 +685,7 @@ class UINodes {
 			if (nodes.colorPickerCallback != null) {
 				Context.selectTool(ToolPicker);
 				var tmp = nodes.colorPickerCallback;
-				Context.colorPickerCallback = function(color : TSwatchColor) { 
+				Context.colorPickerCallback = function(color: TSwatchColor) {
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
 					if (Config.raw.material_live)
