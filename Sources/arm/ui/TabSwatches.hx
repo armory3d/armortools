@@ -137,15 +137,20 @@ class TabSwatches {
 										Project.raw.swatches[i].base = color.base;
 									};
 								});
-								var hopacity = Id.handle({ value: Context.swatch.opacity });
+								var hopacity = Id.handle();
+								hopacity.value = Context.swatch.opacity;
 								Context.swatch.opacity = ui.slider(hopacity, "Opacity", 0, 1, true);
-								var hocclusion = Id.handle({ value: Context.swatch.occlusion });
+								var hocclusion = Id.handle();
+								hocclusion.value = Context.swatch.occlusion;
 								Context.swatch.occlusion = ui.slider(hocclusion, "Occlusion", 0, 1, true);
-								var hroughness = Id.handle({ value: Context.swatch.roughness });
+								var hroughness = Id.handle();
+								hroughness.value = Context.swatch.roughness;
 								Context.swatch.roughness = ui.slider(hroughness, "Roughness", 0, 1, true);
-								var hmetallic = Id.handle({ value: Context.swatch.metallic });
+								var hmetallic = Id.handle();
+								hmetallic.value = Context.swatch.metallic;
 								Context.swatch.metallic = ui.slider(hmetallic, "Metallic", 0, 1, true);
-								var hheight = Id.handle({ value: Context.swatch.height });
+								var hheight = Id.handle();
+								hheight.value = Context.swatch.height;
 								Context.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
 
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
