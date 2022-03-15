@@ -461,7 +461,7 @@ class App {
 			Krom.setMouseCursor(0); // Arrow
 			isDragging = false;
 		}
-		if (Context.colorPickerCallback != null && mouse.released()) {
+		if (Context.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
 			Context.colorPickerCallback = null;
 		}
 
