@@ -165,7 +165,7 @@ class LayerSlot {
 		}
 	}
 
-	public function clear(baseColor = 0x00000000, baseImage: kha.Image = null) {
+	public function clear(baseColor = 0x00000000, baseImage: kha.Image = null, occlusion = 1.0, roughness = Layers.defaultRough, metallic = 0.0) {
 		texpaint.g4.begin();
 		texpaint.g4.clear(baseColor); // Base
 		texpaint.g4.end();
@@ -180,7 +180,7 @@ class LayerSlot {
 			texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
 			texpaint_nor.g4.end();
 			texpaint_pack.g4.begin();
-			texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, Layers.defaultRough, 0.0, 0.0)); // Occ, rough, met
+			texpaint_pack.g4.clear(kha.Color.fromFloats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
 			texpaint_pack.g4.end();
 		}
 

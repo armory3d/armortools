@@ -11,7 +11,6 @@ import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
 import iron.math.Mat4;
-import arm.ui.UISidebar;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
 import arm.node.MakeMaterial;
@@ -791,11 +790,13 @@ class Layers {
 			Context.pdirty = 0;
 			Context.ddirty = 2;
 			Context.rdirty = 2;
+			Context.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
 			if (current != null) current.begin(false);
 			Context.layer = _layer;
 			setObjectMask();
 			Context.tool = _tool;
 			Context.fillTypeHandle.position = _fillType;
+			MakeMaterial.parsePaintMaterial(false);
 		}
 	}
 
@@ -917,13 +918,13 @@ class Layers {
 		Context.layerPreviewDirty = true;
 	}
 
-	public static function createColorLayer(baseColor: Int) {
+	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = Layers.defaultRough, metallic = 0.0 ) {
 		function _init() {
 			var l = newLayer(false);
 			History.newLayer();
 			l.uvType = UVMap;
 			l.objectMask = Context.layerFilter;
-			l.clear(baseColor);
+			l.clear(baseColor, occlusion, roughness, metallic);
 		}
 		iron.App.notifyOnInit(_init);
 	}
