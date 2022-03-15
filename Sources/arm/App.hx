@@ -463,6 +463,7 @@ class App {
 		}
 		if (Context.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
 			Context.colorPickerCallback = null;
+			Context.selectTool(Context.colorPickerPreviousTool);
 		}
 
 		handleDropPaths();

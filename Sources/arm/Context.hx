@@ -66,6 +66,7 @@ class Context {
 	public static var swatch: TSwatchColor;
 	public static var pickedColor: TSwatchColor = Project.makeSwatch();
 	public static var colorPickerCallback: TSwatchColor->Void = null;
+	public static var colorPickerPreviousTool = ToolBrush;
 	public static var materialIdPicked = 0;
 	public static var uvxPicked = 0.0;
 	public static var uvyPicked = 0.0;
