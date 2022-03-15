@@ -130,7 +130,13 @@ class TabSwatches {
 								ui.changed = false;
 								var h = Id.handle();
 								h.color = Context.swatch.base;
-								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true);
+
+								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true, function () {
+									Context.selectTool(ToolPicker);
+									Context.colorPickerCallback = function (color: TSwatchColor) {
+										Project.raw.swatches[i].base = color.base;
+									};
+								});
 								var hopacity = Id.handle({ value: Context.swatch.opacity });
 								Context.swatch.opacity = ui.slider(hopacity, "Opacity", 0, 1, true);
 								var hocclusion = Id.handle({ value: Context.swatch.occlusion });
@@ -141,6 +147,7 @@ class TabSwatches {
 								Context.swatch.metallic = ui.slider(hmetallic, "Metallic", 0, 1, true);
 								var hheight = Id.handle({ value: Context.swatch.height });
 								Context.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
+
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
 								if (ui.inputReleased) Context.setSwatch(Context.swatch); // Trigger material preview update
 							}, 16, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));

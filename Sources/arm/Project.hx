@@ -271,6 +271,7 @@ class Project {
 			Project.setDefaultSwatches();
 			Context.swatch = Project.raw.swatches[0];
 			Context.pickedColor = Project.makeSwatch();
+			Context.colorPickerCallback = null;
 			History.reset();
 
 			MakeMaterial.parsePaintMaterial();

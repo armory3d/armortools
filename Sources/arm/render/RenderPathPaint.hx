@@ -211,6 +211,10 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 					var d = texpaint_uv_picker.getPixels();
 
+					if (Context.colorPickerCallback != null) {
+						Context.colorPickerCallback(Context.pickedColor);
+					}
+
 					// Picked surface values
 					#if (kha_metal || kha_vulkan)
 					Context.pickedColor.base.Rb = a.get(2);
@@ -242,7 +246,7 @@ class RenderPathPaint {
 					Context.uvyPicked = d.get(1) / 255;
 					#end
 					// Pick material
-					if (Context.pickerSelectMaterial) {
+					if (Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 						var matid = Std.int((b.get(3) - (b.get(3) % 3)) / 3);
 						for (m in Project.materials) {
