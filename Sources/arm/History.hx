@@ -73,7 +73,12 @@ class History {
 				Context.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
-				Context.layer = Project.layers[step.layer + 1];
+				var children = Project.layers[step.layer].getRecursiveChildren();
+				var position = step.layer + 1;
+				if (children != null)
+					position += children.length;
+
+				Context.layer = Project.layers[position];
 				Context.layer.delete();
 			}
 			else if (step.name == tr("Order Layers")) {
@@ -266,7 +271,10 @@ class History {
 			}
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.layer = Project.layers[step.layer];
-				Context.layer = Context.layer.duplicate();
+				function _next() {
+					Layers.duplicateLayer(Context.layer);
+				}
+				App.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Order Layers")) {
 				var target = Project.layers[step.prev_order];

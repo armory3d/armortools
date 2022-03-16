@@ -619,6 +619,8 @@ class TabLayers {
 			ui.enabled = true;
 			if (ui.button(tr("Duplicate"), Left)) {
 				function _init() {
+					Context.setLayer(l);
+					History.duplicateLayer();
 					Layers.duplicateLayer(l);
 				}
 				iron.App.notifyOnInit(_init);
