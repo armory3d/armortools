@@ -18,6 +18,7 @@ project.addLibrary("iron");
 project.addLibrary("zui");
 project.addLibrary("armorbase");
 project.addShaders("Shaders/*.glsl", { embed: snapshot});
+project.addShaders("armorcore/Shaders/*.glsl", { embed: snapshot});
 project.addAssets("Assets/*", { destination: "data/{name}", embed: snapshot });
 project.addShaders("Libraries/armorbase/Shaders/common/*.glsl", { embed: snapshot});
 project.addAssets("Libraries/armorbase/Assets/common/*", { destination: "data/{name}", embed: snapshot });
