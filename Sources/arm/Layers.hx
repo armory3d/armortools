@@ -921,10 +921,11 @@ class Layers {
 		return l;
 	}
 
-	public static function newMask(clear = true, parent: LayerSlot): LayerSlot {
+	public static function newMask(clear = true, parent: LayerSlot, position = -1): LayerSlot {
 		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot("", SlotMask, parent);
-		Project.layers.insert(Project.layers.indexOf(parent), l);
+		if (position == -1) position = Project.layers.indexOf(parent);
+		Project.layers.insert(position, l);
 		Context.setLayer(l);
 		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
 		Context.layerPreviewDirty = true;
