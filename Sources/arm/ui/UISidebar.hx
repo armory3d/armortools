@@ -815,13 +815,19 @@ class UISidebar {
 			}
 
 			// Show picked material next to cursor
-			if (Context.tool == ToolPicker && Context.pickerSelectMaterial) {
+			if (Context.tool == ToolPicker && Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
 				var img = Context.material.imageIcon;
 				#if kha_opengl
 				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 				#else
 				g.drawImage(img, mx + 10, my + 10);
 				#end
+			}
+			if (Context.tool == ToolPicker && Context.colorPickerCallback != null) {
+				var img = Res.get("icons.k");
+				var rect = Res.tile50(img, ToolPicker, 0);
+					
+				g.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 			}
 
 			var cursorImg = Res.get("cursor.k");
