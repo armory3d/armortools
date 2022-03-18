@@ -54,7 +54,7 @@ git apply armorcore/patch/android_document_picker.diff --directory=armorcore/Kin
 **iOS** *wip*
 ```bash
 git clone https://github.com/armory3d/armorpaint_plugins armorcore/Libraries/plugins
-armorcore/Kinc/make ios -g metal
+armorcore/Kinc/make ios --from armorcore -g metal
 cp -a build/krom/ armorcore/Deployment
 git apply armorcore/patch/ios_document_picker.diff --directory=armorcore/Kinc
 git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
@@ -66,7 +66,7 @@ git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
 **Windows DXR** *wip*
 ```bash
 # Unpack `armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
-armorcore/Kinc/make -g direct3d12
+armorcore/Kinc/make --from armorcore -g direct3d12
 git apply armorcore/patch/window_handling.diff --directory=armorcore/Kinc
 git apply armorcore/patch/d3d12_raytrace.diff --directory=armorcore/Kinc
 git apply armorcore/patch/d3d12_wrap_sampler.diff --directory=armorcore/Kinc
@@ -77,7 +77,7 @@ git apply armorcore/patch/d3d12_wrap_sampler.diff --directory=armorcore/Kinc
 **Linux VKRT** *wip*
 ```bash
 git clone --recursive https://github.com/armory3d/glsl_to_spirv armorcore/Libraries/glsl_to_spirv
-armorcore/Kinc/make -g vulkan --compiler clang --compile
+armorcore/Kinc/make --from armorcore -g vulkan --compiler clang --compile
 cd armorcore
 git apply armorcore/patch/vulkan_raytrace.diff --directory=armorcore/Kinc
 cd armorcore/Deployment
@@ -88,7 +88,7 @@ strip ArmorPaint
 **Windows VR** *wip*
 ```bash
 # Unpack `armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
-armorcore/Kinc/make -g direct3d11 --vr oculus
+armorcore/Kinc/make --from armorcore -g direct3d11 --vr oculus
 git apply armorcore/patch/window_handling.diff --directory=armorcore/Kinc
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
@@ -113,7 +113,7 @@ python ./Assets/locale/tools/extract_locales.py <locale code>
 # Compile krom.js using the closure compiler
 https://developers.google.com/closure/compiler
 # Generate a v8 snapshot file
-armorcore/Kinc/make -g api --snapshot
+armorcore/Kinc/make --from armorcore -g api --snapshot
 ./ArmorPaint . --snapshot
 # Generates a `krom.bin` file from `krom.js` file
 ```
