@@ -17,5 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Get Submodules
       run: git submodule update --init --recursive
+    - name: Clone plugins
+      run: git clone https://github.com/armory3d/armorpaint_plugins armorcore/Libraries/plugins
     - name: Compile
       run: armorcore/Kinc/make --from armorcore ios -g metal
