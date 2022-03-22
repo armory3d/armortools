@@ -18,4 +18,4 @@ jobs:
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Compile
-      run: armorcore/Kinc/make android --from armorcore -g vulkan
+      run: armorcore/Kinc/make --from armorcore android -g vulkan

@@ -18,4 +18,4 @@ jobs:
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Compile
-      run: armorcore/Kinc/make ios --from armorcore -g metal
+      run: armorcore/Kinc/make --from armorcore ios -g metal
