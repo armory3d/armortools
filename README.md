@@ -18,7 +18,7 @@ cd armorpaint
 ```bash
 # Unpack `armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply armorcore/patch/window_handling.diff --directory=armorcore/Kinc
-armorcore/Kinc/make --from armorcore -g direct3d11
+armorcore\Kinc\make --from armorcore -g direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
@@ -69,7 +69,7 @@ cp -a build/krom/ armorcore/Deployment
 git apply armorcore/patch/window_handling.diff --directory=armorcore/Kinc
 git apply armorcore/patch/d3d12_raytrace.diff --directory=armorcore/Kinc
 git apply armorcore/patch/d3d12_wrap_sampler.diff --directory=armorcore/Kinc
-armorcore/Kinc/make --from armorcore -g direct3d12
+armorcore\Kinc\make --from armorcore -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
@@ -88,7 +88,7 @@ strip ArmorPaint
 ```bash
 # Unpack `armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply armorcore/patch/window_handling.diff --directory=armorcore/Kinc
-armorcore/Kinc/make --from armorcore -g direct3d11 --vr oculus
+armorcore\Kinc\make --from armorcore -g direct3d11 --vr oculus
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
 ```
@@ -112,7 +112,8 @@ python ./Assets/locale/tools/extract_locales.py <locale code>
 # Compile krom.js using the closure compiler
 https://developers.google.com/closure/compiler
 # Generate a v8 snapshot file
-armorcore/Kinc/make --from armorcore -g api --snapshot
+export ARM_SNAPSHOT=1
+armorcore/Kinc/make --from armorcore -g api
 ./ArmorPaint . --snapshot
 # Generates a `krom.bin` file from `krom.js` file
 ```
