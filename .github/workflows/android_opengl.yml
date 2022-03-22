@@ -1,4 +1,4 @@
-name: Android (Vulkan)
+name: Android (OpenGL)
 
 on:
   push:
@@ -18,4 +18,4 @@ jobs:
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Compile
-      run: armorcore/Kinc/make --from armorcore android -g opengl --shaderversion 300
+      run: armorcore/Kinc/make --from armorcore android -g opengl
