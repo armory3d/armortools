@@ -43,7 +43,7 @@ cp -a build/krom/ armorcore/Deployment
 **Android** *wip*
 ```bash
 git apply armorcore/patch/android_document_picker.diff --directory=armorcore/Kinc
-armorcore/Kinc/make android --from armorcore -g opengl --shaderversion 300
+armorcore/Kinc/make android --from armorcore -g opengl
 cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 # Manual tweaking is required for now:
 # https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68
