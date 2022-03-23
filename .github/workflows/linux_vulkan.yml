@@ -21,5 +21,7 @@ jobs:
       run: sudo apt-get install libasound2-dev libxrandr-dev libxinerama-dev libgl1-mesa-dev libxi-dev libxcursor-dev libudev-dev libgtk-3-dev --yes --quiet
     - name: Get Submodules
       run: git submodule update --init --recursive
+    - name: Clone krafix
+      run: git clone --recursive https://github.com/armory3d/glsl_to_spirv armorcore/Libraries/glsl_to_spirv
     - name: Compile
       run: armorcore/Kinc/make --from armorcore -g vulkan --compiler clang
