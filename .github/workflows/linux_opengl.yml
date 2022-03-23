@@ -15,7 +15,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Apt Update
+      run: sudo apt-get update
+    - name: Apt Install
+      run: sudo apt-get install libasound2-dev libxrandr-dev libxinerama-dev libgl1-mesa-dev libxi-dev libxcursor-dev libudev-dev libgtk-3-dev --yes --quiet
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Compile
-      run: armorcore/Kinc/make --from armorcore -g opengl
+      run: armorcore/Kinc/make --from armorcore -g opengl --compiler clang
