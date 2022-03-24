@@ -66,7 +66,6 @@ cp -a build/krom/ armorcore/Deployment
 ```bash
 # Unpack `armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 git apply armorcore/patch/d3d12_raytrace.diff --directory=armorcore/Kinc
-git apply armorcore/patch/d3d12_wrap_sampler.diff --directory=armorcore/Kinc
 armorcore\Kinc\make --from armorcore -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
