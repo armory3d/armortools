@@ -98,21 +98,29 @@ class ParticleUtil {
 	#if arm_physics
 
 	public static function initParticlePhysics() {
-		if (arm.plugin.PhysicsWorld.active != null) return;
+		if (arm.plugin.PhysicsWorld.active != null) {
+			initParticleMesh();
+			return;
+		}
 
 		arm.plugin.PhysicsWorld.load(function() {
 			Scene.active.sceneParent.addTrait(new arm.plugin.PhysicsWorld());
-
-			var po = Context.mergedObject != null ? Context.mergedObject : Context.paintObject;
-
-			po.transform.scale.x = po.parent.transform.scale.x;
-			po.transform.scale.y = po.parent.transform.scale.y;
-			po.transform.scale.z = po.parent.transform.scale.z;
-
-			Context.paintBody = new arm.plugin.PhysicsBody();
-			Context.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
-			po.addTrait(Context.paintBody);
+			initParticleMesh();
 		});
+	}
+
+	static function initParticleMesh() {
+		if (Context.paintBody != null) return;
+
+		var po = Context.mergedObject != null ? Context.mergedObject : Context.paintObject;
+
+		po.transform.scale.x = po.parent.transform.scale.x;
+		po.transform.scale.y = po.parent.transform.scale.y;
+		po.transform.scale.z = po.parent.transform.scale.z;
+
+		Context.paintBody = new arm.plugin.PhysicsBody();
+		Context.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
+		po.addTrait(Context.paintBody);
 	}
 
 	#end
