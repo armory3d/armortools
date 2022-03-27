@@ -32,6 +32,7 @@ import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ImportTexture;
 import arm.io.ExportArm;
+import arm.io.ExportGpl;
 import arm.node.NodesBrush;
 import arm.Viewport;
 import arm.ProjectFormat;
@@ -574,10 +575,11 @@ class Project {
 	}
 
 	public static function exportSwatches() {
-		UIFiles.show("arm", true, false, function(path: String) {
+		UIFiles.show("arm,gpl", true, false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
-			ExportArm.runSwatches(path + Path.sep + f);
+			if (f.endsWith(".gpl")) ExportGpl.run(path + Path.sep + f, f.substring(0,f.lastIndexOf(".")), Project.raw.swatches);
+			else ExportArm.runSwatches(path + Path.sep + f);
 		});
 	}
 
