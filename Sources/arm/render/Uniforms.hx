@@ -159,7 +159,7 @@ class Uniforms {
 				if (Config.raw.pressure_angle && pen.down()) {
 					angle *= pen.pressure * Config.raw.pressure_sensitivity;
 				}
-				vec.set(Math.cos(angle), Math.sin(angle), 0);
+				vec.set(Math.cos(-angle), Math.sin(-angle), 0);
 				return vec;
 			}
 			case "_texpaintSize": {
