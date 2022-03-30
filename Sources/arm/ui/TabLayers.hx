@@ -787,17 +787,30 @@ class TabLayers {
 				heightBlendHandle.selected = l.paintHeightBlend;
 				emisHandle.selected = l.paintEmis;
 				subsHandle.selected = l.paintSubs;
+				
 				l.paintBase = ui.check(baseHandle, tr("Base Color"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Base Color")]));
 				l.paintOpac = ui.check(opacHandle, tr("Opacity"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Opacity")]));
 				l.paintNor = ui.check(norHandle, tr("Normal"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal")]));
 				l.paintNorBlend = ui.check(norBlendHandle, tr("Normal Blending"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal Blending")]));
 				l.paintOcc = ui.check(occHandle, tr("Occlusion"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Occlusion")]));
 				l.paintRough = ui.check(roughHandle, tr("Roughness"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Roughness")]));
 				l.paintMet = ui.check(metHandle, tr("Metallic"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Metallic")]));
 				l.paintHeight = ui.check(heightHandle, tr("Height"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height")]));
 				l.paintHeightBlend = ui.check(heightBlendHandle, tr("Height Blending"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height Blending")]));
 				l.paintEmis = ui.check(emisHandle, tr("Emission"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Emission")]));
 				l.paintSubs = ui.check(subsHandle, tr("Subsurface"));
+				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Subsurface")]));
+
 				if (baseHandle.changed ||
 					opacHandle.changed ||
 					norHandle.changed ||
@@ -809,6 +822,20 @@ class TabLayers {
 					heightBlendHandle.changed ||
 					emisHandle.changed ||
 					subsHandle.changed) {
+
+					if (ui.isAltDown) {
+						l.paintBase = baseHandle.changed;
+						l.paintOpac = opacHandle.changed;
+						l.paintNor = norHandle.changed;
+						l.paintNorBlend = norBlendHandle.changed;
+						l.paintOcc = occHandle.changed;
+						l.paintRough = roughHandle.changed;
+						l.paintMet = metHandle.changed;
+						l.paintHeight = heightHandle.changed;
+						l.paintHeightBlend = heightBlendHandle.changed;
+						l.paintEmis = emisHandle.changed;
+						l.paintSubs = subsHandle.changed;
+					}
 					MakeMaterial.parseMeshMaterial();
 					UIMenu.keepOpen = true;
 				}
