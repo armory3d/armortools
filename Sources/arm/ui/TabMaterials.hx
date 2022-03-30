@@ -162,14 +162,23 @@ class TabMaterials {
 							emisHandle.selected = m.paintEmis;
 							subsHandle.selected = m.paintSubs;
 							m.paintBase = ui.check(baseHandle, tr("Base Color"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Base Color")]));
 							m.paintOpac = ui.check(opacHandle, tr("Opacity"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Opacity")]));
 							m.paintNor = ui.check(norHandle, tr("Normal"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal")]));
 							m.paintOcc = ui.check(occHandle, tr("Occlusion"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Occlusion")]));
 							m.paintRough = ui.check(roughHandle, tr("Roughness"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Roughness")]));
 							m.paintMet = ui.check(metHandle, tr("Metallic"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Metallic")]));
 							m.paintHeight = ui.check(heightHandle, tr("Height"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height")]));
 							m.paintEmis = ui.check(emisHandle, tr("Emission"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Emission")]));
 							m.paintSubs = ui.check(subsHandle, tr("Subsurface"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Subsurface")]));
 							if (baseHandle.changed ||
 								opacHandle.changed ||
 								norHandle.changed ||
@@ -179,6 +188,17 @@ class TabMaterials {
 								heightHandle.changed ||
 								emisHandle.changed ||
 								subsHandle.changed) {
+								if (ui.isAltDown) {
+									m.paintBase = baseHandle.changed;
+									m.paintOpac = opacHandle.changed;
+									m.paintNor = norHandle.changed;
+									m.paintOcc = occHandle.changed;
+									m.paintRough = roughHandle.changed;
+									m.paintMet = metHandle.changed;
+									m.paintHeight = heightHandle.changed;
+									m.paintEmis = emisHandle.changed;
+									m.paintSubs = subsHandle.changed;
+								}
 								MakeMaterial.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
