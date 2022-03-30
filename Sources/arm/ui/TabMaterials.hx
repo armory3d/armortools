@@ -143,15 +143,24 @@ class TabMaterials {
 								deleteMaterial(m);
 							}
 
-							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
-							var opacHandle = Id.handle().nest(m.id, {selected: m.paintOpac});
-							var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
-							var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
-							var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
-							var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
-							var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
-							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
-							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
+							var baseHandle = Id.handle().nest(m.id);
+							var opacHandle = Id.handle().nest(m.id);
+							var norHandle = Id.handle().nest(m.id);
+							var occHandle = Id.handle().nest(m.id);
+							var roughHandle = Id.handle().nest(m.id);
+							var metHandle = Id.handle().nest(m.id);
+							var heightHandle = Id.handle().nest(m.id);
+							var emisHandle = Id.handle().nest(m.id);
+							var subsHandle = Id.handle().nest(m.id);
+							baseHandle.selected = m.paintBase;
+							opacHandle.selected = m.paintOpac;
+							norHandle.selected = m.paintNor;
+							occHandle.selected = m.paintOcc;
+							roughHandle.selected = m.paintRough;
+							metHandle.selected = m.paintMet;
+							heightHandle.selected = m.paintHeight;
+							emisHandle.selected = m.paintEmis;
+							subsHandle.selected = m.paintSubs;
 							m.paintBase = ui.check(baseHandle, tr("Base Color"));
 							m.paintOpac = ui.check(opacHandle, tr("Opacity"));
 							m.paintNor = ui.check(norHandle, tr("Normal"));
