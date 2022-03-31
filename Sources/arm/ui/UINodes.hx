@@ -93,7 +93,16 @@ class UINodes {
 					var n = nodes.nodesSelected[0];
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 						linkDrag.to_id = n.id;
+						var fromType = node.outputs[linkDrag.from_socket].type;
+						// 1. step: Connect to the first socket.
 						linkDrag.to_socket = 0;
+						// 2. step: Try to find the first type-matching socket and use it if present.
+						for (socket in n.inputs) {
+							if (socket.type == fromType) {
+								linkDrag.to_socket = n.inputs.indexOf(socket);
+								break;
+							}
+						}
 						getCanvas(true).links.push(linkDrag);
 					}
 					else if (linkDrag.from_id == -1 && n.outputs.length > 0) {
