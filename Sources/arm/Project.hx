@@ -580,7 +580,7 @@ class Project {
 		UIFiles.show("arm,gpl", true, false, function(path: String) {
 			var f = UIFiles.filename;
 			if (f == "") f = tr("untitled");
-			if (f.endsWith(".gpl")) ExportGpl.run(path + Path.sep + f, f.substring(0, f.lastIndexOf(".")), Project.raw.swatches);
+			if (Path.isGimpColorPalette(f)) ExportGpl.run(path + Path.sep + f, f.substring(0, f.lastIndexOf(".")), Project.raw.swatches);
 			else ExportArm.runSwatches(path + Path.sep + f);
 		});
 	}
