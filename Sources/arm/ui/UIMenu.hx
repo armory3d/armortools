@@ -72,7 +72,7 @@ class UIMenu {
 				if (menuButton(ui, tr("Import Font..."))) Project.importAsset("ttf,ttc,otf");
 				if (menuButton(ui, tr("Import Material..."))) Project.importMaterial();
 				if (menuButton(ui, tr("Import Brush..."))) Project.importBrush();
-				if (menuButton(ui, tr("Import Swatches..."))) Project.importAsset("arm");
+				if (menuButton(ui, tr("Import Swatches..."))) Project.importSwatches();
 				if (menuButton(ui, tr("Import Mesh..."))) Project.importMesh();
 				if (menuButton(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();

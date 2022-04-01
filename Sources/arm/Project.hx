@@ -28,6 +28,7 @@ import arm.data.MaterialSlot;
 import arm.node.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
+import arm.io.ImportGpl;
 import arm.io.ImportBlend;
 import arm.io.ImportMesh;
 import arm.io.ImportTexture;
@@ -498,8 +499,9 @@ class Project {
 	}
 
 	public static function importSwatches(replaceExisting = false) {
-		UIFiles.show("arm", false, false, function(path: String) {
-			ImportArm.runSwatches(path, replaceExisting);
+		UIFiles.show("arm,gpl", false, false, function(path: String) {
+			if (Path.isGimpColorPalette(path)) ImportGpl.run(path, replaceExisting);
+			else ImportArm.runSwatches(path, replaceExisting);
 		});
 	}
 
