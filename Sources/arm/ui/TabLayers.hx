@@ -51,7 +51,7 @@ class TabLayers {
 						}
 						App.notifyOnNextFrame(_next);
 						Context.layerPreviewDirty = true;
-						History.newLayer();
+						History.newBlackMask();
 					}
 					if (ui.button(tr("White Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
@@ -63,7 +63,7 @@ class TabLayers {
 						}
 						App.notifyOnNextFrame(_next);
 						Context.layerPreviewDirty = true;
-						History.newLayer();
+						History.newWhiteMask();
 					}
 					if (ui.button(tr("Fill Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
@@ -75,20 +75,25 @@ class TabLayers {
 						}
 						iron.App.notifyOnInit(_init);
 						Context.layerPreviewDirty = true;
-						History.newLayer();
+						History.newFillMask();
 					}
-					if (ui.button(tr("Group"), Left) && !Context.layer.isGroup() && Context.layer.parent == null) {
-						if (l.parent != null || l.isGroup()) return;
+					ui.enabled = !Context.layer.isGroup() && !Context.layer.isInGroup();
+					if (ui.button(tr("Group"), Left)) {
+						if (l.isGroup() || l.isInGroup()) return;
+
+						if (l.isLayerMask()) l = l.parent;
+
 						var pointers = initLayerMap();
 						var group = Layers.newGroup();
 						Context.setLayer(l);
 						Project.layers.remove(group);
 						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
 						l.parent = group;
-						// History.newGroup();
 						for (m in Project.materials) remapLayerPointers(m.canvas.nodes, fillLayerMap(pointers));
 						Context.setLayer(group);
+						History.newGroup();
 					}
+					ui.enabled = true;
 				}, 8);
 			}
 			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DLayer);
@@ -375,7 +380,10 @@ class TabLayers {
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
 			if (inFocus && ui.isDeleteDown && canDelete(Context.layer)) {
 				ui.isDeleteDown = false;
-				deleteLayer(Context.layer);
+				function _init() {
+					deleteLayer(Context.layer);
+				}
+				iron.App.notifyOnInit(_init);
 			}
 		}
 		ui._y -= center;
@@ -485,20 +493,21 @@ class TabLayers {
 		}
 	}
 
+	static function canMergeDown(l: LayerSlot) : Bool {
+		var index = Project.layers.indexOf(l);
+		// Lowest layer
+		if (index == 0) return false;
+		// Lowest layer that has masks
+		if (l.isLayer() && Project.layers[0].isMask() && Project.layers[0].parent == l) return false;
+		// The lowest toplevel layer is a group
+		if (l.isGroup() && Project.layers[0].isInGroup() && Project.layers[0].getContainingGroup() == l) return false;
+		// Masks must be merged down to masks
+		if (l.isMask() && !Project.layers[index - 1].isMask()) return false;
+		return true;
+	}
+
 	static function drawLayerContextMenu(l: LayerSlot) {
 		var add = 0;
-		var li = Project.layers.indexOf(l);
-		var canMergeDown = li > 0 && (l.isGroup() || l.isLayer() || (l.isMask() && Project.layers[li - 1].isMask()));
-		if (l.isLayer() && l.hasMasks() && li == l.getMasks().length) canMergeDown = false; // First layer
-
-		// Is the current group the first group?
-		var firstGroup = true;
-		for (i in 0...li - 1) {
-			if (!Project.layers[i].isMask() && Project.layers[i].parent != l) {
-				firstGroup = false;
-			}
-		}
-		if (l.isGroup() && firstGroup) canMergeDown = false;
 
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
@@ -524,27 +533,32 @@ class TabLayers {
 				}
 			}
 
-			var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
-			var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
+			if (!l.isGroup()) {
+				var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
+				var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
 
-			if (!l.isGroup() && l.fill_layer == null && ui.button(toFillString, Left)) {
-				function _init() {
-					History.toFillLayer();
-					l.toFillLayer();
+				if (l.fill_layer == null && ui.button(toFillString, Left)) {
+					function _init() {
+						l.isLayer() ? History.toFillLayer() : History.toFillMask();
+						l.toFillLayer();
+					}
+					iron.App.notifyOnInit(_init);
 				}
-				iron.App.notifyOnInit(_init);
-			}
-			if (!l.isGroup() && l.fill_layer != null && ui.button(toPaintString, Left)) {
-				function _init() {
-					History.toPaintLayer();
-					l.toPaintLayer();
+				if (l.fill_layer != null && ui.button(toPaintString, Left)) {
+					function _init() {
+						l.isLayer() ? History.toPaintLayer() : History.toPaintMask();
+						l.toPaintLayer();
+					}
+					iron.App.notifyOnInit(_init);
 				}
-				iron.App.notifyOnInit(_init);
 			}
 
 			ui.enabled = canDelete(l);
 			if (ui.button(tr("Delete"), Left, "delete")) {
-				deleteLayer(l);
+				function _init() {
+					deleteLayer(Context.layer);
+				}
+				iron.App.notifyOnInit(_init);
 			}
 			ui.enabled = true;
 
@@ -569,13 +583,15 @@ class TabLayers {
 			}
 			if (l.isMask() && l.fill_layer == null && ui.button(tr("Invert"), Left)) {
 				function _init() {
+					Context.setLayer(l);
+					History.invertMask();
 					l.invertMask();
 				}
 				iron.App.notifyOnInit(_init);
 			}
 			if (l.isMask() && ui.button(tr("Apply"), Left)) {
 				function _init() {
-					Context.setLayer(l);
+					Context.layer = l;
 					History.applyMask();
 					l.applyMask();
 					Context.setLayer(l.parent);
@@ -586,25 +602,11 @@ class TabLayers {
 			}
 			if (l.isGroup() && ui.button(tr("Merge Group"), Left)) {
 				function _init() {
-					var children = l.getChildren();
-
-					if (children.length == 1 && children[0].hasMasks()) {
-						Layers.applyMasks(children[0]);
-					}
-
-					for (i in 0...children.length - 1) {
-						Context.setLayer(children[children.length - 1 - i]);
-						History.mergeLayers();
-						Layers.mergeDown();
-					}
-					children[0].parent = null;
-					children[0].name = l.name;
-					if (children[0].fill_layer != null) children[0].toPaintLayer();
-					l.delete();
+					Layers.mergeGroup(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			ui.enabled = canMergeDown;
+			ui.enabled = canMergeDown(l);
 			if (ui.button(tr("Merge Down"), Left)) {
 				function _init() {
 					Context.setLayer(l);
@@ -617,49 +619,9 @@ class TabLayers {
 			ui.enabled = true;
 			if (ui.button(tr("Duplicate"), Left)) {
 				function _init() {
-					if (!l.isGroup()) {
-						var masks = l.getMasks();
-						Context.setLayer(l);
-						History.duplicateLayer();
-						l = l.duplicate();
-						Context.setLayer(l);
-						if (masks != null) {
-							for (m in masks) {
-								Context.setLayer(m);
-								History.duplicateLayer();
-								m = m.duplicate();
-								m.parent = l;
-								Project.layers.remove(m);
-								Project.layers.insert(Project.layers.indexOf(l), m);
-							}
-						}
-					}
-					else {
-						var group = Layers.newGroup();
-						Project.layers.remove(group);
-						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
-						// group.show_panel = true;
-						for (c in l.getChildren()) {
-							var masks = c.getMasks();
-							Context.setLayer(c);
-							History.duplicateLayer();
-							c = c.duplicate();
-							c.parent = group;
-							Project.layers.remove(c);
-							Project.layers.insert(Project.layers.indexOf(group), c);
-							if (masks != null) {
-								for (m in masks) {
-									Context.setLayer(m);
-									History.duplicateLayer();
-									m = m.duplicate();
-									m.parent = c;
-									Project.layers.remove(m);
-									Project.layers.insert(Project.layers.indexOf(c), m);
-								}
-							}
-						}
-						Context.setLayer(group);
-					}
+					Context.setLayer(l);
+					History.duplicateLayer();
+					Layers.duplicateLayer(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -834,36 +796,55 @@ class TabLayers {
 		}
 	}
 
-	static function getSlotCount(layers: Array<LayerSlot>): Int {
-		var count = 0;
-		for (l in layers) {
-			count += 1;
-			if (l.getMasks() != null) count += l.getMasks().length;
-		}
-		return count;
-	}
-
 	static function deleteLayer(l: LayerSlot) {
 		var pointers = initLayerMap();
-		Context.layer = l;
-		if (!l.isGroup()) {
-			History.deleteLayer();
+		
+		if (l.isLayer() && l.hasMasks(false)) {
+			for (m in l.getMasks(false)) {
+				Context.layer = m;
+				History.deleteLayer();
+				m.delete();
+			}
 		}
-		else {
+		if (l.isGroup()) {
 			for (c in l.getChildren()) {
+				if (c.hasMasks(false)) {
+					for (m in c.getMasks(false)) {
+						Context.layer = m;
+						History.deleteLayer();
+						m.delete();
+					}
+				}
 				Context.layer = c;
 				History.deleteLayer();
 				c.delete();
 			}
+			if (l.hasMasks()) {
+				for (m in l.getMasks()) {
+					Context.layer = m;
+					History.deleteLayer();
+					m.delete();
+				}
+			}
 		}
+		
+		Context.layer = l;
+		History.deleteLayer();
 		l.delete();
 
 		// Remove empty group
-		if (l.parent != null && l.parent.isGroup() && l.parent.getChildren() == null) {
-			// Remove group masks
-			var masks = l.parent.getMasks();
-			if (masks != null) for (m in masks) m.delete();
-			// Remove group
+		if (l.isInGroup() && l.getContainingGroup().getChildren() == null) {
+			var g = l.getContainingGroup();
+			//Maybe some group masks are left
+			if (g.hasMasks()) {
+				for (m in g.getMasks()) {
+					Context.layer = m;
+					History.deleteLayer();
+					m.delete();
+				}
+			}
+			Context.layer = l.parent;
+			History.deleteLayer();
 			l.parent.delete();
 		}
 		Context.ddirty = 2;
@@ -871,11 +852,19 @@ class TabLayers {
 	}
 
 	static function canDelete(l: LayerSlot) {
-		var result = Project.layers.length > 1;
-		if (l.isLayer() && l.parent != null && l.parent.getChildren().length == 1 && Project.layers.length == 2) result = false;
-		if (l.isLayer() && l.parent != null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 2) result = false;
-		if (l.isLayer() && l.parent == null && l.getMasks() != null && Project.layers.length == l.getMasks().length + 1) result = false;
-		if (l.isGroup() && Project.layers.length == getSlotCount(l.getChildren()) + 1) result = false;
-		return result;
+		var numLayers = 0;
+
+		if (l.isMask()) return true;
+		
+		for (slot in Project.layers) {
+			if (slot.isLayer()) ++numLayers;
+		}
+
+		// All layers are in one group
+		if (l.isGroup() && l.getChildren().length == numLayers) return false;
+
+		// Do not delete last layer
+		return numLayers > 1;
 	}
+
 }

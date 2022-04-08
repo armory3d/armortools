@@ -26,9 +26,17 @@ class History {
 			var active = steps.length - 1 - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer")) {
+			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				Context.layer = Project.layers[step.layer];
 				Context.layer.delete();
+				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
+			}
+			else if (step.name == tr("New Group")) {
+				Context.layer = Project.layers[step.layer];
+				// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
+				Project.layers[step.layer - 1].parent = null;
+				Context.layer.delete();
+				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("Delete Layer")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
@@ -42,6 +50,20 @@ class History {
 				l.blending = step.layer_blending;
 				l.objectMask = step.layer_object;
 				MakeMaterial.parseMeshMaterial();
+
+				// Undo at least second time in order to avoid empty groups
+				if (step.layer_type == LayerSlotType.SlotGroup) {
+					App.notifyOnNextFrame(function() {
+						// 1. Undo deleting group masks
+						var n = 1;
+						while (steps[active - n].layer_type == LayerSlotType.SlotMask) {
+							undo();
+							++n;
+						}
+						// 2. Undo a mask to have a non empty group
+						undo();
+					});
+				}
 			}
 			else if (step.name == tr("Clear Layer")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -50,7 +72,12 @@ class History {
 				Context.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
-				Context.layer = Project.layers[step.layer + 1];
+				var children = Project.layers[step.layer].getRecursiveChildren();
+				var position = step.layer + 1;
+				if (children != null)
+					position += children.length;
+
+				Context.layer = Project.layers[position];
 				Context.layer.delete();
 			}
 			else if (step.name == tr("Order Layers")) {
@@ -86,21 +113,40 @@ class History {
 				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Apply Mask")) {
-				Context.layer = Project.layers[step.layer];
-				Context.layer.delete();
+				// First restore the layer(s)
+				var maskPosition = step.layer;
+				var currentLayer = null;
+				// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
+				if (Project.layers[maskPosition].isMask())
+					currentLayer = Project.layers[maskPosition].parent;
+				else if (Project.layers[maskPosition].isLayer() || Project.layers[maskPosition].isGroup())
+					currentLayer = Project.layers[maskPosition];
+ 
+				var layersToRestore = currentLayer.isGroup() ? currentLayer.getChildren() : [currentLayer];
+				layersToRestore.reverse();
 
-				Context.layer = Layers.newLayer(false);
-				Project.layers.remove(Context.layer);
-				Project.layers.insert(step.layer, Context.layer);
+				for (layer in layersToRestore) {
+					// Replace the current layer's content with the old one
+					Context.layer = layer;
+					undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+					var oldLayer = undoLayers[undoI];
+					Context.layer.swap(oldLayer);
+				}
 
+				// Now restore the applied mask
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
-
-				Layers.newMask(false, Context.layer);
-				Context.layer.swap(lay);
+				var mask = undoLayers[undoI];
+				Layers.newMask(false, currentLayer,maskPosition);
+				Context.layer.swap(mask);
 				Context.layersPreviewDirty = true;
 				Context.setLayer(Context.layer);
+			}
+			else if (step.name == tr("Invert Mask")) {
+				function _next() {
+					Context.layer = Project.layers[step.layer];
+					Context.layer.invertMask();
+				}
+				iron.App.notifyOnInit(_next);
 			}
 			else if (step.name == "Apply Filter") {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -111,13 +157,13 @@ class History {
 				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
-			else if (step.name == tr("To Fill Layer")) {
+			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 				Context.layer.toPaintLayer();
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 			}
-			else if (step.name == tr("To Paint Layer")) {
+			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -180,16 +226,53 @@ class History {
 			var active = steps.length - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer")) {
+			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
+				if (step.name == tr("New Black Mask")) {
+					App.notifyOnNextFrame(function() {
+						l.clear(0x00000000);
+					});
+				}
+				else if (step.name == tr("New White Mask")) {
+					App.notifyOnNextFrame(function() {
+						l.clear(0xffffffff);
+					});
+				}
+				else if (step.name == tr("New Fill Mask")) {
+					App.notifyOnNextFrame(function() {
+						Context.material = Project.materials[step.material];
+						l.toFillLayer();
+					});
+				}
+				Context.layerPreviewDirty = true;
 				Context.setLayer(l);
+			}
+			else if (step.name == tr("New Group")) {
+				var l = Project.layers[step.layer - 1];
+				var group = Layers.newGroup();
+				Project.layers.remove(group);
+				Project.layers.insert(step.layer, group);
+				l.parent = group;
+				Context.setLayer(group);
 			}
 			else if (step.name == tr("Delete Layer")) {
 				Context.layer = Project.layers[step.layer];
 				swapActive();
 				Context.layer.delete();
+
+				// Redoing the last delete would result in an empty group
+				// Redo deleting all group masks + the group itself
+				if (step.layer_type == LayerSlotType.SlotLayer && steps.length >= active + 2 && (steps[active + 1].layer_type == LayerSlotType.SlotGroup || steps[active + 1].layer_type == LayerSlotType.SlotMask)) {
+					var n = 1;
+					while (steps[active + n].layer_type == LayerSlotType.SlotMask) {
+						++n;
+					}
+					App.notifyOnNextFrame(function() {
+						for (i in 0...n) redo();
+						});
+				}
 			}
 			else if (step.name == tr("Clear Layer")) {
 				Context.layer = Project.layers[step.layer];
@@ -199,7 +282,10 @@ class History {
 			}
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.layer = Project.layers[step.layer];
-				Context.layer = Context.layer.duplicate();
+				function _next() {
+					Layers.duplicateLayer(Context.layer);
+				}
+				App.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Order Layers")) {
 				var target = Project.layers[step.prev_order];
@@ -212,13 +298,28 @@ class History {
 				iron.App.notifyOnInit(Layers.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
+				Context.layer = Project.layers[step.layer];
+					if (Context.layer.isGroupMask()) {
+						var group = Context.layer.parent;
+						var layers = group.getChildren();
+						layers.insert(0,Context.layer);
+						copyMergingLayers2(layers);	
+					}
+					else copyMergingLayers2([Context.layer,Context.layer.parent]);
+
 				function _next() {
-					Context.layer = Project.layers[step.layer];
-					copyToUndo(Context.layer.id, undoI, true);
 					Context.layer.applyMask();
 					Context.setLayer(Context.layer);
+					Context.layersPreviewDirty = true;
 				}
 				App.notifyOnNextFrame(_next);
+			}
+			else if (step.name == tr("Invert Mask")) {
+				function _next() {
+					Context.layer = Project.layers[step.layer];
+					Context.layer.invertMask();
+				}
+				iron.App.notifyOnInit(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];
@@ -229,13 +330,13 @@ class History {
 				Context.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
-			else if (step.name == tr("To Fill Layer")) {
+			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
 				Context.layer.fill_layer = Project.materials[step.material];
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
-			else if (step.name == tr("To Paint Layer")) {
+			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 				Context.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
 				Context.layer.swap(lay);
@@ -314,6 +415,22 @@ class History {
 	public static function newLayer() {
 		push(tr("New Layer"));
 	}
+	
+	public static function newBlackMask() {
+		push(tr("New Black Mask"));
+	}
+
+	public static function newWhiteMask() {
+		push(tr("New White Mask"));
+	}
+
+	public static function newFillMask() {
+		push(tr("New Fill Mask"));
+	}
+
+	public static function newGroup() {
+		push(tr("New Group"));
+	}
 
 	public static function duplicateLayer() {
 		push(tr("Duplicate Layer"));
@@ -345,8 +462,19 @@ class History {
 	}
 
 	public static function applyMask() {
-		copyToUndo(Context.layer.id, undoI, true);
+		if (Context.layer.isGroupMask()) {
+			var group = Context.layer.parent;
+			var layers = group.getChildren();
+			layers.insert(0,Context.layer);
+			copyMergingLayers2(layers);	
+		}
+		else copyMergingLayers2([Context.layer,Context.layer.parent]);
 		push(tr("Apply Mask"));
+	}
+
+	
+	public static function invertMask() {
+		push(tr("Invert Mask"));
 	}
 
 	@:keep
@@ -356,13 +484,23 @@ class History {
 	}
 
 	public static function toFillLayer() {
-		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
+		copyToUndo(Context.layer.id, undoI, false);
 		push(tr("To Fill Layer"));
 	}
 
+	public static function toFillMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Fill Mask"));
+	}
+
 	public static function toPaintLayer() {
-		copyToUndo(Context.layer.id, undoI, Context.layer.isMask());
+		copyToUndo(Context.layer.id, undoI, false);
 		push(tr("To Paint Layer"));
+	}
+
+	public static function toPaintMask() {
+		copyToUndo(Context.layer.id, undoI, true);
+		push(tr("To Paint Mask"));
 	}
 
 	public static function layerOpacity() {
@@ -447,6 +585,11 @@ class History {
 		var below = Project.layers.indexOf(lay) - 1;
 		lay = Project.layers[below];
 		copyToUndo(lay.id, undoI, Context.layer.isMask());
+	}
+
+	static function copyMergingLayers2(layers : Array<LayerSlot>) {
+		for (layer in layers)
+			copyToUndo(layer.id, undoI, layer.isMask());
 	}
 
 	static function swapActive() {
