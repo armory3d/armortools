@@ -1,7 +1,7 @@
 package arm.io;
 
-import kha.Color;
 import haxe.io.BytesInput;
+import kha.Color;
 import kha.Blob;
 import iron.data.Data;
 
