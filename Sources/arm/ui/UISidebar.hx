@@ -439,6 +439,7 @@ class UISidebar {
 			Context.ddirty = 2;
 			Context.rdirty = 2;
 			if (mouse.started()) {
+				History.pushUndo = true;
 				Scene.active.spawnObject(".Sphere", null, function(o: Object) {
 					iron.data.Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
 						var mo: MeshObject = cast o;
@@ -581,7 +582,7 @@ class UISidebar {
 
 
 		#if arm_physics
-		if (Context.particlePhysics) {
+		if (Context.tool == ToolParticle && Context.particlePhysics) {
 			down = false;
 		}
 		#end
