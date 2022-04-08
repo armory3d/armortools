@@ -99,8 +99,9 @@ class MakeParticle {
 			frag.add_uniform('vec3 particleHit', '_particleHit');
 			frag.write('dist = distance(particleHit, wpos.xyz) * 10.0;');
 			frag.write('if (dist > 1.0) discard;');
-			frag.write('float str = 1.0;');
+			frag.write('float str = clamp(pow(1.0 / dist * brushHardness * 0.2, 4.0), 0.0, 1.0) * opacity;');
 			frag.write('if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;');
+			frag.write('if (str == 0.0) discard;');
 			return;
 		}
 		#end
