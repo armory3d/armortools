@@ -143,6 +143,10 @@ class Context {
 	public static var particleHitX = 0.0;
 	public static var particleHitY = 0.0;
 	public static var particleHitZ = 0.0;
+	public static var lastParticleHitX = 0.0;
+	public static var lastParticleHitY = 0.0;
+	public static var lastParticleHitZ = 0.0;
+	public static var particleTimer: iron.system.Tween.TAnim = null;
 	public static var paintBody: arm.plugin.PhysicsBody = null;
 	#end
 

@@ -95,7 +95,6 @@ class ImportMesh {
 
 		#if arm_physics
 		Context.paintBody = null;
-		arm.util.ParticleUtil.initParticlePhysics();
 		#end
 	}
 

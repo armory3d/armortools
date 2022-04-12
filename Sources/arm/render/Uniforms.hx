@@ -220,6 +220,11 @@ class Uniforms {
 				v.set(Context.particleHitX, Context.particleHitY, Context.particleHitZ);
 				return v;
 			}
+			case "_particleHitLast": {
+				v = iron.object.Uniforms.helpVec;
+				v.set(Context.lastParticleHitX, Context.lastParticleHitY, Context.lastParticleHitZ);
+				return v;
+			}
 			#end
 		}
 

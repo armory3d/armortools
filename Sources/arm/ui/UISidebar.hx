@@ -434,12 +434,19 @@ class UISidebar {
 
 		#if arm_physics
 		if (Context.tool == ToolParticle && Context.particlePhysics && inViewport && !Context.paint2d) {
+			arm.util.ParticleUtil.initParticlePhysics();
 			var world = arm.plugin.PhysicsWorld.active;
 			world.lateUpdate();
 			Context.ddirty = 2;
 			Context.rdirty = 2;
 			if (mouse.started()) {
+				if (Context.particleTimer != null) {
+					iron.system.Tween.stop(Context.particleTimer);
+					Context.particleTimer.done();
+					Context.particleTimer = null;
+				}
 				History.pushUndo = true;
+				Context.particleHitX = Context.particleHitY = Context.particleHitZ = 0;
 				Scene.active.spawnObject(".Sphere", null, function(o: Object) {
 					iron.data.Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
 						var mo: MeshObject = cast o;
@@ -456,12 +463,15 @@ class UISidebar {
 						var body = new arm.plugin.PhysicsBody();
 						body.shape = arm.plugin.PhysicsBody.ShapeType.ShapeSphere;
 						body.mass = 1.0;
+						body.ccd = true;
+						mo.transform.radius /= 10; // Lower ccd radius
 						mo.addTrait(body);
+						mo.transform.radius *= 10;
 
 						var ray = iron.math.RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
-						body.applyImpulse(ray.direction.mult(0.1));
+						body.applyImpulse(ray.direction.mult(0.15));
 
-						iron.system.Tween.timer(5, mo.remove);
+						Context.particleTimer = iron.system.Tween.timer(5, mo.remove);
 					});
 				});
 			}
@@ -469,10 +479,14 @@ class UISidebar {
 			var pairs = world.getContactPairs(Context.paintBody);
 			if (pairs != null) {
 				for (p in pairs) {
+					Context.lastParticleHitX = Context.particleHitX != 0 ? Context.particleHitX : p.posA.x;
+					Context.lastParticleHitY = Context.particleHitY != 0 ? Context.particleHitY : p.posA.y;
+					Context.lastParticleHitZ = Context.particleHitZ != 0 ? Context.particleHitZ : p.posA.z;
 					Context.particleHitX = p.posA.x;
 					Context.particleHitY = p.posA.y;
 					Context.particleHitZ = p.posA.z;
 					Context.pdirty = 1;
+					break; // 1 pair for now
 				}
 			}
 		}

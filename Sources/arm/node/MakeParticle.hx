@@ -97,7 +97,14 @@ class MakeParticle {
 			vert.add_uniform('mat4 W', '_worldMatrix');
 			vert.write_attrib('wpos = mul(vec4(pos.xyz, 1.0), W);');
 			frag.add_uniform('vec3 particleHit', '_particleHit');
-			frag.write('dist = distance(particleHit, wpos.xyz) * 10.0;');
+			frag.add_uniform('vec3 particleHitLast', '_particleHitLast');
+
+			frag.write('vec3 pa = wpos.xyz - particleHit;');
+			frag.write('vec3 ba = particleHitLast - particleHit;');
+			frag.write('float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);');
+			frag.write('dist = length(pa - ba * h) * 10.0;');
+			// frag.write('dist = distance(particleHit, wpos.xyz) * 10.0;');
+
 			frag.write('if (dist > 1.0) discard;');
 			frag.write('float str = clamp(pow(1.0 / dist * brushHardness * 0.2, 4.0), 0.0, 1.0) * opacity;');
 			frag.write('if (particleHit.x == 0.0 && particleHit.y == 0.0 && particleHit.z == 0.0) str = 0.0;');
