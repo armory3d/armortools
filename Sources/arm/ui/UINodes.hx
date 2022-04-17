@@ -125,7 +125,7 @@ class UINodes {
 		var canvas = getCanvas(true);
 		var node = nodes.getNode(canvas.nodes, socket.node_id);
 		if (ui.inputReleasedR) {
-			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
+			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT" || node.type == "MATERIAL_INPUT") {
 				App.notifyOnNextFrame(function() {
 					arm.ui.UIMenu.draw(function(ui: Zui) {
 						ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
@@ -187,7 +187,10 @@ class UINodes {
 											socket.max = max;
 											socket.default_value = default_value;
 											UIBox.show = false;
-											NodesMaterial.syncSockets(node);
+											if (node.type != "MATERIAL_INPUT")
+												NodesMaterial.syncSockets(node);
+											else
+												UISidebar.inst.hwnd0.redraws = 2;
 											hwnd.redraws = 2;
 										}
 									}

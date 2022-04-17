@@ -748,6 +748,7 @@ class UISidebar {
 		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
 		if (ui.window(hwnd0, tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
 			TabLayers.draw();
+			TabProperties.draw();
 			TabHistory.draw();
 			TabPlugins.draw();
 		}

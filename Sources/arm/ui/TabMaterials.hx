@@ -212,7 +212,7 @@ class TabMaterials {
 		}
 	}
 
-	static function updateMaterial() {
+	public static function updateMaterial() {
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 		UINodes.inst.groupStack = [];
