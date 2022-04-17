@@ -20,13 +20,15 @@ class TabProperties {
             for (node in nodes) {
                 if (node.type == "MATERIAL_INPUT") {
                     for (n in 0...node.outputs.length) {
-                        ui.text(node.outputs[n].name);
                         
                         if (node.outputs[n].type == "RGBA") {
                             var h = Id.handle().nest(n);
                             var oldColor = Color.fromFloats(node.outputs[n].default_value[0],node.outputs[n].default_value[1],node.outputs[n].default_value[2]);
                             h.color = oldColor;
+                            ui.row([1/3, 2/3]);
+                            ui.text(node.outputs[n].name);
                             ui.text("", 0, h.color);
+                            
                             if (ui.isHovered && ui.inputDown) {
                                 UIMenu.draw(function(ui) {
                                     ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
@@ -48,7 +50,7 @@ class TabProperties {
                         else if (node.outputs[n].type == "VALUE") {
                             var h = Id.handle().nest(n);
                             h.value = node.outputs[n].default_value;
-                            var val = ui.slider(h,"",node.outputs[n].min,node.outputs[n].max);
+                            var val = ui.slider(h,node.outputs[n].name,node.outputs[n].min,node.outputs[n].max, true,100.0,true, Align.Left);
                             
                             if (h.changed) {
                                 node.outputs[n].default_value = val;
@@ -59,16 +61,17 @@ class TabProperties {
                             }
                         }
                         else if (node.outputs[n].type == "VECTOR") {
+                            ui.text(node.outputs[n].name);
                             var val = [0.0,0.0,0.0];
                             var h1 = Id.handle().nest(n,{selected: node.outputs[n].default_value[0]});
                             h1.value = node.outputs[n].default_value[0];
-                            val[0] = ui.slider(h1,"x",node.outputs[n].min,node.outputs[n].max);
+                            val[0] = ui.slider(h1,"x",node.outputs[n].min,node.outputs[n].max, true, 100.0, true, Align.Left);
                             var h2 = Id.handle().nest(n,{selected: node.outputs[n].default_value[1]});
                             h2.value = node.outputs[n].default_value[1];
-                            val[1] = ui.slider(h2,"y",node.outputs[n].min,node.outputs[n].max);
+                            val[1] = ui.slider(h2,"y",node.outputs[n].min,node.outputs[n].max, true, 100.0, true, Align.Left);
                             var h3 = Id.handle().nest(n,{selected: node.outputs[n].default_value[2]});
                             h3.value = node.outputs[n].default_value[2];
-                            val[2] = ui.slider(h3,"z",node.outputs[n].min,node.outputs[n].max);
+                            val[2] = ui.slider(h3,"z",node.outputs[n].min,node.outputs[n].max, true, 100.0, true, Align.Left);
                             
                             if (h1.changed || h2.changed || h3.changed) {
                                 node.outputs[n].default_value = val;
@@ -78,9 +81,11 @@ class TabProperties {
                                 });
                             }
                         }
+                        ui.separator(5, false);
                     }
                 } 
             }
+
 		}
 	}
 }
