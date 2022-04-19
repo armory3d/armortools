@@ -788,54 +788,43 @@ class TabLayers {
 				emisHandle.selected = l.paintEmis;
 				subsHandle.selected = l.paintSubs;
 				
-				l.paintBase = ui.check(baseHandle, tr("Base Color"));
+				ui.beginGroup(AltExclusive);
+				ui.check(baseHandle, tr("Base Color"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Base Color")]));
-				l.paintOpac = ui.check(opacHandle, tr("Opacity"));
+				ui.check(opacHandle, tr("Opacity"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Opacity")]));
-				l.paintNor = ui.check(norHandle, tr("Normal"));
+				ui.check(norHandle, tr("Normal"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal")]));
-				l.paintNorBlend = ui.check(norBlendHandle, tr("Normal Blending"));
+				ui.check(norBlendHandle, tr("Normal Blending"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal Blending")]));
-				l.paintOcc = ui.check(occHandle, tr("Occlusion"));
+				ui.check(occHandle, tr("Occlusion"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Occlusion")]));
-				l.paintRough = ui.check(roughHandle, tr("Roughness"));
+				ui.check(roughHandle, tr("Roughness"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Roughness")]));
-				l.paintMet = ui.check(metHandle, tr("Metallic"));
+				ui.check(metHandle, tr("Metallic"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Metallic")]));
-				l.paintHeight = ui.check(heightHandle, tr("Height"));
+				ui.check(heightHandle, tr("Height"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height")]));
-				l.paintHeightBlend = ui.check(heightBlendHandle, tr("Height Blending"));
+				ui.check(heightBlendHandle, tr("Height Blending"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height Blending")]));
-				l.paintEmis = ui.check(emisHandle, tr("Emission"));
+				ui.check(emisHandle, tr("Emission"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Emission")]));
-				l.paintSubs = ui.check(subsHandle, tr("Subsurface"));
+				ui.check(subsHandle, tr("Subsurface"));
 				if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Subsurface")]));
+				var changed = ui.endGroup();
 
-				if (baseHandle.changed ||
-					opacHandle.changed ||
-					norHandle.changed ||
-					norBlendHandle.changed ||
-					occHandle.changed ||
-					roughHandle.changed ||
-					metHandle.changed ||
-					heightHandle.changed ||
-					heightBlendHandle.changed ||
-					emisHandle.changed ||
-					subsHandle.changed) {
-
-					if (ui.isAltDown) {
-						l.paintBase = baseHandle.changed;
-						l.paintOpac = opacHandle.changed;
-						l.paintNor = norHandle.changed;
-						l.paintNorBlend = norBlendHandle.changed;
-						l.paintOcc = occHandle.changed;
-						l.paintRough = roughHandle.changed;
-						l.paintMet = metHandle.changed;
-						l.paintHeight = heightHandle.changed;
-						l.paintHeightBlend = heightBlendHandle.changed;
-						l.paintEmis = emisHandle.changed;
-						l.paintSubs = subsHandle.changed;
-					}
+				if (changed) {
+					l.paintBase = baseHandle.selected;
+					l.paintOpac = opacHandle.selected;
+					l.paintNor = norHandle.selected;
+					l.paintNorBlend = norBlendHandle.selected;
+					l.paintOcc = occHandle.selected;
+					l.paintRough = roughHandle.selected;
+					l.paintMet = metHandle.selected;
+					l.paintHeight = heightHandle.selected;
+					l.paintHeightBlend = heightBlendHandle.selected;
+					l.paintEmis = emisHandle.selected;
+					l.paintSubs = subsHandle.selected;
 					MakeMaterial.parseMeshMaterial();
 					UIMenu.keepOpen = true;
 				}
