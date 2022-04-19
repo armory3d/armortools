@@ -20,6 +20,7 @@ cd armorpaint
 armorcore\Kinc\make --from armorcore -g direct3d11
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
+# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
 ```
 
 **Linux**
@@ -69,6 +70,7 @@ git apply armorcore/patch/d3d12_raytrace.diff --directory=armorcore/Kinc
 armorcore\Kinc\make --from armorcore -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
+# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
 ```
 
 **Linux VKRT** *wip*
@@ -87,11 +89,12 @@ strip ArmorPaint
 armorcore\Kinc\make --from armorcore -g direct3d11 --vr oculus
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
+# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
 ```
 
 **Updating cloned repository**
 ```bash
-git pull origin master
+git pull origin main
 git submodule update --init --recursive
 # Delete `armorpaint/build` directory if present
 ```
