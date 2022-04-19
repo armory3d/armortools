@@ -270,25 +270,7 @@ class UIMenu {
 					ui.radio(modeHandle, i, modes[i]);
 				}
 
-				Context.viewportMode = modeHandle.position;
-				if (modeHandle.changed) {
-					var deferred = Context.renderMode != RenderForward && (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace);
-					if (deferred) {
-						RenderPath.active.commands = RenderPathDeferred.commands;
-					}
-					// else if (Context.viewportMode == ViewPathTrace) {
-					// }
-					else {
-						if (RenderPathForward.path == null) {
-							RenderPathForward.init(RenderPath.active);
-						}
-						RenderPath.active.commands = RenderPathForward.commands;
-					}
-					var _workspace = UIHeader.inst.worktab.position;
-					UIHeader.inst.worktab.position = SpacePaint;
-					MakeMaterial.parseMeshMaterial();
-					UIHeader.inst.worktab.position = _workspace;
-				}
+				if (modeHandle.changed) Context.setViewportMode(modeHandle.position);
 			}
 			else if (menuCategory == MenuCamera) {
 				if (menuButton(ui, tr("Reset"), Config.keymap.view_reset)) {
