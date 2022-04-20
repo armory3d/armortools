@@ -46,6 +46,7 @@
 	"view_zoom_in": "",
 	"view_zoom_out": "",
 	"view_distract_free": "f11",
+	"viewport_mode_menu": "ctrl+m",
 	"tool_brush": "b",
 	"tool_eraser": "e",
 	"tool_fill": "g",

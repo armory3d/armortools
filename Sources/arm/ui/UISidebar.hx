@@ -365,7 +365,7 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) Viewport.orbitOpposite();
 				else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutRepeat)) Viewport.zoom(0.2);
 				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) Viewport.zoom(-0.2);
-				else if (Operator.shortcut("ctrl+m")) {
+				else if (Operator.shortcut(Config.keymap.viewport_mode_menu)) {
 					UIMenu.draw(function(ui: Zui) {
 					var modeHandle = Id.handle();
 					modeHandle.position = Context.viewportMode;
