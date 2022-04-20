@@ -262,14 +262,14 @@ class UIMenu {
 					tr("Object ID"),
 					tr("Mask")
 				];
-				var shortcuts = [ "l", "b", "n", "o", "r", "m", "a", "h", "t", "1", "2", "3", "4" ];
+				var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "t", "1", "2", "3", "4"];
 				#if (kha_direct3d12 || kha_vulkan)
 				modes.push(tr("Path Traced"));
 				shortcuts.push("p");
 				#end
 				for (i in 0...modes.length) {
 					menuFill(ui);
-					ui.radio(modeHandle, i, modes[i], Config.keymap.viewport_mode_menu + ", " + shortcuts[i]);
+					ui.radio(modeHandle, i, modes[i], Config.keymap.viewport_mode + ", " + shortcuts[i]);
 				}
 
 				if (modeHandle.changed) Context.setViewportMode(modeHandle.position);

@@ -288,7 +288,7 @@ class Context {
 		setMaterial(Project.materials[i]);
 	}
 
-	public static function setViewportMode(mode : ViewportMode) {
+	public static function setViewportMode(mode: ViewportMode) {
 		if (mode == viewportMode) return;
 
 		viewportMode = mode;

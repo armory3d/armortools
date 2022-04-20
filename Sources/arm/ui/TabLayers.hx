@@ -835,7 +835,7 @@ class TabLayers {
 		// Remove empty group
 		if (l.isInGroup() && l.getContainingGroup().getChildren() == null) {
 			var g = l.getContainingGroup();
-			//Maybe some group masks are left
+			// Maybe some group masks are left
 			if (g.hasMasks()) {
 				for (m in g.getMasks()) {
 					Context.layer = m;
@@ -866,5 +866,4 @@ class TabLayers {
 		// Do not delete last layer
 		return numLayers > 1;
 	}
-
 }

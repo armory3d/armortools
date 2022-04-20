@@ -365,47 +365,47 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.view_orbit_opposite)) Viewport.orbitOpposite();
 				else if (Operator.shortcut(Config.keymap.view_zoom_in, ShortcutRepeat)) Viewport.zoom(0.2);
 				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) Viewport.zoom(-0.2);
-				else if (Operator.shortcut(Config.keymap.viewport_mode_menu)) {
+				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
 					UIMenu.draw(function(ui: Zui) {
-					var modeHandle = Id.handle();
-					modeHandle.position = Context.viewportMode;
-					ui.text(tr("Viewport mode"), Right, ui.t.HIGHLIGHT_COL);
-					var modes = [
-						tr("Lit"),
-						tr("Base Color"),
-						tr("Normal"),
-						tr("Occlusion"),
-						tr("Roughness"),
-						tr("Metallic"),
-						tr("Opacity"),
-						tr("Height"),
-						tr("TexCoord"),
-						tr("Object Normal"),
-						tr("Material ID"),
-						tr("Object ID"),
-						tr("Mask")
-					];
-					var shortcuts = [ "l", "b", "n", "o", "r", "m", "a", "h", "t", "1", "2", "3", "4" ];
-					#if (kha_direct3d12 || kha_vulkan)
-					modes.push(tr("Path Traced"));
-					shortcuts.push("p");
-					#end
-					for (i in 0...modes.length) {
-						ui.radio(modeHandle, i, modes[i], shortcuts[i]);
-					}
+						var modeHandle = Id.handle();
+						modeHandle.position = Context.viewportMode;
+						ui.text(tr("Viewport Mode"), Right, ui.t.HIGHLIGHT_COL);
+						var modes = [
+							tr("Lit"),
+							tr("Base Color"),
+							tr("Normal"),
+							tr("Occlusion"),
+							tr("Roughness"),
+							tr("Metallic"),
+							tr("Opacity"),
+							tr("Height"),
+							tr("TexCoord"),
+							tr("Object Normal"),
+							tr("Material ID"),
+							tr("Object ID"),
+							tr("Mask")
+						];
+						var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "t", "1", "2", "3", "4"];
+						#if (kha_direct3d12 || kha_vulkan)
+						modes.push(tr("Path Traced"));
+						shortcuts.push("p");
+						#end
+						for (i in 0...modes.length) {
+							ui.radio(modeHandle, i, modes[i], shortcuts[i]);
+						}
 
-					var index = shortcuts.indexOf(Keyboard.keyCode(ui.key));
-					if (ui.isKeyPressed && index != -1) {
-						modeHandle.position = index;
-						ui.changed = true;
-						Context.setViewportMode(modeHandle.position);
-					}
-					else if (modeHandle.changed) {
-						Context.setViewportMode(modeHandle.position);
-						ui.changed = true;
-					}
-				}, 14 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
-		}
+						var index = shortcuts.indexOf(Keyboard.keyCode(ui.key));
+						if (ui.isKeyPressed && index != -1) {
+							modeHandle.position = index;
+							ui.changed = true;
+							Context.setViewportMode(modeHandle.position);
+						}
+						else if (modeHandle.changed) {
+							Context.setViewportMode(modeHandle.position);
+							ui.changed = true;
+						}
+					}, 14 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
+				}
 
 			}
 		}

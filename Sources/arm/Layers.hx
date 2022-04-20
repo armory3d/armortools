@@ -457,7 +457,7 @@ class Layers {
 		Context.layerPreviewDirty = true;
 	}
 
-	public static function mergeGroup(l : LayerSlot) {
+	public static function mergeGroup(l: LayerSlot) {
 		if (!l.isGroup()) return null;
 
 		var children = l.getChildren();
