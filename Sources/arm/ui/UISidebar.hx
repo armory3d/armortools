@@ -406,7 +406,6 @@ class UISidebar {
 						}
 					}, 14 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
 				}
-
 			}
 		}
 
