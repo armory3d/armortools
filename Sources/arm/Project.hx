@@ -605,6 +605,20 @@ class Project {
 		for (g in materialGroups) if (g.canvas.name == groupName) return g;
 		return null;
 	}
+
+	public static function isMaterialGroupInUse(group: TNodeGroup) {
+		var canvases: Array<TNodeCanvas> = [];
+		for (m in materials) canvases.push(m.canvas);
+		for (m in materialGroups) canvases.push(m.canvas);
+		for (canvas in canvases) {
+			for (n in canvas.nodes) {
+				if (n.type == "GROUP" && n.name == group.canvas.name) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
 
 typedef TNodeGroup = {
