@@ -924,6 +924,7 @@ class UINodes {
 					}
 					ui.enabled = !Project.isMaterialGroupInUse(g);
 					if (ui.button("x", Center)) {
+						History.deleteMaterialGroup(g);
 						Project.materialGroups.remove(g);
 					}
 					

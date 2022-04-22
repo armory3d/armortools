@@ -1,5 +1,6 @@
 package arm;
 
+import arm.Project.TNodeGroup;
 import zui.Nodes;
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
@@ -186,6 +187,10 @@ class History {
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);
 			}
+			else if (step.name == tr("Delete Node Group")) {
+				Project.materialGroups.insert(step.canvas_group,{ canvas: null, nodes: new Nodes() });
+				swapCanvas(step);
+			}
 			else if (step.name == tr("New Material")) {
 				Context.material = Project.materials[step.material];
 				step.canvas = Context.material.canvas;
@@ -358,6 +363,10 @@ class History {
 			}
 			else if (step.name == tr("Edit Nodes")) {
 				swapCanvas(step);
+			}
+			else if (step.name == tr("Delete Node Group")) {
+				swapCanvas(step);
+				Project.materialGroups.remove(Project.materialGroups[step.canvas_group]);
 			}
 			else if (step.name == tr("New Material")) {
 				Context.material = new MaterialSlot(Project.materials[0].data);
@@ -538,6 +547,13 @@ class History {
 		step.canvas_type = canvas_type;
 		step.canvas_group = canvas_group;
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
+	}
+
+	public static function deleteMaterialGroup(group: TNodeGroup) {
+		var step = push(tr("Delete Node Group"));
+		step.canvas_type = CanvasMaterial;
+		step.canvas_group = Project.materialGroups.indexOf(group);
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(group.canvas));
 	}
 
 	static function push(name: String): TStep {
