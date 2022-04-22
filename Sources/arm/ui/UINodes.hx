@@ -328,28 +328,6 @@ class UINodes {
 	}
 
 	public static function onNodeRemove(node: TNode) {
-		if (node.type == "GROUP") { // Remove unused groups
-			var found = false;
-			var canvases: Array<TNodeCanvas> = [];
-			for (m in Project.materials) canvases.push(m.canvas);
-			for (m in Project.materialGroups) canvases.push(m.canvas);
-			for (canvas in canvases) {
-				for (n in canvas.nodes) {
-					if (n.type == "GROUP" && n.name == node.name) {
-						found = true;
-						break;
-					}
-				}
-			}
-			if (!found) {
-				for (g in Project.materialGroups) {
-					if (g.canvas.name == node.name) {
-						Project.materialGroups.remove(g);
-						break;
-					}
-				}
-			}
-		}
 	}
 
 	function onCanvasControl(): zui.Nodes.CanvasControl {
@@ -931,7 +909,9 @@ class UINodes {
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
 					ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
+					ui.fill(1, 1, ui._w / ui.SCALE() - 2, ui.t.BUTTON_H + 1 , ui.t.SEPARATOR_COL);
 					ui.enabled = canPlaceGroup(g.canvas.name);
+					ui.row([5 / 6, 1 / 6]);
 					if (ui.button("      " + g.canvas.name, Left)) {
 						pushUndo();
 						var canvas = getCanvas(true);
@@ -941,6 +921,11 @@ class UINodes {
 						nodes.nodesSelected = [node];
 						nodes.nodesDrag = true;
 					}
+					ui.enabled = !Project.isMaterialGroupInUse(g);
+					if (ui.button("x", Center)) {
+						Project.materialGroups.remove(g);
+					}
+					
 					ui.enabled = true;
 				}
 			}
