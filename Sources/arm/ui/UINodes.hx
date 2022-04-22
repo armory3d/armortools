@@ -665,9 +665,6 @@ class UINodes {
 			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
 			nodes.nodeCanvas(ui, c);
 			ui.inputEnabled = _inputEnabled;
-			if (isNodeMenuOperation) {
-				Zui.isCopy = Zui.isCut = Zui.isPaste = ui.isDeleteDown = false;
-			}
 
 			if (nodes.colorPickerCallback != null) {
 				Context.colorPickerPreviousTool = Context.tool;
@@ -710,6 +707,10 @@ class UINodes {
 						i--;
 					}
 				}
+			}
+
+			if (isNodeMenuOperation) {
+				Zui.isCopy = Zui.isCut = Zui.isPaste = ui.isDeleteDown = false;
 			}
 
 			// Recompile material on change
