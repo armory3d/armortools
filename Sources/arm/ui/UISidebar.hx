@@ -265,6 +265,7 @@ class UISidebar {
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 		if (!isTyping) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
+				UISidebar.inst.hwnd1.redraws = 2;
 				for (i in 1...10) if (kb.started(i + "")) Context.selectMaterial(i - 1);
 			}
 			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
