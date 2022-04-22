@@ -269,6 +269,7 @@ class UISidebar {
 				for (i in 1...10) if (kb.started(i + "")) Context.selectMaterial(i - 1);
 			}
 			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
+				UISidebar.inst.hwnd0.redraws = 2;
 				for (i in 1...10) if (kb.started(i + "")) Context.selectLayer(i - 1);
 			}
 		}

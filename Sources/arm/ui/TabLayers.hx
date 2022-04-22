@@ -292,6 +292,19 @@ class TabLayers {
 
 			state = ui.image(icon, 0xffffffff, iconH);
 
+			var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+			if (!isTyping) {
+				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
+					var number = Std.string(i + 1) ;
+					var width = ui.ops.font.width(ui.fontSize, number) + 10;
+					var height = ui.ops.font.height(ui.fontSize);
+					ui.g.color = ui.t.TEXT_COL;
+					ui.g.fillRect(uix, uiy, width, height);
+					ui.g.color = ui.t.ACCENT_COL;
+					ui.g.drawString(number, uix + 5, uiy);
+				}
+			}
+
 			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = null;
 			}
