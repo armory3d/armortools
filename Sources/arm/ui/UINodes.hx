@@ -45,7 +45,6 @@ class UINodes {
 	var recompileMatFinal = false;
 	var nodeSearchSpawn: TNode = null;
 	var nodeSearchOffset = 0;
-	var nodeSearchLast = "";
 	var lastCanvas: TNodeCanvas = null;
 	var lastNodeSelected: TNode = null;
 	var releaseLink = false;
@@ -469,22 +468,16 @@ class UINodes {
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			ui.textInput(searchHandle, "");
+			var search = ui.textInput(searchHandle, "", Left, true, true);
 			ui.changed = false;
 			if (first) {
 				first = false;
-				ui.startTextEdit(searchHandle); // Focus search bar
-				ui.textSelected = searchHandle.text;
 				searchHandle.text = "";
-				nodeSearchLast = "";
+				ui.startTextEdit(searchHandle); // Focus search bar
 			}
-			var search = searchHandle.text;
-			if (ui.textSelected != "") search = ui.textSelected;
 
-			if (search != nodeSearchLast) {
-				nodeSearchOffset = 0;
-				nodeSearchLast = search;
-			}
+			if (searchHandle.changed) nodeSearchOffset = 0;
+			
 			if (ui.isKeyPressed) { // Move selection
 				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
 				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
