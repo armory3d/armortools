@@ -1,5 +1,6 @@
 package arm.ui;
 
+import kha.input.KeyCode;
 import zui.Zui;
 import zui.Id;
 import arm.sys.Path;
@@ -54,8 +55,12 @@ class TabBrowser {
 			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == kha.input.KeyCode.F5)) {
 				refresh = true;
 			}
-			hsearch.text = ui.textInput(hsearch, tr("Search"));
-			if (hsearch.text != "" && ui.button(tr("X"))) {
+			hsearch.text = ui.textInput(hsearch, tr("Search"), Align.Left, true, true);
+			if (ui.isHovered) ui.tooltip(tr("Press ctrl+f to search and esc to cancel"));
+			if (ui.isCtrlDown && ui.isKeyPressed && ui.key == KeyCode.F) { // start searching via ctrl+f
+				ui.startTextEdit(hsearch);
+			}
+			if (hsearch.text != "" && (ui.button(tr("X")) || ui.isEscapeDown)) {
 				hsearch.text = "";
 			}
 			ui.endSticky();
