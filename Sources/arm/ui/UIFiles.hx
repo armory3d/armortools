@@ -146,6 +146,7 @@ class UIFiles {
 		var slotw = Std.int(70 * ui.SCALE());
 		var num = Std.int(ui._w / slotw);
 
+		ui._y += 4; // Don't cut off the border around selected materials
 		// Directory contents
 		for (row in 0...Std.int(Math.ceil(files.length / num))) {
 
@@ -212,7 +213,14 @@ class UIFiles {
 						}
 					}
 					if (icon != null) {
-						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
+						var w = 50;
+						if (i == selected) {
+							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						}
+						state = ui.image(icon, 0xffffffff, w * ui.SCALE());
 						if (ui.isHovered) {
 							ui.tooltipImage(icon);
 							ui.tooltip(f);
@@ -242,7 +250,14 @@ class UIFiles {
 						iconMap.set(key, icon);
 					}
 					if (icon != null) {
-						state = ui.image(icon, 0xffffffff, 50 * ui.SCALE());
+						var w = 50;
+						if (i == selected) {
+							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						}
+						state = ui.image(icon, 0xffffffff, w * ui.SCALE());
 						if (ui.isHovered) {
 							ui.tooltipImage(icon);
 							ui.tooltip(f);
