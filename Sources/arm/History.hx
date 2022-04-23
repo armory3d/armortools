@@ -188,7 +188,7 @@ class History {
 				swapCanvas(step);
 			}
 			else if (step.name == tr("Delete Node Group")) {
-				Project.materialGroups.insert(step.canvas_group,{ canvas: null, nodes: new Nodes() });
+				Project.materialGroups.insert(step.canvas_group, { canvas: null, nodes: new Nodes() });
 				swapCanvas(step);
 			}
 			else if (step.name == tr("New Material")) {

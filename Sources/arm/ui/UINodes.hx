@@ -910,7 +910,7 @@ class UINodes {
 			if (isGroupCategory) {
 				for (g in Project.materialGroups) {
 					ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
-					ui.fill(1, 1, ui._w / ui.SCALE() - 2, ui.t.BUTTON_H + 1 , ui.t.SEPARATOR_COL);
+					ui.fill(1, 1, ui._w / ui.SCALE() - 2, ui.t.BUTTON_H + 1, ui.t.SEPARATOR_COL);
 					ui.enabled = canPlaceGroup(g.canvas.name);
 					ui.row([5 / 6, 1 / 6]);
 					if (ui.button("      " + g.canvas.name, Left)) {

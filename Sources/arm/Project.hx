@@ -606,7 +606,7 @@ class Project {
 		return null;
 	}
 
-	public static function isMaterialGroupInUse(group: TNodeGroup) {
+	public static function isMaterialGroupInUse(group: TNodeGroup): Bool {
 		var canvases: Array<TNodeCanvas> = [];
 		for (m in materials) canvases.push(m.canvas);
 		for (m in materialGroups) canvases.push(m.canvas);
