@@ -412,6 +412,8 @@
     "Path": "パス",
     "Refresh": "リフレッシュ",
     "Search": "検索",
+    "ctrl+f to search": "ctrl+fで検索します",
+    "esc to cancel": "escでキャンセルします",
     "Cloud": "クラウド",
     "Brushes": "ブラシ",
     "Console": "コンソール",
