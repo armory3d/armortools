@@ -56,8 +56,8 @@ class TabBrowser {
 				refresh = true;
 			}
 			hsearch.text = ui.textInput(hsearch, tr("Search"), Align.Left, true, true);
-			if (ui.isHovered) ui.tooltip(tr("Press ctrl+f to search and esc to cancel"));
-			if (ui.isCtrlDown && ui.isKeyPressed && ui.key == KeyCode.F) { // start searching via ctrl+f
+			if (ui.isHovered) ui.tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+			if (ui.isCtrlDown && ui.isKeyPressed && ui.key == KeyCode.F) { // Start searching via ctrl+f
 				ui.startTextEdit(hsearch);
 			}
 			if (hsearch.text != "" && (ui.button(tr("X")) || ui.isEscapeDown)) {
