@@ -313,7 +313,7 @@ class UIHeader {
 				if (Context.tool == ToolText) {
 					var h = Id.handle();
 					h.text = Context.textToolText;
-					Context.textToolText = ui.textInput(h, "");
+					Context.textToolText = ui.textInput(h, "", Left, true, true);
 					if (h.changed) {
 						ui.g.end();
 						RenderUtil.makeTextPreview();
