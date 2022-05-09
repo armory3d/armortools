@@ -361,7 +361,7 @@ class TabLayers {
 		}
 		else {
 			if (ui.enabled && ui.inputEnabled &&
-				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._x + ui._w &&
+				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._windowW &&
 				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * ui.SCALE()) * 2) {
 				if (ui.inputStarted) {
 					Context.setLayer(l);
