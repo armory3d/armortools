@@ -4,6 +4,7 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.io.ExportTexture;
 import arm.io.ExportMesh;
+import arm.io.ExportArm;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.ui.BoxExport;
@@ -22,37 +23,51 @@ class Args {
 	static var exportTexturesPath = "";
 	static var exportMesh = false;
 	static var exportMeshPath = "";
+	static var exportMaterial = false;
+	static var exportMaterialPath = "";
 	static var background = false;
 
 	public static function parse() {
 		if (Krom.getArgCount() > 1) {
 			useArgs = true;
 
-			for (v in 0...Krom.getArgCount()) {
+			var i = 0;
+			while (i < Krom.getArgCount()) {
 				// Process each arg
-				var currentArg = Krom.getArg(v);
-				if (Path.isProject(currentArg)) {
-					Project.filepath = currentArg;
-				}
-				else if (Path.isMesh(currentArg) || Path.isTexture(currentArg)) {
-					assetPath = currentArg;
-				}
-				else if (currentArg == "--reload-mesh") {
+				var currentArg = Krom.getArg(i);
+				if (currentArg == "--reload-mesh") {
 					reimportMesh = true;
 				}
-				else if (currentArg == "--export-textures" && (v + 3) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-textures" && (i + 3) <= Krom.getArgCount()) {
 					exportTextures = true;
-					exportTexturesType = Krom.getArg(v + 1);
-					exportTexturesPreset = Krom.getArg(v + 2);
-					exportTexturesPath = Krom.getArg(v + 3);
+					++i;
+					exportTexturesType = Krom.getArg(i);
+					++i;
+					exportTexturesPreset = Krom.getArg(i);
+					++i;
+					exportTexturesPath = Krom.getArg(i);
+
 				}
-				else if (currentArg == "--export-mesh" && (v + 1) <= Krom.getArgCount()) {
+				else if (currentArg == "--export-mesh" && (i + 1) <= Krom.getArgCount()) {
 					exportMesh = true;
-					exportMeshPath = Krom.getArg(v + 1);
+					++i;
+					exportMeshPath = Krom.getArg(i);
+				}
+				else if (currentArg == "--export-material" && (i + 1) <= Krom.getArgCount()) {
+					exportMaterial = true;
+					++i;
+					exportMaterialPath = Krom.getArg(i);
 				}
 				else if (currentArg == "--b" || currentArg == "--background") {
 					background = true;
 				}
+				else if (Path.isProject(currentArg)) {
+					Project.filepath = currentArg;
+				}
+				else if (Path.isMesh(currentArg) || Path.isTexture(currentArg) || (!currentArg.startsWith("-") && Path.isFolder(currentArg))) {
+					assetPath = currentArg;
+				}
+				++i;
 			}
 		}
 	}
@@ -70,10 +85,11 @@ class Args {
 				else if (reimportMesh) {
 					Project.reimportMesh();
 				}
-				else if (exportTextures) {
+
+				if (exportTextures) {
 					if (exportTexturesType == "png" ||
-						exportTexturesType == "jpg"||
-						exportTexturesType == "exr16"||
+						exportTexturesType == "jpg" ||
+						exportTexturesType == "exr16" ||
 						exportTexturesType == "exr32") {
 						if (Path.isFolder(exportTexturesPath)) {
 							// Applying the correct format type from args
@@ -134,6 +150,11 @@ class Args {
 						trace("Invalid export directory");
 					}
 				}
+				else if (exportMaterial) {
+					Context.writeIconOnExport = true;
+					ExportArm.runMaterial(exportMaterialPath);
+				}
+
 				if (background) kha.System.stop();
 			});
 		}
