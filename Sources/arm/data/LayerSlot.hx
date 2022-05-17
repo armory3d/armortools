@@ -277,13 +277,17 @@ class LayerSlot {
 		l.objectMask = objectMask;
 		l.blending = blending;
 		l.uvType = uvType;
+		l.scale = scale;
+		l.angle = angle;
 		l.paintBase = paintBase;
 		l.paintOpac = paintOpac;
 		l.paintOcc = paintOcc;
 		l.paintRough = paintRough;
 		l.paintMet = paintMet;
 		l.paintNor = paintNor;
+		l.paintNorBlend = paintNorBlend;
 		l.paintHeight = paintHeight;
+		l.paintHeightBlend = paintHeightBlend;
 		l.paintEmis = paintEmis;
 		l.paintSubs = paintSubs;
 
