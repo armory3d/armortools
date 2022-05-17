@@ -64,7 +64,7 @@ class Args {
 				else if (Path.isProject(currentArg)) {
 					Project.filepath = currentArg;
 				}
-				else if (Path.isMesh(currentArg) || Path.isTexture(currentArg) || (!currentArg.startsWith("-") && Path.isFolder(currentArg))) {
+				else if (Path.isMesh(currentArg) || Path.isTexture(currentArg) || (i > 1 && !currentArg.startsWith("-") && Path.isFolder(currentArg))) {
 					assetPath = currentArg;
 				}
 				++i;
