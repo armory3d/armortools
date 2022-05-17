@@ -63,8 +63,10 @@ class UIBox {
 			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
 				if (ui.tab(Id.handle(), boxTitle)) {
+					var htext = Id.handle();
+					htext.text = boxText;
 					copyable ?
-						Ext.textArea(ui, Id.handle({ text: boxText }), false) :
+						Ext.textArea(ui, htext, false) :
 						ui.text(boxText);
 					ui.endElement();
 
