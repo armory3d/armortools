@@ -465,6 +465,9 @@ class History {
 
 		var step = push(tr("Merge Layers"));
 		step.layer -= 1; // Merge down
+		if (Context.layer.hasMasks()) {
+			step.layer -= Context.layer.getMasks().length;
+		}
 		steps.shift(); // Merge consumes 2 steps
 		undos--;
 		// TODO: use undo layer in Layers.mergeDown to save memory
