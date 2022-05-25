@@ -70,15 +70,7 @@ class BoxExport {
 			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
 			if (App.resHandle.changed) {
-				iron.App.notifyOnInit(Layers.resizeLayers);
-				UVUtil.uvmap = null;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemap = null;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
-				#if (kha_direct3d12 || kha_vulkan)
-				arm.render.RenderPathRaytrace.ready = false;
-				#end
+				Layers.onLayersResized();
 			}
 			#if (krom_android || krom_ios)
 			ui.combo(App.bitsHandle, ["8bit"], tr("Color"), true);
