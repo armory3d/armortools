@@ -272,7 +272,7 @@ class UIHeader {
 				Context.brushOpacity = ui.slider(Context.brushOpacityHandle, tr("Opacity"), 0.0, 1.0, true);
 				if (ui.isHovered) ui.tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", ["brush_opacity" => Config.keymap.brush_opacity]));
 
-				if (Context.tool == ToolBrush || Context.tool == ToolEraser || decalMask) {
+				if (Context.tool == ToolBrush || Context.tool == ToolEraser || Context.tool == ToolClone || decalMask) {
 					Context.brushHardness = ui.slider(Id.handle({ value: Context.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
 				}
 

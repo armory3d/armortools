@@ -66,7 +66,7 @@ class Uniforms {
 			case "_brushHardness": {
 				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-				if (Context.tool != ToolBrush && Context.tool != ToolEraser && !decalMask) return 1.0;
+				if (Context.tool != ToolBrush && Context.tool != ToolEraser && Context.tool != ToolClone && !decalMask) return 1.0;
 				var val = Context.brushHardness * Context.brushNodesHardness;
 				var pen = Input.getPen();
 				if (Config.raw.pressure_hardness && pen.down()) {
