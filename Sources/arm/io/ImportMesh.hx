@@ -19,6 +19,10 @@ class ImportMesh {
 
 	static var clearLayers = true;
 
+	#if arm_debug
+	static var timer: Float;
+	#end
+
 	public static function run(path: String, _clearLayers = true, replaceExisting = true) {
 		if (!Path.isMesh(path)) {
 			if (!Context.enableImportPlugin(path)) {
@@ -31,7 +35,7 @@ class ImportMesh {
 		Context.layerFilter = 0;
 
 		#if arm_debug
-		var timer = iron.system.Time.realTime();
+		timer = iron.system.Time.realTime();
 		#end
 
 		var p = path.toLowerCase();
