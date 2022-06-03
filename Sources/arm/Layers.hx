@@ -431,14 +431,19 @@ class Layers {
 	}
 
 	public static function mergeDown() {
+		History.beginMergeLayers();
+		
 		var l1 = Context.layer;
 
 		if (l1.isGroup()) {
 			l1 = mergeGroup(l1);
 		}
-		else if (l1.hasMasks()) { // It is a layer
-			applyMasks(l1);
-			Context.setLayer(l1);
+		else { // It is a layer
+			History.deleteLayer2(l1);
+			if (l1.hasMasks()) { 
+				applyMasks(l1);
+				Context.setLayer(l1);
+			}
 		}
 
 		var l0 = Project.layers[Project.layers.indexOf(l1) - 1];
@@ -446,14 +451,22 @@ class Layers {
 		if (l0.isGroup()) {
 			l0 = mergeGroup(l0);
 		}
-		else if (l0.hasMasks()) { // It is a layer
-			applyMasks(l0);
-			Context.setLayer(l0);
+		else {  // It is a layer
+			History.deleteLayer2(l0);
+			if (l0.hasMasks()) {
+				applyMasks(l0);
+				Context.setLayer(l0);
+			}
 		}
 
 		mergeLayer(l0, l1);
 		l1.delete();
+		
+		History.newLayer();
 		Context.setLayer(l0);
+		
+		History.end();
+		
 		Context.layerPreviewDirty = true;
 	}
 
@@ -468,7 +481,6 @@ class Layers {
 
 		for (i in 0...children.length - 1) {
 			Context.setLayer(children[children.length - 1 - i]);
-			History.mergeLayers();
 			Layers.mergeDown();
 		}
 

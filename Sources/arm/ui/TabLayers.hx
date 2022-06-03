@@ -623,7 +623,6 @@ class TabLayers {
 			if (ui.button(tr("Merge Down"), Left)) {
 				function _init() {
 					Context.setLayer(l);
-					History.mergeLayers();
 					Layers.mergeDown();
 					if (Context.layer.fill_layer != null) Context.layer.toPaintLayer();
 				}
