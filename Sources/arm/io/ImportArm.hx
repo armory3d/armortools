@@ -231,6 +231,10 @@ class ImportArm {
 			}
 
 			for (l in Project.layers) l.unload();
+			
+			// TODO: check if this is enough to keep ids consistent across project reloads
+			LayerSlot.lastId = 0;
+			
 			Project.layers = [];
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];

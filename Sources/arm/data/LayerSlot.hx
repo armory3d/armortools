@@ -42,11 +42,17 @@ class LayerSlot {
 	public var paintSubs = true;
 	public var decalMat = iron.math.Mat4.identity(); // Decal layer
 
-	public function new(ext = "", type = SlotLayer, parent: LayerSlot = null) {
+	public static var lastId = 0;
+
+	public function new(ext = "", type = SlotLayer, parent: LayerSlot = null, id: Int = -1) {
 		if (ext == "") {
-			id = 0;
-			for (l in Project.layers) if (l.id >= id) id = l.id + 1;
-			ext = id + "";
+			if (id < 0) {
+				this.id = lastId;
+				lastId += 1;
+			} else {
+				this.id = id;
+			}
+			ext = this.id + "";
 		}
 		this.ext = ext;
 		this.parent = parent;
@@ -628,5 +634,14 @@ class LayerSlot {
 		}
 
 		for (m in Project.materials) TabLayers.remapLayerPointers(m.canvas.nodes, TabLayers.fillLayerMap(pointers));
+	}
+
+	public static function findById(id: Int): LayerSlot {
+		for (l in Project.layers) {
+			if (l.id == id) {
+				return l;
+			}
+		}
+		return null;
 	}
 }
