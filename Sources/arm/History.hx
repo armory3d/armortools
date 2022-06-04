@@ -37,21 +37,22 @@ class History {
 		var step = steps[active];
 
 		if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
-			Context.layer = Project.layers[step.layer];
+			Context.layer = LayerSlot.findById(step.layer_id);
 			Context.layer.delete();
 			Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 		}
 		else if (step.name == tr("New Group")) {
-			Context.layer = Project.layers[step.layer];
+			Context.layer = LayerSlot.findById(step.layer_id);
 			// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
 			Project.layers[step.layer - 1].parent = null;
 			Context.layer.delete();
 			Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 		}
 		else if (step.name == tr("Delete Layer") || step.name == tr("Delete Layer (internal)")) {
-			var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
-			var l = new LayerSlot("", step.layer_type, parent);
-			Project.layers.insert(step.layer, l);
+			var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
+			var position = parent == null ? step.layer : Project.layers.indexOf(parent) - step.layer;
+			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
+			Project.layers.insert(position, l);
 			Context.setLayer(l);
 			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
@@ -205,7 +206,7 @@ class History {
 			var step = steps[active];
 
 			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
-				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
+				var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
 				if (step.name == tr("New Black Mask")) {
@@ -385,6 +386,7 @@ class History {
 			internal: false, 
 			num_children: 0, 
 			layer: 0, 
+			layer_id: 0,
 			layer_type: SlotLayer, 
 			layer_parent: -1, 
 			object: 0, 
@@ -407,6 +409,10 @@ class History {
 
 	public static function newLayer() {
 		push(tr("New Layer"));
+	}
+
+	public static function newLayer2(layer: LayerSlot) {
+		push(tr("New Layer"), layer);
 	}
 
 	public static function newBlackMask() {
@@ -436,7 +442,7 @@ class History {
 
 	public static function deleteLayer2(l: LayerSlot) {
 		swapActive2(l);
-		push(tr("Delete Layer (internal)"));
+		push(tr("Delete Layer (internal)"), l);
 	}
 
 	public static function clearLayer() {
@@ -452,6 +458,10 @@ class History {
 	public static function beginMergeLayers() {
 		begin(tr("Merge Layers"));
 		// TODO: use undo layer in Layers.mergeDown to save memory
+	}
+
+	public static function beginMergeGroup() {
+		begin(tr("Merge Layers"));
 	}
 
 	public static function mergeLayers(l0: LayerSlot, l1: LayerSlot) {
@@ -546,7 +556,7 @@ class History {
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(group.canvas));
 	}
 
-	static function push(name: String): TStep {
+	static function push(name: String, layer: LayerSlot = null): TStep {
 		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
 		kha.Window.get(0).title = filename + "* - " + Main.title;
@@ -558,7 +568,7 @@ class History {
 			redos = 0;
 		}
 
-		steps.push(prepareStep(name));
+		steps.push(prepareStep(name, layer));
 
 		if (!stepStack.isEmpty()) {
 			stepStack.first().num_children += 1;
@@ -590,25 +600,38 @@ class History {
 		return steps[steps.length - 1];
 	}
 
-	static function prepareStep(name: String): TStep {
+	static function prepareStep(name: String, layer: LayerSlot = null): TStep {
+		var internal = !stepStack.isEmpty();
+		if (layer == null) {
+			layer = Context.layer;
+		}
+		
 		var opos = Project.paintObjects.indexOf(Context.paintObject);
-		var lpos = Project.layers.indexOf(Context.layer);
+		var lpos = Project.layers.indexOf(layer);
 		var mpos = Project.materials.indexOf(Context.material);
 		var bpos = Project.brushes.indexOf(Context.brush);
+		
+		var layer_type = layer.isMask() ? SlotMask : layer.isGroup() ? SlotGroup : SlotLayer;
+
+		if (layer.parent != null) {
+			// Save position relative to the parent layer
+			lpos = Project.layers.indexOf(layer.parent) - lpos;
+		}
 
 		var step: TStep = {
 			name: name,
-			internal: !stepStack.isEmpty(),
+			internal: internal,
 			num_children: 0,
 			layer: lpos,
-			layer_type: Context.layer.isMask() ? SlotMask : Context.layer.isGroup() ? SlotGroup : SlotLayer,
-			layer_parent: Context.layer.parent == null ? -1 : Project.layers.indexOf(Context.layer.parent),
+			layer_id: layer.id,
+			layer_type: layer_type,
+			layer_parent: layer.parent == null ? -1 : layer.parent.id,
 			object: opos,
 			material: mpos,
 			brush: bpos,
-			layer_opacity: Context.layer.maskOpacity,
-			layer_object: Context.layer.objectMask,
-			layer_blending: Context.layer.blending
+			layer_opacity: layer.maskOpacity,
+			layer_object: layer.objectMask,
+			layer_blending: layer.blending
 		};
 
 		return step;
@@ -685,8 +708,8 @@ class History {
 		UINodes.inst.hwnd.redraws = 2;
 	}
 
-	static function begin(name: String) {
-		stepStack.add(prepareStep(name));	
+	static function begin(name: String, layer: LayerSlot = null) {
+		stepStack.add(prepareStep(name, layer));
 	}
 
 	public static function end() {
@@ -700,6 +723,7 @@ typedef TStep = {
 	public var internal: Bool;
 	public var num_children: Int;
 	public var layer: Int;
+	public var layer_id: Int;
 	public var layer_type: LayerSlotType;
 	public var layer_parent: Int;
 	public var object: Int;

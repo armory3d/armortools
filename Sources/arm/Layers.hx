@@ -462,8 +462,8 @@ class Layers {
 		mergeLayer(l0, l1);
 		l1.delete();
 		
-		History.newLayer();
 		Context.setLayer(l0);
+		History.newLayer2(l0);
 		
 		History.end();
 		
@@ -473,6 +473,7 @@ class Layers {
 	public static function mergeGroup(l: LayerSlot) {
 		if (!l.isGroup()) return null;
 
+		History.beginMergeGroup();
 		var children = l.getChildren();
 
 		if (children.length == 1 && children[0].hasMasks(false)) {
@@ -497,7 +498,9 @@ class Layers {
 		children[0].parent = null;
 		children[0].name = l.name;
 		if (children[0].fill_layer != null) children[0].toPaintLayer();
+		History.deleteLayer2(l);
 		l.delete();
+		History.end();
 		return children[0];
 	}
 
