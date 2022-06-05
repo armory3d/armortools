@@ -49,9 +49,10 @@ class History {
 			Context.layer.delete();
 			Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 		}
-		else if (step.name == tr("Delete Layer") || step.name == tr("Delete Layer (internal)")) {
+		else if (step.name == tr("Delete Layer")) {
 			var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
-			var position = parent == null ? step.layer : Project.layers.indexOf(parent) - step.layer;
+			// Always insert at the parent position if the parent is set
+			var position = parent == null ? step.layer : Project.layers.indexOf(parent);
 			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
 			Project.layers.insert(position, l);
 			Context.setLayer(l);
@@ -451,7 +452,7 @@ class History {
 
 	public static function deleteLayer2(l: LayerSlot) {
 		swapActive2(l);
-		push(tr("Delete Layer (internal)"), l);
+		push(tr("Delete Layer"), l);
 	}
 
 	public static function clearLayer() {
