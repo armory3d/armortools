@@ -503,12 +503,25 @@ class Layers {
 			Layers.applyMask(children[0], masks[masks.length - 1]);
 		}
 
+		if (children.length == 1) {
+			// A special case: the group only has one child. Because of that, it won't be
+			// saved to history in the `for` cycle just above where we merge down all the 
+			// children. Which is why we have to save it here manually.
+			History.deleteLayer2(children[0]);
+
+			// But then we also need to delete it, because it won't be deleted by 
+			// undoing "Merge Layers" (since we never called "Merge Layers" in this case).
+			History.newLayer2(children[0]);
+		}
 		children[0].parent = null;
 		children[0].name = l.name;
 		if (children[0].fill_layer != null) children[0].toPaintLayer();
+		
 		History.deleteLayer2(l);
 		l.delete();
+
 		History.end();
+		
 		return children[0];
 	}
 
