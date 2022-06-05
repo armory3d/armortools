@@ -33,8 +33,9 @@ class History {
 		undoInternal(active);
 	}
 
-	public static function undoInternal(active: Int) {
+	public static function undoInternal(active: Int): Int {
 		var step = steps[active];
+		var numChildrenTotal = 0;
 
 		if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 			Context.layer = LayerSlot.findById(step.layer_id);
@@ -84,8 +85,13 @@ class History {
 		}
 		else if (step.name == tr("Merge Layers")) {
 			// num_children is 1-based
+			// Each step can have more than one child and they may not be laid out
+			// sequentially since there could be more than one step in between them.
+			// This applies to _all_ children on all levels of nestedness.
+			// So we need to take this into account when iterating over children by
+			// skipping all children of the nested steps.
 			for (i in 1...step.num_children + 1) {
-				undoInternal(active - i); 
+				numChildrenTotal += undoInternal(active - i - numChildrenTotal);
 			}
 		}
 		else if (step.name == tr("Apply Mask")) {
@@ -198,6 +204,9 @@ class History {
 		UISidebar.inst.hwnd1.redraws = 2;
 		Context.ddirty = 2;
 		if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+		// Return total number of steps consumed during execution of this method
+		// (including any steps consumed during recursion)
+		return numChildrenTotal + step.num_children;
 	}
 
 	public static function redo() {
