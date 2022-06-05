@@ -439,7 +439,6 @@ class Layers {
 			l1 = mergeGroup(l1);
 		}
 		else { // It is a layer
-			History.deleteLayer2(l1);
 			if (l1.hasMasks()) { 
 				applyMasks(l1);
 				Context.setLayer(l1);
@@ -469,6 +468,7 @@ class Layers {
 		}
 
 		mergeLayer(l0, l1);
+		History.deleteLayer2(l1);
 		l1.delete();
 		
 		Context.setLayer(l0);
