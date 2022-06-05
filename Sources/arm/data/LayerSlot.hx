@@ -47,6 +47,9 @@ class LayerSlot {
 	public function new(ext = "", type = SlotLayer, parent: LayerSlot = null, id: Int = -1) {
 		if (ext == "") {
 			if (id < 0) {
+				// TODO: this is just a monotonically increasing id. It probably shouldn't be used
+				// in UI. A good practice is to have different increasing IDs for different kinds of
+				// layers, ie. Group 1, Layer 1, Layer 2, Group 2, Layer 3, Mask 1 etc.
 				this.id = lastId;
 				lastId += 1;
 			} else {
@@ -58,10 +61,10 @@ class LayerSlot {
 		this.parent = parent;
 
 		if (type == SlotGroup) {
-			name = "Group " + (id + 1);
+			name = "Group " + (this.id + 1);
 		}
 		else if (type == SlotLayer) {
-			name = "Layer " + (id + 1);
+			name = "Layer " + (this.id + 1);
 			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
 						 App.bitsHandle.position == Bits16 ? "RGBA64" :
 						 									 "RGBA128";
@@ -94,7 +97,7 @@ class LayerSlot {
 			texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.RGBA32);
 		}
 		else { // Mask
-			name = "Mask " + (id + 1);
+			name = "Mask " + (this.id + 1);
 			var format = "RGBA32"; // Full bits for undo support, R8 is used
 			blending = BlendAdd;
 
