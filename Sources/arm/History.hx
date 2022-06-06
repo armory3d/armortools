@@ -51,8 +51,18 @@ class History {
 		}
 		else if (step.name == tr("Delete Layer")) {
 			var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
-			// Always insert at the parent position if the parent is set
-			var position = parent == null ? step.layer : Project.layers.indexOf(parent);
+			var position = step.layer;
+			if (parent != null) { 
+				// If this layer has a parent, insert it either at parent's position
+				// or below the position of the last child. This is needed because children
+				// are restored in the reverse order, and if we just insert them at the 
+				// parent position, the resulting order will be reversed.
+				position = Project.layers.indexOf(parent);
+				var children = parent.getChildren();
+				if (children != null) {
+					position -= children.length;
+				}
+			}
 			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
 			Project.layers.insert(position, l);
 			Context.setLayer(l);
