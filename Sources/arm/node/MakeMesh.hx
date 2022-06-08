@@ -420,6 +420,14 @@ class MakeMesh {
 			else if (Context.viewportMode == ViewHeight && Context.layer.paintHeight) {
 				frag.write('fragColor[1] = vec4(vec3(height, height, height), 1.0);');
 			}
+			else if (Context.viewportMode == ViewEmission) {
+				frag.write('float emis = int(matid * 255.0) % 3 == 1 ? 1.0 : 0.0;');
+				frag.write('fragColor[1] = vec4(vec3(emis, emis, emis), 1.0);');
+			}
+			else if (Context.viewportMode == ViewSubsurface) {
+				frag.write('float subs = int(matid * 255.0) % 3 == 2 ? 1.0 : 0.0;');
+				frag.write('fragColor[1] = vec4(vec3(subs, subs, subs), 1.0);');
+			}
 			else if (Context.viewportMode == ViewTexCoord) {
 				frag.write('fragColor[1] = vec4(texCoord, 0.0, 1.0);');
 			}
