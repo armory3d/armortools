@@ -7,8 +7,6 @@ import iron.data.MeshData;
 import iron.data.Data;
 import iron.object.MeshObject;
 import iron.math.Vec4;
-import arm.ui.UIHeader;
-import arm.Enums;
 
 class MeshUtil {
 
