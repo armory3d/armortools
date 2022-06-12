@@ -57,10 +57,18 @@ class History {
 				// or below the position of the last child. This is needed because children
 				// are restored in the reverse order, and if we just insert them at the 
 				// parent position, the resulting order will be reversed.
+				// Same applies to masks.
 				position = Project.layers.indexOf(parent);
-				var children = parent.getChildren();
-				if (children != null) {
-					position -= children.length;
+				if (step.layer_type == LayerSlotType.SlotLayer) {
+					var children = parent.getChildren();
+					if (children != null) {
+						position -= children.length;
+					}
+				} else if (step.layer_type == LayerSlotType.SlotMask) {
+					var masks = parent.getMasks();
+					if (masks != null) {
+						position -= masks.length;
+					}
 				}
 			}
 			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
