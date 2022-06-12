@@ -170,6 +170,9 @@ class LayerSlot {
 			var _texpaint_preview = texpaint_preview;
 			texpaint_preview = other.texpaint_preview;
 			other.texpaint_preview = _texpaint_preview;
+			var _fill_layer = fill_layer;
+			fill_layer = other.fill_layer;
+			other.fill_layer = _fill_layer;
 		}
 
 		if (isLayer() && other.isLayer()) {
