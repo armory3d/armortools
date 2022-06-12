@@ -420,14 +420,30 @@ class Layers {
 	public static function applyMasks(l: LayerSlot) {
 		var masks = l.getMasks();
 
-		if (masks != null) {
-			for (i in 0...masks.length - 1) {
-				mergeLayer(masks[i + 1], masks[i]);
-				masks[i].delete();
-			}
-			masks[masks.length - 1].applyMask();
-			Context.layerPreviewDirty = true;
+		if (masks == null) {
+			return;
 		}
+
+		History.beginApplyMasks();
+
+		// Copy masks before merging them
+		for (i in 0...masks.length - 1) {
+			History.deleteLayer2(masks[i]);
+		}
+
+		for (i in 0...masks.length - 1) {
+			mergeLayer(masks[i + 1], masks[i]);
+			masks[i].delete();
+		}
+
+		// Apply the merged mask. 
+		// This will also record all neccessary steps to restore the layer on undo
+		// (and also will remove the merged mask)
+		masks[masks.length - 1].applyMask();
+
+		History.end();
+
+		Context.layerPreviewDirty = true;
 	}
 
 	public static function mergeDown() {
