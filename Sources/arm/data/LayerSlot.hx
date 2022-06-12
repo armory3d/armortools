@@ -231,6 +231,16 @@ class LayerSlot {
 	}
 
 	public function applyMask() {
+		// First, we back up the current mask layer, then we back up parent, then we mark the layer 
+		// with the applied mask for deletion.
+		// This is done in this order because the undo system will replay these steps in reverse order,
+		// and if we restore the mask after we delete the resulting layer the mask will be deleted too
+		// because its parent is still set to resulting layer. Also, parent layer should exist when the
+		// mask is restored.
+		History.beginApplyMask();
+		History.deleteLayer2(this);
+		History.deleteLayer2(parent);
+		History.newLayer2(parent);
 		if (parent.fill_layer != null) {
 			parent.toPaintLayer();
 		}
@@ -243,6 +253,7 @@ class LayerSlot {
 			Layers.applyMask(parent, this);
 		}
 		delete();
+		History.end();
 	}
 
 	public function duplicate(): LayerSlot {

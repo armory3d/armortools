@@ -605,7 +605,6 @@ class TabLayers {
 			if (l.isMask() && ui.button(tr("Apply"), Left)) {
 				function _init() {
 					Context.layer = l;
-					History.applyMask();
 					l.applyMask();
 					Context.setLayer(l.parent);
 					MakeMaterial.parseMeshMaterial();

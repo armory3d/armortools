@@ -94,45 +94,15 @@ class History {
 			Project.layers[step.prev_order] = Project.layers[step.layer];
 			Project.layers[step.layer] = target;
 		}
-		else if (step.name == tr("Merge Layers")) {
-			// num_children is 1-based
+		else if (step.name == tr("Merge Layers") || step.name == tr("Apply Mask") || step.name == tr("Apply Masks (internal)")) {
 			// Each step can have more than one child and they may not be laid out
 			// sequentially since there could be more than one step in between them.
-			// This applies to _all_ children on all levels of nestedness.
+			// This applies to _all_ children on all levels of nesting.
 			// So we need to take this into account when iterating over children by
 			// skipping all children of the nested steps.
 			for (i in 1...step.num_children + 1) {
 				numChildrenTotal += undoInternal(active - i - numChildrenTotal);
 			}
-		}
-		else if (step.name == tr("Apply Mask")) {
-			// First restore the layer(s)
-			var maskPosition = step.layer;
-			var currentLayer = null;
-			// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
-			if (Project.layers[maskPosition].isMask())
-				currentLayer = Project.layers[maskPosition].parent;
-			else if (Project.layers[maskPosition].isLayer() || Project.layers[maskPosition].isGroup())
-				currentLayer = Project.layers[maskPosition];
-
-			var layersToRestore = currentLayer.isGroup() ? currentLayer.getChildren() : [currentLayer];
-			layersToRestore.reverse();
-
-			for (layer in layersToRestore) {
-				// Replace the current layer's content with the old one
-				Context.layer = layer;
-				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-				var oldLayer = undoLayers[undoI];
-				Context.layer.swap(oldLayer);
-			}
-
-			// Now restore the applied mask
-			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
-			var mask = undoLayers[undoI];
-			Layers.newMask(false, currentLayer, maskPosition);
-			Context.layer.swap(mask);
-			Context.layersPreviewDirty = true;
-			Context.setLayer(Context.layer);
 		}
 		else if (step.name == tr("Invert Mask")) {
 			function _next() {
@@ -490,18 +460,13 @@ class History {
 		push(tr("Merge Layers (internal)"));
 	}
 
-	public static function applyMask() {
-		if (Context.layer.isGroupMask()) {
-			var group = Context.layer.parent;
-			var layers = group.getChildren();
-			layers.insert(0, Context.layer);
-			copyMergingLayers2(layers);	
-		}
-		else copyMergingLayers2([Context.layer, Context.layer.parent]);
-		push(tr("Apply Mask"));
+	public static function beginApplyMask() {
+		begin(tr("Apply Mask"));
 	}
 
-	
+	public static function beginApplyMasks() {
+		begin(tr("Apply Masks (internal)"));
+	}
 	public static function invertMask() {
 		push(tr("Invert Mask"));
 	}
