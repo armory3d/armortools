@@ -239,8 +239,8 @@ class LayerSlot {
 		// mask is restored.
 		History.beginApplyMask();
 		History.deleteLayer2(this);
-		History.deleteLayer2(parent);
-		History.newLayer2(parent);
+		History.applyMask(parent);
+
 		if (parent.fill_layer != null) {
 			parent.toPaintLayer();
 		}
@@ -384,6 +384,10 @@ class LayerSlot {
 		}
 	}
 
+	// TODO: these are used internally by several methods but don't
+	// record undo steps for themselves. I've added a hack that copies
+	// fill_layer when swapping as a stop-gap measure, but there's no
+	// guarantee that it actually works correctly.
 	public function toFillLayer() {
 		Context.setLayer(this);
 		fill_layer = Context.material;

@@ -513,6 +513,7 @@ class Layers {
 		var masks = l.getMasks();
 		if (masks != null) {
 			for (i in 0...masks.length - 1) {
+				// TODO: preserve the masks for undo with History.deleteLayer2(masks[i]);
 				mergeLayer(masks[i + 1], masks[i]);
 				masks[i].delete();
 			}

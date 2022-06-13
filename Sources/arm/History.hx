@@ -63,6 +63,11 @@ class History {
 					var children = parent.getChildren();
 					if (children != null) {
 						position -= children.length;
+						// Also account for any masks any of the children may have
+						for (l in parent.getChildren()) {
+							var masks = l.getMasks();
+							if (masks != null) {
+								position -= masks.length;
 					}
 				} else if (step.layer_type == LayerSlotType.SlotMask) {
 					var masks = parent.getMasks();
@@ -102,7 +107,7 @@ class History {
 			Project.layers[step.prev_order] = Project.layers[step.layer];
 			Project.layers[step.layer] = target;
 		}
-		else if (step.name == tr("Merge Layers") || step.name == tr("Apply Mask") || step.name == tr("Apply Masks (internal)")) {
+		else if (step.name == tr("Merge Layers") || step.name == tr("Merge Group (internal)") || step.name == tr("Apply Mask") || step.name == tr("Apply Masks (internal)")) {
 			// Each step can have more than one child and they may not be laid out
 			// sequentially since there could be more than one step in between them.
 			// This applies to _all_ children on all levels of nesting.
@@ -111,6 +116,11 @@ class History {
 			for (i in 1...step.num_children + 1) {
 				numChildrenTotal += undoInternal(active - i - numChildrenTotal);
 			}
+		else if (step.name == tr("Apply Mask (internal)")) {
+			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
+			var lay = undoLayers[undoI];
+			Context.setLayer(LayerSlot.findById(step.layer_id));
+			Context.layer.swap(lay);
 		}
 		else if (step.name == tr("Invert Mask")) {
 			function _next() {
@@ -444,6 +454,11 @@ class History {
 	public static function deleteLayer2(l: LayerSlot) {
 		swapActive2(l);
 		push(tr("Delete Layer"), l);
+	}
+
+	public static function applyMask(l: LayerSlot) {
+		swapActive2(l);
+		push(tr("Apply Mask (internal)"), l);
 	}
 
 	public static function clearLayer() {
