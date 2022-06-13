@@ -201,6 +201,10 @@ class History {
 	public static function redo() {
 		if (redos > 0) {
 			var active = steps.length - redos;
+			while (steps[active].internal) {
+				active += 1;
+				undos++;
+				redos--;
 			var step = steps[active];
 
 			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
@@ -270,8 +274,7 @@ class History {
 				Project.layers[step.layer] = target;
 			}
 			else if (step.name == tr("Merge Layers")) {
-				Context.layer = Project.layers[step.layer + 1];
-				iron.App.notifyOnInit(redoMergeLayers);
+				Context.layer = Project.layers[step.layer];
 				iron.App.notifyOnInit(Layers.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
@@ -459,13 +462,7 @@ class History {
 	}
 
 	public static function beginMergeGroup() {
-		begin(tr("Merge Layers"));
-	}
-
-	public static function mergeLayers(l0: LayerSlot, l1: LayerSlot) {
-		copyToUndo(l0.id, undoI, l0.isMask());
-		copyToUndo(l1.id, undoI, l1.isMask());
-		push(tr("Merge Layers (internal)"));
+		begin(tr("Merge Group (internal)"));
 	}
 
 	public static function beginApplyMask() {
@@ -475,6 +472,18 @@ class History {
 	public static function beginApplyMasks() {
 		begin(tr("Apply Masks (internal)"));
 	}
+
+	// public static function applyMask() {
+	// 	if (Context.layer.isGroupMask()) {
+	// 		var group = Context.layer.parent;
+	// 		var layers = group.getChildren();
+	// 		layers.insert(0, Context.layer);
+	// 		copyMergingLayers2(layers);	
+	// 	}
+	// 	else copyMergingLayers2([Context.layer, Context.layer.parent]);
+	// 	push(tr("Apply Mask"));
+	// }
+
 	public static function invertMask() {
 		push(tr("Invert Mask"));
 	}
