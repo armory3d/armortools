@@ -110,7 +110,7 @@ class BoxPreferences {
 							});
 						}
 						if (ui.button(tr("Import..."), Left)) {
-							UIFiles.show("arm", false, false, function(path: String) {
+							UIFiles.show("json", false, false, function(path: String) {
 								Data.getBlob(path, function(b: kha.Blob) {
 									var raw = Json.parse(b.toString());
 									iron.App.notifyOnInit(function() {
