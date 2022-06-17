@@ -52,30 +52,6 @@ class History {
 		else if (step.name == tr("Delete Layer")) {
 			var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
 			var position = step.layer;
-			if (parent != null) { 
-				// If this layer has a parent, insert it either at parent's position
-				// or below the position of the last child. This is needed because children
-				// are restored in the reverse order, and if we just insert them at the 
-				// parent position, the resulting order will be reversed.
-				// Same applies to masks.
-				position = Project.layers.indexOf(parent);
-				if (step.layer_type == LayerSlotType.SlotLayer) {
-					var children = parent.getChildren();
-					if (children != null) {
-						position -= children.length;
-						// Also account for any masks any of the children may have
-						for (l in parent.getChildren()) {
-							var masks = l.getMasks();
-							if (masks != null) {
-								position -= masks.length;
-					}
-				} else if (step.layer_type == LayerSlotType.SlotMask) {
-					var masks = parent.getMasks();
-					if (masks != null) {
-						position -= masks.length;
-					}
-				}
-			}
 			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
 			Project.layers.insert(position, l);
 			Context.setLayer(l);
@@ -116,6 +92,7 @@ class History {
 			for (i in 1...step.num_children + 1) {
 				numChildrenTotal += undoInternal(active - i - numChildrenTotal);
 			}
+		}
 		else if (step.name == tr("Apply Mask (internal)")) {
 			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
@@ -215,6 +192,7 @@ class History {
 				active += 1;
 				undos++;
 				redos--;
+			}
 			var step = steps[active];
 
 			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
@@ -629,11 +607,6 @@ class History {
 		var bpos = Project.brushes.indexOf(Context.brush);
 		
 		var layer_type = layer.isMask() ? SlotMask : layer.isGroup() ? SlotGroup : SlotLayer;
-
-		if (layer.parent != null) {
-			// Save position relative to the parent layer
-			lpos = Project.layers.indexOf(layer.parent) - lpos;
-		}
 
 		var step: TStep = {
 			name: name,
