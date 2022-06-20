@@ -50,7 +50,7 @@ class History {
 			Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 		}
 		else if (step.name == tr("Delete Layer")) {
-			var parent = step.layer_parent > 0 ? LayerSlot.findById(step.layer_parent) : null;
+			var parent = step.layer_parent >= 0 ? LayerSlot.findById(step.layer_parent) : null;
 			var position = step.layer;
 			var l = new LayerSlot("", step.layer_type, parent, step.layer_id);
 			Project.layers.insert(position, l);
