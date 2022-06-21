@@ -91,7 +91,7 @@ class History {
 			Project.layers[step.prev_order] = Project.layers[step.layer];
 			Project.layers[step.layer] = target;
 		}
-		else if (step.name == tr("Merge Layers") || step.name == tr("Merge Group (internal)") || step.name == tr("Apply Mask") || step.name == tr("Apply Masks (internal)")) {
+		else if (step.name == tr("Merge Layers") || step.name == tr("Merge Group") || step.name == tr("Apply Mask (internal)") || step.name == tr("Apply Masks")) {
 			// Each step can have more than one child and they may not be laid out
 			// sequentially since there could be more than one step in between them.
 			// This applies to _all_ children on all levels of nesting.
@@ -101,7 +101,7 @@ class History {
 				numChildrenTotal += undoInternal(active - i - numChildrenTotal);
 			}
 		}
-		else if (step.name == tr("Apply Mask (internal)")) {
+		else if (step.name == tr("Apply Mask")) {
 			undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 			var lay = undoLayers[undoI];
 			Context.setLayer(LayerSlot.findById(step.layer_id));
@@ -453,7 +453,7 @@ class History {
 
 	public static function applyMask(l: LayerSlot) {
 		swapActive2(l);
-		push(tr("Apply Mask (internal)"), l);
+		push(tr("Apply Mask"), l);
 	}
 
 	public static function clearLayer() {
@@ -472,15 +472,15 @@ class History {
 	}
 
 	public static function beginMergeGroup() {
-		begin(tr("Merge Group (internal)"));
+		begin(tr("Merge Group"));
 	}
 
 	public static function beginApplyMask() {
-		begin(tr("Apply Mask"));
+		begin(tr("Apply Mask (internal)"));
 	}
 
 	public static function beginApplyMasks() {
-		begin(tr("Apply Masks (internal)"));
+		begin(tr("Apply Masks"));
 	}
 
 	// public static function applyMask() {
