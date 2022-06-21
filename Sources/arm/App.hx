@@ -214,7 +214,7 @@ class App {
 	}
 
 	public static function w(): Int {
-		// Draw material preview
+		// Drawing material preview
 		if (UISidebar.inst != null && Context.materialPreview) {
 			return RenderUtil.matPreviewSize;
 		}
@@ -249,7 +249,7 @@ class App {
 	}
 
 	public static function h(): Int {
-		// Draw material preview
+		// Drawing material preview
 		if (UISidebar.inst != null && Context.materialPreview) {
 			return RenderUtil.matPreviewSize;
 		}

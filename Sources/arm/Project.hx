@@ -96,7 +96,7 @@ class Project {
 					}
 					if (ui.isHovered) ui.tooltip(path);
 				}
-				if (ui.button("Clear", Left)) {
+				if (ui.button(tr("Clear"), Left)) {
 					Config.raw.recent_projects = [];
 					Config.save();
 				}
