@@ -744,7 +744,7 @@ class App {
 		raw.keymap = "default.json";
 		raw.theme = "default.json";
 		raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
-		raw.undo_steps = 4;
+		raw.undo_steps = 32;
 		raw.pressure_radius = true;
 		raw.pressure_hardness = true;
 		raw.pressure_angle = false;
