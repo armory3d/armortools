@@ -23,7 +23,8 @@ class TabHistory {
 				#if arm_debug
 				var formatted_name = '${step.name} (${step.num_children})';
 				if (step.internal)
-					formatted_name = '<internal>' + formatted_name;
+					formatted_name = '<internal> ' + formatted_name;
+				formatted_name = '${i} ' + formatted_name;
 				ui.text(formatted_name);
 				#else
 				ui.text(step.name);

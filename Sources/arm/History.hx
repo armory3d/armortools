@@ -37,6 +37,14 @@ class History {
 		var step = steps[active];
 		var numChildrenTotal = 0;
 
+		#if arm_debug
+		trace('Undoing step:${active} name:"${step.name}" layer:${step.layer} layer_parent:${step.layer_parent}');
+		trace('Before:');
+		for (l in Project.layers) {
+			trace('    id:${l.id} parent:${l.parent != null ? l.parent.id : -1} name:"${l.name}"');
+		}
+		#end
+
 		if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 			Context.layer = LayerSlot.findById(step.layer_id);
 			Context.layer.delete();
@@ -180,6 +188,15 @@ class History {
 		UISidebar.inst.hwnd1.redraws = 2;
 		Context.ddirty = 2;
 		if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+
+		#if arm_debug
+		trace('Done undoing step:${active} name:"${step.name}" layer:${step.layer} layer_parent:${step.layer_parent}');
+		trace('After:');
+		for (l in Project.layers) {
+			trace('    id:${l.id} parent:${l.parent != null ? l.parent.id : -1} name:"${l.name}"');
+		}
+		#end
+
 		// Return total number of steps consumed during execution of this method
 		// (including any steps consumed during recursion)
 		return numChildrenTotal + step.num_children;
