@@ -468,19 +468,21 @@ class Layers {
 		}
 		else {
 			// This should be done _before_ History.newLayer (or strange things will happen).
-			// What we do here is we back up layer l0 as it will be used as a combined layer,
-			// but we also want to delete the combined layer on undo.
-			// The undo steps are executed in reverse order, so if we want our layer to
-			// exist after undoing this command, we should do deleteLayer first and newLayer second.
-			History.deleteLayer2(l0);
-			// Only delete the combined layer on undo if it wasn't a group, because if it was a group 
-			// the undo logic for "Merge Group" will delete it automatically (because it deletes the 
-			// layer that was the result of merging the group).
-			History.newLayer2(l0);
+			// Undoing of applyMasks should happen before History.newLayer, because the undo 
+			// steps are executed in reverse order.
 			if (l0.hasMasks()) {
 				applyMasks(l0);
 				Context.setLayer(l0);
 			}
+
+			// Back up layer l0 as it will be used as a combined layer,
+			// but we also want to delete the combined layer on undo.
+			History.deleteLayer2(l0);
+
+			// Only delete the combined layer on undo if it wasn't a group, because if it was a group 
+			// the undo logic for "Merge Group" will delete it automatically (because it deletes the 
+			// layer that was the result of merging the group).
+			History.newLayer2(l0);
 		}
 
 		mergeLayer(l0, l1);
