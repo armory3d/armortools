@@ -282,6 +282,12 @@ class History {
 				Context.layer = Project.layers[step.layer];
 				iron.App.notifyOnInit(Layers.mergeDown);
 			}
+			else if (step.name == tr("Merge Group")) {
+				function _next() {
+					Layers.mergeGroup(Project.layers[step.layer]);
+				}
+				App.notifyOnNextFrame(_next);
+			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.layer = Project.layers[step.layer];
 					if (Context.layer.isGroupMask()) {
