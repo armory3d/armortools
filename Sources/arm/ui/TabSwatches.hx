@@ -207,14 +207,14 @@ class TabSwatches {
 				}
 			}
 
-			// Draw the rightmost line next to the last swatch.
+			// Draw the rightmost line next to the last swatch
 			if (App.dragSwatch != null && dragPosition == Project.raw.swatches.length) {
 				ui._x = uix; // Reset the position because otherwise it would start in the row below
 				ui._y = uiy;
 				ui.fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);
 			}
 
-			// Currently there is no valid dragPosition so reset it.
+			// Currently there is no valid dragPosition so reset it
 			if (!dragPositionSet)
 				dragPosition = -1;
 

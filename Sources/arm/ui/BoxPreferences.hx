@@ -566,7 +566,7 @@ plugin.drawUI = function(ui) {
 								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
 									TabScript.hscript.text = blob.toString();
 									iron.data.Data.deleteBlob("plugins/" + f);
-									Console.info("Script opened");
+									Console.info(tr("Script opened"));
 								});
 
 							}

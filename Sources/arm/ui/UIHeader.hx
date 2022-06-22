@@ -97,7 +97,7 @@ class UIHeader {
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 					App.dragSwatch = Project.cloneSwatch(Context.pickedColor);
 				}
-				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor."));
+				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 				if (ui.isHovered && ui.inputReleased) {
 					UIMenu.draw(function(ui) {
 						ui.fill(0, 0, ui._w / ui.ops.scaleFactor, ui.t.ELEMENT_H * 9, ui.t.SEPARATOR_COL);
