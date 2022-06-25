@@ -1,6 +1,5 @@
 package arm;
 
-import arm.ui.TabMaterials;
 import haxe.io.Bytes;
 import kha.graphics2.truetype.StbTruetype;
 import kha.Image;
@@ -22,6 +21,7 @@ import arm.ui.UIFiles;
 import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.ui.UIMenubar;
+import arm.ui.TabMaterials;
 import arm.ui.TabSwatches;
 import arm.ui.TabLayers;
 import arm.ui.BoxExport;
@@ -31,11 +31,11 @@ import arm.io.ExportTexture;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.util.RenderUtil;
-import arm.Viewport;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.ConstData;
 import arm.node.MakeMaterial;
+import arm.Viewport;
 import arm.Camera;
 import arm.Enums;
 import arm.ProjectFormat;
