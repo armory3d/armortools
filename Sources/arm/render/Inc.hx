@@ -104,6 +104,7 @@ class Inc {
 			compass.transform.scale.set(0.4, 0.4, 0.4);
 			compass.transform.buildMatrix();
 
+			compass.frustumCulling = false;
 			compass.render(currentG, "overlay", []);
 
 			cam.P = P;
