@@ -53,7 +53,7 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 
 **iOS** *wip*
 ```bash
-git clone https://github.com/armory3d/armorpaint_plugins armorcore/Libraries/plugins
+git clone https://github.com/armory3d/armorpaint_plugins Libraries/plugins
 git apply armorcore/patch/ios_document_picker.diff --directory=armorcore/Kinc
 git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
 armorcore/Kinc/make ios --from armorcore -g metal
