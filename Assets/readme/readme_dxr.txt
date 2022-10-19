@@ -1,11 +1,10 @@
 ! This is an experimental build with hardware accelerated ray-tracing using DXR and Direct3D12 !
 
 Supported GPUs:
-- NVIDIA RTX 20 Series
-- NVIDIA RTX 30 Series
+- NVIDIA RTX 20 Series or better
 - AMD RX 6800 XT or better
 
-Up to date Windows 10 and graphics drivers required.
+Up to date Windows 10/11 and graphics drivers required.
 
 Learn more:
 https://en.wikipedia.org/wiki/DirectX_Raytracing

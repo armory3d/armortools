@@ -1,9 +1,8 @@
-! This is an experimental build with hardware accelerated ray-tracing powered by Vulkan Ray Tracing extension !
+! This is an experimental build with hardware accelerated ray-tracing powered by Vulkan Ray Tracing !
 
 Supported GPUs:
-- NVIDIA GTX 10 Series (GTX 1060 or better)
-- NVIDIA GTX 16 Series
-- NVIDIA RTX 20 Series
+- NVIDIA RTX 20 Series or better
+- AMD RX 6800 XT or better
 
 Requires Vulkan driver 455.46.04 or newer on NVIDIA cards:
 https://developer.nvidia.com/vulkan-driver
