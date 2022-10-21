@@ -40,8 +40,11 @@ class TabMeshes {
 			}
 
 			if (ui.button(tr("Calculate Normals"))) {
-				MeshUtil.calcNormals();
-				Context.ddirty = 2;
+				UIMenu.draw(function(ui: Zui) {
+					ui.text(tr("Normals"), Right, ui.t.HIGHLIGHT_COL);
+					if (ui.button(tr("Smooth"), Left)) { MeshUtil.calcNormals(true); Context.ddirty = 2; }
+					if (ui.button(tr("Flat"), Left)) { MeshUtil.calcNormals(false); Context.ddirty = 2; }
+				}, 3);
 			}
 
 			if (ui.button(tr("Geometry to Origin"))) {
