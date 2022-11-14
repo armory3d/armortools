@@ -134,7 +134,7 @@ else if (ios) {
 }
 
 if (process.platform !== "darwin" && !raytrace && !android && !ios) {
-	project.addDefine("rp_voxelao");
+	project.addDefine("rp_voxels");
 	project.addDefine("arm_voxelgi_revox");
 
 	if (process.platform === "win32" && win_hlsl) {

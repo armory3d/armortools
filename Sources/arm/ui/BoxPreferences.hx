@@ -400,7 +400,7 @@ class BoxPreferences {
 				#end
 
 				if (Context.renderMode == RenderDeferred) {
-					#if rp_voxelao
+					#if rp_voxels
 					ui.check(Context.hvxao, tr("Voxel AO"));
 					if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
 					if (Context.hvxao.changed) {

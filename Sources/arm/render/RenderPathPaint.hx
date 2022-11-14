@@ -260,14 +260,14 @@ class RenderPathPaint {
 				}
 			}
 			else {
-				#if rp_voxelao
+				#if rp_voxels
 				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
 						// Init voxel texture
 						var rp_gi = Config.raw.rp_gi;
 						Config.raw.rp_gi = true;
-						#if rp_voxelao
+						#if rp_voxels
 						Inc.initGI();
 						#end
 						Config.raw.rp_gi = rp_gi;
@@ -310,7 +310,7 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
-				#if rp_voxelao
+				#if rp_voxels
 				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}

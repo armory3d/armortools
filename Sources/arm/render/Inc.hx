@@ -19,7 +19,7 @@ class Inc {
 	static var lastX = -1.0;
 	static var lastY = -1.0;
 
-	#if rp_voxelao
+	#if rp_voxels
 	static var voxelsCreated = false;
 	#end
 
@@ -40,12 +40,12 @@ class Inc {
 			}
 			path.resize();
 		}
-		#if rp_voxelao
+		#if rp_voxels
 		if (!voxelsCreated) initGI();
 		#end
 	}
 
-	#if rp_voxelao
+	#if rp_voxels
 	public static function initGI(tname = "voxels") {
 		var config = Config.raw;
 		if (config.rp_gi != true || voxelsCreated) return;

@@ -2,7 +2,7 @@ package arm.node;
 
 class MakeVoxel {
 
-	#if rp_voxelao
+	#if rp_voxels
 	public static function run(data: iron.data.ShaderData.ShaderContext) {
 		var structure = new kha.graphics4.VertexStructure();
 		structure.add("pos", kha.graphics4.VertexData.Short4Norm);
