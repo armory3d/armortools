@@ -38,7 +38,7 @@ class MakeMaterial {
 			if (c.raw.name == "mesh") {
 				m.shader.raw.contexts.remove(c.raw);
 				m.shader.contexts.remove(c);
-				c.delete();
+				deleteContext(c);
 				break;
 			}
 		}
@@ -51,7 +51,7 @@ class MakeMaterial {
 					if (c.raw.name == "mesh" + j) {
 						m.shader.raw.contexts.remove(c.raw);
 						m.shader.contexts.remove(c);
-						c.delete();
+						deleteContext(c);
 						i--;
 						break;
 					}
@@ -131,7 +131,7 @@ class MakeMaterial {
 			m.shader.contexts.remove(sc);
 		}
 		var con = MakeParticle.run(new NodeShaderData({ name: "MaterialParticle", canvas: null }));
-		if (sc != null) sc.delete();
+		if (sc != null) deleteContext(sc);
 		sc = new ShaderContext(con.data, function(sc: ShaderContext){});
 		m.shader.raw.contexts.push(sc.raw);
 		m.shader.contexts.push(sc);
@@ -163,7 +163,7 @@ class MakeMaterial {
 			}
 		}
 
-		if (scon != null) scon.delete();
+		if (scon != null) deleteContext(scon);
 
 		var compileError = false;
 		scon = new ShaderContext(con.data, function(scon: ShaderContext) {
@@ -208,7 +208,7 @@ class MakeMaterial {
 			if (c.raw.name == "paint") {
 				m.shader.raw.contexts.remove(c.raw);
 				m.shader.contexts.remove(c);
-				if (c != defaultScon) c.delete();
+				if (c != defaultScon) deleteContext(c);
 				break;
 			}
 		}
@@ -496,5 +496,11 @@ class MakeMaterial {
 	public static inline function voxelgiHalfExtents():String {
 		var ext = Context.vxaoExt;
 		return 'const vec3 voxelgiHalfExtents = vec3($ext, $ext, $ext);';
+	}
+
+	static function deleteContext(c: ShaderContext) {
+		arm.App.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
+			c.delete();
+		});
 	}
 }
