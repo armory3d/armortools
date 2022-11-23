@@ -487,13 +487,10 @@ class MakeMesh {
 	}
 
 	static inline function getMaxTextures(): Int {
-		#if (kha_direct3d11 || kha_metal)
+		#if kha_direct3d11
 		return 128 - 66;
-		#elseif (kha_direct3d12 || kha_vulkan)
-		// CommandList5Impl->textureCount = 16;
-		return 16 - 3;
 		#else
-		return 16 - 3;
+		return 16 - 3; // G4onG5/G4.c.h MAX_TEXTURES
 		#end
 	}
 }
