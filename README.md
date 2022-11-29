@@ -46,7 +46,7 @@ git apply armorcore/patch/android_document_picker.diff --directory=armorcore/Kin
 armorcore/Kinc/make android --from armorcore -g opengl
 cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 # Manual tweaking is required for now:
-# https://github.com/armory3d/armorcore/blob/master/kincfile.js#L68
+# https://github.com/armory3d/armorcore/blob/master/kfile.js#L136
 # Open generated Android Studio project at `build/ArmorPaint`
 # Build for device
 ```
