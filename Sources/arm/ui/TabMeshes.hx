@@ -15,11 +15,12 @@ class TabMeshes {
 		if (ui.tab(UIStatus.inst.statustab, tr("Meshes")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
-			#if arm_touchui
-			ui.row([1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8]);
-			#else
-			ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14, 1 / 14, 1 / 14]);
-			#end
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14, 1 / 14, 1 / 14]);
+			}
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {

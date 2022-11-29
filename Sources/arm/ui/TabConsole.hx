@@ -20,12 +20,20 @@ class TabConsole {
 		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
-			#if (krom_windows || krom_linux || krom_darwin)
-			ui.row([1 / 14, 1 / 14, 1 / 14]); // Copy
-			#elseif arm_touchui
-			ui.row([1 / 4, 1 / 4]);
+			#if (krom_windows || krom_linux || krom_darwin) // Copy
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 4, 1 / 4, 1 / 4]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 14, 1 / 14]);
+			}
 			#else
-			ui.row([1 / 14, 1 / 14]);
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 4, 1 / 4]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 14]);
+			}
 			#end
 
 			if (ui.button(tr("Clear"))) {

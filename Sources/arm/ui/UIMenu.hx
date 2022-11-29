@@ -513,25 +513,26 @@ class UIMenu {
 
 	static function menuSeparator(ui: Zui) {
 		ui._y++;
-		#if arm_touchui
-		ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
-		#else
-		ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
-		#end
+		if (Config.raw.touch_ui) {
+			ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
+		}
+		else {
+			ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
+		}
 	}
 
 	static function menuButton(ui: Zui, text: String, label = ""): Bool {
 		menuFill(ui);
-		#if arm_touchui
-		label = "";
-		#end
+		if (Config.raw.touch_ui) {
+			label = "";
+		}
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 
 	static function menuAlign(ui: Zui) {
-		#if !arm_touchui
-		ui.row([1 / 8, 7 / 8]);
-		ui.endElement();
-		#end
+		if (!Config.raw.touch_ui) {
+			ui.row([1 / 8, 7 / 8]);
+			ui.endElement();
+		}
 	}
 }

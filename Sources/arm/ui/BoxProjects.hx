@@ -4,8 +4,6 @@ import zui.Zui;
 import zui.Id;
 import arm.io.ImportArm;
 
-#if arm_touchui
-
 class BoxProjects {
 
 	public static var htab = Id.handle();
@@ -168,5 +166,3 @@ class BoxProjects {
 		UIBox.hwnd.dragY = Std.int(-apph / 2 + mh / 2);
 	}
 }
-
-#end

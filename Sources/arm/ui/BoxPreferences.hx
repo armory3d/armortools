@@ -30,9 +30,9 @@ class BoxPreferences {
 	public static function show() {
 
 		UIBox.showCustom(function(ui: Zui) {
-			#if arm_touchui
-			alignToLeftSide();
-			#end
+			if (Config.raw.touch_ui) {
+				alignToLeftSide();
+			}
 
 			if (ui.tab(htab, tr("Interface"), true)) {
 
@@ -51,12 +51,13 @@ class BoxPreferences {
 
 				var hscale = Id.handle({ value: Config.raw.window_scale });
 				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
-				if (!hscale.changed && Context.hscaleWasChanged) {
+				if (Context.hscaleWasChanged && !ui.inputDown) {
+					Context.hscaleWasChanged = false;
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					setScale();
 				}
-				Context.hscaleWasChanged = hscale.changed;
+				if (hscale.changed) Context.hscaleWasChanged = true;
 
 				var hspeed = Id.handle({ value: Config.raw.camera_zoom_speed });
 				Config.raw.camera_zoom_speed = ui.slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
@@ -88,6 +89,16 @@ class BoxPreferences {
 				if (ui.changed) {
 					UISidebar.inst.tagUIRedraw();
 				}
+
+				#if !(kha_android || kha_ios)
+				ui.changed = false;
+				Config.raw.touch_ui = ui.check(Id.handle({ selected: Config.raw.touch_ui }), tr("Touch UI"));
+				if (ui.changed) {
+					Zui.touchControls = Config.raw.touch_ui;
+					Config.loadTheme(Config.raw.theme);
+					UISidebar.inst.tagUIRedraw();
+				}
+				#end
 
 				// ui.text("Node Editor");
 				// var gridSnap = ui.check(Id.handle({ selected: false }), "Grid Snap");
@@ -591,7 +602,6 @@ plugin.drawUI = function(ui) {
 		}, 600, 400, function() { Config.save(); });
 	}
 
-	#if arm_touchui
 	static function alignToLeftSide() {
 		@:privateAccess UIBox.modalH = Std.int((kha.System.windowHeight() - UIHeader.inst.headerh) / App.uiBox.SCALE());
 		var appw = kha.System.windowWidth();
@@ -601,7 +611,6 @@ plugin.drawUI = function(ui) {
 		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);
 		UIBox.hwnd.dragY = Std.int(-apph / 2 + mh / 2 + UIHeader.inst.headerh);
 	}
-	#end
 
 	public static function fetchThemes() {
 		themes = File.readDirectory(Path.data() + Path.sep + "themes");

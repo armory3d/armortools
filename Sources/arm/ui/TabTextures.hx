@@ -21,11 +21,12 @@ class TabTextures {
 		if (ui.tab(UIStatus.inst.statustab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
-			#if arm_touchui
-			ui.row([1 / 4, 1 / 4]);
-			#else
-			ui.row([1 / 14, 1 / 14]);
-			#end
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 4, 1 / 4]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 14]);
+			}
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {

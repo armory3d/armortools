@@ -197,11 +197,11 @@ class App {
 
 					Args.run();
 
-					#if arm_touchui
-					if (Config.raw.recent_projects.length > 0) {
-						arm.ui.BoxProjects.show();
+					if (Config.raw.touch_ui) {
+						if (Config.raw.recent_projects.length > 0) {
+							arm.ui.BoxProjects.show();
+						}
 					}
-					#end
 				});
 			});
 		});
@@ -771,5 +771,10 @@ class App {
 		raw.layer_res = Res2048;
 		raw.dilate = DilateInstant;
 		raw.dilate_radius = 2;
+		#if arm_touchui
+		raw.touch_ui = true;
+		#else
+		raw.touch_ui = false;
+		#end
 	}
 }
