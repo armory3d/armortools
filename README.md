@@ -59,7 +59,7 @@ git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
 armorcore/Kinc/make --from armorcore -g metal ios
 cp -a build/krom/ armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
-# Set iOS Deployment Target to 11.0
+# Set iOS Deployment Target to 14.0
 # Build for device in release mode
 ```
 
