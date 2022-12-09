@@ -23,15 +23,6 @@ class UIFiles {
 	static var offline = false;
 
 	public static function show(filters: String, isSave: Bool, openMultiple: Bool, filesDone: String->Void) {
-
-		#if krom_android
-		if (isSave) {
-			if (path == null) path = defaultPath;
-			showCustom(filters, isSave, filesDone);
-		}
-		else {
-		#end
-
 		if (isSave) {
 			path = Krom.saveDialog(filters, "");
 			if (path != null) {
@@ -49,41 +40,35 @@ class UIFiles {
 					while (path.indexOf(Path.sep + Path.sep) >= 0) path = path.replace(Path.sep + Path.sep, Path.sep);
 					path = path.replace("\r", "");
 					filename = path.substr(path.lastIndexOf(Path.sep) + 1);
-					filesDone(path); 
+					filesDone(path);
 				}
 			}
 		}
-	
+
 		releaseKeys();
-
-		#if krom_android
-		}
-		#end
 	}
 
-	#if krom_android
-	@:access(zui.Zui)
-	static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
-		var known = false;
-		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(Id.handle(), tr("File Browser"))) {
-				var pathHandle = Id.handle();
-				var fileHandle = Id.handle();
-				ui.row([6 / 10, 2 / 10, 2 / 10]);
-				filename = ui.textInput(fileHandle, tr("File"));
-				ui.text("*." + filters, Center);
-				if (ui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
-					UIBox.show = false;
-					filesDone((known || isSave) ? path : path + Path.sep + filename);
-					if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
-				}
-				known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
-				path = fileBrowser(ui, pathHandle, false);
-				if (pathHandle.changed) ui.currentWindow.redraws = 3;
-			}
-		}, 600, 500);
-	}
-	#end
+	// @:access(zui.Zui)
+	// static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
+	// 	var known = false;
+	// 	UIBox.showCustom(function(ui: Zui) {
+	// 		if (ui.tab(Id.handle(), tr("File Browser"))) {
+	// 			var pathHandle = Id.handle();
+	// 			var fileHandle = Id.handle();
+	// 			ui.row([6 / 10, 2 / 10, 2 / 10]);
+	// 			filename = ui.textInput(fileHandle, tr("File"));
+	// 			ui.text("*." + filters, Center);
+	// 			if (ui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
+	// 				UIBox.show = false;
+	// 				filesDone((known || isSave) ? path : path + Path.sep + filename);
+	// 				if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
+	// 			}
+	// 			known = Path.isTexture(path) || Path.isMesh(path) || Path.isProject(path);
+	// 			path = fileBrowser(ui, pathHandle, false);
+	// 			if (pathHandle.changed) ui.currentWindow.redraws = 3;
+	// 		}
+	// 	}, 600, 500);
+	// }
 
 	static function releaseKeys() {
 		// File dialog may prevent firing key up events
@@ -344,8 +329,7 @@ class UIFiles {
 		#if krom_windows
 		"C:\\Users"
 		#elseif krom_android
-		// "/sdcard/Android/data/org.armorpaint/files"
-		"/sdcard/Download"
+		"/storage/emulated/0/Download"
 		#elseif krom_darwin
 		"/Users"
 		#else

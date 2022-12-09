@@ -388,7 +388,7 @@ class App {
 			var inNodes = UINodes.inst.show &&
 						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
-			var inSwatches = UIStatus.inst.statustab.position == 4 && 
+			var inSwatches = UIStatus.inst.statustab.position == 4 &&
 						  mx > iron.App.x() && mx < iron.App.x() + System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] &&
 						  my > System.windowHeight() - Config.raw.layout[LayoutStatusH];
 
