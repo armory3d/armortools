@@ -492,11 +492,12 @@ class UIMenu {
 		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
+		// Prevent the menu going out of screen
 		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
 		if (menuX + menuW > System.windowWidth()) {
 			menuX = Std.int(System.windowWidth() - menuW);
 		}
-		var menuH = menuElements * 28; // ui.t.ELEMENT_H
+		var menuH = Std.int(menuElements * 28 * App.uiMenu.SCALE()); // ui.t.ELEMENT_H
 		if (menuY + menuH > System.windowHeight()) {
 			menuY = System.windowHeight() - menuH;
 			menuX += 1; // Move out of mouse focus
