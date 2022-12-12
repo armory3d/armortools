@@ -354,7 +354,7 @@ class MakeMesh {
 					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
 					frag.vVec = true;
 					frag.write('float dotNV = max(dot(n, vVec), 0.0);');
-					frag.write('vec2 envBRDF = texture(senvmapBrdf, vec2(roughness, 1.0 - dotNV)).xy;');
+					frag.write('vec2 envBRDF = texelFetch(senvmapBrdf, ivec2(vec2(roughness, 1.0 - dotNV) * 256.0), 0).xy;');
 					frag.add_uniform('int envmapNumMipmaps', '_envmapNumMipmaps');
 					frag.add_uniform('vec4 envmapData', '_envmapData'); // angle, sin(angle), cos(angle), strength
 					frag.write('vec3 wreflect = reflect(-vVec, n);');
