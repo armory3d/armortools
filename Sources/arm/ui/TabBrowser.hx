@@ -37,18 +37,37 @@ class TabBrowser {
 			}
 
 			ui.beginSticky();
+			var step = (1 - bookmarksW / ui._w);
 			if (hsearch.text != "") {
-				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75, (1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.17, (1 - bookmarksW / ui._w) * 0.03]);
+				ui.row([bookmarksW / ui._w, step * 0.745, step * 0.055, step * 0.17, step * 0.03]);
 			}
 			else {
-				ui.row([bookmarksW / ui._w, (1 - bookmarksW / ui._w) * 0.75, (1 - bookmarksW / ui._w) * 0.05, (1 - bookmarksW / ui._w) * 0.2]);
+				ui.row([bookmarksW / ui._w, step * 0.745, step * 0.055, step * 0.2]);
 			}
 
 			if (ui.button("+")) {
 				Config.raw.bookmarks.push(hpath.text);
 				Config.save();
 			}
+			if (ui.isHovered) ui.tooltip(tr("Add bookmark"));
+
+			#if krom_android
+			var stripped = false;
+			var strip = "/storage/emulated/0/";
+			if (hpath.text.startsWith(strip)) {
+				hpath.text = hpath.text.substr(strip.length - 1);
+				stripped = true;
+			}
+			#end
+
 			hpath.text = ui.textInput(hpath, tr("Path"));
+
+			#if krom_android
+			if (stripped) {
+				hpath.text = "/storage/emulated/0" + hpath.text;
+			}
+			#end
+
 			var refresh = false;
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
@@ -97,7 +116,25 @@ class TabBrowser {
 			}
 
 			if (ui.button(tr("Disk"), Left)) {
+				#if krom_android
+				UIMenu.draw(function(ui: Zui) {
+					ui.text(tr("Disk"), Right, ui.t.HIGHLIGHT_COL);
+					if (ui.button(tr("Download"), Left)) {
+						hpath.text = UIFiles.defaultPath;
+					}
+					if (ui.button(tr("Pictures"), Left)) {
+						hpath.text = "/storage/emulated/0/Pictures";
+					}
+					if (ui.button(tr("Camera"), Left)) {
+						hpath.text = "/storage/emulated/0/DCIM/Camera";
+					}
+					if (ui.button(tr("Projects"), Left)) {
+						hpath.text = Krom.savePath();
+					}
+				}, 5);
+				#else
 				hpath.text = UIFiles.defaultPath;
+				#end
 			}
 
 			for (b in Config.raw.bookmarks) {
