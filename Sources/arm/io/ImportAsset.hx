@@ -12,10 +12,22 @@ class ImportAsset {
 	public static function run(path: String, dropX = -1.0, dropY = -1.0, showBox = true, hdrAsEnvmap = true, done: Void->Void = null) {
 
 		if (path.startsWith("cloud")) {
-			File.cacheCloud(path, function(abs: String) {
-				if (abs == null) return;
-				run(abs, dropX, dropY, showBox, hdrAsEnvmap, done);
+			function doCacheCloud() {
+				File.cacheCloud(path, function(abs: String) {
+					if (abs == null) return;
+					run(abs, dropX, dropY, showBox, hdrAsEnvmap, done);
+				});
+			}
+
+			#if (krom_android || krom_ios)
+			arm.App.notifyOnNextFrame(function() {
+				Console.toast(tr("Downloading"));
+				arm.App.notifyOnNextFrame(doCacheCloud);
 			});
+			#else
+			doCacheCloud();
+			#end
+
 			return;
 		}
 
