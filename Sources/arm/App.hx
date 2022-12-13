@@ -11,6 +11,7 @@ import zui.Nodes;
 import iron.Scene;
 import iron.data.Data;
 import iron.system.Input;
+import iron.system.Time;
 import arm.ui.UISidebar;
 import arm.ui.UIToolbar;
 import arm.ui.UINodes;
@@ -57,6 +58,7 @@ class App {
 	public static var dragRect: TRect = null;
 	public static var dragOffX = 0.0;
 	public static var dragOffY = 0.0;
+	public static var dragStart = 0.0;
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
 	public static var font: Font = null;
@@ -370,6 +372,31 @@ class App {
 		}
 
 		var hasDrag = dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null || dragSwatch != null;
+
+		if (Config.raw.touch_ui) {
+			// Touch and hold to activate dragging
+			if (dragStart < 0.2) {
+				if (hasDrag && mouse.down()) dragStart += Time.realDelta;
+				else dragStart = 0;
+				hasDrag = false;
+			}
+			var moved = Math.abs(mouse.movementX) > 1 && Math.abs(mouse.movementY) > 1;
+			if (mouse.released()) {
+				dragStart = 0;
+			}
+			if ((mouse.released() || moved) && !hasDrag) {
+				dragAsset = null;
+				dragMaterial = null;
+				dragSwatch = null;
+				dragLayer = null;
+				dragFile = null;
+				dragFileIcon = null;
+				isDragging = false;
+			}
+			// Disable touch scrolling while dragging is active
+			Zui.touchControls = !isDragging;
+		}
+
 		if (hasDrag && (mouse.movementX != 0 || mouse.movementY != 0)) {
 			isDragging = true;
 		}
