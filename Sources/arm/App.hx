@@ -621,7 +621,7 @@ class App {
 		}
 
 		var usingMenu = UIMenu.show && mouse.y > UIHeader.inst.headerh;
-		uiEnabled = !UIBox.show && !usingMenu;
+		uiEnabled = !UIBox.show && !usingMenu && !isComboSelected();
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
 
