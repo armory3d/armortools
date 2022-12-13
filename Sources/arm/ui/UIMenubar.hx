@@ -121,6 +121,7 @@ class UIMenubar {
 			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
 			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.inst.headerh / 2);
 			UIMenu.menuY += 4;
+			UIMenu.keepOpen = true;
 		}
 	}
 
