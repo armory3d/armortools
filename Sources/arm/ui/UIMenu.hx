@@ -377,8 +377,12 @@ class UIMenu {
 				}
 				menuSeparator(ui);
 
-				#if !(krom_android || krom_ios)
 				if (menuButton(ui, tr("Check for Updates..."))) {
+					#if krom_android
+					File.loadUrl("https://play.google.com/store/apps/details?id=org.armorpaint");
+					#elseif krom_ios
+					File.loadUrl("https://apps.apple.com/app/armorpaint/id1533967534");
+					#else
 					// Retrieve latest version number
 					var url = "https://luboslenco.gitlab.io/armorpaint/index.html";
 					File.downloadBytes(url, function(bytes: Bytes) {
@@ -401,8 +405,8 @@ class UIMenu {
 							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorpaint.org."));
 						}
 					});
+					#end
 				}
-				#end
 
 				if (menuButton(ui, tr("About..."))) {
 					#if kha_direct3d11
