@@ -94,7 +94,7 @@ class BoxPreferences {
 				ui.changed = false;
 				Config.raw.touch_ui = ui.check(Id.handle({ selected: Config.raw.touch_ui }), tr("Touch UI"));
 				if (ui.changed) {
-					Zui.touchControls = Config.raw.touch_ui;
+					Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
 					Config.loadTheme(Config.raw.theme);
 					UISidebar.inst.tagUIRedraw();
 				}

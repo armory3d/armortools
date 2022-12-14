@@ -380,10 +380,10 @@ class App {
 				else dragStart = 0;
 				hasDrag = false;
 			}
-			var moved = Math.abs(mouse.movementX) > 1 && Math.abs(mouse.movementY) > 1;
 			if (mouse.released()) {
 				dragStart = 0;
 			}
+			var moved = Math.abs(mouse.movementX) > 1 && Math.abs(mouse.movementY) > 1;
 			if ((mouse.released() || moved) && !hasDrag) {
 				dragAsset = null;
 				dragMaterial = null;
@@ -394,7 +394,7 @@ class App {
 				isDragging = false;
 			}
 			// Disable touch scrolling while dragging is active
-			Zui.touchControls = !isDragging;
+			Zui.touchScroll = !isDragging;
 		}
 
 		if (hasDrag && (mouse.movementX != 0 || mouse.movementY != 0)) {
@@ -798,7 +798,7 @@ class App {
 		raw.layer_res = Res2048;
 		raw.dilate = DilateInstant;
 		raw.dilate_radius = 2;
-		#if arm_touchui
+		#if (krom_android || krom_ios)
 		raw.touch_ui = true;
 		#else
 		raw.touch_ui = false;
