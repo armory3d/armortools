@@ -631,15 +631,14 @@ class UISidebar {
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 				   (Input.getPen().down() && !kb.down("alt"));
 
-		#if (krom_android || krom_ios)
-		if (Input.getPen().down()) {
-			Context.penPaintingOnly = true;
+		if (Config.raw.touch_ui) {
+			if (Input.getPen().down()) {
+				Context.penPaintingOnly = true;
+			}
+			else if (Context.penPaintingOnly) {
+				down = false;
+			}
 		}
-		else if (Context.penPaintingOnly) {
-			down = false;
-		}
-		#end
-
 
 		#if arm_physics
 		if (Context.tool == ToolParticle && Context.particlePhysics) {
