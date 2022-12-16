@@ -555,6 +555,12 @@ class RenderPathDeferred {
 				t.scale = Inc.getSuperSampling();
 				path.createRenderTarget(t);
 			}
+
+			#if kha_metal
+			// TODO: Fix depth attach for gbuffer0_copy on metal
+			// Use resize to re-create buffers from scratch for now
+			path.resize();
+			#end
 		}
 	}
 
