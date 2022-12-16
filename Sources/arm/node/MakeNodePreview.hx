@@ -14,8 +14,8 @@ class MakeNodePreview {
 		var context_id = "mesh";
 		var con_mesh: NodeShaderContext = data.add_context({
 			name: context_id,
-			depth_write: true,
-			compare_mode: "less",
+			depth_write: false,
+			compare_mode: "always",
 			cull_mode: "clockwise",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}, {name: "col", data: "short4norm"}],
 			color_attachments: ["RGBA32"]
