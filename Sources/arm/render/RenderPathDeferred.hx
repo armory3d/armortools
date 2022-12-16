@@ -563,7 +563,7 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer0_copy", "tex0");
 		path.bindTarget("gbuffer1_copy", "tex1");
 		path.bindTarget("gbuffer2_copy", "tex2");
-		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
 	}
 
 	static function drawSplit() {

@@ -114,6 +114,7 @@ class RenderPathPaint {
 		}
 
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
 		path.loadShader("shader_datas/dilate_pass/dilate_pass");
 	}
 
