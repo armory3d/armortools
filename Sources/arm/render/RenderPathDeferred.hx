@@ -23,21 +23,6 @@ class RenderPathDeferred {
 
 		path = _path;
 
-		#if kha_metal
-		{
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_r8");
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_rgba32");
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_depth_rgba64");
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_r8");
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_rgba32");
-			path.loadShader("clear_pass/clear_pass/clear_pass_color_rgba64");
-			path.loadShader("clear_pass/clear_pass/clear_pass_depth_r8");
-			path.loadShader("clear_pass/clear_pass/clear_pass_depth_rgba32");
-			path.loadShader("clear_pass/clear_pass/clear_pass_depth_rgba64");
-			path.clearShader = "clear_pass/clear_pass/clear_pass";
-		}
-		#end
-
 		path.createDepthBuffer("main", "DEPTH24");
 
 		{

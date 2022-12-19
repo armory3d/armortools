@@ -33,7 +33,6 @@ strip ArmorPaint
 
 **macOS**
 ```bash
-git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
 armorcore/Kinc/make --from armorcore -g metal
 cp -a build/krom/ armorcore/Deployment
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
@@ -55,7 +54,6 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 ```bash
 git clone https://github.com/armory3d/armorpaint_plugins Libraries/plugins
 git apply armorcore/patch/ios_document_picker.diff --directory=armorcore/Kinc
-git apply armorcore/patch/metal_depth.diff --directory=armorcore/Kinc
 armorcore/Kinc/make --from armorcore -g metal ios
 cp -a build/krom/ armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
