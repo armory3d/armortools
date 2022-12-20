@@ -49,6 +49,10 @@ class MaterialSlot {
 		else {
 			canvas = c;
 		}
+
+		#if (krom_android || krom_ios)
+		nodes.panX -= 30; // Center initial position
+		#end
 	}
 
 	public function unload() {

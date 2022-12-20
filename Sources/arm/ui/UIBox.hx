@@ -21,6 +21,9 @@ class UIBox {
 	static var modalOnHide: Void->Void = null;
 	static var draws = 0;
 	static var copyable = false;
+	#if (krom_android || krom_ios)
+	static var tweenAlpha = 0.0;
+	#end
 
 	public static function render(g: kha.graphics2.Graphics) {
 		if (!UIMenu.show) {
@@ -42,10 +45,18 @@ class UIBox {
 				var my = mouse.y;
 				if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
 					if (modalOnHide != null) modalOnHide();
-					show = false;
-					App.redrawUI();
+					hide();
 				}
 			}
+		}
+
+		if (Config.raw.touch_ui) { // Darken bg
+			#if (krom_android || krom_ios)
+			g.color = kha.Color.fromFloats(0, 0, 0, tweenAlpha);
+			#else
+			g.color = kha.Color.fromFloats(0, 0, 0, 0.5);
+			#end
+			g.fillRect(0, 0, kha.System.windowWidth(), kha.System.windowHeight());
 		}
 
 		g.end();
@@ -62,7 +73,8 @@ class UIBox {
 			ui.begin(g);
 			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
-				if (ui.tab(Id.handle(), boxTitle)) {
+				var tabVertical = Config.raw.touch_ui;
+				if (ui.tab(Id.handle(), boxTitle, tabVertical)) {
 					var htext = Id.handle();
 					htext.text = boxText;
 					copyable ?
@@ -85,8 +97,7 @@ class UIBox {
 					}
 					#end
 					if (ui.button(tr("OK"))) {
-						show = false;
-						App.redrawUI();
+						hide();
 					}
 				}
 				windowBorder(ui);
@@ -117,6 +128,9 @@ class UIBox {
 		boxCommands = null;
 		UIBox.copyable = copyable;
 		draggable = true;
+		#if (krom_android || krom_ios)
+		tweenIn();
+		#end
 	}
 
 	public static function showCustom(commands: Zui->Void = null, mw = 400, mh = 200, onHide: Void->Void = null, draggable = true) {
@@ -126,7 +140,36 @@ class UIBox {
 		modalOnHide = onHide;
 		boxCommands = commands;
 		UIBox.draggable = draggable;
+		#if (krom_android || krom_ios)
+		tweenIn();
+		#end
 	}
+
+	public static function hide() {
+		#if (krom_android || krom_ios)
+		tweenOut();
+		#else
+		hideInternal();
+		#end
+	}
+
+	static function hideInternal() {
+		show = false;
+		App.redrawUI();
+	}
+
+	#if (krom_android || krom_ios)
+	static function tweenIn() {
+		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut});
+		UIBox.hwnd.dragY = Std.int(kha.System.windowHeight() / 2);
+		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
+	}
+
+	static function tweenOut() {
+		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn, done: hideInternal});
+		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: kha.System.windowHeight() / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
+	}
+	#end
 
 	static function init() {
 		hwnd.redraws = 2;

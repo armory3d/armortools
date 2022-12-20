@@ -319,6 +319,10 @@ class TabLayers {
 		ui._x -= 2;
 		ui._y -= 3;
 
+		if (Config.raw.touch_ui) {
+			ui._x += 6 * ui.SCALE();
+		}
+
 		#if kha_opengl
 		ui.imageInvertY = false;
 		#end
@@ -471,6 +475,10 @@ class TabLayers {
 			@:privateAccess ui.endElement();
 			@:privateAccess ui.endElement();
 			@:privateAccess ui.endElement();
+
+			if (Config.raw.touch_ui) {
+				ui._x += 6 * ui.SCALE();
+			}
 
 			var ar = [tr("Shared")];
 			for (p in Project.paintObjects) ar.push(p.name);

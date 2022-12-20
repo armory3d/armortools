@@ -469,8 +469,8 @@ class RenderPathDeferred {
 		}
 	}
 
-	public static function drawGbuffer() {
-		path.setTarget("gbuffer0"); // Only clear gbuffer0
+	public static function drawGbuffer(gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2") {
+		path.setTarget(gbuffer0); // Only clear gbuffer0
 		#if kha_metal
 		path.clearTarget(0x00000000, 1.0);
 		#else
@@ -480,7 +480,7 @@ class RenderPathDeferred {
 			path.setTarget("gbuffer2");
 			path.clearTarget(0xff000000);
 		}
-		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
+		path.setTarget(gbuffer0, [gbuffer1, gbuffer2]);
 		var currentG = path.currentG;
 		RenderPathPaint.bindLayers();
 		path.drawMeshes("mesh");

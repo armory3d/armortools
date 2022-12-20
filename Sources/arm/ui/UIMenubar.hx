@@ -32,10 +32,10 @@ class UIMenubar {
 			Ext.beginMenu(ui);
 
 			if (Config.raw.touch_ui) {
+				ui._y += 4;
 				ui._w = Std.int(UIToolbar.defaultToolbarW * ui.SCALE());
 				if (iconButton(ui, 0, 2)) BoxPreferences.show();
 				if (iconButton(ui, 0, 3)) {
-					ui.fill(0, 2, -(32 + 4), 32, 0x66000000);
 					#if (krom_android || krom_ios)
 					Console.toast(tr("Saving project"));
 					Project.projectSave();
@@ -46,13 +46,14 @@ class UIMenubar {
 				}
 				if (iconButton(ui, 4, 2)) Project.importAsset();
 				if (iconButton(ui, 5, 2)) BoxExport.showTextures();
-				if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+				var size = UIToolbar.defaultToolbarW;
+				if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 8, 2)) showMenu(ui, MenuViewport);
-				if (UIMenu.show && UIMenu.menuCategory == MenuMode) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuMode) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 9, 2)) showMenu(ui, MenuMode);
-				if (UIMenu.show && UIMenu.menuCategory == MenuCamera) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuCamera) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 10, 2)) showMenu(ui, MenuCamera);
-				if (UIMenu.show && UIMenu.menuCategory == MenuHelp) ui.fill(0, 2, 32 + 4, 32, ui.t.HIGHLIGHT_COL);
+				if (UIMenu.show && UIMenu.menuCategory == MenuHelp) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 11, 2)) showMenu(ui, MenuHelp);
 				// ui.enabled = History.undos > 0;
 				if (iconButton(ui, 6, 2)) History.undo();
@@ -120,7 +121,7 @@ class UIMenubar {
 		if (Config.raw.touch_ui) {
 			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
 			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.inst.headerh / 2);
-			UIMenu.menuY += 4;
+			// UIMenu.menuY += 4;
 			UIMenu.keepOpen = true;
 		}
 	}

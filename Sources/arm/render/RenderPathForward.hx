@@ -30,7 +30,7 @@ class RenderPathForward {
 
 		RenderPathPaint.begin();
 		drawSplit();
-		drawGbuffer();
+		RenderPathDeferred.drawGbuffer();
 		RenderPathPaint.draw();
 
 		#if (kha_direct3d12 || kha_vulkan)
@@ -45,40 +45,6 @@ class RenderPathForward {
 		RenderPathPaint.end();
 		Inc.end();
 		RenderPathDeferred.taaFrame++;
-	}
-
-	public static function drawGbuffer(gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2") {
-		path.setTarget(gbuffer0);
-		#if kha_metal
-		path.clearTarget(0x00000000, 1.0);
-		#else
-		path.clearTarget(null, 1.0);
-		#end
-		path.setTarget(gbuffer2);
-		path.clearTarget(0xff000000);
-		path.setTarget(gbuffer0, [gbuffer1, gbuffer2]);
-		var currentG = path.currentG;
-		RenderPathPaint.bindLayers();
-		path.drawMeshes("mesh");
-		RenderPathPaint.unbindLayers();
-		if (MakeMesh.layerPassCount > 1) {
-			RenderPathDeferred.makeGbufferCopyTextures();
-			for (i in 1...MakeMesh.layerPassCount) {
-				var ping = i % 2 == 1 ? "_copy" : "";
-				var pong = i % 2 == 1 ? "" : "_copy";
-				path.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
-				path.bindTarget("gbuffer0" + pong, "gbuffer0");
-				path.bindTarget("gbuffer1" + pong, "gbuffer1");
-				path.bindTarget("gbuffer2" + pong, "gbuffer2");
-				RenderPathPaint.bindLayers();
-				path.drawMeshes("mesh" + i);
-				RenderPathPaint.unbindLayers();
-			}
-			if (MakeMesh.layerPassCount % 2 == 0) {
-				RenderPathDeferred.copyToGbuffer();
-			}
-		}
-		LineDraw.render(currentG);
 	}
 
 	public static function drawForward(eye = false, output = "", gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2", buf = "buf", bufa = "bufa", taa = "taa", taa2 = "taa2") {
@@ -164,7 +130,7 @@ class RenderPathForward {
 			cam.buildMatrix();
 			cam.buildProjection();
 
-			drawGbuffer();
+			RenderPathDeferred.drawGbuffer();
 
 			#if (kha_direct3d12 || kha_vulkan)
 			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;

@@ -185,7 +185,7 @@ class UINodes {
 											socket.min = min;
 											socket.max = max;
 											socket.default_value = default_value;
-											UIBox.show = false;
+											UIBox.hide();
 											NodesMaterial.syncSockets(node);
 											hwnd.redraws = 2;
 										}
@@ -542,19 +542,21 @@ class UINodes {
 		grid.g2.begin(true, ui.t.SEPARATOR_COL);
 
 		grid.g2.color = ui.t.SEPARATOR_COL - 0x00050505;
-		for (i in 0...Std.int(h / 20) + 1) {
-			grid.g2.drawLine(0, i * 20, w, i * 20);
+		var step = 20; // * ui.SCALE();
+		for (i in 0...Std.int(h / step) + 1) {
+			grid.g2.drawLine(0, i * step, w, i * step);
 		}
-		for (i in 0...Std.int(w / 20) + 1) {
-			grid.g2.drawLine(i * 20, 0, i * 20, h);
+		for (i in 0...Std.int(w / step) + 1) {
+			grid.g2.drawLine(i * step, 0, i * step, h);
 		}
 
 		grid.g2.color = ui.t.SEPARATOR_COL - 0x00090909;
-		for (i in 0...Std.int(h / 100) + 1) {
-			grid.g2.drawLine(0, i * 100, w, i * 100);
+		var step = 100; // * ui.SCALE();
+		for (i in 0...Std.int(h / step) + 1) {
+			grid.g2.drawLine(0, i * step, w, i * step);
 		}
-		for (i in 0...Std.int(w / 100) + 1) {
-			grid.g2.drawLine(i * 100, 0, i * 100, h);
+		for (i in 0...Std.int(w / step) + 1) {
+			grid.g2.drawLine(i * step, 0, i * step, h);
 		}
 
 		grid.g2.end();

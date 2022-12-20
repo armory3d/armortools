@@ -161,7 +161,7 @@ class RenderPathForwardVR {
 				Scene.active.camera.P._33 = proj._33;
 				Scene.active.camera.VP.multmats(Scene.active.camera.P, Scene.active.camera.V);
 				Scene.active.camera.transform.world.getInverse(Scene.active.camera.V);
-				RenderPathForward.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
+				RenderPathDeferred.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
 				RenderPathForward.drawForward(true, "eye" + eye, "gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye", "buf_eye", "bufa_eye", "taa_eye", "taa2_eye");
 			}
 
@@ -182,7 +182,7 @@ class RenderPathForwardVR {
 		iron.Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
-		RenderPathForward.drawGbuffer();
+		RenderPathDeferred.drawGbuffer();
 		RenderPathForward.drawForward();
 		RenderPathPaint.draw();
 		RenderPathPaint.end();

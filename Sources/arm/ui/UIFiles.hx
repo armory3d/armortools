@@ -59,7 +59,7 @@ class UIFiles {
 	// 			filename = ui.textInput(fileHandle, tr("File"));
 	// 			ui.text("*." + filters, Center);
 	// 			if (ui.button(isSave ? tr("Save") : tr("Open")) || known || ui.isReturnDown) {
-	// 				UIBox.show = false;
+	// 				UIBox.hide();
 	// 				filesDone((known || isSave) ? path : path + Path.sep + filename);
 	// 				if (known) pathHandle.text = pathHandle.text.substr(0, pathHandle.text.lastIndexOf(Path.sep));
 	// 			}
@@ -221,7 +221,8 @@ class UIFiles {
 						var blobPath = key;
 						#if krom_ios
 						blobPath = documentDirectory + blobPath;
-						#end
+						// TODO: implement native .arm parsing first
+						#else
 						var bytes = Bytes.ofData(Krom.loadBlob(blobPath));
 						var raw = ArmPack.decode(bytes);
 						if (raw.material_icons != null) {
@@ -233,6 +234,7 @@ class UIFiles {
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						iconMap.set(key, icon);
+						#end
 					}
 					if (icon != null) {
 						var w = 50;

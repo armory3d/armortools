@@ -757,7 +757,11 @@ class App {
 			Std.int(UISidebar.defaultWindowW * raw.window_scale),
 			Std.int(kha.System.windowHeight() / 2),
 			Std.int(kha.System.windowHeight() / 2),
+			#if krom_ios
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.6) : Std.int(iron.App.w() * 0.6),
+			#else
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
+			#end
 			Std.int(iron.App.h() / 2),
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)
 		];

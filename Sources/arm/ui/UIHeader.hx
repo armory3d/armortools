@@ -18,7 +18,11 @@ class UIHeader {
 
 	public static var inst: UIHeader;
 
+	#if (krom_android || krom_ios)
+	public static inline var defaultHeaderH = 28 + 4;
+	#else
 	public static inline var defaultHeaderH = 28;
+	#end
 
 	public var headerHandle = new Handle({ layout: Horizontal });
 	public var headerh = defaultHeaderH;
@@ -348,6 +352,10 @@ class UIHeader {
 					var sc = ui.SCALE();
 					ui._w = Std.int(60 * sc);
 
+					if (Config.raw.touch_ui) {
+						ui._x -= 6 * sc;
+					}
+
 					var xrayHandle = Id.handle({ selected: Context.xray });
 					Context.xray = ui.check(xrayHandle, tr("X-Ray"));
 					if (xrayHandle.changed) {
@@ -357,16 +365,28 @@ class UIHeader {
 					var symXHandle = Id.handle({ selected: false });
 					var symYHandle = Id.handle({ selected: false });
 					var symZHandle = Id.handle({ selected: false });
-					#if krom_ios
-					ui._x -= 10 * sc;
-					#else
-					ui._w = Std.int(56 * sc);
-					ui.text(tr("Symmetry"));
-					#end
-					ui._w = Std.int(25 * sc);
-					Context.symX = ui.check(symXHandle, tr("X"));
-					Context.symY = ui.check(symYHandle, tr("Y"));
-					Context.symZ = ui.check(symZHandle, tr("Z"));
+					
+					if (Config.raw.touch_ui) {
+						ui._x -= 6 * sc;
+						ui._w = Std.int(27 * sc);
+						Context.symX = ui.check(symXHandle, "");
+						ui._x -= 12 * sc;
+						Context.symY = ui.check(symYHandle, "");
+						ui._x -= 12 * sc;
+						Context.symZ = ui.check(symZHandle, "");
+						ui._x -= 12 * sc;
+						ui._w = Std.int(40 * sc);
+						ui.text(tr("X") + tr("Y") + tr("Z"));
+					}
+					else {
+						ui._w = Std.int(56 * sc);
+						ui.text(tr("Symmetry"));
+						ui._w = Std.int(25 * sc);
+						Context.symX = ui.check(symXHandle, tr("X"));
+						Context.symY = ui.check(symYHandle, tr("Y"));
+						Context.symZ = ui.check(symZHandle, tr("Z"));
+					}
+					
 					if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}

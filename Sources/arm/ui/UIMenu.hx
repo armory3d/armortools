@@ -271,7 +271,8 @@ class UIMenu {
 				#end
 				for (i in 0...modes.length) {
 					menuFill(ui);
-					ui.radio(modeHandle, i, modes[i], Config.keymap.viewport_mode + ", " + shortcuts[i]);
+					var shortcut = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
+					ui.radio(modeHandle, i, modes[i], shortcut);
 				}
 
 				if (modeHandle.changed) Context.setViewportMode(modeHandle.position);
@@ -446,7 +447,8 @@ class UIMenu {
 					#end
 
 					UIBox.showCustom(function(ui: Zui) {
-						if (ui.tab(Id.handle(), tr("About"))) {
+						var tabVertical = Config.raw.touch_ui;
+						if (ui.tab(Id.handle(), tr("About"), tabVertical)) {
 							Ext.textArea(ui, Id.handle({ text: msg }), false);
 
 							ui.row([1 / 3, 1 / 3, 1 / 3]);
@@ -463,8 +465,7 @@ class UIMenu {
 								File.loadUrl("https://github.com/armory3d/armorpaint/graphs/contributors");
 							}
 							if (ui.button(tr("OK"))) {
-								UIBox.show = false;
-								App.redrawUI();
+								UIBox.hide();
 							}
 						}
 					});
@@ -482,11 +483,15 @@ class UIMenu {
 		ui.endRegion();
 
 		if (hideMenu) {
-			show = false;
-			App.redrawUI();
+			hide();
 			showMenuFirst = true;
 			menuCommands = null;
 		}
+	}
+
+	static function hide() {
+		show = false;
+		App.redrawUI();
 	}
 
 	public static function draw(commands: Zui->Void = null, elements: Int, x = -1, y = -1) {

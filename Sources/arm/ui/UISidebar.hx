@@ -125,6 +125,7 @@ class UISidebar {
 		ui = new Zui({ theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel, black_white_gradient: App.blackWhiteGradient });
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
+		Zui.onDeselectText = onDeselectText;
 
 		var resources = ["cursor.k", "icons.k"];
 		Res.load(resources, done);
@@ -743,7 +744,8 @@ class UISidebar {
 				var source = l.texpaint;
 				var g2 = target.g2;
 				g2.begin(true, 0x00000000);
-				g2.pipeline = l.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
+				// g2.pipeline = l.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
+				g2.pipeline = Layers.pipeCopy; // texpaint_preview is always RGBA32 for now
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
 				g2.pipeline = null;
 				g2.end();
@@ -760,7 +762,8 @@ class UISidebar {
 			var source = l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
-			g2.pipeline = Context.layer.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
+			// g2.pipeline = Context.layer.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
+			g2.pipeline = Layers.pipeCopy; // texpaint_preview is always RGBA32 for now
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();
@@ -1054,6 +1057,13 @@ class UISidebar {
 
 	function onTextHover() {
 		Krom.setMouseCursor(2); // I-cursor
+	}
+
+	function onDeselectText() {
+		#if krom_ios
+		var kb = kha.input.Keyboard.get();
+		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Shift);
+		#end
 	}
 
 	public function tagUIRedraw() {

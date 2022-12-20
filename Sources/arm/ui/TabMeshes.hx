@@ -16,10 +16,10 @@ class TabMeshes {
 
 			ui.beginSticky();
 			if (Config.raw.touch_ui) {
-				ui.row([1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8, 1 / 8]);
+				ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 			}
 			else {
-				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14, 1 / 14, 1 / 14]);
+				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
 			}
 
 			if (ui.button(tr("Import"))) {
@@ -59,19 +59,24 @@ class TabMeshes {
 				Context.ddirty = 2;
 			}
 
-			if (ui.button(tr("Rotate X"))) {
-				MeshUtil.swapAxis(1, 2);
-				Context.ddirty = 2;
-			}
+			if (ui.button(tr("Rotate"))) {
+				UIMenu.draw(function(ui: Zui) {
+					ui.text(tr("Rotate"), Right, ui.t.HIGHLIGHT_COL);
+					if (ui.button(tr("Rotate X"))) {
+						MeshUtil.swapAxis(1, 2);
+						Context.ddirty = 2;
+					}
 
-			if (ui.button(tr("Rotate Y"))) {
-				MeshUtil.swapAxis(2, 0);
-				Context.ddirty = 2;
-			}
+					if (ui.button(tr("Rotate Y"))) {
+						MeshUtil.swapAxis(2, 0);
+						Context.ddirty = 2;
+					}
 
-			if (ui.button(tr("Rotate Z"))) {
-				MeshUtil.swapAxis(0, 1);
-				Context.ddirty = 2;
+					if (ui.button(tr("Rotate Z"))) {
+						MeshUtil.swapAxis(0, 1);
+						Context.ddirty = 2;
+					}
+				}, 4);
 			}
 
 			ui.endSticky();

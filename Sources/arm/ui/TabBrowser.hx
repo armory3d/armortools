@@ -39,10 +39,10 @@ class TabBrowser {
 			ui.beginSticky();
 			var step = (1 - bookmarksW / ui._w);
 			if (hsearch.text != "") {
-				ui.row([bookmarksW / ui._w, step * 0.745, step * 0.055, step * 0.17, step * 0.03]);
+				ui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.17, step * 0.03]);
 			}
 			else {
-				ui.row([bookmarksW / ui._w, step * 0.745, step * 0.055, step * 0.2]);
+				ui.row([bookmarksW / ui._w, step * 0.73, step * 0.07, step * 0.2]);
 			}
 
 			if (ui.button("+")) {

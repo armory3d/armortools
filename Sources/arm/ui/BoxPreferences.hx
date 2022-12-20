@@ -30,10 +30,6 @@ class BoxPreferences {
 	public static function show() {
 
 		UIBox.showCustom(function(ui: Zui) {
-			if (Config.raw.touch_ui) {
-				alignToLeftSide();
-			}
-
 			if (ui.tab(htab, tr("Interface"), true)) {
 
 				if (locales == null) {
@@ -176,8 +172,7 @@ class BoxPreferences {
 								fetchThemes(); // Refresh file list
 								Config.raw.theme = themeName;
 								themeHandle.position = getThemeIndex();
-								UIBox.show = false;
-								App.redrawUI();
+								UIBox.hide();
 								BoxPreferences.htab.position = 1; // Themes
 								BoxPreferences.show();
 							}
@@ -533,8 +528,7 @@ plugin.drawUI = function(ui) {
 								var path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
 								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
 								filesPlugin = null; // Refresh file list
-								UIBox.show = false;
-								App.redrawUI();
+								UIBox.hide();
 								BoxPreferences.htab.position = 6; // Plugins
 								BoxPreferences.show();
 							}
@@ -600,16 +594,6 @@ plugin.drawUI = function(ui) {
 				}
 			}
 		}, 600, 400, function() { Config.save(); });
-	}
-
-	static function alignToLeftSide() {
-		@:privateAccess UIBox.modalH = Std.int((kha.System.windowHeight() - UIHeader.inst.headerh) / App.uiBox.SCALE());
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
-		var mw = @:privateAccess Std.int(UIBox.modalW * App.uiBox.SCALE());
-		var mh = @:privateAccess Std.int(UIBox.modalH * App.uiBox.SCALE());
-		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);
-		UIBox.hwnd.dragY = Std.int(-apph / 2 + mh / 2 + UIHeader.inst.headerh);
 	}
 
 	public static function fetchThemes() {
