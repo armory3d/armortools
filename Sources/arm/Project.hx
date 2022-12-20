@@ -412,7 +412,6 @@ class Project {
 				}
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.hide();
-					App.redrawUI();
 					function doImport() {
 						ImportMesh.run(path, clearLayers, replaceExisting);
 					}
@@ -464,7 +463,6 @@ class Project {
 				}
 				if (ui.button(tr("Unwrap")) || ui.isReturnDown) {
 					UIBox.hide();
-					App.redrawUI();
 					function doImport() {
 						if (unwrapBy == unwrapPlugins.length - 1) {
 							MeshUtil.equirectUnwrap(mesh);
