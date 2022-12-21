@@ -44,7 +44,6 @@ class UIBox {
 				var mx = mouse.x;
 				var my = mouse.y;
 				if ((clickToHide && (mx < left || mx > right || my < top || my > bottom)) || isEscape) {
-					if (modalOnHide != null) modalOnHide();
 					hide();
 				}
 			}
@@ -154,12 +153,14 @@ class UIBox {
 	}
 
 	static function hideInternal() {
+		if (modalOnHide != null) modalOnHide();
 		show = false;
 		App.redrawUI();
 	}
 
 	#if (krom_android || krom_ios)
 	static function tweenIn() {
+		iron.system.Tween.reset();
 		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut});
 		UIBox.hwnd.dragY = Std.int(kha.System.windowHeight() / 2);
 		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
