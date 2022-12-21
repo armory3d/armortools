@@ -25,7 +25,8 @@ let import_gltf_glb = function(path, done) {
 		let inda = new Uint32Array(r.buffer, a._get_indices(), index_count);
 		let posa = new Int16Array(r.buffer, a._get_positions(), vertex_count * 4);
 		let nora = new Int16Array(r.buffer, a._get_normals(), vertex_count * 2);
-		let texa = new Int16Array(r.buffer, a._get_uvs(), vertex_count * 2);
+		let uvs = a._get_uvs();
+		let texa = uvs == 0 ? null : new Int16Array(r.buffer, uvs, vertex_count * 2);
 		let name = path.split("\\").pop().split("/").pop().split(".").shift();
 		done({
 			name: name,
