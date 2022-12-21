@@ -62,17 +62,17 @@ class TabMeshes {
 			if (ui.button(tr("Rotate"))) {
 				UIMenu.draw(function(ui: Zui) {
 					ui.text(tr("Rotate"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Rotate X", Left))) {
+					if (ui.button(tr("Rotate X"), Left)) {
 						MeshUtil.swapAxis(1, 2);
 						Context.ddirty = 2;
 					}
 
-					if (ui.button(tr("Rotate Y", Left))) {
+					if (ui.button(tr("Rotate Y"), Left)) {
 						MeshUtil.swapAxis(2, 0);
 						Context.ddirty = 2;
 					}
 
-					if (ui.button(tr("Rotate Z", Left))) {
+					if (ui.button(tr("Rotate Z"), Left)) {
 						MeshUtil.swapAxis(0, 1);
 						Context.ddirty = 2;
 					}
