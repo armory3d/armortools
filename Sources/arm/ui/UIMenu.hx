@@ -369,11 +369,19 @@ class UIMenu {
 					File.loadUrl("https://github.com/armory3d/armorpaint/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
+					#if (krom_darwin || krom_ios) // Limited url length
+					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					#else
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					#end
 					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
+					#if (krom_darwin || krom_ios) // Limited url length
+					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					#else
 					var url = "https://github.com/armory3d/armorpaint/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					#end
 					File.loadUrl(url);
 				}
 				menuSeparator(ui);
