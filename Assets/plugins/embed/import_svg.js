@@ -8,7 +8,8 @@ let r = new R();
 // import_svg.js
 let import_svg = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let buf = new Uint8Array(r.buffer, a._init(b.bytes.length + 1), b.bytes.length + 1);
+		let buf_off = a._init(b.bytes.length + 1); //// Allocate r.buffer
+		let buf = new Uint8Array(r.buffer, buf_off, b.bytes.length + 1);
 		for (let i = 0; i < b.bytes.length; ++i) buf[i] = b.readU8(i);
 		buf[b.bytes.length] = 0;
 
@@ -19,7 +20,7 @@ let import_svg = function(path, done) {
 		let image = core.Image.fromBytes(core.Bytes.ofData(pixels), w, h);
 		done(image);
 
-		a._destroy();
+		// a._destroy(); //// Destroys r.buffer
 		iron.Data.deleteBlob(path);
 	});
 }
@@ -34,4 +35,3 @@ plugin.delete = function() {
 	formats.splice(formats.indexOf("svg"), 1);
 	importers.h["svg"] = null;
 };
-

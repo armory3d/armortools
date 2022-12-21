@@ -8,7 +8,8 @@ let r = new R();
 // import_usdc.js
 let import_usdc = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let buf = new Uint8Array(r.buffer, a._init(b.bytes.length), b.bytes.length);
+		let buf_off = a._init(b.bytes.length); //// Allocate r.buffer
+		let buf = new Uint8Array(r.buffer, buf_off, b.bytes.length);
 		for (let i = 0; i < b.bytes.length; ++i) buf[i] = b.readU8(i);
 		a._parse();
 		let vertex_count = a._get_vertex_count();
@@ -27,7 +28,7 @@ let import_usdc = function(path, done) {
 			scale_pos: a._get_scale_pos(),
 			scale_tex: 1.0
 		});
-		a._destroy();
+		// a._destroy(); //// Destroys r.buffer
 		iron.Data.deleteBlob(path);
 	});
 }

@@ -66,7 +66,7 @@ function unwrap_mesh(mesh) {
 	mesh.texa = ua16;
 	mesh.inda = ia32;
 
-	a._destroy();
+	// a._destroy(); //// Destroys r.buffer
 }
 
 let plugin = new arm.Plugin();
