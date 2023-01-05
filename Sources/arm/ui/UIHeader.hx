@@ -45,10 +45,12 @@ class UIHeader {
 				if (Context.colorIdPicked) {
 					ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
+				ui.enabled = Context.colorIdPicked;
 				if (ui.button(tr("Clear"))) {
 					Context.colorIdPicked = false;
 					UIToolbar.inst.toolbarHandle.redraws = 1;
 				}
+				ui.enabled = true;
 				ui.text(tr("Color ID Map"));
 				if (Project.assetNames.length > 0) {
 					var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
@@ -58,6 +60,7 @@ class UIHeader {
 						UIToolbar.inst.toolbarHandle.redraws = 1;
 					}
 					ui.image(Project.getImage(Project.assets[cid]));
+					if (ui.isHovered) ui.tooltipImage(Project.getImage(Project.assets[cid]), 256);
 				}
 				if (ui.button(tr("Import"))) {
 					UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
@@ -74,6 +77,30 @@ class UIHeader {
 						UIStatus.inst.statusHandle.redraws = 2;
 					});
 				}
+				ui.enabled = Context.colorIdPicked;
+				if (ui.button(tr("To Mask"))) {
+					if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
+					var m = Layers.newMask(false, Context.layer);
+					function _next() {
+						if (Layers.pipeMerge == null) Layers.makePipe();
+						if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+						m.texpaint.g4.begin();
+						m.texpaint.g4.setPipeline(Layers.pipeColorIdToMask);
+						m.texpaint.g4.setTexture(Layers.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
+						m.texpaint.g4.setTexture(Layers.texColorId, Project.getImage(Project.assets[Context.colorIdHandle.position]));
+						m.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+						m.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+						m.texpaint.g4.drawIndexedVertices();
+						m.texpaint.g4.end();
+						Context.colorIdPicked = false;
+						UIToolbar.inst.toolbarHandle.redraws = 1;
+						UIHeader.inst.headerHandle.redraws = 1;
+						Context.layerPreviewDirty = true;
+					}
+					App.notifyOnNextFrame(_next);
+					History.newWhiteMask();
+				}
+				ui.enabled = true;
 			}
 			else if (Context.tool == ToolPicker) {
 				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;

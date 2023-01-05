@@ -35,6 +35,7 @@ class Layers {
 	public static var pipeInvert8: PipelineState;
 	public static var pipeApplyMask: PipelineState;
 	public static var pipeMergeMask: PipelineState;
+	public static var pipeColorIdToMask: PipelineState;
 	public static var tex0: TextureUnit;
 	public static var tex1: TextureUnit;
 	public static var texmask: TextureUnit;
@@ -45,6 +46,8 @@ class Layers {
 	public static var texaMask: TextureUnit;
 	public static var tex0MergeMask: TextureUnit;
 	public static var texaMergeMask: TextureUnit;
+	public static var texColorId: TextureUnit;
+	public static var texpaintColorId: TextureUnit;
 	public static var opacMergeMask: ConstantLocation;
 	public static var blendingMergeMask: ConstantLocation;
 	public static var tempImage: Image = null;
@@ -240,6 +243,16 @@ class Layers {
 		texaMergeMask = pipeMergeMask.getTextureUnit("texa");
 		opacMergeMask = pipeMergeMask.getConstantLocation("opac");
 		blendingMergeMask = pipeMergeMask.getConstantLocation("blending");
+
+		pipeColorIdToMask = new PipelineState();
+		pipeColorIdToMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeColorIdToMask.fragmentShader = kha.Shaders.getFragment("mask_colorid.frag");
+		var vs = new VertexStructure();
+		vs.add("pos", VertexData.Float2);
+		pipeColorIdToMask.inputLayout = [vs];
+		pipeColorIdToMask.compile();
+		texpaintColorId = pipeColorIdToMask.getTextureUnit("texpaint_colorid");
+		texColorId = pipeColorIdToMask.getTextureUnit("texcolorid");
 	}
 
 	public static function makePipeCopyRGB() {
