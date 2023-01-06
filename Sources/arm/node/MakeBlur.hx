@@ -19,7 +19,13 @@ class MakeBlur {
 		frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 		frag.write('float height = 0.0;');
 		frag.write('float mat_opacity = 1.0;');
-		frag.write('float opacity = 0.0;');
+		var isMask = Context.layer.isMask();
+		if (isMask) {
+			frag.write('float opacity = 1.0;');
+		}
+		else {
+			frag.write('float opacity = 0.0;');
+		}
 		if (Context.material.paintEmis) {
 			frag.write('float emis = 0.0;');
 		}
