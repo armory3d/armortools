@@ -17,7 +17,6 @@ package arm;
 
 @:enum abstract SpaceType(Int) from Int to Int {
 	var SpacePaint = 0;
-	// var SpaceSculpt = 0;
 	var SpaceMaterial = 1;
 	var SpaceBake = 2;
 }
