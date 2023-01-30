@@ -156,33 +156,55 @@ class TabMaterials {
 								deleteMaterial(m);
 							}
 
-							var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
-							var opacHandle = Id.handle().nest(m.id, {selected: m.paintOpac});
-							var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
-							var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
-							var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
-							var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
-							var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
-							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
-							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
-							m.paintBase = ui.check(baseHandle, tr("Base Color"));
-							m.paintOpac = ui.check(opacHandle, tr("Opacity"));
-							m.paintNor = ui.check(norHandle, tr("Normal"));
-							m.paintOcc = ui.check(occHandle, tr("Occlusion"));
-							m.paintRough = ui.check(roughHandle, tr("Roughness"));
-							m.paintMet = ui.check(metHandle, tr("Metallic"));
-							m.paintHeight = ui.check(heightHandle, tr("Height"));
-							m.paintEmis = ui.check(emisHandle, tr("Emission"));
-							m.paintSubs = ui.check(subsHandle, tr("Subsurface"));
-							if (baseHandle.changed ||
-								opacHandle.changed ||
-								norHandle.changed ||
-								occHandle.changed ||
-								roughHandle.changed ||
-								metHandle.changed ||
-								heightHandle.changed ||
-								emisHandle.changed ||
-								subsHandle.changed) {
+							var baseHandle = Id.handle().nest(m.id);
+							var opacHandle = Id.handle().nest(m.id);
+							var norHandle = Id.handle().nest(m.id);
+							var occHandle = Id.handle().nest(m.id);
+							var roughHandle = Id.handle().nest(m.id);
+							var metHandle = Id.handle().nest(m.id);
+							var heightHandle = Id.handle().nest(m.id);
+							var emisHandle = Id.handle().nest(m.id);
+							var subsHandle = Id.handle().nest(m.id);
+							baseHandle.selected = m.paintBase;
+							opacHandle.selected = m.paintOpac;
+							norHandle.selected = m.paintNor;
+							occHandle.selected = m.paintOcc;
+							roughHandle.selected = m.paintRough;
+							metHandle.selected = m.paintMet;
+							heightHandle.selected = m.paintHeight;
+							emisHandle.selected = m.paintEmis;
+							subsHandle.selected = m.paintSubs;
+							ui.beginGroup(AltExclusive);
+							ui.check(baseHandle, tr("Base Color"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Base Color")]));
+							ui.check(opacHandle, tr("Opacity"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Opacity")]));
+							ui.check(norHandle, tr("Normal"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Normal")]));
+							ui.check(occHandle, tr("Occlusion"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Occlusion")]));
+							ui.check(roughHandle, tr("Roughness"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Roughness")]));
+							ui.check(metHandle, tr("Metallic"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Metallic")]));
+							ui.check(heightHandle, tr("Height"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Height")]));
+							ui.check(emisHandle, tr("Emission"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Emission")]));
+							ui.check(subsHandle, tr("Subsurface"));
+							if (ui.isHovered) ui.tooltip(tr("Hold alt and click to exclusively select the {channel} channel.", ["channel" => tr("Subsurface")]));
+
+							var changed = ui.endGroup();
+							if (changed) {
+								m.paintBase = baseHandle.selected;
+								m.paintOpac = opacHandle.selected;
+								m.paintNor = norHandle.selected;
+								m.paintOcc = occHandle.selected;
+								m.paintRough = roughHandle.selected;
+								m.paintMet = metHandle.selected;
+								m.paintHeight = heightHandle.selected;
+								m.paintEmis = emisHandle.selected;
+								m.paintSubs = subsHandle.selected;
 								MakeMaterial.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
