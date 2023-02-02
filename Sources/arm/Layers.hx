@@ -979,7 +979,7 @@ class Layers {
 		Context.layerPreviewDirty = true;
 	}
 
-	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = Layers.defaultRough, metallic = 0.0 ) {
+	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = Layers.defaultRough, metallic = 0.0) {
 		function _init() {
 			var l = newLayer(false);
 			History.newLayer();
