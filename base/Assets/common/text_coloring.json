@@ -1,0 +1,12 @@
+{
+	"colorings": [
+		{ "color": 4294627760, "start": ["\""], "end": "\"" },
+		{ "color": 4294627760, "start": ["'"], "end": "'" },
+		{ "color": 4284384616, "start": ["//"], "end": "\n" },
+		{ "color": 4288038789, "start": ["#pragma", "#include", "#ifdef", "#ifndef", "#undef", "#else", "#elif", "#define", "#if", "defined", "#endif"], "end": "", "separated": true  },
+		{ "color": 4291204550, "start": ["void", "const", "extern", "char", "bool", "int32_t", "float", "double", "unsigned", "for", "while", "if", "else", "NULL", "null", "nullptr", "var", "let", "new", "delete", "import", "typedef", "class", "struct", "String", "Bool", "Int", "Float", "Dynamic", "Array", "Void", "static", "package", "enum", "abstract", "to", "from", "int", "public", "private", "function", "true", "false", "size_t", "wchar_t", "in", "using", "namespace", "return"], "end": "", "separated": true },
+		{ "color": 4289117513, "start": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], "end": "", "separated": true },
+		{ "color": 4287269514, "start": ["=", "(", ")", "<", ">", "[", "]", "{", "}", ";", "-", "+", "/", "*", "@", "#", "$", "%", ":", ",", ".", "&", "!", "?"], "end": "" }
+	],
+	"default_color": 4293453797
+}
