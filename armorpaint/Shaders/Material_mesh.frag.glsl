@@ -1,5 +1,5 @@
 #version 450
-#include "../Libraries/armorbase/Shaders/std/gbuffer.glsl"
+#include "../../base/Shaders/std/gbuffer.glsl"
 in vec2 texCoord;
 in vec3 wnormal;
 in vec4 wvpposition;
