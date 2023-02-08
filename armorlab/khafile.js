@@ -12,17 +12,17 @@ let snapshot = process.argv.indexOf("--snapshot") >= 0;
 
 let project = new Project("ArmorLab");
 project.addSources("Sources");
-project.addLibrary("iron");
-project.addLibrary("zui");
-project.addLibrary("armorbase");
 project.addShaders("Shaders/*.glsl", { embed: snapshot });
-project.addShaders("armorcore/Shaders/*.glsl", { embed: snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: snapshot });
-project.addShaders("Libraries/armorbase/Shaders/common/*.glsl", { embed: snapshot });
-project.addAssets("Libraries/armorbase/Assets/common/*", { destination: "data/{name}", embed: snapshot });
+project.addLibrary("../../Libraries/iron");
+project.addLibrary("../../Libraries/zui");
+project.addLibrary("../../base");
+project.addShaders("../armorcore/Shaders/*.glsl", { embed: snapshot });
+project.addShaders("../base/Shaders/common/*.glsl", { embed: snapshot });
+project.addAssets("../base/Assets/common/*", { destination: "data/{name}", embed: snapshot });
 if (!snapshot) {
 	project.addDefine("arm_noembed");
-	project.addAssets("Libraries/armorbase/Assets/common/extra/*", { destination: "data/{name}" });
+	project.addAssets("../base/Assets/common/extra/*", { destination: "data/{name}" });
 }
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
@@ -32,8 +32,8 @@ project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("Assets/meshes/*", { destination: "data/meshes/{name}" });
 project.addAssets("Assets/models/*.onnx", { destination: "data/models/{name}" });
 project.addAssets("Assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
-project.addAssets("Libraries/armorbase/Assets/licenses/**", { destination: "data/licenses/{name}" });
-project.addAssets("Libraries/armorbase/Assets/themes/*.json", { destination: "data/themes/{name}" });
+project.addAssets("../base/Assets/licenses/**", { destination: "data/licenses/{name}" });
+project.addAssets("../base/Assets/themes/*.json", { destination: "data/themes/{name}" });
 project.addDefine("js-es=6");
 project.addParameter("--macro include('arm.node.brush')");
 project.addDefine("kha_no_ogg");
@@ -59,12 +59,12 @@ else if (ios) {
 else if (process.platform === "win32") {
 	project.addDefine("krom_windows");
 	project.addDefine("kha_windows");
-	project.addAssets("armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
+	project.addAssets("../armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
 }
 else if (process.platform === "linux") {
 	project.addDefine("krom_linux");
 	project.addDefine("kha_linux");
-	project.addAssets("armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
+	project.addAssets("../armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
 }
 else if (process.platform === "darwin") {
 	project.addDefine("krom_darwin");
@@ -96,13 +96,13 @@ if (snapshot) {
 project.addAssets("Assets/readme/readme.txt", { destination: "{name}" });
 
 if (raytrace) {
-	project.addAssets("Libraries/armorbase/Assets/raytrace/*", { destination: "data/{name}", embed: snapshot });
+	project.addAssets("../base/Assets/raytrace/*", { destination: "data/{name}", embed: snapshot });
 	if (d3d12) {
-		project.addAssets("Libraries/armorbase/Shaders/raytrace/*.cso", { destination: "data/{name}", embed: snapshot });
+		project.addAssets("../base/Shaders/raytrace/*.cso", { destination: "data/{name}", embed: snapshot });
 		project.addAssets("Assets/readme/readme_dxr.txt", { destination: "{name}" });
 	}
 	else if (vulkan) {
-		project.addAssets("Libraries/armorbase/Shaders/raytrace/*.spirv", { destination: "data/{name}", embed: snapshot });
+		project.addAssets("../base/Shaders/raytrace/*.spirv", { destination: "data/{name}", embed: snapshot });
 		project.addAssets("Assets/readme/readme_vkrt.txt", { destination: "{name}" });
 	}
 }
@@ -119,10 +119,10 @@ if (process.platform !== "darwin" && !raytrace && !android && !ios) {
 	project.addDefine("arm_voxelgi_revox");
 
 	if (process.platform === "win32" && win_hlsl) {
-		project.addShaders("Libraries/armorbase/Shaders/voxel_hlsl/*.glsl", { embed: snapshot, noprocessing: true });
+		project.addShaders("../base/Shaders/voxel_hlsl/*.glsl", { embed: snapshot, noprocessing: true });
 	}
 	else {
-		project.addShaders("Libraries/armorbase/Shaders/voxel_glsl/*.glsl", { embed: snapshot });
+		project.addShaders("../base/Shaders/voxel_glsl/*.glsl", { embed: snapshot });
 	}
 }
 
