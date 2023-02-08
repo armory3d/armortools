@@ -72,7 +72,7 @@ git apply ../armorcore/patch/d3d12_raytrace.diff --directory=../armorcore/Kinc
 
 **Linux VKRT** *wip*
 ```bash
-git clone --recursive https://github.com/armory3d/glsl_to_spirv armorcore/Libraries/glsl_to_spirv
+git clone --recursive https://github.com/armory3d/glsl_to_spirv
 git apply ../armorcore/patch/vulkan_raytrace.diff --directory=../armorcore/Kinc
 ../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang --compile
 cd ../armorcore/Deployment
