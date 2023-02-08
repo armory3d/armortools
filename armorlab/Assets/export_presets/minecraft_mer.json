@@ -1,0 +1,7 @@
+{
+	"textures": [
+		{ "name": "", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" },
+		{ "name": "normal", "channels": ["nor_r", "nor_g", "nor_b", "1.0"], "color_space": "linear" },
+		{ "name": "mer", "channels": ["0.0", "emis", "rough", "1.0"], "color_space": "linear" }
+	]
+}

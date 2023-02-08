@@ -1,0 +1,8 @@
+{
+	"textures": [
+		{ "name": "base", "channels": ["base_r", "base_g", "base_b", "1.0"], "color_space": "linear" },
+		{ "name": "nor", "channels": ["nor_r", "nor_g", "0.0", "1.0"], "color_space": "linear" },
+		{ "name": "sh", "channels": ["0.0", "rough", "0.0", "1.0"], "color_space": "linear" },
+		{ "name": "occ", "channels": ["occ", "0.0", "0.0", "1.0"], "color_space": "linear" }
+	]
+}
