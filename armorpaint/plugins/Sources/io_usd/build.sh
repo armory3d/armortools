@@ -1,0 +1,1 @@
+emcc io_usd.cc tinyusdz/tinyusdz.cc tinyusdz/integerCoding.cpp tinyusdz/lz4-compression.cc tinyusdz/pxrLZ4/lz4.cpp -o import_usd.js -O3 --closure 1 -DLZ4_DISABLE_DEPRECATE_WARNINGS -s ENVIRONMENT='shell' -s WASM_OBJECT_FILES=0 --llvm-lto 1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s ALLOW_MEMORY_GROWTH=1 -fno-rtti -fno-exceptions
