@@ -24,4 +24,6 @@ jobs:
     - name: Clone krafix
       run: git clone --recursive https://github.com/armory3d/glsl_to_spirv armorcore/Libraries/glsl_to_spirv
     - name: Compile
-      run: armorcore/Kinc/make --from armorcore -g vulkan --compiler clang
+      run: |
+        cd armorpaint
+        ../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang

@@ -18,4 +18,6 @@ jobs:
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Compile
-      run: armorcore/Kinc/make --from armorcore -g direct3d11
+      run: |
+        cd armorpaint
+        ../armorcore/Kinc/make --from ../armorcore -g direct3d11
