@@ -365,7 +365,7 @@ class UIMenu {
 					// File.loadUrl("https://apps.apple.com/app/armorlab/id");
 					#else
 					// Retrieve latest version number
-					var url = "https://luboslenco.gitlab.io/armorpaint/index_lab.html";
+					var url = "https://server.armorpaint.org/lab.html";
 					File.downloadBytes(url, function(bytes: Bytes) {
 						if (bytes != null)  {
 							// Compare versions
