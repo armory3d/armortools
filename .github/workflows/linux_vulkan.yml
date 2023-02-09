@@ -22,7 +22,7 @@ jobs:
     - name: Get Submodules
       run: git submodule update --init --recursive
     - name: Clone krafix
-      run: git clone --recursive https://github.com/armory3d/glsl_to_spirv armorcore/Libraries/glsl_to_spirv
+      run: git clone --recursive https://github.com/armory3d/glsl_to_spirv armorpaint/glsl_to_spirv
     - name: Compile
       run: |
         cd armorpaint
