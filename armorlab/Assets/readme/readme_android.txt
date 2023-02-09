@@ -14,4 +14,4 @@ This build is only intended for testing and
 may be sub-par in other areas compared to regular builds.
 
 Please report bugs at:
-https://github.com/armory3d/armorlab/issues
+https://github.com/armory3d/armortools/issues

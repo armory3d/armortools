@@ -346,14 +346,14 @@ class UIMenu {
 					File.loadUrl("https://armorlab.org/notes");
 				}
 				if (menuButton(ui, tr("Issue Tracker"))) {
-					File.loadUrl("https://github.com/armory3d/armorlab/issues");
+					File.loadUrl("https://github.com/armory3d/armortools/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
-					var url = "https://github.com/armory3d/armorlab/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
 					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
-					var url = "https://github.com/armory3d/armorlab/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
 					File.loadUrl(url);
 				}
 				menuSeparator(ui);
@@ -442,7 +442,7 @@ class UIMenu {
 							#end
 
 							if (ui.button(tr("Contributors"))) {
-								File.loadUrl("https://github.com/armory3d/armorlab/graphs/contributors");
+								File.loadUrl("https://github.com/armory3d/armortools/graphs/contributors");
 							}
 							if (ui.button(tr("OK"))) {
 								UIBox.hide();

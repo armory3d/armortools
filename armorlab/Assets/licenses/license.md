@@ -6,4 +6,4 @@ The origin of this software must not be misrepresented; you must not claim that 
 Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 This notice may not be removed or altered from any source distribution.
 
-https://github.com/armory3d/armorlab
+https://github.com/armory3d/armortools
