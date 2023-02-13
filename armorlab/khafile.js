@@ -19,6 +19,7 @@ project.addLibrary("../../Libraries/zui");
 project.addLibrary("../../base");
 project.addShaders("../armorcore/Shaders/*.glsl", { embed: snapshot });
 project.addShaders("../base/Shaders/common/*.glsl", { embed: snapshot });
+project.addShaders("../base/Shaders/shared/*.glsl", { embed: snapshot });
 project.addAssets("../base/Assets/common/*", { destination: "data/{name}", embed: snapshot });
 if (!snapshot) {
 	project.addDefine("arm_noembed");

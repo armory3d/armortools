@@ -1,5 +1,5 @@
 #version 450
-#include "../../base/Shaders/std/gbuffer.glsl"
+#include "../std/gbuffer.glsl"
 in vec2 texCoord;
 in vec3 wnormal;
 in vec4 wvpposition;
