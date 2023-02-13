@@ -60,7 +60,7 @@ def main() -> None:
         )
 
     matches: List[str] = []
-    for folder in ["Sources", "Libraries"]:
+    for folder in ["Sources", os.path.join("..", "Libraries"), os.path.join("..", "base")]:
         for root, dirnames, filenames in os.walk(folder):
             dirnames[:] = [d for d in dirnames]
             for filename in fnmatch.filter(filenames, "*.hx"):
