@@ -25,6 +25,7 @@ class Context {
 	public static var material: Dynamic; ////
 	public static var paintObject: MeshObject;
 	public static var mergedObject: MeshObject = null;
+	public static var mergedObjectIsAtlas = false; // Only objects referenced by atlas are merged
 	public static var texture: TAsset = null;
 	public static var tool = ToolEraser;
 

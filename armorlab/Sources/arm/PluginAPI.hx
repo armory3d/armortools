@@ -22,7 +22,6 @@ class ArmBridge {
 	public static var UIMenu = arm.ui.UIMenu;
 	public static var UIBox = arm.ui.UIBox;
 	public static var MeshUtil = arm.util.MeshUtil;
-	public static var UVUtil = arm.util.UVUtil;
 	public static var Viewport = arm.Viewport;
 }
 

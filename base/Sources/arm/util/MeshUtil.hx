@@ -312,9 +312,9 @@ class MeshUtil {
 		mergeMesh();
 	}
 
-	public static function applyDisplacement() {
-		var height = Project.layers[0].texpaint_pack.getPixels();
-		var res = Project.layers[0].texpaint_pack.width;
+	public static function applyDisplacement(texpaint_pack: kha.Image) {
+		var height = texpaint_pack.getPixels();
+		var res = texpaint_pack.width;
 		var strength = 0.1;
 		var o = Project.paintObjects[0];
 		var g = o.data.geom;

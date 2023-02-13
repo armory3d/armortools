@@ -6,7 +6,6 @@ import iron.data.Data;
 import iron.math.Vec4;
 import iron.Scene;
 import arm.util.MeshUtil;
-import arm.util.UVUtil;
 import arm.Viewport;
 import arm.sys.Path;
 import arm.ui.UIHeader;
@@ -123,9 +122,6 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.ddirty = 4;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
 
 				// Wait for addMesh calls to finish
 				iron.App.notifyOnInit(finishImport);
@@ -167,9 +163,6 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.ddirty = 4;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
 			});
 		}
 
