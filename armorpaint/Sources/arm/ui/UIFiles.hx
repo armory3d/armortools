@@ -82,7 +82,7 @@ class UIFiles {
 
 	@:access(zui.Zui)
 	@:access(arm.sys.File)
-	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false): String {
+	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu : String -> Void = null): String {
 
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
@@ -255,6 +255,10 @@ class UIFiles {
 
 				if (generic) {
 					state = ui.image(icons, col, 50 * ui.SCALE(), rect.x, rect.y, rect.w, rect.h);
+				}
+
+				if (ui.isHovered && ui.inputReleasedR && contextMenu != null) {
+					contextMenu(handle.text + Path.sep + f);
 				}
 
 				if (state == Started) {
