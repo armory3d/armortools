@@ -27,10 +27,7 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 	) {
 	vec3 ld = lp - p;
 	vec3 l = normalize(ld);
-	vec3 h = normalize(v + l);
-	float dotNH = dot(n, h);
-	float dotVH = dot(v, h);
-	float dotNL = dot(n, l);
+	float dotNL = max(0.0, dot(n, l));
 
 	float theta = acos(dotNV);
 	vec2 tuv = vec2(rough, theta / (0.5 * PI));
@@ -47,8 +44,7 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 
 	direct *= attenuate(distance(p, lp));
 	direct *= lightCol;
-
-	direct *= dotNL + 2.0 * occ * occ - 1.0;
+	direct *= clamp(dotNL + 2.0 * occ * occ - 1.0, 0.0, 1.0); // Micro shadowing
 
 	#ifdef _VoxelAOvar
 	#ifdef _VoxelShadow

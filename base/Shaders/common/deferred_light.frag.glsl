@@ -68,7 +68,7 @@ void main() {
 	float depth = textureLod(gbufferD, texCoord, 0.0).r * 2.0 - 1.0;
 	vec3 p = getPos(eye, eyeLook, normalize(viewRay), depth, cameraProj);
 	vec3 v = normalize(eye - p);
-	float dotNV = max(dot(n, v), 0.0);
+	float dotNV = max(0.0, dot(n, v));
 
 	occ = mix(1.0, occ, dotNV); // AO Fresnel
 
