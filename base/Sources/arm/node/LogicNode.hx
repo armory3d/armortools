@@ -29,6 +29,8 @@ class LogicNode {
 	public function getImage(): kha.Image {
 		return null;
 	}
+
+	function run(from: Int) {}
 }
 
 class LogicNodeInput {

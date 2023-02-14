@@ -122,9 +122,13 @@ class InputNode extends LogicNode {
 		Context.parseBrushInputs();
 	}
 
-	override function get(from: Int): Dynamic {
-		Context.brushLazyRadius = inputs[0].get();
-		Context.brushLazyStep = inputs[1].get();
-		return coords;
+	override function get(from: Int, done: Dynamic->Void) {
+		inputs[0].get(function(value) {
+			Context.brushLazyRadius = value;
+			inputs[1].get(function(value) {
+				Context.brushLazyStep = value;
+				done(coords);
+			});
+		});
 	}
 }

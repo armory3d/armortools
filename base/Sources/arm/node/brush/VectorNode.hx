@@ -17,11 +17,17 @@ class VectorNode extends LogicNode {
 		}
 	}
 
-	override function get(from: Int): Dynamic {
-		value.x = inputs[0].get();
-		value.y = inputs[1].get();
-		value.z = inputs[2].get();
-		return value;
+	override function get(from: Int, done: Dynamic->Void) {
+		inputs[0].get(function(x: Float) {
+			inputs[1].get(function(y: Float) {
+				inputs[2].get(function(z: Float) {
+					value.x = x;
+					value.y = y;
+					value.z = z;
+					done(value);
+				});
+			});
+		});
 	}
 
 	override function set(value: Dynamic) {

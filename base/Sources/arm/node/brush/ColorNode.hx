@@ -13,9 +13,9 @@ class ColorNode extends LogicNode {
 		value.set(r, g, b, a);
 	}
 
-	override function get(from: Int): Dynamic {
-		if (inputs.length > 0) return inputs[0].get();
-		return value;
+	override function get(from: Int, done: Dynamic->Void) {
+		if (inputs.length > 0) inputs[0].get(done);
+		else done(value);
 	}
 
 	override function set(value: Dynamic) {

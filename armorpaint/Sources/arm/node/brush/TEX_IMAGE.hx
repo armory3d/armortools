@@ -10,8 +10,8 @@ class TEX_IMAGE extends LogicNode {
 		super(tree);
 	}
 
-	override function get(from: Int): Dynamic {
-		if (from == 0) return file + ".rgb";
-		return file + ".a";
+	override function get(from: Int, done: Dynamic->Void) {
+		if (from == 0) done(file + ".rgb");
+		else done(file + ".a");
 	}
 }

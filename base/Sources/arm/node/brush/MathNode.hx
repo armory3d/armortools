@@ -11,10 +11,8 @@ class MathNode extends LogicNode {
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {
-
 		inputs[0].get(function(v1: Float) {
 			inputs[1].get(function(v2: Float) {
-
 				var f = 0.0;
 				switch (operation) {
 					case "Add":

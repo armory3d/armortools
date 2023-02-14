@@ -28,13 +28,13 @@ class BrushOutputNode extends LogicNode {
 		var input5: Dynamic;
 		var input6: Dynamic;
 		try {
-			input0 = inputs[0].get();
-			input1 = inputs[1].get();
-			input2 = inputs[2].get();
-			input3 = inputs[3].get();
-			input4 = inputs[4].get();
-			input5 = inputs[5].get();
-			input6 = inputs[6].get();
+			inputs[0].get(function(value) { input0 = value; });
+			inputs[1].get(function(value) { input1 = value; });
+			inputs[2].get(function(value) { input2 = value; });
+			inputs[3].get(function(value) { input3 = value; });
+			inputs[4].get(function(value) { input4 = value; });
+			inputs[5].get(function(value) { input5 = value; });
+			inputs[6].get(function(value) { input6 = value; });
 		}
 		catch (_) {
 			return;
