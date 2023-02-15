@@ -135,7 +135,7 @@ class RenderPathRaytrace {
 		commands(useLiveLayer);
 
 		if (Config.raw.rp_bloom != false) {
-			RenderPathDeferred.commandsBloom("buf");
+			Inc.commandsBloom("buf");
 		}
 		path.setTarget("buf");
 		path.drawMeshes("overlay");

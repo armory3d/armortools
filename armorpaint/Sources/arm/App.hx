@@ -64,7 +64,7 @@ class App {
 	public static var font: Font = null;
 	public static var theme: TTheme;
 	public static var colorWheel: Image;
-	public static var blackWhiteGradient: Image;
+	public static var colorWheelGradient: Image;
 	public static var uiBox: Zui;
 	public static var uiMenu: Zui;
 	public static var defaultElementW = 100;
@@ -126,7 +126,7 @@ class App {
 
 		Data.getFont("font.ttf", function(f: Font) {
 			Data.getImage("color_wheel.k", function(imageColorWheel: Image) {
-				Data.getImage("black_white_gradient.k", function(imageBlackWhiteGradient: Image) {
+				Data.getImage("color_wheel_gradient.k", function(imageColorWheelGradient: Image) {
 					font = f;
 					Config.loadTheme(Config.raw.theme, false);
 					defaultElementW = theme.ELEMENT_W;
@@ -162,11 +162,11 @@ class App {
 					}
 
 					colorWheel = imageColorWheel;
-					blackWhiteGradient = imageBlackWhiteGradient;
+					colorWheelGradient = imageColorWheelGradient;
 					Nodes.enumTexts = enumTexts;
 					Nodes.tr = tr;
-					uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: blackWhiteGradient });
-					uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: blackWhiteGradient });
+					uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
+					uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
 					defaultElementH = uiMenu.t.ELEMENT_H;
 
 					// Init plugins

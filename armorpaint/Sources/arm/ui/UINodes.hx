@@ -69,7 +69,7 @@ class UINodes {
 		Nodes.onCanvasControl = onCanvasControl;
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.blackWhiteGradient, scaleFactor: scale });
+		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.colorWheelGradient, scaleFactor: scale });
 		ui.scrollEnabled = false;
 	}
 
