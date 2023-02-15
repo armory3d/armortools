@@ -1,6 +1,8 @@
 package arm;
 
-@:structInit class TConfig extends arm.ConfigBaseFormat.TConfigBase {
+import arm.ConfigBaseFormat;
+
+@:structInit class TConfig extends TConfigBase {
 	@:optional public var pressure_radius: Null<Bool>; // Pen pressure controls
 	@:optional public var pressure_hardness: Null<Bool>;
 	@:optional public var pressure_angle: Null<Bool>;
