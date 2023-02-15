@@ -10,7 +10,7 @@ import arm.io.ImportTexture;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Enums;
-import arm.ProjectFormat;
+import arm.ProjectBaseFormat;
 
 class TabTextures {
 

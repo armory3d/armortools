@@ -15,7 +15,7 @@ import arm.node.MakeMaterial;
 import arm.ui.UIHeader;
 import arm.Enums;
 import arm.Project;
-import arm.ProjectFormat.TSwatchColor;
+import arm.ProjectBaseFormat;
 
 @:access(zui.Zui)
 @:access(zui.Nodes)

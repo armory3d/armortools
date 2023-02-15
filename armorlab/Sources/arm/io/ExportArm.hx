@@ -10,6 +10,7 @@ import iron.system.Lz4;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.sys.Path;
+import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
 import arm.Enums;
 

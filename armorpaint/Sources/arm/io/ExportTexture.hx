@@ -12,7 +12,7 @@ import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
-import arm.ProjectFormat;
+import arm.ProjectBaseFormat;
 import arm.Enums;
 
 class ExportTexture {

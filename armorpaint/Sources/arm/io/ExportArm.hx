@@ -11,6 +11,7 @@ import arm.data.FontSlot;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.sys.Path;
+import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
 import arm.Enums;
 
@@ -277,7 +278,7 @@ class ExportArm {
 			packed_assets = getPackedAssets(path, texture_files);
 		}
 
-		var raw = {
+		var raw: TProjectFormat = {
 			version: Main.version,
 			brush_nodes: bnodes,
 			brush_icons: isCloud ? null :
