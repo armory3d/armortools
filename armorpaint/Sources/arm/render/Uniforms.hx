@@ -19,12 +19,17 @@ class Uniforms {
 	static var orthoP = Mat4.ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	public static function init() {
+		iron.object.Uniforms.externalIntLinks = [linkInt];
 		iron.object.Uniforms.externalFloatLinks = [linkFloat];
 		iron.object.Uniforms.externalVec2Links = [linkVec2];
 		iron.object.Uniforms.externalVec3Links = [linkVec3];
 		iron.object.Uniforms.externalVec4Links = [linkVec4];
 		iron.object.Uniforms.externalMat4Links = [linkMat4];
 		iron.object.Uniforms.externalTextureLinks = [linkTex];
+	}
+
+	public static function linkInt(object: Object, mat: MaterialData, link: String): Null<Int> {
+		return null;
 	}
 
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {

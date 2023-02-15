@@ -147,4 +147,60 @@ class Inc {
 		}
 		return false;
 	}
+
+	static var bloomMipmaps: Array<RenderTarget>;
+	static var bloomCurrentMip = 0;
+	static var bloomSampleScale: Float;
+
+	public static function commandsBloom(tex = "tex") {
+		if (Config.raw.rp_bloom != false) {
+			if (bloomMipmaps == null) {
+				bloomMipmaps = [];
+
+				var prevScale = 1.0;
+				for (i in 0...10) {
+					var t = new RenderTargetRaw();
+					t.name = "bloom_mip_" + i;
+					t.width = 0;
+					t.height = 0;
+					t.scale = (prevScale *= 0.5);
+					t.format = "RGBA64";
+					bloomMipmaps.push(path.createRenderTarget(t));
+				}
+
+				path.loadShader("shader_datas/bloom_pass/downsample_pass");
+				path.loadShader("shader_datas/bloom_pass/upsample_pass");
+
+				iron.object.Uniforms.externalIntLinks.push(function(_, _, link: String) {
+					if (link == "_bloomCurrentMip") return bloomCurrentMip;
+					return null;
+				});
+				iron.object.Uniforms.externalFloatLinks.push(function(_, _, link: String) {
+					if (link == "_bloomSampleScale") return bloomSampleScale;
+					return null;
+				});
+			}
+
+			var bloomRadius = 6.5;
+			var minDim = Math.min(path.currentW, path.currentH);
+			var logMinDim = Math.max(1.0, js.lib.Math.log2(minDim) + (bloomRadius - 8.0));
+			var numMips = Std.int(logMinDim);
+			bloomSampleScale = 0.5 + logMinDim - numMips;
+
+			for (i in 0...numMips) {
+				bloomCurrentMip = i;
+				path.setTarget(bloomMipmaps[i].raw.name);
+				path.clearTarget();
+				path.bindTarget(i == 0 ? tex : bloomMipmaps[i - 1].raw.name, "tex");
+				path.drawShader("shader_datas/bloom_pass/downsample_pass");
+			}
+			for (i in 0...numMips) {
+				var mipLevel = numMips - 1 - i;
+				bloomCurrentMip = mipLevel;
+				path.setTarget(mipLevel == 0 ? tex : bloomMipmaps[mipLevel - 1].raw.name);
+				path.bindTarget(bloomMipmaps[mipLevel].raw.name, "tex");
+				path.drawShader("shader_datas/bloom_pass/upsample_pass");
+			}
+		}
+	}
 }
