@@ -1,11 +1,7 @@
 #version 450
 
-// #define _AutoExposure
-
 uniform sampler2D tex;
-#ifdef _AutoExposure
-uniform sampler2D histogram;
-#endif
+// uniform sampler2D histogram;
 
 uniform float vignetteStrength;
 
@@ -27,11 +23,10 @@ void main() {
 
 	fragColor.rgb *= (1.0 - vignetteStrength) + vignetteStrength * pow(16.0 * texCoord.x * texCoord.y * (1.0 - texCoord.x) * (1.0 - texCoord.y), 0.2);
 
-#ifdef _AutoExposure
-	const float autoExposureStrength = 1.0;
-	float expo = 2.0 - clamp(length(textureLod(histogram, vec2(0.5, 0.5), 0).rgb), 0.0, 1.0);
-	fragColor.rgb *= pow(expo, autoExposureStrength * 2.0);
-#endif
+	// Auto exposure
+	// const float autoExposureStrength = 1.0;
+	// float expo = 2.0 - clamp(length(textureLod(histogram, vec2(0.5, 0.5), 0).rgb), 0.0, 1.0);
+	// fragColor.rgb *= pow(expo, autoExposureStrength * 2.0);
 
 	fragColor.rgb = tonemapFilmic(fragColor.rgb); // With gamma
 }

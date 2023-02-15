@@ -4,10 +4,10 @@
 
 #include "../std/brdf.glsl"
 #include "../std/math.glsl"
-#ifdef _VoxelAOvar
+#include "../std/ltc.glsl"
+#ifdef _Voxel
 #include "../std/conetrace.glsl"
 #endif
-#include "../std/ltc.glsl"
 
 uniform vec3 lightArea0;
 uniform vec3 lightArea1;
@@ -17,13 +17,10 @@ uniform sampler2D sltcMat;
 uniform sampler2D sltcMag;
 
 vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, const vec3 lp, const vec3 lightCol,
-	const vec3 albedo, const float rough, const vec3 f0
-	#ifdef _VoxelAOvar
-	#ifdef _VoxelShadow
-		, sampler3D voxels, vec3 voxpos
-	#endif
-	#endif
-		, float occ
+	const vec3 albedo, const float rough, const vec3 f0, const float occ
+#ifdef _Voxel
+	, sampler3D voxels, vec3 voxpos
+#endif
 	) {
 	vec3 ld = lp - p;
 	vec3 l = normalize(ld);
@@ -46,10 +43,8 @@ vec3 sampleLight(const vec3 p, const vec3 n, const vec3 v, const float dotNV, co
 	direct *= lightCol;
 	direct *= clamp(dotNL + 2.0 * occ * occ - 1.0, 0.0, 1.0); // Micro shadowing
 
-	#ifdef _VoxelAOvar
-	#ifdef _VoxelShadow
+	#ifdef _Voxel
 	direct *= 1.0 - traceShadow(voxels, voxpos, l);
-	#endif
 	#endif
 
 	return direct;
