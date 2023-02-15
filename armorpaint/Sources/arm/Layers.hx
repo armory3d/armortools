@@ -135,7 +135,7 @@ class Layers {
 
 	static function makeMergePipe(red: Bool, green: Bool, blue: Bool, alpha: Bool): PipelineState {
 		var pipe = new PipelineState();
-		pipe.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipe.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipe.fragmentShader = kha.Shaders.getFragment("layer_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
@@ -223,7 +223,7 @@ class Layers {
 		pipeInvert8.compile();
 
 		pipeApplyMask = new PipelineState();
-		pipeApplyMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeApplyMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
@@ -233,7 +233,7 @@ class Layers {
 		texaMask = pipeApplyMask.getTextureUnit("texa");
 
 		pipeMergeMask = new PipelineState();
-		pipeMergeMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeMergeMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeMergeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
@@ -245,7 +245,7 @@ class Layers {
 		blendingMergeMask = pipeMergeMask.getConstantLocation("blending");
 
 		pipeColorIdToMask = new PipelineState();
-		pipeColorIdToMask.vertexShader = kha.Shaders.getVertex("layer_merge.vert");
+		pipeColorIdToMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeColorIdToMask.fragmentShader = kha.Shaders.getFragment("mask_colorid.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);

@@ -1,17 +1,21 @@
-#version 330
+#version 450
+
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D texmask;
 uniform sampler2D texa;
 uniform float opac;
 uniform int blending;
+
 in vec2 texCoord;
 out vec4 FragColor;
+
 vec3 hsv_to_rgb(const vec3 c) {
 	const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
 	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
+
 vec3 rgb_to_hsv(const vec3 c) {
 	const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -20,6 +24,7 @@ vec3 rgb_to_hsv(const vec3 c) {
 	float e = 1.0e-10;
 	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
+
 void main() {
 	vec4 col0 = textureLod(tex0, texCoord, 0);
 	vec4 cola = textureLod(texa, texCoord, 0);

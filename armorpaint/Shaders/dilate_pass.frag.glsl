@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform sampler2D texdilate;
 uniform float dilateRadius;
+
 in vec2 texCoord;
 out vec4 fragColor;
 

@@ -1,10 +1,13 @@
-#version 330
+#version 450
+
 uniform sampler2D tex0;
 uniform sampler2D texa;
 uniform float opac;
 uniform int blending;
+
 in vec2 texCoord;
 out vec4 FragColor;
+
 void main() {
 	float col0 = textureLod(tex0, texCoord, 0).r;
 	float cola = textureLod(texa, texCoord, 0).r;

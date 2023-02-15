@@ -1,9 +1,12 @@
 #version 450
+
 #include "../../base/Shaders/std/gbuffer.glsl"
+
 in vec3 wnormal;
 in vec4 wvpposition;
 in vec4 prevwvpposition;
 out vec4 fragColor[3];
+
 void main() {
 	vec3 n = normalize(wnormal);
 	vec3 basecol = vec3(0.8, 0.8, 0.8);

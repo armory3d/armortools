@@ -164,7 +164,7 @@ class Layers {
 		pipeCopyB.compile();
 
 		pipeApplyMask = new PipelineState();
-		pipeApplyMask.vertexShader = kha.Shaders.getVertex("layer_copy_rrrr.vert");
+		pipeApplyMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
@@ -189,7 +189,7 @@ class Layers {
 
 	public static function makePipeCopyA() {
 		pipeCopyA = new PipelineState();
-		pipeCopyA.vertexShader = kha.Shaders.getVertex("layer_copy_rrrr.vert");
+		pipeCopyA.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeCopyA.fragmentShader = kha.Shaders.getFragment("layer_copy_rrrr.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
