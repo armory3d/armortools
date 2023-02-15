@@ -1,10 +1,13 @@
 #version 450
+
 #include "../std/gbuffer.glsl"
+
 in vec2 texCoord;
 in vec3 wnormal;
 in vec4 wvpposition;
 in vec4 prevwvpposition;
 out vec4 fragColor[3];
+
 void main() {
 	vec3 n = normalize(wnormal);
 	vec3 basecol = vec3(0.2, 0.2, 0.2) + texCoord.x * 0.0000001; // keep texCoord

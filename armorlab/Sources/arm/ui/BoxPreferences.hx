@@ -306,7 +306,7 @@ class BoxPreferences {
 				}
 			}
 
-			Context.hssgi = Id.handle({ selected: Config.raw.rp_ssgi });
+			Context.hssao = Id.handle({ selected: Config.raw.rp_ssao });
 			Context.hssr = Id.handle({ selected: Config.raw.rp_ssr });
 			Context.hbloom = Id.handle({ selected: Config.raw.rp_bloom });
 			Context.hsupersample = Id.handle({ position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
@@ -359,8 +359,8 @@ class BoxPreferences {
 					if (h.changed) Context.ddirty = 2;
 					ui.enabled = true;
 					#end
-					ui.check(Context.hssgi, tr("SSAO"));
-					if (Context.hssgi.changed) Config.applyConfig();
+					ui.check(Context.hssao, tr("SSAO"));
+					if (Context.hssao.changed) Config.applyConfig();
 					ui.check(Context.hssr, tr("SSR"));
 					if (Context.hssr.changed) Config.applyConfig();
 					ui.check(Context.hbloom, tr("Bloom"));

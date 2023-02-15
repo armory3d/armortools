@@ -3,12 +3,6 @@
 #include "../std/math.glsl"
 #include "../std/gbuffer.glsl"
 
-const float ssrRayStep = 0.04;
-const float ssrMinRayStep = 0.05;
-const float ssrSearchDist = 5.0;
-const float ssrFalloffExp = 5.0;
-const float ssrJitter = 0.6;
-
 uniform sampler2D tex;
 uniform sampler2D gbufferD;
 uniform sampler2D gbuffer0; // Normal, roughness
@@ -21,11 +15,16 @@ in vec3 viewRay;
 in vec2 texCoord;
 out vec4 fragColor;
 
-vec3 hitCoord;
-float depth;
-
+const float ssrRayStep = 0.04;
+const float ssrMinRayStep = 0.05;
+const float ssrSearchDist = 5.0;
+const float ssrFalloffExp = 5.0;
+const float ssrJitter = 0.6;
 const int numBinarySearchSteps = 7;
 const int maxSteps = 18;
+
+vec3 hitCoord;
+float depth;
 
 vec2 getProjectedCoord(const vec3 hit) {
 	vec4 projectedCoord = P * vec4(hit, 1.0);

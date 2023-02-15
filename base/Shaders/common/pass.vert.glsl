@@ -1,11 +1,10 @@
 #version 450
 
 in vec2 pos;
-
 out vec2 texCoord;
 
 void main() {
-	// Scale vertex attribute to 0-1 range
+	// Scale vertex attribute to [0-1] range
 	const vec2 madd = vec2(0.5, 0.5);
 	texCoord = pos.xy * madd + madd;
 	#if defined(HLSL) || defined(METAL) || defined(SPIRV)

@@ -229,8 +229,8 @@ class Inc {
 					bloomMipmaps.push(path.createRenderTarget(t));
 				}
 
-				path.loadShader("shader_datas/bloom_pass/downsample_pass");
-				path.loadShader("shader_datas/bloom_pass/upsample_pass");
+				path.loadShader("shader_datas/bloom_pass/bloom_downsample_pass");
+				path.loadShader("shader_datas/bloom_pass/bloom_upsample_pass");
 
 				iron.object.Uniforms.externalIntLinks.push(function(_, _, link: String) {
 					if (link == "_bloomCurrentMip") return bloomCurrentMip;
@@ -253,14 +253,14 @@ class Inc {
 				path.setTarget(bloomMipmaps[i].raw.name);
 				path.clearTarget();
 				path.bindTarget(i == 0 ? tex : bloomMipmaps[i - 1].raw.name, "tex");
-				path.drawShader("shader_datas/bloom_pass/downsample_pass");
+				path.drawShader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
 			for (i in 0...numMips) {
 				var mipLevel = numMips - 1 - i;
 				bloomCurrentMip = mipLevel;
 				path.setTarget(mipLevel == 0 ? tex : bloomMipmaps[mipLevel - 1].raw.name);
 				path.bindTarget(bloomMipmaps[mipLevel].raw.name, "tex");
-				path.drawShader("shader_datas/bloom_pass/upsample_pass");
+				path.drawShader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
 		}
 	}

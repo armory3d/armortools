@@ -1,8 +1,11 @@
-#version 330
+#version 450
+
 uniform sampler2D tex0;
 uniform sampler2D texa;
+
 in vec2 texCoord;
 out vec4 FragColor;
+
 void main() {
 	vec4 col0 = textureLod(tex0, texCoord, 0);
 	float mask = textureLod(texa, texCoord, 0).r;

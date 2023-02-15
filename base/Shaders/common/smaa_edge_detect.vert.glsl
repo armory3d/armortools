@@ -1,9 +1,8 @@
 #version 450
 
-in vec2 pos;
-
 uniform vec2 screenSizeInv;
 
+in vec2 pos;
 out vec2 texCoord;
 out vec4 offset0;
 out vec4 offset1;

@@ -1,4 +1,3 @@
-// Exclusive to SSR for now
 #version 450
 
 #include "../std/gbuffer.glsl"
@@ -13,10 +12,6 @@ out vec4 fragColor;
 
 void main() {
 	float roughness = textureLod(gbuffer0, texCoord, 0.0).b;
-	// if (roughness == 0.0) { // Always blur for now, non blured output can produce noise
-		// fragColor.rgb = textureLod(tex, texCoord).rgb;
-		// return;
-	// }
 	if (roughness >= 0.8) { // No reflections
 		fragColor.rgb = textureLod(tex, texCoord, 0.0).rgb;
 		return;

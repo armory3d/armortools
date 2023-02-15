@@ -1,10 +1,9 @@
 #version 450
 
-in vec2 texCoord;
-
 uniform sampler2D radiance;
 uniform vec4 params;
 
+in vec2 texCoord;
 out vec4 fragColor;
 
 const float PI = 3.14159265358979;

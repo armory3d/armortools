@@ -94,9 +94,9 @@ class Config {
 			raw.rp_vignette = 0.2;
 			raw.rp_motionblur = false;
 			#if (krom_android || krom_ios)
-			raw.rp_ssgi = false;
+			raw.rp_ssao = false;
 			#else
-			raw.rp_ssgi = true;
+			raw.rp_ssao = true;
 			#end
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
@@ -174,7 +174,7 @@ class Config {
 	}
 
 	public static function applyConfig() {
-		Config.raw.rp_ssgi = Context.hssgi.selected;
+		Config.raw.rp_ssao = Context.hssao.selected;
 		Config.raw.rp_ssr = Context.hssr.selected;
 		Config.raw.rp_bloom = Context.hbloom.selected;
 		Config.raw.rp_gi = Context.hvxao.selected;

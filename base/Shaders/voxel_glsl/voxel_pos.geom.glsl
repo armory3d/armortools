@@ -2,8 +2,10 @@
 layout(triangles) in;
 layout(triangle_strip) out;
 layout(max_vertices=3) out;
+
 in vec3 voxpositionGeom[];
 out vec3 voxposition;
+
 void main() {
 	vec3 p1 = voxpositionGeom[1] - voxpositionGeom[0];
 	vec3 p2 = voxpositionGeom[2] - voxpositionGeom[0];

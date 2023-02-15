@@ -7,7 +7,6 @@ uniform sampler2D blendTex;
 #ifdef _Veloc
 uniform sampler2D sveloc;
 #endif
-
 uniform vec2 screenSizeInv;
 
 in vec2 texCoord;

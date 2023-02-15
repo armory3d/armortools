@@ -18,7 +18,7 @@ typedef TConfig = {
 	@:optional var window_scale: Null<Float>;
 	// Render path
 	@:optional var rp_supersample: Null<Float>;
-	@:optional var rp_ssgi: Null<Bool>;
+	@:optional var rp_ssao: Null<Bool>;
 	@:optional var rp_ssr: Null<Bool>;
 	@:optional var rp_bloom: Null<Bool>;
 	@:optional var rp_motionblur: Null<Bool>;

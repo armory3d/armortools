@@ -121,7 +121,7 @@ class Context {
 	public static var camHandle = new Handle();
 	public static var fovHandle: Handle = null;
 	public static var undoHandle: Handle = null;
-	public static var hssgi: Handle = null;
+	public static var hssao: Handle = null;
 	public static var hssr: Handle = null;
 	public static var hbloom: Handle = null;
 	public static var hsupersample: Handle = null;

@@ -1,11 +1,11 @@
 #version 450
 
+uniform mat4 SMVP;
+
 in vec3 pos;
 in vec3 nor;
 
 out vec3 normal;
-
-uniform mat4 SMVP;
 
 void main() {
 	normal = nor;

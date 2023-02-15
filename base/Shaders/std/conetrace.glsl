@@ -11,6 +11,9 @@
 // http://www.seas.upenn.edu/%7Epcozzi/OpenGLInsights/OpenGLInsights-SparseVoxelization.pdf
 // https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf
 
+uniform float coneOffset;
+uniform float coneAperture;
+
 const ivec3 voxelgiResolution = ivec3(256, 256, 256);
 const vec3 voxelgiHalfExtents = vec3(1, 1, 1);
 const float voxelgiOcc = 1.0;
@@ -18,9 +21,6 @@ const float voxelgiStep = 1.0;
 const float voxelgiRange = 2.0;
 const float MAX_DISTANCE = 1.73205080757 * voxelgiRange;
 const float VOXEL_SIZE = (2.0 / voxelgiResolution.x) * voxelgiStep;
-
-uniform float coneOffset;
-uniform float coneAperture;
 
 vec3 tangent(const vec3 n) {
 	vec3 t1 = cross(n, vec3(0, 0, 1));
@@ -33,7 +33,6 @@ float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float ape
 	dir = normalize(dir);
 	float sampleCol = 0.0;
 	float dist = 1.5 * VOXEL_SIZE * coneOffset;
-	// float dist = (0.02 + 0.02 * (1.0 - dot(dir, normal)) ) * coneOffset;
 	float diam = dist * aperture;
 	vec3 samplePos;
 	while (sampleCol < 1.0 && dist < maxDist) {
