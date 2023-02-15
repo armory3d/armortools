@@ -4,7 +4,6 @@
 
 uniform sampler2D tex;
 uniform sampler2D gbuffer0; // Roughness
-
 uniform vec2 dirInv;
 
 in vec2 texCoord;

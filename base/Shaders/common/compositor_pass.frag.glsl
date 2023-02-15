@@ -2,7 +2,6 @@
 
 uniform sampler2D tex;
 // uniform sampler2D histogram;
-
 uniform float vignetteStrength;
 
 in vec2 texCoord;

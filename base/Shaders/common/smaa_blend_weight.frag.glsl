@@ -18,7 +18,6 @@
 uniform sampler2D edgesTex;
 uniform sampler2D areaTex;
 uniform sampler2D searchTex;
-
 uniform vec2 screenSize;
 uniform vec2 screenSizeInv;
 
