@@ -17,8 +17,8 @@ git submodule update --init --recursive
 
 **Generating a locale file**
 ```bash
-pip install typing_extensions -t armorpaint/Assets/locale/tools
-python ./armorpaint/Assets/locale/tools/extract_locales.py <locale code>
+pip install typing_extensions -t base/tools
+python ./base/tools/extract_locales.py armorpaint <locale code>
 # Generates an `armorpaint/Assets/locale/<locale code>.json` file
 ```
 

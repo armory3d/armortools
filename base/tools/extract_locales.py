@@ -45,14 +45,14 @@ def process_file(f: IO[Any], fname: str, template_data: Dict[str, str]) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        sys.exit(f"Usage: {sys.argv[0]} <locale code>")
+    if len(sys.argv) != 3:
+        sys.exit(f"Usage: {sys.argv[0]} <app name> <locale code>")
 
     # Change to the directory where the script is located,
     # so that the script can be run from any location.
-    os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../..")
+    os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../" + sys.argv[1])
 
-    output_path: Final = f"Assets/locale/{sys.argv[1]}.json"
+    output_path: Final = f"Assets/locale/{sys.argv[2]}.json"
 
     if not os.path.exists("Sources"):
         sys.exit(
