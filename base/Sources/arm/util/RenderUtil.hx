@@ -1,7 +1,6 @@
 package arm.util;
 
 import kha.Image;
-import kha.Font;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.VertexBuffer;
 import kha.graphics4.IndexBuffer;
@@ -15,20 +14,15 @@ import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Vec4;
 import iron.math.Quat;
-import iron.data.MaterialData;
-import iron.data.ShaderData;
-import arm.ui.UIHeader;
-import arm.ui.UINodes;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathDeferred;
 import arm.shader.MakeMaterial;
-import arm.io.ImportFont;
 import arm.Enums;
 
 class RenderUtil {
 
-	public static inline var matPreviewSize = 256;
+	public static inline var materialPreviewSize = 256;
 	public static inline var decalPreviewSize = 512;
 	public static inline var layerPreviewSize = 200;
 	static var screenAlignedFullVB: VertexBuffer = null;
@@ -68,8 +62,8 @@ class RenderUtil {
 
 		Scene.active.world.envmap = Context.previewEnvmap;
 		// No resize
-		@:privateAccess RenderPath.active.lastW = matPreviewSize;
-		@:privateAccess RenderPath.active.lastH = matPreviewSize;
+		@:privateAccess RenderPath.active.lastW = materialPreviewSize;
+		@:privateAccess RenderPath.active.lastH = materialPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
@@ -108,7 +102,7 @@ class RenderUtil {
 		if (current != null) current.end();
 
 		if (Context.decalImage == null) {
-			Context.decalImage = Image.createRenderTarget(RenderUtil.decalPreviewSize, RenderUtil.decalPreviewSize);
+			Context.decalImage = Image.createRenderTarget(decalPreviewSize, decalPreviewSize);
 		}
 		Context.decalPreview = true;
 
@@ -134,8 +128,8 @@ class RenderUtil {
 		Scene.active.world.envmap = Context.previewEnvmap;
 
 		// No resize
-		@:privateAccess RenderPath.active.lastW = RenderUtil.decalPreviewSize;
-		@:privateAccess RenderPath.active.lastH = RenderUtil.decalPreviewSize;
+		@:privateAccess RenderPath.active.lastW = decalPreviewSize;
+		@:privateAccess RenderPath.active.lastH = decalPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
@@ -227,7 +221,6 @@ class RenderUtil {
 	}
 
 	public static function makeBrushPreview() {
-
 		if (RenderPathPaint.liveLayerLocked) return;
 		Context.materialPreview = true;
 
@@ -240,45 +233,13 @@ class RenderUtil {
 		}
 
 		var l = RenderPathPaint.liveLayer;
-		l.texpaint.g4.begin();
-		l.texpaint.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0)); // Base
-		l.texpaint.g4.end();
-
-		l.texpaint_nor.g4.begin();
-		l.texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
-		l.texpaint_nor.g4.end();
-
-		l.texpaint_pack.g4.begin();
-		l.texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0)); // Occ, rough, met
-		l.texpaint_pack.g4.end();
+		l.clear();
 
 		if (Context.brush.image == null) {
-			Context.brush.image = Image.createRenderTarget(matPreviewSize, matPreviewSize);
+			Context.brush.image = Image.createRenderTarget(materialPreviewSize, materialPreviewSize);
 			Context.brush.imageIcon = Image.createRenderTarget(50, 50);
 		}
 
-		// var scons = Project.materials[0].data.shader.contexts;
-		// var mcons = Project.materials[0].data.contexts;
-		// var _scon: ShaderContext = null;
-		// var _mcon: MaterialContext = null;
-		// var _si = 0;
-		// var _mi = 0;
-		// for (i in 0...scons.length) {
-		// 	if (scons[i].raw.name == "paint") {
-		// 		_si = i;
-		// 		_scon = scons[i];
-		// 		scons[i] = MakeMaterial.defaultScon;
-		// 		break;
-		// 	}
-		// }
-		// for (i in 0...mcons.length) {
-		// 	if (mcons[i].raw.name == "paint") {
-		// 		_mi = i;
-		// 		_mcon = mcons[i];
-		// 		mcons[i] = MakeMaterial.defaultMcon;
-		// 		break;
-		// 	}
-		// }
 		var _material = Context.material;
 		Context.material = new arm.data.MaterialSlot();
 		var _tool = Context.tool;
@@ -352,8 +313,6 @@ class RenderUtil {
 		var _pdirty = Context.pdirty;
 		Context.pdirty = 2;
 
-		// var pointsX = [0.2, 0.5, 0.5, 0.8, 0.8];
-		// var pointsY = [0.5, 0.2 - 0.08, 0.6 + 0.03, 0.3 - 0.05, 0.7 + 0.05];
 		var pointsX = [0.2, 0.2,  0.35, 0.5,  0.5, 0.5,  0.65, 0.8,  0.8, 0.8];
 		var pointsY = [0.5, 0.5,  0.35 - 0.04, 0.2 - 0.08,  0.4 + 0.015, 0.6 + 0.03,  0.45 - 0.025, 0.3 - 0.05,  0.5 + 0.025, 0.7 + 0.05];
 		for (i in 1...pointsX.length) {
@@ -377,8 +336,6 @@ class RenderUtil {
 		RenderPathPaint.useLiveLayer(false);
 		Context.layer.fill_layer = _fill_layer;
 		Context.layer = _layer;
-		// scons[_si] = _scon;
-		// mcons[_mi] = _mcon;
 		Context.material = _material;
 		Context.tool = _tool;
 		function _init() {
@@ -423,30 +380,6 @@ class RenderUtil {
 		Context.brushBlendDirty = true;
 
 		if (current != null) current.begin(false);
-	}
-
-	static function createScreenAlignedFullData() {
-		// Over-sized triangle
-		var data = [-Std.int(32767 / 3), -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
-					 32767,              -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
-					-Std.int(32767 / 3),  32767,              0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
-		var indices = [0, 1, 2];
-
-		// Mandatory vertex data names and sizes
-		var structure = new VertexStructure();
-		structure.add("pos", VertexData.Short4Norm);
-		structure.add("nor", VertexData.Short2Norm);
-		structure.add("tex", VertexData.Short2Norm);
-		structure.add("col", VertexData.Short4Norm);
-		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
-		var vertices = screenAlignedFullVB.lock();
-		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i]);
-		screenAlignedFullVB.unlock();
-
-		screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);
-		var id = screenAlignedFullIB.lock();
-		for (i in 0...id.length) id[i] = indices[i];
-		screenAlignedFullIB.unlock();
 	}
 
 	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image, group: TNodeCanvas = null, parents: Array<TNode> = null) {
@@ -496,12 +429,36 @@ class RenderUtil {
 	}
 
 	public static function getDecalMat(): Mat4 {
-		RenderUtil.pickPosNorTex();
+		pickPosNorTex();
 		var decalMat = Mat4.identity();
 		var loc = new Vec4(Context.posXPicked, Context.posYPicked, Context.posZPicked);
 		var rot = new Quat().fromTo(new Vec4(0.0, 0.0, -1.0), new Vec4(Context.norXPicked, Context.norYPicked, Context.norZPicked));
 		var scale = new Vec4(Context.brushRadius * 0.5, Context.brushRadius * 0.5, Context.brushRadius * 0.5);
 		decalMat.compose(loc, rot, scale);
 		return decalMat;
+	}
+
+	static function createScreenAlignedFullData() {
+		// Over-sized triangle
+		var data = [-Std.int(32767 / 3), -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
+					 32767,              -Std.int(32767 / 3), 0, 32767, 0, 0, 0, 0, 0, 0, 0, 0,
+					-Std.int(32767 / 3),  32767,              0, 32767, 0, 0, 0, 0, 0, 0, 0, 0];
+		var indices = [0, 1, 2];
+
+		// Mandatory vertex data names and sizes
+		var structure = new VertexStructure();
+		structure.add("pos", VertexData.Short4Norm);
+		structure.add("nor", VertexData.Short2Norm);
+		structure.add("tex", VertexData.Short2Norm);
+		structure.add("col", VertexData.Short4Norm);
+		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
+		var vertices = screenAlignedFullVB.lock();
+		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i]);
+		screenAlignedFullVB.unlock();
+
+		screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);
+		var id = screenAlignedFullIB.lock();
+		for (i in 0...id.length) id[i] = indices[i];
+		screenAlignedFullIB.unlock();
 	}
 }

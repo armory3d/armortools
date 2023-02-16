@@ -218,7 +218,7 @@ class App {
 	public static function w(): Int {
 		// Drawing material preview
 		if (UISidebar.inst != null && Context.materialPreview) {
-			return RenderUtil.matPreviewSize;
+			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview
@@ -253,7 +253,7 @@ class App {
 	public static function h(): Int {
 		// Drawing material preview
 		if (UISidebar.inst != null && Context.materialPreview) {
-			return RenderUtil.matPreviewSize;
+			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview

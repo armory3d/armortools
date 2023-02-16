@@ -32,7 +32,7 @@ class MaterialSlot {
 		for (mat in Project.materials) if (mat.id >= id) id = mat.id + 1;
 		data = m;
 
-		var w = RenderUtil.matPreviewSize;
+		var w = RenderUtil.materialPreviewSize;
 		var wIcon = 50;
 		image = Image.createRenderTarget(w, w);
 		imageIcon = Image.createRenderTarget(wIcon, wIcon);

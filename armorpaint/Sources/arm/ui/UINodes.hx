@@ -1077,7 +1077,7 @@ class UINodes {
 		if (Context.material.canvas.nodes.indexOf(node) == -1) return;
 
 		if (Context.nodePreview == null) {
-			Context.nodePreview = kha.Image.createRenderTarget(RenderUtil.matPreviewSize, RenderUtil.matPreviewSize);
+			Context.nodePreview = kha.Image.createRenderTarget(RenderUtil.materialPreviewSize, RenderUtil.materialPreviewSize);
 		}
 
 		Context.nodePreviewDirty = false;

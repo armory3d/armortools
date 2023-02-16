@@ -35,8 +35,8 @@ class RenderPathPreview {
 
 			var t = new RenderTargetRaw();
 			t.name = "mtex";
-			t.width = Std.int(RenderUtil.matPreviewSize * 2.0);
-			t.height = Std.int(RenderUtil.matPreviewSize * 2.0);
+			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
+			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
 			#if kha_opengl
@@ -48,8 +48,8 @@ class RenderPathPreview {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "mgbuffer0";
-			t.width = Std.int(RenderUtil.matPreviewSize * 2.0);
-			t.height = Std.int(RenderUtil.matPreviewSize * 2.0);
+			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
+			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
 			t.depth_buffer = "mmain";
@@ -59,8 +59,8 @@ class RenderPathPreview {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "mgbuffer1";
-			t.width = Std.int(RenderUtil.matPreviewSize * 2.0);
-			t.height = Std.int(RenderUtil.matPreviewSize * 2.0);
+			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
+			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
@@ -69,8 +69,8 @@ class RenderPathPreview {
 		{
 			var t = new RenderTargetRaw();
 			t.name = "mgbuffer2";
-			t.width = Std.int(RenderUtil.matPreviewSize * 2.0);
-			t.height = Std.int(RenderUtil.matPreviewSize * 2.0);
+			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
+			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = Inc.getSuperSampling();
 			path.createRenderTarget(t);
