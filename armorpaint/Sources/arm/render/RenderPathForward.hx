@@ -3,6 +3,7 @@ package arm.render;
 import kha.System;
 import iron.RenderPath;
 import iron.Scene;
+import arm.Enums;
 
 class RenderPathForward {
 

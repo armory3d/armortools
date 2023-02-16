@@ -3,7 +3,6 @@ package arm.ui;
 import haxe.io.Bytes;
 import kha.Image;
 import kha.System;
-import kha.input.Keyboard;
 import kha.input.KeyCode;
 import zui.Zui;
 import zui.Id;
@@ -1057,7 +1056,7 @@ class UISidebar {
 
 	function onDeselectText() {
 		#if krom_ios
-		var kb = Keyboard.get();
+		var kb = kha.input.Keyboard.get();
 		@:privateAccess kb.sendUpEvent(KeyCode.Shift);
 		#end
 	}
