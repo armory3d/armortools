@@ -13,9 +13,9 @@ class ArmBridge {
 	public static var Res = arm.Res;
 	public static var Path = arm.sys.Path;
 	public static var File = arm.sys.File;
-	public static var NodesBrush = arm.node.NodesBrush;
-	public static var Brush = arm.node.Brush;
-	public static var BrushOutputNode = arm.node.brush.BrushOutputNode;
+	public static var NodesBrush = arm.logic.NodesBrush;
+	public static var LogicParser = arm.logic.LogicParser;
+	public static var BrushOutputNode = arm.logic.BrushOutputNode;
 	public static var UISidebar = arm.ui.UISidebar;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;

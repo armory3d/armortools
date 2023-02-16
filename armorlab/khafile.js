@@ -36,7 +36,7 @@ project.addAssets("Assets/models/LICENSE.txt", { destination: "data/models/LICEN
 project.addAssets("../base/Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("../base/Assets/themes/*.json", { destination: "data/themes/{name}" });
 project.addDefine("js-es=6");
-project.addParameter("--macro include('arm.node.brush')");
+project.addParameter("--macro include('arm.logic')");
 project.addDefine("kha_no_ogg");
 project.addDefine("zui_translate");
 project.addDefine("arm_data_dir");

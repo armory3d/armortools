@@ -144,7 +144,7 @@ class ObjParser {
 						nz = norTemp[(na[0] - nindOff) * 3 + 2];
 					}
 					else {
-						var n = MeshParser.calcNormal(
+						var n = arm.util.MeshUtil.calcNormal(
 							new iron.math.Vec4(posTemp[(va[0] - vindOff) * 3], posTemp[(va[0] - vindOff) * 3 + 1], posTemp[(va[0] - vindOff) * 3 + 2]),
 							new iron.math.Vec4(posTemp[(va[1] - vindOff) * 3], posTemp[(va[1] - vindOff) * 3 + 1], posTemp[(va[1] - vindOff) * 3 + 2]),
 							new iron.math.Vec4(posTemp[(va[2] - vindOff) * 3], posTemp[(va[2] - vindOff) * 3 + 1], posTemp[(va[2] - vindOff) * 3 + 2])
@@ -189,7 +189,7 @@ class ObjParser {
 							var j0 = (va[(i + 3 + j) % vi] - vindOff) * 3;
 							var px = posTemp[j0 + axis0];
 							var py = posTemp[j0 + axis1];
-							if (MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+							if (arm.util.MeshUtil.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 								overlap = true;
 								break;
 							}

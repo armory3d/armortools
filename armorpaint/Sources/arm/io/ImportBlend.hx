@@ -11,7 +11,7 @@ import zui.Nodes;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.shader.NodesMaterial;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
@@ -250,7 +250,7 @@ class ImportBlend {
 								var px = co[axis0];
 								var py = co[axis1];
 
-								if (arm.format.MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+								if (arm.util.MeshUtil.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 									overlap = true;
 									break;
 								}

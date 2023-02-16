@@ -93,8 +93,8 @@ class TabBrowser {
 			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
-			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh, function(file) {
-				var fileName = file.substr(file.lastIndexOf(Path.sep)+1);
+			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh, function(file: String) {
+				var fileName = file.substr(file.lastIndexOf(Path.sep) + 1);
 				if (fileName != "..") {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(fileName, Right, ui.t.HIGHLIGHT_COL);
@@ -112,8 +112,9 @@ class TabBrowser {
 												break;
 											}
 										}
-										if (assetIndex != -1)
+										if (assetIndex != -1) {
 											arm.io.ImportEnvmap.run(file, Project.getImage(Project.assets[assetIndex]));
+										}
 									});
 								});
 							}
@@ -127,8 +128,9 @@ class TabBrowser {
 												break;
 											}
 										}
-										if (assetIndex != -1)
+										if (assetIndex != -1) {
 											Layers.createImageMask(Project.assets[assetIndex]);
+										}
 									});
 								});
 							}
@@ -155,7 +157,7 @@ class TabBrowser {
 								});
 							}
 						}
-						if (ui.button(tr("Open externally"), Left)) {
+						if (ui.button(tr("Open Externally"), Left)) {
 							File.start(file);
 						}
 					}, Path.isTexture(file) ? 6 : 3);

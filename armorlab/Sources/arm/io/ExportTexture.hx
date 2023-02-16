@@ -5,7 +5,7 @@ import haxe.io.BytesOutput;
 import kha.Image;
 import iron.Scene;
 import arm.render.RenderPathPaint;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UIFiles;
@@ -19,7 +19,7 @@ class ExportTexture {
 	static inline var gamma = 1.0 / 2.2;
 
 	public static function run(path: String) {
-		runLayers(path, [arm.node.brush.BrushOutputNode.inst]);
+		runLayers(path, [arm.logic.BrushOutputNode.inst]);
 		#if krom_ios
 		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + Main.title + "')");
 		#elseif krom_android
@@ -44,9 +44,9 @@ class ExportTexture {
 		var ext = formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 
-		var texpaint = arm.node.brush.BrushOutputNode.inst.texpaint;
-		var texpaint_nor = arm.node.brush.BrushOutputNode.inst.texpaint_nor;
-		var texpaint_pack = arm.node.brush.BrushOutputNode.inst.texpaint_pack;
+		var texpaint = arm.logic.BrushOutputNode.inst.texpaint;
+		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
+		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
 		var pixpaint: Bytes = null;
 		var pixpaint_nor: Bytes = null;
 		var pixpaint_pack: Bytes = null;

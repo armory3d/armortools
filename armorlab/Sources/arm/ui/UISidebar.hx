@@ -18,7 +18,7 @@ import iron.system.Input;
 import iron.system.Time;
 import iron.RenderPath;
 import iron.Scene;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Viewport;
 import arm.io.ExportTexture;
 import arm.Enums;
@@ -61,7 +61,7 @@ class UISidebar {
 
 		Context.parseBrushInputs();
 
-		arm.node.Brush.parse(Project.canvas, false);
+		arm.logic.LogicParser.parse(Project.canvas, false);
 
 		if (Project.raw.swatches == null) {
 			Project.setDefaultSwatches();

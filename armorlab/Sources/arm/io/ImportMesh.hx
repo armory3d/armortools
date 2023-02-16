@@ -73,8 +73,8 @@ class ImportMesh {
 		Viewport.scaleToBounds();
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
-		arm.node.MakeMaterial.parsePaintMaterial();
-		arm.node.MakeMaterial.parseMeshMaterial();
+		arm.shader.MakeMaterial.parsePaintMaterial();
+		arm.shader.MakeMaterial.parseMeshMaterial();
 
 		#if arm_debug
 		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));

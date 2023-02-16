@@ -10,7 +10,7 @@ import arm.ui.UIToolbar;
 import arm.sys.Path;
 import arm.data.LayerSlot;
 import arm.data.MaterialSlot;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class History {

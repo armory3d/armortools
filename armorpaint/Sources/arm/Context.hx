@@ -26,7 +26,7 @@ import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.ui.BoxPreferences;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 import arm.ProjectBaseFormat;
 

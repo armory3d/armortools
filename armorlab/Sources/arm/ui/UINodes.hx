@@ -10,8 +10,8 @@ import zui.Nodes;
 import iron.system.Input;
 import arm.shader.NodesMaterial;
 import arm.shader.MaterialParser;
-import arm.node.NodesBrush;
-import arm.node.MakeMaterial;
+import arm.logic.NodesBrush;
+import arm.shader.MakeMaterial;
 import arm.ui.UIHeader;
 import arm.Enums;
 import arm.Project;
@@ -476,7 +476,7 @@ class UINodes {
 							canvas.nodes.push(nodeSearchSpawn);
 							nodes.nodesSelected = [nodeSearchSpawn];
 							nodes.nodesDrag = true;
-							arm.node.Brush.parse(canvas, false);
+							arm.logic.LogicParser.parse(canvas, false);
 							hwnd.redraws = 2;
 							if (enter) {
 								ui.changed = true;
@@ -540,7 +540,7 @@ class UINodes {
 
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
-			arm.node.Brush.parse(Project.canvas, false);
+			arm.logic.LogicParser.parse(Project.canvas, false);
 			recompileMat = false;
 		}
 		else if (recompileMatFinal) {
@@ -685,14 +685,14 @@ class UINodes {
 					var timer = iron.system.Time.realTime();
 					#end
 
-					arm.node.Brush.parse(Project.canvas, false);
+					arm.logic.LogicParser.parse(Project.canvas, false);
 
-					arm.node.brush.PhotoToPBRNode.cachedSource = null;
-					@:privateAccess arm.node.brush.BrushOutputNode.inst.get(ChannelBaseColor, function(texbase) {
-					@:privateAccess arm.node.brush.BrushOutputNode.inst.get(ChannelOcclusion, function(texocc) {
-					@:privateAccess arm.node.brush.BrushOutputNode.inst.get(ChannelRoughness, function(texrough) {
-					@:privateAccess arm.node.brush.BrushOutputNode.inst.get(ChannelNormalMap, function(texnor) {
-					@:privateAccess arm.node.brush.BrushOutputNode.inst.get(ChannelHeight, function(texheight) {
+					arm.logic.PhotoToPBRNode.cachedSource = null;
+					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelBaseColor, function(texbase) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelOcclusion, function(texocc) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelRoughness, function(texrough) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelNormalMap, function(texnor) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelHeight, function(texheight) {
 
 						if (texbase != null) {
 							var texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image;
@@ -832,7 +832,7 @@ class UINodes {
 					canvas.nodes.push(node);
 					nodes.nodesSelected = [node];
 					nodes.nodesDrag = true;
-					arm.node.Brush.parse(canvas, false);
+					arm.logic.LogicParser.parse(canvas, false);
 				}
 				// Next column
 				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) {
@@ -919,7 +919,7 @@ class UINodes {
 		var n = NodesBrush.createNode("ImageTextureNode");
 		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
-		arm.node.Brush.parse(Project.canvas, false);
+		arm.logic.LogicParser.parse(Project.canvas, false);
 	}
 
 	public function acceptSwatchDrag(swatch: TSwatchColor) {

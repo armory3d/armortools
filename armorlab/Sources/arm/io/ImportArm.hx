@@ -118,7 +118,7 @@ class ImportArm {
 
 			initNodes(project.material.nodes);
 			Project.canvas = project.material;
-			arm.node.Brush.parse(Project.canvas, false);
+			arm.logic.LogicParser.parse(Project.canvas, false);
 
 			Context.ddirty = 4;
 

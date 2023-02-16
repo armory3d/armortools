@@ -35,7 +35,7 @@ import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.ConstData;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Viewport;
 import arm.Camera;
 import arm.Enums;

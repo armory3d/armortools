@@ -45,10 +45,6 @@ class PhysicsWorld extends iron.Trait {
 		vec1 = new Bt.Vector3(0, 0, 0);
 		vec2 = new Bt.Vector3(0, 0, 0);
 		init();
-
-		// Ensure physics are updated first in the lateUpdate list
-		// _lateUpdate = [lateUpdate];
-		// @:privateAccess iron.App.traitLateUpdates.insert(0, lateUpdate);
 	}
 
 	public function reset() {

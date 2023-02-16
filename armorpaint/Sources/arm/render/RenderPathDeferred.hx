@@ -4,7 +4,7 @@ import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
-import arm.node.MakeMesh;
+import arm.shader.MakeMesh;
 import arm.Enums;
 
 class RenderPathDeferred {
@@ -273,7 +273,7 @@ class RenderPathDeferred {
 				path.setTarget("");
 				path.setViewport(res, res);
 				path.bindTarget(voxtex, "voxels");
-				if (arm.node.MakeMaterial.heightUsed) {
+				if (arm.shader.MakeMaterial.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}

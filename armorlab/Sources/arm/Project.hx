@@ -22,7 +22,7 @@ import arm.ui.UINodes;
 import arm.ui.UIHeader;
 import arm.ui.BoxPreferences;
 import arm.util.MeshUtil;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportGpl;
@@ -30,7 +30,7 @@ import arm.io.ImportTexture;
 import arm.io.ImportMesh;
 import arm.io.ExportArm;
 import arm.io.ExportGpl;
-import arm.node.NodesBrush;
+import arm.logic.NodesBrush;
 import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
 import arm.Enums;
@@ -443,7 +443,7 @@ class Project {
 			Project.assetNames.insert(i, Project.assetNames.pop());
 			// if (Context.texture == oldAsset) Context.texture = Project.assets[i];
 			function _next() {
-				arm.node.MakeMaterial.parsePaintMaterial();
+				arm.shader.MakeMaterial.parsePaintMaterial();
 			}
 			App.notifyOnNextFrame(_next);
 		}

@@ -12,7 +12,7 @@ import arm.Viewport;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.ui.UIStatus;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class RenderPathPaint {

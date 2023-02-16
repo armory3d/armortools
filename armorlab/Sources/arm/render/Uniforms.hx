@@ -151,19 +151,19 @@ class Uniforms {
 		}
 		if (link.startsWith("_texpaint_vert")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return arm.node.brush.BrushOutputNode.inst.texpaint;
+			return arm.logic.BrushOutputNode.inst.texpaint;
 		}
 		if (link.startsWith("_texpaint_nor")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return arm.node.brush.BrushOutputNode.inst.texpaint_nor;
+			return arm.logic.BrushOutputNode.inst.texpaint_nor;
 		}
 		if (link.startsWith("_texpaint_pack")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return arm.node.brush.BrushOutputNode.inst.texpaint_pack;
+			return arm.logic.BrushOutputNode.inst.texpaint_pack;
 		}
 		if (link.startsWith("_texpaint")) {
 			var tid = Std.parseInt(link.substr(link.length - 1));
-			return arm.node.brush.BrushOutputNode.inst.texpaint;
+			return arm.logic.BrushOutputNode.inst.texpaint;
 		}
 
 		return null;

@@ -5,7 +5,7 @@ import haxe.io.BytesOutput;
 import kha.Image;
 import iron.Scene;
 import arm.render.RenderPathPaint;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.data.LayerSlot;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;

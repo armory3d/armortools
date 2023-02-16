@@ -30,7 +30,7 @@ import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class ImportArm {

@@ -80,8 +80,8 @@ class ImportMesh {
 		Viewport.scaleToBounds();
 
 		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
-		arm.node.MakeMaterial.parsePaintMaterial();
-		arm.node.MakeMaterial.parseMeshMaterial();
+		arm.shader.MakeMaterial.parsePaintMaterial();
+		arm.shader.MakeMaterial.parseMeshMaterial();
 
 		UIView2D.inst.hwnd.redraws = 2;
 

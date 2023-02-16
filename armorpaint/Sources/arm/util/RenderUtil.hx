@@ -22,7 +22,7 @@ import arm.ui.UINodes;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathDeferred;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.io.ImportFont;
 import arm.Enums;
 

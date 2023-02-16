@@ -848,7 +848,7 @@ class Geometry {
 							var j0 = polys[va[(i + 3 + j) % vi]] * 3;
 							var px = pbuf[j0 + axis0];
 							var py = pbuf[j0 + axis1];
-							if (MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+							if (arm.util.MeshUtil.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 								overlap = true;
 								break;
 							}

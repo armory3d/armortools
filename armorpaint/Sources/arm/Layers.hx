@@ -13,7 +13,7 @@ import iron.RenderPath;
 import iron.math.Mat4;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;

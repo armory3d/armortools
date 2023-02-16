@@ -13,7 +13,7 @@ import iron.RenderPath;
 import iron.math.Mat4;
 import arm.ui.UISidebar;
 import arm.ui.UIHeader;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 import arm.ProjectFormat;
@@ -231,7 +231,7 @@ class Layers {
 	}
 
 	public static function makeTempImg() {
-		var l = arm.node.brush.BrushOutputNode.inst;
+		var l = arm.logic.BrushOutputNode.inst;
 		if (tempImage != null && (tempImage.width != l.texpaint.width || tempImage.height != l.texpaint.height || tempImage.format != l.texpaint.format)) {
 			var _temptex0 = RenderPath.active.renderTargets.get("temptex0");
 			App.notifyOnNextFrame(function() {
@@ -252,7 +252,7 @@ class Layers {
 	}
 
 	public static function makeExportImg() {
-		var l = arm.node.brush.BrushOutputNode.inst;
+		var l = arm.logic.BrushOutputNode.inst;
 		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height || expa.format != l.texpaint.format)) {
 			var _expa = expa;
 			var _expb = expb;
@@ -297,38 +297,38 @@ class Layers {
 	}
 
 	public static function flatten(heightToNormal = false): Dynamic {
-		var texpaint = arm.node.brush.BrushOutputNode.inst.texpaint;
-		var texpaint_nor = arm.node.brush.BrushOutputNode.inst.texpaint_nor;
-		var texpaint_pack = arm.node.brush.BrushOutputNode.inst.texpaint_pack;
+		var texpaint = arm.logic.BrushOutputNode.inst.texpaint;
+		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
+		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
 		return { texpaint: texpaint, texpaint_nor: texpaint_nor, texpaint_pack: texpaint_pack };
 	}
 
 	public static function onLayersResized() {
-		arm.node.brush.BrushOutputNode.inst.texpaint.unload();
-		arm.node.brush.BrushOutputNode.inst.texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		arm.node.brush.BrushOutputNode.inst.texpaint_nor.unload();
-		arm.node.brush.BrushOutputNode.inst.texpaint_nor = iron.RenderPath.active.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		arm.node.brush.BrushOutputNode.inst.texpaint_pack.unload();
-		arm.node.brush.BrushOutputNode.inst.texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.logic.BrushOutputNode.inst.texpaint.unload();
+		arm.logic.BrushOutputNode.inst.texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.logic.BrushOutputNode.inst.texpaint_nor.unload();
+		arm.logic.BrushOutputNode.inst.texpaint_nor = iron.RenderPath.active.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.logic.BrushOutputNode.inst.texpaint_pack.unload();
+		arm.logic.BrushOutputNode.inst.texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 
-		if (@:privateAccess arm.node.brush.InpaintNode.image != null) {
-			@:privateAccess arm.node.brush.InpaintNode.image.unload();
-			@:privateAccess arm.node.brush.InpaintNode.image = null;
-			@:privateAccess arm.node.brush.InpaintNode.mask.unload();
-			@:privateAccess arm.node.brush.InpaintNode.mask = null;
-			arm.node.brush.InpaintNode.init();
+		if (@:privateAccess arm.logic.InpaintNode.image != null) {
+			@:privateAccess arm.logic.InpaintNode.image.unload();
+			@:privateAccess arm.logic.InpaintNode.image = null;
+			@:privateAccess arm.logic.InpaintNode.mask.unload();
+			@:privateAccess arm.logic.InpaintNode.mask = null;
+			arm.logic.InpaintNode.init();
 		}
 
-		if (@:privateAccess arm.node.brush.PhotoToPBRNode.images != null) {
-			for (image in @:privateAccess arm.node.brush.PhotoToPBRNode.images) image.unload();
-			@:privateAccess arm.node.brush.PhotoToPBRNode.images = null;
-			arm.node.brush.PhotoToPBRNode.init();
+		if (@:privateAccess arm.logic.PhotoToPBRNode.images != null) {
+			for (image in @:privateAccess arm.logic.PhotoToPBRNode.images) image.unload();
+			@:privateAccess arm.logic.PhotoToPBRNode.images = null;
+			arm.logic.PhotoToPBRNode.init();
 		}
 
-		if (@:privateAccess arm.node.brush.TilingNode.image != null) {
-			@:privateAccess arm.node.brush.TilingNode.image.unload();
-			@:privateAccess arm.node.brush.TilingNode.image = null;
-			arm.node.brush.TilingNode.init();
+		if (@:privateAccess arm.logic.TilingNode.image != null) {
+			@:privateAccess arm.logic.TilingNode.image.unload();
+			@:privateAccess arm.logic.TilingNode.image = null;
+			arm.logic.TilingNode.init();
 		}
 
 		iron.RenderPath.active.renderTargets.get("texpaint_blend0").image.unload();

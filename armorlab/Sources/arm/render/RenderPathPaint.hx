@@ -12,7 +12,7 @@ import arm.Viewport;
 import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class RenderPathPaint {
@@ -272,7 +272,7 @@ class RenderPathPaint {
 		var image: kha.Image = null;
 		if (UINodes.inst.getNodes().nodesSelected.length > 0) {
 			var node = UINodes.inst.getNodes().nodesSelected[0];
-			var brushNode = arm.node.Brush.getBrushNode(node);
+			var brushNode = arm.logic.LogicParser.getLogicNode(node);
 			if (brushNode != null) {
 				image = brushNode.getImage();
 			}
@@ -304,8 +304,8 @@ class RenderPathPaint {
 			var node = UINodes.inst.getNodes().nodesSelected[0];
 			var inpaint = node.type == "InpaintNode";
 			if (inpaint) {
-				var brushNode = arm.node.Brush.getBrushNode(node);
-				path.renderTargets.get("texpaint_node_target").image = cast(brushNode, arm.node.brush.InpaintNode).getTarget();
+				var brushNode = arm.logic.LogicParser.getLogicNode(node);
+				path.renderTargets.get("texpaint_node_target").image = cast(brushNode, arm.logic.InpaintNode).getTarget();
 			}
 		}
 		else {

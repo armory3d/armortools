@@ -4,7 +4,7 @@ import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UISidebar;
-import arm.node.MakeMesh;
+import arm.shader.MakeMesh;
 import arm.Enums;
 
 class RenderPathForward {

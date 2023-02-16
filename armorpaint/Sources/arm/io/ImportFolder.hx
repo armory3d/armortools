@@ -9,7 +9,7 @@ import arm.util.RenderUtil;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.NodesMaterial;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.Enums;
 

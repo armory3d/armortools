@@ -246,7 +246,7 @@ class ImportBlend {
 								var px = co[axis0];
 								var py = co[axis1];
 
-								if (arm.format.MeshParser.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
+								if (arm.util.MeshUtil.pnpoly(v0x, v0y, v1x, v1y, v2x, v2y, px, py)) {
 									overlap = true;
 									break;
 								}

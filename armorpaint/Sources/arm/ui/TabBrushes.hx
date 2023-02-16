@@ -4,7 +4,7 @@ import haxe.Json;
 import iron.system.Time;
 import zui.Zui;
 import arm.data.BrushSlot;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.sys.Path;
 import arm.Enums;

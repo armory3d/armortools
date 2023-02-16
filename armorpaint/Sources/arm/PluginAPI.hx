@@ -14,10 +14,10 @@ class ArmBridge {
 	public static var Path = arm.sys.Path;
 	public static var File = arm.sys.File;
 	public static var NodesMaterial = arm.shader.NodesMaterial;
-	public static var NodesBrush = arm.node.NodesBrush;
+	public static var NodesBrush = arm.logic.NodesBrush;
 	public static var MaterialParser = arm.shader.MaterialParser;
-	public static var MakeMaterial = arm.node.MakeMaterial;
-	public static var Brush = arm.node.Brush;
+	public static var MakeMaterial = arm.shader.MakeMaterial;
+	public static var LogicParser = arm.logic.LogicParser;
 	public static var UISidebar = arm.ui.UISidebar;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;

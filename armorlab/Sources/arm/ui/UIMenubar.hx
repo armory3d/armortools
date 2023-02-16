@@ -7,7 +7,7 @@ import zui.Ext;
 import iron.RenderPath;
 import iron.Scene;
 import iron.object.MeshObject;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.render.RenderPathPaint;
 import arm.Enums;
 

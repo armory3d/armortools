@@ -230,7 +230,7 @@ class TabTextures {
 		Project.assets.splice(i, 1);
 		Project.assetNames.splice(i, 1);
 		function _next() {
-			arm.node.MakeMaterial.parsePaintMaterial();
+			arm.shader.MakeMaterial.parsePaintMaterial();
 			arm.util.RenderUtil.makeMaterialPreview();
 			UISidebar.inst.hwnd1.redraws = 2;
 		}

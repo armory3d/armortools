@@ -1,5 +1,4 @@
 // .blend file parser
-// https://github.com/armory3d/blend
 // Reference:
 // https://github.com/fschutt/mystery-of-the-blend-backup
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
@@ -10,7 +9,6 @@
 // trace(scenes[0].get("id").get("name"));
 package arm.format;
 
-// https://github.com/Kode/Kha
 import kha.Blob;
 
 class BlendParser {

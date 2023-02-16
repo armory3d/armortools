@@ -6,7 +6,7 @@ import iron.RenderPath;
 import arm.ui.UISidebar;
 import arm.ui.TabLayers;
 import arm.util.RenderUtil;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class LayerSlot {

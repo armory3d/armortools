@@ -5,7 +5,7 @@ import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
 import iron.system.Input;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportAsset;

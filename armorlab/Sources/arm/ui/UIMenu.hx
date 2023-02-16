@@ -15,7 +15,7 @@ import arm.Viewport;
 import arm.sys.BuildMacros;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.node.MakeMaterial;
+import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
