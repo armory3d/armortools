@@ -9,7 +9,7 @@ import iron.math.Vec4;
 import zui.Nodes;
 import arm.format.BlendParser;
 
-class ImportBlend {
+class ImportBlendMesh {
 
 	static inline var eps = 1.0 / 32767;
 

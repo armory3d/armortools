@@ -28,7 +28,7 @@ import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.io.ImportGpl;
-import arm.io.ImportBlend;
+import arm.io.ImportBlendMaterial;
 import arm.io.ImportMesh;
 import arm.io.ImportTexture;
 import arm.io.ExportArm;
@@ -317,7 +317,7 @@ class Project {
 	public static function importMaterial() {
 		UIFiles.show("arm,blend", false, true, function(path: String) {
 			path.endsWith(".blend") ?
-				ImportBlend.runMaterial(path) :
+				ImportBlendMaterial.run(path) :
 				ImportArm.runMaterial(path);
 		});
 	}
