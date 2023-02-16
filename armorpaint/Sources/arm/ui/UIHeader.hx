@@ -9,7 +9,6 @@ import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportAsset;
-import arm.io.ImportFont;
 import arm.sys.Path;
 import arm.ProjectBaseFormat;
 import arm.Enums;

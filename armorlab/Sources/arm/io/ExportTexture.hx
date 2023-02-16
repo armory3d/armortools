@@ -1,13 +1,7 @@
 package arm.io;
 
 import haxe.io.Bytes;
-import haxe.io.BytesOutput;
 import kha.Image;
-import iron.Scene;
-import arm.render.RenderPathPaint;
-import arm.shader.MakeMaterial;
-import arm.ui.UIHeader;
-import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;

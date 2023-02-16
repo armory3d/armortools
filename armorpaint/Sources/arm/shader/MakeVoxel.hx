@@ -1,13 +1,18 @@
 package arm.shader;
 
+import kha.graphics4.VertexStructure;
+import kha.graphics4.VertexData;
+import kha.graphics4.VertexShader;
+import iron.data.ShaderData;
+
 class MakeVoxel {
 
 	#if rp_voxels
-	public static function run(data: iron.data.ShaderData.ShaderContext) {
-		var structure = new kha.graphics4.VertexStructure();
-		structure.add("pos", kha.graphics4.VertexData.Short4Norm);
-		structure.add("nor", kha.graphics4.VertexData.Short2Norm);
-		structure.add("tex", kha.graphics4.VertexData.Short2Norm);
+	public static function run(data: ShaderContext) {
+		var structure = new VertexStructure();
+		structure.add("pos", VertexData.Short4Norm);
+		structure.add("nor", VertexData.Short2Norm);
+		structure.add("tex", VertexData.Short2Norm);
 
 		var pipeState = data.pipeState;
 		pipeState.inputLayout = [structure];
@@ -17,15 +22,15 @@ class MakeVoxel {
 		// var isMesh = Std.isOfType(Context.object, MeshObject);
 		// var skin = isMesh && cast(Context.object, MeshObject).data.geom.bones != null;
 		// if (skin) {
-		// 	structure.add("bone", kha.graphics4.VertexData.Short4Norm);
-		// 	structure.add("weight", kha.graphics4.VertexData.Short4Norm);
+		// 	structure.add("bone", VertexData.Short4Norm);
+		// 	structure.add("weight", VertexData.Short4Norm);
 		// 	data.raw.vertex_elements.push({ name: "bone", data: 'short4norm' });
 		// 	data.raw.vertex_elements.push({ name: "weight", data: 'short4norm' });
 		// }
 		// #end
 
 		var ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertexShader = kha.graphics4.VertexShader.fromSource(
+		pipeState.vertexShader = VertexShader.fromSource(
 		#if kha_direct3d11
 		"#define vec3 float3
 		uniform float4x4 W;

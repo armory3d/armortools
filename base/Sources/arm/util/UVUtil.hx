@@ -1,10 +1,10 @@
 package arm.util;
 
-import kha.Image;
 import kha.graphics4.PipelineState;
 import kha.graphics4.VertexData;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.CompareMode;
+import kha.Image;
 
 class UVUtil {
 

@@ -5,7 +5,6 @@ import haxe.Json;
 import zui.Id;
 import zui.Zui;
 import iron.data.Data;
-import iron.RenderPath;
 import arm.shader.MakeMaterial;
 import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;

@@ -1,9 +1,6 @@
 package arm.io;
 
 import zui.Nodes;
-import iron.data.Data;
-import iron.data.MaterialData;
-import arm.ui.UIHeader;
 import arm.ui.UISidebar;
 import arm.util.RenderUtil;
 import arm.sys.Path;

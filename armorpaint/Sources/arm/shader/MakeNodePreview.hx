@@ -3,7 +3,6 @@ package arm.shader;
 import zui.Nodes;
 import iron.data.SceneFormat;
 import arm.shader.MaterialParser;
-import arm.shader.NodeShader;
 import arm.shader.NodeShaderData;
 import arm.shader.NodeShaderContext;
 

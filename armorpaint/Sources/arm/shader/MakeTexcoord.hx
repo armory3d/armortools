@@ -1,6 +1,5 @@
 package arm.shader;
 
-import arm.ui.UISidebar;
 import arm.shader.NodeShader;
 import arm.Enums;
 

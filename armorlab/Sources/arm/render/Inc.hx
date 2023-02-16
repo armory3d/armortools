@@ -7,7 +7,6 @@ import iron.object.MeshObject;
 import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
-import arm.ui.UIHeader;
 import arm.Enums;
 
 class Inc {

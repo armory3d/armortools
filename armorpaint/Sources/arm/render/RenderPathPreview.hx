@@ -2,8 +2,6 @@ package arm.render;
 
 import iron.RenderPath;
 import arm.util.RenderUtil;
-import arm.ui.UIHeader;
-import arm.Enums;
 
 @:access(iron.RenderPath)
 class RenderPathPreview {

@@ -1,6 +1,5 @@
 package arm.io;
 
-import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.arrays.Int16Array;
 import iron.object.MeshObject;

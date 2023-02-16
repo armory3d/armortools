@@ -1,18 +1,12 @@
 package arm.render;
 
 import iron.math.Mat4;
-import iron.math.Vec4;
-import iron.system.Input;
 import iron.object.MeshObject;
 import iron.data.SceneFormat;
-import iron.data.MeshData;
 import iron.RenderPath;
 import iron.Scene;
-import arm.Viewport;
 import arm.ui.UIHeader;
-import arm.ui.UISidebar;
 import arm.ui.UINodes;
-import arm.shader.MakeMaterial;
 import arm.Enums;
 
 class RenderPathPaint {

@@ -3,7 +3,6 @@ package arm.ui;
 import haxe.io.Bytes;
 import zui.Zui;
 import zui.Id;
-import arm.util.UVUtil;
 import arm.io.ExportMesh;
 import arm.io.ExportTexture;
 import arm.io.ExportArm;

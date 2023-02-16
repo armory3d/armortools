@@ -2,7 +2,6 @@ package arm.render;
 
 import iron.math.Mat4;
 import iron.math.Vec4;
-import iron.system.Input;
 import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
@@ -521,7 +520,7 @@ class RenderPathPaint {
 		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(Layers.cursorTint, tintR, tintG, tintB);
 		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
-		var helpMat = iron.math.Mat4.identity();
+		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(Layers.cursorInvVP, helpMat.self);
 		#if (kha_metal || kha_vulkan)

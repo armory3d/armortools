@@ -6,7 +6,6 @@ import zui.Zui;
 import arm.data.BrushSlot;
 import arm.shader.MakeMaterial;
 import arm.util.RenderUtil;
-import arm.sys.Path;
 import arm.Enums;
 
 class TabBrushes {

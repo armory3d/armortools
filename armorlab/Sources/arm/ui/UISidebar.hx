@@ -10,17 +10,12 @@ import zui.Id;
 import zui.Nodes;
 import iron.data.Data;
 import iron.data.MaterialData;
-import iron.object.Object;
 import iron.object.MeshObject;
-import iron.math.Mat4;
-import iron.math.Vec4;
 import iron.system.Input;
 import iron.system.Time;
-import iron.RenderPath;
 import iron.Scene;
-import arm.shader.MakeMaterial;
-import arm.Viewport;
 import arm.io.ExportTexture;
+import arm.Viewport;
 import arm.Enums;
 import arm.ProjectFormat;
 import arm.Res;
@@ -511,7 +506,7 @@ class UISidebar {
 	function onDeselectText() {
 		#if krom_ios
 		var kb = kha.input.Keyboard.get();
-		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Shift);
+		@:privateAccess kb.sendUpEvent(KeyCode.Shift);
 		#end
 	}
 

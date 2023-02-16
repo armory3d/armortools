@@ -2,13 +2,9 @@ package arm;
 
 import kha.Image;
 import zui.Zui;
-import zui.Id;
 import iron.RenderPath;
 import iron.math.Vec4;
-import iron.math.Mat4;
-import iron.object.Object;
 import iron.object.MeshObject;
-import iron.data.MaterialData;
 import arm.shader.NodeShader;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;

@@ -1,6 +1,5 @@
 package arm;
 
-import arm.Project.TNodeGroup;
 import zui.Nodes;
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
@@ -11,6 +10,7 @@ import arm.sys.Path;
 import arm.data.LayerSlot;
 import arm.data.MaterialSlot;
 import arm.shader.MakeMaterial;
+import arm.Project;
 import arm.Enums;
 
 class History {

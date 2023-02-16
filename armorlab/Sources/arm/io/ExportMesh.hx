@@ -1,7 +1,6 @@
 package arm.io;
 
 import iron.object.MeshObject;
-import arm.ui.UISidebar;
 
 class ExportMesh {
 

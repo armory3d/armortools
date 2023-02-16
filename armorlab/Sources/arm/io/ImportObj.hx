@@ -3,7 +3,6 @@ package arm.io;
 import kha.Blob;
 import iron.data.Data;
 import arm.format.ObjParser;
-import arm.ui.UISidebar;
 
 class ImportObj {
 

@@ -6,7 +6,6 @@ import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;
 import arm.io.ImportAsset;
-import arm.io.ImportTexture;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Enums;

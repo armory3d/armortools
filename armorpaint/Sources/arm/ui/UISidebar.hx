@@ -3,6 +3,7 @@ package arm.ui;
 import haxe.io.Bytes;
 import kha.Image;
 import kha.System;
+import kha.input.Keyboard;
 import kha.input.KeyCode;
 import zui.Zui;
 import zui.Id;
@@ -10,21 +11,16 @@ import iron.data.Data;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
-import iron.math.Mat4;
-import iron.math.Vec4;
 import iron.system.Input;
 import iron.system.Time;
-import iron.RenderPath;
 import iron.Scene;
 import arm.shader.MakeMaterial;
-import arm.util.RenderUtil;
 import arm.Viewport;
 import arm.util.UVUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
 import arm.data.MaterialSlot;
-import arm.io.ImportFont;
 import arm.io.ExportTexture;
 import arm.Enums;
 import arm.ProjectFormat;
@@ -1061,8 +1057,8 @@ class UISidebar {
 
 	function onDeselectText() {
 		#if krom_ios
-		var kb = kha.input.Keyboard.get();
-		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Shift);
+		var kb = Keyboard.get();
+		@:privateAccess kb.sendUpEvent(KeyCode.Shift);
 		#end
 	}
 

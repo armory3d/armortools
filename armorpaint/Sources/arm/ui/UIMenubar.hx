@@ -2,11 +2,7 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
-import zui.Id;
 import zui.Ext;
-import iron.RenderPath;
-import arm.shader.MakeMaterial;
-import arm.render.RenderPathPaint;
 import arm.Enums;
 
 @:access(zui.Zui)

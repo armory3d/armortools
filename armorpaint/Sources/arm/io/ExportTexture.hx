@@ -8,7 +8,6 @@ import arm.render.RenderPathPaint;
 import arm.shader.MakeMaterial;
 import arm.data.LayerSlot;
 import arm.ui.UIHeader;
-import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;

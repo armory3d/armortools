@@ -7,11 +7,9 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.RenderPath;
 import iron.Scene;
-import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.util.UVUtil;
 import arm.shader.MaterialParser;
-import arm.Enums;
 
 class Uniforms {
 

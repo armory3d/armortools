@@ -3,12 +3,10 @@ package arm.ui;
 import haxe.io.Bytes;
 import haxe.Json;
 import kha.System;
-import kha.Image;
 import zui.Zui;
 import zui.Id;
 import zui.Ext;
 import iron.Scene;
-import iron.RenderPath;
 import iron.system.Input;
 import arm.Viewport;
 import arm.util.UVUtil;
@@ -17,8 +15,6 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
 import arm.Enums;
 
 @:access(zui.Zui)

@@ -19,7 +19,6 @@ import arm.ui.UISidebar;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.ui.UINodes;
-import arm.ui.UIHeader;
 import arm.ui.BoxPreferences;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -525,8 +524,8 @@ class Project {
 			Project.assetNames.insert(i, Project.assetNames.pop());
 			if (Context.texture == oldAsset) Context.texture = Project.assets[i];
 			function _next() {
-				arm.shader.MakeMaterial.parsePaintMaterial();
-				arm.util.RenderUtil.makeMaterialPreview();
+				MakeMaterial.parsePaintMaterial();
+				RenderUtil.makeMaterialPreview();
 				UISidebar.inst.hwnd1.redraws = 2;
 			}
 			App.notifyOnNextFrame(_next);

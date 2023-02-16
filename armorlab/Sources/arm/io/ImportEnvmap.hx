@@ -1,22 +1,16 @@
 package arm.io;
 
 import kha.Image;
-import kha.Blob;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.PipelineState;
 import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
 import kha.graphics4.TextureUnit;
 import kha.graphics4.ConstantLocation;
-import kha.graphics4.TextureAddressing;
-import kha.graphics4.TextureFilter;
-import kha.graphics4.MipMapFilter;
 import kha.arrays.Float32Array;
-import iron.data.Data;
 import iron.data.ConstData;
 import iron.math.Vec4;
 import iron.Scene;
-import arm.sys.Path;
 
 class ImportEnvmap {
 

@@ -2,13 +2,12 @@ package arm.util;
 
 import haxe.Json;
 import kha.arrays.Float32Array;
-import iron.RenderPath;
-import iron.Scene;
 import iron.data.SceneFormat;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.object.MeshObject;
-import arm.ui.UISidebar;
+import iron.RenderPath;
+import iron.Scene;
 
 class ParticleUtil {
 

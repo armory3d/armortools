@@ -1,11 +1,8 @@
 package arm.shader;
 
 import iron.data.SceneFormat;
-import zui.Nodes;
-import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.shader.MaterialParser;
-import arm.shader.NodeShader;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;

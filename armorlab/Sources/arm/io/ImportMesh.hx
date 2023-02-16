@@ -3,13 +3,10 @@ package arm.io;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
-import iron.math.Vec4;
 import iron.Scene;
 import arm.util.MeshUtil;
-import arm.Viewport;
 import arm.sys.Path;
-import arm.ui.UIHeader;
-import arm.ui.UISidebar;
+import arm.Viewport;
 import arm.Project;
 import arm.Enums;
 

@@ -10,11 +10,6 @@ import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
-import iron.math.Mat4;
-import arm.ui.UISidebar;
-import arm.ui.UIHeader;
-import arm.shader.MakeMaterial;
-import arm.render.RenderPathPaint;
 import arm.Enums;
 import arm.ProjectFormat;
 

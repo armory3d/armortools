@@ -3,7 +3,6 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import zui.Id;
-import iron.RenderPath;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;

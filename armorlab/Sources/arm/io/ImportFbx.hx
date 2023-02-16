@@ -3,7 +3,6 @@ package arm.io;
 import kha.Blob;
 import iron.data.Data;
 import arm.format.FbxParser;
-import arm.ui.UISidebar;
 
 class ImportFbx {
 

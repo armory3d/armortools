@@ -10,14 +10,13 @@ import zui.Nodes;
 import iron.system.Input;
 import iron.system.Time;
 import arm.shader.NodesMaterial;
-import arm.shader.MaterialParser;
 import arm.logic.NodesBrush;
 import arm.shader.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Enums;
 import arm.Project;
-import arm.ProjectBaseFormat.TSwatchColor;
+import arm.ProjectBaseFormat;
 
 @:access(zui.Zui)
 @:access(zui.Nodes)

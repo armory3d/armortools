@@ -14,7 +14,6 @@ import iron.data.SceneFormat;
 import iron.math.Mat4;
 import iron.system.ArmPack;
 import iron.system.Lz4;
-import iron.object.Object;
 import iron.object.MeshObject;
 import iron.Scene;
 import iron.RenderPath;

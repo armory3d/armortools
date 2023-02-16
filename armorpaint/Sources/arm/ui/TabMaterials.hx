@@ -6,13 +6,10 @@ import zui.Id;
 import zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
-import iron.object.MeshObject;
-import iron.data.Data;
 import arm.shader.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.ProjectBaseFormat;
 import arm.util.RenderUtil;
-import arm.sys.Path;
 import arm.Enums;
 
 class TabMaterials {

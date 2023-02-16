@@ -1,6 +1,5 @@
 package arm;
 
-import kha.Image;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.TextureUnit;
 import kha.graphics4.ConstantLocation;
@@ -9,8 +8,9 @@ import kha.graphics4.VertexStructure;
 import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
-import iron.RenderPath;
+import kha.Image;
 import iron.math.Mat4;
+import iron.RenderPath;
 import arm.ui.UIHeader;
 import arm.data.LayerSlot;
 import arm.shader.MakeMaterial;

@@ -1,7 +1,5 @@
 package arm.render;
 
-import iron.object.MeshObject;
-import iron.object.LightObject;
 import iron.system.Input;
 import iron.math.RayCaster;
 import iron.math.Vec4;

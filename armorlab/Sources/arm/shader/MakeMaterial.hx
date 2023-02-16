@@ -4,16 +4,7 @@ import zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
-import iron.RenderPath;
-import arm.ui.UIHeader;
-import arm.ui.UINodes;
-import arm.ui.UISidebar;
-import arm.shader.NodeShader;
-import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
-import arm.shader.ShaderFunctions;
-import arm.shader.MaterialParser;
-import arm.render.RenderPathPaint;
 import arm.Enums;
 
 class MakeMaterial {

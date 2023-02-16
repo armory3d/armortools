@@ -2,8 +2,6 @@ package arm.logic;
 
 import iron.math.Vec4;
 import arm.logic.LogicNode;
-import arm.ui.UISidebar;
-import arm.Enums;
 
 @:keep
 class InputNode extends LogicNode {

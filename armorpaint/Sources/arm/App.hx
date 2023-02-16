@@ -1,6 +1,5 @@
 package arm;
 
-import haxe.io.Bytes;
 import kha.graphics2.truetype.StbTruetype;
 import kha.Image;
 import kha.Font;
@@ -25,12 +24,7 @@ import arm.ui.UIMenubar;
 import arm.ui.TabMaterials;
 import arm.ui.TabSwatches;
 import arm.ui.TabLayers;
-import arm.ui.BoxExport;
 import arm.io.ImportAsset;
-import arm.io.ExportMesh;
-import arm.io.ExportTexture;
-import arm.sys.File;
-import arm.sys.Path;
 import arm.util.RenderUtil;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;

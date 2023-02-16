@@ -21,7 +21,7 @@ class ImportTexture {
 			if (a.file == path) {
 				// Set as envmap
 				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-					Data.getImage(path, function(image: kha.Image) {
+					Data.getImage(path, function(image: Image) {
 						App.notifyOnNextFrame(function() { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
 						});
