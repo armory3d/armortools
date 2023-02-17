@@ -1,6 +1,5 @@
 package arm.render;
 
-import kha.System;
 import iron.RenderPath;
 import iron.Scene;
 import arm.shader.MakeMesh;
@@ -152,34 +151,7 @@ class RenderPathDeferred {
 	}
 
 	public static function commands() {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
-
-		RenderPathBase.begin();
-		if (RenderPathBase.isCached()) return;
-
-		// Match projection matrix jitter
-		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
-		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathDeferred.taaFrame;
-		@:privateAccess Scene.active.camera.projectionJitter();
-		Scene.active.camera.buildMatrix();
-
-		RenderPathPaint.begin();
-		drawSplit();
-		drawGbuffer();
-		RenderPathPaint.draw();
-
-		#if (kha_direct3d12 || kha_vulkan)
-		if (Context.viewportMode == ViewPathTrace) {
-			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
-			RenderPathRaytrace.draw(useLiveLayer);
-			return;
-		}
-		#end
-
-		drawDeferred();
-		RenderPathPaint.end();
-		RenderPathBase.end();
-		taaFrame++;
+		RenderPathBase.commands(drawDeferred);
 	}
 
 	public static function drawDeferred() {
@@ -428,8 +400,8 @@ class RenderPathDeferred {
 		}
 	}
 
-	public static function drawGbuffer(gbuffer0 = "gbuffer0", gbuffer1 = "gbuffer1", gbuffer2 = "gbuffer2") {
-		path.setTarget(gbuffer0); // Only clear gbuffer0
+	public static function drawGbuffer() {
+		path.setTarget("gbuffer0"); // Only clear gbuffer0
 		#if kha_metal
 		path.clearTarget(0x00000000, 1.0);
 		#else
@@ -439,7 +411,7 @@ class RenderPathDeferred {
 			path.setTarget("gbuffer2");
 			path.clearTarget(0xff000000);
 		}
-		path.setTarget(gbuffer0, [gbuffer1, gbuffer2]);
+		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		var currentG = path.currentG;
 		RenderPathPaint.bindLayers();
 		path.drawMeshes("mesh");
@@ -514,35 +486,5 @@ class RenderPathDeferred {
 		path.bindTarget("gbuffer1_copy", "tex1");
 		path.bindTarget("gbuffer2_copy", "tex2");
 		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
-	}
-
-	static function drawSplit() {
-		if (Context.splitView && !Context.paint2dView) {
-			#if (kha_metal || krom_android)
-			Context.ddirty = 2;
-			#else
-			Context.ddirty = 1;
-			#end
-			var cam = Scene.active.camera;
-
-			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
-
-			RenderPathDeferred.drawGbuffer();
-
-			#if (kha_direct3d12 || kha_vulkan)
-			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
-			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawDeferred();
-			#else
-			drawDeferred();
-			#end
-
-			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
-			cam.buildMatrix();
-			cam.buildProjection();
-		}
 	}
 }

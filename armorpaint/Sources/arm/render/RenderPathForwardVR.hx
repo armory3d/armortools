@@ -107,9 +107,7 @@ class RenderPathForwardVR {
 		}
 	}
 
-	@:access(iron.RenderPath)
 	public static function commands() {
-
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (Krom.vrGetSensorStateHmdMounted()) {
@@ -160,8 +158,8 @@ class RenderPathForwardVR {
 				Scene.active.camera.P._33 = proj._33;
 				Scene.active.camera.VP.multmats(Scene.active.camera.P, Scene.active.camera.V);
 				Scene.active.camera.transform.world.getInverse(Scene.active.camera.V);
-				RenderPathDeferred.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
-				RenderPathForward.drawForward(true, "eye" + eye, "gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye", "buf_eye", "bufa_eye", "taa_eye", "taa2_eye");
+				// RenderPathDeferred.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
+				// RenderPathForward.drawForward(true, "eye" + eye, "gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye", "buf_eye", "bufa_eye", "taa_eye", "taa2_eye");
 			}
 
 			Scene.active.camera.transform.world.setFrom(m);
@@ -178,7 +176,7 @@ class RenderPathForwardVR {
 			Krom.vrWarpSwap();
 		}
 
-		iron.Scene.active.camera.buildMatrix();
+		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
 		RenderPathDeferred.drawGbuffer();

@@ -1,5 +1,6 @@
 package arm.render;
 
+import kha.System;
 import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.Quat;
@@ -188,7 +189,38 @@ class RenderPathBase {
 		return false;
 	}
 
-	public static function commandsBloom(tex = "tex") {
+	public static function commands(drawCommands: Void->Void) {
+		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+
+		RenderPathBase.begin();
+		if (RenderPathBase.isCached()) return;
+
+		// Match projection matrix jitter
+		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
+		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathDeferred.taaFrame;
+		@:privateAccess Scene.active.camera.projectionJitter();
+		Scene.active.camera.buildMatrix();
+
+		RenderPathPaint.begin();
+		RenderPathBase.drawSplit(drawCommands);
+		RenderPathDeferred.drawGbuffer();
+		RenderPathPaint.draw();
+
+		#if (kha_direct3d12 || kha_vulkan)
+		if (Context.viewportMode == ViewPathTrace) {
+			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			RenderPathRaytrace.draw(useLiveLayer);
+			return;
+		}
+		#end
+
+		drawCommands();
+		RenderPathPaint.end();
+		RenderPathBase.end();
+		RenderPathDeferred.taaFrame++;
+	}
+
+	public static function commandsBloom() {
 		if (Config.raw.rp_bloom != false) {
 			if (bloomMipmaps == null) {
 				bloomMipmaps = [];
@@ -227,16 +259,46 @@ class RenderPathBase {
 				bloomCurrentMip = i;
 				path.setTarget(bloomMipmaps[i].raw.name);
 				path.clearTarget();
-				path.bindTarget(i == 0 ? tex : bloomMipmaps[i - 1].raw.name, "tex");
+				path.bindTarget(i == 0 ? "tex" : bloomMipmaps[i - 1].raw.name, "tex");
 				path.drawShader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
 			for (i in 0...numMips) {
 				var mipLevel = numMips - 1 - i;
 				bloomCurrentMip = mipLevel;
-				path.setTarget(mipLevel == 0 ? tex : bloomMipmaps[mipLevel - 1].raw.name);
+				path.setTarget(mipLevel == 0 ? "tex" : bloomMipmaps[mipLevel - 1].raw.name);
 				path.bindTarget(bloomMipmaps[mipLevel].raw.name, "tex");
 				path.drawShader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}
+		}
+	}
+
+	public static function drawSplit(drawCommands: Void->Void) {
+		if (Context.splitView && !Context.paint2dView) {
+			#if (kha_metal || krom_android)
+			Context.ddirty = 2;
+			#else
+			Context.ddirty = 1;
+			#end
+			var cam = Scene.active.camera;
+
+			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
+			cam.buildMatrix();
+			cam.buildProjection();
+
+			RenderPathDeferred.drawGbuffer();
+
+			#if (kha_direct3d12 || kha_vulkan)
+			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
+			#else
+			drawCommands();
+			#end
+
+			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
+			cam.buildMatrix();
+			cam.buildProjection();
 		}
 	}
 }
