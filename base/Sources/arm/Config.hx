@@ -9,7 +9,7 @@ import kha.System;
 import iron.data.Data;
 import zui.Zui;
 import arm.ui.UISidebar;
-import arm.render.Inc;
+import arm.render.RenderPathBase;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.Enums;
@@ -185,7 +185,7 @@ class Config {
 
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
-		Inc.applyConfig();
+		RenderPathBase.applyConfig();
 		if (current != null) current.begin(false);
 	}
 

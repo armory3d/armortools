@@ -9,19 +9,10 @@ import arm.Enums;
 class RenderPathDeferred {
 
 	public static var path: RenderPath;
-
-	#if rp_voxels
-	static var voxels = "voxels";
-	static var voxelsLast = "voxels";
-	public static var voxelFrame = 0;
-	public static var voxelFreq = 6; // Revoxelizing frequency
-	#end
 	public static var taaFrame = 0;
 
 	public static function init(_path: RenderPath) {
-
 		path = _path;
-
 		path.createDepthBuffer("main", "DEPTH24");
 
 		{
@@ -30,7 +21,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			t.depth_buffer = "main";
 			path.createRenderTarget(t);
 		}
@@ -40,7 +31,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -49,7 +40,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -58,7 +49,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			#if kha_opengl
 			t.depth_buffer = "main";
 			#end
@@ -76,7 +67,7 @@ class RenderPathDeferred {
 			#else
 			t.format = "RGBA32";
 			#end
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -85,7 +76,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -94,7 +85,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -103,7 +94,7 @@ class RenderPathDeferred {
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -139,44 +130,32 @@ class RenderPathDeferred {
 		path.loadShader("shader_datas/compositor_pass/compositor_pass");
 		path.loadShader("shader_datas/copy_pass/copy_pass");
 		path.loadShader("shader_datas/copy_pass/copyR8_pass");
-		//path.loadShader("shader_datas/copy_pass/copyD32_pass");
 		path.loadShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
 		path.loadShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
 		path.loadShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 		path.loadShader("shader_datas/taa_pass/taa_pass");
 		path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
-
-		#if (rp_motionblur == "Camera")
-		{
-			path.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
-		}
-		#end
-		#if (rp_motionblur == "Object")
-		{
-			path.loadShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
-		}
-		#end
+		// path.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
+		// path.loadShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
 		#if rp_voxels
 		{
-			Inc.initGI();
+			RenderPathBase.initVoxels();
 			path.loadShader("shader_datas/deferred_light/deferred_light_voxel");
 		}
 		#end
 
 		RenderPathPaint.init(path);
 		RenderPathPreview.init(path);
-
 		#if (kha_direct3d12 || kha_vulkan)
 		RenderPathRaytrace.init(path);
 		#end
 	}
 
-	@:access(iron.RenderPath)
 	public static function commands() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		Inc.beginSplit();
-		if (Inc.isCached()) return;
+		RenderPathBase.begin();
+		if (RenderPathBase.isCached()) return;
 
 		// Match projection matrix jitter
 		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
@@ -199,7 +178,7 @@ class RenderPathDeferred {
 
 		drawDeferred();
 		RenderPathPaint.end();
-		Inc.end();
+		RenderPathBase.end();
 		taaFrame++;
 	}
 
@@ -216,7 +195,7 @@ class RenderPathDeferred {
 					t.width = 0;
 					t.height = 0;
 					t.format = "R8";
-					t.scale = Inc.getSuperSampling();
+					t.scale = RenderPathBase.getSuperSampling();
 					path.createRenderTarget(t);
 				}
 				{
@@ -225,7 +204,7 @@ class RenderPathDeferred {
 					t.width = 0;
 					t.height = 0;
 					t.format = "R8";
-					t.scale = Inc.getSuperSampling();
+					t.scale = RenderPathBase.getSuperSampling();
 					path.createRenderTarget(t);
 				}
 				path.loadShader("shader_datas/ssao_pass/ssao_pass");
@@ -249,35 +228,22 @@ class RenderPathDeferred {
 			path.drawShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
 		}
 
-		// Voxels
 		#if rp_voxels
 		if (Config.raw.rp_gi != false)
 		{
 			var voxelize = path.voxelize() && ddirty > 0 && taaFrame > 0;
 
-			#if arm_voxelgi_temporal
-			voxelize = ++voxelFrame % voxelFreq == 0;
-
 			if (voxelize) {
-				voxels = voxels == "voxels" ? "voxelsB" : "voxels";
-				voxelsLast = voxels == "voxels" ? "voxelsB" : "voxels";
-			}
-			#end
-
-			if (voxelize) {
-				var res = 256;
-				var voxtex = voxels;
-
-				path.clearImage(voxtex, 0x00000000);
+				path.clearImage("voxels", 0x00000000);
 				path.setTarget("");
-				path.setViewport(res, res);
-				path.bindTarget(voxtex, "voxels");
+				path.setViewport(256, 256);
+				path.bindTarget("voxels", "voxels");
 				if (arm.shader.MakeMaterial.heightUsed) {
 					var tid = Project.layers[0].id;
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
 				}
 				path.drawMeshes("voxel");
-				path.generateMipmaps(voxels);
+				path.generateMipmaps("voxels");
 			}
 		}
 		#end
@@ -301,12 +267,7 @@ class RenderPathDeferred {
 		if (Config.raw.rp_gi != false)
 		{
 			voxelao_pass = true;
-			path.bindTarget(voxels, "voxels");
-			#if arm_voxelgi_temporal
-			{
-				path.bindTarget(voxelsLast, "voxelsLast");
-			}
-			#end
+			path.bindTarget("voxels", "voxels");
 		}
 		#end
 
@@ -326,7 +287,7 @@ class RenderPathDeferred {
 		#end
 
 		if (Config.raw.rp_bloom != false) {
-			Inc.commandsBloom();
+			RenderPathBase.commandsBloom();
 		}
 
 		if (Config.raw.rp_ssr != false) {
@@ -420,7 +381,7 @@ class RenderPathDeferred {
 		path.setTarget("buf");
 		var currentG = path.currentG;
 		path.drawMeshes("overlay");
-		Inc.drawCompass(currentG);
+		RenderPathBase.drawCompass(currentG);
 
 		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
 		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
@@ -455,16 +416,15 @@ class RenderPathDeferred {
 			path.drawShader("shader_datas/taa_pass/taa_pass");
 		}
 
-		if (!Inc.ssaa4()) {
-			path.setTarget("");
-			path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-
-		if (Inc.ssaa4()) {
+		if (RenderPathBase.ssaa4()) {
 			path.setTarget("");
 			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
+		}
+		else {
+			path.setTarget("");
+			path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 	}
 
@@ -517,7 +477,7 @@ class RenderPathDeferred {
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
+				t.scale = RenderPathBase.getSuperSampling();
 				t.depth_buffer = "main";
 				path.createRenderTarget(t);
 			}
@@ -527,7 +487,7 @@ class RenderPathDeferred {
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
+				t.scale = RenderPathBase.getSuperSampling();
 				path.createRenderTarget(t);
 			}
 			{
@@ -536,7 +496,7 @@ class RenderPathDeferred {
 				t.width = 0;
 				t.height = 0;
 				t.format = "RGBA64";
-				t.scale = Inc.getSuperSampling();
+				t.scale = RenderPathBase.getSuperSampling();
 				path.createRenderTarget(t);
 			}
 
@@ -570,7 +530,7 @@ class RenderPathDeferred {
 			cam.buildMatrix();
 			cam.buildProjection();
 
-			drawGbuffer();
+			RenderPathDeferred.drawGbuffer();
 
 			#if (kha_direct3d12 || kha_vulkan)
 			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;

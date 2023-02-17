@@ -268,7 +268,7 @@ class RenderPathPaint {
 						var rp_gi = Config.raw.rp_gi;
 						Config.raw.rp_gi = true;
 						#if rp_voxels
-						Inc.initGI();
+						RenderPathBase.initVoxels();
 						#end
 						Config.raw.rp_gi = rp_gi;
 					}

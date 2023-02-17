@@ -13,12 +13,11 @@ class RenderPathForward {
 		path = _path;
 	}
 
-	@:access(iron.RenderPath)
 	public static function commands() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		Inc.beginSplit();
-		if (Inc.isCached()) return;
+		RenderPathBase.begin();
+		if (RenderPathBase.isCached()) return;
 
 		// Match projection matrix jitter
 		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
@@ -41,7 +40,7 @@ class RenderPathForward {
 
 		drawForward();
 		RenderPathPaint.end();
-		Inc.end();
+		RenderPathBase.end();
 		RenderPathDeferred.taaFrame++;
 	}
 
@@ -64,7 +63,7 @@ class RenderPathForward {
 			path.setTarget(buf);
 			var currentG = path.currentG;
 			path.drawMeshes("overlay");
-			Inc.drawCompass(currentG);
+			RenderPathBase.drawCompass(currentG);
 		}
 
 		var taaFrame = RenderPathDeferred.taaFrame;
@@ -101,13 +100,13 @@ class RenderPathForward {
 			path.drawShader("shader_datas/taa_pass/taa_pass");
 		}
 
-		if (!Inc.ssaa4()) {
+		if (!RenderPathBase.ssaa4()) {
 			path.setTarget(output);
 			path.bindTarget(taaFrame % 2 == 0 ? current : taa, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 		}
 
-		if (Inc.ssaa4()) {
+		if (RenderPathBase.ssaa4()) {
 			path.setTarget(output);
 			path.bindTarget(taaFrame % 2 == 0 ? taa2 : taa, "tex");
 			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");

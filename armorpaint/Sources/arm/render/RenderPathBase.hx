@@ -10,73 +10,57 @@ import iron.Scene;
 import arm.ui.UIView2D;
 import arm.Enums;
 
-class Inc {
+class RenderPathBase {
 
+	static var superSample = 1.0;
 	static var path: RenderPath;
-	public static var superSample = 1.0;
-
 	static var lastX = -1.0;
 	static var lastY = -1.0;
-
+	static var bloomMipmaps: Array<RenderTarget>;
+	static var bloomCurrentMip = 0;
+	static var bloomSampleScale: Float;
 	#if rp_voxels
 	static var voxelsCreated = false;
 	#end
 
 	public static function init(_path: RenderPath) {
 		path = _path;
-		var config = Config.raw;
-		superSample = config.rp_supersample;
+		superSample = Config.raw.rp_supersample;
 	}
 
+	#if rp_voxels
+	public static function initVoxels(targetName = "voxels") {
+		if (Config.raw.rp_gi != true || voxelsCreated) return;
+		voxelsCreated = true;
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = targetName;
+			t.format = "R8";
+			t.width = 256;
+			t.height = 256;
+			t.depth = 256;
+			t.is_image = true;
+			t.mipmaps = true;
+			path.createRenderTarget(t);
+		}
+	}
+	#end
+
 	public static function applyConfig() {
-		var config = Config.raw;
-		if (superSample != config.rp_supersample) {
-			superSample = config.rp_supersample;
+		if (superSample != Config.raw.rp_supersample) {
+			superSample = Config.raw.rp_supersample;
 			for (rt in path.renderTargets) {
 				if (rt.raw.width == 0 && rt.raw.scale != null) {
-					rt.raw.scale = getSuperSampling();
+					rt.raw.scale = superSample;
 				}
 			}
 			path.resize();
 		}
 		#if rp_voxels
-		if (!voxelsCreated) initGI();
+		if (!voxelsCreated) initVoxels();
 		#end
 	}
-
-	#if rp_voxels
-	public static function initGI(tname = "voxels") {
-		var config = Config.raw;
-		if (config.rp_gi != true || voxelsCreated) return;
-		voxelsCreated = true;
-
-		var t = new RenderTargetRaw();
-		t.name = tname;
-		t.format = "R8";
-		var res = 256;
-		var resZ =  1.0;
-		t.width = res;
-		t.height = res;
-		t.depth = Std.int(res * resZ);
-		t.is_image = true;
-		t.mipmaps = true;
-		path.createRenderTarget(t);
-
-		#if arm_voxelgi_temporal
-		{
-			var tB = new RenderTargetRaw();
-			tB.name = t.name + "B";
-			tB.format = t.format;
-			tB.width = t.width;
-			tB.height = t.height;
-			tB.depth = t.depth;
-			tB.is_image = t.is_image;
-			tB.mipmaps = t.mipmaps;
-			path.createRenderTarget(tB);
-		}
-		#end
-	}
-	#end
 
 	public static inline function getSuperSampling(): Float {
 		return superSample;
@@ -85,16 +69,16 @@ class Inc {
 	public static function drawCompass(currentG: kha.graphics4.Graphics) {
 		if (Context.showCompass) {
 			var scene = Scene.active;
-			var cam = Scene.active.camera;
+			var cam = scene.camera;
 			var compass: MeshObject = cast scene.getChild(".Compass");
 
-			var visible = compass.visible;
-			var parent = compass.parent;
-			var loc = compass.transform.loc;
-			var rot = compass.transform.rot;
+			var _visible = compass.visible;
+			var _parent = compass.parent;
+			var _loc = compass.transform.loc;
+			var _rot = compass.transform.rot;
 			var crot = cam.transform.rot;
 			var ratio = iron.App.w() / iron.App.h();
-			var P = cam.P;
+			var _P = cam.P;
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			compass.visible = true;
 			compass.parent = cam;
@@ -102,22 +86,21 @@ class Inc {
 			compass.transform.rot = new Quat(-crot.x, -crot.y, -crot.z, crot.w);
 			compass.transform.scale.set(0.4, 0.4, 0.4);
 			compass.transform.buildMatrix();
-
 			compass.frustumCulling = false;
 			compass.render(currentG, "overlay", []);
 
-			cam.P = P;
-			compass.visible = visible;
-			compass.parent = parent;
-			compass.transform.loc = loc;
-			compass.transform.rot = rot;
+			cam.P = _P;
+			compass.visible = _visible;
+			compass.parent = _parent;
+			compass.transform.loc = _loc;
+			compass.transform.rot = _rot;
 			compass.transform.buildMatrix();
 		}
 	}
 
-	public static function beginSplit() {
+	public static function begin() {
+		// Begin split
 		if (Context.splitView && !Context.paint2dView) {
-
 			if (Context.viewIndexLast == -1 && Context.viewIndex == -1) {
 				// Begin split, draw right viewport first
 				Context.viewIndex = 1;
@@ -147,17 +130,14 @@ class Inc {
 	}
 
 	public static function end() {
-		endSplit();
+		// End split
+		Context.viewIndexLast = Context.viewIndex;
+		Context.viewIndex = -1;
 
 		if (Context.foregroundEvent && !iron.system.Input.getMouse().down()) {
 			Context.foregroundEvent = false;
 			Context.pdirty = 0;
 		}
-	}
-
-	static function endSplit() {
-		Context.viewIndexLast = Context.viewIndex;
-		Context.viewIndex = -1;
 	}
 
 	public static inline function ssaa4(): Bool {
@@ -207,10 +187,6 @@ class Inc {
 		}
 		return false;
 	}
-
-	static var bloomMipmaps: Array<RenderTarget>;
-	static var bloomCurrentMip = 0;
-	static var bloomSampleScale: Float;
 
 	public static function commandsBloom(tex = "tex") {
 		if (Config.raw.rp_bloom != false) {

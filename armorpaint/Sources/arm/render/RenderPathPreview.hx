@@ -36,7 +36,7 @@ class RenderPathPreview {
 			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			#if kha_opengl
 			t.depth_buffer = "mmain";
 			#end
@@ -49,7 +49,7 @@ class RenderPathPreview {
 			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			t.depth_buffer = "mmain";
 			path.createRenderTarget(t);
 		}
@@ -60,7 +60,7 @@ class RenderPathPreview {
 			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 
@@ -70,7 +70,7 @@ class RenderPathPreview {
 			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 

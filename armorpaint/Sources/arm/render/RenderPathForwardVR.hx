@@ -22,7 +22,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -31,7 +31,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 
@@ -43,7 +43,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			t.depth_buffer = "main_eye";
 			path.createRenderTarget(t);
 		}
@@ -53,7 +53,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -62,7 +62,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA64";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -75,7 +75,7 @@ class RenderPathForwardVR {
 			#else
 			t.format = "RGBA32";
 			#end
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -84,7 +84,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -93,7 +93,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 		{
@@ -102,7 +102,7 @@ class RenderPathForwardVR {
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
-			t.scale = Inc.getSuperSampling();
+			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
 	}

@@ -54,7 +54,7 @@ class ParticleUtil {
 			t.width = 0;
 			t.height = 0;
 			t.format = "R8";
-			t.scale = arm.render.Inc.getSuperSampling();
+			t.scale = arm.render.RenderPathBase.getSuperSampling();
 			RenderPath.active.createRenderTarget(t);
 		}
 
