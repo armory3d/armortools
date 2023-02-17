@@ -220,7 +220,7 @@ class RenderPathBase {
 		RenderPathDeferred.taaFrame++;
 	}
 
-	public static function commandsBloom() {
+	public static function commandsBloom(tex = "tex") {
 		if (Config.raw.rp_bloom != false) {
 			if (bloomMipmaps == null) {
 				bloomMipmaps = [];
@@ -259,13 +259,13 @@ class RenderPathBase {
 				bloomCurrentMip = i;
 				path.setTarget(bloomMipmaps[i].raw.name);
 				path.clearTarget();
-				path.bindTarget(i == 0 ? "tex" : bloomMipmaps[i - 1].raw.name, "tex");
+				path.bindTarget(i == 0 ? tex : bloomMipmaps[i - 1].raw.name, "tex");
 				path.drawShader("shader_datas/bloom_pass/bloom_downsample_pass");
 			}
 			for (i in 0...numMips) {
 				var mipLevel = numMips - 1 - i;
 				bloomCurrentMip = mipLevel;
-				path.setTarget(mipLevel == 0 ? "tex" : bloomMipmaps[mipLevel - 1].raw.name);
+				path.setTarget(mipLevel == 0 ? tex : bloomMipmaps[mipLevel - 1].raw.name);
 				path.bindTarget(bloomMipmaps[mipLevel].raw.name, "tex");
 				path.drawShader("shader_datas/bloom_pass/bloom_upsample_pass");
 			}

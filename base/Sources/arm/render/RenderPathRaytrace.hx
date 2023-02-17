@@ -135,12 +135,12 @@ class RenderPathRaytrace {
 		commands(useLiveLayer);
 
 		if (Config.raw.rp_bloom != false) {
-			Inc.commandsBloom("buf");
+			RenderPathBase.commandsBloom("buf");
 		}
 		path.setTarget("buf");
 		path.drawMeshes("overlay");
 		path.setTarget("buf");
-		Inc.drawCompass(path.currentG);
+		RenderPathBase.drawCompass(path.currentG);
 		path.setTarget("taa");
 		path.bindTarget("buf", "tex");
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
