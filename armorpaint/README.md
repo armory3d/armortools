@@ -79,12 +79,3 @@ cd ../armorcore/Deployment
 strip ArmorPaint
 ./ArmorPaint ../../armorpaint/build/krom
 ```
-
-**Windows VR** *wip*
-```bash
-# Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
-..\armorcore\Kinc\make --from ..\armorcore -g direct3d11 --vr oculus
-# Open generated Visual Studio project at `build\ArmorPaint.sln`
-# Build and run for x64 & release
-# Copy build\x64\Release\ArmorPaint.exe to build\krom to run ArmorPaint.exe directly
-```
