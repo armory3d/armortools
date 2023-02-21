@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_shader_image_load_store : enable
 
-#include "std/conetrace.glsl"
+#include "../std/conetrace.glsl"
 
 uniform layout(r8) writeonly image3D voxels;
 
