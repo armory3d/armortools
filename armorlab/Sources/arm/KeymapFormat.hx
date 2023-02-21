@@ -11,4 +11,5 @@ import arm.KeymapBaseFormat;
 	public var brush_ruler: String;
 	public var file_export_textures: String;
 	public var file_export_textures_as: String;
+	public var stencil_hide: String; // Unused
 }

@@ -16,7 +16,7 @@ import iron.Scene;
 import iron.RenderPath;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
-import arm.render.RenderPathDeferred;
+import arm.render.RenderPathBase;
 import arm.shader.MakeMaterial;
 import arm.Enums;
 
@@ -297,7 +297,7 @@ class RenderUtil {
 		planeo.transform.buildMatrix();
 
 		RenderPathPaint.liveLayerDrawn = 0;
-		RenderPathDeferred.drawGbuffer();
+		RenderPathBase.drawGbuffer();
 
 		// Paint brush preview
 		var _brushRadius = Context.brushRadius;

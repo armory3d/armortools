@@ -5,7 +5,7 @@ import kha.System;
 import iron.object.Object;
 import iron.Scene;
 import iron.RenderPath;
-import arm.render.Inc;
+import arm.render.RenderPathBase;
 import arm.render.RenderPathForward;
 import arm.render.RenderPathDeferred;
 import arm.render.Uniforms;
@@ -121,7 +121,7 @@ class Main {
 				Scene.setActive("Scene", function(o: Object) {
 					Uniforms.init();
 					var path = new RenderPath();
-					Inc.init(path);
+					RenderPathBase.init(path);
 
 					if (Context.renderMode == RenderForward) {
 						RenderPathDeferred.init(path); // Allocate gbuffer

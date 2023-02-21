@@ -19,6 +19,7 @@ import arm.ProjectBaseFormat;
 class Context {
 
 	public static var material: Dynamic; ////
+	public static var layer: Dynamic; ////
 	public static var paintObject: MeshObject;
 	public static var mergedObject: MeshObject = null;
 	public static var mergedObjectIsAtlas = false; // Only objects referenced by atlas are merged
@@ -31,6 +32,8 @@ class Context {
 	public static var brushBlendDirty = true;
 	public static var nodePreviewSocket = 0;
 
+	public static var splitView = false;
+	public static var viewIndex = -1;
 	public static var viewIndexLast = -1;
 
 	public static var swatch: TSwatchColor;
@@ -107,6 +110,7 @@ class Context {
 	public static var prevPaintVecX = -1.0;
 	public static var prevPaintVecY = -1.0;
 	public static var frame = 0;
+	public static var paint2dView = false;
 
 	public static var lockStartedX = -1.0;
 	public static var lockStartedY = -1.0;

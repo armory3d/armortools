@@ -8,6 +8,8 @@ import arm.Enums;
 
 class MakeMesh {
 
+	public static var layerPassCount = 1;
+
 	public static function run(data: NodeShaderData, layerPass = 0): NodeShaderContext {
 		var con_mesh: NodeShaderContext = data.add_context({
 			name: "mesh",

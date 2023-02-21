@@ -1,14 +1,10 @@
 package arm.render;
 
 import iron.RenderPath;
-import iron.Scene;
-import arm.shader.MakeMesh;
-import arm.Enums;
 
 class RenderPathDeferred {
 
 	public static var path: RenderPath;
-	public static var taaFrame = 0;
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -71,7 +67,7 @@ class RenderPathDeferred {
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "bufa";
+			t.name = "buf2";
 			t.width = 0;
 			t.height = 0;
 			t.format = "RGBA32";
@@ -151,340 +147,30 @@ class RenderPathDeferred {
 	}
 
 	public static function commands() {
+		RenderPathPaint.liveBrushDirty();
 		RenderPathBase.commands(drawDeferred);
 	}
 
 	public static function drawDeferred() {
-		var cameraType = Context.cameraType;
-		var ddirty = Context.ddirty;
-
-		var ssao = Config.raw.rp_ssao != false && cameraType == CameraPerspective;
-		if (ssao && ddirty > 0 && taaFrame > 0) {
-			if (path.renderTargets.get("singlea") == null) {
-				{
-					var t = new RenderTargetRaw();
-					t.name = "singlea";
-					t.width = 0;
-					t.height = 0;
-					t.format = "R8";
-					t.scale = RenderPathBase.getSuperSampling();
-					path.createRenderTarget(t);
-				}
-				{
-					var t = new RenderTargetRaw();
-					t.name = "singleb";
-					t.width = 0;
-					t.height = 0;
-					t.format = "R8";
-					t.scale = RenderPathBase.getSuperSampling();
-					path.createRenderTarget(t);
-				}
-				path.loadShader("shader_datas/ssao_pass/ssao_pass");
-				path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
-				path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
-			}
-
-			path.setTarget("singlea");
-			path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.drawShader("shader_datas/ssao_pass/ssao_pass");
-
-			path.setTarget("singleb");
-			path.bindTarget("singlea", "tex");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.drawShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
-
-			path.setTarget("singlea");
-			path.bindTarget("singleb", "tex");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.drawShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
-		}
-
+		RenderPathBase.drawSSAO();
 		#if rp_voxels
-		if (Config.raw.rp_gi != false)
-		{
-			var voxelize = path.voxelize() && ddirty > 0 && taaFrame > 0;
-
-			if (voxelize) {
-				path.clearImage("voxels", 0x00000000);
-				path.setTarget("");
-				path.setViewport(256, 256);
-				path.bindTarget("voxels", "voxels");
-				if (arm.shader.MakeMaterial.heightUsed) {
-					var tid = Project.layers[0].id;
-					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
-				}
-				path.drawMeshes("voxel");
-				path.generateMipmaps("voxels");
-			}
-		}
+		RenderPathBase.drawVoxels();
 		#end
-
-		// ---
-		// Deferred light
-		// ---
-		path.setTarget("tex");
-		path.bindTarget("_main", "gbufferD");
-		path.bindTarget("gbuffer0", "gbuffer0");
-		path.bindTarget("gbuffer1", "gbuffer1");
-		var ssao = Config.raw.rp_ssao != false && cameraType == CameraPerspective;
-		if (ssao && taaFrame > 0) {
-			path.bindTarget("singlea", "ssaotex");
-		}
-		else {
-			path.bindTarget("empty_white", "ssaotex");
-		}
-		var voxelao_pass = false;
-		#if rp_voxels
-		if (Config.raw.rp_gi != false)
-		{
-			voxelao_pass = true;
-			path.bindTarget("voxels", "voxels");
-		}
-		#end
-
-		voxelao_pass ?
-			path.drawShader("shader_datas/deferred_light/deferred_light_voxel") :
-			path.drawShader("shader_datas/deferred_light/deferred_light");
-
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
-		#end
-
-		path.setTarget("tex");
-		path.drawSkydome("shader_datas/world_pass/world_pass");
-
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
-		#end
-
-		if (Config.raw.rp_bloom != false) {
-			RenderPathBase.commandsBloom();
-		}
-
-		if (Config.raw.rp_ssr != false) {
-			if (@:privateAccess path.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
-				{
-					var t = new RenderTargetRaw();
-					t.name = "bufb";
-					t.width = 0;
-					t.height = 0;
-					t.format = "RGBA64";
-					path.createRenderTarget(t);
-				}
-				path.loadShader("shader_datas/ssr_pass/ssr_pass");
-				path.loadShader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
-				path.loadShader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
-			}
-			var targeta = "bufb";
-			var targetb = "gbuffer1";
-
-			path.setTarget(targeta);
-			path.bindTarget("tex", "tex");
-			path.bindTarget("_main", "gbufferD");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.bindTarget("gbuffer1", "gbuffer1");
-			path.drawShader("shader_datas/ssr_pass/ssr_pass");
-
-			path.setTarget(targetb);
-			path.bindTarget(targeta, "tex");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.drawShader("shader_datas/ssr_blur_pass/ssr_blur_pass_x");
-
-			path.setTarget("tex");
-			path.bindTarget(targetb, "tex");
-			path.bindTarget("gbuffer0", "gbuffer0");
-			path.drawShader("shader_datas/ssr_blur_pass/ssr_blur_pass_y3_blend");
-		}
-
-		#if ((rp_motionblur == "Camera") || (rp_motionblur == "Object"))
-		{
-			if (Config.raw.rp_motionblur != false) {
-				path.setTarget("buf");
-				path.bindTarget("tex", "tex");
-				path.bindTarget("gbuffer0", "gbuffer0");
-				#if (rp_motionblur == "Camera")
-				{
-					path.bindTarget("_main", "gbufferD");
-					path.drawShader("shader_datas/motion_blur_pass/motion_blur_pass");
-				}
-				#else
-				{
-					path.bindTarget("gbuffer2", "sveloc");
-					path.drawShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
-				}
-				#end
-				path.setTarget("tex");
-				path.bindTarget("buf", "tex");
-				path.drawShader("shader_datas/copy_pass/copy_pass");
-			}
-		}
-		#end
-
-		// Begin compositor
-		#if rp_autoexposure
-		{
-			{
-				var t = new RenderTargetRaw();
-				t.name = "histogram";
-				t.width = 1;
-				t.height = 1;
-				t.format = "RGBA64";
-				path.createRenderTarget(t);
-				path.loadShader("shader_datas/histogram_pass/histogram_pass");
-			}
-
-			path.setTarget("histogram");
-			path.bindTarget("taa", "tex");
-			path.drawShader("shader_datas/histogram_pass/histogram_pass");
-		}
-		#end
+		RenderPathBase.drawDeferredLight();
+		RenderPathBase.drawBloom();
+		RenderPathBase.drawSSR();
+		// RenderPathBase.drawMotionBlur();
+		// RenderPathBase.drawHistogram();
 
 		path.setTarget("buf");
 		path.bindTarget("tex", "tex");
-		#if rp_autoexposure
-		{
-			path.bindTarget("histogram", "histogram");
-		}
-		#end
+		// path.bindTarget("histogram", "histogram");
 		path.drawShader("shader_datas/compositor_pass/compositor_pass");
-		// End compositor
 
 		path.setTarget("buf");
-		var currentG = path.currentG;
+		RenderPathBase.drawCompass(path.currentG);
 		path.drawMeshes("overlay");
-		RenderPathBase.drawCompass(currentG);
 
-		var current = taaFrame % 2 == 0 ? "bufa" : "taa2";
-		var last = taaFrame % 2 == 0 ? "taa2" : "bufa";
-
-		path.setTarget(current);
-		path.clearTarget(0x00000000);
-		path.bindTarget("buf", "colorTex");
-		path.drawShader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-
-		path.setTarget("taa");
-		path.clearTarget(0x00000000);
-		path.bindTarget(current, "edgesTex");
-		path.drawShader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-
-		path.setTarget(current);
-		path.bindTarget("buf", "colorTex");
-		path.bindTarget("taa", "blendTex");
-		path.bindTarget("gbuffer2", "sveloc");
-		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
-
-		var skipTaa = Context.splitView;
-		if (skipTaa) {
-			path.setTarget("taa");
-			path.bindTarget(current, "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-		else {
-			path.setTarget("taa");
-			path.bindTarget(current, "tex");
-			path.bindTarget(last, "tex2");
-			path.bindTarget("gbuffer2", "sveloc");
-			path.drawShader("shader_datas/taa_pass/taa_pass");
-		}
-
-		if (RenderPathBase.ssaa4()) {
-			path.setTarget("");
-			path.bindTarget(taaFrame % 2 == 0 ? "taa2" : "taa", "tex");
-			path.drawShader("shader_datas/supersample_resolve/supersample_resolve");
-		}
-		else {
-			path.setTarget("");
-			path.bindTarget(taaFrame == 0 ? current : "taa", "tex");
-			path.drawShader("shader_datas/copy_pass/copy_pass");
-		}
-	}
-
-	public static function drawGbuffer() {
-		path.setTarget("gbuffer0"); // Only clear gbuffer0
-		#if kha_metal
-		path.clearTarget(0x00000000, 1.0);
-		#else
-		path.clearTarget(null, 1.0);
-		#end
-		if (MakeMesh.layerPassCount == 1) {
-			path.setTarget("gbuffer2");
-			path.clearTarget(0xff000000);
-		}
-		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		var currentG = path.currentG;
-		RenderPathPaint.bindLayers();
-		path.drawMeshes("mesh");
-		RenderPathPaint.unbindLayers();
-		if (MakeMesh.layerPassCount > 1) {
-			makeGbufferCopyTextures();
-			for (i in 1...MakeMesh.layerPassCount) {
-				var ping = i % 2 == 1 ? "_copy" : "";
-				var pong = i % 2 == 1 ? "" : "_copy";
-				if (i == MakeMesh.layerPassCount - 1) {
-					path.setTarget("gbuffer2" + ping);
-					path.clearTarget(0xff000000);
-				}
-				path.setTarget("gbuffer0" + ping, ["gbuffer1" + ping, "gbuffer2" + ping]);
-				path.bindTarget("gbuffer0" + pong, "gbuffer0");
-				path.bindTarget("gbuffer1" + pong, "gbuffer1");
-				path.bindTarget("gbuffer2" + pong, "gbuffer2");
-				RenderPathPaint.bindLayers();
-				path.drawMeshes("mesh" + i);
-				RenderPathPaint.unbindLayers();
-			}
-			if (MakeMesh.layerPassCount % 2 == 0) {
-				copyToGbuffer();
-			}
-		}
-		LineDraw.render(currentG);
-	}
-
-	public static function makeGbufferCopyTextures() {
-		var copy = path.renderTargets.get("gbuffer0_copy");
-		if (copy == null || copy.image.width != path.renderTargets.get("gbuffer0").image.width || copy.image.height != path.renderTargets.get("gbuffer0").image.height) {
-			{
-				var t = new RenderTargetRaw();
-				t.name = "gbuffer0_copy";
-				t.width = 0;
-				t.height = 0;
-				t.format = "RGBA64";
-				t.scale = RenderPathBase.getSuperSampling();
-				t.depth_buffer = "main";
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "gbuffer1_copy";
-				t.width = 0;
-				t.height = 0;
-				t.format = "RGBA64";
-				t.scale = RenderPathBase.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-			{
-				var t = new RenderTargetRaw();
-				t.name = "gbuffer2_copy";
-				t.width = 0;
-				t.height = 0;
-				t.format = "RGBA64";
-				t.scale = RenderPathBase.getSuperSampling();
-				path.createRenderTarget(t);
-			}
-
-			#if kha_metal
-			// TODO: Fix depth attach for gbuffer0_copy on metal
-			// Use resize to re-create buffers from scratch for now
-			path.resize();
-			#end
-		}
-	}
-
-	public static function copyToGbuffer() {
-		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
-		path.bindTarget("gbuffer0_copy", "tex0");
-		path.bindTarget("gbuffer1_copy", "tex1");
-		path.bindTarget("gbuffer2_copy", "tex2");
-		path.drawShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+		RenderPathBase.drawTAA();
 	}
 }

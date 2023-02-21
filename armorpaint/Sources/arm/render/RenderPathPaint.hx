@@ -5,6 +5,7 @@ import iron.math.Vec4;
 import iron.object.MeshObject;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
+import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.Viewport;
@@ -35,6 +36,8 @@ class RenderPathPaint {
 	static var _texpaint_undo: RenderTarget;
 	static var _texpaint_nor_undo: RenderTarget;
 	static var _texpaint_pack_undo: RenderTarget;
+	static var lastX = -1.0;
+	static var lastY = -1.0;
 
 	public static function init(_path: RenderPath) {
 		path = _path;
@@ -389,7 +392,6 @@ class RenderPathPaint {
 	}
 
 	static function commandsLiveBrush() {
-
 		var tool = Context.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
@@ -456,6 +458,7 @@ class RenderPathPaint {
 	}
 
 	public static function commandsCursor() {
+		if (!Config.raw.brush_3d) return;
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 		var tool = Context.tool;
@@ -482,19 +485,6 @@ class RenderPathPaint {
 		}
 		var radius = decalMask ? Context.brushDecalMaskRadius : Context.brushRadius;
 		drawCursor(mx, my, Context.brushNodesRadius * radius / 3.4);
-
-		// if (Context.brushLazyRadius > 0 && (Context.tool == ToolBrush || Context.tool == ToolEraser)) {
-		// 	var _brushRadius = Context.brushRadius;
-		// 	Context.brushRadius = Context.brushLazyRadius;
-		// 	mx = Context.brushLazyX;
-		// 	my = 1.0 - Context.brushLazyY;
-		// 	if (Context.brushLocked) {
-		// 		mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
-		// 		my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
-		// 	}
-		// 	drawCursor(mx, my, 0.2, 0.2, 0.2);
-		// 	Context.brushRadius -= Context.brushLazyRadius;
-		// }
 	}
 
 	@:access(iron.RenderPath)
@@ -588,7 +578,31 @@ class RenderPathPaint {
 		return !fillLayer && !groupLayer && !Context.foregroundEvent;
 	}
 
+	public static function liveBrushDirty() {
+		var mouse = Input.getMouse();
+		var mx = lastX;
+		var my = lastY;
+		lastX = mouse.viewX;
+		lastY = mouse.viewY;
+		if (Config.raw.brush_live && Context.pdirty <= 0) {
+			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
+							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
+			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
+						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
+			var moved = (mx != lastX || my != lastY) && (inViewport || in2dView);
+			if (moved || Context.brushLocked) {
+				Context.rdirty = 2;
+			}
+		}
+	}
+
 	public static function begin() {
+		if (!dilated) {
+			dilate(Config.raw.dilate == DilateDelayed, true);
+			dilated = true;
+		}
+
 		if (!paintEnabled()) return;
 
 		pushUndoLast = History.pushUndo;
@@ -609,7 +623,7 @@ class RenderPathPaint {
 	}
 
 	public static function end() {
-		if (Config.raw.brush_3d) commandsCursor();
+		commandsCursor();
 		Context.ddirty--;
 		Context.rdirty--;
 
@@ -729,7 +743,6 @@ class RenderPathPaint {
 
 	public static function setPlaneMesh() {
 		Context.paint2dView = true;
-		// Set plane mesh
 		painto = Context.paintObject;
 		visibles = [];
 		for (p in Project.paintObjects) {
@@ -804,7 +817,6 @@ class RenderPathPaint {
 
 	public static function restorePlaneMesh() {
 		Context.paint2dView = false;
-		// Restore paint mesh
 		planeo.visible = false;
 		planeo.transform.loc.set(0.0, 0.0, 0.0);
 		for (i in 0...Project.paintObjects.length) {
@@ -820,7 +832,7 @@ class RenderPathPaint {
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
-		RenderPathDeferred.drawGbuffer();
+		RenderPathBase.drawGbuffer();
 	}
 
 	public static function bindLayers() {

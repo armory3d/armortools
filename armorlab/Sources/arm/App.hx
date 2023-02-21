@@ -602,4 +602,8 @@ class App {
 		raw.touch_ui = false;
 		#end
 	}
+
+	public static function isDecalLayer(): Bool {
+		return false;
+	}
 }

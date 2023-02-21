@@ -80,7 +80,7 @@ class RenderPathForwardVR {
 		}
 		{
 			var t = new RenderTargetRaw();
-			t.name = "bufa_eye";
+			t.name = "buf2_eye";
 			t.width = 1440;
 			t.height = 1600;
 			t.format = "RGBA32";
@@ -111,8 +111,8 @@ class RenderPathForwardVR {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (Krom.vrGetSensorStateHmdMounted()) {
-			var current = RenderPathDeferred.taaFrame % 2 == 0 ? "bufa" : "taa2";
-			var output = RenderPathDeferred.taaFrame % 2 == 0 ? current : "taa";
+			var current = RenderPathBase.taaFrame % 2 == 0 ? "buf2" : "taa2";
+			var output = RenderPathBase.taaFrame % 2 == 0 ? current : "taa";
 
 			m.setFrom(Scene.active.camera.transform.world);
 
@@ -158,8 +158,8 @@ class RenderPathForwardVR {
 				Scene.active.camera.P._33 = proj._33;
 				Scene.active.camera.VP.multmats(Scene.active.camera.P, Scene.active.camera.V);
 				Scene.active.camera.transform.world.getInverse(Scene.active.camera.V);
-				// RenderPathDeferred.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
-				// RenderPathForward.drawForward(true, "eye" + eye, "gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye", "buf_eye", "bufa_eye", "taa_eye", "taa2_eye");
+				// RenderPathBase.drawGbuffer("gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye");
+				// RenderPathForward.drawForward(true, "eye" + eye, "gbuffer0_eye", "gbuffer1_eye", "gbuffer2_eye", "buf_eye", "buf2_eye", "taa_eye", "taa2_eye");
 			}
 
 			Scene.active.camera.transform.world.setFrom(m);
@@ -179,11 +179,11 @@ class RenderPathForwardVR {
 		Scene.active.camera.buildMatrix();
 
 		RenderPathPaint.begin();
-		RenderPathDeferred.drawGbuffer();
+		RenderPathBase.drawGbuffer();
 		RenderPathForward.drawForward();
 		RenderPathPaint.draw();
 		RenderPathPaint.end();
-		RenderPathDeferred.taaFrame++;
+		RenderPathBase.taaFrame++;
 	}
 }
 

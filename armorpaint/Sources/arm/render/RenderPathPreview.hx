@@ -28,9 +28,9 @@ class RenderPathPreview {
 			path.createRenderTarget(t);
 		}
 
-		{
-			path.createDepthBuffer("mmain", "DEPTH24");
+		path.createDepthBuffer("mmain", "DEPTH24");
 
+		{
 			var t = new RenderTargetRaw();
 			t.name = "mtex";
 			t.width = Std.int(RenderUtil.materialPreviewSize * 2.0);
@@ -73,13 +73,6 @@ class RenderPathPreview {
 			t.scale = RenderPathBase.getSuperSampling();
 			path.createRenderTarget(t);
 		}
-
-		//
-		// path.loadShader("shader_datas/deferred_light/deferred_light");
-		// path.loadShader("shader_datas/world_pass/world_pass");
-		// path.loadShader("shader_datas/compositor_pass/compositor_pass");
-		// path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
-		//
 	}
 
 	public static function commandsPreview() {
@@ -97,9 +90,7 @@ class RenderPathPreview {
 		path.setTarget("mgbuffer0", ["mgbuffer1", "mgbuffer2"]);
 		path.drawMeshes("mesh");
 
-		// ---
 		// Deferred light
-		// ---
 		path.setTarget("mtex");
 		path.bindTarget("_mmain", "gbufferD");
 		path.bindTarget("mgbuffer0", "gbuffer0");
@@ -149,9 +140,7 @@ class RenderPathPreview {
 		path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 		path.drawMeshes("mesh");
 
-		// ---
 		// Deferred light
-		// ---
 		path.setTarget("tex");
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");

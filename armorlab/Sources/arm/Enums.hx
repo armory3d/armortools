@@ -5,6 +5,9 @@ package arm;
 	var ToolClone = 1;
 	var ToolBlur = 2;
 	var ToolPicker = 3;
+
+	var ToolDecal = 4; // Unused
+	var ToolText = 5;
 }
 
 @:enum abstract SpaceType(Int) from Int to Int {

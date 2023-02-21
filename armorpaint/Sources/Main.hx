@@ -13,9 +13,6 @@ import arm.sys.BuildMacros;
 import arm.Config;
 import arm.Context;
 import arm.Res;
-#if arm_vr
-import arm.render.RenderPathForwardVR;
-#end
 
 class Main {
 
@@ -130,12 +127,6 @@ class Main {
 					var path = new RenderPath();
 					RenderPathBase.init(path);
 
-					#if arm_vr
-					RenderPathDeferred.init(path); // Allocate gbuffer
-					RenderPathForward.init(path);
-					RenderPathForwardVR.init(path);
-					path.commands = RenderPathForwardVR.commands;
-					#else
 					if (Context.renderMode == RenderForward) {
 						RenderPathDeferred.init(path); // Allocate gbuffer
 						RenderPathForward.init(path);
@@ -145,7 +136,6 @@ class Main {
 						RenderPathDeferred.init(path);
 						path.commands = RenderPathDeferred.commands;
 					}
-					#end
 
 					RenderPath.setActive(path);
 					new arm.App();

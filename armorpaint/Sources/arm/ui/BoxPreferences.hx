@@ -374,10 +374,7 @@ class BoxPreferences {
 			Context.hsupersample = Id.handle({ position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
 			Context.hvxao = Id.handle({ selected: Config.raw.rp_gi });
 			if (ui.tab(htab, tr("Viewport"), true)) {
-				#if (!arm_vr)
-
 				#if (kha_direct3d12 || kha_vulkan)
-
 				var hpathtracemode = Id.handle({ position: Context.pathTraceMode });
 				Context.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
 				if (hpathtracemode.changed) {
@@ -391,9 +388,6 @@ class BoxPreferences {
 				if (hrendermode.changed) {
 					Context.setRenderPath();
 				}
-
-				#end
-
 				#end
 
 				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);

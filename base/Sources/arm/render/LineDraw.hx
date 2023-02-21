@@ -39,16 +39,10 @@ class LineDraw {
 
 	static var g: kha.graphics4.Graphics;
 
-	public static function render(g4: kha.graphics4.Graphics) {
-
-		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || iron.system.Input.getKeyboard().down("control");
-		var isDecal = App.isDecalLayer();
-		if (!isDecal || hide) return;
-
-		mat = Context.layer.decalMat;
-		dim = Context.layer.decalMat.getScale();
-
+	public static function render(g4: kha.graphics4.Graphics, matrix: iron.math.Mat4) {
 		g = g4;
+		mat = matrix;
+		dim = matrix.getScale();
 
 		if (pipeline == null) {
 			var structure = new VertexStructure();
@@ -143,7 +137,6 @@ class LineDraw {
 	static var corner4 = new Vec4();
 	static var cameraLook = new Vec4();
 	public static function line(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float) {
-
 		if (lines >= maxLines) {
 			end();
 			begin();

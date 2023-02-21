@@ -6,6 +6,7 @@
 	"rotate_light": "shift+middle",
 	"rotate_envmap": "ctrl+middle",
 	"set_clone_source": "alt",
+	"stencil_hide": "z",
 	"brush_radius": "f",
 	"brush_radius_decrease": "[",
 	"brush_radius_increase": "]",
