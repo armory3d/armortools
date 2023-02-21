@@ -18,12 +18,11 @@ project.addLibrary("../../Libraries/iron");
 project.addLibrary("../../Libraries/zui");
 project.addLibrary("../../base");
 project.addShaders("../armorcore/Shaders/*.glsl", { embed: snapshot });
-project.addShaders("../base/Shaders/common/*.glsl", { embed: snapshot });
-project.addShaders("../base/Shaders/shared/*.glsl", { embed: snapshot });
-project.addAssets("../base/Assets/common/*", { destination: "data/{name}", embed: snapshot });
+project.addShaders("../base/Shaders/*.glsl", { embed: snapshot });
+project.addAssets("../base/Assets/*", { destination: "data/{name}", embed: snapshot });
 if (!snapshot) {
 	project.addDefine("arm_noembed");
-	project.addAssets("../base/Assets/common/extra/*", { destination: "data/{name}" });
+	project.addAssets("../base/Assets/extra/*", { destination: "data/{name}" });
 }
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });

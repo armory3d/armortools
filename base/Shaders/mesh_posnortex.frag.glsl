@@ -1,6 +1,6 @@
 #version 450
 
-#include "../std/gbuffer.glsl"
+#include "std/gbuffer.glsl"
 
 in vec2 texCoord;
 in vec3 wnormal;

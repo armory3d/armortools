@@ -2,11 +2,11 @@
 #ifndef _DEFERRED_LIGHT_GLSL_
 #define _DEFERRED_LIGHT_GLSL_
 
-#include "../std/gbuffer.glsl"
-#include "../std/light.glsl"
-#include "../std/shirr.glsl"
+#include "std/gbuffer.glsl"
+#include "std/light.glsl"
+#include "std/shirr.glsl"
 #ifdef _Voxel
-#include "../std/conetrace.glsl"
+#include "std/conetrace.glsl"
 #endif
 
 uniform sampler2D gbufferD;

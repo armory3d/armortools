@@ -1,6 +1,6 @@
 #version 450
 
-#include "../std/math.glsl"
+#include "std/math.glsl"
 
 uniform sampler2D envmap;
 uniform vec4 envmapDataWorld; // angle, sin(angle), cos(angle), strength

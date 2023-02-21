@@ -1,6 +1,6 @@
 #version 450
 
-#include "../std/gbuffer.glsl"
+#include "std/gbuffer.glsl"
 
 uniform sampler2D tex;
 uniform sampler2D gbuffer0; // Roughness

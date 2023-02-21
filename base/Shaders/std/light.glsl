@@ -2,11 +2,11 @@
 #ifndef _LIGHT_GLSL_
 #define _LIGHT_GLSL_
 
-#include "../std/brdf.glsl"
-#include "../std/math.glsl"
-#include "../std/ltc.glsl"
+#include "std/brdf.glsl"
+#include "std/math.glsl"
+#include "std/ltc.glsl"
 #ifdef _Voxel
-#include "../std/conetrace.glsl"
+#include "std/conetrace.glsl"
 #endif
 
 uniform vec3 lightArea0;

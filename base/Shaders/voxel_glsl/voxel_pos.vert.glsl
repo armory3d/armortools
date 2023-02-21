@@ -1,6 +1,6 @@
 #version 450
 
-#include "../std/conetrace.glsl"
+#include "std/conetrace.glsl"
 
 uniform mat4 W;
 
