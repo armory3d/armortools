@@ -21,7 +21,6 @@ class BrushOutputNode extends LogicNode {
 		super(tree);
 
 		if (inst == null) {
-
 			{
 				var t = new RenderTargetRaw();
 				t.name = "texpaint";
@@ -72,7 +71,7 @@ class BrushOutputNode extends LogicNode {
 		inst = this;
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
-		inputs[from].get(done);
+	override function getAsImage(from: Int, done: kha.Image->Void) {
+		inputs[from].getAsImage(done);
 	}
 }

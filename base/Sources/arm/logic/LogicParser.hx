@@ -192,12 +192,12 @@ class LogicParser {
 			v = createClassInstance("VectorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
 		else if (inp.type == "RGBA") {
-			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
+			if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
 			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 		}
 		else if (inp.type == "RGB") {
-			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
-			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
+			if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
+			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 		}
 		else if (inp.type == "VALUE") {
 			v = createClassInstance("FloatNode", [tree, inp.default_value]);

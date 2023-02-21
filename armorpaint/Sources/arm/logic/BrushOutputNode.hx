@@ -85,7 +85,7 @@ class BrushOutputNode extends LogicNode {
 		Context.brushDirectional = Directional;
 	}
 
-	override function run(from: Int) {
+	function run(from: Int) {
 		var left = 0.0;
 		var right = 1.0;
 		if (Context.paint2d) {

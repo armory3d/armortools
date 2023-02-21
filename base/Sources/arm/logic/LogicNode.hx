@@ -18,16 +18,18 @@ class LogicNode {
 	}
 
 	public function get(from: Int, done: Dynamic->Void) {
-		done(this);
+		done(null);
 	}
 
-	public function set(value: Dynamic) {}
+	public function getAsImage(from: Int, done: kha.Image->Void) {
+		done(null);
+	}
 
-	public function getImage(): kha.Image {
+	public function getCachedImage(): kha.Image {
 		return null;
 	}
 
-	function run(from: Int) {}
+	public function set(value: Dynamic) {}
 }
 
 class LogicNodeInput {
@@ -41,6 +43,10 @@ class LogicNodeInput {
 
 	public function get(done: Dynamic->Void) {
 		node.get(from, done);
+	}
+
+	public function getAsImage(done: kha.Image->Void) {
+		node.getAsImage(from, done);
 	}
 
 	public function set(value: Dynamic) {

@@ -13,12 +13,12 @@ class TextToPhotoNode extends LogicNode {
 		super(tree);
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
+	override function getAsImage(from: Int, done: kha.Image->Void) {
 		stableDiffusion(prompt, function(img: kha.Image) { image = img; });
 		done(image);
 	}
 
-	override public function getImage(): kha.Image {
+	override public function getCachedImage(): kha.Image {
 		return image;
 	}
 

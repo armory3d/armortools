@@ -12,8 +12,8 @@ class UpscaleNode extends LogicNode {
 		super(tree);
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
-		inputs[0].get(function(img: kha.Image) {
+	override function getAsImage(from: Int, done: kha.Image->Void) {
+		inputs[0].getAsImage(function(img: kha.Image) {
 			image = img;
 
 			if (image.width < Config.getTextureResX()) {
@@ -29,7 +29,7 @@ class UpscaleNode extends LogicNode {
 		});
 	}
 
-	override public function getImage(): kha.Image {
+	override public function getCachedImage(): kha.Image {
 		return image;
 	}
 

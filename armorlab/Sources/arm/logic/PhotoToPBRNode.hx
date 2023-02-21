@@ -10,7 +10,7 @@ class PhotoToPBRNode extends LogicNode {
 	static var images: Array<kha.Image> = null;
 	static var modelNames = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-	public static var cachedSource: Dynamic = null;
+	public static var cachedSource: kha.Image = null;
 
 	public function new(tree: LogicTree) {
 		super(tree);
@@ -31,16 +31,14 @@ class PhotoToPBRNode extends LogicNode {
 		}
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
-		function getSource(done: Dynamic->Void) {
+	override function getAsImage(from: Int, done: kha.Image->Void) {
+		function getSource(done: kha.Image->Void) {
 			if (cachedSource != null) done(cachedSource);
-			else inputs[0].get(done);
+			else inputs[0].getAsImage(done);
 		}
 
 		getSource(function(source: kha.Image) {
 			cachedSource = source;
-
-			if (!Std.isOfType(source, kha.Image)) { done(null); return; }
 
 			var tilesX = Std.int(Config.getTextureResX() / 2048);
 			var tilesY = Std.int(Config.getTextureResY() / 2048);

@@ -29,10 +29,10 @@ class VarianceNode extends LogicNode {
 		node.buttons[0].height = prompt.split("\n").length;
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
+	override function getAsImage(from: Int, done: kha.Image->Void) {
 		var strength = untyped inst.inputs[1].node.value;
 
-		inst.inputs[0].get(function(source: kha.Image) {
+		inst.inputs[0].getAsImage(function(source: kha.Image) {
 			temp.g2.begin(false);
 			temp.g2.drawScaledImage(source, 0, 0, 512, 512);
 			temp.g2.end();
@@ -75,7 +75,7 @@ class VarianceNode extends LogicNode {
 		});
 	}
 
-	override public function getImage(): kha.Image {
+	override public function getCachedImage(): kha.Image {
 		return image;
 	}
 }

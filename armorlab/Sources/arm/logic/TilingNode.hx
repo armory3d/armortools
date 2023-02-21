@@ -5,8 +5,8 @@ import arm.logic.LogicNode;
 @:keep
 class TilingNode extends LogicNode {
 
-	static var image: kha.Image = null;
 	var result: kha.Image = null;
+	static var image: kha.Image = null;
 	static var prompt = "";
 	static var strength = 0.5;
 	static var auto = true;
@@ -33,10 +33,8 @@ class TilingNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
-		inputs[0].get(function(source: Dynamic) {
-			if (!Std.isOfType(source, kha.Image)) { done(null); return; }
-
+	override function getAsImage(from: Int, done: kha.Image->Void) {
+		inputs[0].getAsImage(function(source: kha.Image) {
 			image.g2.begin(false);
 			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 			image.g2.end();
@@ -46,7 +44,7 @@ class TilingNode extends LogicNode {
 		});
 	}
 
-	override public function getImage(): kha.Image {
+	override public function getCachedImage(): kha.Image {
 		return result;
 	}
 

@@ -67,7 +67,7 @@ class InpaintNode extends LogicNode {
 		});
 	}
 
-	override public function getImage(): kha.Image {
+	override public function getCachedImage(): kha.Image {
 		App.notifyOnNextFrame(function() {
 			inputs[0].get(function(source: Dynamic) {
 				if (Layers.pipeCopy == null) Layers.makePipe();

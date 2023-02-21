@@ -268,7 +268,7 @@ class RenderPathPaint {
 			var node = UINodes.inst.getNodes().nodesSelected[0];
 			var brushNode = arm.logic.LogicParser.getLogicNode(node);
 			if (brushNode != null) {
-				image = brushNode.getImage();
+				image = brushNode.getCachedImage();
 			}
 		}
 		if (image != null) {

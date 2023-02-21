@@ -686,11 +686,11 @@ class UINodes {
 					arm.logic.LogicParser.parse(Project.canvas, false);
 
 					arm.logic.PhotoToPBRNode.cachedSource = null;
-					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelBaseColor, function(texbase) {
-					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelOcclusion, function(texocc) {
-					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelRoughness, function(texrough) {
-					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelNormalMap, function(texnor) {
-					@:privateAccess arm.logic.BrushOutputNode.inst.get(ChannelHeight, function(texheight) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelBaseColor, function(texbase: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelOcclusion, function(texocc: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelRoughness, function(texrough: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelNormalMap, function(texnor: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelHeight, function(texheight: kha.Image) {
 
 						if (texbase != null) {
 							var texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image;
