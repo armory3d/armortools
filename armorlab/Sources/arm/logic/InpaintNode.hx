@@ -1,6 +1,9 @@
 package arm.logic;
 
+import zui.Nodes;
 import arm.logic.LogicNode;
+import arm.logic.LogicParser.f32;
+import arm.Translator._tr;
 
 @:keep
 class InpaintNode extends LogicNode {
@@ -177,4 +180,46 @@ class InpaintNode extends LogicNode {
 
 		return result;
 	}
+
+	public static var def: TNode = {
+		id: 0,
+		name: _tr("Inpaint"),
+		type: "InpaintNode",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32([1.0, 1.0, 1.0, 1.0])
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32([0.0, 0.0, 0.0, 1.0])
+			}
+		],
+		buttons: [
+			{
+				name: _tr("auto"),
+				type: "BOOL",
+				default_value: true,
+				output: 0
+			},
+			{
+				name: "arm.logic.InpaintNode.buttons",
+				type: "CUSTOM",
+				height: 0
+			}
+		]
+	};
 }

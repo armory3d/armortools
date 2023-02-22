@@ -1,7 +1,9 @@
 package arm.logic;
 
 import iron.math.Vec4;
+import zui.Nodes;
 import arm.logic.LogicNode;
+import arm.Translator._tr;
 
 @:keep
 class InputNode extends LogicNode {
@@ -130,4 +132,42 @@ class InputNode extends LogicNode {
 			});
 		});
 	}
+
+	public static var def: TNode = {
+		id: 0,
+		name: _tr("Input"),
+		type: "InputNode",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Lazy Radius"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Lazy Step"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Position"),
+				type: "VECTOR",
+				color: 0xff63c763,
+				default_value: null
+			}
+		],
+		buttons: []
+	};
 }

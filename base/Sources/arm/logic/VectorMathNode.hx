@@ -1,7 +1,10 @@
 package arm.logic;
 
 import iron.math.Vec4;
+import zui.Nodes;
 import arm.logic.LogicNode;
+import arm.logic.LogicParser.f32;
+import arm.Translator._tr;
 
 @:keep
 class VectorMathNode extends LogicNode {
@@ -113,4 +116,58 @@ class VectorMathNode extends LogicNode {
 			});
 		});
 	}
+
+	public static var def: TNode = {
+		id: 0,
+		name: _tr("Vector Math"),
+		type: "VectorMathNode",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32([0.0, 0.0, 0.0])
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32([0.0, 0.0, 0.0])
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Vector"),
+				type: "VECTOR",
+				color: 0xff6363c7,
+				default_value: f32([0.0, 0.0, 0.0])
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("operation"),
+				type: "ENUM",
+				data: ["Add", "Subtract", "Multiply", "Divide", "Average", "Cross Product", "Project", "Reflect", "Dot Product", "Distance", "Length", "Scale", "Normalize", "Absolute", "Minimum", "Maximum", "Floor", "Ceil", "Fraction", "Modulo", "Snap", "Sine", "Cosine", "Tangent"],
+				default_value: 0,
+				output: 0
+			}
+		]
+	};
 }

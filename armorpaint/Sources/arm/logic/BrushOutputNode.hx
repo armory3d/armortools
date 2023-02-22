@@ -152,4 +152,80 @@ class BrushOutputNode extends LogicNode {
 			}
 		}
 	}
+
+	// public static var def: TNode = {
+	// 	id: 0,
+	// 	name: _tr("Brush Output"),
+	// 	type: "BrushOutputNode",
+	// 	x: 0,
+	// 	y: 0,
+	// 	color: 0xff4982a0,
+	// 	inputs: [
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Position"),
+	// 			type: "VECTOR",
+	// 			color: 0xff63c763,
+	// 			default_value: f32([0.0, 0.0, 0.0])
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Radius"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 1.0
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Scale"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 1.0
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Angle"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 0.0
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Opacity"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 1.0
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Hardness"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 1.0
+	// 		},
+	// 		{
+	// 			id: 0,
+	// 			node_id: 0,
+	// 			name: _tr("Stencil"),
+	// 			type: "VALUE",
+	// 			color: 0xffa1a1a1,
+	// 			default_value: 1.0
+	// 		}
+	// 	],
+	// 	outputs: [],
+	// 	buttons: [
+	// 		{
+	// 			name: _tr("Directional"),
+	// 			type: "BOOL",
+	// 			default_value: false,
+	// 			output: 0
+	// 		}
+	// 	]
+	// };
 }

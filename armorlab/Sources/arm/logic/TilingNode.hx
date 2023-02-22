@@ -1,6 +1,9 @@
 package arm.logic;
 
+import zui.Nodes;
 import arm.logic.LogicNode;
+import arm.logic.LogicParser.f32;
+import arm.Translator._tr;
 
 @:keep
 class TilingNode extends LogicNode {
@@ -83,4 +86,46 @@ class TilingNode extends LogicNode {
 		if (seed >= 0) RandomNode.setSeed(seed);
 		return InpaintNode.sdInpaint(tile, mask);
 	}
+
+	public static var def: TNode = {
+		id: 0,
+		name: _tr("Tiling"),
+		type: "TilingNode",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32([0.0, 0.0, 0.0, 1.0])
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32([0.0, 0.0, 0.0, 1.0])
+			}
+		],
+		buttons: [
+			{
+				name: _tr("auto"),
+				type: "BOOL",
+				default_value: true,
+				output: 0
+			},
+			{
+				name: "arm.logic.TilingNode.buttons",
+				type: "CUSTOM",
+				height: 0
+			}
+		]
+	};
 }

@@ -1,6 +1,8 @@
 package arm.logic;
 
+import zui.Nodes;
 import arm.logic.LogicNode;
+import arm.Translator._tr;
 
 @:keep
 class MathNode extends LogicNode {
@@ -95,4 +97,56 @@ class MathNode extends LogicNode {
 			});
 		});
 	}
+
+	public static var def: TNode = {
+		id: 0,
+		name: _tr("Math"),
+		type: "MathNode",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.5
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.5
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Value"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: 0.0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("operation"),
+				type: "ENUM",
+				data: ["Add", "Subtract", "Multiply", "Divide", "Power", "Logarithm", "Square Root", "Inverse Square Root", "Absolute", "Exponent", "Minimum", "Maximum", "Less Than", "Greater Than", "Sign", "Round", "Floor", "Ceil", "Truncate", "Fraction", "Modulo", "Snap", "Ping-Pong", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine", "Arctangent", "Arctan2", "Hyperbolic Sine", "Hyperbolic Cosine", "Hyperbolic Tangent", "To Radians", "To Degrees"],
+				default_value: 0,
+				output: 0
+			},
+			{
+				name: _tr("use_clamp"),
+				type: "BOOL",
+				default_value: false,
+				output: 0
+			}
+		]
+	};
 }
