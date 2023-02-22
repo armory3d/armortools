@@ -84,12 +84,9 @@ class App {
 		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);
-			dropPaths = dropPath.split("file://");
-			for (i in 0...dropPaths.length) dropPaths[i] = dropPaths[i].rtrim();
-			#else
+			#end
 			dropPath = dropPath.rtrim();
 			dropPaths.push(dropPath);
-			#end
 		});
 
 		System.notifyOnApplicationState(
