@@ -252,9 +252,6 @@ class UISidebar {
 			}
 		}
 
-		var right = iron.App.w();
-		if (UIView2D.inst.show) right += UIView2D.inst.ww;
-
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
@@ -271,9 +268,7 @@ class UISidebar {
 		}
 
 		// Viewport shortcuts
-		var inViewport = mouse.viewX > 0 && mouse.viewX < right &&
-						 mouse.viewY > 0 && mouse.viewY < iron.App.h();
-		if (inViewport && !isTyping) {
+		if (Context.inPaintArea() && !isTyping) {
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				if (!mouse.down("right")) { // Fly mode off
 					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
@@ -475,7 +470,7 @@ class UISidebar {
 		}
 
 		#if arm_physics
-		if (Context.tool == ToolParticle && Context.particlePhysics && inViewport && !Context.paint2d) {
+		if (Context.tool == ToolParticle && Context.particlePhysics && Context.inPaintArea() && !Context.paint2d) {
 			arm.util.ParticleUtil.initParticlePhysics();
 			var world = arm.plugin.PhysicsWorld.active;
 			world.lateUpdate();
@@ -901,17 +896,11 @@ class UISidebar {
 				g.color = 0xffffffff;
 			}
 
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
-						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
-						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			var inNodes = UINodes.inst.show &&
-						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
-						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
 			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 
-			if (!Config.raw.brush_3d || in2dView || decal) {
+			if (!Config.raw.brush_3d || Context.in2dView() || decal) {
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
-				if (decal && !inNodes) {
+				if (decal && !Context.inNodes()) {
 					var decalAlpha = 0.5;
 					if (!decalMask) {
 						Context.decalX = Context.paintVec.x;
@@ -952,11 +941,11 @@ class UISidebar {
 					Context.tool == ToolBlur   ||
 					Context.tool == ToolParticle ||
 					(decalMask && !Config.raw.brush_3d) ||
-					(decalMask && in2dView)) {
+					(decalMask && Context.in2dView())) {
 					if (decalMask) {
 						psize = Std.int(cursorImg.width * (Context.brushDecalMaskRadius * Context.brushNodesRadius) * ui.SCALE());
 					}
-					if (Config.raw.brush_3d && in2dView) {
+					if (Config.raw.brush_3d && Context.in2dView()) {
 						psize = Std.int(psize * UIView2D.inst.panScale);
 					}
 					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);

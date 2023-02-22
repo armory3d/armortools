@@ -197,11 +197,8 @@ class TabLayers {
 
 		// Highlight drag destination
 		var mouse = Input.getMouse();
-		var mx = mouse.x;
-		var my = mouse.y;
-		var inLayers = mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
-		if (App.isDragging && App.dragLayer != null && inLayers) {
-			if (my > ui._y + step && my < ui._y + step * 3) {
+		if (App.isDragging && App.dragLayer != null && Context.inLayers()) {
+			if (mouse.y > ui._y + step && mouse.y < ui._y + step * 3) {
 				var down = Project.layers.indexOf(App.dragLayer) >= i;
 				Context.dragDestination = down ? i : i - 1;
 
@@ -215,7 +212,7 @@ class TabLayers {
 					}
 				}
 			}
-			else if (i == Project.layers.length - 1 && my < ui._y + step) {
+			else if (i == Project.layers.length - 1 && mouse.y < ui._y + step) {
 				Context.dragDestination = Project.layers.length - 1;
 				if (Context.layer.canMove(Context.dragDestination)) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);

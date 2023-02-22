@@ -90,10 +90,6 @@ class App {
 			dropPath = dropPath.rtrim();
 			dropPaths.push(dropPath);
 			#end
-			// #if krom_ios
-			// Import immediately while access to resource is unlocked
-			// handleDropPaths();
-			// #end
 		});
 
 		System.notifyOnApplicationState(
@@ -395,32 +391,14 @@ class App {
 			isDragging = true;
 		}
 		if (mouse.released() && hasDrag) {
-			var mx = mouse.x;
-			var my = mouse.y;
-			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
-							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
-			var inLayers = UISidebar.inst.htab0.position == 0 &&
-						   mx > UISidebar.inst.tabx && my < Config.raw.layout[LayoutSidebarH0];
-			var inMaterials = UISidebar.inst.htab1.position == 0 &&
-						   mx > UISidebar.inst.tabx && my > Config.raw.layout[LayoutSidebarH0] && my < Config.raw.layout[LayoutSidebarH1] + Config.raw.layout[LayoutSidebarH0];
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
-						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
-						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			var inNodes = UINodes.inst.show &&
-						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
-						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
-			var inSwatches = UIStatus.inst.statustab.position == 4 &&
-						  mx > iron.App.x() && mx < iron.App.x() + System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] &&
-						  my > System.windowHeight() - Config.raw.layout[LayoutStatusH];
-
 			if (dragAsset != null) {
-				if (inNodes) { // Create image texture
+				if (Context.inNodes()) { // Create image texture
 					UINodes.inst.acceptAssetDrag(Project.assets.indexOf(dragAsset));
 				}
-				else if (inLayers || in2dView) { // Create mask
+				else if (Context.inLayers() || Context.in2dView()) { // Create mask
 					Layers.createImageMask(dragAsset);
 				}
-				else if (inViewport) {
+				else if (Context.inViewport()) {
 					if (dragAsset.file.toLowerCase().endsWith(".hdr")) {
 						var image = Project.getImage(dragAsset);
 						arm.io.ImportEnvmap.run(dragAsset.file, image);
@@ -429,42 +407,38 @@ class App {
 				dragAsset = null;
 			}
 			else if (dragSwatch != null) {
-				if (inNodes) { // Create RGB node
+				if (Context.inNodes()) { // Create RGB node
 					UINodes.inst.acceptSwatchDrag(dragSwatch);
 				}
-				else if (inMaterials) {
+				else if (Context.inMaterials()) {
 					TabMaterials.acceptSwatchDrag(dragSwatch);
 				}
-				else if (inLayers || inViewport) {
+				else if (Context.inLayers() || Context.inViewport()) {
 					var color = dragSwatch.base;
 					color.A = dragSwatch.opacity;
 
 					Layers.createColorLayer(color.value, dragSwatch.occlusion, dragSwatch.roughness, dragSwatch.metallic);
 				}
-				else if (inSwatches) {
+				else if (Context.inSwatches()) {
 					TabSwatches.acceptSwatchDrag(dragSwatch);
 				}
 				dragSwatch = null;
 			}
 			else if (dragMaterial != null) {
-				materialDropped(inViewport, inLayers, inNodes);
+				materialDropped();
 			}
 			else if (dragLayer != null) {
-				if (inNodes) {
+				if (Context.inNodes()) {
 					UINodes.inst.acceptLayerDrag(Project.layers.indexOf(dragLayer));
 				}
-				else if (inLayers && isDragging) {
+				else if (Context.inLayers() && isDragging) {
 					dragLayer.move(Context.dragDestination);
 					MakeMaterial.parseMeshMaterial();
 				}
 				dragLayer = null;
 			}
 			else if (dragFile != null) {
-				var statush = Config.raw.layout[LayoutStatusH];
-				var inBrowser =
-					mx > iron.App.x() && mx < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW]) &&
-					my > System.windowHeight() - statush;
-				if (!inBrowser) {
+				if (!Context.inBrowser()) {
 					dropX = mouse.x;
 					dropY = mouse.y;
 					var materialCount = Project.materials.length;
@@ -472,7 +446,7 @@ class App {
 						// Asset was material
 						if (Project.materials.length > materialCount) {
 							dragMaterial = Context.material;
-							materialDropped(inViewport, inLayers, inNodes);
+							materialDropped();
 						}
 					});
 				}
@@ -505,14 +479,14 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
 	}
 
-	static function materialDropped(inViewport: Bool, inLayers: Bool, inNodes: Bool) {
+	static function materialDropped() {
 		// Material drag and dropped onto viewport or layers tab
-		if (inViewport || inLayers) {
+		if (Context.inViewport() || Context.inLayers()) {
 			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
 			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
 			Layers.createFillLayer(uvType, decalMat);
 		}
-		else if (inNodes) {
+		else if (Context.inNodes()) {
 			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
 		}
 		dragMaterial = null;

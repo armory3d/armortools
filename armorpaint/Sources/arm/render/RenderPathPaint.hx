@@ -8,20 +8,20 @@ import iron.data.MeshData;
 import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
-import arm.Viewport;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.shader.MakeMaterial;
+import arm.Viewport;
 import arm.Enums;
 
 class RenderPathPaint {
 
-	public static var dilated = true;
 	public static var liveLayer: arm.data.LayerSlot = null;
 	public static var liveLayerDrawn = 0;
 	public static var liveLayerLocked = false;
 	static var path: RenderPath;
+	static var dilated = true;
 	static var initVoxels = true; // Bake AO
 	static var pushUndoLast: Bool;
 	static var painto: MeshObject = null;
@@ -120,7 +120,6 @@ class RenderPathPaint {
 		path.loadShader("shader_datas/dilate_pass/dilate_pass");
 	}
 
-	@:access(iron.RenderPath)
 	public static function commandsPaint(dilation = true) {
 		var tid = Context.layer.id;
 
@@ -181,18 +180,7 @@ class RenderPathPaint {
 					Context.uvyPicked = b.getFloat(12);
 				}
 				else {
-					#if kha_metal
-					//path.setTarget("texpaint_picker");
-					//path.clearTarget(0xff000000);
-					//path.setTarget("texpaint_nor_picker");
-					//path.clearTarget(0xff000000);
-					//path.setTarget("texpaint_pack_picker");
-					//path.clearTarget(0xff000000);
 					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
-					#else
-					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
-					//path.clearTarget(0xff000000);
-					#end
 					path.bindTarget("gbuffer2", "gbuffer2");
 					tid = Context.layer.id;
 					var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
@@ -220,34 +208,28 @@ class RenderPathPaint {
 
 					// Picked surface values
 					#if (kha_metal || kha_vulkan)
-					Context.pickedColor.base.Rb = a.get(2);
-					Context.pickedColor.base.Gb = a.get(1);
-					Context.pickedColor.base.Bb = a.get(0);
-					Context.pickedColor.normal.Rb = b.get(2);
-					Context.pickedColor.normal.Gb = b.get(1);
-					Context.pickedColor.normal.Bb = b.get(0);
-					Context.pickedColor.occlusion = c.get(2) / 255;
-					Context.pickedColor.roughness = c.get(1) / 255;
-					Context.pickedColor.metallic = c.get(0) / 255;
-					Context.pickedColor.height = c.get(3) / 255;
-					Context.pickedColor.opacity = a.get(3) / 255;
-					Context.uvxPicked = d.get(2) / 255;
-					Context.uvyPicked = d.get(1) / 255;
+					var i0 = 2;
+					var i1 = 1;
+					var i2 = 0;
 					#else
-					Context.pickedColor.base.Rb = a.get(0);
-					Context.pickedColor.base.Gb = a.get(1);
-					Context.pickedColor.base.Bb = a.get(2);
-					Context.pickedColor.normal.Rb = b.get(0);
-					Context.pickedColor.normal.Gb = b.get(1);
-					Context.pickedColor.normal.Bb = b.get(2);
-					Context.pickedColor.occlusion = c.get(0) / 255;
-					Context.pickedColor.roughness = c.get(1) / 255;
-					Context.pickedColor.metallic = c.get(2) / 255;
-					Context.pickedColor.height = c.get(3) / 255;
-					Context.pickedColor.opacity = a.get(3) / 255;
-					Context.uvxPicked = d.get(0) / 255;
-					Context.uvyPicked = d.get(1) / 255;
+					var i0 = 0;
+					var i1 = 1;
+					var i2 = 2;
 					#end
+					var i3 = 3;
+					Context.pickedColor.base.Rb = a.get(i0);
+					Context.pickedColor.base.Gb = a.get(i1);
+					Context.pickedColor.base.Bb = a.get(i2);
+					Context.pickedColor.normal.Rb = b.get(i0);
+					Context.pickedColor.normal.Gb = b.get(i1);
+					Context.pickedColor.normal.Bb = b.get(i2);
+					Context.pickedColor.occlusion = c.get(i0) / 255;
+					Context.pickedColor.roughness = c.get(i1) / 255;
+					Context.pickedColor.metallic = c.get(i2) / 255;
+					Context.pickedColor.height = c.get(i3) / 255;
+					Context.pickedColor.opacity = a.get(i3) / 255;
+					Context.uvxPicked = d.get(i0) / 255;
+					Context.uvyPicked = d.get(i1) / 255;
 					// Pick material
 					if (Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
@@ -267,13 +249,10 @@ class RenderPathPaint {
 				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
-						// Init voxel texture
-						var rp_gi = Config.raw.rp_gi;
+						var _rp_gi = Config.raw.rp_gi;
 						Config.raw.rp_gi = true;
-						#if rp_voxels
 						RenderPathBase.initVoxels();
-						#end
-						Config.raw.rp_gi = rp_gi;
+						Config.raw.rp_gi = _rp_gi;
 					}
 					path.clearImage("voxels", 0x00000000);
 					path.setTarget("");
@@ -585,12 +564,7 @@ class RenderPathPaint {
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
 		if (Config.raw.brush_live && Context.pdirty <= 0) {
-			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
-							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
-			var in2dView = UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
-						   mx > UIView2D.inst.wx && mx < UIView2D.inst.wx + UIView2D.inst.ww &&
-						   my > UIView2D.inst.wy && my < UIView2D.inst.wy + UIView2D.inst.wh;
-			var moved = (mx != lastX || my != lastY) && (inViewport || in2dView);
+			var moved = (mx != lastX || my != lastY) && (Context.inViewport() || Context.in2dView());
 			if (moved || Context.brushLocked) {
 				Context.rdirty = 2;
 			}
@@ -642,7 +616,6 @@ class RenderPathPaint {
 		#end
 
 		if (History.undoLayers != null) {
-
 			commandsSymmetry();
 
 			if (Context.pdirty > 0) dilated = false;
@@ -720,8 +693,6 @@ class RenderPathPaint {
 				commandsPaint();
 			}
 		}
-
-		//
 
 		if (Context.brushBlendDirty) {
 			Context.brushBlendDirty = false;

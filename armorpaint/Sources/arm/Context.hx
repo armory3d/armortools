@@ -1,6 +1,7 @@
 package arm;
 
 import kha.Image;
+import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.RenderPath;
@@ -9,6 +10,7 @@ import iron.math.Mat4;
 import iron.object.Object;
 import iron.object.MeshObject;
 import iron.data.MaterialData;
+import iron.system.Input;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -488,5 +490,61 @@ class Context {
 
 	public static function objectMaskUsed(): Bool {
 		return layer.getObjectMask() > 0 && layer.getObjectMask() <= Project.paintObjects.length;
+	}
+
+	public static function inViewport(): Bool {
+		return Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
+			   Context.paintVec.y < 1 && Context.paintVec.y > 0;
+	}
+
+	public static function inPaintArea(): Bool {
+		var mouse = Input.getMouse();
+		var right = iron.App.w();
+		if (UIView2D.inst.show) right += UIView2D.inst.ww;
+		return mouse.viewX > 0 && mouse.viewX < right &&
+			   mouse.viewY > 0 && mouse.viewY < iron.App.h();
+	}
+
+	public static function inLayers(): Bool {
+		var mouse = Input.getMouse();
+		return UISidebar.inst.htab0.position == 0 &&
+			   mouse.x > UISidebar.inst.tabx && mouse.y < Config.raw.layout[LayoutSidebarH0];
+	}
+
+	public static function inMaterials(): Bool {
+		var mouse = Input.getMouse();
+		return UISidebar.inst.htab1.position == 0 &&
+			   mouse.x > UISidebar.inst.tabx &&
+			   mouse.y > Config.raw.layout[LayoutSidebarH0] &&
+			   mouse.y < Config.raw.layout[LayoutSidebarH1] + Config.raw.layout[LayoutSidebarH0];
+	}
+
+	public static function in2dView(): Bool {
+		var mouse = Input.getMouse();
+		return UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+			   mouse.x > UIView2D.inst.wx && mouse.x < UIView2D.inst.wx + UIView2D.inst.ww &&
+			   mouse.y > UIView2D.inst.wy && mouse.y < UIView2D.inst.wy + UIView2D.inst.wh;
+	}
+
+	public static function inNodes(): Bool {
+		var mouse = Input.getMouse();
+		return UINodes.inst.show &&
+			   mouse.x > UINodes.inst.wx && mouse.x < UINodes.inst.wx + UINodes.inst.ww &&
+			   mouse.y > UINodes.inst.wy && mouse.y < UINodes.inst.wy + UINodes.inst.wh;
+	}
+
+	public static function inSwatches(): Bool {
+		var mouse = Input.getMouse();
+		return UIStatus.inst.statustab.position == 4 &&
+			   mouse.x > iron.App.x() &&
+			   mouse.x < iron.App.x() + System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] &&
+			   mouse.y > System.windowHeight() - Config.raw.layout[LayoutStatusH];
+	}
+
+	public static function inBrowser(): Bool {
+		var mouse = Input.getMouse();
+		return mouse.x > iron.App.x() &&
+			   mouse.x < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW]) &&
+			   mouse.y > System.windowHeight() - Config.raw.layout[LayoutStatusH];
 	}
 }
