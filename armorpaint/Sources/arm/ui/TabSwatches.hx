@@ -76,9 +76,8 @@ class TabSwatches {
 			ui.endSticky();
 			ui.separator(3, false);
 
-			var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 			var slotw = Std.int(26 * ui.SCALE());
-			var num = Std.int(statusw / (slotw + 3));
+			var num = Std.int(ui._w / (slotw + 3));
 			var dragPositionSet = false;
 
 			var uix = 0.0;

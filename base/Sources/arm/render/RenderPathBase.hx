@@ -291,7 +291,7 @@ class RenderPathBase {
 	#if rp_voxels
 	public static function drawVoxels() {
 		if (Config.raw.rp_gi != false) {
-			var voxelize = path.voxelize() && Context.ddirty > 0 && taaFrame > 0;
+			var voxelize = Context.ddirty > 0 && taaFrame > 0;
 			if (voxelize) {
 				path.clearImage("voxels", 0x00000000);
 				path.setTarget("");

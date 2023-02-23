@@ -28,7 +28,8 @@ class TabSwatches {
 	@:access(zui.Zui)
 	public static function draw() {
 		var ui = UISidebar.inst.ui;
-		if (ui.tab(UIStatus.inst.statustab, tr("Swatches"))) {
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (ui.tab(UIStatus.inst.statustab, tr("Swatches")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			if (Config.raw.touch_ui) {
@@ -75,9 +76,8 @@ class TabSwatches {
 			ui.endSticky();
 			ui.separator(3, false);
 
-			var statusw = kha.System.windowWidth();
 			var slotw = Std.int(26 * ui.SCALE());
-			var num = Std.int(statusw / (slotw + 3));
+			var num = Std.int(ui._w / (slotw + 3));
 			var dragPositionSet = false;
 
 			var uix = 0.0;
@@ -130,6 +130,7 @@ class TabSwatches {
 								ui.changed = false;
 								var h = Id.handle();
 								h.color = Context.swatch.base;
+
 								Context.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true, function () {
 									Context.colorPickerPreviousTool = Context.tool;
 									Context.selectTool(ToolPicker);
@@ -152,6 +153,7 @@ class TabSwatches {
 								var hheight = Id.handle();
 								hheight.value = Context.swatch.height;
 								Context.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
+
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
 								if (ui.inputReleased) Context.setSwatch(Context.swatch); // Trigger material preview update
 							}, 16, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
