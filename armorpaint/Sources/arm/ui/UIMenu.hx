@@ -366,17 +366,17 @@ class UIMenu {
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
 					#if (krom_darwin || krom_ios) // Limited url length
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId;
 					#else
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
 					#end
 					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
 					#if (krom_darwin || krom_ios) // Limited url length
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId;
 					#else
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
 					#end
 					File.loadUrl(url);
 				}
@@ -425,7 +425,7 @@ class UIMenu {
 					#else
 					var gapi = "OpenGL";
 					#end
-					var msg = "ArmorPaint.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					var msg = "ArmorPaint.org - v" + Main.version + " (" + MainBase.date + ") - " + MainBase.sha + "\n";
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows

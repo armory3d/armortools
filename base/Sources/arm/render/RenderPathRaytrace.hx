@@ -23,9 +23,9 @@ class RenderPathRaytrace {
 	static var isBake = false;
 
 	#if kha_direct3d12
-	static inline var ext = ".cso";
+	public static inline var ext = ".cso";
 	#else
-	static inline var ext = ".spirv";
+	public static inline var ext = ".spirv";
 	#end
 
 	public static function init(_path: RenderPath) {

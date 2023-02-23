@@ -344,11 +344,11 @@ class UIMenu {
 					File.loadUrl("https://github.com/armory3d/armortools/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
 					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + MainBase.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
 					File.loadUrl(url);
 				}
 				menuSeparator(ui);
@@ -396,7 +396,7 @@ class UIMenu {
 					#else
 					var gapi = "OpenGL";
 					#end
-					var msg = "ArmorLab.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					var msg = "ArmorLab.org - v" + Main.version + " (" + MainBase.date + ") - " + MainBase.sha + "\n";
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows
