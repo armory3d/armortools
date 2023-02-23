@@ -119,6 +119,7 @@ class MainBase {
 	#if (kha_direct3d12 || kha_vulkan)
 
 	public static function embedRaytrace() {
+		var global = js.Syntax.code("globalThis");
 		var files = [
 			"bnoise_rank.k",
 			"bnoise_scramble.k",
@@ -133,6 +134,7 @@ class MainBase {
 	}
 
 	public static function embedRaytraceBake() {
+		var global = js.Syntax.code("globalThis");
 		var files = [
 			"raytrace_bake_ao" + RenderPathRaytrace.ext,
 			"raytrace_bake_bent" + RenderPathRaytrace.ext,
