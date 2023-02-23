@@ -8,6 +8,7 @@ import iron.RenderPath;
 import arm.render.RenderPathBase;
 import arm.render.RenderPathForward;
 import arm.render.RenderPathDeferred;
+import arm.render.RenderPathRaytrace;
 import arm.render.Uniforms;
 import arm.sys.BuildMacros;
 import arm.Config;
@@ -115,6 +116,8 @@ class MainBase {
 		}
 	}
 
+	#if (kha_direct3d12 || kha_vulkan)
+
 	public static function embedRaytrace() {
 		var files = [
 			"bnoise_rank.k",
@@ -141,6 +144,8 @@ class MainBase {
 			untyped global["data/" + file] = null;
 		}
 	}
+
+	#end
 
 	#end
 }
