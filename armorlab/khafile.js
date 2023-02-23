@@ -1,5 +1,4 @@
 
-let debug = false;
 let android = process.argv.indexOf("android") >= 0;
 let ios = process.argv.indexOf("ios") >= 0;
 let win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
@@ -7,7 +6,6 @@ let d3d12 = process.argv.indexOf("direct3d12") >= 0;
 let vulkan = process.argv.indexOf("vulkan") >= 0;
 let raytrace = d3d12 || vulkan;
 let metal = process.argv.indexOf("metal") >= 0;
-let vr = process.argv.indexOf("--vr") >= 0;
 let snapshot = process.argv.indexOf("--snapshot") >= 0;
 
 let project = new Project("ArmorLab");
@@ -46,44 +44,11 @@ project.addDefine("arm_resizable");
 project.addDefine("arm_taa");
 project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
+project.addParameter("-dce full");
+project.addDefine("analyzer-optimize");
 
 if (android) {
-	project.addDefine("krom_android");
-	project.addDefine("kha_android");
 	project.addDefine("kha_android_rmb");
-}
-else if (ios) {
-	project.addDefine("krom_ios");
-	project.addDefine("kha_ios");
-}
-else if (process.platform === "win32") {
-	project.addDefine("krom_windows");
-	project.addDefine("kha_windows");
-	project.addAssets("../armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
-}
-else if (process.platform === "linux") {
-	project.addDefine("krom_linux");
-	project.addDefine("kha_linux");
-	project.addAssets("../armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
-}
-else if (process.platform === "darwin") {
-	project.addDefine("krom_darwin");
-	project.addDefine("kha_darwin");
-}
-
-if (debug) {
-	project.addDefine("arm_debug");
-	project.addParameter("--times");
-	// project.addParameter("--no-inline");
-}
-else {
-	project.addParameter("-dce full");
-	project.addDefine("analyzer-optimize");
-}
-
-if (vr) {
-	project.addDefine("arm_vr");
-	project.addAssets("Assets/readme/readme_vr.txt", { destination: "{name}" });
 }
 
 if (snapshot) {
@@ -95,8 +60,16 @@ if (snapshot) {
 
 project.addAssets("Assets/readme/readme.txt", { destination: "{name}" });
 
+if (android) {
+	project.addAssets("Assets/readme/readme_android.txt", { destination: "{name}" });
+}
+else if (ios) {
+	project.addAssets("Assets/readme/readme_ios.txt", { destination: "{name}" });
+}
+
 if (raytrace) {
 	project.addAssets("../base/Assets/raytrace/*", { destination: "data/{name}", embed: snapshot });
+
 	if (d3d12) {
 		project.addAssets("../base/Shaders/raytrace/*.cso", { destination: "data/{name}", embed: snapshot });
 		project.addAssets("Assets/readme/readme_dxr.txt", { destination: "{name}" });
@@ -107,16 +80,8 @@ if (raytrace) {
 	}
 }
 
-if (android) {
-	project.addAssets("Assets/readme/readme_android.txt", { destination: "{name}" });
-}
-else if (ios) {
-	project.addAssets("Assets/readme/readme_ios.txt", { destination: "{name}" });
-}
-
 if (process.platform !== "darwin" && !raytrace && !android && !ios) {
 	project.addDefine("rp_voxels");
-	project.addDefine("arm_voxelgi_revox");
 
 	if (process.platform === "win32" && win_hlsl) {
 		project.addShaders("../base/Shaders/voxel_hlsl/*.glsl", { embed: snapshot, noprocessing: true });
