@@ -155,6 +155,7 @@ class App {
 					defaultElementH = uiMenu.t.ELEMENT_H;
 
 					// Init plugins
+					PluginAPI.init();
 					if (Config.raw.plugins != null) {
 						for (plugin in Config.raw.plugins) {
 							Plugin.start(plugin);
