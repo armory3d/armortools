@@ -33,7 +33,7 @@ class Plugin {
 			});
 		}
 		catch (e: Dynamic) {
-			trace("Failed to load plugin '" + plugin + "'");
+			Console.error(tr("Failed to load plugin") + " '" + plugin + "'");
 			trace(e);
 		}
 	}
