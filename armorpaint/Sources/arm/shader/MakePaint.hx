@@ -6,7 +6,6 @@ import arm.shader.MaterialParser;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;
-import arm.Enums;
 
 class MakePaint {
 

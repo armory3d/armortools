@@ -13,7 +13,6 @@ import kha.graphics4.TextureFormat;
 import kha.graphics4.DepthStencilFormat;
 import iron.math.Vec4;
 import iron.math.Mat4;
-import arm.Enums;
 
 class LineDraw {
 

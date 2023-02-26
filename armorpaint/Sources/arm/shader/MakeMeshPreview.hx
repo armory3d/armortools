@@ -7,7 +7,6 @@ import arm.shader.MaterialParser;
 import arm.shader.NodeShaderData;
 import arm.shader.NodeShaderContext;
 import arm.shader.ShaderFunctions;
-import arm.Enums;
 
 class MakeMeshPreview {
 

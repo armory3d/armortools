@@ -11,7 +11,6 @@ import arm.data.LayerSlot;
 import arm.data.MaterialSlot;
 import arm.shader.MakeMaterial;
 import arm.Project;
-import arm.Enums;
 
 class History {
 

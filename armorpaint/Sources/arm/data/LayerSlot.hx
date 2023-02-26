@@ -7,7 +7,6 @@ import arm.ui.UISidebar;
 import arm.ui.TabLayers;
 import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
-import arm.Enums;
 
 class LayerSlot {
 	public var id = 0;

@@ -10,7 +10,6 @@ import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.CompareMode;
 import iron.RenderPath;
-import arm.Enums;
 import arm.ProjectFormat;
 
 class Layers {

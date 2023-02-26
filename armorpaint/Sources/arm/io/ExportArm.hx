@@ -12,7 +12,6 @@ import arm.ui.UINodes;
 import arm.sys.Path;
 import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
-import arm.Enums;
 
 class ExportArm {
 

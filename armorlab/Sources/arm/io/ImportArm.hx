@@ -17,7 +17,6 @@ import arm.ui.UIStatus;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
-import arm.Enums;
 
 class ImportArm {
 

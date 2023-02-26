@@ -4,7 +4,6 @@ import arm.shader.NodeShader;
 import arm.shader.NodeShaderContext;
 import arm.shader.ShaderFunctions;
 import arm.shader.MaterialParser;
-import arm.Enums;
 
 class MakeBake {
 

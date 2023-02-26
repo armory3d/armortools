@@ -32,7 +32,6 @@ import arm.data.ConstData;
 import arm.shader.MakeMaterial;
 import arm.Viewport;
 import arm.Camera;
-import arm.Enums;
 import arm.ProjectBaseFormat;
 import arm.Res;
 

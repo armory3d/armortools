@@ -6,7 +6,6 @@ import arm.io.ExportTexture;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.ui.BoxExport;
-import arm.Enums;
 
 class Args {
 
@@ -93,11 +92,11 @@ class Args {
 							iron.App.notifyOnInit(_init);
 						}
 						else {
-							trace("Invalid export directory");
+							Krom.log(tr("Invalid export directory"));
 						}
 					}
 					else {
-						trace("Invalid texture type");
+						Krom.log(tr("Invalid texture type"));
 					}
 				}
 				if (background) kha.System.stop();

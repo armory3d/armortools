@@ -11,7 +11,6 @@ import iron.system.Input;
 import arm.shader.NodesMaterial;
 import arm.logic.NodesBrush;
 import arm.ui.UIHeader;
-import arm.Enums;
 import arm.Project;
 import arm.ProjectBaseFormat;
 

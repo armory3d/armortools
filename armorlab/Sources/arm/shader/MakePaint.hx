@@ -5,7 +5,6 @@ import zui.Nodes;
 import arm.shader.MaterialParser;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
-import arm.Enums;
 
 class MakePaint {
 

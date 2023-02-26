@@ -1,7 +1,6 @@
 package arm.shader;
 
 import arm.shader.NodeShader;
-import arm.Enums;
 
 class MakeTexcoord {
 

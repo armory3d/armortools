@@ -30,7 +30,6 @@ import arm.io.ExportArm;
 import arm.io.ExportGpl;
 import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
-import arm.Enums;
 
 class Project {
 

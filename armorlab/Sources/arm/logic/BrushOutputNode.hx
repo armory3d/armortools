@@ -3,7 +3,6 @@ package arm.logic;
 import kha.Image;
 import iron.RenderPath;
 import arm.logic.LogicNode;
-import arm.Enums;
 
 @:keep
 class BrushOutputNode extends LogicNode {

@@ -5,7 +5,6 @@ import zui.Zui;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.io.ImportAsset;
-import arm.Enums;
 
 class TabBrowser {
 

@@ -5,7 +5,6 @@ import iron.math.RayCaster;
 import iron.math.Vec4;
 import iron.math.Quat;
 import iron.Scene;
-import arm.Enums;
 
 class Gizmo {
 

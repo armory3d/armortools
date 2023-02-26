@@ -11,7 +11,6 @@ import arm.ui.UISidebar;
 import arm.ui.UIView2D;
 import arm.Viewport;
 import arm.Project;
-import arm.Enums;
 
 class ImportMesh {
 

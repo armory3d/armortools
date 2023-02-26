@@ -1,7 +1,6 @@
 package arm.render;
 
 import iron.RenderPath;
-import arm.Enums;
 
 class RenderPathForward {
 

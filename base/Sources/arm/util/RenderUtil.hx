@@ -18,7 +18,6 @@ import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathBase;
 import arm.shader.MakeMaterial;
-import arm.Enums;
 
 class RenderUtil {
 

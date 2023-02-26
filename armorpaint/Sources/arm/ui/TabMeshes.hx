@@ -4,7 +4,6 @@ import zui.Zui;
 import zui.Id;
 import iron.object.MeshObject;
 import arm.util.MeshUtil;
-import arm.Enums;
 
 class TabMeshes {
 

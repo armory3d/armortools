@@ -4,7 +4,6 @@ import kha.arrays.Float32Array;
 import iron.math.Vec4;
 import iron.Scene;
 import arm.Camera;
-import arm.Enums;
 
 class Viewport {
 

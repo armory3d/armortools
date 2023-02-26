@@ -1,7 +1,5 @@
 package arm.ui;
 
-import arm.Enums;
-
 class TabPlugins {
 
 	public static function draw() {

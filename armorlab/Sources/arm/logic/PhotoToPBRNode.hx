@@ -4,7 +4,6 @@ import zui.Nodes;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
-import arm.Enums;
 
 @:keep
 class PhotoToPBRNode extends LogicNode {

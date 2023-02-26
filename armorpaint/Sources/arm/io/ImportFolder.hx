@@ -8,7 +8,6 @@ import arm.sys.File;
 import arm.shader.NodesMaterial;
 import arm.shader.MakeMaterial;
 import arm.data.MaterialSlot;
-import arm.Enums;
 
 class ImportFolder {
 

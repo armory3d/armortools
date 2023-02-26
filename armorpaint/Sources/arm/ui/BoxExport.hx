@@ -8,7 +8,6 @@ import arm.io.ExportTexture;
 import arm.io.ExportArm;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.Enums;
 
 class BoxExport {
 

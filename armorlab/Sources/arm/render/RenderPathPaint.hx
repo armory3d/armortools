@@ -7,7 +7,6 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UIHeader;
 import arm.ui.UINodes;
-import arm.Enums;
 
 class RenderPathPaint {
 

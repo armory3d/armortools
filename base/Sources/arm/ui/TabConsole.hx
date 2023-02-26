@@ -3,7 +3,6 @@ package arm.ui;
 import haxe.io.Bytes;
 import zui.Zui;
 import arm.sys.Path;
-import arm.Enums;
 
 class TabConsole {
 

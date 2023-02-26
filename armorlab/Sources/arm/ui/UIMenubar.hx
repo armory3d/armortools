@@ -5,7 +5,6 @@ import zui.Zui;
 import zui.Ext;
 import iron.Scene;
 import iron.object.MeshObject;
-import arm.Enums;
 
 @:access(zui.Zui)
 class UIMenubar {

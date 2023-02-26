@@ -11,7 +11,6 @@ import arm.util.RenderUtil;
 import arm.io.ImportAsset;
 import arm.sys.Path;
 import arm.ProjectBaseFormat;
-import arm.Enums;
 
 class UIHeader {
 

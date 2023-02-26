@@ -16,7 +16,6 @@ import iron.system.Time;
 import iron.Scene;
 import arm.io.ExportTexture;
 import arm.Viewport;
-import arm.Enums;
 import arm.ProjectFormat;
 import arm.Res;
 

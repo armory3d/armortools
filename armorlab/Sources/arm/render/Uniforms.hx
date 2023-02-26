@@ -8,7 +8,6 @@ import iron.math.Mat4;
 import iron.RenderPath;
 import iron.Scene;
 import arm.shader.MaterialParser;
-import arm.Enums;
 
 class Uniforms {
 

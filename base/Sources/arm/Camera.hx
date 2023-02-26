@@ -5,7 +5,6 @@ import iron.system.Time;
 import iron.math.Vec4;
 import iron.math.Mat4;
 import arm.Viewport;
-import arm.Enums;
 
 class Camera {
 

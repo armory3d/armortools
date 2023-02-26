@@ -5,7 +5,6 @@ import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
 import arm.shader.ShaderFunctions;
 import arm.data.LayerSlot;
-import arm.Enums;
 
 class MakeMesh {
 

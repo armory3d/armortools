@@ -12,7 +12,6 @@ import arm.util.UVUtil;
 import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.sys.Path;
-import arm.Enums;
 
 @:access(zui.Zui)
 class TabLayers {

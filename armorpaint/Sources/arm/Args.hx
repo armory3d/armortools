@@ -10,7 +10,6 @@ import arm.io.ImportArm;
 import arm.ui.BoxExport;
 import arm.ui.UIFiles;
 import arm.ui.UISidebar;
-import arm.Enums;
 
 class Args {
 
@@ -133,11 +132,11 @@ class Args {
 							iron.App.notifyOnInit(_init);
 						}
 						else {
-							trace("Invalid export directory");
+							Krom.log(tr("Invalid export directory"));
 						}
 					}
 					else {
-						trace("Invalid texture type");
+						Krom.log(tr("Invalid texture type"));
 					}
 				}
 				else if (exportMesh) {
@@ -147,7 +146,7 @@ class Args {
 						ExportMesh.run(exportMeshPath + Path.sep + f, null, false);
 					}
 					else {
-						trace("Invalid export directory");
+						Krom.log(tr("Invalid export directory"));
 					}
 				}
 				else if (exportMaterial) {

@@ -2,7 +2,6 @@ package arm.shader;
 
 import arm.shader.NodeShader;
 import arm.shader.ShaderFunctions;
-import arm.Enums;
 
 class MakeBrush {
 

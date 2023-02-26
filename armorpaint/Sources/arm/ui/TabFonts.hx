@@ -4,7 +4,6 @@ import zui.Zui;
 import iron.system.Time;
 import arm.data.FontSlot;
 import arm.util.RenderUtil;
-import arm.Enums;
 
 class TabFonts {
 

@@ -5,7 +5,6 @@ import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
 import arm.shader.NodeShaderData;
-import arm.Enums;
 
 class MakeMaterial {
 

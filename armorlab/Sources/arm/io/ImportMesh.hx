@@ -8,7 +8,6 @@ import arm.util.MeshUtil;
 import arm.sys.Path;
 import arm.Viewport;
 import arm.Project;
-import arm.Enums;
 
 class ImportMesh {
 

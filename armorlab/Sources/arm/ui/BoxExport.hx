@@ -7,7 +7,6 @@ import arm.io.ExportTexture;
 import arm.io.ExportMesh;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.Enums;
 
 class BoxExport {
 

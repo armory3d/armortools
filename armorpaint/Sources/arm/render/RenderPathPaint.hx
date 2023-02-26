@@ -13,7 +13,6 @@ import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.shader.MakeMaterial;
 import arm.Viewport;
-import arm.Enums;
 
 class RenderPathPaint {
 

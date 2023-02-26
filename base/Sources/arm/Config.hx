@@ -12,7 +12,6 @@ import arm.ui.UISidebar;
 import arm.render.RenderPathBase;
 import arm.sys.File;
 import arm.sys.Path;
-import arm.Enums;
 import arm.ConfigFormat;
 import arm.KeymapFormat;
 

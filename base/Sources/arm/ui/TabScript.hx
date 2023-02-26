@@ -7,7 +7,6 @@ import zui.Ext;
 import zui.Id;
 import iron.data.Data;
 import arm.sys.Path;
-import arm.Enums;
 
 class TabScript {
 

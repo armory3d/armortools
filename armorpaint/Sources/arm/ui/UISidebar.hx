@@ -21,7 +21,6 @@ import arm.data.BrushSlot;
 import arm.data.FontSlot;
 import arm.data.MaterialSlot;
 import arm.io.ExportTexture;
-import arm.Enums;
 import arm.ProjectFormat;
 import arm.Res;
 

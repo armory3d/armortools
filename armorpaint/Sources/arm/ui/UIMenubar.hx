@@ -3,7 +3,6 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import zui.Ext;
-import arm.Enums;
 
 @:access(zui.Zui)
 class UIMenubar {

@@ -13,7 +13,6 @@ import arm.shader.ShaderFunctions;
 import arm.shader.MaterialParser;
 import arm.render.RenderPathPaint;
 import arm.util.RenderUtil;
-import arm.Enums;
 
 class MakeMaterial {
 

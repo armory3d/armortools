@@ -13,7 +13,6 @@ import iron.system.Input;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.render.RenderPathPaint;
-import arm.Enums;
 
 class UIView2D {
 

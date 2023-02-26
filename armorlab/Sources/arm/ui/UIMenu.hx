@@ -14,7 +14,6 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
-import arm.Enums;
 
 @:access(zui.Zui)
 class UIMenu {

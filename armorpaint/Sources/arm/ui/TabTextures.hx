@@ -8,7 +8,6 @@ import iron.system.Input;
 import arm.io.ImportAsset;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.Enums;
 import arm.ProjectBaseFormat;
 
 class TabTextures {

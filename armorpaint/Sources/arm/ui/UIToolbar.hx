@@ -2,7 +2,6 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
-import arm.Enums;
 import iron.RenderPath;
 import arm.Translator._tr;
 

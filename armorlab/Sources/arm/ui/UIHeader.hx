@@ -6,7 +6,6 @@ import zui.Id;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;
-import arm.Enums;
 
 class UIHeader {
 

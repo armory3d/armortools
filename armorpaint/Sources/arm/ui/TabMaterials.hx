@@ -10,7 +10,6 @@ import arm.shader.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.ProjectBaseFormat;
 import arm.util.RenderUtil;
-import arm.Enums;
 
 class TabMaterials {
 

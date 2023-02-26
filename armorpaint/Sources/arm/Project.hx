@@ -37,7 +37,6 @@ import arm.logic.NodesBrush;
 import arm.Viewport;
 import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
-import arm.Enums;
 
 class Project {
 

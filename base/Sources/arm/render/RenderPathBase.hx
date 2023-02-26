@@ -9,7 +9,6 @@ import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.shader.MakeMesh;
-import arm.Enums;
 
 class RenderPathBase {
 

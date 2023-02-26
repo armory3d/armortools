@@ -5,7 +5,6 @@ import arm.shader.MakeMaterial;
 import arm.ui.UIToolbar;
 import arm.ui.UISidebar;
 import arm.ui.UIView2D;
-import arm.Enums;
 
 @:keep
 class BrushOutputNode extends LogicNode {

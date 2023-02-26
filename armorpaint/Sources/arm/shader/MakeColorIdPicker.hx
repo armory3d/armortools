@@ -2,7 +2,6 @@ package arm.shader;
 
 import arm.shader.ShaderFunctions;
 import arm.shader.NodeShader;
-import arm.Enums;
 
 class MakeColorIdPicker {
 
