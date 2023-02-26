@@ -66,9 +66,11 @@ class App {
 		lastWindowWidth = System.windowWidth();
 		lastWindowHeight = System.windowHeight();
 
-		#if arm_resizable
 		iron.App.onResize = onResize;
-		#end
+		iron.App.w = w;
+		iron.App.h = h;
+		iron.App.x = x;
+		iron.App.y = y;
 
 		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
@@ -233,7 +235,6 @@ class App {
 		return appy;
 	}
 
-	#if arm_resizable
 	static function onResize() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
@@ -250,7 +251,6 @@ class App {
 		saveWindowRect();
 		#end
 	}
-	#end
 
 	static function saveWindowRect() {
 		#if (krom_windows || krom_linux || krom_darwin)
