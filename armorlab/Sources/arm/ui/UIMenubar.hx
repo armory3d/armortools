@@ -89,8 +89,8 @@ class UIMenubar {
 			ui.tab(UIHeader.inst.worktab, tr("3D"));
 			ui.tab(UIHeader.inst.worktab, tr("2D"));
 			if (UIHeader.inst.worktab.changed) {
-				Context.ddirty = 2;
-				Context.brushBlendDirty = true;
+				Context.raw.ddirty = 2;
+				Context.raw.brushBlendDirty = true;
 				UIHeader.inst.headerHandle.redraws = 2;
 
 				Context.mainObject().skip_context = null;

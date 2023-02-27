@@ -31,14 +31,14 @@ class MakeMaterial {
 			var sampler = con.frag.sharedSamplers[0];
 			scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.textureFilter) {
+		if (!Context.raw.textureFilter) {
 			scon.overrideContext.filter = "point";
 		}
 		scon.overrideContext.addressing = "repeat";
 		m.shader.raw.contexts.push(scon.raw);
 		m.shader.contexts.push(scon);
 
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 
 		#if rp_voxels
 		makeVoxel(m);
@@ -113,7 +113,7 @@ class MakeMaterial {
 	}
 
 	public static inline function voxelgiHalfExtents():String {
-		var ext = Context.vxaoExt;
+		var ext = Context.raw.vxaoExt;
 		return 'const vec3 voxelgiHalfExtents = vec3($ext, $ext, $ext);';
 	}
 

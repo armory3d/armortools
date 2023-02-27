@@ -18,9 +18,9 @@ class RenderPathRaytraceBake {
 	public static function commands(parsePaintMaterial: ?Bool->Void): Bool {
 		var path = RenderPathRaytrace.path;
 
-		if (!RenderPathRaytrace.ready || !RenderPathRaytrace.isBake || lastBake != Context.bakeType) {
-			var rebuild = !(RenderPathRaytrace.ready && RenderPathRaytrace.isBake && lastBake != Context.bakeType);
-			lastBake = Context.bakeType;
+		if (!RenderPathRaytrace.ready || !RenderPathRaytrace.isBake || lastBake != Context.raw.bakeType) {
+			var rebuild = !(RenderPathRaytrace.ready && RenderPathRaytrace.isBake && lastBake != Context.raw.bakeType);
+			lastBake = Context.raw.bakeType;
 			RenderPathRaytrace.ready = true;
 			RenderPathRaytrace.isBake = true;
 			RenderPathRaytrace.lastEnvmap = null;
@@ -57,14 +57,14 @@ class RenderPathRaytraceBake {
 				path.createRenderTarget(t);
 			}
 
-			var _bakeType = Context.bakeType;
-			Context.bakeType = BakeInit;
+			var _bakeType = Context.raw.bakeType;
+			Context.raw.bakeType = BakeInit;
 			parsePaintMaterial();
 			path.setTarget("baketex0");
 			path.clearTarget(0x00000000); // Pixels with alpha of 0.0 are skipped during raytracing
 			path.setTarget("baketex0", ["baketex1"]);
 			path.drawMeshes("paint");
-			Context.bakeType = _bakeType;
+			Context.raw.bakeType = _bakeType;
 			function _next() {
 				parsePaintMaterial();
 			}
@@ -75,12 +75,12 @@ class RenderPathRaytraceBake {
 			return false;
 		}
 
-		if (!Context.envmapLoaded) Context.loadEnvmap();
+		if (!Context.raw.envmapLoaded) Context.loadEnvmap();
 		var probe = Scene.active.world.probe;
-		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.savedEnvmap;
-		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || lastLayer != Context.layer.texpaint) {
+		var savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+		if (RenderPathRaytrace.lastEnvmap != savedEnvmap || lastLayer != Context.raw.layer.texpaint) {
 			RenderPathRaytrace.lastEnvmap = savedEnvmap;
-			lastLayer = Context.layer.texpaint;
+			lastLayer = Context.raw.layer.texpaint;
 
 			var baketex0 = path.renderTargets.get("baketex0").image;
 			var baketex1 = path.renderTargets.get("baketex1").image;
@@ -91,25 +91,25 @@ class RenderPathRaytraceBake {
 			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, texpaint_undo.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
-		if (Context.brushTime > 0) {
-			Context.pdirty = 2;
-			Context.rdirty = 2;
+		if (Context.raw.brushTime > 0) {
+			Context.raw.pdirty = 2;
+			Context.raw.rdirty = 2;
 		}
 
-		if (Context.pdirty > 0) {
+		if (Context.raw.pdirty > 0) {
 			var f32 = RenderPathRaytrace.f32;
 			f32[0] = RenderPathRaytrace.frame++;
-			f32[1] = Context.bakeAoStrength;
-			f32[2] = Context.bakeAoRadius;
-			f32[3] = Context.bakeAoOffset;
+			f32[1] = Context.raw.bakeAoStrength;
+			f32[2] = Context.raw.bakeAoRadius;
+			f32[3] = Context.raw.bakeAoOffset;
 			f32[4] = Scene.active.world.probe.raw.strength;
-			f32[5] = Context.bakeUpAxis;
-			f32[6] = Context.envmapAngle;
+			f32[5] = Context.raw.bakeUpAxis;
+			f32[6] = Context.raw.envmapAngle;
 
 			var framebuffer = path.renderTargets.get("baketex2").image;
 			Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-			path.setTarget("texpaint" + Context.layer.id);
+			path.setTarget("texpaint" + Context.raw.layer.id);
 			path.bindTarget("baketex2", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 
@@ -133,9 +133,9 @@ class RenderPathRaytraceBake {
 
 	static function getBakeShaderName(): String {
 		return
-			Context.bakeType == BakeAO  		? "raytrace_bake_ao" + RenderPathRaytrace.ext :
-			Context.bakeType == BakeLightmap 	? "raytrace_bake_light" + RenderPathRaytrace.ext :
-			Context.bakeType == BakeBentNormal  ? "raytrace_bake_bent" + RenderPathRaytrace.ext :
+			Context.raw.bakeType == BakeAO  		? "raytrace_bake_ao" + RenderPathRaytrace.ext :
+			Context.raw.bakeType == BakeLightmap 	? "raytrace_bake_light" + RenderPathRaytrace.ext :
+			Context.raw.bakeType == BakeBentNormal  ? "raytrace_bake_bent" + RenderPathRaytrace.ext :
 												  "raytrace_bake_thick" + RenderPathRaytrace.ext;
 	}
 }

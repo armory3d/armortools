@@ -30,7 +30,7 @@ class ImportFont {
 
 			function _init() {
 				for (f in fontSlots) {
-					Context.font = f;
+					Context.raw.font = f;
 					Project.fonts.push(f);
 					RenderUtil.makeFontPreview();
 				}

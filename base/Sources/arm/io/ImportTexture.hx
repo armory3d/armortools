@@ -43,7 +43,7 @@ class ImportTexture {
 			var name = ar[ar.length - 1];
 			var asset: TAsset = {name: name, file: path, id: Project.assetId++};
 			Project.assets.push(asset);
-			if (Context.texture == null) Context.texture = asset;
+			if (Context.raw.texture == null) Context.raw.texture = asset;
 			Project.assetNames.push(name);
 			Project.assetMap.set(asset.id, image);
 			UIStatus.inst.statusHandle.redraws = 2;

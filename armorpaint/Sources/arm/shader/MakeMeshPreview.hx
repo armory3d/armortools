@@ -30,8 +30,8 @@ class MakeMeshPreview {
 		var pos = "pos";
 
 		#if arm_skin
-		var isMesh = Std.isOfType(Context.object, MeshObject);
-		var skin = isMesh && cast(Context.object, MeshObject).data.geom.getVArray("bone") != null;
+		var isMesh = Std.isOfType(Context.raw.object, MeshObject);
+		var skin = isMesh && cast(Context.raw.object, MeshObject).data.geom.getVArray("bone") != null;
 		if (skin) {
 			pos = "spos";
 			con_mesh.add_elem("bone", 'short4norm');
@@ -53,11 +53,11 @@ class MakeMeshPreview {
 		vert.add_uniform('mat4 WVP', '_worldViewProjectionMatrix');
 		vert.write_attrib('gl_Position = mul(vec4($pos.xyz, 1.0), WVP);');
 
-		var brushScale = (Context.brushScale * Context.brushNodesScale) + "";
+		var brushScale = (Context.raw.brushScale * Context.raw.brushNodesScale) + "";
 		vert.add_out('vec2 texCoord');
 		vert.write_attrib('texCoord = tex * float(${brushScale});');
 
-		var decal = Context.decalPreview;
+		var decal = Context.raw.decalPreview;
 		MaterialParser.sample_keep_aspect = decal;
 		MaterialParser.sample_uv_scale = brushScale;
 		MaterialParser.parse_height = MakeMaterial.heightUsed;
@@ -92,7 +92,7 @@ class MakeMeshPreview {
 		// }
 
 		if (decal) {
-			if (Context.tool == ToolText) {
+			if (Context.raw.tool == ToolText) {
 				frag.add_uniform('sampler2D textexttool', '_textexttool');
 				frag.write('opacity *= textureLod(textexttool, texCoord / float(${brushScale}), 0.0).r;');
 			}

@@ -22,7 +22,7 @@ class History {
 			}
 			undos--;
 			redos++;
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 		}
 	}
 
@@ -36,7 +36,7 @@ class History {
 			}
 			undos++;
 			redos--;
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 		}
 	}
 

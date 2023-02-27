@@ -46,26 +46,26 @@ class TabMeshes {
 
 			if (ui.button(tr("Flip Normals"))) {
 				MeshUtil.flipNormals();
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 			}
 
 			if (ui.button(tr("Calculate Normals"))) {
 				UIMenu.draw(function(ui: Zui) {
 					ui.text(tr("Normals"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Smooth"), Left)) { MeshUtil.calcNormals(true); Context.ddirty = 2; }
-					if (ui.button(tr("Flat"), Left)) { MeshUtil.calcNormals(false); Context.ddirty = 2; }
+					if (ui.button(tr("Smooth"), Left)) { MeshUtil.calcNormals(true); Context.raw.ddirty = 2; }
+					if (ui.button(tr("Flat"), Left)) { MeshUtil.calcNormals(false); Context.raw.ddirty = 2; }
 				}, 3);
 			}
 
 			if (ui.button(tr("Geometry to Origin"))) {
 				MeshUtil.toOrigin();
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 			}
 
 			if (ui.button(tr("Apply Displacement"))) {
 				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack);
 				MeshUtil.calcNormals();
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 			}
 
 			if (ui.button(tr("Rotate"))) {
@@ -74,17 +74,17 @@ class TabMeshes {
 
 					if (ui.button(tr("Rotate X"), Left)) {
 						MeshUtil.swapAxis(1, 2);
-						Context.ddirty = 2;
+						Context.raw.ddirty = 2;
 					}
 
 					if (ui.button(tr("Rotate Y"), Left)) {
 						MeshUtil.swapAxis(2, 0);
-						Context.ddirty = 2;
+						Context.raw.ddirty = 2;
 					}
 
 					if (ui.button(tr("Rotate Z"), Left)) {
 						MeshUtil.swapAxis(0, 1);
-						Context.ddirty = 2;
+						Context.raw.ddirty = 2;
 					}
 				}, 4);
 			}
@@ -100,7 +100,7 @@ class TabMeshes {
 					UIMenu.draw(function(ui: Zui) {
 						ui.text(o.name, Right, ui.t.HIGHLIGHT_COL);
 						if (ui.button(tr("Export"), Left)) {
-							Context.exportMeshIndex = i + 1;
+							Context.raw.exportMeshIndex = i + 1;
 							BoxExport.showMesh();
 						}
 						if (Project.paintObjects.length > 1 && ui.button(tr("Delete"), Left)) {
@@ -118,9 +118,9 @@ class TabMeshes {
 							}
 							iron.data.Data.deleteMesh(o.data.handle);
 							o.remove();
-							Context.paintObject = Context.mainObject();
+							Context.raw.paintObject = Context.mainObject();
 							MeshUtil.mergeMesh();
-							Context.ddirty = 2;
+							Context.raw.ddirty = 2;
 						}
 					}, Project.paintObjects.length > 1 ? 3 : 2);
 				}
@@ -128,7 +128,7 @@ class TabMeshes {
 					var visibles: Array<MeshObject> = [];
 					for (p in Project.paintObjects) if (p.visible) visibles.push(p);
 					MeshUtil.mergeMesh(visibles);
-					Context.ddirty = 2;
+					Context.raw.ddirty = 2;
 				}
 			}
 		}
@@ -138,8 +138,8 @@ class TabMeshes {
 		var mo: MeshObject = cast iron.Scene.active.getChild(name);
 		mo.visible = true;
 		iron.Scene.active.meshes = [mo];
-		Context.ddirty = 2;
-		Context.paintObject = mo;
+		Context.raw.ddirty = 2;
+		Context.raw.paintObject = mo;
 		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end

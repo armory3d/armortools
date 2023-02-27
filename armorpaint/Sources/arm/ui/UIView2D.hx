@@ -73,7 +73,7 @@ class UIView2D {
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (Context.pdirty >= 0) hwnd.redraws = 2; // Paint was active
+		if (Context.raw.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
 		g.end();
 
@@ -84,7 +84,7 @@ class UIView2D {
 		if (uvmapShow) UVUtil.cacheUVMap();
 
 		// Ensure font image is drawn
-		if (Context.font.image == null) RenderUtil.makeFontPreview();
+		if (Context.raw.font.image == null) RenderUtil.makeFontPreview();
 
 		ui.begin(g);
 		wh = iron.App.h();
@@ -98,7 +98,7 @@ class UIView2D {
 			ui.g.drawImage(UINodes.inst.grid, (panX * panScale) % 40 - 40, (panY * panScale) % 40 - 40);
 
 			// Texture
-			var l = Context.layer;
+			var l = Context.raw.layer;
 			var tex: Image = null;
 			var channel = 0;
 
@@ -127,14 +127,14 @@ class UIView2D {
 				}
 
 				tex =
-					Context.layer.isMask() ? layer.texpaint :
+					Context.raw.layer.isMask() ? layer.texpaint :
 					texType == TexBase     ? layer.texpaint :
 					texType == TexOpacity  ? layer.texpaint :
 					texType == TexNormal   ? layer.texpaint_nor :
 										     layer.texpaint_pack;
 
 				channel =
-					Context.layer.isMask()  ? 1 :
+					Context.raw.layer.isMask()  ? 1 :
 					texType == TexOcclusion ? 1 :
 					texType == TexRoughness ? 2 :
 					texType == TexMetallic  ? 3 :
@@ -144,13 +144,13 @@ class UIView2D {
 											  0;
 			}
 			else if (type == View2DAsset) {
-				tex = Project.getImage(Context.texture);
+				tex = Project.getImage(Context.raw.texture);
 			}
 			else if (type == View2DFont) {
-				tex = Context.font.image;
+				tex = Context.raw.font.image;
 			}
 			else { // View2DNode
-				tex = Context.nodePreview;
+				tex = Context.raw.nodePreview;
 			}
 
 			var th = tw;
@@ -160,7 +160,7 @@ class UIView2D {
 
 				if (type == View2DLayer) {
 					ui.g.pipeline = pipe;
-					if (!Context.textureFilter) {
+					if (!Context.raw.textureFilter) {
 						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
 					}
 					#if kha_opengl
@@ -184,7 +184,7 @@ class UIView2D {
 
 				if (type == View2DLayer) {
 					ui.g.pipeline = null;
-					if (!Context.textureFilter) {
+					if (!Context.raw.textureFilter) {
 						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
 					}
 				}
@@ -215,7 +215,7 @@ class UIView2D {
 				textInputHover = ui.isHovered;
 			}
 			else if (type == View2DAsset) {
-				var asset = Context.texture;
+				var asset = Context.raw.texture;
 				if (asset != null) {
 					var assetNames = Project.assetNames;
 					var i = assetNames.indexOf(asset.name);
@@ -225,8 +225,8 @@ class UIView2D {
 				}
 			}
 			else if (type == View2DFont) {
-				h.text = Context.font.name;
-				Context.font.name = ui.textInput(h, "", Right);
+				h.text = Context.raw.font.name;
+				Context.raw.font.name = ui.textInput(h, "", Right);
 			}
 			// else { // View2DNode
 			// }
@@ -254,7 +254,7 @@ class UIView2D {
 				ui._x += ew + 3;
 				ui._y = 2;
 
-				if (!Context.layer.isMask()) {
+				if (!Context.raw.layer.isMask()) {
 					texType = ui.combo(Id.handle({ position: texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),
@@ -281,11 +281,11 @@ class UIView2D {
 				ui.text(tex.width + "x" + tex.height);
 			}
 
-			if (Context.tool == ToolPicker && (type == View2DLayer || type == View2DAsset)) {
+			if (Context.raw.tool == ToolPicker && (type == View2DLayer || type == View2DAsset)) {
 				var cursorImg = Res.get("cursor.k");
 				var hsize = 16 * ui.SCALE();
 				var size = hsize * 2;
-				ui.g.drawScaledImage(cursorImg, tx + tw * Context.uvxPicked - hsize, ty + th * Context.uvyPicked - hsize, size, size);
+				ui.g.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
 			}
 		}
 		ui.end();
@@ -297,7 +297,7 @@ class UIView2D {
 		var kb = Input.getKeyboard();
 
 		var headerh = ui.ELEMENT_H() * 1.4;
-		Context.paint2d = false;
+		Context.raw.paint2d = false;
 
 		if (!App.uiEnabled ||
 			!show ||
@@ -324,9 +324,9 @@ class UIView2D {
 			panY = _panY * panScale;
 		}
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
+		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		if (type == View2DLayer &&
 			!textInputHover &&
@@ -335,7 +335,7 @@ class UIView2D {
 			 decalMask ||
 			 setCloneSource ||
 			 Config.raw.brush_live)) {
-			Context.paint2d = true;
+			Context.raw.paint2d = true;
 		}
 
 		if (ui.isTyping) return;

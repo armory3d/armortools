@@ -32,14 +32,14 @@ class InputNode extends LogicNode {
 	}
 
 	function update() {
-		if (Context.splitView) {
-			Context.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+		if (Context.raw.splitView) {
+			Context.raw.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 		}
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 
-		var lazyPaint = Context.brushLazyRadius > 0 &&
+		var lazyPaint = Context.raw.brushLazyRadius > 0 &&
 			(Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 			 decalMask);
@@ -67,17 +67,17 @@ class InputNode extends LogicNode {
 			if (lockY) paintY = startY;
 		}
 
-		if (Context.brushLazyRadius > 0) {
-			Context.brushLazyX = paintX;
-			Context.brushLazyY = paintY;
+		if (Context.raw.brushLazyRadius > 0) {
+			Context.raw.brushLazyX = paintX;
+			Context.raw.brushLazyY = paintY;
 		}
 		if (!lazyPaint) {
 			coords.x = paintX;
 			coords.y = paintY;
 		}
 
-		if (Context.splitView) {
-			Context.viewIndex = -1;
+		if (Context.raw.splitView) {
+			Context.raw.viewIndex = -1;
 		}
 
 		if (lockBegin) {
@@ -99,35 +99,35 @@ class InputNode extends LogicNode {
 			lockX = lockY = lockBegin = false;
 		}
 
-		if (Context.brushLazyRadius > 0) {
-			var v1 = new Vec4(Context.brushLazyX * iron.App.w(), Context.brushLazyY * iron.App.h(), 0.0);
+		if (Context.raw.brushLazyRadius > 0) {
+			var v1 = new Vec4(Context.raw.brushLazyX * iron.App.w(), Context.raw.brushLazyY * iron.App.h(), 0.0);
 			var v2 = new Vec4(coords.x * iron.App.w(), coords.y * iron.App.h(), 0.0);
 			var d = Vec4.distance(v1, v2);
-			var r = Context.brushLazyRadius * 85;
+			var r = Context.raw.brushLazyRadius * 85;
 			if (d > r) {
 				var v3 = new Vec4();
 				v3.subvecs(v2, v1);
 				v3.normalize();
-				v3.mult(1.0 - Context.brushLazyStep);
+				v3.mult(1.0 - Context.raw.brushLazyStep);
 				v3.mult(r);
 				v2.addvecs(v1, v3);
 				coords.x = v2.x / iron.App.w();
 				coords.y = v2.y / iron.App.h();
 				// Parse brush inputs once on next draw
-				Context.painted = -1;
+				Context.raw.painted = -1;
 			}
-			Context.lastPaintX = -1;
-			Context.lastPaintY = -1;
+			Context.raw.lastPaintX = -1;
+			Context.raw.lastPaintY = -1;
 		}
 
-		Context.parseBrushInputs();
+		Context.raw.parseBrushInputs();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {
 		inputs[0].get(function(value) {
-			Context.brushLazyRadius = value;
+			Context.raw.brushLazyRadius = value;
 			inputs[1].get(function(value) {
-				Context.brushLazyStep = value;
+				Context.raw.brushLazyStep = value;
 				done(coords);
 			});
 		});

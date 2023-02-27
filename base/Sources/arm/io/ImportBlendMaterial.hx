@@ -32,11 +32,11 @@ class ImportBlendMaterial {
 
 			for (mat in mats) {
 				// Material slot
-				Context.material = new MaterialSlot(Project.materials[0].data);
-				Project.materials.push(Context.material);
-				imported.push(Context.material);
-				var nodes = Context.material.nodes;
-				var canvas = Context.material.canvas;
+				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.push(Context.raw.material);
+				imported.push(Context.raw.material);
+				var nodes = Context.raw.material.nodes;
+				var canvas = Context.raw.material.canvas;
 				canvas.name = mat.get("id").get("name").substr(2); // MAWood
 				var nout: TNode = null;
 				for (n in canvas.nodes) {

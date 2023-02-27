@@ -66,7 +66,7 @@ class ExportArm {
 		};
 
 		#if (krom_android || krom_ios)
-		var tex = iron.RenderPath.active.renderTargets.get(Context.renderMode == RenderForward ? "buf" : "tex").image;
+		var tex = iron.RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderForward ? "buf" : "tex").image;
 		var mesh_icon = kha.Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);

@@ -31,7 +31,7 @@ class Uniforms {
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
 		switch (link) {
 			case "_brushRadius": {
-				var radius = Context.brushRadius;
+				var radius = Context.raw.brushRadius;
 				var val = radius / 15.0;
 				var pen = Input.getPen();
 				if (Config.raw.pressure_radius && pen.down()) {
@@ -71,7 +71,7 @@ class Uniforms {
 				return vec;
 			}
 			case "_cloneDelta": {
-				vec.set(Context.cloneDeltaX, Context.cloneDeltaY, 0);
+				vec.set(Context.raw.cloneDeltaX, Context.raw.cloneDeltaY, 0);
 				return vec;
 			}
 			case "_texpaintSize": {
@@ -94,20 +94,20 @@ class Uniforms {
 		switch (link) {
 			case "_inputBrush": {
 				var down = Input.getMouse().down() || Input.getPen().down();
-				vec.set(Context.paintVec.x, Context.paintVec.y, down ? 1.0 : 0.0, 0.0);
+				vec.set(Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
 				return vec;
 			}
 			case "_inputBrushLast": {
 				var down = Input.getMouse().down() || Input.getPen().down();
-				vec.set(Context.lastPaintVecX, Context.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
+				vec.set(Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 				return vec;
 			}
 			case "_envmapData": {
-				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Scene.active.world.probe.raw.strength);
+				vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Scene.active.world.probe.raw.strength);
 				return vec;
 			}
 			case "_envmapDataWorld": {
-				vec.set(Context.envmapAngle, Math.sin(-Context.envmapAngle), Math.cos(-Context.envmapAngle), Context.showEnvmap ? Scene.active.world.probe.raw.strength : 4.0);
+				vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.active.world.probe.raw.strength : 4.0);
 				return vec;
 			}
 		}

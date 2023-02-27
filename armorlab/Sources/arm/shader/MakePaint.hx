@@ -17,7 +17,7 @@ class MakePaint {
 			cull_mode: "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments:
-				Context.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
+				Context.raw.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
@@ -25,13 +25,13 @@ class MakePaint {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
-		con_paint.allow_vcols = Context.paintObject.data.geom.cols != null;
+		con_paint.allow_vcols = Context.raw.paintObject.data.geom.cols != null;
 
 		var vert = con_paint.make_vert();
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		if (Context.tool == ToolPicker) {
+		if (Context.raw.tool == ToolPicker) {
 			// Mangle vertices to form full screen triangle
 			vert.write('gl_Position = vec4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);');
 
@@ -93,9 +93,9 @@ class MakePaint {
 		frag.add_uniform('float brushOpacity', '_brushOpacity');
 		frag.add_uniform('float brushHardness', '_brushHardness');
 
-		if (Context.tool == ToolEraser ||
-			Context.tool == ToolClone  ||
-			Context.tool == ToolBlur) {
+		if (Context.raw.tool == ToolEraser ||
+			Context.raw.tool == ToolClone  ||
+			Context.raw.tool == ToolBlur) {
 
 			frag.write('float dist = 0.0;');
 
@@ -137,14 +137,14 @@ class MakePaint {
 		vert.add_out('vec2 texCoord');
 		vert.write('texCoord = tex * brushScale;');
 
-		if (Context.tool == ToolClone || Context.tool == ToolBlur) {
+		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur) {
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
 			frag.add_uniform('sampler2D texpaint_nor_undo', '_texpaint_nor_undo');
 			frag.add_uniform('sampler2D texpaint_pack_undo', '_texpaint_pack_undo');
 
-			if (Context.tool == ToolClone) {
+			if (Context.raw.tool == ToolClone) {
 				// frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
 				// frag.write('vec2 cloneDeltaLocal = cloneDelta;'); // TODO: spirv workaround
 				// frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
@@ -191,7 +191,7 @@ class MakePaint {
 				// frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
 				// frag.write('vec2 texpaintSizeLocal = texpaintSize;'); // TODO: spirv workaround
 				// frag.write('float blur_step = 1.0 / texpaintSizeLocal.x;');
-				// if (Context.blurDirectional) {
+				// if (Context.raw.blurDirectional) {
 				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 				// 	frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
 				// 	#else
@@ -269,7 +269,7 @@ class MakePaint {
 		frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
 		frag.write('vec4 sample_undo = textureLod(texpaint_undo, sample_tc, 0.0);');
 
-		if (Context.tool == ToolEraser) {
+		if (Context.raw.tool == ToolEraser) {
 			// frag.write('fragColor[0] = vec4(mix(sample_undo.rgb, vec3(0.0, 0.0, 0.0), str), sample_undo.a - str);');
 			frag.write('fragColor[0] = vec4(0.0, 0.0, 0.0, 0.0);');
 			frag.write('fragColor[1] = vec4(0.5, 0.5, 1.0, 0.0);');

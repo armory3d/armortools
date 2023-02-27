@@ -68,7 +68,7 @@ class RenderPathBase {
 	}
 
 	public static function drawCompass(currentG: kha.graphics4.Graphics) {
-		if (Context.showCompass) {
+		if (Context.raw.showCompass) {
 			var scene = Scene.active;
 			var cam = scene.camera;
 			var compass: MeshObject = cast scene.getChild(".Compass");
@@ -101,36 +101,36 @@ class RenderPathBase {
 
 	public static function begin() {
 		// Begin split
-		if (Context.splitView && !Context.paint2dView) {
-			if (Context.viewIndexLast == -1 && Context.viewIndex == -1) {
+		if (Context.raw.splitView && !Context.raw.paint2dView) {
+			if (Context.raw.viewIndexLast == -1 && Context.raw.viewIndex == -1) {
 				// Begin split, draw right viewport first
-				Context.viewIndex = 1;
+				Context.raw.viewIndex = 1;
 			}
 			else {
 				// Set current viewport
-				Context.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				Context.raw.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
 			}
 
 			var cam = Scene.active.camera;
-			if (Context.viewIndexLast > -1) {
+			if (Context.raw.viewIndexLast > -1) {
 				// Save current viewport camera
-				arm.Camera.inst.views[Context.viewIndexLast].setFrom(cam.transform.local);
+				arm.Camera.inst.views[Context.raw.viewIndexLast].setFrom(cam.transform.local);
 			}
 
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 
-			if (Context.viewIndexLast != Context.viewIndex || decal || !Config.raw.brush_3d) {
+			if (Context.raw.viewIndexLast != Context.raw.viewIndex || decal || !Config.raw.brush_3d) {
 				// Redraw on current viewport change
-				Context.ddirty = 1;
+				Context.raw.ddirty = 1;
 			}
 
-			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
 
 		// Match projection matrix jitter
-		var skipTaa = Context.splitView || ((Context.tool == ToolClone || Context.tool == ToolBlur) && Context.pdirty > 0);
+		var skipTaa = Context.raw.splitView || ((Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur) && Context.raw.pdirty > 0);
 		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
 		Scene.active.camera.buildMatrix();
@@ -138,12 +138,12 @@ class RenderPathBase {
 
 	public static function end() {
 		// End split
-		Context.viewIndexLast = Context.viewIndex;
-		Context.viewIndex = -1;
+		Context.raw.viewIndexLast = Context.raw.viewIndex;
+		Context.raw.viewIndex = -1;
 
-		if (Context.foregroundEvent && !iron.system.Input.getMouse().down()) {
-			Context.foregroundEvent = false;
-			Context.pdirty = 0;
+		if (Context.raw.foregroundEvent && !iron.system.Input.getMouse().down()) {
+			Context.raw.foregroundEvent = false;
+			Context.raw.pdirty = 0;
 		}
 
 		taaFrame++;
@@ -162,12 +162,12 @@ class RenderPathBase {
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
 
-		if (Context.ddirty <= 0 && Context.rdirty <= 0 && Context.pdirty <= 0) {
-			if (mx != lastX || my != lastY || mouse.locked) Context.ddirty = 0;
+		if (Context.raw.ddirty <= 0 && Context.raw.rdirty <= 0 && Context.raw.pdirty <= 0) {
+			if (mx != lastX || my != lastY || mouse.locked) Context.raw.ddirty = 0;
 			#if (kha_metal || krom_android)
-			if (Context.ddirty > -6) {
+			if (Context.raw.ddirty > -6) {
 			#else
-			if (Context.ddirty > -2) {
+			if (Context.raw.ddirty > -2) {
 			#end
 				path.setTarget("");
 				path.bindTarget("taa", "tex");
@@ -175,7 +175,7 @@ class RenderPathBase {
 					path.drawShader("shader_datas/supersample_resolve/supersample_resolve") :
 					path.drawShader("shader_datas/copy_pass/copy_pass");
 				RenderPathPaint.commandsCursor();
-				if (Context.ddirty <= 0) Context.ddirty--;
+				if (Context.raw.ddirty <= 0) Context.raw.ddirty--;
 			}
 			end();
 			return true;
@@ -193,7 +193,7 @@ class RenderPathBase {
 		RenderPathPaint.draw();
 
 		#if (kha_direct3d12 || kha_vulkan)
-		if (Context.viewportMode == ViewPathTrace) {
+		if (Context.raw.viewportMode == ViewPathTrace) {
 			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
 			RenderPathRaytrace.draw(useLiveLayer);
 			return;
@@ -258,16 +258,16 @@ class RenderPathBase {
 	}
 
 	public static function drawSplit(drawCommands: Void->Void) {
-		if (Context.splitView && !Context.paint2dView) {
+		if (Context.raw.splitView && !Context.raw.paint2dView) {
 			#if (kha_metal || krom_android)
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 			#else
-			Context.ddirty = 1;
+			Context.raw.ddirty = 1;
 			#end
 			var cam = Scene.active.camera;
 
-			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
+			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 
@@ -275,13 +275,13 @@ class RenderPathBase {
 
 			#if (kha_direct3d12 || kha_vulkan)
 			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
-			Context.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
+			Context.raw.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
 			#else
 			drawCommands();
 			#end
 
-			Context.viewIndex = Context.viewIndex == 0 ? 1 : 0;
-			cam.transform.setMatrix(arm.Camera.inst.views[Context.viewIndex]);
+			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
+			cam.transform.setMatrix(arm.Camera.inst.views[Context.raw.viewIndex]);
 			cam.buildMatrix();
 			cam.buildProjection();
 		}
@@ -290,7 +290,7 @@ class RenderPathBase {
 	#if rp_voxels
 	public static function drawVoxels() {
 		if (Config.raw.rp_gi != false) {
-			var voxelize = Context.ddirty > 0 && taaFrame > 0;
+			var voxelize = Context.raw.ddirty > 0 && taaFrame > 0;
 			if (voxelize) {
 				path.clearImage("voxels", 0x00000000);
 				path.setTarget("");
@@ -308,8 +308,8 @@ class RenderPathBase {
 	#end
 
 	public static function drawSSAO() {
-		var ssao = Config.raw.rp_ssao != false && Context.cameraType == CameraPerspective;
-		if (ssao && Context.ddirty > 0 && taaFrame > 0) {
+		var ssao = Config.raw.rp_ssao != false && Context.raw.cameraType == CameraPerspective;
+		if (ssao && Context.raw.ddirty > 0 && taaFrame > 0) {
 			if (path.renderTargets.get("singlea") == null) {
 				{
 					var t = new RenderTargetRaw();
@@ -356,7 +356,7 @@ class RenderPathBase {
 		path.bindTarget("_main", "gbufferD");
 		path.bindTarget("gbuffer0", "gbuffer0");
 		path.bindTarget("gbuffer1", "gbuffer1");
-		var ssao = Config.raw.rp_ssao != false && Context.cameraType == CameraPerspective;
+		var ssao = Config.raw.rp_ssao != false && Context.raw.cameraType == CameraPerspective;
 		if (ssao && taaFrame > 0) {
 			path.bindTarget("singlea", "ssaotex");
 		}
@@ -484,7 +484,7 @@ class RenderPathBase {
 		path.bindTarget("gbuffer2", "sveloc");
 		path.drawShader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 
-		var skipTaa = Context.splitView;
+		var skipTaa = Context.raw.splitView;
 		if (skipTaa) {
 			path.setTarget("taa");
 			path.bindTarget(current, "tex");
@@ -550,7 +550,7 @@ class RenderPathBase {
 
 		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || iron.system.Input.getKeyboard().down("control");
 		var isDecal = App.isDecalLayer();
-		if (isDecal && !hide) LineDraw.render(currentG, Context.layer.decalMat);
+		if (isDecal && !hide) LineDraw.render(currentG, Context.raw.layer.decalMat);
 	}
 
 	static function makeGbufferCopyTextures() {

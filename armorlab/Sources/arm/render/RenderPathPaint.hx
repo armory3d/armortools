@@ -72,9 +72,9 @@ class RenderPathPaint {
 	public static function commandsPaint(dilation = true) {
 		var tid = "";
 
-		if (Context.pdirty > 0) {
+		if (Context.raw.pdirty > 0) {
 
-			if (Context.tool == ToolPicker) {
+			if (Context.raw.tool == ToolPicker) {
 
 					#if kha_metal
 					//path.setTarget("texpaint_picker");
@@ -89,7 +89,7 @@ class RenderPathPaint {
 					//path.clearTarget(0xff000000);
 					#end
 					path.bindTarget("gbuffer2", "gbuffer2");
-					// tid = Context.layer.id;
+					// tid = Context.raw.layer.id;
 					path.bindTarget("texpaint" + tid, "texpaint");
 					path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
 					path.bindTarget("texpaint_pack" + tid, "texpaint_pack");
@@ -105,39 +105,39 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 					var d = texpaint_uv_picker.getPixels();
 
-					if (Context.colorPickerCallback != null) {
-						Context.colorPickerCallback(Context.pickedColor);
+					if (Context.raw.colorPickerCallback != null) {
+						Context.raw.colorPickerCallback(Context.raw.pickedColor);
 					}
 
 					// Picked surface values
 					// #if (kha_metal || kha_vulkan)
-					// Context.pickedColor.base.Rb = a.get(2);
-					// Context.pickedColor.base.Gb = a.get(1);
-					// Context.pickedColor.base.Bb = a.get(0);
-					// Context.pickedColor.normal.Rb = b.get(2);
-					// Context.pickedColor.normal.Gb = b.get(1);
-					// Context.pickedColor.normal.Bb = b.get(0);
-					// Context.pickedColor.occlusion = c.get(2) / 255;
-					// Context.pickedColor.roughness = c.get(1) / 255;
-					// Context.pickedColor.metallic = c.get(0) / 255;
-					// Context.pickedColor.height = c.get(3) / 255;
-					// Context.pickedColor.opacity = a.get(3) / 255;
-					// Context.uvxPicked = d.get(2) / 255;
-					// Context.uvyPicked = d.get(1) / 255;
+					// Context.raw.pickedColor.base.Rb = a.get(2);
+					// Context.raw.pickedColor.base.Gb = a.get(1);
+					// Context.raw.pickedColor.base.Bb = a.get(0);
+					// Context.raw.pickedColor.normal.Rb = b.get(2);
+					// Context.raw.pickedColor.normal.Gb = b.get(1);
+					// Context.raw.pickedColor.normal.Bb = b.get(0);
+					// Context.raw.pickedColor.occlusion = c.get(2) / 255;
+					// Context.raw.pickedColor.roughness = c.get(1) / 255;
+					// Context.raw.pickedColor.metallic = c.get(0) / 255;
+					// Context.raw.pickedColor.height = c.get(3) / 255;
+					// Context.raw.pickedColor.opacity = a.get(3) / 255;
+					// Context.raw.uvxPicked = d.get(2) / 255;
+					// Context.raw.uvyPicked = d.get(1) / 255;
 					// #else
-					// Context.pickedColor.base.Rb = a.get(0);
-					// Context.pickedColor.base.Gb = a.get(1);
-					// Context.pickedColor.base.Bb = a.get(2);
-					// Context.pickedColor.normal.Rb = b.get(0);
-					// Context.pickedColor.normal.Gb = b.get(1);
-					// Context.pickedColor.normal.Bb = b.get(2);
-					// Context.pickedColor.occlusion = c.get(0) / 255;
-					// Context.pickedColor.roughness = c.get(1) / 255;
-					// Context.pickedColor.metallic = c.get(2) / 255;
-					// Context.pickedColor.height = c.get(3) / 255;
-					// Context.pickedColor.opacity = a.get(3) / 255;
-					// Context.uvxPicked = d.get(0) / 255;
-					// Context.uvyPicked = d.get(1) / 255;
+					// Context.raw.pickedColor.base.Rb = a.get(0);
+					// Context.raw.pickedColor.base.Gb = a.get(1);
+					// Context.raw.pickedColor.base.Bb = a.get(2);
+					// Context.raw.pickedColor.normal.Rb = b.get(0);
+					// Context.raw.pickedColor.normal.Gb = b.get(1);
+					// Context.raw.pickedColor.normal.Bb = b.get(2);
+					// Context.raw.pickedColor.occlusion = c.get(0) / 255;
+					// Context.raw.pickedColor.roughness = c.get(1) / 255;
+					// Context.raw.pickedColor.metallic = c.get(2) / 255;
+					// Context.raw.pickedColor.height = c.get(3) / 255;
+					// Context.raw.pickedColor.opacity = a.get(3) / 255;
+					// Context.raw.uvxPicked = d.get(0) / 255;
+					// Context.raw.uvyPicked = d.get(1) / 255;
 					// #end
 			}
 			else {
@@ -154,8 +154,8 @@ class RenderPathPaint {
 				path.bindTarget("texpaint_blend1", "paintmask");
 
 				// Read texcoords from gbuffer
-				var readTC = Context.tool == ToolClone ||
-							 Context.tool == ToolBlur;
+				var readTC = Context.raw.tool == ToolClone ||
+							 Context.raw.tool == ToolBlur;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
@@ -166,7 +166,7 @@ class RenderPathPaint {
 	}
 
 	public static function commandsCursor() {
-		var tool = Context.tool;
+		var tool = Context.raw.tool;
 		if (tool != ToolEraser &&
 			tool != ToolClone &&
 			tool != ToolBlur) {
@@ -179,13 +179,13 @@ class RenderPathPaint {
 			return;
 		}
 
-		var mx = Context.paintVec.x;
-		var my = 1.0 - Context.paintVec.y;
-		if (Context.brushLocked) {
-			mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
+		var mx = Context.raw.paintVec.x;
+		var my = 1.0 - Context.raw.paintVec.y;
+		if (Context.raw.brushLocked) {
+			mx = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		var radius = Context.brushRadius;
+		var radius = Context.raw.brushRadius;
 		drawCursor(mx, my, radius / 3.4);
 	}
 
@@ -226,7 +226,7 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
-		return !Context.foregroundEvent;
+		return !Context.raw.foregroundEvent;
 	}
 
 	public static function begin() {
@@ -235,11 +235,11 @@ class RenderPathPaint {
 
 	public static function end() {
 		commandsCursor();
-		Context.ddirty--;
-		Context.rdirty--;
+		Context.raw.ddirty--;
+		Context.raw.rdirty--;
 
 		if (!paintEnabled()) return;
-		Context.pdirty--;
+		Context.raw.pdirty--;
 	}
 
 	public static function draw() {
@@ -247,8 +247,8 @@ class RenderPathPaint {
 
 		commandsPaint();
 
-		if (Context.brushBlendDirty) {
-			Context.brushBlendDirty = false;
+		if (Context.raw.brushBlendDirty) {
+			Context.raw.brushBlendDirty = false;
 			#if kha_metal
 			path.setTarget("texpaint_blend0");
 			path.clearTarget(0x00000000);

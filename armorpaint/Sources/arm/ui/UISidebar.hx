@@ -47,7 +47,7 @@ class UISidebar {
 		new UIStatus();
 		new UIMenubar();
 
-		Context.textToolText = tr("Text");
+		Context.raw.textToolText = tr("Text");
 
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
 		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
@@ -57,14 +57,14 @@ class UISidebar {
 			Project.materials = [];
 			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 				Project.materials.push(new MaterialSlot(m));
-				Context.material = Project.materials[0];
+				Context.raw.material = Project.materials[0];
 			});
 		}
 
 		if (Project.brushes == null) {
 			Project.brushes = [];
 			Project.brushes.push(new BrushSlot());
-			Context.brush = Project.brushes[0];
+			Context.raw.brush = Project.brushes[0];
 			MakeMaterial.parseBrush();
 		}
 
@@ -72,46 +72,46 @@ class UISidebar {
 			Project.fonts = [];
 			var fontNames = App.font.getFontNames();
 			Project.fonts.push(new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font));
-			Context.font = Project.fonts[0];
+			Context.raw.font = Project.fonts[0];
 		}
 
 		if (Project.layers == null) {
 			Project.layers = [];
 			Project.layers.push(new LayerSlot());
-			Context.layer = Project.layers[0];
+			Context.raw.layer = Project.layers[0];
 		}
 
 		if (Project.raw.swatches == null) {
 			Project.setDefaultSwatches();
-			Context.swatch = Project.raw.swatches[0];
+			Context.raw.swatch = Project.raw.swatches[0];
 		}
 
-		if (Context.emptyEnvmap == null) {
+		if (Context.raw.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 2);
 			b.set(1, 2);
 			b.set(2, 2);
 			b.set(3, 255);
-			Context.emptyEnvmap = Image.fromBytes(b, 1, 1);
+			Context.raw.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}
-		if (Context.previewEnvmap == null) {
+		if (Context.raw.previewEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 0);
 			b.set(1, 0);
 			b.set(2, 0);
 			b.set(3, 255);
-			Context.previewEnvmap = Image.fromBytes(b, 1, 1);
+			Context.raw.previewEnvmap = Image.fromBytes(b, 1, 1);
 		}
 
 		var world = Scene.active.world;
-		if (Context.savedEnvmap == null) {
-			// Context.savedEnvmap = world.envmap;
-			Context.defaultIrradiance = world.probe.irradiance;
-			Context.defaultRadiance = world.probe.radiance;
-			Context.defaultRadianceMipmaps = world.probe.radianceMipmaps;
+		if (Context.raw.savedEnvmap == null) {
+			// Context.raw.savedEnvmap = world.envmap;
+			Context.raw.defaultIrradiance = world.probe.irradiance;
+			Context.raw.defaultRadiance = world.probe.radiance;
+			Context.raw.defaultRadianceMipmaps = world.probe.radianceMipmaps;
 		}
-		world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
-		Context.ddirty = 1;
+		world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Context.raw.ddirty = 1;
 
 		History.reset();
 
@@ -124,26 +124,26 @@ class UISidebar {
 		var resources = ["cursor.k", "icons.k"];
 		Res.load(resources, done);
 
-		Context.projectObjects = [];
-		for (m in Scene.active.meshes) Context.projectObjects.push(m);
+		Context.raw.projectObjects = [];
+		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
 	}
 
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
 
-		Context.gizmo = Scene.active.getChild(".Gizmo");
-		Context.gizmoTranslateX = Context.gizmo.getChild(".TranslateX");
-		Context.gizmoTranslateY = Context.gizmo.getChild(".TranslateY");
-		Context.gizmoTranslateZ = Context.gizmo.getChild(".TranslateZ");
-		Context.gizmoScaleX = Context.gizmo.getChild(".ScaleX");
-		Context.gizmoScaleY = Context.gizmo.getChild(".ScaleY");
-		Context.gizmoScaleZ = Context.gizmo.getChild(".ScaleZ");
-		Context.gizmoRotateX = Context.gizmo.getChild(".RotateX");
-		Context.gizmoRotateY = Context.gizmo.getChild(".RotateY");
-		Context.gizmoRotateZ = Context.gizmo.getChild(".RotateZ");
+		Context.raw.gizmo = Scene.active.getChild(".Gizmo");
+		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
+		Context.raw.gizmoTranslateY = Context.raw.gizmo.getChild(".TranslateY");
+		Context.raw.gizmoTranslateZ = Context.raw.gizmo.getChild(".TranslateZ");
+		Context.raw.gizmoScaleX = Context.raw.gizmo.getChild(".ScaleX");
+		Context.raw.gizmoScaleY = Context.raw.gizmo.getChild(".ScaleY");
+		Context.raw.gizmoScaleZ = Context.raw.gizmo.getChild(".ScaleZ");
+		Context.raw.gizmoRotateX = Context.raw.gizmo.getChild(".RotateX");
+		Context.raw.gizmoRotateY = Context.raw.gizmo.getChild(".RotateY");
+		Context.raw.gizmoRotateZ = Context.raw.gizmo.getChild(".RotateZ");
 
-		Context.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
-		Project.paintObjects = [Context.paintObject];
+		Context.raw.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
+		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
 			iron.App.notifyOnInit(App.initLayers);
@@ -177,19 +177,19 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimportTextures();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
-			if (Context.textureExportPath == "") { // First export, ask for path
-				Context.layersExport = ExportVisible;
+			if (Context.raw.textureExportPath == "") { // First export, ask for path
+				Context.raw.layersExport = ExportVisible;
 				BoxExport.showTextures();
 			}
 			else {
 				function _init() {
-					ExportTexture.run(Context.textureExportPath);
+					ExportTexture.run(Context.raw.textureExportPath);
 				}
 				iron.App.notifyOnInit(_init);
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
-			Context.layersExport = ExportVisible;
+			Context.raw.layersExport = ExportVisible;
 			BoxExport.showTextures();
 		}
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
@@ -208,50 +208,50 @@ class UISidebar {
 		#end
 
 		var mouse = Input.getMouse();
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
-		if ((Context.brushCanLock || Context.brushLocked) && mouse.moved) {
+		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) ||
 				Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) ||
 				(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
-				if (Context.brushLocked) {
+				if (Context.raw.brushLocked) {
 					if (Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown)) {
-						Context.brushOpacity += mouse.movementX / 500;
-						Context.brushOpacity = Math.max(0.0, Math.min(1.0, Context.brushOpacity));
-						Context.brushOpacity = Math.round(Context.brushOpacity * 100) / 100;
-						Context.brushOpacityHandle.value = Context.brushOpacity;
+						Context.raw.brushOpacity += mouse.movementX / 500;
+						Context.raw.brushOpacity = Math.max(0.0, Math.min(1.0, Context.raw.brushOpacity));
+						Context.raw.brushOpacity = Math.round(Context.raw.brushOpacity * 100) / 100;
+						Context.raw.brushOpacityHandle.value = Context.raw.brushOpacity;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_angle, ShortcutDown)) {
-						Context.brushAngle += mouse.movementX / 5;
-						Context.brushAngle = Std.int(Context.brushAngle) % 360;
-						if (Context.brushAngle < 0) Context.brushAngle += 360;
-						Context.brushAngleHandle.value = Context.brushAngle;
+						Context.raw.brushAngle += mouse.movementX / 5;
+						Context.raw.brushAngle = Std.int(Context.raw.brushAngle) % 360;
+						if (Context.raw.brushAngle < 0) Context.raw.brushAngle += 360;
+						Context.raw.brushAngleHandle.value = Context.raw.brushAngle;
 						MakeMaterial.parsePaintMaterial();
 					}
 					else if (decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown)) {
-						Context.brushDecalMaskRadius += mouse.movementX / 150;
-						Context.brushDecalMaskRadius = Math.max(0.01, Math.min(4.0, Context.brushDecalMaskRadius));
-						Context.brushDecalMaskRadius = Math.round(Context.brushDecalMaskRadius * 100) / 100;
-						Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
+						Context.raw.brushDecalMaskRadius += mouse.movementX / 150;
+						Context.raw.brushDecalMaskRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushDecalMaskRadius));
+						Context.raw.brushDecalMaskRadius = Math.round(Context.raw.brushDecalMaskRadius * 100) / 100;
+						Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
 					}
 					else {
-						Context.brushRadius += mouse.movementX / 150;
-						Context.brushRadius = Math.max(0.01, Math.min(4.0, Context.brushRadius));
-						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius += mouse.movementX / 150;
+						Context.raw.brushRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushRadius));
+						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 					}
 					UIHeader.inst.headerHandle.redraws = 2;
 				}
-				else if (Context.brushCanLock) {
-					Context.brushCanLock = false;
-					Context.brushLocked = true;
+				else if (Context.raw.brushCanLock) {
+					Context.raw.brushCanLock = false;
+					Context.raw.brushLocked = true;
 				}
 			}
 		}
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
@@ -280,49 +280,49 @@ class UISidebar {
 					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
 					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
 					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
-					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.tool == ToolBrush ? ToolEraser : ToolBrush);
+					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.raw.tool == ToolBrush ? ToolEraser : ToolBrush);
 				}
 
 				// Radius
-				if (Context.tool == ToolBrush  ||
-					Context.tool == ToolEraser ||
-					Context.tool == ToolDecal  ||
-					Context.tool == ToolText   ||
-					Context.tool == ToolClone  ||
-					Context.tool == ToolBlur   ||
-					Context.tool == ToolParticle) {
+				if (Context.raw.tool == ToolBrush  ||
+					Context.raw.tool == ToolEraser ||
+					Context.raw.tool == ToolDecal  ||
+					Context.raw.tool == ToolText   ||
+					Context.raw.tool == ToolClone  ||
+					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolParticle) {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
 						Operator.shortcut(Config.keymap.brush_opacity) ||
 						Operator.shortcut(Config.keymap.brush_angle) ||
 						(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
-						Context.brushCanLock = true;
+						Context.raw.brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
-						Context.lockStartedX = mouse.x;
-						Context.lockStartedY = mouse.y;
+						Context.raw.lockStartedX = mouse.x;
+						Context.raw.lockStartedY = mouse.y;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-						Context.brushRadius -= getRadiusIncrement();
-						Context.brushRadius = Math.max(Math.round(Context.brushRadius * 100) / 100, 0.01);
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius -= getRadiusIncrement();
+						Context.raw.brushRadius = Math.max(Math.round(Context.raw.brushRadius * 100) / 100, 0.01);
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-						Context.brushRadius += getRadiusIncrement();
-						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius += getRadiusIncrement();
+						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 					else if (decalMask) {
 						if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-							Context.brushDecalMaskRadius -= getRadiusIncrement();
-							Context.brushDecalMaskRadius = Math.max(Math.round(Context.brushDecalMaskRadius * 100) / 100, 0.01);
-							Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
+							Context.raw.brushDecalMaskRadius -= getRadiusIncrement();
+							Context.raw.brushDecalMaskRadius = Math.max(Math.round(Context.raw.brushDecalMaskRadius * 100) / 100, 0.01);
+							Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
 							UIHeader.inst.headerHandle.redraws = 2;
 						}
 						else if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-							Context.brushDecalMaskRadius += getRadiusIncrement();
-							Context.brushDecalMaskRadius = Math.round(Context.brushDecalMaskRadius * 100) / 100;
-							Context.brushDecalMaskRadiusHandle.value = Context.brushDecalMaskRadius;
+							Context.raw.brushDecalMaskRadius += getRadiusIncrement();
+							Context.raw.brushDecalMaskRadius = Math.round(Context.raw.brushDecalMaskRadius * 100) / 100;
+							Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
 							UIHeader.inst.headerHandle.redraws = 2;
 						}
 					}
@@ -346,9 +346,9 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
 				else if (Operator.shortcut(Config.keymap.view_top)) Viewport.setView(0, 0, 1, 0, 0, 0);
 				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-					Context.cameraType = Context.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
-					Context.camHandle.position = Context.cameraType;
-					Viewport.updateCameraType(Context.cameraType);
+					Context.raw.cameraType = Context.raw.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
+					Context.raw.camHandle.position = Context.raw.cameraType;
+					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 				else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) Viewport.orbit(-Math.PI / 12, 0);
 				else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) Viewport.orbit(Math.PI / 12, 0);
@@ -360,7 +360,7 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
 					UIMenu.draw(function(ui: Zui) {
 						var modeHandle = Id.handle();
-						modeHandle.position = Context.viewportMode;
+						modeHandle.position = Context.raw.viewportMode;
 						ui.text(tr("Viewport Mode"), Right, ui.t.HIGHLIGHT_COL);
 						var modes = [
 							tr("Lit"),
@@ -403,26 +403,26 @@ class UISidebar {
 			}
 		}
 
-		if (Context.brushCanLock || Context.brushLocked) {
-			if (mouse.moved && Context.brushCanUnlock) {
-				Context.brushLocked = false;
-				Context.brushCanUnlock = false;
+		if (Context.raw.brushCanLock || Context.raw.brushLocked) {
+			if (mouse.moved && Context.raw.brushCanUnlock) {
+				Context.raw.brushLocked = false;
+				Context.raw.brushCanUnlock = false;
 			}
-			if ((Context.brushCanLock || Context.brushLocked) &&
+			if ((Context.raw.brushCanLock || Context.raw.brushLocked) &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) &&
 				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
 				mouse.unlock();
-				Context.lastPaintX = -1;
-				Context.lastPaintY = -1;
-				if (Context.brushCanLock) {
-					Context.brushCanLock = false;
-					Context.brushCanUnlock = false;
-					Context.brushLocked = false;
+				Context.raw.lastPaintX = -1;
+				Context.raw.lastPaintY = -1;
+				if (Context.raw.brushCanLock) {
+					Context.raw.brushCanLock = false;
+					Context.raw.brushCanUnlock = false;
+					Context.raw.brushLocked = false;
 				}
 				else {
-					Context.brushCanUnlock = true;
+					Context.raw.brushCanUnlock = true;
 				}
 			}
 		}
@@ -469,20 +469,20 @@ class UISidebar {
 		}
 
 		#if arm_physics
-		if (Context.tool == ToolParticle && Context.particlePhysics && Context.inPaintArea() && !Context.paint2d) {
+		if (Context.raw.tool == ToolParticle && Context.raw.particlePhysics && Context.inPaintArea() && !Context.raw.paint2d) {
 			arm.util.ParticleUtil.initParticlePhysics();
 			var world = arm.plugin.PhysicsWorld.active;
 			world.lateUpdate();
-			Context.ddirty = 2;
-			Context.rdirty = 2;
+			Context.raw.ddirty = 2;
+			Context.raw.rdirty = 2;
 			if (mouse.started()) {
-				if (Context.particleTimer != null) {
-					iron.system.Tween.stop(Context.particleTimer);
-					Context.particleTimer.done();
-					Context.particleTimer = null;
+				if (Context.raw.particleTimer != null) {
+					iron.system.Tween.stop(Context.raw.particleTimer);
+					Context.raw.particleTimer.done();
+					Context.raw.particleTimer = null;
 				}
 				History.pushUndo = true;
-				Context.particleHitX = Context.particleHitY = Context.particleHitZ = 0;
+				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
 				Scene.active.spawnObject(".Sphere", null, function(o: Object) {
 					iron.data.Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
 						var mo: MeshObject = cast o;
@@ -493,7 +493,7 @@ class UISidebar {
 						var camera = iron.Scene.active.camera;
 						var ct = camera.transform;
 						mo.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
-						mo.transform.scale.set(Context.brushRadius * 0.2, Context.brushRadius * 0.2, Context.brushRadius * 0.2);
+						mo.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
 						mo.transform.buildMatrix();
 
 						var body = new arm.plugin.PhysicsBody();
@@ -507,21 +507,21 @@ class UISidebar {
 						var ray = iron.math.RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
 						body.applyImpulse(ray.direction.mult(0.15));
 
-						Context.particleTimer = iron.system.Tween.timer(5, mo.remove);
+						Context.raw.particleTimer = iron.system.Tween.timer(5, mo.remove);
 					});
 				});
 			}
 
-			var pairs = world.getContactPairs(Context.paintBody);
+			var pairs = world.getContactPairs(Context.raw.paintBody);
 			if (pairs != null) {
 				for (p in pairs) {
-					Context.lastParticleHitX = Context.particleHitX != 0 ? Context.particleHitX : p.posA.x;
-					Context.lastParticleHitY = Context.particleHitY != 0 ? Context.particleHitY : p.posA.y;
-					Context.lastParticleHitZ = Context.particleHitZ != 0 ? Context.particleHitZ : p.posA.z;
-					Context.particleHitX = p.posA.x;
-					Context.particleHitY = p.posA.y;
-					Context.particleHitZ = p.posA.z;
-					Context.pdirty = 1;
+					Context.raw.lastParticleHitX = Context.raw.particleHitX != 0 ? Context.raw.particleHitX : p.posA.x;
+					Context.raw.lastParticleHitY = Context.raw.particleHitY != 0 ? Context.raw.particleHitY : p.posA.y;
+					Context.raw.lastParticleHitZ = Context.raw.particleHitZ != 0 ? Context.raw.particleHitZ : p.posA.z;
+					Context.raw.particleHitX = p.posA.x;
+					Context.raw.particleHitY = p.posA.y;
+					Context.raw.particleHitZ = p.posA.z;
+					Context.raw.pdirty = 1;
 					break; // 1 pair for now
 				}
 			}
@@ -543,10 +543,10 @@ class UISidebar {
 	}
 
 	function getBrushStencilRect(): TRect {
-		var w = Std.int(Context.brushStencilImage.width * (App.h() / Context.brushStencilImage.height) * Context.brushStencilScale);
-		var h = Std.int(App.h() * Context.brushStencilScale);
-		var x = Std.int(App.x() + Context.brushStencilX * App.w());
-		var y = Std.int(App.y() + Context.brushStencilY * App.h());
+		var w = Std.int(Context.raw.brushStencilImage.width * (App.h() / Context.raw.brushStencilImage.height) * Context.raw.brushStencilScale);
+		var h = Std.int(App.h() * Context.raw.brushStencilScale);
+		var x = Std.int(App.x() + Context.raw.brushStencilX * App.w());
+		var y = Std.int(App.y() + Context.raw.brushStencilY * App.h());
 		return { w: w, h: h, x: x, y: y };
 	}
 
@@ -562,58 +562,58 @@ class UISidebar {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		if (Context.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown)) {
+		if (Context.raw.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown)) {
 			var r = getBrushStencilRect();
 			if (mouse.started("left")) {
-				Context.brushStencilScaling =
+				Context.raw.brushStencilScaling =
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.y - 8,       16, 16) ||
 					hitRect(mouse.x, mouse.y, r.x - 8,       r.h + r.y - 8, 16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.y - 8,       16, 16) ||
 					hitRect(mouse.x, mouse.y, r.w + r.x - 8, r.h + r.y - 8, 16, 16);
-				var cosa = Math.cos(-Context.brushStencilAngle);
-				var sina = Math.sin(-Context.brushStencilAngle);
+				var cosa = Math.cos(-Context.raw.brushStencilAngle);
+				var sina = Math.sin(-Context.raw.brushStencilAngle);
 				var ox = 0;
 				var oy = -r.h / 2;
 				var x = ox * cosa - oy * sina;
 				var y = ox * sina + oy * cosa;
 				x += r.x + r.w / 2;
 				y += r.y + r.h / 2;
-				Context.brushStencilRotating =
+				Context.raw.brushStencilRotating =
 					hitRect(mouse.x, mouse.y, Std.int(x - 16), Std.int(y - 16), 32, 32);
 			}
-			var _scale = Context.brushStencilScale;
+			var _scale = Context.raw.brushStencilScale;
 			if (mouse.down("left")) {
-				if (Context.brushStencilScaling) {
+				if (Context.raw.brushStencilScaling) {
 					var mult = mouse.x > r.x + r.w / 2 ? 1 : -1;
-					Context.brushStencilScale += mouse.movementX / 400 * mult;
+					Context.raw.brushStencilScale += mouse.movementX / 400 * mult;
 				}
-				else if (Context.brushStencilRotating) {
+				else if (Context.raw.brushStencilRotating) {
 					var gizmoX = r.x + r.w / 2;
 					var gizmoY = r.y + r.h / 2;
-					Context.brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
+					Context.raw.brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
 				}
 				else {
-					Context.brushStencilX += mouse.movementX / App.w();
-					Context.brushStencilY += mouse.movementY / App.h();
+					Context.raw.brushStencilX += mouse.movementX / App.w();
+					Context.raw.brushStencilY += mouse.movementY / App.h();
 				}
 			}
-			else Context.brushStencilScaling = false;
+			else Context.raw.brushStencilScaling = false;
 			if (mouse.wheelDelta != 0) {
-				Context.brushStencilScale -= mouse.wheelDelta / 10;
+				Context.raw.brushStencilScale -= mouse.wheelDelta / 10;
 			}
 			// Center after scale
-			var ratio = App.h() / Context.brushStencilImage.height;
-			var oldW = _scale * Context.brushStencilImage.width * ratio;
-			var newW = Context.brushStencilScale * Context.brushStencilImage.width * ratio;
+			var ratio = App.h() / Context.raw.brushStencilImage.height;
+			var oldW = _scale * Context.raw.brushStencilImage.width * ratio;
+			var newW = Context.raw.brushStencilScale * Context.raw.brushStencilImage.width * ratio;
 			var oldH = _scale * App.h();
-			var newH = Context.brushStencilScale * App.h();
-			Context.brushStencilX += (oldW - newW) / App.w() / 2;
-			Context.brushStencilY += (oldH - newH) / App.h() / 2;
+			var newH = Context.raw.brushStencilScale * App.h();
+			Context.raw.brushStencilX += (oldW - newW) / App.w() / 2;
+			Context.raw.brushStencilY += (oldH - newH) / App.h() / 2;
 		}
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
+		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 				   decalMask ||
@@ -623,15 +623,15 @@ class UISidebar {
 
 		if (Config.raw.touch_ui) {
 			if (Input.getPen().down()) {
-				Context.penPaintingOnly = true;
+				Context.raw.penPaintingOnly = true;
 			}
-			else if (Context.penPaintingOnly) {
+			else if (Context.raw.penPaintingOnly) {
 				down = false;
 			}
 		}
 
 		#if arm_physics
-		if (Context.tool == ToolParticle && Context.particlePhysics) {
+		if (Context.raw.tool == ToolParticle && Context.raw.particlePhysics) {
 			down = false;
 		}
 		#end
@@ -640,7 +640,7 @@ class UISidebar {
 		// No hover on iPad, decals are painted by pen release
 		if (decal) {
 			down = Input.getPen().released();
-			if (!Context.penPaintingOnly) {
+			if (!Context.raw.penPaintingOnly) {
 				down = down || Input.getMouse().released();
 			}
 		}
@@ -650,7 +650,7 @@ class UISidebar {
 			var mx = mouse.viewX;
 			var my = mouse.viewY;
 			var ww = iron.App.w();
-			if (Context.paint2d) {
+			if (Context.raw.paint2d) {
 				mx -= iron.App.w();
 				ww = UIView2D.inst.ww;
 			}
@@ -661,29 +661,29 @@ class UISidebar {
 				my > iron.App.y()) {
 
 				if (setCloneSource) {
-					Context.cloneStartX = mx;
-					Context.cloneStartY = my;
+					Context.raw.cloneStartX = mx;
+					Context.raw.cloneStartY = my;
 				}
 				else {
-					if (Context.brushTime == 0 &&
+					if (Context.raw.brushTime == 0 &&
 						!App.isDragging &&
 						!App.isResizing &&
 						!App.isComboSelected()) { // Paint started
 
 						// Draw line
 						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
-							Context.lastPaintVecX = Context.lastPaintX;
-							Context.lastPaintVecY = Context.lastPaintY;
+							Context.raw.lastPaintVecX = Context.raw.lastPaintX;
+							Context.raw.lastPaintVecY = Context.raw.lastPaintY;
 						}
 
 						History.pushUndo = true;
 
-						if (Context.tool == ToolClone && Context.cloneStartX >= 0.0) { // Clone delta
-							Context.cloneDeltaX = (Context.cloneStartX - mx) / ww;
-							Context.cloneDeltaY = (Context.cloneStartY - my) / iron.App.h();
-							Context.cloneStartX = -1;
+						if (Context.raw.tool == ToolClone && Context.raw.cloneStartX >= 0.0) { // Clone delta
+							Context.raw.cloneDeltaX = (Context.raw.cloneStartX - mx) / ww;
+							Context.raw.cloneDeltaY = (Context.raw.cloneStartY - my) / iron.App.h();
+							Context.raw.cloneStartX = -1;
 						}
-						else if (Context.tool == ToolParticle) {
+						else if (Context.raw.tool == ToolParticle) {
 							// Reset particles
 							#if arm_particles
 							var emitter: MeshObject = cast Scene.active.getChild(".ParticleEmitter");
@@ -693,27 +693,27 @@ class UISidebar {
 							// @:privateAccess psys.seed++;
 							#end
 						}
-						else if (Context.tool == ToolFill && Context.fillTypeHandle.position == FillUVIsland) {
+						else if (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillUVIsland) {
 							UVUtil.uvislandmapCached = false;
 						}
 					}
-					Context.brushTime += Time.delta;
-					if (Context.runBrush != null) Context.runBrush(0);
+					Context.raw.brushTime += Time.delta;
+					if (Context.raw.runBrush != null) Context.raw.runBrush(0);
 				}
 			}
 		}
-		else if (Context.brushTime > 0) { // Brush released
-			Context.brushTime = 0;
-			Context.prevPaintVecX = -1;
-			Context.prevPaintVecY = -1;
+		else if (Context.raw.brushTime > 0) { // Brush released
+			Context.raw.brushTime = 0;
+			Context.raw.prevPaintVecX = -1;
+			Context.raw.prevPaintVecY = -1;
 			#if (!kha_direct3d12 && !kha_vulkan) // Keep accumulated samples for D3D12
-			Context.ddirty = 3;
+			Context.raw.ddirty = 3;
 			#end
-			Context.brushBlendDirty = true; // Update brush mask
-			Context.layerPreviewDirty = true; // Update layer preview
+			Context.raw.brushBlendDirty = true; // Update brush mask
+			Context.raw.layerPreviewDirty = true; // Update layer preview
 
 			// New color id picked, update fill layer
-			if (Context.tool == ToolColorId && Context.layer.fill_layer != null) {
+			if (Context.raw.tool == ToolColorId && Context.raw.layer.fill_layer != null) {
 				App.notifyOnNextFrame(function() {
 					App.updateFillLayer();
 					MakeMaterial.parsePaintMaterial(false);
@@ -721,10 +721,10 @@ class UISidebar {
 			}
 		}
 
-		if (Context.layersPreviewDirty) {
-			Context.layersPreviewDirty = false;
-			Context.layerPreviewDirty = false;
-			Context.maskPreviewLast = null;
+		if (Context.raw.layersPreviewDirty) {
+			Context.raw.layersPreviewDirty = false;
+			Context.raw.layerPreviewDirty = false;
+			Context.raw.maskPreviewLast = null;
 			if (App.pipeMerge == null) App.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
@@ -741,17 +741,17 @@ class UISidebar {
 			}
 			hwnd0.redraws = 2;
 		}
-		if (Context.layerPreviewDirty && !Context.layer.isGroup()) {
-			Context.layerPreviewDirty = false;
-			Context.maskPreviewLast = null;
+		if (Context.raw.layerPreviewDirty && !Context.raw.layer.isGroup()) {
+			Context.raw.layerPreviewDirty = false;
+			Context.raw.maskPreviewLast = null;
 			if (App.pipeMerge == null) App.makePipe();
 			// Update layer preview
-			var l = Context.layer;
+			var l = Context.raw.layer;
 			var target = l.texpaint_preview;
 			var source = l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
-			// g2.pipeline = Context.layer.isMask() ? App.pipeCopy8 : App.pipeCopy;
+			// g2.pipeline = Context.raw.layer.isMask() ? App.pipeCopy8 : App.pipeCopy;
 			g2.pipeline = App.pipeCopy; // texpaint_preview is always RGBA32 for now
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
@@ -813,14 +813,14 @@ class UISidebar {
 			if (ui.window(hminimize, System.windowWidth() - width, 0, width, Std.int(ui.BUTTON_H()))) {
 				ui._w = width;
 				if (ui.button("<<"))
-					Config.raw.layout[LayoutSidebarW] = Context.maximizedSidebarWidth != 0 ? Context.maximizedSidebarWidth : Std.int(UISidebar.defaultWindowW * Config.raw.window_scale);
+					Config.raw.layout[LayoutSidebarW] = Context.raw.maximizedSidebarWidth != 0 ? Context.raw.maximizedSidebarWidth : Std.int(UISidebar.defaultWindowW * Config.raw.window_scale);
 			}
 		}
-		if (htab0.changed && (htab0.position == Context.lastHtab0Position) && Config.raw.layout[LayoutSidebarW] != 0) {
-			Context.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
+		if (htab0.changed && (htab0.position == Context.raw.lastHtab0Position) && Config.raw.layout[LayoutSidebarW] != 0) {
+			Context.raw.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
 			Config.raw.layout[LayoutSidebarW] = 0 ;
 		}
-		Context.lastHtab0Position = htab0.position;
+		Context.raw.lastHtab0Position = htab0.position;
 		ui.end();
 		g.begin(false);
 	}
@@ -830,23 +830,23 @@ class UISidebar {
 
 		// Brush
 		if (App.uiEnabled && UIHeader.inst.worktab.position == SpacePaint) {
-			Context.viewIndex = Context.viewIndexLast;
-			var mx = App.x() + Context.paintVec.x * App.w();
-			var my = App.y() + Context.paintVec.y * App.h();
-			Context.viewIndex = -1;
+			Context.raw.viewIndex = Context.raw.viewIndexLast;
+			var mx = App.x() + Context.raw.paintVec.x * App.w();
+			var my = App.y() + Context.raw.paintVec.y * App.h();
+			Context.raw.viewIndex = -1;
 
 			// Radius being scaled
-			if (Context.brushLocked) {
-				mx += Context.lockStartedX - System.windowWidth() / 2;
-				my += Context.lockStartedY - System.windowHeight() / 2;
+			if (Context.raw.brushLocked) {
+				mx += Context.raw.lockStartedX - System.windowWidth() / 2;
+				my += Context.raw.lockStartedY - System.windowHeight() / 2;
 			}
 
-			if (Context.brushStencilImage != null && Context.tool != ToolBake && Context.tool != ToolPicker && Context.tool != ToolColorId) {
+			if (Context.raw.brushStencilImage != null && Context.raw.tool != ToolBake && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId) {
 				var r = getBrushStencilRect();
 				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
 					g.color = 0x88ffffff;
-					g.pushRotation(-Context.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
-					g.drawScaledImage(Context.brushStencilImage, r.x, r.y, r.w, r.h);
+					g.pushRotation(-Context.raw.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
 					g.popTransformation();
 					g.color = 0xffffffff;
 				}
@@ -860,22 +860,22 @@ class UISidebar {
 					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 					// Rotate
-					g.pushRotation(-Context.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					g.pushRotation(-Context.raw.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
 					kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
 					g.popTransformation();
 				}
 			}
 
 			// Show picked material next to cursor
-			if (Context.tool == ToolPicker && Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
-				var img = Context.material.imageIcon;
+			if (Context.raw.tool == ToolPicker && Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
+				var img = Context.raw.material.imageIcon;
 				#if kha_opengl
 				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 				#else
 				g.drawImage(img, mx + 10, my + 10);
 				#end
 			}
-			if (Context.tool == ToolPicker && Context.colorPickerCallback != null) {
+			if (Context.raw.tool == ToolPicker && Context.raw.colorPickerCallback != null) {
 				var img = Res.get("icons.k");
 				var rect = Res.tile50(img, ToolPicker, 0);
 					
@@ -883,66 +883,66 @@ class UISidebar {
 			}
 
 			var cursorImg = Res.get("cursor.k");
-			var psize = Std.int(cursorImg.width * (Context.brushRadius * Context.brushNodesRadius) * ui.SCALE());
+			var psize = Std.int(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * ui.SCALE());
 
 			// Clone source cursor
 			var mouse = Input.getMouse();
 			var pen = Input.getPen();
 			var kb = Input.getKeyboard();
-			if (Context.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
+			if (Context.raw.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 				g.color = 0x66ffffff;
-				g.drawScaledImage(cursorImg, mx + Context.cloneDeltaX * iron.App.w() - psize / 2, my + Context.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+				g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * iron.App.w() - psize / 2, my + Context.raw.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
 				g.color = 0xffffffff;
 			}
 
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 
 			if (!Config.raw.brush_3d || Context.in2dView() || decal) {
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 				if (decal && !Context.inNodes()) {
 					var decalAlpha = 0.5;
 					if (!decalMask) {
-						Context.decalX = Context.paintVec.x;
-						Context.decalY = Context.paintVec.y;
-						decalAlpha = Context.brushOpacity;
+						Context.raw.decalX = Context.raw.paintVec.x;
+						Context.raw.decalY = Context.raw.paintVec.y;
+						decalAlpha = Context.raw.brushOpacity;
 
 						// Radius being scaled
-						if (Context.brushLocked) {
-							Context.decalX += (Context.lockStartedX - System.windowWidth() / 2) / App.w();
-							Context.decalY += (Context.lockStartedY - System.windowHeight() / 2) / App.h();
+						if (Context.raw.brushLocked) {
+							Context.raw.decalX += (Context.raw.lockStartedX - System.windowWidth() / 2) / App.w();
+							Context.raw.decalY += (Context.raw.lockStartedY - System.windowHeight() / 2) / App.h();
 						}
 					}
 
 					if (!Config.raw.brush_live) {
-						var psizex = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius * Context.brushScaleX));
-						var psizey = Std.int(256 * ui.SCALE() * (Context.brushRadius * Context.brushNodesRadius));
+						var psizex = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius * Context.raw.brushScaleX));
+						var psizey = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
 
-						Context.viewIndex = Context.viewIndexLast;
-						var decalX = App.x() + Context.decalX * App.w() - psizex / 2;
-						var decalY = App.y() + Context.decalY * App.h() - psizey / 2;
-						Context.viewIndex = -1;
+						Context.raw.viewIndex = Context.raw.viewIndexLast;
+						var decalX = App.x() + Context.raw.decalX * App.w() - psizex / 2;
+						var decalY = App.y() + Context.raw.decalY * App.h() - psizey / 2;
+						Context.raw.viewIndex = -1;
 
 						g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
-						var angle = (Context.brushAngle + Context.brushNodesAngle) * (Math.PI / 180);
+						var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
 						g.pushRotation(angle, decalX + psizex / 2, decalY + psizey / 2);
 						#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-						g.drawScaledImage(Context.decalImage, decalX, decalY, psizex, psizey);
+						g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 						#else
-						g.drawScaledImage(Context.decalImage, decalX, decalY + psizey, psizex, -psizey);
+						g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
 						#end
 						g.popTransformation();
 						g.color = 0xffffffff;
 					}
 				}
-				if (Context.tool == ToolBrush  ||
-					Context.tool == ToolEraser ||
-					Context.tool == ToolClone  ||
-					Context.tool == ToolBlur   ||
-					Context.tool == ToolParticle ||
+				if (Context.raw.tool == ToolBrush  ||
+					Context.raw.tool == ToolEraser ||
+					Context.raw.tool == ToolClone  ||
+					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolParticle ||
 					(decalMask && !Config.raw.brush_3d) ||
 					(decalMask && Context.in2dView())) {
 					if (decalMask) {
-						psize = Std.int(cursorImg.width * (Context.brushDecalMaskRadius * Context.brushNodesRadius) * ui.SCALE());
+						psize = Std.int(cursorImg.width * (Context.raw.brushDecalMaskRadius * Context.raw.brushNodesRadius) * ui.SCALE());
 					}
 					if (Config.raw.brush_3d && Context.in2dView()) {
 						psize = Std.int(psize * UIView2D.inst.panScale);
@@ -951,18 +951,18 @@ class UISidebar {
 				}
 			}
 
-			if (Context.brushLazyRadius > 0 && !Context.brushLocked &&
-				(Context.tool == ToolBrush ||
-				 Context.tool == ToolEraser ||
-				 Context.tool == ToolDecal ||
-				 Context.tool == ToolText ||
-				 Context.tool == ToolClone ||
-				 Context.tool == ToolBlur ||
-				 Context.tool == ToolParticle)) {
+			if (Context.raw.brushLazyRadius > 0 && !Context.raw.brushLocked &&
+				(Context.raw.tool == ToolBrush ||
+				 Context.raw.tool == ToolEraser ||
+				 Context.raw.tool == ToolDecal ||
+				 Context.raw.tool == ToolText ||
+				 Context.raw.tool == ToolClone ||
+				 Context.raw.tool == ToolBlur ||
+				 Context.raw.tool == ToolParticle)) {
 				g.fillRect(mx - 1, my - 1, 2, 2);
-				var mx = Context.brushLazyX * App.w() + App.x();
-				var my = Context.brushLazyY * App.h() + App.y();
-				var radius = Context.brushLazyRadius * 180;
+				var mx = Context.raw.brushLazyX * App.w() + App.x();
+				var my = Context.raw.brushLazyY * App.h() + App.y();
+				var radius = Context.raw.brushLazyRadius * 180;
 				g.color = 0xff666666;
 				g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
 				g.color = 0xffffffff;

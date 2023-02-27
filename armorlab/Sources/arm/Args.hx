@@ -63,10 +63,10 @@ class Args {
 						if (Path.isFolder(exportTexturesPath)) {
 							// Applying the correct format type from args
 							if (exportTexturesType == "png") {
-								Context.formatType = FormatPng;
+								Context.raw.formatType = FormatPng;
 							}
 							else if (exportTexturesType == "jpg") {
-								Context.formatType = FormatJpg;
+								Context.raw.formatType = FormatJpg;
 							}
 
 							// Get export preset and apply the correct one from args

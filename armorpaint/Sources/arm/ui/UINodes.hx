@@ -111,8 +111,8 @@ class UINodes {
 			}
 			// Selecting which node socket to preview
 			else if (node == nodes.nodesSelected[0]) {
-				Context.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
-				Context.nodePreviewDirty = true;
+				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+				Context.raw.nodePreviewDirty = true;
 			}
 		}
 	}
@@ -216,8 +216,8 @@ class UINodes {
 		else if (node == nodes.nodesSelected[0]) {
 			var i = node.outputs.indexOf(socket);
 			if (i > -1) {
-				Context.nodePreviewSocket = i;
-				Context.nodePreviewDirty = true;
+				Context.raw.nodePreviewSocket = i;
+				Context.raw.nodePreviewDirty = true;
 			}
 		}
 	}
@@ -315,8 +315,8 @@ class UINodes {
 				if (ui.getInputInRect(ui._windowX + nodes.NODE_X(node), ui._windowY + nodes.NODE_Y(node), nodes.NODE_W(node), nodes.NODE_H(canvas, node))) {
 					if (node == nodes.nodesSelected[0]) {
 						UIView2D.inst.hwnd.redraws = 2;
-						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DNode);
-						Context.selectTime = Time.time();
+						if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DNode);
+						Context.raw.selectTime = Time.time();
 					}
 					break;
 				}
@@ -395,19 +395,19 @@ class UINodes {
 			if (groups && groupStack.length > 0) return groupStack[groupStack.length - 1].canvas;
 			else return getCanvasMaterial();
 		}
-		else return Context.brush.canvas;
+		else return Context.raw.brush.canvas;
 	}
 
 	public function getCanvasMaterial(): TNodeCanvas {
-		return Context.material.canvas;
+		return Context.raw.material.canvas;
 	}
 
 	public function getNodes(): Nodes {
 		if (canvasType == CanvasMaterial) {
 			if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
-			else return Context.material.nodes;
+			else return Context.raw.material.nodes;
 		}
-		else return Context.brush.nodes;
+		else return Context.raw.brush.nodes;
 	}
 
 	public function update() {
@@ -585,19 +585,19 @@ class UINodes {
 				RenderUtil.makeMaterialPreview();
 			}
 
-			var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 
 			UISidebar.inst.hwnd0.redraws = 2;
 			recompileMatFinal = false;
-			Context.nodePreviewDirty = true;
+			Context.raw.nodePreviewDirty = true;
 		}
 
 		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
 			lastNodeSelected = nodes.nodesSelected[0];
-			Context.nodePreviewDirty = true;
-			Context.nodePreviewSocket = 0;
+			Context.raw.nodePreviewDirty = true;
+			Context.raw.nodePreviewSocket = 0;
 		}
 
 		// Remove dragged link when mouse is released out of the node viewport
@@ -616,7 +616,7 @@ class UINodes {
 
 		if (grid == null) drawGrid();
 
-		if (Config.raw.node_preview && Context.nodePreviewDirty) makeNodePreview();
+		if (Config.raw.node_preview && Context.raw.nodePreviewDirty) makeNodePreview();
 
 		// Start with UI
 		ui.begin(g);
@@ -660,10 +660,10 @@ class UINodes {
 			ui.inputEnabled = _inputEnabled;
 
 			if (nodes.colorPickerCallback != null) {
-				Context.colorPickerPreviousTool = Context.tool;
+				Context.raw.colorPickerPreviousTool = Context.raw.tool;
 				Context.selectTool(ToolPicker);
 				var tmp = nodes.colorPickerCallback;
-				Context.colorPickerCallback = function(color: TSwatchColor) {
+				Context.raw.colorPickerCallback = function(color: TSwatchColor) {
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
 					if (Config.raw.material_live)
@@ -734,13 +734,13 @@ class UINodes {
 					}
 				}
 				else if (sel.type == "OUTPUT_MATERIAL_PBR") {
-					img = Context.material.image;
+					img = Context.raw.material.image;
 				}
 				else if (sel.type == "BrushOutputNode") {
-					img = Context.brush.image;
+					img = Context.raw.brush.image;
 				}
 				else if (canvasType == CanvasMaterial) {
-					img = Context.nodePreview;
+					img = Context.raw.nodePreview;
 				}
 				if (img != null) {
 					var tw = 80 * ui.SCALE();
@@ -996,7 +996,7 @@ class UINodes {
 		pushUndo();
 		if (Project.layers[index].isGroup()) return;
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
-		var n = NodesMaterial.createNode(Context.layer.isMask() ? "LAYER_MASK" : "LAYER", g);
+		var n = NodesMaterial.createNode(Context.raw.layer.isMask() ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
 	}
@@ -1063,7 +1063,7 @@ class UINodes {
 	}
 
 	function makeNodePreview() {
-		var nodes = Context.material.nodes;
+		var nodes = Context.raw.material.nodes;
 		if (nodes.nodesSelected.length == 0) return;
 
 		var node = nodes.nodesSelected[0];
@@ -1072,15 +1072,15 @@ class UINodes {
 			node.type == "MATERIAL" ||
 			node.type == "OUTPUT_MATERIAL_PBR") return;
 
-		if (Context.material.canvas.nodes.indexOf(node) == -1) return;
+		if (Context.raw.material.canvas.nodes.indexOf(node) == -1) return;
 
-		if (Context.nodePreview == null) {
-			Context.nodePreview = kha.Image.createRenderTarget(RenderUtil.materialPreviewSize, RenderUtil.materialPreviewSize);
+		if (Context.raw.nodePreview == null) {
+			Context.raw.nodePreview = kha.Image.createRenderTarget(RenderUtil.materialPreviewSize, RenderUtil.materialPreviewSize);
 		}
 
-		Context.nodePreviewDirty = false;
+		Context.raw.nodePreviewDirty = false;
 		UINodes.inst.hwnd.redraws = 2;
-		RenderUtil.makeNodePreview(Context.material.canvas, node, Context.nodePreview);
+		RenderUtil.makeNodePreview(Context.raw.material.canvas, node, Context.raw.nodePreview);
 	}
 
 	public static function hasGroup(c: TNodeCanvas): Bool {

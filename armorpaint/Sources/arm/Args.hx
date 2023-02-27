@@ -94,11 +94,11 @@ class Args {
 							// Applying the correct format type from args
 							if (exportTexturesType == "png") {
 								App.bitsHandle.position = Bits8;
-								Context.formatType = FormatPng;
+								Context.raw.formatType = FormatPng;
 							}
 							else if (exportTexturesType == "jpg") {
 								App.bitsHandle.position = Bits8;
-								Context.formatType = FormatJpg;
+								Context.raw.formatType = FormatJpg;
 							}
 							else if (exportTexturesType == "exr16") {
 								App.bitsHandle.position = Bits16;
@@ -107,7 +107,7 @@ class Args {
 								App.bitsHandle.position = Bits32;
 							}
 
-							Context.layersExport = ExportVisible;
+							Context.raw.layersExport = ExportVisible;
 
 							// Get export preset and apply the correct one from args
 							BoxExport.files = File.readDirectory(Path.data() + Path.sep + "export_presets");
@@ -150,7 +150,7 @@ class Args {
 					}
 				}
 				else if (exportMaterial) {
-					Context.writeIconOnExport = true;
+					Context.raw.writeIconOnExport = true;
 					ExportArm.runMaterial(exportMaterialPath);
 				}
 

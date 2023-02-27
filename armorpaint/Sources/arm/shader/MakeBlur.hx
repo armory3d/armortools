@@ -19,24 +19,24 @@ class MakeBlur {
 		frag.write('vec3 nortan = vec3(0.0, 0.0, 0.0);');
 		frag.write('float height = 0.0;');
 		frag.write('float mat_opacity = 1.0;');
-		var isMask = Context.layer.isMask();
+		var isMask = Context.raw.layer.isMask();
 		if (isMask) {
 			frag.write('float opacity = 1.0;');
 		}
 		else {
 			frag.write('float opacity = 0.0;');
 		}
-		if (Context.material.paintEmis) {
+		if (Context.raw.material.paintEmis) {
 			frag.write('float emis = 0.0;');
 		}
-		if (Context.material.paintSubs) {
+		if (Context.raw.material.paintSubs) {
 			frag.write('float subs = 0.0;');
 		}
 
 		frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
 		frag.write('vec2 texpaintSizeLocal = texpaintSize;'); // TODO: spirv workaround
 		frag.write('float blur_step = 1.0 / texpaintSizeLocal.x;');
-		if (Context.blurDirectional) {
+		if (Context.raw.blurDirectional) {
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 			frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
 			#else

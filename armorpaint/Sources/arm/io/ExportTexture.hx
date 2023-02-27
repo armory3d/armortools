@@ -25,7 +25,7 @@ class ExportTexture {
 		if (bakeMaterial) {
 			runBakeMaterial(path);
 		}
-		else if (Context.layersExport == ExportPerUdimTile) {
+		else if (Context.raw.layersExport == ExportPerUdimTile) {
 			var udimTiles: Array<String> = [];
 			for (l in Project.layers) {
 				if (l.getObjectMask() > 0) {
@@ -40,7 +40,7 @@ class ExportTexture {
 			}
 			else runLayers(path, Project.layers);
 		}
-		else if (Context.layersExport == ExportPerObject) {
+		else if (Context.raw.layersExport == ExportPerObject) {
 			var objectNames: Array<String> = [];
 			for (l in Project.layers) {
 				if (l.getObjectMask() > 0) {
@@ -80,7 +80,7 @@ class ExportTexture {
 					}
 				}
 			}
-			else runLayers(path, Context.layersExport == ExportSelected ? (Context.layer.isGroup() ? Context.layer.getChildren() : [Context.layer]) : Project.layers);
+			else runLayers(path, Context.raw.layersExport == ExportSelected ? (Context.raw.layer.isGroup() ? Context.raw.layer.getChildren() : [Context.raw.layer]) : Project.layers);
 		}
 
 		#if arm_debug
@@ -103,24 +103,24 @@ class ExportTexture {
 		}
 
 		var _space = UIHeader.inst.worktab.position;
-		var _tool = Context.tool;
+		var _tool = Context.raw.tool;
 		UIHeader.inst.worktab.position = SpacePaint;
-		Context.tool = ToolFill;
+		Context.raw.tool = ToolFill;
 		MakeMaterial.parsePaintMaterial();
-		var _paintObject = Context.paintObject;
+		var _paintObject = Context.raw.paintObject;
 		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
 		planeo.visible = true;
-		Context.paintObject = planeo;
-		Context.pdirty = 1;
+		Context.raw.paintObject = planeo;
+		Context.raw.pdirty = 1;
 		RenderPathPaint.useLiveLayer(true);
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.useLiveLayer(false);
-		Context.tool = _tool;
+		Context.raw.tool = _tool;
 		MakeMaterial.parsePaintMaterial();
-		Context.pdirty = 0;
+		Context.raw.pdirty = 0;
 		UIHeader.inst.worktab.position = _space;
 		planeo.visible = false;
-		Context.paintObject = _paintObject;
+		Context.raw.paintObject = _paintObject;
 
 		runLayers(path, [RenderPathPaint.liveLayer], "", true);
 	}
@@ -128,18 +128,18 @@ class ExportTexture {
 	static function runLayers(path: String, layers: Array<LayerSlot>, objectName = "", bakeMaterial = false) {
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
-		var formatQuality = Context.formatQuality;
+		var formatQuality = Context.raw.formatQuality;
 		#if (krom_android || krom_ios)
 		var f = kha.Window.get(0).title;
 		#else
 		var f = UIFiles.filename;
 		#end
 		if (f == "") f = tr("untitled");
-		var formatType = Context.formatType;
+		var formatType = Context.raw.formatType;
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
-		var isUdim = Context.layersExport == ExportPerUdimTile;
+		var isUdim = Context.raw.layersExport == ExportPerUdimTile;
 		if (isUdim) ext = objectName + ext;
 
 		App.makeTempImg();
@@ -149,7 +149,7 @@ class ExportTexture {
 		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
 
 		// Append object mask name
-		var exportSelected = Context.layersExport == ExportSelected;
+		var exportSelected = Context.raw.layersExport == ExportSelected;
 		if (exportSelected && layers[0].getObjectMask() > 0) {
 			f += "_" + Project.paintObjects[layers[0].getObjectMask() - 1].name;
 		}
@@ -175,7 +175,7 @@ class ExportTexture {
 
 			if (objectName != "" && l1.getObjectMask() > 0) {
 				if (isUdim && !Project.paintObjects[l1.getObjectMask() - 1].name.endsWith(objectName)) continue;
-				var perObject = Context.layersExport == ExportPerObject;
+				var perObject = Context.raw.layersExport == ExportPerObject;
 				if (perObject && Project.paintObjects[l1.getObjectMask() - 1].name != objectName) continue;
 			}
 
@@ -349,7 +349,7 @@ class ExportTexture {
 		if (type == 2 && off == 2) format = 5; // BBB1
 		if (type == 2 && off == 3) format = 6; // AAA1
 
-		if (Context.layersDestination == DestinationPacked) {
+		if (Context.raw.layersDestination == DestinationPacked) {
 			var image = kha.Image.fromBytes(pixels, resX, resY);
 			iron.data.Data.cachedImages.set(file, image);
 			var ar = file.split(Path.sep);
@@ -364,11 +364,11 @@ class ExportTexture {
 			return;
 		}
 
-		if (bits == 8 && Context.formatType == FormatPng) {
+		if (bits == 8 && Context.raw.formatType == FormatPng) {
 			Krom.writePng(file, pixels.getData(), resX, resY, format);
 		}
-		else if (bits == 8 && Context.formatType == FormatJpg) {
-			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.formatQuality));
+		else if (bits == 8 && Context.raw.formatType == FormatJpg) {
+			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.raw.formatQuality));
 		}
 		else { // Exr
 			var out = new BytesOutput();

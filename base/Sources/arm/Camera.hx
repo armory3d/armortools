@@ -91,7 +91,7 @@ class Camera {
 				return;
 			}
 
-			var controls = Context.cameraControls;
+			var controls = Context.raw.cameraControls;
 			if (controls == ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif))) {
 				redraws = 2;
 				var dist = distance();
@@ -165,8 +165,8 @@ class Camera {
 				var d = Time.delta * fast * ease * 2.0 * ((moveForward || moveBackward) ? Config.raw.camera_zoom_speed : Config.raw.camera_pan_speed);
 				if (d > 0.0) {
 					camera.transform.move(dir, d);
-					if (Context.cameraType == CameraOrthographic) {
-						Viewport.updateCameraType(Context.cameraType);
+					if (Context.raw.cameraType == CameraOrthographic) {
+						Viewport.updateCameraType(Context.raw.cameraType);
 					}
 				}
 
@@ -179,7 +179,7 @@ class Camera {
 				redraws = 2;
 				var light = iron.Scene.active.lights[0];
 				var m = iron.math.Mat4.identity();
-				Context.lightAngle = (Context.lightAngle + ((mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
+				Context.raw.lightAngle = (Context.raw.lightAngle + ((mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
 				m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
 				light.transform.local.multmat(m);
 				light.transform.decompose();
@@ -187,15 +187,15 @@ class Camera {
 
 			if (Operator.shortcut(Config.keymap.rotate_envmap, ShortcutDown)) {
 				redraws = 2;
-				Context.envmapAngle -= mouse.movementX / 100;
+				Context.raw.envmapAngle -= mouse.movementX / 100;
 			}
 
 			if (redraws > 0) {
 				redraws--;
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 
-				if (Context.cameraType == CameraOrthographic) {
-					Viewport.updateCameraType(Context.cameraType);
+				if (Context.raw.cameraType == CameraOrthographic) {
+					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 			}
 		});
@@ -207,7 +207,7 @@ class Camera {
 	}
 
 	public function index(): Int {
-		return Context.viewIndexLast > 0 ? 1 : 0;
+		return Context.raw.viewIndexLast > 0 ? 1 : 0;
 	}
 
 	function getCameraZoomSpeed(): Float {

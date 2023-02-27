@@ -93,17 +93,17 @@ class ImportArm {
 
 			// Synchronous for now
 			new MeshData(project.mesh_data, function(md: MeshData) {
-				Context.paintObject.setData(md);
-				Context.paintObject.transform.scale.set(1, 1, 1);
-				Context.paintObject.transform.buildMatrix();
-				Context.paintObject.name = md.name;
-				Project.paintObjects = [Context.paintObject];
+				Context.raw.paintObject.setData(md);
+				Context.raw.paintObject.transform.scale.set(1, 1, 1);
+				Context.raw.paintObject.transform.buildMatrix();
+				Context.raw.paintObject.name = md.name;
+				Project.paintObjects = [Context.raw.paintObject];
 			});
 
 			Context.selectPaintObject(Context.mainObject());
 			Viewport.scaleToBounds();
-			Context.paintObject.skip_context = "paint";
-			Context.mergedObject.visible = true;
+			Context.raw.paintObject.skip_context = "paint";
+			Context.raw.mergedObject.visible = true;
 
 			arm.ui.UINodes.inst.hwnd.redraws = 2;
 			arm.ui.UINodes.inst.groupStack = [];
@@ -116,7 +116,7 @@ class ImportArm {
 			Project.canvas = project.material;
 			arm.logic.LogicParser.parse(Project.canvas, false);
 
-			Context.ddirty = 4;
+			Context.raw.ddirty = 4;
 
 			Data.deleteBlob(path);
 		});

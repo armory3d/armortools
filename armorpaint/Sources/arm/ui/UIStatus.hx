@@ -39,10 +39,10 @@ class UIStatus {
 			TabConsole.draw();
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-			if (statustab.changed && (statustab.position == Context.lastStatusPosition || minimized)) {
+			if (statustab.changed && (statustab.position == Context.raw.lastStatusPosition || minimized)) {
 				UISidebar.inst.toggleBrowser();
 			}
-			Context.lastStatusPosition = statustab.position;
+			Context.raw.lastStatusPosition = statustab.position;
 		}
 	}
 }

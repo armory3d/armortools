@@ -6,11 +6,11 @@ class MakeTexcoord {
 
 	public static function run(vert: NodeShader, frag: NodeShader) {
 
-		var fillLayer = Context.layer.fill_layer != null;
-		var uvType = fillLayer ? Context.layer.uvType : Context.brushPaint;
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var angle = Context.brushAngle + Context.brushNodesAngle;
-		var uvAngle = fillLayer ? Context.layer.angle : angle;
+		var fillLayer = Context.raw.layer.fill_layer != null;
+		var uvType = fillLayer ? Context.raw.layer.uvType : Context.raw.brushPaint;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
+		var angle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
+		var uvAngle = fillLayer ? Context.raw.layer.angle : angle;
 
 		if (uvType == UVProject || decal) { // TexCoords - project
 			frag.add_uniform('float brushScale', '_brushScale');
@@ -26,7 +26,7 @@ class MakeTexcoord {
 
 				frag.n = true;
 				frag.add_uniform('vec3 decalLayerNor', '_decalLayerNor');
-				var dotAngle = Context.brushAngleRejectDot;
+				var dotAngle = Context.raw.brushAngleRejectDot;
 				frag.write('if (abs(dot(n, decalLayerNor) - 1.0) > $dotAngle) discard;');
 
 				frag.wposition = true;
@@ -41,7 +41,7 @@ class MakeTexcoord {
 				frag.write_attrib('uvsp.x *= aspectRatio;');
 				frag.write_attrib('uvsp *= 0.21 / (decalMaskLocal.w * 0.9);'); // Decal radius
 
-				if (Context.brushDirectional) {
+				if (Context.raw.brushDirectional) {
 					frag.add_uniform('vec3 brushDirection', '_brushDirection');
 					frag.write_attrib('if (brushDirection.z == 0.0) discard;');
 					frag.write_attrib('uvsp = vec2(uvsp.x * brushDirection.x - uvsp.y * brushDirection.y, uvsp.x * brushDirection.y + uvsp.y * brushDirection.x);');

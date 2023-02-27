@@ -82,12 +82,12 @@ class ImportEnvmap {
 		Scene.active.world.raw.envmap = path;
 		Scene.active.world.probe.radiance = radianceCpu;
 		Scene.active.world.probe.radianceMipmaps = mipsCpu;
-		Context.savedEnvmap = image;
-		Context.showEnvmapHandle.selected = Context.showEnvmap = true;
-		if (Context.showEnvmapBlur) {
+		Context.raw.savedEnvmap = image;
+		Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = true;
+		if (Context.raw.showEnvmapBlur) {
 			Scene.active.world.envmap = Scene.active.world.probe.radianceMipmaps[0];
 		}
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 		Project.raw.envmap = path;
 	}
 

@@ -52,7 +52,7 @@ class TabFonts {
 					}
 					var img = Project.fonts[i].image;
 
-					if (Context.font == Project.fonts[i]) {
+					if (Context.raw.font == Project.fonts[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 50;
@@ -80,14 +80,14 @@ class TabFonts {
 					}
 
 					if (state == State.Started) {
-						if (Context.font != Project.fonts[i]) {
+						if (Context.raw.font != Project.fonts[i]) {
 							function _init() {
 								Context.selectFont(i);
 							}
 							iron.App.notifyOnInit(_init);
 						}
-						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DFont);
-						Context.selectTime = Time.time();
+						if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DFont);
+						Context.raw.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.selectFont(i);
@@ -104,10 +104,10 @@ class TabFonts {
 					if (ui.isHovered) {
 						if (img == null) {
 							iron.App.notifyOnInit(function() {
-								var _font = Context.font;
-								Context.font = Project.fonts[i];
+								var _font = Context.raw.font;
+								Context.raw.font = Project.fonts[i];
 								RenderUtil.makeFontPreview();
-								Context.font = _font;
+								Context.raw.font = _font;
 							});
 						}
 						else {
@@ -133,9 +133,9 @@ class TabFonts {
 
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (inFocus && ui.isDeleteDown && Project.fonts.length > 1 && Context.font.file != "") {
+			if (inFocus && ui.isDeleteDown && Project.fonts.length > 1 && Context.raw.font.file != "") {
 				ui.isDeleteDown = false;
-				deleteFont(Context.font);
+				deleteFont(Context.raw.font);
 			}
 		}
 	}

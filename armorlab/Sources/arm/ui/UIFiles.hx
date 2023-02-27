@@ -274,7 +274,7 @@ class UIFiles {
 					}
 
 					selected = i;
-					if (Time.time() - Context.selectTime < 0.25) {
+					if (Time.time() - Context.raw.selectTime < 0.25) {
 						App.dragFile = null;
 						App.dragFileIcon = null;
 						App.isDragging = false;
@@ -292,7 +292,7 @@ class UIFiles {
 						}
 						selected = -1;
 					}
-					Context.selectTime = Time.time();
+					Context.raw.selectTime = Time.time();
 				}
 
 				// Label

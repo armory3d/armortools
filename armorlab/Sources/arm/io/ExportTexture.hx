@@ -26,14 +26,14 @@ class ExportTexture {
 	static function runLayers(path: String, layers: Array<Dynamic>, objectName = "") {
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
-		var formatQuality = Context.formatQuality;
+		var formatQuality = Context.raw.formatQuality;
 		#if (krom_android || krom_ios)
 		var f = kha.Window.get(0).title;
 		#else
 		var f = UIFiles.filename;
 		#end
 		if (f == "") f = tr("untitled");
-		var formatType = Context.formatType;
+		var formatType = Context.raw.formatType;
 		var ext = formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 
@@ -117,7 +117,7 @@ class ExportTexture {
 		if (type == 2 && off == 2) format = 5; // BBB1
 		if (type == 2 && off == 3) format = 6; // AAA1
 
-		if (Context.layersDestination == DestinationPacked) {
+		if (Context.raw.layersDestination == DestinationPacked) {
 			var image = kha.Image.fromBytes(pixels, resX, resY);
 			iron.data.Data.cachedImages.set(file, image);
 			var ar = file.split(Path.sep);
@@ -132,11 +132,11 @@ class ExportTexture {
 			return;
 		}
 
-		if (Context.formatType == FormatPng) {
+		if (Context.raw.formatType == FormatPng) {
 			Krom.writePng(file, pixels.getData(), resX, resY, format);
 		}
-		else if (Context.formatType == FormatJpg) {
-			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.formatQuality));
+		else if (Context.raw.formatType == FormatJpg) {
+			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.raw.formatQuality));
 		}
 	}
 

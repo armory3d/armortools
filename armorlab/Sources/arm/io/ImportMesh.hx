@@ -43,10 +43,10 @@ class ImportMesh {
 	}
 
 	static function finishImport() {
-		if (Context.mergedObject != null) {
-			Context.mergedObject.remove();
-			Data.deleteMesh(Context.mergedObject.data.handle);
-			Context.mergedObject = null;
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.remove();
+			Data.deleteMesh(Context.raw.mergedObject.data.handle);
+			Context.raw.mergedObject = null;
 		}
 
 		Context.selectPaintObject(Context.mainObject());
@@ -61,14 +61,14 @@ class ImportMesh {
 
 			// No mask by default
 			for (p in Project.paintObjects) p.visible = true;
-			if (Context.mergedObject == null) MeshUtil.mergeMesh();
-			Context.paintObject.skip_context = "paint";
-			Context.mergedObject.visible = true;
+			if (Context.raw.mergedObject == null) MeshUtil.mergeMesh();
+			Context.raw.paintObject.skip_context = "paint";
+			Context.raw.mergedObject.visible = true;
 		}
 
 		Viewport.scaleToBounds();
 
-		if (Context.paintObject.name == "") Context.paintObject.name = "Object";
+		if (Context.raw.paintObject.name == "") Context.raw.paintObject.name = "Object";
 		arm.shader.MakeMaterial.parsePaintMaterial();
 		arm.shader.MakeMaterial.parseMeshMaterial();
 
@@ -81,7 +81,7 @@ class ImportMesh {
 		#end
 
 		#if arm_physics
-		Context.paintBody = null;
+		Context.raw.paintBody = null;
 		#end
 	}
 
@@ -96,28 +96,28 @@ class ImportMesh {
 			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
 			new MeshData(raw, function(md: MeshData) {
-				Context.paintObject = Context.mainObject();
+				Context.raw.paintObject = Context.mainObject();
 
 				Context.selectPaintObject(Context.mainObject());
 				for (i in 0...Project.paintObjects.length) {
 					var p = Project.paintObjects[i];
-					if (p == Context.paintObject) continue;
+					if (p == Context.raw.paintObject) continue;
 					Data.deleteMesh(p.data.handle);
 					p.remove();
 				}
-				var handle = Context.paintObject.data.handle;
+				var handle = Context.raw.paintObject.data.handle;
 				if (handle != "SceneSphere" && handle != "ScenePlane") {
 					Data.deleteMesh(handle);
 				}
 
-				Context.paintObject.setData(md);
-				Context.paintObject.name = mesh.name;
-				Project.paintObjects = [Context.paintObject];
+				Context.raw.paintObject.setData(md);
+				Context.raw.paintObject.name = mesh.name;
+				Project.paintObjects = [Context.raw.paintObject];
 
 				md.handle = raw.name;
 				Data.cachedMeshes.set(md.handle, md);
 
-				Context.ddirty = 4;
+				Context.raw.ddirty = 4;
 
 				// Wait for addMesh calls to finish
 				iron.App.notifyOnInit(finishImport);
@@ -140,7 +140,7 @@ class ImportMesh {
 
 			new MeshData(raw, function(md: MeshData) {
 
-				var object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
+				var object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 				object.name = mesh.name;
 				object.skip_context = "paint";
 
@@ -158,7 +158,7 @@ class ImportMesh {
 				md.handle = raw.name;
 				Data.cachedMeshes.set(md.handle, md);
 
-				Context.ddirty = 4;
+				Context.raw.ddirty = 4;
 			});
 		}
 

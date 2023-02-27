@@ -39,11 +39,11 @@ class ImportArm {
 			new MeshData(raw.mesh_datas[i], function(md: MeshData) {
 				var object: MeshObject = null;
 				if (i == 0) {
-					Context.paintObject.setData(md);
-					object = Context.paintObject;
+					Context.raw.paintObject.setData(md);
+					object = Context.raw.paintObject;
 				}
 				else {
-					object = Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
+					object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
 					md.handle = md.name;
@@ -83,8 +83,8 @@ class ImportArm {
 
 			var importAsMesh = project.version == null;
 
-			Context.layersPreviewDirty = true;
-			Context.layerFilter = 0;
+			Context.raw.layersPreviewDirty = true;
+			Context.raw.layerFilter = 0;
 			Project.projectNew(importAsMesh);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
@@ -174,17 +174,17 @@ class ImportArm {
 
 			// Synchronous for now
 			new MeshData(project.mesh_datas[0], function(md: MeshData) {
-				Context.paintObject.setData(md);
-				Context.paintObject.transform.scale.set(1, 1, 1);
-				Context.paintObject.transform.buildMatrix();
-				Context.paintObject.name = md.name;
-				Project.paintObjects = [Context.paintObject];
+				Context.raw.paintObject.setData(md);
+				Context.raw.paintObject.transform.scale.set(1, 1, 1);
+				Context.raw.paintObject.transform.buildMatrix();
+				Context.raw.paintObject.name = md.name;
+				Project.paintObjects = [Context.raw.paintObject];
 			});
 
 			for (i in 1...project.mesh_datas.length) {
 				var raw = project.mesh_datas[i];
 				new MeshData(raw, function(md: MeshData) {
-					var object = iron.Scene.active.addMeshObject(md, Context.paintObject.materials, Context.paintObject);
+					var object = iron.Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
 					Project.paintObjects.push(object);
@@ -201,11 +201,11 @@ class ImportArm {
 			if (project.atlas_names != null) Project.atlasNames = project.atlas_names;
 
 			// No mask by default
-			if (Context.mergedObject == null) MeshUtil.mergeMesh();
+			if (Context.raw.mergedObject == null) MeshUtil.mergeMesh();
 			Context.selectPaintObject(Context.mainObject());
 			Viewport.scaleToBounds();
-			Context.paintObject.skip_context = "paint";
-			Context.mergedObject.visible = true;
+			Context.raw.paintObject.skip_context = "paint";
+			Context.raw.mergedObject.visible = true;
 
 			var tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
@@ -225,7 +225,7 @@ class ImportArm {
 				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
 				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
-				Context.brushBlendDirty = true;
+				Context.raw.brushBlendDirty = true;
 			}
 
 			for (l in Project.layers) l.unload();
@@ -324,8 +324,8 @@ class ImportArm {
 			Project.materials = [];
 			for (n in project.material_nodes) {
 				initNodes(n.nodes);
-				Context.material = new MaterialSlot(m0, n);
-				Project.materials.push(Context.material);
+				Context.raw.material = new MaterialSlot(m0, n);
+				Project.materials.push(Context.raw.material);
 			}
 
 			arm.ui.UINodes.inst.hwnd.redraws = 2;
@@ -336,7 +336,7 @@ class ImportArm {
 			}
 
 			for (m in Project.materials) {
-				Context.material = m;
+				Context.raw.material = m;
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
 			}
@@ -344,8 +344,8 @@ class ImportArm {
 			Project.brushes = [];
 			for (n in project.brush_nodes) {
 				initNodes(n.nodes);
-				Context.brush = new BrushSlot(n);
-				Project.brushes.push(Context.brush);
+				Context.raw.brush = new BrushSlot(n);
+				Project.brushes.push(Context.raw.brush);
 				MakeMaterial.parseBrush();
 				RenderUtil.makeBrushPreview();
 			}
@@ -360,7 +360,7 @@ class ImportArm {
 				}
 			}
 
-			Context.ddirty = 4;
+			Context.raw.ddirty = 4;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
 
@@ -404,9 +404,9 @@ class ImportArm {
 
 		for (c in project.material_nodes) {
 			initNodes(c.nodes);
-			Context.material = new MaterialSlot(m0, c);
-			Project.materials.push(Context.material);
-			imported.push(Context.material);
+			Context.raw.material = new MaterialSlot(m0, c);
+			Project.materials.push(Context.raw.material);
+			imported.push(Context.raw.material);
 			History.newMaterial();
 		}
 
@@ -484,9 +484,9 @@ class ImportArm {
 
 		for (n in project.brush_nodes) {
 			initNodes(n.nodes);
-			Context.brush = new BrushSlot(n);
-			Project.brushes.push(Context.brush);
-			imported.push(Context.brush);
+			Context.raw.brush = new BrushSlot(n);
+			Project.brushes.push(Context.raw.brush);
+			imported.push(Context.raw.brush);
 		}
 
 		function _init() {

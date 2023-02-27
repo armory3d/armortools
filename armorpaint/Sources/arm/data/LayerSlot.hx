@@ -195,8 +195,8 @@ class LayerSlot {
 			texpaint_pack.g4.end();
 		}
 
-		Context.layerPreviewDirty = true;
-		Context.ddirty = 3;
+		Context.raw.layerPreviewDirty = true;
+		Context.raw.ddirty = 3;
 	}
 
 	public function invertMask() {
@@ -213,8 +213,8 @@ class LayerSlot {
 		}
 		App.notifyOnNextFrame(_next);
 		texpaint = RenderPath.active.renderTargets.get("texpaint" + id).image = inverted;
-		Context.layerPreviewDirty = true;
-		Context.ddirty = 3;
+		Context.raw.layerPreviewDirty = true;
+		Context.raw.ddirty = 3;
 	}
 
 	public function applyMask() {
@@ -362,11 +362,11 @@ class LayerSlot {
 
 	public function toFillLayer() {
 		Context.setLayer(this);
-		fill_layer = Context.material;
+		fill_layer = Context.raw.material;
 		App.updateFillLayer();
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
-			Context.layerPreviewDirty = true;
+			Context.raw.layerPreviewDirty = true;
 			UISidebar.inst.hwnd0.redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
@@ -376,7 +376,7 @@ class LayerSlot {
 		Context.setLayer(this);
 		fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
-		Context.layerPreviewDirty = true;
+		Context.raw.layerPreviewDirty = true;
 		UISidebar.inst.hwnd0.redraws = 2;
 	}
 

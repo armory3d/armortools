@@ -71,14 +71,14 @@ class TabTextures {
 							App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 							App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 							App.dragAsset = asset;
-							Context.texture = asset;
+							Context.raw.texture = asset;
 
-							if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.show2DView(View2DAsset);
-							Context.selectTime = Time.time();
+							if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DAsset);
+							Context.raw.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
 						}
 
-						if (asset == Context.texture) {
+						if (asset == Context.raw.texture) {
 							var _uix = ui._x;
 							var _uiy = ui._y;
 							ui._x = uix;
@@ -99,7 +99,7 @@ class TabTextures {
 						}
 
 						if (ui.isHovered && ui.inputReleasedR) {
-							Context.texture = asset;
+							Context.raw.texture = asset;
 							var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 							UIMenu.draw(function(ui: Zui) {
 								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);
@@ -137,12 +137,12 @@ class TabTextures {
 									});
 								}
 								if (ui.button(tr("Set as Color ID Map"), Left)) {
-									Context.colorIdHandle.position = i;
-									Context.colorIdPicked = false;
+									Context.raw.colorIdHandle.position = i;
+									Context.raw.colorIdPicked = false;
 									UIToolbar.inst.toolbarHandle.redraws = 1;
-									if (Context.tool == ToolColorId) {
+									if (Context.raw.tool == ToolColorId) {
 										UIHeader.inst.headerHandle.redraws = 2;
-										Context.ddirty = 2;
+										Context.raw.ddirty = 2;
 									}
 								}
 								if (ui.button(tr("Delete"), Left, "delete")) {
@@ -179,9 +179,9 @@ class TabTextures {
 
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (inFocus && ui.isDeleteDown && Project.assets.length > 0 && Project.assets.indexOf(Context.texture) >= 0) {
+			if (inFocus && ui.isDeleteDown && Project.assets.length > 0 && Project.assets.indexOf(Context.raw.texture) >= 0) {
 				ui.isDeleteDown = false;
-				deleteTexture(Context.texture);
+				deleteTexture(Context.raw.texture);
 			}
 		}
 	}
@@ -213,14 +213,14 @@ class TabTextures {
 	static function deleteTexture(asset: TAsset) {
 		var i = Project.assets.indexOf(asset);
 		if (Project.assets.length > 1) {
-			Context.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
+			Context.raw.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
 		UIStatus.inst.statusHandle.redraws = 2;
 
-		if (Context.tool == ToolColorId && i == Context.colorIdHandle.position) {
+		if (Context.raw.tool == ToolColorId && i == Context.raw.colorIdHandle.position) {
 			UIHeader.inst.headerHandle.redraws = 2;
-			Context.ddirty = 2;
-			Context.colorIdPicked = false;
+			Context.raw.ddirty = 2;
+			Context.raw.colorIdPicked = false;
 			UIToolbar.inst.toolbarHandle.redraws = 1;
 		}
 		Data.deleteImage(asset.file);

@@ -134,9 +134,9 @@ class App {
 
 		System.notifyOnApplicationState(
 			function() { // Foreground
-				Context.foregroundEvent = true;
-				Context.lastPaintX = -1;
-				Context.lastPaintY = -1;
+				Context.raw.foregroundEvent = true;
+				Context.raw.lastPaintX = -1;
+				Context.raw.lastPaintY = -1;
 			},
 			function() {}, // Resume
 			function() {}, // Pause
@@ -248,12 +248,12 @@ class App {
 
 	public static function w(): Int {
 		// Drawing material preview
-		if (UISidebar.inst != null && Context.materialPreview) {
+		if (UISidebar.inst != null && Context.raw.materialPreview) {
 			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && Context.decalPreview) {
+		if (UISidebar.inst != null && Context.raw.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
@@ -271,10 +271,10 @@ class App {
 		else { // Distract free
 			res = System.windowWidth();
 		}
-		if (UISidebar.inst != null && Context.viewIndex > -1) {
+		if (UISidebar.inst != null && Context.raw.viewIndex > -1) {
 			res = Std.int(res / 2);
 		}
-		if (Context.paint2dView) {
+		if (Context.raw.paint2dView) {
 			res = UIView2D.inst.ww;
 		}
 
@@ -283,12 +283,12 @@ class App {
 
 	public static function h(): Int {
 		// Drawing material preview
-		if (UISidebar.inst != null && Context.materialPreview) {
+		if (UISidebar.inst != null && Context.raw.materialPreview) {
 			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && Context.decalPreview) {
+		if (UISidebar.inst != null && Context.raw.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
@@ -305,7 +305,7 @@ class App {
 	}
 
 	public static function x(): Int {
-		return Context.viewIndex == 1 ? appx + w() : appx;
+		return Context.raw.viewIndex == 1 ? appx + w() : appx;
 	}
 
 	public static function y(): Int {
@@ -351,11 +351,11 @@ class App {
 		}
 		cam.buildProjection();
 
-		if (Context.cameraType == CameraOrthographic) {
-			Viewport.updateCameraType(Context.cameraType);
+		if (Context.raw.cameraType == CameraOrthographic) {
+			Viewport.updateCameraType(Context.raw.cameraType);
 		}
 
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 
 		if (UISidebar.inst.show) {
 			appx = UIToolbar.inst.toolbarw;
@@ -389,8 +389,8 @@ class App {
 		UINodes.inst.hwnd.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 		UIBox.hwnd.redraws = 2;
-		if (Context.ddirty < 0) Context.ddirty = 0; // Redraw viewport
-		if (Context.splitView) Context.ddirty = 1;
+		if (Context.raw.ddirty < 0) Context.raw.ddirty = 0; // Redraw viewport
+		if (Context.raw.splitView) Context.raw.ddirty = 1;
 	}
 
 	static function update() {
@@ -471,7 +471,7 @@ class App {
 					UINodes.inst.acceptLayerDrag(Project.layers.indexOf(dragLayer));
 				}
 				else if (Context.inLayers() && isDragging) {
-					dragLayer.move(Context.dragDestination);
+					dragLayer.move(Context.raw.dragDestination);
 					MakeMaterial.parseMeshMaterial();
 				}
 				dragLayer = null;
@@ -484,7 +484,7 @@ class App {
 					ImportAsset.run(dragFile, dropX, dropY, true, true, function() {
 						// Asset was material
 						if (Project.materials.length > materialCount) {
-							dragMaterial = Context.material;
+							dragMaterial = Context.raw.material;
 							materialDropped();
 						}
 					});
@@ -495,17 +495,17 @@ class App {
 			Krom.setMouseCursor(0); // Arrow
 			isDragging = false;
 		}
-		if (Context.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
-			Context.colorPickerCallback = null;
-			Context.selectTool(Context.colorPickerPreviousTool);
+		if (Context.raw.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
+			Context.raw.colorPickerCallback = null;
+			Context.selectTool(Context.raw.colorPickerPreviousTool);
 		}
 
 		handleDropPaths();
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
-		var isPicker = Context.tool == ToolPicker;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
+		var isPicker = Context.raw.tool == ToolPicker;
 		#if krom_windows
-		Zui.alwaysRedrawWindow = !Context.cacheDraws ||
+		Zui.alwaysRedrawWindow = !Context.raw.cacheDraws ||
 			UIMenu.show ||
 			UIBox.show ||
 			isDragging ||
@@ -513,9 +513,9 @@ class App {
 			decal ||
 			UIView2D.inst.show ||
 			!Config.raw.brush_3d ||
-			Context.frame < 3;
+			Context.raw.frame < 3;
 		#end
-		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
+		if (Zui.alwaysRedrawWindow && Context.raw.ddirty < 0) Context.raw.ddirty = 0;
 	}
 
 	static function materialDropped() {
@@ -581,7 +581,7 @@ class App {
 		}
 		if (dragLayer != null && dragLayer.isMask() && dragLayer.fill_layer == null) {
 			TabLayers.makeMaskPreviewRgba32(dragLayer);
-			return Context.maskPreviewRgba32;
+			return Context.raw.maskPreviewRgba32;
 		}
 		if (dragLayer != null) {
 			return dragLayer.fill_layer != null ? dragLayer.fill_layer.imageIcon : dragLayer.texpaint_preview;
@@ -599,12 +599,12 @@ class App {
 	static function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (Context.frame == 2) {
+		if (Context.raw.frame == 2) {
 			RenderUtil.makeMaterialPreview();
 			UISidebar.inst.hwnd1.redraws = 2;
 			MakeMaterial.parseMeshMaterial();
 			MakeMaterial.parsePaintMaterial();
-			Context.ddirty = 0;
+			Context.raw.ddirty = 0;
 			if (History.undoLayers == null) {
 				History.undoLayers = [];
 				for (i in 0...Config.raw.undo_steps) {
@@ -628,10 +628,10 @@ class App {
 				}
 			}
 		}
-		else if (Context.frame == 3) {
-			Context.ddirty = Context.renderMode == RenderForward ? 3 : 1;
+		else if (Context.raw.frame == 3) {
+			Context.raw.ddirty = Context.raw.renderMode == RenderForward ? 3 : 1;
 		}
-		Context.frame++;
+		Context.raw.frame++;
 
 		var mouse = Input.getMouse();
 		if (isDragging) {
@@ -660,14 +660,14 @@ class App {
 		if (UIMenu.show) UIMenu.render(g);
 
 		// Save last pos for continuos paint
-		Context.lastPaintVecX = Context.paintVec.x;
-		Context.lastPaintVecY = Context.paintVec.y;
+		Context.raw.lastPaintVecX = Context.raw.paintVec.x;
+		Context.raw.lastPaintVecY = Context.raw.paintVec.y;
 
 		#if (krom_android || krom_ios)
 		// No mouse move events for touch, re-init last paint position on touch start
 		if (!mouse.down()) {
-			Context.lastPaintX = -1;
-			Context.lastPaintY = -1;
+			Context.raw.lastPaintX = -1;
+			Context.raw.lastPaintY = -1;
 		}
 		#end
 	}
@@ -741,7 +741,7 @@ class App {
 
 	public static function isDecalLayer(): Bool {
 		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
-		return isPaint && Context.layer.fill_layer != null && Context.layer.uvType == UVProject;
+		return isPaint && Context.raw.layer.fill_layer != null && Context.raw.layer.uvType == UVProject;
 	}
 
 	public static function redrawStatus() {
@@ -824,8 +824,8 @@ class App {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
 			C.undo_steps = 1;
-			if (Context.undoHandle != null) {
-				Context.undoHandle.value = C.undo_steps;
+			if (Context.raw.undoHandle != null) {
+				Context.raw.undoHandle.value = C.undo_steps;
 			}
 			while (History.undoLayers.length > C.undo_steps) {
 				var l = History.undoLayers.pop();
@@ -851,7 +851,7 @@ class App {
 		rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
 		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
-		Context.brushBlendDirty = true;
+		Context.raw.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
 			var _texpaint_blur = rts.get("texpaint_blur").image;
 			App.notifyOnNextFrame(function() {
@@ -867,7 +867,7 @@ class App {
 		#if (kha_direct3d12 || kha_vulkan)
 		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 	}
 
 	public static function setLayerBits() {
@@ -1181,12 +1181,12 @@ class App {
 				masks[i].delete();
 			}
 			masks[masks.length - 1].applyMask();
-			Context.layerPreviewDirty = true;
+			Context.raw.layerPreviewDirty = true;
 		}
 	}
 
 	public static function mergeDown() {
-		var l1 = Context.layer;
+		var l1 = Context.raw.layer;
 
 		if (l1.isGroup()) {
 			l1 = mergeGroup(l1);
@@ -1209,7 +1209,7 @@ class App {
 		mergeLayer(l0, l1);
 		l1.delete();
 		Context.setLayer(l0);
-		Context.layerPreviewDirty = true;
+		Context.raw.layerPreviewDirty = true;
 	}
 
 	public static function mergeGroup(l: LayerSlot) {
@@ -1506,15 +1506,15 @@ class App {
 
 	public static function isFillMaterial(): Bool {
 		if (UIHeader.inst.worktab.position == SpaceMaterial) return true;
-		var m = Context.material;
+		var m = Context.raw.material;
 		for (l in Project.layers) if (l.fill_layer == m) return true;
 		return false;
 	}
 
 	public static function updateFillLayers() {
-		var _layer = Context.layer;
-		var _tool = Context.tool;
-		var _fillType = Context.fillTypeHandle.position;
+		var _layer = Context.raw.layer;
+		var _tool = Context.raw.tool;
+		var _fillType = Context.raw.fillTypeHandle.position;
 		var current: kha.graphics2.Graphics = null;
 
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
@@ -1526,18 +1526,18 @@ class App {
 			if (current != null) current.end();
 
 			UIHeader.inst.worktab.position = SpacePaint;
-			Context.tool = ToolFill;
-			Context.fillTypeHandle.position = FillObject;
+			Context.raw.tool = ToolFill;
+			Context.raw.fillTypeHandle.position = FillObject;
 			MakeMaterial.parsePaintMaterial(false);
-			Context.pdirty = 1;
+			Context.raw.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint(false);
 			RenderPathPaint.dilate(true, true);
 			RenderPathPaint.useLiveLayer(false);
-			Context.tool = _tool;
-			Context.fillTypeHandle.position = _fillType;
-			Context.pdirty = 0;
-			Context.rdirty = 2;
+			Context.raw.tool = _tool;
+			Context.raw.fillTypeHandle.position = _fillType;
+			Context.raw.pdirty = 0;
+			Context.raw.rdirty = 2;
 			UIHeader.inst.worktab.position = SpaceMaterial;
 
 			if (current != null) current.begin(false);
@@ -1546,21 +1546,21 @@ class App {
 
 		var hasFillLayer = false;
 		var hasFillMask = false;
-		for (l in Project.layers) if (l.isLayer() && l.fill_layer == Context.material) hasFillLayer = true;
-		for (l in Project.layers) if (l.isMask() && l.fill_layer == Context.material) hasFillMask = true;
+		for (l in Project.layers) if (l.isLayer() && l.fill_layer == Context.raw.material) hasFillLayer = true;
+		for (l in Project.layers) if (l.isMask() && l.fill_layer == Context.raw.material) hasFillMask = true;
 
 		if (hasFillLayer || hasFillMask) {
 			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
-			Context.pdirty = 1;
-			Context.tool = ToolFill;
-			Context.fillTypeHandle.position = FillObject;
+			Context.raw.pdirty = 1;
+			Context.raw.tool = ToolFill;
+			Context.raw.fillTypeHandle.position = FillObject;
 
 			if (hasFillLayer) {
 				var first = true;
 				for (l in Project.layers) {
-					if (l.isLayer() && l.fill_layer == Context.material) {
-						Context.layer = l;
+					if (l.isLayer() && l.fill_layer == Context.raw.material) {
+						Context.raw.layer = l;
 						if (first) {
 							first = false;
 							MakeMaterial.parsePaintMaterial(false);
@@ -1575,8 +1575,8 @@ class App {
 			if (hasFillMask) {
 				var first = true;
 				for (l in Project.layers) {
-					if (l.isMask() && l.fill_layer == Context.material) {
-						Context.layer = l;
+					if (l.isMask() && l.fill_layer == Context.raw.material) {
+						Context.raw.layer = l;
 						if (first) {
 							first = false;
 							MakeMaterial.parsePaintMaterial(false);
@@ -1589,15 +1589,15 @@ class App {
 				}
 			}
 
-			Context.pdirty = 0;
-			Context.ddirty = 2;
-			Context.rdirty = 2;
-			Context.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
+			Context.raw.pdirty = 0;
+			Context.raw.ddirty = 2;
+			Context.raw.rdirty = 2;
+			Context.raw.layersPreviewDirty = true; // Repaint all layer previews as multiple layers might have changed.
 			if (current != null) current.begin(false);
-			Context.layer = _layer;
+			Context.raw.layer = _layer;
 			setObjectMask();
-			Context.tool = _tool;
-			Context.fillTypeHandle.position = _fillType;
+			Context.raw.tool = _tool;
+			Context.raw.fillTypeHandle.position = _fillType;
 			MakeMaterial.parsePaintMaterial(false);
 		}
 	}
@@ -1606,22 +1606,22 @@ class App {
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
-		var _tool = Context.tool;
-		var _fillType = Context.fillTypeHandle.position;
-		Context.tool = ToolFill;
-		Context.fillTypeHandle.position = FillObject;
-		Context.pdirty = 1;
+		var _tool = Context.raw.tool;
+		var _fillType = Context.raw.fillTypeHandle.position;
+		Context.raw.tool = ToolFill;
+		Context.raw.fillTypeHandle.position = FillObject;
+		Context.raw.pdirty = 1;
 		var _workspace = UIHeader.inst.worktab.position;
 		UIHeader.inst.worktab.position = SpacePaint;
-		Context.layer.clear();
+		Context.raw.layer.clear();
 
 		if (parsePaint) MakeMaterial.parsePaintMaterial(false);
 		RenderPathPaint.commandsPaint(false);
 		RenderPathPaint.dilate(true, true);
 
-		Context.rdirty = 2;
-		Context.tool = _tool;
-		Context.fillTypeHandle.position = _fillType;
+		Context.raw.rdirty = 2;
+		Context.raw.tool = _tool;
+		Context.raw.fillTypeHandle.position = _fillType;
 		UIHeader.inst.worktab.position = _workspace;
 		if (current != null) current.begin(false);
 	}
@@ -1630,11 +1630,11 @@ class App {
 		var ar = [tr("None")];
 		for (p in Project.paintObjects) ar.push(p.name);
 
-		var mask = Context.objectMaskUsed() ? Context.layer.getObjectMask() : 0;
-		if (Context.layerFilterUsed()) mask = Context.layerFilter;
+		var mask = Context.objectMaskUsed() ? Context.raw.layer.getObjectMask() : 0;
+		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
 		if (mask > 0) {
-			if (Context.mergedObject != null) {
-				Context.mergedObject.visible = false;
+			if (Context.raw.mergedObject != null) {
+				Context.raw.mergedObject.visible = false;
 			}
 			var o = Project.paintObjects[0];
 			for (p in Project.paintObjects) {
@@ -1646,14 +1646,14 @@ class App {
 			Context.selectPaintObject(o);
 		}
 		else {
-			var isAtlas = Context.layer.getObjectMask() > 0 && Context.layer.getObjectMask() <= Project.paintObjects.length;
-			if (Context.mergedObject == null || isAtlas || Context.mergedObjectIsAtlas) {
-				var visibles = isAtlas ? Project.getAtlasObjects(Context.layer.getObjectMask()) : null;
+			var isAtlas = Context.raw.layer.getObjectMask() > 0 && Context.raw.layer.getObjectMask() <= Project.paintObjects.length;
+			if (Context.raw.mergedObject == null || isAtlas || Context.raw.mergedObjectIsAtlas) {
+				var visibles = isAtlas ? Project.getAtlasObjects(Context.raw.layer.getObjectMask()) : null;
 				MeshUtil.mergeMesh(visibles);
 			}
 			Context.selectPaintObject(Context.mainObject());
-			Context.paintObject.skip_context = "paint";
-			Context.mergedObject.visible = true;
+			Context.raw.paintObject.skip_context = "paint";
+			Context.raw.mergedObject.visible = true;
 		}
 		UVUtil.dilatemapCached = false;
 	}
@@ -1661,19 +1661,19 @@ class App {
 	public static function newLayer(clear = true): LayerSlot {
 		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot();
-		l.objectMask = Context.layerFilter;
-		if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
-		Project.layers.insert(Project.layers.indexOf(Context.layer) + 1, l);
+		l.objectMask = Context.raw.layerFilter;
+		if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
+		Project.layers.insert(Project.layers.indexOf(Context.raw.layer) + 1, l);
 		Context.setLayer(l);
-		var li = Project.layers.indexOf(Context.layer);
+		var li = Project.layers.indexOf(Context.raw.layer);
 		if (li > 0) {
 			var below = Project.layers[li - 1];
 			if (below.isLayer()) {
-				Context.layer.parent = below.parent;
+				Context.raw.layer.parent = below.parent;
 			}
 		}
 		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
-		Context.layerPreviewDirty = true;
+		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
 
@@ -1684,7 +1684,7 @@ class App {
 		Project.layers.insert(position, l);
 		Context.setLayer(l);
 		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
-		Context.layerPreviewDirty = true;
+		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
 
@@ -1702,7 +1702,7 @@ class App {
 			History.newLayer();
 			l.uvType = uvType;
 			if (decalMat != null) l.decalMat = decalMat;
-			l.objectMask = Context.layerFilter;
+			l.objectMask = Context.raw.layerFilter;
 			History.toFillLayer();
 			l.toFillLayer();
 		}
@@ -1710,7 +1710,7 @@ class App {
 	}
 
 	public static function createImageMask(asset: TAsset) {
-		var l = Context.layer;
+		var l = Context.raw.layer;
 		if (l.isMask() || l.isGroup()) {
 			return;
 		}
@@ -1718,7 +1718,7 @@ class App {
 		History.newLayer();
 		var m = App.newMask(false, l);
 		m.clear(0x00000000, Project.getImage(asset));
-		Context.layerPreviewDirty = true;
+		Context.raw.layerPreviewDirty = true;
 	}
 
 	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
@@ -1726,7 +1726,7 @@ class App {
 			var l = newLayer(false);
 			History.newLayer();
 			l.uvType = UVMap;
-			l.objectMask = Context.layerFilter;
+			l.objectMask = Context.raw.layerFilter;
 			l.clear(baseColor, occlusion, roughness, metallic);
 		}
 		iron.App.notifyOnInit(_init);
@@ -1735,17 +1735,17 @@ class App {
 	public static function onLayersResized() {
 		iron.App.notifyOnInit(function() {
 			App.resizeLayers();
-			var _layer = Context.layer;
-			var _material = Context.material;
+			var _layer = Context.raw.layer;
+			var _material = Context.raw.material;
 			for (l in arm.Project.layers) {
 				if (l.fill_layer != null) {
-					Context.layer = l;
-					Context.material = l.fill_layer;
+					Context.raw.layer = l;
+					Context.raw.material = l.fill_layer;
 					App.updateFillLayer();
 				}
 			}
-			Context.layer = _layer;
-			Context.material = _material;
+			Context.raw.layer = _layer;
+			Context.raw.material = _material;
 			MakeMaterial.parsePaintMaterial();
 		});
 		UVUtil.uvmap = null;

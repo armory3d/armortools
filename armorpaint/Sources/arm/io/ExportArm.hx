@@ -122,7 +122,7 @@ class ExportArm {
 		};
 
 		#if (krom_android || krom_ios)
-		var tex = iron.RenderPath.active.renderTargets.get(Context.renderMode == RenderForward ? "buf" : "tex").image;
+		var tex = iron.RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderForward ? "buf" : "tex").image;
 		var mesh_icon = kha.Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);
@@ -200,7 +200,7 @@ class ExportArm {
 		if (!path.endsWith(".arm")) path += ".arm";
 		var mnodes: Array<TNodeCanvas> = [];
 		var mgroups: Array<TNodeCanvas> = null;
-		var m = Context.material;
+		var m = Context.raw.material;
 		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
 		var assets: Array<TAsset> = [];
 		if (UINodes.hasGroup(c)) {
@@ -215,7 +215,7 @@ class ExportArm {
 		var isCloud = path.endsWith("_cloud_.arm");
 		if (isCloud) path = path.replace("_cloud_", "");
 		var packed_assets: Array<TPackedAsset> = null;
-		if (!Context.packAssetsOnExport) {
+		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = getPackedAssets(path, texture_files);
 		}
 
@@ -233,14 +233,14 @@ class ExportArm {
 			packed_assets: packed_assets
 		};
 
-		if (Context.writeIconOnExport) { // Separate icon files
+		if (Context.raw.writeIconOnExport) { // Separate icon files
 			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", m.image.getPixels().getData(), m.image.width, m.image.height, 0);
 			if (isCloud) {
 				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", m.image.getPixels().getData(), m.image.width, m.image.height, 0, 50);
 			}
 		}
 
-		if (Context.packAssetsOnExport) { // Pack textures
+		if (Context.raw.packAssetsOnExport) { // Pack textures
 			packAssets(raw, assets);
 		}
 
@@ -262,7 +262,7 @@ class ExportArm {
 	public static function runBrush(path: String) {
 		if (!path.endsWith(".arm")) path += ".arm";
 		var bnodes: Array<TNodeCanvas> = [];
-		var b = Context.brush;
+		var b = Context.raw.brush;
 		var c: TNodeCanvas = Json.parse(Json.stringify(b.canvas));
 		var assets: Array<TAsset> = [];
 		for (n in c.nodes) exportNode(n, assets);
@@ -272,7 +272,7 @@ class ExportArm {
 		var isCloud = path.endsWith("_cloud_.arm");
 		if (isCloud) path = path.replace("_cloud_", "");
 		var packed_assets: Array<TPackedAsset> = null;
-		if (!Context.packAssetsOnExport) {
+		if (!Context.raw.packAssetsOnExport) {
 			packed_assets = getPackedAssets(path, texture_files);
 		}
 
@@ -289,11 +289,11 @@ class ExportArm {
 			packed_assets: packed_assets
 		};
 
-		if (Context.writeIconOnExport) { // Separate icon file
+		if (Context.raw.writeIconOnExport) { // Separate icon file
 			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", b.image.getPixels().getData(), b.image.width, b.image.height, 0);
 		}
 
-		if (Context.packAssetsOnExport) { // Pack textures
+		if (Context.raw.packAssetsOnExport) { // Pack textures
 			packAssets(raw, assets);
 		}
 

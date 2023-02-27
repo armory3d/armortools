@@ -52,9 +52,9 @@ class ImportAsset {
 				UINodes.inst.getNodes().nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}
-			if (Context.tool == ToolColorId && Project.assetNames.length == 1) {
+			if (Context.raw.tool == ToolColorId && Project.assetNames.length == 1) {
 				UIHeader.inst.headerHandle.redraws = 2;
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 			}
 		}
 		else if (Path.isFont(path)) {

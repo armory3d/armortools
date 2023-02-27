@@ -38,23 +38,23 @@ class UIHeader {
 		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], Std.int(defaultHeaderH * ui.SCALE()))) {
 			ui._y += 2;
 
-			if (Context.tool == ToolColorId) {
+			if (Context.raw.tool == ToolColorId) {
 				ui.text(tr("Picked Color"));
-				if (Context.colorIdPicked) {
+				if (Context.raw.colorIdPicked) {
 					ui.image(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0xffffffff, 64);
 				}
-				ui.enabled = Context.colorIdPicked;
+				ui.enabled = Context.raw.colorIdPicked;
 				if (ui.button(tr("Clear"))) {
-					Context.colorIdPicked = false;
+					Context.raw.colorIdPicked = false;
 					UIToolbar.inst.toolbarHandle.redraws = 1;
 				}
 				ui.enabled = true;
 				ui.text(tr("Color ID Map"));
 				if (Project.assetNames.length > 0) {
-					var cid = ui.combo(Context.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
-					if (Context.colorIdHandle.changed) {
-						Context.ddirty = 2;
-						Context.colorIdPicked = false;
+					var cid = ui.combo(Context.raw.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
+					if (Context.raw.colorIdHandle.changed) {
+						Context.raw.ddirty = 2;
+						Context.raw.colorIdPicked = false;
 						UIToolbar.inst.toolbarHandle.redraws = 1;
 					}
 					ui.image(Project.getImage(Project.assets[cid]));
@@ -64,54 +64,54 @@ class UIHeader {
 					UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
 						ImportAsset.run(path, -1.0, -1.0, true, false);
 
-						Context.colorIdHandle.position = Project.assetNames.length - 1;
+						Context.raw.colorIdHandle.position = Project.assetNames.length - 1;
 						for (a in Project.assets) {
 							// Already imported
-							if (a.file == path) Context.colorIdHandle.position = Project.assets.indexOf(a);
+							if (a.file == path) Context.raw.colorIdHandle.position = Project.assets.indexOf(a);
 						}
-						Context.ddirty = 2;
-						Context.colorIdPicked = false;
+						Context.raw.ddirty = 2;
+						Context.raw.colorIdPicked = false;
 						UIToolbar.inst.toolbarHandle.redraws = 1;
 						UIStatus.inst.statusHandle.redraws = 2;
 					});
 				}
-				ui.enabled = Context.colorIdPicked;
+				ui.enabled = Context.raw.colorIdPicked;
 				if (ui.button(tr("To Mask"))) {
-					if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
-					var m = App.newMask(false, Context.layer);
+					if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
+					var m = App.newMask(false, Context.raw.layer);
 					function _next() {
 						if (App.pipeMerge == null) App.makePipe();
 						if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 						m.texpaint.g4.begin();
 						m.texpaint.g4.setPipeline(App.pipeColorIdToMask);
 						m.texpaint.g4.setTexture(App.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
-						m.texpaint.g4.setTexture(App.texColorId, Project.getImage(Project.assets[Context.colorIdHandle.position]));
+						m.texpaint.g4.setTexture(App.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
 						m.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 						m.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 						m.texpaint.g4.drawIndexedVertices();
 						m.texpaint.g4.end();
-						Context.colorIdPicked = false;
+						Context.raw.colorIdPicked = false;
 						UIToolbar.inst.toolbarHandle.redraws = 1;
 						UIHeader.inst.headerHandle.redraws = 1;
-						Context.layerPreviewDirty = true;
+						Context.raw.layerPreviewDirty = true;
 					}
 					App.notifyOnNextFrame(_next);
 					History.newWhiteMask();
 				}
 				ui.enabled = true;
 			}
-			else if (Context.tool == ToolPicker) {
-				var baseRPicked = Math.round(Context.pickedColor.base.R * 10) / 10;
-				var baseGPicked = Math.round(Context.pickedColor.base.G * 10) / 10;
-				var baseBPicked = Math.round(Context.pickedColor.base.B * 10) / 10;
-				var normalRPicked = Math.round(Context.pickedColor.normal.R * 10) / 10;
-				var normalGPicked = Math.round(Context.pickedColor.normal.G * 10) / 10;
-				var normalBPicked = Math.round(Context.pickedColor.normal.B * 10) / 10;
-				var occlusionPicked = Math.round(Context.pickedColor.occlusion * 100) / 100;
-				var roughnessPicked = Math.round(Context.pickedColor.roughness * 100) / 100;
-				var metallicPicked = Math.round(Context.pickedColor.metallic * 100) / 100;
-				var heightPicked = Math.round(Context.pickedColor.height * 100) / 100;
-				var opacityPicked = Math.round(Context.pickedColor.opacity * 100) / 100;
+			else if (Context.raw.tool == ToolPicker) {
+				var baseRPicked = Math.round(Context.raw.pickedColor.base.R * 10) / 10;
+				var baseGPicked = Math.round(Context.raw.pickedColor.base.G * 10) / 10;
+				var baseBPicked = Math.round(Context.raw.pickedColor.base.B * 10) / 10;
+				var normalRPicked = Math.round(Context.raw.pickedColor.normal.R * 10) / 10;
+				var normalGPicked = Math.round(Context.raw.pickedColor.normal.G * 10) / 10;
+				var normalBPicked = Math.round(Context.raw.pickedColor.normal.B * 10) / 10;
+				var occlusionPicked = Math.round(Context.raw.pickedColor.occlusion * 100) / 100;
+				var roughnessPicked = Math.round(Context.raw.pickedColor.roughness * 100) / 100;
+				var metallicPicked = Math.round(Context.raw.pickedColor.metallic * 100) / 100;
+				var heightPicked = Math.round(Context.raw.pickedColor.height * 100) / 100;
+				var opacityPicked = Math.round(Context.raw.pickedColor.opacity * 100) / 100;
 
 				var h = Id.handle();
 				h.color.R = baseRPicked;
@@ -124,7 +124,7 @@ class UIHeader {
 					var uiy = ui._y;
 					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragSwatch = Project.cloneSwatch(Context.pickedColor);
+					App.dragSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 				}
 				if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 				if (ui.isHovered && ui.inputReleased) {
@@ -136,7 +136,7 @@ class UIHeader {
 					}, 10);
 				}
 				if (ui.button(tr("Add Swatch"))) {
-					var newSwatch = Project.cloneSwatch(Context.pickedColor);
+					var newSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 					Context.setSwatch(newSwatch);
 					Project.raw.swatches.push(newSwatch);
 					UIStatus.inst.statusHandle.redraws = 1;
@@ -150,21 +150,21 @@ class UIHeader {
 				ui.text(tr("Metallic") + ' ($metallicPicked)');
 				ui.text(tr("Height") + ' ($heightPicked)');
 				ui.text(tr("Opacity") + ' ($opacityPicked)');
-				Context.pickerSelectMaterial = ui.check(Id.handle({ selected: Context.pickerSelectMaterial }), tr("Select Material"));
-				ui.combo(Context.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
-				if (Context.pickerMaskHandle.changed) {
+				Context.raw.pickerSelectMaterial = ui.check(Id.handle({ selected: Context.raw.pickerSelectMaterial }), tr("Select Material"));
+				ui.combo(Context.raw.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
+				if (Context.raw.pickerMaskHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
 				}
 			}
-			else if (Context.tool == ToolBake) {
+			else if (Context.raw.tool == ToolBake) {
 				ui.changed = false;
 
 				#if (kha_direct3d12 || kha_vulkan)
-				var baking = Context.pdirty > 0;
-				var rtBake = Context.bakeType == BakeAO || Context.bakeType == BakeLightmap || Context.bakeType == BakeBentNormal || Context.bakeType == BakeThickness;
+				var baking = Context.raw.pdirty > 0;
+				var rtBake = Context.raw.bakeType == BakeAO || Context.raw.bakeType == BakeLightmap || Context.raw.bakeType == BakeBentNormal || Context.raw.bakeType == BakeThickness;
 				if (baking && ui.button(tr("Stop"))) {
-					Context.pdirty = 0;
-					Context.rdirty = 2;
+					Context.raw.pdirty = 0;
+					Context.raw.rdirty = 2;
 				}
 				#else
 				var baking = false;
@@ -172,16 +172,16 @@ class UIHeader {
 				#end
 
 				if (!baking && ui.button(tr("Bake"))) {
-					Context.pdirty = rtBake ? Context.bakeSamples : 1;
-					Context.rdirty = 3;
+					Context.raw.pdirty = rtBake ? Context.raw.bakeSamples : 1;
+					Context.raw.rdirty = 3;
 					App.notifyOnNextFrame(function() {
-						Context.layerPreviewDirty = true;
+						Context.raw.layerPreviewDirty = true;
 					});
 					UISidebar.inst.hwnd0.redraws = 2;
 					History.pushUndo = true;
 				}
 
-				var bakeHandle = Id.handle({ position: Context.bakeType });
+				var bakeHandle = Id.handle({ position: Context.raw.bakeType });
 				var bakes = [
 					tr("AO"),
 					tr("Curvature"),
@@ -200,30 +200,30 @@ class UIHeader {
 				bakes.push(tr("Bent Normal"));
 				bakes.push(tr("Thickness"));
 				#end
-				Context.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
+				Context.raw.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
 
 				#if (kha_direct3d12 || kha_vulkan)
 				if (rtBake) {
-					var samplesHandle = Id.handle({ value: Context.bakeSamples });
-					Context.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
+					var samplesHandle = Id.handle({ value: Context.raw.bakeSamples });
+					Context.raw.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
 				}
 				#end
 
-				if (Context.bakeType == BakeNormalObject || Context.bakeType == BakePosition || Context.bakeType == BakeBentNormal) {
-					var bakeUpAxisHandle = Id.handle({ position: Context.bakeUpAxis });
-					Context.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
+				if (Context.raw.bakeType == BakeNormalObject || Context.raw.bakeType == BakePosition || Context.raw.bakeType == BakeBentNormal) {
+					var bakeUpAxisHandle = Id.handle({ position: Context.raw.bakeUpAxis });
+					Context.raw.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 				}
-				if (Context.bakeType == BakeAO || Context.bakeType == BakeCurvature) {
-					var bakeAxisHandle = Id.handle({ position: Context.bakeAxis });
-					Context.bakeAxis = ui.combo(bakeAxisHandle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
+				if (Context.raw.bakeType == BakeAO || Context.raw.bakeType == BakeCurvature) {
+					var bakeAxisHandle = Id.handle({ position: Context.raw.bakeAxis });
+					Context.raw.bakeAxis = ui.combo(bakeAxisHandle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 				}
-				if (Context.bakeType == BakeAO) {
-					var strengthHandle = Id.handle({ value: Context.bakeAoStrength });
-					Context.bakeAoStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-					var radiusHandle = Id.handle({ value: Context.bakeAoRadius });
-					Context.bakeAoRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-					var offsetHandle = Id.handle({ value: Context.bakeAoOffset });
-					Context.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
+				if (Context.raw.bakeType == BakeAO) {
+					var strengthHandle = Id.handle({ value: Context.raw.bakeAoStrength });
+					Context.raw.bakeAoStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
+					var radiusHandle = Id.handle({ value: Context.raw.bakeAoRadius });
+					Context.raw.bakeAoRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
+					var offsetHandle = Id.handle({ value: Context.raw.bakeAoOffset });
+					Context.raw.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 				}
 				#if (kha_direct3d12 || kha_vulkan)
 				if (rtBake) {
@@ -231,83 +231,83 @@ class UIHeader {
 					ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytraceBake.raysSec}');
 				}
 				#end
-				if (Context.bakeType == BakeCurvature) {
-					var strengthHandle = Id.handle({ value: Context.bakeCurvStrength });
-					Context.bakeCurvStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-					var radiusHandle = Id.handle({ value: Context.bakeCurvRadius });
-					Context.bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-					var offsetHandle = Id.handle({ value: Context.bakeCurvOffset });
-					Context.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), -2.0, 2.0, true);
-					var smoothHandle = Id.handle({ value: Context.bakeCurvSmooth });
-					Context.bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
+				if (Context.raw.bakeType == BakeCurvature) {
+					var strengthHandle = Id.handle({ value: Context.raw.bakeCurvStrength });
+					Context.raw.bakeCurvStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
+					var radiusHandle = Id.handle({ value: Context.raw.bakeCurvRadius });
+					Context.raw.bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
+					var offsetHandle = Id.handle({ value: Context.raw.bakeCurvOffset });
+					Context.raw.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), -2.0, 2.0, true);
+					var smoothHandle = Id.handle({ value: Context.raw.bakeCurvSmooth });
+					Context.raw.bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
 				}
-				if (Context.bakeType == BakeNormal || Context.bakeType == BakeHeight || Context.bakeType == BakeDerivative) {
+				if (Context.raw.bakeType == BakeNormal || Context.raw.bakeType == BakeHeight || Context.raw.bakeType == BakeDerivative) {
 					var ar = [for (p in Project.paintObjects) p.name];
-					var polyHandle = Id.handle({ position: Context.bakeHighPoly });
-					Context.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
+					var polyHandle = Id.handle({ position: Context.raw.bakeHighPoly });
+					Context.raw.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
 				}
 				if (ui.changed) {
 					MakeMaterial.parsePaintMaterial();
 				}
 			}
-			else if (Context.tool == ToolBrush ||
-					 Context.tool == ToolEraser ||
-					 Context.tool == ToolFill ||
-					 Context.tool == ToolDecal ||
-					 Context.tool == ToolText ||
-					 Context.tool == ToolClone ||
-					 Context.tool == ToolBlur ||
-					 Context.tool == ToolParticle) {
+			else if (Context.raw.tool == ToolBrush ||
+					 Context.raw.tool == ToolEraser ||
+					 Context.raw.tool == ToolFill ||
+					 Context.raw.tool == ToolDecal ||
+					 Context.raw.tool == ToolText ||
+					 Context.raw.tool == ToolClone ||
+					 Context.raw.tool == ToolBlur ||
+					 Context.raw.tool == ToolParticle) {
 
-				var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+				var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
-				if (Context.tool != ToolFill) {
+				if (Context.raw.tool != ToolFill) {
 					if (decalMask) {
-						Context.brushDecalMaskRadius = ui.slider(Context.brushDecalMaskRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+						Context.raw.brushDecalMaskRadius = ui.slider(Context.raw.brushDecalMaskRadiusHandle, tr("Radius"), 0.01, 2.0, true);
 						if (ui.isHovered) ui.tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", ["brush_radius" => Config.keymap.brush_radius, "brush_radius_decrease" => Config.keymap.brush_radius_decrease, "brush_radius_increase" => Config.keymap.brush_radius_increase]));
 					}
 					else {
-						Context.brushRadius = ui.slider(Context.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+						Context.raw.brushRadius = ui.slider(Context.raw.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
 						if (ui.isHovered) ui.tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", ["brush_radius" => Config.keymap.brush_radius, "brush_radius_decrease" => Config.keymap.brush_radius_decrease, "brush_radius_increase" => Config.keymap.brush_radius_increase]));	
 					}
 				}
 
-				if (Context.tool == ToolDecal || Context.tool == ToolText) {
-					Context.brushScaleX = ui.slider(Context.brushScaleXHandle, tr("Scale X"), 0.01, 2.0, true);
+				if (Context.raw.tool == ToolDecal || Context.raw.tool == ToolText) {
+					Context.raw.brushScaleX = ui.slider(Context.raw.brushScaleXHandle, tr("Scale X"), 0.01, 2.0, true);
 				}
 
-				if (Context.tool == ToolBrush  ||
-					Context.tool == ToolFill   ||
-					Context.tool == ToolDecal  ||
-					Context.tool == ToolText) {
-					var brushScaleHandle = Id.handle({ value: Context.brushScale });
-					Context.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
+				if (Context.raw.tool == ToolBrush  ||
+					Context.raw.tool == ToolFill   ||
+					Context.raw.tool == ToolDecal  ||
+					Context.raw.tool == ToolText) {
+					var brushScaleHandle = Id.handle({ value: Context.raw.brushScale });
+					Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 					if (brushScaleHandle.changed) {
-						if (Context.tool == ToolDecal || Context.tool == ToolText) {
+						if (Context.raw.tool == ToolDecal || Context.raw.tool == ToolText) {
 							ui.g.end();
 							RenderUtil.makeDecalPreview();
 							ui.g.begin(false);
 						}
 					}
 
-					Context.brushAngle = ui.slider(Context.brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
+					Context.raw.brushAngle = ui.slider(Context.raw.brushAngleHandle, tr("Angle"), 0.0, 360.0, true, 1);
 					if (ui.isHovered) ui.tooltip(tr("Hold {brush_angle} and move mouse to the left to decrease the angle\nHold {brush_angle} and move mouse to the right to increase the angle", ["brush_angle" => Config.keymap.brush_angle]));
 
-					if (Context.brushAngleHandle.changed) {
+					if (Context.raw.brushAngleHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
 				}
 
-				Context.brushOpacity = ui.slider(Context.brushOpacityHandle, tr("Opacity"), 0.0, 1.0, true);
+				Context.raw.brushOpacity = ui.slider(Context.raw.brushOpacityHandle, tr("Opacity"), 0.0, 1.0, true);
 				if (ui.isHovered) ui.tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", ["brush_opacity" => Config.keymap.brush_opacity]));
 
-				if (Context.tool == ToolBrush || Context.tool == ToolEraser || Context.tool == ToolClone || decalMask) {
-					Context.brushHardness = ui.slider(Id.handle({ value: Context.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
+				if (Context.raw.tool == ToolBrush || Context.raw.tool == ToolEraser || Context.raw.tool == ToolClone || decalMask) {
+					Context.raw.brushHardness = ui.slider(Id.handle({ value: Context.raw.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
 				}
 
-				if (Context.tool != ToolEraser) {
-					var brushBlendingHandle = Id.handle({ value: Context.brushBlending });
-					Context.brushBlending = ui.combo(brushBlendingHandle, [
+				if (Context.raw.tool != ToolEraser) {
+					var brushBlendingHandle = Id.handle({ value: Context.raw.brushBlending });
+					Context.raw.brushBlending = ui.combo(brushBlendingHandle, [
 						tr("Mix"),
 						tr("Darken"),
 						tr("Multiply"),
@@ -332,22 +332,22 @@ class UIHeader {
 					}
 				}
 
-				if (Context.tool == ToolBrush || Context.tool == ToolFill) {
+				if (Context.raw.tool == ToolBrush || Context.raw.tool == ToolFill) {
 					var paintHandle = Id.handle();
-					Context.brushPaint = ui.combo(paintHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
+					Context.raw.brushPaint = ui.combo(paintHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 					if (paintHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
 				}
-				if (Context.tool == ToolText) {
+				if (Context.raw.tool == ToolText) {
 					var h = Id.handle();
-					h.text = Context.textToolText;
+					h.text = Context.raw.textToolText;
 					var w = ui._w;
 					if (ui.textSelectedHandle == h || ui.submitTextHandle == h) {
 						ui._w *= 3;
 					}
 					
-					Context.textToolText = ui.textInput(h, "", Left, true, true);
+					Context.raw.textToolText = ui.textInput(h, "", Left, true, true);
 					ui._w = w;
 
 					if (h.changed) {
@@ -358,10 +358,10 @@ class UIHeader {
 					}
 				}
 
-				if (Context.tool == ToolFill) {
-					ui.combo(Context.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
-					if (Context.fillTypeHandle.changed) {
-						if (Context.fillTypeHandle.position == FillFace) {
+				if (Context.raw.tool == ToolFill) {
+					ui.combo(Context.raw.fillTypeHandle, [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")], tr("Fill Mode"));
+					if (Context.raw.fillTypeHandle.changed) {
+						if (Context.raw.fillTypeHandle.position == FillFace) {
 							ui.g.end();
 							// UVUtil.cacheUVMap();
 							UVUtil.cacheTriangleMap();
@@ -381,8 +381,8 @@ class UIHeader {
 						ui._x -= 6 * sc;
 					}
 
-					var xrayHandle = Id.handle({ selected: Context.xray });
-					Context.xray = ui.check(xrayHandle, tr("X-Ray"));
+					var xrayHandle = Id.handle({ selected: Context.raw.xray });
+					Context.raw.xray = ui.check(xrayHandle, tr("X-Ray"));
 					if (xrayHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
@@ -394,11 +394,11 @@ class UIHeader {
 					if (Config.raw.touch_ui) {
 						ui._x -= 6 * sc;
 						ui._w = Std.int(27 * sc);
-						Context.symX = ui.check(symXHandle, "");
+						Context.raw.symX = ui.check(symXHandle, "");
 						ui._x -= 12 * sc;
-						Context.symY = ui.check(symYHandle, "");
+						Context.raw.symY = ui.check(symYHandle, "");
 						ui._x -= 12 * sc;
-						Context.symZ = ui.check(symZHandle, "");
+						Context.raw.symZ = ui.check(symZHandle, "");
 						ui._x -= 12 * sc;
 						ui._w = Std.int(40 * sc);
 						ui.text(tr("X") + tr("Y") + tr("Z"));
@@ -407,9 +407,9 @@ class UIHeader {
 						ui._w = Std.int(56 * sc);
 						ui.text(tr("Symmetry"));
 						ui._w = Std.int(25 * sc);
-						Context.symX = ui.check(symXHandle, tr("X"));
-						Context.symY = ui.check(symYHandle, tr("Y"));
-						Context.symZ = ui.check(symZHandle, tr("Z"));
+						Context.raw.symX = ui.check(symXHandle, tr("X"));
+						Context.raw.symY = ui.check(symYHandle, tr("Y"));
+						Context.raw.symZ = ui.check(symZHandle, tr("Z"));
 					}
 					
 					if (symXHandle.changed || symYHandle.changed || symZHandle.changed) {
@@ -418,20 +418,20 @@ class UIHeader {
 					ui._w = _w;
 				}
 
-				if (Context.tool == ToolBlur) {
+				if (Context.raw.tool == ToolBlur) {
 					ui._x += 10 * ui.SCALE();
 					var dirHandle = Id.handle({ selected: false });
-					Context.blurDirectional = ui.check(dirHandle, tr("Directional"));
+					Context.raw.blurDirectional = ui.check(dirHandle, tr("Directional"));
 					if (dirHandle.changed) {
 						MakeMaterial.parsePaintMaterial();
 					}
 				}
 
 				#if arm_physics
-				if (Context.tool == ToolParticle) {
+				if (Context.raw.tool == ToolParticle) {
 					ui._x += 10 * ui.SCALE();
 					var physHandle = Id.handle({ selected: false });
-					Context.particlePhysics = ui.check(physHandle, tr("Physics"));
+					Context.raw.particlePhysics = ui.check(physHandle, tr("Physics"));
 					if (physHandle.changed) {
 						arm.util.ParticleUtil.initParticlePhysics();
 						MakeMaterial.parsePaintMaterial();

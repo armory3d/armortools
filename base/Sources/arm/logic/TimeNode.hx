@@ -14,7 +14,7 @@ class TimeNode extends LogicNode {
 	override function get(from: Int, done: Dynamic->Void) {
 		if (from == 0) done(iron.system.Time.time());
 		else if (from == 1) done(iron.system.Time.delta);
-		else done(Context.brushTime);
+		else done(Context.raw.brushTime);
 	}
 
 	public static var def: TNode = {

@@ -34,17 +34,17 @@ class MakeNodePreview {
 		#end
 
 		MaterialParser.init();
-		MaterialParser.canvases = [Context.material.canvas];
-		MaterialParser.nodes = Context.material.canvas.nodes;
-		MaterialParser.links = Context.material.canvas.links;
+		MaterialParser.canvases = [Context.raw.material.canvas];
+		MaterialParser.nodes = Context.raw.material.canvas.nodes;
+		MaterialParser.links = Context.raw.material.canvas.links;
 		if (group != null) {
 			MaterialParser.push_group(group);
 			MaterialParser.parents = parents;
 		}
 		var links = MaterialParser.links;
-		var nodes = Context.material.nodes;
+		var nodes = Context.raw.material.nodes;
 
-		var link: TNodeLink = { id: nodes.getLinkId(links), from_id: node.id, from_socket: Context.nodePreviewSocket, to_id: -1, to_socket: -1 };
+		var link: TNodeLink = { id: nodes.getLinkId(links), from_id: node.id, from_socket: Context.raw.nodePreviewSocket, to_id: -1, to_socket: -1 };
 		links.push(link);
 
 		MaterialParser.con = con_mesh;

@@ -7,7 +7,7 @@ import arm.format.ObjParser;
 class ImportObj {
 
 	public static function run(path: String, replaceExisting = true) {
-		var i = Context.splitBy;
+		var i = Context.raw.splitBy;
 		var isUdim = i == SplitUdim;
 		ObjParser.splitCode =
 			(i == SplitObject || isUdim) ? "o".code :
@@ -34,7 +34,7 @@ class ImportObj {
 					obj = new ObjParser(b, obj.pos);
 					parts.push(obj);
 				}
-				if (Context.splitBy == SplitMaterial) {
+				if (Context.raw.splitBy == SplitMaterial) {
 					var posa0;
 					var posa1;
 					var nora0;

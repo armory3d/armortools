@@ -59,35 +59,35 @@ class UISidebar {
 
 		if (Project.raw.swatches == null) {
 			Project.setDefaultSwatches();
-			Context.swatch = Project.raw.swatches[0];
+			Context.raw.swatch = Project.raw.swatches[0];
 		}
 
-		if (Context.emptyEnvmap == null) {
+		if (Context.raw.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 2);
 			b.set(1, 2);
 			b.set(2, 2);
 			b.set(3, 255);
-			Context.emptyEnvmap = Image.fromBytes(b, 1, 1);
+			Context.raw.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}
-		if (Context.previewEnvmap == null) {
+		if (Context.raw.previewEnvmap == null) {
 			var b = Bytes.alloc(4);
 			b.set(0, 0);
 			b.set(1, 0);
 			b.set(2, 0);
 			b.set(3, 255);
-			Context.previewEnvmap = Image.fromBytes(b, 1, 1);
+			Context.raw.previewEnvmap = Image.fromBytes(b, 1, 1);
 		}
 
 		var world = Scene.active.world;
-		if (Context.savedEnvmap == null) {
-			// Context.savedEnvmap = world.envmap;
-			Context.defaultIrradiance = world.probe.irradiance;
-			Context.defaultRadiance = world.probe.radiance;
-			Context.defaultRadianceMipmaps = world.probe.radianceMipmaps;
+		if (Context.raw.savedEnvmap == null) {
+			// Context.raw.savedEnvmap = world.envmap;
+			Context.raw.defaultIrradiance = world.probe.irradiance;
+			Context.raw.defaultRadiance = world.probe.radiance;
+			Context.raw.defaultRadianceMipmaps = world.probe.radianceMipmaps;
 		}
-		world.envmap = Context.showEnvmap ? Context.savedEnvmap : Context.emptyEnvmap;
-		Context.ddirty = 1;
+		world.envmap = Context.raw.showEnvmap ? Context.raw.savedEnvmap : Context.raw.emptyEnvmap;
+		Context.raw.ddirty = 1;
 
 		History.reset();
 
@@ -100,15 +100,15 @@ class UISidebar {
 		var resources = ["cursor.k", "icons.k", "placeholder.k"];
 		Res.load(resources, done);
 
-		Context.projectObjects = [];
-		for (m in Scene.active.meshes) Context.projectObjects.push(m);
+		Context.raw.projectObjects = [];
+		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
 	}
 
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
 
-		Context.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
-		Project.paintObjects = [Context.paintObject];
+		Context.raw.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
+		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
 			iron.App.notifyOnInit(App.initLayers);
@@ -138,12 +138,12 @@ class UISidebar {
 		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimportTextures();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
-			if (Context.textureExportPath == "") { // First export, ask for path
+			if (Context.raw.textureExportPath == "") { // First export, ask for path
 				BoxExport.showTextures();
 			}
 			else {
 				function _init() {
-					ExportTexture.run(Context.textureExportPath);
+					ExportTexture.run(Context.raw.textureExportPath);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -168,20 +168,20 @@ class UISidebar {
 
 		var mouse = Input.getMouse();
 
-		if ((Context.brushCanLock || Context.brushLocked) && mouse.moved) {
+		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && mouse.moved) {
 			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown)) {
-				if (Context.brushLocked) {
+				if (Context.raw.brushLocked) {
 
-						Context.brushRadius += mouse.movementX / 150;
-						Context.brushRadius = Math.max(0.01, Math.min(4.0, Context.brushRadius));
-						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius += mouse.movementX / 150;
+						Context.raw.brushRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushRadius));
+						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 
 					UIHeader.inst.headerHandle.redraws = 2;
 				}
-				else if (Context.brushCanLock) {
-					Context.brushCanLock = false;
-					Context.brushLocked = true;
+				else if (Context.raw.brushCanLock) {
+					Context.raw.brushCanLock = false;
+					Context.raw.brushLocked = true;
 				}
 			}
 		}
@@ -196,25 +196,25 @@ class UISidebar {
 		if (inViewport && !isTyping) {
 			if (UIHeader.inst.worktab.position == Space3D) {
 				// Radius
-				if (Context.tool == ToolEraser ||
-					Context.tool == ToolClone  ||
-					Context.tool == ToolBlur) {
+				if (Context.raw.tool == ToolEraser ||
+					Context.raw.tool == ToolClone  ||
+					Context.raw.tool == ToolBlur) {
 					if (Operator.shortcut(Config.keymap.brush_radius)) {
-						Context.brushCanLock = true;
+						Context.raw.brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
-						Context.lockStartedX = mouse.x;
-						Context.lockStartedY = mouse.y;
+						Context.raw.lockStartedX = mouse.x;
+						Context.raw.lockStartedY = mouse.y;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-						Context.brushRadius -= getRadiusIncrement();
-						Context.brushRadius = Math.max(Math.round(Context.brushRadius * 100) / 100, 0.01);
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius -= getRadiusIncrement();
+						Context.raw.brushRadius = Math.max(Math.round(Context.raw.brushRadius * 100) / 100, 0.01);
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-						Context.brushRadius += getRadiusIncrement();
-						Context.brushRadius = Math.round(Context.brushRadius * 100) / 100;
-						Context.brushRadiusHandle.value = Context.brushRadius;
+						Context.raw.brushRadius += getRadiusIncrement();
+						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 						UIHeader.inst.headerHandle.redraws = 2;
 					}
 				}
@@ -233,9 +233,9 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
 				else if (Operator.shortcut(Config.keymap.view_top)) Viewport.setView(0, 0, 1, 0, 0, 0);
 				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
-					Context.cameraType = Context.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
-					Context.camHandle.position = Context.cameraType;
-					Viewport.updateCameraType(Context.cameraType);
+					Context.raw.cameraType = Context.raw.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
+					Context.raw.camHandle.position = Context.raw.cameraType;
+					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 				else if (Operator.shortcut(Config.keymap.view_orbit_left, ShortcutRepeat)) Viewport.orbit(-Math.PI / 12, 0);
 				else if (Operator.shortcut(Config.keymap.view_orbit_right, ShortcutRepeat)) Viewport.orbit(Math.PI / 12, 0);
@@ -247,7 +247,7 @@ class UISidebar {
 				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
 					UIMenu.draw(function(ui: Zui) {
 						var modeHandle = Id.handle();
-						modeHandle.position = Context.viewportMode;
+						modeHandle.position = Context.raw.viewportMode;
 						ui.text(tr("Viewport Mode"), Right, ui.t.HIGHLIGHT_COL);
 						var modes = [
 							tr("Lit"),
@@ -283,23 +283,23 @@ class UISidebar {
 			}
 		}
 
-		if (Context.brushCanLock || Context.brushLocked) {
-			if (mouse.moved && Context.brushCanUnlock) {
-				Context.brushLocked = false;
-				Context.brushCanUnlock = false;
+		if (Context.raw.brushCanLock || Context.raw.brushLocked) {
+			if (mouse.moved && Context.raw.brushCanUnlock) {
+				Context.raw.brushLocked = false;
+				Context.raw.brushCanUnlock = false;
 			}
-			if ((Context.brushCanLock || Context.brushLocked) &&
+			if ((Context.raw.brushCanLock || Context.raw.brushLocked) &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown)) {
 				mouse.unlock();
-				Context.lastPaintX = -1;
-				Context.lastPaintY = -1;
-				if (Context.brushCanLock) {
-					Context.brushCanLock = false;
-					Context.brushCanUnlock = false;
-					Context.brushLocked = false;
+				Context.raw.lastPaintX = -1;
+				Context.raw.lastPaintY = -1;
+				if (Context.raw.brushCanLock) {
+					Context.raw.brushCanLock = false;
+					Context.raw.brushCanUnlock = false;
+					Context.raw.brushLocked = false;
 				}
 				else {
-					Context.brushCanUnlock = true;
+					Context.raw.brushCanUnlock = true;
 				}
 			}
 		}
@@ -362,7 +362,7 @@ class UISidebar {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		var setCloneSource = Context.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
+		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 				   setCloneSource ||
@@ -371,9 +371,9 @@ class UISidebar {
 
 		if (Config.raw.touch_ui) {
 			if (Input.getPen().down()) {
-				Context.penPaintingOnly = true;
+				Context.raw.penPaintingOnly = true;
 			}
-			else if (Context.penPaintingOnly) {
+			else if (Context.raw.penPaintingOnly) {
 				down = false;
 			}
 		}
@@ -388,31 +388,31 @@ class UISidebar {
 				my < iron.App.h() &&
 				my > iron.App.y()) {
 
-				if (Context.brushTime == 0 &&
+				if (Context.raw.brushTime == 0 &&
 					!App.isDragging &&
 					!App.isResizing &&
 					!App.isComboSelected()) { // Paint started
 
 					// Draw line
 					if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
-						Context.lastPaintVecX = Context.lastPaintX;
-						Context.lastPaintVecY = Context.lastPaintY;
+						Context.raw.lastPaintVecX = Context.raw.lastPaintX;
+						Context.raw.lastPaintVecY = Context.raw.lastPaintY;
 					}
 
 					// History.pushUndo = true;
 				}
-				Context.brushTime += Time.delta;
+				Context.raw.brushTime += Time.delta;
 				if (Context.runBrush != null) Context.runBrush(0);
 			}
 		}
-		else if (Context.brushTime > 0) { // Brush released
-			Context.brushTime = 0;
-			Context.prevPaintVecX = -1;
-			Context.prevPaintVecY = -1;
+		else if (Context.raw.brushTime > 0) { // Brush released
+			Context.raw.brushTime = 0;
+			Context.raw.prevPaintVecX = -1;
+			Context.raw.prevPaintVecY = -1;
 			#if (!kha_direct3d12 && !kha_vulkan) // Keep accumulated samples for D3D12
-			Context.ddirty = 3;
+			Context.raw.ddirty = 3;
 			#end
-			Context.brushBlendDirty = true; // Update brush mask
+			Context.raw.brushBlendDirty = true; // Update brush mask
 		}
 
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);

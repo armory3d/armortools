@@ -143,12 +143,12 @@ class TabBrowser {
 											}
 										}
 										if (assetIndex != -1) {
-											Context.colorIdHandle.position = assetIndex;
-											Context.colorIdPicked = false;
+											Context.raw.colorIdHandle.position = assetIndex;
+											Context.raw.colorIdPicked = false;
 											UIToolbar.inst.toolbarHandle.redraws = 1;
-											if (Context.tool == ToolColorId) {
+											if (Context.raw.tool == ToolColorId) {
 												UIHeader.inst.headerHandle.redraws = 2;
-												Context.ddirty = 2;
+												Context.raw.ddirty = 2;
 											}
 										}
 									});

@@ -3041,8 +3041,8 @@ class NodesMaterial {
 	public static function createNode(nodeType: String, group: TNodeGroup = null): TNode {
 		var n = getTNode(nodeType);
 		if (n == null) return null;
-		var canvas = group != null ? group.canvas : Context.material.canvas;
-		var nodes = group != null ? group.nodes : Context.material.nodes;
+		var canvas = group != null ? group.canvas : Context.raw.material.canvas;
+		var nodes = group != null ? group.nodes : Context.raw.material.nodes;
 		var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 		canvas.nodes.push(node);
 		return node;

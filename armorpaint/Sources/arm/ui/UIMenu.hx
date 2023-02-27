@@ -73,12 +73,12 @@ class UIMenu {
 				if (menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Export Textures..."), Config.keymap.file_export_textures_as)) {
-					Context.layersExport = ExportVisible;
+					Context.raw.layersExport = ExportVisible;
 					BoxExport.showTextures();
 				}
 				if (menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
 				if (menuButton(ui, tr("Export Mesh..."))) {
-					Context.exportMeshIndex = 0; // All
+					Context.raw.exportMeshIndex = 0; // All
 					BoxExport.showMesh();
 				}
 				if (menuButton(ui, tr("Bake Material..."))) BoxExport.showBakeMaterial();
@@ -123,11 +123,11 @@ class UIMenu {
 				envHandle.value = p.raw.strength;
 				menuAlign(ui);
 				p.raw.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
-				if (envHandle.changed) Context.ddirty = 2;
+				if (envHandle.changed) Context.raw.ddirty = 2;
 
 				menuFill(ui);
 				var envaHandle = Id.handle();
-				envaHandle.value = Context.envmapAngle / Math.PI * 180.0;
+				envaHandle.value = Context.raw.envmapAngle / Math.PI * 180.0;
 				if (envaHandle.value < 0) {
 					envaHandle.value += (Std.int(-envaHandle.value / 360) + 1) * 360;
 				}
@@ -135,9 +135,9 @@ class UIMenu {
 					envaHandle.value -= Std.int(envaHandle.value / 360) * 360;
 				}
 				menuAlign(ui);
-				Context.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
+				Context.raw.envmapAngle = ui.slider(envaHandle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * Math.PI;
 				if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_envmap]));
-				if (envaHandle.changed) Context.ddirty = 2;
+				if (envaHandle.changed) Context.raw.ddirty = 2;
 
 				if (Scene.active.lights.length > 0) {
 					var light = Scene.active.lights[0];
@@ -149,25 +149,25 @@ class UIMenu {
 					lhandle.value = Std.int(lhandle.value * 100) / 100;
 					menuAlign(ui);
 					light.data.raw.strength = ui.slider(lhandle, tr("Light"), 0.0, 4.0, true) * scale;
-					if (lhandle.changed) Context.ddirty = 2;
+					if (lhandle.changed) Context.raw.ddirty = 2;
 
 					menuFill(ui);
 					var light = iron.Scene.active.lights[0];
 					var lahandle = Id.handle();
-					lahandle.value = Context.lightAngle / Math.PI * 180;
+					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
 					menuAlign(ui);
 					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
 					if (ui.isHovered) ui.tooltip(tr("{shortcut} and move mouse", ["shortcut" => Config.keymap.rotate_light]));
-					var ldiff = newAngle - Context.lightAngle;
+					var ldiff = newAngle - Context.raw.lightAngle;
 					if (Math.abs(ldiff) > 0.005) {
 						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
 						else if (newAngle > 2 * Math.PI) newAngle -= Std.int(newAngle / (2 * Math.PI)) * 2 * Math.PI;
-						Context.lightAngle = newAngle;
+						Context.raw.lightAngle = newAngle;
 						var m = iron.math.Mat4.identity();
 						m.self = kha.math.FastMatrix4.rotationZ(ldiff);
 						light.transform.local.multmat(m);
 						light.transform.decompose();
-						Context.ddirty = 2;
+						Context.raw.ddirty = 2;
 					}
 
 					menuFill(ui);
@@ -175,34 +175,34 @@ class UIMenu {
 					sxhandle.value = light.data.raw.size;
 					menuAlign(ui);
 					light.data.raw.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
-					if (sxhandle.changed) Context.ddirty = 2;
+					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
 				menuFill(ui);
-				var splitViewHandle = Id.handle({ selected: Context.splitView });
-				Context.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
+				var splitViewHandle = Id.handle({ selected: Context.raw.splitView });
+				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					App.resize();
 				}
 
 				menuFill(ui);
-				var cullHandle = Id.handle({ selected: Context.cullBackfaces });
-				Context.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
+				var cullHandle = Id.handle({ selected: Context.raw.cullBackfaces });
+				Context.raw.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				menuFill(ui);
-				var filterHandle = Id.handle({ selected: Context.textureFilter });
-				Context.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
+				var filterHandle = Id.handle({ selected: Context.raw.textureFilter });
+				Context.raw.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				menuFill(ui);
-				Context.drawWireframe = ui.check(Context.wireframeHandle, " " + tr("Wireframe"));
-				if (Context.wireframeHandle.changed) {
+				Context.raw.drawWireframe = ui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
+				if (Context.raw.wireframeHandle.changed) {
 					ui.g.end();
 					UVUtil.cacheUVMap();
 					ui.g.begin(false);
@@ -210,38 +210,38 @@ class UIMenu {
 				}
 
 				menuFill(ui);
-				Context.drawTexels = ui.check(Context.texelsHandle, " " + tr("Texels"));
-				if (Context.texelsHandle.changed) {
+				Context.raw.drawTexels = ui.check(Context.raw.texelsHandle, " " + tr("Texels"));
+				if (Context.raw.texelsHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				menuFill(ui);
-				var compassHandle = Id.handle({ selected: Context.showCompass });
-				Context.showCompass = ui.check(compassHandle, " " + tr("Compass"));
-				if (compassHandle.changed) Context.ddirty = 2;
+				var compassHandle = Id.handle({ selected: Context.raw.showCompass });
+				Context.raw.showCompass = ui.check(compassHandle, " " + tr("Compass"));
+				if (compassHandle.changed) Context.raw.ddirty = 2;
 
 				menuFill(ui);
-				Context.showEnvmap = ui.check(Context.showEnvmapHandle, " " + tr("Envmap"));
-				if (Context.showEnvmapHandle.changed) {
+				Context.raw.showEnvmap = ui.check(Context.raw.showEnvmapHandle, " " + tr("Envmap"));
+				if (Context.raw.showEnvmapHandle.changed) {
 					Context.loadEnvmap();
-					Context.ddirty = 2;
+					Context.raw.ddirty = 2;
 				}
 
 				menuFill(ui);
-				Context.showEnvmapBlur = ui.check(Context.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
-				if (Context.showEnvmapBlurHandle.changed) Context.ddirty = 2;
-				if (Context.showEnvmap) {
-					Scene.active.world.envmap = Context.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.savedEnvmap;
+				Context.raw.showEnvmapBlur = ui.check(Context.raw.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
+				if (Context.raw.showEnvmapBlurHandle.changed) Context.raw.ddirty = 2;
+				if (Context.raw.showEnvmap) {
+					Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 				}
 				else {
-					Scene.active.world.envmap = Context.emptyEnvmap;
+					Scene.active.world.envmap = Context.raw.emptyEnvmap;
 				}
 
 				if (ui.changed) keepOpen = true;
 			}
 			else if (menuCategory == MenuMode) {
 				var modeHandle = Id.handle();
-				modeHandle.position = Context.viewportMode;
+				modeHandle.position = Context.raw.viewportMode;
 				var modes = [
 					tr("Lit"),
 					tr("Base Color"),
@@ -325,16 +325,16 @@ class UIMenu {
 
 				menuFill(ui);
 				var cam = Scene.active.camera;
-				Context.fovHandle = Id.handle({ value: Std.int(cam.data.raw.fov * 100) / 100 });
+				Context.raw.fovHandle = Id.handle({ value: Std.int(cam.data.raw.fov * 100) / 100 });
 				menuAlign(ui);
-				cam.data.raw.fov = ui.slider(Context.fovHandle, tr("FoV"), 0.3, 2.0, true);
-				if (Context.fovHandle.changed) {
-					Viewport.updateCameraType(Context.cameraType);
+				cam.data.raw.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 2.0, true);
+				if (Context.raw.fovHandle.changed) {
+					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 
 				menuFill(ui);
 				menuAlign(ui);
-				Context.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				Context.raw.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.raw.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
 				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", 
 				["rotate_shortcut" => Config.keymap.action_rotate, 
 				"zoom_shortcut" => Config.keymap.action_zoom,  
@@ -345,10 +345,10 @@ class UIMenu {
 				if (ui.isHovered) ui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
 				menuFill(ui);
 				menuAlign(ui);
-				Context.cameraType = Ext.inlineRadio(ui, Context.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
+				Context.raw.cameraType = Ext.inlineRadio(ui, Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
 				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ' (${Config.keymap.view_camera_type})');
-				if (Context.camHandle.changed) {
-					Viewport.updateCameraType(Context.cameraType);
+				if (Context.raw.camHandle.changed) {
+					Viewport.updateCameraType(Context.raw.cameraType);
 				}
 
 				if (ui.changed) keepOpen = true;

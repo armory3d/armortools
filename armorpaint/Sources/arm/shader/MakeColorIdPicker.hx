@@ -21,14 +21,14 @@ class MakeColorIdPicker {
 		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inpLocal.x * gbufferSizeLocal.x, (1.0 - inpLocal.y) * gbufferSizeLocal.y), 0).ba;');
 		#end
 
-		if (Context.tool == ToolColorId) {
+		if (Context.raw.tool == ToolColorId) {
 			frag.add_out('vec4 fragColor');
 			frag.add_uniform('sampler2D texcolorid', '_texcolorid');
 			frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
 			frag.write('fragColor = vec4(idcol, 1.0);');
 		}
-		else if (Context.tool == ToolPicker) {
-			if (Context.pickPosNorTex) {
+		else if (Context.raw.tool == ToolPicker) {
+			if (Context.raw.pickPosNorTex) {
 				frag.add_out('vec4 fragColor[2]');
 				frag.add_uniform('sampler2D gbufferD');
 				frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');

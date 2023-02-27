@@ -27,16 +27,16 @@ class History {
 			var step = steps[active];
 
 			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
-				Context.layer = Project.layers[step.layer];
-				Context.layer.delete();
-				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
+				Context.raw.layer = Project.layers[step.layer];
+				Context.raw.layer.delete();
+				Context.raw.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("New Group")) {
-				Context.layer = Project.layers[step.layer];
+				Context.raw.layer = Project.layers[step.layer];
 				// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
 				Project.layers[step.layer - 1].parent = null;
-				Context.layer.delete();
-				Context.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
+				Context.raw.layer.delete();
+				Context.raw.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
 			}
 			else if (step.name == tr("Delete Layer")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
@@ -68,8 +68,8 @@ class History {
 			else if (step.name == tr("Clear Layer")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.swap(lay);
+				Context.raw.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
 				var children = Project.layers[step.layer].getRecursiveChildren();
@@ -77,8 +77,8 @@ class History {
 				if (children != null)
 					position += children.length;
 
-				Context.layer = Project.layers[position];
-				Context.layer.delete();
+				Context.raw.layer = Project.layers[position];
+				Context.raw.layer.delete();
 			}
 			else if (step.name == tr("Order Layers")) {
 				var target = Project.layers[step.prev_order];
@@ -86,8 +86,8 @@ class History {
 				Project.layers[step.layer] = target;
 			}
 			else if (step.name == tr("Merge Layers")) {
-				Context.layer = Project.layers[step.layer];
-				Context.layer.delete();
+				Context.raw.layer = Project.layers[step.layer];
+				Context.raw.layer.delete();
 
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 2] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
@@ -96,7 +96,7 @@ class History {
 
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
+				Context.raw.layer.swap(lay);
 
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer + 1, l);
@@ -104,12 +104,12 @@ class History {
 
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
+				Context.raw.layer.swap(lay);
 
-				Context.layer.maskOpacity = step.layer_opacity;
-				Context.layer.blending = step.layer_blending;
-				Context.layer.objectMask = step.layer_object;
-				Context.layersPreviewDirty = true;
+				Context.raw.layer.maskOpacity = step.layer_opacity;
+				Context.raw.layer.blending = step.layer_blending;
+				Context.raw.layer.objectMask = step.layer_object;
+				Context.raw.layersPreviewDirty = true;
 				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Apply Mask")) {
@@ -127,24 +127,24 @@ class History {
 
 				for (layer in layersToRestore) {
 					// Replace the current layer's content with the old one
-					Context.layer = layer;
+					Context.raw.layer = layer;
 					undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 					var oldLayer = undoLayers[undoI];
-					Context.layer.swap(oldLayer);
+					Context.raw.layer.swap(oldLayer);
 				}
 
 				// Now restore the applied mask
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var mask = undoLayers[undoI];
 				App.newMask(false, currentLayer, maskPosition);
-				Context.layer.swap(mask);
-				Context.layersPreviewDirty = true;
-				Context.setLayer(Context.layer);
+				Context.raw.layer.swap(mask);
+				Context.raw.layersPreviewDirty = true;
+				Context.setLayer(Context.raw.layer);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				function _next() {
-					Context.layer = Project.layers[step.layer];
-					Context.layer.invertMask();
+					Context.raw.layer = Project.layers[step.layer];
+					Context.raw.layer.invertMask();
 				}
 				iron.App.notifyOnInit(_next);
 			}
@@ -152,34 +152,34 @@ class History {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
-				Context.layer.swap(lay);
-				App.newMask(false, Context.layer);
-				Context.layer.swap(lay);
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.swap(lay);
+				App.newMask(false, Context.raw.layer);
+				Context.raw.layer.swap(lay);
+				Context.raw.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
-				Context.layer.toPaintLayer();
+				Context.raw.layer.toPaintLayer();
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
+				Context.raw.layer.swap(lay);
 			}
 			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
-				Context.layer.fill_layer = Project.materials[step.material];
+				Context.raw.layer.swap(lay);
+				Context.raw.layer.fill_layer = Project.materials[step.material];
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.setLayer(Project.layers[step.layer]);
-				var t = Context.layer.maskOpacity;
-				Context.layer.maskOpacity = step.layer_opacity;
+				var t = Context.raw.layer.maskOpacity;
+				Context.raw.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
 				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Layer Blending")) {
 				Context.setLayer(Project.layers[step.layer]);
-				var t = Context.layer.blending;
-				Context.layer.blending = step.layer_blending;
+				var t = Context.raw.layer.blending;
+				Context.raw.layer.blending = step.layer_blending;
 				step.layer_blending = t;
 				MakeMaterial.parseMeshMaterial();
 			}
@@ -191,36 +191,36 @@ class History {
 				swapCanvas(step);
 			}
 			else if (step.name == tr("New Material")) {
-				Context.material = Project.materials[step.material];
-				step.canvas = Context.material.canvas;
-				Context.material.delete();
+				Context.raw.material = Project.materials[step.material];
+				step.canvas = Context.raw.material.canvas;
+				Context.raw.material.delete();
 			}
 			else if (step.name == tr("Delete Material")) {
-				Context.material = new MaterialSlot(Project.materials[0].data);
-				Project.materials.insert(step.material, Context.material);
-				Context.material.canvas = step.canvas;
+				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.raw.material);
+				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
 				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Duplicate Material")) {
-				Context.material = Project.materials[step.material];
-				step.canvas = Context.material.canvas;
-				Context.material.delete();
+				Context.raw.material = Project.materials[step.material];
+				step.canvas = Context.raw.material.canvas;
+				Context.raw.material.delete();
 			}
 			else { // Paint operation
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
 				Context.setLayer(Project.layers[step.layer]);
-				Context.layer.swap(lay);
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.swap(lay);
+				Context.raw.layerPreviewDirty = true;
 			}
 			undos--;
 			redos++;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
@@ -246,11 +246,11 @@ class History {
 				}
 				else if (step.name == tr("New Fill Mask")) {
 					App.notifyOnNextFrame(function() {
-						Context.material = Project.materials[step.material];
+						Context.raw.material = Project.materials[step.material];
 						l.toFillLayer();
 					});
 				}
-				Context.layerPreviewDirty = true;
+				Context.raw.layerPreviewDirty = true;
 				Context.setLayer(l);
 			}
 			else if (step.name == tr("New Group")) {
@@ -262,9 +262,9 @@ class History {
 				Context.setLayer(group);
 			}
 			else if (step.name == tr("Delete Layer")) {
-				Context.layer = Project.layers[step.layer];
+				Context.raw.layer = Project.layers[step.layer];
 				swapActive();
-				Context.layer.delete();
+				Context.raw.layer.delete();
 
 				// Redoing the last delete would result in an empty group
 				// Redo deleting all group masks + the group itself
@@ -279,15 +279,15 @@ class History {
 				}
 			}
 			else if (step.name == tr("Clear Layer")) {
-				Context.layer = Project.layers[step.layer];
+				Context.raw.layer = Project.layers[step.layer];
 				swapActive();
-				Context.layer.clear();
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.clear();
+				Context.raw.layerPreviewDirty = true;
 			}
 			else if (step.name == tr("Duplicate Layer")) {
-				Context.layer = Project.layers[step.layer];
+				Context.raw.layer = Project.layers[step.layer];
 				function _next() {
-					App.duplicateLayer(Context.layer);
+					App.duplicateLayer(Context.raw.layer);
 				}
 				App.notifyOnNextFrame(_next);
 			}
@@ -297,66 +297,66 @@ class History {
 				Project.layers[step.layer] = target;
 			}
 			else if (step.name == tr("Merge Layers")) {
-				Context.layer = Project.layers[step.layer + 1];
+				Context.raw.layer = Project.layers[step.layer + 1];
 				iron.App.notifyOnInit(redoMergeLayers);
 				iron.App.notifyOnInit(App.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
-				Context.layer = Project.layers[step.layer];
-					if (Context.layer.isGroupMask()) {
-						var group = Context.layer.parent;
+				Context.raw.layer = Project.layers[step.layer];
+					if (Context.raw.layer.isGroupMask()) {
+						var group = Context.raw.layer.parent;
 						var layers = group.getChildren();
-						layers.insert(0, Context.layer);
+						layers.insert(0, Context.raw.layer);
 						copyMergingLayers2(layers);	
 					}
-					else copyMergingLayers2([Context.layer, Context.layer.parent]);
+					else copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
 
 				function _next() {
-					Context.layer.applyMask();
-					Context.setLayer(Context.layer);
-					Context.layersPreviewDirty = true;
+					Context.raw.layer.applyMask();
+					Context.setLayer(Context.raw.layer);
+					Context.raw.layersPreviewDirty = true;
 				}
 				App.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				function _next() {
-					Context.layer = Project.layers[step.layer];
-					Context.layer.invertMask();
+					Context.raw.layer = Project.layers[step.layer];
+					Context.raw.layer.invertMask();
 				}
 				iron.App.notifyOnInit(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
-				Context.layer.swap(lay);
+				Context.raw.layer.swap(lay);
 				App.newMask(false, lay);
-				Context.layer.swap(lay);
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.swap(lay);
+				Context.raw.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
-				Context.layer.fill_layer = Project.materials[step.material];
+				Context.raw.layer.swap(lay);
+				Context.raw.layer.fill_layer = Project.materials[step.material];
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
-				Context.layer.toPaintLayer();
+				Context.raw.layer.toPaintLayer();
 				var lay = undoLayers[undoI];
-				Context.layer.swap(lay);
+				Context.raw.layer.swap(lay);
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			else if (step.name == tr("Layer Opacity")) {
 				Context.setLayer(Project.layers[step.layer]);
-				var t = Context.layer.maskOpacity;
-				Context.layer.maskOpacity = step.layer_opacity;
+				var t = Context.raw.layer.maskOpacity;
+				Context.raw.layer.maskOpacity = step.layer_opacity;
 				step.layer_opacity = t;
 				MakeMaterial.parseMeshMaterial();
 			}
 			else if (step.name == tr("Layer Blending")) {
 				Context.setLayer(Project.layers[step.layer]);
-				var t = Context.layer.blending;
-				Context.layer.blending = step.layer_blending;
+				var t = Context.raw.layer.blending;
+				Context.raw.layer.blending = step.layer_blending;
 				step.layer_blending = t;
 				MakeMaterial.parseMeshMaterial();
 			}
@@ -368,22 +368,22 @@ class History {
 				Project.materialGroups.remove(Project.materialGroups[step.canvas_group]);
 			}
 			else if (step.name == tr("New Material")) {
-				Context.material = new MaterialSlot(Project.materials[0].data);
-				Project.materials.insert(step.material, Context.material);
-				Context.material.canvas = step.canvas;
+				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.raw.material);
+				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
 				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Delete Material")) {
-				Context.material = Project.materials[step.material];
-				step.canvas = Context.material.canvas;
-				Context.material.delete();
+				Context.raw.material = Project.materials[step.material];
+				step.canvas = Context.raw.material.canvas;
+				Context.raw.material.delete();
 			}
 			else if (step.name == tr("Duplicate Material")) {
-				Context.material = new MaterialSlot(Project.materials[0].data);
-				Project.materials.insert(step.material, Context.material);
-				Context.material.canvas = step.canvas;
+				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.insert(step.material, Context.raw.material);
+				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
 				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
@@ -392,15 +392,15 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.selectPaintObject(Project.paintObjects[step.object]);
 				Context.setLayer(Project.layers[step.layer]);
-				Context.layer.swap(lay);
-				Context.layerPreviewDirty = true;
+				Context.raw.layer.swap(lay);
+				Context.raw.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
 			undos++;
 			redos--;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
 	}
@@ -413,11 +413,11 @@ class History {
 	}
 
 	public static function paint() {
-		var isMask = Context.layer.isMask();
-		copyToUndo(Context.layer.id, undoI, isMask);
+		var isMask = Context.raw.layer.isMask();
+		copyToUndo(Context.raw.layer.id, undoI, isMask);
 
 		pushUndo = false;
-		push(tr(UIToolbar.inst.toolNames[Context.tool]));
+		push(tr(UIToolbar.inst.toolNames[Context.raw.tool]));
 	}
 
 	public static function newLayer() {
@@ -464,8 +464,8 @@ class History {
 
 		var step = push(tr("Merge Layers"));
 		step.layer -= 1; // Merge down
-		if (Context.layer.hasMasks()) {
-			step.layer -= Context.layer.getMasks().length;
+		if (Context.raw.layer.hasMasks()) {
+			step.layer -= Context.raw.layer.getMasks().length;
 		}
 		steps.shift(); // Merge consumes 2 steps
 		undos--;
@@ -473,13 +473,13 @@ class History {
 	}
 
 	public static function applyMask() {
-		if (Context.layer.isGroupMask()) {
-			var group = Context.layer.parent;
+		if (Context.raw.layer.isGroupMask()) {
+			var group = Context.raw.layer.parent;
 			var layers = group.getChildren();
-			layers.insert(0, Context.layer);
+			layers.insert(0, Context.raw.layer);
 			copyMergingLayers2(layers);	
 		}
-		else copyMergingLayers2([Context.layer, Context.layer.parent]);
+		else copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
 		push(tr("Apply Mask"));
 	}
 
@@ -490,27 +490,27 @@ class History {
 
 	@:keep
 	public static function applyFilter() {
-		copyToUndo(Context.layer.id, undoI, true);
+		copyToUndo(Context.raw.layer.id, undoI, true);
 		push(tr("Apply Filter"));
 	}
 
 	public static function toFillLayer() {
-		copyToUndo(Context.layer.id, undoI, false);
+		copyToUndo(Context.raw.layer.id, undoI, false);
 		push(tr("To Fill Layer"));
 	}
 
 	public static function toFillMask() {
-		copyToUndo(Context.layer.id, undoI, true);
+		copyToUndo(Context.raw.layer.id, undoI, true);
 		push(tr("To Fill Mask"));
 	}
 
 	public static function toPaintLayer() {
-		copyToUndo(Context.layer.id, undoI, false);
+		copyToUndo(Context.raw.layer.id, undoI, false);
 		push(tr("To Paint Layer"));
 	}
 
 	public static function toPaintMask() {
-		copyToUndo(Context.layer.id, undoI, true);
+		copyToUndo(Context.raw.layer.id, undoI, true);
 		push(tr("To Paint Mask"));
 	}
 
@@ -529,19 +529,19 @@ class History {
 	public static function newMaterial() {
 		var step = push(tr("New Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function deleteMaterial() {
 		var step = push(tr("Delete Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function duplicateMaterial() {
 		var step = push(tr("Duplicate Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.material.canvas));
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
@@ -570,22 +570,22 @@ class History {
 			redos = 0;
 		}
 
-		var opos = Project.paintObjects.indexOf(Context.paintObject);
-		var lpos = Project.layers.indexOf(Context.layer);
-		var mpos = Project.materials.indexOf(Context.material);
-		var bpos = Project.brushes.indexOf(Context.brush);
+		var opos = Project.paintObjects.indexOf(Context.raw.paintObject);
+		var lpos = Project.layers.indexOf(Context.raw.layer);
+		var mpos = Project.materials.indexOf(Context.raw.material);
+		var bpos = Project.brushes.indexOf(Context.raw.brush);
 
 		steps.push({
 			name: name,
 			layer: lpos,
-			layer_type: Context.layer.isMask() ? SlotMask : Context.layer.isGroup() ? SlotGroup : SlotLayer,
-			layer_parent: Context.layer.parent == null ? -1 : Project.layers.indexOf(Context.layer.parent),
+			layer_type: Context.raw.layer.isMask() ? SlotMask : Context.raw.layer.isGroup() ? SlotGroup : SlotLayer,
+			layer_parent: Context.raw.layer.parent == null ? -1 : Project.layers.indexOf(Context.raw.layer.parent),
 			object: opos,
 			material: mpos,
 			brush: bpos,
-			layer_opacity: Context.layer.maskOpacity,
-			layer_object: Context.layer.objectMask,
-			layer_blending: Context.layer.blending
+			layer_opacity: Context.raw.layer.maskOpacity,
+			layer_object: Context.raw.layer.objectMask,
+			layer_blending: Context.raw.layer.blending
 		});
 
 		while (steps.length > Config.raw.undo_steps + 1) steps.shift();
@@ -597,12 +597,12 @@ class History {
 	}
 
 	static function copyMergingLayers() {
-		var lay = Context.layer;
-		copyToUndo(lay.id, undoI, Context.layer.isMask());
+		var lay = Context.raw.layer;
+		copyToUndo(lay.id, undoI, Context.raw.layer.isMask());
 
 		var below = Project.layers.indexOf(lay) - 1;
 		lay = Project.layers[below];
-		copyToUndo(lay.id, undoI, Context.layer.isMask());
+		copyToUndo(lay.id, undoI, Context.raw.layer.isMask());
 	}
 
 	static function copyMergingLayers2(layers: Array<LayerSlot>) {
@@ -612,7 +612,7 @@ class History {
 
 	static function swapActive() {
 		var undoLayer = undoLayers[undoI];
-		undoLayer.swap(Context.layer);
+		undoLayer.swap(Context.raw.layer);
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
 
@@ -643,13 +643,13 @@ class History {
 			var _canvas = getCanvasOwner(step).canvas;
 			getCanvasOwner(step).canvas = step.canvas;
 			step.canvas = _canvas;
-			Context.material = Project.materials[step.material];
+			Context.raw.material = Project.materials[step.material];
 		}
 		else {
 			var _canvas = Project.brushes[step.brush].canvas;
 			Project.brushes[step.brush].canvas = step.canvas;
 			step.canvas = _canvas;
-			Context.brush = Project.brushes[step.brush];
+			Context.raw.brush = Project.brushes[step.brush];
 		}
 
 		UINodes.inst.canvasChanged();

@@ -30,10 +30,10 @@ class MakeClone {
 		frag.write('float height = $height;');
 		frag.write('float mat_opacity = $opac;');
 		frag.write('float opacity = mat_opacity * brushOpacity;');
-		if (Context.material.paintEmis) {
+		if (Context.raw.material.paintEmis) {
 			frag.write('float emis = 0.0;');
 		}
-		if (Context.material.paintSubs) {
+		if (Context.raw.material.paintSubs) {
 			frag.write('float subs = 0.0;');
 		}
 	}

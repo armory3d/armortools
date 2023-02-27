@@ -9,9 +9,9 @@ class MakeBrush {
 
 		frag.write('float dist = 0.0;');
 
-		if (Context.tool == ToolParticle) return;
+		if (Context.raw.tool == ToolParticle) return;
 
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		if (decal) frag.write('if (decalMaskLocal.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
@@ -29,7 +29,7 @@ class MakeBrush {
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			if (Config.raw.brush_angle_reject || Context.xray) {
+			if (Config.raw.brush_angle_reject || Context.raw.xray) {
 				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -43,10 +43,10 @@ class MakeBrush {
 				frag.write('wn = normalize(wn);');
 				frag.write('float planeDist = dot(wn, winp.xyz - wposition);');
 
-				if (Config.raw.brush_angle_reject && !Context.xray) {
+				if (Config.raw.brush_angle_reject && !Context.raw.xray) {
 					frag.write('if (planeDist < -0.01) discard;');
 					frag.n = true;
-					var angle = Context.brushAngleRejectDot;
+					var angle = Context.raw.brushAngleRejectDot;
 					frag.write('if (dot(wn, n) < $angle) discard;');
 				}
 			}
@@ -62,12 +62,12 @@ class MakeBrush {
 			frag.write('winplast.xyz /= winplast.w;');
 
 			frag.write('vec3 pa = wposition - winp.xyz;');
-			if (Context.xray) {
+			if (Context.raw.xray) {
 				frag.write('pa += wn * vec3(planeDist, planeDist, planeDist);');
 			}
 			frag.write('vec3 ba = winplast.xyz - winp.xyz;');
 
-			if (Context.brushLazyRadius > 0 && Context.brushLazyStep > 0) {
+			if (Context.raw.brushLazyRadius > 0 && Context.raw.brushLazyStep > 0) {
 				// Sphere
 				frag.write('dist = distance(wposition, winp.xyz);');
 			}

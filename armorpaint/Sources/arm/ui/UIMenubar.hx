@@ -79,8 +79,8 @@ class UIMenubar {
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
 			if (UIHeader.inst.worktab.changed) {
-				Context.ddirty = 2;
-				Context.brushBlendDirty = true;
+				Context.raw.ddirty = 2;
+				Context.raw.brushBlendDirty = true;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				UIHeader.inst.headerHandle.redraws = 2;
 				UISidebar.inst.hwnd0.redraws = 2;
@@ -93,8 +93,8 @@ class UIMenubar {
 					Context.selectTool(ToolBake);
 					#if (kha_direct3d12 || kha_vulkan)
 					// Bake in lit mode for now
-					if (Context.viewportMode == ViewPathTrace) {
-						Context.viewportMode = ViewLit;
+					if (Context.raw.viewportMode == ViewPathTrace) {
+						Context.raw.viewportMode = ViewLit;
 					}
 					#end
 				}

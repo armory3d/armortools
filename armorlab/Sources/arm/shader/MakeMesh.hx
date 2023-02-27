@@ -14,7 +14,7 @@ class MakeMesh {
 			name: "mesh",
 			depth_write: layerPass == 0 ? true : false,
 			compare_mode: layerPass == 0 ? "less" : "equal",
-			cull_mode: (Context.cullBackfaces || layerPass > 0) ? "clockwise" : "none",
+			cull_mode: (Context.raw.cullBackfaces || layerPass > 0) ? "clockwise" : "none",
 			vertex_elements: [{name: "pos", data: "short4norm"}, {name: "nor", data: "short2norm"}, {name: "tex", data: "short2norm"}],
 			color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
 			depth_attachment: "DEPTH32"
@@ -41,7 +41,7 @@ class MakeMesh {
 		}
 
 		vert.write('gl_Position = mul(vec4(wposition.xyz, 1.0), VP);');
-		var brushScale = Context.brushScale;
+		var brushScale = Context.raw.brushScale;
 		vert.write('texCoord = tex * $brushScale;');
 		if (MakeMaterial.heightUsed && displaceStrength > 0) {
 			vert.add_uniform('mat4 invW', '_inverseWorldMatrix');
@@ -78,7 +78,7 @@ class MakeMesh {
 			frag.write('float height3 = 0.0;');
 		}
 
-		if (Context.viewportMode == ViewLit && Context.renderMode == RenderForward) {
+		if (Context.raw.viewportMode == ViewLit && Context.raw.renderMode == RenderForward) {
 			frag.add_uniform('sampler2D senvmapBrdf', "$brdf.k");
 			frag.add_uniform('sampler2D senvmapRadiance', '_envmapRadiance');
 			frag.add_uniform('sampler2D sltcMat', '_ltcMat');
@@ -141,15 +141,15 @@ class MakeMesh {
 		frag.write('n.y = -n.y;');
 		frag.write('n = normalize(mul(n, TBN));');
 
-		if (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace) {
+		if (Context.raw.viewportMode == ViewLit || Context.raw.viewportMode == ViewPathTrace) {
 
 			frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 
-			if (Context.viewportShader != null) {
-				var color = Context.viewportShader(frag);
+			if (Context.raw.viewportShader != null) {
+				var color = Context.raw.viewportShader(frag);
 				frag.write('fragColor[1] = vec4($color, 1.0);');
 			}
-			else if (Context.renderMode == RenderForward) {
+			else if (Context.raw.renderMode == RenderForward) {
 				frag.wposition = true;
 				frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 				frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
@@ -197,25 +197,25 @@ class MakeMesh {
 				frag.write('fragColor[1] = vec4(basecol, occlusion);');
 			}
 		}
-		else if (Context.viewportMode == ViewBaseColor) {
+		else if (Context.raw.viewportMode == ViewBaseColor) {
 			frag.write('fragColor[1] = vec4(basecol, 1.0);');
 		}
-		else if (Context.viewportMode == ViewNormalMap) {
+		else if (Context.raw.viewportMode == ViewNormalMap) {
 			frag.write('fragColor[1] = vec4(ntex.rgb, 1.0);');
 		}
-		else if (Context.viewportMode == ViewOcclusion) {
+		else if (Context.raw.viewportMode == ViewOcclusion) {
 			frag.write('fragColor[1] = vec4(vec3(occlusion, occlusion, occlusion), 1.0);');
 		}
-		else if (Context.viewportMode == ViewRoughness) {
+		else if (Context.raw.viewportMode == ViewRoughness) {
 			frag.write('fragColor[1] = vec4(vec3(roughness, roughness, roughness), 1.0);');
 		}
-		else if (Context.viewportMode == ViewMetallic) {
+		else if (Context.raw.viewportMode == ViewMetallic) {
 			frag.write('fragColor[1] = vec4(vec3(metallic, metallic, metallic), 1.0);');
 		}
-		else if (Context.viewportMode == ViewOpacity) {
+		else if (Context.raw.viewportMode == ViewOpacity) {
 			frag.write('fragColor[1] = vec4(vec3(texpaint_sample.a, texpaint_sample.a, texpaint_sample.a), 1.0);');
 		}
-		else if (Context.viewportMode == ViewHeight) {
+		else if (Context.raw.viewportMode == ViewHeight) {
 			frag.write('fragColor[1] = vec4(vec3(height, height, height), 1.0);');
 		}
 		else {

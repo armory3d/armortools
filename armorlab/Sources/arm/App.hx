@@ -112,9 +112,9 @@ class App {
 
 		System.notifyOnApplicationState(
 			function() { // Foreground
-				Context.foregroundEvent = true;
-				Context.lastPaintX = -1;
-				Context.lastPaintY = -1;
+				Context.raw.foregroundEvent = true;
+				Context.raw.lastPaintX = -1;
+				Context.raw.lastPaintY = -1;
 			},
 			function() {}, // Resume
 			function() {}, // Pause
@@ -295,11 +295,11 @@ class App {
 		}
 		cam.buildProjection();
 
-		if (Context.cameraType == CameraOrthographic) {
-			Viewport.updateCameraType(Context.cameraType);
+		if (Context.raw.cameraType == CameraOrthographic) {
+			Viewport.updateCameraType(Context.raw.cameraType);
 		}
 
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 
 		if (UISidebar.inst.show) {
 			appx = 0;
@@ -329,7 +329,7 @@ class App {
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 		UIBox.hwnd.redraws = 2;
-		if (Context.ddirty < 0) Context.ddirty = 0; // Redraw viewport
+		if (Context.raw.ddirty < 0) Context.raw.ddirty = 0; // Redraw viewport
 	}
 
 	static function update() {
@@ -369,8 +369,8 @@ class App {
 		if (mouse.released() && hasDrag) {
 			var mx = mouse.x;
 			var my = mouse.y;
-			var inViewport = Context.paintVec.x < 1 && Context.paintVec.x > 0 &&
-							 Context.paintVec.y < 1 && Context.paintVec.y > 0;
+			var inViewport = Context.raw.paintVec.x < 1 && Context.raw.paintVec.x > 0 &&
+							 Context.raw.paintVec.y < 1 && Context.raw.paintVec.y > 0;
 			var inNodes = UINodes.inst.show &&
 						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
 						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
@@ -414,15 +414,15 @@ class App {
 			Krom.setMouseCursor(0); // Arrow
 			isDragging = false;
 		}
-		if (Context.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
-			Context.colorPickerCallback = null;
-			Context.selectTool(Context.colorPickerPreviousTool);
+		if (Context.raw.colorPickerCallback != null && (mouse.released() || mouse.released("right"))) {
+			Context.raw.colorPickerCallback = null;
+			Context.selectTool(Context.raw.colorPickerPreviousTool);
 		}
 
 		handleDropPaths();
 
-		var isPicker = Context.tool == ToolPicker;
-		if (Zui.alwaysRedrawWindow && Context.ddirty < 0) Context.ddirty = 0;
+		var isPicker = Context.raw.tool == ToolPicker;
+		if (Zui.alwaysRedrawWindow && Context.raw.ddirty < 0) Context.raw.ddirty = 0;
 	}
 
 	static function handleDropPaths() {
@@ -467,10 +467,10 @@ class App {
 	static function render(g: kha.graphics2.Graphics) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
-		if (Context.frame == 2) {
+		if (Context.raw.frame == 2) {
 			MakeMaterial.parseMeshMaterial();
 			MakeMaterial.parsePaintMaterial();
-			Context.ddirty = 0;
+			Context.raw.ddirty = 0;
 			// Default workspace
 			if (Config.raw.workspace != 0) {
 				UIHeader.inst.worktab.position = Config.raw.workspace;
@@ -478,10 +478,10 @@ class App {
 				UIHeader.inst.worktab.changed = true;
 			}
 		}
-		else if (Context.frame == 3) {
-			Context.ddirty = 2;
+		else if (Context.raw.frame == 3) {
+			Context.raw.ddirty = 2;
 		}
-		Context.frame++;
+		Context.raw.frame++;
 
 		var mouse = Input.getMouse();
 		if (isDragging) {
@@ -504,14 +504,14 @@ class App {
 		if (UIMenu.show) UIMenu.render(g);
 
 		// Save last pos for continuos paint
-		Context.lastPaintVecX = Context.paintVec.x;
-		Context.lastPaintVecY = Context.paintVec.y;
+		Context.raw.lastPaintVecX = Context.raw.paintVec.x;
+		Context.raw.lastPaintVecY = Context.raw.paintVec.y;
 
 		#if (krom_android || krom_ios)
 		// No mouse move events for touch, re-init last paint position on touch start
 		if (!mouse.down()) {
-			Context.lastPaintX = -1;
-			Context.lastPaintY = -1;
+			Context.raw.lastPaintX = -1;
+			Context.raw.lastPaintY = -1;
 		}
 		#end
 	}

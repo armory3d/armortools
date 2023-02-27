@@ -151,8 +151,8 @@ class Project {
 				}
 
 				ui.row([0.5, 0.5]);
-				Context.projectType = ui.combo(Id.handle({ position: Context.projectType }), meshList, tr("Template"), true);
-				Context.projectAspectRatio = ui.combo(Id.handle({ position: Context.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+				Context.raw.projectType = ui.combo(Id.handle({ position: Context.raw.projectType }), meshList, tr("Template"), true);
+				Context.raw.projectAspectRatio = ui.combo(Id.handle({ position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 				@:privateAccess ui.endElement();
 				ui.row([0.5, 0.5]);
@@ -173,23 +173,23 @@ class Project {
 		Window.get(0).title = Main.title;
 		#end
 		filepath = "";
-		if (Context.mergedObject != null) {
-			Context.mergedObject.remove();
-			Data.deleteMesh(Context.mergedObject.data.handle);
-			Context.mergedObject = null;
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.remove();
+			Data.deleteMesh(Context.raw.mergedObject.data.handle);
+			Context.raw.mergedObject = null;
 		}
 
 		Viewport.reset();
-		Context.layerPreviewDirty = true;
-		Context.layerFilter = 0;
+		Context.raw.layerPreviewDirty = true;
+		Context.raw.layerFilter = 0;
 		Project.meshAssets = [];
 
-		Context.paintObject = Context.mainObject();
+		Context.raw.paintObject = Context.mainObject();
 
 		Context.selectPaintObject(Context.mainObject());
 		for (i in 1...paintObjects.length) {
 			var p = paintObjects[i];
-			if (p == Context.paintObject) continue;
+			if (p == Context.raw.paintObject) continue;
 			Data.deleteMesh(p.data.handle);
 			p.remove();
 		}
@@ -197,22 +197,22 @@ class Project {
 		var len = meshes.length;
 		for (i in 0...len) {
 			var m = meshes[len - i - 1];
-			if (Context.projectObjects.indexOf(m) == -1 &&
+			if (Context.raw.projectObjects.indexOf(m) == -1 &&
 				m.name != ".ParticleEmitter" &&
 				m.name != ".Particle") {
 				Data.deleteMesh(m.data.handle);
 				m.remove();
 			}
 		}
-		var handle = Context.paintObject.data.handle;
+		var handle = Context.raw.paintObject.data.handle;
 		if (handle != "SceneSphere" && handle != "ScenePlane") {
 			Data.deleteMesh(handle);
 		}
 
-		if (Context.projectType != ModelRoundedCube) {
+		if (Context.raw.projectType != ModelRoundedCube) {
 			var raw: TMeshData = null;
-			if (Context.projectType == ModelSphere || Context.projectType == ModelTessellatedPlane) {
-				var mesh: Dynamic = Context.projectType == ModelSphere ?
+			if (Context.raw.projectType == ModelSphere || Context.raw.projectType == ModelTessellatedPlane) {
+				var mesh: Dynamic = Context.raw.projectType == ModelSphere ?
 					new arm.geom.Sphere(1, 512, 256) :
 					new arm.geom.Plane(1, 1, 512, 512);
 				raw = {
@@ -230,7 +230,7 @@ class Project {
 				};
 			}
 			else {
-				Data.getBlob("meshes/" + meshList[Context.projectType] + ".arm", function(b: kha.Blob) {
+				Data.getBlob("meshes/" + meshList[Context.raw.projectType] + ".arm", function(b: kha.Blob) {
 					raw = iron.system.ArmPack.decode(b.toBytes()).mesh_datas[0];
 				});
 			}
@@ -238,40 +238,40 @@ class Project {
 			var md = new MeshData(raw, function(md: MeshData) {});
 			Data.cachedMeshes.set("SceneTessellated", md);
 
-			if (Context.projectType == ModelTessellatedPlane) {
+			if (Context.raw.projectType == ModelTessellatedPlane) {
 				Viewport.setView(0, 0, 0.75, 0, 0, 0); // Top
 			}
 		}
 
-		var n = Context.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
+		var n = Context.raw.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
 			var current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 
-			Context.pickerMaskHandle.position = MaskNone;
-			Context.paintObject.setData(md);
-			Context.paintObject.transform.scale.set(1, 1, 1);
-			Context.paintObject.transform.buildMatrix();
-			Context.paintObject.name = n;
-			paintObjects = [Context.paintObject];
+			Context.raw.pickerMaskHandle.position = MaskNone;
+			Context.raw.paintObject.setData(md);
+			Context.raw.paintObject.transform.scale.set(1, 1, 1);
+			Context.raw.paintObject.transform.buildMatrix();
+			Context.raw.paintObject.name = n;
+			paintObjects = [Context.raw.paintObject];
 			while (materials.length > 0) materials.pop().unload();
 			Data.getMaterial("Scene", "Material", function(m: iron.data.MaterialData) {
 				materials.push(new MaterialSlot(m));
 			});
-			Context.material = materials[0];
+			Context.raw.material = materials[0];
 			arm.ui.UINodes.inst.hwnd.redraws = 2;
 			arm.ui.UINodes.inst.groupStack = [];
 			materialGroups = [];
 			brushes = [new BrushSlot()];
-			Context.brush = brushes[0];
+			Context.raw.brush = brushes[0];
 			var fontNames = App.font.getFontNames();
 			fonts = [new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font)];
-			Context.font = fonts[0];
+			Context.raw.font = fonts[0];
 			Project.setDefaultSwatches();
-			Context.swatch = Project.raw.swatches[0];
-			Context.pickedColor = Project.makeSwatch();
-			Context.colorPickerCallback = null;
+			Context.raw.swatch = Project.raw.swatches[0];
+			Context.raw.pickedColor = Project.makeSwatch();
+			Context.raw.colorPickerCallback = null;
 			History.reset();
 
 			MakeMaterial.parsePaintMaterial();
@@ -282,7 +282,7 @@ class Project {
 			assetMap = [];
 			assetId = 0;
 			Project.raw.packed_assets = [];
-			Context.ddirty = 4;
+			Context.raw.ddirty = 4;
 			UISidebar.inst.hwnd0.redraws = 2;
 			UISidebar.inst.hwnd1.redraws = 2;
 
@@ -300,14 +300,14 @@ class Project {
 
 			if (current != null) current.begin(false);
 
-			Context.savedEnvmap = null;
-			Context.envmapLoaded = false;
-			Scene.active.world.envmap = Context.emptyEnvmap;
+			Context.raw.savedEnvmap = null;
+			Context.raw.envmapLoaded = false;
+			Scene.active.world.envmap = Context.raw.emptyEnvmap;
 			Scene.active.world.raw.envmap = "World_radiance.k";
-			Context.showEnvmapHandle.selected = Context.showEnvmap = false;
-			Scene.active.world.probe.radiance = Context.defaultRadiance;
-			Scene.active.world.probe.radianceMipmaps = Context.defaultRadianceMipmaps;
-			Scene.active.world.probe.irradiance = Context.defaultIrradiance;
+			Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = false;
+			Scene.active.world.probe.radiance = Context.raw.defaultRadiance;
+			Scene.active.world.probe.radianceMipmaps = Context.raw.defaultRadianceMipmaps;
+			Scene.active.world.probe.irradiance = Context.raw.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
 			Context.initTool();
 		});
@@ -336,17 +336,17 @@ class Project {
 				}
 
 				// Create a new brush
-				Context.brush = new BrushSlot();
-				Project.brushes.push(Context.brush);
+				Context.raw.brush = new BrushSlot();
+				Project.brushes.push(Context.raw.brush);
 
 				// Create and link image node
 				var n = NodesBrush.createNode("TEX_IMAGE");
 				n.x = 83;
 				n.y = 340;
 				n.buttons[0].default_value = assetIndex;
-				var links = Context.brush.canvas.links;
+				var links = Context.raw.brush.canvas.links;
 				links.push({
-					id: Context.brush.nodes.getLinkId(links),
+					id: Context.raw.brush.nodes.getLinkId(links),
 					from_id: n.id,
 					from_socket: 0,
 					to_id: 0,
@@ -386,7 +386,7 @@ class Project {
 			if (ui.tab(Id.handle(), tr("Import Mesh"), tabVertical)) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					Context.splitBy = ui.combo(Id.handle(), [
+					Context.raw.splitBy = ui.combo(Id.handle(), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
@@ -396,12 +396,12 @@ class Project {
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					Context.parseTransform = ui.check(Id.handle({ selected: Context.parseTransform }), tr("Parse Transforms"));
+					Context.raw.parseTransform = ui.check(Id.handle({ selected: Context.raw.parseTransform }), tr("Parse Transforms"));
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					Context.parseVCols = ui.check(Id.handle({ selected: Context.parseVCols }), tr("Parse Vertex Colors"));
+					Context.raw.parseVCols = ui.check(Id.handle({ selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 
@@ -521,7 +521,7 @@ class Project {
 			ImportTexture.run(asset.file);
 			Project.assets.insert(i, Project.assets.pop());
 			Project.assetNames.insert(i, Project.assetNames.pop());
-			if (Context.texture == oldAsset) Context.texture = Project.assets[i];
+			if (Context.raw.texture == oldAsset) Context.raw.texture = Project.assets[i];
 			function _next() {
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
@@ -555,8 +555,8 @@ class Project {
 	}
 
 	public static function isAtlasObject(p: MeshObject): Bool {
-		if (Context.layerFilter <= Project.paintObjects.length) return false;
-		var atlasName = getUsedAtlases()[Context.layerFilter - Project.paintObjects.length - 1];
+		if (Context.raw.layerFilter <= Project.paintObjects.length) return false;
+		var atlasName = getUsedAtlases()[Context.raw.layerFilter - Project.paintObjects.length - 1];
 		var atlasI = Project.atlasNames.indexOf(atlasName);
 		return atlasI == Project.atlasObjects[Project.paintObjects.indexOf(p)];
 	}

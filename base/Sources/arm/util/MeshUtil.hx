@@ -15,7 +15,7 @@ class MeshUtil {
 	public static function mergeMesh(paintObjects: Array<MeshObject> = null) {
 		if (paintObjects == null) paintObjects = Project.paintObjects;
 		if (paintObjects.length == 0) return;
-		Context.mergedObjectIsAtlas = paintObjects.length < Project.paintObjects.length;
+		Context.raw.mergedObjectIsAtlas = paintObjects.length < Project.paintObjects.length;
 		var vlen = 0;
 		var ilen = 0;
 		var maxScale = 0.0;
@@ -54,7 +54,7 @@ class MeshUtil {
 		}
 
 		var raw: TMeshData = {
-			name: Context.paintObject.name,
+			name: Context.raw.paintObject.name,
 			vertex_arrays: [
 				{ values: va0, attrib: "pos", data: "short4norm" },
 				{ values: va1, attrib: "nor", data: "short2norm" },
@@ -68,16 +68,16 @@ class MeshUtil {
 		};
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
-		if (Context.mergedObject != null) {
-			Context.mergedObject.remove();
-			Data.deleteMesh(Context.mergedObject.data.handle);
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.remove();
+			Data.deleteMesh(Context.raw.mergedObject.data.handle);
 		}
 
 		new MeshData(raw, function(md: MeshData) {
-			Context.mergedObject = new MeshObject(md, Context.paintObject.materials);
-			Context.mergedObject.name = Context.paintObject.name + "_merged";
-			Context.mergedObject.force_context = "paint";
-			Context.mergedObject.setParent(Context.mainObject());
+			Context.raw.mergedObject = new MeshObject(md, Context.raw.paintObject.materials);
+			Context.raw.mergedObject.name = Context.raw.paintObject.name + "_merged";
+			Context.raw.mergedObject.force_context = "paint";
+			Context.raw.mergedObject.setParent(Context.mainObject());
 		});
 
 		#if (kha_direct3d12 || kha_vulkan)
@@ -122,10 +122,10 @@ class MeshUtil {
 			g.vertexBuffer.unlock();
 		}
 
-		if (Context.mergedObject != null) {
-			Context.mergedObject.remove();
-			Data.deleteMesh(Context.mergedObject.data.handle);
-			Context.mergedObject = null;
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.remove();
+			Data.deleteMesh(Context.raw.mergedObject.data.handle);
+			Context.raw.mergedObject = null;
 		}
 		mergeMesh();
 	}

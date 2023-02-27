@@ -71,10 +71,10 @@ class ImportFolder {
 		}
 
 		// Create material
-		Context.material = new MaterialSlot(Project.materials[0].data);
-		Project.materials.push(Context.material);
-		var nodes = Context.material.nodes;
-		var canvas = Context.material.canvas;
+		Context.raw.material = new MaterialSlot(Project.materials[0].data);
+		Project.materials.push(Context.raw.material);
+		var nodes = Context.raw.material.nodes;
+		var canvas = Context.raw.material.canvas;
 		var dirs = path.split(Path.sep);
 		canvas.name = dirs[dirs.length - 1];
 		var nout: TNode = null;

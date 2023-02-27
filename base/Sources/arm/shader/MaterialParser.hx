@@ -1885,7 +1885,7 @@ class MaterialParser {
 			file: filepath
 		};
 
-		if (Context.textureFilter) {
+		if (Context.raw.textureFilter) {
 			tex.min_filter = "anisotropic";
 			tex.mag_filter = "linear";
 			tex.mipmap_filter = "linear";

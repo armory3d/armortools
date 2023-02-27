@@ -44,13 +44,13 @@ class BoxPreferences {
 
 				var hscale = Id.handle({ value: Config.raw.window_scale });
 				ui.slider(hscale, tr("UI Scale"), 1.0, 4.0, true, 10);
-				if (Context.hscaleWasChanged && !ui.inputDown) {
-					Context.hscaleWasChanged = false;
+				if (Context.raw.hscaleWasChanged && !ui.inputDown) {
+					Context.raw.hscaleWasChanged = false;
 					if (hscale.value == null || Math.isNaN(hscale.value)) hscale.value = 1.0;
 					Config.raw.window_scale = hscale.value;
 					setScale();
 				}
-				if (hscale.changed) Context.hscaleWasChanged = true;
+				if (hscale.changed) Context.raw.hscaleWasChanged = true;
 
 				var hspeed = Id.handle({ value: Config.raw.camera_zoom_speed });
 				Config.raw.camera_zoom_speed = ui.slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
@@ -208,10 +208,10 @@ class BoxPreferences {
 					b.set(1, worldColor.Gb);
 					b.set(2, worldColor.Bb);
 					b.set(3, 255);
-					Context.emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
-					Context.ddirty = 2;
-					if (!Context.showEnvmap) {
-						iron.Scene.active.world.envmap = Context.emptyEnvmap;
+					Context.raw.emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+					Context.raw.ddirty = 2;
+					if (!Context.raw.showEnvmap) {
+						iron.Scene.active.world.envmap = Context.raw.emptyEnvmap;
 					}
 				}
 
@@ -256,10 +256,10 @@ class BoxPreferences {
 			}
 
 			if (ui.tab(htab, tr("Usage"), true)) {
-				Context.undoHandle = Id.handle({ value: Config.raw.undo_steps });
-				Config.raw.undo_steps = Std.int(ui.slider(Context.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
-				if (Config.raw.undo_steps < 1) Config.raw.undo_steps = Std.int(Context.undoHandle.value = 1);
-				if (Context.undoHandle.changed) {
+				Context.raw.undoHandle = Id.handle({ value: Config.raw.undo_steps });
+				Config.raw.undo_steps = Std.int(ui.slider(Context.raw.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
+				if (Config.raw.undo_steps < 1) Config.raw.undo_steps = Std.int(Context.raw.undoHandle.value = 1);
+				if (Context.raw.undoHandle.changed) {
 					ui.g.end();
 					History.reset();
 					ui.g.begin(false);
@@ -304,69 +304,69 @@ class BoxPreferences {
 				}
 			}
 
-			Context.hssao = Id.handle({ selected: Config.raw.rp_ssao });
-			Context.hssr = Id.handle({ selected: Config.raw.rp_ssr });
-			Context.hbloom = Id.handle({ selected: Config.raw.rp_bloom });
-			Context.hsupersample = Id.handle({ position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
-			Context.hvxao = Id.handle({ selected: Config.raw.rp_gi });
+			Context.raw.hssao = Id.handle({ selected: Config.raw.rp_ssao });
+			Context.raw.hssr = Id.handle({ selected: Config.raw.rp_ssr });
+			Context.raw.hbloom = Id.handle({ selected: Config.raw.rp_bloom });
+			Context.raw.hsupersample = Id.handle({ position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
+			Context.raw.hvxao = Id.handle({ selected: Config.raw.rp_gi });
 			if (ui.tab(htab, tr("Viewport"), true)) {
 				#if (kha_direct3d12 || kha_vulkan)
 
-				var hpathtracemode = Id.handle({ position: Context.pathTraceMode });
-				Context.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
+				var hpathtracemode = Id.handle({ position: Context.raw.pathTraceMode });
+				Context.raw.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);
 				if (hpathtracemode.changed) {
 					arm.render.RenderPathRaytrace.ready = false;
 				}
 
 				#else
 
-				var hrendermode = Id.handle({ position: Context.renderMode });
-				Context.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
+				var hrendermode = Id.handle({ position: Context.raw.renderMode });
+				Context.raw.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
 					Context.setRenderPath();
 				}
 				#end
 
-				ui.combo(Context.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x"], tr("Super Sample"), true);
-				if (Context.hsupersample.changed) Config.applyConfig();
+				ui.combo(Context.raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x"], tr("Super Sample"), true);
+				if (Context.raw.hsupersample.changed) Config.applyConfig();
 
 				#if arm_debug
 				var vsyncHandle = Id.handle({ selected: Config.raw.window_vsync });
 				Config.raw.window_vsync = ui.check(vsyncHandle, tr("VSync"));
 				#end
 
-				if (Context.renderMode == RenderDeferred) {
+				if (Context.raw.renderMode == RenderDeferred) {
 					#if rp_voxels
-					ui.check(Context.hvxao, tr("Voxel AO"));
+					ui.check(Context.raw.hvxao, tr("Voxel AO"));
 					if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
-					if (Context.hvxao.changed) {
+					if (Context.raw.hvxao.changed) {
 						Config.applyConfig();
 					}
 
-					ui.enabled = Context.hvxao.selected;
-					var h = Id.handle({ value: Context.vxaoOffset });
-					Context.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
-					if (h.changed) Context.ddirty = 2;
-					var h = Id.handle({ value: Context.vxaoAperture });
-					Context.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
-					if (h.changed) Context.ddirty = 2;
+					ui.enabled = Context.raw.hvxao.selected;
+					var h = Id.handle({ value: Context.raw.vxaoOffset });
+					Context.raw.vxaoOffset = ui.slider(h, tr("Cone Offset"), 1.0, 4.0, true);
+					if (h.changed) Context.raw.ddirty = 2;
+					var h = Id.handle({ value: Context.raw.vxaoAperture });
+					Context.raw.vxaoAperture = ui.slider(h, tr("Aperture"), 1.0, 4.0, true);
+					if (h.changed) Context.raw.ddirty = 2;
 					ui.enabled = true;
 					#end
-					ui.check(Context.hssao, tr("SSAO"));
-					if (Context.hssao.changed) Config.applyConfig();
-					ui.check(Context.hssr, tr("SSR"));
-					if (Context.hssr.changed) Config.applyConfig();
-					ui.check(Context.hbloom, tr("Bloom"));
-					if (Context.hbloom.changed) Config.applyConfig();
+					ui.check(Context.raw.hssao, tr("SSAO"));
+					if (Context.raw.hssao.changed) Config.applyConfig();
+					ui.check(Context.raw.hssr, tr("SSR"));
+					if (Context.raw.hssr.changed) Config.applyConfig();
+					ui.check(Context.raw.hbloom, tr("Bloom"));
+					if (Context.raw.hbloom.changed) Config.applyConfig();
 				}
 
 				var h = Id.handle({ value: Config.raw.rp_vignette });
 				Config.raw.rp_vignette = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
-				if (h.changed) Context.ddirty = 2;
+				if (h.changed) Context.raw.ddirty = 2;
 
-				// var h = Id.handle({ value: Context.autoExposureStrength });
-				// Context.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
-				// if (h.changed) Context.ddirty = 2;
+				// var h = Id.handle({ value: Context.raw.autoExposureStrength });
+				// Context.raw.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
+				// if (h.changed) Context.raw.ddirty = 2;
 
 				var cam = iron.Scene.active.camera;
 				var camRaw = cam.data.raw;
@@ -383,7 +383,7 @@ class BoxPreferences {
 				var dispHandle = Id.handle({ value: Config.raw.displace_strength });
 				Config.raw.displace_strength = ui.slider(dispHandle, tr("Displacement Strength"), 0.0, 10.0, true);
 				if (dispHandle.changed) {
-					Context.ddirty = 2;
+					Context.raw.ddirty = 2;
 					MakeMaterial.parseMeshMaterial();
 				}
 			}

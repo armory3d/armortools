@@ -78,7 +78,7 @@ class MakeMaterial {
 			var sampler = con.frag.sharedSamplers[0];
 			scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 		}
-		if (!Context.textureFilter) {
+		if (!Context.raw.textureFilter) {
 			scon.overrideContext.filter = "point";
 		}
 		m.shader.raw.contexts.push(scon.raw);
@@ -92,7 +92,7 @@ class MakeMaterial {
 				var sampler = con.frag.sharedSamplers[0];
 				scon.overrideContext.shared_sampler = sampler.substr(sampler.lastIndexOf(" ") + 1);
 			}
-			if (!Context.textureFilter) {
+			if (!Context.raw.textureFilter) {
 				scon.overrideContext.filter = "point";
 			}
 			m.shader.raw.contexts.push(scon.raw);
@@ -103,7 +103,7 @@ class MakeMaterial {
 			m.contexts.push(mcon);
 		}
 
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 
 		#if rp_voxels
 		makeVoxel(m);
@@ -115,7 +115,7 @@ class MakeMaterial {
 	}
 
 	public static function parseParticleMaterial() {
-		var m = Context.particleMaterial;
+		var m = Context.raw.particleMaterial;
 		var sc: ShaderContext = null;
 		for (c in m.shader.contexts) {
 			if (c.raw.name == "mesh") {
@@ -240,14 +240,14 @@ class MakeMaterial {
 	}
 
 	static function bakeNodePreviews() {
-		Context.nodePreviewsUsed = [];
-		if (Context.nodePreviews == null) Context.nodePreviews = [];
+		Context.raw.nodePreviewsUsed = [];
+		if (Context.raw.nodePreviews == null) Context.raw.nodePreviews = [];
 		traverseNodes(UINodes.inst.getCanvasMaterial().nodes, null, []);
-		for (key in Context.nodePreviews.keys()) {
-			if (Context.nodePreviewsUsed.indexOf(key) == -1) {
-				var image = Context.nodePreviews.get(key);
+		for (key in Context.raw.nodePreviews.keys()) {
+			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
+				var image = Context.raw.nodePreviews.get(key);
 				App.notifyOnNextFrame(image.unload);
-				Context.nodePreviews.remove(key);
+				Context.raw.nodePreviews.remove(key);
 			}
 		}
 	}
@@ -271,14 +271,14 @@ class MakeMaterial {
 	static function bakeNodePreview(node: TNode, group: TNodeCanvas, parents: Array<TNode>) {
 		if (node.type == "BLUR") {
 			var id = MaterialParser.node_name(node, parents);
-			var image = Context.nodePreviews.get(id);
-			Context.nodePreviewsUsed.push(id);
+			var image = Context.raw.nodePreviews.get(id);
+			Context.raw.nodePreviewsUsed.push(id);
 			var resX = Std.int(Config.getTextureResX() / 4);
 			var resY = Std.int(Config.getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
 				image = kha.Image.createRenderTarget(resX, resY);
-				Context.nodePreviews.set(id, image);
+				Context.raw.nodePreviews.set(id, image);
 			}
 
 			MaterialParser.blur_passthrough = true;
@@ -287,14 +287,14 @@ class MakeMaterial {
 		}
 		else if (node.type == "DIRECT_WARP") {
 			var id = MaterialParser.node_name(node, parents);
-			var image = Context.nodePreviews.get(id);
-			Context.nodePreviewsUsed.push(id);
+			var image = Context.raw.nodePreviews.get(id);
+			Context.raw.nodePreviewsUsed.push(id);
 			var resX = Std.int(Config.getTextureResX());
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
 				image = kha.Image.createRenderTarget(resX, resY);
-				Context.nodePreviews.set(id, image);
+				Context.raw.nodePreviews.set(id, image);
 			}
 
 			MaterialParser.warp_passthrough = true;
@@ -303,14 +303,14 @@ class MakeMaterial {
 		}
 		else if (node.type == "BAKE_CURVATURE") {
 			var id = MaterialParser.node_name(node, parents);
-			var image = Context.nodePreviews.get(id);
-			Context.nodePreviewsUsed.push(id);
+			var image = Context.raw.nodePreviews.get(id);
+			Context.raw.nodePreviewsUsed.push(id);
 			var resX = Std.int(Config.getTextureResX());
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
 				image = kha.Image.createRenderTarget(resX, resY, kha.graphics4.TextureFormat.L8);
-				Context.nodePreviews.set(id, image);
+				Context.raw.nodePreviews.set(id, image);
 			}
 
 			if (RenderPathPaint.liveLayer == null) {
@@ -318,11 +318,11 @@ class MakeMaterial {
 			}
 
 			var _space = UIHeader.inst.worktab.position;
-			var _tool = Context.tool;
-			var _bakeType = Context.bakeType;
+			var _tool = Context.raw.tool;
+			var _bakeType = Context.raw.bakeType;
 			UIHeader.inst.worktab.position = SpacePaint;
-			Context.tool = ToolBake;
-			Context.bakeType = BakeCurvature;
+			Context.raw.tool = ToolBake;
+			Context.raw.bakeType = BakeCurvature;
 
 			MaterialParser.bake_passthrough = true;
 			MaterialParser.start_node = node;
@@ -333,16 +333,16 @@ class MakeMaterial {
 			MaterialParser.start_node = null;
 			MaterialParser.start_group = null;
 			MaterialParser.start_parents = null;
-			Context.pdirty = 1;
+			Context.raw.pdirty = 1;
 			RenderPathPaint.useLiveLayer(true);
 			RenderPathPaint.commandsPaint(false);
 			RenderPathPaint.dilate(true, false);
 			RenderPathPaint.useLiveLayer(false);
-			Context.pdirty = 0;
+			Context.raw.pdirty = 0;
 
 			UIHeader.inst.worktab.position = _space;
-			Context.tool = _tool;
-			Context.bakeType = _bakeType;
+			Context.raw.tool = _tool;
+			Context.raw.bakeType = _bakeType;
 			parsePaintMaterial(false);
 
 			var rts = RenderPath.active.renderTargets;
@@ -369,7 +369,7 @@ class MakeMaterial {
 	}
 
 	public static function parseBrush() {
-		arm.logic.LogicParser.parse(Context.brush.canvas, false);
+		arm.logic.LogicParser.parse(Context.raw.brush.canvas, false);
 	}
 
 	public static function blendMode(frag: NodeShader, blending: Int, cola: String, colb: String, opac: String): String {
@@ -491,7 +491,7 @@ class MakeMaterial {
 	}
 
 	public static inline function voxelgiHalfExtents():String {
-		var ext = Context.vxaoExt;
+		var ext = Context.raw.vxaoExt;
 		return 'const vec3 voxelgiHalfExtents = vec3($ext, $ext, $ext);';
 	}
 

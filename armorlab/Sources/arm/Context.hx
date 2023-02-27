@@ -1,9 +1,7 @@
 package arm;
 
-import kha.Image;
 import zui.Zui;
 import iron.RenderPath;
-import iron.math.Vec4;
 import iron.object.MeshObject;
 import arm.shader.NodeShader;
 import arm.render.RenderPathDeferred;
@@ -14,146 +12,21 @@ import arm.ui.UIHeader;
 import arm.ui.BoxPreferences;
 import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;
+import arm.ContextFormat;
 
 class Context {
 
-	public static var material: Dynamic; ////
-	public static var layer: Dynamic; ////
-	public static var paintObject: MeshObject;
-	public static var mergedObject: MeshObject = null;
-	public static var mergedObjectIsAtlas = false; // Only objects referenced by atlas are merged
-	public static var texture: TAsset = null;
-	public static var tool = ToolEraser;
-
-	public static var ddirty = 0; // depth
-	public static var pdirty = 0; // paint
-	public static var rdirty = 0; // render
-	public static var brushBlendDirty = true;
-	public static var nodePreviewSocket = 0;
-
-	public static var splitView = false;
-	public static var viewIndex = -1;
-	public static var viewIndexLast = -1;
-
-	public static var swatch: TSwatchColor;
-	public static var pickedColor: TSwatchColor = Project.makeSwatch();
-	public static var colorPickerCallback: TSwatchColor->Void = null;
-	public static var colorPickerPreviousTool = ToolEraser;
-
-	public static var defaultIrradiance: kha.arrays.Float32Array = null;
-	public static var defaultRadiance: Image = null;
-	public static var defaultRadianceMipmaps: Array<Image> = null;
-	public static var savedEnvmap: Image = null;
-	public static var emptyEnvmap: Image = null;
-	public static var previewEnvmap: Image = null;
-	public static var envmapLoaded = false;
-	public static var showEnvmap = false;
-	public static var showEnvmapHandle = new Handle({ selected: false });
-	public static var showEnvmapBlur = false;
-	public static var showEnvmapBlurHandle = new Handle({ selected: false });
-	public static var envmapAngle = 0.0;
-	public static var lightAngle = 0.0;
-	public static var cullBackfaces = true;
-	public static var textureFilter = true;
-
-	public static var formatType = FormatPng;
-	public static var formatQuality = 100.0;
-	public static var layersDestination = DestinationDisk;
-	public static var splitBy = SplitObject;
-	public static var parseTransform = true;
-	public static var parseVCols = false;
-
-	public static var selectTime = 0.0;
-	#if (kha_direct3d12 || kha_vulkan)
-	public static var viewportMode = ViewPathTrace;
-	#else
-	public static var viewportMode = ViewLit;
-	#end
-	#if (krom_android || krom_ios || arm_vr)
-	public static var renderMode = RenderForward;
-	#else
-	public static var renderMode = RenderDeferred;
-	#end
-	#if (kha_direct3d12 || kha_vulkan)
-	public static var pathTraceMode = TraceCore;
-	#end
-	public static var viewportShader: NodeShader->String = null;
-	public static var hscaleWasChanged = false;
-	public static var exportMeshFormat = FormatObj;
-	public static var exportMeshIndex = 0;
-	public static var packAssetsOnExport = true;
-
-	public static var paintVec = new Vec4();
-	public static var lastPaintX = -1.0;
-	public static var lastPaintY = -1.0;
-	public static var foregroundEvent = false;
-	public static var painted = 0;
-	public static var brushTime = 0.0;
-	public static var cloneStartX = -1.0;
-	public static var cloneStartY = -1.0;
-	public static var cloneDeltaX = 0.0;
-	public static var cloneDeltaY = 0.0;
-
-	public static var brushRadius = 0.25;
-	public static var brushRadiusHandle = new Handle({ value: 0.25 });
-	public static var brushScale = 1.0;
-
-	public static var blurDirectional = false;
-	public static var showCompass = true;
-	public static var projectType = ModelRoundedCube;
-	public static var projectAspectRatio = 0; // 1:1, 2:1, 1:2
-	public static var projectObjects: Array<MeshObject>;
-
-	public static var lastPaintVecX = -1.0;
-	public static var lastPaintVecY = -1.0;
-	public static var prevPaintVecX = -1.0;
-	public static var prevPaintVecY = -1.0;
-	public static var frame = 0;
-	public static var paint2dView = false;
-
-	public static var lockStartedX = -1.0;
-	public static var lockStartedY = -1.0;
-	public static var brushLocked = false;
-	public static var brushCanLock = false;
-	public static var brushCanUnlock = false;
-	public static var cameraType = CameraPerspective;
-	public static var camHandle = new Handle();
-	public static var fovHandle: Handle = null;
-	public static var undoHandle: Handle = null;
-	public static var hssao: Handle = null;
-	public static var hssr: Handle = null;
-	public static var hbloom: Handle = null;
-	public static var hsupersample: Handle = null;
-	public static var hvxao: Handle = null;
-	public static var vxaoExt = 1.0;
-	public static var vxaoOffset = 1.5;
-	public static var vxaoAperture = 1.2;
-	public static var textureExportPath = "";
-	public static var lastStatusPosition = 0;
-	public static var cameraControls = ControlsOrbit;
-	public static var penPaintingOnly = false; // Reject painting with finger when using pen
-
-	static var coords = new Vec4();
-	static var startX = 0.0;
-	static var startY = 0.0;
-
-	// Brush ruler
-	static var lockBegin = false;
-	static var lockX = false;
-	static var lockY = false;
-	static var lockStartX = 0.0;
-	static var lockStartY = 0.0;
-	static var registered = false;
+	public static var raw: TContext = {};
 
 	public static function setViewportMode(mode: ViewportMode) {
-		if (mode == viewportMode) return;
+		if (mode == raw.viewportMode) return;
 
-		viewportMode = mode;
-		var deferred = Context.renderMode != RenderForward && (Context.viewportMode == ViewLit || Context.viewportMode == ViewPathTrace);
+		raw.viewportMode = mode;
+		var deferred = raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace);
 		if (deferred) {
 			RenderPath.active.commands = RenderPathDeferred.commands;
 		}
-		// else if (Context.viewportMode == ViewPathTrace) {
+		// else if (raw.viewportMode == ViewPathTrace) {
 		// }
 		else {
 			if (RenderPathForward.path == null) {
@@ -170,7 +43,7 @@ class Context {
 	public static function layerFilterUsed(): Bool { return true; } ////
 
 	public static function setSwatch(s: TSwatchColor) {
-		swatch = s;
+		raw.swatch = s;
 		App.notifyOnNextFrame(function() {
 			// MakeMaterial.parsePaintMaterial();
 			// RenderUtil.makeMaterialPreview();
@@ -179,14 +52,14 @@ class Context {
 	}
 
 	public static function selectTool(i: Int) {
-		tool = i;
+		raw.tool = i;
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
-		ddirty = 3;
+		raw.ddirty = 3;
 	}
 
 	public static function selectPaintObject(o: MeshObject) {
-		paintObject = o;
+		raw.paintObject = o;
 	}
 
 	public static function mainObject(): MeshObject {
@@ -194,23 +67,23 @@ class Context {
 	}
 
 	public static function loadEnvmap() {
-		if (!envmapLoaded) {
+		if (!raw.envmapLoaded) {
 			// TODO: Unable to share texture for both radiance and envmap - reload image
-			envmapLoaded = true;
+			raw.envmapLoaded = true;
 			iron.data.Data.cachedImages.remove("World_radiance.k");
 		}
 		iron.Scene.active.world.loadEnvmap(function(_) {});
-		if (Context.savedEnvmap == null) Context.savedEnvmap = iron.Scene.active.world.envmap;
+		if (raw.savedEnvmap == null) raw.savedEnvmap = iron.Scene.active.world.envmap;
 	}
 
 	@:keep
 	public static function setViewportShader(viewportShader: NodeShader->String) {
-		Context.viewportShader = viewportShader;
+		raw.viewportShader = viewportShader;
 		setRenderPath();
 	}
 
 	public static function setRenderPath() {
-		if (Context.renderMode == RenderForward || Context.viewportShader != null) {
+		if (raw.renderMode == RenderForward || raw.viewportShader != null) {
 			if (RenderPathForward.path == null) {
 				RenderPathForward.init(RenderPath.active);
 			}
@@ -245,19 +118,19 @@ class Context {
 		var right = 1.0;
 
 		// First time init
-		if (Context.lastPaintX < 0 || Context.lastPaintY < 0) {
-			Context.lastPaintVecX = Context.paintVec.x;
-			Context.lastPaintVecY = Context.paintVec.y;
+		if (raw.lastPaintX < 0 || raw.lastPaintY < 0) {
+			raw.lastPaintVecX = raw.paintVec.x;
+			raw.lastPaintVecY = raw.paintVec.y;
 		}
 
 		var inpaint = UINodes.inst.getNodes().nodesSelected.length > 0 && UINodes.inst.getNodes().nodesSelected[0].type == "InpaintNode";
 
 		// Paint bounds
 		if (inpaint &&
-			Context.paintVec.x > left &&
-			Context.paintVec.x < right &&
-			Context.paintVec.y > 0 &&
-			Context.paintVec.y < 1 &&
+			raw.paintVec.x > left &&
+			raw.paintVec.x < right &&
+			raw.paintVec.y > 0 &&
+			raw.paintVec.y < 1 &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			!arm.App.isScrolling() &&
@@ -266,34 +139,34 @@ class Context {
 			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 
 			// Prevent painting the same spot
-			var sameSpot = Context.paintVec.x == Context.lastPaintX && Context.paintVec.y == Context.lastPaintY;
+			var sameSpot = raw.paintVec.x == raw.lastPaintX && raw.paintVec.y == raw.lastPaintY;
 			if (down && sameSpot) {
-				Context.painted++;
+				raw.painted++;
 			}
 			else {
-				Context.painted = 0;
+				raw.painted = 0;
 			}
-			Context.lastPaintX = Context.paintVec.x;
-			Context.lastPaintY = Context.paintVec.y;
+			raw.lastPaintX = raw.paintVec.x;
+			raw.lastPaintY = raw.paintVec.y;
 
-			if (Context.painted == 0) {
+			if (raw.painted == 0) {
 				parseBrushInputs();
 			}
 
-			if (Context.painted <= 1) {
-				Context.pdirty = 1;
-				Context.rdirty = 2;
+			if (raw.painted <= 1) {
+				raw.pdirty = 1;
+				raw.rdirty = 2;
 			}
 		}
 	}
 
 	public static function parseBrushInputs() {
-		if (!registered) {
-			registered = true;
+		if (!raw.registered) {
+			raw.registered = true;
 			iron.App.notifyOnUpdate(update);
 		}
 
-		Context.paintVec = coords;
+		raw.paintVec = raw.coords;
 	}
 
 	static function update() {
@@ -301,8 +174,8 @@ class Context {
 		var paintX = mouse.viewX / iron.App.w();
 		var paintY = mouse.viewY / iron.App.h();
 		if (mouse.started()) {
-			startX = mouse.viewX / iron.App.w();
-			startY = mouse.viewY / iron.App.h();
+			raw.startX = mouse.viewX / iron.App.w();
+			raw.startY = mouse.viewY / iron.App.h();
 		}
 
 		var pen = iron.system.Input.getPen();
@@ -311,37 +184,37 @@ class Context {
 			paintY = pen.viewY / iron.App.h();
 		}
 		if (pen.started()) {
-			startX = pen.viewX / iron.App.w();
-			startY = pen.viewY / iron.App.h();
+			raw.startX = pen.viewX / iron.App.w();
+			raw.startY = pen.viewY / iron.App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
-			if (lockX) paintX = startX;
-			if (lockY) paintY = startY;
+			if (raw.lockX) paintX = raw.startX;
+			if (raw.lockY) paintY = raw.startY;
 		}
 
-		coords.x = paintX;
-		coords.y = paintY;
+		raw.coords.x = paintX;
+		raw.coords.y = paintY;
 
-		if (lockBegin) {
-			var dx = Math.abs(lockStartX - mouse.viewX);
-			var dy = Math.abs(lockStartY - mouse.viewY);
+		if (raw.lockBegin) {
+			var dx = Math.abs(raw.lockStartX - mouse.viewX);
+			var dy = Math.abs(raw.lockStartY - mouse.viewY);
 			if (dx > 1 || dy > 1) {
-				lockBegin = false;
-				dx > dy ? lockY = true : lockX = true;
+				raw.lockBegin = false;
+				dx > dy ? raw.lockY = true : raw.lockX = true;
 			}
 		}
 
 		var kb = iron.system.Input.getKeyboard();
 		if (kb.started(Config.keymap.brush_ruler)) {
-			lockStartX = mouse.viewX;
-			lockStartY = mouse.viewY;
-			lockBegin = true;
+			raw.lockStartX = mouse.viewX;
+			raw.lockStartY = mouse.viewY;
+			raw.lockBegin = true;
 		}
 		else if (kb.released(Config.keymap.brush_ruler)) {
-			lockX = lockY = lockBegin = false;
+			raw.lockX = raw.lockY = raw.lockBegin = false;
 		}
 
-		Context.parseBrushInputs();
+		parseBrushInputs();
 	}
 }

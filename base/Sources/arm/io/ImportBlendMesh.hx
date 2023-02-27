@@ -51,7 +51,7 @@ class ImportBlendMesh {
 				var nora = new Int16Array(numtri * 3 * 2);
 				var hasuv = m.get("mloopuv") != null;
 				var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-				var hascol = Context.parseVCols && m.get("mloopcol") != null;
+				var hascol = Context.raw.parseVCols && m.get("mloopcol") != null;
 				var cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
 
 				var tri = 0;

@@ -18,7 +18,7 @@ class ParticleUtil {
 	}
 
 	public static function initParticle() {
-		if (Context.particleMaterial != null) return;
+		if (Context.raw.particleMaterial != null) return;
 
 		var raw: TParticleData = {
 			name: "Particles",
@@ -68,7 +68,7 @@ class ParticleUtil {
 		}
 
 		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
-			Context.particleMaterial = md;
+			Context.raw.particleMaterial = md;
 
 			for (obj in Scene.active.raw.objects) {
 				if (obj.name == ".Sphere") {
@@ -109,17 +109,17 @@ class ParticleUtil {
 	}
 
 	static function initParticleMesh() {
-		if (Context.paintBody != null) return;
+		if (Context.raw.paintBody != null) return;
 
-		var po = Context.mergedObject != null ? Context.mergedObject : Context.paintObject;
+		var po = Context.raw.mergedObject != null ? Context.raw.mergedObject : Context.raw.paintObject;
 
 		po.transform.scale.x = po.parent.transform.scale.x;
 		po.transform.scale.y = po.parent.transform.scale.y;
 		po.transform.scale.z = po.parent.transform.scale.z;
 
-		Context.paintBody = new arm.plugin.PhysicsBody();
-		Context.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
-		po.addTrait(Context.paintBody);
+		Context.raw.paintBody = new arm.plugin.PhysicsBody();
+		Context.raw.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
+		po.addTrait(Context.raw.paintBody);
 	}
 
 	#end

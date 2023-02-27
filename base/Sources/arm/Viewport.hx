@@ -8,7 +8,7 @@ import arm.Camera;
 class Viewport {
 
 	public static function scaleToBounds() {
-		var po = Context.mergedObject == null ? Context.mainObject() : Context.mergedObject;
+		var po = Context.raw.mergedObject == null ? Context.mainObject() : Context.raw.mergedObject;
 		var md = po.data;
 		md.geom.calculateAABB();
 		var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
@@ -31,11 +31,11 @@ class Viewport {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (Context.fovHandle != null) Context.fovHandle.value = cam.data.raw.fov = 0.92;
-				Context.camHandle.position = 0;
+				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = 0.92;
+				Context.raw.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();
-				Context.ddirty = 2;
+				Context.raw.ddirty = 2;
 				Camera.inst.reset();
 				break;
 			}
@@ -43,16 +43,16 @@ class Viewport {
 	}
 
 	public static function setView(x: Float, y: Float, z: Float, rx: Float, ry: Float, rz: Float) {
-		Context.paintObject.transform.rot.set(0, 0, 0, 1);
-		Context.paintObject.transform.dirty = true;
+		Context.raw.paintObject.transform.rot.set(0, 0, 0, 1);
+		Context.raw.paintObject.transform.dirty = true;
 		var cam = Scene.active.camera;
 		var dist = cam.transform.loc.length();
 		cam.transform.loc.set(x * dist, y * dist, z * dist);
 		cam.transform.rot.fromEuler(rx, ry, rz);
 		cam.transform.buildMatrix();
 		cam.buildProjection();
-		Context.ddirty = 2;
-		Camera.inst.reset(Context.viewIndexLast);
+		Context.raw.ddirty = 2;
+		Camera.inst.reset(Context.raw.viewIndexLast);
 	}
 
 	public static function orbit(x: Float, y: Float) {
@@ -62,7 +62,7 @@ class Viewport {
 		cam.transform.rotate(new Vec4(0, 0, 1), x);
 		cam.transform.rotate(cam.rightWorld(), y);
 		cam.transform.move(cam.lookWorld(), -dist);
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 	}
 
 	public static function orbitOpposite() {
@@ -74,7 +74,7 @@ class Viewport {
 	public static function zoom(f: Float) {
 		var cam = Scene.active.camera;
 		cam.transform.move(cam.look(), f);
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 	}
 
 	public static function updateCameraType(cameraType: Int) {
@@ -95,6 +95,6 @@ class Viewport {
 			light.visible = false;
 		}
 		cam.buildProjection();
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 	}
 }

@@ -25,8 +25,8 @@ class NodesBrush {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {
-					var canvas = Context.brush.canvas;
-					var nodes = Context.brush.nodes;
+					var canvas = Context.raw.brush.canvas;
+					var nodes = Context.raw.brush.nodes;
 					var node = arm.ui.UINodes.makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
 					return node;

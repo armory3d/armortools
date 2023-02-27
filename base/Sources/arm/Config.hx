@@ -173,14 +173,14 @@ class Config {
 	}
 
 	public static function applyConfig() {
-		Config.raw.rp_ssao = Context.hssao.selected;
-		Config.raw.rp_ssr = Context.hssr.selected;
-		Config.raw.rp_bloom = Context.hbloom.selected;
-		Config.raw.rp_gi = Context.hvxao.selected;
-		Config.raw.rp_supersample = getSuperSampleSize(Context.hsupersample.position);
+		Config.raw.rp_ssao = Context.raw.hssao.selected;
+		Config.raw.rp_ssr = Context.raw.hssr.selected;
+		Config.raw.rp_bloom = Context.raw.hbloom.selected;
+		Config.raw.rp_gi = Context.raw.hvxao.selected;
+		Config.raw.rp_supersample = getSuperSampleSize(Context.raw.hsupersample.position);
 		iron.object.Uniforms.defaultFilter = Config.raw.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
 		save();
-		Context.ddirty = 2;
+		Context.raw.ddirty = 2;
 
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
@@ -229,11 +229,11 @@ class Config {
 	}
 
 	public static function getTextureResX(): Int {
-		return Context.projectAspectRatio == 2 ? Std.int(getTextureRes() / 2) : getTextureRes();
+		return Context.raw.projectAspectRatio == 2 ? Std.int(getTextureRes() / 2) : getTextureRes();
 	}
 
 	public static function getTextureResY(): Int {
-		return Context.projectAspectRatio == 1 ? Std.int(getTextureRes() / 2) : getTextureRes();
+		return Context.raw.projectAspectRatio == 1 ? Std.int(getTextureRes() / 2) : getTextureRes();
 	}
 
 	public static function getTextureResBias(): Float {

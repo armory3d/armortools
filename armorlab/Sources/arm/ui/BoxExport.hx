@@ -49,17 +49,17 @@ class BoxExport {
 			}
 
 			ui.row([0.5, 0.5]);
-			Context.formatType = ui.combo(Id.handle({ position: Context.formatType }), ["png", "jpg"], tr("Format"), true);
+			Context.raw.formatType = ui.combo(Id.handle({ position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
 
-			ui.enabled = Context.formatType == FormatJpg;
-			Context.formatQuality = ui.slider(Id.handle({ value: Context.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
+			ui.enabled = Context.raw.formatType == FormatJpg;
+			Context.raw.formatQuality = ui.slider(Id.handle({ value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
 			ui.combo(hpreset, files, tr("Preset"), true);
 			if (hpreset.changed) preset = null;
 
 			var layersDestinationHandle = Id.handle();
-			layersDestinationHandle.position = Context.layersDestination;
-			Context.layersDestination = ui.combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
+			layersDestinationHandle.position = Context.raw.layersDestination;
+			Context.raw.layersDestination = ui.combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
 			@:privateAccess ui.endElement();
 
@@ -69,20 +69,20 @@ class BoxExport {
 			}
 			if (ui.button(tr("Export"))) {
 				UIBox.hide();
-				if (Context.layersDestination == DestinationPacked) {
-					Context.textureExportPath = "/";
+				if (Context.raw.layersDestination == DestinationPacked) {
+					Context.raw.textureExportPath = "/";
 					function _init() {
-						ExportTexture.run(Context.textureExportPath);
+						ExportTexture.run(Context.raw.textureExportPath);
 					}
 					iron.App.notifyOnInit(_init);
 				}
 				else {
-					var filters = Context.formatType == FormatPng ? "png" : "jpg";
+					var filters = Context.raw.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, false, function(path: String) {
-						Context.textureExportPath = path;
+						Context.raw.textureExportPath = path;
 						function doExport() {
 							function _init() {
-								ExportTexture.run(Context.textureExportPath);
+								ExportTexture.run(Context.raw.textureExportPath);
 							}
 							iron.App.notifyOnInit(_init);
 						}
@@ -214,7 +214,7 @@ class BoxExport {
 	}
 
 	public static function showMesh() {
-		exportMeshHandle.position = Context.exportMeshIndex;
+		exportMeshHandle.position = Context.raw.exportMeshIndex;
 		UIBox.showCustom(function(ui: Zui) {
 			var htab = Id.handle();
 			tabExportMesh(ui, htab);
@@ -227,7 +227,7 @@ class BoxExport {
 
 			ui.row([1 / 2, 1 / 2]);
 
-			Context.exportMeshFormat = ui.combo(Id.handle({ position: Context.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
+			Context.raw.exportMeshFormat = ui.combo(Id.handle({ position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
@@ -251,7 +251,7 @@ class BoxExport {
 			}
 			if (ui.button(tr("Export"))) {
 				UIBox.hide();
-				UIFiles.show(Context.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
+				UIFiles.show(Context.raw.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
 					#if (krom_android || krom_ios)
 					var f = kha.Window.get(0).title;
 					#else

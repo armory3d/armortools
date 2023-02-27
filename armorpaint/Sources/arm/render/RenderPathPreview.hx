@@ -112,7 +112,7 @@ class RenderPathPreview {
 		#end
 
 		var framebuffer = "texpreview";
-		var selectedMat = Context.material;
+		var selectedMat = Context.raw.material;
 		RenderPath.active.renderTargets.get("texpreview").image = selectedMat.image;
 		RenderPath.active.renderTargets.get("texpreview_icon").image = selectedMat.imageIcon;
 
@@ -162,7 +162,7 @@ class RenderPathPreview {
 		#end
 
 		var framebuffer = "texpreview";
-		RenderPath.active.renderTargets.get("texpreview").image = Context.decalImage;
+		RenderPath.active.renderTargets.get("texpreview").image = Context.raw.decalImage;
 
 		path.setTarget(framebuffer);
 

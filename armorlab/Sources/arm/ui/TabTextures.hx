@@ -68,12 +68,12 @@ class TabTextures {
 							App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 							App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 							App.dragAsset = asset;
-							Context.texture = asset;
+							Context.raw.texture = asset;
 
-							Context.selectTime = Time.time();
+							Context.raw.selectTime = Time.time();
 						}
 
-						if (asset == Context.texture) {
+						if (asset == Context.raw.texture) {
 							var _uix = ui._x;
 							var _uiy = ui._y;
 							ui._x = uix;
@@ -148,9 +148,9 @@ class TabTextures {
 
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (inFocus && ui.isDeleteDown && Project.assets.length > 0 && Project.assets.indexOf(Context.texture) >= 0) {
+			if (inFocus && ui.isDeleteDown && Project.assets.length > 0 && Project.assets.indexOf(Context.raw.texture) >= 0) {
 				ui.isDeleteDown = false;
-				deleteTexture(Context.texture);
+				deleteTexture(Context.raw.texture);
 			}
 		}
 	}
@@ -182,7 +182,7 @@ class TabTextures {
 	static function deleteTexture(asset: TAsset) {
 		var i = Project.assets.indexOf(asset);
 		if (Project.assets.length > 1) {
-			Context.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
+			Context.raw.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
 		UIStatus.inst.statusHandle.redraws = 2;
 		Data.deleteImage(asset.file);

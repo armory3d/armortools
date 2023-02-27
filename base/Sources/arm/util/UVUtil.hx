@@ -35,9 +35,9 @@ class UVUtil {
 		}
 
 		uvmapCached = true;
-		var merged = Context.mergedObject;
-		var mesh = (Context.layerFilter == 0 && merged != null) ?
-					merged.data.raw : Context.paintObject.data.raw;
+		var merged = Context.raw.mergedObject;
+		var mesh = (Context.raw.layerFilter == 0 && merged != null) ?
+					merged.data.raw : Context.raw.paintObject.data.raw;
 
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
@@ -73,7 +73,7 @@ class UVUtil {
 		}
 
 		trianglemapCached = true;
-		var merged = Context.mergedObject != null ? Context.mergedObject.data.raw : Context.paintObject.data.raw;
+		var merged = Context.raw.mergedObject != null ? Context.raw.mergedObject.data.raw : Context.raw.paintObject.data.raw;
 		var mesh = merged;
 		var texa = mesh.vertex_arrays[2].values;
 		var inda = mesh.index_arrays[0].values;
@@ -128,9 +128,9 @@ class UVUtil {
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
 
-		var mask = Context.objectMaskUsed() ? Context.layer.getObjectMask() : 0;
-		if (Context.layerFilterUsed()) mask = Context.layerFilter;
-		var geom = mask == 0 && Context.mergedObject != null ? Context.mergedObject.data.geom : Context.paintObject.data.geom;
+		var mask = Context.objectMaskUsed() ? Context.raw.layer.getObjectMask() : 0;
+		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
+		var geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data.geom : Context.raw.paintObject.data.geom;
 		var g4 = dilatemap.g4;
 		g4.begin();
 		g4.clear(0x00000000);
@@ -155,8 +155,8 @@ class UVUtil {
 		RenderUtil.pickPosNorTex();
 		var w = 2048; // Config.getTextureResX()
 		var h = 2048; // Config.getTextureResY()
-		var x = Std.int(Context.uvxPicked * w);
-		var y = Std.int(Context.uvyPicked * h);
+		var x = Std.int(Context.raw.uvxPicked * w);
+		var y = Std.int(Context.raw.uvyPicked * h);
 		var bytes = haxe.io.Bytes.alloc(w * h);
 		var coords: Array<TCoord> = [{ x: x, y: y }];
 		var r = Std.int(dilatemap.width / w);

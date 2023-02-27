@@ -48,7 +48,7 @@ class MainBase {
 					var path = new RenderPath();
 					RenderPathBase.init(path);
 
-					if (Context.renderMode == RenderForward) {
+					if (Context.raw.renderMode == RenderForward) {
 						RenderPathDeferred.init(path); // Allocate gbuffer
 						RenderPathForward.init(path);
 						path.commands = RenderPathForward.commands;

@@ -23,7 +23,7 @@ class RenderPathForward {
 
 		path.setTarget("buf");
 		path.bindTarget("gbuffer1", "tex");
-		if (Context.viewportMode == ViewLit) {
+		if (Context.raw.viewportMode == ViewLit) {
 			path.drawShader("shader_datas/compositor_pass/compositor_pass");
 		}
 		else {

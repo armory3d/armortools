@@ -36,14 +36,14 @@ class RenderPathRaytrace {
 		if (!ready || isBake) {
 			ready = true;
 			isBake = false;
-			var mode = Context.pathTraceMode == TraceCore ? "core" : "full";
+			var mode = Context.raw.pathTraceMode == TraceCore ? "core" : "full";
 			raytraceInit("raytrace_brute_" + mode + ext);
 			lastEnvmap = null;
 		}
 
-		if (!Context.envmapLoaded) Context.loadEnvmap();
+		if (!Context.raw.envmapLoaded) Context.loadEnvmap();
 		var probe = Scene.active.world.probe;
-		var savedEnvmap = Context.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.savedEnvmap;
+		var savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 		if (lastEnvmap != savedEnvmap) {
 			lastEnvmap = savedEnvmap;
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
@@ -53,7 +53,7 @@ class RenderPathRaytrace {
 			Krom.raytraceSetTextures(l.texpaint.renderTarget_, l.texpaint_nor.renderTarget_, l.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
-		if (Context.pdirty > 0 || dirty > 0) {
+		if (Context.raw.pdirty > 0 || dirty > 0) {
 			App.flatten(true);
 		}
 
@@ -85,19 +85,19 @@ class RenderPathRaytrace {
 		f32[18] = helpMat._32;
 		f32[19] = helpMat._33;
 		f32[20] = Scene.active.world.probe.raw.strength * 1.5;
-		if (!Context.showEnvmap) f32[20] = -f32[20];
-		f32[21] = Context.envmapAngle;
+		if (!Context.raw.showEnvmap) f32[20] = -f32[20];
+		f32[21] = Context.raw.envmapAngle;
 		f32[22] = uvScale;
 
 		var framebuffer = path.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-		if (Context.ddirty == 1 || Context.pdirty == 1) Context.rdirty = 4;
-		Context.ddirty--;
-		Context.pdirty--;
-		Context.rdirty--;
+		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) Context.raw.rdirty = 4;
+		Context.raw.ddirty--;
+		Context.raw.pdirty--;
+		Context.raw.rdirty--;
 
-		// Context.ddirty = 1; // _RENDER
+		// Context.raw.ddirty = 1; // _RENDER
 	}
 
 	static function raytraceInit(shaderName: String, build = true) {
@@ -118,8 +118,8 @@ class RenderPathRaytrace {
 	}
 
 	static function buildData() {
-		if (Context.mergedObject == null) arm.util.MeshUtil.mergeMesh();
-		var mo = !Context.layerFilterUsed() ? Context.mergedObject : Context.paintObject;
+		if (Context.raw.mergedObject == null) arm.util.MeshUtil.mergeMesh();
+		var mo = !Context.layerFilterUsed() ? Context.raw.mergedObject : Context.raw.paintObject;
 		var md = mo.data;
 		var geom = md.geom;
 		var mo_scale = mo.transform.scale.x; // Uniform scale only
@@ -130,7 +130,7 @@ class RenderPathRaytrace {
 
 	public static function draw(useLiveLayer: Bool) {
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
-		if (Context.ddirty > 1 || Context.pdirty > 0 || isLive) frame = 0;
+		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || isLive) frame = 0;
 
 		commands(useLiveLayer);
 

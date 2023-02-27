@@ -106,7 +106,7 @@ class UINodes {
 			}
 			// Selecting which node socket to preview
 			else if (node == nodes.nodesSelected[0]) {
-				Context.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
 			}
 		}
 	}
@@ -210,7 +210,7 @@ class UINodes {
 		else if (node == nodes.nodesSelected[0]) {
 			var i = node.outputs.indexOf(socket);
 			if (i > -1) {
-				Context.nodePreviewSocket = i;
+				Context.raw.nodePreviewSocket = i;
 			}
 		}
 	}
@@ -547,13 +547,13 @@ class UINodes {
 		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
 			lastNodeSelected = nodes.nodesSelected[0];
-			Context.nodePreviewSocket = 0;
-			Context.ddirty = 2; // Show selected node texture in viewport
+			Context.raw.nodePreviewSocket = 0;
+			Context.raw.ddirty = 2; // Show selected node texture in viewport
 			UIHeader.inst.headerHandle.redraws = 2;
 		}
 		else if (lastNodeSelected != null) {
 			lastNodeSelected = null;
-			Context.ddirty = 2;
+			Context.raw.ddirty = 2;
 		}
 
 		// Remove dragged link when mouse is released out of the node viewport
@@ -607,10 +607,10 @@ class UINodes {
 			}
 
 			if (nodes.colorPickerCallback != null) {
-				Context.colorPickerPreviousTool = Context.tool;
+				Context.raw.colorPickerPreviousTool = Context.raw.tool;
 				Context.selectTool(ToolPicker);
 				var tmp = nodes.colorPickerCallback;
-				Context.colorPickerCallback = function(color: TSwatchColor) {
+				Context.raw.colorPickerCallback = function(color: TSwatchColor) {
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
 					UINodes.inst.canvasChanged();
@@ -740,7 +740,7 @@ class UINodes {
 							// arm.util.MeshUtil.calcNormals();
 						}
 
-						Context.ddirty = 2;
+						Context.raw.ddirty = 2;
 
 						#if (kha_direct3d12 || kha_vulkan)
 						arm.render.RenderPathRaytrace.ready = false;

@@ -16,8 +16,8 @@ class TabBrushes {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
-				Context.brush = new BrushSlot();
-				Project.brushes.push(Context.brush);
+				Context.raw.brush = new BrushSlot();
+				Project.brushes.push(Context.raw.brush);
 				MakeMaterial.parseBrush();
 				UINodes.inst.hwnd.redraws = 2;
 			}
@@ -52,7 +52,7 @@ class TabBrushes {
 					var img = ui.SCALE() > 1 ? Project.brushes[i].image : Project.brushes[i].imageIcon;
 					var imgFull = Project.brushes[i].image;
 
-					if (Context.brush == Project.brushes[i]) {
+					if (Context.raw.brush == Project.brushes[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 50;
@@ -68,13 +68,13 @@ class TabBrushes {
 					var tile = ui.SCALE() > 1 ? 100 : 50;
 					var state = Project.brushes[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile * 5, tile, tile, tile);
 					if (state == State.Started) {
-						if (Context.brush != Project.brushes[i]) Context.selectBrush(i);
-						if (Time.time() - Context.selectTime < 0.25) UISidebar.inst.showBrushNodes();
-						Context.selectTime = Time.time();
+						if (Context.raw.brush != Project.brushes[i]) Context.selectBrush(i);
+						if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.showBrushNodes();
+						Context.raw.selectTime = Time.time();
 						// var mouse = Input.getMouse();
 						// App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						// App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						// App.dragBrush = Context.brush;
+						// App.dragBrush = Context.raw.brush;
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.selectBrush(i);
@@ -90,11 +90,11 @@ class TabBrushes {
 
 							if (ui.button(tr("Duplicate"), Left)) {
 								function _init() {
-									Context.brush = new BrushSlot();
-									Project.brushes.push(Context.brush);
+									Context.raw.brush = new BrushSlot();
+									Project.brushes.push(Context.raw.brush);
 									var cloned = Json.parse(Json.stringify(Project.brushes[i].canvas));
-									Context.brush.canvas = cloned;
-									Context.setBrush(Context.brush);
+									Context.raw.brush.canvas = cloned;
+									Context.setBrush(Context.raw.brush);
 									RenderUtil.makeBrushPreview();
 								}
 								iron.App.notifyOnInit(_init);
@@ -109,11 +109,11 @@ class TabBrushes {
 					if (ui.isHovered) {
 						if (imgFull == null) {
 							iron.App.notifyOnInit(function() {
-								var _brush = Context.brush;
-								Context.brush = Project.brushes[i];
+								var _brush = Context.raw.brush;
+								Context.raw.brush = Project.brushes[i];
 								MakeMaterial.parseBrush();
 								RenderUtil.makeBrushPreview();
-								Context.brush = _brush;
+								Context.raw.brush = _brush;
 							});
 						}
 						else {
@@ -141,7 +141,7 @@ class TabBrushes {
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
 			if (inFocus && ui.isDeleteDown && Project.brushes.length > 1) {
 				ui.isDeleteDown = false;
-				deleteBrush(Context.brush);
+				deleteBrush(Context.raw.brush);
 			}
 		}
 	}

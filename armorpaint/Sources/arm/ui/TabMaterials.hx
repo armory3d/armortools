@@ -21,8 +21,8 @@ class TabMaterials {
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
 				ui.g.end();
-				Context.material = new MaterialSlot(Project.materials[0].data);
-				Project.materials.push(Context.material);
+				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Project.materials.push(Context.raw.material);
 				updateMaterial();
 				ui.g.begin(false);
 				History.newMaterial();
@@ -61,7 +61,7 @@ class TabMaterials {
 					var img = ui.SCALE() > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
 					var imgFull = Project.materials[i].image;
 
-					if (Context.material == Project.materials[i]) {
+					if (Context.raw.material == Project.materials[i]) {
 						// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
 						var off = row % 2 == 1 ? 1 : 0;
 						var w = 50;
@@ -94,7 +94,7 @@ class TabMaterials {
 					}
 
 					if (state == State.Started && ui.inputY > ui._windowY) {
-						if (Context.material != Project.materials[i]) {
+						if (Context.raw.material != Project.materials[i]) {
 							Context.selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
@@ -106,13 +106,13 @@ class TabMaterials {
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragMaterial = Context.material;
-						if (Time.time() - Context.selectTime < 0.25) {
+						App.dragMaterial = Context.raw.material;
+						if (Time.time() - Context.raw.selectTime < 0.25) {
 							UISidebar.inst.showMaterialNodes();
 							App.dragMaterial = null;
 							App.isDragging = false;
 						}
-						Context.selectTime = Time.time();
+						Context.raw.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						Context.selectMaterial(i);
@@ -138,10 +138,10 @@ class TabMaterials {
 
 							if (ui.button(tr("Duplicate"), Left)) {
 								function _init() {
-									Context.material = new MaterialSlot(Project.materials[0].data);
-									Project.materials.push(Context.material);
+									Context.raw.material = new MaterialSlot(Project.materials[0].data);
+									Project.materials.push(Context.raw.material);
 									var cloned = Json.parse(Json.stringify(Project.materials[i].canvas));
-									Context.material.canvas = cloned;
+									Context.raw.material.canvas = cloned;
 									updateMaterial();
 									History.duplicateMaterial();
 								}
@@ -216,7 +216,7 @@ class TabMaterials {
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
 			if (inFocus && ui.isDeleteDown && Project.materials.length > 1) {
 				ui.isDeleteDown = false;
-				deleteMaterial(Context.material);
+				deleteMaterial(Context.raw.material);
 			}
 		}
 	}
@@ -227,7 +227,7 @@ class TabMaterials {
 		UINodes.inst.groupStack = [];
 		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		if (decal) RenderUtil.makeDecalPreview();
 	}
 
@@ -245,8 +245,8 @@ class TabMaterials {
 	}
 
 	public static function acceptSwatchDrag(swatch: TSwatchColor) {
-		Context.material = new MaterialSlot(Project.materials[0].data);
-		for (node in Context.material.canvas.nodes) {
+		Context.raw.material = new MaterialSlot(Project.materials[0].data);
+		for (node in Context.raw.material.canvas.nodes) {
 			if (node.type == "RGB" ) {
 				node.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
 			}
@@ -258,7 +258,7 @@ class TabMaterials {
 				node.inputs[7].default_value = swatch.height;
 			}
 		}
-		Project.materials.push(Context.material);
+		Project.materials.push(Context.raw.material);
 		updateMaterial();
 		History.newMaterial();
 	}

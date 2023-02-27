@@ -120,19 +120,19 @@ class RenderPathPaint {
 	}
 
 	public static function commandsPaint(dilation = true) {
-		var tid = Context.layer.id;
+		var tid = Context.raw.layer.id;
 
-		if (Context.pdirty > 0) {
+		if (Context.raw.pdirty > 0) {
 			#if arm_physics
-			var particlePhysics = Context.particlePhysics;
+			var particlePhysics = Context.raw.particlePhysics;
 			#else
 			var particlePhysics = false;
 			#end
-			if (Context.tool == ToolParticle && !particlePhysics) {
+			if (Context.raw.tool == ToolParticle && !particlePhysics) {
 				path.setTarget("texparticle");
 				path.clearTarget(0x00000000);
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
+				if ((Context.raw.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 
@@ -148,16 +148,16 @@ class RenderPathPaint {
 				@:privateAccess path.end();
 			}
 
-			if (Context.tool == ToolColorId) {
+			if (Context.raw.tool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
 				path.bindTarget("gbuffer2", "gbuffer2");
 				path.drawMeshes("paint");
 				UIHeader.inst.headerHandle.redraws = 2;
 			}
-			else if (Context.tool == ToolPicker) {
-				if (Context.pickPosNorTex) {
-					if (Context.paint2d) {
+			else if (Context.raw.tool == ToolPicker) {
+				if (Context.raw.pickPosNorTex) {
+					if (Context.raw.paint2d) {
 						path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
 						path.drawMeshes("mesh");
 					}
@@ -169,19 +169,19 @@ class RenderPathPaint {
 					var texpaint_posnortex_picker1 = path.renderTargets.get("texpaint_posnortex_picker1").image;
 					var a = texpaint_posnortex_picker0.getPixels();
 					var b = texpaint_posnortex_picker1.getPixels();
-					Context.posXPicked = a.getFloat(0);
-					Context.posYPicked = a.getFloat(4);
-					Context.posZPicked = a.getFloat(8);
-					Context.uvxPicked = a.getFloat(12);
-					Context.norXPicked = b.getFloat(0);
-					Context.norYPicked = b.getFloat(4);
-					Context.norZPicked = b.getFloat(8);
-					Context.uvyPicked = b.getFloat(12);
+					Context.raw.posXPicked = a.getFloat(0);
+					Context.raw.posYPicked = a.getFloat(4);
+					Context.raw.posZPicked = a.getFloat(8);
+					Context.raw.uvxPicked = a.getFloat(12);
+					Context.raw.norXPicked = b.getFloat(0);
+					Context.raw.norYPicked = b.getFloat(4);
+					Context.raw.norZPicked = b.getFloat(8);
+					Context.raw.uvyPicked = b.getFloat(12);
 				}
 				else {
 					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
 					path.bindTarget("gbuffer2", "gbuffer2");
-					tid = Context.layer.id;
+					tid = Context.raw.layer.id;
 					var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
 					if (useLiveLayer) RenderPathPaint.useLiveLayer(true);
 					path.bindTarget("texpaint" + tid, "texpaint");
@@ -201,8 +201,8 @@ class RenderPathPaint {
 					var c = texpaint_pack_picker.getPixels();
 					var d = texpaint_uv_picker.getPixels();
 
-					if (Context.colorPickerCallback != null) {
-						Context.colorPickerCallback(Context.pickedColor);
+					if (Context.raw.colorPickerCallback != null) {
+						Context.raw.colorPickerCallback(Context.raw.pickedColor);
 					}
 
 					// Picked surface values
@@ -216,27 +216,27 @@ class RenderPathPaint {
 					var i2 = 2;
 					#end
 					var i3 = 3;
-					Context.pickedColor.base.Rb = a.get(i0);
-					Context.pickedColor.base.Gb = a.get(i1);
-					Context.pickedColor.base.Bb = a.get(i2);
-					Context.pickedColor.normal.Rb = b.get(i0);
-					Context.pickedColor.normal.Gb = b.get(i1);
-					Context.pickedColor.normal.Bb = b.get(i2);
-					Context.pickedColor.occlusion = c.get(i0) / 255;
-					Context.pickedColor.roughness = c.get(i1) / 255;
-					Context.pickedColor.metallic = c.get(i2) / 255;
-					Context.pickedColor.height = c.get(i3) / 255;
-					Context.pickedColor.opacity = a.get(i3) / 255;
-					Context.uvxPicked = d.get(i0) / 255;
-					Context.uvyPicked = d.get(i1) / 255;
+					Context.raw.pickedColor.base.Rb = a.get(i0);
+					Context.raw.pickedColor.base.Gb = a.get(i1);
+					Context.raw.pickedColor.base.Bb = a.get(i2);
+					Context.raw.pickedColor.normal.Rb = b.get(i0);
+					Context.raw.pickedColor.normal.Gb = b.get(i1);
+					Context.raw.pickedColor.normal.Bb = b.get(i2);
+					Context.raw.pickedColor.occlusion = c.get(i0) / 255;
+					Context.raw.pickedColor.roughness = c.get(i1) / 255;
+					Context.raw.pickedColor.metallic = c.get(i2) / 255;
+					Context.raw.pickedColor.height = c.get(i3) / 255;
+					Context.raw.pickedColor.opacity = a.get(i3) / 255;
+					Context.raw.uvxPicked = d.get(i0) / 255;
+					Context.raw.uvyPicked = d.get(i1) / 255;
 					// Pick material
-					if (Context.pickerSelectMaterial && Context.colorPickerCallback == null) {
+					if (Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
 						var matid = Std.int((b.get(3) - (b.get(3) % 3)) / 3);
 						for (m in Project.materials) {
 							if (m.id == matid) {
 								Context.setMaterial(m);
-								Context.materialIdPicked = matid;
+								Context.raw.materialIdPicked = matid;
 								break;
 							}
 						}
@@ -245,7 +245,7 @@ class RenderPathPaint {
 			}
 			else {
 				#if rp_voxels
-				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
+				if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
 						var _rp_gi = Config.raw.rp_gi;
@@ -263,7 +263,7 @@ class RenderPathPaint {
 				#end
 
 				var texpaint = "texpaint" + tid;
-				if (Context.tool == ToolBake && Context.brushTime == iron.system.Time.delta) {
+				if (Context.raw.tool == ToolBake && Context.raw.brushTime == iron.system.Time.delta) {
 					// Clear to black on bake start
 					path.setTarget(texpaint);
 					path.clearTarget(0xff000000);
@@ -272,11 +272,11 @@ class RenderPathPaint {
 				path.setTarget("texpaint_blend1");
 				path.bindTarget("texpaint_blend0", "tex");
 				path.drawShader("shader_datas/copy_pass/copyR8_pass");
-				var isMask = Context.layer.isMask();
+				var isMask = Context.raw.layer.isMask();
 				if (isMask) {
-					var ptid = Context.layer.parent.id;
-					if (Context.layer.parent.isGroup()) { // Group mask
-						for (c in Context.layer.parent.getChildren()) {
+					var ptid = Context.raw.layer.parent.id;
+					if (Context.raw.layer.parent.isGroup()) { // Group mask
+						for (c in Context.raw.layer.parent.getChildren()) {
 							ptid = c.id;
 							break;
 						}
@@ -287,30 +287,30 @@ class RenderPathPaint {
 					path.setTarget(texpaint, ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"]);
 				}
 				path.bindTarget("_main", "gbufferD");
-				if ((Context.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
+				if ((Context.raw.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
 				#if rp_voxels
-				if (Context.tool == ToolBake && Context.bakeType == BakeAO) {
+				if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}
 				#end
-				if (Context.colorIdPicked) {
+				if (Context.raw.colorIdPicked) {
 					path.bindTarget("texpaint_colorid", "texpaint_colorid");
 				}
 
 				// Read texcoords from gbuffer
-				var readTC = (Context.tool == ToolFill && Context.fillTypeHandle.position == FillFace) ||
-							  Context.tool == ToolClone ||
-							  Context.tool == ToolBlur;
+				var readTC = (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillFace) ||
+							  Context.raw.tool == ToolClone ||
+							  Context.raw.tool == ToolBlur;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
 
 				path.drawMeshes("paint");
 
-				if (Context.tool == ToolBake && Context.bakeType == BakeCurvature && Context.bakeCurvSmooth > 0) {
+				if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeCurvature && Context.raw.bakeCurvSmooth > 0) {
 					if (path.renderTargets.get("texpaint_blur") == null) {
 						var t = new RenderTargetRaw();
 						t.name = "texpaint_blur";
@@ -319,7 +319,7 @@ class RenderPathPaint {
 						t.format = "RGBA32";
 						path.createRenderTarget(t);
 					}
-					var blurs = Math.round(Context.bakeCurvSmooth);
+					var blurs = Math.round(Context.raw.bakeCurvSmooth);
 					for (i in 0...blurs) {
 						path.setTarget("texpaint_blur");
 						path.bindTarget(texpaint, "tex");
@@ -338,7 +338,7 @@ class RenderPathPaint {
 	}
 
 	public static function useLiveLayer(use: Bool) {
-		var tid = Context.layer.id;
+		var tid = Context.raw.layer.id;
 		var hid = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 		if (use) {
 			_texpaint = path.renderTargets.get("texpaint" + tid);
@@ -349,7 +349,7 @@ class RenderPathPaint {
 			_texpaint_pack = path.renderTargets.get("texpaint_pack" + tid);
 			path.renderTargets.set("texpaint_undo" + hid, path.renderTargets.get("texpaint" + tid));
 			path.renderTargets.set("texpaint" + tid, path.renderTargets.get("texpaint_live"));
-			if (Context.layer.isLayer()) {
+			if (Context.raw.layer.isLayer()) {
 				path.renderTargets.set("texpaint_nor_undo" + hid, path.renderTargets.get("texpaint_nor" + tid));
 				path.renderTargets.set("texpaint_pack_undo" + hid, path.renderTargets.get("texpaint_pack" + tid));
 				path.renderTargets.set("texpaint_nor" + tid, path.renderTargets.get("texpaint_nor_live"));
@@ -359,7 +359,7 @@ class RenderPathPaint {
 		else {
 			path.renderTargets.set("texpaint" + tid, _texpaint);
 			path.renderTargets.set("texpaint_undo" + hid, _texpaint_undo);
-			if (Context.layer.isLayer()) {
+			if (Context.raw.layer.isLayer()) {
 				path.renderTargets.set("texpaint_nor_undo" + hid, _texpaint_nor_undo);
 				path.renderTargets.set("texpaint_pack_undo" + hid, _texpaint_pack_undo);
 				path.renderTargets.set("texpaint_nor" + tid, _texpaint_nor);
@@ -370,7 +370,7 @@ class RenderPathPaint {
 	}
 
 	static function commandsLiveBrush() {
-		var tool = Context.tool;
+		var tool = Context.raw.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
 			tool != ToolClone &&
@@ -386,8 +386,8 @@ class RenderPathPaint {
 			liveLayer = new arm.data.LayerSlot("_live");
 		}
 
-		var tid = Context.layer.id;
-		if (Context.layer.isMask()) {
+		var tid = Context.raw.layer.id;
+		if (Context.raw.layer.isMask()) {
 			path.setTarget("texpaint_live");
 			path.bindTarget("texpaint" + tid, "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
@@ -405,41 +405,41 @@ class RenderPathPaint {
 		liveLayerDrawn = 2;
 
 		UIView2D.inst.hwnd.redraws = 2;
-		var _x = Context.paintVec.x;
-		var _y = Context.paintVec.y;
-		if (Context.brushLocked) {
-			Context.paintVec.x = (Context.lockStartedX - iron.App.x()) / iron.App.w();
-			Context.paintVec.y = (Context.lockStartedY - iron.App.y()) / iron.App.h();
+		var _x = Context.raw.paintVec.x;
+		var _y = Context.raw.paintVec.y;
+		if (Context.raw.brushLocked) {
+			Context.raw.paintVec.x = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
+			Context.raw.paintVec.y = (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		var _lastX = Context.lastPaintVecX;
-		var _lastY = Context.lastPaintVecY;
-		var _pdirty = Context.pdirty;
-		Context.lastPaintVecX = Context.paintVec.x;
-		Context.lastPaintVecY = Context.paintVec.y;
+		var _lastX = Context.raw.lastPaintVecX;
+		var _lastY = Context.raw.lastPaintVecY;
+		var _pdirty = Context.raw.pdirty;
+		Context.raw.lastPaintVecX = Context.raw.paintVec.x;
+		Context.raw.lastPaintVecY = Context.raw.paintVec.y;
 		if (Operator.shortcut(Config.keymap.brush_ruler)) {
-			Context.lastPaintVecX = Context.lastPaintX;
-			Context.lastPaintVecY = Context.lastPaintY;
+			Context.raw.lastPaintVecX = Context.raw.lastPaintX;
+			Context.raw.lastPaintVecY = Context.raw.lastPaintY;
 		}
-		Context.pdirty = 2;
+		Context.raw.pdirty = 2;
 
 		commandsSymmetry();
 		commandsPaint();
 
 		useLiveLayer(false);
 
-		Context.paintVec.x = _x;
-		Context.paintVec.y = _y;
-		Context.lastPaintVecX = _lastX;
-		Context.lastPaintVecY = _lastY;
-		Context.pdirty = _pdirty;
-		Context.brushBlendDirty = true;
+		Context.raw.paintVec.x = _x;
+		Context.raw.paintVec.y = _y;
+		Context.raw.lastPaintVecX = _lastX;
+		Context.raw.lastPaintVecY = _lastY;
+		Context.raw.pdirty = _pdirty;
+		Context.raw.brushBlendDirty = true;
 	}
 
 	public static function commandsCursor() {
 		if (!Config.raw.brush_3d) return;
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
-		var tool = Context.tool;
+		var tool = Context.raw.tool;
 		if (tool != ToolBrush &&
 			tool != ToolEraser &&
 			tool != ToolClone &&
@@ -449,20 +449,20 @@ class RenderPathPaint {
 				return;
 		}
 
-		var fillLayer = Context.layer.fill_layer != null;
-		var groupLayer = Context.layer.isGroup();
+		var fillLayer = Context.raw.layer.fill_layer != null;
+		var groupLayer = Context.raw.layer.isGroup();
 		if (!App.uiEnabled || App.isDragging || fillLayer || groupLayer) {
 			return;
 		}
 
-		var mx = Context.paintVec.x;
-		var my = 1.0 - Context.paintVec.y;
-		if (Context.brushLocked) {
-			mx = (Context.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (Context.lockStartedY - iron.App.y()) / iron.App.h();
+		var mx = Context.raw.paintVec.x;
+		var my = 1.0 - Context.raw.paintVec.y;
+		if (Context.raw.brushLocked) {
+			mx = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
+			my = 1.0 - (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
 		}
-		var radius = decalMask ? Context.brushDecalMaskRadius : Context.brushRadius;
-		drawCursor(mx, my, Context.brushNodesRadius * radius / 3.4);
+		var radius = decalMask ? Context.raw.brushDecalMaskRadius : Context.raw.brushRadius;
+		drawCursor(mx, my, Context.raw.brushNodesRadius * radius / 3.4);
 	}
 
 	@:access(iron.RenderPath)
@@ -475,9 +475,9 @@ class RenderPathPaint {
 
 		path.setTarget("");
 		g.setPipeline(App.pipeCursor);
-		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
-		var img = (decal && !decalMask) ? Context.decalImage : Res.get("cursor.k");
+		var img = (decal && !decalMask) ? Context.raw.decalImage : Res.get("cursor.k");
 		g.setTexture(App.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
 		g.setTextureDepth(App.cursorGbufferD, gbuffer0);
@@ -504,43 +504,43 @@ class RenderPathPaint {
 	}
 
 	static function commandsSymmetry() {
-		if (Context.symX || Context.symY || Context.symZ) {
-			Context.ddirty = 2;
-			var t = Context.paintObject.transform;
+		if (Context.raw.symX || Context.raw.symY || Context.raw.symZ) {
+			Context.raw.ddirty = 2;
+			var t = Context.raw.paintObject.transform;
 			var sx = t.scale.x;
 			var sy = t.scale.y;
 			var sz = t.scale.z;
-			if (Context.symX) {
+			if (Context.raw.symX) {
 				t.scale.set(-sx, sy, sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symY) {
+			if (Context.raw.symY) {
 				t.scale.set(sx, -sy, sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symZ) {
+			if (Context.raw.symZ) {
 				t.scale.set(sx, sy, -sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symX && Context.symY) {
+			if (Context.raw.symX && Context.raw.symY) {
 				t.scale.set(-sx, -sy, sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symX && Context.symZ) {
+			if (Context.raw.symX && Context.raw.symZ) {
 				t.scale.set(-sx, sy, -sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symY && Context.symZ) {
+			if (Context.raw.symY && Context.raw.symZ) {
 				t.scale.set(sx, -sy, -sz);
 				t.buildMatrix();
 				commandsPaint(false);
 			}
-			if (Context.symX && Context.symY && Context.symZ) {
+			if (Context.raw.symX && Context.raw.symY && Context.raw.symZ) {
 				t.scale.set(-sx, -sy, -sz);
 				t.buildMatrix();
 				commandsPaint(false);
@@ -551,9 +551,9 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
-		var fillLayer = Context.layer.fill_layer != null && Context.tool != ToolPicker && Context.tool != ToolColorId;
-		var groupLayer = Context.layer.isGroup();
-		return !fillLayer && !groupLayer && !Context.foregroundEvent;
+		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId;
+		var groupLayer = Context.raw.layer.isGroup();
+		return !fillLayer && !groupLayer && !Context.raw.foregroundEvent;
 	}
 
 	public static function liveBrushDirty() {
@@ -562,10 +562,10 @@ class RenderPathPaint {
 		var my = lastY;
 		lastX = mouse.viewX;
 		lastY = mouse.viewY;
-		if (Config.raw.brush_live && Context.pdirty <= 0) {
+		if (Config.raw.brush_live && Context.raw.pdirty <= 0) {
 			var moved = (mx != lastX || my != lastY) && (Context.inViewport() || Context.in2dView());
-			if (moved || Context.brushLocked) {
-				Context.rdirty = 2;
+			if (moved || Context.raw.brushLocked) {
+				Context.raw.rdirty = 2;
 			}
 		}
 	}
@@ -583,13 +583,13 @@ class RenderPathPaint {
 			History.paint();
 		}
 
-		if (Context.paint2d) {
+		if (Context.raw.paint2d) {
 			setPlaneMesh();
 		}
 
 		if (liveLayerDrawn > 0) liveLayerDrawn--;
 
-		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty <= 0 && Context.brushTime == 0) {
+		if (Config.raw.brush_live && Context.raw.pdirty <= 0 && Context.raw.ddirty <= 0 && Context.raw.brushTime == 0) {
 			// Depth is unchanged, draw before gbuffer gets updated
 			commandsLiveBrush();
 		}
@@ -597,18 +597,18 @@ class RenderPathPaint {
 
 	public static function end() {
 		commandsCursor();
-		Context.ddirty--;
-		Context.rdirty--;
+		Context.raw.ddirty--;
+		Context.raw.rdirty--;
 
 		if (!paintEnabled()) return;
-		Context.pdirty--;
+		Context.raw.pdirty--;
 	}
 
 	public static function draw() {
 		if (!paintEnabled()) return;
 
 		#if (!krom_ios) // No hover on iPad, decals are painted by pen release
-		if (Config.raw.brush_live && Context.pdirty <= 0 && Context.ddirty > 0 && Context.brushTime == 0) {
+		if (Config.raw.brush_live && Context.raw.pdirty <= 0 && Context.raw.ddirty > 0 && Context.raw.brushTime == 0) {
 			// gbuffer has been updated now but brush will lag 1 frame
 			commandsLiveBrush();
 		}
@@ -617,16 +617,16 @@ class RenderPathPaint {
 		if (History.undoLayers != null) {
 			commandsSymmetry();
 
-			if (Context.pdirty > 0) dilated = false;
-			if (Context.tool == ToolBake) {
-				if (Context.bakeType == BakeNormal || Context.bakeType == BakeHeight || Context.bakeType == BakeDerivative) {
-					if (!baking && Context.pdirty > 0) {
+			if (Context.raw.pdirty > 0) dilated = false;
+			if (Context.raw.tool == ToolBake) {
+				if (Context.raw.bakeType == BakeNormal || Context.raw.bakeType == BakeHeight || Context.raw.bakeType == BakeDerivative) {
+					if (!baking && Context.raw.pdirty > 0) {
 						baking = true;
-						var _bakeType = Context.bakeType;
-						Context.bakeType = Context.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
+						var _bakeType = Context.raw.bakeType;
+						Context.raw.bakeType = Context.raw.bakeType == BakeNormal ? BakeNormalObject : BakePosition; // Bake high poly data
 						MakeMaterial.parsePaintMaterial();
-						var _paintObject = Context.paintObject;
-						var highPoly = Project.paintObjects[Context.bakeHighPoly];
+						var _paintObject = Context.raw.paintObject;
+						var highPoly = Project.paintObjects[Context.raw.bakeHighPoly];
 						var _visible = highPoly.visible;
 						highPoly.visible = true;
 						Context.selectPaintObject(highPoly);
@@ -636,50 +636,50 @@ class RenderPathPaint {
 						Context.selectPaintObject(_paintObject);
 
 						function _renderFinal() {
-							Context.bakeType = _bakeType;
+							Context.raw.bakeType = _bakeType;
 							MakeMaterial.parsePaintMaterial();
-							Context.pdirty = 1;
+							Context.raw.pdirty = 1;
 							commandsPaint();
-							Context.pdirty = 0;
+							Context.raw.pdirty = 0;
 							baking = false;
 						}
 						function _renderDeriv() {
-							Context.bakeType = BakeHeight;
+							Context.raw.bakeType = BakeHeight;
 							MakeMaterial.parsePaintMaterial();
-							Context.pdirty = 1;
+							Context.raw.pdirty = 1;
 							commandsPaint();
-							Context.pdirty = 0;
+							Context.raw.pdirty = 0;
 							if (pushUndoLast) History.paint();
 							iron.App.notifyOnInit(_renderFinal);
 						}
-						iron.App.notifyOnInit(Context.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
+						iron.App.notifyOnInit(Context.raw.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
-				else if (Context.bakeType == BakeObjectID) {
-					var _layerFilter = Context.layerFilter;
-					var _paintObject = Context.paintObject;
-					var isMerged = Context.mergedObject != null;
-					var _visible = isMerged && Context.mergedObject.visible;
-					Context.layerFilter = 1;
-					if (isMerged) Context.mergedObject.visible = false;
+				else if (Context.raw.bakeType == BakeObjectID) {
+					var _layerFilter = Context.raw.layerFilter;
+					var _paintObject = Context.raw.paintObject;
+					var isMerged = Context.raw.mergedObject != null;
+					var _visible = isMerged && Context.raw.mergedObject.visible;
+					Context.raw.layerFilter = 1;
+					if (isMerged) Context.raw.mergedObject.visible = false;
 
 					for (p in Project.paintObjects) {
 						Context.selectPaintObject(p);
 						commandsPaint();
 					}
 
-					Context.layerFilter = _layerFilter;
+					Context.raw.layerFilter = _layerFilter;
 					Context.selectPaintObject(_paintObject);
-					if (isMerged) Context.mergedObject.visible = _visible;
+					if (isMerged) Context.raw.mergedObject.visible = _visible;
 				}
 				#if (kha_direct3d12 || kha_vulkan)
-				else if (Context.bakeType == BakeAO  ||
-						 Context.bakeType == BakeLightmap ||
-						 Context.bakeType == BakeBentNormal ||
-						 Context.bakeType == BakeThickness) {
+				else if (Context.raw.bakeType == BakeAO  ||
+						 Context.raw.bakeType == BakeLightmap ||
+						 Context.raw.bakeType == BakeBentNormal ||
+						 Context.raw.bakeType == BakeThickness) {
 					var dirty = RenderPathRaytraceBake.commands(MakeMaterial.parsePaintMaterial);
 					if (dirty) UIHeader.inst.headerHandle.redraws = 2;
-					if (Config.raw.dilate == DilateInstant) { // && Context.pdirty == 1
+					if (Config.raw.dilate == DilateInstant) { // && Context.raw.pdirty == 1
 						dilate(true, false);
 					}
 				}
@@ -693,8 +693,8 @@ class RenderPathPaint {
 			}
 		}
 
-		if (Context.brushBlendDirty) {
-			Context.brushBlendDirty = false;
+		if (Context.raw.brushBlendDirty) {
+			Context.raw.brushBlendDirty = false;
 			#if kha_metal
 			path.setTarget("texpaint_blend0");
 			path.clearTarget(0x00000000);
@@ -706,26 +706,26 @@ class RenderPathPaint {
 			#end
 		}
 
-		if (Context.paint2d) {
+		if (Context.raw.paint2d) {
 			restorePlaneMesh();
 		}
 	}
 
 	public static function setPlaneMesh() {
-		Context.paint2dView = true;
-		painto = Context.paintObject;
+		Context.raw.paint2dView = true;
+		painto = Context.raw.paintObject;
 		visibles = [];
 		for (p in Project.paintObjects) {
 			visibles.push(p.visible);
 			p.visible = false;
 		}
-		if (Context.mergedObject != null) {
-			mergedObjectVisible = Context.mergedObject.visible;
-			Context.mergedObject.visible = false;
+		if (Context.raw.mergedObject != null) {
+			mergedObjectVisible = Context.raw.mergedObject.visible;
+			Context.raw.mergedObject.visible = false;
 		}
 
 		var cam = Scene.active.camera;
-		Context.savedCamera.setFrom(cam.transform.local);
+		Context.raw.savedCamera.setFrom(cam.transform.local);
 		savedFov = cam.data.raw.fov;
 		Viewport.updateCameraType(CameraPerspective);
 		var m = Mat4.identity();
@@ -774,7 +774,7 @@ class RenderPathPaint {
 
 		planeo = cast Scene.active.getChild(tiled ? ".PlaneTiled" : ".Plane");
 		planeo.visible = true;
-		Context.paintObject = planeo;
+		Context.raw.paintObject = planeo;
 
 		var v = new Vec4();
 		var sx = v.set(m._00, m._01, m._02).length();
@@ -786,19 +786,19 @@ class RenderPathPaint {
 	}
 
 	public static function restorePlaneMesh() {
-		Context.paint2dView = false;
+		Context.raw.paint2dView = false;
 		planeo.visible = false;
 		planeo.transform.loc.set(0.0, 0.0, 0.0);
 		for (i in 0...Project.paintObjects.length) {
 			Project.paintObjects[i].visible = visibles[i];
 		}
-		if (Context.mergedObject != null) {
-			Context.mergedObject.visible = mergedObjectVisible;
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.visible = mergedObjectVisible;
 		}
-		Context.paintObject = painto;
-		Scene.active.camera.transform.setMatrix(Context.savedCamera);
+		Context.raw.paintObject = painto;
+		Scene.active.camera.transform.setMatrix(Context.raw.savedCamera);
 		Scene.active.camera.data.raw.fov = savedFov;
-		Viewport.updateCameraType(Context.cameraType);
+		Viewport.updateCameraType(Context.raw.cameraType);
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
@@ -827,10 +827,10 @@ class RenderPathPaint {
 	}
 
 	public static function dilate(base: Bool, nor_pack: Bool) {
-		if (Config.raw.dilate_radius > 0 && !Context.paint2d) {
+		if (Config.raw.dilate_radius > 0 && !Context.raw.paint2d) {
 			arm.util.UVUtil.cacheDilateMap();
 			App.makeTempImg();
-			var tid = Context.layer.id;
+			var tid = Context.raw.layer.id;
 			if (base) {
 				var texpaint = "texpaint";
 				path.setTarget("temptex0");
@@ -840,7 +840,7 @@ class RenderPathPaint {
 				path.bindTarget("temptex0", "tex");
 				path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
-			if (nor_pack && !Context.layer.isMask()) {
+			if (nor_pack && !Context.raw.layer.isMask()) {
 				path.setTarget("temptex0");
 				path.bindTarget("texpaint_nor" + tid, "tex");
 				path.drawShader("shader_datas/copy_pass/copy_pass");
