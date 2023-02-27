@@ -48,6 +48,12 @@ project.addDefine("analyzer-optimize");
 if (android) {
 	project.addDefine("kha_android_rmb");
 }
+else if (process.platform === "win32") {
+	project.addAssets("../armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
+}
+else if (process.platform === "linux") {
+	project.addAssets("../armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
+}
 
 if (snapshot) {
 	project.addDefine("arm_snapshot");
