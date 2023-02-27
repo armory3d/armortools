@@ -142,9 +142,9 @@ class ExportTexture {
 		var isUdim = Context.layersExport == ExportPerUdimTile;
 		if (isUdim) ext = objectName + ext;
 
-		Layers.makeTempImg();
-		Layers.makeExportImg();
-		if (Layers.pipeMerge == null) Layers.makePipe();
+		App.makeTempImg();
+		App.makeExportImg();
+		if (App.pipeMerge == null) App.makePipe();
 		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
 
@@ -158,15 +158,15 @@ class ExportTexture {
 		}
 
 		// Clear export layer
-		Layers.expa.g4.begin();
-		Layers.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
-		Layers.expa.g4.end();
-		Layers.expb.g4.begin();
-		Layers.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
-		Layers.expb.g4.end();
-		Layers.expc.g4.begin();
-		Layers.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
-		Layers.expc.g4.end();
+		App.expa.g4.begin();
+		App.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+		App.expa.g4.end();
+		App.expb.g4.begin();
+		App.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+		App.expb.g4.end();
+		App.expc.g4.begin();
+		App.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+		App.expc.g4.end();
 
 		// Flatten layers
 		for (l1 in layers) {
@@ -183,91 +183,91 @@ class ExportTexture {
 			var l1masks = l1.getMasks();
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
-					Layers.makeTempMaskImg();
-					Layers.tempMaskImage.g2.begin(true, 0x00000000);
-					Layers.tempMaskImage.g2.end();
-					var l1 = { texpaint: Layers.tempMaskImage };
+					App.makeTempMaskImg();
+					App.tempMaskImage.g2.begin(true, 0x00000000);
+					App.tempMaskImage.g2.end();
+					var l1 = { texpaint: App.tempMaskImage };
 					for (i in 0...l1masks.length) {
-						Layers.mergeLayer(untyped l1, l1masks[i]);
+						App.mergeLayer(untyped l1, l1masks[i]);
 					}
-					mask = Layers.tempMaskImage;
+					mask = App.tempMaskImage;
 				}
 				else mask = l1masks[0].texpaint;
 			}
 
 			if (l1.paintBase) {
-				Layers.tempImage.g2.begin(false); // Copy to temp
-				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
-				Layers.tempImage.g2.drawImage(Layers.expa, 0, 0);
-				Layers.tempImage.g2.pipeline = null;
-				Layers.tempImage.g2.end();
+				App.tempImage.g2.begin(false); // Copy to temp
+				App.tempImage.g2.pipeline = App.pipeCopy;
+				App.tempImage.g2.drawImage(App.expa, 0, 0);
+				App.tempImage.g2.pipeline = null;
+				App.tempImage.g2.end();
 
-				Layers.expa.g4.begin();
-				Layers.expa.g4.setPipeline(Layers.pipeMerge);
-				Layers.expa.g4.setTexture(Layers.tex0, l1.texpaint);
-				Layers.expa.g4.setTexture(Layers.tex1, empty);
-				Layers.expa.g4.setTexture(Layers.texmask, mask);
-				Layers.expa.g4.setTexture(Layers.texa, Layers.tempImage);
-				Layers.expa.g4.setFloat(Layers.opac, l1.getOpacity());
-				Layers.expa.g4.setInt(Layers.blending, layers.length > 1 ? l1.blending : 0);
-				Layers.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-				Layers.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-				Layers.expa.g4.drawIndexedVertices();
-				Layers.expa.g4.end();
+				App.expa.g4.begin();
+				App.expa.g4.setPipeline(App.pipeMerge);
+				App.expa.g4.setTexture(App.tex0, l1.texpaint);
+				App.expa.g4.setTexture(App.tex1, empty);
+				App.expa.g4.setTexture(App.texmask, mask);
+				App.expa.g4.setTexture(App.texa, App.tempImage);
+				App.expa.g4.setFloat(App.opac, l1.getOpacity());
+				App.expa.g4.setInt(App.blending, layers.length > 1 ? l1.blending : 0);
+				App.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				App.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				App.expa.g4.drawIndexedVertices();
+				App.expa.g4.end();
 			}
 
 			if (l1.paintNor) {
-				Layers.tempImage.g2.begin(false);
-				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
-				Layers.tempImage.g2.drawImage(Layers.expb, 0, 0);
-				Layers.tempImage.g2.pipeline = null;
-				Layers.tempImage.g2.end();
+				App.tempImage.g2.begin(false);
+				App.tempImage.g2.pipeline = App.pipeCopy;
+				App.tempImage.g2.drawImage(App.expb, 0, 0);
+				App.tempImage.g2.pipeline = null;
+				App.tempImage.g2.end();
 
-				Layers.expb.g4.begin();
-				Layers.expb.g4.setPipeline(Layers.pipeMerge);
-				Layers.expb.g4.setTexture(Layers.tex0, l1.texpaint);
-				Layers.expb.g4.setTexture(Layers.tex1, l1.texpaint_nor);
-				Layers.expb.g4.setTexture(Layers.texmask, mask);
-				Layers.expb.g4.setTexture(Layers.texa, Layers.tempImage);
-				Layers.expb.g4.setFloat(Layers.opac, l1.getOpacity());
-				Layers.expb.g4.setInt(Layers.blending, l1.paintNorBlend ? -2 : -1);
-				Layers.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-				Layers.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-				Layers.expb.g4.drawIndexedVertices();
-				Layers.expb.g4.end();
+				App.expb.g4.begin();
+				App.expb.g4.setPipeline(App.pipeMerge);
+				App.expb.g4.setTexture(App.tex0, l1.texpaint);
+				App.expb.g4.setTexture(App.tex1, l1.texpaint_nor);
+				App.expb.g4.setTexture(App.texmask, mask);
+				App.expb.g4.setTexture(App.texa, App.tempImage);
+				App.expb.g4.setFloat(App.opac, l1.getOpacity());
+				App.expb.g4.setInt(App.blending, l1.paintNorBlend ? -2 : -1);
+				App.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+				App.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				App.expb.g4.drawIndexedVertices();
+				App.expb.g4.end();
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				Layers.tempImage.g2.begin(false);
-				Layers.tempImage.g2.pipeline = Layers.pipeCopy;
-				Layers.tempImage.g2.drawImage(Layers.expc, 0, 0);
-				Layers.tempImage.g2.pipeline = null;
-				Layers.tempImage.g2.end();
+				App.tempImage.g2.begin(false);
+				App.tempImage.g2.pipeline = App.pipeCopy;
+				App.tempImage.g2.drawImage(App.expc, 0, 0);
+				App.tempImage.g2.pipeline = null;
+				App.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					Layers.commandsMergePack(Layers.pipeMerge, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+					App.commandsMergePack(App.pipeMerge, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) Layers.commandsMergePack(Layers.pipeMergeR, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintRough) Layers.commandsMergePack(Layers.pipeMergeG, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintMet) Layers.commandsMergePack(Layers.pipeMergeB, Layers.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintOcc) App.commandsMergePack(App.pipeMergeR, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintRough) App.commandsMergePack(App.pipeMergeG, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintMet) App.commandsMergePack(App.pipeMergeB, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
 		}
 
 		#if kha_metal
 		// Flush command list
-		Layers.expa.g2.begin(false);
-		Layers.expa.g2.end();
-		Layers.expb.g2.begin(false);
-		Layers.expb.g2.end();
-		Layers.expc.g2.begin(false);
-		Layers.expc.g2.end();
+		App.expa.g2.begin(false);
+		App.expa.g2.end();
+		App.expb.g2.begin(false);
+		App.expb.g2.end();
+		App.expc.g2.begin(false);
+		App.expc.g2.end();
 		#end
 
-		var texpaint = Layers.expa;
-		var texpaint_nor = Layers.expb;
-		var texpaint_pack = Layers.expc;
+		var texpaint = App.expa;
+		var texpaint_nor = App.expb;
+		var texpaint_pack = App.expc;
 		var pixpaint: Bytes = null;
 		var pixpaint_nor: Bytes = null;
 		var pixpaint_pack: Bytes = null;

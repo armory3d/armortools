@@ -136,7 +136,7 @@ class History {
 				// Now restore the applied mask
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var mask = undoLayers[undoI];
-				Layers.newMask(false, currentLayer, maskPosition);
+				App.newMask(false, currentLayer, maskPosition);
 				Context.layer.swap(mask);
 				Context.layersPreviewDirty = true;
 				Context.setLayer(Context.layer);
@@ -153,7 +153,7 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
 				Context.layer.swap(lay);
-				Layers.newMask(false, Context.layer);
+				App.newMask(false, Context.layer);
 				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 			}
@@ -255,7 +255,7 @@ class History {
 			}
 			else if (step.name == tr("New Group")) {
 				var l = Project.layers[step.layer - 1];
-				var group = Layers.newGroup();
+				var group = App.newGroup();
 				Project.layers.remove(group);
 				Project.layers.insert(step.layer, group);
 				l.parent = group;
@@ -287,7 +287,7 @@ class History {
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.layer = Project.layers[step.layer];
 				function _next() {
-					Layers.duplicateLayer(Context.layer);
+					App.duplicateLayer(Context.layer);
 				}
 				App.notifyOnNextFrame(_next);
 			}
@@ -299,7 +299,7 @@ class History {
 			else if (step.name == tr("Merge Layers")) {
 				Context.layer = Project.layers[step.layer + 1];
 				iron.App.notifyOnInit(redoMergeLayers);
-				iron.App.notifyOnInit(Layers.mergeDown);
+				iron.App.notifyOnInit(App.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.layer = Project.layers[step.layer];
@@ -329,7 +329,7 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
 				Context.layer.swap(lay);
-				Layers.newMask(false, lay);
+				App.newMask(false, lay);
 				Context.layer.swap(lay);
 				Context.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
@@ -469,7 +469,7 @@ class History {
 		}
 		steps.shift(); // Merge consumes 2 steps
 		undos--;
-		// TODO: use undo layer in Layers.mergeDown to save memory
+		// TODO: use undo layer in App.mergeDown to save memory
 	}
 
 	public static function applyMask() {

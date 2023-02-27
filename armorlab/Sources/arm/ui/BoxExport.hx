@@ -45,7 +45,7 @@ class BoxExport {
 			ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
 			if (App.resHandle.changed) {
-				Layers.onLayersResized();
+				App.onLayersResized();
 			}
 
 			ui.row([0.5, 0.5]);

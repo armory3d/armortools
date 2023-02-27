@@ -471,26 +471,26 @@ class RenderPathPaint {
 		var geom = plane.data.geom;
 
 		var g = path.frameG;
-		if (Layers.pipeCursor == null) Layers.makeCursorPipe();
+		if (App.pipeCursor == null) App.makeCursorPipe();
 
 		path.setTarget("");
-		g.setPipeline(Layers.pipeCursor);
+		g.setPipeline(App.pipeCursor);
 		var decal = Context.tool == ToolDecal || Context.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 		var img = (decal && !decalMask) ? Context.decalImage : Res.get("cursor.k");
-		g.setTexture(Layers.cursorTex, img);
+		g.setTexture(App.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
-		g.setTextureDepth(Layers.cursorGbufferD, gbuffer0);
-		g.setFloat2(Layers.cursorMouse, mx, my);
-		g.setFloat2(Layers.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(Layers.cursorRadius, radius);
+		g.setTextureDepth(App.cursorGbufferD, gbuffer0);
+		g.setFloat2(App.cursorMouse, mx, my);
+		g.setFloat2(App.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		g.setFloat(App.cursorRadius, radius);
 		var right = Scene.active.camera.rightWorld().normalize();
-		g.setFloat3(Layers.cursorCameraRight, right.x, right.y, right.z);
-		g.setFloat3(Layers.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(Layers.cursorVP, Scene.active.camera.VP.self);
+		g.setFloat3(App.cursorCameraRight, right.x, right.y, right.z);
+		g.setFloat3(App.cursorTint, tintR, tintG, tintB);
+		g.setMatrix(App.cursorVP, Scene.active.camera.VP.self);
 		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
-		g.setMatrix(Layers.cursorInvVP, helpMat.self);
+		g.setMatrix(App.cursorInvVP, helpMat.self);
 		#if (kha_metal || kha_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
@@ -829,7 +829,7 @@ class RenderPathPaint {
 	public static function dilate(base: Bool, nor_pack: Bool) {
 		if (Config.raw.dilate_radius > 0 && !Context.paint2d) {
 			arm.util.UVUtil.cacheDilateMap();
-			Layers.makeTempImg();
+			App.makeTempImg();
 			var tid = Context.layer.id;
 			if (base) {
 				var texpaint = "texpaint";

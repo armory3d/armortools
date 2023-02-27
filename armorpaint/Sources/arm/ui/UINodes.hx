@@ -568,7 +568,7 @@ class UINodes {
 				UISidebar.inst.hwnd1.redraws = 2;
 			}
 			else {
-				Layers.isFillMaterial() ? Layers.updateFillLayers() : RenderUtil.makeMaterialPreview();
+				App.isFillMaterial() ? App.updateFillLayers() : RenderUtil.makeMaterialPreview();
 				if (UIView2D.inst.show && UIView2D.inst.type == View2DNode) {
 					UIView2D.inst.hwnd.redraws = 2;
 				}
@@ -580,8 +580,8 @@ class UINodes {
 		else if (recompileMatFinal) {
 			MakeMaterial.parsePaintMaterial();
 
-			if (canvasType == CanvasMaterial && Layers.isFillMaterial()) {
-				Layers.updateFillLayers();
+			if (canvasType == CanvasMaterial && App.isFillMaterial()) {
+				App.updateFillLayers();
 				RenderUtil.makeMaterialPreview();
 			}
 

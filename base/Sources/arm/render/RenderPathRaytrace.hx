@@ -49,12 +49,12 @@ class RenderPathRaytrace {
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			var l = Layers.flatten(true);
+			var l = App.flatten(true);
 			Krom.raytraceSetTextures(l.texpaint.renderTarget_, l.texpaint_nor.renderTarget_, l.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (Context.pdirty > 0 || dirty > 0) {
-			Layers.flatten(true);
+			App.flatten(true);
 		}
 
 		var cam = Scene.active.camera;

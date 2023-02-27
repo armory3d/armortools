@@ -293,9 +293,9 @@ class Project {
 				layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
-					iron.App.notifyOnInit(Layers.resizeLayers);
+					iron.App.notifyOnInit(App.resizeLayers);
 				}
-				iron.App.notifyOnInit(Layers.initLayers);
+				iron.App.notifyOnInit(App.initLayers);
 			}
 
 			if (current != null) current.begin(false);

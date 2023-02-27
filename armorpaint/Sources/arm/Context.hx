@@ -30,8 +30,11 @@ import arm.ui.UIStatus;
 import arm.ui.BoxPreferences;
 import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;
+import arm.ContextFormat;
 
 class Context {
+
+	public static var raw: TContext;
 
 	public static var material: MaterialSlot;
 	public static var layer: LayerSlot;
@@ -376,7 +379,7 @@ class Context {
 		var current = @:privateAccess kha.graphics2.Graphics.current;
 		if (current != null) current.end();
 
-		Layers.setObjectMask();
+		App.setObjectMask();
 		MakeMaterial.parseMeshMaterial();
 		MakeMaterial.parsePaintMaterial();
 

@@ -138,7 +138,7 @@ class Gizmo {
 				if (Context.material != Context.layer.fill_layer) {
 					Context.setMaterial(Context.layer.fill_layer);
 				}
-				Layers.updateFillLayer(Context.gizmoStarted);
+				App.updateFillLayer(Context.gizmoStarted);
 			}
 		}
 

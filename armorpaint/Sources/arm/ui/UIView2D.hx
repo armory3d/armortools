@@ -116,13 +116,13 @@ class UIView2D {
 				if (layerMode == View2DVisible) {
 					var current = @:privateAccess kha.graphics2.Graphics.current;
 					if (current != null) current.end();
-					layer = untyped Layers.flatten();
+					layer = untyped App.flatten();
 					if (current != null) current.begin(false);
 				}
 				else if (layer.isGroup()) {
 					var current = @:privateAccess kha.graphics2.Graphics.current;
 					if (current != null) current.end();
-					layer = untyped Layers.flatten(false, layer.getChildren());
+					layer = untyped App.flatten(false, layer.getChildren());
 					if (current != null) current.begin(false);
 				}
 

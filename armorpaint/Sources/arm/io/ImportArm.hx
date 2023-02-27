@@ -57,7 +57,7 @@ class ImportArm {
 				Viewport.scaleToBounds();
 			});
 		}
-		iron.App.notifyOnInit(Layers.initLayers);
+		iron.App.notifyOnInit(App.initLayers);
 		History.reset();
 	}
 
@@ -240,7 +240,7 @@ class ImportArm {
 				Project.layers.push(l);
 
 				if (!isGroup) {
-					if (Layers.pipeMerge == null) Layers.makePipe();
+					if (App.pipeMerge == null) App.makePipe();
 
 					var _texpaint: kha.Image = null;
 					var _texpaint_nor: kha.Image = null;
@@ -248,7 +248,7 @@ class ImportArm {
 					if (isMask) {
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
 						l.texpaint.g2.begin(false);
-						l.texpaint.g2.pipeline = Layers.pipeCopy8;
+						l.texpaint.g2.pipeline = App.pipeCopy8;
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
@@ -257,21 +257,21 @@ class ImportArm {
 						// TODO: create render target from bytes
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint.g2.begin(false);
-						l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
 
 						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint_nor.g2.begin(false);
-						l.texpaint_nor.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint_nor.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
 						l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
 						l.texpaint_nor.g2.pipeline = null;
 						l.texpaint_nor.g2.end();
 
 						_texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint_pack.g2.begin(false);
-						l.texpaint_pack.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy;
+						l.texpaint_pack.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
 						l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
 						l.texpaint_pack.g2.pipeline = null;
 						l.texpaint_pack.g2.end();

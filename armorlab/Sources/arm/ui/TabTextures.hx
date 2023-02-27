@@ -100,10 +100,10 @@ class TabTextures {
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, false, function(path: String) {
 										App.notifyOnNextFrame(function () {
-											if (Layers.pipeCopy == null) Layers.makePipe();
+											if (App.pipeCopy == null) App.makePipe();
 											var target = kha.Image.createRenderTarget(to_pow2(img.width), to_pow2(img.height));
 											target.g2.begin(false);
-											target.g2.pipeline = Layers.pipeCopy;
+											target.g2.pipeline = App.pipeCopy;
 											target.g2.drawScaledImage(img, 0, 0, target.width, target.height);
 											target.g2.pipeline = null;
 											target.g2.end();

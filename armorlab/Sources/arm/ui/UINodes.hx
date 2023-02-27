@@ -705,15 +705,15 @@ class UINodes {
 							texpaint_nor.g2.end();
 						}
 
-						if (Layers.pipeCopy == null) Layers.makePipe();
-						if (Layers.pipeCopyA == null) Layers.makePipeCopyA();
+						if (App.pipeCopy == null) App.makePipe();
+						if (App.pipeCopyA == null) App.makePipeCopyA();
 						if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 
 						var texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack").image;
 
 						if (texocc != null) {
 							texpaint_pack.g2.begin(false);
-							texpaint_pack.g2.pipeline = Layers.pipeCopyR;
+							texpaint_pack.g2.pipeline = App.pipeCopyR;
 							texpaint_pack.g2.drawScaledImage(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 							texpaint_pack.g2.pipeline = null;
 							texpaint_pack.g2.end();
@@ -721,7 +721,7 @@ class UINodes {
 
 						if (texrough != null) {
 							texpaint_pack.g2.begin(false);
-							texpaint_pack.g2.pipeline = Layers.pipeCopyG;
+							texpaint_pack.g2.pipeline = App.pipeCopyG;
 							texpaint_pack.g2.drawScaledImage(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 							texpaint_pack.g2.pipeline = null;
 							texpaint_pack.g2.end();
@@ -729,8 +729,8 @@ class UINodes {
 
 						if (texheight != null) {
 							texpaint_pack.g4.begin();
-							texpaint_pack.g4.setPipeline(Layers.pipeCopyA);
-							texpaint_pack.g4.setTexture(Layers.pipeCopyATex, texheight);
+							texpaint_pack.g4.setPipeline(App.pipeCopyA);
+							texpaint_pack.g4.setTexture(App.pipeCopyATex, texheight);
 							texpaint_pack.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 							texpaint_pack.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 							texpaint_pack.g4.drawIndexedVertices();
@@ -765,7 +765,7 @@ class UINodes {
 			ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
 			#end
 			if (App.resHandle.changed) {
-				Layers.onLayersResized();
+				App.onLayersResized();
 			}
 			ui._x += ew + 3;
 			ui._y = 0;

@@ -359,11 +359,11 @@ class RenderUtil {
 		Scene.active.camera.buildMatrix();
 
 		// Scale layer down to to image preview
-		if (Layers.pipeMerge == null) Layers.makePipe();
+		if (App.pipeMerge == null) App.makePipe();
 		var l = RenderPathPaint.liveLayer;
 		var target = Context.brush.image;
 		target.g2.begin(true, 0x00000000);
-		target.g2.pipeline = Layers.pipeCopy;
+		target.g2.pipeline = App.pipeCopy;
 		target.g2.drawScaledImage(l.texpaint, 0, 0, target.width, target.height);
 		target.g2.pipeline = null;
 		target.g2.end();

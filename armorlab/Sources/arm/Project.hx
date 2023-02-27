@@ -264,7 +264,7 @@ class Project {
 			Context.ddirty = 4;
 
 			if (resetLayers) {
-				iron.App.notifyOnInit(Layers.initLayers);
+				iron.App.notifyOnInit(App.initLayers);
 			}
 
 			if (current != null) current.begin(false);

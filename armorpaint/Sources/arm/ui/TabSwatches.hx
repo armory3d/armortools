@@ -192,7 +192,7 @@ class TabSwatches {
 								var color = Project.raw.swatches[i].base;
 								color.A = Project.raw.swatches[i].opacity;
 			
-								Layers.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+								App.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
 							}
 						}, 4 + add);
 					}

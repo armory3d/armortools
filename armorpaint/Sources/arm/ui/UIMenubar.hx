@@ -100,7 +100,7 @@ class UIMenubar {
 				}
 				else if (UIHeader.inst.worktab.position == SpaceMaterial) {
 					Context.selectTool(ToolPicker);
-					Layers.updateFillLayers();
+					App.updateFillLayers();
 				}
 
 				Context.mainObject().skip_context = null;

@@ -127,7 +127,7 @@ class TabBrowser {
 											}
 										}
 										if (assetIndex != -1) {
-											Layers.createImageMask(Project.assets[assetIndex]);
+											App.createImageMask(Project.assets[assetIndex]);
 										}
 									});
 								});

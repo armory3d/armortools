@@ -111,7 +111,7 @@ class UISidebar {
 		Project.paintObjects = [Context.paintObject];
 
 		if (Project.filepath == "") {
-			iron.App.notifyOnInit(Layers.initLayers);
+			iron.App.notifyOnInit(App.initLayers);
 		}
 	}
 

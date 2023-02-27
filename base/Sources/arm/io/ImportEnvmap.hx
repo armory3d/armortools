@@ -54,7 +54,7 @@ class ImportEnvmap {
 
 		// Down-scale to 1024x512
 		radiance.g2.begin(false);
-		radiance.g2.pipeline = Layers.pipeCopy128;
+		radiance.g2.pipeline = App.pipeCopy128;
 		radiance.g2.drawScaledImage(image, 0, 0, 1024, 512);
 		radiance.g2.pipeline = null;
 		radiance.g2.end();

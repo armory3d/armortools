@@ -69,7 +69,7 @@ class BoxExport {
 			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
 			if (App.resHandle.changed) {
-				Layers.onLayersResized();
+				App.onLayersResized();
 			}
 			#if (krom_android || krom_ios)
 			ui.combo(App.bitsHandle, ["8bit"], tr("Color"), true);
@@ -77,7 +77,7 @@ class BoxExport {
 			ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
 			#end
 			if (App.bitsHandle.changed) {
-				iron.App.notifyOnInit(Layers.setLayerBits);
+				iron.App.notifyOnInit(App.setLayerBits);
 			}
 
 			ui.row([0.5, 0.5]);

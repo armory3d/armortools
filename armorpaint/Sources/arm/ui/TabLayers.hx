@@ -31,20 +31,20 @@ class TabLayers {
 					var l = Context.layer;
 					ui.text("New", Right, ui.t.HIGHLIGHT_COL);
 					if (ui.button(tr("Paint Layer"), Left)) {
-						Layers.newLayer();
+						App.newLayer();
 						History.newLayer();
 					}
 					if (ui.button(tr("Fill Layer"), Left)) {
-						Layers.createFillLayer(UVMap);
+						App.createFillLayer(UVMap);
 					}
 					if (ui.button(tr("Decal Layer"), Left)) {
-						Layers.createFillLayer(UVProject);
+						App.createFillLayer(UVProject);
 					}
 					if (ui.button(tr("Black Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.layer;
 
-						var m = Layers.newMask(false, l);
+						var m = App.newMask(false, l);
 						function _next() {
 							m.clear(0x00000000);
 						}
@@ -56,7 +56,7 @@ class TabLayers {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.layer;
 
-						var m = Layers.newMask(false, l);
+						var m = App.newMask(false, l);
 						function _next() {
 							m.clear(0xffffffff);
 						}
@@ -68,7 +68,7 @@ class TabLayers {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.layer;
 
-						var m = Layers.newMask(false, l);
+						var m = App.newMask(false, l);
 						function _init() {
 							m.toFillLayer();
 						}
@@ -83,7 +83,7 @@ class TabLayers {
 						if (l.isLayerMask()) l = l.parent;
 
 						var pointers = initLayerMap();
-						var group = Layers.newGroup();
+						var group = App.newGroup();
 						Context.setLayer(l);
 						Project.layers.remove(group);
 						Project.layers.insert(Project.layers.indexOf(l) + 1, group);
@@ -117,7 +117,7 @@ class TabLayers {
 					for (p in Project.paintObjects) if (p.visible) visibles.push(p);
 					MeshUtil.mergeMesh(visibles);
 				}
-				Layers.setObjectMask();
+				App.setObjectMask();
 				UVUtil.uvmapCached = false;
 				Context.ddirty = 2;
 				#if (kha_direct3d12 || kha_vulkan)
@@ -490,12 +490,12 @@ class TabLayers {
 					function _init() {
 						Context.material = l.fill_layer;
 						l.clear();
-						Layers.updateFillLayers();
+						App.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 				}
 				else {
-					Layers.setObjectMask();
+					App.setObjectMask();
 				}
 			}
 			@:privateAccess ui.endElement();
@@ -619,7 +619,7 @@ class TabLayers {
 			}
 			if (l.isGroup() && ui.button(tr("Merge Group"), Left)) {
 				function _init() {
-					Layers.mergeGroup(l);
+					App.mergeGroup(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -628,7 +628,7 @@ class TabLayers {
 				function _init() {
 					Context.setLayer(l);
 					History.mergeLayers();
-					Layers.mergeDown();
+					App.mergeDown();
 					if (Context.layer.fill_layer != null) Context.layer.toPaintLayer();
 				}
 				iron.App.notifyOnInit(_init);
@@ -638,7 +638,7 @@ class TabLayers {
 				function _init() {
 					Context.setLayer(l);
 					History.duplicateLayer();
-					Layers.duplicateLayer(l);
+					App.duplicateLayer(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -669,7 +669,7 @@ class TabLayers {
 					UIMenu.keepOpen = true;
 				}
 				if (resHandleChangedLast && !App.resHandle.changed) {
-					Layers.onLayersResized();
+					App.onLayersResized();
 				}
 				ui.text(tr("Res"));
 
@@ -680,7 +680,7 @@ class TabLayers {
 				zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit", "16bit", "32bit"]);
 				#end
 				if (App.bitsHandle.changed) {
-					iron.App.notifyOnInit(Layers.setLayerBits);
+					iron.App.notifyOnInit(App.setLayerBits);
 					UIMenu.keepOpen = true;
 				}
 				ui.text(tr("Color"));
@@ -695,7 +695,7 @@ class TabLayers {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
 					function _init() {
-						Layers.updateFillLayers();
+						App.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
@@ -711,7 +711,7 @@ class TabLayers {
 					Context.setLayer(l);
 					MakeMaterial.parsePaintMaterial();
 					function _init() {
-						Layers.updateFillLayers();
+						App.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
@@ -727,7 +727,7 @@ class TabLayers {
 					Context.setLayer(l);
 					MakeMaterial.parsePaintMaterial();
 					function _init() {
-						Layers.updateFillLayers();
+						App.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;

@@ -78,14 +78,14 @@ class UIHeader {
 				ui.enabled = Context.colorIdPicked;
 				if (ui.button(tr("To Mask"))) {
 					if (Context.layer.isMask()) Context.setLayer(Context.layer.parent);
-					var m = Layers.newMask(false, Context.layer);
+					var m = App.newMask(false, Context.layer);
 					function _next() {
-						if (Layers.pipeMerge == null) Layers.makePipe();
+						if (App.pipeMerge == null) App.makePipe();
 						if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 						m.texpaint.g4.begin();
-						m.texpaint.g4.setPipeline(Layers.pipeColorIdToMask);
-						m.texpaint.g4.setTexture(Layers.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
-						m.texpaint.g4.setTexture(Layers.texColorId, Project.getImage(Project.assets[Context.colorIdHandle.position]));
+						m.texpaint.g4.setPipeline(App.pipeColorIdToMask);
+						m.texpaint.g4.setTexture(App.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
+						m.texpaint.g4.setTexture(App.texColorId, Project.getImage(Project.assets[Context.colorIdHandle.position]));
 						m.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 						m.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 						m.texpaint.g4.drawIndexedVertices();

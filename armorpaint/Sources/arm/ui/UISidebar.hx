@@ -146,7 +146,7 @@ class UISidebar {
 		Project.paintObjects = [Context.paintObject];
 
 		if (Project.filepath == "") {
-			iron.App.notifyOnInit(Layers.initLayers);
+			iron.App.notifyOnInit(App.initLayers);
 		}
 	}
 
@@ -715,7 +715,7 @@ class UISidebar {
 			// New color id picked, update fill layer
 			if (Context.tool == ToolColorId && Context.layer.fill_layer != null) {
 				App.notifyOnNextFrame(function() {
-					Layers.updateFillLayer();
+					App.updateFillLayer();
 					MakeMaterial.parsePaintMaterial(false);
 				});
 			}
@@ -725,7 +725,7 @@ class UISidebar {
 			Context.layersPreviewDirty = false;
 			Context.layerPreviewDirty = false;
 			Context.maskPreviewLast = null;
-			if (Layers.pipeMerge == null) Layers.makePipe();
+			if (App.pipeMerge == null) App.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
 				if (l.isGroup()) continue;
@@ -733,8 +733,8 @@ class UISidebar {
 				var source = l.texpaint;
 				var g2 = target.g2;
 				g2.begin(true, 0x00000000);
-				// g2.pipeline = l.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
-				g2.pipeline = Layers.pipeCopy; // texpaint_preview is always RGBA32 for now
+				// g2.pipeline = l.isMask() ? App.pipeCopy8 : App.pipeCopy;
+				g2.pipeline = App.pipeCopy; // texpaint_preview is always RGBA32 for now
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
 				g2.pipeline = null;
 				g2.end();
@@ -744,15 +744,15 @@ class UISidebar {
 		if (Context.layerPreviewDirty && !Context.layer.isGroup()) {
 			Context.layerPreviewDirty = false;
 			Context.maskPreviewLast = null;
-			if (Layers.pipeMerge == null) Layers.makePipe();
+			if (App.pipeMerge == null) App.makePipe();
 			// Update layer preview
 			var l = Context.layer;
 			var target = l.texpaint_preview;
 			var source = l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
-			// g2.pipeline = Context.layer.isMask() ? Layers.pipeCopy8 : Layers.pipeCopy;
-			g2.pipeline = Layers.pipeCopy; // texpaint_preview is always RGBA32 for now
+			// g2.pipeline = Context.layer.isMask() ? App.pipeCopy8 : App.pipeCopy;
+			g2.pipeline = App.pipeCopy; // texpaint_preview is always RGBA32 for now
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();

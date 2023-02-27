@@ -125,8 +125,8 @@ class ImportMesh {
 						var l = Project.layers.pop();
 						l.unload();
 					}
-					Layers.newLayer(false);
-					iron.App.notifyOnInit(Layers.initLayers);
+					App.newLayer(false);
+					iron.App.notifyOnInit(App.initLayers);
 					History.reset();
 				}
 

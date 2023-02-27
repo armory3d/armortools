@@ -98,7 +98,7 @@ class TabMaterials {
 							Context.selectMaterial(i);
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
-									Layers.updateFillLayers();
+									App.updateFillLayers();
 								}
 								iron.App.notifyOnInit(_init);
 							}
@@ -123,7 +123,7 @@ class TabMaterials {
 
 							if (ui.button(tr("To Fill Layer"), Left)) {
 								Context.selectMaterial(i);
-								Layers.createFillLayer();
+								App.createFillLayer();
 							}
 
 							if (ui.button(tr("Export"), Left)) {

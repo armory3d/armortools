@@ -175,7 +175,7 @@ class UIFiles {
 								if (abs != null) {
 									iron.data.Data.getImage(abs, function(image: kha.Image) {
 										iron.App.notifyOnInit(function() {
-											if (Layers.pipeCopyRGB == null) Layers.makePipeCopyRGB();
+											if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
 											icon = kha.Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 												icon.g2.begin(false);
@@ -184,7 +184,7 @@ class UIFiles {
 											else {
 												icon.g2.begin(true, 0xffffffff);
 											}
-											icon.g2.pipeline = Layers.pipeCopyRGB;
+											icon.g2.pipeline = App.pipeCopyRGB;
 											icon.g2.drawImage(image, 0, 0);
 											icon.g2.pipeline = null;
 											icon.g2.end();
