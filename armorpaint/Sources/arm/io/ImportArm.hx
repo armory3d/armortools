@@ -248,8 +248,8 @@ class ImportArm {
 					if (isMask) {
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
 						l.texpaint.g2.begin(false);
-						// l.texpaint.g2.pipeline = Layers.pipeCopy8;
-						l.texpaint.g2.pipeline = project.is_bgra ? Layers.pipeCopyBGRA : Layers.pipeCopy; // Full bits for undo support, R8 is used
+						// l.texpaint.g2.pipeline = App.pipeCopy8;
+						l.texpaint.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy; // Full bits for undo support, R8 is used
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
