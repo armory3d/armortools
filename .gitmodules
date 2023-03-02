@@ -1,9 +1,3 @@
-[submodule "Libraries/iron"]
-	path = Libraries/iron
-	url = https://github.com/armory3d/iron
-[submodule "Libraries/zui"]
-	path = Libraries/zui
-	url = https://github.com/armory3d/zui
 [submodule "armorcore"]
 	path = armorcore
 	url = https://github.com/armory3d/armorcore

@@ -12,8 +12,6 @@ let project = new Project("ArmorLab");
 project.addSources("Sources");
 project.addShaders("Shaders/*.glsl", { embed: snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: snapshot });
-project.addLibrary("../../Libraries/iron");
-project.addLibrary("../../Libraries/zui");
 project.addLibrary("../../base");
 project.addShaders("../armorcore/Shaders/*.glsl", { embed: snapshot });
 project.addShaders("../base/Shaders/*.glsl", { embed: snapshot });
