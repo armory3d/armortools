@@ -259,11 +259,7 @@ class RenderPathBase {
 
 	public static function drawSplit(drawCommands: Void->Void) {
 		if (Context.raw.splitView && !Context.raw.paint2dView) {
-			#if (kha_metal || krom_android)
 			Context.raw.ddirty = 2;
-			#else
-			Context.raw.ddirty = 1;
-			#end
 			var cam = Scene.active.camera;
 
 			Context.raw.viewIndex = Context.raw.viewIndex == 0 ? 1 : 0;
