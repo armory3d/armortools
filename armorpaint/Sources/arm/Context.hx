@@ -9,6 +9,7 @@ import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
 import arm.shader.NodeShader;
+import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
@@ -21,7 +22,6 @@ import arm.ui.UIView2D;
 import arm.ui.UIHeader;
 import arm.ui.UIStatus;
 import arm.ui.BoxPreferences;
-import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;
 import arm.ContextFormat;
 

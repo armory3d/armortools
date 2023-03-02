@@ -3,16 +3,13 @@ package arm;
 import kha.Image;
 import zui.Zui;
 import zui.Id;
-import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.object.Object;
-import iron.object.MeshObject;
 import iron.data.MaterialData;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
-import arm.shader.NodeShader;
 import arm.ProjectBaseFormat;
 import arm.ContextBaseFormat;
 
