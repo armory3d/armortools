@@ -84,7 +84,6 @@ class MainBase {
 		untyped global["data/font_mono.ttf"] = null;
 
 		var files = [
-			"font13.bin",
 			"ltc_mag.arm",
 			"ltc_mat.arm",
 			"default_brush.arm",
