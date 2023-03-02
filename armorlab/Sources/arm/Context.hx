@@ -4,13 +4,13 @@ import zui.Zui;
 import iron.RenderPath;
 import iron.object.MeshObject;
 import arm.shader.NodeShader;
+import arm.shader.MakeMaterial;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
 import arm.ui.UISidebar;
 import arm.ui.UINodes;
 import arm.ui.UIHeader;
 import arm.ui.BoxPreferences;
-import arm.shader.MakeMaterial;
 import arm.ProjectBaseFormat;
 import arm.ContextFormat;
 

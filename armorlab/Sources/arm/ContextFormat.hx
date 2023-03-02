@@ -1,10 +1,7 @@
 package arm;
 
-import kha.Image;
 import zui.Zui;
 import iron.math.Vec4;
-import iron.object.MeshObject;
-import arm.shader.NodeShader;
 import arm.ProjectBaseFormat;
 import arm.ContextBaseFormat;
 
