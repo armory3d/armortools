@@ -17,11 +17,11 @@ class ImportFont {
 			}
 		}
 		Data.getFont(path, function(font: Font) {
-			var fn = font.getFontNames();
+			var count = Krom.g2_font_count(font.font_);
 			var fontSlots = new Array<FontSlot>();
-			for (i in 0...fn.length) {
+			for (i in 0...count) {
 				var ar = path.split(Path.sep);
-				var name = fn[i] != null ? fn[i] : ar[ar.length - 1];
+				var name = ar[ar.length - 1];
 				var f = font.clone();
 				f.setFontIndex(i);
 				var fontSlot = new FontSlot(name, f, path);

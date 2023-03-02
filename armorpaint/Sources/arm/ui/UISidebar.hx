@@ -1,9 +1,10 @@
 package arm.ui;
 
 import haxe.io.Bytes;
+import kha.input.KeyCode;
+import kha.math.FastMatrix3;
 import kha.Image;
 import kha.System;
-import kha.input.KeyCode;
 import zui.Zui;
 import zui.Id;
 import iron.data.Data;
@@ -70,8 +71,7 @@ class UISidebar {
 
 		if (Project.fonts == null) {
 			Project.fonts = [];
-			var fontNames = App.font.getFontNames();
-			Project.fonts.push(new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font));
+			Project.fonts.push(new FontSlot("default.ttf", App.font));
 			Context.raw.font = Project.fonts[0];
 		}
 
@@ -845,9 +845,12 @@ class UISidebar {
 				var r = getBrushStencilRect();
 				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
 					g.color = 0x88ffffff;
-					g.pushRotation(-Context.raw.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					var angle = Context.raw.brushStencilAngle;
+					var cx = r.x + r.w / 2;
+					var cy = r.y + r.h / 2;
+					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
 					g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
-					g.popTransformation();
+					g.transformation = null;
 					g.color = 0xffffffff;
 				}
 				var transform = Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown);
@@ -860,9 +863,12 @@ class UISidebar {
 					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 					// Rotate
-					g.pushRotation(-Context.raw.brushStencilAngle, r.x + r.w / 2, r.y + r.h / 2);
+					var angle = Context.raw.brushStencilAngle;
+					var cx = r.x + r.w / 2;
+					var cy = r.y + r.h / 2;
+					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
 					kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
-					g.popTransformation();
+					g.transformation = null;
 				}
 			}
 
@@ -878,7 +884,6 @@ class UISidebar {
 			if (Context.raw.tool == ToolPicker && Context.raw.colorPickerCallback != null) {
 				var img = Res.get("icons.k");
 				var rect = Res.tile50(img, ToolPicker, 0);
-					
 				g.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 			}
 
@@ -924,13 +929,15 @@ class UISidebar {
 
 						g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
 						var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
-						g.pushRotation(angle, decalX + psizex / 2, decalY + psizey / 2);
+						var cx = decalX + psizex / 2;
+						var cy = decalY + psizey / 2;
+						g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-cx, -cy));
 						#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 						g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 						#else
 						g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
 						#end
-						g.popTransformation();
+						g.transformation = null;
 						g.color = 0xffffffff;
 					}
 				}

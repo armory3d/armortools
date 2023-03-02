@@ -93,40 +93,38 @@ class Translator {
 			}
 		}
 
-		var newFont = { path: "font.ttf", scale: 1.0 };
 		if (cjk) {
-			newFont = { path: (Path.isProtected() ? Krom.savePath() : "") + "font_cjk.ttc", scale: 1.4 };
-			var cjkFontPath = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "font_cjk.ttc";
-			if (!File.exists(cjkFontPath)) {
-				File.download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjkFontPath, function() {
-					if (!File.exists(cjkFontPath)) {
+			var cjkFontPath = (Path.isProtected() ? Krom.savePath() : "") + "font_cjk.ttc";
+			var cjkFontDiskPath = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "font_cjk.ttc";
+			if (!File.exists(cjkFontDiskPath)) {
+				File.download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", cjkFontDiskPath, function() {
+					if (!File.exists(cjkFontDiskPath)) {
 						// Fall back to English
 						Config.raw.locale = "en";
 						extendedGlyphs();
 						translations.clear();
-						newFont = { path: "font.ttf", scale: 1.0 };
-						initFont(false, newFont);
+						initFont(false, "font.ttf", 1.0);
 					}
-					else initFont(true, newFont);
+					else initFont(true, cjkFontPath, 1.4);
 				}, 20332392);
 			}
-			else initFont(true, newFont);
+			else initFont(true, cjkFontPath, 1.4);
 		}
-		else initFont(false, newFont);
+		else initFont(false, "font.ttf", 1.0);
 	}
 
-	static function initFont(cjk: Bool, newFont: Dynamic) {
+	static function initFont(cjk: Bool, fontPath: String, fontScale: Float) {
 		kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
 		// Load and assign font with cjk characters
 		iron.App.notifyOnInit(function() {
-			iron.data.Data.getFont(newFont.path, function(f: kha.Font) {
+			iron.data.Data.getFont(fontPath, function(f: kha.Font) {
 				if (cjk) {
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
 					f.setFontIndex(fontIndex);
 				}
 				App.font = f;
 				// Scale up the font size and elements width a bit
-				App.theme.FONT_SIZE = Std.int(App.defaultFontSize * newFont.scale);
+				App.theme.FONT_SIZE = Std.int(App.defaultFontSize * fontScale);
 				App.theme.ELEMENT_W = Std.int(App.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
 				var uis = App.getUIs();
 				for (ui in uis) {

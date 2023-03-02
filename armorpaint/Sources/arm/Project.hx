@@ -265,8 +265,7 @@ class Project {
 			materialGroups = [];
 			brushes = [new BrushSlot()];
 			Context.raw.brush = brushes[0];
-			var fontNames = App.font.getFontNames();
-			fonts = [new FontSlot(fontNames.length > 0 ? fontNames[0] : "default.ttf", App.font)];
+			fonts = [new FontSlot("default.ttf", App.font)];
 			Context.raw.font = fonts[0];
 			Project.setDefaultSwatches();
 			Context.raw.swatch = Project.raw.swatches[0];
