@@ -46,13 +46,13 @@ let nodes = [
 arm.NodesBrush.list.push(nodes);
 
 // Brush node
-arm.Brush.customNodes.set(nodeType, function(node, from) {
+arm.LogicParser.customNodes.set(nodeType, function(node, from) {
 	return Math.sin(core.Scheduler.time() * node.inputs[0].get(0));
 });
 
 // Cleanup
 plugin.delete = function() {
-	arm.Brush.customNodes.delete(nodeType);
+	arm.LogicParser.customNodes.delete(nodeType);
 	arm.NodesBrush.list.splice(arm.NodesBrush.list.indexOf(nodes), 1);
 	categories.splice(categories.indexOf(categoryName), 1);
 };
