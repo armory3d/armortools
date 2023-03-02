@@ -106,7 +106,8 @@ class MainBase {
 			"icons2x.k",
 			"noise256.k",
 			"smaa_search.k",
-			"smaa_area.k"
+			"smaa_area.k",
+			"text_coloring.json"
 		];
 		for (add in additional) files.push(add);
 		for (file in files) {
