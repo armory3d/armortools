@@ -169,6 +169,7 @@ class App {
 					// Baked font for fast startup
 					if (Config.raw.locale == "en") {
 						font.font_ = Krom.g2_font_13(font.blob.bytes.getData());
+						font.fontGlyphs = kha.graphics2.Graphics.fontGlyphs;
 					}
 
 					colorWheel = imageColorWheel;
