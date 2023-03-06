@@ -120,6 +120,10 @@ class RenderPathDeferred {
 			path.renderTargets.set(t.name, rt);
 		}
 
+		if (Config.raw.rp_ssao) {
+			RenderPathBase.initSSAO();
+		}
+
 		path.loadShader("shader_datas/world_pass/world_pass");
 		path.loadShader("shader_datas/deferred_light/deferred_light");
 		path.loadShader("shader_datas/compositor_pass/compositor_pass");

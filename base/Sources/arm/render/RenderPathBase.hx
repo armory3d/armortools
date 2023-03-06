@@ -303,31 +303,35 @@ class RenderPathBase {
 	}
 	#end
 
+	public static function initSSAO() {
+		{
+			var t = new RenderTargetRaw();
+			t.name = "singlea";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R8";
+			t.scale = getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "singleb";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R8";
+			t.scale = getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		path.loadShader("shader_datas/ssao_pass/ssao_pass");
+		path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
+		path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+	}
+
 	public static function drawSSAO() {
 		var ssao = Config.raw.rp_ssao != false && Context.raw.cameraType == CameraPerspective;
 		if (ssao && Context.raw.ddirty > 0 && taaFrame > 0) {
 			if (path.renderTargets.get("singlea") == null) {
-				{
-					var t = new RenderTargetRaw();
-					t.name = "singlea";
-					t.width = 0;
-					t.height = 0;
-					t.format = "R8";
-					t.scale = getSuperSampling();
-					path.createRenderTarget(t);
-				}
-				{
-					var t = new RenderTargetRaw();
-					t.name = "singleb";
-					t.width = 0;
-					t.height = 0;
-					t.format = "R8";
-					t.scale = getSuperSampling();
-					path.createRenderTarget(t);
-				}
-				path.loadShader("shader_datas/ssao_pass/ssao_pass");
-				path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
-				path.loadShader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+				initSSAO();
 			}
 
 			path.setTarget("singlea");

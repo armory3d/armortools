@@ -610,7 +610,7 @@ class App {
 			}
 		}
 		else if (Context.raw.frame == 3) {
-			Context.raw.ddirty = Context.raw.renderMode == RenderForward ? 3 : 1;
+			Context.raw.ddirty = 3;
 		}
 		Context.raw.frame++;
 
