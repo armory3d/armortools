@@ -1,7 +1,6 @@
 package arm;
 
 import kha.graphics4.*;
-import kha.graphics2.truetype.StbTruetype;
 import kha.Image;
 import kha.Font;
 import kha.System;
@@ -140,28 +139,10 @@ class App {
 					kha.Window.get(0).title = tr("untitled");
 					#end
 
-					// Precompiled font for fast startup
+					// Baked font for fast startup
 					if (Config.raw.locale == "en") {
-						var kimg: kha.Font.KravurImage = js.lib.Object.create(untyped kha.Font.KravurImage.prototype);
-						@:privateAccess kimg.mySize = 13;
-						@:privateAccess kimg.width = 128;
-						@:privateAccess kimg.height = 128;
-						@:privateAccess kimg.baseline = 10;
-						var chars = new haxe.ds.Vector(ConstData.font_x0.length);
-						kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
-						for (i in 0...95) chars[i] = new Stbtt_bakedchar();
-						for (i in 0...ConstData.font_x0.length) chars[i].x0 = ConstData.font_x0[i];
-						for (i in 0...ConstData.font_y0.length) chars[i].y0 = ConstData.font_y0[i];
-						for (i in 0...ConstData.font_x1.length) chars[i].x1 = ConstData.font_x1[i];
-						for (i in 0...ConstData.font_y1.length) chars[i].y1 = ConstData.font_y1[i];
-						for (i in 0...ConstData.font_xoff.length) chars[i].xoff = ConstData.font_xoff[i];
-						for (i in 0...ConstData.font_yoff.length) chars[i].yoff = ConstData.font_yoff[i];
-						for (i in 0...ConstData.font_xadvance.length) chars[i].xadvance = ConstData.font_xadvance[i];
-						@:privateAccess kimg.chars = chars;
-						Data.getBlob("font13.bin", function(fontbin: kha.Blob) {
-							@:privateAccess kimg.texture = Image.fromBytes(fontbin.toBytes(), 128, 128, kha.graphics4.TextureFormat.L8);
-							@:privateAccess cast(font, kha.Font).images.set(130095, kimg);
-						});
+						font.font_ = Krom.g2_font_13(font.blob.bytes.getData());
+						font.fontGlyphs = kha.graphics2.Graphics.fontGlyphs;
 					}
 
 					colorWheel = imageColorWheel;
