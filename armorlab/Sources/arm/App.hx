@@ -89,12 +89,6 @@ class App {
 		lastWindowWidth = System.windowWidth();
 		lastWindowHeight = System.windowHeight();
 
-		iron.App.onResize = onResize;
-		iron.App.w = w;
-		iron.App.h = h;
-		iron.App.x = x;
-		iron.App.y = y;
-
 		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);
@@ -258,7 +252,7 @@ class App {
 		return appy;
 	}
 
-	static function onResize() {
+	public static function onResize() {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		var ratioW = System.windowWidth() / lastWindowWidth;

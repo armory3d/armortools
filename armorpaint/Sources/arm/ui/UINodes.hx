@@ -575,6 +575,7 @@ class UINodes {
 			}
 
 			UISidebar.inst.hwnd1.redraws = 2;
+			if (Context.raw.splitView) Context.raw.ddirty = 2;
 			recompileMat = false;
 		}
 		else if (recompileMatFinal) {

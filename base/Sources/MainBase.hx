@@ -38,6 +38,12 @@ class MainBase {
 	public static function start() {
 		if (tasks > 0) return;
 
+		iron.App.onResize = arm.App.onResize;
+		iron.App.w = arm.App.w;
+		iron.App.h = arm.App.h;
+		iron.App.x = arm.App.x;
+		iron.App.y = arm.App.y;
+
 		Config.init();
 		System.start(Config.getOptions(), function(window: Window) {
 			if (Config.raw.layout == null) arm.App.initLayout();
