@@ -41,7 +41,9 @@ cp -a build/krom/ ../armorcore/Deployment
 
 **Android** *wip*
 ```bash
-git apply ../armorcore/patch/android_document_picker.diff --directory=../armorcore/Kinc
+cd ../armorcore
+git apply patch/android_document_picker.diff --directory=Kinc
+cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g opengl android
 cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 # Manual tweaking is required for now:
@@ -52,7 +54,9 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 
 **iOS** *wip*
 ```bash
-git apply ../armorcore/patch/ios_document_picker.diff --directory=../armorcore/Kinc
+cd ../armorcore
+git apply patch/ios_document_picker.diff --directory=Kinc
+cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal ios
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
@@ -63,7 +67,9 @@ cp -a build/krom/ ../armorcore/Deployment
 **Windows DXR** *wip*
 ```bash
 # Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
-git apply ../armorcore/patch/d3d12_raytrace.diff --directory=../armorcore/Kinc
+cd ..\armorcore
+git apply patch/d3d12_raytrace.diff --directory=Kinc
+cd ..\armorpaint
 ..\armorcore\Kinc\make --from ..\armorcore -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
 # Build and run for x64 & release
@@ -73,7 +79,9 @@ git apply ../armorcore/patch/d3d12_raytrace.diff --directory=../armorcore/Kinc
 **Linux VKRT** *wip*
 ```bash
 git clone --recursive https://github.com/armory3d/glsl_to_spirv
-git apply ../armorcore/patch/vulkan_raytrace.diff --directory=../armorcore/Kinc
+cd ../armorcore
+git apply patch/vulkan_raytrace.diff --directory=Kinc
+cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang --compile
 cd ../armorcore/Deployment
 strip ArmorPaint
