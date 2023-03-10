@@ -2,37 +2,38 @@ package arm.io;
 
 import kha.Blob;
 import iron.data.Data;
-import arm.format.ObjParser;
 
 class ImportObj {
 
 	public static function run(path: String, replaceExisting = true) {
 		var i = Context.raw.splitBy;
 		var isUdim = i == SplitUdim;
-		ObjParser.splitCode =
+		var splitCode =
 			(i == SplitObject || isUdim) ? "o".code :
 			 i == SplitGroup 			 ? "g".code :
 			 				 			   "u".code; // usemtl
+
 		Data.getBlob(path, function(b: Blob) {
+
 			if (isUdim) {
-				var obj = new ObjParser(b, 0, isUdim);
-				var name = obj.name;
-				for (i in 0...obj.udims.length) {
-					if (obj.udims[i].length == 0) continue;
-					var u = i % obj.udimsU;
-					var v = Std.int(i / obj.udimsU);
-					obj.name = name + "." + (1000 + v * 10 + u + 1);
-					obj.inda = obj.udims[i];
-					i == 0 ? (replaceExisting ? ImportMesh.makeMesh(obj, path) : ImportMesh.addMesh(obj)) : ImportMesh.addMesh(obj);
+				var part = Krom.io_obj_parse(b.bytes.getData(), splitCode, 0, isUdim);
+				var name = part.name;
+				for (i in 0...part.udims.length) {
+					if (part.udims[i].length == 0) continue;
+					var u = i % part.udims_u;
+					var v = Std.int(i / part.udims_u);
+					part.name = name + "." + (1000 + v * 10 + u + 1);
+					part.inda = part.udims[i];
+					i == 0 ? (replaceExisting ? ImportMesh.makeMesh(part, path) : ImportMesh.addMesh(part)) : ImportMesh.addMesh(part);
 				}
 			}
 			else {
-				var parts: Array<ObjParser> = [];
-				var obj = new ObjParser(b);
-				parts.push(obj);
-				while (obj.hasNext) {
-					obj = new ObjParser(b, obj.pos);
-					parts.push(obj);
+				var parts: Array<Dynamic> = [];
+				var part = Krom.io_obj_parse(b.bytes.getData(), splitCode, 0, false);
+				parts.push(part);
+				while (part.has_next) {
+					part = Krom.io_obj_parse(b.bytes.getData(), splitCode, part.pos, false);
+					parts.push(part);
 				}
 				if (Context.raw.splitBy == SplitMaterial) {
 					var posa0;
