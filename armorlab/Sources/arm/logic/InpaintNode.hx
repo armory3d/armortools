@@ -56,10 +56,8 @@ class InpaintNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override function get(from: Int, done: Dynamic->Void) {
-		inputs[0].get(function(source: Dynamic) {
-			if (!Std.isOfType(source, kha.Image)) { done(null); return; }
-
+	override function getAsImage(from: Int, done: kha.Image->Void) {
+		inputs[0].getAsImage(function(source: kha.Image) {
 			image.g2.begin(false);
 			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 			image.g2.end();
@@ -72,7 +70,7 @@ class InpaintNode extends LogicNode {
 
 	override public function getCachedImage(): kha.Image {
 		App.notifyOnNextFrame(function() {
-			inputs[0].get(function(source: Dynamic) {
+			inputs[0].getAsImage(function(source: kha.Image) {
 				if (App.pipeCopy == null) App.makePipe();
 				if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 				image.g4.begin();
