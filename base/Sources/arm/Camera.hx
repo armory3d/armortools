@@ -60,6 +60,7 @@ class Camera {
 
 			var modifKey = kb.down("alt") || kb.down("shift") || kb.down("control");
 			var modif = modifKey || Config.keymap.action_rotate == "middle";
+			var defaultKeymap = Config.raw.keymap == "default.json";
 
 			if (Operator.shortcut(Config.keymap.action_rotate, ShortcutStarted) ||
 				Operator.shortcut(Config.keymap.action_zoom, ShortcutStarted) ||
@@ -92,7 +93,7 @@ class Camera {
 			}
 
 			var controls = Context.raw.cameraControls;
-			if (controls == ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif))) {
+			if (controls == ControlsOrbit && (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif && defaultKeymap))) {
 				redraws = 2;
 				var dist = distance();
 				camera.transform.move(camera.lookWorld(), dist);
@@ -103,7 +104,7 @@ class Camera {
 				}
 				camera.transform.move(camera.lookWorld(), -dist);
 			}
-			else if (controls == ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif))) {
+			else if (controls == ControlsRotate && (Operator.shortcut(Config.keymap.action_rotate, ShortcutDown) || (mouse.down("right") && !modif && defaultKeymap))) {
 				redraws = 2;
 				var t = Context.mainObject().transform;
 				var up = t.up().normalize();
@@ -117,7 +118,7 @@ class Camera {
 			}
 			
 			if (controls == ControlsRotate || controls == ControlsOrbit) {
-				panAction(modif);
+				panAction(modif, defaultKeymap);
 
 				if (Operator.shortcut(Config.keymap.action_zoom, ShortcutDown)) {
 					redraws = 2;
@@ -229,10 +230,10 @@ class Camera {
 		}
 	}
 
-	function panAction(modif: Bool) {
+	function panAction(modif: Bool, defaultKeymap: Bool) {
 		var camera = iron.Scene.active.camera;
 		var mouse = Input.getMouse();
-		if (Operator.shortcut(Config.keymap.action_pan, ShortcutDown) || (mouse.down("middle") && !modif)) {
+		if (Operator.shortcut(Config.keymap.action_pan, ShortcutDown) || (mouse.down("middle") && !modif && defaultKeymap)) {
 			redraws = 2;
 			var look = camera.transform.look().normalize().mult(mouse.movementY / 150 * Config.raw.camera_pan_speed);
 			var right = camera.transform.right().normalize().mult(-mouse.movementX / 150 * Config.raw.camera_pan_speed);
