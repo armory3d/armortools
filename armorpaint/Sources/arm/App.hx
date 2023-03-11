@@ -754,7 +754,11 @@ class App {
 		raw.recent_projects = [];
 		raw.bookmarks = [];
 		raw.plugins = [];
+		#if (krom_android || krom_ios)
+		raw.keymap = "touch.json";
+		#else
 		raw.keymap = "default.json";
+		#end
 		raw.theme = "default.json";
 		raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
 		raw.undo_steps = 4;
