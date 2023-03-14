@@ -570,10 +570,10 @@ class UISidebar {
 			RenderUtil.pickPosNorTex();
 			#if kha_metal
 			RenderUtil.pickPosNorTex(); // Flush
+			#end
 			var isMesh = Math.abs(Context.raw.posXPicked) < 50 && Math.abs(Context.raw.posYPicked) < 50 && Math.abs(Context.raw.posZPicked) < 50;
 			var penOnly = Context.raw.penPaintingOnly;
 			var isPen = penOnly && Input.getPen().down();
-			#end
 			// Mesh picked - disable rotate
 			// Pen painting only - rotate with touch, paint with pen
 			if ((isMesh && !penOnly) || isPen) {
