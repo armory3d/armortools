@@ -2,6 +2,7 @@ package arm.ui;
 
 import haxe.io.Bytes;
 import zui.Zui;
+import iron.data.Data;
 import arm.sys.Path;
 
 class TabConsole {
@@ -55,9 +56,15 @@ class TabConsole {
 
 			ui.endSticky();
 
+			var _font = ui.ops.font;
+			var _fontSize = ui.fontSize;
+			Data.getFont("font_mono.ttf", function(f: kha.Font) { ui.ops.font = f; }); // Sync
+			ui.fontSize = Std.int(15 * ui.SCALE());
 			for (t in Console.lastTraces) {
 				ui.text(t);
 			}
+			ui.ops.font = _font;
+			ui.fontSize = _fontSize;
 		}
 	}
 }
