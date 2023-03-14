@@ -564,22 +564,29 @@ class UISidebar {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		// Same mapping for paint and rotate
+		// Same mapping for paint and rotate (predefined in touch keymap)
 		if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 			action_paint_remap = Config.keymap.action_paint;
 			RenderUtil.pickPosNorTex();
-			// World sphere picked - disable paint
-			if (Math.abs(Context.raw.posXPicked) > 50 || Math.abs(Context.raw.posYPicked) > 50 || Math.abs(Context.raw.posZPicked) > 50) {
-				Config.keymap.action_paint = "";
-				Config.keymap.action_rotate = action_paint_remap;
-			}
+			#if kha_metal
+			RenderUtil.pickPosNorTex(); // Flush
+			var isMesh = Math.abs(Context.raw.posXPicked) < 50 && Math.abs(Context.raw.posYPicked) < 50 && Math.abs(Context.raw.posZPicked) < 50;
+			var penOnly = Context.raw.penPaintingOnly;
+			var isPen = penOnly && Input.getPen().down();
+			#end
 			// Mesh picked - disable rotate
-			else {
+			// Pen painting only - rotate with touch, paint with pen
+			if ((isMesh && !penOnly) || isPen) {
 				Config.keymap.action_rotate = "";
 				Config.keymap.action_paint = action_paint_remap;
 			}
+			// World sphere picked - disable paint
+			else {
+				Config.keymap.action_paint = "";
+				Config.keymap.action_rotate = action_paint_remap;
+			}
 		}
-		else if (action_paint_remap != "") {
+		else if (!mouse.down() && action_paint_remap != "") {
 			Config.keymap.action_rotate = action_paint_remap;
 			Config.keymap.action_paint = action_paint_remap;
 			action_paint_remap = "";
