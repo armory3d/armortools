@@ -196,6 +196,7 @@ class App {
 					iron.App.notifyOnRender2D(UINodes.inst.render);
 					iron.App.notifyOnUpdate(UISidebar.inst.update);
 					iron.App.notifyOnRender2D(UISidebar.inst.render);
+					iron.App.notifyOnUpdate(Camera.inst.update);
 					iron.App.notifyOnRender2D(render);
 					appx = UIToolbar.inst.toolbarw;
 					appy = UIHeader.inst.headerh * 2;

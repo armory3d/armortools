@@ -17,6 +17,7 @@ import iron.Scene;
 import arm.shader.MakeMaterial;
 import arm.Viewport;
 import arm.util.UVUtil;
+import arm.util.RenderUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
@@ -40,6 +41,7 @@ class UISidebar {
 	public var hminimize = Id.handle();
 	var borderStarted = 0;
 	var borderHandle: Handle = null;
+	var action_paint_remap = "";
 
 	public function new() {
 		inst = this;
@@ -561,6 +563,27 @@ class UISidebar {
 
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
+
+		// Same mapping for paint and rotate
+		if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
+			action_paint_remap = Config.keymap.action_paint;
+			RenderUtil.pickPosNorTex();
+			// World sphere picked - disable paint
+			if (Math.abs(Context.raw.posXPicked) > 50 || Math.abs(Context.raw.posYPicked) > 50 || Math.abs(Context.raw.posZPicked) > 50) {
+				Config.keymap.action_paint = "";
+				Config.keymap.action_rotate = action_paint_remap;
+			}
+			// Mesh picked - disable rotate
+			else {
+				Config.keymap.action_rotate = "";
+				Config.keymap.action_paint = action_paint_remap;
+			}
+		}
+		else if (action_paint_remap != "") {
+			Config.keymap.action_rotate = action_paint_remap;
+			Config.keymap.action_paint = action_paint_remap;
+			action_paint_remap = "";
+		}
 
 		if (Context.raw.brushStencilImage != null && Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown)) {
 			var r = getBrushStencilRect();
