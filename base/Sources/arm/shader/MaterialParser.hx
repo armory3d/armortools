@@ -1768,7 +1768,7 @@ class MaterialParser {
 		var tex_store = store_var_name(node);
 
 		if (sample_keep_aspect) {
-			curshader.write('vec2 ${tex_store}_size = textureSize($tex_name, 0);');
+			curshader.write('vec2 ${tex_store}_size = vec2(textureSize($tex_name, 0));');
 			curshader.write('float ${tex_store}_ax = ${tex_store}_size.x / ${tex_store}_size.y;');
 			curshader.write('float ${tex_store}_ay = ${tex_store}_size.y / ${tex_store}_size.x;');
 			curshader.write('vec2 ${tex_store}_uv = ((${uv_name}.xy / ${sample_uv_scale} - vec2(0.5, 0.5)) * vec2(max(${tex_store}_ay, 1.0), max(${tex_store}_ax, 1.0))) + vec2(0.5, 0.5);');

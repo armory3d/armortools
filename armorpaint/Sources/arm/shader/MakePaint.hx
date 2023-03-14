@@ -263,7 +263,7 @@ class MakePaint {
 			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');
 			frag.add_uniform('vec4 stencilTransform', '_stencilTransform');
 			frag.write('vec2 stencil_uv = vec2((sp.xy - stencilTransform.xy) / stencilTransform.z * vec2(aspectRatio, 1.0));');
-			frag.write('vec2 stencil_size = textureSize(texbrushstencil, 0);');
+			frag.write('vec2 stencil_size = vec2(textureSize(texbrushstencil, 0));');
 			frag.write('float stencil_ratio = stencil_size.y / stencil_size.x;');
 			frag.write('stencil_uv -= vec2(0.5 / stencil_ratio, 0.5);');
 			frag.write('stencil_uv = vec2(stencil_uv.x * cos(stencilTransform.w) - stencil_uv.y * sin(stencilTransform.w),
