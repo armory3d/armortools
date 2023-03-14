@@ -38,7 +38,7 @@ class UISidebar {
 	public var hwnd1 = Id.handle();
 	public var htab0 = Id.handle();
 	public var htab1 = Id.handle();
-	public var hminimize = Id.handle();
+	public var hminimized = Id.handle();
 	var borderStarted = 0;
 	var borderHandle: Handle = null;
 	var action_paint_remap = "";
@@ -840,13 +840,14 @@ class UISidebar {
 		}
 		if (Config.raw.layout[LayoutSidebarW] == 0) {
 			var width = Std.int(ui.ops.font.width(ui.fontSize, "<<") + 25 * ui.SCALE());
-			if (ui.window(hminimize, System.windowWidth() - width, 0, width, Std.int(ui.BUTTON_H()))) {
+			if (ui.window(hminimized, System.windowWidth() - width, 0, width, Std.int(ui.BUTTON_H()))) {
 				ui._w = width;
-				if (ui.button("<<"))
+				if (ui.button("<<")) {
 					Config.raw.layout[LayoutSidebarW] = Context.raw.maximizedSidebarWidth != 0 ? Context.raw.maximizedSidebarWidth : Std.int(UISidebar.defaultWindowW * Config.raw.window_scale);
+				}
 			}
 		}
-		if (htab0.changed && (htab0.position == Context.raw.lastHtab0Position) && Config.raw.layout[LayoutSidebarW] != 0) {
+		else if (htab0.changed && (htab0.position == Context.raw.lastHtab0Position)) {
 			Context.raw.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
 			Config.raw.layout[LayoutSidebarW] = 0 ;
 		}
