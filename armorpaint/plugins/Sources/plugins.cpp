@@ -346,6 +346,7 @@ void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
 	Local<ObjectTemplate> krom_import_svg = ObjectTemplate::New(isolate);
 	krom_import_svg->Set(String::NewFromUtf8(isolate, "_buffer").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_buffer));
 	krom_import_svg->Set(String::NewFromUtf8(isolate, "_init").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_init));
+	krom_import_svg->Set(String::NewFromUtf8(isolate, "_parse").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_parse));
 	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels_w").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels_w));
 	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels_h").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels_h));
 	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels));
