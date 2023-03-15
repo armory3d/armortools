@@ -51,6 +51,7 @@ class TabLayers {
 						App.notifyOnNextFrame(_next);
 						Context.raw.layerPreviewDirty = true;
 						History.newBlackMask();
+						App.updateFillLayers();
 					}
 					if (ui.button(tr("White Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
@@ -63,6 +64,7 @@ class TabLayers {
 						App.notifyOnNextFrame(_next);
 						Context.raw.layerPreviewDirty = true;
 						History.newWhiteMask();
+						App.updateFillLayers();
 					}
 					if (ui.button(tr("Fill Mask"), Left)) {
 						if (l.isMask()) Context.setLayer(l.parent);
@@ -75,6 +77,7 @@ class TabLayers {
 						iron.App.notifyOnInit(_init);
 						Context.raw.layerPreviewDirty = true;
 						History.newFillMask();
+						App.updateFillLayers();
 					}
 					ui.enabled = !Context.raw.layer.isGroup() && !Context.raw.layer.isInGroup();
 					if (ui.button(tr("Group"), Left)) {
@@ -836,10 +839,15 @@ class TabLayers {
 				}
 			}
 		}
-		
+
 		Context.raw.layer = l;
 		History.deleteLayer();
 		l.delete();
+
+		if (l.isMask()) {
+			Context.raw.layer = l.parent;
+			App.updateFillLayers();
+		}
 
 		// Remove empty group
 		if (l.isInGroup() && l.getContainingGroup().getChildren() == null) {

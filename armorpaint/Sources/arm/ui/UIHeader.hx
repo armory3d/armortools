@@ -94,6 +94,7 @@ class UIHeader {
 						UIToolbar.inst.toolbarHandle.redraws = 1;
 						UIHeader.inst.headerHandle.redraws = 1;
 						Context.raw.layerPreviewDirty = true;
+						App.updateFillLayers();
 					}
 					App.notifyOnNextFrame(_next);
 					History.newWhiteMask();
