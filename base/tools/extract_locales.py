@@ -45,22 +45,27 @@ def process_file(f: IO[Any], fname: str, template_data: Dict[str, str]) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 3:
-        sys.exit(f"Usage: {sys.argv[0]} <app name> <locale code>")
+    if len(sys.argv) != 2:
+        sys.exit(f"Usage: {sys.argv[0]} <locale code>")
 
     # Change to the directory where the script is located,
     # so that the script can be run from any location.
-    os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../" + sys.argv[1])
+    os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../")
 
-    output_path: Final = f"Assets/locale/{sys.argv[2]}.json"
+    output_path: Final = f"base/Assets/locale/{sys.argv[1]}.json"
 
-    if not os.path.exists("Sources"):
+    if not os.path.exists(os.path.join("armorpaint", "Sources")):
+        sys.exit(
+            "ERROR: Couldn't find the Sources folder in the folder where this script is located."
+        )
+
+    if not os.path.exists(os.path.join("armorlab", "Sources")):
         sys.exit(
             "ERROR: Couldn't find the Sources folder in the folder where this script is located."
         )
 
     matches: List[str] = []
-    for folder in ["Sources", os.path.join("..", "Libraries"), os.path.join("..", "base")]:
+    for folder in [os.path.join("armorpaint", "Sources"), os.path.join("armarlab", "Sources"), "Libraries", "base"]:
         for root, dirnames, filenames in os.walk(folder):
             dirnames[:] = [d for d in dirnames]
             for filename in fnmatch.filter(filenames, "*.hx"):
