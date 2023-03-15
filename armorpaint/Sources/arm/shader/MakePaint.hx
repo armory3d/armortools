@@ -107,6 +107,7 @@ class MakePaint {
 			Context.raw.tool == ToolEraser ||
 			Context.raw.tool == ToolClone  ||
 			Context.raw.tool == ToolBlur   ||
+			Context.raw.tool == ToolSmudge   ||
 			Context.raw.tool == ToolParticle ||
 			decal) {
 
@@ -174,7 +175,7 @@ class MakePaint {
 
 		MakeTexcoord.run(vert, frag);
 
-		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur) {
+		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) {
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');
@@ -184,7 +185,7 @@ class MakePaint {
 			if (Context.raw.tool == ToolClone) {
 				MakeClone.run(vert, frag);
 			}
-			else { // Blur
+			else { // Blur, Smudge
 				MakeBlur.run(vert, frag);
 			}
 		}
@@ -258,6 +259,7 @@ class MakePaint {
 			Context.raw.tool == ToolFill ||
 			Context.raw.tool == ToolClone  ||
 			Context.raw.tool == ToolBlur   ||
+			Context.raw.tool == ToolSmudge   ||
 			Context.raw.tool == ToolParticle ||
 			decal)) {
 			frag.add_uniform('sampler2D texbrushstencil', '_texbrushstencil');

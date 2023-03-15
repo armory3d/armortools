@@ -257,6 +257,7 @@ class UIHeader {
 					 Context.raw.tool == ToolText ||
 					 Context.raw.tool == ToolClone ||
 					 Context.raw.tool == ToolBlur ||
+					 Context.raw.tool == ToolSmudge ||
 					 Context.raw.tool == ToolParticle) {
 
 				var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
@@ -416,15 +417,6 @@ class UIHeader {
 						MakeMaterial.parsePaintMaterial();
 					}
 					ui._w = _w;
-				}
-
-				if (Context.raw.tool == ToolBlur) {
-					ui._x += 10 * ui.SCALE();
-					var dirHandle = Id.handle({ selected: false });
-					Context.raw.blurDirectional = ui.check(dirHandle, tr("Directional"));
-					if (dirHandle.changed) {
-						MakeMaterial.parsePaintMaterial();
-					}
 				}
 
 				#if arm_physics

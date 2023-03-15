@@ -54,6 +54,7 @@
 	"tool_text": "t",
 	"tool_clone": "l",
 	"tool_blur": "u",
+	"tool_smudge": "m",
 	"tool_particle": "p",
 	"tool_colorid": "c",
 	"tool_picker": "v",

@@ -303,7 +303,8 @@ class RenderPathPaint {
 				// Read texcoords from gbuffer
 				var readTC = (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillFace) ||
 							  Context.raw.tool == ToolClone ||
-							  Context.raw.tool == ToolBlur;
+							  Context.raw.tool == ToolBlur ||
+							  Context.raw.tool == ToolSmudge;
 				if (readTC) {
 					path.bindTarget("gbuffer2", "gbuffer2");
 				}
@@ -376,7 +377,8 @@ class RenderPathPaint {
 			tool != ToolClone &&
 			tool != ToolDecal &&
 			tool != ToolText &&
-			tool != ToolBlur) {
+			tool != ToolBlur &&
+			tool != ToolSmudge) {
 				return;
 		}
 
@@ -444,6 +446,7 @@ class RenderPathPaint {
 			tool != ToolEraser &&
 			tool != ToolClone &&
 			tool != ToolBlur &&
+			tool != ToolSmudge &&
 			tool != ToolParticle &&
 			!decalMask) {
 				return;

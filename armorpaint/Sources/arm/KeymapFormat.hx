@@ -25,6 +25,7 @@ import arm.KeymapBaseFormat;
 	public var tool_text: String;
 	public var tool_clone: String;
 	public var tool_blur: String;
+	public var tool_smudge: String;
 	public var tool_particle: String;
 	public var tool_colorid: String;
 	public var tool_picker: String;

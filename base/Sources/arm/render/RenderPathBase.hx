@@ -130,7 +130,7 @@ class RenderPathBase {
 		}
 
 		// Match projection matrix jitter
-		var skipTaa = Context.raw.splitView || ((Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur) && Context.raw.pdirty > 0);
+		var skipTaa = Context.raw.splitView || ((Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) && Context.raw.pdirty > 0);
 		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
 		@:privateAccess Scene.active.camera.projectionJitter();
 		Scene.active.camera.buildMatrix();

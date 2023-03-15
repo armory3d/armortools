@@ -280,6 +280,7 @@ class UISidebar {
 					else if (Operator.shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
 					else if (Operator.shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
 					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
+					else if (Operator.shortcut(Config.keymap.tool_smudge)) Context.selectTool(ToolSmudge);
 					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
 					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
 					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.raw.tool == ToolBrush ? ToolEraser : ToolBrush);
@@ -292,6 +293,7 @@ class UISidebar {
 					Context.raw.tool == ToolText   ||
 					Context.raw.tool == ToolClone  ||
 					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolSmudge   ||
 					Context.raw.tool == ToolParticle) {
 					if (Operator.shortcut(Config.keymap.brush_radius) ||
 						Operator.shortcut(Config.keymap.brush_opacity) ||
@@ -981,6 +983,7 @@ class UISidebar {
 					Context.raw.tool == ToolEraser ||
 					Context.raw.tool == ToolClone  ||
 					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolSmudge   ||
 					Context.raw.tool == ToolParticle ||
 					(decalMask && !Config.raw.brush_3d) ||
 					(decalMask && Context.in2dView())) {
@@ -1001,6 +1004,7 @@ class UISidebar {
 				 Context.raw.tool == ToolText ||
 				 Context.raw.tool == ToolClone ||
 				 Context.raw.tool == ToolBlur ||
+				 Context.raw.tool == ToolSmudge ||
 				 Context.raw.tool == ToolParticle)) {
 				g.fillRect(mx - 1, my - 1, 2, 2);
 				var mx = Context.raw.brushLazyX * App.w() + App.x();

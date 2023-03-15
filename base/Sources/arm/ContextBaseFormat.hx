@@ -84,7 +84,6 @@ import arm.ContextBaseFormat;
 	@:optional public var cloneDeltaX = 0.0;
 	@:optional public var cloneDeltaY = 0.0;
 
-	@:optional public var blurDirectional = false;
 	@:optional public var showCompass = true;
 	@:optional public var projectType = ModelRoundedCube;
 	@:optional public var projectAspectRatio = 0; // 1:1, 2:1, 1:2

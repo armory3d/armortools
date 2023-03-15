@@ -8,11 +8,12 @@ package arm;
 	var ToolText = 4;
 	var ToolClone = 5;
 	var ToolBlur = 6;
-	var ToolParticle = 7;
-	var ToolColorId = 8;
-	var ToolPicker = 9;
-	var ToolGizmo = 10;
+	var ToolSmudge = 7;
+	var ToolParticle = 8;
+	var ToolColorId = 9;
+	var ToolPicker = 10;
 	var ToolBake = 11;
+	var ToolGizmo = 12;
 }
 
 @:enum abstract SpaceType(Int) from Int to Int {
