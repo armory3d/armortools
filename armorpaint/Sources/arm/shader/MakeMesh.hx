@@ -338,7 +338,6 @@ class MakeMesh {
 			frag.write('n = normalize(mul(n, TBN));');
 
 			if (Context.raw.viewportMode == ViewLit || Context.raw.viewportMode == ViewPathTrace) {
-
 				frag.write('basecol = pow(basecol, vec3(2.2, 2.2, 2.2));');
 
 				if (Context.raw.viewportShader != null) {
@@ -465,6 +464,10 @@ class MakeMesh {
 			}
 			else {
 				frag.write('fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
+			}
+
+			if (Context.raw.viewportMode != ViewLit && Context.raw.viewportMode != ViewPathTrace) {
+				frag.write('fragColor[1].rgb = pow(fragColor[1].rgb, vec3(2.2, 2.2, 2.2));');
 			}
 
 			frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');

@@ -38,7 +38,7 @@ class Context {
 		if (mode == raw.viewportMode) return;
 
 		raw.viewportMode = mode;
-		var deferred = raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace);
+		var deferred = raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace) && raw.tool != ToolColorId;
 		if (deferred) {
 			RenderPath.active.commands = RenderPathDeferred.commands;
 		}
@@ -141,6 +141,9 @@ class Context {
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		raw.ddirty = 3;
 		initTool();
+		var _viewportMode = raw.viewportMode;
+		raw.viewportMode = -1;
+		setViewportMode(_viewportMode);
 	}
 
 	public static function initTool() {
