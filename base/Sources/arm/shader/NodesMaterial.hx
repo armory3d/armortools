@@ -1758,6 +1758,7 @@ class NodesMaterial {
 					},
 					{
 						name: _tr("use_clamp"),
+						tooltip: _tr("Clamps the output value to the interval [0,1]."),
 						type: "BOOL",
 						default_value: false,
 						output: 0
@@ -1767,6 +1768,7 @@ class NodesMaterial {
 			{
 				id: 0,
 				name: _tr("Quantize"),
+				tooltip: _tr("Creates a posterization effect."),
 				type: "QUANTIZE",
 				x: 0,
 				y: 0,
@@ -1924,6 +1926,7 @@ class NodesMaterial {
 			{
 				id: 0,
 				name: _tr("Bump"),
+				tooltip: _tr("Generates a normal map from a height texture."),
 				type: "BUMP",
 				x: 0,
 				y: 0,
@@ -1941,6 +1944,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: _tr("Distance"),
+						tooltip: _tr("Currently not implemented."),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -1949,6 +1953,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: _tr("Height"),
+						tooltip: _tr("Scalar value-typically a height map texture-giving the height offset from the surface."),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 1.0
@@ -1977,6 +1982,7 @@ class NodesMaterial {
 			{
 				id: 0,
 				name: _tr("Mapping"),
+				tooltip: _tr("Transforms the input vector by applying translation, rotation, and scaling."),
 				type: "MAPPING",
 				x: 0,
 				y: 0,
@@ -2069,6 +2075,7 @@ class NodesMaterial {
 				buttons: [
 					{
 						name: _tr("blend_type"),
+						tooltip: _tr("Blending method"),
 						type: "ENUM",
 						data: [_tr("Partial Derivative"), _tr("Whiteout"), _tr("Reoriented")],
 						default_value: 0,
@@ -2209,6 +2216,7 @@ class NodesMaterial {
 			{
 				id: 0,
 				name: _tr("Clamp"),
+				tooltip: _tr("Clamps a value between a minimum and a maximum."),
 				type: "CLAMP",
 				x: 0,
 				y: 0,
@@ -2308,6 +2316,7 @@ class NodesMaterial {
 			{
 				id: 0,
 				name: _tr("Color Mask"),
+				tooltip: _tr("Generates a mask from color values-typically a texture-equal to mask color."),
 				type: "COLMASK",
 				x: 0,
 				y: 0,
@@ -2325,6 +2334,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: _tr("Mask Color"),
+						tooltip: _tr("Color to use for mask."),
 						type: "RGBA",
 						color: 0xffc7c729,
 						default_value: f32([0.8, 0.8, 0.8, 1.0])
@@ -2333,6 +2343,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: _tr("Radius"),
+						tooltip: _tr("Select colors within this range from input Mask Color."),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.1,
@@ -2343,6 +2354,7 @@ class NodesMaterial {
 						id: 0,
 						node_id: 0,
 						name: _tr("Fuzziness"),
+						tooltip: _tr("Feather edges around selection. Higher values result in a softer mask."),
 						type: "VALUE",
 						color: 0xffa1a1a1,
 						default_value: 0.0
@@ -2557,6 +2569,7 @@ class NodesMaterial {
 				buttons: [
 					{
 						name: _tr("use_clamp"),
+						tooltip: _tr("Clamps the output value to the interval [0,1]."),
 						type: "BOOL",
 						default_value: false,
 						output: 0
@@ -2608,6 +2621,7 @@ class NodesMaterial {
 					},
 					{
 						name: _tr("use_clamp"),
+						tooltip: _tr("Clamps the output value to the interval [0,1]."),
 						type: "BOOL",
 						default_value: false,
 						output: 0
