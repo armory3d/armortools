@@ -19,7 +19,7 @@ git submodule update --init --recursive
 ```bash
 pip install typing_extensions -t base/tools
 python ./base/tools/extract_locales.py <locale code>
-# Generates an `armorpaint/Assets/locale/<locale code>.json` file
+# Generates a `base/Assets/locale/<locale code>.json` file
 ```
 
 **Release builds** *Optional, used for best performance*
