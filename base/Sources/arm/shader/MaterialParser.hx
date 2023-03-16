@@ -685,6 +685,14 @@ class MaterialParser {
 			var col = parse_vector_input(node.inputs[1]);
 			return '(floor(100.0 * $strength * $col) / (100.0 * $strength))';
 		}
+		else if (node.type == "REPLACECOL") {
+			var inputColor = parse_vector_input(node.inputs[0]);
+			var oldColor = parse_vector_input(node.inputs[1]);
+			var newColor = parse_vector_input(node.inputs[2]);
+			var radius = parse_value_input(node.inputs[3]);
+			var fuzziness = parse_value_input(node.inputs[4]);
+			return 'mix($newColor, $inputColor, clamp((distance($oldColor, $inputColor) - $radius) / max($fuzziness, $eps), 0.0, 1.0))';
+		}
 		else if (node.type == "VALTORGB") { // ColorRamp
 			var fac = parse_value_input(node.inputs[0]);
 			var interp = node.buttons[0].data == 0 ? "LINEAR" : "CONSTANT";
