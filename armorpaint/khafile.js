@@ -25,7 +25,7 @@ if (!snapshot) {
 }
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
-project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
+project.addAssets("../base/Assets/locale/*", { destination: "data/locale/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
 project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 if (plugin_embed) {
