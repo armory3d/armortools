@@ -37,4 +37,5 @@ package arm;
 	public var toggle_node_editor: String;
 	public var toggle_browser: String;
 	public var node_search: String;
+	public var operator_search: String;
 }

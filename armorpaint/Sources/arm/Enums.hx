@@ -22,6 +22,15 @@ package arm;
 	var SpaceBake = 2;
 }
 
+@:enum abstract AreaType(Int) from Int to Int {
+	var AreaViewport = 0;
+	var Area2DView = 1;
+	var AreaLayers = 2;
+	var AreaMaterials = 3;
+	var AreaNodes = 4;
+	var AreaBrowser = 5;
+}
+
 @:enum abstract TextureRes(Int) from Int to Int {
 	var Res128 = 0;
 	var Res256 = 1;

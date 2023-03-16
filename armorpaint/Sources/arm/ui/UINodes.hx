@@ -441,7 +441,7 @@ class UINodes {
 		}
 
 		// Node search popup
-		if (kb.started(Config.keymap.node_search)) nodeSearch();
+		if (Operator.shortcut(Config.keymap.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x; // Fix inputDX after popup removal
 			ui.inputY = mouse.y;

@@ -4,15 +4,17 @@ import iron.system.Input;
 
 class Operator {
 
-	public static var run = new Map<String, Dynamic>();
+	public static var calls = new Map<String, Dynamic>();
 	public static var keymap = new Map<String, String>();
 
 	public static function register(name: String, key: String, call: Dynamic) {
-		run[name] = call;
+		calls[name] = call;
 		keymap[key] = name;
 	}
 
-	public static function update() {}
+	public static function run(name: String) {
+		calls[name]();
+	}
 
 	public static function shortcut(s: String, type = ShortcutStarted): Bool {
 		if (s == "") return false;

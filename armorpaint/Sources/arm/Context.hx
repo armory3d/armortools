@@ -296,4 +296,14 @@ class Context {
 			   mouse.x < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW]) &&
 			   mouse.y > System.windowHeight() - Config.raw.layout[LayoutStatusH];
 	}
+
+	public static function getAreaType(): AreaType {
+		if (inViewport()) return AreaViewport;
+		if (in2dView()) return Area2DView;
+		if (inLayers()) return AreaLayers;
+		if (inMaterials()) return AreaMaterials;
+		if (inNodes()) return AreaNodes;
+		if (inBrowser()) return AreaBrowser;
+		return -1;
+	}
 }
