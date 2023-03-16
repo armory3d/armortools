@@ -13,12 +13,11 @@ import arm.render.RenderPathBase;
 import arm.sys.File;
 import arm.sys.Path;
 import arm.ConfigFormat;
-import arm.KeymapFormat;
 
 class Config {
 
 	public static var raw: TConfig = null;
-	public static var keymap: TKeymap;
+	public static var keymap: Dynamic;
 	public static var configLoaded = false;
 	public static var buttonAlign = zui.Zui.Align.Left;
 	public static var buttonSpacing = "      ";
@@ -189,12 +188,24 @@ class Config {
 	}
 
 	public static function loadKeymap() {
-		Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) {
-			keymap = Json.parse(blob.toString());
-		});
+		if (raw.keymap == "default.json") { // Built-in default
+			keymap = App.defaultKeymap;
+		}
+		else {
+			Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) {
+				keymap = Json.parse(blob.toString());
+				// Fill in undefined keys with defaults
+				for (field in Reflect.fields(App.defaultKeymap)) {
+					if (!Reflect.hasField(keymap, field)) {
+						Reflect.setField(keymap, field, Reflect.field(App.defaultKeymap, field));
+					}
+				}
+			});
+		}
 	}
 
 	public static function saveKeymap() {
+		if (raw.keymap == "default.json") return;
 		var path = Data.dataPath + "keymap_presets/" + raw.keymap;
 		var bytes = Bytes.ofString(Json.stringify(keymap));
 		Krom.fileSaveBytes(path, bytes.getData());
