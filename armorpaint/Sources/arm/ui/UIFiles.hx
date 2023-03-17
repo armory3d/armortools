@@ -229,8 +229,12 @@ class UIFiles {
 							var bytesIcon = raw.material_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
-						if (raw.mesh_icons != null) {
+						else if (raw.mesh_icons != null) {
 							var bytesIcon = raw.mesh_icons[0];
+							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+						}
+						else if (raw.brush_icons != null) {
+							var bytesIcon = raw.brush_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						iconMap.set(key, icon);
