@@ -3,7 +3,7 @@ package arm.logic;
 import arm.logic.LogicNode;
 import arm.shader.MakeMaterial;
 import arm.ui.UIToolbar;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIView2D;
 
 @:keep
@@ -112,7 +112,7 @@ class BrushOutputNode extends LogicNode {
 			!fillLayer &&
 			!groupLayer &&
 			(Context.raw.layer.isVisible() || Context.raw.paint2d) &&
-			!UISidebar.inst.ui.isHovered &&
+			!UIBase.inst.ui.isHovered &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
 			!arm.App.isScrolling() &&

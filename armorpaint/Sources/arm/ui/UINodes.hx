@@ -301,7 +301,7 @@ class UINodes {
 					if (canvasType == CanvasMaterial) {
 						menuSeparator(uiMenu);
 						if (menuButton(uiMenu, tr("2D View"))) {
-							UISidebar.inst.show2DView(View2DNode);
+							UIBase.inst.show2DView(View2DNode);
 						}
 					}
 					uiMenu.enabled = true;
@@ -315,7 +315,7 @@ class UINodes {
 				if (ui.getInputInRect(ui._windowX + nodes.NODE_X(node), ui._windowY + nodes.NODE_Y(node), nodes.NODE_W(node), nodes.NODE_H(canvas, node))) {
 					if (node == nodes.nodesSelected[0]) {
 						UIView2D.inst.hwnd.redraws = 2;
-						if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DNode);
+						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DNode);
 						Context.raw.selectTime = Time.time();
 					}
 					break;
@@ -422,7 +422,7 @@ class UINodes {
 			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
 		var ww = Config.raw.layout[LayoutNodesW];
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			wy = 0;
@@ -528,7 +528,7 @@ class UINodes {
 
 	public function drawGrid() {
 		var ww = Config.raw.layout[LayoutNodesW];
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 		}
 		var wh = iron.App.h();
@@ -565,7 +565,7 @@ class UINodes {
 			if (canvasType == CanvasBrush) {
 				MakeMaterial.parseBrush();
 				RenderUtil.makeBrushPreview();
-				UISidebar.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnd1.redraws = 2;
 			}
 			else {
 				App.isFillMaterial() ? App.updateFillLayers() : RenderUtil.makeMaterialPreview();
@@ -574,7 +574,7 @@ class UINodes {
 				}
 			}
 
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 			if (Context.raw.splitView) Context.raw.ddirty = 2;
 			recompileMat = false;
 		}
@@ -589,7 +589,7 @@ class UINodes {
 			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 
-			UISidebar.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
 			recompileMatFinal = false;
 			Context.raw.nodePreviewDirty = true;
 		}
@@ -626,7 +626,7 @@ class UINodes {
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			wy = 0;
@@ -636,7 +636,7 @@ class UINodes {
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
 			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.inst.headerh * 2;
-			if (!UISidebar.inst.show) {
+			if (!UIBase.inst.show) {
 				wy -= UIHeader.inst.headerh * 2;
 			}
 		}
@@ -980,7 +980,7 @@ class UINodes {
 
 	function pushUndo(lastCanvas: TNodeCanvas = null) {
 		if (lastCanvas == null) lastCanvas = getCanvas(true);
-		UISidebar.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnd0.redraws = 2;
 		var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
 		History.editNodes(lastCanvas, canvasType, canvasGroup);
 	}

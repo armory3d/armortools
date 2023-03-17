@@ -1,7 +1,7 @@
 package arm;
 
 import zui.Nodes;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIView2D;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
@@ -218,8 +218,8 @@ class History {
 			}
 			undos--;
 			redos++;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -398,8 +398,8 @@ class History {
 			}
 			undos++;
 			redos--;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}

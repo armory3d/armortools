@@ -9,7 +9,7 @@ class TabConsole {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		var title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
 		var color = Console.messageTimer > 0 ? Console.messageColor : -1;

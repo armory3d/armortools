@@ -401,7 +401,7 @@ class UINodes {
 		wx = Std.int(iron.App.w());
 		wy = UIHeader.inst.headerh * 2;
 		var ww = Config.raw.layout[LayoutNodesW];
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			wy = 0;
 		}
 		var mx = mouse.x;
@@ -579,7 +579,7 @@ class UINodes {
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w());
 		wy = UIHeader.inst.headerh * 2;
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			wy = 0;
 		}
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);

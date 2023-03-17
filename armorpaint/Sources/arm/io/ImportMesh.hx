@@ -7,7 +7,7 @@ import iron.Scene;
 import arm.util.MeshUtil;
 import arm.util.UVUtil;
 import arm.sys.Path;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIView2D;
 import arm.Viewport;
 import arm.Project;
@@ -138,8 +138,8 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UISidebar.inst.hwnd0.redraws = 2;
-				UISidebar.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnd0.redraws = 2;
+				UIBase.inst.hwnd1.redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;
@@ -184,7 +184,7 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UISidebar.inst.hwnd0.redraws = 2;
+				UIBase.inst.hwnd0.redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;

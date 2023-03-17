@@ -23,7 +23,7 @@ class UIMenubar {
 	}
 
 	public function renderUI(g: kha.graphics2.Graphics) {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		var panelx = iron.App.x();
 		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {

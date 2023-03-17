@@ -8,7 +8,7 @@ import kha.WindowMode;
 import kha.System;
 import iron.data.Data;
 import zui.Zui;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.render.RenderPathBase;
 import arm.sys.File;
 import arm.sys.Path;
@@ -282,7 +282,7 @@ class Config {
 		App.theme.FILL_WINDOW_BG = true;
 		if (tagRedraw) {
 			for (ui in App.getUIs()) ui.t = App.theme;
-			UISidebar.inst.tagUIRedraw();
+			UIBase.inst.tagUIRedraw();
 		}
 		if (Config.raw.touch_ui) {
 			// Enlarge elements

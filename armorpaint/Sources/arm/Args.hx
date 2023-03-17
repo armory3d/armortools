@@ -9,7 +9,7 @@ import arm.io.ImportAsset;
 import arm.io.ImportArm;
 import arm.ui.BoxExport;
 import arm.ui.UIFiles;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 
 class Args {
 
@@ -79,7 +79,7 @@ class Args {
 				}
 				else if (assetPath != "") {
 					ImportAsset.run(assetPath, -1, -1, false);
-					if (Path.isTexture(assetPath)) UISidebar.inst.show2DView(View2DAsset);
+					if (Path.isTexture(assetPath)) UIBase.inst.show2DView(View2DAsset);
 				}
 				else if (reimportMesh) {
 					Project.reimportMesh();

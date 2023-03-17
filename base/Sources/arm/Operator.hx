@@ -4,16 +4,22 @@ import iron.system.Input;
 
 class Operator {
 
-	public static var calls = new Map<String, Dynamic>();
-	public static var keymap = new Map<String, String>();
+	public static var ops = new Map<String, Dynamic>();
 
-	public static function register(name: String, key: String, call: Dynamic) {
-		calls[name] = call;
-		keymap[key] = name;
+	public static function register(name: String, call: Dynamic) {
+		ops[name] = call;
 	}
 
 	public static function run(name: String) {
-		calls[name]();
+		if (ops[name] != null) ops[name]();
+	}
+
+	public static function update() {
+		if (Input.getMouse().startedAny() || Input.getKeyboard().startedAny()) {
+			for (op in Reflect.fields(Config.keymap)) {
+				if (shortcut(Reflect.field(Config.keymap, op))) run(op);
+			}
+		}
 	}
 
 	public static function shortcut(s: String, type = ShortcutStarted): Bool {

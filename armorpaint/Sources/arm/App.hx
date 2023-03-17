@@ -185,17 +185,17 @@ class App {
 					Args.parse();
 
 					iron.App.notifyOnUpdate(update);
-					new UISidebar();
+					new UIBase();
 					new UINodes();
 					new UIView2D();
 					new Camera();
 					iron.App.notifyOnRender2D(UIView2D.inst.render);
 					iron.App.notifyOnUpdate(UIView2D.inst.update);
-					iron.App.notifyOnRender2D(UISidebar.inst.renderCursor);
+					iron.App.notifyOnRender2D(UIBase.inst.renderCursor);
 					iron.App.notifyOnUpdate(UINodes.inst.update);
 					iron.App.notifyOnRender2D(UINodes.inst.render);
-					iron.App.notifyOnUpdate(UISidebar.inst.update);
-					iron.App.notifyOnRender2D(UISidebar.inst.render);
+					iron.App.notifyOnUpdate(UIBase.inst.update);
+					iron.App.notifyOnRender2D(UIBase.inst.render);
 					iron.App.notifyOnUpdate(Camera.inst.update);
 					iron.App.notifyOnRender2D(render);
 					appx = UIToolbar.inst.toolbarw;
@@ -224,30 +224,30 @@ class App {
 
 	public static function w(): Int {
 		// Drawing material preview
-		if (UISidebar.inst != null && Context.raw.materialPreview) {
+		if (UIBase.inst != null && Context.raw.materialPreview) {
 			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && Context.raw.decalPreview) {
+		if (UIBase.inst != null && Context.raw.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
 		var res = 0;
-		if (UINodes.inst == null || UISidebar.inst == null) {
-			var sidebarw = Config.raw.layout == null ? UISidebar.defaultWindowW : Config.raw.layout[LayoutSidebarW];
+		if (UINodes.inst == null || UIBase.inst == null) {
+			var sidebarw = Config.raw.layout == null ? UIBase.defaultWindowW : Config.raw.layout[LayoutSidebarW];
 			res = System.windowWidth() - sidebarw - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
 			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - Config.raw.layout[LayoutNodesW] - UIToolbar.inst.toolbarw;
 		}
-		else if (UISidebar.inst.show) {
+		else if (UIBase.inst.show) {
 			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - UIToolbar.inst.toolbarw;
 		}
 		else { // Distract free
 			res = System.windowWidth();
 		}
-		if (UISidebar.inst != null && Context.raw.viewIndex > -1) {
+		if (UIBase.inst != null && Context.raw.viewIndex > -1) {
 			res = Std.int(res / 2);
 		}
 		if (Context.raw.paint2dView) {
@@ -259,20 +259,20 @@ class App {
 
 	public static function h(): Int {
 		// Drawing material preview
-		if (UISidebar.inst != null && Context.raw.materialPreview) {
+		if (UIBase.inst != null && Context.raw.materialPreview) {
 			return RenderUtil.materialPreviewSize;
 		}
 
 		// Drawing decal preview
-		if (UISidebar.inst != null && Context.raw.decalPreview) {
+		if (UIBase.inst != null && Context.raw.decalPreview) {
 			return RenderUtil.decalPreviewSize;
 		}
 
 		var res = System.windowHeight();
-		if (UISidebar.inst == null) {
+		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
-		else if (UISidebar.inst != null && UISidebar.inst.show && res > 0) {
+		else if (UIBase.inst != null && UIBase.inst.show && res > 0) {
 			var statush = Config.raw.layout[LayoutStatusH];
 			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 		}
@@ -333,7 +333,7 @@ class App {
 
 		Context.raw.ddirty = 2;
 
-		if (UISidebar.inst.show) {
+		if (UIBase.inst.show) {
 			appx = UIToolbar.inst.toolbarw;
 			appy = UIHeader.inst.headerh * 2;
 		}
@@ -355,8 +355,8 @@ class App {
 	}
 
 	public static function redrawUI() {
-		UISidebar.inst.hwnd0.redraws = 2;
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		UIStatus.inst.statusHandle.redraws = 2;
@@ -552,7 +552,7 @@ class App {
 			var folderClosed = Res.tile50(icons, 2, 1);
 			var folderOpen = Res.tile50(icons, 8, 1);
 			dragRect = dragLayer.show_panel ? folderOpen : folderClosed;
-			dragTint = UISidebar.inst.ui.t.LABEL_COL - 0x00202020;
+			dragTint = UIBase.inst.ui.t.LABEL_COL - 0x00202020;
 			return icons;
 		}
 		if (dragLayer != null && dragLayer.isMask() && dragLayer.fill_layer == null) {
@@ -566,7 +566,7 @@ class App {
 			if (dragFileIcon != null) return dragFileIcon;
 			var icons = Res.get("icons.k");
 			dragRect = dragFile.indexOf(".") > 0 ? Res.tile50(icons, 3, 1) : Res.tile50(icons, 2, 1);
-			dragTint = UISidebar.inst.ui.t.HIGHLIGHT_COL;
+			dragTint = UIBase.inst.ui.t.HIGHLIGHT_COL;
 			return icons;
 		}
 		return null;
@@ -577,7 +577,7 @@ class App {
 
 		if (Context.raw.frame == 2) {
 			RenderUtil.makeMaterialPreview();
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 			MakeMaterial.parseMeshMaterial();
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.ddirty = 0;
@@ -613,7 +613,7 @@ class App {
 		if (isDragging) {
 			Krom.setMouseCursor(1); // Hand
 			var img = getDragImage();
-			var size = (dragSize == -1 ? 50 : dragSize) * UISidebar.inst.ui.ops.scaleFactor;
+			var size = (dragSize == -1 ? 50 : dragSize) * UIBase.inst.ui.ops.scaleFactor;
 			var ratio = size / img.width;
 			var h = img.height * ratio;
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
@@ -712,7 +712,7 @@ class App {
 	}
 
 	public static function getUIs(): Array<Zui> {
-		return [App.uiBox, App.uiMenu, arm.ui.UISidebar.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
+		return [App.uiBox, App.uiMenu, arm.ui.UIBase.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
 	}
 
 	public static function isDecalLayer(): Bool {
@@ -728,7 +728,7 @@ class App {
 
 	public static function redrawConsole() {
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (arm.ui.UIStatus.inst != null && arm.ui.UISidebar.inst != null && arm.ui.UISidebar.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UISidebar.inst.ui.SCALE()) {
+		if (arm.ui.UIStatus.inst != null && arm.ui.UIBase.inst != null && arm.ui.UIBase.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UIBase.inst.ui.SCALE()) {
 			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
 		}
 	}
@@ -737,7 +737,7 @@ class App {
 		var show2d = (UINodes.inst != null && UINodes.inst.show) || (UIView2D.inst != null && UIView2D.inst.show);
 		var raw = Config.raw;
 		raw.layout = [
-			Std.int(UISidebar.defaultWindowW * raw.window_scale),
+			Std.int(UIBase.defaultWindowW * raw.window_scale),
 			Std.int(kha.System.windowHeight() / 2),
 			Std.int(kha.System.windowHeight() / 2),
 			#if krom_ios

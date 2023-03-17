@@ -21,7 +21,7 @@ class TabBrowser {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 

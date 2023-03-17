@@ -15,7 +15,7 @@ import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
@@ -60,7 +60,7 @@ class Context {
 		if (Project.materials.indexOf(m) == -1) return;
 		raw.material = m;
 		MakeMaterial.parsePaintMaterial();
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 		UINodes.inst.groupStack = [];
@@ -83,7 +83,7 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		raw.brush = b;
 		MakeMaterial.parseBrush();
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 	}
 
@@ -106,7 +106,7 @@ class Context {
 		App.notifyOnNextFrame(function() {
 			MakeMaterial.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 		});
 	}
 
@@ -129,7 +129,7 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UISidebar.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnd0.redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
@@ -256,14 +256,14 @@ class Context {
 
 	public static function inLayers(): Bool {
 		var mouse = Input.getMouse();
-		return UISidebar.inst.htab0.position == 0 &&
-			   mouse.x > UISidebar.inst.tabx && mouse.y < Config.raw.layout[LayoutSidebarH0];
+		return UIBase.inst.htab0.position == 0 &&
+			   mouse.x > UIBase.inst.tabx && mouse.y < Config.raw.layout[LayoutSidebarH0];
 	}
 
 	public static function inMaterials(): Bool {
 		var mouse = Input.getMouse();
-		return UISidebar.inst.htab1.position == 0 &&
-			   mouse.x > UISidebar.inst.tabx &&
+		return UIBase.inst.htab1.position == 0 &&
+			   mouse.x > UIBase.inst.tabx &&
 			   mouse.y > Config.raw.layout[LayoutSidebarH0] &&
 			   mouse.y < Config.raw.layout[LayoutSidebarH1] + Config.raw.layout[LayoutSidebarH0];
 	}

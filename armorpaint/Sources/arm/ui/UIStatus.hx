@@ -19,7 +19,7 @@ class UIStatus {
 
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
@@ -40,7 +40,7 @@ class UIStatus {
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
 			if (statustab.changed && (statustab.position == Context.raw.lastStatusPosition || minimized)) {
-				UISidebar.inst.toggleBrowser();
+				UIBase.inst.toggleBrowser();
 			}
 			Context.raw.lastStatusPosition = statustab.position;
 		}

@@ -15,7 +15,7 @@ import arm.util.RenderUtil;
 import arm.util.MeshUtil;
 import arm.sys.File;
 import arm.sys.Path;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIFiles;
 import arm.ui.UIBox;
 import arm.ui.UINodes;
@@ -282,8 +282,8 @@ class Project {
 			assetId = 0;
 			Project.raw.packed_assets = [];
 			Context.raw.ddirty = 4;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 
 			if (resetLayers) {
 				var aspectRatioChanged = layers[0].texpaint.width != Config.getTextureResX() || layers[0].texpaint.height != Config.getTextureResY();
@@ -524,7 +524,7 @@ class Project {
 			function _next() {
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
-				UISidebar.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnd1.redraws = 2;
 			}
 			App.notifyOnNextFrame(_next);
 		}

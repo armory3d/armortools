@@ -9,7 +9,7 @@ class TabFonts {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (ui.tab(UIStatus.inst.statustab, tr("Fonts")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -25,7 +25,7 @@ class TabFonts {
 			if (ui.isHovered) ui.tooltip(tr("Import font file"));
 
 			if (ui.button(tr("2D View"))) {
-				UISidebar.inst.show2DView(View2DFont);
+				UIBase.inst.show2DView(View2DFont);
 			}
 			ui.endSticky();
 			ui.separator(3, false);
@@ -86,7 +86,7 @@ class TabFonts {
 							}
 							iron.App.notifyOnInit(_init);
 						}
-						if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DFont);
+						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DFont);
 						Context.raw.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {

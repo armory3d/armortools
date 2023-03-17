@@ -3,7 +3,7 @@ package arm.data;
 import kha.graphics4.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.TabLayers;
 import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
@@ -367,7 +367,7 @@ class LayerSlot {
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.layerPreviewDirty = true;
-			UISidebar.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
 	}
@@ -377,7 +377,7 @@ class LayerSlot {
 		fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.layerPreviewDirty = true;
-		UISidebar.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnd0.redraws = 2;
 	}
 
 	public function isVisible(): Bool {
@@ -570,7 +570,7 @@ class LayerSlot {
 
 		Context.setLayer(this);
 		History.orderLayers(to);
-		UISidebar.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnd0.redraws = 2;
 
 		Project.layers.remove(this);
 		Project.layers.insert(to, this);

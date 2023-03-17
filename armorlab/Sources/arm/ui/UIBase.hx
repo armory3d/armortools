@@ -20,9 +20,9 @@ import arm.ProjectFormat;
 import arm.Res;
 
 @:access(zui.Zui)
-class UISidebar {
+class UIBase {
 
-	public static var inst: UISidebar;
+	public static var inst: UIBase;
 	public var show = true;
 	public var ui: Zui;
 	var borderStarted = 0;

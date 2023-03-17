@@ -18,7 +18,7 @@ class UIMenubar {
 	}
 
 	public function renderUI(g: kha.graphics2.Graphics) {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		var panelx = iron.App.x() - UIToolbar.inst.toolbarw;
 		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
@@ -83,8 +83,8 @@ class UIMenubar {
 				Context.raw.brushBlendDirty = true;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				UIHeader.inst.headerHandle.redraws = 2;
-				UISidebar.inst.hwnd0.redraws = 2;
-				UISidebar.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnd0.redraws = 2;
+				UIBase.inst.hwnd1.redraws = 2;
 
 				if (UIHeader.inst.worktab.position == SpacePaint) {
 					Context.selectTool(ToolBrush);

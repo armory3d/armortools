@@ -164,14 +164,14 @@ class App {
 					Args.parse();
 
 					iron.App.notifyOnUpdate(update);
-					new UISidebar();
+					new UIBase();
 					new UINodes();
 					new Camera();
 					arm.logic.RandomNode.setSeed(Std.int(iron.system.Time.realTime() * 4294967295));
 					iron.App.notifyOnUpdate(UINodes.inst.update);
 					iron.App.notifyOnRender2D(UINodes.inst.render);
-					iron.App.notifyOnUpdate(UISidebar.inst.update);
-					iron.App.notifyOnRender2D(UISidebar.inst.render);
+					iron.App.notifyOnUpdate(UIBase.inst.update);
+					iron.App.notifyOnRender2D(UIBase.inst.render);
 					iron.App.notifyOnRender2D(render);
 					appx = 0;
 					appy = UIHeader.inst.headerh * 2;
@@ -214,10 +214,10 @@ class App {
 
 	public static function h(): Int {
 		var res = System.windowHeight();
-		if (UISidebar.inst == null) {
+		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
-		else if (UISidebar.inst != null && res > 0) {
+		else if (UIBase.inst != null && res > 0) {
 			var statush = Config.raw.layout[LayoutStatusH];
 			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
 		}
@@ -276,7 +276,7 @@ class App {
 
 		Context.raw.ddirty = 2;
 
-		if (UISidebar.inst.show) {
+		if (UIBase.inst.show) {
 			appx = 0;
 			appy = UIHeader.inst.headerh * 2;
 		}
@@ -535,7 +535,7 @@ class App {
 	}
 
 	public static function isScrolling(): Bool {
-		return UISidebar.inst.ui.isScrolling;
+		return UIBase.inst.ui.isScrolling;
 		for (ui in getUIs()) if (ui.isScrolling) return true;
 		return false;
 	}
@@ -546,7 +546,7 @@ class App {
 	}
 
 	public static function getUIs(): Array<Zui> {
-		return [App.uiBox, App.uiMenu, UISidebar.inst.ui, arm.ui.UINodes.inst.ui];
+		return [App.uiBox, App.uiMenu, UIBase.inst.ui, arm.ui.UINodes.inst.ui];
 	}
 
 	public static function redrawStatus() {

@@ -41,7 +41,7 @@ class UIToolbar {
 
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		if (ui.window(toolbarHandle, 0, UIHeader.inst.headerh, toolbarw, System.windowHeight() - UIHeader.inst.headerh)) {
 			ui._y -= 4 * ui.SCALE();

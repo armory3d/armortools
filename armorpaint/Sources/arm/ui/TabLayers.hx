@@ -20,8 +20,8 @@ class TabLayers {
 	static var layerNameHandle = Id.handle();
 
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab0, tr("Layers"))) {
+		var ui = UIBase.inst.ui;
+		if (ui.tab(UIBase.inst.htab0, tr("Layers"))) {
 
 			ui.beginSticky();
 
@@ -98,7 +98,7 @@ class TabLayers {
 					ui.enabled = true;
 				}, 8);
 			}
-			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DLayer);
+			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DLayer);
 			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_2d_view})');
 
 			var ar = [tr("All")];
@@ -132,7 +132,7 @@ class TabLayers {
 			ui._y += 2;
 
 			var step = ui.t.ELEMENT_H * 2;
-			var fullH = ui._windowH - UISidebar.inst.hwnd0.scrollOffset;
+			var fullH = ui._windowH - UIBase.inst.hwnd0.scrollOffset;
 			for (i in 0...Std.int(fullH / step)) {
 				if (i % 2 == 0) {
 					ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
@@ -179,7 +179,7 @@ class TabLayers {
 	}
 
 	static function drawLayerSlot(l: LayerSlot, i: Int) {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 
 		if (Context.raw.layerFilter > 0 &&
 			l.getObjectMask() > 0 &&
@@ -348,7 +348,7 @@ class TabLayers {
 		}
 		else if (state == State.Released) {
 			if (Time.time() - Context.raw.selectTime < 0.2) {
-				UISidebar.inst.show2DView(View2DLayer);
+				UIBase.inst.show2DView(View2DLayer);
 			}
 			if (Time.time() - Context.raw.selectTime > 0.2) {
 				Context.raw.selectTime = Time.time();

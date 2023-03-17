@@ -1,7 +1,7 @@
 package arm.io;
 
 import zui.Nodes;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.util.RenderUtil;
 import arm.sys.Path;
 import arm.sys.File;
@@ -126,7 +126,7 @@ class ImportFolder {
 
 		MakeMaterial.parsePaintMaterial();
 		RenderUtil.makeMaterialPreview();
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		History.newMaterial();
 	}
 

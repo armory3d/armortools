@@ -113,7 +113,7 @@ class ArmBridge {
 	public static var File = arm.sys.File;
 	public static var NodesBrush = arm.logic.NodesBrush;
 	public static var LogicParser = arm.logic.LogicParser;
-	public static var UISidebar = arm.ui.UISidebar;
+	public static var UIBase = arm.ui.UIBase;
 	public static var UINodes = arm.ui.UINodes;
 	public static var UIFiles = arm.ui.UIFiles;
 	public static var UIMenu = arm.ui.UIMenu;

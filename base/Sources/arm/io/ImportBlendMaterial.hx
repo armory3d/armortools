@@ -4,7 +4,7 @@ import kha.Blob;
 import iron.data.Data;
 import zui.Nodes;
 import arm.format.BlendParser;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UINodes;
 import arm.shader.NodesMaterial;
 import arm.shader.MakeMaterial;
@@ -263,7 +263,7 @@ class ImportBlendMaterial {
 			}
 			iron.App.notifyOnInit(_init);
 
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 			Data.deleteBlob(path);
 		});
 	}

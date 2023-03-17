@@ -14,7 +14,7 @@ class TabTextures {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
+		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (ui.tab(UIStatus.inst.statustab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
@@ -34,7 +34,7 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			if (ui.button(tr("2D View"))) UISidebar.inst.show2DView(View2DAsset);
+			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DAsset);
 
 			ui.endSticky();
 
@@ -73,7 +73,7 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.raw.texture = asset;
 
-							if (Time.time() - Context.raw.selectTime < 0.25) UISidebar.inst.show2DView(View2DAsset);
+							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DAsset);
 							Context.raw.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
 						}
@@ -230,7 +230,7 @@ class TabTextures {
 		function _next() {
 			arm.shader.MakeMaterial.parsePaintMaterial();
 			arm.util.RenderUtil.makeMaterialPreview();
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
 		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);

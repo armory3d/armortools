@@ -18,7 +18,7 @@ import iron.object.MeshObject;
 import iron.Scene;
 import iron.RenderPath;
 import arm.ProjectFormat;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UIStatus;
 import arm.ui.UIFiles;
 import arm.sys.Path;
@@ -361,8 +361,8 @@ class ImportArm {
 			}
 
 			Context.raw.ddirty = 4;
-			UISidebar.inst.hwnd0.redraws = 2;
-			UISidebar.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnd1.redraws = 2;
 
 			Data.deleteBlob(path);
 		});
@@ -428,7 +428,7 @@ class ImportArm {
 		iron.App.notifyOnInit(_init);
 
 		arm.ui.UINodes.inst.groupStack = [];
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -497,7 +497,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnInit(_init);
 
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		Data.deleteBlob(path);
 	}
 

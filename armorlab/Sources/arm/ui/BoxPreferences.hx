@@ -39,7 +39,7 @@ class BoxPreferences {
 					var localeCode = locales[localeHandle.position];
 					Config.raw.locale = localeCode;
 					Translator.loadTranslations(localeCode);
-					UISidebar.inst.tagUIRedraw();
+					UIBase.inst.tagUIRedraw();
 				}
 
 				var hscale = Id.handle({ value: Config.raw.window_scale });
@@ -76,7 +76,7 @@ class BoxPreferences {
 				if (ui.changed) {
 					Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
 					Config.loadTheme(Config.raw.theme);
-					UISidebar.inst.tagUIRedraw();
+					UIBase.inst.tagUIRedraw();
 				}
 				#end
 
@@ -553,11 +553,11 @@ plugin.drawUI = function(ui) {
 
 	static function setScale() {
 		var scale = Config.raw.window_scale;
-		UISidebar.inst.ui.setScale(scale);
+		UIBase.inst.ui.setScale(scale);
 		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * scale);
 		Config.raw.layout[LayoutStatusH] = Std.int(UIStatus.defaultStatusH * scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * scale);
-		UISidebar.inst.setIconScale();
+		UIBase.inst.setIconScale();
 		UINodes.inst.ui.setScale(scale);
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);

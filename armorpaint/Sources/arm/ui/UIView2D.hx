@@ -64,7 +64,7 @@ class UIView2D {
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
-		if (!UISidebar.inst.show) {
+		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			wy = 0;
@@ -231,7 +231,7 @@ class UIView2D {
 			// else { // View2DNode
 			// }
 
-			if (h.changed) UISidebar.inst.hwnd0.redraws = 2;
+			if (h.changed) UIBase.inst.hwnd0.redraws = 2;
 			ui.t.ACCENT_COL = ACCENT_COL;
 			ui.t.BUTTON_H = BUTTON_H;
 			ui.t.ELEMENT_H = ELEMENT_H;

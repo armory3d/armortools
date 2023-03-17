@@ -7,7 +7,7 @@ import arm.shader.NodeShader;
 import arm.shader.MakeMaterial;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
-import arm.ui.UISidebar;
+import arm.ui.UIBase;
 import arm.ui.UINodes;
 import arm.ui.UIHeader;
 import arm.ui.BoxPreferences;
@@ -47,7 +47,7 @@ class Context {
 		App.notifyOnNextFrame(function() {
 			// MakeMaterial.parsePaintMaterial();
 			// RenderUtil.makeMaterialPreview();
-			// UISidebar.inst.hwnd1.redraws = 2;
+			// UIBase.inst.hwnd1.redraws = 2;
 		});
 	}
 

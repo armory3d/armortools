@@ -15,8 +15,8 @@ class TabMaterials {
 
 	@:access(zui.Zui)
 	public static function draw() {
-		var ui = UISidebar.inst.ui;
-		if (ui.tab(UISidebar.inst.htab1, tr("Materials"))) {
+		var ui = UIBase.inst.ui;
+		if (ui.tab(UIBase.inst.htab1, tr("Materials"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
@@ -33,7 +33,7 @@ class TabMaterials {
 			}
 
 			if (ui.button(tr("Nodes"))) {
-				UISidebar.inst.showMaterialNodes();
+				UIBase.inst.showMaterialNodes();
 			}
 			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_node_editor})');
 			ui.endSticky();
@@ -108,7 +108,7 @@ class TabMaterials {
 						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 						App.dragMaterial = Context.raw.material;
 						if (Time.time() - Context.raw.selectTime < 0.25) {
-							UISidebar.inst.showMaterialNodes();
+							UIBase.inst.showMaterialNodes();
 							App.dragMaterial = null;
 							App.isDragging = false;
 						}
@@ -269,7 +269,7 @@ class TabMaterials {
 		History.deleteMaterial();
 		Context.selectMaterial(i == Project.materials.length - 1 ? i - 1 : i + 1);
 		Project.materials.splice(i, 1);
-		UISidebar.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnd1.redraws = 2;
 		for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
 		for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
 	}
