@@ -466,7 +466,7 @@ class UINodes {
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			var search = ui.textInput(searchHandle, "", Left, true, true);
+			var search = ui.textInput(searchHandle, "", Left, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
 				first = false;
