@@ -428,11 +428,16 @@ class App {
 				else if (Context.inMaterials()) {
 					TabMaterials.acceptSwatchDrag(dragSwatch);
 				}
-				else if (Context.inLayers() || Context.inViewport()) {
+				else if (Context.inViewport()) {
 					var color = dragSwatch.base;
 					color.A = dragSwatch.opacity;
 
 					App.createColorLayer(color.value, dragSwatch.occlusion, dragSwatch.roughness, dragSwatch.metallic);
+				}
+				else if (Context.inLayers() && TabLayers.canDropNewLayer(Context.raw.dragDestination)) {
+					var color = dragSwatch.base;
+					color.A = dragSwatch.opacity;
+					App.createColorLayer(color.value, dragSwatch.occlusion, dragSwatch.roughness, dragSwatch.metallic, Context.raw.dragDestination);
 				}
 				else if (Context.inSwatches()) {
 					TabSwatches.acceptSwatchDrag(dragSwatch);
@@ -496,10 +501,15 @@ class App {
 
 	static function materialDropped() {
 		// Material drag and dropped onto viewport or layers tab
-		if (Context.inViewport() || Context.inLayers()) {
+		if (Context.inViewport()) {
 			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
 			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
 			App.createFillLayer(uvType, decalMat);
+		}
+		if (Context.inLayers() && TabLayers.canDropNewLayer(Context.raw.dragDestination)) {
+			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
+			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
+			App.createFillLayer(uvType, decalMat, Context.raw.dragDestination);
 		}
 		else if (Context.inNodes()) {
 			UINodes.inst.acceptMaterialDrag(Project.materials.indexOf(dragMaterial));
@@ -1638,12 +1648,18 @@ class App {
 		UVUtil.dilatemapCached = false;
 	}
 
-	public static function newLayer(clear = true): LayerSlot {
+	public static function newLayer(clear = true, position = -1): LayerSlot {
 		if (Project.layers.length > maxLayers) return null;
 		var l = new LayerSlot();
 		l.objectMask = Context.raw.layerFilter;
-		if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
-		Project.layers.insert(Project.layers.indexOf(Context.raw.layer) + 1, l);
+		if (position == -1) {
+			if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
+			Project.layers.insert(Project.layers.indexOf(Context.raw.layer) + 1, l);
+		}
+		else {
+			Project.layers.insert(position, l);	
+		}
+		
 		Context.setLayer(l);
 		var li = Project.layers.indexOf(Context.raw.layer);
 		if (li > 0) {
@@ -1676,9 +1692,9 @@ class App {
 		return l;
 	}
 
-	public static function createFillLayer(uvType = UVMap, decalMat: Mat4 = null) {
+	public static function createFillLayer(uvType = UVMap, decalMat: Mat4 = null, position = -1) {
 		function _init() {
-			var l = newLayer(false);
+			var l = newLayer(false, position);
 			History.newLayer();
 			l.uvType = uvType;
 			if (decalMat != null) l.decalMat = decalMat;
@@ -1701,9 +1717,9 @@ class App {
 		Context.raw.layerPreviewDirty = true;
 	}
 
-	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
+	public static function createColorLayer(baseColor: Int, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0, position = -1) {
 		function _init() {
-			var l = newLayer(false);
+			var l = newLayer(false, position);
 			History.newLayer();
 			l.uvType = UVMap;
 			l.objectMask = Context.raw.layerFilter;

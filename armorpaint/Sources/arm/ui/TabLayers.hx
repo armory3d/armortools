@@ -221,6 +221,18 @@ class TabLayers {
 				}
 			}
 		}
+		if (App.isDragging && (App.dragMaterial != null || App.dragSwatch != null) && Context.inLayers()) {
+			if (mouse.y > ui._y + step && mouse.y < ui._y + step * 3) {
+				Context.raw.dragDestination = i;
+				if (canDropNewLayer(i))
+					ui.fill(checkw, 2 * step, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+			}
+			else if (i == Project.layers.length - 1 && mouse.y < ui._y + step) {
+				Context.raw.dragDestination = Project.layers.length;
+				if (canDropNewLayer(Project.layers.length))
+					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
+			}
+		}
 
 		var hasPanel = l.isGroup() || (l.isLayer() && l.getMasks(false) != null);
 		if (hasPanel) {
@@ -882,5 +894,14 @@ class TabLayers {
 
 		// Do not delete last layer
 		return numLayers > 1;
+	}
+
+	public static function canDropNewLayer(position: Int) {
+		if (position > 0 && position < Project.layers.length && Project.layers[position - 1].isMask()) {
+			// 1. The layer to insert is inserted in the middle
+			// 2. The layer below is a mask, i.e. the layer would have to be a (group) mask, too.
+			return false;
+		}
+		return true;
 	}
 }
