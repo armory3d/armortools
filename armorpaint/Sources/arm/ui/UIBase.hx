@@ -91,9 +91,9 @@ class UIBase {
 
 		if (Context.raw.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
-			b.set(0, 2);
-			b.set(1, 2);
-			b.set(2, 2);
+			b.set(0, 8);
+			b.set(1, 8);
+			b.set(2, 8);
 			b.set(3, 255);
 			Context.raw.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}

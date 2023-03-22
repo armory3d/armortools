@@ -22,7 +22,7 @@ class BoxPreferences {
 	public static var presetHandle: Handle;
 	static var locales: Array<String> = null;
 	static var themes: Array<String> = null;
-	static var worldColor = kha.Color.fromValue(0xff020202);
+	static var worldColor = kha.Color.fromValue(0xff080808);
 
 	@:access(zui.Zui)
 	public static function show() {
