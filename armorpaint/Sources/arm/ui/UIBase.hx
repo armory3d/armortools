@@ -129,6 +129,8 @@ class UIBase {
 
 		Context.raw.projectObjects = [];
 		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
+
+		Operator.register("view_top", view_top);
 	}
 
 	function done() {
@@ -350,7 +352,6 @@ class UIBase {
 				else if (Operator.shortcut(Config.keymap.view_left)) Viewport.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
 				else if (Operator.shortcut(Config.keymap.view_right)) Viewport.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
 				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_top)) Viewport.setView(0, 0, 1, 0, 0, 0);
 				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
 					Context.raw.cameraType = Context.raw.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
 					Context.raw.camHandle.position = Context.raw.cameraType;
@@ -535,6 +536,16 @@ class UIBase {
 			}
 		}
 		#end
+	}
+
+	function view_top() {
+		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+		var mouse = Input.getMouse();
+		if (Context.inPaintArea() && !isTyping) {
+			if (mouse.viewX < iron.App.w()) {
+				Viewport.setView(0, 0, 1, 0, 0, 0);
+			}
+		}
 	}
 
 	function operatorSearch() {
