@@ -916,8 +916,11 @@ class UIBase {
 			}
 		}
 		else if (htab0.changed && (htab0.position == Context.raw.lastHtab0Position)) {
-			Context.raw.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
-			Config.raw.layout[LayoutSidebarW] = 0 ;
+			if (Time.time() - Context.raw.selectTime < 0.25) {
+				Context.raw.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
+				Config.raw.layout[LayoutSidebarW] = 0;
+			}
+			Context.raw.selectTime = Time.time();
 		}
 		Context.raw.lastHtab0Position = htab0.position;
 		ui.end();
