@@ -16,14 +16,14 @@ class TabBrowser {
 	public static function showDirectory(directory: String) {
 		hpath.text = directory;
 		hsearch.text = "";
-		UIStatus.inst.statustab.position = 0;
+		UIBase.inst.htabs[2].position = 0;
 	}
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];

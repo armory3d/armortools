@@ -367,7 +367,7 @@ class LayerSlot {
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.layerPreviewDirty = true;
-			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
 	}
@@ -377,7 +377,7 @@ class LayerSlot {
 		fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.layerPreviewDirty = true;
-		UIBase.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnds[0].redraws = 2;
 	}
 
 	public function isVisible(): Bool {
@@ -570,7 +570,7 @@ class LayerSlot {
 
 		Context.setLayer(this);
 		History.orderLayers(to);
-		UIBase.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnds[0].redraws = 2;
 
 		Project.layers.remove(this);
 		Project.layers.insert(to, this);

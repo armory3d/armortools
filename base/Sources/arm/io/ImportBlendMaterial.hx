@@ -263,7 +263,7 @@ class ImportBlendMaterial {
 			}
 			iron.App.notifyOnInit(_init);
 
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 			Data.deleteBlob(path);
 		});
 	}

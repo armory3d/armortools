@@ -282,8 +282,8 @@ class Project {
 			assetId = 0;
 			Project.raw.packed_assets = [];
 			Context.raw.ddirty = 4;
-			UIBase.inst.hwnd0.redraws = 2;
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 
 			if (resetLayers) {
 				var aspectRatioChanged = layers[0].texpaint.width != Config.getTextureResX() || layers[0].texpaint.height != Config.getTextureResY();
@@ -524,7 +524,7 @@ class Project {
 			function _next() {
 				MakeMaterial.parsePaintMaterial();
 				RenderUtil.makeMaterialPreview();
-				UIBase.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnds[1].redraws = 2;
 			}
 			App.notifyOnNextFrame(_next);
 		}

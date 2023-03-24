@@ -218,8 +218,8 @@ class History {
 			}
 			undos--;
 			redos++;
-			UIBase.inst.hwnd0.redraws = 2;
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}
@@ -398,8 +398,8 @@ class History {
 			}
 			undos++;
 			redos--;
-			UIBase.inst.hwnd0.redraws = 2;
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 			Context.raw.ddirty = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
 		}

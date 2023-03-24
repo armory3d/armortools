@@ -72,7 +72,7 @@ class UIHeader {
 						Context.raw.ddirty = 2;
 						Context.raw.colorIdPicked = false;
 						UIToolbar.inst.toolbarHandle.redraws = 1;
-						UIStatus.inst.statusHandle.redraws = 2;
+						UIBase.inst.hwnds[2].redraws = 2;
 					});
 				}
 				ui.enabled = Context.raw.colorIdPicked;
@@ -140,7 +140,7 @@ class UIHeader {
 					var newSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 					Context.setSwatch(newSwatch);
 					Project.raw.swatches.push(newSwatch);
-					UIStatus.inst.statusHandle.redraws = 1;
+					UIBase.inst.hwnds[2].redraws = 1;
 				}
 				if (ui.isHovered) ui.tooltip(tr("Add picked color to swatches"));
 
@@ -178,7 +178,7 @@ class UIHeader {
 					App.notifyOnNextFrame(function() {
 						Context.raw.layerPreviewDirty = true;
 					});
-					UIBase.inst.hwnd0.redraws = 2;
+					UIBase.inst.hwnds[0].redraws = 2;
 					History.pushUndo = true;
 				}
 

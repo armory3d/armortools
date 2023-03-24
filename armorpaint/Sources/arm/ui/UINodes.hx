@@ -295,7 +295,7 @@ class UINodes {
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
 							Context.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
-							UIStatus.inst.statusHandle.redraws = 1;
+							UIBase.inst.hwnds[2].redraws = 1;
 						}
 					}
 					if (canvasType == CanvasMaterial) {
@@ -565,7 +565,7 @@ class UINodes {
 			if (canvasType == CanvasBrush) {
 				MakeMaterial.parseBrush();
 				RenderUtil.makeBrushPreview();
-				UIBase.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnds[1].redraws = 2;
 			}
 			else {
 				App.isFillMaterial() ? App.updateFillLayers() : RenderUtil.makeMaterialPreview();
@@ -574,7 +574,7 @@ class UINodes {
 				}
 			}
 
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 			if (Context.raw.splitView) Context.raw.ddirty = 2;
 			recompileMat = false;
 		}
@@ -589,7 +589,7 @@ class UINodes {
 			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 
-			UIBase.inst.hwnd0.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
 			recompileMatFinal = false;
 			Context.raw.nodePreviewDirty = true;
 		}
@@ -980,7 +980,7 @@ class UINodes {
 
 	function pushUndo(lastCanvas: TNodeCanvas = null) {
 		if (lastCanvas == null) lastCanvas = getCanvas(true);
-		UIBase.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnds[0].redraws = 2;
 		var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
 		History.editNodes(lastCanvas, canvasType, canvasGroup);
 	}

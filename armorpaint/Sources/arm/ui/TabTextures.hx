@@ -13,10 +13,10 @@ import arm.ProjectBaseFormat;
 class TabTextures {
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			if (Config.raw.touch_ui) {
@@ -29,7 +29,7 @@ class TabTextures {
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
 					ImportAsset.run(path, -1.0, -1.0, true, false);
-					UIStatus.inst.statusHandle.redraws = 2;
+					UIBase.inst.hwnds[2].redraws = 2;
 				});
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
@@ -215,7 +215,7 @@ class TabTextures {
 		if (Project.assets.length > 1) {
 			Context.raw.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[2].redraws = 2;
 
 		if (Context.raw.tool == ToolColorId && i == Context.raw.colorIdHandle.position) {
 			UIHeader.inst.headerHandle.redraws = 2;
@@ -230,7 +230,7 @@ class TabTextures {
 		function _next() {
 			arm.shader.MakeMaterial.parsePaintMaterial();
 			arm.util.RenderUtil.makeMaterialPreview();
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
 		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);

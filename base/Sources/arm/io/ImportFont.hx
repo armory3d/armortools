@@ -3,7 +3,7 @@ package arm.io;
 import kha.Font;
 import iron.data.Data;
 import arm.sys.Path;
-import arm.ui.UIStatus;
+import arm.ui.UIBase;
 import arm.data.FontSlot;
 import arm.util.RenderUtil;
 
@@ -37,7 +37,7 @@ class ImportFont {
 			}
 			iron.App.notifyOnInit(_init);
 
-			UIStatus.inst.statusHandle.redraws = 2;
+			UIBase.inst.hwnds[2].redraws = 2;
 		});
 	}
 }

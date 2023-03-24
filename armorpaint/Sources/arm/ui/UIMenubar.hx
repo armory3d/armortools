@@ -83,8 +83,8 @@ class UIMenubar {
 				Context.raw.brushBlendDirty = true;
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				UIHeader.inst.headerHandle.redraws = 2;
-				UIBase.inst.hwnd0.redraws = 2;
-				UIBase.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnds[0].redraws = 2;
+				UIBase.inst.hwnds[1].redraws = 2;
 
 				if (UIHeader.inst.worktab.position == SpacePaint) {
 					Context.selectTool(ToolBrush);

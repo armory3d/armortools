@@ -1,11 +1,13 @@
 package arm.ui;
 
+import zui.Zui;
+
 class TabHistory {
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		if (ui.tab(UIBase.inst.htab0, tr("History"))) {
+		if (ui.tab(htab, tr("History"))) {
 			for (i in 0...History.steps.length) {
 				var active = History.steps.length - 1 - History.redos;
 				if (i == active) {

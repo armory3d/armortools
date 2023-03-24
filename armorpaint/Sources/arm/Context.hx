@@ -60,7 +60,7 @@ class Context {
 		if (Project.materials.indexOf(m) == -1) return;
 		raw.material = m;
 		MakeMaterial.parsePaintMaterial();
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 		UINodes.inst.groupStack = [];
@@ -83,7 +83,7 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		raw.brush = b;
 		MakeMaterial.parseBrush();
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 	}
 
@@ -97,7 +97,7 @@ class Context {
 		raw.font = f;
 		RenderUtil.makeTextPreview();
 		RenderUtil.makeDecalPreview();
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[2].redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
@@ -106,7 +106,7 @@ class Context {
 		App.notifyOnNextFrame(function() {
 			MakeMaterial.parsePaintMaterial();
 			RenderUtil.makeMaterialPreview();
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 		});
 	}
 
@@ -129,7 +129,7 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UIBase.inst.hwnd0.redraws = 2;
+		UIBase.inst.hwnds[0].redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
@@ -255,17 +255,11 @@ class Context {
 	}
 
 	public static function inLayers(): Bool {
-		var mouse = Input.getMouse();
-		return UIBase.inst.htab0.position == 0 &&
-			   mouse.x > UIBase.inst.tabx && mouse.y < Config.raw.layout[LayoutSidebarH0];
+		return UIBase.inst.ui.getHoveredTabName() == tr("Layers");
 	}
 
 	public static function inMaterials(): Bool {
-		var mouse = Input.getMouse();
-		return UIBase.inst.htab1.position == 0 &&
-			   mouse.x > UIBase.inst.tabx &&
-			   mouse.y > Config.raw.layout[LayoutSidebarH0] &&
-			   mouse.y < Config.raw.layout[LayoutSidebarH1] + Config.raw.layout[LayoutSidebarH0];
+		return UIBase.inst.ui.getHoveredTabName() == tr("Materials");
 	}
 
 	public static function in2dView(): Bool {
@@ -283,18 +277,11 @@ class Context {
 	}
 
 	public static function inSwatches(): Bool {
-		var mouse = Input.getMouse();
-		return UIStatus.inst.statustab.position == 4 &&
-			   mouse.x > iron.App.x() &&
-			   mouse.x < iron.App.x() + System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] &&
-			   mouse.y > System.windowHeight() - Config.raw.layout[LayoutStatusH];
+		return UIBase.inst.ui.getHoveredTabName() == tr("Swatches");
 	}
 
 	public static function inBrowser(): Bool {
-		var mouse = Input.getMouse();
-		return mouse.x > iron.App.x() &&
-			   mouse.x < iron.App.x() + (System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW]) &&
-			   mouse.y > System.windowHeight() - Config.raw.layout[LayoutStatusH];
+		return UIBase.inst.ui.getHoveredTabName() == tr("Browser");
 	}
 
 	public static function getAreaType(): AreaType {

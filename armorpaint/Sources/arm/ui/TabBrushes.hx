@@ -10,9 +10,9 @@ import arm.util.RenderUtil;
 class TabBrushes {
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		if (ui.tab(UIBase.inst.htab1, tr("Brushes"))) {
+		if (ui.tab(htab, tr("Brushes"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
 			if (ui.button(tr("New"))) {
@@ -150,6 +150,6 @@ class TabBrushes {
 		var i = Project.brushes.indexOf(b);
 		Context.selectBrush(i == Project.brushes.length - 1 ? i - 1 : i + 1);
 		Project.brushes.splice(i, 1);
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 	}
 }

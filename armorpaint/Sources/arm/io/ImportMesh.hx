@@ -138,8 +138,8 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnd0.redraws = 2;
-				UIBase.inst.hwnd1.redraws = 2;
+				UIBase.inst.hwnds[0].redraws = 2;
+				UIBase.inst.hwnds[1].redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;
@@ -184,7 +184,7 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnd0.redraws = 2;
+				UIBase.inst.hwnds[0].redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;

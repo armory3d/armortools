@@ -10,7 +10,7 @@ import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
-import arm.ui.UIStatus;
+import arm.ui.UIBase;
 import arm.shader.MakeMaterial;
 import arm.Viewport;
 
@@ -190,7 +190,7 @@ class RenderPathPaint {
 					path.drawMeshes("paint");
 					if (useLiveLayer) RenderPathPaint.useLiveLayer(false);
 					UIHeader.inst.headerHandle.redraws = 2;
-					UIStatus.inst.statusHandle.redraws = 2;
+					UIBase.inst.hwnds[2].redraws = 2;
 
 					var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;

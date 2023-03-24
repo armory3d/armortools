@@ -14,10 +14,10 @@ class TabScript {
 	static var textColoring: TTextColoring = null;
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Script")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Script")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			if (Config.raw.touch_ui) {

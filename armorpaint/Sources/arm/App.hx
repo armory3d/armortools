@@ -355,11 +355,11 @@ class App {
 	}
 
 	public static function redrawUI() {
-		UIBase.inst.hwnd0.redraws = 2;
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[0].redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[2].redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
@@ -587,7 +587,7 @@ class App {
 
 		if (Context.raw.frame == 2) {
 			RenderUtil.makeMaterialPreview();
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 			MakeMaterial.parseMeshMaterial();
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.ddirty = 0;
@@ -732,14 +732,14 @@ class App {
 
 	public static function redrawStatus() {
 		if (arm.ui.UIStatus.inst != null) {
-			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+			UIBase.inst.hwnds[2].redraws = 2;
 		}
 	}
 
 	public static function redrawConsole() {
 		var statush = Config.raw.layout[LayoutStatusH];
 		if (arm.ui.UIStatus.inst != null && arm.ui.UIBase.inst != null && arm.ui.UIBase.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UIBase.inst.ui.SCALE()) {
-			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+			UIBase.inst.hwnds[2].redraws = 2;
 		}
 	}
 

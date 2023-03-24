@@ -89,7 +89,7 @@ class UIFiles {
 		var file = Res.tile50(icons, 3, 1);
 		var isCloud = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud(function() { UIStatus.inst.statusHandle.redraws = 3; });
+		if (isCloud && File.cloud == null) File.initCloud(function() { UIBase.inst.hwnds[2].redraws = 3; });
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		#if krom_ios
@@ -189,7 +189,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											iconMap.set(handle.text + Path.sep + f, icon);
-											UIStatus.inst.statusHandle.redraws = 3;
+											UIBase.inst.hwnds[2].redraws = 3;
 										});
 									});
 								}
@@ -276,7 +276,7 @@ class UIFiles {
 								icon.g2.pipeline = null;
 								icon.g2.end();
 								iconMap.set(handle.text + Path.sep + f, icon);
-								UIStatus.inst.statusHandle.redraws = 3;
+								UIBase.inst.hwnds[2].redraws = 3;
 								image.unload(); // The big image is not needed anymore
 							});
 						});

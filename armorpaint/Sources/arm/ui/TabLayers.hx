@@ -19,9 +19,9 @@ class TabLayers {
 	static var layerNameEdit = -1;
 	static var layerNameHandle = Id.handle();
 
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		if (ui.tab(UIBase.inst.htab0, tr("Layers"))) {
+		if (ui.tab(htab, tr("Layers"))) {
 
 			ui.beginSticky();
 
@@ -132,7 +132,7 @@ class TabLayers {
 			ui._y += 2;
 
 			var step = ui.t.ELEMENT_H * 2;
-			var fullH = ui._windowH - UIBase.inst.hwnd0.scrollOffset;
+			var fullH = ui._windowH - UIBase.inst.hwnds[0].scrollOffset;
 			for (i in 0...Std.int(fullH / step)) {
 				if (i % 2 == 0) {
 					ui.fill(0, i * step, (ui._w / ui.SCALE() - 2), step, ui.t.WINDOW_BG_COL - 0x00040404);
@@ -199,8 +199,9 @@ class TabLayers {
 
 		// Highlight drag destination
 		var mouse = Input.getMouse();
+		var absy = ui._windowY + ui._y;
 		if (App.isDragging && App.dragLayer != null && Context.inLayers()) {
-			if (mouse.y > ui._y + step && mouse.y < ui._y + step * 3) {
+			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
 				var down = Project.layers.indexOf(App.dragLayer) >= i;
 				Context.raw.dragDestination = down ? i : i - 1;
 
@@ -214,7 +215,7 @@ class TabLayers {
 					}
 				}
 			}
-			else if (i == Project.layers.length - 1 && mouse.y < ui._y + step) {
+			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length - 1;
 				if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
@@ -222,12 +223,12 @@ class TabLayers {
 			}
 		}
 		if (App.isDragging && (App.dragMaterial != null || App.dragSwatch != null) && Context.inLayers()) {
-			if (mouse.y > ui._y + step && mouse.y < ui._y + step * 3) {
+			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (canDropNewLayer(i))
 					ui.fill(checkw, 2 * step, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
 			}
-			else if (i == Project.layers.length - 1 && mouse.y < ui._y + step) {
+			else if (i == Project.layers.length - 1 && mouse.y < absy + step) {
 				Context.raw.dragDestination = Project.layers.length;
 				if (canDropNewLayer(Project.layers.length))
 					ui.fill(checkw, 0, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);

@@ -1,10 +1,12 @@
 package arm.ui;
 
+import zui.Zui;
+
 class TabPlugins {
 
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		if (ui.tab(UIBase.inst.htab0, tr("Plugins"))) {
+		if (ui.tab(htab, tr("Plugins"))) {
 
 			ui.beginSticky();
 			ui.row([1 / 4]);

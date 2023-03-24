@@ -361,8 +361,8 @@ class ImportArm {
 			}
 
 			Context.raw.ddirty = 4;
-			UIBase.inst.hwnd0.redraws = 2;
-			UIBase.inst.hwnd1.redraws = 2;
+			UIBase.inst.hwnds[0].redraws = 2;
+			UIBase.inst.hwnds[1].redraws = 2;
 
 			Data.deleteBlob(path);
 		});
@@ -428,7 +428,7 @@ class ImportArm {
 		iron.App.notifyOnInit(_init);
 
 		arm.ui.UINodes.inst.groupStack = [];
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -497,7 +497,7 @@ class ImportArm {
 		}
 		iron.App.notifyOnInit(_init);
 
-		UIBase.inst.hwnd1.redraws = 2;
+		UIBase.inst.hwnds[1].redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -523,7 +523,7 @@ class ImportArm {
 				Project.raw.swatches.push(s);
 			}
 		}
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[2].redraws = 2;
 		Data.deleteBlob(path);
 	}
 

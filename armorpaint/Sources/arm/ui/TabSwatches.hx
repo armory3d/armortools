@@ -25,10 +25,10 @@ class TabSwatches {
 	static var dragPosition: Int = -1;
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Swatches")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Swatches")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			if (Config.raw.touch_ui) {
@@ -247,6 +247,6 @@ class TabSwatches {
 		var i = Project.raw.swatches.indexOf(swatch);
 		Context.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
 		Project.raw.swatches.splice(i, 1);
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[2].redraws = 2;
 	}
 }

@@ -8,14 +8,14 @@ import arm.sys.Path;
 class TabConsole {
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 
 		var title = Console.messageTimer > 0 ? Console.message + "        " : tr("Console");
 		var color = Console.messageTimer > 0 ? Console.messageColor : -1;
 
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, title, false, color) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			#if (krom_windows || krom_linux || krom_darwin) // Copy
