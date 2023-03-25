@@ -321,63 +321,68 @@ namespace {
 	}
 }
 
+#define SET_FUNCTION(object, name, fn)\
+	object->Set(String::NewFromUtf8(isolate, name).ToLocalChecked(),\
+	FunctionTemplate::New(isolate, fn, Local<v8::Value>(), Local<v8::Signature>(), 0,\
+	v8::ConstructorBehavior::kThrow, v8::SideEffectType::kHasNoSideEffect, nullptr))
+
 void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
 	isolate = _isolate;
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 
 	Local<ObjectTemplate> krom_uv_unwrap = ObjectTemplate::New(isolate);
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_buffer").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_buffer));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_setVertexCount").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_setVertexCount));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_setIndexCount").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_setIndexCount));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_setPositions").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_setPositions));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_setNormals").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_setNormals));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_setIndices").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_setIndices));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getVertexCount").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getVertexCount));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getIndexCount").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getIndexCount));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getPositions").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getPositions));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getNormals").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getNormals));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getUVs").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getUVs));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_getIndices").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_getIndices));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_unwrap").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_unwrap));
-	krom_uv_unwrap->Set(String::NewFromUtf8(isolate, "_destroy").ToLocalChecked(), FunctionTemplate::New(isolate, krom_uv_unwrap_destroy));
+	SET_FUNCTION(krom_uv_unwrap, "_buffer", krom_uv_unwrap_buffer);
+	SET_FUNCTION(krom_uv_unwrap, "_setVertexCount", krom_uv_unwrap_setVertexCount);
+	SET_FUNCTION(krom_uv_unwrap, "_setIndexCount", krom_uv_unwrap_setIndexCount);
+	SET_FUNCTION(krom_uv_unwrap, "_setPositions", krom_uv_unwrap_setPositions);
+	SET_FUNCTION(krom_uv_unwrap, "_setNormals", krom_uv_unwrap_setNormals);
+	SET_FUNCTION(krom_uv_unwrap, "_setIndices", krom_uv_unwrap_setIndices);
+	SET_FUNCTION(krom_uv_unwrap, "_getVertexCount", krom_uv_unwrap_getVertexCount);
+	SET_FUNCTION(krom_uv_unwrap, "_getIndexCount", krom_uv_unwrap_getIndexCount);
+	SET_FUNCTION(krom_uv_unwrap, "_getPositions", krom_uv_unwrap_getPositions);
+	SET_FUNCTION(krom_uv_unwrap, "_getNormals", krom_uv_unwrap_getNormals);
+	SET_FUNCTION(krom_uv_unwrap, "_getUVs", krom_uv_unwrap_getUVs);
+	SET_FUNCTION(krom_uv_unwrap, "_getIndices", krom_uv_unwrap_getIndices);
+	SET_FUNCTION(krom_uv_unwrap, "_unwrap", krom_uv_unwrap_unwrap);
+	SET_FUNCTION(krom_uv_unwrap, "_destroy", krom_uv_unwrap_destroy);
 	global->Set(String::NewFromUtf8(isolate, "Krom_uv_unwrap").ToLocalChecked(), krom_uv_unwrap);
 
 	Local<ObjectTemplate> krom_import_svg = ObjectTemplate::New(isolate);
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_buffer").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_buffer));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_init").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_init));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_parse").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_parse));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels_w").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels_w));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels_h").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels_h));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_get_pixels").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_get_pixels));
-	krom_import_svg->Set(String::NewFromUtf8(isolate, "_destroy").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_svg_destroy));
+	SET_FUNCTION(krom_import_svg, "_buffer", krom_import_svg_buffer);
+	SET_FUNCTION(krom_import_svg, "_init", krom_import_svg_init);
+	SET_FUNCTION(krom_import_svg, "_parse", krom_import_svg_parse);
+	SET_FUNCTION(krom_import_svg, "_get_pixels_w", krom_import_svg_get_pixels_w);
+	SET_FUNCTION(krom_import_svg, "_get_pixels_h", krom_import_svg_get_pixels_h);
+	SET_FUNCTION(krom_import_svg, "_get_pixels", krom_import_svg_get_pixels);
+	SET_FUNCTION(krom_import_svg, "_destroy", krom_import_svg_destroy);
 	global->Set(String::NewFromUtf8(isolate, "Krom_import_svg").ToLocalChecked(), krom_import_svg);
 
 	Local<ObjectTemplate> krom_import_gltf = ObjectTemplate::New(isolate);
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_buffer").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_buffer));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_init").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_init));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_parse").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_parse));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_vertex_count").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_vertex_count));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_index_count").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_index_count));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_indices").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_indices));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_positions").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_positions));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_normals").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_normals));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_uvs").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_uvs));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_get_scale_pos").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_get_scale_pos));
-	krom_import_gltf->Set(String::NewFromUtf8(isolate, "_destroy").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_gltf_destroy));
+	SET_FUNCTION(krom_import_gltf, "_buffer", krom_import_gltf_buffer);
+	SET_FUNCTION(krom_import_gltf, "_init", krom_import_gltf_init);
+	SET_FUNCTION(krom_import_gltf, "_parse", krom_import_gltf_parse);
+	SET_FUNCTION(krom_import_gltf, "_get_vertex_count", krom_import_gltf_get_vertex_count);
+	SET_FUNCTION(krom_import_gltf, "_get_index_count", krom_import_gltf_get_index_count);
+	SET_FUNCTION(krom_import_gltf, "_get_indices", krom_import_gltf_get_indices);
+	SET_FUNCTION(krom_import_gltf, "_get_positions", krom_import_gltf_get_positions);
+	SET_FUNCTION(krom_import_gltf, "_get_normals", krom_import_gltf_get_normals);
+	SET_FUNCTION(krom_import_gltf, "_get_uvs", krom_import_gltf_get_uvs);
+	SET_FUNCTION(krom_import_gltf, "_get_scale_pos", krom_import_gltf_get_scale_pos);
+	SET_FUNCTION(krom_import_gltf, "_destroy", krom_import_gltf_destroy);
 	global->Set(String::NewFromUtf8(isolate, "Krom_import_gltf").ToLocalChecked(), krom_import_gltf);
 
 	Local<ObjectTemplate> krom_import_usdc = ObjectTemplate::New(isolate);
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_buffer").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_buffer));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_init").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_init));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_parse").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_parse));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_vertex_count").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_vertex_count));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_index_count").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_index_count));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_indices").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_indices));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_positions").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_positions));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_normals").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_normals));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_uvs").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_uvs));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_get_scale_pos").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_get_scale_pos));
-	krom_import_usdc->Set(String::NewFromUtf8(isolate, "_destroy").ToLocalChecked(), FunctionTemplate::New(isolate, krom_import_usdc_destroy));
+	SET_FUNCTION(krom_import_usdc, "_buffer", krom_import_usdc_buffer);
+	SET_FUNCTION(krom_import_usdc, "_init", krom_import_usdc_init);
+	SET_FUNCTION(krom_import_usdc, "_parse", krom_import_usdc_parse);
+	SET_FUNCTION(krom_import_usdc, "_get_vertex_count", krom_import_usdc_get_vertex_count);
+	SET_FUNCTION(krom_import_usdc, "_get_index_count", krom_import_usdc_get_index_count);
+	SET_FUNCTION(krom_import_usdc, "_get_indices", krom_import_usdc_get_indices);
+	SET_FUNCTION(krom_import_usdc, "_get_positions", krom_import_usdc_get_positions);
+	SET_FUNCTION(krom_import_usdc, "_get_normals", krom_import_usdc_get_normals);
+	SET_FUNCTION(krom_import_usdc, "_get_uvs", krom_import_usdc_get_uvs);
+	SET_FUNCTION(krom_import_usdc, "_get_scale_pos", krom_import_usdc_get_scale_pos);
+	SET_FUNCTION(krom_import_usdc, "_destroy", krom_import_usdc_destroy);
 	global->Set(String::NewFromUtf8(isolate, "Krom_import_usdc").ToLocalChecked(), krom_import_usdc);
 }
