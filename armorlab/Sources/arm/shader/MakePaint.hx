@@ -95,7 +95,8 @@ class MakePaint {
 
 		if (Context.raw.tool == ToolEraser ||
 			Context.raw.tool == ToolClone  ||
-			Context.raw.tool == ToolBlur) {
+			Context.raw.tool == ToolBlur   ||
+			Context.raw.tool == ToolSmudge) {
 
 			frag.write('float dist = 0.0;');
 
@@ -137,7 +138,7 @@ class MakePaint {
 		vert.add_out('vec2 texCoord');
 		vert.write('texCoord = tex * brushScale;');
 
-		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur) {
+		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) {
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('sampler2D texpaint_undo', '_texpaint_undo');

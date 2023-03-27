@@ -82,14 +82,14 @@ class UIFiles {
 
 	@:access(zui.Zui)
 	@:access(arm.sys.File)
-	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false): String {
+	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu : String -> Void = null): String {
 
 		var icons = Res.get("icons.k");
 		var folder = Res.tile50(icons, 2, 1);
 		var file = Res.tile50(icons, 3, 1);
 		var isCloud = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud(function() { UIStatus.inst.statusHandle.redraws = 3; });
+		if (isCloud && File.cloud == null) File.initCloud(function() { UIBase.inst.hwnds[TabStatus].redraws = 3; });
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		#if krom_ios
@@ -189,7 +189,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											iconMap.set(handle.text + Path.sep + f, icon);
-											UIStatus.inst.statusHandle.redraws = 3;
+											UIBase.inst.hwnds[TabStatus].redraws = 3;
 										});
 									});
 								}
@@ -253,8 +253,48 @@ class UIFiles {
 					}
 				}
 
+				if (Path.isTexture(f) && !isCloud) {
+					var w = 50;
+					if (iconMap == null) iconMap = [];
+					icon = iconMap.get(handle.text + Path.sep + f);
+					if (icon == null) {
+						var empty = iron.RenderPath.active.renderTargets.get("empty_black").image;
+						iconMap.set(handle.text + Path.sep + f, empty);
+						kha.Assets.loadImageFromPath(handle.text + Path.sep + f, false, function(image: kha.Image) {
+							iron.App.notifyOnInit(function() {
+								if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
+								var sw = image.width > image.height ? w : Std.int(1.0 * image.width / image.height * w);
+								var sh = image.width > image.height ? Std.int(1.0 * image.height / image.width * w) : w;
+								icon = kha.Image.createRenderTarget(sw, sh);
+								icon.g2.begin(true, 0xffffffff);
+								icon.g2.pipeline = App.pipeCopyRGB;
+								icon.g2.drawScaledImage(image, 0, 0, sw, sh);
+								icon.g2.pipeline = null;
+								icon.g2.end();
+								iconMap.set(handle.text + Path.sep + f, icon);
+								UIBase.inst.hwnds[TabStatus].redraws = 3;
+								image.unload(); // The big image is not needed anymore
+							});
+						});
+					}
+					if (icon != null) {
+						if (i == selected) {
+							ui.fill(-2,        -2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,     w + 2, w + 4,     2, ui.t.HIGHLIGHT_COL);
+							ui.fill(-2,         0,     2, w + 4, ui.t.HIGHLIGHT_COL);
+							ui.fill(w + 2 ,    -2,     2, w + 6, ui.t.HIGHLIGHT_COL);
+						}
+						state = ui.image(icon, 0xffffffff, icon.height * ui.SCALE());
+						generic = false;
+					}
+				}
+
 				if (generic) {
 					state = ui.image(icons, col, 50 * ui.SCALE(), rect.x, rect.y, rect.w, rect.h);
+				}
+
+				if (ui.isHovered && ui.inputReleasedR && contextMenu != null) {
+					contextMenu(handle.text + Path.sep + f);
 				}
 
 				if (state == Started) {

@@ -91,16 +91,9 @@ class App {
 		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
 			dropPath = untyped decodeURIComponent(dropPath);
-			dropPaths = dropPath.split("file://");
-			for (i in 0...dropPaths.length) dropPaths[i] = dropPaths[i].rtrim();
-			#else
+			#end
 			dropPath = dropPath.rtrim();
 			dropPaths.push(dropPath);
-			#end
-			// #if krom_ios
-			// Import immediately while access to resource is unlocked
-			// handleDropPaths();
-			// #end
 		});
 
 		System.notifyOnApplicationState(
@@ -172,6 +165,7 @@ class App {
 					iron.App.notifyOnRender2D(UINodes.inst.render);
 					iron.App.notifyOnUpdate(UIBase.inst.update);
 					iron.App.notifyOnRender2D(UIBase.inst.render);
+					iron.App.notifyOnUpdate(Camera.inst.update);
 					iron.App.notifyOnRender2D(render);
 					appx = 0;
 					appy = UIHeader.inst.headerh * 2;
@@ -299,7 +293,7 @@ class App {
 
 	public static function redrawUI() {
 		UIHeader.inst.headerHandle.redraws = 2;
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[TabStatus].redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
@@ -342,43 +336,29 @@ class App {
 			isDragging = true;
 		}
 		if (mouse.released() && hasDrag) {
-			var mx = mouse.x;
-			var my = mouse.y;
-			var inViewport = Context.raw.paintVec.x < 1 && Context.raw.paintVec.x > 0 &&
-							 Context.raw.paintVec.y < 1 && Context.raw.paintVec.y > 0;
-			var inNodes = UINodes.inst.show &&
-						  mx > UINodes.inst.wx && mx < UINodes.inst.wx + UINodes.inst.ww &&
-						  my > UINodes.inst.wy && my < UINodes.inst.wy + UINodes.inst.wh;
-			var inSwatches = UIStatus.inst.statustab.position == 4 &&
-						  mx > iron.App.x() && mx < iron.App.x() + System.windowWidth() &&
-						  my > System.windowHeight() - Config.raw.layout[LayoutStatusH];
 			if (dragAsset != null) {
-				if (inNodes) { // Create image texture
+				if (Context.inNodes()) { // Create image texture
 					UINodes.inst.acceptAssetDrag(Project.assets.indexOf(dragAsset));
 				}
-				else if (inViewport) {
+				else if (Context.inViewport()) {
 					if (dragAsset.file.toLowerCase().endsWith(".hdr")) {
 						var image = Project.getImage(dragAsset);
 						arm.io.ImportEnvmap.run(dragAsset.file, image);
 					}
 				}
-				else if (inSwatches) {
+				else if (Context.inSwatches()) {
 					TabSwatches.acceptSwatchDrag(dragSwatch);
 				}
 				dragAsset = null;
 			}
 			else if (dragSwatch != null) {
-				if (inNodes) { // Create RGB node
+				if (Context.inNodes()) { // Create RGB node
 					UINodes.inst.acceptSwatchDrag(dragSwatch);
 				}
 				dragSwatch = null;
 			}
 			else if (dragFile != null) {
-				var statush = Config.raw.layout[LayoutStatusH];
-				var inBrowser =
-					mx > iron.App.x() && mx < iron.App.x() + System.windowWidth() &&
-					my > System.windowHeight() - statush;
-				if (!inBrowser) {
+				if (!Context.inBrowser()) {
 					dropX = mouse.x;
 					dropY = mouse.y;
 					ImportAsset.run(dragFile, dropX, dropY);
@@ -454,7 +434,7 @@ class App {
 			}
 		}
 		else if (Context.raw.frame == 3) {
-			Context.raw.ddirty = 2;
+			Context.raw.ddirty = 3;
 		}
 		Context.raw.frame++;
 
@@ -535,7 +515,6 @@ class App {
 	}
 
 	public static function isScrolling(): Bool {
-		return UIBase.inst.ui.isScrolling;
 		for (ui in getUIs()) if (ui.isScrolling) return true;
 		return false;
 	}
@@ -551,14 +530,15 @@ class App {
 
 	public static function redrawStatus() {
 		if (arm.ui.UIStatus.inst != null) {
-			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
+			UIBase.inst.hwnds[TabStatus].redraws = 2;
 		}
 	}
 
 	public static function redrawConsole() {
-		if (arm.ui.UIStatus.inst != null) {
-			arm.ui.UIStatus.inst.statusHandle.redraws = 2;
-		}
+		var statush = Config.raw.layout[LayoutStatusH];
+		if (arm.ui.UIStatus.inst != null && arm.ui.UIBase.inst != null && arm.ui.UIBase.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UIBase.inst.ui.SCALE()) {
+			UIBase.inst.hwnds[TabStatus].redraws = 2;
+ 		}
 	}
 
 	public static function initLayout() {
@@ -579,7 +559,11 @@ class App {
 		raw.recent_projects = [];
 		raw.bookmarks = [];
 		raw.plugins = [];
+		#if (krom_android || krom_ios)
+		raw.keymap = "touch.json";
+		#else
 		raw.keymap = "default.json";
+		#end
 		raw.theme = "default.json";
 		raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
 		raw.undo_steps = 4;
@@ -908,4 +892,52 @@ class App {
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
+
+	public static var defaultKeymap = {
+		action_paint: "left",
+		action_rotate: "alt+left",
+		action_pan: "alt+middle",
+		action_zoom: "alt+right",
+		rotate_light: "shift+middle",
+		rotate_envmap: "ctrl+middle",
+		set_clone_source: "alt",
+		stencil_hide: "z",
+		brush_radius: "f",
+		brush_radius_decrease: "[",
+		brush_radius_increase: "]",
+		brush_ruler: "shift",
+		file_new: "ctrl+n",
+		file_open: "ctrl+o",
+		file_open_recent: "ctrl+shift+o",
+		file_save: "ctrl+s",
+		file_save_as: "ctrl+shift+s",
+		file_reimport_textures: "ctrl+shift+r",
+		file_import_assets: "ctrl+i",
+		file_export_textures: "ctrl+e",
+		file_export_textures_as: "ctrl+shift+e",
+		edit_undo: "ctrl+z",
+		edit_redo: "ctrl+shift+z",
+		edit_prefs: "ctrl+k",
+		view_reset: "0",
+		view_front: "1",
+		view_back: "ctrl+1",
+		view_right: "3",
+		view_left: "ctrl+3",
+		view_top: "7",
+		view_bottom: "ctrl+7",
+		view_camera_type: "5",
+		view_orbit_left: "4",
+		view_orbit_right: "6",
+		view_orbit_up: "8",
+		view_orbit_down: "2",
+		view_orbit_opposite: "9",
+		view_zoom_in: "",
+		view_zoom_out: "",
+		view_distract_free: "f11",
+		viewport_mode: "ctrl+m",
+		toggle_node_editor: "tab",
+		toggle_browser: "`",
+		node_search: "space",
+		operator_search: "space"
+	};
 }

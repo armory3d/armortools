@@ -222,6 +222,10 @@ class MakeMesh {
 			frag.write('fragColor[1] = vec4(1.0, 0.0, 1.0, 1.0);'); // Pink
 		}
 
+		if (Context.raw.viewportMode != ViewLit && Context.raw.viewportMode != ViewPathTrace) {
+			frag.write('fragColor[1].rgb = pow(fragColor[1].rgb, vec3(2.2, 2.2, 2.2));');
+		}
+
 		frag.write('n /= (abs(n.x) + abs(n.y) + abs(n.z));');
 		frag.write('n.xy = n.z >= 0.0 ? n.xy : octahedronWrap(n.xy);');
 		frag.write('fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, uint(int(matid * 255.0) % 3)));');

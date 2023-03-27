@@ -286,7 +286,7 @@ class UINodes {
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
 							Context.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
-							UIStatus.inst.statusHandle.redraws = 1;
+							UIBase.inst.hwnds[TabStatus].redraws = 1;
 						}
 					}
 					uiMenu.enabled = true;
@@ -418,7 +418,7 @@ class UINodes {
 		}
 
 		// Node search popup
-		if (kb.started(Config.keymap.node_search)) nodeSearch();
+		if (Operator.shortcut(Config.keymap.node_search)) nodeSearch();
 		if (nodeSearchSpawn != null) {
 			ui.inputX = mouse.x; // Fix inputDX after popup removal
 			ui.inputY = mouse.y;
@@ -443,7 +443,7 @@ class UINodes {
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
-			var search = ui.textInput(searchHandle, "", Left, true, true);
+			var search = ui.textInput(searchHandle, "", Left, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
 				first = false;

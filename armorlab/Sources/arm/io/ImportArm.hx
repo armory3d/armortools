@@ -13,7 +13,7 @@ import iron.system.ArmPack;
 import iron.Scene;
 import arm.ProjectFormat;
 import arm.ui.UIFiles;
-import arm.ui.UIStatus;
+import arm.ui.UIBase;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
@@ -144,7 +144,7 @@ class ImportArm {
 				Project.raw.swatches.push(s);
 			}
 		}
-		UIStatus.inst.statusHandle.redraws = 2;
+		UIBase.inst.hwnds[TabStatus].redraws = 2;
 		Data.deleteBlob(path);
 	}
 

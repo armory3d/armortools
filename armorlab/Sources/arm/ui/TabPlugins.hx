@@ -1,11 +1,13 @@
 package arm.ui;
 
+import zui.Zui;
+
 class TabPlugins {
 
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Plugins")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Plugins")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
 			ui.row([1 / 14]);

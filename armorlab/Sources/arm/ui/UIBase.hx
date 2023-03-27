@@ -25,8 +25,15 @@ class UIBase {
 	public static var inst: UIBase;
 	public var show = true;
 	public var ui: Zui;
+	public var hwnds = [Id.handle()];
+	public var htabs = [Id.handle()];
+	public var hwndTabs = [
+		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabSwatches.draw, TabPlugins.draw, TabScript.draw, TabConsole.draw]
+	];
 	var borderStarted = 0;
 	var borderHandle: Handle = null;
+	var action_paint_remap = "";
+	var operatorSearchOffset = 0;
 
 	public function new() {
 		inst = this;
@@ -64,9 +71,9 @@ class UIBase {
 
 		if (Context.raw.emptyEnvmap == null) {
 			var b = Bytes.alloc(4);
-			b.set(0, 2);
-			b.set(1, 2);
-			b.set(2, 2);
+			b.set(0, 8);
+			b.set(1, 8);
+			b.set(2, 8);
 			b.set(3, 255);
 			Context.raw.emptyEnvmap = Image.fromBytes(b, 1, 1);
 		}
@@ -96,12 +103,15 @@ class UIBase {
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 		Zui.onDeselectText = onDeselectText;
+		Zui.onTabDrop = onTabDrop;
 
 		var resources = ["cursor.k", "icons.k", "placeholder.k"];
 		Res.load(resources, done);
 
 		Context.raw.projectObjects = [];
 		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
+
+		Operator.register("view_top", view_top);
 	}
 
 	function done() {
@@ -117,6 +127,7 @@ class UIBase {
 
 	public function update() {
 		updateUI();
+		Operator.update();
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 
@@ -191,14 +202,13 @@ class UIBase {
 		var isTyping = UINodes.inst.ui.isTyping;
 
 		// Viewport shortcuts
-		var inViewport = mouse.viewX > 0 && mouse.viewX < right &&
-						 mouse.viewY > 0 && mouse.viewY < iron.App.h();
-		if (inViewport && !isTyping) {
+		if (Context.inPaintArea() && !isTyping) {
 			if (UIHeader.inst.worktab.position == Space3D) {
 				// Radius
 				if (Context.raw.tool == ToolEraser ||
 					Context.raw.tool == ToolClone  ||
-					Context.raw.tool == ToolBlur) {
+					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolSmudge) {
 					if (Operator.shortcut(Config.keymap.brush_radius)) {
 						Context.raw.brushCanLock = true;
 						if (!Input.getPen().connected) mouse.lock();
@@ -231,7 +241,6 @@ class UIBase {
 				else if (Operator.shortcut(Config.keymap.view_left)) Viewport.setView(-1, 0, 0, Math.PI / 2, 0, -Math.PI / 2);
 				else if (Operator.shortcut(Config.keymap.view_right)) Viewport.setView(1, 0, 0, Math.PI / 2, 0, Math.PI / 2);
 				else if (Operator.shortcut(Config.keymap.view_bottom)) Viewport.setView(0, 0, -1, Math.PI, 0, Math.PI);
-				else if (Operator.shortcut(Config.keymap.view_top)) Viewport.setView(0, 0, 1, 0, 0, 0);
 				else if (Operator.shortcut(Config.keymap.view_camera_type)) {
 					Context.raw.cameraType = Context.raw.cameraType == CameraPerspective ? CameraOrthographic : CameraPerspective;
 					Context.raw.camHandle.position = Context.raw.cameraType;
@@ -281,6 +290,8 @@ class UIBase {
 					}, 9 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
 				}
 			}
+
+			if (Operator.shortcut(Config.keymap.operator_search)) operatorSearch();
 		}
 
 		if (Context.raw.brushCanLock || Context.raw.brushLocked) {
@@ -315,7 +326,7 @@ class UIBase {
 
 				}
 			}
-			else if (borderHandle == UIStatus.inst.statusHandle) {
+			else if (borderHandle == hwnds[TabStatus]) {
 				var my = Std.int(mouse.movementY);
 				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
@@ -337,6 +348,62 @@ class UIBase {
 		}
 	}
 
+	function view_top() {
+		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
+		var mouse = Input.getMouse();
+		if (Context.inPaintArea() && !isTyping) {
+			if (mouse.viewX < iron.App.w()) {
+				Viewport.setView(0, 0, 1, 0, 0, 0);
+			}
+		}
+	}
+
+	function operatorSearch() {
+		var kb = Input.getKeyboard();
+		var searchHandle = Id.handle();
+		var first = true;
+		UIMenu.draw(function(ui: Zui) {
+			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
+			var search = ui.textInput(searchHandle, "", Left, true, true);
+			ui.changed = false;
+			if (first) {
+				first = false;
+				searchHandle.text = "";
+				ui.startTextEdit(searchHandle); // Focus search bar
+			}
+
+			if (searchHandle.changed) operatorSearchOffset = 0;
+
+			if (ui.isKeyPressed) { // Move selection
+				if (ui.key == kha.input.KeyCode.Down && operatorSearchOffset < 6) operatorSearchOffset++;
+				if (ui.key == kha.input.KeyCode.Up && operatorSearchOffset > 0) operatorSearchOffset--;
+			}
+			var enter = kb.down("enter");
+			var count = 0;
+			var BUTTON_COL = ui.t.BUTTON_COL;
+
+			for (n in Reflect.fields(Config.keymap)) {
+				if (n.indexOf(search) >= 0) {
+					ui.t.BUTTON_COL = count == operatorSearchOffset ? ui.t.HIGHLIGHT_COL : ui.t.SEPARATOR_COL;
+					if (ui.button(n, Left) || (enter && count == operatorSearchOffset)) {
+						if (enter) {
+							ui.changed = true;
+							count = 6; // Trigger break
+						}
+						Operator.run(n);
+					}
+					if (++count > 6) break;
+				}
+			}
+
+			if (enter && count == 0) { // Hide popup on enter when command is not found
+				ui.changed = true;
+				searchHandle.text = "";
+			}
+			ui.t.BUTTON_COL = BUTTON_COL;
+		}, 8, -1, -1);
+	}
+
 	public function toggleDistractFree() {
 		show = !show;
 		App.resize();
@@ -354,7 +421,7 @@ class UIBase {
 
 		if (Console.messageTimer > 0) {
 			Console.messageTimer -= Time.delta;
-			if (Console.messageTimer <= 0) UIStatus.inst.statusHandle.redraws = 2;
+			if (Console.messageTimer <= 0) hwnds[TabStatus].redraws = 2;
 		}
 
 		if (!App.uiEnabled) return;
@@ -480,11 +547,11 @@ class UIBase {
 
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uiEnabled) return;
-		if (handle != UIStatus.inst.statusHandle &&
+		if (handle != hwnds[TabStatus] &&
 			handle != UINodes.inst.hwnd) return; // Scalable handles
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
 		if (handle == UINodes.inst.hwnd && side == SideTop) return;
-		if (handle == UIStatus.inst.statusHandle && side != SideTop) return;
+		if (handle == hwnds[TabStatus] && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?
@@ -509,9 +576,21 @@ class UIBase {
 		#end
 	}
 
+	function onTabDrop(to: Handle, toPosition: Int, from: Handle, fromPosition: Int) {
+		var i = htabs.indexOf(to);
+		var j = htabs.indexOf(from);
+		if (i > -1 && j > -1) {
+			var element = hwndTabs[j][fromPosition];
+			hwndTabs[j].splice(fromPosition, 1);
+			hwndTabs[i].insert(toPosition, element);
+			hwnds[i].redraws = 2;
+			hwnds[j].redraws = 2;
+		}
+	}
+
 	public function tagUIRedraw() {
 		UIHeader.inst.headerHandle.redraws = 2;
-		UIStatus.inst.statusHandle.redraws = 2;
+		hwnds[TabStatus].redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
 	}

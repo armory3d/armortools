@@ -7,11 +7,7 @@ import zui.Id;
 class UIStatus {
 
 	public static var inst: UIStatus;
-
 	public static inline var defaultStatusH = 32;
-
-	public var statusHandle = new Handle();
-	public var statustab = Id.handle();
 
 	public function new() {
 		inst = this;
@@ -22,7 +18,7 @@ class UIStatus {
 		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.window(statusHandle, iron.App.x(), System.windowHeight() - statush, System.windowWidth(), statush)) {
+		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.windowHeight() - statush, System.windowWidth(), statush)) {
 			ui._y += 2;
 
 			// Border
@@ -30,19 +26,13 @@ class UIStatus {
 			ui.g.fillRect(0, 0, 1, ui._windowH);
 			ui.g.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
 
-			TabBrowser.draw();
-			TabTextures.draw();
-			TabMeshes.draw();
-			TabSwatches.draw();
-			TabPlugins.draw();
-			TabScript.draw();
-			TabConsole.draw();
+			for (draw in UIBase.inst.hwndTabs[TabStatus]) draw(UIBase.inst.htabs[TabStatus]);
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-			if (statustab.changed && (statustab.position == Context.raw.lastStatusPosition || minimized)) {
+			if (UIBase.inst.htabs[TabStatus].changed && (UIBase.inst.htabs[TabStatus].position == Context.raw.lastStatusPosition || minimized)) {
 				UIBase.inst.toggleBrowser();
 			}
-			Context.raw.lastStatusPosition = statustab.position;
+			Context.raw.lastStatusPosition = UIBase.inst.htabs[TabStatus].position;
 		}
 	}
 }

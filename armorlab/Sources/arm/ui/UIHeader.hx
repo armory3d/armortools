@@ -72,7 +72,7 @@ class UIHeader {
 				// 	var newSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 				// 	Context.setSwatch(newSwatch);
 				// 	Project.raw.swatches.push(newSwatch);
-				// 	UIStatus.inst.statusHandle.redraws = 1;
+				// 	UIBase.inst.hwnds[TabStatus].redraws = 1;
 				// }
 				// if (ui.isHovered) ui.tooltip(tr("Add picked color to swatches"));
 
@@ -90,8 +90,9 @@ class UIHeader {
 				// }
 			}
 			else if (Context.raw.tool == ToolEraser ||
-					 Context.raw.tool == ToolClone ||
-					 Context.raw.tool == ToolBlur) {
+					 Context.raw.tool == ToolClone  ||
+					 Context.raw.tool == ToolBlur   ||
+					 Context.raw.tool == ToolSmudge) {
 
 				var inpaint = UINodes.inst.getNodes().nodesSelected.length > 0 && UINodes.inst.getNodes().nodesSelected[0].type == "InpaintNode";
 				if (inpaint) {
@@ -125,15 +126,6 @@ class UIHeader {
 				// 		MakeMaterial.parsePaintMaterial();
 				// 	}
 				// }
-
-				if (Context.raw.tool == ToolBlur) {
-					ui._x += 10 * ui.SCALE();
-					var dirHandle = Id.handle({ selected: false });
-					Context.raw.blurDirectional = ui.check(dirHandle, tr("Directional"));
-					if (dirHandle.changed) {
-						MakeMaterial.parsePaintMaterial();
-					}
-				}
 			}
 		}
 	}

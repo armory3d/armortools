@@ -4,15 +4,26 @@ package arm;
 	var ToolEraser = 0;
 	var ToolClone = 1;
 	var ToolBlur = 2;
-	var ToolPicker = 3;
+	var ToolSmudge = 3;
+	var ToolPicker = 4;
 
-	var ToolDecal = 4; // Unused
-	var ToolText = 5;
+	var ToolDecal = 5; // Unused
+	var ToolText = 6;
 }
 
 @:enum abstract SpaceType(Int) from Int to Int {
 	var Space3D = 0;
 	var Space2D = 1;
+}
+
+@:enum abstract AreaType(Int) from Int to Int {
+	var AreaViewport = 0;
+	var AreaNodes = 1;
+	var AreaBrowser = 2;
+}
+
+@:enum abstract TabArea(Int) from Int to Int {
+	var TabStatus = 0;
 }
 
 @:enum abstract TextureRes(Int) from Int to Int {

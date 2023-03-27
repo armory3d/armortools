@@ -3,6 +3,7 @@ package arm.ui;
 import kha.input.KeyCode;
 import zui.Zui;
 import arm.sys.Path;
+import arm.sys.File;
 import arm.io.ImportAsset;
 
 class TabBrowser {
@@ -15,14 +16,14 @@ class TabBrowser {
 	public static function showDirectory(directory: String) {
 		hpath.text = directory;
 		hsearch.text = "";
-		UIStatus.inst.statustab.position = 0;
+		UIBase.inst.htabs[TabStatus].position = 0;
 	}
 
 	@:access(zui.Zui)
-	public static function draw() {
+	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.tab(UIStatus.inst.statustab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
+		if (ui.tab(htab, tr("Browser")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			if (Config.raw.bookmarks == null) {
 				Config.raw.bookmarks = [];
@@ -90,7 +91,38 @@ class TabBrowser {
 			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
-			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh);
+			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh, function(file) {
+				var fileName = file.substr(file.lastIndexOf(Path.sep) + 1);
+				if (fileName != "..") {
+					UIMenu.draw(function(ui: Zui) {
+						ui.text(fileName, Right, ui.t.HIGHLIGHT_COL);
+						if (ui.button(tr("Import"), Left)) {
+							ImportAsset.run(file);
+						}
+						if (Path.isTexture(file)) {
+							if (ui.button(tr("Set as Envmap"), Left)) {
+								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
+									App.notifyOnNextFrame(function() {
+										var assetIndex = -1;
+										for (i in 0...Project.assets.length) {
+											if (Project.assets[i].file == file) {
+												assetIndex = i;
+												break;
+											}
+										}
+										if (assetIndex != -1) {
+											arm.io.ImportEnvmap.run(file, Project.getImage(Project.assets[assetIndex]));
+										}
+									});
+								});
+							}
+						}
+						if (ui.button(tr("Open externally"), Left)) {
+							File.start(file);
+						}
+					}, Path.isTexture(file) ? 6 : 3);
+				}
+			});
 
 			if (known) {
 				var path = hpath.text;

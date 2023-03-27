@@ -1,8 +1,9 @@
 package arm;
 
 import zui.Zui;
-import iron.RenderPath;
 import iron.object.MeshObject;
+import iron.system.Input;
+import iron.RenderPath;
 import arm.shader.NodeShader;
 import arm.shader.MakeMaterial;
 import arm.render.RenderPathDeferred;
@@ -56,6 +57,9 @@ class Context {
 		MakeMaterial.parsePaintMaterial();
 		MakeMaterial.parseMeshMaterial();
 		raw.ddirty = 3;
+		var _viewportMode = raw.viewportMode;
+		raw.viewportMode = -1;
+		setViewportMode(_viewportMode);
 	}
 
 	public static function selectPaintObject(o: MeshObject) {
@@ -216,5 +220,36 @@ class Context {
 		}
 
 		parseBrushInputs();
+	}
+
+	public static function inViewport(): Bool {
+		return raw.paintVec.x < 1 && raw.paintVec.x > 0 &&
+			   raw.paintVec.y < 1 && raw.paintVec.y > 0;
+	}
+
+	public static function inPaintArea(): Bool {
+		return inViewport();
+	}
+
+	public static function inNodes(): Bool {
+		var mouse = Input.getMouse();
+		return UINodes.inst.show &&
+			   mouse.x > UINodes.inst.wx && mouse.x < UINodes.inst.wx + UINodes.inst.ww &&
+			   mouse.y > UINodes.inst.wy && mouse.y < UINodes.inst.wy + UINodes.inst.wh;
+	}
+
+	public static function inSwatches(): Bool {
+		return UIBase.inst.ui.getHoveredTabName() == tr("Swatches");
+	}
+
+	public static function inBrowser(): Bool {
+		return UIBase.inst.ui.getHoveredTabName() == tr("Browser");
+	}
+
+	public static function getAreaType(): AreaType {
+		if (inViewport()) return AreaViewport;
+		if (inNodes()) return AreaNodes;
+		if (inBrowser()) return AreaBrowser;
+		return -1;
 	}
 }
