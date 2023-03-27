@@ -34,7 +34,6 @@ class UIBase {
 	public var tabx = 0;
 	public var show = true;
 	public var ui: Zui;
-	// Sidebar0, Sidebar1, Status
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
 	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
 	public var hwndTabs = [
@@ -268,11 +267,11 @@ class UIBase {
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 		if (!isTyping) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
-				hwnds[1].redraws = 2;
+				hwnds[TabSidebar1].redraws = 2;
 				for (i in 1...10) if (kb.started(i + "")) Context.selectMaterial(i - 1);
 			}
 			else if (Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
-				hwnds[0].redraws = 2;
+				hwnds[TabSidebar0].redraws = 2;
 				for (i in 1...10) if (kb.started(i + "")) Context.selectLayer(i - 1);
 			}
 		}
@@ -454,7 +453,7 @@ class UIBase {
 					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
 				}
 			}
-			else if (borderHandle == hwnds[2]) {
+			else if (borderHandle == hwnds[TabStatus]) {
 				var my = Std.int(mouse.movementY);
 				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
@@ -468,7 +467,7 @@ class UIBase {
 				}
 				else {
 					var my = Std.int(mouse.movementY);
-					if (borderHandle == hwnds[1] && borderStarted == SideTop) {
+					if (borderHandle == hwnds[TabSidebar1] && borderStarted == SideTop) {
 						if (Config.raw.layout[LayoutSidebarH0] + my > 32 && Config.raw.layout[LayoutSidebarH1] - my > 32) {
 							Config.raw.layout[LayoutSidebarH0] += my;
 							Config.raw.layout[LayoutSidebarH1] -= my;
@@ -624,7 +623,7 @@ class UIBase {
 
 		if (Console.messageTimer > 0) {
 			Console.messageTimer -= Time.delta;
-			if (Console.messageTimer <= 0) hwnds[2].redraws = 2;
+			if (Console.messageTimer <= 0) hwnds[TabStatus].redraws = 2;
 		}
 
 		if (!App.uiEnabled) return;
@@ -842,7 +841,7 @@ class UIBase {
 				g2.pipeline = null;
 				g2.end();
 			}
-			hwnds[0].redraws = 2;
+			hwnds[TabSidebar0].redraws = 2;
 		}
 		if (Context.raw.layerPreviewDirty && !Context.raw.layer.isGroup()) {
 			Context.raw.layerPreviewDirty = false;
@@ -859,7 +858,7 @@ class UIBase {
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();
-			hwnds[0].redraws = 2;
+			hwnds[TabSidebar0].redraws = 2;
 		}
 
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
@@ -901,11 +900,11 @@ class UIBase {
 		UIStatus.inst.renderUI(g);
 
 		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
-		if (ui.window(hwnds[0], tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
-			for (draw in hwndTabs[0]) draw(htabs[0]);
+		if (ui.window(hwnds[TabSidebar0], tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
+			for (draw in hwndTabs[TabSidebar0]) draw(htabs[TabSidebar0]);
 		}
-		if (ui.window(hwnds[1], tabx, Config.raw.layout[LayoutSidebarH0], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH1])) {
-			for (draw in hwndTabs[1]) draw(htabs[1]);
+		if (ui.window(hwnds[TabSidebar1], tabx, Config.raw.layout[LayoutSidebarH0], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH1])) {
+			for (draw in hwndTabs[TabSidebar1]) draw(htabs[TabSidebar1]);
 		}
 
 		if (Config.raw.layout[LayoutSidebarW] == 0) {
@@ -917,14 +916,14 @@ class UIBase {
 				}
 			}
 		}
-		else if (htabs[0].changed && (htabs[0].position == Context.raw.lastHtab0Position)) {
+		else if (htabs[TabSidebar0].changed && htabs[TabSidebar0].position == Context.raw.lastHtab0Position) {
 			if (Time.time() - Context.raw.selectTime < 0.25) {
 				Context.raw.maximizedSidebarWidth = Config.raw.layout[LayoutSidebarW];
 				Config.raw.layout[LayoutSidebarW] = 0;
 			}
 			Context.raw.selectTime = Time.time();
 		}
-		Context.raw.lastHtab0Position = htabs[0].position;
+		Context.raw.lastHtab0Position = htabs[TabSidebar0].position;
 
 		ui.end();
 		g.begin(false);
@@ -1129,16 +1128,16 @@ class UIBase {
 
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uiEnabled) return;
-		if (handle != hwnds[0] &&
-			handle != hwnds[1] &&
-			handle != hwnds[2] &&
+		if (handle != hwnds[TabSidebar0] &&
+			handle != hwnds[TabSidebar1] &&
+			handle != hwnds[TabStatus] &&
 			handle != UINodes.inst.hwnd &&
 			handle != UIView2D.inst.hwnd) return; // Scalable handles
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
 		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
-		if (handle == hwnds[0] && side == SideTop) return;
-		if (handle == hwnds[2] && side != SideTop) return;
+		if (handle == hwnds[TabSidebar0] && side == SideTop) return;
+		if (handle == hwnds[TabStatus] && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?
@@ -1178,10 +1177,10 @@ class UIBase {
 	public function tagUIRedraw() {
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
-		hwnds[2].redraws = 2;
+		hwnds[TabStatus].redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
-		hwnds[0].redraws = 2;
-		hwnds[1].redraws = 2;
+		hwnds[TabSidebar0].redraws = 2;
+		hwnds[TabSidebar1].redraws = 2;
 	}
 }

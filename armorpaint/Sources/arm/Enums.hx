@@ -31,6 +31,12 @@ package arm;
 	var AreaBrowser = 5;
 }
 
+@:enum abstract TabArea(Int) from Int to Int {
+	var TabSidebar0 = 0;
+	var TabSidebar1 = 1;
+	var TabStatus = 2;
+}
+
 @:enum abstract TextureRes(Int) from Int to Int {
 	var Res128 = 0;
 	var Res256 = 1;

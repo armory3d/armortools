@@ -18,7 +18,7 @@ class UIStatus {
 		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (ui.window(UIBase.inst.hwnds[2], iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
+		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 			ui._y += 2;
 
 			// Border
@@ -26,13 +26,13 @@ class UIStatus {
 			ui.g.fillRect(0, 0, 1, ui._windowH);
 			ui.g.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
 
-			for (draw in UIBase.inst.hwndTabs[2]) draw(UIBase.inst.htabs[2]);
+			for (draw in UIBase.inst.hwndTabs[TabStatus]) draw(UIBase.inst.htabs[TabStatus]);
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
-			if (UIBase.inst.htabs[2].changed && (UIBase.inst.htabs[2].position == Context.raw.lastStatusPosition || minimized)) {
+			if (UIBase.inst.htabs[TabStatus].changed && (UIBase.inst.htabs[TabStatus].position == Context.raw.lastStatusPosition || minimized)) {
 				UIBase.inst.toggleBrowser();
 			}
-			Context.raw.lastStatusPosition = UIBase.inst.htabs[2].position;
+			Context.raw.lastStatusPosition = UIBase.inst.htabs[TabStatus].position;
 		}
 	}
 }

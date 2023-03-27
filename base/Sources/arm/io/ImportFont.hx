@@ -37,7 +37,7 @@ class ImportFont {
 			}
 			iron.App.notifyOnInit(_init);
 
-			UIBase.inst.hwnds[2].redraws = 2;
+			UIBase.inst.hwnds[TabStatus].redraws = 2;
 		});
 	}
 }

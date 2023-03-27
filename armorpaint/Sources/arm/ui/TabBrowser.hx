@@ -16,7 +16,7 @@ class TabBrowser {
 	public static function showDirectory(directory: String) {
 		hpath.text = directory;
 		hsearch.text = "";
-		UIBase.inst.htabs[2].position = 0;
+		UIBase.inst.htabs[TabStatus].position = 0;
 	}
 
 	@:access(zui.Zui)
