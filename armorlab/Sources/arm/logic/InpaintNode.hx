@@ -74,9 +74,9 @@ class InpaintNode extends LogicNode {
 				if (App.pipeCopy == null) App.makePipe();
 				if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
 				image.g4.begin();
-				image.g4.setPipeline(App.pipeApplyMask);
-				image.g4.setTexture(App.tex0Mask, source);
-				image.g4.setTexture(App.texaMask, mask);
+				image.g4.setPipeline(App.pipeInpaintPreview);
+				image.g4.setTexture(App.tex0InpaintPreview, source);
+				image.g4.setTexture(App.texaInpaintPreview, mask);
 				image.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
 				image.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
 				image.g4.drawIndexedVertices();

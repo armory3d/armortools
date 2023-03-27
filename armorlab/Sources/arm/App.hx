@@ -65,9 +65,9 @@ class App {
 	public static var pipeCopy128: PipelineState;
 	public static var pipeCopyBGRA: PipelineState;
 	public static var pipeCopyRGB: PipelineState = null;
-	public static var pipeApplyMask: PipelineState;
-	public static var tex0Mask: TextureUnit;
-	public static var texaMask: TextureUnit;
+	public static var pipeInpaintPreview: PipelineState;
+	public static var tex0InpaintPreview: TextureUnit;
+	public static var texaInpaintPreview: TextureUnit;
 	public static var tempImage: Image = null;
 	public static var expa: Image = null;
 	public static var expb: Image = null;
@@ -704,15 +704,15 @@ class App {
 		pipeCopyB.colorWriteMasksAlpha = [false];
 		pipeCopyB.compile();
 
-		pipeApplyMask = new PipelineState();
-		pipeApplyMask.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
+		pipeInpaintPreview = new PipelineState();
+		pipeInpaintPreview.vertexShader = kha.Shaders.getVertex("pass.vert");
+		pipeInpaintPreview.fragmentShader = kha.Shaders.getFragment("inpaint_preview.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.Float2);
-		pipeApplyMask.inputLayout = [vs];
-		pipeApplyMask.compile();
-		tex0Mask = pipeApplyMask.getTextureUnit("tex0");
-		texaMask = pipeApplyMask.getTextureUnit("texa");
+		pipeInpaintPreview.inputLayout = [vs];
+		pipeInpaintPreview.compile();
+		tex0InpaintPreview = pipeInpaintPreview.getTextureUnit("tex0");
+		texaInpaintPreview = pipeInpaintPreview.getTextureUnit("texa");
 	}
 
 	public static function makePipeCopyRGB() {
