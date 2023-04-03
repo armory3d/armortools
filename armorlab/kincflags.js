@@ -10,6 +10,7 @@ flags.with_stb_image_write = true;
 flags.with_onnx = true;
 flags.with_g2 = true;
 flags.with_iron = true;
+flags.with_zui = true;
 
 flags.on_project_created = async function(project) {
 	project.addDefine('IDLE_SLEEP');
