@@ -358,7 +358,7 @@ class BoxPreferences {
 				Config.raw.pressure_hardness = ui.check(Id.handle({ selected: Config.raw.pressure_hardness }), tr("Brush Hardness"));
 				Config.raw.pressure_opacity = ui.check(Id.handle({ selected: Config.raw.pressure_opacity }), tr("Brush Opacity"));
 				Config.raw.pressure_angle = ui.check(Id.handle({ selected: Config.raw.pressure_angle }), tr("Brush Angle"));
-				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 2.0, true);
+				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
 
 				ui.endElement();
 				ui.row([0.5]);

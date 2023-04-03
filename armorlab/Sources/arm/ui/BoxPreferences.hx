@@ -295,7 +295,7 @@ class BoxPreferences {
 			#end
 				ui.text(tr("Pressure controls"));
 				Config.raw.pressure_radius = ui.check(Id.handle({ selected: Config.raw.pressure_radius }), tr("Brush Radius"));
-				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 2.0, true);
+				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
 
 				ui.endElement();
 				ui.row([0.5]);
