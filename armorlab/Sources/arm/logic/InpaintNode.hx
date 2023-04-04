@@ -58,13 +58,17 @@ class InpaintNode extends LogicNode {
 
 	override function getAsImage(from: Int, done: kha.Image->Void) {
 		inputs[0].getAsImage(function(source: kha.Image) {
-			image.g2.begin(false);
-			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
-			image.g2.end();
 
-			result = auto ? texsynthInpaint(image, false, mask) : sdInpaint(image, mask);
+			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
+			App.notifyOnNextFrame(function() {
+				image.g2.begin(false);
+				image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+				image.g2.end();
 
-			done(result);
+				result = auto ? texsynthInpaint(image, false, mask) : sdInpaint(image, mask);
+
+				done(result);
+			});
 		});
 	}
 

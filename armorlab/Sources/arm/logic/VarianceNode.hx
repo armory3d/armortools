@@ -49,32 +49,34 @@ class VarianceNode extends LogicNode {
 				f32[i + 512 * 512 * 2] = (u8[i * 4 + 2] / 255) * 2.0 - 1.0;
 			}
 
-			kha.Assets.loadBlobFromPath("data/models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: kha.Blob) {
-				var latents_buf = Krom.mlInference(untyped vae_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
-				var latents = new js.lib.Float32Array(latents_buf);
-				for (i in 0...latents.length) {
-					latents[i] = 0.18215 * latents[i];
-				}
+			Console.progress(tr("Processing") + " - " + tr("Variance"));
+			App.notifyOnNextFrame(function() {
+				kha.Assets.loadBlobFromPath("data/models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: kha.Blob) {
+					var latents_buf = Krom.mlInference(untyped vae_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+					var latents = new js.lib.Float32Array(latents_buf);
+					for (i in 0...latents.length) {
+						latents[i] = 0.18215 * latents[i];
+					}
 
-				var noise = new js.lib.Float32Array(latents.length);
-				for (i in 0...noise.length) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
-				var num_inference_steps = 50;
-				var init_timestep = Std.int(num_inference_steps * strength);
-				var timesteps = @:privateAccess TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-				var alphas_cumprod = @:privateAccess TextToPhotoNode.alphas_cumprod;
-				var sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
-				var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
-				for (i in 0...latents.length) {
-					latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
-				}
-				var t_start = num_inference_steps - init_timestep;
+					var noise = new js.lib.Float32Array(latents.length);
+					for (i in 0...noise.length) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+					var num_inference_steps = 50;
+					var init_timestep = Std.int(num_inference_steps * strength);
+					var timesteps = @:privateAccess TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
+					var alphas_cumprod = @:privateAccess TextToPhotoNode.alphas_cumprod;
+					var sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
+					var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
+					for (i in 0...latents.length) {
+						latents[i] = sqrt_alpha_prod * latents[i] + sqrt_one_minus_alpha_prod * noise[i];
+					}
+					var t_start = num_inference_steps - init_timestep;
 
-				TextToPhotoNode.stableDiffusion(prompt, function(img: kha.Image) {
-					image = img;
-				}, latents, t_start);
+					TextToPhotoNode.stableDiffusion(prompt, function(_image: kha.Image) {
+						image = _image;
+						done(image);
+					}, latents, t_start);
+				});
 			});
-
-			done(image);
 		});
 	}
 

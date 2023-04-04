@@ -16,19 +16,21 @@ class UpscaleNode extends LogicNode {
 	}
 
 	override function getAsImage(from: Int, done: kha.Image->Void) {
-		inputs[0].getAsImage(function(img: kha.Image) {
-			image = img;
+		inputs[0].getAsImage(function(_image: kha.Image) {
+			image = _image;
 
-			if (image.width < Config.getTextureResX()) {
-				image = esrgan(image);
-				while (image.width < Config.getTextureResX()) {
-					var lastImage = image;
+			Console.progress(tr("Processing") + " - " + tr("Upscale"));
+			App.notifyOnNextFrame(function() {
+				if (image.width < Config.getTextureResX()) {
 					image = esrgan(image);
-					lastImage.unload();
+					while (image.width < Config.getTextureResX()) {
+						var lastImage = image;
+						image = esrgan(image);
+						lastImage.unload();
+					}
 				}
-			}
-
-			done(image);
+				done(image);
+			});
 		});
 	}
 

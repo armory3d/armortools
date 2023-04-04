@@ -676,11 +676,9 @@ class UINodes {
 			ui._w = ew;
 
 			if (ui.button(tr("Run"))) {
-				Console.toast(tr("Processing"));
-				iron.App.notifyOnInit(function() {
-					#if arm_debug
+				Console.progress(tr("Processing"));
+				App.notifyOnNextFrame(function() {
 					var timer = iron.system.Time.realTime();
-					#end
 
 					arm.logic.LogicParser.parse(Project.canvas, false);
 
@@ -746,9 +744,8 @@ class UINodes {
 						arm.render.RenderPathRaytrace.ready = false;
 						#end
 
-						#if arm_debug
-						trace("Model run in " + (iron.system.Time.realTime() - timer));
-						#end
+						Console.log("Processing finished in " + (iron.system.Time.realTime() - timer));
+						Console.progress(null);
 					});
 					});
 					});

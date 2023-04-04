@@ -42,8 +42,11 @@ class TilingNode extends LogicNode {
 			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 			image.g2.end();
 
-			result = auto ? InpaintNode.texsynthInpaint(image, true) : sdTiling(image);
-			done(result);
+			Console.progress(tr("Processing") + " - " + tr("Tiling"));
+			App.notifyOnNextFrame(function() {
+				result = auto ? InpaintNode.texsynthInpaint(image, true) : sdTiling(image);
+				done(result);
+			});
 		});
 	}
 

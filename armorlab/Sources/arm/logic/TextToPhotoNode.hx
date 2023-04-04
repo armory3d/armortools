@@ -11,14 +11,19 @@ class TextToPhotoNode extends LogicNode {
 	static var prompt = "";
 	static var image: kha.Image = null;
 	static var tiling = false;
+	static var text_encoder_blob : kha.Blob;
+	static var unet_blob : kha.Blob;
+	static var vae_decoder_blob : kha.Blob;
 
 	public function new(tree: LogicTree) {
 		super(tree);
 	}
 
 	override function getAsImage(from: Int, done: kha.Image->Void) {
-		stableDiffusion(prompt, function(img: kha.Image) { image = img; });
-		done(image);
+		stableDiffusion(prompt, function(_image: kha.Image) {
+			image = _image;
+			done(image);
+		});
 	}
 
 	override public function getCachedImage(): kha.Image {
@@ -31,13 +36,26 @@ class TextToPhotoNode extends LogicNode {
 		node.buttons[1].height = prompt.split("\n").length;
 	}
 
-	public static function stableDiffusion(prompt: String, done: kha.Image->Void = null, inpaintLatents: js.lib.Float32Array = null, offset = 0, upscale = true, mask: js.lib.Float32Array = null, latents_orig: js.lib.Float32Array = null) {
-		kha.Assets.loadBlobFromPath("data/models/sd_text_encoder.quant.onnx", function(text_encoder_blob: kha.Blob) {
-		kha.Assets.loadBlobFromPath("data/models/sd_unet.quant.onnx", function(unet_blob: kha.Blob) {
-		kha.Assets.loadBlobFromPath("data/models/sd_vae_decoder.quant.onnx", function(vae_decoder_blob: kha.Blob) {
+	public static function stableDiffusion(prompt: String, done: kha.Image->Void, inpaintLatents: js.lib.Float32Array = null, offset = 0, upscale = true, mask: js.lib.Float32Array = null, latents_orig: js.lib.Float32Array = null) {
+		kha.Assets.loadBlobFromPath("data/models/sd_text_encoder.quant.onnx", function(_text_encoder_blob: kha.Blob) {
+		kha.Assets.loadBlobFromPath("data/models/sd_unet.quant.onnx", function(_unet_blob: kha.Blob) {
+		kha.Assets.loadBlobFromPath("data/models/sd_vae_decoder.quant.onnx", function(_vae_decoder_blob: kha.Blob) {
+			text_encoder_blob = _text_encoder_blob;
+			unet_blob = _unet_blob;
+			vae_decoder_blob = _vae_decoder_blob;
+			textEncoder(prompt, inpaintLatents, function(latents: js.lib.Float32Array, text_embeddings: js.lib.Float32Array) {
+				unet(latents, text_embeddings, mask, latents_orig, offset, function(latents: js.lib.Float32Array) {
+					vaeDecoder(latents, upscale, done);
+				});
+			});
+		});
+		});
+		});
+	}
 
-			var seed = RandomNode.getSeed();
-
+	static function textEncoder(prompt: String, inpaintLatents: js.lib.Float32Array, done: js.lib.Float32Array->js.lib.Float32Array->Void) {
+		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
+		App.notifyOnNextFrame(function() {
 			var words = prompt.replace("\n", " ").replace(",", " , ").replace("  ", " ").trim().split(" ");
 			for (i in 0...words.length) {
 				text_input_ids[i + 1] = untyped vocab[words[i].toLowerCase() + "</w>"];
@@ -54,12 +72,6 @@ class TextToPhotoNode extends LogicNode {
 			var uncond_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference, true);
 			var uncond_embeddings = new js.lib.Float32Array(uncond_embeddings_buf);
 
-			var cur_latents = null;
-			var num_train_timesteps = 1000;
-			var num_inference_steps = 50;
-			var ets = [];
-			var counter = 0;
-
 			var f32 = new js.lib.Float32Array(uncond_embeddings.length + text_embeddings.length);
 			for (i in 0...uncond_embeddings.length) f32[i] = uncond_embeddings[i];
 			for (i in 0...text_embeddings.length) f32[i + uncond_embeddings.length] = text_embeddings[i];
@@ -75,152 +87,164 @@ class TextToPhotoNode extends LogicNode {
 				for (i in 0...latents.length) latents[i] = inpaintLatents[i];
 			}
 
-			var latent_model_input = new js.lib.Float32Array(latents.length * 2);
-			var noise_pred_uncond = new js.lib.Float32Array(latents.length);
-			var noise_pred_text = new js.lib.Float32Array(latents.length);
+			done(latents, text_embeddings);
+		});
+	}
 
-			// function _render2D(g) { // TODO: sleeps when out of focus
+	static function unet(latents: js.lib.Float32Array, text_embeddings: js.lib.Float32Array, mask: js.lib.Float32Array, latents_orig: js.lib.Float32Array, offset: Int, done: js.lib.Float32Array->Void) {
+		var latent_model_input = new js.lib.Float32Array(latents.length * 2);
+		var noise_pred_uncond = new js.lib.Float32Array(latents.length);
+		var noise_pred_text = new js.lib.Float32Array(latents.length);
 
-			for (i in 0...(51 - offset)) {
-				trace(i);
-				// Console.toast(tr("Processing") + " " + (counter + 1) + "/50", g);
-				// g.end();
+		var cur_latents = null;
+		var num_train_timesteps = 1000;
+		var num_inference_steps = 50;
+		var ets = [];
+		var counter = 0;
 
-				var timestep = timesteps[counter + offset];
-				for (i in 0...latents.length) latent_model_input[i] = latents[i];
-				for (i in 0...latents.length) latent_model_input[i + latents.length] = latents[i];
+		function processing(g) {
+			Console.progress(tr("Processing") + " - " + tr("Text to Photo") + " (" + (counter + 1) + "/" + (50 - offset) + ")");
 
-				var t32 = new js.lib.Int32Array(2);
-				t32[0] = timestep;
-				var noise_pred_buf = Krom.mlInference(untyped unet_blob.toBytes().b.buffer, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference, true);
-				var noise_pred = new js.lib.Float32Array(noise_pred_buf);
+			var timestep = timesteps[counter + offset];
+			for (i in 0...latents.length) latent_model_input[i] = latents[i];
+			for (i in 0...latents.length) latent_model_input[i + latents.length] = latents[i];
 
-				for (i in 0...noise_pred_uncond.length) noise_pred_uncond[i] = noise_pred[i];
-				for (i in 0...noise_pred_text.length) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
+			var t32 = new js.lib.Int32Array(2);
+			t32[0] = timestep;
+			var noise_pred_buf = Krom.mlInference(untyped unet_blob.toBytes().b.buffer, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference, true);
+			var noise_pred = new js.lib.Float32Array(noise_pred_buf);
 
-				var guidance_scale = 7.5;
-				noise_pred = new js.lib.Float32Array(noise_pred_uncond.length);
-				for (i in 0...noise_pred_uncond.length) {
-					noise_pred[i] = noise_pred_uncond[i] + guidance_scale * (noise_pred_text[i] - noise_pred_uncond[i]);
-				}
+			for (i in 0...noise_pred_uncond.length) noise_pred_uncond[i] = noise_pred[i];
+			for (i in 0...noise_pred_text.length) noise_pred_text[i] = noise_pred[noise_pred_uncond.length + i];
 
-				var prev_timestep = Std.int(Math.max(timestep - Std.int(num_train_timesteps / num_inference_steps), 0));
-
-				if (counter != 1) {
-					ets.push(noise_pred);
-				}
-				else {
-					prev_timestep = timestep;
-					timestep = timestep + Std.int(num_train_timesteps / num_inference_steps);
-				}
-
-				if (ets.length == 1 && counter == 0) {
-					cur_latents = latents;
-				}
-				else if (ets.length == 1 && counter == 1) {
-					var _noise_pred = new js.lib.Float32Array(noise_pred.length);
-					for (i in 0...noise_pred.length) {
-						_noise_pred[i] = (noise_pred[i] + ets[ets.length - 1][i]) / 2;
-					}
-					noise_pred = _noise_pred;
-					latents = cur_latents;
-					cur_latents = null;
-				}
-				else if (ets.length == 2) {
-					var _noise_pred = new js.lib.Float32Array(noise_pred.length);
-					for (i in 0...noise_pred.length) {
-						_noise_pred[i] = (3 * ets[ets.length - 1][i] - ets[ets.length - 2][i]) / 2;
-					}
-					noise_pred = _noise_pred;
-				}
-				else if (ets.length == 3) {
-					var _noise_pred = new js.lib.Float32Array(noise_pred.length);
-					for (i in 0...noise_pred.length) {
-						_noise_pred[i] = (23 * ets[ets.length - 1][i] - 16 * ets[ets.length - 2][i] + 5 * ets[ets.length - 3][i]) / 12;
-					}
-					noise_pred = _noise_pred;
-				}
-				else {
-					var _noise_pred = new js.lib.Float32Array(noise_pred.length);
-					for (i in 0...noise_pred.length) {
-						_noise_pred[i] = (1 / 24) * (55 * ets[ets.length - 1][i] - 59 * ets[ets.length - 2][i] + 37 * ets[ets.length - 3][i] - 9 * ets[ets.length - 4][i]);
-					}
-					noise_pred = _noise_pred;
-				}
-
-				var alpha_prod_t = alphas_cumprod[timestep + 1];
-				var alpha_prod_t_prev = alphas_cumprod[prev_timestep + 1];
-				var beta_prod_t = 1 - alpha_prod_t;
-				var beta_prod_t_prev = 1 - alpha_prod_t_prev;
-				var latents_coeff = Math.pow(alpha_prod_t_prev / alpha_prod_t, (0.5));
-				var noise_pred_denom_coeff = alpha_prod_t * Math.pow(beta_prod_t_prev, (0.5)) + Math.pow(alpha_prod_t * beta_prod_t * alpha_prod_t_prev, (0.5));
-				for (i in 0...latents.length) {
-					latents[i] = (latents_coeff * latents[i] - (alpha_prod_t_prev - alpha_prod_t) * noise_pred[i] / noise_pred_denom_coeff);
-				}
-				counter += 1;
-
-				if (mask != null) {
-					var noise = new js.lib.Float32Array(latents.length);
-					for (i in 0...noise.length) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
-					var sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
-					var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
-
-					var init_latents_proper = new js.lib.Float32Array(latents.length);
-					for (i in 0...init_latents_proper.length) {
-						init_latents_proper[i] = sqrt_alpha_prod * latents_orig[i] + sqrt_one_minus_alpha_prod * noise[i];
-					}
-
-					for (i in 0...latents.length) {
-						latents[i] = (init_latents_proper[i] * mask[i]) + (latents[i] * (1.0 - mask[i]));
-					}
-				}
-
-				if (counter == (51 - offset)) {
-					// iron.App.removeRender2D(_render2D);
-
-					for (i in 0...latents.length) {
-						latents[i] = 1.0 / 0.18215 * latents[i];
-					}
-
-					var pyimage_buf = Krom.mlInference(untyped vae_decoder_blob.toBytes().b.buffer, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
-					var pyimage = new js.lib.Float32Array(pyimage_buf);
-
-					for (i in 0...pyimage.length) {
-						pyimage[i] = pyimage[i] / 2.0 + 0.5;
-						if (pyimage[i] < 0) pyimage[i] = 0;
-						else if (pyimage[i] > 1) pyimage[i] = 1;
-					}
-
-					var bytes = haxe.io.Bytes.alloc(4 * 512 * 512);
-					for (i in 0...(512 * 512)) {
-						bytes.set(i * 4    , Std.int(pyimage[i                ] * 255));
-						bytes.set(i * 4 + 1, Std.int(pyimage[i + 512 * 512    ] * 255));
-						bytes.set(i * 4 + 2, Std.int(pyimage[i + 512 * 512 * 2] * 255));
-						bytes.set(i * 4 + 3, 255);
-					}
-					var image = kha.Image.fromBytes(bytes, 512, 512);
-
-					if (tiling) {
-						@:privateAccess TilingNode.prompt = prompt;
-						image = TilingNode.sdTiling(image, seed);
-						if (done != null) done(image);
-					}
-					else {
-						if (upscale) {
-							while (image.width < Config.getTextureResX()) {
-								var lastImage = image;
-								image = UpscaleNode.esrgan(image);
-								lastImage.unload();
-							}
-						}
-						if (done != null) done(image);
-					}
-				}
-				// g.begin(false);
+			var guidance_scale = 7.5;
+			noise_pred = new js.lib.Float32Array(noise_pred_uncond.length);
+			for (i in 0...noise_pred_uncond.length) {
+				noise_pred[i] = noise_pred_uncond[i] + guidance_scale * (noise_pred_text[i] - noise_pred_uncond[i]);
 			}
-			// iron.App.notifyOnRender2D(_render2D);
-		});
-		});
+
+			var prev_timestep = Std.int(Math.max(timestep - Std.int(num_train_timesteps / num_inference_steps), 0));
+
+			if (counter != 1) {
+				ets.push(noise_pred);
+			}
+			else {
+				prev_timestep = timestep;
+				timestep = timestep + Std.int(num_train_timesteps / num_inference_steps);
+			}
+
+			if (ets.length == 1 && counter == 0) {
+				cur_latents = latents;
+			}
+			else if (ets.length == 1 && counter == 1) {
+				var _noise_pred = new js.lib.Float32Array(noise_pred.length);
+				for (i in 0...noise_pred.length) {
+					_noise_pred[i] = (noise_pred[i] + ets[ets.length - 1][i]) / 2;
+				}
+				noise_pred = _noise_pred;
+				latents = cur_latents;
+				cur_latents = null;
+			}
+			else if (ets.length == 2) {
+				var _noise_pred = new js.lib.Float32Array(noise_pred.length);
+				for (i in 0...noise_pred.length) {
+					_noise_pred[i] = (3 * ets[ets.length - 1][i] - ets[ets.length - 2][i]) / 2;
+				}
+				noise_pred = _noise_pred;
+			}
+			else if (ets.length == 3) {
+				var _noise_pred = new js.lib.Float32Array(noise_pred.length);
+				for (i in 0...noise_pred.length) {
+					_noise_pred[i] = (23 * ets[ets.length - 1][i] - 16 * ets[ets.length - 2][i] + 5 * ets[ets.length - 3][i]) / 12;
+				}
+				noise_pred = _noise_pred;
+			}
+			else {
+				var _noise_pred = new js.lib.Float32Array(noise_pred.length);
+				for (i in 0...noise_pred.length) {
+					_noise_pred[i] = (1 / 24) * (55 * ets[ets.length - 1][i] - 59 * ets[ets.length - 2][i] + 37 * ets[ets.length - 3][i] - 9 * ets[ets.length - 4][i]);
+				}
+				noise_pred = _noise_pred;
+			}
+
+			var alpha_prod_t = alphas_cumprod[timestep + 1];
+			var alpha_prod_t_prev = alphas_cumprod[prev_timestep + 1];
+			var beta_prod_t = 1 - alpha_prod_t;
+			var beta_prod_t_prev = 1 - alpha_prod_t_prev;
+			var latents_coeff = Math.pow(alpha_prod_t_prev / alpha_prod_t, (0.5));
+			var noise_pred_denom_coeff = alpha_prod_t * Math.pow(beta_prod_t_prev, (0.5)) + Math.pow(alpha_prod_t * beta_prod_t * alpha_prod_t_prev, (0.5));
+			for (i in 0...latents.length) {
+				latents[i] = (latents_coeff * latents[i] - (alpha_prod_t_prev - alpha_prod_t) * noise_pred[i] / noise_pred_denom_coeff);
+			}
+			counter += 1;
+
+			if (mask != null) {
+				var noise = new js.lib.Float32Array(latents.length);
+				for (i in 0...noise.length) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
+				var sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
+				var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
+
+				var init_latents_proper = new js.lib.Float32Array(latents.length);
+				for (i in 0...init_latents_proper.length) {
+					init_latents_proper[i] = sqrt_alpha_prod * latents_orig[i] + sqrt_one_minus_alpha_prod * noise[i];
+				}
+
+				for (i in 0...latents.length) {
+					latents[i] = (init_latents_proper[i] * mask[i]) + (latents[i] * (1.0 - mask[i]));
+				}
+			}
+
+			if (counter == (51 - offset)) {
+				iron.App.removeRender2D(processing);
+				done(latents);
+			}
+
+			Krom.delayIdleSleep();
+		}
+		iron.App.notifyOnRender2D(processing);
+	}
+
+	static function vaeDecoder(latents: js.lib.Float32Array, upscale: Bool, done: kha.Image->Void) {
+		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
+		App.notifyOnNextFrame(function() {
+			for (i in 0...latents.length) {
+				latents[i] = 1.0 / 0.18215 * latents[i];
+			}
+
+			var pyimage_buf = Krom.mlInference(untyped vae_decoder_blob.toBytes().b.buffer, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
+			var pyimage = new js.lib.Float32Array(pyimage_buf);
+
+			for (i in 0...pyimage.length) {
+				pyimage[i] = pyimage[i] / 2.0 + 0.5;
+				if (pyimage[i] < 0) pyimage[i] = 0;
+				else if (pyimage[i] > 1) pyimage[i] = 1;
+			}
+
+			var bytes = haxe.io.Bytes.alloc(4 * 512 * 512);
+			for (i in 0...(512 * 512)) {
+				bytes.set(i * 4    , Std.int(pyimage[i                ] * 255));
+				bytes.set(i * 4 + 1, Std.int(pyimage[i + 512 * 512    ] * 255));
+				bytes.set(i * 4 + 2, Std.int(pyimage[i + 512 * 512 * 2] * 255));
+				bytes.set(i * 4 + 3, 255);
+			}
+			var image = kha.Image.fromBytes(bytes, 512, 512);
+
+			if (tiling) {
+				@:privateAccess TilingNode.prompt = prompt;
+				var seed = RandomNode.getSeed();
+				image = TilingNode.sdTiling(image, seed);
+				done(image);
+			}
+			else {
+				if (upscale) {
+					while (image.width < Config.getTextureResX()) {
+						var lastImage = image;
+						image = UpscaleNode.esrgan(image);
+						lastImage.unload();
+					}
+				}
+				done(image);
+			}
 		});
 	}
 
