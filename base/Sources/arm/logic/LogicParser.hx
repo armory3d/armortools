@@ -117,22 +117,8 @@ class LogicParser {
 			// Is linked - find node
 			var l = getInputLink(inp);
 			if (l != null) {
-				var n = getNode(l.from_id);
-				var socket = n.outputs[l.from_socket];
-				// Ensure matching socket types
-				if (socket.type == node.inputs[i].type) {
-					inp_node = nodeMap.get(build_node(n));
-					for (i in 0...n.outputs.length) {
-						if (n.outputs[i] == socket) {
-							inp_from = i;
-							break;
-						}
-					}
-				}
-				else {
-					inp_node = build_default_node(inp);
-					inp_from = 0;
-				}
+				inp_node = nodeMap.get(build_node(getNode(l.from_id)));
+				inp_from = l.from_socket;
 			}
 			// Not linked - create node with default values
 			else {
