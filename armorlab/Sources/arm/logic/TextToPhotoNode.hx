@@ -198,8 +198,6 @@ class TextToPhotoNode extends LogicNode {
 				iron.App.removeRender2D(processing);
 				done(latents);
 			}
-
-			Krom.delayIdleSleep();
 		}
 		iron.App.notifyOnRender2D(processing);
 	}
