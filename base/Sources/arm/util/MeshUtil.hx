@@ -312,10 +312,9 @@ class MeshUtil {
 		mergeMesh();
 	}
 
-	public static function applyDisplacement(texpaint_pack: kha.Image) {
+	public static function applyDisplacement(texpaint_pack: kha.Image, strength = 0.1, uvScale = 1.0) {
 		var height = texpaint_pack.getPixels();
 		var res = texpaint_pack.width;
-		var strength = 0.1;
 		var o = Project.paintObjects[0];
 		var g = o.data.geom;
 		var l = g.structLength;
@@ -323,7 +322,9 @@ class MeshUtil {
 		for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
 			var x = Std.int(vertices.getInt16((i * l + 6) * 2) / 32767 * res);
 			var y = Std.int(vertices.getInt16((i * l + 7) * 2) / 32767 * res);
-			var h = (1.0 - height.get((y * res + x) * 4 + 3) / 255) * strength;
+			var xx = Std.int(x * uvScale) % res;
+			var yy = Std.int(y * uvScale) % res;
+			var h = (1.0 - height.get((yy * res + xx) * 4 + 3) / 255) * strength;
 			vertices.setInt16((i * l    ) * 2, vertices.getInt16((i * l    ) * 2) - Std.int(vertices.getInt16((i * l + 4) * 2) * h));
 			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2) - Std.int(vertices.getInt16((i * l + 5) * 2) * h));
 			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2) - Std.int(vertices.getInt16((i * l + 3) * 2) * h));
