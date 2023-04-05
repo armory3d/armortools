@@ -51,17 +51,17 @@ class MakeMaterial {
 
 	#if rp_voxels
 	static function makeVoxel(m: MaterialData) {
-		// var rebuild = heightUsed;
-		// if (Config.raw.rp_gi != false && rebuild) {
-		// 	var scon: ShaderContext = null;
-		// 	for (c in m.shader.contexts) {
-		// 		if (c.raw.name == "voxel") {
-		// 			scon = c;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if (scon != null) MakeVoxel.run(scon);
-		// }
+		var rebuild = true; // heightUsed;
+		if (Config.raw.rp_gi != false && rebuild) {
+			var scon: ShaderContext = null;
+			for (c in m.shader.contexts) {
+				if (c.raw.name == "voxel") {
+					scon = c;
+					break;
+				}
+			}
+			if (scon != null) MakeVoxel.run(scon);
+		}
 	}
 	#end
 

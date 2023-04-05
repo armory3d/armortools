@@ -43,6 +43,12 @@ class Uniforms {
 			case "_vignetteStrength": {
 				return Config.raw.rp_vignette;
 			}
+			case "_coneOffset": {
+				return Context.raw.vxaoOffset;
+			}
+			case "_coneAperture": {
+				return Context.raw.vxaoAperture;
+			}
 		}
 		if (MaterialParser.script_links != null) {
 			for (key in MaterialParser.script_links.keys()) {
