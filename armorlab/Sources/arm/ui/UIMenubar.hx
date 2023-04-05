@@ -14,9 +14,7 @@ class UIMenubar {
 	public var workspaceHandle = new Handle({ layout: Horizontal });
 	public var menuHandle = new Handle({ layout: Horizontal });
 	public var menubarw = defaultMenubarW;
-
-	static var _meshes: Array<MeshObject> = null;
-	static var _savedCamera = iron.math.Mat4.identity();
+	static var _savedCamera: iron.math.Mat4 = null;
 
 	public function new() {
 		inst = this;
@@ -92,15 +90,14 @@ class UIMenubar {
 				Context.raw.ddirty = 2;
 				Context.raw.brushBlendDirty = true;
 				UIHeader.inst.headerHandle.redraws = 2;
-
 				Context.mainObject().skip_context = null;
 
 				if (UIHeader.inst.worktab.position == Space3D) {
-					if (_meshes != null) {
-						Scene.active.meshes = _meshes;
+					if (_savedCamera != null) {
 						Scene.active.camera.transform.setMatrix(_savedCamera);
-						_meshes = null;
+						_savedCamera = null;
 					}
+					Scene.active.meshes = [Context.mainObject()];
 				}
 				else { // Space2D
 					var plane: MeshObject = cast Scene.active.getChild(".Plane");
@@ -108,9 +105,8 @@ class UIMenubar {
 					plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
 					plane.transform.buildMatrix();
 					plane.visible = true;
-					if (_meshes == null) {
-						_meshes = Scene.active.meshes;
-						_savedCamera.setFrom(Scene.active.camera.transform.local);
+					if (_savedCamera == null) {
+						_savedCamera = Scene.active.camera.transform.local.clone();
 					}
 					Scene.active.meshes = [plane];
 					var m = iron.math.Mat4.identity();
