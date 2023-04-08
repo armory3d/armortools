@@ -63,7 +63,7 @@ class TabMeshes {
 			}
 
 			if (ui.button(tr("Apply Displacement"))) {
-				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack);
+				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05, Context.raw.brushScale);
 				MeshUtil.calcNormals();
 				Context.raw.ddirty = 2;
 			}
