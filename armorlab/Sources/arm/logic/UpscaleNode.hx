@@ -90,20 +90,25 @@ class UpscaleNode extends LogicNode {
 		var size2w = Std.int(size1w * 2);
 		var size2h = Std.int(size1h * 2);
 		var tileSize = 512;
-		// var tileSize = 1024;
 		var tileSize2x = Std.int(tileSize * 2);
 
 		if (size1w >= tileSize2x || size1h >= tileSize2x) { // Split into tiles
 			result = kha.Image.createRenderTarget(size2w, size2h);
-			var tileSource = kha.Image.createRenderTarget(tileSize, tileSize);
+			var tileSource = kha.Image.createRenderTarget(tileSize + 32 * 2, tileSize + 32 * 2);
 			for (x in 0...Std.int(size1w / tileSize)) {
 				for (y in 0...Std.int(size1h / tileSize)) {
 					tileSource.g2.begin(false);
-					tileSource.g2.drawImage(source, -x * tileSize, -y * tileSize);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, source.width, -source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, -source.width, -source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, -source.width, source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize + tileSize, 32 - y * tileSize + tileSize, source.width, -source.height);
+					tileSource.g2.drawScaledImage(source, 32 - x * tileSize, 32 - y * tileSize, source.width, source.height);
 					tileSource.g2.end();
 					var tileResult = doTile(tileSource);
 					result.g2.begin(false);
-					result.g2.drawImage(tileResult, x * tileSize2x, y * tileSize2x);
+					result.g2.drawSubImage(tileResult, x * tileSize2x, y * tileSize2x, 64, 64, tileSize2x, tileSize2x);
 					result.g2.end();
 					tileResult.unload();
 				}
