@@ -230,8 +230,7 @@ class TextToPhotoNode extends LogicNode {
 			if (tiling) {
 				@:privateAccess TilingNode.prompt = prompt;
 				var seed = RandomNode.getSeed();
-				image = TilingNode.sdTiling(image, seed);
-				done(image);
+				TilingNode.sdTiling(image, seed, done);
 			}
 			else {
 				if (upscale) {

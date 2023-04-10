@@ -65,9 +65,7 @@ class InpaintNode extends LogicNode {
 				image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				image.g2.end();
 
-				result = auto ? texsynthInpaint(image, false, mask) : sdInpaint(image, mask);
-
-				done(result);
+				auto ? texsynthInpaint(image, false, mask, done) : sdInpaint(image, mask, done);
 			});
 		});
 	}
@@ -94,7 +92,7 @@ class InpaintNode extends LogicNode {
 		return mask;
 	}
 
-	public static function texsynthInpaint(image: kha.Image, tiling: Bool, mask: kha.Image = null): kha.Image {
+	public static function texsynthInpaint(image: kha.Image, tiling: Bool, mask: kha.Image/* = null*/, done: kha.Image->Void) {
 		var w = arm.Config.getTextureResX();
 		var h = arm.Config.getTextureResY();
 
@@ -103,10 +101,11 @@ class InpaintNode extends LogicNode {
 		var bytes_out = haxe.io.Bytes.ofData(new js.lib.ArrayBuffer(w * h * 4));
 		untyped Krom_texsynth.inpaint(w, h, untyped bytes_out.b.buffer, bytes_img, bytes_mask, tiling);
 
-		return kha.Image.fromBytes(bytes_out, w, h);
+		result = kha.Image.fromBytes(bytes_out, w, h);
+		done(result);
 	}
 
-	public static function sdInpaint(image: kha.Image, mask: kha.Image): kha.Image {
+	public static function sdInpaint(image: kha.Image, mask: kha.Image, done: kha.Image->Void) {
 		init();
 
 		var bytes_img = untyped mask.getPixels().b.buffer;
@@ -175,12 +174,11 @@ class InpaintNode extends LogicNode {
 						// result.g2.drawImage(img, x * 512, y * 512);
 						// result.g2.end();
 						result = img;
+						done(img);
 					}, latents, start, true, f32mask, latents_orig);
 				// }
 			// }
 		});
-
-		return result;
 	}
 
 	public static var def: TNode = {

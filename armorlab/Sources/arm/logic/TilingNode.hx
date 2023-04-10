@@ -44,8 +44,11 @@ class TilingNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
 			App.notifyOnNextFrame(function() {
-				result = auto ? InpaintNode.texsynthInpaint(image, true) : sdTiling(image);
-				done(result);
+				function _done(image: kha.Image) {
+					result = image;
+					done(image);
+				}
+				auto ? InpaintNode.texsynthInpaint(image, true, null, _done) : sdTiling(image, -1, _done);
 			});
 		});
 	}
@@ -54,7 +57,7 @@ class TilingNode extends LogicNode {
 		return result;
 	}
 
-	public static function sdTiling(image: kha.Image, seed = -1): kha.Image {
+	public static function sdTiling(image: kha.Image, seed: Int/* = -1*/, done: kha.Image->Void) {
 		@:privateAccess TextToPhotoNode.tiling = false;
 		var tile = kha.Image.createRenderTarget(512, 512);
 		tile.g2.begin(false);
@@ -87,7 +90,7 @@ class TilingNode extends LogicNode {
 		@:privateAccess InpaintNode.prompt = prompt;
 		@:privateAccess InpaintNode.strength = strength;
 		if (seed >= 0) RandomNode.setSeed(seed);
-		return InpaintNode.sdInpaint(tile, mask);
+		InpaintNode.sdInpaint(tile, mask, done);
 	}
 
 	public static var def: TNode = {
