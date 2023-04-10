@@ -65,11 +65,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			var f32 = new js.lib.Int32Array(text_input_ids);
-			var text_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference, true);
+			var text_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			var text_embeddings = new js.lib.Float32Array(text_embeddings_buf);
 
 			var f32 = new js.lib.Int32Array(uncond_input_ids);
-			var uncond_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference, true);
+			var uncond_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			var uncond_embeddings = new js.lib.Float32Array(uncond_embeddings_buf);
 
 			var f32 = new js.lib.Float32Array(uncond_embeddings.length + text_embeddings.length);
@@ -111,7 +111,7 @@ class TextToPhotoNode extends LogicNode {
 
 			var t32 = new js.lib.Int32Array(2);
 			t32[0] = timestep;
-			var noise_pred_buf = Krom.mlInference(untyped unet_blob.toBytes().b.buffer, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference, true);
+			var noise_pred_buf = Krom.mlInference(untyped unet_blob.toBytes().b.buffer, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
 			var noise_pred = new js.lib.Float32Array(noise_pred_buf);
 
 			for (i in 0...noise_pred_uncond.length) noise_pred_uncond[i] = noise_pred[i];
@@ -235,13 +235,16 @@ class TextToPhotoNode extends LogicNode {
 			}
 			else {
 				if (upscale) {
-					while (image.width < Config.getTextureResX()) {
-						var lastImage = image;
-						image = UpscaleNode.esrgan(image);
-						lastImage.unload();
-					}
+					UpscaleNode.loadBlob(function() {
+						while (image.width < Config.getTextureResX()) {
+							var lastImage = image;
+							image = UpscaleNode.esrgan(image);
+							lastImage.unload();
+						}
+						done(image);
+					});
 				}
-				done(image);
+				else done(image);
 			}
 		});
 	}

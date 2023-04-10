@@ -752,6 +752,7 @@ class UINodes {
 
 						Console.log("Processing finished in " + (iron.system.Time.realTime() - timer));
 						Console.progress(null);
+						Krom.mlUnload();
 
 						iron.App.removeRender2D(delayIdleSleep);
 					});

@@ -284,7 +284,7 @@ class BoxPreferences {
 				var serverHandle = Id.handle({ text: Config.raw.server });
 				Config.raw.server = ui.textInput(serverHandle, tr("Cloud Server"));
 
-				Config.raw.gpu_inference = ui.check(Id.handle({ selected: Config.raw.gpu_inference }), tr("GPU Inference"));
+				Config.raw.gpu_inference = ui.check(Id.handle({ selected: Config.raw.gpu_inference }), tr("Use GPU"));
 				if (ui.isHovered) ui.tooltip(tr("Use GPU to accelerate node graph processing"));
 			}
 
