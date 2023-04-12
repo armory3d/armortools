@@ -222,13 +222,13 @@ class TabSwatches {
 		if (TabSwatches.dragPosition == -1) return;
 
 		var swatchPosition = Project.raw.swatches.indexOf(swatch);
-		// A new swatch from color picker.
+		// A new swatch from color picker
 		if (swatchPosition == -1) {
 			Project.raw.swatches.insert(dragPosition, swatch);
 		}
 		else if (Math.abs(swatchPosition - dragPosition) > 0) { // Existing swatch is reordered
 			Project.raw.swatches.remove(swatch);
-			// If the new position is after the old one, decrease by one because the swatch has been deleted.
+			// If the new position is after the old one, decrease by one because the swatch has been deleted
 			var newPosition = dragPosition - swatchPosition > 0 ? dragPosition -1 : dragPosition;
 			Project.raw.swatches.insert(newPosition, swatch);
 		}

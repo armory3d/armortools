@@ -231,13 +231,13 @@ class TabSwatches {
 		if (TabSwatches.dragPosition == -1) return;
 
 		var swatchPosition = Project.raw.swatches.indexOf(swatch);
-		// A new swatch from color picker.
-		if (swatchPosition == -1) { 
+		// A new swatch from color picker
+		if (swatchPosition == -1) {
 			Project.raw.swatches.insert(dragPosition, swatch);
 		}
 		else if (Math.abs(swatchPosition - dragPosition) > 0) { // Existing swatch is reordered
 			Project.raw.swatches.remove(swatch);
-			// If the new position is after the old one, decrease by one because the swatch has been deleted.
+			// If the new position is after the old one, decrease by one because the swatch has been deleted
 			var newPosition = dragPosition - swatchPosition > 0 ? dragPosition -1 : dragPosition;
 			Project.raw.swatches.insert(newPosition, swatch);
 		}
@@ -247,6 +247,6 @@ class TabSwatches {
 		var i = Project.raw.swatches.indexOf(swatch);
 		Context.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
 		Project.raw.swatches.splice(i, 1);
-		UIBase.inst.hwnds[2].redraws = 2;
+		UIBase.inst.hwnds[TabStatus].redraws = 2;
 	}
 }
