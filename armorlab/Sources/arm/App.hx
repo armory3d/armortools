@@ -355,6 +355,9 @@ class App {
 				if (Context.inNodes()) { // Create RGB node
 					UINodes.inst.acceptSwatchDrag(dragSwatch);
 				}
+				else if (Context.inSwatches()) {
+					TabSwatches.acceptSwatchDrag(dragSwatch);
+				}
 				dragSwatch = null;
 			}
 			else if (dragFile != null) {
