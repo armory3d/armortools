@@ -15,14 +15,6 @@ project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("Assets/meshes/*", { destination: "data/meshes/{name}" });
 project.addAssets("Assets/models/*.onnx", { destination: "data/models/{name}" });
 project.addAssets("Assets/models/LICENSE.txt", { destination: "data/models/LICENSE.txt" });
-
-if (process.platform === "win32") {
-	project.addAssets("../armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
-}
-else if (process.platform === "linux") {
-	project.addAssets("../armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
-}
-
 project.addAssets("Assets/readme/readme.txt", { destination: "{name}" });
 
 if (flags.android) {
@@ -30,6 +22,13 @@ if (flags.android) {
 }
 else if (flags.ios) {
 	project.addAssets("Assets/readme/readme_ios.txt", { destination: "{name}" });
+}
+
+if (process.platform === "win32") {
+	project.addAssets("../armorcore/Libraries/onnx/win32/*.dll", { destination: "{name}" });
+}
+else if (process.platform === "linux") {
+	project.addAssets("../armorcore/Libraries/onnx/linux/*.so.*", { destination: "{name}" }); // Versioned lib
 }
 
 if (flags.raytrace) {
