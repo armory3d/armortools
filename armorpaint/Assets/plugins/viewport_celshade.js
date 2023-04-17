@@ -2,7 +2,7 @@
 let plugin = new arm.Plugin();
 
 // Register custom viewport shader
-arm.Context.setViewportShader(function(shader) {
+arm.ContextBase.setViewportShader(function(shader) {
 	shader.add_uniform('vec3 lightDir', '_lightDirection');
 	shader.write(`
 		float dotNL = max(dot(n, lightDir), 0.0);
@@ -12,5 +12,5 @@ arm.Context.setViewportShader(function(shader) {
 });
 
 plugin.delete = function() {
-	arm.Context.setViewportShader(null);
+	arm.ContextBase.setViewportShader(null);
 }

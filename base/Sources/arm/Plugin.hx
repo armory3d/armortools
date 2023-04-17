@@ -104,6 +104,7 @@ class ArmBridge {
 	public static var App = arm.App;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
+	public static var ContextBase = arm.ContextBase;
 	public static var History = arm.History;
 	public static var Operator = arm.Operator;
 	public static var Plugin = arm.Plugin;

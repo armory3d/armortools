@@ -207,7 +207,7 @@ class UIMenu {
 				menuFill(ui);
 				Context.raw.showEnvmap = ui.check(Context.raw.showEnvmapHandle, " " + tr("Envmap"));
 				if (Context.raw.showEnvmapHandle.changed) {
-					Context.loadEnvmap();
+					ContextBase.loadEnvmap();
 					Context.raw.ddirty = 2;
 				}
 
@@ -247,7 +247,7 @@ class UIMenu {
 					ui.radio(modeHandle, i, modes[i], shortcut);
 				}
 
-				if (modeHandle.changed) Context.setViewportMode(modeHandle.position);
+				if (modeHandle.changed) ContextBase.setViewportMode(modeHandle.position);
 			}
 			else if (menuCategory == MenuCamera) {
 				if (menuButton(ui, tr("Reset"), Config.keymap.view_reset)) {

@@ -13,7 +13,7 @@ class ImportMesh {
 
 	public static function run(path: String, replaceExisting = true) {
 		if (!Path.isMesh(path)) {
-			if (!Context.enableImportPlugin(path)) {
+			if (!ContextBase.enableImportPlugin(path)) {
 				Console.error(Strings.error1());
 				return;
 			}

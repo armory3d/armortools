@@ -284,7 +284,7 @@ class UINodes {
 						if (menuButton(uiMenu, tr("Add Swatch"))) {
 							var color = selected.outputs[0].default_value;
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
-							Context.setSwatch(newSwatch);
+							ContextBase.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
 							UIBase.inst.hwnds[TabStatus].redraws = 1;
 						}

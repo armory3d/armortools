@@ -62,7 +62,7 @@ class ImportAsset {
 			ImportGpl.run(path, false);
 		}
 		else {
-			if (Context.enableImportPlugin(path)) {
+			if (ContextBase.enableImportPlugin(path)) {
 				run(path, dropX, dropY, showBox);
 			}
 			else {

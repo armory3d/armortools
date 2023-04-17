@@ -403,10 +403,10 @@ class UIBase {
 						if (ui.isKeyPressed && index != -1) {
 							modeHandle.position = index;
 							ui.changed = true;
-							Context.setViewportMode(modeHandle.position);
+							ContextBase.setViewportMode(modeHandle.position);
 						}
 						else if (modeHandle.changed) {
-							Context.setViewportMode(modeHandle.position);
+							ContextBase.setViewportMode(modeHandle.position);
 							ui.changed = true;
 						}
 					}, 16 #if (kha_direct3d12 || kha_vulkan) + 1 #end );

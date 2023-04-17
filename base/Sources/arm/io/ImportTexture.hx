@@ -10,7 +10,7 @@ class ImportTexture {
 
 	public static function run(path: String, hdrAsEnvmap = true) {
 		if (!Path.isTexture(path)) {
-			if (!Context.enableImportPlugin(path)) {
+			if (!ContextBase.enableImportPlugin(path)) {
 				Console.error(Strings.error1());
 				return;
 			}

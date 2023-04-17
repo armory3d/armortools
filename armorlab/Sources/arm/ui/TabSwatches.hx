@@ -39,7 +39,7 @@ class TabSwatches {
 			}
 
 			if (ui.button(tr("New"))) {
-				Context.setSwatch(Project.makeSwatch());
+				ContextBase.setSwatch(Project.makeSwatch());
 				Project.raw.swatches.push(Context.raw.swatch);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Add new swatch"));
@@ -49,7 +49,7 @@ class TabSwatches {
 					ui.text(tr("Import"), Right, ui.t.HIGHLIGHT_COL);
 					if (ui.button(tr("Replace Existing"), Left)) {
 						Project.importSwatches(true);
-						Context.setSwatch(Project.raw.swatches[0]);
+						ContextBase.setSwatch(Project.raw.swatches[0]);
 					}
 					if (ui.button(tr("Append"), Left)) {
 						Project.importSwatches(false);
@@ -62,13 +62,13 @@ class TabSwatches {
 			if (ui.isHovered) ui.tooltip(tr("Export swatches"));
 
 			if (ui.button(tr("Clear"))) {
-				Context.setSwatch(Project.makeSwatch());
+				ContextBase.setSwatch(Project.makeSwatch());
 				Project.raw.swatches = [Context.raw.swatch];
 			}
 
 			if (ui.button(tr("Restore"))) {
 				Project.setDefaultSwatches();
-				Context.setSwatch(Project.raw.swatches[0]);
+				ContextBase.setSwatch(Project.raw.swatches[0]);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Restore default swatches"));
 
@@ -111,7 +111,7 @@ class TabSwatches {
 					var state = ui.image(empty, Project.raw.swatches[i].base, slotw);
 
 					if (state == State.Started) {
-						Context.setSwatch(Project.raw.swatches[i]);
+						ContextBase.setSwatch(Project.raw.swatches[i]);
 
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 2 * slotw);
@@ -154,14 +154,14 @@ class TabSwatches {
 								Context.raw.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
 
 								if (ui.changed || ui.isTyping) UIMenu.keepOpen = true;
-								if (ui.inputReleased) Context.setSwatch(Context.raw.swatch); // Trigger material preview update
+								if (ui.inputReleased) ContextBase.setSwatch(Context.raw.swatch); // Trigger material preview update
 							}, 16, Std.int(Input.getMouse().x - 200 * ui.SCALE()), Std.int(Input.getMouse().y - 250 * ui.SCALE()));
 						}
 
 						Context.raw.selectTime = Time.time();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
-						Context.setSwatch(Project.raw.swatches[i]);
+						ContextBase.setSwatch(Project.raw.swatches[i]);
 						var add = Project.raw.swatches.length > 1 ? 1 : 0;
 						#if (krom_windows || krom_linux || krom_darwin)
 						add += 1; // Copy
@@ -170,7 +170,7 @@ class TabSwatches {
 						UIMenu.draw(function(ui: Zui) {
 							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
 							if (ui.button(tr("Duplicate"), Left)) {
-								Context.setSwatch(Project.cloneSwatch(Context.raw.swatch));
+								ContextBase.setSwatch(Project.cloneSwatch(Context.raw.swatch));
 								Project.raw.swatches.push(Context.raw.swatch);
 							}
 							#if (krom_windows || krom_linux || krom_darwin)
@@ -236,7 +236,7 @@ class TabSwatches {
 
 	static function deleteSwatch(swatch: TSwatchColor) {
 		var i = Project.raw.swatches.indexOf(swatch);
-		Context.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
+		ContextBase.setSwatch(Project.raw.swatches[i == Project.raw.swatches.length - 1 ? i - 1 : i + 1]);
 		Project.raw.swatches.splice(i, 1);
 		UIBase.inst.hwnds[TabStatus].redraws = 2;
 	}

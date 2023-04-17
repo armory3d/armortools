@@ -1,27 +1,20 @@
 package arm;
 
-import kha.System;
-import iron.RenderPath;
 import iron.object.MeshObject;
 import iron.system.Input;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
-import arm.shader.NodeShader;
 import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.util.ParticleUtil;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
 import arm.ui.UIBase;
 import arm.ui.UIToolbar;
 import arm.ui.UINodes;
 import arm.ui.UIView2D;
 import arm.ui.UIHeader;
-import arm.ui.UIStatus;
-import arm.ui.BoxPreferences;
 import arm.ProjectBaseFormat;
 import arm.ContextFormat;
 
@@ -29,38 +22,20 @@ class Context {
 
 	public static var raw: TContext = {};
 
+	public static function useDeferred(): Bool {
+		return raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace) && raw.tool != ToolColorId;
+	}
+
 	public static function selectMaterial(i: Int) {
 		if (Project.materials.length <= i) return;
 		setMaterial(Project.materials[i]);
-	}
-
-	public static function setViewportMode(mode: ViewportMode) {
-		if (mode == raw.viewportMode) return;
-
-		raw.viewportMode = mode;
-		var deferred = raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace) && raw.tool != ToolColorId;
-		if (deferred) {
-			RenderPath.active.commands = RenderPathDeferred.commands;
-		}
-		// else if (raw.viewportMode == ViewPathTrace) {
-		// }
-		else {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
-		}
-		var _workspace = UIHeader.inst.worktab.position;
-		UIHeader.inst.worktab.position = SpacePaint;
-		MakeMaterial.parseMeshMaterial();
-		UIHeader.inst.worktab.position = _workspace;
 	}
 
 	public static function setMaterial(m: MaterialSlot) {
 		if (Project.materials.indexOf(m) == -1) return;
 		raw.material = m;
 		MakeMaterial.parsePaintMaterial();
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		UIHeader.inst.headerHandle.redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 		UINodes.inst.groupStack = [];
@@ -83,7 +58,7 @@ class Context {
 		if (Project.brushes.indexOf(b) == -1) return;
 		raw.brush = b;
 		MakeMaterial.parseBrush();
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		UINodes.inst.hwnd.redraws = 2;
 	}
 
@@ -97,17 +72,8 @@ class Context {
 		raw.font = f;
 		RenderUtil.makeTextPreview();
 		RenderUtil.makeDecalPreview();
-		UIBase.inst.hwnds[2].redraws = 2;
+		UIBase.inst.hwnds[TabStatus].redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
-	}
-
-	public static function setSwatch(s: TSwatchColor) {
-		raw.swatch = s;
-		App.notifyOnNextFrame(function() {
-			MakeMaterial.parsePaintMaterial();
-			RenderUtil.makeMaterialPreview();
-			UIBase.inst.hwnds[1].redraws = 2;
-		});
 	}
 
 	public static function selectLayer(i: Int) {
@@ -129,21 +95,15 @@ class Context {
 
 		if (current != null) current.begin(false);
 
-		UIBase.inst.hwnds[0].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
 
 	public static function selectTool(i: Int) {
-		raw.tool = i;
-		MakeMaterial.parsePaintMaterial();
-		MakeMaterial.parseMeshMaterial();
+		@:privateAccess ContextBase.selectTool(i);
+		initTool();
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
-		raw.ddirty = 3;
-		initTool();
-		var _viewportMode = raw.viewportMode;
-		raw.viewportMode = -1;
-		setViewportMode(_viewportMode);
 	}
 
 	public static function initTool() {
@@ -184,53 +144,6 @@ class Context {
 	public static function mainObject(): MeshObject {
 		for (po in Project.paintObjects) if (po.children.length > 0) return po;
 		return Project.paintObjects[0];
-	}
-
-	public static function loadEnvmap() {
-		if (!raw.envmapLoaded) {
-			// TODO: Unable to share texture for both radiance and envmap - reload image
-			raw.envmapLoaded = true;
-			iron.data.Data.cachedImages.remove("World_radiance.k");
-		}
-		iron.Scene.active.world.loadEnvmap(function(_) {});
-		if (raw.savedEnvmap == null) raw.savedEnvmap = iron.Scene.active.world.envmap;
-	}
-
-	@:keep
-	public static function setViewportShader(viewportShader: NodeShader->String) {
-		raw.viewportShader = viewportShader;
-		setRenderPath();
-	}
-
-	public static function setRenderPath() {
-		if (raw.renderMode == RenderForward || raw.viewportShader != null) {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
-		}
-		else {
-			RenderPath.active.commands = RenderPathDeferred.commands;
-		}
-		iron.App.notifyOnInit(function() {
-			MakeMaterial.parseMeshMaterial();
-		});
-	}
-
-	public static function enableImportPlugin(file: String): Bool {
-		// Return plugin name suitable for importing the specified file
-		if (BoxPreferences.filesPlugin == null) {
-			BoxPreferences.fetchPlugins();
-		}
-		var ext = file.substr(file.lastIndexOf(".") + 1);
-		for (f in BoxPreferences.filesPlugin) {
-			if (f.startsWith("import_") && f.indexOf(ext) >= 0) {
-				Config.enablePlugin(f);
-				Console.info(f + " " + tr("plugin enabled"));
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public static function layerFilterUsed(): Bool {

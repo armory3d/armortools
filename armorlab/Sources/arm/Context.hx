@@ -1,17 +1,10 @@
 package arm;
 
-import zui.Zui;
 import iron.object.MeshObject;
 import iron.system.Input;
-import iron.RenderPath;
-import arm.shader.NodeShader;
 import arm.shader.MakeMaterial;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
 import arm.ui.UIBase;
 import arm.ui.UINodes;
-import arm.ui.UIHeader;
-import arm.ui.BoxPreferences;
 import arm.ProjectBaseFormat;
 import arm.ContextFormat;
 
@@ -19,47 +12,14 @@ class Context {
 
 	public static var raw: TContext = {};
 
-	public static function setViewportMode(mode: ViewportMode) {
-		if (mode == raw.viewportMode) return;
-
-		raw.viewportMode = mode;
-		var deferred = raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace);
-		if (deferred) {
-			RenderPath.active.commands = RenderPathDeferred.commands;
-		}
-		// else if (raw.viewportMode == ViewPathTrace) {
-		// }
-		else {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
-		}
-		var _workspace = UIHeader.inst.worktab.position;
-		UIHeader.inst.worktab.position = Space3D;
-		MakeMaterial.parseMeshMaterial();
-		UIHeader.inst.worktab.position = _workspace;
+	public static function useDeferred(): Bool {
+		return raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace);
 	}
 
 	public static function layerFilterUsed(): Bool { return true; } ////
 
-	public static function setSwatch(s: TSwatchColor) {
-		raw.swatch = s;
-		App.notifyOnNextFrame(function() {
-			// MakeMaterial.parsePaintMaterial();
-			// RenderUtil.makeMaterialPreview();
-			// UIBase.inst.hwnd1.redraws = 2;
-		});
-	}
-
 	public static function selectTool(i: Int) {
-		raw.tool = i;
-		MakeMaterial.parsePaintMaterial();
-		MakeMaterial.parseMeshMaterial();
-		raw.ddirty = 3;
-		var _viewportMode = raw.viewportMode;
-		raw.viewportMode = -1;
-		setViewportMode(_viewportMode);
+		@:privateAccess ContextBase.selectTool(i);
 	}
 
 	public static function selectPaintObject(o: MeshObject) {
@@ -68,53 +28,6 @@ class Context {
 
 	public static function mainObject(): MeshObject {
 		return Project.paintObjects[0];
-	}
-
-	public static function loadEnvmap() {
-		if (!raw.envmapLoaded) {
-			// TODO: Unable to share texture for both radiance and envmap - reload image
-			raw.envmapLoaded = true;
-			iron.data.Data.cachedImages.remove("World_radiance.k");
-		}
-		iron.Scene.active.world.loadEnvmap(function(_) {});
-		if (raw.savedEnvmap == null) raw.savedEnvmap = iron.Scene.active.world.envmap;
-	}
-
-	@:keep
-	public static function setViewportShader(viewportShader: NodeShader->String) {
-		raw.viewportShader = viewportShader;
-		setRenderPath();
-	}
-
-	public static function setRenderPath() {
-		if (raw.renderMode == RenderForward || raw.viewportShader != null) {
-			if (RenderPathForward.path == null) {
-				RenderPathForward.init(RenderPath.active);
-			}
-			RenderPath.active.commands = RenderPathForward.commands;
-		}
-		else {
-			RenderPath.active.commands = RenderPathDeferred.commands;
-		}
-		iron.App.notifyOnInit(function() {
-			MakeMaterial.parseMeshMaterial();
-		});
-	}
-
-	public static function enableImportPlugin(file: String): Bool {
-		// Return plugin name suitable for importing the specified file
-		if (BoxPreferences.filesPlugin == null) {
-			BoxPreferences.fetchPlugins();
-		}
-		var ext = file.substr(file.lastIndexOf(".") + 1);
-		for (f in BoxPreferences.filesPlugin) {
-			if (f.startsWith("import_") && f.indexOf(ext) >= 0) {
-				Config.enablePlugin(f);
-				Console.info(f + " " + tr("plugin enabled"));
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public static function runBrush(from: Int) {
