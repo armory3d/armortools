@@ -1,7 +1,7 @@
 package arm.io;
 
 import haxe.io.BytesOutput;
-import arm.ProjectBaseFormat;
+import arm.ProjectFormat;
 
 class ExportGpl {
 

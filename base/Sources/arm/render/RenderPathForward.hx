@@ -11,6 +11,9 @@ class RenderPathForward {
 	}
 
 	public static function commands() {
+		#if is_paint
+		RenderPathPaint.liveBrushDirty();
+		#end
 		RenderPathBase.commands(drawForward);
 	}
 

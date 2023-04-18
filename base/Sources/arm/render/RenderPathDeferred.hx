@@ -144,14 +144,20 @@ class RenderPathDeferred {
 		#end
 
 		RenderPathPaint.init(path);
+
+		#if is_paint
 		RenderPathPreview.init(path);
+		#end
+
 		#if (kha_direct3d12 || kha_vulkan)
 		RenderPathRaytrace.init(path);
 		#end
 	}
 
 	public static function commands() {
+		#if is_paint
 		RenderPathPaint.liveBrushDirty();
+		#end
 		RenderPathBase.commands(drawDeferred);
 	}
 

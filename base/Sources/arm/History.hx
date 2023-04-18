@@ -1,16 +1,18 @@
 package arm;
 
 import zui.Nodes;
-import arm.ui.UIBase;
-import arm.ui.UIView2D;
+import arm.sys.Path;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
+#if is_paint
+import arm.ui.UIBase;
+import arm.ui.UIView2D;
 import arm.ui.UIToolbar;
-import arm.sys.Path;
 import arm.data.LayerSlot;
 import arm.data.MaterialSlot;
 import arm.shader.MakeMaterial;
 import arm.Project;
+#end
 
 class History {
 
@@ -18,15 +20,22 @@ class History {
 	public static var undoI = 0; // Undo layer
 	public static var undos = 0; // Undos available
 	public static var redos = 0; // Redos available
+	#if is_paint
 	public static var pushUndo = false; // Store undo on next paint
 	public static var undoLayers: Array<LayerSlot> = null;
+	#end
 
 	public static function undo() {
 		if (undos > 0) {
 			var active = steps.length - 1 - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
+			if (step.name == tr("Edit Nodes")) {
+				swapCanvas(step);
+			}
+
+			#if is_paint
+			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
 				Context.raw.layer.delete();
 				Context.raw.layer = Project.layers[step.layer > 0 ? step.layer - 1 : 0];
@@ -121,7 +130,7 @@ class History {
 					currentLayer = Project.layers[maskPosition].parent;
 				else if (Project.layers[maskPosition].isLayer() || Project.layers[maskPosition].isGroup())
 					currentLayer = Project.layers[maskPosition];
- 
+
 				var layersToRestore = currentLayer.isGroup() ? currentLayer.getChildren() : [currentLayer];
 				layersToRestore.reverse();
 
@@ -183,9 +192,6 @@ class History {
 				step.layer_blending = t;
 				MakeMaterial.parseMeshMaterial();
 			}
-			else if (step.name == tr("Edit Nodes")) {
-				swapCanvas(step);
-			}
 			else if (step.name == tr("Delete Node Group")) {
 				Project.materialGroups.insert(step.canvas_group, { canvas: null, nodes: new Nodes() });
 				swapCanvas(step);
@@ -216,12 +222,19 @@ class History {
 				Context.raw.layer.swap(lay);
 				Context.raw.layerPreviewDirty = true;
 			}
+			#end
+
 			undos--;
 			redos++;
-			UIBase.inst.hwnds[0].redraws = 2;
-			UIBase.inst.hwnds[1].redraws = 2;
 			Context.raw.ddirty = 2;
-			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+
+			#if is_paint
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
+			if (UIView2D.inst.show) {
+				UIView2D.inst.hwnd.redraws = 2;
+			}
+			#end
 		}
 	}
 
@@ -230,7 +243,12 @@ class History {
 			var active = steps.length - redos;
 			var step = steps[active];
 
-			if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
+			if (step.name == tr("Edit Nodes")) {
+				swapCanvas(step);
+			}
+
+			#if is_paint
+			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
@@ -307,7 +325,7 @@ class History {
 						var group = Context.raw.layer.parent;
 						var layers = group.getChildren();
 						layers.insert(0, Context.raw.layer);
-						copyMergingLayers2(layers);	
+						copyMergingLayers2(layers);
 					}
 					else copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
 
@@ -360,9 +378,6 @@ class History {
 				step.layer_blending = t;
 				MakeMaterial.parseMeshMaterial();
 			}
-			else if (step.name == tr("Edit Nodes")) {
-				swapCanvas(step);
-			}
 			else if (step.name == tr("Delete Node Group")) {
 				swapCanvas(step);
 				Project.materialGroups.remove(Project.materialGroups[step.canvas_group]);
@@ -396,22 +411,48 @@ class History {
 				Context.raw.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
 			}
+			#end
+
 			undos++;
 			redos--;
-			UIBase.inst.hwnds[0].redraws = 2;
-			UIBase.inst.hwnds[1].redraws = 2;
 			Context.raw.ddirty = 2;
+
+			#if is_paint
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+			#end
 		}
 	}
 
 	public static function reset() {
+		#if is_paint
 		steps = [{name: tr("New"), layer: 0, layer_type: SlotLayer, layer_parent: -1, object: 0, material: 0, brush: 0}];
+		#end
+		#if is_lab
+		steps = [{name: tr("New")}];
+		#end
+
 		undos = 0;
 		redos = 0;
 		undoI = 0;
 	}
 
+	#if is_paint
+	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
+	#end
+	#if is_lab
+	public static function editNodes(canvas: TNodeCanvas, canvas_group: Null<Int> = null) {
+	#end
+		var step = push(tr("Edit Nodes"));
+		step.canvas_group = canvas_group;
+		#if is_paint
+		step.canvas_type = canvas_type;
+		#end
+		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
+	}
+
+	#if is_paint
 	public static function paint() {
 		var isMask = Context.raw.layer.isMask();
 		copyToUndo(Context.raw.layer.id, undoI, isMask);
@@ -423,7 +464,7 @@ class History {
 	public static function newLayer() {
 		push(tr("New Layer"));
 	}
-	
+
 	public static function newBlackMask() {
 		push(tr("New Black Mask"));
 	}
@@ -477,13 +518,13 @@ class History {
 			var group = Context.raw.layer.parent;
 			var layers = group.getChildren();
 			layers.insert(0, Context.raw.layer);
-			copyMergingLayers2(layers);	
+			copyMergingLayers2(layers);
 		}
 		else copyMergingLayers2([Context.raw.layer, Context.raw.layer.parent]);
 		push(tr("Apply Mask"));
 	}
 
-	
+
 	public static function invertMask() {
 		push(tr("Invert Mask"));
 	}
@@ -544,19 +585,13 @@ class History {
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
 	}
 
-	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
-		var step = push(tr("Edit Nodes"));
-		step.canvas_type = canvas_type;
-		step.canvas_group = canvas_group;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
-	}
-
 	public static function deleteMaterialGroup(group: TNodeGroup) {
 		var step = push(tr("Delete Node Group"));
 		step.canvas_type = CanvasMaterial;
 		step.canvas_group = Project.materialGroups.indexOf(group);
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(group.canvas));
 	}
+	#end
 
 	static function push(name: String): TStep {
 		#if (krom_windows || krom_linux || krom_darwin)
@@ -570,6 +605,7 @@ class History {
 			redos = 0;
 		}
 
+		#if is_paint
 		var opos = Project.paintObjects.indexOf(Context.raw.paintObject);
 		var lpos = Project.layers.indexOf(Context.raw.layer);
 		var mpos = Project.materials.indexOf(Context.raw.material);
@@ -587,11 +623,19 @@ class History {
 			layer_object: Context.raw.layer.objectMask,
 			layer_blending: Context.raw.layer.blending
 		});
+		#end
+
+		#if is_lab
+		steps.push({
+			name: name
+		});
+		#end
 
 		while (steps.length > Config.raw.undo_steps + 1) steps.shift();
 		return steps[steps.length - 1];
 	}
 
+	#if is_paint
 	static function redoMergeLayers() {
 		copyMergingLayers();
 	}
@@ -633,12 +677,22 @@ class History {
 		}
 		undoI = (undoI + 1) % Config.raw.undo_steps;
 	}
+	#end
 
 	static function getCanvasOwner(step: TStep): Dynamic {
-		return step.canvas_group == null ? Project.materials[step.material] : Project.materialGroups[step.canvas_group];
+		#if is_paint
+		return step.canvas_group == null ?
+			Project.materials[step.material] :
+			Project.materialGroups[step.canvas_group];
+		#end
+
+		#if is_lab
+		return null;
+		#end
 	}
 
 	static function swapCanvas(step: TStep) {
+		#if is_paint
 		if (step.canvas_type == 0) {
 			var _canvas = getCanvasOwner(step).canvas;
 			getCanvasOwner(step).canvas = step.canvas;
@@ -651,6 +705,13 @@ class History {
 			step.canvas = _canvas;
 			Context.raw.brush = Project.brushes[step.brush];
 		}
+		#end
+
+		#if is_lab
+		var _canvas = getCanvasOwner(step).canvas;
+		getCanvasOwner(step).canvas = step.canvas;
+		step.canvas = _canvas;
+		#end
 
 		UINodes.inst.canvasChanged();
 		@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
@@ -660,6 +721,9 @@ class History {
 
 typedef TStep = {
 	public var name: String;
+	@:optional public var canvas: TNodeCanvas; // Node history
+	@:optional public var canvas_group: Int;
+	#if is_paint
 	public var layer: Int;
 	public var layer_type: LayerSlotType;
 	public var layer_parent: Int;
@@ -670,7 +734,6 @@ typedef TStep = {
 	@:optional public var layer_object: Int;
 	@:optional public var layer_blending: Int;
 	@:optional public var prev_order: Int; // Previous layer position
-	@:optional public var canvas: TNodeCanvas; // Node history
 	@:optional public var canvas_type: Int;
-	@:optional public var canvas_group: Int;
+	#end
 }

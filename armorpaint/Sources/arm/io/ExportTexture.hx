@@ -11,7 +11,7 @@ import arm.ui.UIHeader;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
-import arm.ProjectBaseFormat;
+import arm.ProjectFormat;
 
 class ExportTexture {
 

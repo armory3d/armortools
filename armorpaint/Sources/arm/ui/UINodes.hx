@@ -15,7 +15,7 @@ import arm.shader.MakeMaterial;
 import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Project;
-import arm.ProjectBaseFormat;
+import arm.ProjectFormat;
 
 @:access(zui.Zui)
 @:access(zui.Nodes)
@@ -293,7 +293,7 @@ class UINodes {
 						if (menuButton(uiMenu, tr("Add Swatch"))) {
 							var color = selected.outputs[0].default_value;
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
-							ContextBase.setSwatch(newSwatch);
+							Context.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
 							UIBase.inst.hwnds[2].redraws = 1;
 						}

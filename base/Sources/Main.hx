@@ -15,11 +15,44 @@ import arm.Config;
 import arm.Context;
 import arm.Res;
 
-class MainBase {
+class Main {
 
 	public static var sha = BuildMacros.sha().substr(1, 7);
 	public static var date = BuildMacros.date().split(" ")[0];
 	public static var tasks: Int;
+
+	#if is_paint
+	public static inline var title = "ArmorPaint";
+	public static inline var version = "0.9";
+	#end
+	#if is_lab
+	public static inline var title = "ArmorLab";
+	public static inline var version = "0.1";
+	#end
+
+	public static function main() {
+		#if arm_snapshot
+
+		#if is_paint
+		embed(["default_material.arm"]);
+		#end
+		#if is_lab
+		embed(["placeholder.k"]);
+		#end
+
+		#if (kha_direct3d12 || kha_vulkan)
+		embedRaytrace();
+		#if is_paint
+		embedRaytraceBake();
+		#end
+		#end
+
+		#else
+
+		kickstart();
+
+		#end
+	}
 
 	@:keep
 	public static function kickstart() {
@@ -75,7 +108,7 @@ class MainBase {
 
 	public static function embed(additional: Array<String>) {
 		var global = js.Syntax.code("globalThis");
-		global.kickstart = MainBase.kickstart;
+		global.kickstart = Main.kickstart;
 
 		Res.embedRaw("Scene", "Scene.arm", untyped global["data/Scene.arm"]);
 		untyped global["data/Scene.arm"] = null;

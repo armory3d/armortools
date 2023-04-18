@@ -8,7 +8,6 @@ import iron.object.MeshObject;
 import iron.system.ArmPack;
 import iron.system.Lz4;
 import arm.sys.Path;
-import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
 
 class ExportArm {

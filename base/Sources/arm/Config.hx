@@ -99,7 +99,7 @@ class Config {
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
 			raw.version = Main.version;
-			raw.sha = MainBase.sha;
+			raw.sha = Main.sha;
 			App.initConfig();
 		}
 		else {
@@ -108,7 +108,7 @@ class Config {
 			// 	raw.version = Main.version;
 			// 	save();
 			// }
-			if (raw.sha != MainBase.sha) {
+			if (raw.sha != Main.sha) {
 				configLoaded = false;
 				init();
 				return;

@@ -5,7 +5,6 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
-import arm.ProjectBaseFormat;
 
 class UIHeader {
 
@@ -70,7 +69,7 @@ class UIHeader {
 				// }
 				// if (ui.button(tr("Add Swatch"))) {
 				// 	var newSwatch = Project.cloneSwatch(Context.raw.pickedColor);
-				// 	ContextBase.setSwatch(newSwatch);
+				// 	Context.setSwatch(newSwatch);
 				// 	Project.raw.swatches.push(newSwatch);
 				// 	UIBase.inst.hwnds[TabStatus].redraws = 1;
 				// }

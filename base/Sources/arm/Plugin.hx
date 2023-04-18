@@ -1,7 +1,5 @@
 package arm;
 
-import arm.PluginAPI; // Keep included
-
 @:keep
 class Plugin {
 
@@ -19,6 +17,20 @@ class Plugin {
 	public function new() {
 		name = pluginName;
 		plugins.set(name, this);
+	}
+
+	public static function init() {
+		var api = js.Syntax.code("arm");
+		#if is_paint
+		api.MaterialParser = arm.shader.MaterialParser;
+		api.NodesMaterial = arm.shader.NodesMaterial;
+		api.UIView2D = arm.ui.UIView2D;
+		api.RenderUtil = arm.util.RenderUtil;
+		api.UVUtil = arm.util.UVUtil;
+		#end
+		#if is_lab
+		api.BrushOutputNode = arm.logic.BrushOutputNode;
+		#end
 	}
 
 	public static function start(plugin: String) {
@@ -55,6 +67,16 @@ class Keep {
 		];
 	}
 }
+
+#if is_lab
+@:keep
+class KeepLab {
+	public static function keep() {
+		var a = App.uiBox.panel;
+		return [a];
+	}
+}
+#end
 
 @:expose("core")
 class CoreBridge {
@@ -104,7 +126,6 @@ class ArmBridge {
 	public static var App = arm.App;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
-	public static var ContextBase = arm.ContextBase;
 	public static var History = arm.History;
 	public static var Operator = arm.Operator;
 	public static var Plugin = arm.Plugin;

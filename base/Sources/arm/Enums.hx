@@ -233,3 +233,107 @@ package arm;
 	var SlotMask = 1;
 	var SlotGroup = 2;
 }
+
+@:enum abstract SpaceType(Int) from Int to Int {
+	#if is_paint
+	var SpacePaint = 0;
+	var SpaceMaterial = 1;
+	var SpaceBake = 2;
+	#end
+	#if is_lab
+	var Space3D = 0;
+	var Space2D = 1;
+	#end
+}
+
+@:enum abstract WorkspaceTool(Int) from Int to Int {
+	#if is_paint
+	var ToolBrush = 0;
+	var ToolEraser = 1;
+	var ToolFill = 2;
+	var ToolDecal = 3;
+	var ToolText = 4;
+	var ToolClone = 5;
+	var ToolBlur = 6;
+	var ToolSmudge = 7;
+	var ToolParticle = 8;
+	var ToolColorId = 9;
+	var ToolPicker = 10;
+	var ToolBake = 11;
+	var ToolGizmo = 12;
+	#end
+	#if is_lab
+	var ToolEraser = 0;
+	var ToolClone = 1;
+	var ToolBlur = 2;
+	var ToolSmudge = 3;
+	var ToolPicker = 4;
+	var ToolDecal = 5; // Unused
+	var ToolText = 6;
+	#end
+}
+
+@:enum abstract AreaType(Int) from Int to Int {
+	#if is_paint
+	var AreaViewport = 0;
+	var Area2DView = 1;
+	var AreaLayers = 2;
+	var AreaMaterials = 3;
+	var AreaNodes = 4;
+	var AreaBrowser = 5;
+	#end
+	#if is_lab
+	var AreaViewport = 0;
+	var AreaNodes = 1;
+	var AreaBrowser = 2;
+	#end
+}
+
+@:enum abstract TabArea(Int) from Int to Int {
+	#if is_paint
+	var TabSidebar0 = 0;
+	var TabSidebar1 = 1;
+	var TabStatus = 2;
+	#end
+	#if is_lab
+	var TabStatus = 0;
+	#end
+}
+
+@:enum abstract TextureRes(Int) from Int to Int {
+	#if is_paint
+	var Res128 = 0;
+	var Res256 = 1;
+	var Res512 = 2;
+	var Res1024 = 3;
+	var Res2048 = 4;
+	var Res4096 = 5;
+	var Res8192 = 6;
+	var Res16384 = 7;
+	#end
+	#if is_lab
+	var Res2048 = 0;
+	var Res4096 = 1;
+	var Res8192 = 2;
+	var Res16384 = 3;
+	var Res128 = 4; // Unused
+	var Res256 = 5;
+	var Res512 = 6;
+	var Res1024 = 7;
+	#end
+}
+
+@:enum abstract LayoutSize(Int) from Int to Int {
+	#if is_paint
+	var LayoutSidebarW = 0;
+	var LayoutSidebarH0 = 1;
+	var LayoutSidebarH1 = 2;
+	var LayoutNodesW = 3;
+	var LayoutNodesH = 4;
+	var LayoutStatusH = 5;
+	#end
+	#if is_lab
+	var LayoutNodesW = 0;
+	var LayoutStatusH = 1;
+	#end
+}

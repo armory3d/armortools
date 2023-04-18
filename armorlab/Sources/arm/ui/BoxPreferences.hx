@@ -323,7 +323,7 @@ class BoxPreferences {
 				var hrendermode = Id.handle({ position: Context.raw.renderMode });
 				Context.raw.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
-					ContextBase.setRenderPath();
+					Context.setRenderPath();
 				}
 				#end
 

@@ -10,7 +10,6 @@ import iron.system.Lz4;
 import arm.data.FontSlot;
 import arm.ui.UINodes;
 import arm.sys.Path;
-import arm.ProjectBaseFormat;
 import arm.ProjectFormat;
 
 class ExportArm {

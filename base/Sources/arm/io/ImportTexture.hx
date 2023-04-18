@@ -4,13 +4,13 @@ import kha.Image;
 import iron.data.Data;
 import arm.ui.UIBase;
 import arm.sys.Path;
-import arm.ProjectBaseFormat;
+import arm.ProjectFormat;
 
 class ImportTexture {
 
 	public static function run(path: String, hdrAsEnvmap = true) {
 		if (!Path.isTexture(path)) {
-			if (!ContextBase.enableImportPlugin(path)) {
+			if (!Context.enableImportPlugin(path)) {
 				Console.error(Strings.error1());
 				return;
 			}
