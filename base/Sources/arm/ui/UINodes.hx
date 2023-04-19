@@ -8,14 +8,16 @@ import zui.Zui;
 import zui.Id;
 import zui.Nodes;
 import iron.system.Input;
-import iron.system.Time;
 import arm.shader.NodesMaterial;
 import arm.logic.NodesBrush;
-import arm.shader.MakeMaterial;
-import arm.util.RenderUtil;
 import arm.ui.UIHeader;
 import arm.Project;
 import arm.ProjectFormat;
+#if is_paint
+import iron.system.Time;
+import arm.util.RenderUtil;
+import arm.shader.MakeMaterial;
+#end
 
 @:access(zui.Zui)
 @:access(zui.Nodes)
@@ -23,14 +25,22 @@ class UINodes {
 
 	public static var inst: UINodes;
 
+	#if is_paint
 	public var show = false;
+	#end
+	#if is_lab
+	public var show = true;
+	#end
+
 	public var wx: Int;
 	public var wy: Int;
 	public var ww: Int;
 	public var wh: Int;
 
 	public var ui: Zui;
+	#if is_paint
 	public var canvasType = CanvasMaterial;
+	#end
 	var showMenu = false;
 	var showMenuFirst = true;
 	var hideMenu = false;
@@ -56,7 +66,9 @@ class UINodes {
 	public function new() {
 		inst = this;
 
+		#if is_paint
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
+		#end
 		Nodes.excludeRemove.push("GROUP_OUTPUT");
 		Nodes.excludeRemove.push("GROUP_INPUT");
 		Nodes.excludeRemove.push("BrushOutputNode");
@@ -112,7 +124,9 @@ class UINodes {
 			// Selecting which node socket to preview
 			else if (node == nodes.nodesSelected[0]) {
 				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
+				#if is_paint
 				Context.raw.nodePreviewDirty = true;
+				#end
 			}
 		}
 	}
@@ -217,7 +231,9 @@ class UINodes {
 			var i = node.outputs.indexOf(socket);
 			if (i > -1) {
 				Context.raw.nodePreviewSocket = i;
+				#if is_paint
 				Context.raw.nodePreviewDirty = true;
+				#end
 			}
 		}
 	}
@@ -240,13 +256,17 @@ class UINodes {
 			// Node context menu
 			if (!Nodes.socketReleased) {
 				var numberOfEntries = 5;
+				#if is_paint
 				if (canvasType == CanvasMaterial) ++numberOfEntries;
+				#end
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
 				
 				UIMenu.draw(function(uiMenu: Zui) {
 					uiMenu._y += 1;
 					var protected = selected == null ||
+									#if is_paint
 									selected.type == "OUTPUT_MATERIAL_PBR" ||
+									#end
 									selected.type == "GROUP_INPUT" ||
 									selected.type == "GROUP_OUTPUT" ||
 									selected.type == "BrushOutputNode";
@@ -295,19 +315,25 @@ class UINodes {
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
 							Context.setSwatch(newSwatch);
 							Project.raw.swatches.push(newSwatch);
-							UIBase.inst.hwnds[2].redraws = 1;
+							UIBase.inst.hwnds[TabStatus].redraws = 1;
 						}
 					}
+
+					#if is_paint
 					if (canvasType == CanvasMaterial) {
 						menuSeparator(uiMenu);
 						if (menuButton(uiMenu, tr("2D View"))) {
 							UIBase.inst.show2DView(View2DNode);
 						}
 					}
+					#end
+
 					uiMenu.enabled = true;
 				}, numberOfEntries);
 			}
 		}
+
+		#if is_paint
 		if (ui.inputReleased) {
 			var nodes = getNodes();
 			var canvas = getCanvas(true);
@@ -322,9 +348,32 @@ class UINodes {
 				}
 			}
 		}
+		#end
 	}
 
 	public static function onNodeRemove(node: TNode) {
+		// if (node.type == "GROUP") { // Remove unused groups
+		// 	var found = false;
+		// 	var canvases: Array<TNodeCanvas> = [];
+		// 	for (m in Project.materials) canvases.push(m.canvas);
+		// 	for (m in Project.materialGroups) canvases.push(m.canvas);
+		// 	for (canvas in canvases) {
+		// 		for (n in canvas.nodes) {
+		// 			if (n.type == "GROUP" && n.name == node.name) {
+		// 				found = true;
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+		// 	if (!found) {
+		// 		for (g in Project.materialGroups) {
+		// 			if (g.canvas.name == node.name) {
+		// 				Project.materialGroups.remove(g);
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 
 	function onCanvasControl(): zui.Nodes.CanvasControl {
@@ -391,23 +440,38 @@ class UINodes {
 	}
 
 	public function getCanvas(groups = false): TNodeCanvas {
+		#if is_paint
 		if (canvasType == CanvasMaterial) {
 			if (groups && groupStack.length > 0) return groupStack[groupStack.length - 1].canvas;
 			else return getCanvasMaterial();
 		}
 		else return Context.raw.brush.canvas;
+		#end
+
+		#if is_lab
+		return Project.canvas;
+		#end
 	}
 
+	#if is_paint
 	public function getCanvasMaterial(): TNodeCanvas {
 		return Context.raw.material.canvas;
 	}
+	#end
 
 	public function getNodes(): Nodes {
+		#if is_paint
 		if (canvasType == CanvasMaterial) {
 			if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
 			else return Context.raw.material.nodes;
 		}
 		else return Context.raw.brush.nodes;
+		#end
+
+		#if is_lab
+		if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
+		else return Project.nodes;
+		#end
 	}
 
 	public function update() {
@@ -416,17 +480,29 @@ class UINodes {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
+		#if is_paint
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		#end
+		#if is_lab
+		wx = Std.int(iron.App.w());
+		#end
 		wy = UIHeader.inst.headerh * 2;
+
+		#if is_paint
 		if (UIView2D.inst.show) {
 			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
+		#end
+
 		var ww = Config.raw.layout[LayoutNodesW];
 		if (!UIBase.inst.show) {
+			#if is_paint
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
+			#end
 			wy = 0;
 		}
+
 		var mx = mouse.x;
 		var my = mouse.y;
 		if (mx < wx || mx > wx + ww || my < wy) return;
@@ -483,7 +559,14 @@ class UINodes {
 			var enter = kb.down("enter");
 			var count = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
+
+			#if is_paint
 			var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+			#end
+			#if is_lab
+			var nodeList = NodesBrush.list;
+			#end
+
 			for (list in nodeList) {
 				for (n in list) {
 					if (tr(n.name).toLowerCase().indexOf(search) >= 0) {
@@ -496,6 +579,11 @@ class UINodes {
 							canvas.nodes.push(nodeSearchSpawn);
 							nodes.nodesSelected = [nodeSearchSpawn];
 							nodes.nodesDrag = true;
+
+							#if is_lab
+							arm.logic.LogicParser.parse(canvas, false);
+							#end
+
 							hwnd.redraws = 2;
 							if (enter) {
 								ui.changed = true;
@@ -528,9 +616,13 @@ class UINodes {
 
 	public function drawGrid() {
 		var ww = Config.raw.layout[LayoutNodesW];
+
+		#if is_paint
 		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 		}
+		#end
+
 		var wh = iron.App.h();
 		var w = ww + 100 * 2;
 		var h = wh + 100 * 2;
@@ -562,10 +654,12 @@ class UINodes {
 
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
+
+			#if is_paint
 			if (canvasType == CanvasBrush) {
 				MakeMaterial.parseBrush();
 				RenderUtil.makeBrushPreview();
-				UIBase.inst.hwnds[1].redraws = 2;
+				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			}
 			else {
 				App.isFillMaterial() ? App.updateFillLayers() : RenderUtil.makeMaterialPreview();
@@ -574,11 +668,18 @@ class UINodes {
 				}
 			}
 
-			UIBase.inst.hwnds[1].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			if (Context.raw.splitView) Context.raw.ddirty = 2;
+			#end
+
+			#if is_lab
+			arm.logic.LogicParser.parse(Project.canvas, false);
+			#end
+
 			recompileMat = false;
 		}
 		else if (recompileMatFinal) {
+			#if is_paint
 			MakeMaterial.parsePaintMaterial();
 
 			if (canvasType == CanvasMaterial && App.isFillMaterial()) {
@@ -589,15 +690,25 @@ class UINodes {
 			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 			if (decal) RenderUtil.makeDecalPreview();
 
-			UIBase.inst.hwnds[0].redraws = 2;
-			recompileMatFinal = false;
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 			Context.raw.nodePreviewDirty = true;
+			#end
+
+			recompileMatFinal = false;
 		}
 
 		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
 			lastNodeSelected = nodes.nodesSelected[0];
+			#if is_paint
 			Context.raw.nodePreviewDirty = true;
+			#end
+
+			#if is_lab
+			Context.raw.ddirty = 2; // Show selected node texture in viewport
+			UIHeader.inst.headerHandle.redraws = 2;
+			#end
+
 			Context.raw.nodePreviewSocket = 0;
 		}
 
@@ -617,22 +728,39 @@ class UINodes {
 
 		if (grid == null) drawGrid();
 
-		if (Config.raw.node_preview && Context.raw.nodePreviewDirty) makeNodePreview();
+		#if is_paint
+		if (Config.raw.node_preview && Context.raw.nodePreviewDirty) {
+			makeNodePreview();
+		}
+		#end
 
 		// Start with UI
 		ui.begin(g);
 
 		// Make window
 		ww = Config.raw.layout[LayoutNodesW];
+
+		#if is_paint
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		#end
+		#if is_lab
+		wx = Std.int(iron.App.w());
+		#end
+
 		wy = UIHeader.inst.headerh * 2;
 		if (!UIBase.inst.show) {
+			#if is_paint
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
+			#end
+
 			wy = 0;
 		}
+
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
+
+		#if is_paint
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
 			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.inst.headerh * 2;
@@ -640,6 +768,8 @@ class UINodes {
 				wy -= UIHeader.inst.headerh * 2;
 			}
 		}
+		#end
+
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
 			// Grid
@@ -654,7 +784,9 @@ class UINodes {
 			// Nodes
 			var _inputEnabled = ui.inputEnabled;
 			ui.inputEnabled = _inputEnabled && !showMenu;
+			#if is_paint
 			ui.windowBorderRight = Config.raw.layout[LayoutSidebarW];
+			#end
 			ui.windowBorderTop = UIHeader.inst.headerh * 2;
 			ui.windowBorderBottom = Config.raw.layout[LayoutStatusH];
 			nodes.nodeCanvas(ui, c);
@@ -667,15 +799,30 @@ class UINodes {
 				Context.raw.colorPickerCallback = function(color: TSwatchColor) {
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
-					if (Config.raw.material_live)
+
+					#if is_paint
+					var material_live = Config.raw.material_live;
+					#end
+					#if is_lab
+					var material_live = true;
+					#end
+
+					if (material_live) {
 						UINodes.inst.canvasChanged();
+					}
 				};
 				nodes.colorPickerCallback = null;
 			}
 
 			// Remove nodes with unknown id for this canvas type
 			if (Zui.isPaste) {
+				#if is_paint
 				var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+				#end
+				#if is_lab
+				var nodeList = NodesBrush.list;
+				#end
+
 				var i = 0;
 				while (i++ < c.nodes.length) {
 					var canvasNode = c.nodes[i - 1];
@@ -709,7 +856,12 @@ class UINodes {
 
 			// Recompile material on change
 			if (ui.changed) {
+				#if is_paint
 				recompileMat = (ui.inputDX != 0 || ui.inputDY != 0 || !uichangedLast) && Config.raw.material_live; // Instant preview
+				#end
+				#if is_lab
+				recompileMat = (ui.inputDX != 0 || ui.inputDY != 0 || !uichangedLast); // Instant preview
+				#end
 			}
 			else if (uichangedLast) {
 				canvasChanged();
@@ -717,6 +869,7 @@ class UINodes {
 			}
 			uichangedLast = ui.changed;
 
+			#if is_paint
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
@@ -820,6 +973,7 @@ class UINodes {
 			ui.t.BUTTON_H = _BUTTON_H;
 			ui.t.ELEMENT_H = _ELEMENT_H;
 			ui.fontSize = _FONT_SIZE;
+			#end
 
 			// Close node group
 			if (groupStack.length > 0) {
@@ -838,10 +992,119 @@ class UINodes {
 			ui._y = 0;
 			ui._w = ew;
 
+			#if is_lab
+			if (ui.button(tr("Run"))) {
+				Console.progress(tr("Processing"));
+
+				function delayIdleSleep(_) {
+					Krom.delayIdleSleep();
+				}
+				iron.App.notifyOnRender2D(delayIdleSleep);
+
+				App.notifyOnNextFrame(function() {
+					var timer = iron.system.Time.realTime();
+
+					arm.logic.LogicParser.parse(Project.canvas, false);
+
+					arm.logic.PhotoToPBRNode.cachedSource = null;
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelBaseColor, function(texbase: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelOcclusion, function(texocc: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelRoughness, function(texrough: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelNormalMap, function(texnor: kha.Image) {
+					@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelHeight, function(texheight: kha.Image) {
+
+						if (texbase != null) {
+							var texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image;
+							texpaint.g2.begin(false);
+							texpaint.g2.drawScaledImage(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+							texpaint.g2.end();
+						}
+
+						if (texnor != null) {
+							var texpaint_nor = iron.RenderPath.active.renderTargets.get("texpaint_nor").image;
+							texpaint_nor.g2.begin(false);
+							texpaint_nor.g2.drawScaledImage(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+							texpaint_nor.g2.end();
+						}
+
+						if (App.pipeCopy == null) App.makePipe();
+						if (App.pipeCopyA == null) App.makePipeCopyA();
+						if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+
+						var texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack").image;
+
+						if (texocc != null) {
+							texpaint_pack.g2.begin(false);
+							texpaint_pack.g2.pipeline = App.pipeCopyR;
+							texpaint_pack.g2.drawScaledImage(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+							texpaint_pack.g2.pipeline = null;
+							texpaint_pack.g2.end();
+						}
+
+						if (texrough != null) {
+							texpaint_pack.g2.begin(false);
+							texpaint_pack.g2.pipeline = App.pipeCopyG;
+							texpaint_pack.g2.drawScaledImage(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+							texpaint_pack.g2.pipeline = null;
+							texpaint_pack.g2.end();
+						}
+
+						if (texheight != null) {
+							texpaint_pack.g4.begin();
+							texpaint_pack.g4.setPipeline(App.pipeCopyA);
+							texpaint_pack.g4.setTexture(App.pipeCopyATex, texheight);
+							texpaint_pack.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+							texpaint_pack.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+							texpaint_pack.g4.drawIndexedVertices();
+							texpaint_pack.g4.end();
+
+							// arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.08, Context.raw.brushScale);
+							// arm.util.MeshUtil.calcNormals();
+						}
+
+						Context.raw.ddirty = 2;
+
+						#if (kha_direct3d12 || kha_vulkan)
+						arm.render.RenderPathRaytrace.ready = false;
+						#end
+
+						Console.log("Processing finished in " + (iron.system.Time.realTime() - timer));
+						Console.progress(null);
+						Krom.mlUnload();
+
+						iron.App.removeRender2D(delayIdleSleep);
+					});
+					});
+					});
+					});
+					});
+				});
+			}
+			ui._x += ew + 3;
+			ui._y = 0;
+
+			#if (krom_android || krom_ios)
+			ui.combo(App.resHandle, ["2K", "4K"], tr("Resolution"));
+			#else
+			ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
+			#end
+			if (App.resHandle.changed) {
+				App.onLayersResized();
+			}
+			ui._x += ew + 3;
+			ui._y = 0;
+			#end
+
 			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
+			#if is_paint
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
+			#end
+			#if is_lab
+			var cats = NodesBrush.categories;
+			#end
+
 			for (i in 0...cats.length) {
 				if ((ui.button(tr(cats[i]), Left)) || (ui.isHovered && showMenu)) {
 					showMenu = true;
@@ -871,10 +1134,22 @@ class UINodes {
 		g.begin(false);
 
 		if (showMenu) {
+			#if is_paint
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
+			#end
+			#if is_lab
+			var list = NodesBrush.list;
+			#end
+
 			var numNodes = list[menuCategory].length;
 
+			#if is_paint
 			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == "Group";
+			#end
+			#if is_lab
+			var isGroupCategory = NodesMaterial.categories[menuCategory] == "Group";
+			#end
+
 			if (isGroupCategory) numNodes += Project.materialGroups.length;
 
 			var py = popupY;
@@ -897,6 +1172,9 @@ class UINodes {
 					canvas.nodes.push(node);
 					nodes.nodesSelected = [node];
 					nodes.nodesDrag = true;
+					#if is_lab
+					arm.logic.LogicParser.parse(canvas, false);
+					#end
 				}
 				// Next column
 				if (ui._y - wy + ui.ELEMENT_H() / 2 > wh) {
@@ -919,11 +1197,14 @@ class UINodes {
 						nodes.nodesSelected = [node];
 						nodes.nodesDrag = true;
 					}
+
+					#if is_paint
 					ui.enabled = !Project.isMaterialGroupInUse(g);
 					if (ui.button("x", Center)) {
 						History.deleteMaterialGroup(g);
 						Project.materialGroups.remove(g);
 					}
+					#end
 					
 					ui.enabled = true;
 				}
@@ -980,19 +1261,36 @@ class UINodes {
 
 	function pushUndo(lastCanvas: TNodeCanvas = null) {
 		if (lastCanvas == null) lastCanvas = getCanvas(true);
-		UIBase.inst.hwnds[0].redraws = 2;
 		var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
+
+		#if is_paint
+		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		History.editNodes(lastCanvas, canvasType, canvasGroup);
+		#end
+		#if is_lab
+		History.editNodes(lastCanvas, canvasGroup);
+		#end
 	}
 
 	public function acceptAssetDrag(index: Int) {
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
+		#if is_paint
 		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
+		#end
+		#if is_lab
+		var n = NodesBrush.createNode("ImageTextureNode");
+		#end
+
 		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
+
+		#if is_lab
+		arm.logic.LogicParser.parse(Project.canvas, false);
+		#end
 	}
 
+	#if is_paint
 	public function acceptLayerDrag(index: Int) {
 		pushUndo();
 		if (Project.layers[index].isGroup()) return;
@@ -1009,13 +1307,16 @@ class UINodes {
 		n.buttons[0].default_value = index;
 		getNodes().nodesSelected = [n];
 	}
+	#end
 
 	public function acceptSwatchDrag(swatch: TSwatchColor) {
+		#if is_paint
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
 		n.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
 		getNodes().nodesSelected = [n];
+		#end
 	}
 
 	public static function makeNode(n: TNode, nodes: Nodes, canvas: TNodeCanvas): TNode {
@@ -1063,6 +1364,7 @@ class UINodes {
 		return node;
 	}
 
+	#if is_paint
 	function makeNodePreview() {
 		var nodes = Context.raw.material.nodes;
 		if (nodes.nodesSelected.length == 0) return;
@@ -1083,6 +1385,7 @@ class UINodes {
 		UINodes.inst.hwnd.redraws = 2;
 		RenderUtil.makeNodePreview(Context.raw.material.canvas, node, Context.raw.nodePreview);
 	}
+	#end
 
 	public static function hasGroup(c: TNodeCanvas): Bool {
 		for (n in c.nodes) if (n.type == "GROUP") return true;

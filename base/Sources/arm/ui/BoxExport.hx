@@ -3,10 +3,13 @@ package arm.ui;
 import haxe.io.Bytes;
 import zui.Zui;
 import zui.Id;
-import arm.io.ExportTexture;
 import arm.io.ExportMesh;
+import arm.io.ExportTexture;
 import arm.sys.Path;
 import arm.sys.File;
+#if is_paint
+import arm.io.ExportArm;
+#end
 
 class BoxExport {
 
@@ -14,7 +17,7 @@ class BoxExport {
 	public static var hpreset = Id.handle();
 	public static var files: Array<String> = null;
 	public static var preset: TExportPreset = null;
-	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "0.0", "1.0"];
+	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static var colorSpaces = ["linear", "srgb"];
 	static var exportMeshHandle = Id.handle();
 
@@ -33,27 +36,95 @@ class BoxExport {
 			tabExportTextures(ui, tr("Export Textures"));
 			tabPresets(ui);
 
+			#if is_paint
+			tabAtlases(ui);
+			#if (krom_android || krom_ios)
+			tabExportMesh(ui, htab);
+			#end
+			#end
+
 		}, 540, 310);
 	}
 
-	static function tabExportTextures(ui: Zui, title: String) {
+	#if is_paint
+	public static function showBakeMaterial() {
+		UIBox.showCustom(function(ui: Zui) {
+
+			if (files == null) {
+				fetchPresets();
+				hpreset.position = files.indexOf("generic");
+			}
+			if (preset == null) {
+				parsePreset();
+				@:privateAccess hpreset.children = null;
+			}
+
+			tabExportTextures(ui, tr("Bake to Textures"), true);
+			tabPresets(ui);
+
+		}, 540, 310);
+	}
+	#end
+
+	static function tabExportTextures(ui: Zui, title: String, bakeMaterial = false) {
 		var tabVertical = Config.raw.touch_ui;
 		if (ui.tab(htab, title, tabVertical)) {
+
+			ui.row([0.5, 0.5]);
+
+			#if is_paint
+			#if (krom_android || krom_ios)
+			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
+			#else
+			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			#end
+			#end
+
+			#if is_lab
 			#if (krom_android || krom_ios)
 			ui.combo(App.resHandle, ["2K", "4K"], tr("Resolution"), true);
 			#else
 			ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
+			#end
+
 			if (App.resHandle.changed) {
 				App.onLayersResized();
 			}
 
-			ui.row([0.5, 0.5]);
-			Context.raw.formatType = ui.combo(Id.handle({ position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
+			#if (is_lab || krom_android || krom_ios)
+			ui.combo(App.bitsHandle, ["8bit"], tr("Color"), true);
+			#else
+			ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
+			#end
 
-			ui.enabled = Context.raw.formatType == FormatJpg;
+			#if is_paint
+			if (App.bitsHandle.changed) {
+				iron.App.notifyOnInit(App.setLayerBits);
+			}
+			#end
+
+			ui.row([0.5, 0.5]);
+			if (App.bitsHandle.position == Bits8) {
+				Context.raw.formatType = ui.combo(Id.handle({ position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
+			}
+			else {
+				Context.raw.formatType = ui.combo(Id.handle({ position: Context.raw.formatType }), ["exr"], tr("Format"), true);
+			}
+
+			ui.enabled = Context.raw.formatType == FormatJpg && App.bitsHandle.position == Bits8;
 			Context.raw.formatQuality = ui.slider(Id.handle({ value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
+
+			#if is_paint
+			ui.row([0.5, 0.5]);
+			ui.enabled = !bakeMaterial;
+			var layersExportHandle = Id.handle();
+			layersExportHandle.position = Context.raw.layersExport;
+			Context.raw.layersExport = ui.combo(layersExportHandle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
+			ui.enabled = true;
+			#end
+
 			ui.combo(hpreset, files, tr("Preset"), true);
 			if (hpreset.changed) preset = null;
 
@@ -72,17 +143,27 @@ class BoxExport {
 				if (Context.raw.layersDestination == DestinationPacked) {
 					Context.raw.textureExportPath = "/";
 					function _init() {
+						#if is_paint
+						ExportTexture.run(Context.raw.textureExportPath, bakeMaterial);
+						#end
+						#if is_lab
 						ExportTexture.run(Context.raw.textureExportPath);
+						#end
 					}
 					iron.App.notifyOnInit(_init);
 				}
 				else {
-					var filters = Context.raw.formatType == FormatPng ? "png" : "jpg";
+					var filters = App.bitsHandle.position != Bits8 ? "exr" : Context.raw.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, false, function(path: String) {
 						Context.raw.textureExportPath = path;
 						function doExport() {
 							function _init() {
+								#if is_paint
+								ExportTexture.run(Context.raw.textureExportPath, bakeMaterial);
+								#end
+								#if is_lab
 								ExportTexture.run(Context.raw.textureExportPath);
+								#end
 							}
 							iron.App.notifyOnInit(_init);
 						}
@@ -213,6 +294,29 @@ class BoxExport {
 		}
 	}
 
+	#if is_paint
+	static function tabAtlases(ui: Zui) {
+		var tabVertical = Config.raw.touch_ui;
+		if (ui.tab(htab, tr("Atlases"), tabVertical)) {
+			if (Project.atlasObjects == null || Project.atlasObjects.length != Project.paintObjects.length) {
+				Project.atlasObjects = [];
+				Project.atlasNames = [];
+				for (i in 0...Project.paintObjects.length) {
+					Project.atlasObjects.push(0);
+					Project.atlasNames.push(tr("Atlas") + " " + (i + 1));
+				}
+			}
+			for (i in 0...Project.paintObjects.length) {
+				ui.row([1 / 2, 1 / 2]);
+				ui.text(Project.paintObjects[i].name);
+				var hatlas = Id.handle().nest(i);
+				hatlas.position = Project.atlasObjects[i];
+				Project.atlasObjects[i] = ui.combo(hatlas, Project.atlasNames, tr("Atlas"));
+			}
+		}
+	}
+	#end
+
 	public static function showMesh() {
 		exportMeshHandle.position = Context.raw.exportMeshIndex;
 		UIBox.showCustom(function(ui: Zui) {
@@ -273,6 +377,66 @@ class BoxExport {
 			}
 		}
 	}
+
+	#if is_paint
+	public static function showMaterial() {
+		UIBox.showCustom(function(ui: Zui) {
+			var htab = Id.handle();
+			var tabVertical = Config.raw.touch_ui;
+			if (ui.tab(htab, tr("Export Material"), tabVertical)) {
+				var h1 = Id.handle();
+				var h2 = Id.handle();
+				h1.selected = Context.raw.packAssetsOnExport;
+				h2.selected = Context.raw.writeIconOnExport;
+				Context.raw.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));
+				Context.raw.writeIconOnExport = ui.check(h2, tr("Export Icon"));
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.hide();
+				}
+				if (ui.button(tr("Export"))) {
+					UIBox.hide();
+					UIFiles.show("arm", true, false, function(path: String) {
+						var f = UIFiles.filename;
+						if (f == "") f = tr("untitled");
+						iron.App.notifyOnInit(function() {
+							ExportArm.runMaterial(path + Path.sep + f);
+						});
+					});
+				}
+			}
+		});
+	}
+
+	public static function showBrush() {
+		UIBox.showCustom(function(ui: Zui) {
+			var htab = Id.handle();
+			var tabVertical = Config.raw.touch_ui;
+			if (ui.tab(htab, tr("Export Brush"), tabVertical)) {
+				var h1 = Id.handle();
+				var h2 = Id.handle();
+				h1.selected = Context.raw.packAssetsOnExport;
+				h2.selected = Context.raw.writeIconOnExport;
+				Context.raw.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));
+				Context.raw.writeIconOnExport = ui.check(h2, tr("Export Icon"));
+				ui.row([0.5, 0.5]);
+				if (ui.button(tr("Cancel"))) {
+					UIBox.hide();
+				}
+				if (ui.button(tr("Export"))) {
+					UIBox.hide();
+					UIFiles.show("arm", true, false, function(path: String) {
+						var f = UIFiles.filename;
+						if (f == "") f = tr("untitled");
+						iron.App.notifyOnInit(function() {
+							ExportArm.runBrush(path + Path.sep + f);
+						});
+					});
+				}
+			}
+		});
+	}
+	#end
 
 	static function fetchPresets() {
 		files = File.readDirectory(Path.data() + Path.sep + "export_presets");

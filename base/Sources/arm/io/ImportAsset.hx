@@ -4,8 +4,10 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.ui.UINodes;
 import arm.ui.UIBox;
-import arm.ui.UIHeader;
 import arm.Project;
+#if is_paint
+import arm.ui.UIHeader;
+#end
 
 class ImportAsset {
 
@@ -52,13 +54,13 @@ class ImportAsset {
 				UINodes.inst.getNodes().nodesDrag = false;
 				UINodes.inst.hwnd.redraws = 2;
 			}
+
+			#if is_paint
 			if (Context.raw.tool == ToolColorId && Project.assetNames.length == 1) {
 				UIHeader.inst.headerHandle.redraws = 2;
 				Context.raw.ddirty = 2;
 			}
-		}
-		else if (Path.isFont(path)) {
-			ImportFont.run(path);
+			#end
 		}
 		else if (Path.isProject(path)) {
 			ImportArm.runProject(path);
@@ -66,12 +68,17 @@ class ImportAsset {
 		else if (Path.isPlugin(path)) {
 			ImportPlugin.run(path);
 		}
-		else if (Path.isFolder(path)) {
-			ImportFolder.run(path);
-		}
 		else if (Path.isGimpColorPalette(path)) {
 			ImportGpl.run(path, false);
 		}
+		#if is_paint
+		else if (Path.isFont(path)) {
+			ImportFont.run(path);
+		}
+		else if (Path.isFolder(path)) {
+			ImportFolder.run(path);
+		}
+		#end
 		else {
 			if (Context.enableImportPlugin(path)) {
 				run(path, dropX, dropY, showBox);

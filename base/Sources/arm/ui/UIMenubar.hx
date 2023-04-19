@@ -3,8 +3,10 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import zui.Ext;
+#if is_lab
 import iron.Scene;
 import iron.object.MeshObject;
+#end
 
 @:access(zui.Zui)
 class UIMenubar {
@@ -14,7 +16,10 @@ class UIMenubar {
 	public var workspaceHandle = new Handle({ layout: Horizontal });
 	public var menuHandle = new Handle({ layout: Horizontal });
 	public var menubarw = defaultMenubarW;
+
+	#if is_lab
 	static var _savedCamera: iron.math.Mat4 = null;
+	#end
 
 	public function new() {
 		inst = this;
@@ -23,7 +28,13 @@ class UIMenubar {
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UIBase.inst.ui;
 
+		#if is_paint
+		var panelx = iron.App.x() - UIToolbar.inst.toolbarw;
+		#end
+		#if is_lab
 		var panelx = iron.App.x();
+		#end
+
 		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
@@ -32,13 +43,20 @@ class UIMenubar {
 			if (Config.raw.touch_ui) {
 				ui._y += 4;
 
+				#if is_paint
+				var defaultToolbarW = UIToolbar.defaultToolbarW;
+				#end
+
+				#if is_lab
 				#if (krom_android || krom_ios)
 				var defaultToolbarW = 36 + 4;
 				#else
 				var defaultToolbarW = 36;
 				#end
+				#end
 
 				ui._w = Std.int(defaultToolbarW * ui.SCALE());
+
 				if (iconButton(ui, 0, 2)) BoxPreferences.show();
 				if (iconButton(ui, 0, 3)) {
 					#if (krom_android || krom_ios)
@@ -77,11 +95,52 @@ class UIMenubar {
 
 			if (menubarw < ui._x + 10) {
 				menubarw = Std.int(ui._x + 10);
+
+				#if is_paint
+				UIToolbar.inst.toolbarHandle.redraws = 2;
+				#end
 			}
 
 			Ext.endMenu(ui);
 		}
 
+		#if is_paint
+		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
+		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
+			ui.tab(UIHeader.inst.worktab, tr("Paint"));
+			ui.tab(UIHeader.inst.worktab, tr("Material"));
+			ui.tab(UIHeader.inst.worktab, tr("Bake"));
+			if (UIHeader.inst.worktab.changed) {
+				Context.raw.ddirty = 2;
+				Context.raw.brushBlendDirty = true;
+				UIToolbar.inst.toolbarHandle.redraws = 2;
+				UIHeader.inst.headerHandle.redraws = 2;
+				UIBase.inst.hwnds[0].redraws = 2;
+				UIBase.inst.hwnds[1].redraws = 2;
+
+				if (UIHeader.inst.worktab.position == SpacePaint) {
+					Context.selectTool(ToolBrush);
+				}
+				else if (UIHeader.inst.worktab.position == SpaceBake) {
+					Context.selectTool(ToolBake);
+					#if (kha_direct3d12 || kha_vulkan)
+					// Bake in lit mode for now
+					if (Context.raw.viewportMode == ViewPathTrace) {
+						Context.raw.viewportMode = ViewLit;
+					}
+					#end
+				}
+				else if (UIHeader.inst.worktab.position == SpaceMaterial) {
+					Context.selectTool(ToolPicker);
+					App.updateFillLayers();
+				}
+
+				Context.mainObject().skip_context = null;
+			}
+		}
+		#end
+
+		#if is_lab
 		var panelx = (iron.App.x()) + menubarw;
 		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
 			ui.tab(UIHeader.inst.worktab, tr("3D"));
@@ -115,6 +174,7 @@ class UIMenubar {
 				}
 			}
 		}
+		#end
 	}
 
 	function showMenu(ui: Zui, category: Int) {
@@ -134,7 +194,7 @@ class UIMenubar {
 		var col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += untyped 4294967296;
 		var light = col > 0xff666666 + 4294967296;
-		var iconAccent = light ? 0xff666666 : 0xff999999;
+		var iconAccent = light ? 0xff666666 : 0xffaaaaaa;
 		var img = Res.get("icons.k");
 		var rect = Res.tile50(img, i, j);
 		return ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Released;

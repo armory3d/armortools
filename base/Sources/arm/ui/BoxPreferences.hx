@@ -11,6 +11,9 @@ import arm.io.ImportKeymap;
 import arm.io.ImportTheme;
 import arm.sys.Path;
 import arm.sys.File;
+#if is_paint
+import arm.data.LayerSlot;
+#end
 
 class BoxPreferences {
 
@@ -69,6 +72,16 @@ class BoxPreferences {
 
 				Config.raw.wrap_mouse = ui.check(Id.handle({ selected: Config.raw.wrap_mouse }), tr("Wrap Mouse"));
 				if (ui.isHovered) ui.tooltip(tr("Wrap mouse around view boundaries during camera control"));
+
+				#if is_paint
+				Config.raw.node_preview = ui.check(Id.handle({ selected: Config.raw.node_preview }), tr("Show Node Preview"));
+				#end
+
+				ui.changed = false;
+				Config.raw.show_asset_names = ui.check(Id.handle({ selected: Config.raw.show_asset_names }), tr("Show Asset Names"));
+				if (ui.changed) {
+					UIBase.inst.tagUIRedraw();
+				}
 
 				#if !(kha_android || kha_ios)
 				ui.changed = false;
@@ -258,25 +271,61 @@ class BoxPreferences {
 			if (ui.tab(htab, tr("Usage"), true)) {
 				Context.raw.undoHandle = Id.handle({ value: Config.raw.undo_steps });
 				Config.raw.undo_steps = Std.int(ui.slider(Context.raw.undoHandle, tr("Undo Steps"), 1, 64, false, 1));
-				if (Config.raw.undo_steps < 1) Config.raw.undo_steps = Std.int(Context.raw.undoHandle.value = 1);
+				if (Config.raw.undo_steps < 1) {
+					Config.raw.undo_steps = Std.int(Context.raw.undoHandle.value = 1);
+				}
 				if (Context.raw.undoHandle.changed) {
 					ui.g.end();
+
+					#if is_paint
+					while (History.undoLayers.length < Config.raw.undo_steps) {
+						var l = new LayerSlot("_undo" + History.undoLayers.length);
+						History.undoLayers.push(l);
+					}
+					while (History.undoLayers.length > Config.raw.undo_steps) {
+						var l = History.undoLayers.pop();
+						l.unload();
+					}
+					#end
+
 					History.reset();
 					ui.g.begin(false);
 				}
 
+				#if is_paint
+				Config.raw.dilate_radius = Std.int(ui.slider(Id.handle({ value: Config.raw.dilate_radius }), tr("Dilate Radius"), 0.0, 16.0, true, 1));
+				if (ui.isHovered) ui.tooltip(tr("Dilate painted textures to prevent seams"));
+
+				var dilateHandle = Id.handle({ position: Config.raw.dilate });
+				ui.combo(dilateHandle, [tr("Instant"), tr("Delayed")], tr("Dilate"), true);
+				if (dilateHandle.changed) {
+					Config.raw.dilate = dilateHandle.position;
+				}
+				#end
+
 				var workspaceHandle = Id.handle({ position: Config.raw.workspace });
-				ui.combo(workspaceHandle, [tr("3D"), tr("2D")], tr("Default Workspace"), true);
+				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake")], tr("Default Workspace"), true);
 				if (workspaceHandle.changed) {
 					Config.raw.workspace = workspaceHandle.position;
 				}
 
 				var layerResHandle = Id.handle({ position: Config.raw.layer_res });
+
+				#if is_paint
+				#if (krom_android || krom_ios)
+				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
+				#else
+				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
+				#end
+				#end
+				#if is_lab
 				#if (krom_android || krom_ios)
 				ui.combo(layerResHandle, ["2K", "4K"], tr("Default Layer Resolution"), true);
 				#else
 				ui.combo(layerResHandle, ["2K", "4K", "8K", "16K"], tr("Default Layer Resolution"), true);
 				#end
+				#end
+
 				if (layerResHandle.changed) {
 					Config.raw.layer_res = layerResHandle.position;
 				}
@@ -284,8 +333,44 @@ class BoxPreferences {
 				var serverHandle = Id.handle({ text: Config.raw.server });
 				Config.raw.server = ui.textInput(serverHandle, tr("Cloud Server"));
 
+				#if is_paint
+				var materialLiveHandle = Id.handle( {selected: Config.raw.material_live });
+				Config.raw.material_live = ui.check(materialLiveHandle, tr("Live Material Preview"));
+				if (ui.isHovered) ui.tooltip(tr("Instantly update material preview on node change"));
+
+				var brushLiveHandle = Id.handle({ selected: Config.raw.brush_live });
+				Config.raw.brush_live = ui.check(brushLiveHandle, tr("Live Brush Preview"));
+				if (ui.isHovered) ui.tooltip(tr("Draw live brush preview in viewport"));
+				if (brushLiveHandle.changed) Context.raw.ddirty = 2;
+
+				var brush3dHandle = Id.handle({ selected: Config.raw.brush_3d });
+				Config.raw.brush_3d = ui.check(brush3dHandle, tr("3D Cursor"));
+				if (brush3dHandle.changed) MakeMaterial.parsePaintMaterial();
+
+				ui.enabled = Config.raw.brush_3d;
+				var brushDepthRejectHandle = Id.handle({ selected: Config.raw.brush_depth_reject });
+				Config.raw.brush_depth_reject = ui.check(brushDepthRejectHandle, tr("Depth Reject"));
+				if (brushDepthRejectHandle.changed) MakeMaterial.parsePaintMaterial();
+
+				ui.row([0.5, 0.5]);
+
+				var brushAngleRejectHandle = Id.handle({ selected: Config.raw.brush_angle_reject });
+				Config.raw.brush_angle_reject = ui.check(brushAngleRejectHandle, tr("Angle Reject"));
+				if (brushAngleRejectHandle.changed) MakeMaterial.parsePaintMaterial();
+
+				if (!Config.raw.brush_angle_reject) ui.enabled = false;
+				var angleDotHandle = Id.handle({ value: Context.raw.brushAngleRejectDot });
+				Context.raw.brushAngleRejectDot = ui.slider(angleDotHandle, tr("Angle"), 0.0, 1.0, true);
+				if (angleDotHandle.changed) {
+					MakeMaterial.parsePaintMaterial();
+				}
+				ui.enabled = true;
+				#end
+
+				#if is_lab
 				Config.raw.gpu_inference = ui.check(Id.handle({ selected: Config.raw.gpu_inference }), tr("Use GPU"));
 				if (ui.isHovered) ui.tooltip(tr("Use GPU to accelerate node graph processing"));
+				#end
 			}
 
 			#if krom_ios
@@ -296,11 +381,21 @@ class BoxPreferences {
 				ui.text(tr("Pressure controls"));
 				Config.raw.pressure_radius = ui.check(Id.handle({ selected: Config.raw.pressure_radius }), tr("Brush Radius"));
 				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
+				#if is_paint
+				Config.raw.pressure_hardness = ui.check(Id.handle({ selected: Config.raw.pressure_hardness }), tr("Brush Hardness"));
+				Config.raw.pressure_opacity = ui.check(Id.handle({ selected: Config.raw.pressure_opacity }), tr("Brush Opacity"));
+				Config.raw.pressure_angle = ui.check(Id.handle({ selected: Config.raw.pressure_angle }), tr("Brush Angle"));
+				#end
 
 				ui.endElement();
 				ui.row([0.5]);
 				if (ui.button(tr("Help"))) {
+					#if is_paint
+					File.loadUrl("https://github.com/armory3d/armorpaint_docs#pen");
+					#end
+					#if is_lab
 					File.loadUrl("https://github.com/armory3d/armorlab_docs#pen");
+					#end
 				}
 			}
 
@@ -327,13 +422,8 @@ class BoxPreferences {
 				}
 				#end
 
-				ui.combo(Context.raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x"], tr("Super Sample"), true);
+				ui.combo(Context.raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
 				if (Context.raw.hsupersample.changed) Config.applyConfig();
-
-				#if arm_debug
-				var vsyncHandle = Id.handle({ selected: Config.raw.window_vsync });
-				Config.raw.window_vsync = ui.check(vsyncHandle, tr("VSync"));
-				#end
 
 				if (Context.raw.renderMode == RenderDeferred) {
 					#if rp_voxels
@@ -352,6 +442,7 @@ class BoxPreferences {
 					if (h.changed) Context.raw.ddirty = 2;
 					ui.enabled = true;
 					#end
+
 					ui.check(Context.raw.hssao, tr("SSAO"));
 					if (Context.raw.hssao.changed) Config.applyConfig();
 					ui.check(Context.raw.hssr, tr("SSR"));
@@ -584,5 +675,10 @@ plugin.drawUI = function(ui) {
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);
 		App.resize();
+		#if is_paint
+		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultWindowW * scale);
+		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);
+		UIView2D.inst.ui.setScale(scale);
+		#end
 	}
 }

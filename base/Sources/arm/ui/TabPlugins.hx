@@ -9,7 +9,14 @@ class TabPlugins {
 		if (ui.tab(htab, tr("Plugins"))) {
 
 			ui.beginSticky();
+
+			#if is_paint
 			ui.row([1 / 4]);
+			#end
+			#if is_lab
+			ui.row([1 / 14]);
+			#end
+
 			if (ui.button(tr("Manager"))) {
 				BoxPreferences.htab.position = 6; // Plugins
 				BoxPreferences.show();

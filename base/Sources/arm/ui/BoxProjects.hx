@@ -14,7 +14,9 @@ class BoxProjects {
 	public static function show() {
 
 		if (iconMap != null) {
-			for (handle in iconMap.keys()) iron.data.Data.deleteImage(handle);
+			for (handle in iconMap.keys()) {
+				iron.data.Data.deleteImage(handle);
+			}
 			iconMap = null;
 		}
 
@@ -22,6 +24,7 @@ class BoxProjects {
 			alignToFullScreen();
 
 			if (ui.tab(htab, tr("Projects"), true)) {
+
 				ui.beginSticky();
 				if (ui.button(tr("New"))) {
 					Project.projectNew();

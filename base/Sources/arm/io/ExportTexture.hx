@@ -3,25 +3,25 @@ package arm.io;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
+import arm.ui.UIFiles;
+import arm.ui.BoxExport;
+import arm.sys.Path;
+import arm.ProjectFormat;
+#if is_paint
 import iron.Scene;
 import arm.render.RenderPathPaint;
 import arm.shader.MakeMaterial;
 import arm.data.LayerSlot;
 import arm.ui.UIHeader;
-import arm.ui.UIFiles;
-import arm.ui.BoxExport;
-import arm.sys.Path;
-import arm.ProjectFormat;
+#end
 
 class ExportTexture {
 
 	static inline var gamma = 1.0 / 2.2;
 
 	public static function run(path: String, bakeMaterial = false) {
-		#if arm_debug
-		var timer = iron.system.Time.realTime();
-		#end
 
+		#if is_paint
 		if (bakeMaterial) {
 			runBakeMaterial(path);
 		}
@@ -82,9 +82,10 @@ class ExportTexture {
 			}
 			else runLayers(path, Context.raw.layersExport == ExportSelected ? (Context.raw.layer.isGroup() ? Context.raw.layer.getChildren() : [Context.raw.layer]) : Project.layers);
 		}
+		#end
 
-		#if arm_debug
-		trace("Textures exported in " + (iron.system.Time.realTime() - timer));
+		#if is_lab
+		runLayers(path, [arm.logic.BrushOutputNode.inst]);
 		#end
 
 		#if krom_ios
@@ -97,6 +98,7 @@ class ExportTexture {
 		@:privateAccess UIFiles.lastPath = "";
 	}
 
+	#if is_paint
 	static function runBakeMaterial(path: String) {
 		if (RenderPathPaint.liveLayer == null) {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
@@ -124,8 +126,16 @@ class ExportTexture {
 
 		runLayers(path, [RenderPathPaint.liveLayer], "", true);
 	}
+	#end
 
+	#if is_paint
 	static function runLayers(path: String, layers: Array<LayerSlot>, objectName = "", bakeMaterial = false) {
+	#end
+
+	#if is_lab
+	static function runLayers(path: String, layers: Array<Dynamic>, objectName = "") {
+	#end
+
 		var textureSizeX = Config.getTextureResX();
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.raw.formatQuality;
@@ -139,6 +149,8 @@ class ExportTexture {
 		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
+
+		#if is_paint
 		var isUdim = Context.raw.layersExport == ExportPerUdimTile;
 		if (isUdim) ext = objectName + ext;
 
@@ -264,10 +276,20 @@ class ExportTexture {
 		App.expc.g2.begin(false);
 		App.expc.g2.end();
 		#end
+		#end
 
+		#if is_paint
 		var texpaint = App.expa;
 		var texpaint_nor = App.expb;
 		var texpaint_pack = App.expc;
+		#end
+
+		#if is_lab
+		var texpaint = arm.logic.BrushOutputNode.inst.texpaint;
+		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
+		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
+		#end
+
 		var pixpaint: Bytes = null;
 		var pixpaint_nor: Bytes = null;
 		var pixpaint_pack: Bytes = null;

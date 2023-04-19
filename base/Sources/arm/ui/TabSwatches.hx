@@ -55,7 +55,7 @@ class TabSwatches {
 						Project.importSwatches(false);
 					}
 				}, 3);
-			}
+			}	
 			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
 
 			if (ui.button(tr("Export"))) Project.exportSwatches();
@@ -185,7 +185,24 @@ class TabSwatches {
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
+							#if is_paint
+							else if (ui.button(tr("Create Material"), Left)) {
+								TabMaterials.acceptSwatchDrag(Project.raw.swatches[i]);
+							}
+							else if (ui.button(tr("Create Color Layer"), Left)) {
+								var color = Project.raw.swatches[i].base;
+								color.A = Project.raw.swatches[i].opacity;
+			
+								App.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+							}
+							#end
+
+						#if is_paint
+						}, 4 + add);
+						#end
+						#if is_lab
 						}, 2 + add);
+						#end
 					}
 					if (ui.isHovered) {
 						var color = Project.raw.swatches[i].base;
@@ -205,8 +222,9 @@ class TabSwatches {
 			}
 
 			// Currently there is no valid dragPosition so reset it
-			if (!dragPositionSet)
+			if (!dragPositionSet) {
 				dragPosition = -1;
+			}
 
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;

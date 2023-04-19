@@ -14,12 +14,24 @@ class TabMeshes {
 		if (ui.tab(htab, tr("Meshes")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
+
+			#if is_paint
 			if (Config.raw.touch_ui) {
 				ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 			}
 			else {
 				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
 			}
+			#end
+
+			#if is_lab
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7, 1 / 7]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14]);
+			}
+			#end
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {
@@ -33,6 +45,18 @@ class TabMeshes {
 				}, 3);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import mesh file"));
+
+			#if is_lab
+			if (ui.button(tr("Set Default"))) {
+				UIMenu.draw(function(ui: Zui) {
+					ui.text(tr("Meshes"), Right, ui.t.HIGHLIGHT_COL);
+					if (ui.button(tr("Cube"), Left)) setDefaultMesh(".Cube");
+					if (ui.button(tr("Plane"), Left)) setDefaultMesh(".Plane");
+					if (ui.button(tr("Sphere"), Left)) setDefaultMesh(".Sphere");
+					if (ui.button(tr("Cylinder"), Left)) setDefaultMesh(".Cylinder");
+				}, 5);
+			}
+			#end
 
 			if (ui.button(tr("Flip Normals"))) {
 				MeshUtil.flipNormals();
@@ -53,7 +77,13 @@ class TabMeshes {
 			}
 
 			if (ui.button(tr("Apply Displacement"))) {
+				#if is_paint
 				MeshUtil.applyDisplacement(Project.layers[0].texpaint_pack);
+				#end
+				#if is_lab
+				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05, Context.raw.brushScale);
+				#end
+
 				MeshUtil.calcNormals();
 				Context.raw.ddirty = 2;
 			}
@@ -122,4 +152,17 @@ class TabMeshes {
 			}
 		}
 	}
+
+	#if is_lab
+	static function setDefaultMesh(name: String) {
+		var mo: MeshObject = cast iron.Scene.active.getChild(name);
+		mo.visible = true;
+		iron.Scene.active.meshes = [mo];
+		Context.raw.ddirty = 2;
+		Context.raw.paintObject = mo;
+		#if (kha_direct3d12 || kha_vulkan)
+		arm.render.RenderPathRaytrace.ready = false;
+		#end
+	}
+	#end
 }

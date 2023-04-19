@@ -5,18 +5,29 @@ import iron.data.MeshData;
 import iron.data.Data;
 import iron.Scene;
 import arm.util.MeshUtil;
-import arm.util.UVUtil;
 import arm.sys.Path;
-import arm.ui.UIBase;
-import arm.ui.UIView2D;
 import arm.Viewport;
 import arm.Project;
+#if is_paint
+import arm.ui.UIBase;
+import arm.ui.UIView2D;
+import arm.util.UVUtil;
+#end
 
 class ImportMesh {
 
+	#if is_paint
 	static var clearLayers = true;
+	#end
 
+	#if is_paint
 	public static function run(path: String, _clearLayers = true, replaceExisting = true) {
+	#end
+
+	#if is_lab
+	public static function run(path: String, replaceExisting = true) {
+	#end
+
 		if (!Path.isMesh(path)) {
 			if (!Context.enableImportPlugin(path)) {
 				Console.error(Strings.error1());
@@ -24,11 +35,9 @@ class ImportMesh {
 			}
 		}
 
+		#if is_paint
 		clearLayers = _clearLayers;
 		Context.raw.layerFilter = 0;
-
-		#if arm_debug
-		var timer = iron.system.Time.realTime();
 		#end
 
 		var p = path.toLowerCase();
@@ -80,10 +89,8 @@ class ImportMesh {
 		arm.shader.MakeMaterial.parsePaintMaterial();
 		arm.shader.MakeMaterial.parseMeshMaterial();
 
+		#if is_paint
 		UIView2D.inst.hwnd.redraws = 2;
-
-		#if arm_debug
-		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));
 		#end
 
 		#if (kha_direct3d12 || kha_vulkan)
@@ -120,6 +127,7 @@ class ImportMesh {
 					Data.deleteMesh(handle);
 				}
 
+				#if is_paint
 				if (clearLayers) {
 					while (Project.layers.length > 0) {
 						var l = Project.layers.pop();
@@ -129,6 +137,7 @@ class ImportMesh {
 					iron.App.notifyOnInit(App.initLayers);
 					History.reset();
 				}
+				#end
 
 				Context.raw.paintObject.setData(md);
 				Context.raw.paintObject.name = mesh.name;
@@ -138,11 +147,14 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnds[0].redraws = 2;
-				UIBase.inst.hwnds[1].redraws = 2;
+
+				#if is_paint
+				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;
+				#end
 
 				// Wait for addMesh calls to finish
 				iron.App.notifyOnInit(finishImport);
@@ -184,10 +196,13 @@ class ImportMesh {
 				Data.cachedMeshes.set(md.handle, md);
 
 				Context.raw.ddirty = 4;
-				UIBase.inst.hwnds[0].redraws = 2;
+
+				#if is_paint
+				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;
 				UVUtil.dilatemapCached = false;
+				#end
 			});
 		}
 

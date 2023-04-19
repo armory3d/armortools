@@ -19,12 +19,24 @@ class TabTextures {
 		if (ui.tab(htab, tr("Textures")) && statush > UIStatus.defaultStatusH * ui.SCALE()) {
 
 			ui.beginSticky();
+
+			#if is_paint
+			if (Config.raw.touch_ui) {
+				ui.row([1 / 4, 1 / 4]);
+			}
+			else {
+				ui.row([1 / 14, 1 / 14]);
+			}
+			#end
+
+			#if is_lab
 			if (Config.raw.touch_ui) {
 				ui.row([1 / 4]);
 			}
 			else {
 				ui.row([1 / 14]);
 			}
+			#end
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
@@ -34,20 +46,30 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
+			#if is_paint
+			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DAsset);
+			#end
+
 			ui.endSticky();
 
 			if (Project.assets.length > 0) {
 
+				#if is_paint
+				var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
+				#end
+				#if is_lab
 				var statusw = kha.System.windowWidth();
+				#end
+
 				var slotw = Std.int(52 * ui.SCALE());
 				var num = Std.int(statusw / slotw);
 
 				for (row in 0...Std.int(Math.ceil(Project.assets.length / num))) {
-					var mult = 1;
+					var mult = Config.raw.show_asset_names ? 2 : 1;
 					ui.row([for (i in 0...num * mult) 1 / num]);
 
 					ui._x += 2;
-					var off = 6;
+					var off = Config.raw.show_asset_names ? ui.ELEMENT_OFFSET() * 10.0 : 6;
 					if (row > 0) ui._y += off;
 
 					for (j in 0...num) {
@@ -55,6 +77,7 @@ class TabTextures {
 						var i = j + row * num;
 						if (i >= Project.assets.length) {
 							@:privateAccess ui.endElement(imgw);
+							if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
 							continue;
 						}
 
@@ -70,7 +93,11 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.raw.texture = asset;
 
+							#if is_paint
+							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DAsset);
 							Context.raw.selectTime = Time.time();
+							UIView2D.inst.hwnd.redraws = 2;
+							#end
 						}
 
 						if (asset == Context.raw.texture) {
@@ -94,13 +121,20 @@ class TabTextures {
 						}
 
 						if (ui.isHovered && ui.inputReleasedR) {
+							Context.raw.texture = asset;
 							var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 							UIMenu.draw(function(ui: Zui) {
 								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, false, function(path: String) {
 										App.notifyOnNextFrame(function () {
+											#if is_paint
+											if (App.pipeMerge == null) App.makePipe();
+											#end
+											#if is_lab
 											if (App.pipeCopy == null) App.makePipe();
+											#end
+
 											var target = kha.Image.createRenderTarget(to_pow2(img.width), to_pow2(img.height));
 											target.g2.begin(false);
 											target.g2.pipeline = App.pipeCopy;
@@ -120,11 +154,33 @@ class TabTextures {
 								if (ui.button(tr("Reimport"), Left)) {
 									Project.reimportTexture(asset);
 								}
+
+								#if is_paint
+								if (ui.button(tr("To Mask"), Left)) {
+									App.notifyOnNextFrame(function() {
+										App.createImageMask(asset);
+									});
+								}
+								#end
+
 								if (ui.button(tr("Set as Envmap"), Left)) {
 									App.notifyOnNextFrame(function() {
 										arm.io.ImportEnvmap.run(asset.file, img);
 									});
 								}
+
+								#if is_paint
+								if (ui.button(tr("Set as Color ID Map"), Left)) {
+									Context.raw.colorIdHandle.position = i;
+									Context.raw.colorIdPicked = false;
+									UIToolbar.inst.toolbarHandle.redraws = 1;
+									if (Context.raw.tool == ToolColorId) {
+										UIHeader.inst.headerHandle.redraws = 2;
+										Context.raw.ddirty = 2;
+									}
+								}
+								#end
+
 								if (ui.button(tr("Delete"), Left, "delete")) {
 									deleteTexture(asset);
 								}
@@ -134,7 +190,24 @@ class TabTextures {
 								if (!isPacked && ui.button(tr("Open in Browser"), Left)) {
 									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-							}, isPacked ? 5 : 7);
+
+							#if is_paint
+							}, isPacked ? 7 : 9);
+							#end
+							#if is_lab
+							}, isPacked ? 7 : 7);
+							#end
+						}
+
+						if (Config.raw.show_asset_names) {
+							ui._x = uix;
+							ui._y += slotw * 0.9;
+							ui.text(Project.assets[i].name, Center);
+							if (ui.isHovered) ui.tooltip(Project.assets[i].name);
+							ui._y -= slotw * 0.9;
+							if (i == Project.assets.length - 1) {
+								ui._y += j == num - 1 ? imgw : imgw + ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
+							}
 						}
 					}
 				}
@@ -185,14 +258,33 @@ class TabTextures {
 			Context.raw.texture = Project.assets[i == Project.assets.length - 1 ? i - 1 : i + 1];
 		}
 		UIBase.inst.hwnds[TabStatus].redraws = 2;
+
+		#if is_paint
+		if (Context.raw.tool == ToolColorId && i == Context.raw.colorIdHandle.position) {
+			UIHeader.inst.headerHandle.redraws = 2;
+			Context.raw.ddirty = 2;
+			Context.raw.colorIdPicked = false;
+			UIToolbar.inst.toolbarHandle.redraws = 1;
+		}
+		#end
+
 		Data.deleteImage(asset.file);
 		Project.assetMap.remove(asset.id);
 		Project.assets.splice(i, 1);
 		Project.assetNames.splice(i, 1);
 		function _next() {
 			arm.shader.MakeMaterial.parsePaintMaterial();
+
+			#if is_paint
+			arm.util.RenderUtil.makeMaterialPreview();
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
+			#end
 		}
 		App.notifyOnNextFrame(_next);
+
 		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
+		#if is_paint
+		for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
+		#end
 	}
 }

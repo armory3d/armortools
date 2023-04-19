@@ -3,13 +3,15 @@ package arm.ui;
 import kha.System;
 import zui.Zui;
 import zui.Id;
-import iron.RenderPath;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
+#if is_paint
+import iron.RenderPath;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.io.ImportAsset;
 import arm.sys.Path;
+#end
 
 class UIHeader {
 
@@ -32,8 +34,10 @@ class UIHeader {
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UIBase.inst.ui;
-
 		var panelx = iron.App.x();
+
+		#if is_paint
+
 		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], Std.int(defaultHeaderH * ui.SCALE()))) {
 			ui._y += 2;
 
@@ -432,5 +436,27 @@ class UIHeader {
 				#end
 			}
 		}
+		#end
+
+		#if is_lab
+		if (ui.window(headerHandle, panelx, headerh, System.windowWidth(), Std.int(defaultHeaderH * ui.SCALE()))) {
+			ui._y += 2;
+
+			if (Context.raw.tool == ToolPicker) {
+
+			}
+			else if (Context.raw.tool == ToolEraser ||
+					 Context.raw.tool == ToolClone  ||
+					 Context.raw.tool == ToolBlur   ||
+					 Context.raw.tool == ToolSmudge) {
+
+				var inpaint = UINodes.inst.getNodes().nodesSelected.length > 0 && UINodes.inst.getNodes().nodesSelected[0].type == "InpaintNode";
+				if (inpaint) {
+					Context.raw.brushRadius = ui.slider(Context.raw.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+					if (ui.isHovered) ui.tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", ["brush_radius" => Config.keymap.brush_radius, "brush_radius_decrease" => Config.keymap.brush_radius_decrease, "brush_radius_increase" => Config.keymap.brush_radius_increase]));
+				}
+			}
+		}
+		#end
 	}
 }

@@ -9,6 +9,10 @@ import iron.system.ArmPack;
 import iron.system.Lz4;
 import arm.sys.Path;
 import arm.ProjectFormat;
+#if is_paint
+import arm.data.FontSlot;
+import arm.ui.UINodes;
+#end
 
 class ExportArm {
 
@@ -23,8 +27,22 @@ class ExportArm {
 
 	public static function runProject() {
 
+		#if is_paint
+		var mnodes: Array<TNodeCanvas> = [];
+		for (m in Project.materials) {
+			var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+			for (n in c.nodes) exportNode(n);
+			mnodes.push(c);
+		}
+
+		var bnodes: Array<TNodeCanvas> = [];
+		for (b in Project.brushes) bnodes.push(b.canvas);
+		#end
+
+		#if is_lab
 		var c: TNodeCanvas = Json.parse(Json.stringify(Project.canvas));
 		for (n in c.nodes) exportNode(n);
+		#end
 
 		var mgroups: Array<TNodeCanvas> = null;
 		if (Project.materialGroups.length > 0) {
@@ -36,7 +54,58 @@ class ExportArm {
 			}
 		}
 
+		#if is_paint
+		var md: Array<TMeshData> = [];
+		for (p in Project.paintObjects) md.push(p.data.raw);
+		#end
+
+		#if is_lab
+		var md = Project.paintObjects[0].data.raw;
+		#end
+
 		var texture_files = assetsToFiles(Project.filepath, Project.assets);
+
+		#if is_paint
+		var font_files = fontsToFiles(Project.filepath, Project.fonts);
+		var mesh_files = meshesToFiles(Project.filepath);
+
+		var bitsPos = App.bitsHandle.position;
+		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
+
+		var ld: Array<TLayerData> = [];
+		for (l in Project.layers) {
+			ld.push({
+				name: l.name,
+				res: l.texpaint != null ? l.texpaint.width : Project.layers[0].texpaint.width,
+				bpp: bpp,
+				texpaint: l.texpaint != null ? Lz4.encode(l.texpaint.getPixels()) : null,
+				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(l.texpaint_nor.getPixels()) : null,
+				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(l.texpaint_pack.getPixels()) : null,
+				uv_scale: l.scale,
+				uv_rot: l.angle,
+				uv_type: l.uvType,
+				decal_mat: l.uvType == UVProject ? l.decalMat.toFloat32Array() : null,
+				opacity_mask: l.maskOpacity,
+				fill_layer: l.fill_layer != null ? Project.materials.indexOf(l.fill_layer) : -1,
+				object_mask: l.objectMask,
+				blending: l.blending,
+				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1,
+				visible: l.visible,
+				paint_base: l.paintBase,
+				paint_opac: l.paintOpac,
+				paint_occ: l.paintOcc,
+				paint_rough: l.paintRough,
+				paint_met: l.paintMet,
+				paint_nor: l.paintNor,
+				paint_nor_blend: l.paintNorBlend,
+				paint_height: l.paintHeight,
+				paint_height_blend: l.paintHeightBlend,
+				paint_emis: l.paintEmis,
+				paint_subs: l.paintSubs
+			});
+		}
+		#end
+
 		var packed_assets = Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0 ? null : Project.raw.packed_assets;
 		#if krom_ios
 		var sameDrive = false;
@@ -46,17 +115,32 @@ class ExportArm {
 
 		Project.raw = {
 			version: Main.version,
-			material: c,
 			material_groups: mgroups,
-			mesh_data: Project.paintObjects[0].data.raw,
 			assets: texture_files,
-			swatches: Project.raw.swatches,
 			packed_assets: packed_assets,
+			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
 			envmap_strength: iron.Scene.active.world.probe.raw.strength,
 			camera_world: iron.Scene.active.camera.transform.local.toFloat32Array(),
 			camera_origin: vec3f32(arm.Camera.inst.origins[0]),
 			camera_fov: iron.Scene.active.camera.data.raw.fov,
+
+			#if is_paint
+			mesh_datas: md,
+			material_nodes: mnodes,
+			brush_nodes: bnodes,
+			layer_datas: ld,
+			font_assets: font_files,
+			mesh_assets: mesh_files,
+			atlas_objects: Project.atlasObjects,
+			atlas_names: Project.atlasNames,
+			#end
+
+			#if is_lab
+			mesh_data: md,
+			material: c,
+			#end
+
 			#if (kha_metal || kha_vulkan)
 			is_bgra: true
 			#else
@@ -99,6 +183,13 @@ class ExportArm {
 		Krom.writePng(Project.filepath.substr(0, Project.filepath.length - 4) + "_icon.png", mesh_icon_pixels.getData(), 256, 256, 0);
 		#end
 
+		#if is_paint
+		var isPacked = Project.filepath.endsWith("_packed_.arm");
+		if (isPacked) { // Pack textures
+			packAssets(Project.raw, Project.assets);
+		}
+		#end
+
 		var bytes = ArmPack.encode(Project.raw);
 		Krom.fileSaveBytes(Project.filepath, bytes.getData(), bytes.length + 1);
 
@@ -117,7 +208,14 @@ class ExportArm {
 	}
 
 	static function exportNode(n: TNode, assets: Array<TAsset> = null) {
+		#if is_paint
+		if (n.type == "TEX_IMAGE") {
+		#end
+
+		#if is_lab
 		if (n.type == "ImageTextureNode") {
+		#end
+
 			var index = n.buttons[0].default_value;
 			n.buttons[0].data = App.enumTexts(n.type)[index];
 
@@ -134,6 +232,60 @@ class ExportArm {
 		for (out in n.outputs) if (out.color > 0) out.color -= untyped 4294967296;
 	}
 
+	#if is_paint
+	public static function runMaterial(path: String) {
+		if (!path.endsWith(".arm")) path += ".arm";
+		var mnodes: Array<TNodeCanvas> = [];
+		var mgroups: Array<TNodeCanvas> = null;
+		var m = Context.raw.material;
+		var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
+		var assets: Array<TAsset> = [];
+		if (UINodes.hasGroup(c)) {
+			mgroups = [];
+			UINodes.traverseGroup(mgroups, c);
+			for (gc in mgroups) for (n in gc.nodes) exportNode(n, assets);
+		}
+		for (n in c.nodes) exportNode(n, assets);
+		mnodes.push(c);
+
+		var texture_files = assetsToFiles(path, assets);
+		var isCloud = path.endsWith("_cloud_.arm");
+		if (isCloud) path = path.replace("_cloud_", "");
+		var packed_assets: Array<TPackedAsset> = null;
+		if (!Context.raw.packAssetsOnExport) {
+			packed_assets = getPackedAssets(path, texture_files);
+		}
+
+		var raw: TProjectFormat = {
+			version: Main.version,
+			material_nodes: mnodes,
+			material_groups: mgroups,
+			material_icons: isCloud ? null :
+				#if (kha_metal || kha_vulkan)
+				[Lz4.encode(bgraSwap(m.image.getPixels()))],
+				#else
+				[Lz4.encode(m.image.getPixels())],
+				#end
+			assets: texture_files,
+			packed_assets: packed_assets
+		};
+
+		if (Context.raw.writeIconOnExport) { // Separate icon files
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", m.image.getPixels().getData(), m.image.width, m.image.height, 0);
+			if (isCloud) {
+				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", m.image.getPixels().getData(), m.image.width, m.image.height, 0, 50);
+			}
+		}
+
+		if (Context.raw.packAssetsOnExport) { // Pack textures
+			packAssets(raw, assets);
+		}
+
+		var bytes = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+	}
+	#end
+
 	#if (kha_metal || kha_vulkan)
 	static function bgraSwap(bytes: haxe.io.Bytes) {
 		for (i in 0...Std.int(bytes.length / 4)) {
@@ -145,15 +297,59 @@ class ExportArm {
 	}
 	#end
 
+	#if is_paint
+	public static function runBrush(path: String) {
+		if (!path.endsWith(".arm")) path += ".arm";
+		var bnodes: Array<TNodeCanvas> = [];
+		var b = Context.raw.brush;
+		var c: TNodeCanvas = Json.parse(Json.stringify(b.canvas));
+		var assets: Array<TAsset> = [];
+		for (n in c.nodes) exportNode(n, assets);
+		bnodes.push(c);
+
+		var texture_files = assetsToFiles(path, assets);
+		var isCloud = path.endsWith("_cloud_.arm");
+		if (isCloud) path = path.replace("_cloud_", "");
+		var packed_assets: Array<TPackedAsset> = null;
+		if (!Context.raw.packAssetsOnExport) {
+			packed_assets = getPackedAssets(path, texture_files);
+		}
+
+		var raw: TProjectFormat = {
+			version: Main.version,
+			brush_nodes: bnodes,
+			brush_icons: isCloud ? null :
+			#if (kha_metal || kha_vulkan)
+			[Lz4.encode(bgraSwap(b.image.getPixels()))],
+			#else
+			[Lz4.encode(b.image.getPixels())],
+			#end
+			assets: texture_files,
+			packed_assets: packed_assets
+		};
+
+		if (Context.raw.writeIconOnExport) { // Separate icon file
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", b.image.getPixels().getData(), b.image.width, b.image.height, 0);
+		}
+
+		if (Context.raw.packAssetsOnExport) { // Pack textures
+			packAssets(raw, assets);
+		}
+
+		var bytes = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+	}
+	#end
+
 	static function assetsToFiles(projectPath: String, assets: Array<TAsset>): Array<String> {
 		var texture_files: Array<String> = [];
 		for (a in assets) {
-			// Convert image path from absolute to relative
 			#if krom_ios
 			var sameDrive = false;
 			#else
 			var sameDrive = projectPath.charAt(0) == a.file.charAt(0);
 			#end
+			// Convert image path from absolute to relative
 			if (sameDrive) {
 				texture_files.push(Path.toRelative(projectPath, a.file));
 			}
@@ -164,16 +360,57 @@ class ExportArm {
 		return texture_files;
 	}
 
+	#if is_paint
+	static function meshesToFiles(projectPath: String): Array<String> {
+		var mesh_files: Array<String> = [];
+		for (file in Project.meshAssets) {
+			#if krom_ios
+			var sameDrive = false;
+			#else
+			var sameDrive = projectPath.charAt(0) == file.charAt(0);
+			#end
+			// Convert mesh path from absolute to relative
+			if (sameDrive) {
+				mesh_files.push(Path.toRelative(projectPath, file));
+			}
+			else {
+				mesh_files.push(file);
+			}
+		}
+		return mesh_files;
+	}
+
+	static function fontsToFiles(projectPath: String, fonts: Array<FontSlot>): Array<String> {
+		var font_files: Array<String> = [];
+		for (i in 1...fonts.length) {
+			var f = fonts[i];
+			#if krom_ios
+			var sameDrive = false;
+			#else
+			var sameDrive = projectPath.charAt(0) == f.file.charAt(0);
+			#end
+			// Convert font path from absolute to relative
+			if (sameDrive) {
+				font_files.push(Path.toRelative(projectPath, f.file));
+			}
+			else {
+				font_files.push(f.file);
+			}
+		}
+		return font_files;
+	}
+	#end
+
 	static function getPackedAssets(projectPath: String, texture_files: Array<String>): Array<TPackedAsset> {
 		var packed_assets: Array<TPackedAsset> = null;
 		if (Project.raw.packed_assets != null) {
 			for (pa in Project.raw.packed_assets) {
-				// Convert path from absolute to relative
 				#if krom_ios
 				var sameDrive = false;
 				#else
 				var sameDrive = projectPath.charAt(0) == pa.name.charAt(0);
 				#end
+				// Convert path from absolute to relative
 				pa.name = sameDrive ? Path.toRelative(projectPath, pa.name) : pa.name;
 				for (tf in texture_files) {
 					if (pa.name == tf) {

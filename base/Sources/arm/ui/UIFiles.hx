@@ -89,7 +89,7 @@ class UIFiles {
 		var file = Res.tile50(icons, 3, 1);
 		var isCloud = handle.text.startsWith("cloud");
 
-		if (isCloud && File.cloud == null) File.initCloud(function() { UIBase.inst.hwnds[2].redraws = 3; });
+		if (isCloud && File.cloud == null) File.initCloud(function() { UIBase.inst.hwnds[TabStatus].redraws = 3; });
 		if (isCloud && File.readDirectory("cloud", false).length == 0) return handle.text;
 
 		#if krom_ios
@@ -179,7 +179,10 @@ class UIFiles {
 											icon = kha.Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 												icon.g2.begin(false);
+
+												#if is_paint
 												icon.g2.drawImage(Project.materials[0].image, 0, 0);
+												#end
 											}
 											else {
 												icon.g2.begin(true, 0xffffffff);
@@ -189,7 +192,7 @@ class UIFiles {
 											icon.g2.pipeline = null;
 											icon.g2.end();
 											iconMap.set(handle.text + Path.sep + f, icon);
-											UIBase.inst.hwnds[2].redraws = 3;
+											UIBase.inst.hwnds[TabStatus].redraws = 3;
 										});
 									});
 								}
@@ -219,16 +222,20 @@ class UIFiles {
 					icon = iconMap.get(key);
 					if (!iconMap.exists(key)) {
 						var blobPath = key;
+
 						#if krom_ios
 						blobPath = documentDirectory + blobPath;
 						// TODO: implement native .arm parsing first
 						#else
+
 						var bytes = Bytes.ofData(Krom.loadBlob(blobPath));
 						var raw = ArmPack.decode(bytes);
 						if (raw.material_icons != null) {
 							var bytesIcon = raw.material_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
+
+						#if is_paint
 						else if (raw.mesh_icons != null) {
 							var bytesIcon = raw.mesh_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
@@ -237,6 +244,15 @@ class UIFiles {
 							var bytesIcon = raw.brush_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
+						#end
+
+						#if is_lab
+						if (raw.mesh_icon != null) {
+							var bytesIcon = raw.mesh_icon;
+							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+						}
+						#end
+
 						iconMap.set(key, icon);
 						#end
 					}
@@ -276,7 +292,7 @@ class UIFiles {
 								icon.g2.pipeline = null;
 								icon.g2.end();
 								iconMap.set(handle.text + Path.sep + f, icon);
-								UIBase.inst.hwnds[2].redraws = 3;
+								UIBase.inst.hwnds[TabStatus].redraws = 3;
 								image.unload(); // The big image is not needed anymore
 							});
 						});

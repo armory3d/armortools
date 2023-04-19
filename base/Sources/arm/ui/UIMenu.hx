@@ -14,6 +14,9 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
+#if is_paint
+import arm.util.UVUtil;
+#end
 
 @:access(zui.Zui)
 class UIMenu {
@@ -63,12 +66,22 @@ class UIMenu {
 						ImportAsset.run(path);
 					});
 				}
+
+				#if is_paint
+				if (menuButton(ui, tr("Import Font..."))) Project.importAsset("ttf,ttc,otf");
+				if (menuButton(ui, tr("Import Material..."))) Project.importMaterial();
+				if (menuButton(ui, tr("Import Brush..."))) Project.importBrush();
+				#end
+
 				if (menuButton(ui, tr("Import Swatches..."))) Project.importSwatches();
 				if (menuButton(ui, tr("Import Mesh..."))) Project.importMesh();
 				if (menuButton(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Export Textures..."), Config.keymap.file_export_textures_as)) {
+					#if is_paint
+					Context.raw.layersExport = ExportVisible;
+					#end
 					BoxExport.showTextures();
 				}
 				if (menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
@@ -76,6 +89,10 @@ class UIMenu {
 					Context.raw.exportMeshIndex = 0; // All
 					BoxExport.showMesh();
 				}
+
+				#if is_paint
+				if (menuButton(ui, tr("Bake Material..."))) BoxExport.showBakeMaterial();
+				#end
 
 				menuSeparator(ui);
 				if (menuButton(ui, tr("Exit"))) System.stop();
@@ -172,6 +189,16 @@ class UIMenu {
 					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
+				#if is_paint
+				menuFill(ui);
+				var splitViewHandle = Id.handle({ selected: Context.raw.splitView });
+				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
+				if (splitViewHandle.changed) {
+					App.resize();
+				}
+				#end
+
+				#if is_lab
 				menuFill(ui);
 				var brushScaleHandle = Id.handle({ value: Context.raw.brushScale });
 				menuAlign(ui);
@@ -183,6 +210,7 @@ class UIMenu {
 					arm.render.RenderPathRaytrace.ready = false;
 					#end
 				}
+				#end
 
 				menuFill(ui);
 				var cullHandle = Id.handle({ selected: Context.raw.cullBackfaces });
@@ -198,6 +226,23 @@ class UIMenu {
 					MakeMaterial.parsePaintMaterial();
 					MakeMaterial.parseMeshMaterial();
 				}
+
+				#if is_paint
+				menuFill(ui);
+				Context.raw.drawWireframe = ui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
+				if (Context.raw.wireframeHandle.changed) {
+					ui.g.end();
+					UVUtil.cacheUVMap();
+					ui.g.begin(false);
+					MakeMaterial.parseMeshMaterial();
+				}
+
+				menuFill(ui);
+				Context.raw.drawTexels = ui.check(Context.raw.texelsHandle, " " + tr("Texels"));
+				if (Context.raw.texelsHandle.changed) {
+					MakeMaterial.parseMeshMaterial();
+				}
+				#end
 
 				menuFill(ui);
 				var compassHandle = Id.handle({ selected: Context.raw.showCompass });
@@ -234,13 +279,24 @@ class UIMenu {
 					tr("Roughness"),
 					tr("Metallic"),
 					tr("Opacity"),
-					tr("Height")
+					tr("Height"),
+					#if is_paint
+					tr("Emission"),
+					tr("Subsurface"),
+					tr("TexCoord"),
+					tr("Object Normal"),
+					tr("Material ID"),
+					tr("Object ID"),
+					tr("Mask")
+					#end
 				];
-				var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "t", "1", "2", "3", "4"];
+				var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
+
 				#if (kha_direct3d12 || kha_vulkan)
 				modes.push(tr("Path Traced"));
 				shortcuts.push("p");
 				#end
+
 				for (i in 0...modes.length) {
 					menuFill(ui);
 					var shortcut = Config.raw.touch_ui ? "" : Config.keymap.viewport_mode + ", " + shortcuts[i];
@@ -312,16 +368,14 @@ class UIMenu {
 				menuFill(ui);
 				menuAlign(ui);
 				Context.raw.cameraControls = Ext.inlineRadio(ui, Id.handle({ position: Context.raw.cameraControls }), [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
-
-				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
-				["rotate_shortcut" => Config.keymap.action_rotate,
-				"zoom_shortcut" => Config.keymap.action_zoom,
+				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", 
+				["rotate_shortcut" => Config.keymap.action_rotate, 
+				"zoom_shortcut" => Config.keymap.action_zoom,  
 				"pan_shortcut" => Config.keymap.action_pan,
 				]);
 
 				var flyTooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
 				if (ui.isHovered) ui.tooltip(orbitAndRotateTooltip + "\n\n" + flyTooltip);
-
 				menuFill(ui);
 				menuAlign(ui);
 				Context.raw.cameraType = Ext.inlineRadio(ui, Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
@@ -334,32 +388,71 @@ class UIMenu {
 			}
 			else if (menuCategory == MenuHelp) {
 				if (menuButton(ui, tr("Manual"))) {
+					#if is_paint
+					File.loadUrl("https://armorpaint.org/manual");
+					#end
+					#if is_lab
 					File.loadUrl("https://armorlab.org/manual");
+					#end
 				}
 				if (menuButton(ui, tr("What's New"))) {
+					#if is_paint
+					File.loadUrl("https://armorpaint.org/notes");
+					#end
+					#if is_lab
 					File.loadUrl("https://armorlab.org/notes");
+					#end
 				}
 				if (menuButton(ui, tr("Issue Tracker"))) {
 					File.loadUrl("https://github.com/armory3d/armortools/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
+					#if is_paint
+					#if (krom_darwin || krom_ios) // Limited url length
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					#else
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					#end
+					#end
+
+					#if is_lab
 					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					#end
+
 					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
+					#if is_paint
+					#if (krom_darwin || krom_ios) // Limited url length
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					#else
+					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					#end
+					#end
+
+					#if is_lab
 					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					#end
+
 					File.loadUrl(url);
 				}
 				menuSeparator(ui);
 
 				if (menuButton(ui, tr("Check for Updates..."))) {
 					#if krom_android
-					// File.loadUrl("https://play.google.com/store/apps/details?id=org.armorlab");
+					File.loadUrl("https://play.google.com/store/apps/details?id=org.armorpaint");
 					#elseif krom_ios
-					// File.loadUrl("https://apps.apple.com/app/armorlab/id");
+					File.loadUrl("https://apps.apple.com/app/armorpaint/id1533967534");
 					#else
+
 					// Retrieve latest version number
+					#if is_paint
+					var url = "https://server.armorpaint.org/paint.html";
+					#end
+					#if is_lab
 					var url = "https://server.armorpaint.org/lab.html";
+					#end
+
 					File.downloadBytes(url, function(bytes: Bytes) {
 						if (bytes != null)  {
 							// Compare versions
@@ -369,7 +462,12 @@ class UIMenu {
 								var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
 								var dateInt = Std.parseInt(date.replace("-", ""));
 								if (updateVersion > dateInt) {
+									#if is_paint
+									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorpaint.org to download."));
+									#end
+									#if is_lab
 									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorlab.org to download."));
+									#end
 								}
 								else {
 									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
@@ -377,7 +475,7 @@ class UIMenu {
 							}
 						}
 						else {
-							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorlab.org."));
+							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorpaint.org."));
 						}
 					});
 					#end
@@ -395,7 +493,14 @@ class UIMenu {
 					#else
 					var gapi = "OpenGL";
 					#end
+
+					#if is_paint
+					var msg = "ArmorPaint.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					#end
+					#if is_lab
 					var msg = "ArmorLab.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					#end
+
 					msg += System.systemId + " - " + gapi;
 
 					#if krom_windows

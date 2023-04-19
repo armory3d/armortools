@@ -2,8 +2,8 @@ package arm.ui;
 
 import kha.input.KeyCode;
 import zui.Zui;
-import arm.sys.Path;
 import arm.sys.File;
+import arm.sys.Path;
 import arm.io.ImportAsset;
 
 class TabBrowser {
@@ -70,7 +70,7 @@ class TabBrowser {
 			var refresh = false;
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == KeyCode.F5)) {
+			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == kha.input.KeyCode.F5)) {
 				refresh = true;
 			}
 			hsearch.text = ui.textInput(hsearch, tr("Search"), Align.Left, true, true);
@@ -91,7 +91,7 @@ class TabBrowser {
 			var _y = ui._y;
 			ui._x = bookmarksW;
 			ui._w -= bookmarksW;
-			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh, function(file) {
+			UIFiles.fileBrowser(ui, hpath, false, true, hsearch.text, refresh, function(file: String) {
 				var fileName = file.substr(file.lastIndexOf(Path.sep) + 1);
 				if (fileName != "..") {
 					UIMenu.draw(function(ui: Zui) {
@@ -116,8 +116,49 @@ class TabBrowser {
 									});
 								});
 							}
+
+							#if is_paint
+							if (ui.button(tr("Set as Mask"), Left)) {
+								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
+									App.notifyOnNextFrame(function() {
+										var assetIndex = -1;
+										for (i in 0...Project.assets.length) {
+											if (Project.assets[i].file == file) {
+												assetIndex = i;
+												break;
+											}
+										}
+										if (assetIndex != -1) {
+											App.createImageMask(Project.assets[assetIndex]);
+										}
+									});
+								});
+							}
+							if (ui.button(tr("Set as Color ID Map"), Left)) {
+								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
+									App.notifyOnNextFrame(function() {
+										var assetIndex = -1;
+										for (i in 0...Project.assets.length) {
+											if (Project.assets[i].file == file) {
+												assetIndex = i;
+												break;
+											}
+										}
+										if (assetIndex != -1) {
+											Context.raw.colorIdHandle.position = assetIndex;
+											Context.raw.colorIdPicked = false;
+											UIToolbar.inst.toolbarHandle.redraws = 1;
+											if (Context.raw.tool == ToolColorId) {
+												UIHeader.inst.headerHandle.redraws = 2;
+												Context.raw.ddirty = 2;
+											}
+										}
+									});
+								});
+							}
+							#end
 						}
-						if (ui.button(tr("Open externally"), Left)) {
+						if (ui.button(tr("Open Externally"), Left)) {
 							File.start(file);
 						}
 					}, Path.isTexture(file) ? 6 : 3);
@@ -133,7 +174,12 @@ class TabBrowser {
 			}
 			known = hpath.text.substr(hpath.text.lastIndexOf(Path.sep)).indexOf(".") > 0;
 			#if krom_android
+			#if is_paint
+			if (hpath.text.endsWith(".armorpaint")) known = false;
+			#end
+			#if is_lab
 			if (hpath.text.endsWith(".armorlab")) known = false;
+			#end
 			#end
 
 			var bottomY = ui._y;

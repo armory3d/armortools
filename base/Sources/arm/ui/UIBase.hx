@@ -2,38 +2,48 @@ package arm.ui;
 
 import haxe.io.Bytes;
 import kha.input.KeyCode;
-import kha.math.FastMatrix3;
 import kha.Image;
 import kha.System;
 import zui.Zui;
 import zui.Id;
 import iron.data.Data;
 import iron.data.MaterialData;
-import iron.object.Object;
 import iron.object.MeshObject;
 import iron.system.Input;
 import iron.system.Time;
 import iron.Scene;
-import arm.shader.MakeMaterial;
+import arm.io.ExportTexture;
+import arm.ProjectFormat;
 import arm.Viewport;
+import arm.Res;
+#if is_paint
+import kha.math.FastMatrix3;
+import iron.object.Object;
+import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.FontSlot;
 import arm.data.MaterialSlot;
-import arm.io.ExportTexture;
-import arm.ProjectFormat;
-import arm.Res;
+#end
+#if is_lab
+import kha.Blob;
+import zui.Nodes;
+#end
 
 @:access(zui.Zui)
 class UIBase {
 
 	public static var inst: UIBase;
-	public static inline var defaultWindowW = 280;
-	public var tabx = 0;
 	public var show = true;
 	public var ui: Zui;
+	var borderStarted = 0;
+	var borderHandle: Handle = null;
+	var action_paint_remap = "";
+	var operatorSearchOffset = 0;
+
+	#if is_paint
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
 	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
 	public var hwndTabs = [
@@ -41,25 +51,38 @@ class UIBase {
 		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
 		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabSwatches.draw, TabScript.draw, TabConsole.draw]
 	];
+	#end
+	#if is_lab
+	public var hwnds = [Id.handle()];
+	public var htabs = [Id.handle()];
+	public var hwndTabs = [
+		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabSwatches.draw, TabPlugins.draw, TabScript.draw, TabConsole.draw]
+	];
+	#end
+
+	#if is_paint
+	public static inline var defaultWindowW = 280;
+	public var tabx = 0;
 	public var hminimized = Id.handle();
-	var borderStarted = 0;
-	var borderHandle: Handle = null;
-	var action_paint_remap = "";
-	var operatorSearchOffset = 0;
+	#end
 
 	public function new() {
 		inst = this;
+
+		#if is_paint
 		new UIToolbar();
+		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
+		Context.raw.textToolText = tr("Text");
+		#end
+
 		new UIHeader();
 		new UIStatus();
 		new UIMenubar();
 
-		Context.raw.textToolText = tr("Text");
-
-		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
 		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * Config.raw.window_scale);
 
+		#if is_paint
 		if (Project.materials == null) {
 			Project.materials = [];
 			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
@@ -86,6 +109,29 @@ class UIBase {
 			Project.layers.push(new LayerSlot());
 			Context.raw.layer = Project.layers[0];
 		}
+		#end
+
+		#if is_lab
+		if (Project.materialData == null) {
+			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
+				Project.materialData = m;
+			});
+		}
+
+		if (Project.defaultCanvas == null) { // Synchronous
+			Data.getBlob("default_brush.arm", function(b: Blob) {
+				Project.defaultCanvas = b;
+			});
+		}
+
+		Project.nodes = new Nodes();
+		Project.canvas = iron.system.ArmPack.decode(Project.defaultCanvas.toBytes());
+		Project.canvas.name = "Brush 1";
+
+		Context.parseBrushInputs();
+
+		arm.logic.LogicParser.parse(Project.canvas, false);
+		#end
 
 		if (Project.raw.swatches == null) {
 			Project.setDefaultSwatches();
@@ -128,7 +174,13 @@ class UIBase {
 		Zui.onDeselectText = onDeselectText;
 		Zui.onTabDrop = onTabDrop;
 
+		#if is_paint
 		var resources = ["cursor.k", "icons.k"];
+		#end
+		#if is_lab
+		var resources = ["cursor.k", "icons.k", "placeholder.k"];
+		#end
+
 		Res.load(resources, done);
 
 		Context.raw.projectObjects = [];
@@ -140,6 +192,7 @@ class UIBase {
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
 
+		#if is_paint
 		Context.raw.gizmo = Scene.active.getChild(".Gizmo");
 		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
 		Context.raw.gizmoTranslateY = Context.raw.gizmo.getChild(".TranslateY");
@@ -150,6 +203,7 @@ class UIBase {
 		Context.raw.gizmoRotateX = Context.raw.gizmo.getChild(".RotateX");
 		Context.raw.gizmoRotateY = Context.raw.gizmo.getChild(".RotateY");
 		Context.raw.gizmoRotateZ = Context.raw.gizmo.getChild(".RotateZ");
+		#end
 
 		Context.raw.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
 		Project.paintObjects = [Context.raw.paintObject];
@@ -168,15 +222,23 @@ class UIBase {
 		if (!App.uiEnabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
-			if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
-				show2DView(View2DLayer);
-			}
-			else if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
+			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
+				#if is_paint
 				UINodes.inst.canvasType == CanvasMaterial ? showMaterialNodes() : showBrushNodes();
+				#end
+				#if is_lab
+				showMaterialNodes();
+				#end
 			}
 			else if (Operator.shortcut(Config.keymap.toggle_browser)) {
 				toggleBrowser();
 			}
+
+			#if is_paint
+			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
+				show2DView(View2DLayer);
+			}
+			#end
 		}
 
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
@@ -188,7 +250,9 @@ class UIBase {
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (Context.raw.textureExportPath == "") { // First export, ask for path
+				#if is_paint
 				Context.raw.layersExport = ExportVisible;
+				#end
 				BoxExport.showTextures();
 			}
 			else {
@@ -199,7 +263,9 @@ class UIBase {
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
+			#if is_paint
 			Context.raw.layersExport = ExportVisible;
+			#end
 			BoxExport.showTextures();
 		}
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
@@ -218,6 +284,8 @@ class UIBase {
 		#end
 
 		var mouse = Input.getMouse();
+
+		#if is_paint
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
@@ -260,11 +328,34 @@ class UIBase {
 				}
 			}
 		}
+		#end
 
-		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
-		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
+		#if is_lab
+		if ((Context.raw.brushCanLock || Context.raw.brushLocked) && mouse.moved) {
+			if (Operator.shortcut(Config.keymap.brush_radius, ShortcutDown)) {
+				if (Context.raw.brushLocked) {
+					Context.raw.brushRadius += mouse.movementX / 150;
+					Context.raw.brushRadius = Math.max(0.01, Math.min(4.0, Context.raw.brushRadius));
+					Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+					Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
+					UIHeader.inst.headerHandle.redraws = 2;
+				}
+				else if (Context.raw.brushCanLock) {
+					Context.raw.brushCanLock = false;
+					Context.raw.brushLocked = true;
+				}
+			}
+		}
+		#end
 
+		#if is_paint
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+		#end
+		#if is_lab
+		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
+		#end
+
+		#if is_paint
 		if (!isTyping) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
 				hwnds[TabSidebar1].redraws = 2;
@@ -275,9 +366,12 @@ class UIBase {
 				for (i in 1...10) if (kb.started(i + "")) Context.selectLayer(i - 1);
 			}
 		}
+		#end
 
 		// Viewport shortcuts
 		if (Context.inPaintArea() && !isTyping) {
+
+			#if is_paint
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				if (!mouse.down("right")) { // Fly mode off
 					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
@@ -344,6 +438,36 @@ class UIBase {
 					UIHeader.inst.headerHandle.redraws = 2;
 				}
 			}
+			#end
+
+			#if is_lab
+			if (UIHeader.inst.worktab.position == Space3D) {
+				// Radius
+				if (Context.raw.tool == ToolEraser ||
+					Context.raw.tool == ToolClone  ||
+					Context.raw.tool == ToolBlur   ||
+					Context.raw.tool == ToolSmudge) {
+					if (Operator.shortcut(Config.keymap.brush_radius)) {
+						Context.raw.brushCanLock = true;
+						if (!Input.getPen().connected) mouse.lock();
+						Context.raw.lockStartedX = mouse.x;
+						Context.raw.lockStartedY = mouse.y;
+					}
+					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
+						Context.raw.brushRadius -= getRadiusIncrement();
+						Context.raw.brushRadius = Math.max(Math.round(Context.raw.brushRadius * 100) / 100, 0.01);
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
+						UIHeader.inst.headerHandle.redraws = 2;
+					}
+					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
+						Context.raw.brushRadius += getRadiusIncrement();
+						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
+						UIHeader.inst.headerHandle.redraws = 2;
+					}
+				}
+			}
+			#end
 
 			// Viewpoint
 			if (mouse.viewX < iron.App.w()) {
@@ -382,6 +506,7 @@ class UIBase {
 							tr("Metallic"),
 							tr("Opacity"),
 							tr("Height"),
+							#if is_paint
 							tr("Emission"),
 							tr("Subsurface"),
 							tr("TexCoord"),
@@ -389,12 +514,16 @@ class UIBase {
 							tr("Material ID"),
 							tr("Object ID"),
 							tr("Mask")
+							#end
 						];
+
 						var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
+
 						#if (kha_direct3d12 || kha_vulkan)
 						modes.push(tr("Path Traced"));
 						shortcuts.push("p");
 						#end
+
 						for (i in 0...modes.length) {
 							ui.radio(modeHandle, i, modes[i], shortcuts[i]);
 						}
@@ -409,7 +538,13 @@ class UIBase {
 							Context.setViewportMode(modeHandle.position);
 							ui.changed = true;
 						}
+
+					#if is_paint
 					}, 16 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
+					#end
+					#if is_lab
+					}, 9 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
+					#end
 				}
 			}
 
@@ -421,11 +556,20 @@ class UIBase {
 				Context.raw.brushLocked = false;
 				Context.raw.brushCanUnlock = false;
 			}
-			if ((Context.raw.brushCanLock || Context.raw.brushLocked) &&
+
+			#if is_paint
+			var b = (Context.raw.brushCanLock || Context.raw.brushLocked) &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_angle, ShortcutDown) &&
-				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown))) {
+				!(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius, ShortcutDown));
+			#end
+			#if is_lab
+			var b = (Context.raw.brushCanLock || Context.raw.brushLocked) &&
+				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown);
+			#end
+
+			if (b) {
 				mouse.unlock();
 				Context.raw.lastPaintX = -1;
 				Context.raw.lastPaintY = -1;
@@ -440,6 +584,7 @@ class UIBase {
 			}
 		}
 
+		#if is_paint
 		if (borderHandle != null) {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
 				if (borderStarted == SideLeft) {
@@ -476,6 +621,38 @@ class UIBase {
 				}
 			}
 		}
+		#end
+
+		#if is_lab
+		if (borderHandle != null) {
+			if (borderHandle == UINodes.inst.hwnd) {
+				if (borderStarted == SideLeft) {
+					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
+					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
+					else if (Config.raw.layout[LayoutNodesW] > System.windowWidth() * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.windowWidth() * 0.7);
+				}
+				else { // UINodes
+
+				}
+			}
+			else if (borderHandle == hwnds[TabStatus]) {
+				var my = Std.int(mouse.movementY);
+				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
+					Config.raw.layout[LayoutStatusH] -= my;
+				}
+			}
+			else {
+				if (borderStarted == SideLeft) {
+
+				}
+				else {
+					var my = Std.int(mouse.movementY);
+
+				}
+			}
+		}
+		#end
+
 		if (!mouse.down()) {
 			borderHandle = null;
 			App.isResizing = false;
@@ -543,7 +720,13 @@ class UIBase {
 	}
 
 	function view_top() {
+		#if is_paint
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+		#end
+		#if is_lab
+		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
+		#end
+
 		var mouse = Input.getMouse();
 		if (Context.inPaintArea() && !isTyping) {
 			if (mouse.viewX < iron.App.w()) {
@@ -611,6 +794,7 @@ class UIBase {
 		return mx > x && mx < x + w && my > y && my < y + h;
 	}
 
+	#if is_paint
 	function getBrushStencilRect(): TRect {
 		var w = Std.int(Context.raw.brushStencilImage.width * (App.h() / Context.raw.brushStencilImage.height) * Context.raw.brushStencilScale);
 		var h = Std.int(App.h() * Context.raw.brushStencilScale);
@@ -618,6 +802,7 @@ class UIBase {
 		var y = Std.int(App.y() + Context.raw.brushStencilY * App.h());
 		return { w: w, h: h, x: x, y: y };
 	}
+	#end
 
 	function updateUI() {
 
@@ -631,6 +816,7 @@ class UIBase {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
+		#if is_paint
 		// Same mapping for paint and rotate (predefined in touch keymap)
 		if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 			action_paint_remap = Config.keymap.action_paint;
@@ -712,16 +898,25 @@ class UIBase {
 			Context.raw.brushStencilX += (oldW - newW) / App.w() / 2;
 			Context.raw.brushStencilY += (oldH - newH) / App.h() / 2;
 		}
+		#end
 
-		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
-		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
+		#if is_paint
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
+		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
 				   decalMask ||
 				   setCloneSource ||
 				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 				   (Input.getPen().down() && !kb.down("alt"));
+		#end
+		#if is_lab
+		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
+				   setCloneSource ||
+				   Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
+				   (Input.getPen().down() && !kb.down("alt"));
+		#end
 
 		if (Config.raw.touch_ui) {
 			if (Input.getPen().down()) {
@@ -738,6 +933,7 @@ class UIBase {
 		}
 		#end
 
+		#if is_paint
 		#if krom_ios
 		// No hover on iPad, decals are painted by pen release
 		if (decal) {
@@ -747,15 +943,19 @@ class UIBase {
 			}
 		}
 		#end
+		#end
 
 		if (down) {
 			var mx = mouse.viewX;
 			var my = mouse.viewY;
 			var ww = iron.App.w();
+
+			#if is_paint
 			if (Context.raw.paint2d) {
 				mx -= iron.App.w();
 				ww = UIView2D.inst.ww;
 			}
+			#end
 
 			if (mx < ww &&
 				mx > iron.App.x() &&
@@ -778,6 +978,7 @@ class UIBase {
 							Context.raw.lastPaintVecY = Context.raw.lastPaintY;
 						}
 
+						#if is_paint
 						History.pushUndo = true;
 
 						if (Context.raw.tool == ToolClone && Context.raw.cloneStartX >= 0.0) { // Clone delta
@@ -798,9 +999,21 @@ class UIBase {
 						else if (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillUVIsland) {
 							UVUtil.uvislandmapCached = false;
 						}
+						#end
 					}
+
 					Context.raw.brushTime += Time.delta;
-					if (Context.raw.runBrush != null) Context.raw.runBrush(0);
+
+					#if is_paint
+					if (Context.raw.runBrush != null) {
+						Context.raw.runBrush(0);
+					}
+					#end
+					#if is_lab
+					if (Context.runBrush != null) {
+						Context.runBrush(0);
+					}
+					#end
 				}
 			}
 		}
@@ -812,8 +1025,12 @@ class UIBase {
 			Context.raw.ddirty = 3;
 			#end
 			Context.raw.brushBlendDirty = true; // Update brush mask
-			Context.raw.layerPreviewDirty = true; // Update layer preview
 
+			#if is_paint
+			Context.raw.layerPreviewDirty = true; // Update layer preview
+			#end
+
+			#if is_paint
 			// New color id picked, update fill layer
 			if (Context.raw.tool == ToolColorId && Context.raw.layer.fill_layer != null) {
 				App.notifyOnNextFrame(function() {
@@ -821,8 +1038,10 @@ class UIBase {
 					MakeMaterial.parsePaintMaterial(false);
 				});
 			}
+			#end
 		}
 
+		#if is_paint
 		if (Context.raw.layersPreviewDirty) {
 			Context.raw.layersPreviewDirty = false;
 			Context.raw.layerPreviewDirty = false;
@@ -860,6 +1079,7 @@ class UIBase {
 			g2.end();
 			hwnds[TabSidebar0].redraws = 2;
 		}
+		#end
 
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
 		var redoPressed = Operator.shortcut(Config.keymap.edit_redo) ||
@@ -868,7 +1088,9 @@ class UIBase {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
+		#if is_paint
 		arm.render.Gizmo.update();
+		#end
 	}
 
 	public function render(g: kha.graphics2.Graphics) {
@@ -894,11 +1116,14 @@ class UIBase {
 		g.end();
 		ui.begin(g);
 
+		#if is_paint
 		UIToolbar.inst.renderUI(g);
+		#end
 		UIMenubar.inst.renderUI(g);
 		UIHeader.inst.renderUI(g);
 		UIStatus.inst.renderUI(g);
 
+		#if is_paint
 		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
 		if (ui.window(hwnds[TabSidebar0], tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
 			for (draw in hwndTabs[TabSidebar0]) draw(htabs[TabSidebar0]);
@@ -924,11 +1149,13 @@ class UIBase {
 			Context.raw.selectTime = Time.time();
 		}
 		Context.raw.lastHtab0Position = htabs[TabSidebar0].position;
+		#end
 
 		ui.end();
 		g.begin(false);
 	}
 
+	#if is_paint
 	public function renderCursor(g: kha.graphics2.Graphics) {
 		g.color = 0xffffffff;
 
@@ -1082,15 +1309,24 @@ class UIBase {
 			}
 		}
 	}
+	#end
 
 	public function showMaterialNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
+
+		#if is_paint
 		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasMaterial;
 		UINodes.inst.canvasType = CanvasMaterial;
+		#end
+		#if is_lab
+		UINodes.inst.show = !UINodes.inst.show;
+		#end
+
 		App.resize();
 	}
 
+	#if is_paint
 	public function showBrushNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
@@ -1108,6 +1344,7 @@ class UIBase {
 		UIView2D.inst.hwnd.redraws = 2;
 		App.resize();
 	}
+	#end
 
 	public function toggleBrowser() {
 		var minimized = Config.raw.layout[LayoutStatusH] <= (UIStatus.defaultStatusH * Config.raw.window_scale);
@@ -1128,15 +1365,25 @@ class UIBase {
 
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uiEnabled) return;
+
+		#if is_paint
 		if (handle != hwnds[TabSidebar0] &&
 			handle != hwnds[TabSidebar1] &&
 			handle != hwnds[TabStatus] &&
 			handle != UINodes.inst.hwnd &&
 			handle != UIView2D.inst.hwnd) return; // Scalable handles
-		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
-		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
+		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		if (handle == hwnds[TabSidebar0] && side == SideTop) return;
+		#end
+
+		#if is_lab
+		if (handle != hwnds[TabStatus] &&
+			handle != UINodes.inst.hwnd) return; // Scalable handles
+		if (handle == UINodes.inst.hwnd && side == SideTop) return;
+		#end
+
+		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
 		if (handle == hwnds[TabStatus] && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
@@ -1176,11 +1423,13 @@ class UIBase {
 
 	public function tagUIRedraw() {
 		UIHeader.inst.headerHandle.redraws = 2;
-		UIToolbar.inst.toolbarHandle.redraws = 2;
 		hwnds[TabStatus].redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
+		#if is_paint
 		hwnds[TabSidebar0].redraws = 2;
 		hwnds[TabSidebar1].redraws = 2;
+		UIToolbar.inst.toolbarHandle.redraws = 2;
+		#end
 	}
 }

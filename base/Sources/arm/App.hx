@@ -56,6 +56,7 @@ class App {
 	public static var defaultElementH = 28;
 	public static var defaultFontSize = 13;
 	public static var resHandle = new Handle();
+	public static var bitsHandle = new Handle();
 	static var dropPaths: Array<String> = [];
 	static var appx = 0;
 	static var appy = 0;
@@ -64,7 +65,6 @@ class App {
 	#if is_paint
 	public static var dragMaterial: MaterialSlot = null;
 	public static var dragLayer: LayerSlot = null;
-	public static var bitsHandle = new Handle();
 	#end
 
 	public static var pipeCopy: PipelineState;
@@ -991,6 +991,10 @@ class App {
 		raw.node_preview = true;
 		raw.dilate = DilateInstant;
 		raw.dilate_radius = 2;
+		#end
+
+		#if is_lab
+		raw.gpu_inference = true;
 		#end
 	}
 

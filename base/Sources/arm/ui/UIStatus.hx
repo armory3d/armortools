@@ -18,7 +18,15 @@ class UIStatus {
 		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];
+
+		#if is_paint
 		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
+		#end
+
+		#if is_lab
+		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.windowHeight() - statush, System.windowWidth(), statush)) {
+		#end
+
 			ui._y += 2;
 
 			// Border
