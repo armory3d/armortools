@@ -4,67 +4,42 @@ import haxe.io.Bytes;
 import kha.Window;
 import kha.Blob;
 import kha.Image;
-import kha.graphics4.TextureFormat;
-import kha.graphics4.DepthStencilFormat;
 import zui.Nodes;
-import iron.data.MaterialData;
 import iron.data.MeshData;
 import iron.data.Data;
 import iron.data.SceneFormat;
 import iron.math.Mat4;
 import iron.system.ArmPack;
-import iron.system.Lz4;
-import iron.object.MeshObject;
 import iron.Scene;
-import iron.RenderPath;
 import arm.ProjectFormat;
-import arm.ui.UIBase;
-import arm.ui.UIStatus;
 import arm.ui.UIFiles;
+import arm.ui.UIBase;
 import arm.sys.Path;
 import arm.sys.File;
-import arm.util.RenderUtil;
 import arm.Viewport;
+#if is_paint
+import kha.graphics4.TextureFormat;
+import kha.graphics4.DepthStencilFormat;
+import iron.data.MaterialData;
+import iron.system.Lz4;
+import iron.object.MeshObject;
+import iron.RenderPath;
+import arm.util.RenderUtil;
+import arm.ui.UIStatus;
 import arm.util.MeshUtil;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
 import arm.data.MaterialSlot;
 import arm.shader.MakeMaterial;
+#end
 
 class ImportArm {
-
-	public static function runMesh(raw: TSceneFormat) {
-		Project.paintObjects = [];
-		for (i in 0...raw.mesh_datas.length) {
-			new MeshData(raw.mesh_datas[i], function(md: MeshData) {
-				var object: MeshObject = null;
-				if (i == 0) {
-					Context.raw.paintObject.setData(md);
-					object = Context.raw.paintObject;
-				}
-				else {
-					object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
-					object.name = md.name;
-					object.skip_context = "paint";
-					md.handle = md.name;
-					Data.cachedMeshes.set(md.handle, md);
-				}
-				object.transform.scale.set(1, 1, 1);
-				object.transform.buildMatrix();
-				object.name = md.name;
-				Project.paintObjects.push(object);
-				MeshUtil.mergeMesh();
-				Viewport.scaleToBounds();
-			});
-		}
-		iron.App.notifyOnInit(App.initLayers);
-		History.reset();
-	}
 
 	public static function runProject(path: String) {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
+			#if is_paint
 			if (project.version != null && project.layer_datas == null) {
 				// Import as material
 				if (project.material_nodes != null) {
@@ -82,9 +57,14 @@ class ImportArm {
 			}
 
 			var importAsMesh = project.version == null;
-
 			Context.raw.layersPreviewDirty = true;
 			Context.raw.layerFilter = 0;
+			#end
+
+			#if is_lab
+			var importAsMesh = true;
+			#end
+
 			Project.projectNew(importAsMesh);
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
@@ -94,11 +74,13 @@ class ImportArm {
 			Window.get(0).title = UIFiles.filename + " - " + Main.title;
 			#end
 
+			#if is_paint
 			// Import as mesh instead
 			if (importAsMesh) {
 				runMesh(untyped project);
 				return;
 			}
+			#end
 
 			// Save to recent
 			#if krom_ios
@@ -113,12 +95,14 @@ class ImportArm {
 
 			Project.raw = project;
 
+			#if is_paint
 			var l0 = project.layer_datas[0];
 			App.resHandle.position = Config.getTextureResPos(l0.res);
 			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
 			App.bitsHandle.position = bitsPos;
 			var bytesPerPixel = Std.int(l0.bpp / 8);
 			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
+			#end
 
 			var base = Path.baseDir(path);
 			if (Project.raw.envmap != null) {
@@ -157,6 +141,7 @@ class ImportArm {
 				ImportTexture.run(abs, hdrAsEnvmap);
 			}
 
+			#if is_paint
 			if (project.font_assets != null) {
 				for (file in project.font_assets) {
 					#if krom_windows
@@ -171,9 +156,17 @@ class ImportArm {
 					}
 				}
 			}
+			#end
 
 			// Synchronous for now
+			#if is_paint
 			new MeshData(project.mesh_datas[0], function(md: MeshData) {
+			#end
+
+			#if is_lab
+			new MeshData(project.mesh_data, function(md: MeshData) {
+			#end
+
 				Context.raw.paintObject.setData(md);
 				Context.raw.paintObject.transform.scale.set(1, 1, 1);
 				Context.raw.paintObject.transform.buildMatrix();
@@ -181,6 +174,7 @@ class ImportArm {
 				Project.paintObjects = [Context.raw.paintObject];
 			});
 
+			#if is_paint
 			for (i in 1...project.mesh_datas.length) {
 				var raw = project.mesh_datas[i];
 				new MeshData(raw, function(md: MeshData) {
@@ -202,11 +196,14 @@ class ImportArm {
 
 			// No mask by default
 			if (Context.raw.mergedObject == null) MeshUtil.mergeMesh();
+			#end
+
 			Context.selectPaintObject(Context.mainObject());
 			Viewport.scaleToBounds();
 			Context.raw.paintObject.skip_context = "paint";
 			Context.raw.mergedObject.visible = true;
 
+			#if is_paint
 			var tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 				if (History.undoLayers != null) for (l in History.undoLayers) l.resizeAndSetBits();
@@ -327,6 +324,7 @@ class ImportArm {
 				Context.raw.material = new MaterialSlot(m0, n);
 				Project.materials.push(Context.raw.material);
 			}
+			#end
 
 			arm.ui.UINodes.inst.hwnd.redraws = 2;
 			arm.ui.UINodes.inst.groupStack = [];
@@ -335,6 +333,7 @@ class ImportArm {
 				for (g in project.material_groups) Project.materialGroups.push({ canvas: g, nodes: new Nodes() });
 			}
 
+			#if is_paint
 			for (m in Project.materials) {
 				Context.raw.material = m;
 				MakeMaterial.parsePaintMaterial();
@@ -360,12 +359,48 @@ class ImportArm {
 				}
 			}
 
-			Context.raw.ddirty = 4;
-			UIBase.inst.hwnds[0].redraws = 2;
-			UIBase.inst.hwnds[1].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
+			#end
 
+			#if is_lab
+			initNodes(project.material.nodes);
+			Project.canvas = project.material;
+			arm.logic.LogicParser.parse(Project.canvas, false);
+			#end
+
+			Context.raw.ddirty = 4;
 			Data.deleteBlob(path);
 		});
+	}
+
+	#if is_paint
+	public static function runMesh(raw: TSceneFormat) {
+		Project.paintObjects = [];
+		for (i in 0...raw.mesh_datas.length) {
+			new MeshData(raw.mesh_datas[i], function(md: MeshData) {
+				var object: MeshObject = null;
+				if (i == 0) {
+					Context.raw.paintObject.setData(md);
+					object = Context.raw.paintObject;
+				}
+				else {
+					object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+					object.name = md.name;
+					object.skip_context = "paint";
+					md.handle = md.name;
+					Data.cachedMeshes.set(md.handle, md);
+				}
+				object.transform.scale.set(1, 1, 1);
+				object.transform.buildMatrix();
+				object.name = md.name;
+				Project.paintObjects.push(object);
+				MeshUtil.mergeMesh();
+				Viewport.scaleToBounds();
+			});
+		}
+		iron.App.notifyOnInit(App.initLayers);
+		History.reset();
 	}
 
 	public static function runMaterial(path: String) {
@@ -428,7 +463,7 @@ class ImportArm {
 		iron.App.notifyOnInit(_init);
 
 		arm.ui.UINodes.inst.groupStack = [];
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -497,9 +532,10 @@ class ImportArm {
 		}
 		iron.App.notifyOnInit(_init);
 
-		UIBase.inst.hwnds[1].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		Data.deleteBlob(path);
 	}
+	#end
 
 	public static function runSwatches(path: String, replaceExisting = false) {
 		Data.getBlob(path, function(b: Blob) {
@@ -523,7 +559,7 @@ class ImportArm {
 				Project.raw.swatches.push(s);
 			}
 		}
-		UIBase.inst.hwnds[2].redraws = 2;
+		UIBase.inst.hwnds[TabStatus].redraws = 2;
 		Data.deleteBlob(path);
 	}
 
@@ -540,29 +576,16 @@ class ImportArm {
 
 	static function initNodes(nodes: Array<TNode>) {
 		for (node in nodes) {
-			if (node.type == "TEX_IMAGE") {
-				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 
-				if (node.buttons[1].data.length == 2) { // TODO: deprecated
-					node.buttons[1].data = [tr("Auto"), tr("Linear"), tr("sRGB"), tr("DirectX Normal Map")];
-				}
-			}
-			else if (node.type == "VALTORGB") { // TODO: deprecated
-				var but = node.buttons[0];
-				if (but.type != "CUSTOM") {
-					but.type = "CUSTOM";
-					but.name = "arm.shader.NodesMaterial.colorRampButton";
-					but.height = 4.5;
-				}
-			}
-			else if (node.type == "MAPPING") { // TODO: deprecated
-				if (node.inputs.length < 4) {
-					var latest: TNode = haxe.Json.parse(haxe.Json.stringify(arm.shader.NodesMaterial.getTNode("MAPPING")));
-					node.inputs = latest.inputs;
-					for (inp in node.inputs) inp.node_id = node.id;
-					for (i in 0...node.buttons.length) node.inputs[i + 1].default_value = node.buttons[i].default_value;
-					node.buttons = [];
-				}
+			#if is_paint
+			if (node.type == "TEX_IMAGE") {
+			#end
+
+			#if is_lab
+			if (node.type == "ImageTextureNode") {
+			#end
+
+				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
 			}
 		}
 	}
