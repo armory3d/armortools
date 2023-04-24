@@ -13,7 +13,7 @@ import arm.logic.NodesBrush;
 import arm.ui.UIHeader;
 import arm.Project;
 import arm.ProjectFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import iron.system.Time;
 import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
@@ -25,7 +25,7 @@ class UINodes {
 
 	public static var inst: UINodes;
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public var show = false;
 	#end
 	#if is_lab
@@ -38,7 +38,7 @@ class UINodes {
 	public var wh: Int;
 
 	public var ui: Zui;
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public var canvasType = CanvasMaterial;
 	#end
 	var showMenu = false;
@@ -66,7 +66,7 @@ class UINodes {
 	public function new() {
 		inst = this;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
 		#end
 		Nodes.excludeRemove.push("GROUP_OUTPUT");
@@ -124,7 +124,7 @@ class UINodes {
 			// Selecting which node socket to preview
 			else if (node == nodes.nodesSelected[0]) {
 				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				Context.raw.nodePreviewDirty = true;
 				#end
 			}
@@ -231,7 +231,7 @@ class UINodes {
 			var i = node.outputs.indexOf(socket);
 			if (i > -1) {
 				Context.raw.nodePreviewSocket = i;
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				Context.raw.nodePreviewDirty = true;
 				#end
 			}
@@ -256,7 +256,7 @@ class UINodes {
 			// Node context menu
 			if (!Nodes.socketReleased) {
 				var numberOfEntries = 5;
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (canvasType == CanvasMaterial) ++numberOfEntries;
 				#end
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
@@ -264,7 +264,7 @@ class UINodes {
 				UIMenu.draw(function(uiMenu: Zui) {
 					uiMenu._y += 1;
 					var protected = selected == null ||
-									#if is_paint
+									#if (is_paint || is_sculpt)
 									selected.type == "OUTPUT_MATERIAL_PBR" ||
 									#end
 									selected.type == "GROUP_INPUT" ||
@@ -319,7 +319,7 @@ class UINodes {
 						}
 					}
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					if (canvasType == CanvasMaterial) {
 						menuSeparator(uiMenu);
 						if (menuButton(uiMenu, tr("2D View"))) {
@@ -333,7 +333,7 @@ class UINodes {
 			}
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (ui.inputReleased) {
 			var nodes = getNodes();
 			var canvas = getCanvas(true);
@@ -440,7 +440,7 @@ class UINodes {
 	}
 
 	public function getCanvas(groups = false): TNodeCanvas {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (canvasType == CanvasMaterial) {
 			if (groups && groupStack.length > 0) return groupStack[groupStack.length - 1].canvas;
 			else return getCanvasMaterial();
@@ -453,14 +453,14 @@ class UINodes {
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public function getCanvasMaterial(): TNodeCanvas {
 		return Context.raw.material.canvas;
 	}
 	#end
 
 	public function getNodes(): Nodes {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (canvasType == CanvasMaterial) {
 			if (groupStack.length > 0) return groupStack[groupStack.length - 1].nodes;
 			else return Context.raw.material.nodes;
@@ -480,7 +480,7 @@ class UINodes {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
@@ -488,7 +488,7 @@ class UINodes {
 		#end
 		wy = UIHeader.inst.headerh * 2;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
 			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
@@ -496,7 +496,7 @@ class UINodes {
 
 		var ww = Config.raw.layout[LayoutNodesW];
 		if (!UIBase.inst.show) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			#end
@@ -560,7 +560,7 @@ class UINodes {
 			var count = 0;
 			var BUTTON_COL = ui.t.BUTTON_COL;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			#end
 			#if is_lab
@@ -617,7 +617,7 @@ class UINodes {
 	public function drawGrid() {
 		var ww = Config.raw.layout[LayoutNodesW];
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 		}
@@ -655,7 +655,7 @@ class UINodes {
 	public function render(g: kha.graphics2.Graphics) {
 		if (recompileMat) {
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (canvasType == CanvasBrush) {
 				MakeMaterial.parseBrush();
 				RenderUtil.makeBrushPreview();
@@ -679,7 +679,7 @@ class UINodes {
 			recompileMat = false;
 		}
 		else if (recompileMatFinal) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			MakeMaterial.parsePaintMaterial();
 
 			if (canvasType == CanvasMaterial && App.isFillMaterial()) {
@@ -700,7 +700,7 @@ class UINodes {
 		var nodes = getNodes();
 		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
 			lastNodeSelected = nodes.nodesSelected[0];
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Context.raw.nodePreviewDirty = true;
 			#end
 
@@ -728,7 +728,7 @@ class UINodes {
 
 		if (grid == null) drawGrid();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (Config.raw.node_preview && Context.raw.nodePreviewDirty) {
 			makeNodePreview();
 		}
@@ -740,7 +740,7 @@ class UINodes {
 		// Make window
 		ww = Config.raw.layout[LayoutNodesW];
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
@@ -749,7 +749,7 @@ class UINodes {
 
 		wy = UIHeader.inst.headerh * 2;
 		if (!UIBase.inst.show) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			#end
@@ -760,7 +760,7 @@ class UINodes {
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
 			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.inst.headerh * 2;
@@ -784,7 +784,7 @@ class UINodes {
 			// Nodes
 			var _inputEnabled = ui.inputEnabled;
 			ui.inputEnabled = _inputEnabled && !showMenu;
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			ui.windowBorderRight = Config.raw.layout[LayoutSidebarW];
 			#end
 			ui.windowBorderTop = UIHeader.inst.headerh * 2;
@@ -800,7 +800,7 @@ class UINodes {
 					tmp(color.base);
 					UINodes.inst.hwnd.redraws = 2;
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					var material_live = Config.raw.material_live;
 					#end
 					#if is_lab
@@ -816,7 +816,7 @@ class UINodes {
 
 			// Remove nodes with unknown id for this canvas type
 			if (Zui.isPaste) {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var nodeList = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 				#end
 				#if is_lab
@@ -856,7 +856,7 @@ class UINodes {
 
 			// Recompile material on change
 			if (ui.changed) {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				recompileMat = (ui.inputDX != 0 || ui.inputDY != 0 || !uichangedLast) && Config.raw.material_live; // Instant preview
 				#end
 				#if is_lab
@@ -869,7 +869,7 @@ class UINodes {
 			}
 			uichangedLast = ui.changed;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
@@ -878,7 +878,9 @@ class UINodes {
 				if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
 					var id = sel.buttons[0].default_value;
 					if (id < Project.layers.length) {
+						#if is_paint
 						img = Project.layers[id].texpaint_preview;
+						#end
 					}
 				}
 				else if (sel.type == "MATERIAL") {
@@ -1098,7 +1100,7 @@ class UINodes {
 			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var cats = canvasType == CanvasMaterial ? NodesMaterial.categories : NodesBrush.categories;
 			#end
 			#if is_lab
@@ -1134,7 +1136,7 @@ class UINodes {
 		g.begin(false);
 
 		if (showMenu) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var list = canvasType == CanvasMaterial ? NodesMaterial.list : NodesBrush.list;
 			#end
 			#if is_lab
@@ -1143,7 +1145,7 @@ class UINodes {
 
 			var numNodes = list[menuCategory].length;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var isGroupCategory = canvasType == CanvasMaterial && NodesMaterial.categories[menuCategory] == "Group";
 			#end
 			#if is_lab
@@ -1198,7 +1200,7 @@ class UINodes {
 						nodes.nodesDrag = true;
 					}
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					ui.enabled = !Project.isMaterialGroupInUse(g);
 					if (ui.button("x", Center)) {
 						History.deleteMaterialGroup(g);
@@ -1263,7 +1265,7 @@ class UINodes {
 		if (lastCanvas == null) lastCanvas = getCanvas(true);
 		var canvasGroup = groupStack.length > 0 ? Project.materialGroups.indexOf(groupStack[groupStack.length - 1]) : null;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		History.editNodes(lastCanvas, canvasType, canvasGroup);
 		#end
@@ -1275,7 +1277,7 @@ class UINodes {
 	public function acceptAssetDrag(index: Int) {
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var n = canvasType == CanvasMaterial ? NodesMaterial.createNode("TEX_IMAGE", g) : NodesBrush.createNode("TEX_IMAGE");
 		#end
 		#if is_lab
@@ -1290,7 +1292,7 @@ class UINodes {
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public function acceptLayerDrag(index: Int) {
 		pushUndo();
 		if (Project.layers[index].isGroup()) return;
@@ -1310,7 +1312,7 @@ class UINodes {
 	#end
 
 	public function acceptSwatchDrag(swatch: TSwatchColor) {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		pushUndo();
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
@@ -1364,7 +1366,7 @@ class UINodes {
 		return node;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	function makeNodePreview() {
 		var nodes = Context.raw.material.nodes;
 		if (nodes.nodesSelected.length == 0) return;

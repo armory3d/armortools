@@ -16,7 +16,7 @@ import arm.io.ExportTexture;
 import arm.ProjectFormat;
 import arm.Viewport;
 import arm.Res;
-#if is_paint
+#if (is_paint || is_sculpt)
 import kha.math.FastMatrix3;
 import iron.object.Object;
 import arm.shader.MakeMaterial;
@@ -43,7 +43,7 @@ class UIBase {
 	var action_paint_remap = "";
 	var operatorSearchOffset = 0;
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
 	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
 	public var hwndTabs = [
@@ -60,7 +60,7 @@ class UIBase {
 	];
 	#end
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static inline var defaultWindowW = 280;
 	public var tabx = 0;
 	public var hminimized = Id.handle();
@@ -69,7 +69,7 @@ class UIBase {
 	public function new() {
 		inst = this;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		new UIToolbar();
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * Config.raw.window_scale);
 		Context.raw.textToolText = tr("Text");
@@ -82,7 +82,7 @@ class UIBase {
 		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * Config.raw.window_scale);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (Project.materials == null) {
 			Project.materials = [];
 			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
@@ -174,7 +174,7 @@ class UIBase {
 		Zui.onDeselectText = onDeselectText;
 		Zui.onTabDrop = onTabDrop;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var resources = ["cursor.k", "icons.k"];
 		#end
 		#if is_lab
@@ -192,7 +192,7 @@ class UIBase {
 	function done() {
 		if (ui.SCALE() > 1) setIconScale();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		Context.raw.gizmo = Scene.active.getChild(".Gizmo");
 		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
 		Context.raw.gizmoTranslateY = Context.raw.gizmo.getChild(".TranslateY");
@@ -223,7 +223,7 @@ class UIBase {
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
 			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				UINodes.inst.canvasType == CanvasMaterial ? showMaterialNodes() : showBrushNodes();
 				#end
 				#if is_lab
@@ -234,7 +234,7 @@ class UIBase {
 				toggleBrowser();
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
 				show2DView(View2DLayer);
 			}
@@ -248,6 +248,7 @@ class UIBase {
 		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimportTextures();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
+		#if (is_paint || is_lab)
 		else if (Operator.shortcut(Config.keymap.file_export_textures)) {
 			if (Context.raw.textureExportPath == "") { // First export, ask for path
 				#if is_paint
@@ -263,11 +264,12 @@ class UIBase {
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Context.raw.layersExport = ExportVisible;
 			#end
 			BoxExport.showTextures();
 		}
+		#end
 		else if (Operator.shortcut(Config.keymap.file_import_assets)) Project.importAsset();
 		else if (Operator.shortcut(Config.keymap.edit_prefs)) BoxPreferences.show();
 
@@ -285,7 +287,7 @@ class UIBase {
 
 		var mouse = Input.getMouse();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 
@@ -348,14 +350,14 @@ class UIBase {
 		}
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 		#end
 		#if is_lab
 		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (!isTyping) {
 			if (Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
 				hwnds[TabSidebar1].redraws = 2;
@@ -506,7 +508,7 @@ class UIBase {
 							tr("Metallic"),
 							tr("Opacity"),
 							tr("Height"),
-							#if is_paint
+							#if (is_paint || is_sculpt)
 							tr("Emission"),
 							tr("Subsurface"),
 							tr("TexCoord"),
@@ -539,7 +541,7 @@ class UIBase {
 							ui.changed = true;
 						}
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					}, 16 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
 					#end
 					#if is_lab
@@ -557,7 +559,7 @@ class UIBase {
 				Context.raw.brushCanUnlock = false;
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var b = (Context.raw.brushCanLock || Context.raw.brushLocked) &&
 				!Operator.shortcut(Config.keymap.brush_radius, ShortcutDown) &&
 				!Operator.shortcut(Config.keymap.brush_opacity, ShortcutDown) &&
@@ -584,7 +586,7 @@ class UIBase {
 			}
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (borderHandle != null) {
 			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
 				if (borderStarted == SideLeft) {
@@ -720,7 +722,7 @@ class UIBase {
 	}
 
 	function view_top() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 		#end
 		#if is_lab
@@ -794,7 +796,7 @@ class UIBase {
 		return mx > x && mx < x + w && my > y && my < y + h;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	function getBrushStencilRect(): TRect {
 		var w = Std.int(Context.raw.brushStencilImage.width * (App.h() / Context.raw.brushStencilImage.height) * Context.raw.brushStencilScale);
 		var h = Std.int(App.h() * Context.raw.brushStencilScale);
@@ -816,7 +818,7 @@ class UIBase {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		// Same mapping for paint and rotate (predefined in touch keymap)
 		if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 			action_paint_remap = Config.keymap.action_paint;
@@ -902,7 +904,7 @@ class UIBase {
 
 		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var down = Operator.shortcut(Config.keymap.action_paint, ShortcutDown) ||
@@ -933,7 +935,7 @@ class UIBase {
 		}
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		#if krom_ios
 		// No hover on iPad, decals are painted by pen release
 		if (decal) {
@@ -950,7 +952,7 @@ class UIBase {
 			var my = mouse.viewY;
 			var ww = iron.App.w();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (Context.raw.paint2d) {
 				mx -= iron.App.w();
 				ww = UIView2D.inst.ww;
@@ -978,7 +980,7 @@ class UIBase {
 							Context.raw.lastPaintVecY = Context.raw.lastPaintY;
 						}
 
-						#if is_paint
+						#if (is_paint || is_sculpt)
 						History.pushUndo = true;
 
 						if (Context.raw.tool == ToolClone && Context.raw.cloneStartX >= 0.0) { // Clone delta
@@ -1004,7 +1006,7 @@ class UIBase {
 
 					Context.raw.brushTime += Time.delta;
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					if (Context.raw.runBrush != null) {
 						Context.raw.runBrush(0);
 					}
@@ -1026,7 +1028,7 @@ class UIBase {
 			#end
 			Context.raw.brushBlendDirty = true; // Update brush mask
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Context.raw.layerPreviewDirty = true; // Update layer preview
 			#end
 
@@ -1088,7 +1090,7 @@ class UIBase {
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		arm.render.Gizmo.update();
 		#end
 	}
@@ -1116,14 +1118,14 @@ class UIBase {
 		g.end();
 		ui.begin(g);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIToolbar.inst.renderUI(g);
 		#end
 		UIMenubar.inst.renderUI(g);
 		UIHeader.inst.renderUI(g);
 		UIStatus.inst.renderUI(g);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
 		if (ui.window(hwnds[TabSidebar0], tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
 			for (draw in hwndTabs[TabSidebar0]) draw(htabs[TabSidebar0]);
@@ -1155,158 +1157,163 @@ class UIBase {
 		g.begin(false);
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public function renderCursor(g: kha.graphics2.Graphics) {
+		if (!App.uiEnabled) return;
+
+		#if is_paint
+		if (UIHeader.inst.worktab.position != SpacePaint) return;
+		#end
+
 		g.color = 0xffffffff;
 
-		// Brush
-		if (App.uiEnabled && UIHeader.inst.worktab.position == SpacePaint) {
-			Context.raw.viewIndex = Context.raw.viewIndexLast;
-			var mx = App.x() + Context.raw.paintVec.x * App.w();
-			var my = App.y() + Context.raw.paintVec.y * App.h();
-			Context.raw.viewIndex = -1;
+		Context.raw.viewIndex = Context.raw.viewIndexLast;
+		var mx = App.x() + Context.raw.paintVec.x * App.w();
+		var my = App.y() + Context.raw.paintVec.y * App.h();
+		Context.raw.viewIndex = -1;
 
-			// Radius being scaled
-			if (Context.raw.brushLocked) {
-				mx += Context.raw.lockStartedX - System.windowWidth() / 2;
-				my += Context.raw.lockStartedY - System.windowHeight() / 2;
+		// Radius being scaled
+		if (Context.raw.brushLocked) {
+			mx += Context.raw.lockStartedX - System.windowWidth() / 2;
+			my += Context.raw.lockStartedY - System.windowHeight() / 2;
+		}
+
+		#if is_paint
+		if (Context.raw.brushStencilImage != null && Context.raw.tool != ToolBake && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId) {
+			var r = getBrushStencilRect();
+			if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
+				g.color = 0x88ffffff;
+				var angle = Context.raw.brushStencilAngle;
+				var cx = r.x + r.w / 2;
+				var cy = r.y + r.h / 2;
+				g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
+				g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
+				g.transformation = null;
+				g.color = 0xffffffff;
 			}
+			var transform = Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown);
+			if (transform) {
+				// Outline
+				g.drawRect(r.x, r.y, r.w, r.h);
+				// Scale
+				g.drawRect(r.x - 8,       r.y - 8,       16, 16);
+				g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
+				g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
+				g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
+				// Rotate
+				var angle = Context.raw.brushStencilAngle;
+				var cx = r.x + r.w / 2;
+				var cy = r.y + r.h / 2;
+				g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
+				kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
+				g.transformation = null;
+			}
+		}
+		#end
 
-			if (Context.raw.brushStencilImage != null && Context.raw.tool != ToolBake && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId) {
-				var r = getBrushStencilRect();
-				if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
-					g.color = 0x88ffffff;
-					var angle = Context.raw.brushStencilAngle;
-					var cx = r.x + r.w / 2;
-					var cy = r.y + r.h / 2;
-					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
-					g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
+		// Show picked material next to cursor
+		if (Context.raw.tool == ToolPicker && Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
+			var img = Context.raw.material.imageIcon;
+			#if kha_opengl
+			g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
+			#else
+			g.drawImage(img, mx + 10, my + 10);
+			#end
+		}
+		if (Context.raw.tool == ToolPicker && Context.raw.colorPickerCallback != null) {
+			var img = Res.get("icons.k");
+			var rect = Res.tile50(img, ToolPicker, 0);
+			g.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
+		}
+
+		var cursorImg = Res.get("cursor.k");
+		var psize = Std.int(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * ui.SCALE());
+
+		// Clone source cursor
+		var mouse = Input.getMouse();
+		var pen = Input.getPen();
+		var kb = Input.getKeyboard();
+		if (Context.raw.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
+			g.color = 0x66ffffff;
+			g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * iron.App.w() - psize / 2, my + Context.raw.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+			g.color = 0xffffffff;
+		}
+
+		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
+
+		if (!Config.raw.brush_3d || Context.in2dView() || decal) {
+			var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
+			if (decal && !Context.inNodes()) {
+				var decalAlpha = 0.5;
+				if (!decalMask) {
+					Context.raw.decalX = Context.raw.paintVec.x;
+					Context.raw.decalY = Context.raw.paintVec.y;
+					decalAlpha = Context.raw.brushOpacity;
+
+					// Radius being scaled
+					if (Context.raw.brushLocked) {
+						Context.raw.decalX += (Context.raw.lockStartedX - System.windowWidth() / 2) / App.w();
+						Context.raw.decalY += (Context.raw.lockStartedY - System.windowHeight() / 2) / App.h();
+					}
+				}
+
+				if (!Config.raw.brush_live) {
+					var psizex = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius * Context.raw.brushScaleX));
+					var psizey = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
+
+					Context.raw.viewIndex = Context.raw.viewIndexLast;
+					var decalX = App.x() + Context.raw.decalX * App.w() - psizex / 2;
+					var decalY = App.y() + Context.raw.decalY * App.h() - psizey / 2;
+					Context.raw.viewIndex = -1;
+
+					g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
+					var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
+					var cx = decalX + psizex / 2;
+					var cy = decalY + psizey / 2;
+					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-cx, -cy));
+					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+					g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
+					#else
+					g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
+					#end
 					g.transformation = null;
 					g.color = 0xffffffff;
 				}
-				var transform = Operator.shortcut(Config.keymap.stencil_transform, ShortcutDown);
-				if (transform) {
-					// Outline
-					g.drawRect(r.x, r.y, r.w, r.h);
-					// Scale
-					g.drawRect(r.x - 8,       r.y - 8,       16, 16);
-					g.drawRect(r.x - 8 + r.w, r.y - 8,       16, 16);
-					g.drawRect(r.x - 8,       r.y - 8 + r.h, 16, 16);
-					g.drawRect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
-					// Rotate
-					var angle = Context.raw.brushStencilAngle;
-					var cx = r.x + r.w / 2;
-					var cy = r.y + r.h / 2;
-					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
-					kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
-					g.transformation = null;
+			}
+			if (Context.raw.tool == ToolBrush  ||
+				Context.raw.tool == ToolEraser ||
+				Context.raw.tool == ToolClone  ||
+				Context.raw.tool == ToolBlur   ||
+				Context.raw.tool == ToolSmudge   ||
+				Context.raw.tool == ToolParticle ||
+				(decalMask && !Config.raw.brush_3d) ||
+				(decalMask && Context.in2dView())) {
+				if (decalMask) {
+					psize = Std.int(cursorImg.width * (Context.raw.brushDecalMaskRadius * Context.raw.brushNodesRadius) * ui.SCALE());
 				}
-			}
-
-			// Show picked material next to cursor
-			if (Context.raw.tool == ToolPicker && Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
-				var img = Context.raw.material.imageIcon;
-				#if kha_opengl
-				g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
-				#else
-				g.drawImage(img, mx + 10, my + 10);
-				#end
-			}
-			if (Context.raw.tool == ToolPicker && Context.raw.colorPickerCallback != null) {
-				var img = Res.get("icons.k");
-				var rect = Res.tile50(img, ToolPicker, 0);
-				g.drawSubImage(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
-			}
-
-			var cursorImg = Res.get("cursor.k");
-			var psize = Std.int(cursorImg.width * (Context.raw.brushRadius * Context.raw.brushNodesRadius) * ui.SCALE());
-
-			// Clone source cursor
-			var mouse = Input.getMouse();
-			var pen = Input.getPen();
-			var kb = Input.getKeyboard();
-			if (Context.raw.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
-				g.color = 0x66ffffff;
-				g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * iron.App.w() - psize / 2, my + Context.raw.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
-				g.color = 0xffffffff;
-			}
-
-			var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
-
-			if (!Config.raw.brush_3d || Context.in2dView() || decal) {
-				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
-				if (decal && !Context.inNodes()) {
-					var decalAlpha = 0.5;
-					if (!decalMask) {
-						Context.raw.decalX = Context.raw.paintVec.x;
-						Context.raw.decalY = Context.raw.paintVec.y;
-						decalAlpha = Context.raw.brushOpacity;
-
-						// Radius being scaled
-						if (Context.raw.brushLocked) {
-							Context.raw.decalX += (Context.raw.lockStartedX - System.windowWidth() / 2) / App.w();
-							Context.raw.decalY += (Context.raw.lockStartedY - System.windowHeight() / 2) / App.h();
-						}
-					}
-
-					if (!Config.raw.brush_live) {
-						var psizex = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius * Context.raw.brushScaleX));
-						var psizey = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
-
-						Context.raw.viewIndex = Context.raw.viewIndexLast;
-						var decalX = App.x() + Context.raw.decalX * App.w() - psizex / 2;
-						var decalY = App.y() + Context.raw.decalY * App.h() - psizey / 2;
-						Context.raw.viewIndex = -1;
-
-						g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
-						var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
-						var cx = decalX + psizex / 2;
-						var cy = decalY + psizey / 2;
-						g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-cx, -cy));
-						#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-						g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
-						#else
-						g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);
-						#end
-						g.transformation = null;
-						g.color = 0xffffffff;
-					}
+				if (Config.raw.brush_3d && Context.in2dView()) {
+					psize = Std.int(psize * UIView2D.inst.panScale);
 				}
-				if (Context.raw.tool == ToolBrush  ||
-					Context.raw.tool == ToolEraser ||
-					Context.raw.tool == ToolClone  ||
-					Context.raw.tool == ToolBlur   ||
-					Context.raw.tool == ToolSmudge   ||
-					Context.raw.tool == ToolParticle ||
-					(decalMask && !Config.raw.brush_3d) ||
-					(decalMask && Context.in2dView())) {
-					if (decalMask) {
-						psize = Std.int(cursorImg.width * (Context.raw.brushDecalMaskRadius * Context.raw.brushNodesRadius) * ui.SCALE());
-					}
-					if (Config.raw.brush_3d && Context.in2dView()) {
-						psize = Std.int(psize * UIView2D.inst.panScale);
-					}
-					g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
-				}
+				g.drawScaledImage(cursorImg, mx - psize / 2, my - psize / 2, psize, psize);
 			}
+		}
 
-			if (Context.raw.brushLazyRadius > 0 && !Context.raw.brushLocked &&
-				(Context.raw.tool == ToolBrush ||
-				 Context.raw.tool == ToolEraser ||
-				 Context.raw.tool == ToolDecal ||
-				 Context.raw.tool == ToolText ||
-				 Context.raw.tool == ToolClone ||
-				 Context.raw.tool == ToolBlur ||
-				 Context.raw.tool == ToolSmudge ||
-				 Context.raw.tool == ToolParticle)) {
-				g.fillRect(mx - 1, my - 1, 2, 2);
-				var mx = Context.raw.brushLazyX * App.w() + App.x();
-				var my = Context.raw.brushLazyY * App.h() + App.y();
-				var radius = Context.raw.brushLazyRadius * 180;
-				g.color = 0xff666666;
-				g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
-				g.color = 0xffffffff;
-			}
+		if (Context.raw.brushLazyRadius > 0 && !Context.raw.brushLocked &&
+			(Context.raw.tool == ToolBrush ||
+			 Context.raw.tool == ToolEraser ||
+			 Context.raw.tool == ToolDecal ||
+			 Context.raw.tool == ToolText ||
+			 Context.raw.tool == ToolClone ||
+			 Context.raw.tool == ToolBlur ||
+			 Context.raw.tool == ToolSmudge ||
+			 Context.raw.tool == ToolParticle)) {
+			g.fillRect(mx - 1, my - 1, 2, 2);
+			var mx = Context.raw.brushLazyX * App.w() + App.x();
+			var my = Context.raw.brushLazyY * App.h() + App.y();
+			var radius = Context.raw.brushLazyRadius * 180;
+			g.color = 0xff666666;
+			g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
+			g.color = 0xffffffff;
 		}
 	}
 	#end
@@ -1315,7 +1322,7 @@ class UIBase {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasMaterial;
 		UINodes.inst.canvasType = CanvasMaterial;
 		#end
@@ -1326,7 +1333,7 @@ class UIBase {
 		App.resize();
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public function showBrushNodes() {
 		// Clear input state as ui receives input events even when not drawn
 		@:privateAccess UINodes.inst.ui.endInput();
@@ -1366,7 +1373,7 @@ class UIBase {
 	function onBorderHover(handle: Handle, side: Int) {
 		if (!App.uiEnabled) return;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (handle != hwnds[TabSidebar0] &&
 			handle != hwnds[TabSidebar1] &&
 			handle != hwnds[TabStatus] &&
@@ -1426,7 +1433,7 @@ class UIBase {
 		hwnds[TabStatus].redraws = 2;
 		UIMenubar.inst.workspaceHandle.redraws = 2;
 		UIMenubar.inst.menuHandle.redraws = 2;
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		hwnds[TabSidebar0].redraws = 2;
 		hwnds[TabSidebar1].redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;

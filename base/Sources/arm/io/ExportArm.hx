@@ -9,7 +9,7 @@ import iron.system.ArmPack;
 import iron.system.Lz4;
 import arm.sys.Path;
 import arm.ProjectFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.data.FontSlot;
 import arm.ui.UINodes;
 #end
@@ -27,7 +27,7 @@ class ExportArm {
 
 	public static function runProject() {
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var mnodes: Array<TNodeCanvas> = [];
 		for (m in Project.materials) {
 			var c: TNodeCanvas = Json.parse(Json.stringify(m.canvas));
@@ -54,7 +54,7 @@ class ExportArm {
 			}
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var md: Array<TMeshData> = [];
 		for (p in Project.paintObjects) md.push(p.data.raw);
 		#end
@@ -65,7 +65,7 @@ class ExportArm {
 
 		var texture_files = assetsToFiles(Project.filepath, Project.assets);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var font_files = fontsToFiles(Project.filepath, Project.fonts);
 		var mesh_files = meshesToFiles(Project.filepath);
 
@@ -79,8 +79,6 @@ class ExportArm {
 				res: l.texpaint != null ? l.texpaint.width : Project.layers[0].texpaint.width,
 				bpp: bpp,
 				texpaint: l.texpaint != null ? Lz4.encode(l.texpaint.getPixels()) : null,
-				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(l.texpaint_nor.getPixels()) : null,
-				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(l.texpaint_pack.getPixels()) : null,
 				uv_scale: l.scale,
 				uv_rot: l.angle,
 				uv_type: l.uvType,
@@ -91,6 +89,9 @@ class ExportArm {
 				blending: l.blending,
 				parent: l.parent != null ? Project.layers.indexOf(l.parent) : -1,
 				visible: l.visible,
+				#if is_paint
+				texpaint_nor: l.texpaint_nor != null ? Lz4.encode(l.texpaint_nor.getPixels()) : null,
+				texpaint_pack: l.texpaint_pack != null ? Lz4.encode(l.texpaint_pack.getPixels()) : null,
 				paint_base: l.paintBase,
 				paint_opac: l.paintOpac,
 				paint_occ: l.paintOcc,
@@ -102,6 +103,7 @@ class ExportArm {
 				paint_height_blend: l.paintHeightBlend,
 				paint_emis: l.paintEmis,
 				paint_subs: l.paintSubs
+				#end
 			});
 		}
 		#end
@@ -114,7 +116,7 @@ class ExportArm {
 		#end
 
 		Project.raw = {
-			version: Main.version,
+			version: Manifest.version,
 			material_groups: mgroups,
 			assets: texture_files,
 			packed_assets: packed_assets,
@@ -125,13 +127,16 @@ class ExportArm {
 			camera_origin: vec3f32(arm.Camera.inst.origins[0]),
 			camera_fov: iron.Scene.active.camera.data.raw.fov,
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			mesh_datas: md,
 			material_nodes: mnodes,
 			brush_nodes: bnodes,
 			layer_datas: ld,
 			font_assets: font_files,
 			mesh_assets: mesh_files,
+			#end
+
+			#if is_paint
 			atlas_objects: Project.atlasObjects,
 			atlas_names: Project.atlasNames,
 			#end
@@ -183,7 +188,7 @@ class ExportArm {
 		Krom.writePng(Project.filepath.substr(0, Project.filepath.length - 4) + "_icon.png", mesh_icon_pixels.getData(), 256, 256, 0);
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var isPacked = Project.filepath.endsWith("_packed_.arm");
 		if (isPacked) { // Pack textures
 			packAssets(Project.raw, Project.assets);
@@ -208,7 +213,7 @@ class ExportArm {
 	}
 
 	static function exportNode(n: TNode, assets: Array<TAsset> = null) {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (n.type == "TEX_IMAGE") {
 		#end
 
@@ -232,7 +237,7 @@ class ExportArm {
 		for (out in n.outputs) if (out.color > 0) out.color -= untyped 4294967296;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function runMaterial(path: String) {
 		if (!path.endsWith(".arm")) path += ".arm";
 		var mnodes: Array<TNodeCanvas> = [];
@@ -257,7 +262,7 @@ class ExportArm {
 		}
 
 		var raw: TProjectFormat = {
-			version: Main.version,
+			version: Manifest.version,
 			material_nodes: mnodes,
 			material_groups: mgroups,
 			material_icons: isCloud ? null :
@@ -297,7 +302,7 @@ class ExportArm {
 	}
 	#end
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function runBrush(path: String) {
 		if (!path.endsWith(".arm")) path += ".arm";
 		var bnodes: Array<TNodeCanvas> = [];
@@ -316,7 +321,7 @@ class ExportArm {
 		}
 
 		var raw: TProjectFormat = {
-			version: Main.version,
+			version: Manifest.version,
 			brush_nodes: bnodes,
 			brush_icons: isCloud ? null :
 			#if (kha_metal || kha_vulkan)
@@ -360,7 +365,7 @@ class ExportArm {
 		return texture_files;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static function meshesToFiles(projectPath: String): Array<String> {
 		var mesh_files: Array<String> = [];
 		for (file in Project.meshAssets) {
@@ -456,7 +461,7 @@ class ExportArm {
 	public static function runSwatches(path: String) {
 		if (!path.endsWith(".arm")) path += ".arm";
 		var raw = {
-			version: Main.version,
+			version: Manifest.version,
 			swatches: Project.raw.swatches
 		};
 		var bytes = ArmPack.encode(raw);

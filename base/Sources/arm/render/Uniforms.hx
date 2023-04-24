@@ -8,8 +8,10 @@ import iron.math.Mat4;
 import iron.RenderPath;
 import iron.Scene;
 import arm.shader.MaterialParser;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.ui.UIView2D;
+#end
+#if is_paint
 import arm.util.UVUtil;
 #end
 
@@ -35,7 +37,7 @@ class Uniforms {
 	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
 		switch (link) {
 			case "_brushRadius": {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 				var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 				var brushDecalMaskRadius = Context.raw.brushDecalMaskRadius;
@@ -80,7 +82,7 @@ class Uniforms {
 				return Context.raw.vxaoAperture;
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_brushScaleX": {
 				return 1 / Context.raw.brushScaleX;
 			}
@@ -119,9 +121,11 @@ class Uniforms {
 			case "_objectId": {
 				return Project.paintObjects.indexOf(cast object);
 			}
+			#if is_paint
 			case "_dilateRadius": {
 				return UVUtil.dilatemap != null ? Config.raw.dilate_radius : 0.0;
 			}
+			#end
 			case "_decalLayerDim": {
 				return Context.raw.layer.decalMat.getScale().z * 0.5;
 			}
@@ -176,7 +180,7 @@ class Uniforms {
 				vec.set(Config.getTextureResX(), Config.getTextureResY(), 0);
 				return vec;
 			}
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_brushAngle": {
 				var brushAngle = Context.raw.brushAngle + Context.raw.brushNodesAngle;
 				var angle = Context.raw.layer.fill_layer != null ? Context.raw.layer.angle : brushAngle;
@@ -196,7 +200,7 @@ class Uniforms {
 	public static function linkVec3(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
 		var v: Vec4 = null;
 		switch (link) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_brushDirection": {
 				v = iron.object.Uniforms.helpVec;
 				// Discard first paint for directional brush
@@ -256,7 +260,7 @@ class Uniforms {
 		return v;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static function vec2d(x: Float) {
 		// Transform from 3d viewport coord to 2d view coord
 		Context.raw.paint2dView = false;
@@ -272,7 +276,7 @@ class Uniforms {
 				var down = Input.getMouse().down() || Input.getPen().down();
 				vec.set(Context.raw.paintVec.x, Context.raw.paintVec.y, down ? 1.0 : 0.0, 0.0);
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
 					vec.x = vec2d(vec.x);
 				}
@@ -284,7 +288,7 @@ class Uniforms {
 				var down = Input.getMouse().down() || Input.getPen().down();
 				vec.set(Context.raw.lastPaintVecX, Context.raw.lastPaintVecY, down ? 1.0 : 0.0, 0.0);
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (Context.raw.paint2d) {
 					vec.x = vec2d(vec.x);
 				}
@@ -300,7 +304,7 @@ class Uniforms {
 				vec.set(Context.raw.envmapAngle, Math.sin(-Context.raw.envmapAngle), Math.cos(-Context.raw.envmapAngle), Context.raw.showEnvmap ? Scene.active.world.probe.raw.strength : 1.0);
 				return vec;
 			}
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_stencilTransform": {
 				vec.set(Context.raw.brushStencilX, Context.raw.brushStencilY, Context.raw.brushStencilScale, Context.raw.brushStencilAngle);
 				if (Context.raw.paint2d) vec.x = vec2d(vec.x);
@@ -323,7 +327,7 @@ class Uniforms {
 
 	public static function linkMat4(object: Object, mat: MaterialData, link: String): iron.math.Mat4 {
 		switch (link) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
 				var camera = Scene.active.camera;
 				var m = iron.object.Uniforms.helpMat;
@@ -340,7 +344,7 @@ class Uniforms {
 	public static function linkTex(object: Object, mat: MaterialData, link: String): kha.Image {
 		switch (link) {
 			case "_texpaint_undo": {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 				return RenderPath.active.renderTargets.get("texpaint_undo" + i).image;
 				#end
@@ -350,7 +354,7 @@ class Uniforms {
 				#end
 			}
 			case "_texpaint_nor_undo": {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 				return RenderPath.active.renderTargets.get("texpaint_nor_undo" + i).image;
 				#end
@@ -360,7 +364,7 @@ class Uniforms {
 				#end
 			}
 			case "_texpaint_pack_undo": {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var i = History.undoI - 1 < 0 ? Config.raw.undo_steps - 1 : History.undoI - 1;
 				return RenderPath.active.renderTargets.get("texpaint_pack_undo" + i).image;
 				#end
@@ -381,11 +385,26 @@ class Uniforms {
 			}
 			#end
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			case "_texcolorid": {
 				if (Project.assets.length == 0) return RenderPath.active.renderTargets.get("empty_white").image;
 				else return Project.getImage(Project.assets[Context.raw.colorIdHandle.position]);
 			}
+			case "_textexttool": { // Opacity map for text
+				return Context.raw.textToolImage;
+			}
+			case "_texbrushmask": {
+				return Context.raw.brushMaskImage;
+			}
+			case "_texbrushstencil": {
+				return Context.raw.brushStencilImage;
+			}
+			case "_texparticle": {
+				return RenderPath.active.renderTargets.get("texparticle").image;
+			}
+			#end
+
+			#if is_paint
 			case "_texuvmap": {
 				if (!UVUtil.uvmapCached) {
 					function _init() {
@@ -414,18 +433,6 @@ class Uniforms {
 			case "_texdilatemap": {
 				return UVUtil.dilatemap;
 			}
-			case "_textexttool": { // Opacity map for text
-				return Context.raw.textToolImage;
-			}
-			case "_texbrushmask": {
-				return Context.raw.brushMaskImage;
-			}
-			case "_texbrushstencil": {
-				return Context.raw.brushStencilImage;
-			}
-			case "_texparticle": {
-				return RenderPath.active.renderTargets.get("texparticle").image;
-			}
 			#end
 		}
 
@@ -435,7 +442,7 @@ class Uniforms {
 		}
 
 		if (link.startsWith("_texpaint_vert")) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var tid = Std.parseInt(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 			#end
@@ -465,7 +472,7 @@ class Uniforms {
 			#end
 		}
 		if (link.startsWith("_texpaint")) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var tid = Std.parseInt(link.substr(link.length - 1));
 			return tid < Project.layers.length ? Project.layers[tid].texpaint : null;
 			#end
@@ -475,7 +482,7 @@ class Uniforms {
 			#end
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (link.startsWith("_texblur_")) {
 			var id = link.substr(9);
 			return Context.raw.nodePreviews != null ? Context.raw.nodePreviews.get(id) : RenderPath.active.renderTargets.get("empty_black").image;

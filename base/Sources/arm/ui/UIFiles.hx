@@ -180,7 +180,7 @@ class UIFiles {
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 												icon.g2.begin(false);
 
-												#if is_paint
+												#if (is_paint || is_sculpt)
 												icon.g2.drawImage(Project.materials[0].image, 0, 0);
 												#end
 											}
@@ -235,7 +235,7 @@ class UIFiles {
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 
-						#if is_paint
+						#if (is_paint || is_sculpt)
 						else if (raw.mesh_icons != null) {
 							var bytesIcon = raw.mesh_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);

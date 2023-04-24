@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import haxe.Json;
 import zui.Zui;
 import zui.Id;
@@ -96,12 +98,14 @@ class TabMaterials {
 					if (state == State.Started && ui.inputY > ui._windowY) {
 						if (Context.raw.material != Project.materials[i]) {
 							Context.selectMaterial(i);
+							#if is_paint
 							if (UIHeader.inst.worktab.position == SpaceMaterial) {
 								function _init() {
 									App.updateFillLayers();
 								}
 								iron.App.notifyOnInit(_init);
 							}
+							#end
 						}
 						var mouse = Input.getMouse();
 						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
@@ -131,10 +135,12 @@ class TabMaterials {
 								BoxExport.showMaterial();
 							}
 
+							#if is_paint
 							if (ui.button(tr("Bake"), Left)) {
 								Context.selectMaterial(i);
 								BoxExport.showBakeMaterial();
 							}
+							#end
 
 							if (ui.button(tr("Duplicate"), Left)) {
 								function _init() {
@@ -274,3 +280,5 @@ class TabMaterials {
 		for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
 	}
 }
+
+#end

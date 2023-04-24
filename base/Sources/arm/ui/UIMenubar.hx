@@ -28,7 +28,7 @@ class UIMenubar {
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UIBase.inst.ui;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var panelx = iron.App.x() - UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
@@ -43,7 +43,7 @@ class UIMenubar {
 			if (Config.raw.touch_ui) {
 				ui._y += 4;
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var defaultToolbarW = UIToolbar.defaultToolbarW;
 				#end
 
@@ -68,7 +68,9 @@ class UIMenubar {
 					});
 				}
 				if (iconButton(ui, 4, 2)) Project.importAsset();
+				#if (is_paint || is_lab)
 				if (iconButton(ui, 5, 2)) BoxExport.showTextures();
+				#end
 				var size = defaultToolbarW;
 				if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 8, 2)) showMenu(ui, MenuViewport);
@@ -96,7 +98,7 @@ class UIMenubar {
 			if (menubarw < ui._x + 10) {
 				menubarw = Std.int(ui._x + 10);
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				UIToolbar.inst.toolbarHandle.redraws = 2;
 				#end
 			}
@@ -137,6 +139,13 @@ class UIMenubar {
 
 				Context.mainObject().skip_context = null;
 			}
+		}
+		#end
+
+		#if is_sculpt
+		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
+		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
+			ui.tab(UIHeader.inst.worktab, tr("Sculpt"));
 		}
 		#end
 

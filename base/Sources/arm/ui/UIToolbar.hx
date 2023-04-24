@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import kha.System;
 import zui.Zui;
 import iron.RenderPath;
@@ -61,6 +63,7 @@ class UIToolbar {
 
 			var size = UIToolbar.defaultToolbarW - 4;
 
+			#if is_paint
 			if (UIHeader.inst.worktab.position == SpacePaint) {
 				var keys = [
 					"(" + Config.keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", ["key" => Config.keymap.brush_ruler, "action_paint" => Config.keymap.action_paint]),
@@ -120,8 +123,11 @@ class UIToolbar {
 				ui._x -= 2;
 				ui._y += 2;
 			}
+			#end
 
 			ui.imageScrollAlign = true;
 		}
 	}
 }
+
+#end

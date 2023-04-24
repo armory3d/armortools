@@ -13,7 +13,7 @@ import arm.ui.UIBase;
 import arm.ui.UINodes;
 import arm.ProjectFormat;
 import arm.ContextFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -34,12 +34,12 @@ class Context {
 		return raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace) && raw.tool != ToolColorId;
 		#end
 
-		#if is_lab
+		#if (is_sculpt || is_lab)
 		return raw.renderMode != RenderForward && (raw.viewportMode == ViewLit || raw.viewportMode == ViewPathTrace);
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function selectMaterial(i: Int) {
 		if (Project.materials.length <= i) return;
 		setMaterial(Project.materials[i]);
@@ -123,14 +123,14 @@ class Context {
 		raw.viewportMode = -1;
 		setViewportMode(_viewportMode);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		initTool();
 		UIHeader.inst.headerHandle.redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function initTool() {
 		var decal = raw.tool == ToolDecal || raw.tool == ToolText;
 		if (decal) {
@@ -152,7 +152,7 @@ class Context {
 	#end
 
 	public static function selectPaintObject(o: MeshObject) {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIHeader.inst.headerHandle.redraws = 2;
 		for (p in Project.paintObjects) p.skip_context = "paint";
 		raw.paintObject = o;
@@ -174,7 +174,7 @@ class Context {
 	}
 
 	public static function mainObject(): MeshObject {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		for (po in Project.paintObjects) if (po.children.length > 0) return po;
 		return Project.paintObjects[0];
 		#end
@@ -185,7 +185,7 @@ class Context {
 	}
 
 	public static function layerFilterUsed(): Bool {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		return raw.layerFilter > 0 && raw.layerFilter <= Project.paintObjects.length;
 		#end
 
@@ -204,7 +204,7 @@ class Context {
 	}
 
 	public static function inPaintArea(): Bool {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var mouse = Input.getMouse();
 		var right = iron.App.w();
 		if (UIView2D.inst.show) right += UIView2D.inst.ww;
@@ -225,7 +225,7 @@ class Context {
 		return UIBase.inst.ui.getHoveredTabName() == tr("Materials");
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function in2dView(): Bool {
 		var mouse = Input.getMouse();
 		return UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
@@ -253,7 +253,7 @@ class Context {
 		if (inViewport()) return AreaViewport;
 		if (inNodes()) return AreaNodes;
 		if (inBrowser()) return AreaBrowser;
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (in2dView()) return Area2DView;
 		if (inLayers()) return AreaLayers;
 		if (inMaterials()) return AreaMaterials;

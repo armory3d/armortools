@@ -1,26 +1,32 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import zui.Zui;
 import zui.Id;
 import arm.io.ExportMesh;
-import arm.io.ExportTexture;
 import arm.sys.Path;
-import arm.sys.File;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.io.ExportArm;
+#end
+#if (is_paint || is_lab)
+import haxe.io.Bytes;
+import arm.io.ExportTexture;
+import arm.sys.File;
 #end
 
 class BoxExport {
 
 	public static var htab = Id.handle();
-	public static var hpreset = Id.handle();
 	public static var files: Array<String> = null;
+	static var exportMeshHandle = Id.handle();
+
+	#if (is_paint || is_lab)
+	public static var hpreset = Id.handle();
 	public static var preset: TExportPreset = null;
 	static var channels = ["base_r", "base_g", "base_b", "height", "metal", "nor_r", "nor_g", "nor_g_directx", "nor_b", "occ", "opac", "rough", "smooth", "emis", "subs", "0.0", "1.0"];
 	static var colorSpaces = ["linear", "srgb"];
-	static var exportMeshHandle = Id.handle();
+	#end
 
+	#if (is_paint || is_lab)
 	public static function showTextures() {
 		UIBox.showCustom(function(ui: Zui) {
 
@@ -45,6 +51,7 @@ class BoxExport {
 
 		}, 540, 310);
 	}
+	#end
 
 	#if is_paint
 	public static function showBakeMaterial() {
@@ -66,6 +73,7 @@ class BoxExport {
 	}
 	#end
 
+	#if (is_paint || is_lab)
 	static function tabExportTextures(ui: Zui, title: String, bakeMaterial = false) {
 		var tabVertical = Config.raw.touch_ui;
 		if (ui.tab(htab, title, tabVertical)) {
@@ -293,6 +301,7 @@ class BoxExport {
 			}
 		}
 	}
+	#end
 
 	#if is_paint
 	static function tabAtlases(ui: Zui) {
@@ -378,7 +387,7 @@ class BoxExport {
 		}
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function showMaterial() {
 		UIBox.showCustom(function(ui: Zui) {
 			var htab = Id.handle();
@@ -438,6 +447,7 @@ class BoxExport {
 	}
 	#end
 
+	#if (is_paint || is_lab)
 	static function fetchPresets() {
 		files = File.readDirectory(Path.data() + Path.sep + "export_presets");
 		for (i in 0...files.length) {
@@ -472,4 +482,5 @@ class BoxExport {
 		var path = Path.data() + Path.sep + "export_presets" + Path.sep + name + ".json";
 		Krom.fileSaveBytes(path, Bytes.ofString(haxe.Json.stringify(preset)).getData());
 	}
+	#end
 }

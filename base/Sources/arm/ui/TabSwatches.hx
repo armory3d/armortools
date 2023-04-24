@@ -185,7 +185,7 @@ class TabSwatches {
 							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
-							#if is_paint
+							#if (is_paint || is_sculpt)
 							else if (ui.button(tr("Create Material"), Left)) {
 								TabMaterials.acceptSwatchDrag(Project.raw.swatches[i]);
 							}
@@ -197,7 +197,7 @@ class TabSwatches {
 							}
 							#end
 
-						#if is_paint
+						#if (is_paint || is_sculpt)
 						}, 4 + add);
 						#end
 						#if is_lab

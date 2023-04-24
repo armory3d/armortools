@@ -13,7 +13,9 @@ import iron.data.SceneFormat;
 	@:optional public var camera_world: kha.arrays.Float32Array;
 	@:optional public var camera_origin: kha.arrays.Float32Array;
 	@:optional public var camera_fov: Null<Float>;
-	#if is_paint
+	@:optional public var swatches: Array<TSwatchColor>;
+
+	#if (is_paint || is_sculpt)
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
 	@:optional public var brush_icons: Array<haxe.io.Bytes>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
@@ -24,16 +26,18 @@ import iron.data.SceneFormat;
 	@:optional public var mesh_datas: Array<TMeshData>;
 	@:optional public var mesh_assets: Array<String>;
 	@:optional public var mesh_icons: Array<haxe.io.Bytes>;
+	#end
+
+	#if is_paint
 	@:optional public var atlas_objects: Array<Int>;
 	@:optional public var atlas_names: Array<String>;
-	@:optional public var swatches: Array<TSwatchColor>;
 	#end
+
 	#if is_lab
 	@:optional public var material: TNodeCanvas;
 	@:optional public var material_groups: Array<TNodeCanvas>;
 	@:optional public var mesh_data: TMeshData;
 	@:optional public var mesh_icon: haxe.io.Bytes;
-	@:optional public var swatches: Array<TSwatchColor>;
 	#end
 }
 
@@ -60,14 +64,12 @@ import iron.data.SceneFormat;
 	public var subsurface: Float;
 }
 
-#if is_paint
+#if (is_paint || is_sculpt)
 @:structInit class TLayerData {
 	public var name: String;
 	public var res: Int; // Width pixels
 	public var bpp: Int; // Bits per pixel
 	public var texpaint: haxe.io.Bytes;
-	public var texpaint_nor: haxe.io.Bytes;
-	public var texpaint_pack: haxe.io.Bytes;
 	public var uv_scale: Float;
 	public var uv_rot: Float;
 	public var uv_type: Int;
@@ -78,6 +80,9 @@ import iron.data.SceneFormat;
 	public var blending: Int;
 	public var parent: Int;
 	public var visible: Bool;
+	#if is_paint
+	public var texpaint_nor: haxe.io.Bytes;
+	public var texpaint_pack: haxe.io.Bytes;
 	public var paint_base: Bool;
 	public var paint_opac: Bool;
 	public var paint_occ: Bool;
@@ -89,5 +94,6 @@ import iron.data.SceneFormat;
 	public var paint_height_blend: Bool;
 	public var paint_emis: Bool;
 	public var paint_subs: Bool;
+	#end
 }
 #end

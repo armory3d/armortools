@@ -4,7 +4,7 @@ import zui.Nodes;
 import arm.sys.Path;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.ui.UIBase;
 import arm.ui.UIView2D;
 import arm.ui.UIToolbar;
@@ -20,9 +20,12 @@ class History {
 	public static var undoI = 0; // Undo layer
 	public static var undos = 0; // Undos available
 	public static var redos = 0; // Redos available
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static var pushUndo = false; // Store undo on next paint
 	public static var undoLayers: Array<LayerSlot> = null;
+	#end
+	#if is_sculpt
+	public static var pushUndo2 = false;
 	#end
 
 	public static function undo() {
@@ -34,7 +37,7 @@ class History {
 				swapCanvas(step);
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
 				Context.raw.layer.delete();
@@ -228,7 +231,7 @@ class History {
 			redos++;
 			Context.raw.ddirty = 2;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			if (UIView2D.inst.show) {
@@ -247,7 +250,7 @@ class History {
 				swapCanvas(step);
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
 				var l = new LayerSlot("", step.layer_type, parent);
@@ -417,7 +420,7 @@ class History {
 			redos--;
 			Context.raw.ddirty = 2;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
@@ -426,7 +429,7 @@ class History {
 	}
 
 	public static function reset() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		steps = [{name: tr("New"), layer: 0, layer_type: SlotLayer, layer_parent: -1, object: 0, material: 0, brush: 0}];
 		#end
 		#if is_lab
@@ -438,7 +441,7 @@ class History {
 		undoI = 0;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function editNodes(canvas: TNodeCanvas, canvas_type: Int, canvas_group: Null<Int> = null) {
 	#end
 	#if is_lab
@@ -446,13 +449,13 @@ class History {
 	#end
 		var step = push(tr("Edit Nodes"));
 		step.canvas_group = canvas_group;
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		step.canvas_type = canvas_type;
 		#end
 		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function paint() {
 		var isMask = Context.raw.layer.isMask();
 		copyToUndo(Context.raw.layer.id, undoI, isMask);
@@ -596,7 +599,7 @@ class History {
 	static function push(name: String): TStep {
 		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath == "" ? UIFiles.filename : Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		kha.Window.get(0).title = filename + "* - " + Main.title;
+		kha.Window.get(0).title = filename + "* - " + Manifest.title;
 		#end
 
 		if (undos < Config.raw.undo_steps) undos++;
@@ -605,7 +608,7 @@ class History {
 			redos = 0;
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var opos = Project.paintObjects.indexOf(Context.raw.paintObject);
 		var lpos = Project.layers.indexOf(Context.raw.layer);
 		var mpos = Project.materials.indexOf(Context.raw.material);
@@ -635,7 +638,7 @@ class History {
 		return steps[steps.length - 1];
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static function redoMergeLayers() {
 		copyMergingLayers();
 	}
@@ -662,6 +665,11 @@ class History {
 
 	static function copyToUndo(fromId: Int, toId: Int, isMask: Bool) {
 		var path = iron.RenderPath.active;
+
+		#if is_sculpt
+		isMask = true;
+		#end
+
 		if (isMask) {
 			path.setTarget("texpaint_undo" + toId);
 			path.bindTarget("texpaint" + fromId, "tex");
@@ -680,7 +688,7 @@ class History {
 	#end
 
 	static function getCanvasOwner(step: TStep): Dynamic {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		return step.canvas_group == null ?
 			Project.materials[step.material] :
 			Project.materialGroups[step.canvas_group];
@@ -692,7 +700,7 @@ class History {
 	}
 
 	static function swapCanvas(step: TStep) {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (step.canvas_type == 0) {
 			var _canvas = getCanvasOwner(step).canvas;
 			getCanvasOwner(step).canvas = step.canvas;
@@ -723,7 +731,7 @@ typedef TStep = {
 	public var name: String;
 	@:optional public var canvas: TNodeCanvas; // Node history
 	@:optional public var canvas_group: Int;
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public var layer: Int;
 	public var layer_type: LayerSlotType;
 	public var layer_parent: Int;

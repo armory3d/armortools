@@ -11,7 +11,7 @@ import arm.io.ImportKeymap;
 import arm.io.ImportTheme;
 import arm.sys.Path;
 import arm.sys.File;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.data.LayerSlot;
 #end
 
@@ -73,7 +73,7 @@ class BoxPreferences {
 				Config.raw.wrap_mouse = ui.check(Id.handle({ selected: Config.raw.wrap_mouse }), tr("Wrap Mouse"));
 				if (ui.isHovered) ui.tooltip(tr("Wrap mouse around view boundaries during camera control"));
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				Config.raw.node_preview = ui.check(Id.handle({ selected: Config.raw.node_preview }), tr("Show Node Preview"));
 				#end
 
@@ -277,7 +277,7 @@ class BoxPreferences {
 				if (Context.raw.undoHandle.changed) {
 					ui.g.end();
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					while (History.undoLayers.length < Config.raw.undo_steps) {
 						var l = new LayerSlot("_undo" + History.undoLayers.length);
 						History.undoLayers.push(l);
@@ -311,7 +311,7 @@ class BoxPreferences {
 
 				var layerResHandle = Id.handle({ position: Config.raw.layer_res });
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				#if (krom_android || krom_ios)
 				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
 				#else
@@ -333,7 +333,7 @@ class BoxPreferences {
 				var serverHandle = Id.handle({ text: Config.raw.server });
 				Config.raw.server = ui.textInput(serverHandle, tr("Cloud Server"));
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var materialLiveHandle = Id.handle( {selected: Config.raw.material_live });
 				Config.raw.material_live = ui.check(materialLiveHandle, tr("Live Material Preview"));
 				if (ui.isHovered) ui.tooltip(tr("Instantly update material preview on node change"));
@@ -381,7 +381,7 @@ class BoxPreferences {
 				ui.text(tr("Pressure controls"));
 				Config.raw.pressure_radius = ui.check(Id.handle({ selected: Config.raw.pressure_radius }), tr("Brush Radius"));
 				Config.raw.pressure_sensitivity = ui.slider(Id.handle({ value: Config.raw.pressure_sensitivity }), tr("Sensitivity"), 0.0, 10.0, true);
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				Config.raw.pressure_hardness = ui.check(Id.handle({ selected: Config.raw.pressure_hardness }), tr("Brush Hardness"));
 				Config.raw.pressure_opacity = ui.check(Id.handle({ selected: Config.raw.pressure_opacity }), tr("Brush Opacity"));
 				Config.raw.pressure_angle = ui.check(Id.handle({ selected: Config.raw.pressure_angle }), tr("Brush Angle"));
@@ -390,7 +390,7 @@ class BoxPreferences {
 				ui.endElement();
 				ui.row([0.5]);
 				if (ui.button(tr("Help"))) {
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					File.loadUrl("https://github.com/armory3d/armorpaint_docs#pen");
 					#end
 					#if is_lab
@@ -675,7 +675,7 @@ plugin.drawUI = function(ui) {
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);
 		App.resize();
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultWindowW * scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);
 		UIView2D.inst.ui.setScale(scale);

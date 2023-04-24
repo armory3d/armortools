@@ -20,7 +20,7 @@ class TabTextures {
 
 			ui.beginSticky();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (Config.raw.touch_ui) {
 				ui.row([1 / 4, 1 / 4]);
 			}
@@ -46,7 +46,7 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DAsset);
 			#end
 
@@ -54,7 +54,7 @@ class TabTextures {
 
 			if (Project.assets.length > 0) {
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 				#end
 				#if is_lab
@@ -93,7 +93,7 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.raw.texture = asset;
 
-							#if is_paint
+							#if (is_paint || is_sculpt)
 							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DAsset);
 							Context.raw.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
@@ -128,7 +128,7 @@ class TabTextures {
 								if (ui.button(tr("Export"), Left)) {
 									UIFiles.show("png", true, false, function(path: String) {
 										App.notifyOnNextFrame(function () {
-											#if is_paint
+											#if (is_paint || is_sculpt)
 											if (App.pipeMerge == null) App.makePipe();
 											#end
 											#if is_lab
@@ -155,7 +155,7 @@ class TabTextures {
 									Project.reimportTexture(asset);
 								}
 
-								#if is_paint
+								#if (is_paint || is_sculpt)
 								if (ui.button(tr("To Mask"), Left)) {
 									App.notifyOnNextFrame(function() {
 										App.createImageMask(asset);
@@ -191,7 +191,7 @@ class TabTextures {
 									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
 
-							#if is_paint
+							#if (is_paint || is_sculpt)
 							}, isPacked ? 7 : 9);
 							#end
 							#if is_lab
@@ -275,7 +275,7 @@ class TabTextures {
 		function _next() {
 			arm.shader.MakeMaterial.parsePaintMaterial();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			arm.util.RenderUtil.makeMaterialPreview();
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			#end
@@ -283,7 +283,7 @@ class TabTextures {
 		App.notifyOnNextFrame(_next);
 
 		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		for (b in Project.brushes) updateTexturePointers(b.canvas.nodes, i);
 		#end
 	}

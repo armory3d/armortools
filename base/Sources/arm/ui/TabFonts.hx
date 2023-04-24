@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import zui.Zui;
 import iron.system.Time;
 import arm.data.FontSlot;
@@ -151,3 +153,5 @@ class TabFonts {
 		UIBase.inst.hwnds[2].redraws = 2;
 	}
 }
+
+#end

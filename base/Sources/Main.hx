@@ -21,19 +21,10 @@ class Main {
 	public static var date = BuildMacros.date().split(" ")[0];
 	public static var tasks: Int;
 
-	#if is_paint
-	public static inline var title = "ArmorPaint";
-	public static inline var version = "0.9";
-	#end
-	#if is_lab
-	public static inline var title = "ArmorLab";
-	public static inline var version = "0.1";
-	#end
-
 	public static function main() {
 		#if arm_snapshot
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		embed(["default_material.arm"]);
 		#end
 		#if is_lab
@@ -61,7 +52,7 @@ class Main {
 		#end
 
 		// Used to locate external application data folder
-		Krom.setApplicationName(Main.title);
+		Krom.setApplicationName(Manifest.title);
 
 		tasks = 1;
 		tasks++; Config.load(function() { tasks--; start(); });
@@ -80,7 +71,7 @@ class Main {
 		Config.init();
 		System.start(Config.getOptions(), function(window: Window) {
 			if (Config.raw.layout == null) arm.App.initLayout();
-			Krom.setApplicationName(Main.title);
+			Krom.setApplicationName(Manifest.title);
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
 					Uniforms.init();

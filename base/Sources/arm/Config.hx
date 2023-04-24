@@ -98,14 +98,14 @@ class Config {
 			#end
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
-			raw.version = Main.version;
+			raw.version = Manifest.version;
 			raw.sha = Main.sha;
 			App.initConfig();
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
-			// if (raw.version != Main.version) {
-			// 	raw.version = Main.version;
+			// if (raw.version != Manifest.version) {
+			// 	raw.version = Manifest.version;
 			// 	save();
 			// }
 			if (raw.sha != Main.sha) {
@@ -126,7 +126,7 @@ class Config {
 		if (raw.window_resizable) windowFeatures |= FeatureResizable;
 		if (raw.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (raw.window_minimizable) windowFeatures |= FeatureMinimizable;
-		var title = "untitled - " + Main.title;
+		var title = "untitled - " + Manifest.title;
 		return {
 			title: title,
 			window: {

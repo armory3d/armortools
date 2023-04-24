@@ -1,31 +1,39 @@
 package arm;
 
 import arm.sys.Path;
-import arm.sys.File;
-import arm.io.ExportTexture;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
-import arm.ui.BoxExport;
 #if is_paint
-import arm.io.ExportMesh;
 import arm.io.ExportArm;
+#end
+#if (is_paint || is_sculpt)
+import arm.io.ExportMesh;
 import arm.ui.UIFiles;
 import arm.ui.UIBase;
+#end
+#if (is_paint || is_lab)
+import arm.sys.File;
+import arm.io.ExportTexture;
+import arm.ui.BoxExport;
 #end
 
 class Args {
 
 	static var useArgs = false;
 	static var assetPath = "";
+	static var background = false;
+	#if (is_paint || is_lab)
 	static var exportTextures = false;
 	static var exportTexturesType = "";
 	static var exportTexturesPreset = "";
 	static var exportTexturesPath = "";
-	static var background = false;
-	#if is_paint
+	#end
+	#if (is_paint || is_sculpt)
 	static var reimportMesh = false;
 	static var exportMesh = false;
 	static var exportMeshPath = "";
+	#end
+	#if is_paint
 	static var exportMaterial = false;
 	static var exportMaterialPath = "";
 	#end
@@ -42,6 +50,11 @@ class Args {
 				if (Path.isProject(currentArg)) {
 					Project.filepath = currentArg;
 				}
+				else if (currentArg == "--b" || currentArg == "--background") {
+					background = true;
+				}
+
+				#if (is_paint || is_lab)
 				else if (Path.isTexture(currentArg)) {
 					assetPath = currentArg;
 				}
@@ -54,11 +67,9 @@ class Args {
 					++i;
 					exportTexturesPath = Krom.getArg(i);
 				}
-				else if (currentArg == "--b" || currentArg == "--background") {
-					background = true;
-				}
+				#end
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				else if (currentArg == "--reload-mesh") {
 					reimportMesh = true;
 				}
@@ -67,13 +78,16 @@ class Args {
 					++i;
 					exportMeshPath = Krom.getArg(i);
 				}
+				else if (Path.isMesh(currentArg) || (i > 1 && !currentArg.startsWith("-") && Path.isFolder(currentArg))) {
+					assetPath = currentArg;
+				}
+				#end
+
+				#if is_paint
 				else if (currentArg == "--export-material" && (i + 1) <= Krom.getArgCount()) {
 					exportMaterial = true;
 					++i;
 					exportMaterialPath = Krom.getArg(i);
-				}
-				else if (Path.isMesh(currentArg) || (i > 1 && !currentArg.startsWith("-") && Path.isFolder(currentArg))) {
-					assetPath = currentArg;
 				}
 				#end
 
@@ -96,12 +110,13 @@ class Args {
 					}
 					#end
 				}
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				else if (reimportMesh) {
 					Project.reimportMesh();
 				}
 				#end
 
+				#if (is_paint || is_lab)
 				if (exportTextures) {
 					if (exportTexturesType == "png" ||
 						exportTexturesType == "jpg" ||
@@ -166,8 +181,9 @@ class Args {
 						Krom.log(tr("Invalid texture type"));
 					}
 				}
+				#end
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				else if (exportMesh) {
 					if (Path.isFolder(exportMeshPath)) {
 						var f = UIFiles.filename;
@@ -178,6 +194,9 @@ class Args {
 						Krom.log(tr("Invalid export directory"));
 					}
 				}
+				#end
+
+				#if is_paint
 				else if (exportMaterial) {
 					Context.raw.writeIconOnExport = true;
 					ExportArm.runMaterial(exportMaterialPath);

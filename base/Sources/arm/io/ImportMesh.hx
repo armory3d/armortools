@@ -8,7 +8,7 @@ import arm.util.MeshUtil;
 import arm.sys.Path;
 import arm.Viewport;
 import arm.Project;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.ui.UIBase;
 import arm.ui.UIView2D;
 import arm.util.UVUtil;
@@ -16,11 +16,11 @@ import arm.util.UVUtil;
 
 class ImportMesh {
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static var clearLayers = true;
 	#end
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function run(path: String, _clearLayers = true, replaceExisting = true) {
 	#end
 
@@ -35,7 +35,7 @@ class ImportMesh {
 			}
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		clearLayers = _clearLayers;
 		Context.raw.layerFilter = 0;
 		#end
@@ -89,7 +89,7 @@ class ImportMesh {
 		arm.shader.MakeMaterial.parsePaintMaterial();
 		arm.shader.MakeMaterial.parseMeshMaterial();
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIView2D.inst.hwnd.redraws = 2;
 		#end
 
@@ -127,7 +127,7 @@ class ImportMesh {
 					Data.deleteMesh(handle);
 				}
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (clearLayers) {
 					while (Project.layers.length > 0) {
 						var l = Project.layers.pop();
@@ -148,7 +148,7 @@ class ImportMesh {
 
 				Context.raw.ddirty = 4;
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 				UVUtil.uvmapCached = false;
@@ -197,7 +197,7 @@ class ImportMesh {
 
 				Context.raw.ddirty = 4;
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 				UVUtil.uvmapCached = false;
 				UVUtil.trianglemapCached = false;

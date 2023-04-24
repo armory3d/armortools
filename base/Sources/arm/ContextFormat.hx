@@ -7,7 +7,7 @@ import iron.math.Vec4;
 import iron.object.MeshObject;
 import arm.shader.NodeShader;
 import arm.ProjectFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import iron.math.Mat4;
 import iron.object.Object;
 import iron.data.MaterialData;
@@ -126,7 +126,7 @@ import arm.data.FontSlot;
 	@:optional public var cameraControls = ControlsOrbit;
 	@:optional public var penPaintingOnly = false; // Reject painting with finger when using pen
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	@:optional public var material: MaterialSlot;
 	@:optional public var layer: LayerSlot;
 	@:optional public var brush: BrushSlot;
@@ -248,7 +248,12 @@ import arm.data.FontSlot;
 	@:optional public var brushScale = 1.0;
 	@:optional public var brushAngle = 0.0;
 	@:optional public var brushAngleHandle = new Handle({ value: 0.0 });
+	#if is_paint
 	@:optional public var brushHardness = 0.8;
+	#end
+	#if is_sculpt
+	@:optional public var brushHardness = 0.05;
+	#end
 	@:optional public var brushLazyRadius = 0.0;
 	@:optional public var brushLazyStep = 0.0;
 	@:optional public var brushLazyX = 0.0;

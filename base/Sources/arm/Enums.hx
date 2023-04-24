@@ -240,6 +240,9 @@ package arm;
 	var SpaceMaterial = 1;
 	var SpaceBake = 2;
 	#end
+	#if is_sculpt
+	var SpaceSculpt = 0;
+	#end
 	#if is_lab
 	var Space3D = 0;
 	var Space2D = 1;
@@ -262,6 +265,19 @@ package arm;
 	var ToolBake = 11;
 	var ToolGizmo = 12;
 	#end
+	#if is_sculpt
+	var ToolBrush = 0;
+	var ToolEraser = 1;
+	var ToolFill = 2;
+	var ToolDecal = 3;
+	var ToolText = 4;
+	var ToolClone = 5;
+	var ToolBlur = 6;
+	var ToolSmudge = 7;
+	var ToolParticle = 8;
+	var ToolPicker = 9;
+	var ToolGizmo = 10;
+	#end
 	#if is_lab
 	var ToolEraser = 0;
 	var ToolClone = 1;
@@ -274,7 +290,7 @@ package arm;
 }
 
 @:enum abstract AreaType(Int) from Int to Int {
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	var AreaViewport = 0;
 	var Area2DView = 1;
 	var AreaLayers = 2;
@@ -290,7 +306,7 @@ package arm;
 }
 
 @:enum abstract TabArea(Int) from Int to Int {
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	var TabSidebar0 = 0;
 	var TabSidebar1 = 1;
 	var TabStatus = 2;
@@ -301,7 +317,7 @@ package arm;
 }
 
 @:enum abstract TextureRes(Int) from Int to Int {
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	var Res128 = 0;
 	var Res256 = 1;
 	var Res512 = 2;
@@ -324,7 +340,7 @@ package arm;
 }
 
 @:enum abstract LayoutSize(Int) from Int to Int {
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	var LayoutSidebarW = 0;
 	var LayoutSidebarH0 = 1;
 	var LayoutSidebarH1 = 2;

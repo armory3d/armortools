@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import kha.System;
 import kha.Image;
 import kha.graphics4.PipelineState;
@@ -61,6 +63,9 @@ class UIView2D {
 
 	@:access(zui.Zui)
 	public function render(g: kha.graphics2.Graphics) {
+
+		#if is_paint
+
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
 		wy = UIHeader.inst.headerh * 2;
@@ -290,9 +295,14 @@ class UIView2D {
 		}
 		ui.end();
 		g.begin(false);
+
+		#end
 	}
 
 	public function update() {
+
+		#if is_paint
+
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
@@ -362,5 +372,9 @@ class UIView2D {
 			panY = 0.0;
 			panScale = 1.0;
 		}
+
+		#end
 	}
 }
+
+#end

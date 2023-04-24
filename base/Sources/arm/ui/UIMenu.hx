@@ -14,7 +14,7 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.MakeMaterial;
 import arm.io.ImportAsset;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.util.UVUtil;
 #end
 
@@ -67,7 +67,7 @@ class UIMenu {
 					});
 				}
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (menuButton(ui, tr("Import Font..."))) Project.importAsset("ttf,ttc,otf");
 				if (menuButton(ui, tr("Import Material..."))) Project.importMaterial();
 				if (menuButton(ui, tr("Import Brush..."))) Project.importBrush();
@@ -78,12 +78,14 @@ class UIMenu {
 				if (menuButton(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();
 				menuSeparator(ui);
+				#if (is_paint || is_lab)
 				if (menuButton(ui, tr("Export Textures..."), Config.keymap.file_export_textures_as)) {
 					#if is_paint
 					Context.raw.layersExport = ExportVisible;
 					#end
 					BoxExport.showTextures();
 				}
+				#end
 				if (menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
 				if (menuButton(ui, tr("Export Mesh..."))) {
 					Context.raw.exportMeshIndex = 0; // All
@@ -189,7 +191,7 @@ class UIMenu {
 					if (sxhandle.changed) Context.raw.ddirty = 2;
 				}
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				menuFill(ui);
 				var splitViewHandle = Id.handle({ selected: Context.raw.splitView });
 				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
@@ -227,7 +229,7 @@ class UIMenu {
 					MakeMaterial.parseMeshMaterial();
 				}
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				menuFill(ui);
 				Context.raw.drawWireframe = ui.check(Context.raw.wireframeHandle, " " + tr("Wireframe"));
 				if (Context.raw.wireframeHandle.changed) {
@@ -280,7 +282,7 @@ class UIMenu {
 					tr("Metallic"),
 					tr("Opacity"),
 					tr("Height"),
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					tr("Emission"),
 					tr("Subsurface"),
 					tr("TexCoord"),
@@ -388,72 +390,38 @@ class UIMenu {
 			}
 			else if (menuCategory == MenuHelp) {
 				if (menuButton(ui, tr("Manual"))) {
-					#if is_paint
-					File.loadUrl("https://armorpaint.org/manual");
-					#end
-					#if is_lab
-					File.loadUrl("https://armorlab.org/manual");
-					#end
+					File.loadUrl(Manifest.url + "/manual");
 				}
 				if (menuButton(ui, tr("What's New"))) {
-					#if is_paint
-					File.loadUrl("https://armorpaint.org/notes");
-					#end
-					#if is_lab
-					File.loadUrl("https://armorlab.org/notes");
-					#end
+					File.loadUrl(Manifest.url + "/notes");
 				}
 				if (menuButton(ui, tr("Issue Tracker"))) {
 					File.loadUrl("https://github.com/armory3d/armortools/issues");
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
-					#if is_paint
 					#if (krom_darwin || krom_ios) // Limited url length
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId);
 					#else
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 					#end
-					#end
-
-					#if is_lab
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A";
-					#end
-
-					File.loadUrl(url);
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
-					#if is_paint
 					#if (krom_darwin || krom_ios) // Limited url length
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId;
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId);
 					#else
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorPaint%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
 					#end
-					#end
-
-					#if is_lab
-					var url = "https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*ArmorLab%20" + Main.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A";
-					#end
-
-					File.loadUrl(url);
 				}
 				menuSeparator(ui);
 
 				if (menuButton(ui, tr("Check for Updates..."))) {
 					#if krom_android
-					File.loadUrl("https://play.google.com/store/apps/details?id=org.armorpaint");
+					File.loadUrl(Manifest.url_android);
 					#elseif krom_ios
-					File.loadUrl("https://apps.apple.com/app/armorpaint/id1533967534");
+					File.loadUrl(Manifest.url_ios);
 					#else
-
 					// Retrieve latest version number
-					#if is_paint
-					var url = "https://server.armorpaint.org/paint.html";
-					#end
-					#if is_lab
-					var url = "https://server.armorpaint.org/lab.html";
-					#end
-
-					File.downloadBytes(url, function(bytes: Bytes) {
+					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title + ".html", function(bytes: Bytes) {
 						if (bytes != null)  {
 							// Compare versions
 							var update = Json.parse(bytes.toString());
@@ -462,12 +430,7 @@ class UIMenu {
 								var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
 								var dateInt = Std.parseInt(date.replace("-", ""));
 								if (updateVersion > dateInt) {
-									#if is_paint
-									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorpaint.org to download."));
-									#end
-									#if is_lab
-									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit armorlab.org to download."));
-									#end
+									UIBox.showMessage(tr("Update"), tr("Update is available!") + "\n" + tr("Please visit ") + Manifest.url + ".");
 								}
 								else {
 									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
@@ -475,33 +438,16 @@ class UIMenu {
 							}
 						}
 						else {
-							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit armorpaint.org."));
+							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.") + "\n" + tr("Please visit ") + Manifest.url + ".");
 						}
 					});
 					#end
 				}
 
 				if (menuButton(ui, tr("About..."))) {
-					#if kha_direct3d11
-					var gapi = "Direct3D11";
-					#elseif kha_direct3d12
-					var gapi = "Direct3D12";
-					#elseif kha_metal
-					var gapi = "Metal";
-					#elseif kha_vulkan
-					var gapi = "Vulkan";
-					#else
-					var gapi = "OpenGL";
-					#end
 
-					#if is_paint
-					var msg = "ArmorPaint.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
-					#end
-					#if is_lab
-					var msg = "ArmorLab.org - v" + Main.version + " (" + Main.date + ") - " + Main.sha + "\n";
-					#end
-
-					msg += System.systemId + " - " + gapi;
+					var msg = Manifest.title + ".org - v" + Manifest.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					msg += System.systemId + " - " + Strings.graphics_api;
 
 					#if krom_windows
 					var save = (Path.isProtected() ? Krom.savePath() : Path.data()) + Path.sep + "tmp.txt";

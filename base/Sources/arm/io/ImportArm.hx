@@ -17,7 +17,7 @@ import arm.ui.UIBase;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
-#if is_paint
+#if (is_paint || is_sculpt)
 import kha.graphics4.TextureFormat;
 import kha.graphics4.DepthStencilFormat;
 import iron.data.MaterialData;
@@ -39,7 +39,7 @@ class ImportArm {
 		Data.getBlob(path, function(b: Blob) {
 			var project: TProjectFormat = ArmPack.decode(b.toBytes());
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (project.version != null && project.layer_datas == null) {
 				// Import as material
 				if (project.material_nodes != null) {
@@ -71,10 +71,10 @@ class ImportArm {
 			#if (krom_android || krom_ios)
 			Window.get(0).title = UIFiles.filename;
 			#else
-			Window.get(0).title = UIFiles.filename + " - " + Main.title;
+			Window.get(0).title = UIFiles.filename + " - " + Manifest.title;
 			#end
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			// Import as mesh instead
 			if (importAsMesh) {
 				runMesh(untyped project);
@@ -95,7 +95,7 @@ class ImportArm {
 
 			Project.raw = project;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var l0 = project.layer_datas[0];
 			App.resHandle.position = Config.getTextureResPos(l0.res);
 			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
@@ -141,7 +141,7 @@ class ImportArm {
 				ImportTexture.run(abs, hdrAsEnvmap);
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (project.font_assets != null) {
 				for (file in project.font_assets) {
 					#if krom_windows
@@ -159,7 +159,7 @@ class ImportArm {
 			#end
 
 			// Synchronous for now
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			new MeshData(project.mesh_datas[0], function(md: MeshData) {
 			#end
 
@@ -174,7 +174,7 @@ class ImportArm {
 				Project.paintObjects = [Context.raw.paintObject];
 			});
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			for (i in 1...project.mesh_datas.length) {
 				var raw = project.mesh_datas[i];
 				new MeshData(raw, function(md: MeshData) {
@@ -191,8 +191,10 @@ class ImportArm {
 				Project.meshAssets = [abs];
 			}
 
+			#if is_paint
 			if (project.atlas_objects != null) Project.atlasObjects = project.atlas_objects;
 			if (project.atlas_names != null) Project.atlasNames = project.atlas_names;
+			#end
 
 			// No mask by default
 			if (Context.raw.mergedObject == null) MeshUtil.mergeMesh();
@@ -203,7 +205,7 @@ class ImportArm {
 			Context.raw.paintObject.skip_context = "paint";
 			Context.raw.mergedObject.visible = true;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var tex = Project.layers[0].texpaint;
 			if (tex.width != Config.getTextureResX() || tex.height != Config.getTextureResY()) {
 				if (History.undoLayers != null) for (l in History.undoLayers) l.resizeAndSetBits();
@@ -230,7 +232,14 @@ class ImportArm {
 			for (i in 0...project.layer_datas.length) {
 				var ld = project.layer_datas[i];
 				var isGroup = ld.texpaint == null;
+
+				#if is_paint
 				var isMask = ld.texpaint != null && ld.texpaint_nor == null;
+				#end
+				#if is_sculpt
+				var isMask = false;
+				#end
+
 				var l = new LayerSlot("", isGroup ? SlotGroup : isMask ? SlotMask : SlotLayer);
 				if (ld.name != null) l.name = ld.name;
 				l.visible = ld.visible;
@@ -240,8 +249,12 @@ class ImportArm {
 					if (App.pipeMerge == null) App.makePipe();
 
 					var _texpaint: kha.Image = null;
+
+					#if is_paint
 					var _texpaint_nor: kha.Image = null;
 					var _texpaint_pack: kha.Image = null;
+					#end
+
 					if (isMask) {
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
 						l.texpaint.g2.begin(false);
@@ -260,6 +273,7 @@ class ImportArm {
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
 
+						#if is_paint
 						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint_nor.g2.begin(false);
 						l.texpaint_nor.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
@@ -273,6 +287,7 @@ class ImportArm {
 						l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
 						l.texpaint_pack.g2.pipeline = null;
 						l.texpaint_pack.g2.end();
+						#end
 					}
 
 					l.scale = ld.uv_scale;
@@ -282,6 +297,8 @@ class ImportArm {
 					l.maskOpacity = ld.opacity_mask;
 					l.objectMask = ld.object_mask;
 					l.blending = ld.blending;
+
+					#if is_paint
 					l.paintBase = ld.paint_base;
 					l.paintOpac = ld.paint_opac;
 					l.paintOcc = ld.paint_occ;
@@ -293,11 +310,14 @@ class ImportArm {
 					l.paintHeightBlend = ld.paint_height_blend != null ? ld.paint_height_blend : true; // TODO: deprecated
 					l.paintEmis = ld.paint_emis;
 					l.paintSubs = ld.paint_subs;
+					#end
 
 					App.notifyOnNextFrame(function() {
 						_texpaint.unload();
+						#if is_paint
 						if (_texpaint_nor != null) _texpaint_nor.unload();
 						if (_texpaint_pack != null) _texpaint_pack.unload();
+						#end
 					});
 				}
 			}
@@ -333,7 +353,7 @@ class ImportArm {
 				for (g in project.material_groups) Project.materialGroups.push({ canvas: g, nodes: new Nodes() });
 			}
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			for (m in Project.materials) {
 				Context.raw.material = m;
 				MakeMaterial.parsePaintMaterial();
@@ -374,7 +394,7 @@ class ImportArm {
 		});
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function runMesh(raw: TSceneFormat) {
 		Project.paintObjects = [];
 		for (i in 0...raw.mesh_datas.length) {
@@ -577,7 +597,7 @@ class ImportArm {
 	static function initNodes(nodes: Array<TNode>) {
 		for (node in nodes) {
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (node.type == "TEX_IMAGE") {
 			#end
 

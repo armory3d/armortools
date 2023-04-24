@@ -120,6 +120,27 @@ class RenderPathDeferred {
 			path.renderTargets.set(t.name, rt);
 		}
 
+		#if is_sculpt
+		{
+			var t = new RenderTargetRaw();
+			t.name = "gbuffer0_undo";
+			t.width = 0;
+			t.height = 0;
+			t.format = "RGBA64";
+			t.scale = RenderPathBase.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		{
+			var t = new RenderTargetRaw();
+			t.name = "gbufferD_undo";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R32";
+			t.scale = RenderPathBase.getSuperSampling();
+			path.createRenderTarget(t);
+		}
+		#end
+
 		if (Config.raw.rp_ssao) {
 			RenderPathBase.initSSAO();
 		}
@@ -145,7 +166,7 @@ class RenderPathDeferred {
 
 		RenderPathPaint.init(path);
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		RenderPathPreview.init(path);
 		#end
 

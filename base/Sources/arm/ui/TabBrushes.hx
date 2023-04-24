@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import haxe.Json;
 import iron.system.Time;
 import zui.Zui;
@@ -153,3 +155,5 @@ class TabBrushes {
 		UIBase.inst.hwnds[1].redraws = 2;
 	}
 }
+
+#end

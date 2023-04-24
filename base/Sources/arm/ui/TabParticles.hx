@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import zui.Zui;
 
 class TabParticles {
@@ -16,3 +18,5 @@ class TabParticles {
 		}
 	}
 }
+
+#end

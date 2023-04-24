@@ -28,7 +28,7 @@ import arm.io.ImportTexture;
 import arm.io.ExportArm;
 import arm.io.ExportGpl;
 import arm.ProjectFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import arm.util.RenderUtil;
 import arm.ui.UIBase;
 import arm.data.LayerSlot;
@@ -54,7 +54,7 @@ class Project {
 	public static var paintObjects: Array<MeshObject> = null;
 	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
 	static var meshList: Array<String> = null;
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static var materials: Array<MaterialSlot> = null;
 	public static var brushes: Array<BrushSlot> = null;
 	public static var layers: Array<LayerSlot> = null;
@@ -132,7 +132,7 @@ class Project {
 
 		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		Window.get(0).title = filename + " - " + Main.title;
+		Window.get(0).title = filename + " - " + Manifest.title;
 		#end
 
 		function _init() {
@@ -153,7 +153,7 @@ class Project {
 	}
 
 	public static function projectNewBox() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIBox.showCustom(function(ui: Zui) {
 			if (ui.tab(Id.handle(), tr("New Project"))) {
 				if (meshList == null) {
@@ -190,11 +190,11 @@ class Project {
 
 	public static function projectNew(resetLayers = true) {
 		#if (krom_windows || krom_linux || krom_darwin)
-		Window.get(0).title = Main.title;
+		Window.get(0).title = Manifest.title;
 		#end
 		filepath = "";
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (Context.raw.mergedObject != null) {
 			Context.raw.mergedObject.remove();
 			Data.deleteMesh(Context.raw.mergedObject.data.handle);
@@ -282,7 +282,7 @@ class Project {
 			paintObjects = [Context.raw.paintObject];
 			while (materials.length > 0) materials.pop().unload();
 			Data.getMaterial("Scene", "Material", function(m: iron.data.MaterialData) {
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				materials.push(new MaterialSlot(m));
 				#end
 				#if is_lab
@@ -290,7 +290,7 @@ class Project {
 				#end
 			});
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Context.raw.material = materials[0];
 			#end
 
@@ -298,7 +298,7 @@ class Project {
 			arm.ui.UINodes.inst.groupStack = [];
 			materialGroups = [];
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			brushes = [new BrushSlot()];
 			Context.raw.brush = brushes[0];
 
@@ -315,7 +315,7 @@ class Project {
 
 			MakeMaterial.parsePaintMaterial();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			RenderUtil.makeMaterialPreview();
 			#end
 
@@ -327,14 +327,14 @@ class Project {
 			Project.raw.packed_assets = [];
 			Context.raw.ddirty = 4;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			#end
 
 			if (resetLayers) {
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				var aspectRatioChanged = layers[0].texpaint.width != Config.getTextureResX() || layers[0].texpaint.height != Config.getTextureResY();
 				while (layers.length > 0) layers.pop().unload();
 				var layer = new LayerSlot();
@@ -360,7 +360,7 @@ class Project {
 			Scene.active.world.probe.irradiance = Context.raw.defaultIrradiance;
 			Scene.active.world.probe.raw.strength = 4.0;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Context.initTool();
 			#end
 		});
@@ -370,7 +370,7 @@ class Project {
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function importMaterial() {
 		UIFiles.show("arm,blend", false, true, function(path: String) {
 			path.endsWith(".blend") ?
@@ -459,7 +459,7 @@ class Project {
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
 					Context.raw.parseVCols = ui.check(Id.handle({ selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
@@ -473,7 +473,7 @@ class Project {
 				if (ui.button(tr("Import")) || ui.isReturnDown) {
 					UIBox.hide();
 					function doImport() {
-						#if is_paint
+						#if (is_paint || is_sculpt)
 						ImportMesh.run(path, clearLayers, replaceExisting);
 						#end
 						#if is_lab
@@ -588,14 +588,14 @@ class Project {
 			Project.assets.insert(i, Project.assets.pop());
 			Project.assetNames.insert(i, Project.assetNames.pop());
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (Context.raw.texture == oldAsset) Context.raw.texture = Project.assets[i];
 			#end
 
 			function _next() {
 				MakeMaterial.parsePaintMaterial();
 
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				RenderUtil.makeMaterialPreview();
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 				#end
@@ -615,7 +615,7 @@ class Project {
 		return asset != null ? Project.assetMap.get(asset.id) : null;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function getUsedAtlases(): Array<String> {
 		if (Project.atlasObjects == null) return null;
 		var used: Array<Int> = [];
@@ -679,7 +679,7 @@ class Project {
 		return null;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function isMaterialGroupInUse(group: TNodeGroup): Bool {
 		var canvases: Array<TNodeCanvas> = [];
 		for (m in materials) canvases.push(m.canvas);

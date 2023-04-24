@@ -19,7 +19,7 @@ import arm.Viewport;
 import arm.Camera;
 import arm.Res;
 import arm.ProjectFormat;
-#if is_paint
+#if (is_paint || is_sculpt)
 import iron.math.Mat4;
 import arm.data.*;
 import arm.util.*;
@@ -62,7 +62,7 @@ class App {
 	static var appy = 0;
 	static var lastWindowWidth = 0;
 	static var lastWindowHeight = 0;
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static var dragMaterial: MaterialSlot = null;
 	public static var dragLayer: LayerSlot = null;
 	#end
@@ -72,7 +72,7 @@ class App {
 	public static var pipeCopy128: PipelineState;
 	public static var pipeCopyBGRA: PipelineState;
 	public static var pipeCopyRGB: PipelineState = null;
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static var pipeMerge: PipelineState = null;
 	public static var pipeMergeR: PipelineState = null;
 	public static var pipeMergeG: PipelineState = null;
@@ -123,7 +123,7 @@ class App {
 	public static var cursorTex: TextureUnit;
 	public static var cursorGbufferD: TextureUnit;
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static inline var defaultBase = 0.5;
 	public static inline var defaultRough = 0.4;
 	#if (krom_android || krom_ios)
@@ -209,7 +209,7 @@ class App {
 					new Camera();
 					new UIBase();
 					new UINodes();
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					new UIView2D();
 					#end
 
@@ -218,7 +218,7 @@ class App {
 					#end
 
 					iron.App.notifyOnUpdate(update);
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					iron.App.notifyOnRender2D(UIView2D.inst.render);
 					iron.App.notifyOnUpdate(UIView2D.inst.update);
 					iron.App.notifyOnRender2D(UIBase.inst.renderCursor);
@@ -230,7 +230,7 @@ class App {
 					iron.App.notifyOnUpdate(Camera.inst.update);
 					iron.App.notifyOnRender2D(render);
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					appx = UIToolbar.inst.toolbarw;
 					#end
 					#if is_lab
@@ -260,7 +260,7 @@ class App {
 		else System.stop();
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function w(): Int {
 		// Drawing material preview
 		if (UIBase.inst != null && Context.raw.materialPreview) {
@@ -351,7 +351,7 @@ class App {
 	#end
 
 	public static function x(): Int {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		return Context.raw.viewIndex == 1 ? appx + w() : appx;
 		#end
 		#if is_lab
@@ -372,7 +372,7 @@ class App {
 		lastWindowHeight = System.windowHeight();
 
 		Config.raw.layout[LayoutNodesW] = Std.int(Config.raw.layout[LayoutNodesW] * ratioW);
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratioH);
 		Config.raw.layout[LayoutSidebarH1] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0];
 		#end
@@ -411,7 +411,7 @@ class App {
 		Context.raw.ddirty = 2;
 
 		if (UIBase.inst.show) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			appx = UIToolbar.inst.toolbarw;
 			#end
 			#if is_lab
@@ -444,7 +444,7 @@ class App {
 		UINodes.inst.hwnd.redraws = 2;
 		UIBox.hwnd.redraws = 2;
 		if (Context.raw.ddirty < 0) Context.raw.ddirty = 0; // Redraw viewport
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		UIToolbar.inst.toolbarHandle.redraws = 2;
@@ -460,7 +460,7 @@ class App {
 			Krom.setMouseCursor(0); // Arrow
 		}
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var hasDrag = dragAsset != null || dragMaterial != null || dragLayer != null || dragFile != null || dragSwatch != null;
 		#end
 		#if is_lab
@@ -484,7 +484,7 @@ class App {
 				dragFile = null;
 				dragFileIcon = null;
 				isDragging = false;
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				dragMaterial = null;
 				dragLayer = null;
 				#end
@@ -507,7 +507,7 @@ class App {
 						arm.io.ImportEnvmap.run(dragAsset.file, image);
 					}
 				}
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				else if (Context.inLayers() || Context.in2dView()) { // Create mask
 					App.createImageMask(dragAsset);
 				}
@@ -521,7 +521,7 @@ class App {
 				else if (Context.inSwatches()) {
 					TabSwatches.acceptSwatchDrag(dragSwatch);
 				}
-				#if is_paint
+				#if (is_paint || is_sculpt)
 				else if (Context.inMaterials()) {
 					TabMaterials.acceptSwatchDrag(dragSwatch);
 				}
@@ -544,7 +544,7 @@ class App {
 					dropX = mouse.x;
 					dropY = mouse.y;
 
-					#if is_paint
+					#if (is_paint || is_sculpt)
 					var materialCount = Project.materials.length;
 					ImportAsset.run(dragFile, dropX, dropY, true, true, function() {
 						// Asset was material
@@ -562,7 +562,7 @@ class App {
 				dragFile = null;
 				dragFileIcon = null;
 			}
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			else if (dragMaterial != null) {
 				materialDropped();
 			}
@@ -590,7 +590,7 @@ class App {
 
 		var isPicker = Context.raw.tool == ToolPicker;
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		#if krom_windows
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		Zui.alwaysRedrawWindow = !Context.raw.cacheDraws ||
@@ -608,7 +608,7 @@ class App {
 		if (Zui.alwaysRedrawWindow && Context.raw.ddirty < 0) Context.raw.ddirty = 0;
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static function materialDropped() {
 		// Material drag and dropped onto viewport or layers tab
 		if (Context.inViewport()) {
@@ -645,7 +645,7 @@ class App {
 		}
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	static function getDragBackground(): TRect {
 		var icons = Res.get("icons.k");
 		if (dragLayer != null && !dragLayer.isGroup() && dragLayer.fill_layer == null) {
@@ -703,7 +703,7 @@ class App {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (Context.raw.frame == 2) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			RenderUtil.makeMaterialPreview();
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			#end
@@ -712,7 +712,7 @@ class App {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.ddirty = 0;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (History.undoLayers == null) {
 				History.undoLayers = [];
 				for (i in 0...Config.raw.undo_steps) {
@@ -755,7 +755,7 @@ class App {
 			Krom.setMouseCursor(1); // Hand
 			var img = getDragImage();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var scaleFactor = UIBase.inst.ui.ops.scaleFactor;
 			#end
 			#if is_lab
@@ -774,7 +774,7 @@ class App {
 
 			g.color = dragTint;
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var bgRect = getDragBackground();
 			if (bgRect != null) {
 				g.drawScaledSubImage(Res.get("icons.k"), bgRect.x, bgRect.y, bgRect.w, bgRect.h, mouse.x + dragOffX, mouse.y + dragOffY + inv, size, h - inv * 2);
@@ -806,7 +806,7 @@ class App {
 	}
 
 	public static function enumTexts(nodeType: String): Array<String> {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (nodeType == "TEX_IMAGE") {
 			return Project.assetNames.length > 0 ? Project.assetNames : [""];
 		}
@@ -878,7 +878,7 @@ class App {
 	}
 
 	public static function getUIs(): Array<Zui> {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		return [App.uiBox, App.uiMenu, arm.ui.UIBase.inst.ui, arm.ui.UINodes.inst.ui, arm.ui.UIView2D.inst.ui];
 		#end
 		#if is_lab
@@ -892,7 +892,7 @@ class App {
 		return isPaint && Context.raw.layer.fill_layer != null && Context.raw.layer.uvType == UVProject;
 		#end
 
-		#if is_lab
+		#if (is_sculpt || is_lab)
 		return false;
 		#end
 	}
@@ -911,7 +911,7 @@ class App {
 	}
 
 	public static function initLayout() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var show2d = (UINodes.inst != null && UINodes.inst.show) || (UIView2D.inst != null && UIView2D.inst.show);
 		#end
 		#if is_lab
@@ -920,7 +920,7 @@ class App {
 
 		var raw = Config.raw;
 		raw.layout = [
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Std.int(UIBase.defaultWindowW * raw.window_scale),
 			Std.int(kha.System.windowHeight() / 2),
 			Std.int(kha.System.windowHeight() / 2),
@@ -932,7 +932,7 @@ class App {
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
 			#end
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			Std.int(iron.App.h() / 2),
 			#end
 
@@ -964,6 +964,9 @@ class App {
 		#if is_paint
 		raw.workspace = SpacePaint;
 		#end
+		#if is_sculpt
+		raw.workspace = SpaceSculpt;
+		#end
 		#if is_lab
 		raw.workspace = Space2D;
 		#end
@@ -974,7 +977,7 @@ class App {
 		raw.touch_ui = false;
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		raw.pressure_hardness = true;
 		raw.pressure_angle = false;
 		raw.pressure_opacity = false;
@@ -989,6 +992,9 @@ class App {
 		raw.brush_live = false;
 		raw.show_asset_names = false;
 		raw.node_preview = true;
+		#end
+
+		#if is_paint
 		raw.dilate = DilateInstant;
 		raw.dilate_radius = 2;
 		#end
@@ -999,7 +1005,7 @@ class App {
 	}
 
 	public static function initLayers() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		Project.layers[0].clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
 		#end
 
@@ -1027,7 +1033,7 @@ class App {
 		#end
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function resizeLayers() {
 		var C = Config.raw;
 		if (App.resHandle.position >= Std.int(Res16384)) { // Save memory for >=16k
@@ -1100,7 +1106,7 @@ class App {
 	#end
 
 	public static function makePipe() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		pipeMerge = makeMergePipe(true, true, true, true);
 		pipeMergeR = makeMergePipe(true, false, false, false);
 		pipeMergeG = makeMergePipe(false, true, false, false);
@@ -1163,7 +1169,7 @@ class App {
 		pipeCopy128 = pipeCopy;
 		#end
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		pipeInvert8 = new PipelineState();
 		pipeInvert8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeInvert8.fragmentShader = kha.Shaders.getFragment("layer_invert.frag");
@@ -1320,7 +1326,7 @@ class App {
 	}
 
 	public static function makeTempImg() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var l = Project.layers[0];
 		#end
 		#if is_lab
@@ -1336,7 +1342,7 @@ class App {
 			tempImage = null;
 		}
 		if (tempImage == null) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
 					 	 App.bitsHandle.position == Bits16 ? "RGBA64" :
 					 										 "RGBA128";
@@ -1355,7 +1361,7 @@ class App {
 		}
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function makeTempMaskImg() {
 		if (tempMaskImage != null && (tempMaskImage.width != Config.getTextureResX() || tempMaskImage.height != Config.getTextureResY())) {
 			var _tempMaskImage = tempMaskImage;
@@ -1371,7 +1377,7 @@ class App {
 	#end
 
 	public static function makeExportImg() {
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		var l = Project.layers[0];
 		#end
 		#if is_lab
@@ -1395,7 +1401,7 @@ class App {
 			RenderPath.active.renderTargets.remove("expc");
 		}
 		if (expa == null) {
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
 					 	 App.bitsHandle.position == Bits16 ? "RGBA64" :
 					 										 "RGBA128";
@@ -1430,7 +1436,7 @@ class App {
 		}
 	}
 
-	#if is_paint
+	#if (is_paint || is_sculpt)
 	public static function duplicateLayer(l: LayerSlot) {
 		if (!l.isGroup()) {
 			var newLayer = l.duplicate();
@@ -1603,6 +1609,7 @@ class App {
 				l0.texpaint.g4.end();
 			}
 
+			#if is_paint
 			tempImage.g2.begin(false);
 			tempImage.g2.pipeline = pipeCopy;
 			tempImage.g2.drawImage(l0.texpaint_nor, 0, 0);
@@ -1640,6 +1647,7 @@ class App {
 					if (l1.paintMet) commandsMergePack(pipeMergeB, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
+			#end
 		}
 	}
 
@@ -1704,6 +1712,7 @@ class App {
 				App.expa.g4.end();
 			}
 
+			#if is_paint
 			if (l1.paintNor) {
 				App.tempImage.g2.begin(false);
 				App.tempImage.g2.pipeline = App.pipeCopy;
@@ -1741,6 +1750,7 @@ class App {
 					if (l1.paintMet) App.commandsMergePack(App.pipeMergeB, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
+			#end
 		}
 
 		var l0 = { texpaint: App.expa, texpaint_nor: App.expb, texpaint_pack: App.expc };
@@ -1812,7 +1822,10 @@ class App {
 	}
 
 	public static function isFillMaterial(): Bool {
+		#if is_paint
 		if (UIHeader.inst.worktab.position == SpaceMaterial) return true;
+		#end
+
 		var m = Context.raw.material;
 		for (l in Project.layers) if (l.fill_layer == m) return true;
 		return false;
@@ -1824,6 +1837,7 @@ class App {
 		var _fillType = Context.raw.fillTypeHandle.position;
 		var current: kha.graphics2.Graphics = null;
 
+		#if is_paint
 		if (UIHeader.inst.worktab.position == SpaceMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
@@ -1850,6 +1864,7 @@ class App {
 			if (current != null) current.begin(false);
 			return;
 		}
+		#end
 
 		var hasFillLayer = false;
 		var hasFillMask = false;
@@ -1919,7 +1934,14 @@ class App {
 		Context.raw.fillTypeHandle.position = FillObject;
 		Context.raw.pdirty = 1;
 		var _workspace = UIHeader.inst.worktab.position;
+
+		#if is_paint
 		UIHeader.inst.worktab.position = SpacePaint;
+		#end
+		#if is_sculpt
+		UIHeader.inst.worktab.position = SpaceSculpt;
+		#end
+
 		Context.raw.layer.clear();
 
 		if (parsePaint) MakeMaterial.parsePaintMaterial(false);
@@ -2179,7 +2201,7 @@ class App {
 		node_search: "space",
 		operator_search: "space",
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		decal_mask: "ctrl",
 		select_material: "shift+number",
 		select_layer: "alt+number",

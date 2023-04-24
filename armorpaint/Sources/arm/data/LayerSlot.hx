@@ -5,8 +5,10 @@ import kha.Image;
 import iron.RenderPath;
 import arm.ui.UIBase;
 import arm.ui.TabLayers;
-import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
+#if is_paint
+import arm.util.RenderUtil;
+#end
 
 class LayerSlot {
 	public var id = 0;
@@ -16,9 +18,11 @@ class LayerSlot {
 	public var parent: LayerSlot = null; // Group (for layers) or layer (for masks)
 
 	public var texpaint: Image = null; // Base or mask
+	#if is_paint
 	public var texpaint_nor: Image = null;
 	public var texpaint_pack: Image = null;
 	public var texpaint_preview: Image = null; // Layer preview
+	#end
 
 	public var maskOpacity = 1.0; // Opacity mask
 	public var fill_layer: MaterialSlot = null;
@@ -55,9 +59,15 @@ class LayerSlot {
 		}
 		else if (type == SlotLayer) {
 			name = "Layer " + (id + 1);
+			#if is_paint
 			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
 						 App.bitsHandle.position == Bits16 ? "RGBA64" :
 						 									 "RGBA128";
+			#end
+
+			#if is_sculpt
+			var format = "RGBA128";
+			#end
 
 			{
 				var t = new RenderTargetRaw();
@@ -67,6 +77,8 @@ class LayerSlot {
 				t.format = format;
 				texpaint = RenderPath.active.createRenderTarget(t).image;
 			}
+
+			#if is_paint
 			{
 				var t = new RenderTargetRaw();
 				t.name = "texpaint_nor" + ext;
@@ -85,7 +97,10 @@ class LayerSlot {
 			}
 
 			texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.RGBA32);
+			#end
 		}
+
+		#if is_paint
 		else { // Mask
 			name = "Mask " + (id + 1);
 			var format = "RGBA32"; // Full bits for undo support, R8 is used
@@ -102,6 +117,7 @@ class LayerSlot {
 
 			texpaint_preview = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize, TextureFormat.RGBA32);
 		}
+		#end
 	}
 
 	public function delete() {
@@ -132,22 +148,29 @@ class LayerSlot {
 		if (isGroup()) return;
 
 		var _texpaint = texpaint;
+		#if is_paint
 		var _texpaint_nor = texpaint_nor;
 		var _texpaint_pack = texpaint_pack;
 		var _texpaint_preview = texpaint_preview;
+		#end
+
 		function _next() {
 			_texpaint.unload();
+			#if is_paint
 			if (_texpaint_nor != null) _texpaint_nor.unload();
 			if (_texpaint_pack != null) _texpaint_pack.unload();
 			_texpaint_preview.unload();
+			#end
 		}
 		App.notifyOnNextFrame(_next);
 
 		RenderPath.active.renderTargets.remove("texpaint" + ext);
+		#if is_paint
 		if (isLayer()) {
 			RenderPath.active.renderTargets.remove("texpaint_nor" + ext);
 			RenderPath.active.renderTargets.remove("texpaint_pack" + ext);
 		}
+		#end
 	}
 
 	public function swap(other: LayerSlot) {
@@ -157,11 +180,15 @@ class LayerSlot {
 			var _texpaint = texpaint;
 			texpaint = other.texpaint;
 			other.texpaint = _texpaint;
+
+			#if is_paint
 			var _texpaint_preview = texpaint_preview;
 			texpaint_preview = other.texpaint_preview;
 			other.texpaint_preview = _texpaint_preview;
+			#end
 		}
 
+		#if is_paint
 		if (isLayer() && other.isLayer()) {
 			RenderPath.active.renderTargets.get("texpaint_nor" + ext).image = other.texpaint_nor;
 			RenderPath.active.renderTargets.get("texpaint_pack" + ext).image = other.texpaint_pack;
@@ -174,6 +201,7 @@ class LayerSlot {
 			other.texpaint_nor = _texpaint_nor;
 			other.texpaint_pack = _texpaint_pack;
 		}
+		#end
 	}
 
 	public function clear(baseColor = 0x00000000, baseImage: kha.Image = null, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
@@ -186,6 +214,7 @@ class LayerSlot {
 			texpaint.g2.end();
 		}
 
+		#if is_paint
 		if (isLayer()) {
 			texpaint_nor.g4.begin();
 			texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
@@ -194,6 +223,7 @@ class LayerSlot {
 			texpaint_pack.g4.clear(kha.Color.fromFloats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
 			texpaint_pack.g4.end();
 		}
+		#end
 
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
@@ -245,6 +275,7 @@ class LayerSlot {
 			l.texpaint.g2.drawImage(texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
 			l.texpaint.g2.end();
+			#if is_paint
 			l.texpaint_nor.g2.begin(false);
 			l.texpaint_nor.g2.pipeline = App.pipeCopy;
 			l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
@@ -255,6 +286,7 @@ class LayerSlot {
 			l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 			l.texpaint_pack.g2.pipeline = null;
 			l.texpaint_pack.g2.end();
+			#end
 		}
 		else if (isMask()) {
 			l.texpaint.g2.begin(false);
@@ -264,11 +296,13 @@ class LayerSlot {
 			l.texpaint.g2.end();
 		}
 
+		#if is_paint
 		l.texpaint_preview.g2.begin(true, 0x00000000);
 		l.texpaint_preview.g2.pipeline = App.pipeCopy;
 		l.texpaint_preview.g2.drawScaledImage(texpaint_preview, 0, 0, texpaint_preview.width, texpaint_preview.height);
 		l.texpaint_preview.g2.pipeline = null;
 		l.texpaint_preview.g2.end();
+		#end
 
 		l.visible = visible;
 		l.maskOpacity = maskOpacity;
@@ -300,23 +334,29 @@ class LayerSlot {
 		if (App.pipeMerge == null) App.makePipe();
 
 		if (isLayer()) {
+			#if is_paint
 			var format = App.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
 						 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
 						 									 TextureFormat.RGBA128;
+			#end
+
+			#if is_sculpt
+			var format = TextureFormat.RGBA128;
+			#end
 
 			var _texpaint = this.texpaint;
-			var _texpaint_nor = this.texpaint_nor;
-			var _texpaint_pack = this.texpaint_pack;
-
 			this.texpaint = Image.createRenderTarget(resX, resY, format);
-			this.texpaint_nor = Image.createRenderTarget(resX, resY, format);
-			this.texpaint_pack = Image.createRenderTarget(resX, resY, format);
-
 			this.texpaint.g2.begin(false);
 			this.texpaint.g2.pipeline = App.pipeCopy;
 			this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
 			this.texpaint.g2.pipeline = null;
 			this.texpaint.g2.end();
+
+			#if is_paint
+			var _texpaint_nor = this.texpaint_nor;
+			var _texpaint_pack = this.texpaint_pack;
+			this.texpaint_nor = Image.createRenderTarget(resX, resY, format);
+			this.texpaint_pack = Image.createRenderTarget(resX, resY, format);
 
 			this.texpaint_nor.g2.begin(false);
 			this.texpaint_nor.g2.pipeline = App.pipeCopy;
@@ -329,17 +369,22 @@ class LayerSlot {
 			this.texpaint_pack.g2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
 			this.texpaint_pack.g2.pipeline = null;
 			this.texpaint_pack.g2.end();
+			#end
 
 			function _next() {
 				_texpaint.unload();
+				#if is_paint
 				_texpaint_nor.unload();
 				_texpaint_pack.unload();
+				#end
 			}
 			App.notifyOnNextFrame(_next);
 
 			rts.get("texpaint" + this.ext).image = this.texpaint;
+			#if is_paint
 			rts.get("texpaint_nor" + this.ext).image = this.texpaint_nor;
 			rts.get("texpaint_pack" + this.ext).image = this.texpaint_pack;
+			#end
 		}
 		else if (isMask()) {
 			var _texpaint = this.texpaint;
@@ -367,7 +412,7 @@ class LayerSlot {
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.layerPreviewDirty = true;
-			UIBase.inst.hwnds[0].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		}
 		App.notifyOnNextFrame(_next);
 	}
@@ -377,7 +422,7 @@ class LayerSlot {
 		fill_layer = null;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.layerPreviewDirty = true;
-		UIBase.inst.hwnds[0].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 	}
 
 	public function isVisible(): Bool {
@@ -464,7 +509,12 @@ class LayerSlot {
 	}
 
 	public function isLayer(): Bool {
+		#if is_paint
 		return texpaint != null && texpaint_nor != null;
+		#end
+		#if is_sculpt
+		return texpaint != null;
+		#end
 	}
 
 	public function isGroup(): Bool {
@@ -480,15 +530,30 @@ class LayerSlot {
 	}
 
 	public function isMask(): Bool {
+		#if is_paint
 		return texpaint != null && texpaint_nor == null;
+		#end
+		#if is_sculpt
+		return false;
+		#end
 	}
 
 	public function isGroupMask(): Bool {
+		#if is_paint
 		return texpaint != null && texpaint_nor == null && parent.isGroup();
+		#end
+		#if is_sculpt
+		return false;
+		#end
 	}
 
 	public function isLayerMask(): Bool {
+		#if is_paint
 		return texpaint != null && texpaint_nor == null && parent.isLayer();
+		#end
+		#if is_sculpt
+		return false;
+		#end
 	}
 
 	public function isInGroup(): Bool {
@@ -570,7 +635,7 @@ class LayerSlot {
 
 		Context.setLayer(this);
 		History.orderLayers(to);
-		UIBase.inst.hwnds[0].redraws = 2;
+		UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 
 		Project.layers.remove(this);
 		Project.layers.insert(to, this);

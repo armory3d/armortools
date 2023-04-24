@@ -15,7 +15,7 @@ class TabMeshes {
 
 			ui.beginSticky();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			if (Config.raw.touch_ui) {
 				ui.row([1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
 			}

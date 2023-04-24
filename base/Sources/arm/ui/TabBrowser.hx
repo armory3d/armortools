@@ -117,7 +117,7 @@ class TabBrowser {
 								});
 							}
 
-							#if is_paint
+							#if (is_paint || is_sculpt)
 							if (ui.button(tr("Set as Mask"), Left)) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
 									App.notifyOnNextFrame(function() {
@@ -134,6 +134,9 @@ class TabBrowser {
 									});
 								});
 							}
+							#end
+
+							#if is_paint
 							if (ui.button(tr("Set as Color ID Map"), Left)) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
 									App.notifyOnNextFrame(function() {
@@ -176,6 +179,9 @@ class TabBrowser {
 			#if krom_android
 			#if is_paint
 			if (hpath.text.endsWith(".armorpaint")) known = false;
+			#end
+			#if is_sculpt
+			if (hpath.text.endsWith(".armorsculpt")) known = false;
 			#end
 			#if is_lab
 			if (hpath.text.endsWith(".armorlab")) known = false;

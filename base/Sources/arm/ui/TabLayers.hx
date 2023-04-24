@@ -1,5 +1,7 @@
 package arm.ui;
 
+#if (is_paint || is_sculpt)
+
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
@@ -280,8 +282,15 @@ class TabLayers {
 		var state = State.Idle;
 		var iconH = (ui.ELEMENT_H() - 3) * 2;
 
+		#if is_paint
+		var texpaint_preview = l.texpaint_preview;
+		#end
+		#if is_sculpt
+		var texpaint_preview = l.texpaint;
+		#end
+
 		if (!l.isGroup()) {
-			var icon = l.fill_layer == null ? l.texpaint_preview : l.fill_layer.imageIcon;
+			var icon = l.fill_layer == null ? texpaint_preview : l.fill_layer.imageIcon;
 			if (l.fill_layer == null) {
 				// Checker
 				var r = Res.tile50(icons, 4, 1);
@@ -339,13 +348,13 @@ class TabLayers {
 		ui.imageInvertY = false;
 		#end
 
-		if (ui.isHovered && l.texpaint_preview != null) {
+		if (ui.isHovered && texpaint_preview != null) {
 			if (l.isMask()) {
 				makeMaskPreviewRgba32(l);
 				ui.tooltipImage(Context.raw.maskPreviewRgba32);
 			}
 			else {
-				ui.tooltipImage(l.texpaint_preview);
+				ui.tooltipImage(texpaint_preview);
 			}
 			if (i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
 			else ui.tooltip(l.name);
@@ -561,8 +570,10 @@ class TabLayers {
 					});
 				}
 				else {
+					#if is_paint
 					Context.raw.layersExport = ExportSelected;
 					BoxExport.showTextures();
+					#end
 				}
 			}
 
@@ -804,6 +815,7 @@ class TabLayers {
 	}
 
 	public static function makeMaskPreviewRgba32(l: LayerSlot) {
+		#if is_paint
 		if (Context.raw.maskPreviewRgba32 == null) {
 			Context.raw.maskPreviewRgba32 = kha.Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
 		}
@@ -819,6 +831,7 @@ class TabLayers {
 				Context.raw.maskPreviewRgba32.g2.pipeline = null;
 			});
 		}
+		#end
 	}
 
 	static function deleteLayer(l: LayerSlot) {
@@ -906,3 +919,5 @@ class TabLayers {
 		return true;
 	}
 }
+
+#end

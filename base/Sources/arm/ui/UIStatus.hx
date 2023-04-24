@@ -19,7 +19,7 @@ class UIStatus {
 
 		var statush = Config.raw.layout[LayoutStatusH];
 
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.windowHeight() - statush, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 		#end
 

@@ -1,5 +1,7 @@
 package arm.io;
 
+#if (is_paint || is_lab)
+
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import kha.Image;
@@ -11,8 +13,10 @@ import arm.ProjectFormat;
 import iron.Scene;
 import arm.render.RenderPathPaint;
 import arm.shader.MakeMaterial;
-import arm.data.LayerSlot;
 import arm.ui.UIHeader;
+#end
+#if is_paint
+import arm.data.LayerSlot;
 #end
 
 class ExportTexture {
@@ -89,9 +93,9 @@ class ExportTexture {
 		#end
 
 		#if krom_ios
-		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + Main.title + "')");
+		Console.info(tr("Textures exported") + " ('Files/On My iPad/" + Manifest.title + "')");
 		#elseif krom_android
-		Console.info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + Main.title + "')");
+		Console.info(tr("Textures exported") + " ('Files/Internal storage/Pictures/" + Manifest.title + "')");
 		#else
 		Console.info(tr("Textures exported"));
 		#end
@@ -443,3 +447,5 @@ typedef TExportPresetTexture = {
 	public var channels: Array<String>;
 	public var color_space: String;
 }
+
+#end

@@ -10,7 +10,7 @@ class TabPlugins {
 
 			ui.beginSticky();
 
-			#if is_paint
+			#if (is_paint || is_sculpt)
 			ui.row([1 / 4]);
 			#end
 			#if is_lab

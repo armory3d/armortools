@@ -9,10 +9,12 @@ import iron.system.Input;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UIView2D;
+import arm.Viewport;
+#if is_paint
 import arm.ui.UIHeader;
 import arm.ui.UIBase;
 import arm.shader.MakeMaterial;
-import arm.Viewport;
+#end
 
 class RenderPathPaint {
 
@@ -116,7 +118,9 @@ class RenderPathPaint {
 
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+		#if is_paint
 		path.loadShader("shader_datas/dilate_pass/dilate_pass");
+		#end
 	}
 
 	public static function commandsPaint(dilation = true) {
@@ -148,6 +152,7 @@ class RenderPathPaint {
 				@:privateAccess path.end();
 			}
 
+			#if is_paint
 			if (Context.raw.tool == ToolColorId) {
 				path.setTarget("texpaint_colorid");
 				path.clearTarget(0xff000000);
@@ -335,6 +340,46 @@ class RenderPathPaint {
 					dilate(true, false);
 				}
 			}
+			#end
+
+			#if is_sculpt
+			var texpaint = "texpaint" + tid;
+			path.setTarget("texpaint_blend1");
+			path.bindTarget("texpaint_blend0", "tex");
+			path.drawShader("shader_datas/copy_pass/copyR8_pass");
+			path.setTarget(texpaint, ["texpaint_blend0"]);
+			path.bindTarget("gbufferD_undo", "gbufferD");
+			if ((Context.raw.xray || Config.raw.brush_angle_reject) && Config.raw.brush_3d) {
+				path.bindTarget("gbuffer0", "gbuffer0");
+			}
+			path.bindTarget("texpaint_blend1", "paintmask");
+
+			// Read texcoords from gbuffer
+			var readTC = (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillFace) ||
+						  Context.raw.tool == ToolClone ||
+						  Context.raw.tool == ToolBlur ||
+						  Context.raw.tool == ToolSmudge;
+			if (readTC) {
+				path.bindTarget("gbuffer2", "gbuffer2");
+			}
+			path.bindTarget("gbuffer0_undo", "gbuffer0_undo");
+
+			var materialContexts: Array<iron.data.MaterialData.MaterialContext> = [];
+			var shaderContexts: Array<iron.data.ShaderData.ShaderContext> = [];
+			var mats = Project.paintObjects[0].materials;
+			@:privateAccess Project.paintObjects[0].getContexts("paint", mats, materialContexts, shaderContexts);
+
+			var cc_context = shaderContexts[0];
+			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+			path.currentG.setPipeline(cc_context.pipeState);
+			iron.object.Uniforms.setContextConstants(path.currentG, cc_context, @:privateAccess path.bindParams);
+			iron.object.Uniforms.setObjectConstants(path.currentG, cc_context, Project.paintObjects[0]);
+			iron.object.Uniforms.setMaterialConstants(path.currentG, cc_context, materialContexts[0]);
+			path.currentG.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
+			path.currentG.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			path.currentG.drawIndexedVertices();
+			@:privateAccess path.end();
+			#end
 		}
 	}
 
@@ -554,7 +599,14 @@ class RenderPathPaint {
 	}
 
 	static function paintEnabled(): Bool {
+		#if is_paint
 		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId;
+		#end
+
+		#if is_sculpt
+		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker;
+		#end
+
 		var groupLayer = Context.raw.layer.isGroup();
 		return !fillLayer && !groupLayer && !Context.raw.foregroundEvent;
 	}
@@ -574,17 +626,39 @@ class RenderPathPaint {
 	}
 
 	public static function begin() {
+
+		#if is_paint
 		if (!dilated) {
 			dilate(Config.raw.dilate == DilateDelayed, true);
 			dilated = true;
 		}
+		#end
 
 		if (!paintEnabled()) return;
 
+		#if is_paint
 		pushUndoLast = History.pushUndo;
+		#end
+
 		if (History.pushUndo && History.undoLayers != null) {
 			History.paint();
+
+			#if is_sculpt
+			path.setTarget("gbuffer0_undo");
+			path.bindTarget("gbuffer0", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+
+			path.setTarget("gbufferD_undo");
+			path.bindTarget("_main", "tex");
+			path.drawShader("shader_datas/copy_pass/copy_pass");
+			#end
 		}
+
+		#if is_sculpt
+		if (History.pushUndo2 && History.undoLayers != null) {
+			History.paint();
+		}
+		#end
 
 		if (Context.raw.paint2d) {
 			setPlaneMesh();
@@ -621,6 +695,8 @@ class RenderPathPaint {
 			commandsSymmetry();
 
 			if (Context.raw.pdirty > 0) dilated = false;
+
+			#if is_paint
 			if (Context.raw.tool == ToolBake) {
 				if (Context.raw.bakeType == BakeNormal || Context.raw.bakeType == BakeHeight || Context.raw.bakeType == BakeDerivative) {
 					if (!baking && Context.raw.pdirty > 0) {
@@ -694,6 +770,11 @@ class RenderPathPaint {
 			else { // Paint
 				commandsPaint();
 			}
+			#end
+
+			#if is_sculpt
+			commandsPaint();
+			#end
 		}
 
 		if (Context.raw.brushBlendDirty) {
@@ -809,27 +890,35 @@ class RenderPathPaint {
 	}
 
 	public static function bindLayers() {
+		#if is_paint
 		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
 		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
 		if (isLive || isMaterialSpace) useLiveLayer(true);
+		#end
 
 		for (i in 0...Project.layers.length) {
 			var l = Project.layers[i];
 			path.bindTarget("texpaint" + l.id, "texpaint" + l.id);
+
+			#if is_paint
 			if (l.isLayer()) {
 				path.bindTarget("texpaint_nor" + l.id, "texpaint_nor" + l.id);
 				path.bindTarget("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 			}
+			#end
 		}
 	}
 
 	public static function unbindLayers() {
+		#if is_paint
 		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
 		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
 		if (isLive || isMaterialSpace) useLiveLayer(false);
+		#end
 	}
 
 	public static function dilate(base: Bool, nor_pack: Bool) {
+		#if is_paint
 		if (Config.raw.dilate_radius > 0 && !Context.raw.paint2d) {
 			arm.util.UVUtil.cacheDilateMap();
 			App.makeTempImg();
@@ -859,6 +948,7 @@ class RenderPathPaint {
 				path.drawShader("shader_datas/dilate_pass/dilate_pass");
 			}
 		}
+		#end
 	}
 
 	static function u32(ar: Array<Int>): kha.arrays.Uint32Array {

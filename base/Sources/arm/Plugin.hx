@@ -21,11 +21,13 @@ class Plugin {
 
 	public static function init() {
 		var api = js.Syntax.code("arm");
-		#if is_paint
+		#if (is_paint || is_sculpt)
 		api.MaterialParser = arm.shader.MaterialParser;
 		api.NodesMaterial = arm.shader.NodesMaterial;
 		api.UIView2D = arm.ui.UIView2D;
 		api.RenderUtil = arm.util.RenderUtil;
+		#end
+		#if is_paint
 		api.UVUtil = arm.util.UVUtil;
 		#end
 		#if is_lab

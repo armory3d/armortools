@@ -5,7 +5,7 @@ import zui.Zui;
 import zui.Id;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
-#if is_paint
+#if (is_paint || is_sculpt)
 import iron.RenderPath;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
@@ -40,6 +40,7 @@ class UIHeader {
 
 		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], Std.int(defaultHeaderH * ui.SCALE()))) {
 			ui._y += 2;
+
 
 			if (Context.raw.tool == ToolColorId) {
 				ui.text(tr("Picked Color"));
