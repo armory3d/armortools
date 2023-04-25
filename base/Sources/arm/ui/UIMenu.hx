@@ -430,7 +430,7 @@ class UIMenu {
 								var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
 								var dateInt = Std.parseInt(date.replace("-", ""));
 								if (updateVersion > dateInt) {
-									UIBox.showMessage(tr("Update"), tr("Update is available!") + "\n" + tr("Please visit ") + Manifest.url + ".");
+									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", ["url" => Manifest.url]));
 								}
 								else {
 									UIBox.showMessage(tr("Update"), tr("You are up to date!"));
@@ -438,7 +438,7 @@ class UIMenu {
 							}
 						}
 						else {
-							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.") + "\n" + tr("Please visit ") + Manifest.url + ".");
+							UIBox.showMessage(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", ["url" => Manifest.url]));
 						}
 					});
 					#end
