@@ -14,7 +14,7 @@
 uniform float coneOffset;
 uniform float coneAperture;
 
-const ivec3 voxelgiResolution = ivec3(256, 256, 256);
+const int voxelgiResolution = 256;
 const vec3 voxelgiHalfExtents = vec3(1, 1, 1);
 const float voxelgiOcc = 1.0;
 const float voxelgiStep = 1.0;

@@ -21,6 +21,7 @@ class RenderPathBase {
 	static var bloomCurrentMip = 0;
 	static var bloomSampleScale: Float;
 	#if rp_voxels
+	public static inline var voxelsRes = 256;
 	static var voxelsCreated = false;
 	#end
 
@@ -38,9 +39,9 @@ class RenderPathBase {
 			var t = new RenderTargetRaw();
 			t.name = targetName;
 			t.format = "R8";
-			t.width = 256;
-			t.height = 256;
-			t.depth = 256;
+			t.width = voxelsRes;
+			t.height = voxelsRes;
+			t.depth = voxelsRes;
 			t.is_image = true;
 			t.mipmaps = true;
 			path.createRenderTarget(t);
@@ -290,7 +291,7 @@ class RenderPathBase {
 			if (voxelize) {
 				path.clearImage("voxels", 0x00000000);
 				path.setTarget("");
-				path.setViewport(256, 256);
+				path.setViewport(voxelsRes, voxelsRes);
 				path.bindTarget("voxels", "voxels");
 				if (arm.shader.MakeMaterial.heightUsed) {
 					var tid = 0; // Project.layers[0].id;

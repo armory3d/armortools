@@ -15,19 +15,19 @@ float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension, int f
 	sampleDimension = sampleDimension & 255;
 
 	// xor index based on optimized ranking
-	int i = sampleDimension + (pixel_i + pixel_j*128)*8;
+	int i = sampleDimension + (pixel_i + pixel_j * 128) * 8;
 	int rankedSampleIndex = sampleIndex ^ int(rank.Load(uint3(i % 128, uint(i / 128), 0)).r * 255);
 
 	// fetch value in sequence
-	i = sampleDimension + rankedSampleIndex*256;
+	i = sampleDimension + rankedSampleIndex * 256;
 	int value = int(sobol.Load(uint3(i % 256, uint(i / 256), 0)).r * 255);
 
 	// If the dimension is optimized, xor sequence value based on optimized scrambling
-	i = (sampleDimension%8) + (pixel_i + pixel_j*128)*8;
+	i = (sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8;
 	value = value ^ int(scramble.Load(uint3(i % 128, uint(i / 128), 0)).r * 255);
 
 	// convert to float and return
-	float v = (0.5f+value)/256.0f;
+	float v = (0.5f + value) / 256.0f;
 	return v;
 }
 
