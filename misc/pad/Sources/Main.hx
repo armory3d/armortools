@@ -258,6 +258,10 @@ class Main {
 		minimap.g2.color = 0xff333333;
 		var lines = storage.text.split("\n");
 		for (i in 0...lines.length) {
+			if (i * 2 > minimap_h) {
+				// Out of screen
+				break;
+			}
 			var words = lines[i].split(" ");
 			var x = 0;
 			for (j in 0...words.length) {
