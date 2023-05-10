@@ -134,10 +134,10 @@ class MakeMaterial {
 		m.shader.contexts.push(sc);
 	}
 
-	public static function parseMeshPreviewMaterial() {
+	public static function parseMeshPreviewMaterial(md: MaterialData = null) {
 		if (!getMOut()) return;
 
-		var m = Project.materials[0].data;
+		var m = md == null ? Project.materials[0].data : md;
 		var scon: ShaderContext = null;
 		for (c in m.shader.contexts) {
 			if (c.raw.name == "mesh") {
