@@ -33,6 +33,10 @@ class ImportObj {
 				parts.push(part);
 				while (part.has_next) {
 					part = Krom.io_obj_parse(b.bytes.getData(), splitCode, part.pos, false);
+					// This part does not contain faces (may contain lines only)
+					if (part.inda.length == 0) {
+						continue;
+					}
 					parts.push(part);
 				}
 				if (Context.raw.splitBy == SplitMaterial) {
