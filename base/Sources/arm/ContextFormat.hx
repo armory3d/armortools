@@ -118,7 +118,11 @@ import arm.data.FontSlot;
 	@:optional public var hbloom: Handle = null;
 	@:optional public var hsupersample: Handle = null;
 	@:optional public var hvxao: Handle = null;
+	#if is_forge
+	@:optional public var vxaoExt = 2.0;
+	#else
 	@:optional public var vxaoExt = 1.0;
+	#end
 	@:optional public var vxaoOffset = 1.5;
 	@:optional public var vxaoAperture = 1.2;
 	@:optional public var textureExportPath = "";
@@ -308,5 +312,9 @@ import arm.data.FontSlot;
 	@:optional public var lockStartX = 0.0;
 	@:optional public var lockStartY = 0.0;
 	@:optional public var registered = false;
+	#end
+
+	#if is_forge
+	@:optional public var selectedObject: Object = null;
 	#end
 }

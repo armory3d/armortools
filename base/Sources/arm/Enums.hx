@@ -240,6 +240,9 @@ package arm;
 	var SpaceMaterial = 1;
 	var SpaceBake = 2;
 	#end
+	#if is_forge
+	var SpaceScene = 3;
+	#end
 	#if is_sculpt
 	var SpaceSculpt = 0;
 	#end

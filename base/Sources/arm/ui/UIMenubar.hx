@@ -112,6 +112,11 @@ class UIMenubar {
 			ui.tab(UIHeader.inst.worktab, tr("Paint"));
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
+
+			#if is_forge
+			ui.tab(UIHeader.inst.worktab, tr("Scene"));
+			#end
+
 			if (UIHeader.inst.worktab.changed) {
 				Context.raw.ddirty = 2;
 				Context.raw.brushBlendDirty = true;
@@ -136,6 +141,11 @@ class UIMenubar {
 					Context.selectTool(ToolPicker);
 					App.updateFillLayers();
 				}
+				#if is_forge
+				else if (UIHeader.inst.worktab.position == SpaceScene) {
+					Context.selectTool(ToolGizmo);
+				}
+				#end
 
 				Context.mainObject().skip_context = null;
 			}

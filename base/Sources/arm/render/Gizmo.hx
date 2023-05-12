@@ -25,8 +25,15 @@ class Gizmo {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
+		var paintObject: iron.object.Object = cast Context.raw.paintObject;
+		#if is_forge
+		if (Context.raw.selectedObject != null) {
+			paintObject = Context.raw.selectedObject;
+		}
+		#end
+
 		if (isObject) {
-			gizmo.transform.loc.setFrom(Context.raw.paintObject.transform.loc);
+			gizmo.transform.loc.setFrom(paintObject.transform.loc);
 		}
 		else if (isDecal) {
 			gizmo.transform.loc.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
@@ -50,40 +57,40 @@ class Gizmo {
 		if (isObject) {
 			if (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) {
 				if (Context.raw.translateX) {
-					Context.raw.paintObject.transform.loc.x = Context.raw.gizmoDrag;
+					paintObject.transform.loc.x = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.translateY) {
-					Context.raw.paintObject.transform.loc.y = Context.raw.gizmoDrag;
+					paintObject.transform.loc.y = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.translateZ) {
-					Context.raw.paintObject.transform.loc.z = Context.raw.gizmoDrag;
+					paintObject.transform.loc.z = Context.raw.gizmoDrag;
 				}
 				else if (Context.raw.scaleX) {
-					Context.raw.paintObject.transform.scale.x += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
+					paintObject.transform.scale.x += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
 				}
 				else if (Context.raw.scaleY) {
-					Context.raw.paintObject.transform.scale.y += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
+					paintObject.transform.scale.y += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
 				}
 				else if (Context.raw.scaleZ) {
-					Context.raw.paintObject.transform.scale.z += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
+					paintObject.transform.scale.z += Context.raw.gizmoDrag - Context.raw.gizmoDragLast;
 				}
 				else if (Context.raw.rotateX) {
 					q0.fromAxisAngle(Vec4.xAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					Context.raw.paintObject.transform.rot.mult(q0);
+					paintObject.transform.rot.mult(q0);
 				}
 				else if (Context.raw.rotateY) {
 					q0.fromAxisAngle(Vec4.yAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					Context.raw.paintObject.transform.rot.mult(q0);
+					paintObject.transform.rot.mult(q0);
 				}
 				else if (Context.raw.rotateZ) {
 					q0.fromAxisAngle(Vec4.zAxis(), Context.raw.gizmoDrag - Context.raw.gizmoDragLast);
-					Context.raw.paintObject.transform.rot.mult(q0);
+					paintObject.transform.rot.mult(q0);
 				}
 				Context.raw.gizmoDragLast = Context.raw.gizmoDrag;
 
-				Context.raw.paintObject.transform.buildMatrix();
+				paintObject.transform.buildMatrix();
 				#if arm_physics
-				var pb = Context.raw.paintObject.getTrait(arm.plugin.PhysicsBody);
+				var pb = paintObject.getTrait(arm.plugin.PhysicsBody);
 				if (pb != null) pb.syncTransform();
 				#end
 			}
@@ -143,7 +150,7 @@ class Gizmo {
 		}
 
 		Context.raw.gizmoStarted = false;
-		if (mouse.started("left") && Context.raw.paintObject.name != "Scene") {
+		if (mouse.started("left") && paintObject.name != "Scene") {
 			// Translate, scale
 			var trs = [Context.raw.gizmoTranslateX.transform, Context.raw.gizmoTranslateY.transform, Context.raw.gizmoTranslateZ.transform,
 					   Context.raw.gizmoScaleX.transform, Context.raw.gizmoScaleY.transform, Context.raw.gizmoScaleZ.transform];
@@ -185,7 +192,7 @@ class Gizmo {
 			Context.raw.rdirty = 2;
 
 			if (isObject) {
-				var t = Context.raw.paintObject.transform;
+				var t = paintObject.transform;
 				v.set(t.worldx(), t.worldy(), t.worldz());
 			}
 			else if (isDecal) {

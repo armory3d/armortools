@@ -47,7 +47,7 @@ class UIBase {
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
 	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
 	public var hwndTabs = [
-		[TabLayers.draw, TabHistory.draw, TabPlugins.draw],
+		[TabLayers.draw, TabHistory.draw, TabPlugins.draw #if is_forge , TabObjects.draw #end],
 		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
 		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabSwatches.draw, TabScript.draw, TabConsole.draw]
 	];
