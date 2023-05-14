@@ -21,6 +21,7 @@ project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
 project.addAssets("Assets/locale/*", { destination: "data/locale/{name}" });
 project.addAssets("Assets/licenses/**", { destination: "data/licenses/{name}" });
+project.addAssets("Assets/plugins/*", { destination: "data/plugins/{name}" });
 project.addAssets("Assets/themes/*.json", { destination: "data/themes/{name}" });
 
 if (flags.snapshot) {
