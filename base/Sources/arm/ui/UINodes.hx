@@ -271,7 +271,7 @@ class UINodes {
 									selected.type == "GROUP_OUTPUT" ||
 									selected.type == "BrushOutputNode";
 					uiMenu.enabled = !protected;
-					if (menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
+					if (UIMenu.menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
 						App.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isCopy = true;
@@ -279,14 +279,14 @@ class UINodes {
 							isNodeMenuOperation = true;
 						});
 					}
-					if (menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
+					if (UIMenu.menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
 						App.notifyOnNextFrame(function() {
 							Zui.isCopy = true;
 							isNodeMenuOperation = true;
 						});
 					}
 					uiMenu.enabled = Nodes.clipboard != "";
-					if (menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
+					if (UIMenu.menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
 						App.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isPaste = true;
@@ -294,14 +294,14 @@ class UINodes {
 						});
 					}
 					uiMenu.enabled = !protected;
-					if (menuButton(uiMenu, tr("Delete"), "delete")) {
+					if (UIMenu.menuButton(uiMenu, tr("Delete"), "delete")) {
 						App.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							ui.isDeleteDown = true;
 							isNodeMenuOperation = true;
 						});
 					}
-					if (menuButton(uiMenu, tr("Duplicate"))) {
+					if (UIMenu.menuButton(uiMenu, tr("Duplicate"))) {
 						App.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isCopy = true;
@@ -310,7 +310,7 @@ class UINodes {
 						});
 					}
 					if (selected != null && selected.type == "RGB") {
-						if (menuButton(uiMenu, tr("Add Swatch"))) {
+						if (UIMenu.menuButton(uiMenu, tr("Add Swatch"))) {
 							var color = selected.outputs[0].default_value;
 							var newSwatch = Project.makeSwatch(Color.fromFloats(color[0], color[1], color[2], color[3]));
 							Context.setSwatch(newSwatch);
@@ -321,8 +321,8 @@ class UINodes {
 
 					#if (is_paint || is_sculpt)
 					if (canvasType == CanvasMaterial) {
-						menuSeparator(uiMenu);
-						if (menuButton(uiMenu, tr("2D View"))) {
+						UIMenu.menuSeparator(uiMenu);
+						if (UIMenu.menuButton(uiMenu, tr("2D View"))) {
 							UIBase.inst.show2DView(View2DNode);
 						}
 					}
@@ -1190,7 +1190,7 @@ class UINodes {
 					ui.fill(1, 1, ui._w / ui.SCALE() - 2, ui.t.BUTTON_H + 1, ui.t.SEPARATOR_COL);
 					ui.enabled = canPlaceGroup(g.canvas.name);
 					ui.row([5 / 6, 1 / 6]);
-					if (ui.button("      " + g.canvas.name, Left)) {
+					if (ui.button(Config.buttonSpacing + g.canvas.name, Left)) {
 						pushUndo();
 						var canvas = getCanvas(true);
 						var nodes = getNodes();
@@ -1411,22 +1411,5 @@ class UINodes {
 	static function getGroup(canvases: Array<TNodeCanvas>, name: String): TNodeCanvas {
 		for (c in canvases) if (c.name == name) return c;
 		return null;
-	}
-
-	static function menuButton(ui: Zui, text: String, label = ""): Bool {
-		if (Config.raw.touch_ui) {
-			label = "";
-		}
-		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
-	}
-
-	static function menuSeparator(ui: Zui) {
-		ui._y++;
-		if (Config.raw.touch_ui) {
-			ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
-		}
-		else {
-			ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
-		}
 	}
 }

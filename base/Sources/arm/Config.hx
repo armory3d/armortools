@@ -20,7 +20,8 @@ class Config {
 	public static var keymap: Dynamic;
 	public static var configLoaded = false;
 	public static var buttonAlign = zui.Zui.Align.Left;
-	public static var buttonSpacing = "      ";
+	public static inline var defaultButtonSpacing = "        ";
+	public static var buttonSpacing = defaultButtonSpacing;
 
 	public static function load(done: Void->Void) {
 		try {
@@ -299,7 +300,7 @@ class Config {
 		else {
 			App.theme.FULL_TABS = false;
 			buttonAlign = zui.Zui.Align.Left;
-			buttonSpacing = "      ";
+			buttonSpacing = defaultButtonSpacing;
 		}
 	}
 

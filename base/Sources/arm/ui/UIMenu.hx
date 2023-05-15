@@ -39,7 +39,7 @@ class UIMenu {
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
 		var _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = 28;
+		ui.t.ELEMENT_H = 30;
 
 		ui.beginRegion(g, menuX, menuY, menuW);
 
@@ -538,7 +538,7 @@ class UIMenu {
 		}
 	}
 
-	static function menuFill(ui: Zui) {
+	public static function menuFill(ui: Zui) {
 		ui.g.color = ui.t.ACCENT_SELECT_COL;
 		ui.g.fillRect(ui._x - 1, ui._y, ui._w + 2, ui.ELEMENT_H() + 1 + 1);
 		ui.g.color = ui.t.SEPARATOR_COL;
@@ -546,21 +546,26 @@ class UIMenu {
 		ui.g.color = 0xffffffff;
 	}
 
-	static function menuSeparator(ui: Zui) {
+	public static function menuSeparator(ui: Zui) {
 		ui._y++;
 		if (Config.raw.touch_ui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
 		}
 		else {
-			ui.fill(22, 0, ui._w / ui.SCALE() - 22, 1, ui.t.ACCENT_SELECT_COL);
+			ui.fill(28, 0, ui._w / ui.SCALE() - 28, 1, ui.t.ACCENT_SELECT_COL);
 		}
 	}
 
-	static function menuButton(ui: Zui, text: String, label = ""): Bool {
+	public static function menuButton(ui: Zui, text: String, label = ""/*, icon = -1*/): Bool {
 		menuFill(ui);
 		if (Config.raw.touch_ui) {
 			label = "";
 		}
+
+		// var icons = icon > -1 ? Res.get("icons.k") : null;
+		// var r = Res.tile25(icons, icon, 8);
+		// return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label, icons, r.x, r.y, r.w, r.h);
+
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 
