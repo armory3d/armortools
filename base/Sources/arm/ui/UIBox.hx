@@ -65,6 +65,8 @@ class UIBox {
 		var apph = System.windowHeight();
 		var mw = Std.int(modalW * ui.SCALE());
 		var mh = Std.int(modalH * ui.SCALE());
+		if (mw > appw) mw = appw;
+		if (mh > apph) mh = apph;
 		var left = Std.int(appw / 2 - mw / 2);
 		var top = Std.int(apph / 2 - mh / 2);
 
