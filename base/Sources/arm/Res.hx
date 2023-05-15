@@ -23,7 +23,12 @@ class Res {
 	}
 
 	public static function tile50(img: kha.Image, x: Int, y: Int): TRect {
-		var size = Config.raw.window_scale > 1 ? 100 :  50;
+		var size = Config.raw.window_scale > 1 ? 100 : 50;
+		return { x: x * size, y: y * size, w: size, h: size };
+	}
+
+	public static function tile25(img: kha.Image, x: Int, y: Int): TRect {
+		var size = Config.raw.window_scale > 1 ? 50 : 25;
 		return { x: x * size, y: y * size, w: size, h: size };
 	}
 
