@@ -17,6 +17,7 @@ class ImportFont {
 			}
 		}
 		Data.getFont(path, function(font: Font) {
+			font.init(); // Make sure font_ is ready
 			var count = Krom.g2_font_count(font.font_);
 			var fontSlots = new Array<FontSlot>();
 			for (i in 0...count) {
