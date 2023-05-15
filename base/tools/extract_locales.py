@@ -94,11 +94,11 @@ def main() -> None:
             template_data = {**template_data, **existing_data_no_obsolete}
 
         with open(output_path, "w", encoding="utf8") as f:
-            json.dump(template_data, f, ensure_ascii=False, indent=4)
+            json.dump(template_data, f, ensure_ascii=False, indent=4, sort_keys=True)
     else:
         print(f'Creating new translation template at "{output_path}"...')
         with open(output_path, "w", encoding="utf8") as f:
-            json.dump(template_data, f, ensure_ascii=False, indent=4)
+            json.dump(template_data, f, ensure_ascii=False, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
