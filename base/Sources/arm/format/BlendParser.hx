@@ -317,7 +317,9 @@ class Handle {
 	public var block: Block;
 	public var offset: Int = 0; // Block data bytes offset
 	public var ds: DnaStruct;
+
 	public function new() {}
+
 	function getSize(index: Int): Int {
 		var nameIndex = ds.fieldNames[index];
 		var typeIndex = ds.fieldTypes[index];
@@ -329,14 +331,17 @@ class Handle {
 		if (n.indexOf("[") > 0) size *= getArrayLen(n);
 		return size;
 	}
+
 	function baseName(s: String): String {
 		while (s.charAt(0) == "*") s = s.substring(1, s.length);
 		if (s.charAt(s.length - 1) == "]") s = s.substring(0, s.indexOf("["));
 		return s;
 	}
+
 	function getArrayLen(s: String): Int {
 		return Std.parseInt(s.substring(s.indexOf("[") + 1, s.indexOf("]")));
 	}
+
 	public function get(name: String, index = 0, asType: String = null, arrayLen = 0): Dynamic {
 		// Return raw type or structure
 		var dna = ds.dna;
@@ -348,7 +353,7 @@ class Handle {
 				var type = dna.types[typeIndex];
 				var newOffset = offset;
 				for (j in 0...i) newOffset += getSize(j);
-				// Cast void* to type
+				// Cast void * to type
 				if (asType != null) {
 					for (i in 0...dna.types.length) {
 						if (dna.types[i] == asType) {
@@ -375,7 +380,7 @@ class Handle {
 						case "ulong": return isArray ? blend.read32array(len) : blend.read32();
 						case "int64_t": return blend.read64();
 						case "uint64_t": return blend.read64();
-						case "void": return 0;
+						case "void": dnaName.charAt(0) == "*" ? return blend.read64() : 0;
 					}
 				}
 				// Structure

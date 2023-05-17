@@ -49,9 +49,44 @@ class ImportBlendMesh {
 				var posa32 = new Float32Array(numtri * 3 * 4);
 				var posa = new Int16Array(numtri * 3 * 4);
 				var nora = new Int16Array(numtri * 3 * 2);
-				var hasuv = m.get("mloopuv") != null;
+
+				// pdata, 25 == CD_MPOLY
+				// var vdata: Dynamic = m.get("vdata");
+				// var codata: Dynamic = null;
+				// var codata_pos = 0;
+				// for (i in 0...vdata.get("totlayer")) {
+				// 	var l = vdata.get("layers", i);
+				// 	if (l.get("type") == 0) { // CD_MVERT
+				// 		var ptr: Dynamic = l.get("data");
+				// 		codata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+				// 		codata = l;
+				// 	}
+				// }
+
+				var ldata: Dynamic = m.get("ldata");
+				var uvdata: Dynamic = null;
+				var uvdata_pos = 0;
+				var coldata: Dynamic = null;
+				var coldata_pos = 0;
+
+				for (i in 0...ldata.get("totlayer")) {
+					var l = ldata.get("layers", i);
+					if (l.get("type") == 16) { // CD_MLOOPUV
+						var ptr: Dynamic = l.get("data");
+						uvdata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+						uvdata = l;
+					}
+					else if (l.get("type") == 17) { // CD_PROP_BYTE_COLOR
+						var ptr: Dynamic = l.get("data");
+						coldata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+						coldata = l;
+					}
+					// CD_MLOOP == 26
+				}
+
+				var hasuv = uvdata != null;
 				var texa = hasuv ? new Int16Array(numtri * 3 * 2) : null;
-				var hascol = Context.raw.parseVCols && m.get("mloopcol") != null;
+				var hascol = Context.raw.parseVCols && coldata != null;
 				var cola = hascol ? new Int16Array(numtri * 3 * 3) : null;
 
 				var tri = 0;
@@ -60,7 +95,8 @@ class ImportBlendMesh {
 				var vec2 = new Vec4();
 				for (i in 0...totpoly) {
 					var poly = m.get("mpoly", i);
-					var smooth = poly.get("flag") & 1 == 1; // ME_SMOOTH
+					// var smooth = poly.get("flag") & 1 == 1; // ME_SMOOTH
+					var smooth = false; // TODO: fetch smooth normals
 					var loopstart = poly.get("loopstart");
 					var totloop = poly.get("totloop");
 					if (totloop <= 4) { // Convex, fan triangulation
@@ -78,10 +114,12 @@ class ImportBlendMesh {
 						var uv1: Float32Array = null;
 						var uv2: Float32Array = null;
 						if (hasuv) {
-							uv0 = m.get("mloopuv", loopstart + totloop - 1).get("uv");
+							bl.pos = uvdata_pos + (loopstart + totloop - 1) * 4 * 3; // * 3 = x, y, flag
+							uv0 = bl.readf32array(2);
 							if (uv0[0] > 1.0 + eps) uv0[0] = uv0[0] - Std.int(uv0[0]);
 							if (uv0[1] > 1.0 + eps) uv0[1] = uv0[1] - Std.int(uv0[1]);
-							uv1 = m.get("mloopuv", loopstart).get("uv");
+							bl.pos = uvdata_pos + (loopstart) * 4 * 3;
+							uv1 = bl.readf32array(2);
 							if (uv1[0] > 1.0 + eps) uv1[0] = uv1[0] - Std.int(uv1[0]);
 							if (uv1[1] > 1.0 + eps) uv1[1] = uv1[1] - Std.int(uv1[1]);
 						}
@@ -95,14 +133,14 @@ class ImportBlendMesh {
 						var col2g: Int = 0;
 						var col2b: Int = 0;
 						if (hascol) {
-							var loop = m.get("mloopcol", loopstart + totloop - 1);
-							col0r = loop.get("r");
-							col0g = loop.get("g");
-							col0b = loop.get("b");
-							loop = m.get("mloopcol", loopstart);
-							col1r = loop.get("r");
-							col1g = loop.get("g");
-							col1b = loop.get("b");
+							bl.pos = coldata_pos + (loopstart + totloop - 1) * 1 * 4; // * 4 = r, g, b, a
+							col0r = bl.read8();
+							col0g = bl.read8();
+							col0b = bl.read8();
+							bl.pos = coldata_pos + (loopstart) * 1 * 4;
+							col1r = bl.read8();
+							col1g = bl.read8();
+							col1b = bl.read8();
 						}
 						for (j in 0...totloop - 2) {
 							var v2 = m.get("mvert", m.get("mloop", loopstart + j + 1).get("v"));
@@ -142,7 +180,8 @@ class ImportBlendMesh {
 							no1 = no2;
 							vec1.setFrom(vec2);
 							if (hasuv) {
-								uv2 = m.get("mloopuv", loopstart + j + 1).get("uv");
+								bl.pos = uvdata_pos + (loopstart + j + 1) * 4 * 3;
+								uv2 = bl.readf32array(2);
 								if (uv2[0] > 1.0 + eps) uv2[0] = uv2[0] - Std.int(uv2[0]);
 								if (uv2[1] > 1.0 + eps) uv2[1] = uv2[1] - Std.int(uv2[1]);
 								texa[tri * 6    ] = Std.int(uv0[0] * 32767);
@@ -154,10 +193,10 @@ class ImportBlendMesh {
 								uv1 = uv2;
 							}
 							if (hascol) {
-								var loop = m.get("mloopcol", loopstart + j + 1);
-								col2r = loop.get("r");
-								col2g = loop.get("g");
-								col2b = loop.get("b");
+								bl.pos = coldata_pos + (loopstart + j + 1) * 1 * 4;
+								col2r = bl.read8();
+								col2g = bl.read8();
+								col2b = bl.read8();
 								cola[tri * 9    ] = col0r * 128;
 								cola[tri * 9 + 1] = col0g * 128;
 								cola[tri * 9 + 2] = col0b * 128;
@@ -273,13 +312,16 @@ class ImportBlendMesh {
 								var uv1: Float32Array = null;
 								var uv2: Float32Array = null;
 								if (hasuv) {
-									uv0 = m.get("mloopuv", va[i ]).get("uv");
+									bl.pos = uvdata_pos + (va[i ]) * 4 * 3;
+									uv0 = bl.readf32array(2);
 									if (uv0[0] > 1.0 + eps) uv0[0] = uv0[0] - Std.int(uv0[0]);
 									if (uv0[1] > 1.0 + eps) uv0[1] = uv0[1] - Std.int(uv0[1]);
-									uv1 = m.get("mloopuv", va[i1]).get("uv");
+									bl.pos = uvdata_pos + (va[i1]) * 4 * 3;
+									uv1 = bl.readf32array(2);
 									if (uv1[0] > 1.0 + eps) uv1[0] = uv1[0] - Std.int(uv1[0]);
 									if (uv1[1] > 1.0 + eps) uv1[1] = uv1[1] - Std.int(uv1[1]);
-									uv2 = m.get("mloopuv", va[i2]).get("uv");
+									bl.pos = uvdata_pos + (va[i2]) * 4 * 3;
+									uv2 = bl.readf32array(2);
 									if (uv2[0] > 1.0 + eps) uv2[0] = uv2[0] - Std.int(uv2[0]);
 									if (uv2[1] > 1.0 + eps) uv2[1] = uv2[1] - Std.int(uv2[1]);
 								}
@@ -293,18 +335,18 @@ class ImportBlendMesh {
 								var col2g: Int = 0;
 								var col2b: Int = 0;
 								if (hascol) {
-									var loop = m.get("mloopcol", va[i ]);
-									col0r = loop.get("r");
-									col0g = loop.get("g");
-									col0b = loop.get("b");
-									loop = m.get("mloopcol", va[i1]);
-									col1r = loop.get("r");
-									col1g = loop.get("g");
-									col1b = loop.get("b");
-									loop = m.get("mloopcol", va[i2]);
-									col2r = loop.get("r");
-									col2g = loop.get("g");
-									col2b = loop.get("b");
+									bl.pos = coldata_pos + (va[i ]) * 1 * 4;
+									col0r = bl.read8();
+									col0g = bl.read8();
+									col0b = bl.read8();
+									bl.pos = coldata_pos + (va[i1]) * 1 * 4;
+									col1r = bl.read8();
+									col1g = bl.read8();
+									col1b = bl.read8();
+									bl.pos = coldata_pos + (va[i2]) * 1 * 4;
+									col2r = bl.read8();
+									col2g = bl.read8();
+									col2b = bl.read8();
 								}
 								posa32[tri * 9    ] = co0[0];
 								posa32[tri * 9 + 1] = co0[1];
