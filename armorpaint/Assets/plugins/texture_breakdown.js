@@ -64,7 +64,7 @@ function drawBreakdown(type) {
 	g2.disableScissor();
 
 	if (h2.position === 0) { // Material
-		var lay = arm.Context.layer;
+		var lay = arm.Context.raw.layer;
 		for (let i = 0; i < slots.length; ++i) {
 			g2.set_pipeline(arm.UIView2D.pipe);
 			let image = lay.texpaint;
@@ -89,7 +89,8 @@ function drawBreakdown(type) {
 			var step_source = image.get_width() / slots.length;
 			var step_dest = breakdown.get_width() / slots.length;
 			g2.drawScaledSubImage(image, step_source * i, 0, step_source, image.get_height(), step_dest * i, 0, step_dest, breakdown.get_height());
-			g2.flush();
+			g2.end(); // Flush
+			g2.begin(false);
 		}
 	}
 	else { // Viewport

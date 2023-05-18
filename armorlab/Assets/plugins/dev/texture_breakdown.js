@@ -89,7 +89,8 @@ function drawBreakdown(type) {
 			var step_source = image.get_width() / slots.length;
 			var step_dest = breakdown.get_width() / slots.length;
 			g2.drawScaledSubImage(image, step_source * i, 0, step_source, image.get_height(), step_dest * i, 0, step_dest, breakdown.get_height());
-			g2.flush();
+			g2.end(); // Flush
+			g2.begin(false);
 		}
 	}
 	else { // Viewport
