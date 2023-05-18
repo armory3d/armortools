@@ -250,6 +250,8 @@ class BoxPreferences {
 						}
 					}
 
+					ui.changed = false;
+
 					if (Std.isOfType(val, Bool)) {
 						h.selected = val;
 						untyped theme[key] = ui.check(h, key);
@@ -264,6 +266,10 @@ class BoxPreferences {
 						var res = ui.textInput(h, key);
 						if (isHex) untyped theme[key] = parseInt(h.text, 16);
 						else untyped theme[key] = parseInt(h.text);
+					}
+
+					if (ui.changed) {
+						ui.elementsBaked = false;
 					}
 				}
 			}

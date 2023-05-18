@@ -100,7 +100,7 @@ class UIView2D {
 
 			// Grid
 			ui.g.color = 0xffffffff;
-			ui.g.drawImage(UINodes.inst.grid, (panX * panScale) % 40 - 40, (panY * panScale) % 40 - 40);
+			ui.g.drawImage(UINodes.inst.grid, (panX * panScale) % 100 - 100, (panY * panScale) % 100 - 100);
 
 			// Texture
 			var l = Context.raw.layer;
@@ -200,20 +200,17 @@ class UIView2D {
 				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, th);
 			}
 
-			// Editable layer name
-			var ACCENT_COL = ui.t.ACCENT_COL;
-			var BUTTON_H = ui.t.BUTTON_H;
-			var ELEMENT_H = ui.t.ELEMENT_H;
-			var FONT_SIZE = ui.fontSize;
-			ui.t.ACCENT_COL = 0x00000000;
-			ui.t.BUTTON_H = 30;
-			ui.t.ELEMENT_H = 30;
-			ui.fontSize = Std.int(22 * ui.SCALE());
-			ui._x = ww - ui.ELEMENT_W() * 1.4;
-			ui._y = wh - ui.ELEMENT_H() * 1.2;
-			ui._w = Std.int(ui.ELEMENT_W() * 1.4);
-			var h = Id.handle();
+			// Controls
+			var ew = Std.int(ui.ELEMENT_W());
+			ui.g.color = ui.t.SEPARATOR_COL;
+			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
+			ui.g.color = 0xffffffff;
+			ui._x = 2;
+			ui._y = 2;
+			ui._w = ew;
 
+			// Editable layer name
+			var h = Id.handle();
 			if (type == View2DLayer) {
 				h.text = l.name;
 				l.name = ui.textInput(h, "", Right);
@@ -235,21 +232,9 @@ class UIView2D {
 			}
 			// else { // View2DNode
 			// }
-
 			if (h.changed) UIBase.inst.hwnds[0].redraws = 2;
-			ui.t.ACCENT_COL = ACCENT_COL;
-			ui.t.BUTTON_H = BUTTON_H;
-			ui.t.ELEMENT_H = ELEMENT_H;
-			ui.fontSize = FONT_SIZE;
-
-			// Controls
-			var ew = Std.int(ui.ELEMENT_W());
-			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
-			ui.g.color = 0xffffffff;
-			ui._x = 2;
+			ui._x += ew + 3;
 			ui._y = 2;
-			ui._w = ew;
 
 			if (type == View2DLayer) {
 				layerMode = ui.combo(Id.handle({ position: layerMode }), [

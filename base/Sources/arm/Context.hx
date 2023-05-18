@@ -226,9 +226,9 @@ class Context {
 	}
 
 	#if (is_paint || is_sculpt)
-	public static function in2dView(): Bool {
+	public static function in2dView(type = View2DLayer): Bool {
 		var mouse = Input.getMouse();
-		return UIView2D.inst.show && UIView2D.inst.type == View2DLayer &&
+		return UIView2D.inst.show && UIView2D.inst.type == type &&
 			   mouse.x > UIView2D.inst.wx && mouse.x < UIView2D.inst.wx + UIView2D.inst.ww &&
 			   mouse.y > UIView2D.inst.wy && mouse.y < UIView2D.inst.wy + UIView2D.inst.wh;
 	}
