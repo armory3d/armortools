@@ -1180,6 +1180,7 @@ class UINodes {
 					ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
 					ui.fill(1, 1, ui._w / ui.SCALE() - 2, ui.t.BUTTON_H + 1, ui.t.SEPARATOR_COL);
 					ui.enabled = canPlaceGroup(g.canvas.name);
+					UIMenu.menuFill(ui);
 					ui.row([5 / 6, 1 / 6]);
 					if (ui.button(Config.buttonSpacing + g.canvas.name, Left)) {
 						pushUndo();
