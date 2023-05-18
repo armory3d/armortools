@@ -193,6 +193,34 @@ class UIView2D {
 						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
 					}
 				}
+
+				// Texture and node preview color picking
+				if ((Context.in2dView(View2DAsset) || Context.in2dView(View2DNode)) && Context.raw.tool == ToolPicker && ui.inputDown) {
+					var x = ui.inputX - tx - wx;
+					var y = ui.inputY - ty - wy;
+					App.notifyOnNextFrame(function() {
+						var path = iron.RenderPath.active;
+						var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
+						var g2 = texpaint_picker.g2;
+						g2.begin(false);
+						g2.drawScaledImage(tex, -x, -y, tw, th);
+						g2.end();
+						var a = texpaint_picker.getPixels();
+						#if (kha_metal || kha_vulkan)
+						var i0 = 2;
+						var i1 = 1;
+						var i2 = 0;
+						#else
+						var i0 = 0;
+						var i1 = 1;
+						var i2 = 2;
+						#end
+						Context.raw.pickedColor.base.Rb = a.get(i0);
+						Context.raw.pickedColor.base.Gb = a.get(i1);
+						Context.raw.pickedColor.base.Bb = a.get(i2);
+						UIHeader.inst.headerHandle.redraws = 2;
+					});
+				}
 			}
 
 			// UV map
