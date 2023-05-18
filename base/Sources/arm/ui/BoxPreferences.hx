@@ -269,7 +269,9 @@ class BoxPreferences {
 					}
 
 					if (ui.changed) {
-						ui.elementsBaked = false;
+						for (ui in App.getUIs()) {
+							ui.elementsBaked = false;
+						}
 					}
 				}
 			}
