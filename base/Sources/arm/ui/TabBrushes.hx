@@ -83,14 +83,13 @@ class TabBrushes {
 						var add = Project.brushes.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							//var b = Project.brushes[i];
-							ui.text(Project.brushes[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
-							if (ui.button(tr("Export"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Export"))) {
 								Context.selectBrush(i);
 								BoxExport.showBrush();
 							}
 
-							if (ui.button(tr("Duplicate"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 								function _init() {
 									Context.raw.brush = new BrushSlot();
 									Project.brushes.push(Context.raw.brush);
@@ -102,10 +101,10 @@ class TabBrushes {
 								iron.App.notifyOnInit(_init);
 							}
 
-							if (Project.brushes.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
+							if (Project.brushes.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {
 								deleteBrush(Project.brushes[i]);
 							}
-						}, 3 + add);
+						}, 2 + add);
 					}
 
 					if (ui.isHovered) {

@@ -199,6 +199,8 @@ class UIMenubar {
 	function showMenu(ui: Zui, category: Int) {
 		UIMenu.show = true;
 		UIMenu.menuCategory = category;
+		UIMenu.menuCategoryW = ui._w;
+		UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
 		UIMenu.menuX = Std.int(ui._x - ui._w);
 		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
 		if (Config.raw.touch_ui) {

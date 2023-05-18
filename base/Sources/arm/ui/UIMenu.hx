@@ -23,6 +23,8 @@ class UIMenu {
 
 	public static var show = false;
 	public static var menuCategory = 0;
+	public static var menuCategoryW = 0;
+	public static var menuCategoryH = 0;
 	public static var menuX = 0;
 	public static var menuY = 0;
 	public static var menuElements = 0;
@@ -39,7 +41,7 @@ class UIMenu {
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
 		var _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = 30;
+		ui.t.ELEMENT_H = 28;
 
 		ui.beginRegion(g, menuX, menuY, menuW);
 
@@ -49,6 +51,7 @@ class UIMenu {
 			menuCommands(ui);
 		}
 		else {
+			menuStart(ui);
 			if (menuCategory == MenuFile) {
 				if (menuButton(ui, tr("New Project..."), Config.keymap.file_new)) Project.projectNewBox();
 				if (menuButton(ui, tr("Open..."), Config.keymap.file_open)) Project.projectOpen();
@@ -524,8 +527,8 @@ class UIMenu {
 		show = true;
 		menuCommands = commands;
 		menuElements = elements;
-		menuX = x > -1 ? x : Std.int(Input.getMouse().x);
-		menuY = y > -1 ? y : Std.int(Input.getMouse().y);
+		menuX = x > -1 ? x : Std.int(Input.getMouse().x + 1);
+		menuY = y > -1 ? y : Std.int(Input.getMouse().y + 1);
 		// Prevent the menu going out of screen
 		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
 		if (menuX + menuW > System.windowWidth()) {
@@ -552,7 +555,7 @@ class UIMenu {
 			ui.fill(0, 0, ui._w / ui.SCALE(), 1, ui.t.ACCENT_SELECT_COL);
 		}
 		else {
-			ui.fill(28, 0, ui._w / ui.SCALE() - 28, 1, ui.t.ACCENT_SELECT_COL);
+			ui.fill(26, 0, ui._w / ui.SCALE() - 26, 1, ui.t.ACCENT_SELECT_COL);
 		}
 	}
 
@@ -569,10 +572,20 @@ class UIMenu {
 		return ui.button(Config.buttonSpacing + text, Config.buttonAlign, label);
 	}
 
-	static function menuAlign(ui: Zui) {
+	public static function menuAlign(ui: Zui) {
 		if (!Config.raw.touch_ui) {
-			ui.row([1 / 8, 7 / 8]);
+			ui.row([12 / 100, 88 / 100]);
 			ui.endElement();
 		}
+	}
+
+	public static function menuStart(ui: Zui) {
+		// Draw top border
+		ui.g.color = ui.t.ACCENT_SELECT_COL;
+		ui.g.fillRect(ui._x - 1 + menuCategoryW, ui._y - 1, ui._w + 2 - menuCategoryW, 1);
+		ui.g.fillRect(ui._x - 1, ui._y - menuCategoryH, menuCategoryW, 1);
+		ui.g.fillRect(ui._x - 1, ui._y - menuCategoryH, 1, menuCategoryH);
+		ui.g.fillRect(ui._x - 1 + menuCategoryW, ui._y - menuCategoryH, 1, menuCategoryH);
+		ui.g.color = 0xffffffff;
 	}
 }

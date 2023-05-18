@@ -228,7 +228,7 @@ class UIView2D {
 				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, th);
 			}
 
-			// Controls
+			// Menu
 			var ew = Std.int(ui.ELEMENT_W());
 			ui.g.color = ui.t.SEPARATOR_COL;
 			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
@@ -239,9 +239,11 @@ class UIView2D {
 
 			// Editable layer name
 			var h = Id.handle();
+			var text = type == View2DNode ? Context.raw.nodePreviewName : h.text;
+			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
 			if (type == View2DLayer) {
 				h.text = l.name;
-				l.name = ui.textInput(h, "", Right);
+				l.name = ui.textInput(h, "");
 				textInputHover = ui.isHovered;
 			}
 			else if (type == View2DAsset) {
@@ -250,19 +252,21 @@ class UIView2D {
 					var assetNames = Project.assetNames;
 					var i = assetNames.indexOf(asset.name);
 					h.text = asset.name;
-					asset.name = ui.textInput(h, "", Right);
+					asset.name = ui.textInput(h, "");
 					assetNames[i] = asset.name;
 				}
 			}
 			else if (type == View2DFont) {
 				h.text = Context.raw.font.name;
-				Context.raw.font.name = ui.textInput(h, "", Right);
+				Context.raw.font.name = ui.textInput(h, "");
 			}
-			// else { // View2DNode
-			// }
+			else { // View2DNode
+				ui.text(Context.raw.nodePreviewName);
+			}
 			if (h.changed) UIBase.inst.hwnds[0].redraws = 2;
-			ui._x += ew + 3;
+			ui._x += ui._w + 3;
 			ui._y = 2;
+			ui._w = ew;
 
 			if (type == View2DLayer) {
 				layerMode = ui.combo(Id.handle({ position: layerMode }), [
@@ -287,18 +291,19 @@ class UIView2D {
 				}
 
 				uvmapShow = ui.check(Id.handle({ selected: uvmapShow }), tr("UV Map"));
-				ui._x += ew + 3;
+				ui._x += ew * 0.7 + 3;
 				ui._y = 2;
 			}
 
 			tiledShow = ui.check(Id.handle({ selected: tiledShow }), tr("Tiled"));
+			ui._x += ew * 0.7 + 3;
+			ui._y = 2;
 
 			if (type == View2DAsset && tex != null) { // Texture resolution
-				ui._x += ew + 3;
-				ui._y = 2;
 				ui.text(tex.width + "x" + tex.height);
 			}
 
+			// Picked position
 			if (Context.raw.tool == ToolPicker && (type == View2DLayer || type == View2DAsset)) {
 				var cursorImg = Res.get("cursor.k");
 				var hsize = 16 * ui.SCALE();

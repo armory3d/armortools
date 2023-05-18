@@ -119,9 +119,8 @@ class BoxProjects {
 							var name = path.substring(path.lastIndexOf(arm.sys.Path.sep) + 1, path.lastIndexOf("."));
 							if (ui.isHovered && ui.inputReleasedR) {
 								UIMenu.draw(function(ui: Zui) {
-									ui.text(name, Right, ui.t.HIGHLIGHT_COL);
-									// if (ui.button(tr("Duplicate"), Left)) {}
-									if (ui.button(tr("Delete"), Left)) {
+									// if (UIMenu.menuButton(ui, tr("Duplicate"))) {}
+									if (UIMenu.menuButton(ui, tr("Delete"))) {
 										iron.App.notifyOnInit(function() {
 											arm.sys.File.delete(path);
 											arm.sys.File.delete(iconPath);
@@ -130,7 +129,7 @@ class BoxProjects {
 											recent_projects.splice(i, 1);
 										});
 									}
-								}, 2);
+								}, 1);
 							}
 
 							if (show_asset_names) {

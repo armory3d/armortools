@@ -95,12 +95,11 @@ class TabBrowser {
 				var fileName = file.substr(file.lastIndexOf(Path.sep) + 1);
 				if (fileName != "..") {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(fileName, Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Import"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Import"))) {
 							ImportAsset.run(file);
 						}
 						if (Path.isTexture(file)) {
-							if (ui.button(tr("Set as Envmap"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Set as Envmap"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
 									App.notifyOnNextFrame(function() {
 										var assetIndex = -1;
@@ -118,7 +117,7 @@ class TabBrowser {
 							}
 
 							#if (is_paint || is_sculpt)
-							if (ui.button(tr("Set as Mask"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Set as Mask"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
 									App.notifyOnNextFrame(function() {
 										var assetIndex = -1;
@@ -137,7 +136,7 @@ class TabBrowser {
 							#end
 
 							#if is_paint
-							if (ui.button(tr("Set as Color ID Map"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Set as Color ID Map"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
 									App.notifyOnNextFrame(function() {
 										var assetIndex = -1;
@@ -161,10 +160,10 @@ class TabBrowser {
 							}
 							#end
 						}
-						if (ui.button(tr("Open Externally"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Open Externally"))) {
 							File.start(file);
 						}
-					}, Path.isTexture(file) ? 6 : 3);
+					}, Path.isTexture(file) ? 5 : 2);
 				}
 			});
 
@@ -177,15 +176,7 @@ class TabBrowser {
 			}
 			known = hpath.text.substr(hpath.text.lastIndexOf(Path.sep)).indexOf(".") > 0;
 			#if krom_android
-			#if is_paint
-			if (hpath.text.endsWith(".armorpaint")) known = false;
-			#end
-			#if is_sculpt
-			if (hpath.text.endsWith(".armorsculpt")) known = false;
-			#end
-			#if is_lab
-			if (hpath.text.endsWith(".armorlab")) known = false;
-			#end
+			if (hpath.text.endsWith("." + Manifest.title.toLowerCase())) known = false;
 			#end
 
 			var bottomY = ui._y;
@@ -200,20 +191,19 @@ class TabBrowser {
 			if (ui.button(tr("Disk"), Left)) {
 				#if krom_android
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Disk"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Download"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Download"))) {
 						hpath.text = UIFiles.defaultPath;
 					}
-					if (ui.button(tr("Pictures"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Pictures"))) {
 						hpath.text = "/storage/emulated/0/Pictures";
 					}
-					if (ui.button(tr("Camera"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Camera"))) {
 						hpath.text = "/storage/emulated/0/DCIM/Camera";
 					}
-					if (ui.button(tr("Projects"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Projects"))) {
 						hpath.text = Krom.savePath();
 					}
-				}, 5);
+				}, 4);
 				#else
 				hpath.text = UIFiles.defaultPath;
 				#end
@@ -228,12 +218,11 @@ class TabBrowser {
 
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(folder, Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Delete"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Delete"))) {
 							Config.raw.bookmarks.remove(b);
 							Config.save();
 						}
-					}, 2);
+					}, 1);
 				}
 			}
 

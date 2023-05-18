@@ -143,6 +143,7 @@ import arm.data.FontSlot;
 	@:optional public var nodePreview: Image = null;
 	@:optional public var nodePreviews: Map<String, Image> = null;
 	@:optional public var nodePreviewsUsed: Array<String> = null;
+	@:optional public var nodePreviewName = "";
 	@:optional public var maskPreviewRgba32: kha.Image = null;
 	@:optional public var maskPreviewLast: LayerSlot = null;
 

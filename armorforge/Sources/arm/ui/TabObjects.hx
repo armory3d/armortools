@@ -79,8 +79,7 @@ class TabObjects {
 
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.text(currentObject.name, Right, ui.t.HIGHLIGHT_COL);
-							if (ui.button("Assign Material", Left)) {
+							if (UIMenu.menuButton(ui, "Assign Material")) {
 								materialId++;
 
 								for (sh in iron.Scene.active.raw.shader_datas) {
@@ -108,7 +107,7 @@ class TabObjects {
 									arm.shader.MakeMaterial.parseMeshPreviewMaterial(md);
 								});
 							}
-						}, 2);
+						}, 1);
 					}
 
 					if (b) {

@@ -96,12 +96,10 @@ class TabFonts {
 						var add = Project.fonts.length > 1 ? 1 : 0;
 						var fontName = Project.fonts[i].name;
 						UIMenu.draw(function(ui: Zui) {
-							ui.text(fontName, Right, ui.t.HIGHLIGHT_COL);
-
-							if (Project.fonts.length > 1 && ui.button(tr("Delete"), Left, "delete") && Project.fonts[i].file != "") {
+							if (Project.fonts.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete") && Project.fonts[i].file != "") {
 								deleteFont(Project.fonts[i]);
 							}
-						}, 1 + add);
+						}, 0 + add);
 					}
 					if (ui.isHovered) {
 						if (img == null) {

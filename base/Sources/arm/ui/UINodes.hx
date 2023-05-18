@@ -7,6 +7,7 @@ import kha.System;
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
+import zui.Ext;
 import iron.system.Input;
 import arm.shader.NodesMaterial;
 import arm.logic.NodesBrush;
@@ -138,9 +139,8 @@ class UINodes {
 		if (ui.inputReleasedR) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 				App.notifyOnNextFrame(function() {
-					arm.ui.UIMenu.draw(function(ui: Zui) {
-						ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Edit"), Left)) {
+					UIMenu.draw(function(ui: Zui) {
+						if (UIMenu.menuButton(ui, tr("Edit"))) {
 							var htype = Id.handle();
 							var hname = Id.handle();
 							var hmin = Id.handle();
@@ -169,26 +169,26 @@ class UINodes {
 										var type = ui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 										var name = ui.textInput(hname, tr("Name"));
-										var min = zui.Ext.floatInput(ui, hmin, tr("Min"));
-										var max = zui.Ext.floatInput(ui, hmax, tr("Max"));
+										var min = Ext.floatInput(ui, hmin, tr("Min"));
+										var max = Ext.floatInput(ui, hmax, tr("Max"));
 										var default_value: Dynamic = null;
 										if (type == 0) {
 											ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
-											zui.Ext.floatInput(ui, hval0, tr("R"));
-											zui.Ext.floatInput(ui, hval1, tr("G"));
-											zui.Ext.floatInput(ui, hval2, tr("B"));
-											zui.Ext.floatInput(ui, hval3, tr("A"));
+											Ext.floatInput(ui, hval0, tr("R"));
+											Ext.floatInput(ui, hval1, tr("G"));
+											Ext.floatInput(ui, hval2, tr("B"));
+											Ext.floatInput(ui, hval3, tr("A"));
 											default_value = [hval0.value, hval1.value, hval2.value, hval3.value];
 										}
 										else if (type == 1) {
 											ui.row([1 / 3, 1 / 3, 1 / 3]);
-											hval0.value = zui.Ext.floatInput(ui, hval0, tr("X"));
-											hval1.value = zui.Ext.floatInput(ui, hval1, tr("Y"));
-											hval2.value = zui.Ext.floatInput(ui, hval2, tr("Z"));
+											hval0.value = Ext.floatInput(ui, hval0, tr("X"));
+											hval1.value = Ext.floatInput(ui, hval1, tr("Y"));
+											hval2.value = Ext.floatInput(ui, hval2, tr("Z"));
 											default_value = [hval0.value, hval1.value, hval2.value];
 										}
 										else {
-											default_value = zui.Ext.floatInput(ui, hval0, tr("default_value"));
+											default_value = Ext.floatInput(ui, hval0, tr("default_value"));
 										}
 										if (ui.button(tr("OK"))) { // || ui.isReturnDown
 											socket.name = name;
@@ -205,7 +205,7 @@ class UINodes {
 								}, 400, 250);
 							});
 						}
-						if (ui.button(tr("Delete"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Delete"))) {
 							var i = 0;
 							// Remove links connected to the socket
 							while (i < canvas.links.length) {
@@ -221,7 +221,7 @@ class UINodes {
 							node.outputs.remove(socket);
 							NodesMaterial.syncSockets(node);
 						}
-					}, 3);
+					}, 2);
 				});
 			}
 			else onCanvasReleased();
@@ -942,9 +942,11 @@ class UINodes {
 			// Editable canvas name
 			var h = Id.handle();
 			h.text = c.name;
-			var newName = ui.textInput(h, "", Right);
-			ui._x += ew + 3;
+			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, h.text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
+			var newName = ui.textInput(h, "");
+			ui._x += ui._w + 3;
 			ui._y = 0;
+			ui._w = ew;
 
 			if (h.changed) { // Check whether renaming is possible and update group links
 				if (groupStack.length > 0) {
@@ -1087,7 +1089,7 @@ class UINodes {
 			#end
 
 			for (i in 0...cats.length) {
-				if ((ui.button(tr(cats[i]), Left)) || (ui.isHovered && showMenu)) {
+				if ((Ext.menuButton(ui, tr(cats[i]))) || (ui.isHovered && showMenu)) {
 					showMenu = true;
 					menuCategory = i;
 					popupX = wx + ui._x;
@@ -1095,24 +1097,26 @@ class UINodes {
 					if (Config.raw.touch_ui) {
 						showMenuFirst = true;
 					}
+					UIMenu.menuCategoryW = ui._w;
+					UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
 				}
-				if (i < cats.length - 1) {
-					ui._x += ew + 3;
-					ui._y = 0;
-				}
+				ui._x += ui._w + 3;
+				ui._y = 0;
 			}
-			ui._x += ew + 3;
-			ui._y = 0;
 
-			if (ui.button(tr("Search"), Left)) nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
-			if (ui.isHovered) ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');
-			ui._x += ew + 3;
+			if (Ext.menuButton(ui, tr("Search"))) {
+				nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+			}
+			if (ui.isHovered) {
+				ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');
+			}
+			ui._x += ui._w + 3;
 			ui._y = 0;
 
 			ui.t.BUTTON_COL = _BUTTON_COL;
 
 			// Close node group
-			if (groupStack.length > 0 && ui.button(tr("Close"))) {
+			if (groupStack.length > 0 && Ext.menuButton(ui, tr("Close"))) {
 				groupStack.pop();
 			}
 		}
@@ -1141,18 +1145,19 @@ class UINodes {
 			if (isGroupCategory) numNodes += Project.materialGroups.length;
 
 			var py = popupY;
-			var menuw = Std.int(ew * 2.0);
+			var menuw = Std.int(ew * 2.3);
 			ui.beginRegion(g, Std.int(popupX), Std.int(py), menuw);
 			var _BUTTON_COL = ui.t.BUTTON_COL;
 			ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
-			var _BUTTON_H = ui.t.BUTTON_H;
-			ui.t.BUTTON_H = ui.t.ELEMENT_H;
 			var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
+			var _ELEMENT_H = ui.t.ELEMENT_H;
+			ui.t.ELEMENT_H = 28;
+
+			UIMenu.menuStart(ui);
 
 			for (n in list[menuCategory]) {
-				ui.fill(0, 1, ui._w / ui.SCALE(), ui.t.BUTTON_H + 2, ui.t.ACCENT_SELECT_COL);
-				if (ui.button(Config.buttonSpacing + tr(n.name), Config.buttonAlign)) {
+				if (UIMenu.menuButton(ui, tr(n.name))) {
 					pushUndo();
 					var canvas = getCanvas(true);
 					var nodes = getNodes();
@@ -1202,8 +1207,8 @@ class UINodes {
 			showMenuFirst = false;
 
 			ui.t.BUTTON_COL = _BUTTON_COL;
-			ui.t.BUTTON_H = _BUTTON_H;
 			ui.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
+			ui.t.ELEMENT_H = _ELEMENT_H;
 			ui.endRegion();
 		}
 
@@ -1358,6 +1363,8 @@ class UINodes {
 		if (nodes.nodesSelected.length == 0) return;
 
 		var node = nodes.nodesSelected[0];
+		Context.raw.nodePreviewName = node.name;
+
 		if (node.type == "LAYER" ||
 			node.type == "LAYER_MASK" ||
 			node.type == "MATERIAL" ||

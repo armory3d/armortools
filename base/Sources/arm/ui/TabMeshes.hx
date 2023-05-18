@@ -35,26 +35,24 @@ class TabMeshes {
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Import"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Replace Existing"), Left, '${Config.keymap.file_import_assets}')) {
+					if (UIMenu.menuButton(ui, tr("Replace Existing"), '${Config.keymap.file_import_assets}')) {
 						Project.importMesh(true);
 					}
-					if (ui.button(tr("Append"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Append"))) {
 						Project.importMesh(false);
 					}
-				}, 3);
+				}, 2);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import mesh file"));
 
 			#if is_lab
 			if (ui.button(tr("Set Default"))) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Meshes"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Cube"), Left)) setDefaultMesh(".Cube");
-					if (ui.button(tr("Plane"), Left)) setDefaultMesh(".Plane");
-					if (ui.button(tr("Sphere"), Left)) setDefaultMesh(".Sphere");
-					if (ui.button(tr("Cylinder"), Left)) setDefaultMesh(".Cylinder");
-				}, 5);
+					if (UIMenu.menuButton(ui, tr("Cube"))) setDefaultMesh(".Cube");
+					if (UIMenu.menuButton(ui, tr("Plane"))) setDefaultMesh(".Plane");
+					if (UIMenu.menuButton(ui, tr("Sphere"))) setDefaultMesh(".Sphere");
+					if (UIMenu.menuButton(ui, tr("Cylinder"))) setDefaultMesh(".Cylinder");
+				}, 4);
 			}
 			#end
 
@@ -65,10 +63,9 @@ class TabMeshes {
 
 			if (ui.button(tr("Calculate Normals"))) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Normals"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Smooth"), Left)) { MeshUtil.calcNormals(true); Context.raw.ddirty = 2; }
-					if (ui.button(tr("Flat"), Left)) { MeshUtil.calcNormals(false); Context.raw.ddirty = 2; }
-				}, 3);
+					if (UIMenu.menuButton(ui, tr("Smooth"))) { MeshUtil.calcNormals(true); Context.raw.ddirty = 2; }
+					if (UIMenu.menuButton(ui, tr("Flat"))) { MeshUtil.calcNormals(false); Context.raw.ddirty = 2; }
+				}, 2);
 			}
 
 			if (ui.button(tr("Geometry to Origin"))) {
@@ -90,22 +87,21 @@ class TabMeshes {
 
 			if (ui.button(tr("Rotate"))) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Rotate"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Rotate X"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Rotate X"))) {
 						MeshUtil.swapAxis(1, 2);
 						Context.raw.ddirty = 2;
 					}
 
-					if (ui.button(tr("Rotate Y"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Rotate Y"))) {
 						MeshUtil.swapAxis(2, 0);
 						Context.raw.ddirty = 2;
 					}
 
-					if (ui.button(tr("Rotate Z"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Rotate Z"))) {
 						MeshUtil.swapAxis(0, 1);
 						Context.raw.ddirty = 2;
 					}
-				}, 4);
+				}, 3);
 			}
 
 			ui.endSticky();
@@ -117,12 +113,11 @@ class TabMeshes {
 				o.visible = ui.check(h, o.name);
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(o.name, Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Export"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Export"))) {
 							Context.raw.exportMeshIndex = i + 1;
 							BoxExport.showMesh();
 						}
-						if (Project.paintObjects.length > 1 && ui.button(tr("Delete"), Left)) {
+						if (Project.paintObjects.length > 1 && UIMenu.menuButton(ui, tr("Delete"))) {
 							Project.paintObjects.remove(o);
 							while (o.children.length > 0) {
 								var child = o.children[0];
@@ -141,7 +136,7 @@ class TabMeshes {
 							MeshUtil.mergeMesh();
 							Context.raw.ddirty = 2;
 						}
-					}, Project.paintObjects.length > 1 ? 3 : 2);
+					}, Project.paintObjects.length > 1 ? 2 : 1);
 				}
 				if (h.changed) {
 					var visibles: Array<MeshObject> = [];

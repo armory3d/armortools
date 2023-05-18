@@ -2964,22 +2964,21 @@ class NodesMaterial {
 	static function addSocketButton(ui: Zui, nodes: Nodes, node: TNode, sockets: Array<TNodeSocket>) {
 		if (ui.button(tr("Add"))) {
 			arm.ui.UIMenu.draw(function(ui: Zui) {
-				ui.text(tr("Socket"), Right, ui.t.HIGHLIGHT_COL);
 				var groupStack = arm.ui.UINodes.inst.groupStack;
 				var c = groupStack[groupStack.length - 1].canvas;
-				if (ui.button(tr("RGBA"), Left)) {
+				if (arm.ui.UIMenu.menuButton(ui, tr("RGBA"))) {
 					sockets.push(createSocket(nodes, node, null, "RGBA", c));
 					syncSockets(node);
 				}
-				if (ui.button(tr("Vector"), Left)) {
+				if (arm.ui.UIMenu.menuButton(ui, tr("Vector"))) {
 					sockets.push(createSocket(nodes, node, null, "VECTOR", c));
 					syncSockets(node);
 				}
-				if (ui.button(tr("Value"), Left)) {
+				if (arm.ui.UIMenu.menuButton(ui, tr("Value"))) {
 					sockets.push(createSocket(nodes, node, null, "VALUE", c));
 					syncSockets(node);
 				}
-			}, 4);
+			}, 3);
 		}
 	}
 

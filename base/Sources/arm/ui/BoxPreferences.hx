@@ -100,8 +100,7 @@ class BoxPreferences {
 				ui.row([0.5, 0.5]);
 				if (ui.button(tr("Restore"))) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(tr("Restore defaults?"), Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Confirm"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Confirm"))) {
 							iron.App.notifyOnInit(function() {
 								ui.t.ELEMENT_H = App.defaultElementH;
 								Config.restore();
@@ -113,7 +112,7 @@ class BoxPreferences {
 								MakeMaterial.parsePaintMaterial();
 							});
 						}
-						if (ui.button(tr("Import..."), Left)) {
+						if (UIMenu.menuButton(ui, tr("Import..."))) {
 							UIFiles.show("json", false, false, function(path: String) {
 								Data.getBlob(path, function(b: kha.Blob) {
 									var raw = Json.parse(b.toString());
@@ -127,16 +126,15 @@ class BoxPreferences {
 								});
 							});
 						}
-					}, 3);
+					}, 2);
 				}
 				if (ui.button(tr("Reset Layout"))) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(tr("Reset layout?"), Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Confirm"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Confirm"))) {
 							App.initLayout();
 							Config.save();
 						}
-					}, 2);
+					}, 1);
 				}
 			}
 
@@ -612,12 +610,11 @@ plugin.drawUI = function(ui) {
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
-							ui.text(f, Right, ui.t.HIGHLIGHT_COL);
 							var path = Path.data() + Path.sep + "plugins" + Path.sep + f;
-							if (ui.button(tr("Edit in Text Editor"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Edit in Text Editor"))) {
 								File.start(path);
 							}
-							if (ui.button(tr("Edit in Script Tab"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Edit in Script Tab"))) {
 								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
 									TabScript.hscript.text = blob.toString();
 									iron.data.Data.deleteBlob("plugins/" + f);
@@ -625,13 +622,13 @@ plugin.drawUI = function(ui) {
 								});
 
 							}
-							if (ui.button(tr("Export"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Export"))) {
 								UIFiles.show("js", true, false, function(dest: String) {
 									if (!UIFiles.filename.endsWith(".js")) UIFiles.filename += ".js";
 									File.copy(path, dest + Path.sep + UIFiles.filename);
 								});
 							}
-							if (ui.button(tr("Delete"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Delete"))) {
 								if (Config.raw.plugins.indexOf(f) >= 0) {
 									Config.raw.plugins.remove(f);
 									Plugin.stop(f);
@@ -639,7 +636,7 @@ plugin.drawUI = function(ui) {
 								filesPlugin.remove(f);
 								File.delete(path);
 							}
-						}, 5);
+						}, 4);
 					}
 				}
 			}

@@ -123,26 +123,25 @@ class TabMaterials {
 						var add = Project.materials.length > 1 ? 1 : 0;
 						UIMenu.draw(function(ui: Zui) {
 							var m = Project.materials[i];
-							ui.text(Project.materials[i].canvas.name, Right, ui.t.HIGHLIGHT_COL);
 
-							if (ui.button(tr("To Fill Layer"), Left)) {
+							if (UIMenu.menuButton(ui, tr("To Fill Layer"))) {
 								Context.selectMaterial(i);
 								App.createFillLayer();
 							}
 
-							if (ui.button(tr("Export"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Export"))) {
 								Context.selectMaterial(i);
 								BoxExport.showMaterial();
 							}
 
 							#if is_paint
-							if (ui.button(tr("Bake"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Bake"))) {
 								Context.selectMaterial(i);
 								BoxExport.showBakeMaterial();
 							}
 							#end
 
-							if (ui.button(tr("Duplicate"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 								function _init() {
 									Context.raw.material = new MaterialSlot(Project.materials[0].data);
 									Project.materials.push(Context.raw.material);
@@ -154,7 +153,7 @@ class TabMaterials {
 								iron.App.notifyOnInit(_init);
 							}
 
-							if (Project.materials.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
+							if (Project.materials.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {
 								deleteMaterial(m);
 							}
 
@@ -167,14 +166,23 @@ class TabMaterials {
 							var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
 							var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
 							var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
+							UIMenu.menuFill(ui);
 							m.paintBase = ui.check(baseHandle, tr("Base Color"));
+							UIMenu.menuFill(ui);
 							m.paintOpac = ui.check(opacHandle, tr("Opacity"));
+							UIMenu.menuFill(ui);
 							m.paintNor = ui.check(norHandle, tr("Normal"));
+							UIMenu.menuFill(ui);
 							m.paintOcc = ui.check(occHandle, tr("Occlusion"));
+							UIMenu.menuFill(ui);
 							m.paintRough = ui.check(roughHandle, tr("Roughness"));
+							UIMenu.menuFill(ui);
 							m.paintMet = ui.check(metHandle, tr("Metallic"));
+							UIMenu.menuFill(ui);
 							m.paintHeight = ui.check(heightHandle, tr("Height"));
+							UIMenu.menuFill(ui);
 							m.paintEmis = ui.check(emisHandle, tr("Emission"));
+							UIMenu.menuFill(ui);
 							m.paintSubs = ui.check(subsHandle, tr("Subsurface"));
 							if (baseHandle.changed ||
 								opacHandle.changed ||
@@ -188,7 +196,7 @@ class TabMaterials {
 								MakeMaterial.parsePaintMaterial();
 								UIMenu.keepOpen = true;
 							}
-						}, 14 + add);
+						}, 13 + add);
 					}
 					if (ui.isHovered) {
 						ui.tooltipImage(imgFull);

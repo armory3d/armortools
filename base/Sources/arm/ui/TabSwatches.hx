@@ -46,15 +46,14 @@ class TabSwatches {
 
 			if (ui.button(tr("Import"))) {
 				UIMenu.draw(function(ui: Zui) {
-					ui.text(tr("Import"), Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Replace Existing"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Replace Existing"))) {
 						Project.importSwatches(true);
 						Context.setSwatch(Project.raw.swatches[0]);
 					}
-					if (ui.button(tr("Append"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Append"))) {
 						Project.importSwatches(false);
 					}
-				}, 3);
+				}, 2);
 			}	
 			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
 
@@ -168,13 +167,12 @@ class TabSwatches {
 						#end
 
 						UIMenu.draw(function(ui: Zui) {
-							ui.text(tr("Swatch"), Right, ui.t.HIGHLIGHT_COL);
-							if (ui.button(tr("Duplicate"), Left)) {
+							if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 								Context.setSwatch(Project.cloneSwatch(Context.raw.swatch));
 								Project.raw.swatches.push(Context.raw.swatch);
 							}
 							#if (krom_windows || krom_linux || krom_darwin)
-							else if (ui.button(tr("Copy Hex Code"), Left)) {
+							else if (UIMenu.menuButton(ui, tr("Copy Hex Code"))) {
 								var color = Context.raw.swatch.base;
 								color.A = Context.raw.swatch.opacity;
 								var val = untyped color;
@@ -182,26 +180,25 @@ class TabSwatches {
 								Krom.copyToClipboard(untyped val.toString(16));
 							}
 							#end
-							else if (Project.raw.swatches.length > 1 && ui.button(tr("Delete"), Left, "delete")) {
+							else if (Project.raw.swatches.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {
 								deleteSwatch(Project.raw.swatches[i]);
 							}
 							#if (is_paint || is_sculpt)
-							else if (ui.button(tr("Create Material"), Left)) {
+							else if (UIMenu.menuButton(ui, tr("Create Material"))) {
 								TabMaterials.acceptSwatchDrag(Project.raw.swatches[i]);
 							}
-							else if (ui.button(tr("Create Color Layer"), Left)) {
+							else if (UIMenu.menuButton(ui, tr("Create Color Layer"))) {
 								var color = Project.raw.swatches[i].base;
 								color.A = Project.raw.swatches[i].opacity;
-			
 								App.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
 							}
 							#end
 
 						#if (is_paint || is_sculpt)
-						}, 4 + add);
+						}, 3 + add);
 						#end
 						#if is_lab
-						}, 2 + add);
+						}, 1 + add);
 						#end
 					}
 					if (ui.isHovered) {

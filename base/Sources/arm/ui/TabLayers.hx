@@ -31,18 +31,17 @@ class TabLayers {
 			if (ui.button(tr("New"))) {
 				UIMenu.draw(function(ui: Zui) {
 					var l = Context.raw.layer;
-					ui.text("New", Right, ui.t.HIGHLIGHT_COL);
-					if (ui.button(tr("Paint Layer"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Paint Layer"))) {
 						App.newLayer();
 						History.newLayer();
 					}
-					if (ui.button(tr("Fill Layer"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Fill Layer"))) {
 						App.createFillLayer(UVMap);
 					}
-					if (ui.button(tr("Decal Layer"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Decal Layer"))) {
 						App.createFillLayer(UVProject);
 					}
-					if (ui.button(tr("Black Mask"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Black Mask"))) {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.raw.layer;
 
@@ -55,7 +54,7 @@ class TabLayers {
 						History.newBlackMask();
 						App.updateFillLayers();
 					}
-					if (ui.button(tr("White Mask"), Left)) {
+					if (UIMenu.menuButton(ui, tr("White Mask"))) {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.raw.layer;
 
@@ -68,7 +67,7 @@ class TabLayers {
 						History.newWhiteMask();
 						App.updateFillLayers();
 					}
-					if (ui.button(tr("Fill Mask"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Fill Mask"))) {
 						if (l.isMask()) Context.setLayer(l.parent);
 						var l = Context.raw.layer;
 
@@ -82,7 +81,7 @@ class TabLayers {
 						App.updateFillLayers();
 					}
 					ui.enabled = !Context.raw.layer.isGroup() && !Context.raw.layer.isInGroup();
-					if (ui.button(tr("Group"), Left)) {
+					if (UIMenu.menuButton(ui, tr("Group"))) {
 						if (l.isGroup() || l.isInGroup()) return;
 
 						if (l.isLayerMask()) l = l.parent;
@@ -98,7 +97,7 @@ class TabLayers {
 						History.newGroup();
 					}
 					ui.enabled = true;
-				}, 8);
+				}, 7);
 			}
 			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DLayer);
 			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_2d_view})');
@@ -555,12 +554,10 @@ class TabLayers {
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;
 		if (l.isMask()) add += 2;
-		var menuElements = l.isGroup() ? 8 : (20 + add);
+		var menuElements = l.isGroup() ? 7 : (19 + add);
 
 		UIMenu.draw(function(ui: Zui) {
-			ui.text(l.name, Right, ui.t.HIGHLIGHT_COL);
-
-			if (ui.button(tr("Export"), Left)) {
+			if (UIMenu.menuButton(ui, tr("Export"))) {
 				if (l.isMask()) {
 					UIFiles.show("png", true, false, function(path: String) {
 						var f = UIFiles.filename;
@@ -581,14 +578,14 @@ class TabLayers {
 				var toFillString = l.isLayer() ? tr("To Fill Layer") : tr("To Fill Mask");
 				var toPaintString = l.isLayer() ? tr("To Paint Layer") : tr("To Paint Mask");
 
-				if (l.fill_layer == null && ui.button(toFillString, Left)) {
+				if (l.fill_layer == null && UIMenu.menuButton(ui, toFillString)) {
 					function _init() {
 						l.isLayer() ? History.toFillLayer() : History.toFillMask();
 						l.toFillLayer();
 					}
 					iron.App.notifyOnInit(_init);
 				}
-				if (l.fill_layer != null && ui.button(toPaintString, Left)) {
+				if (l.fill_layer != null && UIMenu.menuButton(ui, toPaintString)) {
 					function _init() {
 						l.isLayer() ? History.toPaintLayer() : History.toPaintMask();
 						l.toPaintLayer();
@@ -598,7 +595,7 @@ class TabLayers {
 			}
 
 			ui.enabled = canDelete(l);
-			if (ui.button(tr("Delete"), Left, "delete")) {
+			if (UIMenu.menuButton(ui, tr("Delete"), "delete")) {
 				function _init() {
 					deleteLayer(Context.raw.layer);
 				}
@@ -606,7 +603,7 @@ class TabLayers {
 			}
 			ui.enabled = true;
 
-			if (l.fill_layer == null && ui.button(tr("Clear"), Left)) {
+			if (l.fill_layer == null && UIMenu.menuButton(ui, tr("Clear"))) {
 				Context.setLayer(l);
 				function _init() {
 					if (!l.isGroup()) {
@@ -625,7 +622,7 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			if (l.isMask() && l.fill_layer == null && ui.button(tr("Invert"), Left)) {
+			if (l.isMask() && l.fill_layer == null && UIMenu.menuButton(ui, tr("Invert"))) {
 				function _init() {
 					Context.setLayer(l);
 					History.invertMask();
@@ -633,7 +630,7 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			if (l.isMask() && ui.button(tr("Apply"), Left)) {
+			if (l.isMask() && UIMenu.menuButton(ui, tr("Apply"))) {
 				function _init() {
 					Context.raw.layer = l;
 					History.applyMask();
@@ -644,14 +641,14 @@ class TabLayers {
 				}
 				iron.App.notifyOnInit(_init);
 			}
-			if (l.isGroup() && ui.button(tr("Merge Group"), Left)) {
+			if (l.isGroup() && UIMenu.menuButton(ui, tr("Merge Group"))) {
 				function _init() {
 					App.mergeGroup(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
 			ui.enabled = canMergeDown(l);
-			if (ui.button(tr("Merge Down"), Left)) {
+			if (UIMenu.menuButton(ui, tr("Merge Down"))) {
 				function _init() {
 					Context.setLayer(l);
 					History.mergeLayers();
@@ -661,7 +658,7 @@ class TabLayers {
 				iron.App.notifyOnInit(_init);
 			}
 			ui.enabled = true;
-			if (ui.button(tr("Duplicate"), Left)) {
+			if (UIMenu.menuButton(ui, tr("Duplicate"))) {
 				function _init() {
 					Context.setLayer(l);
 					History.duplicateLayer();
@@ -670,26 +667,28 @@ class TabLayers {
 				iron.App.notifyOnInit(_init);
 			}
 
-			ui.row([7 / 10, 3 / 10]);
+			UIMenu.menuFill(ui);
+			UIMenu.menuAlign(ui);
 			var layerOpacHandle = Id.handle().nest(l.id);
 			layerOpacHandle.value = l.maskOpacity;
-			ui.slider(layerOpacHandle, "", 0.0, 1.0, true);
+			ui.slider(layerOpacHandle, tr("Opacity"), 0.0, 1.0, true);
 			if (layerOpacHandle.changed) {
 				if (ui.inputStarted) History.layerOpacity();
 				l.maskOpacity = layerOpacHandle.value;
 				MakeMaterial.parseMeshMaterial();
 				UIMenu.keepOpen = true;
 			}
-			ui.text(tr("Opacity"));
 
 			if (!l.isGroup()) {
-				ui.row([7 / 10, 3 / 10]);
+				UIMenu.menuFill(ui);
+				UIMenu.menuAlign(ui);
 				var resHandleChangedLast = App.resHandle.changed;
 				#if (krom_android || krom_ios)
 				var ar = ["128", "256", "512", "1K", "2K", "4K"];
 				#else
 				var ar = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
 				#end
+				var _y = ui._y;
 				App.resHandle.value = App.resHandle.position;
 				App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, ar.length - 1, false, 1, false, Left, false));
 				if (App.resHandle.changed) {
@@ -698,9 +697,12 @@ class TabLayers {
 				if (resHandleChangedLast && !App.resHandle.changed) {
 					App.onLayersResized();
 				}
-				ui.text(tr("Res"));
+				ui._y = _y;
+				ui.drawString(ui.g, tr("Res"), null, 0, Right);
+				ui.endElement();
 
-				ui.row([7 / 10, 3 / 10]);
+				UIMenu.menuFill(ui);
+				UIMenu.menuAlign(ui);
 				#if (krom_android || krom_ios)
 				zui.Ext.inlineRadio(ui, App.bitsHandle, ["8bit"]);
 				#else
@@ -710,14 +712,14 @@ class TabLayers {
 					iron.App.notifyOnInit(App.setLayerBits);
 					UIMenu.keepOpen = true;
 				}
-				ui.text(tr("Color"));
 			}
 
 			if (l.fill_layer != null) {
-				ui.row([7 / 10, 3 / 10]);
+				UIMenu.menuFill(ui);
+				UIMenu.menuAlign(ui);
 				var scaleHandle = Id.handle().nest(l.id);
 				scaleHandle.value = l.scale;
-				l.scale = ui.slider(scaleHandle, "", 0.0, 5.0, true);
+				l.scale = ui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
 				if (scaleHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
@@ -727,12 +729,12 @@ class TabLayers {
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
-				ui.text(tr("UV Scale"));
 
-				ui.row([7 / 10, 3 / 10]);
+				UIMenu.menuFill(ui);
+				UIMenu.menuAlign(ui);
 				var angleHandle = Id.handle().nest(l.id);
 				angleHandle.value = l.angle;
-				l.angle = ui.slider(angleHandle, "", 0.0, 360, true, 1);
+				l.angle = ui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
 				if (angleHandle.changed) {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
@@ -743,9 +745,9 @@ class TabLayers {
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
-				ui.text(tr("Angle"));
 
-				ui.row([7 / 10, 3 / 10]);
+				UIMenu.menuFill(ui);
+				UIMenu.menuAlign(ui);
 				var uvTypeHandle = Id.handle().nest(l.id);
 				uvTypeHandle.position = l.uvType;
 				l.uvType = zui.Ext.inlineRadio(ui, uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], Left);
@@ -759,7 +761,6 @@ class TabLayers {
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
-				ui.text(tr("TexCoord"));
 			}
 
 			if (!l.isGroup()) {
@@ -785,16 +786,27 @@ class TabLayers {
 				heightBlendHandle.selected = l.paintHeightBlend;
 				emisHandle.selected = l.paintEmis;
 				subsHandle.selected = l.paintSubs;
+				UIMenu.menuFill(ui);
 				l.paintBase = ui.check(baseHandle, tr("Base Color"));
+				UIMenu.menuFill(ui);
 				l.paintOpac = ui.check(opacHandle, tr("Opacity"));
+				UIMenu.menuFill(ui);
 				l.paintNor = ui.check(norHandle, tr("Normal"));
+				UIMenu.menuFill(ui);
 				l.paintNorBlend = ui.check(norBlendHandle, tr("Normal Blending"));
+				UIMenu.menuFill(ui);
 				l.paintOcc = ui.check(occHandle, tr("Occlusion"));
+				UIMenu.menuFill(ui);
 				l.paintRough = ui.check(roughHandle, tr("Roughness"));
+				UIMenu.menuFill(ui);
 				l.paintMet = ui.check(metHandle, tr("Metallic"));
+				UIMenu.menuFill(ui);
 				l.paintHeight = ui.check(heightHandle, tr("Height"));
+				UIMenu.menuFill(ui);
 				l.paintHeightBlend = ui.check(heightBlendHandle, tr("Height Blending"));
+				UIMenu.menuFill(ui);
 				l.paintEmis = ui.check(emisHandle, tr("Emission"));
+				UIMenu.menuFill(ui);
 				l.paintSubs = ui.check(subsHandle, tr("Subsurface"));
 				if (baseHandle.changed ||
 					opacHandle.changed ||

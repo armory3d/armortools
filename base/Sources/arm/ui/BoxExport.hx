@@ -257,12 +257,11 @@ class BoxExport {
 
 				if (ui.isHovered && ui.inputReleasedR) {
 					UIMenu.draw(function(ui: Zui) {
-						ui.text(t.name, Right, ui.t.HIGHLIGHT_COL);
-						if (ui.button(tr("Delete"), Left)) {
+						if (UIMenu.menuButton(ui, tr("Delete"))) {
 							preset.textures.remove(t);
 							savePreset();
 						}
-					}, 2);
+					}, 1);
 				}
 
 				var hr = htex.nest(0);

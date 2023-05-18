@@ -115,17 +115,17 @@ class TabTextures {
 							ui._y = _uiy;
 						}
 
+						var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
+
 						if (ui.isHovered) {
 							ui.tooltipImage(img, 256);
-							ui.tooltip(asset.name);
+							ui.tooltip(asset.name + (isPacked ? " " + tr("(packed)") : ""));
 						}
 
 						if (ui.isHovered && ui.inputReleasedR) {
 							Context.raw.texture = asset;
-							var isPacked = Project.raw.packed_assets != null && Project.packedAssetExists(Project.raw.packed_assets, asset.file);
 							UIMenu.draw(function(ui: Zui) {
-								ui.text(asset.name + (isPacked ? " " + tr("(packed)") : ""), Right, ui.t.HIGHLIGHT_COL);
-								if (ui.button(tr("Export"), Left)) {
+								if (UIMenu.menuButton(ui, tr("Export"))) {
 									UIFiles.show("png", true, false, function(path: String) {
 										App.notifyOnNextFrame(function () {
 											#if (is_paint || is_sculpt)
@@ -151,26 +151,26 @@ class TabTextures {
 										});
 									});
 								}
-								if (ui.button(tr("Reimport"), Left)) {
+								if (UIMenu.menuButton(ui, tr("Reimport"))) {
 									Project.reimportTexture(asset);
 								}
 
 								#if (is_paint || is_sculpt)
-								if (ui.button(tr("To Mask"), Left)) {
+								if (UIMenu.menuButton(ui, tr("To Mask"))) {
 									App.notifyOnNextFrame(function() {
 										App.createImageMask(asset);
 									});
 								}
 								#end
 
-								if (ui.button(tr("Set as Envmap"), Left)) {
+								if (UIMenu.menuButton(ui, tr("Set as Envmap"))) {
 									App.notifyOnNextFrame(function() {
 										arm.io.ImportEnvmap.run(asset.file, img);
 									});
 								}
 
 								#if is_paint
-								if (ui.button(tr("Set as Color ID Map"), Left)) {
+								if (UIMenu.menuButton(ui, tr("Set as Color ID Map"))) {
 									Context.raw.colorIdHandle.position = i;
 									Context.raw.colorIdPicked = false;
 									UIToolbar.inst.toolbarHandle.redraws = 1;
@@ -181,21 +181,21 @@ class TabTextures {
 								}
 								#end
 
-								if (ui.button(tr("Delete"), Left, "delete")) {
+								if (UIMenu.menuButton(ui, tr("Delete"), "delete")) {
 									deleteTexture(asset);
 								}
-								if (!isPacked && ui.button(tr("Open Containing Directory..."), Left)) {
+								if (!isPacked && UIMenu.menuButton(ui, tr("Open Containing Directory..."))) {
 									File.start(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
-								if (!isPacked && ui.button(tr("Open in Browser"), Left)) {
+								if (!isPacked && UIMenu.menuButton(ui, tr("Open in Browser"))) {
 									TabBrowser.showDirectory(asset.file.substr(0, asset.file.lastIndexOf(Path.sep)));
 								}
 
 							#if (is_paint || is_sculpt)
-							}, isPacked ? 7 : 9);
+							}, isPacked ? 6 : 8);
 							#end
 							#if is_lab
-							}, isPacked ? 7 : 7);
+							}, isPacked ? 6 : 6);
 							#end
 						}
 
