@@ -11,8 +11,9 @@ class MakeBrush {
 
 		if (Context.raw.tool == ToolParticle) return;
 
+		var fillLayer = Context.raw.layer.fill_layer != null;
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
-		if (decal) frag.write('if (decalMaskLocal.z > 0.0) {');
+		if (decal && !fillLayer) frag.write('if (decalMaskLocal.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
 			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
@@ -94,6 +95,6 @@ class MakeBrush {
 
 		frag.write('if (dist > brushRadius) discard;');
 
-		if (decal) frag.write('}');
+		if (decal && !fillLayer) frag.write('}');
 	}
 }
