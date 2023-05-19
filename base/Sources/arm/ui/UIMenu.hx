@@ -55,7 +55,7 @@ class UIMenu {
 			if (menuCategory == MenuFile) {
 				if (menuButton(ui, tr("New Project..."), Config.keymap.file_new)) Project.projectNewBox();
 				if (menuButton(ui, tr("Open..."), Config.keymap.file_open)) Project.projectOpen();
-				if (menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) Project.projectOpenRecentBox();
+				if (menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) BoxProjects.showRecent();
 				if (menuButton(ui, tr("Save"), Config.keymap.file_save)) Project.projectSave();
 				if (menuButton(ui, tr("Save As..."), Config.keymap.file_save_as)) Project.projectSaveAs();
 				menuSeparator(ui);

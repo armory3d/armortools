@@ -40,6 +40,7 @@ package arm;
 	@:optional public var wrap_mouse: Null<Bool>;
 	@:optional public var show_asset_names: Null<Bool>;
 	@:optional public var touch_ui: Null<Bool>;
+	@:optional public var splash_screen: Null<Bool>;
 	@:optional public var layout: Array<Int>;
 	@:optional public var workspace: Null<Int>;
 	@:optional public var server: String;

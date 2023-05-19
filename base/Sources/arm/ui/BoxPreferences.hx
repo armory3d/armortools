@@ -93,6 +93,8 @@ class BoxPreferences {
 				}
 				#end
 
+				Config.raw.splash_screen = ui.check(Id.handle({ selected: Config.raw.splash_screen }), tr("Splash Screen"));
+
 				// ui.text("Node Editor");
 				// var gridSnap = ui.check(Id.handle({ selected: false }), "Grid Snap");
 

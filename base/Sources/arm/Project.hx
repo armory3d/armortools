@@ -86,36 +86,6 @@ class Project {
 		});
 	}
 
-	public static function projectOpenRecentBox() {
-		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(Id.handle(), tr("Recent Projects"))) {
-				for (path in Config.raw.recent_projects) {
-					var file = path;
-					#if krom_windows
-					file = path.replace("/", "\\");
-					#else
-					file = path.replace("\\", "/");
-					#end
-					file = file.substr(file.lastIndexOf(Path.sep) + 1);
-					if (ui.button(file, Left)) {
-						var current = @:privateAccess kha.graphics2.Graphics.current;
-						if (current != null) current.end();
-
-						ImportArm.runProject(path);
-
-						if (current != null) current.begin(false);
-						UIBox.hide();
-					}
-					if (ui.isHovered) ui.tooltip(path);
-				}
-				if (ui.button(tr("Clear"), Left)) {
-					Config.raw.recent_projects = [];
-					Config.save();
-				}
-			}
-		}, 400, 320);
-	}
-
 	public static function projectSave(saveAndQuit = false) {
 		if (filepath == "") {
 			#if krom_ios

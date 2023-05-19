@@ -244,10 +244,14 @@ class App {
 
 					Args.run();
 
-					if (Config.raw.touch_ui) {
-						if (Config.raw.recent_projects.length > 0) {
-							arm.ui.BoxProjects.show();
-						}
+					#if (krom_android || krom_ios)
+					var hasProjects = Config.raw.recent_projects.length > 0;
+					#else
+					var hasProjects = true;
+					#end
+
+					if (Config.raw.splash_screen && hasProjects) {
+						arm.ui.BoxProjects.show();
 					}
 				});
 			});
@@ -973,8 +977,10 @@ class App {
 		raw.layer_res = Res2048;
 		#if (krom_android || krom_ios)
 		raw.touch_ui = true;
+		raw.splash_screen = true;
 		#else
 		raw.touch_ui = false;
+		raw.splash_screen = false;
 		#end
 
 		#if (is_paint || is_sculpt)

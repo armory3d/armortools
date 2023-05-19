@@ -3,6 +3,7 @@ package arm.ui;
 import zui.Zui;
 import zui.Id;
 import arm.io.ImportArm;
+import arm.sys.Path;
 
 class BoxProjects {
 
@@ -20,8 +21,17 @@ class BoxProjects {
 			iconMap = null;
 		}
 
+		#if (krom_android || krom_ios)
+		var draggable = false;
+		#else
+		var draggable = true;
+		#end
+
 		UIBox.showCustom(function(ui: Zui) {
+
+			#if (krom_android || krom_ios)
 			alignToFullScreen();
+			#end
 
 			if (ui.tab(htab, tr("Projects"), true)) {
 
@@ -153,7 +163,37 @@ class BoxProjects {
 					ui._y += 150;
 				}
 			}
-		}, 600, 400, null, false);
+		}, 600, 400, null, draggable);
+	}
+
+	public static function showRecent() {
+		UIBox.showCustom(function(ui: Zui) {
+			if (ui.tab(Id.handle(), tr("Recent Projects"))) {
+				for (path in Config.raw.recent_projects) {
+					var file = path;
+					#if krom_windows
+					file = path.replace("/", "\\");
+					#else
+					file = path.replace("\\", "/");
+					#end
+					file = file.substr(file.lastIndexOf(Path.sep) + 1);
+					if (ui.button(file, Left)) {
+						var current = @:privateAccess kha.graphics2.Graphics.current;
+						if (current != null) current.end();
+
+						ImportArm.runProject(path);
+
+						if (current != null) current.begin(false);
+						UIBox.hide();
+					}
+					if (ui.isHovered) ui.tooltip(path);
+				}
+				if (ui.button(tr("Clear"), Left)) {
+					Config.raw.recent_projects = [];
+					Config.save();
+				}
+			}
+		}, 400, 320);
 	}
 
 	static function alignToFullScreen() {
