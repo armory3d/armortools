@@ -939,6 +939,7 @@ class UINodes {
 			ui._y = 0;
 			ui._w = ew;
 
+			#if (is_paint || is_sculpt)
 			// Editable canvas name
 			var h = Id.handle();
 			h.text = c.name;
@@ -974,6 +975,7 @@ class UINodes {
 					c.name = newName;
 				}
 			}
+			#end
 
 			#if is_lab
 			if (ui.button(tr("Run"))) {
