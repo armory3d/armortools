@@ -41,7 +41,8 @@ package arm;
 	@:optional public var show_asset_names: Null<Bool>;
 	@:optional public var touch_ui: Null<Bool>;
 	@:optional public var splash_screen: Null<Bool>;
-	@:optional public var layout: Array<Int>;
+	@:optional public var layout: Array<Int>; // Sizes
+	@:optional public var layout_tabs: Array<Int>; // Active tabs
 	@:optional public var workspace: Null<Int>;
 	@:optional public var server: String;
 

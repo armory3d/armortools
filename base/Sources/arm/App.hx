@@ -942,6 +942,14 @@ class App {
 
 			Std.int(UIStatus.defaultStatusH * raw.window_scale)
 		];
+
+		raw.layout_tabs = [
+			#if (is_paint || is_sculpt)
+			0,
+			0,
+			#end
+			0
+		];
 	}
 
 	public static function initConfig() {

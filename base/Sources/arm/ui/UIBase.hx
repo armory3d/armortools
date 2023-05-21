@@ -181,17 +181,6 @@ class UIBase {
 		var resources = ["cursor.k", "icons.k", "placeholder.k"];
 		#end
 
-		Res.load(resources, done);
-
-		Context.raw.projectObjects = [];
-		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
-
-		Operator.register("view_top", view_top);
-	}
-
-	function done() {
-		if (ui.SCALE() > 1) setIconScale();
-
 		#if (is_paint || is_sculpt)
 		Context.raw.gizmo = Scene.active.getChild(".Gizmo");
 		Context.raw.gizmoTranslateX = Context.raw.gizmo.getChild(".TranslateX");
@@ -205,12 +194,21 @@ class UIBase {
 		Context.raw.gizmoRotateZ = Context.raw.gizmo.getChild(".RotateZ");
 		#end
 
+		Res.load(resources, function() {});
+
+		if (ui.SCALE() > 1) setIconScale();
+
 		Context.raw.paintObject = cast(Scene.active.getChild(".Cube"), MeshObject);
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
 			iron.App.notifyOnInit(App.initLayers);
 		}
+
+		Context.raw.projectObjects = [];
+		for (m in Scene.active.meshes) Context.raw.projectObjects.push(m);
+
+		Operator.register("view_top", view_top);
 	}
 
 	public function update() {
@@ -1115,6 +1113,19 @@ class UIBase {
 
 		ui.inputEnabled = App.uiEnabled;
 
+		// Remember last tab positions
+		for (i in 0...htabs.length) {
+			if (htabs[i].changed) {
+				Config.raw.layout_tabs[i] = htabs[i].position;
+				Config.save();
+			}
+		}
+
+		// Set tab positions
+		for (i in 0...htabs.length) {
+			htabs[i].position = Config.raw.layout_tabs[i];
+		}
+
 		g.end();
 		ui.begin(g);
 
@@ -1152,6 +1163,8 @@ class UIBase {
 		}
 		Context.raw.lastHtab0Position = htabs[TabSidebar0].position;
 		#end
+
+
 
 		ui.end();
 		g.begin(false);
