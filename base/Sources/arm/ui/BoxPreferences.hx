@@ -100,7 +100,7 @@ class BoxPreferences {
 
 				ui.endElement();
 				ui.row([0.5, 0.5]);
-				if (ui.button(tr("Restore"))) {
+				if (ui.button(tr("Restore")) && !UIMenu.show) {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Confirm"))) {
 							iron.App.notifyOnInit(function() {
@@ -130,7 +130,7 @@ class BoxPreferences {
 						}
 					}, 2);
 				}
-				if (ui.button(tr("Reset Layout"))) {
+				if (ui.button(tr("Reset Layout")) && !UIMenu.show) {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Confirm"))) {
 							App.initLayout();
