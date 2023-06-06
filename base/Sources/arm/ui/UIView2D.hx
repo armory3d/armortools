@@ -296,6 +296,7 @@ class UIView2D {
 					ui._y = 2 + startY;
 				}
 
+				ui._w = Std.int(ew * 0.7 + 3);
 				uvmapShow = ui.check(Id.handle({ selected: uvmapShow }), tr("UV Map"));
 				ui._x += ew * 0.7 + 3;
 				ui._y = 2 + startY;
