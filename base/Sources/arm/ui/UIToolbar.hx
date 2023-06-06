@@ -57,8 +57,12 @@ class UIToolbar {
 			var light = col > 0xff666666 + 4294967296;
 			var iconAccent = light ? 0xff666666 : -1;
 
+			// Properties icon
 			var rect = Res.tile50(img, 7, 1);
-			ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h);
+			if (ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Started) {
+				UIHeader.inst.show = !UIHeader.inst.show;
+			}
+			if (ui.isHovered) ui.tooltip(tr("Toggle header"));
 			ui._y -= 4 * ui.SCALE();
 
 			var size = UIToolbar.defaultToolbarW - 4;

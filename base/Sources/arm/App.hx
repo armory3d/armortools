@@ -318,6 +318,10 @@ class App {
 		else if (UIBase.inst != null && UIBase.inst.show && res > 0) {
 			var statush = Config.raw.layout[LayoutStatusH];
 			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
+
+			if (UIHeader.inst != null && !UIHeader.inst.show) {
+				res += UIHeader.inst.headerh;
+			}
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -422,6 +426,9 @@ class App {
 			appx = 0;
 			#end
 			appy = UIHeader.inst.headerh * 2;
+			if (!UIHeader.inst.show) {
+				appy -= UIHeader.inst.headerh;
+			}
 		}
 		else {
 			appx = 0;

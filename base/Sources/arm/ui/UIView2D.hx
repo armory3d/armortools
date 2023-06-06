@@ -91,8 +91,11 @@ class UIView2D {
 		if (Context.raw.font.image == null) RenderUtil.makeFontPreview();
 
 		ui.begin(g);
-		var apph = iron.App.h() + UIHeader.inst.headerh * 4;
-		wh = apph;
+
+		var apph = System.windowHeight();
+		if (UIHeader.inst.show) apph += UIHeader.inst.headerh;
+		wh = System.windowHeight() - UIHeader.inst.headerh;
+
 		if (UINodes.inst.show) {
 			wh -= Config.raw.layout[LayoutNodesH];
 		}

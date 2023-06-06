@@ -27,12 +27,20 @@ class UIHeader {
 	public var headerh = defaultHeaderH;
 	public var worktab = Id.handle();
 
+	#if (krom_android || krom_ios)
+	public var show = false;
+	#else
+	public var show = true;
+	#end
+
 	public function new() {
 		inst = this;
 	}
 
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
+		if (!show) return;
+
 		var ui = UIBase.inst.ui;
 		var panelx = iron.App.x();
 
