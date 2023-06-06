@@ -68,11 +68,10 @@ class UIView2D {
 
 		ww = Config.raw.layout[LayoutNodesW];
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
-		wy = UIHeader.inst.headerh * 2;
+		wy = 0;
 		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
-			wy = 0;
 		}
 
 		if (!show) return;
@@ -92,11 +91,14 @@ class UIView2D {
 		if (Context.raw.font.image == null) RenderUtil.makeFontPreview();
 
 		ui.begin(g);
-		wh = iron.App.h();
+		var apph = iron.App.h() + UIHeader.inst.headerh * 4;
+		wh = apph;
 		if (UINodes.inst.show) {
 			wh -= Config.raw.layout[LayoutNodesH];
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
+
+			ui.tab(Id.handle(), tr("2D View"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -109,7 +111,7 @@ class UIView2D {
 
 			var tw = ww * 0.95 * panScale;
 			var tx = ww / 2 - tw / 2 + panX;
-			var ty = iron.App.h() / 2 - tw / 2 + panY;
+			var ty = apph / 2 - tw / 2 + panY;
 
 			if (type == View2DLayer) {
 				var layer = l;
@@ -161,7 +163,7 @@ class UIView2D {
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
-				ty = iron.App.h() / 2 - th / 2 + panY;
+				ty = apph / 2 - th / 2 + panY;
 
 				if (type == View2DLayer) {
 					ui.g.pipeline = pipe;
@@ -229,12 +231,13 @@ class UIView2D {
 			}
 
 			// Menu
+			var startY = ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
 			var ew = Std.int(ui.ELEMENT_W());
 			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
+			ui.g.fillRect(0, startY, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 			ui.g.color = 0xffffffff;
 			ui._x = 2;
-			ui._y = 2;
+			ui._y = 2 + startY;
 			ui._w = ew;
 
 			// Editable layer name
@@ -265,7 +268,7 @@ class UIView2D {
 			}
 			if (h.changed) UIBase.inst.hwnds[0].redraws = 2;
 			ui._x += ui._w + 3;
-			ui._y = 2;
+			ui._y = 2 + startY;
 			ui._w = ew;
 
 			if (type == View2DLayer) {
@@ -274,7 +277,7 @@ class UIView2D {
 					tr("Selected"),
 				], tr("Layers"));
 				ui._x += ew + 3;
-				ui._y = 2;
+				ui._y = 2 + startY;
 
 				if (!Context.raw.layer.isMask()) {
 					texType = ui.combo(Id.handle({ position: texType }), [
@@ -287,17 +290,17 @@ class UIView2D {
 						tr("Height"),
 					], tr("Texture"));
 					ui._x += ew + 3;
-					ui._y = 2;
+					ui._y = 2 + startY;
 				}
 
 				uvmapShow = ui.check(Id.handle({ selected: uvmapShow }), tr("UV Map"));
 				ui._x += ew * 0.7 + 3;
-				ui._y = 2;
+				ui._y = 2 + startY;
 			}
 
 			tiledShow = ui.check(Id.handle({ selected: tiledShow }), tr("Tiled"));
 			ui._x += ew * 0.7 + 3;
-			ui._y = 2;
+			ui._y = 2 + startY;
 
 			if (type == View2DAsset && tex != null) { // Texture resolution
 				ui.text(tex.width + "x" + tex.height);

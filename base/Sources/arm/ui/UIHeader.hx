@@ -38,9 +38,11 @@ class UIHeader {
 
 		#if is_paint
 
-		if (ui.window(headerHandle, panelx, headerh, System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], Std.int(defaultHeaderH * ui.SCALE()))) {
-			ui._y += 2;
+		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
+		var ww = System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 
+		if (ui.window(headerHandle, panelx, headerh, ww, Std.int(defaultHeaderH * ui.SCALE()))) {
+			ui._y += 2;
 
 			if (Context.raw.tool == ToolColorId) {
 				ui.text(tr("Picked Color"));

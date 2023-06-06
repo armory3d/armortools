@@ -933,7 +933,7 @@ class App {
 			#if krom_ios
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.6) : Std.int(iron.App.w() * 0.6),
 			#else
-			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) / 2) : Std.int(iron.App.w() / 2),
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.515) : Std.int(iron.App.w() * 0.515), // Align with ui header controls
 			#end
 
 			#if (is_paint || is_sculpt)

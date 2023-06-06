@@ -624,8 +624,8 @@ class UINodes {
 		#end
 
 		var wh = iron.App.h();
-		var w = ww + 100 * 2;
-		var h = wh + 100 * 2;
+		var w = ww + 100 * 3;
+		var h = wh + 100 * 3;
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		grid = Image.createRenderTarget(w, h);
@@ -747,18 +747,16 @@ class UINodes {
 		wx = Std.int(iron.App.w());
 		#end
 
-		wy = UIHeader.inst.headerh * 2;
+		wy = 0;
 		if (!UIBase.inst.show) {
 			#if (is_paint || is_sculpt)
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 			#end
-
-			wy = 0;
 		}
 
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		wh = iron.App.h();
+		wh = iron.App.h() + UIHeader.inst.headerh * 2;
 
 		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
@@ -771,6 +769,8 @@ class UINodes {
 		#end
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
+
+			ui.tab(Id.handle(), tr("Nodes"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -931,12 +931,13 @@ class UINodes {
 			#end
 
 			// Menu
+			var startY = ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
 			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.g.fillRect(0, 0, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
+			ui.g.fillRect(0, startY, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
 			ui.g.color = 0xffffffff;
 
 			ui._x = 0;
-			ui._y = 0;
+			ui._y = 2 + startY;
 			ui._w = ew;
 
 			#if (is_paint || is_sculpt)
@@ -946,7 +947,7 @@ class UINodes {
 			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, h.text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
 			var newName = ui.textInput(h, "");
 			ui._x += ui._w + 3;
-			ui._y = 0;
+			ui._y = 2 + startY;
 			ui._w = ew;
 
 			if (h.changed) { // Check whether renaming is possible and update group links
@@ -1066,7 +1067,7 @@ class UINodes {
 				});
 			}
 			ui._x += ew + 3;
-			ui._y = 0;
+			ui._y = 2 + startY;
 
 			#if (krom_android || krom_ios)
 			ui.combo(App.resHandle, ["2K", "4K"], tr("Resolution"));
@@ -1077,7 +1078,7 @@ class UINodes {
 				App.onLayersResized();
 			}
 			ui._x += ew + 3;
-			ui._y = 0;
+			ui._y = 2 + startY;
 			#end
 
 			var _BUTTON_COL = ui.t.BUTTON_COL;
@@ -1103,7 +1104,7 @@ class UINodes {
 					UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
 				}
 				ui._x += ui._w + 3;
-				ui._y = 0;
+				ui._y = 2 + startY;
 			}
 
 			if (Ext.menuButton(ui, tr("Search"))) {
@@ -1113,7 +1114,7 @@ class UINodes {
 				ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');
 			}
 			ui._x += ui._w + 3;
-			ui._y = 0;
+			ui._y = 2 + startY;
 
 			ui.t.BUTTON_COL = _BUTTON_COL;
 

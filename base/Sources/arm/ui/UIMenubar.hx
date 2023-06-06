@@ -108,7 +108,9 @@ class UIMenubar {
 
 		#if is_paint
 		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
+		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
+		var ww = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
+		if (ui.window(workspaceHandle, panelx, 0, ww, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
 			ui.tab(UIHeader.inst.worktab, tr("Paint"));
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
