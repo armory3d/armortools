@@ -55,7 +55,7 @@ class UIMenu {
 			if (menuCategory == MenuFile) {
 				if (menuButton(ui, tr("New Project..."), Config.keymap.file_new)) Project.projectNewBox();
 				if (menuButton(ui, tr("Open..."), Config.keymap.file_open)) Project.projectOpen();
-				if (menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) BoxProjects.showRecent();
+				if (menuButton(ui, tr("Open Recent..."), Config.keymap.file_open_recent)) BoxProjects.show();
 				if (menuButton(ui, tr("Save"), Config.keymap.file_save)) Project.projectSave();
 				if (menuButton(ui, tr("Save As..."), Config.keymap.file_save_as)) Project.projectSaveAs();
 				menuSeparator(ui);
@@ -395,6 +395,9 @@ class UIMenu {
 				if (menuButton(ui, tr("Manual"))) {
 					File.loadUrl(Manifest.url + "/manual");
 				}
+				if (menuButton(ui, tr("How To"))) {
+					File.loadUrl(Manifest.url + "/howto");
+				}
 				if (menuButton(ui, tr("What's New"))) {
 					File.loadUrl(Manifest.url + "/notes");
 				}
@@ -477,6 +480,12 @@ class UIMenu {
 					UIBox.showCustom(function(ui: Zui) {
 						var tabVertical = Config.raw.touch_ui;
 						if (ui.tab(Id.handle(), tr("About"), tabVertical)) {
+
+							iron.data.Data.getImage("badge.k", function(img) {
+								ui.image(img);
+								ui.endElement();
+							});
+
 							Ext.textArea(ui, Id.handle({ text: msg }), false);
 
 							ui.row([1 / 3, 1 / 3, 1 / 3]);
@@ -496,7 +505,7 @@ class UIMenu {
 								UIBox.hide();
 							}
 						}
-					});
+					}, 400, 320);
 				}
 			}
 		}

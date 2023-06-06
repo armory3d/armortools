@@ -242,7 +242,7 @@ class UIBase {
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
 		else if (Operator.shortcut(Config.keymap.file_save)) Project.projectSave();
 		else if (Operator.shortcut(Config.keymap.file_open)) Project.projectOpen();
-		else if (Operator.shortcut(Config.keymap.file_open_recent)) BoxProjects.showRecent();
+		else if (Operator.shortcut(Config.keymap.file_open_recent)) BoxProjects.show();
 		else if (Operator.shortcut(Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 		else if (Operator.shortcut(Config.keymap.file_reimport_textures)) Project.reimportTextures();
 		else if (Operator.shortcut(Config.keymap.file_new)) Project.projectNewBox();
