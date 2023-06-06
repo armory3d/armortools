@@ -134,6 +134,7 @@ class Main {
 			"cursor.k",
 			"icons.k",
 			"icons2x.k",
+			"badge.k",
 			"noise256.k",
 			"smaa_search.k",
 			"smaa_area.k",
