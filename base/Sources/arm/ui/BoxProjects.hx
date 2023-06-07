@@ -4,6 +4,7 @@ import zui.Zui;
 import zui.Id;
 import arm.io.ImportArm;
 import arm.sys.Path;
+import arm.sys.File;
 
 @:access(zui.Zui)
 class BoxProjects {
@@ -230,9 +231,15 @@ class BoxProjects {
 
 	static function getStartedTab(ui: Zui) {
 		if (ui.tab(htab, tr("Get Started"), true)) {
-			ui.button("How To");
-			ui.button("Manual");
-			ui.button("What's new");
+			if (ui.button(tr("Manual"))) {
+				File.loadUrl(Manifest.url + "/manual");
+			}
+			if (ui.button(tr("How To"))) {
+				File.loadUrl(Manifest.url + "/howto");
+			}
+			if (ui.button(tr("What's New"))) {
+				File.loadUrl(Manifest.url + "/notes");
+			}
 		}
 	}
 
