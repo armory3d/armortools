@@ -316,14 +316,23 @@ class App {
 
 		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
+
+			#if (krom_android || krom_ios)
+			var layoutHeader = 0;
+			#else
+			var layoutHeader = 1;
+			#end
+			if (layoutHeader == 0) {
+				res += UIHeader.headerh;
+			}
 		}
 		else if (UIBase.inst != null && UIBase.inst.show && res > 0) {
 			var statush = Config.raw.layout[LayoutStatusH];
 			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
-		}
 
-		if (Config.raw.layout[LayoutHeader] == 0) {
-			res += UIHeader.headerh;
+			if (Config.raw.layout[LayoutHeader] == 0) {
+				res += UIHeader.headerh;
+			}
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
