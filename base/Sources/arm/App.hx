@@ -748,23 +748,7 @@ class App {
 			if (Config.raw.workspace != 0) {
 				UIHeader.inst.worktab.position = Config.raw.workspace;
 				UIMenubar.inst.workspaceHandle.redraws = 2;
-
-				#if is_paint
-				if (UIHeader.inst.worktab.position == SpaceBake) {
-					Context.selectTool(ToolBake);
-				}
-				else {
-					Context.selectTool(ToolGizmo);
-				}
-				if (UIHeader.inst.worktab.position == SpaceMaterial) {
-					App.updateFillLayers();
-					UINodes.inst.show = true;
-				}
-				#end
-
-				#if is_lab
 				UIHeader.inst.worktab.changed = true;
-				#end
 			}
 		}
 		else if (Context.raw.frame == 3) {
@@ -910,7 +894,7 @@ class App {
 
 	public static function isDecalLayer(): Bool {
 		#if is_paint
-		var isPaint = UIHeader.inst.worktab.position == SpacePaint;
+		var isPaint = Context.raw.tool != ToolMaterial && Context.raw.tool != ToolBake;
 		return isPaint && Context.raw.layer.fill_layer != null && Context.raw.layer.uvType == UVProject;
 		#end
 
@@ -998,10 +982,10 @@ class App {
 		raw.displace_strength = 0.0;
 		raw.wrap_mouse = false;
 		#if is_paint
-		raw.workspace = SpacePaint;
+		raw.workspace = Space3D;
 		#end
 		#if is_sculpt
-		raw.workspace = SpaceSculpt;
+		raw.workspace = Space3D;
 		#end
 		#if is_lab
 		raw.workspace = Space2D;
@@ -1861,7 +1845,7 @@ class App {
 
 	public static function isFillMaterial(): Bool {
 		#if is_paint
-		if (UIHeader.inst.worktab.position == SpaceMaterial) return true;
+		if (Context.raw.tool == ToolMaterial) return true;
 		#end
 
 		var m = Context.raw.material;
@@ -1876,7 +1860,7 @@ class App {
 		var current: kha.graphics2.Graphics = null;
 
 		#if is_paint
-		if (UIHeader.inst.worktab.position == SpaceMaterial) {
+		if (Context.raw.tool == ToolMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
 			}
@@ -1884,7 +1868,6 @@ class App {
 			current = @:privateAccess kha.graphics2.Graphics.current;
 			if (current != null) current.end();
 
-			UIHeader.inst.worktab.position = SpacePaint;
 			Context.raw.tool = ToolFill;
 			Context.raw.fillTypeHandle.position = FillObject;
 			MakeMaterial.parsePaintMaterial(false);
@@ -1897,7 +1880,6 @@ class App {
 			Context.raw.fillTypeHandle.position = _fillType;
 			Context.raw.pdirty = 0;
 			Context.raw.rdirty = 2;
-			UIHeader.inst.worktab.position = SpaceMaterial;
 
 			if (current != null) current.begin(false);
 			return;
@@ -1971,14 +1953,6 @@ class App {
 		Context.raw.tool = ToolFill;
 		Context.raw.fillTypeHandle.position = FillObject;
 		Context.raw.pdirty = 1;
-		var _workspace = UIHeader.inst.worktab.position;
-
-		#if is_paint
-		UIHeader.inst.worktab.position = SpacePaint;
-		#end
-		#if is_sculpt
-		UIHeader.inst.worktab.position = SpaceSculpt;
-		#end
 
 		Context.raw.layer.clear();
 
@@ -1989,7 +1963,6 @@ class App {
 		Context.raw.rdirty = 2;
 		Context.raw.tool = _tool;
 		Context.raw.fillTypeHandle.position = _fillType;
-		UIHeader.inst.worktab.position = _workspace;
 		if (current != null) current.begin(false);
 	}
 
@@ -2256,6 +2229,9 @@ class App {
 		tool_particle: "p",
 		tool_colorid: "c",
 		tool_picker: "v",
+		tool_bake: "k",
+		tool_gizmo: "",
+		tool_material: "",
 		swap_brush_eraser: "",
 		toggle_2d_view: "shift+tab",
 		#end

@@ -106,67 +106,20 @@ class UIMenubar {
 			Ext.endMenu(ui);
 		}
 
-		#if is_paint
 		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		var ww = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
 		if (ui.window(workspaceHandle, panelx, 0, ww, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
-			// ui.tab(UIHeader.inst.worktab, tr("3D View"));
-			ui.tab(UIHeader.inst.worktab, tr("Paint"));
-			ui.tab(UIHeader.inst.worktab, tr("Material"));
-			ui.tab(UIHeader.inst.worktab, tr("Bake"));
 
-			#if is_forge
-			ui.tab(UIHeader.inst.worktab, tr("Scene"));
-			#end
-
-			if (UIHeader.inst.worktab.changed) {
-				Context.raw.ddirty = 2;
-				Context.raw.brushBlendDirty = true;
-				UIToolbar.inst.toolbarHandle.redraws = 2;
-				UIHeader.inst.headerHandle.redraws = 2;
-				UIBase.inst.hwnds[0].redraws = 2;
-				UIBase.inst.hwnds[1].redraws = 2;
-
-				if (UIHeader.inst.worktab.position == SpacePaint) {
-					Context.selectTool(ToolBrush);
-				}
-				else if (UIHeader.inst.worktab.position == SpaceBake) {
-					Context.selectTool(ToolBake);
-					#if (kha_direct3d12 || kha_vulkan)
-					// Bake in lit mode for now
-					if (Context.raw.viewportMode == ViewPathTrace) {
-						Context.raw.viewportMode = ViewLit;
-					}
-					#end
-				}
-				else if (UIHeader.inst.worktab.position == SpaceMaterial) {
-					Context.selectTool(ToolPicker);
-					App.updateFillLayers();
-				}
-				#if is_forge
-				else if (UIHeader.inst.worktab.position == SpaceScene) {
-					Context.selectTool(ToolGizmo);
-				}
-				#end
-
-				Context.mainObject().skip_context = null;
+			if (!Config.raw.touch_ui) {
+				ui.tab(UIHeader.inst.worktab, tr("3D View"));
 			}
-		}
-		#end
+			else {
+				ui.fill(0, 0, ui._windowW, ui._windowH + 4, ui.t.SEPARATOR_COL);
+			}
 
-		#if is_sculpt
-		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
-			ui.tab(UIHeader.inst.worktab, tr("Sculpt"));
-		}
-		#end
-
-		#if is_lab
-		var panelx = (iron.App.x()) + menubarw;
-		if (ui.window(workspaceHandle, panelx, 0, System.windowWidth() - menubarw, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
-			ui.tab(UIHeader.inst.worktab, tr("3D"));
-			ui.tab(UIHeader.inst.worktab, tr("2D"));
+			#if is_lab
+			ui.tab(UIHeader.inst.worktab, tr("2D View"));
 			if (UIHeader.inst.worktab.changed) {
 				Context.raw.ddirty = 2;
 				Context.raw.brushBlendDirty = true;
@@ -195,8 +148,8 @@ class UIMenubar {
 					Scene.active.camera.transform.setMatrix(m);
 				}
 			}
+			#end
 		}
-		#end
 	}
 
 	function showMenu(ui: Zui, category: Int) {

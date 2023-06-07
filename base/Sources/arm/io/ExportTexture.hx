@@ -108,9 +108,7 @@ class ExportTexture {
 			RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
 		}
 
-		var _space = UIHeader.inst.worktab.position;
 		var _tool = Context.raw.tool;
-		UIHeader.inst.worktab.position = SpacePaint;
 		Context.raw.tool = ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		var _paintObject = Context.raw.paintObject;
@@ -124,7 +122,6 @@ class ExportTexture {
 		Context.raw.tool = _tool;
 		MakeMaterial.parsePaintMaterial();
 		Context.raw.pdirty = 0;
-		UIHeader.inst.worktab.position = _space;
 		planeo.visible = false;
 		Context.raw.paintObject = _paintObject;
 

@@ -313,7 +313,7 @@ class BoxPreferences {
 				#end
 
 				var workspaceHandle = Id.handle({ position: Config.raw.workspace });
-				ui.combo(workspaceHandle, [tr("Paint"), tr("Material"), tr("Bake")], tr("Default Workspace"), true);
+				ui.combo(workspaceHandle, [tr("3D View")], tr("Default Workspace"), true);
 				if (workspaceHandle.changed) {
 					Config.raw.workspace = workspaceHandle.position;
 				}

@@ -139,9 +139,24 @@ class Context {
 			}
 			RenderUtil.makeDecalPreview();
 		}
-		if (raw.tool == ToolParticle) {
+
+		else if (raw.tool == ToolParticle) {
 			ParticleUtil.initParticle();
 			MakeMaterial.parseParticleMaterial();
+		}
+
+		else if (raw.tool == ToolBake) {
+			#if (kha_direct3d12 || kha_vulkan)
+			// Bake in lit mode for now
+			if (Context.raw.viewportMode == ViewPathTrace) {
+				Context.raw.viewportMode = ViewLit;
+			}
+			#end
+		}
+
+		else if (raw.tool == ToolMaterial) {
+			App.updateFillLayers();
+			Context.mainObject().skip_context = null;
 		}
 
 		#if krom_ios

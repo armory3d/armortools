@@ -372,71 +372,72 @@ class UIBase {
 		if (Context.inPaintArea() && !isTyping) {
 
 			#if is_paint
-			if (UIHeader.inst.worktab.position == SpacePaint) {
-				if (!mouse.down("right")) { // Fly mode off
-					if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
-					else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
-					else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
-					else if (Operator.shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
-					else if (Operator.shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
-					else if (Operator.shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
-					else if (Operator.shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
-					else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
-					else if (Operator.shortcut(Config.keymap.tool_smudge)) Context.selectTool(ToolSmudge);
-					else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
-					else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
-					else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.raw.tool == ToolBrush ? ToolEraser : ToolBrush);
-				}
+			if (!mouse.down("right")) { // Fly mode off
+				if (Operator.shortcut(Config.keymap.tool_brush)) Context.selectTool(ToolBrush);
+				else if (Operator.shortcut(Config.keymap.tool_eraser)) Context.selectTool(ToolEraser);
+				else if (Operator.shortcut(Config.keymap.tool_fill)) Context.selectTool(ToolFill);
+				else if (Operator.shortcut(Config.keymap.tool_colorid)) Context.selectTool(ToolColorId);
+				else if (Operator.shortcut(Config.keymap.tool_decal)) Context.selectTool(ToolDecal);
+				else if (Operator.shortcut(Config.keymap.tool_text)) Context.selectTool(ToolText);
+				else if (Operator.shortcut(Config.keymap.tool_clone)) Context.selectTool(ToolClone);
+				else if (Operator.shortcut(Config.keymap.tool_blur)) Context.selectTool(ToolBlur);
+				else if (Operator.shortcut(Config.keymap.tool_smudge)) Context.selectTool(ToolSmudge);
+				else if (Operator.shortcut(Config.keymap.tool_particle)) Context.selectTool(ToolParticle);
+				else if (Operator.shortcut(Config.keymap.tool_picker)) Context.selectTool(ToolPicker);
+				else if (Operator.shortcut(Config.keymap.tool_bake)) Context.selectTool(ToolBake);
+				else if (Operator.shortcut(Config.keymap.tool_gizmo)) Context.selectTool(ToolGizmo);
+				else if (Operator.shortcut(Config.keymap.tool_material)) Context.selectTool(ToolMaterial);
+				else if (Operator.shortcut(Config.keymap.swap_brush_eraser)) Context.selectTool(Context.raw.tool == ToolBrush ? ToolEraser : ToolBrush);
+			}
 
-				// Radius
-				if (Context.raw.tool == ToolBrush  ||
-					Context.raw.tool == ToolEraser ||
-					Context.raw.tool == ToolDecal  ||
-					Context.raw.tool == ToolText   ||
-					Context.raw.tool == ToolClone  ||
-					Context.raw.tool == ToolBlur   ||
-					Context.raw.tool == ToolSmudge   ||
-					Context.raw.tool == ToolParticle) {
-					if (Operator.shortcut(Config.keymap.brush_radius) ||
-						Operator.shortcut(Config.keymap.brush_opacity) ||
-						Operator.shortcut(Config.keymap.brush_angle) ||
-						(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
-						Context.raw.brushCanLock = true;
-						if (!Input.getPen().connected) mouse.lock();
-						Context.raw.lockStartedX = mouse.x;
-						Context.raw.lockStartedY = mouse.y;
-					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-						Context.raw.brushRadius -= getRadiusIncrement();
-						Context.raw.brushRadius = Math.max(Math.round(Context.raw.brushRadius * 100) / 100, 0.01);
-						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
-						UIHeader.inst.headerHandle.redraws = 2;
-					}
-					else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-						Context.raw.brushRadius += getRadiusIncrement();
-						Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
-						Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
-						UIHeader.inst.headerHandle.redraws = 2;
-					}
-					else if (decalMask) {
-						if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
-							Context.raw.brushDecalMaskRadius -= getRadiusIncrement();
-							Context.raw.brushDecalMaskRadius = Math.max(Math.round(Context.raw.brushDecalMaskRadius * 100) / 100, 0.01);
-							Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
-							UIHeader.inst.headerHandle.redraws = 2;
-						}
-						else if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_increase, ShortcutRepeat)) {
-							Context.raw.brushDecalMaskRadius += getRadiusIncrement();
-							Context.raw.brushDecalMaskRadius = Math.round(Context.raw.brushDecalMaskRadius * 100) / 100;
-							Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
-							UIHeader.inst.headerHandle.redraws = 2;
-						}
-					}
+			// Radius
+			if (Context.raw.tool == ToolBrush  ||
+				Context.raw.tool == ToolEraser ||
+				Context.raw.tool == ToolDecal  ||
+				Context.raw.tool == ToolText   ||
+				Context.raw.tool == ToolClone  ||
+				Context.raw.tool == ToolBlur   ||
+				Context.raw.tool == ToolSmudge   ||
+				Context.raw.tool == ToolParticle) {
+				if (Operator.shortcut(Config.keymap.brush_radius) ||
+					Operator.shortcut(Config.keymap.brush_opacity) ||
+					Operator.shortcut(Config.keymap.brush_angle) ||
+					(decalMask && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius))) {
+					Context.raw.brushCanLock = true;
+					if (!Input.getPen().connected) mouse.lock();
+					Context.raw.lockStartedX = mouse.x;
+					Context.raw.lockStartedY = mouse.y;
 				}
-
-				if (decalMask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutReleased))) {
+				else if (Operator.shortcut(Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
+					Context.raw.brushRadius -= getRadiusIncrement();
+					Context.raw.brushRadius = Math.max(Math.round(Context.raw.brushRadius * 100) / 100, 0.01);
+					Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
 					UIHeader.inst.headerHandle.redraws = 2;
 				}
+				else if (Operator.shortcut(Config.keymap.brush_radius_increase, ShortcutRepeat)) {
+					Context.raw.brushRadius += getRadiusIncrement();
+					Context.raw.brushRadius = Math.round(Context.raw.brushRadius * 100) / 100;
+					Context.raw.brushRadiusHandle.value = Context.raw.brushRadius;
+					UIHeader.inst.headerHandle.redraws = 2;
+				}
+				else if (decalMask) {
+					if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_decrease, ShortcutRepeat)) {
+						Context.raw.brushDecalMaskRadius -= getRadiusIncrement();
+						Context.raw.brushDecalMaskRadius = Math.max(Math.round(Context.raw.brushDecalMaskRadius * 100) / 100, 0.01);
+						Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
+						UIHeader.inst.headerHandle.redraws = 2;
+					}
+					else if (Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.brush_radius_increase, ShortcutRepeat)) {
+						Context.raw.brushDecalMaskRadius += getRadiusIncrement();
+						Context.raw.brushDecalMaskRadius = Math.round(Context.raw.brushDecalMaskRadius * 100) / 100;
+						Context.raw.brushDecalMaskRadiusHandle.value = Context.raw.brushDecalMaskRadius;
+						UIHeader.inst.headerHandle.redraws = 2;
+					}
+				}
+			}
+
+			if (decalMask && (Operator.shortcut(Config.keymap.decal_mask, ShortcutStarted) || Operator.shortcut(Config.keymap.decal_mask, ShortcutReleased))) {
+				UIHeader.inst.headerHandle.redraws = 2;
 			}
 			#end
 
@@ -1175,7 +1176,7 @@ class UIBase {
 		if (!App.uiEnabled) return;
 
 		#if is_paint
-		if (UIHeader.inst.worktab.position != SpacePaint) return;
+		if (Context.raw.tool == ToolMaterial || Context.raw.tool == ToolBake) return;
 		#end
 
 		g.color = 0xffffffff;

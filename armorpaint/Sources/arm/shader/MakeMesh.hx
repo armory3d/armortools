@@ -150,9 +150,9 @@ class MakeMesh {
 			layerPassCount = 1;
 			var layers: Array<LayerSlot> = [];
 			var startCount = textureCount;
-			var isMaterialSpace = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			var isMaterialTool = Context.raw.tool == ToolMaterial;
 			for (l in Project.layers) {
-				if (isMaterialSpace && l != Context.raw.layer) continue;
+				if (isMaterialTool && l != Context.raw.layer) continue;
 				if (!l.isLayer() || !l.isVisible()) continue;
 
 				var count = 3;

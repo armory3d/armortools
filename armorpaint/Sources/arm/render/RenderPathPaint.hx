@@ -187,7 +187,7 @@ class RenderPathPaint {
 					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
 					path.bindTarget("gbuffer2", "gbuffer2");
 					tid = Context.raw.layer.id;
-					var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+					var useLiveLayer = Context.raw.tool == ToolMaterial;
 					if (useLiveLayer) RenderPathPaint.useLiveLayer(true);
 					path.bindTarget("texpaint" + tid, "texpaint");
 					path.bindTarget("texpaint_nor" + tid, "texpaint_nor");
@@ -892,8 +892,8 @@ class RenderPathPaint {
 	public static function bindLayers() {
 		#if is_paint
 		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
-		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
-		if (isLive || isMaterialSpace) useLiveLayer(true);
+		var isMaterialTool = Context.raw.tool == ToolMaterial;
+		if (isLive || isMaterialTool) useLiveLayer(true);
 		#end
 
 		for (i in 0...Project.layers.length) {
@@ -912,8 +912,8 @@ class RenderPathPaint {
 	public static function unbindLayers() {
 		#if is_paint
 		var isLive = Config.raw.brush_live && liveLayerDrawn > 0;
-		var isMaterialSpace = UIHeader.inst.worktab.position == SpaceMaterial;
-		if (isLive || isMaterialSpace) useLiveLayer(false);
+		var isMaterialTool = Context.raw.tool == ToolMaterial;
+		if (isLive || isMaterialTool) useLiveLayer(false);
 		#end
 	}
 

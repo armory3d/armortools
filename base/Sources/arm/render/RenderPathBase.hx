@@ -195,7 +195,7 @@ class RenderPathBase {
 
 		#if (kha_direct3d12 || kha_vulkan)
 		if (Context.raw.viewportMode == ViewPathTrace) {
-			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			var useLiveLayer = Context.raw.tool == ToolMaterial;
 			RenderPathRaytrace.draw(useLiveLayer);
 			return;
 		}
@@ -271,7 +271,7 @@ class RenderPathBase {
 			drawGbuffer();
 
 			#if (kha_direct3d12 || kha_vulkan)
-			var useLiveLayer = arm.ui.UIHeader.inst.worktab.position == SpaceMaterial;
+			var useLiveLayer = Context.raw.tool == ToolMaterial;
 			Context.raw.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
 			#else
 			drawCommands();

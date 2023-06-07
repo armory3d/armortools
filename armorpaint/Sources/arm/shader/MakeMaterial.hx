@@ -320,7 +320,7 @@ class MakeMaterial {
 			var _space = UIHeader.inst.worktab.position;
 			var _tool = Context.raw.tool;
 			var _bakeType = Context.raw.bakeType;
-			UIHeader.inst.worktab.position = SpacePaint;
+			UIHeader.inst.worktab.position = Space3D;
 			Context.raw.tool = ToolBake;
 			Context.raw.bakeType = BakeCurvature;
 

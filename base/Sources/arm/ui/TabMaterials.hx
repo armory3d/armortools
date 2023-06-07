@@ -99,7 +99,7 @@ class TabMaterials {
 						if (Context.raw.material != Project.materials[i]) {
 							Context.selectMaterial(i);
 							#if is_paint
-							if (UIHeader.inst.worktab.position == SpaceMaterial) {
+							if (Context.raw.tool == ToolMaterial) {
 								function _init() {
 									App.updateFillLayers();
 								}
