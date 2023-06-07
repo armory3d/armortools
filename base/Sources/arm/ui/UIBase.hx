@@ -79,7 +79,7 @@ class UIBase {
 		new UIStatus();
 		new UIMenubar();
 
-		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
+		UIHeader.headerh = Std.int(UIHeader.defaultHeaderH * Config.raw.window_scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * Config.raw.window_scale);
 
 		#if (is_paint || is_sculpt)

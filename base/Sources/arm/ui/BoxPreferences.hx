@@ -89,6 +89,7 @@ class BoxPreferences {
 				if (ui.changed) {
 					Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
 					Config.loadTheme(Config.raw.theme);
+					setScale();
 					UIBase.inst.tagUIRedraw();
 				}
 				#end
@@ -642,7 +643,7 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-		}, 600, 400, function() { Config.save(); });
+		}, 620, 450, function() { Config.save(); });
 	}
 
 	public static function fetchThemes() {
@@ -674,7 +675,7 @@ plugin.drawUI = function(ui) {
 	static function setScale() {
 		var scale = Config.raw.window_scale;
 		UIBase.inst.ui.setScale(scale);
-		UIHeader.inst.headerh = Std.int(UIHeader.defaultHeaderH * scale);
+		UIHeader.headerh = Std.int(UIHeader.defaultHeaderH * scale);
 		Config.raw.layout[LayoutStatusH] = Std.int(UIStatus.defaultStatusH * scale);
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * scale);
 		UIBase.inst.setIconScale();

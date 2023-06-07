@@ -23,15 +23,9 @@ class UIHeader {
 	public static inline var defaultHeaderH = 28;
 	#end
 
+	public static var headerh = defaultHeaderH;
 	public var headerHandle = new Handle({ layout: Horizontal });
-	public var headerh = defaultHeaderH;
 	public var worktab = Id.handle();
-
-	#if (krom_android || krom_ios)
-	public var show = false;
-	#else
-	public var show = true;
-	#end
 
 	public function new() {
 		inst = this;
@@ -39,7 +33,7 @@ class UIHeader {
 
 	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
-		if (!show) return;
+		if (Config.raw.layout[LayoutHeader] == 0) return;
 
 		var ui = UIBase.inst.ui;
 		var panelx = iron.App.x();

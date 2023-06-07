@@ -237,7 +237,8 @@ class App {
 					appx = 0;
 					#end
 
-					appy = UIHeader.inst.headerh * 2;
+					appy = UIHeader.headerh;
+					if (Config.raw.layout[LayoutHeader] == 1) appy += UIHeader.headerh;
 					var cam = Scene.active.camera;
 					cam.data.raw.fov = Std.int(cam.data.raw.fov * 100) / 100;
 					cam.buildProjection();
@@ -312,16 +313,17 @@ class App {
 		}
 
 		var res = System.windowHeight();
+
 		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
 		else if (UIBase.inst != null && UIBase.inst.show && res > 0) {
 			var statush = Config.raw.layout[LayoutStatusH];
 			res -= Std.int(UIHeader.defaultHeaderH * 2 * Config.raw.window_scale) + statush;
+		}
 
-			if (UIHeader.inst != null && !UIHeader.inst.show) {
-				res += UIHeader.inst.headerh;
-			}
+		if (Config.raw.layout[LayoutHeader] == 0) {
+			res += UIHeader.headerh;
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
@@ -425,9 +427,9 @@ class App {
 			#if is_lab
 			appx = 0;
 			#end
-			appy = UIHeader.inst.headerh * 2;
-			if (!UIHeader.inst.show) {
-				appy -= UIHeader.inst.headerh;
+			appy = UIHeader.headerh * 2;
+			if (Config.raw.layout[LayoutHeader] == 0) {
+				appy -= UIHeader.headerh;
 			}
 		}
 		else {
@@ -798,7 +800,7 @@ class App {
 			g.color = 0xffffffff;
 		}
 
-		var usingMenu = UIMenu.show && mouse.y > UIHeader.inst.headerh;
+		var usingMenu = UIMenu.show && mouse.y > UIHeader.headerh;
 		uiEnabled = !UIBox.show && !usingMenu && !isComboSelected();
 		if (UIBox.show) UIBox.render(g);
 		if (UIMenu.show) UIMenu.render(g);
@@ -947,7 +949,13 @@ class App {
 			Std.int(iron.App.h() / 2),
 			#end
 
-			Std.int(UIStatus.defaultStatusH * raw.window_scale)
+			Std.int(UIStatus.defaultStatusH * raw.window_scale),
+
+			#if (krom_android || krom_ios)
+			0, // LayoutHeader
+			#else
+			1,
+			#end
 		];
 
 		raw.layout_tabs = [

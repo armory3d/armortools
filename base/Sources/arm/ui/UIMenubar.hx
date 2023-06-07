@@ -111,6 +111,7 @@ class UIMenubar {
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		var ww = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
 		if (ui.window(workspaceHandle, panelx, 0, ww, Std.int(UIHeader.defaultHeaderH * ui.SCALE()))) {
+			// ui.tab(UIHeader.inst.worktab, tr("3D View"));
 			ui.tab(UIHeader.inst.worktab, tr("Paint"));
 			ui.tab(UIHeader.inst.worktab, tr("Material"));
 			ui.tab(UIHeader.inst.worktab, tr("Bake"));
@@ -207,7 +208,7 @@ class UIMenubar {
 		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
 		if (Config.raw.touch_ui) {
 			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
-			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.inst.headerh / 2);
+			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.headerh / 2);
 			// UIMenu.menuY += 4;
 			UIMenu.keepOpen = true;
 		}

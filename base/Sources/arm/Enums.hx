@@ -350,9 +350,11 @@ package arm;
 	var LayoutNodesW = 3;
 	var LayoutNodesH = 4;
 	var LayoutStatusH = 5;
+	var LayoutHeader = 6; // 0 - hidden, 1 - visible
 	#end
 	#if is_lab
 	var LayoutNodesW = 0;
 	var LayoutStatusH = 1;
+	var LayoutHeader = 2;
 	#end
 }

@@ -45,7 +45,7 @@ class UIToolbar {
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UIBase.inst.ui;
 
-		if (ui.window(toolbarHandle, 0, UIHeader.inst.headerh, toolbarw, System.windowHeight() - UIHeader.inst.headerh)) {
+		if (ui.window(toolbarHandle, 0, UIHeader.headerh, toolbarw, System.windowHeight() - UIHeader.headerh)) {
 			ui._y -= 4 * ui.SCALE();
 
 			ui.imageScrollAlign = false;
@@ -60,7 +60,7 @@ class UIToolbar {
 			// Properties icon
 			var rect = Res.tile50(img, 7, 1);
 			if (ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Started) {
-				UIHeader.inst.show = !UIHeader.inst.show;
+				Config.raw.layout[LayoutHeader] = 1 - Config.raw.layout[LayoutHeader];
 			}
 			if (ui.isHovered) ui.tooltip(tr("Toggle header"));
 			ui._y -= 4 * ui.SCALE();

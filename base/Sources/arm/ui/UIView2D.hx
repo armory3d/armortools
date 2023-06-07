@@ -92,9 +92,9 @@ class UIView2D {
 
 		ui.begin(g);
 
-		var apph = System.windowHeight();
-		if (UIHeader.inst.show) apph += UIHeader.inst.headerh;
-		wh = System.windowHeight() - UIHeader.inst.headerh;
+		var headerh = Config.raw.layout[LayoutHeader] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
+		var apph = System.windowHeight() - Config.raw.layout[LayoutStatusH] + headerh;
+		wh = System.windowHeight() - Config.raw.layout[LayoutStatusH];
 
 		if (UINodes.inst.show) {
 			wh -= Config.raw.layout[LayoutNodesH];
@@ -234,11 +234,12 @@ class UIView2D {
 			}
 
 			// Menu
-			var startY = ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
 			var ew = Std.int(ui.ELEMENT_W());
 			ui.g.color = ui.t.SEPARATOR_COL;
-			ui.g.fillRect(0, startY, ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
+			ui.g.fillRect(0, ui.ELEMENT_H(), ww, ui.ELEMENT_H() + ui.ELEMENT_OFFSET() * 2);
 			ui.g.color = 0xffffffff;
+
+			var startY = ui.ELEMENT_H() + ui.ELEMENT_OFFSET();
 			ui._x = 2;
 			ui._y = 2 + startY;
 			ui._w = ew;
