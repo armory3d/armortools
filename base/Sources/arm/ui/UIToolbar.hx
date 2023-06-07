@@ -58,14 +58,30 @@ class UIToolbar {
 			var iconAccent = light ? 0xff666666 : -1;
 
 			// Properties icon
-			var rect = Res.tile50(img, 7, 1);
-			if (ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Started) {
-				Config.raw.layout[LayoutHeader] = 1 - Config.raw.layout[LayoutHeader];
+			if (Config.raw.layout[LayoutHeader] == 1) {
+				var rect = Res.tile50(img, 7, 1);
+				if (ui.image(img, light ? 0xff666666 : ui.t.BUTTON_COL, null, rect.x, rect.y, rect.w, rect.h) == State.Released) {
+					Config.raw.layout[LayoutHeader] = 0;
+				}
+			}
+			// Draw ">>" button if header is hidden
+			else {
+				var _ELEMENT_H = ui.t.ELEMENT_H;
+				var _BUTTON_H = ui.t.BUTTON_H;
+				var _fontOffsetY = ui.fontOffsetY;
+				ui.t.ELEMENT_H = Std.int(ui.t.ELEMENT_H * 1.5);
+				ui.t.BUTTON_H = ui.t.ELEMENT_H;
+				var fontHeight = ui.ops.font.height(ui.fontSize);
+				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
+				if (ui.button(">>")) {
+					Config.raw.layout[LayoutHeader] = 1;
+				}
+				ui.t.ELEMENT_H = _ELEMENT_H;
+				ui.t.BUTTON_H = _BUTTON_H;
+				ui.fontOffsetY = _fontOffsetY;
 			}
 			if (ui.isHovered) ui.tooltip(tr("Toggle header"));
 			ui._y -= 4 * ui.SCALE();
-
-			var size = UIToolbar.defaultToolbarW - 4;
 
 			#if is_paint
 
