@@ -1193,7 +1193,7 @@ class UIBase {
 		}
 
 		#if is_paint
-		if (Context.raw.brushStencilImage != null && Context.raw.tool != ToolBake && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId) {
+		if (Context.raw.brushStencilImage != null && Context.raw.tool != ToolBake && Context.raw.tool != ToolPicker && Context.raw.tool != ToolMaterial && Context.raw.tool != ToolColorId) {
 			var r = getBrushStencilRect();
 			if (!Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown)) {
 				g.color = 0x88ffffff;

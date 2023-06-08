@@ -104,7 +104,7 @@ class UIHeader {
 				}
 				ui.enabled = true;
 			}
-			else if (Context.raw.tool == ToolPicker) {
+			else if (Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) {
 				var baseRPicked = Math.round(Context.raw.pickedColor.base.R * 10) / 10;
 				var baseGPicked = Math.round(Context.raw.pickedColor.base.G * 10) / 10;
 				var baseBPicked = Math.round(Context.raw.pickedColor.base.B * 10) / 10;

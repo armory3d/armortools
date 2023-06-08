@@ -27,7 +27,7 @@ class MakeColorIdPicker {
 			frag.write('vec3 idcol = textureLod(texcolorid, texCoordInp, 0.0).rgb;');
 			frag.write('fragColor = vec4(idcol, 1.0);');
 		}
-		else if (Context.raw.tool == ToolPicker) {
+		else if (Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) {
 			if (Context.raw.pickPosNorTex) {
 				frag.add_out('vec4 fragColor[2]');
 				frag.add_uniform('sampler2D gbufferD');

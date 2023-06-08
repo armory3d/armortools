@@ -160,7 +160,7 @@ class RenderPathPaint {
 				path.drawMeshes("paint");
 				UIHeader.inst.headerHandle.redraws = 2;
 			}
-			else if (Context.raw.tool == ToolPicker) {
+			else if (Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) {
 				if (Context.raw.pickPosNorTex) {
 					if (Context.raw.paint2d) {
 						path.setTarget("gbuffer0", ["gbuffer1", "gbuffer2"]);
@@ -600,11 +600,11 @@ class RenderPathPaint {
 
 	static function paintEnabled(): Bool {
 		#if is_paint
-		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker && Context.raw.tool != ToolColorId;
+		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker && Context.raw.tool != ToolMaterial && Context.raw.tool != ToolColorId;
 		#end
 
 		#if is_sculpt
-		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker;
+		var fillLayer = Context.raw.layer.fill_layer != null && Context.raw.tool != ToolPicker && Context.raw.tool != ToolMaterial;
 		#end
 
 		var groupLayer = Context.raw.layer.isGroup();

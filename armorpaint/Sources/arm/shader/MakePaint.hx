@@ -21,7 +21,7 @@ class MakePaint {
 			color_attachments:
 				Context.raw.tool == ToolColorId ? ["RGBA32"] :
 				(Context.raw.tool == ToolPicker && Context.raw.pickPosNorTex) ? ["RGBA128", "RGBA128"] :
-				Context.raw.tool == ToolPicker ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
+				(Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 
@@ -50,7 +50,7 @@ class MakePaint {
 			MakeBake.setColorWrites(con_paint);
 		}
 
-		if (Context.raw.tool == ToolColorId || Context.raw.tool == ToolPicker) {
+		if (Context.raw.tool == ToolColorId || Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) {
 			MakeColorIdPicker.run(vert, frag);
 			con_paint.data.shader_from_source = true;
 			con_paint.data.vertex_shader = vert.get();

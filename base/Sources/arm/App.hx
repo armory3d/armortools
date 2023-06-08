@@ -610,7 +610,7 @@ class App {
 
 		handleDropPaths();
 
-		var isPicker = Context.raw.tool == ToolPicker;
+		var isPicker = Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial;
 
 		#if (is_paint || is_sculpt)
 		#if krom_windows
