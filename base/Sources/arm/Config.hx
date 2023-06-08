@@ -9,6 +9,7 @@ import kha.System;
 import iron.data.Data;
 import zui.Zui;
 import arm.ui.UIBase;
+import arm.ui.UIHeader;
 import arm.render.RenderPathBase;
 import arm.sys.File;
 import arm.sys.Path;
@@ -294,7 +295,8 @@ class Config {
 			App.theme.ARROW_SIZE = 5 + 2;
 			App.theme.CHECK_SIZE = 15 + 4;
 			App.theme.CHECK_SELECT_SIZE = 8 + 2;
-			buttonAlign = zui.Zui.Align.Center;
+			UIHeader.defaultHeaderH = 28 + 4;
+			buttonAlign = zui.Zui.Align.Left;
 			buttonSpacing = "";
 		}
 		else {

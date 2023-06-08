@@ -756,12 +756,14 @@ class UINodes {
 		}
 
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		wh = iron.App.h() + UIHeader.headerh * 2;
+		wh = iron.App.h() + UIHeader.headerh;
+		if (Config.raw.layout[LayoutHeader] == 1) wh += UIHeader.headerh;
 
 		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
-			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.headerh * 2;
+			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.headerh;
+			if (Config.raw.layout[LayoutHeader] == 1) wy += UIHeader.headerh;
 			if (!UIBase.inst.show) {
 				wy -= UIHeader.headerh * 2;
 			}
