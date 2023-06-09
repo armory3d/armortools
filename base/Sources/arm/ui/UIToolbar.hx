@@ -7,6 +7,7 @@ import zui.Zui;
 import iron.RenderPath;
 import arm.Translator._tr;
 
+@:access(zui.Zui)
 class UIToolbar {
 
 	public static var inst: UIToolbar;
@@ -19,6 +20,7 @@ class UIToolbar {
 
 	public var toolbarHandle = new Handle();
 	public var toolbarw = defaultToolbarW;
+	var lastTool = 0;
 
 	public var toolNames = [
 		_tr("Brush"),
@@ -41,7 +43,6 @@ class UIToolbar {
 		inst = this;
 	}
 
-	@:access(zui.Zui)
 	public function renderUI(g: kha.graphics2.Graphics) {
 		var ui = UIBase.inst.ui;
 
@@ -73,9 +74,11 @@ class UIToolbar {
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
 				var fontHeight = ui.ops.font.height(ui.fontSize);
 				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
+
 				if (ui.button(">>")) {
-					Config.raw.layout[LayoutHeader] = 1;
+					toolPropertiesMenu();
 				}
+
 				ui.t.ELEMENT_H = _ELEMENT_H;
 				ui.t.BUTTON_H = _BUTTON_H;
 				ui.fontOffsetY = _fontOffsetY;
@@ -109,7 +112,17 @@ class UIToolbar {
 				var tileX = tileY % 2 == 0 ? i % 12 : (11 - (i % 12));
 				var rect = Res.tile50(img, tileX, tileY);
 				var _y = ui._y;
-				if (ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h) == State.Started) Context.selectTool(i);
+
+				var imageState = ui.image(img, iconAccent, null, rect.x, rect.y, rect.w, rect.h);
+				if (imageState == State.Started) {
+					Context.selectTool(i);
+				}
+				else if (imageState == State.Released && Config.raw.layout[LayoutHeader] == 0) {
+					if (lastTool == i) {
+						toolPropertiesMenu();
+					}
+					lastTool = i;
+				}
 
 				if (i == ToolColorId && Context.raw.colorIdPicked) {
 					ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
@@ -142,6 +155,27 @@ class UIToolbar {
 
 			ui.imageScrollAlign = true;
 		}
+	}
+
+	static function toolPropertiesMenu() {
+		var ui = UIBase.inst.ui;
+		UIMenu.draw(function(ui: Zui) {
+			var _y = ui._y;
+			ui.changed = false;
+
+			UIHeader.inst.drawToolProperties(ui);
+
+			if (ui.changed) {
+				UIMenu.keepOpen = true;
+			}
+
+			if (ui.button(tr("Pin to Header"), Left)) {
+				Config.raw.layout[LayoutHeader] = 1;
+			}
+
+			var h = ui._y - _y;
+			UIMenu.menuElements = Std.int(h / ui.ELEMENT_H());
+		}, 0, Std.int(ui._x + ui._w + 2), Std.int(ui._y - 5));
 	}
 
 	@:access(zui.Zui)
