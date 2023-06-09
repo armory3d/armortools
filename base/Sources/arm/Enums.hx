@@ -271,6 +271,7 @@ package arm;
 	var ToolPicker = 9;
 	var ToolGizmo = 10;
 	var ToolMaterial = 11;
+	var ToolBake = 12; // Unused
 	#end
 	#if is_lab
 	var ToolEraser = 0;

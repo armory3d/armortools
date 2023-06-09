@@ -610,10 +610,9 @@ class App {
 
 		handleDropPaths();
 
-		var isPicker = Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial;
-
 		#if (is_paint || is_sculpt)
 		#if krom_windows
+		var isPicker = Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial;
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		Zui.alwaysRedrawWindow = !Context.raw.cacheDraws ||
 			UIMenu.show ||
