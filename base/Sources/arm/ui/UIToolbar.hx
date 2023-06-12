@@ -47,6 +47,7 @@ class UIToolbar {
 		else {
 			toolbarw = defaultToolbarW;
 		}
+		toolbarw = Std.int(toolbarw * ui.SCALE());
 
 		if (ui.window(toolbarHandle, 0, UIHeader.headerh, toolbarw, System.windowHeight() - UIHeader.headerh)) {
 			ui._y -= 4 * ui.SCALE();
@@ -181,7 +182,7 @@ class UIToolbar {
 			var h = ui._y - startY;
 			UIMenu.menuElements = Std.int(h / ui.ELEMENT_H());
 			UIMenu.menuX = Std.int(_x + _w + 2);
-			UIMenu.menuY = Std.int(_y - 5);
+			UIMenu.menuY = Std.int(_y - 6 * ui.SCALE());
 			UIMenu.fitToScreen();
 
 		}, 0);
@@ -194,7 +195,7 @@ class UIToolbar {
 	@:access(zui.Zui)
 	static function drawHighlight() {
 		var ui = UIBase.inst.ui;
-		var size = (UIToolbar.inst.toolbarw - 4) * ui.SCALE();
+		var size = UIToolbar.inst.toolbarw - 4;
 		ui.g.color = ui.t.HIGHLIGHT_COL;
 		ui.drawRect(ui.g, true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 	}

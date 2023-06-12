@@ -35,15 +35,19 @@ class UIMenubar {
 		var panelx = iron.App.x();
 		#end
 
-		if (ui.window(menuHandle, panelx, 0, menubarw, Std.int(UIHeader.headerh * ui.SCALE()))) {
+		if (ui.window(menuHandle, panelx, 0, menubarw, UIHeader.headerh)) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
 			Ext.beginMenu(ui);
 
 			if (Config.raw.touch_ui) {
 
-				var defaultToolbarW = UIToolbar.inst.toolbarw;
-				ui._w = Std.int(defaultToolbarW * ui.SCALE());
+				#if (is_paint || is_sculpt)
+				ui._w = UIToolbar.inst.toolbarw;
+				#end
+				#if is_lab
+				ui._w = 36;
+				#end
 
 				if (iconButton(ui, 0, 2)) BoxPreferences.show();
 				if (iconButton(ui, 0, 3)) {
@@ -59,7 +63,7 @@ class UIMenubar {
 				#if (is_paint || is_lab)
 				if (iconButton(ui, 5, 2)) BoxExport.showTextures();
 				#end
-				var size = defaultToolbarW;
+				var size = Std.int(ui._w / ui.SCALE());
 				if (UIMenu.show && UIMenu.menuCategory == MenuViewport) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 8, 2)) showMenu(ui, MenuViewport);
 				if (UIMenu.show && UIMenu.menuCategory == MenuMode) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
@@ -104,7 +108,7 @@ class UIMenubar {
 		var panelx = (iron.App.x()) + menubarw;
 		#end
 
-		if (ui.window(workspaceHandle, panelx, 0, ww, Std.int(UIHeader.headerh * ui.SCALE()))) {
+		if (ui.window(workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {
 
 			if (!Config.raw.touch_ui) {
 				ui.tab(UIHeader.inst.worktab, tr("3D View"));
@@ -157,8 +161,8 @@ class UIMenubar {
 		if (Config.raw.touch_ui) {
 			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
 			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.headerh / 2);
-			UIMenu.menuX += 2;
-			UIMenu.menuY -= 2;
+			UIMenu.menuX += Std.int(2 * App.uiMenu.SCALE());
+			UIMenu.menuY -= Std.int(2 * App.uiMenu.SCALE());
 			UIMenu.keepOpen = true;
 		}
 	}

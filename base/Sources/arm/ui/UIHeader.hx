@@ -28,17 +28,16 @@ class UIHeader {
 	}
 
 	public function renderUI(g: kha.graphics2.Graphics) {
+		var ui = UIBase.inst.ui;
 		if (Config.raw.touch_ui) {
 			headerh = defaultHeaderH + 6;
 		}
 		else {
 			headerh = defaultHeaderH;
 		}
+		headerh = Std.int(headerh * ui.SCALE());
 
 		if (Config.raw.layout[LayoutHeader] == 0) return;
-
-		var ui = UIBase.inst.ui;
-		var panelx = iron.App.x();
 
 		#if is_lab
 		var nodesw = (UINodes.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
@@ -48,7 +47,7 @@ class UIHeader {
 		var ww = System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 		#end
 
-		if (ui.window(headerHandle, panelx, headerh, ww, Std.int(headerh * ui.SCALE()))) {
+		if (ui.window(headerHandle, iron.App.x(), headerh, ww, headerh)) {
 			ui._y += 2;
 			drawToolProperties(ui);
 		}

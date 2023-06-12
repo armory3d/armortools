@@ -1061,7 +1061,7 @@ class UINodes {
 			var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 			ui.t.ELEMENT_OFFSET = 0;
 			var _ELEMENT_H = ui.t.ELEMENT_H;
-			ui.t.ELEMENT_H = 28;
+			ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
 			UIMenu.menuStart(ui);
 

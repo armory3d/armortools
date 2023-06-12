@@ -598,7 +598,7 @@ class UIMenu {
 		if (Config.raw.touch_ui) {
 			ui.g.fillRect(ui._x + ui._w / 2 + menuCategoryW / 2, ui._y - 1, ui._w / 2 - menuCategoryW / 2 + 1, 1);
 			ui.g.fillRect(ui._x - 1, ui._y - 1, ui._w / 2 - menuCategoryW / 2 + 1, 1);
-			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH + 2, menuCategoryW, 1);
+			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH, menuCategoryW, 1);
 			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH, 1, menuCategoryH);
 			ui.g.fillRect(ui._x + ui._w / 2 + menuCategoryW / 2, ui._y - menuCategoryH, 1, menuCategoryH);
 		}
