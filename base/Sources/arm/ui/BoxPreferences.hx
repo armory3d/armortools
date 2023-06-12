@@ -643,7 +643,7 @@ plugin.drawUI = function(ui) {
 					}
 				}
 			}
-		}, 620, 450, function() { Config.save(); });
+		}, 620, Config.raw.touch_ui ? 480 : 420, function() { Config.save(); });
 	}
 
 	public static function fetchThemes() {

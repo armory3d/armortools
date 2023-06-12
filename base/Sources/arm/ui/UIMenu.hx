@@ -41,7 +41,7 @@ class UIMenu {
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
 		ui.t.ELEMENT_OFFSET = 0;
 		var _ELEMENT_H = ui.t.ELEMENT_H;
-		ui.t.ELEMENT_H = 28;
+		ui.t.ELEMENT_H = Config.raw.touch_ui ? (28 + 2) : 28;
 
 		ui.beginRegion(g, menuX, menuY, menuW);
 
@@ -538,6 +538,10 @@ class UIMenu {
 		menuElements = elements;
 		menuX = x > -1 ? x : Std.int(Input.getMouse().x + 1);
 		menuY = y > -1 ? y : Std.int(Input.getMouse().y + 1);
+		fitToScreen();
+	}
+
+	public static function fitToScreen() {
 		// Prevent the menu going out of screen
 		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
 		if (menuX + menuW > System.windowWidth()) {
@@ -594,7 +598,7 @@ class UIMenu {
 		if (Config.raw.touch_ui) {
 			ui.g.fillRect(ui._x + ui._w / 2 + menuCategoryW / 2, ui._y - 1, ui._w / 2 - menuCategoryW / 2 + 1, 1);
 			ui.g.fillRect(ui._x - 1, ui._y - 1, ui._w / 2 - menuCategoryW / 2 + 1, 1);
-			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH, menuCategoryW, 1);
+			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH + 2, menuCategoryW, 1);
 			ui.g.fillRect(ui._x + ui._w / 2 - menuCategoryW / 2, ui._y - menuCategoryH, 1, menuCategoryH);
 			ui.g.fillRect(ui._x + ui._w / 2 + menuCategoryW / 2, ui._y - menuCategoryH, 1, menuCategoryH);
 		}

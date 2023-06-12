@@ -18,7 +18,7 @@ class UIHeader {
 
 	public static var inst: UIHeader;
 
-	public static var defaultHeaderH = 28;
+	public static inline var defaultHeaderH = 28;
 	public static var headerh = defaultHeaderH;
 	public var headerHandle = new Handle({ layout: Horizontal });
 	public var worktab = Id.handle();
@@ -28,6 +28,13 @@ class UIHeader {
 	}
 
 	public function renderUI(g: kha.graphics2.Graphics) {
+		if (Config.raw.touch_ui) {
+			headerh = defaultHeaderH + 6;
+		}
+		else {
+			headerh = defaultHeaderH;
+		}
+
 		if (Config.raw.layout[LayoutHeader] == 0) return;
 
 		var ui = UIBase.inst.ui;
@@ -41,7 +48,7 @@ class UIHeader {
 		var ww = System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 		#end
 
-		if (ui.window(headerHandle, panelx, headerh, ww, Std.int(defaultHeaderH * ui.SCALE()))) {
+		if (ui.window(headerHandle, panelx, headerh, ww, Std.int(headerh * ui.SCALE()))) {
 			ui._y += 2;
 			drawToolProperties(ui);
 		}
@@ -389,11 +396,8 @@ class UIHeader {
 			else {
 				var _w = ui._w;
 				var sc = ui.SCALE();
-				ui._w = Std.int(60 * sc);
-
-				if (Config.raw.touch_ui) {
-					ui._x -= 6 * sc;
-				}
+				var touchHeader = (Config.raw.touch_ui && Config.raw.layout[LayoutHeader] == 1);
+				ui._w = Std.int((touchHeader ? 54 : 60) * sc);
 
 				var xrayHandle = Id.handle({ selected: Context.raw.xray });
 				Context.raw.xray = ui.check(xrayHandle, tr("X-Ray"));
@@ -407,14 +411,13 @@ class UIHeader {
 
 				if (Config.raw.layout[LayoutHeader] == 1) {
 					if (Config.raw.touch_ui) {
-						ui._x -= 6 * sc;
-						ui._w = Std.int(27 * sc);
+						ui._w = Std.int(19 * sc);
 						Context.raw.symX = ui.check(symXHandle, "");
-						ui._x -= 12 * sc;
+						ui._x -= 4 * sc;
 						Context.raw.symY = ui.check(symYHandle, "");
-						ui._x -= 12 * sc;
+						ui._x -= 4 * sc;
 						Context.raw.symZ = ui.check(symZHandle, "");
-						ui._x -= 12 * sc;
+						ui._x -= 4 * sc;
 						ui._w = Std.int(40 * sc);
 						ui.text(tr("X") + tr("Y") + tr("Z"));
 					}

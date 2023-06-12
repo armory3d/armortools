@@ -340,7 +340,7 @@ class TabLayers {
 		ui._y -= 3;
 
 		if (Config.raw.touch_ui) {
-			ui._x += 6 * ui.SCALE();
+			ui._x += 12 * ui.SCALE();
 		}
 
 		#if kha_opengl
@@ -497,7 +497,7 @@ class TabLayers {
 			@:privateAccess ui.endElement();
 
 			if (Config.raw.touch_ui) {
-				ui._x += 6 * ui.SCALE();
+				ui._x += 12 * ui.SCALE();
 			}
 
 			var ar = [tr("Shared")];
