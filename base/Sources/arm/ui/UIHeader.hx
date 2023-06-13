@@ -396,6 +396,7 @@ class UIHeader {
 				var _w = ui._w;
 				var sc = ui.SCALE();
 				var touchHeader = (Config.raw.touch_ui && Config.raw.layout[LayoutHeader] == 1);
+				if (touchHeader) ui._x -= 4 * sc;
 				ui._w = Std.int((touchHeader ? 54 : 60) * sc);
 
 				var xrayHandle = Id.handle({ selected: Context.raw.xray });

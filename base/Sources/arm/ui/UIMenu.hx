@@ -46,8 +46,12 @@ class UIMenu {
 		ui.beginRegion(g, menuX, menuY, menuW);
 
 		if (menuCommands != null) {
-			ui.fill(-1, -1, ui._w / ui.SCALE() + 2, ui.t.ELEMENT_H * menuElements + 2, ui.t.ACCENT_SELECT_COL);
-			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * menuElements, ui.t.SEPARATOR_COL);
+			ui.g.color = ui.t.ACCENT_SELECT_COL;
+			ui.drawRect(ui.g, true, ui._x + -1, ui._y + -1, ui._w + 2, ui.ELEMENT_H() * menuElements + 2);
+			ui.g.color = ui.t.SEPARATOR_COL;
+			ui.drawRect(ui.g, true, ui._x + 0, ui._y + 0, ui._w, ui.ELEMENT_H() * menuElements);
+			ui.g.color = 0xffffffff;
+
 			menuCommands(ui);
 		}
 		else {

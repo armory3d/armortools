@@ -541,7 +541,10 @@ class UINodes {
 		var searchHandle = Id.handle();
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
-			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
+			ui.g.color = ui.t.SEPARATOR_COL;
+			ui.drawRect(ui.g, true, ui._x, ui._y, ui._w, ui.ELEMENT_H() * 8);
+			ui.g.color = 0xffffffff;
+
 			var search = ui.textInput(searchHandle, "", Left, true, true).toLowerCase();
 			ui.changed = false;
 			if (first) {
@@ -624,15 +627,16 @@ class UINodes {
 		#end
 
 		var wh = iron.App.h();
-		var w = ww + 100 * 3;
-		var h = wh + 100 * 3;
+		var step = 100 * ui.SCALE();
+		var w = Std.int(ww + step * 3);
+		var h = Std.int(wh + step * 3);
 		if (w < 1) w = 1;
 		if (h < 1) h = 1;
 		grid = Image.createRenderTarget(w, h);
 		grid.g2.begin(true, ui.t.SEPARATOR_COL);
 
 		grid.g2.color = ui.t.SEPARATOR_COL - 0x00050505;
-		var step = 20; // * ui.SCALE();
+		var step = 20 * ui.SCALE();
 		for (i in 0...Std.int(h / step) + 1) {
 			grid.g2.drawLine(0, i * step, w, i * step);
 		}
@@ -641,7 +645,7 @@ class UINodes {
 		}
 
 		grid.g2.color = ui.t.SEPARATOR_COL - 0x00090909;
-		var step = 100; // * ui.SCALE();
+		var step = 100 * ui.SCALE();
 		for (i in 0...Std.int(h / step) + 1) {
 			grid.g2.drawLine(0, i * step, w, i * step);
 		}
@@ -775,7 +779,8 @@ class UINodes {
 
 			// Grid
 			ui.g.color = 0xffffffff;
-			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % 100 - 100, (nodes.panY * nodes.SCALE()) % 100 - 100);
+			var step = 100 * ui.SCALE();
+			ui.g.drawImage(grid, (nodes.panX * nodes.SCALE()) % step - step, (nodes.panY * nodes.SCALE()) % step - step);
 
 			// Undo
 			if (ui.inputStarted || ui.isKeyPressed) {
@@ -1013,8 +1018,19 @@ class UINodes {
 				ui._y = 2 + startY;
 			}
 
-			if (Ext.menuButton(ui, tr("Search"))) {
-				nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+			if (Config.raw.touch_ui) {
+				var _w = ui._w;
+				ui._w = Std.int(36 * ui.SCALE());
+				ui._y = 4 * ui.SCALE() + startY;
+				if (UIMenubar.iconButton(ui, 2, 3)) {
+					nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+				}
+				ui._w = _w;
+			}
+			else {
+				if (Ext.menuButton(ui, tr("Search"))) {
+					nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
+				}
 			}
 			if (ui.isHovered) {
 				ui.tooltip(tr("Search for nodes") + ' (${Config.keymap.node_search})');

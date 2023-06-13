@@ -167,7 +167,7 @@ class UIMenubar {
 		}
 	}
 
-	function iconButton(ui: Zui, i: Int, j: Int): Bool {
+	public static function iconButton(ui: Zui, i: Int, j: Int): Bool {
 		var col = ui.t.WINDOW_BG_COL;
 		if (col < 0) col += untyped 4294967296;
 		var light = col > 0xff666666 + 4294967296;
