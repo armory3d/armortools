@@ -325,6 +325,7 @@ class UIView2D {
 		#end
 	}
 
+	@:access(zui.Zui)
 	public function update() {
 
 		#if is_paint
@@ -358,6 +359,12 @@ class UIView2D {
 			if (panScale > 6.0) panScale = 6.0;
 			panX = _panX * panScale;
 			panY = _panY * panScale;
+
+			if (Zui.touchScroll) {
+				// Zoom to finger location
+				panX -= (ui.inputX - ui._windowX - ui._windowW / 2) * control.zoom;
+				panY -= (ui.inputY - ui._windowY - ui._windowH / 2) * control.zoom;
+			}
 		}
 
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;

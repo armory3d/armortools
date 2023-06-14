@@ -602,6 +602,11 @@ class History {
 		kha.Window.get(0).title = filename + "* - " + Manifest.title;
 		#end
 
+		if (Config.raw.touch_ui) {
+			// Refresh undo & redo buttons
+			arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+		}
+
 		if (undos < Config.raw.undo_steps) undos++;
 		if (redos > 0) {
 			for (i in 0...redos) steps.pop();

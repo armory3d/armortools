@@ -72,11 +72,11 @@ class UIMenubar {
 				if (iconButton(ui, 10, 2)) showMenu(ui, MenuCamera);
 				if (UIMenu.show && UIMenu.menuCategory == MenuHelp) ui.fill(0, -6, size, size - 4, ui.t.HIGHLIGHT_COL);
 				if (iconButton(ui, 11, 2)) showMenu(ui, MenuHelp);
-				// ui.enabled = History.undos > 0;
+				ui.enabled = History.undos > 0;
 				if (iconButton(ui, 6, 2)) History.undo();
-				// ui.enabled = History.redos > 0;
+				ui.enabled = History.redos > 0;
 				if (iconButton(ui, 7, 2)) History.redo();
-				// ui.enabled = true;
+				ui.enabled = true;
 			}
 			else {
 				var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];

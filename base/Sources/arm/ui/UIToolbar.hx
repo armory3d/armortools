@@ -72,18 +72,24 @@ class UIToolbar {
 			else {
 				var _ELEMENT_H = ui.t.ELEMENT_H;
 				var _BUTTON_H = ui.t.BUTTON_H;
+				var _BUTTON_COL = ui.t.BUTTON_COL;
 				var _fontOffsetY = ui.fontOffsetY;
 				ui.t.ELEMENT_H = Std.int(ui.t.ELEMENT_H * 1.5);
 				ui.t.BUTTON_H = ui.t.ELEMENT_H;
+				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 				var fontHeight = ui.ops.font.height(ui.fontSize);
 				ui.fontOffsetY = (ui.ELEMENT_H() - fontHeight) / 2;
+				var _w = ui._w;
+				ui._w = toolbarw;
 
 				if (ui.button(">>")) {
 					toolPropertiesMenu();
 				}
 
+				ui._w = _w;
 				ui.t.ELEMENT_H = _ELEMENT_H;
 				ui.t.BUTTON_H = _BUTTON_H;
+				ui.t.BUTTON_COL = _BUTTON_COL;
 				ui.fontOffsetY = _fontOffsetY;
 			}
 			if (ui.isHovered) ui.tooltip(tr("Toggle header"));

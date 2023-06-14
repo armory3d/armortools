@@ -1148,11 +1148,18 @@ class UIBase {
 
 		if (Config.raw.layout[LayoutSidebarW] == 0) {
 			var width = Std.int(ui.ops.font.width(ui.fontSize, "<<") + 25 * ui.SCALE());
-			if (ui.window(hminimized, System.windowWidth() - width, 0, width, Std.int(ui.BUTTON_H()))) {
+			if (ui.window(hminimized, System.windowWidth() - width, 0, width, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET()))) {
 				ui._w = width;
+				var _BUTTON_H = ui.t.BUTTON_H;
+				var _BUTTON_COL = ui.t.BUTTON_COL;
+				ui.t.BUTTON_H = ui.t.ELEMENT_H;
+				ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
+
 				if (ui.button("<<")) {
 					Config.raw.layout[LayoutSidebarW] = Context.raw.maximizedSidebarWidth != 0 ? Context.raw.maximizedSidebarWidth : Std.int(UIBase.defaultWindowW * Config.raw.window_scale);
 				}
+				ui.t.BUTTON_H = _BUTTON_H;
+				ui.t.BUTTON_COL = _BUTTON_COL;
 			}
 		}
 		else if (htabs[TabSidebar0].changed && htabs[TabSidebar0].position == Context.raw.lastHtab0Position) {

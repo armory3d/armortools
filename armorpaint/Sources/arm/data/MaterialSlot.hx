@@ -50,7 +50,7 @@ class MaterialSlot {
 		}
 
 		#if (krom_android || krom_ios)
-		nodes.panX -= 30; // Center initial position
+		nodes.panX -= 50; // Center initial position
 		#end
 	}
 
