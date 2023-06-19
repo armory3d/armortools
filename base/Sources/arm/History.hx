@@ -237,6 +237,11 @@ class History {
 			if (UIView2D.inst.show) {
 				UIView2D.inst.hwnd.redraws = 2;
 			}
+
+			if (Config.raw.touch_ui) {
+				// Refresh undo & redo buttons
+				arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+			}
 			#end
 		}
 	}
@@ -424,6 +429,11 @@ class History {
 			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			if (UIView2D.inst.show) UIView2D.inst.hwnd.redraws = 2;
+
+			if (Config.raw.touch_ui) {
+				// Refresh undo & redo buttons
+				arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+			}
 			#end
 		}
 	}
