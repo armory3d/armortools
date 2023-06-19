@@ -98,6 +98,7 @@ class UIView2D {
 
 		if (UINodes.inst.show) {
 			wh -= Config.raw.layout[LayoutNodesH];
+			if (Config.raw.touch_ui) wh += UIHeader.headerh;
 		}
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
