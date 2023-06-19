@@ -42,6 +42,8 @@ class UIBase {
 	var borderHandle: Handle = null;
 	var action_paint_remap = "";
 	var operatorSearchOffset = 0;
+	var undoTapTime = 0.0;
+	var redoTapTime = 0.0;
 
 	#if (is_paint || is_sculpt)
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
@@ -1085,6 +1087,14 @@ class UIBase {
 		var undoPressed = Operator.shortcut(Config.keymap.edit_undo);
 		var redoPressed = Operator.shortcut(Config.keymap.edit_redo) ||
 						  (kb.down("control") && kb.started("y"));
+
+		// Two-finger tap to undo, three-finger tap to redo
+		if (Config.raw.touch_ui) {
+			if (mouse.started("middle")) { redoTapTime = Time.time(); }
+			else if (mouse.started("right")) { undoTapTime = Time.time(); }
+			else if (mouse.released("middle") && Time.time() - redoTapTime < 0.2) { redoTapTime = undoTapTime = 0; redoPressed = true; }
+			else if (mouse.released("right") && Time.time() - undoTapTime < 0.2) { redoTapTime = undoTapTime = 0; undoPressed = true; }
+		}
 
 		if (undoPressed) History.undo();
 		else if (redoPressed) History.redo();
