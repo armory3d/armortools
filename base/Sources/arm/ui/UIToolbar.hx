@@ -164,6 +164,14 @@ class UIToolbar {
 
 			ui.imageScrollAlign = true;
 		}
+
+		if (Config.raw.touch_ui) {
+			// Hide scrollbar
+			var _SCROLL_W = ui.t.SCROLL_W;
+			ui.t.SCROLL_W = 0;
+			ui.endWindow();
+			ui.t.SCROLL_W = _SCROLL_W;
+		}
 	}
 
 	static function toolPropertiesMenu() {
