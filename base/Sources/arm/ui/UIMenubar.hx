@@ -153,6 +153,7 @@ class UIMenubar {
 
 	function showMenu(ui: Zui, category: Int) {
 		UIMenu.show = true;
+		UIMenu.menuCommands = null;
 		UIMenu.menuCategory = category;
 		UIMenu.menuCategoryW = ui._w;
 		UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
