@@ -46,6 +46,9 @@ class MakeBake {
 			var strength = pass ? MaterialParser.bake_passthrough_strength : Context.raw.bakeCurvStrength + "";
 			var radius = pass ? MaterialParser.bake_passthrough_radius : Context.raw.bakeCurvRadius + "";
 			var offset = pass ? MaterialParser.bake_passthrough_offset : Context.raw.bakeCurvOffset + "";
+			strength = 'float($strength)';
+			radius = 'float($radius)';
+			offset = 'float($offset)';
 			frag.n = true;
 			frag.write('vec3 dx = dFdx(n);');
 			frag.write('vec3 dy = dFdy(n);');
