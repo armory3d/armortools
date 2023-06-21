@@ -933,6 +933,8 @@ class App {
 
 			#if krom_ios
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473),
+			#elseif krom_android
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473),
 			#else
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.515) : Std.int(iron.App.w() * 0.515), // Align with ui header controls
 			#end

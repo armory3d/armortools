@@ -100,6 +100,7 @@ class UIView2D {
 			wh -= Config.raw.layout[LayoutNodesH];
 			if (Config.raw.touch_ui) wh += UIHeader.headerh;
 		}
+
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
 			ui.tab(Id.handle(), tr("2D View"));
