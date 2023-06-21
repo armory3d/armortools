@@ -115,9 +115,7 @@ class BrushOutputNode extends LogicNode {
 			!UIBase.inst.ui.isHovered &&
 			!arm.App.isDragging &&
 			!arm.App.isResizing &&
-			#if !(krom_android || krom_ios)
 			!arm.App.isScrolling() &&
-			#end
 			!arm.App.isComboSelected()) {
 
 			// Set color pick
