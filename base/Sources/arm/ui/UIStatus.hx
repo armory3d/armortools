@@ -7,7 +7,7 @@ import zui.Id;
 class UIStatus {
 
 	public static var inst: UIStatus;
-	public static inline var defaultStatusH = 32;
+	public static inline var defaultStatusH = 33;
 
 	public function new() {
 		inst = this;
