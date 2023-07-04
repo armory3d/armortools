@@ -35,7 +35,7 @@ class MakePaint {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		#if (kha_direct3d12 || kha_vulkan)
+		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeInit) {
 			// Init raytraced bake
 			MakeBake.positionAndNormal(vert, frag);

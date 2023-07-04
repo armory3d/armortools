@@ -3,7 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 
-#if (kha_direct3d12 || kha_vulkan)
+#if (kha_direct3d12 || kha_vulkan || kha_metal)
 
 class RenderPathRaytrace {
 
@@ -24,6 +24,8 @@ class RenderPathRaytrace {
 
 	#if kha_direct3d12
 	public static inline var ext = ".cso";
+	#elseif kha_metal
+	public static inline var ext = ".metal";
 	#else
 	public static inline var ext = ".spirv";
 	#end

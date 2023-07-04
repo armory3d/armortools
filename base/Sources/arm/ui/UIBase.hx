@@ -522,7 +522,7 @@ class UIBase {
 
 						var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-						#if (kha_direct3d12 || kha_vulkan)
+						#if (kha_direct3d12 || kha_vulkan || kha_metal)
 						modes.push(tr("Path Traced"));
 						shortcuts.push("p");
 						#end
@@ -543,10 +543,10 @@ class UIBase {
 						}
 
 					#if (is_paint || is_sculpt)
-					}, 16 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
+					}, 16 #if (kha_direct3d12 || kha_vulkan || kha_metal) + 1 #end );
 					#end
 					#if is_lab
-					}, 9 #if (kha_direct3d12 || kha_vulkan) + 1 #end );
+					}, 9 #if (kha_direct3d12 || kha_vulkan || kha_metal) + 1 #end );
 					#end
 				}
 			}
@@ -1026,7 +1026,7 @@ class UIBase {
 			Context.raw.brushTime = 0;
 			Context.raw.prevPaintVecX = -1;
 			Context.raw.prevPaintVecY = -1;
-			#if (!kha_direct3d12 && !kha_vulkan) // Keep accumulated samples for D3D12
+			#if (!kha_direct3d12 && !kha_vulkan && !kha_metal) // Keep accumulated samples for D3D12
 			Context.raw.ddirty = 3;
 			#end
 			Context.raw.brushBlendDirty = true; // Update brush mask

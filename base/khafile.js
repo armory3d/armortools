@@ -6,13 +6,12 @@ flags.ios = process.argv.indexOf("ios") >= 0;
 flags.win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
 flags.d3d12 = process.argv.indexOf("direct3d12") >= 0;
 flags.vulkan = process.argv.indexOf("vulkan") >= 0;
-flags.raytrace = flags.d3d12 || flags.vulkan;
 flags.metal = process.argv.indexOf("metal") >= 0;
-flags.vr = process.argv.indexOf("--vr") >= 0;
+flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
 flags.snapshot = process.argv.indexOf("--snapshot") >= 0;
 flags.plugin_embed = flags.ios;
 flags.physics = !flags.ios;
-flags.voxels = process.platform !== "darwin" && !flags.raytrace && !flags.android && !flags.ios;
+flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
 let project = new Project("Base");
 project.addSources("Sources");
@@ -60,6 +59,9 @@ if (flags.raytrace) {
 	}
 	else if (flags.vulkan) {
 		project.addAssets("Shaders/raytrace/*.spirv", { destination: "data/{name}", embed: flags.snapshot });
+	}
+	else if (flags.metal) {
+		project.addAssets("Shaders/raytrace/*.metal", { destination: "data/{name}", embed: flags.snapshot });
 	}
 }
 

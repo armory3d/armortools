@@ -178,7 +178,7 @@ class UIHeader {
 		else if (Context.raw.tool == ToolBake) {
 			ui.changed = false;
 
-			#if (kha_direct3d12 || kha_vulkan)
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			var baking = Context.raw.pdirty > 0;
 			var rtBake = Context.raw.bakeType == BakeAO || Context.raw.bakeType == BakeLightmap || Context.raw.bakeType == BakeBentNormal || Context.raw.bakeType == BakeThickness;
 			if (baking && ui.button(tr("Stop"))) {
@@ -214,14 +214,14 @@ class UIHeader {
 				tr("Object ID"),
 				tr("Vertex Color"),
 			];
-			#if (kha_direct3d12 || kha_vulkan)
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			bakes.push(tr("Lightmap"));
 			bakes.push(tr("Bent Normal"));
 			bakes.push(tr("Thickness"));
 			#end
 			Context.raw.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
 
-			#if (kha_direct3d12 || kha_vulkan)
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
 				var samplesHandle = Id.handle({ value: Context.raw.bakeSamples });
 				Context.raw.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
@@ -244,7 +244,7 @@ class UIHeader {
 				var offsetHandle = Id.handle({ value: Context.raw.bakeAoOffset });
 				Context.raw.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 			}
-			#if (kha_direct3d12 || kha_vulkan)
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
 				ui.text(tr("Rays/pix:") + ' ${arm.render.RenderPathRaytraceBake.raysPix}');
 				ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytraceBake.raysSec}');

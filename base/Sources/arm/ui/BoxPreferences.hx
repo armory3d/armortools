@@ -414,7 +414,7 @@ class BoxPreferences {
 			Context.raw.hsupersample = Id.handle({ position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
 			Context.raw.hvxao = Id.handle({ selected: Config.raw.rp_gi });
 			if (ui.tab(htab, tr("Viewport"), true)) {
-				#if (kha_direct3d12 || kha_vulkan)
+				#if (kha_direct3d12 || kha_vulkan || kha_metal)
 
 				var hpathtracemode = Id.handle({ position: Context.raw.pathTraceMode });
 				Context.raw.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);

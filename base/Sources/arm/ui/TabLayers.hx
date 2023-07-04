@@ -124,7 +124,7 @@ class TabLayers {
 				App.setObjectMask();
 				UVUtil.uvmapCached = false;
 				Context.raw.ddirty = 2;
-				#if (kha_direct3d12 || kha_vulkan)
+				#if (kha_direct3d12 || kha_vulkan || kha_metal)
 				arm.render.RenderPathRaytrace.ready = false;
 				#end
 			}

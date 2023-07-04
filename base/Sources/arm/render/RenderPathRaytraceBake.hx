@@ -3,7 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 
-#if (kha_direct3d12 || kha_vulkan)
+#if (kha_direct3d12 || kha_vulkan || kha_metal)
 
 @:access(arm.render.RenderPathRaytrace)
 class RenderPathRaytraceBake {

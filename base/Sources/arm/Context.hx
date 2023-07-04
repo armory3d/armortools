@@ -146,7 +146,7 @@ class Context {
 		}
 
 		else if (raw.tool == ToolBake) {
-			#if (kha_direct3d12 || kha_vulkan)
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			// Bake in lit mode for now
 			if (Context.raw.viewportMode == ViewPathTrace) {
 				Context.raw.viewportMode = ViewLit;

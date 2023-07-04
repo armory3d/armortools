@@ -1101,7 +1101,7 @@ class App {
 			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
-		#if (kha_direct3d12 || kha_vulkan)
+		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
 		Context.raw.ddirty = 2;
@@ -2100,7 +2100,7 @@ class App {
 		UVUtil.trianglemap = null;
 		UVUtil.trianglemapCached = false;
 		UVUtil.dilatemapCached = false;
-		#if (kha_direct3d12 || kha_vulkan)
+		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
@@ -2158,7 +2158,7 @@ class App {
 			initLayers();
 		});
 
-		#if (kha_direct3d12 || kha_vulkan)
+		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}

@@ -92,7 +92,7 @@ package arm;
 	var DestinationPacked = 1;
 }
 
-#if (kha_direct3d12 || kha_vulkan)
+#if (kha_direct3d12 || kha_vulkan || kha_metal)
 @:enum abstract PathTraceMode(Int) from Int to Int {
 	var TraceCore = 0;
 	var TraceFull = 1;

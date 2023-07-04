@@ -214,7 +214,7 @@ class UIMenu {
 				Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
-					#if (kha_direct3d12 || kha_vulkan)
+					#if (kha_direct3d12 || kha_vulkan || kha_metal)
 					arm.render.RenderPathRaytrace.uvScale = Context.raw.brushScale;
 					arm.render.RenderPathRaytrace.ready = false;
 					#end
@@ -301,7 +301,7 @@ class UIMenu {
 				];
 				var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-				#if (kha_direct3d12 || kha_vulkan)
+				#if (kha_direct3d12 || kha_vulkan || kha_metal)
 				modes.push(tr("Path Traced"));
 				shortcuts.push("p");
 				#end
