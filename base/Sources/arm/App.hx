@@ -1776,6 +1776,16 @@ class App {
 			#end
 		}
 
+		#if kha_metal
+		// Flush command list
+		App.expa.g2.begin(false);
+		App.expa.g2.end();
+		App.expb.g2.begin(false);
+		App.expb.g2.end();
+		App.expc.g2.begin(false);
+		App.expc.g2.end();
+		#end
+
 		var l0 = { texpaint: App.expa, texpaint_nor: App.expb, texpaint_pack: App.expc };
 
 		// Merge height map into normal map
