@@ -11,6 +11,16 @@ class MakePaint {
 
 	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
 		var context_id = "paint";
+
+		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		var isRaytracedBake = (Context.raw.bakeType == BakeAO  ||
+			Context.raw.bakeType == BakeLightmap ||
+			Context.raw.bakeType == BakeBentNormal ||
+			Context.raw.bakeType == BakeThickness);
+		#else
+		var isRaytracedBake = false;
+		#end
+
 		var con_paint:NodeShaderContext = data.add_context({
 			name: context_id,
 			depth_write: false,
@@ -22,6 +32,7 @@ class MakePaint {
 				Context.raw.tool == ToolColorId ? ["RGBA32"] :
 				(Context.raw.tool == ToolPicker && Context.raw.pickPosNorTex) ? ["RGBA128", "RGBA128"] :
 				(Context.raw.tool == ToolPicker || Context.raw.tool == ToolMaterial) ? ["RGBA32", "RGBA32", "RGBA32", "RGBA32"] :
+				(Context.raw.tool == ToolBake && isRaytracedBake) ? ["RGBA64", "RGBA64"] :
 					["RGBA32", "RGBA32", "RGBA32", "R8"]
 		});
 

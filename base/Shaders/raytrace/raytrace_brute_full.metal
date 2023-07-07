@@ -1,4 +1,4 @@
-
+#define FULL
 #ifdef _FULL
 #define _EMISSION
 #define _SUBSURFACE
@@ -30,11 +30,11 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-constant int SAMPLES = 8;//64;
+constant int SAMPLES = 64;
 #ifdef _TRANSLUCENCY
 constant int DEPTH = 6;
 #else
-constant int DEPTH = 2;//3; // Opaque hits
+constant int DEPTH = 3; // Opaque hits
 #endif
 #ifdef _TRANSPARENCY
 constant int DEPTH_TRANSPARENT = 16; // Transparent hits

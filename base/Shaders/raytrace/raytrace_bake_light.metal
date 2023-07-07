@@ -79,6 +79,12 @@ float2 hit_attribute2d(float2 vertexAttribute[3], float2 barycentrics) {
 		barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
 }
 
+float2 s16_to_f32(uint val) {
+	int a = (int)(val << 16) >> 16;
+	int b = (int)(val & 0xffff0000) >> 16;
+	return float2(a, b) / 32767.0f;
+}
+
 kernel void raytracingKernel(
 	uint2 tid [[thread_position_in_grid]],
 	constant RayGenConstantBuffer &constant_buffer [[buffer(0)]],
@@ -97,13 +103,13 @@ kernel void raytracingKernel(
 	uint seed = 0;
 
 	float2 xy = float2(tid) + float2(0.5f, 0.5f);
-	float4 tex0 = mytexture0.read(xy, 0);
+	float4 tex0 = mytexture0.read(uint2(xy), 0);
 	if (tex0.a == 0.0) {
 		render_target.write(float4(0.0f, 0.0f, 0.0f, 0.0f), tid);
 		return;
 	}
 	float3 pos = tex0.rgb;
-	float3 nor = mytexture1.read(xy, 0).rgb;
+	float3 nor = mytexture1.read(uint2(xy), 0).rgb;
 
 	RayPayload payload;
 
@@ -114,7 +120,7 @@ kernel void raytracingKernel(
 	float3 accum = float3(0, 0, 0);
 
 	for (int i = 0; i < SAMPLES; ++i) {
-		ray.direction = cos_weighted_hemisphere_direction(nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		ray.direction = cos_weighted_hemisphere_direction(tid, nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
 		seed += 1;
 
 		intersector<triangle_data, instancing> in;
@@ -127,7 +133,7 @@ kernel void raytracingKernel(
 		if (intersection.type == intersection_type::none) {
 			float2 tex_coord = equirect(ray.direction, constant_buffer.v1.z);
 			uint2 size = uint2(mytexture_env.get_width(), mytexture_env.get_height());
-			float3 texenv = mytexture_env.read(tex_coord * size, 0).rgb * constant_buffer.v1.x;
+			float3 texenv = mytexture_env.read(uint2(tex_coord * float2(size)), 0).rgb * constant_buffer.v1.x;
 			payload.color = float4(texenv.rgb, -1);
 		}
 		else {
@@ -144,6 +150,7 @@ kernel void raytracingKernel(
 				float3(s16_to_f32(verta[indices_sample[1]].nor), s16_to_f32(verta[indices_sample[1]].poszw).y),
 				float3(s16_to_f32(verta[indices_sample[2]].nor), s16_to_f32(verta[indices_sample[2]].poszw).y)
 			};
+			float2 barycentrics = intersection.triangle_barycentric_coord;
 			float3 n = normalize(hit_attribute(vertex_normals, barycentrics));
 
 			float2 vertex_uvs[3] = {
@@ -154,7 +161,7 @@ kernel void raytracingKernel(
 			float2 tex_coord = hit_attribute2d(vertex_uvs, barycentrics);
 
 			uint2 size = uint2(mytexture2.get_width(), mytexture2.get_height());
-			float3 texpaint2 = pow(mytexture2.read(tex_coord * size, 0).rgb, 2.2); // layer base
+			float3 texpaint2 = pow(mytexture2.read(uint2(tex_coord * float2(size)), 0).rgb, 2.2); // layer base
 			payload.color.rgb = texpaint2.rgb;
 		}
 
@@ -163,7 +170,7 @@ kernel void raytracingKernel(
 
 	accum /= SAMPLES;
 
-	float3 texpaint2 = mytexture2.read(xy, 0).rgb; // layer base
+	float3 texpaint2 = mytexture2.read(uint2(xy), 0).rgb; // layer base
 	accum *= texpaint2;
 
 	float3 color = render_target.read(tid).xyz;

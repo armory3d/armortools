@@ -77,13 +77,13 @@ kernel void raytracingKernel(
 	uint seed = 0;
 
 	float2 xy = float2(tid) + float2(0.5f, 0.5f);
-	float4 tex0 = mytexture0.read(xy, 0);
+	float4 tex0 = mytexture0.read(uint2(xy), 0);
 	if (tex0.a == 0.0) {
 		render_target.write(float4(0.0f, 0.0f, 0.0f, 0.0f), tid);
 		return;
 	}
 	float3 pos = tex0.rgb;
-	float3 nor = mytexture1.read(xy, 0).rgb;
+	float3 nor = mytexture1.read(uint2(xy), 0).rgb;
 
 	RayPayload payload;
 
@@ -95,7 +95,7 @@ kernel void raytracingKernel(
 	float3 accum = float3(0, 0, 0);
 
 	for (int i = 0; i < SAMPLES; ++i) {
-		ray.direction = cos_weighted_hemisphere_direction(-nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		ray.direction = cos_weighted_hemisphere_direction(tid, -nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
 		seed += 1;
 
 		intersector<triangle_data, instancing> in;

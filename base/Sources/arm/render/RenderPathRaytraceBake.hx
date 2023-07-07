@@ -136,7 +136,7 @@ class RenderPathRaytraceBake {
 			Context.raw.bakeType == BakeAO  		? "raytrace_bake_ao" + RenderPathRaytrace.ext :
 			Context.raw.bakeType == BakeLightmap 	? "raytrace_bake_light" + RenderPathRaytrace.ext :
 			Context.raw.bakeType == BakeBentNormal  ? "raytrace_bake_bent" + RenderPathRaytrace.ext :
-												  "raytrace_bake_thick" + RenderPathRaytrace.ext;
+													  "raytrace_bake_thick" + RenderPathRaytrace.ext;
 	}
 }
 

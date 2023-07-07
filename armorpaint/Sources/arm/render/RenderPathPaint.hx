@@ -698,6 +698,14 @@ class RenderPathPaint {
 
 			#if is_paint
 			if (Context.raw.tool == ToolBake) {
+
+				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				var isRaytracedBake = (Context.raw.bakeType == BakeAO  ||
+					Context.raw.bakeType == BakeLightmap ||
+					Context.raw.bakeType == BakeBentNormal ||
+					Context.raw.bakeType == BakeThickness);
+				#end
+
 				if (Context.raw.bakeType == BakeNormal || Context.raw.bakeType == BakeHeight || Context.raw.bakeType == BakeDerivative) {
 					if (!baking && Context.raw.pdirty > 0) {
 						baking = true;
@@ -752,10 +760,7 @@ class RenderPathPaint {
 					if (isMerged) Context.raw.mergedObject.visible = _visible;
 				}
 				#if (kha_direct3d12 || kha_vulkan || kha_metal)
-				else if (Context.raw.bakeType == BakeAO  ||
-						 Context.raw.bakeType == BakeLightmap ||
-						 Context.raw.bakeType == BakeBentNormal ||
-						 Context.raw.bakeType == BakeThickness) {
+				else if (isRaytracedBake) {
 					var dirty = RenderPathRaytraceBake.commands(MakeMaterial.parsePaintMaterial);
 					if (dirty) UIHeader.inst.headerHandle.redraws = 2;
 					if (Config.raw.dilate == DilateInstant) { // && Context.raw.pdirty == 1
