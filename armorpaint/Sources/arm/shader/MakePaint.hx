@@ -13,10 +13,7 @@ class MakePaint {
 		var context_id = "paint";
 
 		#if (kha_direct3d12 || kha_vulkan || kha_metal)
-		var isRaytracedBake = (Context.raw.bakeType == BakeAO  ||
-			Context.raw.bakeType == BakeLightmap ||
-			Context.raw.bakeType == BakeBentNormal ||
-			Context.raw.bakeType == BakeThickness);
+		var isRaytracedBake = Context.raw.bakeType == BakeInit;
 		#else
 		var isRaytracedBake = false;
 		#end
