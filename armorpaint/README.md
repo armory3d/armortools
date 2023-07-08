@@ -33,6 +33,9 @@ strip ArmorPaint
 
 **macOS**
 ```bash
+cd ../armorcore
+git apply patch/metal_raytrace.diff --directory=Kinc
+cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
@@ -55,6 +58,7 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 **iOS** *wip*
 ```bash
 cd ../armorcore
+git apply patch/metal_raytrace.diff --directory=Kinc
 git apply patch/ios_document_picker.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal ios
