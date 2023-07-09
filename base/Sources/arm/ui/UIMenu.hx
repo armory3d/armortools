@@ -302,8 +302,10 @@ class UIMenu {
 				var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
 				#if (kha_direct3d12 || kha_vulkan || kha_metal)
-				modes.push(tr("Path Traced"));
-				shortcuts.push("p");
+				if (Krom.raytraceSupported()) {
+					modes.push(tr("Path Traced"));
+					shortcuts.push("p");
+				}
 				#end
 
 				for (i in 0...modes.length) {

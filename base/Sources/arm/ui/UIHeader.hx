@@ -215,11 +215,23 @@ class UIHeader {
 				tr("Vertex Color"),
 			];
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
-			bakes.push(tr("Lightmap"));
-			bakes.push(tr("Bent Normal"));
-			bakes.push(tr("Thickness"));
+			if (Krom.raytraceSupported()) {
+				bakes.push(tr("Lightmap"));
+				bakes.push(tr("Bent Normal"));
+				bakes.push(tr("Thickness"));
+			}
+			else {
+				bakes.shift(); // Remove AO
+			}
 			#end
+
 			Context.raw.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
+
+			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			if (!Krom.raytraceSupported()) {
+				Context.raw.bakeType += 1; // Offset for removed AO
+			}
+			#end
 
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
