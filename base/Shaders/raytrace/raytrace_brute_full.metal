@@ -1,10 +1,10 @@
-#define FULL
+#define _FULL
 #ifdef _FULL
 #define _EMISSION
 #define _SUBSURFACE
 #define _TRANSLUCENCY
 #endif
-// #define _RENDER
+#define _RENDER
 // #define _ROULETTE
 // #define _TRANSPARENCY
 
@@ -30,7 +30,7 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-constant int SAMPLES = 64;
+constant int SAMPLES = 2; // 64
 #ifdef _TRANSLUCENCY
 constant int DEPTH = 6;
 #else
@@ -355,6 +355,6 @@ kernel void raytracingKernel(
 	if (constant_buffer.eye.w == 0) {
 		color = accum.xyz / SAMPLES;
 	}
-	render_target.write(float4(mix(color.xyz, accum.xyz / SAMPLES, 1.0 / 4.0), 0.0f), tid);
+	render_target.write(float4(mix(color.xyz, accum.xyz / SAMPLES, 1.0 / 16.0), 0.0f), tid);
 	#endif
 }

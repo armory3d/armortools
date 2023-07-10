@@ -23,7 +23,7 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-constant int SAMPLES = 64;
+constant int SAMPLES = 4;//64;
 
 float2 equirect(float3 normal, float angle) {
 	const float PI = 3.1415926535;

@@ -23,7 +23,7 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-constant int SAMPLES = 64;
+constant int SAMPLES = 4;//64;
 
 float rand(int pixel_i, int pixel_j, int sampleIndex, int sampleDimension, int frame, texture2d<float, access::read> sobol, texture2d<float, access::read> scramble, texture2d<float, access::read> rank) {
 	pixel_i += frame * 9;

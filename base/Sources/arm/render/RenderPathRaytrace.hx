@@ -68,8 +68,13 @@ class RenderPathRaytrace {
 		f32[1] = ct.worldy();
 		f32[2] = ct.worldz();
 		f32[3] = frame;
+		#if kha_metal
+		// frame = (frame % (16)) + 1; // _PAINT
+		frame = frame + 1; // _RENDER
+		#else
 		frame = (frame % 4) + 1; // _PAINT
 		// frame = frame + 1; // _RENDER
+		#end
 		f32[4] = helpMat._00;
 		f32[5] = helpMat._01;
 		f32[6] = helpMat._02;
@@ -94,7 +99,13 @@ class RenderPathRaytrace {
 		var framebuffer = path.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
-		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) Context.raw.rdirty = 4;
+		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
+			#if kha_metal
+			Context.raw.rdirty = 128;
+			#else
+			Context.raw.rdirty = 4;
+			#end
+		}
 		Context.raw.ddirty--;
 		Context.raw.pdirty--;
 		Context.raw.rdirty--;

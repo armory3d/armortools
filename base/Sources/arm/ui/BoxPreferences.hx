@@ -422,14 +422,13 @@ class BoxPreferences {
 					arm.render.RenderPathRaytrace.ready = false;
 				}
 
-				#else
+				#end
 
 				var hrendermode = Id.handle({ position: Context.raw.renderMode });
 				Context.raw.renderMode = ui.combo(hrendermode, [tr("Full"), tr("Mobile")], tr("Renderer"), true);
 				if (hrendermode.changed) {
 					Context.setRenderPath();
 				}
-				#end
 
 				ui.combo(Context.raw.hsupersample, ["0.25x", "0.5x", "1.0x", "1.5x", "2.0x", "4.0x"], tr("Super Sample"), true);
 				if (Context.raw.hsupersample.changed) Config.applyConfig();

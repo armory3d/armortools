@@ -344,7 +344,7 @@ class MakeMesh {
 					var color = Context.raw.viewportShader(frag);
 					frag.write('fragColor[1] = vec4($color, 1.0);');
 				}
-				else if (Context.raw.renderMode == RenderForward) {
+				else if (Context.raw.renderMode == RenderForward && Context.raw.viewportMode != ViewPathTrace) {
 					frag.wposition = true;
 					frag.write('vec3 albedo = mix(basecol, vec3(0.0, 0.0, 0.0), metallic);');
 					frag.write('vec3 f0 = mix(vec3(0.04, 0.04, 0.04), basecol, metallic);');
