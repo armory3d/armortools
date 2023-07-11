@@ -198,6 +198,9 @@ class UIHeader {
 				});
 				UIBase.inst.hwnds[0].redraws = 2;
 				History.pushUndo = true;
+				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				arm.render.RenderPathRaytraceBake.currentSample = 0;
+				#end
 			}
 
 			var bakeHandle = Id.handle({ position: Context.raw.bakeType });
@@ -258,8 +261,14 @@ class UIHeader {
 			}
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
-				ui.text(tr("Rays/pix:") + ' ${arm.render.RenderPathRaytraceBake.raysPix}');
-				ui.text(tr("Rays/sec:") + ' ${arm.render.RenderPathRaytraceBake.raysSec}');
+				var progress = Std.int(arm.render.RenderPathRaytraceBake.currentSample / Context.raw.bakeSamples * 100);
+				if (progress > 100) progress = 100;
+				ui.fill(0, 0, ui._w, ui._h, ui.t.SEPARATOR_COL);
+				ui.fill(0, 0, ui._w * progress / 100, ui._h, ui.t.HIGHLIGHT_COL);
+				ui.text(tr("Progress") + ": " + progress + "%");
+				ui.text(tr("Samples") + ": " + arm.render.RenderPathRaytraceBake.currentSample);
+				ui.text(tr("Rays/pixel" + ": ") + arm.render.RenderPathRaytraceBake.raysPix);
+				ui.text(tr("Rays/second" + ": ") + arm.render.RenderPathRaytraceBake.raysSec);
 			}
 			#end
 			if (Context.raw.bakeType == BakeCurvature) {

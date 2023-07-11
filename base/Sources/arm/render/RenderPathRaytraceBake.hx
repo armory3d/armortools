@@ -10,6 +10,7 @@ class RenderPathRaytraceBake {
 
 	public static var raysPix = 0;
 	public static var raysSec = 0;
+	public static var currentSample = 0;
 	static var raysTimer = 0.0;
 	static var raysCounter = 0;
 	static var lastLayer: kha.Image = null;
@@ -113,20 +114,29 @@ class RenderPathRaytraceBake {
 			path.bindTarget("baketex2", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 
-			raysPix = RenderPathRaytrace.frame * 64;
-			raysCounter += 64;
+			#if kha_metal
+			var samplesPerFrame = 4;
+			#else
+			var samplesPerFrame = 64;
+			#end
+
+			raysPix = RenderPathRaytrace.frame * samplesPerFrame;
+			raysCounter += samplesPerFrame;
 			raysTimer += iron.system.Time.realDelta;
 			if (raysTimer >= 1) {
 				raysSec = raysCounter;
 				raysTimer = 0;
 				raysCounter = 0;
 			}
+			currentSample++;
+			Krom.delayIdleSleep();
 			return true;
 		}
 		else {
 			RenderPathRaytrace.frame = 0;
 			raysTimer = 0;
 			raysCounter = 0;
+			currentSample = 0;
 			return false;
 		}
 	}
