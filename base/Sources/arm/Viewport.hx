@@ -37,6 +37,7 @@ class Viewport {
 				cam.buildProjection();
 				Context.raw.ddirty = 2;
 				Camera.inst.reset();
+				Context.mainObject().transform.reset();
 				break;
 			}
 		}
