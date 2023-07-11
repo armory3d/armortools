@@ -749,6 +749,9 @@ class App {
 				UIMenubar.inst.workspaceHandle.redraws = 2;
 				UIHeader.inst.worktab.changed = true;
 			}
+
+			// Default camera controls
+			Context.raw.cameraControls = Config.raw.camera_controls;
 		}
 		else if (Context.raw.frame == 3) {
 			Context.raw.ddirty = 3;
@@ -990,6 +993,11 @@ class App {
 		#end
 		#if is_lab
 		raw.workspace = Space2D;
+		#end
+		#if (krom_android || krom_ios)
+		raw.camera_controls = ControlsRotate;
+		#else
+		raw.camera_controls = ControlsOrbit;
 		#end
 		raw.layer_res = Res2048;
 		#if (krom_android || krom_ios)

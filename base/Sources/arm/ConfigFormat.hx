@@ -44,6 +44,7 @@ package arm;
 	@:optional public var layout: Array<Int>; // Sizes
 	@:optional public var layout_tabs: Array<Int>; // Active tabs
 	@:optional public var workspace: Null<Int>;
+	@:optional public var camera_controls: Null<Int>; // Orbit, rotate
 	@:optional public var server: String;
 
 	@:optional public var pressure_radius: Null<Bool>; // Pen pressure controls

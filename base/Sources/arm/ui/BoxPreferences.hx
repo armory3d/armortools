@@ -318,6 +318,12 @@ class BoxPreferences {
 					Config.raw.workspace = workspaceHandle.position;
 				}
 
+				var cameraControlsHandle = Id.handle({ position: Config.raw.camera_controls });
+				ui.combo(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
+				if (cameraControlsHandle.changed) {
+					Config.raw.camera_controls = cameraControlsHandle.position;
+				}
+
 				var layerResHandle = Id.handle({ position: Config.raw.layer_res });
 
 				#if (is_paint || is_sculpt)
