@@ -40,6 +40,7 @@ cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorLab.xcodeproj`
+# Set macOS Deployment Target to 13.0
 # Build and run
 ```
 

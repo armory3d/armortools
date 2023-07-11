@@ -39,6 +39,7 @@ cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project at `build/ArmorPaint.xcodeproj`
+# Set macOS Deployment Target to 13.0
 # Build and run
 ```
 
@@ -64,7 +65,7 @@ cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal ios
 cp -a build/krom/ ../armorcore/Deployment
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
-# Set iOS Deployment Target to 14.0
+# Set iOS Deployment Target to 16.0
 # Build for device in release mode
 ```
 
