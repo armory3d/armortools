@@ -261,11 +261,14 @@ class UIHeader {
 			}
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
-				var progress = Std.int(arm.render.RenderPathRaytraceBake.currentSample / Context.raw.bakeSamples * 100);
-				if (progress > 100) progress = 100;
-				ui.fill(0, 0, ui._w, ui._h, ui.t.SEPARATOR_COL);
-				ui.fill(0, 0, ui._w * progress / 100, ui._h, ui.t.HIGHLIGHT_COL);
-				ui.text(tr("Progress") + ": " + progress + "%");
+				var progress = arm.render.RenderPathRaytraceBake.currentSample / Context.raw.bakeSamples;
+				if (progress > 1.0) progress = 1.0;
+				// Progress bar
+				ui.g.color = ui.t.SEPARATOR_COL;
+				ui.drawRect(ui.g, true, ui._x + 1, ui._y, ui._w - 2, ui.ELEMENT_H());
+				ui.g.color = ui.t.HIGHLIGHT_COL;
+				ui.drawRect(ui.g, true, ui._x + 1, ui._y, (ui._w - 2) * progress, ui.ELEMENT_H());
+				ui.g.color = 0xffffffff;
 				ui.text(tr("Samples") + ": " + arm.render.RenderPathRaytraceBake.currentSample);
 				ui.text(tr("Rays/pixel" + ": ") + arm.render.RenderPathRaytraceBake.raysPix);
 				ui.text(tr("Rays/second" + ": ") + arm.render.RenderPathRaytraceBake.raysSec);
