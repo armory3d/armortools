@@ -69,7 +69,7 @@ import arm.data.FontSlot;
 	#else
 	@:optional public var viewportMode = ViewLit;
 	#end
-	#if (krom_android || krom_ios || arm_vr)
+	#if (krom_android || krom_ios)
 	@:optional public var renderMode = RenderForward;
 	#else
 	@:optional public var renderMode = RenderDeferred;
