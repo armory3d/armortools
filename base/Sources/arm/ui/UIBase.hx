@@ -1096,8 +1096,8 @@ class UIBase {
 		if (Config.raw.touch_ui) {
 			if (mouse.started("middle")) { redoTapTime = Time.time(); }
 			else if (mouse.started("right")) { undoTapTime = Time.time(); }
-			else if (mouse.released("middle") && Time.time() - redoTapTime < 0.2) { redoTapTime = undoTapTime = 0; redoPressed = true; }
-			else if (mouse.released("right") && Time.time() - undoTapTime < 0.2) { redoTapTime = undoTapTime = 0; undoPressed = true; }
+			else if (mouse.released("middle") && Time.time() - redoTapTime < 0.1) { redoTapTime = undoTapTime = 0; redoPressed = true; }
+			else if (mouse.released("right") && Time.time() - undoTapTime < 0.1) { redoTapTime = undoTapTime = 0; undoPressed = true; }
 		}
 
 		if (undoPressed) History.undo();
