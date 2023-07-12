@@ -268,12 +268,8 @@ class UIMenu {
 				menuFill(ui);
 				Context.raw.showEnvmapBlur = ui.check(Context.raw.showEnvmapBlurHandle, " " + tr("Blur Envmap"));
 				if (Context.raw.showEnvmapBlurHandle.changed) Context.raw.ddirty = 2;
-				if (Context.raw.showEnvmap) {
-					Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
-				}
-				else {
-					Scene.active.world.envmap = Context.raw.emptyEnvmap;
-				}
+
+				Context.updateEnvmap();
 
 				if (ui.changed) keepOpen = true;
 			}

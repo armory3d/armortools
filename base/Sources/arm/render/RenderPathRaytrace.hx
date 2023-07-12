@@ -43,7 +43,10 @@ class RenderPathRaytrace {
 			lastEnvmap = null;
 		}
 
-		if (!Context.raw.envmapLoaded) Context.loadEnvmap();
+		if (!Context.raw.envmapLoaded) {
+			Context.loadEnvmap();
+			Context.updateEnvmap();
+		}
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
 		if (lastEnvmap != savedEnvmap) {
@@ -144,6 +147,12 @@ class RenderPathRaytrace {
 	public static function draw(useLiveLayer: Bool) {
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || isLive) frame = 0;
+
+		#if kha_metal
+		// Delay path tracing additional samples while painting
+		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+		if (Context.inViewport() && down) frame = 0;
+		#end
 
 		commands(useLiveLayer);
 

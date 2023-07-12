@@ -1,6 +1,7 @@
 package arm;
 
 import iron.RenderPath;
+import iron.Scene;
 import iron.object.MeshObject;
 import iron.system.Input;
 import arm.render.RenderPathDeferred;
@@ -301,8 +302,17 @@ class Context {
 			raw.envmapLoaded = true;
 			iron.data.Data.cachedImages.remove("World_radiance.k");
 		}
-		iron.Scene.active.world.loadEnvmap(function(_) {});
-		if (raw.savedEnvmap == null) raw.savedEnvmap = iron.Scene.active.world.envmap;
+		Scene.active.world.loadEnvmap(function(_) {});
+		if (raw.savedEnvmap == null) raw.savedEnvmap = Scene.active.world.envmap;
+	}
+
+	public static function updateEnvmap() {
+		if (Context.raw.showEnvmap) {
+			Scene.active.world.envmap = Context.raw.showEnvmapBlur ? Scene.active.world.probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+		}
+		else {
+			Scene.active.world.envmap = Context.raw.emptyEnvmap;
+		}
 	}
 
 	@:keep
