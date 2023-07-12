@@ -61,6 +61,7 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 cd ../armorcore
 git apply patch/metal_raytrace.diff --directory=Kinc
 git apply patch/ios_document_picker.diff --directory=Kinc
+git apply patch/ios_pencil_hover.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal ios
 cp -a build/krom/ ../armorcore/Deployment
