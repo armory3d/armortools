@@ -20,6 +20,7 @@ class TabLayers {
 
 	static var layerNameEdit = -1;
 	static var layerNameHandle = Id.handle();
+	static var showContextMenu = false;
 
 	public static function draw(htab: Handle) {
 		var mini = Config.raw.layout[LayoutSidebarW] <= UIBase.sidebarMiniW;
@@ -28,23 +29,33 @@ class TabLayers {
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		ui.separator(5);
+		@:privateAccess ui.setHoveredTabName(tr("Layers"));
+
+		var _ELEMENT_H = ui.t.ELEMENT_H;
+		ui.t.ELEMENT_H = Std.int(UIBase.sidebarMiniW / 2 / ui.SCALE());
+
 		ui.beginSticky();
+		ui.separator(5);
+
 		comboFilter();
 		button2dView();
 		buttonNew("+");
+
 		ui.endSticky();
 		ui._y += 2;
+
 		highlightOddLines();
 		drawSlots(true);
+
+		ui.t.ELEMENT_H = _ELEMENT_H;
 	}
 
 	static function drawFull(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		if (ui.tab(htab, tr("Layers"))) {
 			ui.beginSticky();
-
 			ui.row([1 / 4, 1 / 4, 1 / 2]);
+
 			buttonNew(tr("New"));
 			button2dView();
 			comboFilter();
@@ -277,11 +288,12 @@ class TabLayers {
 			}
 		}
 
-		if (mini) {
-			drawLayerSlotMini(l, i);
-		}
-		else {
-			drawLayerSlotFull(l, i);
+		mini ? drawLayerSlotMini(l, i) : drawLayerSlotFull(l, i);
+
+		drawLayerHighlight(l, mini);
+
+		if (showContextMenu) {
+			drawLayerContextMenu(l, mini);
 		}
 	}
 
@@ -291,14 +303,12 @@ class TabLayers {
 		ui.row([1, 1]);
 		var uix = ui._x;
 		var uiy = ui._y;
-		var state = drawLayerIcon(l, i, uix, uiy);
-		handleLayerIconState(l, state, uix, uiy);
+		var state = drawLayerIcon(l, i, uix, uiy, true);
+		handleLayerIconState(l, i, state, uix, uiy);
 		@:privateAccess ui.endElement();
 
-		var step = ui.t.ELEMENT_H;
-		ui._y += step;
+		ui._y += ui.ELEMENT_H();
 		ui._y -= ui.ELEMENT_OFFSET();
-		drawLayerHighlight(l); // var step = ui.t.ELEMENT_H;
 	}
 
 	static function drawLayerSlotFull(l: LayerSlot, i: Int) {
@@ -326,15 +336,11 @@ class TabLayers {
 		if (parentHidden) col -= 0x99000000;
 
 		if (ui.image(icons, col, null, r.x, r.y, r.w, r.h) == Released) {
-			l.visible = !l.visible;
-			UIView2D.inst.hwnd.redraws = 2;
-			MakeMaterial.parseMeshMaterial();
+			layerToggleVisible(l);
 		}
 		ui._x -= 2;
 		ui._y -= 3;
 		ui._y -= center;
-
-		var contextMenu = false;
 
 		#if kha_opengl
 		ui.imageInvertY = l.fill_layer != null;
@@ -349,18 +355,7 @@ class TabLayers {
 			if (l.parent.parent != null) ui._x += 10 * ui.SCALE();
 		}
 
-		var state = State.Idle;
-		var iconH = (ui.ELEMENT_H() - 3) * 2;
-
-		if (!l.isGroup()) {
-			state = drawLayerIcon(l, i, uix, uiy);
-		}
-		else { // Group
-			var folderClosed = Res.tile50(icons, 2, 1);
-			var folderOpen = Res.tile50(icons, 8, 1);
-			var folder = l.show_panel ? folderOpen : folderClosed;
-			state = ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
-		}
+		var state = drawLayerIcon(l, i, uix, uiy, false);
 
 		ui._x -= 2;
 		ui._y -= 3;
@@ -373,33 +368,7 @@ class TabLayers {
 		ui.imageInvertY = false;
 		#end
 
-		#if is_paint
-		var texpaint_preview = l.texpaint_preview;
-		#end
-		#if is_sculpt
-		var texpaint_preview = l.texpaint;
-		#end
-
-		// Layer preview tooltip
-		if (ui.isHovered && texpaint_preview != null) {
-			if (l.isMask()) {
-				makeMaskPreviewRgba32(l);
-				ui.tooltipImage(Context.raw.maskPreviewRgba32);
-			}
-			else {
-				ui.tooltipImage(texpaint_preview);
-			}
-			if (i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
-			else ui.tooltip(l.name);
-		}
-
-		// Show context menu
-		if (ui.isHovered && ui.inputReleasedR) {
-			Context.setLayer(l);
-			contextMenu = true;
-		}
-
-		handleLayerIconState(l, state, uix, uiy);
+		handleLayerIconState(l, i, state, uix, uiy);
 
 		// Draw layer name
 		ui._y += center;
@@ -424,7 +393,7 @@ class TabLayers {
 				}
 				else if (ui.inputReleasedR) {
 					Context.setLayer(l);
-					contextMenu = true;
+					showContextMenu = true;
 				}
 			}
 
@@ -455,10 +424,6 @@ class TabLayers {
 			if (l.parent.parent != null) ui._x -= 10 * ui.SCALE();
 		}
 
-		if (contextMenu) {
-			drawLayerContextMenu(l);
-		}
-
 		if (l.isGroup()) {
 			@:privateAccess ui.endElement();
 		}
@@ -467,34 +432,7 @@ class TabLayers {
 				ui._y += center;
 			}
 
-			var blendingHandle = Id.handle().nest(l.id);
-			blendingHandle.position = l.blending;
-			ui.combo(blendingHandle, [
-				tr("Mix"),
-				tr("Darken"),
-				tr("Multiply"),
-				tr("Burn"),
-				tr("Lighten"),
-				tr("Screen"),
-				tr("Dodge"),
-				tr("Add"),
-				tr("Overlay"),
-				tr("Soft Light"),
-				tr("Linear Light"),
-				tr("Difference"),
-				tr("Subtract"),
-				tr("Divide"),
-				tr("Hue"),
-				tr("Saturation"),
-				tr("Color"),
-				tr("Value"),
-			], tr("Blending"));
-			if (blendingHandle.changed) {
-				Context.setLayer(l);
-				History.layerBlending();
-				l.blending = blendingHandle.position;
-				MakeMaterial.parseMeshMaterial();
-			}
+			comboBlending(ui, l);
 
 			if (l.isMask()) {
 				ui._y -= center;
@@ -525,51 +463,126 @@ class TabLayers {
 				ui._x += 12 * ui.SCALE();
 			}
 
-			var ar = [tr("Shared")];
-			for (p in Project.paintObjects) ar.push(p.name);
-			var atlases = Project.getUsedAtlases();
-			if (atlases != null) for (a in atlases) ar.push(a);
-			var objectHandle = Id.handle().nest(l.id);
-			objectHandle.position = l.objectMask;
-			l.objectMask = ui.combo(objectHandle, ar, tr("Object"), false, Left);
-			if (objectHandle.changed) {
-				Context.setLayer(l);
-				MakeMaterial.parseMeshMaterial();
-				if (l.fill_layer != null) { // Fill layer
-					function _init() {
-						Context.raw.material = l.fill_layer;
-						l.clear();
-						App.updateFillLayers();
-					}
-					iron.App.notifyOnInit(_init);
-				}
-				else {
-					App.setObjectMask();
-				}
-			}
+			comboObject(ui, l);
 			@:privateAccess ui.endElement();
 		}
 
 		ui._y -= ui.ELEMENT_OFFSET();
-
-		drawLayerHighlight(l);
 	}
 
-	static function drawLayerHighlight(l: LayerSlot) {
+	static function comboObject(ui: Zui, l: LayerSlot, label = false): Handle {
+		var ar = [tr("Shared")];
+		for (p in Project.paintObjects) ar.push(p.name);
+		var atlases = Project.getUsedAtlases();
+		if (atlases != null) for (a in atlases) ar.push(a);
+		var objectHandle = Id.handle().nest(l.id);
+		objectHandle.position = l.objectMask;
+		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Left);
+		if (objectHandle.changed) {
+			Context.setLayer(l);
+			MakeMaterial.parseMeshMaterial();
+			if (l.fill_layer != null) { // Fill layer
+				function _init() {
+					Context.raw.material = l.fill_layer;
+					l.clear();
+					App.updateFillLayers();
+				}
+				iron.App.notifyOnInit(_init);
+			}
+			else {
+				App.setObjectMask();
+			}
+		}
+		return objectHandle;
+	}
+
+	static function comboBlending(ui: Zui, l: LayerSlot, label = false): Handle {
+		var blendingHandle = Id.handle().nest(l.id);
+		blendingHandle.position = l.blending;
+		ui.combo(blendingHandle, [
+			tr("Mix"),
+			tr("Darken"),
+			tr("Multiply"),
+			tr("Burn"),
+			tr("Lighten"),
+			tr("Screen"),
+			tr("Dodge"),
+			tr("Add"),
+			tr("Overlay"),
+			tr("Soft Light"),
+			tr("Linear Light"),
+			tr("Difference"),
+			tr("Subtract"),
+			tr("Divide"),
+			tr("Hue"),
+			tr("Saturation"),
+			tr("Color"),
+			tr("Value"),
+		], tr("Blending"), label);
+		if (blendingHandle.changed) {
+			Context.setLayer(l);
+			History.layerBlending();
+			l.blending = blendingHandle.position;
+			MakeMaterial.parseMeshMaterial();
+		}
+		return blendingHandle;
+	}
+
+	static function layerToggleVisible(l: LayerSlot) {
+		l.visible = !l.visible;
+		UIView2D.inst.hwnd.redraws = 2;
+		MakeMaterial.parseMeshMaterial();
+	}
+
+	static function drawLayerHighlight(l: LayerSlot, mini: Bool) {
 		var ui = UIBase.inst.ui;
-		var step = ui.t.ELEMENT_H * 2;
+		var step = ui.t.ELEMENT_H;
 
 		// Separator line
 		ui.fill(0, 0, (ui._w / ui.SCALE() - 2), 1 * ui.SCALE(), ui.t.SEPARATOR_COL);
 
 		// Highlight selected
 		if (Context.raw.layer == l) {
-			ui.rect(1, -step * 2 - 1, (ui._w / ui.SCALE() - 2), step * 2 + 1, ui.t.HIGHLIGHT_COL, 2);
+			if (mini) {
+				ui.rect(1, -step * 2, ui._w / ui.SCALE() - 1, step * 2 + (mini ? -1 : 1), ui.t.HIGHLIGHT_COL, 3);
+			}
+			else {
+				ui.rect(1, -step * 2 - 1, ui._w / ui.SCALE() - 2, step * 2 + (mini ? -2 : 1), ui.t.HIGHLIGHT_COL, 2);
+			}
 		}
 	}
 
-	static function handleLayerIconState(l: LayerSlot, state: State, uix: Float, uiy: Float) {
+	static function handleLayerIconState(l: LayerSlot, i: Int, state: State, uix: Float, uiy: Float) {
 		var ui = UIBase.inst.ui;
+
+		#if is_paint
+		var texpaint_preview = l.texpaint_preview;
+		#end
+		#if is_sculpt
+		var texpaint_preview = l.texpaint;
+		#end
+
+		showContextMenu = false;
+
+		// Layer preview tooltip
+		if (ui.isHovered && texpaint_preview != null) {
+			if (l.isMask()) {
+				makeMaskPreviewRgba32(l);
+				ui.tooltipImage(Context.raw.maskPreviewRgba32);
+			}
+			else {
+				ui.tooltipImage(texpaint_preview);
+			}
+			if (i < 9) ui.tooltip(l.name + " - (" + Config.keymap.select_layer + " " + (i + 1) + ")");
+			else ui.tooltip(l.name);
+		}
+
+		// Show context menu
+		if (ui.isHovered && ui.inputReleasedR) {
+			Context.setLayer(l);
+			showContextMenu = true;
+		}
+
 		if (state == State.Started) {
 			Context.setLayer(l);
 			var mouse = Input.getMouse();
@@ -586,60 +599,81 @@ class TabLayers {
 		}
 	}
 
-	static function drawLayerIcon(l: LayerSlot, i: Int, uix: Float, uiy: Float) {
+	static function drawLayerIcon(l: LayerSlot, i: Int, uix: Float, uiy: Float, mini: Bool) {
 		var ui = UIBase.inst.ui;
 		var icons = Res.get("icons.k");
-		var iconH = (ui.ELEMENT_H() - 3) * 2;
+		var iconH = (ui.ELEMENT_H() - (mini ? 2 : 3)) * 2;
 
-		#if is_paint
-		var texpaint_preview = l.texpaint_preview;
-		#end
-		#if is_sculpt
-		var texpaint_preview = l.texpaint;
-		#end
-
-		var icon = l.fill_layer == null ? texpaint_preview : l.fill_layer.imageIcon;
-		if (l.fill_layer == null) {
-			// Checker
-			var r = Res.tile50(icons, 4, 1);
-			var _x = ui._x;
-			var _y = ui._y;
-			var _w = ui._w;
-			ui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
-			ui.curRatio--;
-			ui._x = _x;
-			ui._y = _y;
-			ui._w = _w;
-		}
-		if (l.fill_layer == null && l.isMask()) {
-			ui.g.pipeline = UIView2D.pipe;
-			#if kha_opengl
-			ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
-			#end
-			ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
+		if (mini && ui.SCALE() > 1) {
+			ui._x -= 1 * ui.SCALE();
 		}
 
-		var state = ui.image(icon, 0xffffffff, iconH);
-
-		if (l.fill_layer == null && l.isMask()) {
-			ui.g.pipeline = null;
-		}
-
-		// Draw layer numbers when selecting a layer via keyboard shortcut
-		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
-		if (!isTyping) {
-			if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
-				var number = Std.string(i + 1) ;
-				var width = ui.ops.font.width(ui.fontSize, number) + 10;
-				var height = ui.ops.font.height(ui.fontSize);
-				ui.g.color = ui.t.TEXT_COL;
-				ui.g.fillRect(uix, uiy, width, height);
-				ui.g.color = ui.t.ACCENT_COL;
-				ui.g.drawString(number, uix + 5, uiy);
+		if (l.parent != null) {
+			ui._x += (iconH - iconH * 0.9) / 2;
+			iconH *= 0.9;
+			if (l.parent.parent != null) {
+				ui._x += (iconH - iconH * 0.9) / 2;
+				iconH *= 0.9;
 			}
 		}
 
-		return state;
+		if (!l.isGroup()) {
+			#if is_paint
+			var texpaint_preview = l.texpaint_preview;
+			#end
+			#if is_sculpt
+			var texpaint_preview = l.texpaint;
+			#end
+
+			var icon = l.fill_layer == null ? texpaint_preview : l.fill_layer.imageIcon;
+			if (l.fill_layer == null) {
+				// Checker
+				var r = Res.tile50(icons, 4, 1);
+				var _x = ui._x;
+				var _y = ui._y;
+				var _w = ui._w;
+				ui.image(icons, 0xffffffff, iconH, r.x, r.y, r.w, r.h);
+				ui.curRatio--;
+				ui._x = _x;
+				ui._y = _y;
+				ui._w = _w;
+			}
+			if (l.fill_layer == null && l.isMask()) {
+				ui.g.pipeline = UIView2D.pipe;
+				#if kha_opengl
+				ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
+				#end
+				ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
+			}
+
+			var state = ui.image(icon, 0xffffffff, iconH);
+
+			if (l.fill_layer == null && l.isMask()) {
+				ui.g.pipeline = null;
+			}
+
+			// Draw layer numbers when selecting a layer via keyboard shortcut
+			var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
+			if (!isTyping) {
+				if (i < 9 && Operator.shortcut(Config.keymap.select_layer, ShortcutDown)) {
+					var number = Std.string(i + 1) ;
+					var width = ui.ops.font.width(ui.fontSize, number) + 10;
+					var height = ui.ops.font.height(ui.fontSize);
+					ui.g.color = ui.t.TEXT_COL;
+					ui.g.fillRect(uix, uiy, width, height);
+					ui.g.color = ui.t.ACCENT_COL;
+					ui.g.drawString(number, uix + 5, uiy);
+				}
+			}
+
+			return state;
+		}
+		else { // Group
+			var folderClosed = Res.tile50(icons, 2, 1);
+			var folderOpen = Res.tile50(icons, 8, 1);
+			var folder = l.show_panel ? folderOpen : folderClosed;
+			return ui.image(icons, ui.t.LABEL_COL - 0x00202020, iconH, folder.x, folder.y, folder.w, folder.h);
+		}
 	}
 
 	static function canMergeDown(l: LayerSlot) : Bool {
@@ -655,16 +689,46 @@ class TabLayers {
 		return true;
 	}
 
-	static function drawLayerContextMenu(l: LayerSlot) {
+	static function drawLayerContextMenu(l: LayerSlot, mini: Bool) {
 		var add = 0;
 
 		if (l.fill_layer == null) add += 1; // Clear
 		if (l.fill_layer != null && !l.isMask()) add += 3;
 		if (l.fill_layer != null && l.isMask()) add += 2;
 		if (l.isMask()) add += 2;
+		if (mini) {
+			add += 1;
+			if (!l.isGroup()) add += 1;
+			if (l.isLayer()) add += 1;
+		}
 		var menuElements = l.isGroup() ? 7 : (19 + add);
 
 		UIMenu.draw(function(ui: Zui) {
+
+			if (mini) {
+				var visibleHandle = Id.handle();
+				visibleHandle.selected = l.visible;
+				UIMenu.menuFill(ui);
+				ui.check(visibleHandle, tr("Visible"));
+				if (visibleHandle.changed) {
+					layerToggleVisible(l);
+					UIMenu.keepOpen = true;
+				}
+
+				if (!l.isGroup()) {
+					UIMenu.menuFill(ui);
+					if (comboBlending(ui, l, true).changed) {
+						UIMenu.keepOpen = true;
+					}
+				}
+				if (l.isLayer()) {
+					UIMenu.menuFill(ui);
+					if (comboObject(ui, l, true).changed) {
+						UIMenu.keepOpen = true;
+					}
+				}
+			}
+
 			if (UIMenu.menuButton(ui, tr("Export"))) {
 				if (l.isMask()) {
 					UIFiles.show("png", true, false, function(path: String) {

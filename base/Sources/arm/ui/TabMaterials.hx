@@ -22,10 +22,14 @@ class TabMaterials {
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
+		@:privateAccess ui.setHoveredTabName(tr("Materials"));
+
 		ui.beginSticky();
 		ui.separator(5);
+
 		buttonNodes();
 		buttonNew("+");
+
 		ui.endSticky();
 		ui.separator(3, false);
 		drawSlots(true);
@@ -36,11 +40,13 @@ class TabMaterials {
 		if (ui.tab(htab, tr("Materials"))) {
 			ui.beginSticky();
 			ui.row([1 / 4, 1 / 4, 1 / 4]);
+
 			buttonNew(tr("New"));
 			if (ui.button(tr("Import"))) {
 				Project.importMaterial();
 			}
 			buttonNodes();
+
 			ui.endSticky();
 			ui.separator(3, false);
 			drawSlots(false);
@@ -84,7 +90,7 @@ class TabMaterials {
 				if (Context.raw.material == Project.materials[i]) {
 					if (mini) {
 						var w = ui._w / ui.SCALE();
-						ui.rect(-1, -2, w - 2, w - 2, ui.t.HIGHLIGHT_COL, 2);
+						ui.rect(0, -2, w - 2, w - 4, ui.t.HIGHLIGHT_COL, 3);
 					}
 					else {
 						var off = row % 2 == 1 ? 1 : 0;
@@ -253,7 +259,7 @@ class TabMaterials {
 				}
 			}
 
-			ui._y += 6;
+			ui._y += mini ? 0 : 6;
 
 			#if kha_opengl
 			ui.imageInvertY = false; // Material preview
