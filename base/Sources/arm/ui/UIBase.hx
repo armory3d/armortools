@@ -1101,7 +1101,7 @@ class UIBase {
 						  (kb.down("control") && kb.started("y"));
 
 		// Two-finger tap to undo, three-finger tap to redo
-		if (Config.raw.touch_ui) {
+		if (Context.inViewport() && Config.raw.touch_ui) {
 			if (mouse.started("middle")) { redoTapTime = Time.time(); }
 			else if (mouse.started("right")) { undoTapTime = Time.time(); }
 			else if (mouse.released("middle") && Time.time() - redoTapTime < 0.1) { redoTapTime = undoTapTime = 0; redoPressed = true; }
