@@ -689,7 +689,7 @@ plugin.drawUI = function(ui) {
 		App.uiMenu.setScale(scale);
 		App.resize();
 		#if (is_paint || is_sculpt)
-		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultWindowW * scale);
+		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultSidebarW * scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);
 		UIView2D.inst.ui.setScale(scale);
 		#end

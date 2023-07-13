@@ -279,7 +279,7 @@ class App {
 
 		var res = 0;
 		if (UINodes.inst == null || UIBase.inst == null) {
-			var sidebarw = Config.raw.layout == null ? UIBase.defaultWindowW : Config.raw.layout[LayoutSidebarW];
+			var sidebarw = Config.raw.layout == null ? UIBase.defaultSidebarW : Config.raw.layout[LayoutSidebarW];
 			res = System.windowWidth() - sidebarw - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
@@ -929,13 +929,13 @@ class App {
 		var raw = Config.raw;
 		raw.layout = [
 			#if (is_paint || is_sculpt)
-			Std.int(UIBase.defaultWindowW * raw.window_scale),
-			Std.int(kha.System.windowHeight() / 2),
-			Std.int(kha.System.windowHeight() / 2),
+			Std.int(UIBase.defaultSidebarW * raw.window_scale), // LayoutSidebarW
+			Std.int(kha.System.windowHeight() / 2), // LayoutSidebarH0
+			Std.int(kha.System.windowHeight() / 2), // LayoutSidebarH1
 			#end
 
 			#if krom_ios
-			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473),
+			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473), // LayoutNodesW
 			#elseif krom_android
 			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473),
 			#else
@@ -943,10 +943,10 @@ class App {
 			#end
 
 			#if (is_paint || is_sculpt)
-			Std.int(iron.App.h() / 2),
+			Std.int(iron.App.h() / 2), // LayoutNodesH
 			#end
 
-			Std.int(UIStatus.defaultStatusH * raw.window_scale),
+			Std.int(UIStatus.defaultStatusH * raw.window_scale), // LayoutStatusH
 
 			#if (krom_android || krom_ios)
 			0, // LayoutHeader
