@@ -23,12 +23,7 @@ class TabLayers {
 
 	public static function draw(htab: Handle) {
 		var mini = Config.raw.layout[LayoutSidebarW] <= UIBase.sidebarMiniW;
-		if (mini) {
-			drawMini(htab);
-		}
-		else {
-			drawFull(htab);
-		}
+		mini ? drawMini(htab) : drawFull(htab);
 	}
 
 	static function drawMini(htab: Handle) {
@@ -36,6 +31,7 @@ class TabLayers {
 		ui.separator(5);
 		ui.beginSticky();
 		comboFilter();
+		button2dView();
 		buttonNew("+");
 		ui.endSticky();
 		ui._y += 2;
@@ -50,8 +46,7 @@ class TabLayers {
 
 			ui.row([1 / 4, 1 / 4, 1 / 2]);
 			buttonNew(tr("New"));
-			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DLayer);
-			else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_2d_view})');
+			button2dView();
 			comboFilter();
 
 			ui.endSticky();
@@ -60,6 +55,14 @@ class TabLayers {
 			highlightOddLines();
 			drawSlots(false);
 		}
+	}
+
+	static function button2dView() {
+		var ui = UIBase.inst.ui;
+		if (ui.button(tr("2D View"))) {
+			UIBase.inst.show2DView(View2DLayer);
+		}
+		else if (ui.isHovered) ui.tooltip(tr("Show 2D View") + ' (${Config.keymap.toggle_2d_view})');
 	}
 
 	static function drawSlots(mini: Bool) {

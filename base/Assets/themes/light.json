@@ -22,6 +22,7 @@
 	"CHECK_SIZE": 15,
 	"CHECK_SELECT_SIZE": 8,
 	"SCROLL_W": 9,
+	"SCROLL_MINI_W": 3,
 	"TEXT_OFFSET": 8,
 	"TAB_W": 12,
 	"FILL_WINDOW_BG": true,

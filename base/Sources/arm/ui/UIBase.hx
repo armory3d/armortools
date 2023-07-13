@@ -1172,12 +1172,18 @@ class UIBase {
 		var expandButtonOffset = Config.raw.touch_ui ? Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET()) : 0;
 		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
 
+		var _SCROLL_W = ui.t.SCROLL_W;
+		if (mini) ui.t.SCROLL_W = ui.t.SCROLL_MINI_W;
+
 		if (ui.window(hwnds[TabSidebar0], tabx, 0, Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH0])) {
 			for (i in 0...(mini ? 1 : hwndTabs[TabSidebar0].length)) hwndTabs[TabSidebar0][i](htabs[TabSidebar0]);
 		}
 		if (ui.window(hwnds[TabSidebar1], tabx, Config.raw.layout[LayoutSidebarH0], Config.raw.layout[LayoutSidebarW], Config.raw.layout[LayoutSidebarH1] - expandButtonOffset)) {
 			for (i in 0...(mini ? 1 : hwndTabs[TabSidebar1].length)) hwndTabs[TabSidebar1][i](htabs[TabSidebar1]);
 		}
+
+		ui.endWindow();
+		ui.t.SCROLL_W = _SCROLL_W;
 
 		// Collapse / expand button for mini sidebar
 		if (Config.raw.touch_ui) {

@@ -17,18 +17,14 @@ class TabMaterials {
 
 	public static function draw(htab: Handle) {
 		var mini = Config.raw.layout[LayoutSidebarW] <= UIBase.sidebarMiniW;
-		if (mini) {
-			drawMini(htab);
-		}
-		else {
-			drawFull(htab);
-		}
+		mini ? drawMini(htab) : drawFull(htab);
 	}
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		ui.separator(5);
 		ui.beginSticky();
+		ui.separator(5);
+		buttonNodes();
 		buttonNew("+");
 		ui.endSticky();
 		ui.separator(3, false);
@@ -44,15 +40,19 @@ class TabMaterials {
 			if (ui.button(tr("Import"))) {
 				Project.importMaterial();
 			}
-
-			if (ui.button(tr("Nodes"))) {
-				UIBase.inst.showMaterialNodes();
-			}
-			else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_node_editor})');
+			buttonNodes();
 			ui.endSticky();
 			ui.separator(3, false);
 			drawSlots(false);
 		}
+	}
+
+	static function buttonNodes() {
+		var ui = UIBase.inst.ui;
+		if (ui.button(tr("Nodes"))) {
+			UIBase.inst.showMaterialNodes();
+		}
+		else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_node_editor})');
 	}
 
 	@:access(zui.Zui)
@@ -80,25 +80,37 @@ class TabMaterials {
 				var img = ui.SCALE() > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
 				var imgFull = Project.materials[i].image;
 
+				// Highligh selected
 				if (Context.raw.material == Project.materials[i]) {
-					// ui.fill(1, -2, img.width + 3, img.height + 3, ui.t.HIGHLIGHT_COL); // TODO
-					var off = row % 2 == 1 ? 1 : 0;
-					var w = 50;
-					if (Config.raw.window_scale > 1) w += Std.int(Config.raw.window_scale * 2);
-					ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
-					ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
-					ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
-					ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+					if (mini) {
+						var w = ui._w;
+						ui.rect(-1, -2, w - 2, w - 2, ui.t.HIGHLIGHT_COL, 2);
+					}
+					else {
+						var off = row % 2 == 1 ? 1 : 0;
+						var w = 50;
+						if (Config.raw.window_scale > 1) w += Std.int(Config.raw.window_scale * 2);
+						ui.fill(-1,         -2, w + 3,       2, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,    w - off, w + 3, 2 + off, ui.t.HIGHLIGHT_COL);
+						ui.fill(-1,         -2,     2,   w + 3, ui.t.HIGHLIGHT_COL);
+						ui.fill(w + 1,      -2,     2,   w + 4, ui.t.HIGHLIGHT_COL);
+					}
 				}
 
 				#if kha_opengl
 				ui.imageInvertY = Project.materials[i].previewReady;
 				#end
 
+				// Draw material icon
 				var uix = ui._x;
 				var uiy = ui._y;
 				var tile = ui.SCALE() > 1 ? 100 : 50;
-				var state = Project.materials[i].previewReady ? ui.image(img) : ui.image(Res.get("icons.k"), -1, null, tile, tile, tile, tile);
+				var imgh: Null<Float> = mini ? UIBase.defaultSidebarMiniW * 0.85 : null;
+				var state = Project.materials[i].previewReady ?
+					ui.image(img, 0xffffffff, imgh) :
+					ui.image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
+
+				// Draw material numbers when selecting a material via keyboard shortcut
 				var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
@@ -112,6 +124,7 @@ class TabMaterials {
 					}
 				}
 
+				// Select material
 				if (state == State.Started && ui.inputY > ui._windowY) {
 					if (Context.raw.material != Project.materials[i]) {
 						Context.selectMaterial(i);
@@ -128,6 +141,7 @@ class TabMaterials {
 					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
 					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
 					App.dragMaterial = Context.raw.material;
+					// Double click to show nodes
 					if (Time.time() - Context.raw.selectTime < 0.25) {
 						UIBase.inst.showMaterialNodes();
 						App.dragMaterial = null;
@@ -135,6 +149,8 @@ class TabMaterials {
 					}
 					Context.raw.selectTime = Time.time();
 				}
+
+				// Context menu
 				if (ui.isHovered && ui.inputReleasedR) {
 					Context.selectMaterial(i);
 					var add = Project.materials.length > 1 ? 1 : 0;
