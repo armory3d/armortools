@@ -1197,6 +1197,7 @@ class UIBase {
 				ui.t.BUTTON_COL = ui.t.WINDOW_BG_COL;
 				if (ui.button(mini ? "<<" : ">>")) {
 					Config.raw.layout[LayoutSidebarW] = mini ? defaultSidebarFullW : defaultSidebarMiniW;
+					Config.raw.layout[LayoutSidebarW] = Std.int(Config.raw.layout[LayoutSidebarW] * ui.SCALE());
 				}
 				ui.t.BUTTON_H = _BUTTON_H;
 				ui.t.BUTTON_COL = _BUTTON_COL;

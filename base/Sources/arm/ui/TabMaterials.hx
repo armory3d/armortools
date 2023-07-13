@@ -83,7 +83,7 @@ class TabMaterials {
 				// Highligh selected
 				if (Context.raw.material == Project.materials[i]) {
 					if (mini) {
-						var w = ui._w;
+						var w = ui._w / ui.SCALE();
 						ui.rect(-1, -2, w - 2, w - 2, ui.t.HIGHLIGHT_COL, 2);
 					}
 					else {
@@ -105,7 +105,7 @@ class TabMaterials {
 				var uix = ui._x;
 				var uiy = ui._y;
 				var tile = ui.SCALE() > 1 ? 100 : 50;
-				var imgh: Null<Float> = mini ? UIBase.defaultSidebarMiniW * 0.85 : null;
+				var imgh: Null<Float> = mini ? UIBase.defaultSidebarMiniW * 0.85 * ui.SCALE() : null;
 				var state = Project.materials[i].previewReady ?
 					ui.image(img, 0xffffffff, imgh) :
 					ui.image(Res.get("icons.k"), 0xffffffff, null, tile, tile, tile, tile);
