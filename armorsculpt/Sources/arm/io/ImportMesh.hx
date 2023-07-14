@@ -44,6 +44,12 @@ class ImportMesh {
 
 		Project.meshAssets = [path];
 
+		#if arm_debug
+		var ar = path.split(Path.sep);
+		var name = ar[ar.length - 1];
+		Console.info(tr("Mesh imported:") + " " + name);
+		#end
+
 		#if (krom_android || krom_ios)
 		kha.Window.get(0).title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		#end
