@@ -31,7 +31,7 @@ class Viewport {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = 0.92;
+				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = App.defaultFov;
 				Context.raw.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();

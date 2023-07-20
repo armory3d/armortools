@@ -132,6 +132,7 @@ class App {
 	public static inline var maxLayers = 255;
 	#end
 	#end
+	public static inline var defaultFov = 0.69;
 
 	public function new() {
 		Console.init();

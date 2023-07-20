@@ -374,7 +374,7 @@ class UIMenu {
 				var cam = Scene.active.camera;
 				Context.raw.fovHandle = Id.handle({ value: Std.int(cam.data.raw.fov * 100) / 100 });
 				menuAlign(ui);
-				cam.data.raw.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 2.0, true);
+				cam.data.raw.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
 				if (Context.raw.fovHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
 				}

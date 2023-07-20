@@ -820,7 +820,7 @@ class RenderPathPaint {
 		var m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
-		cam.data.raw.fov = 0.92;
+		cam.data.raw.fov = App.defaultFov;
 		cam.buildProjection();
 		cam.buildMatrix();
 
