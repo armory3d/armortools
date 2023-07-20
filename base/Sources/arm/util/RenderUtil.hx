@@ -44,7 +44,7 @@ class RenderUtil {
 		var m = new Mat4(0.9146286343879498, -0.0032648027153306235, 0.404281837254303, 0.4659988049397712, 0.404295023959927, 0.007367569133732468, -0.9145989516155143, -1.0687517188018691, 0.000007410128652369705, 0.9999675337275382, 0.008058532943908717, 0.015935682577325486, 0, 0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
-		Scene.active.camera.data.raw.fov = App.defaultFov;
+		Scene.active.camera.data.raw.fov = 0.92;
 		Viewport.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		var _lightStrength = light.data.raw.strength;
@@ -120,7 +120,7 @@ class RenderUtil {
 		m.translate(0, 0, 1);
 		Scene.active.camera.transform.setMatrix(m);
 		var savedFov = Scene.active.camera.data.raw.fov;
-		Scene.active.camera.data.raw.fov = App.defaultFov;
+		Scene.active.camera.data.raw.fov = 0.92;
 		Viewport.updateCameraType(CameraPerspective);
 		var light = Scene.active.lights[0];
 		light.visible = false;
@@ -279,7 +279,7 @@ class RenderUtil {
 		var m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
-		cam.data.raw.fov = App.defaultFov;
+		cam.data.raw.fov = 0.92;
 		cam.buildProjection();
 		cam.buildMatrix();
 		m.getInverse(Scene.active.camera.VP);
