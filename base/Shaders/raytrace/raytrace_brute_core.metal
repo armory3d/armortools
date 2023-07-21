@@ -4,6 +4,7 @@
 #define _SUBSURFACE
 #define _TRANSLUCENCY
 #endif
+#define _FRESNEL
 #define _RENDER
 // #define _ROULETTE
 // #define _TRANSPARENCY
@@ -140,6 +141,10 @@ float3 envBRDFApprox(float3 specular, float roughness, float dotNV) {
 	return specular * ab.x + ab.y;
 }
 
+float fresnel(float3 normal, float3 incident) {
+	return mix(0.5, 1.0, pow(1.0 + dot(normal, incident), 5.0));
+}
+
 kernel void raytracingKernel(
 	uint2 tid [[thread_position_in_grid]],
 	constant RayGenConstantBuffer &constant_buffer [[buffer(0)]],
@@ -266,6 +271,7 @@ kernel void raytracingKernel(
 				n = float3x3(tangent, binormal, n) * texpaint1.rgb;
 
 				float f = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				seed += 1;
 
 				#ifdef _TRANSLUCENCY
 				float3 diffuseDir = texpaint0.a < f ?
@@ -275,14 +281,20 @@ kernel void raytracingKernel(
 				float3 diffuseDir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#endif
 
-				if (f < 0.5) {
+				#ifdef _FRESNEL
+				float specularChance = fresnel(ray.direction, n);
+				#else
+				const float specularChance = 0.5;
+				#endif
+
+				if (f < specularChance) {
 					#ifdef _TRANSLUCENCY
 					float3 specularDir = texpaint0.a < f * 2 ? ray.direction : reflect(ray.direction, n);
 					#else
 					float3 specularDir = reflect(ray.direction, n);
 					#endif
-
 					payload.ray_dir = mix(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
+
 					float3 v = normalize(constant_buffer.eye.xyz - hit_world_position(ray, intersection));
 					float dotNV = max(dot(n, v), 0.0);
 					float3 specular = surfaceSpecular(texcolor, texpaint2.b);
@@ -331,7 +343,7 @@ kernel void raytracingKernel(
 					payload.color.rgb = float3(0.032, 0.032, 0.032);
 				}
 
-				accum += payload.color.rgb;
+				accum += clamp(payload.color.rgb, 0.0, 8.0);
 				break;
 			}
 
@@ -345,16 +357,17 @@ kernel void raytracingKernel(
 	}
 
 	float3 color = render_target.read(tid).xyz;
+	accum = accum / SAMPLES;
 
 	#ifdef _RENDER
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
-	color = color * b + (accum.xyz / SAMPLES) * a;
-	render_target.write(float4(color.xyz, 0.0f), tid);
+	color = color * b + accum * a;
+	render_target.write(float4(color, 0.0f), tid);
 	#else
 	if (constant_buffer.eye.w == 0) {
-		color = accum.xyz / SAMPLES;
+		color = accum;
 	}
-	render_target.write(float4(mix(color.xyz, accum.xyz / SAMPLES, 1.0 / 16.0), 0.0f), tid);
+	render_target.write(float4(mix(color, accum, 1.0 / 16.0), 0.0f), tid);
 	#endif
 }

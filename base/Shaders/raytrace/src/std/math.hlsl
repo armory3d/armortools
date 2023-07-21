@@ -62,4 +62,8 @@ float3 envBRDFApprox(float3 specular, float roughness, float dotNV) {
 	return specular * ab.x + ab.y;
 }
 
+float fresnel(float3 normal, float3 incident) {
+	return lerp(0.5, 1.0, pow(1.0 + dot(normal, incident), 5.0));
+}
+
 #endif

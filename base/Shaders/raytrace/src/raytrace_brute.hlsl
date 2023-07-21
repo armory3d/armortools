@@ -4,6 +4,7 @@
 #define _SUBSURFACE
 #define _TRANSLUCENCY
 #endif
+#define _FRESNEL
 // #define _RENDER
 // #define _ROULETTE
 // #define _TRANSPARENCY
@@ -123,7 +124,7 @@ void raygeneration() {
 					payload.color.rgb = float3(0.032, 0.032, 0.032);
 				}
 
-				accum += payload.color.rgb;
+				accum += clamp(payload.color.rgb, 0.0, 8.0);
 				break;
 			}
 
@@ -137,17 +138,18 @@ void raygeneration() {
 	}
 
 	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
+	accum = accum / SAMPLES;
 
 	#ifdef _RENDER
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
-	color = color * b + (accum.xyz / SAMPLES) * a;
-	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 0.0f);
+	color = color * b + accum * a;
+	render_target[DispatchRaysIndex().xy] = float4(color, 0.0f);
 	#else
 	if (constant_buffer.eye.w == 0) {
-		color = accum.xyz / SAMPLES;
+		color = accum;
 	}
-	render_target[DispatchRaysIndex().xy] = float4(lerp(color.xyz, accum.xyz / SAMPLES, 1.0 / 4.0), 0.0f);
+	render_target[DispatchRaysIndex().xy] = float4(lerp(color, accum, 1.0 / 4.0), 0.0f);
 	#endif
 }
 
@@ -198,6 +200,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	n = mul(texpaint1.rgb, float3x3(tangent, binormal, n));
 
 	float f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	seed += 1;
 
 	#ifdef _TRANSLUCENCY
 	float3 diffuseDir = texpaint0.a < f ?
@@ -207,14 +210,20 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	float3 diffuseDir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 	#endif
 
-	if (f < 0.5) {
+	#ifdef _FRESNEL
+	float specularChance = fresnel(WorldRayDirection(), n);
+	#else
+	const float specularChance = 0.5;
+	#endif
+
+	if (f < specularChance) {
 		#ifdef _TRANSLUCENCY
 		float3 specularDir = texpaint0.a < f * 2 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
 		#else
 		float3 specularDir = reflect(WorldRayDirection(), n);
 		#endif
-
 		payload.ray_dir = lerp(specularDir, diffuseDir, texpaint2.g * texpaint2.g);
+
 		float3 v = normalize(constant_buffer.eye.xyz - hit_world_position());
 		float dotNV = max(dot(n, v), 0.0);
 		float3 specular = surfaceSpecular(texcolor, texpaint2.b);
