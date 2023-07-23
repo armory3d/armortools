@@ -69,8 +69,8 @@ class MeshUtil {
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
 		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.data.delete();
 			Context.raw.mergedObject.remove();
-			Data.deleteMesh(Context.raw.mergedObject.data.handle);
 		}
 
 		new MeshData(raw, function(md: MeshData) {
