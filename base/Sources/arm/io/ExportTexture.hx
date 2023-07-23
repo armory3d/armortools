@@ -358,6 +358,11 @@ class ExportTexture {
 				writeTexture(path + Path.sep + f + tex_name + ext, pix, 3);
 			}
 		}
+
+		// Release staging memory allocated in Image.getPixels()
+		@:privateAccess texpaint.pixels = null;
+		@:privateAccess texpaint_nor.pixels = null;
+		@:privateAccess texpaint_pack.pixels = null;
 	}
 
 	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
