@@ -3,11 +3,11 @@
 #define _EMISSION
 #define _SUBSURFACE
 #define _TRANSLUCENCY
-#define _FRESNEL
+#define _ROULETTE
+#define _TRANSPARENCY
 #endif
+#define _FRESNEL
 // #define _RENDER
-// #define _ROULETTE
-// #define _TRANSPARENCY
 
 #include "std/rand.hlsl"
 #include "std/attrib.hlsl"
@@ -211,7 +211,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	#endif
 
 	#ifdef _FRESNEL
-	float specularChance = fresnel(WorldRayDirection(), n);
+	float specularChance = fresnel(n, WorldRayDirection());
 	#else
 	const float specularChance = 0.5;
 	#endif
@@ -228,11 +228,20 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 		float dotNV = max(dot(n, v), 0.0);
 		float3 specular = surfaceSpecular(texcolor, texpaint2.b);
 		payload.color.xyz *= envBRDFApprox(specular, texpaint2.g, dotNV);
+		#ifdef _FRESNEL
+		payload.color.xyz /= specularChance;
+		#endif
 	}
 	else {
 		payload.ray_dir = diffuseDir;
 		payload.color.xyz *= surfaceAlbedo(texcolor, texpaint2.b);
+		#ifdef _FRESNEL
+		payload.color.xyz /= 1.0 - specularChance;
+		#endif
 	}
+	#ifdef _FRESNEL
+	payload.color.xyz *= 0.5;
+	#endif
 
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 
