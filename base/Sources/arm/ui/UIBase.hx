@@ -822,7 +822,9 @@ class UIBase {
 			if (Console.messageTimer <= 0) hwnds[TabStatus].redraws = 2;
 		}
 
+		#if (is_paint || is_sculpt)
 		sidebarMiniW = Std.int(defaultSidebarMiniW * ui.SCALE());
+		#end
 
 		if (!App.uiEnabled) return;
 
