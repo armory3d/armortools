@@ -418,6 +418,10 @@ class RenderUtil {
 			arm.render.RenderPathPaint.setPlaneMesh();
 		}
 		arm.render.RenderPathPaint.commandsPaint(false);
+		#if kha_metal
+		// Flush command list
+		arm.render.RenderPathPaint.commandsPaint(false);
+		#end
 		if (Context.raw.paint2d) {
 			arm.render.RenderPathPaint.restorePlaneMesh();
 		}

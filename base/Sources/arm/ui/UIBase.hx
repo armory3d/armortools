@@ -835,9 +835,6 @@ class UIBase {
 			if (mouse.started() && Config.keymap.action_paint == Config.keymap.action_rotate) {
 				action_paint_remap = Config.keymap.action_paint;
 				RenderUtil.pickPosNorTex();
-				#if kha_metal
-				RenderUtil.pickPosNorTex(); // Flush
-				#end
 				var isMesh = Math.abs(Context.raw.posXPicked) < 50 && Math.abs(Context.raw.posYPicked) < 50 && Math.abs(Context.raw.posZPicked) < 50;
 				#if kha_android
 				// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
