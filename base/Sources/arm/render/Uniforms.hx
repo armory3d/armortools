@@ -75,6 +75,9 @@ class Uniforms {
 			case "_vignetteStrength": {
 				return Config.raw.rp_vignette;
 			}
+			case "_grainStrength": {
+				return Config.raw.rp_grain;
+			}
 			case "_coneOffset": {
 				return Context.raw.vxaoOffset;
 			}

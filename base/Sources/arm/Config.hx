@@ -92,6 +92,7 @@ class Config {
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_vignette = 0.2;
+			raw.rp_grain = 0.09;
 			raw.rp_motionblur = false;
 			#if (krom_android || krom_ios)
 			raw.rp_ssao = false;

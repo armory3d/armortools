@@ -469,6 +469,10 @@ class BoxPreferences {
 				Config.raw.rp_vignette = ui.slider(h, tr("Vignette"), 0.0, 1.0, true);
 				if (h.changed) Context.raw.ddirty = 2;
 
+				var h = Id.handle({ value: Config.raw.rp_grain });
+				Config.raw.rp_grain = ui.slider(h, tr("Noise Grain"), 0.0, 1.0, true);
+				if (h.changed) Context.raw.ddirty = 2;
+
 				// var h = Id.handle({ value: Context.raw.autoExposureStrength });
 				// Context.raw.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.raw.ddirty = 2;

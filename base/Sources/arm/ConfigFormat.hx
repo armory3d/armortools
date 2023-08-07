@@ -24,6 +24,7 @@ package arm;
 	@:optional public var rp_motionblur: Null<Bool>;
 	@:optional public var rp_gi: Null<Bool>;
 	@:optional public var rp_vignette: Null<Float>;
+	@:optional public var rp_grain: Null<Float>;
 	// Application
 	@:optional public var version: String;
 	@:optional public var sha: String; // Commit id
