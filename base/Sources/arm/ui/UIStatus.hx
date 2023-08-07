@@ -34,7 +34,15 @@ class UIStatus {
 			ui.g.fillRect(0, 0, 1, ui._windowH);
 			ui.g.fillRect(ui._windowW - 1, 0, 1, ui._windowH);
 
+			// Draw tabs
 			for (draw in UIBase.inst.hwndTabs[TabStatus]) draw(UIBase.inst.htabs[TabStatus]);
+
+			// Version label
+			if (!Config.raw.touch_ui) {
+				ui.enabled = false;
+				ui.tab(UIBase.inst.htabs[TabStatus], "0.9");
+				ui.enabled = true;
+			}
 
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
 			if (UIBase.inst.htabs[TabStatus].changed && (UIBase.inst.htabs[TabStatus].position == Context.raw.lastStatusPosition || minimized)) {
