@@ -40,7 +40,7 @@ class UIStatus {
 			// Version label
 			if (!Config.raw.touch_ui) {
 				ui.enabled = false;
-				ui.tab(UIBase.inst.htabs[TabStatus], "0.9");
+				ui.tab(UIBase.inst.htabs[TabStatus], Manifest.version);
 				ui.enabled = true;
 			}
 
