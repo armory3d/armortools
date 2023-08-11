@@ -37,18 +37,21 @@ class UIStatus {
 			// Draw tabs
 			for (draw in UIBase.inst.hwndTabs[TabStatus]) draw(UIBase.inst.htabs[TabStatus]);
 
-			// Version label
-			if (!Config.raw.touch_ui) {
-				ui.enabled = false;
-				ui.tab(UIBase.inst.htabs[TabStatus], Manifest.version);
-				ui.enabled = true;
-			}
-
 			var minimized = statush <= defaultStatusH * Config.raw.window_scale;
 			if (UIBase.inst.htabs[TabStatus].changed && (UIBase.inst.htabs[TabStatus].position == Context.raw.lastStatusPosition || minimized)) {
 				UIBase.inst.toggleBrowser();
 			}
 			Context.raw.lastStatusPosition = UIBase.inst.htabs[TabStatus].position;
+		}
+	}
+
+	public static function drawVersionTab(htab: Handle) {
+		// Version label
+		if (!Config.raw.touch_ui) {
+			var ui = UIBase.inst.ui;
+			ui.enabled = false;
+			ui.tab(UIBase.inst.htabs[TabStatus], Manifest.version);
+			ui.enabled = true;
 		}
 	}
 }
