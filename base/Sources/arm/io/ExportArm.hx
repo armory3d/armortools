@@ -26,7 +26,6 @@ class ExportArm {
 	}
 
 	public static function runProject() {
-
 		#if (is_paint || is_sculpt)
 		var mnodes: Array<TNodeCanvas> = [];
 		for (m in Project.materials) {
@@ -108,7 +107,7 @@ class ExportArm {
 		}
 		#end
 
-		var packed_assets = Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0 ? null : Project.raw.packed_assets;
+		var packed_assets = (Project.raw.packed_assets == null || Project.raw.packed_assets.length == 0) ? null : Project.raw.packed_assets;
 		#if krom_ios
 		var sameDrive = false;
 		#else

@@ -442,6 +442,7 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			var abs = Data.isAbsolute(file) ? file : base + file;
 			if (project.packed_assets != null) {
+				abs = Path.normalize(abs);
 				unpackAsset(project, abs, file);
 			}
 			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
@@ -527,6 +528,7 @@ class ImportArm {
 			// Convert image path from relative to absolute
 			var abs = Data.isAbsolute(file) ? file : base + file;
 			if (project.packed_assets != null) {
+				abs = Path.normalize(abs);
 				unpackAsset(project, abs, file);
 			}
 			if (Data.cachedImages.get(abs) == null && !File.exists(abs)) {
