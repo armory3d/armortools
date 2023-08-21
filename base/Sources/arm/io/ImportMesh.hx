@@ -20,6 +20,8 @@ class ImportMesh {
 	static var clearLayers = true;
 	#end
 
+	static var meshesToUnwrap: Array<Dynamic> = null;
+
 	#if (is_paint || is_sculpt)
 	public static function run(path: String, _clearLayers = true, replaceExisting = true) {
 	#end
@@ -39,6 +41,8 @@ class ImportMesh {
 		clearLayers = _clearLayers;
 		Context.raw.layerFilter = 0;
 		#end
+
+		meshesToUnwrap = null;
 
 		var p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
@@ -108,115 +112,127 @@ class ImportMesh {
 		#end
 	}
 
+	static function _makeMesh(mesh: Dynamic) {
+		var raw = rawMesh(mesh);
+		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+
+		new MeshData(raw, function(md: MeshData) {
+			Context.raw.paintObject = Context.mainObject();
+
+			Context.selectPaintObject(Context.mainObject());
+			for (i in 0...Project.paintObjects.length) {
+				var p = Project.paintObjects[i];
+				if (p == Context.raw.paintObject) continue;
+				Data.deleteMesh(p.data.handle);
+				p.remove();
+			}
+			var handle = Context.raw.paintObject.data.handle;
+			if (handle != "SceneSphere" && handle != "ScenePlane") {
+				Data.deleteMesh(handle);
+			}
+
+			#if (is_paint || is_sculpt)
+			if (clearLayers) {
+				while (Project.layers.length > 0) {
+					var l = Project.layers.pop();
+					l.unload();
+				}
+				App.newLayer(false);
+				iron.App.notifyOnInit(App.initLayers);
+				History.reset();
+			}
+			#end
+
+			Context.raw.paintObject.setData(md);
+			Context.raw.paintObject.name = mesh.name;
+			Project.paintObjects = [Context.raw.paintObject];
+
+			md.handle = raw.name;
+			Data.cachedMeshes.set(md.handle, md);
+
+			Context.raw.ddirty = 4;
+
+			#if (is_paint || is_sculpt)
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
+			UVUtil.dilatemapCached = false;
+			#end
+
+			// Wait for addMesh calls to finish
+			if (meshesToUnwrap != null) {
+				App.notifyOnNextFrame(finishImport);
+			}
+			else {
+				iron.App.notifyOnInit(finishImport);
+			}
+		});
+	}
+
 	public static function makeMesh(mesh: Dynamic, path: String) {
 		if (mesh == null || mesh.posa == null || mesh.nora == null || mesh.inda == null || mesh.posa.length == 0) {
 			Console.error(Strings.error3());
 			return;
 		}
 
-		function _makeMesh() {
-			var raw = rawMesh(mesh);
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
-
-			new MeshData(raw, function(md: MeshData) {
-				Context.raw.paintObject = Context.mainObject();
-
-				Context.selectPaintObject(Context.mainObject());
-				for (i in 0...Project.paintObjects.length) {
-					var p = Project.paintObjects[i];
-					if (p == Context.raw.paintObject) continue;
-					Data.deleteMesh(p.data.handle);
-					p.remove();
-				}
-				var handle = Context.raw.paintObject.data.handle;
-				if (handle != "SceneSphere" && handle != "ScenePlane") {
-					Data.deleteMesh(handle);
-				}
-
-				#if (is_paint || is_sculpt)
-				if (clearLayers) {
-					while (Project.layers.length > 0) {
-						var l = Project.layers.pop();
-						l.unload();
-					}
-					App.newLayer(false);
-					iron.App.notifyOnInit(App.initLayers);
-					History.reset();
-				}
-				#end
-
-				Context.raw.paintObject.setData(md);
-				Context.raw.paintObject.name = mesh.name;
-				Project.paintObjects = [Context.raw.paintObject];
-
-				md.handle = raw.name;
-				Data.cachedMeshes.set(md.handle, md);
-
-				Context.raw.ddirty = 4;
-
-				#if (is_paint || is_sculpt)
-				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
-				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
-				#end
-
-				// Wait for addMesh calls to finish
-				iron.App.notifyOnInit(finishImport);
-			});
-		}
-
 		if (mesh.texa == null) {
-			Project.unwrapMeshBox(mesh, _makeMesh);
+			if (meshesToUnwrap == null) {
+				meshesToUnwrap = [];
+			}
+			function firstUnwrapDone(mesh: Dynamic) {
+				_makeMesh(mesh);
+				for (mesh in meshesToUnwrap) Project.unwrapMeshBox(mesh, _addMesh, true);
+			}
+			Project.unwrapMeshBox(mesh, firstUnwrapDone);
 		}
 		else {
-			_makeMesh();
+			_makeMesh(mesh);
 		}
 	}
 
-	public static function addMesh(mesh: Dynamic) {
+	static function _addMesh(mesh: Dynamic) {
+		var raw = rawMesh(mesh);
+		if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
 
-		function _addMesh() {
-			var raw = rawMesh(mesh);
-			if (mesh.cola != null) raw.vertex_arrays.push({ values: mesh.cola, attrib: "col", data: "short4norm", padding: 1 });
+		new MeshData(raw, function(md: MeshData) {
 
-			new MeshData(raw, function(md: MeshData) {
+			var object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+			object.name = mesh.name;
+			object.skip_context = "paint";
 
-				var object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
-				object.name = mesh.name;
-				object.skip_context = "paint";
-
-				// Ensure unique names
-				for (p in Project.paintObjects) {
-					if (p.name == object.name) {
-						p.name += ".001";
-						p.data.handle += ".001";
-						Data.cachedMeshes.set(p.data.handle, p.data);
-					}
+			// Ensure unique names
+			for (p in Project.paintObjects) {
+				if (p.name == object.name) {
+					p.name += ".001";
+					p.data.handle += ".001";
+					Data.cachedMeshes.set(p.data.handle, p.data);
 				}
+			}
 
-				Project.paintObjects.push(object);
+			Project.paintObjects.push(object);
 
-				md.handle = raw.name;
-				Data.cachedMeshes.set(md.handle, md);
+			md.handle = raw.name;
+			Data.cachedMeshes.set(md.handle, md);
 
-				Context.raw.ddirty = 4;
+			Context.raw.ddirty = 4;
 
-				#if (is_paint || is_sculpt)
-				UIBase.inst.hwnds[TabSidebar0].redraws = 2;
-				UVUtil.uvmapCached = false;
-				UVUtil.trianglemapCached = false;
-				UVUtil.dilatemapCached = false;
-				#end
-			});
-		}
+			#if (is_paint || is_sculpt)
+			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
+			UVUtil.uvmapCached = false;
+			UVUtil.trianglemapCached = false;
+			UVUtil.dilatemapCached = false;
+			#end
+		});
+	}
 
+	public static function addMesh(mesh: Dynamic) {
 		if (mesh.texa == null) {
-			Project.unwrapMeshBox(mesh, _addMesh);
+			if (meshesToUnwrap != null) meshesToUnwrap.push(mesh);
+			else Project.unwrapMeshBox(mesh, _addMesh);
 		}
 		else {
-			_addMesh();
+			_addMesh(mesh);
 		}
 	}
 

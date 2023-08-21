@@ -475,7 +475,7 @@ class Project {
 		else importAsset();
 	}
 
-	public static function unwrapMeshBox(mesh: Dynamic, done: Void->Void) {
+	public static function unwrapMeshBox(mesh: Dynamic, done: Dynamic->Void, skipUI = false) {
 		UIBox.showCustom(function(ui: Zui) {
 			var tabVertical = Config.raw.touch_ui;
 			if (ui.tab(Id.handle(), tr("Unwrap Mesh"), tabVertical)) {
@@ -497,9 +497,9 @@ class Project {
 				if (ui.button(tr("Cancel"))) {
 					UIBox.hide();
 				}
-				if (ui.button(tr("Unwrap")) || ui.isReturnDown) {
+				if (ui.button(tr("Unwrap")) || ui.isReturnDown || skipUI) {
 					UIBox.hide();
-					function doImport() {
+					function doUnwrap() {
 						if (unwrapBy == unwrapPlugins.length - 1) {
 							MeshUtil.equirectUnwrap(mesh);
 						}
@@ -511,15 +511,15 @@ class Project {
 							}
 							MeshUtil.unwrappers.get(f)(mesh);
 						}
-						done();
+						done(mesh);
 					}
 					#if (krom_android || krom_ios)
 					arm.App.notifyOnNextFrame(function() {
 						Console.toast(tr("Unwrapping mesh"));
-						arm.App.notifyOnNextFrame(doImport);
+						arm.App.notifyOnNextFrame(doUnwrap);
 					});
 					#else
-					doImport();
+					doUnwrap();
 					#end
 				}
 			}
