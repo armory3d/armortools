@@ -38,15 +38,31 @@ class MeshUtil {
 			var ias = paintObjects[i].data.raw.index_arrays;
 			var scale = paintObjects[i].data.scalePos;
 
+			// Pos
 			for (j in 0...vas[0].values.length) va0[j + voff * 4] = vas[0].values[j];
+
+			// Translate
+			#if is_forge
+			for (j in 0...Std.int(va0.length / 4)) {
+				va0[j * 4     + voff * 4] += Std.int(paintObjects[i].transform.worldx() * 32767);
+				va0[j * 4 + 1 + voff * 4] += Std.int(paintObjects[i].transform.worldy() * 32767);
+				va0[j * 4 + 2 + voff * 4] += Std.int(paintObjects[i].transform.worldz() * 32767);
+			}
+			#end
+
+			// Re-scale
 			for (j in 0...Std.int(va0.length / 4)) {
 				va0[j * 4     + voff * 4] = Std.int((va0[j * 4     + voff * 4] * scale) / maxScale);
 				va0[j * 4 + 1 + voff * 4] = Std.int((va0[j * 4 + 1 + voff * 4] * scale) / maxScale);
 				va0[j * 4 + 2 + voff * 4] = Std.int((va0[j * 4 + 2 + voff * 4] * scale) / maxScale);
 			}
+			// Nor
 			for (j in 0...vas[1].values.length) va1[j + voff * 2] = vas[1].values[j];
+			// Tex
 			for (j in 0...vas[2].values.length) va2[j + voff * 2] = vas[2].values[j];
+			// Col
 			if (va3 != null) for (j in 0...vas[3].values.length) va3[j + voff * 3] = vas[3].values[j];
+			// Indices
 			for (j in 0...ias[0].values.length) ia[j + ioff] = ias[0].values[j] + voff;
 
 			voff += Std.int(vas[0].values.length / 4);
@@ -68,11 +84,7 @@ class MeshUtil {
 		};
 		if (va3 != null) raw.vertex_arrays.push({ values: va3, attrib: "col", data: "short4norm", padding: 1 });
 
-		if (Context.raw.mergedObject != null) {
-			Context.raw.mergedObject.data.delete();
-			Context.raw.mergedObject.remove();
-		}
-
+		removeMergedMesh();
 		new MeshData(raw, function(md: MeshData) {
 			Context.raw.mergedObject = new MeshObject(md, Context.raw.paintObject.materials);
 			Context.raw.mergedObject.name = Context.raw.paintObject.name + "_merged";
@@ -83,6 +95,14 @@ class MeshUtil {
 		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
+	}
+
+	public static function removeMergedMesh() {
+		if (Context.raw.mergedObject != null) {
+			Context.raw.mergedObject.data.delete();
+			Context.raw.mergedObject.remove();
+			Context.raw.mergedObject = null;
+		}
 	}
 
 	public static function swapAxis(a: Int, b: Int) {
@@ -122,11 +142,7 @@ class MeshUtil {
 			g.vertexBuffer.unlock();
 		}
 
-		if (Context.raw.mergedObject != null) {
-			Context.raw.mergedObject.remove();
-			Data.deleteMesh(Context.raw.mergedObject.data.handle);
-			Context.raw.mergedObject = null;
-		}
+		removeMergedMesh();
 		mergeMesh();
 	}
 

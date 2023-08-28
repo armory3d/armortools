@@ -252,6 +252,11 @@ class Gizmo {
 			}
 
 			if (Context.raw.gizmoStarted) Context.raw.gizmoDragLast = Context.raw.gizmoDrag;
+
+			#if is_forge
+			arm.util.MeshUtil.removeMergedMesh();
+			arm.render.RenderPathRaytrace.ready = false;
+			#end
 		}
 
 		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && mouse.viewX < App.w();
