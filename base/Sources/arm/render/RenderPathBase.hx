@@ -195,7 +195,11 @@ class RenderPathBase {
 
 		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		if (Context.raw.viewportMode == ViewPathTrace) {
+			#if is_paint
 			var useLiveLayer = Context.raw.tool == ToolMaterial;
+			#else
+			var useLiveLayer = false;
+			#end
 			RenderPathRaytrace.draw(useLiveLayer);
 			return;
 		}
@@ -271,7 +275,11 @@ class RenderPathBase {
 			drawGbuffer();
 
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if is_paint
 			var useLiveLayer = Context.raw.tool == ToolMaterial;
+			#else
+			var useLiveLayer = false;
+			#end
 			Context.raw.viewportMode == ViewPathTrace ? RenderPathRaytrace.draw(useLiveLayer) : drawCommands();
 			#else
 			drawCommands();

@@ -753,6 +753,14 @@ class App {
 
 			// Default camera controls
 			Context.raw.cameraControls = Config.raw.camera_controls;
+
+			#if is_lab
+			arm.App.notifyOnNextFrame(function() {
+				arm.App.notifyOnNextFrame(function() {
+					@:privateAccess TabMeshes.setDefaultMesh(".Sphere");
+				});
+			});
+			#end
 		}
 		else if (Context.raw.frame == 3) {
 			Context.raw.ddirty = 3;

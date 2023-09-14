@@ -2,6 +2,7 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Id;
+import iron.data.MeshData;
 import iron.object.MeshObject;
 import arm.util.MeshUtil;
 
@@ -150,11 +151,39 @@ class TabMeshes {
 
 	#if is_lab
 	static function setDefaultMesh(name: String) {
-		var mo: MeshObject = cast iron.Scene.active.getChild(name);
+		var mo: MeshObject = null;
+		if (name == ".Plane" || name == ".Sphere") {
+			var mesh: Dynamic = name == ".Plane" ? new arm.geom.Plane(1, 1, 2048, 2048) : new arm.geom.Sphere(0.9, 2048, 1024, false, 3.0);
+			var raw = {
+				name: "Tessellated",
+				vertex_arrays: [
+					{ values: mesh.posa, attrib: "pos", data: "short4norm" },
+					{ values: mesh.nora, attrib: "nor", data: "short2norm" },
+					{ values: mesh.texa, attrib: "tex", data: "short2norm" }
+				],
+				index_arrays: [
+					{ values: mesh.inda, material: 0 }
+				],
+				scale_pos: mesh.scalePos,
+				scale_tex: mesh.scaleTex
+			};
+			var md = new MeshData(raw, function(md: MeshData) {});
+			mo = new MeshObject(md, Context.raw.paintObject.materials);
+			iron.Scene.active.meshes.remove(mo);
+			mo.name = "Tessellated";
+		}
+		else {
+			mo = cast iron.Scene.active.getChild(name);
+		}
+
 		mo.visible = true;
-		iron.Scene.active.meshes = [mo];
 		Context.raw.ddirty = 2;
 		Context.raw.paintObject = mo;
+		Project.paintObjects[0] = mo;
+		if (UIHeader.inst.worktab.position == Space3D) {
+			iron.Scene.active.meshes = [mo];
+		}
+
 		#if (kha_direct3d12 || kha_vulkan || kha_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end

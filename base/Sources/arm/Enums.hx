@@ -55,6 +55,7 @@ package arm;
 	var ViewMetallic = 5;
 	var ViewOpacity = 6;
 	var ViewHeight = 7;
+	#if (is_paint || is_sculpt)
 	var ViewEmission = 8;
 	var ViewSubsurface = 9;
 	var ViewTexCoord = 10;
@@ -63,6 +64,9 @@ package arm;
 	var ViewObjectID = 13;
 	var ViewMask = 14;
 	var ViewPathTrace = 15;
+	#else
+	var ViewPathTrace = 8;
+	#end
 }
 
 @:enum abstract ChannelType(Int) from Int to Int {

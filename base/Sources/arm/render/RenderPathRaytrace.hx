@@ -139,7 +139,8 @@ class RenderPathRaytrace {
 		var md = mo.data;
 		var geom = md.geom;
 		var mo_scale = mo.transform.scale.x; // Uniform scale only
-		vb_scale = mo.parent.transform.scale.x * md.scalePos * mo_scale;
+		vb_scale = md.scalePos * mo_scale;
+		if (mo.parent != null) vb_scale *= mo.parent.transform.scale.x;
 		vb = geom.vertexBuffer;
 		ib = geom.indexBuffers[0];
 	}
