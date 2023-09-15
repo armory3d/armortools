@@ -5,6 +5,7 @@ import zui.Zui;
 import zui.Ext;
 #if is_lab
 import iron.Scene;
+import iron.data.MeshData;
 import iron.object.MeshObject;
 #end
 
@@ -19,6 +20,7 @@ class UIMenubar {
 
 	#if is_lab
 	static var _savedCamera: iron.math.Mat4 = null;
+	static var _plane: MeshObject = null;
 	#end
 
 	public function new() {
@@ -132,15 +134,31 @@ class UIMenubar {
 					Scene.active.meshes = [Context.mainObject()];
 				}
 				else { // Space2D
-					var plane: MeshObject = cast Scene.active.getChild(".Plane");
-					plane.transform.scale.set(1, 1, 1);
-					plane.transform.rot.fromEuler(-Math.PI / 2, 0, 0);
-					plane.transform.buildMatrix();
-					plane.visible = true;
+					if (_plane == null) {
+						var mesh: Dynamic = new arm.geom.Plane(1, 1, 2, 2);
+						var raw = {
+							name: "2DView",
+							vertex_arrays: [
+								{ values: mesh.posa, attrib: "pos", data: "short4norm" },
+								{ values: mesh.nora, attrib: "nor", data: "short2norm" },
+								{ values: mesh.texa, attrib: "tex", data: "short2norm" }
+							],
+							index_arrays: [
+								{ values: mesh.inda, material: 0 }
+							],
+							scale_pos: mesh.scalePos,
+							scale_tex: mesh.scaleTex
+						};
+						var md = new MeshData(raw, function(md: MeshData) {});
+						var dotPlane: MeshObject = cast Scene.active.getChild(".Plane");
+						_plane = new MeshObject(md, dotPlane.materials);
+						iron.Scene.active.meshes.remove(_plane);
+					}
+
 					if (_savedCamera == null) {
 						_savedCamera = Scene.active.camera.transform.local.clone();
 					}
-					Scene.active.meshes = [plane];
+					Scene.active.meshes = [_plane];
 					var m = iron.math.Mat4.identity();
 					m.translate(0, 0, 1.6);
 					Scene.active.camera.transform.setMatrix(m);

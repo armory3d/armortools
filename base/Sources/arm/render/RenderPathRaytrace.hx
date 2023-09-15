@@ -135,7 +135,11 @@ class RenderPathRaytrace {
 
 	static function buildData() {
 		if (Context.raw.mergedObject == null) arm.util.MeshUtil.mergeMesh();
+		#if is_paint
 		var mo = !Context.layerFilterUsed() ? Context.raw.mergedObject : Context.raw.paintObject;
+		#else
+		var mo = Scene.active.meshes[0];
+		#end
 		var md = mo.data;
 		var geom = md.geom;
 		var mo_scale = mo.transform.scale.x; // Uniform scale only
