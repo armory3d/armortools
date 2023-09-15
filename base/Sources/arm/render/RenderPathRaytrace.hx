@@ -30,6 +30,10 @@ class RenderPathRaytrace {
 	public static inline var ext = ".spirv";
 	#end
 
+	#if is_lab
+	static var lastTexpaint: kha.Image = null;
+	#end
+
 	public static function init(_path: RenderPath) {
 		path = _path;
 	}
@@ -47,16 +51,33 @@ class RenderPathRaytrace {
 			Context.loadEnvmap();
 			Context.updateEnvmap();
 		}
+
 		var probe = Scene.active.world.probe;
 		var savedEnvmap = Context.raw.showEnvmapBlur ? probe.radianceMipmaps[0] : Context.raw.savedEnvmap;
+
 		if (lastEnvmap != savedEnvmap) {
 			lastEnvmap = savedEnvmap;
+
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
+
 			var l = App.flatten(true);
-			Krom.raytraceSetTextures(l.texpaint.renderTarget_, l.texpaint_nor.renderTarget_, l.texpaint_pack.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
+
+		#if is_lab
+		var l = App.flatten(true);
+		if (l.texpaint != lastTexpaint) {
+			lastTexpaint = l.texpaint;
+
+			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
+			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
+			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
+
+			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+		}
+		#end
 
 		if (Context.raw.pdirty > 0 || dirty > 0) {
 			App.flatten(true);

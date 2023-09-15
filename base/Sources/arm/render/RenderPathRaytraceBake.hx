@@ -92,7 +92,7 @@ class RenderPathRaytraceBake {
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
 			var texpaint_undo = RenderPath.active.renderTargets.get("texpaint_undo" + History.undoI).image;
-			Krom.raytraceSetTextures(baketex0.renderTarget_, baketex1.renderTarget_, texpaint_undo.renderTarget_, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
+			Krom.raytraceSetTextures(baketex0, baketex1, texpaint_undo, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		if (Context.raw.brushTime > 0) {

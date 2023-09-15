@@ -187,8 +187,14 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	};
 	float3 n = normalize(hit_attribute(vertex_normals, attr));
 
+	mytexture1.GetDimensions(size.x, size.y);
+	utex_coord = uint3((tex_coord - uint2(tex_coord)) * size, 0);
 	float4 texpaint1 = mytexture1.Load(utex_coord);
+
+	mytexture2.GetDimensions(size.x, size.y);
+	utex_coord = uint3((tex_coord - uint2(tex_coord)) * size, 0);
 	float4 texpaint2 = mytexture2.Load(utex_coord);
+
 	float3 texcolor = pow(texpaint0.rgb, float3(2.2, 2.2, 2.2));
 
 	float3 tangent = float3(0, 0, 0);

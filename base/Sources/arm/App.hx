@@ -2127,6 +2127,17 @@ class App {
 		var texpaint = arm.logic.BrushOutputNode.inst.texpaint;
 		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
 		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
+
+		if (UINodes.inst.getNodes().nodesSelected.length > 0) {
+			var node = UINodes.inst.getNodes().nodesSelected[0];
+			var brushNode = arm.logic.LogicParser.getLogicNode(node);
+			if (brushNode != null && brushNode.getCachedImage() != null) {
+				texpaint = brushNode.getCachedImage();
+				texpaint_nor = iron.RenderPath.active.renderTargets.get("texpaint_nor_empty").image;
+				texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack_empty").image;
+			}
+		}
+
 		return { texpaint: texpaint, texpaint_nor: texpaint_nor, texpaint_pack: texpaint_pack };
 	}
 
