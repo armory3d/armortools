@@ -184,14 +184,18 @@ package arm;
 
 @:enum abstract CanvasType(Int) from Int to Int {
 	var CanvasMaterial = 0;
+	#if (is_paint || is_sculpt)
 	var CanvasBrush = 1;
+	#end
 }
 
 @:enum abstract View2DType(Int) from Int to Int {
-	var View2DLayer = 0;
-	var View2DAsset = 1;
+	var View2DAsset = 0;
+	var View2DNode = 1;
+	#if (is_paint || is_sculpt)
 	var View2DFont = 2;
-	var View2DNode = 3;
+	var View2DLayer = 3;
+	#end
 }
 
 @:enum abstract View2DLayerMode(Int) from Int to Int {
@@ -350,7 +354,8 @@ package arm;
 	#end
 	#if is_lab
 	var LayoutNodesW = 0;
-	var LayoutStatusH = 1;
-	var LayoutHeader = 2;
+	var LayoutNodesH = 1;
+	var LayoutStatusH = 2;
+	var LayoutHeader = 3;
 	#end
 }

@@ -98,12 +98,11 @@ class UIMenubar {
 			Ext.endMenu(ui);
 		}
 
-		#if (is_paint || is_sculpt)
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
+		#if (is_paint || is_sculpt)
 		var ww = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
 		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
 		#else
-		var nodesw = (UINodes.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		var ww = System.windowWidth() - menubarw - nodesw;
 		var panelx = (iron.App.x()) + menubarw;
 		#end
@@ -143,7 +142,7 @@ class UIMenubar {
 					}
 					Scene.active.meshes = [plane];
 					var m = iron.math.Mat4.identity();
-					m.translate(0, 0, 1.5);
+					m.translate(0, 0, 1.6);
 					Scene.active.camera.transform.setMatrix(m);
 				}
 				#if (kha_direct3d12 || kha_vulkan || kha_metal)

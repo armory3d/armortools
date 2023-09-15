@@ -9,13 +9,13 @@ import zui.Id;
 import zui.Nodes;
 import zui.Ext;
 import iron.system.Input;
+import iron.system.Time;
 import arm.shader.NodesMaterial;
 import arm.logic.NodesBrush;
 import arm.ui.UIHeader;
 import arm.Project;
 import arm.ProjectFormat;
 #if (is_paint || is_sculpt)
-import iron.system.Time;
 import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
 #end
@@ -39,9 +39,7 @@ class UINodes {
 	public var wh: Int;
 
 	public var ui: Zui;
-	#if (is_paint || is_sculpt)
 	public var canvasType = CanvasMaterial;
-	#end
 	var showMenu = false;
 	var showMenuFirst = true;
 	var hideMenu = false;
@@ -260,9 +258,7 @@ class UINodes {
 			// Node context menu
 			if (!Nodes.socketReleased) {
 				var numberOfEntries = 5;
-				#if (is_paint || is_sculpt)
 				if (canvasType == CanvasMaterial) ++numberOfEntries;
-				#end
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
 				
 				UIMenu.draw(function(uiMenu: Zui) {
@@ -323,21 +319,18 @@ class UINodes {
 						}
 					}
 
-					#if (is_paint || is_sculpt)
 					if (canvasType == CanvasMaterial) {
 						UIMenu.menuSeparator(uiMenu);
 						if (UIMenu.menuButton(uiMenu, tr("2D View"))) {
 							UIBase.inst.show2DView(View2DNode);
 						}
 					}
-					#end
 
 					uiMenu.enabled = true;
 				}, numberOfEntries);
 			}
 		}
 
-		#if (is_paint || is_sculpt)
 		if (ui.inputReleased) {
 			var nodes = getNodes();
 			var canvas = getCanvas(true);
@@ -352,7 +345,6 @@ class UINodes {
 				}
 			}
 		}
-		#end
 	}
 
 	public static function onNodeRemove(node: TNode) {
@@ -492,11 +484,9 @@ class UINodes {
 		#end
 		wy = UIHeader.headerh * 2;
 
-		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
 			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
 		}
-		#end
 
 		var ww = Config.raw.layout[LayoutNodesW];
 		if (!UIBase.inst.show) {
@@ -755,18 +745,18 @@ class UINodes {
 		#end
 
 		wy = 0;
+
+		#if (is_paint || is_sculpt)
 		if (!UIBase.inst.show) {
-			#if (is_paint || is_sculpt)
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
-			#end
 		}
+		#end
 
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
 		wh = iron.App.h() + UIHeader.headerh;
 		if (Config.raw.layout[LayoutHeader] == 1) wh += UIHeader.headerh;
 
-		#if (is_paint || is_sculpt)
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
 			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.headerh;
@@ -775,7 +765,6 @@ class UINodes {
 				wy -= UIHeader.headerh * 2;
 			}
 		}
-		#end
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
@@ -879,11 +868,15 @@ class UINodes {
 			}
 			uichangedLast = ui.changed;
 
-			#if (is_paint || is_sculpt)
+
+
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
 				var img: kha.Image = null;
 				var sel = nodes.nodesSelected[0];
+
+				#if (is_paint || is_sculpt)
+
 				var singleChannel = sel.type == "LAYER_MASK";
 				if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
 					var id = sel.buttons[0].default_value;
@@ -908,6 +901,16 @@ class UINodes {
 				else if (canvasType == CanvasMaterial) {
 					img = Context.raw.nodePreview;
 				}
+
+				#else
+
+				var brushNode = arm.logic.LogicParser.getLogicNode(sel);
+				if (brushNode != null) {
+					img = brushNode.getCachedImage();
+				}
+
+				#end
+
 				if (img != null) {
 					var tw = 128 * ui.SCALE();
 					var th = tw * (img.height / img.width);
@@ -920,6 +923,7 @@ class UINodes {
 					var invertY = false;
 					#end
 
+					#if (is_paint || is_sculpt)
 					if (singleChannel) {
 						ui.g.pipeline = UIView2D.pipe;
 						#if kha_opengl
@@ -927,18 +931,20 @@ class UINodes {
 						#end
 						ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
 					}
+					#end
 
 					ui.g.color = 0xffffffff;
 					invertY ?
 						ui.g.drawScaledImage(img, tx, ty + th, tw, -th) :
 						ui.g.drawScaledImage(img, tx, ty, tw, th);
 
+					#if (is_paint || is_sculpt)
 					if  (singleChannel) {
 						ui.g.pipeline = null;
 					}
+					#end
 				}
 			}
-			#end
 
 			// Menu
 			ui.g.color = ui.t.SEPARATOR_COL;

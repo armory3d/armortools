@@ -20,23 +20,12 @@ class TabTextures {
 
 			ui.beginSticky();
 
-			#if (is_paint || is_sculpt)
 			if (Config.raw.touch_ui) {
 				ui.row([1 / 4, 1 / 4]);
 			}
 			else {
 				ui.row([1 / 14, 1 / 14]);
 			}
-			#end
-
-			#if is_lab
-			if (Config.raw.touch_ui) {
-				ui.row([1 / 4]);
-			}
-			else {
-				ui.row([1 / 14]);
-			}
-			#end
 
 			if (ui.button(tr("Import"))) {
 				UIFiles.show(Path.textureFormats.join(","), false, true, function(path: String) {
@@ -46,9 +35,7 @@ class TabTextures {
 			}
 			if (ui.isHovered) ui.tooltip(tr("Import texture file") + ' (${Config.keymap.file_import_assets})');
 
-			#if (is_paint || is_sculpt)
 			if (ui.button(tr("2D View"))) UIBase.inst.show2DView(View2DAsset);
-			#end
 
 			ui.endSticky();
 
@@ -93,11 +80,9 @@ class TabTextures {
 							App.dragAsset = asset;
 							Context.raw.texture = asset;
 
-							#if (is_paint || is_sculpt)
 							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DAsset);
 							Context.raw.selectTime = Time.time();
 							UIView2D.inst.hwnd.redraws = 2;
-							#end
 						}
 
 						if (asset == Context.raw.texture) {

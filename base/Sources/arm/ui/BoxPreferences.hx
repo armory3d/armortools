@@ -73,9 +73,7 @@ class BoxPreferences {
 				Config.raw.wrap_mouse = ui.check(Id.handle({ selected: Config.raw.wrap_mouse }), tr("Wrap Mouse"));
 				if (ui.isHovered) ui.tooltip(tr("Wrap mouse around view boundaries during camera control"));
 
-				#if (is_paint || is_sculpt)
 				Config.raw.node_preview = ui.check(Id.handle({ selected: Config.raw.node_preview }), tr("Show Node Preview"));
-				#end
 
 				ui.changed = false;
 				Config.raw.show_asset_names = ui.check(Id.handle({ selected: Config.raw.show_asset_names }), tr("Show Asset Names"));
@@ -689,13 +687,13 @@ plugin.drawUI = function(ui) {
 		UIMenubar.inst.menubarw = Std.int(UIMenubar.defaultMenubarW * scale);
 		UIBase.inst.setIconScale();
 		UINodes.inst.ui.setScale(scale);
+		UIView2D.inst.ui.setScale(scale);
 		App.uiBox.setScale(scale);
 		App.uiMenu.setScale(scale);
 		App.resize();
 		#if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultSidebarW * scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);
-		UIView2D.inst.ui.setScale(scale);
 		#end
 	}
 }

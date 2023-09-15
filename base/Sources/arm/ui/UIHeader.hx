@@ -39,11 +39,10 @@ class UIHeader {
 
 		if (Config.raw.layout[LayoutHeader] == 0) return;
 
+		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		#if is_lab
-		var nodesw = (UINodes.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		var ww = System.windowWidth() - nodesw;
 		#else
-		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		var ww = System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 		#end
 

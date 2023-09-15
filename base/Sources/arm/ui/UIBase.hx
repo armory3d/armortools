@@ -241,11 +241,13 @@ class UIBase {
 				toggleBrowser();
 			}
 
-			#if (is_paint || is_sculpt)
 			else if (Operator.shortcut(Config.keymap.toggle_2d_view)) {
+				#if (is_paint || is_sculpt)
 				show2DView(View2DLayer);
+				#else
+				show2DView(View2DAsset);
+				#end
 			}
-			#end
 		}
 
 		if (Operator.shortcut(Config.keymap.file_save_as)) Project.projectSaveAs();
@@ -357,12 +359,7 @@ class UIBase {
 		}
 		#end
 
-		#if (is_paint || is_sculpt)
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
-		#end
-		#if is_lab
-		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
-		#end
 
 		#if (is_paint || is_sculpt)
 		if (!isTyping) {
@@ -637,29 +634,22 @@ class UIBase {
 
 		#if is_lab
 		if (borderHandle != null) {
-			if (borderHandle == UINodes.inst.hwnd) {
+			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
 					else if (Config.raw.layout[LayoutNodesW] > System.windowWidth() * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.windowWidth() * 0.7);
 				}
-				else { // UINodes
-
+				else { // UINodes / UIView2D ratio
+					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
+					if (Config.raw.layout[LayoutNodesH] < 32) Config.raw.layout[LayoutNodesH] = 32;
+					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
 				}
 			}
 			else if (borderHandle == hwnds[TabStatus]) {
 				var my = Std.int(mouse.movementY);
 				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
-				}
-			}
-			else {
-				if (borderStarted == SideLeft) {
-
-				}
-				else {
-					var my = Std.int(mouse.movementY);
-
 				}
 			}
 		}
@@ -732,12 +722,7 @@ class UIBase {
 	}
 
 	function view_top() {
-		#if (is_paint || is_sculpt)
 		var isTyping = ui.isTyping || UIView2D.inst.ui.isTyping || UINodes.inst.ui.isTyping;
-		#end
-		#if is_lab
-		var isTyping = ui.isTyping || UINodes.inst.ui.isTyping;
-		#end
 
 		var mouse = Input.getMouse();
 		if (Context.inPaintArea() && !isTyping) {
@@ -1413,6 +1398,7 @@ class UIBase {
 		UINodes.inst.canvasType = CanvasBrush;
 		App.resize();
 	}
+	#end
 
 	public function show2DView(type: View2DType) {
 		// Clear input state as ui receives input events even when not drawn
@@ -1423,7 +1409,6 @@ class UIBase {
 		UIView2D.inst.hwnd.redraws = 2;
 		App.resize();
 	}
-	#end
 
 	public function toggleBrowser() {
 		var minimized = Config.raw.layout[LayoutStatusH] <= (UIStatus.defaultStatusH * Config.raw.window_scale);
@@ -1458,8 +1443,10 @@ class UIBase {
 
 		#if is_lab
 		if (handle != hwnds[TabStatus] &&
-			handle != UINodes.inst.hwnd) return; // Scalable handles
-		if (handle == UINodes.inst.hwnd && side == SideTop) return;
+			handle != UINodes.inst.hwnd &&
+			handle != UIView2D.inst.hwnd) return; // Scalable handles
+		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
+		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
 		#end
 
 		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;

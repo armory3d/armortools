@@ -54,6 +54,7 @@ package arm;
 	@:optional public var layer_res: Null<Int>;
 	@:optional public var brush_live: Null<Bool>;
 	@:optional public var brush_3d: Null<Bool>;
+	@:optional public var node_preview: Null<Bool>;
 
 	#if (is_paint || is_sculpt)
 	@:optional public var pressure_hardness: Null<Bool>;
@@ -62,7 +63,6 @@ package arm;
 	@:optional public var material_live: Null<Bool>;
 	@:optional public var brush_depth_reject: Null<Bool>;
 	@:optional public var brush_angle_reject: Null<Bool>;
-	@:optional public var node_preview: Null<Bool>;
 	#end
 
 	#if is_paint

@@ -1,7 +1,5 @@
 package arm.ui;
 
-#if (is_paint || is_sculpt)
-
 import kha.System;
 import kha.Image;
 import kha.graphics4.PipelineState;
@@ -12,18 +10,31 @@ import kha.graphics4.ConstantLocation;
 import zui.Zui;
 import zui.Id;
 import iron.system.Input;
-import arm.util.UVUtil;
+#if (is_paint || is_sculpt)
 import arm.util.RenderUtil;
+import arm.util.UVUtil;
 import arm.render.RenderPathPaint;
+#end
 
 class UIView2D {
 
-	public static var inst: UIView2D;
+	#if (is_paint || is_sculpt)
 	public static var pipe: PipelineState;
 	public static var channelLocation: ConstantLocation;
 	public static var textInputHover = false;
-	public var show = false;
+	public var uvmapShow = false;
+	var texType = TexBase;
+	var layerMode = View2DSelected;
+	#end
+
+	#if (is_paint || is_sculpt)
 	public var type = View2DLayer;
+	#else
+	public var type = View2DAsset;
+	#end
+
+	public static var inst: UIView2D;
+	public var show = false;
 	public var wx: Int;
 	public var wy: Int;
 	public var ww: Int;
@@ -33,15 +44,13 @@ class UIView2D {
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
-	public var uvmapShow = false;
 	public var tiledShow = false;
 	public var controlsDown = false;
-	var texType = TexBase;
-	var layerMode = View2DSelected;
 
 	public function new() {
 		inst = this;
 
+		#if (is_paint || is_sculpt)
 		pipe = new PipelineState();
 		pipe.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipe.fragmentShader = kha.Shaders.getFragment("layer_view.frag");
@@ -55,6 +64,7 @@ class UIView2D {
 		pipe.colorWriteMaskAlpha = false;
 		pipe.compile();
 		channelLocation = pipe.getConstantLocation("channel");
+		#end
 
 		var scale = Config.raw.window_scale;
 		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.colorWheelGradient, scaleFactor: scale });
@@ -64,15 +74,22 @@ class UIView2D {
 	@:access(zui.Zui)
 	public function render(g: kha.graphics2.Graphics) {
 
-		#if is_paint
-
 		ww = Config.raw.layout[LayoutNodesW];
+
+		#if (is_paint || is_sculpt)
 		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		#else
+		wx = Std.int(iron.App.w());
+		#end
+
 		wy = 0;
+
+		#if (is_paint || is_sculpt)
 		if (!UIBase.inst.show) {
 			ww += Config.raw.layout[LayoutSidebarW] + UIToolbar.inst.toolbarw;
 			wx -= UIToolbar.inst.toolbarw;
 		}
+		#end
 
 		if (!show) return;
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
@@ -85,10 +102,14 @@ class UIView2D {
 		if (UINodes.inst.grid == null) UINodes.inst.drawGrid();
 
 		// Ensure UV map is drawn
+		#if (is_paint || is_sculpt)
 		if (uvmapShow) UVUtil.cacheUVMap();
+		#end
 
 		// Ensure font image is drawn
+		#if (is_paint || is_sculpt)
 		if (Context.raw.font.image == null) RenderUtil.makeFontPreview();
+		#end
 
 		ui.begin(g);
 
@@ -110,15 +131,40 @@ class UIView2D {
 			ui.g.drawImage(UINodes.inst.grid, (panX * panScale) % 100 - 100, (panY * panScale) % 100 - 100);
 
 			// Texture
-			var l = Context.raw.layer;
 			var tex: Image = null;
+
+			#if (is_paint || is_sculpt)
+			var l = Context.raw.layer;
 			var channel = 0;
+			#end
 
 			var tw = ww * 0.95 * panScale;
 			var tx = ww / 2 - tw / 2 + panX;
 			var ty = apph / 2 - tw / 2 + panY;
 
-			if (type == View2DLayer) {
+			if (type == View2DAsset) {
+				tex = Project.getImage(Context.raw.texture);
+			}
+			else if (type == View2DNode) {
+				#if (is_paint || is_sculpt)
+
+				tex = Context.raw.nodePreview;
+
+				#else
+
+				var nodes = UINodes.inst.getNodes();
+				if (nodes.nodesSelected.length > 0) {
+					var sel = nodes.nodesSelected[0];
+					var brushNode = arm.logic.LogicParser.getLogicNode(sel);
+					if (brushNode != null) {
+						tex = brushNode.getCachedImage();
+					}
+				}
+
+				#end
+			}
+			#if (is_paint || is_sculpt)
+			else if (type == View2DLayer) {
 				var layer = l;
 
 				if (Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0) {
@@ -155,21 +201,17 @@ class UIView2D {
 					texType == TexNormal    ? 5 :
 											  0;
 			}
-			else if (type == View2DAsset) {
-				tex = Project.getImage(Context.raw.texture);
-			}
 			else if (type == View2DFont) {
 				tex = Context.raw.font.image;
 			}
-			else { // View2DNode
-				tex = Context.raw.nodePreview;
-			}
+			#end
 
 			var th = tw;
 			if (tex != null) {
 				th = tw * (tex.height / tex.width);
 				ty = apph / 2 - th / 2 + panY;
 
+				#if (is_paint || is_sculpt)
 				if (type == View2DLayer) {
 					ui.g.pipeline = pipe;
 					if (!Context.raw.textureFilter) {
@@ -180,6 +222,7 @@ class UIView2D {
 					#end
 					ui.currentWindow.texture.g4.setInt(channelLocation, channel);
 				}
+				#end
 
 				ui.g.drawScaledImage(tex, tx, ty, tw, th);
 
@@ -194,6 +237,7 @@ class UIView2D {
 					ui.g.drawScaledImage(tex, tx, ty + th, tw, th);
 				}
 
+				#if (is_paint || is_sculpt)
 				if (type == View2DLayer) {
 					ui.g.pipeline = null;
 					if (!Context.raw.textureFilter) {
@@ -228,12 +272,15 @@ class UIView2D {
 						UIHeader.inst.headerHandle.redraws = 2;
 					});
 				}
+				#end
 			}
 
+			#if (is_paint || is_sculpt)
 			// UV map
 			if (type == View2DLayer && uvmapShow) {
 				ui.g.drawScaledImage(UVUtil.uvmap, tx, ty, tw, th);
 			}
+			#end
 
 			// Menu
 			var ew = Std.int(ui.ELEMENT_W());
@@ -248,14 +295,16 @@ class UIView2D {
 
 			// Editable layer name
 			var h = Id.handle();
+
+			#if (is_paint || is_sculpt)
 			var text = type == View2DNode ? Context.raw.nodePreviewName : h.text;
+			#else
+			var text = h.text;
+			#end
+
 			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
-			if (type == View2DLayer) {
-				h.text = l.name;
-				l.name = ui.textInput(h, "");
-				textInputHover = ui.isHovered;
-			}
-			else if (type == View2DAsset) {
+
+			if (type == View2DAsset) {
 				var asset = Context.raw.texture;
 				if (asset != null) {
 					var assetNames = Project.assetNames;
@@ -265,18 +314,38 @@ class UIView2D {
 					assetNames[i] = asset.name;
 				}
 			}
+			else if (type == View2DNode) {
+				#if (is_paint || is_sculpt)
+
+				ui.text(Context.raw.nodePreviewName);
+
+				#else
+
+				var nodes = UINodes.inst.getNodes();
+				if (nodes.nodesSelected.length > 0) {
+					ui.text(nodes.nodesSelected[0].name);
+				}
+
+				#end
+			}
+			#if (is_paint || is_sculpt)
+			else if (type == View2DLayer) {
+				h.text = l.name;
+				l.name = ui.textInput(h, "");
+				textInputHover = ui.isHovered;
+			}
 			else if (type == View2DFont) {
 				h.text = Context.raw.font.name;
 				Context.raw.font.name = ui.textInput(h, "");
 			}
-			else { // View2DNode
-				ui.text(Context.raw.nodePreviewName);
-			}
+			#end
+
 			if (h.changed) UIBase.inst.hwnds[0].redraws = 2;
 			ui._x += ui._w + 3;
 			ui._y = 2 + startY;
 			ui._w = ew;
 
+			#if (is_paint || is_sculpt)
 			if (type == View2DLayer) {
 				layerMode = ui.combo(Id.handle({ position: layerMode }), [
 					tr("Visible"),
@@ -304,6 +373,7 @@ class UIView2D {
 				ui._x += ew * 0.7 + 3;
 				ui._y = 2 + startY;
 			}
+			#end
 
 			tiledShow = ui.check(Id.handle({ selected: tiledShow }), tr("Tiled"));
 			ui._x += ew * 0.7 + 3;
@@ -314,29 +384,30 @@ class UIView2D {
 			}
 
 			// Picked position
+			#if (is_paint || is_sculpt)
 			if (Context.raw.tool == ToolPicker && (type == View2DLayer || type == View2DAsset)) {
 				var cursorImg = Res.get("cursor.k");
 				var hsize = 16 * ui.SCALE();
 				var size = hsize * 2;
 				ui.g.drawScaledImage(cursorImg, tx + tw * Context.raw.uvxPicked - hsize, ty + th * Context.raw.uvyPicked - hsize, size, size);
 			}
+			#end
 		}
 		ui.end();
 		g.begin(false);
-
-		#end
 	}
 
 	@:access(zui.Zui)
 	public function update() {
 
-		#if is_paint
-
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
 		var headerh = ui.ELEMENT_H() * 1.4;
+
+		#if (is_paint || is_sculpt)
 		Context.raw.paint2d = false;
+		#end
 
 		if (!App.uiEnabled ||
 			!show ||
@@ -369,6 +440,7 @@ class UIView2D {
 			}
 		}
 
+		#if (is_paint || is_sculpt)
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 		var setCloneSource = Context.raw.tool == ToolClone && Operator.shortcut(Config.keymap.set_clone_source + "+" + Config.keymap.action_paint, ShortcutDown);
@@ -382,6 +454,7 @@ class UIView2D {
 			 Config.raw.brush_live)) {
 			Context.raw.paint2d = true;
 		}
+		#end
 
 		if (ui.isTyping) return;
 
@@ -407,9 +480,5 @@ class UIView2D {
 			panY = 0.0;
 			panScale = 1.0;
 		}
-
-		#end
 	}
 }
-
-#end
