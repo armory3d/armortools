@@ -13,11 +13,16 @@ class LogicParser {
 	static var parsed_nodes: Array<String> = null;
 	static var parsed_labels: Map<String, String> = null;
 	static var nodeMap: Map<String, LogicNode>;
+	static var rawMap: Map<LogicNode, TNode>;
 
 	public static var packageName = "arm.logic";
 
 	public static function getLogicNode(node: TNode): LogicNode {
 		return nodeMap.get(node_name(node));
+	}
+
+	public static function getRawNode(node: LogicNode): TNode {
+		return rawMap.get(node);
 	}
 
 	public static function getNode(id: Int): TNode {
@@ -69,6 +74,7 @@ class LogicParser {
 		parsed_nodes = [];
 		parsed_labels = new Map();
 		nodeMap = new Map();
+		rawMap = new Map();
 		var root_nodes = get_root_nodes(canvas);
 
 		tree = new LogicTree();
@@ -96,6 +102,7 @@ class LogicParser {
 		// Create node
 		var v = createClassInstance(node.type, [tree]);
 		nodeMap.set(name, v);
+		rawMap.set(v, node);
 
 		// Expose button values in node class
 		for (b in node.buttons) {
