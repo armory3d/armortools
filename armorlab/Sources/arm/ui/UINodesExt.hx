@@ -1,7 +1,11 @@
 package arm.ui;
 
+import kha.arrays.ByteArray;
+
 @:access(zui.Zui)
 class UINodesExt {
+
+	static var lastVertices: ByteArray = null; // Before displacement
 
 	public static function drawButtons(ew: Float, startY: Float) {
 		var ui = UINodes.inst.ui;
@@ -70,8 +74,35 @@ class UINodesExt {
 						texpaint_pack.g4.drawIndexedVertices();
 						texpaint_pack.g4.end();
 
-						// arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.08, Context.raw.brushScale);
-						// arm.util.MeshUtil.calcNormals();
+						// Make copy of vertices before displacement
+						var o = Project.paintObjects[0];
+						var g = o.data.geom;
+						var vertices = g.vertexBuffer.lock();
+						if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
+							lastVertices = ByteArray.make(vertices.byteLength);
+							for (i in 0...Std.int(vertices.byteLength / 2)) {
+								lastVertices.setInt16(i * 2, vertices.getInt16(i * 2));
+							}
+						}
+						else {
+							for (i in 0...Std.int(vertices.byteLength / 2)) {
+								vertices.setInt16(i * 2, lastVertices.getInt16(i * 2));
+							}
+						}
+						g.vertexBuffer.unlock();
+
+						// Apply displacement
+						if (Config.raw.displace_strength > 0) {
+							arm.App.notifyOnNextFrame(function() {
+								Console.progress(tr("Apply Displacement"));
+								arm.App.notifyOnNextFrame(function() {
+									arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, Context.raw.brushScale);
+									arm.util.MeshUtil.calcNormals();
+									Context.raw.ddirty = 2;
+									Console.progress(null);
+								});
+							});
+						}
 					}
 
 					Context.raw.ddirty = 2;

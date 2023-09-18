@@ -348,7 +348,6 @@ class MeshUtil {
 		g.vertexBuffer.unlock();
 
 		var va0 = o.data.raw.vertex_arrays[0].values;
-		var va1 = o.data.raw.vertex_arrays[1].values;
 		for (i in 0...Std.int(vertices.byteLength / 4 / l)) {
 			va0[i * 4    ] = vertices.getInt16((i * l    ) * 2);
 			va0[i * 4 + 1] = vertices.getInt16((i * l + 1) * 2);

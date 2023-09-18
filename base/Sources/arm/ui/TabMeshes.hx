@@ -79,7 +79,8 @@ class TabMeshes {
 				MeshUtil.applyDisplacement(Project.layers[0].texpaint_pack);
 				#end
 				#if is_lab
-				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05, Context.raw.brushScale);
+				var displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
+				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, Context.raw.brushScale);
 				#end
 
 				MeshUtil.calcNormals();

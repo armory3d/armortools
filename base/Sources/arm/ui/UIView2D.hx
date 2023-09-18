@@ -163,7 +163,7 @@ class UIView2D {
 
 				#end
 			}
-			#if (is_paint || is_sculpt)
+			#if is_paint
 			else if (type == View2DLayer) {
 				var layer = l;
 
