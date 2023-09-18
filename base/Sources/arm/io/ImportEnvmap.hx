@@ -83,7 +83,6 @@ class ImportEnvmap {
 		Scene.active.world.probe.radiance = radianceCpu;
 		Scene.active.world.probe.radianceMipmaps = mipsCpu;
 		Context.raw.savedEnvmap = image;
-		Context.raw.showEnvmapHandle.selected = Context.raw.showEnvmap = true;
 		if (Context.raw.showEnvmapBlur) {
 			Scene.active.world.envmap = Scene.active.world.probe.radianceMipmaps[0];
 		}
