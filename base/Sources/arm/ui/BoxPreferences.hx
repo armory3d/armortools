@@ -310,11 +310,13 @@ class BoxPreferences {
 				}
 				#end
 
+				#if is_lab
 				var workspaceHandle = Id.handle({ position: Config.raw.workspace });
-				ui.combo(workspaceHandle, [tr("3D View")], tr("Default Workspace"), true);
+				ui.combo(workspaceHandle, [tr("3D View"), tr("2D View")], tr("Default Workspace"), true);
 				if (workspaceHandle.changed) {
 					Config.raw.workspace = workspaceHandle.position;
 				}
+				#end
 
 				var cameraControlsHandle = Id.handle({ position: Config.raw.camera_controls });
 				ui.combo(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], tr("Default Camera Controls"), true);
