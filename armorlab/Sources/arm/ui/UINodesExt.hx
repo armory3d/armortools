@@ -17,9 +17,23 @@ class UINodesExt {
 			}
 			iron.App.notifyOnRender2D(delayIdleSleep);
 
+			var tasks = 1;
+
+			function taskDone() {
+				tasks--;
+				if (tasks == 0) {
+					Console.progress(null);
+					Context.raw.ddirty = 2;
+					iron.App.removeRender2D(delayIdleSleep);
+
+					#if (kha_direct3d12 || kha_vulkan || kha_metal)
+					arm.render.RenderPathRaytrace.ready = false;
+					#end
+				}
+			}
+
 			App.notifyOnNextFrame(function() {
 				var timer = iron.system.Time.realTime();
-
 				arm.logic.LogicParser.parse(Project.canvas, false);
 
 				arm.logic.PhotoToPBRNode.cachedSource = null;
@@ -93,29 +107,22 @@ class UINodesExt {
 
 						// Apply displacement
 						if (Config.raw.displace_strength > 0) {
+							tasks++;
 							arm.App.notifyOnNextFrame(function() {
 								Console.progress(tr("Apply Displacement"));
 								arm.App.notifyOnNextFrame(function() {
 									arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, Context.raw.brushScale);
 									arm.util.MeshUtil.calcNormals();
-									Context.raw.ddirty = 2;
-									Console.progress(null);
+									taskDone();
 								});
 							});
 						}
 					}
 
-					Context.raw.ddirty = 2;
-
-					#if (kha_direct3d12 || kha_vulkan || kha_metal)
-					arm.render.RenderPathRaytrace.ready = false;
-					#end
-
 					Console.log("Processing finished in " + (iron.system.Time.realTime() - timer));
-					Console.progress(null);
 					Krom.mlUnload();
 
-					iron.App.removeRender2D(delayIdleSleep);
+					taskDone();
 				});
 				});
 				});
