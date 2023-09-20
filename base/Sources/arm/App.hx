@@ -977,7 +977,11 @@ class App {
 		raw.camera_pan_speed = 1.0;
 		raw.camera_rotation_speed = 1.0;
 		raw.zoom_direction = ZoomVertical;
+		#if (is_paint || is_sculpt)
 		raw.displace_strength = 0.0;
+		#else
+		raw.displace_strength = 1.0;
+		#end
 		raw.wrap_mouse = false;
 		#if is_paint
 		raw.workspace = Space3D;
