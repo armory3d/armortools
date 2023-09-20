@@ -155,7 +155,8 @@ class TabMeshes {
 	static function setDefaultMesh(name: String) {
 		var mo: MeshObject = null;
 		if (name == ".Plane" || name == ".Sphere") {
-			var mesh: Dynamic = name == ".Plane" ? new arm.geom.Plane(1, 1, 2048, 2048) : new arm.geom.UVSphere(1.0, 2048, 1024, false, 2.0);
+			var res = Config.raw.rp_supersample > 1.0 ? 2048 : 1024;
+			var mesh: Dynamic = name == ".Plane" ? new arm.geom.Plane(1, 1, res, res) : new arm.geom.UVSphere(1.0, res, Std.int(res / 2), false, 2.0);
 			var raw = {
 				name: "Tessellated",
 				vertex_arrays: [
