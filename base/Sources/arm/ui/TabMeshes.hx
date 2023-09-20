@@ -80,7 +80,8 @@ class TabMeshes {
 				#end
 				#if is_lab
 				var displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
-				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, Context.raw.brushScale);
+				var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 				#end
 
 				MeshUtil.calcNormals();
@@ -154,7 +155,7 @@ class TabMeshes {
 	static function setDefaultMesh(name: String) {
 		var mo: MeshObject = null;
 		if (name == ".Plane" || name == ".Sphere") {
-			var mesh: Dynamic = name == ".Plane" ? new arm.geom.Plane(1, 1, 2048, 2048) : new arm.geom.Sphere(0.9, 2048, 1024, false, 3.0);
+			var mesh: Dynamic = name == ".Plane" ? new arm.geom.Plane(1, 1, 2048, 2048) : new arm.geom.UVSphere(1.0, 2048, 1024, false, 2.0);
 			var raw = {
 				name: "Tessellated",
 				vertex_arrays: [

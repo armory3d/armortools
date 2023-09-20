@@ -119,6 +119,9 @@ class RenderPathRaytrace {
 		if (!Context.raw.showEnvmap) f32[20] = -f32[20];
 		f32[21] = Context.raw.envmapAngle;
 		f32[22] = uvScale;
+		#if is_lab
+		f32[22] *= Scene.active.meshes[0].data.scaleTex;
+		#end
 
 		var framebuffer = path.renderTargets.get("buf").image;
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);

@@ -111,7 +111,8 @@ class UINodesExt {
 							arm.App.notifyOnNextFrame(function() {
 								Console.progress(tr("Apply Displacement"));
 								arm.App.notifyOnNextFrame(function() {
-									arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, Context.raw.brushScale);
+									var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+									arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
 									arm.util.MeshUtil.calcNormals();
 									taskDone();
 								});

@@ -63,6 +63,7 @@ class MakePaint {
 
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
+		// vert.write('vec2 tpos = vec2(frac(tex.x * texScale) * 2.0 - 1.0, (1.0 - frac(tex.y * texScale)) * 2.0 - 1.0);'); // 3D View
 		#else
 		vert.write('vec2 tpos = vec2(tex.xy * 2.0 - 1.0);');
 		#end
@@ -134,9 +135,10 @@ class MakePaint {
 			frag.write('if (dist > brushRadius) discard;');
 		}
 
-		vert.add_uniform('float brushScale', '_brushScale');
-		vert.add_out('vec2 texCoord');
-		vert.write('texCoord = tex * brushScale;');
+		// vert.add_uniform('float brushScale', '_brushScale');
+		// vert.add_uniform('float texScale', '_texUnpack');
+		// vert.add_out('vec2 texCoord');
+		// vert.write('texCoord = tex * brushScale * texScale;');
 
 		if (Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) {
 			frag.add_uniform('sampler2D gbuffer2');
