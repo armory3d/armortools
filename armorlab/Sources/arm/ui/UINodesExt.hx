@@ -88,35 +88,39 @@ class UINodesExt {
 						texpaint_pack.g4.drawIndexedVertices();
 						texpaint_pack.g4.end();
 
-						// Make copy of vertices before displacement
-						var o = Project.paintObjects[0];
-						var g = o.data.geom;
-						var vertices = g.vertexBuffer.lock();
-						if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
-							lastVertices = ByteArray.make(vertices.byteLength);
-							for (i in 0...Std.int(vertices.byteLength / 2)) {
-								lastVertices.setInt16(i * 2, vertices.getInt16(i * 2));
-							}
-						}
-						else {
-							for (i in 0...Std.int(vertices.byteLength / 2)) {
-								vertices.setInt16(i * 2, lastVertices.getInt16(i * 2));
-							}
-						}
-						g.vertexBuffer.unlock();
+						if (UIHeader.inst.worktab.position == Space3D &&
+							!Std.isOfType(@:privateAccess arm.logic.BrushOutputNode.inst.inputs[ChannelHeight].node, arm.logic.FloatNode)) {
 
-						// Apply displacement
-						if (Config.raw.displace_strength > 0) {
-							tasks++;
-							arm.App.notifyOnNextFrame(function() {
-								Console.progress(tr("Apply Displacement"));
+							// Make copy of vertices before displacement
+							var o = Project.paintObjects[0];
+							var g = o.data.geom;
+							var vertices = g.vertexBuffer.lock();
+							if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
+								lastVertices = ByteArray.make(vertices.byteLength);
+								for (i in 0...Std.int(vertices.byteLength / 2)) {
+									lastVertices.setInt16(i * 2, vertices.getInt16(i * 2));
+								}
+							}
+							else {
+								for (i in 0...Std.int(vertices.byteLength / 2)) {
+									vertices.setInt16(i * 2, lastVertices.getInt16(i * 2));
+								}
+							}
+							g.vertexBuffer.unlock();
+
+							// Apply displacement
+							if (Config.raw.displace_strength > 0) {
+								tasks++;
 								arm.App.notifyOnNextFrame(function() {
-									var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
-									arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
-									arm.util.MeshUtil.calcNormals();
-									taskDone();
+									Console.progress(tr("Apply Displacement"));
+									arm.App.notifyOnNextFrame(function() {
+										var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+										arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
+										arm.util.MeshUtil.calcNormals();
+										taskDone();
+									});
 								});
-							});
+							}
 						}
 					}
 
