@@ -60,11 +60,25 @@ class ImportEnvmap {
 		radiance.g2.end();
 
 		var radiancePixels = radiance.getPixels();
-		if (radianceCpu != null) radianceCpu.unload();
+		if (radianceCpu != null) {
+			var _radianceCpu = radianceCpu;
+			App.notifyOnNextFrame(function() {
+				_radianceCpu.unload();
+			});
+		}
 		radianceCpu = Image.fromBytes(radiancePixels, radiance.width, radiance.height, TextureFormat.RGBA128, kha.graphics4.Usage.DynamicUsage);
 
 		// Radiance
-		if (mipsCpu != null) for (mip in mipsCpu) mip.unload();
+		if (mipsCpu != null) {
+			for (mip in mipsCpu) {
+				var _mip = mip;
+				App.notifyOnNextFrame(function() {
+					#if (!kha_direct3d12) // TODO: crashes after 50+ imports
+					_mip.unload();
+					#end
+				});
+			}
+		}
 		mipsCpu = [];
 		for (i in 0...mips.length) {
 			getRadianceMip(mips[i], i, radiance);
