@@ -1,6 +1,6 @@
 package arm.geom;
 
-class Sphere {
+class UVSphere {
 
 	public var posa: kha.arrays.Int16Array = null;
 	public var nora: kha.arrays.Int16Array = null;
@@ -14,6 +14,7 @@ class Sphere {
 	public function new(radius = 1.0, widthSegments = 32, heightSegments = 16, stretchUV = true, uvScale = 1.0) {
 		// Pack positions to (-1, 1) range
 		scalePos = radius;
+		scaleTex = uvScale;
 		var inv = (1 / scalePos) * 32767;
 		var pi2 = Math.PI * 2;
 
@@ -48,8 +49,8 @@ class Sphere {
 				posa[i4 + 3] = Std.int(nor.z * 32767);
 				nora[i2    ] = Std.int(nor.x * 32767);
 				nora[i2 + 1] = Std.int(nor.y * 32767);
-				texa[i2    ] = Std.int((u + uOff) * 32767 * uvScale) % 32767;
-				texa[i2 + 1] = Std.int(vFlip      * 32767 * uvScale) % 32767;
+				texa[i2    ] = (Std.int((u + uOff) * 32767) - 1) % 32767;
+				texa[i2 + 1] = (Std.int(vFlip      * 32767) - 1) % 32767;
 				pos++;
 			}
 		}

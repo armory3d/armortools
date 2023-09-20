@@ -205,7 +205,7 @@ class Project {
 			var raw: TMeshData = null;
 			if (Context.raw.projectType == ModelSphere || Context.raw.projectType == ModelTessellatedPlane) {
 				var mesh: Dynamic = Context.raw.projectType == ModelSphere ?
-					new arm.geom.Sphere(1, 512, 256) :
+					new arm.geom.UVSphere(1, 512, 256) :
 					new arm.geom.Plane(1, 1, 512, 512);
 				raw = {
 					name: "Tessellated",
