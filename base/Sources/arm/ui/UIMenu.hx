@@ -441,7 +441,7 @@ class UIMenu {
 					File.loadUrl(Manifest.url_ios);
 					#else
 					// Retrieve latest version number
-					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title + ".html", function(bytes: Bytes) {
+					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title.toLowerCase() + ".html", function(bytes: Bytes) {
 						if (bytes != null)  {
 							// Compare versions
 							var update = Json.parse(bytes.toString());
