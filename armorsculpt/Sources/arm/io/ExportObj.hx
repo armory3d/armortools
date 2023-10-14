@@ -6,51 +6,39 @@ import iron.object.MeshObject;
 
 class ExportObj {
 
-	// var f32 = new kha.arrays.Float32Array(2048 * 2048 * 4);
-	// for (i in 0...raw.index_arrays[0].values.length) {
-	// 	var index = raw.index_arrays[0].values[i];
-	// 	f32[i * 4]     = mesh.posa[index * 4]     / 32767;
-	// 	f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
-	// 	f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
-	// 	f32[i * 4 + 3] = 1.0;
-	// }
-	// var bytes = haxe.io.Bytes.ofData(f32.buffer);
-	// var imgmesh = kha.Image.fromBytes(bytes, 2048, 2048, kha.graphics4.TextureFormat.RGBA128);
-	// var texpaint = Project.layers[0].texpaint;
-	// texpaint.g2.begin(false);
-	// texpaint.g2.pipeline = App.pipeCopy128;
-	// texpaint.g2.drawScaledImage(imgmesh, 0, 0, 2048, 2048);
-	// texpaint.g2.pipeline = null;
-	// texpaint.g2.end();
-
 	public static function run(path: String, paintObjects: Array<MeshObject>, applyDisplacement = false) {
 		var o = new BytesOutput();
 		o.bigEndian = false;
 		o.writeString("# armorsculpt.org\n");
 
+		var texpaint = Project.layers[0].texpaint;
+		var pixels = texpaint.getPixels();
+		var mesh = paintObjects[0].data.raw;
+		var inda = mesh.index_arrays[0].values;
+
+		var posa = new Int16Array(inda.length * 4);
+		for (i in 0...inda.length) {
+			var index = inda[i];
+			posa[index * 4    ] = Std.int(pixels.getFloat(i * 16    ) * 32767);
+			posa[index * 4 + 1] = Std.int(pixels.getFloat(i * 16 + 4) * 32767);
+			posa[index * 4 + 2] = Std.int(pixels.getFloat(i * 16 + 8) * 32767);
+		}
+
 		var poff = 0;
-		// var noff = 0;
-		// var toff = 0;
-		for (p in paintObjects) {
-			var mesh = p.data.raw;
+		// for (p in paintObjects) {
+			var p = paintObjects[0];
+			// var mesh = p.data.raw;
 			var inv = 1 / 32767;
 			var sc = p.data.scalePos * inv;
-			var posa = mesh.vertex_arrays[0].values;
-			// var nora = mesh.vertex_arrays[1].values;
-			// var texa = mesh.vertex_arrays[2].values;
+			// var posa = mesh.vertex_arrays[0].values;
 			var len = Std.int(posa.length / 4);
+			// var len = Std.int(inda.length);
 
 			// Merge shared vertices and remap indices
 			var posa2 = new Int16Array(len * 3);
-			// var nora2 = new Int16Array(len * 3);
-			// var texa2 = new Int16Array(len * 2);
 			var posmap = new Map<Int, Int>();
-			// var normap = new Map<Int, Int>();
-			// var texmap = new Map<Int, Int>();
 
 			var pi = 0;
-			// var ni = 0;
-			// var ti = 0;
 			for (i in 0...len) {
 				var found = false;
 				for (j in 0...pi) {
@@ -69,104 +57,37 @@ class ExportObj {
 					posa2[pi * 3 + 2] = posa[i * 4 + 2];
 					pi++;
 				}
-
-				// found = false;
-				// for (j in 0...ni) {
-				// 	if (nora2[j * 3    ] == nora[i * 2    ] &&
-				// 		nora2[j * 3 + 1] == nora[i * 2 + 1] &&
-				// 		nora2[j * 3 + 2] == posa[i * 4 + 3]) {
-				// 		normap.set(i, j);
-				// 		found = true;
-				// 		break;
-				// 	}
-				// }
-				// if (!found) {
-				// 	normap.set(i, ni);
-				// 	nora2[ni * 3    ] = nora[i * 2    ];
-				// 	nora2[ni * 3 + 1] = nora[i * 2 + 1];
-				// 	nora2[ni * 3 + 2] = posa[i * 4 + 3];
-				// 	ni++;
-				// }
-
-				// found = false;
-				// for (j in 0...ti) {
-				// 	if (texa2[j * 2    ] == texa[i * 2    ] &&
-				// 		texa2[j * 2 + 1] == texa[i * 2 + 1]) {
-				// 		texmap.set(i, j);
-				// 		found = true;
-				// 		break;
-				// 	}
-				// }
-				// if (!found) {
-				// 	texmap.set(i, ti);
-				// 	texa2[ti * 2    ] = texa[i * 2    ];
-				// 	texa2[ti * 2 + 1] = texa[i * 2 + 1];
-				// 	ti++;
-				// }
 			}
 
 			o.writeString("o " + p.name + "\n");
 			for (i in 0...pi) {
 				o.writeString("v ");
-				o.writeString(posa2[i * 3] * sc + "");
+				var vx = posa2[i * 3] * sc + "";
+				o.writeString(vx.substr(0, vx.indexOf(".") + 7));
 				o.writeString(" ");
-				o.writeString(posa2[i * 3 + 2] * sc + "");
+				var vy = posa2[i * 3 + 2] * sc + "";
+				o.writeString(vy.substr(0, vy.indexOf(".") + 7));
 				o.writeString(" ");
-				o.writeString(-posa2[i * 3 + 1] * sc + "");
+				var vz = -posa2[i * 3 + 1] * sc + "";
+				o.writeString(vz.substr(0, vz.indexOf(".") + 7));
 				o.writeString("\n");
 			}
-			// for (i in 0...ni) {
-			// 	o.writeString("vn ");
-			// 	o.writeString(nora2[i * 3] * inv + "");
-			// 	o.writeString(" ");
-			// 	o.writeString(nora2[i * 3 + 2] * inv + "");
-			// 	o.writeString(" ");
-			// 	o.writeString(-nora2[i * 3 + 1] * inv + "");
-			// 	o.writeString("\n");
-			// }
-			// for (i in 0...ti) {
-			// 	o.writeString("vt ");
-			// 	o.writeString(texa2[i * 2] * inv + "");
-			// 	o.writeString(" ");
-			// 	o.writeString(1.0 - texa2[i * 2 + 1] * inv + "");
-			// 	o.writeString("\n");
-			// }
 
-			var inda = mesh.index_arrays[0].values;
+			// var inda = mesh.index_arrays[0].values;
 			for (i in 0...Std.int(inda.length / 3)) {
 				var pi1 = posmap.get(inda[i * 3    ]) + 1 + poff;
 				var pi2 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
 				var pi3 = posmap.get(inda[i * 3 + 2]) + 1 + poff;
-				// var ni1 = normap.get(inda[i * 3    ]) + 1 + noff;
-				// var ni2 = normap.get(inda[i * 3 + 1]) + 1 + noff;
-				// var ni3 = normap.get(inda[i * 3 + 2]) + 1 + noff;
-				// var ti1 = texmap.get(inda[i * 3    ]) + 1 + toff;
-				// var ti2 = texmap.get(inda[i * 3 + 1]) + 1 + toff;
-				// var ti3 = texmap.get(inda[i * 3 + 2]) + 1 + toff;
 				o.writeString("f ");
 				o.writeString(pi1 + "");
-				o.writeString("/");
-				// o.writeString(ti1 + "");
-				o.writeString("/");
-				// o.writeString(ni1 + "");
 				o.writeString(" ");
 				o.writeString(pi2 + "");
-				o.writeString("/");
-				// o.writeString(ti2 + "");
-				o.writeString("/");
-				// o.writeString(ni2 + "");
 				o.writeString(" ");
 				o.writeString(pi3 + "");
-				o.writeString("/");
-				// o.writeString(ti3 + "");
-				o.writeString("/");
-				// o.writeString(ni3 + "");
 				o.writeString("\n");
 			}
 			poff += pi;
-			// noff += ni;
-			// toff += ti;
-		}
+		// }
 
 		if (!path.endsWith(".obj")) path += ".obj";
 
