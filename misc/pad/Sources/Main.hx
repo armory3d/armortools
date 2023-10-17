@@ -33,6 +33,7 @@ class Main {
 	static var resizing_sidebar = false;
 	static var minimap_w = 150;
 	static var minimap_h = 0;
+	static var minimap_box_h = 0;
 	static var minimap_scrolling = false;
 	static var minimap: kha.Image = null;
 	static var window_header_h = 0;
@@ -101,14 +102,20 @@ class Main {
 		var files = Krom.readDirectory(path, false).split("\n");
 		for (f in files) {
 			var abs = path + "/" + f;
+			var isFile = f.indexOf(".") >= 0;
+			var isExpanded = storage.expanded.indexOf(abs) >= 0;
 
+			// Active file
 			if (abs == storage.file) {
 				ui.fill(0, 1, @:privateAccess ui._w - 1, ui.ELEMENT_H() - 1, ui.t.BUTTON_PRESSED_COL);
 			}
 
-			if (ui.button(f, Left)) {
+			var prefix = "";
+			if (!isFile) prefix = isExpanded ? "- " : "+ ";
+
+			if (ui.button(prefix + f, Left)) {
 				// Open file
-				if (f.indexOf(".") >= 0) {
+				if (isFile) {
 					storage.file = abs;
 					var bytes = Bytes.ofData(Krom.loadBlob(storage.file));
 					storage.text = f.endsWith(".arm") ? Json.stringify(ArmPack.decode(bytes), "    ") : bytes.toString();
@@ -123,7 +130,7 @@ class Main {
 				}
 			}
 
-			if (storage.expanded.indexOf(abs) >= 0) {
+			if (isExpanded) {
 				ui.indent(false);
 				list_folder(abs);
 				ui.unindent(false);
@@ -154,26 +161,33 @@ class Main {
 			ui.t.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
 		}
 
+		ui.fill(System.windowWidth() - minimap_w, 0, minimap_w, ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1, ui.t.SEPARATOR_COL);
+		ui.fill(storage.sidebar_w, 0, 1, System.windowHeight(), ui.t.SEPARATOR_COL);
+
 		var editor_updated = false;
 
-		if (ui.window(editor_handle, storage.sidebar_w, 0, System.windowWidth() - storage.sidebar_w - minimap_w, System.windowHeight(), false)) {
+		if (ui.window(editor_handle, storage.sidebar_w + 1, 0, System.windowWidth() - storage.sidebar_w - minimap_w, System.windowHeight(), false)) {
 			editor_updated = true;
 			var htab = Id.handle({ position: 0 });
 			var file_name = storage.file.substring(storage.file.lastIndexOf("/") + 1);
-			if (ui.tab(htab, file_name + (storage.modified ? "*" : ""))) {
+			var file_names = [file_name];
 
-				// File modified
-				if (ui.isKeyPressed) {
-					storage.modified = true;
+			for (file_name in file_names) {
+				if (ui.tab(htab, file_name + (storage.modified ? "*" : ""))) {
+					// File modified
+					if (ui.isKeyPressed) {
+						storage.modified = true;
+					}
+
+					// Save
+					if (ui.isCtrlDown && ui.key == kha.input.KeyCode.S) {
+						save_file();
+					}
+
+					storage.text = Ext.textArea(ui, text_handle);
 				}
-
-				// Save
-				if (ui.isCtrlDown && ui.key == kha.input.KeyCode.S) {
-					save_file();
-				}
-
-				storage.text = Ext.textArea(ui, text_handle);
 			}
+
 			window_header_h = @:privateAccess Std.int(ui.windowHeaderH);
 		}
 
@@ -196,6 +210,7 @@ class Main {
 		}
 		if (minimap_scrolling) {
 			editor_handle.scrollOffset -= ui.inputDY * ui.ELEMENT_H() / 2;
+			// editor_handle.scrollOffset = -((ui.inputY - minimap_y - minimap_box_h / 2) * ui.ELEMENT_H() / 2);
 			redraw = true;
 		}
 
@@ -252,17 +267,21 @@ class Main {
 			minimap = kha.Image.createRenderTarget(minimap_w, minimap_h);
 		}
 
-		minimap.g2.begin(true, 0xff000000);
-		minimap.g2.color = ui.t.BUTTON_HOVER_COL;
-		minimap.g2.fillRect(0, 0, 1, minimap_h);
+		minimap.g2.begin(true, ui.t.SEPARATOR_COL);
 		minimap.g2.color = 0xff333333;
 		var lines = storage.text.split("\n");
+		var minimap_full_h = lines.length * 2;
+		var scrollProgress = -editor_handle.scrollOffset / (lines.length * ui.ELEMENT_H());
+		var outOfScreen = minimap_full_h - minimap_h;
+		if (outOfScreen < 0) outOfScreen = 0;
+		var offset = Std.int((outOfScreen * scrollProgress) / 2);
+
 		for (i in 0...lines.length) {
-			if (i * 2 > minimap_h) {
+			if (i * 2 > minimap_h || i + offset >= lines.length) {
 				// Out of screen
 				break;
 			}
-			var words = lines[i].split(" ");
+			var words = lines[i + offset].split(" ");
 			var x = 0;
 			for (j in 0...words.length) {
 				var word = words[j];
@@ -270,8 +289,12 @@ class Main {
 				x += word.length + 1;
 			}
 		}
+
+		// Current position
+		var visibleArea = outOfScreen > 0 ? minimap_h : minimap_full_h;
 		minimap.g2.color = 0x11ffffff;
-		minimap.g2.fillRect(0, -editor_handle.scrollOffset / (ui.ELEMENT_H() / 2), minimap_w, Std.int((System.windowHeight() - window_header_h) / ui.ELEMENT_H() * 2));
+		minimap_box_h = Std.int((System.windowHeight() - window_header_h) / ui.ELEMENT_H() * 2);
+		minimap.g2.fillRect(0, scrollProgress * visibleArea, minimap_w, minimap_box_h);
 		minimap.g2.end();
 	}
 
