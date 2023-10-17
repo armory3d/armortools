@@ -207,19 +207,30 @@ class Project {
 				var mesh: Dynamic = Context.raw.projectType == ModelSphere ?
 					new arm.geom.UVSphere(1, 512, 256) :
 					new arm.geom.Plane(1, 1, 512, 512);
-				raw = {
-					name: "Tessellated",
-					vertex_arrays: [
-						{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-						{ values: mesh.nora, attrib: "nor", data: "short2norm" },
-						{ values: mesh.texa, attrib: "tex", data: "short2norm" }
-					],
-					index_arrays: [
-						{ values: mesh.inda, material: 0 }
-					],
-					scale_pos: mesh.scalePos,
-					scale_tex: mesh.scaleTex
-				};
+				mesh.name = "Tessellated";
+				raw = ImportMesh.rawMesh(mesh);
+
+				#if is_sculpt
+				arm.App.notifyOnNextFrame(function() {
+					var f32 = new kha.arrays.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
+					for (i in 0...Std.int(mesh.inda.length)) {
+						var index = mesh.inda[i];
+						f32[i * 4]     = mesh.posa[index * 4]     / 32767;
+						f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
+						f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
+						f32[i * 4 + 3] = 1.0;
+					}
+
+					var bytes = haxe.io.Bytes.ofData(f32.buffer);
+					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.RGBA128);
+					var texpaint = Project.layers[0].texpaint;
+					texpaint.g2.begin(false);
+					texpaint.g2.pipeline = App.pipeCopy128;
+					texpaint.g2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
+					texpaint.g2.pipeline = null;
+					texpaint.g2.end();
+				});
+				#end
 			}
 			else {
 				Data.getBlob("meshes/" + meshList[Context.raw.projectType] + ".arm", function(b: kha.Blob) {

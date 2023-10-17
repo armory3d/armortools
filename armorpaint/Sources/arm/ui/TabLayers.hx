@@ -1,7 +1,5 @@
 package arm.ui;
 
-#if (is_paint || is_sculpt)
-
 import zui.Zui;
 import zui.Id;
 import zui.Nodes;
@@ -1103,5 +1101,3 @@ class TabLayers {
 		return true;
 	}
 }
-
-#end

@@ -276,7 +276,7 @@ package arm;
 	var ToolBlur = 6;
 	var ToolSmudge = 7;
 	var ToolParticle = 8;
-	var ToolPicker = 9;
+	var ToolPicker = 9; // Unused
 	var ToolGizmo = 10;
 	var ToolMaterial = 11;
 	var ToolBake = 12; // Unused

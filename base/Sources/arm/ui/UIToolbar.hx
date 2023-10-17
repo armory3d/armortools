@@ -95,8 +95,6 @@ class UIToolbar {
 			if (ui.isHovered) ui.tooltip(tr("Toggle header"));
 			ui._y -= 4 * ui.SCALE();
 
-			#if is_paint
-
 			var keys = [
 				"(" + Config.keymap.tool_brush + ") - " + tr("Hold {action_paint} to paint\nHold {key} and press {action_paint} to paint a straight line (ruler mode)", ["key" => Config.keymap.brush_ruler, "action_paint" => Config.keymap.action_paint]),
 				"(" + Config.keymap.tool_eraser + ") - " + tr("Hold {action_paint} to erase\nHold {key} and press {action_paint} to erase a straight line (ruler mode)", ["key" => Config.keymap.brush_ruler, "action_paint" => Config.keymap.action_paint]),
@@ -133,9 +131,11 @@ class UIToolbar {
 					lastTool = i;
 				}
 
+				#if is_paint
 				if (i == ToolColorId && Context.raw.colorIdPicked) {
 					ui.g.drawScaledSubImage(RenderPath.active.renderTargets.get("texpaint_colorid").image, 0, 0, 1, 1, 0, _y + 1.5 * ui.SCALE(), 5 * ui.SCALE(), 34 * ui.SCALE());
 				}
+				#end
 
 				if (ui.isHovered) ui.tooltip(tr(toolNames[i]) + " " + keys[i]);
 				ui._x -= 2;
@@ -143,6 +143,7 @@ class UIToolbar {
 			}
 
 			drawTool(ToolBrush);
+			#if is_paint
 			drawTool(ToolEraser);
 			drawTool(ToolFill);
 			drawTool(ToolDecal);
@@ -155,11 +156,10 @@ class UIToolbar {
 			drawTool(ToolPicker);
 			drawTool(ToolBake);
 			drawTool(ToolMaterial);
+			#end
 
 			#if is_forge
 			drawTool(ToolGizmo);
-			#end
-
 			#end
 
 			ui.imageScrollAlign = true;

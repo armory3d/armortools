@@ -759,6 +759,15 @@ class App {
 				});
 			});
 			#end
+
+			#if is_sculpt
+			arm.App.notifyOnNextFrame(function() {
+				arm.App.notifyOnNextFrame(function() {
+					Context.raw.projectType = ModelSphere;
+					Project.projectNew();
+				});
+			});
+			#end
 		}
 		else if (Context.raw.frame == 3) {
 			Context.raw.ddirty = 3;
@@ -1988,6 +1997,10 @@ class App {
 	}
 
 	public static function setObjectMask() {
+		#if is_sculpt
+		return;
+		#end
+
 		var ar = [tr("None")];
 		for (p in Project.paintObjects) ar.push(p.name);
 

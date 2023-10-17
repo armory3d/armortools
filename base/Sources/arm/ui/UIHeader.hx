@@ -485,7 +485,12 @@ class UIHeader {
 
 	#if is_sculpt
 
-	public function drawToolProperties(ui: Zui) {}
+	public function drawToolProperties(ui: Zui) {
+		if (Context.raw.tool == ToolBrush) {
+			Context.raw.brushRadius = ui.slider(Context.raw.brushRadiusHandle, tr("Radius"), 0.01, 2.0, true);
+			if (ui.isHovered) ui.tooltip(tr("Hold {brush_radius} and move mouse to the left or press {brush_radius_decrease} to decrease the radius\nHold {brush_radius} and move mouse to the right or press {brush_radius_increase} to increase the radius", ["brush_radius" => Config.keymap.brush_radius, "brush_radius_decrease" => Config.keymap.brush_radius_decrease, "brush_radius_increase" => Config.keymap.brush_radius_increase]));
+		}
+	}
 
 	#end
 

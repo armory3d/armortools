@@ -147,8 +147,8 @@ class ImportMesh {
 
 				arm.App.notifyOnNextFrame(function() {
 					var f32 = new kha.arrays.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
-					for (i in 0...raw.index_arrays[0].values.length) {
-						var index = raw.index_arrays[0].values[i];
+					for (i in 0...Std.int(mesh.inda.length)) {
+						var index = mesh.inda[i];
 						f32[i * 4]     = mesh.posa[index * 4]     / 32767;
 						f32[i * 4 + 1] = mesh.posa[index * 4 + 1] / 32767;
 						f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
@@ -203,7 +203,7 @@ class ImportMesh {
 		_addMesh();
 	}
 
-	static function rawMesh(mesh: Dynamic): TMeshData {
+	public static function rawMesh(mesh: Dynamic): TMeshData {
 		var posa = new kha.arrays.Int16Array(Std.int(mesh.inda.length * 4));
 		for (i in 0...posa.length) posa[i] = 32767;
 		var inda = new kha.arrays.Uint32Array(mesh.inda.length);

@@ -80,7 +80,9 @@ class UIMenu {
 				if (menuButton(ui, tr("Import Brush..."))) Project.importBrush();
 				#end
 
+				#if (is_paint || is_lab)
 				if (menuButton(ui, tr("Import Swatches..."))) Project.importSwatches();
+				#end
 				if (menuButton(ui, tr("Import Mesh..."))) Project.importMesh();
 				if (menuButton(ui, tr("Reimport Mesh"), Config.keymap.file_reimport_mesh)) Project.reimportMesh();
 				if (menuButton(ui, tr("Reimport Textures"), Config.keymap.file_reimport_textures)) Project.reimportTextures();
@@ -92,8 +94,8 @@ class UIMenu {
 					#end
 					BoxExport.showTextures();
 				}
-				#end
 				if (menuButton(ui, tr("Export Swatches..."))) Project.exportSwatches();
+				#end
 				if (menuButton(ui, tr("Export Mesh..."))) {
 					Context.raw.exportMeshIndex = 0; // All
 					BoxExport.showMesh();
@@ -245,7 +247,9 @@ class UIMenu {
 					ui.g.begin(false);
 					MakeMaterial.parseMeshMaterial();
 				}
+				#end
 
+				#if is_paint
 				menuFill(ui);
 				Context.raw.drawTexels = ui.check(Context.raw.texelsHandle, " " + tr("Texels"));
 				if (Context.raw.texelsHandle.changed) {
@@ -279,15 +283,19 @@ class UIMenu {
 				var modes = [
 					tr("Lit"),
 					tr("Base Color"),
+					#if (is_paint || is_lab)
 					tr("Normal"),
 					tr("Occlusion"),
 					tr("Roughness"),
 					tr("Metallic"),
 					tr("Opacity"),
 					tr("Height"),
-					#if (is_paint || is_sculpt)
+					#end
+					#if (is_paint)
 					tr("Emission"),
 					tr("Subsurface"),
+					#end
+					#if (is_paint || is_sculpt)
 					tr("TexCoord"),
 					tr("Object Normal"),
 					tr("Material ID"),

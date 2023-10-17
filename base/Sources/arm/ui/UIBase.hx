@@ -45,13 +45,22 @@ class UIBase {
 	var undoTapTime = 0.0;
 	var redoTapTime = 0.0;
 
-	#if (is_paint || is_sculpt)
+	#if is_paint
 	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
 	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
 	public var hwndTabs = [
 		[TabLayers.draw, TabHistory.draw, TabPlugins.draw #if is_forge , TabObjects.draw #end],
 		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
 		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabSwatches.draw, TabScript.draw, TabConsole.draw, UIStatus.drawVersionTab]
+	];
+	#end
+	#if is_sculpt
+	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
+	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
+	public var hwndTabs = [
+		[TabLayers.draw, TabHistory.draw, TabPlugins.draw #if is_forge , TabObjects.draw #end],
+		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
+		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabFonts.draw, TabScript.draw, TabConsole.draw, UIStatus.drawVersionTab]
 	];
 	#end
 	#if is_lab

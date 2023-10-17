@@ -326,13 +326,14 @@ class BoxPreferences {
 
 				var layerResHandle = Id.handle({ position: Config.raw.layer_res });
 
-				#if (is_paint || is_sculpt)
+				#if is_paint
 				#if (krom_android || krom_ios)
 				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Default Layer Resolution"), true);
 				#else
 				ui.combo(layerResHandle, ["128", "256", "512", "1K", "2K", "4K", "8K"], tr("Default Layer Resolution"), true);
 				#end
 				#end
+
 				#if is_lab
 				#if (krom_android || krom_ios)
 				ui.combo(layerResHandle, ["2K", "4K"], tr("Default Layer Resolution"), true);
