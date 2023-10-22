@@ -16,6 +16,7 @@ flags.on_project_created = async function(project) {
 	project.addDefine('IDLE_SLEEP');
 
 	if (graphics === 'vulkan') {
+		project.addDefine('KORE_VKRT');
 		await project.addProject('../armorlab/glsl_to_spirv');
 	}
 	await project.addProject('../armorlab/plugins');
