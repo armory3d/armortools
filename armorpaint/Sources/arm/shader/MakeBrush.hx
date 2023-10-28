@@ -13,19 +13,17 @@ class MakeBrush {
 
 		var fillLayer = Context.raw.layer.fill_layer != null;
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
-		if (decal && !fillLayer) frag.write('if (decalMaskLocal.z > 0.0) {');
+		if (decal && !fillLayer) frag.write('if (decalMask.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
-			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
-			frag.write('vec4 inplastLocal = inplast;'); // TODO: spirv workaround
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float depth = textureLod(gbufferD, inpLocal.xy, 0.0).r;');
+			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			#else
-			frag.write('float depth = textureLod(gbufferD, vec2(inpLocal.x, 1.0 - inpLocal.y), 0.0).r;');
+			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#end
 
 			frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
-			frag.write('vec4 winp = vec4(vec2(inpLocal.x, 1.0 - inpLocal.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
+			frag.write('vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
 			frag.write('winp = mul(winp, invVP);');
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
@@ -34,9 +32,9 @@ class MakeBrush {
 				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
 				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				frag.write('vec2 g0 = textureLod(gbuffer0, inpLocal.xy, 0.0).rg;');
+				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				#else
-				frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inpLocal.x, 1.0 - inpLocal.y), 0.0).rg;');
+				frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
 				#end
 				frag.write('vec3 wn;');
 				frag.write('wn.z = 1.0 - abs(g0.x) - abs(g0.y);');
@@ -53,12 +51,12 @@ class MakeBrush {
 			}
 
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float depthlast = textureLod(gbufferD, inplastLocal.xy, 0.0).r;');
+			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			#else
-			frag.write('float depthlast = textureLod(gbufferD, vec2(inplastLocal.x, 1.0 - inplastLocal.y), 0.0).r;');
+			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 			#end
 
-			frag.write('vec4 winplast = vec4(vec2(inplastLocal.x, 1.0 - inplastLocal.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
+			frag.write('vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
 			frag.write('winplast = mul(winplast, invVP);');
 			frag.write('winplast.xyz /= winplast.w;');
 

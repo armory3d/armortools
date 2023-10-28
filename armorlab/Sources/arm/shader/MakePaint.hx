@@ -38,13 +38,11 @@ class MakePaint {
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('vec4 inp', '_inputBrush');
-			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
-			frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inpLocal.x * gbufferSizeLocal.x, inpLocal.y * gbufferSizeLocal.y), 0).ba;');
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
 			#else
-			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inpLocal.x * gbufferSizeLocal.x, (1.0 - inpLocal.y) * gbufferSizeLocal.y), 0).ba;');
+			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
 			#end
 
 			frag.add_out('vec4 fragColor[4]');
@@ -101,27 +99,25 @@ class MakePaint {
 
 			frag.write('float dist = 0.0;');
 
-			frag.write('vec4 inpLocal = inp;'); // TODO: spirv workaround
-			frag.write('vec4 inplastLocal = inplast;'); // TODO: spirv workaround
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float depth = textureLod(gbufferD, inpLocal.xy, 0.0).r;');
+			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			#else
-			frag.write('float depth = textureLod(gbufferD, vec2(inpLocal.x, 1.0 - inpLocal.y), 0.0).r;');
+			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
 			#end
 
 			frag.add_uniform('mat4 invVP', '_inverseViewProjectionMatrix');
-			frag.write('vec4 winp = vec4(vec2(inpLocal.x, 1.0 - inpLocal.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
+			frag.write('vec4 winp = vec4(vec2(inp.x, 1.0 - inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);');
 			frag.write('winp = mul(winp, invVP);');
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('float depthlast = textureLod(gbufferD, inplastLocal.xy, 0.0).r;');
+			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			#else
-			frag.write('float depthlast = textureLod(gbufferD, vec2(inplastLocal.x, 1.0 - inplastLocal.y), 0.0).r;');
+			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
 			#end
 
-			frag.write('vec4 winplast = vec4(vec2(inplastLocal.x, 1.0 - inplastLocal.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
+			frag.write('vec4 winplast = vec4(vec2(inplast.x, 1.0 - inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);');
 			frag.write('winplast = mul(winplast, invVP);');
 			frag.write('winplast.xyz /= winplast.w;');
 
@@ -149,12 +145,10 @@ class MakePaint {
 
 			if (Context.raw.tool == ToolClone) {
 				// frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
-				// frag.write('vec2 cloneDeltaLocal = cloneDelta;'); // TODO: spirv workaround
-				// frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 				// #if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDeltaLocal) * gbufferSizeLocal), 0).ba;');
+				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
 				// #else
-				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDeltaLocal.x) * gbufferSizeLocal.x, (1.0 - (sp.y + cloneDeltaLocal.y)) * gbufferSizeLocal.y), 0).ba;');
+				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
 				// #end
 
 				// frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');
@@ -175,11 +169,10 @@ class MakePaint {
 				// frag.write('float opacity = mat_opacity * brushOpacity;');
 			}
 			else { // Blur
-				// frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 				// #if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSizeLocal.x, sp.y * gbufferSizeLocal.y), 0).ba;');
+				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
 				// #else
-				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSizeLocal.x, (1.0 - sp.y) * gbufferSizeLocal.y), 0).ba;');
+				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
 				// #end
 
 				// frag.write('vec3 basecol = vec3(0.0, 0.0, 0.0);');
@@ -192,8 +185,7 @@ class MakePaint {
 				// frag.write('float opacity = 0.0;');
 
 				// frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
-				// frag.write('vec2 texpaintSizeLocal = texpaintSize;'); // TODO: spirv workaround
-				// frag.write('float blur_step = 1.0 / texpaintSizeLocal.x;');
+				// frag.write('float blur_step = 1.0 / texpaintSize.x;');
 				// if (Context.raw.blurDirectional) {
 				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 				// 	frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
@@ -204,9 +196,9 @@ class MakePaint {
 				// 	frag.write('vec2 blur_direction = brushDirection.yx;');
 				// 	frag.write('for (int i = 0; i < 7; ++i) {');
 				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSizeLocal.y), 0).ba;');
+				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSize.y), 0).ba;');
 				// 	#else
-				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSizeLocal.y), 0).ba;');
+				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSize.y), 0).ba;');
 				// 	#end
 				// 	frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp2);');
 				// 	frag.write('opacity += texpaint_sample.a * blur_weight[i];');

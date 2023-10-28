@@ -6,12 +6,10 @@ class MakeClone {
 
 	public static function run(vert: NodeShader, frag: NodeShader) {
 		frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
-		frag.write('vec2 cloneDeltaLocal = cloneDelta;'); // TODO: spirv workaround
-		frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDeltaLocal) * gbufferSizeLocal), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
 		#else
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDeltaLocal.x) * gbufferSizeLocal.x, (1.0 - (sp.y + cloneDeltaLocal.y)) * gbufferSizeLocal.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
 		#end
 
 		frag.write('vec3 texpaint_pack_sample = textureLod(texpaint_pack_undo, texCoordInp, 0.0).rgb;');

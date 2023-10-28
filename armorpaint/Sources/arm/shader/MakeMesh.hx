@@ -356,8 +356,7 @@ class MakeMesh {
 					frag.write('vec3 wreflect = reflect(-vVec, n);');
 					frag.write('float envlod = roughness * float(envmapNumMipmaps);');
 					frag.add_function(ShaderFunctions.str_envMapEquirect);
-					frag.write('vec4 envmapDataLocal = envmapData;'); // TODO: spirv workaround
-					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapDataLocal.x), envlod).rgb;');
+					frag.write('vec3 prefilteredColor = textureLod(senvmapRadiance, envMapEquirect(wreflect, envmapData.x), envlod).rgb;');
 					frag.add_uniform('vec3 lightArea0', '_lightArea0');
 					frag.add_uniform('vec3 lightArea1', '_lightArea1');
 					frag.add_uniform('vec3 lightArea2', '_lightArea2');
@@ -385,9 +384,9 @@ class MakeMesh {
 
 					frag.add_uniform('vec4 shirr[7]', '_envmapIrradiance');
 					frag.add_function(ShaderFunctions.str_shIrradiance);
-					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(n.x * envmapDataLocal.z - n.y * envmapDataLocal.y, n.x * envmapDataLocal.y + n.y * envmapDataLocal.z, n.z), shirr) / 3.14159265);');
+					frag.write('vec3 indirect = albedo * (shIrradiance(vec3(n.x * envmapData.z - n.y * envmapData.y, n.x * envmapData.y + n.y * envmapData.z, n.z), shirr) / 3.14159265);');
 					frag.write('indirect += prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * 1.5;');
-					frag.write('indirect *= envmapDataLocal.w * occlusion;');
+					frag.write('indirect *= envmapData.w * occlusion;');
 					frag.write('fragColor[1] = vec4(direct + indirect, 1.0);');
 				}
 				else { // Deferred, Pathtraced

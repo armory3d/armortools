@@ -36,10 +36,9 @@ class MakeTexcoord {
 			}
 			else if (decal) {
 				frag.add_uniform('vec4 decalMask', '_decalMask');
-				frag.write_attrib('vec4 decalMaskLocal = decalMask;'); // TODO: spirv workaround
-				frag.write_attrib('uvsp -= decalMaskLocal.xy;');
+				frag.write_attrib('uvsp -= decalMask.xy;');
 				frag.write_attrib('uvsp.x *= aspectRatio;');
-				frag.write_attrib('uvsp *= 0.21 / (decalMaskLocal.w * 0.9);'); // Decal radius
+				frag.write_attrib('uvsp *= 0.21 / (decalMask.w * 0.9);'); // Decal radius
 
 				if (Context.raw.brushDirectional) {
 					frag.add_uniform('vec3 brushDirection', '_brushDirection');

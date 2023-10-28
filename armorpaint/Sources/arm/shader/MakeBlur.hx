@@ -5,11 +5,10 @@ import arm.shader.NodeShader;
 class MakeBlur {
 
 	public static function run(vert: NodeShader, frag: NodeShader) {
-		frag.write('vec2 gbufferSizeLocal = gbufferSize;'); // TODO: spirv workaround
 		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSizeLocal.x, sp.y * gbufferSizeLocal.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
 		#else
-		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSizeLocal.x, (1.0 - sp.y) * gbufferSizeLocal.y), 0).ba;');
+		frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
 		#end
 
 		frag.write('vec3 basecol = vec3(0.0, 0.0, 0.0);');
@@ -34,8 +33,7 @@ class MakeBlur {
 		}
 
 		frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
-		frag.write('vec2 texpaintSizeLocal = texpaintSize;'); // TODO: spirv workaround
-		frag.write('float blur_step = 1.0 / texpaintSizeLocal.x;');
+		frag.write('float blur_step = 1.0 / texpaintSize.x;');
 		if (Context.raw.tool == ToolSmudge) {
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
 			frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
@@ -46,9 +44,9 @@ class MakeBlur {
 			frag.write('vec2 blur_direction = brushDirection.yx;');
 			frag.write('for (int i = 0; i < 7; ++i) {');
 			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
-			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSizeLocal.y), 0).ba;');
+			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSize.y), 0).ba;');
 			#else
-			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSizeLocal.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSizeLocal.y), 0).ba;');
+			frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSize.y), 0).ba;');
 			#end
 			frag.write('vec4 texpaint_sample = texture(texpaint_undo, texCoordInp2);');
 			frag.write('opacity += texpaint_sample.a * blur_weight[i];');
