@@ -4,3 +4,4 @@
 *.blend1
 armorlab/Assets/models/*.onnx
 armorlab/Assets/models/*.txt
+glsl_to_spirv
