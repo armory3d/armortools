@@ -197,15 +197,15 @@ class TabMaterials {
 							deleteMaterial(m);
 						}
 
-						var baseHandle = Id.handle().nest(m.id, {selected: m.paintBase});
-						var opacHandle = Id.handle().nest(m.id, {selected: m.paintOpac});
-						var norHandle = Id.handle().nest(m.id, {selected: m.paintNor});
-						var occHandle = Id.handle().nest(m.id, {selected: m.paintOcc});
-						var roughHandle = Id.handle().nest(m.id, {selected: m.paintRough});
-						var metHandle = Id.handle().nest(m.id, {selected: m.paintMet});
-						var heightHandle = Id.handle().nest(m.id, {selected: m.paintHeight});
-						var emisHandle = Id.handle().nest(m.id, {selected: m.paintEmis});
-						var subsHandle = Id.handle().nest(m.id, {selected: m.paintSubs});
+						var baseHandle = Id.handle("tabmaterials_0").nest(m.id, {selected: m.paintBase});
+						var opacHandle = Id.handle("tabmaterials_1").nest(m.id, {selected: m.paintOpac});
+						var norHandle = Id.handle("tabmaterials_2").nest(m.id, {selected: m.paintNor});
+						var occHandle = Id.handle("tabmaterials_3").nest(m.id, {selected: m.paintOcc});
+						var roughHandle = Id.handle("tabmaterials_4").nest(m.id, {selected: m.paintRough});
+						var metHandle = Id.handle("tabmaterials_5").nest(m.id, {selected: m.paintMet});
+						var heightHandle = Id.handle("tabmaterials_6").nest(m.id, {selected: m.paintHeight});
+						var emisHandle = Id.handle("tabmaterials_7").nest(m.id, {selected: m.paintEmis});
+						var subsHandle = Id.handle("tabmaterials_8").nest(m.id, {selected: m.paintSubs});
 						UIMenu.menuFill(ui);
 						m.paintBase = ui.check(baseHandle, tr("Base Color"));
 						UIMenu.menuFill(ui);

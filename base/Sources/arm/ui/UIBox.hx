@@ -75,8 +75,8 @@ class UIBox {
 			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
 				var tabVertical = Config.raw.touch_ui;
-				if (ui.tab(Id.handle(), boxTitle, tabVertical)) {
-					var htext = Id.handle();
+				if (ui.tab(Id.handle("uibox_0"), boxTitle, tabVertical)) {
+					var htext = Id.handle("uibox_1");
 					htext.text = boxText;
 					copyable ?
 						Ext.textArea(ui, htext, false) :

@@ -149,7 +149,7 @@ class Config {
 	}
 
 	public static function restore() {
-		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
+		zui.Id.children = []; // Reset ui handles
 		configLoaded = false;
 		var _layout = raw.layout;
 		init();
@@ -166,7 +166,7 @@ class Config {
 		raw = from;
 		raw.sha = _sha;
 		raw.version = _version;
-		zui.Zui.Handle.global = new zui.Zui.Handle(); // Reset ui handles
+		zui.Id.children = []; // Reset ui handles
 		loadKeymap();
 		App.initLayout();
 		Translator.loadTranslations(raw.locale);

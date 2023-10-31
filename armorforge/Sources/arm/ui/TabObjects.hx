@@ -26,7 +26,7 @@ class TabObjects {
 			}
 			ui.endSticky();
 
-			if (ui.panel(Id.handle({selected: true}), "Outliner")) {
+			if (ui.panel(Id.handle("tabobjects_0", {selected: true}), "Outliner")) {
 				ui.indent();
 				ui._y -= ui.ELEMENT_OFFSET();
 
@@ -125,17 +125,17 @@ class TabObjects {
 					}
 				}
 				for (c in iron.Scene.active.root.children) {
-					drawList(Id.handle(), c);
+					drawList(Id.handle("tabobjects_1"), c);
 				}
 
 				ui.unindent();
 			}
 
-			if (ui.panel(Id.handle({selected: true}), 'Properties')) {
+			if (ui.panel(Id.handle("tabobjects_2", {selected: true}), 'Properties')) {
 				ui.indent();
 
 				if (Context.raw.selectedObject != null) {
-					var h = Id.handle();
+					var h = Id.handle("tabobjects_3");
 					h.selected = Context.raw.selectedObject.visible;
 					Context.raw.selectedObject.visible = ui.check(h, "Visible");
 
@@ -151,17 +151,17 @@ class TabObjects {
 					ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 					ui.text("Loc");
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_4");
 					h.text = roundfp(localPos.x) + "";
 					f = Std.parseFloat(ui.textInput(h, "X"));
 					if (h.changed) localPos.x = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_5");
 					h.text = roundfp(localPos.y) + "";
 					f = Std.parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) localPos.y = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_6");
 					h.text = roundfp(localPos.z) + "";
 					f = Std.parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) localPos.z = f;
@@ -169,18 +169,18 @@ class TabObjects {
 					ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 					ui.text("Rotation");
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_7");
 					h.text = roundfp(rot.x) + "";
 					f = Std.parseFloat(ui.textInput(h, "X"));
 					var changed = false;
 					if (h.changed) { changed = true; rot.x = f; }
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_8");
 					h.text = roundfp(rot.y) + "";
 					f = Std.parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) { changed = true; rot.y = f; }
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_9");
 					h.text = roundfp(rot.z) + "";
 					f = Std.parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) { changed = true; rot.z = f; }
@@ -198,17 +198,17 @@ class TabObjects {
 					ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 					ui.text("Scale");
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_10");
 					h.text = roundfp(scale.x) + "";
 					f = Std.parseFloat(ui.textInput(h, "X"));
 					if (h.changed) scale.x = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_11");
 					h.text = roundfp(scale.y) + "";
 					f = Std.parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) scale.y = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_12");
 					h.text = roundfp(scale.z) + "";
 					f = Std.parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) scale.z = f;
@@ -216,17 +216,17 @@ class TabObjects {
 					ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
 					ui.text("Dimensions");
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_13");
 					h.text = roundfp(dim.x) + "";
 					f = Std.parseFloat(ui.textInput(h, "X"));
 					if (h.changed) dim.x = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_14");
 					h.text = roundfp(dim.y) + "";
 					f = Std.parseFloat(ui.textInput(h, "Y"));
 					if (h.changed) dim.y = f;
 
-					h = Id.handle();
+					h = Id.handle("tabobjects_15");
 					h.text = roundfp(dim.z) + "";
 					f = Std.parseFloat(ui.textInput(h, "Z"));
 					if (h.changed) dim.z = f;
@@ -235,17 +235,17 @@ class TabObjects {
 
 					if (Context.raw.selectedObject.name == "Scene") {
 						var p = iron.Scene.active.world.probe;
-						p.raw.strength = ui.slider(Id.handle({value: p.raw.strength}), "Environment", 0.0, 5.0, true);
+						p.raw.strength = ui.slider(Id.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					}
 					else if (Std.isOfType(Context.raw.selectedObject, iron.object.LightObject)) {
 						var light = cast(Context.raw.selectedObject, iron.object.LightObject);
-						var lightHandle = Id.handle();
+						var lightHandle = Id.handle("tabobjects_17");
 						lightHandle.value = light.data.raw.strength / 10;
 						light.data.raw.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
 					else if (Std.isOfType(Context.raw.selectedObject, iron.object.CameraObject)) {
 						var cam = cast(Context.raw.selectedObject, iron.object.CameraObject);
-						var fovHandle = Id.handle();
+						var fovHandle = Id.handle("tabobjects_18");
 						fovHandle.value = Std.int(cam.data.raw.fov * 100) / 100;
 						cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);
 						if (fovHandle.changed) {

@@ -46,8 +46,8 @@ class UIBase {
 	var redoTapTime = 0.0;
 
 	#if is_paint
-	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
-	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
+	public var hwnds = [new Handle(), new Handle(), new Handle()];
+	public var htabs = [new Handle(), new Handle(), new Handle()];
 	public var hwndTabs = [
 		[TabLayers.draw, TabHistory.draw, TabPlugins.draw #if is_forge , TabObjects.draw #end],
 		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
@@ -55,8 +55,8 @@ class UIBase {
 	];
 	#end
 	#if is_sculpt
-	public var hwnds = [Id.handle(), Id.handle(), Id.handle()];
-	public var htabs = [Id.handle(), Id.handle(), Id.handle()];
+	public var hwnds = [new Handle(), new Handle(), new Handle()];
+	public var htabs = [new Handle(), new Handle(), new Handle()];
 	public var hwndTabs = [
 		[TabLayers.draw, TabHistory.draw, TabPlugins.draw #if is_forge , TabObjects.draw #end],
 		[TabMaterials.draw, TabBrushes.draw, TabParticles.draw],
@@ -64,8 +64,8 @@ class UIBase {
 	];
 	#end
 	#if is_lab
-	public var hwnds = [Id.handle()];
-	public var htabs = [Id.handle()];
+	public var hwnds = [new Handle()];
+	public var htabs = [new Handle()];
 	public var hwndTabs = [
 		[TabBrowser.draw, TabTextures.draw, TabMeshes.draw, TabSwatches.draw, TabPlugins.draw, TabScript.draw, TabConsole.draw, UIStatus.drawVersionTab]
 	];
@@ -80,7 +80,7 @@ class UIBase {
 	public static inline var defaultSidebarW = defaultSidebarFullW;
 	#end
 	public var tabx = 0;
-	public var hminimized = Id.handle();
+	public var hminimized = new Handle();
 	public static var sidebarMiniW = defaultSidebarMiniW;
 	#end
 
@@ -510,7 +510,7 @@ class UIBase {
 				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) Viewport.zoom(-0.2);
 				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
 					UIMenu.draw(function(ui: Zui) {
-						var modeHandle = Id.handle();
+						var modeHandle = Id.handle("uibase_0");
 						modeHandle.position = Context.raw.viewportMode;
 						ui.text(tr("Viewport Mode"), Right, ui.t.HIGHLIGHT_COL);
 						var modes = [
@@ -743,7 +743,7 @@ class UIBase {
 
 	function operatorSearch() {
 		var kb = Input.getKeyboard();
-		var searchHandle = Id.handle();
+		var searchHandle = Id.handle("uibase_1");
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
@@ -1114,7 +1114,7 @@ class UIBase {
 			ui.inputEnabled = true;
 			g.end();
 			ui.begin(g);
-			if (ui.window(Id.handle(), 0, 0, 150, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
+			if (ui.window(Id.handle("uibase_2"), 0, 0, 150, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
 				if (ui.button(tr("Close"))) {
 					toggleDistractFree();
 				}
@@ -1182,7 +1182,7 @@ class UIBase {
 		if (Config.raw.touch_ui) {
 			var width = Config.raw.layout[LayoutSidebarW];
 			var height = Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
-			if (ui.window(Id.handle(), System.windowWidth() - width, System.windowHeight() - height, width, height + 1)) {
+			if (ui.window(Id.handle("uibase_3"), System.windowWidth() - width, System.windowHeight() - height, width, height + 1)) {
 				ui._w = width;
 				var _BUTTON_H = ui.t.BUTTON_H;
 				var _BUTTON_COL = ui.t.BUTTON_COL;

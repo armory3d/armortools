@@ -40,7 +40,7 @@ class UIView2D {
 	public var ww: Int;
 	public var wh: Int;
 	public var ui: Zui;
-	public var hwnd = Id.handle();
+	public var hwnd = new Handle();
 	public var panX = 0.0;
 	public var panY = 0.0;
 	public var panScale = 1.0;
@@ -124,7 +124,7 @@ class UIView2D {
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
-			ui.tab(Id.handle(), tr("2D View"));
+			ui.tab(Id.handle("uiview2d_0"), tr("2D View"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -294,7 +294,7 @@ class UIView2D {
 			ui._w = ew;
 
 			// Editable layer name
-			var h = Id.handle();
+			var h = Id.handle("uiview2d_1");
 
 			#if (is_paint || is_sculpt)
 			var text = type == View2DNode ? Context.raw.nodePreviewName : h.text;
@@ -347,7 +347,7 @@ class UIView2D {
 
 			#if (is_paint || is_sculpt)
 			if (type == View2DLayer) {
-				layerMode = ui.combo(Id.handle({ position: layerMode }), [
+				layerMode = ui.combo(Id.handle("uiview2d_2", { position: layerMode }), [
 					tr("Visible"),
 					tr("Selected"),
 				], tr("Layers"));
@@ -355,7 +355,7 @@ class UIView2D {
 				ui._y = 2 + startY;
 
 				if (!Context.raw.layer.isMask()) {
-					texType = ui.combo(Id.handle({ position: texType }), [
+					texType = ui.combo(Id.handle("uiview2d_3", { position: texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),
 						tr("Occlusion"),
@@ -369,13 +369,13 @@ class UIView2D {
 				}
 
 				ui._w = Std.int(ew * 0.7 + 3);
-				uvmapShow = ui.check(Id.handle({ selected: uvmapShow }), tr("UV Map"));
+				uvmapShow = ui.check(Id.handle("uiview2d_4", { selected: uvmapShow }), tr("UV Map"));
 				ui._x += ew * 0.7 + 3;
 				ui._y = 2 + startY;
 			}
 			#end
 
-			tiledShow = ui.check(Id.handle({ selected: tiledShow }), tr("Tiled"));
+			tiledShow = ui.check(Id.handle("uiview2d_5", { selected: tiledShow }), tr("Tiled"));
 			ui._x += ew * 0.7 + 3;
 			ui._y = 2 + startY;
 

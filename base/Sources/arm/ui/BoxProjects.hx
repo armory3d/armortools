@@ -9,7 +9,7 @@ import arm.sys.File;
 @:access(zui.Zui)
 class BoxProjects {
 
-	public static var htab = Id.handle();
+	public static var htab = new Handle();
 	static var hsearch = new Handle();
 	static var iconMap: Map<String, kha.Image> = null;
 

@@ -17,7 +17,7 @@ import arm.sys.Path;
 class TabLayers {
 
 	static var layerNameEdit = -1;
-	static var layerNameHandle = Id.handle();
+	static var layerNameHandle = new Handle();
 	static var showContextMenu = false;
 
 	public static function draw(htab: Handle) {
@@ -175,7 +175,7 @@ class TabLayers {
 		for (p in Project.paintObjects) ar.push(p.name);
 		var atlases = Project.getUsedAtlases();
 		if (atlases != null) for (a in atlases) ar.push(a);
-		var filterHandle = Id.handle();
+		var filterHandle = Id.handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
 		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left);
 		if (filterHandle.changed) {
@@ -439,7 +439,7 @@ class TabLayers {
 
 		if (hasPanel) {
 			ui._y += center;
-			var layerPanel = Id.handle().nest(l.id);
+			var layerPanel = Id.handle("tablayers_1").nest(l.id);
 			layerPanel.selected = l.show_panel;
 			l.show_panel = ui.panel(layerPanel, "", true, false, false);
 			ui._y -= center;
@@ -473,7 +473,7 @@ class TabLayers {
 		for (p in Project.paintObjects) ar.push(p.name);
 		var atlases = Project.getUsedAtlases();
 		if (atlases != null) for (a in atlases) ar.push(a);
-		var objectHandle = Id.handle().nest(l.id);
+		var objectHandle = Id.handle("tablayers_2").nest(l.id);
 		objectHandle.position = l.objectMask;
 		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Left);
 		if (objectHandle.changed) {
@@ -495,7 +495,7 @@ class TabLayers {
 	}
 
 	static function comboBlending(ui: Zui, l: LayerSlot, label = false): Handle {
-		var blendingHandle = Id.handle().nest(l.id);
+		var blendingHandle = Id.handle("tablayers_3").nest(l.id);
 		blendingHandle.position = l.blending;
 		ui.combo(blendingHandle, [
 			tr("Mix"),
@@ -704,7 +704,7 @@ class TabLayers {
 		UIMenu.draw(function(ui: Zui) {
 
 			if (mini) {
-				var visibleHandle = Id.handle();
+				var visibleHandle = Id.handle("tablayers_4");
 				visibleHandle.selected = l.visible;
 				UIMenu.menuFill(ui);
 				ui.check(visibleHandle, tr("Visible"));
@@ -839,7 +839,7 @@ class TabLayers {
 
 			UIMenu.menuFill(ui);
 			UIMenu.menuAlign(ui);
-			var layerOpacHandle = Id.handle().nest(l.id);
+			var layerOpacHandle = Id.handle("tablayers_5").nest(l.id);
 			layerOpacHandle.value = l.maskOpacity;
 			ui.slider(layerOpacHandle, tr("Opacity"), 0.0, 1.0, true);
 			if (layerOpacHandle.changed) {
@@ -887,7 +887,7 @@ class TabLayers {
 			if (l.fill_layer != null) {
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				var scaleHandle = Id.handle().nest(l.id);
+				var scaleHandle = Id.handle("tablayers_6").nest(l.id);
 				scaleHandle.value = l.scale;
 				l.scale = ui.slider(scaleHandle, tr("UV Scale"), 0.0, 5.0, true);
 				if (scaleHandle.changed) {
@@ -902,7 +902,7 @@ class TabLayers {
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				var angleHandle = Id.handle().nest(l.id);
+				var angleHandle = Id.handle("tablayers_7").nest(l.id);
 				angleHandle.value = l.angle;
 				l.angle = ui.slider(angleHandle, tr("Angle"), 0.0, 360, true, 1);
 				if (angleHandle.changed) {
@@ -918,7 +918,7 @@ class TabLayers {
 
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				var uvTypeHandle = Id.handle().nest(l.id);
+				var uvTypeHandle = Id.handle("tablayers_8").nest(l.id);
 				uvTypeHandle.position = l.uvType;
 				l.uvType = zui.Ext.inlineRadio(ui, uvTypeHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], Left);
 				if (uvTypeHandle.changed) {
@@ -934,17 +934,17 @@ class TabLayers {
 			}
 
 			if (!l.isGroup()) {
-				var baseHandle = Id.handle().nest(l.id);
-				var opacHandle = Id.handle().nest(l.id);
-				var norHandle = Id.handle().nest(l.id);
-				var norBlendHandle = Id.handle().nest(l.id);
-				var occHandle = Id.handle().nest(l.id);
-				var roughHandle = Id.handle().nest(l.id);
-				var metHandle = Id.handle().nest(l.id);
-				var heightHandle = Id.handle().nest(l.id);
-				var heightBlendHandle = Id.handle().nest(l.id);
-				var emisHandle = Id.handle().nest(l.id);
-				var subsHandle = Id.handle().nest(l.id);
+				var baseHandle = Id.handle("tablayers_9").nest(l.id);
+				var opacHandle = Id.handle("tablayers_10").nest(l.id);
+				var norHandle = Id.handle("tablayers_11").nest(l.id);
+				var norBlendHandle = Id.handle("tablayers_12").nest(l.id);
+				var occHandle = Id.handle("tablayers_13").nest(l.id);
+				var roughHandle = Id.handle("tablayers_14").nest(l.id);
+				var metHandle = Id.handle("tablayers_15").nest(l.id);
+				var heightHandle = Id.handle("tablayers_16").nest(l.id);
+				var heightBlendHandle = Id.handle("tablayers_17").nest(l.id);
+				var emisHandle = Id.handle("tablayers_18").nest(l.id);
+				var subsHandle = Id.handle("tablayers_19").nest(l.id);
 				baseHandle.selected = l.paintBase;
 				opacHandle.selected = l.paintOpac;
 				norHandle.selected = l.paintNor;

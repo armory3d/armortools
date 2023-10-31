@@ -126,7 +126,7 @@ class TabSwatches {
 						if (Time.time() - Context.raw.selectTime < 0.25) {
 							UIMenu.draw(function(ui) {
 								ui.changed = false;
-								var h = Id.handle();
+								var h = Id.handle("tabswatches_0");
 								h.color = Context.raw.swatch.base;
 
 								Context.raw.swatch.base = zui.Ext.colorWheel(ui, h, false, null, 11 * ui.t.ELEMENT_H * ui.SCALE(), true, function () {
@@ -136,19 +136,19 @@ class TabSwatches {
 										Project.raw.swatches[i] = Project.cloneSwatch(color);
 									};
 								});
-								var hopacity = Id.handle();
+								var hopacity = Id.handle("tabswatches_1");
 								hopacity.value = Context.raw.swatch.opacity;
 								Context.raw.swatch.opacity = ui.slider(hopacity, "Opacity", 0, 1, true);
-								var hocclusion = Id.handle();
+								var hocclusion = Id.handle("tabswatches_2");
 								hocclusion.value = Context.raw.swatch.occlusion;
 								Context.raw.swatch.occlusion = ui.slider(hocclusion, "Occlusion", 0, 1, true);
-								var hroughness = Id.handle();
+								var hroughness = Id.handle("tabswatches_3");
 								hroughness.value = Context.raw.swatch.roughness;
 								Context.raw.swatch.roughness = ui.slider(hroughness, "Roughness", 0, 1, true);
-								var hmetallic = Id.handle();
+								var hmetallic = Id.handle("tabswatches_4");
 								hmetallic.value = Context.raw.swatch.metallic;
 								Context.raw.swatch.metallic = ui.slider(hmetallic, "Metallic", 0, 1, true);
-								var hheight = Id.handle();
+								var hheight = Id.handle("tabswatches_5");
 								hheight.value = Context.raw.swatch.height;
 								Context.raw.swatch.height = ui.slider(hheight, "Height", 0, 1, true);
 

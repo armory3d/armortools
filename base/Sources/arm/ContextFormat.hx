@@ -170,7 +170,7 @@ import arm.data.FontSlot;
 	@:optional public var drawTexels = false;
 	@:optional public var texelsHandle = new Handle({ selected: false });
 
-	@:optional public var colorIdHandle = Id.handle();
+	@:optional public var colorIdHandle = new Handle();
 	@:optional public var layersExport = ExportVisible;
 
 	@:optional public var decalImage: Image = null;

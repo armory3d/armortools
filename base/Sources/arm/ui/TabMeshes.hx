@@ -111,7 +111,7 @@ class TabMeshes {
 
 			for (i in 0...Project.paintObjects.length) {
 				var o = Project.paintObjects[i];
-				var h = Id.handle();
+				var h = Id.handle("tabmeshes_0");
 				h.selected = o.visible;
 				o.visible = ui.check(h, o.name);
 				if (ui.isHovered && ui.inputReleasedR) {

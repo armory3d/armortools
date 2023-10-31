@@ -2790,7 +2790,7 @@ class NodesMaterial {
 	@:access(zui.Zui)
 	public static function vectorCurvesButton(ui: Zui, nodes: Nodes, node: TNode) {
 		var but = node.buttons[0];
-		var nhandle = Id.handle().nest(node.id);
+		var nhandle = Id.handle("nodesmaterial_0").nest(node.id);
 		ui.row([1 / 3, 1 / 3, 1 / 3]);
 		ui.radio(nhandle.nest(0).nest(1), 0, "X");
 		ui.radio(nhandle.nest(0).nest(1), 1, "Y");
@@ -2825,7 +2825,7 @@ class NodesMaterial {
 	@:access(zui.Zui)
 	public static function colorRampButton(ui: Zui, nodes: Nodes, node: TNode) {
 		var but = node.buttons[0];
-		var nhandle = Id.handle().nest(node.id);
+		var nhandle = Id.handle("nodesmaterial_1").nest(node.id);
 		var nx = ui._x;
 		var ny = ui._y;
 

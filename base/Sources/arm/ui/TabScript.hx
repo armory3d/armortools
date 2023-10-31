@@ -10,7 +10,7 @@ import arm.sys.Path;
 
 class TabScript {
 
-	public static var hscript = Id.handle();
+	public static var hscript = new Handle();
 	static var textColoring: TTextColoring = null;
 
 	@:access(zui.Zui)

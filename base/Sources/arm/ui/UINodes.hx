@@ -58,7 +58,7 @@ class UINodes {
 	var isNodeMenuOperation = false;
 
 	public var grid: Image = null;
-	public var hwnd = Id.handle();
+	public var hwnd = new Handle();
 	public var groupStack: Array<TNodeGroup> = [];
 	public var controlsDown = false;
 
@@ -143,14 +143,14 @@ class UINodes {
 				App.notifyOnNextFrame(function() {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Edit"))) {
-							var htype = Id.handle();
-							var hname = Id.handle();
-							var hmin = Id.handle();
-							var hmax = Id.handle();
-							var hval0 = Id.handle();
-							var hval1 = Id.handle();
-							var hval2 = Id.handle();
-							var hval3 = Id.handle();
+							var htype = Id.handle("uinodes_0");
+							var hname = Id.handle("uinodes_1");
+							var hmin = Id.handle("uinodes_2");
+							var hmax = Id.handle("uinodes_3");
+							var hval0 = Id.handle("uinodes_4");
+							var hval1 = Id.handle("uinodes_5");
+							var hval2 = Id.handle("uinodes_6");
+							var hval3 = Id.handle("uinodes_7");
 							htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 							hname.text = socket.name;
 							hmin.value = socket.min;
@@ -167,7 +167,7 @@ class UINodes {
 							App.notifyOnNextFrame(function() {
 								App.uiBox.endInput();
 								UIBox.showCustom(function(ui: Zui) {
-									if (ui.tab(Id.handle(), tr("Socket"))) {
+									if (ui.tab(Id.handle("uinodes_8"), tr("Socket"))) {
 										var type = ui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 										var name = ui.textInput(hname, tr("Name"));
@@ -532,7 +532,7 @@ class UINodes {
 
 	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {
 		var kb = Input.getKeyboard();
-		var searchHandle = Id.handle();
+		var searchHandle = Id.handle("uinodes_9");
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.g.color = ui.t.SEPARATOR_COL;
@@ -768,7 +768,7 @@ class UINodes {
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
-			ui.tab(Id.handle(), tr("Nodes"));
+			ui.tab(Id.handle("uinodes_10"), tr("Nodes"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -958,7 +958,7 @@ class UINodes {
 
 			#if (is_paint || is_sculpt)
 			// Editable canvas name
-			var h = Id.handle();
+			var h = Id.handle("uinodes_11");
 			h.text = c.name;
 			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, h.text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
 			var newName = ui.textInput(h, "");

@@ -32,7 +32,7 @@ class TextToPhotoNode extends LogicNode {
 
 	public static function buttons(ui: zui.Zui, nodes: zui.Nodes, node: zui.Nodes.TNode) {
 		tiling = node.buttons[0].default_value;
-		prompt = zui.Ext.textArea(ui, zui.Id.handle(), true, tr("prompt"), true);
+		prompt = zui.Ext.textArea(ui, zui.Id.handle("texttophotonode_0"), true, tr("prompt"), true);
 		node.buttons[1].height = prompt.split("\n").length;
 	}
 

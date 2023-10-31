@@ -21,7 +21,7 @@ class UIHeader {
 	public static inline var defaultHeaderH = 28;
 	public static var headerh = defaultHeaderH;
 	public var headerHandle = new Handle({ layout: Horizontal });
-	public var worktab = Id.handle();
+	public var worktab = new Handle();
 
 	public function new() {
 		inst = this;
@@ -131,7 +131,7 @@ class UIHeader {
 			var heightPicked = Math.round(Context.raw.pickedColor.height * 100) / 100;
 			var opacityPicked = Math.round(Context.raw.pickedColor.opacity * 100) / 100;
 
-			var h = Id.handle();
+			var h = Id.handle("uiheader_0");
 			h.color.R = baseRPicked;
 			h.color.G = baseGPicked;
 			h.color.B = baseBPicked;
@@ -168,7 +168,7 @@ class UIHeader {
 			ui.text(tr("Metallic") + ' ($metallicPicked)');
 			ui.text(tr("Height") + ' ($heightPicked)');
 			ui.text(tr("Opacity") + ' ($opacityPicked)');
-			Context.raw.pickerSelectMaterial = ui.check(Id.handle({ selected: Context.raw.pickerSelectMaterial }), tr("Select Material"));
+			Context.raw.pickerSelectMaterial = ui.check(Id.handle("uiheader_1", { selected: Context.raw.pickerSelectMaterial }), tr("Select Material"));
 			ui.combo(Context.raw.pickerMaskHandle, [tr("None"), tr("Material")], tr("Mask"), true);
 			if (Context.raw.pickerMaskHandle.changed) {
 				MakeMaterial.parsePaintMaterial();
@@ -202,7 +202,7 @@ class UIHeader {
 				#end
 			}
 
-			var bakeHandle = Id.handle({ position: Context.raw.bakeType });
+			var bakeHandle = Id.handle("uiheader_2", { position: Context.raw.bakeType });
 			var bakes = [
 				tr("AO"),
 				tr("Curvature"),
@@ -237,25 +237,25 @@ class UIHeader {
 
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
 			if (rtBake) {
-				var samplesHandle = Id.handle({ value: Context.raw.bakeSamples });
+				var samplesHandle = Id.handle("uiheader_3", { value: Context.raw.bakeSamples });
 				Context.raw.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
 			}
 			#end
 
 			if (Context.raw.bakeType == BakeNormalObject || Context.raw.bakeType == BakePosition || Context.raw.bakeType == BakeBentNormal) {
-				var bakeUpAxisHandle = Id.handle({ position: Context.raw.bakeUpAxis });
+				var bakeUpAxisHandle = Id.handle("uiheader_4", { position: Context.raw.bakeUpAxis });
 				Context.raw.bakeUpAxis = ui.combo(bakeUpAxisHandle, [tr("Z"), tr("Y")], tr("Up Axis"), true);
 			}
 			if (Context.raw.bakeType == BakeAO || Context.raw.bakeType == BakeCurvature) {
-				var bakeAxisHandle = Id.handle({ position: Context.raw.bakeAxis });
+				var bakeAxisHandle = Id.handle("uiheader_5", { position: Context.raw.bakeAxis });
 				Context.raw.bakeAxis = ui.combo(bakeAxisHandle, [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")], tr("Axis"), true);
 			}
 			if (Context.raw.bakeType == BakeAO) {
-				var strengthHandle = Id.handle({ value: Context.raw.bakeAoStrength });
+				var strengthHandle = Id.handle("uiheader_6", { value: Context.raw.bakeAoStrength });
 				Context.raw.bakeAoStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-				var radiusHandle = Id.handle({ value: Context.raw.bakeAoRadius });
+				var radiusHandle = Id.handle("uiheader_7", { value: Context.raw.bakeAoRadius });
 				Context.raw.bakeAoRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-				var offsetHandle = Id.handle({ value: Context.raw.bakeAoOffset });
+				var offsetHandle = Id.handle("uiheader_8", { value: Context.raw.bakeAoOffset });
 				Context.raw.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 			}
 			#if (kha_direct3d12 || kha_vulkan || kha_metal)
@@ -274,18 +274,18 @@ class UIHeader {
 			}
 			#end
 			if (Context.raw.bakeType == BakeCurvature) {
-				var strengthHandle = Id.handle({ value: Context.raw.bakeCurvStrength });
+				var strengthHandle = Id.handle("uiheader_9", { value: Context.raw.bakeCurvStrength });
 				Context.raw.bakeCurvStrength = ui.slider(strengthHandle, tr("Strength"), 0.0, 2.0, true);
-				var radiusHandle = Id.handle({ value: Context.raw.bakeCurvRadius });
+				var radiusHandle = Id.handle("uiheader_10", { value: Context.raw.bakeCurvRadius });
 				Context.raw.bakeCurvRadius = ui.slider(radiusHandle, tr("Radius"), 0.0, 2.0, true);
-				var offsetHandle = Id.handle({ value: Context.raw.bakeCurvOffset });
+				var offsetHandle = Id.handle("uiheader_11", { value: Context.raw.bakeCurvOffset });
 				Context.raw.bakeCurvOffset = ui.slider(offsetHandle, tr("Offset"), -2.0, 2.0, true);
-				var smoothHandle = Id.handle({ value: Context.raw.bakeCurvSmooth });
+				var smoothHandle = Id.handle("uiheader_12", { value: Context.raw.bakeCurvSmooth });
 				Context.raw.bakeCurvSmooth = Std.int(ui.slider(smoothHandle, tr("Smooth"), 0, 5, false, 1));
 			}
 			if (Context.raw.bakeType == BakeNormal || Context.raw.bakeType == BakeHeight || Context.raw.bakeType == BakeDerivative) {
 				var ar = [for (p in Project.paintObjects) p.name];
-				var polyHandle = Id.handle({ position: Context.raw.bakeHighPoly });
+				var polyHandle = Id.handle("uiheader_13", { position: Context.raw.bakeHighPoly });
 				Context.raw.bakeHighPoly = ui.combo(polyHandle, ar, tr("High Poly"));
 			}
 			if (ui.changed) {
@@ -323,7 +323,7 @@ class UIHeader {
 				Context.raw.tool == ToolFill   ||
 				Context.raw.tool == ToolDecal  ||
 				Context.raw.tool == ToolText) {
-				var brushScaleHandle = Id.handle({ value: Context.raw.brushScale });
+				var brushScaleHandle = Id.handle("uiheader_14", { value: Context.raw.brushScale });
 				Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
 					if (Context.raw.tool == ToolDecal || Context.raw.tool == ToolText) {
@@ -345,11 +345,11 @@ class UIHeader {
 			if (ui.isHovered) ui.tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", ["brush_opacity" => Config.keymap.brush_opacity]));
 
 			if (Context.raw.tool == ToolBrush || Context.raw.tool == ToolEraser || Context.raw.tool == ToolClone || decalMask) {
-				Context.raw.brushHardness = ui.slider(Id.handle({ value: Context.raw.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
+				Context.raw.brushHardness = ui.slider(Id.handle("uiheader_15", { value: Context.raw.brushHardness }), tr("Hardness"), 0.0, 1.0, true);
 			}
 
 			if (Context.raw.tool != ToolEraser) {
-				var brushBlendingHandle = Id.handle({ value: Context.raw.brushBlending });
+				var brushBlendingHandle = Id.handle("uiheader_16", { value: Context.raw.brushBlending });
 				Context.raw.brushBlending = ui.combo(brushBlendingHandle, [
 					tr("Mix"),
 					tr("Darken"),
@@ -376,14 +376,14 @@ class UIHeader {
 			}
 
 			if (Context.raw.tool == ToolBrush || Context.raw.tool == ToolFill) {
-				var paintHandle = Id.handle();
+				var paintHandle = Id.handle("uiheader_17");
 				Context.raw.brushPaint = ui.combo(paintHandle, [tr("UV Map"), tr("Triplanar"), tr("Project")], tr("TexCoord"));
 				if (paintHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
 				}
 			}
 			if (Context.raw.tool == ToolText) {
-				var h = Id.handle();
+				var h = Id.handle("uiheader_18");
 				h.text = Context.raw.textToolText;
 				var w = ui._w;
 				if (ui.textSelectedHandle == h || ui.submitTextHandle == h) {
@@ -422,15 +422,15 @@ class UIHeader {
 				if (touchHeader) ui._x -= 4 * sc;
 				ui._w = Std.int((touchHeader ? 54 : 60) * sc);
 
-				var xrayHandle = Id.handle({ selected: Context.raw.xray });
+				var xrayHandle = Id.handle("uiheader_19", { selected: Context.raw.xray });
 				Context.raw.xray = ui.check(xrayHandle, tr("X-Ray"));
 				if (xrayHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
 				}
 
-				var symXHandle = Id.handle({ selected: false });
-				var symYHandle = Id.handle({ selected: false });
-				var symZHandle = Id.handle({ selected: false });
+				var symXHandle = Id.handle("uiheader_20", { selected: false });
+				var symYHandle = Id.handle("uiheader_21", { selected: false });
+				var symZHandle = Id.handle("uiheader_22", { selected: false });
 
 				if (Config.raw.layout[LayoutHeader] == 1) {
 					if (Config.raw.touch_ui) {
@@ -470,7 +470,7 @@ class UIHeader {
 			#if arm_physics
 			if (Context.raw.tool == ToolParticle) {
 				ui._x += 10 * ui.SCALE();
-				var physHandle = Id.handle({ selected: false });
+				var physHandle = Id.handle("uiheader_23", { selected: false });
 				Context.raw.particlePhysics = ui.check(physHandle, tr("Physics"));
 				if (physHandle.changed) {
 					arm.util.ParticleUtil.initParticlePhysics();

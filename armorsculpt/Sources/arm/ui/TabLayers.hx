@@ -17,7 +17,7 @@ import arm.sys.Path;
 class TabLayers {
 
 	static var layerNameEdit = -1;
-	static var layerNameHandle = Id.handle();
+	static var layerNameHandle = new Handle();
 	static var showContextMenu = false;
 
 	public static function draw(htab: Handle) {
@@ -100,7 +100,7 @@ class TabLayers {
 	static function comboFilter() {
 		var ui = UIBase.inst.ui;
 		var ar = [tr("All")];
-		var filterHandle = Id.handle();
+		var filterHandle = Id.handle("tablayers_0");
 		filterHandle.position = Context.raw.layerFilter;
 		Context.raw.layerFilter = ui.combo(filterHandle, ar, tr("Filter"), false, Left);
 	}
@@ -320,7 +320,7 @@ class TabLayers {
 
 		if (hasPanel) {
 			ui._y += center;
-			var layerPanel = Id.handle().nest(l.id);
+			var layerPanel = Id.handle("tablayers_1").nest(l.id);
 			layerPanel.selected = l.show_panel;
 			l.show_panel = ui.panel(layerPanel, "", true, false, false);
 			ui._y -= center;
@@ -354,7 +354,7 @@ class TabLayers {
 
 	static function comboObject(ui: Zui, l: LayerSlot, label = false): Handle {
 		var ar = [tr("Shared")];
-		var objectHandle = Id.handle().nest(l.id);
+		var objectHandle = Id.handle("tablayers_2").nest(l.id);
 		objectHandle.position = l.objectMask;
 		l.objectMask = ui.combo(objectHandle, ar, tr("Object"), label, Left);
 		return objectHandle;
