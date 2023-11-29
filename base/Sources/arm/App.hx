@@ -188,11 +188,12 @@ class App {
 						font.font_ = Krom.g2_font_13(font.blob.bytes.getData());
 						font.fontGlyphs = kha.graphics2.Graphics.fontGlyphs;
 					}
+					else font.init();
 
 					colorWheel = imageColorWheel;
 					colorWheelGradient = imageColorWheelGradient;
 					Nodes.enumTexts = enumTexts;
-					// Nodes.tr = tr;
+					Nodes.tr = tr;
 					uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
 					uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
 					defaultElementH = uiMenu.t.ELEMENT_H;
