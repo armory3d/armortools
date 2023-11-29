@@ -2,7 +2,6 @@ package arm.ui;
 
 import haxe.io.Bytes;
 import zui.Zui;
-import zui.Id;
 import iron.system.Input;
 import iron.system.Time;
 import iron.system.ArmPack;
@@ -52,9 +51,9 @@ class UIFiles {
 	// static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
 	// 	var known = false;
 	// 	UIBox.showCustom(function(ui: Zui) {
-	// 		if (ui.tab(Id.handle(), tr("File Browser"))) {
-	// 			var pathHandle = Id.handle();
-	// 			var fileHandle = Id.handle();
+	// 		if (ui.tab(Zui.handle(), tr("File Browser"))) {
+	// 			var pathHandle = Zui.handle();
+	// 			var fileHandle = Zui.handle();
 	// 			ui.row([6 / 10, 2 / 10, 2 / 10]);
 	// 			filename = ui.textInput(fileHandle, tr("File"));
 	// 			ui.text("*." + filters, Center);
@@ -360,7 +359,7 @@ class UIFiles {
 				ui._y += slotw * 0.75;
 				var label0 = (showExtensions || f.indexOf(".") <= 0) ? f : f.substr(0, f.lastIndexOf("."));
 				var label1 = "";
-				while (label0.length > 0 && ui.ops.font.width(ui.fontSize, label0) > ui._w - 6) { // 2 line split
+				while (label0.length > 0 && ui.font.width(ui.fontSize, label0) > ui._w - 6) { // 2 line split
 					label1 = label0.charAt(label0.length - 1) + label1;
 					label0 = label0.substr(0, label0.length - 1);
 				}
@@ -369,10 +368,10 @@ class UIFiles {
 				if (ui.isHovered) ui.tooltip(label0 + label1);
 				if (label1 != "") { // Second line
 					ui._x = _x;
-					ui._y += ui.ops.font.height(ui.fontSize);
+					ui._y += ui.font.height(ui.fontSize);
 					ui.text(label1, Center);
 					if (ui.isHovered) ui.tooltip(label0 + label1);
-					ui._y -= ui.ops.font.height(ui.fontSize);
+					ui._y -= ui.font.height(ui.fontSize);
 				}
 
 				ui._y -= slotw * 0.75;

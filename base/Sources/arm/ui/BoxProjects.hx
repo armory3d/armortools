@@ -1,7 +1,6 @@
 package arm.ui;
 
 import zui.Zui;
-import zui.Id;
 import arm.io.ImportArm;
 import arm.sys.Path;
 import arm.sys.File;

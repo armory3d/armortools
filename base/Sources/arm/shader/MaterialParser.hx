@@ -16,7 +16,11 @@
 //
 package arm.shader;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
+import zui.Zui.TNodeCanvas;
+import zui.Zui.TNodeLink;
+import zui.Zui.TNodeSocket;
 import iron.data.SceneFormat;
 import arm.shader.NodeShader;
 
@@ -112,6 +116,7 @@ class MaterialParser {
 	}
 
 	public static function parse(canvas: TNodeCanvas, _con: NodeShaderContext, _vert: NodeShader, _frag: NodeShader, _matcon: TMaterialContext): TShaderOut {
+		Nodes.updateCanvasFormat(canvas);
 		init();
 		canvases = [canvas];
 		nodes = canvas.nodes;

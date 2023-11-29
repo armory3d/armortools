@@ -1,6 +1,10 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
+import zui.Zui.TNodeLink;
+import zui.Zui.TNodeSocket;
+import zui.Zui.TNodeCanvas;
 import arm.logic.LogicNode;
 
 class LogicParser {
@@ -108,7 +112,7 @@ class LogicParser {
 		for (b in node.buttons) {
 			if (b.type == "ENUM") {
 				var arrayData = Std.isOfType(b.data, Array);
-				var texts = arrayData ? b.data : Nodes.enumTexts(node.type);
+				var texts = arrayData ? b.data : Nodes.enumTextsHaxe(node.type);
 				Reflect.setProperty(v, b.name, texts[b.default_value]);
 			}
 			else {

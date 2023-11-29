@@ -1,6 +1,9 @@
 package arm.io;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNodeCanvas;
+import zui.Zui.TNode;
+import zui.Zui.TNodeLink;
 import arm.ui.UIBase;
 import arm.util.RenderUtil;
 import arm.sys.Path;

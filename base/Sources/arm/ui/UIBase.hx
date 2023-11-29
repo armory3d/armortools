@@ -5,7 +5,6 @@ import kha.input.KeyCode;
 import kha.Image;
 import kha.System;
 import zui.Zui;
-import zui.Id;
 import iron.data.Data;
 import iron.data.MaterialData;
 import iron.object.MeshObject;
@@ -39,7 +38,7 @@ class UIBase {
 	public var show = true;
 	public var ui: Zui;
 	var borderStarted = 0;
-	var borderHandle: Handle = null;
+	var borderHandle_ptr: Int = 0;
 	var action_paint_remap = "";
 	var operatorSearchOffset = 0;
 	var undoTapTime = 0.0;
@@ -510,7 +509,7 @@ class UIBase {
 				else if (Operator.shortcut(Config.keymap.view_zoom_out, ShortcutRepeat)) Viewport.zoom(-0.2);
 				else if (Operator.shortcut(Config.keymap.viewport_mode)) {
 					UIMenu.draw(function(ui: Zui) {
-						var modeHandle = Id.handle("uibase_0");
+						var modeHandle = Zui.handle("uibase_0");
 						modeHandle.position = Context.raw.viewportMode;
 						ui.text(tr("Viewport Mode"), Right, ui.t.HIGHLIGHT_COL);
 						var modes = [
@@ -603,8 +602,8 @@ class UIBase {
 		}
 
 		#if (is_paint || is_sculpt)
-		if (borderHandle != null) {
-			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
+		if (borderHandle_ptr != 0) {
+			if (borderHandle_ptr == UINodes.inst.hwnd.ptr || borderHandle_ptr == UIView2D.inst.hwnd.ptr) {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
@@ -616,7 +615,7 @@ class UIBase {
 					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
 				}
 			}
-			else if (borderHandle == hwnds[TabStatus]) {
+			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
 				var my = Std.int(mouse.movementY);
 				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
@@ -630,7 +629,7 @@ class UIBase {
 				}
 				else {
 					var my = Std.int(mouse.movementY);
-					if (borderHandle == hwnds[TabSidebar1] && borderStarted == SideTop) {
+					if (borderHandle_ptr == hwnds[TabSidebar1].ptr && borderStarted == SideTop) {
 						if (Config.raw.layout[LayoutSidebarH0] + my > 32 && Config.raw.layout[LayoutSidebarH1] - my > 32) {
 							Config.raw.layout[LayoutSidebarH0] += my;
 							Config.raw.layout[LayoutSidebarH1] -= my;
@@ -642,8 +641,8 @@ class UIBase {
 		#end
 
 		#if is_lab
-		if (borderHandle != null) {
-			if (borderHandle == UINodes.inst.hwnd || borderHandle == UIView2D.inst.hwnd) {
+		if (borderHandle_ptr != 0) {
+			if (borderHandle_ptr == UINodes.inst.hwnd.ptr || borderHandle_ptr == UIView2D.inst.hwnd.ptr) {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
@@ -655,7 +654,7 @@ class UIBase {
 					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
 				}
 			}
-			else if (borderHandle == hwnds[TabStatus]) {
+			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
 				var my = Std.int(mouse.movementY);
 				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
@@ -665,7 +664,7 @@ class UIBase {
 		#end
 
 		if (!mouse.down()) {
-			borderHandle = null;
+			borderHandle_ptr = 0;
 			App.isResizing = false;
 		}
 
@@ -743,7 +742,7 @@ class UIBase {
 
 	function operatorSearch() {
 		var kb = Input.getKeyboard();
-		var searchHandle = Id.handle("uibase_1");
+		var searchHandle = Zui.handle("uibase_1");
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.fill(0, 0, ui._w / ui.SCALE(), ui.t.ELEMENT_H * 8, ui.t.SEPARATOR_COL);
@@ -1114,7 +1113,7 @@ class UIBase {
 			ui.inputEnabled = true;
 			g.end();
 			ui.begin(g);
-			if (ui.window(Id.handle("uibase_2"), 0, 0, 150, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
+			if (ui.window(Zui.handle("uibase_2"), 0, 0, 150, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
 				if (ui.button(tr("Close"))) {
 					toggleDistractFree();
 				}
@@ -1182,7 +1181,7 @@ class UIBase {
 		if (Config.raw.touch_ui) {
 			var width = Config.raw.layout[LayoutSidebarW];
 			var height = Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
-			if (ui.window(Id.handle("uibase_3"), System.windowWidth() - width, System.windowHeight() - height, width, height + 1)) {
+			if (ui.window(Zui.handle("uibase_3"), System.windowWidth() - width, System.windowHeight() - height, width, height + 1)) {
 				ui._w = width;
 				var _BUTTON_H = ui.t.BUTTON_H;
 				var _BUTTON_COL = ui.t.BUTTON_COL;
@@ -1199,7 +1198,7 @@ class UIBase {
 
 		// Expand button
 		if (Config.raw.layout[LayoutSidebarW] == 0) {
-			var width = Std.int(ui.ops.font.width(ui.fontSize, "<<") + 25 * ui.SCALE());
+			var width = Std.int(ui.font.width(ui.fontSize, "<<") + 25 * ui.SCALE());
 			if (ui.window(hminimized, System.windowWidth() - width, 0, width, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
 				ui._w = width;
 				var _BUTTON_H = ui.t.BUTTON_H;
@@ -1436,30 +1435,30 @@ class UIBase {
 		}
 	}
 
-	function onBorderHover(handle: Handle, side: Int) {
+	function onBorderHover(handle_ptr: Int, side: Int) {
 		if (!App.uiEnabled) return;
 
 		#if (is_paint || is_sculpt)
-		if (handle != hwnds[TabSidebar0] &&
-			handle != hwnds[TabSidebar1] &&
-			handle != hwnds[TabStatus] &&
-			handle != UINodes.inst.hwnd &&
-			handle != UIView2D.inst.hwnd) return; // Scalable handles
-		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
-		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
-		if (handle == hwnds[TabSidebar0] && side == SideTop) return;
+		if (handle_ptr != hwnds[TabSidebar0].ptr &&
+			handle_ptr != hwnds[TabSidebar1].ptr &&
+			handle_ptr != hwnds[TabStatus].ptr &&
+			handle_ptr != UINodes.inst.hwnd.ptr &&
+			handle_ptr != UIView2D.inst.hwnd.ptr) return; // Scalable handles
+		if (handle_ptr == UIView2D.inst.hwnd.ptr && side != SideLeft) return;
+		if (handle_ptr == UINodes.inst.hwnd.ptr && side == SideTop && !UIView2D.inst.show) return;
+		if (handle_ptr == hwnds[TabSidebar0].ptr && side == SideTop) return;
 		#end
 
 		#if is_lab
-		if (handle != hwnds[TabStatus] &&
-			handle != UINodes.inst.hwnd &&
-			handle != UIView2D.inst.hwnd) return; // Scalable handles
-		if (handle == UIView2D.inst.hwnd && side != SideLeft) return;
-		if (handle == UINodes.inst.hwnd && side == SideTop && !UIView2D.inst.show) return;
+		if (handle_ptr != hwnds[TabStatus].ptr &&
+			handle_ptr != UINodes.inst.hwnd.ptr &&
+			handle_ptr != UIView2D.inst.hwnd.ptr) return; // Scalable handles
+		if (handle_ptr == UIView2D.inst.hwnd.ptr && side != SideLeft) return;
+		if (handle_ptr == UINodes.inst.hwnd.ptr && side == SideTop && !UIView2D.inst.show) return;
 		#end
 
-		if (handle == UINodes.inst.hwnd && side != SideLeft && side != SideTop) return;
-		if (handle == hwnds[TabStatus] && side != SideTop) return;
+		if (handle_ptr == UINodes.inst.hwnd.ptr && side != SideLeft && side != SideTop) return;
+		if (handle_ptr == hwnds[TabStatus].ptr && side != SideTop) return;
 		if (side == SideRight) return; // UI is snapped to the right side
 
 		side == SideLeft || side == SideRight ?
@@ -1468,7 +1467,7 @@ class UIBase {
 
 		if (Zui.current.inputStarted) {
 			borderStarted = side;
-			borderHandle = handle;
+			borderHandle_ptr = handle_ptr;
 			App.isResizing = true;
 		}
 	}
@@ -1484,9 +1483,13 @@ class UIBase {
 		#end
 	}
 
-	function onTabDrop(to: Handle, toPosition: Int, from: Handle, fromPosition: Int) {
-		var i = htabs.indexOf(to);
-		var j = htabs.indexOf(from);
+	function onTabDrop(to_ptr: Int, toPosition: Int, from_ptr: Int, fromPosition: Int) {
+		var i = -1;
+		var j = -1;
+		for (k in 0...htabs.length) {
+			if (htabs[k].ptr == to_ptr) i = k;
+			if (htabs[k].ptr == from_ptr) j = k;
+		}
 		if (i > -1 && j > -1) {
 			var element = hwndTabs[j][fromPosition];
 			hwndTabs[j].splice(fromPosition, 1);

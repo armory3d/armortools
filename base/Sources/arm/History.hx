@@ -1,6 +1,7 @@
 package arm;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNodeCanvas;
 import arm.sys.Path;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;

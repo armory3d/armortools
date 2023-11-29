@@ -2,7 +2,8 @@ package arm.data;
 
 import kha.Image;
 import kha.Blob;
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNodeCanvas;
 import iron.data.Data;
 
 class BrushSlot {

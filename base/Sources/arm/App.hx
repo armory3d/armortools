@@ -5,8 +5,8 @@ import kha.Image;
 import kha.Font;
 import kha.System;
 import zui.Zui;
-import zui.Themes;
-import zui.Nodes;
+import zui.Zui.Theme;
+import zui.Zui.Nodes;
 import iron.Scene;
 import iron.data.Data;
 import iron.system.Input;
@@ -47,7 +47,7 @@ class App {
 	public static var dropX = 0.0;
 	public static var dropY = 0.0;
 	public static var font: Font = null;
-	public static var theme: TTheme;
+	public static var theme: zui.Zui.Theme;
 	public static var colorWheel: Image;
 	public static var colorWheelGradient: Image;
 	public static var uiBox: Zui;
@@ -192,7 +192,7 @@ class App {
 					colorWheel = imageColorWheel;
 					colorWheelGradient = imageColorWheelGradient;
 					Nodes.enumTexts = enumTexts;
-					Nodes.tr = tr;
+					// Nodes.tr = tr;
 					uiBox = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
 					uiMenu = new Zui({ theme: App.theme, font: f, scaleFactor: Config.raw.window_scale, color_wheel: colorWheel, black_white_gradient: colorWheelGradient });
 					defaultElementH = uiMenu.t.ELEMENT_H;
@@ -780,10 +780,10 @@ class App {
 			var img = getDragImage();
 
 			#if (is_paint || is_sculpt)
-			var scaleFactor = UIBase.inst.ui.ops.scaleFactor;
+			var scaleFactor = UIBase.inst.ui.SCALE();
 			#end
 			#if is_lab
-			var scaleFactor = uiBox.ops.scaleFactor;
+			var scaleFactor = uiBox.SCALE();
 			#end
 
 			var size = (dragSize == -1 ? 50 : dragSize) * scaleFactor;
@@ -897,7 +897,7 @@ class App {
 	}
 
 	public static function isComboSelected(): Bool {
-		for (ui in getUIs()) if (@:privateAccess ui.comboSelectedHandle != null) return true;
+		for (ui in getUIs()) if (@:privateAccess ui.comboSelectedHandle_ptr != null) return true;
 		return false;
 	}
 
@@ -2041,9 +2041,9 @@ class App {
 			Project.layers.insert(Project.layers.indexOf(Context.raw.layer) + 1, l);
 		}
 		else {
-			Project.layers.insert(position, l);	
+			Project.layers.insert(position, l);
 		}
-		
+
 		Context.setLayer(l);
 		var li = Project.layers.indexOf(Context.raw.layer);
 		if (li > 0) {

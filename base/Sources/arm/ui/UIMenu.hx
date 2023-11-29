@@ -4,8 +4,6 @@ import haxe.io.Bytes;
 import haxe.Json;
 import kha.System;
 import zui.Zui;
-import zui.Id;
-import zui.Ext;
 import iron.Scene;
 import iron.system.Input;
 import arm.Viewport;
@@ -18,7 +16,6 @@ import arm.io.ImportAsset;
 import arm.util.UVUtil;
 #end
 
-@:access(zui.Zui)
 class UIMenu {
 
 	public static var show = false;
@@ -141,14 +138,14 @@ class UIMenu {
 
 				menuFill(ui);
 				var p = Scene.active.world.probe;
-				var envHandle = Id.handle("uimenu_0");
+				var envHandle = Zui.handle("uimenu_0");
 				envHandle.value = p.raw.strength;
 				menuAlign(ui);
 				p.raw.strength = ui.slider(envHandle, tr("Environment"), 0.0, 8.0, true);
 				if (envHandle.changed) Context.raw.ddirty = 2;
 
 				menuFill(ui);
-				var envaHandle = Id.handle("uimenu_1");
+				var envaHandle = Zui.handle("uimenu_1");
 				envaHandle.value = Context.raw.envmapAngle / Math.PI * 180.0;
 				if (envaHandle.value < 0) {
 					envaHandle.value += (Std.int(-envaHandle.value / 360) + 1) * 360;
@@ -165,7 +162,7 @@ class UIMenu {
 					var light = Scene.active.lights[0];
 
 					menuFill(ui);
-					var lhandle = Id.handle("uimenu_2");
+					var lhandle = Zui.handle("uimenu_2");
 					var scale = 1333;
 					lhandle.value = light.data.raw.strength / scale;
 					lhandle.value = Std.int(lhandle.value * 100) / 100;
@@ -175,7 +172,7 @@ class UIMenu {
 
 					menuFill(ui);
 					var light = iron.Scene.active.lights[0];
-					var lahandle = Id.handle("uimenu_3");
+					var lahandle = Zui.handle("uimenu_3");
 					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
 					menuAlign(ui);
 					var newAngle = ui.slider(lahandle, tr("Light Angle"), 0.0, 360.0, true, 1) / 180 * Math.PI;
@@ -193,7 +190,7 @@ class UIMenu {
 					}
 
 					menuFill(ui);
-					var sxhandle = Id.handle("uimenu_4");
+					var sxhandle = Zui.handle("uimenu_4");
 					sxhandle.value = light.data.raw.size;
 					menuAlign(ui);
 					light.data.raw.size = ui.slider(sxhandle, tr("Light Size"), 0.0, 4.0, true);
@@ -202,7 +199,7 @@ class UIMenu {
 
 				#if (is_paint || is_sculpt)
 				menuFill(ui);
-				var splitViewHandle = Id.handle("uimenu_5", { selected: Context.raw.splitView });
+				var splitViewHandle = Zui.handle("uimenu_5", { selected: Context.raw.splitView });
 				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
 					App.resize();
@@ -211,7 +208,7 @@ class UIMenu {
 
 				#if is_lab
 				menuFill(ui);
-				var brushScaleHandle = Id.handle("uimenu_6", { value: Context.raw.brushScale });
+				var brushScaleHandle = Zui.handle("uimenu_6", { value: Context.raw.brushScale });
 				menuAlign(ui);
 				Context.raw.brushScale = ui.slider(brushScaleHandle, tr("UV Scale"), 0.01, 5.0, true);
 				if (brushScaleHandle.changed) {
@@ -224,14 +221,14 @@ class UIMenu {
 				#end
 
 				menuFill(ui);
-				var cullHandle = Id.handle("uimenu_7", { selected: Context.raw.cullBackfaces });
+				var cullHandle = Zui.handle("uimenu_7", { selected: Context.raw.cullBackfaces });
 				Context.raw.cullBackfaces = ui.check(cullHandle, " " + tr("Cull Backfaces"));
 				if (cullHandle.changed) {
 					MakeMaterial.parseMeshMaterial();
 				}
 
 				menuFill(ui);
-				var filterHandle = Id.handle("uimenu_8", { selected: Context.raw.textureFilter });
+				var filterHandle = Zui.handle("uimenu_8", { selected: Context.raw.textureFilter });
 				Context.raw.textureFilter = ui.check(filterHandle, " " + tr("Filter Textures"));
 				if (filterHandle.changed) {
 					MakeMaterial.parsePaintMaterial();
@@ -258,7 +255,7 @@ class UIMenu {
 				#end
 
 				menuFill(ui);
-				var compassHandle = Id.handle("uimenu_9", { selected: Context.raw.showCompass });
+				var compassHandle = Zui.handle("uimenu_9", { selected: Context.raw.showCompass });
 				Context.raw.showCompass = ui.check(compassHandle, " " + tr("Compass"));
 				if (compassHandle.changed) Context.raw.ddirty = 2;
 
@@ -278,7 +275,7 @@ class UIMenu {
 				if (ui.changed) keepOpen = true;
 			}
 			else if (menuCategory == MenuMode) {
-				var modeHandle = Id.handle("uimenu_10");
+				var modeHandle = Zui.handle("uimenu_10");
 				modeHandle.position = Context.raw.viewportMode;
 				var modes = [
 					tr("Lit"),
@@ -380,7 +377,7 @@ class UIMenu {
 
 				menuFill(ui);
 				var cam = Scene.active.camera;
-				Context.raw.fovHandle = Id.handle("uimenu_11", { value: Std.int(cam.data.raw.fov * 100) / 100 });
+				Context.raw.fovHandle = Zui.handle("uimenu_11", { value: Std.int(cam.data.raw.fov * 100) / 100 });
 				menuAlign(ui);
 				cam.data.raw.fov = ui.slider(Context.raw.fovHandle, tr("FoV"), 0.3, 1.4, true);
 				if (Context.raw.fovHandle.changed) {
@@ -389,9 +386,9 @@ class UIMenu {
 
 				menuFill(ui);
 				menuAlign(ui);
-				var cameraControlsHandle = Id.handle("uimenu_12");
+				var cameraControlsHandle = Zui.handle("uimenu_12");
 				cameraControlsHandle.position = Context.raw.cameraControls;
-				Context.raw.cameraControls = Ext.inlineRadio(ui, cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
+				Context.raw.cameraControls = ui.inlineRadio(cameraControlsHandle, [tr("Orbit"), tr("Rotate"), tr("Fly")], Left);
 
 				var orbitAndRotateTooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
 					[
@@ -405,7 +402,7 @@ class UIMenu {
 
 				menuFill(ui);
 				menuAlign(ui);
-				Context.raw.cameraType = Ext.inlineRadio(ui, Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
+				Context.raw.cameraType = ui.inlineRadio(Context.raw.camHandle, [tr("Perspective"), tr("Orthographic")], Left);
 				if (ui.isHovered) ui.tooltip(tr("Camera Type") + ' (${Config.keymap.view_camera_type})');
 				if (Context.raw.camHandle.changed) {
 					Viewport.updateCameraType(Context.raw.cameraType);
@@ -501,14 +498,14 @@ class UIMenu {
 
 					UIBox.showCustom(function(ui: Zui) {
 						var tabVertical = Config.raw.touch_ui;
-						if (ui.tab(Id.handle("uimenu_13"), tr("About"), tabVertical)) {
+						if (ui.tab(Zui.handle("uimenu_13"), tr("About"), tabVertical)) {
 
 							iron.data.Data.getImage("badge.k", function(img) {
 								ui.image(img);
 								ui.endElement();
 							});
 
-							Ext.textArea(ui, Id.handle("uimenu_14", { text: msg }), false);
+							ui.textArea(Zui.handle("uimenu_14", { text: msg }), false);
 
 							ui.row([1 / 3, 1 / 3, 1 / 3]);
 
@@ -532,7 +529,7 @@ class UIMenu {
 			}
 		}
 
-		hideMenu = ui.comboSelectedHandle == null && !keepOpen && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
+		hideMenu = ui.comboSelectedHandle_ptr == null && !keepOpen && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
 		showMenuFirst = false;
 		keepOpen = false;
 

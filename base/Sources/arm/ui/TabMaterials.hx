@@ -4,8 +4,7 @@ package arm.ui;
 
 import haxe.Json;
 import zui.Zui;
-import zui.Id;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
@@ -121,8 +120,8 @@ class TabMaterials {
 				if (!isTyping) {
 					if (i < 9 && Operator.shortcut(Config.keymap.select_material, ShortcutDown)) {
 						var number = Std.string(i + 1) ;
-						var width = ui.ops.font.width(ui.fontSize, number) + 10;
-						var height = ui.ops.font.height(ui.fontSize);
+						var width = ui.font.width(ui.fontSize, number) + 10;
+						var height = ui.font.height(ui.fontSize);
 						ui.g.color = ui.t.TEXT_COL;
 						ui.g.fillRect(uix, uiy, width, height);
 						ui.g.color = ui.t.ACCENT_COL;
@@ -197,15 +196,15 @@ class TabMaterials {
 							deleteMaterial(m);
 						}
 
-						var baseHandle = Id.handle("tabmaterials_0").nest(m.id, {selected: m.paintBase});
-						var opacHandle = Id.handle("tabmaterials_1").nest(m.id, {selected: m.paintOpac});
-						var norHandle = Id.handle("tabmaterials_2").nest(m.id, {selected: m.paintNor});
-						var occHandle = Id.handle("tabmaterials_3").nest(m.id, {selected: m.paintOcc});
-						var roughHandle = Id.handle("tabmaterials_4").nest(m.id, {selected: m.paintRough});
-						var metHandle = Id.handle("tabmaterials_5").nest(m.id, {selected: m.paintMet});
-						var heightHandle = Id.handle("tabmaterials_6").nest(m.id, {selected: m.paintHeight});
-						var emisHandle = Id.handle("tabmaterials_7").nest(m.id, {selected: m.paintEmis});
-						var subsHandle = Id.handle("tabmaterials_8").nest(m.id, {selected: m.paintSubs});
+						var baseHandle = Zui.handle("tabmaterials_0").nest(m.id, {selected: m.paintBase});
+						var opacHandle = Zui.handle("tabmaterials_1").nest(m.id, {selected: m.paintOpac});
+						var norHandle = Zui.handle("tabmaterials_2").nest(m.id, {selected: m.paintNor});
+						var occHandle = Zui.handle("tabmaterials_3").nest(m.id, {selected: m.paintOcc});
+						var roughHandle = Zui.handle("tabmaterials_4").nest(m.id, {selected: m.paintRough});
+						var metHandle = Zui.handle("tabmaterials_5").nest(m.id, {selected: m.paintMet});
+						var heightHandle = Zui.handle("tabmaterials_6").nest(m.id, {selected: m.paintHeight});
+						var emisHandle = Zui.handle("tabmaterials_7").nest(m.id, {selected: m.paintEmis});
+						var subsHandle = Zui.handle("tabmaterials_8").nest(m.id, {selected: m.paintSubs});
 						UIMenu.menuFill(ui);
 						m.paintBase = ui.check(baseHandle, tr("Base Color"));
 						UIMenu.menuFill(ui);
@@ -336,7 +335,7 @@ class TabMaterials {
 		Project.materials.splice(i, 1);
 		UIBase.inst.hwnds[1].redraws = 2;
 		for (m in Project.materials) updateMaterialPointers(m.canvas.nodes, i);
-		for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
+		// for (n in m.canvas.nodes) UINodes.onNodeRemove(n);
 	}
 }
 

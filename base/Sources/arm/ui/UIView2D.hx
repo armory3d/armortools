@@ -8,7 +8,6 @@ import kha.graphics4.VertexData;
 import kha.graphics4.BlendingFactor;
 import kha.graphics4.ConstantLocation;
 import zui.Zui;
-import zui.Id;
 import iron.system.Input;
 #if (is_paint || is_sculpt)
 import arm.util.RenderUtil;
@@ -124,7 +123,7 @@ class UIView2D {
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
-			ui.tab(Id.handle("uiview2d_0"), tr("2D View"));
+			ui.tab(Zui.handle("uiview2d_0"), tr("2D View"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -213,14 +212,16 @@ class UIView2D {
 
 				#if (is_paint || is_sculpt)
 				if (type == View2DLayer) {
+					#if (!kha_opengl)
 					ui.g.pipeline = pipe;
+					#end
 					if (!Context.raw.textureFilter) {
 						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
 					}
 					#if kha_opengl
-					ui.currentWindow.texture.g4.setPipeline(pipe);
+					Krom.setPipeline(pipe.pipeline);
 					#end
-					ui.currentWindow.texture.g4.setInt(channelLocation, channel);
+					Krom.setInt(channelLocation, channel);
 				}
 				#end
 
@@ -294,7 +295,7 @@ class UIView2D {
 			ui._w = ew;
 
 			// Editable layer name
-			var h = Id.handle("uiview2d_1");
+			var h = Zui.handle("uiview2d_1");
 
 			#if (is_paint || is_sculpt)
 			var text = type == View2DNode ? Context.raw.nodePreviewName : h.text;
@@ -302,7 +303,7 @@ class UIView2D {
 			var text = h.text;
 			#end
 
-			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
+			ui._w = Std.int(Math.min(ui.font.width(ui.fontSize, text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
 
 			if (type == View2DAsset) {
 				var asset = Context.raw.texture;
@@ -347,7 +348,7 @@ class UIView2D {
 
 			#if (is_paint || is_sculpt)
 			if (type == View2DLayer) {
-				layerMode = ui.combo(Id.handle("uiview2d_2", { position: layerMode }), [
+				layerMode = ui.combo(Zui.handle("uiview2d_2", { position: layerMode }), [
 					tr("Visible"),
 					tr("Selected"),
 				], tr("Layers"));
@@ -355,7 +356,7 @@ class UIView2D {
 				ui._y = 2 + startY;
 
 				if (!Context.raw.layer.isMask()) {
-					texType = ui.combo(Id.handle("uiview2d_3", { position: texType }), [
+					texType = ui.combo(Zui.handle("uiview2d_3", { position: texType }), [
 						tr("Base Color"),
 						tr("Normal Map"),
 						tr("Occlusion"),
@@ -369,13 +370,13 @@ class UIView2D {
 				}
 
 				ui._w = Std.int(ew * 0.7 + 3);
-				uvmapShow = ui.check(Id.handle("uiview2d_4", { selected: uvmapShow }), tr("UV Map"));
+				uvmapShow = ui.check(Zui.handle("uiview2d_4", { selected: uvmapShow }), tr("UV Map"));
 				ui._x += ew * 0.7 + 3;
 				ui._y = 2 + startY;
 			}
 			#end
 
-			tiledShow = ui.check(Id.handle("uiview2d_5", { selected: tiledShow }), tr("Tiled"));
+			tiledShow = ui.check(Zui.handle("uiview2d_5", { selected: tiledShow }), tr("Tiled"));
 			ui._x += ew * 0.7 + 3;
 			ui._y = 2 + startY;
 

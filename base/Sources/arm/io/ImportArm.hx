@@ -4,7 +4,9 @@ import haxe.io.Bytes;
 import kha.Window;
 import kha.Blob;
 import kha.Image;
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNodeCanvas;
+import zui.Zui.TNode;
 import iron.data.MeshData;
 import iron.data.Data;
 import iron.data.SceneFormat;
@@ -608,6 +610,7 @@ class ImportArm {
 			#end
 
 				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
+				node.buttons[0].data = "";
 			}
 		}
 	}

@@ -2,7 +2,6 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
-import zui.Ext;
 #if is_lab
 import iron.Scene;
 import iron.data.MeshData;
@@ -40,7 +39,7 @@ class UIMenubar {
 		if (ui.window(menuHandle, panelx, 0, menubarw, UIHeader.headerh)) {
 			ui._x += 1; // Prevent "File" button highlight on startup
 
-			Ext.beginMenu(ui);
+			ui.beginMenu();
 
 			if (Config.raw.touch_ui) {
 
@@ -83,7 +82,7 @@ class UIMenubar {
 			else {
 				var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 				for (i in 0...categories.length) {
-					if (Ext.menuButton(ui, categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
+					if (ui.menuButton(categories[i]) || (UIMenu.show && UIMenu.menuCommands == null && ui.isHovered)) {
 						showMenu(ui, i);
 					}
 				}
@@ -97,7 +96,7 @@ class UIMenubar {
 				#end
 			}
 
-			Ext.endMenu(ui);
+			ui.endMenu();
 		}
 
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
@@ -176,9 +175,9 @@ class UIMenubar {
 		UIMenu.menuCommands = null;
 		UIMenu.menuCategory = category;
 		UIMenu.menuCategoryW = ui._w;
-		UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
+		UIMenu.menuCategoryH = Std.int(ui.MENUBAR_H());
 		UIMenu.menuX = Std.int(ui._x - ui._w);
-		UIMenu.menuY = Std.int(Ext.MENUBAR_H(ui));
+		UIMenu.menuY = Std.int(ui.MENUBAR_H());
 		if (Config.raw.touch_ui) {
 			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
 			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.headerh / 2);

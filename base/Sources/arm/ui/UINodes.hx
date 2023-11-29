@@ -5,9 +5,7 @@ import kha.Color;
 import kha.Image;
 import kha.System;
 import zui.Zui;
-import zui.Id;
-import zui.Nodes;
-import zui.Ext;
+import zui.Zui.Nodes;
 import iron.system.Input;
 import iron.system.Time;
 import arm.shader.NodesMaterial;
@@ -20,8 +18,6 @@ import arm.util.RenderUtil;
 import arm.shader.MakeMaterial;
 #end
 
-@:access(zui.Zui)
-@:access(zui.Nodes)
 class UINodes {
 
 	public static var inst: UINodes;
@@ -53,7 +49,7 @@ class UINodes {
 	var nodeSearchSpawn: TNode = null;
 	var nodeSearchOffset = 0;
 	var lastCanvas: TNodeCanvas = null;
-	var lastNodeSelected: TNode = null;
+	var lastNodeSelectedId = -1;
 	var releaseLink = false;
 	var isNodeMenuOperation = false;
 
@@ -65,16 +61,10 @@ class UINodes {
 	public function new() {
 		inst = this;
 
-		#if (is_paint || is_sculpt)
-		Nodes.excludeRemove.push("OUTPUT_MATERIAL_PBR");
-		#end
-		Nodes.excludeRemove.push("GROUP_OUTPUT");
-		Nodes.excludeRemove.push("GROUP_INPUT");
-		Nodes.excludeRemove.push("BrushOutputNode");
 		Nodes.onLinkDrag = onLinkDrag;
 		Nodes.onSocketReleased = onSocketReleased;
 		Nodes.onCanvasReleased = onCanvasReleased;
-		Nodes.onNodeRemove = onNodeRemove;
+		// Nodes.onNodeRemove = onNodeRemove;
 		Nodes.onCanvasControl = onCanvasControl;
 
 		var scale = Config.raw.window_scale;
@@ -82,9 +72,10 @@ class UINodes {
 		ui.scrollEnabled = false;
 	}
 
-	function onLinkDrag(linkDrag: TNodeLink, isNewLink: Bool) {
+	function onLinkDrag(linkDragId: Int, isNewLink: Bool) {
 		if (isNewLink) {
 			var nodes = getNodes();
+			var linkDrag = nodes.getLink(getCanvas(true).links, linkDragId);
 			var node = nodes.getNode(getCanvas(true).nodes, linkDrag.from_id > -1 ? linkDrag.from_id : linkDrag.to_id);
 			var linkX = ui._windowX + nodes.NODE_X(node);
 			var linkY = ui._windowY + nodes.NODE_Y(node);
@@ -98,7 +89,7 @@ class UINodes {
 			var mouse = Input.getMouse();
 			if (Math.abs(mouse.x - linkX) > 5 || Math.abs(mouse.y - linkY) > 5) { // Link length
 				nodeSearch(-1, -1, function() {
-					var n = nodes.nodesSelected[0];
+					var n = nodes.getNode(getCanvas(true).nodes, nodes.nodesSelectedId[0]);
 					if (linkDrag.to_id == -1 && n.inputs.length > 0) {
 						linkDrag.to_id = n.id;
 						var fromType = node.outputs[linkDrag.from_socket].type;
@@ -125,7 +116,7 @@ class UINodes {
 				});
 			}
 			// Selecting which node socket to preview
-			else if (node == nodes.nodesSelected[0]) {
+			else if (node.id == nodes.nodesSelectedId[0]) {
 				Context.raw.nodePreviewSocket = linkDrag.from_id > -1 ? linkDrag.from_socket : 0;
 				#if (is_paint || is_sculpt)
 				Context.raw.nodePreviewDirty = true;
@@ -134,23 +125,24 @@ class UINodes {
 		}
 	}
 
-	function onSocketReleased(socket: TNodeSocket) {
+	function onSocketReleased(socket_id: Int) {
 		var nodes = getNodes();
 		var canvas = getCanvas(true);
+		var socket = nodes.getSocket(canvas.nodes, socket_id);
 		var node = nodes.getNode(canvas.nodes, socket.node_id);
 		if (ui.inputReleasedR) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 				App.notifyOnNextFrame(function() {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Edit"))) {
-							var htype = Id.handle("uinodes_0");
-							var hname = Id.handle("uinodes_1");
-							var hmin = Id.handle("uinodes_2");
-							var hmax = Id.handle("uinodes_3");
-							var hval0 = Id.handle("uinodes_4");
-							var hval1 = Id.handle("uinodes_5");
-							var hval2 = Id.handle("uinodes_6");
-							var hval3 = Id.handle("uinodes_7");
+							var htype = Zui.handle("uinodes_0");
+							var hname = Zui.handle("uinodes_1");
+							var hmin = Zui.handle("uinodes_2");
+							var hmax = Zui.handle("uinodes_3");
+							var hval0 = Zui.handle("uinodes_4");
+							var hval1 = Zui.handle("uinodes_5");
+							var hval2 = Zui.handle("uinodes_6");
+							var hval3 = Zui.handle("uinodes_7");
 							htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 							hname.text = socket.name;
 							hmin.value = socket.min;
@@ -167,30 +159,30 @@ class UINodes {
 							App.notifyOnNextFrame(function() {
 								App.uiBox.endInput();
 								UIBox.showCustom(function(ui: Zui) {
-									if (ui.tab(Id.handle("uinodes_8"), tr("Socket"))) {
+									if (ui.tab(Zui.handle("uinodes_8"), tr("Socket"))) {
 										var type = ui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
 										if (htype.changed) hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 										var name = ui.textInput(hname, tr("Name"));
-										var min = Ext.floatInput(ui, hmin, tr("Min"));
-										var max = Ext.floatInput(ui, hmax, tr("Max"));
+										var min = ui.floatInput(hmin, tr("Min"));
+										var max = ui.floatInput(hmax, tr("Max"));
 										var default_value: Dynamic = null;
 										if (type == 0) {
 											ui.row([1 / 4, 1 / 4, 1 / 4, 1 / 4]);
-											Ext.floatInput(ui, hval0, tr("R"));
-											Ext.floatInput(ui, hval1, tr("G"));
-											Ext.floatInput(ui, hval2, tr("B"));
-											Ext.floatInput(ui, hval3, tr("A"));
-											default_value = [hval0.value, hval1.value, hval2.value, hval3.value];
+											ui.floatInput(hval0, tr("R"));
+											ui.floatInput(hval1, tr("G"));
+											ui.floatInput(hval2, tr("B"));
+											ui.floatInput(hval3, tr("A"));
+											default_value = f32([hval0.value, hval1.value, hval2.value, hval3.value]);
 										}
 										else if (type == 1) {
 											ui.row([1 / 3, 1 / 3, 1 / 3]);
-											hval0.value = Ext.floatInput(ui, hval0, tr("X"));
-											hval1.value = Ext.floatInput(ui, hval1, tr("Y"));
-											hval2.value = Ext.floatInput(ui, hval2, tr("Z"));
-											default_value = [hval0.value, hval1.value, hval2.value];
+											hval0.value = ui.floatInput(hval0, tr("X"));
+											hval1.value = ui.floatInput(hval1, tr("Y"));
+											hval2.value = ui.floatInput(hval2, tr("Z"));
+											default_value = f32([hval0.value, hval1.value, hval2.value]);
 										}
 										else {
-											default_value = Ext.floatInput(ui, hval0, tr("default_value"));
+											default_value = ui.floatInput(hval0, tr("default_value"));
 										}
 										if (ui.button(tr("OK"))) { // || ui.isReturnDown
 											socket.name = name;
@@ -229,7 +221,7 @@ class UINodes {
 			else onCanvasReleased();
 		}
 		// Selecting which node socket to preview
-		else if (node == nodes.nodesSelected[0]) {
+		else if (node.id == nodes.nodesSelectedId[0]) {
 			var i = node.outputs.indexOf(socket);
 			if (i > -1) {
 				Context.raw.nodePreviewSocket = i;
@@ -238,6 +230,12 @@ class UINodes {
 				#end
 			}
 		}
+	}
+
+	static function f32(ar: Array<kha.FastFloat>): kha.arrays.Float32Array {
+		var res = new kha.arrays.Float32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
 	}
 
 	function onCanvasReleased() {
@@ -252,15 +250,15 @@ class UINodes {
 					break;
 				}
 			}
-			if (selected == null) nodes.nodesSelected = [];
-			else if (nodes.nodesSelected.indexOf(selected) == -1) nodes.nodesSelected = [selected];
+			if (selected == null) nodes.nodesSelectedId = [];
+			else if (nodes.nodesSelectedId.indexOf(selected.id) == -1) nodes.nodesSelectedId = [selected.id];
 
 			// Node context menu
 			if (!Nodes.socketReleased) {
 				var numberOfEntries = 5;
 				if (canvasType == CanvasMaterial) ++numberOfEntries;
 				if (selected != null && selected.type == "RGB") ++numberOfEntries;
-				
+
 				UIMenu.draw(function(uiMenu: Zui) {
 					uiMenu._y += 1;
 					var protected = selected == null ||
@@ -336,7 +334,7 @@ class UINodes {
 			var canvas = getCanvas(true);
 			for (node in canvas.nodes) {
 				if (ui.getInputInRect(ui._windowX + nodes.NODE_X(node), ui._windowY + nodes.NODE_Y(node), nodes.NODE_W(node), nodes.NODE_H(canvas, node))) {
-					if (node == nodes.nodesSelected[0]) {
+					if (node.id == nodes.nodesSelectedId[0]) {
 						UIView2D.inst.hwnd.redraws = 2;
 						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DNode);
 						Context.raw.selectTime = Time.time();
@@ -347,7 +345,7 @@ class UINodes {
 		}
 	}
 
-	public static function onNodeRemove(node: TNode) {
+	// public static function onNodeRemove(node: TNode) {
 		// if (node.type == "GROUP") { // Remove unused groups
 		// 	var found = false;
 		// 	var canvases: Array<TNodeCanvas> = [];
@@ -370,13 +368,13 @@ class UINodes {
 		// 		}
 		// 	}
 		// }
-	}
+	// }
 
-	function onCanvasControl(): zui.Nodes.CanvasControl {
+	function onCanvasControl(): zui.Zui.CanvasControl {
 		return getCanvasControl(ui, inst);
 	}
 
-	public static function getCanvasControl(ui: Zui, parent: Dynamic): zui.Nodes.CanvasControl {
+	public static function getCanvasControl(ui: Zui, parent: Dynamic): zui.Zui.CanvasControl {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
 			if (ui.inputX < ui._windowX) {
 				@:privateAccess ui.inputX = ui._windowX + ui._windowW;
@@ -503,11 +501,11 @@ class UINodes {
 		if (ui.isTyping || !ui.inputEnabled) return;
 
 		var nodes = getNodes();
-		if (nodes.nodesSelected.length > 0 && ui.isKeyPressed) {
-			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelected) n.x -= 1;
-			else if (ui.key == kha.input.KeyCode.Right) for (n in nodes.nodesSelected) n.x += 1;
-			if (ui.key == kha.input.KeyCode.Up) for (n in nodes.nodesSelected) n.y -= 1;
-			else if (ui.key == kha.input.KeyCode.Down) for (n in nodes.nodesSelected) n.y += 1;
+		if (nodes.nodesSelectedId.length > 0 && ui.isKeyPressed) {
+			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x -= 1;
+			else if (ui.key == kha.input.KeyCode.Right) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x += 1;
+			if (ui.key == kha.input.KeyCode.Up) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y -= 1;
+			else if (ui.key == kha.input.KeyCode.Down) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y += 1;
 		}
 
 		// Node search popup
@@ -532,7 +530,7 @@ class UINodes {
 
 	function nodeSearch(x = -1, y = -1, done: Void->Void = null) {
 		var kb = Input.getKeyboard();
-		var searchHandle = Id.handle("uinodes_9");
+		var searchHandle = Zui.handle("uinodes_9");
 		var first = true;
 		UIMenu.draw(function(ui: Zui) {
 			ui.g.color = ui.t.SEPARATOR_COL;
@@ -548,7 +546,7 @@ class UINodes {
 			}
 
 			if (searchHandle.changed) nodeSearchOffset = 0;
-			
+
 			if (ui.isKeyPressed) { // Move selection
 				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
 				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
@@ -574,7 +572,7 @@ class UINodes {
 							var canvas = getCanvas(true);
 							nodeSearchSpawn = makeNode(n, nodes, canvas); // Spawn selected node
 							canvas.nodes.push(nodeSearchSpawn);
-							nodes.nodesSelected = [nodeSearchSpawn];
+							nodes.nodesSelectedId = [nodeSearchSpawn.id];
 							nodes.nodesDrag = true;
 
 							#if is_lab
@@ -695,8 +693,8 @@ class UINodes {
 		}
 
 		var nodes = getNodes();
-		if (nodes.nodesSelected.length > 0 && nodes.nodesSelected[0] != lastNodeSelected) {
-			lastNodeSelected = nodes.nodesSelected[0];
+		if (nodes.nodesSelectedId.length > 0 && nodes.nodesSelectedId[0] != lastNodeSelectedId) {
+			lastNodeSelectedId = nodes.nodesSelectedId[0];
 			#if (is_paint || is_sculpt)
 			Context.raw.nodePreviewDirty = true;
 			#end
@@ -711,9 +709,9 @@ class UINodes {
 
 		// Remove dragged link when mouse is released out of the node viewport
 		var c = getCanvas(true);
-		if (releaseLink && nodes.linkDrag != null) {
-			c.links.remove(nodes.linkDrag);
-			nodes.linkDrag = null;
+		if (releaseLink && nodes.linkDragId != -1) {
+			c.links.remove(nodes.getLink(c.links, nodes.linkDragId));
+			nodes.linkDragId = -1;
 		}
 		releaseLink = ui.inputReleased;
 
@@ -768,7 +766,7 @@ class UINodes {
 
 		if (ui.window(hwnd, wx, wy, ww, wh)) {
 
-			ui.tab(Id.handle("uinodes_10"), tr("Nodes"));
+			ui.tab(Zui.handle("uinodes_10"), tr("Nodes"));
 
 			// Grid
 			ui.g.color = 0xffffffff;
@@ -843,7 +841,7 @@ class UINodes {
 					}
 					if (!found) {
 						nodes.removeNode(canvasNode, c);
-						nodes.nodesSelected.remove(canvasNode);
+						nodes.nodesSelectedId.remove(canvasNode.id);
 						i--;
 					}
 				}
@@ -868,12 +866,10 @@ class UINodes {
 			}
 			uichangedLast = ui.changed;
 
-
-
 			// Node previews
-			if (Config.raw.node_preview && nodes.nodesSelected.length > 0) {
+			if (Config.raw.node_preview && nodes.nodesSelectedId.length > 0) {
 				var img: kha.Image = null;
-				var sel = nodes.nodesSelected[0];
+				var sel = nodes.getNode(c.nodes, nodes.nodesSelectedId[0]);
 
 				#if (is_paint || is_sculpt)
 
@@ -927,9 +923,9 @@ class UINodes {
 					if (singleChannel) {
 						ui.g.pipeline = UIView2D.pipe;
 						#if kha_opengl
-						ui.currentWindow.texture.g4.setPipeline(UIView2D.pipe);
+						Krom.setPipeline(UIView2D.pipe.pipeline);
 						#end
-						ui.currentWindow.texture.g4.setInt(UIView2D.channelLocation, 1);
+						Krom.setInt(UIView2D.channelLocation, 1);
 					}
 					#end
 
@@ -958,9 +954,9 @@ class UINodes {
 
 			#if (is_paint || is_sculpt)
 			// Editable canvas name
-			var h = Id.handle("uinodes_11");
+			var h = Zui.handle("uinodes_11");
 			h.text = c.name;
-			ui._w = Std.int(Math.min(ui.ops.font.width(ui.fontSize, h.text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
+			ui._w = Std.int(Math.min(ui.font.width(ui.fontSize, h.text) + 15 * ui.SCALE(), 100 * ui.SCALE()));
 			var newName = ui.textInput(h, "");
 			ui._x += ui._w + 3;
 			ui._y = 2 + startY;
@@ -1010,7 +1006,7 @@ class UINodes {
 			#end
 
 			for (i in 0...cats.length) {
-				if ((Ext.menuButton(ui, tr(cats[i]))) || (ui.isHovered && showMenu)) {
+				if ((ui.menuButton(tr(cats[i]))) || (ui.isHovered && showMenu)) {
 					showMenu = true;
 					menuCategory = i;
 					popupX = wx + ui._x;
@@ -1022,7 +1018,7 @@ class UINodes {
 						popupX += ui._w / 2;
 					}
 					UIMenu.menuCategoryW = ui._w;
-					UIMenu.menuCategoryH = Std.int(Ext.MENUBAR_H(ui));
+					UIMenu.menuCategoryH = Std.int(ui.MENUBAR_H());
 				}
 				ui._x += ui._w + 3;
 				ui._y = 2 + startY;
@@ -1038,7 +1034,7 @@ class UINodes {
 				ui._w = _w;
 			}
 			else {
-				if (Ext.menuButton(ui, tr("Search"))) {
+				if (ui.menuButton(tr("Search"))) {
 					nodeSearch(Std.int(ui._windowX + ui._x), Std.int(ui._windowY + ui._y));
 				}
 			}
@@ -1051,7 +1047,7 @@ class UINodes {
 			ui.t.BUTTON_COL = _BUTTON_COL;
 
 			// Close node group
-			if (groupStack.length > 0 && Ext.menuButton(ui, tr("Close"))) {
+			if (groupStack.length > 0 && ui.menuButton(tr("Close"))) {
 				groupStack.pop();
 			}
 		}
@@ -1098,7 +1094,7 @@ class UINodes {
 					var nodes = getNodes();
 					var node = makeNode(n, nodes, canvas);
 					canvas.nodes.push(node);
-					nodes.nodesSelected = [node];
+					nodes.nodesSelectedId = [node.id];
 					nodes.nodesDrag = true;
 					#if is_lab
 					arm.logic.LogicParser.parse(canvas, false);
@@ -1123,7 +1119,7 @@ class UINodes {
 						var nodes = getNodes();
 						var node = makeGroupNode(g.canvas, nodes, canvas);
 						canvas.nodes.push(node);
-						nodes.nodesSelected = [node];
+						nodes.nodesSelectedId = [node.id];
 						nodes.nodesDrag = true;
 					}
 
@@ -1134,12 +1130,12 @@ class UINodes {
 						Project.materialGroups.remove(g);
 					}
 					#end
-					
+
 					ui.enabled = true;
 				}
 			}
 
-			hideMenu = ui.comboSelectedHandle == null && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
+			hideMenu = ui.comboSelectedHandle_ptr == null && !showMenuFirst && (ui.changed || ui.inputReleased || ui.inputReleasedR || ui.isEscapeDown);
 			showMenuFirst = false;
 
 			ui.t.BUTTON_COL = _BUTTON_COL;
@@ -1170,10 +1166,10 @@ class UINodes {
 	}
 
 	function canPlaceGroup(groupName: String): Bool {
-		// Prevent Recursive node groups 
+		// Prevent Recursive node groups
 		// The group to place must not contain the current group or a group that contains the current group
 		if (groupStack.length > 0) {
-			for (g in groupStack) { 
+			for (g in groupStack) {
 				if (containsNodeGroupRecursive(Project.getMaterialGroupByName(groupName), g.canvas.name)) return false;
 			}
 		}
@@ -1212,7 +1208,7 @@ class UINodes {
 		#end
 
 		n.buttons[0].default_value = index;
-		getNodes().nodesSelected = [n];
+		getNodes().nodesSelectedId = [n.id];
 
 		#if is_lab
 		arm.logic.LogicParser.parse(Project.canvas, false);
@@ -1226,7 +1222,7 @@ class UINodes {
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode(Context.raw.layer.isMask() ? "LAYER_MASK" : "LAYER", g);
 		n.buttons[0].default_value = index;
-		getNodes().nodesSelected = [n];
+		getNodes().nodesSelectedId = [n.id];
 	}
 
 	public function acceptMaterialDrag(index: Int) {
@@ -1234,7 +1230,7 @@ class UINodes {
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("MATERIAL", g);
 		n.buttons[0].default_value = index;
-		getNodes().nodesSelected = [n];
+		getNodes().nodesSelectedId = [n.id];
 	}
 	#end
 
@@ -1244,7 +1240,7 @@ class UINodes {
 		var g = groupStack.length > 0 ? groupStack[groupStack.length - 1] : null;
 		var n = NodesMaterial.createNode("RGB", g);
 		n.outputs[0].default_value = [swatch.base.R, swatch.base.G, swatch.base.B, swatch.base.A];
-		getNodes().nodesSelected = [n];
+		getNodes().nodesSelectedId = [n.id];
 		#end
 	}
 
@@ -1253,13 +1249,16 @@ class UINodes {
 		node.id = nodes.getNodeId(canvas.nodes);
 		node.x = UINodes.inst.getNodeX();
 		node.y = UINodes.inst.getNodeY();
+		var count = 0;
 		for (soc in node.inputs) {
-			soc.id = nodes.getSocketId(canvas.nodes);
+			soc.id = nodes.getSocketId(canvas.nodes) + count;
 			soc.node_id = node.id;
+			count++;
 		}
 		for (soc in node.outputs) {
-			soc.id = nodes.getSocketId(canvas.nodes);
+			soc.id = nodes.getSocketId(canvas.nodes) + count;
 			soc.node_id = node.id;
+			count++;
 		}
 		return node;
 	}
@@ -1296,9 +1295,9 @@ class UINodes {
 	#if (is_paint || is_sculpt)
 	function makeNodePreview() {
 		var nodes = Context.raw.material.nodes;
-		if (nodes.nodesSelected.length == 0) return;
+		if (nodes.nodesSelectedId.length == 0) return;
 
-		var node = nodes.nodesSelected[0];
+		var node = nodes.getNode(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
 		Context.raw.nodePreviewName = node.name;
 
 		if (node.type == "LAYER" ||

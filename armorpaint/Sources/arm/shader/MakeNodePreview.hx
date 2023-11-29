@@ -1,6 +1,9 @@
 package arm.shader;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
+import zui.Zui.TNodeCanvas;
+import zui.Zui.TNodeLink;
 import iron.data.SceneFormat;
 import arm.shader.MaterialParser;
 import arm.shader.NodeShaderData;

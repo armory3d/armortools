@@ -1,6 +1,7 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
 import arm.Translator._tr;
 
 class NodesBrush {

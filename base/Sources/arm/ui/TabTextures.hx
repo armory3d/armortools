@@ -1,7 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import iron.data.Data;
 import iron.system.Time;
 import iron.system.Input;

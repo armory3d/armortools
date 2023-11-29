@@ -2,7 +2,6 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
-import zui.Id;
 
 class UIStatus {
 

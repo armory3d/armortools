@@ -6,7 +6,7 @@ import kha.arrays.Float32Array;
 import kha.arrays.Int16Array;
 import iron.data.Data;
 import iron.math.Vec4;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.format.BlendParser;
 
 class ImportBlendMesh {

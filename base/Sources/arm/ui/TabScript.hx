@@ -3,8 +3,6 @@ package arm.ui;
 import haxe.io.Bytes;
 import kha.Blob;
 import zui.Zui;
-import zui.Ext;
-import zui.Id;
 import iron.data.Data;
 import arm.sys.Path;
 
@@ -57,18 +55,18 @@ class TabScript {
 			}
 			ui.endSticky();
 
-			var _font = ui.ops.font;
+			var _font = ui.font;
 			var _fontSize = ui.fontSize;
-			Data.getFont("font_mono.ttf", function(f: kha.Font) { ui.ops.font = f; }); // Sync
+			Data.getFont("font_mono.ttf", function(f: kha.Font) { ui.setFont(f); }); // Sync
 			ui.fontSize = Std.int(15 * ui.SCALE());
-			Ext.textAreaLineNumbers = true;
-			Ext.textAreaScrollPastEnd = true;
-			Ext.textAreaColoring = getTextColoring();
-			Ext.textArea(ui, hscript);
-			Ext.textAreaLineNumbers = false;
-			Ext.textAreaScrollPastEnd = false;
-			Ext.textAreaColoring = null;
-			ui.ops.font = _font;
+			Zui.textAreaLineNumbers = true;
+			Zui.textAreaScrollPastEnd = true;
+			Zui.textAreaColoring = getTextColoring();
+			ui.textArea(hscript);
+			Zui.textAreaLineNumbers = false;
+			Zui.textAreaScrollPastEnd = false;
+			Zui.textAreaColoring = null;
+			ui.setFont(_font);
 			ui.fontSize = _fontSize;
 		}
 	}
@@ -77,6 +75,8 @@ class TabScript {
 		if (textColoring == null) {
 			Data.getBlob("text_coloring.json", function(blob: Blob) {
 				textColoring = haxe.Json.parse(blob.toString());
+				textColoring.default_color = Std.int(textColoring.default_color);
+				for (coloring in textColoring.colorings) coloring.color = Std.int(coloring.color);
 			});
 		}
 		return textColoring;

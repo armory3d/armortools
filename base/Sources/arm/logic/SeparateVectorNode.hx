@@ -1,7 +1,8 @@
 package arm.logic;
 
 import iron.math.Vec4;
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;

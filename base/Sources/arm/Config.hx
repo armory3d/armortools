@@ -149,7 +149,7 @@ class Config {
 	}
 
 	public static function restore() {
-		zui.Id.children = []; // Reset ui handles
+		zui.Zui.children = []; // Reset ui handles
 		configLoaded = false;
 		var _layout = raw.layout;
 		init();
@@ -166,7 +166,7 @@ class Config {
 		raw = from;
 		raw.sha = _sha;
 		raw.version = _version;
-		zui.Id.children = []; // Reset ui handles
+		zui.Zui.children = []; // Reset ui handles
 		loadKeymap();
 		App.initLayout();
 		Translator.loadTranslations(raw.locale);
@@ -275,11 +275,18 @@ class Config {
 
 	public static function loadTheme(theme: String, tagRedraw = true) {
 		if (theme == "default.json") { // Built-in default
-			App.theme = zui.Themes.dark;
+			App.theme = new zui.Zui.Theme();
 		}
 		else {
 			Data.getBlob("themes/" + theme, function(b: kha.Blob) {
-				App.theme = Json.parse(b.toString());
+				var parsed = Json.parse(b.toString());
+				App.theme = new zui.Zui.Theme();
+				for (key in Type.getInstanceFields(zui.Zui.Theme)) {
+					if (key == "theme_") continue;
+					if (key.startsWith("set_")) continue;
+					if (key.startsWith("get_")) key = key.substr(4);
+					Reflect.setProperty(App.theme, key, Reflect.getProperty(parsed, key));
+				}
 			});
 		}
 		App.theme.FILL_WINDOW_BG = true;

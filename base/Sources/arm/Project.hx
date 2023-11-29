@@ -4,8 +4,7 @@ import kha.System;
 import kha.Window;
 import kha.Image;
 import zui.Zui;
-import zui.Id;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -125,7 +124,7 @@ class Project {
 	public static function projectNewBox() {
 		#if (is_paint || is_sculpt)
 		UIBox.showCustom(function(ui: Zui) {
-			if (ui.tab(Id.handle("project_0"), tr("New Project"))) {
+			if (ui.tab(Zui.handle("project_0"), tr("New Project"))) {
 				if (meshList == null) {
 					meshList = File.readDirectory(Path.data() + Path.sep + "meshes");
 					for (i in 0...meshList.length) meshList[i] = meshList[i].substr(0, meshList[i].length - 4); // Trim .arm
@@ -135,8 +134,8 @@ class Project {
 				}
 
 				ui.row([0.5, 0.5]);
-				Context.raw.projectType = ui.combo(Id.handle("project_1", { position: Context.raw.projectType }), meshList, tr("Template"), true);
-				Context.raw.projectAspectRatio = ui.combo(Id.handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
+				Context.raw.projectType = ui.combo(Zui.handle("project_1", { position: Context.raw.projectType }), meshList, tr("Template"), true);
+				Context.raw.projectAspectRatio = ui.combo(Zui.handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
 				@:privateAccess ui.endElement();
 				ui.row([0.5, 0.5]);
@@ -423,10 +422,10 @@ class Project {
 
 		UIBox.showCustom(function(ui: Zui) {
 			var tabVertical = Config.raw.touch_ui;
-			if (ui.tab(Id.handle("project_3"), tr("Import Mesh"), tabVertical)) {
+			if (ui.tab(Zui.handle("project_3"), tr("Import Mesh"), tabVertical)) {
 
 				if (path.toLowerCase().endsWith(".obj")) {
-					Context.raw.splitBy = ui.combo(Id.handle("project_4"), [
+					Context.raw.splitBy = ui.combo(Zui.handle("project_4"), [
 						tr("Object"),
 						tr("Group"),
 						tr("Material"),
@@ -436,13 +435,13 @@ class Project {
 				}
 
 				if (path.toLowerCase().endsWith(".fbx")) {
-					Context.raw.parseTransform = ui.check(Id.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
+					Context.raw.parseTransform = ui.check(Zui.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
 					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
 				}
 
 				#if (is_paint || is_sculpt)
 				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
-					Context.raw.parseVCols = ui.check(Id.handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
+					Context.raw.parseVCols = ui.check(Zui.handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}
 				#end
@@ -489,7 +488,7 @@ class Project {
 	public static function unwrapMeshBox(mesh: Dynamic, done: Dynamic->Void, skipUI = false) {
 		UIBox.showCustom(function(ui: Zui) {
 			var tabVertical = Config.raw.touch_ui;
-			if (ui.tab(Id.handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
+			if (ui.tab(Zui.handle("project_7"), tr("Unwrap Mesh"), tabVertical)) {
 
 				var unwrapPlugins = [];
 				if (BoxPreferences.filesPlugin == null) {
@@ -502,7 +501,7 @@ class Project {
 				}
 				unwrapPlugins.push("equirect");
 
-				var unwrapBy = ui.combo(Id.handle("project_8"), unwrapPlugins, tr("Plugin"), true);
+				var unwrapBy = ui.combo(Zui.handle("project_8"), unwrapPlugins, tr("Plugin"), true);
 
 				ui.row([0.5, 0.5]);
 				if (ui.button(tr("Cancel"))) {

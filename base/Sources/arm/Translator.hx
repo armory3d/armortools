@@ -128,8 +128,8 @@ class Translator {
 				App.theme.ELEMENT_W = Std.int(App.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
 				var uis = App.getUIs();
 				for (ui in uis) {
-					ui.ops.font = f;
-					ui.setScale(ui.ops.scaleFactor);
+					ui.setFont(f);
+					ui.setScale(ui.SCALE());
 				}
 			});
 		});

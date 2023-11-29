@@ -2,8 +2,6 @@ package arm.ui;
 
 import kha.System;
 import zui.Zui;
-import zui.Ext;
-import zui.Id;
 import iron.system.Input;
 
 @:access(zui.Zui)
@@ -30,7 +28,7 @@ class UIBox {
 			var mouse = Input.getMouse();
 			var kb = Input.getKeyboard();
 			var ui = App.uiBox;
-			var inUse = ui.comboSelectedHandle != null;
+			var inUse = ui.comboSelectedHandle_ptr != null;
 			var isEscape = kb.started("escape");
 			if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
 				var appw = System.windowWidth();
@@ -75,11 +73,11 @@ class UIBox {
 			if (ui.window(hwnd, left, top, mw, mh, draggable)) {
 				ui._y += 10;
 				var tabVertical = Config.raw.touch_ui;
-				if (ui.tab(Id.handle("uibox_0"), boxTitle, tabVertical)) {
-					var htext = Id.handle("uibox_1");
+				if (ui.tab(Zui.handle("uibox_0"), boxTitle, tabVertical)) {
+					var htext = Zui.handle("uibox_1");
 					htext.text = boxText;
 					copyable ?
-						Ext.textArea(ui, htext, false) :
+						ui.textArea(htext, false) :
 						ui.text(boxText);
 					ui.endElement();
 

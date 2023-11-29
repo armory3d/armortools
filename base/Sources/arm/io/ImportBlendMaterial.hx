@@ -2,7 +2,9 @@ package arm.io;
 
 import kha.Blob;
 import iron.data.Data;
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
+import zui.Zui.TNodeLink;
 import arm.format.BlendParser;
 import arm.ui.UIBase;
 import arm.ui.UINodes;

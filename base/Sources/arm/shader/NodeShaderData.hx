@@ -1,6 +1,7 @@
 package arm.shader;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNodeCanvas;
 import iron.data.SceneFormat;
 
 class NodeShaderData {

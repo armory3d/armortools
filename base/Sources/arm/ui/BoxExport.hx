@@ -1,7 +1,6 @@
 package arm.ui;
 
 import zui.Zui;
-import zui.Id;
 import arm.io.ExportMesh;
 import arm.sys.Path;
 #if (is_paint || is_sculpt)
@@ -114,20 +113,20 @@ class BoxExport {
 
 			ui.row([0.5, 0.5]);
 			if (App.bitsHandle.position == Bits8) {
-				Context.raw.formatType = ui.combo(Id.handle("boxexport_0", { position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
+				Context.raw.formatType = ui.combo(Zui.handle("boxexport_0", { position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
 			}
 			else {
-				Context.raw.formatType = ui.combo(Id.handle("boxexport_1", { position: Context.raw.formatType }), ["exr"], tr("Format"), true);
+				Context.raw.formatType = ui.combo(Zui.handle("boxexport_1", { position: Context.raw.formatType }), ["exr"], tr("Format"), true);
 			}
 
 			ui.enabled = Context.raw.formatType == FormatJpg && App.bitsHandle.position == Bits8;
-			Context.raw.formatQuality = ui.slider(Id.handle("boxexport_2", { value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
+			Context.raw.formatQuality = ui.slider(Zui.handle("boxexport_2", { value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
 
 			#if is_paint
 			ui.row([0.5, 0.5]);
 			ui.enabled = !bakeMaterial;
-			var layersExportHandle = Id.handle("boxexport_3");
+			var layersExportHandle = Zui.handle("boxexport_3");
 			layersExportHandle.position = Context.raw.layersExport;
 			Context.raw.layersExport = ui.combo(layersExportHandle, [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")], tr("Layers"), true);
 			ui.enabled = true;
@@ -136,7 +135,7 @@ class BoxExport {
 			ui.combo(hpreset, files, tr("Preset"), true);
 			if (hpreset.changed) preset = null;
 
-			var layersDestinationHandle = Id.handle("boxexport_4");
+			var layersDestinationHandle = Zui.handle("boxexport_4");
 			layersDestinationHandle.position = Context.raw.layersDestination;
 			Context.raw.layersDestination = ui.combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
@@ -201,9 +200,9 @@ class BoxExport {
 			if (ui.button(tr("New"))) {
 				UIBox.showCustom(function(ui: Zui) {
 					var tabVertical = Config.raw.touch_ui;
-					if (ui.tab(Id.handle("boxexport_5"), tr("New Preset"), tabVertical)) {
+					if (ui.tab(Zui.handle("boxexport_5"), tr("New Preset"), tabVertical)) {
 						ui.row([0.5, 0.5]);
-						var presetName = ui.textInput(Id.handle("boxexport_6", { text: "new_preset" }), tr("Name"));
+						var presetName = ui.textInput(Zui.handle("boxexport_6", { text: "new_preset" }), tr("Name"));
 						if (ui.button(tr("OK")) || ui.isReturnDown) {
 							newPreset(presetName);
 							fetchPresets();
@@ -317,7 +316,7 @@ class BoxExport {
 			for (i in 0...Project.paintObjects.length) {
 				ui.row([1 / 2, 1 / 2]);
 				ui.text(Project.paintObjects[i].name);
-				var hatlas = Id.handle("boxexport_7").nest(i);
+				var hatlas = Zui.handle("boxexport_7").nest(i);
 				hatlas.position = Project.atlasObjects[i];
 				Project.atlasObjects[i] = ui.combo(hatlas, Project.atlasNames, tr("Atlas"));
 			}
@@ -328,7 +327,7 @@ class BoxExport {
 	public static function showMesh() {
 		exportMeshHandle.position = Context.raw.exportMeshIndex;
 		UIBox.showCustom(function(ui: Zui) {
-			var htab = Id.handle("boxexport_8");
+			var htab = Zui.handle("boxexport_8");
 			tabExportMesh(ui, htab);
 		});
 	}
@@ -339,13 +338,13 @@ class BoxExport {
 
 			ui.row([1 / 2, 1 / 2]);
 
-			Context.raw.exportMeshFormat = ui.combo(Id.handle("boxexport_9", { position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
+			Context.raw.exportMeshFormat = ui.combo(Zui.handle("boxexport_9", { position: Context.raw.exportMeshFormat }), ["obj", "arm"], tr("Format"), true);
 
 			var ar = [tr("All")];
 			for (p in Project.paintObjects) ar.push(p.name);
 			ui.combo(exportMeshHandle, ar, tr("Meshes"), true);
 
-			var applyDisplacement = ui.check(Id.handle("boxexport_10"), tr("Apply Displacement"));
+			var applyDisplacement = ui.check(Zui.handle("boxexport_10"), tr("Apply Displacement"));
 
 			var tris = 0;
 			var pos = exportMeshHandle.position;
@@ -389,11 +388,11 @@ class BoxExport {
 	#if (is_paint || is_sculpt)
 	public static function showMaterial() {
 		UIBox.showCustom(function(ui: Zui) {
-			var htab = Id.handle("boxexport_11");
+			var htab = Zui.handle("boxexport_11");
 			var tabVertical = Config.raw.touch_ui;
 			if (ui.tab(htab, tr("Export Material"), tabVertical)) {
-				var h1 = Id.handle("boxexport_12");
-				var h2 = Id.handle("boxexport_13");
+				var h1 = Zui.handle("boxexport_12");
+				var h2 = Zui.handle("boxexport_13");
 				h1.selected = Context.raw.packAssetsOnExport;
 				h2.selected = Context.raw.writeIconOnExport;
 				Context.raw.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));
@@ -418,11 +417,11 @@ class BoxExport {
 
 	public static function showBrush() {
 		UIBox.showCustom(function(ui: Zui) {
-			var htab = Id.handle("boxexport_14");
+			var htab = Zui.handle("boxexport_14");
 			var tabVertical = Config.raw.touch_ui;
 			if (ui.tab(htab, tr("Export Brush"), tabVertical)) {
-				var h1 = Id.handle("boxexport_15");
-				var h2 = Id.handle("boxexport_16");
+				var h1 = Zui.handle("boxexport_15");
+				var h2 = Zui.handle("boxexport_16");
 				h1.selected = Context.raw.packAssetsOnExport;
 				h2.selected = Context.raw.writeIconOnExport;
 				Context.raw.packAssetsOnExport = ui.check(h1, tr("Pack Assets"));

@@ -2,7 +2,9 @@ package arm.io;
 
 import haxe.Json;
 import haxe.io.Bytes;
-import zui.Nodes;
+import zui.Zui.Nodes;
+import zui.Zui.TNode;
+import zui.Zui.TNodeCanvas;
 import iron.data.SceneFormat;
 import iron.object.MeshObject;
 import iron.system.ArmPack;

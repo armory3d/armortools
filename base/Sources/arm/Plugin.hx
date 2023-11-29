@@ -114,7 +114,6 @@ class IronBridge {
 class ZuiBridge {
 	public static var Handle = zui.Zui.Handle;
 	public static var Zui = zui.Zui;
-	public static var Ext = zui.Ext;
 }
 
 @:expose("console")

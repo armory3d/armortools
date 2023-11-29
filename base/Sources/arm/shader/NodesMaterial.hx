@@ -2,8 +2,7 @@ package arm.shader;
 
 import haxe.Json;
 import zui.Zui;
-import zui.Id;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.Project;
 import arm.Translator._tr;
 
@@ -2790,7 +2789,7 @@ class NodesMaterial {
 	@:access(zui.Zui)
 	public static function vectorCurvesButton(ui: Zui, nodes: Nodes, node: TNode) {
 		var but = node.buttons[0];
-		var nhandle = Id.handle("nodesmaterial_0").nest(node.id);
+		var nhandle = Zui.handle("nodesmaterial_0").nest(node.id);
 		ui.row([1 / 3, 1 / 3, 1 / 3]);
 		ui.radio(nhandle.nest(0).nest(1), 0, "X");
 		ui.radio(nhandle.nest(0).nest(1), 1, "Y");
@@ -2825,7 +2824,7 @@ class NodesMaterial {
 	@:access(zui.Zui)
 	public static function colorRampButton(ui: Zui, nodes: Nodes, node: TNode) {
 		var but = node.buttons[0];
-		var nhandle = Id.handle("nodesmaterial_1").nest(node.id);
+		var nhandle = Zui.handle("nodesmaterial_1").nest(node.id);
 		var nx = ui._x;
 		var ny = ui._y;
 
@@ -2886,6 +2885,7 @@ class NodesMaterial {
 		if (node.name == "New Group") {
 			for (i in 1...999) {
 				node.name = tr("Group") + " " + i;
+
 				var found = false;
 				for (g in Project.materialGroups) {
 					if (g.canvas.name == node.name) {
@@ -2895,15 +2895,19 @@ class NodesMaterial {
 				}
 				if (!found) break;
 			}
+
+			Nodes.node_replace.push(node);
+
 			var canvas: TNodeCanvas = {
 				name: node.name,
 				nodes: [
 					{
 						id: 0,
-						x: 50,
-						y: 200,
 						name: _tr("Group Input"),
 						type: "GROUP_INPUT",
+						x: 50,
+						y: 200,
+						color: 0xff448c6d,
 						inputs: [],
 						outputs: [],
 						buttons: [
@@ -2912,15 +2916,15 @@ class NodesMaterial {
 								type: "CUSTOM",
 								height: 1
 							}
-						],
-						color: 0xff448c6d
+						]
 					},
 					{
 						id: 1,
-						x: 450,
-						y: 200,
 						name: _tr("Group Output"),
 						type: "GROUP_OUTPUT",
+						x: 450,
+						y: 200,
+						color: 0xff448c6d,
 						inputs: [],
 						outputs: [],
 						buttons: [
@@ -2929,8 +2933,7 @@ class NodesMaterial {
 								type: "CUSTOM",
 								height: 1
 							}
-						],
-						color: 0xff448c6d
+						]
 					}
 				],
 				links: []
@@ -2987,6 +2990,7 @@ class NodesMaterial {
 		var c = groupStack[groupStack.length - 1].canvas;
 		for (m in Project.materials) syncGroupSockets(m.canvas, c.name, node);
 		for (g in Project.materialGroups) syncGroupSockets(g.canvas, c.name, node);
+		Nodes.node_replace.push(node);
 	}
 
 	static function syncGroupSockets(canvas: TNodeCanvas, groupName: String, node: TNode) {
