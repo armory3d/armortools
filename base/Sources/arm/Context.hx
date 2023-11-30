@@ -367,7 +367,9 @@ class Context {
 			raw.lastPaintVecY = raw.paintVec.y;
 		}
 
-		var inpaint = UINodes.inst.getNodes().nodesSelected.length > 0 && UINodes.inst.getNodes().nodesSelected[0].type == "InpaintNode";
+		var nodes = UINodes.inst.getNodes();
+		var canvas = UINodes.inst.getCanvas(true);
+		var inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		// Paint bounds
 		if (inpaint &&

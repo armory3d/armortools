@@ -111,7 +111,8 @@ class LogicParser {
 		// Expose button values in node class
 		for (b in node.buttons) {
 			if (b.type == "ENUM") {
-				var arrayData = Std.isOfType(b.data, Array);
+				// var arrayData = Std.isOfType(b.data, Array);
+				var arrayData = b.data.length > 1;
 				var texts = arrayData ? b.data : Nodes.enumTextsHaxe(node.type);
 				Reflect.setProperty(v, b.name, texts[b.default_value]);
 			}

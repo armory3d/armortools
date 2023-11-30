@@ -1,6 +1,6 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -27,7 +27,7 @@ class ImageTextureNode extends LogicNode {
 		return image;
 	}
 
-	public static var def: TNode = {
+	public static var def: zui.Zui.TNode = {
 		id: 0,
 		name: _tr("Image Texture"),
 		type: "ImageTextureNode",

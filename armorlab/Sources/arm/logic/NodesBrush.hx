@@ -1,13 +1,13 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.Translator._tr;
 
 class NodesBrush {
 
 	public static var categories = [_tr("Input"), _tr("Model")];
 
-	public static var list: Array<Array<TNode>> = [
+	public static var list: Array<Array<zui.Zui.TNode>> = [
 		[ // Input
 			ImageTextureNode.def,
 			RGBNode.def,
@@ -22,7 +22,7 @@ class NodesBrush {
 		]
 	];
 
-	public static function createNode(nodeType: String): TNode {
+	public static function createNode(nodeType: String): zui.Zui.TNode {
 		for (c in list) {
 			for (n in c) {
 				if (n.type == nodeType) {

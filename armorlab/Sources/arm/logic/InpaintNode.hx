@@ -1,6 +1,6 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -46,11 +46,11 @@ class InpaintNode extends LogicNode {
 		}
 	}
 
-	public static function buttons(ui: zui.Zui, nodes: zui.Nodes, node: zui.Nodes.TNode) {
+	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
 		auto = node.buttons[0].default_value;
 		if (!auto) {
 			strength = ui.slider(zui.Zui.handle("inpaintnode_0", {value: strength}), tr("strength"), 0, 1, true);
-			prompt = zui.Ext.textArea(ui, zui.Zui.handle("inpaintnode_1"), true, tr("prompt"), true);
+			prompt = ui.textArea(zui.Zui.handle("inpaintnode_1"), true, tr("prompt"), true);
 			node.buttons[1].height = 1 + prompt.split("\n").length;
 		}
 		else node.buttons[1].height = 0;
@@ -181,7 +181,7 @@ class InpaintNode extends LogicNode {
 		});
 	}
 
-	public static var def: TNode = {
+	public static var def: zui.Zui.TNode = {
 		id: 0,
 		name: _tr("Inpaint"),
 		type: "InpaintNode",

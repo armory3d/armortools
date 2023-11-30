@@ -1,7 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
-import zui.Nodes;
+import zui.Zui.Nodes;
 import iron.system.Time;
 import iron.system.Input;
 import iron.object.MeshObject;
@@ -252,10 +252,10 @@ class TabLayers {
 		if (layerNameEdit == l.id) {
 			layerNameHandle.text = l.name;
 			l.name = ui.textInput(layerNameHandle);
-			if (ui.textSelectedHandle != layerNameHandle) layerNameEdit = -1;
+			if (ui.textSelectedHandle_ptr != layerNameHandle.ptr) layerNameEdit = -1;
 		}
 		else {
-			if (ui.enabled && ui.inputEnabled && ui.comboSelectedHandle == null &&
+			if (ui.enabled && ui.inputEnabled && ui.comboSelectedHandle_ptr == null &&
 				ui.inputX > ui._windowX + ui._x && ui.inputX < ui._windowX + ui._windowW &&
 				ui.inputY > ui._windowY + ui._y - center && ui.inputY < ui._windowY + ui._y - center + (step * ui.SCALE()) * 2) {
 				if (ui.inputStarted) {

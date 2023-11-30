@@ -2146,8 +2146,10 @@ class App {
 		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
 		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
 
-		if (UINodes.inst.getNodes().nodesSelected.length > 0) {
-			var node = UINodes.inst.getNodes().nodesSelected[0];
+		var nodes = UINodes.inst.getNodes();
+		var canvas = UINodes.inst.getCanvas(true);
+		if (nodes.nodesSelectedId.length > 0) {
+			var node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			var brushNode = arm.logic.LogicParser.getLogicNode(node);
 			if (brushNode != null && brushNode.getCachedImage() != null) {
 				texpaint = brushNode.getCachedImage();

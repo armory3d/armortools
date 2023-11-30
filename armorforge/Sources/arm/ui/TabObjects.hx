@@ -26,7 +26,7 @@ class TabObjects {
 			ui.endSticky();
 
 			if (ui.panel(Zui.handle("tabobjects_0", {selected: true}), "Outliner")) {
-				ui.indent();
+				// ui.indent();
 				ui._y -= ui.ELEMENT_OFFSET();
 
 				var listX = ui._x;
@@ -112,9 +112,9 @@ class TabObjects {
 					if (b) {
 						var currentY = ui._y;
 						for (child in currentObject.children) {
-							ui.indent();
+							// ui.indent();
 							drawList(listHandle, child);
-							ui.unindent();
+							// ui.unindent();
 						}
 
 						// Draw line that shows parent relations
@@ -127,11 +127,11 @@ class TabObjects {
 					drawList(Zui.handle("tabobjects_1"), c);
 				}
 
-				ui.unindent();
+				// ui.unindent();
 			}
 
 			if (ui.panel(Zui.handle("tabobjects_2", {selected: true}), 'Properties')) {
-				ui.indent();
+				// ui.indent();
 
 				if (Context.raw.selectedObject != null) {
 					var h = Zui.handle("tabobjects_3");
@@ -253,7 +253,7 @@ class TabObjects {
 					}
 				}
 
-				ui.unindent();
+				// ui.unindent();
 			}
 		}
 	}

@@ -175,7 +175,9 @@ class RenderPathPaint {
 			return;
 		}
 
-		var inpaint = UINodes.inst.getNodes().nodesSelected.length > 0 && UINodes.inst.getNodes().nodesSelected[0].type == "InpaintNode";
+		var nodes = UINodes.inst.getNodes();
+		var canvas = UINodes.inst.getCanvas(true);
+		var inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
 		if (!App.uiEnabled || App.isDragging || !inpaint) {
 			return;
@@ -265,8 +267,10 @@ class RenderPathPaint {
 
 	public static function bindLayers() {
 		var image: kha.Image = null;
-		if (UINodes.inst.getNodes().nodesSelected.length > 0) {
-			var node = UINodes.inst.getNodes().nodesSelected[0];
+		var nodes = UINodes.inst.getNodes();
+		var canvas = UINodes.inst.getCanvas(true);
+		if (nodes.nodesSelectedId.length > 0) {
+			var node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			var brushNode = arm.logic.LogicParser.getLogicNode(node);
 			if (brushNode != null) {
 				image = brushNode.getCachedImage();
@@ -296,7 +300,9 @@ class RenderPathPaint {
 			path.bindTarget("texpaint_nor_empty", "texpaint_nor");
 			path.bindTarget("texpaint_pack_empty", "texpaint_pack");
 
-			var node = UINodes.inst.getNodes().nodesSelected[0];
+			var nodes = UINodes.inst.getNodes();
+			var canvas = UINodes.inst.getCanvas(true);
+			var node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
 			var inpaint = node.type == "InpaintNode";
 			if (inpaint) {
 				var brushNode = arm.logic.LogicParser.getLogicNode(node);

@@ -28,7 +28,7 @@ import arm.data.MaterialSlot;
 #end
 #if is_lab
 import kha.Blob;
-import zui.Nodes;
+import zui.Zui.Nodes;
 #end
 
 @:access(zui.Zui)

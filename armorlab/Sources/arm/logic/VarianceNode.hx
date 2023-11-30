@@ -1,6 +1,6 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -27,8 +27,8 @@ class VarianceNode extends LogicNode {
 		}
 	}
 
-	public static function buttons(ui: zui.Zui, nodes: zui.Nodes, node: zui.Nodes.TNode) {
-		prompt = zui.Ext.textArea(ui, zui.Zui.handle("variancenode_0"), true, tr("prompt"), true);
+	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
+		prompt = ui.textArea(zui.Zui.handle("variancenode_0"), true, tr("prompt"), true);
 		node.buttons[0].height = prompt.split("\n").length;
 	}
 
@@ -84,7 +84,7 @@ class VarianceNode extends LogicNode {
 		return image;
 	}
 
-	public static var def: TNode = {
+	public static var def: zui.Zui.TNode = {
 		id: 0,
 		name: _tr("Variance"),
 		type: "VarianceNode",

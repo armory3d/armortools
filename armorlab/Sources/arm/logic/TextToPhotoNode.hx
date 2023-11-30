@@ -1,6 +1,6 @@
 package arm.logic;
 
-import zui.Nodes;
+import zui.Zui.Nodes;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -30,9 +30,9 @@ class TextToPhotoNode extends LogicNode {
 		return image;
 	}
 
-	public static function buttons(ui: zui.Zui, nodes: zui.Nodes, node: zui.Nodes.TNode) {
+	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
 		tiling = node.buttons[0].default_value;
-		prompt = zui.Ext.textArea(ui, zui.Zui.handle("texttophotonode_0"), true, tr("prompt"), true);
+		prompt = ui.textArea(zui.Zui.handle("texttophotonode_0"), true, tr("prompt"), true);
 		node.buttons[1].height = prompt.split("\n").length;
 	}
 
@@ -248,7 +248,7 @@ class TextToPhotoNode extends LogicNode {
 		});
 	}
 
-	public static var def: TNode = {
+	public static var def: zui.Zui.TNode = {
 		id: 0,
 		name: _tr("Text to Photo"),
 		type: "TextToPhotoNode",

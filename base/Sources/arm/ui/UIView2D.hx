@@ -152,8 +152,8 @@ class UIView2D {
 				#else
 
 				var nodes = UINodes.inst.getNodes();
-				if (nodes.nodesSelected.length > 0) {
-					var sel = nodes.nodesSelected[0];
+				if (nodes.nodesSelectedId.length > 0) {
+					var sel = nodes.getNode(UINodes.inst.getCanvas(true).nodes, nodes.nodesSelectedId[0]);
 					var brushNode = arm.logic.LogicParser.getLogicNode(sel);
 					if (brushNode != null) {
 						tex = brushNode.getCachedImage();
@@ -323,8 +323,8 @@ class UIView2D {
 				#else
 
 				var nodes = UINodes.inst.getNodes();
-				if (nodes.nodesSelected.length > 0) {
-					ui.text(nodes.nodesSelected[0].name);
+				if (nodes.nodesSelectedId.length > 0) {
+					ui.text(nodes.getNode(UINodes.inst.getCanvas(true).nodes, nodes.nodesSelectedId[0]).name);
 				}
 
 				#end
