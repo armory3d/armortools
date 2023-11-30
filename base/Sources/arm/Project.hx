@@ -64,7 +64,7 @@ class Project {
 	#if is_lab
 	public static var materialData: iron.data.MaterialData = null; ////
 	public static var materials: Array<Dynamic> = null; ////
-	public static var nodes = new Nodes();
+	public static var nodes: Nodes;
 	public static var canvas: TNodeCanvas;
 	public static var defaultCanvas: Blob = null;
 	#end

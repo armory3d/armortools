@@ -17,6 +17,7 @@ import arm.Res;
 
 class Main {
 
+	// @:keep static var snapshotHelper = js.Syntax.code("globalThis").Krom = {};
 	public static var sha = BuildMacros.sha().substr(1, 7);
 	public static var date = BuildMacros.date().split(" ")[0];
 	public static var tasks: Int;
