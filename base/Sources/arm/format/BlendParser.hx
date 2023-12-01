@@ -256,8 +256,8 @@ class BlendParser {
 		return ar;
 	}
 
-	public function readf32array(len: Int): kha.arrays.Float32Array {
-		var ar = new kha.arrays.Float32Array(len);
+	public function readf32array(len: Int): js.lib.Float32Array {
+		var ar = new js.lib.Float32Array(len);
 		for (i in 0...len) ar[i] = readf32();
 		return ar;
 	}

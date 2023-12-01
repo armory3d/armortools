@@ -11,8 +11,8 @@ import iron.data.SceneFormat;
 	@:optional public var packed_assets: Array<TPackedAsset>;
 	@:optional public var envmap: String; // Asset name
 	@:optional public var envmap_strength: Null<Float>;
-	@:optional public var camera_world: kha.arrays.Float32Array;
-	@:optional public var camera_origin: kha.arrays.Float32Array;
+	@:optional public var camera_world: js.lib.Float32Array;
+	@:optional public var camera_origin: js.lib.Float32Array;
 	@:optional public var camera_fov: Null<Float>;
 	@:optional public var swatches: Array<TSwatchColor>;
 
@@ -74,7 +74,7 @@ import iron.data.SceneFormat;
 	public var uv_scale: Float;
 	public var uv_rot: Float;
 	public var uv_type: Int;
-	public var decal_mat: kha.arrays.Float32Array;
+	public var decal_mat: js.lib.Float32Array;
 	public var opacity_mask: Float;
 	public var fill_layer: Int;
 	public var object_mask: Int;

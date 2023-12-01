@@ -226,8 +226,8 @@ class LogicParser {
 		return Type.createInstance(cname, args);
 	}
 
-	public static function f32(ar: Array<Float>): kha.arrays.Float32Array {
-		var res = new kha.arrays.Float32Array(ar.length);
+	public static function f32(ar: Array<Float>): js.lib.Float32Array {
+		var res = new js.lib.Float32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;
 	}

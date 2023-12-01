@@ -1,7 +1,7 @@
 package arm.util;
 
-import kha.arrays.Int16Array;
-import kha.arrays.Uint32Array;
+import js.lib.Int16Array;
+import js.lib.Uint32Array;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -132,12 +132,12 @@ class MeshUtil {
 			var l = g.structLength;
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
-				vertices.setInt16((i * l    ) * 2, vas[0].values[i * 4    ]);
-				vertices.setInt16((i * l + 1) * 2, vas[0].values[i * 4 + 1]);
-				vertices.setInt16((i * l + 2) * 2, vas[0].values[i * 4 + 2]);
-				vertices.setInt16((i * l + 3) * 2, vas[0].values[i * 4 + 3]);
-				vertices.setInt16((i * l + 4) * 2, vas[1].values[i * 2    ]);
-				vertices.setInt16((i * l + 5) * 2, vas[1].values[i * 2 + 1]);
+				vertices.setInt16((i * l    ) * 2, vas[0].values[i * 4    ], true);
+				vertices.setInt16((i * l + 1) * 2, vas[0].values[i * 4 + 1], true);
+				vertices.setInt16((i * l + 2) * 2, vas[0].values[i * 4 + 2], true);
+				vertices.setInt16((i * l + 3) * 2, vas[0].values[i * 4 + 3], true);
+				vertices.setInt16((i * l + 4) * 2, vas[1].values[i * 2    ], true);
+				vertices.setInt16((i * l + 5) * 2, vas[1].values[i * 2 + 1], true);
 			}
 			g.vertexBuffer.unlock();
 		}
@@ -159,9 +159,9 @@ class MeshUtil {
 				va0[i * 4 + 3] = -va0[i * 4 + 3];
 				va1[i * 2] = -va1[i * 2];
 				va1[i * 2 + 1] = -va1[i * 2 + 1];
-				vertices.setInt16((i * l + 3) * 2, -vertices.getInt16((i * l + 3) * 2));
-				vertices.setInt16((i * l + 4) * 2, -vertices.getInt16((i * l + 4) * 2));
-				vertices.setInt16((i * l + 5) * 2, -vertices.getInt16((i * l + 5) * 2));
+				vertices.setInt16((i * l + 3) * 2, -vertices.getInt16((i * l + 3) * 2), true);
+				vertices.setInt16((i * l + 4) * 2, -vertices.getInt16((i * l + 4) * 2), true);
+				vertices.setInt16((i * l + 5) * 2, -vertices.getInt16((i * l + 5) * 2), true);
 			}
 			g.vertexBuffer.unlock();
 		}
@@ -194,15 +194,15 @@ class MeshUtil {
 				ab.subvecs(va, vb);
 				cb.cross(ab);
 				cb.normalize();
-				vertices.setInt16((i1 * l + 4) * 2, Std.int(cb.x * 32767));
-				vertices.setInt16((i1 * l + 5) * 2, Std.int(cb.y * 32767));
-				vertices.setInt16((i1 * l + 3) * 2, Std.int(cb.z * 32767));
-				vertices.setInt16((i2 * l + 4) * 2, Std.int(cb.x * 32767));
-				vertices.setInt16((i2 * l + 5) * 2, Std.int(cb.y * 32767));
-				vertices.setInt16((i2 * l + 3) * 2, Std.int(cb.z * 32767));
-				vertices.setInt16((i3 * l + 4) * 2, Std.int(cb.x * 32767));
-				vertices.setInt16((i3 * l + 5) * 2, Std.int(cb.y * 32767));
-				vertices.setInt16((i3 * l + 3) * 2, Std.int(cb.z * 32767));
+				vertices.setInt16((i1 * l + 4) * 2, Std.int(cb.x * 32767), true);
+				vertices.setInt16((i1 * l + 5) * 2, Std.int(cb.y * 32767), true);
+				vertices.setInt16((i1 * l + 3) * 2, Std.int(cb.z * 32767), true);
+				vertices.setInt16((i2 * l + 4) * 2, Std.int(cb.x * 32767), true);
+				vertices.setInt16((i2 * l + 5) * 2, Std.int(cb.y * 32767), true);
+				vertices.setInt16((i2 * l + 3) * 2, Std.int(cb.z * 32767), true);
+				vertices.setInt16((i3 * l + 4) * 2, Std.int(cb.x * 32767), true);
+				vertices.setInt16((i3 * l + 5) * 2, Std.int(cb.y * 32767), true);
+				vertices.setInt16((i3 * l + 3) * 2, Std.int(cb.z * 32767), true);
 			}
 
 			if (smooth) {
@@ -242,9 +242,9 @@ class MeshUtil {
 						for (j in 0...sharedLen) {
 							var i1 = shared[j];
 							var i1l = i1 * l;
-							vertices.setInt16((i1l + 4) * 2, vax);
-							vertices.setInt16((i1l + 5) * 2, vay);
-							vertices.setInt16((i1l + 3) * 2, vaz);
+							vertices.setInt16((i1l + 4) * 2, vax, true);
+							vertices.setInt16((i1l + 5) * 2, vay, true);
+							vertices.setInt16((i1l + 3) * 2, vaz, true);
 						}
 					}
 				}
@@ -318,9 +318,9 @@ class MeshUtil {
 			var l = g.structLength;
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
-				vertices.setInt16((i * l    ) * 2, va[i * 4    ]);
-				vertices.setInt16((i * l + 1) * 2, va[i * 4 + 1]);
-				vertices.setInt16((i * l + 2) * 2, va[i * 4 + 2]);
+				vertices.setInt16((i * l    ) * 2, va[i * 4    ], true);
+				vertices.setInt16((i * l + 1) * 2, va[i * 4 + 1], true);
+				vertices.setInt16((i * l + 2) * 2, va[i * 4 + 2], true);
 			}
 			g.vertexBuffer.unlock();
 		}
@@ -341,9 +341,9 @@ class MeshUtil {
 			var xx = Std.int(x * uvScale) % res;
 			var yy = Std.int(y * uvScale) % res;
 			var h = (1.0 - height.get((yy * res + xx) * 4 + 3) / 255) * strength;
-			vertices.setInt16((i * l    ) * 2, vertices.getInt16((i * l    ) * 2) - Std.int(vertices.getInt16((i * l + 4) * 2) * h));
-			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2) - Std.int(vertices.getInt16((i * l + 5) * 2) * h));
-			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2) - Std.int(vertices.getInt16((i * l + 3) * 2) * h));
+			vertices.setInt16((i * l    ) * 2, vertices.getInt16((i * l    ) * 2) - Std.int(vertices.getInt16((i * l + 4) * 2) * h), true);
+			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2) - Std.int(vertices.getInt16((i * l + 5) * 2) * h), true);
+			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2) - Std.int(vertices.getInt16((i * l + 3) * 2) * h), true);
 		}
 		g.vertexBuffer.unlock();
 

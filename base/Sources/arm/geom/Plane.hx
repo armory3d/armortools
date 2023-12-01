@@ -2,10 +2,10 @@ package arm.geom;
 
 class Plane {
 
-	public var posa: kha.arrays.Int16Array = null;
-	public var nora: kha.arrays.Int16Array = null;
-	public var texa: kha.arrays.Int16Array = null;
-	public var inda: kha.arrays.Uint32Array = null;
+	public var posa: js.lib.Int16Array = null;
+	public var nora: js.lib.Int16Array = null;
+	public var texa: js.lib.Int16Array = null;
+	public var inda: js.lib.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";
@@ -18,10 +18,10 @@ class Plane {
 		scalePos = Math.max(halfX, halfY);
 		var inv = (1 / scalePos) * 32767;
 
-		posa = new kha.arrays.Int16Array(vertsX * vertsY * 4);
-		nora = new kha.arrays.Int16Array(vertsX * vertsY * 2);
-		texa = new kha.arrays.Int16Array(vertsX * vertsY * 2);
-		inda = new kha.arrays.Uint32Array((vertsX - 1) * (vertsY - 1) * 6);
+		posa = new js.lib.Int16Array(vertsX * vertsY * 4);
+		nora = new js.lib.Int16Array(vertsX * vertsY * 2);
+		texa = new js.lib.Int16Array(vertsX * vertsY * 2);
+		inda = new js.lib.Uint32Array((vertsX - 1) * (vertsY - 1) * 6);
 		var stepX = sizeX / (vertsX - 1);
 		var stepY = sizeY / (vertsY - 1);
 		for (i in 0...vertsX * vertsY) {

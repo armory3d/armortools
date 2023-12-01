@@ -63,7 +63,7 @@ class ImportObj {
 								inda1 = parts[j].inda;
 								var voff = Std.int(posa0.length / 4);
 								// Repack merged positions
-								var posa32 = new kha.arrays.Float32Array(Std.int(posa0.length / 4) * 3 + Std.int(posa1.length / 4) * 3);
+								var posa32 = new js.lib.Float32Array(Std.int(posa0.length / 4) * 3 + Std.int(posa1.length / 4) * 3);
 								for (k in 0...Std.int(posa0.length / 4)) {
 									posa32[k * 3    ] = posa0[k * 4    ] / 32767 * parts[i].scalePos;
 									posa32[k * 3 + 1] = posa0[k * 4 + 1] / 32767 * parts[i].scalePos;
@@ -80,7 +80,7 @@ class ImportObj {
 									if (scalePos < f) scalePos = f;
 								}
 								var inv = 32767 * (1 / scalePos);
-								var posa = new kha.arrays.Int16Array(posa0.length + posa1.length);
+								var posa = new js.lib.Int16Array(posa0.length + posa1.length);
 								for (k in 0...Std.int(posa.length / 4)) {
 									posa[k * 4    ] = Std.int(posa32[k * 3    ] * inv);
 									posa[k * 4 + 1] = Std.int(posa32[k * 3 + 1] * inv);
@@ -89,9 +89,9 @@ class ImportObj {
 								for (k in 0...Std.int(posa0.length / 4)) posa[k * 4 + 3] = posa0[k * 4 + 3];
 								for (k in 0...Std.int(posa1.length / 4)) posa[posa0.length + k * 4 + 3] = posa1[k * 4 + 3];
 								// Merge normals and uvs
-								var nora = new kha.arrays.Int16Array(nora0.length + nora1.length);
-								var texa = (texa0 != null && texa1 != null) ? new kha.arrays.Int16Array(texa0.length + texa1.length) : null;
-								var inda = new kha.arrays.Uint32Array(inda0.length + inda1.length);
+								var nora = new js.lib.Int16Array(nora0.length + nora1.length);
+								var texa = (texa0 != null && texa1 != null) ? new js.lib.Int16Array(texa0.length + texa1.length) : null;
+								var inda = new js.lib.Uint32Array(inda0.length + inda1.length);
 								js.Syntax.code("nora.set(nora0)");
 								js.Syntax.code("nora.set(nora1, nora0.length)");
 								if (texa != null) {

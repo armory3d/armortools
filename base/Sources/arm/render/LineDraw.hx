@@ -28,8 +28,8 @@ class LineDraw {
 	static var vp: Mat4;
 	static var vpID: ConstantLocation;
 
-	static var vbData: kha.arrays.ByteArray;
-	static var ibData: kha.arrays.Uint32Array;
+	static var vbData: js.lib.DataView;
+	static var ibData: js.lib.Uint32Array;
 
 	static inline var maxLines = 300;
 	static inline var maxVertices = maxLines * 4;
@@ -202,7 +202,7 @@ class LineDraw {
 
 	inline static function addVbData(i: Int, data: Array<Float>) {
 		for (offset in 0...6) {
-			vbData.setFloat32((i + offset) * 4, data[offset]);
+			vbData.setFloat32((i + offset) * 4, data[offset], true);
 		}
 	}
 }

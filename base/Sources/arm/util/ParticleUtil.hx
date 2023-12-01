@@ -1,7 +1,7 @@
 package arm.util;
 
 import haxe.Json;
-import kha.arrays.Float32Array;
+import js.lib.Float32Array;
 import iron.data.SceneFormat;
 import iron.data.MaterialData;
 import iron.object.Object;

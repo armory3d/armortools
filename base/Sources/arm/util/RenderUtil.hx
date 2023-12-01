@@ -458,7 +458,7 @@ class RenderUtil {
 		structure.add("col", VertexData.Short4Norm);
 		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
 		var vertices = screenAlignedFullVB.lock();
-		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i]);
+		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i], true);
 		screenAlignedFullVB.unlock();
 
 		screenAlignedFullIB = new IndexBuffer(indices.length, Usage.StaticUsage);

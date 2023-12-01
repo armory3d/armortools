@@ -755,11 +755,11 @@ class Geometry {
 		}
 
 		// Pack into 16bit
-		var posa = new kha.arrays.Int16Array(vlen * 4);
-		var nora = new kha.arrays.Int16Array(vlen * 2);
-		var texa = tbuf != null ? new kha.arrays.Int16Array(vlen * 2) : null;
-		var cola = cbuf != null ? new kha.arrays.Int16Array(vlen * 3) : null;
-		var inda = new kha.arrays.Uint32Array(ilen);
+		var posa = new js.lib.Int16Array(vlen * 4);
+		var nora = new js.lib.Int16Array(vlen * 2);
+		var texa = tbuf != null ? new js.lib.Int16Array(vlen * 2) : null;
+		var cola = cbuf != null ? new js.lib.Int16Array(vlen * 3) : null;
+		var inda = new js.lib.Uint32Array(ilen);
 
 		pos = 0;
 		count = 0;

@@ -6,11 +6,11 @@ import arm.format.FbxLibrary;
 @:access(arm.format.Geometry)
 class FbxParser {
 
-	public var posa: kha.arrays.Int16Array = null;
-	public var nora: kha.arrays.Int16Array = null;
-	public var texa: kha.arrays.Int16Array = null;
-	public var cola: kha.arrays.Int16Array = null;
-	public var inda: kha.arrays.Uint32Array = null;
+	public var posa: js.lib.Int16Array = null;
+	public var nora: js.lib.Int16Array = null;
+	public var texa: js.lib.Int16Array = null;
+	public var cola: js.lib.Int16Array = null;
+	public var inda: js.lib.Uint32Array = null;
 	public var scalePos = 1.0;
 	public var scaleTex = 1.0;
 	public var name = "";

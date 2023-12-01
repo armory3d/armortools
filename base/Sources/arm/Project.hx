@@ -211,7 +211,7 @@ class Project {
 
 				#if is_sculpt
 				arm.App.notifyOnNextFrame(function() {
-					var f32 = new kha.arrays.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
+					var f32 = new js.lib.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
 					for (i in 0...Std.int(mesh.inda.length)) {
 						var index = mesh.inda[i];
 						f32[i * 4]     = mesh.posa[index * 4]     / 32767;

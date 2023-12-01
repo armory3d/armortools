@@ -132,7 +132,7 @@ class ImportMesh {
 				iron.App.notifyOnInit(finishImport);
 
 				arm.App.notifyOnNextFrame(function() {
-					var f32 = new kha.arrays.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
+					var f32 = new js.lib.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
 					for (i in 0...Std.int(mesh.inda.length)) {
 						var index = mesh.inda[i];
 						f32[i * 4]     = mesh.posa[index * 4]     / 32767;
@@ -190,9 +190,9 @@ class ImportMesh {
 	}
 
 	public static function rawMesh(mesh: Dynamic): TMeshData {
-		var posa = new kha.arrays.Int16Array(Std.int(mesh.inda.length * 4));
+		var posa = new js.lib.Int16Array(Std.int(mesh.inda.length * 4));
 		for (i in 0...posa.length) posa[i] = 32767;
-		var inda = new kha.arrays.Uint32Array(mesh.inda.length);
+		var inda = new js.lib.Uint32Array(mesh.inda.length);
 		for (i in 0...inda.length) inda[i] = i;
 		return {
 			name: mesh.name,

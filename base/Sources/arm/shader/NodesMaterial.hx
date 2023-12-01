@@ -2796,14 +2796,14 @@ class NodesMaterial {
 		ui.radio(nhandle.nest(0).nest(1), 2, "Z");
 		// Preview
 		var axis = nhandle.nest(0).nest(1).position;
-		var val: Array<kha.arrays.Float32Array> = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
+		var val: Array<js.lib.Float32Array> = but.default_value[axis]; // [ [[x, y], [x, y], ..], [[x, y]], ..]
 		var num = val.length;
 		// for (i in 0...num) { ui.line(); }
 		ui._y += nodes.LINE_H() * 5;
 		// Edit
 		ui.row([1 / 5, 1 / 5, 3 / 5]);
 		if (ui.button("+")) {
-			var f32 = new kha.arrays.Float32Array(2);
+			var f32 = new js.lib.Float32Array(2);
 			f32[0] = 0; f32[1] = 0;
 			val.push(f32);
 		}
@@ -2829,7 +2829,7 @@ class NodesMaterial {
 		var ny = ui._y;
 
 		// Preview
-		var vals: Array<kha.arrays.Float32Array> = but.default_value; // [[r, g, b, a, pos], ..]
+		var vals: Array<js.lib.Float32Array> = but.default_value; // [[r, g, b, a, pos], ..]
 		var sw = ui._w / nodes.SCALE();
 		for (val in vals) {
 			var pos = val[4];
@@ -2842,7 +2842,7 @@ class NodesMaterial {
 		ui.row([1 / 4, 1 / 4, 2 / 4]);
 		if (ui.button("+")) {
 			var last = vals[vals.length - 1];
-			var f32 = new kha.arrays.Float32Array(5);
+			var f32 = new js.lib.Float32Array(5);
 			f32[0] = last[0];
 			f32[1] = last[1];
 			f32[2] = last[2];
@@ -3051,8 +3051,8 @@ class NodesMaterial {
 		return node;
 	}
 
-	static function f32(ar: Array<Float>): kha.arrays.Float32Array {
-		var res = new kha.arrays.Float32Array(ar.length);
+	static function f32(ar: Array<Float>): js.lib.Float32Array {
+		var res = new js.lib.Float32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;
 	}

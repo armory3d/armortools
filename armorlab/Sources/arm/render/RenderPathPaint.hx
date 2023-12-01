@@ -320,14 +320,14 @@ class RenderPathPaint {
 
 	}
 
-	static function u32(ar: Array<Int>): kha.arrays.Uint32Array {
-		var res = new kha.arrays.Uint32Array(ar.length);
+	static function u32(ar: Array<Int>): js.lib.Uint32Array {
+		var res = new js.lib.Uint32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;
 	}
 
-	static function i16(ar: Array<Int>): kha.arrays.Int16Array {
-		var res = new kha.arrays.Int16Array(ar.length);
+	static function i16(ar: Array<Int>): js.lib.Int16Array {
+		var res = new js.lib.Int16Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;
 	}

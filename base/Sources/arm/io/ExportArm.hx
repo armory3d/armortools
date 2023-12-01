@@ -469,8 +469,8 @@ class ExportArm {
 		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
 	}
 
-	static function vec3f32(v: iron.math.Vec4): kha.arrays.Float32Array {
-		var res = new kha.arrays.Float32Array(3);
+	static function vec3f32(v: iron.math.Vec4): js.lib.Float32Array {
+		var res = new js.lib.Float32Array(3);
 		res[0] = v.x;
 		res[1] = v.y;
 		res[2] = v.z;

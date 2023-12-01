@@ -1692,7 +1692,7 @@ class MaterialParser {
 		}
 	}
 
-	static function vector_curve(name: String, fac: String, points: Array<kha.arrays.Float32Array>): String {
+	static function vector_curve(name: String, fac: String, points: Array<js.lib.Float32Array>): String {
 		// Write Ys array
 		var ys_var = name + "_ys";
 		var num = points.length;

@@ -13,7 +13,7 @@ class RenderPathRaytrace {
 	public static var uvScale = 1.0;
 	static var path: RenderPath;
 	static var first = true;
-	static var f32 = new kha.arrays.Float32Array(24);
+	static var f32 = new js.lib.Float32Array(24);
 	static var helpMat = iron.math.Mat4.identity();
 	static var vb_scale = 1.0;
 	static var vb: kha.graphics4.VertexBuffer;

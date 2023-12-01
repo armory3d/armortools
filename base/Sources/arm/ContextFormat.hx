@@ -36,7 +36,7 @@ import arm.data.FontSlot;
 	@:optional public var pickedColor: TSwatchColor = Project.makeSwatch();
 	@:optional public var colorPickerCallback: TSwatchColor->Void = null;
 
-	@:optional public var defaultIrradiance: kha.arrays.Float32Array = null;
+	@:optional public var defaultIrradiance: js.lib.Float32Array = null;
 	@:optional public var defaultRadiance: Image = null;
 	@:optional public var defaultRadianceMipmaps: Array<Image> = null;
 	@:optional public var savedEnvmap: Image = null;

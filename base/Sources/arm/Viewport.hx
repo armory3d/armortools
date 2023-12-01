@@ -1,6 +1,6 @@
 package arm;
 
-import kha.arrays.Float32Array;
+import js.lib.Float32Array;
 import iron.math.Vec4;
 import iron.Scene;
 import arm.Camera;

@@ -1,9 +1,9 @@
 package arm.io;
 
 import kha.Blob;
-import kha.arrays.Uint32Array;
-import kha.arrays.Float32Array;
-import kha.arrays.Int16Array;
+import js.lib.Uint32Array;
+import js.lib.Float32Array;
+import js.lib.Int16Array;
 import iron.data.Data;
 import iron.math.Vec4;
 import zui.Zui.Nodes;

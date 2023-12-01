@@ -98,12 +98,12 @@ class UINodesExt {
 							if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
 								lastVertices = ByteArray.make(vertices.byteLength);
 								for (i in 0...Std.int(vertices.byteLength / 2)) {
-									lastVertices.setInt16(i * 2, vertices.getInt16(i * 2));
+									lastVertices.setInt16(i * 2, vertices.getInt16(i * 2), true);
 								}
 							}
 							else {
 								for (i in 0...Std.int(vertices.byteLength / 2)) {
-									vertices.setInt16(i * 2, lastVertices.getInt16(i * 2));
+									vertices.setInt16(i * 2, lastVertices.getInt16(i * 2), true);
 								}
 							}
 							g.vertexBuffer.unlock();
