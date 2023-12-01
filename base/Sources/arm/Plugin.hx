@@ -39,10 +39,8 @@ class Plugin {
 		try {
 			iron.data.Data.getBlob("plugins/" + plugin, function(blob: kha.Blob) {
 				pluginName = plugin;
-				#if js
 				// js.Syntax.code("(1, eval)({0})", blob.toString()); // Global scope
 				js.Syntax.code("eval({0})", blob.toString()); // Local scope
-				#end
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}

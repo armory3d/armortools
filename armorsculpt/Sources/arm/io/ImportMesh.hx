@@ -26,10 +26,6 @@ class ImportMesh {
 		clearLayers = _clearLayers;
 		Context.raw.layerFilter = 0;
 
-		#if arm_debug
-		var timer = iron.system.Time.realTime();
-		#end
-
 		var p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
 		else if (p.endsWith(".fbx")) ImportFbx.run(path, replaceExisting);
@@ -43,12 +39,6 @@ class ImportMesh {
 		}
 
 		Project.meshAssets = [path];
-
-		#if arm_debug
-		var ar = path.split(Path.sep);
-		var name = ar[ar.length - 1];
-		Console.info(tr("Mesh imported:") + " " + name);
-		#end
 
 		#if (krom_android || krom_ios)
 		kha.Window.get(0).title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
@@ -86,10 +76,6 @@ class ImportMesh {
 		arm.shader.MakeMaterial.parseMeshMaterial();
 
 		UIView2D.inst.hwnd.redraws = 2;
-
-		#if arm_debug
-		trace("Mesh imported in " + (iron.system.Time.realTime() - timer));
-		#end
 
 		#if arm_physics
 		Context.raw.paintBody = null;
