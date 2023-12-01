@@ -11,7 +11,7 @@ import iron.Scene;
 
 class ParticleUtil {
 
-	static function f32(ar: Array<kha.FastFloat>): Float32Array {
+	static function f32(ar: Array<Float>): Float32Array {
 		var res = new Float32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;

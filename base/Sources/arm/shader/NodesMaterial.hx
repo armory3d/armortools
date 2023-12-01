@@ -3051,7 +3051,7 @@ class NodesMaterial {
 		return node;
 	}
 
-	static function f32(ar: Array<kha.FastFloat>): kha.arrays.Float32Array {
+	static function f32(ar: Array<Float>): kha.arrays.Float32Array {
 		var res = new kha.arrays.Float32Array(ar.length);
 		for (i in 0...ar.length) res[i] = ar[i];
 		return res;

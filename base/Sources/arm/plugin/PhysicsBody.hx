@@ -357,7 +357,7 @@ class PhysicsBody extends iron.Trait {
 		body.setCcdMotionThreshold(motionThreshold);
 	}
 
-	function fillConvexHull(scale: Vec4, margin: kha.FastFloat): Bt.ConvexHullShape {
+	function fillConvexHull(scale: Vec4, margin: Float): Bt.ConvexHullShape {
 		// Check whether shape already exists
 		var data = cast(object, MeshObject).data;
 		var shape = convexHullCache.get(data);
@@ -372,9 +372,9 @@ class PhysicsBody extends iron.Trait {
 
 		var positions = data.geom.positions.values;
 
-		var sx: kha.FastFloat = scale.x * (1.0 - margin) * (1 / 32767);
-		var sy: kha.FastFloat = scale.y * (1.0 - margin) * (1 / 32767);
-		var sz: kha.FastFloat = scale.z * (1.0 - margin) * (1 / 32767);
+		var sx: Float = scale.x * (1.0 - margin) * (1 / 32767);
+		var sy: Float = scale.y * (1.0 - margin) * (1 / 32767);
+		var sz: Float = scale.z * (1.0 - margin) * (1 / 32767);
 
 		if (data.raw.scale_pos != null) {
 			sx *= data.raw.scale_pos;
@@ -407,9 +407,9 @@ class PhysicsBody extends iron.Trait {
 		var positions = data.geom.positions.values;
 		var indices = data.geom.indices;
 
-		var sx: kha.FastFloat = scale.x * (1 / 32767);
-		var sy: kha.FastFloat = scale.y * (1 / 32767);
-		var sz: kha.FastFloat = scale.z * (1 / 32767);
+		var sx: Float = scale.x * (1 / 32767);
+		var sy: Float = scale.y * (1 / 32767);
+		var sz: Float = scale.z * (1 / 32767);
 
 		if (data.raw.scale_pos != null) {
 			sx *= data.raw.scale_pos;

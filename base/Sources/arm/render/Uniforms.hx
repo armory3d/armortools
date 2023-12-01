@@ -34,7 +34,7 @@ class Uniforms {
 		return null;
 	}
 
-	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<kha.FastFloat> {
+	public static function linkFloat(object: Object, mat: MaterialData, link: String): Null<Float> {
 		switch (link) {
 			case "_brushRadius": {
 				#if (is_paint || is_sculpt)
