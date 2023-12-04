@@ -4,8 +4,7 @@ import haxe.io.Bytes;
 import haxe.Json;
 import kha.Window;
 import kha.System;
-import kha.Storage;
-import zui.*;
+import zui.Zui;
 import iron.system.ArmPack;
 using StringTools;
 
@@ -25,10 +24,9 @@ typedef TStorage = {
 class Main {
 
 	static var ui: Zui;
-	static var text_handle = Id.handle();
-	static var sidebar_handle = Id.handle();
-	static var editor_handle = Id.handle();
-	static var storage_file: StorageFile = null;
+	static var text_handle = new Handle();
+	static var sidebar_handle = new Handle();
+	static var editor_handle = new Handle();
 	static var storage: TStorage = null;
 	static var resizing_sidebar = false;
 	static var minimap_w = 150;
@@ -40,13 +38,12 @@ class Main {
 
 	public static function main() {
 
-		Ext.textAreaLineNumbers = true;
-		Ext.textAreaScrollPastEnd = true;
+		Zui.textAreaLineNumbers = true;
+		Zui.textAreaScrollPastEnd = true;
 
 		Krom.setApplicationName("ArmorPad");
-		storage_file = kha.Storage.defaultFile();
-		storage = storage_file.readObject();
-		if (storage == null) {
+		var blob_storage = Krom.loadBlob(Krom.savePath() + "/config.json");
+		if (blob_storage == null) {
 			storage = {
 				project: "",
 				file: "untitled",
@@ -60,8 +57,9 @@ class Main {
 				sidebar_w: 230,
 			};
 		}
-		text_handle.text = storage.text;
+		else storage = haxe.Json.parse(haxe.io.Bytes.ofData(blob_storage).toString());
 
+		text_handle.text = storage.text;
 		var ops: SystemOptions = {
 			title: "ArmorPad",
 			width: storage.window_w,
@@ -76,10 +74,26 @@ class Main {
 			kha.Assets.loadFontFromPath("data/font_mono.ttf", function(font: kha.Font) {
 				kha.Assets.loadBlobFromPath("data/themes/dark.json", function(blob_theme: kha.Blob) {
 					kha.Assets.loadBlobFromPath("data/text_coloring.json", function(blob_coloring: kha.Blob) {
-						ui = new Zui({ theme: haxe.Json.parse(blob_theme.toString()), font: font });
+
+						var parsed = haxe.Json.parse(blob_theme.toString());
+						var theme = new zui.Zui.Theme();
+						for (key in Type.getInstanceFields(zui.Zui.Theme)) {
+							if (key == "theme_") continue;
+							if (key.startsWith("set_")) continue;
+							if (key.startsWith("get_")) key = key.substr(4);
+							Reflect.setProperty(theme, key, Reflect.getProperty(parsed, key));
+						}
+
+						font.init();
+						ui = new Zui({ theme: theme, font: font, scaleFactor: 1.0, color_wheel: null, black_white_gradient: null });
 						Zui.onBorderHover = on_border_hover;
 						Zui.onTextHover = on_text_hover;
-						Ext.textAreaColoring = haxe.Json.parse(blob_coloring.toString());
+
+						var textColoring: TTextColoring = haxe.Json.parse(blob_coloring.toString());
+						textColoring.default_color = Std.int(textColoring.default_color);
+						for (coloring in textColoring.colorings) coloring.color = Std.int(coloring.color);
+						Zui.textAreaColoring = textColoring;
+
 						System.notifyOnFrames(render);
 					});
 				});
@@ -93,7 +107,7 @@ class Main {
 
 		Krom.setApplicationStateCallback(function() {}, function() {}, function() {}, function() {},
 			function() { // Shutdown
-				storage_file.writeObject(storage);
+				Krom.fileSaveBytes(Krom.savePath() + "/config.json", haxe.io.Bytes.ofString(haxe.Json.stringify(storage)).getData());
 			}
 		);
 	}
@@ -131,15 +145,15 @@ class Main {
 			}
 
 			if (isExpanded) {
-				ui.indent(false);
+				// ui.indent(false);
 				list_folder(abs);
-				ui.unindent(false);
+				// ui.unindent(false);
 			}
 		}
 	}
 
-	static function render(framebuffers: Array<kha.Framebuffer>): Void {
-		var g = framebuffers[0].g2;
+	static function render(framebuffer: kha.Framebuffer): Void {
+		var g = framebuffer.g2;
 
 		storage.window_w = System.windowWidth();
 		storage.window_h = System.windowHeight();
@@ -168,7 +182,7 @@ class Main {
 
 		if (ui.window(editor_handle, storage.sidebar_w + 1, 0, System.windowWidth() - storage.sidebar_w - minimap_w, System.windowHeight(), false)) {
 			editor_updated = true;
-			var htab = Id.handle({ position: 0 });
+			var htab = Zui.handle("main_0", { position: 0 });
 			var file_name = storage.file.substring(storage.file.lastIndexOf("/") + 1);
 			var file_names = [file_name];
 
@@ -180,15 +194,15 @@ class Main {
 					}
 
 					// Save
-					if (ui.isCtrlDown && ui.key == kha.input.KeyCode.S) {
+					if (ui.isCtrlDown && ui.key == kha.input.Keyboard.KeyCode.S) {
 						save_file();
 					}
 
-					storage.text = Ext.textArea(ui, text_handle);
+					storage.text = ui.textArea(text_handle);
 				}
 			}
 
-			window_header_h = @:privateAccess Std.int(ui.windowHeaderH);
+			window_header_h = 32;//@:privateAccess Std.int(ui.windowHeaderH);
 		}
 
 		if (resizing_sidebar) {
@@ -209,13 +223,13 @@ class Main {
 			minimap_scrolling = false;
 		}
 		if (minimap_scrolling) {
-			editor_handle.scrollOffset -= ui.inputDY * ui.ELEMENT_H() / 2;
-			// editor_handle.scrollOffset = -((ui.inputY - minimap_y - minimap_box_h / 2) * ui.ELEMENT_H() / 2);
+			// editor_handle.scrollOffset -= ui.inputDY * ui.ELEMENT_H() / 2;
+			// // editor_handle.scrollOffset = -((ui.inputY - minimap_y - minimap_box_h / 2) * ui.ELEMENT_H() / 2);
 			redraw = true;
 		}
 
 		// Build project
-		if (ui.isCtrlDown && ui.key == kha.input.KeyCode.B) {
+		if (ui.isCtrlDown && ui.key == kha.input.Keyboard.KeyCode.B) {
 			save_file();
 			build_project();
 		}
@@ -302,7 +316,7 @@ class Main {
 		return mx > x && mx < x + w && my > y && my < y + h;
 	}
 
-	static function on_border_hover(handle: Zui.Handle, side: Int) {
+	static function on_border_hover(handle: Handle, side: Int) {
 		if (handle != sidebar_handle) return;
 		if (side != 1) return; // Right
 

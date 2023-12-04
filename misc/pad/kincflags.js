@@ -6,6 +6,7 @@ flags.with_nfd = true;
 flags.with_tinydir = true;
 flags.with_g2 = true;
 flags.with_iron = true;
+flags.with_zui = true;
 flags.on_project_created = function(project) {
 	project.addDefine('IDLE_SLEEP');
 }
