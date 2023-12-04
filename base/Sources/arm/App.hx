@@ -797,7 +797,7 @@ class App {
 			var ratio = size / img.width;
 			var h = img.height * ratio;
 
-			#if (is_lab || kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (is_lab || krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			var inv = 0;
 			#else
 			var inv = (dragMaterial != null || (dragLayer != null && dragLayer.fill_layer != null)) ? h : 0;
@@ -1031,7 +1031,7 @@ class App {
 		raw.pressure_hardness = true;
 		raw.pressure_angle = false;
 		raw.pressure_opacity = false;
-		#if (kha_vulkan || krom_ios)
+		#if (krom_vulkan || krom_ios)
 		raw.material_live = false;
 		#else
 		raw.material_live = true;
@@ -1127,7 +1127,7 @@ class App {
 			rts.get("texpaint_blur").image = Image.createRenderTarget(sizeX, sizeY);
 		}
 		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
 		Context.raw.ddirty = 2;
@@ -1189,7 +1189,7 @@ class App {
 		pipeCopyBGRA.inputLayout = [vs];
 		pipeCopyBGRA.compile();
 
-		#if (kha_metal || kha_vulkan || kha_direct3d12)
+		#if (krom_metal || krom_vulkan || krom_direct3d12)
 		pipeCopy8 = new PipelineState();
 		pipeCopy8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopy8.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
@@ -1350,7 +1350,7 @@ class App {
 		pipeCursor.vertexShader = kha.Shaders.getVertex("cursor.vert");
 		pipeCursor.fragmentShader = kha.Shaders.getFragment("cursor.frag");
 		var vs = new VertexStructure();
-		#if (kha_metal || kha_vulkan)
+		#if (krom_metal || krom_vulkan)
 		vs.add("tex", VertexData.Short2Norm);
 		#else
 		vs.add("pos", VertexData.Short4Norm);
@@ -1802,7 +1802,7 @@ class App {
 			#end
 		}
 
-		#if kha_metal
+		#if krom_metal
 		// Flush command list
 		App.expa.g2.begin(false);
 		App.expa.g2.end();
@@ -2140,7 +2140,7 @@ class App {
 		UVUtil.trianglemap = null;
 		UVUtil.trianglemapCached = false;
 		UVUtil.dilatemapCached = false;
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}
@@ -2211,7 +2211,7 @@ class App {
 			initLayers();
 		});
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}

@@ -68,7 +68,7 @@ class MakeMesh {
 			frag.add_uniform('sampler2D gbuffer1');
 			frag.add_uniform('sampler2D gbuffer2');
 			frag.write('vec2 fragcoord = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('fragcoord.y = 1.0 - fragcoord.y;');
 			#end
 			frag.write('vec4 gbuffer0_sample = textureLod(gbuffer0, fragcoord, 0.0);');
@@ -234,7 +234,7 @@ class MakeMesh {
 			}
 
 			frag.vVec = true;
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -336,7 +336,7 @@ class MakeMesh {
 	}
 
 	static inline function getMaxTextures(): Int {
-		#if kha_direct3d11
+		#if krom_direct3d11
 		return 128 - 66;
 		#else
 		return 16 - 3; // G4onG5/G4.c.h MAX_TEXTURES

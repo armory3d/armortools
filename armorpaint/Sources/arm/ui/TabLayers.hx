@@ -192,7 +192,7 @@ class TabLayers {
 			App.setObjectMask();
 			UVUtil.uvmapCached = false;
 			Context.raw.ddirty = 2;
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			arm.render.RenderPathRaytrace.ready = false;
 			#end
 		}
@@ -339,7 +339,7 @@ class TabLayers {
 		ui._y -= 3;
 		ui._y -= center;
 
-		#if kha_opengl
+		#if krom_opengl
 		ui.imageInvertY = l.fill_layer != null;
 		#end
 
@@ -361,7 +361,7 @@ class TabLayers {
 			ui._x += 12 * ui.SCALE();
 		}
 
-		#if kha_opengl
+		#if krom_opengl
 		ui.imageInvertY = false;
 		#end
 
@@ -632,7 +632,7 @@ class TabLayers {
 			}
 			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = UIView2D.pipe;
-				#if kha_opengl
+				#if krom_opengl
 				Krom.setPipeline(UIView2D.pipe.pipeline);
 				#end
 				Krom.setInt(UIView2D.channelLocation, 1);

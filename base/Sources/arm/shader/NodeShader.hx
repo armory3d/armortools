@@ -172,7 +172,7 @@ class NodeShader {
 			sharedSampler = sharedSamplers[0].split(' ')[1] + '_sampler';
 		}
 
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (krom_direct3d11 || krom_direct3d12)
 		var s = '#define HLSL\n';
 		s += '#define textureArg(tex) Texture2D tex,SamplerState tex ## _sampler\n';
 		s += '#define texturePass(tex) tex,tex ## _sampler\n';
@@ -353,7 +353,7 @@ class NodeShader {
 		}
 		s += '}\n';
 
-		#elseif kha_metal
+		#elseif krom_metal
 
 		var s = '#define METAL\n';
 		s += '#include <metal_stdlib>\n';
@@ -576,9 +576,9 @@ class NodeShader {
 		}
 		s += '}\n';
 
-		#else // kha_opengl
+		#else // krom_opengl
 
-		#if kha_vulkan
+		#if krom_vulkan
 		var s = '#version 450\n';
 		#elseif krom_android
 		var s = '#version 300 es\n';

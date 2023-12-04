@@ -39,7 +39,7 @@ class MakePaint {
 			frag.add_uniform('vec2 gbufferSize', '_gbufferSize');
 			frag.add_uniform('vec4 inp', '_inputBrush');
 
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, inp.y * gbufferSize.y), 0).ba;');
 			#else
 			frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(inp.x * gbufferSize.x, (1.0 - inp.y) * gbufferSize.y), 0).ba;');
@@ -59,7 +59,7 @@ class MakePaint {
 			return con_paint;
 		}
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		// vert.write('vec2 tpos = vec2(frac(tex.x * texScale) * 2.0 - 1.0, (1.0 - frac(tex.y * texScale)) * 2.0 - 1.0);'); // 3D View
 		#else
@@ -99,7 +99,7 @@ class MakePaint {
 
 			frag.write('float dist = 0.0;');
 
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			#else
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
@@ -111,7 +111,7 @@ class MakePaint {
 			frag.write('winp.xyz /= winp.w;');
 			frag.wposition = true;
 
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			#else
 			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');
@@ -145,7 +145,7 @@ class MakePaint {
 
 			if (Context.raw.tool == ToolClone) {
 				// frag.add_uniform('vec2 cloneDelta', '_cloneDelta');
-				// #if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				// #if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.xy + cloneDelta) * gbufferSize), 0).ba;');
 				// #else
 				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2((sp.x + cloneDelta.x) * gbufferSize.x, (1.0 - (sp.y + cloneDelta.y)) * gbufferSize.y), 0).ba;');
@@ -169,7 +169,7 @@ class MakePaint {
 				// frag.write('float opacity = mat_opacity * brushOpacity;');
 			}
 			else { // Blur
-				// #if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				// #if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, sp.y * gbufferSize.y), 0).ba;');
 				// #else
 				// frag.write('vec2 texCoordInp = texelFetch(gbuffer2, ivec2(sp.x * gbufferSize.x, (1.0 - sp.y) * gbufferSize.y), 0).ba;');
@@ -187,7 +187,7 @@ class MakePaint {
 				// frag.add_uniform('vec2 texpaintSize', '_texpaintSize');
 				// frag.write('float blur_step = 1.0 / texpaintSize.x;');
 				// if (Context.raw.blurDirectional) {
-				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+				// 	#if (krom_direct3d11 || krom_direct3d12 || krom_metal)
 				// 	frag.write('const float blur_weight[7] = {1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0};');
 				// 	#else
 				// 	frag.write('const float blur_weight[7] = float[](1.0 / 28.0, 2.0 / 28.0, 3.0 / 28.0, 4.0 / 28.0, 5.0 / 28.0, 6.0 / 28.0, 7.0 / 28.0);');
@@ -195,7 +195,7 @@ class MakePaint {
 				// 	frag.add_uniform('vec3 brushDirection', '_brushDirection');
 				// 	frag.write('vec2 blur_direction = brushDirection.yx;');
 				// 	frag.write('for (int i = 0; i < 7; ++i) {');
-				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				// 	#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (sp.y + blur_direction.y * blur_step * float(i)) * gbufferSize.y), 0).ba;');
 				// 	#else
 				// 	frag.write('vec2 texCoordInp2 = texelFetch(gbuffer2, ivec2((sp.x + blur_direction.x * blur_step * float(i)) * gbufferSize.x, (1.0 - (sp.y + blur_direction.y * blur_step * float(i))) * gbufferSize.y), 0).ba;');
@@ -212,7 +212,7 @@ class MakePaint {
 				// 	frag.write('}');
 				// }
 				// else {
-				// 	#if (kha_direct3d11 || kha_direct3d12 || kha_metal)
+				// 	#if (krom_direct3d11 || krom_direct3d12 || krom_metal)
 				// 	frag.write('const float blur_weight[15] = {0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0};');
 				// 	#else
 				// 	frag.write('const float blur_weight[15] = float[](0.034619 / 2.0, 0.044859 / 2.0, 0.055857 / 2.0, 0.066833 / 2.0, 0.076841 / 2.0, 0.084894 / 2.0, 0.090126 / 2.0, 0.09194 / 2.0, 0.090126 / 2.0, 0.084894 / 2.0, 0.076841 / 2.0, 0.066833 / 2.0, 0.055857 / 2.0, 0.044859 / 2.0, 0.034619 / 2.0);');
@@ -254,7 +254,7 @@ class MakePaint {
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
 		frag.write('vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');

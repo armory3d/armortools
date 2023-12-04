@@ -16,7 +16,7 @@ class MakeBrush {
 		if (decal && !fillLayer) frag.write('if (decalMask.z > 0.0) {');
 
 		if (Config.raw.brush_3d) {
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			#else
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
@@ -31,7 +31,7 @@ class MakeBrush {
 			if (Config.raw.brush_angle_reject || Context.raw.xray) {
 				frag.add_function(ShaderFunctions.str_octahedronWrap);
 				frag.add_uniform('sampler2D gbuffer0');
-				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				frag.write('vec2 g0 = textureLod(gbuffer0, inp.xy, 0.0).rg;');
 				#else
 				frag.write('vec2 g0 = textureLod(gbuffer0, vec2(inp.x, 1.0 - inp.y), 0.0).rg;');
@@ -50,7 +50,7 @@ class MakeBrush {
 				}
 			}
 
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			#else
 			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');

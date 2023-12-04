@@ -9,7 +9,7 @@ class MakeBrush {
 		frag.write('float dist = 0.0;');
 
 		if (Config.raw.brush_3d) {
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depth = textureLod(gbufferD, inp.xy, 0.0).r;');
 			#else
 			frag.write('float depth = textureLod(gbufferD, vec2(inp.x, 1.0 - inp.y), 0.0).r;');
@@ -24,7 +24,7 @@ class MakeBrush {
 
 			frag.write_attrib('vec3 wposition = mul(texelFetch(texpaint_undo, ivec2(texCoord.x * textureSize(texpaint_undo, 0).x, texCoord.y * textureSize(texpaint_undo, 0).y), 0), W).xyz;');
 
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('float depthlast = textureLod(gbufferD, inplast.xy, 0.0).r;');
 			#else
 			frag.write('float depthlast = textureLod(gbufferD, vec2(inplast.x, 1.0 - inplast.y), 0.0).r;');

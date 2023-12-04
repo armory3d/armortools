@@ -114,7 +114,7 @@ class MakeParticle {
 		#end
 
 		frag.add_uniform('sampler2D texparticle', '_texparticle');
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		frag.write('float str = textureLod(texparticle, sp.xy, 0.0).r;');
 		#else
 		frag.write('float str = textureLod(texparticle, vec2(sp.x, (1.0 - sp.y)), 0.0).r;');

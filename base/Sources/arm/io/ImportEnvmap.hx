@@ -73,7 +73,7 @@ class ImportEnvmap {
 			for (mip in mipsCpu) {
 				var _mip = mip;
 				App.notifyOnNextFrame(function() {
-					#if (!kha_direct3d12) // TODO: crashes after 50+ imports
+					#if (!krom_direct3d12) // TODO: crashes after 50+ imports
 					_mip.unload();
 					#end
 				});

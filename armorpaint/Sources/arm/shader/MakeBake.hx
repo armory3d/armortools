@@ -15,7 +15,7 @@ class MakeBake {
 			frag.n = true;
 			frag.vVec = true;
 			frag.add_function(ShaderFunctions.str_cotangentFrame);
-			#if kha_direct3d11
+			#if krom_direct3d11
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');

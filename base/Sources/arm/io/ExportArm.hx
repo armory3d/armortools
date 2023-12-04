@@ -147,7 +147,7 @@ class ExportArm {
 			material: c,
 			#end
 
-			#if (kha_metal || kha_vulkan)
+			#if (krom_metal || krom_vulkan)
 			is_bgra: true
 			#else
 			is_bgra: false
@@ -159,13 +159,13 @@ class ExportArm {
 		var mesh_icon = kha.Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);
-		#if kha_opengl
+		#if krom_opengl
 		mesh_icon.g2.drawScaledImage(tex, -(256 * r - 256) / 2, 256, 256 * r, -256);
 		#else
 		mesh_icon.g2.drawScaledImage(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 		#end
 		mesh_icon.g2.end();
-		#if kha_metal
+		#if krom_metal
 		// Flush command list
 		mesh_icon.g2.begin(false);
 		mesh_icon.g2.end();
@@ -174,14 +174,14 @@ class ExportArm {
 		for (i in 0...256 * 256 * 4) {
 			mesh_icon_pixels.set(i, Std.int(Math.pow(mesh_icon_pixels.get(i) / 255, 1.0 / 2.2) * 255));
 		}
-		#if (kha_metal || kha_vulkan)
+		#if (krom_metal || krom_vulkan)
 		bgraSwap(mesh_icon_pixels);
 		#end
 		App.notifyOnNextFrame(function() {
 			mesh_icon.unload();
 		});
 		// Project.raw.mesh_icons =
-		// 	#if (kha_metal || kha_vulkan)
+		// 	#if (krom_metal || krom_vulkan)
 		// 	[Lz4.encode(bgraSwap(mesh_icon_pixels)];
 		// 	#else
 		// 	[Lz4.encode(mesh_icon_pixels)];
@@ -267,7 +267,7 @@ class ExportArm {
 			material_nodes: mnodes,
 			material_groups: mgroups,
 			material_icons: isCloud ? null :
-				#if (kha_metal || kha_vulkan)
+				#if (krom_metal || krom_vulkan)
 				[Lz4.encode(bgraSwap(m.image.getPixels()))],
 				#else
 				[Lz4.encode(m.image.getPixels())],
@@ -292,7 +292,7 @@ class ExportArm {
 	}
 	#end
 
-	#if (kha_metal || kha_vulkan)
+	#if (krom_metal || krom_vulkan)
 	static function bgraSwap(bytes: haxe.io.Bytes) {
 		for (i in 0...Std.int(bytes.length / 4)) {
 			var r = bytes.get(i * 4);
@@ -325,7 +325,7 @@ class ExportArm {
 			version: Manifest.version,
 			brush_nodes: bnodes,
 			brush_icons: isCloud ? null :
-			#if (kha_metal || kha_vulkan)
+			#if (krom_metal || krom_vulkan)
 			[Lz4.encode(bgraSwap(b.image.getPixels()))],
 			#else
 			[Lz4.encode(b.image.getPixels())],

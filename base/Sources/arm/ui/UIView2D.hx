@@ -212,13 +212,13 @@ class UIView2D {
 
 				#if (is_paint || is_sculpt)
 				if (type == View2DLayer) {
-					#if (!kha_opengl)
+					#if (!krom_opengl)
 					ui.g.pipeline = pipe;
 					#end
 					if (!Context.raw.textureFilter) {
 						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.Low;
 					}
-					#if kha_opengl
+					#if krom_opengl
 					Krom.setPipeline(pipe.pipeline);
 					#end
 					Krom.setInt(channelLocation, channel);
@@ -258,7 +258,7 @@ class UIView2D {
 						g2.drawScaledImage(tex, -x, -y, tw, th);
 						g2.end();
 						var a = texpaint_picker.getPixels();
-						#if (kha_metal || kha_vulkan)
+						#if (krom_metal || krom_vulkan)
 						var i0 = 2;
 						var i1 = 1;
 						var i2 = 0;

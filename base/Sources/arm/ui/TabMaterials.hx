@@ -102,7 +102,7 @@ class TabMaterials {
 					}
 				}
 
-				#if kha_opengl
+				#if krom_opengl
 				ui.imageInvertY = Project.materials[i].previewReady;
 				#end
 
@@ -260,7 +260,7 @@ class TabMaterials {
 
 			ui._y += mini ? 0 : 6;
 
-			#if kha_opengl
+			#if krom_opengl
 			ui.imageInvertY = false; // Material preview
 			#end
 		}

@@ -73,7 +73,7 @@ class UIBase {
 	#if (is_paint || is_sculpt)
 	public static inline var defaultSidebarMiniW = 56;
 	public static inline var defaultSidebarFullW = 280;
-	#if (kha_android || kha_ios)
+	#if (krom_android || krom_ios)
 	public static inline var defaultSidebarW = defaultSidebarMiniW;
 	#else
 	public static inline var defaultSidebarW = defaultSidebarFullW;
@@ -534,7 +534,7 @@ class UIBase {
 
 						var shortcuts = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-						#if (kha_direct3d12 || kha_vulkan || kha_metal)
+						#if (krom_direct3d12 || krom_vulkan || krom_metal)
 						if (Krom.raytraceSupported()) {
 							modes.push(tr("Path Traced"));
 							shortcuts.push("p");
@@ -557,10 +557,10 @@ class UIBase {
 						}
 
 					#if (is_paint || is_sculpt)
-					}, 16 #if (kha_direct3d12 || kha_vulkan || kha_metal) + 1 #end );
+					}, 16 #if (krom_direct3d12 || krom_vulkan || krom_metal) + 1 #end );
 					#end
 					#if is_lab
-					}, 9 #if (kha_direct3d12 || kha_vulkan || kha_metal) + 1 #end );
+					}, 9 #if (krom_direct3d12 || krom_vulkan || krom_metal) + 1 #end );
 					#end
 				}
 			}
@@ -832,7 +832,7 @@ class UIBase {
 				action_paint_remap = Config.keymap.action_paint;
 				RenderUtil.pickPosNorTex();
 				var isMesh = Math.abs(Context.raw.posXPicked) < 50 && Math.abs(Context.raw.posYPicked) < 50 && Math.abs(Context.raw.posZPicked) < 50;
-				#if kha_android
+				#if krom_android
 				// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
 				var penOnly = false;
 				#else
@@ -1029,7 +1029,7 @@ class UIBase {
 			Context.raw.brushTime = 0;
 			Context.raw.prevPaintVecX = -1;
 			Context.raw.prevPaintVecY = -1;
-			#if (!kha_direct3d12 && !kha_vulkan && !kha_metal) // Keep accumulated samples for D3D12
+			#if (!krom_direct3d12 && !krom_vulkan && !krom_metal) // Keep accumulated samples for D3D12
 			Context.raw.ddirty = 3;
 			#end
 			Context.raw.brushBlendDirty = true; // Update brush mask
@@ -1280,7 +1280,7 @@ class UIBase {
 		// Show picked material next to cursor
 		if (Context.raw.tool == ToolPicker && Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
 			var img = Context.raw.material.imageIcon;
-			#if kha_opengl
+			#if krom_opengl
 			g.drawScaledImage(img, mx + 10, my + 10 + img.height, img.width, -img.height);
 			#else
 			g.drawImage(img, mx + 10, my + 10);
@@ -1337,7 +1337,7 @@ class UIBase {
 					var cx = decalX + psizex / 2;
 					var cy = decalY + psizey / 2;
 					g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(angle)).multmat(Mat3.translation(-cx, -cy));
-					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+					#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 					g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 					#else
 					g.drawScaledImage(Context.raw.decalImage, decalX, decalY + psizey, psizex, -psizey);

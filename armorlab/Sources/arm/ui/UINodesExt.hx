@@ -27,7 +27,7 @@ class UINodesExt {
 					Context.raw.ddirty = 2;
 					iron.App.removeRender2D(delayIdleSleep);
 
-					#if (kha_direct3d12 || kha_vulkan || kha_metal)
+					#if (krom_direct3d12 || krom_vulkan || krom_metal)
 					arm.render.RenderPathRaytrace.ready = false;
 					#end
 				}

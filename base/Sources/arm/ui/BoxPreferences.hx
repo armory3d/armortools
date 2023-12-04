@@ -80,7 +80,7 @@ class BoxPreferences {
 					UIBase.inst.tagUIRedraw();
 				}
 
-				#if !(kha_android || kha_ios)
+				#if !(krom_android || krom_ios)
 				ui.changed = false;
 				Config.raw.touch_ui = ui.check(Zui.handle("boxpreferences_9", { selected: Config.raw.touch_ui }), tr("Touch UI"));
 				if (ui.changed) {
@@ -426,7 +426,7 @@ class BoxPreferences {
 			Context.raw.hsupersample = Zui.handle("boxpreferences_38", { position: Config.getSuperSampleQuality(Config.raw.rp_supersample) });
 			Context.raw.hvxao = Zui.handle("boxpreferences_39", { selected: Config.raw.rp_gi });
 			if (ui.tab(htab, tr("Viewport"), true)) {
-				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				#if (krom_direct3d12 || krom_vulkan || krom_metal)
 
 				var hpathtracemode = Zui.handle("boxpreferences_40", { position: Context.raw.pathTraceMode });
 				Context.raw.pathTraceMode = ui.combo(hpathtracemode, [tr("Core"), tr("Full")], tr("Path Tracer"), true);

@@ -165,7 +165,7 @@ class RenderPathBase {
 
 		if (Context.raw.ddirty <= 0 && Context.raw.rdirty <= 0 && Context.raw.pdirty <= 0) {
 			if (mx != lastX || my != lastY || mouse.locked) Context.raw.ddirty = 0;
-			#if (kha_metal || krom_android)
+			#if (krom_metal || krom_android)
 			if (Context.raw.ddirty > -6) {
 			#else
 			if (Context.raw.ddirty > -2) {
@@ -193,7 +193,7 @@ class RenderPathBase {
 		drawGbuffer();
 		RenderPathPaint.draw();
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		if (Context.raw.viewportMode == ViewPathTrace) {
 			#if is_paint
 			var useLiveLayer = Context.raw.tool == ToolMaterial;
@@ -274,7 +274,7 @@ class RenderPathBase {
 
 			drawGbuffer();
 
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			#if is_paint
 			var useLiveLayer = Context.raw.tool == ToolMaterial;
 			#else
@@ -385,14 +385,14 @@ class RenderPathBase {
 			path.drawShader("shader_datas/deferred_light/deferred_light_voxel") :
 			path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("tex");
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
 		#end
 	}
@@ -521,7 +521,7 @@ class RenderPathBase {
 
 	public static function drawGbuffer() {
 		path.setTarget("gbuffer0"); // Only clear gbuffer0
-		#if kha_metal
+		#if krom_metal
 		path.clearTarget(0x00000000, 1.0);
 		#else
 		path.clearTarget(null, 1.0);
@@ -594,7 +594,7 @@ class RenderPathBase {
 				path.createRenderTarget(t);
 			}
 
-			#if kha_metal
+			#if krom_metal
 			// TODO: Fix depth attach for gbuffer0_copy on metal
 			// Use resize to re-create buffers from scratch for now
 			path.resize();

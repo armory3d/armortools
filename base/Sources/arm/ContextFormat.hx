@@ -60,10 +60,10 @@ import arm.data.FontSlot;
 	@:optional public var parseVCols = false;
 
 	@:optional public var selectTime = 0.0;
-	#if (kha_direct3d12 || kha_vulkan || kha_metal)
+	#if (krom_direct3d12 || krom_vulkan || krom_metal)
 	@:optional public var pathTraceMode = TraceCore;
 	#end
-	#if (kha_direct3d12 || kha_vulkan) // || kha_metal)
+	#if (krom_direct3d12 || krom_vulkan) // || krom_metal)
 	@:optional public var viewportMode = ViewPathTrace;
 	#else
 	@:optional public var viewportMode = ViewLit;

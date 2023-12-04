@@ -162,7 +162,7 @@ class UIMenubar {
 					m.translate(0, 0, 1.6);
 					Scene.active.camera.transform.setMatrix(m);
 				}
-				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				#if (krom_direct3d12 || krom_vulkan || krom_metal)
 				arm.render.RenderPathRaytrace.ready = false;
 				#end
 			}

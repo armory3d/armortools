@@ -178,7 +178,7 @@ class UIHeader {
 		else if (Context.raw.tool == ToolBake) {
 			ui.changed = false;
 
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			var baking = Context.raw.pdirty > 0;
 			var rtBake = Context.raw.bakeType == BakeAO || Context.raw.bakeType == BakeLightmap || Context.raw.bakeType == BakeBentNormal || Context.raw.bakeType == BakeThickness;
 			if (baking && ui.button(tr("Stop"))) {
@@ -198,7 +198,7 @@ class UIHeader {
 				});
 				UIBase.inst.hwnds[0].redraws = 2;
 				History.pushUndo = true;
-				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				#if (krom_direct3d12 || krom_vulkan || krom_metal)
 				arm.render.RenderPathRaytraceBake.currentSample = 0;
 				#end
 			}
@@ -217,7 +217,7 @@ class UIHeader {
 				tr("Object ID"),
 				tr("Vertex Color"),
 			];
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (Krom.raytraceSupported()) {
 				bakes.push(tr("Lightmap"));
 				bakes.push(tr("Bent Normal"));
@@ -230,13 +230,13 @@ class UIHeader {
 
 			Context.raw.bakeType = ui.combo(bakeHandle, bakes, tr("Bake"));
 
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (!Krom.raytraceSupported()) {
 				Context.raw.bakeType += 1; // Offset for removed AO
 			}
 			#end
 
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (rtBake) {
 				var samplesHandle = Zui.handle("uiheader_3", { value: Context.raw.bakeSamples });
 				Context.raw.bakeSamples = Std.int(ui.slider(samplesHandle, tr("Samples"), 1, 512, true, 1));
@@ -259,7 +259,7 @@ class UIHeader {
 				var offsetHandle = Zui.handle("uiheader_8", { value: Context.raw.bakeAoOffset });
 				Context.raw.bakeAoOffset = ui.slider(offsetHandle, tr("Offset"), 0.0, 2.0, true);
 			}
-			#if (kha_direct3d12 || kha_vulkan || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan || krom_metal)
 			if (rtBake) {
 				var progress = arm.render.RenderPathRaytraceBake.currentSample / Context.raw.bakeSamples;
 				if (progress > 1.0) progress = 1.0;

@@ -37,7 +37,7 @@ class RenderPathPreview {
 			t.height = Std.int(RenderUtil.materialPreviewSize * 2.0);
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			#if kha_opengl
+			#if krom_opengl
 			t.depth_buffer = "mmain";
 			#end
 			path.createRenderTarget(t);
@@ -79,7 +79,7 @@ class RenderPathPreview {
 		path.setTarget("mgbuffer2");
 		path.clearTarget(0xff000000);
 
-		#if (kha_metal)
+		#if (krom_metal)
 		var clearColor = 0xffffffff;
 		#else
 		var clearColor: Null<Int> = null;
@@ -100,14 +100,14 @@ class RenderPathPreview {
 		}
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("mtex", "mgbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("mtex"); // Re-binds depth
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("mtex", "mgbuffer1"); // Unbind depth
 		#end
 
@@ -129,7 +129,7 @@ class RenderPathPreview {
 		path.setTarget("gbuffer2");
 		path.clearTarget(0xff000000);
 
-		#if (kha_metal)
+		#if (krom_metal)
 		var clearColor = 0xffffffff;
 		#else
 		var clearColor: Null<Int> = null;
@@ -150,14 +150,14 @@ class RenderPathPreview {
 		}
 		path.drawShader("shader_datas/deferred_light/deferred_light");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("tex", "gbuffer0"); // Bind depth for world pass
 		#end
 
 		path.setTarget("tex");
 		path.drawSkydome("shader_datas/world_pass/world_pass");
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		path.setDepthFrom("tex", "gbuffer1"); // Unbind depth
 		#end
 

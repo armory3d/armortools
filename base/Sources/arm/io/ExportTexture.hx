@@ -268,7 +268,7 @@ class ExportTexture {
 			}
 		}
 
-		#if kha_metal
+		#if krom_metal
 		// Flush command list
 		App.expa.g2.begin(false);
 		App.expa.g2.end();

@@ -180,7 +180,7 @@ class RenderUtil {
 			Context.raw.textToolImage = null;
 		}
 		if (Context.raw.textToolImage == null) {
-			#if kha_metal
+			#if krom_metal
 			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.RGBA32);
 			#else
 			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
@@ -420,7 +420,7 @@ class RenderUtil {
 			arm.render.RenderPathPaint.setPlaneMesh();
 		}
 		arm.render.RenderPathPaint.commandsPaint(false);
-		#if kha_metal
+		#if krom_metal
 		// Flush command list
 		arm.render.RenderPathPaint.commandsPaint(false);
 		#end

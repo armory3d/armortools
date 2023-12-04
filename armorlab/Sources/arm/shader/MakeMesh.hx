@@ -133,7 +133,7 @@ class MakeMesh {
 		}
 
 		frag.vVec = true;
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 		#else
 		frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');

@@ -38,7 +38,7 @@ class MakeSculpt {
 		vert.add_out('vec2 texCoord');
 		vert.write('const vec2 madd = vec2(0.5, 0.5);');
 		vert.write('texCoord = pos.xy * madd + madd;');
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		vert.write('texCoord.y = 1.0 - texCoord.y;');
 		#end
 		vert.write('gl_Position = vec4(pos.xy, 0.0, 1.0);');

@@ -76,7 +76,7 @@ class RenderPathPaint {
 
 			if (Context.raw.tool == ToolPicker) {
 
-					#if kha_metal
+					#if krom_metal
 					//path.setTarget("texpaint_picker");
 					//path.clearTarget(0xff000000);
 					//path.setTarget("texpaint_nor_picker");
@@ -110,7 +110,7 @@ class RenderPathPaint {
 					}
 
 					// Picked surface values
-					// #if (kha_metal || kha_vulkan)
+					// #if (krom_metal || krom_vulkan)
 					// Context.raw.pickedColor.base.Rb = a.get(2);
 					// Context.raw.pickedColor.base.Gb = a.get(1);
 					// Context.raw.pickedColor.base.Bb = a.get(0);
@@ -217,7 +217,7 @@ class RenderPathPaint {
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(App.cursorInvVP, helpMat.self);
-		#if (kha_metal || kha_vulkan)
+		#if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
 		g.setVertexBuffer(geom.vertexBuffer);
@@ -253,7 +253,7 @@ class RenderPathPaint {
 
 		if (Context.raw.brushBlendDirty) {
 			Context.raw.brushBlendDirty = false;
-			#if kha_metal
+			#if krom_metal
 			path.setTarget("texpaint_blend0");
 			path.clearTarget(0x00000000);
 			path.setTarget("texpaint_blend1");

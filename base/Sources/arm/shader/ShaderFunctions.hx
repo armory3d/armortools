@@ -318,7 +318,7 @@ void createBasis(vec3 normal, out vec3 tangent, out vec3 binormal) {
 ";
 
 	public static var str_shIrradiance =
-#if kha_metal
+#if krom_metal
 "vec3 shIrradiance(const vec3 nor, constant vec4 shirr[7]) {
 	const float c1 = 0.429043;
 	const float c2 = 0.511664;

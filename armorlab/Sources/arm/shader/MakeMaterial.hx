@@ -44,7 +44,7 @@ class MakeMaterial {
 		makeVoxel(m);
 		#end
 
-		#if (kha_direct3d12 || kha_vulkan)
+		#if (krom_direct3d12 || krom_vulkan)
 		arm.render.RenderPathRaytrace.dirty = 1;
 		#end
 	}

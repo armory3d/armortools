@@ -3,7 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 
-#if (kha_direct3d12 || kha_vulkan || kha_metal)
+#if (krom_direct3d12 || krom_vulkan || krom_metal)
 
 class RenderPathRaytrace {
 
@@ -22,9 +22,9 @@ class RenderPathRaytrace {
 	static var lastEnvmap: kha.Image = null;
 	static var isBake = false;
 
-	#if kha_direct3d12
+	#if krom_direct3d12
 	public static inline var ext = ".cso";
-	#elseif kha_metal
+	#elseif krom_metal
 	public static inline var ext = ".metal";
 	#else
 	public static inline var ext = ".spirv";
@@ -92,7 +92,7 @@ class RenderPathRaytrace {
 		f32[1] = ct.worldy();
 		f32[2] = ct.worldz();
 		f32[3] = frame;
-		#if kha_metal
+		#if krom_metal
 		// frame = (frame % (16)) + 1; // _PAINT
 		frame = frame + 1; // _RENDER
 		#else
@@ -127,7 +127,7 @@ class RenderPathRaytrace {
 		Krom.raytraceDispatchRays(framebuffer.renderTarget_, f32.buffer);
 
 		if (Context.raw.ddirty == 1 || Context.raw.pdirty == 1) {
-			#if kha_metal
+			#if krom_metal
 			Context.raw.rdirty = 128;
 			#else
 			Context.raw.rdirty = 4;
@@ -177,7 +177,7 @@ class RenderPathRaytrace {
 		var isLive = Config.raw.brush_live && RenderPathPaint.liveLayerDrawn > 0;
 		if (Context.raw.ddirty > 1 || Context.raw.pdirty > 0 || isLive) frame = 0;
 
-		#if kha_metal
+		#if krom_metal
 		// Delay path tracing additional samples while painting
 		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
 		if (Context.inViewport() && down) frame = 0;

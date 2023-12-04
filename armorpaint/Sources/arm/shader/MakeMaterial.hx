@@ -111,7 +111,7 @@ class MakeMaterial {
 		makeVoxel(m);
 		#end
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		arm.render.RenderPathRaytrace.dirty = 1;
 		#end
 	}

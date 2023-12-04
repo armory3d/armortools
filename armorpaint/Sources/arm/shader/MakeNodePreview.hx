@@ -32,7 +32,7 @@ class MakeNodePreview {
 		vert.write_attrib('const vec2 madd = vec2(0.5, 0.5);');
 		vert.add_out('vec2 texCoord');
 		vert.write_attrib('texCoord = gl_Position.xy * madd + madd;');
-		#if (!kha_opengl)
+		#if (!krom_opengl)
 		vert.write_attrib('texCoord.y = 1.0 - texCoord.y;');
 		#end
 

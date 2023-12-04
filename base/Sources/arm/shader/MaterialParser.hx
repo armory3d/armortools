@@ -1102,7 +1102,7 @@ class MaterialParser {
 				frag.add_function(ShaderFunctions.str_cotangentFrame);
 			}
 			frag.n = true;
-			#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+			#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 			frag.write('mat3 TBN = cotangentFrame(n, vVec, texCoord);');
 			#else
 			frag.write('mat3 TBN = cotangentFrame(n, -vVec, texCoord);');
@@ -1163,7 +1163,7 @@ class MaterialParser {
 		else if (node.type == "CAMERA") {
 			if (socket == node.outputs[1]) { // View Z Depth
 				curshader.add_uniform("vec2 cameraProj", "_cameraPlaneProj");
-				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				curshader.wvpposition = true;
 				return "(cameraProj.y / ((wvpposition.z / wvpposition.w) - cameraProj.x))";
 				#else
@@ -1266,7 +1266,7 @@ class MaterialParser {
 		}
 		else if (node.type == "NEW_GEOMETRY") {
 			if (socket == node.outputs[6]) { // Backfacing
-				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				return "0.0"; // SV_IsFrontFace
 				#else
 				return "(1.0 - float(gl_FrontFacing))";
@@ -1834,7 +1834,7 @@ class MaterialParser {
 	}
 
 	public static inline function to_vec3(s: String): String {
-		#if (kha_direct3d11 || kha_direct3d12)
+		#if (krom_direct3d11 || krom_direct3d12)
 		return '($s).xxx';
 		#else
 		return 'vec3($s)';
@@ -1867,7 +1867,7 @@ class MaterialParser {
 			if (!letter && !digit) s = s.replace(s.charAt(i), "_");
 			if (i == 0 && digit) s = "_" + s;
 		}
-		#if kha_opengl
+		#if krom_opengl
 		while (s.indexOf("__") >= 0) s = s.replace("__", "_");
 		#end
 		return s;

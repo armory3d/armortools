@@ -3,7 +3,7 @@ package arm.render;
 import iron.RenderPath;
 import iron.Scene;
 
-#if (kha_direct3d12 || kha_vulkan || kha_metal)
+#if (krom_direct3d12 || krom_vulkan || krom_metal)
 
 @:access(arm.render.RenderPathRaytrace)
 class RenderPathRaytraceBake {
@@ -117,7 +117,7 @@ class RenderPathRaytraceBake {
 			path.bindTarget("baketex2", "tex");
 			path.drawShader("shader_datas/copy_pass/copy_pass");
 
-			#if kha_metal
+			#if krom_metal
 			var samplesPerFrame = 4;
 			#else
 			var samplesPerFrame = 64;

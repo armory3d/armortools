@@ -12,7 +12,7 @@ class MakePaint {
 	public static function run(data: NodeShaderData, matcon: TMaterialContext): NodeShaderContext {
 		var context_id = "paint";
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		var isRaytracedBake = Context.raw.bakeType == BakeInit;
 		#else
 		var isRaytracedBake = false;
@@ -43,7 +43,7 @@ class MakePaint {
 		var frag = con_paint.make_frag();
 		frag.ins = vert.outs;
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeInit) {
 			// Init raytraced bake
 			MakeBake.positionAndNormal(vert, frag);
@@ -70,7 +70,7 @@ class MakePaint {
 		var uvIslandFill = Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillUVIsland;
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		vert.write('vec2 tpos = vec2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);');
 		#else
 		vert.write('vec2 tpos = vec2(tex.xy * 2.0 - 1.0);');
@@ -129,7 +129,7 @@ class MakePaint {
 			}
 
 			if (depthReject) {
-				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				#else
 				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
@@ -155,7 +155,7 @@ class MakePaint {
 			}
 			var stencilFill = Context.raw.tool == ToolFill && Context.raw.brushStencilImage != null;
 			if (stencilFill) {
-				#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+				#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 				frag.write('if (sp.z > textureLod(gbufferD, sp.xy, 0.0).r + 0.0005) discard;');
 				#else
 				frag.write('if (sp.z > textureLod(gbufferD, vec2(sp.x, 1.0 - sp.y), 0.0).r + 0.0005) discard;');
@@ -333,7 +333,7 @@ class MakePaint {
 		// Manual blending to preserve memory
 		frag.wvpposition = true;
 		frag.write('vec2 sample_tc = vec2(wvpposition.xy / wvpposition.w) * 0.5 + 0.5;');
-		#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
+		#if (krom_direct3d11 || krom_direct3d12 || krom_metal || krom_vulkan)
 		frag.write('sample_tc.y = 1.0 - sample_tc.y;');
 		#end
 		frag.add_uniform('sampler2D paintmask');

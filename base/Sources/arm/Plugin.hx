@@ -140,7 +140,7 @@ class ArmBridge {
 	public static var UIBox = arm.ui.UIBox;
 	public static var MeshUtil = arm.util.MeshUtil;
 	public static var Viewport = arm.Viewport;
-	#if (kha_direct3d12 || kha_vulkan || kha_metal)
+	#if (krom_direct3d12 || krom_vulkan || krom_metal)
 	public static var RenderPathRaytrace = arm.render.RenderPathRaytrace;
 	#end
 }

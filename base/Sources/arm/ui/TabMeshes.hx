@@ -186,7 +186,7 @@ class TabMeshes {
 			iron.Scene.active.meshes = [mo];
 		}
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		arm.render.RenderPathRaytrace.ready = false;
 		#end
 	}

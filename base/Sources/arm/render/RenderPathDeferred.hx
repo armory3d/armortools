@@ -45,7 +45,7 @@ class RenderPathDeferred {
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = RenderPathBase.getSuperSampling();
-			#if kha_opengl
+			#if krom_opengl
 			t.depth_buffer = "main";
 			#end
 			path.createRenderTarget(t);
@@ -55,7 +55,7 @@ class RenderPathDeferred {
 			t.name = "buf";
 			t.width = 0;
 			t.height = 0;
-			#if (kha_direct3d12 || kha_vulkan)// || kha_metal)
+			#if (krom_direct3d12 || krom_vulkan)// || krom_metal)
 			// Match raytrace_target format
 			// Will cause "The render target format in slot 0 does not match that specified by the current pipeline state"
 			t.format = "RGBA64";
@@ -170,7 +170,7 @@ class RenderPathDeferred {
 		RenderPathPreview.init(path);
 		#end
 
-		#if (kha_direct3d12 || kha_vulkan || kha_metal)
+		#if (krom_direct3d12 || krom_vulkan || krom_metal)
 		RenderPathRaytrace.init(path);
 		#end
 	}

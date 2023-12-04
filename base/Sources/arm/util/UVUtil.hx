@@ -113,7 +113,7 @@ class UVUtil {
 			pipeDilate.vertexShader = kha.Shaders.getVertex("dilate_map.vert");
 			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_map.frag");
 			var vs = new VertexStructure();
-			#if (kha_metal || kha_vulkan)
+			#if (krom_metal || krom_vulkan)
 			vs.add("tex", VertexData.Short2Norm);
 			#else
 			vs.add("pos", VertexData.Short4Norm);
@@ -135,7 +135,7 @@ class UVUtil {
 		g4.begin();
 		g4.clear(0x00000000);
 		g4.setPipeline(pipeDilate);
-		#if (kha_metal || kha_vulkan)
+		#if (krom_metal || krom_vulkan)
 		g4.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
 		g4.setVertexBuffer(geom.vertexBuffer);

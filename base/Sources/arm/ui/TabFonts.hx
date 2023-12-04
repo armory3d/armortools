@@ -70,7 +70,7 @@ class TabFonts {
 					var state = State.Idle;
 					if (Project.fonts[i].previewReady) {
 						// ui.g.pipeline = UIView2D.inst.pipe; // L8
-						// #if kha_opengl
+						// #if krom_opengl
 						// ui.currentWindow.texture.g4.setPipeline(UIView2D.inst.pipe);
 						// #end
 						// ui.currentWindow.texture.g4.setInt(UIView2D.inst.channelLocation, 1);

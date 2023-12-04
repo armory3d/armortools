@@ -211,7 +211,7 @@ class RenderPathPaint {
 					}
 
 					// Picked surface values
-					#if (kha_metal || kha_vulkan)
+					#if (krom_metal || krom_vulkan)
 					var i0 = 2;
 					var i1 = 1;
 					var i2 = 0;
@@ -539,7 +539,7 @@ class RenderPathPaint {
 		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
 		g.setMatrix(App.cursorInvVP, helpMat);
-		#if (kha_metal || kha_vulkan)
+		#if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
 		g.setVertexBuffer(geom.vertexBuffer);
@@ -699,7 +699,7 @@ class RenderPathPaint {
 			#if is_paint
 			if (Context.raw.tool == ToolBake) {
 
-				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				#if (krom_direct3d12 || krom_vulkan || krom_metal)
 				var isRaytracedBake = (Context.raw.bakeType == BakeAO  ||
 					Context.raw.bakeType == BakeLightmap ||
 					Context.raw.bakeType == BakeBentNormal ||
@@ -759,7 +759,7 @@ class RenderPathPaint {
 					Context.selectPaintObject(_paintObject);
 					if (isMerged) Context.raw.mergedObject.visible = _visible;
 				}
-				#if (kha_direct3d12 || kha_vulkan || kha_metal)
+				#if (krom_direct3d12 || krom_vulkan || krom_metal)
 				else if (isRaytracedBake) {
 					var dirty = RenderPathRaytraceBake.commands(MakeMaterial.parsePaintMaterial);
 					if (dirty) UIHeader.inst.headerHandle.redraws = 2;
@@ -784,7 +784,7 @@ class RenderPathPaint {
 
 		if (Context.raw.brushBlendDirty) {
 			Context.raw.brushBlendDirty = false;
-			#if kha_metal
+			#if krom_metal
 			path.setTarget("texpaint_blend0");
 			path.clearTarget(0x00000000);
 			path.setTarget("texpaint_blend1");

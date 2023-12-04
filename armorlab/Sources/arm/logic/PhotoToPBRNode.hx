@@ -144,7 +144,7 @@ class PhotoToPBRNode extends LogicNode {
 							}
 						}
 
-						#if (kha_metal || kha_vulkan)
+						#if (krom_metal || krom_vulkan)
 						if (from == ChannelBaseColor) bgraSwap(bytes);
 						#end
 
@@ -163,7 +163,7 @@ class PhotoToPBRNode extends LogicNode {
 		});
 	}
 
-	#if (kha_metal || kha_vulkan)
+	#if (krom_metal || krom_vulkan)
 	static function bgraSwap(bytes: haxe.io.Bytes) {
 		for (i in 0...Std.int(bytes.length / 4)) {
 			var r = bytes.get(i * 4);

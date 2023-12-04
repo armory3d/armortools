@@ -914,7 +914,7 @@ class UINodes {
 					var tx = ww - tw - 8 * ui.SCALE();
 					var ty = wh - th - 8 * ui.SCALE();
 
-					#if kha_opengl
+					#if krom_opengl
 					var invertY = sel.type == "MATERIAL";
 					#else
 					var invertY = false;
@@ -923,7 +923,7 @@ class UINodes {
 					#if (is_paint || is_sculpt)
 					if (singleChannel) {
 						ui.g.pipeline = UIView2D.pipe;
-						#if kha_opengl
+						#if krom_opengl
 						Krom.setPipeline(UIView2D.pipe.pipeline);
 						#end
 						Krom.setInt(UIView2D.channelLocation, 1);
