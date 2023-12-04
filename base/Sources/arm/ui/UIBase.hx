@@ -1479,8 +1479,7 @@ class UIBase {
 
 	function onDeselectText() {
 		#if krom_ios
-		var kb = kha.input.Keyboard.get();
-		@:privateAccess kb.sendUpEvent(KeyCode.Shift);
+		Input.getKeyboard().upListener(KeyCode.Shift);
 		#end
 	}
 

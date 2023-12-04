@@ -163,8 +163,8 @@ class App {
 			function() {}, // Pause
 			function() { // Background
 				// Release keys after alt-tab / win-tab
-				@:privateAccess Input.getKeyboard().upListener(KeyCode.Alt);
-				@:privateAccess Input.getKeyboard().upListener(KeyCode.Win);
+				Input.getKeyboard().upListener(KeyCode.Alt);
+				Input.getKeyboard().upListener(KeyCode.Win);
 			},
 			function() { // Shutdown
 				#if (krom_android || krom_ios)
