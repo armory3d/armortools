@@ -364,7 +364,7 @@ class BoxExport {
 				UIBox.hide();
 				UIFiles.show(Context.raw.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
 					#if (krom_android || krom_ios)
-					var f = kha.Window.get(0).title;
+					var f = kha.Window.get().title;
 					#else
 					var f = UIFiles.filename;
 					#end

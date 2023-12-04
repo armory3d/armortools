@@ -90,9 +90,9 @@ class Project {
 			#if krom_ios
 			var documentDirectory = Krom.saveDialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			filepath = documentDirectory + "/" + kha.Window.get(0).title + ".arm";
+			filepath = documentDirectory + "/" + kha.Window.get().title + ".arm";
 			#elseif krom_android
-			filepath = Krom.savePath() + "/" + kha.Window.get(0).title + ".arm";
+			filepath = Krom.savePath() + "/" + kha.Window.get().title + ".arm";
 			#else
 			projectSaveAs(saveAndQuit);
 			return;

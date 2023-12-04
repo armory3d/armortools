@@ -186,7 +186,7 @@ class App {
 					Translator.loadTranslations(Config.raw.locale);
 					UIFiles.filename = tr("untitled");
 					#if (krom_android || krom_ios)
-					kha.Window.get(0).title = tr("untitled");
+					kha.Window.get().title = tr("untitled");
 					#end
 
 					// Baked font for fast startup
