@@ -2,11 +2,11 @@ package arm.ui;
 
 import kha.System;
 import kha.Image;
-import kha.graphics4.PipelineState;
-import kha.graphics4.VertexStructure;
-import kha.graphics4.VertexData;
-import kha.graphics4.BlendingFactor;
-import kha.graphics4.ConstantLocation;
+import kha.PipelineState;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
+import kha.PipelineState.BlendingFactor;
+import kha.Graphics4;
 import zui.Zui;
 import iron.system.Input;
 #if (is_paint || is_sculpt)
@@ -71,7 +71,7 @@ class UIView2D {
 	}
 
 	@:access(zui.Zui)
-	public function render(g: kha.graphics2.Graphics) {
+	public function render(g: kha.Graphics2) {
 
 		ww = Config.raw.layout[LayoutNodesW];
 
@@ -171,13 +171,13 @@ class UIView2D {
 				}
 
 				if (layerMode == View2DVisible) {
-					var current = @:privateAccess kha.graphics2.Graphics.current;
+					var current = @:privateAccess kha.Graphics2.current;
 					if (current != null) current.end();
 					layer = untyped App.flatten();
 					if (current != null) current.begin(false);
 				}
 				else if (layer.isGroup()) {
-					var current = @:privateAccess kha.graphics2.Graphics.current;
+					var current = @:privateAccess kha.Graphics2.current;
 					if (current != null) current.end();
 					layer = untyped App.flatten(false, layer.getChildren());
 					if (current != null) current.begin(false);
@@ -216,7 +216,7 @@ class UIView2D {
 					ui.g.pipeline = pipe;
 					#end
 					if (!Context.raw.textureFilter) {
-						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.Low;
+						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.Low;
 					}
 					#if kha_opengl
 					Krom.setPipeline(pipe.pipeline);
@@ -242,7 +242,7 @@ class UIView2D {
 				if (type == View2DLayer) {
 					ui.g.pipeline = null;
 					if (!Context.raw.textureFilter) {
-						ui.g.imageScaleQuality = kha.graphics2.ImageScaleQuality.High;
+						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.High;
 					}
 				}
 

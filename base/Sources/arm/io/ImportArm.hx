@@ -20,8 +20,8 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
 #if (is_paint || is_sculpt)
-import kha.graphics4.TextureFormat;
-import kha.graphics4.DepthStencilFormat;
+import kha.Image.TextureFormat;
+import kha.Image.DepthStencilFormat;
 import iron.data.MaterialData;
 import iron.system.Lz4;
 import iron.object.MeshObject;
@@ -71,9 +71,9 @@ class ImportArm {
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			#if (krom_android || krom_ios)
-			Window.get(0).title = UIFiles.filename;
+			Window.get().title = UIFiles.filename;
 			#else
-			Window.get(0).title = UIFiles.filename + " - " + Manifest.title;
+			Window.get().title = UIFiles.filename + " - " + Manifest.title;
 			#end
 
 			#if (is_paint || is_sculpt)

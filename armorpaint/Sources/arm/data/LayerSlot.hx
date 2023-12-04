@@ -1,6 +1,6 @@
 package arm.data;
 
-import kha.graphics4.TextureFormat;
+import kha.Image.TextureFormat;
 import kha.Image;
 import iron.RenderPath;
 import arm.ui.UIBase;
@@ -649,7 +649,7 @@ class LayerSlot {
 				this.parent = null; // Placed below a collapsed group.
 			else if (newUpperLayer.isLayer())
 				this.parent = newUpperLayer.parent; // Placed below a layer, use the same parent.
-			else if (newUpperLayer.isGroup()) 
+			else if (newUpperLayer.isGroup())
 				this.parent = newUpperLayer; // Placed as top layer in a group.
 			else if (newUpperLayer.isGroupMask())
 				this.parent = newUpperLayer.parent; // Placed in a group below the lowest group mask.
@@ -677,7 +677,7 @@ class LayerSlot {
 				this.parent = newUpperLayer;
 			else if (newUpperLayer.isMask()) { // Group mask or layer mask.
 				this.parent = newUpperLayer.parent;
-			}	
+			}
 		}
 		else if (this.isGroup()) {
 			var children = this.getRecursiveChildren();

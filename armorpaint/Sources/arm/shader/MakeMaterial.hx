@@ -107,7 +107,7 @@ class MakeMaterial {
 
 		Context.raw.ddirty = 2;
 
-		#if rp_voxels
+		#if arm_voxels
 		makeVoxel(m);
 		#end
 
@@ -174,7 +174,7 @@ class MakeMaterial {
 		m.shader.contexts.push(scon);
 	}
 
-	#if rp_voxels
+	#if arm_voxels
 	static function makeVoxel(m: MaterialData) {
 		var rebuild = heightUsed;
 		if (Config.raw.rp_gi != false && rebuild) {
@@ -194,7 +194,7 @@ class MakeMaterial {
 		if (!getMOut()) return;
 
 		if (bakePreviews) {
-			var current = @:privateAccess kha.graphics2.Graphics.current;
+			var current = @:privateAccess kha.Graphics2.current;
 			if (current != null) current.end();
 			bakeNodePreviews();
 			if (current != null) current.begin(false);
@@ -311,7 +311,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY, kha.graphics4.TextureFormat.L8);
+				image = kha.Image.createRenderTarget(resX, resY, kha.Image.TextureFormat.L8);
 				Context.raw.nodePreviews.set(id, image);
 			}
 

@@ -76,7 +76,7 @@ class Project {
 				return;
 			}
 
-			var current = @:privateAccess kha.graphics2.Graphics.current;
+			var current = @:privateAccess kha.Graphics2.current;
 			if (current != null) current.end();
 
 			ImportArm.runProject(path);
@@ -101,7 +101,7 @@ class Project {
 
 		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		Window.get(0).title = filename + " - " + Manifest.title;
+		Window.get().title = filename + " - " + Manifest.title;
 		#end
 
 		function _init() {
@@ -159,7 +159,7 @@ class Project {
 
 	public static function projectNew(resetLayers = true) {
 		#if (krom_windows || krom_linux || krom_darwin)
-		Window.get(0).title = Manifest.title;
+		Window.get().title = Manifest.title;
 		#end
 		filepath = "";
 
@@ -221,7 +221,7 @@ class Project {
 					}
 
 					var bytes = haxe.io.Bytes.ofData(f32.buffer);
-					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.RGBA128);
+					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.RGBA128);
 					var texpaint = Project.layers[0].texpaint;
 					texpaint.g2.begin(false);
 					texpaint.g2.pipeline = App.pipeCopy128;
@@ -248,7 +248,7 @@ class Project {
 		var n = Context.raw.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
-			var current = @:privateAccess kha.graphics2.Graphics.current;
+			var current = @:privateAccess kha.Graphics2.current;
 			if (current != null) current.end();
 
 			#if is_paint

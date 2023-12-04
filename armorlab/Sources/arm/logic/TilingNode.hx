@@ -85,7 +85,7 @@ class TilingNode extends LogicNode {
 		// 		bytes.set(y * 512 + x, 0);
 		// 	}
 		// }
-		var mask = kha.Image.fromBytes(bytes, 512, 512, kha.graphics4.TextureFormat.L8);
+		var mask = kha.Image.fromBytes(bytes, 512, 512, kha.Image.TextureFormat.L8);
 
 		@:privateAccess InpaintNode.prompt = prompt;
 		@:privateAccess InpaintNode.strength = strength;

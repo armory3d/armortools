@@ -1,13 +1,13 @@
 package arm.shader;
 
-import kha.graphics4.VertexStructure;
-import kha.graphics4.VertexData;
-import kha.graphics4.VertexShader;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
+import kha.VertexShader;
 import iron.data.ShaderData;
 
 class MakeVoxel {
 
-	#if rp_voxels
+	#if arm_voxels
 	public static function run(data: ShaderContext) {
 		var structure = new VertexStructure();
 		structure.add("pos", VertexData.Short4Norm);

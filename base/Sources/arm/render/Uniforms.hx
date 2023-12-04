@@ -377,7 +377,6 @@ class Uniforms {
 				#end
 			}
 
-			#if arm_ltc
 			case "_ltcMat": {
 				if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
 				return arm.data.ConstData.ltcMatTex;
@@ -386,7 +385,6 @@ class Uniforms {
 				if (arm.data.ConstData.ltcMagTex == null) arm.data.ConstData.initLTC();
 				return arm.data.ConstData.ltcMagTex;
 			}
-			#end
 
 			#if (is_paint || is_sculpt)
 			case "_texcolorid": {

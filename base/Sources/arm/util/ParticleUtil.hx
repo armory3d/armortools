@@ -119,6 +119,7 @@ class ParticleUtil {
 
 		Context.raw.paintBody = new arm.plugin.PhysicsBody();
 		Context.raw.paintBody.shape = arm.plugin.PhysicsBody.ShapeType.ShapeMesh;
+		Context.raw.paintBody.init(po);
 		po.addTrait(Context.raw.paintBody);
 	}
 

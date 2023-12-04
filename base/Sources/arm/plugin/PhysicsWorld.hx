@@ -7,7 +7,7 @@ import iron.math.Vec4;
 import iron.math.RayCaster;
 
 @:access(arm.plugin.PhysicsBody)
-class PhysicsWorld extends iron.Trait {
+class PhysicsWorld {
 
 	public static var active: PhysicsWorld = null;
 	static var vec1: Bt.Vector3 = null;
@@ -39,8 +39,6 @@ class PhysicsWorld extends iron.Trait {
 	}
 
 	public function new() {
-		super();
-
 		active = this;
 		vec1 = new Bt.Vector3(0, 0, 0);
 		vec2 = new Bt.Vector3(0, 0, 0);

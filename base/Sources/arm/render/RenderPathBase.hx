@@ -20,7 +20,7 @@ class RenderPathBase {
 	static var bloomMipmaps: Array<RenderTarget>;
 	static var bloomCurrentMip = 0;
 	static var bloomSampleScale: Float;
-	#if rp_voxels
+	#if arm_voxels
 	public static inline var voxelsRes = 256;
 	static var voxelsCreated = false;
 	#end
@@ -30,7 +30,7 @@ class RenderPathBase {
 		superSample = Config.raw.rp_supersample;
 	}
 
-	#if rp_voxels
+	#if arm_voxels
 	public static function initVoxels(targetName = "voxels") {
 		if (Config.raw.rp_gi != true || voxelsCreated) return;
 		voxelsCreated = true;
@@ -59,7 +59,7 @@ class RenderPathBase {
 			}
 			path.resize();
 		}
-		#if rp_voxels
+		#if arm_voxels
 		if (!voxelsCreated) initVoxels();
 		#end
 	}
@@ -68,7 +68,7 @@ class RenderPathBase {
 		return superSample;
 	}
 
-	public static function drawCompass(currentG: kha.graphics4.Graphics) {
+	public static function drawCompass(currentG: kha.Graphics4) {
 		if (Context.raw.showCompass) {
 			var scene = Scene.active;
 			var cam = scene.camera;
@@ -292,7 +292,7 @@ class RenderPathBase {
 		}
 	}
 
-	#if rp_voxels
+	#if arm_voxels
 	public static function drawVoxels() {
 		if (Config.raw.rp_gi != false) {
 			var voxelize = Context.raw.ddirty > 0 && taaFrame > 0;
@@ -374,7 +374,7 @@ class RenderPathBase {
 		}
 
 		var voxelao_pass = false;
-		#if rp_voxels
+		#if arm_voxels
 		if (Config.raw.rp_gi != false) {
 			voxelao_pass = true;
 			path.bindTarget("voxels", "voxels");

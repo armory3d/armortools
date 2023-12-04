@@ -101,7 +101,7 @@ class RenderPathDeferred {
 			var rt = new RenderTarget(t);
 			var b = haxe.io.Bytes.alloc(1);
 			b.set(0, 255);
-			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.L8);
+			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.L8);
 			path.renderTargets.set(t.name, rt);
 		}
 		{
@@ -116,7 +116,7 @@ class RenderPathDeferred {
 			b.set(1, 0);
 			b.set(2, 0);
 			b.set(3, 0);
-			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.graphics4.TextureFormat.RGBA32);
+			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.RGBA32);
 			path.renderTargets.set(t.name, rt);
 		}
 
@@ -157,7 +157,7 @@ class RenderPathDeferred {
 		path.loadShader("shader_datas/supersample_resolve/supersample_resolve");
 		// path.loadShader("shader_datas/motion_blur_pass/motion_blur_pass");
 		// path.loadShader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
-		#if rp_voxels
+		#if arm_voxels
 		{
 			RenderPathBase.initVoxels();
 			path.loadShader("shader_datas/deferred_light/deferred_light_voxel");
@@ -184,7 +184,7 @@ class RenderPathDeferred {
 
 	public static function drawDeferred() {
 		RenderPathBase.drawSSAO();
-		#if rp_voxels
+		#if arm_voxels
 		RenderPathBase.drawVoxels();
 		#end
 		RenderPathBase.drawDeferredLight();

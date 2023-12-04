@@ -38,7 +38,7 @@ class UIToolbar {
 		inst = this;
 	}
 
-	public function renderUI(g: kha.graphics2.Graphics) {
+	public function renderUI(g: kha.Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		if (Config.raw.touch_ui) {

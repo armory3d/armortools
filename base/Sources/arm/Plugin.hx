@@ -90,7 +90,6 @@ class CoreBridge {
 	public static var BytesOutput = haxe.io.BytesOutput;
 	public static var Blob = kha.Blob;
 	public static var Image = kha.Image;
-	public static var Scheduler = kha.Scheduler;
 	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
 		return kha.Color.fromFloats(r, g, b, a);
 	}

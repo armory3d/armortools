@@ -1,11 +1,11 @@
 package arm.io;
 
-import kha.graphics4.TextureFormat;
-import kha.graphics4.PipelineState;
-import kha.graphics4.VertexStructure;
-import kha.graphics4.VertexData;
-import kha.graphics4.TextureUnit;
-import kha.graphics4.ConstantLocation;
+import kha.Image.TextureFormat;
+import kha.PipelineState;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
+import kha.Graphics4.TextureUnit;
+import kha.Graphics4.ConstantLocation;
 import js.lib.Float32Array;
 import kha.Image;
 import iron.data.ConstData;
@@ -66,7 +66,7 @@ class ImportEnvmap {
 				_radianceCpu.unload();
 			});
 		}
-		radianceCpu = Image.fromBytes(radiancePixels, radiance.width, radiance.height, TextureFormat.RGBA128, kha.graphics4.Usage.DynamicUsage);
+		radianceCpu = Image.fromBytes(radiancePixels, radiance.width, radiance.height, TextureFormat.RGBA128, kha.Graphics4.Usage.DynamicUsage);
 
 		// Radiance
 		if (mipsCpu != null) {
@@ -82,7 +82,7 @@ class ImportEnvmap {
 		mipsCpu = [];
 		for (i in 0...mips.length) {
 			getRadianceMip(mips[i], i, radiance);
-			mipsCpu.push(Image.fromBytes(mips[i].getPixels(), mips[i].width, mips[i].height, TextureFormat.RGBA128, kha.graphics4.Usage.DynamicUsage));
+			mipsCpu.push(Image.fromBytes(mips[i].getPixels(), mips[i].width, mips[i].height, TextureFormat.RGBA128, kha.Graphics4.Usage.DynamicUsage));
 		}
 		radianceCpu.setMipmaps(mipsCpu);
 

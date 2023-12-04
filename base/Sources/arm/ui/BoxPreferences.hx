@@ -446,7 +446,7 @@ class BoxPreferences {
 				if (Context.raw.hsupersample.changed) Config.applyConfig();
 
 				if (Context.raw.renderMode == RenderDeferred) {
-					#if rp_voxels
+					#if arm_voxels
 					ui.check(Context.raw.hvxao, tr("Voxel AO"));
 					if (ui.isHovered) ui.tooltip(tr("Cone-traced AO and shadows"));
 					if (Context.raw.hvxao.changed) {

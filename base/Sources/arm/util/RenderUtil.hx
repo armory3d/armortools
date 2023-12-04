@@ -1,11 +1,11 @@
 package arm.util;
 
-import kha.graphics4.TextureFormat;
-import kha.graphics4.VertexBuffer;
-import kha.graphics4.IndexBuffer;
-import kha.graphics4.Usage;
-import kha.graphics4.VertexStructure;
-import kha.graphics4.VertexData;
+import kha.Image.TextureFormat;
+import kha.VertexBuffer;
+import kha.IndexBuffer;
+import kha.Graphics4.Usage;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
 import kha.Image;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
@@ -99,7 +99,7 @@ class RenderUtil {
 	}
 
 	public static function makeDecalPreview() {
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		if (Context.raw.decalImage == null) {
@@ -165,7 +165,7 @@ class RenderUtil {
 	}
 
 	public static function makeTextPreview() {
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		var text = Context.raw.textToolText;
@@ -198,7 +198,7 @@ class RenderUtil {
 	}
 
 	public static function makeFontPreview() {
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		var text = "Abg";
@@ -225,7 +225,7 @@ class RenderUtil {
 		if (RenderPathPaint.liveLayerLocked) return;
 		Context.raw.materialPreview = true;
 
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		// Prepare layers

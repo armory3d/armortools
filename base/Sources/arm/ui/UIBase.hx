@@ -1,7 +1,7 @@
 package arm.ui;
 
 import haxe.io.Bytes;
-import kha.input.KeyCode;
+import iron.system.Input.KeyCode;
 import kha.Image;
 import kha.System;
 import zui.Zui;
@@ -16,7 +16,7 @@ import arm.ProjectFormat;
 import arm.Viewport;
 import arm.Res;
 #if (is_paint || is_sculpt)
-import kha.math.FastMatrix3;
+import iron.math.Mat3;
 import iron.object.Object;
 import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
@@ -701,6 +701,7 @@ class UIBase {
 						body.mass = 1.0;
 						body.ccd = true;
 						mo.transform.radius /= 10; // Lower ccd radius
+						body.init(mo);
 						mo.addTrait(body);
 						mo.transform.radius *= 10;
 
@@ -757,8 +758,8 @@ class UIBase {
 			if (searchHandle.changed) operatorSearchOffset = 0;
 
 			if (ui.isKeyPressed) { // Move selection
-				if (ui.key == kha.input.KeyCode.Down && operatorSearchOffset < 6) operatorSearchOffset++;
-				if (ui.key == kha.input.KeyCode.Up && operatorSearchOffset > 0) operatorSearchOffset--;
+				if (ui.key == KeyCode.Down && operatorSearchOffset < 6) operatorSearchOffset++;
+				if (ui.key == KeyCode.Up && operatorSearchOffset > 0) operatorSearchOffset--;
 			}
 			var enter = kb.down("enter");
 			var count = 0;
@@ -1108,7 +1109,7 @@ class UIBase {
 		#end
 	}
 
-	public function render(g: kha.graphics2.Graphics) {
+	public function render(g: kha.Graphics2) {
 		if (!show && Config.raw.touch_ui) {
 			ui.inputEnabled = true;
 			g.end();
@@ -1223,7 +1224,7 @@ class UIBase {
 		Context.raw.lastHtab0Position = htabs[TabSidebar0].position;
 	}
 
-	public function renderCursor(g: kha.graphics2.Graphics) {
+	public function renderCursor(g: kha.Graphics2) {
 		if (!App.uiEnabled) return;
 
 		#if is_paint
@@ -1251,7 +1252,7 @@ class UIBase {
 				var angle = Context.raw.brushStencilAngle;
 				var cx = r.x + r.w / 2;
 				var cy = r.y + r.h / 2;
-				g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
+				g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(-angle)).multmat(Mat3.translation(-cx, -cy));
 				g.drawScaledImage(Context.raw.brushStencilImage, r.x, r.y, r.w, r.h);
 				g.transformation = null;
 				g.color = 0xffffffff;
@@ -1269,8 +1270,8 @@ class UIBase {
 				var angle = Context.raw.brushStencilAngle;
 				var cx = r.x + r.w / 2;
 				var cy = r.y + r.h / 2;
-				g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(-angle)).multmat(FastMatrix3.translation(-cx, -cy));
-				kha.graphics2.GraphicsExtension.fillCircle(g, r.x + r.w / 2, r.y - 4, 8);
+				g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(-angle)).multmat(Mat3.translation(-cx, -cy));
+				g.fillCircle(r.x + r.w / 2, r.y - 4, 8);
 				g.transformation = null;
 			}
 		}
@@ -1335,7 +1336,7 @@ class UIBase {
 					var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
 					var cx = decalX + psizex / 2;
 					var cy = decalY + psizey / 2;
-					g.transformation = FastMatrix3.translation(cx, cy).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-cx, -cy));
+					g.transformation = Mat3.translation(cx, cy).multmat(Mat3.rotation(angle)).multmat(Mat3.translation(-cx, -cy));
 					#if (kha_direct3d11 || kha_direct3d12 || kha_metal || kha_vulkan)
 					g.drawScaledImage(Context.raw.decalImage, decalX, decalY, psizex, psizey);
 					#else

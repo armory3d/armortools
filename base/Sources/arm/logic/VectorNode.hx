@@ -46,7 +46,7 @@ class VectorNode extends LogicNode {
 					b.setFloat(4, untyped inputs[1].node.value);
 					b.setFloat(8, untyped inputs[2].node.value);
 					b.setFloat(12, 1.0);
-					image = kha.Image.fromBytes(b, 1, 1, kha.graphics4.TextureFormat.RGBA128);
+					image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
 					done(image);
 				});
 			});

@@ -1,11 +1,12 @@
 package arm.ui;
 
-import kha.arrays.ByteArray;
+import js.lib.DataView;
+import js.lib.ArrayBuffer;
 
 @:access(zui.Zui)
 class UINodesExt {
 
-	static var lastVertices: ByteArray = null; // Before displacement
+	static var lastVertices: DataView = null; // Before displacement
 
 	public static function drawButtons(ew: Float, startY: Float) {
 		var ui = UINodes.inst.ui;
@@ -33,7 +34,7 @@ class UINodesExt {
 			}
 
 			App.notifyOnNextFrame(function() {
-				var timer = iron.system.Time.realTime();
+				var timer = iron.system.Time.time();
 				arm.logic.LogicParser.parse(Project.canvas, false);
 
 				arm.logic.PhotoToPBRNode.cachedSource = null;
@@ -96,7 +97,7 @@ class UINodesExt {
 							var g = o.data.geom;
 							var vertices = g.vertexBuffer.lock();
 							if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
-								lastVertices = ByteArray.make(vertices.byteLength);
+								lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
 								for (i in 0...Std.int(vertices.byteLength / 2)) {
 									lastVertices.setInt16(i * 2, vertices.getInt16(i * 2), true);
 								}
@@ -124,7 +125,7 @@ class UINodesExt {
 						}
 					}
 
-					Console.log("Processing finished in " + (iron.system.Time.realTime() - timer));
+					Console.log("Processing finished in " + (iron.system.Time.time() - timer));
 					Krom.mlUnload();
 
 					taskDone();

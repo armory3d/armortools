@@ -65,7 +65,7 @@ class BoxProjects {
 						j = 0;
 					}
 				}
-				kha.Window.get(0).title = title;
+				kha.Window.get().title = title;
 			}
 			ui.endSticky();
 			ui.separator(3, false);
@@ -197,7 +197,7 @@ class BoxProjects {
 				if (file.toLowerCase().indexOf(hsearch.text.toLowerCase()) < 0) continue; // Search filter
 
 				if (ui.button(file, Left) && arm.sys.File.exists(path)) {
-					var current = @:privateAccess kha.graphics2.Graphics.current;
+					var current = @:privateAccess kha.Graphics2.current;
 					if (current != null) current.end();
 
 					ImportArm.runProject(path);

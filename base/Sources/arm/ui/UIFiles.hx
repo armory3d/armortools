@@ -1,6 +1,7 @@
 package arm.ui;
 
 import haxe.io.Bytes;
+import iron.system.Input.KeyCode;
 import zui.Zui;
 import iron.system.Input;
 import iron.system.Time;
@@ -71,11 +72,11 @@ class UIFiles {
 
 	static function releaseKeys() {
 		// File dialog may prevent firing key up events
-		var kb = kha.input.Keyboard.get();
-		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Shift);
-		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Control);
+		var kb = iron.system.Input.getKeyboard();
+		kb.upListener(KeyCode.Shift);
+		kb.upListener(KeyCode.Control);
 		#if krom_darwin
-		@:privateAccess kb.sendUpEvent(kha.input.KeyCode.Meta);
+		kb.upListener(KeyCode.Meta);
 		#end
 	}
 

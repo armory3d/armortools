@@ -30,7 +30,7 @@ class UIMenu {
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 
-	public static function render(g: kha.graphics2.Graphics) {
+	public static function render(g: kha.Graphics2) {
 		var ui = App.uiMenu;
 		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.3) : Std.int(ui.ELEMENT_W() * 2.3);
 		var _BUTTON_COL = ui.t.BUTTON_COL;
@@ -182,8 +182,7 @@ class UIMenu {
 						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
 						else if (newAngle > 2 * Math.PI) newAngle -= Std.int(newAngle / (2 * Math.PI)) * 2 * Math.PI;
 						Context.raw.lightAngle = newAngle;
-						var m = iron.math.Mat4.identity();
-						m.self = kha.math.FastMatrix4.rotationZ(ldiff);
+						var m = iron.math.Mat4.rotationZ(ldiff);
 						light.transform.local.multmat(m);
 						light.transform.decompose();
 						Context.raw.ddirty = 2;

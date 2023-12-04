@@ -1,13 +1,12 @@
 package arm.data;
 
-import kha.graphics4.TextureFormat;
+import kha.Image.TextureFormat;
 import kha.Blob;
 import kha.Image;
 import iron.data.Data;
 import iron.system.ArmPack;
 
 class ConstData {
-	#if arm_ltc
 	public static var ltcMatTex: Image = null;
 	public static var ltcMagTex: Image = null;
 	public static function initLTC() {
@@ -20,5 +19,4 @@ class ConstData {
 			});
 		});
 	}
-	#end
 }

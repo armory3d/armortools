@@ -1,9 +1,9 @@
 package arm.util;
 
-import kha.graphics4.PipelineState;
-import kha.graphics4.VertexData;
-import kha.graphics4.VertexStructure;
-import kha.graphics4.CompareMode;
+import kha.PipelineState;
+import kha.VertexBuffer.VertexData;
+import kha.VertexBuffer.VertexStructure;
+import kha.PipelineState.CompareMode;
 import kha.Image;
 
 class UVUtil {
@@ -105,7 +105,7 @@ class UVUtil {
 		if (dilatemapCached) return;
 
 		if (dilatemap == null) {
-			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.L8);
+			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.L8);
 		}
 
 		if (pipeDilate == null) {
@@ -123,7 +123,7 @@ class UVUtil {
 			pipeDilate.inputLayout = [vs];
 			pipeDilate.depthWrite = false;
 			pipeDilate.depthMode = CompareMode.Always;
-			pipeDilate.colorAttachments[0] = kha.graphics4.TextureFormat.L8;
+			pipeDilate.colorAttachments[0] = kha.Image.TextureFormat.L8;
 			pipeDilate.compile();
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
@@ -179,7 +179,7 @@ class UVUtil {
 		if (uvislandmap != null) {
 			uvislandmap.unload();
 		}
-		uvislandmap = Image.fromBytes(bytes, w, h, kha.graphics4.TextureFormat.L8);
+		uvislandmap = Image.fromBytes(bytes, w, h, kha.Image.TextureFormat.L8);
 		uvislandmapCached = true;
 	}
 }

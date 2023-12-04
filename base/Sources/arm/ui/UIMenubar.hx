@@ -26,7 +26,7 @@ class UIMenubar {
 		inst = this;
 	}
 
-	public function renderUI(g: kha.graphics2.Graphics) {
+	public function renderUI(g: kha.Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		#if (is_paint || is_sculpt)

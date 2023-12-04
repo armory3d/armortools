@@ -1,6 +1,6 @@
 package arm.ui;
 
-import kha.input.KeyCode;
+import iron.system.Input.KeyCode;
 import zui.Zui;
 import arm.sys.File;
 import arm.sys.Path;
@@ -70,7 +70,7 @@ class TabBrowser {
 			var refresh = false;
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&
 						  ui.inputY > ui._windowY && ui.inputY < ui._windowY + ui._windowH;
-			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == kha.input.KeyCode.F5)) {
+			if (ui.button(tr("Refresh")) || (inFocus && ui.isKeyPressed && ui.key == KeyCode.F5)) {
 				refresh = true;
 			}
 			hsearch.text = ui.textInput(hsearch, tr("Search"), Align.Left, true, true);

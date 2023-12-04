@@ -200,7 +200,7 @@ vec3 brightcontrast(const vec3 col, const float bright, const float contr) {
 
 //
 
-	#if rp_voxels
+	#if arm_voxels
 	public static var str_traceAO = '
 float traceConeAO(sampler3D voxels, const vec3 origin, vec3 dir, const float aperture, const float maxDist, const float offset) {
 	const ivec3 voxelgiResolution = ivec3(256, 256, 256);

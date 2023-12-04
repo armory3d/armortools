@@ -9,7 +9,7 @@ class MakeBake {
 
 	public static function run(con: NodeShaderContext, vert: NodeShader, frag: NodeShader) {
 		if (Context.raw.bakeType == BakeAO) { // Voxel
-			#if rp_voxels
+			#if arm_voxels
 			// Apply normal channel
 			frag.wposition = true;
 			frag.n = true;

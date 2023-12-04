@@ -23,7 +23,7 @@ class UIBox {
 	static var tweenAlpha = 0.0;
 	#end
 
-	public static function render(g: kha.graphics2.Graphics) {
+	public static function render(g: kha.Graphics2) {
 		if (!UIMenu.show) {
 			var mouse = Input.getMouse();
 			var kb = Input.getKeyboard();

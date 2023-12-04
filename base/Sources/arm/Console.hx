@@ -10,7 +10,7 @@ class Console {
 	static var haxeTrace: Dynamic->haxe.PosInfos->Void = null;
 	static var progressText: String = null;
 
-	static function drawToast(s: String, g: kha.graphics2.Graphics) {
+	static function drawToast(s: String, g: kha.Graphics2) {
 		g.color = 0x55000000;
 		g.fillRect(0, 0, kha.System.windowWidth(), kha.System.windowHeight());
 		var scale = arm.App.getUIs()[0].SCALE();
@@ -23,9 +23,9 @@ class Console {
 		g.drawString(s, x - g.font.width(g.fontSize, s) / 2, y + 40 * scale - g.font.height(g.fontSize) / 2);
 	}
 
-	public static function toast(s: String, g2: kha.graphics2.Graphics = null) {
+	public static function toast(s: String, g2: kha.Graphics2 = null) {
 		// Show a popup message
-		function _render(g: kha.graphics2.Graphics) {
+		function _render(g: kha.Graphics2) {
 			drawToast(s, g);
 			if (g2 == null) {
 				arm.App.notifyOnNextFrame(function() {
@@ -37,7 +37,7 @@ class Console {
 		consoleTrace(s);
 	}
 
-	static function drawProgress(g: kha.graphics2.Graphics) {
+	static function drawProgress(g: kha.Graphics2) {
 		drawToast(progressText, g);
 	}
 

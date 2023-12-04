@@ -29,7 +29,7 @@ class RGBNode extends LogicNode {
 		b.setFloat(4, default_value[1]);
 		b.setFloat(8, default_value[2]);
 		b.setFloat(12, default_value[3]);
-		image = kha.Image.fromBytes(b, 1, 1, kha.graphics4.TextureFormat.RGBA128);
+		image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
 		done(image);
 	}
 

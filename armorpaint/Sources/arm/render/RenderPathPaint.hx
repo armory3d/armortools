@@ -249,7 +249,7 @@ class RenderPathPaint {
 				}
 			}
 			else {
-				#if rp_voxels
+				#if arm_voxels
 				if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeAO) {
 					if (initVoxels) {
 						initVoxels = false;
@@ -296,7 +296,7 @@ class RenderPathPaint {
 					path.bindTarget("gbuffer0", "gbuffer0");
 				}
 				path.bindTarget("texpaint_blend1", "paintmask");
-				#if rp_voxels
+				#if arm_voxels
 				if (Context.raw.tool == ToolBake && Context.raw.bakeType == BakeAO) {
 					path.bindTarget("voxels", "voxels");
 				}
@@ -535,10 +535,10 @@ class RenderPathPaint {
 		var right = Scene.active.camera.rightWorld().normalize();
 		g.setFloat3(App.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(App.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(App.cursorVP, Scene.active.camera.VP.self);
+		g.setMatrix(App.cursorVP, Scene.active.camera.VP);
 		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
-		g.setMatrix(App.cursorInvVP, helpMat.self);
+		g.setMatrix(App.cursorInvVP, helpMat);
 		#if (kha_metal || kha_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else

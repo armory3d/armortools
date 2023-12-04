@@ -1,16 +1,16 @@
 package arm.render;
 
-import kha.graphics4.PipelineState;
-import kha.graphics4.VertexStructure;
-import kha.graphics4.VertexBuffer;
-import kha.graphics4.IndexBuffer;
-import kha.graphics4.VertexData;
-import kha.graphics4.Usage;
-import kha.graphics4.ConstantLocation;
-import kha.graphics4.CompareMode;
-import kha.graphics4.CullMode;
-import kha.graphics4.TextureFormat;
-import kha.graphics4.DepthStencilFormat;
+import kha.PipelineState;
+import kha.PipelineState.CompareMode;
+import kha.PipelineState.CullMode;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
+import kha.VertexBuffer;
+import kha.IndexBuffer;
+import kha.Graphics4.Usage;
+import kha.Graphics4.ConstantLocation;
+import kha.Image.TextureFormat;
+import kha.Image.DepthStencilFormat;
 import iron.math.Vec4;
 import iron.math.Mat4;
 
@@ -36,9 +36,9 @@ class LineDraw {
 	static inline var maxIndices = maxLines * 6;
 	static var lines = 0;
 
-	static var g: kha.graphics4.Graphics;
+	static var g: kha.Graphics4;
 
-	public static function render(g4: kha.graphics4.Graphics, matrix: iron.math.Mat4) {
+	public static function render(g4: kha.Graphics4, matrix: iron.math.Mat4) {
 		g = g4;
 		mat = matrix;
 		dim = matrix.getScale();
@@ -196,7 +196,7 @@ class LineDraw {
 		var camera = iron.Scene.active.camera;
 		vp.setFrom(camera.V);
 		vp.multmat(camera.P);
-		g.setMatrix(vpID, vp.self);
+		g.setMatrix(vpID, vp);
 		g.drawIndexedVertices(0, lines * 6);
 	}
 

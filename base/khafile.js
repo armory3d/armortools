@@ -3,7 +3,6 @@ let flags = {};
 globalThis.flags = flags;
 flags.android = process.argv.indexOf("android") >= 0;
 flags.ios = process.argv.indexOf("ios") >= 0;
-flags.win_hlsl = process.platform === "win32" && process.argv.indexOf("opengl") < 0;
 flags.d3d12 = process.argv.indexOf("direct3d12") >= 0;
 flags.vulkan = process.argv.indexOf("vulkan") >= 0;
 flags.metal = process.argv.indexOf("metal") >= 0;
@@ -38,14 +37,9 @@ project.addParameter("--macro include('arm.logic')");
 project.addParameter("-dce full");
 project.addDefine("analyzer-optimize");
 project.addDefine("js-es=6");
-project.addDefine("zui_translate");
-project.addDefine("arm_data_dir");
-project.addDefine("arm_ltc");
-project.addDefine("arm_skip_envmap");
-project.addDefine("arm_taa");
-project.addDefine("arm_veloc");
 project.addDefine("arm_particles");
 // project.addDefine("arm_skin");
+// project.addDefine("arm_audio");
 
 if (flags.android) {
 	project.addDefine("kha_android_rmb");
@@ -66,9 +60,9 @@ if (flags.raytrace) {
 }
 
 if (flags.voxels) {
-	project.addDefine("rp_voxels");
+	project.addDefine("arm_voxels");
 
-	if (process.platform === "win32" && flags.win_hlsl) {
+	if (process.platform === "win32") {
 		project.addShaders("Shaders/voxel_hlsl/*.glsl", { embed: flags.snapshot, noprocessing: true });
 	}
 	else {

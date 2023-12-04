@@ -9,7 +9,7 @@ import iron.object.MeshObject;
 import iron.data.MeshData;
 
 @:access(arm.plugin.PhysicsWorld)
-class PhysicsBody extends iron.Trait {
+class PhysicsBody {
 
 	@:keep
 	public var props = ["mass"];
@@ -19,15 +19,17 @@ class PhysicsBody extends iron.Trait {
 	@:keep
 	function set_mass(f: Float): Float {
 		if (ready) {
-			remove();
+			// remove();
 			var t = new PhysicsBody();
 			t.mass = f;
+			t.init(object);
 			object.addTrait(t);
 		}
 		else mass = f;
 		return f;
 	}
 
+	public var object: iron.object.Object;
 	public var friction = 0.5;
 	public var restitution = 0.0;
 	public var collisionMargin = 0.0;
@@ -74,8 +76,6 @@ class PhysicsBody extends iron.Trait {
 	static var usersCache = new Map<MeshData, Int>();
 
 	public function new() {
-		super();
-
 		if (first) {
 			first = false;
 			vec1 = new Bt.Vector3(0, 0, 0);
@@ -85,15 +85,14 @@ class PhysicsBody extends iron.Trait {
 			trans1 = new Bt.Transform();
 			trans2 = new Bt.Transform();
 		}
-
-		notifyOnAdd(init);
 	}
 
 	inline function withMargin(f: Float) {
 		return f - f * collisionMargin;
 	}
 
-	function init() {
+	public function init(o: iron.object.Object) {
+		object = o;
 		if (ready) return;
 		ready = true;
 
@@ -217,7 +216,8 @@ class PhysicsBody extends iron.Trait {
 		untyped body.userIndex = id;
 
 		physics.addBody(this);
-		notifyOnRemove(removeFromWorld);
+
+		// notifyOnRemove(removeFromWorld);
 
 		Bt.Ammo.destroy(bodyCI);
 	}

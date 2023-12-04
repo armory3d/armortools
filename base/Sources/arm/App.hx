@@ -1,6 +1,12 @@
 package arm;
 
-import kha.graphics4.*;
+import iron.system.Input.KeyCode;
+import kha.PipelineState;
+import kha.Graphics4;
+import kha.VertexBuffer.VertexStructure;
+import kha.VertexBuffer.VertexData;
+import kha.PipelineState.BlendingFactor;
+import kha.PipelineState.CompareMode;
 import kha.Image;
 import kha.Font;
 import kha.System;
@@ -157,8 +163,8 @@ class App {
 			function() {}, // Pause
 			function() { // Background
 				// Release keys after alt-tab / win-tab
-				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Alt);
-				@:privateAccess Input.getKeyboard().upListener(kha.input.KeyCode.Win);
+				@:privateAccess Input.getKeyboard().upListener(KeyCode.Alt);
+				@:privateAccess Input.getKeyboard().upListener(KeyCode.Win);
 			},
 			function() { // Shutdown
 				#if (krom_android || krom_ios)
@@ -186,7 +192,7 @@ class App {
 					// Baked font for fast startup
 					if (Config.raw.locale == "en") {
 						font.font_ = Krom.g2_font_13(font.blob.bytes.getData());
-						font.fontGlyphs = kha.graphics2.Graphics.fontGlyphs;
+						font.fontGlyphs = kha.Graphics2.fontGlyphs;
 					}
 					else font.init();
 
@@ -214,7 +220,7 @@ class App {
 					new UIView2D();
 
 					#if is_lab
-					arm.logic.RandomNode.setSeed(Std.int(iron.system.Time.realTime() * 4294967295));
+					arm.logic.RandomNode.setSeed(Std.int(iron.system.Time.time() * 4294967295));
 					#end
 
 					iron.App.notifyOnUpdate(update);
@@ -407,8 +413,8 @@ class App {
 		#if (krom_windows || krom_linux || krom_darwin)
 		Config.raw.window_w = System.windowWidth();
 		Config.raw.window_h = System.windowHeight();
-		Config.raw.window_x = kha.Window.get(0).x;
-		Config.raw.window_y = kha.Window.get(0).y;
+		Config.raw.window_x = kha.Window.get().x;
+		Config.raw.window_y = kha.Window.get().y;
 		Config.save();
 		#end
 	}
@@ -720,7 +726,7 @@ class App {
 		return null;
 	}
 
-	static function render(g: kha.graphics2.Graphics) {
+	static function render(g: kha.Graphics2) {
 		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
 
 		if (Context.raw.frame == 2) {
@@ -876,19 +882,19 @@ class App {
 	}
 
 	public static function toggleFullscreen() {
-		if (kha.Window.get(0).mode == kha.WindowMode.Windowed) {
+		if (kha.Window.get().mode == kha.Window.WindowMode.Windowed) {
 			#if (krom_windows || krom_linux || krom_darwin)
 			Config.raw.window_w = System.windowWidth();
 			Config.raw.window_h = System.windowHeight();
-			Config.raw.window_x = kha.Window.get(0).x;
-			Config.raw.window_y = kha.Window.get(0).y;
+			Config.raw.window_x = kha.Window.get().x;
+			Config.raw.window_y = kha.Window.get().y;
 			#end
-			kha.Window.get(0).mode = kha.WindowMode.Fullscreen;
+			kha.Window.get().mode = kha.Window.WindowMode.Fullscreen;
 		}
 		else {
-			kha.Window.get(0).mode = kha.WindowMode.Windowed;
-			kha.Window.get(0).resize(Config.raw.window_w, Config.raw.window_h);
-			kha.Window.get(0).move(Config.raw.window_x, Config.raw.window_y);
+			kha.Window.get().mode = kha.Window.WindowMode.Windowed;
+			kha.Window.get().resize(Config.raw.window_w, Config.raw.window_h);
+			kha.Window.get().move(Config.raw.window_x, Config.raw.window_y);
 		}
 	}
 
@@ -1888,7 +1894,7 @@ class App {
 		var _layer = Context.raw.layer;
 		var _tool = Context.raw.tool;
 		var _fillType = Context.raw.fillTypeHandle.position;
-		var current: kha.graphics2.Graphics = null;
+		var current: kha.Graphics2 = null;
 
 		#if is_paint
 		if (Context.raw.tool == ToolMaterial) {
@@ -1896,7 +1902,7 @@ class App {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
 			}
 
-			current = @:privateAccess kha.graphics2.Graphics.current;
+			current = @:privateAccess kha.Graphics2.current;
 			if (current != null) current.end();
 
 			Context.raw.tool = ToolFill;
@@ -1923,7 +1929,7 @@ class App {
 		for (l in Project.layers) if (l.isMask() && l.fill_layer == Context.raw.material) hasFillMask = true;
 
 		if (hasFillLayer || hasFillMask) {
-			current = @:privateAccess kha.graphics2.Graphics.current;
+			current = @:privateAccess kha.Graphics2.current;
 			if (current != null) current.end();
 			Context.raw.pdirty = 1;
 			Context.raw.tool = ToolFill;
@@ -1976,7 +1982,7 @@ class App {
 	}
 
 	public static function updateFillLayer(parsePaint = true) {
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		var _tool = Context.raw.tool;

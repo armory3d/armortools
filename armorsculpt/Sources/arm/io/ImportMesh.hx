@@ -141,7 +141,7 @@ class ImportMesh {
 						f32[i * 4 + 3] = 1.0;
 					}
 					var bytes = haxe.io.Bytes.ofData(f32.buffer);
-					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.RGBA128);
+					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.RGBA128);
 					var texpaint = Project.layers[0].texpaint;
 					texpaint.g2.begin(false);
 					texpaint.g2.pipeline = App.pipeCopy128;

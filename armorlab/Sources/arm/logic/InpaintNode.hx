@@ -29,7 +29,7 @@ class InpaintNode extends LogicNode {
 		}
 
 		if (mask == null) {
-			mask = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.graphics4.TextureFormat.L8);
+			mask = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.L8);
 			App.notifyOnNextFrame(function() {
 				mask.g4.begin();
 				mask.g4.clear(kha.Color.fromFloats(1.0, 1.0, 1.0, 1.0));

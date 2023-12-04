@@ -27,7 +27,7 @@ class ColorNode extends LogicNode {
 		b.setFloat(4, value.y);
 		b.setFloat(8, value.z);
 		b.setFloat(12, value.w);
-		image = kha.Image.fromBytes(b, 1, 1, kha.graphics4.TextureFormat.RGBA128);
+		image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
 		done(image);
 	}
 

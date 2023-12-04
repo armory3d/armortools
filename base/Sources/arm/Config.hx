@@ -3,8 +3,8 @@ package arm;
 import haxe.io.Bytes;
 import haxe.Json;
 import kha.Display;
-import kha.WindowOptions;
-import kha.WindowMode;
+import kha.Window.WindowOptions;
+import kha.Window.WindowMode;
 import kha.System;
 import iron.data.Data;
 import zui.Zui;
@@ -125,7 +125,7 @@ class Config {
 
 	public static function getOptions(): kha.SystemOptions {
 		var windowMode = raw.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
-		var windowFeatures = None;
+		var windowFeatures = kha.Window.WindowFeatures.None;
 		if (raw.window_resizable) windowFeatures |= FeatureResizable;
 		if (raw.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (raw.window_minimizable) windowFeatures |= FeatureMinimizable;
@@ -180,11 +180,10 @@ class Config {
 		Config.raw.rp_bloom = Context.raw.hbloom.selected;
 		Config.raw.rp_gi = Context.raw.hvxao.selected;
 		Config.raw.rp_supersample = getSuperSampleSize(Context.raw.hsupersample.position);
-		iron.object.Uniforms.defaultFilter = Config.raw.rp_supersample < 1.0 ? kha.graphics4.TextureFilter.PointFilter : kha.graphics4.TextureFilter.LinearFilter;
 		save();
 		Context.raw.ddirty = 2;
 
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 		RenderPathBase.applyConfig();
 		if (current != null) current.begin(false);

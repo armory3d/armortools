@@ -1,6 +1,7 @@
 package arm.ui;
 
 import haxe.Json;
+import iron.system.Input.KeyCode;
 import kha.Color;
 import kha.Image;
 import kha.System;
@@ -502,10 +503,10 @@ class UINodes {
 
 		var nodes = getNodes();
 		if (nodes.nodesSelectedId.length > 0 && ui.isKeyPressed) {
-			if (ui.key == kha.input.KeyCode.Left) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x -= 1;
-			else if (ui.key == kha.input.KeyCode.Right) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x += 1;
-			if (ui.key == kha.input.KeyCode.Up) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y -= 1;
-			else if (ui.key == kha.input.KeyCode.Down) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y += 1;
+			if (ui.key == KeyCode.Left) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x -= 1;
+			else if (ui.key == KeyCode.Right) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).x += 1;
+			if (ui.key == KeyCode.Up) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y -= 1;
+			else if (ui.key == KeyCode.Down) for (n in nodes.nodesSelectedId) nodes.getNode(getCanvas(true).nodes, n).y += 1;
 		}
 
 		// Node search popup
@@ -548,8 +549,8 @@ class UINodes {
 			if (searchHandle.changed) nodeSearchOffset = 0;
 
 			if (ui.isKeyPressed) { // Move selection
-				if (ui.key == kha.input.KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
-				if (ui.key == kha.input.KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
+				if (ui.key == KeyCode.Down && nodeSearchOffset < 6) nodeSearchOffset++;
+				if (ui.key == KeyCode.Up && nodeSearchOffset > 0) nodeSearchOffset--;
 			}
 			var enter = kb.down("enter");
 			var count = 0;
@@ -648,7 +649,7 @@ class UINodes {
 		grid.g2.end();
 	}
 
-	public function render(g: kha.graphics2.Graphics) {
+	public function render(g: kha.Graphics2) {
 		if (recompileMat) {
 			#if (is_paint || is_sculpt)
 			if (canvasType == CanvasBrush) {
@@ -1298,6 +1299,7 @@ class UINodes {
 		if (nodes.nodesSelectedId.length == 0) return;
 
 		var node = nodes.getNode(Context.raw.material.canvas.nodes, nodes.nodesSelectedId[0]);
+		// if (node == null) return;
 		Context.raw.nodePreviewName = node.name;
 
 		if (node.type == "LAYER" ||

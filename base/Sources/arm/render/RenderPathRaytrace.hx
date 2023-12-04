@@ -16,8 +16,8 @@ class RenderPathRaytrace {
 	static var f32 = new js.lib.Float32Array(24);
 	static var helpMat = iron.math.Mat4.identity();
 	static var vb_scale = 1.0;
-	static var vb: kha.graphics4.VertexBuffer;
-	static var ib: kha.graphics4.IndexBuffer;
+	static var vb: kha.VertexBuffer;
+	static var ib: kha.IndexBuffer;
 
 	static var lastEnvmap: kha.Image = null;
 	static var isBake = false;

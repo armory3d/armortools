@@ -383,11 +383,6 @@ class TabLayers {
 					var mouse = Input.getMouse();
 					setDragLayer(Context.raw.layer, -(mouse.x - uix - ui._windowX - 3), -(mouse.y - uiy - ui._windowY + 1));
 				}
-				else if (ui.inputReleased) {
-					if (Time.time() - Context.raw.selectTime > 0.2) {
-						Context.raw.selectTime = Time.time();
-					}
-				}
 				else if (ui.inputReleasedR) {
 					Context.setLayer(l);
 					showContextMenu = true;
@@ -396,12 +391,12 @@ class TabLayers {
 
 			var state = ui.text(l.name);
 			if (state == State.Released) {
-				var td = Time.time() - Context.raw.selectTime;
-				if (td < 0.2 && td > 0.0) {
+				if (Time.time() - Context.raw.selectTime < 0.25) {
 					layerNameEdit = l.id;
 					layerNameHandle.text = l.name;
 					ui.startTextEdit(layerNameHandle);
 				}
+				Context.raw.selectTime = Time.time();
 			}
 
 			var inFocus = ui.inputX > ui._windowX && ui.inputX < ui._windowX + ui._windowW &&

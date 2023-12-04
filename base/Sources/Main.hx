@@ -48,10 +48,6 @@ class Main {
 
 	@:keep
 	public static function kickstart() {
-		#if (!arm_snapshot)
-		iron.data.ShaderData.shaderPath = ""; // Use arm_data_dir
-		#end
-
 		// Used to locate external application data folder
 		Krom.setApplicationName(Manifest.title);
 

@@ -83,12 +83,12 @@ class Translator {
 		for (s in translations) {
 			for (i in 0...s.length) {
 				// Assume cjk in the > 1119 range for now
-				if (s.charCodeAt(i) > 1119 && kha.graphics2.Graphics.fontGlyphs.indexOf(s.charCodeAt(i)) == -1) {
+				if (s.charCodeAt(i) > 1119 && kha.Graphics2.fontGlyphs.indexOf(s.charCodeAt(i)) == -1) {
 					if (!cjk) {
-						kha.graphics2.Graphics.fontGlyphs = [for (i in 32...127) i];
+						kha.Graphics2.fontGlyphs = [for (i in 32...127) i];
 						cjk = true;
 					}
-					kha.graphics2.Graphics.fontGlyphs.push(s.charCodeAt(i));
+					kha.Graphics2.fontGlyphs.push(s.charCodeAt(i));
 				}
 			}
 		}
@@ -114,7 +114,7 @@ class Translator {
 	}
 
 	static function initFont(cjk: Bool, fontPath: String, fontScale: Float) {
-		kha.graphics2.Graphics.fontGlyphs.sort(Reflect.compare);
+		kha.Graphics2.fontGlyphs.sort(Reflect.compare);
 		// Load and assign font with cjk characters
 		iron.App.notifyOnInit(function() {
 			iron.data.Data.getFont(fontPath, function(f: kha.Font) {
@@ -137,11 +137,11 @@ class Translator {
 
 	static function extendedGlyphs() {
 		// Basic Latin + Latin-1 Supplement + Latin Extended-A
-		kha.graphics2.Graphics.fontGlyphs = [for (i in 32...383) i];
+		kha.Graphics2.fontGlyphs = [for (i in 32...383) i];
 		// + Greek
-		for (i in 880...1023) kha.graphics2.Graphics.fontGlyphs.push(i);
+		for (i in 880...1023) kha.Graphics2.fontGlyphs.push(i);
 		// + Cyrillic
-		for (i in 1024...1119) kha.graphics2.Graphics.fontGlyphs.push(i);
+		for (i in 1024...1119) kha.Graphics2.fontGlyphs.push(i);
 	}
 
 	// Returns a list of supported locales (plus English and the automatically detected system locale)

@@ -101,7 +101,7 @@ class Context {
 		raw.layer = l;
 		UIHeader.inst.headerHandle.redraws = 2;
 
-		var current = @:privateAccess kha.graphics2.Graphics.current;
+		var current = @:privateAccess kha.Graphics2.current;
 		if (current != null) current.end();
 
 		App.setObjectMask();

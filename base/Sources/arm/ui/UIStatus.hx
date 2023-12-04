@@ -13,7 +13,7 @@ class UIStatus {
 	}
 
 	@:access(zui.Zui)
-	public function renderUI(g: kha.graphics2.Graphics) {
+	public function renderUI(g: kha.Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];

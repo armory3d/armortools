@@ -180,9 +180,8 @@ class Camera {
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutDown)) {
 			redraws = 2;
 			var light = iron.Scene.active.lights[0];
-			var m = iron.math.Mat4.identity();
 			Context.raw.lightAngle = (Context.raw.lightAngle + ((mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
-			m.self = kha.math.FastMatrix4.rotationZ(mouse.movementX / 100);
+			var m = iron.math.Mat4.rotationZ(mouse.movementX / 100);
 			light.transform.local.multmat(m);
 			light.transform.decompose();
 		}
