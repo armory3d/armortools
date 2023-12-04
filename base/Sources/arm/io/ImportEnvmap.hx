@@ -32,7 +32,7 @@ class ImportEnvmap {
 			pipeline.vertexShader = kha.Shaders.getVertex("pass.vert");
 			pipeline.fragmentShader = kha.Shaders.getFragment("prefilter_envmap.frag");
 			var vs = new VertexStructure();
-			vs.add("pos", VertexData.Float2);
+			vs.add("pos", VertexData.F32_2X);
 			pipeline.inputLayout = [vs];
 			pipeline.colorAttachmentCount = 1;
 			pipeline.colorAttachments[0] = TextureFormat.RGBA128;

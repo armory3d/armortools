@@ -1143,7 +1143,7 @@ class App {
 		pipe.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipe.fragmentShader = kha.Shaders.getFragment("layer_merge.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipe.inputLayout = [vs];
 		pipe.colorWriteMasksRed = [red];
 		pipe.colorWriteMasksGreen = [green];
@@ -1173,9 +1173,9 @@ class App {
 		pipeCopy.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopy.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopy.inputLayout = [vs];
 		pipeCopy.compile();
 
@@ -1183,9 +1183,9 @@ class App {
 		pipeCopyBGRA.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopyBGRA.fragmentShader = kha.Shaders.getFragment("layer_copy_bgra.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopyBGRA.inputLayout = [vs];
 		pipeCopyBGRA.compile();
 
@@ -1194,9 +1194,9 @@ class App {
 		pipeCopy8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopy8.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopy8.inputLayout = [vs];
 		pipeCopy8.colorAttachmentCount = 1;
 		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
@@ -1206,9 +1206,9 @@ class App {
 		pipeCopy128.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopy128.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopy128.inputLayout = [vs];
 		pipeCopy128.colorAttachmentCount = 1;
 		pipeCopy128.colorAttachments[0] = TextureFormat.RGBA128;
@@ -1223,9 +1223,9 @@ class App {
 		pipeInvert8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeInvert8.fragmentShader = kha.Shaders.getFragment("layer_invert.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeInvert8.inputLayout = [vs];
 		pipeInvert8.colorAttachmentCount = 1;
 		pipeInvert8.colorAttachments[0] = TextureFormat.L8;
@@ -1235,7 +1235,7 @@ class App {
 		pipeApplyMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipeApplyMask.inputLayout = [vs];
 		pipeApplyMask.compile();
 		tex0Mask = pipeApplyMask.getTextureUnit("tex0");
@@ -1245,7 +1245,7 @@ class App {
 		pipeMergeMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeMergeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipeMergeMask.inputLayout = [vs];
 		pipeMergeMask.compile();
 		tex0MergeMask = pipeMergeMask.getTextureUnit("tex0");
@@ -1257,7 +1257,7 @@ class App {
 		pipeColorIdToMask.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeColorIdToMask.fragmentShader = kha.Shaders.getFragment("mask_colorid.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipeColorIdToMask.inputLayout = [vs];
 		pipeColorIdToMask.compile();
 		texpaintColorId = pipeColorIdToMask.getTextureUnit("texpaint_colorid");
@@ -1269,9 +1269,9 @@ class App {
 		pipeCopyR.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopyR.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopyR.inputLayout = [vs];
 		pipeCopyR.colorWriteMasksGreen = [false];
 		pipeCopyR.colorWriteMasksBlue = [false];
@@ -1282,9 +1282,9 @@ class App {
 		pipeCopyG.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopyG.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopyG.inputLayout = [vs];
 		pipeCopyG.colorWriteMasksRed = [false];
 		pipeCopyG.colorWriteMasksBlue = [false];
@@ -1295,9 +1295,9 @@ class App {
 		pipeCopyB.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopyB.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopyB.inputLayout = [vs];
 		pipeCopyB.colorWriteMasksRed = [false];
 		pipeCopyB.colorWriteMasksGreen = [false];
@@ -1308,7 +1308,7 @@ class App {
 		pipeInpaintPreview.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeInpaintPreview.fragmentShader = kha.Shaders.getFragment("inpaint_preview.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipeInpaintPreview.inputLayout = [vs];
 		pipeInpaintPreview.compile();
 		tex0InpaintPreview = pipeInpaintPreview.getTextureUnit("tex0");
@@ -1321,9 +1321,9 @@ class App {
 		pipeCopyRGB.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipeCopyRGB.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopyRGB.inputLayout = [vs];
 		pipeCopyRGB.colorWriteMasksAlpha = [false];
 		pipeCopyRGB.compile();
@@ -1335,7 +1335,7 @@ class App {
 		pipeCopyA.vertexShader = kha.Shaders.getVertex("pass.vert");
 		pipeCopyA.fragmentShader = kha.Shaders.getFragment("layer_copy_rrrr.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float2);
+		vs.add("pos", VertexData.F32_2X);
 		pipeCopyA.inputLayout = [vs];
 		pipeCopyA.colorWriteMasksRed = [false];
 		pipeCopyA.colorWriteMasksGreen = [false];
@@ -1351,11 +1351,11 @@ class App {
 		pipeCursor.fragmentShader = kha.Shaders.getFragment("cursor.frag");
 		var vs = new VertexStructure();
 		#if (krom_metal || krom_vulkan)
-		vs.add("tex", VertexData.Short2Norm);
+		vs.add("tex", VertexData.I16_2X_Normalized);
 		#else
-		vs.add("pos", VertexData.Short4Norm);
-		vs.add("nor", VertexData.Short2Norm);
-		vs.add("tex", VertexData.Short2Norm);
+		vs.add("pos", VertexData.I16_4X_Normalized);
+		vs.add("nor", VertexData.I16_2X_Normalized);
+		vs.add("tex", VertexData.I16_2X_Normalized);
 		#end
 		pipeCursor.inputLayout = [vs];
 		pipeCursor.blendSource = BlendingFactor.SourceAlpha;

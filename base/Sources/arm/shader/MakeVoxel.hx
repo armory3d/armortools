@@ -10,9 +10,9 @@ class MakeVoxel {
 	#if arm_voxels
 	public static function run(data: ShaderContext) {
 		var structure = new VertexStructure();
-		structure.add("pos", VertexData.Short4Norm);
-		structure.add("nor", VertexData.Short2Norm);
-		structure.add("tex", VertexData.Short2Norm);
+		structure.add("pos", VertexData.I16_4X_Normalized);
+		structure.add("nor", VertexData.I16_2X_Normalized);
+		structure.add("tex", VertexData.I16_2X_Normalized);
 
 		var pipeState = data.pipeState;
 		pipeState.inputLayout = [structure];
@@ -22,8 +22,8 @@ class MakeVoxel {
 		// var isMesh = Std.isOfType(Context.raw.object, MeshObject);
 		// var skin = isMesh && cast(Context.raw.object, MeshObject).data.geom.bones != null;
 		// if (skin) {
-		// 	structure.add("bone", VertexData.Short4Norm);
-		// 	structure.add("weight", VertexData.Short4Norm);
+		// 	structure.add("bone", VertexData.I16_4X_Normalized);
+		// 	structure.add("weight", VertexData.I16_4X_Normalized);
 		// 	data.raw.vertex_elements.push({ name: "bone", data: 'short4norm' });
 		// 	data.raw.vertex_elements.push({ name: "weight", data: 'short4norm' });
 		// }

@@ -54,9 +54,9 @@ class UIView2D {
 		pipe.vertexShader = kha.Shaders.getVertex("layer_view.vert");
 		pipe.fragmentShader = kha.Shaders.getFragment("layer_view.frag");
 		var vs = new VertexStructure();
-		vs.add("pos", VertexData.Float3);
-		vs.add("tex", VertexData.Float2);
-		vs.add("col", VertexData.UInt8_4X_Normalized);
+		vs.add("pos", VertexData.F32_3X);
+		vs.add("tex", VertexData.F32_2X);
+		vs.add("col", VertexData.U8_4X_Normalized);
 		pipe.inputLayout = [vs];
 		pipe.blendSource = BlendingFactor.BlendOne;
 		pipe.blendDestination = BlendingFactor.BlendZero;

@@ -452,10 +452,10 @@ class RenderUtil {
 
 		// Mandatory vertex data names and sizes
 		var structure = new VertexStructure();
-		structure.add("pos", VertexData.Short4Norm);
-		structure.add("nor", VertexData.Short2Norm);
-		structure.add("tex", VertexData.Short2Norm);
-		structure.add("col", VertexData.Short4Norm);
+		structure.add("pos", VertexData.I16_4X_Normalized);
+		structure.add("nor", VertexData.I16_2X_Normalized);
+		structure.add("tex", VertexData.I16_2X_Normalized);
+		structure.add("col", VertexData.I16_4X_Normalized);
 		screenAlignedFullVB = new VertexBuffer(Std.int(data.length / Std.int(structure.byteSize() / 4)), structure, Usage.StaticUsage);
 		var vertices = screenAlignedFullVB.lock();
 		for (i in 0...Std.int(vertices.byteLength / 2)) vertices.setInt16(i * 2, data[i], true);

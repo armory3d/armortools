@@ -114,11 +114,11 @@ class UVUtil {
 			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_map.frag");
 			var vs = new VertexStructure();
 			#if (krom_metal || krom_vulkan)
-			vs.add("tex", VertexData.Short2Norm);
+			vs.add("tex", VertexData.I16_2X_Normalized);
 			#else
-			vs.add("pos", VertexData.Short4Norm);
-			vs.add("nor", VertexData.Short2Norm);
-			vs.add("tex", VertexData.Short2Norm);
+			vs.add("pos", VertexData.I16_4X_Normalized);
+			vs.add("nor", VertexData.I16_2X_Normalized);
+			vs.add("tex", VertexData.I16_2X_Normalized);
 			#end
 			pipeDilate.inputLayout = [vs];
 			pipeDilate.depthWrite = false;

@@ -45,8 +45,8 @@ class LineDraw {
 
 		if (pipeline == null) {
 			var structure = new VertexStructure();
-			structure.add("pos", VertexData.Float3);
-			structure.add("col", VertexData.Float3);
+			structure.add("pos", VertexData.F32_3X);
+			structure.add("col", VertexData.F32_3X);
 			pipeline = new PipelineState();
 			pipeline.inputLayout = [structure];
 			pipeline.fragmentShader = kha.Shaders.getFragment("line.frag");
