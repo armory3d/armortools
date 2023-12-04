@@ -1,6 +1,5 @@
 
-let flags = {};
-globalThis.flags = flags;
+let flags = globalThis.flags;
 flags.android = process.argv.indexOf("android") >= 0;
 flags.ios = process.argv.indexOf("ios") >= 0;
 flags.d3d12 = process.argv.indexOf("direct3d12") >= 0;
@@ -11,6 +10,47 @@ flags.snapshot = process.argv.indexOf("--snapshot") >= 0;
 flags.plugin_embed = flags.ios;
 flags.physics = !flags.ios;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
+
+flags.with_d3dcompiler = true;
+flags.with_nfd = true;
+flags.with_tinydir = true;
+flags.with_zlib = true;
+flags.with_stb_image_write = true;
+flags.with_g2 = true;
+flags.with_iron = true;
+flags.with_zui = true;
+
+flags.on_c_project_created = async function(c_project, platform, graphics) {
+	c_project.addDefine("IDLE_SLEEP");
+	let dir = flags.name.toLowerCase();
+
+	if (graphics === "vulkan") {
+		c_project.addDefine("KORE_VKRT");
+		await c_project.addProject("../" + dir + "/glsl_to_spirv");
+	}
+	if (platform === "ios") {
+		flags.with_plugin_embed = true;
+	}
+
+	if (flags.with_onnx) {
+		c_project.addDefine("WITH_ONNX");
+		c_project.addIncludeDir("../" + dir + "/onnx/include");
+		if (platform === Platform.Windows) {
+			c_project.addLib("../" + dir + "/onnx/win32/onnxruntime");
+		}
+		else if (platform === Platform.Linux) {
+			// patchelf --set-rpath . ArmorLab
+			c_project.addLib("onnxruntime -L" + __dirname + "/../" + dir + "/onnx/linux");
+		}
+		else if (platform === Platform.OSX) {
+			c_project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
+		}
+	}
+
+	if (flags.with_plugin_embed) {
+		await c_project.addProject("../" + dir + "/plugins");
+	}
+};
 
 let project = new Project("Base");
 project.addSources("Sources");

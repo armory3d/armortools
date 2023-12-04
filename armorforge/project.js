@@ -1,11 +1,16 @@
 
-let project = new Project("ArmorSculpt");
-project.addDefine("is_sculpt");
-
-await project.addProject("../base");
 let flags = globalThis.flags;
+flags.name = 'ArmorForge';
+flags.package = 'org.armorforge';
+flags.with_mpeg_write = true;
+
+let project = new Project(flags.name);
+project.addDefine("is_forge");
+project.addDefine("is_paint");
+await project.addProject("../base");
 
 project.addSources("../armorpaint/Sources"); ////
+project.addShaders("../armorpaint/Shaders/*.glsl", { embed: flags.snapshot }); ////
 project.addSources("Sources");
 project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
@@ -32,6 +37,15 @@ else {
 if (flags.physics) {
 	project.addDefine("arm_physics");
 	project.addAssets("Assets/plugins/wasm/ammo/*", { destination: "data/plugins/{name}" });
+}
+
+if (flags.raytrace) {
+	if (flags.d3d12) {
+		project.addAssets("Assets/readme/readme_dxr.txt", { destination: "{name}" });
+	}
+	else if (flags.vulkan) {
+		project.addAssets("Assets/readme/readme_vkrt.txt", { destination: "{name}" });
+	}
 }
 
 resolve(project);

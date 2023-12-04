@@ -1,9 +1,13 @@
 
-let project = new Project("ArmorLab");
-project.addDefine("is_lab");
-
-await project.addProject("../base");
 let flags = globalThis.flags;
+flags.name = 'ArmorLab';
+flags.package = 'org.armorlab';
+flags.with_onnx = true;
+flags.with_plugin_embed = true;
+
+let project = new Project(flags.name);
+project.addDefine("is_lab");
+await project.addProject("../base");
 
 project.addSources("Sources");
 project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
