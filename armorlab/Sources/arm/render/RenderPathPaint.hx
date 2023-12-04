@@ -213,10 +213,10 @@ class RenderPathPaint {
 		var right = Scene.active.camera.rightWorld().normalize();
 		g.setFloat3(App.cursorCameraRight, right.x, right.y, right.z);
 		g.setFloat3(App.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(App.cursorVP, Scene.active.camera.VP.self);
+		g.setMatrix(App.cursorVP, Scene.active.camera.VP);
 		var helpMat = iron.math.Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
-		g.setMatrix(App.cursorInvVP, helpMat.self);
+		g.setMatrix(App.cursorInvVP, helpMat);
 		#if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else

@@ -35,14 +35,15 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 	if (flags.with_onnx) {
 		c_project.addDefine("WITH_ONNX");
 		c_project.addIncludeDir("../" + dir + "/onnx/include");
-		if (platform === Platform.Windows) {
+		console.log(platform);
+		if (platform === 'win32') {
 			c_project.addLib("../" + dir + "/onnx/win32/onnxruntime");
 		}
-		else if (platform === Platform.Linux) {
+		else if (platform === 'linux') {
 			// patchelf --set-rpath . ArmorLab
-			c_project.addLib("onnxruntime -L" + __dirname + "/../" + dir + "/onnx/linux");
+			c_project.addLib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
 		}
-		else if (platform === Platform.OSX) {
+		else if (platform === 'osx') {
 			c_project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
 		}
 	}
