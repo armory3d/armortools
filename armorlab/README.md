@@ -36,7 +36,7 @@ strip ArmorLab
 **macOS** *wip - apple silicon only*
 ```bash
 cd ../armorcore
-git apply patch/metal_raytrace.diff --directory=Kinc
+git apply Patches/metal_raytrace.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment

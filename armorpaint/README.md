@@ -34,7 +34,7 @@ strip ArmorPaint
 **macOS**
 ```bash
 cd ../armorcore
-git apply patch/metal_raytrace.diff --directory=Kinc
+git apply Patches/metal_raytrace.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal
 cp -a build/krom/ ../armorcore/Deployment
@@ -46,7 +46,7 @@ cp -a build/krom/ ../armorcore/Deployment
 **Android** *wip*
 ```bash
 cd ../armorcore
-git apply patch/android_document_picker.diff --directory=Kinc
+git apply Patches/android_document_picker.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g opengl android
 cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
@@ -59,9 +59,9 @@ cp -r build/krom/* build/ArmorPaint/app/src/main/assets/
 **iOS** *wip*
 ```bash
 cd ../armorcore
-git apply patch/metal_raytrace.diff --directory=Kinc
-git apply patch/ios_document_picker.diff --directory=Kinc
-git apply patch/ios_pencil_hover.diff --directory=Kinc
+git apply Patches/metal_raytrace.diff --directory=Kinc
+git apply Patches/ios_document_picker.diff --directory=Kinc
+git apply Patches/ios_pencil_hover.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g metal ios
 cp -a build/krom/ ../armorcore/Deployment
@@ -74,7 +74,7 @@ cp -a build/krom/ ../armorcore/Deployment
 ```bash
 # Unpack `..\armorcore\v8\libraries\win32\release\v8_monolith.7z` using 7-Zip - Extract Here (exceeds 100MB)
 cd ..\armorcore
-git apply patch/d3d12_raytrace.diff --directory=Kinc
+git apply Patches/d3d12_raytrace.diff --directory=Kinc
 cd ..\armorpaint
 ..\armorcore\Kinc\make --from ..\armorcore -g direct3d12
 # Open generated Visual Studio project at `build\ArmorPaint.sln`
@@ -86,7 +86,7 @@ cd ..\armorpaint
 ```bash
 git clone --recursive https://github.com/armory3d/glsl_to_spirv
 cd ../armorcore
-git apply patch/vulkan_raytrace.diff --directory=Kinc
+git apply Patches/vulkan_raytrace.diff --directory=Kinc
 cd ../armorpaint
 ../armorcore/Kinc/make --from ../armorcore -g vulkan --compiler clang --compile
 cd ../armorcore/Deployment

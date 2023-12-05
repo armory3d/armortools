@@ -62,11 +62,14 @@ class Main {
 		text_handle.text = storage.text;
 		var ops: SystemOptions = {
 			title: "ArmorPad",
-			width: storage.window_w,
-			height: storage.window_h,
 			window: {
 				x: storage.window_x,
-				y: storage.window_y
+				y: storage.window_y,
+				width: storage.window_w,
+				height: storage.window_h
+			},
+			framebuffer: {
+				samplesPerPixel: 1
 			}
 		};
 
@@ -194,7 +197,7 @@ class Main {
 					}
 
 					// Save
-					if (ui.isCtrlDown && ui.key == kha.input.Keyboard.KeyCode.S) {
+					if (ui.isCtrlDown && ui.key == iron.system.Input.KeyCode.S) {
 						save_file();
 					}
 
@@ -229,7 +232,7 @@ class Main {
 		}
 
 		// Build project
-		if (ui.isCtrlDown && ui.key == kha.input.Keyboard.KeyCode.B) {
+		if (ui.isCtrlDown && ui.key == iron.system.Input.KeyCode.B) {
 			save_file();
 			build_project();
 		}

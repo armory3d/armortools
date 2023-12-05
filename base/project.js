@@ -49,7 +49,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 	}
 
 	if (flags.with_plugin_embed) {
-		await c_project.addProject("../" + dir + "/plugins");
+		await c_project.addProject("../" + dir + "/Plugins");
 	}
 };
 
