@@ -41,11 +41,12 @@ class VectorNode extends LogicNode {
 			inputs[1].get(function(y: Float) {
 				inputs[2].get(function(z: Float) {
 					if (image != null) image.unload();
-					var b = haxe.io.Bytes.alloc(16);
-					b.setFloat(0, untyped inputs[0].node.value);
-					b.setFloat(4, untyped inputs[1].node.value);
-					b.setFloat(8, untyped inputs[2].node.value);
-					b.setFloat(12, 1.0);
+					var b = new js.lib.ArrayBuffer(16);
+					var v = new js.lib.DataView(b);
+					v.setFloat32(0, untyped inputs[0].node.value, true);
+					v.setFloat32(4, untyped inputs[1].node.value, true);
+					v.setFloat32(8, untyped inputs[2].node.value, true);
+					v.setFloat32(12, 1.0, true);
 					image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
 					done(image);
 				});

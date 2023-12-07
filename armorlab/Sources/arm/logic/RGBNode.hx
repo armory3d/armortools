@@ -22,14 +22,14 @@ class RGBNode extends LogicNode {
 			});
 		}
 
-		var b = haxe.io.Bytes.alloc(16);
+		var f32 = new js.lib.Float32Array(4);
 		var raw = LogicParser.getRawNode(this);
 		var default_value = raw.outputs[0].default_value;
-		b.setFloat(0, default_value[0]);
-		b.setFloat(4, default_value[1]);
-		b.setFloat(8, default_value[2]);
-		b.setFloat(12, default_value[3]);
-		image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
+		f32[0] = default_value[0];
+		f32[1] = default_value[1];
+		f32[2] = default_value[2];
+		f32[3] = default_value[3];
+		image = kha.Image.fromBytes(f32.buffer, 1, 1, kha.Image.TextureFormat.RGBA128);
 		done(image);
 	}
 

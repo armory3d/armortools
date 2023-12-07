@@ -27,7 +27,6 @@ import arm.data.FontSlot;
 import arm.data.MaterialSlot;
 #end
 #if is_lab
-import kha.Blob;
 import zui.Zui.Nodes;
 #end
 
@@ -136,13 +135,13 @@ class UIBase {
 		}
 
 		if (Project.defaultCanvas == null) { // Synchronous
-			Data.getBlob("default_brush.arm", function(b: Blob) {
+			Data.getBlob("default_brush.arm", function(b: js.lib.ArrayBuffer) {
 				Project.defaultCanvas = b;
 			});
 		}
 
 		Project.nodes = new Nodes();
-		Project.canvas = iron.system.ArmPack.decode(Project.defaultCanvas.toBytes());
+		Project.canvas = iron.system.ArmPack.decode(Project.defaultCanvas);
 		Project.canvas.name = "Brush 1";
 
 		Context.parseBrushInputs();
@@ -156,20 +155,20 @@ class UIBase {
 		}
 
 		if (Context.raw.emptyEnvmap == null) {
-			var b = Bytes.alloc(4);
-			b.set(0, 8);
-			b.set(1, 8);
-			b.set(2, 8);
-			b.set(3, 255);
-			Context.raw.emptyEnvmap = Image.fromBytes(b, 1, 1);
+			var b = new js.lib.Uint8Array(4);
+			b[0] = 8;
+			b[1] = 8;
+			b[2] = 8;
+			b[3] = 255;
+			Context.raw.emptyEnvmap = Image.fromBytes(b.buffer, 1, 1);
 		}
 		if (Context.raw.previewEnvmap == null) {
-			var b = Bytes.alloc(4);
-			b.set(0, 0);
-			b.set(1, 0);
-			b.set(2, 0);
-			b.set(3, 255);
-			Context.raw.previewEnvmap = Image.fromBytes(b, 1, 1);
+			var b = new js.lib.Uint8Array(4);
+			b[0] = 0;
+			b[1] = 0;
+			b[2] = 0;
+			b[3] = 255;
+			Context.raw.previewEnvmap = Image.fromBytes(b.buffer, 1, 1);
 		}
 
 		var world = Scene.active.world;
@@ -607,7 +606,7 @@ class UIBase {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
-					else if (Config.raw.layout[LayoutNodesW] > System.windowWidth() * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.windowWidth() * 0.7);
+					else if (Config.raw.layout[LayoutNodesW] > System.width * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.width * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
@@ -617,7 +616,7 @@ class UIBase {
 			}
 			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
 				var my = Std.int(mouse.movementY);
-				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
+				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.height * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
 				}
 			}
@@ -625,7 +624,7 @@ class UIBase {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutSidebarW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutSidebarW] < sidebarMiniW) Config.raw.layout[LayoutSidebarW] = sidebarMiniW;
-					else if (Config.raw.layout[LayoutSidebarW] > System.windowWidth() - sidebarMiniW) Config.raw.layout[LayoutSidebarW] = System.windowWidth() - sidebarMiniW;
+					else if (Config.raw.layout[LayoutSidebarW] > System.width - sidebarMiniW) Config.raw.layout[LayoutSidebarW] = System.width - sidebarMiniW;
 				}
 				else {
 					var my = Std.int(mouse.movementY);
@@ -646,7 +645,7 @@ class UIBase {
 				if (borderStarted == SideLeft) {
 					Config.raw.layout[LayoutNodesW] -= Std.int(mouse.movementX);
 					if (Config.raw.layout[LayoutNodesW] < 32) Config.raw.layout[LayoutNodesW] = 32;
-					else if (Config.raw.layout[LayoutNodesW] > System.windowWidth() * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.windowWidth() * 0.7);
+					else if (Config.raw.layout[LayoutNodesW] > System.width * 0.7) Config.raw.layout[LayoutNodesW] = Std.int(System.width * 0.7);
 				}
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
@@ -656,7 +655,7 @@ class UIBase {
 			}
 			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
 				var my = Std.int(mouse.movementY);
-				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.windowHeight() * 0.7) {
+				if (Config.raw.layout[LayoutStatusH] - my >= UIStatus.defaultStatusH * Config.raw.window_scale && Config.raw.layout[LayoutStatusH] - my < System.height * 0.7) {
 					Config.raw.layout[LayoutStatusH] -= my;
 				}
 			}
@@ -1123,7 +1122,7 @@ class UIBase {
 			g.begin(false);
 		}
 
-		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (!show || System.width == 0 || System.height == 0) return;
 
 		ui.inputEnabled = App.uiEnabled;
 
@@ -1163,7 +1162,7 @@ class UIBase {
 		// Tabs
 		var mini = Config.raw.layout[LayoutSidebarW] <= sidebarMiniW;
 		var expandButtonOffset = Config.raw.touch_ui ? Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET()) : 0;
-		tabx = System.windowWidth() - Config.raw.layout[LayoutSidebarW];
+		tabx = System.width - Config.raw.layout[LayoutSidebarW];
 
 		var _SCROLL_W = ui.t.SCROLL_W;
 		if (mini) ui.t.SCROLL_W = ui.t.SCROLL_MINI_W;
@@ -1182,7 +1181,7 @@ class UIBase {
 		if (Config.raw.touch_ui) {
 			var width = Config.raw.layout[LayoutSidebarW];
 			var height = Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET());
-			if (ui.window(Zui.handle("uibase_3"), System.windowWidth() - width, System.windowHeight() - height, width, height + 1)) {
+			if (ui.window(Zui.handle("uibase_3"), System.width - width, System.height - height, width, height + 1)) {
 				ui._w = width;
 				var _BUTTON_H = ui.t.BUTTON_H;
 				var _BUTTON_COL = ui.t.BUTTON_COL;
@@ -1200,7 +1199,7 @@ class UIBase {
 		// Expand button
 		if (Config.raw.layout[LayoutSidebarW] == 0) {
 			var width = Std.int(ui.font.width(ui.fontSize, "<<") + 25 * ui.SCALE());
-			if (ui.window(hminimized, System.windowWidth() - width, 0, width, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
+			if (ui.window(hminimized, System.width - width, 0, width, Std.int(ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1))) {
 				ui._w = width;
 				var _BUTTON_H = ui.t.BUTTON_H;
 				var _BUTTON_COL = ui.t.BUTTON_COL;
@@ -1240,8 +1239,8 @@ class UIBase {
 
 		// Radius being scaled
 		if (Context.raw.brushLocked) {
-			mx += Context.raw.lockStartedX - System.windowWidth() / 2;
-			my += Context.raw.lockStartedY - System.windowHeight() / 2;
+			mx += Context.raw.lockStartedX - System.width / 2;
+			my += Context.raw.lockStartedY - System.height / 2;
 		}
 
 		#if is_paint
@@ -1318,8 +1317,8 @@ class UIBase {
 
 					// Radius being scaled
 					if (Context.raw.brushLocked) {
-						Context.raw.decalX += (Context.raw.lockStartedX - System.windowWidth() / 2) / App.w();
-						Context.raw.decalY += (Context.raw.lockStartedY - System.windowHeight() / 2) / App.h();
+						Context.raw.decalX += (Context.raw.lockStartedX - System.width / 2) / App.w();
+						Context.raw.decalY += (Context.raw.lockStartedY - System.height / 2) / App.h();
 					}
 				}
 

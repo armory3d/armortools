@@ -1,7 +1,6 @@
 package arm.data;
 
 import kha.Image;
-import kha.Blob;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import iron.data.MaterialData;
@@ -16,7 +15,7 @@ class MaterialSlot {
 	public var previewReady = false;
 	public var data: MaterialData;
 	public var id = 0;
-	static var defaultCanvas: Blob = null;
+	static var defaultCanvas: js.lib.ArrayBuffer = null;
 
 	public var paintBase = true;
 	public var paintOpac = true;
@@ -39,11 +38,11 @@ class MaterialSlot {
 
 		if (c == null) {
 			if (defaultCanvas == null) { // Synchronous
-				Data.getBlob("default_material.arm", function(b: Blob) {
+				Data.getBlob("default_material.arm", function(b: js.lib.ArrayBuffer) {
 					defaultCanvas = b;
 				});
 			}
-			canvas = iron.system.ArmPack.decode(defaultCanvas.toBytes());
+			canvas = iron.system.ArmPack.decode(defaultCanvas);
 			canvas.name = "Material " + (id + 1);
 		}
 		else {

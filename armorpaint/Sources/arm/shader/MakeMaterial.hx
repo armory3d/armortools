@@ -311,7 +311,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY, kha.Image.TextureFormat.L8);
+				image = kha.Image.createRenderTarget(resX, resY, kha.Image.TextureFormat.R8);
 				Context.raw.nodePreviews.set(id, image);
 			}
 

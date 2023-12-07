@@ -2,9 +2,7 @@ package arm;
 
 import haxe.io.Bytes;
 import haxe.Json;
-import kha.Display;
-import kha.Window.WindowOptions;
-import kha.Window.WindowMode;
+import kha.System.WindowMode;
 import kha.System;
 import iron.data.Data;
 import zui.Zui;
@@ -26,9 +24,9 @@ class Config {
 
 	public static function load(done: Void->Void) {
 		try {
-			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.json", function(blob: kha.Blob) {
+			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.json", function(blob: js.lib.ArrayBuffer) {
 				configLoaded = true;
-				raw = Json.parse(blob.toString());
+				raw = Json.parse(kha.System.bufferToString(blob));
 
 				done();
 			});
@@ -36,9 +34,9 @@ class Config {
 		catch (e: Dynamic) {
 			#if krom_linux
 			try { // Protected directory
-				Data.getBlob(Krom.savePath() + "config.json", function(blob: kha.Blob) {
+				Data.getBlob(Krom.savePath() + "config.json", function(blob: js.lib.ArrayBuffer) {
 					configLoaded = true;
-					raw = Json.parse(blob.toString());
+					raw = Json.parse(kha.System.bufferToString(blob));
 					done();
 				});
 			}
@@ -80,15 +78,14 @@ class Config {
 			raw.window_x = -1;
 			raw.window_y = -1;
 			raw.window_scale = 1.0;
-			var disp = Display.primary;
-			if (disp.width >= 2560 && disp.height >= 1600) {
+			if (kha.System.displayWidth() >= 2560 && kha.System.displayHeight() >= 1600) {
 				raw.window_scale = 2.0;
 			}
 			#if (krom_android || krom_ios || krom_darwin)
 			raw.window_scale = 2.0;
 			#end
 			raw.window_vsync = true;
-			raw.window_frequency = disp.frequency;
+			raw.window_frequency = kha.System.displayFrequency();
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_vignette = 0.2;
@@ -125,26 +122,21 @@ class Config {
 
 	public static function getOptions(): kha.SystemOptions {
 		var windowMode = raw.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
-		var windowFeatures = kha.Window.WindowFeatures.None;
+		var windowFeatures = kha.System.WindowFeatures.None;
 		if (raw.window_resizable) windowFeatures |= FeatureResizable;
 		if (raw.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (raw.window_minimizable) windowFeatures |= FeatureMinimizable;
 		var title = "untitled - " + Manifest.title;
 		return {
 			title: title,
-			window: {
-				width: raw.window_w,
-				height: raw.window_h,
-				x: raw.window_x,
-				y: raw.window_y,
-				mode: windowMode,
-				windowFeatures: windowFeatures
-			},
-			framebuffer: {
-				samplesPerPixel: 1,
-				verticalSync: raw.window_vsync,
-				frequency: raw.window_frequency
-			}
+			width: raw.window_w,
+			height: raw.window_h,
+			x: raw.window_x,
+			y: raw.window_y,
+			mode: windowMode,
+			features: windowFeatures,
+			vsync: raw.window_vsync,
+			frequency: raw.window_frequency
 		};
 	}
 
@@ -194,8 +186,8 @@ class Config {
 			keymap = App.defaultKeymap;
 		}
 		else {
-			Data.getBlob("keymap_presets/" + raw.keymap, function(blob: kha.Blob) {
-				keymap = Json.parse(blob.toString());
+			Data.getBlob("keymap_presets/" + raw.keymap, function(blob: js.lib.ArrayBuffer) {
+				keymap = Json.parse(kha.System.bufferToString(blob));
 				// Fill in undefined keys with defaults
 				for (field in Reflect.fields(App.defaultKeymap)) {
 					if (!Reflect.hasField(keymap, field)) {
@@ -277,8 +269,8 @@ class Config {
 			App.theme = new zui.Zui.Theme();
 		}
 		else {
-			Data.getBlob("themes/" + theme, function(b: kha.Blob) {
-				var parsed = Json.parse(b.toString());
+			Data.getBlob("themes/" + theme, function(b: js.lib.ArrayBuffer) {
+				var parsed = Json.parse(kha.System.bufferToString(b));
 				App.theme = new zui.Zui.Theme();
 				for (key in Type.getInstanceFields(zui.Zui.Theme)) {
 					if (key == "theme_") continue;

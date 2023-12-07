@@ -16,7 +16,7 @@ class UVUtil {
 	public static var dilatemapCached = false;
 	public static var uvislandmap: Image = null;
 	public static var uvislandmapCached = false;
-	static var dilateBytes: haxe.io.Bytes = null;
+	static var dilateBytes: js.lib.ArrayBuffer = null;
 	static var pipeDilate: PipelineState = null;
 
 	public static function cacheUVMap() {
@@ -105,7 +105,7 @@ class UVUtil {
 		if (dilatemapCached) return;
 
 		if (dilatemap == null) {
-			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.L8);
+			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.R8);
 		}
 
 		if (pipeDilate == null) {
@@ -123,7 +123,7 @@ class UVUtil {
 			pipeDilate.inputLayout = [vs];
 			pipeDilate.depthWrite = false;
 			pipeDilate.depthMode = CompareMode.Always;
-			pipeDilate.colorAttachments[0] = kha.Image.TextureFormat.L8;
+			pipeDilate.colorAttachments[0] = kha.Image.TextureFormat.R8;
 			pipeDilate.compile();
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
@@ -157,15 +157,17 @@ class UVUtil {
 		var h = 2048; // Config.getTextureResY()
 		var x = Std.int(Context.raw.uvxPicked * w);
 		var y = Std.int(Context.raw.uvyPicked * h);
-		var bytes = haxe.io.Bytes.alloc(w * h);
+		var bytes = new js.lib.ArrayBuffer(w * h);
+		var view = new js.lib.DataView(bytes);
 		var coords: Array<TCoord> = [{ x: x, y: y }];
 		var r = Std.int(dilatemap.width / w);
 
 		function check(c: TCoord) {
 			if (c.x < 0 || c.x >= w || c.y < 0 || c.y >= h) return;
-			if (bytes.get(c.y * w + c.x) == 255) return;
-			if (dilateBytes.get(c.y * r * dilatemap.width + c.x * r) == 0) return;
-			bytes.set(c.y * w + c.x, 255);
+			if (view.getUint8(c.y * w + c.x) == 255) return;
+			var dilateView = new js.lib.DataView(dilateBytes);
+			if (dilateView.getUint8(c.y * r * dilatemap.width + c.x * r) == 0) return;
+			view.setUint8(c.y * w + c.x, 255);
 			coords.push({ x: c.x + 1, y: c.y });
 			coords.push({ x: c.x - 1, y: c.y });
 			coords.push({ x: c.x, y: c.y + 1 });
@@ -179,7 +181,7 @@ class UVUtil {
 		if (uvislandmap != null) {
 			uvislandmap.unload();
 		}
-		uvislandmap = Image.fromBytes(bytes, w, h, kha.Image.TextureFormat.L8);
+		uvislandmap = Image.fromBytes(bytes, w, h, kha.Image.TextureFormat.R8);
 		uvislandmapCached = true;
 	}
 }

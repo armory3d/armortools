@@ -65,8 +65,8 @@ class PhotoToPBRNode extends LogicNode {
 					temp.g2.drawScaledImage(source, borderW - x * tileW, borderW - y * tileW, Config.getTextureResX(), Config.getTextureResY());
 					temp.g2.end();
 
-					var bytes_img = untyped temp.getPixels().b.buffer;
-					var u8 = new js.lib.Uint8Array(untyped bytes_img);
+					var bytes_img = temp.getPixels();
+					var u8 = new js.lib.Uint8Array(bytes_img);
 					var f32 = new js.lib.Float32Array(3 * tileWithBorderW * tileWithBorderW);
 					for (i in 0...(tileWithBorderW * tileWithBorderW)) {
 						f32[i                                        ] = (u8[i * 4    ] / 255 - 0.5) / 0.5;
@@ -74,19 +74,19 @@ class PhotoToPBRNode extends LogicNode {
 						f32[i + tileWithBorderW * tileWithBorderW * 2] = (u8[i * 4 + 2] / 255 - 0.5) / 0.5;
 					}
 
-					kha.Assets.loadBlobFromPath("data/models/photo_to_" + modelNames[from] + ".quant.onnx", function(model_blob: kha.Blob) {
-						var buf = Krom.mlInference(untyped model_blob.toBytes().b.buffer, [f32.buffer], null, null, Config.raw.gpu_inference);
+					iron.data.Data.getBlob("models/photo_to_" + modelNames[from] + ".quant.onnx", function(model_blob: js.lib.ArrayBuffer) {
+						var buf = Krom.mlInference(untyped model_blob, [f32.buffer], null, null, Config.raw.gpu_inference);
 						var ar = new js.lib.Float32Array(buf);
-						var bytes = haxe.io.Bytes.alloc(4 * tileW * tileW);
+						var u8 = new js.lib.Uint8Array(4 * tileW * tileW);
 						var offsetG = (from == ChannelBaseColor || from == ChannelNormalMap) ? tileWithBorderW * tileWithBorderW : 0;
 						var offsetB = (from == ChannelBaseColor || from == ChannelNormalMap) ? tileWithBorderW * tileWithBorderW * 2 : 0;
 						for (i in 0...(tileW * tileW)) {
 							var x = borderW + i % tileW;
 							var y = borderW + Std.int(i / tileW);
-							bytes.set(i * 4    , Std.int((ar[y * tileWithBorderW + x          ] * 0.5 + 0.5) * 255));
-							bytes.set(i * 4 + 1, Std.int((ar[y * tileWithBorderW + x + offsetG] * 0.5 + 0.5) * 255));
-							bytes.set(i * 4 + 2, Std.int((ar[y * tileWithBorderW + x + offsetB] * 0.5 + 0.5) * 255));
-							bytes.set(i * 4 + 3, 255);
+							u8[i * 4    ] = Std.int((ar[y * tileWithBorderW + x          ] * 0.5 + 0.5) * 255);
+							u8[i * 4 + 1] = Std.int((ar[y * tileWithBorderW + x + offsetG] * 0.5 + 0.5) * 255);
+							u8[i * 4 + 2] = Std.int((ar[y * tileWithBorderW + x + offsetB] * 0.5 + 0.5) * 255);
+							u8[i * 4 + 3] = 255;
 						}
 						tileFloats.push(ar);
 
@@ -97,9 +97,9 @@ class PhotoToPBRNode extends LogicNode {
 								for (yy in 0...tileW) {
 									for (xx in 0...borderW) {
 										var i = yy * tileW + xx;
-										var a = bytes.get(i * 4);
-										var b = bytes.get(i * 4 + 1);
-										var c = bytes.get(i * 4 + 2);
+										var a = u8[i * 4];
+										var b = u8[i * 4 + 1];
+										var c = u8[i * 4 + 2];
 
 										var aa = Std.int((ar[(borderW + yy) * tileWithBorderW + borderW + tileW + xx          ] * 0.5 + 0.5) * 255);
 										var bb = Std.int((ar[(borderW + yy) * tileWithBorderW + borderW + tileW + xx + offsetG] * 0.5 + 0.5) * 255);
@@ -111,9 +111,9 @@ class PhotoToPBRNode extends LogicNode {
 										b = Std.int(b * f + bb * invf);
 										c = Std.int(c * f + cc * invf);
 
-										bytes.set(i * 4    , a);
-										bytes.set(i * 4 + 1, b);
-										bytes.set(i * 4 + 2, c);
+										u8[i * 4    ] = a;
+										u8[i * 4 + 1] = b;
+										u8[i * 4 + 2] = c;
 									}
 								}
 							}
@@ -122,9 +122,9 @@ class PhotoToPBRNode extends LogicNode {
 								for (xx in 0...tileW) {
 									for (yy in 0...borderW) {
 										var i = yy * tileW + xx;
-										var a = bytes.get(i * 4);
-										var b = bytes.get(i * 4 + 1);
-										var c = bytes.get(i * 4 + 2);
+										var a = u8[i * 4];
+										var b = u8[i * 4 + 1];
+										var c = u8[i * 4 + 2];
 
 										var aa = Std.int((ar[(borderW + tileW + yy) * tileWithBorderW + borderW + xx          ] * 0.5 + 0.5) * 255);
 										var bb = Std.int((ar[(borderW + tileW + yy) * tileWithBorderW + borderW + xx + offsetG] * 0.5 + 0.5) * 255);
@@ -136,19 +136,19 @@ class PhotoToPBRNode extends LogicNode {
 										b = Std.int(b * f + bb * invf);
 										c = Std.int(c * f + cc * invf);
 
-										bytes.set(i * 4    , a);
-										bytes.set(i * 4 + 1, b);
-										bytes.set(i * 4 + 2, c);
+										u8[i * 4    ] = a;
+										u8[i * 4 + 1] = b;
+										u8[i * 4 + 2] = c;
 									}
 								}
 							}
 						}
 
 						#if (krom_metal || krom_vulkan)
-						if (from == ChannelBaseColor) bgraSwap(bytes);
+						if (from == ChannelBaseColor) bgraSwap(u8.buffer);
 						#end
 
-						var temp2 = kha.Image.fromBytes(bytes, tileW, tileW);
+						var temp2 = kha.Image.fromBytes(u8.buffer, tileW, tileW);
 						images[from].g2.begin(false);
 						images[from].g2.drawImage(temp2, x * tileW, y * tileW);
 						images[from].g2.end();
@@ -164,13 +164,14 @@ class PhotoToPBRNode extends LogicNode {
 	}
 
 	#if (krom_metal || krom_vulkan)
-	static function bgraSwap(bytes: haxe.io.Bytes) {
-		for (i in 0...Std.int(bytes.length / 4)) {
-			var r = bytes.get(i * 4);
-			bytes.set(i * 4, bytes.get(i * 4 + 2));
-			bytes.set(i * 4 + 2, r);
+	static function bgraSwap(buffer: js.lib.ArrayBuffer) {
+		var u8 = new js.lib.Uint8Array(buffer);
+		for (i in 0...Std.int(buffer.byteLength / 4)) {
+			var r = u8[i * 4];
+			u8[i * 4] = u8[i * 4 + 2];
+			u8[i * 4 + 2] = r;
 		}
-		return bytes;
+		return buffer;
 	}
 	#end
 

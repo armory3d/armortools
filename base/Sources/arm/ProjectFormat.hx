@@ -18,15 +18,15 @@ import iron.data.SceneFormat;
 
 	#if (is_paint || is_sculpt)
 	@:optional public var brush_nodes: Array<TNodeCanvas>;
-	@:optional public var brush_icons: Array<haxe.io.Bytes>;
+	@:optional public var brush_icons: Array<js.lib.ArrayBuffer>;
 	@:optional public var material_nodes: Array<TNodeCanvas>;
 	@:optional public var material_groups: Array<TNodeCanvas>;
-	@:optional public var material_icons: Array<haxe.io.Bytes>;
+	@:optional public var material_icons: Array<js.lib.ArrayBuffer>;
 	@:optional public var font_assets: Array<String>;
 	@:optional public var layer_datas: Array<TLayerData>;
 	@:optional public var mesh_datas: Array<TMeshData>;
 	@:optional public var mesh_assets: Array<String>;
-	@:optional public var mesh_icons: Array<haxe.io.Bytes>;
+	@:optional public var mesh_icons: Array<js.lib.ArrayBuffer>;
 	#end
 
 	#if is_paint
@@ -38,7 +38,7 @@ import iron.data.SceneFormat;
 	@:optional public var material: TNodeCanvas;
 	@:optional public var material_groups: Array<TNodeCanvas>;
 	@:optional public var mesh_data: TMeshData;
-	@:optional public var mesh_icon: haxe.io.Bytes;
+	@:optional public var mesh_icon: js.lib.ArrayBuffer;
 	#end
 }
 
@@ -50,7 +50,7 @@ import iron.data.SceneFormat;
 
 @:structInit class TPackedAsset {
 	public var name: String;
-	public var bytes: haxe.io.Bytes;
+	public var bytes: js.lib.ArrayBuffer;
 }
 
 @:structInit class TSwatchColor {
@@ -70,7 +70,7 @@ import iron.data.SceneFormat;
 	public var name: String;
 	public var res: Int; // Width pixels
 	public var bpp: Int; // Bits per pixel
-	public var texpaint: haxe.io.Bytes;
+	public var texpaint: js.lib.ArrayBuffer;
 	public var uv_scale: Float;
 	public var uv_rot: Float;
 	public var uv_type: Int;
@@ -82,8 +82,8 @@ import iron.data.SceneFormat;
 	public var parent: Int;
 	public var visible: Bool;
 	#if is_paint
-	public var texpaint_nor: haxe.io.Bytes;
-	public var texpaint_pack: haxe.io.Bytes;
+	public var texpaint_nor: js.lib.ArrayBuffer;
+	public var texpaint_pack: js.lib.ArrayBuffer;
 	public var paint_base: Bool;
 	public var paint_opac: Bool;
 	public var paint_occ: Bool;

@@ -148,12 +148,12 @@ class RenderPathRaytrace {
 			Scene.active.embedData("bnoise_rank.k", function() {});
 		}
 
-		iron.data.Data.getBlob(shaderName, function(shader: kha.Blob) {
+		iron.data.Data.getBlob(shaderName, function(shader: js.lib.ArrayBuffer) {
 			if (build) buildData();
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
-			Krom.raytraceInit(shader.bytes.getData(), untyped vb.buffer, untyped ib.buffer, vb_scale);
+			Krom.raytraceInit(shader, vb.buffer_, ib.buffer_, vb_scale);
 		});
 	}
 

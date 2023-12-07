@@ -2,8 +2,6 @@ package arm.io;
 
 #if (is_paint || is_lab)
 
-import haxe.io.Bytes;
-import haxe.io.BytesOutput;
 import kha.Image;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
@@ -291,11 +289,11 @@ class ExportTexture {
 		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
 		#end
 
-		var pixpaint: Bytes = null;
-		var pixpaint_nor: Bytes = null;
-		var pixpaint_pack: Bytes = null;
+		var pixpaint: js.lib.ArrayBuffer = null;
+		var pixpaint_nor: js.lib.ArrayBuffer = null;
+		var pixpaint_pack: js.lib.ArrayBuffer = null;
 		var preset = BoxExport.preset;
-		var pix: Bytes = null;
+		var pix: js.lib.ArrayBuffer = null;
 
 		for (t in preset.textures) {
 			for (c in t.channels) {
@@ -334,26 +332,26 @@ class ExportTexture {
 				writeTexture(path + Path.sep + f + tex_name + ext, pixpaint, 2, 3);
 			}
 			else {
-				if (pix == null) pix = Bytes.alloc(textureSizeX * textureSizeY * 4 * Std.int(bits / 8));
+				if (pix == null) pix = new js.lib.ArrayBuffer(textureSizeX * textureSizeY * 4 * Std.int(bits / 8));
 				for (i in 0...4) {
 					var c = t.channels[i];
-					if      (c == "base_r") copyChannel(pixpaint, 0, pix, i, t.color_space == "linear");
-					else if (c == "base_g") copyChannel(pixpaint, 1, pix, i, t.color_space == "linear");
-					else if (c == "base_b") copyChannel(pixpaint, 2, pix, i, t.color_space == "linear");
-					else if (c == "height") copyChannel(pixpaint_pack, 3, pix, i, t.color_space == "linear");
-					else if (c == "metal") copyChannel(pixpaint_pack, 2, pix, i, t.color_space == "linear");
-					else if (c == "nor_r") copyChannel(pixpaint_nor, 0, pix, i, t.color_space == "linear");
-					else if (c == "nor_g") copyChannel(pixpaint_nor, 1, pix, i, t.color_space == "linear");
-					else if (c == "nor_g_directx") copyChannelInv(pixpaint_nor, 1, pix, i, t.color_space == "linear");
-					else if (c == "nor_b") copyChannel(pixpaint_nor, 2, pix, i, t.color_space == "linear");
-					else if (c == "occ") copyChannel(pixpaint_pack, 0, pix, i, t.color_space == "linear");
-					else if (c == "opac") copyChannel(pixpaint, 3, pix, i, t.color_space == "linear");
-					else if (c == "rough") copyChannel(pixpaint_pack, 1, pix, i, t.color_space == "linear");
-					else if (c == "smooth") copyChannelInv(pixpaint_pack, 1, pix, i, t.color_space == "linear");
-					else if (c == "emis") extractChannel(pixpaint_nor, 3, pix, i, 3, 1, t.color_space == "linear");
-					else if (c == "subs") extractChannel(pixpaint_nor, 3, pix, i, 3, 2, t.color_space == "linear");
-					else if (c == "0.0") setChannel(0, pix, i);
-					else if (c == "1.0") setChannel(255, pix, i);
+					if      (c == "base_r") copyChannel(new js.lib.DataView(pixpaint), 0, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "base_g") copyChannel(new js.lib.DataView(pixpaint), 1, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "base_b") copyChannel(new js.lib.DataView(pixpaint), 2, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "height") copyChannel(new js.lib.DataView(pixpaint_pack), 3, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "metal") copyChannel(new js.lib.DataView(pixpaint_pack), 2, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "nor_r") copyChannel(new js.lib.DataView(pixpaint_nor), 0, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "nor_g") copyChannel(new js.lib.DataView(pixpaint_nor), 1, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "nor_g_directx") copyChannelInv(new js.lib.DataView(pixpaint_nor), 1, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "nor_b") copyChannel(new js.lib.DataView(pixpaint_nor), 2, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "occ") copyChannel(new js.lib.DataView(pixpaint_pack), 0, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "opac") copyChannel(new js.lib.DataView(pixpaint), 3, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "rough") copyChannel(new js.lib.DataView(pixpaint_pack), 1, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "smooth") copyChannelInv(new js.lib.DataView(pixpaint_pack), 1, new js.lib.DataView(pix), i, t.color_space == "linear");
+					else if (c == "emis") extractChannel(new js.lib.DataView(pixpaint_nor), 3, new js.lib.DataView(pix), i, 3, 1, t.color_space == "linear");
+					else if (c == "subs") extractChannel(new js.lib.DataView(pixpaint_nor), 3, new js.lib.DataView(pix), i, 3, 2, t.color_space == "linear");
+					else if (c == "0.0") setChannel(0, new js.lib.DataView(pix), i);
+					else if (c == "1.0") setChannel(255, new js.lib.DataView(pix), i);
 				}
 				writeTexture(path + Path.sep + f + tex_name + ext, pix, 3);
 			}
@@ -365,7 +363,7 @@ class ExportTexture {
 		@:privateAccess texpaint_pack.pixels = null;
 	}
 
-	static function writeTexture(file: String, pixels: Bytes, type = 1, off = 0) {
+	static function writeTexture(file: String, pixels: js.lib.ArrayBuffer, type = 1, off = 0) {
 		var resX = Config.getTextureResX();
 		var resY = Config.getTextureResY();
 		var bitsHandle = App.bitsHandle.position;
@@ -393,49 +391,48 @@ class ExportTexture {
 		}
 
 		if (bits == 8 && Context.raw.formatType == FormatPng) {
-			Krom.writePng(file, pixels.getData(), resX, resY, format);
+			Krom.writePng(file, pixels, resX, resY, format);
 		}
 		else if (bits == 8 && Context.raw.formatType == FormatJpg) {
-			Krom.writeJpg(file, pixels.getData(), resX, resY, format, Std.int(Context.raw.formatQuality));
+			Krom.writeJpg(file, pixels, resX, resY, format, Std.int(Context.raw.formatQuality));
 		}
 		else { // Exr
-			var out = new BytesOutput();
-			var writer = new arm.format.ExrWriter(out, resX, resY, pixels, bits, type, off);
-			Krom.fileSaveBytes(file, out.getBytes().getData(), out.getBytes().length);
+			var b = arm.format.ExrWriter.run(resX, resY, pixels, bits, type, off);
+			Krom.fileSaveBytes(file, b, b.byteLength);
 		}
 	}
 
-	static function copyChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, linear = true) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel));
-		}
-		if (!linear) toSrgb(to, toChannel);
-	}
-
-	static function copyChannelInv(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, linear = true) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, 255 - from.get(i * 4 + fromChannel));
+	static function copyChannel(from: js.lib.DataView, fromChannel: Int, to: js.lib.DataView, toChannel: Int, linear = true) {
+		for (i in 0...Std.int(to.byteLength / 4)) {
+			to.setUint8(i * 4 + toChannel, from.getUint8(i * 4 + fromChannel));
 		}
 		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static function extractChannel(from: Bytes, fromChannel: Int, to: Bytes, toChannel: Int, step: Int, mask: Int, linear = true) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, from.get(i * 4 + fromChannel) % step == mask ? 255 : 0);
+	static function copyChannelInv(from: js.lib.DataView, fromChannel: Int, to: js.lib.DataView, toChannel: Int, linear = true) {
+		for (i in 0...Std.int(to.byteLength / 4)) {
+			to.setUint8(i * 4 + toChannel, 255 - from.getUint8(i * 4 + fromChannel));
 		}
 		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static function setChannel(value: Int, to: Bytes, toChannel: Int, linear = true) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, value);
+	static function extractChannel(from: js.lib.DataView, fromChannel: Int, to: js.lib.DataView, toChannel: Int, step: Int, mask: Int, linear = true) {
+		for (i in 0...Std.int(to.byteLength / 4)) {
+			to.setUint8(i * 4 + toChannel, from.getUint8(i * 4 + fromChannel) % step == mask ? 255 : 0);
 		}
 		if (!linear) toSrgb(to, toChannel);
 	}
 
-	static function toSrgb(to: Bytes, toChannel: Int) {
-		for (i in 0...Std.int(to.length / 4)) {
-			to.set(i * 4 + toChannel, Std.int(Math.pow(to.get(i * 4 + toChannel) / 255, gamma) * 255));
+	static function setChannel(value: Int, to: js.lib.DataView, toChannel: Int, linear = true) {
+		for (i in 0...Std.int(to.byteLength / 4)) {
+			to.setUint8(i * 4 + toChannel, value);
+		}
+		if (!linear) toSrgb(to, toChannel);
+	}
+
+	static function toSrgb(to: js.lib.DataView, toChannel: Int) {
+		for (i in 0...Std.int(to.byteLength / 4)) {
+			to.setUint8(i * 4 + toChannel, Std.int(Math.pow(to.getUint8(i * 4 + toChannel) / 255, gamma) * 255));
 		}
 	}
 }

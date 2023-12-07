@@ -39,19 +39,19 @@ class Camera {
 			if (Config.raw.wrap_mouse && controlsDown) {
 				if (mouse.viewX < 0) {
 					@:privateAccess mouse.x = mouse.lastX = iron.App.x() + iron.App.w();
-					Krom.setMousePosition(0, Std.int(mouse.x), Std.int(mouse.y));
+					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewX > iron.App.w()) {
 					@:privateAccess mouse.x = mouse.lastX = iron.App.x();
-					Krom.setMousePosition(0, Std.int(mouse.x), Std.int(mouse.y));
+					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewY < 0) {
 					@:privateAccess mouse.y = mouse.lastY = iron.App.y() + iron.App.h();
-					Krom.setMousePosition(0, Std.int(mouse.x), Std.int(mouse.y));
+					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewY > iron.App.h()) {
 					@:privateAccess mouse.y = mouse.lastY = iron.App.y();
-					Krom.setMousePosition(0, Std.int(mouse.x), Std.int(mouse.y));
+					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 			}
 			else {

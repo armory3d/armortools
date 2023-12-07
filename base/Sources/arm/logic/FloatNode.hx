@@ -24,11 +24,12 @@ class FloatNode extends LogicNode {
 	override function getAsImage(from: Int, done: kha.Image->Void) {
 		if (inputs.length > 0) { inputs[0].getAsImage(done); return; }
 		if (image != null) image.unload();
-		var b = haxe.io.Bytes.alloc(16);
-		b.setFloat(0, value);
-		b.setFloat(4, value);
-		b.setFloat(8, value);
-		b.setFloat(12, 1.0);
+		var b = new js.lib.ArrayBuffer(16);
+		var v = new js.lib.DataView(b);
+		v.setFloat32(0, value, true);
+		v.setFloat32(4, value, true);
+		v.setFloat32(8, value, true);
+		v.setFloat32(12, 1.0, true);
 		image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
 		done(image);
 	}

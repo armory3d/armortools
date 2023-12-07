@@ -5,236 +5,243 @@ package arm.format;
 
 class ExrWriter {
 
-	public function new(out: haxe.io.BytesOutput, width: Int, height: Int, src: haxe.io.Bytes, bits = 16, type = 1, off = 0) {
-		out.writeByte(0x76); // magic
-		out.writeByte(0x2f);
-		out.writeByte(0x31);
-		out.writeByte(0x01);
-		out.writeByte(2); // version, scanline
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeString("channels");
-		out.writeByte(0);
-		out.writeString("chlist");
-		out.writeByte(0);
+	static function writeString(out: Array<Int>, str: String) {
+		for (i in 0...str.length) {
+			out.push(str.charCodeAt(i));
+		}
+	}
 
-		out.writeByte(55);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+	public static function run(width: Int, height: Int, src: js.lib.ArrayBuffer, bits = 16, type = 1, off = 0): js.lib.ArrayBuffer {
+		var out = [];
+		out.push(0x76); // magic
+		out.push(0x2f);
+		out.push(0x31);
+		out.push(0x01);
+		out.push(2); // version, scanline
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		writeString(out, "channels");
+		out.push(0);
+		writeString(out, "chlist");
+		out.push(0);
+
+		out.push(55);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
 		var attrib = bits == 16 ? 1 : 2; // half, float
 
-		out.writeByte("B".code); // B
-		out.writeByte(0);
+		out.push("B".code); // B
+		out.push(0);
 
-		out.writeByte(attrib);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(attrib);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte("G".code); // G
-		out.writeByte(0);
+		out.push("G".code); // G
+		out.push(0);
 
-		out.writeByte(attrib);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(attrib);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte("R".code); // R
-		out.writeByte(0);
+		out.push("R".code); // R
+		out.push(0);
 
-		out.writeByte(attrib);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(attrib);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
+		out.push(0);
 
-		out.writeString("compression");
-		out.writeByte(0);
-		out.writeString("compression");
-		out.writeByte(0);
+		writeString(out, "compression");
+		out.push(0);
+		writeString(out, "compression");
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0); // no compression
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0); // no compression
 
-		out.writeString("dataWindow");
-		out.writeByte(0);
-		out.writeString("box2i");
-		out.writeByte(0);
+		writeString(out, "dataWindow");
+		out.push(0);
+		writeString(out, "box2i");
+		out.push(0);
 
-		out.writeByte(16);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(16);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
 		var ww = width - 1;
 		var hh = height - 1;
 
-		out.writeByte(ww & 0xff);
-		out.writeByte((ww >> 8) & 0xff);
-		out.writeByte((ww >> 16) & 0xff);
-		out.writeByte((ww >> 24) & 0xff);
+		out.push(ww & 0xff);
+		out.push((ww >> 8) & 0xff);
+		out.push((ww >> 16) & 0xff);
+		out.push((ww >> 24) & 0xff);
 
-		out.writeByte(hh & 0xff);
-		out.writeByte((hh >> 8) & 0xff);
-		out.writeByte((hh >> 16) & 0xff);
-		out.writeByte((hh >> 24) & 0xff);
+		out.push(hh & 0xff);
+		out.push((hh >> 8) & 0xff);
+		out.push((hh >> 16) & 0xff);
+		out.push((hh >> 24) & 0xff);
 
-		out.writeString("displayWindow");
-		out.writeByte(0);
-		out.writeString("box2i");
-		out.writeByte(0);
+		writeString(out, "displayWindow");
+		out.push(0);
+		writeString(out, "box2i");
+		out.push(0);
 
-		out.writeByte(16);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(16);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(ww & 0xff);
-		out.writeByte((ww >> 8) & 0xff);
-		out.writeByte((ww >> 16) & 0xff);
-		out.writeByte((ww >> 24) & 0xff);
+		out.push(ww & 0xff);
+		out.push((ww >> 8) & 0xff);
+		out.push((ww >> 16) & 0xff);
+		out.push((ww >> 24) & 0xff);
 
-		out.writeByte(hh & 0xff);
-		out.writeByte((hh >> 8) & 0xff);
-		out.writeByte((hh >> 16) & 0xff);
-		out.writeByte((hh >> 24) & 0xff);
+		out.push(hh & 0xff);
+		out.push((hh >> 8) & 0xff);
+		out.push((hh >> 16) & 0xff);
+		out.push((hh >> 24) & 0xff);
 
-		out.writeString("lineOrder");
-		out.writeByte(0);
-		out.writeString("lineOrder");
-		out.writeByte(0);
+		writeString(out, "lineOrder");
+		out.push(0);
+		writeString(out, "lineOrder");
+		out.push(0);
 
-		out.writeByte(1);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0); // increasing Y
+		out.push(1);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0); // increasing Y
 
-		out.writeString("pixelAspectRatio");
-		out.writeByte(0);
-		out.writeString("float");
-		out.writeByte(0);
+		writeString(out, "pixelAspectRatio");
+		out.push(0);
+		writeString(out, "float");
+		out.push(0);
 
-		out.writeByte(4);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(4);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0); // 1.0f
-		out.writeByte(0);
-		out.writeByte(0x80);
-		out.writeByte(0x3f);
+		out.push(0); // 1.0f
+		out.push(0);
+		out.push(0x80);
+		out.push(0x3f);
 
-		out.writeString("screenWindowCenter");
-		out.writeByte(0);
+		writeString(out, "screenWindowCenter");
+		out.push(0);
 
-		out.writeString("v2f");
-		out.writeByte(0);
+		writeString(out, "v2f");
+		out.push(0);
 
-		out.writeByte(8);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(8);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeString("screenWindowWidth");
-		out.writeByte(0);
+		writeString(out, "screenWindowWidth");
+		out.push(0);
 
-		out.writeString("float");
-		out.writeByte(0);
+		writeString(out, "float");
+		out.push(0);
 
-		out.writeByte(4);
-		out.writeByte(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.push(4);
+		out.push(0);
+		out.push(0);
+		out.push(0);
 
-		out.writeByte(0); // 1.0f
-		out.writeByte(0);
-		out.writeByte(0x80);
-		out.writeByte(0x3f);
+		out.push(0); // 1.0f
+		out.push(0);
+		out.push(0x80);
+		out.push(0x3f);
 
-		out.writeByte(0); // end of header
+		out.push(0); // end of header
 
 		var channels = 4;
 		var byteSize = bits == 16 ? 2 : 4;
@@ -246,35 +253,36 @@ class ExrWriter {
 		// line offset table
 		var ofs = kHeaderSize + kScanlineTableSize;
 		for (y in 0...height) {
-			out.writeByte(ofs & 0xff);
-			out.writeByte((ofs >> 8) & 0xff);
-			out.writeByte((ofs >> 16) & 0xff);
-			out.writeByte((ofs >> 24) & 0xff);
-			out.writeByte(0);
-			out.writeByte(0);
-			out.writeByte(0);
-			out.writeByte(0);
+			out.push(ofs & 0xff);
+			out.push((ofs >> 8) & 0xff);
+			out.push((ofs >> 16) & 0xff);
+			out.push((ofs >> 24) & 0xff);
+			out.push(0);
+			out.push(0);
+			out.push(0);
+			out.push(0);
 			ofs += fullRowSize;
 		}
 
 		// scanline data
 		var stride = channels * byteSize;
 		var pos = 0;
+		var srcView = new js.lib.DataView(src);
 
 		function writeLine16(bytePos: Int) {
 			for (x in 0...width) {
-				out.writeByte(src.get(bytePos    ));
-				out.writeByte(src.get(bytePos + 1));
+				out.push(srcView.getUint8(bytePos    ));
+				out.push(srcView.getUint8(bytePos + 1));
 				bytePos += stride;
 			}
 		}
 
 		function writeLine32(bytePos: Int) {
 			for (x in 0...width) {
-				out.writeByte(src.get(bytePos    ));
-				out.writeByte(src.get(bytePos + 1));
-				out.writeByte(src.get(bytePos + 2));
-				out.writeByte(src.get(bytePos + 3));
+				out.push(srcView.getUint8(bytePos    ));
+				out.push(srcView.getUint8(bytePos + 1));
+				out.push(srcView.getUint8(bytePos + 2));
+				out.push(srcView.getUint8(bytePos + 3));
 				bytePos += stride;
 			}
 		}
@@ -297,18 +305,20 @@ class ExrWriter {
 
 		for (y in 0...height) {
 			// coordinate
-			out.writeByte(y & 0xff);
-			out.writeByte((y >> 8) & 0xff);
-			out.writeByte((y >> 16) & 0xff);
-			out.writeByte((y >> 24) & 0xff);
+			out.push(y & 0xff);
+			out.push((y >> 8) & 0xff);
+			out.push((y >> 16) & 0xff);
+			out.push((y >> 24) & 0xff);
 			// data size
-			out.writeByte(pixelRowSize & 0xff);
-			out.writeByte((pixelRowSize >> 8) & 0xff);
-			out.writeByte((pixelRowSize >> 16) & 0xff);
-			out.writeByte((pixelRowSize >> 24) & 0xff);
+			out.push(pixelRowSize & 0xff);
+			out.push((pixelRowSize >> 8) & 0xff);
+			out.push((pixelRowSize >> 16) & 0xff);
+			out.push((pixelRowSize >> 24) & 0xff);
 			// data
 			writeData(off);
 			pos += width * stride;
 		}
+
+		return js.lib.Uint8Array.from(out).buffer;
 	}
 }

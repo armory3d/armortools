@@ -31,8 +31,8 @@ class UIBox {
 			var inUse = ui.comboSelectedHandle_ptr != null;
 			var isEscape = kb.started("escape");
 			if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
-				var appw = System.windowWidth();
-				var apph = System.windowHeight();
+				var appw = System.width;
+				var apph = System.height;
 				var mw = Std.int(modalW * ui.SCALE());
 				var mh = Std.int(modalH * ui.SCALE());
 				var left = (appw / 2 - mw / 2) + hwnd.dragX;
@@ -53,14 +53,14 @@ class UIBox {
 			#else
 			g.color = kha.Color.fromFloats(0, 0, 0, 0.5);
 			#end
-			g.fillRect(0, 0, kha.System.windowWidth(), kha.System.windowHeight());
+			g.fillRect(0, 0, kha.System.width, kha.System.height);
 		}
 
 		g.end();
 
 		var ui = App.uiBox;
-		var appw = System.windowWidth();
-		var apph = System.windowHeight();
+		var appw = System.width;
+		var apph = System.height;
 		var mw = Std.int(modalW * ui.SCALE());
 		var mh = Std.int(modalH * ui.SCALE());
 		if (mw > appw) mw = appw;
@@ -162,13 +162,13 @@ class UIBox {
 	static function tweenIn() {
 		iron.system.Tween.reset();
 		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut});
-		UIBox.hwnd.dragY = Std.int(kha.System.windowHeight() / 2);
+		UIBox.hwnd.dragY = Std.int(kha.System.height / 2);
 		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
 	}
 
 	static function tweenOut() {
 		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn, done: hideInternal});
-		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: kha.System.windowHeight() / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
+		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: kha.System.height / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
 	}
 	#end
 

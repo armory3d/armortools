@@ -3,18 +3,19 @@
 // https://github.com/fschutt/mystery-of-the-blend-backup
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
 // Usage:
-// var bl = new BlendParser(blob:kha.Blob);
+// var bl = new BlendParser(blob: DataView);
 // trace(bl.dir("Scene"));
 // var scenes = bl.get("Scene");
 // trace(scenes[0].get("id").get("name"));
 package arm.format;
 
-import kha.Blob;
+import js.lib.ArrayBuffer;
+import js.lib.DataView;
 
 class BlendParser {
 
 	public var pos: Int;
-	var blob: Blob;
+	var view: DataView;
 
 	// Header
 	public var version: String;
@@ -25,11 +26,11 @@ class BlendParser {
 	public var dna: Dna = null;
 	public var map = new Map<Int, Map<Int, Block>>(); // Map blocks by memory address
 
-	public function new(blob: Blob) {
-		this.blob = blob;
+	public function new(buffer: ArrayBuffer) {
+		this.view = new DataView(buffer);
 		this.pos = 0;
 		if (readChars(7) != "BLENDER") {
-			this.blob = Blob.fromBytes(haxe.io.Bytes.ofData(Krom.inflate(blob.toBytes().getData(), false)));
+			this.view = new DataView(Krom.inflate(buffer, false));
 			this.pos = 0;
 			if (readChars(7) != "BLENDER") return;
 		}
@@ -84,24 +85,12 @@ class BlendParser {
 
 		// v - little endian, V - big endian
 		littleEndian = readChar() == "v";
-		if (littleEndian) {
-			read16 = read16LE;
-			read32 = read32LE;
-			read64 = read64LE;
-			readf32 = readf32LE;
-		}
-		else {
-			read16 = read16BE;
-			read32 = read32BE;
-			read64 = read64BE;
-			readf32 = readf32BE;
-		}
 
 		version = readChars(3);
 
 		// Reading file blocks
 		// Header - data
-		while (pos < blob.length) {
+		while (pos < view.byteLength) {
 			align();
 			var b = new Block();
 
@@ -184,74 +173,47 @@ class BlendParser {
 	}
 
 	public function read8(): Int {
-		var i = blob.readU8(pos);
+		var i = view.getUint8(pos);
 		pos += 1;
 		return i;
 	}
 
-	public var read16: Void->Int;
-	public var read32: Void->Int;
-	public var read64: Void->haxe.Int64;
-	public var readf32: Void->Float;
-
-	function read16LE(): Int {
-		var i = blob.readS16LE(pos);
+	public function read16(): Int {
+		var i = view.getInt16(pos, littleEndian);
 		pos += 2;
 		return i;
 	}
 
-	function read32LE(): Int {
-		var i = blob.readS32LE(pos);
+	public function read32(): Int {
+		var i = view.getInt32(pos, littleEndian);
 		pos += 4;
 		return i;
 	}
 
-	function read64LE(): haxe.Int64 {
+	public function read64(): haxe.Int64 {
 		return haxe.Int64.make(read32(), read32());
 	}
 
-	function readf32LE(): Float {
-		var f = blob.readF32LE(pos);
+	public function readf32(): Float {
+		var f = view.getFloat32(pos, littleEndian);
 		pos += 4;
 		return f;
 	}
 
-	function read16BE(): Int {
-		var i = blob.readS16BE(pos);
-		pos += 2;
-		return i;
-	}
-
-	function read32BE(): Int {
-		var i = blob.readS32BE(pos);
-		pos += 4;
-		return i;
-	}
-
-	function read64BE(): haxe.Int64 {
-		return haxe.Int64.make(read32(), read32());
-	}
-
-	function readf32BE(): Float {
-		var f = blob.readF32BE(pos);
-		pos += 4;
-		return f;
-	}
-
-	public function read8array(len: Int): haxe.io.Int32Array {
-		var ar = new haxe.io.Int32Array(len);
+	public function read8array(len: Int): js.lib.Int32Array {
+		var ar = new js.lib.Int32Array(len);
 		for (i in 0...len) ar[i] = read8();
 		return ar;
 	}
 
-	public function read16array(len: Int): haxe.io.Int32Array {
-		var ar = new haxe.io.Int32Array(len);
+	public function read16array(len: Int): js.lib.Int32Array {
+		var ar = new js.lib.Int32Array(len);
 		for (i in 0...len) ar[i] = read16();
 		return ar;
 	}
 
-	public function read32array(len: Int): haxe.io.Int32Array {
-		var ar = new haxe.io.Int32Array(len);
+	public function read32array(len: Int): js.lib.Int32Array {
+		var ar = new js.lib.Int32Array(len);
 		for (i in 0...len) ar[i] = read32();
 		return ar;
 	}

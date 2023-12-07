@@ -155,7 +155,7 @@ class RenderPathBase {
 	}
 
 	public static function isCached(): Bool {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return true;
+		if (System.width == 0 || System.height == 0) return true;
 
 		var mouse = Input.getMouse();
 		var mx = lastX;

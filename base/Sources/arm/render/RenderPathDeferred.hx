@@ -99,9 +99,10 @@ class RenderPathDeferred {
 			t.height = 1;
 			t.format = "R8";
 			var rt = new RenderTarget(t);
-			var b = haxe.io.Bytes.alloc(1);
-			b.set(0, 255);
-			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.L8);
+			var b = new js.lib.ArrayBuffer(1);
+			var v = new js.lib.DataView(b);
+			v.setUint8(0, 255);
+			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.R8);
 			path.renderTargets.set(t.name, rt);
 		}
 		{
@@ -111,11 +112,12 @@ class RenderPathDeferred {
 			t.height = 1;
 			t.format = "RGBA32";
 			var rt = new RenderTarget(t);
-			var b = haxe.io.Bytes.alloc(4);
-			b.set(0, 0);
-			b.set(1, 0);
-			b.set(2, 0);
-			b.set(3, 0);
+			var b = new js.lib.ArrayBuffer(4);
+			var v = new js.lib.DataView(b);
+			v.setUint8(0, 0);
+			v.setUint8(1, 0);
+			v.setUint8(2, 0);
+			v.setUint8(3, 0);
 			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.RGBA32);
 			path.renderTargets.set(t.name, rt);
 		}

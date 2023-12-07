@@ -1,6 +1,5 @@
 package arm.io;
 
-import kha.Blob;
 import iron.data.Data;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
@@ -17,7 +16,7 @@ import arm.data.MaterialSlot;
 class ImportBlendMaterial {
 
 	public static function run(path: String) {
-		Data.getBlob(path, function(b: Blob) {
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				Console.error(Strings.error3());

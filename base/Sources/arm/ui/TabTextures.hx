@@ -42,10 +42,10 @@ class TabTextures {
 			if (Project.assets.length > 0) {
 
 				#if (is_paint || is_sculpt)
-				var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
+				var statusw = kha.System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 				#end
 				#if is_lab
-				var statusw = kha.System.windowWidth();
+				var statusw = kha.System.width;
 				#end
 
 				var slotw = Std.int(52 * ui.SCALE());
@@ -130,7 +130,7 @@ class TabTextures {
 												var f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
-												Krom.writePng(path + Path.sep + f, target.getPixels().getData(), target.width, target.height, 0);
+												Krom.writePng(path + Path.sep + f, target.getPixels(), target.width, target.height, 0);
 												target.unload();
 											});
 										});

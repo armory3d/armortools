@@ -37,10 +37,10 @@ class Plugin {
 
 	public static function start(plugin: String) {
 		try {
-			iron.data.Data.getBlob("plugins/" + plugin, function(blob: kha.Blob) {
+			iron.data.Data.getBlob("plugins/" + plugin, function(blob: js.lib.ArrayBuffer) {
 				pluginName = plugin;
-				// js.Syntax.code("(1, eval)({0})", blob.toString()); // Global scope
-				js.Syntax.code("eval({0})", blob.toString()); // Local scope
+				// js.Syntax.code("(1, eval)({0})", kha.System.bufferToString(blob)); // Global scope
+				js.Syntax.code("eval({0})", kha.System.bufferToString(blob)); // Local scope
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}
@@ -85,10 +85,6 @@ class CoreBridge {
 	public static var ReflectField = Reflect.field;
 	public static var ReflectSetField = Reflect.setField;
 	public static var StdIs = Std.isOfType;
-	public static var Bytes = haxe.io.Bytes;
-	public static var BytesInput = haxe.io.BytesInput;
-	public static var BytesOutput = haxe.io.BytesOutput;
-	public static var Blob = kha.Blob;
 	public static var Image = kha.Image;
 	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
 		return kha.Color.fromFloats(r, g, b, a);

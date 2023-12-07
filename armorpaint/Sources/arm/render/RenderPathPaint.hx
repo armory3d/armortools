@@ -172,16 +172,16 @@ class RenderPathPaint {
 					path.drawMeshes("paint");
 					var texpaint_posnortex_picker0 = path.renderTargets.get("texpaint_posnortex_picker0").image;
 					var texpaint_posnortex_picker1 = path.renderTargets.get("texpaint_posnortex_picker1").image;
-					var a = texpaint_posnortex_picker0.getPixels();
-					var b = texpaint_posnortex_picker1.getPixels();
-					Context.raw.posXPicked = a.getFloat(0);
-					Context.raw.posYPicked = a.getFloat(4);
-					Context.raw.posZPicked = a.getFloat(8);
-					Context.raw.uvxPicked = a.getFloat(12);
-					Context.raw.norXPicked = b.getFloat(0);
-					Context.raw.norYPicked = b.getFloat(4);
-					Context.raw.norZPicked = b.getFloat(8);
-					Context.raw.uvyPicked = b.getFloat(12);
+					var a = new js.lib.DataView(texpaint_posnortex_picker0.getPixels());
+					var b = new js.lib.DataView(texpaint_posnortex_picker1.getPixels());
+					Context.raw.posXPicked = a.getFloat32(0, true);
+					Context.raw.posYPicked = a.getFloat32(4, true);
+					Context.raw.posZPicked = a.getFloat32(8, true);
+					Context.raw.uvxPicked = a.getFloat32(12, true);
+					Context.raw.norXPicked = b.getFloat32(0, true);
+					Context.raw.norYPicked = b.getFloat32(4, true);
+					Context.raw.norZPicked = b.getFloat32(8, true);
+					Context.raw.uvyPicked = b.getFloat32(12, true);
 				}
 				else {
 					path.setTarget("texpaint_picker", ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"]);
@@ -201,10 +201,10 @@ class RenderPathPaint {
 					var texpaint_nor_picker = path.renderTargets.get("texpaint_nor_picker").image;
 					var texpaint_pack_picker = path.renderTargets.get("texpaint_pack_picker").image;
 					var texpaint_uv_picker = path.renderTargets.get("texpaint_uv_picker").image;
-					var a = texpaint_picker.getPixels();
-					var b = texpaint_nor_picker.getPixels();
-					var c = texpaint_pack_picker.getPixels();
-					var d = texpaint_uv_picker.getPixels();
+					var a = new js.lib.DataView(texpaint_picker.getPixels());
+					var b = new js.lib.DataView(texpaint_nor_picker.getPixels());
+					var c = new js.lib.DataView(texpaint_pack_picker.getPixels());
+					var d = new js.lib.DataView(texpaint_uv_picker.getPixels());
 
 					if (Context.raw.colorPickerCallback != null) {
 						Context.raw.colorPickerCallback(Context.raw.pickedColor);
@@ -221,23 +221,23 @@ class RenderPathPaint {
 					var i2 = 2;
 					#end
 					var i3 = 3;
-					Context.raw.pickedColor.base.Rb = a.get(i0);
-					Context.raw.pickedColor.base.Gb = a.get(i1);
-					Context.raw.pickedColor.base.Bb = a.get(i2);
-					Context.raw.pickedColor.normal.Rb = b.get(i0);
-					Context.raw.pickedColor.normal.Gb = b.get(i1);
-					Context.raw.pickedColor.normal.Bb = b.get(i2);
-					Context.raw.pickedColor.occlusion = c.get(i0) / 255;
-					Context.raw.pickedColor.roughness = c.get(i1) / 255;
-					Context.raw.pickedColor.metallic = c.get(i2) / 255;
-					Context.raw.pickedColor.height = c.get(i3) / 255;
-					Context.raw.pickedColor.opacity = a.get(i3) / 255;
-					Context.raw.uvxPicked = d.get(i0) / 255;
-					Context.raw.uvyPicked = d.get(i1) / 255;
+					Context.raw.pickedColor.base.Rb = a.getUint8(i0);
+					Context.raw.pickedColor.base.Gb = a.getUint8(i1);
+					Context.raw.pickedColor.base.Bb = a.getUint8(i2);
+					Context.raw.pickedColor.normal.Rb = b.getUint8(i0);
+					Context.raw.pickedColor.normal.Gb = b.getUint8(i1);
+					Context.raw.pickedColor.normal.Bb = b.getUint8(i2);
+					Context.raw.pickedColor.occlusion = c.getUint8(i0) / 255;
+					Context.raw.pickedColor.roughness = c.getUint8(i1) / 255;
+					Context.raw.pickedColor.metallic = c.getUint8(i2) / 255;
+					Context.raw.pickedColor.height = c.getUint8(i3) / 255;
+					Context.raw.pickedColor.opacity = a.getUint8(i3) / 255;
+					Context.raw.uvxPicked = d.getUint8(i0) / 255;
+					Context.raw.uvyPicked = d.getUint8(i1) / 255;
 					// Pick material
 					if (Context.raw.pickerSelectMaterial && Context.raw.colorPickerCallback == null) {
 						// matid % 3 == 0 - normal, 1 - emission, 2 - subsurface
-						var matid = Std.int((b.get(3) - (b.get(3) % 3)) / 3);
+						var matid = Std.int((b.getUint8(3) - (b.getUint8(3) % 3)) / 3);
 						for (m in Project.materials) {
 							if (m.id == matid) {
 								Context.setMaterial(m);

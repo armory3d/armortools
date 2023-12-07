@@ -32,7 +32,7 @@ class TabFonts {
 			ui.endSticky();
 			ui.separator(3, false);
 
-			var statusw = kha.System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
+			var statusw = kha.System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(statusw / slotw);
 

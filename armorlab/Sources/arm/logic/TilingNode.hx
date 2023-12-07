@@ -27,7 +27,7 @@ class TilingNode extends LogicNode {
 	}
 
 	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
-		auto = node.buttons[0].default_value;
+		auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!auto) {
 			strength = ui.slider(zui.Zui.handle("tilingnode_0", {value: strength}), tr("strength"), 0, 1, true);
 			prompt = ui.textArea(zui.Zui.handle("tilingnode_1"), true, tr("prompt"), true);
@@ -67,25 +67,25 @@ class TilingNode extends LogicNode {
 		tile.g2.drawScaledImage(image, 256, 256, 512, 512);
 		tile.g2.end();
 
-		var bytes = haxe.io.Bytes.alloc(512 * 512);
+		var u8 = new js.lib.Uint8Array(512 * 512);
 		for (i in 0...512 * 512) {
 			var x = i % 512;
 			var y = Std.int(i / 512);
 			var l = y < 256 ? y : (511 - y);
-			bytes.set(i, (x > 256 - l && x < 256 + l) ? 0 : 255);
+			u8[i] = (x > 256 - l && x < 256 + l) ? 0 : 255;
 		}
-		// for (i in 0...512 * 512) bytes.set(i, 255);
+		// for (i in 0...512 * 512) u8[i] = 255;
 		// for (x in (256 - 32)...(256 + 32)) {
 		// 	for (y in 0...512) {
-		// 		bytes.set(y * 512 + x, 0);
+		// 		u8[y * 512 + x] = 0;
 		// 	}
 		// }
 		// for (x in 0...512) {
 		// 	for (y in (256 - 32)...(256 + 32)) {
-		// 		bytes.set(y * 512 + x, 0);
+		// 		u8[y * 512 + x] = 0;
 		// 	}
 		// }
-		var mask = kha.Image.fromBytes(bytes, 512, 512, kha.Image.TextureFormat.L8);
+		var mask = kha.Image.fromBytes(u8.buffer, 512, 512, kha.Image.TextureFormat.R8);
 
 		@:privateAccess InpaintNode.prompt = prompt;
 		@:privateAccess InpaintNode.strength = strength;

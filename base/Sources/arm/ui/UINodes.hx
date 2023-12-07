@@ -379,19 +379,19 @@ class UINodes {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
 			if (ui.inputX < ui._windowX) {
 				@:privateAccess ui.inputX = ui._windowX + ui._windowW;
-				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputX > ui._windowX + ui._windowW) {
 				@:privateAccess ui.inputX = ui._windowX;
-				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputY < ui._windowY) {
 				@:privateAccess ui.inputY = ui._windowY + ui._windowH;
-				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputY > ui._windowY + ui._windowH) {
 				@:privateAccess ui.inputY = ui._windowY;
-				Krom.setMousePosition(0, Std.int(ui.inputX), Std.int(ui.inputY));
+				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 		}
 
@@ -716,7 +716,7 @@ class UINodes {
 		}
 		releaseLink = ui.inputReleased;
 
-		if (!show || System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (!show || System.width == 0 || System.height == 0) return;
 
 		ui.inputEnabled = App.uiEnabled;
 
@@ -924,7 +924,7 @@ class UINodes {
 					if (singleChannel) {
 						ui.g.pipeline = UIView2D.pipe;
 						#if krom_opengl
-						Krom.setPipeline(UIView2D.pipe.pipeline);
+						Krom.setPipeline(UIView2D.pipe.pipeline_);
 						#end
 						Krom.setInt(UIView2D.channelLocation, 1);
 					}

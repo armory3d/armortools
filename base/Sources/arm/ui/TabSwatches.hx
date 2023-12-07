@@ -11,12 +11,12 @@ class TabSwatches {
 
 	public static function get_empty() {
 		if (empty == null) {
-			var b = haxe.io.Bytes.alloc(4);
-			b.set(0, 255);
-			b.set(1, 255);
-			b.set(2, 255);
-			b.set(3, 255);
-			empty = kha.Image.fromBytes(b, 1, 1);
+			var b = new js.lib.Uint8Array(4);
+			b[0] = 255;
+			b[1] = 255;
+			b[2] = 255;
+			b[3] = 255;
+			empty = kha.Image.fromBytes(b.buffer, 1, 1);
 		}
 		return empty;
 	}
@@ -53,7 +53,7 @@ class TabSwatches {
 						Project.importSwatches(false);
 					}
 				}, 2);
-			}	
+			}
 			if (ui.isHovered) ui.tooltip(tr("Import swatches"));
 
 			if (ui.button(tr("Export"))) Project.exportSwatches();

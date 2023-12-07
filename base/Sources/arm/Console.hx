@@ -12,10 +12,10 @@ class Console {
 
 	static function drawToast(s: String, g: kha.Graphics2) {
 		g.color = 0x55000000;
-		g.fillRect(0, 0, kha.System.windowWidth(), kha.System.windowHeight());
+		g.fillRect(0, 0, kha.System.width, kha.System.height);
 		var scale = arm.App.getUIs()[0].SCALE();
-		var x = kha.System.windowWidth() / 2;
-		var y = kha.System.windowHeight() - 200 * scale;
+		var x = kha.System.width / 2;
+		var y = kha.System.height - 200 * scale;
 		g.fillRect(x - 200 * scale, y, 400 * scale, 80 * scale);
 		g.font = App.font;
 		g.fontSize = Std.int(22 * scale);

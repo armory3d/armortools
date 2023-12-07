@@ -73,7 +73,7 @@ class Main {
 			}
 		};
 
-		System.start(ops, function(window: Window) {
+		System.start(ops, function() {
 			kha.Assets.loadFontFromPath("data/font_mono.ttf", function(font: kha.Font) {
 				kha.Assets.loadBlobFromPath("data/themes/dark.json", function(blob_theme: kha.Blob) {
 					kha.Assets.loadBlobFromPath("data/text_coloring.json", function(blob_coloring: kha.Blob) {
@@ -158,15 +158,15 @@ class Main {
 	static function render(framebuffer: kha.Framebuffer): Void {
 		var g = framebuffer.g2;
 
-		storage.window_w = System.windowWidth();
-		storage.window_h = System.windowHeight();
+		storage.window_w = System.width;
+		storage.window_h = System.height;
 		storage.window_x = Krom.windowX(0);
 		storage.window_y = Krom.windowY(0);
 		if (ui.inputDX != 0 || ui.inputDY != 0) Krom.setMouseCursor(0); // Arrow
 
 		ui.begin(g);
 
-		if (ui.window(sidebar_handle, 0, 0, storage.sidebar_w, System.windowHeight(), false)) {
+		if (ui.window(sidebar_handle, 0, 0, storage.sidebar_w, System.height, false)) {
 			var _BUTTON_TEXT_COL = ui.t.BUTTON_TEXT_COL;
 			ui.t.BUTTON_TEXT_COL = ui.t.ACCENT_COL;
 			if (storage.project != "") {
@@ -178,12 +178,12 @@ class Main {
 			ui.t.BUTTON_TEXT_COL = _BUTTON_TEXT_COL;
 		}
 
-		ui.fill(System.windowWidth() - minimap_w, 0, minimap_w, ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1, ui.t.SEPARATOR_COL);
-		ui.fill(storage.sidebar_w, 0, 1, System.windowHeight(), ui.t.SEPARATOR_COL);
+		ui.fill(System.width - minimap_w, 0, minimap_w, ui.ELEMENT_H() + ui.ELEMENT_OFFSET() + 1, ui.t.SEPARATOR_COL);
+		ui.fill(storage.sidebar_w, 0, 1, System.height, ui.t.SEPARATOR_COL);
 
 		var editor_updated = false;
 
-		if (ui.window(editor_handle, storage.sidebar_w + 1, 0, System.windowWidth() - storage.sidebar_w - minimap_w, System.windowHeight(), false)) {
+		if (ui.window(editor_handle, storage.sidebar_w + 1, 0, System.width - storage.sidebar_w - minimap_w, System.height, false)) {
 			editor_updated = true;
 			var htab = Zui.handle("main_0", { position: 0 });
 			var file_name = storage.file.substring(storage.file.lastIndexOf("/") + 1);
@@ -216,7 +216,7 @@ class Main {
 		}
 
 		// Minimap controls
-		var minimap_x = System.windowWidth() - minimap_w;
+		var minimap_x = System.width - minimap_w;
 		var minimap_y = window_header_h + 1;
 		var redraw = false;
 		if (ui.inputStarted && hit_test(ui.inputX, ui.inputY, minimap_x + 5, minimap_y, minimap_w, minimap_h)) {
@@ -278,8 +278,8 @@ class Main {
 	}
 
 	static function draw_minimap() {
-		if (minimap_h != System.windowHeight()) {
-			minimap_h = System.windowHeight();
+		if (minimap_h != System.height) {
+			minimap_h = System.height;
 			if (minimap != null) minimap.unload();
 			minimap = kha.Image.createRenderTarget(minimap_w, minimap_h);
 		}
@@ -310,7 +310,7 @@ class Main {
 		// Current position
 		var visibleArea = outOfScreen > 0 ? minimap_h : minimap_full_h;
 		minimap.g2.color = 0x11ffffff;
-		minimap_box_h = Std.int((System.windowHeight() - window_header_h) / ui.ELEMENT_H() * 2);
+		minimap_box_h = Std.int((System.height - window_header_h) / ui.ELEMENT_H() * 2);
 		minimap.g2.fillRect(0, scrollProgress * visibleArea, minimap_w, minimap_box_h);
 		minimap.g2.end();
 	}

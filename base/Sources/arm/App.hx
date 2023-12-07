@@ -142,8 +142,8 @@ class App {
 
 	public function new() {
 		Console.init();
-		lastWindowWidth = System.windowWidth();
-		lastWindowHeight = System.windowHeight();
+		lastWindowWidth = System.width;
+		lastWindowHeight = System.height;
 
 		System.notifyOnDropFiles(function(dropPath: String) {
 			#if krom_linux
@@ -186,12 +186,12 @@ class App {
 					Translator.loadTranslations(Config.raw.locale);
 					UIFiles.filename = tr("untitled");
 					#if (krom_android || krom_ios)
-					kha.Window.get().title = tr("untitled");
+					System.title = tr("untitled");
 					#end
 
 					// Baked font for fast startup
 					if (Config.raw.locale == "en") {
-						font.font_ = Krom.g2_font_13(font.blob.bytes.getData());
+						font.font_ = Krom.g2_font_13(font.blob);
 						font.fontGlyphs = kha.Graphics2.fontGlyphs;
 					}
 					else font.init();
@@ -286,16 +286,16 @@ class App {
 		var res = 0;
 		if (UINodes.inst == null || UIBase.inst == null) {
 			var sidebarw = Config.raw.layout == null ? UIBase.defaultSidebarW : Config.raw.layout[LayoutSidebarW];
-			res = System.windowWidth() - sidebarw - UIToolbar.defaultToolbarW;
+			res = System.width - sidebarw - UIToolbar.defaultToolbarW;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - Config.raw.layout[LayoutNodesW] - UIToolbar.inst.toolbarw;
+			res = System.width - Config.raw.layout[LayoutSidebarW] - Config.raw.layout[LayoutNodesW] - UIToolbar.inst.toolbarw;
 		}
 		else if (UIBase.inst.show) {
-			res = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - UIToolbar.inst.toolbarw;
+			res = System.width - Config.raw.layout[LayoutSidebarW] - UIToolbar.inst.toolbarw;
 		}
 		else { // Distract free
-			res = System.windowWidth();
+			res = System.width;
 		}
 		if (UIBase.inst != null && Context.raw.viewIndex > -1) {
 			res = Std.int(res / 2);
@@ -318,7 +318,7 @@ class App {
 			return RenderUtil.decalPreviewSize;
 		}
 
-		var res = System.windowHeight();
+		var res = System.height;
 
 		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
@@ -349,20 +349,20 @@ class App {
 	public static function w(): Int {
 		var res = 0;
 		if (UINodes.inst == null) {
-			res = System.windowWidth();
+			res = System.width;
 		}
 		else if (UINodes.inst.show || UIView2D.inst.show) {
-			res = System.windowWidth() - Config.raw.layout[LayoutNodesW];
+			res = System.width - Config.raw.layout[LayoutNodesW];
 		}
 		else { // Distract free
-			res = System.windowWidth();
+			res = System.width;
 		}
 
 		return res > 0 ? res : 1; // App was minimized, force render path resize
 	}
 
 	public static function h(): Int {
-		var res = System.windowHeight();
+		var res = System.height;
 		if (UIBase.inst == null) {
 			res -= UIHeader.defaultHeaderH * 2 + UIStatus.defaultStatusH;
 		}
@@ -389,17 +389,17 @@ class App {
 	}
 
 	public static function onResize() {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (System.width == 0 || System.height == 0) return;
 
-		var ratioW = System.windowWidth() / lastWindowWidth;
-		lastWindowWidth = System.windowWidth();
-		var ratioH = System.windowHeight() / lastWindowHeight;
-		lastWindowHeight = System.windowHeight();
+		var ratioW = System.width / lastWindowWidth;
+		lastWindowWidth = System.width;
+		var ratioH = System.height / lastWindowHeight;
+		lastWindowHeight = System.height;
 
 		Config.raw.layout[LayoutNodesW] = Std.int(Config.raw.layout[LayoutNodesW] * ratioW);
 		#if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSidebarH0] = Std.int(Config.raw.layout[LayoutSidebarH0] * ratioH);
-		Config.raw.layout[LayoutSidebarH1] = System.windowHeight() - Config.raw.layout[LayoutSidebarH0];
+		Config.raw.layout[LayoutSidebarH1] = System.height - Config.raw.layout[LayoutSidebarH0];
 		#end
 
 		resize();
@@ -411,16 +411,16 @@ class App {
 
 	static function saveWindowRect() {
 		#if (krom_windows || krom_linux || krom_darwin)
-		Config.raw.window_w = System.windowWidth();
-		Config.raw.window_h = System.windowHeight();
-		Config.raw.window_x = kha.Window.get().x;
-		Config.raw.window_y = kha.Window.get().y;
+		Config.raw.window_w = System.width;
+		Config.raw.window_h = System.height;
+		Config.raw.window_x = System.x;
+		Config.raw.window_y = System.y;
 		Config.save();
 		#end
 	}
 
 	public static function resize() {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (System.width == 0 || System.height == 0) return;
 
 		var cam = Scene.active.camera;
 		if (cam.data.raw.ortho != null) {
@@ -727,7 +727,7 @@ class App {
 	}
 
 	static function render(g: kha.Graphics2) {
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (System.width == 0 || System.height == 0) return;
 
 		if (Context.raw.frame == 2) {
 			#if (is_paint || is_sculpt)
@@ -882,19 +882,19 @@ class App {
 	}
 
 	public static function toggleFullscreen() {
-		if (kha.Window.get().mode == kha.Window.WindowMode.Windowed) {
+		if (System.mode == WindowMode.Windowed) {
 			#if (krom_windows || krom_linux || krom_darwin)
-			Config.raw.window_w = System.windowWidth();
-			Config.raw.window_h = System.windowHeight();
-			Config.raw.window_x = kha.Window.get().x;
-			Config.raw.window_y = kha.Window.get().y;
+			Config.raw.window_w = System.width;
+			Config.raw.window_h = System.height;
+			Config.raw.window_x = System.x;
+			Config.raw.window_y = System.y;
 			#end
-			kha.Window.get().mode = kha.Window.WindowMode.Fullscreen;
+			System.mode = WindowMode.Fullscreen;
 		}
 		else {
-			kha.Window.get().mode = kha.Window.WindowMode.Windowed;
-			kha.Window.get().resize(Config.raw.window_w, Config.raw.window_h);
-			kha.Window.get().move(Config.raw.window_x, Config.raw.window_y);
+			System.mode = WindowMode.Windowed;
+			System.resize(Config.raw.window_w, Config.raw.window_h);
+			System.move(Config.raw.window_x, Config.raw.window_y);
 		}
 	}
 
@@ -943,8 +943,8 @@ class App {
 		raw.layout = [
 			#if (is_paint || is_sculpt)
 			Std.int(UIBase.defaultSidebarW * raw.window_scale), // LayoutSidebarW
-			Std.int(kha.System.windowHeight() / 2), // LayoutSidebarH0
-			Std.int(kha.System.windowHeight() / 2), // LayoutSidebarH1
+			Std.int(kha.System.height / 2), // LayoutSidebarH0
+			Std.int(kha.System.height / 2), // LayoutSidebarH1
 			#end
 
 			#if krom_ios
@@ -1106,14 +1106,14 @@ class App {
 		});
 		rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
 		rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
-		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
+		rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		var _texpaint_blend1 = rts.get("texpaint_blend1").image;
 		App.notifyOnNextFrame(function() {
 			_texpaint_blend1.unload();
 		});
 		rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 		rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
-		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
+		rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		Context.raw.brushBlendDirty = true;
 		if (rts.get("texpaint_blur") != null) {
 			var _texpaint_blur = rts.get("texpaint_blur").image;
@@ -1199,7 +1199,7 @@ class App {
 		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeCopy8.inputLayout = [vs];
 		pipeCopy8.colorAttachmentCount = 1;
-		pipeCopy8.colorAttachments[0] = TextureFormat.L8;
+		pipeCopy8.colorAttachments[0] = TextureFormat.R8;
 		pipeCopy8.compile();
 
 		pipeCopy128 = new PipelineState();
@@ -1228,7 +1228,7 @@ class App {
 		vs.add("col", VertexData.U8_4X_Normalized);
 		pipeInvert8.inputLayout = [vs];
 		pipeInvert8.colorAttachmentCount = 1;
-		pipeInvert8.colorAttachments[0] = TextureFormat.L8;
+		pipeInvert8.colorAttachments[0] = TextureFormat.R8;
 		pipeInvert8.compile();
 
 		pipeApplyMask = new PipelineState();
@@ -1420,7 +1420,7 @@ class App {
 			tempMaskImage = null;
 		}
 		if (tempMaskImage == null) {
-			tempMaskImage = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
+			tempMaskImage = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		}
 	}
 	#end
@@ -2196,9 +2196,9 @@ class App {
 		}
 
 		iron.RenderPath.active.renderTargets.get("texpaint_blend0").image.unload();
-		iron.RenderPath.active.renderTargets.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
+		iron.RenderPath.active.renderTargets.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		iron.RenderPath.active.renderTargets.get("texpaint_blend1").image.unload();
-		iron.RenderPath.active.renderTargets.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8);
+		iron.RenderPath.active.renderTargets.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 
 		if (iron.RenderPath.active.renderTargets.get("texpaint_node") != null) {
 			iron.RenderPath.active.renderTargets.remove("texpaint_node");

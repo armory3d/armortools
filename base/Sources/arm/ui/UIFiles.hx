@@ -228,8 +228,8 @@ class UIFiles {
 						// TODO: implement native .arm parsing first
 						#else
 
-						var bytes = Bytes.ofData(Krom.loadBlob(blobPath));
-						var raw = ArmPack.decode(bytes);
+						var buffer = Krom.loadBlob(blobPath);
+						var raw = ArmPack.decode(buffer);
 						if (raw.material_icons != null) {
 							var bytesIcon = raw.material_icons[0];
 							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
@@ -276,11 +276,12 @@ class UIFiles {
 				if (Path.isTexture(f) && !isCloud) {
 					var w = 50;
 					if (iconMap == null) iconMap = [];
-					icon = iconMap.get(handle.text + Path.sep + f);
+					var handle = handle.text + Path.sep + f;
+					icon = iconMap.get(handle);
 					if (icon == null) {
 						var empty = iron.RenderPath.active.renderTargets.get("empty_black").image;
-						iconMap.set(handle.text + Path.sep + f, empty);
-						kha.Assets.loadImageFromPath(handle.text + Path.sep + f, false, function(image: kha.Image) {
+						iconMap.set(handle, empty);
+						iron.data.Data.getImage(handle, function(image: kha.Image) {
 							iron.App.notifyOnInit(function() {
 								if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
 								var sw = image.width > image.height ? w : Std.int(1.0 * image.width / image.height * w);
@@ -291,9 +292,9 @@ class UIFiles {
 								icon.g2.drawScaledImage(image, 0, 0, sw, sh);
 								icon.g2.pipeline = null;
 								icon.g2.end();
-								iconMap.set(handle.text + Path.sep + f, icon);
+								iconMap.set(handle, icon);
 								UIBase.inst.hwnds[TabStatus].redraws = 3;
-								image.unload(); // The big image is not needed anymore
+								iron.data.Data.deleteImage(handle); // The big image is not needed anymore
 							});
 						});
 					}

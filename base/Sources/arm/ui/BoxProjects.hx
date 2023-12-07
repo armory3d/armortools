@@ -65,13 +65,13 @@ class BoxProjects {
 						j = 0;
 					}
 				}
-				kha.Window.get().title = title;
+				kha.System.title = title;
 			}
 			ui.endSticky();
 			ui.separator(3, false);
 
 			var slotw = Std.int(150 * ui.SCALE());
-			var num = Std.int(kha.System.windowWidth() / slotw);
+			var num = Std.int(kha.System.width / slotw);
 			var recent_projects = Config.raw.recent_projects;
 			var show_asset_names = true;
 
@@ -243,10 +243,10 @@ class BoxProjects {
 	}
 
 	static function alignToFullScreen() {
-		@:privateAccess UIBox.modalW = Std.int(kha.System.windowWidth() / App.uiBox.SCALE());
-		@:privateAccess UIBox.modalH = Std.int(kha.System.windowHeight() / App.uiBox.SCALE());
-		var appw = kha.System.windowWidth();
-		var apph = kha.System.windowHeight();
+		@:privateAccess UIBox.modalW = Std.int(kha.System.width / App.uiBox.SCALE());
+		@:privateAccess UIBox.modalH = Std.int(kha.System.height / App.uiBox.SCALE());
+		var appw = kha.System.width;
+		var apph = kha.System.height;
 		var mw = appw;
 		var mh = apph;
 		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);

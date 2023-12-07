@@ -114,8 +114,8 @@ class BoxPreferences {
 						}
 						if (UIMenu.menuButton(ui, tr("Import..."))) {
 							UIFiles.show("json", false, false, function(path: String) {
-								Data.getBlob(path, function(b: kha.Blob) {
-									var raw = Json.parse(b.toString());
+								Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+									var raw = Json.parse(kha.System.bufferToString(b));
 									iron.App.notifyOnInit(function() {
 										ui.t.ELEMENT_H = App.defaultElementH;
 										Config.importFrom(raw);
@@ -214,12 +214,12 @@ class BoxPreferences {
 
 				if (worldColor != h.color) {
 					worldColor = h.color;
-					var b = Bytes.alloc(4);
-					b.set(0, worldColor.Rb);
-					b.set(1, worldColor.Gb);
-					b.set(2, worldColor.Bb);
-					b.set(3, 255);
-					Context.raw.emptyEnvmap = kha.Image.fromBytes(b, 1, 1);
+					var b = new js.lib.Uint8Array(4);
+					b[0] = worldColor.Rb;
+					b[1] = worldColor.Gb;
+					b[2] = worldColor.Bb;
+					b[3] = 255;
+					Context.raw.emptyEnvmap = kha.Image.fromBytes(b.buffer, 1, 1);
 					Context.raw.ddirty = 2;
 					if (!Context.raw.showEnvmap) {
 						iron.Scene.active.world.envmap = Context.raw.emptyEnvmap;
@@ -633,8 +633,8 @@ plugin.drawUI = function(ui) {
 								File.start(path);
 							}
 							if (UIMenu.menuButton(ui, tr("Edit in Script Tab"))) {
-								iron.data.Data.getBlob("plugins/" + f, function(blob: kha.Blob) {
-									TabScript.hscript.text = blob.toString();
+								iron.data.Data.getBlob("plugins/" + f, function(blob: js.lib.ArrayBuffer) {
+									TabScript.hscript.text = kha.System.bufferToString(blob);
 									iron.data.Data.deleteBlob("plugins/" + f);
 									Console.info(tr("Script opened"));
 								});

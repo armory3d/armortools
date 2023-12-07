@@ -11,9 +11,9 @@ class TextToPhotoNode extends LogicNode {
 	static var prompt = "";
 	static var image: kha.Image = null;
 	static var tiling = false;
-	static var text_encoder_blob : kha.Blob;
-	static var unet_blob : kha.Blob;
-	static var vae_decoder_blob : kha.Blob;
+	static var text_encoder_blob : js.lib.ArrayBuffer;
+	static var unet_blob : js.lib.ArrayBuffer;
+	static var vae_decoder_blob : js.lib.ArrayBuffer;
 
 	public function new(tree: LogicTree) {
 		super(tree);
@@ -31,15 +31,15 @@ class TextToPhotoNode extends LogicNode {
 	}
 
 	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
-		tiling = node.buttons[0].default_value;
+		tiling = node.buttons[0].default_value == 0 ? false : true;
 		prompt = ui.textArea(zui.Zui.handle("texttophotonode_0"), true, tr("prompt"), true);
 		node.buttons[1].height = prompt.split("\n").length;
 	}
 
 	public static function stableDiffusion(prompt: String, done: kha.Image->Void, inpaintLatents: js.lib.Float32Array = null, offset = 0, upscale = true, mask: js.lib.Float32Array = null, latents_orig: js.lib.Float32Array = null) {
-		kha.Assets.loadBlobFromPath("data/models/sd_text_encoder.quant.onnx", function(_text_encoder_blob: kha.Blob) {
-		kha.Assets.loadBlobFromPath("data/models/sd_unet.quant.onnx", function(_unet_blob: kha.Blob) {
-		kha.Assets.loadBlobFromPath("data/models/sd_vae_decoder.quant.onnx", function(_vae_decoder_blob: kha.Blob) {
+		iron.data.Data.getBlob("models/sd_text_encoder.quant.onnx", function(_text_encoder_blob: js.lib.ArrayBuffer) {
+		iron.data.Data.getBlob("models/sd_unet.quant.onnx", function(_unet_blob: js.lib.ArrayBuffer) {
+		iron.data.Data.getBlob("models/sd_vae_decoder.quant.onnx", function(_vae_decoder_blob: js.lib.ArrayBuffer) {
 			text_encoder_blob = _text_encoder_blob;
 			unet_blob = _unet_blob;
 			vae_decoder_blob = _vae_decoder_blob;
@@ -65,11 +65,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			var f32 = new js.lib.Int32Array(text_input_ids);
-			var text_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			var text_embeddings_buf = Krom.mlInference(text_encoder_blob, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			var text_embeddings = new js.lib.Float32Array(text_embeddings_buf);
 
 			var f32 = new js.lib.Int32Array(uncond_input_ids);
-			var uncond_embeddings_buf = Krom.mlInference(untyped text_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
+			var uncond_embeddings_buf = Krom.mlInference(text_encoder_blob, [f32.buffer], [[1, 77]], [1, 77, 768], Config.raw.gpu_inference);
 			var uncond_embeddings = new js.lib.Float32Array(uncond_embeddings_buf);
 
 			var f32 = new js.lib.Float32Array(uncond_embeddings.length + text_embeddings.length);
@@ -111,7 +111,7 @@ class TextToPhotoNode extends LogicNode {
 
 			var t32 = new js.lib.Int32Array(2);
 			t32[0] = timestep;
-			var noise_pred_buf = Krom.mlInference(untyped unet_blob.toBytes().b.buffer, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
+			var noise_pred_buf = Krom.mlInference(unet_blob, [latent_model_input.buffer, t32.buffer, text_embeddings.buffer], [[2, 4, 64, 64], [1], [2, 77, 768]], [2, 4, 64, 64], Config.raw.gpu_inference);
 			var noise_pred = new js.lib.Float32Array(noise_pred_buf);
 
 			for (i in 0...noise_pred_uncond.length) noise_pred_uncond[i] = noise_pred[i];
@@ -209,7 +209,7 @@ class TextToPhotoNode extends LogicNode {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}
 
-			var pyimage_buf = Krom.mlInference(untyped vae_decoder_blob.toBytes().b.buffer, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
+			var pyimage_buf = Krom.mlInference(vae_decoder_blob, [latents.buffer], [[1, 4, 64, 64]], [1, 3, 512, 512], Config.raw.gpu_inference);
 			var pyimage = new js.lib.Float32Array(pyimage_buf);
 
 			for (i in 0...pyimage.length) {
@@ -218,14 +218,14 @@ class TextToPhotoNode extends LogicNode {
 				else if (pyimage[i] > 1) pyimage[i] = 1;
 			}
 
-			var bytes = haxe.io.Bytes.alloc(4 * 512 * 512);
+			var u8 = new js.lib.Uint8Array(4 * 512 * 512);
 			for (i in 0...(512 * 512)) {
-				bytes.set(i * 4    , Std.int(pyimage[i                ] * 255));
-				bytes.set(i * 4 + 1, Std.int(pyimage[i + 512 * 512    ] * 255));
-				bytes.set(i * 4 + 2, Std.int(pyimage[i + 512 * 512 * 2] * 255));
-				bytes.set(i * 4 + 3, 255);
+				u8[i * 4    ] = Std.int(pyimage[i                ] * 255);
+				u8[i * 4 + 1] = Std.int(pyimage[i + 512 * 512    ] * 255);
+				u8[i * 4 + 2] = Std.int(pyimage[i + 512 * 512 * 2] * 255);
+				u8[i * 4 + 3] = 255;
 			}
-			var image = kha.Image.fromBytes(bytes, 512, 512);
+			var image = kha.Image.fromBytes(u8.buffer, 512, 512);
 
 			if (tiling) {
 				@:privateAccess TilingNode.prompt = prompt;

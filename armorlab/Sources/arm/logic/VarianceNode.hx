@@ -51,8 +51,8 @@ class VarianceNode extends LogicNode {
 
 			Console.progress(tr("Processing") + " - " + tr("Variance"));
 			App.notifyOnNextFrame(function() {
-				kha.Assets.loadBlobFromPath("data/models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: kha.Blob) {
-					var latents_buf = Krom.mlInference(untyped vae_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+				iron.data.Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
+					var latents_buf = Krom.mlInference(vae_encoder_blob, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 					var latents = new js.lib.Float32Array(latents_buf);
 					for (i in 0...latents.length) {
 						latents[i] = 0.18215 * latents[i];

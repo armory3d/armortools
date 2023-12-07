@@ -5,14 +5,14 @@ import arm.format.FbxLibrary;
 class FbxBinaryParser {
 
 	var pos: Int;
-	var blob: kha.Blob;
+	var view: js.lib.DataView;
 
 	var version: Int;
 	var is64: Bool;
 	var root: FbxNode;
 
-	function new(blob: kha.Blob) {
-		this.blob = blob;
+	function new(view: js.lib.DataView) {
+		this.view = view;
 		pos = 0;
 		var magic = "Kaydara FBX Binary\x20\x20\x00\x1a\x00";
 		var valid = readChars(magic.length) == magic;
@@ -26,8 +26,8 @@ class FbxBinaryParser {
 		};
 	}
 
-	public static function parse(blob: kha.Blob): FbxNode {
-		return new FbxBinaryParser(blob).root;
+	public static function parse(view: js.lib.DataView): FbxNode {
+		return new FbxBinaryParser(view).root;
 	}
 
 	function parseArray(readVal: Void->Dynamic, isFloat = false): FbxProp {
@@ -35,17 +35,17 @@ class FbxBinaryParser {
 		var encoding = read32();
 		var compressedLen = read32();
 		var endPos = pos + compressedLen;
-		var _blob = blob;
+		var _view = view;
 		if (encoding != 0) {
 			pos += 2;
-			var input = blob.sub(pos, compressedLen).toBytes().getData();
-			blob = kha.Blob.fromBytes(haxe.io.Bytes.ofData(Krom.inflate(input, true)));
+			var input = view.buffer.slice(pos, pos + compressedLen);
+			view = new js.lib.DataView(Krom.inflate(input, true));
 			pos = 0;
 		}
 		var res = isFloat ? parseArrayf(readVal, len) : parseArrayi(readVal, len);
 		if (encoding != 0) {
 			pos = endPos;
-			blob = _blob;
+			view = _view;
 		}
 		return res;
 	}
@@ -143,20 +143,19 @@ class FbxBinaryParser {
 	}
 
 	function read8(): Int {
-		var i = blob.readU8(pos);
+		var i = view.getUint8(pos);
 		pos += 1;
 		return i;
 	}
 
 	function read16(): Int {
-		var i = blob.readS16LE(pos);
+		var i = view.getInt16(pos, true);
 		pos += 2;
 		return i;
 	}
 
 	function read32(): Int {
-		var i = blob.bytes.getInt32(pos);
-		// var i = blob.readS32LE(pos); // Result sometimes off by 1?
+		var i = view.getInt32(pos, true);
 		pos += 4;
 		return i;
 	}
@@ -169,7 +168,7 @@ class FbxBinaryParser {
 	}
 
 	function readf32(): Float {
-		var f = blob.readF32LE(pos);
+		var f = view.getFloat32(pos, true);
 		pos += 4;
 		return f;
 	}
@@ -204,9 +203,9 @@ class FbxBinaryParser {
 		return read8(); // return read8() == 1;
 	}
 
-	function readBytes(len: Int): kha.Blob {
-		var b = blob.sub(pos, len);
+	function readBytes(len: Int): js.lib.DataView {
+		var v = new js.lib.DataView(view.buffer, pos, len);
 		pos += len;
-		return b;
+		return v;
 	}
 }

@@ -29,7 +29,7 @@ class InpaintNode extends LogicNode {
 		}
 
 		if (mask == null) {
-			mask = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.L8);
+			mask = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.R8);
 			App.notifyOnNextFrame(function() {
 				mask.g4.begin();
 				mask.g4.clear(kha.Color.fromFloats(1.0, 1.0, 1.0, 1.0));
@@ -47,7 +47,7 @@ class InpaintNode extends LogicNode {
 	}
 
 	public static function buttons(ui: zui.Zui, nodes: zui.Zui.Nodes, node: zui.Zui.TNode) {
-		auto = node.buttons[0].default_value;
+		auto = node.buttons[0].default_value == 0 ? false : true;
 		if (!auto) {
 			strength = ui.slider(zui.Zui.handle("inpaintnode_0", {value: strength}), tr("strength"), 0, 1, true);
 			prompt = ui.textArea(zui.Zui.handle("inpaintnode_1"), true, tr("prompt"), true);
@@ -96,10 +96,10 @@ class InpaintNode extends LogicNode {
 		var w = arm.Config.getTextureResX();
 		var h = arm.Config.getTextureResY();
 
-		var bytes_img = untyped image.getPixels().b.buffer;
-		var bytes_mask = mask != null ? untyped mask.getPixels().b.buffer : new js.lib.ArrayBuffer(w * h);
-		var bytes_out = haxe.io.Bytes.ofData(new js.lib.ArrayBuffer(w * h * 4));
-		untyped Krom_texsynth.inpaint(w, h, untyped bytes_out.b.buffer, bytes_img, bytes_mask, tiling);
+		var bytes_img = image.getPixels();
+		var bytes_mask = mask != null ? mask.getPixels() : new js.lib.ArrayBuffer(w * h);
+		var bytes_out = new js.lib.ArrayBuffer(w * h * 4);
+		untyped Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
 		result = kha.Image.fromBytes(bytes_out, w, h);
 		done(result);
@@ -112,7 +112,7 @@ class InpaintNode extends LogicNode {
 		var u8 = new js.lib.Uint8Array(untyped bytes_img);
 		var f32mask = new js.lib.Float32Array(4 * 64 * 64);
 
-		kha.Assets.loadBlobFromPath("data/models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: kha.Blob) {
+		iron.data.Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
 			// for (x in 0...Std.int(image.width / 512)) {
 				// for (y in 0...Std.int(image.height / 512)) {
 					var x = 0;
@@ -147,7 +147,7 @@ class InpaintNode extends LogicNode {
 						f32[i + 512 * 512 * 2] = (u8[i * 4 + 2] / 255.0) * 2.0 - 1.0;
 					}
 
-					var latents_buf = Krom.mlInference(untyped vae_encoder_blob.toBytes().b.buffer, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
+					var latents_buf = Krom.mlInference(untyped vae_encoder_blob, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 					var latents = new js.lib.Float32Array(latents_buf);
 					for (i in 0...latents.length) {
 						latents[i] = 0.18215 * latents[i];

@@ -101,10 +101,10 @@ class UIMenubar {
 
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		#if (is_paint || is_sculpt)
-		var ww = System.windowWidth() - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
+		var ww = System.width - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
 		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
 		#else
-		var ww = System.windowWidth() - menubarw - nodesw;
+		var ww = System.width - menubarw - nodesw;
 		var panelx = (iron.App.x()) + menubarw;
 		#end
 

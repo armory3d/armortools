@@ -125,7 +125,7 @@ class ImportEnvmap {
 
 	// https://ndotl.wordpress.com/2015/03/07/pbr-cubemap-filtering
 	// https://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering
-	static function getSphericalHarmonics(source: haxe.io.Bytes, sourceWidth: Int, sourceHeight: Int): Float32Array {
+	static function getSphericalHarmonics(source: js.lib.ArrayBuffer, sourceWidth: Int, sourceHeight: Int): Float32Array {
 		var sh = new Float32Array(9 * 3 + 1); // Align to mult of 4 - 27->28
 		var accum = 0.0;
 		var weight = 1.0;
@@ -134,13 +134,14 @@ class ImportEnvmap {
 		var weight3 = weight * 15 / 17;
 		var weight4 = weight * 5 / 68;
 		var weight5 = weight * 15 / 68;
+		var view = new js.lib.DataView(source);
 
 		for (x in 0...sourceWidth) {
 			for (y in 0...sourceHeight) {
 				n = reverseEquirect(x / sourceWidth, y / sourceHeight);
 
 				for (i in 0...3) {
-					var value = source.getFloat(((x + y * sourceWidth) * 16 + i * 4));
+					var value = view.getFloat32(((x + y * sourceWidth) * 16 + i * 4), true);
 					value = Math.pow(value, 1.0 / 2.2);
 
 					sh[0 + i] += value * weight1;

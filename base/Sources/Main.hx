@@ -1,6 +1,5 @@
 package;
 
-import kha.Window;
 import kha.System;
 import iron.object.Object;
 import iron.Scene;
@@ -66,7 +65,7 @@ class Main {
 		iron.App.y = arm.App.y;
 
 		Config.init();
-		System.start(Config.getOptions(), function(window: Window) {
+		System.start(Config.getOptions(), function() {
 			if (Config.raw.layout == null) arm.App.initLayout();
 			Krom.setApplicationName(Manifest.title);
 			iron.App.init(function() {

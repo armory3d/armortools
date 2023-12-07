@@ -24,7 +24,7 @@ class ExportArm {
 		var raw: TSceneFormat = { mesh_datas: mesh_datas };
 		var b = ArmPack.encode(raw);
 		if (!path.endsWith(".arm")) path += ".arm";
-		Krom.fileSaveBytes(path, b.getData(), b.length + 1);
+		Krom.fileSaveBytes(path, b, b.byteLength + 1);
 	}
 
 	public static function runProject() {
@@ -196,8 +196,8 @@ class ExportArm {
 		}
 		#end
 
-		var bytes = ArmPack.encode(Project.raw);
-		Krom.fileSaveBytes(Project.filepath, bytes.getData(), bytes.length + 1);
+		var buffer = ArmPack.encode(Project.raw);
+		Krom.fileSaveBytes(Project.filepath, buffer, buffer.byteLength + 1);
 
 		// Save to recent
 		#if krom_ios
@@ -277,9 +277,9 @@ class ExportArm {
 		};
 
 		if (Context.raw.writeIconOnExport) { // Separate icon files
-			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", m.image.getPixels().getData(), m.image.width, m.image.height, 0);
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", m.image.getPixels(), m.image.width, m.image.height, 0);
 			if (isCloud) {
-				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", m.image.getPixels().getData(), m.image.width, m.image.height, 0, 50);
+				Krom.writeJpg(path.substr(0, path.length - 4) + "_icon.jpg", m.image.getPixels(), m.image.width, m.image.height, 0, 50);
 			}
 		}
 
@@ -287,19 +287,20 @@ class ExportArm {
 			packAssets(raw, assets);
 		}
 
-		var bytes = ArmPack.encode(raw);
-		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+		var buffer = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, buffer, buffer.byteLength + 1);
 	}
 	#end
 
 	#if (krom_metal || krom_vulkan)
-	static function bgraSwap(bytes: haxe.io.Bytes) {
-		for (i in 0...Std.int(bytes.length / 4)) {
-			var r = bytes.get(i * 4);
-			bytes.set(i * 4, bytes.get(i * 4 + 2));
-			bytes.set(i * 4 + 2, r);
+	static function bgraSwap(buffer: js.lib.ArrayBuffer) {
+		var view = new js.lib.DataView(buffer);
+		for (i in 0...Std.int(buffer.byteLength / 4)) {
+			var r = view.getUint8(i * 4);
+			view.setUint8(i * 4, view.getUint8(i * 4 + 2));
+			view.setUint8(i * 4 + 2, r);
 		}
-		return bytes;
+		return buffer;
 	}
 	#end
 
@@ -335,15 +336,15 @@ class ExportArm {
 		};
 
 		if (Context.raw.writeIconOnExport) { // Separate icon file
-			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", b.image.getPixels().getData(), b.image.width, b.image.height, 0);
+			Krom.writePng(path.substr(0, path.length - 4) + "_icon.png", b.image.getPixels(), b.image.width, b.image.height, 0);
 		}
 
 		if (Context.raw.packAssetsOnExport) { // Pack textures
 			packAssets(raw, assets);
 		}
 
-		var bytes = ArmPack.encode(raw);
-		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+		var buffer = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, buffer, buffer.byteLength + 1);
 	}
 	#end
 
@@ -447,10 +448,9 @@ class ExportArm {
 				tempImages.push(temp);
 				raw.packed_assets.push({
 					name: assets[i].file,
-					bytes: Bytes.ofData(assets[i].file.endsWith(".jpg") ?
-						Krom.encodeJpg(temp.getPixels().getData(), temp.width, temp.height, 0, 80) :
-						Krom.encodePng(temp.getPixels().getData(), temp.width, temp.height, 0)
-					)
+					bytes: assets[i].file.endsWith(".jpg") ?
+						Krom.encodeJpg(temp.getPixels(), temp.width, temp.height, 0, 80) :
+						Krom.encodePng(temp.getPixels(), temp.width, temp.height, 0)
 				});
 			}
 		}
@@ -465,8 +465,8 @@ class ExportArm {
 			version: Manifest.version,
 			swatches: Project.raw.swatches
 		};
-		var bytes = ArmPack.encode(raw);
-		Krom.fileSaveBytes(path, bytes.getData(), bytes.length + 1);
+		var buffer = ArmPack.encode(raw);
+		Krom.fileSaveBytes(path, buffer, buffer.byteLength + 1);
 	}
 
 	static function vec3f32(v: iron.math.Vec4): js.lib.Float32Array {

@@ -10,7 +10,7 @@ class UpscaleNode extends LogicNode {
 
 	static var temp: kha.Image = null;
 	static var image: kha.Image = null;
-	static var esrgan_blob: kha.Blob;
+	static var esrgan_blob: js.lib.ArrayBuffer;
 
 	public function new(tree: LogicTree) {
 		super(tree);
@@ -38,7 +38,7 @@ class UpscaleNode extends LogicNode {
 	}
 
 	public static function loadBlob(done: Void->Void) {
-		kha.Assets.loadBlobFromPath("data/models/esrgan.quant.onnx", function(_esrgan_blob: kha.Blob) {
+		iron.data.Data.getBlob("models/esrgan.quant.onnx", function(_esrgan_blob: js.lib.ArrayBuffer) {
 			esrgan_blob = _esrgan_blob;
 			done();
 		});
@@ -62,8 +62,8 @@ class UpscaleNode extends LogicNode {
 		temp.g2.drawScaledImage(source, 0, 0, size1w, size1h);
 		temp.g2.end();
 
-		var bytes_img = untyped temp.getPixels().b.buffer;
-		var u8 = new js.lib.Uint8Array(untyped bytes_img);
+		var bytes_img = temp.getPixels();
+		var u8 = new js.lib.Uint8Array(bytes_img);
 		var f32 = new js.lib.Float32Array(3 * size1w * size1h);
 		for (i in 0...(size1w * size1h)) {
 			f32[i                      ] = (u8[i * 4    ] / 255);
@@ -71,22 +71,22 @@ class UpscaleNode extends LogicNode {
 			f32[i + size1w * size1w * 2] = (u8[i * 4 + 2] / 255);
 		}
 
-		var esrgan2x_buf = Krom.mlInference(untyped esrgan_blob.toBytes().b.buffer, [f32.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], Config.raw.gpu_inference);
+		var esrgan2x_buf = Krom.mlInference(esrgan_blob, [f32.buffer], [[1, 3, size1w, size1h]], [1, 3, size2w, size2h], Config.raw.gpu_inference);
 		var esrgan2x = new js.lib.Float32Array(esrgan2x_buf);
 		for (i in 0...esrgan2x.length) {
 			if (esrgan2x[i] < 0) esrgan2x[i] = 0;
 			else if (esrgan2x[i] > 1) esrgan2x[i] = 1;
 		}
 
-		var bytes = haxe.io.Bytes.alloc(4 * size2w * size2h);
+		var u8 = new js.lib.Uint8Array(4 * size2w * size2h);
 		for (i in 0...(size2w * size2h)) {
-			bytes.set(i * 4    , Std.int(esrgan2x[i                      ] * 255));
-			bytes.set(i * 4 + 1, Std.int(esrgan2x[i + size2w * size2w    ] * 255));
-			bytes.set(i * 4 + 2, Std.int(esrgan2x[i + size2w * size2w * 2] * 255));
-			bytes.set(i * 4 + 3, 255);
+			u8[i * 4    ] = Std.int(esrgan2x[i                      ] * 255);
+			u8[i * 4 + 1] = Std.int(esrgan2x[i + size2w * size2w    ] * 255);
+			u8[i * 4 + 2] = Std.int(esrgan2x[i + size2w * size2w * 2] * 255);
+			u8[i * 4 + 3] = 255;
 		}
 
-		result = kha.Image.fromBytes(bytes, size2w, size2h);
+		result = kha.Image.fromBytes(u8.buffer, size2w, size2h);
 		return result;
 	}
 

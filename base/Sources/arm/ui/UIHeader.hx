@@ -40,9 +40,9 @@ class UIHeader {
 
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		#if is_lab
-		var ww = System.windowWidth() - nodesw;
+		var ww = System.width - nodesw;
 		#else
-		var ww = System.windowWidth() - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
+		var ww = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 		#end
 
 		if (ui.window(headerHandle, iron.App.x(), headerh, ww, headerh)) {

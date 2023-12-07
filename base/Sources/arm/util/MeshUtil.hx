@@ -330,6 +330,7 @@ class MeshUtil {
 
 	public static function applyDisplacement(texpaint_pack: kha.Image, strength = 0.1, uvScale = 1.0) {
 		var height = texpaint_pack.getPixels();
+		var heightView = new js.lib.DataView(height);
 		var res = texpaint_pack.width;
 		var o = Project.paintObjects[0];
 		var g = o.data.geom;
@@ -340,7 +341,7 @@ class MeshUtil {
 			var y = Std.int(vertices.getInt16((i * l + 7) * 2, true) / 32767 * res);
 			var xx = Std.int(x * uvScale) % res;
 			var yy = Std.int(y * uvScale) % res;
-			var h = (1.0 - height.get((yy * res + xx) * 4 + 3) / 255) * strength;
+			var h = (1.0 - heightView.getUint8((yy * res + xx) * 4 + 3) / 255) * strength;
 			vertices.setInt16((i * l    ) * 2, vertices.getInt16((i * l    ) * 2, true) - Std.int(vertices.getInt16((i * l + 4) * 2, true) * h), true);
 			vertices.setInt16((i * l + 1) * 2, vertices.getInt16((i * l + 1) * 2, true) - Std.int(vertices.getInt16((i * l + 5) * 2, true) * h), true);
 			vertices.setInt16((i * l + 2) * 2, vertices.getInt16((i * l + 2) * 2, true) - Std.int(vertices.getInt16((i * l + 3) * 2, true) * h), true);

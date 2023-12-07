@@ -183,7 +183,7 @@ class RenderUtil {
 			#if krom_metal
 			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.RGBA32);
 			#else
-			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.L8);
+			Context.raw.textToolImage = Image.createRenderTarget(texW, texW, TextureFormat.R8);
 			#end
 		}
 		var g2 = Context.raw.textToolImage.g2;

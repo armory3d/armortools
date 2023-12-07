@@ -1,15 +1,19 @@
 package arm.io;
 
-import haxe.io.BytesOutput;
 import js.lib.Int16Array;
 import iron.object.MeshObject;
 
 class ExportObj {
 
+	static function writeString(out: Array<Int>, str: String) {
+		for (i in 0...str.length) {
+			out.push(str.charCodeAt(i));
+		}
+	}
+
 	public static function run(path: String, paintObjects: Array<MeshObject>, applyDisplacement = false) {
-		var o = new BytesOutput();
-		o.bigEndian = false;
-		o.writeString("# armorsculpt.org\n");
+		var o: Array<Int> = [];
+		writeString(o, "# armorsculpt.org\n");
 
 		var texpaint = Project.layers[0].texpaint;
 		var pixels = texpaint.getPixels();
@@ -59,18 +63,18 @@ class ExportObj {
 				}
 			}
 
-			o.writeString("o " + p.name + "\n");
+			writeString(o, "o " + p.name + "\n");
 			for (i in 0...pi) {
-				o.writeString("v ");
+				writeString(o, "v ");
 				var vx = posa2[i * 3] * sc + "";
-				o.writeString(vx.substr(0, vx.indexOf(".") + 7));
-				o.writeString(" ");
+				writeString(o, vx.substr(0, vx.indexOf(".") + 7));
+				writeString(o, " ");
 				var vy = posa2[i * 3 + 2] * sc + "";
-				o.writeString(vy.substr(0, vy.indexOf(".") + 7));
-				o.writeString(" ");
+				writeString(o, vy.substr(0, vy.indexOf(".") + 7));
+				writeString(o, " ");
 				var vz = -posa2[i * 3 + 1] * sc + "";
-				o.writeString(vz.substr(0, vz.indexOf(".") + 7));
-				o.writeString("\n");
+				writeString(o, vz.substr(0, vz.indexOf(".") + 7));
+				writeString(o, "\n");
 			}
 
 			// var inda = mesh.index_arrays[0].values;
@@ -78,19 +82,20 @@ class ExportObj {
 				var pi1 = posmap.get(inda[i * 3    ]) + 1 + poff;
 				var pi2 = posmap.get(inda[i * 3 + 1]) + 1 + poff;
 				var pi3 = posmap.get(inda[i * 3 + 2]) + 1 + poff;
-				o.writeString("f ");
-				o.writeString(pi1 + "");
-				o.writeString(" ");
-				o.writeString(pi2 + "");
-				o.writeString(" ");
-				o.writeString(pi3 + "");
-				o.writeString("\n");
+				writeString(o, "f ");
+				writeString(o, pi1 + "");
+				writeString(o, " ");
+				writeString(o, pi2 + "");
+				writeString(o, " ");
+				writeString(o, pi3 + "");
+				writeString(o, "\n");
 			}
 			poff += pi;
 		// }
 
 		if (!path.endsWith(".obj")) path += ".obj";
 
-		Krom.fileSaveBytes(path, o.getBytes().getData(), o.getBytes().length);
+		var b = js.lib.Uint8Array.from(o).buffer;
+		Krom.fileSaveBytes(path, b, b.byteLength);
 	}
 }

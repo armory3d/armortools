@@ -60,7 +60,7 @@ class UIView2D {
 		pipe.inputLayout = [vs];
 		pipe.blendSource = BlendingFactor.BlendOne;
 		pipe.blendDestination = BlendingFactor.BlendZero;
-		pipe.colorWriteMaskAlpha = false;
+		pipe.colorWriteMasksAlpha[0] = false;
 		pipe.compile();
 		channelLocation = pipe.getConstantLocation("channel");
 		#end
@@ -91,7 +91,7 @@ class UIView2D {
 		#end
 
 		if (!show) return;
-		if (System.windowWidth() == 0 || System.windowHeight() == 0) return;
+		if (System.width == 0 || System.height == 0) return;
 
 		if (Context.raw.pdirty >= 0) hwnd.redraws = 2; // Paint was active
 
@@ -113,8 +113,8 @@ class UIView2D {
 		ui.begin(g);
 
 		var headerh = Config.raw.layout[LayoutHeader] == 1 ? UIHeader.headerh * 2 : UIHeader.headerh;
-		var apph = System.windowHeight() - Config.raw.layout[LayoutStatusH] + headerh;
-		wh = System.windowHeight() - Config.raw.layout[LayoutStatusH];
+		var apph = System.height - Config.raw.layout[LayoutStatusH] + headerh;
+		wh = System.height - Config.raw.layout[LayoutStatusH];
 
 		if (UINodes.inst.show) {
 			wh -= Config.raw.layout[LayoutNodesH];
@@ -219,7 +219,7 @@ class UIView2D {
 						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.Low;
 					}
 					#if krom_opengl
-					Krom.setPipeline(pipe.pipeline);
+					Krom.setPipeline(pipe.pipeline_);
 					#end
 					Krom.setInt(channelLocation, channel);
 				}
@@ -257,7 +257,7 @@ class UIView2D {
 						g2.begin(false);
 						g2.drawScaledImage(tex, -x, -y, tw, th);
 						g2.end();
-						var a = texpaint_picker.getPixels();
+						var a = new js.lib.DataView(texpaint_picker.getPixels());
 						#if (krom_metal || krom_vulkan)
 						var i0 = 2;
 						var i1 = 1;
@@ -267,9 +267,9 @@ class UIView2D {
 						var i1 = 1;
 						var i2 = 2;
 						#end
-						Context.raw.pickedColor.base.Rb = a.get(i0);
-						Context.raw.pickedColor.base.Gb = a.get(i1);
-						Context.raw.pickedColor.base.Bb = a.get(i2);
+						Context.raw.pickedColor.base.Rb = a.getUint8(i0);
+						Context.raw.pickedColor.base.Gb = a.getUint8(i1);
+						Context.raw.pickedColor.base.Bb = a.getUint8(i2);
 						UIHeader.inst.headerHandle.redraws = 2;
 					});
 				}

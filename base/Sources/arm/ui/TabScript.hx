@@ -1,7 +1,6 @@
 package arm.ui;
 
 import haxe.io.Bytes;
-import kha.Blob;
 import zui.Zui;
 import iron.data.Data;
 import arm.sys.Path;
@@ -37,8 +36,8 @@ class TabScript {
 			}
 			if (ui.button(tr("Import"))) {
 				UIFiles.show("js", false, false, function(path: String) {
-					Data.getBlob(path, function(b: Blob) {
-						hscript.text = b.toString();
+					Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+						hscript.text = kha.System.bufferToString(b);
 						Data.deleteBlob(path);
 					});
 				});
@@ -73,8 +72,8 @@ class TabScript {
 
 	static function getTextColoring(): TTextColoring {
 		if (textColoring == null) {
-			Data.getBlob("text_coloring.json", function(blob: Blob) {
-				textColoring = haxe.Json.parse(blob.toString());
+			Data.getBlob("text_coloring.json", function(blob: js.lib.ArrayBuffer) {
+				textColoring = haxe.Json.parse(kha.System.bufferToString(blob));
 				textColoring.default_color = Std.int(textColoring.default_color);
 				for (coloring in textColoring.colorings) coloring.color = Std.int(coloring.color);
 			});

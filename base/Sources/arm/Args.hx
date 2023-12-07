@@ -162,8 +162,8 @@ class Args {
 								file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
 							}
 
-							iron.data.Data.getBlob(file, function(blob: kha.Blob) {
-								BoxExport.preset = haxe.Json.parse(blob.toString());
+							iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
+								BoxExport.preset = haxe.Json.parse(kha.System.bufferToString(blob));
 								iron.data.Data.deleteBlob("export_presets/" + file);
 							});
 

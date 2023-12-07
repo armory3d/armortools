@@ -562,21 +562,21 @@ class UIMenu {
 	public static function fitToScreen() {
 		// Prevent the menu going out of screen
 		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
-		if (menuX + menuW > System.windowWidth()) {
+		if (menuX + menuW > System.width) {
 			if (menuX - menuW > 0) {
 				menuX = Std.int(menuX - menuW);
 			}
 			else {
-				menuX = Std.int(System.windowWidth() - menuW);
+				menuX = Std.int(System.width - menuW);
 			}
 		}
 		var menuH = Std.int(menuElements * 30 * App.uiMenu.SCALE()); // ui.t.ELEMENT_H
-		if (menuY + menuH > System.windowHeight()) {
+		if (menuY + menuH > System.height) {
 			if (menuY - menuH > 0) {
 				menuY = Std.int(menuY - menuH);
 			}
 			else {
-				menuY = System.windowHeight() - menuH;
+				menuY = System.height - menuH;
 			}
 			menuX += 1; // Move out of mouse focus
 		}

@@ -1,6 +1,5 @@
 package arm.io;
 
-import kha.Blob;
 import js.lib.Uint32Array;
 import js.lib.Float32Array;
 import js.lib.Int16Array;
@@ -14,7 +13,7 @@ class ImportBlendMesh {
 	static inline var eps = 1.0 / 32767;
 
 	public static function run(path: String, replaceExisting = true) {
-		Data.getBlob(path, function(b: Blob) {
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
 			var bl = new BlendParser(b);
 			if (bl.dna == null) {
 				Console.error(Strings.error3());

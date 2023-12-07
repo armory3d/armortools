@@ -1,6 +1,5 @@
 package arm.io;
 
-import kha.Blob;
 import iron.data.Data;
 
 class ImportObj {
@@ -13,10 +12,10 @@ class ImportObj {
 			 i == SplitGroup 			 ? "g".code :
 			 				 			   "u".code; // usemtl
 
-		Data.getBlob(path, function(b: Blob) {
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
 
 			if (isUdim) {
-				var part = Krom.io_obj_parse(b.bytes.getData(), splitCode, 0, isUdim);
+				var part = Krom.io_obj_parse(b, splitCode, 0, isUdim);
 				var name = part.name;
 				for (i in 0...part.udims.length) {
 					if (part.udims[i].length == 0) continue;
@@ -29,10 +28,10 @@ class ImportObj {
 			}
 			else {
 				var parts: Array<Dynamic> = [];
-				var part = Krom.io_obj_parse(b.bytes.getData(), splitCode, 0, false);
+				var part = Krom.io_obj_parse(b, splitCode, 0, false);
 				parts.push(part);
 				while (part.has_next) {
-					part = Krom.io_obj_parse(b.bytes.getData(), splitCode, part.pos, false);
+					part = Krom.io_obj_parse(b, splitCode, part.pos, false);
 					// This part does not contain faces (may contain lines only)
 					if (part.inda.length == 0) {
 						continue;

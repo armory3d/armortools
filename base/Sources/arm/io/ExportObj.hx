@@ -1,15 +1,19 @@
 package arm.io;
 
-import haxe.io.BytesOutput;
 import js.lib.Int16Array;
 import iron.object.MeshObject;
 
 class ExportObj {
 
+	static function writeString(out: Array<Int>, str: String) {
+		for (i in 0...str.length) {
+			out.push(str.charCodeAt(i));
+		}
+	}
+
 	public static function run(path: String, paintObjects: Array<MeshObject>, applyDisplacement = false) {
-		var o = new BytesOutput();
-		o.bigEndian = false;
-		o.writeString("# armorpaint.org\n");
+		var o: Array<Int> = [];
+		writeString(o, "# armorpaint.org\n");
 
 		var poff = 0;
 		var noff = 0;
@@ -102,31 +106,31 @@ class ExportObj {
 				// }
 			}
 
-			o.writeString("o " + p.name + "\n");
+			writeString(o, "o " + p.name + "\n");
 			for (i in 0...pi) {
-				o.writeString("v ");
-				o.writeString(posa2[i * 3] * sc + "");
-				o.writeString(" ");
-				o.writeString(posa2[i * 3 + 2] * sc + "");
-				o.writeString(" ");
-				o.writeString(-posa2[i * 3 + 1] * sc + "");
-				o.writeString("\n");
+				writeString(o, "v ");
+				writeString(o, posa2[i * 3] * sc + "");
+				writeString(o, " ");
+				writeString(o, posa2[i * 3 + 2] * sc + "");
+				writeString(o, " ");
+				writeString(o, -posa2[i * 3 + 1] * sc + "");
+				writeString(o, "\n");
 			}
 			for (i in 0...ni) {
-				o.writeString("vn ");
-				o.writeString(nora2[i * 3] * inv + "");
-				o.writeString(" ");
-				o.writeString(nora2[i * 3 + 2] * inv + "");
-				o.writeString(" ");
-				o.writeString(-nora2[i * 3 + 1] * inv + "");
-				o.writeString("\n");
+				writeString(o, "vn ");
+				writeString(o, nora2[i * 3] * inv + "");
+				writeString(o, " ");
+				writeString(o, nora2[i * 3 + 2] * inv + "");
+				writeString(o, " ");
+				writeString(o, -nora2[i * 3 + 1] * inv + "");
+				writeString(o, "\n");
 			}
 			for (i in 0...ti) {
-				o.writeString("vt ");
-				o.writeString(texa2[i * 2] * inv + "");
-				o.writeString(" ");
-				o.writeString(1.0 - texa2[i * 2 + 1] * inv + "");
-				o.writeString("\n");
+				writeString(o, "vt ");
+				writeString(o, texa2[i * 2] * inv + "");
+				writeString(o, " ");
+				writeString(o, 1.0 - texa2[i * 2 + 1] * inv + "");
+				writeString(o, "\n");
 			}
 
 			var inda = mesh.index_arrays[0].values;
@@ -140,25 +144,25 @@ class ExportObj {
 				var ti1 = texmap.get(inda[i * 3    ]) + 1 + toff;
 				var ti2 = texmap.get(inda[i * 3 + 1]) + 1 + toff;
 				var ti3 = texmap.get(inda[i * 3 + 2]) + 1 + toff;
-				o.writeString("f ");
-				o.writeString(pi1 + "");
-				o.writeString("/");
-				o.writeString(ti1 + "");
-				o.writeString("/");
-				o.writeString(ni1 + "");
-				o.writeString(" ");
-				o.writeString(pi2 + "");
-				o.writeString("/");
-				o.writeString(ti2 + "");
-				o.writeString("/");
-				o.writeString(ni2 + "");
-				o.writeString(" ");
-				o.writeString(pi3 + "");
-				o.writeString("/");
-				o.writeString(ti3 + "");
-				o.writeString("/");
-				o.writeString(ni3 + "");
-				o.writeString("\n");
+				writeString(o, "f ");
+				writeString(o, pi1 + "");
+				writeString(o, "/");
+				writeString(o, ti1 + "");
+				writeString(o, "/");
+				writeString(o, ni1 + "");
+				writeString(o, " ");
+				writeString(o, pi2 + "");
+				writeString(o, "/");
+				writeString(o, ti2 + "");
+				writeString(o, "/");
+				writeString(o, ni2 + "");
+				writeString(o, " ");
+				writeString(o, pi3 + "");
+				writeString(o, "/");
+				writeString(o, ti3 + "");
+				writeString(o, "/");
+				writeString(o, ni3 + "");
+				writeString(o, "\n");
 			}
 			poff += pi;
 			noff += ni;
@@ -167,6 +171,7 @@ class ExportObj {
 
 		if (!path.endsWith(".obj")) path += ".obj";
 
-		Krom.fileSaveBytes(path, o.getBytes().getData(), o.getBytes().length);
+		var b = js.lib.Uint8Array.from(o).buffer;
+		Krom.fileSaveBytes(path, b, b.byteLength);
 	}
 }

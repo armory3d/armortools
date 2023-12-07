@@ -455,8 +455,8 @@ class BoxExport {
 
 	static function parsePreset() {
 		var file = "export_presets/" + files[hpreset.position] + ".json";
-		iron.data.Data.getBlob(file, function(blob: kha.Blob) {
-			preset = haxe.Json.parse(blob.toString());
+		iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
+			preset = haxe.Json.parse(kha.System.bufferToString(blob));
 			iron.data.Data.deleteBlob("export_presets/" + file);
 		});
 	}

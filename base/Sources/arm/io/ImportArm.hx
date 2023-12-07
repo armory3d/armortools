@@ -1,8 +1,5 @@
 package arm.io;
 
-import haxe.io.Bytes;
-import kha.Window;
-import kha.Blob;
 import kha.Image;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
@@ -38,8 +35,8 @@ import arm.shader.MakeMaterial;
 class ImportArm {
 
 	public static function runProject(path: String) {
-		Data.getBlob(path, function(b: Blob) {
-			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+			var project: TProjectFormat = ArmPack.decode(b);
 
 			#if (is_paint || is_sculpt)
 			if (project.version != null && project.layer_datas == null) {
@@ -71,9 +68,9 @@ class ImportArm {
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			#if (krom_android || krom_ios)
-			Window.get().title = UIFiles.filename;
+			kha.System.title = UIFiles.filename;
 			#else
-			Window.get().title = UIFiles.filename + " - " + Manifest.title;
+			kha.System.title = UIFiles.filename + " - " + Manifest.title;
 			#end
 
 			#if (is_paint || is_sculpt)
@@ -218,14 +215,14 @@ class ImportArm {
 				});
 				rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
-				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
 				var _texpaint_blend1 = rts.get("texpaint_blend1").image;
 				App.notifyOnNextFrame(function() {
 					_texpaint_blend1.unload();
 				});
 				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend1").raw.height = Config.getTextureResY();
-				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.L8, DepthStencilFormat.NoDepthAndStencil);
+				rts.get("texpaint_blend1").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
 				Context.raw.brushBlendDirty = true;
 			}
 
@@ -426,8 +423,8 @@ class ImportArm {
 	}
 
 	public static function runMaterial(path: String) {
-		Data.getBlob(path, function(b: Blob) {
-			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+			var project: TProjectFormat = ArmPack.decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			runMaterialFromProject(project, path);
 		});
@@ -512,8 +509,8 @@ class ImportArm {
 	}
 
 	public static function runBrush(path: String) {
-		Data.getBlob(path, function(b: Blob) {
-			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+			var project: TProjectFormat = ArmPack.decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			runBrushFromProject(project, path);
 		});
@@ -562,8 +559,8 @@ class ImportArm {
 	#end
 
 	public static function runSwatches(path: String, replaceExisting = false) {
-		Data.getBlob(path, function(b: Blob) {
-			var project: TProjectFormat = ArmPack.decode(b.toBytes());
+		Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
+			var project: TProjectFormat = ArmPack.decode(b);
 			if (project.version == null) { Data.deleteBlob(path); return; }
 			runSwatchesFromProject(project, path, replaceExisting);
 		});
@@ -589,12 +586,12 @@ class ImportArm {
 
 	static function makePink(abs: String) {
 		Console.error(Strings.error2() + " " + abs);
-		var b = Bytes.alloc(4);
-		b.set(0, 255);
-		b.set(1, 0);
-		b.set(2, 255);
-		b.set(3, 255);
-		var pink = Image.fromBytes(b, 1, 1);
+		var b = new js.lib.Uint8Array(4);
+		b[0] = 255;
+		b[1] = 0;
+		b[2] = 255;
+		b[3] = 255;
+		var pink = Image.fromBytes(b.buffer, 1, 1);
 		Data.cachedImages.set(abs, pink);
 	}
 

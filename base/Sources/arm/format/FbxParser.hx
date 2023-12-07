@@ -33,13 +33,14 @@ class FbxParser {
 	var current = 0;
 	var binary = true;
 
-	public function new(blob: kha.Blob) {
+	public function new(buffer: js.lib.ArrayBuffer) {
+		var view = new js.lib.DataView(buffer);
 		var magic = "Kaydara FBX Binary\x20\x20\x00\x1a\x00";
 		var s = "";
-		for (i in 0...magic.length) s += String.fromCharCode(blob.readU8(i));
+		for (i in 0...magic.length) s += String.fromCharCode(view.getUint8(i));
 		binary = s == magic;
 
-		var fbx = binary ? FbxBinaryParser.parse(blob) : Parser.parse(blob.toString());
+		var fbx = binary ? FbxBinaryParser.parse(view) : Parser.parse(untyped String.fromCharCode.apply(null, new js.lib.Uint8Array(buffer)));
 		var lib = new FbxLibrary();
 		try {
 			lib.load(fbx);

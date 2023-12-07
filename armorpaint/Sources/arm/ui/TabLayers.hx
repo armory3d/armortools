@@ -633,7 +633,7 @@ class TabLayers {
 			if (l.fill_layer == null && l.isMask()) {
 				ui.g.pipeline = UIView2D.pipe;
 				#if krom_opengl
-				Krom.setPipeline(UIView2D.pipe.pipeline);
+				Krom.setPipeline(UIView2D.pipe.pipeline_);
 				#end
 				Krom.setInt(UIView2D.channelLocation, 1);
 			}
@@ -727,7 +727,7 @@ class TabLayers {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
 						if (!f.endsWith(".png")) f += ".png";
-						Krom.writePng(path + Path.sep + f, l.texpaint.getPixels().getData(), l.texpaint.width, l.texpaint.height, 3); // RRR1
+						Krom.writePng(path + Path.sep + f, l.texpaint.getPixels(), l.texpaint.width, l.texpaint.height, 3); // RRR1
 					});
 				}
 				else {

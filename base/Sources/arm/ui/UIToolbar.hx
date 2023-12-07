@@ -49,7 +49,7 @@ class UIToolbar {
 		}
 		toolbarw = Std.int(toolbarw * ui.SCALE());
 
-		if (ui.window(toolbarHandle, 0, UIHeader.headerh, toolbarw, System.windowHeight() - UIHeader.headerh)) {
+		if (ui.window(toolbarHandle, 0, UIHeader.headerh, toolbarw, System.height - UIHeader.headerh)) {
 			ui._y -= 4 * ui.SCALE();
 
 			ui.imageScrollAlign = false;
@@ -202,8 +202,8 @@ class UIToolbar {
 		}, 0);
 
 		// First draw out of screen, then align the menu based on menu height
-		UIMenu.menuX = -kha.System.windowWidth();
-		UIMenu.menuY = -kha.System.windowHeight();
+		UIMenu.menuX = -kha.System.width;
+		UIMenu.menuY = -kha.System.height;
 	}
 
 	@:access(zui.Zui)

@@ -1,7 +1,6 @@
 package arm;
 
 import kha.System;
-import kha.Window;
 import kha.Image;
 import zui.Zui;
 import zui.Zui.Nodes;
@@ -37,9 +36,6 @@ import arm.data.MaterialSlot;
 import arm.io.ImportBlendMaterial;
 import arm.logic.NodesBrush;
 #end
-#if is_lab
-import kha.Blob;
-#end
 
 class Project {
 
@@ -66,7 +62,7 @@ class Project {
 	public static var materials: Array<Dynamic> = null; ////
 	public static var nodes: Nodes;
 	public static var canvas: TNodeCanvas;
-	public static var defaultCanvas: Blob = null;
+	public static var defaultCanvas: js.lib.ArrayBuffer = null;
 	#end
 
 	public static function projectOpen() {
@@ -90,9 +86,9 @@ class Project {
 			#if krom_ios
 			var documentDirectory = Krom.saveDialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			filepath = documentDirectory + "/" + kha.Window.get().title + ".arm";
+			filepath = documentDirectory + "/" + kha.System.title + ".arm";
 			#elseif krom_android
-			filepath = Krom.savePath() + "/" + kha.Window.get().title + ".arm";
+			filepath = Krom.savePath() + "/" + kha.System.title + ".arm";
 			#else
 			projectSaveAs(saveAndQuit);
 			return;
@@ -101,7 +97,7 @@ class Project {
 
 		#if (krom_windows || krom_linux || krom_darwin)
 		var filename = Project.filepath.substring(Project.filepath.lastIndexOf(Path.sep) + 1, Project.filepath.length - 4);
-		Window.get().title = filename + " - " + Manifest.title;
+		System.title = filename + " - " + Manifest.title;
 		#end
 
 		function _init() {
@@ -159,7 +155,7 @@ class Project {
 
 	public static function projectNew(resetLayers = true) {
 		#if (krom_windows || krom_linux || krom_darwin)
-		Window.get().title = Manifest.title;
+		System.title = Manifest.title;
 		#end
 		filepath = "";
 
@@ -232,8 +228,8 @@ class Project {
 				#end
 			}
 			else {
-				Data.getBlob("meshes/" + meshList[Context.raw.projectType] + ".arm", function(b: kha.Blob) {
-					raw = iron.system.ArmPack.decode(b.toBytes()).mesh_datas[0];
+				Data.getBlob("meshes/" + meshList[Context.raw.projectType] + ".arm", function(b: js.lib.ArrayBuffer) {
+					raw = iron.system.ArmPack.decode(b).mesh_datas[0];
 				});
 			}
 

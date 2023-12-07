@@ -42,6 +42,14 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 		else if (platform === 'linux') {
 			// patchelf --set-rpath . ArmorLab
 			c_project.addLib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
+			// c_project.addLib("onnxruntime_providers_cuda");
+			// c_project.addLib("onnxruntime_providers_shared");
+			// c_project.addLib("cublasLt");
+			// c_project.addLib("cublas");
+			// c_project.addLib("cudart");
+			// c_project.addLib("cudnn");
+			// c_project.addLib("cufft");
+			// c_project.addLib("curand");
 		}
 		else if (platform === 'osx') {
 			c_project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
