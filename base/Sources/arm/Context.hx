@@ -1,5 +1,6 @@
 package arm;
 
+import iron.System;
 import iron.RenderPath;
 import iron.Scene;
 import iron.object.MeshObject;
@@ -101,7 +102,7 @@ class Context {
 		raw.layer = l;
 		UIHeader.inst.headerHandle.redraws = 2;
 
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		App.setObjectMask();

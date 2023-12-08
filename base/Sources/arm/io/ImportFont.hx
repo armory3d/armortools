@@ -1,6 +1,6 @@
 package arm.io;
 
-import kha.Font;
+import iron.System;
 import iron.data.Data;
 import arm.sys.Path;
 import arm.ui.UIBase;

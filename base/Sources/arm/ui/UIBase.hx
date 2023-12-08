@@ -1,10 +1,9 @@
 package arm.ui;
 
 import haxe.io.Bytes;
-import iron.system.Input.KeyCode;
-import kha.Image;
-import kha.System;
 import zui.Zui;
+import iron.system.Input.KeyCode;
+import iron.System;
 import iron.data.Data;
 import iron.data.MaterialData;
 import iron.object.MeshObject;
@@ -1108,7 +1107,7 @@ class UIBase {
 		#end
 	}
 
-	public function render(g: kha.Graphics2) {
+	public function render(g: Graphics2) {
 		if (!show && Config.raw.touch_ui) {
 			ui.inputEnabled = true;
 			g.end();
@@ -1223,7 +1222,7 @@ class UIBase {
 		Context.raw.lastHtab0Position = htabs[TabSidebar0].position;
 	}
 
-	public function renderCursor(g: kha.Graphics2) {
+	public function renderCursor(g: Graphics2) {
 		if (!App.uiEnabled) return;
 
 		#if is_paint
@@ -1331,7 +1330,7 @@ class UIBase {
 					var decalY = App.y() + Context.raw.decalY * App.h() - psizey / 2;
 					Context.raw.viewIndex = -1;
 
-					g.color = kha.Color.fromFloats(1, 1, 1, decalAlpha);
+					g.color = Color.fromFloats(1, 1, 1, decalAlpha);
 					var angle = (Context.raw.brushAngle + Context.raw.brushNodesAngle) * (Math.PI / 180);
 					var cx = decalX + psizex / 2;
 					var cy = decalY + psizey / 2;

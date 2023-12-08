@@ -1,5 +1,6 @@
 package arm.logic;
 
+import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import arm.logic.LogicNode;
@@ -9,7 +10,7 @@ import arm.Translator._tr;
 class FloatNode extends LogicNode {
 
 	public var value: Float;
-	var image: kha.Image = null;
+	var image: Image = null;
 
 	public function new(tree: LogicTree, value = 0.0) {
 		super(tree);
@@ -21,7 +22,7 @@ class FloatNode extends LogicNode {
 		else done(value);
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
 		if (inputs.length > 0) { inputs[0].getAsImage(done); return; }
 		if (image != null) image.unload();
 		var b = new js.lib.ArrayBuffer(16);
@@ -30,7 +31,7 @@ class FloatNode extends LogicNode {
 		v.setFloat32(4, value, true);
 		v.setFloat32(8, value, true);
 		v.setFloat32(12, 1.0, true);
-		image = kha.Image.fromBytes(b, 1, 1, kha.Image.TextureFormat.RGBA128);
+		image = Image.fromBytes(b, 1, 1, TextureFormat.RGBA128);
 		done(image);
 	}
 

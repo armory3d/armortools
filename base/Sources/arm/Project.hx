@@ -1,9 +1,8 @@
 package arm;
 
-import kha.System;
-import kha.Image;
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.System;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -72,7 +71,7 @@ class Project {
 				return;
 			}
 
-			var current = @:privateAccess kha.Graphics2.current;
+			var current = @:privateAccess Graphics2.current;
 			if (current != null) current.end();
 
 			ImportArm.runProject(path);
@@ -244,7 +243,7 @@ class Project {
 		var n = Context.raw.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
-			var current = @:privateAccess kha.Graphics2.current;
+			var current = @:privateAccess Graphics2.current;
 			if (current != null) current.end();
 
 			#if is_paint

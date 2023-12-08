@@ -1,5 +1,6 @@
 package arm;
 
+import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import iron.data.SceneFormat;
@@ -54,12 +55,12 @@ import iron.data.SceneFormat;
 }
 
 @:structInit class TSwatchColor {
-	public var base: kha.Color;
+	public var base: Color;
 	public var opacity: Float;
 	public var occlusion: Float;
 	public var roughness: Float;
 	public var metallic: Float;
-	public var normal: kha.Color;
+	public var normal: Color;
 	public var emission: Float;
 	public var height: Float;
 	public var subsurface: Float;

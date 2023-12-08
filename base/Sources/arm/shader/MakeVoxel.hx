@@ -1,8 +1,6 @@
 package arm.shader;
 
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.VertexShader;
+import iron.System;
 import iron.data.ShaderData;
 
 class MakeVoxel {
@@ -30,7 +28,7 @@ class MakeVoxel {
 		// #end
 
 		var ds = MakeMaterial.getDisplaceStrength();
-		pipeState.vertexShader = VertexShader.fromSource(
+		pipeState.vertexShader = Shader.fromSource(
 		#if krom_direct3d11
 		"#define vec3 float3
 		uniform float4x4 W;
@@ -66,7 +64,7 @@ class MakeVoxel {
 			voxpositionGeom += wnormal * vec3(height) * vec3(" + ds + ");
 		}"
 		#end
-		);
+		, Vertex);
 
 		pipeState.compile();
 		data.raw.constants = [{ name: "W", type: "mat4", link: "_worldMatrix" }, { name: "N", type: "mat3", link: "_normalMatrix" }];

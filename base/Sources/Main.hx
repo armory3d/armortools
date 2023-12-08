@@ -1,6 +1,6 @@
 package;
 
-import kha.System;
+import iron.System;
 import iron.object.Object;
 import iron.Scene;
 import iron.RenderPath;

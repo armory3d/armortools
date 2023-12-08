@@ -1,7 +1,7 @@
 package arm.ui;
 
-import kha.System;
 import zui.Zui;
+import iron.System;
 import iron.system.Input;
 import arm.shader.MakeMaterial;
 #if (is_paint || is_sculpt)
@@ -26,7 +26,7 @@ class UIHeader {
 		inst = this;
 	}
 
-	public function renderUI(g: kha.Graphics2) {
+	public function renderUI(g: Graphics2) {
 		var ui = UIBase.inst.ui;
 		if (Config.raw.touch_ui) {
 			headerh = defaultHeaderH + 6;
@@ -131,7 +131,7 @@ class UIHeader {
 			var opacityPicked = Math.round(Context.raw.pickedColor.opacity * 100) / 100;
 
 			var h = Zui.handle("uiheader_0");
-			var color: kha.Color = 0xffffffff;
+			var color: Color = 0xffffffff;
 			color.R = baseRPicked;
 			color.G = baseGPicked;
 			color.B = baseBPicked;

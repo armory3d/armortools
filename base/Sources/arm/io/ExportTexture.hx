@@ -2,7 +2,7 @@ package arm.io;
 
 #if (is_paint || is_lab)
 
-import kha.Image;
+import iron.System;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
@@ -139,7 +139,7 @@ class ExportTexture {
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.raw.formatQuality;
 		#if (krom_android || krom_ios)
-		var f = kha.Window.get().title;
+		var f = kha.System.title;
 		#else
 		var f = UIFiles.filename;
 		#end
@@ -170,13 +170,13 @@ class ExportTexture {
 
 		// Clear export layer
 		App.expa.g4.begin();
-		App.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+		App.expa.g4.clear(Color.fromFloats(0.0, 0.0, 0.0, 0.0));
 		App.expa.g4.end();
 		App.expb.g4.begin();
-		App.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+		App.expb.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0));
 		App.expb.g4.end();
 		App.expc.g4.begin();
-		App.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+		App.expc.g4.clear(Color.fromFloats(1.0, 0.0, 0.0, 0.0));
 		App.expc.g4.end();
 
 		// Flatten layers
@@ -376,7 +376,7 @@ class ExportTexture {
 		if (type == 2 && off == 3) format = 6; // AAA1
 
 		if (Context.raw.layersDestination == DestinationPacked) {
-			var image = kha.Image.fromBytes(pixels, resX, resY);
+			var image = Image.fromBytes(pixels, resX, resY);
 			iron.data.Data.cachedImages.set(file, image);
 			var ar = file.split(Path.sep);
 			var name = ar[ar.length - 1];

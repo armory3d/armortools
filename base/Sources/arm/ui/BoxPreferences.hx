@@ -3,6 +3,7 @@ package arm.ui;
 import haxe.io.Bytes;
 import haxe.Json;
 import zui.Zui;
+import iron.System;
 import iron.data.Data;
 import arm.shader.MakeMaterial;
 import arm.io.ImportPlugin;
@@ -23,7 +24,7 @@ class BoxPreferences {
 	public static var presetHandle: Handle;
 	static var locales: Array<String> = null;
 	static var themes: Array<String> = null;
-	static var worldColor = kha.Color.fromValue(0xff080808);
+	static var worldColor = Color.fromValue(0xff080808);
 
 	@:access(zui.Zui)
 	public static function show() {
@@ -115,7 +116,7 @@ class BoxPreferences {
 						if (UIMenu.menuButton(ui, tr("Import..."))) {
 							UIFiles.show("json", false, false, function(path: String) {
 								Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
-									var raw = Json.parse(kha.System.bufferToString(b));
+									var raw = Json.parse(System.bufferToString(b));
 									iron.App.notifyOnInit(function() {
 										ui.t.ELEMENT_H = App.defaultElementH;
 										Config.importFrom(raw);
@@ -219,7 +220,7 @@ class BoxPreferences {
 					b[1] = worldColor.Gb;
 					b[2] = worldColor.Bb;
 					b[3] = 255;
-					Context.raw.emptyEnvmap = kha.Image.fromBytes(b.buffer, 1, 1);
+					Context.raw.emptyEnvmap = Image.fromBytes(b.buffer, 1, 1);
 					Context.raw.ddirty = 2;
 					if (!Context.raw.showEnvmap) {
 						iron.Scene.active.world.envmap = Context.raw.emptyEnvmap;
@@ -634,7 +635,7 @@ plugin.drawUI = function(ui) {
 							}
 							if (UIMenu.menuButton(ui, tr("Edit in Script Tab"))) {
 								iron.data.Data.getBlob("plugins/" + f, function(blob: js.lib.ArrayBuffer) {
-									TabScript.hscript.text = kha.System.bufferToString(blob);
+									TabScript.hscript.text = System.bufferToString(blob);
 									iron.data.Data.deleteBlob("plugins/" + f);
 									Console.info(tr("Script opened"));
 								});

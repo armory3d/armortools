@@ -2,7 +2,7 @@ package arm.io;
 
 import js.lib.ArrayBuffer;
 import js.lib.DataView;
-import kha.Color;
+import iron.System;
 import iron.data.Data;
 
 class ImportGpl {
@@ -11,7 +11,7 @@ class ImportGpl {
 		Data.getBlob(path, function(b: ArrayBuffer) {
 			var swatches = [];
 
-			var str = kha.System.bufferToString(b);
+			var str = System.bufferToString(b);
 			var lines = str.split("\n");
 
 			var view = new DataView(b);

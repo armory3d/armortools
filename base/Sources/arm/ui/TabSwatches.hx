@@ -1,13 +1,14 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.System;
 import iron.system.Time;
 import iron.system.Input;
 import arm.ProjectFormat;
 
 class TabSwatches {
 
-	public static var empty(get, default): kha.Image = null;
+	public static var empty(get, default): Image = null;
 
 	public static function get_empty() {
 		if (empty == null) {
@@ -16,7 +17,7 @@ class TabSwatches {
 			b[1] = 255;
 			b[2] = 255;
 			b[3] = 255;
-			empty = kha.Image.fromBytes(b.buffer, 1, 1);
+			empty = Image.fromBytes(b.buffer, 1, 1);
 		}
 		return empty;
 	}

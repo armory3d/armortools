@@ -1,15 +1,7 @@
 package arm;
 
+import iron.System;
 import iron.system.Input.KeyCode;
-import kha.PipelineState;
-import kha.Graphics4;
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.PipelineState.BlendingFactor;
-import kha.PipelineState.CompareMode;
-import kha.Image;
-import kha.Font;
-import kha.System;
 import zui.Zui;
 import zui.Zui.Theme;
 import zui.Zui.Nodes;
@@ -192,7 +184,7 @@ class App {
 					// Baked font for fast startup
 					if (Config.raw.locale == "en") {
 						font.font_ = Krom.g2_font_13(font.blob);
-						font.fontGlyphs = kha.Graphics2.fontGlyphs;
+						font.fontGlyphs = Graphics2.fontGlyphs;
 					}
 					else font.init();
 
@@ -682,7 +674,7 @@ class App {
 	}
 	#end
 
-	static function getDragImage(): kha.Image {
+	static function getDragImage(): Image {
 		dragTint = 0xffffffff;
 		dragSize = -1;
 		dragRect = null;
@@ -726,7 +718,7 @@ class App {
 		return null;
 	}
 
-	static function render(g: kha.Graphics2) {
+	static function render(g: Graphics2) {
 		if (System.width == 0 || System.height == 0) return;
 
 		if (Context.raw.frame == 2) {
@@ -943,8 +935,8 @@ class App {
 		raw.layout = [
 			#if (is_paint || is_sculpt)
 			Std.int(UIBase.defaultSidebarW * raw.window_scale), // LayoutSidebarW
-			Std.int(kha.System.height / 2), // LayoutSidebarH0
-			Std.int(kha.System.height / 2), // LayoutSidebarH1
+			Std.int(System.height / 2), // LayoutSidebarH0
+			Std.int(System.height / 2), // LayoutSidebarH1
 			#end
 
 			#if krom_ios
@@ -1055,7 +1047,7 @@ class App {
 
 	public static function initLayers() {
 		#if (is_paint || is_sculpt)
-		Project.layers[0].clear(kha.Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
+		Project.layers[0].clear(Color.fromFloats(defaultBase, defaultBase, defaultBase, 1.0));
 		#end
 
 		#if is_lab
@@ -1066,18 +1058,18 @@ class App {
 		texpaint.g2.drawScaledImage(Res.get("placeholder.k"), 0, 0, Config.getTextureResX(), Config.getTextureResY()); // Base
 		texpaint.g2.end();
 		texpaint_nor.g4.begin();
-		texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		texpaint_nor.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
 		texpaint_nor.g4.end();
 		texpaint_pack.g4.begin();
-		texpaint_pack.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+		texpaint_pack.g4.clear(Color.fromFloats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		texpaint_pack.g4.end();
 		var texpaint_nor_empty = iron.RenderPath.active.renderTargets.get("texpaint_nor_empty").image;
 		var texpaint_pack_empty = iron.RenderPath.active.renderTargets.get("texpaint_pack_empty").image;
 		texpaint_nor_empty.g4.begin();
-		texpaint_nor_empty.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+		texpaint_nor_empty.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
 		texpaint_nor_empty.g4.end();
 		texpaint_pack_empty.g4.begin();
-		texpaint_pack_empty.g4.clear(kha.Color.fromFloats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+		texpaint_pack_empty.g4.clear(Color.fromFloats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
 		texpaint_pack_empty.g4.end();
 		#end
 	}
@@ -1140,8 +1132,8 @@ class App {
 
 	static function makeMergePipe(red: Bool, green: Bool, blue: Bool, alpha: Bool): PipelineState {
 		var pipe = new PipelineState();
-		pipe.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipe.fragmentShader = kha.Shaders.getFragment("layer_merge.frag");
+		pipe.vertexShader = System.getShader("pass.vert");
+		pipe.fragmentShader = System.getShader("layer_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipe.inputLayout = [vs];
@@ -1170,8 +1162,8 @@ class App {
 		#end
 
 		pipeCopy = new PipelineState();
-		pipeCopy.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopy.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopy.vertexShader = System.getShader("layer_view.vert");
+		pipeCopy.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1180,8 +1172,8 @@ class App {
 		pipeCopy.compile();
 
 		pipeCopyBGRA = new PipelineState();
-		pipeCopyBGRA.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopyBGRA.fragmentShader = kha.Shaders.getFragment("layer_copy_bgra.frag");
+		pipeCopyBGRA.vertexShader = System.getShader("layer_view.vert");
+		pipeCopyBGRA.fragmentShader = System.getShader("layer_copy_bgra.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1191,8 +1183,8 @@ class App {
 
 		#if (krom_metal || krom_vulkan || krom_direct3d12)
 		pipeCopy8 = new PipelineState();
-		pipeCopy8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopy8.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopy8.vertexShader = System.getShader("layer_view.vert");
+		pipeCopy8.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1203,8 +1195,8 @@ class App {
 		pipeCopy8.compile();
 
 		pipeCopy128 = new PipelineState();
-		pipeCopy128.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopy128.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopy128.vertexShader = System.getShader("layer_view.vert");
+		pipeCopy128.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1220,8 +1212,8 @@ class App {
 
 		#if (is_paint || is_sculpt)
 		pipeInvert8 = new PipelineState();
-		pipeInvert8.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeInvert8.fragmentShader = kha.Shaders.getFragment("layer_invert.frag");
+		pipeInvert8.vertexShader = System.getShader("layer_view.vert");
+		pipeInvert8.fragmentShader = System.getShader("layer_invert.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1232,8 +1224,8 @@ class App {
 		pipeInvert8.compile();
 
 		pipeApplyMask = new PipelineState();
-		pipeApplyMask.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeApplyMask.fragmentShader = kha.Shaders.getFragment("mask_apply.frag");
+		pipeApplyMask.vertexShader = System.getShader("pass.vert");
+		pipeApplyMask.fragmentShader = System.getShader("mask_apply.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipeApplyMask.inputLayout = [vs];
@@ -1242,8 +1234,8 @@ class App {
 		texaMask = pipeApplyMask.getTextureUnit("texa");
 
 		pipeMergeMask = new PipelineState();
-		pipeMergeMask.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeMergeMask.fragmentShader = kha.Shaders.getFragment("mask_merge.frag");
+		pipeMergeMask.vertexShader = System.getShader("pass.vert");
+		pipeMergeMask.fragmentShader = System.getShader("mask_merge.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipeMergeMask.inputLayout = [vs];
@@ -1254,8 +1246,8 @@ class App {
 		blendingMergeMask = pipeMergeMask.getConstantLocation("blending");
 
 		pipeColorIdToMask = new PipelineState();
-		pipeColorIdToMask.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeColorIdToMask.fragmentShader = kha.Shaders.getFragment("mask_colorid.frag");
+		pipeColorIdToMask.vertexShader = System.getShader("pass.vert");
+		pipeColorIdToMask.fragmentShader = System.getShader("mask_colorid.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipeColorIdToMask.inputLayout = [vs];
@@ -1266,8 +1258,8 @@ class App {
 
 		#if is_lab
 		pipeCopyR = new PipelineState();
-		pipeCopyR.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopyR.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopyR.vertexShader = System.getShader("layer_view.vert");
+		pipeCopyR.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1279,8 +1271,8 @@ class App {
 		pipeCopyR.compile();
 
 		pipeCopyG = new PipelineState();
-		pipeCopyG.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopyG.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopyG.vertexShader = System.getShader("layer_view.vert");
+		pipeCopyG.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1292,8 +1284,8 @@ class App {
 		pipeCopyG.compile();
 
 		pipeCopyB = new PipelineState();
-		pipeCopyB.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopyB.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopyB.vertexShader = System.getShader("layer_view.vert");
+		pipeCopyB.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1305,8 +1297,8 @@ class App {
 		pipeCopyB.compile();
 
 		pipeInpaintPreview = new PipelineState();
-		pipeInpaintPreview.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeInpaintPreview.fragmentShader = kha.Shaders.getFragment("inpaint_preview.frag");
+		pipeInpaintPreview.vertexShader = System.getShader("pass.vert");
+		pipeInpaintPreview.fragmentShader = System.getShader("inpaint_preview.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipeInpaintPreview.inputLayout = [vs];
@@ -1318,8 +1310,8 @@ class App {
 
 	public static function makePipeCopyRGB() {
 		pipeCopyRGB = new PipelineState();
-		pipeCopyRGB.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipeCopyRGB.fragmentShader = kha.Shaders.getFragment("layer_copy.frag");
+		pipeCopyRGB.vertexShader = System.getShader("layer_view.vert");
+		pipeCopyRGB.fragmentShader = System.getShader("layer_copy.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -1332,8 +1324,8 @@ class App {
 	#if is_lab
 	public static function makePipeCopyA() {
 		pipeCopyA = new PipelineState();
-		pipeCopyA.vertexShader = kha.Shaders.getVertex("pass.vert");
-		pipeCopyA.fragmentShader = kha.Shaders.getFragment("layer_copy_rrrr.frag");
+		pipeCopyA.vertexShader = System.getShader("pass.vert");
+		pipeCopyA.fragmentShader = System.getShader("layer_copy_rrrr.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_2X);
 		pipeCopyA.inputLayout = [vs];
@@ -1347,8 +1339,8 @@ class App {
 
 	public static function makeCursorPipe() {
 		pipeCursor = new PipelineState();
-		pipeCursor.vertexShader = kha.Shaders.getVertex("cursor.vert");
-		pipeCursor.fragmentShader = kha.Shaders.getFragment("cursor.frag");
+		pipeCursor.vertexShader = System.getShader("cursor.vert");
+		pipeCursor.fragmentShader = System.getShader("cursor.frag");
 		var vs = new VertexStructure();
 		#if (krom_metal || krom_vulkan)
 		vs.add("tex", VertexData.I16_2X_Normalized);
@@ -1710,13 +1702,13 @@ class App {
 
 		// Clear export layer
 		App.expa.g4.begin();
-		App.expa.g4.clear(kha.Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+		App.expa.g4.clear(Color.fromFloats(0.0, 0.0, 0.0, 0.0));
 		App.expa.g4.end();
 		App.expb.g4.begin();
-		App.expb.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+		App.expb.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0));
 		App.expb.g4.end();
 		App.expc.g4.begin();
-		App.expc.g4.clear(kha.Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+		App.expc.g4.clear(Color.fromFloats(1.0, 0.0, 0.0, 0.0));
 		App.expc.g4.end();
 
 		// Flatten layers
@@ -1865,7 +1857,7 @@ class App {
 		l.texpaint.g4.end();
 	}
 
-	public static function commandsMergePack(pipe: PipelineState, i0: kha.Image, i1: kha.Image, i1pack: kha.Image, i1maskOpacity: Float, i1texmask: kha.Image, i1blending = -1) {
+	public static function commandsMergePack(pipe: PipelineState, i0: Image, i1: Image, i1pack: Image, i1maskOpacity: Float, i1texmask: Image, i1blending = -1) {
 		i0.g4.begin();
 		i0.g4.setPipeline(pipe);
 		i0.g4.setTexture(tex0, i1);
@@ -1894,7 +1886,7 @@ class App {
 		var _layer = Context.raw.layer;
 		var _tool = Context.raw.tool;
 		var _fillType = Context.raw.fillTypeHandle.position;
-		var current: kha.Graphics2 = null;
+		var current: Graphics2 = null;
 
 		#if is_paint
 		if (Context.raw.tool == ToolMaterial) {
@@ -1902,7 +1894,7 @@ class App {
 				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
 			}
 
-			current = @:privateAccess kha.Graphics2.current;
+			current = @:privateAccess Graphics2.current;
 			if (current != null) current.end();
 
 			Context.raw.tool = ToolFill;
@@ -1929,7 +1921,7 @@ class App {
 		for (l in Project.layers) if (l.isMask() && l.fill_layer == Context.raw.material) hasFillMask = true;
 
 		if (hasFillLayer || hasFillMask) {
-			current = @:privateAccess kha.Graphics2.current;
+			current = @:privateAccess Graphics2.current;
 			if (current != null) current.end();
 			Context.raw.pdirty = 1;
 			Context.raw.tool = ToolFill;
@@ -1982,7 +1974,7 @@ class App {
 	}
 
 	public static function updateFillLayer(parsePaint = true) {
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		var _tool = Context.raw.tool;

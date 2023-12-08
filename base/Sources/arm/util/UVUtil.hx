@@ -1,10 +1,6 @@
 package arm.util;
 
-import kha.PipelineState;
-import kha.VertexBuffer.VertexData;
-import kha.VertexBuffer.VertexStructure;
-import kha.PipelineState.CompareMode;
-import kha.Image;
+import iron.System;
 
 class UVUtil {
 
@@ -105,13 +101,13 @@ class UVUtil {
 		if (dilatemapCached) return;
 
 		if (dilatemap == null) {
-			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.R8);
+			dilatemap = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
 		}
 
 		if (pipeDilate == null) {
 			pipeDilate = new PipelineState();
-			pipeDilate.vertexShader = kha.Shaders.getVertex("dilate_map.vert");
-			pipeDilate.fragmentShader = kha.Shaders.getFragment("dilate_map.frag");
+			pipeDilate.vertexShader = System.getShader("dilate_map.vert");
+			pipeDilate.fragmentShader = System.getShader("dilate_map.frag");
 			var vs = new VertexStructure();
 			#if (krom_metal || krom_vulkan)
 			vs.add("tex", VertexData.I16_2X_Normalized);
@@ -123,7 +119,7 @@ class UVUtil {
 			pipeDilate.inputLayout = [vs];
 			pipeDilate.depthWrite = false;
 			pipeDilate.depthMode = CompareMode.Always;
-			pipeDilate.colorAttachments[0] = kha.Image.TextureFormat.R8;
+			pipeDilate.colorAttachments[0] = TextureFormat.R8;
 			pipeDilate.compile();
 			// dilateTexUnpack = pipeDilate.getConstantLocation("texUnpack");
 		}
@@ -181,7 +177,7 @@ class UVUtil {
 		if (uvislandmap != null) {
 			uvislandmap.unload();
 		}
-		uvislandmap = Image.fromBytes(bytes, w, h, kha.Image.TextureFormat.R8);
+		uvislandmap = Image.fromBytes(bytes, w, h, TextureFormat.R8);
 		uvislandmapCached = true;
 	}
 }

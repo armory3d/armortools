@@ -1,6 +1,6 @@
 package arm.io;
 
-import kha.Image;
+import iron.System;
 import iron.data.Data;
 import arm.ui.UIBase;
 import arm.sys.Path;

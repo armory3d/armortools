@@ -1,13 +1,7 @@
 package arm.ui;
 
-import kha.System;
-import kha.Image;
-import kha.PipelineState;
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.PipelineState.BlendingFactor;
-import kha.Graphics4;
 import zui.Zui;
+import iron.System;
 import iron.system.Input;
 #if (is_paint || is_sculpt)
 import arm.util.RenderUtil;
@@ -51,8 +45,8 @@ class UIView2D {
 
 		#if (is_paint || is_sculpt)
 		pipe = new PipelineState();
-		pipe.vertexShader = kha.Shaders.getVertex("layer_view.vert");
-		pipe.fragmentShader = kha.Shaders.getFragment("layer_view.frag");
+		pipe.vertexShader = System.getShader("layer_view.vert");
+		pipe.fragmentShader = System.getShader("layer_view.frag");
 		var vs = new VertexStructure();
 		vs.add("pos", VertexData.F32_3X);
 		vs.add("tex", VertexData.F32_2X);
@@ -71,7 +65,7 @@ class UIView2D {
 	}
 
 	@:access(zui.Zui)
-	public function render(g: kha.Graphics2) {
+	public function render(g: Graphics2) {
 
 		ww = Config.raw.layout[LayoutNodesW];
 
@@ -171,13 +165,13 @@ class UIView2D {
 				}
 
 				if (layerMode == View2DVisible) {
-					var current = @:privateAccess kha.Graphics2.current;
+					var current = @:privateAccess Graphics2.current;
 					if (current != null) current.end();
 					layer = untyped App.flatten();
 					if (current != null) current.begin(false);
 				}
 				else if (layer.isGroup()) {
-					var current = @:privateAccess kha.Graphics2.current;
+					var current = @:privateAccess Graphics2.current;
 					if (current != null) current.end();
 					layer = untyped App.flatten(false, layer.getChildren());
 					if (current != null) current.begin(false);
@@ -216,7 +210,7 @@ class UIView2D {
 					ui.g.pipeline = pipe;
 					#end
 					if (!Context.raw.textureFilter) {
-						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.Low;
+						ui.g.imageScaleQuality = ImageScaleQuality.Low;
 					}
 					#if krom_opengl
 					Krom.setPipeline(pipe.pipeline_);
@@ -242,7 +236,7 @@ class UIView2D {
 				if (type == View2DLayer) {
 					ui.g.pipeline = null;
 					if (!Context.raw.textureFilter) {
-						ui.g.imageScaleQuality = kha.Graphics2.ImageScaleQuality.High;
+						ui.g.imageScaleQuality = ImageScaleQuality.High;
 					}
 				}
 

@@ -1,6 +1,6 @@
 package arm.ui;
 
-import kha.System;
+import iron.System;
 import zui.Zui;
 #if is_lab
 import iron.Scene;
@@ -26,7 +26,7 @@ class UIMenubar {
 		inst = this;
 	}
 
-	public function renderUI(g: kha.Graphics2) {
+	public function renderUI(g: Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		#if (is_paint || is_sculpt)

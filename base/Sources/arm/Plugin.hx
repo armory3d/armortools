@@ -1,5 +1,7 @@
 package arm;
 
+import iron.System;
+
 @:keep
 class Plugin {
 
@@ -39,8 +41,8 @@ class Plugin {
 		try {
 			iron.data.Data.getBlob("plugins/" + plugin, function(blob: js.lib.ArrayBuffer) {
 				pluginName = plugin;
-				// js.Syntax.code("(1, eval)({0})", kha.System.bufferToString(blob)); // Global scope
-				js.Syntax.code("eval({0})", kha.System.bufferToString(blob)); // Local scope
+				// js.Syntax.code("(1, eval)({0})", System.bufferToString(blob)); // Global scope
+				js.Syntax.code("eval({0})", System.bufferToString(blob)); // Local scope
 				iron.data.Data.deleteBlob("plugins/" + plugin);
 			});
 		}
@@ -85,9 +87,9 @@ class CoreBridge {
 	public static var ReflectField = Reflect.field;
 	public static var ReflectSetField = Reflect.setField;
 	public static var StdIs = Std.isOfType;
-	public static var Image = kha.Image;
-	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): kha.Color {
-		return kha.Color.fromFloats(r, g, b, a);
+	public static var Image = Image;
+	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): Color {
+		return Color.fromFloats(r, g, b, a);
 	}
 }
 

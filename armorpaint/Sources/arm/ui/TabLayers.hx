@@ -2,6 +2,7 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.System;
 import iron.system.Time;
 import iron.system.Input;
 import iron.object.MeshObject;
@@ -993,7 +994,7 @@ class TabLayers {
 	public static function makeMaskPreviewRgba32(l: LayerSlot) {
 		#if is_paint
 		if (Context.raw.maskPreviewRgba32 == null) {
-			Context.raw.maskPreviewRgba32 = kha.Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
+			Context.raw.maskPreviewRgba32 = Image.createRenderTarget(RenderUtil.layerPreviewSize, RenderUtil.layerPreviewSize);
 		}
 		// Convert from R8 to RGBA32 for tooltip display
 		if (Context.raw.maskPreviewLast != l) {

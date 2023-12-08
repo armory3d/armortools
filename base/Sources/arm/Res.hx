@@ -1,6 +1,6 @@
 package arm;
 
-import kha.Image;
+import iron.System;
 import iron.data.Data;
 
 class Res {
@@ -22,17 +22,17 @@ class Res {
 		return bundled.get(name);
 	}
 
-	public static function tile50(img: kha.Image, x: Int, y: Int): TRect {
+	public static function tile50(img: Image, x: Int, y: Int): TRect {
 		var size = Config.raw.window_scale > 1 ? 100 : 50;
 		return { x: x * size, y: y * size, w: size, h: size };
 	}
 
-	public static function tile25(img: kha.Image, x: Int, y: Int): TRect {
+	public static function tile25(img: Image, x: Int, y: Int): TRect {
 		var size = Config.raw.window_scale > 1 ? 50 : 25;
 		return { x: x * size, y: y * size, w: size, h: size };
 	}
 
-	public static function tile18(img: kha.Image, x: Int, y: Int): TRect {
+	public static function tile18(img: Image, x: Int, y: Int): TRect {
 		var size = Config.raw.window_scale > 1 ? 36 : 18;
 		return { x: x * size, y: img.height - (y + 1) * size, w: size, h: size };
 	}

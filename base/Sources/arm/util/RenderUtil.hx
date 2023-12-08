@@ -1,15 +1,9 @@
 package arm.util;
 
-import kha.Image.TextureFormat;
-import kha.VertexBuffer;
-import kha.IndexBuffer;
-import kha.Graphics4.Usage;
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.Image;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
+import iron.System;
 import iron.object.MeshObject;
 import iron.math.Mat4;
 import iron.math.Vec4;
@@ -99,7 +93,7 @@ class RenderUtil {
 	}
 
 	public static function makeDecalPreview() {
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		if (Context.raw.decalImage == null) {
@@ -165,7 +159,7 @@ class RenderUtil {
 	}
 
 	public static function makeTextPreview() {
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		var text = Context.raw.textToolText;
@@ -198,7 +192,7 @@ class RenderUtil {
 	}
 
 	public static function makeFontPreview() {
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		var text = "Abg";
@@ -225,7 +219,7 @@ class RenderUtil {
 		if (RenderPathPaint.liveLayerLocked) return;
 		Context.raw.materialPreview = true;
 
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 
 		// Prepare layers
@@ -383,7 +377,7 @@ class RenderUtil {
 		if (current != null) current.begin(false);
 	}
 
-	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: kha.Image, group: TNodeCanvas = null, parents: Array<TNode> = null) {
+	public static function makeNodePreview(canvas: TNodeCanvas, node: TNode, image: Image, group: TNodeCanvas = null, parents: Array<TNode> = null) {
 		var res = MakeMaterial.parseNodePreviewMaterial(node, group, parents);
 		if (res == null || res.scon == null) return;
 

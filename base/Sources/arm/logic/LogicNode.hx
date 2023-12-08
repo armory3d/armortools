@@ -1,5 +1,7 @@
 package arm.logic;
 
+import iron.System;
+
 class LogicNode {
 	var tree: LogicTree;
 	var inputs: Array<LogicNodeInput> = [];
@@ -21,11 +23,11 @@ class LogicNode {
 		done(null);
 	}
 
-	public function getAsImage(from: Int, done: kha.Image->Void) {
+	public function getAsImage(from: Int, done: Image->Void) {
 		done(null);
 	}
 
-	public function getCachedImage(): kha.Image {
+	public function getCachedImage(): Image {
 		return null;
 	}
 
@@ -45,7 +47,7 @@ class LogicNodeInput {
 		node.get(from, done);
 	}
 
-	public function getAsImage(done: kha.Image->Void) {
+	public function getAsImage(done: Image->Void) {
 		node.getAsImage(from, done);
 	}
 
@@ -65,8 +67,8 @@ class LogicTree {
 	var _remove: Array<Void->Void> = null;
 	var _update: Array<Void->Void> = null;
 	var _lateUpdate: Array<Void->Void> = null;
-	var _render: Array<kha.Graphics4->Void> = null;
-	var _render2D: Array<kha.Graphics2->Void> = null;
+	var _render: Array<Graphics4->Void> = null;
+	var _render2D: Array<Graphics2->Void> = null;
 
 	public function remove() {
 		// object.removeTrait(this);
@@ -110,24 +112,24 @@ class LogicTree {
 		iron.App.removeLateUpdate(f);
 	}
 
-	public function notifyOnRender(f: kha.Graphics4->Void) {
+	public function notifyOnRender(f: Graphics4->Void) {
 		if (_render == null) _render = [];
 		_render.push(f);
 		iron.App.notifyOnRender(f);
 	}
 
-	public function removeRender(f: kha.Graphics4->Void) {
+	public function removeRender(f: Graphics4->Void) {
 		_render.remove(f);
 		iron.App.removeRender(f);
 	}
 
-	public function notifyOnRender2D(f: kha.Graphics2->Void) {
+	public function notifyOnRender2D(f: Graphics2->Void) {
 		if (_render2D == null) _render2D = [];
 		_render2D.push(f);
 		iron.App.notifyOnRender2D(f);
 	}
 
-	public function removeRender2D(f: kha.Graphics2->Void) {
+	public function removeRender2D(f: Graphics2->Void) {
 		_render2D.remove(f);
 		iron.App.removeRender2D(f);
 	}

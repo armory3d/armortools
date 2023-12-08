@@ -3,6 +3,7 @@ package arm.ui;
 #if (is_paint || is_sculpt)
 
 import zui.Zui;
+import iron.System;
 import iron.system.Time;
 import arm.data.FontSlot;
 import arm.util.RenderUtil;
@@ -32,7 +33,7 @@ class TabFonts {
 			ui.endSticky();
 			ui.separator(3, false);
 
-			var statusw = kha.System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
+			var statusw = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW];
 			var slotw = Std.int(51 * ui.SCALE());
 			var num = Std.int(statusw / slotw);
 

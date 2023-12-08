@@ -1,6 +1,6 @@
 package arm.data;
 
-import kha.Image;
+import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import iron.data.Data;

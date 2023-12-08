@@ -1,5 +1,6 @@
 package arm.ui;
 
+import iron.System;
 import zui.Zui;
 import arm.io.ImportArm;
 import arm.sys.Path;
@@ -10,7 +11,7 @@ class BoxProjects {
 
 	public static var htab = new Handle();
 	static var hsearch = new Handle();
-	static var iconMap: Map<String, kha.Image> = null;
+	static var iconMap: Map<String, Image> = null;
 
 	public static function show() {
 		if (iconMap != null) {
@@ -65,13 +66,13 @@ class BoxProjects {
 						j = 0;
 					}
 				}
-				kha.System.title = title;
+				System.title = title;
 			}
 			ui.endSticky();
 			ui.separator(3, false);
 
 			var slotw = Std.int(150 * ui.SCALE());
-			var num = Std.int(kha.System.width / slotw);
+			var num = Std.int(System.width / slotw);
 			var recent_projects = Config.raw.recent_projects;
 			var show_asset_names = true;
 
@@ -104,7 +105,7 @@ class BoxProjects {
 					if (iconMap == null) iconMap = [];
 					var icon = iconMap.get(iconPath);
 					if (icon == null) {
-						iron.data.Data.getImage(iconPath, function(image: kha.Image) {
+						iron.data.Data.getImage(iconPath, function(image: Image) {
 							icon = image;
 							iconMap.set(iconPath, icon);
 						});
@@ -197,7 +198,7 @@ class BoxProjects {
 				if (file.toLowerCase().indexOf(hsearch.text.toLowerCase()) < 0) continue; // Search filter
 
 				if (ui.button(file, Left) && arm.sys.File.exists(path)) {
-					var current = @:privateAccess kha.Graphics2.current;
+					var current = @:privateAccess Graphics2.current;
 					if (current != null) current.end();
 
 					ImportArm.runProject(path);
@@ -243,10 +244,10 @@ class BoxProjects {
 	}
 
 	static function alignToFullScreen() {
-		@:privateAccess UIBox.modalW = Std.int(kha.System.width / App.uiBox.SCALE());
-		@:privateAccess UIBox.modalH = Std.int(kha.System.height / App.uiBox.SCALE());
-		var appw = kha.System.width;
-		var apph = kha.System.height;
+		@:privateAccess UIBox.modalW = Std.int(System.width / App.uiBox.SCALE());
+		@:privateAccess UIBox.modalH = Std.int(System.height / App.uiBox.SCALE());
+		var appw = System.width;
+		var apph = System.height;
 		var mw = appw;
 		var mh = apph;
 		UIBox.hwnd.dragX = Std.int(-appw / 2 + mw / 2);

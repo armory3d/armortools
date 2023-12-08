@@ -1,5 +1,6 @@
 package arm.sys;
 
+import iron.System;
 import iron.data.Data;
 
 class Path {
@@ -14,7 +15,7 @@ class Path {
 	public static var textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
 	public static var meshImporters = new Map<String, String->(Dynamic->Void)->Void>();
-	public static var textureImporters = new Map<String, String->(kha.Image->Void)->Void>();
+	public static var textureImporters = new Map<String, String->(Image->Void)->Void>();
 
 	public static var baseColorExt = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
 	public static var opacityExt = ["opac", "opacity", "alpha"];

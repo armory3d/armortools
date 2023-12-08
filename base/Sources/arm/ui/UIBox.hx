@@ -1,7 +1,7 @@
 package arm.ui;
 
-import kha.System;
 import zui.Zui;
+import iron.System;
 import iron.system.Input;
 
 @:access(zui.Zui)
@@ -23,7 +23,7 @@ class UIBox {
 	static var tweenAlpha = 0.0;
 	#end
 
-	public static function render(g: kha.Graphics2) {
+	public static function render(g: Graphics2) {
 		if (!UIMenu.show) {
 			var mouse = Input.getMouse();
 			var kb = Input.getKeyboard();
@@ -49,11 +49,11 @@ class UIBox {
 
 		if (Config.raw.touch_ui) { // Darken bg
 			#if (krom_android || krom_ios)
-			g.color = kha.Color.fromFloats(0, 0, 0, tweenAlpha);
+			g.color = Color.fromFloats(0, 0, 0, tweenAlpha);
 			#else
-			g.color = kha.Color.fromFloats(0, 0, 0, 0.5);
+			g.color = Color.fromFloats(0, 0, 0, 0.5);
 			#end
-			g.fillRect(0, 0, kha.System.width, kha.System.height);
+			g.fillRect(0, 0, System.width, System.height);
 		}
 
 		g.end();
@@ -162,13 +162,13 @@ class UIBox {
 	static function tweenIn() {
 		iron.system.Tween.reset();
 		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut});
-		UIBox.hwnd.dragY = Std.int(kha.System.height / 2);
+		UIBox.hwnd.dragY = Std.int(System.height / 2);
 		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
 	}
 
 	static function tweenOut() {
 		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn, done: hideInternal});
-		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: kha.System.height / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
+		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
 	}
 	#end
 

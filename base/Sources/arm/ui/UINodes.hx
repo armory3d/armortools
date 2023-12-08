@@ -1,12 +1,10 @@
 package arm.ui;
 
 import haxe.Json;
-import iron.system.Input.KeyCode;
-import kha.Color;
-import kha.Image;
-import kha.System;
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.system.Input.KeyCode;
+import iron.System;
 import iron.system.Input;
 import iron.system.Time;
 import arm.shader.NodesMaterial;
@@ -649,7 +647,7 @@ class UINodes {
 		grid.g2.end();
 	}
 
-	public function render(g: kha.Graphics2) {
+	public function render(g: Graphics2) {
 		if (recompileMat) {
 			#if (is_paint || is_sculpt)
 			if (canvasType == CanvasBrush) {
@@ -869,7 +867,7 @@ class UINodes {
 
 			// Node previews
 			if (Config.raw.node_preview && nodes.nodesSelectedId.length > 0) {
-				var img: kha.Image = null;
+				var img: Image = null;
 				var sel = nodes.getNode(c.nodes, nodes.nodesSelectedId[0]);
 
 				#if (is_paint || is_sculpt)
@@ -1310,7 +1308,7 @@ class UINodes {
 		if (Context.raw.material.canvas.nodes.indexOf(node) == -1) return;
 
 		if (Context.raw.nodePreview == null) {
-			Context.raw.nodePreview = kha.Image.createRenderTarget(RenderUtil.materialPreviewSize, RenderUtil.materialPreviewSize);
+			Context.raw.nodePreview = Image.createRenderTarget(RenderUtil.materialPreviewSize, RenderUtil.materialPreviewSize);
 		}
 
 		Context.raw.nodePreviewDirty = false;

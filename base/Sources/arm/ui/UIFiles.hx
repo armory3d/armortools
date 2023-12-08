@@ -1,8 +1,9 @@
 package arm.ui;
 
 import haxe.io.Bytes;
-import iron.system.Input.KeyCode;
 import zui.Zui;
+import iron.System;
+import iron.system.Input.KeyCode;
 import iron.system.Input;
 import iron.system.Time;
 import iron.system.ArmPack;
@@ -17,7 +18,7 @@ class UIFiles {
 	static var lastPath = "";
 	static var lastSearch = "";
 	static var files: Array<String> = null;
-	static var iconMap: Map<String, kha.Image> = null;
+	static var iconMap: Map<String, Image> = null;
 	static var selected = -1;
 	static var showExtensions = false;
 	static var offline = false;
@@ -160,7 +161,7 @@ class UIFiles {
 				var uiy = ui._y;
 				var state = Idle;
 				var generic = true;
-				var icon: kha.Image = null;
+				var icon: Image = null;
 
 				if (isCloud && f != ".." && !offline) {
 					if (iconMap == null) iconMap = [];
@@ -173,10 +174,10 @@ class UIFiles {
 							iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, function(abs: String) {
 								if (abs != null) {
-									iron.data.Data.getImage(abs, function(image: kha.Image) {
+									iron.data.Data.getImage(abs, function(image: Image) {
 										iron.App.notifyOnInit(function() {
 											if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
-											icon = kha.Image.createRenderTarget(image.width, image.height);
+											icon = Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 												icon.g2.begin(false);
 
@@ -232,24 +233,24 @@ class UIFiles {
 						var raw = ArmPack.decode(buffer);
 						if (raw.material_icons != null) {
 							var bytesIcon = raw.material_icons[0];
-							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 
 						#if (is_paint || is_sculpt)
 						else if (raw.mesh_icons != null) {
 							var bytesIcon = raw.mesh_icons[0];
-							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						else if (raw.brush_icons != null) {
 							var bytesIcon = raw.brush_icons[0];
-							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						#end
 
 						#if is_lab
 						if (raw.mesh_icon != null) {
 							var bytesIcon = raw.mesh_icon;
-							icon = kha.Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
+							icon = Image.fromBytes(Lz4.decode(bytesIcon, 256 * 256 * 4), 256, 256);
 						}
 						#end
 
@@ -281,12 +282,12 @@ class UIFiles {
 					if (icon == null) {
 						var empty = iron.RenderPath.active.renderTargets.get("empty_black").image;
 						iconMap.set(handle, empty);
-						iron.data.Data.getImage(handle, function(image: kha.Image) {
+						iron.data.Data.getImage(handle, function(image: Image) {
 							iron.App.notifyOnInit(function() {
 								if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
 								var sw = image.width > image.height ? w : Std.int(1.0 * image.width / image.height * w);
 								var sh = image.width > image.height ? Std.int(1.0 * image.height / image.width * w) : w;
-								icon = kha.Image.createRenderTarget(sw, sh);
+								icon = Image.createRenderTarget(sw, sh);
 								icon.g2.begin(true, 0xffffffff);
 								icon.g2.pipeline = App.pipeCopyRGB;
 								icon.g2.drawScaledImage(image, 0, 0, sw, sh);

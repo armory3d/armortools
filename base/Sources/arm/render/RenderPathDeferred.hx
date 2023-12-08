@@ -1,5 +1,6 @@
 package arm.render;
 
+import iron.System;
 import iron.RenderPath;
 
 class RenderPathDeferred {
@@ -102,7 +103,7 @@ class RenderPathDeferred {
 			var b = new js.lib.ArrayBuffer(1);
 			var v = new js.lib.DataView(b);
 			v.setUint8(0, 255);
-			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.R8);
+			rt.image = Image.fromBytes(b, t.width, t.height, TextureFormat.R8);
 			path.renderTargets.set(t.name, rt);
 		}
 		{
@@ -118,7 +119,7 @@ class RenderPathDeferred {
 			v.setUint8(1, 0);
 			v.setUint8(2, 0);
 			v.setUint8(3, 0);
-			rt.image = kha.Image.fromBytes(b, t.width, t.height, kha.Image.TextureFormat.RGBA32);
+			rt.image = Image.fromBytes(b, t.width, t.height, TextureFormat.RGBA32);
 			path.renderTargets.set(t.name, rt);
 		}
 

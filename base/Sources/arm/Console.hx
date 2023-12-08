@@ -1,5 +1,7 @@
 package arm;
 
+import iron.System;
+
 @:keep
 class Console {
 
@@ -10,12 +12,12 @@ class Console {
 	static var haxeTrace: Dynamic->haxe.PosInfos->Void = null;
 	static var progressText: String = null;
 
-	static function drawToast(s: String, g: kha.Graphics2) {
+	static function drawToast(s: String, g: Graphics2) {
 		g.color = 0x55000000;
-		g.fillRect(0, 0, kha.System.width, kha.System.height);
+		g.fillRect(0, 0, System.width, System.height);
 		var scale = arm.App.getUIs()[0].SCALE();
-		var x = kha.System.width / 2;
-		var y = kha.System.height - 200 * scale;
+		var x = System.width / 2;
+		var y = System.height - 200 * scale;
 		g.fillRect(x - 200 * scale, y, 400 * scale, 80 * scale);
 		g.font = App.font;
 		g.fontSize = Std.int(22 * scale);
@@ -23,9 +25,9 @@ class Console {
 		g.drawString(s, x - g.font.width(g.fontSize, s) / 2, y + 40 * scale - g.font.height(g.fontSize) / 2);
 	}
 
-	public static function toast(s: String, g2: kha.Graphics2 = null) {
+	public static function toast(s: String, g2: Graphics2 = null) {
 		// Show a popup message
-		function _render(g: kha.Graphics2) {
+		function _render(g: Graphics2) {
 			drawToast(s, g);
 			if (g2 == null) {
 				arm.App.notifyOnNextFrame(function() {
@@ -37,7 +39,7 @@ class Console {
 		consoleTrace(s);
 	}
 
-	static function drawProgress(g: kha.Graphics2) {
+	static function drawProgress(g: Graphics2) {
 		drawToast(progressText, g);
 	}
 

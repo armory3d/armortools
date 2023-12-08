@@ -2,6 +2,7 @@ package arm.util;
 
 import js.lib.Int16Array;
 import js.lib.Uint32Array;
+import iron.System;
 import iron.data.SceneFormat;
 import iron.data.MeshData;
 import iron.data.Data;
@@ -328,7 +329,7 @@ class MeshUtil {
 		mergeMesh();
 	}
 
-	public static function applyDisplacement(texpaint_pack: kha.Image, strength = 0.1, uvScale = 1.0) {
+	public static function applyDisplacement(texpaint_pack: Image, strength = 0.1, uvScale = 1.0) {
 		var height = texpaint_pack.getPixels();
 		var heightView = new js.lib.DataView(height);
 		var res = texpaint_pack.width;

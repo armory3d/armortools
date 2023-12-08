@@ -1,7 +1,6 @@
 package arm.data;
 
-import kha.Image.TextureFormat;
-import kha.Image;
+import iron.System;
 import iron.RenderPath;
 import arm.ui.UIBase;
 import arm.ui.TabLayers;
@@ -204,7 +203,7 @@ class LayerSlot {
 		#end
 	}
 
-	public function clear(baseColor = 0x00000000, baseImage: kha.Image = null, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
+	public function clear(baseColor = 0x00000000, baseImage: Image = null, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
 		texpaint.g4.begin();
 		texpaint.g4.clear(baseColor); // Base
 		texpaint.g4.end();
@@ -217,10 +216,10 @@ class LayerSlot {
 		#if is_paint
 		if (isLayer()) {
 			texpaint_nor.g4.begin();
-			texpaint_nor.g4.clear(kha.Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
+			texpaint_nor.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0)); // Nor
 			texpaint_nor.g4.end();
 			texpaint_pack.g4.begin();
-			texpaint_pack.g4.clear(kha.Color.fromFloats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
+			texpaint_pack.g4.clear(Color.fromFloats(occlusion, roughness, metallic, 0.0)); // Occ, rough, met
 			texpaint_pack.g4.end();
 		}
 		#end

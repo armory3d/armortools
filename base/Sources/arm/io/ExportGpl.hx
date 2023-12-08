@@ -1,5 +1,6 @@
 package arm.io;
 
+import iron.System;
 import arm.ProjectFormat;
 
 class ExportGpl {
@@ -15,6 +16,6 @@ class ExportGpl {
 			o += Std.string(swatch.base.Rb) + " " + Std.string(swatch.base.Gb) + " " + Std.string(swatch.base.Bb) + "\n";
 		}
 
-		Krom.fileSaveBytes(path, kha.System.stringToBuffer(o), o.length);
+		Krom.fileSaveBytes(path, System.stringToBuffer(o), o.length);
 	}
 }

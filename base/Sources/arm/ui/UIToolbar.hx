@@ -2,7 +2,7 @@ package arm.ui;
 
 #if (is_paint || is_sculpt)
 
-import kha.System;
+import iron.System;
 import zui.Zui;
 import iron.RenderPath;
 import arm.Translator._tr;
@@ -38,7 +38,7 @@ class UIToolbar {
 		inst = this;
 	}
 
-	public function renderUI(g: kha.Graphics2) {
+	public function renderUI(g: Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		if (Config.raw.touch_ui) {
@@ -202,8 +202,8 @@ class UIToolbar {
 		}, 0);
 
 		// First draw out of screen, then align the menu based on menu height
-		UIMenu.menuX = -kha.System.width;
-		UIMenu.menuY = -kha.System.height;
+		UIMenu.menuX = -System.width;
+		UIMenu.menuY = -System.height;
 	}
 
 	@:access(zui.Zui)

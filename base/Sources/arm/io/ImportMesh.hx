@@ -59,7 +59,7 @@ class ImportMesh {
 		Project.meshAssets = [path];
 
 		#if (krom_android || krom_ios)
-		kha.Window.get().title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		kha.System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		#end
 	}
 

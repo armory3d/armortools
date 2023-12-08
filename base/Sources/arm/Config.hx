@@ -2,8 +2,7 @@ package arm;
 
 import haxe.io.Bytes;
 import haxe.Json;
-import kha.System.WindowMode;
-import kha.System;
+import iron.System;
 import iron.data.Data;
 import zui.Zui;
 import arm.ui.UIBase;
@@ -26,7 +25,7 @@ class Config {
 		try {
 			Data.getBlob((Path.isProtected() ? Krom.savePath() : "") + "config.json", function(blob: js.lib.ArrayBuffer) {
 				configLoaded = true;
-				raw = Json.parse(kha.System.bufferToString(blob));
+				raw = Json.parse(System.bufferToString(blob));
 
 				done();
 			});
@@ -36,7 +35,7 @@ class Config {
 			try { // Protected directory
 				Data.getBlob(Krom.savePath() + "config.json", function(blob: js.lib.ArrayBuffer) {
 					configLoaded = true;
-					raw = Json.parse(kha.System.bufferToString(blob));
+					raw = Json.parse(System.bufferToString(blob));
 					done();
 				});
 			}
@@ -78,14 +77,14 @@ class Config {
 			raw.window_x = -1;
 			raw.window_y = -1;
 			raw.window_scale = 1.0;
-			if (kha.System.displayWidth() >= 2560 && kha.System.displayHeight() >= 1600) {
+			if (System.displayWidth() >= 2560 && System.displayHeight() >= 1600) {
 				raw.window_scale = 2.0;
 			}
 			#if (krom_android || krom_ios || krom_darwin)
 			raw.window_scale = 2.0;
 			#end
 			raw.window_vsync = true;
-			raw.window_frequency = kha.System.displayFrequency();
+			raw.window_frequency = System.displayFrequency();
 			raw.rp_bloom = false;
 			raw.rp_gi = false;
 			raw.rp_vignette = 0.2;
@@ -120,9 +119,9 @@ class Config {
 		loadKeymap();
 	}
 
-	public static function getOptions(): kha.SystemOptions {
+	public static function getOptions(): SystemOptions {
 		var windowMode = raw.window_mode == 0 ? WindowMode.Windowed : WindowMode.Fullscreen;
-		var windowFeatures = kha.System.WindowFeatures.None;
+		var windowFeatures = WindowFeatures.FeatureNone;
 		if (raw.window_resizable) windowFeatures |= FeatureResizable;
 		if (raw.window_maximizable) windowFeatures |= FeatureMaximizable;
 		if (raw.window_minimizable) windowFeatures |= FeatureMinimizable;
@@ -175,7 +174,7 @@ class Config {
 		save();
 		Context.raw.ddirty = 2;
 
-		var current = @:privateAccess kha.Graphics2.current;
+		var current = @:privateAccess Graphics2.current;
 		if (current != null) current.end();
 		RenderPathBase.applyConfig();
 		if (current != null) current.begin(false);
@@ -187,7 +186,7 @@ class Config {
 		}
 		else {
 			Data.getBlob("keymap_presets/" + raw.keymap, function(blob: js.lib.ArrayBuffer) {
-				keymap = Json.parse(kha.System.bufferToString(blob));
+				keymap = Json.parse(System.bufferToString(blob));
 				// Fill in undefined keys with defaults
 				for (field in Reflect.fields(App.defaultKeymap)) {
 					if (!Reflect.hasField(keymap, field)) {
@@ -270,7 +269,7 @@ class Config {
 		}
 		else {
 			Data.getBlob("themes/" + theme, function(b: js.lib.ArrayBuffer) {
-				var parsed = Json.parse(kha.System.bufferToString(b));
+				var parsed = Json.parse(System.bufferToString(b));
 				App.theme = new zui.Zui.Theme();
 				for (key in Type.getInstanceFields(zui.Zui.Theme)) {
 					if (key == "theme_") continue;

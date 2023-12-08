@@ -1,13 +1,7 @@
 package arm.io;
 
-import kha.Image.TextureFormat;
-import kha.PipelineState;
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.Graphics4.TextureUnit;
-import kha.Graphics4.ConstantLocation;
 import js.lib.Float32Array;
-import kha.Image;
+import iron.System;
 import iron.data.ConstData;
 import iron.math.Vec4;
 import iron.Scene;
@@ -29,8 +23,8 @@ class ImportEnvmap {
 		// Init
 		if (pipeline == null) {
 			pipeline = new PipelineState();
-			pipeline.vertexShader = kha.Shaders.getVertex("pass.vert");
-			pipeline.fragmentShader = kha.Shaders.getFragment("prefilter_envmap.frag");
+			pipeline.vertexShader = System.getShader("pass.vert");
+			pipeline.fragmentShader = System.getShader("prefilter_envmap.frag");
 			var vs = new VertexStructure();
 			vs.add("pos", VertexData.F32_2X);
 			pipeline.inputLayout = [vs];
@@ -66,7 +60,7 @@ class ImportEnvmap {
 				_radianceCpu.unload();
 			});
 		}
-		radianceCpu = Image.fromBytes(radiancePixels, radiance.width, radiance.height, TextureFormat.RGBA128, kha.Graphics4.Usage.DynamicUsage);
+		radianceCpu = Image.fromBytes(radiancePixels, radiance.width, radiance.height, TextureFormat.RGBA128, Usage.DynamicUsage);
 
 		// Radiance
 		if (mipsCpu != null) {
@@ -82,7 +76,7 @@ class ImportEnvmap {
 		mipsCpu = [];
 		for (i in 0...mips.length) {
 			getRadianceMip(mips[i], i, radiance);
-			mipsCpu.push(Image.fromBytes(mips[i].getPixels(), mips[i].width, mips[i].height, TextureFormat.RGBA128, kha.Graphics4.Usage.DynamicUsage));
+			mipsCpu.push(Image.fromBytes(mips[i].getPixels(), mips[i].width, mips[i].height, TextureFormat.RGBA128, Usage.DynamicUsage));
 		}
 		radianceCpu.setMipmaps(mipsCpu);
 
@@ -104,7 +98,7 @@ class ImportEnvmap {
 		Project.raw.envmap = path;
 	}
 
-	static function getRadianceMip(mip: kha.Image, level: Int, radiance: kha.Image) {
+	static function getRadianceMip(mip: Image, level: Int, radiance: Image) {
 		mip.g4.begin();
 		mip.g4.setVertexBuffer(ConstData.screenAlignedVB);
 		mip.g4.setIndexBuffer(ConstData.screenAlignedIB);

@@ -5,6 +5,7 @@ import haxe.io.Bytes;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
+import iron.System;
 import iron.data.SceneFormat;
 import iron.object.MeshObject;
 import iron.system.ArmPack;
@@ -156,7 +157,7 @@ class ExportArm {
 
 		#if (krom_android || krom_ios)
 		var tex = iron.RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderForward ? "buf" : "tex").image;
-		var mesh_icon = kha.Image.createRenderTarget(256, 256);
+		var mesh_icon = Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);
 		#if krom_opengl
@@ -171,8 +172,9 @@ class ExportArm {
 		mesh_icon.g2.end();
 		#end
 		var mesh_icon_pixels = mesh_icon.getPixels();
+		var u8 = new js.lib.Uint8Array(mesh_icon_pixels);
 		for (i in 0...256 * 256 * 4) {
-			mesh_icon_pixels.set(i, Std.int(Math.pow(mesh_icon_pixels.get(i) / 255, 1.0 / 2.2) * 255));
+			u8[i] = Std.int(Math.pow(u8[i] / 255, 1.0 / 2.2) * 255);
 		}
 		#if (krom_metal || krom_vulkan)
 		bgraSwap(mesh_icon_pixels);
@@ -186,7 +188,7 @@ class ExportArm {
 		// 	#else
 		// 	[Lz4.encode(mesh_icon_pixels)];
 		// 	#end
-		Krom.writePng(Project.filepath.substr(0, Project.filepath.length - 4) + "_icon.png", mesh_icon_pixels.getData(), 256, 256, 0);
+		Krom.writePng(Project.filepath.substr(0, Project.filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
 		#end
 
 		#if (is_paint || is_sculpt)
@@ -437,11 +439,11 @@ class ExportArm {
 		if (raw.packed_assets == null) {
 			raw.packed_assets = [];
 		}
-		var tempImages: Array<kha.Image> = [];
+		var tempImages: Array<Image> = [];
 		for (i in 0...assets.length) {
 			if (!Project.packedAssetExists(raw.packed_assets, assets[i].file)) {
 				var image = Project.getImage(assets[i]);
-				var temp = kha.Image.createRenderTarget(image.width, image.height);
+				var temp = Image.createRenderTarget(image.width, image.height);
 				temp.g2.begin(false);
 				temp.g2.drawImage(image, 0, 0);
 				temp.g2.end();

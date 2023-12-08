@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.System;
 import arm.io.ExportMesh;
 import arm.sys.Path;
 #if (is_paint || is_sculpt)
@@ -364,7 +365,7 @@ class BoxExport {
 				UIBox.hide();
 				UIFiles.show(Context.raw.exportMeshFormat == FormatObj ? "obj" : "arm", true, false, function(path: String) {
 					#if (krom_android || krom_ios)
-					var f = kha.Window.get().title;
+					var f = System.title;
 					#else
 					var f = UIFiles.filename;
 					#end
@@ -456,7 +457,7 @@ class BoxExport {
 	static function parsePreset() {
 		var file = "export_presets/" + files[hpreset.position] + ".json";
 		iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
-			preset = haxe.Json.parse(kha.System.bufferToString(blob));
+			preset = haxe.Json.parse(System.bufferToString(blob));
 			iron.data.Data.deleteBlob("export_presets/" + file);
 		});
 	}

@@ -2,6 +2,7 @@ package arm;
 
 import haxe.io.Bytes;
 import haxe.Json;
+import iron.System;
 import arm.sys.File;
 import arm.sys.Path;
 
@@ -83,12 +84,12 @@ class Translator {
 		for (s in translations) {
 			for (i in 0...s.length) {
 				// Assume cjk in the > 1119 range for now
-				if (s.charCodeAt(i) > 1119 && kha.Graphics2.fontGlyphs.indexOf(s.charCodeAt(i)) == -1) {
+				if (s.charCodeAt(i) > 1119 && Graphics2.fontGlyphs.indexOf(s.charCodeAt(i)) == -1) {
 					if (!cjk) {
-						kha.Graphics2.fontGlyphs = [for (i in 32...127) i];
+						Graphics2.fontGlyphs = [for (i in 32...127) i];
 						cjk = true;
 					}
-					kha.Graphics2.fontGlyphs.push(s.charCodeAt(i));
+					Graphics2.fontGlyphs.push(s.charCodeAt(i));
 				}
 			}
 		}
@@ -114,10 +115,10 @@ class Translator {
 	}
 
 	static function initFont(cjk: Bool, fontPath: String, fontScale: Float) {
-		kha.Graphics2.fontGlyphs.sort(Reflect.compare);
+		Graphics2.fontGlyphs.sort(Reflect.compare);
 		// Load and assign font with cjk characters
 		iron.App.notifyOnInit(function() {
-			iron.data.Data.getFont(fontPath, function(f: kha.Font) {
+			iron.data.Data.getFont(fontPath, function(f: Font) {
 				if (cjk) {
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
 					f.setFontIndex(fontIndex);
@@ -137,11 +138,11 @@ class Translator {
 
 	static function extendedGlyphs() {
 		// Basic Latin + Latin-1 Supplement + Latin Extended-A
-		kha.Graphics2.fontGlyphs = [for (i in 32...383) i];
+		Graphics2.fontGlyphs = [for (i in 32...383) i];
 		// + Greek
-		for (i in 880...1023) kha.Graphics2.fontGlyphs.push(i);
+		for (i in 880...1023) Graphics2.fontGlyphs.push(i);
 		// + Cyrillic
-		for (i in 1024...1119) kha.Graphics2.fontGlyphs.push(i);
+		for (i in 1024...1119) Graphics2.fontGlyphs.push(i);
 	}
 
 	// Returns a list of supported locales (plus English and the automatically detected system locale)

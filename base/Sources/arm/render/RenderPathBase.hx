@@ -1,6 +1,6 @@
 package arm.render;
 
-import kha.System;
+import iron.System;
 import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.Quat;
@@ -68,7 +68,7 @@ class RenderPathBase {
 		return superSample;
 	}
 
-	public static function drawCompass(currentG: kha.Graphics4) {
+	public static function drawCompass(currentG: Graphics4) {
 		if (Context.raw.showCompass) {
 			var scene = Scene.active;
 			var cam = scene.camera;

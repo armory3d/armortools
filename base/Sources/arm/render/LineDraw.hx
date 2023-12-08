@@ -1,22 +1,12 @@
 package arm.render;
 
-import kha.PipelineState;
-import kha.PipelineState.CompareMode;
-import kha.PipelineState.CullMode;
-import kha.VertexBuffer.VertexStructure;
-import kha.VertexBuffer.VertexData;
-import kha.VertexBuffer;
-import kha.IndexBuffer;
-import kha.Graphics4.Usage;
-import kha.Graphics4.ConstantLocation;
-import kha.Image.TextureFormat;
-import kha.Image.DepthStencilFormat;
+import iron.System;
 import iron.math.Vec4;
 import iron.math.Mat4;
 
 class LineDraw {
 
-	public static var color: kha.Color = 0xffff0000;
+	public static var color: Color = 0xffff0000;
 	public static var strength = 0.005;
 	public static var mat: iron.math.Mat4 = null;
 	public static var dim: iron.math.Vec4 = null;
@@ -36,9 +26,9 @@ class LineDraw {
 	static inline var maxIndices = maxLines * 6;
 	static var lines = 0;
 
-	static var g: kha.Graphics4;
+	static var g: Graphics4;
 
-	public static function render(g4: kha.Graphics4, matrix: iron.math.Mat4) {
+	public static function render(g4: Graphics4, matrix: iron.math.Mat4) {
 		g = g4;
 		mat = matrix;
 		dim = matrix.getScale();
@@ -49,8 +39,8 @@ class LineDraw {
 			structure.add("col", VertexData.F32_3X);
 			pipeline = new PipelineState();
 			pipeline.inputLayout = [structure];
-			pipeline.fragmentShader = kha.Shaders.getFragment("line.frag");
-			pipeline.vertexShader = kha.Shaders.getVertex("line.vert");
+			pipeline.fragmentShader = System.getShader("line.frag");
+			pipeline.vertexShader = System.getShader("line.vert");
 			pipeline.depthWrite = true;
 			pipeline.depthMode = CompareMode.Less;
 			pipeline.cullMode = CullMode.None;

@@ -1,5 +1,6 @@
 package arm.render;
 
+import iron.System;
 import iron.data.MaterialData;
 import iron.object.Object;
 import iron.system.Input;
@@ -344,7 +345,7 @@ class Uniforms {
 		return null;
 	}
 
-	public static function linkTex(object: Object, mat: MaterialData, link: String): kha.Image {
+	public static function linkTex(object: Object, mat: MaterialData, link: String): Image {
 		switch (link) {
 			case "_texpaint_undo": {
 				#if (is_paint || is_sculpt)

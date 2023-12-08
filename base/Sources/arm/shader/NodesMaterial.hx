@@ -1,6 +1,7 @@
 package arm.shader;
 
 import haxe.Json;
+import iron.System;
 import zui.Zui;
 import zui.Zui.Nodes;
 import arm.Project;
@@ -2833,7 +2834,7 @@ class NodesMaterial {
 		var sw = ui._w / nodes.SCALE();
 		for (val in vals) {
 			var pos = val[4];
-			var col = kha.Color.fromFloats(val[0], val[1], val[2]);
+			var col = Color.fromFloats(val[0], val[1], val[2]);
 			ui.fill(pos * sw, 0, (1.0 - pos) * sw, nodes.LINE_H() - 2 * nodes.SCALE(), col);
 		}
 		ui._y += nodes.LINE_H();
@@ -2868,7 +2869,7 @@ class NodesMaterial {
 		else if (val[4] < 0.0) val[4] = 0.0;
 
 		var chandle = nhandle.nest(0).nest(4);
-		chandle.color = kha.Color.fromFloats(val[0], val[1], val[2]);
+		chandle.color = Color.fromFloats(val[0], val[1], val[2]);
 		if (ui.text("", Right, chandle.color) == Started) {
 			var rx = nx + ui._w - nodes.p(37);
 			var ry = ny - nodes.p(5);

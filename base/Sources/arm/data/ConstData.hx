@@ -1,7 +1,6 @@
 package arm.data;
 
-import kha.Image.TextureFormat;
-import kha.Image;
+import iron.System;
 import iron.data.Data;
 import iron.system.ArmPack;
 

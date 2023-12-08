@@ -1,5 +1,6 @@
 package arm;
 
+import iron.System;
 import arm.sys.Path;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
@@ -163,7 +164,7 @@ class Args {
 							}
 
 							iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
-								BoxExport.preset = haxe.Json.parse(kha.System.bufferToString(blob));
+								BoxExport.preset = haxe.Json.parse(System.bufferToString(blob));
 								iron.data.Data.deleteBlob("export_presets/" + file);
 							});
 
@@ -203,7 +204,7 @@ class Args {
 				}
 				#end
 
-				if (background) kha.System.stop();
+				if (background) System.stop();
 			});
 		}
 	}

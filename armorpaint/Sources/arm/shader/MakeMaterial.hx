@@ -3,6 +3,7 @@ package arm.shader;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
+import iron.System;
 import iron.data.SceneFormat;
 import iron.data.ShaderData;
 import iron.data.MaterialData;
@@ -194,7 +195,7 @@ class MakeMaterial {
 		if (!getMOut()) return;
 
 		if (bakePreviews) {
-			var current = @:privateAccess kha.Graphics2.current;
+			var current = @:privateAccess Graphics2.current;
 			if (current != null) current.end();
 			bakeNodePreviews();
 			if (current != null) current.begin(false);
@@ -279,7 +280,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY);
+				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}
 
@@ -295,7 +296,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY);
+				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}
 
@@ -311,7 +312,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY, kha.Image.TextureFormat.R8);
+				image = Image.createRenderTarget(resX, resY, TextureFormat.R8);
 				Context.raw.nodePreviews.set(id, image);
 			}
 

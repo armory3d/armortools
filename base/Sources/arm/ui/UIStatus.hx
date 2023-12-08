@@ -1,6 +1,6 @@
 package arm.ui;
 
-import kha.System;
+import iron.System;
 import zui.Zui;
 
 class UIStatus {
@@ -13,7 +13,7 @@ class UIStatus {
 	}
 
 	@:access(zui.Zui)
-	public function renderUI(g: kha.Graphics2) {
+	public function renderUI(g: Graphics2) {
 		var ui = UIBase.inst.ui;
 
 		var statush = Config.raw.layout[LayoutStatusH];

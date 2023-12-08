@@ -1,7 +1,6 @@
 package arm.data;
 
-import kha.Image;
-import kha.Font;
+import iron.System;
 
 class FontSlot {
 	public var image: Image = null; // 200px

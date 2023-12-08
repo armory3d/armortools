@@ -2,7 +2,7 @@ package arm.ui;
 
 import haxe.io.Bytes;
 import haxe.Json;
-import kha.System;
+import iron.System;
 import zui.Zui;
 import iron.Scene;
 import iron.system.Input;
@@ -30,7 +30,7 @@ class UIMenu {
 	static var showMenuFirst = true;
 	static var hideMenu = false;
 
-	public static function render(g: kha.Graphics2) {
+	public static function render(g: Graphics2) {
 		var ui = App.uiMenu;
 		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.3) : Std.int(ui.ELEMENT_W() * 2.3);
 		var _BUTTON_COL = ui.t.BUTTON_COL;

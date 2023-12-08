@@ -1,6 +1,6 @@
 package arm.io;
 
-import kha.Image;
+import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import zui.Zui.TNode;
@@ -17,8 +17,6 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
 #if (is_paint || is_sculpt)
-import kha.Image.TextureFormat;
-import kha.Image.DepthStencilFormat;
 import iron.data.MaterialData;
 import iron.system.Lz4;
 import iron.object.MeshObject;
@@ -68,9 +66,9 @@ class ImportArm {
 			Project.filepath = path;
 			UIFiles.filename = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 			#if (krom_android || krom_ios)
-			kha.System.title = UIFiles.filename;
+			System.title = UIFiles.filename;
 			#else
-			kha.System.title = UIFiles.filename + " - " + Manifest.title;
+			System.title = UIFiles.filename + " - " + Manifest.title;
 			#end
 
 			#if (is_paint || is_sculpt)
@@ -247,11 +245,11 @@ class ImportArm {
 				if (!isGroup) {
 					if (App.pipeMerge == null) App.makePipe();
 
-					var _texpaint: kha.Image = null;
+					var _texpaint: Image = null;
 
 					#if is_paint
-					var _texpaint_nor: kha.Image = null;
-					var _texpaint_pack: kha.Image = null;
+					var _texpaint_nor: Image = null;
+					var _texpaint_pack: Image = null;
 					#end
 
 					if (isMask) {
@@ -628,7 +626,7 @@ class ImportArm {
 				if (!Project.packedAssetExists(Project.raw.packed_assets, pa.name)) {
 					Project.raw.packed_assets.push(pa);
 				}
-				kha.Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", function(image: kha.Image) {
+				Image.fromEncodedBytes(pa.bytes, pa.name.endsWith(".jpg") ? ".jpg" : ".png", function(image: Image) {
 					Data.cachedImages.set(abs, image);
 				}, null, false);
 				break;
