@@ -1,5 +1,7 @@
 package arm.geom;
 
+import iron.Vec4;
+
 class UVSphere {
 
 	public var posa: js.lib.Int16Array = null;
@@ -25,7 +27,7 @@ class UVSphere {
 		texa = new js.lib.Int16Array(widthVerts * heightVerts * 2);
 		inda = new js.lib.Uint32Array(widthSegments * heightSegments * 6 - widthSegments * 6);
 
-		var nor = new iron.math.Vec4();
+		var nor = new Vec4();
 		var pos = 0;
 		for (y in 0...heightVerts) {
 			var v = y / heightSegments;

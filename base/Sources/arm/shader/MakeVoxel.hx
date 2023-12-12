@@ -1,7 +1,7 @@
 package arm.shader;
 
 import iron.System;
-import iron.data.ShaderData;
+import iron.ShaderData;
 
 class MakeVoxel {
 

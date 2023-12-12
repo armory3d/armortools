@@ -1,12 +1,12 @@
 package arm.ui;
 
 import iron.System;
+import iron.Data;
 import zui.Zui;
 import arm.io.ImportArm;
 import arm.sys.Path;
 import arm.sys.File;
 
-@:access(zui.Zui)
 class BoxProjects {
 
 	public static var htab = new Handle();
@@ -16,7 +16,7 @@ class BoxProjects {
 	public static function show() {
 		if (iconMap != null) {
 			for (handle in iconMap.keys()) {
-				iron.data.Data.deleteImage(handle);
+				Data.deleteImage(handle);
 			}
 			iconMap = null;
 		}
@@ -88,8 +88,8 @@ class BoxProjects {
 					var imgw = Std.int(128 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= recent_projects.length) {
-						@:privateAccess ui.endElement(imgw);
-						if (show_asset_names) @:privateAccess ui.endElement(0);
+						ui.endElement(imgw);
+						if (show_asset_names) ui.endElement(0);
 						continue;
 					}
 
@@ -105,7 +105,7 @@ class BoxProjects {
 					if (iconMap == null) iconMap = [];
 					var icon = iconMap.get(iconPath);
 					if (icon == null) {
-						iron.data.Data.getImage(iconPath, function(image: Image) {
+						Data.getImage(iconPath, function(image: Image) {
 							icon = image;
 							iconMap.set(iconPath, icon);
 						});
@@ -129,9 +129,9 @@ class BoxProjects {
 							}
 
 							#if (krom_android || krom_ios)
-							arm.App.notifyOnNextFrame(function() {
+							Base.notifyOnNextFrame(function() {
 								Console.toast(tr("Opening project"));
-								arm.App.notifyOnNextFrame(doImport);
+								Base.notifyOnNextFrame(doImport);
 							});
 							#else
 							doImport();
@@ -166,8 +166,8 @@ class BoxProjects {
 						}
 					}
 					else {
-						@:privateAccess ui.endElement(0);
-						if (show_asset_names) @:privateAccess ui.endElement(0);
+						ui.endElement(0);
+						if (show_asset_names) ui.endElement(0);
 						ui._x = uix;
 					}
 				}
@@ -198,7 +198,7 @@ class BoxProjects {
 				if (file.toLowerCase().indexOf(hsearch.text.toLowerCase()) < 0) continue; // Search filter
 
 				if (ui.button(file, Left) && arm.sys.File.exists(path)) {
-					var current = @:privateAccess Graphics2.current;
+					var current = Graphics2.current;
 					if (current != null) current.end();
 
 					ImportArm.runProject(path);
@@ -223,7 +223,7 @@ class BoxProjects {
 	}
 
 	static function drawBadge(ui: Zui) {
-		iron.data.Data.getImage("badge.k", function(img) {
+		Data.getImage("badge.k", function(img) {
 			ui.image(img);
 			ui.endElement();
 		});
@@ -244,8 +244,8 @@ class BoxProjects {
 	}
 
 	static function alignToFullScreen() {
-		@:privateAccess UIBox.modalW = Std.int(System.width / App.uiBox.SCALE());
-		@:privateAccess UIBox.modalH = Std.int(System.height / App.uiBox.SCALE());
+		UIBox.modalW = Std.int(System.width / Base.uiBox.SCALE());
+		UIBox.modalH = Std.int(System.height / Base.uiBox.SCALE());
 		var appw = System.width;
 		var apph = System.height;
 		var mw = appw;

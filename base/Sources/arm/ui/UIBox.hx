@@ -2,9 +2,9 @@ package arm.ui;
 
 import zui.Zui;
 import iron.System;
-import iron.system.Input;
+import iron.Input;
+import iron.Tween;
 
-@:access(zui.Zui)
 class UIBox {
 
 	public static var show = false;
@@ -14,8 +14,8 @@ class UIBox {
 	public static var boxText = "";
 	public static var boxCommands: Zui->Void = null;
 	public static var clickToHide = true;
-	static var modalW = 400;
-	static var modalH = 170;
+	public static var modalW = 400;
+	public static var modalH = 170;
 	static var modalOnHide: Void->Void = null;
 	static var draws = 0;
 	static var copyable = false;
@@ -27,7 +27,7 @@ class UIBox {
 		if (!UIMenu.show) {
 			var mouse = Input.getMouse();
 			var kb = Input.getKeyboard();
-			var ui = App.uiBox;
+			var ui = Base.uiBox;
 			var inUse = ui.comboSelectedHandle_ptr != null;
 			var isEscape = kb.started("escape");
 			if (draws > 2 && (ui.inputReleased || isEscape) && !inUse && !ui.isTyping) {
@@ -58,7 +58,7 @@ class UIBox {
 
 		g.end();
 
-		var ui = App.uiBox;
+		var ui = Base.uiBox;
 		var appw = System.width;
 		var apph = System.height;
 		var mw = Std.int(modalW * ui.SCALE());
@@ -155,20 +155,20 @@ class UIBox {
 	static function hideInternal() {
 		if (modalOnHide != null) modalOnHide();
 		show = false;
-		App.redrawUI();
+		Base.redrawUI();
 	}
 
 	#if (krom_android || krom_ios)
 	static function tweenIn() {
-		iron.system.Tween.reset();
-		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut});
+		Tween.reset();
+		Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Tween.Ease.ExpoOut});
 		UIBox.hwnd.dragY = Std.int(System.height / 2);
-		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
+		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
 	}
 
 	static function tweenOut() {
-		iron.system.Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn, done: hideInternal});
-		iron.system.Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: iron.system.Tween.Ease.ExpoIn});
+		Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Tween.Ease.ExpoIn, done: hideInternal});
+		Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: Tween.Ease.ExpoIn});
 	}
 	#end
 

@@ -1,6 +1,8 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
+import iron.Data;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -9,24 +11,24 @@ import arm.Translator._tr;
 class TextToPhotoNode extends LogicNode {
 
 	static var prompt = "";
-	static var image: kha.Image = null;
-	static var tiling = false;
+	static var image: Image = null;
+	public static var tiling = false;
 	static var text_encoder_blob : js.lib.ArrayBuffer;
 	static var unet_blob : js.lib.ArrayBuffer;
 	static var vae_decoder_blob : js.lib.ArrayBuffer;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
-		stableDiffusion(prompt, function(_image: kha.Image) {
+	override function getAsImage(from: Int, done: Image->Void) {
+		stableDiffusion(prompt, function(_image: Image) {
 			image = _image;
 			done(image);
 		});
 	}
 
-	override public function getCachedImage(): kha.Image {
+	override public function getCachedImage(): Image {
 		return image;
 	}
 
@@ -36,10 +38,10 @@ class TextToPhotoNode extends LogicNode {
 		node.buttons[1].height = prompt.split("\n").length;
 	}
 
-	public static function stableDiffusion(prompt: String, done: kha.Image->Void, inpaintLatents: js.lib.Float32Array = null, offset = 0, upscale = true, mask: js.lib.Float32Array = null, latents_orig: js.lib.Float32Array = null) {
-		iron.data.Data.getBlob("models/sd_text_encoder.quant.onnx", function(_text_encoder_blob: js.lib.ArrayBuffer) {
-		iron.data.Data.getBlob("models/sd_unet.quant.onnx", function(_unet_blob: js.lib.ArrayBuffer) {
-		iron.data.Data.getBlob("models/sd_vae_decoder.quant.onnx", function(_vae_decoder_blob: js.lib.ArrayBuffer) {
+	public static function stableDiffusion(prompt: String, done: Image->Void, inpaintLatents: js.lib.Float32Array = null, offset = 0, upscale = true, mask: js.lib.Float32Array = null, latents_orig: js.lib.Float32Array = null) {
+		Data.getBlob("models/sd_text_encoder.quant.onnx", function(_text_encoder_blob: js.lib.ArrayBuffer) {
+		Data.getBlob("models/sd_unet.quant.onnx", function(_unet_blob: js.lib.ArrayBuffer) {
+		Data.getBlob("models/sd_vae_decoder.quant.onnx", function(_vae_decoder_blob: js.lib.ArrayBuffer) {
 			text_encoder_blob = _text_encoder_blob;
 			unet_blob = _unet_blob;
 			vae_decoder_blob = _vae_decoder_blob;
@@ -55,7 +57,7 @@ class TextToPhotoNode extends LogicNode {
 
 	static function textEncoder(prompt: String, inpaintLatents: js.lib.Float32Array, done: js.lib.Float32Array->js.lib.Float32Array->Void) {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
-		App.notifyOnNextFrame(function() {
+		Base.notifyOnNextFrame(function() {
 			var words = prompt.replace("\n", " ").replace(",", " , ").replace("  ", " ").trim().split(" ");
 			for (i in 0...words.length) {
 				text_input_ids[i + 1] = untyped vocab[words[i].toLowerCase() + "</w>"];
@@ -202,9 +204,9 @@ class TextToPhotoNode extends LogicNode {
 		iron.App.notifyOnRender2D(processing);
 	}
 
-	static function vaeDecoder(latents: js.lib.Float32Array, upscale: Bool, done: kha.Image->Void) {
+	static function vaeDecoder(latents: js.lib.Float32Array, upscale: Bool, done: Image->Void) {
 		Console.progress(tr("Processing") + " - " + tr("Text to Photo"));
-		App.notifyOnNextFrame(function() {
+		Base.notifyOnNextFrame(function() {
 			for (i in 0...latents.length) {
 				latents[i] = 1.0 / 0.18215 * latents[i];
 			}
@@ -225,10 +227,10 @@ class TextToPhotoNode extends LogicNode {
 				u8[i * 4 + 2] = Std.int(pyimage[i + 512 * 512 * 2] * 255);
 				u8[i * 4 + 3] = 255;
 			}
-			var image = kha.Image.fromBytes(u8.buffer, 512, 512);
+			var image = Image.fromBytes(u8.buffer, 512, 512);
 
 			if (tiling) {
-				@:privateAccess TilingNode.prompt = prompt;
+				TilingNode.prompt = prompt;
 				var seed = RandomNode.getSeed();
 				TilingNode.sdTiling(image, seed, done);
 			}
@@ -301,7 +303,7 @@ class TextToPhotoNode extends LogicNode {
 		49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
 		49407, 49407, 49407, 49407, 49407];
 
-	static var alphas_cumprod = [0.99915, 0.998296, 0.9974381, 0.99657613, 0.99571025, 0.9948404,
+	public static var alphas_cumprod = [0.99915, 0.998296, 0.9974381, 0.99657613, 0.99571025, 0.9948404,
 		0.9939665,  0.99308866, 0.9922069,  0.9913211,  0.9904313,  0.98953754,
 		0.9886398,  0.9877381,  0.9868324,  0.9859227,  0.985009,   0.98409134,
 		0.9831697,  0.982244,   0.98131436, 0.9803807,  0.97944313, 0.97850156,
@@ -469,7 +471,7 @@ class TextToPhotoNode extends LogicNode {
 		0.00519163, 0.00513006, 0.00506913, 0.00500883, 0.00494917, 0.00489013,
 		0.0048317,  0.00477389, 0.00471669, 0.00466009];
 
-	static var timesteps = [981, 961, 961, 941, 921, 901, 881, 861, 841, 821, 801, 781, 761, 741, 721, 701, 681, 661,
+	public static var timesteps = [981, 961, 961, 941, 921, 901, 881, 861, 841, 821, 801, 781, 761, 741, 721, 701, 681, 661,
 		641, 621, 601, 581, 561, 541, 521, 501, 481, 461, 441, 421, 401, 381, 361, 341, 321, 301,
 		281, 261, 241, 221, 201, 181, 161, 141, 121, 101, 81, 61, 41, 21, 1];
 

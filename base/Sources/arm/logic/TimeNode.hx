@@ -1,5 +1,6 @@
 package arm.logic;
 
+import iron.Time;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import arm.logic.LogicNode;
@@ -8,13 +9,13 @@ import arm.Translator._tr;
 @:keep
 class TimeNode extends LogicNode {
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {
-		if (from == 0) done(iron.system.Time.time());
-		else if (from == 1) done(iron.system.Time.delta);
+		if (from == 0) done(Time.time());
+		else if (from == 1) done(Time.delta);
 		else done(Context.raw.brushTime);
 	}
 

@@ -3,10 +3,10 @@ package arm.ui;
 import haxe.Json;
 import zui.Zui;
 import zui.Zui.Nodes;
-import iron.system.Input.KeyCode;
+import iron.Input;
 import iron.System;
-import iron.system.Input;
-import iron.system.Time;
+import iron.Input;
+import iron.Time;
 import arm.shader.NodesMaterial;
 import arm.logic.NodesBrush;
 import arm.ui.UIHeader;
@@ -67,7 +67,7 @@ class UINodes {
 		Nodes.onCanvasControl = onCanvasControl;
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.colorWheelGradient, scaleFactor: scale });
+		ui = new Zui({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
 		ui.scrollEnabled = false;
 	}
 
@@ -109,7 +109,7 @@ class UINodes {
 						getCanvas(true).links.push(linkDrag);
 					}
 					#if is_lab
-					arm.logic.LogicParser.parse(getCanvas(true), false);
+					arm.logic.LogicParser.parse(getCanvas(true));
 					Context.raw.rdirty = 5;
 					#end
 				});
@@ -131,7 +131,7 @@ class UINodes {
 		var node = nodes.getNode(canvas.nodes, socket.node_id);
 		if (ui.inputReleasedR) {
 			if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
-				App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Edit"))) {
 							var htype = Zui.handle("uinodes_0");
@@ -155,8 +155,8 @@ class UINodes {
 								}
 							}
 							else hval0.value = socket.default_value;
-							App.notifyOnNextFrame(function() {
-								App.uiBox.endInput();
+							Base.notifyOnNextFrame(function() {
+								Base.uiBox.endInput();
 								UIBox.showCustom(function(ui: Zui) {
 									if (ui.tab(Zui.handle("uinodes_8"), tr("Socket"))) {
 										var type = ui.combo(htype, [tr("Color"), tr("Vector"), tr("Value")], tr("Type"), true);
@@ -269,7 +269,7 @@ class UINodes {
 									selected.type == "BrushOutputNode";
 					uiMenu.enabled = !protected;
 					if (UIMenu.menuButton(uiMenu, tr("Cut"), "ctrl+x")) {
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isCopy = true;
 							Zui.isCut = true;
@@ -277,14 +277,14 @@ class UINodes {
 						});
 					}
 					if (UIMenu.menuButton(uiMenu, tr("Copy"), "ctrl+c")) {
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							Zui.isCopy = true;
 							isNodeMenuOperation = true;
 						});
 					}
 					uiMenu.enabled = Nodes.clipboard != "";
 					if (UIMenu.menuButton(uiMenu, tr("Paste"), "ctrl+v")) {
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isPaste = true;
 							isNodeMenuOperation = true;
@@ -292,14 +292,14 @@ class UINodes {
 					}
 					uiMenu.enabled = !protected;
 					if (UIMenu.menuButton(uiMenu, tr("Delete"), "delete")) {
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							ui.isDeleteDown = true;
 							isNodeMenuOperation = true;
 						});
 					}
 					if (UIMenu.menuButton(uiMenu, tr("Duplicate"))) {
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							hwnd.redraws = 2;
 							Zui.isCopy = true;
 							Zui.isPaste = true;
@@ -376,19 +376,19 @@ class UINodes {
 	public static function getCanvasControl(ui: Zui, parent: Dynamic): zui.Zui.CanvasControl {
 		if (Config.raw.wrap_mouse && parent.controlsDown) {
 			if (ui.inputX < ui._windowX) {
-				@:privateAccess ui.inputX = ui._windowX + ui._windowW;
+				ui.inputX = ui._windowX + ui._windowW;
 				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputX > ui._windowX + ui._windowW) {
-				@:privateAccess ui.inputX = ui._windowX;
+				ui.inputX = ui._windowX;
 				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputY < ui._windowY) {
-				@:privateAccess ui.inputY = ui._windowY + ui._windowH;
+				ui.inputY = ui._windowY + ui._windowH;
 				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 			else if (ui.inputY > ui._windowY + ui._windowH) {
-				@:privateAccess ui.inputY = ui._windowY;
+				ui.inputY = ui._windowY;
 				Krom.setMousePosition(Std.int(ui.inputX), Std.int(ui.inputY));
 			}
 		}
@@ -420,7 +420,7 @@ class UINodes {
 			panY: pan ? ui.inputDY : 0.0,
 			zoom: ui.inputWheelDelta != 0.0 ? -ui.inputWheelDelta / 10 : zoomDelta
 		};
-		if (App.isComboSelected()) control.zoom = 0.0;
+		if (Base.isComboSelected()) control.zoom = 0.0;
 		return control;
 	}
 
@@ -468,7 +468,7 @@ class UINodes {
 	}
 
 	public function update() {
-		if (!show || !App.uiEnabled) return;
+		if (!show || !Base.uiEnabled) return;
 
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
@@ -575,7 +575,7 @@ class UINodes {
 							nodes.nodesDrag = true;
 
 							#if is_lab
-							arm.logic.LogicParser.parse(canvas, false);
+							arm.logic.LogicParser.parse(canvas);
 							#end
 
 							hwnd.redraws = 2;
@@ -656,7 +656,7 @@ class UINodes {
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			}
 			else {
-				App.isFillMaterial() ? App.updateFillLayers() : RenderUtil.makeMaterialPreview();
+				Base.isFillMaterial() ? Base.updateFillLayers() : RenderUtil.makeMaterialPreview();
 				if (UIView2D.inst.show && UIView2D.inst.type == View2DNode) {
 					UIView2D.inst.hwnd.redraws = 2;
 				}
@@ -667,7 +667,7 @@ class UINodes {
 			#end
 
 			#if is_lab
-			arm.logic.LogicParser.parse(Project.canvas, false);
+			arm.logic.LogicParser.parse(Project.canvas);
 			#end
 
 			recompileMat = false;
@@ -676,8 +676,8 @@ class UINodes {
 			#if (is_paint || is_sculpt)
 			MakeMaterial.parsePaintMaterial();
 
-			if (canvasType == CanvasMaterial && App.isFillMaterial()) {
-				App.updateFillLayers();
+			if (canvasType == CanvasMaterial && Base.isFillMaterial()) {
+				Base.updateFillLayers();
 				RenderUtil.makeMaterialPreview();
 			}
 
@@ -716,7 +716,7 @@ class UINodes {
 
 		if (!show || System.width == 0 || System.height == 0) return;
 
-		ui.inputEnabled = App.uiEnabled;
+		ui.inputEnabled = Base.uiEnabled;
 
 		g.end();
 
@@ -1096,7 +1096,7 @@ class UINodes {
 					nodes.nodesSelectedId = [node.id];
 					nodes.nodesDrag = true;
 					#if is_lab
-					arm.logic.LogicParser.parse(canvas, false);
+					arm.logic.LogicParser.parse(canvas);
 					#end
 				}
 				// Next column
@@ -1210,7 +1210,7 @@ class UINodes {
 		getNodes().nodesSelectedId = [n.id];
 
 		#if is_lab
-		arm.logic.LogicParser.parse(Project.canvas, false);
+		arm.logic.LogicParser.parse(Project.canvas);
 		#end
 	}
 

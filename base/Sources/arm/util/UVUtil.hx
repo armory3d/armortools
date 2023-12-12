@@ -126,7 +126,7 @@ class UVUtil {
 
 		var mask = Context.objectMaskUsed() ? Context.raw.layer.getObjectMask() : 0;
 		if (Context.layerFilterUsed()) mask = Context.raw.layerFilter;
-		var geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data.geom : Context.raw.paintObject.data.geom;
+		var geom = mask == 0 && Context.raw.mergedObject != null ? Context.raw.mergedObject.data : Context.raw.paintObject.data;
 		var g4 = dilatemap.g4;
 		g4.begin();
 		g4.clear(0x00000000);

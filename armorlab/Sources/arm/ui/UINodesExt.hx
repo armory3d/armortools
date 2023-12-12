@@ -2,8 +2,12 @@ package arm.ui;
 
 import js.lib.DataView;
 import js.lib.ArrayBuffer;
+import iron.System;
+import iron.Time;
+import iron.Scene;
+import iron.RenderPath;
+import iron.ConstData;
 
-@:access(zui.Zui)
 class UINodesExt {
 
 	static var lastVertices: DataView = null; // Before displacement
@@ -33,40 +37,40 @@ class UINodesExt {
 				}
 			}
 
-			App.notifyOnNextFrame(function() {
-				var timer = iron.system.Time.time();
-				arm.logic.LogicParser.parse(Project.canvas, false);
+			Base.notifyOnNextFrame(function() {
+				var timer = Time.time();
+				arm.logic.LogicParser.parse(Project.canvas);
 
 				arm.logic.PhotoToPBRNode.cachedSource = null;
-				@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelBaseColor, function(texbase: kha.Image) {
-				@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelOcclusion, function(texocc: kha.Image) {
-				@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelRoughness, function(texrough: kha.Image) {
-				@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelNormalMap, function(texnor: kha.Image) {
-				@:privateAccess arm.logic.BrushOutputNode.inst.getAsImage(ChannelHeight, function(texheight: kha.Image) {
+				arm.logic.BrushOutputNode.inst.getAsImage(ChannelBaseColor, function(texbase: Image) {
+				arm.logic.BrushOutputNode.inst.getAsImage(ChannelOcclusion, function(texocc: Image) {
+				arm.logic.BrushOutputNode.inst.getAsImage(ChannelRoughness, function(texrough: Image) {
+				arm.logic.BrushOutputNode.inst.getAsImage(ChannelNormalMap, function(texnor: Image) {
+				arm.logic.BrushOutputNode.inst.getAsImage(ChannelHeight, function(texheight: Image) {
 
 					if (texbase != null) {
-						var texpaint = iron.RenderPath.active.renderTargets.get("texpaint").image;
+						var texpaint = RenderPath.active.renderTargets.get("texpaint").image;
 						texpaint.g2.begin(false);
 						texpaint.g2.drawScaledImage(texbase, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint.g2.end();
 					}
 
 					if (texnor != null) {
-						var texpaint_nor = iron.RenderPath.active.renderTargets.get("texpaint_nor").image;
+						var texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image;
 						texpaint_nor.g2.begin(false);
 						texpaint_nor.g2.drawScaledImage(texnor, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint_nor.g2.end();
 					}
 
-					if (App.pipeCopy == null) App.makePipe();
-					if (App.pipeCopyA == null) App.makePipeCopyA();
-					if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+					if (Base.pipeCopy == null) Base.makePipe();
+					if (Base.pipeCopyA == null) Base.makePipeCopyA();
+					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 
-					var texpaint_pack = iron.RenderPath.active.renderTargets.get("texpaint_pack").image;
+					var texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image;
 
 					if (texocc != null) {
 						texpaint_pack.g2.begin(false);
-						texpaint_pack.g2.pipeline = App.pipeCopyR;
+						texpaint_pack.g2.pipeline = Base.pipeCopyR;
 						texpaint_pack.g2.drawScaledImage(texocc, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint_pack.g2.pipeline = null;
 						texpaint_pack.g2.end();
@@ -74,7 +78,7 @@ class UINodesExt {
 
 					if (texrough != null) {
 						texpaint_pack.g2.begin(false);
-						texpaint_pack.g2.pipeline = App.pipeCopyG;
+						texpaint_pack.g2.pipeline = Base.pipeCopyG;
 						texpaint_pack.g2.drawScaledImage(texrough, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 						texpaint_pack.g2.pipeline = null;
 						texpaint_pack.g2.end();
@@ -82,19 +86,19 @@ class UINodesExt {
 
 					if (texheight != null) {
 						texpaint_pack.g4.begin();
-						texpaint_pack.g4.setPipeline(App.pipeCopyA);
-						texpaint_pack.g4.setTexture(App.pipeCopyATex, texheight);
-						texpaint_pack.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-						texpaint_pack.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+						texpaint_pack.g4.setPipeline(Base.pipeCopyA);
+						texpaint_pack.g4.setTexture(Base.pipeCopyATex, texheight);
+						texpaint_pack.g4.setVertexBuffer(ConstData.screenAlignedVB);
+						texpaint_pack.g4.setIndexBuffer(ConstData.screenAlignedIB);
 						texpaint_pack.g4.drawIndexedVertices();
 						texpaint_pack.g4.end();
 
 						if (UIHeader.inst.worktab.position == Space3D &&
-							!Std.isOfType(@:privateAccess arm.logic.BrushOutputNode.inst.inputs[ChannelHeight].node, arm.logic.FloatNode)) {
+							!Std.isOfType(arm.logic.BrushOutputNode.inst.inputs[ChannelHeight].node, arm.logic.FloatNode)) {
 
 							// Make copy of vertices before displacement
 							var o = Project.paintObjects[0];
-							var g = o.data.geom;
+							var g = o.data;
 							var vertices = g.vertexBuffer.lock();
 							if (lastVertices == null || lastVertices.byteLength != vertices.byteLength) {
 								lastVertices = new DataView(new ArrayBuffer(vertices.byteLength));
@@ -112,10 +116,10 @@ class UINodesExt {
 							// Apply displacement
 							if (Config.raw.displace_strength > 0) {
 								tasks++;
-								arm.App.notifyOnNextFrame(function() {
+								Base.notifyOnNextFrame(function() {
 									Console.progress(tr("Apply Displacement"));
-									arm.App.notifyOnNextFrame(function() {
-										var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+									Base.notifyOnNextFrame(function() {
+										var uv_scale = Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
 										arm.util.MeshUtil.applyDisplacement(texpaint_pack, 0.05 * Config.raw.displace_strength, uv_scale);
 										arm.util.MeshUtil.calcNormals();
 										taskDone();
@@ -125,7 +129,7 @@ class UINodesExt {
 						}
 					}
 
-					Console.log("Processing finished in " + (iron.system.Time.time() - timer));
+					Console.log("Processing finished in " + (Time.time() - timer));
 					Krom.mlUnload();
 
 					taskDone();
@@ -140,12 +144,12 @@ class UINodesExt {
 		ui._y = 2 + startY;
 
 		#if (krom_android || krom_ios)
-		ui.combo(App.resHandle, ["2K", "4K"], tr("Resolution"));
+		ui.combo(Base.resHandle, ["2K", "4K"], tr("Resolution"));
 		#else
-		ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
+		ui.combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"));
 		#end
-		if (App.resHandle.changed) {
-			App.onLayersResized();
+		if (Base.resHandle.changed) {
+			Base.onLayersResized();
 		}
 		ui._x += ew + 3;
 		ui._y = 2 + startY;

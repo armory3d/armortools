@@ -1,6 +1,6 @@
 package arm.logic;
 
-import iron.math.Vec4;
+import iron.Vec4;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import arm.logic.LogicNode;
@@ -13,8 +13,8 @@ class VectorMathNode extends LogicNode {
 	public var operation: String;
 	var v = new Vec4();
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {

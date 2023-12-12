@@ -7,8 +7,8 @@ class StringNode extends LogicNode {
 
 	public var value: String;
 
-	public function new(tree: LogicTree, value = "") {
-		super(tree);
+	public function new(value = "") {
+		super();
 		this.value = value;
 	}
 

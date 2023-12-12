@@ -1,6 +1,6 @@
 package arm.io;
 
-import iron.object.MeshObject;
+import iron.MeshObject;
 
 class ExportMesh {
 

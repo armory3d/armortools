@@ -8,9 +8,10 @@ let r = new R();
 // import_gltf_glb.js
 let import_gltf_glb = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let buf_off = a._init(b.bytes.length); //// Allocate r.buffer
-		let buf = new Uint8Array(r.buffer, buf_off, b.bytes.length);
-		for (let i = 0; i < b.bytes.length; ++i) buf[i] = b.readU8(i);
+		let buf_off = a._init(b.byteLength); //// Allocate r.buffer
+		let buf = new Uint8Array(r.buffer, buf_off, b.byteLength);
+		let bbuf = new Uint8Array(b);
+		for (let i = 0; i < b.byteLength; ++i) buf[i] = bbuf[i];
 		a._parse();
 		let vertex_count = a._get_vertex_count();
 		let index_count = a._get_index_count();

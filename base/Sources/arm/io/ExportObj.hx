@@ -1,7 +1,7 @@
 package arm.io;
 
 import js.lib.Int16Array;
-import iron.object.MeshObject;
+import iron.MeshObject;
 
 class ExportObj {
 

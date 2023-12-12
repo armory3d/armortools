@@ -21,22 +21,22 @@ import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
 import zui.Zui.TNodeLink;
 import zui.Zui.TNodeSocket;
-import iron.data.SceneFormat;
+import iron.SceneFormat;
 import arm.shader.NodeShader;
 
 class MaterialParser {
 
-	static var con: NodeShaderContext;
-	static var vert: NodeShader;
-	static var frag: NodeShader;
-	static var curshader: NodeShader;
-	static var matcon: TMaterialContext;
+	public static var con: NodeShaderContext;
+	public static var vert: NodeShader;
+	public static var frag: NodeShader;
+	public static var curshader: NodeShader;
+	public static var matcon: TMaterialContext;
 	static var parsed: Array<String>;
-	static var parents: Array<TNode>;
+	public static var parents: Array<TNode>;
 
-	static var canvases: Array<TNodeCanvas>;
-	static var nodes: Array<TNode>;
-	static var links: Array<TNodeLink>;
+	public static var canvases: Array<TNodeCanvas>;
+	public static var nodes: Array<TNode>;
+	public static var links: Array<TNodeLink>;
 
 	static var cotangentFrameWritten: Bool;
 	static var tex_coord = "texCoord";
@@ -106,7 +106,7 @@ class MaterialParser {
 		return ls;
 	}
 
-	static function init() {
+	public static function init() {
 		parsed = [];
 		parents = [];
 		cotangentFrameWritten = false;
@@ -278,13 +278,13 @@ class MaterialParser {
 		return null;
 	}
 
-	static function push_group(g: TNodeCanvas) {
+	public static function push_group(g: TNodeCanvas) {
 		canvases.push(g);
 		nodes = g.nodes;
 		links = g.links;
 	}
 
-	static function pop_group() {
+	public static function pop_group() {
 		canvases.pop();
 		var g = canvases[canvases.length - 1];
 		nodes = g.nodes;
@@ -1728,7 +1728,7 @@ class MaterialParser {
 	static var parsedMap = new Map<String, String>();
 	static var textureMap = new Map<String, String>();
 
-	static function write_result(l: TNodeLink): String {
+	public static function write_result(l: TNodeLink): String {
 		var from_node = getNode(l.from_id);
 		var from_socket = from_node.outputs[l.from_socket];
 		var res_var = res_var_name(from_node, from_socket);
@@ -1880,7 +1880,7 @@ class MaterialParser {
 
 	static function make_texture(image_node: TNode, tex_name: String, matname: String = null): TBindTexture {
 
-		var filepath = enumData(App.enumTexts(image_node.type)[image_node.buttons[0].default_value]);
+		var filepath = enumData(Base.enumTexts(image_node.type)[image_node.buttons[0].default_value]);
 		if (filepath == "" || filepath.indexOf(".") == -1) {
 			return null;
 		}

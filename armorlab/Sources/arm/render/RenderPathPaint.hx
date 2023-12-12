@@ -1,8 +1,9 @@
 package arm.render;
 
-import iron.math.Mat4;
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
+import iron.System;
+import iron.Mat4;
+import iron.MeshObject;
+import iron.SceneFormat;
 import iron.RenderPath;
 import iron.Scene;
 import arm.ui.UIHeader;
@@ -68,7 +69,6 @@ class RenderPathPaint {
 		path.loadShader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 	}
 
-	@:access(iron.RenderPath)
 	public static function commandsPaint(dilation = true) {
 		var tid = "";
 
@@ -179,7 +179,7 @@ class RenderPathPaint {
 		var canvas = UINodes.inst.getCanvas(true);
 		var inpaint = nodes.nodesSelectedId.length > 0 && nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]).type == "InpaintNode";
 
-		if (!App.uiEnabled || App.isDragging || !inpaint) {
+		if (!Base.uiEnabled || Base.isDragging || !inpaint) {
 			return;
 		}
 
@@ -193,30 +193,29 @@ class RenderPathPaint {
 		drawCursor(mx, my, radius / 3.4);
 	}
 
-	@:access(iron.RenderPath)
 	static function drawCursor(mx: Float, my: Float, radius: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
-		var geom = plane.data.geom;
+		var geom = plane.data;
 
 		var g = path.frameG;
-		if (App.pipeCursor == null) App.makeCursorPipe();
+		if (Base.pipeCursor == null) Base.makeCursorPipe();
 
 		path.setTarget("");
-		g.setPipeline(App.pipeCursor);
+		g.setPipeline(Base.pipeCursor);
 		var img = Res.get("cursor.k");
-		g.setTexture(App.cursorTex, img);
+		g.setTexture(Base.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
-		g.setTextureDepth(App.cursorGbufferD, gbuffer0);
-		g.setFloat2(App.cursorMouse, mx, my);
-		g.setFloat2(App.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(App.cursorRadius, radius);
+		g.setTextureDepth(Base.cursorGbufferD, gbuffer0);
+		g.setFloat2(Base.cursorMouse, mx, my);
+		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		g.setFloat(Base.cursorRadius, radius);
 		var right = Scene.active.camera.rightWorld().normalize();
-		g.setFloat3(App.cursorCameraRight, right.x, right.y, right.z);
-		g.setFloat3(App.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(App.cursorVP, Scene.active.camera.VP);
-		var helpMat = iron.math.Mat4.identity();
+		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
+		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
+		g.setMatrix(Base.cursorVP, Scene.active.camera.VP);
+		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
-		g.setMatrix(App.cursorInvVP, helpMat);
+		g.setMatrix(Base.cursorInvVP, helpMat);
 		#if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
@@ -266,7 +265,7 @@ class RenderPathPaint {
 	}
 
 	public static function bindLayers() {
-		var image: kha.Image = null;
+		var image: Image = null;
 		var nodes = UINodes.inst.getNodes();
 		var canvas = UINodes.inst.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {

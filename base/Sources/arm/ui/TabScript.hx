@@ -1,9 +1,9 @@
 package arm.ui;
 
-import haxe.io.Bytes;
+import haxe.Json;
 import zui.Zui;
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 import arm.sys.Path;
 
 class TabScript {
@@ -11,7 +11,6 @@ class TabScript {
 	public static var hscript = new Handle();
 	static var textColoring: TTextColoring = null;
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -50,7 +49,7 @@ class TabScript {
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".js")) path += ".js";
-					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
+					Krom.fileSaveBytes(path, System.stringToBuffer(str));
 				});
 			}
 			ui.endSticky();
@@ -74,7 +73,7 @@ class TabScript {
 	static function getTextColoring(): TTextColoring {
 		if (textColoring == null) {
 			Data.getBlob("text_coloring.json", function(blob: js.lib.ArrayBuffer) {
-				textColoring = haxe.Json.parse(System.bufferToString(blob));
+				textColoring = Json.parse(System.bufferToString(blob));
 				textColoring.default_color = Std.int(textColoring.default_color);
 				for (coloring in textColoring.colorings) coloring.color = Std.int(coloring.color);
 			});

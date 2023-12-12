@@ -1,24 +1,22 @@
 package;
 
 import iron.System;
-import iron.object.Object;
+import iron.Object;
 import iron.Scene;
 import iron.RenderPath;
 import arm.render.RenderPathBase;
 import arm.render.RenderPathForward;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathRaytrace;
-import arm.render.Uniforms;
-import arm.sys.BuildMacros;
+import arm.render.UniformsExt;
 import arm.Config;
 import arm.Context;
 import arm.Res;
+import arm.Base;
 
 class Main {
 
 	// @:keep static var snapshotHelper = js.Syntax.code("globalThis").Krom = {};
-	public static var sha = BuildMacros.sha().substr(1, 7);
-	public static var date = BuildMacros.date().split(" ")[0];
 	public static var tasks: Int;
 
 	public static function main() {
@@ -58,19 +56,19 @@ class Main {
 	public static function start() {
 		if (tasks > 0) return;
 
-		iron.App.onResize = arm.App.onResize;
-		iron.App.w = arm.App.w;
-		iron.App.h = arm.App.h;
-		iron.App.x = arm.App.x;
-		iron.App.y = arm.App.y;
+		iron.App.onResize = Base.onResize;
+		iron.App.w = Base.w;
+		iron.App.h = Base.h;
+		iron.App.x = Base.x;
+		iron.App.y = Base.y;
 
 		Config.init();
 		System.start(Config.getOptions(), function() {
-			if (Config.raw.layout == null) arm.App.initLayout();
+			if (Config.raw.layout == null) Base.initLayout();
 			Krom.setApplicationName(Manifest.title);
 			iron.App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
-					Uniforms.init();
+					UniformsExt.init();
 					var path = new RenderPath();
 					RenderPathBase.init(path);
 
@@ -85,7 +83,7 @@ class Main {
 					}
 
 					RenderPath.setActive(path);
-					new arm.App();
+					new Base();
 				});
 			});
 		});
@@ -134,7 +132,8 @@ class Main {
 			"noise256.k",
 			"smaa_search.k",
 			"smaa_area.k",
-			"text_coloring.json"
+			"text_coloring.json",
+			"version.json"
 		];
 		for (add in additional) files.push(add);
 		for (file in files) {

@@ -1,6 +1,8 @@
 package arm;
 
+import haxe.Json;
 import iron.System;
+import iron.Data;
 import arm.sys.Path;
 import arm.io.ImportAsset;
 import arm.io.ImportArm;
@@ -127,24 +129,24 @@ class Args {
 							// Applying the correct format type from args
 							if (exportTexturesType == "png") {
 								#if is_paint
-								App.bitsHandle.position = Bits8;
+								Base.bitsHandle.position = Bits8;
 								#end
 								Context.raw.formatType = FormatPng;
 							}
 							else if (exportTexturesType == "jpg") {
 								#if is_paint
-								App.bitsHandle.position = Bits8;
+								Base.bitsHandle.position = Bits8;
 								#end
 								Context.raw.formatType = FormatJpg;
 							}
 							else if (exportTexturesType == "exr16") {
 								#if is_paint
-								App.bitsHandle.position = Bits16;
+								Base.bitsHandle.position = Bits16;
 								#end
 							}
 							else if (exportTexturesType == "exr32") {
 								#if is_paint
-								App.bitsHandle.position = Bits32;
+								Base.bitsHandle.position = Bits32;
 								#end
 							}
 
@@ -163,9 +165,9 @@ class Args {
 								file = "export_presets/" + BoxExport.files[BoxExport.files.indexOf(f)] + ".json";
 							}
 
-							iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
-								BoxExport.preset = haxe.Json.parse(System.bufferToString(blob));
-								iron.data.Data.deleteBlob("export_presets/" + file);
+							Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
+								BoxExport.preset = Json.parse(System.bufferToString(blob));
+								Data.deleteBlob("export_presets/" + file);
 							});
 
 							// Export queue

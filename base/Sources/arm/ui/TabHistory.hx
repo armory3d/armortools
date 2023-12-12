@@ -6,7 +6,6 @@ import zui.Zui;
 
 class TabHistory {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		if (ui.tab(htab, tr("History"))) {

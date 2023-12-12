@@ -2,9 +2,9 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Zui.Nodes;
-import iron.data.Data;
-import iron.system.Time;
-import iron.system.Input;
+import iron.Data;
+import iron.Time;
+import iron.Input;
 import iron.System;
 import arm.io.ImportAsset;
 import arm.sys.Path;
@@ -13,7 +13,6 @@ import arm.ProjectFormat;
 
 class TabTextures {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -64,8 +63,8 @@ class TabTextures {
 						var imgw = Std.int(50 * ui.SCALE());
 						var i = j + row * num;
 						if (i >= Project.assets.length) {
-							@:privateAccess ui.endElement(imgw);
-							if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
+							ui.endElement(imgw);
+							if (Config.raw.show_asset_names) ui.endElement(0);
 							continue;
 						}
 
@@ -76,9 +75,9 @@ class TabTextures {
 						var sw = img.height < img.width ? img.height : 0;
 						if (ui.image(img, 0xffffffff, slotw, 0, 0, sw, sw) == State.Started && ui.inputY > ui._windowY) {
 							var mouse = Input.getMouse();
-							App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-							App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-							App.dragAsset = asset;
+							Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+							Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+							Base.dragAsset = asset;
 							Context.raw.texture = asset;
 
 							if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DAsset);
@@ -113,21 +112,21 @@ class TabTextures {
 							UIMenu.draw(function(ui: Zui) {
 								if (UIMenu.menuButton(ui, tr("Export"))) {
 									UIFiles.show("png", true, false, function(path: String) {
-										App.notifyOnNextFrame(function () {
+										Base.notifyOnNextFrame(function () {
 											#if (is_paint || is_sculpt)
-											if (App.pipeMerge == null) App.makePipe();
+											if (Base.pipeMerge == null) Base.makePipe();
 											#end
 											#if is_lab
-											if (App.pipeCopy == null) App.makePipe();
+											if (Base.pipeCopy == null) Base.makePipe();
 											#end
 
 											var target = Image.createRenderTarget(to_pow2(img.width), to_pow2(img.height));
 											target.g2.begin(false);
-											target.g2.pipeline = App.pipeCopy;
+											target.g2.pipeline = Base.pipeCopy;
 											target.g2.drawScaledImage(img, 0, 0, target.width, target.height);
 											target.g2.pipeline = null;
 											target.g2.end();
-											App.notifyOnNextFrame(function () {
+											Base.notifyOnNextFrame(function () {
 												var f = UIFiles.filename;
 												if (f == "") f = tr("untitled");
 												if (!f.endsWith(".png")) f += ".png";
@@ -143,14 +142,14 @@ class TabTextures {
 
 								#if (is_paint || is_sculpt)
 								if (UIMenu.menuButton(ui, tr("To Mask"))) {
-									App.notifyOnNextFrame(function() {
-										App.createImageMask(asset);
+									Base.notifyOnNextFrame(function() {
+										Base.createImageMask(asset);
 									});
 								}
 								#end
 
 								if (UIMenu.menuButton(ui, tr("Set as Envmap"))) {
-									App.notifyOnNextFrame(function() {
+									Base.notifyOnNextFrame(function() {
 										arm.io.ImportEnvmap.run(asset.file, img);
 									});
 								}
@@ -266,7 +265,7 @@ class TabTextures {
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			#end
 		}
-		App.notifyOnNextFrame(_next);
+		Base.notifyOnNextFrame(_next);
 
 		for (m in Project.materials) updateTexturePointers(m.canvas.nodes, i);
 		#if (is_paint || is_sculpt)

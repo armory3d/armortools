@@ -1,6 +1,8 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
+import iron.Data;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -8,13 +10,13 @@ import arm.Translator._tr;
 @:keep
 class VarianceNode extends LogicNode {
 
-	static var temp: kha.Image = null;
-	static var image: kha.Image = null;
+	static var temp: Image = null;
+	static var image: Image = null;
 	static var inst: VarianceNode = null;
 	static var prompt = "";
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		inst = this;
 
@@ -23,7 +25,7 @@ class VarianceNode extends LogicNode {
 
 	public static function init() {
 		if (temp == null) {
-			temp = kha.Image.createRenderTarget(512, 512);
+			temp = Image.createRenderTarget(512, 512);
 		}
 	}
 
@@ -32,10 +34,10 @@ class VarianceNode extends LogicNode {
 		node.buttons[0].height = prompt.split("\n").length;
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
 		var strength = untyped inst.inputs[1].node.value;
 
-		inst.inputs[0].getAsImage(function(source: kha.Image) {
+		inst.inputs[0].getAsImage(function(source: Image) {
 			temp.g2.begin(false);
 			temp.g2.drawScaledImage(source, 0, 0, 512, 512);
 			temp.g2.end();
@@ -50,8 +52,8 @@ class VarianceNode extends LogicNode {
 			}
 
 			Console.progress(tr("Processing") + " - " + tr("Variance"));
-			App.notifyOnNextFrame(function() {
-				iron.data.Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
+			Base.notifyOnNextFrame(function() {
+				Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
 					var latents_buf = Krom.mlInference(vae_encoder_blob, [f32.buffer], [[1, 3, 512, 512]], [1, 4, 64, 64], Config.raw.gpu_inference);
 					var latents = new js.lib.Float32Array(latents_buf);
 					for (i in 0...latents.length) {
@@ -62,8 +64,8 @@ class VarianceNode extends LogicNode {
 					for (i in 0...noise.length) noise[i] = Math.cos(2.0 * 3.14 * RandomNode.getFloat()) * Math.sqrt(-2.0 * Math.log(RandomNode.getFloat()));
 					var num_inference_steps = 50;
 					var init_timestep = Std.int(num_inference_steps * strength);
-					var timesteps = @:privateAccess TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-					var alphas_cumprod = @:privateAccess TextToPhotoNode.alphas_cumprod;
+					var timesteps = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
+					var alphas_cumprod = TextToPhotoNode.alphas_cumprod;
 					var sqrt_alpha_prod = Math.pow(alphas_cumprod[timesteps], 0.5);
 					var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timesteps], 0.5);
 					for (i in 0...latents.length) {
@@ -71,7 +73,7 @@ class VarianceNode extends LogicNode {
 					}
 					var t_start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(prompt, function(_image: kha.Image) {
+					TextToPhotoNode.stableDiffusion(prompt, function(_image: Image) {
 						image = _image;
 						done(image);
 					}, latents, t_start);
@@ -80,7 +82,7 @@ class VarianceNode extends LogicNode {
 		});
 	}
 
-	override public function getCachedImage(): kha.Image {
+	override public function getCachedImage(): Image {
 		return image;
 	}
 

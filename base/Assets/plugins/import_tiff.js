@@ -6,10 +6,10 @@ var UTIF={},pako=null;function log(){console.log(arguments)}!function(x,A){funct
 // Register as ArmorPaint plugin
 let import_tiff = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let ifds = UTIF.decode(b.bytes.b.bufferValue);
-		UTIF.decodeImage(b.bytes.b.bufferValue, ifds[0]);
+		let ifds = UTIF.decode(b);
+		UTIF.decodeImage(b, ifds[0]);
 		let rgba = UTIF.toRGBA8(ifds[0]);
-		let image = core.Image.fromBytes(core.Bytes.ofData(rgba.buffer), ifds[0].width, ifds[0].height);
+		let image = core.Image.fromBytes(rgba.buffer, ifds[0].width, ifds[0].height);
 		done(image);
 	});
 }

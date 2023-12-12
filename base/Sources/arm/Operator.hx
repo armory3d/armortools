@@ -1,6 +1,6 @@
 package arm;
 
-import iron.system.Input;
+import iron.Input;
 
 class Operator {
 

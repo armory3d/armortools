@@ -1,6 +1,6 @@
 package arm.ui;
 
-import iron.system.Input.KeyCode;
+import iron.Input;
 import zui.Zui;
 import arm.sys.File;
 import arm.sys.Path;
@@ -19,7 +19,6 @@ class TabBrowser {
 		UIBase.inst.htabs[TabStatus].position = 0;
 	}
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -101,7 +100,7 @@ class TabBrowser {
 						if (Path.isTexture(file)) {
 							if (UIMenu.menuButton(ui, tr("Set as Envmap"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
-									App.notifyOnNextFrame(function() {
+									Base.notifyOnNextFrame(function() {
 										var assetIndex = -1;
 										for (i in 0...Project.assets.length) {
 											if (Project.assets[i].file == file) {
@@ -119,7 +118,7 @@ class TabBrowser {
 							#if (is_paint || is_sculpt)
 							if (UIMenu.menuButton(ui, tr("Set as Mask"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
-									App.notifyOnNextFrame(function() {
+									Base.notifyOnNextFrame(function() {
 										var assetIndex = -1;
 										for (i in 0...Project.assets.length) {
 											if (Project.assets[i].file == file) {
@@ -128,7 +127,7 @@ class TabBrowser {
 											}
 										}
 										if (assetIndex != -1) {
-											App.createImageMask(Project.assets[assetIndex]);
+											Base.createImageMask(Project.assets[assetIndex]);
 										}
 									});
 								});
@@ -138,7 +137,7 @@ class TabBrowser {
 							#if is_paint
 							if (UIMenu.menuButton(ui, tr("Set as Color ID Map"))) {
 								ImportAsset.run(file, -1.0, -1.0, true, true, function() {
-									App.notifyOnNextFrame(function() {
+									Base.notifyOnNextFrame(function() {
 										var assetIndex = -1;
 										for (i in 0...Project.assets.length) {
 											if (Project.assets[i].file == file) {

@@ -1,9 +1,9 @@
 package arm.shader;
 
 import zui.Zui.Nodes;
-import iron.data.SceneFormat;
-import iron.data.ShaderData;
-import iron.data.MaterialData;
+import iron.SceneFormat;
+import iron.ShaderData;
+import iron.MaterialData;
 import arm.shader.NodeShaderData;
 
 class MakeMaterial {
@@ -118,7 +118,7 @@ class MakeMaterial {
 	}
 
 	static function deleteContext(c: ShaderContext) {
-		arm.App.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
+		Base.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
 			c.delete();
 		});
 	}

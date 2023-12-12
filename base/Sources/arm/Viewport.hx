@@ -1,7 +1,7 @@
 package arm;
 
 import js.lib.Float32Array;
-import iron.math.Vec4;
+import iron.Vec4;
 import iron.Scene;
 import arm.Camera;
 
@@ -10,12 +10,12 @@ class Viewport {
 	public static function scaleToBounds() {
 		var po = Context.raw.mergedObject == null ? Context.mainObject() : Context.raw.mergedObject;
 		var md = po.data;
-		md.geom.calculateAABB();
-		var r = Math.sqrt(md.geom.aabb.x * md.geom.aabb.x + md.geom.aabb.y * md.geom.aabb.y + md.geom.aabb.z * md.geom.aabb.z);
+		md.calculateAABB();
+		var r = Math.sqrt(md.aabb.x * md.aabb.x + md.aabb.y * md.aabb.y + md.aabb.z * md.aabb.z);
 		po = Context.mainObject();
-		po.transform.dim.x = md.geom.aabb.x;
-		po.transform.dim.y = md.geom.aabb.y;
-		po.transform.dim.z = md.geom.aabb.z;
+		po.transform.dim.x = md.aabb.x;
+		po.transform.dim.y = md.aabb.y;
+		po.transform.dim.z = md.aabb.z;
 		po.transform.scale.set(2 / r, 2 / r, 2 / r);
 		po.transform.loc.set(0, 0, 0);
 		po.transform.buildMatrix();
@@ -31,7 +31,7 @@ class Viewport {
 			if (o.type == "camera_object") {
 				cam.transform.local.setF32(o.transform.values);
 				cam.transform.decompose();
-				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = App.defaultFov;
+				if (Context.raw.fovHandle != null) Context.raw.fovHandle.value = cam.data.raw.fov = Base.defaultFov;
 				Context.raw.camHandle.position = 0;
 				cam.data.raw.ortho = null;
 				cam.buildProjection();

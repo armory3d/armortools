@@ -1,6 +1,8 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
+import iron.Data;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -8,20 +10,20 @@ import arm.Translator._tr;
 @:keep
 class UpscaleNode extends LogicNode {
 
-	static var temp: kha.Image = null;
-	static var image: kha.Image = null;
+	static var temp: Image = null;
+	static var image: Image = null;
 	static var esrgan_blob: js.lib.ArrayBuffer;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
-		inputs[0].getAsImage(function(_image: kha.Image) {
+	override function getAsImage(from: Int, done: Image->Void) {
+		inputs[0].getAsImage(function(_image: Image) {
 			image = _image;
 
 			Console.progress(tr("Processing") + " - " + tr("Upscale"));
-			App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				loadBlob(function() {
 					if (image.width < Config.getTextureResX()) {
 						image = esrgan(image);
@@ -38,18 +40,18 @@ class UpscaleNode extends LogicNode {
 	}
 
 	public static function loadBlob(done: Void->Void) {
-		iron.data.Data.getBlob("models/esrgan.quant.onnx", function(_esrgan_blob: js.lib.ArrayBuffer) {
+		Data.getBlob("models/esrgan.quant.onnx", function(_esrgan_blob: js.lib.ArrayBuffer) {
 			esrgan_blob = _esrgan_blob;
 			done();
 		});
 	}
 
-	override public function getCachedImage(): kha.Image {
+	override public function getCachedImage(): Image {
 		return image;
 	}
 
-	static function doTile(source: kha.Image) {
-		var result: kha.Image = null;
+	static function doTile(source: Image) {
+		var result: Image = null;
 		var size1w = source.width;
 		var size1h = source.height;
 		var size2w = Std.int(size1w * 2);
@@ -57,7 +59,7 @@ class UpscaleNode extends LogicNode {
 		if (temp != null) {
 			temp.unload();
 		}
-		temp = kha.Image.createRenderTarget(size1w, size1h);
+		temp = Image.createRenderTarget(size1w, size1h);
 		temp.g2.begin(false);
 		temp.g2.drawScaledImage(source, 0, 0, size1w, size1h);
 		temp.g2.end();
@@ -86,12 +88,12 @@ class UpscaleNode extends LogicNode {
 			u8[i * 4 + 3] = 255;
 		}
 
-		result = kha.Image.fromBytes(u8.buffer, size2w, size2h);
+		result = Image.fromBytes(u8.buffer, size2w, size2h);
 		return result;
 	}
 
-	public static function esrgan(source: kha.Image): kha.Image {
-		var result: kha.Image = null;
+	public static function esrgan(source: Image): Image {
+		var result: Image = null;
 		var size1w = source.width;
 		var size1h = source.height;
 		var tileSize = 512;
@@ -100,8 +102,8 @@ class UpscaleNode extends LogicNode {
 		if (size1w >= tileSize2x || size1h >= tileSize2x) { // Split into tiles
 			var size2w = Std.int(size1w * 2);
 			var size2h = Std.int(size1h * 2);
-			result = kha.Image.createRenderTarget(size2w, size2h);
-			var tileSource = kha.Image.createRenderTarget(tileSize + 32 * 2, tileSize + 32 * 2);
+			result = Image.createRenderTarget(size2w, size2h);
+			var tileSource = Image.createRenderTarget(tileSize + 32 * 2, tileSize + 32 * 2);
 			for (x in 0...Std.int(size1w / tileSize)) {
 				for (y in 0...Std.int(size1h / tileSize)) {
 					tileSource.g2.begin(false);

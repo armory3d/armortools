@@ -1,13 +1,14 @@
 package arm.ui;
 
 import zui.Zui;
-import iron.data.MeshData;
-import iron.object.MeshObject;
+import iron.MeshData;
+import iron.MeshObject;
+import iron.Scene;
+import iron.Data;
 import arm.util.MeshUtil;
 
 class TabMeshes {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -79,7 +80,7 @@ class TabMeshes {
 				#end
 				#if is_lab
 				var displace_strength = Config.raw.displace_strength > 0 ? Config.raw.displace_strength : 1.0;
-				var uv_scale = iron.Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
+				var uv_scale = Scene.active.meshes[0].data.scaleTex * Context.raw.brushScale;
 				MeshUtil.applyDisplacement(arm.logic.BrushOutputNode.inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
 				#end
 
@@ -132,7 +133,7 @@ class TabMeshes {
 									Project.paintObjects[0].transform.buildMatrix();
 								}
 							}
-							iron.data.Data.deleteMesh(o.data.handle);
+							Data.deleteMesh(o.data.handle);
 							o.remove();
 							Context.raw.paintObject = Context.mainObject();
 							MeshUtil.mergeMesh();
@@ -151,7 +152,7 @@ class TabMeshes {
 	}
 
 	#if is_lab
-	static function setDefaultMesh(name: String) {
+	public static function setDefaultMesh(name: String) {
 		var mo: MeshObject = null;
 		if (name == ".Plane" || name == ".Sphere") {
 			var res = Config.raw.rp_supersample > 1.0 ? 2048 : 1024;
@@ -171,11 +172,11 @@ class TabMeshes {
 			};
 			var md = new MeshData(raw, function(md: MeshData) {});
 			mo = new MeshObject(md, Context.raw.paintObject.materials);
-			iron.Scene.active.meshes.remove(mo);
+			Scene.active.meshes.remove(mo);
 			mo.name = "Tessellated";
 		}
 		else {
-			mo = cast iron.Scene.active.getChild(name);
+			mo = cast Scene.active.getChild(name);
 		}
 
 		mo.visible = true;
@@ -183,7 +184,7 @@ class TabMeshes {
 		Context.raw.paintObject = mo;
 		Project.paintObjects[0] = mo;
 		if (UIHeader.inst.worktab.position == Space3D) {
-			iron.Scene.active.meshes = [mo];
+			Scene.active.meshes = [mo];
 		}
 
 		#if (krom_direct3d12 || krom_vulkan || krom_metal)

@@ -4,13 +4,13 @@ package arm.ui;
 
 import zui.Zui;
 import iron.System;
-import iron.system.Time;
+import iron.Time;
+import iron.Data;
 import arm.data.FontSlot;
 import arm.util.RenderUtil;
 
 class TabFonts {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -49,8 +49,8 @@ class TabFonts {
 					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= Project.fonts.length) {
-						@:privateAccess ui.endElement(imgw);
-						if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
+						ui.endElement(imgw);
+						if (Config.raw.show_asset_names) ui.endElement(0);
 						continue;
 					}
 					var img = Project.fonts[i].image;
@@ -145,7 +145,7 @@ class TabFonts {
 		var i = Project.fonts.indexOf(font);
 		function _init() {
 			Context.selectFont(i == Project.fonts.length - 1 ? i - 1 : i + 1);
-			iron.data.Data.deleteFont(Project.fonts[i].file);
+			Data.deleteFont(Project.fonts[i].file);
 			Project.fonts.splice(i, 1);
 		}
 		iron.App.notifyOnInit(_init);

@@ -1,6 +1,6 @@
 package arm.io;
 
-import iron.data.Data;
+import iron.Data;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeLink;
@@ -123,7 +123,7 @@ class ImportBlendMaterial {
 							ImportTexture.run(file);
 							var ar = file.split(Path.sep);
 							var filename = ar[ar.length - 1];
-							n.buttons[0].default_value = App.getAssetIndex(filename);
+							n.buttons[0].default_value = Base.getAssetIndex(filename);
 						}
 						else if (search == "valtorgb") {
 							var ramp: Dynamic = node.get("storage", 0, "ColorBand");

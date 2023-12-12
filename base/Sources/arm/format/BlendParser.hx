@@ -4,9 +4,9 @@
 // https://web.archive.org/web/20170630054951/http://www.atmind.nl/blender/mystery_ot_blend.html
 // Usage:
 // var bl = new BlendParser(blob: DataView);
-// trace(bl.dir("Scene"));
+// Krom.log(bl.dir("Scene"));
 // var scenes = bl.get("Scene");
-// trace(scenes[0].get("id").get("name"));
+// Krom.log(scenes[0].get("id").get("name"));
 package arm.format;
 
 import js.lib.ArrayBuffer;
@@ -24,7 +24,7 @@ class BlendParser {
 	// Data
 	public var blocks: Array<Block> = [];
 	public var dna: Dna = null;
-	public var map = new Map<Int, Map<Int, Block>>(); // Map blocks by memory address
+	public var map = new Map<Dynamic, Block>(); // Map blocks by memory address
 
 	public function new(buffer: ArrayBuffer) {
 		this.view = new DataView(buffer);
@@ -106,8 +106,7 @@ class BlendParser {
 
 			// Memory address
 			var addr = readPointer();
-			if (!map.exists(addr.high)) map.set(addr.high, new Map<Int, Block>());
-			map.get(addr.high).set(addr.low, b);
+			if (!map.exists(addr)) map.set(addr, b);
 
 			// Index of dna struct contained in this block
 			b.sdnaIndex = read32();
@@ -190,8 +189,10 @@ class BlendParser {
 		return i;
 	}
 
-	public function read64(): haxe.Int64 {
-		return haxe.Int64.make(read32(), read32());
+	public function read64(): Dynamic {
+		var i = untyped view.getBigInt64(pos, littleEndian);
+		pos += 8;
+		return i;
 	}
 
 	public function readf32(): Float {
@@ -244,8 +245,8 @@ class BlendParser {
 		return String.fromCharCode(read8());
 	}
 
-	public function readPointer(): haxe.Int64 {
-		return pointerSize == 4 ? haxe.Int64.ofInt(read32()) : read64();
+	public function readPointer(): Dynamic {
+		return pointerSize == 4 ? read32() : read64();
 	}
 }
 
@@ -352,8 +353,8 @@ class Handle {
 				if (isPointer) {
 					block.blend.pos = block.pos + newOffset;
 					var addr = block.blend.readPointer();
-					if (block.blend.map.exists(addr.high)) {
-						h.block = block.blend.map.get(addr.high).get(addr.low);
+					if (block.blend.map.exists(addr)) {
+						h.block = block.blend.map.get(addr);
 					}
 					else h.block = block;
 					h.offset = 0;

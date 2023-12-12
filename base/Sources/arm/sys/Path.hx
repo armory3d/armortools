@@ -1,7 +1,7 @@
 package arm.sys;
 
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 
 class Path {
 
@@ -71,7 +71,7 @@ class Path {
 			#end
 			var save = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "working_dir.txt";
 			Krom.sysCommand(cmd + ' > "' + save + '"');
-			workingDirCache = haxe.io.Bytes.ofData(Krom.loadBlob(save)).toString().rtrim();
+			workingDirCache = System.bufferToString(Krom.loadBlob(save)).rtrim();
 		}
 		return workingDirCache;
 	}

@@ -1,8 +1,8 @@
 package arm;
 
-import haxe.io.Bytes;
 import haxe.Json;
 import iron.System;
+import iron.Data;
 import arm.sys.File;
 import arm.sys.Path;
 
@@ -69,10 +69,11 @@ class Translator {
 
 		if (Config.raw.locale != "en") {
 			// Load the translation file
-			var translationJson = Bytes.ofData(Krom.loadBlob('data/locale/${Config.raw.locale}.json')).toString();
-			var data: haxe.DynamicAccess<String> = Json.parse(translationJson);
-			for (key => value in data) {
-				translations[Std.string(key)] = value;
+			var translationJson = System.bufferToString(Krom.loadBlob('data/locale/${Config.raw.locale}.json'));
+
+			var data = Json.parse(translationJson);
+			for (field in Reflect.fields(data)) {
+				translations[Std.string(field)] = Reflect.getProperty(data, field);
 			}
 		}
 
@@ -118,16 +119,16 @@ class Translator {
 		Graphics2.fontGlyphs.sort(Reflect.compare);
 		// Load and assign font with cjk characters
 		iron.App.notifyOnInit(function() {
-			iron.data.Data.getFont(fontPath, function(f: Font) {
+			Data.getFont(fontPath, function(f: Font) {
 				if (cjk) {
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;
 					f.setFontIndex(fontIndex);
 				}
-				App.font = f;
+				Base.font = f;
 				// Scale up the font size and elements width a bit
-				App.theme.FONT_SIZE = Std.int(App.defaultFontSize * fontScale);
-				App.theme.ELEMENT_W = Std.int(App.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
-				var uis = App.getUIs();
+				Base.theme.FONT_SIZE = Std.int(Base.defaultFontSize * fontScale);
+				Base.theme.ELEMENT_W = Std.int(Base.defaultElementW * (Config.raw.locale != "en" ? 1.4 : 1.0));
+				var uis = Base.getUIs();
 				for (ui in uis) {
 					ui.setFont(f);
 					ui.setScale(ui.SCALE());

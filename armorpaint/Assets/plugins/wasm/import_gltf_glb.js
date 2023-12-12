@@ -17,8 +17,9 @@ var a;a=a||("undefined"!=typeof Module?Module:{});var g,f={};for(g in a)a.hasOwn
 // Register as ArmorPaint plugin
 let import_gltf_glb = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let buf = new Uint8Array(r.buffer, a._init(b.bytes.length), b.bytes.length);
-		for (let i = 0; i < b.bytes.length; ++i) buf[i] = b.readU8(i);
+		let buf = new Uint8Array(r.buffer, a._init(b.byteLength), b.byteLength);
+		let bbuf = new Uint8Array(b);
+		for (let i = 0; i < b.byteLength; ++i) buf[i] = bbuf[i];
 		a._parse();
 		let vertex_count = a._get_vertex_count();
 		let index_count = a._get_index_count();

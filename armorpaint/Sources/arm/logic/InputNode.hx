@@ -1,6 +1,7 @@
 package arm.logic;
 
-import iron.math.Vec4;
+import iron.Input;
+import iron.Vec4;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import arm.logic.LogicNode;
@@ -23,18 +24,18 @@ class InputNode extends LogicNode {
 
 	static var registered = false;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		if (!registered) {
 			registered = true;
-			tree.notifyOnUpdate(update);
+			iron.App.notifyOnUpdate(update);
 		}
 	}
 
 	function update() {
 		if (Context.raw.splitView) {
-			Context.raw.viewIndex = iron.system.Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+			Context.raw.viewIndex = Input.getMouse().viewX > Base.w() / 2 ? 1 : 0;
 		}
 
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
@@ -45,7 +46,7 @@ class InputNode extends LogicNode {
 			 Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown) ||
 			 decalMask);
 
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		var paintX = mouse.viewX / iron.App.w();
 		var paintY = mouse.viewY / iron.App.h();
 		if (mouse.started()) {
@@ -53,7 +54,7 @@ class InputNode extends LogicNode {
 			startY = mouse.viewY / iron.App.h();
 		}
 
-		var pen = iron.system.Input.getPen();
+		var pen = Input.getPen();
 		if (pen.down()) {
 			paintX = pen.viewX / iron.App.w();
 			paintY = pen.viewY / iron.App.h();
@@ -90,7 +91,7 @@ class InputNode extends LogicNode {
 			}
 		}
 
-		var kb = iron.system.Input.getKeyboard();
+		var kb = Input.getKeyboard();
 		if (kb.started(Config.keymap.brush_ruler)) {
 			lockStartX = mouse.viewX;
 			lockStartY = mouse.viewY;

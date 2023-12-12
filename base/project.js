@@ -119,4 +119,14 @@ if (flags.voxels) {
 	}
 }
 
+let export_version_info = true;
+if (export_version_info) {
+	const fs = require("fs");
+	let dir = "../" + flags.name.toLowerCase() + "/build/krom/data/version.json";
+	let sha = require("child_process").execSync(`git log --pretty=format:"%h" -n 1`).toString().substr(1, 7);
+	let date = new Date().toISOString().split("T")[0];
+	let data = `{ "sha": "${sha}", "date": "${date}" }`;
+	fs.writeFileSync(dir, data);
+}
+
 resolve(project);

@@ -1,8 +1,10 @@
 package arm;
 
+import haxe.Json;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import iron.System;
+import iron.RenderPath;
 import arm.sys.Path;
 import arm.ui.UIFiles;
 import arm.ui.UINodes;
@@ -67,7 +69,7 @@ class History {
 
 				// Undo at least second time in order to avoid empty groups
 				if (step.layer_type == LayerSlotType.SlotGroup) {
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						// 1. Undo deleting group masks
 						var n = 1;
 						while (steps[active - n].layer_type == LayerSlotType.SlotMask) {
@@ -150,7 +152,7 @@ class History {
 				// Now restore the applied mask
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
 				var mask = undoLayers[undoI];
-				App.newMask(false, currentLayer, maskPosition);
+				Base.newMask(false, currentLayer, maskPosition);
 				Context.raw.layer.swap(mask);
 				Context.raw.layersPreviewDirty = true;
 				Context.setLayer(Context.raw.layer);
@@ -167,7 +169,7 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
 				Context.raw.layer.swap(lay);
-				App.newMask(false, Context.raw.layer);
+				Base.newMask(false, Context.raw.layer);
 				Context.raw.layer.swap(lay);
 				Context.raw.layerPreviewDirty = true;
 			}
@@ -211,7 +213,7 @@ class History {
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
-				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Duplicate Material")) {
@@ -263,17 +265,17 @@ class History {
 				var l = new LayerSlot("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
 				if (step.name == tr("New Black Mask")) {
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						l.clear(0x00000000);
 					});
 				}
 				else if (step.name == tr("New White Mask")) {
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						l.clear(0xffffffff);
 					});
 				}
 				else if (step.name == tr("New Fill Mask")) {
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						Context.raw.material = Project.materials[step.material];
 						l.toFillLayer();
 					});
@@ -283,7 +285,7 @@ class History {
 			}
 			else if (step.name == tr("New Group")) {
 				var l = Project.layers[step.layer - 1];
-				var group = App.newGroup();
+				var group = Base.newGroup();
 				Project.layers.remove(group);
 				Project.layers.insert(step.layer, group);
 				l.parent = group;
@@ -301,7 +303,7 @@ class History {
 					while (steps[active + n].layer_type == LayerSlotType.SlotMask) {
 						++n;
 					}
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						for (i in 0...n) redo();
 					});
 				}
@@ -315,9 +317,9 @@ class History {
 			else if (step.name == tr("Duplicate Layer")) {
 				Context.raw.layer = Project.layers[step.layer];
 				function _next() {
-					App.duplicateLayer(Context.raw.layer);
+					Base.duplicateLayer(Context.raw.layer);
 				}
-				App.notifyOnNextFrame(_next);
+				Base.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Order Layers")) {
 				var target = Project.layers[step.prev_order];
@@ -327,7 +329,7 @@ class History {
 			else if (step.name == tr("Merge Layers")) {
 				Context.raw.layer = Project.layers[step.layer + 1];
 				iron.App.notifyOnInit(redoMergeLayers);
-				iron.App.notifyOnInit(App.mergeDown);
+				iron.App.notifyOnInit(Base.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
@@ -344,7 +346,7 @@ class History {
 					Context.setLayer(Context.raw.layer);
 					Context.raw.layersPreviewDirty = true;
 				}
-				App.notifyOnNextFrame(_next);
+				Base.notifyOnNextFrame(_next);
 			}
 			else if (step.name == tr("Invert Mask")) {
 				function _next() {
@@ -357,7 +359,7 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.setLayer(Project.layers[step.layer]);
 				Context.raw.layer.swap(lay);
-				App.newMask(false, lay);
+				Base.newMask(false, lay);
 				Context.raw.layer.swap(lay);
 				Context.raw.layerPreviewDirty = true;
 				undoI = (undoI + 1) % Config.raw.undo_steps;
@@ -397,7 +399,7 @@ class History {
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
-				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			else if (step.name == tr("Delete Material")) {
@@ -410,7 +412,7 @@ class History {
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
-				@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+				UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 				UINodes.inst.hwnd.redraws = 2;
 			}
 			else { // Paint operation
@@ -464,7 +466,7 @@ class History {
 		#if (is_paint || is_sculpt)
 		step.canvas_type = canvas_type;
 		#end
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(canvas));
+		step.canvas = Json.parse(Json.stringify(canvas));
 	}
 
 	#if (is_paint || is_sculpt)
@@ -585,26 +587,26 @@ class History {
 	public static function newMaterial() {
 		var step = push(tr("New Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
+		step.canvas = Json.parse(Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function deleteMaterial() {
 		var step = push(tr("Delete Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
+		step.canvas = Json.parse(Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function duplicateMaterial() {
 		var step = push(tr("Duplicate Material"));
 		step.canvas_type = 0;
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(Context.raw.material.canvas));
+		step.canvas = Json.parse(Json.stringify(Context.raw.material.canvas));
 	}
 
 	public static function deleteMaterialGroup(group: TNodeGroup) {
 		var step = push(tr("Delete Node Group"));
 		step.canvas_type = CanvasMaterial;
 		step.canvas_group = Project.materialGroups.indexOf(group);
-		step.canvas = haxe.Json.parse(haxe.Json.stringify(group.canvas));
+		step.canvas = Json.parse(Json.stringify(group.canvas));
 	}
 	#end
 
@@ -681,7 +683,7 @@ class History {
 	}
 
 	static function copyToUndo(fromId: Int, toId: Int, isMask: Bool) {
-		var path = iron.RenderPath.active;
+		var path = RenderPath.active;
 
 		#if is_sculpt
 		isMask = true;
@@ -739,7 +741,7 @@ class History {
 		#end
 
 		UINodes.inst.canvasChanged();
-		@:privateAccess UINodes.inst.getNodes().handle = new zui.Zui.Handle();
+		UINodes.inst.getNodes().handle = new zui.Zui.Handle();
 		UINodes.inst.hwnd.redraws = 2;
 	}
 }

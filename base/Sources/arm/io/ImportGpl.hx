@@ -3,7 +3,7 @@ package arm.io;
 import js.lib.ArrayBuffer;
 import js.lib.DataView;
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 
 class ImportGpl {
 

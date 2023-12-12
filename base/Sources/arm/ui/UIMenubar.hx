@@ -1,14 +1,12 @@
 package arm.ui;
 
-import iron.System;
 import zui.Zui;
-#if is_lab
+import iron.System;
+import iron.Mat4;
 import iron.Scene;
-import iron.data.MeshData;
-import iron.object.MeshObject;
-#end
+import iron.MeshData;
+import iron.MeshObject;
 
-@:access(zui.Zui)
 class UIMenubar {
 
 	public static var inst: UIMenubar;
@@ -18,7 +16,7 @@ class UIMenubar {
 	public var menubarw = defaultMenubarW;
 
 	#if is_lab
-	static var _savedCamera: iron.math.Mat4 = null;
+	static var _savedCamera: Mat4 = null;
 	static var _plane: MeshObject = null;
 	#end
 
@@ -56,7 +54,7 @@ class UIMenubar {
 					Console.toast(tr("Saving project"));
 					Project.projectSave();
 					#end
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						BoxProjects.show();
 					});
 				}
@@ -151,14 +149,14 @@ class UIMenubar {
 						var md = new MeshData(raw, function(md: MeshData) {});
 						var dotPlane: MeshObject = cast Scene.active.getChild(".Plane");
 						_plane = new MeshObject(md, dotPlane.materials);
-						iron.Scene.active.meshes.remove(_plane);
+						Scene.active.meshes.remove(_plane);
 					}
 
 					if (_savedCamera == null) {
 						_savedCamera = Scene.active.camera.transform.local.clone();
 					}
 					Scene.active.meshes = [_plane];
-					var m = iron.math.Mat4.identity();
+					var m = Mat4.identity();
 					m.translate(0, 0, 1.6);
 					Scene.active.camera.transform.setMatrix(m);
 				}
@@ -179,10 +177,10 @@ class UIMenubar {
 		UIMenu.menuX = Std.int(ui._x - ui._w);
 		UIMenu.menuY = Std.int(ui.MENUBAR_H());
 		if (Config.raw.touch_ui) {
-			var menuW = Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.0);
+			var menuW = Std.int(Base.defaultElementW * Base.uiMenu.SCALE() * 2.0);
 			UIMenu.menuX -= Std.int((menuW - ui._w) / 2) + Std.int(UIHeader.headerh / 2);
-			UIMenu.menuX += Std.int(2 * App.uiMenu.SCALE());
-			UIMenu.menuY -= Std.int(2 * App.uiMenu.SCALE());
+			UIMenu.menuX += Std.int(2 * Base.uiMenu.SCALE());
+			UIMenu.menuY -= Std.int(2 * Base.uiMenu.SCALE());
 			UIMenu.keepOpen = true;
 		}
 	}

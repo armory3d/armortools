@@ -1,11 +1,12 @@
 package arm.render;
 
+import iron.System;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Time;
 
 #if (krom_direct3d12 || krom_vulkan || krom_metal)
 
-@:access(arm.render.RenderPathRaytrace)
 class RenderPathRaytraceBake {
 
 	public static var raysPix = 0;
@@ -13,7 +14,7 @@ class RenderPathRaytraceBake {
 	public static var currentSample = 0;
 	static var raysTimer = 0.0;
 	static var raysCounter = 0;
-	static var lastLayer: kha.Image = null;
+	static var lastLayer: Image = null;
 	static var lastBake = 0;
 
 	public static function commands(parsePaintMaterial: ?Bool->Void): Bool {
@@ -69,7 +70,7 @@ class RenderPathRaytraceBake {
 			function _next() {
 				parsePaintMaterial();
 			}
-			App.notifyOnNextFrame(_next);
+			Base.notifyOnNextFrame(_next);
 
 			RenderPathRaytrace.raytraceInit(getBakeShaderName(), rebuild);
 
@@ -125,7 +126,7 @@ class RenderPathRaytraceBake {
 
 			raysPix = RenderPathRaytrace.frame * samplesPerFrame;
 			raysCounter += samplesPerFrame;
-			raysTimer += iron.system.Time.realDelta;
+			raysTimer += Time.realDelta;
 			if (raysTimer >= 1) {
 				raysSec = raysCounter;
 				raysTimer = 0;

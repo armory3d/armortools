@@ -1,14 +1,14 @@
 package arm.io;
 
-import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import zui.Zui.TNode;
-import iron.data.MeshData;
-import iron.data.Data;
-import iron.data.SceneFormat;
-import iron.math.Mat4;
-import iron.system.ArmPack;
+import iron.System;
+import iron.MeshData;
+import iron.Data;
+import iron.SceneFormat;
+import iron.Mat4;
+import iron.ArmPack;
 import iron.Scene;
 import arm.ProjectFormat;
 import arm.ui.UIFiles;
@@ -17,9 +17,9 @@ import arm.sys.Path;
 import arm.sys.File;
 import arm.Viewport;
 #if (is_paint || is_sculpt)
-import iron.data.MaterialData;
-import iron.system.Lz4;
-import iron.object.MeshObject;
+import iron.MaterialData;
+import iron.Lz4;
+import iron.MeshObject;
 import iron.RenderPath;
 import arm.util.RenderUtil;
 import arm.ui.UIStatus;
@@ -94,9 +94,9 @@ class ImportArm {
 
 			#if (is_paint || is_sculpt)
 			var l0 = project.layer_datas[0];
-			App.resHandle.position = Config.getTextureResPos(l0.res);
+			Base.resHandle.position = Config.getTextureResPos(l0.res);
 			var bitsPos = l0.bpp == 8 ? Bits8 : l0.bpp == 16 ? Bits16 : Bits32;
-			App.bitsHandle.position = bitsPos;
+			Base.bitsHandle.position = bitsPos;
 			var bytesPerPixel = Std.int(l0.bpp / 8);
 			var format = l0.bpp == 8 ? TextureFormat.RGBA32 : l0.bpp == 16 ? TextureFormat.RGBA64 : TextureFormat.RGBA128;
 			#end
@@ -106,13 +106,13 @@ class ImportArm {
 				Project.raw.envmap = Data.isAbsolute(Project.raw.envmap) ? Project.raw.envmap : base + Project.raw.envmap;
 			}
 			if (Project.raw.envmap_strength != null) {
-				iron.Scene.active.world.probe.raw.strength = Project.raw.envmap_strength;
+				Scene.active.world.probe.raw.strength = Project.raw.envmap_strength;
 			}
 			if (Project.raw.camera_world != null) {
-				iron.Scene.active.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
-				iron.Scene.active.camera.transform.decompose();
-				iron.Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
-				iron.Scene.active.camera.buildProjection();
+				Scene.active.camera.transform.local = Mat4.fromFloat32Array(Project.raw.camera_world);
+				Scene.active.camera.transform.decompose();
+				Scene.active.camera.data.raw.fov = Project.raw.camera_fov;
+				Scene.active.camera.buildProjection();
 				var origin = Project.raw.camera_origin;
 				arm.Camera.inst.origins[0].x = origin[0];
 				arm.Camera.inst.origins[0].y = origin[1];
@@ -175,7 +175,7 @@ class ImportArm {
 			for (i in 1...project.mesh_datas.length) {
 				var raw = project.mesh_datas[i];
 				new MeshData(raw, function(md: MeshData) {
-					var object = iron.Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
+					var object = Scene.active.addMeshObject(md, Context.raw.paintObject.materials, Context.raw.paintObject);
 					object.name = md.name;
 					object.skip_context = "paint";
 					Project.paintObjects.push(object);
@@ -208,14 +208,14 @@ class ImportArm {
 				if (History.undoLayers != null) for (l in History.undoLayers) l.resizeAndSetBits();
 				var rts = RenderPath.active.renderTargets;
 				var _texpaint_blend0 = rts.get("texpaint_blend0").image;
-				App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					_texpaint_blend0.unload();
 				});
 				rts.get("texpaint_blend0").raw.width = Config.getTextureResX();
 				rts.get("texpaint_blend0").raw.height = Config.getTextureResY();
 				rts.get("texpaint_blend0").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8, DepthStencilFormat.NoDepthAndStencil);
 				var _texpaint_blend1 = rts.get("texpaint_blend1").image;
-				App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					_texpaint_blend1.unload();
 				});
 				rts.get("texpaint_blend1").raw.width = Config.getTextureResX();
@@ -243,7 +243,7 @@ class ImportArm {
 				Project.layers.push(l);
 
 				if (!isGroup) {
-					if (App.pipeMerge == null) App.makePipe();
+					if (Base.pipeMerge == null) Base.makePipe();
 
 					var _texpaint: Image = null;
 
@@ -255,8 +255,8 @@ class ImportArm {
 					if (isMask) {
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, TextureFormat.RGBA32);
 						l.texpaint.g2.begin(false);
-						// l.texpaint.g2.pipeline = App.pipeCopy8;
-						l.texpaint.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy; // Full bits for undo support, R8 is used
+						// l.texpaint.g2.pipeline = Base.pipeCopy8;
+						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy; // Full bits for undo support, R8 is used
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
@@ -265,7 +265,7 @@ class ImportArm {
 						// TODO: create render target from bytes
 						_texpaint = Image.fromBytes(Lz4.decode(ld.texpaint, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint.g2.begin(false);
-						l.texpaint.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
+						l.texpaint.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
 						l.texpaint.g2.drawImage(_texpaint, 0, 0);
 						l.texpaint.g2.pipeline = null;
 						l.texpaint.g2.end();
@@ -273,14 +273,14 @@ class ImportArm {
 						#if is_paint
 						_texpaint_nor = Image.fromBytes(Lz4.decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint_nor.g2.begin(false);
-						l.texpaint_nor.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
+						l.texpaint_nor.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
 						l.texpaint_nor.g2.drawImage(_texpaint_nor, 0, 0);
 						l.texpaint_nor.g2.pipeline = null;
 						l.texpaint_nor.g2.end();
 
 						_texpaint_pack = Image.fromBytes(Lz4.decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytesPerPixel), ld.res, ld.res, format);
 						l.texpaint_pack.g2.begin(false);
-						l.texpaint_pack.g2.pipeline = project.is_bgra ? App.pipeCopyBGRA : App.pipeCopy;
+						l.texpaint_pack.g2.pipeline = project.is_bgra ? Base.pipeCopyBGRA : Base.pipeCopy;
 						l.texpaint_pack.g2.drawImage(_texpaint_pack, 0, 0);
 						l.texpaint_pack.g2.pipeline = null;
 						l.texpaint_pack.g2.end();
@@ -309,7 +309,7 @@ class ImportArm {
 					l.paintSubs = ld.paint_subs;
 					#end
 
-					App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						_texpaint.unload();
 						#if is_paint
 						if (_texpaint_nor != null) _texpaint_nor.unload();
@@ -383,7 +383,7 @@ class ImportArm {
 			#if is_lab
 			initNodes(project.material.nodes);
 			Project.canvas = project.material;
-			arm.logic.LogicParser.parse(Project.canvas, false);
+			arm.logic.LogicParser.parse(Project.canvas);
 			#end
 
 			Context.raw.ddirty = 4;
@@ -416,7 +416,7 @@ class ImportArm {
 				Viewport.scaleToBounds();
 			});
 		}
-		iron.App.notifyOnInit(App.initLayers);
+		iron.App.notifyOnInit(Base.initLayers);
 		History.reset();
 	}
 
@@ -604,7 +604,7 @@ class ImportArm {
 			if (node.type == "ImageTextureNode") {
 			#end
 
-				node.buttons[0].default_value = App.getAssetIndex(node.buttons[0].data);
+				node.buttons[0].default_value = Base.getAssetIndex(node.buttons[0].data);
 				node.buttons[0].data = "";
 			}
 		}

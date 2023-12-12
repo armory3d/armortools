@@ -1,9 +1,17 @@
 package arm.ui;
 
+import haxe.Json;
 import zui.Zui;
-import iron.math.Vec4;
+import iron.Vec4;
+import iron.Object;
+import iron.Scene;
+import iron.SceneFormat;
+import iron.Data;
+import iron.MaterialData;
+import iron.MeshObject;
+import iron.LightObject;
+import iron.CameraObject;
 
-@:access(zui.Zui)
 class TabObjects {
 
 	static var materialId = 0;
@@ -33,7 +41,7 @@ class TabObjects {
 				var listW = ui._w;
 
 				var lineCounter = 0;
-				function drawList(listHandle: zui.Zui.Handle, currentObject: iron.object.Object) {
+				function drawList(listHandle: zui.Zui.Handle, currentObject: Object) {
 					if (currentObject.name.charAt(0) == ".") return; // Hidden
 					var b = false;
 
@@ -81,28 +89,28 @@ class TabObjects {
 							if (UIMenu.menuButton(ui, "Assign Material")) {
 								materialId++;
 
-								for (sh in iron.Scene.active.raw.shader_datas) {
+								for (sh in Scene.active.raw.shader_datas) {
 									if (sh.name == "Material_data") {
-										var s: iron.data.SceneFormat.TShaderData = haxe.Json.parse(haxe.Json.stringify(sh));
+										var s: TShaderData = Json.parse(Json.stringify(sh));
 										s.name = "TempMaterial_data" + materialId;
-										iron.Scene.active.raw.shader_datas.push(s);
+										Scene.active.raw.shader_datas.push(s);
 										break;
 									}
 								}
 
-								for (mat in iron.Scene.active.raw.material_datas) {
+								for (mat in Scene.active.raw.material_datas) {
 									if (mat.name == "Material") {
-										var m: iron.data.SceneFormat.TMaterialData = haxe.Json.parse(haxe.Json.stringify(mat));
+										var m: TMaterialData = Json.parse(Json.stringify(mat));
 										m.name = "TempMaterial" + materialId;
 										m.shader = "TempMaterial_data" + materialId;
-										iron.Scene.active.raw.material_datas.push(m);
+										Scene.active.raw.material_datas.push(m);
 										break;
 									}
 								}
 
-								iron.data.Data.getMaterial("Scene", "TempMaterial" + materialId, function(md: iron.data.MaterialData) {
-									var mo: iron.object.MeshObject = cast currentObject;
-									mo.materials = haxe.ds.Vector.fromArrayCopy([md]);
+								Data.getMaterial("Scene", "TempMaterial" + materialId, function(md: MaterialData) {
+									var mo: MeshObject = cast currentObject;
+									mo.materials = [md];
 									arm.shader.MakeMaterial.parseMeshPreviewMaterial(md);
 								});
 							}
@@ -123,7 +131,7 @@ class TabObjects {
 						ui.g.color = 0xffffffff;
 					}
 				}
-				for (c in iron.Scene.active.root.children) {
+				for (c in Scene.active.root.children) {
 					drawList(Zui.handle("tabobjects_1"), c);
 				}
 
@@ -233,17 +241,17 @@ class TabObjects {
 					Context.raw.selectedObject.transform.dirty = true;
 
 					if (Context.raw.selectedObject.name == "Scene") {
-						var p = iron.Scene.active.world.probe;
+						var p = Scene.active.world.probe;
 						p.raw.strength = ui.slider(Zui.handle("tabobjects_16", {value: p.raw.strength}), "Environment", 0.0, 5.0, true);
 					}
-					else if (Std.isOfType(Context.raw.selectedObject, iron.object.LightObject)) {
-						var light = cast(Context.raw.selectedObject, iron.object.LightObject);
+					else if (Std.isOfType(Context.raw.selectedObject, LightObject)) {
+						var light = cast(Context.raw.selectedObject, LightObject);
 						var lightHandle = Zui.handle("tabobjects_17");
 						lightHandle.value = light.data.raw.strength / 10;
 						light.data.raw.strength = ui.slider(lightHandle, "Strength", 0.0, 5.0, true) * 10;
 					}
-					else if (Std.isOfType(Context.raw.selectedObject, iron.object.CameraObject)) {
-						var cam = cast(Context.raw.selectedObject, iron.object.CameraObject);
+					else if (Std.isOfType(Context.raw.selectedObject, CameraObject)) {
+						var cam = cast(Context.raw.selectedObject, CameraObject);
 						var fovHandle = Zui.handle("tabobjects_18");
 						fovHandle.value = Std.int(cam.data.raw.fov * 100) / 100;
 						cam.data.raw.fov = ui.slider(fovHandle, "FoV", 0.3, 2.0, true);

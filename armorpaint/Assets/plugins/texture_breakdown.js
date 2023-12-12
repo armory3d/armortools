@@ -44,11 +44,11 @@ plugin.drawUI = function(ui) {
 
 		if (ui.button("Export")) {
 			arm.UIFiles.show("png", true, false, function(path) {
-				arm.App.notifyOnNextFrame(function() {
+				arm.Base.notifyOnNextFrame(function() {
 					var f = arm.UIFiles.filename;
 					if (f === "") f = "untitled";
 					if (!f.endsWith(".png")) f += ".png";
-					Krom.writePng(path + arm.Path.sep + f, breakdown.getPixels().b.buffer, breakdown.get_width(), breakdown.get_height(), 2);
+					Krom.writePng(path + arm.Path.sep + f, breakdown.getPixels(), breakdown.get_width(), breakdown.get_height(), 2);
 				});
 			});
 		}

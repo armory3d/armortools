@@ -1,6 +1,6 @@
 package arm.logic;
 
-import kha.Image;
+import iron.System;
 import iron.RenderPath;
 import arm.logic.LogicNode;
 
@@ -16,8 +16,8 @@ class BrushOutputNode extends LogicNode {
 
 	public static var inst: BrushOutputNode = null;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		if (inst == null) {
 			{
@@ -70,7 +70,7 @@ class BrushOutputNode extends LogicNode {
 		inst = this;
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
 		inputs[from].getAsImage(done);
 	}
 }

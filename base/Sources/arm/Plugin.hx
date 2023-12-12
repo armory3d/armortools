@@ -1,6 +1,8 @@
 package arm;
 
+import iron.ArmPack;
 import iron.System;
+import iron.Data;
 
 @:keep
 class Plugin {
@@ -39,16 +41,16 @@ class Plugin {
 
 	public static function start(plugin: String) {
 		try {
-			iron.data.Data.getBlob("plugins/" + plugin, function(blob: js.lib.ArrayBuffer) {
+			Data.getBlob("plugins/" + plugin, function(blob: js.lib.ArrayBuffer) {
 				pluginName = plugin;
 				// js.Syntax.code("(1, eval)({0})", System.bufferToString(blob)); // Global scope
 				js.Syntax.code("eval({0})", System.bufferToString(blob)); // Local scope
-				iron.data.Data.deleteBlob("plugins/" + plugin);
+				Data.deleteBlob("plugins/" + plugin);
 			});
 		}
 		catch (e: Dynamic) {
 			Console.error(tr("Failed to load plugin") + " '" + plugin + "'");
-			trace(e);
+			Krom.log(e);
 		}
 	}
 
@@ -63,8 +65,8 @@ class Plugin {
 class Keep {
 	public static function keep() {
 		return untyped [
-			iron.system.ArmPack.decode,
-			iron.system.ArmPack.encode,
+			ArmPack.decode,
+			ArmPack.encode,
 			arm.ui.UIBox.showMessage
 		];
 	}
@@ -74,7 +76,7 @@ class Keep {
 @:keep
 class KeepLab {
 	public static function keep() {
-		var a = App.uiBox.panel;
+		var a = Base.uiBox.panel;
 		return [a];
 	}
 }
@@ -83,11 +85,8 @@ class KeepLab {
 @:expose("core")
 class CoreBridge {
 	public static var Json = haxe.Json;
-	public static var ReflectFields = Reflect.fields;
-	public static var ReflectField = Reflect.field;
-	public static var ReflectSetField = Reflect.setField;
-	public static var StdIs = Std.isOfType;
 	public static var Image = Image;
+	public static var System = System;
 	public static function colorFromFloats(r: Float, g: Float, b: Float, a: Float): Color {
 		return Color.fromFloats(r, g, b, a);
 	}
@@ -98,11 +97,11 @@ class IronBridge {
 	public static var App = iron.App;
 	public static var Scene = iron.Scene;
 	public static var RenderPath = iron.RenderPath;
-	public static var Time = iron.system.Time;
-	public static var Input = iron.system.Input;
-	public static var ArmPack = iron.system.ArmPack;
-	public static var Object = iron.object.Object;
-	public static var Data = iron.data.Data;
+	public static var Time = iron.Time;
+	public static var Input = iron.Input;
+	public static var ArmPack = iron.ArmPack;
+	public static var Object = iron.Object;
+	public static var Data = iron.Data;
 }
 
 @:expose("zui")
@@ -119,7 +118,7 @@ class ConsoleBridge {
 
 @:expose("arm")
 class ArmBridge {
-	public static var App = arm.App;
+	public static var Base = arm.Base;
 	public static var Config = arm.Config;
 	public static var Context = arm.Context;
 	public static var History = arm.History;

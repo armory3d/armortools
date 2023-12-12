@@ -1,13 +1,14 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import zui.Zui;
 import iron.System;
-import iron.system.Input.KeyCode;
-import iron.system.Input;
-import iron.system.Time;
-import iron.system.ArmPack;
-import iron.system.Lz4;
+import iron.Input;
+import iron.Input;
+import iron.Time;
+import iron.ArmPack;
+import iron.Lz4;
+import iron.Data;
+import iron.RenderPath;
 import arm.sys.Path;
 import arm.sys.File;
 
@@ -15,7 +16,7 @@ class UIFiles {
 
 	public static var filename: String;
 	public static var path = defaultPath;
-	static var lastPath = "";
+	public static var lastPath = "";
 	static var lastSearch = "";
 	static var files: Array<String> = null;
 	static var iconMap: Map<String, Image> = null;
@@ -49,7 +50,6 @@ class UIFiles {
 		releaseKeys();
 	}
 
-	// @:access(zui.Zui)
 	// static function showCustom(filters: String, isSave: Bool, filesDone: String->Void) {
 	// 	var known = false;
 	// 	UIBox.showCustom(function(ui: Zui) {
@@ -73,7 +73,7 @@ class UIFiles {
 
 	static function releaseKeys() {
 		// File dialog may prevent firing key up events
-		var kb = iron.system.Input.getKeyboard();
+		var kb = Input.getKeyboard();
 		kb.upListener(KeyCode.Shift);
 		kb.upListener(KeyCode.Control);
 		#if krom_darwin
@@ -81,8 +81,6 @@ class UIFiles {
 		#end
 	}
 
-	@:access(zui.Zui)
-	@:access(arm.sys.File)
 	public static function fileBrowser(ui: Zui, handle: Handle, foldersOnly = false, dragFiles = false, search = "", refresh = false, contextMenu : String -> Void = null): String {
 
 		var icons = Res.get("icons.k");
@@ -142,8 +140,8 @@ class UIFiles {
 			for (j in 0...num) {
 				var i = j + row * num;
 				if (i >= files.length) {
-					@:privateAccess ui.endElement(slotw);
-					@:privateAccess ui.endElement(slotw);
+					ui.endElement(slotw);
+					ui.endElement(slotw);
 					continue;
 				}
 
@@ -170,13 +168,13 @@ class UIFiles {
 						var filesAll = File.readDirectory(handle.text);
 						var iconFile = f.substr(0, f.lastIndexOf(".")) + "_icon.jpg";
 						if (filesAll.indexOf(iconFile) >= 0) {
-							var empty = iron.RenderPath.active.renderTargets.get("empty_black").image;
+							var empty = RenderPath.active.renderTargets.get("empty_black").image;
 							iconMap.set(handle.text + Path.sep + f, empty);
 							File.cacheCloud(handle.text + Path.sep + iconFile, function(abs: String) {
 								if (abs != null) {
-									iron.data.Data.getImage(abs, function(image: Image) {
+									Data.getImage(abs, function(image: Image) {
 										iron.App.notifyOnInit(function() {
-											if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
+											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 											icon = Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
 												icon.g2.begin(false);
@@ -188,7 +186,7 @@ class UIFiles {
 											else {
 												icon.g2.begin(true, 0xffffffff);
 											}
-											icon.g2.pipeline = App.pipeCopyRGB;
+											icon.g2.pipeline = Base.pipeCopyRGB;
 											icon.g2.drawImage(image, 0, 0);
 											icon.g2.pipeline = null;
 											icon.g2.end();
@@ -280,22 +278,22 @@ class UIFiles {
 					var handle = handle.text + Path.sep + f;
 					icon = iconMap.get(handle);
 					if (icon == null) {
-						var empty = iron.RenderPath.active.renderTargets.get("empty_black").image;
+						var empty = RenderPath.active.renderTargets.get("empty_black").image;
 						iconMap.set(handle, empty);
-						iron.data.Data.getImage(handle, function(image: Image) {
+						Data.getImage(handle, function(image: Image) {
 							iron.App.notifyOnInit(function() {
-								if (App.pipeCopyRGB == null) App.makePipeCopyRGB();
+								if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 								var sw = image.width > image.height ? w : Std.int(1.0 * image.width / image.height * w);
 								var sh = image.width > image.height ? Std.int(1.0 * image.height / image.width * w) : w;
 								icon = Image.createRenderTarget(sw, sh);
 								icon.g2.begin(true, 0xffffffff);
-								icon.g2.pipeline = App.pipeCopyRGB;
+								icon.g2.pipeline = Base.pipeCopyRGB;
 								icon.g2.drawScaledImage(image, 0, 0, sw, sh);
 								icon.g2.pipeline = null;
 								icon.g2.end();
 								iconMap.set(handle, icon);
 								UIBase.inst.hwnds[TabStatus].redraws = 3;
-								iron.data.Data.deleteImage(handle); // The big image is not needed anymore
+								Data.deleteImage(handle); // The big image is not needed anymore
 							});
 						});
 					}
@@ -322,24 +320,24 @@ class UIFiles {
 				if (state == Started) {
 					if (f != ".." && dragFiles) {
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragFile = handle.text;
+						Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+						Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						Base.dragFile = handle.text;
 						#if krom_ios
-						if (!isCloud) App.dragFile = documentDirectory + App.dragFile;
+						if (!isCloud) Base.dragFile = documentDirectory + Base.dragFile;
 						#end
-						if (App.dragFile.charAt(App.dragFile.length - 1) != Path.sep) {
-							App.dragFile += Path.sep;
+						if (Base.dragFile.charAt(Base.dragFile.length - 1) != Path.sep) {
+							Base.dragFile += Path.sep;
 						}
-						App.dragFile += f;
-						App.dragFileIcon = icon;
+						Base.dragFile += f;
+						Base.dragFileIcon = icon;
 					}
 
 					selected = i;
 					if (Time.time() - Context.raw.selectTime < 0.25) {
-						App.dragFile = null;
-						App.dragFileIcon = null;
-						App.isDragging = false;
+						Base.dragFile = null;
+						Base.dragFileIcon = null;
+						Base.isDragging = false;
 						handle.changed = ui.changed = true;
 						if (f == "..") { // Up
 							handle.text = handle.text.substring(0, handle.text.lastIndexOf(Path.sep));

@@ -669,7 +669,7 @@ extern class SoftBody extends CollisionObject {
 @:native("Ammo.btSoftBodyHelpers")
 extern class SoftBodyHelpers {
 	public function new(): Void;
-	function CreateFromTriMesh(worldInfo: SoftBodyWorldInfo, vertices: haxe.ds.Vector<Float>, triangles: haxe.ds.Vector<Int>, ntriangles: Int, randomizeConstraints: Bool = true): SoftBody;
+	function CreateFromTriMesh(worldInfo: SoftBodyWorldInfo, vertices: Array<Float>, triangles: Array<Int>, ntriangles: Int, randomizeConstraints: Bool = true): SoftBody;
 }
 
 @:native("Ammo.btOverlappingPairCallback")

@@ -2,9 +2,10 @@ package arm.shader;
 
 import zui.Zui;
 import zui.Zui.Nodes;
-import iron.data.SceneFormat;
-import iron.data.ShaderData;
-import iron.data.MaterialData;
+import iron.System;
+import iron.SceneFormat;
+import iron.ShaderData;
+import iron.MaterialData;
 import arm.ui.UINodes;
 import arm.shader.NodeShaderContext;
 import arm.shader.NodeShaderData;
@@ -185,7 +186,7 @@ class MakeMaterial {
 		if (!getMOut()) return;
 
 		if (bakePreviews) {
-			var current = @:privateAccess kha.Graphics2.current;
+			var current = Graphics2.current;
 			if (current != null) current.end();
 			bakeNodePreviews();
 			if (current != null) current.begin(false);
@@ -239,7 +240,7 @@ class MakeMaterial {
 		for (key in Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				var image = Context.raw.nodePreviews.get(key);
-				App.notifyOnNextFrame(image.unload);
+				Base.notifyOnNextFrame(image.unload);
 				Context.raw.nodePreviews.remove(key);
 			}
 		}
@@ -270,7 +271,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY() / 4);
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY);
+				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}
 
@@ -286,7 +287,7 @@ class MakeMaterial {
 			var resY = Std.int(Config.getTextureResY());
 			if (image == null || image.width != resX || image.height != resY) {
 				if (image != null) image.unload();
-				image = kha.Image.createRenderTarget(resX, resY);
+				image = Image.createRenderTarget(resX, resY);
 				Context.raw.nodePreviews.set(id, image);
 			}
 
@@ -311,7 +312,7 @@ class MakeMaterial {
 	}
 
 	public static function parseBrush() {
-		arm.logic.LogicParser.parse(Context.raw.brush.canvas, false);
+		arm.logic.LogicParser.parse(Context.raw.brush.canvas);
 	}
 
 	public static inline function getDisplaceStrength():Float {
@@ -325,7 +326,7 @@ class MakeMaterial {
 	}
 
 	static function deleteContext(c: ShaderContext) {
-		arm.App.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
+		Base.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
 			c.delete();
 		});
 	}

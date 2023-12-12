@@ -1,15 +1,16 @@
 package arm;
 
-import iron.System;
 import zui.Zui;
-import iron.math.Vec4;
-import iron.object.MeshObject;
+import iron.System;
+import iron.Vec4;
+import iron.MeshObject;
+import iron.Tween;
 import arm.shader.NodeShader;
 import arm.ProjectFormat;
 #if (is_paint || is_sculpt)
-import iron.math.Mat4;
-import iron.object.Object;
-import iron.data.MaterialData;
+import iron.Mat4;
+import iron.Object;
+import iron.MaterialData;
 import arm.data.MaterialSlot;
 import arm.data.LayerSlot;
 import arm.data.BrushSlot;
@@ -191,7 +192,7 @@ import arm.data.FontSlot;
 	@:optional public var lastParticleHitX = 0.0;
 	@:optional public var lastParticleHitY = 0.0;
 	@:optional public var lastParticleHitZ = 0.0;
-	@:optional public var particleTimer: iron.system.Tween.TAnim = null;
+	@:optional public var particleTimer: TAnim = null;
 	@:optional public var paintBody: arm.plugin.PhysicsBody = null;
 	#end
 

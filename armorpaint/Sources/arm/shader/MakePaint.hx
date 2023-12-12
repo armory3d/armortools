@@ -1,6 +1,6 @@
 package arm.shader;
 
-import iron.data.SceneFormat;
+import iron.SceneFormat;
 import arm.ui.UINodes;
 import arm.shader.MaterialParser;
 import arm.shader.NodeShaderContext;
@@ -37,7 +37,7 @@ class MakePaint {
 		con_paint.data.color_writes_green = [true, true, true, true];
 		con_paint.data.color_writes_blue = [true, true, true, true];
 		con_paint.data.color_writes_alpha = [true, true, true, true];
-		con_paint.allow_vcols = Context.raw.paintObject.data.geom.cols != null;
+		con_paint.allow_vcols = Context.raw.paintObject.data.cols != null;
 
 		var vert = con_paint.make_vert();
 		var frag = con_paint.make_frag();

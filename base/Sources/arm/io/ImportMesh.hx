@@ -1,8 +1,8 @@
 package arm.io;
 
-import iron.data.SceneFormat;
-import iron.data.MeshData;
-import iron.data.Data;
+import iron.SceneFormat;
+import iron.MeshData;
+import iron.Data;
 import iron.Scene;
 import arm.util.MeshUtil;
 import arm.sys.Path;
@@ -131,8 +131,8 @@ class ImportMesh {
 					var l = Project.layers.pop();
 					l.unload();
 				}
-				App.newLayer(false);
-				iron.App.notifyOnInit(App.initLayers);
+				Base.newLayer(false);
+				iron.App.notifyOnInit(Base.initLayers);
 				History.reset();
 			}
 			#end
@@ -156,7 +156,7 @@ class ImportMesh {
 
 			// Wait for addMesh calls to finish
 			if (meshesToUnwrap != null) {
-				App.notifyOnNextFrame(finishImport);
+				Base.notifyOnNextFrame(finishImport);
 			}
 			else {
 				iron.App.notifyOnInit(finishImport);

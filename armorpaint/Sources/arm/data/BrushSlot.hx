@@ -1,9 +1,10 @@
 package arm.data;
 
-import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
-import iron.data.Data;
+import iron.System;
+import iron.Data;
+import iron.ArmPack;
 
 class BrushSlot {
 	public var nodes = new Nodes();
@@ -23,7 +24,7 @@ class BrushSlot {
 					defaultCanvas = b;
 				});
 			}
-			canvas = iron.system.ArmPack.decode(defaultCanvas);
+			canvas = ArmPack.decode(defaultCanvas);
 			canvas.name = "Brush " + (id + 1);
 		}
 		else {

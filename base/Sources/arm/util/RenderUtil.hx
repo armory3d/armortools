@@ -4,12 +4,13 @@ import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
 import iron.System;
-import iron.object.MeshObject;
-import iron.math.Mat4;
-import iron.math.Vec4;
-import iron.math.Quat;
+import iron.MeshObject;
+import iron.Mat4;
+import iron.Vec4;
+import iron.Quat;
 import iron.Scene;
 import iron.RenderPath;
+import iron.Uniforms;
 import arm.render.RenderPathPreview;
 import arm.render.RenderPathPaint;
 import arm.render.RenderPathBase;
@@ -57,8 +58,8 @@ class RenderUtil {
 
 		Scene.active.world.envmap = Context.raw.previewEnvmap;
 		// No resize
-		@:privateAccess RenderPath.active.lastW = materialPreviewSize;
-		@:privateAccess RenderPath.active.lastH = materialPreviewSize;
+		RenderPath.active.lastW = materialPreviewSize;
+		RenderPath.active.lastH = materialPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
@@ -69,8 +70,8 @@ class RenderUtil {
 		RenderPath.active.commands = _commands;
 
 		Context.raw.materialPreview = false;
-		@:privateAccess RenderPath.active.lastW = iron.App.w();
-		@:privateAccess RenderPath.active.lastH = iron.App.h();
+		RenderPath.active.lastW = iron.App.w();
+		RenderPath.active.lastH = iron.App.h();
 
 		// Restore
 		sphere.visible = false;
@@ -93,7 +94,7 @@ class RenderUtil {
 	}
 
 	public static function makeDecalPreview() {
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 
 		if (Context.raw.decalImage == null) {
@@ -123,8 +124,8 @@ class RenderUtil {
 		Scene.active.world.envmap = Context.raw.previewEnvmap;
 
 		// No resize
-		@:privateAccess RenderPath.active.lastW = decalPreviewSize;
-		@:privateAccess RenderPath.active.lastH = decalPreviewSize;
+		RenderPath.active.lastW = decalPreviewSize;
+		RenderPath.active.lastH = decalPreviewSize;
 		Scene.active.camera.buildProjection();
 		Scene.active.camera.buildMatrix();
 
@@ -135,8 +136,8 @@ class RenderUtil {
 		RenderPath.active.commands = _commands;
 
 		Context.raw.decalPreview = false;
-		@:privateAccess RenderPath.active.lastW = iron.App.w();
-		@:privateAccess RenderPath.active.lastH = iron.App.h();
+		RenderPath.active.lastW = iron.App.w();
+		RenderPath.active.lastH = iron.App.h();
 
 		// Restore
 		plane.visible = false;
@@ -159,7 +160,7 @@ class RenderUtil {
 	}
 
 	public static function makeTextPreview() {
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 
 		var text = Context.raw.textToolText;
@@ -192,7 +193,7 @@ class RenderUtil {
 	}
 
 	public static function makeFontPreview() {
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 
 		var text = "Abg";
@@ -219,7 +220,7 @@ class RenderUtil {
 		if (RenderPathPaint.liveLayerLocked) return;
 		Context.raw.materialPreview = true;
 
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 
 		// Prepare layers
@@ -355,11 +356,11 @@ class RenderUtil {
 		Scene.active.camera.buildMatrix();
 
 		// Scale layer down to to image preview
-		if (App.pipeMerge == null) App.makePipe();
+		if (Base.pipeMerge == null) Base.makePipe();
 		var l = RenderPathPaint.liveLayer;
 		var target = Context.raw.brush.image;
 		target.g2.begin(true, 0x00000000);
-		target.g2.pipeline = App.pipeCopy;
+		target.g2.pipeline = Base.pipeCopy;
 		target.g2.drawScaledImage(l.texpaint, 0, 0, target.width, target.height);
 		target.g2.pipeline = null;
 		target.g2.end();
@@ -392,9 +393,9 @@ class RenderUtil {
 
 		g4.begin();
 		g4.setPipeline(res.scon.pipeState);
-		iron.object.Uniforms.setContextConstants(g4, res.scon, [""]);
-		iron.object.Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject);
-		iron.object.Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
+		Uniforms.setContextConstants(g4, res.scon, [""]);
+		Uniforms.setObjectConstants(g4, res.scon, Context.raw.paintObject);
+		Uniforms.setMaterialConstants(g4, res.scon, res.mcon);
 		g4.setVertexBuffer(screenAlignedFullVB);
 		g4.setIndexBuffer(screenAlignedFullIB);
 		g4.drawIndexedVertices();

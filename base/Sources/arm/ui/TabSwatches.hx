@@ -2,8 +2,8 @@ package arm.ui;
 
 import zui.Zui;
 import iron.System;
-import iron.system.Time;
-import iron.system.Input;
+import iron.Time;
+import iron.Input;
 import arm.ProjectFormat;
 
 class TabSwatches {
@@ -24,7 +24,6 @@ class TabSwatches {
 
 	static var dragPosition: Int = -1;
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		var statush = Config.raw.layout[LayoutStatusH];
@@ -89,7 +88,7 @@ class TabSwatches {
 				for (j in 0...num) {
 					var i = j + row * num;
 					if (i >= Project.raw.swatches.length) {
-						@:privateAccess ui.endElement(slotw);
+						ui.endElement(slotw);
 						continue;
 					}
 
@@ -103,7 +102,7 @@ class TabSwatches {
 					uiy = ui._y;
 
 					// Draw the drag position indicator
-					if (App.dragSwatch != null && dragPosition == i) {
+					if (Base.dragSwatch != null && dragPosition == i) {
 						ui.fill(-1, -2 , 2, 32, ui.t.HIGHLIGHT_COL);
 					}
 
@@ -113,9 +112,9 @@ class TabSwatches {
 						Context.setSwatch(Project.raw.swatches[i]);
 
 						var mouse = Input.getMouse();
-						App.dragOffX = -(mouse.x - uix - ui._windowX - 2 * slotw);
-						App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-						App.dragSwatch = Context.raw.swatch;
+						Base.dragOffX = -(mouse.x - uix - ui._windowX - 2 * slotw);
+						Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+						Base.dragSwatch = Context.raw.swatch;
 					}
 					else if (state == State.Hovered) {
 						var mouse = Input.getMouse();
@@ -190,7 +189,7 @@ class TabSwatches {
 							else if (UIMenu.menuButton(ui, tr("Create Color Layer"))) {
 								var color = Project.raw.swatches[i].base;
 								color.A = Project.raw.swatches[i].opacity;
-								App.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
+								Base.createColorLayer(color.value, Project.raw.swatches[i].occlusion, Project.raw.swatches[i].roughness, Project.raw.swatches[i].metallic);
 							}
 							#end
 
@@ -212,7 +211,7 @@ class TabSwatches {
 			}
 
 			// Draw the rightmost line next to the last swatch
-			if (App.dragSwatch != null && dragPosition == Project.raw.swatches.length) {
+			if (Base.dragSwatch != null && dragPosition == Project.raw.swatches.length) {
 				ui._x = uix; // Reset the position because otherwise it would start in the row below
 				ui._y = uiy;
 				ui.fill(28, -2, 2, 32, ui.t.HIGHLIGHT_COL);

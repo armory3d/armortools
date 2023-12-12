@@ -3,8 +3,9 @@ package arm.io;
 import js.lib.Uint32Array;
 import js.lib.Float32Array;
 import js.lib.Int16Array;
-import iron.data.Data;
-import iron.math.Vec4;
+import iron.Data;
+import iron.Mat4;
+import iron.Vec4;
 import zui.Zui.Nodes;
 import arm.format.BlendParser;
 
@@ -57,7 +58,7 @@ class ImportBlendMesh {
 				// 	var l = vdata.get("layers", i);
 				// 	if (l.get("type") == 0) { // CD_MVERT
 				// 		var ptr: Dynamic = l.get("data");
-				// 		codata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+				// 		codata_pos = bl.map.get(ptr).pos;
 				// 		codata = l;
 				// 	}
 				// }
@@ -72,12 +73,12 @@ class ImportBlendMesh {
 					var l = ldata.get("layers", i);
 					if (l.get("type") == 16) { // CD_MLOOPUV
 						var ptr: Dynamic = l.get("data");
-						uvdata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+						uvdata_pos = bl.map.get(ptr).pos;
 						uvdata = l;
 					}
 					else if (l.get("type") == 17) { // CD_PROP_BYTE_COLOR
 						var ptr: Dynamic = l.get("data");
-						coldata_pos = bl.map.get(ptr.high).get(ptr.low).pos;
+						coldata_pos = bl.map.get(ptr).pos;
 						coldata = l;
 					}
 					// CD_MLOOP == 26
@@ -399,8 +400,8 @@ class ImportBlendMesh {
 
 				// Apply world matrix
 				var obmat = ob.get("obmat", 0, "float", 16);
-				var mat = iron.math.Mat4.fromFloat32Array(obmat).transpose();
-				var v = new iron.math.Vec4();
+				var mat = Mat4.fromFloat32Array(obmat).transpose();
+				var v = new Vec4();
 				for (i in 0...Std.int(posa32.length / 3)) {
 					v.set(posa32[i * 3], posa32[i * 3 + 1], posa32[i * 3 + 2]);
 					v.applymat4(mat);

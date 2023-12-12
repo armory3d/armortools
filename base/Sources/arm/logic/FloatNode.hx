@@ -12,8 +12,8 @@ class FloatNode extends LogicNode {
 	public var value: Float;
 	var image: Image = null;
 
-	public function new(tree: LogicTree, value = 0.0) {
-		super(tree);
+	public function new(value = 0.0) {
+		super();
 		this.value = value;
 	}
 

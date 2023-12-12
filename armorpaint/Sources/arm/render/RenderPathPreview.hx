@@ -3,7 +3,6 @@ package arm.render;
 import iron.RenderPath;
 import arm.util.RenderUtil;
 
-@:access(iron.RenderPath)
 class RenderPathPreview {
 
 	public static var path: RenderPath;

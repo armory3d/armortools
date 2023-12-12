@@ -12,7 +12,6 @@ class UIStatus {
 		inst = this;
 	}
 
-	@:access(zui.Zui)
 	public function renderUI(g: Graphics2) {
 		var ui = UIBase.inst.ui;
 

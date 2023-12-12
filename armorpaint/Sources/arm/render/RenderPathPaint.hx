@@ -1,13 +1,18 @@
 package arm.render;
 
-import iron.math.Mat4;
-import iron.math.Vec4;
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
-import iron.data.MeshData;
-import iron.system.Input;
+import iron.Mat4;
+import iron.Vec4;
+import iron.MeshObject;
+import iron.SceneFormat;
+import iron.MeshData;
+import iron.Input;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Time;
+import iron.Uniforms;
+import iron.MaterialData;
+import iron.ShaderData;
+import iron.ConstData;
 import arm.ui.UIView2D;
 import arm.Viewport;
 #if is_paint
@@ -142,14 +147,14 @@ class RenderPathPaint {
 
 				var mo: MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 				mo.visible = true;
-				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
+				mo.render(path.currentG, "mesh", path.bindParams);
 				mo.visible = false;
 
 				mo = cast Scene.active.getChild(".Particle");
 				mo.visible = true;
-				mo.render(path.currentG, "mesh", @:privateAccess path.bindParams);
+				mo.render(path.currentG, "mesh", path.bindParams);
 				mo.visible = false;
-				@:privateAccess path.end();
+				path.end();
 			}
 
 			#if is_paint
@@ -268,7 +273,7 @@ class RenderPathPaint {
 				#end
 
 				var texpaint = "texpaint" + tid;
-				if (Context.raw.tool == ToolBake && Context.raw.brushTime == iron.system.Time.delta) {
+				if (Context.raw.tool == ToolBake && Context.raw.brushTime == Time.delta) {
 					// Clear to black on bake start
 					path.setTarget(texpaint);
 					path.clearTarget(0xff000000);
@@ -364,21 +369,21 @@ class RenderPathPaint {
 			}
 			path.bindTarget("gbuffer0_undo", "gbuffer0_undo");
 
-			var materialContexts: Array<iron.data.MaterialData.MaterialContext> = [];
-			var shaderContexts: Array<iron.data.ShaderData.ShaderContext> = [];
+			var materialContexts: Array<MaterialContext> = [];
+			var shaderContexts: Array<ShaderContext> = [];
 			var mats = Project.paintObjects[0].materials;
-			@:privateAccess Project.paintObjects[0].getContexts("paint", mats, materialContexts, shaderContexts);
+			Project.paintObjects[0].getContexts("paint", mats, materialContexts, shaderContexts);
 
 			var cc_context = shaderContexts[0];
-			if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+			if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 			path.currentG.setPipeline(cc_context.pipeState);
-			iron.object.Uniforms.setContextConstants(path.currentG, cc_context, @:privateAccess path.bindParams);
-			iron.object.Uniforms.setObjectConstants(path.currentG, cc_context, Project.paintObjects[0]);
-			iron.object.Uniforms.setMaterialConstants(path.currentG, cc_context, materialContexts[0]);
-			path.currentG.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-			path.currentG.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+			Uniforms.setContextConstants(path.currentG, cc_context, path.bindParams);
+			Uniforms.setObjectConstants(path.currentG, cc_context, Project.paintObjects[0]);
+			Uniforms.setMaterialConstants(path.currentG, cc_context, materialContexts[0]);
+			path.currentG.setVertexBuffer(ConstData.screenAlignedVB);
+			path.currentG.setIndexBuffer(ConstData.screenAlignedIB);
 			path.currentG.drawIndexedVertices();
-			@:privateAccess path.end();
+			path.end();
 			#end
 		}
 	}
@@ -499,7 +504,7 @@ class RenderPathPaint {
 
 		var fillLayer = Context.raw.layer.fill_layer != null;
 		var groupLayer = Context.raw.layer.isGroup();
-		if (!App.uiEnabled || App.isDragging || fillLayer || groupLayer) {
+		if (!Base.uiEnabled || Base.isDragging || fillLayer || groupLayer) {
 			return;
 		}
 
@@ -513,32 +518,31 @@ class RenderPathPaint {
 		drawCursor(mx, my, Context.raw.brushNodesRadius * radius / 3.4);
 	}
 
-	@:access(iron.RenderPath)
 	static function drawCursor(mx: Float, my: Float, radius: Float, tintR = 1.0, tintG = 1.0, tintB = 1.0) {
 		var plane = cast(Scene.active.getChild(".Plane"), MeshObject);
-		var geom = plane.data.geom;
+		var geom = plane.data;
 
 		var g = path.frameG;
-		if (App.pipeCursor == null) App.makeCursorPipe();
+		if (Base.pipeCursor == null) Base.makeCursorPipe();
 
 		path.setTarget("");
-		g.setPipeline(App.pipeCursor);
+		g.setPipeline(Base.pipeCursor);
 		var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 		var decalMask = decal && Operator.shortcut(Config.keymap.decal_mask, ShortcutDown);
 		var img = (decal && !decalMask) ? Context.raw.decalImage : Res.get("cursor.k");
-		g.setTexture(App.cursorTex, img);
+		g.setTexture(Base.cursorTex, img);
 		var gbuffer0 = path.renderTargets.get("gbuffer0").image;
-		g.setTextureDepth(App.cursorGbufferD, gbuffer0);
-		g.setFloat2(App.cursorMouse, mx, my);
-		g.setFloat2(App.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
-		g.setFloat(App.cursorRadius, radius);
+		g.setTextureDepth(Base.cursorGbufferD, gbuffer0);
+		g.setFloat2(Base.cursorMouse, mx, my);
+		g.setFloat2(Base.cursorTexStep, 1 / gbuffer0.width, 1 / gbuffer0.height);
+		g.setFloat(Base.cursorRadius, radius);
 		var right = Scene.active.camera.rightWorld().normalize();
-		g.setFloat3(App.cursorCameraRight, right.x, right.y, right.z);
-		g.setFloat3(App.cursorTint, tintR, tintG, tintB);
-		g.setMatrix(App.cursorVP, Scene.active.camera.VP);
+		g.setFloat3(Base.cursorCameraRight, right.x, right.y, right.z);
+		g.setFloat3(Base.cursorTint, tintR, tintG, tintB);
+		g.setMatrix(Base.cursorVP, Scene.active.camera.VP);
 		var helpMat = Mat4.identity();
 		helpMat.getInverse(Scene.active.camera.VP);
-		g.setMatrix(App.cursorInvVP, helpMat);
+		g.setMatrix(Base.cursorInvVP, helpMat);
 		#if (krom_metal || krom_vulkan)
 		g.setVertexBuffer(geom.get([{name: "tex", data: "short2norm"}]));
 		#else
@@ -820,7 +824,7 @@ class RenderPathPaint {
 		var m = Mat4.identity();
 		m.translate(0, 0, 0.5);
 		cam.transform.setMatrix(m);
-		cam.data.raw.fov = App.defaultFov;
+		cam.data.raw.fov = Base.defaultFov;
 		cam.buildProjection();
 		cam.buildMatrix();
 
@@ -926,7 +930,7 @@ class RenderPathPaint {
 		#if is_paint
 		if (Config.raw.dilate_radius > 0 && !Context.raw.paint2d) {
 			arm.util.UVUtil.cacheDilateMap();
-			App.makeTempImg();
+			Base.makeTempImg();
 			var tid = Context.raw.layer.id;
 			if (base) {
 				var texpaint = "texpaint";

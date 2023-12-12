@@ -2,7 +2,8 @@ package arm.ui;
 
 import zui.Zui;
 import iron.System;
-import iron.system.Input;
+import iron.Input;
+import iron.ConstData;
 import arm.shader.MakeMaterial;
 #if (is_paint || is_sculpt)
 import iron.RenderPath;
@@ -12,7 +13,6 @@ import arm.io.ImportAsset;
 import arm.sys.Path;
 #end
 
-@:access(zui.Zui)
 class UIHeader {
 
 	public static var inst: UIHeader;
@@ -67,7 +67,7 @@ class UIHeader {
 			ui.enabled = true;
 			ui.text(tr("Color ID Map"));
 			if (Project.assetNames.length > 0) {
-				var cid = ui.combo(Context.raw.colorIdHandle, App.enumTexts("TEX_IMAGE"), tr("Color ID"));
+				var cid = ui.combo(Context.raw.colorIdHandle, Base.enumTexts("TEX_IMAGE"), tr("Color ID"));
 				if (Context.raw.colorIdHandle.changed) {
 					Context.raw.ddirty = 2;
 					Context.raw.colorIdPicked = false;
@@ -94,25 +94,25 @@ class UIHeader {
 			ui.enabled = Context.raw.colorIdPicked;
 			if (ui.button(tr("To Mask"))) {
 				if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
-				var m = App.newMask(false, Context.raw.layer);
+				var m = Base.newMask(false, Context.raw.layer);
 				function _next() {
-					if (App.pipeMerge == null) App.makePipe();
-					if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+					if (Base.pipeMerge == null) Base.makePipe();
+					if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 					m.texpaint.g4.begin();
-					m.texpaint.g4.setPipeline(App.pipeColorIdToMask);
-					m.texpaint.g4.setTexture(App.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
-					m.texpaint.g4.setTexture(App.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
-					m.texpaint.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-					m.texpaint.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+					m.texpaint.g4.setPipeline(Base.pipeColorIdToMask);
+					m.texpaint.g4.setTexture(Base.texpaintColorId, RenderPath.active.renderTargets.get("texpaint_colorid").image);
+					m.texpaint.g4.setTexture(Base.texColorId, Project.getImage(Project.assets[Context.raw.colorIdHandle.position]));
+					m.texpaint.g4.setVertexBuffer(ConstData.screenAlignedVB);
+					m.texpaint.g4.setIndexBuffer(ConstData.screenAlignedIB);
 					m.texpaint.g4.drawIndexedVertices();
 					m.texpaint.g4.end();
 					Context.raw.colorIdPicked = false;
 					UIToolbar.inst.toolbarHandle.redraws = 1;
 					UIHeader.inst.headerHandle.redraws = 1;
 					Context.raw.layerPreviewDirty = true;
-					App.updateFillLayers();
+					Base.updateFillLayers();
 				}
-				App.notifyOnNextFrame(_next);
+				Base.notifyOnNextFrame(_next);
 				History.newWhiteMask();
 			}
 			ui.enabled = true;
@@ -141,9 +141,9 @@ class UIHeader {
 				var mouse = Input.getMouse();
 				var uix = ui._x;
 				var uiy = ui._y;
-				App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-				App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-				App.dragSwatch = Project.cloneSwatch(Context.raw.pickedColor);
+				Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+				Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+				Base.dragSwatch = Project.cloneSwatch(Context.raw.pickedColor);
 			}
 			if (ui.isHovered) ui.tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 			if (ui.isHovered && ui.inputReleased) {
@@ -193,7 +193,7 @@ class UIHeader {
 			if (!baking && ui.button(tr("Bake"))) {
 				Context.raw.pdirty = rtBake ? Context.raw.bakeSamples : 1;
 				Context.raw.rdirty = 3;
-				App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					Context.raw.layerPreviewDirty = true;
 				});
 				UIBase.inst.hwnds[0].redraws = 2;

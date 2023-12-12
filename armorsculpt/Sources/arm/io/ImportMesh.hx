@@ -1,9 +1,10 @@
 package arm.io;
 
-import iron.data.SceneFormat;
-import iron.data.MeshData;
-import iron.data.Data;
+import iron.SceneFormat;
+import iron.MeshData;
+import iron.Data;
 import iron.Scene;
+import iron.System;
 import arm.util.MeshUtil;
 import arm.Viewport;
 import arm.sys.Path;
@@ -41,7 +42,7 @@ class ImportMesh {
 		Project.meshAssets = [path];
 
 		#if (krom_android || krom_ios)
-		kha.Window.get().title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		#end
 	}
 
@@ -112,8 +113,8 @@ class ImportMesh {
 						var l = Project.layers.pop();
 						l.unload();
 					}
-					App.newLayer(false);
-					iron.App.notifyOnInit(App.initLayers);
+					Base.newLayer(false);
+					iron.App.notifyOnInit(Base.initLayers);
 					History.reset();
 				}
 
@@ -131,7 +132,7 @@ class ImportMesh {
 				// Wait for addMesh calls to finish
 				iron.App.notifyOnInit(finishImport);
 
-				arm.App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					var f32 = new js.lib.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
 					for (i in 0...Std.int(mesh.inda.length)) {
 						var index = mesh.inda[i];
@@ -140,11 +141,10 @@ class ImportMesh {
 						f32[i * 4 + 2] = mesh.posa[index * 4 + 2] / 32767;
 						f32[i * 4 + 3] = 1.0;
 					}
-					var bytes = haxe.io.Bytes.ofData(f32.buffer);
-					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.RGBA128);
+					var imgmesh = Image.fromBytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					var texpaint = Project.layers[0].texpaint;
 					texpaint.g2.begin(false);
-					texpaint.g2.pipeline = App.pipeCopy128;
+					texpaint.g2.pipeline = Base.pipeCopy128;
 					texpaint.g2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
 					texpaint.g2.end();

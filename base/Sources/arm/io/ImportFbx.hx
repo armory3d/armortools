@@ -1,6 +1,6 @@
 package arm.io;
 
-import iron.data.Data;
+import iron.Data;
 import arm.format.FbxParser;
 
 class ImportFbx {

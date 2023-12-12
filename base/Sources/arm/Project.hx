@@ -2,11 +2,13 @@ package arm;
 
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.ArmPack;
+import iron.MaterialData;
 import iron.System;
-import iron.data.SceneFormat;
-import iron.data.MeshData;
-import iron.data.Data;
-import iron.object.MeshObject;
+import iron.SceneFormat;
+import iron.MeshData;
+import iron.Data;
+import iron.MeshObject;
 import iron.Scene;
 import arm.Viewport;
 import arm.sys.File;
@@ -46,7 +48,7 @@ class Project {
 	public static var meshAssets: Array<String> = [];
 	public static var materialGroups: Array<TNodeGroup> = [];
 	public static var paintObjects: Array<MeshObject> = null;
-	public static var assetMap = new Map<Int, Dynamic>(); // kha.Image | kha.Font
+	public static var assetMap = new Map<Int, Dynamic>(); // Image | Font
 	static var meshList: Array<String> = null;
 	#if (is_paint || is_sculpt)
 	public static var materials: Array<MaterialSlot> = null;
@@ -57,7 +59,7 @@ class Project {
 	public static var atlasNames: Array<String> = null;
 	#end
 	#if is_lab
-	public static var materialData: iron.data.MaterialData = null; ////
+	public static var materialData: MaterialData = null; ////
 	public static var materials: Array<Dynamic> = null; ////
 	public static var nodes: Nodes;
 	public static var canvas: TNodeCanvas;
@@ -71,7 +73,7 @@ class Project {
 				return;
 			}
 
-			var current = @:privateAccess Graphics2.current;
+			var current = Graphics2.current;
 			if (current != null) current.end();
 
 			ImportArm.runProject(path);
@@ -85,9 +87,9 @@ class Project {
 			#if krom_ios
 			var documentDirectory = Krom.saveDialog("", "");
 			documentDirectory = documentDirectory.substr(0, documentDirectory.length - 8); // Strip /'untitled'
-			filepath = documentDirectory + "/" + kha.System.title + ".arm";
+			filepath = documentDirectory + "/" + System.title + ".arm";
 			#elseif krom_android
-			filepath = Krom.savePath() + "/" + kha.System.title + ".arm";
+			filepath = Krom.savePath() + "/" + System.title + ".arm";
 			#else
 			projectSaveAs(saveAndQuit);
 			return;
@@ -132,7 +134,7 @@ class Project {
 				Context.raw.projectType = ui.combo(Zui.handle("project_1", { position: Context.raw.projectType }), meshList, tr("Template"), true);
 				Context.raw.projectAspectRatio = ui.combo(Zui.handle("project_2", { position: Context.raw.projectAspectRatio }), ["1:1", "2:1", "1:2"], tr("Aspect Ratio"), true);
 
-				@:privateAccess ui.endElement();
+				ui.endElement();
 				ui.row([0.5, 0.5]);
 				if (ui.button(tr("Cancel"))) {
 					UIBox.hide();
@@ -205,7 +207,7 @@ class Project {
 				raw = ImportMesh.rawMesh(mesh);
 
 				#if is_sculpt
-				arm.App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					var f32 = new js.lib.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);
 					for (i in 0...Std.int(mesh.inda.length)) {
 						var index = mesh.inda[i];
@@ -215,11 +217,10 @@ class Project {
 						f32[i * 4 + 3] = 1.0;
 					}
 
-					var bytes = haxe.io.Bytes.ofData(f32.buffer);
-					var imgmesh = kha.Image.fromBytes(bytes, Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.RGBA128);
+					var imgmesh = Image.fromBytes(f32.buffer, Config.getTextureResX(), Config.getTextureResY(), TextureFormat.RGBA128);
 					var texpaint = Project.layers[0].texpaint;
 					texpaint.g2.begin(false);
-					texpaint.g2.pipeline = App.pipeCopy128;
+					texpaint.g2.pipeline = Base.pipeCopy128;
 					texpaint.g2.drawScaledImage(imgmesh, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 					texpaint.g2.pipeline = null;
 					texpaint.g2.end();
@@ -228,7 +229,7 @@ class Project {
 			}
 			else {
 				Data.getBlob("meshes/" + meshList[Context.raw.projectType] + ".arm", function(b: js.lib.ArrayBuffer) {
-					raw = iron.system.ArmPack.decode(b).mesh_datas[0];
+					raw = ArmPack.decode(b).mesh_datas[0];
 				});
 			}
 
@@ -243,7 +244,7 @@ class Project {
 		var n = Context.raw.projectType == ModelRoundedCube ? ".Cube" : "Tessellated";
 		Data.getMesh("Scene", n, function(md: MeshData) {
 
-			var current = @:privateAccess Graphics2.current;
+			var current = Graphics2.current;
 			if (current != null) current.end();
 
 			#if is_paint
@@ -256,7 +257,7 @@ class Project {
 			Context.raw.paintObject.name = n;
 			paintObjects = [Context.raw.paintObject];
 			while (materials.length > 0) materials.pop().unload();
-			Data.getMaterial("Scene", "Material", function(m: iron.data.MaterialData) {
+			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 				#if (is_paint || is_sculpt)
 				materials.push(new MaterialSlot(m));
 				#end
@@ -277,7 +278,7 @@ class Project {
 			brushes = [new BrushSlot()];
 			Context.raw.brush = brushes[0];
 
-			fonts = [new FontSlot("default.ttf", App.font)];
+			fonts = [new FontSlot("default.ttf", Base.font)];
 			Context.raw.font = fonts[0];
 			#end
 
@@ -316,11 +317,11 @@ class Project {
 				layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
-					iron.App.notifyOnInit(App.resizeLayers);
+					iron.App.notifyOnInit(Base.resizeLayers);
 				}
 				#end
 
-				iron.App.notifyOnInit(App.initLayers);
+				iron.App.notifyOnInit(Base.initLayers);
 			}
 
 			if (current != null) current.begin(false);
@@ -412,7 +413,7 @@ class Project {
 
 		#if krom_ios
 		// Import immediately while access to resource is unlocked
-		// Data.getBlob(path, function(b: kha.Blob) {});
+		// Data.getBlob(path, function(b: Blob) {});
 		#end
 
 		UIBox.showCustom(function(ui: Zui) {
@@ -457,9 +458,9 @@ class Project {
 						if (done != null) done();
 					}
 					#if (krom_android || krom_ios)
-					arm.App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						Console.toast(tr("Importing mesh"));
-						arm.App.notifyOnNextFrame(doImport);
+						Base.notifyOnNextFrame(doImport);
 					});
 					#else
 					doImport();
@@ -519,9 +520,9 @@ class Project {
 						done(mesh);
 					}
 					#if (krom_android || krom_ios)
-					arm.App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						Console.toast(tr("Unwrapping mesh"));
-						arm.App.notifyOnNextFrame(doUnwrap);
+						Base.notifyOnNextFrame(doUnwrap);
 					});
 					#else
 					doUnwrap();
@@ -576,7 +577,7 @@ class Project {
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 				#end
 			}
-			App.notifyOnNextFrame(_next);
+			Base.notifyOnNextFrame(_next);
 		}
 		if (!File.exists(asset.file)) {
 			var filters = Path.textureFormats.join(",");

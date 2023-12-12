@@ -2,6 +2,7 @@ package arm.data;
 
 import iron.System;
 import iron.RenderPath;
+import iron.Mat4;
 import arm.ui.UIBase;
 import arm.ui.TabLayers;
 import arm.shader.MakeMaterial;
@@ -42,7 +43,7 @@ class LayerSlot {
 	public var paintHeightBlend = true;
 	public var paintEmis = true;
 	public var paintSubs = true;
-	public var decalMat = iron.math.Mat4.identity(); // Decal layer
+	public var decalMat = Mat4.identity(); // Decal layer
 
 	public function new(ext = "", type = SlotLayer, parent: LayerSlot = null) {
 		if (ext == "") {
@@ -59,9 +60,9 @@ class LayerSlot {
 		else if (type == SlotLayer) {
 			name = "Layer " + (id + 1);
 			#if is_paint
-			var format = App.bitsHandle.position == Bits8  ? "RGBA32" :
-						 App.bitsHandle.position == Bits16 ? "RGBA64" :
-						 									 "RGBA128";
+			var format = Base.bitsHandle.position == Bits8  ? "RGBA32" :
+						 Base.bitsHandle.position == Bits16 ? "RGBA64" :
+						 									  "RGBA128";
 			#end
 
 			#if is_sculpt
@@ -161,7 +162,7 @@ class LayerSlot {
 			_texpaint_preview.unload();
 			#end
 		}
-		App.notifyOnNextFrame(_next);
+		Base.notifyOnNextFrame(_next);
 
 		RenderPath.active.renderTargets.remove("texpaint" + ext);
 		#if is_paint
@@ -203,7 +204,7 @@ class LayerSlot {
 		#end
 	}
 
-	public function clear(baseColor = 0x00000000, baseImage: Image = null, occlusion = 1.0, roughness = App.defaultRough, metallic = 0.0) {
+	public function clear(baseColor = 0x00000000, baseImage: Image = null, occlusion = 1.0, roughness = Base.defaultRough, metallic = 0.0) {
 		texpaint.g4.begin();
 		texpaint.g4.clear(baseColor); // Base
 		texpaint.g4.end();
@@ -229,10 +230,10 @@ class LayerSlot {
 	}
 
 	public function invertMask() {
-		if (App.pipeInvert8 == null) App.makePipe();
+		if (Base.pipeInvert8 == null) Base.makePipe();
 		var inverted = Image.createRenderTarget(texpaint.width, texpaint.height, TextureFormat.RGBA32);
 		inverted.g2.begin(false);
-		inverted.g2.pipeline = App.pipeInvert8;
+		inverted.g2.pipeline = Base.pipeInvert8;
 		inverted.g2.drawImage(texpaint, 0, 0);
 		inverted.g2.pipeline = null;
 		inverted.g2.end();
@@ -240,7 +241,7 @@ class LayerSlot {
 		function _next() {
 			_texpaint.unload();
 		}
-		App.notifyOnNextFrame(_next);
+		Base.notifyOnNextFrame(_next);
 		texpaint = RenderPath.active.renderTargets.get("texpaint" + id).image = inverted;
 		Context.raw.layerPreviewDirty = true;
 		Context.raw.ddirty = 3;
@@ -252,11 +253,11 @@ class LayerSlot {
 		}
 		if (parent.isGroup()) {
 			for (c in parent.getChildren()) {
-				App.applyMask(c, this);
+				Base.applyMask(c, this);
 			}
 		}
 		else {
-			App.applyMask(parent, this);
+			Base.applyMask(parent, this);
 		}
 		delete();
 	}
@@ -267,21 +268,21 @@ class LayerSlot {
 		var l = new LayerSlot("", isLayer() ? SlotLayer : isMask() ? SlotMask : SlotGroup, parent);
 		layers.insert(i, l);
 
-		if (App.pipeMerge == null) App.makePipe();
+		if (Base.pipeMerge == null) Base.makePipe();
 		if (isLayer()) {
 			l.texpaint.g2.begin(false);
-			l.texpaint.g2.pipeline = App.pipeCopy;
+			l.texpaint.g2.pipeline = Base.pipeCopy;
 			l.texpaint.g2.drawImage(texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
 			l.texpaint.g2.end();
 			#if is_paint
 			l.texpaint_nor.g2.begin(false);
-			l.texpaint_nor.g2.pipeline = App.pipeCopy;
+			l.texpaint_nor.g2.pipeline = Base.pipeCopy;
 			l.texpaint_nor.g2.drawImage(texpaint_nor, 0, 0);
 			l.texpaint_nor.g2.pipeline = null;
 			l.texpaint_nor.g2.end();
 			l.texpaint_pack.g2.begin(false);
-			l.texpaint_pack.g2.pipeline = App.pipeCopy;
+			l.texpaint_pack.g2.pipeline = Base.pipeCopy;
 			l.texpaint_pack.g2.drawImage(texpaint_pack, 0, 0);
 			l.texpaint_pack.g2.pipeline = null;
 			l.texpaint_pack.g2.end();
@@ -289,7 +290,7 @@ class LayerSlot {
 		}
 		else if (isMask()) {
 			l.texpaint.g2.begin(false);
-			l.texpaint.g2.pipeline = App.pipeCopy8;
+			l.texpaint.g2.pipeline = Base.pipeCopy8;
 			l.texpaint.g2.drawImage(texpaint, 0, 0);
 			l.texpaint.g2.pipeline = null;
 			l.texpaint.g2.end();
@@ -297,7 +298,7 @@ class LayerSlot {
 
 		#if is_paint
 		l.texpaint_preview.g2.begin(true, 0x00000000);
-		l.texpaint_preview.g2.pipeline = App.pipeCopy;
+		l.texpaint_preview.g2.pipeline = Base.pipeCopy;
 		l.texpaint_preview.g2.drawScaledImage(texpaint_preview, 0, 0, texpaint_preview.width, texpaint_preview.height);
 		l.texpaint_preview.g2.pipeline = null;
 		l.texpaint_preview.g2.end();
@@ -330,13 +331,13 @@ class LayerSlot {
 		var resX = Config.getTextureResX();
 		var resY = Config.getTextureResY();
 		var rts = RenderPath.active.renderTargets;
-		if (App.pipeMerge == null) App.makePipe();
+		if (Base.pipeMerge == null) Base.makePipe();
 
 		if (isLayer()) {
 			#if is_paint
-			var format = App.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
-						 App.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
-						 									 TextureFormat.RGBA128;
+			var format = Base.bitsHandle.position == Bits8  ? TextureFormat.RGBA32 :
+						 Base.bitsHandle.position == Bits16 ? TextureFormat.RGBA64 :
+						 									  TextureFormat.RGBA128;
 			#end
 
 			#if is_sculpt
@@ -346,7 +347,7 @@ class LayerSlot {
 			var _texpaint = this.texpaint;
 			this.texpaint = Image.createRenderTarget(resX, resY, format);
 			this.texpaint.g2.begin(false);
-			this.texpaint.g2.pipeline = App.pipeCopy;
+			this.texpaint.g2.pipeline = Base.pipeCopy;
 			this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
 			this.texpaint.g2.pipeline = null;
 			this.texpaint.g2.end();
@@ -358,13 +359,13 @@ class LayerSlot {
 			this.texpaint_pack = Image.createRenderTarget(resX, resY, format);
 
 			this.texpaint_nor.g2.begin(false);
-			this.texpaint_nor.g2.pipeline = App.pipeCopy;
+			this.texpaint_nor.g2.pipeline = Base.pipeCopy;
 			this.texpaint_nor.g2.drawScaledImage(_texpaint_nor, 0, 0, resX, resY);
 			this.texpaint_nor.g2.pipeline = null;
 			this.texpaint_nor.g2.end();
 
 			this.texpaint_pack.g2.begin(false);
-			this.texpaint_pack.g2.pipeline = App.pipeCopy;
+			this.texpaint_pack.g2.pipeline = Base.pipeCopy;
 			this.texpaint_pack.g2.drawScaledImage(_texpaint_pack, 0, 0, resX, resY);
 			this.texpaint_pack.g2.pipeline = null;
 			this.texpaint_pack.g2.end();
@@ -377,7 +378,7 @@ class LayerSlot {
 				_texpaint_pack.unload();
 				#end
 			}
-			App.notifyOnNextFrame(_next);
+			Base.notifyOnNextFrame(_next);
 
 			rts.get("texpaint" + this.ext).image = this.texpaint;
 			#if is_paint
@@ -390,7 +391,7 @@ class LayerSlot {
 			this.texpaint = Image.createRenderTarget(resX, resY, TextureFormat.RGBA32);
 
 			this.texpaint.g2.begin(false);
-			this.texpaint.g2.pipeline = App.pipeCopy8;
+			this.texpaint.g2.pipeline = Base.pipeCopy8;
 			this.texpaint.g2.drawScaledImage(_texpaint, 0, 0, resX, resY);
 			this.texpaint.g2.pipeline = null;
 			this.texpaint.g2.end();
@@ -398,7 +399,7 @@ class LayerSlot {
 			function _next() {
 				_texpaint.unload();
 			}
-			App.notifyOnNextFrame(_next);
+			Base.notifyOnNextFrame(_next);
 
 			rts.get("texpaint" + this.ext).image = this.texpaint;
 		}
@@ -407,13 +408,13 @@ class LayerSlot {
 	public function toFillLayer() {
 		Context.setLayer(this);
 		fill_layer = Context.raw.material;
-		App.updateFillLayer();
+		Base.updateFillLayer();
 		function _next() {
 			MakeMaterial.parsePaintMaterial();
 			Context.raw.layerPreviewDirty = true;
 			UIBase.inst.hwnds[TabSidebar0].redraws = 2;
 		}
-		App.notifyOnNextFrame(_next);
+		Base.notifyOnNextFrame(_next);
 	}
 
 	public function toPaintLayer() {

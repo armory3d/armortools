@@ -12,8 +12,8 @@ class TEX_IMAGE extends LogicNode {
 	public var file: String;
 	public var color_space: String;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {

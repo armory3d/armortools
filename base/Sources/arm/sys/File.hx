@@ -1,6 +1,6 @@
 package arm.sys;
 
-import haxe.io.Bytes;
+import iron.System;
 
 class File {
 
@@ -12,31 +12,31 @@ class File {
 	static inline var cmd_copy = "cp";
 	#end
 
-	static var cloud: Map<String, Array<String>> = null;
+	public static var cloud: Map<String, Array<String>> = null;
 	static var cloudSizes: Map<String, Int> = null;
 
-	#if krom_android
-	static var internal: Map<String, Array<String>> = null; // .apk contents
-	#end
+	// #if krom_android
+	// static var internal: Map<String, Array<String>> = null; // .apk contents
+	// #end
 
 	public static function readDirectory(path: String, foldersOnly = false): Array<String> {
 		if (path.startsWith("cloud")) {
 			var files = cloud != null ? cloud.get(path.replace("\\", "/")) : null;
 			return files != null ? files : [];
 		}
-		#if krom_android
-		path = path.replace("//", "/");
-		if (internal == null) {
-			internal = [];
-			internal.set("/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
-			internal.set("/data/export_presets", BuildMacros.readDirectory("krom/data/export_presets"));
-			internal.set("/data/keymap_presets", BuildMacros.readDirectory("krom/data/keymap_presets"));
-			internal.set("/data/locale", BuildMacros.readDirectory("krom/data/locale"));
-			internal.set("/data/meshes", BuildMacros.readDirectory("krom/data/meshes"));
-			internal.set("/data/themes", BuildMacros.readDirectory("krom/data/themes"));
-		}
-		if (internal.exists(path)) return internal.get(path);
-		#end
+		// #if krom_android
+		// path = path.replace("//", "/");
+		// if (internal == null) {
+		// 	internal = [];
+		// 	internal.set("/data/plugins", BuildMacros.readDirectory("krom/data/plugins"));
+		// 	internal.set("/data/export_presets", BuildMacros.readDirectory("krom/data/export_presets"));
+		// 	internal.set("/data/keymap_presets", BuildMacros.readDirectory("krom/data/keymap_presets"));
+		// 	internal.set("/data/locale", BuildMacros.readDirectory("krom/data/locale"));
+		// 	internal.set("/data/meshes", BuildMacros.readDirectory("krom/data/meshes"));
+		// 	internal.set("/data/themes", BuildMacros.readDirectory("krom/data/themes"));
+		// }
+		// if (internal.exists(path)) return internal.get(path);
+		// #end
 		return Krom.readDirectory(path, foldersOnly).split("\n");
 	}
 
@@ -85,15 +85,15 @@ class File {
 		#end
 	}
 
-	public static function downloadBytes(url: String, done: Bytes->Void) {
+	public static function downloadBytes(url: String, done: js.lib.ArrayBuffer->Void) {
 		var save = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "download.bin";
 		File.download(url, save, function() {
-			var bytes: Bytes = null;
+			var buffer: js.lib.ArrayBuffer = null;
 			try {
-				bytes = Bytes.ofData(Krom.loadBlob(save));
+				buffer = Krom.loadBlob(save);
 			}
 			catch (e: Dynamic) {}
-			done(bytes);
+			done(buffer);
 		});
 	}
 
@@ -136,15 +136,15 @@ class File {
 	}
 
 	static function initCloudBytes(done: Void->Void, append = "") {
-		File.downloadBytes(Config.raw.server + "/?list-type=2" + append, function(bytes: Bytes) {
-			if (bytes == null) {
+		File.downloadBytes(Config.raw.server + "/?list-type=2" + append, function(buffer: js.lib.ArrayBuffer) {
+			if (buffer == null) {
 				cloud.set("cloud", []);
 				Console.error(Strings.error5());
 				return;
 			}
 			var files: Array<String> = [];
 			var sizes: Array<Int> = [];
-			var xml = Xml.parse(bytes.toString());
+			var xml = Xml.parse(System.bufferToString(buffer));
 			for (e in xml.firstElement().elementsNamed("Contents")) {
 				for (k in e.elementsNamed("Key")) {
 					files.push(k.firstChild().nodeValue);
@@ -180,7 +180,7 @@ class File {
 		});
 	}
 
-	static function initCloud(done: Void->Void) {
+	public static function initCloud(done: Void->Void) {
 		cloud = [];
 		cloudSizes = [];
 		initCloudBytes(done);

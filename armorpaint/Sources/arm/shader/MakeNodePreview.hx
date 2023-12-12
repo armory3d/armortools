@@ -4,14 +4,13 @@ import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
 import zui.Zui.TNodeLink;
-import iron.data.SceneFormat;
+import iron.SceneFormat;
 import arm.shader.MaterialParser;
 import arm.shader.NodeShaderData;
 import arm.shader.NodeShaderContext;
 
 class MakeNodePreview {
 
-	@:access(arm.shader.MaterialParser)
 	public static function run(data: NodeShaderData, matcon: TMaterialContext, node: TNode, group: TNodeCanvas, parents: Array<TNode>): NodeShaderContext {
 		var context_id = "mesh";
 		var con_mesh: NodeShaderContext = data.add_context({

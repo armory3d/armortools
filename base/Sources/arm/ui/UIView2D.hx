@@ -2,7 +2,8 @@ package arm.ui;
 
 import zui.Zui;
 import iron.System;
-import iron.system.Input;
+import iron.Input;
+import iron.RenderPath;
 #if (is_paint || is_sculpt)
 import arm.util.RenderUtil;
 import arm.util.UVUtil;
@@ -60,11 +61,10 @@ class UIView2D {
 		#end
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({ theme: App.theme, font: App.font, color_wheel: App.colorWheel, black_white_gradient: App.colorWheelGradient, scaleFactor: scale });
+		ui = new Zui({ theme: Base.theme, font: Base.font, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient, scaleFactor: scale });
 		ui.scrollEnabled = false;
 	}
 
-	@:access(zui.Zui)
 	public function render(g: Graphics2) {
 
 		ww = Config.raw.layout[LayoutNodesW];
@@ -165,15 +165,15 @@ class UIView2D {
 				}
 
 				if (layerMode == View2DVisible) {
-					var current = @:privateAccess Graphics2.current;
+					var current = Graphics2.current;
 					if (current != null) current.end();
-					layer = untyped App.flatten();
+					layer = untyped Base.flatten();
 					if (current != null) current.begin(false);
 				}
 				else if (layer.isGroup()) {
-					var current = @:privateAccess Graphics2.current;
+					var current = Graphics2.current;
 					if (current != null) current.end();
-					layer = untyped App.flatten(false, layer.getChildren());
+					layer = untyped Base.flatten(false, layer.getChildren());
 					if (current != null) current.begin(false);
 				}
 
@@ -244,8 +244,8 @@ class UIView2D {
 				if ((Context.in2dView(View2DAsset) || Context.in2dView(View2DNode)) && Context.raw.tool == ToolPicker && ui.inputDown) {
 					var x = ui.inputX - tx - wx;
 					var y = ui.inputY - ty - wy;
-					App.notifyOnNextFrame(function() {
-						var path = iron.RenderPath.active;
+					Base.notifyOnNextFrame(function() {
+						var path = RenderPath.active;
 						var texpaint_picker = path.renderTargets.get("texpaint_picker").image;
 						var g2 = texpaint_picker.g2;
 						g2.begin(false);
@@ -392,7 +392,6 @@ class UIView2D {
 		g.begin(false);
 	}
 
-	@:access(zui.Zui)
 	public function update() {
 
 		var mouse = Input.getMouse();
@@ -404,7 +403,7 @@ class UIView2D {
 		Context.raw.paint2d = false;
 		#end
 
-		if (!App.uiEnabled ||
+		if (!Base.uiEnabled ||
 			!show ||
 			mouse.x < wx ||
 			mouse.x > wx + ww ||

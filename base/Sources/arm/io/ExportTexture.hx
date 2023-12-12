@@ -3,6 +3,10 @@ package arm.io;
 #if (is_paint || is_lab)
 
 import iron.System;
+import iron.MeshObject;
+import iron.ConstData;
+import iron.RenderPath;
+import iron.Data;
 import arm.ui.UIFiles;
 import arm.ui.BoxExport;
 import arm.sys.Path;
@@ -97,7 +101,7 @@ class ExportTexture {
 		#else
 		Console.info(tr("Textures exported"));
 		#end
-		@:privateAccess UIFiles.lastPath = "";
+		UIFiles.lastPath = "";
 	}
 
 	#if is_paint
@@ -110,7 +114,7 @@ class ExportTexture {
 		Context.raw.tool = ToolFill;
 		MakeMaterial.parsePaintMaterial();
 		var _paintObject = Context.raw.paintObject;
-		var planeo: iron.object.MeshObject = cast Scene.active.getChild(".Plane");
+		var planeo: MeshObject = cast Scene.active.getChild(".Plane");
 		planeo.visible = true;
 		Context.raw.paintObject = planeo;
 		Context.raw.pdirty = 1;
@@ -145,7 +149,7 @@ class ExportTexture {
 		#end
 		if (f == "") f = tr("untitled");
 		var formatType = Context.raw.formatType;
-		var bits = App.bitsHandle.position == Bits8 ? 8 : 16;
+		var bits = Base.bitsHandle.position == Bits8 ? 8 : 16;
 		var ext = bits == 16 ? ".exr" : formatType == FormatPng ? ".png" : ".jpg";
 		if (f.endsWith(ext)) f = f.substr(0, f.length - 4);
 
@@ -153,11 +157,11 @@ class ExportTexture {
 		var isUdim = Context.raw.layersExport == ExportPerUdimTile;
 		if (isUdim) ext = objectName + ext;
 
-		App.makeTempImg();
-		App.makeExportImg();
-		if (App.pipeMerge == null) App.makePipe();
-		if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
-		var empty = iron.RenderPath.active.renderTargets.get("empty_white").image;
+		Base.makeTempImg();
+		Base.makeExportImg();
+		if (Base.pipeMerge == null) Base.makePipe();
+		if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
+		var empty = RenderPath.active.renderTargets.get("empty_white").image;
 
 		// Append object mask name
 		var exportSelected = Context.raw.layersExport == ExportSelected;
@@ -169,15 +173,15 @@ class ExportTexture {
 		}
 
 		// Clear export layer
-		App.expa.g4.begin();
-		App.expa.g4.clear(Color.fromFloats(0.0, 0.0, 0.0, 0.0));
-		App.expa.g4.end();
-		App.expb.g4.begin();
-		App.expb.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0));
-		App.expb.g4.end();
-		App.expc.g4.begin();
-		App.expc.g4.clear(Color.fromFloats(1.0, 0.0, 0.0, 0.0));
-		App.expc.g4.end();
+		Base.expa.g4.begin();
+		Base.expa.g4.clear(Color.fromFloats(0.0, 0.0, 0.0, 0.0));
+		Base.expa.g4.end();
+		Base.expb.g4.begin();
+		Base.expb.g4.clear(Color.fromFloats(0.5, 0.5, 1.0, 0.0));
+		Base.expb.g4.end();
+		Base.expc.g4.begin();
+		Base.expc.g4.clear(Color.fromFloats(1.0, 0.0, 0.0, 0.0));
+		Base.expc.g4.end();
 
 		// Flatten layers
 		for (l1 in layers) {
@@ -194,93 +198,93 @@ class ExportTexture {
 			var l1masks = l1.getMasks();
 			if (l1masks != null && !bakeMaterial) {
 				if (l1masks.length > 1) {
-					App.makeTempMaskImg();
-					App.tempMaskImage.g2.begin(true, 0x00000000);
-					App.tempMaskImage.g2.end();
-					var l1 = { texpaint: App.tempMaskImage };
+					Base.makeTempMaskImg();
+					Base.tempMaskImage.g2.begin(true, 0x00000000);
+					Base.tempMaskImage.g2.end();
+					var l1 = { texpaint: Base.tempMaskImage };
 					for (i in 0...l1masks.length) {
-						App.mergeLayer(untyped l1, l1masks[i]);
+						Base.mergeLayer(untyped l1, l1masks[i]);
 					}
-					mask = App.tempMaskImage;
+					mask = Base.tempMaskImage;
 				}
 				else mask = l1masks[0].texpaint;
 			}
 
 			if (l1.paintBase) {
-				App.tempImage.g2.begin(false); // Copy to temp
-				App.tempImage.g2.pipeline = App.pipeCopy;
-				App.tempImage.g2.drawImage(App.expa, 0, 0);
-				App.tempImage.g2.pipeline = null;
-				App.tempImage.g2.end();
+				Base.tempImage.g2.begin(false); // Copy to temp
+				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				Base.tempImage.g2.drawImage(Base.expa, 0, 0);
+				Base.tempImage.g2.pipeline = null;
+				Base.tempImage.g2.end();
 
-				App.expa.g4.begin();
-				App.expa.g4.setPipeline(App.pipeMerge);
-				App.expa.g4.setTexture(App.tex0, l1.texpaint);
-				App.expa.g4.setTexture(App.tex1, empty);
-				App.expa.g4.setTexture(App.texmask, mask);
-				App.expa.g4.setTexture(App.texa, App.tempImage);
-				App.expa.g4.setFloat(App.opac, l1.getOpacity());
-				App.expa.g4.setInt(App.blending, layers.length > 1 ? l1.blending : 0);
-				App.expa.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-				App.expa.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-				App.expa.g4.drawIndexedVertices();
-				App.expa.g4.end();
+				Base.expa.g4.begin();
+				Base.expa.g4.setPipeline(Base.pipeMerge);
+				Base.expa.g4.setTexture(Base.tex0, l1.texpaint);
+				Base.expa.g4.setTexture(Base.tex1, empty);
+				Base.expa.g4.setTexture(Base.texmask, mask);
+				Base.expa.g4.setTexture(Base.texa, Base.tempImage);
+				Base.expa.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expa.g4.setInt(Base.blending, layers.length > 1 ? l1.blending : 0);
+				Base.expa.g4.setVertexBuffer(ConstData.screenAlignedVB);
+				Base.expa.g4.setIndexBuffer(ConstData.screenAlignedIB);
+				Base.expa.g4.drawIndexedVertices();
+				Base.expa.g4.end();
 			}
 
 			if (l1.paintNor) {
-				App.tempImage.g2.begin(false);
-				App.tempImage.g2.pipeline = App.pipeCopy;
-				App.tempImage.g2.drawImage(App.expb, 0, 0);
-				App.tempImage.g2.pipeline = null;
-				App.tempImage.g2.end();
+				Base.tempImage.g2.begin(false);
+				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				Base.tempImage.g2.drawImage(Base.expb, 0, 0);
+				Base.tempImage.g2.pipeline = null;
+				Base.tempImage.g2.end();
 
-				App.expb.g4.begin();
-				App.expb.g4.setPipeline(App.pipeMerge);
-				App.expb.g4.setTexture(App.tex0, l1.texpaint);
-				App.expb.g4.setTexture(App.tex1, l1.texpaint_nor);
-				App.expb.g4.setTexture(App.texmask, mask);
-				App.expb.g4.setTexture(App.texa, App.tempImage);
-				App.expb.g4.setFloat(App.opac, l1.getOpacity());
-				App.expb.g4.setInt(App.blending, l1.paintNorBlend ? -2 : -1);
-				App.expb.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-				App.expb.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
-				App.expb.g4.drawIndexedVertices();
-				App.expb.g4.end();
+				Base.expb.g4.begin();
+				Base.expb.g4.setPipeline(Base.pipeMerge);
+				Base.expb.g4.setTexture(Base.tex0, l1.texpaint);
+				Base.expb.g4.setTexture(Base.tex1, l1.texpaint_nor);
+				Base.expb.g4.setTexture(Base.texmask, mask);
+				Base.expb.g4.setTexture(Base.texa, Base.tempImage);
+				Base.expb.g4.setFloat(Base.opac, l1.getOpacity());
+				Base.expb.g4.setInt(Base.blending, l1.paintNorBlend ? -2 : -1);
+				Base.expb.g4.setVertexBuffer(ConstData.screenAlignedVB);
+				Base.expb.g4.setIndexBuffer(ConstData.screenAlignedIB);
+				Base.expb.g4.drawIndexedVertices();
+				Base.expb.g4.end();
 			}
 
 			if (l1.paintOcc || l1.paintRough || l1.paintMet || l1.paintHeight) {
-				App.tempImage.g2.begin(false);
-				App.tempImage.g2.pipeline = App.pipeCopy;
-				App.tempImage.g2.drawImage(App.expc, 0, 0);
-				App.tempImage.g2.pipeline = null;
-				App.tempImage.g2.end();
+				Base.tempImage.g2.begin(false);
+				Base.tempImage.g2.pipeline = Base.pipeCopy;
+				Base.tempImage.g2.drawImage(Base.expc, 0, 0);
+				Base.tempImage.g2.pipeline = null;
+				Base.tempImage.g2.end();
 
 				if (l1.paintOcc && l1.paintRough && l1.paintMet && l1.paintHeight) {
-					App.commandsMergePack(App.pipeMerge, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
+					Base.commandsMergePack(Base.pipeMerge, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask, l1.paintHeightBlend ? -3 : -1);
 				}
 				else {
-					if (l1.paintOcc) App.commandsMergePack(App.pipeMergeR, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintRough) App.commandsMergePack(App.pipeMergeG, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
-					if (l1.paintMet) App.commandsMergePack(App.pipeMergeB, App.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintOcc) Base.commandsMergePack(Base.pipeMergeR, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintRough) Base.commandsMergePack(Base.pipeMergeG, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
+					if (l1.paintMet) Base.commandsMergePack(Base.pipeMergeB, Base.expc, l1.texpaint, l1.texpaint_pack, l1.getOpacity(), mask);
 				}
 			}
 		}
 
 		#if krom_metal
 		// Flush command list
-		App.expa.g2.begin(false);
-		App.expa.g2.end();
-		App.expb.g2.begin(false);
-		App.expb.g2.end();
-		App.expc.g2.begin(false);
-		App.expc.g2.end();
+		Base.expa.g2.begin(false);
+		Base.expa.g2.end();
+		Base.expb.g2.begin(false);
+		Base.expb.g2.end();
+		Base.expc.g2.begin(false);
+		Base.expc.g2.end();
 		#end
 		#end
 
 		#if is_paint
-		var texpaint = App.expa;
-		var texpaint_nor = App.expb;
-		var texpaint_pack = App.expc;
+		var texpaint = Base.expa;
+		var texpaint_nor = Base.expb;
+		var texpaint_pack = Base.expc;
 		#end
 
 		#if is_lab
@@ -358,15 +362,15 @@ class ExportTexture {
 		}
 
 		// Release staging memory allocated in Image.getPixels()
-		@:privateAccess texpaint.pixels = null;
-		@:privateAccess texpaint_nor.pixels = null;
-		@:privateAccess texpaint_pack.pixels = null;
+		texpaint.pixels = null;
+		texpaint_nor.pixels = null;
+		texpaint_pack.pixels = null;
 	}
 
 	static function writeTexture(file: String, pixels: js.lib.ArrayBuffer, type = 1, off = 0) {
 		var resX = Config.getTextureResX();
 		var resY = Config.getTextureResY();
-		var bitsHandle = App.bitsHandle.position;
+		var bitsHandle = Base.bitsHandle.position;
 		var bits = bitsHandle == Bits8 ? 8 : bitsHandle == Bits16 ? 16 : 32;
 		var format = 0; // RGBA
 		if (type == 1) format = 2; // RGB1
@@ -377,7 +381,7 @@ class ExportTexture {
 
 		if (Context.raw.layersDestination == DestinationPacked) {
 			var image = Image.fromBytes(pixels, resX, resY);
-			iron.data.Data.cachedImages.set(file, image);
+			Data.cachedImages.set(file, image);
 			var ar = file.split(Path.sep);
 			var name = ar[ar.length - 1];
 			var asset: TAsset = {name: name, file: file, id: Project.assetId++};
@@ -386,7 +390,7 @@ class ExportTexture {
 			Project.raw.assets.push(asset.file);
 			Project.assetNames.push(asset.name);
 			Project.assetMap.set(asset.id, image);
-			@:privateAccess ExportArm.packAssets(Project.raw, [asset]);
+			ExportArm.packAssets(Project.raw, [asset]);
 			return;
 		}
 

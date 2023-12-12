@@ -22,9 +22,9 @@ class ImportAsset {
 			}
 
 			#if (krom_android || krom_ios)
-			arm.App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				Console.toast(tr("Downloading"));
-				arm.App.notifyOnNextFrame(doCacheCloud);
+				Base.notifyOnNextFrame(doCacheCloud);
 			});
 			#else
 			doCacheCloud();

@@ -1,6 +1,9 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
+import iron.Data;
+import iron.ConstData;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -8,41 +11,41 @@ import arm.Translator._tr;
 @:keep
 class InpaintNode extends LogicNode {
 
-	static var image: kha.Image = null;
-	static var mask: kha.Image = null;
-	static var result: kha.Image = null;
+	public static var image: Image = null;
+	public static var mask: Image = null;
+	static var result: Image = null;
 
-	static var temp: kha.Image = null;
-	static var prompt = "";
-	static var strength = 0.5;
+	static var temp: Image = null;
+	public static var prompt = "";
+	public static var strength = 0.5;
 	static var auto = true;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		init();
 	}
 
 	public static function init() {
 		if (image == null) {
-			image = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		}
 
 		if (mask == null) {
-			mask = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), kha.Image.TextureFormat.R8);
-			App.notifyOnNextFrame(function() {
+			mask = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY(), TextureFormat.R8);
+			Base.notifyOnNextFrame(function() {
 				mask.g4.begin();
-				mask.g4.clear(kha.Color.fromFloats(1.0, 1.0, 1.0, 1.0));
+				mask.g4.clear(Color.fromFloats(1.0, 1.0, 1.0, 1.0));
 				mask.g4.end();
 			});
 		}
 
 		if (temp == null) {
-			temp = kha.Image.createRenderTarget(512, 512);
+			temp = Image.createRenderTarget(512, 512);
 		}
 
 		if (result == null) {
-			result = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			result = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		}
 	}
 
@@ -56,11 +59,11 @@ class InpaintNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
-		inputs[0].getAsImage(function(source: kha.Image) {
+	override function getAsImage(from: Int, done: Image->Void) {
+		inputs[0].getAsImage(function(source: Image) {
 
 			Console.progress(tr("Processing") + " - " + tr("Inpaint"));
-			App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				image.g2.begin(false);
 				image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 				image.g2.end();
@@ -70,17 +73,17 @@ class InpaintNode extends LogicNode {
 		});
 	}
 
-	override public function getCachedImage(): kha.Image {
-		App.notifyOnNextFrame(function() {
-			inputs[0].getAsImage(function(source: kha.Image) {
-				if (App.pipeCopy == null) App.makePipe();
-				if (iron.data.ConstData.screenAlignedVB == null) iron.data.ConstData.createScreenAlignedData();
+	override public function getCachedImage(): Image {
+		Base.notifyOnNextFrame(function() {
+			inputs[0].getAsImage(function(source: Image) {
+				if (Base.pipeCopy == null) Base.makePipe();
+				if (ConstData.screenAlignedVB == null) ConstData.createScreenAlignedData();
 				image.g4.begin();
-				image.g4.setPipeline(App.pipeInpaintPreview);
-				image.g4.setTexture(App.tex0InpaintPreview, source);
-				image.g4.setTexture(App.texaInpaintPreview, mask);
-				image.g4.setVertexBuffer(iron.data.ConstData.screenAlignedVB);
-				image.g4.setIndexBuffer(iron.data.ConstData.screenAlignedIB);
+				image.g4.setPipeline(Base.pipeInpaintPreview);
+				image.g4.setTexture(Base.tex0InpaintPreview, source);
+				image.g4.setTexture(Base.texaInpaintPreview, mask);
+				image.g4.setVertexBuffer(ConstData.screenAlignedVB);
+				image.g4.setIndexBuffer(ConstData.screenAlignedIB);
 				image.g4.drawIndexedVertices();
 				image.g4.end();
 			});
@@ -88,11 +91,11 @@ class InpaintNode extends LogicNode {
 		return image;
 	}
 
-	public function getTarget(): kha.Image {
+	public function getTarget(): Image {
 		return mask;
 	}
 
-	public static function texsynthInpaint(image: kha.Image, tiling: Bool, mask: kha.Image/* = null*/, done: kha.Image->Void) {
+	public static function texsynthInpaint(image: Image, tiling: Bool, mask: Image/* = null*/, done: Image->Void) {
 		var w = arm.Config.getTextureResX();
 		var h = arm.Config.getTextureResY();
 
@@ -101,18 +104,18 @@ class InpaintNode extends LogicNode {
 		var bytes_out = new js.lib.ArrayBuffer(w * h * 4);
 		untyped Krom_texsynth.inpaint(w, h, bytes_out, bytes_img, bytes_mask, tiling);
 
-		result = kha.Image.fromBytes(bytes_out, w, h);
+		result = Image.fromBytes(bytes_out, w, h);
 		done(result);
 	}
 
-	public static function sdInpaint(image: kha.Image, mask: kha.Image, done: kha.Image->Void) {
+	public static function sdInpaint(image: Image, mask: Image, done: Image->Void) {
 		init();
 
 		var bytes_img = untyped mask.getPixels().b.buffer;
 		var u8 = new js.lib.Uint8Array(untyped bytes_img);
 		var f32mask = new js.lib.Float32Array(4 * 64 * 64);
 
-		iron.data.Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
+		Data.getBlob("models/sd_vae_encoder.quant.onnx", function(vae_encoder_blob: js.lib.ArrayBuffer) {
 			// for (x in 0...Std.int(image.width / 512)) {
 				// for (y in 0...Std.int(image.height / 512)) {
 					var x = 0;
@@ -159,8 +162,8 @@ class InpaintNode extends LogicNode {
 
 					var num_inference_steps = 50;
 					var init_timestep = Std.int(num_inference_steps * strength);
-					var timestep = @:privateAccess TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
-					var alphas_cumprod = @:privateAccess TextToPhotoNode.alphas_cumprod;
+					var timestep = TextToPhotoNode.timesteps[num_inference_steps - init_timestep];
+					var alphas_cumprod = TextToPhotoNode.alphas_cumprod;
 					var sqrt_alpha_prod = Math.pow(alphas_cumprod[timestep], 0.5);
 					var sqrt_one_minus_alpha_prod = Math.pow(1.0 - alphas_cumprod[timestep], 0.5);
 					for (i in 0...latents.length) {
@@ -169,7 +172,7 @@ class InpaintNode extends LogicNode {
 
 					var start = num_inference_steps - init_timestep;
 
-					TextToPhotoNode.stableDiffusion(prompt, function(img: kha.Image) {
+					TextToPhotoNode.stableDiffusion(prompt, function(img: Image) {
 						// result.g2.begin(false);
 						// result.g2.drawImage(img, x * 512, y * 512);
 						// result.g2.end();

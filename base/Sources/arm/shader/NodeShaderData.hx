@@ -2,7 +2,7 @@ package arm.shader;
 
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
-import iron.data.SceneFormat;
+import iron.SceneFormat;
 
 class NodeShaderData {
 	var material: TMaterial;

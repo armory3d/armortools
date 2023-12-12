@@ -1,7 +1,7 @@
 package arm.io;
 
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 import arm.ui.UIBase;
 import arm.sys.Path;
 import arm.ProjectFormat;
@@ -22,7 +22,7 @@ class ImportTexture {
 				// Set as envmap
 				if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
 					Data.getImage(path, function(image: Image) {
-						App.notifyOnNextFrame(function() { // Make sure file browser process did finish
+						Base.notifyOnNextFrame(function() { // Make sure file browser process did finish
 							ImportEnvmap.run(path, image);
 						});
 					});
@@ -51,7 +51,7 @@ class ImportTexture {
 
 			// Set as envmap
 			if (hdrAsEnvmap && path.toLowerCase().endsWith(".hdr")) {
-				App.notifyOnNextFrame(function() { // Make sure file browser process did finish
+				Base.notifyOnNextFrame(function() { // Make sure file browser process did finish
 					ImportEnvmap.run(path, image);
 				});
 			}

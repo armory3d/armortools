@@ -1,13 +1,14 @@
 package arm.render;
 
 import iron.System;
-import iron.math.Vec4;
-import iron.math.Mat4;
-import iron.math.Quat;
-import iron.object.MeshObject;
-import iron.system.Input;
+import iron.Vec4;
+import iron.Mat4;
+import iron.Quat;
+import iron.MeshObject;
+import iron.Input;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Uniforms;
 import arm.shader.MakeMesh;
 
 class RenderPathBase {
@@ -109,7 +110,7 @@ class RenderPathBase {
 			}
 			else {
 				// Set current viewport
-				Context.raw.viewIndex = Input.getMouse().viewX > arm.App.w() / 2 ? 1 : 0;
+				Context.raw.viewIndex = Input.getMouse().viewX > Base.w() / 2 ? 1 : 0;
 			}
 
 			var cam = Scene.active.camera;
@@ -132,8 +133,8 @@ class RenderPathBase {
 
 		// Match projection matrix jitter
 		var skipTaa = Context.raw.splitView || ((Context.raw.tool == ToolClone || Context.raw.tool == ToolBlur || Context.raw.tool == ToolSmudge) && Context.raw.pdirty > 0);
-		@:privateAccess Scene.active.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
-		@:privateAccess Scene.active.camera.projectionJitter();
+		Scene.active.camera.frame = skipTaa ? 0 : RenderPathBase.taaFrame;
+		Scene.active.camera.projectionJitter();
 		Scene.active.camera.buildMatrix();
 	}
 
@@ -142,7 +143,7 @@ class RenderPathBase {
 		Context.raw.viewIndexLast = Context.raw.viewIndex;
 		Context.raw.viewIndex = -1;
 
-		if (Context.raw.foregroundEvent && !iron.system.Input.getMouse().down()) {
+		if (Context.raw.foregroundEvent && !Input.getMouse().down()) {
 			Context.raw.foregroundEvent = false;
 			Context.raw.pdirty = 0;
 		}
@@ -229,11 +230,11 @@ class RenderPathBase {
 				path.loadShader("shader_datas/bloom_pass/bloom_downsample_pass");
 				path.loadShader("shader_datas/bloom_pass/bloom_upsample_pass");
 
-				iron.object.Uniforms.externalIntLinks.push(function(_, _, link: String) {
+				Uniforms.externalIntLinks.push(function(_, _, link: String) {
 					if (link == "_bloomCurrentMip") return bloomCurrentMip;
 					return null;
 				});
-				iron.object.Uniforms.externalFloatLinks.push(function(_, _, link: String) {
+				Uniforms.externalFloatLinks.push(function(_, _, link: String) {
 					if (link == "_bloomSampleScale") return bloomSampleScale;
 					return null;
 				});
@@ -399,7 +400,7 @@ class RenderPathBase {
 
 	public static function drawSSR() {
 		if (Config.raw.rp_ssr != false) {
-			if (@:privateAccess path.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
+			if (path.cachedShaderContexts.get("shader_datas/ssr_pass/ssr_pass") == null) {
 				{
 					var t = new RenderTargetRaw();
 					t.name = "bufb";
@@ -557,8 +558,8 @@ class RenderPathBase {
 			}
 		}
 
-		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || iron.system.Input.getKeyboard().down("control");
-		var isDecal = App.isDecalLayer();
+		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown) || Input.getKeyboard().down("control");
+		var isDecal = Base.isDecalLayer();
 		if (isDecal && !hide) LineDraw.render(currentG, Context.raw.layer.decalMat);
 	}
 

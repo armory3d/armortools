@@ -1,14 +1,15 @@
 package arm.ui;
 
+import haxe.Json;
 import zui.Zui;
 import iron.System;
+import iron.Data;
 import arm.io.ExportMesh;
 import arm.sys.Path;
 #if (is_paint || is_sculpt)
 import arm.io.ExportArm;
 #end
 #if (is_paint || is_lab)
-import haxe.io.Bytes;
 import arm.io.ExportTexture;
 import arm.sys.File;
 #end
@@ -36,7 +37,7 @@ class BoxExport {
 			}
 			if (preset == null) {
 				parsePreset();
-				@:privateAccess hpreset.children = null;
+				hpreset.children = null;
 			}
 
 			tabExportTextures(ui, tr("Export Textures"));
@@ -63,7 +64,7 @@ class BoxExport {
 			}
 			if (preset == null) {
 				parsePreset();
-				@:privateAccess hpreset.children = null;
+				hpreset.children = null;
 			}
 
 			tabExportTextures(ui, tr("Bake to Textures"), true);
@@ -82,45 +83,45 @@ class BoxExport {
 
 			#if is_paint
 			#if (krom_android || krom_ios)
-			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
+			ui.combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K"], tr("Resolution"), true);
 			#else
-			ui.combo(App.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			ui.combo(Base.resHandle, ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
 			#end
 
 			#if is_lab
 			#if (krom_android || krom_ios)
-			ui.combo(App.resHandle, ["2K", "4K"], tr("Resolution"), true);
+			ui.combo(Base.resHandle, ["2K", "4K"], tr("Resolution"), true);
 			#else
-			ui.combo(App.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
+			ui.combo(Base.resHandle, ["2K", "4K", "8K", "16K"], tr("Resolution"), true);
 			#end
 			#end
 
-			if (App.resHandle.changed) {
-				App.onLayersResized();
+			if (Base.resHandle.changed) {
+				Base.onLayersResized();
 			}
 
 			#if (is_lab || krom_android || krom_ios)
-			ui.combo(App.bitsHandle, ["8bit"], tr("Color"), true);
+			ui.combo(Base.bitsHandle, ["8bit"], tr("Color"), true);
 			#else
-			ui.combo(App.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
+			ui.combo(Base.bitsHandle, ["8bit", "16bit", "32bit"], tr("Color"), true);
 			#end
 
 			#if is_paint
-			if (App.bitsHandle.changed) {
-				iron.App.notifyOnInit(App.setLayerBits);
+			if (Base.bitsHandle.changed) {
+				iron.App.notifyOnInit(Base.setLayerBits);
 			}
 			#end
 
 			ui.row([0.5, 0.5]);
-			if (App.bitsHandle.position == Bits8) {
+			if (Base.bitsHandle.position == Bits8) {
 				Context.raw.formatType = ui.combo(Zui.handle("boxexport_0", { position: Context.raw.formatType }), ["png", "jpg"], tr("Format"), true);
 			}
 			else {
 				Context.raw.formatType = ui.combo(Zui.handle("boxexport_1", { position: Context.raw.formatType }), ["exr"], tr("Format"), true);
 			}
 
-			ui.enabled = Context.raw.formatType == FormatJpg && App.bitsHandle.position == Bits8;
+			ui.enabled = Context.raw.formatType == FormatJpg && Base.bitsHandle.position == Bits8;
 			Context.raw.formatQuality = ui.slider(Zui.handle("boxexport_2", { value: Context.raw.formatQuality }), tr("Quality"), 0.0, 100.0, true, 1);
 			ui.enabled = true;
 
@@ -140,7 +141,7 @@ class BoxExport {
 			layersDestinationHandle.position = Context.raw.layersDestination;
 			Context.raw.layersDestination = ui.combo(layersDestinationHandle, [tr("Disk"), tr("Packed")], tr("Destination"), true);
 
-			@:privateAccess ui.endElement();
+			ui.endElement();
 
 			ui.row([0.5, 0.5]);
 			if (ui.button(tr("Cancel"))) {
@@ -161,7 +162,7 @@ class BoxExport {
 					iron.App.notifyOnInit(_init);
 				}
 				else {
-					var filters = App.bitsHandle.position != Bits8 ? "exr" : Context.raw.formatType == FormatPng ? "png" : "jpg";
+					var filters = Base.bitsHandle.position != Bits8 ? "exr" : Context.raw.formatType == FormatPng ? "png" : "jpg";
 					UIFiles.show(filters, true, false, function(path: String) {
 						Context.raw.textureExportPath = path;
 						function doExport() {
@@ -176,9 +177,9 @@ class BoxExport {
 							iron.App.notifyOnInit(_init);
 						}
 						#if (krom_android || krom_ios)
-						arm.App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							Console.toast(tr("Exporting textures"));
-							arm.App.notifyOnNextFrame(doExport);
+							Base.notifyOnNextFrame(doExport);
 						});
 						#else
 						doExport();
@@ -235,7 +236,7 @@ class BoxExport {
 
 			if (preset == null) {
 				parsePreset();
-				@:privateAccess hpreset.children = null;
+				hpreset.children = null;
 			}
 
 			// Texture list
@@ -295,7 +296,7 @@ class BoxExport {
 			ui.row([1 / 8]);
 			if (ui.button(tr("Add"))) {
 				preset.textures.push({ name: "base", channels: ["base_r", "base_g", "base_b", "1.0"], color_space: "linear" });
-				@:privateAccess hpreset.children = null;
+				hpreset.children = null;
 				savePreset();
 			}
 		}
@@ -374,9 +375,9 @@ class BoxExport {
 						ExportMesh.run(path + Path.sep + f, exportMeshHandle.position == 0 ? null : [Project.paintObjects[exportMeshHandle.position - 1]], applyDisplacement);
 					}
 					#if (krom_android || krom_ios)
-					arm.App.notifyOnNextFrame(function() {
+					Base.notifyOnNextFrame(function() {
 						Console.toast(tr("Exporting mesh"));
-						arm.App.notifyOnNextFrame(doExport);
+						Base.notifyOnNextFrame(doExport);
 					});
 					#else
 					doExport();
@@ -456,9 +457,9 @@ class BoxExport {
 
 	static function parsePreset() {
 		var file = "export_presets/" + files[hpreset.position] + ".json";
-		iron.data.Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
-			preset = haxe.Json.parse(System.bufferToString(blob));
-			iron.data.Data.deleteBlob("export_presets/" + file);
+		Data.getBlob(file, function(blob: js.lib.ArrayBuffer) {
+			preset = Json.parse(System.bufferToString(blob));
+			Data.deleteBlob("export_presets/" + file);
 		});
 	}
 
@@ -472,14 +473,14 @@ class BoxExport {
 ';
 		if (!name.endsWith(".json")) name += ".json";
 		var path = Path.data() + Path.sep + "export_presets" + Path.sep + name;
-		Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+		Krom.fileSaveBytes(path, System.stringToBuffer(template));
 	}
 
 	static function savePreset() {
 		var name = files[hpreset.position];
 		if (name == "generic") return; // generic is const
 		var path = Path.data() + Path.sep + "export_presets" + Path.sep + name + ".json";
-		Krom.fileSaveBytes(path, Bytes.ofString(haxe.Json.stringify(preset)).getData());
+		Krom.fileSaveBytes(path, System.stringToBuffer(Json.stringify(preset)));
 	}
 	#end
 }

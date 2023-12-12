@@ -1,7 +1,7 @@
 package arm.logic;
 
 import iron.System;
-import iron.math.Vec4;
+import iron.Vec4;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import arm.logic.LogicNode;
@@ -14,13 +14,13 @@ class VectorNode extends LogicNode {
 	var value = new Vec4();
 	var image: Image = null;
 
-	public function new(tree: LogicTree, x: Null<Float> = null, y: Null<Float> = null, z: Null<Float> = null) {
-		super(tree);
+	public function new(x: Null<Float> = null, y: Null<Float> = null, z: Null<Float> = null) {
+		super();
 
 		if (x != null) {
-			addInput(new FloatNode(tree, x), 0);
-			addInput(new FloatNode(tree, y), 0);
-			addInput(new FloatNode(tree, z), 0);
+			addInput(new FloatNode(x), 0);
+			addInput(new FloatNode(y), 0);
+			addInput(new FloatNode(z), 0);
 		}
 	}
 

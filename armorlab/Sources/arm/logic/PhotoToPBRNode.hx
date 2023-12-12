@@ -1,6 +1,8 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
+import iron.Data;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -8,20 +10,20 @@ import arm.Translator._tr;
 @:keep
 class PhotoToPBRNode extends LogicNode {
 
-	static var temp: kha.Image = null;
-	static var images: Array<kha.Image> = null;
+	static var temp: Image = null;
+	public static var images: Array<Image> = null;
 	static var modelNames = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-	public static var cachedSource: kha.Image = null;
+	public static var cachedSource: Image = null;
 	static inline var borderW = 64;
 	static inline var tileW = 2048;
 	static inline var tileWithBorderW = tileW + borderW * 2;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		if (temp == null) {
-			temp = kha.Image.createRenderTarget(tileWithBorderW, tileWithBorderW);
+			temp = Image.createRenderTarget(tileWithBorderW, tileWithBorderW);
 		}
 
 		init();
@@ -31,22 +33,22 @@ class PhotoToPBRNode extends LogicNode {
 		if (images == null) {
 			images = [];
 			for (i in 0...modelNames.length) {
-				images.push(kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY()));
+				images.push(Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY()));
 			}
 		}
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
-		function getSource(done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
+		function getSource(done: Image->Void) {
 			if (cachedSource != null) done(cachedSource);
 			else inputs[0].getAsImage(done);
 		}
 
-		getSource(function(source: kha.Image) {
+		getSource(function(source: Image) {
 			cachedSource = source;
 
 			Console.progress(tr("Processing") + " - " + tr("Photo to PBR"));
-			App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				var tileFloats: Array<js.lib.Float32Array> = [];
 				var tilesX = Std.int(Config.getTextureResX() / tileW);
 				var tilesY = Std.int(Config.getTextureResY() / tileW);
@@ -74,7 +76,7 @@ class PhotoToPBRNode extends LogicNode {
 						f32[i + tileWithBorderW * tileWithBorderW * 2] = (u8[i * 4 + 2] / 255 - 0.5) / 0.5;
 					}
 
-					iron.data.Data.getBlob("models/photo_to_" + modelNames[from] + ".quant.onnx", function(model_blob: js.lib.ArrayBuffer) {
+					Data.getBlob("models/photo_to_" + modelNames[from] + ".quant.onnx", function(model_blob: js.lib.ArrayBuffer) {
 						var buf = Krom.mlInference(untyped model_blob, [f32.buffer], null, null, Config.raw.gpu_inference);
 						var ar = new js.lib.Float32Array(buf);
 						var u8 = new js.lib.Uint8Array(4 * tileW * tileW);
@@ -148,11 +150,11 @@ class PhotoToPBRNode extends LogicNode {
 						if (from == ChannelBaseColor) bgraSwap(u8.buffer);
 						#end
 
-						var temp2 = kha.Image.fromBytes(u8.buffer, tileW, tileW);
+						var temp2 = Image.fromBytes(u8.buffer, tileW, tileW);
 						images[from].g2.begin(false);
 						images[from].g2.drawImage(temp2, x * tileW, y * tileW);
 						images[from].g2.end();
-						App.notifyOnNextFrame(function() {
+						Base.notifyOnNextFrame(function() {
 							temp2.unload();
 						});
 					});

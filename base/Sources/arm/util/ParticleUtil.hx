@@ -2,12 +2,13 @@ package arm.util;
 
 import haxe.Json;
 import js.lib.Float32Array;
-import iron.data.SceneFormat;
-import iron.data.MaterialData;
-import iron.object.Object;
-import iron.object.MeshObject;
+import iron.SceneFormat;
+import iron.MaterialData;
+import iron.Object;
+import iron.MeshObject;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Data;
 
 class ParticleUtil {
 
@@ -67,7 +68,7 @@ class ParticleUtil {
 			}
 		}
 
-		iron.data.Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
+		Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
 			Context.raw.particleMaterial = md;
 
 			for (obj in Scene.active.raw.objects) {

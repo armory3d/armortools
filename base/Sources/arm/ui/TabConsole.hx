@@ -1,14 +1,12 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import zui.Zui;
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 import arm.sys.Path;
 
 class TabConsole {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 
@@ -45,7 +43,7 @@ class TabConsole {
 					if (f == "") f = tr("untitled");
 					path = path + Path.sep + f;
 					if (!path.endsWith(".txt")) path += ".txt";
-					Krom.fileSaveBytes(path, Bytes.ofString(str).getData());
+					Krom.fileSaveBytes(path, System.stringToBuffer(str));
 				});
 			}
 			#if (krom_windows || krom_linux || krom_darwin)

@@ -124,7 +124,7 @@ class Main {
 
 			// Active file
 			if (abs == storage.file) {
-				ui.fill(0, 1, @:privateAccess ui._w - 1, ui.ELEMENT_H() - 1, ui.t.BUTTON_PRESSED_COL);
+				ui.fill(0, 1, ui._w - 1, ui.ELEMENT_H() - 1, ui.t.BUTTON_PRESSED_COL);
 			}
 
 			var prefix = "";
@@ -205,7 +205,7 @@ class Main {
 				}
 			}
 
-			window_header_h = 32;//@:privateAccess Std.int(ui.windowHeaderH);
+			window_header_h = 32;//Std.int(ui.windowHeaderH);
 		}
 
 		if (resizing_sidebar) {

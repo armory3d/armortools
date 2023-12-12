@@ -11,8 +11,8 @@ class MathNode extends LogicNode {
 	public var operation: String;
 	public var use_clamp: Bool;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {

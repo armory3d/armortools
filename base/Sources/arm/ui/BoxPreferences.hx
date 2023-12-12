@@ -1,10 +1,10 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import haxe.Json;
 import zui.Zui;
 import iron.System;
-import iron.data.Data;
+import iron.Data;
+import iron.Scene;
 import arm.shader.MakeMaterial;
 import arm.io.ImportPlugin;
 import arm.io.ImportKeymap;
@@ -26,7 +26,6 @@ class BoxPreferences {
 	static var themes: Array<String> = null;
 	static var worldColor = Color.fromValue(0xff080808);
 
-	@:access(zui.Zui)
 	public static function show() {
 
 		UIBox.showCustom(function(ui: Zui) {
@@ -103,7 +102,7 @@ class BoxPreferences {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Confirm"))) {
 							iron.App.notifyOnInit(function() {
-								ui.t.ELEMENT_H = App.defaultElementH;
+								ui.t.ELEMENT_H = Base.defaultElementH;
 								Config.restore();
 								setScale();
 								if (filesPlugin != null) for (f in filesPlugin) Plugin.stop(f);
@@ -118,7 +117,7 @@ class BoxPreferences {
 								Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
 									var raw = Json.parse(System.bufferToString(b));
 									iron.App.notifyOnInit(function() {
-										ui.t.ELEMENT_H = App.defaultElementH;
+										ui.t.ELEMENT_H = Base.defaultElementH;
 										Config.importFrom(raw);
 										setScale();
 										MakeMaterial.parseMeshMaterial();
@@ -132,7 +131,7 @@ class BoxPreferences {
 				if (ui.button(tr("Reset Layout")) && !UIMenu.show) {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Confirm"))) {
-							App.initLayout();
+							Base.initLayout();
 							Config.save();
 						}
 					}, 1);
@@ -161,10 +160,10 @@ class BoxPreferences {
 							ui.row([0.5, 0.5]);
 							var themeName = ui.textInput(Zui.handle("boxpreferences_14", { text: "new_theme" }), tr("Name"));
 							if (ui.button(tr("OK")) || ui.isReturnDown) {
-								var template = Json.stringify(arm.App.theme);
+								var template = Json.stringify(Base.theme);
 								if (!themeName.endsWith(".json")) themeName += ".json";
 								var path = Path.data() + Path.sep + "themes" + Path.sep + themeName;
-								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+								Krom.fileSaveBytes(path, System.stringToBuffer(template));
 								fetchThemes(); // Refresh file list
 								Config.raw.theme = themeName;
 								themeHandle.position = getThemeIndex();
@@ -186,14 +185,14 @@ class BoxPreferences {
 					UIFiles.show("json", true, false, function(path) {
 						path += Path.sep + UIFiles.filename;
 						if (!path.endsWith(".json")) path += ".json";
-						Krom.fileSaveBytes(path, Bytes.ofString(Json.stringify(arm.App.theme)).getData());
+						Krom.fileSaveBytes(path, System.stringToBuffer(Json.stringify(Base.theme)));
 					});
 				}
 
 				ui.endSticky();
 
 				var i = 0;
-				var theme = arm.App.theme;
+				var theme = Base.theme;
 				var hlist = Zui.handle("boxpreferences_15");
 
 				// Viewport color
@@ -223,7 +222,7 @@ class BoxPreferences {
 					Context.raw.emptyEnvmap = Image.fromBytes(b.buffer, 1, 1);
 					Context.raw.ddirty = 2;
 					if (!Context.raw.showEnvmap) {
-						iron.Scene.active.world.envmap = Context.raw.emptyEnvmap;
+						Scene.active.world.envmap = Context.raw.emptyEnvmap;
 					}
 				}
 
@@ -274,7 +273,7 @@ class BoxPreferences {
 					}
 
 					if (ui.changed) {
-						for (ui in App.getUIs()) {
+						for (ui in Base.getUIs()) {
 							ui.elementsBaked = false;
 						}
 					}
@@ -484,7 +483,7 @@ class BoxPreferences {
 				// Context.raw.autoExposureStrength = ui.slider(h, "Auto Exposure", 0.0, 2.0, true);
 				// if (h.changed) Context.raw.ddirty = 2;
 
-				var cam = iron.Scene.active.camera;
+				var cam = Scene.active.camera;
 				var camRaw = cam.data.raw;
 				var near_handle = Zui.handle("boxpreferences_47");
 				var far_handle = Zui.handle("boxpreferences_48");
@@ -526,10 +525,10 @@ class BoxPreferences {
 							ui.row([0.5, 0.5]);
 							var keymapName = ui.textInput(Zui.handle("boxpreferences_52", { text: "new_keymap" }), tr("Name"));
 							if (ui.button(tr("OK")) || ui.isReturnDown) {
-								var template = Json.stringify(arm.App.defaultKeymap);
+								var template = Json.stringify(Base.defaultKeymap);
 								if (!keymapName.endsWith(".json")) keymapName += ".json";
 								var path = Path.data() + Path.sep + "keymap_presets" + Path.sep + keymapName;
-								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+								Krom.fileSaveBytes(path, System.stringToBuffer(template));
 								fetchKeymaps(); // Refresh file list
 								Config.raw.keymap = keymapName;
 								presetHandle.position = getPresetIndex();
@@ -593,7 +592,7 @@ plugin.drawUI = function(ui) {
 ";
 								if (!pluginName.endsWith(".js")) pluginName += ".js";
 								var path = Path.data() + Path.sep + "plugins" + Path.sep + pluginName;
-								Krom.fileSaveBytes(path, Bytes.ofString(template).getData());
+								Krom.fileSaveBytes(path, System.stringToBuffer(template));
 								filesPlugin = null; // Refresh file list
 								UIBox.hide();
 								BoxPreferences.htab.position = 6; // Plugins
@@ -625,7 +624,7 @@ plugin.drawUI = function(ui) {
 					ui.check(h, tag);
 					if (h.changed && h.selected != enabled) {
 						h.selected ? Config.enablePlugin(f) : Config.disablePlugin(f);
-						App.redrawUI();
+						Base.redrawUI();
 					}
 					if (ui.isHovered && ui.inputReleasedR) {
 						UIMenu.draw(function(ui: Zui) {
@@ -634,9 +633,9 @@ plugin.drawUI = function(ui) {
 								File.start(path);
 							}
 							if (UIMenu.menuButton(ui, tr("Edit in Script Tab"))) {
-								iron.data.Data.getBlob("plugins/" + f, function(blob: js.lib.ArrayBuffer) {
+								Data.getBlob("plugins/" + f, function(blob: js.lib.ArrayBuffer) {
 									TabScript.hscript.text = System.bufferToString(blob);
-									iron.data.Data.deleteBlob("plugins/" + f);
+									Data.deleteBlob("plugins/" + f);
 									Console.info(tr("Script opened"));
 								});
 
@@ -697,9 +696,9 @@ plugin.drawUI = function(ui) {
 		UIBase.inst.setIconScale();
 		UINodes.inst.ui.setScale(scale);
 		UIView2D.inst.ui.setScale(scale);
-		App.uiBox.setScale(scale);
-		App.uiMenu.setScale(scale);
-		App.resize();
+		Base.uiBox.setScale(scale);
+		Base.uiMenu.setScale(scale);
+		Base.resize();
 		#if (is_paint || is_sculpt)
 		Config.raw.layout[LayoutSidebarW] = Std.int(UIBase.defaultSidebarW * scale);
 		UIToolbar.inst.toolbarw = Std.int(UIToolbar.defaultToolbarW * scale);

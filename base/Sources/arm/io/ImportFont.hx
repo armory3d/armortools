@@ -1,7 +1,7 @@
 package arm.io;
 
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 import arm.sys.Path;
 import arm.ui.UIBase;
 import arm.data.FontSlot;

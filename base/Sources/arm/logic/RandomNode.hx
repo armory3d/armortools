@@ -8,8 +8,8 @@ import arm.Translator._tr;
 @:keep
 class RandomNode extends LogicNode {
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
 	override function get(from: Int, done: Dynamic->Void) {

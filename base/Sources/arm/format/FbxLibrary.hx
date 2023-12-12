@@ -22,6 +22,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package arm.format;
 
+import iron.Mat4;
+import iron.Vec4;
+import iron.Quat;
+
 enum FbxProp {
 	PInt(v: Int);
 	PFloat(v: Float);
@@ -453,11 +457,11 @@ class Parser {
 
 class FbxLibrary {
 
-	var root: FbxNode;
-	var ids: Map<Int,FbxNode>;
-	var connect: Map<Int,Array<Int>>;
-	var namedConnect: Map<Int,Map<String,Int>>;
-	var invConnect: Map<Int,Array<Int>>;
+	public var root: FbxNode;
+	public var ids: Map<Int,FbxNode>;
+	public var connect: Map<Int,Array<Int>>;
+	public var namedConnect: Map<Int,Map<String,Int>>;
+	public var invConnect: Map<Int,Array<Int>>;
 	// var uvAnims: Map<String, Array<{ t : Float, u : Float, v : Float }>>;
 	// var animationEvents: Array<{ frame : Int, data : String }>;
 
@@ -490,32 +494,6 @@ class FbxLibrary {
 		for (c in root.childs) {
 			init(c);
 		}
-
-		// init properties
-		// for( m in FbxTools.getAll(this.root, "Objects.Model") ) {
-		// 	for( p in FbxTools.getAll(m, "Properties70.P") )
-		// 		switch( FbxTools.toString(p.props[0]) ) {
-		// 		case "UDP3DSMAX":
-		// 			var userProps = FbxTools.toString(p.props[4]).split("&cr;&lf;");
-		// 			for( p in userProps ) {
-		// 				var pl = p.split("=");
-		// 				var pname = StringTools.trim(pl.shift());
-		// 				var pval = StringTools.trim(pl.join("="));
-		// 				switch( pname ) {
-		// 				case "UV" if( pval != "" ):
-		// 					var xml = try Xml.parse(pval) catch( e : Dynamic ) throw "Invalid UV data in " + FbxTools.getName(m);
-		// 					var frames = [for( f in new haxe.xml.Access(xml.firstElement()).elements ) { var f = f.innerData.split(" ");  { t : Std.parseFloat(f[0]) * 9622116.25, u : Std.parseFloat(f[1]), v : Std.parseFloat(f[2]) }} ];
-		// 					if( uvAnims == null ) uvAnims = new Map();
-		// 					uvAnims.set(FbxTools.getName(m), frames);
-		// 				case "Events":
-		// 					var xml = try Xml.parse(pval) catch( e : Dynamic ) throw "Invalid Events data in " + FbxTools.getName(m);
-		// 					animationEvents = [for( f in new haxe.xml.Access(xml.firstElement()).elements ) { var f = f.innerData.split(" ");  { frame : Std.parseInt(f.shift()), data : StringTools.trim(f.join(" ")) }} ];
-		// 				default:
-		// 				}
-		// 			}
-		// 		default:
-		// 		}
-		// }
 	}
 
 	function init(n: FbxNode) {
@@ -600,8 +578,8 @@ class FbxLibrary {
 
 class Geometry {
 
-	var lib: FbxLibrary;
-	var root: FbxNode;
+	public var lib: FbxLibrary;
+	public var root: FbxNode;
 
 	static inline var eps = 1.0 / 32767;
 
@@ -709,11 +687,11 @@ class Geometry {
 		var polys = getPolygons();
 
 		if (FbxParser.parseTransform) {
-			var m = iron.math.Mat4.identity();
-			var v = new iron.math.Vec4(p.tx, p.ty, p.tz);
-			var q = new iron.math.Quat();
+			var m = Mat4.identity();
+			var v = new Vec4(p.tx, p.ty, p.tz);
+			var q = new Quat();
 			q.fromEuler(p.rx, p.ry, p.rz);
-			var sc = new iron.math.Vec4(p.sx, p.sy, p.sz);
+			var sc = new Vec4(p.sx, p.sy, p.sz);
 			m.compose(v, q, sc);
 
 			for (i in 0...Std.int(pbuf.length / 3)) {

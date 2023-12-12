@@ -1,15 +1,16 @@
 package arm.render;
 
 import iron.System;
-import iron.math.Vec4;
-import iron.math.Mat4;
+import iron.Scene;
+import iron.Vec4;
+import iron.Mat4;
 
 class LineDraw {
 
 	public static var color: Color = 0xffff0000;
 	public static var strength = 0.005;
-	public static var mat: iron.math.Mat4 = null;
-	public static var dim: iron.math.Vec4 = null;
+	public static var mat: Mat4 = null;
+	public static var dim: Vec4 = null;
 
 	static var vertexBuffer: VertexBuffer;
 	static var indexBuffer: IndexBuffer;
@@ -28,7 +29,7 @@ class LineDraw {
 
 	static var g: Graphics4;
 
-	public static function render(g4: Graphics4, matrix: iron.math.Mat4) {
+	public static function render(g4: Graphics4, matrix: Mat4) {
 		g = g4;
 		mat = matrix;
 		dim = matrix.getScale();
@@ -65,7 +66,7 @@ class LineDraw {
 	static var vx = new Vec4();
 	static var vy = new Vec4();
 	static var vz = new Vec4();
-	public static function bounds(mat: iron.math.Mat4, dim: iron.math.Vec4) {
+	public static function bounds(mat: Mat4, dim: Vec4) {
 		wpos = mat.getLoc();
 		var dx = dim.x / 2;
 		var dy = dim.y / 2;
@@ -137,7 +138,7 @@ class LineDraw {
 		midLine.set(x1, y1, z1);
 		midLine.sub(midPoint);
 
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		cameraLook = camera.transform.world.getLoc();
 		cameraLook.sub(midPoint);
 
@@ -183,7 +184,7 @@ class LineDraw {
 		g.setVertexBuffer(vertexBuffer);
 		g.setIndexBuffer(indexBuffer);
 		g.setPipeline(pipeline);
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		vp.setFrom(camera.V);
 		vp.multmat(camera.P);
 		g.setMatrix(vpID, vp);

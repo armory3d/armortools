@@ -1,13 +1,13 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import haxe.Json;
-import iron.System;
 import zui.Zui;
+import iron.System;
 import iron.Scene;
-import iron.system.Input;
+import iron.Mat4;
+import iron.Data;
+import iron.Input;
 import arm.Viewport;
-import arm.sys.BuildMacros;
 import arm.sys.Path;
 import arm.sys.File;
 import arm.shader.MakeMaterial;
@@ -31,8 +31,8 @@ class UIMenu {
 	static var hideMenu = false;
 
 	public static function render(g: Graphics2) {
-		var ui = App.uiMenu;
-		var menuW = menuCommands != null ? Std.int(App.defaultElementW * App.uiMenu.SCALE() * 2.3) : Std.int(ui.ELEMENT_W() * 2.3);
+		var ui = Base.uiMenu;
+		var menuW = menuCommands != null ? Std.int(Base.defaultElementW * Base.uiMenu.SCALE() * 2.3) : Std.int(ui.ELEMENT_W() * 2.3);
 		var _BUTTON_COL = ui.t.BUTTON_COL;
 		ui.t.BUTTON_COL = ui.t.SEPARATOR_COL;
 		var _ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -130,7 +130,7 @@ class UIMenu {
 
 				#if !(krom_android || krom_ios)
 				if (menuButton(ui, tr("Toggle Fullscreen"), "alt+enter")) {
-					App.toggleFullscreen();
+					Base.toggleFullscreen();
 				}
 				#end
 
@@ -171,7 +171,7 @@ class UIMenu {
 					if (lhandle.changed) Context.raw.ddirty = 2;
 
 					menuFill(ui);
-					var light = iron.Scene.active.lights[0];
+					var light = Scene.active.lights[0];
 					var lahandle = Zui.handle("uimenu_3");
 					lahandle.value = Context.raw.lightAngle / Math.PI * 180;
 					menuAlign(ui);
@@ -182,7 +182,7 @@ class UIMenu {
 						if (newAngle < 0) newAngle += (Std.int(-newAngle / (2 * Math.PI)) + 1) * 2 * Math.PI;
 						else if (newAngle > 2 * Math.PI) newAngle -= Std.int(newAngle / (2 * Math.PI)) * 2 * Math.PI;
 						Context.raw.lightAngle = newAngle;
-						var m = iron.math.Mat4.rotationZ(ldiff);
+						var m = Mat4.rotationZ(ldiff);
 						light.transform.local.multmat(m);
 						light.transform.decompose();
 						Context.raw.ddirty = 2;
@@ -201,7 +201,7 @@ class UIMenu {
 				var splitViewHandle = Zui.handle("uimenu_5", { selected: Context.raw.splitView });
 				Context.raw.splitView = ui.check(splitViewHandle, " " + tr("Split View"));
 				if (splitViewHandle.changed) {
-					App.resize();
+					Base.resize();
 				}
 				#end
 
@@ -424,16 +424,16 @@ class UIMenu {
 				}
 				if (menuButton(ui, tr("Report Bug"))) {
 					#if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId);
 					#else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 					#end
 				}
 				if (menuButton(ui, tr("Request Feature"))) {
 					#if (krom_darwin || krom_ios) // Limited url length
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId);
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId);
 					#else
-					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Main.sha + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
+					File.loadUrl("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + Manifest.title + "%20" + Manifest.version + "-" + Config.getSha() + ",%20" + System.systemId + "*%0A%0A**Feature description:**%0A%0A");
 					#end
 				}
 				menuSeparator(ui);
@@ -445,13 +445,13 @@ class UIMenu {
 					File.loadUrl(Manifest.url_ios);
 					#else
 					// Retrieve latest version number
-					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title.toLowerCase() + ".html", function(bytes: Bytes) {
-						if (bytes != null)  {
+					File.downloadBytes("https://server.armorpaint.org/" + Manifest.title.toLowerCase() + ".html", function(buffer: js.lib.ArrayBuffer) {
+						if (buffer != null)  {
 							// Compare versions
-							var update = Json.parse(bytes.toString());
+							var update = Json.parse(System.bufferToString(buffer));
 							var updateVersion = Std.int(update.version);
 							if (updateVersion > 0) {
-								var date = BuildMacros.date().split(" ")[0].substr(2); // 2019 -> 19
+								var date = Config.getDate().substr(2); // 2019 -> 19
 								var dateInt = Std.parseInt(date.replace("-", ""));
 								if (updateVersion > dateInt) {
 									UIBox.showMessage(tr("Update"), tr("Update is available!\nPlease visit {url}.", ["url" => Manifest.url]));
@@ -470,16 +470,17 @@ class UIMenu {
 
 				if (menuButton(ui, tr("About..."))) {
 
-					var msg = Manifest.title + ".org - v" + Manifest.version + " (" + Main.date + ") - " + Main.sha + "\n";
+					var msg = Manifest.title + ".org - v" + Manifest.version + " (" + Config.getDate() + ") - " + Config.getSha() + "\n";
 					msg += System.systemId + " - " + Strings.graphics_api;
 
 					#if krom_windows
 					var save = (Path.isProtected() ? Krom.savePath() : Path.data()) + Path.sep + "tmp.txt";
 					Krom.sysCommand('wmic path win32_VideoController get name > "' + save + '"');
-					var bytes = haxe.io.Bytes.ofData(Krom.loadBlob(save));
+					var blob = Krom.loadBlob(save);
+					var u8 = new js.lib.Uint8Array(blob);
 					var gpuRaw = "";
-					for (i in 0...Std.int(bytes.length / 2)) {
-						var c = String.fromCharCode(bytes.get(i * 2));
+					for (i in 0...Std.int(u8.length / 2)) {
+						var c = String.fromCharCode(u8[i * 2]);
 						gpuRaw += c;
 					}
 
@@ -499,7 +500,7 @@ class UIMenu {
 						var tabVertical = Config.raw.touch_ui;
 						if (ui.tab(Zui.handle("uimenu_13"), tr("About"), tabVertical)) {
 
-							iron.data.Data.getImage("badge.k", function(img) {
+							Data.getImage("badge.k", function(img) {
 								ui.image(img);
 								ui.endElement();
 							});
@@ -546,11 +547,11 @@ class UIMenu {
 
 	static function hide() {
 		show = false;
-		App.redrawUI();
+		Base.redrawUI();
 	}
 
 	public static function draw(commands: Zui->Void = null, elements: Int, x = -1, y = -1) {
-		App.uiMenu.endInput();
+		Base.uiMenu.endInput();
 		show = true;
 		menuCommands = commands;
 		menuElements = elements;
@@ -561,7 +562,7 @@ class UIMenu {
 
 	public static function fitToScreen() {
 		// Prevent the menu going out of screen
-		var menuW = App.defaultElementW * App.uiMenu.SCALE() * 2.3;
+		var menuW = Base.defaultElementW * Base.uiMenu.SCALE() * 2.3;
 		if (menuX + menuW > System.width) {
 			if (menuX - menuW > 0) {
 				menuX = Std.int(menuX - menuW);
@@ -570,7 +571,7 @@ class UIMenu {
 				menuX = Std.int(System.width - menuW);
 			}
 		}
-		var menuH = Std.int(menuElements * 30 * App.uiMenu.SCALE()); // ui.t.ELEMENT_H
+		var menuH = Std.int(menuElements * 30 * Base.uiMenu.SCALE()); // ui.t.ELEMENT_H
 		if (menuY + menuH > System.height) {
 			if (menuY - menuH > 0) {
 				menuY = Std.int(menuY - menuH);

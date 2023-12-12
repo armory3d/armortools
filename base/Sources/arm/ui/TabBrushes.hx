@@ -3,7 +3,7 @@ package arm.ui;
 #if (is_paint || is_sculpt)
 
 import haxe.Json;
-import iron.system.Time;
+import iron.Time;
 import zui.Zui;
 import arm.data.BrushSlot;
 import arm.shader.MakeMaterial;
@@ -11,7 +11,6 @@ import arm.util.RenderUtil;
 
 class TabBrushes {
 
-	@:access(zui.Zui)
 	public static function draw(htab: Handle) {
 		var ui = UIBase.inst.ui;
 		if (ui.tab(htab, tr("Brushes"))) {
@@ -47,8 +46,8 @@ class TabBrushes {
 					var imgw = Std.int(50 * ui.SCALE());
 					var i = j + row * num;
 					if (i >= Project.brushes.length) {
-						@:privateAccess ui.endElement(imgw);
-						if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
+						ui.endElement(imgw);
+						if (Config.raw.show_asset_names) ui.endElement(0);
 						continue;
 					}
 					var img = ui.SCALE() > 1 ? Project.brushes[i].image : Project.brushes[i].imageIcon;

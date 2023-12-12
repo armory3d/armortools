@@ -3,8 +3,9 @@ package arm;
 import iron.System;
 import iron.RenderPath;
 import iron.Scene;
-import iron.object.MeshObject;
-import iron.system.Input;
+import iron.MeshObject;
+import iron.Input;
+import iron.Data;
 import arm.render.RenderPathDeferred;
 import arm.render.RenderPathForward;
 import arm.shader.MakeMaterial;
@@ -61,7 +62,7 @@ class Context {
 			function _next() {
 				RenderUtil.makeDecalPreview();
 			}
-			App.notifyOnNextFrame(_next);
+			Base.notifyOnNextFrame(_next);
 		}
 	}
 
@@ -102,10 +103,10 @@ class Context {
 		raw.layer = l;
 		UIHeader.inst.headerHandle.redraws = 2;
 
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 
-		App.setObjectMask();
+		Base.setObjectMask();
 		MakeMaterial.parseMeshMaterial();
 		MakeMaterial.parsePaintMaterial();
 
@@ -157,7 +158,7 @@ class Context {
 		}
 
 		else if (raw.tool == ToolMaterial) {
-			App.updateFillLayers();
+			Base.updateFillLayers();
 			Context.mainObject().skip_context = null;
 		}
 
@@ -301,7 +302,7 @@ class Context {
 		if (!raw.envmapLoaded) {
 			// TODO: Unable to share texture for both radiance and envmap - reload image
 			raw.envmapLoaded = true;
-			iron.data.Data.cachedImages.remove("World_radiance.k");
+			Data.cachedImages.remove("World_radiance.k");
 		}
 		Scene.active.world.loadEnvmap(function(_) {});
 		if (raw.savedEnvmap == null) raw.savedEnvmap = Scene.active.world.envmap;
@@ -378,12 +379,12 @@ class Context {
 			raw.paintVec.x < right &&
 			raw.paintVec.y > 0 &&
 			raw.paintVec.y < 1 &&
-			!arm.App.isDragging &&
-			!arm.App.isResizing &&
-			!arm.App.isScrolling() &&
-			!arm.App.isComboSelected()) {
+			!Base.isDragging &&
+			!Base.isResizing &&
+			!Base.isScrolling() &&
+			!Base.isComboSelected()) {
 
-			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			var down = Input.getMouse().down() || Input.getPen().down();
 
 			// Prevent painting the same spot
 			var sameSpot = raw.paintVec.x == raw.lastPaintX && raw.paintVec.y == raw.lastPaintY;
@@ -417,7 +418,7 @@ class Context {
 	}
 
 	static function update() {
-		var mouse = iron.system.Input.getMouse();
+		var mouse = Input.getMouse();
 		var paintX = mouse.viewX / iron.App.w();
 		var paintY = mouse.viewY / iron.App.h();
 		if (mouse.started()) {
@@ -425,7 +426,7 @@ class Context {
 			raw.startY = mouse.viewY / iron.App.h();
 		}
 
-		var pen = iron.system.Input.getPen();
+		var pen = Input.getPen();
 		if (pen.down()) {
 			paintX = pen.viewX / iron.App.w();
 			paintY = pen.viewY / iron.App.h();
@@ -452,7 +453,7 @@ class Context {
 			}
 		}
 
-		var kb = iron.system.Input.getKeyboard();
+		var kb = Input.getKeyboard();
 		if (kb.started(Config.keymap.brush_ruler)) {
 			raw.lockStartX = mouse.viewX;
 			raw.lockStartY = mouse.viewY;

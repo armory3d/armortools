@@ -1,9 +1,10 @@
 package arm;
 
-import iron.system.Input;
-import iron.system.Time;
-import iron.math.Vec4;
-import iron.math.Mat4;
+import iron.Input;
+import iron.Time;
+import iron.Vec4;
+import iron.Mat4;
+import iron.Scene;
 import arm.Viewport;
 
 class Camera {
@@ -24,7 +25,7 @@ class Camera {
 	public function update() {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 
 		if (first) {
 			first = false;
@@ -38,19 +39,19 @@ class Camera {
 
 			if (Config.raw.wrap_mouse && controlsDown) {
 				if (mouse.viewX < 0) {
-					@:privateAccess mouse.x = mouse.lastX = iron.App.x() + iron.App.w();
+					mouse.x = mouse.lastX = iron.App.x() + iron.App.w();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewX > iron.App.w()) {
-					@:privateAccess mouse.x = mouse.lastX = iron.App.x();
+					mouse.x = mouse.lastX = iron.App.x();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewY < 0) {
-					@:privateAccess mouse.y = mouse.lastY = iron.App.y() + iron.App.h();
+					mouse.y = mouse.lastY = iron.App.y() + iron.App.h();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewY > iron.App.h()) {
-					@:privateAccess mouse.y = mouse.lastY = iron.App.y();
+					mouse.y = mouse.lastY = iron.App.y();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 			}
@@ -85,10 +86,10 @@ class Camera {
 		}
 
 		if (Input.occupied ||
-			!App.uiEnabled ||
-			App.isDragging ||
-			App.isScrolling() ||
-			App.isComboSelected() ||
+			!Base.uiEnabled ||
+			Base.isDragging ||
+			Base.isScrolling() ||
+			Base.isComboSelected() ||
 			!controlsDown) {
 			return;
 		}
@@ -179,9 +180,9 @@ class Camera {
 
 		if (Operator.shortcut(Config.keymap.rotate_light, ShortcutDown)) {
 			redraws = 2;
-			var light = iron.Scene.active.lights[0];
+			var light = Scene.active.lights[0];
 			Context.raw.lightAngle = (Context.raw.lightAngle + ((mouse.movementX / 100) % (2 * Math.PI) + 2 * Math.PI)) % (2 * Math.PI);
-			var m = iron.math.Mat4.rotationZ(mouse.movementX / 100);
+			var m = Mat4.rotationZ(mouse.movementX / 100);
 			light.transform.local.multmat(m);
 			light.transform.decompose();
 		}
@@ -202,7 +203,7 @@ class Camera {
 	}
 
 	public function distance(): Float {
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		return Vec4.distance(origins[index()], camera.transform.loc);
 	}
 
@@ -218,7 +219,7 @@ class Camera {
 	}
 
 	public function reset(viewIndex = -1) {
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		if (viewIndex == -1) {
 			origins = [new Vec4(0, 0, 0), new Vec4(0, 0, 0)];
 			views = [camera.transform.local.clone(), camera.transform.local.clone()];
@@ -230,7 +231,7 @@ class Camera {
 	}
 
 	function panAction(modif: Bool, defaultKeymap: Bool) {
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		var mouse = Input.getMouse();
 		if (Operator.shortcut(Config.keymap.action_pan, ShortcutDown) || (mouse.down("middle") && !modif && defaultKeymap)) {
 			redraws = 2;

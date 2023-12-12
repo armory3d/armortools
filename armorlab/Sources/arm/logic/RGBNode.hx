@@ -1,7 +1,8 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
-import iron.math.Vec4;
+import iron.System;
+import iron.Vec4;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -9,15 +10,15 @@ import arm.Translator._tr;
 @:keep
 class RGBNode extends LogicNode {
 
-	var image: kha.Image = null;
+	var image: Image = null;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
 		if (image != null) {
-			App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				image.unload();
 			});
 		}
@@ -29,12 +30,12 @@ class RGBNode extends LogicNode {
 		f32[1] = default_value[1];
 		f32[2] = default_value[2];
 		f32[3] = default_value[3];
-		image = kha.Image.fromBytes(f32.buffer, 1, 1, kha.Image.TextureFormat.RGBA128);
+		image = Image.fromBytes(f32.buffer, 1, 1, TextureFormat.RGBA128);
 		done(image);
 	}
 
-	override public function getCachedImage(): kha.Image {
-		getAsImage(0, function(img: kha.Image) {});
+	override public function getCachedImage(): Image {
+		getAsImage(0, function(img: Image) {});
 		return image;
 	}
 

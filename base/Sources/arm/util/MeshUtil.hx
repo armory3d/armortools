@@ -3,11 +3,11 @@ package arm.util;
 import js.lib.Int16Array;
 import js.lib.Uint32Array;
 import iron.System;
-import iron.data.SceneFormat;
-import iron.data.MeshData;
-import iron.data.Data;
-import iron.object.MeshObject;
-import iron.math.Vec4;
+import iron.SceneFormat;
+import iron.MeshData;
+import iron.Data;
+import iron.MeshObject;
+import iron.Vec4;
 
 class MeshUtil {
 
@@ -129,7 +129,7 @@ class MeshUtil {
 				na1[i * f + d] = -t;
 			}
 
-			var g = o.data.geom;
+			var g = o.data;
 			var l = g.structLength;
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
@@ -153,7 +153,7 @@ class MeshUtil {
 			var vas = o.data.raw.vertex_arrays;
 			var va0 = vas[0].values;
 			var va1 = vas[1].values;
-			var g = o.data.geom;
+			var g = o.data;
 			var l = g.structLength;
 			var vertices = g.vertexBuffer.lock(); // posnortex
 			for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
@@ -180,7 +180,7 @@ class MeshUtil {
 		var ab = new Vec4();
 		var objects = Project.paintObjects;
 		for (o in objects) {
-			var g = o.data.geom;
+			var g = o.data;
 			var l = g.structLength;
 			var inda = g.indices[0];
 			var vertices = g.vertexBuffer.lock(); // posnortex
@@ -298,7 +298,7 @@ class MeshUtil {
 		dz /= Project.paintObjects.length;
 
 		for (o in Project.paintObjects) {
-			var g = o.data.geom;
+			var g = o.data;
 			var sc = o.data.scalePos / 32767;
 			var va = o.data.raw.vertex_arrays[0].values;
 			var maxScale = 0.0;
@@ -334,7 +334,7 @@ class MeshUtil {
 		var heightView = new js.lib.DataView(height);
 		var res = texpaint_pack.width;
 		var o = Project.paintObjects[0];
-		var g = o.data.geom;
+		var g = o.data;
 		var l = g.structLength;
 		var vertices = g.vertexBuffer.lock(); // posnortex
 		for (i in 0...Std.int(vertices.byteLength / 2 / l)) {
@@ -382,8 +382,8 @@ class MeshUtil {
 	}
 
 	public static function calcNormal(p0: Vec4, p1: Vec4, p2: Vec4): Vec4 {
-		var cb = new iron.math.Vec4().subvecs(p2, p1);
-		var ab = new iron.math.Vec4().subvecs(p0, p1);
+		var cb = new Vec4().subvecs(p2, p1);
+		var ab = new Vec4().subvecs(p0, p1);
 		cb.cross(ab);
 		cb.normalize();
 		return cb;

@@ -2,8 +2,6 @@ package arm.format;
 
 import arm.format.FbxLibrary;
 
-@:access(arm.format.FbxLibrary)
-@:access(arm.format.Geometry)
 class FbxParser {
 
 	public var posa: js.lib.Int16Array = null;
@@ -46,7 +44,7 @@ class FbxParser {
 			lib.load(fbx);
 		}
 		catch (e: Dynamic) {
-			trace(e);
+			Krom.log(e);
 		}
 
 		geoms = lib.getAllGeometries();

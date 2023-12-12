@@ -1,6 +1,7 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -11,19 +12,19 @@ class ImageTextureNode extends LogicNode {
 	public var file: String;
 	public var color_space: String;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
+	override function getAsImage(from: Int, done: Image->Void) {
 		var index = Project.assetNames.indexOf(file);
 		var asset = Project.assets[index];
 		done(Project.getImage(asset));
 	}
 
-	override public function getCachedImage(): kha.Image {
-		var image: kha.Image;
-		getAsImage(0, function(img: kha.Image) { image = img; });
+	override public function getCachedImage(): Image {
+		var image: Image;
+		getAsImage(0, function(img: Image) { image = img; });
 		return image;
 	}
 

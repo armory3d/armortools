@@ -1,10 +1,11 @@
 package arm.data;
 
-import iron.System;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
-import iron.data.MaterialData;
-import iron.data.Data;
+import iron.System;
+import iron.MaterialData;
+import iron.Data;
+import iron.ArmPack;
 import arm.util.RenderUtil;
 
 class MaterialSlot {
@@ -42,7 +43,7 @@ class MaterialSlot {
 					defaultCanvas = b;
 				});
 			}
-			canvas = iron.system.ArmPack.decode(defaultCanvas);
+			canvas = ArmPack.decode(defaultCanvas);
 			canvas.name = "Material " + (id + 1);
 		}
 		else {
@@ -59,7 +60,7 @@ class MaterialSlot {
 			image.unload();
 			imageIcon.unload();
 		}
-		App.notifyOnNextFrame(_next);
+		Base.notifyOnNextFrame(_next);
 	}
 
 	public function delete() {

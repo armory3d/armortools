@@ -17,8 +17,9 @@ var m,g=g||("undefined"!=typeof Module?Module:{}),k={};for(m in g)g.hasOwnProper
 // Register as ArmorPaint plugin
 let import_usdc = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
-		let buf = new Uint8Array(A.buffer, g.__Z4initi(b.bytes.length), b.bytes.length);
-		for (let i = 0; i < b.bytes.length; ++i) buf[i] = b.readU8(i);
+		let buf = new Uint8Array(A.buffer, g.__Z4initi(b.byteLength), b.byteLength);
+		let bbuf = new Uint8Array(b);
+		for (let i = 0; i < b.byteLength; ++i) buf[i] = bbuf[i];
 		g.__Z5parsev();
 		let vertex_count = g.__Z16get_vertex_countv();
 		let index_count = g.__Z15get_index_countv();

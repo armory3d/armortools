@@ -1,8 +1,7 @@
 package arm.logic;
 
-import iron.math.Vec4;
+import iron.Vec4;
 import iron.System;
-import arm.logic.LogicNode;
 
 @:keep
 class ColorNode extends LogicNode {
@@ -10,8 +9,8 @@ class ColorNode extends LogicNode {
 	var value = new Vec4();
 	var image: Image = null;
 
-	public function new(tree: LogicTree, r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
-		super(tree);
+	public function new(r = 0.8, g = 0.8, b = 0.8, a = 1.0) {
+		super();
 		value.set(r, g, b, a);
 	}
 

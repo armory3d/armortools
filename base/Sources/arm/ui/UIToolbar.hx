@@ -2,12 +2,11 @@ package arm.ui;
 
 #if (is_paint || is_sculpt)
 
-import iron.System;
 import zui.Zui;
+import iron.System;
 import iron.RenderPath;
 import arm.Translator._tr;
 
-@:access(zui.Zui)
 class UIToolbar {
 
 	public static var inst: UIToolbar;
@@ -206,7 +205,6 @@ class UIToolbar {
 		UIMenu.menuY = -System.height;
 	}
 
-	@:access(zui.Zui)
 	static function drawHighlight() {
 		var ui = UIBase.inst.ui;
 		var size = UIToolbar.inst.toolbarw - 4;

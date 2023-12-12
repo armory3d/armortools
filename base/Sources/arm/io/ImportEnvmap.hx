@@ -2,8 +2,8 @@ package arm.io;
 
 import js.lib.Float32Array;
 import iron.System;
-import iron.data.ConstData;
-import iron.math.Vec4;
+import iron.ConstData;
+import iron.Vec4;
 import iron.Scene;
 
 class ImportEnvmap {
@@ -48,7 +48,7 @@ class ImportEnvmap {
 
 		// Down-scale to 1024x512
 		radiance.g2.begin(false);
-		radiance.g2.pipeline = App.pipeCopy128;
+		radiance.g2.pipeline = Base.pipeCopy128;
 		radiance.g2.drawScaledImage(image, 0, 0, 1024, 512);
 		radiance.g2.pipeline = null;
 		radiance.g2.end();
@@ -56,7 +56,7 @@ class ImportEnvmap {
 		var radiancePixels = radiance.getPixels();
 		if (radianceCpu != null) {
 			var _radianceCpu = radianceCpu;
-			App.notifyOnNextFrame(function() {
+			Base.notifyOnNextFrame(function() {
 				_radianceCpu.unload();
 			});
 		}
@@ -66,7 +66,7 @@ class ImportEnvmap {
 		if (mipsCpu != null) {
 			for (mip in mipsCpu) {
 				var _mip = mip;
-				App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					#if (!krom_direct3d12) // TODO: crashes after 50+ imports
 					_mip.unload();
 					#end

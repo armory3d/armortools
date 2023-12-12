@@ -1,5 +1,6 @@
 package arm.logic;
 
+import iron.Input;
 import arm.logic.LogicNode;
 import arm.shader.MakeMaterial;
 import arm.ui.UIBase;
@@ -10,8 +11,8 @@ class BrushOutputNode extends LogicNode {
 
 	public var Directional = false; // button 0
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 		Context.raw.runBrush = run;
 		Context.raw.parseBrushInputs = parseInputs;
 	}
@@ -82,7 +83,7 @@ class BrushOutputNode extends LogicNode {
 		var right = 1.0;
 		if (Context.raw.paint2d) {
 			left = 1.0;
-			right = (Context.raw.splitView ? 2.0 : 1.0) + UIView2D.inst.ww / App.w();
+			right = (Context.raw.splitView ? 2.0 : 1.0) + UIView2D.inst.ww / Base.w();
 		}
 
 		// First time init
@@ -106,12 +107,12 @@ class BrushOutputNode extends LogicNode {
 			!groupLayer &&
 			(Context.raw.layer.isVisible() || Context.raw.paint2d) &&
 			!UIBase.inst.ui.isHovered &&
-			!arm.App.isDragging &&
-			!arm.App.isResizing &&
-			!arm.App.isScrolling() &&
-			!arm.App.isComboSelected()) {
+			!Base.isDragging &&
+			!Base.isResizing &&
+			!Base.isScrolling() &&
+			!Base.isComboSelected()) {
 
-			var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+			var down = Input.getMouse().down() || Input.getPen().down();
 
 			// Prevent painting the same spot
 			var sameSpot = Context.raw.paintVec.x == Context.raw.lastPaintX && Context.raw.paintVec.y == Context.raw.lastPaintY;

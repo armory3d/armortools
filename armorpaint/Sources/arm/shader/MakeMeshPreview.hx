@@ -1,7 +1,7 @@
 package arm.shader;
 
-import iron.object.MeshObject;
-import iron.data.SceneFormat;
+import iron.MeshObject;
+import iron.SceneFormat;
 import arm.ui.UINodes;
 import arm.shader.MaterialParser;
 import arm.shader.NodeShaderData;

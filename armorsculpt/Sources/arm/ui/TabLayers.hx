@@ -2,9 +2,9 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Zui.Nodes;
-import iron.system.Time;
-import iron.system.Input;
-import iron.object.MeshObject;
+import iron.Time;
+import iron.Input;
+import iron.MeshObject;
 import arm.data.LayerSlot;
 import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
@@ -12,7 +12,6 @@ import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.sys.Path;
 
-@:access(zui.Zui)
 class TabLayers {
 
 	static var layerNameEdit = -1;
@@ -26,7 +25,7 @@ class TabLayers {
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		@:privateAccess ui.setHoveredTabName(tr("Layers"));
+		ui.setHoveredTabName(tr("Layers"));
 
 		var _ELEMENT_H = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Std.int(UIBase.sidebarMiniW / 2 / ui.SCALE());
@@ -89,7 +88,7 @@ class TabLayers {
 			UIMenu.draw(function(ui: Zui) {
 				var l = Context.raw.layer;
 				if (UIMenu.menuButton(ui, tr("Paint Layer"))) {
-					App.newLayer();
+					Base.newLayer();
 					History.newLayer();
 				}
 			}, 1);
@@ -128,9 +127,9 @@ class TabLayers {
 	}
 
 	static function setDragLayer(layer: LayerSlot, offX: Float, offY: Float) {
-		App.dragOffX = offX;
-		App.dragOffY = offY;
-		App.dragLayer = layer;
+		Base.dragOffX = offX;
+		Base.dragOffY = offY;
+		Base.dragLayer = layer;
 		Context.raw.dragDestination = Project.layers.indexOf(layer);
 	}
 
@@ -156,15 +155,15 @@ class TabLayers {
 		// Highlight drag destination
 		var mouse = Input.getMouse();
 		var absy = ui._windowY + ui._y;
-		if (App.isDragging && App.dragLayer != null && Context.inLayers()) {
+		if (Base.isDragging && Base.dragLayer != null && Context.inLayers()) {
 			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
-				var down = Project.layers.indexOf(App.dragLayer) >= i;
+				var down = Project.layers.indexOf(Base.dragLayer) >= i;
 				Context.raw.dragDestination = down ? i : i - 1;
 
 				var ls = Project.layers;
 				var dest = Context.raw.dragDestination;
 				var toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				var nestedGroup = App.dragLayer.isGroup() && toGroup;
+				var nestedGroup = Base.dragLayer.isGroup() && toGroup;
 				if (!nestedGroup) {
 					if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
@@ -178,7 +177,7 @@ class TabLayers {
 				}
 			}
 		}
-		if (App.isDragging && (App.dragMaterial != null || App.dragSwatch != null) && Context.inLayers()) {
+		if (Base.isDragging && (Base.dragMaterial != null || Base.dragSwatch != null) && Context.inLayers()) {
 			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (canDropNewLayer(i))
@@ -206,8 +205,8 @@ class TabLayers {
 		ui.row([1, 1]);
 		var uix = ui._x;
 		var uiy = ui._y;
-		@:privateAccess ui.endElement();
-		@:privateAccess ui.endElement();
+		ui.endElement();
+		ui.endElement();
 
 		ui._y += ui.ELEMENT_H();
 		ui._y -= ui.ELEMENT_OFFSET();
@@ -302,7 +301,7 @@ class TabLayers {
 		}
 
 		if (l.isGroup()) {
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 		else {
 			if (l.isMask()) {
@@ -310,7 +309,7 @@ class TabLayers {
 			}
 
 			// comboBlending(ui, l);
-			@:privateAccess ui.endElement();
+			ui.endElement();
 
 			if (l.isMask()) {
 				ui._y -= center;
@@ -327,15 +326,15 @@ class TabLayers {
 
 		if (l.isGroup() || l.isMask()) {
 			ui._y -= ui.ELEMENT_OFFSET();
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 		else {
 			ui._y -= ui.ELEMENT_OFFSET();
 
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
-			@:privateAccess ui.endElement();
-			@:privateAccess ui.endElement();
-			@:privateAccess ui.endElement();
+			ui.endElement();
+			ui.endElement();
+			ui.endElement();
 
 			if (Config.raw.touch_ui) {
 				ui._x += 12 * ui.SCALE();
@@ -345,7 +344,7 @@ class TabLayers {
 			comboObject(ui, l);
 			ui._y += center;
 
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 
 		ui._y -= ui.ELEMENT_OFFSET();

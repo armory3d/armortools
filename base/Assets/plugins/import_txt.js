@@ -3,7 +3,7 @@ let import_txt = function(path, done) {
 	iron.Data.getBlob(path, function(b) {
 		var filename = path.split('\\').pop().split('/').pop();
 		try {
-			arm.UIBox.showMessage(filename, b.toString(), true);
+			arm.UIBox.showMessage(filename, core.System.bufferToString(b), true);
 			arm.UIBox.clickToHide = false;
 			iron.Data.deleteBlob(path);
 		}

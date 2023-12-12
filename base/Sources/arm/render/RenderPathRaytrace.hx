@@ -1,7 +1,11 @@
 package arm.render;
 
+import iron.System;
+import iron.Input;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Mat4;
+import iron.Data;
 
 #if (krom_direct3d12 || krom_vulkan || krom_metal)
 
@@ -11,16 +15,16 @@ class RenderPathRaytrace {
 	public static var ready = false;
 	public static var dirty = 0;
 	public static var uvScale = 1.0;
-	static var path: RenderPath;
+	public static var path: RenderPath;
 	static var first = true;
-	static var f32 = new js.lib.Float32Array(24);
-	static var helpMat = iron.math.Mat4.identity();
+	public static var f32 = new js.lib.Float32Array(24);
+	static var helpMat = Mat4.identity();
 	static var vb_scale = 1.0;
-	static var vb: kha.VertexBuffer;
-	static var ib: kha.IndexBuffer;
+	static var vb: VertexBuffer;
+	static var ib: IndexBuffer;
 
-	static var lastEnvmap: kha.Image = null;
-	static var isBake = false;
+	public static var lastEnvmap: Image = null;
+	public static var isBake = false;
 
 	#if krom_direct3d12
 	public static inline var ext = ".cso";
@@ -31,7 +35,7 @@ class RenderPathRaytrace {
 	#end
 
 	#if is_lab
-	static var lastTexpaint: kha.Image = null;
+	static var lastTexpaint: Image = null;
 	#end
 
 	public static function init(_path: RenderPath) {
@@ -62,12 +66,12 @@ class RenderPathRaytrace {
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
 			var bnoise_rank = Scene.active.embedded.get("bnoise_rank.k");
 
-			var l = App.flatten(true);
+			var l = Base.flatten(true);
 			Krom.raytraceSetTextures(l.texpaint, l.texpaint_nor, l.texpaint_pack, savedEnvmap.texture_, bnoise_sobol.texture_, bnoise_scramble.texture_, bnoise_rank.texture_);
 		}
 
 		#if is_lab
-		var l = App.flatten(true);
+		var l = Base.flatten(true);
 		if (l.texpaint != lastTexpaint) {
 			lastTexpaint = l.texpaint;
 
@@ -80,7 +84,7 @@ class RenderPathRaytrace {
 		#end
 
 		if (Context.raw.pdirty > 0 || dirty > 0) {
-			App.flatten(true);
+			Base.flatten(true);
 		}
 
 		var cam = Scene.active.camera;
@@ -140,7 +144,7 @@ class RenderPathRaytrace {
 		// Context.raw.ddirty = 1; // _RENDER
 	}
 
-	static function raytraceInit(shaderName: String, build = true) {
+	public static function raytraceInit(shaderName: String, build = true) {
 		if (first) {
 			first = false;
 			Scene.active.embedData("bnoise_sobol.k", function() {});
@@ -148,7 +152,7 @@ class RenderPathRaytrace {
 			Scene.active.embedData("bnoise_rank.k", function() {});
 		}
 
-		iron.data.Data.getBlob(shaderName, function(shader: js.lib.ArrayBuffer) {
+		Data.getBlob(shaderName, function(shader: js.lib.ArrayBuffer) {
 			if (build) buildData();
 			var bnoise_sobol = Scene.active.embedded.get("bnoise_sobol.k");
 			var bnoise_scramble = Scene.active.embedded.get("bnoise_scramble.k");
@@ -165,12 +169,11 @@ class RenderPathRaytrace {
 		var mo = Scene.active.meshes[0];
 		#end
 		var md = mo.data;
-		var geom = md.geom;
 		var mo_scale = mo.transform.scale.x; // Uniform scale only
 		vb_scale = md.scalePos * mo_scale;
 		if (mo.parent != null) vb_scale *= mo.parent.transform.scale.x;
-		vb = geom.vertexBuffer;
-		ib = geom.indexBuffers[0];
+		vb = md.vertexBuffer;
+		ib = md.indexBuffers[0];
 	}
 
 	public static function draw(useLiveLayer: Bool) {
@@ -179,7 +182,7 @@ class RenderPathRaytrace {
 
 		#if krom_metal
 		// Delay path tracing additional samples while painting
-		var down = iron.system.Input.getMouse().down() || iron.system.Input.getPen().down();
+		var down = Input.getMouse().down() || Input.getPen().down();
 		if (Context.inViewport() && down) frame = 0;
 		#end
 

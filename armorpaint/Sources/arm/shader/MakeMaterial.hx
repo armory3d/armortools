@@ -4,9 +4,9 @@ import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
 import iron.System;
-import iron.data.SceneFormat;
-import iron.data.ShaderData;
-import iron.data.MaterialData;
+import iron.SceneFormat;
+import iron.ShaderData;
+import iron.MaterialData;
 import iron.RenderPath;
 import arm.ui.UIHeader;
 import arm.ui.UINodes;
@@ -195,7 +195,7 @@ class MakeMaterial {
 		if (!getMOut()) return;
 
 		if (bakePreviews) {
-			var current = @:privateAccess Graphics2.current;
+			var current = Graphics2.current;
 			if (current != null) current.end();
 			bakeNodePreviews();
 			if (current != null) current.begin(false);
@@ -249,7 +249,7 @@ class MakeMaterial {
 		for (key in Context.raw.nodePreviews.keys()) {
 			if (Context.raw.nodePreviewsUsed.indexOf(key) == -1) {
 				var image = Context.raw.nodePreviews.get(key);
-				App.notifyOnNextFrame(image.unload);
+				Base.notifyOnNextFrame(image.unload);
 				Context.raw.nodePreviews.remove(key);
 			}
 		}
@@ -372,7 +372,7 @@ class MakeMaterial {
 	}
 
 	public static function parseBrush() {
-		arm.logic.LogicParser.parse(Context.raw.brush.canvas, false);
+		arm.logic.LogicParser.parse(Context.raw.brush.canvas);
 	}
 
 	public static function blendMode(frag: NodeShader, blending: Int, cola: String, colb: String, opac: String): String {
@@ -499,7 +499,7 @@ class MakeMaterial {
 	}
 
 	static function deleteContext(c: ShaderContext) {
-		arm.App.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
+		Base.notifyOnNextFrame(function() { // Ensure pipeline is no longer in use
 			c.delete();
 		});
 	}

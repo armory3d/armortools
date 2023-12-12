@@ -2,32 +2,32 @@ package arm.plugin;
 
 #if arm_physics
 
-import iron.system.Time;
-import iron.math.Vec4;
-import iron.math.RayCaster;
+import iron.Scene;
+import iron.System;
+import iron.Time;
+import iron.Vec4;
+import iron.RayCaster;
 
-@:access(arm.plugin.PhysicsBody)
 class PhysicsWorld {
 
 	public static var active: PhysicsWorld = null;
 	static var vec1: Bt.Vector3 = null;
 	static var vec2: Bt.Vector3 = null;
-	static var v1 = new iron.math.Vec4();
-	static var v2 = new iron.math.Vec4();
+	static var v1 = new Vec4();
+	static var v2 = new Vec4();
 
-	var world: Bt.DiscreteDynamicsWorld;
-	var dispatcher: Bt.CollisionDispatcher;
+	public var world: Bt.DiscreteDynamicsWorld;
+	public var dispatcher: Bt.CollisionDispatcher;
 	var contacts: Array<TPair> = [];
 	var bodyMap = new Map<Int, PhysicsBody>();
 	var timeScale = 1.0;
 	var timeStep = 1 / 60;
 	var maxSteps = 1;
 
-	@:access(Main)
 	public static function load(done: Void->Void) {
-		var b = haxe.io.Bytes.ofData(Krom.loadBlob("data/plugins/ammo.wasm.js"));
-		var print = function(s: String) { trace(s); };
-		js.Syntax.code("(1, eval)({0})", b.toString());
+		var b = Krom.loadBlob("data/plugins/ammo.wasm.js");
+		var print = function(s: String) { Krom.log(s); };
+		js.Syntax.code("(1, eval)({0})", System.bufferToString(b));
 		var instantiateWasm = function(imports, successCallback) {
 			var wasmbin = Krom.loadBlob("data/plugins/ammo.wasm.wasm");
 			var module = new js.lib.webassembly.Module(wasmbin);
@@ -106,7 +106,7 @@ class PhysicsWorld {
 
 		world.stepSimulation(timeStep, maxSteps, t);
 		updateContacts();
-		for (body in bodyMap) @:privateAccess body.physicsUpdate();
+		for (body in bodyMap) body.physicsUpdate();
 	}
 
 	function updateContacts() {
@@ -144,7 +144,7 @@ class PhysicsWorld {
 	}
 
 	public function pickClosest(inputX: Float, inputY: Float): PhysicsBody {
-		var camera = iron.Scene.active.camera;
+		var camera = Scene.active.camera;
 		var start = new Vec4();
 		var end = new Vec4();
 		RayCaster.getDirection(start, end, inputX, inputY, camera);

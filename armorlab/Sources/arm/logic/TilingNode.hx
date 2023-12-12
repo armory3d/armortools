@@ -1,6 +1,7 @@
 package arm.logic;
 
 import zui.Zui.Nodes;
+import iron.System;
 import arm.logic.LogicNode;
 import arm.logic.LogicParser.f32;
 import arm.Translator._tr;
@@ -8,21 +9,21 @@ import arm.Translator._tr;
 @:keep
 class TilingNode extends LogicNode {
 
-	var result: kha.Image = null;
-	static var image: kha.Image = null;
-	static var prompt = "";
+	var result: Image = null;
+	public static var image: Image = null;
+	public static var prompt = "";
 	static var strength = 0.5;
 	static var auto = true;
 
-	public function new(tree: LogicTree) {
-		super(tree);
+	public function new() {
+		super();
 
 		init();
 	}
 
 	public static function init() {
 		if (image == null) {
-			image = kha.Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+			image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 		}
 	}
 
@@ -36,15 +37,15 @@ class TilingNode extends LogicNode {
 		else node.buttons[1].height = 0;
 	}
 
-	override function getAsImage(from: Int, done: kha.Image->Void) {
-		inputs[0].getAsImage(function(source: kha.Image) {
+	override function getAsImage(from: Int, done: Image->Void) {
+		inputs[0].getAsImage(function(source: Image) {
 			image.g2.begin(false);
 			image.g2.drawScaledImage(source, 0, 0, Config.getTextureResX(), Config.getTextureResY());
 			image.g2.end();
 
 			Console.progress(tr("Processing") + " - " + tr("Tiling"));
-			App.notifyOnNextFrame(function() {
-				function _done(image: kha.Image) {
+			Base.notifyOnNextFrame(function() {
+				function _done(image: Image) {
 					result = image;
 					done(image);
 				}
@@ -53,13 +54,13 @@ class TilingNode extends LogicNode {
 		});
 	}
 
-	override public function getCachedImage(): kha.Image {
+	override public function getCachedImage(): Image {
 		return result;
 	}
 
-	public static function sdTiling(image: kha.Image, seed: Int/* = -1*/, done: kha.Image->Void) {
-		@:privateAccess TextToPhotoNode.tiling = false;
-		var tile = kha.Image.createRenderTarget(512, 512);
+	public static function sdTiling(image: Image, seed: Int/* = -1*/, done: Image->Void) {
+		TextToPhotoNode.tiling = false;
+		var tile = Image.createRenderTarget(512, 512);
 		tile.g2.begin(false);
 		tile.g2.drawScaledImage(image, -256, -256, 512, 512);
 		tile.g2.drawScaledImage(image, 256, -256, 512, 512);
@@ -85,10 +86,10 @@ class TilingNode extends LogicNode {
 		// 		u8[y * 512 + x] = 0;
 		// 	}
 		// }
-		var mask = kha.Image.fromBytes(u8.buffer, 512, 512, kha.Image.TextureFormat.R8);
+		var mask = Image.fromBytes(u8.buffer, 512, 512, TextureFormat.R8);
 
-		@:privateAccess InpaintNode.prompt = prompt;
-		@:privateAccess InpaintNode.strength = strength;
+		InpaintNode.prompt = prompt;
+		InpaintNode.strength = strength;
 		if (seed >= 0) RandomNode.setSeed(seed);
 		InpaintNode.sdInpaint(tile, mask, done);
 	}

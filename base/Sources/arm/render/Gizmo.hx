@@ -1,10 +1,11 @@
 package arm.render;
 
-import iron.system.Input;
-import iron.math.RayCaster;
-import iron.math.Vec4;
-import iron.math.Quat;
+import iron.Input;
+import iron.RayCaster;
+import iron.Vec4;
+import iron.Quat;
 import iron.Scene;
+import iron.Object;
 
 class Gizmo {
 
@@ -15,7 +16,7 @@ class Gizmo {
 
 	public static function update() {
 		var isObject = Context.raw.tool == ToolGizmo;
-		var isDecal = App.isDecalLayer();
+		var isDecal = Base.isDecalLayer();
 
 		var gizmo = Context.raw.gizmo;
 		var hide = Operator.shortcut(Config.keymap.stencil_hide, ShortcutDown);
@@ -25,7 +26,7 @@ class Gizmo {
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
 
-		var paintObject: iron.object.Object = cast Context.raw.paintObject;
+		var paintObject: Object = cast Context.raw.paintObject;
 		#if is_forge
 		if (Context.raw.selectedObject != null) {
 			paintObject = Context.raw.selectedObject;
@@ -145,7 +146,7 @@ class Gizmo {
 				if (Context.raw.material != Context.raw.layer.fill_layer) {
 					Context.setMaterial(Context.raw.layer.fill_layer);
 				}
-				App.updateFillLayer(Context.raw.gizmoStarted);
+				Base.updateFillLayer(Context.raw.gizmoStarted);
 			}
 		}
 
@@ -259,6 +260,6 @@ class Gizmo {
 			#end
 		}
 
-		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && mouse.viewX < App.w();
+		Input.occupied = (Context.raw.translateX || Context.raw.translateY || Context.raw.translateZ || Context.raw.scaleX || Context.raw.scaleY || Context.raw.scaleZ || Context.raw.rotateX || Context.raw.rotateY || Context.raw.rotateZ) && mouse.viewX < Base.w();
 	}
 }

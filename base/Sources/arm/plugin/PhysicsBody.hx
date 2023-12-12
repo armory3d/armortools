@@ -2,13 +2,13 @@ package arm.plugin;
 
 #if arm_physics
 
-import iron.math.Vec4;
-import iron.math.Quat;
-import iron.object.Transform;
-import iron.object.MeshObject;
-import iron.data.MeshData;
+import iron.Vec4;
+import iron.Quat;
+import iron.Transform;
+import iron.MeshObject;
+import iron.MeshData;
+import iron.Object;
 
-@:access(arm.plugin.PhysicsWorld)
 class PhysicsBody {
 
 	@:keep
@@ -29,7 +29,7 @@ class PhysicsBody {
 		return f;
 	}
 
-	public var object: iron.object.Object;
+	public var object: Object;
 	public var friction = 0.5;
 	public var restitution = 0.0;
 	public var collisionMargin = 0.0;
@@ -44,7 +44,7 @@ class PhysicsBody {
 	public var group = 1;
 	public var mask = 1;
 	public var shape = ShapeBox;
-	var destroyed = false;
+	public var destroyed = false;
 	var bodyScaleX: Float; // Transform scale at creation time
 	var bodyScaleY: Float;
 	var bodyScaleZ: Float;
@@ -52,12 +52,12 @@ class PhysicsBody {
 	var currentScaleY: Float;
 	var currentScaleZ: Float;
 
-	var body: Bt.RigidBody = null;
+	public var body: Bt.RigidBody = null;
 	var motionState: Bt.MotionState;
 	var btshape: Bt.CollisionShape;
 	var ready = false;
 	public var id = 0;
-	public var heightData: haxe.io.Bytes = null;
+	public var heightData: js.lib.Uint8Array = null;
 
 	static var nextId = 0;
 	static var ammoArray: Int = -1;
@@ -91,7 +91,7 @@ class PhysicsBody {
 		return f - f * collisionMargin;
 	}
 
-	public function init(o: iron.object.Object) {
+	public function init(o: Object) {
 		object = o;
 		if (ready) return;
 		ready = true;
@@ -162,7 +162,7 @@ class PhysicsBody {
 			}
 			// From texture bytes
 			for (i in 0...length) {
-				Bt.Ammo.HEAPU8[ammoArray + i] = heightData.get(i);
+				Bt.Ammo.HEAPU8[ammoArray + i] = heightData[i];
 			}
 			var slice = Std.int(Math.sqrt(length)); // Assuming square terrain data
 			var axis = 2; // z
@@ -222,7 +222,7 @@ class PhysicsBody {
 		Bt.Ammo.destroy(bodyCI);
 	}
 
-	function physicsUpdate() {
+	public function physicsUpdate() {
 		if (!ready) return;
 		var trans = body.getWorldTransform();
 
@@ -370,7 +370,7 @@ class PhysicsBody {
 		convexHullCache.set(data, shape);
 		usersCache.set(data, 1);
 
-		var positions = data.geom.positions.values;
+		var positions = data.positions.values;
 
 		var sx: Float = scale.x * (1.0 - margin) * (1 / 32767);
 		var sy: Float = scale.y * (1.0 - margin) * (1 / 32767);
@@ -404,8 +404,8 @@ class PhysicsBody {
 		triangleMeshCache.set(data, triangleMesh);
 		usersCache.set(data, 1);
 
-		var positions = data.geom.positions.values;
-		var indices = data.geom.indices;
+		var positions = data.positions.values;
+		var indices = data.indices;
 
 		var sx: Float = scale.x * (1 / 32767);
 		var sy: Float = scale.y * (1 / 32767);

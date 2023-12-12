@@ -5,8 +5,8 @@ package arm.ui;
 import haxe.Json;
 import zui.Zui;
 import zui.Zui.Nodes;
-import iron.system.Time;
-import iron.system.Input;
+import iron.Time;
+import iron.Input;
 import arm.shader.MakeMaterial;
 import arm.data.MaterialSlot;
 import arm.util.RenderUtil;
@@ -21,7 +21,7 @@ class TabMaterials {
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		@:privateAccess ui.setHoveredTabName(tr("Materials"));
+		ui.setHoveredTabName(tr("Materials"));
 
 		ui.beginSticky();
 		ui.separator(5);
@@ -60,7 +60,6 @@ class TabMaterials {
 		else if (ui.isHovered) ui.tooltip(tr("Show Node Editor") + ' (${Config.keymap.toggle_node_editor})');
 	}
 
-	@:access(zui.Zui)
 	static function drawSlots(mini: Bool) {
 		var ui = UIBase.inst.ui;
 		var slotw = Std.int(51 * ui.SCALE());
@@ -78,8 +77,8 @@ class TabMaterials {
 				var imgw = Std.int(50 * ui.SCALE());
 				var i = j + row * num;
 				if (i >= Project.materials.length) {
-					@:privateAccess ui.endElement(imgw);
-					if (Config.raw.show_asset_names) @:privateAccess ui.endElement(0);
+					ui.endElement(imgw);
+					if (Config.raw.show_asset_names) ui.endElement(0);
 					continue;
 				}
 				var img = ui.SCALE() > 1 ? Project.materials[i].image : Project.materials[i].imageIcon;
@@ -136,21 +135,21 @@ class TabMaterials {
 						#if is_paint
 						if (Context.raw.tool == ToolMaterial) {
 							function _init() {
-								App.updateFillLayers();
+								Base.updateFillLayers();
 							}
 							iron.App.notifyOnInit(_init);
 						}
 						#end
 					}
 					var mouse = Input.getMouse();
-					App.dragOffX = -(mouse.x - uix - ui._windowX - 3);
-					App.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
-					App.dragMaterial = Context.raw.material;
+					Base.dragOffX = -(mouse.x - uix - ui._windowX - 3);
+					Base.dragOffY = -(mouse.y - uiy - ui._windowY + 1);
+					Base.dragMaterial = Context.raw.material;
 					// Double click to show nodes
 					if (Time.time() - Context.raw.selectTime < 0.25) {
 						UIBase.inst.showMaterialNodes();
-						App.dragMaterial = null;
-						App.isDragging = false;
+						Base.dragMaterial = null;
+						Base.isDragging = false;
 					}
 					Context.raw.selectTime = Time.time();
 				}
@@ -165,7 +164,7 @@ class TabMaterials {
 
 						if (UIMenu.menuButton(ui, tr("To Fill Layer"))) {
 							Context.selectMaterial(i);
-							App.createFillLayer();
+							Base.createFillLayer();
 						}
 
 						if (UIMenu.menuButton(ui, tr("Export"))) {

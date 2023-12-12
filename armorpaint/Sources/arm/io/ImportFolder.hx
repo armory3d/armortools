@@ -135,7 +135,7 @@ class ImportFolder {
 
 	static function placeImageNode(nodes: Nodes, canvas: TNodeCanvas, asset: String, ny: Int, to_id: Int, to_socket: Int) {
 		var n = NodesMaterial.createNode("TEX_IMAGE");
-		n.buttons[0].default_value = App.getAssetIndex(asset);
+		n.buttons[0].default_value = Base.getAssetIndex(asset);
 		n.x = 72;
 		n.y = ny;
 		var l: TNodeLink = { id: nodes.getLinkId(canvas.links), from_id: n.id, from_socket: 0, to_id: to_id, to_socket: to_socket };

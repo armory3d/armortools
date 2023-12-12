@@ -7,8 +7,8 @@ class BooleanNode extends LogicNode {
 
 	public var value: Bool;
 
-	public function new(tree: LogicTree, value = false) {
-		super(tree);
+	public function new(value = false) {
+		super();
 		this.value = value;
 	}
 

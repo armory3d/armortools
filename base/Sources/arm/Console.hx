@@ -1,6 +1,7 @@
 package arm;
 
 import iron.System;
+import arm.Base;
 
 @:keep
 class Console {
@@ -9,17 +10,16 @@ class Console {
 	public static var messageTimer = 0.0;
 	public static var messageColor = 0x00000000;
 	public static var lastTraces: Array<String> = [""];
-	static var haxeTrace: Dynamic->haxe.PosInfos->Void = null;
 	static var progressText: String = null;
 
 	static function drawToast(s: String, g: Graphics2) {
 		g.color = 0x55000000;
 		g.fillRect(0, 0, System.width, System.height);
-		var scale = arm.App.getUIs()[0].SCALE();
+		var scale = Base.getUIs()[0].SCALE();
 		var x = System.width / 2;
 		var y = System.height - 200 * scale;
 		g.fillRect(x - 200 * scale, y, 400 * scale, 80 * scale);
-		g.font = App.font;
+		g.font = Base.font;
 		g.fontSize = Std.int(22 * scale);
 		g.color = 0xffffffff;
 		g.drawString(s, x - g.font.width(g.fontSize, s) / 2, y + 40 * scale - g.font.height(g.fontSize) / 2);
@@ -30,7 +30,7 @@ class Console {
 		function _render(g: Graphics2) {
 			drawToast(s, g);
 			if (g2 == null) {
-				arm.App.notifyOnNextFrame(function() {
+				Base.notifyOnNextFrame(function() {
 					iron.App.removeRender2D(_render);
 				});
 			}
@@ -59,7 +59,7 @@ class Console {
 		messageTimer = 5.0;
 		message = s;
 		messageColor = 0x00000000;
-		App.redrawStatus();
+		Base.redrawStatus();
 		consoleTrace(s);
 	}
 
@@ -67,7 +67,7 @@ class Console {
 		messageTimer = 8.0;
 		message = s;
 		messageColor = 0xffaa0000;
-		App.redrawStatus();
+		Base.redrawStatus();
 		consoleTrace(s);
 	}
 
@@ -75,17 +75,9 @@ class Console {
 		consoleTrace(s);
 	}
 
-	public static function init() {
-		if (haxeTrace == null) {
-			haxeTrace = haxe.Log.trace;
-			haxe.Log.trace = consoleTrace;
-		}
-	}
-
-	static function consoleTrace(v: Dynamic, ?inf: haxe.PosInfos) {
-		App.redrawConsole();
+	static function consoleTrace(v: Dynamic) {
+		Base.redrawConsole();
 		lastTraces.unshift(Std.string(v));
 		if (lastTraces.length > 100) lastTraces.pop();
-		haxeTrace(v, inf);
 	}
 }

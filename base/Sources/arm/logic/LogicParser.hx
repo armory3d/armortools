@@ -12,7 +12,6 @@ class LogicParser {
 	public static var customNodes = js.Syntax.code("new Map()");
 	static var nodes: Array<TNode>;
 	static var links: Array<TNodeLink>;
-	static var tree: LogicTree;
 
 	static var parsed_nodes: Array<String> = null;
 	static var parsed_labels: Map<String, String> = null;
@@ -71,7 +70,7 @@ class LogicParser {
 		return s;
 	}
 
-	public static function parse(canvas: TNodeCanvas, onAdd = true) {
+	public static function parse(canvas: TNodeCanvas) {
 		nodes = canvas.nodes;
 		links = canvas.links;
 
@@ -81,15 +80,7 @@ class LogicParser {
 		rawMap = new Map();
 		var root_nodes = get_root_nodes(canvas);
 
-		tree = new LogicTree();
-		if (onAdd) {
-			tree.notifyOnAdd(function() {
-				for (node in root_nodes) build_node(node);
-			});
-		}
-		else {
-			for (node in root_nodes) build_node(node);
-		}
+		for (node in root_nodes) build_node(node);
 	}
 
 	static function build_node(node: TNode): String {
@@ -104,7 +95,7 @@ class LogicParser {
 		parsed_nodes.push(name);
 
 		// Create node
-		var v = createClassInstance(node.type, [tree]);
+		var v = createClassInstance(node.type, []);
 		nodeMap.set(name, v);
 		rawMap.set(v, node);
 
@@ -187,37 +178,37 @@ class LogicParser {
 
 		if (inp.type == "VECTOR") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0]; // TODO
-			v = createClassInstance("VectorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
+			v = createClassInstance("VectorNode", [inp.default_value[0], inp.default_value[1], inp.default_value[2]]);
 		}
 		else if (inp.type == "RGBA") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
-			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
+			v = createClassInstance("ColorNode", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 		}
 		else if (inp.type == "RGB") {
 			if (inp.default_value == null) inp.default_value = [0, 0, 0, 0]; // TODO
-			v = createClassInstance("ColorNode", [tree, inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
+			v = createClassInstance("ColorNode", [inp.default_value[0], inp.default_value[1], inp.default_value[2], inp.default_value[3]]);
 		}
 		else if (inp.type == "VALUE") {
-			v = createClassInstance("FloatNode", [tree, inp.default_value]);
+			v = createClassInstance("FloatNode", [inp.default_value]);
 		}
 		else if (inp.type == "INT") {
-			v = createClassInstance("IntegerNode", [tree, inp.default_value]);
+			v = createClassInstance("IntegerNode", [inp.default_value]);
 		}
 		else if (inp.type == "BOOLEAN") {
-			v = createClassInstance("BooleanNode", [tree, inp.default_value]);
+			v = createClassInstance("BooleanNode", [inp.default_value]);
 		}
 		else if (inp.type == "STRING") {
-			v = createClassInstance("StringNode", [tree, inp.default_value]);
+			v = createClassInstance("StringNode", [inp.default_value]);
 		}
 		else {
-			v = createClassInstance("NullNode", [tree]);
+			v = createClassInstance("NullNode", []);
 		}
 		return v;
 	}
 
 	static function createClassInstance(className: String, args: Array<Dynamic>): Dynamic {
 		if (customNodes.get(className) != null) {
-			var node = new LogicNode(args[0]);
+			var node = new LogicNode();
 			untyped node.get = function(from: Int) { return customNodes.get(className)(node, from); }
 			return node;
 		}

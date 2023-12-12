@@ -1,9 +1,8 @@
 package arm;
 
-import haxe.io.Bytes;
 import haxe.Json;
 import iron.System;
-import iron.data.Data;
+import iron.Data;
 import zui.Zui;
 import arm.ui.UIBase;
 import arm.ui.UIHeader;
@@ -52,11 +51,11 @@ class Config {
 		// Use system application data folder
 		// when running from protected path like "Program Files"
 		var path = (Path.isProtected() ? Krom.savePath() : Path.data() + Path.sep) + "config.json";
-		var bytes = Bytes.ofString(Json.stringify(raw));
-		Krom.fileSaveBytes(path, bytes.getData());
+		var buffer = System.stringToBuffer(Json.stringify(raw));
+		Krom.fileSaveBytes(path, buffer);
 
 		#if krom_linux // Protected directory
-		if (!File.exists(path)) Krom.fileSaveBytes(Krom.savePath() + "config.json", bytes.getData());
+		if (!File.exists(path)) Krom.fileSaveBytes(Krom.savePath() + "config.json", buffer);
 		#end
 	}
 
@@ -98,8 +97,8 @@ class Config {
 			raw.rp_ssr = false;
 			raw.rp_supersample = 1.0;
 			raw.version = Manifest.version;
-			raw.sha = Main.sha;
-			App.initConfig();
+			raw.sha = getSha();
+			Base.initConfig();
 		}
 		else {
 			// Upgrade config format created by older ArmorPaint build
@@ -107,7 +106,7 @@ class Config {
 			// 	raw.version = Manifest.version;
 			// 	save();
 			// }
-			if (raw.sha != Main.sha) {
+			if (raw.sha != getSha()) {
 				configLoaded = false;
 				init();
 				return;
@@ -115,8 +114,24 @@ class Config {
 		}
 
 		Zui.touchScroll = Zui.touchHold = Zui.touchTooltip = Config.raw.touch_ui;
-		App.resHandle.position = raw.layer_res;
+		Base.resHandle.position = raw.layer_res;
 		loadKeymap();
+	}
+
+	public static function getSha(): String {
+		var sha = "";
+		Data.getBlob("version.json", function(blob: js.lib.ArrayBuffer) {
+			sha = Json.parse(System.bufferToString(blob)).sha;
+		});
+		return sha;
+	}
+
+	public static function getDate(): String {
+		var date = "";
+		Data.getBlob("version.json", function(blob: js.lib.ArrayBuffer) {
+			date = Json.parse(System.bufferToString(blob)).date;
+		});
+		return date;
 	}
 
 	public static function getOptions(): SystemOptions {
@@ -145,7 +160,7 @@ class Config {
 		var _layout = raw.layout;
 		init();
 		raw.layout = _layout;
-		App.initLayout();
+		Base.initLayout();
 		Translator.loadTranslations(raw.locale);
 		applyConfig();
 		loadTheme(raw.theme);
@@ -159,7 +174,7 @@ class Config {
 		raw.version = _version;
 		zui.Zui.children = []; // Reset ui handles
 		loadKeymap();
-		App.initLayout();
+		Base.initLayout();
 		Translator.loadTranslations(raw.locale);
 		applyConfig();
 		loadTheme(raw.theme);
@@ -174,7 +189,7 @@ class Config {
 		save();
 		Context.raw.ddirty = 2;
 
-		var current = @:privateAccess Graphics2.current;
+		var current = Graphics2.current;
 		if (current != null) current.end();
 		RenderPathBase.applyConfig();
 		if (current != null) current.begin(false);
@@ -182,15 +197,15 @@ class Config {
 
 	public static function loadKeymap() {
 		if (raw.keymap == "default.json") { // Built-in default
-			keymap = App.defaultKeymap;
+			keymap = Base.defaultKeymap;
 		}
 		else {
 			Data.getBlob("keymap_presets/" + raw.keymap, function(blob: js.lib.ArrayBuffer) {
 				keymap = Json.parse(System.bufferToString(blob));
 				// Fill in undefined keys with defaults
-				for (field in Reflect.fields(App.defaultKeymap)) {
+				for (field in Reflect.fields(Base.defaultKeymap)) {
 					if (!Reflect.hasField(keymap, field)) {
-						Reflect.setField(keymap, field, Reflect.field(App.defaultKeymap, field));
+						Reflect.setField(keymap, field, Reflect.field(Base.defaultKeymap, field));
 					}
 				}
 			});
@@ -200,8 +215,8 @@ class Config {
 	public static function saveKeymap() {
 		if (raw.keymap == "default.json") return;
 		var path = Data.dataPath + "keymap_presets/" + raw.keymap;
-		var bytes = Bytes.ofString(Json.stringify(keymap));
-		Krom.fileSaveBytes(path, bytes.getData());
+		var buffer = System.stringToBuffer(Json.stringify(keymap));
+		Krom.fileSaveBytes(path, buffer);
 	}
 
 	public static inline function getSuperSampleQuality(f: Float): Int {
@@ -221,7 +236,7 @@ class Config {
 	}
 
 	static function getTextureRes(): Int {
-		var res = App.resHandle.position;
+		var res = Base.resHandle.position;
 		return res == Res128 ? 128 :
 			   res == Res256 ? 256 :
 			   res == Res512 ? 512 :
@@ -241,7 +256,7 @@ class Config {
 	}
 
 	public static function getTextureResBias(): Float {
-		var res = App.resHandle.position;
+		var res = Base.resHandle.position;
 		return res == Res128 ? 16.0 :
 			   res == Res256 ? 8.0 :
 			   res == Res512 ? 4.0 :
@@ -265,39 +280,39 @@ class Config {
 
 	public static function loadTheme(theme: String, tagRedraw = true) {
 		if (theme == "default.json") { // Built-in default
-			App.theme = new zui.Zui.Theme();
+			Base.theme = new zui.Zui.Theme();
 		}
 		else {
 			Data.getBlob("themes/" + theme, function(b: js.lib.ArrayBuffer) {
 				var parsed = Json.parse(System.bufferToString(b));
-				App.theme = new zui.Zui.Theme();
+				Base.theme = new zui.Zui.Theme();
 				for (key in Type.getInstanceFields(zui.Zui.Theme)) {
 					if (key == "theme_") continue;
 					if (key.startsWith("set_")) continue;
 					if (key.startsWith("get_")) key = key.substr(4);
-					Reflect.setProperty(App.theme, key, Reflect.getProperty(parsed, key));
+					Reflect.setProperty(Base.theme, key, Reflect.getProperty(parsed, key));
 				}
 			});
 		}
-		App.theme.FILL_WINDOW_BG = true;
+		Base.theme.FILL_WINDOW_BG = true;
 		if (tagRedraw) {
-			for (ui in App.getUIs()) ui.t = App.theme;
+			for (ui in Base.getUIs()) ui.t = Base.theme;
 			UIBase.inst.tagUIRedraw();
 		}
 		if (Config.raw.touch_ui) {
 			// Enlarge elements
-			App.theme.FULL_TABS = true;
-			App.theme.ELEMENT_H = 24 + 6;
-			App.theme.BUTTON_H = 22 + 6;
-			App.theme.FONT_SIZE = 13 + 2;
-			App.theme.ARROW_SIZE = 5 + 2;
-			App.theme.CHECK_SIZE = 15 + 4;
-			App.theme.CHECK_SELECT_SIZE = 8 + 2;
+			Base.theme.FULL_TABS = true;
+			Base.theme.ELEMENT_H = 24 + 6;
+			Base.theme.BUTTON_H = 22 + 6;
+			Base.theme.FONT_SIZE = 13 + 2;
+			Base.theme.ARROW_SIZE = 5 + 2;
+			Base.theme.CHECK_SIZE = 15 + 4;
+			Base.theme.CHECK_SELECT_SIZE = 8 + 2;
 			buttonAlign = zui.Zui.Align.Left;
 			buttonSpacing = "";
 		}
 		else {
-			App.theme.FULL_TABS = false;
+			Base.theme.FULL_TABS = false;
 			buttonAlign = zui.Zui.Align.Left;
 			buttonSpacing = defaultButtonSpacing;
 		}

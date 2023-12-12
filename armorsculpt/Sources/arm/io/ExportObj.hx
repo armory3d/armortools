@@ -1,7 +1,7 @@
 package arm.io;
 
 import js.lib.Int16Array;
-import iron.object.MeshObject;
+import iron.MeshObject;
 
 class ExportObj {
 
@@ -17,15 +17,16 @@ class ExportObj {
 
 		var texpaint = Project.layers[0].texpaint;
 		var pixels = texpaint.getPixels();
+		var pixelsView = new js.lib.DataView(pixels);
 		var mesh = paintObjects[0].data.raw;
 		var inda = mesh.index_arrays[0].values;
 
 		var posa = new Int16Array(inda.length * 4);
 		for (i in 0...inda.length) {
 			var index = inda[i];
-			posa[index * 4    ] = Std.int(pixels.getFloat(i * 16    ) * 32767);
-			posa[index * 4 + 1] = Std.int(pixels.getFloat(i * 16 + 4) * 32767);
-			posa[index * 4 + 2] = Std.int(pixels.getFloat(i * 16 + 8) * 32767);
+			posa[index * 4    ] = Std.int(pixelsView.getFloat32(i * 16    , true) * 32767);
+			posa[index * 4 + 1] = Std.int(pixelsView.getFloat32(i * 16 + 4, true) * 32767);
+			posa[index * 4 + 2] = Std.int(pixelsView.getFloat32(i * 16 + 8, true) * 32767);
 		}
 
 		var poff = 0;

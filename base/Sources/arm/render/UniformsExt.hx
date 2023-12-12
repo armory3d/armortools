@@ -1,13 +1,15 @@
 package arm.render;
 
 import iron.System;
-import iron.data.MaterialData;
-import iron.object.Object;
-import iron.system.Input;
-import iron.math.Vec4;
-import iron.math.Mat4;
+import iron.MaterialData;
+import iron.Object;
+import iron.Input;
+import iron.Vec4;
+import iron.Mat4;
 import iron.RenderPath;
 import iron.Scene;
+import iron.Uniforms;
+import iron.ConstData;
 import arm.shader.MaterialParser;
 #if (is_paint || is_sculpt)
 import arm.ui.UIView2D;
@@ -16,19 +18,19 @@ import arm.ui.UIView2D;
 import arm.util.UVUtil;
 #end
 
-class Uniforms {
+class UniformsExt {
 
 	static var vec = new Vec4();
 	static var orthoP = Mat4.ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 	public static function init() {
-		iron.object.Uniforms.externalIntLinks = [linkInt];
-		iron.object.Uniforms.externalFloatLinks = [linkFloat];
-		iron.object.Uniforms.externalVec2Links = [linkVec2];
-		iron.object.Uniforms.externalVec3Links = [linkVec3];
-		iron.object.Uniforms.externalVec4Links = [linkVec4];
-		iron.object.Uniforms.externalMat4Links = [linkMat4];
-		iron.object.Uniforms.externalTextureLinks = [linkTex];
+		Uniforms.externalIntLinks = [linkInt];
+		Uniforms.externalFloatLinks = [linkFloat];
+		Uniforms.externalVec2Links = [linkVec2];
+		Uniforms.externalVec3Links = [linkVec3];
+		Uniforms.externalVec4Links = [linkVec4];
+		Uniforms.externalMat4Links = [linkMat4];
+		Uniforms.externalTextureLinks = [linkTex];
 	}
 
 	public static function linkInt(object: Object, mat: MaterialData, link: String): Null<Int> {
@@ -51,7 +53,7 @@ class Uniforms {
 				if (Config.raw.pressure_radius && pen.down()) {
 					val *= pen.pressure * Config.raw.pressure_sensitivity;
 				}
-				var scale2d = (900 / App.h()) * Config.raw.window_scale;
+				var scale2d = (900 / Base.h()) * Config.raw.window_scale;
 
 				if (Config.raw.brush_3d && !decal) {
 					val *= Context.raw.paint2d ? 0.55 * scale2d * UIView2D.inst.panScale : 2;
@@ -168,7 +170,7 @@ class Uniforms {
 		return null;
 	}
 
-	public static function linkVec2(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
+	public static function linkVec2(object: Object, mat: MaterialData, link: String): Vec4 {
 		switch (link) {
 			case "_gbufferSize": {
 				vec.set(0, 0, 0);
@@ -201,12 +203,12 @@ class Uniforms {
 		return null;
 	}
 
-	public static function linkVec3(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
+	public static function linkVec3(object: Object, mat: MaterialData, link: String): Vec4 {
 		var v: Vec4 = null;
 		switch (link) {
 			#if (is_paint || is_sculpt)
 			case "_brushDirection": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				// Discard first paint for directional brush
 				var allowPaint = Context.raw.prevPaintVecX != Context.raw.lastPaintVecX &&
 								 Context.raw.prevPaintVecY != Context.raw.lastPaintVecY &&
@@ -227,33 +229,33 @@ class Uniforms {
 				return v;
 			}
 			case "_decalLayerLoc": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.layer.decalMat._30, Context.raw.layer.decalMat._31, Context.raw.layer.decalMat._32);
 				return v;
 			}
 			case "_decalLayerNor": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.layer.decalMat._20, Context.raw.layer.decalMat._21, Context.raw.layer.decalMat._22).normalize();
 				return v;
 			}
 			case "_pickerBase": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.pickedColor.base.R, Context.raw.pickedColor.base.G, Context.raw.pickedColor.base.B);
 				return v;
 			}
 			case "_pickerNormal": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.pickedColor.normal.R, Context.raw.pickedColor.normal.G, Context.raw.pickedColor.normal.B);
 				return v;
 			}
 			#if arm_physics
 			case "_particleHit": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.particleHitX, Context.raw.particleHitY, Context.raw.particleHitZ);
 				return v;
 			}
 			case "_particleHitLast": {
-				v = iron.object.Uniforms.helpVec;
+				v = Uniforms.helpVec;
 				v.set(Context.raw.lastParticleHitX, Context.raw.lastParticleHitY, Context.raw.lastParticleHitZ);
 				return v;
 			}
@@ -268,13 +270,13 @@ class Uniforms {
 	static function vec2d(x: Float) {
 		// Transform from 3d viewport coord to 2d view coord
 		Context.raw.paint2dView = false;
-		var res = (x * App.w() - App.w()) / UIView2D.inst.ww;
+		var res = (x * Base.w() - Base.w()) / UIView2D.inst.ww;
 		Context.raw.paint2dView = true;
 		return res;
 	}
 	#end
 
-	public static function linkVec4(object: Object, mat: MaterialData, link: String): iron.math.Vec4 {
+	public static function linkVec4(object: Object, mat: MaterialData, link: String): Vec4 {
 		switch (link) {
 			case "_inputBrush": {
 				var down = Input.getMouse().down() || Input.getPen().down();
@@ -318,7 +320,7 @@ class Uniforms {
 				var decal = Context.raw.tool == ToolDecal || Context.raw.tool == ToolText;
 				var decalMask = Operator.shortcut(Config.keymap.decal_mask + "+" + Config.keymap.action_paint, ShortcutDown);
 				var val = (Context.raw.brushRadius * Context.raw.brushNodesRadius) / 15.0;
-				var scale2d = (900 / App.h()) * Config.raw.window_scale;
+				var scale2d = (900 / Base.h()) * Config.raw.window_scale;
 				val *= scale2d; // Projection ratio
 				vec.set(Context.raw.decalX, Context.raw.decalY, decalMask ? 1 : 0, val);
 				if (Context.raw.paint2d) vec.x = vec2d(vec.x);
@@ -329,12 +331,12 @@ class Uniforms {
 		return null;
 	}
 
-	public static function linkMat4(object: Object, mat: MaterialData, link: String): iron.math.Mat4 {
+	public static function linkMat4(object: Object, mat: MaterialData, link: String): Mat4 {
 		switch (link) {
 			#if (is_paint || is_sculpt)
 			case "_decalLayerMatrix": { // Decal layer
 				var camera = Scene.active.camera;
-				var m = iron.object.Uniforms.helpMat;
+				var m = Uniforms.helpMat;
 				m.setFrom(Context.raw.layer.decalMat);
 				m.getInverse(m);
 				m.multmat(orthoP);
@@ -379,12 +381,12 @@ class Uniforms {
 			}
 
 			case "_ltcMat": {
-				if (arm.data.ConstData.ltcMatTex == null) arm.data.ConstData.initLTC();
-				return arm.data.ConstData.ltcMatTex;
+				if (ConstData.ltcMatTex == null) ConstData.initLTC();
+				return ConstData.ltcMatTex;
 			}
 			case "_ltcMag": {
-				if (arm.data.ConstData.ltcMagTex == null) arm.data.ConstData.initLTC();
-				return arm.data.ConstData.ltcMagTex;
+				if (ConstData.ltcMagTex == null) ConstData.initLTC();
+				return ConstData.ltcMagTex;
 			}
 
 			#if (is_paint || is_sculpt)

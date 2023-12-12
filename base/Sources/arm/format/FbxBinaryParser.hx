@@ -161,10 +161,9 @@ class FbxBinaryParser {
 	}
 
 	function read64(): Int {
-		var i1 = read32();
-		var i2 = read32();
-		// return cast haxe.Int64.make(i1, i2);
-		return i1;
+		var i = untyped view.getBigInt64(pos, true);
+		pos += 8;
+		return i;
 	}
 
 	function readf32(): Float {
@@ -174,9 +173,9 @@ class FbxBinaryParser {
 	}
 
 	function readf64(): Float {
-		var i1 = read32();
-		var i2 = read32();
-		return haxe.io.FPHelper.i64ToDouble(i1, i2); // LE
+		var f = view.getFloat64(pos, true);
+		pos += 8;
+		return f;
 	}
 
 	function readString(): String {

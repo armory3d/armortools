@@ -1,15 +1,17 @@
 package arm.io;
 
 import haxe.Json;
-import haxe.io.Bytes;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
 import iron.System;
-import iron.data.SceneFormat;
-import iron.object.MeshObject;
-import iron.system.ArmPack;
-import iron.system.Lz4;
+import iron.SceneFormat;
+import iron.MeshObject;
+import iron.ArmPack;
+import iron.Scene;
+import iron.RenderPath;
+import iron.Vec4;
+import iron.Lz4;
 import arm.sys.Path;
 import arm.ProjectFormat;
 #if (is_paint || is_sculpt)
@@ -71,7 +73,7 @@ class ExportArm {
 		var font_files = fontsToFiles(Project.filepath, Project.fonts);
 		var mesh_files = meshesToFiles(Project.filepath);
 
-		var bitsPos = App.bitsHandle.position;
+		var bitsPos = Base.bitsHandle.position;
 		var bpp = bitsPos == Bits8 ? 8 : bitsPos == Bits16 ? 16 : 32;
 
 		var ld: Array<TLayerData> = [];
@@ -124,10 +126,10 @@ class ExportArm {
 			packed_assets: packed_assets,
 			swatches: Project.raw.swatches,
 			envmap: Project.raw.envmap != null ? (sameDrive ? Path.toRelative(Project.filepath, Project.raw.envmap) : Project.raw.envmap) : null,
-			envmap_strength: iron.Scene.active.world.probe.raw.strength,
-			camera_world: iron.Scene.active.camera.transform.local.toFloat32Array(),
+			envmap_strength: Scene.active.world.probe.raw.strength,
+			camera_world: Scene.active.camera.transform.local.toFloat32Array(),
 			camera_origin: vec3f32(arm.Camera.inst.origins[0]),
-			camera_fov: iron.Scene.active.camera.data.raw.fov,
+			camera_fov: Scene.active.camera.data.raw.fov,
 
 			#if (is_paint || is_sculpt)
 			mesh_datas: md,
@@ -156,7 +158,7 @@ class ExportArm {
 		};
 
 		#if (krom_android || krom_ios)
-		var tex = iron.RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderForward ? "buf" : "tex").image;
+		var tex = RenderPath.active.renderTargets.get(Context.raw.renderMode == RenderForward ? "buf" : "tex").image;
 		var mesh_icon = Image.createRenderTarget(256, 256);
 		var r = App.w() / App.h();
 		mesh_icon.g2.begin(false);
@@ -225,7 +227,7 @@ class ExportArm {
 		#end
 
 			var index = n.buttons[0].default_value;
-			n.buttons[0].data = App.enumTexts(n.type)[index];
+			n.buttons[0].data = Base.enumTexts(n.type)[index];
 
 			if (assets != null) {
 				var asset = Project.assets[index];
@@ -435,7 +437,7 @@ class ExportArm {
 		return packed_assets;
 	}
 
-	static function packAssets(raw: TProjectFormat, assets: Array<TAsset>) {
+	public static function packAssets(raw: TProjectFormat, assets: Array<TAsset>) {
 		if (raw.packed_assets == null) {
 			raw.packed_assets = [];
 		}
@@ -456,7 +458,7 @@ class ExportArm {
 				});
 			}
 		}
-		App.notifyOnNextFrame(function() {
+		Base.notifyOnNextFrame(function() {
 			for (image in tempImages) image.unload();
 		});
 	}
@@ -471,7 +473,7 @@ class ExportArm {
 		Krom.fileSaveBytes(path, buffer, buffer.byteLength + 1);
 	}
 
-	static function vec3f32(v: iron.math.Vec4): js.lib.Float32Array {
+	static function vec3f32(v: Vec4): js.lib.Float32Array {
 		var res = new js.lib.Float32Array(3);
 		res[0] = v.x;
 		res[1] = v.y;

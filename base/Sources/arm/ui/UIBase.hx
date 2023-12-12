@@ -1,22 +1,24 @@
 package arm.ui;
 
-import haxe.io.Bytes;
 import zui.Zui;
-import iron.system.Input.KeyCode;
+import iron.Input;
 import iron.System;
-import iron.data.Data;
-import iron.data.MaterialData;
-import iron.object.MeshObject;
-import iron.system.Input;
-import iron.system.Time;
+import iron.Data;
+import iron.MaterialData;
+import iron.MeshObject;
+import iron.ArmPack;
+import iron.Input;
+import iron.Time;
 import iron.Scene;
+import iron.Tween;
+import iron.RayCaster;
 import arm.io.ExportTexture;
 import arm.ProjectFormat;
 import arm.Viewport;
 import arm.Res;
 #if (is_paint || is_sculpt)
-import iron.math.Mat3;
-import iron.object.Object;
+import iron.Mat3;
+import iron.Object;
 import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
 import arm.util.RenderUtil;
@@ -29,7 +31,6 @@ import arm.data.MaterialSlot;
 import zui.Zui.Nodes;
 #end
 
-@:access(zui.Zui)
 class UIBase {
 
 	public static var inst: UIBase;
@@ -115,7 +116,7 @@ class UIBase {
 
 		if (Project.fonts == null) {
 			Project.fonts = [];
-			Project.fonts.push(new FontSlot("default.ttf", App.font));
+			Project.fonts.push(new FontSlot("default.ttf", Base.font));
 			Context.raw.font = Project.fonts[0];
 		}
 
@@ -140,12 +141,12 @@ class UIBase {
 		}
 
 		Project.nodes = new Nodes();
-		Project.canvas = iron.system.ArmPack.decode(Project.defaultCanvas);
+		Project.canvas = ArmPack.decode(Project.defaultCanvas);
 		Project.canvas.name = "Brush 1";
 
 		Context.parseBrushInputs();
 
-		arm.logic.LogicParser.parse(Project.canvas, false);
+		arm.logic.LogicParser.parse(Project.canvas);
 		#end
 
 		if (Project.raw.swatches == null) {
@@ -183,7 +184,7 @@ class UIBase {
 		History.reset();
 
 		var scale = Config.raw.window_scale;
-		ui = new Zui({ theme: App.theme, font: App.font, scaleFactor: scale, color_wheel: App.colorWheel, black_white_gradient: App.colorWheelGradient });
+		ui = new Zui({ theme: Base.theme, font: Base.font, scaleFactor: scale, color_wheel: Base.colorWheel, black_white_gradient: Base.colorWheelGradient });
 		Zui.onBorderHover = onBorderHover;
 		Zui.onTextHover = onTextHover;
 		Zui.onDeselectText = onDeselectText;
@@ -217,7 +218,7 @@ class UIBase {
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
-			iron.App.notifyOnInit(App.initLayers);
+			iron.App.notifyOnInit(Base.initLayers);
 		}
 
 		Context.raw.projectObjects = [];
@@ -232,7 +233,7 @@ class UIBase {
 
 		for (p in Plugin.plugins) if (p.update != null) p.update();
 
-		if (!App.uiEnabled) return;
+		if (!Base.uiEnabled) return;
 
 		if (!UINodes.inst.ui.isTyping && !ui.isTyping) {
 			if (Operator.shortcut(Config.keymap.toggle_node_editor)) {
@@ -296,7 +297,7 @@ class UIBase {
 
 		#if krom_linux
 		if (Operator.shortcut("alt+enter", ShortcutStarted)) {
-			App.toggleFullscreen();
+			Base.toggleFullscreen();
 		}
 		#end
 
@@ -663,7 +664,7 @@ class UIBase {
 
 		if (!mouse.down()) {
 			borderHandle_ptr = 0;
-			App.isResizing = false;
+			Base.isResizing = false;
 		}
 
 		#if arm_physics
@@ -675,20 +676,20 @@ class UIBase {
 			Context.raw.rdirty = 2;
 			if (mouse.started()) {
 				if (Context.raw.particleTimer != null) {
-					iron.system.Tween.stop(Context.raw.particleTimer);
+					Tween.stop(Context.raw.particleTimer);
 					Context.raw.particleTimer.done();
 					Context.raw.particleTimer = null;
 				}
 				History.pushUndo = true;
 				Context.raw.particleHitX = Context.raw.particleHitY = Context.raw.particleHitZ = 0;
 				Scene.active.spawnObject(".Sphere", null, function(o: Object) {
-					iron.data.Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
+					Data.getMaterial("Scene", ".Gizmo", function(md: MaterialData) {
 						var mo: MeshObject = cast o;
 						mo.name = ".Bullet";
 						mo.materials[0] = md;
 						mo.visible = true;
 
-						var camera = iron.Scene.active.camera;
+						var camera = Scene.active.camera;
 						var ct = camera.transform;
 						mo.transform.loc.set(ct.worldx(), ct.worldy(), ct.worldz());
 						mo.transform.scale.set(Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2, Context.raw.brushRadius * 0.2);
@@ -703,10 +704,10 @@ class UIBase {
 						mo.addTrait(body);
 						mo.transform.radius *= 10;
 
-						var ray = iron.math.RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
+						var ray = RayCaster.getRay(mouse.viewX, mouse.viewY, camera);
 						body.applyImpulse(ray.direction.mult(0.15));
 
-						Context.raw.particleTimer = iron.system.Tween.timer(5, mo.remove);
+						Context.raw.particleTimer = Tween.timer(5, mo.remove);
 					});
 				});
 			}
@@ -787,7 +788,7 @@ class UIBase {
 
 	public function toggleDistractFree() {
 		show = !show;
-		App.resize();
+		Base.resize();
 	}
 
 	inline function getRadiusIncrement(): Float {
@@ -800,10 +801,10 @@ class UIBase {
 
 	#if (is_paint || is_sculpt)
 	function getBrushStencilRect(): TRect {
-		var w = Std.int(Context.raw.brushStencilImage.width * (App.h() / Context.raw.brushStencilImage.height) * Context.raw.brushStencilScale);
-		var h = Std.int(App.h() * Context.raw.brushStencilScale);
-		var x = Std.int(App.x() + Context.raw.brushStencilX * App.w());
-		var y = Std.int(App.y() + Context.raw.brushStencilY * App.h());
+		var w = Std.int(Context.raw.brushStencilImage.width * (Base.h() / Context.raw.brushStencilImage.height) * Context.raw.brushStencilScale);
+		var h = Std.int(Base.h() * Context.raw.brushStencilScale);
+		var x = Std.int(Base.x() + Context.raw.brushStencilX * Base.w());
+		var y = Std.int(Base.y() + Context.raw.brushStencilY * Base.h());
 		return { w: w, h: h, x: x, y: y };
 	}
 	#end
@@ -818,7 +819,7 @@ class UIBase {
 		sidebarMiniW = Std.int(defaultSidebarMiniW * ui.SCALE());
 		#end
 
-		if (!App.uiEnabled) return;
+		if (!Base.uiEnabled) return;
 
 		var mouse = Input.getMouse();
 		var kb = Input.getKeyboard();
@@ -887,8 +888,8 @@ class UIBase {
 					Context.raw.brushStencilAngle = -Math.atan2(mouse.y - gizmoY, mouse.x - gizmoX) - Math.PI / 2;
 				}
 				else {
-					Context.raw.brushStencilX += mouse.movementX / App.w();
-					Context.raw.brushStencilY += mouse.movementY / App.h();
+					Context.raw.brushStencilX += mouse.movementX / Base.w();
+					Context.raw.brushStencilY += mouse.movementY / Base.h();
 				}
 			}
 			else Context.raw.brushStencilScaling = false;
@@ -896,13 +897,13 @@ class UIBase {
 				Context.raw.brushStencilScale -= mouse.wheelDelta / 10;
 			}
 			// Center after scale
-			var ratio = App.h() / Context.raw.brushStencilImage.height;
+			var ratio = Base.h() / Context.raw.brushStencilImage.height;
 			var oldW = _scale * Context.raw.brushStencilImage.width * ratio;
 			var newW = Context.raw.brushStencilScale * Context.raw.brushStencilImage.width * ratio;
-			var oldH = _scale * App.h();
-			var newH = Context.raw.brushStencilScale * App.h();
-			Context.raw.brushStencilX += (oldW - newW) / App.w() / 2;
-			Context.raw.brushStencilY += (oldH - newH) / App.h() / 2;
+			var oldH = _scale * Base.h();
+			var newH = Context.raw.brushStencilScale * Base.h();
+			Context.raw.brushStencilX += (oldW - newW) / Base.w() / 2;
+			Context.raw.brushStencilY += (oldH - newH) / Base.h() / 2;
 		}
 		#end
 
@@ -974,9 +975,9 @@ class UIBase {
 				}
 				else {
 					if (Context.raw.brushTime == 0 &&
-						!App.isDragging &&
-						!App.isResizing &&
-						!App.isComboSelected()) { // Paint started
+						!Base.isDragging &&
+						!Base.isResizing &&
+						!Base.isComboSelected()) { // Paint started
 
 						// Draw line
 						if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
@@ -997,9 +998,9 @@ class UIBase {
 							#if arm_particles
 							var emitter: MeshObject = cast Scene.active.getChild(".ParticleEmitter");
 							var psys = emitter.particleSystems[0];
-							@:privateAccess psys.time = 0;
-							// @:privateAccess psys.time = @:privateAccess psys.seed * @:privateAccess psys.animtime;
-							// @:privateAccess psys.seed++;
+							psys.time = 0;
+							// psys.time = psys.seed * psys.animtime;
+							// psys.seed++;
 							#end
 						}
 						else if (Context.raw.tool == ToolFill && Context.raw.fillTypeHandle.position == FillUVIsland) {
@@ -1039,8 +1040,8 @@ class UIBase {
 			#if is_paint
 			// New color id picked, update fill layer
 			if (Context.raw.tool == ToolColorId && Context.raw.layer.fill_layer != null) {
-				App.notifyOnNextFrame(function() {
-					App.updateFillLayer();
+				Base.notifyOnNextFrame(function() {
+					Base.updateFillLayer();
 					MakeMaterial.parsePaintMaterial(false);
 				});
 			}
@@ -1052,7 +1053,7 @@ class UIBase {
 			Context.raw.layersPreviewDirty = false;
 			Context.raw.layerPreviewDirty = false;
 			Context.raw.maskPreviewLast = null;
-			if (App.pipeMerge == null) App.makePipe();
+			if (Base.pipeMerge == null) Base.makePipe();
 			// Update all layer previews
 			for (l in Project.layers) {
 				if (l.isGroup()) continue;
@@ -1060,8 +1061,8 @@ class UIBase {
 				var source = l.texpaint;
 				var g2 = target.g2;
 				g2.begin(true, 0x00000000);
-				// g2.pipeline = l.isMask() ? App.pipeCopy8 : App.pipeCopy;
-				g2.pipeline = App.pipeCopy; // texpaint_preview is always RGBA32 for now
+				// g2.pipeline = l.isMask() ? Base.pipeCopy8 : Base.pipeCopy;
+				g2.pipeline = Base.pipeCopy; // texpaint_preview is always RGBA32 for now
 				g2.drawScaledImage(source, 0, 0, target.width, target.height);
 				g2.pipeline = null;
 				g2.end();
@@ -1071,15 +1072,15 @@ class UIBase {
 		if (Context.raw.layerPreviewDirty && !Context.raw.layer.isGroup()) {
 			Context.raw.layerPreviewDirty = false;
 			Context.raw.maskPreviewLast = null;
-			if (App.pipeMerge == null) App.makePipe();
+			if (Base.pipeMerge == null) Base.makePipe();
 			// Update layer preview
 			var l = Context.raw.layer;
 			var target = l.texpaint_preview;
 			var source = l.texpaint;
 			var g2 = target.g2;
 			g2.begin(true, 0x00000000);
-			// g2.pipeline = Context.raw.layer.isMask() ? App.pipeCopy8 : App.pipeCopy;
-			g2.pipeline = App.pipeCopy; // texpaint_preview is always RGBA32 for now
+			// g2.pipeline = Context.raw.layer.isMask() ? Base.pipeCopy8 : Base.pipeCopy;
+			g2.pipeline = Base.pipeCopy; // texpaint_preview is always RGBA32 for now
 			g2.drawScaledImage(source, 0, 0, target.width, target.height);
 			g2.pipeline = null;
 			g2.end();
@@ -1123,7 +1124,7 @@ class UIBase {
 
 		if (!show || System.width == 0 || System.height == 0) return;
 
-		ui.inputEnabled = App.uiEnabled;
+		ui.inputEnabled = Base.uiEnabled;
 
 		// Remember last tab positions
 		for (i in 0...htabs.length) {
@@ -1223,7 +1224,7 @@ class UIBase {
 	}
 
 	public function renderCursor(g: Graphics2) {
-		if (!App.uiEnabled) return;
+		if (!Base.uiEnabled) return;
 
 		#if is_paint
 		if (Context.raw.tool == ToolMaterial || Context.raw.tool == ToolBake) return;
@@ -1232,8 +1233,8 @@ class UIBase {
 		g.color = 0xffffffff;
 
 		Context.raw.viewIndex = Context.raw.viewIndexLast;
-		var mx = App.x() + Context.raw.paintVec.x * App.w();
-		var my = App.y() + Context.raw.paintVec.y * App.h();
+		var mx = Base.x() + Context.raw.paintVec.x * Base.w();
+		var my = Base.y() + Context.raw.paintVec.y * Base.h();
 		Context.raw.viewIndex = -1;
 
 		// Radius being scaled
@@ -1316,8 +1317,8 @@ class UIBase {
 
 					// Radius being scaled
 					if (Context.raw.brushLocked) {
-						Context.raw.decalX += (Context.raw.lockStartedX - System.width / 2) / App.w();
-						Context.raw.decalY += (Context.raw.lockStartedY - System.height / 2) / App.h();
+						Context.raw.decalX += (Context.raw.lockStartedX - System.width / 2) / Base.w();
+						Context.raw.decalY += (Context.raw.lockStartedY - System.height / 2) / Base.h();
 					}
 				}
 
@@ -1326,8 +1327,8 @@ class UIBase {
 					var psizey = Std.int(256 * ui.SCALE() * (Context.raw.brushRadius * Context.raw.brushNodesRadius));
 
 					Context.raw.viewIndex = Context.raw.viewIndexLast;
-					var decalX = App.x() + Context.raw.decalX * App.w() - psizex / 2;
-					var decalY = App.y() + Context.raw.decalY * App.h() - psizey / 2;
+					var decalX = Base.x() + Context.raw.decalX * Base.w() - psizex / 2;
+					var decalY = Base.y() + Context.raw.decalY * Base.h() - psizey / 2;
 					Context.raw.viewIndex = -1;
 
 					g.color = Color.fromFloats(1, 1, 1, decalAlpha);
@@ -1372,8 +1373,8 @@ class UIBase {
 			 Context.raw.tool == ToolSmudge ||
 			 Context.raw.tool == ToolParticle)) {
 			g.fillRect(mx - 1, my - 1, 2, 2);
-			var mx = Context.raw.brushLazyX * App.w() + App.x();
-			var my = Context.raw.brushLazyY * App.h() + App.y();
+			var mx = Context.raw.brushLazyX * Base.w() + Base.x();
+			var my = Context.raw.brushLazyY * Base.h() + Base.y();
 			var radius = Context.raw.brushLazyRadius * 180;
 			g.color = 0xff666666;
 			g.drawScaledImage(cursorImg, mx - radius / 2, my - radius / 2, radius, radius);
@@ -1384,7 +1385,7 @@ class UIBase {
 
 	public function showMaterialNodes() {
 		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UINodes.inst.ui.endInput();
+		UINodes.inst.ui.endInput();
 
 		#if (is_paint || is_sculpt)
 		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasMaterial;
@@ -1394,27 +1395,27 @@ class UIBase {
 		UINodes.inst.show = !UINodes.inst.show;
 		#end
 
-		App.resize();
+		Base.resize();
 	}
 
 	#if (is_paint || is_sculpt)
 	public function showBrushNodes() {
 		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UINodes.inst.ui.endInput();
+		UINodes.inst.ui.endInput();
 		UINodes.inst.show = !UINodes.inst.show || UINodes.inst.canvasType != CanvasBrush;
 		UINodes.inst.canvasType = CanvasBrush;
-		App.resize();
+		Base.resize();
 	}
 	#end
 
 	public function show2DView(type: View2DType) {
 		// Clear input state as ui receives input events even when not drawn
-		@:privateAccess UIView2D.inst.ui.endInput();
+		UIView2D.inst.ui.endInput();
 		if (UIView2D.inst.type != type) UIView2D.inst.show = true;
 		else UIView2D.inst.show = !UIView2D.inst.show;
 		UIView2D.inst.type = type;
 		UIView2D.inst.hwnd.redraws = 2;
-		App.resize();
+		Base.resize();
 	}
 
 	public function toggleBrowser() {
@@ -1426,7 +1427,7 @@ class UIBase {
 	public function setIconScale() {
 		if (ui.SCALE() > 1) {
 			Res.load(["icons2x.k"], function() {
-				@:privateAccess Res.bundled.set("icons.k", Res.get("icons2x.k"));
+				Res.bundled.set("icons.k", Res.get("icons2x.k"));
 			});
 		}
 		else {
@@ -1435,7 +1436,7 @@ class UIBase {
 	}
 
 	function onBorderHover(handle_ptr: Int, side: Int) {
-		if (!App.uiEnabled) return;
+		if (!Base.uiEnabled) return;
 
 		#if (is_paint || is_sculpt)
 		if (handle_ptr != hwnds[TabSidebar0].ptr &&
@@ -1467,7 +1468,7 @@ class UIBase {
 		if (Zui.current.inputStarted) {
 			borderStarted = side;
 			borderHandle_ptr = handle_ptr;
-			App.isResizing = true;
+			Base.isResizing = true;
 		}
 	}
 

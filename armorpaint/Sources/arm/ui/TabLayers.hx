@@ -3,9 +3,9 @@ package arm.ui;
 import zui.Zui;
 import zui.Zui.Nodes;
 import iron.System;
-import iron.system.Time;
-import iron.system.Input;
-import iron.object.MeshObject;
+import iron.Time;
+import iron.Input;
+import iron.MeshObject;
 import arm.data.LayerSlot;
 import arm.shader.MakeMaterial;
 import arm.util.UVUtil;
@@ -13,7 +13,6 @@ import arm.util.MeshUtil;
 import arm.util.RenderUtil;
 import arm.sys.Path;
 
-@:access(zui.Zui)
 class TabLayers {
 
 	static var layerNameEdit = -1;
@@ -27,7 +26,7 @@ class TabLayers {
 
 	static function drawMini(htab: Handle) {
 		var ui = UIBase.inst.ui;
-		@:privateAccess ui.setHoveredTabName(tr("Layers"));
+		ui.setHoveredTabName(tr("Layers"));
 
 		var _ELEMENT_H = ui.t.ELEMENT_H;
 		ui.t.ELEMENT_H = Std.int(UIBase.sidebarMiniW / 2 / ui.SCALE());
@@ -100,53 +99,53 @@ class TabLayers {
 			UIMenu.draw(function(ui: Zui) {
 				var l = Context.raw.layer;
 				if (UIMenu.menuButton(ui, tr("Paint Layer"))) {
-					App.newLayer();
+					Base.newLayer();
 					History.newLayer();
 				}
 				if (UIMenu.menuButton(ui, tr("Fill Layer"))) {
-					App.createFillLayer(UVMap);
+					Base.createFillLayer(UVMap);
 				}
 				if (UIMenu.menuButton(ui, tr("Decal Layer"))) {
-					App.createFillLayer(UVProject);
+					Base.createFillLayer(UVProject);
 				}
 				if (UIMenu.menuButton(ui, tr("Black Mask"))) {
 					if (l.isMask()) Context.setLayer(l.parent);
 					var l = Context.raw.layer;
 
-					var m = App.newMask(false, l);
+					var m = Base.newMask(false, l);
 					function _next() {
 						m.clear(0x00000000);
 					}
-					App.notifyOnNextFrame(_next);
+					Base.notifyOnNextFrame(_next);
 					Context.raw.layerPreviewDirty = true;
 					History.newBlackMask();
-					App.updateFillLayers();
+					Base.updateFillLayers();
 				}
 				if (UIMenu.menuButton(ui, tr("White Mask"))) {
 					if (l.isMask()) Context.setLayer(l.parent);
 					var l = Context.raw.layer;
 
-					var m = App.newMask(false, l);
+					var m = Base.newMask(false, l);
 					function _next() {
 						m.clear(0xffffffff);
 					}
-					App.notifyOnNextFrame(_next);
+					Base.notifyOnNextFrame(_next);
 					Context.raw.layerPreviewDirty = true;
 					History.newWhiteMask();
-					App.updateFillLayers();
+					Base.updateFillLayers();
 				}
 				if (UIMenu.menuButton(ui, tr("Fill Mask"))) {
 					if (l.isMask()) Context.setLayer(l.parent);
 					var l = Context.raw.layer;
 
-					var m = App.newMask(false, l);
+					var m = Base.newMask(false, l);
 					function _init() {
 						m.toFillLayer();
 					}
 					iron.App.notifyOnInit(_init);
 					Context.raw.layerPreviewDirty = true;
 					History.newFillMask();
-					App.updateFillLayers();
+					Base.updateFillLayers();
 				}
 				ui.enabled = !Context.raw.layer.isGroup() && !Context.raw.layer.isInGroup();
 				if (UIMenu.menuButton(ui, tr("Group"))) {
@@ -155,7 +154,7 @@ class TabLayers {
 					if (l.isLayerMask()) l = l.parent;
 
 					var pointers = initLayerMap();
-					var group = App.newGroup();
+					var group = Base.newGroup();
 					Context.setLayer(l);
 					Project.layers.remove(group);
 					Project.layers.insert(Project.layers.indexOf(l) + 1, group);
@@ -190,7 +189,7 @@ class TabLayers {
 				for (p in Project.paintObjects) if (p.visible) visibles.push(p);
 				MeshUtil.mergeMesh(visibles);
 			}
-			App.setObjectMask();
+			Base.setObjectMask();
 			UVUtil.uvmapCached = false;
 			Context.raw.ddirty = 2;
 			#if (krom_direct3d12 || krom_vulkan || krom_metal)
@@ -223,9 +222,9 @@ class TabLayers {
 	}
 
 	static function setDragLayer(layer: LayerSlot, offX: Float, offY: Float) {
-		App.dragOffX = offX;
-		App.dragOffY = offY;
-		App.dragLayer = layer;
+		Base.dragOffX = offX;
+		Base.dragOffY = offY;
+		Base.dragLayer = layer;
 		Context.raw.dragDestination = Project.layers.indexOf(layer);
 	}
 
@@ -251,15 +250,15 @@ class TabLayers {
 		// Highlight drag destination
 		var mouse = Input.getMouse();
 		var absy = ui._windowY + ui._y;
-		if (App.isDragging && App.dragLayer != null && Context.inLayers()) {
+		if (Base.isDragging && Base.dragLayer != null && Context.inLayers()) {
 			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
-				var down = Project.layers.indexOf(App.dragLayer) >= i;
+				var down = Project.layers.indexOf(Base.dragLayer) >= i;
 				Context.raw.dragDestination = down ? i : i - 1;
 
 				var ls = Project.layers;
 				var dest = Context.raw.dragDestination;
 				var toGroup = down ? dest > 0 && ls[dest - 1].parent != null && ls[dest - 1].parent.show_panel : dest < ls.length && ls[dest].parent != null && ls[dest].parent.show_panel;
-				var nestedGroup = App.dragLayer.isGroup() && toGroup;
+				var nestedGroup = Base.dragLayer.isGroup() && toGroup;
 				if (!nestedGroup) {
 					if (Context.raw.layer.canMove(Context.raw.dragDestination)) {
 						ui.fill(checkw, step * 2, (ui._windowW / ui.SCALE() - 2) - checkw, 2 * ui.SCALE(), ui.t.HIGHLIGHT_COL);
@@ -273,7 +272,7 @@ class TabLayers {
 				}
 			}
 		}
-		if (App.isDragging && (App.dragMaterial != null || App.dragSwatch != null) && Context.inLayers()) {
+		if (Base.isDragging && (Base.dragMaterial != null || Base.dragSwatch != null) && Context.inLayers()) {
 			if (mouse.y > absy + step && mouse.y < absy + step * 3) {
 				Context.raw.dragDestination = i;
 				if (canDropNewLayer(i))
@@ -303,7 +302,7 @@ class TabLayers {
 		var uiy = ui._y;
 		var state = drawLayerIcon(l, i, uix, uiy, true);
 		handleLayerIconState(l, i, state, uix, uiy);
-		@:privateAccess ui.endElement();
+		ui.endElement();
 
 		ui._y += ui.ELEMENT_H();
 		ui._y -= ui.ELEMENT_OFFSET();
@@ -418,7 +417,7 @@ class TabLayers {
 		}
 
 		if (l.isGroup()) {
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 		else {
 			if (l.isMask()) {
@@ -442,22 +441,22 @@ class TabLayers {
 
 		if (l.isGroup() || l.isMask()) {
 			ui._y -= ui.ELEMENT_OFFSET();
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 		else {
 			ui._y -= ui.ELEMENT_OFFSET();
 
 			ui.row([8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100]);
-			@:privateAccess ui.endElement();
-			@:privateAccess ui.endElement();
-			@:privateAccess ui.endElement();
+			ui.endElement();
+			ui.endElement();
+			ui.endElement();
 
 			if (Config.raw.touch_ui) {
 				ui._x += 12 * ui.SCALE();
 			}
 
 			comboObject(ui, l);
-			@:privateAccess ui.endElement();
+			ui.endElement();
 		}
 
 		ui._y -= ui.ELEMENT_OFFSET();
@@ -478,12 +477,12 @@ class TabLayers {
 				function _init() {
 					Context.raw.material = l.fill_layer;
 					l.clear();
-					App.updateFillLayers();
+					Base.updateFillLayers();
 				}
 				iron.App.notifyOnInit(_init);
 			}
 			else {
-				App.setObjectMask();
+				Base.setObjectMask();
 			}
 		}
 		return objectHandle;
@@ -808,7 +807,7 @@ class TabLayers {
 			}
 			if (l.isGroup() && UIMenu.menuButton(ui, tr("Merge Group"))) {
 				function _init() {
-					App.mergeGroup(l);
+					Base.mergeGroup(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -817,7 +816,7 @@ class TabLayers {
 				function _init() {
 					Context.setLayer(l);
 					History.mergeLayers();
-					App.mergeDown();
+					Base.mergeDown();
 					if (Context.raw.layer.fill_layer != null) Context.raw.layer.toPaintLayer();
 				}
 				iron.App.notifyOnInit(_init);
@@ -827,7 +826,7 @@ class TabLayers {
 				function _init() {
 					Context.setLayer(l);
 					History.duplicateLayer();
-					App.duplicateLayer(l);
+					Base.duplicateLayer(l);
 				}
 				iron.App.notifyOnInit(_init);
 			}
@@ -847,20 +846,20 @@ class TabLayers {
 			if (!l.isGroup()) {
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
-				var resHandleChangedLast = App.resHandle.changed;
+				var resHandleChangedLast = Base.resHandle.changed;
 				#if (krom_android || krom_ios)
 				var ar = ["128", "256", "512", "1K", "2K", "4K"];
 				#else
 				var ar = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
 				#end
 				var _y = ui._y;
-				App.resHandle.value = App.resHandle.position;
-				App.resHandle.position = Std.int(ui.slider(App.resHandle, ar[App.resHandle.position], 0, ar.length - 1, false, 1, false, Left, false));
-				if (App.resHandle.changed) {
+				Base.resHandle.value = Base.resHandle.position;
+				Base.resHandle.position = Std.int(ui.slider(Base.resHandle, ar[Base.resHandle.position], 0, ar.length - 1, false, 1, false, Left, false));
+				if (Base.resHandle.changed) {
 					UIMenu.keepOpen = true;
 				}
-				if (resHandleChangedLast && !App.resHandle.changed) {
-					App.onLayersResized();
+				if (resHandleChangedLast && !Base.resHandle.changed) {
+					Base.onLayersResized();
 				}
 				ui._y = _y;
 				ui.drawString(ui.g, tr("Res"), null, 0, Right);
@@ -869,12 +868,12 @@ class TabLayers {
 				UIMenu.menuFill(ui);
 				UIMenu.menuAlign(ui);
 				#if (krom_android || krom_ios)
-				ui.inlineRadio(App.bitsHandle, ["8bit"]);
+				ui.inlineRadio(Base.bitsHandle, ["8bit"]);
 				#else
-				ui.inlineRadio(App.bitsHandle, ["8bit", "16bit", "32bit"]);
+				ui.inlineRadio(Base.bitsHandle, ["8bit", "16bit", "32bit"]);
 				#end
-				if (App.bitsHandle.changed) {
-					iron.App.notifyOnInit(App.setLayerBits);
+				if (Base.bitsHandle.changed) {
+					iron.App.notifyOnInit(Base.setLayerBits);
 					UIMenu.keepOpen = true;
 				}
 			}
@@ -889,7 +888,7 @@ class TabLayers {
 					Context.setMaterial(l.fill_layer);
 					Context.setLayer(l);
 					function _init() {
-						App.updateFillLayers();
+						Base.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
@@ -905,7 +904,7 @@ class TabLayers {
 					Context.setLayer(l);
 					MakeMaterial.parsePaintMaterial();
 					function _init() {
-						App.updateFillLayers();
+						Base.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
@@ -921,7 +920,7 @@ class TabLayers {
 					Context.setLayer(l);
 					MakeMaterial.parsePaintMaterial();
 					function _init() {
-						App.updateFillLayers();
+						Base.updateFillLayers();
 					}
 					iron.App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
@@ -1049,7 +1048,7 @@ class TabLayers {
 
 		if (l.isMask()) {
 			Context.raw.layer = l.parent;
-			App.updateFillLayers();
+			Base.updateFillLayers();
 		}
 
 		// Remove empty group
