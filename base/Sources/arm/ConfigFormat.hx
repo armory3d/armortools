@@ -1,6 +1,6 @@
 package arm;
 
-@:structInit class TConfig {
+typedef TConfig = {
 	// The locale should be specified in ISO 639-1 format: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
 	@:optional public var locale: String;

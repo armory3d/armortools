@@ -4,7 +4,6 @@ import js.lib.Float32Array;
 import iron.App;
 import iron.Vec4;
 import iron.Scene;
-import arm.Camera;
 
 class Viewport {
 

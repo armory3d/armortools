@@ -11,33 +11,7 @@ import iron.MeshData;
 import iron.Data;
 import iron.MeshObject;
 import iron.Scene;
-import arm.Viewport;
-import arm.sys.File;
-import arm.sys.Path;
-import arm.ui.UIFiles;
-import arm.ui.UIBox;
-import arm.ui.UINodes;
-import arm.ui.BoxPreferences;
-import arm.util.MeshUtil;
-import arm.shader.MakeMaterial;
-import arm.io.ImportAsset;
-import arm.io.ImportArm;
-import arm.io.ImportGpl;
-import arm.io.ImportMesh;
-import arm.io.ImportTexture;
-import arm.io.ExportArm;
-import arm.io.ExportGpl;
 import arm.ProjectFormat;
-#if (is_paint || is_sculpt)
-import arm.util.RenderUtil;
-import arm.ui.UIBase;
-import arm.data.LayerSlot;
-import arm.data.BrushSlot;
-import arm.data.FontSlot;
-import arm.data.MaterialSlot;
-import arm.io.ImportBlendMaterial;
-import arm.logic.NodesBrush;
-#end
 
 class Project {
 
@@ -52,10 +26,10 @@ class Project {
 	public static var assetMap = new Map<Int, Dynamic>(); // Image | Font
 	static var meshList: Array<String> = null;
 	#if (is_paint || is_sculpt)
-	public static var materials: Array<MaterialSlot> = null;
-	public static var brushes: Array<BrushSlot> = null;
-	public static var layers: Array<LayerSlot> = null;
-	public static var fonts: Array<FontSlot> = null;
+	public static var materials: Array<SlotMaterial> = null;
+	public static var brushes: Array<SlotBrush> = null;
+	public static var layers: Array<SlotLayer> = null;
+	public static var fonts: Array<SlotFont> = null;
 	public static var atlasObjects: Array<Int> = null;
 	public static var atlasNames: Array<String> = null;
 	#end
@@ -202,8 +176,8 @@ class Project {
 			var raw: TMeshData = null;
 			if (Context.raw.projectType == ModelSphere || Context.raw.projectType == ModelTessellatedPlane) {
 				var mesh: Dynamic = Context.raw.projectType == ModelSphere ?
-					new arm.geom.UVSphere(1, 512, 256) :
-					new arm.geom.Plane(1, 1, 512, 512);
+					new GeomUVSphere(1, 512, 256) :
+					new GeomPlane(1, 1, 512, 512);
 				mesh.name = "Tessellated";
 				raw = ImportMesh.rawMesh(mesh);
 
@@ -260,7 +234,7 @@ class Project {
 			while (materials.length > 0) materials.pop().unload();
 			Data.getMaterial("Scene", "Material", function(m: MaterialData) {
 				#if (is_paint || is_sculpt)
-				materials.push(new MaterialSlot(m));
+				materials.push(new SlotMaterial(m));
 				#end
 				#if is_lab
 				materialData = m;
@@ -271,15 +245,15 @@ class Project {
 			Context.raw.material = materials[0];
 			#end
 
-			arm.ui.UINodes.inst.hwnd.redraws = 2;
-			arm.ui.UINodes.inst.groupStack = [];
+			arm.UINodes.inst.hwnd.redraws = 2;
+			arm.UINodes.inst.groupStack = [];
 			materialGroups = [];
 
 			#if (is_paint || is_sculpt)
-			brushes = [new BrushSlot()];
+			brushes = [new SlotBrush()];
 			Context.raw.brush = brushes[0];
 
-			fonts = [new FontSlot("default.ttf", Base.font)];
+			fonts = [new SlotFont("default.ttf", Base.font)];
 			Context.raw.font = fonts[0];
 			#end
 
@@ -293,7 +267,7 @@ class Project {
 			MakeMaterial.parsePaintMaterial();
 
 			#if (is_paint || is_sculpt)
-			RenderUtil.makeMaterialPreview();
+			UtilRender.makeMaterialPreview();
 			#end
 
 			for (a in assets) Data.deleteImage(a.file);
@@ -314,7 +288,7 @@ class Project {
 				#if (is_paint || is_sculpt)
 				var aspectRatioChanged = layers[0].texpaint.width != Config.getTextureResX() || layers[0].texpaint.height != Config.getTextureResY();
 				while (layers.length > 0) layers.pop().unload();
-				var layer = new LayerSlot();
+				var layer = new SlotLayer();
 				layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
@@ -343,7 +317,7 @@ class Project {
 		});
 
 		#if (krom_direct3d12 || krom_vulkan || krom_metal)
-		arm.render.RenderPathRaytrace.ready = false;
+		arm.RenderPathRaytrace.ready = false;
 		#end
 	}
 
@@ -371,7 +345,7 @@ class Project {
 				}
 
 				// Create a new brush
-				Context.raw.brush = new BrushSlot();
+				Context.raw.brush = new SlotBrush();
 				Project.brushes.push(Context.raw.brush);
 
 				// Create and link image node
@@ -392,7 +366,7 @@ class Project {
 				MakeMaterial.parseBrush();
 				UINodes.inst.hwnd.redraws = 2;
 				function _init() {
-					RenderUtil.makeBrushPreview();
+					UtilRender.makeBrushPreview();
 				}
 				App.notifyOnInit(_init);
 			}
@@ -508,7 +482,7 @@ class Project {
 					UIBox.hide();
 					function doUnwrap() {
 						if (unwrapBy == unwrapPlugins.length - 1) {
-							MeshUtil.equirectUnwrap(mesh);
+							UtilMesh.equirectUnwrap(mesh);
 						}
 						else {
 							var f = unwrapPlugins[unwrapBy];
@@ -516,7 +490,7 @@ class Project {
 								Config.enablePlugin(f);
 								Console.info(f + " " + tr("plugin enabled"));
 							}
-							MeshUtil.unwrappers.get(f)(mesh);
+							UtilMesh.unwrappers.get(f)(mesh);
 						}
 						done(mesh);
 					}
@@ -574,7 +548,7 @@ class Project {
 				MakeMaterial.parsePaintMaterial();
 
 				#if (is_paint || is_sculpt)
-				RenderUtil.makeMaterialPreview();
+				UtilRender.makeMaterialPreview();
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 				#end
 			}

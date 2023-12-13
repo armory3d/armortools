@@ -2,7 +2,6 @@ package arm;
 
 import iron.App;
 import iron.System;
-import arm.Base;
 
 @:keep
 class Console {

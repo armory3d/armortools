@@ -11,19 +11,9 @@ import iron.Data;
 import iron.Time;
 import iron.RenderPath;
 import iron.ConstData;
-import arm.ui.*;
-import arm.io.ImportAsset;
-import arm.shader.MakeMaterial;
-import arm.Viewport;
-import arm.Camera;
-import arm.Res;
-import arm.ProjectFormat;
-#if (is_paint || is_sculpt)
 import iron.Mat4;
-import arm.data.*;
-import arm.util.*;
-import arm.render.RenderPathPaint;
-#end
+import arm.ProjectFormat;
+import arm.Res;
 
 class Base {
 
@@ -59,8 +49,8 @@ class Base {
 	static var lastWindowWidth = 0;
 	static var lastWindowHeight = 0;
 	#if (is_paint || is_sculpt)
-	public static var dragMaterial: MaterialSlot = null;
-	public static var dragLayer: LayerSlot = null;
+	public static var dragMaterial: SlotMaterial = null;
+	public static var dragLayer: SlotLayer = null;
 	#end
 
 	public static var pipeCopy: PipelineState;
@@ -209,7 +199,7 @@ class Base {
 					new UIView2D();
 
 					#if is_lab
-					arm.logic.RandomNode.setSeed(Std.int(Time.time() * 4294967295));
+					arm.nodes.RandomNode.setSeed(Std.int(Time.time() * 4294967295));
 					#end
 
 					App.notifyOnUpdate(update);
@@ -247,7 +237,7 @@ class Base {
 					#end
 
 					if (Config.raw.splash_screen && hasProjects) {
-						arm.ui.BoxProjects.show();
+						BoxProjects.show();
 					}
 				});
 			});
@@ -264,12 +254,12 @@ class Base {
 	public static function w(): Int {
 		// Drawing material preview
 		if (UIBase.inst != null && Context.raw.materialPreview) {
-			return RenderUtil.materialPreviewSize;
+			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
 		if (UIBase.inst != null && Context.raw.decalPreview) {
-			return RenderUtil.decalPreviewSize;
+			return UtilRender.decalPreviewSize;
 		}
 
 		var res = 0;
@@ -299,12 +289,12 @@ class Base {
 	public static function h(): Int {
 		// Drawing material preview
 		if (UIBase.inst != null && Context.raw.materialPreview) {
-			return RenderUtil.materialPreviewSize;
+			return UtilRender.materialPreviewSize;
 		}
 
 		// Drawing decal preview
 		if (UIBase.inst != null && Context.raw.decalPreview) {
-			return RenderUtil.decalPreviewSize;
+			return UtilRender.decalPreviewSize;
 		}
 
 		var res = System.height;
@@ -521,7 +511,7 @@ class Base {
 				else if (Context.inViewport()) {
 					if (dragAsset.file.toLowerCase().endsWith(".hdr")) {
 						var image = Project.getImage(dragAsset);
-						arm.io.ImportEnvmap.run(dragAsset.file, image);
+						ImportEnvmap.run(dragAsset.file, image);
 					}
 				}
 				#if (is_paint || is_sculpt)
@@ -629,12 +619,12 @@ class Base {
 		// Material drag and dropped onto viewport or layers tab
 		if (Context.inViewport()) {
 			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
-			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
+			var decalMat = uvType == UVProject ? UtilRender.getDecalMat() : null;
 			Base.createFillLayer(uvType, decalMat);
 		}
 		if (Context.inLayers() && TabLayers.canDropNewLayer(Context.raw.dragDestination)) {
 			var uvType = Input.getKeyboard().down("control") ? UVProject : UVMap;
-			var decalMat = uvType == UVProject ? RenderUtil.getDecalMat() : null;
+			var decalMat = uvType == UVProject ? UtilRender.getDecalMat() : null;
 			Base.createFillLayer(uvType, decalMat, Context.raw.dragDestination);
 		}
 		else if (Context.inNodes()) {
@@ -720,7 +710,7 @@ class Base {
 
 		if (Context.raw.frame == 2) {
 			#if (is_paint || is_sculpt)
-			RenderUtil.makeMaterialPreview();
+			UtilRender.makeMaterialPreview();
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			#end
 
@@ -732,7 +722,7 @@ class Base {
 			if (History.undoLayers == null) {
 				History.undoLayers = [];
 				for (i in 0...Config.raw.undo_steps) {
-					var l = new LayerSlot("_undo" + History.undoLayers.length);
+					var l = new SlotLayer("_undo" + History.undoLayers.length);
 					History.undoLayers.push(l);
 				}
 			}
@@ -913,14 +903,14 @@ class Base {
 	}
 
 	public static function redrawStatus() {
-		if (arm.ui.UIStatus.inst != null) {
+		if (UIStatus.inst != null) {
 			UIBase.inst.hwnds[TabStatus].redraws = 2;
 		}
 	}
 
 	public static function redrawConsole() {
 		var statush = Config.raw.layout[LayoutStatusH];
-		if (arm.ui.UIStatus.inst != null && arm.ui.UIBase.inst != null && arm.ui.UIBase.inst.ui != null && statush > arm.ui.UIStatus.defaultStatusH * arm.ui.UIBase.inst.ui.SCALE()) {
+		if (UIStatus.inst != null && UIBase.inst != null && UIBase.inst.ui != null && statush > UIStatus.defaultStatusH * UIBase.inst.ui.SCALE()) {
 			UIBase.inst.hwnds[TabStatus].redraws = 2;
 		}
 	}
@@ -1117,7 +1107,7 @@ class Base {
 		}
 		if (RenderPathPaint.liveLayer != null) RenderPathPaint.liveLayer.resizeAndSetBits();
 		#if (krom_direct3d12 || krom_vulkan || krom_metal)
-		arm.render.RenderPathRaytrace.ready = false; // Rebuild baketex
+		RenderPathRaytrace.ready = false; // Rebuild baketex
 		#end
 		Context.raw.ddirty = 2;
 	}
@@ -1368,7 +1358,7 @@ class Base {
 		var l = Project.layers[0];
 		#end
 		#if is_lab
-		var l = arm.logic.BrushOutputNode.inst;
+		var l = arm.nodes.BrushOutputNode.inst;
 		#end
 
 		if (tempImage != null && (tempImage.width != l.texpaint.width || tempImage.height != l.texpaint.height || tempImage.format != l.texpaint.format)) {
@@ -1419,7 +1409,7 @@ class Base {
 		var l = Project.layers[0];
 		#end
 		#if is_lab
-		var l = arm.logic.BrushOutputNode.inst;
+		var l = arm.nodes.BrushOutputNode.inst;
 		#end
 
 		if (expa != null && (expa.width != l.texpaint.width || expa.height != l.texpaint.height || expa.format != l.texpaint.format)) {
@@ -1475,7 +1465,7 @@ class Base {
 	}
 
 	#if (is_paint || is_sculpt)
-	public static function duplicateLayer(l: LayerSlot) {
+	public static function duplicateLayer(l: SlotLayer) {
 		if (!l.isGroup()) {
 			var newLayer = l.duplicate();
 			Context.setLayer(newLayer);
@@ -1523,7 +1513,7 @@ class Base {
 		}
 	}
 
-	public static function applyMasks(l: LayerSlot) {
+	public static function applyMasks(l: SlotLayer) {
 		var masks = l.getMasks();
 
 		if (masks != null) {
@@ -1563,7 +1553,7 @@ class Base {
 		Context.raw.layerPreviewDirty = true;
 	}
 
-	public static function mergeGroup(l: LayerSlot) {
+	public static function mergeGroup(l: SlotLayer) {
 		if (!l.isGroup()) return null;
 
 		var children = l.getChildren();
@@ -1595,7 +1585,7 @@ class Base {
 		return children[0];
 	}
 
-	public static function mergeLayer(l0 : LayerSlot, l1: LayerSlot, use_mask = false) {
+	public static function mergeLayer(l0 : SlotLayer, l1: SlotLayer, use_mask = false) {
 		if (!l1.visible || l1.isGroup()) return;
 
 		if (pipeMerge == null) makePipe();
@@ -1689,7 +1679,7 @@ class Base {
 		}
 	}
 
-	public static function flatten(heightToNormal = false, layers: Array<LayerSlot> = null): Dynamic {
+	public static function flatten(heightToNormal = false, layers: Array<SlotLayer> = null): Dynamic {
 		if (layers == null) layers = Project.layers;
 		Base.makeTempImg();
 		Base.makeExportImg();
@@ -1829,7 +1819,7 @@ class Base {
 		return untyped l0;
 	}
 
-	public static function applyMask(l: LayerSlot, m: LayerSlot) {
+	public static function applyMask(l: SlotLayer, m: SlotLayer) {
 		if (!l.isLayer() || !m.isMask()) return;
 
 		if (Base.pipeMerge == null) Base.makePipe();
@@ -1888,7 +1878,7 @@ class Base {
 		#if is_paint
 		if (Context.raw.tool == ToolMaterial) {
 			if (RenderPathPaint.liveLayer == null) {
-				RenderPathPaint.liveLayer = new arm.data.LayerSlot("_live");
+				RenderPathPaint.liveLayer = new SlotLayer("_live");
 			}
 
 			current = Graphics2.current;
@@ -2019,18 +2009,18 @@ class Base {
 			var isAtlas = Context.raw.layer.getObjectMask() > 0 && Context.raw.layer.getObjectMask() <= Project.paintObjects.length;
 			if (Context.raw.mergedObject == null || isAtlas || Context.raw.mergedObjectIsAtlas) {
 				var visibles = isAtlas ? Project.getAtlasObjects(Context.raw.layer.getObjectMask()) : null;
-				MeshUtil.mergeMesh(visibles);
+				UtilMesh.mergeMesh(visibles);
 			}
 			Context.selectPaintObject(Context.mainObject());
 			Context.raw.paintObject.skip_context = "paint";
 			Context.raw.mergedObject.visible = true;
 		}
-		UVUtil.dilatemapCached = false;
+		UtilUV.dilatemapCached = false;
 	}
 
-	public static function newLayer(clear = true, position = -1): LayerSlot {
+	public static function newLayer(clear = true, position = -1): SlotLayer {
 		if (Project.layers.length > maxLayers) return null;
-		var l = new LayerSlot();
+		var l = new SlotLayer();
 		l.objectMask = Context.raw.layerFilter;
 		if (position == -1) {
 			if (Context.raw.layer.isMask()) Context.setLayer(Context.raw.layer.parent);
@@ -2053,9 +2043,9 @@ class Base {
 		return l;
 	}
 
-	public static function newMask(clear = true, parent: LayerSlot, position = -1): LayerSlot {
+	public static function newMask(clear = true, parent: SlotLayer, position = -1): SlotLayer {
 		if (Project.layers.length > maxLayers) return null;
-		var l = new LayerSlot("", SlotMask, parent);
+		var l = new SlotLayer("", SlotMask, parent);
 		if (position == -1) position = Project.layers.indexOf(parent);
 		Project.layers.insert(position, l);
 		Context.setLayer(l);
@@ -2064,9 +2054,9 @@ class Base {
 		return l;
 	}
 
-	public static function newGroup(): LayerSlot {
+	public static function newGroup(): SlotLayer {
 		if (Project.layers.length > maxLayers) return null;
-		var l = new LayerSlot("", SlotGroup);
+		var l = new SlotLayer("", SlotGroup);
 		Project.layers.push(l);
 		Context.setLayer(l);
 		return l;
@@ -2113,7 +2103,7 @@ class Base {
 			Base.resizeLayers();
 			var _layer = Context.raw.layer;
 			var _material = Context.raw.material;
-			for (l in arm.Project.layers) {
+			for (l in Project.layers) {
 				if (l.fill_layer != null) {
 					Context.raw.layer = l;
 					Context.raw.material = l.fill_layer;
@@ -2124,28 +2114,28 @@ class Base {
 			Context.raw.material = _material;
 			MakeMaterial.parsePaintMaterial();
 		});
-		UVUtil.uvmap = null;
-		UVUtil.uvmapCached = false;
-		UVUtil.trianglemap = null;
-		UVUtil.trianglemapCached = false;
-		UVUtil.dilatemapCached = false;
+		UtilUV.uvmap = null;
+		UtilUV.uvmapCached = false;
+		UtilUV.trianglemap = null;
+		UtilUV.trianglemapCached = false;
+		UtilUV.dilatemapCached = false;
 		#if (krom_direct3d12 || krom_vulkan || krom_metal)
-		arm.render.RenderPathRaytrace.ready = false;
+		RenderPathRaytrace.ready = false;
 		#end
 	}
 	#end
 
 	#if is_lab
 	public static function flatten(heightToNormal = false): Dynamic {
-		var texpaint = arm.logic.BrushOutputNode.inst.texpaint;
-		var texpaint_nor = arm.logic.BrushOutputNode.inst.texpaint_nor;
-		var texpaint_pack = arm.logic.BrushOutputNode.inst.texpaint_pack;
+		var texpaint = arm.nodes.BrushOutputNode.inst.texpaint;
+		var texpaint_nor = arm.nodes.BrushOutputNode.inst.texpaint_nor;
+		var texpaint_pack = arm.nodes.BrushOutputNode.inst.texpaint_pack;
 
 		var nodes = UINodes.inst.getNodes();
 		var canvas = UINodes.inst.getCanvas(true);
 		if (nodes.nodesSelectedId.length > 0) {
 			var node = nodes.getNode(canvas.nodes, nodes.nodesSelectedId[0]);
-			var brushNode = arm.logic.LogicParser.getLogicNode(node);
+			var brushNode = ParserLogic.getLogicNode(node);
 			if (brushNode != null && brushNode.getCachedImage() != null) {
 				texpaint = brushNode.getCachedImage();
 				texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor_empty").image;
@@ -2157,31 +2147,31 @@ class Base {
 	}
 
 	public static function onLayersResized() {
-		arm.logic.BrushOutputNode.inst.texpaint.unload();
-		arm.logic.BrushOutputNode.inst.texpaint = RenderPath.active.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		arm.logic.BrushOutputNode.inst.texpaint_nor.unload();
-		arm.logic.BrushOutputNode.inst.texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
-		arm.logic.BrushOutputNode.inst.texpaint_pack.unload();
-		arm.logic.BrushOutputNode.inst.texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.nodes.BrushOutputNode.inst.texpaint.unload();
+		arm.nodes.BrushOutputNode.inst.texpaint = RenderPath.active.renderTargets.get("texpaint").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.nodes.BrushOutputNode.inst.texpaint_nor.unload();
+		arm.nodes.BrushOutputNode.inst.texpaint_nor = RenderPath.active.renderTargets.get("texpaint_nor").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
+		arm.nodes.BrushOutputNode.inst.texpaint_pack.unload();
+		arm.nodes.BrushOutputNode.inst.texpaint_pack = RenderPath.active.renderTargets.get("texpaint_pack").image = Image.createRenderTarget(Config.getTextureResX(), Config.getTextureResY());
 
-		if (arm.logic.InpaintNode.image != null) {
-			arm.logic.InpaintNode.image.unload();
-			arm.logic.InpaintNode.image = null;
-			arm.logic.InpaintNode.mask.unload();
-			arm.logic.InpaintNode.mask = null;
-			arm.logic.InpaintNode.init();
+		if (arm.nodes.InpaintNode.image != null) {
+			arm.nodes.InpaintNode.image.unload();
+			arm.nodes.InpaintNode.image = null;
+			arm.nodes.InpaintNode.mask.unload();
+			arm.nodes.InpaintNode.mask = null;
+			arm.nodes.InpaintNode.init();
 		}
 
-		if (arm.logic.PhotoToPBRNode.images != null) {
-			for (image in arm.logic.PhotoToPBRNode.images) image.unload();
-			arm.logic.PhotoToPBRNode.images = null;
-			arm.logic.PhotoToPBRNode.init();
+		if (arm.nodes.PhotoToPBRNode.images != null) {
+			for (image in arm.nodes.PhotoToPBRNode.images) image.unload();
+			arm.nodes.PhotoToPBRNode.images = null;
+			arm.nodes.PhotoToPBRNode.init();
 		}
 
-		if (arm.logic.TilingNode.image != null) {
-			arm.logic.TilingNode.image.unload();
-			arm.logic.TilingNode.image = null;
-			arm.logic.TilingNode.init();
+		if (arm.nodes.TilingNode.image != null) {
+			arm.nodes.TilingNode.image.unload();
+			arm.nodes.TilingNode.image = null;
+			arm.nodes.TilingNode.init();
 		}
 
 		RenderPath.active.renderTargets.get("texpaint_blend0").image.unload();
@@ -2201,7 +2191,7 @@ class Base {
 		});
 
 		#if (krom_direct3d12 || krom_vulkan || krom_metal)
-		arm.render.RenderPathRaytrace.ready = false;
+		RenderPathRaytrace.ready = false;
 		#end
 	}
 	#end

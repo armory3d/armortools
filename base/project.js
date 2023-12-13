@@ -82,7 +82,7 @@ else {
 	project.addAssets("Assets/extra/*", { destination: "data/{name}" });
 }
 
-project.addParameter("--macro include('arm.logic')");
+project.addParameter("--macro include('arm.nodes')");
 project.addParameter("-dce full");
 project.addDefine("analyzer-optimize");
 project.addDefine("js-es=6");

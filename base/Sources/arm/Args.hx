@@ -4,22 +4,6 @@ import haxe.Json;
 import iron.App;
 import iron.System;
 import iron.Data;
-import arm.sys.Path;
-import arm.io.ImportAsset;
-import arm.io.ImportArm;
-#if is_paint
-import arm.io.ExportArm;
-#end
-#if (is_paint || is_sculpt)
-import arm.io.ExportMesh;
-import arm.ui.UIFiles;
-import arm.ui.UIBase;
-#end
-#if (is_paint || is_lab)
-import arm.sys.File;
-import arm.io.ExportTexture;
-import arm.ui.BoxExport;
-#end
 
 class Args {
 

@@ -26,16 +26,16 @@ class Plugin {
 	public static function init() {
 		var api = js.Syntax.code("arm");
 		#if (is_paint || is_sculpt)
-		api.MaterialParser = arm.shader.MaterialParser;
-		api.NodesMaterial = arm.shader.NodesMaterial;
-		api.UIView2D = arm.ui.UIView2D;
-		api.RenderUtil = arm.util.RenderUtil;
+		api.ParserMaterial = ParserMaterial;
+		api.NodesMaterial = NodesMaterial;
+		api.UIView2D = UIView2D;
+		api.UtilRender = UtilRender;
 		#end
 		#if is_paint
-		api.UVUtil = arm.util.UVUtil;
+		api.UtilUV = UtilUV;
 		#end
 		#if is_lab
-		api.BrushOutputNode = arm.logic.BrushOutputNode;
+		api.BrushOutputNode = arm.nodes.BrushOutputNode;
 		#end
 	}
 
@@ -67,7 +67,7 @@ class Keep {
 		return untyped [
 			ArmPack.decode,
 			ArmPack.encode,
-			arm.ui.UIBox.showMessage
+			UIBox.showMessage
 		];
 	}
 }
@@ -112,32 +112,32 @@ class ZuiBridge {
 
 @:expose("console")
 class ConsoleBridge {
-	public static var log = arm.Console.log;
-	public static var error = arm.Console.error;
+	public static var log = Console.log;
+	public static var error = Console.error;
 }
 
 @:expose("arm")
 class ArmBridge {
-	public static var Base = arm.Base;
-	public static var Config = arm.Config;
-	public static var Context = arm.Context;
-	public static var History = arm.History;
-	public static var Operator = arm.Operator;
-	public static var Plugin = arm.Plugin;
-	public static var Project = arm.Project;
-	public static var Res = arm.Res;
-	public static var Path = arm.sys.Path;
-	public static var File = arm.sys.File;
-	public static var NodesBrush = arm.logic.NodesBrush;
-	public static var LogicParser = arm.logic.LogicParser;
-	public static var UIBase = arm.ui.UIBase;
-	public static var UINodes = arm.ui.UINodes;
-	public static var UIFiles = arm.ui.UIFiles;
-	public static var UIMenu = arm.ui.UIMenu;
-	public static var UIBox = arm.ui.UIBox;
-	public static var MeshUtil = arm.util.MeshUtil;
-	public static var Viewport = arm.Viewport;
+	public static var Base = Base;
+	public static var Config = Config;
+	public static var Context = Context;
+	public static var History = History;
+	public static var Operator = Operator;
+	public static var Plugin = Plugin;
+	public static var Project = Project;
+	public static var Res = Res;
+	public static var Path = Path;
+	public static var File = File;
+	public static var NodesBrush = NodesBrush;
+	public static var ParserLogic = ParserLogic;
+	public static var UIBase = UIBase;
+	public static var UINodes = UINodes;
+	public static var UIFiles = UIFiles;
+	public static var UIMenu = UIMenu;
+	public static var UIBox = UIBox;
+	public static var UtilMesh = UtilMesh;
+	public static var Viewport = Viewport;
 	#if (krom_direct3d12 || krom_vulkan || krom_metal)
-	public static var RenderPathRaytrace = arm.render.RenderPathRaytrace;
+	public static var RenderPathRaytrace = RenderPathRaytrace;
 	#end
 }

@@ -5,7 +5,7 @@ import zui.Zui.TNodeCanvas;
 import iron.System;
 import iron.SceneFormat;
 
-@:structInit class TProjectFormat {
+typedef TProjectFormat = {
 	@:optional public var version: String;
 	@:optional public var assets: Array<String>; // texture_assets
 	@:optional public var is_bgra: Null<Bool>; // Swapped red and blue channels for layer textures
@@ -43,18 +43,18 @@ import iron.SceneFormat;
 	#end
 }
 
-@:structInit class TAsset {
+typedef TAsset = {
 	public var id: Int;
 	public var name: String;
 	public var file: String;
 }
 
-@:structInit class TPackedAsset {
+typedef TPackedAsset = {
 	public var name: String;
 	public var bytes: js.lib.ArrayBuffer;
 }
 
-@:structInit class TSwatchColor {
+typedef TSwatchColor = {
 	public var base: Color;
 	public var opacity: Float;
 	public var occlusion: Float;
@@ -67,7 +67,7 @@ import iron.SceneFormat;
 }
 
 #if (is_paint || is_sculpt)
-@:structInit class TLayerData {
+typedef TLayerData = {
 	public var name: String;
 	public var res: Int; // Width pixels
 	public var bpp: Int; // Bits per pixel

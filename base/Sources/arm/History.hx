@@ -6,18 +6,7 @@ import zui.Zui.TNodeCanvas;
 import iron.App;
 import iron.System;
 import iron.RenderPath;
-import arm.sys.Path;
-import arm.ui.UIFiles;
-import arm.ui.UINodes;
-#if (is_paint || is_sculpt)
-import arm.ui.UIBase;
-import arm.ui.UIView2D;
-import arm.ui.UIToolbar;
-import arm.data.LayerSlot;
-import arm.data.MaterialSlot;
-import arm.shader.MakeMaterial;
 import arm.Project;
-#end
 
 class History {
 
@@ -27,7 +16,7 @@ class History {
 	public static var redos = 0; // Redos available
 	#if (is_paint || is_sculpt)
 	public static var pushUndo = false; // Store undo on next paint
-	public static var undoLayers: Array<LayerSlot> = null;
+	public static var undoLayers: Array<SlotLayer> = null;
 	#end
 	#if is_sculpt
 	public static var pushUndo2 = false;
@@ -57,7 +46,7 @@ class History {
 			}
 			else if (step.name == tr("Delete Layer")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
-				var l = new LayerSlot("", step.layer_type, parent);
+				var l = new SlotLayer("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
 				Context.setLayer(l);
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -107,7 +96,7 @@ class History {
 				Context.raw.layer.delete();
 
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 2] : null;
-				var l = new LayerSlot("", step.layer_type, parent);
+				var l = new SlotLayer("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
 				Context.setLayer(l);
 
@@ -115,7 +104,7 @@ class History {
 				var lay = undoLayers[undoI];
 				Context.raw.layer.swap(lay);
 
-				var l = new LayerSlot("", step.layer_type, parent);
+				var l = new SlotLayer("", step.layer_type, parent);
 				Project.layers.insert(step.layer + 1, l);
 				Context.setLayer(l);
 
@@ -210,7 +199,7 @@ class History {
 				Context.raw.material.delete();
 			}
 			else if (step.name == tr("Delete Material")) {
-				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
@@ -245,7 +234,7 @@ class History {
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+				arm.UIMenubar.inst.menuHandle.redraws = 2;
 			}
 			#end
 		}
@@ -263,7 +252,7 @@ class History {
 			#if (is_paint || is_sculpt)
 			else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 				var parent = step.layer_parent > 0 ? Project.layers[step.layer_parent - 1] : null;
-				var l = new LayerSlot("", step.layer_type, parent);
+				var l = new SlotLayer("", step.layer_type, parent);
 				Project.layers.insert(step.layer, l);
 				if (step.name == tr("New Black Mask")) {
 					Base.notifyOnNextFrame(function() {
@@ -396,7 +385,7 @@ class History {
 				Project.materialGroups.remove(Project.materialGroups[step.canvas_group]);
 			}
 			else if (step.name == tr("New Material")) {
-				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
@@ -409,7 +398,7 @@ class History {
 				Context.raw.material.delete();
 			}
 			else if (step.name == tr("Duplicate Material")) {
-				Context.raw.material = new MaterialSlot(Project.materials[0].data);
+				Context.raw.material = new SlotMaterial(Project.materials[0].data);
 				Project.materials.insert(step.material, Context.raw.material);
 				Context.raw.material.canvas = step.canvas;
 				UINodes.inst.canvasChanged();
@@ -437,7 +426,7 @@ class History {
 
 			if (Config.raw.touch_ui) {
 				// Refresh undo & redo buttons
-				arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+				arm.UIMenubar.inst.menuHandle.redraws = 2;
 			}
 			#end
 		}
@@ -619,7 +608,7 @@ class History {
 
 		if (Config.raw.touch_ui) {
 			// Refresh undo & redo buttons
-			arm.ui.UIMenubar.inst.menuHandle.redraws = 2;
+			arm.UIMenubar.inst.menuHandle.redraws = 2;
 		}
 
 		if (undos < Config.raw.undo_steps) undos++;
@@ -672,7 +661,7 @@ class History {
 		copyToUndo(lay.id, undoI, Context.raw.layer.isMask());
 	}
 
-	static function copyMergingLayers2(layers: Array<LayerSlot>) {
+	static function copyMergingLayers2(layers: Array<SlotLayer>) {
 		for (layer in layers)
 			copyToUndo(layer.id, undoI, layer.isMask());
 	}

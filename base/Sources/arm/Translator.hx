@@ -4,8 +4,6 @@ import haxe.Json;
 import iron.App;
 import iron.System;
 import iron.Data;
-import arm.sys.File;
-import arm.sys.Path;
 
 class Translator {
 

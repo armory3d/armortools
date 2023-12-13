@@ -5,17 +5,10 @@ import iron.System;
 import iron.Vec4;
 import iron.MeshObject;
 import iron.Tween;
-import arm.shader.NodeShader;
-import arm.ProjectFormat;
-#if (is_paint || is_sculpt)
 import iron.Mat4;
 import iron.Object;
 import iron.MaterialData;
-import arm.data.MaterialSlot;
-import arm.data.LayerSlot;
-import arm.data.BrushSlot;
-import arm.data.FontSlot;
-#end
+import arm.ProjectFormat;
 
 @:structInit class TContext {
 	@:optional public var texture: TAsset = null;
@@ -131,10 +124,10 @@ import arm.data.FontSlot;
 	@:optional public var penPaintingOnly = false; // Reject painting with finger when using pen
 
 	#if (is_paint || is_sculpt)
-	@:optional public var material: MaterialSlot;
-	@:optional public var layer: LayerSlot;
-	@:optional public var brush: BrushSlot;
-	@:optional public var font: FontSlot;
+	@:optional public var material: SlotMaterial;
+	@:optional public var layer: SlotLayer;
+	@:optional public var brush: SlotBrush;
+	@:optional public var font: SlotFont;
 	@:optional public var tool = ToolBrush;
 
 	@:optional public var layerPreviewDirty = true;
@@ -145,7 +138,7 @@ import arm.data.FontSlot;
 	@:optional public var nodePreviewsUsed: Array<String> = null;
 	@:optional public var nodePreviewName = "";
 	@:optional public var maskPreviewRgba32: Image = null;
-	@:optional public var maskPreviewLast: LayerSlot = null;
+	@:optional public var maskPreviewLast: SlotLayer = null;
 
 	@:optional public var colorIdPicked = false;
 	@:optional public var materialPreview = false; // Drawing material previews
@@ -193,7 +186,7 @@ import arm.data.FontSlot;
 	@:optional public var lastParticleHitY = 0.0;
 	@:optional public var lastParticleHitZ = 0.0;
 	@:optional public var particleTimer: TAnim = null;
-	@:optional public var paintBody: arm.plugin.PhysicsBody = null;
+	@:optional public var paintBody: PhysicsBody = null;
 	#end
 
 	@:optional public var layerFilter = 0;

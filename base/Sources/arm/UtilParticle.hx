@@ -1,0 +1,128 @@
+package arm;
+
+import haxe.Json;
+import js.lib.Float32Array;
+import iron.SceneFormat;
+import iron.MaterialData;
+import iron.Object;
+import iron.MeshObject;
+import iron.RenderPath;
+import iron.Scene;
+import iron.Data;
+
+class UtilParticle {
+
+	static function f32(ar: Array<Float>): Float32Array {
+		var res = new Float32Array(ar.length);
+		for (i in 0...ar.length) res[i] = ar[i];
+		return res;
+	}
+
+	public static function initParticle() {
+		if (Context.raw.particleMaterial != null) return;
+
+		var raw: TParticleData = {
+			name: "Particles",
+			type: 0,
+			loop: false,
+			count: 1000,
+			frame_start: 0,
+			frame_end: 1000,
+			lifetime: 400,
+			lifetime_random: 0.5,
+			emit_from: 1,
+			object_align_factor: f32([0, 0, -40]),
+			factor_random: 2.0,
+			physics_type: 0,
+			particle_size: 1.0,
+			size_random: 0,
+			mass: 1,
+			instance_object: ".Particle",
+			weight_gravity: 1
+		};
+		Scene.active.raw.particle_datas = [raw];
+		var particle_refs: Array<TParticleReference> = [
+			{
+				name: "Particles",
+				particle: "Particles",
+				seed: 0
+			}
+		];
+
+		{
+			var t = new RenderTargetRaw();
+			t.name = "texparticle";
+			t.width = 0;
+			t.height = 0;
+			t.format = "R8";
+			t.scale = RenderPathBase.getSuperSampling();
+			RenderPath.active.createRenderTarget(t);
+		}
+
+		for (mat in Scene.active.raw.material_datas) {
+			if (mat.name == "Material2") {
+				var m: TMaterialData = Json.parse(Json.stringify(mat));
+				m.name = "MaterialParticle";
+				Scene.active.raw.material_datas.push(m);
+				break;
+			}
+		}
+
+		Data.getMaterial("Scene", "MaterialParticle", function(md: MaterialData) {
+			Context.raw.particleMaterial = md;
+
+			for (obj in Scene.active.raw.objects) {
+				if (obj.name == ".Sphere") {
+					var particle: TObj = Json.parse(Json.stringify(obj));
+					particle.name = ".Particle";
+					particle.is_particle = true;
+					particle.material_refs = ["MaterialParticle"];
+					Scene.active.raw.objects.push(particle);
+					for (i in 0...16) particle.transform.values[i] *= 0.01;
+					break;
+				}
+			}
+
+			Scene.active.spawnObject(".Sphere", null, function(o: Object) {
+				var mo: MeshObject = cast o;
+				mo.name = ".ParticleEmitter";
+				mo.raw = Json.parse(Json.stringify(mo.raw));
+				mo.raw.particle_refs = particle_refs;
+				#if arm_particles
+				mo.setupParticleSystem("Scene", particle_refs[0]);
+				#end
+			});
+		});
+	}
+
+	#if arm_physics
+
+	public static function initParticlePhysics() {
+		if (PhysicsWorld.active != null) {
+			initParticleMesh();
+			return;
+		}
+
+		PhysicsWorld.load(function() {
+			Scene.active.sceneParent.addTrait(new PhysicsWorld());
+			initParticleMesh();
+		});
+	}
+
+	static function initParticleMesh() {
+		if (Context.raw.paintBody != null) return;
+
+		var po = Context.raw.mergedObject != null ? Context.raw.mergedObject : Context.raw.paintObject;
+
+		po.transform.scale.x = po.parent.transform.scale.x;
+		po.transform.scale.y = po.parent.transform.scale.y;
+		po.transform.scale.z = po.parent.transform.scale.z;
+
+		Context.raw.paintBody = new PhysicsBody();
+		Context.raw.paintBody.shape = PhysicsBody.ShapeType.ShapeMesh;
+		Context.raw.paintBody.init(po);
+		po.addTrait(Context.raw.paintBody);
+	}
+
+	#end
+}

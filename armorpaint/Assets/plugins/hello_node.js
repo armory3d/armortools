@@ -54,10 +54,10 @@ let nodes = [
 arm.NodesMaterial.list.push(nodes);
 
 // Node shader
-arm.MaterialParser.customNodes.set(nodeType, function(node, socket) {
-	let frag = arm.MaterialParser.frag;
-	let scale = arm.MaterialParser.parse_value_input(node.inputs[0]);
-	let my_out = arm.MaterialParser.node_name(node) + "_out";
+arm.ParserMaterial.customNodes.set(nodeType, function(node, socket) {
+	let frag = arm.ParserMaterial.frag;
+	let scale = arm.ParserMaterial.parse_value_input(node.inputs[0]);
+	let my_out = arm.ParserMaterial.node_name(node) + "_out";
 
 	frag.write(`
 		float ${my_out} = cos(sin(texCoord.x * 200.0 * ${scale}) + cos(texCoord.y * 200.0 * ${scale}));
@@ -73,7 +73,7 @@ arm.MaterialParser.customNodes.set(nodeType, function(node, socket) {
 
 // Cleanup
 plugin.delete = function() {
-	arm.MaterialParser.customNodes.delete(nodeType);
+	arm.ParserMaterial.customNodes.delete(nodeType);
 	arm.NodesMaterial.list.splice(arm.NodesMaterial.list.indexOf(nodes), 1);
 	categories.splice(categories.indexOf(categoryName), 1);
 };

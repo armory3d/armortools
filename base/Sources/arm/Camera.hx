@@ -6,7 +6,6 @@ import iron.Time;
 import iron.Vec4;
 import iron.Mat4;
 import iron.Scene;
-import arm.Viewport;
 
 class Camera {
 

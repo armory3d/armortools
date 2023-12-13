@@ -4,11 +4,6 @@ import haxe.Json;
 import iron.System;
 import iron.Data;
 import zui.Zui;
-import arm.ui.UIBase;
-import arm.ui.UIHeader;
-import arm.render.RenderPathBase;
-import arm.sys.File;
-import arm.sys.Path;
 import arm.ConfigFormat;
 
 class Config {

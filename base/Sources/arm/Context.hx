@@ -7,27 +7,8 @@ import iron.Scene;
 import iron.MeshObject;
 import iron.Input;
 import iron.Data;
-import arm.render.RenderPathDeferred;
-import arm.render.RenderPathForward;
-import arm.shader.MakeMaterial;
-import arm.shader.NodeShader;
-import arm.ui.BoxPreferences;
-import arm.ui.UIHeader;
-import arm.ui.UIBase;
-import arm.ui.UINodes;
-import arm.ProjectFormat;
 import arm.ContextFormat;
-#if (is_paint || is_sculpt)
-import arm.data.MaterialSlot;
-import arm.data.LayerSlot;
-import arm.data.BrushSlot;
-import arm.data.FontSlot;
-import arm.util.UVUtil;
-import arm.util.RenderUtil;
-import arm.util.ParticleUtil;
-import arm.ui.UIToolbar;
-import arm.ui.UIView2D;
-#end
+import arm.ProjectFormat;
 
 class Context {
 
@@ -49,7 +30,7 @@ class Context {
 		setMaterial(Project.materials[i]);
 	}
 
-	public static function setMaterial(m: MaterialSlot) {
+	public static function setMaterial(m: SlotMaterial) {
 		if (Project.materials.indexOf(m) == -1) return;
 		raw.material = m;
 		MakeMaterial.parsePaintMaterial();
@@ -61,7 +42,7 @@ class Context {
 		var decal = raw.tool == ToolDecal || raw.tool == ToolText;
 		if (decal) {
 			function _next() {
-				RenderUtil.makeDecalPreview();
+				UtilRender.makeDecalPreview();
 			}
 			Base.notifyOnNextFrame(_next);
 		}
@@ -72,7 +53,7 @@ class Context {
 		setBrush(Project.brushes[i]);
 	}
 
-	public static function setBrush(b: BrushSlot) {
+	public static function setBrush(b: SlotBrush) {
 		if (Project.brushes.indexOf(b) == -1) return;
 		raw.brush = b;
 		MakeMaterial.parseBrush();
@@ -85,11 +66,11 @@ class Context {
 		setFont(Project.fonts[i]);
 	}
 
-	public static function setFont(f: FontSlot) {
+	public static function setFont(f: SlotFont) {
 		if (Project.fonts.indexOf(f) == -1) return;
 		raw.font = f;
-		RenderUtil.makeTextPreview();
-		RenderUtil.makeDecalPreview();
+		UtilRender.makeTextPreview();
+		UtilRender.makeDecalPreview();
 		UIBase.inst.hwnds[TabStatus].redraws = 2;
 		UIView2D.inst.hwnd.redraws = 2;
 	}
@@ -99,7 +80,7 @@ class Context {
 		setLayer(Project.layers[i]);
 	}
 
-	public static function setLayer(l: LayerSlot) {
+	public static function setLayer(l: SlotLayer) {
 		if (l == raw.layer) return;
 		raw.layer = l;
 		UIHeader.inst.headerHandle.redraws = 2;
@@ -139,13 +120,13 @@ class Context {
 		var decal = raw.tool == ToolDecal || raw.tool == ToolText;
 		if (decal) {
 			if (raw.tool == ToolText) {
-				RenderUtil.makeTextPreview();
+				UtilRender.makeTextPreview();
 			}
-			RenderUtil.makeDecalPreview();
+			UtilRender.makeDecalPreview();
 		}
 
 		else if (raw.tool == ToolParticle) {
-			ParticleUtil.initParticle();
+			UtilParticle.initParticle();
 			MakeMaterial.parseParticleMaterial();
 		}
 
@@ -182,9 +163,9 @@ class Context {
 		if (raw.mergedObject == null || mask > 0) {
 			raw.paintObject.skip_context = "";
 		}
-		UVUtil.uvmapCached = false;
-		UVUtil.trianglemapCached = false;
-		UVUtil.dilatemapCached = false;
+		UtilUV.uvmapCached = false;
+		UtilUV.trianglemapCached = false;
+		UtilUV.dilatemapCached = false;
 		#end
 
 		#if is_lab

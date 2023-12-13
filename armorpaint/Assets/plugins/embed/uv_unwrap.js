@@ -92,12 +92,12 @@ plugin.drawUI = function(ui) {
 				geom.ready = false;
 				geom.build();
 			}
-			arm.MeshUtil.mergeMesh();
+			arm.UtilMesh.mergeMesh();
 		}
 	}
 }
 
-let unwrappers = arm.MeshUtil.unwrappers;
+let unwrappers = arm.UtilMesh.unwrappers;
 unwrappers.h["uv_unwrap.js"] = unwrap_mesh;
 plugin.delete = function() {
 	unwrappers.h["uv_unwrap.js"] = null;
