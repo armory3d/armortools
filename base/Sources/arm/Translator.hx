@@ -1,6 +1,7 @@
 package arm;
 
 import haxe.Json;
+import iron.App;
 import iron.System;
 import iron.Data;
 import arm.sys.File;
@@ -118,7 +119,7 @@ class Translator {
 	static function initFont(cjk: Bool, fontPath: String, fontScale: Float) {
 		Graphics2.fontGlyphs.sort(Reflect.compare);
 		// Load and assign font with cjk characters
-		iron.App.notifyOnInit(function() {
+		App.notifyOnInit(function() {
 			Data.getFont(fontPath, function(f: Font) {
 				if (cjk) {
 					var fontIndex = cjkFontIndices.exists(Config.raw.locale) ? cjkFontIndices[Config.raw.locale] : 0;

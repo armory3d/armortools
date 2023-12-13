@@ -1,5 +1,6 @@
 package;
 
+import iron.App;
 import iron.System;
 import iron.Object;
 import iron.Scene;
@@ -56,17 +57,17 @@ class Main {
 	public static function start() {
 		if (tasks > 0) return;
 
-		iron.App.onResize = Base.onResize;
-		iron.App.w = Base.w;
-		iron.App.h = Base.h;
-		iron.App.x = Base.x;
-		iron.App.y = Base.y;
+		App.onResize = Base.onResize;
+		App.w = Base.w;
+		App.h = Base.h;
+		App.x = Base.x;
+		App.y = Base.y;
 
 		Config.init();
 		System.start(Config.getOptions(), function() {
 			if (Config.raw.layout == null) Base.initLayout();
 			Krom.setApplicationName(Manifest.title);
-			iron.App.init(function() {
+			App.init(function() {
 				Scene.setActive("Scene", function(o: Object) {
 					UniformsExt.init();
 					var path = new RenderPath();

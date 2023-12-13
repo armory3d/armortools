@@ -1,5 +1,6 @@
 package arm.io;
 
+import iron.App;
 import iron.System;
 import iron.Data;
 import arm.sys.Path;
@@ -36,7 +37,7 @@ class ImportFont {
 					RenderUtil.makeFontPreview();
 				}
 			}
-			iron.App.notifyOnInit(_init);
+			App.notifyOnInit(_init);
 
 			UIBase.inst.hwnds[TabStatus].redraws = 2;
 		});

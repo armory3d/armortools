@@ -3,6 +3,7 @@ package arm;
 import haxe.Json;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
+import iron.App;
 import iron.System;
 import iron.RenderPath;
 import arm.sys.Path;
@@ -162,7 +163,7 @@ class History {
 					Context.raw.layer = Project.layers[step.layer];
 					Context.raw.layer.invertMask();
 				}
-				iron.App.notifyOnInit(_next);
+				App.notifyOnInit(_next);
 			}
 			else if (step.name == "Apply Filter") {
 				undoI = undoI - 1 < 0 ? Config.raw.undo_steps - 1 : undoI - 1;
@@ -328,8 +329,8 @@ class History {
 			}
 			else if (step.name == tr("Merge Layers")) {
 				Context.raw.layer = Project.layers[step.layer + 1];
-				iron.App.notifyOnInit(redoMergeLayers);
-				iron.App.notifyOnInit(Base.mergeDown);
+				App.notifyOnInit(redoMergeLayers);
+				App.notifyOnInit(Base.mergeDown);
 			}
 			else if (step.name == tr("Apply Mask")) {
 				Context.raw.layer = Project.layers[step.layer];
@@ -353,7 +354,7 @@ class History {
 					Context.raw.layer = Project.layers[step.layer];
 					Context.raw.layer.invertMask();
 				}
-				iron.App.notifyOnInit(_next);
+				App.notifyOnInit(_next);
 			}
 			else if (step.name == tr("Apply Filter")) {
 				var lay = undoLayers[undoI];

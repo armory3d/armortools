@@ -1,5 +1,6 @@
 package arm.io;
 
+import iron.App;
 import iron.Data;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
@@ -262,7 +263,7 @@ class ImportBlendMaterial {
 					RenderUtil.makeMaterialPreview();
 				}
 			}
-			iron.App.notifyOnInit(_init);
+			App.notifyOnInit(_init);
 
 			UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 			Data.deleteBlob(path);

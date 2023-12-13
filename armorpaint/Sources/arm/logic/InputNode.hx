@@ -1,5 +1,6 @@
 package arm.logic;
 
+import iron.App;
 import iron.Input;
 import iron.Vec4;
 import zui.Zui.Nodes;
@@ -29,7 +30,7 @@ class InputNode extends LogicNode {
 
 		if (!registered) {
 			registered = true;
-			iron.App.notifyOnUpdate(update);
+			App.notifyOnUpdate(update);
 		}
 	}
 
@@ -47,21 +48,21 @@ class InputNode extends LogicNode {
 			 decalMask);
 
 		var mouse = Input.getMouse();
-		var paintX = mouse.viewX / iron.App.w();
-		var paintY = mouse.viewY / iron.App.h();
+		var paintX = mouse.viewX / App.w();
+		var paintY = mouse.viewY / App.h();
 		if (mouse.started()) {
-			startX = mouse.viewX / iron.App.w();
-			startY = mouse.viewY / iron.App.h();
+			startX = mouse.viewX / App.w();
+			startY = mouse.viewY / App.h();
 		}
 
 		var pen = Input.getPen();
 		if (pen.down()) {
-			paintX = pen.viewX / iron.App.w();
-			paintY = pen.viewY / iron.App.h();
+			paintX = pen.viewX / App.w();
+			paintY = pen.viewY / App.h();
 		}
 		if (pen.started()) {
-			startX = pen.viewX / iron.App.w();
-			startY = pen.viewY / iron.App.h();
+			startX = pen.viewX / App.w();
+			startY = pen.viewY / App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {
@@ -102,8 +103,8 @@ class InputNode extends LogicNode {
 		}
 
 		if (Context.raw.brushLazyRadius > 0) {
-			var v1 = new Vec4(Context.raw.brushLazyX * iron.App.w(), Context.raw.brushLazyY * iron.App.h(), 0.0);
-			var v2 = new Vec4(coords.x * iron.App.w(), coords.y * iron.App.h(), 0.0);
+			var v1 = new Vec4(Context.raw.brushLazyX * App.w(), Context.raw.brushLazyY * App.h(), 0.0);
+			var v2 = new Vec4(coords.x * App.w(), coords.y * App.h(), 0.0);
 			var d = Vec4.distance(v1, v2);
 			var r = Context.raw.brushLazyRadius * 85;
 			if (d > r) {
@@ -113,8 +114,8 @@ class InputNode extends LogicNode {
 				v3.mult(1.0 - Context.raw.brushLazyStep);
 				v3.mult(r);
 				v2.addvecs(v1, v3);
-				coords.x = v2.x / iron.App.w();
-				coords.y = v2.y / iron.App.h();
+				coords.x = v2.x / App.w();
+				coords.y = v2.y / App.h();
 				// Parse brush inputs once on next draw
 				Context.raw.painted = -1;
 			}

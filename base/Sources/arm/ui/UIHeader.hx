@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Input;
 import iron.ConstData;
@@ -45,7 +46,7 @@ class UIHeader {
 		var ww = System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW] - nodesw;
 		#end
 
-		if (ui.window(headerHandle, iron.App.x(), headerh, ww, headerh)) {
+		if (ui.window(headerHandle, App.x(), headerh, ww, headerh)) {
 			ui._y += 2;
 			drawToolProperties(ui);
 		}

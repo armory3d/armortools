@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Input;
 import iron.RenderPath;
@@ -70,9 +71,9 @@ class UIView2D {
 		ww = Config.raw.layout[LayoutNodesW];
 
 		#if (is_paint || is_sculpt)
-		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wx = Std.int(App.w()) + UIToolbar.inst.toolbarw;
 		#else
-		wx = Std.int(iron.App.w());
+		wx = Std.int(App.w());
 		#end
 
 		wy = 0;
@@ -461,7 +462,7 @@ class UIView2D {
 		var border = 32;
 		var tw = ww * 0.95 * panScale;
 		var tx = ww / 2 - tw / 2 + panX;
-		var hh = iron.App.h();
+		var hh = App.h();
 		var ty = hh / 2 - tw / 2 + panY;
 
 		if      (tx + border >  ww) panX =  ww / 2 + tw / 2 - border;

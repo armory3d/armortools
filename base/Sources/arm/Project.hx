@@ -2,6 +2,7 @@ package arm;
 
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.App;
 import iron.ArmPack;
 import iron.MaterialData;
 import iron.System;
@@ -105,7 +106,7 @@ class Project {
 			ExportArm.runProject();
 			if (saveAndQuit) System.stop();
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 	}
 
 	public static function projectSaveAs(saveAndQuit = false) {
@@ -317,11 +318,11 @@ class Project {
 				layers.push(layer);
 				Context.setLayer(layer);
 				if (aspectRatioChanged) {
-					iron.App.notifyOnInit(Base.resizeLayers);
+					App.notifyOnInit(Base.resizeLayers);
 				}
 				#end
 
-				iron.App.notifyOnInit(Base.initLayers);
+				App.notifyOnInit(Base.initLayers);
 			}
 
 			if (current != null) current.begin(false);
@@ -393,7 +394,7 @@ class Project {
 				function _init() {
 					RenderUtil.makeBrushPreview();
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			// Import from project file
 			else {

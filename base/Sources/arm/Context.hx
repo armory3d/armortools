@@ -1,5 +1,6 @@
 package arm;
 
+import iron.App;
 import iron.System;
 import iron.RenderPath;
 import iron.Scene;
@@ -224,10 +225,10 @@ class Context {
 	public static function inPaintArea(): Bool {
 		#if (is_paint || is_sculpt)
 		var mouse = Input.getMouse();
-		var right = iron.App.w();
+		var right = App.w();
 		if (UIView2D.inst.show) right += UIView2D.inst.ww;
 		return mouse.viewX > 0 && mouse.viewX < right &&
-			   mouse.viewY > 0 && mouse.viewY < iron.App.h();
+			   mouse.viewY > 0 && mouse.viewY < App.h();
 		#end
 
 		#if is_lab
@@ -333,7 +334,7 @@ class Context {
 		else {
 			RenderPath.active.commands = RenderPathDeferred.commands;
 		}
-		iron.App.notifyOnInit(function() {
+		App.notifyOnInit(function() {
 			MakeMaterial.parseMeshMaterial();
 		});
 	}
@@ -411,7 +412,7 @@ class Context {
 	public static function parseBrushInputs() {
 		if (!raw.registered) {
 			raw.registered = true;
-			iron.App.notifyOnUpdate(update);
+			App.notifyOnUpdate(update);
 		}
 
 		raw.paintVec = raw.coords;
@@ -419,21 +420,21 @@ class Context {
 
 	static function update() {
 		var mouse = Input.getMouse();
-		var paintX = mouse.viewX / iron.App.w();
-		var paintY = mouse.viewY / iron.App.h();
+		var paintX = mouse.viewX / App.w();
+		var paintY = mouse.viewY / App.h();
 		if (mouse.started()) {
-			raw.startX = mouse.viewX / iron.App.w();
-			raw.startY = mouse.viewY / iron.App.h();
+			raw.startX = mouse.viewX / App.w();
+			raw.startY = mouse.viewY / App.h();
 		}
 
 		var pen = Input.getPen();
 		if (pen.down()) {
-			paintX = pen.viewX / iron.App.w();
-			paintY = pen.viewY / iron.App.h();
+			paintX = pen.viewX / App.w();
+			paintY = pen.viewY / App.h();
 		}
 		if (pen.started()) {
-			raw.startX = pen.viewX / iron.App.w();
-			raw.startY = pen.viewY / iron.App.h();
+			raw.startX = pen.viewX / App.w();
+			raw.startY = pen.viewY / App.h();
 		}
 
 		if (Operator.shortcut(Config.keymap.brush_ruler + "+" + Config.keymap.action_paint, ShortcutDown)) {

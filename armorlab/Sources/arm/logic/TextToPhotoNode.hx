@@ -197,11 +197,11 @@ class TextToPhotoNode extends LogicNode {
 			}
 
 			if (counter == (51 - offset)) {
-				iron.App.removeRender2D(processing);
+				App.removeRender2D(processing);
 				done(latents);
 			}
 		}
-		iron.App.notifyOnRender2D(processing);
+		App.notifyOnRender2D(processing);
 	}
 
 	static function vaeDecoder(latents: js.lib.Float32Array, upscale: Bool, done: Image->Void) {

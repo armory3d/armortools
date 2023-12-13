@@ -186,8 +186,8 @@ class RenderPathPaint {
 		var mx = Context.raw.paintVec.x;
 		var my = 1.0 - Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			mx = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
+			mx = (Context.raw.lockStartedX - App.x()) / App.w();
+			my = 1.0 - (Context.raw.lockStartedY - App.y()) / App.h();
 		}
 		var radius = Context.raw.brushRadius;
 		drawCursor(mx, my, radius / 3.4);

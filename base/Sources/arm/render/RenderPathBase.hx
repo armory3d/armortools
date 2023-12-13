@@ -1,5 +1,6 @@
 package arm.render;
 
+import iron.App;
 import iron.System;
 import iron.Vec4;
 import iron.Mat4;
@@ -80,7 +81,7 @@ class RenderPathBase {
 			var _loc = compass.transform.loc;
 			var _rot = compass.transform.rot;
 			var crot = cam.transform.rot;
-			var ratio = iron.App.w() / iron.App.h();
+			var ratio = App.w() / App.h();
 			var _P = cam.P;
 			cam.P = Mat4.ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 			compass.visible = true;

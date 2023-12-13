@@ -3,6 +3,7 @@ package arm.util;
 import zui.Zui.Nodes;
 import zui.Zui.TNode;
 import zui.Zui.TNodeCanvas;
+import iron.App;
 import iron.System;
 import iron.MeshObject;
 import iron.Mat4;
@@ -70,8 +71,8 @@ class RenderUtil {
 		RenderPath.active.commands = _commands;
 
 		Context.raw.materialPreview = false;
-		RenderPath.active.lastW = iron.App.w();
-		RenderPath.active.lastH = iron.App.h();
+		RenderPath.active.lastW = App.w();
+		RenderPath.active.lastH = App.h();
 
 		// Restore
 		sphere.visible = false;
@@ -136,8 +137,8 @@ class RenderUtil {
 		RenderPath.active.commands = _commands;
 
 		Context.raw.decalPreview = false;
-		RenderPath.active.lastW = iron.App.w();
-		RenderPath.active.lastH = iron.App.h();
+		RenderPath.active.lastW = App.w();
+		RenderPath.active.lastH = App.h();
 
 		// Restore
 		plane.visible = false;
@@ -337,7 +338,7 @@ class RenderUtil {
 		function _init() {
 			MakeMaterial.parsePaintMaterial(false);
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 
 		// Restore paint mesh
 		Context.raw.materialPreview = false;

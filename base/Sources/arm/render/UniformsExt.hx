@@ -1,5 +1,6 @@
 package arm.render;
 
+import iron.App;
 import iron.System;
 import iron.MaterialData;
 import iron.Object;
@@ -414,7 +415,7 @@ class UniformsExt {
 					function _init() {
 						UVUtil.cacheUVMap();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 				}
 				return UVUtil.uvmap;
 			}
@@ -423,7 +424,7 @@ class UniformsExt {
 					function _init() {
 						UVUtil.cacheTriangleMap();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 				}
 				return UVUtil.trianglemap;
 			}
@@ -431,7 +432,7 @@ class UniformsExt {
 				function _init() {
 					UVUtil.cacheUVIslandMap();
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 				return UVUtil.uvislandmapCached ? UVUtil.uvislandmap : RenderPath.active.renderTargets.get("empty_black").image;
 			}
 			case "_texdilatemap": {

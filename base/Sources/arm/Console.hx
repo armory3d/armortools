@@ -1,5 +1,6 @@
 package arm;
 
+import iron.App;
 import iron.System;
 import arm.Base;
 
@@ -31,11 +32,11 @@ class Console {
 			drawToast(s, g);
 			if (g2 == null) {
 				Base.notifyOnNextFrame(function() {
-					iron.App.removeRender2D(_render);
+					App.removeRender2D(_render);
 				});
 			}
 		}
-		g2 != null ? _render(g2) : iron.App.notifyOnRender2D(_render);
+		g2 != null ? _render(g2) : App.notifyOnRender2D(_render);
 		consoleTrace(s);
 	}
 
@@ -46,10 +47,10 @@ class Console {
 	public static function progress(s: String) {
 		// Keep popup message displayed until s == null
 		if (s == null) {
-			iron.App.removeRender2D(drawProgress);
+			App.removeRender2D(drawProgress);
 		}
 		else if (progressText == null) {
-			iron.App.notifyOnRender2D(drawProgress);
+			App.notifyOnRender2D(drawProgress);
 		}
 		if (s != null) consoleTrace(s);
 		progressText = s;

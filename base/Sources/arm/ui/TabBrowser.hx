@@ -1,5 +1,6 @@
 package arm.ui;
 
+import iron.App;
 import iron.Input;
 import zui.Zui;
 import arm.sys.File;
@@ -168,7 +169,7 @@ class TabBrowser {
 
 			if (known) {
 				var path = hpath.text;
-				iron.App.notifyOnInit(function() {
+				App.notifyOnInit(function() {
 					ImportAsset.run(path);
 				});
 				hpath.text = hpath.text.substr(0, hpath.text.lastIndexOf(Path.sep));

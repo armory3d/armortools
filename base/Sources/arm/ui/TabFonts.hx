@@ -3,6 +3,7 @@ package arm.ui;
 #if (is_paint || is_sculpt)
 
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Time;
 import iron.Data;
@@ -87,7 +88,7 @@ class TabFonts {
 							function _init() {
 								Context.selectFont(i);
 							}
-							iron.App.notifyOnInit(_init);
+							App.notifyOnInit(_init);
 						}
 						if (Time.time() - Context.raw.selectTime < 0.25) UIBase.inst.show2DView(View2DFont);
 						Context.raw.selectTime = Time.time();
@@ -104,7 +105,7 @@ class TabFonts {
 					}
 					if (ui.isHovered) {
 						if (img == null) {
-							iron.App.notifyOnInit(function() {
+							App.notifyOnInit(function() {
 								var _font = Context.raw.font;
 								Context.raw.font = Project.fonts[i];
 								RenderUtil.makeFontPreview();
@@ -148,7 +149,7 @@ class TabFonts {
 			Data.deleteFont(Project.fonts[i].file);
 			Project.fonts.splice(i, 1);
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 		UIBase.inst.hwnds[2].redraws = 2;
 	}
 }

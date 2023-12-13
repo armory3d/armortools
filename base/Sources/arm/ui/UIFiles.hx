@@ -4,6 +4,7 @@ import zui.Zui;
 import iron.System;
 import iron.Input;
 import iron.Input;
+import iron.App;
 import iron.Time;
 import iron.ArmPack;
 import iron.Lz4;
@@ -173,7 +174,7 @@ class UIFiles {
 							File.cacheCloud(handle.text + Path.sep + iconFile, function(abs: String) {
 								if (abs != null) {
 									Data.getImage(abs, function(image: Image) {
-										iron.App.notifyOnInit(function() {
+										App.notifyOnInit(function() {
 											if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 											icon = Image.createRenderTarget(image.width, image.height);
 											if (f.endsWith(".arm")) { // Used for material sphere alpha cutout
@@ -281,7 +282,7 @@ class UIFiles {
 						var empty = RenderPath.active.renderTargets.get("empty_black").image;
 						iconMap.set(handle, empty);
 						Data.getImage(handle, function(image: Image) {
-							iron.App.notifyOnInit(function() {
+							App.notifyOnInit(function() {
 								if (Base.pipeCopyRGB == null) Base.makePipeCopyRGB();
 								var sw = image.width > image.height ? w : Std.int(1.0 * image.width / image.height * w);
 								var sh = image.width > image.height ? Std.int(1.0 * image.height / image.width * w) : w;

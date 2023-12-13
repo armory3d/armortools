@@ -1,5 +1,6 @@
 package arm.ui;
 
+import iron.App;
 import iron.System;
 import iron.Data;
 import zui.Zui;
@@ -122,7 +123,7 @@ class BoxProjects {
 							ui.fill(0, 0, 128, 128, 0x66000000);
 							ui._x = _uix;
 							function doImport() {
-								iron.App.notifyOnInit(function() {
+								App.notifyOnInit(function() {
 									UIBox.hide();
 									ImportArm.runProject(path);
 								});
@@ -143,7 +144,7 @@ class BoxProjects {
 							UIMenu.draw(function(ui: Zui) {
 								// if (UIMenu.menuButton(ui, tr("Duplicate"))) {}
 								if (UIMenu.menuButton(ui, tr("Delete"))) {
-									iron.App.notifyOnInit(function() {
+									App.notifyOnInit(function() {
 										arm.sys.File.delete(path);
 										arm.sys.File.delete(iconPath);
 										var dataPath = path.substr(0, path.length - 4);

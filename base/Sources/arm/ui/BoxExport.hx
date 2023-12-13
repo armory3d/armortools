@@ -2,6 +2,7 @@ package arm.ui;
 
 import haxe.Json;
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Data;
 import arm.io.ExportMesh;
@@ -109,7 +110,7 @@ class BoxExport {
 
 			#if is_paint
 			if (Base.bitsHandle.changed) {
-				iron.App.notifyOnInit(Base.setLayerBits);
+				App.notifyOnInit(Base.setLayerBits);
 			}
 			#end
 
@@ -159,7 +160,7 @@ class BoxExport {
 						ExportTexture.run(Context.raw.textureExportPath);
 						#end
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 				}
 				else {
 					var filters = Base.bitsHandle.position != Bits8 ? "exr" : Context.raw.formatType == FormatPng ? "png" : "jpg";
@@ -174,7 +175,7 @@ class BoxExport {
 								ExportTexture.run(Context.raw.textureExportPath);
 								#end
 							}
-							iron.App.notifyOnInit(_init);
+							App.notifyOnInit(_init);
 						}
 						#if (krom_android || krom_ios)
 						Base.notifyOnNextFrame(function() {
@@ -408,7 +409,7 @@ class BoxExport {
 					UIFiles.show("arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						iron.App.notifyOnInit(function() {
+						App.notifyOnInit(function() {
 							ExportArm.runMaterial(path + Path.sep + f);
 						});
 					});
@@ -437,7 +438,7 @@ class BoxExport {
 					UIFiles.show("arm", true, false, function(path: String) {
 						var f = UIFiles.filename;
 						if (f == "") f = tr("untitled");
-						iron.App.notifyOnInit(function() {
+						App.notifyOnInit(function() {
 							ExportArm.runBrush(path + Path.sep + f);
 						});
 					});

@@ -3,6 +3,7 @@ package arm.io;
 import zui.Zui.Nodes;
 import zui.Zui.TNodeCanvas;
 import zui.Zui.TNode;
+import iron.App;
 import iron.System;
 import iron.MeshData;
 import iron.Data;
@@ -416,7 +417,7 @@ class ImportArm {
 				Viewport.scaleToBounds();
 			});
 		}
-		iron.App.notifyOnInit(Base.initLayers);
+		App.notifyOnInit(Base.initLayers);
 		History.reset();
 	}
 
@@ -478,7 +479,7 @@ class ImportArm {
 				RenderUtil.makeMaterialPreview();
 			}
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 
 		arm.ui.UINodes.inst.groupStack = [];
 		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
@@ -549,7 +550,7 @@ class ImportArm {
 				RenderUtil.makeBrushPreview();
 			}
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 
 		UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 		Data.deleteBlob(path);

@@ -1,6 +1,7 @@
 package arm;
 
 import haxe.Json;
+import iron.App;
 import iron.System;
 import iron.Data;
 import arm.sys.Path;
@@ -101,7 +102,7 @@ class Args {
 
 	public static function run() {
 		if (useArgs) {
-			iron.App.notifyOnInit(function() {
+			App.notifyOnInit(function() {
 				if (Project.filepath != "") {
 					ImportArm.runProject(Project.filepath);
 				}
@@ -174,7 +175,7 @@ class Args {
 							function _init() {
 								ExportTexture.run(exportTexturesPath);
 							}
-							iron.App.notifyOnInit(_init);
+							App.notifyOnInit(_init);
 						}
 						else {
 							Krom.log(tr("Invalid export directory"));

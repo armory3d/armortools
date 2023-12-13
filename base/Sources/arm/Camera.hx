@@ -1,5 +1,6 @@
 package arm;
 
+import iron.App;
 import iron.Input;
 import iron.Time;
 import iron.Vec4;
@@ -33,25 +34,25 @@ class Camera {
 		}
 
 		if (mouse.viewX < 0 ||
-			mouse.viewX > iron.App.w() ||
+			mouse.viewX > App.w() ||
 			mouse.viewY < 0 ||
-			mouse.viewY > iron.App.h()) {
+			mouse.viewY > App.h()) {
 
 			if (Config.raw.wrap_mouse && controlsDown) {
 				if (mouse.viewX < 0) {
-					mouse.x = mouse.lastX = iron.App.x() + iron.App.w();
+					mouse.x = mouse.lastX = App.x() + App.w();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
-				else if (mouse.viewX > iron.App.w()) {
-					mouse.x = mouse.lastX = iron.App.x();
+				else if (mouse.viewX > App.w()) {
+					mouse.x = mouse.lastX = App.x();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 				else if (mouse.viewY < 0) {
-					mouse.y = mouse.lastY = iron.App.y() + iron.App.h();
+					mouse.y = mouse.lastY = App.y() + App.h();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
-				else if (mouse.viewY > iron.App.h()) {
-					mouse.y = mouse.lastY = iron.App.y();
+				else if (mouse.viewY > App.h()) {
+					mouse.y = mouse.lastY = App.y();
 					Krom.setMousePosition(Std.int(mouse.x), Std.int(mouse.y));
 				}
 			}

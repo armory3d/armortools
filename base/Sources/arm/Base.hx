@@ -3,6 +3,7 @@ package arm;
 import zui.Zui;
 import zui.Zui.Theme;
 import zui.Zui.Nodes;
+import iron.App;
 import iron.System;
 import iron.Input;
 import iron.Scene;
@@ -211,18 +212,18 @@ class Base {
 					arm.logic.RandomNode.setSeed(Std.int(Time.time() * 4294967295));
 					#end
 
-					iron.App.notifyOnUpdate(update);
-					iron.App.notifyOnRender2D(UIView2D.inst.render);
-					iron.App.notifyOnUpdate(UIView2D.inst.update);
+					App.notifyOnUpdate(update);
+					App.notifyOnRender2D(UIView2D.inst.render);
+					App.notifyOnUpdate(UIView2D.inst.update);
 					#if (is_paint || is_sculpt)
-					iron.App.notifyOnRender2D(UIBase.inst.renderCursor);
+					App.notifyOnRender2D(UIBase.inst.renderCursor);
 					#end
-					iron.App.notifyOnUpdate(UINodes.inst.update);
-					iron.App.notifyOnRender2D(UINodes.inst.render);
-					iron.App.notifyOnUpdate(UIBase.inst.update);
-					iron.App.notifyOnRender2D(UIBase.inst.render);
-					iron.App.notifyOnUpdate(Camera.inst.update);
-					iron.App.notifyOnRender2D(render);
+					App.notifyOnUpdate(UINodes.inst.update);
+					App.notifyOnRender2D(UINodes.inst.render);
+					App.notifyOnUpdate(UIBase.inst.update);
+					App.notifyOnRender2D(UIBase.inst.render);
+					App.notifyOnUpdate(Camera.inst.update);
+					App.notifyOnRender2D(render);
 
 					#if (is_paint || is_sculpt)
 					appx = UIToolbar.inst.toolbarw;
@@ -412,8 +413,8 @@ class Base {
 
 		var cam = Scene.active.camera;
 		if (cam.data.raw.ortho != null) {
-			cam.data.raw.ortho[2] = -2 * (iron.App.h() / iron.App.w());
-			cam.data.raw.ortho[3] =  2 * (iron.App.h() / iron.App.w());
+			cam.data.raw.ortho[2] = -2 * (App.h() / App.w());
+			cam.data.raw.ortho[3] =  2 * (App.h() / App.w());
 		}
 		cam.buildProjection();
 
@@ -857,16 +858,16 @@ class Base {
 
 	public static function notifyOnNextFrame(f: Void->Void) {
 		function _render(_) {
-			iron.App.notifyOnInit(function() {
+			App.notifyOnInit(function() {
 				function _update() {
-					iron.App.notifyOnInit(f);
-					iron.App.removeUpdate(_update);
+					App.notifyOnInit(f);
+					App.removeUpdate(_update);
 				}
-				iron.App.notifyOnUpdate(_update);
+				App.notifyOnUpdate(_update);
 			});
-			iron.App.removeRender(_render);
+			App.removeRender(_render);
 		}
-		iron.App.notifyOnRender(_render);
+		App.notifyOnRender(_render);
 	}
 
 	public static function toggleFullscreen() {
@@ -936,14 +937,14 @@ class Base {
 			#end
 
 			#if krom_ios
-			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473), // LayoutNodesW
+			show2d ? Std.int((App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(App.w() * 0.473), // LayoutNodesW
 			#elseif krom_android
-			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(iron.App.w() * 0.473),
+			show2d ? Std.int((App.w() + raw.layout[LayoutNodesW]) * 0.473) : Std.int(App.w() * 0.473),
 			#else
-			show2d ? Std.int((iron.App.w() + raw.layout[LayoutNodesW]) * 0.515) : Std.int(iron.App.w() * 0.515), // Align with ui header controls
+			show2d ? Std.int((App.w() + raw.layout[LayoutNodesW]) * 0.515) : Std.int(App.w() * 0.515), // Align with ui header controls
 			#end
 
-			Std.int(iron.App.h() / 2), // LayoutNodesH
+			Std.int(App.h() / 2), // LayoutNodesH
 			Std.int(UIStatus.defaultStatusH * raw.window_scale), // LayoutStatusH
 
 			#if (krom_android || krom_ios)
@@ -2047,7 +2048,7 @@ class Base {
 				Context.raw.layer.parent = below.parent;
 			}
 		}
-		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
+		if (clear) App.notifyOnInit(function() { l.clear(); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
@@ -2058,7 +2059,7 @@ class Base {
 		if (position == -1) position = Project.layers.indexOf(parent);
 		Project.layers.insert(position, l);
 		Context.setLayer(l);
-		if (clear) iron.App.notifyOnInit(function() { l.clear(); });
+		if (clear) App.notifyOnInit(function() { l.clear(); });
 		Context.raw.layerPreviewDirty = true;
 		return l;
 	}
@@ -2081,7 +2082,7 @@ class Base {
 			History.toFillLayer();
 			l.toFillLayer();
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 	}
 
 	public static function createImageMask(asset: TAsset) {
@@ -2104,11 +2105,11 @@ class Base {
 			l.objectMask = Context.raw.layerFilter;
 			l.clear(baseColor, occlusion, roughness, metallic);
 		}
-		iron.App.notifyOnInit(_init);
+		App.notifyOnInit(_init);
 	}
 
 	public static function onLayersResized() {
-		iron.App.notifyOnInit(function() {
+		App.notifyOnInit(function() {
 			Base.resizeLayers();
 			var _layer = Context.raw.layer;
 			var _material = Context.raw.material;

@@ -3,6 +3,7 @@ package arm.ui;
 #if (is_paint || is_sculpt)
 
 import haxe.Json;
+import iron.App;
 import iron.Time;
 import zui.Zui;
 import arm.data.BrushSlot;
@@ -97,7 +98,7 @@ class TabBrushes {
 									Context.setBrush(Context.raw.brush);
 									RenderUtil.makeBrushPreview();
 								}
-								iron.App.notifyOnInit(_init);
+								App.notifyOnInit(_init);
 							}
 
 							if (Project.brushes.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {
@@ -108,7 +109,7 @@ class TabBrushes {
 
 					if (ui.isHovered) {
 						if (imgFull == null) {
-							iron.App.notifyOnInit(function() {
+							App.notifyOnInit(function() {
 								var _brush = Context.raw.brush;
 								Context.raw.brush = Project.brushes[i];
 								MakeMaterial.parseBrush();

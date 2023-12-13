@@ -290,7 +290,7 @@ class TabLayers {
 			// 	function _init() {
 			// 		deleteLayer(Context.raw.layer);
 			// 	}
-			// 	iron.App.notifyOnInit(_init);
+			// 	App.notifyOnInit(_init);
 			// }
 		}
 		ui._y -= center;

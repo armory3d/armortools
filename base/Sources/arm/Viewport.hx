@@ -1,6 +1,7 @@
 package arm;
 
 import js.lib.Float32Array;
+import iron.App;
 import iron.Vec4;
 import iron.Scene;
 import arm.Camera;
@@ -90,8 +91,8 @@ class Viewport {
 			var f = cam.data.raw.fov * cam.transform.world.getLoc().length() / 2.5;
 			f32[0] = -2 * f;
 			f32[1] =  2 * f;
-			f32[2] = -2 * f * (iron.App.h() / iron.App.w());
-			f32[3] =  2 * f * (iron.App.h() / iron.App.w());
+			f32[2] = -2 * f * (App.h() / App.w());
+			f32[3] =  2 * f * (App.h() / App.w());
 			cam.data.raw.ortho = f32;
 			light.visible = false;
 		}

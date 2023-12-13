@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.App;
 import iron.Input;
 import iron.System;
 import iron.Data;
@@ -218,7 +219,7 @@ class UIBase {
 		Project.paintObjects = [Context.raw.paintObject];
 
 		if (Project.filepath == "") {
-			iron.App.notifyOnInit(Base.initLayers);
+			App.notifyOnInit(Base.initLayers);
 		}
 
 		Context.raw.projectObjects = [];
@@ -276,7 +277,7 @@ class UIBase {
 				function _init() {
 					ExportTexture.run(Context.raw.textureExportPath);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 		}
 		else if (Operator.shortcut(Config.keymap.file_export_textures_as)) {
@@ -484,7 +485,7 @@ class UIBase {
 			#end
 
 			// Viewpoint
-			if (mouse.viewX < iron.App.w()) {
+			if (mouse.viewX < App.w()) {
 				if (Operator.shortcut(Config.keymap.view_reset)) {
 					Viewport.reset();
 					Viewport.scaleToBounds();
@@ -611,7 +612,7 @@ class UIBase {
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
 					if (Config.raw.layout[LayoutNodesH] < 32) Config.raw.layout[LayoutNodesH] = 32;
-					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
+					else if (Config.raw.layout[LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(App.h() * 0.95);
 				}
 			}
 			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
@@ -650,7 +651,7 @@ class UIBase {
 				else { // UINodes / UIView2D ratio
 					Config.raw.layout[LayoutNodesH] -= Std.int(mouse.movementY);
 					if (Config.raw.layout[LayoutNodesH] < 32) Config.raw.layout[LayoutNodesH] = 32;
-					else if (Config.raw.layout[LayoutNodesH] > iron.App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(iron.App.h() * 0.95);
+					else if (Config.raw.layout[LayoutNodesH] > App.h() * 0.95) Config.raw.layout[LayoutNodesH] = Std.int(App.h() * 0.95);
 				}
 			}
 			else if (borderHandle_ptr == hwnds[TabStatus].ptr) {
@@ -734,7 +735,7 @@ class UIBase {
 
 		var mouse = Input.getMouse();
 		if (Context.inPaintArea() && !isTyping) {
-			if (mouse.viewX < iron.App.w()) {
+			if (mouse.viewX < App.w()) {
 				Viewport.setView(0, 0, 1, 0, 0, 0);
 			}
 		}
@@ -955,19 +956,19 @@ class UIBase {
 		if (down) {
 			var mx = mouse.viewX;
 			var my = mouse.viewY;
-			var ww = iron.App.w();
+			var ww = App.w();
 
 			#if (is_paint || is_sculpt)
 			if (Context.raw.paint2d) {
-				mx -= iron.App.w();
+				mx -= App.w();
 				ww = UIView2D.inst.ww;
 			}
 			#end
 
 			if (mx < ww &&
-				mx > iron.App.x() &&
-				my < iron.App.h() &&
-				my > iron.App.y()) {
+				mx > App.x() &&
+				my < App.h() &&
+				my > App.y()) {
 
 				if (setCloneSource) {
 					Context.raw.cloneStartX = mx;
@@ -990,7 +991,7 @@ class UIBase {
 
 						if (Context.raw.tool == ToolClone && Context.raw.cloneStartX >= 0.0) { // Clone delta
 							Context.raw.cloneDeltaX = (Context.raw.cloneStartX - mx) / ww;
-							Context.raw.cloneDeltaY = (Context.raw.cloneStartY - my) / iron.App.h();
+							Context.raw.cloneDeltaY = (Context.raw.cloneStartY - my) / App.h();
 							Context.raw.cloneStartX = -1;
 						}
 						else if (Context.raw.tool == ToolParticle) {
@@ -1300,7 +1301,7 @@ class UIBase {
 		var kb = Input.getKeyboard();
 		if (Context.raw.tool == ToolClone && !kb.down("alt") && (mouse.down() || pen.down())) {
 			g.color = 0x66ffffff;
-			g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * iron.App.w() - psize / 2, my + Context.raw.cloneDeltaY * iron.App.h() - psize / 2, psize, psize);
+			g.drawScaledImage(cursorImg, mx + Context.raw.cloneDeltaX * App.w() - psize / 2, my + Context.raw.cloneDeltaY * App.h() - psize / 2, psize, psize);
 			g.color = 0xffffffff;
 		}
 

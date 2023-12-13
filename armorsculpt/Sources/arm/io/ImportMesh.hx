@@ -114,7 +114,7 @@ class ImportMesh {
 						l.unload();
 					}
 					Base.newLayer(false);
-					iron.App.notifyOnInit(Base.initLayers);
+					App.notifyOnInit(Base.initLayers);
 					History.reset();
 				}
 
@@ -130,7 +130,7 @@ class ImportMesh {
 				UIBase.inst.hwnds[TabSidebar1].redraws = 2;
 
 				// Wait for addMesh calls to finish
-				iron.App.notifyOnInit(finishImport);
+				App.notifyOnInit(finishImport);
 
 				Base.notifyOnNextFrame(function() {
 					var f32 = new js.lib.Float32Array(Config.getTextureResX() * Config.getTextureResY() * 4);

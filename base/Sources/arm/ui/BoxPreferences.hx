@@ -2,6 +2,7 @@ package arm.ui;
 
 import haxe.Json;
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Data;
 import iron.Scene;
@@ -101,7 +102,7 @@ class BoxPreferences {
 				if (ui.button(tr("Restore")) && !UIMenu.show) {
 					UIMenu.draw(function(ui: Zui) {
 						if (UIMenu.menuButton(ui, tr("Confirm"))) {
-							iron.App.notifyOnInit(function() {
+							App.notifyOnInit(function() {
 								ui.t.ELEMENT_H = Base.defaultElementH;
 								Config.restore();
 								setScale();
@@ -116,7 +117,7 @@ class BoxPreferences {
 							UIFiles.show("json", false, false, function(path: String) {
 								Data.getBlob(path, function(b: js.lib.ArrayBuffer) {
 									var raw = Json.parse(System.bufferToString(b));
-									iron.App.notifyOnInit(function() {
+									App.notifyOnInit(function() {
 										ui.t.ELEMENT_H = Base.defaultElementH;
 										Config.importFrom(raw);
 										setScale();

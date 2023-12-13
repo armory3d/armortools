@@ -1,5 +1,6 @@
 package arm.io;
 
+import iron.App;
 import iron.SceneFormat;
 import iron.MeshData;
 import iron.Data;
@@ -132,7 +133,7 @@ class ImportMesh {
 					l.unload();
 				}
 				Base.newLayer(false);
-				iron.App.notifyOnInit(Base.initLayers);
+				App.notifyOnInit(Base.initLayers);
 				History.reset();
 			}
 			#end
@@ -159,7 +160,7 @@ class ImportMesh {
 				Base.notifyOnNextFrame(finishImport);
 			}
 			else {
-				iron.App.notifyOnInit(finishImport);
+				App.notifyOnInit(finishImport);
 			}
 		});
 	}

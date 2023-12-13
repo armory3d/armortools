@@ -1,6 +1,7 @@
 package arm.ui;
 
 import zui.Zui;
+import iron.App;
 import iron.System;
 import iron.Mat4;
 import iron.Scene;
@@ -28,10 +29,10 @@ class UIMenubar {
 		var ui = UIBase.inst.ui;
 
 		#if (is_paint || is_sculpt)
-		var panelx = iron.App.x() - UIToolbar.inst.toolbarw;
+		var panelx = App.x() - UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
-		var panelx = iron.App.x();
+		var panelx = App.x();
 		#end
 
 		if (ui.window(menuHandle, panelx, 0, menubarw, UIHeader.headerh)) {
@@ -100,10 +101,10 @@ class UIMenubar {
 		var nodesw = (UINodes.inst.show || UIView2D.inst.show) ? Config.raw.layout[LayoutNodesW] : 0;
 		#if (is_paint || is_sculpt)
 		var ww = System.width - Config.raw.layout[LayoutSidebarW] - menubarw - nodesw;
-		var panelx = (iron.App.x() - UIToolbar.inst.toolbarw) + menubarw;
+		var panelx = (App.x() - UIToolbar.inst.toolbarw) + menubarw;
 		#else
 		var ww = System.width - menubarw - nodesw;
-		var panelx = (iron.App.x()) + menubarw;
+		var panelx = (App.x()) + menubarw;
 		#end
 
 		if (ui.window(workspaceHandle, panelx, 0, ww, UIHeader.headerh)) {

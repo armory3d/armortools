@@ -3,6 +3,7 @@ package arm.ui;
 import haxe.Json;
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.App;
 import iron.Input;
 import iron.System;
 import iron.Input;
@@ -474,15 +475,15 @@ class UINodes {
 		var kb = Input.getKeyboard();
 
 		#if (is_paint || is_sculpt)
-		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wx = Std.int(App.w()) + UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
-		wx = Std.int(iron.App.w());
+		wx = Std.int(App.w());
 		#end
 		wy = UIHeader.headerh * 2;
 
 		if (UIView2D.inst.show) {
-			wy += iron.App.h() - Config.raw.layout[LayoutNodesH];
+			wy += App.h() - Config.raw.layout[LayoutNodesH];
 		}
 
 		var ww = Config.raw.layout[LayoutNodesW];
@@ -617,7 +618,7 @@ class UINodes {
 		}
 		#end
 
-		var wh = iron.App.h();
+		var wh = App.h();
 		var step = 100 * ui.SCALE();
 		var w = Std.int(ww + step * 3);
 		var h = Std.int(wh + step * 3);
@@ -735,10 +736,10 @@ class UINodes {
 		ww = Config.raw.layout[LayoutNodesW];
 
 		#if (is_paint || is_sculpt)
-		wx = Std.int(iron.App.w()) + UIToolbar.inst.toolbarw;
+		wx = Std.int(App.w()) + UIToolbar.inst.toolbarw;
 		#end
 		#if is_lab
-		wx = Std.int(iron.App.w());
+		wx = Std.int(App.w());
 		#end
 
 		wy = 0;
@@ -751,12 +752,12 @@ class UINodes {
 		#end
 
 		var ew = Std.int(ui.ELEMENT_W() * 0.7);
-		wh = iron.App.h() + UIHeader.headerh;
+		wh = App.h() + UIHeader.headerh;
 		if (Config.raw.layout[LayoutHeader] == 1) wh += UIHeader.headerh;
 
 		if (UIView2D.inst.show) {
 			wh = Config.raw.layout[LayoutNodesH];
-			wy = iron.App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.headerh;
+			wy = App.h() - Config.raw.layout[LayoutNodesH] + UIHeader.headerh;
 			if (Config.raw.layout[LayoutHeader] == 1) wy += UIHeader.headerh;
 			if (!UIBase.inst.show) {
 				wy -= UIHeader.headerh * 2;

@@ -2,6 +2,7 @@ package arm.ui;
 
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.App;
 import iron.System;
 import iron.Time;
 import iron.Input;
@@ -142,7 +143,7 @@ class TabLayers {
 					function _init() {
 						m.toFillLayer();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 					Context.raw.layerPreviewDirty = true;
 					History.newFillMask();
 					Base.updateFillLayers();
@@ -406,7 +407,7 @@ class TabLayers {
 				function _init() {
 					deleteLayer(Context.raw.layer);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 		}
 		ui._y -= center;
@@ -479,7 +480,7 @@ class TabLayers {
 					l.clear();
 					Base.updateFillLayers();
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			else {
 				Base.setObjectMask();
@@ -747,14 +748,14 @@ class TabLayers {
 						l.isLayer() ? History.toFillLayer() : History.toFillMask();
 						l.toFillLayer();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 				}
 				if (l.fill_layer != null && UIMenu.menuButton(ui, toPaintString)) {
 					function _init() {
 						l.isLayer() ? History.toPaintLayer() : History.toPaintMask();
 						l.toPaintLayer();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 				}
 			}
 
@@ -763,7 +764,7 @@ class TabLayers {
 				function _init() {
 					deleteLayer(Context.raw.layer);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			ui.enabled = true;
 
@@ -784,7 +785,7 @@ class TabLayers {
 						Context.raw.layer = l;
 					}
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			if (l.isMask() && l.fill_layer == null && UIMenu.menuButton(ui, tr("Invert"))) {
 				function _init() {
@@ -792,7 +793,7 @@ class TabLayers {
 					History.invertMask();
 					l.invertMask();
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			if (l.isMask() && UIMenu.menuButton(ui, tr("Apply"))) {
 				function _init() {
@@ -803,13 +804,13 @@ class TabLayers {
 					MakeMaterial.parseMeshMaterial();
 					Context.raw.layersPreviewDirty = true;
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			if (l.isGroup() && UIMenu.menuButton(ui, tr("Merge Group"))) {
 				function _init() {
 					Base.mergeGroup(l);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			ui.enabled = canMergeDown(l);
 			if (UIMenu.menuButton(ui, tr("Merge Down"))) {
@@ -819,7 +820,7 @@ class TabLayers {
 					Base.mergeDown();
 					if (Context.raw.layer.fill_layer != null) Context.raw.layer.toPaintLayer();
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 			ui.enabled = true;
 			if (UIMenu.menuButton(ui, tr("Duplicate"))) {
@@ -828,7 +829,7 @@ class TabLayers {
 					History.duplicateLayer();
 					Base.duplicateLayer(l);
 				}
-				iron.App.notifyOnInit(_init);
+				App.notifyOnInit(_init);
 			}
 
 			UIMenu.menuFill(ui);
@@ -873,7 +874,7 @@ class TabLayers {
 				ui.inlineRadio(Base.bitsHandle, ["8bit", "16bit", "32bit"]);
 				#end
 				if (Base.bitsHandle.changed) {
-					iron.App.notifyOnInit(Base.setLayerBits);
+					App.notifyOnInit(Base.setLayerBits);
 					UIMenu.keepOpen = true;
 				}
 			}
@@ -890,7 +891,7 @@ class TabLayers {
 					function _init() {
 						Base.updateFillLayers();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
 
@@ -906,7 +907,7 @@ class TabLayers {
 					function _init() {
 						Base.updateFillLayers();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
 
@@ -922,7 +923,7 @@ class TabLayers {
 					function _init() {
 						Base.updateFillLayers();
 					}
-					iron.App.notifyOnInit(_init);
+					App.notifyOnInit(_init);
 					UIMenu.keepOpen = true;
 				}
 			}
@@ -998,7 +999,7 @@ class TabLayers {
 		// Convert from R8 to RGBA32 for tooltip display
 		if (Context.raw.maskPreviewLast != l) {
 			Context.raw.maskPreviewLast = l;
-			iron.App.notifyOnInit(function() {
+			App.notifyOnInit(function() {
 				Context.raw.maskPreviewRgba32.g2.begin();
 				Context.raw.maskPreviewRgba32.g2.pipeline = UIView2D.pipe;
 				Context.raw.maskPreviewRgba32.g4.setInt(UIView2D.channelLocation, 1);

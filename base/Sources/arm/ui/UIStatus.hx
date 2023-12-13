@@ -1,5 +1,6 @@
 package arm.ui;
 
+import iron.App;
 import iron.System;
 import zui.Zui;
 
@@ -18,11 +19,11 @@ class UIStatus {
 		var statush = Config.raw.layout[LayoutStatusH];
 
 		#if (is_paint || is_sculpt)
-		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.height - statush, System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
+		if (ui.window(UIBase.inst.hwnds[TabStatus], App.x(), System.height - statush, System.width - UIToolbar.inst.toolbarw - Config.raw.layout[LayoutSidebarW], statush)) {
 		#end
 
 		#if is_lab
-		if (ui.window(UIBase.inst.hwnds[TabStatus], iron.App.x(), System.height - statush, System.width, statush)) {
+		if (ui.window(UIBase.inst.hwnds[TabStatus], App.x(), System.height - statush, System.width, statush)) {
 		#end
 
 			ui._y += 2;

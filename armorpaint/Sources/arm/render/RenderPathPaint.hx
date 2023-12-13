@@ -1,5 +1,6 @@
 package arm.render;
 
+import iron.App;
 import iron.Mat4;
 import iron.Vec4;
 import iron.MeshObject;
@@ -460,8 +461,8 @@ class RenderPathPaint {
 		var _x = Context.raw.paintVec.x;
 		var _y = Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			Context.raw.paintVec.x = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
-			Context.raw.paintVec.y = (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
+			Context.raw.paintVec.x = (Context.raw.lockStartedX - App.x()) / App.w();
+			Context.raw.paintVec.y = (Context.raw.lockStartedY - App.y()) / App.h();
 		}
 		var _lastX = Context.raw.lastPaintVecX;
 		var _lastY = Context.raw.lastPaintVecY;
@@ -511,8 +512,8 @@ class RenderPathPaint {
 		var mx = Context.raw.paintVec.x;
 		var my = 1.0 - Context.raw.paintVec.y;
 		if (Context.raw.brushLocked) {
-			mx = (Context.raw.lockStartedX - iron.App.x()) / iron.App.w();
-			my = 1.0 - (Context.raw.lockStartedY - iron.App.y()) / iron.App.h();
+			mx = (Context.raw.lockStartedX - App.x()) / App.w();
+			my = 1.0 - (Context.raw.lockStartedY - App.y()) / App.h();
 		}
 		var radius = decalMask ? Context.raw.brushDecalMaskRadius : Context.raw.brushRadius;
 		drawCursor(mx, my, Context.raw.brushNodesRadius * radius / 3.4);
@@ -741,9 +742,9 @@ class RenderPathPaint {
 							commandsPaint();
 							Context.raw.pdirty = 0;
 							if (pushUndoLast) History.paint();
-							iron.App.notifyOnInit(_renderFinal);
+							App.notifyOnInit(_renderFinal);
 						}
-						iron.App.notifyOnInit(Context.raw.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
+						App.notifyOnInit(Context.raw.bakeType == BakeDerivative ? _renderDeriv : _renderFinal);
 					}
 				}
 				else if (Context.raw.bakeType == BakeObjectID) {
@@ -830,7 +831,7 @@ class RenderPathPaint {
 
 		var tw = 0.95 * UIView2D.inst.panScale;
 		var tx = UIView2D.inst.panX / UIView2D.inst.ww;
-		var ty = UIView2D.inst.panY / iron.App.h();
+		var ty = UIView2D.inst.panY / App.h();
 		m.setIdentity();
 		m.scale(new Vec4(tw, tw, 1));
 		m.setLoc(new Vec4(tx, ty, 0));

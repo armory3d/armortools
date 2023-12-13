@@ -20,7 +20,7 @@ class UINodesExt {
 			function delayIdleSleep(_) {
 				Krom.delayIdleSleep();
 			}
-			iron.App.notifyOnRender2D(delayIdleSleep);
+			App.notifyOnRender2D(delayIdleSleep);
 
 			var tasks = 1;
 
@@ -29,7 +29,7 @@ class UINodesExt {
 				if (tasks == 0) {
 					Console.progress(null);
 					Context.raw.ddirty = 2;
-					iron.App.removeRender2D(delayIdleSleep);
+					App.removeRender2D(delayIdleSleep);
 
 					#if (krom_direct3d12 || krom_vulkan || krom_metal)
 					arm.render.RenderPathRaytrace.ready = false;

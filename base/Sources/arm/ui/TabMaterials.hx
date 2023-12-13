@@ -5,6 +5,7 @@ package arm.ui;
 import haxe.Json;
 import zui.Zui;
 import zui.Zui.Nodes;
+import iron.App;
 import iron.Time;
 import iron.Input;
 import arm.shader.MakeMaterial;
@@ -137,7 +138,7 @@ class TabMaterials {
 							function _init() {
 								Base.updateFillLayers();
 							}
-							iron.App.notifyOnInit(_init);
+							App.notifyOnInit(_init);
 						}
 						#end
 					}
@@ -188,7 +189,7 @@ class TabMaterials {
 								updateMaterial();
 								History.duplicateMaterial();
 							}
-							iron.App.notifyOnInit(_init);
+							App.notifyOnInit(_init);
 						}
 
 						if (Project.materials.length > 1 && UIMenu.menuButton(ui, tr("Delete"), "delete")) {
