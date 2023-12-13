@@ -36,10 +36,10 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 		c_project.addDefine("WITH_ONNX");
 		c_project.addIncludeDir("../" + dir + "/onnx/include");
 		console.log(platform);
-		if (platform === 'win32') {
+		if (platform === "win32") {
 			c_project.addLib("../" + dir + "/onnx/win32/onnxruntime");
 		}
-		else if (platform === 'linux') {
+		else if (platform === "linux") {
 			// patchelf --set-rpath . ArmorLab
 			c_project.addLib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
 			// c_project.addLib("onnxruntime_providers_cuda");
@@ -51,7 +51,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 			// c_project.addLib("cufft");
 			// c_project.addLib("curand");
 		}
-		else if (platform === 'osx') {
+		else if (platform === "osx") {
 			c_project.addLib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
 		}
 	}
@@ -122,11 +122,12 @@ if (flags.voxels) {
 let export_version_info = true;
 if (export_version_info) {
 	const fs = require("fs");
-	let dir = "../" + flags.name.toLowerCase() + "/build/krom/data/version.json";
+	let dir = "../" + flags.name.toLowerCase() + "/build/krom/data";
 	let sha = require("child_process").execSync(`git log --pretty=format:"%h" -n 1`).toString().substr(1, 7);
 	let date = new Date().toISOString().split("T")[0];
 	let data = `{ "sha": "${sha}", "date": "${date}" }`;
-	fs.writeFileSync(dir, data);
+	fs.ensureDirSync(dir);
+	fs.writeFileSync(dir + "/version.json", data);
 }
 
 resolve(project);
