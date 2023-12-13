@@ -143,7 +143,7 @@ class ExportTexture {
 		var textureSizeY = Config.getTextureResY();
 		var formatQuality = Context.raw.formatQuality;
 		#if (krom_android || krom_ios)
-		var f = kha.System.title;
+		var f = System.title;
 		#else
 		var f = UIFiles.filename;
 		#end

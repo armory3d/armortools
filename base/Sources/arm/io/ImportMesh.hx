@@ -5,6 +5,7 @@ import iron.SceneFormat;
 import iron.MeshData;
 import iron.Data;
 import iron.Scene;
+import iron.System;
 import arm.util.MeshUtil;
 import arm.sys.Path;
 import arm.Viewport;
@@ -60,7 +61,7 @@ class ImportMesh {
 		Project.meshAssets = [path];
 
 		#if (krom_android || krom_ios)
-		kha.System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
+		System.title = path.substring(path.lastIndexOf(Path.sep) + 1, path.lastIndexOf("."));
 		#end
 	}
 

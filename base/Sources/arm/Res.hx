@@ -49,7 +49,7 @@ class Res {
 	}
 
 	public static function embedFont(name: String, file: js.lib.ArrayBuffer) {
-		Data.cachedFonts.set(name, new kha.Font(file));
+		Data.cachedFonts.set(name, new Font(file));
 	}
 	#end
 }

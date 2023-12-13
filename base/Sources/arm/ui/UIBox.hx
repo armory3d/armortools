@@ -4,6 +4,7 @@ import zui.Zui;
 import iron.System;
 import iron.Input;
 import iron.Tween;
+import iron.App;
 
 class UIBox {
 
@@ -161,14 +162,14 @@ class UIBox {
 	#if (krom_android || krom_ios)
 	static function tweenIn() {
 		Tween.reset();
-		Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Tween.Ease.ExpoOut});
+		Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Ease.ExpoOut});
 		UIBox.hwnd.dragY = Std.int(System.height / 2);
-		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Tween.Ease.ExpoOut, tick: function() { App.redrawUI(); }});
+		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: function() { App.redrawUI(); }});
 	}
 
 	static function tweenOut() {
-		Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Tween.Ease.ExpoIn, done: hideInternal});
-		Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: Tween.Ease.ExpoIn});
+		Tween.to({target: UIBox, props: { tweenAlpha: 0.0 }, duration: 0.2, ease: Ease.ExpoIn, done: hideInternal});
+		Tween.to({target: UIBox.hwnd, props: { dragY: System.height / 2 }, duration: 0.2, ease: Ease.ExpoIn});
 	}
 	#end
 

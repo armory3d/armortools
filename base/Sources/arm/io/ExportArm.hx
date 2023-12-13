@@ -12,6 +12,7 @@ import iron.Scene;
 import iron.RenderPath;
 import iron.Vec4;
 import iron.Lz4;
+import iron.App;
 import arm.sys.Path;
 import arm.ProjectFormat;
 #if (is_paint || is_sculpt)

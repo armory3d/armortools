@@ -1,11 +1,12 @@
 package;
 
-import haxe.io.Bytes;
+import js.lib.ArrayBuffer;
 import haxe.Json;
-import kha.Window;
-import kha.System;
 import zui.Zui;
-import iron.system.ArmPack;
+import iron.Data;
+import iron.System;
+import iron.ArmPack;
+import iron.Input;
 using StringTools;
 
 typedef TStorage = {
@@ -33,7 +34,7 @@ class Main {
 	static var minimap_h = 0;
 	static var minimap_box_h = 0;
 	static var minimap_scrolling = false;
-	static var minimap: kha.Image = null;
+	static var minimap: Image = null;
 	static var window_header_h = 0;
 
 	public static function main() {
@@ -62,25 +63,24 @@ class Main {
 		text_handle.text = storage.text;
 		var ops: SystemOptions = {
 			title: "ArmorPad",
-			window: {
-				x: storage.window_x,
-				y: storage.window_y,
-				width: storage.window_w,
-				height: storage.window_h
-			},
-			framebuffer: {
-				samplesPerPixel: 1
-			}
+			x: storage.window_x,
+			y: storage.window_y,
+			width: storage.window_w,
+			height: storage.window_h,
+			features: FeatureResizable | FeatureMaximizable | FeatureMinimizable,
+			mode: WindowMode.Windowed,
+			frequency: 60,
+			vsync: true
 		};
 
 		System.start(ops, function() {
-			kha.Assets.loadFontFromPath("data/font_mono.ttf", function(font: kha.Font) {
-				kha.Assets.loadBlobFromPath("data/themes/dark.json", function(blob_theme: kha.Blob) {
-					kha.Assets.loadBlobFromPath("data/text_coloring.json", function(blob_coloring: kha.Blob) {
+			Data.getFont("font_mono.ttf", function(font: Font) {
+				Data.getBlob("themes/dark.json", function(blob_theme: ArrayBuffer) {
+					Data.getBlob("text_coloring.json", function(blob_coloring: ArrayBuffer) {
 
-						var parsed = haxe.Json.parse(blob_theme.toString());
-						var theme = new zui.Zui.Theme();
-						for (key in Type.getInstanceFields(zui.Zui.Theme)) {
+						var parsed = Json.parse(System.bufferToString(blob_theme));
+						var theme = new Theme();
+						for (key in Type.getInstanceFields(Theme)) {
 							if (key == "theme_") continue;
 							if (key.startsWith("set_")) continue;
 							if (key.startsWith("get_")) key = key.substr(4);
@@ -92,7 +92,7 @@ class Main {
 						Zui.onBorderHover = on_border_hover;
 						Zui.onTextHover = on_text_hover;
 
-						var textColoring: TTextColoring = haxe.Json.parse(blob_coloring.toString());
+						var textColoring: TTextColoring = Json.parse(System.bufferToString(blob_coloring));
 						textColoring.default_color = Std.int(textColoring.default_color);
 						for (coloring in textColoring.colorings) coloring.color = Std.int(coloring.color);
 						Zui.textAreaColoring = textColoring;
@@ -110,7 +110,7 @@ class Main {
 
 		Krom.setApplicationStateCallback(function() {}, function() {}, function() {}, function() {},
 			function() { // Shutdown
-				Krom.fileSaveBytes(Krom.savePath() + "/config.json", haxe.io.Bytes.ofString(haxe.Json.stringify(storage)).getData());
+				Krom.fileSaveBytes(Krom.savePath() + "/config.json", System.stringToBuffer(Json.stringify(storage)));
 			}
 		);
 	}
@@ -134,12 +134,12 @@ class Main {
 				// Open file
 				if (isFile) {
 					storage.file = abs;
-					var bytes = Bytes.ofData(Krom.loadBlob(storage.file));
-					storage.text = f.endsWith(".arm") ? Json.stringify(ArmPack.decode(bytes), "    ") : bytes.toString();
+					var bytes = Krom.loadBlob(storage.file);
+					storage.text = f.endsWith(".arm") ? Json.stringify(ArmPack.decode(bytes), "    ") : System.bufferToString(bytes);
 					storage.text = StringTools.replace(storage.text, "\r", "");
 					text_handle.text = storage.text;
 					editor_handle.redraws = 1;
-					Krom.setWindowTitle(0, abs);
+					Krom.setWindowTitle(abs);
 				}
 				// Expand folder
 				else {
@@ -155,16 +155,14 @@ class Main {
 		}
 	}
 
-	static function render(framebuffer: kha.Framebuffer): Void {
-		var g = framebuffer.g2;
-
+	static function render(g2: Graphics2, g4: Graphics4): Void {
 		storage.window_w = System.width;
 		storage.window_h = System.height;
-		storage.window_x = Krom.windowX(0);
-		storage.window_y = Krom.windowY(0);
+		storage.window_x = Krom.windowX();
+		storage.window_y = Krom.windowY();
 		if (ui.inputDX != 0 || ui.inputDY != 0) Krom.setMouseCursor(0); // Arrow
 
-		ui.begin(g);
+		ui.begin(g2);
 
 		if (ui.window(sidebar_handle, 0, 0, storage.sidebar_w, System.height, false)) {
 			var _BUTTON_TEXT_COL = ui.t.BUTTON_TEXT_COL;
@@ -197,7 +195,7 @@ class Main {
 					}
 
 					// Save
-					if (ui.isCtrlDown && ui.key == iron.system.Input.KeyCode.S) {
+					if (ui.isCtrlDown && ui.key == KeyCode.S) {
 						save_file();
 					}
 
@@ -232,7 +230,7 @@ class Main {
 		}
 
 		// Build project
-		if (ui.isCtrlDown && ui.key == iron.system.Input.KeyCode.B) {
+		if (ui.isCtrlDown && ui.key == KeyCode.B) {
 			save_file();
 			build_project();
 		}
@@ -244,9 +242,9 @@ class Main {
 		}
 
 		if (minimap != null) {
-			g.begin(false);
-			g.drawImage(minimap, minimap_x, minimap_y);
-			g.end();
+			g2.begin(false);
+			g2.drawImage(minimap, minimap_x, minimap_y);
+			g2.end();
 		}
 
 		if (editor_updated) {
@@ -263,8 +261,8 @@ class Main {
 		storage.text = StringTools.replace(storage.text, "    ", "\t");
 		text_handle.text = storage.text;
 		// Write bytes
-		var bytes = storage.file.endsWith(".arm") ? ArmPack.encode(Json.parse(storage.text)) : Bytes.ofString(storage.text);
-		Krom.fileSaveBytes(storage.file, bytes.getData(), bytes.length);
+		var bytes = storage.file.endsWith(".arm") ? ArmPack.encode(Json.parse(storage.text)) : System.stringToBuffer(storage.text);
+		Krom.fileSaveBytes(storage.file, bytes, bytes.byteLength);
 		storage.modified = false;
 	}
 
@@ -281,7 +279,7 @@ class Main {
 		if (minimap_h != System.height) {
 			minimap_h = System.height;
 			if (minimap != null) minimap.unload();
-			minimap = kha.Image.createRenderTarget(minimap_w, minimap_h);
+			minimap = Image.createRenderTarget(minimap_w, minimap_h);
 		}
 
 		minimap.g2.begin(true, ui.t.SEPARATOR_COL);
