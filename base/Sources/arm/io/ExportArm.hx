@@ -182,7 +182,7 @@ class ExportArm {
 		#if (krom_metal || krom_vulkan)
 		bgraSwap(mesh_icon_pixels);
 		#end
-		App.notifyOnNextFrame(function() {
+		Base.notifyOnNextFrame(function() {
 			mesh_icon.unload();
 		});
 		// Project.raw.mesh_icons =

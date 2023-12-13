@@ -164,7 +164,7 @@ class UIBox {
 		Tween.reset();
 		Tween.to({target: UIBox, props: { tweenAlpha: 0.5 }, duration: 0.2, ease: Ease.ExpoOut});
 		UIBox.hwnd.dragY = Std.int(System.height / 2);
-		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: function() { App.redrawUI(); }});
+		Tween.to({target: UIBox.hwnd, props: { dragY: 0 }, duration: 0.2, ease: Ease.ExpoOut, tick: function() { Base.redrawUI(); }});
 	}
 
 	static function tweenOut() {
