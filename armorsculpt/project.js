@@ -9,6 +9,7 @@ await project.addProject("../base");
 
 project.addSources("../armorpaint/Sources"); ////
 project.addSources("Sources");
+project.addSources("Sources/nodes");
 project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
 project.addAssets("Assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });

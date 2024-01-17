@@ -10,6 +10,7 @@ project.addDefine("is_lab");
 await project.addProject("../base");
 
 project.addSources("Sources");
+project.addSources("Sources/nodes");
 project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
 project.addAssets("Assets/export_presets/*", { destination: "data/export_presets/{name}" });

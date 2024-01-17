@@ -63,6 +63,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 
 let project = new Project("Base");
 project.addSources("Sources");
+project.addSources("Sources/nodes");
 project.addShaders("../armorcore/Shaders/*.glsl", { embed: flags.snapshot });
 project.addShaders("Shaders/*.glsl", { embed: flags.snapshot });
 project.addAssets("Assets/*", { destination: "data/{name}", embed: flags.snapshot });
