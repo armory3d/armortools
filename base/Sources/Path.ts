@@ -9,7 +9,7 @@ class Path {
 		///end
 	}
 
-	static meshFormats = ["obj", "fbx", "blend"];
+	static meshFormats = ["obj", "blend"];
 	static textureFormats = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
 
 	static meshImporters = new Map<string, (s: string, f: (a: any)=>void)=>void>();

@@ -57,6 +57,23 @@ extern "C" {
 	int io_usd_get_uvs();
 	float io_usd_get_scale_pos();
 	void io_usd_destroy();
+
+	uint8_t *io_fbx_getBuffer();
+	uint32_t io_fbx_getBufferLength();
+	int io_fbx_init(int i);
+	void io_fbx_parse();
+	int io_fbx_get_vertex_count();
+	int io_fbx_get_index_count();
+	int io_fbx_get_indices();
+	int io_fbx_get_positions();
+	int io_fbx_get_normals();
+	int io_fbx_get_uvs();
+	int io_fbx_get_colors();
+	float io_fbx_get_scale_pos();
+	float *io_fbx_get_transform();
+	char *io_fbx_get_name();
+	void io_fbx_destroy();
+	bool io_fbx_has_next();
 }
 
 namespace {
@@ -319,6 +336,100 @@ namespace {
 		HandleScope scope(args.GetIsolate());
 		io_usd_destroy();
 	}
+
+
+	void krom_import_fbx_buffer(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(io_fbx_getBuffer(), io_fbx_getBufferLength(), [](void*, size_t, void*) {}, nullptr);
+		Local<ArrayBuffer> buffer = ArrayBuffer::New(isolate, std::move(backing));
+		args.GetReturnValue().Set(buffer);
+	}
+
+	void krom_import_fbx_init(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = args[0]->ToInt32(isolate->GetCurrentContext()).ToLocalChecked()->Value();
+		int j = io_fbx_init(i);
+		args.GetReturnValue().Set(Int32::New(isolate, j));
+	}
+
+	void krom_import_fbx_parse(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		io_fbx_parse();
+	}
+
+	void krom_import_fbx_get_vertex_count(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_vertex_count();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_index_count(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_index_count();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_indices(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_indices();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_positions(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_positions();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_normals(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_normals();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_uvs(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_uvs();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_colors(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_get_colors();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
+
+	void krom_import_fbx_get_scale_pos(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		float f = io_fbx_get_scale_pos();
+		args.GetReturnValue().Set(Number::New(isolate, f));
+	}
+
+	void krom_import_fbx_get_transform(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		float *f = io_fbx_get_transform();
+		std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
+			f, 16 * sizeof(float), [](void *, size_t, void *) {}, nullptr);
+		Local<ArrayBuffer> abuffer = ArrayBuffer::New(isolate, std::move(backing));
+		args.GetReturnValue().Set(Float32Array::New(abuffer, 0, 16));
+	}
+
+	void krom_import_fbx_get_name(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		char *name = io_fbx_get_name();
+		args.GetReturnValue().Set(String::NewFromUtf8(isolate, name).ToLocalChecked());
+	}
+
+	void krom_import_fbx_destroy(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		io_fbx_destroy();
+	}
+
+	void krom_import_fbx_has_next(const FunctionCallbackInfo<Value> &args) {
+		HandleScope scope(args.GetIsolate());
+		int i = io_fbx_has_next();
+		args.GetReturnValue().Set(Int32::New(isolate, i));
+	}
 }
 
 #define SET_FUNCTION(object, name, fn)\
@@ -385,4 +496,22 @@ void plugin_embed(Isolate *_isolate, Local<ObjectTemplate> global) {
 	SET_FUNCTION(krom_import_usdc, "_get_scale_pos", krom_import_usdc_get_scale_pos);
 	SET_FUNCTION(krom_import_usdc, "_destroy", krom_import_usdc_destroy);
 	global->Set(String::NewFromUtf8(isolate, "Krom_import_usdc").ToLocalChecked(), krom_import_usdc);
+
+	Local<ObjectTemplate> krom_import_fbx = ObjectTemplate::New(isolate);
+	SET_FUNCTION(krom_import_fbx, "_buffer", krom_import_fbx_buffer);
+	SET_FUNCTION(krom_import_fbx, "_init", krom_import_fbx_init);
+	SET_FUNCTION(krom_import_fbx, "_parse", krom_import_fbx_parse);
+	SET_FUNCTION(krom_import_fbx, "_get_vertex_count", krom_import_fbx_get_vertex_count);
+	SET_FUNCTION(krom_import_fbx, "_get_index_count", krom_import_fbx_get_index_count);
+	SET_FUNCTION(krom_import_fbx, "_get_indices", krom_import_fbx_get_indices);
+	SET_FUNCTION(krom_import_fbx, "_get_positions", krom_import_fbx_get_positions);
+	SET_FUNCTION(krom_import_fbx, "_get_normals", krom_import_fbx_get_normals);
+	SET_FUNCTION(krom_import_fbx, "_get_uvs", krom_import_fbx_get_uvs);
+	SET_FUNCTION(krom_import_fbx, "_get_colors", krom_import_fbx_get_colors);
+	SET_FUNCTION(krom_import_fbx, "_get_scale_pos", krom_import_fbx_get_scale_pos);
+	SET_FUNCTION(krom_import_fbx, "_get_transform", krom_import_fbx_get_transform);
+	SET_FUNCTION(krom_import_fbx, "_get_name", krom_import_fbx_get_name);
+	SET_FUNCTION(krom_import_fbx, "_destroy", krom_import_fbx_destroy);
+	SET_FUNCTION(krom_import_fbx, "_has_next", krom_import_fbx_has_next);
+	global->Set(String::NewFromUtf8(isolate, "Krom_import_fbx").ToLocalChecked(), krom_import_fbx);
 }

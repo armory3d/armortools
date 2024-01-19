@@ -391,13 +391,14 @@ class Project {
 					if (ui.isHovered) ui.tooltip(tr("Split .obj mesh into objects"));
 				}
 
-				if (path.toLowerCase().endsWith(".fbx")) {
-					Context.raw.parseTransform = ui.check(Zui.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
-					if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
-				}
+				// if (path.toLowerCase().endsWith(".fbx")) {
+				// 	Context.raw.parseTransform = ui.check(Zui.handle("project_5", { selected: Context.raw.parseTransform }), tr("Parse Transforms"));
+				// 	if (ui.isHovered) ui.tooltip(tr("Load per-object transforms from .fbx"));
+				// }
 
 				///if (is_paint || is_sculpt)
-				if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
+				// if (path.toLowerCase().endsWith(".fbx") || path.toLowerCase().endsWith(".blend")) {
+				if (path.toLowerCase().endsWith(".blend")) {
 					Context.raw.parseVCols = ui.check(Zui.handle("project_6", { selected: Context.raw.parseVCols }), tr("Parse Vertex Colors"));
 					if (ui.isHovered) ui.tooltip(tr("Import vertex color data"));
 				}

@@ -31,13 +31,24 @@ class ImportMesh {
 
 		let p = path.toLowerCase();
 		if (p.endsWith(".obj")) ImportObj.run(path, replaceExisting);
-		else if (p.endsWith(".fbx")) ImportFbx.run(path, replaceExisting);
 		else if (p.endsWith(".blend")) ImportBlendMesh.run(path, replaceExisting);
 		else {
 			let ext = path.substr(path.lastIndexOf(".") + 1);
 			let importer = Path.meshImporters.get(ext);
 			importer(path, (mesh: any) => {
 				replaceExisting ? ImportMesh.makeMesh(mesh, path) : ImportMesh.addMesh(mesh);
+
+				let has_next = mesh.has_next;
+				while (has_next) {
+					importer(path, (mesh: any) => {
+						has_next = mesh.has_next;
+						ImportMesh.addMesh(mesh);
+
+						// let m = Mat4.fromFloat32Array(mesh.transform);
+						// Project.paintObjects[Project.paintObjects.length - 1].transform.localOnly = true;
+						// Project.paintObjects[Project.paintObjects.length - 1].transform.setMatrix(m);
+					});
+				}
 			});
 		}
 
@@ -110,18 +121,6 @@ class ImportMesh {
 				Data.deleteMesh(handle);
 			}
 
-			///if (is_paint || is_sculpt)
-			if (ImportMesh.clearLayers) {
-				while (Project.layers.length > 0) {
-					let l = Project.layers.pop();
-					l.unload();
-				}
-				Base.newLayer(false);
-				App.notifyOnInit(Base.initLayers);
-				History.reset();
-			}
-			///end
-
 			Context.raw.paintObject.setData(md);
 			Context.raw.paintObject.name = mesh.name;
 			Project.paintObjects = [Context.raw.paintObject];
@@ -137,6 +136,18 @@ class ImportMesh {
 			UtilUV.uvmapCached = false;
 			UtilUV.trianglemapCached = false;
 			UtilUV.dilatemapCached = false;
+			///end
+
+			///if (is_paint || is_sculpt)
+			if (ImportMesh.clearLayers) {
+				while (Project.layers.length > 0) {
+					let l = Project.layers.pop();
+					l.unload();
+				}
+				Base.newLayer(false);
+				App.notifyOnInit(Base.initLayers);
+				History.reset();
+			}
 			///end
 
 			// Wait for addMesh calls to finish
