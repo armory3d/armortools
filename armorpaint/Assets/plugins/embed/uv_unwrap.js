@@ -69,12 +69,12 @@ function unwrap_mesh(mesh) {
 	// a._destroy(); //// Destroys r.buffer
 }
 
-let plugin = new arm.Plugin();
-let h1 = new zui.Handle();
+let plugin = new Plugin();
+let h1 = new Handle();
 plugin.drawUI = function(ui) {
 	if (ui.panel(h1, "UV Unwrap")) {
 		if (ui.button("Unwrap Mesh")) {
-			for (const po of arm.Project.paintObjects) {
+			for (const po of Project.paintObjects) {
 				let raw = po.data.raw;
 				var mesh = {
 					posa: raw.vertex_arrays[0].values,
@@ -92,13 +92,13 @@ plugin.drawUI = function(ui) {
 				geom.ready = false;
 				geom.build();
 			}
-			arm.UtilMesh.mergeMesh();
+			UtilMesh.mergeMesh();
 		}
 	}
 }
 
-let unwrappers = arm.UtilMesh.unwrappers;
-unwrappers.h["uv_unwrap.js"] = unwrap_mesh;
+let unwrappers = UtilMesh.unwrappers;
+unwrappers.set("uv_unwrap.js", unwrap_mesh);
 plugin.delete = function() {
-	unwrappers.h["uv_unwrap.js"] = null;
+	unwrappers.delete("uv_unwrap.js");
 };

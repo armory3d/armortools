@@ -7,7 +7,7 @@ let r = new R();
 
 // import_gltf_glb.js
 let import_gltf_glb = function(path, done) {
-	iron.Data.getBlob(path, function(b) {
+	Data.getBlob(path, function(b) {
 		let buf_off = a._init(b.byteLength); //// Allocate r.buffer
 		let buf = new Uint8Array(r.buffer, buf_off, b.byteLength);
 		let bbuf = new Uint8Array(b);
@@ -31,21 +31,21 @@ let import_gltf_glb = function(path, done) {
 			scale_tex: 1.0
 		});
 		// a._destroy(); //// Destroys r.buffer
-		iron.Data.deleteBlob(path);
+		Data.deleteBlob(path);
 	});
 }
 
-let plugin = new arm.Plugin();
-let formats = arm.Path.meshFormats;
-let importers = arm.Path.meshImporters;
+let plugin = new Plugin();
+let formats = Path.meshFormats;
+let importers = Path.meshImporters;
 formats.push("gltf");
 formats.push("glb");
-importers.h["gltf"] = import_gltf_glb;
-importers.h["glb"] = import_gltf_glb;
+importers.set("gltf", import_gltf_glb);
+importers.set("glb", import_gltf_glb);
 
 plugin.delete = function() {
 	formats.splice(formats.indexOf("gltf"), 1);
 	formats.splice(formats.indexOf("glb"), 1);
-	importers.h["gltf"] = null;
-	importers.h["glb"] = null;
+	importers.delete("gltf");
+	importers.delete("glb");
 };
