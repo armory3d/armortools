@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#ifdef WITH_PLUGIN_EMBED
-#define EMSCRIPTEN_KEEPALIVE
-#else
-#include <emscripten.h>
-#endif
-
 static uint8_t *buffer = NULL;
 static uint32_t bufferLength = 0;
 static int bufOff; /* Pointer to fbx file data */
@@ -26,19 +20,17 @@ static float transform[16];
 static bool has_next = false;
 static int current_node;
 
-EMSCRIPTEN_KEEPALIVE uint8_t *io_fbx_getBuffer() { return buffer; }
-EMSCRIPTEN_KEEPALIVE uint32_t io_fbx_getBufferLength() { return bufferLength; }
+uint8_t *io_fbx_getBuffer() { return buffer; }
+uint32_t io_fbx_getBufferLength() { return bufferLength; }
 
 static int allocate(int size) {
-	#ifdef WITH_PLUGIN_EMBED
 	size += size % 4; // Byte align
-	#endif
 	bufferLength += size;
 	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
 	return bufferLength - size;
 }
 
-EMSCRIPTEN_KEEPALIVE int io_fbx_init(int bufSize) {
+int io_fbx_init(int bufSize) {
 	if (!has_next) {
 		current_node = 0;
 		scale_pos = 0;
@@ -166,7 +158,7 @@ void io_fbx_parse_mesh(ufbx_mesh *mesh) {
 	else colaOff = 0;
 }
 
-EMSCRIPTEN_KEEPALIVE void io_fbx_parse() {
+void io_fbx_parse() {
 	void *buf = &buffer[bufOff];
 	ufbx_load_opts opts = { .generate_missing_normals = true };
 	ufbx_scene *scene = ufbx_load_memory(buf, size, &opts, NULL);
@@ -218,19 +210,19 @@ EMSCRIPTEN_KEEPALIVE void io_fbx_parse() {
 	}
 }
 
-EMSCRIPTEN_KEEPALIVE void io_fbx_destroy() {
+void io_fbx_destroy() {
 	free(buffer);
 	buffer = NULL;
 }
 
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_index_count() { return index_count; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_vertex_count() { return vertex_count; }
-EMSCRIPTEN_KEEPALIVE float io_fbx_get_scale_pos() { return scale_pos; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_indices() { return indaOff; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_positions() { return posaOff; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_normals() { return noraOff; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_uvs() { return texaOff; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_get_colors() { return colaOff; }
-EMSCRIPTEN_KEEPALIVE char *io_fbx_get_name() { return &name[0]; }
-EMSCRIPTEN_KEEPALIVE float *io_fbx_get_transform() { return &transform[0]; }
-EMSCRIPTEN_KEEPALIVE int io_fbx_has_next() { return has_next; }
+int io_fbx_get_index_count() { return index_count; }
+int io_fbx_get_vertex_count() { return vertex_count; }
+float io_fbx_get_scale_pos() { return scale_pos; }
+int io_fbx_get_indices() { return indaOff; }
+int io_fbx_get_positions() { return posaOff; }
+int io_fbx_get_normals() { return noraOff; }
+int io_fbx_get_uvs() { return texaOff; }
+int io_fbx_get_colors() { return colaOff; }
+char *io_fbx_get_name() { return &name[0]; }
+float *io_fbx_get_transform() { return &transform[0]; }
+int io_fbx_has_next() { return has_next; }

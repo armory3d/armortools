@@ -1,10 +1,5 @@
 #include "tinyusdz/tinyusdz.hh"
 #include <math.h>
-#ifdef WITH_PLUGIN_EMBED
-#define EMSCRIPTEN_KEEPALIVE
-#else
-#include <emscripten.h>
-#endif
 
 static uint8_t *buffer = NULL;
 static uint32_t bufferLength = 0;
@@ -19,25 +14,23 @@ static int noraOff;
 static int texaOff;
 static float scale_pos;
 
-extern "C" EMSCRIPTEN_KEEPALIVE uint8_t *io_usd_getBuffer() { return buffer; }
-extern "C" EMSCRIPTEN_KEEPALIVE uint32_t io_usd_getBufferLength() { return bufferLength; }
+extern "C" uint8_t *io_usd_getBuffer() { return buffer; }
+extern "C" uint32_t io_usd_getBufferLength() { return bufferLength; }
 
 static int allocate(int size) {
-	#ifdef WITH_PLUGIN_EMBED
 	size += size % 4; // Byte align
-	#endif
 	bufferLength += size;
 	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
 	return bufferLength - size;
 }
 
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_init(int bufSize) {
+extern "C" int io_usd_init(int bufSize) {
 	size = bufSize;
 	bufOff = allocate(sizeof(uint8_t) * bufSize);
 	return bufOff;
 }
 
-extern "C" EMSCRIPTEN_KEEPALIVE void io_usd_parse() {
+extern "C" void io_usd_parse() {
 	tinyusdz::Scene scene;
 	std::string warn;
 	std::string err;
@@ -160,15 +153,15 @@ extern "C" EMSCRIPTEN_KEEPALIVE void io_usd_parse() {
 	}
 }
 
-extern "C" EMSCRIPTEN_KEEPALIVE void io_usd_destroy() {
+extern "C" void io_usd_destroy() {
 	free(buffer);
 	buffer = NULL;
 }
 
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_index_count() { return index_count; }
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_vertex_count() { return vertex_count; }
-extern "C" EMSCRIPTEN_KEEPALIVE float io_usd_get_scale_pos() { return scale_pos; }
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_indices() { return indaOff; }
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_positions() { return posaOff; }
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_normals() { return noraOff; }
-extern "C" EMSCRIPTEN_KEEPALIVE int io_usd_get_uvs() { return texaOff; }
+extern "C" int io_usd_get_index_count() { return index_count; }
+extern "C" int io_usd_get_vertex_count() { return vertex_count; }
+extern "C" float io_usd_get_scale_pos() { return scale_pos; }
+extern "C" int io_usd_get_indices() { return indaOff; }
+extern "C" int io_usd_get_positions() { return posaOff; }
+extern "C" int io_usd_get_normals() { return noraOff; }
+extern "C" int io_usd_get_uvs() { return texaOff; }

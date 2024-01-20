@@ -33,12 +33,7 @@ https://github.com/brandonpelfrey/Fast-BVH
 MIT License
 Copyright (c) 2012 Brandon Pelfrey
 */
-#ifdef WITH_PLUGIN_EMBED
-#define EMSCRIPTEN_KEEPALIVE
 #define XA_MULTITHREADED 1
-#else
-#include <emscripten.h>
-#endif
 #include "xatlas.h"
 #ifndef XATLAS_C_API
 #define XATLAS_C_API 0
@@ -10063,31 +10058,29 @@ static uint8_t *buffer = NULL;
 static uint32_t bufferLength = 0;
 static int vertexCount = 0;
 static int indexCount = 0;
-static int positionsOff = NULL;
-static int normalsOff = NULL;
-static int indicesOff = NULL;
+static int positionsOff = 0;
+static int normalsOff = 0;
+static int indicesOff = 0;
 
 static int allocate(int size) {
-	#ifdef WITH_PLUGIN_EMBED
 	size += size % 4; // Byte align
-	#endif
 	bufferLength += size;
 	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
 	return bufferLength - size;
 }
 
-EMSCRIPTEN_KEEPALIVE void proc_xatlas_setVertexCount(int i) {
+void proc_xatlas_setVertexCount(int i) {
 	vertexCount = i;
 	positionsOff = allocate(sizeof(float) * vertexCount * 3);
 	normalsOff = allocate(sizeof(float) * vertexCount * 3);
 }
-EMSCRIPTEN_KEEPALIVE void proc_xatlas_setIndexCount(int i) {
+void proc_xatlas_setIndexCount(int i) {
 	indexCount = i;
 	indicesOff = allocate(sizeof(unsigned int) * indexCount);
 }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_setPositions() { return positionsOff; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_setNormals() { return normalsOff; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_setIndices() { return indicesOff; }
+int proc_xatlas_setPositions() { return positionsOff; }
+int proc_xatlas_setNormals() { return normalsOff; }
+int proc_xatlas_setIndices() { return indicesOff; }
 
 static int vertexCountOut = 0;
 static int indexCountOut = 0;
@@ -10096,16 +10089,16 @@ static int normalsOutOff = 0;
 static int uvsOutOff = 0;
 static int indicesOutOff = 0;
 
-EMSCRIPTEN_KEEPALIVE uint8_t *proc_xatlas_getBuffer() { return buffer; }
-EMSCRIPTEN_KEEPALIVE uint32_t proc_xatlas_getBufferLength() { return bufferLength; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getVertexCount() { return vertexCountOut; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getIndexCount() { return indexCountOut; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getPositions() { return positionsOutOff; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getNormals() { return normalsOutOff; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getUVs() { return uvsOutOff; }
-EMSCRIPTEN_KEEPALIVE int proc_xatlas_getIndices() { return indicesOutOff; }
+uint8_t *proc_xatlas_getBuffer() { return buffer; }
+uint32_t proc_xatlas_getBufferLength() { return bufferLength; }
+int proc_xatlas_getVertexCount() { return vertexCountOut; }
+int proc_xatlas_getIndexCount() { return indexCountOut; }
+int proc_xatlas_getPositions() { return positionsOutOff; }
+int proc_xatlas_getNormals() { return normalsOutOff; }
+int proc_xatlas_getUVs() { return uvsOutOff; }
+int proc_xatlas_getIndices() { return indicesOutOff; }
 
-EMSCRIPTEN_KEEPALIVE void proc_xatlas_unwrap() {
+void proc_xatlas_unwrap() {
     atlas = xatlas::Create();
 	xatlas::MeshDecl meshDecl;
 	meshDecl.vertexCount = vertexCount;
@@ -10149,7 +10142,7 @@ EMSCRIPTEN_KEEPALIVE void proc_xatlas_unwrap() {
 	memcpy(buffer + indicesOutOff, mesh.indexArray, sizeof(unsigned int) * indexCountOut);
 }
 
-EMSCRIPTEN_KEEPALIVE void proc_xatlas_destroy() {
+void proc_xatlas_destroy() {
 	xatlas::Destroy(atlas);
 	free(buffer);
 	buffer = NULL;

@@ -9,11 +9,6 @@
 #include "nanosvg.h"
 #define NANOSVGRAST_IMPLEMENTATION
 #include "nanosvgrast.h"
-#ifdef WITH_PLUGIN_EMBED
-#define EMSCRIPTEN_KEEPALIVE
-#else
-#include <emscripten.h>
-#endif
 
 static uint8_t *buffer = NULL;
 static uint32_t bufferLength = 0;
@@ -22,25 +17,23 @@ static int pixelsOff; /* Rasterized pixel output */
 static int w;
 static int h;
 
-EMSCRIPTEN_KEEPALIVE uint8_t *io_svg_getBuffer() { return buffer; }
-EMSCRIPTEN_KEEPALIVE uint32_t io_svg_getBufferLength() { return bufferLength; }
+uint8_t *io_svg_getBuffer() { return buffer; }
+uint32_t io_svg_getBufferLength() { return bufferLength; }
 
 static int allocate(int size) {
-	#ifdef WITH_PLUGIN_EMBED
 	size += size % 4; // Byte align
-	#endif
 	bufferLength += size;
 	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
 	return bufferLength - size;
 }
 
-EMSCRIPTEN_KEEPALIVE int io_svg_init(int buf_size) {
+int io_svg_init(int buf_size) {
 	bufOff = allocate(sizeof(char) * buf_size);
 	return bufOff;
 }
 
-EMSCRIPTEN_KEEPALIVE void io_svg_parse() {
-	char *buf = &buffer[bufOff];
+void io_svg_parse() {
+	char *buf = (char *)&buffer[bufOff];
 	NSVGimage *image = nsvgParse(buf, "px", 96.0f);
 	w = (int)image->width;
 	h = (int)image->height;
@@ -53,11 +46,11 @@ EMSCRIPTEN_KEEPALIVE void io_svg_parse() {
 	nsvgDeleteRasterizer(rast);
 }
 
-EMSCRIPTEN_KEEPALIVE int io_svg_get_pixels() { return pixelsOff; }
-EMSCRIPTEN_KEEPALIVE int io_svg_get_pixels_w() { return w; }
-EMSCRIPTEN_KEEPALIVE int io_svg_get_pixels_h() { return h; }
+int io_svg_get_pixels() { return pixelsOff; }
+int io_svg_get_pixels_w() { return w; }
+int io_svg_get_pixels_h() { return h; }
 
-EMSCRIPTEN_KEEPALIVE void io_svg_destroy() {
+void io_svg_destroy() {
 	free(buffer);
 	buffer = NULL;
 }

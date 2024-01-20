@@ -589,7 +589,7 @@ plugin.drawUI = (ui) { =>
 					});
 				}
 				if (ui.button(tr("Import"))) {
-					UIFiles.show("js,wasm,zip", false, false, (path: string) => {
+					UIFiles.show("js,zip", false, false, (path: string) => {
 						ImportPlugin.run(path);
 					});
 				}
@@ -603,8 +603,7 @@ plugin.drawUI = (ui) { =>
 				let h = Zui.handle("boxpreferences_56", { selected: false });
 				for (let f of BoxPreferences.filesPlugin) {
 					let isJs = f.endsWith(".js");
-					let isWasm = false; //f.endsWith(".wasm");
-					if (!isJs && !isWasm) continue;
+					if (!isJs) continue;
 					let enabled = Config.raw.plugins.indexOf(f) >= 0;
 					h.selected = enabled;
 					let tag = isJs ? f.split(".")[0] : f;

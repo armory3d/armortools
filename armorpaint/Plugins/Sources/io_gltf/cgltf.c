@@ -2,11 +2,6 @@
 
 #define CGLTF_IMPLEMENTATION
 #include "cgltf.h"
-#ifdef WITH_PLUGIN_EMBED
-#define EMSCRIPTEN_KEEPALIVE
-#else
-#include <emscripten.h>
-#endif
 #include <math.h>
 
 static uint8_t *buffer = NULL;
@@ -24,13 +19,11 @@ static int noraOff = 0;
 static int texaOff = 0;
 static float scale_pos;
 
-EMSCRIPTEN_KEEPALIVE uint8_t *io_gltf_getBuffer() { return buffer; }
-EMSCRIPTEN_KEEPALIVE uint32_t io_gltf_getBufferLength() { return bufferLength; }
+uint8_t *io_gltf_getBuffer() { return buffer; }
+uint32_t io_gltf_getBufferLength() { return bufferLength; }
 
 static int allocate(int size) {
-	#ifdef WITH_PLUGIN_EMBED
 	size += size % 4; // Byte align
-	#endif
 	bufferLength += size;
 	buffer = buffer == NULL ? (uint8_t *)malloc(bufferLength) : (uint8_t *)realloc(buffer, bufferLength);
 	return bufferLength - size;
@@ -40,7 +33,7 @@ int io_gltf_read_u8_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
 	unsigned char *ar = (unsigned char *)v->buffer->data + v->offset;
 	int resOff = allocate(sizeof(unsigned int) * v->size);
-	unsigned int *res = &buffer[resOff];
+	unsigned int *res = (unsigned int *)&buffer[resOff];
 	for (int i = 0; i < v->size; ++i) {
 		res[i] = ar[i];
 	}
@@ -51,7 +44,7 @@ int io_gltf_read_u16_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
 	unsigned short *ar = (unsigned short *)v->buffer->data + v->offset / 2;
 	int resOff = allocate(sizeof(unsigned int) * v->size / 2);
-	unsigned int *res = &buffer[resOff];
+	unsigned int *res = (unsigned int *)&buffer[resOff];
 	for (int i = 0; i < v->size / 2; ++i) {
 		res[i] = ar[i];
 	}
@@ -62,7 +55,7 @@ int io_gltf_read_u32_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
 	unsigned int *ar = (unsigned int *)v->buffer->data + v->offset / 4;
 	int resOff = allocate(sizeof(unsigned int) * v->size / 4);
-	unsigned int *res = &buffer[resOff];
+	unsigned int *res = (unsigned int *)&buffer[resOff];
 	for (int i = 0; i < v->size / 4; ++i) {
 		res[i] = ar[i];
 	}
@@ -79,15 +72,15 @@ float *io_gltf_read_f32_array_malloc(cgltf_accessor *a) {
 	return res;
 }
 
-EMSCRIPTEN_KEEPALIVE int io_gltf_init(int bufSize) {
+int io_gltf_init(int bufSize) {
 	size = bufSize;
 	bufOff = allocate(sizeof(char) * bufSize);
 	return bufOff;
 }
 
-EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
+void io_gltf_parse() {
 	cgltf_options options = {0};
-	char *buf = &buffer[bufOff];
+	char *buf = (char *)&buffer[bufOff];
 	cgltf_result result = cgltf_parse(&options, buf, size, &data);
 	if (result != cgltf_result_success) { return; }
 	cgltf_load_buffers(&options, data, NULL);
@@ -137,7 +130,7 @@ EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
 
 	// Pack into 16bit
 	posaOff = allocate(sizeof(short) * vertex_count * 4);
-	short *posa = &buffer[posaOff];
+	short *posa = (short *)&buffer[posaOff];
 	for (int i = 0; i < vertex_count; ++i) {
 		posa[i * 4    ] = posa32[i * 3    ] * 32767 * inv;
 		posa[i * 4 + 1] = posa32[i * 3 + 1] * 32767 * inv;
@@ -145,7 +138,7 @@ EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
 	}
 
 	noraOff = allocate(sizeof(short) * vertex_count * 2);
-	short *nora = &buffer[noraOff];
+	short *nora = (short *)&buffer[noraOff];
 	if (nora32 != NULL) {
 		for (int i = 0; i < vertex_count; ++i) {
 			nora[i * 2    ] = nora32[i * 3    ] * 32767;
@@ -156,7 +149,7 @@ EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
 	}
 	else {
 		// Calc normals
-		int *inda = &buffer[indaOff];
+		int *inda = (int *)&buffer[indaOff];
 		for (int i = 0; i < index_count / 3; ++i) {
 			int i1 = inda[i * 3    ];
 			int i2 = inda[i * 3 + 1];
@@ -193,7 +186,7 @@ EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
 
 	if (texa32 != NULL) {
 		texaOff = allocate(sizeof(short) * vertex_count * 2);
-		short *texa = &buffer[texaOff];
+		short *texa = (short *)&buffer[texaOff];
 		for (int i = 0; i < vertex_count; ++i) {
 			texa[i * 2    ] = texa32[i * 2    ] * 32767;
 			texa[i * 2 + 1] = texa32[i * 2 + 1] * 32767;
@@ -202,16 +195,16 @@ EMSCRIPTEN_KEEPALIVE void io_gltf_parse() {
 	}
 }
 
-EMSCRIPTEN_KEEPALIVE void io_gltf_destroy() {
+void io_gltf_destroy() {
 	cgltf_free(data);
 	free(buffer);
 	buffer = NULL;
 }
 
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_index_count() { return index_count; }
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_vertex_count() { return vertex_count; }
-EMSCRIPTEN_KEEPALIVE float io_gltf_get_scale_pos() { return scale_pos; }
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_indices() { return indaOff; }
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_positions() { return posaOff; }
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_normals() { return noraOff; }
-EMSCRIPTEN_KEEPALIVE int io_gltf_get_uvs() { return texaOff; }
+int io_gltf_get_index_count() { return index_count; }
+int io_gltf_get_vertex_count() { return vertex_count; }
+float io_gltf_get_scale_pos() { return scale_pos; }
+int io_gltf_get_indices() { return indaOff; }
+int io_gltf_get_positions() { return posaOff; }
+int io_gltf_get_normals() { return noraOff; }
+int io_gltf_get_uvs() { return texaOff; }

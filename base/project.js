@@ -7,7 +7,6 @@ flags.vulkan = process.argv.indexOf("vulkan") >= 0;
 flags.metal = process.argv.indexOf("metal") >= 0;
 flags.raytrace = flags.d3d12 || flags.vulkan || flags.metal;
 flags.snapshot = process.argv.indexOf("--snapshot") >= 0;
-flags.plugin_embed = true; // flags.ios;
 flags.physics = !flags.ios;
 flags.voxels = !flags.raytrace && !flags.android && !flags.ios;
 
@@ -28,9 +27,6 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 		c_project.addDefine("KORE_VKRT");
 		await c_project.addProject("../" + dir + "/glsl_to_spirv");
 	}
-	// if (platform === "ios") {
-		flags.with_plugin_embed = true;
-	// }
 
 	if (flags.with_onnx) {
 		c_project.addDefine("WITH_ONNX");
@@ -56,9 +52,7 @@ flags.on_c_project_created = async function(c_project, platform, graphics) {
 		}
 	}
 
-	if (flags.with_plugin_embed) {
-		await c_project.addProject("../" + dir + "/Plugins");
-	}
+	await c_project.addProject("../" + dir + "/Plugins");
 };
 
 let project = new Project("Base");

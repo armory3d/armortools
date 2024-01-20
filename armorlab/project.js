@@ -3,7 +3,6 @@ let flags = globalThis.flags;
 flags.name = 'ArmorLab';
 flags.package = 'org.armorlab';
 flags.with_onnx = true;
-flags.with_plugin_embed = true;
 
 let project = new Project(flags.name);
 project.addDefine("is_lab");

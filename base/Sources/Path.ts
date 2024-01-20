@@ -105,8 +105,6 @@ class Path {
 	static isPlugin = (path: string): bool => {
 		let p = path.toLowerCase();
 		return p.endsWith(".js");
-			   // p.endsWith(".wasm") ||
-			   // p.endsWith(".zip");
 	}
 
 	static isJson = (path: string): bool => {
