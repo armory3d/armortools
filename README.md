@@ -17,8 +17,8 @@ git submodule update --init --recursive
 
 **Generating a locale file**
 ```bash
-pip install typing_extensions -t base/tools
-python ./base/tools/extract_locales.py <locale code>
+export ARM_LOCALE=<locale code>
+./armorcore/Kinc/make --from base/Tools --kfile extract_locales.js
 # Generates a `base/Assets/locale/<locale code>.json` file
 ```
 
